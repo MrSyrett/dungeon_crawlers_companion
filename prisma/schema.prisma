@@ -1,0 +1,147 @@
+// Dungeon Desk — data model
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+
+  sessions  Session[]
+  documents Document[]
+  campaigns Campaign[]
+  homebrew  Homebrew[]
+  vttTokens VttToken[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// One saved sheet / session-prep document. `data` holds the tool's JSON blob
+// (the same shape the original tool wrote to localStorage), keyed in the app
+// by the localStorage key(s) that tool uses.
+model Document {
+  id        String   @id @default(cuid())
+  userId    String
+  tool      String // "dcc-character" | "dcc-session" | "sd-character" | "sd-session"
+  title     String   @default("Untitled")
+  data      Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, tool])
+}
+
+// A campaign links multiple players' tools together. Anyone with the join
+// code can connect; rolls broadcast to every connected tool's roll log.
+model Campaign {
+  id        String   @id @default(cuid())
+  name      String   @default("New Campaign")
+  code      String   @unique
+  ownerId   String
+  createdAt DateTime @default(now())
+  // Link to the table's virtual tabletop room (e.g. an Owlbear Rodeo room).
+  // Stored as given; only ever http(s), validated before it's written.
+  vttUrl    String?
+
+  owner User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  rolls CampaignRoll[]
+  homebrewShares HomebrewShare[]
+}
+
+// A user-owned homebrew spell or gear entry. `data` holds the same object shape
+// the character sheet already uses for its localStorage homebrew (a spell in
+// SD_SPELLS shape, or an item in the sheet's `_homebrewItems` shape), so a sheet
+// can merge these straight into its catalogs and use them with no translation.
+//
+// Ownership is per user (the owner manages it). Sharing is a many-to-many via
+// HomebrewShare: an entry with no shares is personal; each share makes it usable
+// by everyone whose sheet is linked to that campaign.
+model Homebrew {
+  id        String   @id @default(cuid())
+  ownerId   String
+  type      String // "spell" | "gear"
+  name      String
+  data      Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner  User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  shares HomebrewShare[]
+
+  @@index([ownerId])
+}
+
+// An access token for a virtual tabletop (Owlbear Rodeo). The app's session
+// cookie is SameSite=Lax, so it is never sent when a page of ours is framed by
+// another site — a VTT needs its own credential.
+//
+// Deliberately narrow: a token only ever grants read + save on its owner's
+// CHARACTER SHEETS. It cannot touch campaigns, homebrew, or delete anything, so
+// pasting one into a VTT can't cost more than the sheets it is for.
+//
+// Only a SHA-256 hash is stored. The token is shown once at creation; losing it
+// means creating a new one, which is cheap.
+model VttToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  // First few characters, so the owner can tell tokens apart in the UI.
+  prefix    String
+  label     String
+  createdAt DateTime  @default(now())
+  lastUsedAt DateTime?
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Join row: one homebrew entry shared with one campaign. Deleting either side
+// removes the share (a deleted campaign simply makes the entry personal again).
+model HomebrewShare {
+  homebrewId String
+  campaignId String
+
+  homebrew Homebrew @relation(fields: [homebrewId], references: [id], onDelete: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@id([homebrewId, campaignId])
+  @@index([campaignId])
+}
+
+model CampaignRoll {
+  id         Int      @id @default(autoincrement())
+  campaignId String
+  clientKey  String   @default("")
+  source     String
+  label      String
+  result     String
+  detail     String   @default("")
+  type       String   @default("normal")
+  createdAt  DateTime @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, id])
+}

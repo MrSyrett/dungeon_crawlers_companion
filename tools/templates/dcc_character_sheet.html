@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- BUILD: DCC Character Sheet — 2026-07-13 03:04 UTC -->
+<script>window.__BUILD__="DCC Character Sheet — 2026-07-13 03:04 UTC";</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCC Character Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#e8e4e0;--paper:#f5f3f0;--ink:#1a1a1a;--muted:#555;--rule:#b0a898;
+  --red:#c0251e;--gold:#c8a020;--border:#2a2a2a;--section-hdr:#1a1a1a;
+  --box:#ede9e4;--input-bg:#fff;--input-border:#888;
+  --log-bg:#111;--log-text:#e8e4dc;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
+.app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:16px;}
+.roll-log{width:260px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--red);position:sticky;top:0;height:100vh;overflow:hidden;}
+/* collapse tab */
+#log-collapse-btn{position:fixed;right:260px;top:50%;transform:translateY(-50%);z-index:201;background:var(--red);color:white;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
+
+/* The tab's position and glyph follow the .collapsed class rather than being
+   set by JS at click time. Inline styles survived a viewport change, so
+   collapsing on mobile and returning to desktop left the tab parked where
+   the open log used to be, disconnected from a log that was shut. */
+#log-collapse-btn::after{content:"\25C0";}
+.roll-log.collapsed #log-collapse-btn{right:0;}
+.roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
+.log-header{padding:12px 14px 10px;background:var(--red);display:flex;justify-content:space-between;align-items:center;}
+.log-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:.12em;color:white;}
+.log-clear{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:2px;}
+.log-clear:hover{background:rgba(255,255,255,.35);}
+.log-entries{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;gap:6px;}
+.log-entry{background:#1e1e1e;border:1px solid #333;border-radius:3px;padding:8px 10px;}
+.log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:2px;}
+.log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--log-text);line-height:1;}
+.log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#666;margin-top:2px;}
+.log-entry.crit .roll-result{color:#ffd700;}.log-entry.fumble .roll-result{color:#ff4444;}
+.log-entry.remote{border-left:3px solid #8a7ac8;background:#1c1a24;}
+.log-entry.crit{border-color:#ffd700;}.log-entry.fumble{border-color:#ff4444;}
+.log-hint{color:#444;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
+
+/* SHEET */
+.sheet{background:var(--paper);border:2px solid var(--border);max-width:980px;margin:0 auto;position:relative;}
+.sheet::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+.sheet>*{position:relative;z-index:1;}
+.section-bar{background:var(--section-hdr);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.18em;text-transform:uppercase;padding:4px 10px;}
+.section-bar.red{background:var(--red);}
+
+/* HEADER */
+.hdr-row{display:flex;border-bottom:2px solid var(--border);}
+.hdr-logo{background:var(--section-hdr);padding:10px 14px;display:flex;align-items:center;justify-content:center;min-width:100px;}
+.hdr-logo-text{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;color:var(--red);letter-spacing:.08em;text-align:center;line-height:1.2;}
+.hdr-logo-text span{display:block;font-size:18px;color:white;letter-spacing:.04em;}
+.hdr-fields{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;border-left:2px solid var(--border);}
+.hdr-field{padding:4px 8px 6px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);}
+.hdr-field:nth-child(3),.hdr-field:nth-child(6){border-right:none;}
+.hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
+.hdr-field input{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;color:var(--ink);outline:none;padding:2px 0;}
+
+/* HP BAR */
+.hp-section{padding:10px 12px;border-bottom:2px solid var(--border);}
+.hp-bar-wrap{display:flex;gap:4px;align-items:center;}
+.hp-bar-label{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);width:80px;flex-shrink:0;}
+.hp-pips{display:flex;gap:3px;flex:1;}
+.hp-pip{flex:1;height:32px;border:2px solid var(--border);cursor:pointer;position:relative;transition:all .1s;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;}
+.hp-pip:hover{transform:scaleY(1.05);}
+.hp-pip-label{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:700;color:rgba(255,255,255,.6);text-align:center;line-height:1;}
+.hp-pip-val{font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:rgba(255,255,255,.95);position:absolute;top:50%;left:0;width:100%;text-align:center;transform:translateY(-65%);text-shadow:0 1px 3px rgba(0,0,0,.6);}
+.hp-pip.dimmed{background:#555!important;opacity:.35;}
+
+/* BODY ROW */
+.body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
+
+/* STATS COL */
+.stats-col{width:185px;flex-shrink:0;border-right:2px solid var(--border);}
+.stat-block{border-bottom:1px solid var(--rule);padding:7px 10px;}
+.stat-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin-bottom:3px;}
+.stat-scores{display:flex;gap:4px;margin-bottom:3px;align-items:flex-end;}
+/* Scores + MOD on one line, all sharing the width of the Roll button below */
+.stat-line{display:flex;gap:4px;align-items:flex-end;margin-bottom:3px;}
+.stat-mod-wrap{display:flex;flex-direction:column;align-items:center;gap:1px;flex:1;min-width:0;}
+.stat-score-wrap{display:flex;flex-direction:column;align-items:center;gap:1px;flex:1;}
+.stat-score-label{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.stat-input{width:100%;min-width:0;height:30px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
+.stat-divider{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--rule);padding-bottom:4px;}
+.stat-mod-row{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
+.stat-mod-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.stat-mod-val{display:block;width:100%;box-sizing:border-box;height:30px;line-height:28px;font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--ink);background:var(--box);border:1px solid var(--rule);padding:0 4px;min-width:32px;text-align:center;cursor:pointer;transition:background .1s,color .1s,border-color .1s;}
+.stat-mod-val:hover{background:var(--section-hdr);color:#fff;border-color:var(--section-hdr);}
+.stat-mod-val:active{background:var(--red);border-color:var(--red);}
+.stat-mod-val:focus-visible{outline:2px solid var(--red);outline-offset:1px;}
+.mod-toggle{font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:2px 5px;border:1px solid var(--rule);background:transparent;cursor:pointer;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.mod-toggle.enhanced{background:var(--red);border-color:var(--red);color:white;}
+.roll-btn{width:100%;padding:3px 0;background:var(--section-hdr);color:white;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;transition:background .1s;margin-top:2px;}
+.roll-btn:hover{background:var(--red);}
+.btn-die{font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;font-size:1.05em;line-height:1;vertical-align:-1px;}
+.atk-roll-btn,.skill-roll-btn{line-height:1;}
+
+/* CENTER */
+.center-col{flex:1;display:flex;flex-direction:column;}
+.combat-section{border-bottom:1px solid var(--rule);padding:7px 10px;}
+.combat-row{display:flex;align-items:center;gap:5px;margin-bottom:5px;}
+.combat-row:last-child{margin-bottom:0;}
+.combat-tag{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:.04em;min-width:115px;line-height:1.1;}
+.formula-box{display:flex;align-items:center;gap:4px;flex:1;flex-wrap:wrap;}
+.formula-extra-item{display:flex;flex-direction:column;align-items:center;}
+.formula-input{width:44px;height:28px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;outline:none;color:var(--ink);}
+.formula-input[readonly]{background:var(--box);color:var(--muted);cursor:default;}
+.formula-eq{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--muted);}
+.formula-total{width:50px;height:28px;border:2px solid var(--border);background:var(--box);font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;text-align:center;outline:none;color:var(--ink);}
+/* Evade Total doubles as its own roll control (ID beats the .formula-total rules in both themes). */
+#evade-total{cursor:pointer;transition:background .1s,color .1s,border-color .1s;}
+#evade-total:hover{background:var(--section-hdr);color:#fff;border-color:var(--section-hdr);}
+#evade-total:active{background:var(--red);color:#fff;border-color:var(--red);}
+#evade-total:focus-visible{outline:2px solid var(--red);outline-offset:1px;}
+.formula-sublabel{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;margin-top:1px;}
+.formula-extra{display:flex;gap:6px;margin-left:auto;}
+.evade-roll-btn{background:var(--section-hdr);color:white;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;height:28px;padding:0 14px;display:inline-flex;align-items:center;gap:4px;transition:background .1s;}
+.evade-roll-btn:hover{background:var(--red);}
+
+.mana-row{display:flex;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid var(--rule);}
+.mana-group{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.debuff-group{display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin-left:10px;}
+.mana-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);}
+.mana-input{width:44px;height:28px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;outline:none;}
+.mana-input[readonly]{background:var(--box);cursor:default;}
+.mana-slash{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--muted);}
+.debuff-input{flex:1;height:26px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow',sans-serif;font-size:12px;outline:none;padding:0 4px;}
+
+/* ATTACKS */
+.attacks-section{flex:1;}
+.attacks-table{width:100%;border-collapse:collapse;}
+.attacks-table th{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:3px 6px;border-bottom:1px solid var(--rule);text-align:left;}
+.attacks-table th.center{text-align:center;}
+.atk-sub{display:block;font-size:8px;opacity:.7;}
+.attacks-table td{padding:1px 4px;border-bottom:1px solid var(--rule);}
+.attacks-table td input{width:100%;border:none;background:transparent;font-family:'Barlow',sans-serif;font-size:12px;outline:none;padding:3px 2px;color:var(--ink);}
+.atk-formula{display:flex;align-items:center;gap:2px;justify-content:center;}
+.atk-formula input{width:30px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;}
+.atk-plus{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--muted);}
+.atk-roll-btn{height:24px;min-width:34px;padding:0 8px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--muted);transition:all .1s;}
+.atk-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
+
+/* HOTLIST inline */
+.hotlist-inline{border-top:1px solid var(--rule);padding:8px 10px;}
+.hotlist-grid-inline{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.hotlist-card{border:2px solid var(--border);background:var(--input-bg);min-height:80px;padding:3px;display:flex;}
+.hotlist-card textarea{width:100%;height:100%;min-height:76px;border:none;background:transparent;resize:none;font-family:'Barlow',sans-serif;font-size:10px;outline:none;}
+
+/* RIGHT COL */
+.right-col{width:195px;flex-shrink:0;border-left:2px solid var(--border);display:flex;flex-direction:column;}
+.ext-buffs{padding:7px 10px;}
+.ext-buff-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:4px;}
+.ext-buff-row{display:flex;align-items:center;gap:5px;margin-bottom:3px;}
+.ext-buff-num{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;color:var(--muted);width:12px;}
+.ext-buff-input{flex:1;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow',sans-serif;font-size:12px;outline:none;padding:1px 2px;}
+
+/* TABS */
+.tabs-row{display:flex;border-bottom:2px solid var(--border);background:var(--section-hdr);}
+.tab-btn{flex:1;padding:7px 4px;background:none;border:none;border-right:1px solid #333;color:#888;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;transition:all .1s;}
+.tab-btn:last-child{border-right:none;}
+.tab-btn.active{background:var(--red);color:white;}
+.tab-btn:hover:not(.active){color:white;background:#333;}
+.tab-panel{display:none;padding:12px;}
+.tab-panel.active{display:block;}
+
+/* SKILLS */
+.skills-table{width:100%;border-collapse:collapse;}
+.skills-table th{background:var(--section-hdr);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:5px 6px;text-align:left;}
+.skills-table td{border-bottom:1px solid var(--rule);padding:1px 4px;}
+.skills-table td input[type="text"]{width:100%;border:none;background:transparent;font-family:'Barlow',sans-serif;font-size:11px;outline:none;padding:3px 2px;}
+.skill-stat-wrap{display:flex;gap:2px;align-items:center;}
+.skill-stat-sel{border:1px solid var(--rule);background:var(--input-bg);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;outline:none;padding:2px 3px;color:var(--ink);width:52px;}
+.skill-mod-input{width:32px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;text-align:center;padding:2px;}
+.skill-check{width:18px;height:18px;cursor:pointer;accent-color:var(--red);}
+.skill-roll-btn{height:24px;min-width:32px;padding:0 7px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;}
+.skill-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
+.skill-del-btn{padding:1px 4px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-size:10px;color:var(--muted);}
+.skill-del-btn:hover{background:#c0251e;border-color:#c0251e;color:white;}
+
+/* GEAR */
+.gear-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.gear-slot{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:4px 8px;}
+.gear-slot:nth-child(2n){border-right:none;}
+.gear-slot label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:2px;}
+.gear-slot input{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow',sans-serif;font-size:12px;outline:none;}
+.gear-accessories{border-bottom:1px solid var(--rule);padding:6px 8px;}
+.gear-accessories label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:block;margin-bottom:4px;}
+.gear-acc-row{display:flex;align-items:center;gap:4px;margin-bottom:2px;}
+.gear-acc-row input{flex:1;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow',sans-serif;font-size:11px;outline:none;}
+
+/* INVENTORY */
+.inv-table{width:100%;border-collapse:collapse;}
+.inv-table th{background:var(--section-hdr);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:5px 6px;text-align:left;}
+.inv-table td{border-bottom:1px solid var(--rule);padding:1px 4px;}
+.inv-table td input{width:100%;border:none;background:transparent;font-family:'Barlow',sans-serif;font-size:11px;outline:none;padding:3px 2px;}
+.inv-del-btn{padding:1px 6px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-size:11px;color:var(--muted);}
+.inv-del-btn:hover{background:var(--red);border-color:var(--red);color:white;}
+
+/* BACKGROUND TAB */
+.bg-notes-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.notes-box{border:2px solid var(--border);background:var(--input-bg);}
+.notes-box label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);background:var(--box);padding:3px 6px;border-bottom:1px solid var(--rule);}
+.notes-box textarea{width:100%;height:80px;border:none;background:transparent;resize:none;font-family:'Barlow',sans-serif;font-size:11px;outline:none;padding:4px 6px;}
+
+/* ADD/REMOVE buttons */
+.add-btn{margin-top:6px;padding:4px 12px;background:var(--section-hdr);color:white;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;}
+.add-btn:hover{background:var(--red);}
+
+.adv-btns{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px;}
+.adv-btn{padding:5px;background:#1a1a1a;border:1px solid #333;color:#888;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;cursor:pointer;text-align:center;transition:all .1s;letter-spacing:.06em;text-transform:uppercase;}
+.adv-btn.adv-active{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
+.adv-btn.dis-active{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
+
+/* DICE TRAY */
+.dice-tray{border-top:2px solid #222;padding:10px;background:#0e0e0e;flex-shrink:0;}
+.dice-tray-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#555;margin-bottom:6px;}
+.dice-btns{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-bottom:6px;}
+.dice-btn{min-width:0;padding:5px 2px;background:#1a1a1a;border:1px solid #333;color:#aaa;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;cursor:pointer;text-align:center;transition:all .1s;letter-spacing:.04em;}
+.dice-btn:hover{background:#c0251e;border-color:#c0251e;color:white;}
+.dice-btn.active{background:#c0251e;border-color:#ff4444;color:white;}
+.dice-pool-display{font-family:'Share Tech Mono',monospace;font-size:10px;color:#888;min-height:16px;margin-bottom:6px;word-break:break-all;}
+.dice-pool-display span{color:#e8c84a;}
+.dice-tray-actions{display:flex;gap:4px;}
+.dice-roll-btn{flex:1;padding:6px;background:var(--red);border:none;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .1s;}
+.dice-roll-btn:hover{background:#e03030;}
+.dice-clear-btn{padding:6px 10px;background:#1a1a1a;border:1px solid #333;color:#666;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;cursor:pointer;}
+.dice-clear-btn:hover{background:#333;color:#aaa;}
+
+/* DARK MODE */
+body.dark {
+  --bg:#1a1a1e; --paper:#242428; --ink:#e8e4dc; --muted:#aaa; --rule:#3a3a42;
+  --border:#4a4a52; --section-hdr:#0a0a0a; --box:#2e2e36; --input-bg:#1e1e24;
+  --input-border:#4a4a52;
+}
+body.dark .sheet{border-color:#4a4a52;}
+body.dark .hdr-logo{background:#0a0a0a;}
+body.dark .hdr-field input{color:var(--ink);border-bottom-color:var(--rule);}
+body.dark .stat-input{background:var(--input-bg);color:var(--ink);border-color:var(--rule);}
+body.dark .stat-mod-val{background:var(--box);color:var(--ink);}
+body.dark .stat-mod-val:hover{background:var(--section-hdr);color:#fff;border-color:var(--section-hdr);}
+body.dark .stat-mod-val:active{background:var(--red);color:#fff;border-color:var(--red);}
+body.dark .formula-input{background:var(--input-bg);color:var(--ink);}
+body.dark .formula-input[readonly]{background:var(--box);}
+body.dark .formula-total{background:var(--box);color:var(--ink);}
+body.dark .mana-input{background:var(--input-bg);color:var(--ink);}
+body.dark .mana-input[readonly]{background:var(--box);}
+body.dark .debuff-input{color:var(--ink);}
+body.dark .attacks-table td input{color:var(--ink);}
+body.dark .atk-formula input{color:var(--ink);}
+body.dark .skill-stat-sel{background:var(--input-bg);color:var(--ink);border-color:var(--rule);}
+body.dark .skills-table td input{color:var(--ink);}
+body.dark .inv-table td input{color:var(--ink);}
+body.dark .gear-slot input{color:var(--ink);}
+body.dark .gear-acc-row input{color:var(--ink);}
+body.dark .ext-buff-input{color:var(--ink);}
+body.dark .hotlist-card{background:var(--input-bg);border-color:var(--rule);}
+body.dark .hotlist-card textarea{color:var(--ink);}
+body.dark .notes-box{background:var(--input-bg);}
+body.dark .notes-box textarea{color:var(--ink);}
+body.dark .notes-box label{background:var(--box);color:var(--ink);}
+body.dark .tab-panel{background:var(--paper);}
+body.dark .hp-pip.dimmed{background:#333!important;}
+body.dark select.skill-stat-sel{background:var(--input-bg);}
+
+.dm-toggle-wrap{display:flex;align-items:center;gap:6px;}
+.dm-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.7);}
+.dm-toggle-btn{width:36px;height:18px;background:#333;border:1px solid #555;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.dm-toggle-btn.on{background:#c0251e;border-color:#e03030;}
+.dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:white;border-radius:50%;transition:left .2s;}
+.dm-toggle-btn.on::after{left:20px;}
+
+/* SAVE/IMPORT */
+.log-actions{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid #222;}
+.log-action-btn{flex:1;padding:5px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;}
+.log-action-btn.save{background:#1e3a1e;color:#6dbf6d;border:1px solid #2d5a2d;}
+.log-action-btn.save:hover{background:#2d5a2d;color:white;}
+.log-action-btn.export{background:#1a2a3a;color:#6aabdf;border:1px solid #1a4a8a;}
+.log-action-btn.export:hover{background:#1a4a8a;color:white;}
+.log-action-btn.pdf{background:#3a2a10;color:#dfa96a;border:1px solid #8a5a1a;}
+.log-action-btn.pdf:hover{background:#8a5a1a;color:white;}
+.log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
+.log-action-btn.import:hover{background:#5a1a1a;color:white;}
+
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:#111;}
+::-webkit-scrollbar-thumb{background:#444;border-radius:3px;}
+
+/* ── Mobile roll toast ── */
+#roll-toast {
+  display: none;
+  position: fixed;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: rgba(10,10,12,0.93);
+  border: 2px solid var(--red, #b82018);
+  border-radius: 8px;
+  padding: 10px 20px;
+  text-align: center;
+  min-width: 160px;
+  max-width: 82vw;
+  pointer-events: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.7);
+}
+#roll-toast.show { display: block; animation: _toast-in 0.18s ease; }
+#roll-toast.crit { border-color: #6dbf6d; }
+#roll-toast.fumble { border-color: #df6a6a; }
+#roll-toast .t-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a8a93; margin-bottom: 3px; }
+#roll-toast .t-result { font-family: 'Share Tech Mono', monospace; font-size: 30px; font-weight: 900; color: #e8c84a; line-height: 1; }
+#roll-toast.crit .t-result { color: #6dbf6d; }
+#roll-toast.fumble .t-result { color: #df6a6a; }
+#roll-toast .t-detail { font-size: 11px; color: #a0a0aa; margin-top: 3px; }
+@keyframes _toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+</style>
+</head>
+<body>
+<div id="roll-toast"><div class="t-label"></div><div class="t-result"></div><div class="t-detail"></div></div>
+<div class="app-wrap">
+
+<!-- ═══ SHEET ═══ -->
+<div class="sheet-wrap">
+<div class="sheet">
+
+  <!-- HEADER -->
+  <div class="hdr-row">
+    <div class="hdr-logo">
+      <div class="hdr-logo-text"><span>DCC</span>ROLEPLAYING<br>GAME</div>
+    </div>
+    <div class="hdr-fields">
+      <div class="hdr-field"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
+      <div class="hdr-field"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
+      <div class="hdr-field"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
+      <div class="hdr-field"><label>Level</label><input type="text" id="f-level" placeholder="1"></div>
+      <div class="hdr-field"><label>Crawler #</label><input type="text" id="f-crawler"></div>
+      <div class="hdr-field"><label>Class</label><input type="text" id="f-class"></div>
+    </div>
+  </div>
+
+  <!-- HP BAR -->
+  <div class="hp-section">
+    <div class="hp-bar-wrap">
+      <div class="hp-bar-label">Health Bar</div>
+      <div class="hp-pips" id="hp-pips"></div>
+    </div>
+  </div>
+
+  <!-- MAIN BODY -->
+  <div class="body-row">
+
+    <!-- STATS -->
+    <div class="stats-col">
+      <div class="section-bar" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>Stats</span>
+        <button id="global-mod-toggle" onclick="toggleGlobalModSource()" style="background:var(--red);border:none;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;cursor:pointer;">ENH</button>
+      </div>
+      <div id="stats-list"></div>
+    </div>
+
+    <!-- CENTER + RIGHT wrapper: flex column so hotlist fills space below -->
+    <div style="flex:1;display:flex;flex-direction:column;min-height:0;">
+
+      <!-- TOP ROW: center-col + right-col side by side -->
+      <div style="display:flex;flex:0 0 auto;">
+
+        <!-- CENTER -->
+        <div class="center-col" style="flex:1;">
+
+          <!-- EVADE / DR / EXTERNAL BUFFS -->
+          <div class="combat-section" style="display:flex;gap:0;align-items:stretch;">
+
+            <!-- Left: Evade + DR stacked -->
+            <div class="combat-main" style="flex:1;display:flex;flex-direction:column;">
+              <!-- EVADE -->
+              <div class="combat-row" style="flex:1;border-bottom:1px solid var(--rule);">
+                <span class="combat-tag">EVADE</span>
+                <div class="formula-box">
+                  <div class="formula-extra-item">
+                    <input type="text" class="formula-input" id="evade-dex" readonly placeholder="0">
+                    <span class="formula-sublabel">DEX Mod</span>
+                  </div>
+                  <span class="formula-eq">+</span>
+                  <div class="formula-extra-item">
+                    <input type="text" class="formula-input" id="evade-buffs" placeholder="0" oninput="calcEvadeTotal()">
+                    <span class="formula-sublabel">Buffs</span>
+                  </div>
+                  <span class="formula-eq">=</span>
+                  <div class="formula-extra-item">
+                    <input type="text" class="formula-total" id="evade-total" readonly placeholder="—"
+                           role="button" tabindex="0" onclick="rollEvade()" onkeydown="rollEvadeKey(event)"
+                           title="Roll Evade" aria-label="Roll Evade">
+                    <span class="formula-sublabel">Evade Total</span>
+                  </div>
+                </div>
+              </div>
+              <!-- DR -->
+              <div class="combat-row" style="flex:1;">
+                <span class="combat-tag" style="font-size:14px;line-height:1.15;">DAMAGE<br>RESISTANCE</span>
+                <div class="formula-box">
+                  <div class="formula-extra-item">
+                    <input type="text" class="formula-input" id="dr-armor" placeholder="0">
+                    <span class="formula-sublabel">Armor</span>
+                  </div>
+                  <span class="formula-eq">+</span>
+                  <div class="formula-extra-item">
+                    <input type="text" class="formula-input" id="dr-buffs" placeholder="0" oninput="calcDR()">
+                    <span class="formula-sublabel">Buffs</span>
+                  </div>
+                  <span class="formula-eq">=</span>
+                  <div class="formula-extra-item">
+                    <input type="text" class="formula-total" id="dr-total" readonly placeholder="—">
+                    <span class="formula-sublabel">DR Total</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: stat boxes + External Buffs spanning full height -->
+            <div class="combat-side" style="border-left:2px solid var(--border);padding:5px 6px;display:flex;flex-direction:column;justify-content:center;gap:3px;width:220px;flex-shrink:0;">
+              <div style="display:flex;gap:2px;margin-bottom:3px;">
+                <div class="formula-extra-item" style="flex:1;">
+                  <input type="text" class="formula-total" id="evade-move" placeholder="—" style="width:100%;height:20px;font-size:10px;padding:0 2px;">
+                  <span class="formula-sublabel" style="font-size:6.5px;">Move</span>
+                </div>
+                <div class="formula-extra-item" style="flex:1;">
+                  <input type="text" class="formula-total" id="evade-step" placeholder="—" style="width:100%;height:20px;font-size:10px;padding:0 2px;">
+                  <span class="formula-sublabel" style="font-size:6.5px;">Step</span>
+                </div>
+                <div class="formula-extra-item" style="flex:1;">
+                  <input type="text" class="formula-total" id="dr-aifavor" placeholder="—" style="width:100%;height:20px;font-size:10px;padding:0 2px;">
+                  <span class="formula-sublabel" style="font-size:6.5px;">AI Favor</span>
+                </div>
+                <div class="formula-extra-item" style="flex:1;">
+                  <input type="text" class="formula-total" id="dr-size" placeholder="—" style="width:100%;height:20px;font-size:10px;padding:0 2px;">
+                  <span class="formula-sublabel" style="font-size:6.5px;">Size</span>
+                </div>
+              </div>
+              <div style="height:1px;background:var(--rule);margin:2px 0;"></div>
+              <!-- External Buffs -->
+              <span style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">External Buffs</span>
+              <div class="ext-buff-row"><span class="ext-buff-num">1.</span><input type="text" class="ext-buff-input"></div>
+              <div class="ext-buff-row"><span class="ext-buff-num">2.</span><input type="text" class="ext-buff-input"></div>
+              <div class="ext-buff-row"><span class="ext-buff-num">3.</span><input type="text" class="ext-buff-input"></div>
+            </div>
+
+          </div>
+
+          <!-- MANA / DEBUFFS -->
+          <div class="mana-row">
+            <div class="mana-group">
+              <span class="mana-label">Mana</span>
+              <input type="text" class="mana-input" id="mana-current" placeholder="0">
+              <span class="mana-slash">/</span>
+              <input type="text" class="mana-input" id="mana-max" readonly placeholder="0" title="Equals Enhanced INT" style="background:var(--box);cursor:default;">
+            </div>
+            <div class="debuff-group">
+              <span class="mana-label">Debuffs</span>
+              <input type="text" class="debuff-input" id="debuffs" placeholder="">
+            </div>
+          </div>
+
+          <!-- ATTACKS -->
+          <div class="attacks-section">
+            <div class="section-bar">Attacks</div>
+            <table class="attacks-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th class="center">To Hit<span class="atk-sub">Rank</span></th>
+                  <th class="center">Stat Mod<span class="atk-sub">To Hit &amp; Dmg</span></th>
+                  <th class="center">Damage<span class="atk-sub">Dice</span></th>
+                  <th>Effects</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="attacks-body"></tbody>
+            </table>
+          </div>
+
+        </div><!-- end center-col -->
+
+      </div><!-- end top row -->
+
+      <!-- HOTLIST fills remaining height below attacks -->
+      <div style="flex:1;border-top:1px solid var(--rule);min-height:120px;display:flex;flex-direction:column;">
+        <div class="section-bar red" style="flex-shrink:0;">Hotlist</div>
+        <div id="hotlist-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;flex:1;padding:8px 10px;"></div>
+      </div>
+
+    </div><!-- end center+right wrapper -->
+
+  </div><!-- end body-row -->
+
+  <!-- TABS -->
+  <div class="tabs-row">
+    <button class="tab-btn active" onclick="switchTab('skills')">Skills</button>
+    <button class="tab-btn" onclick="switchTab('gear')">Gear</button>
+    <button class="tab-btn" onclick="switchTab('inventory')">Inventory</button>
+    <button class="tab-btn" onclick="switchTab('background')">Background</button>
+  </div>
+
+  <!-- TAB: SKILLS -->
+  <div class="tab-panel active" id="tab-skills">
+    <table class="skills-table">
+      <thead>
+        <tr>
+          <th style="width:28px"></th>
+          <th style="width:26%">Name</th>
+          <th style="width:7%">Rank</th>
+          <th style="width:8%">Stat</th>
+          <th style="width:13%">Check Type</th>
+          <th>Notes &amp; Upgrades</th>
+          <th style="width:28px">✔</th>
+          <th style="width:40px"></th>
+        </tr>
+      </thead>
+      <tbody id="skills-body"></tbody>
+    </table>
+    <button class="add-btn" onclick="addSkillRow()">+ Add Skill</button>
+  </div>
+
+  <!-- TAB: GEAR -->
+  <div class="tab-panel" id="tab-gear">
+    <div class="gear-grid">
+      <div class="gear-slot"><label>Head</label><input type="text"></div>
+      <div class="gear-slot"><label>Torso</label><input type="text"></div>
+      <div class="gear-slot"><label>Arms</label><input type="text"></div>
+      <div class="gear-slot"><label>Hands / Holding</label><input type="text"></div>
+      <div class="gear-slot"><label>Legs</label><input type="text"></div>
+      <div class="gear-slot"><label>Feet</label><input type="text"></div>
+    </div>
+    <div class="gear-accessories">
+      <label>Accessories (Max 10) / Tattoos / Patches</label>
+      <div class="gear-acc-list" id="acc-list"></div>
+    </div>
+  </div>
+
+  <!-- TAB: INVENTORY -->
+  <div class="tab-panel" id="tab-inventory">
+    <table class="inv-table">
+      <thead>
+        <tr><th style="width:36px"></th><th style="width:40%">Item</th><th style="width:12%;text-align:center;">Qty</th><th>Notes</th></tr>
+      </thead>
+      <tbody id="inv-body"></tbody>
+    </table>
+    <button class="add-btn" onclick="addInvRow()">+ Add Item</button>
+  </div>
+
+  <!-- TAB: BACKGROUND -->
+  <div class="tab-panel" id="tab-background">
+    <div class="bg-notes-grid">
+      <div class="notes-box"><label>Popularity</label><textarea placeholder=""></textarea></div>
+      <div class="notes-box"><label>Past Trauma</label><textarea placeholder=""></textarea></div>
+      <div class="notes-box"><label>Loose Ends</label><textarea placeholder=""></textarea></div>
+      <div class="notes-box"><label>Regrets</label><textarea placeholder=""></textarea></div>
+      <div class="notes-box" style="grid-column:1/-1;"><label>Notes</label><textarea style="height:110px;" placeholder=""></textarea></div>
+    </div>
+  </div>
+
+</div><!-- end sheet -->
+</div><!-- end sheet-wrap -->
+
+<!-- ═══ ROLL LOG ═══ -->
+<div class="roll-log">
+  <!-- Toggle button — desktop: fixed tab; mobile: absolute on log top edge via CSS -->
+  <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
+  <div class="log-header">
+    <span class="log-title">Roll Log</span>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="dm-toggle-wrap">
+        <span class="dm-label">Dark</span>
+        <div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div>
+      </div>
+      <button class="log-clear" onclick="clearLog()">Clear</button>
+    </div>
+  </div>
+  <div class="log-actions">
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">🔗</button>
+    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">↓</button>
+    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">↑<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
+    <button class="log-action-btn pdf" onclick="exportPDF()" title="Official DCC sheet PDF" aria-label="Export PDF">🖨</button>
+  </div>
+  <div class="log-entries" id="log-entries">
+    <div class="log-hint">Click any stat or button to roll</div>
+  </div>
+
+  <!-- DICE TRAY -->
+  <div class="dice-tray">
+    <div class="dice-pool-display" id="dice-pool-display"><span>Empty — add dice below</span></div>
+    <div class="adv-btns">
+      <button class="adv-btn" id="adv-btn" onclick="toggleAdv('advantage')">▲ Advantage</button>
+      <button class="adv-btn" id="dis-btn" onclick="toggleAdv('disadvantage')">▼ Disadvantage</button>
+    </div>
+    <div class="dice-btns">
+      <button class="dice-btn" onclick="addDie(2)">D2</button>
+      <button class="dice-btn" onclick="addDie(4)">D4</button>
+      <button class="dice-btn" onclick="addDie(6)">D6</button>
+      <button class="dice-btn" onclick="addDie(8)">D8</button>
+      <button class="dice-btn" onclick="addDie(10)">D10</button>
+      <button class="dice-btn" onclick="addDie(12)">D12</button>
+      <button class="dice-btn" onclick="addDie(20)">D20</button>
+      <button class="dice-btn" onclick="addDie(100)">D100</button>
+    </div>
+    <div class="dice-tray-actions">
+      <button class="dice-clear-btn" onclick="clearDicePool()">Clear</button>
+      <button class="dice-roll-btn" onclick="rollDicePool()" title="Roll dice pool"><span class="btn-die">&#127922;</span> Roll</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- end app-wrap -->
+
+<script>
+
+// ── STAT MODIFIER CHART ──
+function statToMod(val) {
+  const v = parseInt(val);
+  if(isNaN(v) || v < 1) return null;
+  if(v <= 2)   return 1;
+  if(v <= 5)   return 2;
+  if(v <= 9)   return 3;
+  if(v <= 19)  return 4;
+  if(v <= 49)  return 5;
+  if(v <= 99)  return 6;
+  if(v <= 149) return 7;
+  if(v <= 199) return 8;
+  if(v <= 299) return 9;
+  return 10;
+}
+
+function fmtMod(m) {
+  if(m === null) return '—';
+  return (m >= 0 ? '+' : '') + m;
+}
+
+// ── STATS ──
+const STATS = [
+  {id:'str', name:'Strength',    abbr:'STR'},
+  {id:'int', name:'Intelligence',abbr:'INT'},
+  {id:'con', name:'Constitution',abbr:'CON'},
+  {id:'dex', name:'Dexterity',   abbr:'DEX'},
+  {id:'cha', name:'Charisma',    abbr:'CHA'},
+];
+
+// ── GLOBAL MOD SOURCE ──
+let globalModSource = 'enhanced'; // 'enhanced' or 'unenhanced'
+
+function toggleGlobalModSource() {
+  globalModSource = globalModSource === 'enhanced' ? 'unenhanced' : 'enhanced';
+  const btn = document.getElementById('global-mod-toggle');
+  btn.textContent = globalModSource === 'enhanced' ? 'ENH' : 'UNENH';
+  // Update all stats
+  STATS.forEach(s => {
+    updateMod(s.id);
+  });
+  syncEvadeDex();
+  syncMana();
+  updateHpPips();
+}
+
+function buildStats() {
+  const list = document.getElementById('stats-list');
+  STATS.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'stat-block';
+    div.innerHTML = `
+      <div class="stat-name">${s.name}</div>
+      <div class="stat-line">
+        <div class="stat-score-wrap">
+          <span class="stat-score-label">Enh</span>
+          <input type="text" class="stat-input" id="${s.id}-enh" placeholder="—" oninput="onStatChange('${s.id}')">
+        </div>
+        <span class="stat-divider">/</span>
+        <div class="stat-score-wrap">
+          <span class="stat-score-label">Unenh</span>
+          <input type="text" class="stat-input" id="${s.id}-unenh" placeholder="—" oninput="onStatChange('${s.id}')">
+        </div>
+        <div class="stat-mod-wrap">
+          <span class="stat-score-label">${s.abbr} Mod</span>
+          <span class="stat-mod-val" id="${s.id}-mod" role="button" tabindex="0"
+                onclick="rollStat('${s.id}','${s.name}')" onkeydown="rollStatKey(event,'${s.id}','${s.name}')"
+                title="Roll d20 + ${s.abbr} Mod" aria-label="Roll d20 plus ${s.abbr} modifier">—</span>
+        </div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function onStatChange(id) {
+  updateMod(id);
+  if(id === 'dex') syncEvadeDex();
+  if(id === 'int') syncMana();
+  if(id === 'con') updateHpPips();
+}
+
+function updateMod(id) {
+  const val = document.getElementById(id+'-'+(globalModSource==='enhanced'?'enh':'unenh'))?.value;
+  const m = statToMod(val);
+  document.getElementById(id+'-mod').textContent = fmtMod(m);
+}
+
+function getStatMod(id) {
+  const val = document.getElementById(id+'-'+(globalModSource==='enhanced'?'enh':'unenh'))?.value;
+  return statToMod(val) ?? 0;
+}
+
+// Sync DEX Mod → Evade DEX field and recalc total
+function syncEvadeDex() {
+  const m = getStatMod('dex');
+  document.getElementById('evade-dex').value = fmtMod(m);
+  calcEvadeTotal();
+}
+
+function calcEvadeTotal() {
+  const dex = parseMod(document.getElementById('evade-dex')?.value);
+  const buffs = parseMod(document.getElementById('evade-buffs')?.value);
+  document.getElementById('evade-total').value = dex + buffs;
+}
+
+// Sync Enhanced INT → Mana Max
+function syncMana() {
+  const val = document.getElementById('int-enh')?.value;
+  document.getElementById('mana-max').value = val || '';
+}
+
+// ── DR CALC ──
+function calcDR() {
+  const armor = parseInt(document.getElementById('dr-armor')?.value)||0;
+  const buffs = parseInt(document.getElementById('dr-buffs')?.value)||0;
+  document.getElementById('dr-total').value = armor + buffs;
+}
+document.getElementById('dr-armor').addEventListener('input', calcDR);
+document.getElementById('dr-buffs').addEventListener('input', calcDR);
+
+// ── HP BAR ──
+function buildHpBar() {
+  const pips = document.getElementById('hp-pips');
+  pips.innerHTML = '';
+  const pcts = [10,20,30,40,50,60,70,80,90,100];
+  // Colors: Red → Orange → Yellow → Green
+  const colors = [
+    [192, 30,  30],  // 10%  deep red
+    [210, 60,  10],  // 20%  red-orange
+    [220, 100,  0],  // 30%  orange
+    [200, 130,  0],  // 40%  dark orange
+    [180, 150,  0],  // 50%  dark amber
+    [150, 160,  0],  // 60%  dark yellow-green
+    [100, 170,  0],  // 70%  yellow-green
+    [ 60, 170,  0],  // 80%  light green
+    [ 30, 150,  20], // 90%  green
+    [ 10, 120,  10], // 100% deep green
+  ];
+  pcts.forEach((p, i) => {
+    const [r,g,b] = colors[i];
+    const div = document.createElement('div');
+    div.className = 'hp-pip';
+    div.style.background = `rgb(${r},${g},${b})`;
+    div.style.borderColor = 'rgba(0,0,0,0.3)';
+    div.dataset.pct = p;
+    div.dataset.active = 'true';
+    div.title = `${p}%`;
+    div.innerHTML = `<span class="hp-pip-val" id="pip-val-${p}">—</span><span class="hp-pip-label">${p}%</span>`;
+    div.addEventListener('click', () => {
+      div.dataset.active = div.dataset.active==='true'?'false':'true';
+      div.classList.toggle('dimmed', div.dataset.active==='false');
+    });
+    pips.appendChild(div);
+  });
+}
+
+function updateHpPips() {
+  const m = getStatMod('con');
+  document.querySelectorAll('.hp-pip').forEach(pip => {
+    const valEl = pip.querySelector('.hp-pip-val');
+    if(valEl) valEl.textContent = m > 0 ? m : '—';
+  });
+}
+
+// ── ATTACKS ──
+function buildAttacks() {
+  const tbody = document.getElementById('attacks-body');
+  for(let i=0;i<5;i++) addAttackRow(tbody);
+}
+
+function addAttackRow(tbody) {
+  if(!tbody) tbody = document.getElementById('attacks-body');
+  const statOpts = `<option value="">—</option><option value="str">STR</option><option value="int">INT</option><option value="con">CON</option><option value="dex">DEX</option><option value="cha">CHA</option>`;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" placeholder="Attack name..."></td>
+    <td>
+      <div class="atk-formula">
+        <input type="text" placeholder="Rank" style="width:36px;">
+      </div>
+    </td>
+    <td>
+      <div class="atk-formula">
+        <select class="skill-stat-sel atk-stat-sel" style="width:52px;" title="Stat Mod (applies to both To Hit and Damage)">${statOpts}</select>
+      </div>
+    </td>
+    <td>
+      <div class="atk-formula">
+        <input type="text" placeholder="Dice" style="width:44px;">
+      </div>
+    </td>
+    <td><input type="text" placeholder="Effects..."></td>
+    <td><button class="atk-roll-btn" onclick="rollAttack(this)" title="Roll attack" aria-label="Roll attack">&#127922;</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+// ── HOTLIST ──
+function buildHotlist() {
+  const grid = document.getElementById('hotlist-grid');
+  for(let i=0;i<10;i++) {
+    const card = document.createElement('div');
+    card.className = 'hotlist-card';
+    card.innerHTML = '<textarea placeholder=""></textarea>';
+    grid.appendChild(card);
+  }
+}
+
+// ── GEAR ──
+function buildAccessories() {
+  const list = document.getElementById('acc-list');
+  for(let i=0;i<10;i++) {
+    const row = document.createElement('div');
+    row.className = 'gear-acc-row';
+    row.innerHTML = `<span style="font-family:'Barlow Condensed';font-size:10px;color:var(--muted);width:18px;">${i+1}.</span><input type="text">`;
+    list.appendChild(row);
+  }
+}
+
+// ── SKILLS ──
+function addSkillRow() {
+  const tbody = document.getElementById('skills-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><button class="skill-del-btn" onclick="this.closest('tr').remove()" title="Remove skill" aria-label="Remove skill">✕</button></td>
+    <td><input type="text" placeholder="Skill name..."></td>
+    <td><input type="text" placeholder="Rank" style="text-align:center;width:100%;"></td>
+    <td>
+      <div class="skill-stat-wrap">
+        <select class="skill-stat-sel" title="Linked Stat">
+          <option value="">—</option>
+          <option value="str">STR</option>
+          <option value="int">INT</option>
+          <option value="con">CON</option>
+          <option value="dex">DEX</option>
+          <option value="cha">CHA</option>
+        </select>
+      </div>
+    </td>
+    <td><input type="text" placeholder="Active/Passive"></td>
+    <td><input type="text" placeholder="Notes..."></td>
+    <td style="text-align:center;"><input type="checkbox" class="skill-check"></td>
+    <td><button class="skill-roll-btn" onclick="rollSkill(this)" title="Roll skill" aria-label="Roll skill">&#127922;</button></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function buildSkills() {
+  for(let i=0;i<12;i++) addSkillRow();
+}
+
+// ── INVENTORY ──
+function addInvRow() {
+  const tbody = document.getElementById('inv-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><button class="inv-del-btn" onclick="this.closest('tr').remove()" title="Remove item" aria-label="Remove item">✕</button></td>
+    <td><input type="text" placeholder="Item name..."></td>
+    <td><input type="text" style="text-align:center;"></td>
+    <td><input type="text" placeholder="Notes..."></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function buildInventory() {
+  for(let i=0;i<16;i++) addInvRow();
+}
+
+// ── TABS ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().toLowerCase() === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ── DICE ──
+function d(sides) { return Math.floor(Math.random()*sides)+1; }
+function parseMod(val) { if(!val) return 0; const n=parseInt((val+'').replace(/\s/g,'')); return isNaN(n)?0:n; }
+
+
+// ── Roll toast: shown on mobile when log is collapsed ──
+var _toastTimer = null;
+function showRollToast(label, result, detail, type) {
+  if (window.innerWidth > 768) return;
+  var log = document.querySelector('.roll-log');
+  if (!log || !log.classList.contains('collapsed')) return;
+  var t = document.getElementById('roll-toast');
+  if (!t) return;
+  t.className = 'show' + (type === 'crit' ? ' crit' : type === 'fumble' ? ' fumble' : '');
+  t.querySelector('.t-label').textContent = label;
+  t.querySelector('.t-result').textContent = result;
+  t.querySelector('.t-detail').textContent = detail;
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { t.className = ''; }, 3500);
+}
+
+function addLog(label, result, detail, type='normal') {
+  const entries = document.getElementById('log-entries');
+  const hint = entries.querySelector('.log-hint');
+  if(hint) hint.remove();
+  const div = document.createElement('div');
+  div.className = 'log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
+  const advLabel = advState === 'advantage' ? ' <span style="color:#6dbf6d;font-size:9px;">▲ADV</span>'
+                 : advState === 'disadvantage' ? ' <span style="color:#df6a6a;font-size:9px;">▼DIS</span>' : '';
+  div.innerHTML = `<div class="roll-label">${label}${advLabel}</div><div class="roll-result">${result}</div><div class="roll-detail">${detail}</div>`;
+  if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
+  entries.insertBefore(div, entries.firstChild);
+  entries.scrollTop = 0;
+  showRollToast(label, result, detail, type);
+  clearAdv();
+}
+
+function clearLog() {
+  document.getElementById('log-entries').innerHTML = '<div class="log-hint">Click any stat or button to roll</div>';
+}
+
+// The stat modifier doubles as the roll control, so support keyboard activation
+// (Enter / Space) like a real button.
+function rollStatKey(e, id, name) {
+  if(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.code === 'Space') {
+    e.preventDefault();
+    rollStat(id, name);
+  }
+}
+
+function rollStat(id, name) {
+  const mod = getStatMod(id);
+  const {result: roll, detail: advDetail} = rollWithAdv(20);
+  const total = roll + mod;
+  let type = roll===20?'crit':roll===1?'fumble':'normal';
+  let label = name+' Check'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':'');
+  const detailStr = advDetail ? `${advDetail} + Mod(${mod}) = ${total}` : `d20(${roll}) + Mod(${mod}) = ${total}`;
+  addLog(label, total, detailStr, type);
+}
+
+// The Evade Total box doubles as the roll control, so support keyboard
+// activation (Enter / Space) like a real button.
+function rollEvadeKey(e) {
+  if(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.code === 'Space') {
+    e.preventDefault();
+    rollEvade();
+  }
+}
+
+function rollEvade() {
+  const dex = parseMod(document.getElementById('evade-dex')?.value);
+  const buffs = parseMod(document.getElementById('evade-buffs')?.value);
+  const {result: roll, detail: advDetail} = rollWithAdv(20);
+  const total = roll + dex + buffs;
+  let type = roll===20?'crit':roll===1?'fumble':'normal';
+  const base = advDetail ? advDetail : `d20(${roll})`;
+  addLog('Evade Roll'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
+    `${base} + DEX(${dex}) + Buffs(${buffs}) = ${total}`, type);
+}
+
+// Resolve a saved attack's stat, tolerating older saves that stored separate
+// to-hit / damage stats (they were always meant to match).
+function atkStatOf(a) {
+  return (a && (a.stat || a.toHitStat || a.dmgStat)) || '';
+}
+
+function rollAttack(btn) {
+  const row = btn.closest('tr');
+  const inputs = row.querySelectorAll('input[type="text"]');
+  const sels = row.querySelectorAll('select');
+  const name = inputs[0].value || 'Attack';
+  const rank = parseMod(inputs[1].value);
+  const statId = sels[0]?.value || '';                 // one stat feeds both
+  const statMod = statId ? getStatMod(statId) : 0;
+  const statLabel = statId ? `+${statId.toUpperCase()}(${statMod})` : '';
+  const diceStr = inputs[2].value || 'd6';
+
+  const {result: hitRoll, detail: advDetail} = rollWithAdv(20);
+  const hitTotal = hitRoll + rank + statMod;
+  const hitStatLabel = statLabel;
+  let type = hitRoll===20?'crit':hitRoll===1?'fumble':'normal';
+
+  let dmgTotal = null, dmgDetail = '';
+  const diceMatch = diceStr.match(/^(\d*)d(\d+)$/i);
+  if(diceMatch) {
+    const num = parseInt(diceMatch[1]||'1'), sides = parseInt(diceMatch[2]);
+    const rolls = Array.from({length:num}, ()=>d(sides));
+    dmgTotal = rolls.reduce((a,b)=>a+b,0) + statMod;
+    const dmgStatLabel = statLabel;
+    dmgDetail = `${diceStr}(${rolls.join('+')})${dmgStatLabel}=${dmgTotal}`;
+  }
+
+  const resultStr = dmgTotal !== null
+    ? `Hit: ${hitTotal}  |  Dmg: ${dmgTotal}`
+    : `Hit: ${hitTotal}`;
+
+  const hitBase = advDetail ? advDetail : `d20(${hitRoll})`;
+  const detailStr = `${hitBase}+Rank(${rank})${hitStatLabel}=${hitTotal}`
+    + (dmgDetail ? `  |  ${dmgDetail}` : '');
+
+  addLog(`${name}` + (hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''), resultStr, detailStr, type);
+}
+
+function rollSkill(btn) {
+  const row = btn.closest('tr');
+  const inputs = row.querySelectorAll('input[type="text"]');
+  const sel = row.querySelector('select');
+  const name = inputs[0].value||'Skill';
+  const rank = parseMod(inputs[1].value);
+  const statId = sel?.value||'';
+  const statMod = statId ? getStatMod(statId) : 0;
+  const totalMod = rank + statMod;
+  const {result: roll, detail: advDetail} = rollWithAdv(20);
+  const total = roll + totalMod;
+  let type = roll===20?'crit':roll===1?'fumble':'normal';
+  const statLabel = statId ? ` + ${statId.toUpperCase()}(${statMod})` : '';
+  const base = advDetail ? advDetail : `d20(${roll})`;
+  addLog(`${name}`+(roll===20?' ★':roll===1?' ✗':''), total,
+    `${base}+Rank(${rank})${statLabel}=${total}`, type);
+}
+
+// ── DARK MODE ──
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('dm-toggle').classList.toggle('on', isDark);
+  }
+
+// ── ADVANTAGE / DISADVANTAGE ──
+let advState = null; // null | 'advantage' | 'disadvantage'
+
+function toggleAdv(mode) {
+  advState = advState === mode ? null : mode;
+  const advBtn = document.getElementById('adv-btn');
+  const disBtn = document.getElementById('dis-btn');
+  advBtn.className = 'adv-btn' + (advState==='advantage' ? ' adv-active' : '');
+  disBtn.className = 'adv-btn' + (advState==='disadvantage' ? ' dis-active' : '');
+}
+
+function clearAdv() {
+  advState = null;
+  const advBtn = document.getElementById('adv-btn');
+  const disBtn = document.getElementById('dis-btn');
+  if(advBtn) advBtn.className = 'adv-btn';
+  if(disBtn) disBtn.className = 'adv-btn';
+}
+
+// Roll a single die with optional adv/dis applied (only for d20s)
+function rollWithAdv(sides) {
+  const r1 = Math.floor(Math.random()*sides)+1;
+  if(sides !== 20 || !advState) return { result: r1, detail: null };
+  const r2 = Math.floor(Math.random()*sides)+1;
+  if(advState === 'advantage') {
+    return { result: Math.max(r1,r2), detail: `adv[${r1},${r2}]→${Math.max(r1,r2)}` };
+  } else {
+    return { result: Math.min(r1,r2), detail: `dis[${r1},${r2}]→${Math.min(r1,r2)}` };
+  }
+}
+
+// ── DICE TRAY ──
+let dicePool = []; // array of sides e.g. [20, 6, 6, 4]
+
+function addDie(sides) {
+  dicePool.push(sides);
+  updateDicePoolDisplay();
+}
+
+function updateDicePoolDisplay() {
+  const el = document.getElementById('dice-pool-display');
+  if(!dicePool.length) {
+    el.innerHTML = '<span>Empty — add dice above</span>';
+    return;
+  }
+  // Count each die type
+  const counts = {};
+  dicePool.forEach(s => counts[s] = (counts[s]||0)+1);
+  const parts = Object.entries(counts)
+    .sort((a,b) => b[0]-a[0])
+    .map(([s,c]) => `<span>${c}d${s}</span>`);
+  el.innerHTML = parts.join(' + ');
+}
+
+function rollDicePool() {
+  if(!dicePool.length) {
+    addLog('Dice Tray', '—', 'No dice in pool', 'normal');
+    return;
+  }
+  const rollResults = dicePool.map(sides => {
+    if(sides === 20 && advState) {
+      const {result, detail} = rollWithAdv(20);
+      return { sides, result, detail };
+    }
+    return { sides, result: d(sides), detail: null };
+  });
+  const total = rollResults.reduce((sum, r) => sum + r.result, 0);
+
+  const counts = {};
+  dicePool.forEach(s => counts[s] = (counts[s]||0)+1);
+  const poolLabel = Object.entries(counts).sort((a,b)=>b[0]-a[0]).map(([s,c])=>`${c}d${s}`).join('+');
+
+  const detail = rollResults.map(r => r.detail ? r.detail : `d${r.sides}(${r.result})`).join(' + ') + ' = ' + total;
+
+  addLog(`Dice Tray: ${poolLabel}`, total, detail, 'normal');
+}
+
+function clearDicePool() {
+  dicePool = [];
+  updateDicePoolDisplay();
+}
+
+// ── SAVE / EXPORT / IMPORT ──
+
+function collectSheet() {
+  const data = {};
+
+  // Header fields
+  data.header = {};
+  ['f-name','f-race','f-gender','f-level','f-crawler','f-class'].forEach(id => {
+    data.header[id] = document.getElementById(id)?.value || '';
+  });
+
+  // Stats
+  data.stats = {};
+  STATS.forEach(s => {
+    data.stats[s.id] = {
+      enh: document.getElementById(s.id+'-enh')?.value || '',
+      unenh: document.getElementById(s.id+'-unenh')?.value || ''
+    };
+  });
+  data.globalModSource = globalModSource;
+
+  // Combat
+  data.combat = {
+    evadeBuffs: document.getElementById('evade-buffs')?.value || '',
+    evadeMove:  document.getElementById('evade-move')?.value || '',
+    evadeStep:  document.getElementById('evade-step')?.value || '',
+    drArmor:    document.getElementById('dr-armor')?.value || '',
+    drBuffs:    document.getElementById('dr-buffs')?.value || '',
+    drAiFavor:  document.getElementById('dr-aifavor')?.value || '',
+    drSize:     document.getElementById('dr-size')?.value || '',
+    manaCurrentVal: document.getElementById('mana-current')?.value || '',
+    debuffs:    document.getElementById('debuffs')?.value || '',
+  };
+
+  // HP pips
+  data.hpPips = [...document.querySelectorAll('.hp-pip')].map(p => p.dataset.active);
+
+  // Attacks
+  data.attacks = [...document.querySelectorAll('#attacks-body tr')].map(tr => {
+    const inputs = tr.querySelectorAll('input[type="text"]');
+    const sels = tr.querySelectorAll('select');
+    return {
+      name: inputs[0]?.value||'',
+      rank: inputs[1]?.value||'',
+      dice: inputs[2]?.value||'',
+      stat: sels[0]?.value||'',        // one stat drives both To Hit and Damage
+      effects: inputs[3]?.value||'',
+    };
+  });
+
+  // Hotlist
+  data.hotlist = [...document.querySelectorAll('#hotlist-grid textarea')].map(t => t.value);
+
+  // External buffs
+  data.extBuffs = [...document.querySelectorAll('.ext-buff-input')].map(i => i.value);
+
+  // Gear slots
+  data.gear = [...document.querySelectorAll('.gear-slot input')].map(i => i.value);
+
+  // Accessories
+  data.accessories = [...document.querySelectorAll('.gear-acc-row input')].map(i => i.value);
+
+  // Skills
+  data.skills = [...document.querySelectorAll('#skills-body tr')].map(tr => {
+    const inputs = tr.querySelectorAll('input[type="text"]');
+    const sel = tr.querySelector('select');
+    const chk = tr.querySelector('input[type="checkbox"]');
+    return {
+      name: inputs[0]?.value||'',
+      rank: inputs[1]?.value||'',
+      stat: sel?.value||'',
+      checkType: inputs[2]?.value||'',
+      notes: inputs[3]?.value||'',
+      checked: chk?.checked||false,
+    };
+  });
+
+  // Inventory
+  data.inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => {
+    const inputs = tr.querySelectorAll('input[type="text"]');
+    return { item: inputs[0]?.value||'', qty: inputs[1]?.value||'', notes: inputs[2]?.value||'' };
+  });
+
+  // Background
+  data.background = [...document.querySelectorAll('#tab-background textarea')].map(t => t.value);
+
+  // Campaign link
+  data.campaign = (typeof _campaign !== 'undefined' && _campaign)
+    ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null;
+
+  return data;
+}
+
+function applySheet(data) {
+  // Header
+  if(data.header) Object.entries(data.header).forEach(([id,v]) => {
+    const el = document.getElementById(id); if(el) el.value = v;
+  });
+
+  // Global mod source
+  if(data.globalModSource) {
+    globalModSource = data.globalModSource;
+    document.getElementById('global-mod-toggle').textContent = globalModSource === 'enhanced' ? 'ENH' : 'UNENH';
+  }
+
+  // Stats
+  if(data.stats) STATS.forEach(s => {
+    const sd = data.stats[s.id];
+    if(!sd) return;
+    const enh = document.getElementById(s.id+'-enh'); if(enh) enh.value = sd.enh;
+    const unenh = document.getElementById(s.id+'-unenh'); if(unenh) unenh.value = sd.unenh;
+    updateMod(s.id);
+  });
+  syncEvadeDex(); syncMana(); updateHpPips();
+
+  // Combat
+  if(data.combat) {
+    const c = data.combat;
+    const set = (id,v) => { const el=document.getElementById(id); if(el) el.value=v; };
+    set('evade-buffs', c.evadeBuffs); calcEvadeTotal();
+    set('evade-move', c.evadeMove); set('evade-step', c.evadeStep);
+    set('dr-armor', c.drArmor); set('dr-buffs', c.drBuffs); calcDR();
+    set('dr-aifavor', c.drAiFavor); set('dr-size', c.drSize);
+    set('mana-current', c.manaCurrentVal);
+    set('debuffs', c.debuffs);
+  }
+
+  // HP pips
+  if(data.hpPips) {
+    document.querySelectorAll('.hp-pip').forEach((pip, i) => {
+      const active = data.hpPips[i] !== 'false';
+      pip.dataset.active = active ? 'true' : 'false';
+      pip.classList.toggle('dimmed', !active);
+    });
+  }
+
+  // Attacks
+  if(data.attacks) {
+    const tbody = document.getElementById('attacks-body');
+    tbody.innerHTML = '';
+    data.attacks.forEach(a => {
+      addAttackRow(tbody);
+      const tr = tbody.lastElementChild;
+      const inputs = tr.querySelectorAll('input[type="text"]');
+      const sels = tr.querySelectorAll('select');
+      inputs[0].value = a.name; inputs[1].value = a.rank;
+      inputs[2].value = a.dice;
+      sels[0].value = atkStatOf(a);              // one stat; tolerates older saves
+      inputs[3].value = a.effects;
+    });
+  }
+
+  // Hotlist
+  if(data.hotlist) {
+    document.querySelectorAll('#hotlist-grid textarea').forEach((t,i) => { t.value = data.hotlist[i]||''; });
+  }
+
+  // Ext buffs
+  if(data.extBuffs) {
+    document.querySelectorAll('.ext-buff-input').forEach((el,i) => { el.value = data.extBuffs[i]||''; });
+  }
+
+  // Gear
+  if(data.gear) {
+    document.querySelectorAll('.gear-slot input').forEach((el,i) => { el.value = data.gear[i]||''; });
+  }
+  if(data.accessories) {
+    document.querySelectorAll('.gear-acc-row input').forEach((el,i) => { el.value = data.accessories[i]||''; });
+  }
+
+  // Skills
+  if(data.skills) {
+    const tbody = document.getElementById('skills-body');
+    tbody.innerHTML = '';
+    data.skills.forEach(sk => {
+      addSkillRow();
+      const tr = tbody.lastElementChild;
+      const inputs = tr.querySelectorAll('input[type="text"]');
+      const sel = tr.querySelector('select');
+      const chk = tr.querySelector('input[type="checkbox"]');
+      inputs[0].value = sk.name; inputs[1].value = sk.rank;
+      if(sel) sel.value = sk.stat;
+      inputs[2].value = sk.checkType; inputs[3].value = sk.notes;
+      if(chk) chk.checked = sk.checked;
+    });
+  }
+
+  // Inventory
+  if(data.inventory) {
+    const tbody = document.getElementById('inv-body');
+    tbody.innerHTML = '';
+    data.inventory.forEach(inv => {
+      addInvRow();
+      const tr = tbody.lastElementChild;
+      const inputs = tr.querySelectorAll('input[type="text"]');
+      inputs[0].value = inv.item; inputs[1].value = inv.qty; inputs[2].value = inv.notes;
+    });
+  }
+
+  // Background
+  if(data.background) {
+    document.querySelectorAll('#tab-background textarea').forEach((t,i) => { t.value = data.background[i]||''; });
+  }
+
+  // Campaign link
+  if(typeof campaignRestore === 'function') campaignRestore(data.campaign);
+}
+
+function newCharacter() {
+  if(!confirm('Clear the entire sheet and start a new character?\n\nMake sure to Export first if you want to save your current character.')) return;
+
+  // Clear header fields
+  ['f-name','f-race','f-gender','f-level','f-crawler','f-class'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+
+  // Clear stats
+  STATS.forEach(s => {
+    const enh = document.getElementById(s.id+'-enh'); if(enh) enh.value = '';
+    const unenh = document.getElementById(s.id+'-unenh'); if(unenh) unenh.value = '';
+    updateMod(s.id);
+  });
+  syncEvadeDex(); syncMana(); updateHpPips();
+
+  // Reset global mod source to enhanced
+  globalModSource = 'enhanced';
+  const gmBtn = document.getElementById('global-mod-toggle');
+  if(gmBtn) { gmBtn.textContent = 'ENH'; }
+
+  // Clear combat fields
+  ['evade-buffs','evade-move','evade-step','dr-armor','dr-buffs','dr-aifavor','dr-size','mana-current','debuffs'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  calcEvadeTotal(); calcDR();
+
+  // Reset HP pips
+  document.querySelectorAll('.hp-pip').forEach(pip => {
+    pip.dataset.active = 'true';
+    pip.classList.remove('dimmed');
+  });
+
+  // Clear attacks and rebuild empty rows
+  const atBody = document.getElementById('attacks-body');
+  atBody.innerHTML = '';
+  for(let i=0;i<5;i++) addAttackRow(atBody);
+
+  // Clear hotlist
+  document.querySelectorAll('#hotlist-grid textarea').forEach(t => t.value = '');
+
+  // Clear external buffs
+  document.querySelectorAll('.ext-buff-input').forEach(el => el.value = '');
+
+  // Clear gear
+  document.querySelectorAll('.gear-slot input').forEach(el => el.value = '');
+  document.querySelectorAll('.gear-acc-row input').forEach(el => el.value = '');
+
+  // Clear and rebuild skills
+  const skBody = document.getElementById('skills-body');
+  skBody.innerHTML = '';
+  for(let i=0;i<12;i++) addSkillRow();
+
+  // Clear and rebuild inventory
+  const invBody = document.getElementById('inv-body');
+  invBody.innerHTML = '';
+  for(let i=0;i<16;i++) addInvRow();
+
+  // Clear background
+  document.querySelectorAll('#tab-background textarea').forEach(t => t.value = '');
+
+  // Clear localStorage
+  localStorage.removeItem('dcc_sheet');
+  if(typeof campaignLeaveSilent === 'function') campaignLeaveSilent();
+  addLog('New Character', '✦', 'Sheet cleared', 'normal');
+}
+
+function saveSheet(quiet) {
+  const data = collectSheet();
+  const json = JSON.stringify(data);
+  // Save to localStorage for offline fallback
+  try { localStorage.setItem('dcc_sheet', json); } catch(e) {}
+  // Save directly to server (primary path — doesn't rely on localStorage patch)
+  if(window.__ddSave) window.__ddSave({ dcc_sheet: json });
+  syncDocTitle();
+  if(quiet !== true) addLog('Sheet Saved', '💾', 'Saved', 'normal');
+}
+
+// Rename the document on the desk to match the character's name, so the card
+// on the main page is titled correctly when you head back there.
+function syncDocTitle() {
+  const name = (document.getElementById('f-name')?.value || '').trim();
+  if(name && window.__ddSaveTitle) window.__ddSaveTitle(name);
+}
+
+
+// ═══ PRINTER-FRIENDLY PDF EXPORT ══════════════════════════════════════════
+// Rebuilds the sheet as clean black-on-white letter-sized pages and hands it
+// to the browser's print dialog ("Save as PDF"). Real selectable text, a few
+// KB — not a screenshot of the dark UI.
+// ═══════════════════════════════════════════════════════════════════════════
+// OFFICIAL PDF EXPORT
+// Draws the character's data onto Renegade's printable DCC sheet
+// (public/dcc-sheet-printable.pdf) at measured coordinates, then downloads it.
+// The template is a flat (non-fillable) PDF, so we overlay text with pdf-lib
+// rather than filling form fields. Falls back to the print view on any error.
+// ═══════════════════════════════════════════════════════════════════════════
+let _dccPdfLibPromise = null;
+function loadPdfLib() {
+  if(window.PDFLib) return Promise.resolve(window.PDFLib);
+  if(_dccPdfLibPromise) return _dccPdfLibPromise;
+  _dccPdfLibPromise = new Promise((resolve, reject) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+    sc.onload  = () => resolve(window.PDFLib);
+    sc.onerror = () => reject(new Error('pdf-lib failed to load'));
+    document.head.appendChild(sc);
+  });
+  return _dccPdfLibPromise;
+}
+
+async function exportPDF() {
+  try {
+    const [PDFLib, bytes] = await Promise.all([
+      loadPdfLib(),
+      fetch('/dcc-sheet-printable.pdf').then(r => {
+        if(!r.ok) throw new Error('sheet template ' + r.status);
+        return r.arrayBuffer();
+      })
+    ]);
+
+    const d    = collectSheet();
+    const V    = id => (document.getElementById(id)?.value || '').trim();
+    const T    = id => (document.getElementById(id)?.textContent || '').trim();
+
+    const pdf   = await PDFLib.PDFDocument.load(bytes);
+    const font  = await pdf.embedFont(PDFLib.StandardFonts.Helvetica);
+    const pages = pdf.getPages();
+    const p0 = pages[0], p1 = pages[1];
+    const H = p0.getSize().height;                 // 792
+    const INK = PDFLib.rgb(0.05, 0.05, 0.5);
+
+    // Coordinates were measured from the top of the page (like the artwork), so
+    // convert to pdf-lib's bottom-left origin. `topY` is the text baseline.
+    const widthOf = (t, size) => font.widthOfTextAtSize(String(t), size);
+    function draw(page, x, topY, text, size, opts) {
+      opts = opts || {};
+      if(text === undefined || text === null || text === '') return;
+      let str = String(text);
+      if(opts.maxW) {                              // ellipsis-free hard truncate
+        while(str && widthOf(str, size) > opts.maxW) str = str.slice(0, -1);
+      }
+      let dx = x;
+      if(opts.center && opts.boxW) dx = x + Math.max(0, (opts.boxW - widthOf(str, size)) / 2);
+      page.drawText(str, { x: dx, y: H - topY, size, font, color: INK });
+    }
+    // Wrap text inside a box (word-wrap, clipped to a max number of lines).
+    function drawBox(page, x, topY, boxW, text, size, maxLines) {
+      if(!text) return;
+      const words = String(text).replace(/\s+/g, ' ').trim().split(' ');
+      const lines = [];
+      let line = '';
+      for(const w of words) {
+        const trial = line ? line + ' ' + w : w;
+        if(widthOf(trial, size) > boxW && line) { lines.push(line); line = w; }
+        else line = trial;
+      }
+      if(line) lines.push(line);
+      const lh = size * 1.25;
+      lines.slice(0, maxLines || 99).forEach((ln, i) => {
+        page.drawText(ln, { x, y: H - (topY + i * lh), size, font, color: INK });
+      });
+    }
+
+    // ── PAGE 0 · header ────────────────────────────────────────────────────
+    draw(p0, 439, 52, d.header['f-level'],   13, { center:true, boxW:44 });
+    draw(p0, 489, 52, d.header['f-crawler'], 11, { center:true, boxW:44 });
+    // The printable has a FLOOR box; the sheet has no floor field, so leave it blank.
+    draw(p0, 30,  96, d.header['f-name'],   13, { maxW:168 });
+    draw(p0, 204, 96, d.header['f-race'],   13, { maxW:112 });
+    draw(p0, 323, 96, d.header['f-class'],  13, { maxW:112 });
+    draw(p0, 442, 96, d.header['f-gender'], 11, { maxW:138 });
+
+    // ── PAGE 0 · stats (big modifier + ENH / UNENH scores) ─────────────────
+    const STATX = { str:28.9, int:141.4, con:253.1, dex:364.9, cha:476.6 };
+    STATS.forEach(st => {
+      const x0 = STATX[st.id]; if(x0 === undefined) return;
+      const mod = T(st.id + '-mod');
+      const enh = d.stats[st.id]?.enh || '';
+      const un  = d.stats[st.id]?.unenh || '';
+      draw(p0, x0, 232, mod, 26, { center:true, boxW:106 });
+      draw(p0, x0 + 12, 262, enh, 13, { center:true, boxW:44, maxW:44 });
+      draw(p0, x0 + 62, 262, un,  13, { center:true, boxW:44, maxW:44 });
+    });
+
+    // ── PAGE 0 · Evade / DR / Mana ─────────────────────────────────────────
+    draw(p0, 82,  303, V('evade-dex'),   12, { center:true, boxW:127 });
+    draw(p0, 222, 303, V('evade-buffs'), 12, { center:true, boxW:127 });
+    draw(p0, 362, 303, V('evade-total'), 13, { center:true, boxW:127 });
+    draw(p0, 508, 303, V('evade-move'),  11, { center:true, boxW:35 });
+    draw(p0, 548, 303, V('evade-step'),  11, { center:true, boxW:35 });
+
+    draw(p0, 46,  340, V('dr-armor'),  12, { center:true, boxW:139 });
+    draw(p0, 198, 340, V('dr-buffs'),  12, { center:true, boxW:139 });
+    draw(p0, 350, 340, V('dr-total'),  13, { center:true, boxW:139 });
+    draw(p0, 508, 340, V('dr-aifavor'),11, { center:true, boxW:35 });
+    draw(p0, 548, 340, V('dr-size'),   11, { center:true, boxW:35 });
+
+    draw(p0, 49,  402, V('mana-max'),     12, { center:true, boxW:119 });
+    draw(p0, 182, 402, V('mana-current'), 12, { center:true, boxW:118 });
+    drawBox(p0, 31, 446, 268, V('debuffs'), 9, 2);
+
+    // ── PAGE 0 · External buffs (max 3) ────────────────────────────────────
+    (d.extBuffs || []).slice(0, 3).forEach((b, i) => {
+      draw(p0, 323, 390 + i * 18.7, b, 10, { maxW:102 });
+    });
+
+    // ── PAGE 0 · Attacks (5 rows) ──────────────────────────────────────────
+    const ATK_ROW = [488.6, 512.6, 536.6, 559.9, 583.9];
+    (d.attacks || []).filter(a => a.name).slice(0, 5).forEach((a, i) => {
+      const y = ATK_ROW[i] + 16;
+      const su = s => (s || '').toUpperCase();
+      const stat = su(atkStatOf(a));
+      draw(p0, 33,  y, a.name, 10, { maxW:160 });
+      draw(p0, 197, y, a.rank, 10, { center:true, boxW:48 });
+      draw(p0, 250, y, stat, 9, { center:true, boxW:32 });
+      draw(p0, 320, y, a.dice, 10, { center:true, boxW:48 });
+      draw(p0, 373, y, stat, 9, { center:true, boxW:32 });
+      draw(p0, 420, y, a.effects, 9, { maxW:160 });
+    });
+
+    // ── PAGE 0 · Hotlist (10 cards: 5 top, 5 bottom) ───────────────────────
+    const HLX = [28.9, 140.6, 252.4, 364.9, 476.6];
+    (d.hotlist || []).forEach((h, i) => {
+      if(i > 9 || !h) return;
+      const col = i % 5, top = i < 5;
+      drawBox(p0, HLX[col] + 4, top ? 646 : 714, 99, h, 9, 5);
+    });
+
+    // ── PAGE 1 · Skills + Inventory (24 rows each) ─────────────────────────
+    const ROW_Y0 = 56.6, ROW_PITCH = (439.9 - 56.6) / 24;
+    (d.skills || []).filter(s => s.name).slice(0, 24).forEach((s, i) => {
+      const y = ROW_Y0 + i * ROW_PITCH + 10.5;
+      if(s.checked) draw(p1, 36.5, y, 'X', 9);
+      draw(p1, 51,  y, s.name, 9, { maxW:104 });
+      draw(p1, 158, y, s.rank, 9, { center:true, boxW:24 });
+      draw(p1, 182, y, (s.stat || '').toUpperCase(), 9, { center:true, boxW:28 });
+      draw(p1, 244, y, s.checkType, 9, { maxW:56 });
+      draw(p1, 303, y, s.notes, 8, { maxW:95 });
+    });
+    (d.inventory || []).filter(i => i.item).slice(0, 24).forEach((it, i) => {
+      const y = ROW_Y0 + i * ROW_PITCH + 10.5;
+      draw(p1, 372, y, it.item, 9, { maxW:112 });
+      draw(p1, 491, y, it.qty,  9, { center:true, boxW:24 });
+      draw(p1, 519, y, it.notes, 8, { maxW:62 });
+    });
+
+    // ── PAGE 1 · Gear slots + Accessories ──────────────────────────────────
+    const GEAR_Y = [477, 493, 509, 525, 541, 557];   // Head→Feet, in sheet order
+    (d.gear || []).slice(0, 6).forEach((val, i) => {
+      draw(p1, 90, GEAR_Y[i], val, 10, { maxW:75 });
+    });
+    (d.accessories || []).slice(0, 10).forEach((a, i) => {
+      draw(p1, 34, 586 + i * 17.3, a, 9, { maxW:140 });
+    });
+
+    // ── PAGE 1 · Character notes ───────────────────────────────────────────
+    // Background textareas in DOM order: Popularity, Past Trauma, Loose Ends, Regrets, Notes
+    const bg = d.background || [];
+    drawBox(p1, 340, 484, 240, bg[0], 8.5, 5);  // Popularity
+    drawBox(p1, 340, 545, 240, bg[1], 8.5, 5);  // Past Trauma
+    drawBox(p1, 340, 606, 240, bg[2], 8.5, 5);  // Loose Ends
+    drawBox(p1, 340, 666, 240, bg[3], 8.5, 5);  // Regrets
+    drawBox(p1, 340, 728, 240, bg[4], 8.5, 4);  // Notes
+
+    const out  = await pdf.save();
+    const blob = new Blob([out], { type: 'application/pdf' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = ((d.header['f-name'] || 'dcc-crawler').replace(/[^a-z0-9]+/gi, '_').toLowerCase() || 'dcc-crawler') + '.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+
+    addLog('Sheet Exported', '🖨', 'Official DCC sheet PDF', 'normal');
+  } catch(err) {
+    console.warn('Official-PDF export failed, falling back to print view:', err);
+    exportPrintablePDF();
+  }
+}
+
+function exportPrintablePDF() {
+  const d   = collectSheet();
+  const V   = id => (document.getElementById(id)?.value || '').trim();
+  const T   = id => (document.getElementById(id)?.textContent || '').trim();
+  const esc = t => String(t == null ? '' : t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const nl  = t => esc(t).replace(/\n/g,'<br>');
+
+  const name  = d.header['f-name'] || 'Unnamed Crawler';
+  const conMod = (typeof getStatMod === 'function') ? getStatMod('con') : 0;
+
+  // ── Stats: show whichever score feeds the mod, plus both scores ──
+  const statCells = STATS.map(st => {
+    const enh = d.stats[st.id]?.enh || '—';
+    const un  = d.stats[st.id]?.unenh || '—';
+    return `<div class="stat">
+      <div class="stat-abbr">${esc(st.abbr)}</div>
+      <div class="stat-val">${esc(T(st.id+'-mod'))}</div>
+      <div class="stat-scores">${esc(enh)} / ${esc(un)}</div>
+    </div>`;
+  }).join('');
+
+  const attacks = (d.attacks||[]).filter(a => a.name);
+  const attackRows = attacks.length ? attacks.map(a =>
+    `<tr><td>${esc(a.name)}</td>`
+    + `<td class="c">${esc(a.rank)}${atkStatOf(a) ? ' + ' + esc(atkStatOf(a).toUpperCase()) : ''}</td>`
+    + `<td class="c">${esc(a.dice)}${atkStatOf(a) ? ' + ' + esc(atkStatOf(a).toUpperCase()) : ''}</td>`
+    + `<td>${esc(a.effects)}</td></tr>`).join('')
+    : '<tr><td colspan="4" class="empty">—</td></tr>';
+
+  const skills = (d.skills||[]).filter(sk => sk.name);
+  const skillRows = skills.length ? skills.map(sk =>
+    `<tr><td class="c">${sk.checked ? '&#9632;' : '&#9633;'}</td>`
+    + `<td>${esc(sk.name)}</td><td class="c">${esc(sk.rank)}</td>`
+    + `<td class="c">${esc((sk.stat||'').toUpperCase())}</td>`
+    + `<td class="c">${esc(sk.checkType)}</td><td>${esc(sk.notes)}</td></tr>`).join('')
+    : '<tr><td colspan="6" class="empty">—</td></tr>';
+
+  const inv = (d.inventory||[]).filter(i => i.item);
+  const invRows = inv.length ? inv.map(i =>
+    `<tr><td>${esc(i.item)}</td><td class="c">${esc(i.qty)}</td><td>${esc(i.notes)}</td></tr>`).join('')
+    : '<tr><td colspan="3" class="empty">—</td></tr>';
+
+  const GEAR_SLOTS = ['Head','Torso','Arms','Hands / Holding','Legs','Feet'];
+  const gearRows = GEAR_SLOTS.map((label, i) =>
+    `<div class="fld"><span class="fld-l">${esc(label)}</span><span class="fld-v">${esc((d.gear||[])[i] || '') || '&nbsp;'}</span></div>`).join('');
+
+  const accs = (d.accessories||[]).filter(Boolean);
+  const hots = (d.hotlist||[]).filter(Boolean);
+  const buffs = (d.extBuffs||[]).filter(Boolean);
+
+  const BG_LABELS = ['Popularity','Past Trauma','Loose Ends','Regrets','Notes'];
+  const bgBoxes = BG_LABELS.map((label, i) => {
+    const val = (d.background||[])[i] || '';
+    if(!val.trim()) return '';
+    return `<div class="bg-box${i===4 ? ' wide' : ''}"><div class="bg-l">${esc(label)}</div><div class="bg-v">${nl(val)}</div></div>`;
+  }).join('');
+
+  const doc = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<title>${esc(name)} — DCC</title>
+<style>
+  @page { size: letter portrait; margin: 0.5in; }
+  * { box-sizing: border-box; }
+  body { margin: 0; color: #000; background: #fff;
+         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 10px; line-height: 1.4; }
+  h1 { font-size: 21px; margin: 0; }
+  .sub-title { font-size: 10px; color: #444; margin-top: 2px; }
+  header { display: flex; justify-content: space-between; align-items: flex-end;
+           border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px; }
+  .lvl { font-size: 11px; font-weight: 700; text-align: right; white-space: nowrap; }
+
+  h2 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em;
+       margin: 0 0 5px; padding-bottom: 2px; border-bottom: 1px solid #000; }
+  .h2sub { font-weight: 400; text-transform: none; letter-spacing: 0; color: #666; font-size: 9px; }
+  section { margin-bottom: 12px; break-inside: avoid; }
+
+  .row { display: flex; gap: 10px; align-items: stretch; margin-bottom: 12px; }
+  .stats { display: flex; gap: 5px; }
+  .stat { border: 1.5px solid #000; width: 56px; text-align: center; padding: 3px 0; }
+  .stat-abbr   { font-size: 8px; font-weight: 700; letter-spacing: .1em; }
+  .stat-val    { font-size: 19px; font-weight: 700; line-height: 1.1; }
+  .stat-scores { font-size: 8px; color: #555; border-top: 1px solid #ccc; }
+  .vitals { display: flex; gap: 5px; margin-left: auto; }
+  .vital { border: 1.5px solid #000; padding: 3px 9px; text-align: center; min-width: 58px; }
+  .vital-l { font-size: 8px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .vital-v { font-size: 17px; font-weight: 700; line-height: 1.2; }
+
+  .hp-track { display: flex; gap: 3px; margin-bottom: 10px; }
+  .hp-box { flex: 1; border: 1.5px solid #000; height: 24px; text-align: center;
+            font-size: 11px; font-weight: 700; line-height: 22px; }
+
+  table.grid { width: 100%; border-collapse: collapse; }
+  table.grid th { font-size: 8px; text-transform: uppercase; letter-spacing: .08em; color: #555;
+                  text-align: left; border-bottom: 1px solid #000; padding: 2px 4px; }
+  table.grid td { border-bottom: 1px solid #ddd; padding: 3px 4px; vertical-align: top; }
+  table.grid td.c { text-align: center; }
+  .empty { color: #999; }
+
+  .cols { display: flex; gap: 14px; }
+  .col { flex: 1; }
+  .fld { display: flex; gap: 6px; border-bottom: 1px dotted #999; padding: 2px 0; }
+  .fld-l { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+           color: #666; min-width: 74px; padding-top: 1px; }
+  .fld-v { font-size: 10px; flex: 1; }
+  ul.plain { list-style: none; margin: 0; padding: 0; }
+  ul.plain li { border-bottom: 1px dotted #bbb; padding: 2px 0; font-size: 10px; }
+
+  .bg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .bg-box { border: 1px solid #000; padding: 5px 7px; break-inside: avoid; }
+  .bg-box.wide { grid-column: 1 / -1; }
+  .bg-l { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+          color: #666; margin-bottom: 2px; }
+  .bg-v { font-size: 10px; white-space: pre-wrap; }
+
+  footer { margin-top: 10px; border-top: 1px solid #ccc; padding-top: 4px;
+           font-size: 8px; color: #888; display: flex; justify-content: space-between; }
+</style></head>
+<body>
+  <header>
+    <div>
+      <h1>${esc(name)}</h1>
+      <div class="sub-title">${esc([d.header['f-race'], d.header['f-class'], d.header['f-gender']].filter(Boolean).join(' · ')) || '&nbsp;'}</div>
+    </div>
+    <div class="lvl">Level ${esc(d.header['f-level'] || '1')}${d.header['f-crawler'] ? '<br>Crawler #' + esc(d.header['f-crawler']) : ''}</div>
+  </header>
+
+  <div class="row">
+    <div class="stats">${statCells}</div>
+    <div class="vitals">
+      <div class="vital"><div class="vital-l">Evade</div><div class="vital-v">${esc(V('evade-total') || '—')}</div></div>
+      <div class="vital"><div class="vital-l">DR</div><div class="vital-v">${esc(V('dr-total') || '—')}</div></div>
+      <div class="vital"><div class="vital-l">Mana</div><div class="vital-v">${esc(V('mana-current') || '0')}<span style="font-size:11px;color:#666;">/${esc(V('mana-max') || '0')}</span></div></div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Health Bar <span class="h2sub">${conMod > 0 ? esc(conMod) + ' HP per box · tick as they go' : 'CON mod per box'}</span></h2>
+    <div class="hp-track">${Array.from({length: 10}, () => `<div class="hp-box">${conMod > 0 ? conMod : ''}</div>`).join('')}</div>
+  </section>
+
+  <div class="cols">
+    <div class="col">
+      <section>
+        <h2>Evade</h2>
+        <div class="fld"><span class="fld-l">DEX Mod</span><span class="fld-v">${esc(V('evade-dex'))}</span></div>
+        <div class="fld"><span class="fld-l">Buffs</span><span class="fld-v">${esc(V('evade-buffs'))}</span></div>
+        <div class="fld"><span class="fld-l">Move</span><span class="fld-v">${esc(V('evade-move'))}</span></div>
+        <div class="fld"><span class="fld-l">Step</span><span class="fld-v">${esc(V('evade-step'))}</span></div>
+      </section>
+    </div>
+    <div class="col">
+      <section>
+        <h2>Damage Reduction</h2>
+        <div class="fld"><span class="fld-l">Armor</span><span class="fld-v">${esc(V('dr-armor'))}</span></div>
+        <div class="fld"><span class="fld-l">Buffs</span><span class="fld-v">${esc(V('dr-buffs'))}</span></div>
+        <div class="fld"><span class="fld-l">AI Favor</span><span class="fld-v">${esc(V('dr-aifavor'))}</span></div>
+        <div class="fld"><span class="fld-l">Size</span><span class="fld-v">${esc(V('dr-size'))}</span></div>
+      </section>
+    </div>
+  </div>
+
+  ${V('debuffs') ? `<section><h2>Debuffs</h2><div class="fld-v">${nl(V('debuffs'))}</div></section>` : ''}
+
+  <section>
+    <h2>Attacks</h2>
+    <table class="grid">
+      <thead><tr><th>Name</th><th class="c" style="width:90px">To Hit</th><th class="c" style="width:100px">Damage</th><th style="width:34%">Effects</th></tr></thead>
+      <tbody>${attackRows}</tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Skills</h2>
+    <table class="grid">
+      <thead><tr><th class="c" style="width:22px"></th><th>Name</th><th class="c" style="width:36px">Rank</th><th class="c" style="width:44px">Stat</th><th class="c" style="width:70px">Check</th><th style="width:32%">Notes</th></tr></thead>
+      <tbody>${skillRows}</tbody>
+    </table>
+  </section>
+
+  ${hots.length ? `<section><h2>Hotlist</h2><ul class="plain">${hots.map(h => `<li>${nl(h)}</li>`).join('')}</ul></section>` : ''}
+  ${buffs.length ? `<section><h2>External Buffs</h2><ul class="plain">${buffs.map(b => `<li>${esc(b)}</li>`).join('')}</ul></section>` : ''}
+
+  <div class="cols">
+    <div class="col">
+      <section>
+        <h2>Worn Gear</h2>
+        ${gearRows}
+        ${accs.length ? `<div style="margin-top:6px;"><div class="fld-l" style="margin-bottom:2px;">Accessories</div><ul class="plain">${accs.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>` : ''}
+      </section>
+    </div>
+    <div class="col">
+      <section>
+        <h2>Inventory</h2>
+        <table class="grid">
+          <thead><tr><th>Item</th><th class="c" style="width:34px">Qty</th><th style="width:42%">Notes</th></tr></thead>
+          <tbody>${invRows}</tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+
+  ${bgBoxes ? `<section><h2>Background</h2><div class="bg-grid">${bgBoxes}</div></section>` : ''}
+
+  <footer>
+    <span>Dungeon Crawler Carl character sheet</span>
+    <span>${new Date().toLocaleDateString()}</span>
+  </footer>
+</body></html>`;
+
+  // Hidden iframe + print — no pop-up blocker, live sheet untouched.
+  const old = document.getElementById('pdf-print-frame');
+  if(old) old.remove();
+  const frame = document.createElement('iframe');
+  frame.id = 'pdf-print-frame';
+  frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;';
+  document.body.appendChild(frame);
+
+  const fdoc = frame.contentWindow.document;
+  fdoc.open(); fdoc.write(doc); fdoc.close();
+
+  const go = () => {
+    try {
+      frame.contentWindow.focus();
+      frame.contentWindow.print();
+    } catch(e) {
+      const w = window.open('', '_blank');
+      if(w) { w.document.write(doc); w.document.close(); w.focus(); w.print(); }
+      else alert('Your browser blocked the print window. Allow pop-ups for this page and try again.');
+    }
+  };
+  if(fdoc.readyState === 'complete') setTimeout(go, 120);
+  else frame.onload = () => setTimeout(go, 120);
+
+  addLog('Sheet Exported', '🖨', 'Print / Save as PDF', 'normal');
+}
+
+function exportSheet() {
+  const data = collectSheet();
+  const name = document.getElementById('f-name')?.value || 'character';
+  const filename = name.replace(/[^a-z0-9]/gi,'_').toLowerCase() + '_dcc.json';
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  addLog('Sheet Exported', '↓ JSON', filename, 'normal');
+}
+
+function importSheet(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      applySheet(data);
+      addLog('Sheet Imported', '↑ Loaded', file.name, 'normal');
+    } catch(err) {
+      alert('Failed to import: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+function autoLoad() {
+  // Try server state first (injected by app), then fall back to localStorage
+  var saved = null;
+  if(window.__ddState !== undefined) {
+    // Deck mode: only use server state; a new document starts empty
+    saved = window.__ddState['dcc_sheet'] || null;
+  } else {
+    // Standalone mode: use localStorage
+    saved = localStorage.getItem('dcc_sheet');
+  }
+  if(!saved) return;
+  try {
+    const data = JSON.parse(saved);
+    applySheet(data);
+  } catch(e) {
+  }
+}
+
+// ── INIT ──
+if(localStorage.getItem('dcc_dark') === '1') {
+  document.body.classList.add('dark');
+  document.getElementById('dm-toggle').classList.add('on');
+}
+buildStats();
+buildHpBar();
+buildAttacks();
+buildHotlist();
+buildAccessories();
+buildSkills();
+buildInventory();
+autoLoad();
+</script>
+
+<style>
+/* ═══ COLLAPSE + MOBILE ═══ */
+
+/* Roll log collapse (all screen sizes) */
+.roll-log { transition: width 0.2s ease; }
+.roll-log.collapsed { width: 0 !important; overflow: hidden; border: none; }
+#log-collapse-btn { transition: right 0.2s ease; }
+
+@media (max-width: 768px) {
+  .app-wrap { flex-direction: column; align-items: stretch; }
+  .sheet-wrap { padding: 8px; overflow-y: visible; }
+
+  /* Roll log: slides up from bottom on mobile */
+  .roll-log {
+    width: 100% !important;
+    position: fixed; bottom: 0; left: 0; right: 0; top: auto !important;
+    border-left: none; border-top: 3px solid var(--red); z-index: 200;
+    max-height: calc(100vh - 34px);max-height:calc(100dvh - 34px); transition: transform 0.25s ease;
+    overflow: visible !important;
+  }
+  .roll-log.collapsed { transform: translateY(100%); width: 100% !important; }
+  .roll-log:not(.collapsed) .log-entries { max-height: calc(100vh - 194px);max-height:calc(100dvh - 194px); }
+  /* Toggle button: attached to top of log, centered, always visible */
+  #log-collapse-btn {
+    position: absolute !important;
+    bottom: 100% !important; top: auto !important;
+    left: 50% !important; right: auto !important;
+    transform: translateX(-50%) !important;
+    width: 80px !important; height: 28px !important;
+    border-radius: 6px 6px 0 0 !important;
+    font-size: 11px !important;
+  }
+  #log-collapse-btn::after{content:"\25B2 Log";}
+  .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
+  body { padding-top: 0; padding-bottom: 0; }
+
+  /* Header */
+  .hdr-row { flex-direction: column; }
+  .hdr-logo { min-width: unset !important; padding: 10px 14px !important; }
+  .hdr-fields { grid-template-columns: 1fr 1fr; border-left: none; border-top: 2px solid var(--border); }
+  .hdr-field:nth-child(2n) { border-right: none; }
+  .hdr-field:nth-child(3) { border-right: 1px solid var(--rule); }
+
+  .hp-bar-label { font-size: 10px; width: 58px; }
+  .hp-pip { height: 36px; }
+
+  .body-row { flex-direction: column; }
+  .body-row > div[style*="flex:1;display:flex;flex-direction:column"] { width: 100%; }
+  .stats-col { width: 100%; border-right: none; border-bottom: 2px solid var(--border); }
+  #stats-list { display: flex; flex-direction: column; }
+  .stat-block:nth-child(odd) { border-right: none; }
+  .stat-input { width: 52px; height: 40px; font-size: 18px; }
+  .stat-mod-val { font-size: 14px; padding: 3px 10px; }
+  .roll-btn { font-size: 11px; padding: 5px 0; }
+  .center-col { width: 100%; }
+  .combat-row { flex-wrap: wrap; gap: 4px; }
+  .combat-tag { min-width: 80px; font-size: 13px; }
+  .formula-box { flex-wrap: wrap; gap: 3px; }
+  .formula-input { width: 38px; height: 26px; font-size: 11px; }
+  .formula-total { width: 42px; height: 26px; font-size: 12px; }
+  .formula-extra { margin-left: 0; flex-wrap: wrap; }
+  .evade-roll-btn { width: 100%; margin-top: 4px; margin-left: 0; }
+  .mana-row { flex-wrap: wrap; gap: 6px; }
+  .mana-input { width: 40px; }
+  .atk-formula input { width: 26px; font-size: 10px; }
+  .skill-stat-sel { width: 42px; font-size: 10px; padding: 1px 2px; }
+  .atk-roll-btn { font-size: 9px; padding: 2px 4px; }
+  #hotlist-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .hotlist-card { min-height: 70px; }
+  .tabs-row { overflow-x: auto; }
+  .tab-btn { flex-shrink: 0; font-size: 10px; padding: 8px 10px; white-space: nowrap; }
+  .tab-panel { padding: 8px; }
+  /* Skills on mobile: lay each row out as a grid so every field (Stat included)
+     stays visible, and Notes & Upgrades drops to its own full-width line for
+     room. The header row is hidden because the grid no longer lines up with a
+     table header — each input's placeholder labels it instead. */
+  .skills-table thead { display: none; }
+  .skills-table, .skills-table tbody { display: block; width: 100%; }
+  .skills-table tr {
+    display: grid;
+    grid-template-columns: 30px minmax(0,1.6fr) 40px 50px minmax(0,1fr) 26px 46px;
+    grid-template-areas:
+      "del name rank stat check tick roll"
+      "notes notes notes notes notes notes notes";
+    align-items: center;
+    column-gap: 4px;
+    row-gap: 5px;
+    padding: 7px 2px;
+    border-bottom: 2px solid var(--rule);
+  }
+  .skills-table td { border-bottom: none; padding: 0; }
+  .skills-table td:nth-child(1) { grid-area: del; }
+  .skills-table td:nth-child(2) { grid-area: name; }
+  .skills-table td:nth-child(3) { grid-area: rank; }
+  .skills-table td:nth-child(4) { grid-area: stat; }
+  .skills-table td:nth-child(5) { grid-area: check; }
+  .skills-table td:nth-child(6) { grid-area: notes; }
+  .skills-table td:nth-child(7) { grid-area: tick; justify-self: center; }
+  .skills-table td:nth-child(8) { grid-area: roll; }
+  .skills-table .skill-stat-sel { width: 100%; }
+  .skills-table .skill-del-btn { width: 100%; }
+  .skills-table .skill-roll-btn { min-width: 0; width: 100%; padding: 8px 4px !important; }
+  .skills-table th { font-size: 9px; padding: 3px 3px; }
+  .gear-grid { grid-template-columns: 1fr; }
+  .gear-slot { border-right: none !important; }
+  .bg-notes-grid { grid-template-columns: 1fr; }
+  .dice-btn { font-size: 12px !important; padding: 8px 2px !important; min-height: 40px; }
+  .adv-btn { font-size: 12px !important; min-height: 40px; padding: 8px 4px !important; }
+
+  /* ── Bigger touch targets + type for all buttons (min 44px tap area) ── */
+  .evade-roll-btn { min-height: 46px; font-size: 15px !important; padding: 11px 14px !important; }
+  .log-clear { min-height: 42px; font-size: 13px !important; padding: 9px 12px !important; }
+  .log-action-btn { min-height: 46px; font-size: 13px !important; }
+  .dice-roll-btn { min-height: 48px; font-size: 16px !important; }
+  .dice-clear-btn { min-height: 46px; font-size: 14px !important; }
+  .tab-btn { min-height: 46px; font-size: 14px !important; padding: 12px 14px !important; }
+  .atk-roll-btn { min-height: 44px; font-size: 13px !important; padding: 9px 10px !important; }
+  .skill-roll-btn { min-height: 44px; font-size: 13px !important; padding: 9px 10px !important; }
+  /* (row-delete buttons are deliberately smaller — see override below) */
+  .add-btn { min-height: 46px; font-size: 15px !important; padding: 11px 16px !important; }
+  .roll-btn { min-height: 48px; font-size: 16px !important; padding: 12px 0 !important; letter-spacing: .08em; margin-top: 6px; }
+  /* Icon-only roll buttons: square-ish, thumb-sized */
+  .atk-roll-btn, .skill-roll-btn { min-width: 46px; font-size: 20px !important; padding: 8px 10px !important; }
+
+  /* ── Larger, more legible type ── */
+  /* 16px on inputs stops iOS from zooming the page when a field is focused */
+  input[type="text"], input[type="number"], select, textarea { font-size: 16px !important; }
+  /* ── Stat boxes ──
+     Enh / Unenh / MOD share one line and together span the Roll button below.
+     Scores sit a step smaller than the MOD, which is the value you read most. */
+  .stat-block { padding: 12px 12px; }
+  .stat-name { font-size: 18px; margin-bottom: 6px; }
+  .stat-line { gap: 6px; margin-bottom: 8px; align-items: flex-end; }
+  .stat-score-wrap { flex: 1 1 0; min-width: 0; align-items: stretch; gap: 3px; }
+  .stat-mod-wrap   { flex: 1 1 0; min-width: 0; align-items: stretch; gap: 3px; }
+  .stat-score-label { font-size: 11px; text-align: center; }
+  .stat-divider { font-size: 22px; padding-bottom: 12px; flex: 0 0 auto; }
+  .stat-input   { width: 100%; height: 54px; font-size: 26px; }   /* scores */
+  .stat-mod-val { width: 100%; height: 54px; line-height: 52px; font-size: 32px; padding: 0 4px; }  /* mod: larger */
+  .stat-label { font-size: 13px; }
+
+  /* ── (1) Evade + DR take the full width; Move/Step/AI Favor/Size and
+         External Buffs drop below them instead of sitting in a side column ── */
+  .combat-section { flex-direction: column; }
+  .combat-main { width: 100%; }
+  .combat-side {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: 2px solid var(--border);
+    padding: 8px 10px !important;
+    margin-top: 6px;
+  }
+  /* ── (1) Evade + DR: the label sits on its own line so the three boxes
+         can share the full width of the screen ── */
+  .combat-row { flex-direction: column; align-items: stretch; gap: 5px; margin-bottom: 10px; }
+  .combat-tag { min-width: 0; font-size: 15px; }
+  .formula-box { flex-wrap: nowrap; align-items: flex-start; gap: 5px; }
+  .formula-extra-item { flex: 1 1 0; min-width: 0; }
+  .formula-eq { flex: 0 0 auto; align-self: center; padding-top: 10px; font-size: 15px; }
+  .formula-input, .formula-total { width: 100%; height: 48px; font-size: 20px; }
+  .formula-sublabel { font-size: 9px; }
+  /* an earlier mobile rule sets width:100% — with flex:0 0 auto in a nowrap
+     row that would let the button eat the whole line, so pin it back to auto */
+  .evade-roll-btn { flex: 0 0 auto; width: auto !important; align-self: flex-start;
+                    margin-left: 4px !important; height: 48px; padding: 0 10px !important; }
+
+  /* ── (2) Move / Step / AI Favor / Size: taller boxes, bigger numbers.
+         (their inline styles set height/font, so these need !important) ── */
+  .combat-side .formula-total { height: 46px !important; font-size: 19px !important; padding: 0 2px !important; }
+  .combat-side .formula-sublabel { font-size: 10px !important; }
+
+  /* ── (3) Mana gets its own row; Debuffs drops below it ── */
+  .mana-row { flex-direction: column; align-items: stretch; gap: 8px; padding: 8px 10px; }
+  /* Mana boxes match the Evade/DR boxes: let them flex to fill the row
+     (48px tall, 20px numbers) rather than sitting at a fixed narrow width */
+  .mana-group { justify-content: flex-start; width: 100%; gap: 6px; }
+  .mana-input { flex: 1 1 0; min-width: 0; width: auto; height: 48px; font-size: 20px; }
+  .mana-slash { flex: 0 0 auto; font-size: 22px; }
+  .mana-label { flex: 0 0 auto; font-size: 13px; }
+  .debuff-group { margin-left: 0; width: 100%; gap: 6px; }
+  .debuff-input { flex: 1 1 0; min-width: 0; height: 48px; font-size: 17px; }
+
+  /* ── (2) Attacks + Skills: slightly smaller type ── */
+  .attacks-table th { font-size: 10px; padding: 4px 4px; }
+  .attacks-table td { padding: 1px 3px; }
+  .attacks-table td input { font-size: 13px; }
+  .atk-formula input { font-size: 12px; }
+  .skills-table th { font-size: 11px; padding: 5px 3px; }
+  .skills-table td { font-size: 12px; }
+  .skills-table td input[type="text"] { font-size: 13px; }
+  .skill-stat-sel { font-size: 12px; }
+
+  /* ── (3) Row-delete buttons: smaller than the other touch targets ── */
+  .skill-del-btn, .inv-del-btn {
+    min-height: 30px !important;
+    min-width: 30px !important;
+    font-size: 12px !important;
+    padding: 4px 6px !important;
+    line-height: 1;
+  }
+
+  /* ── (4) Campaign shares the Save row — 4 buttons across, so tighten the
+         type a touch and drop the padding rather than letting them wrap ── */
+  .log-actions { flex-wrap: nowrap; gap: 3px; }
+  .log-actions .log-action-btn { font-size: 11px !important; padding: 9px 2px !important; letter-spacing: .02em; }
+  .atk-formula input { width: 34px; font-size: 14px; }
+  .skill-stat-sel { width: 58px; font-size: 14px; padding: 5px 4px; }
+  /* ── Health bar: taller pips, readable values ── */
+  .hp-bar-wrap { gap: 6px; }
+  .hp-bar-label { font-size: 15px; width: 72px; letter-spacing: .06em; }
+  .hp-pips { gap: 3px; }
+  .hp-pip { height: 62px; border-width: 2px; padding-bottom: 3px; }
+  .hp-pip-val { font-size: 19px; }
+  .hp-pip-label { font-size: 10px; }
+  .section-title, .sec-title { font-size: 14px; }
+  .hdr-field label { font-size: 12px; }
+  .hdr-field input { font-size: 16px; }
+  .skills-table th { font-size: 12px; padding: 6px 4px; }
+  .skills-table td { font-size: 14px; }
+  .gear-slot { font-size: 15px; }
+  .hotlist-card { min-height: 84px; font-size: 14px; }
+  .log-entries { font-size: 14px; }
+  .dice-btn { font-size: 16px !important; padding: 12px 4px !important; min-height: 48px; }
+  .adv-btn { font-size: 14px !important; min-height: 46px; padding: 11px 6px !important; }
+}
+
+@media (max-width: 420px) {
+  .hdr-fields { grid-template-columns: 1fr; }
+  .hdr-field:nth-child(3) { border-right: none; }
+  #stats-list { grid-template-columns: 1fr; }
+  .stat-block:nth-child(odd) { border-right: none; }
+  .dice-btns { grid-template-columns: repeat(4,1fr); }
+  .hp-pips { gap: 2px; }
+}
+
+/* ══ ROUNDED BUTTONS ══════════════════════════════════════════════════════
+   Applied last so it wins over the per-button rules above. Deliberately
+   shaped controls are left alone: .dm-toggle-btn (pill switch) and
+   #log-collapse-btn (side tab). */
+.roll-btn, .evade-roll-btn, .add-btn, .dice-roll-btn, .dice-clear-btn,
+.log-action-btn, .dice-btn, .adv-btn, .mod-toggle {
+  border-radius: 6px;
+}
+.atk-roll-btn, .skill-roll-btn, .inv-del-btn, .skill-del-btn, .log-clear {
+  border-radius: 5px;
+}
+/* Tabs sit on a baseline — round the top corners only */
+.tab-btn { border-radius: 6px 6px 0 0; }
+
+/* ══ ROLL BUTTONS: unified black ══════════════════════════════════════════
+   .roll-btn / .evade-roll-btn already used --section-hdr; the attack, skill
+   and dice-pool buttons were transparent / red. All of them now share the
+   same black, keeping red as the hover accent. */
+.roll-btn, .evade-roll-btn, .atk-roll-btn, .skill-roll-btn, .dice-roll-btn {
+  background: var(--section-hdr);
+  border: 1px solid var(--section-hdr);
+  color: #fff;
+}
+.roll-btn:hover, .evade-roll-btn:hover, .atk-roll-btn:hover,
+.skill-roll-btn:hover, .dice-roll-btn:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+/* Dark mode: the panel is already near-black, so lift the buttons off it */
+body.dark .roll-btn, body.dark .evade-roll-btn, body.dark .atk-roll-btn,
+body.dark .skill-roll-btn, body.dark .dice-roll-btn {
+  background: #000;
+  border-color: #3a3a3a;
+}
+body.dark .roll-btn:hover, body.dark .evade-roll-btn:hover,
+body.dark .atk-roll-btn:hover, body.dark .skill-roll-btn:hover,
+body.dark .dice-roll-btn:hover {
+  background: var(--red);
+  border-color: var(--red);
+}
+</style>
+
+<script>
+// ── LOG COLLAPSE ──
+function toggleLogCollapse() {
+  // Everything visual (side vs bottom, glyph, position) is CSS driven off
+  // this class, so the tab can never disagree with the log after a resize.
+  document.querySelector('.roll-log').classList.toggle('collapsed');
+}
+
+
+// Mobile: tapping header also toggles
+document.querySelector('.log-header').addEventListener('click', function(e) {
+  if(window.innerWidth <= 768 && !e.target.closest('button,.dm-toggle-btn')) {
+    toggleLogCollapse();
+  }
+});
+
+// Init: start the log collapsed on a phone; the tab styles itself from there.
+(function() {
+  if(window.innerWidth <= 768) document.querySelector('.roll-log').classList.add('collapsed');
+})();
+
+// ── AUTO-SAVE ON EXIT / BACKGROUND ──
+var _pageReady = false; // don't save until page has fully loaded
+setTimeout(function() { _pageReady = true; }, 3000);
+
+function autoSaveOnExit() {
+  if(!_pageReady) return;
+  try { saveSheet(true); } catch(e) {}
+  try { syncDocTitle(); } catch(e) {}
+}
+window.addEventListener('beforeunload', autoSaveOnExit);
+window.addEventListener('pagehide', autoSaveOnExit);
+document.addEventListener('visibilitychange', function() {
+  if(document.visibilityState === 'hidden') autoSaveOnExit();
+});
+// Leaving via the "← Home" link (or any link out) saves first
+document.addEventListener('click', function(e) {
+  const a = e.target.closest && e.target.closest('a[href]');
+  if(a && !a.target && !a.href.startsWith('javascript:')) autoSaveOnExit();
+}, true);
+// Keep the title in step as soon as the name is typed
+document.getElementById('f-name')?.addEventListener('change', syncDocTitle);
+
+// Auto-save 1.5s after any input — primary save strategy on mobile
+(function() {
+  var t = null;
+  function go() {
+    if(!_pageReady) return;
+    if(t) clearTimeout(t);
+    t = setTimeout(function() { try { saveSheet(true); } catch(e) {} }, 1500);   // silent autosave
+  }
+  document.addEventListener('input', go);
+  document.addEventListener('change', go);
+})();
+</script>
+
+<div id="campaign-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1a1a1a;border:2px solid #8a7ac8;border-radius:6px;max-width:420px;width:100%;display:flex;flex-direction:column;">
+    <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;letter-spacing:.1em;text-transform:uppercase;color:#b8aae0;line-height:1;">Campaign</div>
+      <button onclick="closeCampaign()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">&#10005;</button>
+    </div>
+    <div id="campaign-body" style="padding:14px 16px;"></div>
+  </div>
+</div>
+
+<script>
+// ═══ CAMPAIGN LINK (shared roll log) ════════════════════════════════════════
+// Ported from the Shadowdark sheet; same /api/campaigns contract, so a DCC
+// sheet and an SD sheet can even share one campaign code.
+let _campaign = null; // {id, code, name}
+const _campaignClientKey = 'ck-' + Math.random().toString(36).slice(2, 12);
+let _campaignLastId = 0;
+let _campaignTimer = null;
+
+function campaignPlayerName() {
+  return document.getElementById('f-name')?.value.trim() || 'Player';
+}
+
+function campaignUpdateBtn() {
+  const btn = document.getElementById('campaign-btn');
+  if(!btn) return;
+  btn.textContent = '🔗';   // icon only; name/state conveyed via tooltip + colour
+  if(_campaign) {
+    btn.title = 'Campaign: ' + _campaign.name;
+    btn.setAttribute('aria-label', 'Campaign: ' + _campaign.name);
+    btn.style.background = '#241f10'; btn.style.color = '#e8c84a'; btn.style.borderColor = '#7a5a00';
+  } else {
+    btn.title = 'Campaign';
+    btn.setAttribute('aria-label', 'Campaign');
+    btn.style.background = 'transparent'; btn.style.color = '#888'; btn.style.borderColor = '#333';
+  }
+}
+
+function openCampaign() {
+  document.getElementById('campaign-overlay').style.display = 'flex';
+  campaignRenderModal();
+}
+function closeCampaign() { document.getElementById('campaign-overlay').style.display = 'none'; }
+
+function campaignRenderModal() {
+  const body = document.getElementById('campaign-body');
+  const hint = 'font-family:\'Barlow\',sans-serif;font-size:12px;color:#888;margin:0 0 12px;line-height:1.5;';
+  const inputStyle = 'width:100%;padding:9px 10px;background:#141414;border:1px solid #2a2a2a;border-radius:5px;color:#eee;font-family:Barlow,sans-serif;font-size:13px;outline:none;box-sizing:border-box;';
+  const btnStyle = 'padding:9px 14px;border:none;border-radius:5px;cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:11px;letter-spacing:.1em;text-transform:uppercase;';
+  if(_campaign) {
+    body.innerHTML =
+      '<p style="'+hint+'">Connected — your rolls are shared with everyone in this campaign.</p>'
+      + '<div style="background:#0f0f0f;border:1px solid #7a5a00;border-radius:5px;padding:12px;margin-bottom:12px;">'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;color:#e8c84a;">'+_campaign.name+'</div>'
+      + '<div style="font-family:Barlow,sans-serif;font-size:11px;color:#888;margin-top:4px;">Join code: <b style="color:#eee;font-family:\'Share Tech Mono\',monospace;font-size:15px;letter-spacing:.2em;">'+_campaign.code+'</b></div>'
+      + '<div style="font-family:Barlow,sans-serif;font-size:11px;color:#666;margin-top:4px;">Share this code with your table.</div>'
+      + '</div>'
+      + '<button onclick="campaignLeave()" style="'+btnStyle+'background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;width:100%;">Leave Campaign</button>';
+  } else {
+    body.innerHTML =
+      '<p style="'+hint+'">Create a campaign and share the code, or join with a code from your GM. Rolls appear in everyone\'s roll log.</p>'
+      + '<div style="margin-bottom:14px;">'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#e8c84a;margin-bottom:5px;">Create New</div>'
+      + '<div style="display:flex;gap:6px;"><input type="text" id="campaign-name-input" placeholder="Campaign name..." style="'+inputStyle+'flex:1;">'
+      + '<button onclick="campaignCreate()" style="'+btnStyle+'background:#e8c84a;color:#1a1a1a;flex-shrink:0;">Create</button></div>'
+      + '</div>'
+      + '<div>'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#6ac8df;margin-bottom:5px;">Join Existing</div>'
+      + '<div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="'+inputStyle+'flex:1;text-transform:uppercase;letter-spacing:.15em;">'
+      + '<button onclick="campaignJoin()" style="'+btnStyle+'background:#1a5a7a;color:#fff;flex-shrink:0;">Join</button></div>'
+      + '</div>'
+      + '<div id="campaign-error" style="font-family:Barlow,sans-serif;font-size:12px;color:#df6a6a;margin-top:10px;"></div>';
+  }
+}
+
+function campaignError(msg) {
+  const el = document.getElementById('campaign-error');
+  if(el) el.textContent = msg;
+}
+
+async function campaignCreate() {
+  const name = document.getElementById('campaign-name-input')?.value.trim() || 'New Campaign';
+  try {
+    const r = await fetch('/api/campaigns', {
+      method: 'POST', credentials: 'same-origin',
+      headers: {'content-type':'application/json'},
+      body: JSON.stringify({ name })
+    });
+    if(!r.ok) throw new Error(r.status);
+    _campaign = await r.json();
+    campaignConnected();
+  } catch(e) {
+    campaignError('Could not create campaign — are you signed in to the app?');
+  }
+}
+
+async function campaignJoin() {
+  const code = (document.getElementById('campaign-code-input')?.value || '').trim().toUpperCase();
+  if(!code) { campaignError('Enter a join code.'); return; }
+  try {
+    const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials: 'same-origin' });
+    if(r.status === 404) { campaignError('No campaign found with that code.'); return; }
+    if(!r.ok) throw new Error(r.status);
+    _campaign = await r.json();
+    campaignConnected();
+  } catch(e) {
+    campaignError('Could not join — are you signed in to the app?');
+  }
+}
+
+function campaignConnected() {
+  _campaignLastId = 0;
+  campaignUpdateBtn();
+  campaignRenderModal();
+  campaignStartPolling();
+  addLog('Campaign', '🔗', 'Connected to "'+_campaign.name+'" ('+_campaign.code+')', 'normal');
+  saveSheet(true);
+}
+
+function campaignLeaveSilent() {
+  if(_campaignTimer) { clearInterval(_campaignTimer); _campaignTimer = null; }
+  _campaign = null;
+  _campaignLastId = 0;
+  campaignUpdateBtn();
+}
+
+function campaignLeave() {
+  const name = _campaign ? _campaign.name : '';
+  campaignLeaveSilent();
+  campaignRenderModal();
+  addLog('Campaign', '🔗', 'Left "'+name+'"', 'normal');
+  saveSheet(true);
+}
+
+// Only real rolls are shared — sheet housekeeping stays local.
+const CAMPAIGN_SKIP_LABELS = new Set([
+  'Sheet Saved','Sheet Exported','Exported','Imported','New Character','Item Added','Level Up','Rest'
+]);
+function campaignBroadcast(label, result, detail, type) {
+  if(!_campaign) return;
+  if(CAMPAIGN_SKIP_LABELS.has(String(label))) return;
+  fetch('/api/campaigns/' + _campaign.id + '/rolls', {
+    method: 'POST', credentials: 'same-origin',
+    headers: {'content-type':'application/json'},
+    body: JSON.stringify({
+      clientKey: _campaignClientKey,
+      source: campaignPlayerName(),
+      label: String(label), result: String(result), detail: String(detail||''), type: type||'normal'
+    })
+  }).catch(()=>{});
+}
+
+// Remote entries render directly (never through addLog, so they don't rebroadcast)
+function campaignAddRemote(roll) {
+  const entries = document.getElementById('log-entries');
+  if(!entries) return;
+  const hint = entries.querySelector('.log-hint');
+  if(hint) hint.remove();
+  const div = document.createElement('div');
+  div.className = 'log-entry remote' + (roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
+  const esc = (s)=>String(s).replace(/</g,'&lt;');
+  div.innerHTML = '<div class="roll-label"><span style="color:#8a7ac8;">'+esc(roll.source)+'</span> · '+esc(roll.label)+'</div>'
+    + '<div class="roll-result">'+esc(roll.result)+'</div>'
+    + (roll.detail?'<div class="roll-detail">'+esc(roll.detail)+'</div>':'');
+  entries.insertBefore(div, entries.firstChild);
+  entries.scrollTop = 0;
+  while(entries.children.length > 60) entries.removeChild(entries.lastChild);
+}
+
+async function campaignPoll() {
+  if(!_campaign) return;
+  try {
+    const url = '/api/campaigns/' + _campaign.id + '/rolls' + (_campaignLastId ? '?since='+_campaignLastId : '');
+    const r = await fetch(url, { credentials: 'same-origin' });
+    if(!r.ok) return;
+    const data = await r.json();
+    (data.rolls||[]).forEach(roll=>{
+      if(roll.clientKey !== _campaignClientKey) campaignAddRemote(roll);
+    });
+    if(data.last) _campaignLastId = data.last;
+  } catch(e) {}
+}
+
+function campaignStartPolling() {
+  if(_campaignTimer) clearInterval(_campaignTimer);
+  campaignPoll();
+  _campaignTimer = setInterval(campaignPoll, 4000);
+}
+
+function campaignRestore(saved) {
+  if(saved && saved.id && saved.code) {
+    _campaign = { id: saved.id, code: saved.code, name: saved.name || 'Campaign' };
+    campaignStartPolling();
+  }
+  campaignUpdateBtn();
+}
+campaignUpdateBtn();
+</script>
+</body>
+</html>

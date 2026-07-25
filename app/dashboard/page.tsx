@@ -1,0 +1,259 @@
+import Image from "next/image";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { TOOLS, TOOL_ORDER, type ToolId } from "@/lib/tools";
+import { logout } from "@/app/actions/auth";
+import { createDocument, deleteDocument } from "@/app/actions/documents";
+import { ConfirmButton } from "@/components/ConfirmButton";
+import SystemTabs from "@/components/SystemTabs";
+
+// Toolbar links, in the order they appear beside the system toggle.
+// These work for either ruleset, so they show on both tabs.
+const SHARED_NAV: { href: string; label: string }[] = [
+  { href: "/campaigns", label: "Campaigns" },
+  { href: "/vtt", label: "Virtual Tabletop" },
+  { href: "/gm-screen", label: "GM Screen" },
+];
+
+// Shadowdark reference pages — they read Shadowdark data, so they follow the
+// shared links on that tab only.
+const SD_REFERENCE: { href: string; label: string }[] = [
+  { href: "/rules", label: "Rulebooks" },
+  { href: "/bestiary", label: "Bestiary" },
+  { href: "/spells", label: "Spells" },
+  { href: "/gear", label: "Gear" },
+];
+
+function NavLinks({ links }: { links: { href: string; label: string }[] }) {
+  return (
+    <>
+      {links.map((r) => (
+        <Link
+          key={r.href}
+          href={r.href}
+          className="flex-1 whitespace-nowrap rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-3 text-center text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted)] transition-colors hover:border-[var(--gold)] hover:text-[var(--text)] sm:py-2.5 sm:text-[11px] md:flex-none"
+        >
+          {r.label}
+        </Link>
+      ))}
+    </>
+  );
+}
+
+function ColumnHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="mb-5 text-[13px] font-bold uppercase tracking-[0.3em] text-[var(--muted)] sm:text-[11px] sm:tracking-[0.4em]">
+      {children}
+    </h2>
+  );
+}
+
+function formatDate(d: Date): string {
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(d);
+}
+
+function DocList({
+  id,
+  docs,
+}: {
+  id: ToolId;
+  /** `vttUrl` is set when this sheet is linked to a campaign that has a room. */
+  docs: { id: string; title: string; updatedAt: Date; vttUrl?: string | null }[];
+}) {
+  const def = TOOLS[id];
+  return (
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)]">
+      <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
+        <h3 className="text-base font-bold uppercase tracking-[0.15em] sm:text-sm">{def.label}</h3>
+        <form action={createDocument}>
+          <input type="hidden" name="tool" value={id} />
+          <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] sm:min-h-0 sm:px-2.5 sm:py-1 sm:text-[11px]">
+            + New
+          </button>
+        </form>
+      </div>
+
+      {docs.length === 0 ? (
+        <p className="px-4 py-5 text-base text-[var(--muted)] sm:text-sm">No saved {def.label.toLowerCase()}s yet.</p>
+      ) : (
+        <ul className="divide-y divide-[var(--border)]">
+          {docs.map((doc) => (
+            <li key={doc.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <Link
+                  href={`/tools/${id}/${doc.id}`}
+                  className="block truncate py-1 text-lg font-semibold hover:text-[var(--gold)] sm:py-0 sm:text-base"
+                >
+                  {doc.title}
+                </Link>
+                <span className="text-[13px] text-[var(--muted)] sm:text-[11px]">
+                  Updated {formatDate(doc.updatedAt)}
+                </span>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                {doc.vttUrl ? (
+                  <a
+                    href={doc.vttUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Open this campaign's virtual tabletop in a new tab"
+                    className="min-h-11 shrink-0 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
+                  >
+                    Launch VTT
+                  </a>
+                ) : null}
+                <form action={deleteDocument}>
+                  <input type="hidden" name="id" value={doc.id} />
+                  <ConfirmButton
+                    message={`Delete "${doc.title}"? This cannot be undone.`}
+                    className="min-h-11 shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[#f0a8a3] sm:min-h-0 sm:px-2 sm:py-1 sm:text-[11px]"
+                  >
+                    Delete
+                  </ConfirmButton>
+                </form>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+export default async function DashboardPage() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const docs = await prisma.document.findMany({
+    where: { userId: user.id },
+    orderBy: { updatedAt: "desc" },
+  });
+
+  // A sheet records the campaign it's connected to inside its own saved JSON
+  // (`_sheet.campaign.id`), the same marker the campaign roster reads. Map those
+  // to their campaign's tabletop link so each linked sheet can offer Launch VTT.
+  const linkedCampaignId = (doc: { data: unknown }): string | null => {
+    const raw = (doc.data as Record<string, unknown> | null)?.sd_sheet
+      ?? (doc.data as Record<string, unknown> | null)?.dcc_sheet;
+    if (typeof raw !== "string") return null;
+    try {
+      const sheet = JSON.parse(raw) as { _sheet?: { campaign?: { id?: unknown } | null } | null };
+      const id = sheet?._sheet?.campaign?.id;
+      return typeof id === "string" && id ? id : null;
+    } catch {
+      return null; // a half-written sheet shouldn't break the dashboard
+    }
+  };
+
+  const campaignIds = [...new Set(docs.map(linkedCampaignId).filter((v: string | null): v is string => !!v))];
+  const vttByCampaign = new Map<string, string>();
+  if (campaignIds.length) {
+    const linked = await prisma.campaign.findMany({
+      where: { id: { in: campaignIds }, NOT: { vttUrl: null } },
+      select: { id: true, vttUrl: true },
+    });
+    for (const c of linked as { id: string; vttUrl: string | null }[]) {
+      if (c.vttUrl) vttByCampaign.set(c.id, c.vttUrl);
+    }
+  }
+
+  type DocRow = (typeof docs)[number] & { vttUrl?: string | null };
+  const byTool = new Map<ToolId, DocRow[]>();
+  for (const id of TOOL_ORDER) byTool.set(id, []);
+  for (const doc of docs) {
+    const tool = doc.tool as ToolId;
+    if (!byTool.has(tool)) continue;
+    const cid = linkedCampaignId(doc);
+    byTool.get(tool)!.push({ ...doc, vttUrl: cid ? vttByCampaign.get(cid) ?? null : null });
+  }
+
+  // Split tools by kind
+  const charSheetIds = TOOL_ORDER.filter((id) => TOOLS[id].kind === "character");
+  const sessionPrepIds = TOOL_ORDER.filter((id) => TOOLS[id].kind === "session");
+
+  return (
+    <div className="mx-auto w-full max-w-5xl px-5 py-10">
+      <header className="mb-10 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
+        <div className="flex items-center gap-3">
+          <Image src="/logo-white.png" alt="" width={72} height={72} priority className="h-16 w-16 shrink-0 sm:h-14 sm:w-14" />
+          <div>
+          <h1 className="font-display text-3xl font-black tracking-wide">Dungeon Crawler&rsquo;s Companion</h1>
+          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
+            TTRPG Digital Toolkit
+          </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 text-sm text-[var(--muted)]">
+          <span className="hidden sm:inline">{user.email}</span>
+          <form action={logout}>
+            <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] hover:border-[var(--muted)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]">
+              Sign out
+            </button>
+          </form>
+        </div>
+      </header>
+
+      {/* One system at a time; Shadowdark by default. */}
+      <SystemTabs
+        /* Shared tools on both tabs; the Shadowdark reference pages follow
+           them and are dropped on the DCC tab. */
+        nav={<NavLinks links={SHARED_NAV} />}
+        sdNav={<NavLinks links={SD_REFERENCE} />}
+        shadowdark={
+          <>
+            <div className="grid gap-10 md:grid-cols-2">
+              <section>
+                <ColumnHeading>Character Sheets</ColumnHeading>
+                <div className="flex flex-col gap-6">
+                  {charSheetIds
+                    .filter((id) => TOOLS[id].system === "SD")
+                    .map((id) => (
+                      <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
+                    ))}
+                </div>
+              </section>
+
+              <section>
+                <ColumnHeading>Session Prep</ColumnHeading>
+                <div className="flex flex-col gap-6">
+                  {sessionPrepIds
+                    .filter((id) => TOOLS[id].system === "SD")
+                    .map((id) => (
+                      <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
+                    ))}
+                </div>
+              </section>
+            </div>
+          </>
+        }
+        dcc={
+          <div className="grid gap-10 md:grid-cols-2">
+            <section>
+              <ColumnHeading>Character Sheets</ColumnHeading>
+              <div className="flex flex-col gap-6">
+                {charSheetIds
+                  .filter((id) => TOOLS[id].system === "DCC")
+                  .map((id) => (
+                    <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
+                  ))}
+              </div>
+            </section>
+
+            <section>
+              <ColumnHeading>Session Prep</ColumnHeading>
+              <div className="flex flex-col gap-6">
+                {sessionPrepIds
+                  .filter((id) => TOOLS[id].system === "DCC")
+                  .map((id) => (
+                    <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
+                  ))}
+              </div>
+            </section>
+          </div>
+        }
+      />
+    </div>
+  );
+}
