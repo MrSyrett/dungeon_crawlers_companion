@@ -66,7 +66,7 @@ export default function SystemTabs({
   dcc: ReactNode;
   /** Links shown beside the toggle on both tabs. */
   nav?: ReactNode;
-  /** Shadowdark-only links, appended after `nav` on that tab. */
+  /** Shadowdark-only links, shown ahead of `nav` on that tab. */
   sdNav?: ReactNode;
 }) {
   const active = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
@@ -101,11 +101,11 @@ export default function SystemTabs({
           })}
         </div>
 
-        {/* One wrapping row: shared links first, then the Shadowdark-only ones. */}
+        {/* One wrapping row: the Shadowdark-only links lead, then the shared ones. */}
         {nav || sdNav ? (
           <nav className="flex flex-wrap gap-2 md:justify-end lg:flex-nowrap">
-            {nav}
             {active === "SD" ? sdNav : null}
+            {nav}
           </nav>
         ) : null}
       </div>
