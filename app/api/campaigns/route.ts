@@ -2,16 +2,7 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { getPlayUser } from "@/lib/vtt";
-
-// Short, unambiguous join code (no 0/O/1/I)
-const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-function makeCode(len = 6): string {
-  let out = "";
-  for (let i = 0; i < len; i++) {
-    out += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
-  }
-  return out;
-}
+import { makeCode } from "@/lib/campaign-code";
 
 // POST — create a campaign. Body: { name }. Returns { id, name, code }.
 export async function POST(req: NextRequest) {
