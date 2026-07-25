@@ -1488,16 +1488,37 @@ const GMCamp = (function() {
     el.querySelectorAll('.camp-item').forEach(b => {
       b.onclick = () => {
         const c = (campList || []).find(x => String(x.id) === String(b.getAttribute('data-id')));
-        if(c) { set(c); panelOpen = false; renderPanel(); }
+        if(c) { panelOpen = false; renderPanel(); switchBoard(c); }
       };
     });
 
     const leaveBtn = el.querySelector('.camp-leave');
-    if(leaveBtn) leaveBtn.onclick = () => { set(null); panelOpen = false; renderPanel(); };
+    if(leaveBtn) leaveBtn.onclick = () => { panelOpen = false; renderPanel(); switchBoard(null); };
 
     // Create and Join were removed from the GM Screen: campaigns are created on
     // the Campaigns page, and players join from their character sheets. This
     // panel only lists the account's campaigns and connects the screen to one.
+  }
+
+  // Switching campaigns swaps the whole board. The saved board for each campaign
+  // lives server-side keyed by (user, campaign), so we: (1) save the board we're
+  // leaving under its own campaign, (2) mark the target as the one to open next,
+  // (3) reload — the page then restores that campaign's board and link cleanly,
+  // with no residue from the previous one. Pass null to switch to the personal
+  // (unlinked) board. Falls back to the old in-place link swap if the server
+  // hooks aren't present (e.g. running the raw template outside the app).
+  async function switchBoard(nextCampaign) {
+    if(window.__ddCampaignSwitching) return;
+    if(!window.__ddFlushNow || !window.__ddSelectCampaign) { set(nextCampaign); return; }
+    window.__ddCampaignSwitching = true;
+    try {
+      await window.__ddFlushNow();                       // save the board we're leaving
+      await window.__ddSelectCampaign(nextCampaign || null); // make the target last-used
+      window.location.reload();                          // reopen into the target's board
+    } catch(e) {
+      window.__ddCampaignSwitching = false;
+      set(nextCampaign);                                 // best-effort: at least apply the link
+    }
   }
 
   function set(c) {
