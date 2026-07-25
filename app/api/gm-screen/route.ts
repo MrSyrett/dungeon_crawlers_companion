@@ -18,7 +18,11 @@ function parseCampaignId(req: NextRequest): string | null | undefined {
 // A board blob is self-describing: which campaign it belongs to is read from the
 // campaign link the GM screen already serializes into it.
 function campaignIdOf(body: unknown): string | null {
-  const id = (body as { campaign?: { id?: unknown } } | null)?.campaign?.id;
+  // The GM screen serializes its link as { campaign: {id,...}, hideRolls }, so in
+  // a full board the id sits at body.campaign.campaign.id. Accept that nested
+  // shape first, then fall back to a bare { id } for safety.
+  const camp = (body as { campaign?: { id?: unknown; campaign?: { id?: unknown } } } | null)?.campaign;
+  const id = camp?.campaign?.id ?? camp?.id;
   return typeof id === "string" && id ? id : null;
 }
 
@@ -121,8 +125,10 @@ export async function POST(req: NextRequest) {
         tool: GM_TOOL,
         campaignId,
         title: "GM Screen",
+        // Match the GM screen's serialize shape ({ campaign: {...}, hideRolls })
+        // so restore() picks up the link and activates the campaign on reload.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data: (campaign ? { version: 1, campaign } : { version: 1 }) as any,
+        data: (campaign ? { version: 1, campaign: { campaign } } : { version: 1 }) as any,
       },
     });
   }
