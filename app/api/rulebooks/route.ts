@@ -4,7 +4,9 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-const RULEBOOK_DIR = path.join(process.cwd(), "public", "rulebooks");
+// Rulebooks live outside public/ and are streamed through /api/rulebooks/<file>,
+// which requires a signed-in user — so copyrighted PDFs are never public.
+const RULEBOOK_DIR = path.join(process.cwd(), "protected", "rulebooks");
 
 // "shadowdark-core-rules.pdf" -> "Shadowdark Core Rules" (same rule as /rules)
 function prettyName(file: string): string {
@@ -34,7 +36,7 @@ export async function GET() {
   const books = files.map((file) => ({
     file,
     title: prettyName(file),
-    url: `/rulebooks/${encodeURIComponent(file)}`,
+    url: `/api/rulebooks/${encodeURIComponent(file)}`,
   }));
 
   return Response.json({ books });

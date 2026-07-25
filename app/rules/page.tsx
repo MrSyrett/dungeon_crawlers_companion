@@ -6,7 +6,9 @@ import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-const RULEBOOK_DIR = path.join(process.cwd(), "public", "rulebooks");
+// Private dir (outside public/): PDFs are streamed to signed-in users via
+// /api/rulebooks/<file>, never served statically.
+const RULEBOOK_DIR = path.join(process.cwd(), "protected", "rulebooks");
 
 // Turn "shadowdark-core-rules.pdf" into "Shadowdark Core Rules"
 function prettyName(file: string): string {
@@ -42,7 +44,7 @@ export default async function RulesPage({
   const selected = book && books.includes(book) ? book : null;
 
   if (selected) {
-    const src = `/rulebooks/${encodeURIComponent(selected)}`;
+    const src = `/api/rulebooks/${encodeURIComponent(selected)}`;
     return (
       <div className="flex h-screen flex-col">
         <header className="flex shrink-0 items-center gap-3 border-b border-[var(--border)] bg-[var(--panel)] px-4 py-2">
@@ -113,7 +115,7 @@ export default async function RulesPage({
           <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
             Drop a PDF into{" "}
             <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">
-              public/rulebooks/
+              protected/rulebooks/
             </code>{" "}
             and it will show up here automatically. The filename becomes the title, so{" "}
             <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">

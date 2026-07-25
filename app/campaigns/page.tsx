@@ -129,6 +129,44 @@ export default async function CampaignsPage() {
   );
   const partyFor = new Map(parties);
 
+  // ── Campaigns the player has JOINED (a character is linked) but does not own ──
+  // Membership is recorded inside each of the user's own sheets as
+  // _sheet.campaign.id — the same marker the roster reads. We gather those ids,
+  // drop any this user owns, and show the rest read-only.
+  const ownedIds = new Set(campaigns.map((c) => c.id));
+  const myDocs = await prisma.document.findMany({
+    where: { userId: user.id, tool: "sd-character" },
+    select: { id: true, title: true, data: true },
+    orderBy: { updatedAt: "desc" },
+  });
+
+  const joinedChars = new Map<string, string[]>(); // campaignId -> character names
+  for (const doc of myDocs) {
+    const raw = (doc.data as Record<string, unknown> | null)?.sd_sheet;
+    if (typeof raw !== "string") continue;
+    let sheet: SheetBlob;
+    try {
+      sheet = JSON.parse(raw) as SheetBlob;
+    } catch {
+      continue;
+    }
+    const cid = sheet?._sheet?.campaign?.id;
+    if (typeof cid !== "string" || !cid || ownedIds.has(cid)) continue;
+    const name = (typeof sheet.name === "string" && sheet.name.trim()) || doc.title || "Unnamed";
+    const list = joinedChars.get(cid) ?? [];
+    list.push(name);
+    joinedChars.set(cid, list);
+  }
+
+  const joinedIds = [...joinedChars.keys()];
+  const joinedCampaigns = joinedIds.length
+    ? await prisma.campaign.findMany({
+        where: { id: { in: joinedIds } },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, code: true },
+      })
+    : [];
+
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
@@ -311,6 +349,53 @@ export default async function CampaignsPage() {
           untouched — they belong to the players — but any sheet still linked will quietly stop
           sharing rolls, so tell your table before clearing one out.
         </p>
+      ) : null}
+
+      {joinedCampaigns.length > 0 ? (
+        <section className="mt-12">
+          <div className="mb-4 border-b border-[var(--border)] pb-3">
+            <h2 className="font-display text-xl font-black tracking-wide">Campaigns you&apos;ve joined</h2>
+            <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">
+              Campaigns one of your characters is linked to. These are view-only — the owner
+              manages them.
+            </p>
+          </div>
+          <ul className="flex flex-col gap-3">
+            {joinedCampaigns.map((c) => {
+              const chars = joinedChars.get(c.id) ?? [];
+              return (
+                <li
+                  key={c.id}
+                  className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
+                >
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                      {c.name}
+                    </h3>
+                    <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--text)]">
+                      {c.code}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
+                      · view only
+                    </span>
+                  </div>
+                  {chars.length > 0 ? (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {chars.map((name, i) => (
+                        <span
+                          key={`${c.id}-${i}`}
+                          className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1 text-[11px] text-[var(--text)]"
+                        >
+                          {name}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       ) : null}
     </div>
   );

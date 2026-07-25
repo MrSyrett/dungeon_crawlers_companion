@@ -18,6 +18,7 @@ export async function createVttToken(formData: FormData): Promise<void> {
     data: {
       userId: user.id,
       tokenHash: hashToken(raw),
+      token: raw, // stored so the VTT page can show it again on demand
       prefix: raw.slice(0, 6),
       label,
     },

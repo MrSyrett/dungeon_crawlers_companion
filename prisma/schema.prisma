@@ -115,6 +115,11 @@ model VttToken {
   id        String    @id @default(cuid())
   userId    String
   tokenHash String    @unique
+  // The code in plain form, so the VTT page can show it again on demand. This is
+  // a convenience/security trade-off: a leaked DB now exposes usable codes (each
+  // grants only read + save on its owner's character sheets). Null for codes
+  // created before this was stored — those can only be revoked and remade.
+  token     String?
   // First few characters, so the owner can tell tokens apart in the UI.
   prefix    String
   label     String

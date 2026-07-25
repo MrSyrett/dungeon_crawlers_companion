@@ -49,8 +49,8 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
             Your new access code
           </h2>
           <p className="mt-2 text-[13px] text-[var(--muted)]">
-            Copy it now — it isn&rsquo;t stored in a form we can show you again. If you lose it,
-            revoke it and make another.
+            Here it is — it also stays listed below, so you can copy it again anytime. Revoke it if
+            it&rsquo;s ever exposed.
           </p>
           <CopyField value={justCreated} />
         </div>
@@ -107,29 +107,39 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
         ) : (
           <ul className="flex flex-col gap-3">
             {tokens.map((t: {
-              id: string; label: string; prefix: string;
+              id: string; label: string; prefix: string; token: string | null;
               createdAt: Date; lastUsedAt: Date | null;
             }) => (
               <li
                 key={t.id}
-                className="flex flex-col gap-2 rounded-lg border border-[var(--border)] bg-[var(--panel)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                className="rounded-lg border border-[var(--border)] bg-[var(--panel)] px-4 py-3"
               >
-                <div className="min-w-0">
-                  <div className="truncate text-base font-semibold">{t.label}</div>
-                  <div className="text-[11px] text-[var(--muted)]">
-                    {t.prefix}… · created {formatDate(t.createdAt)} ·{" "}
-                    {t.lastUsedAt ? `last used ${formatDate(t.lastUsedAt)}` : "never used"}
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="truncate text-base font-semibold">{t.label}</div>
+                    <div className="text-[11px] text-[var(--muted)]">
+                      created {formatDate(t.createdAt)} ·{" "}
+                      {t.lastUsedAt ? `last used ${formatDate(t.lastUsedAt)}` : "never used"}
+                    </div>
                   </div>
+                  <form action={revokeVttToken} className="shrink-0">
+                    <input type="hidden" name="id" value={t.id} />
+                    <ConfirmButton
+                      message={`Revoke "${t.label}"? Any tabletop using it will stop working.`}
+                      className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--red)]"
+                    >
+                      Revoke
+                    </ConfirmButton>
+                  </form>
                 </div>
-                <form action={revokeVttToken} className="shrink-0">
-                  <input type="hidden" name="id" value={t.id} />
-                  <ConfirmButton
-                    message={`Revoke "${t.label}"? Any tabletop using it will stop working.`}
-                    className="rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--red)]"
-                  >
-                    Revoke
-                  </ConfirmButton>
-                </form>
+                {t.token ? (
+                  <CopyField value={t.token} />
+                ) : (
+                  <p className="mt-2 text-[11px] leading-relaxed text-[var(--muted)]">
+                    {t.prefix}… — this code was created before codes were stored, so it can&apos;t be
+                    shown again. Revoke it and make a new one to get a copyable code.
+                  </p>
+                )}
               </li>
             ))}
           </ul>
