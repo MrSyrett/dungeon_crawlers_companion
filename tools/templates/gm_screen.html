@@ -84,6 +84,10 @@ body::before {
 /* Topbar spacer */
 .topbar-spacer { flex: 1; }
 
+/* Mobile-only handle that collapses the top bar (with its pinned scenes) to
+   reclaim vertical space. Hidden on desktop; the mobile media query shows it. */
+#hdr-toggle { display: none; }
+
 /* Pane header — sits at top of each pane: dropdown left, action buttons right */
 .pane-header {
   display: flex;
@@ -919,6 +923,18 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 
 /* ═══ MOBILE ═══ */
 @media (max-width: 760px) {
+  #hdr-toggle {
+    display: flex; align-items: center; gap: 6px;
+    width: 100%; height: 24px; flex-shrink: 0;
+    padding: 0 12px; box-sizing: border-box;
+    background: var(--dark); color: var(--gold);
+    border-bottom: 1px solid var(--border);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    cursor: pointer; user-select: none;
+  }
+  body.hdr-hidden .topbar { display: none; }
+
   .topbar { flex-wrap: wrap; height: auto; padding: 10px 12px; gap: 8px; }
   .brand { font-size: 15px; width: 100%; }
   .pane-picker { flex: 1; min-width: 0; }
@@ -1299,6 +1315,9 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 </head>
 <body>
 
+<!-- Mobile-only: collapse/expand the top bar to reclaim space from pinned scenes -->
+<div id="hdr-toggle" role="button" tabindex="0"></div>
+
 <!-- ═══ TOP BAR ═══ -->
 <div class="topbar">
   <div class="brand" style="min-width:140px;"></div>
@@ -1654,6 +1673,26 @@ const GMScenes = (function() {
 })();
 window.GMScenes = GMScenes;
 GMScenes.renderPins();
+
+// ── Mobile header collapse ──
+// On phones a stack of pinned scenes can swallow much of the screen, so the
+// top bar defaults to collapsed behind a slim handle. The choice is remembered.
+(function(){
+  const KEY = 'dd_gmscreen_v1:hdrHidden';
+  const toggle = document.getElementById('hdr-toggle');
+  if(!toggle) return;
+  let hidden;
+  try { const v = localStorage.getItem(KEY); hidden = (v === null) ? true : (v === '1'); }
+  catch(e) { hidden = true; }
+  function apply(){
+    document.body.classList.toggle('hdr-hidden', hidden);
+    toggle.innerHTML = hidden ? '&#9776;&nbsp; Show controls' : '&#10005;&nbsp; Hide controls';
+  }
+  function flip(){ hidden = !hidden; try { localStorage.setItem(KEY, hidden ? '1' : '0'); } catch(e){} apply(); }
+  toggle.addEventListener('click', flip);
+  toggle.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+  apply();
+})();
 </script>
 
 <!-- ═══ MAIN AREA ═══ -->
@@ -2481,6 +2520,7 @@ function setSplit(n) {
   // Multi-pane modes: no two panes may hold the same tool (one instance per tool)
   if(n >= 3) dedupePaneTools(n);
   for(let p = 1; p <= n; p++) renderPane(p);
+  if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
 // Rotating the phone / resizing across the breakpoint re-applies the layout:
@@ -2517,12 +2557,14 @@ function setPaneTool(paneNum, tool) {
       document.getElementById('pane-' + paneNum + '-select').value = tool;
       renderPane(p);
       renderPane(paneNum);
+      if(window.__ddScheduleSave) window.__ddScheduleSave();
       return;
     }
   }
   paneTools[paneNum] = tool;
   document.getElementById('pane-' + paneNum + '-select').value = tool;
   renderPane(paneNum);
+  if(window.__ddScheduleSave) window.__ddScheduleSave();
 }
 
 
@@ -8144,12 +8186,12 @@ function loadSession(input) {
       if(data.campaign) GMCamp.restore(data.campaign);
       if(data.scenes && window.GMScenes) GMScenes.restore(data.scenes);
 
-      // Restore pane layout
-      if(data.splitMode) setSplit(data.splitMode);
+      // Restore pane layout — all four panes, so Focus/Four views come back intact
       if(data.paneTools) {
-        setPaneTool(1, data.paneTools[1] || 'adventure');
-        setPaneTool(2, data.paneTools[2] || 'trackers');
+        [1,2,3,4].forEach(p => { if(data.paneTools[p]) paneTools[p] = normalizeTool(data.paneTools[p]); });
       }
+      setSplit(data.splitMode || splitPref || 1);
+      [1,2,3,4].forEach(p => { const sel = document.getElementById('pane-'+p+'-select'); if(sel && paneTools[p]) sel.value = paneTools[p]; });
 
       // Restore each tool's state (instantiate it first if not yet created)
       if(data.tools) {
@@ -8189,11 +8231,11 @@ window.__gmScreenSetState = function(data) {
   if(!data || !data.version) return;
   if(data.campaign) GMCamp.restore(data.campaign);
   if(data.scenes && window.GMScenes) GMScenes.restore(data.scenes);
-  if(data.splitMode) setSplit(data.splitMode);
   if(data.paneTools) {
-    setPaneTool(1, data.paneTools[1] || 'adventure');
-    setPaneTool(2, data.paneTools[2] || 'trackers');
+    [1,2,3,4].forEach(p => { if(data.paneTools[p]) paneTools[p] = normalizeTool(data.paneTools[p]); });
   }
+  setSplit(data.splitMode || splitPref || 1);
+  [1,2,3,4].forEach(p => { const sel = document.getElementById('pane-'+p+'-select'); if(sel && paneTools[p]) sel.value = paneTools[p]; });
   if(data.tools) {
     migrateToolState(data.tools);
     Object.entries(data.tools).forEach(([type, state]) => {
@@ -8204,6 +8246,93 @@ window.__gmScreenSetState = function(data) {
   renderPane(1);
   for(let p = 2; p <= (data.splitMode || 1); p++) renderPane(p);
 };
+
+// ══════════════════════════════════════════
+// LOCAL AUTO-PERSISTENCE  (campaign-scoped)
+// Saves the whole GM screen to localStorage on change and on exit, and brings
+// it back on open. Each campaign remembers its own screen, stored under its id;
+// a screen with no campaign linked lives under "__none". Swapping campaigns
+// loads the incoming campaign's remembered screen. This is self-contained and
+// works even without the server-side session shim.
+// ══════════════════════════════════════════
+(function(){
+  const NS   = 'dd_gmscreen_v1:';
+  const LAST = NS + 'last';
+  const key  = id => NS + 'screen:' + (id || '__none');
+
+  let applying  = false;      // suppress re-entrancy while pushing a saved state back in
+  let currentId = '__none';   // which campaign's screen is live right now
+  let timer     = null;
+
+  function campId(){
+    const c = (window.GMCamp && GMCamp.get && GMCamp.get());
+    return (c && c.id) ? String(c.id) : '__none';
+  }
+
+  function saveNow(){
+    if(applying) return;
+    try {
+      const state = window.__gmScreenGetState && window.__gmScreenGetState();
+      if(!state) return;
+      const id = campId();
+      currentId = id;
+      localStorage.setItem(key(id), JSON.stringify(state));
+      localStorage.setItem(LAST, id);
+    } catch(e){}
+  }
+
+  function scheduleSave(){
+    if(applying) return;
+    if(timer) clearTimeout(timer);
+    timer = setTimeout(saveNow, 500);
+  }
+
+  function loadInto(id){
+    let raw = null;
+    try { raw = localStorage.getItem(key(id)); } catch(e){}
+    if(!raw) return false;
+    let data; try { data = JSON.parse(raw); } catch(e){ return false; }
+    if(!data) return false;
+    applying = true;
+    try { window.__gmScreenSetState && window.__gmScreenSetState(data); }
+    catch(e){ console.warn('GM screen restore failed', e); }
+    applying = false;
+    currentId = id;
+    return true;
+  }
+
+  // Light up the save hooks already sprinkled through the page.
+  window.__ddScheduleSave = scheduleSave;
+
+  // Campaign create/join/leave flows through GMCamp — swap screens when it changes.
+  if(window.GMCamp && GMCamp.onChange){
+    GMCamp.onChange(function(){
+      if(applying) return;
+      const id = campId();
+      if(id === currentId){ scheduleSave(); return; }   // same campaign (e.g. hide-rolls toggled)
+      // Genuine swap: the outgoing screen was already saved under its own key.
+      const had = loadInto(id);
+      currentId = id;
+      if(!had) saveNow();   // first time for this campaign — seed it with the current layout
+      try { localStorage.setItem(LAST, id); } catch(e){}
+    });
+  }
+
+  // Save on the way out, plus a periodic snapshot to survive hard closes.
+  window.addEventListener('pagehide', saveNow);
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden') saveNow();
+  });
+  setInterval(saveNow, 20000);
+
+  // Restore on open: whichever campaign's screen was last active.
+  (function boot(){
+    let last = null;
+    try { last = localStorage.getItem(LAST); } catch(e){}
+    if(last === null){ currentId = campId(); saveNow(); return; }  // nothing stored yet — seed it
+    if(!loadInto(last)) currentId = campId();
+  })();
+})();
 
 // Trigger auto-save whenever Next Round is clicked or notes are edited
 document.addEventListener('click', function(e) {
