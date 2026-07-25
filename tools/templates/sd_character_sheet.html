@@ -1868,18 +1868,19 @@ function autoEquipArmorFromGear() {
 function buildSpells() {
   const list = document.getElementById('spells-list');
   const hdr = document.createElement('div');
+  hdr.className = 'spell-header';
   hdr.style.cssText = 'display:grid;grid-template-columns:16px 1fr 26px 30px 48px 60px 60px 20px 20px 24px;align-items:center;gap:2px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
   hdr.innerHTML =
-    '<span style="font-size:8px;font-weight:700;color:var(--muted);">#</span>' +
-    '<span style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Spell</span>' +
-    '<span style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;">Lvl</span>' +
-    '<span style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;">+Bon</span>' +
-    '<span style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Range</span>' +
-    '<span style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Dur</span>' +
-    '<span style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Dmg</span>' +
-    '<span style="font-size:8px;font-weight:900;color:var(--muted);text-align:center;" title="Lost">✗</span>' +
-    '<span style="font-size:8px;font-weight:900;color:var(--muted);text-align:center;" title="Advantage">▲</span>' +
-    '<span style="font-size:8px;font-weight:700;color:var(--muted);">Roll</span>';
+    '<span class="sh-num" style="font-size:8px;font-weight:700;color:var(--muted);">#</span>' +
+    '<span class="sh-name" style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Spell</span>' +
+    '<span class="sh-lvl" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;">Lvl</span>' +
+    '<span class="sh-bon" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;">+Bon</span>' +
+    '<span class="sh-range" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Range</span>' +
+    '<span class="sh-dur" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Dur</span>' +
+    '<span class="sh-dmg" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Dmg</span>' +
+    '<span class="sh-lost" style="font-size:8px;font-weight:900;color:var(--muted);text-align:center;" title="Lost">✗</span>' +
+    '<span class="sh-adv" style="font-size:8px;font-weight:900;color:var(--muted);text-align:center;" title="Advantage">▲</span>' +
+    '<span class="sh-roll" style="font-size:8px;font-weight:700;color:var(--muted);">Roll</span>';
   list.appendChild(hdr);
   _spellCount = 0; // start with no spells
 
@@ -3670,6 +3671,60 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   #shop-body button,#spellshop-body button{min-height:40px!important;font-size:11px!important;}
   #shop-tabs button,#spellshop-tabs button{min-height:42px!important;font-size:11px!important;}
   #shop-subtabs button{min-height:38px!important;font-size:10px!important;}
+
+  /* ── Title bar ── The 32px display title plus the Rest and Create/Level Up
+     buttons overran the right edge in a narrow popover. Let the buttons wrap
+     under the title when they don't fit, and trim the title so they usually
+     don't have to. (Rest keeps its margin-left:auto, so both buttons hug the
+     right.) */
+  .sheet-title{flex-wrap:wrap;gap:8px 10px;padding:10px 12px;align-items:center;}
+  .sheet-title-text{font-size:24px;}
+
+  /* ── Attacks ── At popover width the seven table columns crushed the weapon
+     name into an unreadable sliver. Reflow each row the way the spell rows go:
+     turn the table into blocks and lay each row out as a grid — name plus the
+     ▲/roll buttons on the top line, Bonus/Stat/Range/Damage on a second line.
+     A 12-column track lets the name take two-thirds of the top line while the
+     four fields split the second line evenly. The header row is dropped; every
+     field already carries a placeholder (+0, STR, Close, 1d8+2), and the
+     "Attacks" section bar above the table names the group. */
+  .attacks-table,.attacks-table tbody{display:block;width:100%;}
+  .attacks-table thead{display:none;}
+  .attacks-table tbody tr{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:5px 6px;
+    align-items:center;
+    padding:6px 4px;
+    border-bottom:1px solid var(--rule);
+  }
+  .attacks-table td{border:none!important;padding:0!important;overflow:hidden;}
+  .attacks-table td:nth-child(1){grid-column:1 / 9;grid-row:1;}    /* Weapon / Attack */
+  .attacks-table td:nth-child(6){grid-column:9 / 11;grid-row:1;}   /* ▲ advantage     */
+  .attacks-table td:nth-child(7){grid-column:11 / 13;grid-row:1;}  /* roll            */
+  .attacks-table td:nth-child(2){grid-column:1 / 4;grid-row:2;}    /* Bonus  */
+  .attacks-table td:nth-child(3){grid-column:4 / 7;grid-row:2;}    /* Stat   */
+  .attacks-table td:nth-child(4){grid-column:7 / 10;grid-row:2;}   /* Range  */
+  .attacks-table td:nth-child(5){grid-column:10 / 13;grid-row:2;}  /* Damage */
+  .attacks-table td input{width:100%;}
+  .atk-adv-btn,.atk-roll-btn{width:100%;padding-left:0!important;padding-right:0!important;}
+
+  /* ── Spell header ── The rows collapse to a two-line layout on phones, but the
+     JS-built header kept its 10-column desktop grid, so its labels ran off and
+     no longer lined up with the rows. Match the header to the collapsed row's
+     top line and hide the level/bonus/range/dur/dmg labels — those fields drop
+     to each row's second line, where their placeholders already name them. */
+  .spell-header{grid-template-columns:16px 1fr 38px 38px 44px!important;gap:4px!important;padding:5px 6px!important;}
+  .spell-header .sh-num{grid-column:1;grid-row:1;}
+  .spell-header .sh-name{grid-column:2;grid-row:1;}
+  .spell-header .sh-lost{grid-column:3;grid-row:1;text-align:center;}
+  .spell-header .sh-adv{grid-column:4;grid-row:1;text-align:center;}
+  .spell-header .sh-roll{grid-column:5;grid-row:1;text-align:center;}
+  .spell-header .sh-lvl,
+  .spell-header .sh-bon,
+  .spell-header .sh-range,
+  .spell-header .sh-dur,
+  .spell-header .sh-dmg{display:none;}
 }
 @media(max-width:420px){
   .stats-grid{grid-template-columns:1fr 1fr;}
