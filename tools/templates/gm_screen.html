@@ -9072,7 +9072,10 @@ function init_dice(root) {
   // rolls out and folds incoming ones into the log.
   GMCamp.onChange(() => renderPool());   // link connected/left → show or hide the eye
   GMCamp.onRoll(roll => {
-    log.unshift({ label: roll.label, detail: roll.detail, total: roll.result,
+    // The poll re-fetches the campaign's history from id 0 whenever the link
+    // (re)activates, so skip any roll already in the log by its server id.
+    if(roll && roll.id != null && log.some(e => e.id === roll.id)) return;
+    log.unshift({ id: roll ? roll.id : undefined, label: roll.label, detail: roll.detail, total: roll.result,
                   crit: roll.type === 'normal' ? '' : roll.type, adv: 'none',
                   remote: true, source: roll.source });
     if(log.length > 100) log.length = 100;
@@ -9275,10 +9278,27 @@ function init_dice(root) {
     return entry;
   };
 
+  // Collapse duplicate remote rolls when restoring a saved log: by server id
+  // when present, or by a content signature for older entries saved before ids
+  // were tracked. Local (GM) rolls are never collapsed — identical ones are kept.
+  function dedupeLog(arr) {
+    const seen = new Set();
+    const out = [];
+    for(const e of (arr || [])) {
+      if(!e) continue;
+      let key = null;
+      if(e.id != null) key = 'id:' + e.id;
+      else if(e.remote) key = 'sig:' + e.label + '|' + e.total + '|' + e.detail + '|' + e.source;
+      if(key !== null) { if(seen.has(key)) continue; seen.add(key); }
+      out.push(e);
+    }
+    return out;
+  }
+
   root._getState = () => ({ log });
   root._setState = (s) => {
     if(!s) return;
-    if(Array.isArray(s.log)) log = s.log;
+    if(Array.isArray(s.log)) log = dedupeLog(s.log);
     // Sessions saved before the link moved to the top bar kept it in here
     if(s.campaign || typeof s.hideRolls === 'boolean') GMCamp.restore(s);
     renderLog();

@@ -87,7 +87,14 @@ const SHIM = `
       if (pend === null) return;
       sessionStorage.removeItem("dd-activate-campaign");
       var camp = JSON.parse(pend);
-      if (window.GMCamp && typeof window.GMCamp.set === "function") window.GMCamp.set(camp);
+      if (!window.GMCamp || typeof window.GMCamp.set !== "function") return;
+      // If the restored board already activated the intended campaign, don't
+      // re-set it — that would kick off a second full roll-history poll.
+      var cur = (typeof window.GMCamp.get === "function") ? window.GMCamp.get() : null;
+      var curId = cur && cur.id ? String(cur.id) : null;
+      var wantId = camp && camp.id ? String(camp.id) : null;
+      if (curId === wantId) return;
+      window.GMCamp.set(camp);
     } catch (e) {}
   }
 
