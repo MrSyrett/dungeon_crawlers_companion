@@ -1518,7 +1518,7 @@ const GMScenes = (function() {
   let masterVol = 0.8;
   let players = [];       // {trackId, audio} for the active scene
   let onChange = null;
-  const FADE = 900;
+  const FADE = 1800;
 
   const clamp01 = v => Math.max(0, Math.min(1, v));
   const isHttp = u => typeof u === 'string' && /^https?:\/\//i.test(u);
@@ -7287,7 +7287,7 @@ function init_music(root) {
   let playing = false;
   let loopList = true, shuffle = false;
   let musicVol = 0.8, sfxVol = 0.9;
-  const FADE = 700;
+  const FADE = 1400;
   const liveSfx = new Set();
 
   const $ = s => root.querySelector(s);
@@ -7573,6 +7573,14 @@ function init_music(root) {
         row.querySelector('.mus-scene-tdel').addEventListener('click', ()=> GMScenes.removeTrack(sc.id, tid));
         row.querySelector('.mus-scene-tvol').addEventListener('input', e=> GMScenes.setTrackVol(sc.id, tid, e.target.value/100));
         if(row.classList.contains('needs-file')) row.querySelector('.mus-scene-tname').addEventListener('click', ()=>{ sceneFileTarget = sc.id; fileScene.click(); });
+      });
+      // Drag audio files straight onto a scene card to add them as tracks
+      card.addEventListener('dragover',  e=>{ e.preventDefault(); card.classList.add('mus-dragover'); });
+      card.addEventListener('dragleave', e=>{ if(e.target===card) card.classList.remove('mus-dragover'); });
+      card.addEventListener('drop', e=>{
+        e.preventDefault(); card.classList.remove('mus-dragover');
+        if(window.GMScenes && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length)
+          GMScenes.addTrackFiles(sc.id, e.dataTransfer.files);
       });
       sceneList.appendChild(card);
     });
