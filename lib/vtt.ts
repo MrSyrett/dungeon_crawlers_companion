@@ -103,7 +103,15 @@ export const OBR_FRAME_ANCESTORS =
 
 export function embedHeaders(extra: Record<string, string> = {}): Record<string, string> {
   return {
-    "content-security-policy": `frame-ancestors ${OBR_FRAME_ANCESTORS}`,
+    // 'self' belongs here alongside the Owlbear origins: the character sheet is
+    // framed by our own /obr/popover (same origin), not by Owlbear directly. The
+    // popover is a direct child of Owlbear so it loads and the character picker
+    // works — but selecting a sheet nests a *second* frame whose parent is us,
+    // and without 'self' that inner frame is refused. Stricter engines (notably
+    // mobile Safari/WebKit) enforce this, which is why the sheet came up blank on
+    // phones while desktop let it through. Listing more ancestors only widens
+    // what may frame these pages, so it can't break the case that already works.
+    "content-security-policy": `frame-ancestors 'self' ${OBR_FRAME_ANCESTORS}`,
     // The token rides in the iframe URL, so don't hand it to anything the page
     // links out to.
     "referrer-policy": "no-referrer",
