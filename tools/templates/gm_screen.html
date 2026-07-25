@@ -1523,6 +1523,15 @@ const GMScenes = (function() {
   const clamp01 = v => Math.max(0, Math.min(1, v));
   const isHttp = u => typeof u === 'string' && /^https?:\/\//i.test(u);
   function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function normUrl(u){
+    // Dropbox share links serve a preview page unless raw=1 is set; drop the
+    // short-lived st= token and force raw=1 so <audio> gets the file itself.
+    if(typeof u!=='string' || !/dropbox\.com/i.test(u)) return u;
+    const parts = u.split('?'); const base = parts[0];
+    const params = (parts[1]||'').split('&').filter(Boolean).filter(p=>!/^(st|dl|raw)=/i.test(p));
+    params.push('raw=1');
+    return base + '?' + params.join('&');
+  }
   function ramp(a, to, ms, done){
     if(a._ramp){ clearInterval(a._ramp); a._ramp=null; }
     to = clamp01(to); const steps = Math.max(1, Math.round(ms/40)); const from = a.volume; let i=0;
@@ -1573,7 +1582,7 @@ const GMScenes = (function() {
   function togglePin(id){ const s=scene(id); if(s){ s.pinned = !s.pinned; notify(); } }
   function addTrackUrl(id, url){
     const s=scene(id); if(!s || !url) return;
-    const clean = url.trim(); if(!clean) return;
+    const clean = normUrl(url.trim()); if(!clean) return;
     let nm='Track'; try{ nm = decodeURIComponent(clean.split('/').pop().split('?')[0]) || nm; }catch(e){}
     const t = newTrack(nm, clean); s.tracks.push(t);
     if(activeId===id) spawn(t);
@@ -1628,7 +1637,7 @@ const GMScenes = (function() {
       masterVol = (typeof data.masterVol==='number') ? data.masterVol : 0.8;
       scenes = (data.scenes||[]).map(s=>({
         id: nextId++, name: s.name||'Scene', pinned: !!s.pinned,
-        tracks: (s.tracks||[]).map(t=>({ id: nextId++, name:t.name||'Track', url:isHttp(t.url)?t.url:null, loop: t.loop!==false, vol:(typeof t.vol==='number'?t.vol:0.8), needsFile: !isHttp(t.url) }))
+        tracks: (s.tracks||[]).map(t=>({ id: nextId++, name:t.name||'Track', url:isHttp(t.url)?normUrl(t.url):null, loop: t.loop!==false, vol:(typeof t.vol==='number'?t.vol:0.8), needsFile: !isHttp(t.url) }))
       }));
     }
     notify();
@@ -7289,6 +7298,15 @@ function init_music(root) {
   let musicVol = 0.8, sfxVol = 0.9;
   const FADE = 1400;
   const liveSfx = new Set();
+  function normUrl(u){
+    // Dropbox share links serve a preview page unless raw=1 is set; drop the
+    // short-lived st= token and force raw=1 so <audio> gets the file itself.
+    if(typeof u!=='string' || !/dropbox\.com/i.test(u)) return u;
+    const parts = u.split('?'); const base = parts[0];
+    const params = (parts[1]||'').split('&').filter(Boolean).filter(p=>!/^(st|dl|raw)=/i.test(p));
+    params.push('raw=1');
+    return base + '?' + params.join('&');
+  }
 
   const $ = s => root.querySelector(s);
   const nowTitle    = $('.mus-now-title');
@@ -7436,7 +7454,7 @@ function init_music(root) {
   function addUrl(kind){
     const url = prompt('Direct audio URL (mp3 / ogg / wav):');
     if(!url) return;
-    const clean = url.trim(); if(!clean) return;
+    const clean = normUrl(url.trim()); if(!clean) return;
     let name = 'Track';
     try { name = decodeURIComponent(clean.split('/').pop().split('?')[0]) || name; } catch(e){}
     const list = kind==='music' ? music : sfx;
@@ -7622,8 +7640,8 @@ function init_music(root) {
   root._setState = (s) => {
     if(!s) return;
     stopAll();
-    music = (s.music||[]).map(t=>({ id:nextId++, name:t.name||'Track', url:isHttp(t.url)?t.url:null, loop:!!t.loop, vol:(typeof t.vol==='number'?t.vol:1), needsFile: !isHttp(t.url) }));
-    sfx   = (s.sfx||[]).map(t=>({ id:nextId++, name:t.name||'SFX', url:isHttp(t.url)?t.url:null, loop:!!t.loop, vol:(typeof t.vol==='number'?t.vol:1), needsFile: !isHttp(t.url) }));
+    music = (s.music||[]).map(t=>({ id:nextId++, name:t.name||'Track', url:isHttp(t.url)?normUrl(t.url):null, loop:!!t.loop, vol:(typeof t.vol==='number'?t.vol:1), needsFile: !isHttp(t.url) }));
+    sfx   = (s.sfx||[]).map(t=>({ id:nextId++, name:t.name||'SFX', url:isHttp(t.url)?normUrl(t.url):null, loop:!!t.loop, vol:(typeof t.vol==='number'?t.vol:1), needsFile: !isHttp(t.url) }));
     musicVol = (typeof s.musicVol==='number') ? s.musicVol : 0.8;
     sfxVol   = (typeof s.sfxVol==='number') ? s.sfxVol : 0.9;
     loopList = s.loopList !== false;
