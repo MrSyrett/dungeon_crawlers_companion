@@ -10,15 +10,17 @@ import { ConfirmButton } from "@/components/ConfirmButton";
 import SystemTabs from "@/components/SystemTabs";
 
 // Toolbar links, in the order they appear beside the system toggle.
-// These work for either ruleset, so they show on both tabs.
+// These work for either ruleset, so they show on both tabs. On the Shadowdark
+// tab they sit after the Shadowdark reference pages (see SD_REFERENCE); on the
+// DCC tab they're the only toolbar links.
 const SHARED_NAV: { href: string; label: string }[] = [
-  { href: "/campaigns", label: "Campaigns" },
   { href: "/vtt", label: "Virtual Tabletop" },
+  { href: "/campaigns", label: "Campaigns" },
   { href: "/gm-screen", label: "GM Screen" },
 ];
 
-// Shadowdark reference pages — they read Shadowdark data, so they follow the
-// shared links on that tab only.
+// Shadowdark reference pages — they read Shadowdark data, so they lead the
+// toolbar on that tab only, ahead of the shared links.
 const SD_REFERENCE: { href: string; label: string }[] = [
   { href: "/rules", label: "Rulebooks" },
   { href: "/bestiary", label: "Bestiary" },
@@ -197,8 +199,8 @@ export default async function DashboardPage() {
 
       {/* One system at a time; Shadowdark by default. */}
       <SystemTabs
-        /* Shared tools on both tabs; the Shadowdark reference pages follow
-           them and are dropped on the DCC tab. */
+        /* Shared tools on both tabs; the Shadowdark reference pages lead them
+           on the SD tab and are dropped on the DCC tab. */
         nav={<NavLinks links={SHARED_NAV} />}
         sdNav={<NavLinks links={SD_REFERENCE} />}
         shadowdark={
