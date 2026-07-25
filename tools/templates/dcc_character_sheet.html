@@ -2308,14 +2308,9 @@ function campaignRenderModal() {
       + '<button onclick="campaignLeave()" style="'+btnStyle+'background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;width:100%;">Leave Campaign</button>';
   } else {
     body.innerHTML =
-      '<p style="'+hint+'">Create a campaign and share the code, or join with a code from your GM. Rolls appear in everyone\'s roll log.</p>'
-      + '<div style="margin-bottom:14px;">'
-      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#e8c84a;margin-bottom:5px;">Create New</div>'
-      + '<div style="display:flex;gap:6px;"><input type="text" id="campaign-name-input" placeholder="Campaign name..." style="'+inputStyle+'flex:1;">'
-      + '<button onclick="campaignCreate()" style="'+btnStyle+'background:#e8c84a;color:#1a1a1a;flex-shrink:0;">Create</button></div>'
-      + '</div>'
+      '<p style="'+hint+'">Enter a join code from your GM to connect this sheet. Rolls appear in everyone\'s roll log. Campaigns are created on the Campaigns page.</p>'
       + '<div>'
-      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#6ac8df;margin-bottom:5px;">Join Existing</div>'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#6ac8df;margin-bottom:5px;">Join a Campaign</div>'
       + '<div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="'+inputStyle+'flex:1;text-transform:uppercase;letter-spacing:.15em;">'
       + '<button onclick="campaignJoin()" style="'+btnStyle+'background:#1a5a7a;color:#fff;flex-shrink:0;">Join</button></div>'
       + '</div>'
@@ -2328,20 +2323,11 @@ function campaignError(msg) {
   if(el) el.textContent = msg;
 }
 
-async function campaignCreate() {
-  const name = document.getElementById('campaign-name-input')?.value.trim() || 'New Campaign';
-  try {
-    const r = await fetch('/api/campaigns', {
-      method: 'POST', credentials: 'same-origin',
-      headers: {'content-type':'application/json'},
-      body: JSON.stringify({ name })
-    });
-    if(!r.ok) throw new Error(r.status);
-    _campaign = await r.json();
-    campaignConnected();
-  } catch(e) {
-    campaignError('Could not create campaign — are you signed in to the app?');
-  }
+// Campaigns can no longer be created from a character sheet — that now lives on
+// the Campaigns page. Players only join (by code) or leave from here. Kept as a
+// guarded stub so any stale reference fails safe instead of hitting the API.
+function campaignCreate() {
+  campaignError('Campaigns are created on the Campaigns page. From your sheet you can join with a code or leave.');
 }
 
 async function campaignJoin() {

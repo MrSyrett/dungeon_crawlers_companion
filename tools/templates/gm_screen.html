@@ -1466,7 +1466,7 @@ const GMCamp = (function() {
     if(campList === null) {
       listHtml = '<div class="camp-hint">Loading campaigns…</div>';
     } else if(!campList.length) {
-      listHtml = '<div class="camp-hint">No campaigns on your account yet — create one below.</div>';
+      listHtml = '<div class="camp-hint">No campaigns on your account yet — create one on the Campaigns page.</div>';
     } else {
       listHtml = '<div class="camp-list">' + campList.map(c =>
           '<button class="camp-item' + ((campaign && String(campaign.id) === String(c.id)) ? ' active' : '') + '" data-id="' + esc(c.id) + '">'
@@ -1481,11 +1481,8 @@ const GMCamp = (function() {
       + (campaign
           ? '<button class="camp-leave" style="background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;width:100%;margin-top:8px;">Disconnect ' + esc(campaign.code) + '</button>'
           : '')
-      + '<div class="camp-sep"></div>'
-      + '<div class="camp-row"><input type="text" class="camp-name" placeholder="New campaign name..."><button class="camp-create" style="background:var(--gold);color:#1a1a1a;">Create</button></div>'
-      + '<div class="camp-row"><input type="text" class="camp-code" placeholder="Join code..." maxlength="6" style="text-transform:uppercase;letter-spacing:.12em;"><button class="camp-join" style="background:#1a5a7a;color:#fff;">Join</button></div>'
       + '<div class="camp-err"></div>'
-      + '<div class="camp-hint">Pick a campaign to connect, create a new one, or join by code. Rolls sync both ways and linked players show in the Party tool.</div>';
+      + '<div class="camp-hint">Pick a campaign to connect this screen. Rolls sync both ways and linked players show in the Party tool. Campaigns are created and managed on the Campaigns page.</div>';
 
     // Connect to a campaign the user picked from the list
     el.querySelectorAll('.camp-item').forEach(b => {
@@ -1498,30 +1495,9 @@ const GMCamp = (function() {
     const leaveBtn = el.querySelector('.camp-leave');
     if(leaveBtn) leaveBtn.onclick = () => { set(null); panelOpen = false; renderPanel(); };
 
-    const err = m => { const e = el.querySelector('.camp-err'); if(e) e.textContent = m; };
-    el.querySelector('.camp-create').onclick = async () => {
-      const name = el.querySelector('.camp-name').value.trim() || 'New Campaign';
-      try {
-        const r = await fetch('/api/campaigns', { method:'POST', credentials:'same-origin',
-          headers:{'content-type':'application/json'}, body: JSON.stringify({ name }) });
-        if(!r.ok) throw 0;
-        const c = await r.json();
-        if(Array.isArray(campList)) campList.unshift(c);   // show it in the list right away
-        set(c);
-        panelOpen = false; renderPanel();
-      } catch(e) { err('Could not create — are you signed in?'); }
-    };
-    el.querySelector('.camp-join').onclick = async () => {
-      const code = el.querySelector('.camp-code').value.trim().toUpperCase();
-      if(!code) { err('Enter a join code.'); return; }
-      try {
-        const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials:'same-origin' });
-        if(r.status === 404) { err('No campaign with that code.'); return; }
-        if(!r.ok) throw 0;
-        set(await r.json());
-        panelOpen = false; renderPanel();
-      } catch(e) { err('Could not join — are you signed in?'); }
-    };
+    // Create and Join were removed from the GM Screen: campaigns are created on
+    // the Campaigns page, and players join from their character sheets. This
+    // panel only lists the account's campaigns and connects the screen to one.
   }
 
   function set(c) {
