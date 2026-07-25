@@ -77,6 +77,20 @@ const SHIM = `
     if (origSave) window.saveSession = function() { origSave(); schedule(); };
   }
 
+  // After the board is applied, force the campaign link from the object stashed
+  // by the picker before reload. This makes the button/link update reliably even
+  // if the loaded board saved its link in an older shape, and the follow-up
+  // autosave then rewrites that board in the correct shape (self-healing).
+  function activatePending() {
+    try {
+      var pend = sessionStorage.getItem("dd-activate-campaign");
+      if (pend === null) return;
+      sessionStorage.removeItem("dd-activate-campaign");
+      var camp = JSON.parse(pend);
+      if (window.GMCamp && typeof window.GMCamp.set === "function") window.GMCamp.set(camp);
+    } catch (e) {}
+  }
+
   // Load the last-used board once the page is ready, then wire up auto-save.
   window.addEventListener("DOMContentLoaded", function() {
     // Prefer the state injected server-side (no round-trip / no flash); fall
@@ -86,8 +100,8 @@ const SHIM = `
       : fetch(API).then(function(r) { return r.json(); });
 
     boot
-      .then(function(saved) { applyInitial(saved); hookManualSave(); })
-      .catch(function() { hookManualSave(); });
+      .then(function(saved) { applyInitial(saved); activatePending(); hookManualSave(); })
+      .catch(function() { activatePending(); hookManualSave(); });
 
     // Poll for state changes every 30s as a fallback
     setInterval(schedule, 30000);

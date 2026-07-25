@@ -1514,6 +1514,9 @@ const GMCamp = (function() {
     try {
       await window.__ddFlushNow();                       // save the board we're leaving
       await window.__ddSelectCampaign(nextCampaign || null); // make the target last-used
+      // Remember the real campaign so the reloaded page activates the link from
+      // this object directly, rather than depending on the stored board's shape.
+      try { sessionStorage.setItem('dd-activate-campaign', JSON.stringify(nextCampaign || null)); } catch(e){}
       window.location.reload();                          // reopen into the target's board
     } catch(e) {
       window.__ddCampaignSwitching = false;
