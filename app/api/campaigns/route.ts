@@ -39,14 +39,29 @@ export async function POST(req: NextRequest) {
   return new Response("Could not create campaign", { status: 500 });
 }
 
-// GET ?code=XXXXXX — look up a campaign to join. Returns { id, name, code }.
+// GET               — the current user's campaigns (for the GM-screen picker).
+// GET ?code=XXXXXX   — look up a campaign to join. Returns { id, name, code }.
 export async function GET(req: NextRequest) {
+  const code = (req.nextUrl.searchParams.get("code") || "").trim().toUpperCase();
+
+  // No code → list the campaigns this account owns (newest first). This is the
+  // same query the /campaigns page runs, in the shape the picker expects.
+  if (!code) {
+    const user = await getCurrentUser();
+    if (!user) return new Response("Unauthorized", { status: 401 });
+
+    const campaigns = await prisma.campaign.findMany({
+      where: { ownerId: user.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, name: true, code: true },
+    });
+    return Response.json(campaigns);
+  }
+
+  // With a code → join-by-code lookup.
   // Cookie normally; a VTT token when framed by a tabletop.
   const user = await getPlayUser(req);
   if (!user) return new Response("Unauthorized", { status: 401 });
-
-  const code = (req.nextUrl.searchParams.get("code") || "").trim().toUpperCase();
-  if (!code) return new Response("Missing code", { status: 400 });
 
   const campaign = await prisma.campaign.findUnique({
     where: { code },
