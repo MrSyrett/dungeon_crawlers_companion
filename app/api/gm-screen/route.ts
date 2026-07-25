@@ -121,7 +121,8 @@ export async function POST(req: NextRequest) {
         tool: GM_TOOL,
         campaignId,
         title: "GM Screen",
-        data: campaign ? { version: 1, campaign } : { version: 1 },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data: (campaign ? { version: 1, campaign } : { version: 1 }) as any,
       },
     });
   }
