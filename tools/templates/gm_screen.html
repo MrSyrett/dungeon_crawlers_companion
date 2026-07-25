@@ -8304,93 +8304,11 @@ window.__gmScreenSetState = function(data) {
   for(let p = 2; p <= (data.splitMode || 1); p++) renderPane(p);
 };
 
-// ══════════════════════════════════════════
-// LOCAL AUTO-PERSISTENCE  (campaign-scoped)
-// Saves the whole GM screen to localStorage on change and on exit, and brings
-// it back on open. Each campaign remembers its own screen, stored under its id;
-// a screen with no campaign linked lives under "__none". Swapping campaigns
-// loads the incoming campaign's remembered screen. This is self-contained and
-// works even without the server-side session shim.
-// ══════════════════════════════════════════
-(function(){
-  const NS   = 'dd_gmscreen_v1:';
-  const LAST = NS + 'last';
-  const key  = id => NS + 'screen:' + (id || '__none');
 
-  let applying  = false;      // suppress re-entrancy while pushing a saved state back in
-  let currentId = '__none';   // which campaign's screen is live right now
-  let timer     = null;
-
-  function campId(){
-    const c = (window.GMCamp && GMCamp.get && GMCamp.get());
-    return (c && c.id) ? String(c.id) : '__none';
-  }
-
-  function saveNow(){
-    if(applying) return;
-    try {
-      const state = window.__gmScreenGetState && window.__gmScreenGetState();
-      if(!state) return;
-      const id = campId();
-      currentId = id;
-      localStorage.setItem(key(id), JSON.stringify(state));
-      localStorage.setItem(LAST, id);
-    } catch(e){}
-  }
-
-  function scheduleSave(){
-    if(applying) return;
-    if(timer) clearTimeout(timer);
-    timer = setTimeout(saveNow, 500);
-  }
-
-  function loadInto(id){
-    let raw = null;
-    try { raw = localStorage.getItem(key(id)); } catch(e){}
-    if(!raw) return false;
-    let data; try { data = JSON.parse(raw); } catch(e){ return false; }
-    if(!data) return false;
-    applying = true;
-    try { window.__gmScreenSetState && window.__gmScreenSetState(data); }
-    catch(e){ console.warn('GM screen restore failed', e); }
-    applying = false;
-    currentId = id;
-    return true;
-  }
-
-  // Light up the save hooks already sprinkled through the page.
-  window.__ddScheduleSave = scheduleSave;
-
-  // Campaign create/join/leave flows through GMCamp — swap screens when it changes.
-  if(window.GMCamp && GMCamp.onChange){
-    GMCamp.onChange(function(){
-      if(applying) return;
-      const id = campId();
-      if(id === currentId){ scheduleSave(); return; }   // same campaign (e.g. hide-rolls toggled)
-      // Genuine swap: the outgoing screen was already saved under its own key.
-      const had = loadInto(id);
-      currentId = id;
-      if(!had) saveNow();   // first time for this campaign — seed it with the current layout
-      try { localStorage.setItem(LAST, id); } catch(e){}
-    });
-  }
-
-  // Save on the way out, plus a periodic snapshot to survive hard closes.
-  window.addEventListener('pagehide', saveNow);
-  document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState === 'hidden') saveNow();
-  });
-  setInterval(saveNow, 20000);
-
-  // Restore on open: whichever campaign's screen was last active.
-  (function boot(){
-    let last = null;
-    try { last = localStorage.getItem(LAST); } catch(e){}
-    if(last === null){ currentId = campId(); saveNow(); return; }  // nothing stored yet — seed it
-    if(!loadInto(last)) currentId = campId();
-  })();
-})();
-
+// Persistence is handled by the server shim injected in app/gm-screen/route.ts:
+// it restores state on load via __gmScreenSetState and saves via __ddScheduleSave
+// (PATCH /api/gm-screen) + beforeunload. The view-mode / pane-tool changes below
+// call __ddScheduleSave so those edits are captured too.
 // Trigger auto-save whenever Next Round is clicked or notes are edited
 document.addEventListener('click', function(e) {
   if(e.target.closest('.cbt-next-round, .cbt-reset, .cbt-add-tracker, .cbt-add-npc, .nts-clear')) {
