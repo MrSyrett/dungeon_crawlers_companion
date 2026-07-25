@@ -1090,6 +1090,19 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 #camp-popover .camp-hint { font-family: 'Montserrat', sans-serif; font-size: 9px; color: var(--muted); line-height: 1.5; }
 #camp-popover .camp-err { font-family: 'Montserrat', sans-serif; font-size: 10px; color: #df6a6a; min-height: 12px; }
 #camp-popover .camp-live { font-family: 'Montserrat', sans-serif; font-size: 11px; color: var(--gold); flex: 1; }
+#camp-popover .camp-list { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto; margin-bottom: 4px; }
+#camp-popover .camp-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; padding: 8px 10px; text-align: left;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+  color: var(--light); cursor: pointer; text-transform: none; letter-spacing: 0; font-weight: 700;
+}
+#camp-popover .camp-item:hover { border-color: var(--muted); }
+#camp-popover .camp-item.active { background: rgba(200,160,32,0.12); border-color: var(--gold); color: var(--gold); }
+#camp-popover .camp-item-name { font-family: 'Montserrat', sans-serif; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#camp-popover .camp-item-code { font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: .12em; color: var(--muted); flex-shrink: 0; }
+#camp-popover .camp-item.active .camp-item-code { color: var(--gold); }
+#camp-popover .camp-sep { height: 1px; background: var(--border); margin: 8px 0; }
 @media (max-width: 760px) { #camp-popover { top: 54px; left: 12px; right: 12px; width: auto; } }
 .dice-camp-row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
 .dice-log-entry.remote { border-left: 3px solid #8a7ac8; background: #201d2a; }
@@ -1417,7 +1430,7 @@ const GMCamp = (function() {
     const b = btn();
     if(!b) return;
     b.classList.toggle('on', !!campaign);
-    b.textContent = campaign ? '🔗 ' + campaign.code : '🔗 Campaign';
+    b.textContent = (campaign ? '🔗 ' + campaign.code : '🔗 Campaign') + ' ▾';
     b.title = campaign ? 'Campaign: ' + campaign.name + ' (' + campaign.code + ')' : 'Campaign link';
   }
 
@@ -1426,26 +1439,64 @@ const GMCamp = (function() {
   function onChange(fn) { watchers.add(fn); }
   function notify() { watchers.forEach(fn => { try { fn(); } catch(e) {} }); }
 
+  // Cached list of the campaigns on this account (null = not fetched yet).
+  let campList = null;
+
+  async function loadList() {
+    try {
+      const r = await fetch('/api/campaigns', { credentials: 'same-origin' });
+      if(r.ok) {
+        const d = await r.json();
+        campList = Array.isArray(d) ? d : (d && Array.isArray(d.campaigns) ? d.campaigns : []);
+      } else {
+        campList = [];   // endpoint missing / not signed in — create & join still work
+      }
+    } catch(e) { campList = []; }
+    if(panelOpen) renderPanel();
+  }
+
   function renderPanel() {
     const el = pop();
     if(!el) return;
     el.style.display = panelOpen ? 'block' : 'none';
     if(!panelOpen) return;
 
-    if(campaign) {
-      el.innerHTML =
-          '<div class="camp-row"><span class="camp-live">🔗 <b>' + esc(campaign.name) + '</b><br>code <b style="letter-spacing:.15em;">' + esc(campaign.code) + '</b></span>'
-        + '<button class="camp-leave" style="background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;">Leave</button></div>'
-        + '<div class="camp-hint">Rolls are shared both ways. Players who join with this code from their character sheet show up in the Party tool.</div>';
-      el.querySelector('.camp-leave').onclick = () => { set(null); panelOpen = false; renderPanel(); };
-      return;
+    // ── The account's campaigns, as a pick-list ──
+    let listHtml;
+    if(campList === null) {
+      listHtml = '<div class="camp-hint">Loading campaigns…</div>';
+    } else if(!campList.length) {
+      listHtml = '<div class="camp-hint">No campaigns on your account yet — create one below.</div>';
+    } else {
+      listHtml = '<div class="camp-list">' + campList.map(c =>
+          '<button class="camp-item' + ((campaign && String(campaign.id) === String(c.id)) ? ' active' : '') + '" data-id="' + esc(c.id) + '">'
+        +   '<span class="camp-item-name">' + esc(c.name) + '</span>'
+        +   '<span class="camp-item-code">' + esc(c.code) + '</span>'
+        + '</button>'
+      ).join('') + '</div>';
     }
 
     el.innerHTML =
-        '<div class="camp-row"><input type="text" class="camp-name" placeholder="Campaign name..."><button class="camp-create" style="background:var(--gold);color:#1a1a1a;">Create</button></div>'
+        listHtml
+      + (campaign
+          ? '<button class="camp-leave" style="background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;width:100%;margin-top:8px;">Disconnect ' + esc(campaign.code) + '</button>'
+          : '')
+      + '<div class="camp-sep"></div>'
+      + '<div class="camp-row"><input type="text" class="camp-name" placeholder="New campaign name..."><button class="camp-create" style="background:var(--gold);color:#1a1a1a;">Create</button></div>'
       + '<div class="camp-row"><input type="text" class="camp-code" placeholder="Join code..." maxlength="6" style="text-transform:uppercase;letter-spacing:.12em;"><button class="camp-join" style="background:#1a5a7a;color:#fff;">Join</button></div>'
       + '<div class="camp-err"></div>'
-      + '<div class="camp-hint">Create a campaign and give the code to your players, or join one they already made.</div>';
+      + '<div class="camp-hint">Pick a campaign to connect, create a new one, or join by code. Rolls sync both ways and linked players show in the Party tool.</div>';
+
+    // Connect to a campaign the user picked from the list
+    el.querySelectorAll('.camp-item').forEach(b => {
+      b.onclick = () => {
+        const c = (campList || []).find(x => String(x.id) === String(b.getAttribute('data-id')));
+        if(c) { set(c); panelOpen = false; renderPanel(); }
+      };
+    });
+
+    const leaveBtn = el.querySelector('.camp-leave');
+    if(leaveBtn) leaveBtn.onclick = () => { set(null); panelOpen = false; renderPanel(); };
 
     const err = m => { const e = el.querySelector('.camp-err'); if(e) e.textContent = m; };
     el.querySelector('.camp-create').onclick = async () => {
@@ -1454,7 +1505,9 @@ const GMCamp = (function() {
         const r = await fetch('/api/campaigns', { method:'POST', credentials:'same-origin',
           headers:{'content-type':'application/json'}, body: JSON.stringify({ name }) });
         if(!r.ok) throw 0;
-        set(await r.json());
+        const c = await r.json();
+        if(Array.isArray(campList)) campList.unshift(c);   // show it in the list right away
+        set(c);
         panelOpen = false; renderPanel();
       } catch(e) { err('Could not create — are you signed in?'); }
     };
@@ -1481,7 +1534,11 @@ const GMCamp = (function() {
     if(window.__ddScheduleSave) setTimeout(window.__ddScheduleSave, 300);   // persist the link
   }
 
-  function togglePanel() { panelOpen = !panelOpen; renderPanel(); }
+  function togglePanel() {
+    panelOpen = !panelOpen;
+    renderPanel();                 // instant: shows cached list (or a loading line first time)
+    if(panelOpen) loadList();      // refresh in the background, re-renders when it lands
+  }
   function toggleHide()  {
     hideRolls = !hideRolls;
     notify();
