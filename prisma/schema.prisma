@@ -40,15 +40,22 @@ model Session {
 model Document {
   id        String   @id @default(cuid())
   userId    String
-  tool      String // "dcc-character" | "dcc-session" | "sd-character" | "sd-session"
-  title     String   @default("Untitled")
-  data      Json     @default("{}")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  tool      String // "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "gm-screen"
+  // For "gm-screen" docs this scopes the saved board to a campaign:
+  //   null      → the personal "unlinked" scratch board
+  //   <cuid>    → the board for that campaign (per user)
+  // Character-sheet docs leave this null; they keep their campaign link inside `data`.
+  campaignId String?
+  title      String   @default("Untitled")
+  data       Json     @default("{}")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
-  @@index([userId, tool])
+  @@index([userId, tool, campaignId])
+  @@index([userId, tool, updatedAt])
 }
 
 // A campaign links multiple players' tools together. Anyone with the join
@@ -66,6 +73,9 @@ model Campaign {
   owner User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   rolls CampaignRoll[]
   homebrewShares HomebrewShare[]
+  // Per-user GM-screen boards saved for this campaign (tool = "gm-screen").
+  // Deleting the campaign removes them, so a stale board can't outlive it.
+  documents Document[]
 }
 
 // A user-owned homebrew spell or gear entry. `data` holds the same object shape
