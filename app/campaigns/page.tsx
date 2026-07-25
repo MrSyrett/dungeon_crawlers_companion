@@ -1,11 +1,40 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { makeCode } from "@/lib/campaign-code";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
 
 export const dynamic = "force-dynamic";
+
+// Create a campaign owned by the current user. Defined inline here (the page
+// already talks to prisma directly); move it into @/app/actions/campaigns
+// alongside the others if you'd rather keep all mutations in one module.
+async function createCampaign(formData: FormData): Promise<void> {
+  "use server";
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const raw = formData.get("name");
+  const name =
+    typeof raw === "string" && raw.trim() ? raw.trim().slice(0, 60) : "New Campaign";
+
+  // Mirror the /api/campaigns POST: retry on the (unlikely) join-code collision.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      await prisma.campaign.create({
+        data: { name, code: makeCode(), ownerId: user.id },
+      });
+      break;
+    } catch {
+      if (attempt === 4) throw new Error("Could not create campaign");
+    }
+  }
+
+  revalidatePath("/campaigns");
+}
 
 // Only the handful of fields we read out of a saved character sheet.
 type SheetBlob = {
@@ -119,20 +148,40 @@ export default async function CampaignsPage() {
         </Link>
       </header>
 
+      <section className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[var(--gold)]">
+          Create a campaign
+        </h2>
+        <form action={createCampaign} className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <input
+            type="text"
+            name="name"
+            maxLength={60}
+            placeholder="Campaign name…"
+            aria-label="New campaign name"
+            className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-2 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--gold)]"
+          />
+          <button className="shrink-0 rounded border border-[var(--gold)] bg-[var(--gold)] px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.12em] text-[#1a1a1a] hover:opacity-90">
+            Create
+          </button>
+        </form>
+        <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">
+          You&apos;ll be its GM/owner. Share the join code with your players so they can link their
+          character sheets. A blank name becomes &ldquo;New Campaign&rdquo; — rename it below.
+        </p>
+      </section>
+
       {campaigns.length === 0 ? (
         <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
           <h2 className="text-base font-bold uppercase tracking-[0.15em]">No campaigns yet</h2>
           <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            Campaigns are created from the{" "}
-            <Link href="/gm-screen" className="text-[var(--gold)] underline">
-              GM Screen
-            </Link>{" "}
-            — open the 🔗 Campaign button in the top bar and create one. Give the join code to
-            your players and they can link their character sheets to it.
+            Use the <span className="text-[var(--gold)]">Create a campaign</span> box above to
+            start one. You&apos;ll be its GM/owner — give the join code to your players and they
+            can link their character sheets to it from their own sheet.
           </p>
           <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
             Campaigns you joined but don&apos;t own won&apos;t appear here; only their owner can
-            delete them.
+            edit or delete them.
           </p>
         </div>
       ) : (
