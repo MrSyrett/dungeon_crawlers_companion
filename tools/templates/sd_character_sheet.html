@@ -4412,6 +4412,7 @@ function ccwChoices(){
     else if(ch.kind==='advSpell') h+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p class="ccw-hint" style="color:#df6a6a;">You know no spells to gain advantage on — this choice is skipped.</p>';
     else if(ch.kind==='weaponDie') h+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
     else if(ch.kind==='talent') h+=_hbChoiceSelect(ch.key,cur,talents,'ccwSetChoice');
+    else if(ch.kind==='oneOf') h+=_hbChoiceSelect(ch.key,cur,ch.effects.map((e,i)=>[String(i),_hbEffOne(e)]),'ccwSetChoice');
     h+='</div>';
   });
   return h;
@@ -7867,7 +7868,13 @@ function _hbGatherChoices(c){
     });
   }
   const ci=RC_CLASS_INFO[c.cls];
-  if(ci&&ci._hb&&Array.isArray(ci._featureEff)) ci._featureEff.forEach((effs,fi)=>{if(ci._featureChoose&&ci._featureChoose[fi])return;(Array.isArray(effs)?effs:[]).forEach((e,ei)=>push('cf'+fi+'_'+ei,e));});
+  if(ci&&ci._hb&&Array.isArray(ci._featureEff)) ci._featureEff.forEach((effs,fi)=>{
+    if(ci._featureChoose && ci._featureChoose[fi]){
+      if(Array.isArray(effs) && effs.length) list.push({key:'cf'+fi, kind:'oneOf', effects:effs, label:(ci._featureText&&ci._featureText[fi])||'Feature'});
+    } else {
+      (Array.isArray(effs)?effs:[]).forEach((e,ei)=>push('cf'+fi+'_'+ei,e));
+    }
+  });
   return list;
 }
 // Pending choices from one talent slot (prefix keeps main 'tm' / bonus 'tb' distinct).
@@ -7915,6 +7922,7 @@ function _hbChoiceLabel(ch){
   if(ch.kind==='advSpell')return 'Advantage on a spell of your choice';
   if(ch.kind==='weaponDie')return 'Weapon damage die (d'+ch.amount+') — choose a weapon';
   if(ch.kind==='talent')return 'Choose a talent';
+  if(ch.kind==='oneOf')return (ch.label||'Feature')+' — choose one';
   return 'Choose';
 }
 // A styled <select> for a choice. opts = [[value,label],...]; setter = fn name.
@@ -7930,6 +7938,7 @@ function _hbApplyChoice(out, ch, val){
   else if(ch.kind==='advSpell') out.advSpells.push(val);
   else if(ch.kind==='weaponDie'){ if(!out.weaponDice[val])out.weaponDice[val]={count:0,size:0}; out.weaponDice[val].count++; out.weaponDice[val].size=Math.max(out.weaponDice[val].size,ch.amount); }
   else if(ch.kind==='talent'){ const ci=RC_CLASS_INFO[ch.cls]; const idx=parseInt(val); if(ci&&Array.isArray(ci._talentEff)&&Array.isArray(ci._talentEff[idx])) ci._talentEff[idx].forEach(e=>_hbAccumEffect(out,e)); }
+  else if(ch.kind==='oneOf'){ const e=ch.effects[parseInt(val)]; if(e) _hbAccumEffect(out,e); }
 }
 
 function injectHomebrewContent(rows) {
@@ -7963,6 +7972,7 @@ function injectHomebrewContent(rows) {
       const featureEff = (Array.isArray(d.features) ? d.features : [])
         .map(f => (f && Array.isArray(f.effects)) ? f.effects : []);
       const featureChoose = (Array.isArray(d.features) ? d.features : []).map(f => !!(f && f.choose));
+      const featureText = (Array.isArray(d.features) ? d.features : []).map(f => String((f && f.text) || '').split(':')[0]);
       const talentChoose = talentRows.map(r => !!(r && r.choose));
       const bands = d.talentSplit === 'hi'
         ? [[2,2],[3,7],[8,9],[10,11],[12,12]]
@@ -7973,7 +7983,7 @@ function injectHomebrewContent(rows) {
       // ccwBuildTalentRows order, so the wizard can auto-apply a rolled talent.
       const talentEff = [0,1,2,3,4].map(i =>
         (talentRows[i] && Array.isArray(talentRows[i].effects)) ? talentRows[i].effects : []);
-      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _talentEff: talentEff, _featureEff: featureEff, _talentChoose: talentChoose, _featureChoose: featureChoose, _hb: true };
+      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _talentEff: talentEff, _featureEff: featureEff, _talentChoose: talentChoose, _featureChoose: featureChoose, _featureText: featureText, _hb: true };
       if(d.caster && (d.caster.stat || d.caster.list)) {
         RC_CLASS_INFO[nm]._caster = {
           stat: String(d.caster.stat || 'INT').toLowerCase(),
