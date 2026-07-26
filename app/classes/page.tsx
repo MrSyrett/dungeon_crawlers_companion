@@ -1,0 +1,218 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
+import { SD_CLASSES, type SdClass } from "@/lib/data/classes";
+
+export const dynamic = "force-dynamic";
+
+type Query = { q?: string; cast?: string };
+type RawQuery = { [K in keyof Query]?: string | string[] };
+const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
+
+const chipBase =
+  "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
+const chipOff =
+  "border-[var(--border)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]";
+const chipOn = "border-[var(--gold)] bg-[var(--panel-2)] text-[var(--gold)]";
+
+function withParams(current: Query, patch: Query): string {
+  const next = { ...current, ...patch };
+  const sp = new URLSearchParams();
+  if (next.q) sp.set("q", next.q);
+  if (next.cast) sp.set("cast", next.cast);
+  const s = sp.toString();
+  return s ? `/classes?${s}` : "/classes";
+}
+
+function matches(c: SdClass, needle: string, cast: string): boolean {
+  if (cast === "caster" && !c.caster) return false;
+  if (cast === "martial" && c.caster) return false;
+  if (!needle) return true;
+  return (
+    c.name.toLowerCase().includes(needle) ||
+    c.features.some((f) => f.toLowerCase().includes(needle)) ||
+    c.talent.some((t) => t.toLowerCase().includes(needle))
+  );
+}
+
+export default async function ClassesPage({
+  searchParams,
+}: {
+  searchParams: Promise<RawQuery>;
+}) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const raw = await searchParams;
+  const q = one(raw.q).trim();
+  const needle = q.toLowerCase();
+  const cast = ["caster", "martial"].includes(one(raw.cast)) ? one(raw.cast) : "";
+  const current: Query = { q, cast };
+
+  const results = SD_CLASSES.filter((c) => matches(c, needle, cast));
+  const filtered = Boolean(needle || cast);
+
+  return (
+    <div className="mx-auto w-full max-w-5xl px-5 py-10">
+      <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
+        <div>
+          <h1 className="font-display text-3xl font-black tracking-wide">Classes</h1>
+          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
+            {SD_CLASSES.length} Shadowdark classes
+          </p>
+        </div>
+        <Link
+          href="/dashboard"
+          className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+        >
+          ← Home
+        </Link>
+      </header>
+
+      <form method="get" action="/classes" className="mb-4 flex gap-2">
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          placeholder="Search name, feature, or talent…"
+          className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--gold)]"
+        />
+        {cast ? <input type="hidden" name="cast" value={cast} /> : null}
+        <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]">
+          Search
+        </button>
+      </form>
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+          Type
+        </span>
+        <Link href={withParams(current, { cast: "" })} className={`${chipBase} ${cast ? chipOff : chipOn}`}>
+          All
+        </Link>
+        <Link
+          href={withParams(current, { cast: "caster" })}
+          className={`${chipBase} ${cast === "caster" ? chipOn : chipOff}`}
+        >
+          Casters
+        </Link>
+        <Link
+          href={withParams(current, { cast: "martial" })}
+          className={`${chipBase} ${cast === "martial" ? chipOn : chipOff}`}
+        >
+          Martial
+        </Link>
+      </div>
+
+      <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
+        <span>
+          {results.length} {results.length === 1 ? "class" : "classes"}
+        </span>
+        {filtered ? (
+          <Link href="/classes" className="text-[var(--gold)] hover:underline">
+            Clear filters
+          </Link>
+        ) : null}
+      </div>
+
+      {results.length === 0 ? (
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
+          <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
+            No class matches those filters.{" "}
+            <Link href="/classes" className="text-[var(--gold)] underline">
+              Clear them
+            </Link>
+            .
+          </p>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-4">
+          {results.map((c) => (
+            <li key={c.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="text-lg font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                  {c.name}
+                </h2>
+                <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.12em] text-[var(--text)]">
+                  HP {c.hd}
+                </span>
+                {c.caster ? (
+                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                    Spellcaster
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <div className="text-[12px] text-[var(--muted)]">
+                  <span className="font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
+                    Weapons:
+                  </span>{" "}
+                  {c.weapons || "—"}
+                </div>
+                <div className="text-[12px] text-[var(--muted)]">
+                  <span className="font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
+                    Armor:
+                  </span>{" "}
+                  {c.armor || "—"}
+                </div>
+              </div>
+
+              {c.features.length > 0 ? (
+                <div className="mt-3">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
+                    Features
+                  </div>
+                  <ul className="mt-1 flex flex-col gap-1">
+                    {c.features.map((f, i) => (
+                      <li key={i} className="text-[13px] leading-relaxed text-[var(--muted)]">
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {c.talent.length > 0 ? (
+                <details className="mt-3 border-t border-[var(--border)] pt-3">
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)] hover:text-[var(--text)]">
+                    Talent table ({c.talent.length})
+                  </summary>
+                  <ol className="mt-2 flex flex-col gap-1">
+                    {c.talent.map((t, i) => (
+                      <li key={i} className="flex gap-2 text-[12px] leading-relaxed text-[var(--muted)]">
+                        <span className="shrink-0 text-[var(--gold)]">{i + 1}.</span>
+                        <span>{t}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+              ) : null}
+
+              {c.titles ? (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)] hover:text-[var(--text)]">
+                    Titles by alignment
+                  </summary>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    {(["Lawful", "Neutral", "Chaotic"] as const).map((al) => (
+                      <div key={al}>
+                        <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--text)]">
+                          {al}
+                        </div>
+                        <div className="text-[12px] text-[var(--muted)]">
+                          {c.titles![al].join(", ")}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

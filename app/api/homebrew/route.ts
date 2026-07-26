@@ -7,11 +7,12 @@ import {
   normalize,
   resolveShareTargets,
   setShares,
+  isHbType,
   type HbType,
 } from "@/lib/homebrew";
 
 function asType(v: string | null): HbType | undefined {
-  return v === "spell" || v === "gear" || v === "monster" ? v : undefined;
+  return isHbType(v) ? v : undefined;
 }
 
 // GET /api/homebrew?type=spell|gear&campaign=<id>
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
     | { type?: unknown; data?: unknown; campaignIds?: unknown }
     | null;
   const type = asType(typeof body?.type === "string" ? body.type : null);
-  if (!type) return new Response("type must be 'spell', 'gear' or 'monster'", { status: 400 });
+  if (!type) return new Response("Unknown homebrew type", { status: 400 });
 
   let normalized: { name: string; data: Record<string, unknown> };
   let campaignIds: string[];

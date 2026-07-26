@@ -302,6 +302,95 @@ const gearCount = emit(
   gear,
 );
 
+// ── Classes / Ancestries / Backgrounds (Shadowdark character creation) ───────
+// The creation wizard's book data. Classes must be evaluated as one contiguous
+// scope because RC_CLASS_INFO's Ranger features spread SD_REMEDIES/remedyLine,
+// so run the whole block and read the pieces back out. The sheet stays the
+// single source of truth; these files are generated from it (never hand-edited).
+function extractClassScope(html, sourceLabel) {
+  const start = html.indexOf("const RC_CLASSES = [");
+  if (start === -1) throw new Error(`RC_CLASSES not found in ${sourceLabel}`);
+  const tStart = html.indexOf("const RC_TITLES = {", start);
+  if (tStart === -1) throw new Error(`RC_TITLES not found in ${sourceLabel}`);
+  const end = html.indexOf("\n};", tStart);
+  if (end === -1) throw new Error(`RC_TITLES in ${sourceLabel} is not terminated by "\\n};"`);
+  const block = html.slice(start, end + 3);
+  return runInNewContext(
+    `${block}\n;({ RC_CLASSES, RC_CLASS_INFO, RC_TITLES });`,
+    Object.create(null),
+    { timeout: 5000 },
+  );
+}
+
+const cls = extractClassScope(sdSheet, "sd_character_sheet.html");
+const classRows = cls.RC_CLASSES.map((name) => {
+  const info = cls.RC_CLASS_INFO[name] || {};
+  const titles = cls.RC_TITLES[name] || null;
+  const features = Array.isArray(info.features) ? info.features.map(String) : [];
+  return {
+    name,
+    hd: String(info.hd ?? ""),
+    weapons: String(info.weapons ?? ""),
+    armor: String(info.armor ?? ""),
+    talent: Array.isArray(info.talent) ? info.talent.map(String) : [],
+    talentBands: Array.isArray(info.talentBands) ? info.talentBands : null,
+    features,
+    caster: features.some((f) => /Spellcasting/i.test(f)),
+    titles: titles
+      ? {
+          Lawful: (titles.Lawful || []).map(String),
+          Chaotic: (titles.Chaotic || []).map(String),
+          Neutral: (titles.Neutral || []).map(String),
+        }
+      : null,
+  };
+});
+const classCount = emit(
+  "classes.ts",
+  "Source: tools/templates/sd_character_sheet.html (RC_CLASSES, RC_CLASS_INFO, RC_TITLES)",
+  "SdClass",
+  `{
+  name: string;
+  hd: string;
+  weapons: string;
+  armor: string;
+  talent: string[];
+  talentBands: [number, number][] | null;
+  features: string[];
+  caster: boolean;
+  titles: { Lawful: string[]; Chaotic: string[]; Neutral: string[] } | null;
+}`,
+  "SD_CLASSES",
+  classRows,
+);
+
+const anc = extractObject(sdSheet, "RC_ANCESTRY", "sd_character_sheet.html");
+const ancestryRows = (anc.table || []).map((t) => ({
+  name: String(t.v),
+  trait: String((anc.ability || {})[t.v] ?? ""),
+  languages: String((anc.languages || {})[t.v] ?? ""),
+}));
+const ancestryCount = emit(
+  "ancestries.ts",
+  "Source: tools/templates/sd_character_sheet.html (RC_ANCESTRY)",
+  "SdAncestry",
+  `{ name: string; trait: string; languages: string }`,
+  "SD_ANCESTRIES",
+  ancestryRows,
+);
+
+const backgroundRows = extractArray(sdSheet, "RC_BACKGROUNDS", "sd_character_sheet.html").map(
+  (name) => ({ name: String(name) }),
+);
+const backgroundCount = emit(
+  "backgrounds.ts",
+  "Source: tools/templates/sd_character_sheet.html (RC_BACKGROUNDS)",
+  "SdBackground",
+  `{ name: string }`,
+  "SD_BACKGROUNDS",
+  backgroundRows,
+);
+
 console.log(
-  `extract-game-data: ${monsterCount} monsters (${monsterTypeCount} typed), ${spellCount} spells, ${gearCount} gear → lib/data/`,
+  `extract-game-data: ${monsterCount} monsters (${monsterTypeCount} typed), ${spellCount} spells, ${gearCount} gear, ${classCount} classes, ${ancestryCount} ancestries, ${backgroundCount} backgrounds → lib/data/`,
 );

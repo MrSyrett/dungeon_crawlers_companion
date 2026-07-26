@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { normalize, resolveShareTargets, setShares, type HbType } from "@/lib/homebrew";
+import { normalize, resolveShareTargets, setShares, isHbType, type HbType } from "@/lib/homebrew";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -47,7 +47,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   return Response.json({
     item: {
       id: row.id,
-      type: row.type === "gear" ? "gear" : row.type === "monster" ? "monster" : "spell",
+      type: isHbType(row.type) ? row.type : "spell",
       name: row.name,
       campaignIds: campaignIds ?? existing.shares.map((s: { campaignId: string }) => s.campaignId),
       data:

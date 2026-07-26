@@ -26,6 +26,9 @@ const SD_REFERENCE: { href: string; label: string }[] = [
   { href: "/bestiary", label: "Bestiary" },
   { href: "/spells", label: "Spells" },
   { href: "/gear", label: "Gear" },
+  { href: "/classes", label: "Classes" },
+  { href: "/ancestries", label: "Ancestries" },
+  { href: "/backgrounds", label: "Backgrounds" },
 ];
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

@@ -8,7 +8,12 @@ import { MONSTER_TYPES } from "@/lib/data/monster-types";
 //   • a gear entry is a sheet `_homebrewItems`-shaped object (its own `kind`)
 //   • a monster entry is an SD_MONSTERS-shaped stat block (plus `ctype`), so the
 //     GM screen can drop it straight into the bestiary pool
-export type HbType = "spell" | "gear" | "monster";
+export type HbType = "spell" | "gear" | "monster" | "class" | "ancestry" | "background";
+
+const HB_TYPES = ["spell", "gear", "monster", "class", "ancestry", "background"] as const;
+export function isHbType(v: unknown): v is HbType {
+  return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
+}
 
 export type CampaignRef = { id: string; name: string; code: string };
 
@@ -60,7 +65,7 @@ const num = (v: unknown): number | null => {
 function toRecord(r: HomebrewRow, viewerId: string): HomebrewRecord {
   return {
     id: r.id,
-    type: r.type === "gear" ? "gear" : r.type === "monster" ? "monster" : "spell",
+    type: isHbType(r.type) ? r.type : "spell",
     name: r.name,
     campaignIds: (r.shares ?? []).map((sh) => sh.campaignId),
     data: (r.data && typeof r.data === "object" ? (r.data as Record<string, unknown>) : {}),
@@ -283,10 +288,147 @@ export function normalizeMonster(input: unknown): { name: string; data: Record<s
   };
 }
 
+// ── Backgrounds ──────────────────────────────────────────────────────────────
+// A background is a name + descriptive blurb (the book's are a d20 table). The
+// wizard just offers it and writes the name/blurb onto the sheet.
+export function normalizeBackground(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew background needs a name.");
+  return { name, data: { name, desc: str(o.desc).slice(0, 2000) } };
+}
+
+// ── Ancestries ───────────────────────────────────────────────────────────────
+// A name, a trait blurb, optional languages, and optional flat bonuses the
+// wizard applies the same way it applies item/talent bonuses (e.g. Half-Orc's
+// Mighty = +1 melee attack & damage).
+export function normalizeAncestry(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew ancestry needs a name.");
+
+  const targets = BONUS_TARGETS as readonly string[];
+  const bonuses = Array.isArray(o.bonuses)
+    ? (o.bonuses as unknown[])
+        .map((b) => {
+          const bo = (b ?? {}) as Record<string, unknown>;
+          return { amount: num(bo.amount), target: str(bo.target) };
+        })
+        .filter((b): b is { amount: number; target: string } =>
+          b.amount != null && b.amount !== 0 && targets.includes(b.target),
+        )
+    : [];
+
+  const data: Record<string, unknown> = {
+    name,
+    trait: str(o.trait).slice(0, 2000),
+    languages: str(o.languages).slice(0, 300),
+  };
+  if (bonuses.length) data.bonuses = bonuses;
+  return { name, data };
+}
+
+// ── Classes ──────────────────────────────────────────────────────────────────
+// Hit die options and the casting stats / spell lists a homebrew caster can use.
+export const HD_DICE = ["1d4", "1d6", "1d8", "1d10", "1d12"] as const;
+export const CAST_STATS = ["INT", "WIS", "CHA"] as const;
+// Where a homebrew caster draws spells: a book list, or "Homebrew" (spells the
+// author tagged for the class).
+export const SPELL_LISTS = ["Wizard", "Priest", "Witch", "Homebrew"] as const;
+const CLASS_STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
+
+// A talent-table entry: `text` always displays; `effect`, when present, is what
+// the creation/level-up wizard auto-applies. Kinds map onto bonuses the sheet
+// already knows how to apply, so the generic applier (built in the wizard layer)
+// stays small. Free-text-only talents (kind "none") display but don't auto-apply.
+export type TalentEffect =
+  | { kind: "atk"; amount: number } // +N to melee AND ranged attacks
+  | { kind: "dmg"; amount: number } // +N to melee AND ranged damage
+  | { kind: "ac"; amount: number }
+  | { kind: "hp"; amount: number }
+  | { kind: "stat"; stat: string; amount: number } // +N to a fixed stat
+  | { kind: "statChoice"; amount: number } // +N the player assigns
+  | { kind: "spellKnown"; amount: number } // learn N extra spells
+  | { kind: "none" };
+
+function normalizeTalentEffect(raw: unknown): TalentEffect {
+  const e = (raw ?? {}) as Record<string, unknown>;
+  const kind = str(e.kind);
+  const amount = num(e.amount) ?? 0;
+  switch (kind) {
+    case "atk": return { kind: "atk", amount };
+    case "dmg": return { kind: "dmg", amount };
+    case "ac": return { kind: "ac", amount };
+    case "hp": return { kind: "hp", amount };
+    case "stat": {
+      const s = str(e.stat).toUpperCase();
+      return { kind: "stat", stat: (CLASS_STATS as readonly string[]).includes(s) ? s : "STR", amount };
+    }
+    case "statChoice": return { kind: "statChoice", amount };
+    case "spellKnown": return { kind: "spellKnown", amount };
+    default: return { kind: "none" };
+  }
+}
+
+export function normalizeClass(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew class needs a name.");
+
+  const hd = (HD_DICE as readonly string[]).includes(str(o.hd)) ? str(o.hd) : "1d6";
+
+  // Up to 12 talent slots (the book's tables are 12), each { text, effect }.
+  const talent = Array.isArray(o.talent)
+    ? (o.talent as unknown[])
+        .slice(0, 12)
+        .map((t) => {
+          if (typeof t === "string") {
+            return { text: str(t).slice(0, 300), effect: { kind: "none" } as TalentEffect };
+          }
+          const to = (t ?? {}) as Record<string, unknown>;
+          return { text: str(to.text).slice(0, 300), effect: normalizeTalentEffect(to.effect) };
+        })
+        .filter((t) => t.text)
+    : [];
+
+  const features = Array.isArray(o.features)
+    ? (o.features as unknown[]).map((f) => str(f).slice(0, 500)).filter(Boolean).slice(0, 20)
+    : [];
+
+  const data: Record<string, unknown> = {
+    name,
+    hd,
+    weapons: str(o.weapons).slice(0, 400),
+    armor: str(o.armor).slice(0, 400),
+    talent,
+    features,
+  };
+
+  // Optional spellcasting config — present only for caster classes.
+  const caster = (o.caster ?? null) as Record<string, unknown> | null;
+  if (caster && (str(caster.stat) || str(caster.list))) {
+    const stat = str(caster.stat).toUpperCase();
+    const list = str(caster.list);
+    data.caster = {
+      stat: (CAST_STATS as readonly string[]).includes(stat) ? stat : "INT",
+      list: (SPELL_LISTS as readonly string[]).includes(list) ? list : "Homebrew",
+      knownTier1: num(caster.knownTier1) ?? 2,
+      dc: str(caster.dc).slice(0, 120),
+    };
+  }
+
+  return { name, data };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
-  if (type === "spell") return normalizeSpell(data);
-  if (type === "monster") return normalizeMonster(data);
-  return normalizeGear(data);
+  switch (type) {
+    case "spell": return normalizeSpell(data);
+    case "monster": return normalizeMonster(data);
+    case "gear": return normalizeGear(data);
+    case "class": return normalizeClass(data);
+    case "ancestry": return normalizeAncestry(data);
+    case "background": return normalizeBackground(data);
+  }
 }
 
 // Resolve/validate the requested share targets. An empty list means personal.
