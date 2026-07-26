@@ -21,6 +21,7 @@ function effectLabel(e: Effect): string {
   if (e.target === "weaponDie") return `d${e.amount} weapon damage${e.weapon ? ` (${e.weapon})` : ""}`;
   if (e.target === "spellKnown") return e.spell ? `Learn ${e.spell}` : "Learn a spell";
   if (e.target === "advSpell") return e.spell ? `Advantage casting ${e.spell}` : "Advantage on a spell";
+  if (e.target === "playerTalent") return "Player Choice";
   return `${e.amount >= 0 ? "+" : ""}${e.amount} ${label}`;
 }
 
