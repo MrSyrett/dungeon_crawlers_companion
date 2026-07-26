@@ -350,7 +350,7 @@ export function normalizeAncestry(input: unknown): { name: string; data: Record<
                 target: TALENT_TARGET_KEYS.includes(target) ? target : "",
               };
             })
-            .filter((op) => op.label)
+            .filter((op) => op.label || op.target)
             .slice(0, 6);
           if (options.length) return { text, options };
         }

@@ -4714,7 +4714,7 @@ function ccwNext() {
     if(_hbA && Array.isArray(_hbA.traits)) {
       for(let ti=0; ti<_hbA.traits.length; ti++){
         const t = _hbA.traits[ti];
-        if(t && Array.isArray(t.options) && t.options.length && !(_ccw.hbChoice && _ccw.hbChoice[ti]!=null)) {
+        if(t && Array.isArray(t.options) && t.options.length >= 2 && !(_ccw.hbChoice && _ccw.hbChoice[ti]!=null)) {
           alert('Choose an option for ' + (String(t.text||'your ancestry trait').split(':')[0]) + '.'); return;
         }
       }
@@ -4870,7 +4870,7 @@ function ccwAncestry() {
   const _hbAnc = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
   if(_hbAnc && Array.isArray(_hbAnc.traits)) {
     _hbAnc.traits.forEach((t, ti) => {
-      if(!(t && Array.isArray(t.options) && t.options.length)) return;
+      if(!(t && Array.isArray(t.options) && t.options.length >= 2)) return;
       const title = String(t.text||'Choose').split(':')[0];
       let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
       x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 '+title+' \u2014 choose one</div>';
@@ -5326,7 +5326,9 @@ function ccwApply() {
   if(!_ccw.name) _ccw.name = _rc_roll(RC_NAMES[_ccw.ancestry]||RC_NAMES.Human);
   const c = _ccw;
   const eff = ccwEffStats();
-  const hbAnc = _hbAncestryEffects(c);
+  const hbEff = _hbEmptyEff();
+  _hbFillAncestry(hbEff, c);
+  _hbFillTalent(hbEff, c);
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.value=v; };
 
   document.querySelectorAll('#spells-list .spell-row').forEach(row => row.remove());
@@ -5348,16 +5350,16 @@ function ccwApply() {
   if(_hbCaster && _hbCaster.stat) set('spell-stat', _hbCaster.stat);
 
   const statIds = {STR:'str-val',DEX:'dex-val',CON:'con-val',INT:'int-val',WIS:'wis-val',CHA:'cha-val'};
-  Object.entries(statIds).forEach(([k,id])=>{ set(id, eff[k] + (hbAnc[k.toLowerCase()]||0)); });
+  Object.entries(statIds).forEach(([k,id])=>{ set(id, eff[k] + (hbEff[k.toLowerCase()]||0)); });
   document.querySelectorAll('.stat-val').forEach(el=>el.dispatchEvent(new Event('input')));
 
-  set('hp-current', c.hp + hbAnc.hp); set('hp-max', c.hp + hbAnc.hp);
+  set("hp-current", c.hp + hbEff.hp); set("hp-max", c.hp + hbEff.hp);
 
   // AC: base 10 + DEX; armor/shield contribution goes into the bonus box, toggled on.
   // Beastfolk Natural Selection is hide, not gear — it can't be taken off, so it
   // Natural Selection (Beastfolk) is hide, not gear — it can't be equipped, so
   // it's folded on after the equipped-armor AC is computed (see gear section below).
-  const _natAC = ((c.beastNatural==='ac') ? 1 : 0) + (hbAnc.ac || 0);
+  const _natAC = ((c.beastNatural==='ac') ? 1 : 0) + (hbEff.ac || 0);
 
   // Languages line
   const extraLangs = [...c.langCommon, ...c.langRare, ...(c.langPriest?[c.langPriest]:[])];
@@ -5477,9 +5479,10 @@ function ccwApply() {
   if(c.elfFarsight==='spell')  spellChkBonus += 1;        // Farsight
   if(c.koboldKnack==='spell')  spellChkBonus += 1;        // Kobold: Knack
   // Homebrew ancestry: flat bonuses + chosen "choose one" option effects
-  atkBonus.melee += hbAnc.meleeAtk; atkBonus.meleeDmg += hbAnc.meleeDmg;
-  atkBonus.ranged += hbAnc.rangedAtk; atkBonus.rangedDmg += hbAnc.rangedDmg;
-  spellChkBonus += hbAnc.spellCheck;
+  // Homebrew ancestry + talent: attack, damage, and spellcasting-check bonuses
+  atkBonus.melee += hbEff.meleeAtk; atkBonus.meleeDmg += hbEff.meleeDmg;
+  atkBonus.ranged += hbEff.rangedAtk; atkBonus.rangedDmg += hbEff.rangedDmg;
+  spellChkBonus += hbEff.spellCheck;
   [c.tres, c.tres2].forEach(p=>{
     const f = (p && p.final) || '';
     if(/\+1 to melee and ranged attacks/i.test(f) || /\+1 to melee\/ranged attacks/i.test(f)) { atkBonus.melee+=1; atkBonus.ranged+=1; }
@@ -5526,6 +5529,8 @@ function ccwApply() {
     if(masterySet.has(w.name)) { const mb = masteryBonus(1); bonus += mb; dmgBonus += mb; }
     let dmg = dmgOverride || w.damage;
     if(d12Set.has(w.name)) dmg = dmg.replace(/d\d+/g, 'd12');
+    // Homebrew weapon-damage-die talent/trait: upgrade smaller dice to the set die.
+    if(hbEff.weaponDie) dmg = dmg.replace(/d(\d+)/g, (mm,n)=> (parseInt(n) < hbEff.weaponDie) ? 'd'+hbEff.weaponDie : mm);
     if(dmgBonus > 0) dmg = dmg.split('/').map(d=>d+'+'+dmgBonus).join('/');
     if(f2.name)   f2.name.value   = name;
     if(f2.bonus)  f2.bonus.value  = bonus > 0 ? '+'+bonus : '';
@@ -5558,6 +5563,7 @@ function ccwApply() {
       if(!bw) return;
       const baseDmg = (wname==='Strikes') ? unarmedDie : bw.damage;
       let bsDmg = d12Set.has(bw.name) ? baseDmg.replace(/d\d+/g,'d12') : baseDmg;
+      if(hbEff.weaponDie) bsDmg = bsDmg.replace(/d(\d+)/g, (mm,n)=> (parseInt(n) < hbEff.weaponDie) ? 'd'+hbEff.weaponDie : mm);
       bsDmg = bsDmg.replace(/1d/g, bsDice+'d');
       _fillAtkRow('Backstab ('+bw.name+')', bw, bsDmg);
     });
@@ -7311,39 +7317,61 @@ function _hbTalentText(row) {
   return [note, effStr].filter(Boolean).join(' ') || '\u2014';
 }
 
-// Aggregate a homebrew ancestry's applied bonuses for a created character: its
-// flat bonuses plus the effect from whichever option was chosen for each
-// "choose one" trait. Targets the wizard can't apply yet (slots, weaponDie,
-// spellKnown) are ignored. Returns a map keyed by effect target.
-function _hbAncestryEffects(c) {
-  const out = { ac:0, hp:0, meleeAtk:0, meleeDmg:0, rangedAtk:0, rangedDmg:0, spellCheck:0,
-                str:0, dex:0, con:0, int:0, wis:0, cha:0 };
+// Effects applied to a character at creation, aggregated from homebrew ancestry
+// bonuses/choices and homebrew class talents. Targets share one vocabulary; a
+// blank accumulator is filled by the sources below and consumed in ccwApply.
+function _hbEmptyEff(){
+  return { ac:0,hp:0,meleeAtk:0,meleeDmg:0,rangedAtk:0,rangedDmg:0,spellCheck:0,
+           weaponDie:0,str:0,dex:0,con:0,int:0,wis:0,cha:0 };
+}
+function _hbAccumEffect(out, target, amount){
+  const a = Number(amount)||0;
+  switch(target){
+    case 'ac': out.ac+=a; break;
+    case 'hp': out.hp+=a; break;
+    case 'meleeAtk': out.meleeAtk+=a; break;
+    case 'meleeDmg': out.meleeDmg+=a; break;
+    case 'rangedAtk': out.rangedAtk+=a; break;
+    case 'rangedDmg': out.rangedDmg+=a; break;
+    case 'meleeAtkDmg': out.meleeAtk+=a; out.meleeDmg+=a; break;
+    case 'rangedAtkDmg': out.rangedAtk+=a; out.rangedDmg+=a; break;
+    case 'spellCheck': out.spellCheck+=a; break;
+    case 'weaponDie': out.weaponDie = Math.max(out.weaponDie||0, a); break;   // largest die wins
+    case 'str': case 'dex': case 'con': case 'int': case 'wis': case 'cha': out[target]+=a; break;
+    // spellKnown is not auto-applied (would need a spell to be chosen)
+  }
+}
+// Ancestry: flat bonuses always apply; a trait's single option applies
+// automatically, and a 2+-option trait applies whichever was chosen.
+function _hbFillAncestry(out, c){
   const hb = RC_ANCESTRY._hb && RC_ANCESTRY._hb[c.ancestry];
-  if(!hb) return out;
-  const add = (target, amount) => {
-    const a = Number(amount) || 0;
-    switch(target){
-      case 'ac': out.ac+=a; break;
-      case 'hp': out.hp+=a; break;
-      case 'meleeAtk': out.meleeAtk+=a; break;
-      case 'meleeDmg': out.meleeDmg+=a; break;
-      case 'rangedAtk': out.rangedAtk+=a; break;
-      case 'rangedDmg': out.rangedDmg+=a; break;
-      case 'meleeAtkDmg': out.meleeAtk+=a; out.meleeDmg+=a; break;
-      case 'rangedAtkDmg': out.rangedAtk+=a; out.rangedDmg+=a; break;
-      case 'spellCheck': out.spellCheck+=a; break;
-      case 'str': case 'dex': case 'con': case 'int': case 'wis': case 'cha': out[target]+=a; break;
-    }
-  };
-  (Array.isArray(hb.bonuses) ? hb.bonuses : []).forEach(b => add(b && b.target, b && b.amount));
+  if(!hb) return;
+  (Array.isArray(hb.bonuses) ? hb.bonuses : []).forEach(b => _hbAccumEffect(out, b && b.target, b && b.amount));
   (Array.isArray(hb.traits) ? hb.traits : []).forEach((t, ti) => {
-    if(t && Array.isArray(t.options) && t.options.length) {
-      const oi = c.hbChoice && c.hbChoice[ti];
-      const opt = (oi != null) ? t.options[oi] : null;
-      if(opt && opt.target) add(opt.target, opt.amount);
+    if(t && Array.isArray(t.options) && t.options.length){
+      const opt = t.options.length === 1
+        ? t.options[0]
+        : ((c.hbChoice && c.hbChoice[ti] != null) ? t.options[c.hbChoice[ti]] : null);
+      if(opt && opt.target) _hbAccumEffect(out, opt.target, opt.amount);
     }
   });
-  return out;
+}
+// Which talent-table row (0-4) a roll or manual pick landed on.
+function _hbTalentRowIndex(cls, roll, pick){
+  if(pick != null && pick !== ''){ const i = parseInt(pick); if(!isNaN(i)) return i; }
+  if(roll != null){ const rows = ccwBuildTalentRows(cls); const i = rows.findIndex(r => roll>=r.lo && roll<=r.hi); if(i>=0) return i; }
+  return -1;
+}
+// Talents: only homebrew classes carry structured effects (_talentEff). Apply
+// the chosen talent row, plus the Human bonus talent when relevant.
+function _hbFillTalent(out, c){
+  const ci = RC_CLASS_INFO[c.cls];
+  if(!ci || !ci._hb || !Array.isArray(ci._talentEff)) return;
+  const idxs = [ _hbTalentRowIndex(c.cls, c.talentRoll, c.talentPick) ];
+  if(c.ancestry === 'Human') idxs.push(_hbTalentRowIndex(c.cls, c.talent2Roll, c.talent2Pick));
+  idxs.forEach(i => {
+    if(i >= 0 && Array.isArray(ci._talentEff[i])) ci._talentEff[i].forEach(e => _hbAccumEffect(out, e && e.target, e && e.amount));
+  });
 }
 
 function injectHomebrewContent(rows) {
@@ -7374,7 +7402,11 @@ function injectHomebrewContent(rows) {
       const talentRows = Array.isArray(d.talent) ? d.talent : [];
       const talent = new Array(12).fill('');
       [0,1,6,9,11].forEach((slot, i) => { talent[slot] = _hbTalentText(talentRows[i]); });
-      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _hb: true };
+      // Structured effects for each of the 5 talent rows, aligned with
+      // ccwBuildTalentRows order, so the wizard can auto-apply a rolled talent.
+      const talentEff = [0,1,2,3,4].map(i =>
+        (talentRows[i] && Array.isArray(talentRows[i].effects)) ? talentRows[i].effects : []);
+      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _talentEff: talentEff, _hb: true };
       if(d.caster && (d.caster.stat || d.caster.list)) {
         RC_CLASS_INFO[nm]._caster = {
           stat: String(d.caster.stat || 'INT').toLowerCase(),
@@ -7394,7 +7426,7 @@ function injectHomebrewContent(rows) {
       if(offAnc.has(nm) || _hbInjected.ancestries.includes(nm)) continue;
       const ability = (Array.isArray(d.traits) ? d.traits : []).map(t => {
         const txt = String(t && t.text || '').trim();
-        if(Array.isArray(t && t.options) && t.options.length) return txt + ' (choose one)';
+        if(Array.isArray(t && t.options) && t.options.length >= 2) return txt + ' (choose one)';
         const u = Number(t && t.uses) || 0;
         return u > 0 ? txt + ' (' + u + '/day)' : txt;
       }).filter(Boolean).join(' \u00b7 ') || 'Homebrew ancestry.';

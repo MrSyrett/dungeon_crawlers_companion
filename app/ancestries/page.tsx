@@ -179,14 +179,19 @@ export default async function AncestriesPage({
                       <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">{body}</p>
                       {t.options.length ? (
                         <ul className="mt-1 flex flex-col gap-1">
+                          {t.options.length > 1 ? (
+                            <li className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
+                              Choose one:
+                            </li>
+                          ) : null}
                           {t.options.map((o, k) => {
                             const eff = optionEffect(o);
                             return (
                               <li key={k} className="flex gap-2 text-[12px] leading-relaxed text-[var(--muted)]">
                                 <span className="shrink-0 text-[var(--gold)]">▸</span>
                                 <span>
-                                  {o.label}
-                                  {eff ? <span className="text-[var(--gold)]"> ({eff})</span> : null}
+                                  {o.label || eff || "Bonus"}
+                                  {o.label && eff ? <span className="text-[var(--gold)]"> ({eff})</span> : null}
                                 </span>
                               </li>
                             );

@@ -367,7 +367,7 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
       .map((r) => {
         if (r.isChoice) {
           const options = r.options
-            .filter((o) => o.label.trim())
+            .filter((o) => o.label.trim() || o.target)
             .map((o) => ({ label: o.label, amount: Number(o.amount) || 0, target: o.target }));
           if (options.length) return { text: r.text, options };
         }
@@ -516,7 +516,7 @@ export default function HomebrewManager({
               if (j !== i) return t;
               const isChoice = !t.isChoice;
               const options = isChoice && t.options.length === 0
-                ? [{ label: "", amount: "", target: "" }, { label: "", amount: "", target: "" }]
+                ? [{ label: "", amount: "", target: "ac" }]
                 : t.options;
               return { ...t, isChoice, options };
             }),
@@ -673,8 +673,9 @@ export default function HomebrewManager({
       <div className="sm:col-span-2">
         <label className={label}>Traits</label>
         <p className="mb-2 text-[11px] text-[var(--muted)]">
-          Set uses/day for limited-use traits (Luck), or make one a “choose one” with options
-          (Farsight-style) — each option can grant an effect.
+          Set uses/day for limited-use traits (Luck). Toggle <b>Add bonus</b> to attach a mechanical
+          effect: one option applies automatically; add a second (or more) to make it a “choose one”
+          at character creation.
         </p>
         <div className="flex flex-col gap-2">
           {rows.map((r, i) => (
@@ -693,7 +694,7 @@ export default function HomebrewManager({
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
                   <input type="checkbox" checked={r.isChoice} onChange={() => toggleTraitChoice(i)} />
-                  Choose one
+                  Add bonus
                 </label>
                 {!r.isChoice ? (
                   <label className="flex items-center gap-2 text-[13px] text-[var(--muted)]">
@@ -743,7 +744,7 @@ export default function HomebrewManager({
                   ))}
                   {r.options.length < 6 ? (
                     <button className={`${btn} self-start`} onClick={() => addTraitOption(i)}>
-                      + Add option
+                      + Add another option (choice)
                     </button>
                   ) : null}
                 </div>
@@ -1221,7 +1222,6 @@ export default function HomebrewManager({
                         placeholder="Common, Sylvan"
                       />
                     </div>
-                    {bonusEditor("Bonuses (applied at creation)")}
                   </>
                 ) : type === "background" ? (
                   <>
