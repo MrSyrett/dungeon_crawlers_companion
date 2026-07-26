@@ -81,6 +81,10 @@ function talentRollLabel(i: number, split: string): string {
 }
 const emptyTalents = (): TalentRow[] => Array.from({ length: 5 }, () => ({ text: "", effects: [] }));
 
+// Title tiers as a character levels (matches the book's 5-tier title tables).
+const TITLE_TIERS = ["Lvl 1–2", "Lvl 3–4", "Lvl 5–6", "Lvl 7–8", "Lvl 9–10"];
+const emptyTitles = (): string[] => ["", "", "", "", ""];
+
 type BonusRow = { amount: string; target: string };
 type Form = {
   id: string | null; // null while creating
@@ -130,6 +134,10 @@ type Form = {
   castStat: string;
   castList: string;
   castKnown: string;
+  hasTitles: boolean;
+  titlesLawful: string[];
+  titlesNeutral: string[];
+  titlesChaotic: string[];
   // ancestry (also reuses `bonuses`)
   traits: FeatureRow[];
   languages: string;
@@ -182,6 +190,10 @@ function blankForm(type: HbType): Form {
     castStat: "INT",
     castList: "Wizard",
     castKnown: "2",
+    hasTitles: false,
+    titlesLawful: emptyTitles(),
+    titlesNeutral: emptyTitles(),
+    titlesChaotic: emptyTitles(),
     traits: [],
     languages: "",
   };
@@ -234,6 +246,17 @@ function formFromRecord(rec: HomebrewRecord): Form {
       base.castStat = s(caster.stat) || "INT";
       base.castList = s(caster.list) || "Wizard";
       base.castKnown = caster.knownTier1 != null ? s(caster.knownTier1) : "2";
+    }
+    const titles = (d.titles ?? null) as Record<string, unknown> | null;
+    if (titles) {
+      const pad5 = (v: unknown): string[] => {
+        const arr = Array.isArray(v) ? (v as unknown[]).map(s) : [];
+        return emptyTitles().map((_, i) => arr[i] ?? "");
+      };
+      base.hasTitles = true;
+      base.titlesLawful = pad5(titles.Lawful);
+      base.titlesNeutral = pad5(titles.Neutral);
+      base.titlesChaotic = pad5(titles.Chaotic);
     }
   } else if (rec.type === "ancestry") {
     base.languages = s(d.languages);
@@ -312,6 +335,14 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
     };
     if (f.isCaster) {
       data.caster = { stat: f.castStat, list: f.castList, knownTier1: Number(f.castKnown) || 2 };
+    }
+    if (f.hasTitles) {
+      const clean = (arr: string[]) => arr.map((x) => x.trim());
+      data.titles = {
+        Lawful: clean(f.titlesLawful),
+        Neutral: clean(f.titlesNeutral),
+        Chaotic: clean(f.titlesChaotic),
+      };
     }
     return data;
   }
@@ -446,6 +477,9 @@ export default function HomebrewManager({
       const list = f[field];
       return { ...f, [field]: list.includes(name) ? list.filter((x) => x !== name) : [...list, name] };
     });
+
+  const setTitle = (field: "titlesLawful" | "titlesNeutral" | "titlesChaotic", i: number, v: string) =>
+    setForm((f) => (f ? { ...f, [field]: f[field].map((x, j) => (j === i ? v : x)) } : f));
 
   function shareLabel(rec: HomebrewRecord): string {
     const ids = rec.campaignIds ?? [];
@@ -972,6 +1006,48 @@ export default function HomebrewManager({
                           <p className="text-[11px] text-[var(--muted)]">Spellcasting DC is 10 + the spell’s tier.</p>
                         </div>
                       </>
+                    ) : null}
+
+                    <div className="sm:col-span-2">
+                      <label className="flex items-center gap-2 text-sm text-[var(--text)]">
+                        <input type="checkbox" checked={form.hasTitles} onChange={(e) => set("hasTitles", e.target.checked)} />
+                        Titles by alignment
+                      </label>
+                    </div>
+                    {form.hasTitles ? (
+                      <div className="sm:col-span-2">
+                        <label className={label}>Titles</label>
+                        <p className="mb-2 text-[11px] text-[var(--muted)]">
+                          One title per tier as the character levels up. Leave a cell blank to skip that tier.
+                        </p>
+                        <div className="flex flex-col gap-2">
+                          {TITLE_TIERS.map((tierLabel, i) => (
+                            <div key={i} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+                              <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--gold)] sm:w-20">
+                                {tierLabel}
+                              </span>
+                              <input
+                                className={`${fieldBase} min-w-0 flex-1`}
+                                value={form.titlesLawful[i]}
+                                placeholder="Lawful"
+                                onChange={(e) => setTitle("titlesLawful", i, e.target.value)}
+                              />
+                              <input
+                                className={`${fieldBase} min-w-0 flex-1`}
+                                value={form.titlesNeutral[i]}
+                                placeholder="Neutral"
+                                onChange={(e) => setTitle("titlesNeutral", i, e.target.value)}
+                              />
+                              <input
+                                className={`${fieldBase} min-w-0 flex-1`}
+                                value={form.titlesChaotic[i]}
+                                placeholder="Chaotic"
+                                onChange={(e) => setTitle("titlesChaotic", i, e.target.value)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     ) : null}
                   </>
                 ) : type === "ancestry" ? (

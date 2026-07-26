@@ -32,6 +32,23 @@ function rollLabel(i: number, split: string): string {
   return "12";
 }
 
+// Book talent tables are a 12-entry array collapsed into 5 roll bands, matching
+// the sheet: default bands 2 / 3-6 / 7-9 / 10-11 / 12 with row text pulled from
+// these fixed slots. A class can override the bands (e.g. the Witch).
+const DEFAULT_BANDS: [number, number][] = [[2, 2], [3, 6], [7, 9], [10, 11], [12, 12]];
+const TALENT_TEXT_IDX = [0, 1, 6, 9, 11];
+const bandLabel = (lo: number, hi: number): string => (lo === hi ? String(lo) : `${lo}–${hi}`);
+
+type Titles = { Lawful: string[]; Neutral: string[]; Chaotic: string[] };
+function parseTitles(raw: unknown): Titles | null {
+  if (!raw || typeof raw !== "object") return null;
+  const t = raw as Record<string, unknown>;
+  const arr = (v: unknown) => (Array.isArray(v) ? (v as unknown[]).map(String) : []);
+  const titles = { Lawful: arr(t.Lawful), Neutral: arr(t.Neutral), Chaotic: arr(t.Chaotic) };
+  const any = [...titles.Lawful, ...titles.Neutral, ...titles.Chaotic].some((x) => x.trim());
+  return any ? titles : null;
+}
+
 const chipBase =
   "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 const chipOff =
@@ -97,7 +114,7 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
     talentRolls,
     features,
     caster: Boolean(d.caster),
-    titles: null,
+    titles: parseTitles(d.titles),
     homebrew: true,
   };
 }
@@ -117,7 +134,12 @@ export default async function ClassesPage({
   ]);
 
   const hbRows: Row[] = hbVisible.map((h) => homebrewRow(h.data as Record<string, unknown>, h.name));
-  const bookRows: Row[] = SD_CLASSES.map((c) => ({ ...c, homebrew: false, talentRolls: [] }));
+  const bookRows: Row[] = SD_CLASSES.map((c) => {
+    const bands = c.talentBands ?? DEFAULT_BANDS;
+    const talent = bands.map((_, i) => c.talent[TALENT_TEXT_IDX[i]] ?? "");
+    const talentRolls = bands.map(([lo, hi]) => bandLabel(lo, hi));
+    return { ...c, talent, talentRolls, homebrew: false };
+  });
   const ALL: Row[] = [...hbRows, ...bookRows].sort((a, b) => a.name.localeCompare(b.name, "en"));
 
   const raw = await searchParams;
@@ -298,7 +320,7 @@ export default async function ClassesPage({
                           {al}
                         </div>
                         <div className="text-[12px] text-[var(--muted)]">
-                          {c.titles![al].join(", ")}
+                          {c.titles![al].filter((t) => t.trim()).join(", ") || "—"}
                         </div>
                       </div>
                     ))}

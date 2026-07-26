@@ -446,6 +446,20 @@ export function normalizeClass(input: unknown): { name: string; data: Record<str
     };
   }
 
+  // Optional titles by alignment — up to 5 tiers each (kept positional so a
+  // blank tier stays a gap). Stored only when at least one title is filled in.
+  const titlesIn = (o.titles ?? null) as Record<string, unknown> | null;
+  if (titlesIn) {
+    const tierList = (v: unknown): string[] =>
+      Array.isArray(v) ? (v as unknown[]).map((x) => str(x).slice(0, 60)).slice(0, 5) : [];
+    const L = tierList(titlesIn.Lawful);
+    const N = tierList(titlesIn.Neutral);
+    const C = tierList(titlesIn.Chaotic);
+    if ([...L, ...N, ...C].some((x) => x)) {
+      data.titles = { Lawful: L, Neutral: N, Chaotic: C };
+    }
+  }
+
   return { name, data };
 }
 
