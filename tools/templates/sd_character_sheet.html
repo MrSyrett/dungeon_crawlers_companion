@@ -7382,9 +7382,11 @@ const _hbInjected = { classes: [], ancestries: [], backgrounds: [] };
 const HB_TALENT_LABEL = {
   meleeAtk:'Melee Attacks', meleeDmg:'Melee Damage', rangedAtk:'Ranged Attacks',
   rangedDmg:'Ranged Damage', meleeAtkDmg:'Melee Attack & Damage',
-  rangedAtkDmg:'Ranged Attacks and Damage', ac:'AC', hp:'HP',
+  rangedAtkDmg:'Ranged Attack & Damage',
+  mrAtk:'Melee & Ranged Attacks', mrDmg:'Melee & Ranged Damage', mrAtkDmg:'Melee & Ranged Attack & Damage',
+  ac:'AC', hp:'HP',
   str:'Strength', dex:'Dexterity', con:'Constitution', int:'Intelligence',
-  wis:'Wisdom', cha:'Charisma', spellKnown:'Learn Spell', spellCheck:'Spellcasting Checks',
+  wis:'Wisdom', cha:'Charisma', statChoice:'Stat (player choice)', spellKnown:'Learn Spell', spellCheck:'Spellcasting Checks',
   weaponDie:'Weapon Damage Die', advSpell:'Advantage'
 };
 
@@ -7471,6 +7473,9 @@ function _hbAccumEffect(out, e){
     case 'rangedDmg': out.rangedDmg+=a; break;
     case 'meleeAtkDmg': out.meleeAtk+=a; out.meleeDmg+=a; break;
     case 'rangedAtkDmg': out.rangedAtk+=a; out.rangedDmg+=a; break;
+    case 'mrAtk': out.meleeAtk+=a; out.rangedAtk+=a; break;
+    case 'mrDmg': out.meleeDmg+=a; out.rangedDmg+=a; break;
+    case 'mrAtkDmg': out.meleeAtk+=a; out.meleeDmg+=a; out.rangedAtk+=a; out.rangedDmg+=a; break;
     case 'spellCheck': out.spellCheck+=a; break;
     case 'weaponDie': {
       const key = e.weapon ? String(e.weapon) : '*';   // '*' = player choice / all weapons
@@ -7576,6 +7581,7 @@ function injectHomebrewContent(rows) {
       if(offClasses.has(nm) || _hbInjected.classes.includes(nm)) continue;
       const weapons = d.weaponsAll ? 'All weapons' : (Array.isArray(d.weapons) ? d.weapons.join(', ') : '');
       const armor = d.armorAll ? 'All armor and shields' : (Array.isArray(d.armor) ? d.armor.join(', ') : '');
+      const talentRows = Array.isArray(d.talent) ? d.talent : [];
       const features = (Array.isArray(d.features) ? d.features : []).map(f => {
         if(typeof f === 'string') return f;
         const t = String(f && f.text || '');
@@ -7593,7 +7599,6 @@ function injectHomebrewContent(rows) {
       const bands = d.talentSplit === 'hi'
         ? [[2,2],[3,7],[8,9],[10,11],[12,12]]
         : [[2,2],[3,6],[7,9],[10,11],[12,12]];
-      const talentRows = Array.isArray(d.talent) ? d.talent : [];
       const talent = new Array(12).fill('');
       [0,1,6,9,11].forEach((slot, i) => { talent[slot] = _hbTalentText(talentRows[i]); });
       // Structured effects for each of the 5 talent rows, aligned with

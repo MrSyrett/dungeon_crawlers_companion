@@ -57,10 +57,13 @@ const CAST_STATS = ["INT", "WIS", "CHA"];
 const TALENT_TARGETS: [string, string][] = [
   ["meleeAtk", "Melee Attacks"],
   ["meleeDmg", "Melee Damage"],
+  ["meleeAtkDmg", "Melee Attack & Damage"],
   ["rangedAtk", "Ranged Attacks"],
   ["rangedDmg", "Ranged Damage"],
-  ["meleeAtkDmg", "Melee Attack & Damage"],
-  ["rangedAtkDmg", "Ranged Attacks and Damage"],
+  ["rangedAtkDmg", "Ranged Attack & Damage"],
+  ["mrAtk", "Melee & Ranged Attacks"],
+  ["mrDmg", "Melee & Ranged Damage"],
+  ["mrAtkDmg", "Melee & Ranged Attack & Damage"],
   ["ac", "AC"],
   ["hp", "HP"],
   ["str", "Strength"],
@@ -69,12 +72,63 @@ const TALENT_TARGETS: [string, string][] = [
   ["int", "Intelligence"],
   ["wis", "Wisdom"],
   ["cha", "Charisma"],
+  ["statChoice", "Stat (player choice)"],
   ["spellKnown", "Learn Spell"],
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
   ["advSpell", "Advantage: Cast Spell"],
   ["perDay", "Per Day (uses)"],
 ];
+
+// The Effect Builder groups the granular targets above into simple categories.
+// Combat picks a scope (Melee / Ranged / both) then a kind (Attack / Damage /
+// both); Stat picks one ability or "Player Choice".
+const EFFECT_CATEGORIES: [string, string][] = [
+  ["melee", "Melee"],
+  ["ranged", "Ranged"],
+  ["mr", "Melee & Ranged"],
+  ["ac", "AC"],
+  ["hp", "HP"],
+  ["stat", "Stat"],
+  ["spellKnown", "Learn Spell"],
+  ["spellCheck", "Spellcasting Checks"],
+  ["weaponDie", "Weapon Damage Die"],
+  ["advSpell", "Advantage: Cast Spell"],
+  ["perDay", "Per Day (uses)"],
+];
+const COMBAT_KINDS: [string, string][] = [
+  ["atk", "Attack"],
+  ["dmg", "Damage"],
+  ["atkdmg", "Attack and Damage"],
+];
+const COMBAT_MAP: Record<string, Record<string, string>> = {
+  melee: { atk: "meleeAtk", dmg: "meleeDmg", atkdmg: "meleeAtkDmg" },
+  ranged: { atk: "rangedAtk", dmg: "rangedDmg", atkdmg: "rangedAtkDmg" },
+  mr: { atk: "mrAtk", dmg: "mrDmg", atkdmg: "mrAtkDmg" },
+};
+const STAT_OPTIONS: [string, string][] = [
+  ["str", "Strength"],
+  ["dex", "Dexterity"],
+  ["con", "Constitution"],
+  ["int", "Intelligence"],
+  ["wis", "Wisdom"],
+  ["cha", "Charisma"],
+  ["statChoice", "Player Choice"],
+];
+const STAT_KEYS = STAT_OPTIONS.map(([k]) => k);
+// Derive the category and combat-kind for a stored target.
+function targetCategory(t: string): string {
+  if (t === "meleeAtk" || t === "meleeDmg" || t === "meleeAtkDmg") return "melee";
+  if (t === "rangedAtk" || t === "rangedDmg" || t === "rangedAtkDmg") return "ranged";
+  if (t === "mrAtk" || t === "mrDmg" || t === "mrAtkDmg") return "mr";
+  if (STAT_KEYS.includes(t)) return "stat";
+  return t;
+}
+function targetKind(t: string): string {
+  if (t.endsWith("AtkDmg")) return "atkdmg";
+  if (t.endsWith("Dmg")) return "dmg";
+  return "atk";
+}
 
 // One roll-band of a class talent table. Rows 1/4/5 are fixed (2 / 10-11 / 12);
 // rows 2 & 3 shift with `talentSplit`. Each row carries up to 2 effects.
@@ -521,63 +575,99 @@ export default function HomebrewManager({
   function effectsEditor(effects: Effect[], setEffects: (next: Effect[]) => void, max = 6) {
     const patch = (k: number, p: Partial<Effect>) => setEffects(effects.map((e, m) => (m === k ? { ...e, ...p } : e)));
     const isSpell = (t: string) => t === "spellKnown" || t === "advSpell";
+    // Changing the top-level category recomputes the stored target.
+    const changeCategory = (k: number, cat: string, cur: string) => {
+      if (cat === "melee" || cat === "ranged" || cat === "mr") {
+        patch(k, { target: COMBAT_MAP[cat][targetKind(cur)] || COMBAT_MAP[cat].atk });
+      } else if (cat === "stat") {
+        patch(k, { target: STAT_KEYS.includes(cur) ? cur : "str" });
+      } else {
+        patch(k, { target: cat });
+      }
+    };
     return (
       <div className="flex flex-col gap-2">
-        {effects.map((e, k) => (
-          <div key={k} className="flex flex-wrap gap-2">
-            {isSpell(e.target) ? null : (
-              <input
-                className={`${fieldBase} w-16 shrink-0`}
-                type="number"
-                value={e.amount}
-                placeholder={e.target === "perDay" ? "/day" : e.target === "weaponDie" ? "die" : "+1"}
-                onChange={(ev) => patch(k, { amount: ev.target.value })}
-              />
-            )}
-            <select
-              className={`${fieldBase} min-w-0 flex-1`}
-              value={e.target}
-              onChange={(ev) => patch(k, { target: ev.target.value })}
-            >
-              {TALENT_TARGETS.map(([key, lbl]) => (
-                <option key={key} value={key}>{lbl}</option>
-              ))}
-            </select>
-            {e.target === "weaponDie" ? (
+        {effects.map((e, k) => {
+          const cat = targetCategory(e.target);
+          const isCombat = cat === "melee" || cat === "ranged" || cat === "mr";
+          return (
+            <div key={k} className="flex flex-wrap gap-2">
+              {isSpell(e.target) ? null : (
+                <input
+                  className={`${fieldBase} w-16 shrink-0`}
+                  type="number"
+                  value={e.amount}
+                  placeholder={e.target === "perDay" ? "/day" : e.target === "weaponDie" ? "die" : "+1"}
+                  onChange={(ev) => patch(k, { amount: ev.target.value })}
+                />
+              )}
               <select
                 className={`${fieldBase} min-w-0 flex-1`}
-                value={e.weapon}
-                onChange={(ev) => patch(k, { weapon: ev.target.value })}
+                value={cat}
+                onChange={(ev) => changeCategory(k, ev.target.value, e.target)}
               >
-                <option value="">Player Choice</option>
-                <option value="Strikes">Strikes (unarmed)</option>
-                {EFFECT_WEAPONS.map((w) => (
-                  <option key={w} value={w}>{w}</option>
+                {EFFECT_CATEGORIES.map(([key, lbl]) => (
+                  <option key={key} value={key}>{lbl}</option>
                 ))}
               </select>
-            ) : null}
-            {isSpell(e.target) ? (
-              <>
-                <input
+              {isCombat ? (
+                <select
                   className={`${fieldBase} min-w-0 flex-1`}
-                  list="hb-spell-list"
-                  value={e.spell}
-                  placeholder="Spell name, or Player Choice"
-                  onChange={(ev) => patch(k, { spell: ev.target.value })}
-                />
-                <datalist id="hb-spell-list">
-                  <option value="Player Choice" />
-                  {EFFECT_SPELLS.map((sp) => (
-                    <option key={sp} value={sp} />
+                  value={targetKind(e.target)}
+                  onChange={(ev) => patch(k, { target: COMBAT_MAP[cat][ev.target.value] })}
+                >
+                  {COMBAT_KINDS.map(([key, lbl]) => (
+                    <option key={key} value={key}>{lbl}</option>
                   ))}
-                </datalist>
-              </>
-            ) : null}
-            <button className={`${btn} shrink-0`} onClick={() => setEffects(effects.filter((_, m) => m !== k))}>
-              ✕
-            </button>
-          </div>
-        ))}
+                </select>
+              ) : null}
+              {cat === "stat" ? (
+                <select
+                  className={`${fieldBase} min-w-0 flex-1`}
+                  value={e.target}
+                  onChange={(ev) => patch(k, { target: ev.target.value })}
+                >
+                  {STAT_OPTIONS.map(([key, lbl]) => (
+                    <option key={key} value={key}>{lbl}</option>
+                  ))}
+                </select>
+              ) : null}
+              {e.target === "weaponDie" ? (
+                <select
+                  className={`${fieldBase} min-w-0 flex-1`}
+                  value={e.weapon}
+                  onChange={(ev) => patch(k, { weapon: ev.target.value })}
+                >
+                  <option value="">Player Choice</option>
+                  <option value="Strikes">Strikes (unarmed)</option>
+                  {EFFECT_WEAPONS.map((w) => (
+                    <option key={w} value={w}>{w}</option>
+                  ))}
+                </select>
+              ) : null}
+              {isSpell(e.target) ? (
+                <>
+                  <input
+                    className={`${fieldBase} min-w-0 flex-1`}
+                    list="hb-spell-list"
+                    value={e.spell}
+                    placeholder="Spell name, or Player Choice"
+                    onChange={(ev) => patch(k, { spell: ev.target.value })}
+                  />
+                  <datalist id="hb-spell-list">
+                    <option value="Player Choice" />
+                    {EFFECT_SPELLS.map((sp) => (
+                      <option key={sp} value={sp} />
+                    ))}
+                  </datalist>
+                </>
+              ) : null}
+              <button className={`${btn} shrink-0`} onClick={() => setEffects(effects.filter((_, m) => m !== k))}>
+                ✕
+              </button>
+            </div>
+          );
+        })}
         {effects.length < max ? (
           <button
             className={`${btn} self-start`}
