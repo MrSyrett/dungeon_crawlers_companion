@@ -101,9 +101,11 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
   const talentRolls: string[] = [];
   talentData.forEach((row, i) => {
     const effects = Array.isArray(row.effects) ? (row.effects as Record<string, unknown>[]) : [];
-    const effStr = effects.map(effectLabel).join(", ");
+    const sep = row.choose ? " or " : ", ";
+    const effStr = effects.map(effectLabel).join(sep);
     const text = String(row.text ?? "");
-    talent.push([text, effStr].filter(Boolean).join(" — ") || "—");
+    const prefix = row.choose && effects.length > 1 ? "choose one: " : "";
+    talent.push([text, prefix + effStr].filter(Boolean).join(" — ") || "—");
     talentRolls.push(rollLabel(i, split));
   });
 
@@ -116,7 +118,10 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
       const parts = effs.map(effectLabel);
       const legacyUses = Number(fo.uses) || 0; // pre-effects saves
       if (!effs.length && legacyUses > 0) parts.push(`${legacyUses}/day`);
-      return parts.length ? `${text} (${parts.join(", ")})` : text;
+      if (!parts.length) return text;
+      const sep = fo.choose ? " or " : ", ";
+      const prefix = fo.choose && parts.length > 1 ? "choose one: " : "";
+      return `${text} (${prefix}${parts.join(sep)})`;
     })
     .filter(Boolean);
 

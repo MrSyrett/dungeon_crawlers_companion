@@ -4470,7 +4470,7 @@ function startCharWizard() {
   _ccw = { step: 0, stats: null, rolled: null, statMode: 'order', assign: [0,1,2,3,4,5],
            ancestry: null, cls: null, background: null,
            alignment: null, deity: '', talent: null, talent2: null,
-           talentRoll: null, talent2Roll: null, tres: null, tres2: null,
+           talentRoll: null, talent2Roll: null, tres: null, tres2: null, hbTalentChoice: null, hbTalentChoice2: null,
            langCommon: [], langRare: [], langPriest: '', elfFarsight: null, beastNatural: null, koboldKnack: null, hbChoice: {},
            spells: [], spellSrc: null, spellSrcOf: {}, gold: null, buyKit: true, buyWeapons: [], buyArmor: [],
            name: '', hp: null };
@@ -4733,6 +4733,8 @@ function ccwNext() {
     if(_ccw.tres2) ccwResolve(_ccw.tres2);
     if(_ccw.tres && _ccw.tres.kind!=='none' && !_ccw.tres.final) { alert('Resolve your talent choice first.'); return; }
     if(_ccw.tres2 && _ccw.tres2.kind!=='none' && !_ccw.tres2.final) { alert('Resolve your bonus talent choice first.'); return; }
+    if(_hbTalentChooseInfo(_ccw.cls, _ccw.talentRoll, _ccw.talentPick) && _ccw.hbTalentChoice==null) { alert('Choose one effect for your talent.'); return; }
+    if(_ccw.ancestry==='Human' && _hbTalentChooseInfo(_ccw.cls, _ccw.talent2Roll, _ccw.talent2Pick) && _ccw.hbTalentChoice2==null) { alert('Choose one effect for your bonus talent.'); return; }
   }
   if(name==='Languages') {
     const lc = ccwLangChoices();
@@ -5020,6 +5022,25 @@ function ccwBuildTalentRows(cls) {
 function ccwTalentRows() {
   return ccwBuildTalentRows(_ccw.cls);
 }
+// Renders a "choose one effect" picker for a homebrew choose talent (which=1
+// main talent, 2 = Human bonus talent).
+function _hbTalentPickerHtml(which){
+  const roll = which===2 ? _ccw.talent2Roll : _ccw.talentRoll;
+  const pick = which===2 ? _ccw.talent2Pick : _ccw.talentPick;
+  const chosen = which===2 ? _ccw.hbTalentChoice2 : _ccw.hbTalentChoice;
+  const info = _hbTalentChooseInfo(_ccw.cls, roll, pick);
+  if(!info) return '';
+  let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
+  x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 Choose one effect</div>';
+  info.effs.forEach((e,oi)=>{
+    const sel=(chosen===oi)?' selected':'';
+    const lbl=String(_hbEffOne(e)||'Effect').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    x += '<button class="ccw-choice'+sel+'" style="width:49%;margin-right:1%;text-align:center;" onclick="ccwPickTalentEffect('+which+','+oi+')"><div class="ccw-choice-name" style="font-size:10px;">'+lbl+'</div></button>';
+  });
+  return x+'</div>';
+}
+function ccwPickTalentEffect(which, oi){ if(which===2) _ccw.hbTalentChoice2=oi; else _ccw.hbTalentChoice=oi; ccwRender(); }
+
 function ccwTalent() {
   if(_ccw.tres) ccwResolve(_ccw.tres);
   if(_ccw.tres2) ccwResolve(_ccw.tres2);
@@ -5045,6 +5066,7 @@ function ccwTalent() {
   if(_ccw.talent) {
     h += '<div class="ccw-result">'+(_ccw.talentRoll ? '🎲 Rolled '+_ccw.talentRoll : '✔ Chosen')+': '+_ccw.talent+'</div>';
     h += ccwTalentChoiceUI(_ccw.tres, '_ccw.tres', _ccw.spells, _ccw.cls);
+    h += _hbTalentPickerHtml(1);
     if(_ccw.ancestry==='Human') {
       h += '<div style="display:flex;gap:6px;margin:10px 0;">';
       h += '<button class="ccw-roll-btn" style="flex:1;margin:0;background:#241f10;border-color:#7a5a00;color:#c8a020;" onclick="ccwRollTalent2()">🎲 Roll Bonus Talent</button>';
@@ -5059,12 +5081,14 @@ function ccwTalent() {
     if(_ccw.talent2) {
       h += '<div class="ccw-result" style="border-left-color:#c8a020;">✨ Bonus (Human) '+(_ccw.talent2Roll ? 'rolled '+_ccw.talent2Roll : 'chosen')+': '+_ccw.talent2+'</div>';
       h += ccwTalentChoiceUI(_ccw.tres2, '_ccw.tres2', _ccw.spells, _ccw.cls);
+      h += _hbTalentPickerHtml(2);
     }
   }
   return h;
 }
 // Roll only the Human bonus (Ambitious) talent
 function ccwRollTalent2() {
+  _ccw.hbTalentChoice2 = null;
   const roll2d6 = () => Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6);
   const roll = roll2d6();
   const r = ccwTalentRows().find(x=>roll>=x.lo && roll<=x.hi);
@@ -5079,6 +5103,7 @@ function ccwRollTalent2() {
 // Pick a talent directly instead of rolling (GM's discretion / point-buy tables)
 function ccwPickTalent(idx) {
   if(idx === '') return;
+  _ccw.hbTalentChoice = null;
   const rows = ccwTalentRows();
   const r = rows[parseInt(idx)];
   if(!r) return;
@@ -5096,6 +5121,7 @@ function ccwPickTalent(idx) {
 }
 function ccwPickTalent2(idx) {
   if(idx === '') return;
+  _ccw.hbTalentChoice2 = null;
   const r = ccwTalentRows()[parseInt(idx)];
   if(!r) return;
   _ccw.talent2Pick = String(idx);
@@ -5107,6 +5133,7 @@ function ccwPickTalent2(idx) {
 }
 
 function ccwRollTalent() {
+  _ccw.hbTalentChoice = null;
   const roll2d6 = () => Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6);
   const pick = (roll) => {
     const r = ccwTalentRows().find(x=>roll>=x.lo && roll<=x.hi);
@@ -5646,7 +5673,7 @@ function startLevelUp() {
     newLevel: newLevel,
     hpRoll: null,
     gainsTalent: newLevel % 2 === 1, // talents at odd levels (3,5,7,9)
-    talent: null, talentRoll: null, tres: null,
+    talent: null, talentRoll: null, talentPick: null, hbTalentChoice: null, tres: null,
     newSpells: [], spellSrc: null, spellSrcOf: {}, spellsNeeded: 0, spellTiers: [],
   };
   // Spell gains for casters
@@ -5702,6 +5729,7 @@ function lvlNext() {
     if(!_lvl.talent) { alert('Roll or choose your talent first.'); return; }
     if(_lvl.tres) ccwResolve(_lvl.tres);
     if(_lvl.tres && _lvl.tres.kind!=='none' && !_lvl.tres.final) { alert('Resolve your talent choice first.'); return; }
+    if(_hbTalentChooseInfo(_lvl.cls, _lvl.talentRoll, _lvl.talentPick) && _lvl.hbTalentChoice==null) { alert('Choose one effect for your talent.'); return; }
   }
   if(name==='New Spells' && _lvl.newSpells.length < _lvl.spellsNeeded) { alert('Choose '+_lvl.spellsNeeded+' new spell'+(_lvl.spellsNeeded>1?'s':'')+'.'); return; }
   if(name==='Finish') { lvlApply(); return; }
@@ -5766,9 +5794,23 @@ function lvlTalent() {
     const known = [...document.querySelectorAll('#spells-list .spell-row .spell-input')].map(el=>el.value.trim()).filter(Boolean);
     const allKnown = [...new Set([...known, ..._lvl.newSpells])].filter(sp=>sp!=='Magic Missile');
     h += ccwTalentChoiceUI(_lvl.tres, '_lvl.tres', allKnown, _lvl.cls);
+    h += _hbLvlTalentPickerHtml();
   }
   return h;
 }
+function _hbLvlTalentPickerHtml(){
+  const info = _hbTalentChooseInfo(_lvl.cls, _lvl.talentRoll, _lvl.talentPick);
+  if(!info) return '';
+  let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
+  x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 Choose one effect</div>';
+  info.effs.forEach((e,oi)=>{
+    const sel=(_lvl.hbTalentChoice===oi)?' selected':'';
+    const lbl=String(_hbEffOne(e)||'Effect').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    x += '<button class="ccw-choice'+sel+'" style="width:49%;margin-right:1%;text-align:center;" onclick="lvlPickTalentEffect('+oi+')"><div class="ccw-choice-name" style="font-size:10px;">'+lbl+'</div></button>';
+  });
+  return x+'</div>';
+}
+function lvlPickTalentEffect(oi){ _lvl.hbTalentChoice = oi; lvlRender(); }
 // Pick a level-up talent directly instead of rolling
 function lvlPickTalent(idx) {
   if(idx === '') return;
@@ -5776,6 +5818,7 @@ function lvlPickTalent(idx) {
   if(!r) return;
   _lvl.talentPick = String(idx);
   _lvl.talentRoll = null;
+  _lvl.hbTalentChoice = null;
   _lvl.talent = r.text;
   _lvl.tres = ccwAnalyzeTalent(_lvl.talent, _lvl.cls);
   ccwResolve(_lvl.tres);
@@ -5787,6 +5830,7 @@ function lvlRollTalent() {
   const r = lvlTalentRows().find(x=>roll>=x.lo && roll<=x.hi);
   _lvl.talentRoll = roll;
   _lvl.talentPick = null;
+  _lvl.hbTalentChoice = null;
   _lvl.talent = r ? r.text : '';
   _lvl.tres = ccwAnalyzeTalent(_lvl.talent, _lvl.cls);
   ccwResolve(_lvl.tres);
@@ -6030,7 +6074,12 @@ function lvlApply() {
     const effs = ci._talentEff[idx];
     if(!Array.isArray(effs) || !effs.length) return;
     const agg = _hbEmptyEff();
-    effs.forEach(e => _hbAccumEffect(agg, e));
+    if(Array.isArray(ci._talentChoose) && ci._talentChoose[idx]){
+      const e = (_lvl.hbTalentChoice != null) ? effs[_lvl.hbTalentChoice] : null;
+      if(e) _hbAccumEffect(agg, e);
+    } else {
+      effs.forEach(e => _hbAccumEffect(agg, e));
+    }
 
     // Stats
     const smap = {str:'str-val',dex:'dex-val',con:'con-val',int:'int-val',wis:'wis-val',cha:'cha-val'};
@@ -7396,6 +7445,16 @@ function _hbWeaponDamage(dmg, wname, hbEff){
   });
 }
 
+// If the rolled/picked talent is a homebrew "choose one" row, return its
+// effects (so the wizard can present a picker); otherwise null.
+function _hbTalentChooseInfo(cls, roll, pick){
+  const ci = RC_CLASS_INFO[cls];
+  if(!ci || !ci._hb || !Array.isArray(ci._talentChoose)) return null;
+  const idx = _hbTalentRowIndex(cls, roll, pick);
+  if(idx < 0 || !ci._talentChoose[idx]) return null;
+  return { idx, effs: Array.isArray(ci._talentEff[idx]) ? ci._talentEff[idx] : [] };
+}
+
 function _hbEmptyEff(){
   return { ac:0,hp:0,meleeAtk:0,meleeDmg:0,rangedAtk:0,rangedDmg:0,spellCheck:0,
            weaponDice:{}, learnSpells:[], advSpells:[], str:0,dex:0,con:0,int:0,wis:0,cha:0 };
@@ -7464,11 +7523,15 @@ function _hbFillAncestry(out, c){
   });
 }
 // Class features: apply their passive effects at creation (perDay is a tracker,
-// not a combat stat, so it's ignored here).
+// not a combat stat). A "choose one" feature isn't auto-applied — there's no
+// creation picker for features, so the player applies it by hand.
 function _hbFillFeatures(out, c){
   const ci = RC_CLASS_INFO[c.cls];
   if(!ci || !ci._hb || !Array.isArray(ci._featureEff)) return;
-  ci._featureEff.forEach(effs => { if(Array.isArray(effs)) effs.forEach(e => _hbAccumEffect(out, e)); });
+  ci._featureEff.forEach((effs, i) => {
+    if(ci._featureChoose && ci._featureChoose[i]) return;   // player picks manually
+    if(Array.isArray(effs)) effs.forEach(e => _hbAccumEffect(out, e));
+  });
 }
 // Which talent-table row (0-4) a roll or manual pick landed on.
 function _hbTalentRowIndex(cls, roll, pick){
@@ -7477,15 +7540,23 @@ function _hbTalentRowIndex(cls, roll, pick){
   return -1;
 }
 // Talents: only homebrew classes carry structured effects (_talentEff). Apply
-// the chosen talent row, plus the Human bonus talent when relevant.
+// the chosen talent row (a "choose one" row applies just the picked effect),
+// plus the Human bonus talent when relevant.
 function _hbFillTalent(out, c){
   const ci = RC_CLASS_INFO[c.cls];
   if(!ci || !ci._hb || !Array.isArray(ci._talentEff)) return;
-  const idxs = [ _hbTalentRowIndex(c.cls, c.talentRoll, c.talentPick) ];
-  if(c.ancestry === 'Human') idxs.push(_hbTalentRowIndex(c.cls, c.talent2Roll, c.talent2Pick));
-  idxs.forEach(i => {
-    if(i >= 0 && Array.isArray(ci._talentEff[i])) ci._talentEff[i].forEach(e => _hbAccumEffect(out, e));
-  });
+  const applyRow = (idx, choiceIdx) => {
+    if(idx < 0 || !Array.isArray(ci._talentEff[idx])) return;
+    const effs = ci._talentEff[idx];
+    if(ci._talentChoose && ci._talentChoose[idx]){
+      const e = (choiceIdx != null) ? effs[choiceIdx] : null;
+      if(e) _hbAccumEffect(out, e);
+    } else {
+      effs.forEach(e => _hbAccumEffect(out, e));
+    }
+  };
+  applyRow(_hbTalentRowIndex(c.cls, c.talentRoll, c.talentPick), c.hbTalentChoice);
+  if(c.ancestry === 'Human') applyRow(_hbTalentRowIndex(c.cls, c.talent2Roll, c.talent2Pick), c.hbTalentChoice2);
 }
 
 function injectHomebrewContent(rows) {
@@ -7517,6 +7588,8 @@ function injectHomebrewContent(rows) {
       // passive bonuses can be auto-applied at creation.
       const featureEff = (Array.isArray(d.features) ? d.features : [])
         .map(f => (f && Array.isArray(f.effects)) ? f.effects : []);
+      const featureChoose = (Array.isArray(d.features) ? d.features : []).map(f => !!(f && f.choose));
+      const talentChoose = talentRows.map(r => !!(r && r.choose));
       const bands = d.talentSplit === 'hi'
         ? [[2,2],[3,7],[8,9],[10,11],[12,12]]
         : [[2,2],[3,6],[7,9],[10,11],[12,12]];
@@ -7527,7 +7600,7 @@ function injectHomebrewContent(rows) {
       // ccwBuildTalentRows order, so the wizard can auto-apply a rolled talent.
       const talentEff = [0,1,2,3,4].map(i =>
         (talentRows[i] && Array.isArray(talentRows[i].effects)) ? talentRows[i].effects : []);
-      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _talentEff: talentEff, _featureEff: featureEff, _hb: true };
+      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _talentEff: talentEff, _featureEff: featureEff, _talentChoose: talentChoose, _featureChoose: featureChoose, _hb: true };
       if(d.caster && (d.caster.stat || d.caster.list)) {
         RC_CLASS_INFO[nm]._caster = {
           stat: String(d.caster.stat || 'INT').toLowerCase(),

@@ -441,7 +441,9 @@ export function normalizeClass(input: unknown): { name: string; data: Record<str
           .filter((e): e is HbEffect => e != null)
           .slice(0, 4)
       : [];
-    return { text: str(row.text).slice(0, 300), effects };
+    const out: { text: string; effects: HbEffect[]; choose?: boolean } = { text: str(row.text).slice(0, 300), effects };
+    if (row.choose === true) out.choose = true;
+    return out;
   });
 
   // Features: descriptive text + effects (Per Day drives tick boxes).

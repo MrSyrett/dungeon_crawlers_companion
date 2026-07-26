@@ -83,12 +83,11 @@ const TALENT_TARGETS: [string, string][] = [
 // Spell). Shared by class talents, class features, and ancestry traits.
 type Effect = { amount: string; target: string; weapon: string; spell: string };
 type TalentEffectRow = Effect; // alias kept for existing talent code
-type TalentRow = { text: string; effects: Effect[] };
+type TalentRow = { text: string; effects: Effect[]; choose: boolean };
 
 // A trait/feature: descriptive text plus a list of effects (one Effect Builder).
-type FeatureRow = { text: string; effects: Effect[] };
-// Ancestry traits can optionally be a "choose one" — the player picks a single
-// effect at character creation rather than all of them applying.
+// `choose` (on every builder) makes the player pick one effect at creation.
+type FeatureRow = { text: string; effects: Effect[]; choose: boolean };
 type AncestryTraitRow = { text: string; effects: Effect[]; choose: boolean };
 // A trait or feature that can have limited uses/day (renders tick boxes).
 
@@ -100,7 +99,7 @@ function talentRollLabel(i: number, split: string): string {
   if (i === 3) return "10–11";
   return "12";
 }
-const emptyTalents = (): TalentRow[] => Array.from({ length: 5 }, () => ({ text: "", effects: [] }));
+const emptyTalents = (): TalentRow[] => Array.from({ length: 5 }, () => ({ text: "", effects: [], choose: false }));
 
 // Title tiers as a character levels (matches the book's 5-tier title tables).
 const TITLE_TIERS = ["Lvl 1–2", "Lvl 3–4", "Lvl 5–6", "Lvl 7–8", "Lvl 9–10"];
@@ -252,18 +251,18 @@ function formFromRecord(rec: HomebrewRecord): Form {
       const effects = Array.isArray(src.effects)
         ? (src.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon), spell: s(e.spell) }))
         : [];
-      return { text: s(src.text), effects };
+      return { text: s(src.text), effects, choose: !!src.choose };
     });
     base.features = Array.isArray(d.features)
       ? (d.features as unknown[]).map((f) => {
-          if (typeof f === "string") return { text: f, effects: [] };
+          if (typeof f === "string") return { text: f, effects: [], choose: false };
           const fo = f as Record<string, unknown>;
           let effects: Effect[] = Array.isArray(fo.effects)
             ? (fo.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon), spell: s(e.spell) }))
             : [];
           const u = Number(fo.uses) || 0; // legacy uses/day → Per Day effect
           if (!effects.length && u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "", spell: "" }];
-          return { text: s(fo.text), effects };
+          return { text: s(fo.text), effects, choose: !!fo.choose };
         })
       : [];
     const caster = (d.caster ?? null) as Record<string, unknown> | null;
@@ -364,10 +363,10 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
           if (e.target === "spellKnown" || e.target === "advSpell") base.spell = e.spell || "";
           return base;
         });
-    const talent = f.talents.map((row) => ({ text: row.text, effects: mapEffects(row.effects) }));
+    const talent = f.talents.map((row) => ({ text: row.text, choose: !!row.choose, effects: mapEffects(row.effects) }));
     const features = f.features
       .filter((r) => r.text.trim())
-      .map((r) => ({ text: r.text, effects: mapEffects(r.effects) }));
+      .map((r) => ({ text: r.text, choose: !!r.choose, effects: mapEffects(r.effects) }));
     const data: Record<string, unknown> = {
       name: f.name,
       hd: f.hd,
@@ -509,6 +508,16 @@ export default function HomebrewManager({
   // Shared Effect Builder — one amount + target row (plus a weapon picker when
   // the target is Weapon Damage Die). Used by class features, class talents,
   // and ancestry traits so authoring is identical everywhere.
+  // Shared "choose one" toggle — identical across features, talents, and traits.
+  function chooseToggle(checked: boolean, onToggle: () => void) {
+    return (
+      <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
+        <input type="checkbox" checked={checked} onChange={onToggle} />
+        Choose one effect at creation
+      </label>
+    );
+  }
+
   function effectsEditor(effects: Effect[], setEffects: (next: Effect[]) => void, max = 6) {
     const patch = (k: number, p: Partial<Effect>) => setEffects(effects.map((e, m) => (m === k ? { ...e, ...p } : e)));
     const isSpell = (t: string) => t === "spellKnown" || t === "advSpell";
@@ -684,13 +693,14 @@ export default function HomebrewManager({
                   ✕
                 </button>
               </div>
+              {chooseToggle(!!r.choose, () => setRows(rows.map((x, j) => (j === i ? { ...x, choose: !x.choose } : x))))}
               <div className="sm:pl-4">
                 {effectsEditor(r.effects, (next) => setRows(rows.map((x, j) => (j === i ? { ...x, effects: next } : x))))}
               </div>
             </div>
           ))}
         </div>
-        <button className={`${btn} mt-2`} onClick={() => setRows([...rows, { text: "", effects: [] }])}>
+        <button className={`${btn} mt-2`} onClick={() => setRows([...rows, { text: "", effects: [], choose: false }])}>
           + Add
         </button>
       </div>
@@ -725,14 +735,7 @@ export default function HomebrewManager({
                   ✕
                 </button>
               </div>
-              <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
-                <input
-                  type="checkbox"
-                  checked={r.choose}
-                  onChange={() => setRows(rows.map((x, j) => (j === i ? { ...x, choose: !x.choose } : x)))}
-                />
-                Choose one effect at creation
-              </label>
+              {chooseToggle(!!r.choose, () => setRows(rows.map((x, j) => (j === i ? { ...x, choose: !x.choose } : x))))}
               <div className="sm:pl-4">
                 {effectsEditor(r.effects, (next) => setRows(rows.map((x, j) => (j === i ? { ...x, effects: next } : x))))}
               </div>
@@ -1081,7 +1084,10 @@ export default function HomebrewManager({
                               />
                             </div>
                             <div className="mt-2 sm:pl-14">
-                              {effectsEditor(t.effects, (next) => patchTalent(i, { effects: next }), 4)}
+                              {chooseToggle(!!t.choose, () => patchTalent(i, { choose: !t.choose }))}
+                              <div className="mt-2">
+                                {effectsEditor(t.effects, (next) => patchTalent(i, { effects: next }), 4)}
+                              </div>
                             </div>
                           </div>
                         ))}

@@ -71,7 +71,7 @@ export default async function AncestriesPage({
     const traits: Trait[] = Array.isArray(d.traits)
       ? (d.traits as Record<string, unknown>[]).map(toTrait)
       : d.trait
-        ? [{ text: String(d.trait), effects: [] }]
+        ? [{ text: String(d.trait), effects: [], choose: false }]
         : [];
     return {
       name: String(d.name ?? h.name),
