@@ -4756,6 +4756,14 @@ function ccwNext() {
     if(!_ccw.cls) { alert('Choose a class.'); return; }
     if(_ccw.cls==='Fighter' && !_ccw.mastery) { alert('Fighters must choose a weapon type for Weapon Mastery.'); return; }
     if(_ccw.cls==='Fighter' && !_ccw.grit) { alert('Fighters must choose Grit: Strength or Dexterity.'); return; }
+    {
+      const casterList=(ccwCasterInfo()||{}).list;
+      const haveSpells = casterList ? ((RC_T1_BY_SOURCE[casterList]||[]).length>0) : true;
+      for(const ch of _hbExpandChoices(_ccw, _hbGatherFeatureChoices(_ccw))){
+        if(ch.kind==='advSpell' && !haveSpells) continue;
+        if(!(_ccw.hbChoices && _ccw.hbChoices[ch.key])) { alert('Make a feature choice: ' + _hbChoiceLabel(ch)); return; }
+      }
+    }
   }
   if(name==='Background' && !_ccw.background) { alert('Choose a background.'); return; }
   if(name==='Alignment & Deity' && !_ccw.alignment) { alert('Choose an alignment.'); return; }
@@ -4946,14 +4954,23 @@ function ccwPickAncestry(a) { _ccw.ancestry = a; ccwClearAncestryChoices(); ccwR
 function ccwRandAncestry() { _ccw.ancestry = _rc_weighted(RC_ANCESTRY.table); ccwClearAncestryChoices(); ccwRender(); }
 
 // ── Step: Class ──
+function ccwSetClass(c){
+  _ccw.cls = c;
+  _ccw.spells = []; _ccw.langCommon = []; _ccw.langRare = []; _ccw.langPriest = '';
+  _ccw.tres = null; _ccw.tres2 = null; _ccw.talent = null; _ccw.grit = null; _ccw.mastery = null;
+  _ccw.talentRoll = null; _ccw.talent2Roll = null; _ccw.talentPick = null;
+  _ccw.hbTalentChoice = null; _ccw.hbTalentChoice2 = null; _ccw.hbTalentSpells = [];
+  _ccwClearChoiceKeys('cf'); _ccwClearChoiceKeys('tm'); _ccwClearChoiceKeys('tb');
+  ccwRender();
+}
 function ccwClass() {
   let h = '<p class="ccw-hint">Choose your class, or roll randomly.</p>';
-  h += '<button class="ccw-roll-btn" onclick="_ccw.cls=_rc_roll(RC_CLASSES);_ccw.spells=[];_ccw.langCommon=[];_ccw.langRare=[];_ccw.langPriest=\'\';ccwRender()">🎲 Random</button>';
+  h += '<button class="ccw-roll-btn" onclick="ccwSetClass(_rc_roll(RC_CLASSES))">🎲 Random</button>';
   h += '<div class="ccw-choice-grid">';
   CCW_CLASS_ORDER.forEach(c=>{
     const ci = RC_CLASS_INFO[c];
     const sel = _ccw.cls===c ? ' selected' : '';
-    h += '<button class="ccw-choice'+sel+'" onclick="_ccw.cls=\''+c+'\';_ccw.spells=[];_ccw.langCommon=[];_ccw.langRare=[];_ccw.langPriest=\'\';_ccw.tres=null;_ccw.tres2=null;_ccw.talent=null;_ccw.grit=null;_ccw.mastery=null;ccwRender()"><div class="ccw-choice-name">'+c+'</div><div class="ccw-choice-desc">HP: '+ci.hd+' / lvl · '+ci.weapons.split(',').slice(0,3).join(',')+'…</div></button>';
+    h += '<button class="ccw-choice'+sel+'" onclick="ccwSetClass(\''+c+'\')"><div class="ccw-choice-name">'+c+'</div><div class="ccw-choice-desc">HP: '+ci.hd+' / lvl · '+ci.weapons.split(',').slice(0,3).join(',')+'…</div></button>';
   });
   h += '</div>';
   // Fighter: Weapon Mastery — choose a weapon type
@@ -5003,6 +5020,7 @@ function ccwClass() {
     h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;color:#666;font-style:italic;">Select a class to see its full details.</div>';
   }
   h += '</div>';
+  if(_ccw.cls) h += _hbFeatureChoicesHtml();
   return h;
 }
 
@@ -5110,6 +5128,32 @@ function _hbTalentSpellPickerHtml(which){
   return x + '</div>';
 }
 function ccwSetTalentSpell(which, val){ if(which===2) _ccw.hbTalentSpell2=val; else _ccw.hbTalentSpell=val; }
+
+// Feature choices (choose-one + player-choice effects) shown at the Class step,
+// under the class that grants them. Weapons use the full list and spells the
+// caster's accessible list, since gear/spells aren't chosen yet at this step.
+function _hbFeatureChoicesHtml(){
+  const list=_hbExpandChoices(_ccw, _hbGatherFeatureChoices(_ccw));
+  if(!list.length)return '';
+  if(!_ccw.hbChoices)_ccw.hbChoices={};
+  const casterList=(ccwCasterInfo()||{}).list;
+  const spellNames = casterList ? (RC_T1_BY_SOURCE[casterList]||[]) : (typeof allSpells==='function'?allSpells().map(s=>s.name):[]);
+  const spells = spellNames.filter((v,i,a)=>v&&v!=='Magic Missile'&&a.indexOf(v)===i).map(s=>[s,s]);
+  const weapons=_hbAllWeaponOpts();
+  const talents=_hbTalentRowOptions(_ccw.cls);
+  let x='<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
+  x+='<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#c8a020;margin-bottom:4px;">Feature Choices</div>';
+  list.forEach(ch=>{
+    x+='<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:#c8a020;margin:6px 0 4px;">'+_hbChoiceLabel(ch)+'</div>';
+    const cur=_ccw.hbChoices[ch.key]||'';
+    if(ch.kind==='stat') x+=_hbChoiceSelect(ch.key,cur,_HB_STAT_OPTS,'ccwSetChoice');
+    else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">No spells available.</p>';
+    else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
+    else if(ch.kind==='talent') x+=_hbChoiceSelect(ch.key,cur,talents,'ccwSetChoice');
+    else if(ch.kind==='oneOf') x+=_hbChoiceSelect(ch.key,cur,ch.effects.map((e,i)=>[String(i),_hbEffOne(e)]),'ccwSetChoice');
+  });
+  return x+'</div>';
+}
 
 // Stat / advantage / weapon-die / choose-a-talent pickers for a creation talent
 // slot (which=1 main, 2 bonus) — shown right under the talent that grants them.
@@ -5506,6 +5550,7 @@ function ccwApply() {
   // Resolve player-choice effects (stat / advantage / weapon die / talent), expanding
   // any "Choose a talent" pick into the chosen row's own choices.
   _hbExpandChoices(c, _hbGatherChoices(c)).forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
+  _hbExpandChoices(c, _hbGatherFeatureChoices(c)).forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
   _hbExpandChoices(c, _hbGatherTalentChoices(c.cls, c.talentRoll, c.talentPick, c.hbTalentChoice, 'tm')).forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
   if(c.ancestry==='Human') _hbExpandChoices(c, _hbGatherTalentChoices(c.cls, c.talent2Roll, c.talent2Pick, c.hbTalentChoice2, 'tb')).forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.value=v; };
@@ -7855,8 +7900,8 @@ function _hbChoiceFromEffect(key,e,cls){
   if(e.target==='playerTalent')return{key,kind:'talent',cls:cls};
   return null;
 }
-// Pending choices from ancestry traits + class features (NOT talents — those are
-// resolved in the Talent step so they sit with the talent that grants them).
+// Pending choices from ancestry traits (bonuses + non-choose trait effects).
+// Features are gathered separately and resolved at the Class step.
 function _hbGatherChoices(c){
   const list=[]; const push=(k,e)=>{const ch=_hbChoiceFromEffect(k,e,c.cls);if(ch)list.push(ch);};
   const hb=RC_ANCESTRY._hb&&RC_ANCESTRY._hb[c.ancestry];
@@ -7868,12 +7913,18 @@ function _hbGatherChoices(c){
       else effs.forEach((e,ei)=>push('at'+ti+'_'+ei,e));
     });
   }
+  return list;
+}
+// Pending choices from class features (choose-one 'oneOf', plus any player-choice
+// effects). Resolved at the Class step, with the feature that grants them.
+function _hbGatherFeatureChoices(c){
+  const list=[];
   const ci=RC_CLASS_INFO[c.cls];
   if(ci&&ci._hb&&Array.isArray(ci._featureEff)) ci._featureEff.forEach((effs,fi)=>{
     if(ci._featureChoose && ci._featureChoose[fi]){
       if(Array.isArray(effs) && effs.length) list.push({key:'cf'+fi, kind:'oneOf', effects:effs, label:(ci._featureText&&ci._featureText[fi])||'Feature'});
     } else {
-      (Array.isArray(effs)?effs:[]).forEach((e,ei)=>push('cf'+fi+'_'+ei,e));
+      (Array.isArray(effs)?effs:[]).forEach((e,ei)=>{const ch=_hbChoiceFromEffect('cf'+fi+'_'+ei,e,c.cls);if(ch)list.push(ch);});
     }
   });
   return list;
