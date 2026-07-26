@@ -4398,7 +4398,7 @@ function ccwGearSpent() {
 // The Choices step: resolve every "player choice" effect (stat / advantage /
 // weapon damage die) into a concrete pick before finishing.
 function ccwChoices(){
-  const list=_hbGatherChoices(_ccw);
+  const list=_hbExpandChoices(_ccw, _hbGatherChoices(_ccw));
   if(!_ccw.hbChoices)_ccw.hbChoices={};
   const weapons=[['Strikes','Strikes (unarmed)']].concat((_ccw.buyWeapons||[]).filter(w=>!/^strikes$/i.test(w)).map(w=>[w,w]));
   const spells=_hbKnownSpellsCreation(_ccw).filter(s=>s!=='Magic Missile').map(s=>[s,s]);
@@ -4417,7 +4417,7 @@ function ccwChoices(){
   });
   return h;
 }
-function ccwSetChoice(key,val){ if(!_ccw.hbChoices)_ccw.hbChoices={}; _ccw.hbChoices[key]=val; ccwRender(); }
+function ccwSetChoice(key,val){ if(!_ccw.hbChoices)_ccw.hbChoices={}; _ccw.hbChoices[key]=val; Object.keys(_ccw.hbChoices).forEach(k=>{ if(k.indexOf(key+'>')===0) delete _ccw.hbChoices[k]; }); ccwRender(); }
 function _ccwClearChoiceKeys(prefix){ if(_ccw && _ccw.hbChoices) Object.keys(_ccw.hbChoices).forEach(k=>{ if(k.indexOf(prefix)===0) delete _ccw.hbChoices[k]; }); }
 
 function ccwGear() {
@@ -4769,8 +4769,8 @@ function ccwNext() {
     if(_hbTalentChooseInfo(_ccw.cls, _ccw.talentRoll, _ccw.talentPick) && _ccw.hbTalentChoice==null) { alert('Choose one effect for your talent.'); return; }
     if(_ccw.ancestry==='Human' && _hbTalentChooseInfo(_ccw.cls, _ccw.talent2Roll, _ccw.talent2Pick) && _ccw.hbTalentChoice2==null) { alert('Choose one effect for your bonus talent.'); return; }
     {
-      const need = _hbGatherTalentChoices(_ccw.cls,_ccw.talentRoll,_ccw.talentPick,_ccw.hbTalentChoice,'tm')
-        .concat(_ccw.ancestry==='Human' ? _hbGatherTalentChoices(_ccw.cls,_ccw.talent2Roll,_ccw.talent2Pick,_ccw.hbTalentChoice2,'tb') : []);
+      const need = _hbExpandChoices(_ccw, _hbGatherTalentChoices(_ccw.cls,_ccw.talentRoll,_ccw.talentPick,_ccw.hbTalentChoice,'tm'))
+        .concat(_ccw.ancestry==='Human' ? _hbExpandChoices(_ccw, _hbGatherTalentChoices(_ccw.cls,_ccw.talent2Roll,_ccw.talent2Pick,_ccw.hbTalentChoice2,'tb')) : []);
       const haveSpells = _hbKnownSpellsCreation(_ccw).length > 0;
       for(const ch of need){
         if(ch.kind==='advSpell' && !haveSpells) continue;
@@ -4797,7 +4797,7 @@ function ccwNext() {
     if((_ccw.hbTalentSpells||[]).length < n) { alert('Choose ' + n + ' spell' + (n>1?'s':'') + ' to learn.'); return; }
   }
   if(name==='Choices') {
-    const list=_hbGatherChoices(_ccw);
+    const list=_hbExpandChoices(_ccw, _hbGatherChoices(_ccw));
     const haveSpells = _hbKnownSpellsCreation(_ccw).length > 0;
     for(const ch of list){
       if(ch.kind==='advSpell' && !haveSpells) continue;   // nothing to advantage; skipped
@@ -5117,7 +5117,7 @@ function _hbTalentChoicesHtml(which){
   const roll = which===2?_ccw.talent2Roll:_ccw.talentRoll;
   const pick = which===2?_ccw.talent2Pick:_ccw.talentPick;
   const cidx = which===2?_ccw.hbTalentChoice2:_ccw.hbTalentChoice;
-  const list=_hbGatherTalentChoices(_ccw.cls,roll,pick,cidx,which===2?'tb':'tm');
+  const list=_hbExpandChoices(_ccw, _hbGatherTalentChoices(_ccw.cls,roll,pick,cidx,which===2?'tb':'tm'));
   if(!list.length)return '';
   if(!_ccw.hbChoices)_ccw.hbChoices={};
   const spells=_hbKnownSpellsCreation(_ccw).filter(s=>s!=='Magic Missile').map(s=>[s,s]);
@@ -5503,10 +5503,11 @@ function ccwApply() {
   _hbFillAncestry(hbEff, c);
   _hbFillTalent(hbEff, c);
   _hbFillFeatures(hbEff, c);
-  // Resolve player-choice effects (stat / advantage / weapon die / talent).
-  _hbGatherChoices(c).forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
-  _hbGatherTalentChoices(c.cls, c.talentRoll, c.talentPick, c.hbTalentChoice, 'tm').forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
-  if(c.ancestry==='Human') _hbGatherTalentChoices(c.cls, c.talent2Roll, c.talent2Pick, c.hbTalentChoice2, 'tb').forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
+  // Resolve player-choice effects (stat / advantage / weapon die / talent), expanding
+  // any "Choose a talent" pick into the chosen row's own choices.
+  _hbExpandChoices(c, _hbGatherChoices(c)).forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
+  _hbExpandChoices(c, _hbGatherTalentChoices(c.cls, c.talentRoll, c.talentPick, c.hbTalentChoice, 'tm')).forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
+  if(c.ancestry==='Human') _hbExpandChoices(c, _hbGatherTalentChoices(c.cls, c.talent2Roll, c.talent2Pick, c.hbTalentChoice2, 'tb')).forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.value=v; };
 
   document.querySelectorAll('#spells-list .spell-row').forEach(row => row.remove());
@@ -5885,7 +5886,7 @@ function lvlNext() {
     if(_hbTalentLearnChoice(_lvl.cls, _lvl.talentRoll, _lvl.talentPick, _lvl.hbTalentChoice) && !(_lvl.hbTalentSpell||'').trim()) { alert('Choose the spell your talent lets you learn.'); return; }
     {
       const spellsKnown = [...document.querySelectorAll('#spells-list .spell-input')].some(el=>(el.value||'').trim());
-      for(const ch of _hbGatherTalentChoices(_lvl.cls,_lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice)){
+      for(const ch of _hbExpandChoices(_lvl, _hbGatherTalentChoices(_lvl.cls,_lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice,'tm'))){
         if(ch.kind==='advSpell' && !spellsKnown) continue;
         if(!(_lvl.hbChoices && _lvl.hbChoices[ch.key])) { alert('Make a choice: ' + _hbChoiceLabel(ch)); return; }
       }
@@ -5962,7 +5963,7 @@ function lvlTalent() {
 }
 // Stat / advantage / weapon-die pickers for the level-up talent's player choices.
 function _hbLvlChoicesHtml(){
-  const list=_hbGatherTalentChoices(_lvl.cls,_lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice,'tm');
+  const list=_hbExpandChoices(_lvl, _hbGatherTalentChoices(_lvl.cls,_lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice,'tm'));
   if(!list.length)return '';
   if(!_lvl.hbChoices)_lvl.hbChoices={};
   const weapons=[['Strikes','Strikes (unarmed)']].concat(
@@ -5983,7 +5984,7 @@ function _hbLvlChoicesHtml(){
   });
   return x+'</div>';
 }
-function lvlSetChoice(key,val){ if(!_lvl.hbChoices)_lvl.hbChoices={}; _lvl.hbChoices[key]=val; lvlRender(); }
+function lvlSetChoice(key,val){ if(!_lvl.hbChoices)_lvl.hbChoices={}; _lvl.hbChoices[key]=val; Object.keys(_lvl.hbChoices).forEach(k=>{ if(k.indexOf(key+'>')===0) delete _lvl.hbChoices[k]; }); lvlRender(); }
 function _hbLvlTalentSpellPickerHtml(){
   if(!_hbTalentLearnChoice(_lvl.cls, _lvl.talentRoll, _lvl.talentPick, _lvl.hbTalentChoice)) return '';
   const cur = (_lvl.hbTalentSpell||'').replace(/"/g,'&quot;');
@@ -6280,7 +6281,7 @@ function lvlApply() {
       effs.forEach(e => _hbAccumEffect(agg, e));
     }
     // Resolve the talent's player-choice effects (stat / advantage / weapon die).
-    _hbGatherTalentChoices(_lvl.cls,_lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice).forEach(ch => _hbApplyChoice(agg, ch, (_lvl.hbChoices||{})[ch.key]));
+    _hbExpandChoices(_lvl, _hbGatherTalentChoices(_lvl.cls,_lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice,'tm')).forEach(ch => _hbApplyChoice(agg, ch, (_lvl.hbChoices||{})[ch.key]));
 
     // Stats
     const smap = {str:'str-val',dex:'dex-val',con:'con-val',int:'int-val',wis:'wis-val',cha:'cha-val'};
@@ -7883,11 +7884,47 @@ function _hbGatherTalentChoices(cls,roll,pick,cidx,prefix){
   _hbTalentEffective(cls,roll,pick,cidx).forEach((e,ei)=>{const ch=_hbChoiceFromEffect(prefix+ei,e,cls);if(ch)list.push(ch);});
   return list;
 }
+// Expand any resolved "Choose a talent" choice into the picked row's own player
+// choices (nested one level — choose-a-talent rows are excluded from the picker,
+// so a picked talent can't itself be another choose-a-talent).
+function _hbExpandChoices(c, choices){
+  const out=[];
+  (choices||[]).forEach(ch=>{
+    out.push(ch);
+    if(ch.kind==='talent'){
+      const val=(c.hbChoices||{})[ch.key];
+      if(val!=null && val!==''){
+        const ci=RC_CLASS_INFO[ch.cls]; const idx=parseInt(val);
+        if(ci&&Array.isArray(ci._talentEff)&&Array.isArray(ci._talentEff[idx])){
+          ci._talentEff[idx].forEach((e,ei)=>{ const s=_hbChoiceFromEffect(ch.key+'>'+ei,e,ch.cls); if(s) out.push(s); });
+        }
+      }
+    }
+  });
+  return out;
+}
+// Spells that a picked "Choose a talent" row would let you learn (Player Choice).
+function _hbNestedLearnCount(c, roll, pick, cidx, prefix){
+  let n=0;
+  _hbTalentEffective(c.cls,roll,pick,cidx).forEach((e,ei)=>{
+    if(e && e.target==='playerTalent'){
+      const val=(c.hbChoices||{})[prefix+ei];
+      if(val!=null && val!==''){ const ci=RC_CLASS_INFO[c.cls]; const idx=parseInt(val);
+        if(ci&&Array.isArray(ci._talentEff)&&Array.isArray(ci._talentEff[idx])) ci._talentEff[idx].forEach(se=>{ if(se&&se.target==='spellKnown'&&_hbIsPlayerChoice(se.spell)) n++; });
+      }
+    }
+  });
+  return n;
+}
 // How many "Learn Spell → Player Choice" picks the chosen talents grant (main + bonus).
 function _hbTalentLearnCount(c){
   let n=0;
   _hbTalentEffective(c.cls,c.talentRoll,c.talentPick,c.hbTalentChoice).forEach(e=>{if(e&&e.target==='spellKnown'&&_hbIsPlayerChoice(e.spell))n++;});
-  if(c.ancestry==='Human') _hbTalentEffective(c.cls,c.talent2Roll,c.talent2Pick,c.hbTalentChoice2).forEach(e=>{if(e&&e.target==='spellKnown'&&_hbIsPlayerChoice(e.spell))n++;});
+  n += _hbNestedLearnCount(c, c.talentRoll, c.talentPick, c.hbTalentChoice, 'tm');
+  if(c.ancestry==='Human'){
+    _hbTalentEffective(c.cls,c.talent2Roll,c.talent2Pick,c.hbTalentChoice2).forEach(e=>{if(e&&e.target==='spellKnown'&&_hbIsPlayerChoice(e.spell))n++;});
+    n += _hbNestedLearnCount(c, c.talent2Roll, c.talent2Pick, c.hbTalentChoice2, 'tb');
+  }
   return n;
 }
 // Talent-table rows as picker options (for the "Player Choice" = choose a talent).
