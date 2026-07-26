@@ -8,6 +8,7 @@ import { logout } from "@/app/actions/auth";
 import { createDocument, deleteDocument } from "@/app/actions/documents";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import SystemTabs from "@/components/SystemTabs";
+import SystemToggle from "@/components/SystemToggle";
 
 // Toolbar links, in the order they appear beside the system toggle.
 // These work for either ruleset, so they show on both tabs. On the Shadowdark
@@ -180,7 +181,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <header className="mb-10 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
+      <header className="mb-10 flex items-start justify-between gap-4 border-b border-[var(--border)] pb-6">
         <div className="flex items-center gap-3">
           <Image src="/logo-white.png" alt="" width={72} height={72} priority className="h-16 w-16 shrink-0 sm:h-14 sm:w-14" />
           <div>
@@ -190,13 +191,16 @@ export default async function DashboardPage() {
           </p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm text-[var(--muted)]">
-          <span className="hidden sm:inline">{user.email}</span>
-          <form action={logout}>
-            <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] hover:border-[var(--muted)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]">
-              Sign out
-            </button>
-          </form>
+        <div className="flex flex-col items-end gap-3">
+          <div className="flex items-center gap-4 text-sm text-[var(--muted)]">
+            <span className="hidden sm:inline">{user.email}</span>
+            <form action={logout}>
+              <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] hover:border-[var(--muted)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]">
+                Sign out
+              </button>
+            </form>
+          </div>
+          <SystemToggle />
         </div>
       </header>
 
