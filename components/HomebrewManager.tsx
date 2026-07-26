@@ -988,25 +988,45 @@ export default function HomebrewManager({
           {form ? (
             <div className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-4">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <label className={label}>Name</label>
-                  <input
-                    className={field}
-                    value={form.name}
-                    onChange={(e) => set("name", e.target.value)}
-                    placeholder={
-                      type === "spell"
-                        ? "Spell name"
-                        : type === "class"
-                          ? "Class name"
+                {type === "class" ? (
+                  <div className="sm:col-span-2 flex gap-3">
+                    <div className="w-24 shrink-0">
+                      <label className={label}>Hit die</label>
+                      <select className={field} value={form.hd} onChange={(e) => set("hd", e.target.value)}>
+                        {HD_DICE.map((d) => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <label className={label}>Name</label>
+                      <input
+                        className={field}
+                        value={form.name}
+                        onChange={(e) => set("name", e.target.value)}
+                        placeholder="Class name"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="sm:col-span-2">
+                    <label className={label}>Name</label>
+                    <input
+                      className={field}
+                      value={form.name}
+                      onChange={(e) => set("name", e.target.value)}
+                      placeholder={
+                        type === "spell"
+                          ? "Spell name"
                           : type === "ancestry"
                             ? "Ancestry name"
                             : type === "background"
                               ? "Background name"
                               : "Item name"
-                    }
-                  />
-                </div>
+                      }
+                    />
+                  </div>
+                )}
 
                 {type === "monster" ? (
                   <>
@@ -1124,15 +1144,6 @@ export default function HomebrewManager({
                   </>
                 ) : type === "class" ? (
                   <>
-                    <div>
-                      <label className={label}>Hit die</label>
-                      <select className={field} value={form.hd} onChange={(e) => set("hd", e.target.value)}>
-                        {HD_DICE.map((d) => (
-                          <option key={d} value={d}>{d}</option>
-                        ))}
-                      </select>
-                    </div>
-
                     {allowEditor("weapons", "weaponsAll", "Weapons", weaponOptions)}
                     {allowEditor("armor", "armorAll", "Armor", armorOptions)}
 
@@ -1141,6 +1152,40 @@ export default function HomebrewManager({
                       "Features",
                       "Hard to Kill: You have advantage on rolls to stabilize.",
                     )}
+
+                    <div className="sm:col-span-2">
+                      <label className="flex items-center gap-2 text-sm text-[var(--text)]">
+                        <input type="checkbox" checked={form.isCaster} onChange={(e) => set("isCaster", e.target.checked)} />
+                        Spellcaster
+                      </label>
+                    </div>
+                    {form.isCaster ? (
+                      <>
+                        <div>
+                          <label className={label}>Casting stat</label>
+                          <select className={field} value={form.castStat} onChange={(e) => set("castStat", e.target.value)}>
+                            {CAST_STATS.map((st) => (
+                              <option key={st} value={st}>{st}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className={label}>Spell list</label>
+                          <select className={field} value={form.castList} onChange={(e) => set("castList", e.target.value)}>
+                            {(spellListOptions.length ? spellListOptions : [form.castList]).map((l) => (
+                              <option key={l} value={l}>{l}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className={label}>Spells known (tier 1)</label>
+                          <input className={field} type="number" value={form.castKnown} onChange={(e) => set("castKnown", e.target.value)} placeholder="2" />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <p className="text-[11px] text-[var(--muted)]">Spellcasting DC is 10 + the spell’s tier.</p>
+                        </div>
+                      </>
+                    ) : null}
 
                     <div className="sm:col-span-2">
                       <label className={label}>Talent table</label>
@@ -1186,40 +1231,6 @@ export default function HomebrewManager({
 
                     <div className="sm:col-span-2">
                       <label className="flex items-center gap-2 text-sm text-[var(--text)]">
-                        <input type="checkbox" checked={form.isCaster} onChange={(e) => set("isCaster", e.target.checked)} />
-                        Spellcaster
-                      </label>
-                    </div>
-                    {form.isCaster ? (
-                      <>
-                        <div>
-                          <label className={label}>Casting stat</label>
-                          <select className={field} value={form.castStat} onChange={(e) => set("castStat", e.target.value)}>
-                            {CAST_STATS.map((st) => (
-                              <option key={st} value={st}>{st}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className={label}>Spell list</label>
-                          <select className={field} value={form.castList} onChange={(e) => set("castList", e.target.value)}>
-                            {(spellListOptions.length ? spellListOptions : [form.castList]).map((l) => (
-                              <option key={l} value={l}>{l}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className={label}>Spells known (tier 1)</label>
-                          <input className={field} type="number" value={form.castKnown} onChange={(e) => set("castKnown", e.target.value)} placeholder="2" />
-                        </div>
-                        <div className="sm:col-span-2">
-                          <p className="text-[11px] text-[var(--muted)]">Spellcasting DC is 10 + the spell’s tier.</p>
-                        </div>
-                      </>
-                    ) : null}
-
-                    <div className="sm:col-span-2">
-                      <label className="flex items-center gap-2 text-sm text-[var(--text)]">
                         <input type="checkbox" checked={form.hasTitles} onChange={(e) => set("hasTitles", e.target.checked)} />
                         Titles by alignment
                       </label>
@@ -1262,7 +1273,6 @@ export default function HomebrewManager({
                   </>
                 ) : type === "ancestry" ? (
                   <>
-                    {ancestryTraitEditor()}
                     <div className="sm:col-span-2">
                       <label className={label}>Languages</label>
                       <input
@@ -1272,6 +1282,7 @@ export default function HomebrewManager({
                         placeholder="Common, Sylvan"
                       />
                     </div>
+                    {ancestryTraitEditor()}
                   </>
                 ) : type === "background" ? (
                   <>
