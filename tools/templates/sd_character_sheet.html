@@ -4402,6 +4402,7 @@ function ccwChoices(){
   if(!_ccw.hbChoices)_ccw.hbChoices={};
   const weapons=[['Strikes','Strikes (unarmed)']].concat((_ccw.buyWeapons||[]).filter(w=>!/^strikes$/i.test(w)).map(w=>[w,w]));
   const spells=_hbKnownSpellsCreation(_ccw).map(s=>[s,s]);
+  const talents=_hbTalentRowOptions(_ccw.cls);
   let h='<p class="ccw-hint">A few of your abilities let you choose. Pick each one.</p>';
   if(!list.length) return h+'<p class="ccw-hint">Nothing left to choose.</p>';
   list.forEach(ch=>{
@@ -4410,6 +4411,7 @@ function ccwChoices(){
     if(ch.kind==='stat') h+=_hbChoiceSelect(ch.key,cur,_HB_STAT_OPTS,'ccwSetChoice');
     else if(ch.kind==='advSpell') h+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p class="ccw-hint" style="color:#df6a6a;">You know no spells to gain advantage on — this choice is skipped.</p>';
     else if(ch.kind==='weaponDie') h+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
+    else if(ch.kind==='talent') h+=_hbChoiceSelect(ch.key,cur,talents,'ccwSetChoice');
     h+='</div>';
   });
   return h;
@@ -4765,6 +4767,15 @@ function ccwNext() {
     if(_ccw.ancestry==='Human' && _hbTalentChooseInfo(_ccw.cls, _ccw.talent2Roll, _ccw.talent2Pick) && _ccw.hbTalentChoice2==null) { alert('Choose one effect for your bonus talent.'); return; }
     if(_hbTalentLearnChoice(_ccw.cls, _ccw.talentRoll, _ccw.talentPick, _ccw.hbTalentChoice) && !(_ccw.hbTalentSpell||'').trim()) { alert('Choose the spell your talent lets you learn.'); return; }
     if(_ccw.ancestry==='Human' && _hbTalentLearnChoice(_ccw.cls, _ccw.talent2Roll, _ccw.talent2Pick, _ccw.hbTalentChoice2) && !(_ccw.hbTalentSpell2||'').trim()) { alert('Choose the spell your bonus talent lets you learn.'); return; }
+    {
+      const need = _hbGatherTalentChoices(_ccw.cls,_ccw.talentRoll,_ccw.talentPick,_ccw.hbTalentChoice,'tm')
+        .concat(_ccw.ancestry==='Human' ? _hbGatherTalentChoices(_ccw.cls,_ccw.talent2Roll,_ccw.talent2Pick,_ccw.hbTalentChoice2,'tb') : []);
+      const haveSpells = _hbKnownSpellsCreation(_ccw).length > 0;
+      for(const ch of need){
+        if(ch.kind==='advSpell' && !haveSpells) continue;
+        if(!(_ccw.hbChoices && _ccw.hbChoices[ch.key])) { alert('Make a choice: ' + _hbChoiceLabel(ch)); return; }
+      }
+    }
   }
   if(name==='Languages') {
     const lc = ccwLangChoices();
@@ -5095,6 +5106,30 @@ function _hbTalentSpellPickerHtml(which){
 }
 function ccwSetTalentSpell(which, val){ if(which===2) _ccw.hbTalentSpell2=val; else _ccw.hbTalentSpell=val; }
 
+// Stat / advantage / weapon-die / choose-a-talent pickers for a creation talent
+// slot (which=1 main, 2 bonus) — shown right under the talent that grants them.
+function _hbTalentChoicesHtml(which){
+  const roll = which===2?_ccw.talent2Roll:_ccw.talentRoll;
+  const pick = which===2?_ccw.talent2Pick:_ccw.talentPick;
+  const cidx = which===2?_ccw.hbTalentChoice2:_ccw.hbTalentChoice;
+  const list=_hbGatherTalentChoices(_ccw.cls,roll,pick,cidx,which===2?'tb':'tm');
+  if(!list.length)return '';
+  if(!_ccw.hbChoices)_ccw.hbChoices={};
+  const spells=_hbKnownSpellsCreation(_ccw).map(s=>[s,s]);
+  const weapons=_hbAllWeaponOpts();
+  const talents=_hbTalentRowOptions(_ccw.cls);
+  let x='<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:8px;">';
+  list.forEach(ch=>{
+    x+='<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin:2px 0 6px;">'+_hbChoiceLabel(ch)+'</div>';
+    const cur=_ccw.hbChoices[ch.key]||'';
+    if(ch.kind==='stat') x+=_hbChoiceSelect(ch.key,cur,_HB_STAT_OPTS,'ccwSetChoice');
+    else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">You know no spells yet.</p>';
+    else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
+    else if(ch.kind==='talent') x+=_hbChoiceSelect(ch.key,cur,talents,'ccwSetChoice');
+  });
+  return x+'</div>';
+}
+
 function ccwTalent() {
   if(_ccw.tres) ccwResolve(_ccw.tres);
   if(_ccw.tres2) ccwResolve(_ccw.tres2);
@@ -5122,6 +5157,7 @@ function ccwTalent() {
     h += ccwTalentChoiceUI(_ccw.tres, '_ccw.tres', _ccw.spells, _ccw.cls);
     h += _hbTalentPickerHtml(1);
     h += _hbTalentSpellPickerHtml(1);
+    h += _hbTalentChoicesHtml(1);
     if(_ccw.ancestry==='Human') {
       h += '<div style="display:flex;gap:6px;margin:10px 0;">';
       h += '<button class="ccw-roll-btn" style="flex:1;margin:0;background:#241f10;border-color:#7a5a00;color:#c8a020;" onclick="ccwRollTalent2()">🎲 Roll Bonus Talent</button>';
@@ -5138,6 +5174,7 @@ function ccwTalent() {
       h += ccwTalentChoiceUI(_ccw.tres2, '_ccw.tres2', _ccw.spells, _ccw.cls);
       h += _hbTalentPickerHtml(2);
       h += _hbTalentSpellPickerHtml(2);
+      h += _hbTalentChoicesHtml(2);
     }
   }
   return h;
@@ -5421,8 +5458,10 @@ function ccwApply() {
   _hbFillAncestry(hbEff, c);
   _hbFillTalent(hbEff, c);
   _hbFillFeatures(hbEff, c);
-  // Resolve player-choice effects (stat / advantage / weapon die) from the Choices step.
+  // Resolve player-choice effects (stat / advantage / weapon die / talent).
   _hbGatherChoices(c).forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
+  _hbGatherTalentChoices(c.cls, c.talentRoll, c.talentPick, c.hbTalentChoice, 'tm').forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
+  if(c.ancestry==='Human') _hbGatherTalentChoices(c.cls, c.talent2Roll, c.talent2Pick, c.hbTalentChoice2, 'tb').forEach(ch => _hbApplyChoice(hbEff, ch, (c.hbChoices||{})[ch.key]));
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.value=v; };
 
   document.querySelectorAll('#spells-list .spell-row').forEach(row => row.remove());
@@ -5878,7 +5917,7 @@ function lvlTalent() {
 }
 // Stat / advantage / weapon-die pickers for the level-up talent's player choices.
 function _hbLvlChoicesHtml(){
-  const list=_hbGatherTalentChoices(_lvl.cls,_lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice);
+  const list=_hbGatherTalentChoices(_lvl.cls,_lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice,'tm');
   if(!list.length)return '';
   if(!_lvl.hbChoices)_lvl.hbChoices={};
   const weapons=[['Strikes','Strikes (unarmed)']].concat(
@@ -5887,6 +5926,7 @@ function _hbLvlChoicesHtml(){
       .filter((v,i,a)=>v && !/^strikes$/i.test(v) && a.indexOf(v)===i).map(w=>[w,w]));
   const spells=[...document.querySelectorAll('#spells-list .spell-input')].map(el=>(el.value||'').trim())
     .filter((v,i,a)=>v && a.indexOf(v)===i).map(s=>[s,s]);
+  const talents=_hbTalentRowOptions(_lvl.cls);
   let x='<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
   list.forEach(ch=>{
     x+='<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin:2px 0 6px;">'+_hbChoiceLabel(ch)+'</div>';
@@ -5894,6 +5934,7 @@ function _hbLvlChoicesHtml(){
     if(ch.kind==='stat') x+=_hbChoiceSelect(ch.key,cur,_HB_STAT_OPTS,'lvlSetChoice');
     else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'lvlSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">No spells known.</p>';
     else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'lvlSetChoice');
+    else if(ch.kind==='talent') x+=_hbChoiceSelect(ch.key,cur,talents,'lvlSetChoice');
   });
   return x+'</div>';
 }
@@ -7758,16 +7799,18 @@ function _hbActiveEffects(c){
   return out;
 }
 // A single effect → a pending choice descriptor (or null if it needs no choice).
-function _hbChoiceFromEffect(key,e){
+function _hbChoiceFromEffect(key,e,cls){
   if(!e||!e.target)return null;
   if(e.target==='statChoice')return{key,kind:'stat',amount:Number(e.amount)||0};
   if(e.target==='advSpell'&&_hbIsPlayerChoice(e.spell))return{key,kind:'advSpell'};
   if(e.target==='weaponDie'&&!e.weapon)return{key,kind:'weaponDie',amount:Number(e.amount)||0};
+  if(e.target==='playerTalent')return{key,kind:'talent',cls:cls};
   return null;
 }
-// Every pending choice for a character (creation): ancestry + features + talents.
+// Pending choices from ancestry traits + class features (NOT talents — those are
+// resolved in the Talent step so they sit with the talent that grants them).
 function _hbGatherChoices(c){
-  const list=[]; const push=(k,e)=>{const ch=_hbChoiceFromEffect(k,e);if(ch)list.push(ch);};
+  const list=[]; const push=(k,e)=>{const ch=_hbChoiceFromEffect(k,e,c.cls);if(ch)list.push(ch);};
   const hb=RC_ANCESTRY._hb&&RC_ANCESTRY._hb[c.ancestry];
   if(hb){
     (Array.isArray(hb.bonuses)?hb.bonuses:[]).forEach((e,i)=>push('ab'+i,e));
@@ -7779,13 +7822,24 @@ function _hbGatherChoices(c){
   }
   const ci=RC_CLASS_INFO[c.cls];
   if(ci&&ci._hb&&Array.isArray(ci._featureEff)) ci._featureEff.forEach((effs,fi)=>{if(ci._featureChoose&&ci._featureChoose[fi])return;(Array.isArray(effs)?effs:[]).forEach((e,ei)=>push('cf'+fi+'_'+ei,e));});
-  _hbTalentEffective(c.cls,c.talentRoll,c.talentPick,c.hbTalentChoice).forEach((e,ei)=>push('tm'+ei,e));
-  if(c.ancestry==='Human') _hbTalentEffective(c.cls,c.talent2Roll,c.talent2Pick,c.hbTalentChoice2).forEach((e,ei)=>push('tb'+ei,e));
   return list;
 }
-// Pending choices from just one talent slot (level-up).
-function _hbGatherTalentChoices(cls,roll,pick,cidx){
-  const list=[]; _hbTalentEffective(cls,roll,pick,cidx).forEach((e,ei)=>{const ch=_hbChoiceFromEffect('tm'+ei,e);if(ch)list.push(ch);}); return list;
+// Pending choices from one talent slot (prefix keeps main 'tm' / bonus 'tb' distinct).
+function _hbGatherTalentChoices(cls,roll,pick,cidx,prefix){
+  prefix=prefix||'tm'; const list=[];
+  _hbTalentEffective(cls,roll,pick,cidx).forEach((e,ei)=>{const ch=_hbChoiceFromEffect(prefix+ei,e,cls);if(ch)list.push(ch);});
+  return list;
+}
+// Talent-table rows as picker options (for the "Player Choice" = choose a talent).
+function _hbTalentRowOptions(cls){
+  const rows=(typeof ccwBuildTalentRows==='function')?ccwBuildTalentRows(cls):[];
+  return rows.map((r,i)=>[String(i),(r.range?r.range+': ':'')+String(r.text||'\u2014').slice(0,50)]);
+}
+// All weapon names as picker options (creation talent step — bought weapons not known yet).
+function _hbAllWeaponOpts(){
+  const ws=(typeof allWeapons==='function'?allWeapons():[]).map(w=>w.name)
+    .filter((v,i,a)=>v&&!/^strikes$/i.test(v)&&a.indexOf(v)===i);
+  return [['Strikes','Strikes (unarmed)']].concat(ws.map(w=>[w,w]));
 }
 // Spells a character knows at creation (for the advantage picker).
 function _hbKnownSpellsCreation(c){
@@ -7799,6 +7853,7 @@ function _hbChoiceLabel(ch){
   if(ch.kind==='stat')return '+'+ch.amount+' to a stat of your choice';
   if(ch.kind==='advSpell')return 'Advantage on a spell of your choice';
   if(ch.kind==='weaponDie')return 'Weapon damage die (d'+ch.amount+') — choose a weapon';
+  if(ch.kind==='talent')return 'Choose a talent';
   return 'Choose';
 }
 // A styled <select> for a choice. opts = [[value,label],...]; setter = fn name.
@@ -7813,6 +7868,7 @@ function _hbApplyChoice(out, ch, val){
   if(ch.kind==='stat') _hbAccumEffect(out,{target:val,amount:ch.amount});
   else if(ch.kind==='advSpell') out.advSpells.push(val);
   else if(ch.kind==='weaponDie'){ if(!out.weaponDice[val])out.weaponDice[val]={count:0,size:0}; out.weaponDice[val].count++; out.weaponDice[val].size=Math.max(out.weaponDice[val].size,ch.amount); }
+  else if(ch.kind==='talent'){ const ci=RC_CLASS_INFO[ch.cls]; const idx=parseInt(val); if(ci&&Array.isArray(ci._talentEff)&&Array.isArray(ci._talentEff[idx])) ci._talentEff[idx].forEach(e=>_hbAccumEffect(out,e)); }
 }
 
 function injectHomebrewContent(rows) {

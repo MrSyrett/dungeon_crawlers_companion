@@ -8,7 +8,7 @@ import { SPELLS } from "@/lib/data/spells";
 // Weapons available to the shared Effect Builder (Weapon Damage Die). Derived
 // from the same gear data everywhere, so every effect builder lists the same
 // weapons regardless of which page renders it.
-const EFFECT_WEAPONS = GEAR.filter((g) => g.category === "weapon").map((g) => g.name);
+const EFFECT_WEAPONS = GEAR.filter((g) => g.category === "weapon" && !/^strikes$/i.test(g.name)).map((g) => g.name);
 // Spell names for the Learn Spell / Advantage effect pickers (deduped, sorted).
 const EFFECT_SPELLS = Array.from(new Set(SPELLS.map((s) => s.name))).sort((a, b) => a.localeCompare(b, "en"));
 
@@ -77,6 +77,7 @@ const TALENT_TARGETS: [string, string][] = [
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
   ["advSpell", "Advantage: Cast Spell"],
+  ["playerTalent", "Player Choice"],
   ["perDay", "Per Day (uses)"],
 ];
 
@@ -94,6 +95,7 @@ const EFFECT_CATEGORIES: [string, string][] = [
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
   ["advSpell", "Advantage: Cast Spell"],
+  ["playerTalent", "Player Choice"],
   ["perDay", "Per Day (uses)"],
 ];
 const COMBAT_KINDS: [string, string][] = [
@@ -575,6 +577,7 @@ export default function HomebrewManager({
   function effectsEditor(effects: Effect[], setEffects: (next: Effect[]) => void, max = 6) {
     const patch = (k: number, p: Partial<Effect>) => setEffects(effects.map((e, m) => (m === k ? { ...e, ...p } : e)));
     const isSpell = (t: string) => t === "spellKnown" || t === "advSpell";
+    const noAmount = (t: string) => isSpell(t) || t === "playerTalent";
     // Changing the top-level category recomputes the stored target.
     const changeCategory = (k: number, cat: string, cur: string) => {
       if (cat === "melee" || cat === "ranged" || cat === "mr") {
@@ -592,7 +595,7 @@ export default function HomebrewManager({
           const isCombat = cat === "melee" || cat === "ranged" || cat === "mr";
           return (
             <div key={k} className="flex flex-wrap gap-2">
-              {isSpell(e.target) ? null : (
+              {noAmount(e.target) ? null : (
                 <input
                   className={`${fieldBase} w-16 shrink-0`}
                   type="number"

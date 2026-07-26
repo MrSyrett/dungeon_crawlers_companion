@@ -378,6 +378,7 @@ export const TALENT_TARGETS: [string, string][] = [
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
   ["advSpell", "Advantage: Cast Spell"],
+  ["playerTalent", "Player Choice"],
   ["perDay", "Per Day (uses)"],
 ];
 const TALENT_TARGET_KEYS = TALENT_TARGETS.map(([k]) => k);
