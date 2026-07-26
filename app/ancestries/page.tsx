@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SD_ANCESTRIES } from "@/lib/data/ancestries";
-import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import { visibleHomebrew, ownHomebrew, userCampaigns, TALENT_TARGETS } from "@/lib/homebrew";
 import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +10,17 @@ export const dynamic = "force-dynamic";
 type RawQuery = { q?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-type Trait = { text: string; uses: number };
+type TraitOption = { label: string; amount: number; target: string };
+type Trait = { text: string; uses: number; options: TraitOption[] };
 type Row = { name: string; traits: Trait[]; languages: string; homebrew: boolean };
+
+const TALENT_LABEL = new Map(TALENT_TARGETS);
+function optionEffect(o: TraitOption): string {
+  if (!o.target) return "";
+  const label = TALENT_LABEL.get(o.target) ?? o.target;
+  if (o.target === "weaponDie") return `d${o.amount} weapon damage`;
+  return `${o.amount >= 0 ? "+" : ""}${o.amount} ${label}`;
+}
 
 // Split "Farsight: +1 to ranged…" into the trait name and its effect.
 function splitTrait(trait: string): { title: string; body: string } {
@@ -40,9 +49,16 @@ export default async function AncestriesPage({
       ? (d.traits as Record<string, unknown>[]).map((t) => ({
           text: String(t.text ?? ""),
           uses: Number(t.uses) || 0,
+          options: Array.isArray(t.options)
+            ? (t.options as Record<string, unknown>[]).map((o) => ({
+                label: String(o.label ?? ""),
+                amount: Number(o.amount) || 0,
+                target: String(o.target ?? ""),
+              }))
+            : [],
         }))
       : d.trait
-        ? [{ text: String(d.trait), uses: 0 }]
+        ? [{ text: String(d.trait), uses: 0, options: [] }]
         : [];
     return {
       name: String(d.name ?? h.name),
@@ -53,7 +69,7 @@ export default async function AncestriesPage({
   });
   const bookRows: Row[] = SD_ANCESTRIES.map((a) => ({
     name: a.name,
-    traits: a.trait ? [{ text: a.trait, uses: 0 }] : [],
+    traits: a.trait ? [{ text: a.trait, uses: 0, options: [] }] : [],
     languages: a.languages,
     homebrew: false,
   }));
@@ -161,6 +177,22 @@ export default async function AncestriesPage({
                         ) : null}
                       </div>
                       <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">{body}</p>
+                      {t.options.length ? (
+                        <ul className="mt-1 flex flex-col gap-1">
+                          {t.options.map((o, k) => {
+                            const eff = optionEffect(o);
+                            return (
+                              <li key={k} className="flex gap-2 text-[12px] leading-relaxed text-[var(--muted)]">
+                                <span className="shrink-0 text-[var(--gold)]">▸</span>
+                                <span>
+                                  {o.label}
+                                  {eff ? <span className="text-[var(--gold)]"> ({eff})</span> : null}
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : null}
                     </div>
                   );
                 })}

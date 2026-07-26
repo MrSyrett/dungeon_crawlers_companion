@@ -62,6 +62,7 @@ const TALENT_TARGETS: [string, string][] = [
   ["cha", "Charisma"],
   ["spellKnown", "Learned Spell"],
   ["spellCheck", "Spellcasting Checks"],
+  ["weaponDie", "Weapon Damage Die"],
 ];
 
 // One roll-band of a class talent table. Rows 1/4/5 are fixed (2 / 10-11 / 12);
@@ -70,6 +71,9 @@ type TalentEffectRow = { amount: string; target: string };
 type TalentRow = { text: string; effects: TalentEffectRow[] };
 // A trait or feature that can have limited uses/day (renders tick boxes).
 type FeatureRow = { text: string; uses: string };
+// An ancestry trait: a plain trait (uses) OR a "choose one" trait (options).
+type TraitOption = { label: string; amount: string; target: string };
+type AncestryTraitRow = { text: string; uses: string; isChoice: boolean; options: TraitOption[] };
 
 // Roll-band label for talent row `i` given the 2 & 3 split.
 function talentRollLabel(i: number, split: string): string {
@@ -139,7 +143,7 @@ type Form = {
   titlesNeutral: string[];
   titlesChaotic: string[];
   // ancestry (also reuses `bonuses`)
-  traits: FeatureRow[];
+  traits: AncestryTraitRow[];
   languages: string;
 };
 
@@ -261,9 +265,20 @@ function formFromRecord(rec: HomebrewRecord): Form {
   } else if (rec.type === "ancestry") {
     base.languages = s(d.languages);
     base.traits = Array.isArray(d.traits)
-      ? (d.traits as Record<string, unknown>[]).map((t) => ({ text: s(t.text), uses: s(t.uses) }))
+      ? (d.traits as Record<string, unknown>[]).map((t) => {
+          const opts = Array.isArray(t.options) ? (t.options as Record<string, unknown>[]) : [];
+          if (opts.length) {
+            return {
+              text: s(t.text),
+              uses: "",
+              isChoice: true,
+              options: opts.map((op) => ({ label: s(op.label), amount: s(op.amount), target: s(op.target) })),
+            };
+          }
+          return { text: s(t.text), uses: s(t.uses), isChoice: false, options: [] };
+        })
       : s(d.trait)
-        ? [{ text: s(d.trait), uses: "" }]
+        ? [{ text: s(d.trait), uses: "", isChoice: false, options: [] }]
         : [];
     base.bonuses = Array.isArray(d.bonuses)
       ? (d.bonuses as Record<string, unknown>[]).map((b) => ({ amount: s(b.amount), target: s(b.target) }))
@@ -349,7 +364,15 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
   if (type === "ancestry") {
     const traits = f.traits
       .filter((r) => r.text.trim())
-      .map((r) => ({ text: r.text, uses: Number(r.uses) || 0 }));
+      .map((r) => {
+        if (r.isChoice) {
+          const options = r.options
+            .filter((o) => o.label.trim())
+            .map((o) => ({ label: o.label, amount: Number(o.amount) || 0, target: o.target }));
+          if (options.length) return { text: r.text, options };
+        }
+        return { text: r.text, uses: Number(r.uses) || 0 };
+      });
     return { name: f.name, traits, languages: f.languages, bonuses: f.bonuses };
   }
   if (type === "background") {
@@ -481,6 +504,44 @@ export default function HomebrewManager({
   const setTitle = (field: "titlesLawful" | "titlesNeutral" | "titlesChaotic", i: number, v: string) =>
     setForm((f) => (f ? { ...f, [field]: f[field].map((x, j) => (j === i ? v : x)) } : f));
 
+  // Ancestry trait helpers (plain trait / "choose one" trait with options).
+  const setTrait = (i: number, patch: Partial<AncestryTraitRow>) =>
+    setForm((f) => (f ? { ...f, traits: f.traits.map((t, j) => (j === i ? { ...t, ...patch } : t)) } : f));
+  const toggleTraitChoice = (i: number) =>
+    setForm((f) =>
+      f
+        ? {
+            ...f,
+            traits: f.traits.map((t, j) => {
+              if (j !== i) return t;
+              const isChoice = !t.isChoice;
+              const options = isChoice && t.options.length === 0
+                ? [{ label: "", amount: "", target: "" }, { label: "", amount: "", target: "" }]
+                : t.options;
+              return { ...t, isChoice, options };
+            }),
+          }
+        : f,
+    );
+  const setTraitOption = (i: number, k: number, patch: Partial<TraitOption>) =>
+    setForm((f) =>
+      f
+        ? { ...f, traits: f.traits.map((t, j) => (j === i ? { ...t, options: t.options.map((o, m) => (m === k ? { ...o, ...patch } : o)) } : t)) }
+        : f,
+    );
+  const addTraitOption = (i: number) =>
+    setForm((f) =>
+      f
+        ? { ...f, traits: f.traits.map((t, j) => (j === i && t.options.length < 6 ? { ...t, options: [...t.options, { label: "", amount: "", target: "" }] } : t)) }
+        : f,
+    );
+  const removeTraitOption = (i: number, k: number) =>
+    setForm((f) =>
+      f
+        ? { ...f, traits: f.traits.map((t, j) => (j === i ? { ...t, options: t.options.filter((_, m) => m !== k) } : t)) }
+        : f,
+    );
+
   function shareLabel(rec: HomebrewRecord): string {
     const ids = rec.campaignIds ?? [];
     if (!ids.length) return "Personal";
@@ -557,9 +618,9 @@ export default function HomebrewManager({
     );
   }
 
-  // Trait/feature editor with an optional uses/day (renders tick boxes on the
-  // sheet). Shared by ancestry traits and class features.
-  function featureEditor(field: "traits" | "features", labelText: string, placeholder: string) {
+  // Feature editor with an optional uses/day (renders tick boxes on the sheet).
+  // Used by class features. Ancestry traits use ancestryTraitEditor (choices).
+  function featureEditor(field: "features", labelText: string, placeholder: string) {
     if (!form) return null;
     const rows = form[field];
     const setRows = (next: FeatureRow[]) => setForm((f) => (f ? { ...f, [field]: next } : f));
@@ -597,6 +658,104 @@ export default function HomebrewManager({
         </div>
         <button className={`${btn} mt-2`} onClick={() => setRows([...rows, { text: "", uses: "" }])}>
           + Add
+        </button>
+      </div>
+    );
+  }
+
+  // Ancestry traits editor: each trait is plain (optional uses/day) or a
+  // "choose one" with 2+ options, each granting an optional effect.
+  function ancestryTraitEditor() {
+    if (!form) return null;
+    const rows = form.traits;
+    const setRows = (next: AncestryTraitRow[]) => setForm((f) => (f ? { ...f, traits: next } : f));
+    return (
+      <div className="sm:col-span-2">
+        <label className={label}>Traits</label>
+        <p className="mb-2 text-[11px] text-[var(--muted)]">
+          Set uses/day for limited-use traits (Luck), or make one a “choose one” with options
+          (Farsight-style) — each option can grant an effect.
+        </p>
+        <div className="flex flex-col gap-2">
+          {rows.map((r, i) => (
+            <div key={i} className="flex flex-col gap-2 rounded border border-[var(--border)] p-2">
+              <div className="flex gap-2">
+                <input
+                  className={`${fieldBase} min-w-0 flex-1`}
+                  value={r.text}
+                  placeholder="Keen Senses: Advantage on checks to notice hidden creatures."
+                  onChange={(e) => setTrait(i, { text: e.target.value })}
+                />
+                <button className={`${btn} shrink-0`} onClick={() => setRows(rows.filter((_, j) => j !== i))}>
+                  ✕
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
+                  <input type="checkbox" checked={r.isChoice} onChange={() => toggleTraitChoice(i)} />
+                  Choose one
+                </label>
+                {!r.isChoice ? (
+                  <label className="flex items-center gap-2 text-[13px] text-[var(--muted)]">
+                    Uses/day
+                    <input
+                      className={`${fieldBase} w-20`}
+                      type="number"
+                      min="0"
+                      value={r.uses}
+                      placeholder="/day"
+                      onChange={(e) => setTrait(i, { uses: e.target.value })}
+                    />
+                  </label>
+                ) : null}
+              </div>
+              {r.isChoice ? (
+                <div className="flex flex-col gap-2 sm:pl-4">
+                  {r.options.map((o, k) => (
+                    <div key={k} className="flex flex-wrap gap-2">
+                      <input
+                        className={`${fieldBase} min-w-0 flex-1`}
+                        value={o.label}
+                        placeholder="Option label (e.g. +1 to ranged attacks)"
+                        onChange={(e) => setTraitOption(i, k, { label: e.target.value })}
+                      />
+                      <input
+                        className={`${fieldBase} w-16 shrink-0`}
+                        type="number"
+                        value={o.amount}
+                        placeholder="+1"
+                        onChange={(e) => setTraitOption(i, k, { amount: e.target.value })}
+                      />
+                      <select
+                        className={`${fieldBase} min-w-0 flex-1`}
+                        value={o.target}
+                        onChange={(e) => setTraitOption(i, k, { target: e.target.value })}
+                      >
+                        <option value="">— none (text only) —</option>
+                        {TALENT_TARGETS.map(([key, lbl]) => (
+                          <option key={key} value={key}>{lbl}</option>
+                        ))}
+                      </select>
+                      <button className={`${btn} shrink-0`} onClick={() => removeTraitOption(i, k)}>
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  {r.options.length < 6 ? (
+                    <button className={`${btn} self-start`} onClick={() => addTraitOption(i)}>
+                      + Add option
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+        <button
+          className={`${btn} mt-2`}
+          onClick={() => setRows([...rows, { text: "", uses: "", isChoice: false, options: [] }])}
+        >
+          + Add trait
         </button>
       </div>
     );
@@ -1052,11 +1211,7 @@ export default function HomebrewManager({
                   </>
                 ) : type === "ancestry" ? (
                   <>
-                    {featureEditor(
-                      "traits",
-                      "Traits",
-                      "Keen Senses: Advantage on checks to notice hidden creatures.",
-                    )}
+                    {ancestryTraitEditor()}
                     <div className="sm:col-span-2">
                       <label className={label}>Languages</label>
                       <input

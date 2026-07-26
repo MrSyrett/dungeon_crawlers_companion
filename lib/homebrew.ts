@@ -326,14 +326,35 @@ export function normalizeAncestry(input: unknown): { name: string; data: Record<
         )
     : [];
 
-  // Traits: [{text, uses}] so limited-use abilities (Halfling Luck) can render
-  // tick boxes on the sheet. Accept a legacy single `trait` string from earlier saves.
-  let traits: { text: string; uses: number }[] = [];
+  // Traits: [{text, uses}] for a plain trait, or [{text, options:[{label,
+  // amount, target}]}] for a "choose one" trait (Elf Farsight / Beastfolk style)
+  // so limited-use abilities render tick boxes and choices become a wizard pick.
+  // Accept a legacy single `trait` string from earlier saves.
+  type AncTrait =
+    | { text: string; uses: number }
+    | { text: string; options: { label: string; amount: number; target: string }[] };
+  let traits: AncTrait[] = [];
   if (Array.isArray(o.traits)) {
     traits = (o.traits as unknown[])
-      .map((t) => {
+      .map((t): AncTrait => {
         const to = (t ?? {}) as Record<string, unknown>;
-        return { text: str(to.text).slice(0, 500), uses: usesPerDay(to.uses) };
+        const text = str(to.text).slice(0, 500);
+        if (Array.isArray(to.options) && to.options.length) {
+          const options = (to.options as unknown[])
+            .map((op) => {
+              const oo = (op ?? {}) as Record<string, unknown>;
+              const target = str(oo.target);
+              return {
+                label: str(oo.label).slice(0, 120),
+                amount: num(oo.amount) ?? 0,
+                target: TALENT_TARGET_KEYS.includes(target) ? target : "",
+              };
+            })
+            .filter((op) => op.label)
+            .slice(0, 6);
+          if (options.length) return { text, options };
+        }
+        return { text, uses: usesPerDay(to.uses) };
       })
       .filter((t) => t.text)
       .slice(0, 20);
@@ -374,6 +395,7 @@ export const TALENT_TARGETS: [string, string][] = [
   ["cha", "Charisma"],
   ["spellKnown", "Learned Spell"],
   ["spellCheck", "Spellcasting Checks"],
+  ["weaponDie", "Weapon Damage Die"],
 ];
 const TALENT_TARGET_KEYS = TALENT_TARGETS.map(([k]) => k);
 

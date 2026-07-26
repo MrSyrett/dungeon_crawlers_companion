@@ -85,7 +85,9 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
     const effStr = effects
       .map((e) => {
         const amt = Number(e.amount) || 0;
-        return `${amt >= 0 ? "+" : ""}${amt} ${TALENT_LABEL.get(String(e.target)) ?? String(e.target)}`;
+        const label = TALENT_LABEL.get(String(e.target)) ?? String(e.target);
+        if (e.target === "weaponDie") return `d${amt} weapon damage`;
+        return `${amt >= 0 ? "+" : ""}${amt} ${label}`;
       })
       .join(", ");
     const text = String(row.text ?? "");
