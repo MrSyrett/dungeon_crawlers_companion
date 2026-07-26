@@ -30,7 +30,7 @@ export default async function BackgroundsPage({
     const d = h.data as Record<string, unknown>;
     return { name: String(d.name ?? h.name), desc: String(d.desc ?? ""), homebrew: true };
   });
-  const bookRows: Row[] = SD_BACKGROUNDS.map((b) => ({ name: b.name, desc: "", homebrew: false }));
+  const bookRows: Row[] = SD_BACKGROUNDS.map((b) => ({ name: b.name, desc: b.desc, homebrew: false }));
   const ALL: Row[] = [...hbRows, ...bookRows].sort((a, b) => a.name.localeCompare(b.name, "en"));
 
   const raw = await searchParams;
@@ -96,24 +96,24 @@ export default async function BackgroundsPage({
           </p>
         </div>
       ) : (
-        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+        <ul className="flex flex-col gap-3">
           {results.map((b, i) => (
             <li
               key={`${b.homebrew ? "hb" : "bk"}-${b.name}-${i}`}
-              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] px-3 py-3"
+              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
             >
-              <div className="flex items-center justify-center gap-1.5">
-                <span className="text-center text-sm font-semibold uppercase tracking-[0.08em] text-[var(--gold)]">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
                   {b.name}
-                </span>
+                </h2>
                 {b.homebrew ? (
-                  <span className="rounded border border-[var(--gold)] px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--gold)]">
-                    HB
+                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                    Homebrew
                   </span>
                 ) : null}
               </div>
               {b.desc ? (
-                <p className="mt-2 text-center text-[12px] leading-relaxed text-[var(--muted)]">{b.desc}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">{b.desc}</p>
               ) : null}
             </li>
           ))}

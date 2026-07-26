@@ -3957,6 +3957,8 @@ function defaultSpellSources(cls) {
   if(cls==='Wizard')      src.Wizard = true;
   else if(cls==='Priest') src.Priest = true;
   else if(cls==='Witch')  src.Witch  = true;
+  const ci = RC_CLASS_INFO[cls];
+  if(ci && ci._caster && Object.prototype.hasOwnProperty.call(src, ci._caster.list)) src[ci._caster.list] = true;
   return src;
 }
 
@@ -4494,9 +4496,21 @@ function ccwLangChoices() {
   return c;
 }
 
+// Caster config for the current class — official or homebrew. Null = non-caster.
+// Homebrew casters carry {stat, list, known} on RC_CLASS_INFO[cls]._caster.
+function ccwCasterInfo() {
+  const ci = RC_CLASS_INFO[_ccw.cls] || {};
+  if(ci._caster) return ci._caster;
+  if(_ccw.cls==='Wizard') return { stat:'int', list:'Wizard', known:3 };
+  if(_ccw.cls==='Priest') return { stat:'wis', list:'Priest', known:2 };
+  if(_ccw.cls==='Witch')  return { stat:'cha', list:'Witch',  known:3 };
+  return null;
+}
+function ccwSpellsNeeded() { const i = ccwCasterInfo(); return i ? i.known : 0; }
+
 function ccwStepList() {
   const steps = ['Method','Ability Scores','Ancestry','Class','Background','Alignment & Deity'];
-  if(_ccw.cls==='Priest' || _ccw.cls==='Wizard' || _ccw.cls==='Witch') steps.push('Spells');
+  if(ccwCasterInfo()) steps.push('Spells');
   steps.push('Talent');
   const lc = _ccw.ancestry && _ccw.cls ? ccwLangChoices() : {common:0,rare:0,priest:false};
   if(lc.common || lc.rare || lc.priest) steps.push('Languages');
@@ -4719,7 +4733,7 @@ function ccwNext() {
     if(lc.priest && !_ccw.langPriest) { alert('Choose your priest language.'); return; }
   }
   if(name==='Spells') {
-    const needed = _ccw.cls==='Priest' ? 2 : 3;
+    const needed = ccwSpellsNeeded();
     if(_ccw.spells.length < needed) { alert('Choose ' + needed + ' spells.'); return; }
   }
   if(name==='Gear & Weapons') {
@@ -5149,7 +5163,7 @@ function ancestryLine(c) {
 // ── Step: Spells ──
 function ccwSpells() {
   const cls = _ccw.cls;
-  const needed = cls==='Priest' ? 2 : 3;
+  const needed = ccwSpellsNeeded();
   if(!_ccw.spellSrc) _ccw.spellSrc = defaultSpellSources(cls);
 
   // Build the tier-1 pool from every ticked list. If a name appears on two
@@ -5157,7 +5171,7 @@ function ccwSpells() {
   // list wins so a selection is never ambiguous.
   const pool = [];
   const seen = new Set();
-  const own = { Wizard:'Wizard', Priest:'Priest', Witch:'Witch' }[cls] || '';
+  const own = (ccwCasterInfo() || {}).list || '';
   const order = [own, ...SPELL_SOURCES.filter(s=>s!==own)].filter(Boolean);
   order.forEach(srcName=>{
     if(!_ccw.spellSrc[srcName]) return;
@@ -5199,7 +5213,7 @@ function ccwToggleSpellSrc(name, on) {
   ccwRender();
 }
 function ccwToggleSpell(sp, src) {
-  const needed = _ccw.cls==='Priest' ? 2 : 3;
+  const needed = ccwSpellsNeeded();
   const i = _ccw.spells.indexOf(sp);
   if(i >= 0) { _ccw.spells.splice(i,1); delete _ccw.spellSrcOf[sp]; }
   else if(_ccw.spells.length < needed) {
@@ -5288,6 +5302,8 @@ function ccwApply() {
   set('f-level', '1');
   refreshXpNext();                // XP-to-next = 10 × level
   set('spell-stat', c.cls==='Wizard' ? 'int' : c.cls==='Priest' ? 'wis' : (c.cls==='Bard' || c.cls==='Witch') ? 'cha' : '');
+  const _hbCaster = RC_CLASS_INFO[c.cls] && RC_CLASS_INFO[c.cls]._caster;
+  if(_hbCaster && _hbCaster.stat) set('spell-stat', _hbCaster.stat);
 
   const statIds = {STR:'str-val',DEX:'dex-val',CON:'con-val',INT:'int-val',WIS:'wis-val',CHA:'cha-val'};
   Object.entries(statIds).forEach(([k,id])=>{ set(id, eff[k]); });
@@ -7268,6 +7284,13 @@ function injectHomebrewContent(rows) {
       const talent = new Array(12).fill('');
       [0,1,6,9,11].forEach((slot, i) => { talent[slot] = _hbTalentText(talentRows[i]); });
       RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _hb: true };
+      if(d.caster && (d.caster.stat || d.caster.list)) {
+        RC_CLASS_INFO[nm]._caster = {
+          stat: String(d.caster.stat || 'INT').toLowerCase(),
+          list: String(d.caster.list || 'Wizard'),
+          known: Number(d.caster.knownTier1) || 2,
+        };
+      }
       if(d.titles) {
         const arr = v => Array.isArray(v) ? v.map(String) : [];
         const L = arr(d.titles.Lawful), N = arr(d.titles.Neutral), C = arr(d.titles.Chaotic);

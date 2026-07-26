@@ -379,14 +379,15 @@ const ancestryCount = emit(
   ancestryRows,
 );
 
+const bgDesc = extractObject(sdSheet, "CCW_BG_DESC", "sd_character_sheet.html");
 const backgroundRows = extractArray(sdSheet, "RC_BACKGROUNDS", "sd_character_sheet.html").map(
-  (name) => ({ name: String(name) }),
+  (name) => ({ name: String(name), desc: String(bgDesc[String(name)] || "") }),
 );
 const backgroundCount = emit(
   "backgrounds.ts",
-  "Source: tools/templates/sd_character_sheet.html (RC_BACKGROUNDS)",
+  "Source: tools/templates/sd_character_sheet.html (RC_BACKGROUNDS + CCW_BG_DESC)",
   "SdBackground",
-  `{ name: string }`,
+  `{ name: string; desc: string }`,
   "SD_BACKGROUNDS",
   backgroundRows,
 );
