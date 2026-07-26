@@ -61,6 +61,7 @@ const TALENT_TARGETS: [string, string][] = [
   ["wis", "Wisdom"],
   ["cha", "Charisma"],
   ["spellKnown", "Learned Spell"],
+  ["spellCheck", "Spellcasting Checks"],
 ];
 
 // One roll-band of a class talent table. Rows 1/4/5 are fixed (2 / 10-11 / 12);
@@ -424,7 +425,7 @@ export default function HomebrewManager({
         ? {
             ...f,
             talents: f.talents.map((t, j) =>
-              j === i && t.effects.length < 2
+              j === i && t.effects.length < 4
                 ? { ...t, effects: [...t.effects, { amount: "", target: TALENT_TARGETS[0][0] }] }
                 : t,
             ),
@@ -884,7 +885,7 @@ export default function HomebrewManager({
                         </select>
                       </div>
                       <p className="mb-2 text-[11px] text-[var(--muted)]">
-                        Each roll band can carry up to two effects — the amount, then what it boosts.
+                        Each roll band can carry up to four effects — the amount, then what it boosts.
                         Add a note for anything that isn’t a simple bonus.
                       </p>
                       <div className="flex flex-col gap-2">
@@ -928,7 +929,7 @@ export default function HomebrewManager({
                                   </button>
                                 </div>
                               ))}
-                              {t.effects.length < 2 ? (
+                              {t.effects.length < 4 ? (
                                 <button className={`${btn} self-start`} onClick={() => addTalentEffect(i)}>
                                   + Add effect
                                 </button>

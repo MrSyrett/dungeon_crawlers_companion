@@ -373,6 +373,7 @@ export const TALENT_TARGETS: [string, string][] = [
   ["wis", "Wisdom"],
   ["cha", "Charisma"],
   ["spellKnown", "Learned Spell"],
+  ["spellCheck", "Spellcasting Checks"],
 ];
 const TALENT_TARGET_KEYS = TALENT_TARGETS.map(([k]) => k);
 
@@ -405,7 +406,7 @@ export function normalizeClass(input: unknown): { name: string; data: Record<str
       ? (row.effects as unknown[])
           .map(cleanEffect)
           .filter((e): e is { amount: number; target: string } => e != null)
-          .slice(0, 2)
+          .slice(0, 4)
       : [];
     return { text: str(row.text).slice(0, 300), effects };
   });
