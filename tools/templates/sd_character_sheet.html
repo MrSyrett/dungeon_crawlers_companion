@@ -4470,7 +4470,7 @@ function startCharWizard() {
   _ccw = { step: 0, stats: null, rolled: null, statMode: 'order', assign: [0,1,2,3,4,5],
            ancestry: null, cls: null, background: null,
            alignment: null, deity: '', talent: null, talent2: null,
-           talentRoll: null, talent2Roll: null, tres: null, tres2: null, hbTalentChoice: null, hbTalentChoice2: null,
+           talentRoll: null, talent2Roll: null, tres: null, tres2: null, hbTalentChoice: null, hbTalentChoice2: null, hbTalentSpell: '', hbTalentSpell2: '',
            langCommon: [], langRare: [], langPriest: '', elfFarsight: null, beastNatural: null, koboldKnack: null, hbChoice: {},
            spells: [], spellSrc: null, spellSrcOf: {}, gold: null, buyKit: true, buyWeapons: [], buyArmor: [],
            name: '', hp: null };
@@ -4506,11 +4506,11 @@ function ccwCasterInfo() {
   if(_ccw.cls==='Witch')  return { stat:'cha', list:'Witch',  known:3 };
   return null;
 }
-function ccwSpellsNeeded() { const i = ccwCasterInfo(); return i ? i.known : 0; }
+function ccwSpellsNeeded() { const i = ccwCasterInfo(); return (i ? i.known : 0) + _hbAncFeatLearnPicks(_ccw); }
 
 function ccwStepList() {
   const steps = ['Method','Ability Scores','Ancestry','Class','Background','Alignment & Deity'];
-  if(ccwCasterInfo()) steps.push('Spells');
+  if(ccwCasterInfo() || ccwSpellsNeeded() > 0) steps.push('Spells');
   steps.push('Talent');
   const lc = _ccw.ancestry && _ccw.cls ? ccwLangChoices() : {common:0,rare:0,priest:false};
   if(lc.common || lc.rare || lc.priest) steps.push('Languages');
@@ -4735,6 +4735,8 @@ function ccwNext() {
     if(_ccw.tres2 && _ccw.tres2.kind!=='none' && !_ccw.tres2.final) { alert('Resolve your bonus talent choice first.'); return; }
     if(_hbTalentChooseInfo(_ccw.cls, _ccw.talentRoll, _ccw.talentPick) && _ccw.hbTalentChoice==null) { alert('Choose one effect for your talent.'); return; }
     if(_ccw.ancestry==='Human' && _hbTalentChooseInfo(_ccw.cls, _ccw.talent2Roll, _ccw.talent2Pick) && _ccw.hbTalentChoice2==null) { alert('Choose one effect for your bonus talent.'); return; }
+    if(_hbTalentLearnChoice(_ccw.cls, _ccw.talentRoll, _ccw.talentPick, _ccw.hbTalentChoice) && !(_ccw.hbTalentSpell||'').trim()) { alert('Choose the spell your talent lets you learn.'); return; }
+    if(_ccw.ancestry==='Human' && _hbTalentLearnChoice(_ccw.cls, _ccw.talent2Roll, _ccw.talent2Pick, _ccw.hbTalentChoice2) && !(_ccw.hbTalentSpell2||'').trim()) { alert('Choose the spell your bonus talent lets you learn.'); return; }
   }
   if(name==='Languages') {
     const lc = ccwLangChoices();
@@ -5039,7 +5041,23 @@ function _hbTalentPickerHtml(which){
   });
   return x+'</div>';
 }
-function ccwPickTalentEffect(which, oi){ if(which===2) _ccw.hbTalentChoice2=oi; else _ccw.hbTalentChoice=oi; ccwRender(); }
+function ccwPickTalentEffect(which, oi){ if(which===2){ _ccw.hbTalentChoice2=oi; _ccw.hbTalentSpell2=''; } else { _ccw.hbTalentChoice=oi; _ccw.hbTalentSpell=''; } ccwRender(); }
+
+// "Learn a spell of your choice" picker for a talent slot (which=1 main, 2 bonus).
+function _hbTalentSpellPickerHtml(which){
+  const roll = which===2 ? _ccw.talent2Roll : _ccw.talentRoll;
+  const pick = which===2 ? _ccw.talent2Pick : _ccw.talentPick;
+  const choiceIdx = which===2 ? _ccw.hbTalentChoice2 : _ccw.hbTalentChoice;
+  if(!_hbTalentLearnChoice(_ccw.cls, roll, pick, choiceIdx)) return '';
+  const cur = (which===2 ? (_ccw.hbTalentSpell2||'') : (_ccw.hbTalentSpell||'')).replace(/"/g,'&quot;');
+  const dl = 'hb-tal-spell-' + which;
+  let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
+  x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2726 Learn a spell of your choice</div>';
+  x += '<input list="'+dl+'" value="'+cur+'" placeholder="Type a spell name" oninput="ccwSetTalentSpell('+which+',this.value)" style="width:100%;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;" />';
+  x += _hbSpellDatalist(dl);
+  return x + '</div>';
+}
+function ccwSetTalentSpell(which, val){ if(which===2) _ccw.hbTalentSpell2=val; else _ccw.hbTalentSpell=val; }
 
 function ccwTalent() {
   if(_ccw.tres) ccwResolve(_ccw.tres);
@@ -5067,6 +5085,7 @@ function ccwTalent() {
     h += '<div class="ccw-result">'+(_ccw.talentRoll ? '🎲 Rolled '+_ccw.talentRoll : '✔ Chosen')+': '+_ccw.talent+'</div>';
     h += ccwTalentChoiceUI(_ccw.tres, '_ccw.tres', _ccw.spells, _ccw.cls);
     h += _hbTalentPickerHtml(1);
+    h += _hbTalentSpellPickerHtml(1);
     if(_ccw.ancestry==='Human') {
       h += '<div style="display:flex;gap:6px;margin:10px 0;">';
       h += '<button class="ccw-roll-btn" style="flex:1;margin:0;background:#241f10;border-color:#7a5a00;color:#c8a020;" onclick="ccwRollTalent2()">🎲 Roll Bonus Talent</button>';
@@ -5082,6 +5101,7 @@ function ccwTalent() {
       h += '<div class="ccw-result" style="border-left-color:#c8a020;">✨ Bonus (Human) '+(_ccw.talent2Roll ? 'rolled '+_ccw.talent2Roll : 'chosen')+': '+_ccw.talent2+'</div>';
       h += ccwTalentChoiceUI(_ccw.tres2, '_ccw.tres2', _ccw.spells, _ccw.cls);
       h += _hbTalentPickerHtml(2);
+      h += _hbTalentSpellPickerHtml(2);
     }
   }
   return h;
@@ -5089,6 +5109,7 @@ function ccwTalent() {
 // Roll only the Human bonus (Ambitious) talent
 function ccwRollTalent2() {
   _ccw.hbTalentChoice2 = null;
+  _ccw.hbTalentSpell2 = "";
   const roll2d6 = () => Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6);
   const roll = roll2d6();
   const r = ccwTalentRows().find(x=>roll>=x.lo && roll<=x.hi);
@@ -5104,6 +5125,7 @@ function ccwRollTalent2() {
 function ccwPickTalent(idx) {
   if(idx === '') return;
   _ccw.hbTalentChoice = null;
+  _ccw.hbTalentSpell = "";
   const rows = ccwTalentRows();
   const r = rows[parseInt(idx)];
   if(!r) return;
@@ -5122,6 +5144,7 @@ function ccwPickTalent(idx) {
 function ccwPickTalent2(idx) {
   if(idx === '') return;
   _ccw.hbTalentChoice2 = null;
+  _ccw.hbTalentSpell2 = "";
   const r = ccwTalentRows()[parseInt(idx)];
   if(!r) return;
   _ccw.talent2Pick = String(idx);
@@ -5134,6 +5157,7 @@ function ccwPickTalent2(idx) {
 
 function ccwRollTalent() {
   _ccw.hbTalentChoice = null;
+  _ccw.hbTalentSpell = "";
   const roll2d6 = () => Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6);
   const pick = (roll) => {
     const r = ccwTalentRows().find(x=>roll>=x.lo && roll<=x.hi);
@@ -5416,6 +5440,8 @@ function ccwApply() {
   const allSpells = [...c.spells];
   // Homebrew "Learn Spell" talent/trait effects add named spells.
   (hbEff.learnSpells||[]).forEach(sp => { if(sp && !allSpells.includes(sp)) allSpells.push(sp); });
+  // Player-chosen spells from "Learn Spell → Player Choice" talents.
+  [c.hbTalentSpell, c.hbTalentSpell2].forEach(sp => { sp = (sp||'').trim(); if(sp && !allSpells.includes(sp)) allSpells.push(sp); });
   if(c.cls==='Priest') allSpells.push('Turn Undead');
   // Wizard talent "Learn one additional wizard spell" — add the chosen spell
   [c.tres, c.tres2].forEach(p=>{
@@ -5673,7 +5699,7 @@ function startLevelUp() {
     newLevel: newLevel,
     hpRoll: null,
     gainsTalent: newLevel % 2 === 1, // talents at odd levels (3,5,7,9)
-    talent: null, talentRoll: null, talentPick: null, hbTalentChoice: null, tres: null,
+    talent: null, talentRoll: null, talentPick: null, hbTalentChoice: null, hbTalentSpell: '', tres: null,
     newSpells: [], spellSrc: null, spellSrcOf: {}, spellsNeeded: 0, spellTiers: [],
   };
   // Spell gains for casters
@@ -5730,6 +5756,7 @@ function lvlNext() {
     if(_lvl.tres) ccwResolve(_lvl.tres);
     if(_lvl.tres && _lvl.tres.kind!=='none' && !_lvl.tres.final) { alert('Resolve your talent choice first.'); return; }
     if(_hbTalentChooseInfo(_lvl.cls, _lvl.talentRoll, _lvl.talentPick) && _lvl.hbTalentChoice==null) { alert('Choose one effect for your talent.'); return; }
+    if(_hbTalentLearnChoice(_lvl.cls, _lvl.talentRoll, _lvl.talentPick, _lvl.hbTalentChoice) && !(_lvl.hbTalentSpell||'').trim()) { alert('Choose the spell your talent lets you learn.'); return; }
   }
   if(name==='New Spells' && _lvl.newSpells.length < _lvl.spellsNeeded) { alert('Choose '+_lvl.spellsNeeded+' new spell'+(_lvl.spellsNeeded>1?'s':'')+'.'); return; }
   if(name==='Finish') { lvlApply(); return; }
@@ -5795,8 +5822,18 @@ function lvlTalent() {
     const allKnown = [...new Set([...known, ..._lvl.newSpells])].filter(sp=>sp!=='Magic Missile');
     h += ccwTalentChoiceUI(_lvl.tres, '_lvl.tres', allKnown, _lvl.cls);
     h += _hbLvlTalentPickerHtml();
+    h += _hbLvlTalentSpellPickerHtml();
   }
   return h;
+}
+function _hbLvlTalentSpellPickerHtml(){
+  if(!_hbTalentLearnChoice(_lvl.cls, _lvl.talentRoll, _lvl.talentPick, _lvl.hbTalentChoice)) return '';
+  const cur = (_lvl.hbTalentSpell||'').replace(/"/g,'&quot;');
+  let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
+  x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2726 Learn a spell of your choice</div>';
+  x += '<input list="hb-lvl-tal-spell" value="'+cur+'" placeholder="Type a spell name" oninput="_lvl.hbTalentSpell=this.value" style="width:100%;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;" />';
+  x += _hbSpellDatalist('hb-lvl-tal-spell');
+  return x + '</div>';
 }
 function _hbLvlTalentPickerHtml(){
   const info = _hbTalentChooseInfo(_lvl.cls, _lvl.talentRoll, _lvl.talentPick);
@@ -5810,7 +5847,7 @@ function _hbLvlTalentPickerHtml(){
   });
   return x+'</div>';
 }
-function lvlPickTalentEffect(oi){ _lvl.hbTalentChoice = oi; lvlRender(); }
+function lvlPickTalentEffect(oi){ _lvl.hbTalentChoice = oi; _lvl.hbTalentSpell = ""; lvlRender(); }
 // Pick a level-up talent directly instead of rolling
 function lvlPickTalent(idx) {
   if(idx === '') return;
@@ -5819,6 +5856,7 @@ function lvlPickTalent(idx) {
   _lvl.talentPick = String(idx);
   _lvl.talentRoll = null;
   _lvl.hbTalentChoice = null;
+  _lvl.hbTalentSpell = "";
   _lvl.talent = r.text;
   _lvl.tres = ccwAnalyzeTalent(_lvl.talent, _lvl.cls);
   ccwResolve(_lvl.tres);
@@ -5832,6 +5870,7 @@ function lvlRollTalent() {
   _lvl.talentPick = null;
   _lvl.hbTalentChoice = null;
   _lvl.talent = r ? r.text : '';
+  _lvl.hbTalentSpell = "";
   _lvl.tres = ccwAnalyzeTalent(_lvl.talent, _lvl.cls);
   ccwResolve(_lvl.tres);
   lvlRender();
@@ -6116,7 +6155,9 @@ function lvlApply() {
       });
     }
     // Learn spells
-    (agg.learnSpells||[]).forEach(name=>{ if(!name) return; const s=findSpell(name,_lvl.cls)||{name:name}; _spellCount++; const row=addSpellRow(_spellCount); if(!row) return; const q=(cl)=>row.querySelector(cl); const inp=q('.spell-input'); if(inp)inp.value=name; const lvl=q('.spell-level'); if(lvl&&s.tier)lvl.value=s.tier; const rng=q('.spell-range'); if(rng&&s.range)rng.value=s.range; const dur=q('.spell-duration'); if(dur&&s.duration)dur.value=s.duration; const dmg=q('.spell-damage'); if(dmg){const _d=spellRollDice(s); if(_d)dmg.value=_d;} const dsc=q('.spell-desc'); if(dsc&&s.desc){dsc.value=s.desc;autoResizeDesc(dsc);} });
+    const lvlLearn = (agg.learnSpells||[]).slice();
+    if((_lvl.hbTalentSpell||'').trim()) lvlLearn.push(_lvl.hbTalentSpell.trim());   // "Learn Spell → Player Choice"
+    lvlLearn.forEach(name=>{ if(!name) return; const s=findSpell(name,_lvl.cls)||{name:name}; _spellCount++; const row=addSpellRow(_spellCount); if(!row) return; const q=(cl)=>row.querySelector(cl); const inp=q('.spell-input'); if(inp)inp.value=name; const lvl=q('.spell-level'); if(lvl&&s.tier)lvl.value=s.tier; const rng=q('.spell-range'); if(rng&&s.range)rng.value=s.range; const dur=q('.spell-duration'); if(dur&&s.duration)dur.value=s.duration; const dmg=q('.spell-damage'); if(dmg){const _d=spellRollDice(s); if(_d)dmg.value=_d;} const dsc=q('.spell-desc'); if(dsc&&s.desc){dsc.value=s.desc;autoResizeDesc(dsc);} });
     // Advantage on spells
     (agg.advSpells||[]).forEach(name=>{ document.querySelectorAll('#spells-list .spell-row').forEach(row=>{ const nm=row.querySelector('.spell-input')?.value.trim(); if(nm&&nm.toLowerCase()===String(name).toLowerCase()){ const ab=row.querySelector('.spell-adv-btn'); if(ab)ab.classList.add('on'); } }); });
   })();
@@ -7484,8 +7525,8 @@ function _hbAccumEffect(out, e){
       out.weaponDice[key].size = Math.max(out.weaponDice[key].size, a);
       break;
     }
-    case 'spellKnown': if(e.spell) out.learnSpells.push(String(e.spell)); break;   // learn a specific spell
-    case 'advSpell': if(e.spell) out.advSpells.push(String(e.spell)); break;       // advantage casting it
+    case 'spellKnown': if(e.spell && e.spell!=='Player Choice') out.learnSpells.push(String(e.spell)); break;   // specific spell only; Player Choice is picked in the wizard
+    case 'advSpell': if(e.spell && e.spell!=='Player Choice') out.advSpells.push(String(e.spell)); break;       // specific spell only
     case 'perDay': break;   // uses/day tracker, not a combat stat
     case 'str': case 'dex': case 'con': case 'int': case 'wis': case 'cha': out[e.target]+=a; break;
   }
@@ -7562,6 +7603,56 @@ function _hbFillTalent(out, c){
   };
   applyRow(_hbTalentRowIndex(c.cls, c.talentRoll, c.talentPick), c.hbTalentChoice);
   if(c.ancestry === 'Human') applyRow(_hbTalentRowIndex(c.cls, c.talent2Roll, c.talent2Pick), c.hbTalentChoice2);
+}
+
+// A detail of "" or "Player Choice" means the player picks it in the wizard.
+function _hbIsPlayerChoice(v){ return !v || v === 'Player Choice'; }
+// The effects that actually apply for one talent slot (a choose-one row applies
+// only the picked effect).
+function _hbTalentEffective(cls, roll, pick, choiceIdx){
+  const ci = RC_CLASS_INFO[cls];
+  if(!ci || !ci._hb || !Array.isArray(ci._talentEff)) return [];
+  const idx = _hbTalentRowIndex(cls, roll, pick);
+  if(idx < 0 || !Array.isArray(ci._talentEff[idx])) return [];
+  const effs = ci._talentEff[idx];
+  if(ci._talentChoose && ci._talentChoose[idx]){
+    const e = (choiceIdx != null) ? effs[choiceIdx] : null;
+    return e ? [e] : [];
+  }
+  return effs;
+}
+// True if that talent slot grants a "Learn Spell → Player Choice" (needs a picker).
+function _hbTalentLearnChoice(cls, roll, pick, choiceIdx){
+  return _hbTalentEffective(cls, roll, pick, choiceIdx)
+    .some(e => e && e.target === 'spellKnown' && _hbIsPlayerChoice(e.spell));
+}
+// How many "Learn Spell → Player Choice" picks come from ancestry traits + class
+// features (resolved before the Spells step, so they add to the spell count).
+function _hbAncFeatLearnPicks(c){
+  let n = 0;
+  const hb = RC_ANCESTRY._hb && RC_ANCESTRY._hb[c.ancestry];
+  if(hb){
+    (Array.isArray(hb.bonuses) ? hb.bonuses : []).forEach(e => { if(e && e.target==='spellKnown' && _hbIsPlayerChoice(e.spell)) n++; });
+    (Array.isArray(hb.traits) ? hb.traits : []).forEach((t, ti) => {
+      const effs = _hbTraitEffects(t);
+      if(_hbTraitIsChoice(t)){ const oi = c.hbChoice && c.hbChoice[ti]; const e = (oi!=null)?effs[oi]:null; if(e && e.target==='spellKnown' && _hbIsPlayerChoice(e.spell)) n++; }
+      else effs.forEach(e => { if(e && e.target==='spellKnown' && _hbIsPlayerChoice(e.spell)) n++; });
+    });
+  }
+  const ci = RC_CLASS_INFO[c.cls];
+  if(ci && ci._hb && Array.isArray(ci._featureEff)){
+    ci._featureEff.forEach((effs, i) => {
+      if(ci._featureChoose && ci._featureChoose[i]) return;
+      (Array.isArray(effs) ? effs : []).forEach(e => { if(e && e.target==='spellKnown' && _hbIsPlayerChoice(e.spell)) n++; });
+    });
+  }
+  return n;
+}
+// A datalist of every spell name, for the "learn a spell of your choice" pickers.
+function _hbSpellDatalist(id){
+  const names = (typeof allSpells==='function' ? allSpells() : []).map(s => s.name)
+    .filter((v,i,a)=>v && a.indexOf(v)===i).sort();
+  return '<datalist id="'+id+'">' + names.map(n=>'<option value="'+String(n).replace(/"/g,'&quot;')+'"></option>').join('') + '</datalist>';
 }
 
 function injectHomebrewContent(rows) {
