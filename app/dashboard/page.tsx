@@ -183,9 +183,9 @@ export default async function DashboardPage() {
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <header className="mb-10 flex items-start justify-between gap-4 border-b border-[var(--border)] pb-6">
         <div className="flex items-center gap-3">
-          <Image src="/logo-white.png" alt="" width={72} height={72} priority className="h-16 w-16 shrink-0 sm:h-14 sm:w-14" />
+          <Image src="/logo-white.png" alt="" width={72} height={72} priority className="h-10 w-10 shrink-0 sm:h-14 sm:w-14" />
           <div>
-          <h1 className="font-display text-3xl font-black tracking-wide">Dungeon Crawler&rsquo;s Companion</h1>
+          <h1 className="font-display text-xl font-black tracking-wide sm:text-3xl">Dungeon Crawler&rsquo;s Companion</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
             TTRPG Digital Toolkit
           </p>
