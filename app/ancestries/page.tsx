@@ -10,7 +10,8 @@ export const dynamic = "force-dynamic";
 type RawQuery = { q?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-type Row = { name: string; trait: string; languages: string; homebrew: boolean };
+type Trait = { text: string; uses: number };
+type Row = { name: string; traits: Trait[]; languages: string; homebrew: boolean };
 
 // Split "Farsight: +1 to ranged…" into the trait name and its effect.
 function splitTrait(trait: string): { title: string; body: string } {
@@ -35,14 +36,27 @@ export default async function AncestriesPage({
 
   const hbRows: Row[] = hbVisible.map((h) => {
     const d = h.data as Record<string, unknown>;
+    const traits: Trait[] = Array.isArray(d.traits)
+      ? (d.traits as Record<string, unknown>[]).map((t) => ({
+          text: String(t.text ?? ""),
+          uses: Number(t.uses) || 0,
+        }))
+      : d.trait
+        ? [{ text: String(d.trait), uses: 0 }]
+        : [];
     return {
       name: String(d.name ?? h.name),
-      trait: String(d.trait ?? ""),
+      traits: traits.filter((t) => t.text),
       languages: String(d.languages ?? ""),
       homebrew: true,
     };
   });
-  const bookRows: Row[] = SD_ANCESTRIES.map((a) => ({ ...a, homebrew: false }));
+  const bookRows: Row[] = SD_ANCESTRIES.map((a) => ({
+    name: a.name,
+    traits: a.trait ? [{ text: a.trait, uses: 0 }] : [],
+    languages: a.languages,
+    homebrew: false,
+  }));
   const ALL: Row[] = [...hbRows, ...bookRows].sort((a, b) => a.name.localeCompare(b.name, "en"));
 
   const raw = await searchParams;
@@ -50,7 +64,9 @@ export default async function AncestriesPage({
   const needle = q.toLowerCase();
   const results = needle
     ? ALL.filter(
-        (a) => a.name.toLowerCase().includes(needle) || a.trait.toLowerCase().includes(needle),
+        (a) =>
+          a.name.toLowerCase().includes(needle) ||
+          a.traits.some((t) => t.text.toLowerCase().includes(needle)),
       )
     : ALL;
   const filtered = Boolean(needle);
@@ -111,42 +127,55 @@ export default async function AncestriesPage({
         </div>
       ) : (
         <ul className="flex flex-col gap-3">
-          {results.map((a, idx) => {
-            const { title, body } = splitTrait(a.trait);
-            return (
-              <li
-                key={`${a.homebrew ? "hb" : "bk"}-${a.name}-${idx}`}
-                className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
-              >
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                    {a.name}
-                  </h2>
-                  {a.homebrew ? (
-                    <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
-                      Homebrew
-                    </span>
-                  ) : null}
-                  {title ? (
-                    <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-semibold tracking-[0.1em] text-[var(--text)]">
-                      {title}
-                    </span>
-                  ) : null}
-                </div>
-                {body ? (
-                  <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">{body}</p>
+          {results.map((a, idx) => (
+            <li
+              key={`${a.homebrew ? "hb" : "bk"}-${a.name}-${idx}`}
+              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
+            >
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                  {a.name}
+                </h2>
+                {a.homebrew ? (
+                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                    Homebrew
+                  </span>
                 ) : null}
-                {a.languages ? (
-                  <p className="mt-2 text-[12px] text-[var(--muted)]">
-                    <span className="font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
-                      Languages:
-                    </span>{" "}
-                    {a.languages}
-                  </p>
-                ) : null}
-              </li>
-            );
-          })}
+              </div>
+
+              <div className="mt-2 flex flex-col gap-2">
+                {a.traits.map((t, i) => {
+                  const { title, body } = splitTrait(t.text);
+                  return (
+                    <div key={i}>
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                        {title ? (
+                          <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-semibold tracking-[0.1em] text-[var(--text)]">
+                            {title}
+                          </span>
+                        ) : null}
+                        {t.uses > 0 ? (
+                          <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--gold)]">
+                            {t.uses}/day
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">{body}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {a.languages ? (
+                <p className="mt-2 text-[12px] text-[var(--muted)]">
+                  <span className="font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
+                    Languages:
+                  </span>{" "}
+                  {a.languages}
+                </p>
+              ) : null}
+            </li>
+          ))}
         </ul>
       )}
     </div>

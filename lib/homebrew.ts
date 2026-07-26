@@ -62,6 +62,13 @@ const num = (v: unknown): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
+// Uses/day for a limited-use trait or feature. 0 = passive (no tick boxes).
+function usesPerDay(v: unknown): number {
+  const n = num(v);
+  if (n == null || n < 0) return 0;
+  return Math.min(n, 20);
+}
+
 function toRecord(r: HomebrewRow, viewerId: string): HomebrewRecord {
   return {
     id: r.id,
@@ -319,9 +326,24 @@ export function normalizeAncestry(input: unknown): { name: string; data: Record<
         )
     : [];
 
+  // Traits: [{text, uses}] so limited-use abilities (Halfling Luck) can render
+  // tick boxes on the sheet. Accept a legacy single `trait` string from earlier saves.
+  let traits: { text: string; uses: number }[] = [];
+  if (Array.isArray(o.traits)) {
+    traits = (o.traits as unknown[])
+      .map((t) => {
+        const to = (t ?? {}) as Record<string, unknown>;
+        return { text: str(to.text).slice(0, 500), uses: usesPerDay(to.uses) };
+      })
+      .filter((t) => t.text)
+      .slice(0, 20);
+  } else if (str(o.trait)) {
+    traits = [{ text: str(o.trait).slice(0, 500), uses: 0 }];
+  }
+
   const data: Record<string, unknown> = {
     name,
-    trait: str(o.trait).slice(0, 2000),
+    traits,
     languages: str(o.languages).slice(0, 300),
   };
   if (bonuses.length) data.bonuses = bonuses;
@@ -329,46 +351,30 @@ export function normalizeAncestry(input: unknown): { name: string; data: Record<
 }
 
 // ── Classes ──────────────────────────────────────────────────────────────────
-// Hit die options and the casting stats / spell lists a homebrew caster can use.
 export const HD_DICE = ["1d4", "1d6", "1d8", "1d10", "1d12"] as const;
 export const CAST_STATS = ["INT", "WIS", "CHA"] as const;
-// Where a homebrew caster draws spells: a book list, or "Homebrew" (spells the
-// author tagged for the class).
-export const SPELL_LISTS = ["Wizard", "Priest", "Witch", "Homebrew"] as const;
-const CLASS_STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
 
-// A talent-table entry: `text` always displays; `effect`, when present, is what
-// the creation/level-up wizard auto-applies. Kinds map onto bonuses the sheet
-// already knows how to apply, so the generic applier (built in the wizard layer)
-// stays small. Free-text-only talents (kind "none") display but don't auto-apply.
-export type TalentEffect =
-  | { kind: "atk"; amount: number } // +N to melee AND ranged attacks
-  | { kind: "dmg"; amount: number } // +N to melee AND ranged damage
-  | { kind: "ac"; amount: number }
-  | { kind: "hp"; amount: number }
-  | { kind: "stat"; stat: string; amount: number } // +N to a fixed stat
-  | { kind: "statChoice"; amount: number } // +N the player assigns
-  | { kind: "spellKnown"; amount: number } // learn N extra spells
-  | { kind: "none" };
-
-function normalizeTalentEffect(raw: unknown): TalentEffect {
-  const e = (raw ?? {}) as Record<string, unknown>;
-  const kind = str(e.kind);
-  const amount = num(e.amount) ?? 0;
-  switch (kind) {
-    case "atk": return { kind: "atk", amount };
-    case "dmg": return { kind: "dmg", amount };
-    case "ac": return { kind: "ac", amount };
-    case "hp": return { kind: "hp", amount };
-    case "stat": {
-      const s = str(e.stat).toUpperCase();
-      return { kind: "stat", stat: (CLASS_STATS as readonly string[]).includes(s) ? s : "STR", amount };
-    }
-    case "statChoice": return { kind: "statChoice", amount };
-    case "spellKnown": return { kind: "spellKnown", amount };
-    default: return { kind: "none" };
-  }
-}
+// Talent effect targets — the "thing being bonused". In the editor the amount
+// comes first, then this dropdown. Mirrored in HomebrewManager. Each talent row
+// (5 rows total) can carry up to two of these.
+export const TALENT_TARGETS: [string, string][] = [
+  ["meleeAtk", "Melee Attacks"],
+  ["meleeDmg", "Melee Damage"],
+  ["rangedAtk", "Ranged Attacks"],
+  ["rangedDmg", "Ranged Damage"],
+  ["meleeAtkDmg", "Melee Attack & Damage"],
+  ["rangedAtkDmg", "Ranged Attacks and Damage"],
+  ["ac", "AC"],
+  ["hp", "HP"],
+  ["str", "Strength"],
+  ["dex", "Dexterity"],
+  ["con", "Constitution"],
+  ["int", "Intelligence"],
+  ["wis", "Wisdom"],
+  ["cha", "Charisma"],
+  ["spellKnown", "Learned Spell"],
+];
+const TALENT_TARGET_KEYS = TALENT_TARGETS.map(([k]) => k);
 
 export function normalizeClass(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
@@ -377,43 +383,65 @@ export function normalizeClass(input: unknown): { name: string; data: Record<str
 
   const hd = (HD_DICE as readonly string[]).includes(str(o.hd)) ? str(o.hd) : "1d6";
 
-  // Up to 12 talent slots (the book's tables are 12), each { text, effect }.
-  const talent = Array.isArray(o.talent)
-    ? (o.talent as unknown[])
-        .slice(0, 12)
-        .map((t) => {
-          if (typeof t === "string") {
-            return { text: str(t).slice(0, 300), effect: { kind: "none" } as TalentEffect };
-          }
-          const to = (t ?? {}) as Record<string, unknown>;
-          return { text: str(to.text).slice(0, 300), effect: normalizeTalentEffect(to.effect) };
-        })
-        .filter((t) => t.text)
-    : [];
+  const cleanNames = (arr: unknown): string[] =>
+    Array.isArray(arr) ? (arr as unknown[]).map((x) => str(x)).filter(Boolean).slice(0, 60) : [];
+  const weaponsAll = !!o.weaponsAll;
+  const armorAll = !!o.armorAll;
 
+  // Rows 2 & 3 split either 3-6/7-9 ("lo") or 3-7/8-9 ("hi"). Rows 1/4/5 fixed.
+  const talentSplit = str(o.talentSplit) === "hi" ? "hi" : "lo";
+
+  const cleanEffect = (raw: unknown): { amount: number; target: string } | null => {
+    const e = (raw ?? {}) as Record<string, unknown>;
+    const target = str(e.target);
+    if (!TALENT_TARGET_KEYS.includes(target)) return null;
+    return { amount: num(e.amount) ?? 0, target };
+  };
+  // Always exactly 5 rows; each carries up to 2 effects.
+  const talentIn = Array.isArray(o.talent) ? (o.talent as unknown[]) : [];
+  const talent = Array.from({ length: 5 }, (_, i) => {
+    const row = (talentIn[i] ?? {}) as Record<string, unknown>;
+    const effects = Array.isArray(row.effects)
+      ? (row.effects as unknown[])
+          .map(cleanEffect)
+          .filter((e): e is { amount: number; target: string } => e != null)
+          .slice(0, 2)
+      : [];
+    return { text: str(row.text).slice(0, 300), effects };
+  });
+
+  // Features: [{text, uses}] so limited-use features (Barbarian Rage) get tick boxes.
   const features = Array.isArray(o.features)
-    ? (o.features as unknown[]).map((f) => str(f).slice(0, 500)).filter(Boolean).slice(0, 20)
+    ? (o.features as unknown[])
+        .map((f) => {
+          if (typeof f === "string") return { text: str(f).slice(0, 500), uses: 0 };
+          const fo = (f ?? {}) as Record<string, unknown>;
+          return { text: str(fo.text).slice(0, 500), uses: usesPerDay(fo.uses) };
+        })
+        .filter((f) => f.text)
+        .slice(0, 20)
     : [];
 
   const data: Record<string, unknown> = {
     name,
     hd,
-    weapons: str(o.weapons).slice(0, 400),
-    armor: str(o.armor).slice(0, 400),
+    weaponsAll,
+    weapons: weaponsAll ? [] : cleanNames(o.weapons),
+    armorAll,
+    armor: armorAll ? [] : cleanNames(o.armor),
+    talentSplit,
     talent,
     features,
   };
 
-  // Optional spellcasting config — present only for caster classes.
+  // Optional spellcasting — DC is always 10 + tier, so it isn't stored.
   const caster = (o.caster ?? null) as Record<string, unknown> | null;
   if (caster && (str(caster.stat) || str(caster.list))) {
     const stat = str(caster.stat).toUpperCase();
-    const list = str(caster.list);
     data.caster = {
       stat: (CAST_STATS as readonly string[]).includes(stat) ? stat : "INT",
-      list: (SPELL_LISTS as readonly string[]).includes(list) ? list : "Homebrew",
+      list: str(caster.list).slice(0, 40) || "Wizard",
       knownTier1: num(caster.knownTier1) ?? 2,
-      dc: str(caster.dc).slice(0, 120),
     };
   }
 
