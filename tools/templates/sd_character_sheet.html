@@ -5345,6 +5345,8 @@ function ccwApply() {
   renderTalentsView();
 
   const allSpells = [...c.spells];
+  // Homebrew "Learn Spell" talent/trait effects add named spells.
+  (hbEff.learnSpells||[]).forEach(sp => { if(sp && !allSpells.includes(sp)) allSpells.push(sp); });
   if(c.cls==='Priest') allSpells.push('Turn Undead');
   // Wizard talent "Learn one additional wizard spell" — add the chosen spell
   [c.tres, c.tres2].forEach(p=>{
@@ -5373,6 +5375,8 @@ function ccwApply() {
 
   // Auto-toggle advantage: talent-chosen spells + Magic Missile (always adv)
   const advSpells = new Set(['Magic Missile']);
+  // Homebrew "Advantage: Cast Spell" effects grant advantage on those spells.
+  (hbEff.advSpells||[]).forEach(sp => { if(sp) advSpells.add(sp); });
   [c.tres, c.tres2, c.tres && c.tres.sub, c.tres2 && c.tres2.sub].forEach(p=>{
     if(p && p.kind==='spellknown' && p.picked) advSpells.add(p.picked);
   });
@@ -7240,8 +7244,8 @@ const HB_TALENT_LABEL = {
   rangedDmg:'Ranged Damage', meleeAtkDmg:'Melee Attack & Damage',
   rangedAtkDmg:'Ranged Attacks and Damage', ac:'AC', hp:'HP',
   str:'Strength', dex:'Dexterity', con:'Constitution', int:'Intelligence',
-  wis:'Wisdom', cha:'Charisma', spellKnown:'Learned Spell', spellCheck:'Spellcasting Checks',
-  weaponDie:'Weapon Damage Die'
+  wis:'Wisdom', cha:'Charisma', spellKnown:'Learn Spell', spellCheck:'Spellcasting Checks',
+  weaponDie:'Weapon Damage Die', advSpell:'Advantage'
 };
 
 function _hbClearInjected() {
@@ -7271,7 +7275,10 @@ function _hbTalentText(row) {
   const effs = Array.isArray(row && row.effects) ? row.effects : [];
   const parts = effs.filter(e => e && e.target).map(e => {
     const amt = Number(e.amount) || 0;
-    if(e.target === 'weaponDie') return 'Weapon Damage d' + amt;
+    if(e.target === 'weaponDie') return 'Weapon Damage d' + amt + (e.weapon ? ' ('+e.weapon+')' : '');
+    if(e.target === 'spellKnown') return e.spell ? 'Learn ' + e.spell : 'Learn a spell';
+    if(e.target === 'advSpell') return e.spell ? 'Advantage casting ' + e.spell : 'Advantage on a spell';
+    if(e.target === 'perDay') return amt + '/day';
     return (HB_TALENT_LABEL[e.target] || e.target) + ' ' + (amt>=0?'+':'') + amt;
   });
   const effStr = parts.length ? '(' + parts.join(', ') + ')' : '';
@@ -7283,7 +7290,7 @@ function _hbTalentText(row) {
 // blank accumulator is filled by the sources below and consumed in ccwApply.
 function _hbEmptyEff(){
   return { ac:0,hp:0,meleeAtk:0,meleeDmg:0,rangedAtk:0,rangedDmg:0,spellCheck:0,
-           weaponDice:{}, str:0,dex:0,con:0,int:0,wis:0,cha:0 };
+           weaponDice:{}, learnSpells:[], advSpells:[], str:0,dex:0,con:0,int:0,wis:0,cha:0 };
 }
 function _hbAccumEffect(out, e){
   if(!e || !e.target) return;
@@ -7299,9 +7306,10 @@ function _hbAccumEffect(out, e){
     case 'rangedAtkDmg': out.rangedAtk+=a; out.rangedDmg+=a; break;
     case 'spellCheck': out.spellCheck+=a; break;
     case 'weaponDie': { const key = e.weapon ? String(e.weapon) : '*'; out.weaponDice[key] = Math.max(out.weaponDice[key]||0, a); break; }
+    case 'spellKnown': if(e.spell) out.learnSpells.push(String(e.spell)); break;   // learn a specific spell
+    case 'advSpell': if(e.spell) out.advSpells.push(String(e.spell)); break;       // advantage casting it
     case 'perDay': break;   // uses/day tracker, not a combat stat
     case 'str': case 'dex': case 'con': case 'int': case 'wis': case 'cha': out[e.target]+=a; break;
-    // spellKnown is not auto-applied (would need a spell to be chosen)
   }
 }
 // Ancestry: flat bonuses plus every trait's effects (all apply at creation).

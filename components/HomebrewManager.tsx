@@ -2,6 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { GEAR } from "@/lib/data/gear";
+
+// Weapons available to the shared Effect Builder (Weapon Damage Die). Derived
+// from the same gear data everywhere, so every effect builder lists the same
+// weapons regardless of which page renders it.
+const EFFECT_WEAPONS = GEAR.filter((g) => g.category === "weapon").map((g) => g.name);
 
 // Mirror of lib/homebrew's public shapes (kept local so this client component
 // doesn't pull in the server module). Must stay in sync with lib/homebrew's HbType.
@@ -60,18 +66,19 @@ const TALENT_TARGETS: [string, string][] = [
   ["int", "Intelligence"],
   ["wis", "Wisdom"],
   ["cha", "Charisma"],
-  ["spellKnown", "Learned Spell"],
+  ["spellKnown", "Learn Spell"],
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
+  ["advSpell", "Advantage: Cast Spell"],
   ["perDay", "Per Day (uses)"],
 ];
 
 // One roll-band of a class talent table. Rows 1/4/5 are fixed (2 / 10-11 / 12);
 // rows 2 & 3 shift with `talentSplit`. Each row carries up to 2 effects.
-// One mechanical effect: an amount + a target. `weapon` is used only when the
-// target is "weaponDie" (which weapon's damage die changes; "" = all weapons).
-// Shared by class talents, class features, and ancestry traits.
-type Effect = { amount: string; target: string; weapon: string };
+// One mechanical effect: an amount + a target. `weapon` is used only for the
+// "weaponDie" target; `spell` for spell targets (Learn Spell / Advantage: Cast
+// Spell). Shared by class talents, class features, and ancestry traits.
+type Effect = { amount: string; target: string; weapon: string; spell: string };
 type TalentEffectRow = Effect; // alias kept for existing talent code
 type TalentRow = { text: string; effects: Effect[] };
 
@@ -238,7 +245,7 @@ function formFromRecord(rec: HomebrewRecord): Form {
       const src = Array.isArray(d.talent) ? (d.talent[i] as Record<string, unknown> | undefined) : undefined;
       if (!src) return row;
       const effects = Array.isArray(src.effects)
-        ? (src.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon) }))
+        ? (src.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon), spell: s(e.spell) }))
         : [];
       return { text: s(src.text), effects };
     });
@@ -247,10 +254,10 @@ function formFromRecord(rec: HomebrewRecord): Form {
           if (typeof f === "string") return { text: f, effects: [] };
           const fo = f as Record<string, unknown>;
           let effects: Effect[] = Array.isArray(fo.effects)
-            ? (fo.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon) }))
+            ? (fo.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon), spell: s(e.spell) }))
             : [];
           const u = Number(fo.uses) || 0; // legacy uses/day → Per Day effect
-          if (!effects.length && u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "" }];
+          if (!effects.length && u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "", spell: "" }];
           return { text: s(fo.text), effects };
         })
       : [];
@@ -277,16 +284,16 @@ function formFromRecord(rec: HomebrewRecord): Form {
     base.traits = Array.isArray(d.traits)
       ? (d.traits as Record<string, unknown>[]).map((t) => {
           let effects: Effect[] = Array.isArray(t.effects)
-            ? (t.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon) }))
+            ? (t.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon), spell: s(e.spell) }))
             : [];
           // legacy: a "choose one" trait's options flatten into effects
           if (!effects.length && Array.isArray(t.options)) {
             effects = (t.options as Record<string, unknown>[])
-              .map((op) => ({ amount: s(op.amount), target: s(op.target), weapon: "" }))
+              .map((op) => ({ amount: s(op.amount), target: s(op.target), weapon: "", spell: "" }))
               .filter((e) => e.target);
           }
           const u = Number(t.uses) || 0; // legacy uses/day → Per Day effect
-          if (u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "" }, ...effects];
+          if (u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "", spell: "" }, ...effects];
           return { text: s(t.text), effects };
         })
       : s(d.trait)
@@ -343,11 +350,12 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
     const mapEffects = (effects: Effect[]) =>
       effects
         .filter((e) => e.target)
-        .map((e) =>
-          e.target === "weaponDie"
-            ? { amount: Number(e.amount) || 0, target: e.target, weapon: e.weapon || "" }
-            : { amount: Number(e.amount) || 0, target: e.target },
-        );
+        .map((e) => {
+          const base: Record<string, unknown> = { amount: Number(e.amount) || 0, target: e.target };
+          if (e.target === "weaponDie") base.weapon = e.weapon || "";
+          if (e.target === "spellKnown" || e.target === "advSpell") base.spell = e.spell || "";
+          return base;
+        });
     const talent = f.talents.map((row) => ({ text: row.text, effects: mapEffects(row.effects) }));
     const features = f.features
       .filter((r) => r.text.trim())
@@ -383,11 +391,12 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
         text: r.text,
         effects: r.effects
           .filter((e) => e.target)
-          .map((e) =>
-            e.target === "weaponDie"
-              ? { amount: Number(e.amount) || 0, target: e.target, weapon: e.weapon || "" }
-              : { amount: Number(e.amount) || 0, target: e.target },
-          ),
+          .map((e) => {
+            const base: Record<string, unknown> = { amount: Number(e.amount) || 0, target: e.target };
+            if (e.target === "weaponDie") base.weapon = e.weapon || "";
+            if (e.target === "spellKnown" || e.target === "advSpell") base.spell = e.spell || "";
+            return base;
+          }),
       }));
     return { name: f.name, traits, languages: f.languages, bonuses: f.bonuses };
   }
@@ -493,17 +502,20 @@ export default function HomebrewManager({
   // and ancestry traits so authoring is identical everywhere.
   function effectsEditor(effects: Effect[], setEffects: (next: Effect[]) => void, max = 6) {
     const patch = (k: number, p: Partial<Effect>) => setEffects(effects.map((e, m) => (m === k ? { ...e, ...p } : e)));
+    const isSpell = (t: string) => t === "spellKnown" || t === "advSpell";
     return (
       <div className="flex flex-col gap-2">
         {effects.map((e, k) => (
           <div key={k} className="flex flex-wrap gap-2">
-            <input
-              className={`${fieldBase} w-16 shrink-0`}
-              type="number"
-              value={e.amount}
-              placeholder={e.target === "perDay" ? "/day" : e.target === "weaponDie" ? "die" : "+1"}
-              onChange={(ev) => patch(k, { amount: ev.target.value })}
-            />
+            {isSpell(e.target) ? null : (
+              <input
+                className={`${fieldBase} w-16 shrink-0`}
+                type="number"
+                value={e.amount}
+                placeholder={e.target === "perDay" ? "/day" : e.target === "weaponDie" ? "die" : "+1"}
+                onChange={(ev) => patch(k, { amount: ev.target.value })}
+              />
+            )}
             <select
               className={`${fieldBase} min-w-0 flex-1`}
               value={e.target}
@@ -521,10 +533,18 @@ export default function HomebrewManager({
               >
                 <option value="">All weapons</option>
                 <option value="Strikes">Strikes (unarmed)</option>
-                {weaponOptions.map((w) => (
+                {EFFECT_WEAPONS.map((w) => (
                   <option key={w} value={w}>{w}</option>
                 ))}
               </select>
+            ) : null}
+            {isSpell(e.target) ? (
+              <input
+                className={`${fieldBase} min-w-0 flex-1`}
+                value={e.spell}
+                placeholder="Spell name (e.g. Fireball)"
+                onChange={(ev) => patch(k, { spell: ev.target.value })}
+              />
             ) : null}
             <button className={`${btn} shrink-0`} onClick={() => setEffects(effects.filter((_, m) => m !== k))}>
               ✕
@@ -534,7 +554,7 @@ export default function HomebrewManager({
         {effects.length < max ? (
           <button
             className={`${btn} self-start`}
-            onClick={() => setEffects([...effects, { amount: "", target: TALENT_TARGETS[0][0], weapon: "" }])}
+            onClick={() => setEffects([...effects, { amount: "", target: TALENT_TARGETS[0][0], weapon: "", spell: "" }])}
           >
             + Add effect
           </button>

@@ -33,6 +33,14 @@ function effectLabel(e: Record<string, unknown>): string {
     const w = String(e.weapon ?? "");
     return `d${amt} weapon damage${w ? ` (${w})` : ""}`;
   }
+  if (target === "spellKnown") {
+    const sp = String(e.spell ?? "");
+    return sp ? `Learn ${sp}` : "Learn a spell";
+  }
+  if (target === "advSpell") {
+    const sp = String(e.spell ?? "");
+    return sp ? `Advantage casting ${sp}` : "Advantage on a spell";
+  }
   return `${amt >= 0 ? "+" : ""}${amt} ${label}`;
 }
 function rollLabel(i: number, split: string): string {

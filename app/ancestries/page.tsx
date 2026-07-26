@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 type RawQuery = { q?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-type Effect = { amount: number; target: string; weapon: string };
+type Effect = { amount: number; target: string; weapon: string; spell: string };
 type Trait = { text: string; effects: Effect[] };
 type Row = { name: string; traits: Trait[]; languages: string; homebrew: boolean };
 
@@ -19,6 +19,8 @@ function effectLabel(e: Effect): string {
   const label = TALENT_LABEL.get(e.target) ?? e.target;
   if (e.target === "perDay") return `${e.amount}/day`;
   if (e.target === "weaponDie") return `d${e.amount} weapon damage${e.weapon ? ` (${e.weapon})` : ""}`;
+  if (e.target === "spellKnown") return e.spell ? `Learn ${e.spell}` : "Learn a spell";
+  if (e.target === "advSpell") return e.spell ? `Advantage casting ${e.spell}` : "Advantage on a spell";
   return `${e.amount >= 0 ? "+" : ""}${e.amount} ${label}`;
 }
 
@@ -36,15 +38,16 @@ function toTrait(t: Record<string, unknown>): Trait {
         amount: Number(e.amount) || 0,
         target: String(e.target ?? ""),
         weapon: String(e.weapon ?? ""),
+        spell: String(e.spell ?? ""),
       }))
     : [];
   if (!effects.length && Array.isArray(t.options)) {
     effects = (t.options as Record<string, unknown>[])
-      .map((o) => ({ amount: Number(o.amount) || 0, target: String(o.target ?? ""), weapon: "" }))
+      .map((o) => ({ amount: Number(o.amount) || 0, target: String(o.target ?? ""), weapon: "", spell: "" }))
       .filter((e) => e.target);
   }
   const u = Number(t.uses) || 0;
-  if (u > 0 && !effects.some((e) => e.target === "perDay")) effects = [{ amount: u, target: "perDay", weapon: "" }, ...effects];
+  if (u > 0 && !effects.some((e) => e.target === "perDay")) effects = [{ amount: u, target: "perDay", weapon: "", spell: "" }, ...effects];
   return { text: String(t.text ?? ""), effects };
 }
 
