@@ -40,6 +40,26 @@ const WEAPON_RANGES = ["Close", "Near", "Far", "Close/Near", "Close/Far"];
 const SPELL_RANGES = [
   "Self", "Touch", "Close", "Near", "Far", "Double near", "1 mile", "Same plane", "Unlimited",
 ];
+// Mirrors HD_DICE / CAST_STATS / SPELL_LISTS in lib/homebrew.ts (kept local so
+// this client component doesn't import the server module).
+const HD_DICE = ["1d4", "1d6", "1d8", "1d10", "1d12"];
+const CAST_STATS = ["INT", "WIS", "CHA"];
+const SPELL_LISTS = ["Wizard", "Priest", "Witch", "Homebrew"];
+const STAT_KEYS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"];
+// Talent effect kinds the creation wizard can apply (mirrors TalentEffect).
+// "none" is description-only text the player applies by hand.
+const TALENT_KINDS: [string, string][] = [
+  ["none", "Description only"],
+  ["atk", "+N to attacks"],
+  ["dmg", "+N to damage"],
+  ["ac", "+N AC"],
+  ["hp", "+N HP"],
+  ["stat", "+N to a stat"],
+  ["statChoice", "+N to a chosen stat"],
+  ["spellKnown", "Learn N spells"],
+];
+
+type TalentRow = { text: string; effKind: string; effAmount: string; effStat: string };
 
 type BonusRow = { amount: string; target: string };
 type Form = {
@@ -77,6 +97,20 @@ type Form = {
   mS: string; mD: string; mC: string; mI: string; mW: string; mCh: string;
   notes: string;
   ctype: string;
+  // class
+  hd: string;
+  weapons: string;
+  armor: string;
+  talents: TalentRow[];
+  features: string; // one feature per line
+  isCaster: boolean;
+  castStat: string;
+  castList: string;
+  castKnown: string;
+  castDc: string;
+  // ancestry (also reuses `bonuses`)
+  trait: string;
+  languages: string;
 };
 
 const s = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
@@ -114,6 +148,18 @@ function blankForm(type: HbType): Form {
     mS: "+0", mD: "+0", mC: "+0", mI: "+0", mW: "+0", mCh: "+0",
     notes: "",
     ctype: "Monster",
+    hd: "1d6",
+    weapons: "",
+    armor: "",
+    talents: [],
+    features: "",
+    isCaster: false,
+    castStat: "INT",
+    castList: "Homebrew",
+    castKnown: "2",
+    castDc: "",
+    trait: "",
+    languages: "",
   };
 }
 
@@ -135,6 +181,38 @@ function formFromRecord(rec: HomebrewRecord): Form {
     base.range = s(d.range);
     base.duration = s(d.duration);
     base.damage = s(d.damage);
+    base.desc = s(d.desc);
+  } else if (rec.type === "class") {
+    base.hd = s(d.hd) || "1d6";
+    base.weapons = s(d.weapons);
+    base.armor = s(d.armor);
+    base.talents = Array.isArray(d.talent)
+      ? (d.talent as Record<string, unknown>[]).map((t) => {
+          const eff = (t.effect ?? {}) as Record<string, unknown>;
+          return {
+            text: s(t.text),
+            effKind: s(eff.kind) || "none",
+            effAmount: eff.amount != null ? s(eff.amount) : "",
+            effStat: s(eff.stat) || "STR",
+          };
+        })
+      : [];
+    base.features = Array.isArray(d.features) ? (d.features as unknown[]).map(s).join("\n") : "";
+    const caster = (d.caster ?? null) as Record<string, unknown> | null;
+    if (caster) {
+      base.isCaster = true;
+      base.castStat = s(caster.stat) || "INT";
+      base.castList = s(caster.list) || "Homebrew";
+      base.castKnown = caster.knownTier1 != null ? s(caster.knownTier1) : "2";
+      base.castDc = s(caster.dc);
+    }
+  } else if (rec.type === "ancestry") {
+    base.trait = s(d.trait);
+    base.languages = s(d.languages);
+    base.bonuses = Array.isArray(d.bonuses)
+      ? (d.bonuses as Record<string, unknown>[]).map((b) => ({ amount: s(b.amount), target: s(b.target) }))
+      : [];
+  } else if (rec.type === "background") {
     base.desc = s(d.desc);
   } else {
     base.kind = s(d.kind) || "gear";
@@ -177,6 +255,44 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
       damage: f.damage,
       desc: f.desc,
     };
+  }
+  if (type === "class") {
+    const talent = f.talents
+      .filter((t) => t.text.trim())
+      .map((t) => {
+        const kind = t.effKind || "none";
+        const effect: Record<string, unknown> = { kind };
+        if (kind !== "none") effect.amount = Number(t.effAmount) || 0;
+        if (kind === "stat") effect.stat = t.effStat || "STR";
+        return { text: t.text, effect };
+      });
+    const features = f.features
+      .split("\n")
+      .map((x) => x.trim())
+      .filter(Boolean);
+    const data: Record<string, unknown> = {
+      name: f.name,
+      hd: f.hd,
+      weapons: f.weapons,
+      armor: f.armor,
+      talent,
+      features,
+    };
+    if (f.isCaster) {
+      data.caster = {
+        stat: f.castStat,
+        list: f.castList,
+        knownTier1: Number(f.castKnown) || 2,
+        dc: f.castDc,
+      };
+    }
+    return data;
+  }
+  if (type === "ancestry") {
+    return { name: f.name, trait: f.trait, languages: f.languages, bonuses: f.bonuses };
+  }
+  if (type === "background") {
+    return { name: f.name, desc: f.desc };
   }
   return {
     name: f.name,
@@ -233,8 +349,24 @@ export default function HomebrewManager({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const noun = type === "spell" ? "spell" : type === "monster" ? "monster" : "item";
+  const noun =
+    type === "spell"
+      ? "spell"
+      : type === "monster"
+        ? "monster"
+        : type === "class"
+          ? "class"
+          : type === "ancestry"
+            ? "ancestry"
+            : type === "background"
+              ? "background"
+              : "item";
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => (f ? { ...f, [k]: v } : f));
+
+  const setTalent = (i: number, patch: Partial<TalentRow>) =>
+    setForm((f) =>
+      f ? { ...f, talents: f.talents.map((t, j) => (j === i ? { ...t, ...patch } : t)) } : f,
+    );
 
   function shareLabel(rec: HomebrewRecord): string {
     const ids = rec.campaignIds ?? [];
@@ -254,6 +386,61 @@ export default function HomebrewManager({
               : [...f.campaignIds, id],
           }
         : f,
+    );
+  }
+
+  // Shared bonus editor — used by gear (applied when equipped) and ancestry
+  // (applied at creation). Both validate against the same BONUS_TARGETS.
+  function bonusEditor(labelText: string) {
+    if (!form) return null;
+    return (
+      <div className="sm:col-span-2">
+        <label className={label}>{labelText}</label>
+        <div className="flex flex-col gap-2">
+          {form.bonuses.map((b, i) => (
+            <div key={i} className="flex gap-2">
+              <input
+                className={`${fieldBase} w-16 shrink-0`}
+                type="number"
+                value={b.amount}
+                placeholder="+1"
+                onChange={(e) =>
+                  set(
+                    "bonuses",
+                    form.bonuses.map((x, j) => (j === i ? { ...x, amount: e.target.value } : x)),
+                  )
+                }
+              />
+              <select
+                className={`${fieldBase} min-w-0 flex-1`}
+                value={b.target}
+                onChange={(e) =>
+                  set(
+                    "bonuses",
+                    form.bonuses.map((x, j) => (j === i ? { ...x, target: e.target.value } : x)),
+                  )
+                }
+              >
+                {BONUS_TARGETS.map(([k, l]) => (
+                  <option key={k} value={k}>{l}</option>
+                ))}
+              </select>
+              <button
+                className={`${btn} shrink-0`}
+                onClick={() => set("bonuses", form.bonuses.filter((_, j) => j !== i))}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          className={`${btn} mt-2`}
+          onClick={() => set("bonuses", [...form.bonuses, { amount: "", target: "ac" }])}
+        >
+          + Add bonus
+        </button>
+      </div>
     );
   }
 
@@ -324,7 +511,18 @@ export default function HomebrewManager({
         className="flex w-full items-center justify-between px-4 py-3 text-left"
       >
         <span className="text-sm font-bold uppercase tracking-[0.15em]">
-          My Homebrew {type === "spell" ? "Spells" : type === "monster" ? "Monsters" : "Gear"}
+          My Homebrew{" "}
+          {type === "spell"
+            ? "Spells"
+            : type === "monster"
+              ? "Monsters"
+              : type === "class"
+                ? "Classes"
+                : type === "ancestry"
+                  ? "Ancestries"
+                  : type === "background"
+                    ? "Backgrounds"
+                    : "Gear"}
           <span className="ml-2 text-[var(--muted)]">({items.length})</span>
         </span>
         <span className="text-[var(--muted)]">{open ? "▾" : "▸"}</span>
@@ -369,7 +567,17 @@ export default function HomebrewManager({
                     className={field}
                     value={form.name}
                     onChange={(e) => set("name", e.target.value)}
-                    placeholder={type === "spell" ? "Spell name" : "Item name"}
+                    placeholder={
+                      type === "spell"
+                        ? "Spell name"
+                        : type === "class"
+                          ? "Class name"
+                          : type === "ancestry"
+                            ? "Ancestry name"
+                            : type === "background"
+                              ? "Background name"
+                              : "Item name"
+                    }
                   />
                 </div>
 
@@ -487,6 +695,179 @@ export default function HomebrewManager({
                       <textarea className={field} rows={3} value={form.desc} onChange={(e) => set("desc", e.target.value)} />
                     </div>
                   </>
+                ) : type === "class" ? (
+                  <>
+                    <div>
+                      <label className={label}>Hit die</label>
+                      <select className={field} value={form.hd} onChange={(e) => set("hd", e.target.value)}>
+                        {HD_DICE.map((d) => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={label}>Weapons</label>
+                      <input className={field} value={form.weapons} onChange={(e) => set("weapons", e.target.value)} placeholder="All weapons" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={label}>Armor</label>
+                      <input className={field} value={form.armor} onChange={(e) => set("armor", e.target.value)} placeholder="All armor and shields" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={label}>Features</label>
+                      <textarea
+                        className={field}
+                        rows={3}
+                        value={form.features}
+                        onChange={(e) => set("features", e.target.value)}
+                        placeholder={"One per line.\nHard to Kill: You have advantage on rolls to stabilize."}
+                      />
+                      <p className="mt-1 text-[11px] text-[var(--muted)]">One feature per line.</p>
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className={label}>Talent table</label>
+                      <p className="mb-2 text-[11px] text-[var(--muted)]">
+                        Each talent shows on the sheet. Give it an effect and the creation wizard applies it
+                        automatically; leave it “Description only” for text the player applies by hand.
+                      </p>
+                      <div className="flex flex-col gap-2">
+                        {form.talents.map((t, i) => (
+                          <div key={i} className="flex flex-col gap-2 rounded border border-[var(--border)] p-2">
+                            <div className="flex gap-2">
+                              <input
+                                className={`${fieldBase} min-w-0 flex-1`}
+                                value={t.text}
+                                placeholder="Talent text"
+                                onChange={(e) => setTalent(i, { text: e.target.value })}
+                              />
+                              <button
+                                className={`${btn} shrink-0`}
+                                onClick={() => set("talents", form.talents.filter((_, j) => j !== i))}
+                              >
+                                ✕
+                              </button>
+                            </div>
+                            <div className="flex gap-2">
+                              <select
+                                className={`${fieldBase} min-w-0 flex-1`}
+                                value={t.effKind}
+                                onChange={(e) => setTalent(i, { effKind: e.target.value })}
+                              >
+                                {TALENT_KINDS.map(([k, l]) => (
+                                  <option key={k} value={k}>{l}</option>
+                                ))}
+                              </select>
+                              {t.effKind !== "none" ? (
+                                <input
+                                  className={`${fieldBase} w-16 shrink-0`}
+                                  type="number"
+                                  value={t.effAmount}
+                                  placeholder="+1"
+                                  onChange={(e) => setTalent(i, { effAmount: e.target.value })}
+                                />
+                              ) : null}
+                              {t.effKind === "stat" ? (
+                                <select
+                                  className={`${fieldBase} w-24 shrink-0`}
+                                  value={t.effStat}
+                                  onChange={(e) => setTalent(i, { effStat: e.target.value })}
+                                >
+                                  {STAT_KEYS.map((k) => (
+                                    <option key={k} value={k}>{k}</option>
+                                  ))}
+                                </select>
+                              ) : null}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {form.talents.length < 12 ? (
+                        <button
+                          className={`${btn} mt-2`}
+                          onClick={() =>
+                            set("talents", [
+                              ...form.talents,
+                              { text: "", effKind: "none", effAmount: "", effStat: "STR" },
+                            ])
+                          }
+                        >
+                          + Add talent
+                        </button>
+                      ) : null}
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className="flex items-center gap-2 text-sm text-[var(--text)]">
+                        <input type="checkbox" checked={form.isCaster} onChange={(e) => set("isCaster", e.target.checked)} />
+                        Spellcaster
+                      </label>
+                    </div>
+                    {form.isCaster ? (
+                      <>
+                        <div>
+                          <label className={label}>Casting stat</label>
+                          <select className={field} value={form.castStat} onChange={(e) => set("castStat", e.target.value)}>
+                            {CAST_STATS.map((st) => (
+                              <option key={st} value={st}>{st}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className={label}>Spell list</label>
+                          <select className={field} value={form.castList} onChange={(e) => set("castList", e.target.value)}>
+                            {SPELL_LISTS.map((l) => (
+                              <option key={l} value={l}>{l}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className={label}>Spells known (tier 1)</label>
+                          <input className={field} type="number" value={form.castKnown} onChange={(e) => set("castKnown", e.target.value)} placeholder="2" />
+                        </div>
+                        <div>
+                          <label className={label}>Spellcasting DC (optional)</label>
+                          <input className={field} value={form.castDc} onChange={(e) => set("castDc", e.target.value)} placeholder="10 + spell tier" />
+                        </div>
+                      </>
+                    ) : null}
+                  </>
+                ) : type === "ancestry" ? (
+                  <>
+                    <div className="sm:col-span-2">
+                      <label className={label}>Trait</label>
+                      <textarea
+                        className={field}
+                        rows={2}
+                        value={form.trait}
+                        onChange={(e) => set("trait", e.target.value)}
+                        placeholder="Keen Senses: Advantage on checks to notice hidden creatures."
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={label}>Languages</label>
+                      <input
+                        className={field}
+                        value={form.languages}
+                        onChange={(e) => set("languages", e.target.value)}
+                        placeholder="Common, Sylvan"
+                      />
+                    </div>
+                    {bonusEditor("Bonuses (applied at creation)")}
+                  </>
+                ) : type === "background" ? (
+                  <>
+                    <div className="sm:col-span-2">
+                      <label className={label}>Description</label>
+                      <textarea
+                        className={field}
+                        rows={3}
+                        value={form.desc}
+                        onChange={(e) => set("desc", e.target.value)}
+                        placeholder="A short blurb — where this character came from and what they did before adventuring."
+                      />
+                    </div>
+                  </>
                 ) : (
                   <>
                     <div>
@@ -589,53 +970,7 @@ export default function HomebrewManager({
                     </div>
 
                     {/* Bonuses + equippable — same system the sheet applies when the item is equipped */}
-                    <div className="sm:col-span-2">
-                      <label className={label}>Bonuses (applied when equipped)</label>
-                      <div className="flex flex-col gap-2">
-                        {form.bonuses.map((b, i) => (
-                          <div key={i} className="flex gap-2">
-                            <input
-                              className={`${fieldBase} w-16 shrink-0`}
-                              type="number"
-                              value={b.amount}
-                              placeholder="+1"
-                              onChange={(e) =>
-                                set(
-                                  "bonuses",
-                                  form.bonuses.map((x, j) => (j === i ? { ...x, amount: e.target.value } : x)),
-                                )
-                              }
-                            />
-                            <select
-                              className={`${fieldBase} min-w-0 flex-1`}
-                              value={b.target}
-                              onChange={(e) =>
-                                set(
-                                  "bonuses",
-                                  form.bonuses.map((x, j) => (j === i ? { ...x, target: e.target.value } : x)),
-                                )
-                              }
-                            >
-                              {BONUS_TARGETS.map(([k, l]) => (
-                                <option key={k} value={k}>{l}</option>
-                              ))}
-                            </select>
-                            <button
-                              className={`${btn} shrink-0`}
-                              onClick={() => set("bonuses", form.bonuses.filter((_, j) => j !== i))}
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                      <button
-                        className={`${btn} mt-2`}
-                        onClick={() => set("bonuses", [...form.bonuses, { amount: "", target: "ac" }])}
-                      >
-                        + Add bonus
-                      </button>
-                    </div>
+                    {bonusEditor("Bonuses (applied when equipped)")}
                     <div className="sm:col-span-2">
                       <label className="flex items-center gap-2 text-sm text-[var(--text)]">
                         <input type="checkbox" checked={form.equippable} onChange={(e) => set("equippable", e.target.checked)} />
