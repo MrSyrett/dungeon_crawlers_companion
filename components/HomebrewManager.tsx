@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Mirror of lib/homebrew's public shapes (kept local so this client component
-// doesn't pull in the server module).
-type HbType = "spell" | "gear" | "monster";
+// doesn't pull in the server module). Must stay in sync with lib/homebrew's HbType.
+type HbType = "spell" | "gear" | "monster" | "class" | "ancestry" | "background";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {
   id: string;
