@@ -2,13 +2,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SD_BACKGROUNDS } from "@/lib/data/backgrounds";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
 
 type RawQuery = { q?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-const BACKGROUNDS_AZ = [...SD_BACKGROUNDS].sort((a, b) => a.name.localeCompare(b.name, "en"));
+type Row = { name: string; desc: string; homebrew: boolean };
 
 export default async function BackgroundsPage({
   searchParams,
@@ -18,12 +20,25 @@ export default async function BackgroundsPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  const [hbVisible, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "background" }),
+    ownHomebrew(user.id, "background"),
+    userCampaigns(user.id),
+  ]);
+
+  const hbRows: Row[] = hbVisible.map((h) => {
+    const d = h.data as Record<string, unknown>;
+    return { name: String(d.name ?? h.name), desc: String(d.desc ?? ""), homebrew: true };
+  });
+  const bookRows: Row[] = SD_BACKGROUNDS.map((b) => ({ name: b.name, desc: "", homebrew: false }));
+  const ALL: Row[] = [...hbRows, ...bookRows].sort((a, b) => a.name.localeCompare(b.name, "en"));
+
   const raw = await searchParams;
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
   const results = needle
-    ? BACKGROUNDS_AZ.filter((b) => b.name.toLowerCase().includes(needle))
-    : BACKGROUNDS_AZ;
+    ? ALL.filter((b) => b.name.toLowerCase().includes(needle) || b.desc.toLowerCase().includes(needle))
+    : ALL;
   const filtered = Boolean(needle);
 
   return (
@@ -32,16 +47,18 @@ export default async function BackgroundsPage({
         <div>
           <h1 className="font-display text-3xl font-black tracking-wide">Backgrounds</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
-            {SD_BACKGROUNDS.length} Shadowdark backgrounds
+            {SD_BACKGROUNDS.length} Shadowdark backgrounds{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}
           </p>
         </div>
         <Link
           href="/dashboard"
           className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
         >
-          ← Home
+          &larr; Home
         </Link>
       </header>
+
+      <HomebrewManager type="background" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/backgrounds" className="mb-4 flex gap-2">
         <input
@@ -80,12 +97,24 @@ export default async function BackgroundsPage({
         </div>
       ) : (
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-          {results.map((b) => (
+          {results.map((b, i) => (
             <li
-              key={b.name}
-              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] px-3 py-3 text-center text-sm font-semibold uppercase tracking-[0.08em] text-[var(--gold)]"
+              key={`${b.homebrew ? "hb" : "bk"}-${b.name}-${i}`}
+              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] px-3 py-3"
             >
-              {b.name}
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="text-center text-sm font-semibold uppercase tracking-[0.08em] text-[var(--gold)]">
+                  {b.name}
+                </span>
+                {b.homebrew ? (
+                  <span className="rounded border border-[var(--gold)] px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-[var(--gold)]">
+                    HB
+                  </span>
+                ) : null}
+              </div>
+              {b.desc ? (
+                <p className="mt-2 text-center text-[12px] leading-relaxed text-[var(--muted)]">{b.desc}</p>
+              ) : null}
             </li>
           ))}
         </ul>
