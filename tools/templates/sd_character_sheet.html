@@ -4109,6 +4109,10 @@ const CCW_ALL_STATS    = ['STR','DEX','CON','INT','WIS','CHA'];
 function ccwAnalyzeTalent(text, cls) {
   const p = { text: text, kind: 'none', options: [], picked: null, picked2: null, final: text, statBoost: {}, sub: null };
   if(!text) return p;
+  // Homebrew classes resolve their talents through the effect-based pickers
+  // (choose-one, learn spell, and the Choices step). Skip the official text
+  // parser so choices aren't offered twice.
+  if(RC_CLASS_INFO[cls] && RC_CLASS_INFO[cls]._hb) return p;
 
   if(/^Choose a talent/i.test(text)) {
     p.kind = 'meta';
@@ -4396,7 +4400,7 @@ function ccwGearSpent() {
 function ccwChoices(){
   const list=_hbGatherChoices(_ccw);
   if(!_ccw.hbChoices)_ccw.hbChoices={};
-  const weapons=[['Strikes','Strikes (unarmed)']].concat((_ccw.buyWeapons||[]).map(w=>[w,w]));
+  const weapons=[['Strikes','Strikes (unarmed)']].concat((_ccw.buyWeapons||[]).filter(w=>!/^strikes$/i.test(w)).map(w=>[w,w]));
   const spells=_hbKnownSpellsCreation(_ccw).map(s=>[s,s]);
   let h='<p class="ccw-hint">A few of your abilities let you choose. Pick each one.</p>';
   if(!list.length) return h+'<p class="ccw-hint">Nothing left to choose.</p>';
@@ -5880,7 +5884,7 @@ function _hbLvlChoicesHtml(){
   const weapons=[['Strikes','Strikes (unarmed)']].concat(
     [...document.querySelectorAll('#attacks-body .atk-name')].map(el=>(el.value||'').trim())
       .map(n=>{const m=n.match(/^Backstab \((.+)\)$/i);return m?m[1]:n;})
-      .filter((v,i,a)=>v && a.indexOf(v)===i).map(w=>[w,w]));
+      .filter((v,i,a)=>v && !/^strikes$/i.test(v) && a.indexOf(v)===i).map(w=>[w,w]));
   const spells=[...document.querySelectorAll('#spells-list .spell-input')].map(el=>(el.value||'').trim())
     .filter((v,i,a)=>v && a.indexOf(v)===i).map(s=>[s,s]);
   let x='<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';

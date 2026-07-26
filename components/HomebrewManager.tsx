@@ -990,14 +990,6 @@ export default function HomebrewManager({
               <div className="grid gap-3 sm:grid-cols-2">
                 {type === "class" ? (
                   <div className="sm:col-span-2 flex gap-3">
-                    <div className="w-24 shrink-0">
-                      <label className={label}>Hit die</label>
-                      <select className={field} value={form.hd} onChange={(e) => set("hd", e.target.value)}>
-                        {HD_DICE.map((d) => (
-                          <option key={d} value={d}>{d}</option>
-                        ))}
-                      </select>
-                    </div>
                     <div className="min-w-0 flex-1">
                       <label className={label}>Name</label>
                       <input
@@ -1006,6 +998,14 @@ export default function HomebrewManager({
                         onChange={(e) => set("name", e.target.value)}
                         placeholder="Class name"
                       />
+                    </div>
+                    <div className="w-24 shrink-0">
+                      <label className={label}>Hit die</label>
+                      <select className={field} value={form.hd} onChange={(e) => set("hd", e.target.value)}>
+                        {HD_DICE.map((d) => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 ) : (
