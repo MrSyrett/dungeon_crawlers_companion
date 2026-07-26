@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GEAR } from "@/lib/data/gear";
+import { SPELLS } from "@/lib/data/spells";
 
 // Weapons available to the shared Effect Builder (Weapon Damage Die). Derived
 // from the same gear data everywhere, so every effect builder lists the same
 // weapons regardless of which page renders it.
 const EFFECT_WEAPONS = GEAR.filter((g) => g.category === "weapon").map((g) => g.name);
+// Spell names for the Learn Spell / Advantage effect pickers (deduped, sorted).
+const EFFECT_SPELLS = Array.from(new Set(SPELLS.map((s) => s.name))).sort((a, b) => a.localeCompare(b, "en"));
 
 // Mirror of lib/homebrew's public shapes (kept local so this client component
 // doesn't pull in the server module). Must stay in sync with lib/homebrew's HbType.
@@ -84,7 +87,9 @@ type TalentRow = { text: string; effects: Effect[] };
 
 // A trait/feature: descriptive text plus a list of effects (one Effect Builder).
 type FeatureRow = { text: string; effects: Effect[] };
-type AncestryTraitRow = { text: string; effects: Effect[] };
+// Ancestry traits can optionally be a "choose one" — the player picks a single
+// effect at character creation rather than all of them applying.
+type AncestryTraitRow = { text: string; effects: Effect[]; choose: boolean };
 // A trait or feature that can have limited uses/day (renders tick boxes).
 
 // Roll-band label for talent row `i` given the 2 & 3 split.
@@ -294,10 +299,13 @@ function formFromRecord(rec: HomebrewRecord): Form {
           }
           const u = Number(t.uses) || 0; // legacy uses/day → Per Day effect
           if (u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "", spell: "" }, ...effects];
-          return { text: s(t.text), effects };
+          // A legacy "choose one" trait had options; treat that (or an explicit
+          // choose flag) as a choice with the effects as alternatives.
+          const choose = !!t.choose || (Array.isArray(t.options) && t.options.length > 1);
+          return { text: s(t.text), effects, choose };
         })
       : s(d.trait)
-        ? [{ text: s(d.trait), effects: [] }]
+        ? [{ text: s(d.trait), effects: [], choose: false }]
         : [];
     base.bonuses = Array.isArray(d.bonuses)
       ? (d.bonuses as Record<string, unknown>[]).map((b) => ({ amount: s(b.amount), target: s(b.target) }))
@@ -389,6 +397,7 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
       .filter((r) => r.text.trim())
       .map((r) => ({
         text: r.text,
+        choose: !!r.choose,
         effects: r.effects
           .filter((e) => e.target)
           .map((e) => {
@@ -531,7 +540,7 @@ export default function HomebrewManager({
                 value={e.weapon}
                 onChange={(ev) => patch(k, { weapon: ev.target.value })}
               >
-                <option value="">All weapons</option>
+                <option value="">Player Choice</option>
                 <option value="Strikes">Strikes (unarmed)</option>
                 {EFFECT_WEAPONS.map((w) => (
                   <option key={w} value={w}>{w}</option>
@@ -539,12 +548,21 @@ export default function HomebrewManager({
               </select>
             ) : null}
             {isSpell(e.target) ? (
-              <input
-                className={`${fieldBase} min-w-0 flex-1`}
-                value={e.spell}
-                placeholder="Spell name (e.g. Fireball)"
-                onChange={(ev) => patch(k, { spell: ev.target.value })}
-              />
+              <>
+                <input
+                  className={`${fieldBase} min-w-0 flex-1`}
+                  list="hb-spell-list"
+                  value={e.spell}
+                  placeholder="Spell name, or Player Choice"
+                  onChange={(ev) => patch(k, { spell: ev.target.value })}
+                />
+                <datalist id="hb-spell-list">
+                  <option value="Player Choice" />
+                  {EFFECT_SPELLS.map((sp) => (
+                    <option key={sp} value={sp} />
+                  ))}
+                </datalist>
+              </>
             ) : null}
             <button className={`${btn} shrink-0`} onClick={() => setEffects(effects.filter((_, m) => m !== k))}>
               ✕
@@ -690,7 +708,8 @@ export default function HomebrewManager({
         <label className={label}>Traits</label>
         <p className="mb-2 text-[11px] text-[var(--muted)]">
           Describe the trait, then add effects — bonuses (attack, AC, HP, stats…) apply at character
-          creation; use <b>Per Day (uses)</b> for limited-use traits.
+          creation; use <b>Per Day (uses)</b> for limited-use traits. Tick <b>Choose one</b> to make
+          the player pick a single effect at creation (Elf Farsight style).
         </p>
         <div className="flex flex-col gap-2">
           {rows.map((r, i) => (
@@ -706,13 +725,21 @@ export default function HomebrewManager({
                   ✕
                 </button>
               </div>
+              <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
+                <input
+                  type="checkbox"
+                  checked={r.choose}
+                  onChange={() => setRows(rows.map((x, j) => (j === i ? { ...x, choose: !x.choose } : x)))}
+                />
+                Choose one effect at creation
+              </label>
               <div className="sm:pl-4">
                 {effectsEditor(r.effects, (next) => setRows(rows.map((x, j) => (j === i ? { ...x, effects: next } : x))))}
               </div>
             </div>
           ))}
         </div>
-        <button className={`${btn} mt-2`} onClick={() => setRows([...rows, { text: "", effects: [] }])}>
+        <button className={`${btn} mt-2`} onClick={() => setRows([...rows, { text: "", effects: [], choose: false }])}>
           + Add trait
         </button>
       </div>

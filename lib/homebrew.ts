@@ -408,7 +408,11 @@ function cleanEffectRow(raw: unknown): { text: string; effects: HbEffect[] } {
   }
   const u = usesPerDay(o.uses);
   if (u > 0 && !effects.some((e) => e.target === "perDay")) effects = [{ amount: u, target: "perDay" }, ...effects];
-  return { text: str(o.text).slice(0, 500), effects };
+  const row: { text: string; effects: HbEffect[]; choose?: boolean } = { text: str(o.text).slice(0, 500), effects };
+  // A "choose one" trait: player picks a single effect at creation. Legacy
+  // choose-one traits stored multiple `options`, so infer it from those too.
+  if (o.choose === true || (Array.isArray(o.options) && (o.options as unknown[]).length > 1)) row.choose = true;
+  return row;
 }
 
 export function normalizeClass(input: unknown): { name: string; data: Record<string, unknown> } {

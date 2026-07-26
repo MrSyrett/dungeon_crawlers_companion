@@ -4710,6 +4710,14 @@ function ccwNext() {
     if(_ccw.ancestry==='Elf' && !_ccw.elfFarsight) { alert('Choose your Farsight option.'); return; }
     if(_ccw.ancestry==='Beastfolk' && !_ccw.beastNatural) { alert('Choose your Natural Selection option.'); return; }
     if(_ccw.ancestry==='Kobold' && !_ccw.koboldKnack) { alert('Choose your Knack option.'); return; }
+    const _hbA = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
+    if(_hbA && Array.isArray(_hbA.traits)) {
+      for(let ti=0; ti<_hbA.traits.length; ti++){
+        if(_hbTraitIsChoice(_hbA.traits[ti]) && !(_ccw.hbChoice && _ccw.hbChoice[ti]!=null)) {
+          alert('Choose an option for ' + (String(_hbA.traits[ti].text||'your ancestry trait').split(':')[0]) + '.'); return;
+        }
+      }
+    }
   }
   if(name==='Class') {
     if(!_ccw.cls) { alert('Choose a class.'); return; }
@@ -4857,8 +4865,26 @@ function ccwAncestry() {
     h += ancChoice('Natural Selection','beastNatural',[['attack','Strikes (unarmed) deal 1d6'],['ac','+1 to armor class']]);
   if(_ccw.ancestry==='Kobold')
     h += ancChoice('Knack','koboldKnack',[['spell','+1 to spellcasting checks'],['luck','Luck token each session']]);
+  // Homebrew ancestries: render a picker for each "choose one" trait.
+  const _hbAnc = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
+  if(_hbAnc && Array.isArray(_hbAnc.traits)) {
+    _hbAnc.traits.forEach((t, ti) => {
+      if(!_hbTraitIsChoice(t)) return;
+      const effs = _hbTraitEffects(t);
+      const title = String((t && t.text) || 'Choose').split(':')[0];
+      let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
+      x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 '+title+' \u2014 choose one</div>';
+      effs.forEach((e, oi) => {
+        const sel = (_ccw.hbChoice && _ccw.hbChoice[ti]===oi) ? ' selected' : '';
+        const lbl = String(_hbEffOne(e) || 'Effect').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+        x += '<button class="ccw-choice'+sel+'" style="width:49%;margin-right:1%;text-align:center;" onclick="ccwPickHbChoice('+ti+','+oi+')"><div class="ccw-choice-name" style="font-size:10px;">'+lbl+'</div></button>';
+      });
+      h += x + '</div>';
+    });
+  }
   return h;
 }
+function ccwPickHbChoice(ti, oi) { if(!_ccw.hbChoice) _ccw.hbChoice={}; _ccw.hbChoice[ti]=oi; ccwRender(); }
 function ccwClearAncestryChoices() { _ccw.langCommon=[]; _ccw.langRare=[]; _ccw.elfFarsight=null; _ccw.beastNatural=null; _ccw.koboldKnack=null; _ccw.hbChoice={}; }
 function ccwPickAncestry(a) { _ccw.ancestry = a; ccwClearAncestryChoices(); ccwRender(); }
 function ccwRandAncestry() { _ccw.ancestry = _rc_weighted(RC_ANCESTRY.table); ccwClearAncestryChoices(); ccwRender(); }
@@ -5157,6 +5183,21 @@ function ancestryLine(c) {
     return c.koboldKnack==='spell'
       ? 'Knack: +1 to spellcasting checks.'
       : 'Knack: You begin each session with a luck token.';
+  const hb = RC_ANCESTRY._hb && RC_ANCESTRY._hb[c.ancestry];
+  if(hb && Array.isArray(hb.traits)) {
+    const picks = [];
+    hb.traits.forEach((t, ti) => {
+      if(!_hbTraitIsChoice(t)) return;
+      const oi = c.hbChoice && c.hbChoice[ti];
+      const effs = _hbTraitEffects(t);
+      if(oi != null && effs[oi]) {
+        const title = String(t.text||'').split(':')[0];
+        picks.push((title ? title + ': ' : '') + _hbEffOne(effs[oi]));
+      }
+    });
+    const base = RC_ANCESTRY.ability[c.ancestry] || '';
+    if(picks.length) return base ? base + ' \u2014 ' + picks.join('; ') : picks.join('; ');
+  }
   return RC_ANCESTRY.ability[c.ancestry] || '';
 }
 
@@ -5288,6 +5329,7 @@ function ccwApply() {
   const hbEff = _hbEmptyEff();
   _hbFillAncestry(hbEff, c);
   _hbFillTalent(hbEff, c);
+  _hbFillFeatures(hbEff, c);
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.value=v; };
 
   document.querySelectorAll('#spells-list .spell-row').forEach(row => row.remove());
@@ -5492,9 +5534,7 @@ function ccwApply() {
     if(masterySet.has(w.name)) { const mb = masteryBonus(1); bonus += mb; dmgBonus += mb; }
     let dmg = dmgOverride || w.damage;
     if(d12Set.has(w.name)) dmg = dmg.replace(/d\d+/g, 'd12');
-    // Homebrew weapon-damage-die: upgrade this weapon's dice if targeted (by name or "all").
-    const _wdie = hbEff.weaponDice[w.name] || hbEff.weaponDice['*'] || 0;
-    if(_wdie) dmg = dmg.replace(/d(\d+)/g, (mm,n)=> (parseInt(n) < _wdie) ? 'd'+_wdie : mm);
+    dmg = _hbWeaponDamage(dmg, w.name, hbEff);
     if(dmgBonus > 0) dmg = dmg.split('/').map(d=>d+'+'+dmgBonus).join('/');
     if(f2.name)   f2.name.value   = name;
     if(f2.bonus)  f2.bonus.value  = bonus > 0 ? '+'+bonus : '';
@@ -5527,8 +5567,7 @@ function ccwApply() {
       if(!bw) return;
       const baseDmg = (wname==='Strikes') ? unarmedDie : bw.damage;
       let bsDmg = d12Set.has(bw.name) ? baseDmg.replace(/d\d+/g,'d12') : baseDmg;
-      const _bwdie = hbEff.weaponDice[bw.name] || hbEff.weaponDice['*'] || 0;
-      if(_bwdie) bsDmg = bsDmg.replace(/d(\d+)/g, (mm,n)=> (parseInt(n) < _bwdie) ? 'd'+_bwdie : mm);
+      bsDmg = _hbWeaponDamage(bsDmg, bw.name, hbEff);
       bsDmg = bsDmg.replace(/1d/g, bsDice+'d');
       _fillAtkRow('Backstab ('+bw.name+')', bw, bsDmg);
     });
@@ -5747,6 +5786,7 @@ function lvlRollTalent() {
   const roll = Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6);
   const r = lvlTalentRows().find(x=>roll>=x.lo && roll<=x.hi);
   _lvl.talentRoll = roll;
+  _lvl.talentPick = null;
   _lvl.talent = r ? r.text : '';
   _lvl.tres = ccwAnalyzeTalent(_lvl.talent, _lvl.cls);
   ccwResolve(_lvl.tres);
@@ -5979,6 +6019,57 @@ function lvlApply() {
       if(typeof refreshAutoAC === 'function') refreshAutoAC();
       addLog('Armor Talent', '🛡', '+1 AC (' + m[1].trim() + ')', 'normal');
     }
+  })();
+
+  // ── Homebrew class talents: apply structured effects at level-up ──
+  (function(){
+    const ci = RC_CLASS_INFO[_lvl.cls];
+    if(!ci || !ci._hb || !Array.isArray(ci._talentEff)) return;
+    const idx = _hbTalentRowIndex(_lvl.cls, _lvl.talentRoll, _lvl.talentPick);
+    if(idx < 0) return;
+    const effs = ci._talentEff[idx];
+    if(!Array.isArray(effs) || !effs.length) return;
+    const agg = _hbEmptyEff();
+    effs.forEach(e => _hbAccumEffect(agg, e));
+
+    // Stats
+    const smap = {str:'str-val',dex:'dex-val',con:'con-val',int:'int-val',wis:'wis-val',cha:'cha-val'};
+    Object.keys(smap).forEach(k=>{ if(agg[k]){ const el=document.getElementById(smap[k]); if(el){ el.value=String((parseInt(el.value)||10)+agg[k]); el.dispatchEvent(new Event('input')); } } });
+    // HP
+    if(agg.hp){ const hm=document.getElementById('hp-max'), hc=document.getElementById('hp-current'); if(hm) hm.value=String((parseInt(hm.value)||0)+agg.hp); if(hc) hc.value=String((parseInt(hc.value)||0)+agg.hp); }
+    // AC (innate)
+    if(agg.ac){ _innateAC=(parseInt(_innateAC)||0)+agg.ac; if(typeof refreshAutoAC==='function') refreshAutoAC(); }
+    // Spellcasting checks
+    if(agg.spellCheck){ const el=document.getElementById('spell-gbonus'); if(el){ const cur=parseInt((el.value||'').replace(/^\+/,''))||0; const v=cur+agg.spellCheck; el.value=v>0?'+'+v:(v<0?String(v):''); } }
+
+    const rows=[...document.querySelectorAll('#attacks-body tr')];
+    const bumpVal=(el,n)=>{ if(!el||!n)return; const cur=parseInt((el.value||'').replace(/^\+/,''))||0; const v=cur+n; el.value=v>0?'+'+v:(v<0?String(v):''); };
+    const bumpDmg=(d,n)=> d.split('/').map(part=>{ const mm=part.match(/^(.*?)([+-]\d+)?$/); const mod=(parseInt(mm[2]||'0'))+n; return mm[1]+(mod>0?'+'+mod:(mod<0?String(mod):'')); }).join('/');
+    const nameOf=(row)=>{ let nm=(row.querySelector('.atk-name')?.value||'').trim(); const bs=nm.match(/^Backstab \((.+)\)$/i); return bs?bs[1]:nm; };
+    const typeOf=(row)=>{ const nm=nameOf(row); const w=(typeof allWeapons==='function')?allWeapons().find(x=>x.name.toLowerCase()===nm.toLowerCase()):null; if(w) return w.type==='R'?'ranged':'melee'; const rng=row.querySelector('.atk-range')?.value||''; return rng==='Close'?'melee':(rng?'ranged':'melee'); };
+    // Attack / damage bonuses
+    if(agg.meleeAtk||agg.rangedAtk||agg.meleeDmg||agg.rangedDmg){
+      rows.forEach(row=>{ const t=typeOf(row); const bEl=row.querySelector('.atk-bonus'), dEl=row.querySelector('.atk-damage'); const b=t==='melee'?agg.meleeAtk:agg.rangedAtk; const d=t==='melee'?agg.meleeDmg:agg.rangedDmg; if(b)bumpVal(bEl,b); if(d&&dEl&&dEl.value.trim())dEl.value=bumpDmg(dEl.value.trim(),d); });
+    }
+    // Weapon damage die (stacking): already-altered weapon adds a die, else upgrades
+    const dieKeys=Object.keys(agg.weaponDice||{});
+    if(dieKeys.length){
+      rows.forEach(row=>{
+        const nm=nameOf(row);
+        const spec=agg.weaponDice[nm]; const all=agg.weaponDice['*'];
+        if(!spec && !all) return;
+        const size=Math.max(spec?spec.size:0, all?all.size:0);
+        const dEl=row.querySelector('.atk-damage'); if(!dEl||!dEl.value.trim()) return;
+        const base=(typeof allWeapons==='function')?allWeapons().find(x=>x.name.toLowerCase()===nm.toLowerCase()):null;
+        const baseM=(base&&base.damage||'').match(/(\d*)d(\d+)/);
+        const baseCount=baseM?parseInt(baseM[1]||'1'):1, baseSize=baseM?parseInt(baseM[2]):0;
+        dEl.value=dEl.value.trim().replace(/(\d*)d(\d+)/, (m,c,s)=>{ const bc=parseInt(c||'1'), bsz=parseInt(s); const altered=(bc>baseCount)||(bsz>baseSize); return altered ? (bc+1)+'d'+bsz : bc+'d'+Math.max(bsz,size); });
+      });
+    }
+    // Learn spells
+    (agg.learnSpells||[]).forEach(name=>{ if(!name) return; const s=findSpell(name,_lvl.cls)||{name:name}; _spellCount++; const row=addSpellRow(_spellCount); if(!row) return; const q=(cl)=>row.querySelector(cl); const inp=q('.spell-input'); if(inp)inp.value=name; const lvl=q('.spell-level'); if(lvl&&s.tier)lvl.value=s.tier; const rng=q('.spell-range'); if(rng&&s.range)rng.value=s.range; const dur=q('.spell-duration'); if(dur&&s.duration)dur.value=s.duration; const dmg=q('.spell-damage'); if(dmg){const _d=spellRollDice(s); if(_d)dmg.value=_d;} const dsc=q('.spell-desc'); if(dsc&&s.desc){dsc.value=s.desc;autoResizeDesc(dsc);} });
+    // Advantage on spells
+    (agg.advSpells||[]).forEach(name=>{ document.querySelectorAll('#spells-list .spell-row').forEach(row=>{ const nm=row.querySelector('.spell-input')?.value.trim(); if(nm&&nm.toLowerCase()===String(name).toLowerCase()){ const ab=row.querySelector('.spell-adv-btn'); if(ab)ab.classList.add('on'); } }); });
   })();
 
   // Auto-toggle advantage: talent-chosen spell + Magic Missile
@@ -7288,6 +7379,23 @@ function _hbTalentText(row) {
 // Effects applied to a character at creation, aggregated from homebrew ancestry
 // bonuses/choices and homebrew class talents. Targets share one vocabulary; a
 // blank accumulator is filled by the sources below and consumed in ccwApply.
+// Apply homebrew weapon-damage-die changes to a damage string. The first change
+// on a weapon upgrades its die to the largest set size; each additional change
+// on the same weapon adds another die (1d6 → 2d6). Effects targeting a specific
+// weapon and "player choice" (all weapons) both count.
+function _hbWeaponDamage(dmg, wname, hbEff){
+  if(!hbEff || !hbEff.weaponDice) return dmg;
+  const spec = hbEff.weaponDice[wname];
+  const all = hbEff.weaponDice['*'];
+  const count = (spec?spec.count:0) + (all?all.count:0);
+  if(!count) return dmg;
+  const size = Math.max(spec?spec.size:0, all?all.size:0);
+  return String(dmg).replace(/(\d*)d(\d+)/g, (m, cnt, sz)=>{
+    const bc = parseInt(cnt||'1'); const bs = parseInt(sz);
+    return (bc + (count - 1)) + 'd' + Math.max(bs, size);
+  });
+}
+
 function _hbEmptyEff(){
   return { ac:0,hp:0,meleeAtk:0,meleeDmg:0,rangedAtk:0,rangedDmg:0,spellCheck:0,
            weaponDice:{}, learnSpells:[], advSpells:[], str:0,dex:0,con:0,int:0,wis:0,cha:0 };
@@ -7305,23 +7413,62 @@ function _hbAccumEffect(out, e){
     case 'meleeAtkDmg': out.meleeAtk+=a; out.meleeDmg+=a; break;
     case 'rangedAtkDmg': out.rangedAtk+=a; out.rangedDmg+=a; break;
     case 'spellCheck': out.spellCheck+=a; break;
-    case 'weaponDie': { const key = e.weapon ? String(e.weapon) : '*'; out.weaponDice[key] = Math.max(out.weaponDice[key]||0, a); break; }
+    case 'weaponDie': {
+      const key = e.weapon ? String(e.weapon) : '*';   // '*' = player choice / all weapons
+      if(!out.weaponDice[key]) out.weaponDice[key] = { count:0, size:0 };
+      out.weaponDice[key].count += 1;
+      out.weaponDice[key].size = Math.max(out.weaponDice[key].size, a);
+      break;
+    }
     case 'spellKnown': if(e.spell) out.learnSpells.push(String(e.spell)); break;   // learn a specific spell
     case 'advSpell': if(e.spell) out.advSpells.push(String(e.spell)); break;       // advantage casting it
     case 'perDay': break;   // uses/day tracker, not a combat stat
     case 'str': case 'dex': case 'con': case 'int': case 'wis': case 'cha': out[e.target]+=a; break;
   }
 }
-// Ancestry: flat bonuses plus every trait's effects (all apply at creation).
+// Human-readable label for a single effect (used by choice pickers).
+function _hbEffOne(e){
+  if(!e || !e.target) return '';
+  const amt = Number(e.amount)||0;
+  if(e.target==='weaponDie') return 'Weapon damage d'+amt+(e.weapon?' ('+e.weapon+')':'');
+  if(e.target==='spellKnown') return e.spell ? 'Learn '+e.spell : 'Learn a spell';
+  if(e.target==='advSpell') return e.spell ? 'Advantage casting '+e.spell : 'Advantage on a spell';
+  if(e.target==='perDay') return amt+'/day';
+  return (HB_TALENT_LABEL[e.target]||e.target)+' '+(amt>=0?'+':'')+amt;
+}
+// Effects of a trait, from the current shape (effects) or legacy (options).
+function _hbTraitEffects(t){
+  if(!t) return [];
+  if(Array.isArray(t.effects)) return t.effects;
+  if(Array.isArray(t.options)) return t.options;
+  return [];
+}
+function _hbTraitIsChoice(t){
+  return !!(t && (t.choose || (Array.isArray(t.options) && t.options.length > 1)));
+}
+// Ancestry: flat bonuses plus each trait's effects. A "choose one" trait applies
+// only the option the player picked; others apply all their effects.
 function _hbFillAncestry(out, c){
   const hb = RC_ANCESTRY._hb && RC_ANCESTRY._hb[c.ancestry];
   if(!hb) return;
   (Array.isArray(hb.bonuses) ? hb.bonuses : []).forEach(b => _hbAccumEffect(out, b));
-  (Array.isArray(hb.traits) ? hb.traits : []).forEach(t => {
-    if(!t) return;
-    if(Array.isArray(t.effects)) t.effects.forEach(e => _hbAccumEffect(out, e));
-    else if(Array.isArray(t.options)) t.options.forEach(e => _hbAccumEffect(out, e));   // legacy choice data
+  (Array.isArray(hb.traits) ? hb.traits : []).forEach((t, ti) => {
+    const effs = _hbTraitEffects(t);
+    if(_hbTraitIsChoice(t)){
+      const oi = c.hbChoice && c.hbChoice[ti];
+      const chosen = (oi != null) ? effs[oi] : null;
+      if(chosen) _hbAccumEffect(out, chosen);
+    } else {
+      effs.forEach(e => _hbAccumEffect(out, e));
+    }
   });
+}
+// Class features: apply their passive effects at creation (perDay is a tracker,
+// not a combat stat, so it's ignored here).
+function _hbFillFeatures(out, c){
+  const ci = RC_CLASS_INFO[c.cls];
+  if(!ci || !ci._hb || !Array.isArray(ci._featureEff)) return;
+  ci._featureEff.forEach(effs => { if(Array.isArray(effs)) effs.forEach(e => _hbAccumEffect(out, e)); });
 }
 // Which talent-table row (0-4) a roll or manual pick landed on.
 function _hbTalentRowIndex(cls, roll, pick){
@@ -7366,6 +7513,10 @@ function injectHomebrewContent(rows) {
         const u = per ? (Number(per.amount)||0) : (Number(f && f.uses)||0);   // legacy uses fallback
         return u > 0 ? t + ' (' + u + '/day)' : t;
       }).filter(Boolean);
+      // Structured feature effects (aligned with the features array) so simple
+      // passive bonuses can be auto-applied at creation.
+      const featureEff = (Array.isArray(d.features) ? d.features : [])
+        .map(f => (f && Array.isArray(f.effects)) ? f.effects : []);
       const bands = d.talentSplit === 'hi'
         ? [[2,2],[3,7],[8,9],[10,11],[12,12]]
         : [[2,2],[3,6],[7,9],[10,11],[12,12]];
@@ -7376,7 +7527,7 @@ function injectHomebrewContent(rows) {
       // ccwBuildTalentRows order, so the wizard can auto-apply a rolled talent.
       const talentEff = [0,1,2,3,4].map(i =>
         (talentRows[i] && Array.isArray(talentRows[i].effects)) ? talentRows[i].effects : []);
-      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _talentEff: talentEff, _hb: true };
+      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _talentEff: talentEff, _featureEff: featureEff, _hb: true };
       if(d.caster && (d.caster.stat || d.caster.list)) {
         RC_CLASS_INFO[nm]._caster = {
           stat: String(d.caster.stat || 'INT').toLowerCase(),
@@ -7396,6 +7547,7 @@ function injectHomebrewContent(rows) {
       if(offAnc.has(nm) || _hbInjected.ancestries.includes(nm)) continue;
       const ability = (Array.isArray(d.traits) ? d.traits : []).map(t => {
         const txt = String(t && t.text || '').trim();
+        if(_hbTraitIsChoice(t)) return txt + ' (choose one)';
         const effs = Array.isArray(t && t.effects) ? t.effects : [];
         const per = effs.find(e => e && e.target === 'perDay');
         const u = per ? (Number(per.amount)||0) : (Number(t && t.uses)||0);   // legacy uses fallback

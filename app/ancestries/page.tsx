@@ -11,7 +11,7 @@ type RawQuery = { q?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
 type Effect = { amount: number; target: string; weapon: string; spell: string };
-type Trait = { text: string; effects: Effect[] };
+type Trait = { text: string; effects: Effect[]; choose: boolean };
 type Row = { name: string; traits: Trait[]; languages: string; homebrew: boolean };
 
 const TALENT_LABEL = new Map(TALENT_TARGETS);
@@ -48,7 +48,8 @@ function toTrait(t: Record<string, unknown>): Trait {
   }
   const u = Number(t.uses) || 0;
   if (u > 0 && !effects.some((e) => e.target === "perDay")) effects = [{ amount: u, target: "perDay", weapon: "", spell: "" }, ...effects];
-  return { text: String(t.text ?? ""), effects };
+  const choose = !!t.choose || (Array.isArray(t.options) && (t.options as unknown[]).length > 1);
+  return { text: String(t.text ?? ""), effects, choose };
 }
 
 export default async function AncestriesPage({
@@ -81,7 +82,7 @@ export default async function AncestriesPage({
   });
   const bookRows: Row[] = SD_ANCESTRIES.map((a) => ({
     name: a.name,
-    traits: a.trait ? [{ text: a.trait, effects: [] }] : [],
+    traits: a.trait ? [{ text: a.trait, effects: [], choose: false }] : [],
     languages: a.languages,
     homebrew: false,
   }));
@@ -193,6 +194,11 @@ export default async function AncestriesPage({
                       <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">{body}</p>
                       {bonuses.length ? (
                         <ul className="mt-1 flex flex-col gap-1">
+                          {t.choose ? (
+                            <li className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
+                              Choose one:
+                            </li>
+                          ) : null}
                           {bonuses.map((e, k) => (
                             <li key={k} className="flex gap-2 text-[12px] leading-relaxed text-[var(--muted)]">
                               <span className="shrink-0 text-[var(--gold)]">▸</span>
