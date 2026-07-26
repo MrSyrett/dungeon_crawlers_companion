@@ -63,17 +63,22 @@ const TALENT_TARGETS: [string, string][] = [
   ["spellKnown", "Learned Spell"],
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
+  ["perDay", "Per Day (uses)"],
 ];
 
 // One roll-band of a class talent table. Rows 1/4/5 are fixed (2 / 10-11 / 12);
 // rows 2 & 3 shift with `talentSplit`. Each row carries up to 2 effects.
-type TalentEffectRow = { amount: string; target: string };
-type TalentRow = { text: string; effects: TalentEffectRow[] };
+// One mechanical effect: an amount + a target. `weapon` is used only when the
+// target is "weaponDie" (which weapon's damage die changes; "" = all weapons).
+// Shared by class talents, class features, and ancestry traits.
+type Effect = { amount: string; target: string; weapon: string };
+type TalentEffectRow = Effect; // alias kept for existing talent code
+type TalentRow = { text: string; effects: Effect[] };
+
+// A trait/feature: descriptive text plus a list of effects (one Effect Builder).
+type FeatureRow = { text: string; effects: Effect[] };
+type AncestryTraitRow = { text: string; effects: Effect[] };
 // A trait or feature that can have limited uses/day (renders tick boxes).
-type FeatureRow = { text: string; uses: string };
-// An ancestry trait: a plain trait (uses) OR a "choose one" trait (options).
-type TraitOption = { label: string; amount: string; target: string };
-type AncestryTraitRow = { text: string; uses: string; isChoice: boolean; options: TraitOption[] };
 
 // Roll-band label for talent row `i` given the 2 & 3 split.
 function talentRollLabel(i: number, split: string): string {
@@ -233,16 +238,21 @@ function formFromRecord(rec: HomebrewRecord): Form {
       const src = Array.isArray(d.talent) ? (d.talent[i] as Record<string, unknown> | undefined) : undefined;
       if (!src) return row;
       const effects = Array.isArray(src.effects)
-        ? (src.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target) }))
+        ? (src.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon) }))
         : [];
       return { text: s(src.text), effects };
     });
     base.features = Array.isArray(d.features)
-      ? (d.features as unknown[]).map((f) =>
-          typeof f === "string"
-            ? { text: f, uses: "" }
-            : { text: s((f as Record<string, unknown>).text), uses: s((f as Record<string, unknown>).uses) },
-        )
+      ? (d.features as unknown[]).map((f) => {
+          if (typeof f === "string") return { text: f, effects: [] };
+          const fo = f as Record<string, unknown>;
+          let effects: Effect[] = Array.isArray(fo.effects)
+            ? (fo.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon) }))
+            : [];
+          const u = Number(fo.uses) || 0; // legacy uses/day → Per Day effect
+          if (!effects.length && u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "" }];
+          return { text: s(fo.text), effects };
+        })
       : [];
     const caster = (d.caster ?? null) as Record<string, unknown> | null;
     if (caster) {
@@ -266,19 +276,21 @@ function formFromRecord(rec: HomebrewRecord): Form {
     base.languages = s(d.languages);
     base.traits = Array.isArray(d.traits)
       ? (d.traits as Record<string, unknown>[]).map((t) => {
-          const opts = Array.isArray(t.options) ? (t.options as Record<string, unknown>[]) : [];
-          if (opts.length) {
-            return {
-              text: s(t.text),
-              uses: "",
-              isChoice: true,
-              options: opts.map((op) => ({ label: s(op.label), amount: s(op.amount), target: s(op.target) })),
-            };
+          let effects: Effect[] = Array.isArray(t.effects)
+            ? (t.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon) }))
+            : [];
+          // legacy: a "choose one" trait's options flatten into effects
+          if (!effects.length && Array.isArray(t.options)) {
+            effects = (t.options as Record<string, unknown>[])
+              .map((op) => ({ amount: s(op.amount), target: s(op.target), weapon: "" }))
+              .filter((e) => e.target);
           }
-          return { text: s(t.text), uses: s(t.uses), isChoice: false, options: [] };
+          const u = Number(t.uses) || 0; // legacy uses/day → Per Day effect
+          if (u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "" }, ...effects];
+          return { text: s(t.text), effects };
         })
       : s(d.trait)
-        ? [{ text: s(d.trait), uses: "", isChoice: false, options: [] }]
+        ? [{ text: s(d.trait), effects: [] }]
         : [];
     base.bonuses = Array.isArray(d.bonuses)
       ? (d.bonuses as Record<string, unknown>[]).map((b) => ({ amount: s(b.amount), target: s(b.target) }))
@@ -328,15 +340,18 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
     };
   }
   if (type === "class") {
-    const talent = f.talents.map((row) => ({
-      text: row.text,
-      effects: row.effects
+    const mapEffects = (effects: Effect[]) =>
+      effects
         .filter((e) => e.target)
-        .map((e) => ({ amount: Number(e.amount) || 0, target: e.target })),
-    }));
+        .map((e) =>
+          e.target === "weaponDie"
+            ? { amount: Number(e.amount) || 0, target: e.target, weapon: e.weapon || "" }
+            : { amount: Number(e.amount) || 0, target: e.target },
+        );
+    const talent = f.talents.map((row) => ({ text: row.text, effects: mapEffects(row.effects) }));
     const features = f.features
       .filter((r) => r.text.trim())
-      .map((r) => ({ text: r.text, uses: Number(r.uses) || 0 }));
+      .map((r) => ({ text: r.text, effects: mapEffects(r.effects) }));
     const data: Record<string, unknown> = {
       name: f.name,
       hd: f.hd,
@@ -364,15 +379,16 @@ function payloadFromForm(type: HbType, f: Form): Record<string, unknown> {
   if (type === "ancestry") {
     const traits = f.traits
       .filter((r) => r.text.trim())
-      .map((r) => {
-        if (r.isChoice) {
-          const options = r.options
-            .filter((o) => o.label.trim() || o.target)
-            .map((o) => ({ label: o.label, amount: Number(o.amount) || 0, target: o.target }));
-          if (options.length) return { text: r.text, options };
-        }
-        return { text: r.text, uses: Number(r.uses) || 0 };
-      });
+      .map((r) => ({
+        text: r.text,
+        effects: r.effects
+          .filter((e) => e.target)
+          .map((e) =>
+            e.target === "weaponDie"
+              ? { amount: Number(e.amount) || 0, target: e.target, weapon: e.weapon || "" }
+              : { amount: Number(e.amount) || 0, target: e.target },
+          ),
+      }));
     return { name: f.name, traits, languages: f.languages, bonuses: f.bonuses };
   }
   if (type === "background") {
@@ -460,38 +476,6 @@ export default function HomebrewManager({
     setForm((f) =>
       f ? { ...f, talents: f.talents.map((t, j) => (j === i ? { ...t, ...patch } : t)) } : f,
     );
-  const setTalentEffect = (i: number, k: number, patch: Partial<TalentEffectRow>) =>
-    setForm((f) =>
-      f
-        ? {
-            ...f,
-            talents: f.talents.map((t, j) =>
-              j === i
-                ? { ...t, effects: t.effects.map((e, m) => (m === k ? { ...e, ...patch } : e)) }
-                : t,
-            ),
-          }
-        : f,
-    );
-  const addTalentEffect = (i: number) =>
-    setForm((f) =>
-      f
-        ? {
-            ...f,
-            talents: f.talents.map((t, j) =>
-              j === i && t.effects.length < 4
-                ? { ...t, effects: [...t.effects, { amount: "", target: TALENT_TARGETS[0][0] }] }
-                : t,
-            ),
-          }
-        : f,
-    );
-  const removeTalentEffect = (i: number, k: number) =>
-    setForm((f) =>
-      f
-        ? { ...f, talents: f.talents.map((t, j) => (j === i ? { ...t, effects: t.effects.filter((_, m) => m !== k) } : t)) }
-        : f,
-    );
 
   // Toggle a weapon/armor name in a class allow-list.
   const toggleAllowed = (field: "weapons" | "armor", name: string) =>
@@ -504,43 +488,60 @@ export default function HomebrewManager({
   const setTitle = (field: "titlesLawful" | "titlesNeutral" | "titlesChaotic", i: number, v: string) =>
     setForm((f) => (f ? { ...f, [field]: f[field].map((x, j) => (j === i ? v : x)) } : f));
 
-  // Ancestry trait helpers (plain trait / "choose one" trait with options).
-  const setTrait = (i: number, patch: Partial<AncestryTraitRow>) =>
-    setForm((f) => (f ? { ...f, traits: f.traits.map((t, j) => (j === i ? { ...t, ...patch } : t)) } : f));
-  const toggleTraitChoice = (i: number) =>
-    setForm((f) =>
-      f
-        ? {
-            ...f,
-            traits: f.traits.map((t, j) => {
-              if (j !== i) return t;
-              const isChoice = !t.isChoice;
-              const options = isChoice && t.options.length === 0
-                ? [{ label: "", amount: "", target: "ac" }]
-                : t.options;
-              return { ...t, isChoice, options };
-            }),
-          }
-        : f,
+  // Shared Effect Builder — one amount + target row (plus a weapon picker when
+  // the target is Weapon Damage Die). Used by class features, class talents,
+  // and ancestry traits so authoring is identical everywhere.
+  function effectsEditor(effects: Effect[], setEffects: (next: Effect[]) => void, max = 6) {
+    const patch = (k: number, p: Partial<Effect>) => setEffects(effects.map((e, m) => (m === k ? { ...e, ...p } : e)));
+    return (
+      <div className="flex flex-col gap-2">
+        {effects.map((e, k) => (
+          <div key={k} className="flex flex-wrap gap-2">
+            <input
+              className={`${fieldBase} w-16 shrink-0`}
+              type="number"
+              value={e.amount}
+              placeholder={e.target === "perDay" ? "/day" : e.target === "weaponDie" ? "die" : "+1"}
+              onChange={(ev) => patch(k, { amount: ev.target.value })}
+            />
+            <select
+              className={`${fieldBase} min-w-0 flex-1`}
+              value={e.target}
+              onChange={(ev) => patch(k, { target: ev.target.value })}
+            >
+              {TALENT_TARGETS.map(([key, lbl]) => (
+                <option key={key} value={key}>{lbl}</option>
+              ))}
+            </select>
+            {e.target === "weaponDie" ? (
+              <select
+                className={`${fieldBase} min-w-0 flex-1`}
+                value={e.weapon}
+                onChange={(ev) => patch(k, { weapon: ev.target.value })}
+              >
+                <option value="">All weapons</option>
+                <option value="Strikes">Strikes (unarmed)</option>
+                {weaponOptions.map((w) => (
+                  <option key={w} value={w}>{w}</option>
+                ))}
+              </select>
+            ) : null}
+            <button className={`${btn} shrink-0`} onClick={() => setEffects(effects.filter((_, m) => m !== k))}>
+              ✕
+            </button>
+          </div>
+        ))}
+        {effects.length < max ? (
+          <button
+            className={`${btn} self-start`}
+            onClick={() => setEffects([...effects, { amount: "", target: TALENT_TARGETS[0][0], weapon: "" }])}
+          >
+            + Add effect
+          </button>
+        ) : null}
+      </div>
     );
-  const setTraitOption = (i: number, k: number, patch: Partial<TraitOption>) =>
-    setForm((f) =>
-      f
-        ? { ...f, traits: f.traits.map((t, j) => (j === i ? { ...t, options: t.options.map((o, m) => (m === k ? { ...o, ...patch } : o)) } : t)) }
-        : f,
-    );
-  const addTraitOption = (i: number) =>
-    setForm((f) =>
-      f
-        ? { ...f, traits: f.traits.map((t, j) => (j === i && t.options.length < 6 ? { ...t, options: [...t.options, { label: "", amount: "", target: "" }] } : t)) }
-        : f,
-    );
-  const removeTraitOption = (i: number, k: number) =>
-    setForm((f) =>
-      f
-        ? { ...f, traits: f.traits.map((t, j) => (j === i ? { ...t, options: t.options.filter((_, m) => m !== k) } : t)) }
-        : f,
-    );
+  }
 
   function shareLabel(rec: HomebrewRecord): string {
     const ids = rec.campaignIds ?? [];
@@ -618,8 +619,8 @@ export default function HomebrewManager({
     );
   }
 
-  // Feature editor with an optional uses/day (renders tick boxes on the sheet).
-  // Used by class features. Ancestry traits use ancestryTraitEditor (choices).
+  // Feature editor: descriptive text plus effects (Per Day sets tick boxes;
+  // other effects are shown as the ability's mechanical hint).
   function featureEditor(field: "features", labelText: string, placeholder: string) {
     if (!form) return null;
     const rows = form[field];
@@ -628,43 +629,38 @@ export default function HomebrewManager({
       <div className="sm:col-span-2">
         <label className={label}>{labelText}</label>
         <p className="mb-2 text-[11px] text-[var(--muted)]">
-          Set uses/day for limited-use abilities (Rage, Luck); leave it blank for passive ones.
+          Describe the ability, then add effects — use <b>Per Day (uses)</b> for limited-use abilities
+          (Rage, Luck); leave effects empty for passive flavor.
         </p>
         <div className="flex flex-col gap-2">
           {rows.map((r, i) => (
-            <div key={i} className="flex gap-2">
-              <input
-                className={`${fieldBase} min-w-0 flex-1`}
-                value={r.text}
-                placeholder={placeholder}
-                onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
-              />
-              <input
-                className={`${fieldBase} w-20 shrink-0`}
-                type="number"
-                min="0"
-                value={r.uses}
-                placeholder="/day"
-                onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, uses: e.target.value } : x)))}
-              />
-              <button
-                className={`${btn} shrink-0`}
-                onClick={() => setRows(rows.filter((_, j) => j !== i))}
-              >
-                ✕
-              </button>
+            <div key={i} className="flex flex-col gap-2 rounded border border-[var(--border)] p-2">
+              <div className="flex gap-2">
+                <input
+                  className={`${fieldBase} min-w-0 flex-1`}
+                  value={r.text}
+                  placeholder={placeholder}
+                  onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
+                />
+                <button className={`${btn} shrink-0`} onClick={() => setRows(rows.filter((_, j) => j !== i))}>
+                  ✕
+                </button>
+              </div>
+              <div className="sm:pl-4">
+                {effectsEditor(r.effects, (next) => setRows(rows.map((x, j) => (j === i ? { ...x, effects: next } : x))))}
+              </div>
             </div>
           ))}
         </div>
-        <button className={`${btn} mt-2`} onClick={() => setRows([...rows, { text: "", uses: "" }])}>
+        <button className={`${btn} mt-2`} onClick={() => setRows([...rows, { text: "", effects: [] }])}>
           + Add
         </button>
       </div>
     );
   }
 
-  // Ancestry traits editor: each trait is plain (optional uses/day) or a
-  // "choose one" with 2+ options, each granting an optional effect.
+  // Ancestry traits editor: descriptive text plus effects (same builder as
+  // features/talents). Per Day sets tick boxes; other effects apply at creation.
   function ancestryTraitEditor() {
     if (!form) return null;
     const rows = form.traits;
@@ -673,9 +669,8 @@ export default function HomebrewManager({
       <div className="sm:col-span-2">
         <label className={label}>Traits</label>
         <p className="mb-2 text-[11px] text-[var(--muted)]">
-          Set uses/day for limited-use traits (Luck). Toggle <b>Add bonus</b> to attach a mechanical
-          effect: one option applies automatically; add a second (or more) to make it a “choose one”
-          at character creation.
+          Describe the trait, then add effects — bonuses (attack, AC, HP, stats…) apply at character
+          creation; use <b>Per Day (uses)</b> for limited-use traits.
         </p>
         <div className="flex flex-col gap-2">
           {rows.map((r, i) => (
@@ -685,77 +680,19 @@ export default function HomebrewManager({
                   className={`${fieldBase} min-w-0 flex-1`}
                   value={r.text}
                   placeholder="Keen Senses: Advantage on checks to notice hidden creatures."
-                  onChange={(e) => setTrait(i, { text: e.target.value })}
+                  onChange={(e) => setRows(rows.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
                 />
                 <button className={`${btn} shrink-0`} onClick={() => setRows(rows.filter((_, j) => j !== i))}>
                   ✕
                 </button>
               </div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
-                  <input type="checkbox" checked={r.isChoice} onChange={() => toggleTraitChoice(i)} />
-                  Add bonus
-                </label>
-                {!r.isChoice ? (
-                  <label className="flex items-center gap-2 text-[13px] text-[var(--muted)]">
-                    Uses/day
-                    <input
-                      className={`${fieldBase} w-20`}
-                      type="number"
-                      min="0"
-                      value={r.uses}
-                      placeholder="/day"
-                      onChange={(e) => setTrait(i, { uses: e.target.value })}
-                    />
-                  </label>
-                ) : null}
+              <div className="sm:pl-4">
+                {effectsEditor(r.effects, (next) => setRows(rows.map((x, j) => (j === i ? { ...x, effects: next } : x))))}
               </div>
-              {r.isChoice ? (
-                <div className="flex flex-col gap-2 sm:pl-4">
-                  {r.options.map((o, k) => (
-                    <div key={k} className="flex flex-wrap gap-2">
-                      <input
-                        className={`${fieldBase} min-w-0 flex-1`}
-                        value={o.label}
-                        placeholder="Option label (e.g. +1 to ranged attacks)"
-                        onChange={(e) => setTraitOption(i, k, { label: e.target.value })}
-                      />
-                      <input
-                        className={`${fieldBase} w-16 shrink-0`}
-                        type="number"
-                        value={o.amount}
-                        placeholder="+1"
-                        onChange={(e) => setTraitOption(i, k, { amount: e.target.value })}
-                      />
-                      <select
-                        className={`${fieldBase} min-w-0 flex-1`}
-                        value={o.target}
-                        onChange={(e) => setTraitOption(i, k, { target: e.target.value })}
-                      >
-                        <option value="">— none (text only) —</option>
-                        {TALENT_TARGETS.map(([key, lbl]) => (
-                          <option key={key} value={key}>{lbl}</option>
-                        ))}
-                      </select>
-                      <button className={`${btn} shrink-0`} onClick={() => removeTraitOption(i, k)}>
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                  {r.options.length < 6 ? (
-                    <button className={`${btn} self-start`} onClick={() => addTraitOption(i)}>
-                      + Add another option (choice)
-                    </button>
-                  ) : null}
-                </div>
-              ) : null}
             </div>
           ))}
         </div>
-        <button
-          className={`${btn} mt-2`}
-          onClick={() => setRows([...rows, { text: "", uses: "", isChoice: false, options: [] }])}
-        >
+        <button className={`${btn} mt-2`} onClick={() => setRows([...rows, { text: "", effects: [] }])}>
           + Add trait
         </button>
       </div>
@@ -1096,38 +1033,8 @@ export default function HomebrewManager({
                                 onChange={(e) => patchTalent(i, { text: e.target.value })}
                               />
                             </div>
-                            <div className="mt-2 flex flex-col gap-2 sm:pl-14">
-                              {t.effects.map((eff, k) => (
-                                <div key={k} className="flex gap-2">
-                                  <input
-                                    className={`${fieldBase} w-16 shrink-0`}
-                                    type="number"
-                                    value={eff.amount}
-                                    placeholder="+1"
-                                    onChange={(e) => setTalentEffect(i, k, { amount: e.target.value })}
-                                  />
-                                  <select
-                                    className={`${fieldBase} min-w-0 flex-1`}
-                                    value={eff.target}
-                                    onChange={(e) => setTalentEffect(i, k, { target: e.target.value })}
-                                  >
-                                    {TALENT_TARGETS.map(([key, lbl]) => (
-                                      <option key={key} value={key}>{lbl}</option>
-                                    ))}
-                                  </select>
-                                  <button
-                                    className={`${btn} shrink-0`}
-                                    onClick={() => removeTalentEffect(i, k)}
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                              ))}
-                              {t.effects.length < 4 ? (
-                                <button className={`${btn} self-start`} onClick={() => addTalentEffect(i)}>
-                                  + Add effect
-                                </button>
-                              ) : null}
+                            <div className="mt-2 sm:pl-14">
+                              {effectsEditor(t.effects, (next) => patchTalent(i, { effects: next }), 4)}
                             </div>
                           </div>
                         ))}

@@ -10,16 +10,16 @@ export const dynamic = "force-dynamic";
 type RawQuery = { q?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-type TraitOption = { label: string; amount: number; target: string };
-type Trait = { text: string; uses: number; options: TraitOption[] };
+type Effect = { amount: number; target: string; weapon: string };
+type Trait = { text: string; effects: Effect[] };
 type Row = { name: string; traits: Trait[]; languages: string; homebrew: boolean };
 
 const TALENT_LABEL = new Map(TALENT_TARGETS);
-function optionEffect(o: TraitOption): string {
-  if (!o.target) return "";
-  const label = TALENT_LABEL.get(o.target) ?? o.target;
-  if (o.target === "weaponDie") return `d${o.amount} weapon damage`;
-  return `${o.amount >= 0 ? "+" : ""}${o.amount} ${label}`;
+function effectLabel(e: Effect): string {
+  const label = TALENT_LABEL.get(e.target) ?? e.target;
+  if (e.target === "perDay") return `${e.amount}/day`;
+  if (e.target === "weaponDie") return `d${e.amount} weapon damage${e.weapon ? ` (${e.weapon})` : ""}`;
+  return `${e.amount >= 0 ? "+" : ""}${e.amount} ${label}`;
 }
 
 // Split "Farsight: +1 to ranged…" into the trait name and its effect.
@@ -27,6 +27,25 @@ function splitTrait(trait: string): { title: string; body: string } {
   const i = trait.indexOf(":");
   if (i === -1) return { title: "", body: trait };
   return { title: trait.slice(0, i).trim(), body: trait.slice(i + 1).trim() };
+}
+
+// One trait record (current or legacy) → {text, effects}.
+function toTrait(t: Record<string, unknown>): Trait {
+  let effects: Effect[] = Array.isArray(t.effects)
+    ? (t.effects as Record<string, unknown>[]).map((e) => ({
+        amount: Number(e.amount) || 0,
+        target: String(e.target ?? ""),
+        weapon: String(e.weapon ?? ""),
+      }))
+    : [];
+  if (!effects.length && Array.isArray(t.options)) {
+    effects = (t.options as Record<string, unknown>[])
+      .map((o) => ({ amount: Number(o.amount) || 0, target: String(o.target ?? ""), weapon: "" }))
+      .filter((e) => e.target);
+  }
+  const u = Number(t.uses) || 0;
+  if (u > 0 && !effects.some((e) => e.target === "perDay")) effects = [{ amount: u, target: "perDay", weapon: "" }, ...effects];
+  return { text: String(t.text ?? ""), effects };
 }
 
 export default async function AncestriesPage({
@@ -46,19 +65,9 @@ export default async function AncestriesPage({
   const hbRows: Row[] = hbVisible.map((h) => {
     const d = h.data as Record<string, unknown>;
     const traits: Trait[] = Array.isArray(d.traits)
-      ? (d.traits as Record<string, unknown>[]).map((t) => ({
-          text: String(t.text ?? ""),
-          uses: Number(t.uses) || 0,
-          options: Array.isArray(t.options)
-            ? (t.options as Record<string, unknown>[]).map((o) => ({
-                label: String(o.label ?? ""),
-                amount: Number(o.amount) || 0,
-                target: String(o.target ?? ""),
-              }))
-            : [],
-        }))
+      ? (d.traits as Record<string, unknown>[]).map(toTrait)
       : d.trait
-        ? [{ text: String(d.trait), uses: 0, options: [] }]
+        ? [{ text: String(d.trait), effects: [] }]
         : [];
     return {
       name: String(d.name ?? h.name),
@@ -69,7 +78,7 @@ export default async function AncestriesPage({
   });
   const bookRows: Row[] = SD_ANCESTRIES.map((a) => ({
     name: a.name,
-    traits: a.trait ? [{ text: a.trait, uses: 0, options: [] }] : [],
+    traits: a.trait ? [{ text: a.trait, effects: [] }] : [],
     languages: a.languages,
     homebrew: false,
   }));
@@ -162,6 +171,8 @@ export default async function AncestriesPage({
               <div className="mt-2 flex flex-col gap-2">
                 {a.traits.map((t, i) => {
                   const { title, body } = splitTrait(t.text);
+                  const perDay = t.effects.find((e) => e.target === "perDay");
+                  const bonuses = t.effects.filter((e) => e.target !== "perDay");
                   return (
                     <div key={i}>
                       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -170,32 +181,21 @@ export default async function AncestriesPage({
                             {title}
                           </span>
                         ) : null}
-                        {t.uses > 0 ? (
+                        {perDay ? (
                           <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--gold)]">
-                            {t.uses}/day
+                            {perDay.amount}/day
                           </span>
                         ) : null}
                       </div>
                       <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">{body}</p>
-                      {t.options.length ? (
+                      {bonuses.length ? (
                         <ul className="mt-1 flex flex-col gap-1">
-                          {t.options.length > 1 ? (
-                            <li className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--text)]">
-                              Choose one:
+                          {bonuses.map((e, k) => (
+                            <li key={k} className="flex gap-2 text-[12px] leading-relaxed text-[var(--muted)]">
+                              <span className="shrink-0 text-[var(--gold)]">▸</span>
+                              <span className="text-[var(--gold)]">{effectLabel(e)}</span>
                             </li>
-                          ) : null}
-                          {t.options.map((o, k) => {
-                            const eff = optionEffect(o);
-                            return (
-                              <li key={k} className="flex gap-2 text-[12px] leading-relaxed text-[var(--muted)]">
-                                <span className="shrink-0 text-[var(--gold)]">▸</span>
-                                <span>
-                                  {o.label || eff || "Bonus"}
-                                  {o.label && eff ? <span className="text-[var(--gold)]"> ({eff})</span> : null}
-                                </span>
-                              </li>
-                            );
-                          })}
+                          ))}
                         </ul>
                       ) : null}
                     </div>

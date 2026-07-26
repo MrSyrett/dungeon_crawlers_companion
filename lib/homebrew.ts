@@ -326,40 +326,17 @@ export function normalizeAncestry(input: unknown): { name: string; data: Record<
         )
     : [];
 
-  // Traits: [{text, uses}] for a plain trait, or [{text, options:[{label,
-  // amount, target}]}] for a "choose one" trait (Elf Farsight / Beastfolk style)
-  // so limited-use abilities render tick boxes and choices become a wizard pick.
-  // Accept a legacy single `trait` string from earlier saves.
-  type AncTrait =
-    | { text: string; uses: number }
-    | { text: string; options: { label: string; amount: number; target: string }[] };
-  let traits: AncTrait[] = [];
+  // Traits: [{text, effects}] using the shared Effect Builder. Legacy shapes
+  // (uses/day, choose-one options, a single `trait` string) are migrated by
+  // cleanEffectRow so older saves keep working.
+  let traits: { text: string; effects: HbEffect[] }[] = [];
   if (Array.isArray(o.traits)) {
     traits = (o.traits as unknown[])
-      .map((t): AncTrait => {
-        const to = (t ?? {}) as Record<string, unknown>;
-        const text = str(to.text).slice(0, 500);
-        if (Array.isArray(to.options) && to.options.length) {
-          const options = (to.options as unknown[])
-            .map((op) => {
-              const oo = (op ?? {}) as Record<string, unknown>;
-              const target = str(oo.target);
-              return {
-                label: str(oo.label).slice(0, 120),
-                amount: num(oo.amount) ?? 0,
-                target: TALENT_TARGET_KEYS.includes(target) ? target : "",
-              };
-            })
-            .filter((op) => op.label || op.target)
-            .slice(0, 6);
-          if (options.length) return { text, options };
-        }
-        return { text, uses: usesPerDay(to.uses) };
-      })
+      .map(cleanEffectRow)
       .filter((t) => t.text)
       .slice(0, 20);
   } else if (str(o.trait)) {
-    traits = [{ text: str(o.trait).slice(0, 500), uses: 0 }];
+    traits = [{ text: str(o.trait).slice(0, 500), effects: [] }];
   }
 
   const data: Record<string, unknown> = {
@@ -396,8 +373,40 @@ export const TALENT_TARGETS: [string, string][] = [
   ["spellKnown", "Learned Spell"],
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
+  ["perDay", "Per Day (uses)"],
 ];
 const TALENT_TARGET_KEYS = TALENT_TARGETS.map(([k]) => k);
+
+// One mechanical effect shared by class talents, class features, and ancestry
+// traits. `weapon` is kept only for the weaponDie target (which weapon's damage
+// die changes; "" = all weapons). perDay carries a uses/day count as `amount`.
+export type HbEffect = { amount: number; target: string; weapon?: string };
+function cleanEffect(raw: unknown): HbEffect | null {
+  const e = (raw ?? {}) as Record<string, unknown>;
+  const target = str(e.target);
+  if (!TALENT_TARGET_KEYS.includes(target)) return null;
+  if (target === "weaponDie") return { amount: num(e.amount) ?? 0, target, weapon: str(e.weapon).slice(0, 60) };
+  return { amount: num(e.amount) ?? 0, target };
+}
+// A row of descriptive text plus a list of effects (features, traits).
+function cleanEffectRow(raw: unknown): { text: string; effects: HbEffect[] } {
+  if (typeof raw === "string") return { text: str(raw).slice(0, 500), effects: [] };
+  const o = (raw ?? {}) as Record<string, unknown>;
+  let effects = Array.isArray(o.effects)
+    ? (o.effects as unknown[]).map(cleanEffect).filter((e): e is HbEffect => e != null).slice(0, 6)
+    : [];
+  // Migrate legacy shapes: uses/day -> a Per Day effect; a "choose one" trait's
+  // options -> flat effects (the choice UI has been retired for a single builder).
+  if (!effects.length && Array.isArray(o.options)) {
+    effects = (o.options as unknown[])
+      .map((op) => cleanEffect(op))
+      .filter((e): e is HbEffect => e != null)
+      .slice(0, 6);
+  }
+  const u = usesPerDay(o.uses);
+  if (u > 0 && !effects.some((e) => e.target === "perDay")) effects = [{ amount: u, target: "perDay" }, ...effects];
+  return { text: str(o.text).slice(0, 500), effects };
+}
 
 export function normalizeClass(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
@@ -414,33 +423,24 @@ export function normalizeClass(input: unknown): { name: string; data: Record<str
   // Rows 2 & 3 split either 3-6/7-9 ("lo") or 3-7/8-9 ("hi"). Rows 1/4/5 fixed.
   const talentSplit = str(o.talentSplit) === "hi" ? "hi" : "lo";
 
-  const cleanEffect = (raw: unknown): { amount: number; target: string } | null => {
-    const e = (raw ?? {}) as Record<string, unknown>;
-    const target = str(e.target);
-    if (!TALENT_TARGET_KEYS.includes(target)) return null;
-    return { amount: num(e.amount) ?? 0, target };
-  };
-  // Always exactly 5 rows; each carries up to 2 effects.
+  const cleanEffectLocal = cleanEffect;
+  // Always exactly 5 rows; each carries up to 4 effects.
   const talentIn = Array.isArray(o.talent) ? (o.talent as unknown[]) : [];
   const talent = Array.from({ length: 5 }, (_, i) => {
     const row = (talentIn[i] ?? {}) as Record<string, unknown>;
     const effects = Array.isArray(row.effects)
       ? (row.effects as unknown[])
-          .map(cleanEffect)
-          .filter((e): e is { amount: number; target: string } => e != null)
+          .map(cleanEffectLocal)
+          .filter((e): e is HbEffect => e != null)
           .slice(0, 4)
       : [];
     return { text: str(row.text).slice(0, 300), effects };
   });
 
-  // Features: [{text, uses}] so limited-use features (Barbarian Rage) get tick boxes.
+  // Features: descriptive text + effects (Per Day drives tick boxes).
   const features = Array.isArray(o.features)
     ? (o.features as unknown[])
-        .map((f) => {
-          if (typeof f === "string") return { text: str(f).slice(0, 500), uses: 0 };
-          const fo = (f ?? {}) as Record<string, unknown>;
-          return { text: str(fo.text).slice(0, 500), uses: usesPerDay(fo.uses) };
-        })
+        .map(cleanEffectRow)
         .filter((f) => f.text)
         .slice(0, 20)
     : [];

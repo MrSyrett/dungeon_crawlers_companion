@@ -24,6 +24,17 @@ const SPELL_LIST_OPTIONS = [
 ];
 
 const TALENT_LABEL = new Map(TALENT_TARGETS);
+function effectLabel(e: Record<string, unknown>): string {
+  const amt = Number(e.amount) || 0;
+  const target = String(e.target ?? "");
+  const label = TALENT_LABEL.get(target) ?? target;
+  if (target === "perDay") return `${amt}/day`;
+  if (target === "weaponDie") {
+    const w = String(e.weapon ?? "");
+    return `d${amt} weapon damage${w ? ` (${w})` : ""}`;
+  }
+  return `${amt >= 0 ? "+" : ""}${amt} ${label}`;
+}
 function rollLabel(i: number, split: string): string {
   if (i === 0) return "2";
   if (i === 1) return split === "hi" ? "3–7" : "3–6";
@@ -82,14 +93,7 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
   const talentRolls: string[] = [];
   talentData.forEach((row, i) => {
     const effects = Array.isArray(row.effects) ? (row.effects as Record<string, unknown>[]) : [];
-    const effStr = effects
-      .map((e) => {
-        const amt = Number(e.amount) || 0;
-        const label = TALENT_LABEL.get(String(e.target)) ?? String(e.target);
-        if (e.target === "weaponDie") return `d${amt} weapon damage`;
-        return `${amt >= 0 ? "+" : ""}${amt} ${label}`;
-      })
-      .join(", ");
+    const effStr = effects.map(effectLabel).join(", ");
     const text = String(row.text ?? "");
     talent.push([text, effStr].filter(Boolean).join(" — ") || "—");
     talentRolls.push(rollLabel(i, split));
@@ -97,10 +101,14 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
 
   const features = (Array.isArray(d.features) ? (d.features as unknown[]) : [])
     .map((f) => {
+      if (typeof f === "string") return f;
       const fo = (f ?? {}) as Record<string, unknown>;
-      const text = typeof f === "string" ? f : String(fo.text ?? "");
-      const uses = Number(fo.uses) || 0;
-      return uses > 0 ? `${text} (${uses}/day)` : text;
+      const text = String(fo.text ?? "");
+      const effs = Array.isArray(fo.effects) ? (fo.effects as Record<string, unknown>[]) : [];
+      const parts = effs.map(effectLabel);
+      const legacyUses = Number(fo.uses) || 0; // pre-effects saves
+      if (!effs.length && legacyUses > 0) parts.push(`${legacyUses}/day`);
+      return parts.length ? `${text} (${parts.join(", ")})` : text;
     })
     .filter(Boolean);
 
