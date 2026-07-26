@@ -4474,6 +4474,9 @@ function startCharWizard() {
            name: '', hp: null };
   document.getElementById('ccw-overlay').style.display = 'flex';
   ccwRender();
+  // Pull the latest shared homebrew so freshly-authored classes/ancestries/
+  // backgrounds show up; it re-renders the wizard when it lands.
+  try { if(typeof syncSharedHomebrew === 'function') syncSharedHomebrew(); } catch(e) {}
 }
 
 function ccwClose() {
@@ -4820,7 +4823,7 @@ function ccwAncestry() {
   let h = '<p class="ccw-hint">Choose your ancestry, or roll randomly.</p>';
   h += '<button class="ccw-roll-btn" onclick="ccwRandAncestry()">🎲 Random</button>';
   h += '<div class="ccw-choice-grid">';
-  ['Human','Elf','Dwarf','Halfling','Half-Orc','Goblin','Beastfolk','Kobold'].forEach(a=>{
+  ['Human','Elf','Dwarf','Halfling','Half-Orc','Goblin','Beastfolk','Kobold'].concat(_hbAncestryNames).forEach(a=>{
     const sel = _ccw.ancestry===a ? ' selected' : '';
     h += '<button class="ccw-choice'+sel+'" onclick="ccwPickAncestry(\''+a+'\')"><div class="ccw-choice-name">'+a+'</div><div class="ccw-choice-desc">'+RC_ANCESTRY.ability[a]+'</div></button>';
   });
@@ -7184,6 +7187,117 @@ function campaignStartPolling() {
 // only way homebrew reaches the sheet — authoring lives on the web pages.
 // The account is the whole library, so each sync simply replaces what's held in
 // memory — repeat calls are idempotent and nothing is persisted in the browser.
+// ── Homebrew content injection (classes / ancestries / backgrounds) ──
+// Homebrew authored on the web pages is converted into the same reference
+// shapes the creation wizard already reads (RC_CLASS_INFO, RC_ANCESTRY,
+// RC_TITLES, RC_BACKGROUNDS…), so a homebrew class/ancestry/background becomes
+// selectable in the wizard and applies its data-driven mechanics — hit die,
+// weapon/armor proficiency, features, titles, languages, background — through
+// the existing generic code paths. Names that collide with official content
+// are skipped so the book always wins. Talent numeric effects, ancestry stat
+// bonuses, and homebrew spell lists are shown but not yet auto-applied (a later
+// pass wires those into ccwApply). Injection is rebuilt on every sync so it
+// stays idempotent and reflects deletes/edits.
+let _hbAncestryNames = [];
+const _hbInjected = { classes: [], ancestries: [], backgrounds: [] };
+const HB_TALENT_LABEL = {
+  meleeAtk:'Melee Attacks', meleeDmg:'Melee Damage', rangedAtk:'Ranged Attacks',
+  rangedDmg:'Ranged Damage', meleeAtkDmg:'Melee Attack & Damage',
+  rangedAtkDmg:'Ranged Attacks and Damage', ac:'AC', hp:'HP',
+  str:'Strength', dex:'Dexterity', con:'Constitution', int:'Intelligence',
+  wis:'Wisdom', cha:'Charisma', spellKnown:'Learned Spell', spellCheck:'Spellcasting Checks'
+};
+
+function _hbClearInjected() {
+  _hbInjected.classes.forEach(n => {
+    delete RC_CLASS_INFO[n]; delete RC_TITLES[n];
+    let i = CCW_CLASS_ORDER.indexOf(n); if(i>=0) CCW_CLASS_ORDER.splice(i,1);
+    i = RC_CLASSES.indexOf(n); if(i>=0) RC_CLASSES.splice(i,1);
+  });
+  _hbInjected.ancestries.forEach(n => {
+    delete RC_ANCESTRY.ability[n]; delete RC_ANCESTRY.languages[n]; delete RC_NAMES[n];
+    const i = RC_ANCESTRY.table.findIndex(t=>t.v===n); if(i>=0) RC_ANCESTRY.table.splice(i,1);
+  });
+  _hbInjected.backgrounds.forEach(n => {
+    const i = RC_BACKGROUNDS.indexOf(n); if(i>=0) RC_BACKGROUNDS.splice(i,1);
+    delete CCW_BG_DESC[n];
+  });
+  _hbInjected.classes = []; _hbInjected.ancestries = []; _hbInjected.backgrounds = [];
+  _hbAncestryNames = [];
+}
+
+// One talent row -> the display text the wizard's talent table shows. Effects
+// are rendered target-first ("Melee Attacks +1") so they read clearly and don't
+// trip the official talent-choice parser (which keys off "+N to …" phrasing).
+function _hbTalentText(row) {
+  const note = String(row && row.text || '').trim();
+  const effs = Array.isArray(row && row.effects) ? row.effects : [];
+  const parts = effs.filter(e => e && e.target).map(e => {
+    const amt = Number(e.amount) || 0;
+    return (HB_TALENT_LABEL[e.target] || e.target) + ' ' + (amt>=0?'+':'') + amt;
+  });
+  const effStr = parts.length ? '(' + parts.join(', ') + ')' : '';
+  return [note, effStr].filter(Boolean).join(' ') || '\u2014';
+}
+
+function injectHomebrewContent(rows) {
+  _hbClearInjected();
+  const offClasses = new Set(Object.keys(RC_CLASS_INFO));
+  const offAnc = new Set(Object.keys(RC_ANCESTRY.ability));
+  const offBg = new Set(RC_BACKGROUNDS.map(b => b.toLowerCase()));
+
+  for(const row of rows) {
+    if(!row || !row.data) continue;
+    const d = row.data;
+    const nm = String(d.name || '').trim();
+    if(!nm) continue;
+
+    if(row.type === 'class') {
+      if(offClasses.has(nm) || _hbInjected.classes.includes(nm)) continue;
+      const weapons = d.weaponsAll ? 'All weapons' : (Array.isArray(d.weapons) ? d.weapons.join(', ') : '');
+      const armor = d.armorAll ? 'All armor and shields' : (Array.isArray(d.armor) ? d.armor.join(', ') : '');
+      const features = (Array.isArray(d.features) ? d.features : []).map(f => {
+        const t = typeof f === 'string' ? f : String(f && f.text || '');
+        const u = Number(f && f.uses) || 0;
+        return u > 0 ? t + ' (' + u + '/day)' : t;
+      }).filter(Boolean);
+      const bands = d.talentSplit === 'hi'
+        ? [[2,2],[3,7],[8,9],[10,11],[12,12]]
+        : [[2,2],[3,6],[7,9],[10,11],[12,12]];
+      const talentRows = Array.isArray(d.talent) ? d.talent : [];
+      const talent = new Array(12).fill('');
+      [0,1,6,9,11].forEach((slot, i) => { talent[slot] = _hbTalentText(talentRows[i]); });
+      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _hb: true };
+      if(d.titles) {
+        const arr = v => Array.isArray(v) ? v.map(String) : [];
+        const L = arr(d.titles.Lawful), N = arr(d.titles.Neutral), C = arr(d.titles.Chaotic);
+        if([...L, ...N, ...C].some(x => x.trim())) RC_TITLES[nm] = { Lawful:L, Neutral:N, Chaotic:C };
+      }
+      CCW_CLASS_ORDER.push(nm);
+      if(RC_CLASSES.indexOf(nm) < 0) RC_CLASSES.push(nm);
+      _hbInjected.classes.push(nm);
+    } else if(row.type === 'ancestry') {
+      if(offAnc.has(nm) || _hbInjected.ancestries.includes(nm)) continue;
+      const ability = (Array.isArray(d.traits) ? d.traits : []).map(t => {
+        const txt = String(t && t.text || '').trim();
+        const u = Number(t && t.uses) || 0;
+        return u > 0 ? txt + ' (' + u + '/day)' : txt;
+      }).filter(Boolean).join(' \u00b7 ') || 'Homebrew ancestry.';
+      RC_ANCESTRY.ability[nm] = ability;
+      RC_ANCESTRY.languages[nm] = String(d.languages || 'Common');
+      RC_ANCESTRY.table.push({ w:1, v:nm });
+      RC_NAMES[nm] = RC_NAMES.Human;
+      _hbAncestryNames.push(nm);
+      _hbInjected.ancestries.push(nm);
+    } else if(row.type === 'background') {
+      if(offBg.has(nm.toLowerCase()) || _hbInjected.backgrounds.includes(nm)) continue;
+      RC_BACKGROUNDS.push(nm);
+      CCW_BG_DESC[nm] = String(d.desc || '');
+      _hbInjected.backgrounds.push(nm);
+    }
+  }
+}
+
 // Fire-and-forget; a failed fetch leaves the sheet as it was.
 async function syncSharedHomebrew() {
   let url = '/api/homebrew';
@@ -7219,6 +7333,12 @@ async function syncSharedHomebrew() {
 
   _homebrewSpells = nextSpells;
   _homebrewItems  = nextItems;
+
+  // Convert homebrew classes/ancestries/backgrounds into the wizard's reference
+  // shapes so they're selectable and apply their core mechanics.
+  try { injectHomebrewContent(items); } catch(e) {}
+  // If the creation wizard is open, redraw it so injected content appears.
+  try { if(typeof _ccw !== 'undefined' && _ccw && typeof ccwRender === 'function') ccwRender(); } catch(e) {}
 
   // Refresh anything that reads these lists. Spell pickers read allSpells() on
   // open, so they pick up new entries automatically; the shop and equipped-item
