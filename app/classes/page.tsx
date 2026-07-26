@@ -2,12 +2,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SD_CLASSES, type SdClass } from "@/lib/data/classes";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
 
 type Query = { q?: string; cast?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
+
+type Row = SdClass & { homebrew: boolean };
 
 const chipBase =
   "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
@@ -24,7 +28,7 @@ function withParams(current: Query, patch: Query): string {
   return s ? `/classes?${s}` : "/classes";
 }
 
-function matches(c: SdClass, needle: string, cast: string): boolean {
+function matches(c: Row, needle: string, cast: string): boolean {
   if (cast === "caster" && !c.caster) return false;
   if (cast === "martial" && c.caster) return false;
   if (!needle) return true;
@@ -43,13 +47,43 @@ export default async function ClassesPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  const [hbVisible, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "class" }),
+    ownHomebrew(user.id, "class"),
+    userCampaigns(user.id),
+  ]);
+
+  const hbRows: Row[] = hbVisible.map((h) => {
+    const d = h.data as Record<string, unknown>;
+    const talent = Array.isArray(d.talent)
+      ? (d.talent as unknown[]).map((t) =>
+          typeof t === "string" ? t : String((t as Record<string, unknown>).text ?? ""),
+        )
+      : [];
+    const features = Array.isArray(d.features) ? (d.features as unknown[]).map(String) : [];
+    return {
+      name: String(d.name ?? h.name),
+      hd: String(d.hd ?? "1d6"),
+      weapons: String(d.weapons ?? ""),
+      armor: String(d.armor ?? ""),
+      talent: talent.filter(Boolean),
+      talentBands: null,
+      features,
+      caster: Boolean(d.caster),
+      titles: null,
+      homebrew: true,
+    };
+  });
+  const bookRows: Row[] = SD_CLASSES.map((c) => ({ ...c, homebrew: false }));
+  const ALL: Row[] = [...hbRows, ...bookRows].sort((a, b) => a.name.localeCompare(b.name, "en"));
+
   const raw = await searchParams;
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
   const cast = ["caster", "martial"].includes(one(raw.cast)) ? one(raw.cast) : "";
   const current: Query = { q, cast };
 
-  const results = SD_CLASSES.filter((c) => matches(c, needle, cast));
+  const results = ALL.filter((c) => matches(c, needle, cast));
   const filtered = Boolean(needle || cast);
 
   return (
@@ -58,16 +92,18 @@ export default async function ClassesPage({
         <div>
           <h1 className="font-display text-3xl font-black tracking-wide">Classes</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
-            {SD_CLASSES.length} Shadowdark classes
+            {SD_CLASSES.length} Shadowdark classes{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}
           </p>
         </div>
         <Link
           href="/dashboard"
           className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
         >
-          ← Home
+          &larr; Home
         </Link>
       </header>
+
+      <HomebrewManager type="class" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/classes" className="mb-4 flex gap-2">
         <input
@@ -128,8 +164,11 @@ export default async function ClassesPage({
         </div>
       ) : (
         <ul className="flex flex-col gap-4">
-          {results.map((c) => (
-            <li key={c.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
+          {results.map((c, idx) => (
+            <li
+              key={`${c.homebrew ? "hb" : "bk"}-${c.name}-${idx}`}
+              className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
+            >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h2 className="text-lg font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
                   {c.name}
@@ -140,6 +179,11 @@ export default async function ClassesPage({
                 {c.caster ? (
                   <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
                     Spellcaster
+                  </span>
+                ) : null}
+                {c.homebrew ? (
+                  <span className="rounded border border-[var(--gold)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
+                    Homebrew
                   </span>
                 ) : null}
               </div>
