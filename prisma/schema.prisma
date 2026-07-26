@@ -21,6 +21,7 @@ model User {
   campaigns Campaign[]
   homebrew  Homebrew[]
   vttTokens VttToken[]
+  rulebookAccess RulebookAccess[]
 }
 
 model Session {
@@ -159,4 +160,32 @@ model CampaignRoll {
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId, id])
+}
+
+// ── Rulebook access control ──────────────────────────────────────────────────
+// Rulebook PDFs live on disk in protected/rulebooks/ (never under public/), keyed
+// by filename. These two tables gate who may read each file. Default is PRIVATE:
+// a file with no Rulebook row and no grants is visible only to admins
+// (ADMIN_EMAILS) — the safe default for copyrighted material.
+
+// Per-file visibility switch. everyone=true opens a file to any signed-in user;
+// otherwise access is admin-only plus whoever has an explicit grant below.
+model Rulebook {
+  file      String   @id // filename in protected/rulebooks/
+  everyone  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// A grant: this user may read this rulebook file. Deleting the user removes it.
+model RulebookAccess {
+  file      String
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([file, userId])
+  @@index([userId])
+  @@index([file])
 }

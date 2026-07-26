@@ -1,33 +1,10 @@
-import { readdir } from "node:fs/promises";
-import path from "node:path";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/admin";
+import { visibleRulebookFiles, prettyName } from "@/lib/rulebooks";
 
 export const dynamic = "force-dynamic";
-
-// Private dir (outside public/): PDFs are streamed to signed-in users via
-// /api/rulebooks/<file>, never served statically.
-const RULEBOOK_DIR = path.join(process.cwd(), "protected", "rulebooks");
-
-// Turn "shadowdark-core-rules.pdf" into "Shadowdark Core Rules"
-function prettyName(file: string): string {
-  return file
-    .replace(/\.pdf$/i, "")
-    .replace(/[-_]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-async function listRulebooks(): Promise<string[]> {
-  try {
-    const files = await readdir(RULEBOOK_DIR);
-    return files.filter((f) => f.toLowerCase().endsWith(".pdf")).sort();
-  } catch {
-    return []; // directory missing — treated the same as empty
-  }
-}
 
 export default async function RulesPage({
   searchParams,
@@ -37,7 +14,9 @@ export default async function RulesPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const books = await listRulebooks();
+  const isAdmin = isAdminEmail(user.email);
+  // Only the books this user is allowed to see.
+  const books = await visibleRulebookFiles({ id: user.id, email: user.email });
   const { book } = await searchParams;
 
   // Only ever serve a file we actually listed — never trust the query string
@@ -101,12 +80,22 @@ export default async function RulesPage({
             Reference at the table
           </p>
         </div>
-        <Link
-          href="/dashboard"
-          className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-        >
-          ← Home
-        </Link>
+        <div className="flex items-center gap-2">
+          {isAdmin ? (
+            <Link
+              href="/admin/rulebooks"
+              className="rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+            >
+              Manage access
+            </Link>
+          ) : null}
+          <Link
+            href="/dashboard"
+            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+          >
+            ← Home
+          </Link>
+        </div>
       </header>
 
       {books.length === 0 ? (

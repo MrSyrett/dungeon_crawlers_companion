@@ -4,13 +4,9 @@ import { Readable } from "node:stream";
 import path from "node:path";
 import type { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { canAccessRulebook, RULEBOOK_DIR } from "@/lib/rulebooks";
 
 export const dynamic = "force-dynamic";
-
-// Rulebooks live OUTSIDE public/ so Next never serves them statically. They are
-// streamed only to signed-in users through this route, which keeps copyrighted
-// material off the open web while still letting your group read it in-app.
-const RULEBOOK_DIR = path.join(process.cwd(), "protected", "rulebooks");
 
 type Ctx = { params: Promise<{ file: string }> };
 
@@ -40,6 +36,12 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
     listed = false;
   }
   if (!listed) return new Response("Not found", { status: 404 });
+
+  // Access control: admins see everything; everyone else needs the file opened
+  // to all or granted to their account. A denied file 404s (not 403) so the URL
+  // doesn't confirm which private books exist.
+  const allowed = await canAccessRulebook({ id: user.id, email: user.email }, file);
+  if (!allowed) return new Response("Not found", { status: 404 });
 
   const full = path.join(RULEBOOK_DIR, file);
   const info = await stat(full).catch(() => null);
