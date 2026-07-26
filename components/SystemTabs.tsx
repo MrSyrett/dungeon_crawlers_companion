@@ -32,7 +32,7 @@ export default function SystemTabs({
       {/* The toolbar now owns the full width (the toggle moved to the header),
           so the reference links wrap freely instead of running off the edge. */}
       {nav || sdNav ? (
-        <nav className="mb-8 flex flex-wrap gap-2 border-b border-[var(--border)] pb-6">
+        <nav className="mb-8 flex flex-wrap justify-end gap-2 border-b border-[var(--border)] pb-6">
           {active === "SD" ? sdNav : null}
           {nav}
         </nav>
