@@ -9,7 +9,7 @@ import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
 
-type Query = { q?: string; cast?: string };
+type Query = { q?: string; cast?: string; opt?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -81,6 +81,7 @@ function withParams(current: Query, patch: Query): string {
   const sp = new URLSearchParams();
   if (next.q) sp.set("q", next.q);
   if (next.cast) sp.set("cast", next.cast);
+  if (next.opt) sp.set("opt", next.opt);
   const s = sp.toString();
   return s ? `/classes?${s}` : "/classes";
 }
@@ -139,6 +140,7 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
     talentRolls,
     features,
     caster: Boolean(d.caster),
+    optional: false,
     titles: parseTitles(d.titles),
     homebrew: true,
   };
@@ -171,10 +173,11 @@ export default async function ClassesPage({
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
   const cast = ["caster", "martial"].includes(one(raw.cast)) ? one(raw.cast) : "";
-  const current: Query = { q, cast };
+  const opt = one(raw.opt) === "0" ? "0" : "";
+  const current: Query = { q, cast, opt };
 
-  const results = ALL.filter((c) => matches(c, needle, cast));
-  const filtered = Boolean(needle || cast);
+  const results = ALL.filter((c) => matches(c, needle, cast) && (opt !== "0" || !c.optional));
+  const filtered = Boolean(needle || cast || opt);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
@@ -234,6 +237,18 @@ export default async function ClassesPage({
           className={`${chipBase} ${cast === "martial" ? chipOn : chipOff}`}
         >
           Martial
+        </Link>
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+          Optional
+        </span>
+        <Link href={withParams(current, { opt: "" })} className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}>
+          Shown
+        </Link>
+        <Link href={withParams(current, { opt: "0" })} className={`${chipBase} ${opt === "0" ? chipOn : chipOff}`}>
+          Hidden
         </Link>
       </div>
 

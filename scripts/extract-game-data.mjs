@@ -323,6 +323,14 @@ function extractClassScope(html, sourceLabel) {
 }
 
 const cls = extractClassScope(sdSheet, "sd_character_sheet.html");
+// Optional (non-core) content lists. Empty arrays are allowed here.
+function optSet(name) {
+  try { return new Set(extractArray(sdSheet, name, "sd_character_sheet.html").map(String)); }
+  catch { return new Set(); }
+}
+const optClasses = optSet("RC_OPTIONAL_CLASSES");
+const optAncestries = optSet("RC_OPTIONAL_ANCESTRIES");
+const optBackgrounds = optSet("RC_OPTIONAL_BACKGROUNDS");
 const classRows = cls.RC_CLASSES.map((name) => {
   const info = cls.RC_CLASS_INFO[name] || {};
   const titles = cls.RC_TITLES[name] || null;
@@ -336,6 +344,7 @@ const classRows = cls.RC_CLASSES.map((name) => {
     talentBands: Array.isArray(info.talentBands) ? info.talentBands : null,
     features,
     caster: features.some((f) => /Spellcasting/i.test(f)),
+    optional: optClasses.has(name),
     titles: titles
       ? {
           Lawful: (titles.Lawful || []).map(String),
@@ -358,6 +367,7 @@ const classCount = emit(
   talentBands: [number, number][] | null;
   features: string[];
   caster: boolean;
+  optional: boolean;
   titles: { Lawful: string[]; Chaotic: string[]; Neutral: string[] } | null;
 }`,
   "SD_CLASSES",
@@ -369,25 +379,26 @@ const ancestryRows = (anc.table || []).map((t) => ({
   name: String(t.v),
   trait: String((anc.ability || {})[t.v] ?? ""),
   languages: String((anc.languages || {})[t.v] ?? ""),
+  optional: optAncestries.has(String(t.v)),
 }));
 const ancestryCount = emit(
   "ancestries.ts",
   "Source: tools/templates/sd_character_sheet.html (RC_ANCESTRY)",
   "SdAncestry",
-  `{ name: string; trait: string; languages: string }`,
+  `{ name: string; trait: string; languages: string; optional: boolean }`,
   "SD_ANCESTRIES",
   ancestryRows,
 );
 
 const bgDesc = extractObject(sdSheet, "CCW_BG_DESC", "sd_character_sheet.html");
 const backgroundRows = extractArray(sdSheet, "RC_BACKGROUNDS", "sd_character_sheet.html").map(
-  (name) => ({ name: String(name), desc: String(bgDesc[String(name)] || "") }),
+  (name) => ({ name: String(name), desc: String(bgDesc[String(name)] || ""), optional: optBackgrounds.has(String(name)) }),
 );
 const backgroundCount = emit(
   "backgrounds.ts",
   "Source: tools/templates/sd_character_sheet.html (RC_BACKGROUNDS + CCW_BG_DESC)",
   "SdBackground",
-  `{ name: string; desc: string }`,
+  `{ name: string; desc: string; optional: boolean }`,
   "SD_BACKGROUNDS",
   backgroundRows,
 );

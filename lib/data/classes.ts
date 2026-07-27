@@ -11,6 +11,7 @@ export type SdClass = {
   talentBands: [number, number][] | null;
   features: string[];
   caster: boolean;
+  optional: boolean;
   titles: { Lawful: string[]; Chaotic: string[]; Neutral: string[] } | null;
 };
 
@@ -41,6 +42,7 @@ export const SD_CLASSES: SdClass[] = [
       "Grit: Choose STR or DEX; advantage on checks to overcome opposing force."
     ],
     "caster": false,
+    "optional": false,
     "titles": {
       "Lawful": [
         "Squire",
@@ -92,6 +94,7 @@ export const SD_CLASSES: SdClass[] = [
       "Choose a Deity matching your alignment."
     ],
     "caster": true,
+    "optional": false,
     "titles": {
       "Lawful": [
         "Acolyte",
@@ -141,6 +144,7 @@ export const SD_CLASSES: SdClass[] = [
       "Thievery: Advantage on climbing, sneaking, disguises, traps, locks, pickpocketing."
     ],
     "caster": false,
+    "optional": false,
     "titles": {
       "Lawful": [
         "Footpad",
@@ -191,6 +195,7 @@ export const SD_CLASSES: SdClass[] = [
       "Languages: 2 additional common + 2 rare languages."
     ],
     "caster": true,
+    "optional": false,
     "titles": {
       "Lawful": [
         "Apprentice",
@@ -243,6 +248,7 @@ export const SD_CLASSES: SdClass[] = [
       "Languages: 4 additional common + 1 rare language."
     ],
     "caster": false,
+    "optional": false,
     "titles": {
       "Lawful": [
         "Storyteller",
@@ -297,6 +303,7 @@ export const SD_CLASSES: SdClass[] = [
       "  Curative (DC 15): Equivalent to a Potion of Healing."
     ],
     "caster": false,
+    "optional": false,
     "titles": {
       "Lawful": [
         "Wanderer",
@@ -368,6 +375,7 @@ export const SD_CLASSES: SdClass[] = [
       "Languages: Diabolic, Primordial, Sylvan."
     ],
     "caster": true,
+    "optional": true,
     "titles": {
       "Lawful": [
         "Fortune Teller",
@@ -419,6 +427,7 @@ export const SD_CLASSES: SdClass[] = [
       "Relentless: 3/day, when reduced to 0 HP, make a DC 18 Constitution check (Implacable applies). On a success, you go to 1 HP instead."
     ],
     "caster": false,
+    "optional": true,
     "titles": {
       "Lawful": [
         "Rookie",

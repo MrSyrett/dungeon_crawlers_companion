@@ -3842,6 +3842,16 @@ const RC_CLASSES = ['Fighter','Priest','Thief','Wizard','Bard','Ranger','Witch',
 // the left column reads Fighter / Thief / Ranger / Pit Fighter and the right
 // column reads Priest / Wizard / Bard / Witch.
 const CCW_CLASS_ORDER = ['Fighter','Priest','Thief','Wizard','Ranger','Bard','Pit Fighter','Witch'];
+// Official-but-optional content (not part of the Shadowdark core rules). Used by
+// the reference pages and creation to let players include/exclude these.
+const RC_OPTIONAL_CLASSES = [
+  'Pit Fighter','Witch'
+];
+const RC_OPTIONAL_ANCESTRIES = [
+  'Kobold'
+];
+const RC_OPTIONAL_BACKGROUNDS = [
+];
 // ── Ranger herbal remedies (Shadowdark, Ranger) ────────────────────────────
 // One table drives the class feature text, the Talents box and the creation
 // wizard's remedy picker, so the wording can't drift between them.
@@ -4519,6 +4529,7 @@ function startCharWizard() {
            alignment: null, deity: '', talent: null, talent2: null,
            talentRoll: null, talent2Roll: null, tres: null, tres2: null, hbTalentChoice: null, hbTalentChoice2: null, hbTalentSpells: [], hbChoices: {},
            langCommon: [], langRare: [], langPriest: '', elfFarsight: null, beastNatural: null, koboldKnack: null, hbChoice: {},
+           inclOptional: true, inclHomebrew: true,
            spells: [], spellSrc: null, spellSrcOf: {}, gold: null, buyKit: true, buyWeapons: [], buyArmor: [],
            name: '', hp: null };
   document.getElementById('ccw-overlay').style.display = 'flex';
@@ -4593,8 +4604,33 @@ function ccwRender() {
   nb.style.visibility = name==='Method' ? 'hidden' : 'visible';
 }
 
+// Whether optional / homebrew content is included (Step 1 toggles; default on).
+function _ccwInclOptional(){ return _ccw.inclOptional !== false; }
+function _ccwInclHomebrew(){ return _ccw.inclHomebrew !== false; }
+function _ccwClassAllowed(n){ if(_hbInjected.classes.indexOf(n)>=0) return _ccwInclHomebrew(); if(RC_OPTIONAL_CLASSES.indexOf(n)>=0) return _ccwInclOptional(); return true; }
+function _ccwAncestryAllowed(n){ if(_hbInjected.ancestries.indexOf(n)>=0) return _ccwInclHomebrew(); if(RC_OPTIONAL_ANCESTRIES.indexOf(n)>=0) return _ccwInclOptional(); return true; }
+function _ccwBgAllowed(n){ if(_hbInjected.backgrounds.indexOf(n)>=0) return _ccwInclHomebrew(); if(RC_OPTIONAL_BACKGROUNDS.indexOf(n)>=0) return _ccwInclOptional(); return true; }
+// Filtered random pools honoring the Step 1 toggles.
+function _ccwRandomAncestry(){
+  const pool = RC_ANCESTRY.table.filter(t=>_ccwAncestryAllowed(t.v))
+    .concat(_ccwInclHomebrew() ? (_hbAncestryNames||[]).map(n=>({w:1,v:n})) : []);
+  return pool.length ? _rc_weighted(pool) : 'Human';
+}
+function _ccwRandomClass(){
+  const pool = CCW_CLASS_ORDER.filter(_ccwClassAllowed);
+  return pool.length ? pool[Math.floor(Math.random()*pool.length)] : 'Fighter';
+}
+function _ccwRandomBackground(){
+  const pool = RC_BACKGROUNDS.filter(_ccwBgAllowed);
+  return pool.length ? pool[Math.floor(Math.random()*pool.length)] : RC_BACKGROUNDS[0];
+}
+
 function ccwMethod() {
   let h = '<p class="ccw-hint">How do you want to make your character?</p>';
+  h += '<div style="display:flex;gap:16px;justify-content:center;margin:0 0 12px;padding:8px 10px;background:#0f0f0f;border:1px solid #2a2a2a;">';
+  h += '<label style="display:flex;align-items:center;gap:6px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#ccc;cursor:pointer;"><input type="checkbox" '+(_ccwInclOptional()?'checked':'')+' onchange="_ccw.inclOptional=this.checked;ccwRender()"> Optional Content</label>';
+  h += '<label style="display:flex;align-items:center;gap:6px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#ccc;cursor:pointer;"><input type="checkbox" '+(_ccwInclHomebrew()?'checked':'')+' onchange="_ccw.inclHomebrew=this.checked;ccwRender()"> Homebrew</label>';
+  h += '</div>';
   h += '<button class="ccw-choice" style="width:100%;margin-bottom:8px;padding:14px;" onclick="ccwGoRandom()"><div class="ccw-choice-name">🎲 Random Character</div><div class="ccw-choice-desc">Instantly generate a complete character — stats, class, gear, everything rolled for you.</div></button>';
   h += '<button class="ccw-choice" style="width:100%;padding:14px;" onclick="_ccw.step++;ccwRender()"><div class="ccw-choice-name">⚒ Design Your Own</div><div class="ccw-choice-desc">Walk through each step and make every roll and choice yourself.</div></button>';
   return h;
@@ -4651,7 +4687,7 @@ function ccwRandomize() {
   ccwSyncStats();
 
   // Ancestry / class / background / alignment / deity
-  _ccw.ancestry  = _rc_weighted(RC_ANCESTRY.table);
+  _ccw.ancestry  = _ccwRandomAncestry();
   _ccw.elfFarsight = _ccw.ancestry==='Elf' ? rand(['ranged','spell']) : null;
   _ccw.beastNatural = _ccw.ancestry==='Beastfolk' ? rand(['attack','ac']) : null;
   _ccw.koboldKnack  = _ccw.ancestry==='Kobold' ? rand(['spell','luck']) : null;
@@ -4666,10 +4702,11 @@ function ccwRandomize() {
   };
   const maxVal = Math.max(...CCW_ALL_STATS.map(k=>_ccw.stats[k]));
   const topStats = CCW_ALL_STATS.filter(k=>_ccw.stats[k]===maxVal);
-  _ccw.cls = rand(CLASS_BY_STAT[rand(topStats)]);
+  const _clsPool = (CLASS_BY_STAT[rand(topStats)]||[]).filter(_ccwClassAllowed);
+  _ccw.cls = _clsPool.length ? rand(_clsPool) : _ccwRandomClass();
   _ccw.grit = _ccw.cls==='Fighter' ? rand(['Strength','Dexterity']) : null;
   _ccw.mastery = _ccw.cls==='Fighter' ? rand(SD_WEAPONS).name : null;
-  _ccw.background= rand(RC_BACKGROUNDS);
+  _ccw.background= _ccwRandomBackground();
   _ccw.alignment = rand(['Lawful','Neutral','Chaotic']);
   const deities  = RC_DEITIES[_ccw.alignment] || [];
   _ccw.deity     = (_ccw.cls==='Priest' && deities.length) ? rand(deities)
@@ -4927,7 +4964,7 @@ function ccwAncestry() {
   let h = '<p class="ccw-hint">Choose your ancestry, or roll randomly.</p>';
   h += '<button class="ccw-roll-btn" onclick="ccwRandAncestry()">🎲 Random</button>';
   h += '<div class="ccw-choice-grid">';
-  ['Human','Elf','Dwarf','Halfling','Half-Orc','Goblin','Kobold'].concat(_hbAncestryNames).forEach(a=>{
+  ['Human','Elf','Dwarf','Halfling','Half-Orc','Goblin','Kobold'].concat(_hbAncestryNames).filter(_ccwAncestryAllowed).forEach(a=>{
     const sel = _ccw.ancestry===a ? ' selected' : '';
     h += '<button class="ccw-choice'+sel+'" onclick="ccwPickAncestry(\''+a+'\')"><div class="ccw-choice-name">'+a+'</div><div class="ccw-choice-desc">'+RC_ANCESTRY.ability[a]+'</div></button>';
   });
@@ -4965,7 +5002,7 @@ function ccwPickHbChoice(ti, oi) { if(!_ccw.hbChoice) _ccw.hbChoice={}; _ccw.hbC
 function _ccwPickHbChoiceSel(key, val){ const ti=parseInt(key.slice(4)); if(val===''){ if(_ccw.hbChoice) delete _ccw.hbChoice[ti]; ccwRender(); } else ccwPickHbChoice(ti, parseInt(val)); }
 function ccwClearAncestryChoices() { _ccw.langCommon=[]; _ccw.langRare=[]; _ccw.elfFarsight=null; _ccw.beastNatural=null; _ccw.koboldKnack=null; _ccw.hbChoice={}; }
 function ccwPickAncestry(a) { _ccw.ancestry = a; ccwClearAncestryChoices(); ccwRender(); }
-function ccwRandAncestry() { _ccw.ancestry = _rc_weighted(RC_ANCESTRY.table); ccwClearAncestryChoices(); ccwRender(); }
+function ccwRandAncestry() { _ccw.ancestry = _ccwRandomAncestry(); ccwClearAncestryChoices(); ccwRender(); }
 
 // ── Step: Class ──
 function ccwSetClass(c){
@@ -4979,9 +5016,9 @@ function ccwSetClass(c){
 }
 function ccwClass() {
   let h = '<p class="ccw-hint">Choose your class, or roll randomly.</p>';
-  h += '<button class="ccw-roll-btn" onclick="ccwSetClass(_rc_roll(RC_CLASSES))">🎲 Random</button>';
+  h += '<button class="ccw-roll-btn" onclick="ccwSetClass(_ccwRandomClass())">🎲 Random</button>';
   h += '<div class="ccw-choice-grid">';
-  CCW_CLASS_ORDER.forEach(c=>{
+  CCW_CLASS_ORDER.filter(_ccwClassAllowed).forEach(c=>{
     const ci = RC_CLASS_INFO[c];
     const sel = _ccw.cls===c ? ' selected' : '';
     h += '<button class="ccw-choice'+sel+'" onclick="ccwSetClass(\''+c+'\')"><div class="ccw-choice-name">'+c+'</div><div class="ccw-choice-desc">HP: '+ci.hd+' / lvl · '+ci.weapons.split(',').slice(0,3).join(',')+'…</div></button>';
@@ -5043,9 +5080,9 @@ function ccwClass() {
 // ── Step: Background ──
 function ccwBackground() {
   let h = '<p class="ccw-hint">Choose a background, or roll d20.</p>';
-  h += '<button class="ccw-roll-btn" onclick="_ccw.background=RC_BACKGROUNDS[Math.floor(Math.random()*RC_BACKGROUNDS.length)];ccwRender()">🎲 Roll d20</button>';
+  h += '<button class="ccw-roll-btn" onclick="_ccw.background=_ccwRandomBackground();ccwRender()">🎲 Roll d20</button>';
   h += '<div class="ccw-choice-grid">';
-  RC_BACKGROUNDS.forEach(b=>{
+  RC_BACKGROUNDS.filter(_ccwBgAllowed).forEach(b=>{
     const sel = _ccw.background===b ? ' selected' : '';
     const desc = CCW_BG_DESC[b] || '';
     h += '<button class="ccw-choice'+sel+'" onclick="_ccw.background=\''+b.replace(/'/g,"\\'")+'\';ccwRender()"><div class="ccw-choice-name" style="font-size:11px;">'+b+'</div><div class="ccw-choice-desc">'+desc+'</div></button>';

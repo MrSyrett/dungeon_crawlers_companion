@@ -7,12 +7,24 @@ import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
 
-type RawQuery = { q?: string | string[] };
+type RawQuery = { q?: string | string[]; opt?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
 type Effect = { amount: number; target: string; weapon: string; spell: string; feature?: string };
 type Trait = { text: string; effects: Effect[]; choose: boolean };
-type Row = { name: string; traits: Trait[]; languages: string; homebrew: boolean };
+type Row = { name: string; traits: Trait[]; languages: string; homebrew: boolean; optional: boolean };
+const chipBase =
+  "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
+const chipOff =
+  "border-[var(--border)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]";
+const chipOn = "border-[var(--gold)] bg-[var(--panel-2)] text-[var(--gold)]";
+function optHref(q: string, opt: string): string {
+  const sp = new URLSearchParams();
+  if (q) sp.set("q", q);
+  if (opt) sp.set("opt", opt);
+  const s = sp.toString();
+  return s ? `/ancestries?${s}` : "/ancestries";
+}
 
 const TALENT_LABEL = new Map(TALENT_TARGETS);
 function effectLabel(e: Effect): string {
@@ -80,6 +92,7 @@ export default async function AncestriesPage({
       traits: traits.filter((t) => t.text),
       languages: String(d.languages ?? ""),
       homebrew: true,
+      optional: false,
     };
   });
   const bookRows: Row[] = SD_ANCESTRIES.map((a) => ({
@@ -87,20 +100,22 @@ export default async function AncestriesPage({
     traits: a.trait ? [{ text: a.trait, effects: [], choose: false }] : [],
     languages: a.languages,
     homebrew: false,
+    optional: a.optional,
   }));
   const ALL: Row[] = [...hbRows, ...bookRows].sort((a, b) => a.name.localeCompare(b.name, "en"));
 
   const raw = await searchParams;
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
-  const results = needle
-    ? ALL.filter(
-        (a) =>
-          a.name.toLowerCase().includes(needle) ||
-          a.traits.some((t) => t.text.toLowerCase().includes(needle)),
-      )
-    : ALL;
-  const filtered = Boolean(needle);
+  const opt = one(raw.opt) === "0" ? "0" : "";
+  const results = ALL.filter(
+    (a) =>
+      (!needle ||
+        a.name.toLowerCase().includes(needle) ||
+        a.traits.some((t) => t.text.toLowerCase().includes(needle))) &&
+      (opt !== "0" || !a.optional),
+  );
+  const filtered = Boolean(needle || opt);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
@@ -133,6 +148,18 @@ export default async function AncestriesPage({
           Search
         </button>
       </form>
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+          Optional
+        </span>
+        <Link href={optHref(q, "")} className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}>
+          Shown
+        </Link>
+        <Link href={optHref(q, "0")} className={`${chipBase} ${opt === "0" ? chipOn : chipOff}`}>
+          Hidden
+        </Link>
+      </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
         <span>

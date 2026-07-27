@@ -7,10 +7,22 @@ import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
 
-type RawQuery = { q?: string | string[] };
+type RawQuery = { q?: string | string[]; opt?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-type Row = { name: string; desc: string; homebrew: boolean };
+type Row = { name: string; desc: string; homebrew: boolean; optional: boolean };
+const chipBase =
+  "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
+const chipOff =
+  "border-[var(--border)] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]";
+const chipOn = "border-[var(--gold)] bg-[var(--panel-2)] text-[var(--gold)]";
+function optHref(q: string, opt: string): string {
+  const sp = new URLSearchParams();
+  if (q) sp.set("q", q);
+  if (opt) sp.set("opt", opt);
+  const s = sp.toString();
+  return s ? `/backgrounds?${s}` : "/backgrounds";
+}
 
 export default async function BackgroundsPage({
   searchParams,
@@ -28,18 +40,21 @@ export default async function BackgroundsPage({
 
   const hbRows: Row[] = hbVisible.map((h) => {
     const d = h.data as Record<string, unknown>;
-    return { name: String(d.name ?? h.name), desc: String(d.desc ?? ""), homebrew: true };
+    return { name: String(d.name ?? h.name), desc: String(d.desc ?? ""), homebrew: true, optional: false };
   });
-  const bookRows: Row[] = SD_BACKGROUNDS.map((b) => ({ name: b.name, desc: b.desc, homebrew: false }));
+  const bookRows: Row[] = SD_BACKGROUNDS.map((b) => ({ name: b.name, desc: b.desc, homebrew: false, optional: b.optional }));
   const ALL: Row[] = [...hbRows, ...bookRows].sort((a, b) => a.name.localeCompare(b.name, "en"));
 
   const raw = await searchParams;
   const q = one(raw.q).trim();
   const needle = q.toLowerCase();
-  const results = needle
-    ? ALL.filter((b) => b.name.toLowerCase().includes(needle) || b.desc.toLowerCase().includes(needle))
-    : ALL;
-  const filtered = Boolean(needle);
+  const opt = one(raw.opt) === "0" ? "0" : "";
+  const results = ALL.filter(
+    (b) =>
+      (!needle || b.name.toLowerCase().includes(needle) || b.desc.toLowerCase().includes(needle)) &&
+      (opt !== "0" || !b.optional),
+  );
+  const filtered = Boolean(needle || opt);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
@@ -72,6 +87,18 @@ export default async function BackgroundsPage({
           Search
         </button>
       </form>
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+          Optional
+        </span>
+        <Link href={optHref(q, "")} className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}>
+          Shown
+        </Link>
+        <Link href={optHref(q, "0")} className={`${chipBase} ${opt === "0" ? chipOn : chipOff}`}>
+          Hidden
+        </Link>
+      </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
         <span>
