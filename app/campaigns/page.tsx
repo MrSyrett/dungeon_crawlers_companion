@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { makeCode } from "@/lib/campaign-code";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import CopyCodeButton from "@/components/CopyCodeButton";
 import { deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
 
 export const dynamic = "force-dynamic";
@@ -242,8 +243,11 @@ export default async function CampaignsPage() {
                       <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
                         {c.name}
                       </h2>
-                      <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--text)]">
-                        {c.code}
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--text)]">
+                          {c.code}
+                        </span>
+                        <CopyCodeButton value={c.code} label="join code" />
                       </span>
                       {quiet ? (
                         <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
@@ -371,8 +375,11 @@ export default async function CampaignsPage() {
                     <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
                       {c.name}
                     </h3>
-                    <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--text)]">
-                      {c.code}
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="rounded border border-[var(--border)] px-2 py-0.5 text-[11px] font-bold tracking-[0.15em] text-[var(--text)]">
+                        {c.code}
+                      </span>
+                      <CopyCodeButton value={c.code} label="join code" />
                     </span>
                     <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
                       · view only
