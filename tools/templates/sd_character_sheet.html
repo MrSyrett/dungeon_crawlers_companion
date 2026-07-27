@@ -5778,8 +5778,13 @@ function ccwApply() {
   const langLine = RC_ANCESTRY.languages[c.ancestry] + (extraLangs.length ? ', ' + extraLangs.join(', ') : '');
 
   const ci = RC_CLASS_INFO[c.cls];
-  const talentFinal  = (c.tres && c.tres.final) || c.talent;
-  const talent2Final = (c.tres2 && c.tres2.final) || c.talent2;
+  const _isHb = ci && ci._hb;
+  const talentFinal  = _isHb
+    ? _hbTalentResolvedText(c.cls, c.talentRoll, c.talentPick, c.hbTalentChoice, c.talent)
+    : ((c.tres && c.tres.final) || c.talent);
+  const talent2Final = _isHb
+    ? _hbTalentResolvedText(c.cls, c.talent2Roll, c.talent2Pick, c.hbTalentChoice2, c.talent2)
+    : ((c.tres2 && c.tres2.final) || c.talent2);
   // Fighter's Grit names the chosen stat
   const features = (ci.features || []).map(f => {
     if(c.cls === 'Fighter' && c.grit && /^Grit[:.]/i.test(f))
@@ -6408,7 +6413,10 @@ function lvlApply() {
   // Title
   if(_lvl.newTitle) set('f-title', _lvl.newTitle);
   // Talent appended to talents text (resolved final if choices were made)
-  const talentText = (_lvl.tres && _lvl.tres.final) || _lvl.talent;
+  const _lvlCi = RC_CLASS_INFO[_lvl.cls];
+  const talentText = (_lvlCi && _lvlCi._hb)
+    ? _hbTalentResolvedText(_lvl.cls, _lvl.talentRoll, _lvl.talentPick, _lvl.hbTalentChoice, _lvl.talent)
+    : ((_lvl.tres && _lvl.tres.final) || _lvl.talent);
   if(talentText) {
     const ta = document.getElementById('talents-text');
     if(ta) ta.value = (ta.value ? ta.value + '\n' : '') + '— Level ' + _lvl.newLevel + ' Talent —\n' + talentText;
@@ -7923,6 +7931,26 @@ function _hbTalentChooseInfo(cls, roll, pick){
   const idx = _hbTalentRowIndex(cls, roll, pick);
   if(idx < 0 || !ci._talentChoose[idx]) return null;
   return { idx, effs: Array.isArray(ci._talentEff[idx]) ? ci._talentEff[idx] : [] };
+}
+
+// The talent line written to the Talents box for a homebrew class. If the
+// rolled/picked talent is a "choose one" row and the player has made their
+// pick, write just "<name>: <chosen effect>" (e.g. "Natural Selection: AC +1")
+// instead of the full row text that lists every option. Anything else — a
+// non-choice homebrew talent, or a core-class talent — keeps its own text,
+// which the core parser already resolves.
+function _hbTalentResolvedText(cls, roll, pick, choiceIdx, fallbackText){
+  const info = _hbTalentChooseInfo(cls, roll, pick);
+  if(!info || choiceIdx == null) return fallbackText;
+  const eff = info.effs[choiceIdx];
+  if(!eff) return fallbackText;
+  const label = _hbEffOne(eff);
+  if(!label) return fallbackText;
+  // Title = the part before the first ":" of the row text, so a well-named
+  // talent keeps its name; otherwise just show the chosen effect.
+  const title = String(fallbackText || '').split(':')[0].trim();
+  const isFullRow = title && title.length < String(fallbackText||'').trim().length;
+  return isFullRow ? (title + ': ' + label) : label;
 }
 
 function _hbEmptyEff(){
