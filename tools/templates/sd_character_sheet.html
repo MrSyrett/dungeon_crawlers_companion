@@ -7757,11 +7757,21 @@ async function campaignPoll() {
   } catch(e) {}
 }
 
+// Poll every 4s while visible; back off to 20s when the tab is hidden. The
+// ?since cursor means nothing is missed — refocusing polls immediately and
+// restores the 4s cadence.
+function campaignPollDelay() { return document.hidden ? 20000 : 4000; }
 function campaignStartPolling() {
   if(_campaignTimer) clearInterval(_campaignTimer);
   campaignPoll();
-  _campaignTimer = setInterval(campaignPoll, 4000);
+  _campaignTimer = setInterval(campaignPoll, campaignPollDelay());
 }
+document.addEventListener('visibilitychange', function() {
+  if(!_campaign || !_campaignTimer) return;
+  clearInterval(_campaignTimer);
+  if(!document.hidden) campaignPoll();
+  _campaignTimer = setInterval(campaignPoll, campaignPollDelay());
+});
 
 // ── SHARED (DB-backed) HOMEBREW ─────────────────────────────────────────────
 // Pulls the personal homebrew you created on the Spell/Gear pages, plus anything

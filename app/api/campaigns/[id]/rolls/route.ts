@@ -34,10 +34,14 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     select: { id: true },
   });
 
-  // Keep the log bounded — prune anything more than ~500 rolls back
-  await prisma.campaignRoll.deleteMany({
-    where: { campaignId: id, id: { lt: roll.id - 500 } },
-  });
+  // Keep the log bounded to ~500 rolls, but don't pay for a delete on every
+  // single roll — pruning roughly one write in twenty keeps it within a small
+  // margin of the cap while cutting the delete traffic by ~95%.
+  if (Math.random() < 0.05) {
+    await prisma.campaignRoll.deleteMany({
+      where: { campaignId: id, id: { lt: roll.id - 500 } },
+    });
+  }
 
   return Response.json({ ok: true, id: roll.id });
 }

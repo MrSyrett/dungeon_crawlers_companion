@@ -1437,8 +1437,23 @@ const GMCamp = (function() {
     } catch(e) {}
   }
 
-  function start() { stop(); poll(); timer = setInterval(poll, 4000); }
+  // Poll every 4s while the tab is visible; back off to 20s when it's hidden
+  // (a GM screen parked on a second monitor doesn't need live cadence). The
+  // ?since cursor means nothing is missed — backed-off rolls just arrive on the
+  // next tick, and refocusing snaps straight back to 4s with an immediate poll.
+  function pollDelay() { return document.hidden ? 20000 : 4000; }
+  function start() {
+    stop();
+    poll();
+    timer = setInterval(poll, pollDelay());
+  }
   function stop()  { if(timer) { clearInterval(timer); timer = null; } }
+  document.addEventListener('visibilitychange', function() {
+    if(!campaign || !timer) return;   // only re-arm an already-running poll
+    clearInterval(timer);
+    if(!document.hidden) poll();       // refocus → catch up immediately
+    timer = setInterval(poll, pollDelay());
+  });
 
   // The Dice Tray registers here when it is first created — anything that
   // arrived while it didn't exist yet is handed over on the way in.

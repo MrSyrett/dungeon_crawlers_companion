@@ -42,6 +42,9 @@ export async function createSession(userId: string): Promise<void> {
 
 // Memoized per request (React cache): several server components and helpers ask
 // for the current user during one render; only the first call hits the DB.
+// Only id + email are ever read off the result, so we select just those rather
+// than hydrating the whole user row (passwordHash included) on every request —
+// this runs on the 4-second roll poll for every connected tool.
 export const getCurrentUser = cache(async function getCurrentUser() {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(COOKIE_NAME)?.value;
@@ -49,7 +52,11 @@ export const getCurrentUser = cache(async function getCurrentUser() {
 
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
-    include: { user: true },
+    select: {
+      id: true,
+      expiresAt: true,
+      user: { select: { id: true, email: true } },
+    },
   });
   if (!session) return null;
 
