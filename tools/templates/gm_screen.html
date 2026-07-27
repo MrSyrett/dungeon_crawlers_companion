@@ -348,18 +348,6 @@ input[type="number"] { -moz-appearance: textfield; }
   max-width: 240px;
 }
 .doc-controls { display: flex; align-items: center; gap: 6px; }
-.doc-zoom-label {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: var(--light);
-  min-width: 38px;
-  text-align: center;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: center;
-  line-height: 1;
-}
 .doc-controls { display: flex; align-items: center; gap: 6px; }
 .doc-body {
   flex: 1;
@@ -486,7 +474,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .mus-sfx-section { border-left-color: #6a9fc8; }
 .mus-sec-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
 .mus-sec-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); cursor: pointer; }
-.mus-sec-toggle { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 11px; line-height: 1; padding: 2px 4px; flex-shrink: 0; }
+.mus-sec-toggle { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; line-height: 1; padding: 6px 9px; flex-shrink: 0; }
 .mus-sec-toggle:hover { color: #fff; }
 .mus-section.collapsed .mus-sec-head { border-bottom: none; }
 .mus-section.collapsed .mus-sec-actions { display: none; }
@@ -599,7 +587,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .tracker-card.expired { border-left-color: var(--red); opacity: 0.6; }
 .tracker-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .tracker-name-input {
-  flex: 1; background: transparent; border: none; color: var(--white);
+  flex: 1; min-width: 0; background: transparent; border: none; color: var(--white);
   font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; padding: 2px 0;
 }
 .tracker-name-input:focus { border-bottom: 1px solid var(--mid); }
@@ -647,7 +635,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .tracker-round-adjust { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 .tracker-collapse {
   background: transparent; border: none; color: var(--muted); cursor: pointer;
-  font-size: 11px; line-height: 1; padding: 2px 5px; flex-shrink: 0;
+  font-size: 15px; line-height: 1; padding: 6px 9px; flex-shrink: 0;
 }
 .tracker-collapse:hover { color: var(--white); }
 
@@ -926,7 +914,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 /* ═══ MOBILE ═══ */
 @media (max-width: 760px) {
   #hdr-toggle {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; justify-content: flex-end; gap: 6px;
     width: 100%; height: 24px; flex-shrink: 0;
     padding: 0 12px; box-sizing: border-box;
     background: var(--dark); color: var(--gold);
@@ -941,7 +929,11 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   .brand { font-size: 15px; width: 100%; }
   .pane-picker { flex: 1; min-width: 0; }
   .pane-picker-label { display: none; }
-  .view-controls { margin-left: auto; }
+  /* Pack every top-bar control to the left rather than splitting them across
+     the row: drop the flexible spacer and the auto margin that pushed View to
+     the far right. */
+  .topbar .topbar-spacer { display: none; }
+  .view-controls { margin-left: 0; }
 
   .main-area { flex-direction: column; }
   .pane { border-right: none; border-bottom: 2px solid var(--border); }
@@ -1163,6 +1155,19 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   .tracker-del, .npc-del {
     font-size: 18px !important; padding: 6px 9px !important;
     min-height: 34px; min-width: 34px;
+  }
+
+  /* Collapse toggle gets a full tap target on phones (it was a tiny caret) —
+     the name input shrinks to keep it and the "x" on the card. */
+  .tracker-collapse {
+    font-size: 20px !important; padding: 8px 12px !important;
+    min-height: 40px; min-width: 40px;
+  }
+
+  /* Music section collapse toggles get the same treatment. */
+  .mus-sec-toggle {
+    font-size: 20px !important; padding: 8px 12px !important;
+    min-height: 40px; min-width: 40px;
   }
 
   .npc-hp-input   { width: 66px !important; font-size: 18px !important; padding: 11px 4px !important; min-height: 46px; }
@@ -1931,7 +1936,6 @@ GMScenes.renderPins();
       <div class="toolbar-spacer"></div>
       <div class="doc-controls" style="display:none;">
         <button class="btn small doc-zoom-out">−</button>
-        <span class="doc-zoom-label">100%</span>
         <button class="btn small doc-zoom-in">+</button>
         <button class="btn small ghost doc-clear" title="Clear" aria-label="Clear">&#128465;</button>
       </div>
@@ -1957,7 +1961,6 @@ GMScenes.renderPins();
       <div class="toolbar-spacer"></div>
       <div class="doc-controls" style="display:none;">
         <button class="btn small doc-zoom-out">−</button>
-        <span class="doc-zoom-label">100%</span>
         <button class="btn small doc-zoom-in">+</button>
         <button class="btn small ghost doc-clear" title="Clear" aria-label="Clear">&#128465;</button>
       </div>
@@ -2776,22 +2779,8 @@ function syncToolbar(slot, toolNode) {
             if(cloneControls && liveControls) {
               cloneControls.style.display = liveControls.style.display;
             }
-            const cloneZoom = slot.querySelector('.doc-zoom-label');
-            const liveZoom = toolNode.querySelector('.doc-zoom-label');
-            if(cloneZoom && liveZoom) cloneZoom.textContent = liveZoom.textContent;
           }, 200);
         }
-      });
-      // Also mirror zoom label changes on zoom btn clicks
-      ['doc-zoom-in','doc-zoom-out'].forEach(cls => {
-        const liveBtn = toolNode.querySelector('.' + cls);
-        if(liveBtn) liveBtn.addEventListener('click', () => {
-          setTimeout(() => {
-            const cloneZoom = slot.querySelector('.doc-zoom-label');
-            const liveZoom = toolNode.querySelector('.doc-zoom-label');
-            if(cloneZoom && liveZoom) cloneZoom.textContent = liveZoom.textContent;
-          }, 50);
-        });
       });
     }
   }
@@ -2857,7 +2846,6 @@ function initDocTool(root) {
   const emptyEl = root.querySelector('.doc-empty');
   const frameWrap = root.querySelector('.doc-frame-wrap');
   const controls = root.querySelector('.doc-controls');
-  const zoomLabel = root.querySelector('.doc-zoom-label');
   const zoomInBtn = root.querySelector('.doc-zoom-in');
   const zoomOutBtn = root.querySelector('.doc-zoom-out');
   const clearBtn = root.querySelector('.doc-clear');
@@ -2874,7 +2862,6 @@ function initDocTool(root) {
   const HTML_BASE_W = 900; // logical width so builders render their desktop layout
 
   function applyZoom() {
-    zoomLabel.textContent = Math.round(zoom * 100) + '%';
     if(!mediaEl) return;
     if(mediaType === 'image' && naturalW) {
       mediaEl.style.width = (naturalW * zoom) + 'px';
@@ -2998,7 +2985,6 @@ function initDocTool(root) {
       mediaEl = el;
       zoomInBtn.style.display = 'none';
       zoomOutBtn.style.display = 'none';
-      zoomLabel.textContent = 'Native zoom';
     } else if(['png','jpg','jpeg','webp','gif','svg'].includes(ext)) {
       mediaType = 'image';
       zoomInBtn.style.display = '';
