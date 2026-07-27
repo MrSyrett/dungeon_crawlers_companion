@@ -162,7 +162,7 @@ export default async function ClassesPage({
   const filtered = Boolean(needle || cast || opt);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-10">
+    <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
         <div>
           <h1 className="font-display text-3xl font-black tracking-wide">Classes</h1>
@@ -252,7 +252,7 @@ export default async function ClassesPage({
           </p>
         </div>
       ) : (
-        <ul className="flex flex-col gap-4">
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
           {results.map((c, idx) => (
             <li
               key={`${c.homebrew ? "hb" : "bk"}-${c.name}-${idx}`}

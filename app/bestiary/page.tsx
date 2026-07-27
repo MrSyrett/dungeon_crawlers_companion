@@ -124,7 +124,7 @@ export default async function BestiaryPage({
   const current: Query = { q: q.trim(), lv: activeLv, al: activeAl, type: activeType };
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-10">
+    <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
         <div>
           <h1 className="font-display text-3xl font-black tracking-wide">Bestiary</h1>
@@ -244,7 +244,7 @@ export default async function BestiaryPage({
           </p>
         </div>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
           {results.map((m) => (
             <li
               key={`${m.homebrew ? "hb" : "bk"}-${m.name}`}

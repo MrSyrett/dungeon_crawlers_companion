@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { MONSTER_TYPES } from "@/lib/data/monster-types";
-import { TALENT_TARGETS, TALENT_TARGET_KEYS } from "@/lib/effects";
+import { TALENT_TARGET_KEYS } from "@/lib/effects";
 
 // Homebrew is stored in the exact object shapes the character sheet already
 // consumes, so a sheet can merge it straight into its `_homebrewSpells` /
@@ -363,9 +363,7 @@ export const CAST_STATS = ["INT", "WIS", "CHA"] as const;
 
 // The talent effect vocabulary lives in lib/effects.ts (the single source of
 // truth shared with the reference pages and the Effect Builder). Imported at the
-// top of this file; re-exported here so existing importers of "@/lib/homebrew"
-// (which used to find TALENT_TARGETS here) keep working.
-export { TALENT_TARGETS, TALENT_TARGET_KEYS };
+// top of this file for internal use by cleanEffect below.
 
 // One mechanical effect shared by class talents, class features, and ancestry
 // traits. `weapon` is kept only for weaponDie; `spell` for the spell targets

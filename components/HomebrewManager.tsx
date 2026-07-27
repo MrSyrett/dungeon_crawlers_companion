@@ -50,12 +50,11 @@ const WEAPON_RANGES = ["Close", "Near", "Far", "Close/Near", "Close/Far"];
 const SPELL_RANGES = [
   "Self", "Touch", "Close", "Near", "Far", "Double near", "1 mile", "Same plane", "Unlimited",
 ];
-// Mirrors HD_DICE / CAST_STATS / TALENT_TARGETS in lib/homebrew.ts (kept local
-// so this client component doesn't import the server module).
+// Mirrors HD_DICE / CAST_STATS in lib/homebrew.ts (kept local so this client
+// component doesn't import the server module). TALENT_TARGETS is imported from
+// lib/effects, which is dependency-free and safe for a client component.
 const HD_DICE = ["1d4", "1d6", "1d8", "1d10", "1d12"];
 const CAST_STATS = ["INT", "WIS", "CHA"];
-// TALENT_TARGETS (the granular "thing being bonused" list) is imported from
-// lib/effects — the single source of truth shared with the reference pages.
 
 // The Effect Builder groups the granular targets above into simple categories.
 // Combat picks a scope (Melee / Ranged / both) then a kind (Attack / Damage /

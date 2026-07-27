@@ -14,15 +14,6 @@
 // step (scripts/extract-game-data.mjs) regenerates the sheet's label map from
 // TALENT_TARGETS below — edit here, then re-run the extract.
 
-export type EffectTargetKey =
-  | "meleeAtk" | "meleeDmg" | "meleeAtkDmg"
-  | "rangedAtk" | "rangedDmg" | "rangedAtkDmg"
-  | "mrAtk" | "mrDmg" | "mrAtkDmg"
-  | "ac" | "hp" | "gearSlots"
-  | "str" | "dex" | "con" | "int" | "wis" | "cha"
-  | "statChoice" | "spellKnown" | "spellCheck" | "weaponDie"
-  | "advSpell" | "featureCharges" | "playerTalent" | "perDay";
-
 // The "thing being bonused". Order matters: it's the order the Effect Builder's
 // target dropdown presents. `[key, label]` pairs.
 export const TALENT_TARGETS: [string, string][] = [
@@ -56,7 +47,8 @@ export const TALENT_TARGETS: [string, string][] = [
 
 export const TALENT_TARGET_KEYS: string[] = TALENT_TARGETS.map(([k]) => k);
 
-export const TALENT_LABEL: Map<string, string> = new Map(TALENT_TARGETS);
+// Internal: lookup map used by effectLabel below.
+const TALENT_LABEL: Map<string, string> = new Map(TALENT_TARGETS);
 
 // The shape an effect can take. All fields optional except target/amount so this
 // accepts both the strict HbEffect (lib/homebrew) and the looser page-level
