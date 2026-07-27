@@ -36,11 +36,6 @@ export const SD_ANCESTRIES: SdAncestry[] = [
     "languages": "Common, Goblin"
   },
   {
-    "name": "Beastfolk",
-    "trait": "Natural Selection: Strikes (unarmed melee attacks) deal 1d6 damage OR +1 to AC.",
-    "languages": "Common"
-  },
-  {
     "name": "Kobold",
     "trait": "Knack: +1 to spellcasting checks OR begin each session with a luck token.",
     "languages": "Common, Draconic"

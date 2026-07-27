@@ -393,7 +393,7 @@ export const SD_CLASSES: SdClass[] = [
     }
   },
   {
-    "name": "Barbarian",
+    "name": "Pit Fighter",
     "hd": "1d8",
     "weapons": "All weapons",
     "armor": "Leather armor, shields",

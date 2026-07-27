@@ -1363,7 +1363,7 @@ function renderTalentsView() {
     const isSub = /^[ \t]{2,}/.test(raw);
     const m = /^[—–-]{1,2}\s*(.+?)\s*[—–-]{1,2}$/.exec(line);
     if(m) { h += '<div class="tv-head">' + esc(m[1]) + '</div>'; return; }
-    // Anything written "N/day" (Barbarian Flourish and Relentless, the 1/day
+    // Anything written "N/day" (Pit Fighter Flourish and Relentless, the 1/day
     // class talents) gets that many tick boxes. Uses are play state, not text,
     // so they live outside the box and clear on a rest.
     const total0 = perDayCount(line) + _hbLineChargeBonus(line);
@@ -3815,7 +3815,7 @@ const RC_ANCESTRY = {
   table: [
     {w:4,v:'Human'},{w:2,v:'Elf'},{w:2,v:'Dwarf'},
     {w:2,v:'Halfling'},{w:1,v:'Half-Orc'},{w:1,v:'Goblin'},
-    {w:1,v:'Beastfolk'},{w:1,v:'Kobold'}
+    {w:1,v:'Kobold'}
   ],
   ability: {
     Human:    'Ambitious: +1 bonus talent roll at 1st level.',
@@ -3824,7 +3824,6 @@ const RC_ANCESTRY = {
     Halfling: 'Stealthy: Once per day, become invisible for 3 rounds.',
     'Half-Orc': 'Mighty: +1 to attack and damage with melee weapons.',
     Goblin:   'Keen Senses: You cannot be surprised.',
-    Beastfolk: 'Natural Selection: Strikes (unarmed melee attacks) deal 1d6 damage OR +1 to AC.',
     Kobold:   'Knack: +1 to spellcasting checks OR begin each session with a luck token.',
   },
   languages: {
@@ -3834,16 +3833,15 @@ const RC_ANCESTRY = {
     Halfling: 'Common',
     'Half-Orc': 'Common, Orcish',
     Goblin:   'Common, Goblin',
-    Beastfolk: 'Common',
     Kobold:   'Common, Draconic',
   }
 };
 
-const RC_CLASSES = ['Fighter','Priest','Thief','Wizard','Bard','Ranger','Witch','Barbarian'];
+const RC_CLASSES = ['Fighter','Priest','Thief','Wizard','Bard','Ranger','Witch','Pit Fighter'];
 // Display order for the 2-column Character Creation Wizard grid (row-major), so
-// the left column reads Fighter / Thief / Ranger / Barbarian and the right
+// the left column reads Fighter / Thief / Ranger / Pit Fighter and the right
 // column reads Priest / Wizard / Bard / Witch.
-const CCW_CLASS_ORDER = ['Fighter','Priest','Thief','Wizard','Ranger','Bard','Barbarian','Witch'];
+const CCW_CLASS_ORDER = ['Fighter','Priest','Thief','Wizard','Ranger','Bard','Pit Fighter','Witch'];
 // ── Ranger herbal remedies (Shadowdark, Ranger) ────────────────────────────
 // One table drives the class feature text, the Talents box and the creation
 // wizard's remedy picker, so the wording can't drift between them.
@@ -3891,7 +3889,7 @@ const RC_CLASS_INFO = {
             'Choose a talent or +2 points to distribute to stats'],
     talentBands:[[2,2],[3,7],[8,9],[10,11],[12,12]],
     features:["Familiar: A small animal (raven, rat, frog) serves you loyally and speaks Common. It can be the source of your spells — treat it as you for spell ranges. If it dies, restore it by permanently sacrificing 1d4 HP.",'Spellcasting (CHA). Know 3 tier 1 witch spells. DC is 10 + spell tier. Add spells per level.','Languages: Diabolic, Primordial, Sylvan.'] },
-  Barbarian: { hd:'1d8', weapons:'All weapons', armor:'Leather armor, shields',
+  'Pit Fighter': { hd:'1d8', weapons:'All weapons', armor:'Leather armor, shields',
     // 12 slots; text is read from indices 0,1,6,9,11 (one per band).
     talent:['1/day, ignore all damage and effects from one attack',
             'You gain +1 to melee weapon damage','You gain +1 to melee weapon damage','You gain +1 to melee weapon damage','You gain +1 to melee weapon damage','You gain +1 to melee weapon damage',
@@ -3909,7 +3907,7 @@ const RC_TITLES = {
   Bard:    { Lawful:['Storyteller','Balladeer','Philosopher','Poet','Master Poet'], Chaotic:['Guttersnipe','Charlatan','Satirist','Silvertongue','Doomspeaker'], Neutral:['Seeker','Witness','Speaker','Voice','Truthbearer'] },
   Ranger:  { Lawful:['Wanderer','Strider','Warden','Guardian','Sentinel'], Chaotic:['Hood','Outlaw','Fugitive','Exile','Pariah'], Neutral:['Stranger','Wayfarer','Outlander','Recluse','Hermit'] },
   Witch:   { Lawful:['Fortune Teller','Far Seer','Prophet','Wise One','Baba'], Chaotic:['Whisperer','Hexer','Hag/Elder','Crone/Uncle','Baba'], Neutral:['Shaman','Conjurer','Soothsayer','Conduit','Baba'] },
-  Barbarian: { Lawful:['Rookie','Gladiator','Hero','Champion','Legend'], Chaotic:['Ruffian','Brawler','Heel','Villain','Legend'], Neutral:['Underdog','Dark Horse','Wild Card','Victor','Legend'] },
+  'Pit Fighter': { Lawful:['Rookie','Gladiator','Hero','Champion','Legend'], Chaotic:['Ruffian','Brawler','Heel','Villain','Legend'], Neutral:['Underdog','Dark Horse','Wild Card','Victor','Legend'] },
 };
 
 const RC_BACKGROUNDS = [
@@ -4105,7 +4103,7 @@ const CCW_BG_DESC = {
   "Wizard's Apprentice": 'You have a knack and eye for magic',
   'Jeweler': 'You can easily appraise value and authenticity',
   'Herbalist': 'You know plants, medicines, and poisons',
-  'Barbarian': 'You left the horde, but it never quite left you',
+  'Pit Fighter': 'You left the horde, but it never quite left you',
   'Mercenary': 'You fought friend and foe alike for your coin',
   'Sailor': 'Pirate, privateer, or merchant — the seas are yours',
   'Acolyte': "You're well trained in religious rites and doctrines",
@@ -4143,7 +4141,7 @@ function ccwAnalyzeTalent(text, cls) {
   if(/\+2 points? to (distribute to )?(any )?stats/i.test(text)) {
     p.kind = 'distribute'; p.final = null; return p;
   }
-  // Barbarian: "+2 to Strength or Constitution stat, or +1 to melee attacks" — 3-way pick
+  // Pit Fighter: "+2 to Strength or Constitution stat, or +1 to melee attacks" — 3-way pick
   if(/^\+2 to Strength or Constitution stat, or \+1 to melee attacks/i.test(text)) {
     p.kind = 'ortwo';
     p.options = ['+2 to Strength stat', '+2 to Constitution stat', '+1 to melee attacks'];
@@ -4659,9 +4657,9 @@ function ccwRandomize() {
   _ccw.koboldKnack  = _ccw.ancestry==='Kobold' ? rand(['spell','luck']) : null;
   // Class follows the highest stat so builds make sense
   const CLASS_BY_STAT = {
-    STR: ['Fighter','Ranger','Barbarian'],
+    STR: ['Fighter','Ranger','Pit Fighter'],
     DEX: ['Ranger','Thief'],
-    CON: ['Fighter','Barbarian'],
+    CON: ['Fighter','Pit Fighter'],
     INT: ['Wizard'],
     WIS: ['Priest'],
     CHA: ['Bard','Witch'],
@@ -4929,7 +4927,7 @@ function ccwAncestry() {
   let h = '<p class="ccw-hint">Choose your ancestry, or roll randomly.</p>';
   h += '<button class="ccw-roll-btn" onclick="ccwRandAncestry()">🎲 Random</button>';
   h += '<div class="ccw-choice-grid">';
-  ['Human','Elf','Dwarf','Halfling','Half-Orc','Goblin','Beastfolk','Kobold'].concat(_hbAncestryNames).forEach(a=>{
+  ['Human','Elf','Dwarf','Halfling','Half-Orc','Goblin','Kobold'].concat(_hbAncestryNames).forEach(a=>{
     const sel = _ccw.ancestry===a ? ' selected' : '';
     h += '<button class="ccw-choice'+sel+'" onclick="ccwPickAncestry(\''+a+'\')"><div class="ccw-choice-name">'+a+'</div><div class="ccw-choice-desc">'+RC_ANCESTRY.ability[a]+'</div></button>';
   });
@@ -5883,7 +5881,7 @@ function startLevelUp() {
   if(curLevel >= 10) { alert('Already at maximum level (10).'); return; }
   const cls = document.getElementById('f-class')?.value.trim() || '';
   const clsKey = Object.keys(RC_CLASS_INFO).find(k=>k.toLowerCase()===cls.toLowerCase());
-  if(!clsKey) { alert('Set a valid class on the sheet first (Fighter, Priest, Thief, Wizard, Bard, Ranger, Witch, or Barbarian).'); return; }
+  if(!clsKey) { alert('Set a valid class on the sheet first (Fighter, Priest, Thief, Wizard, Bard, Ranger, Witch, or Pit Fighter).'); return; }
   const newLevel = curLevel + 1;
   _lvl = {
     step: 0,

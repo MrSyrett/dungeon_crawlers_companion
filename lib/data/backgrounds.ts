@@ -43,7 +43,7 @@ export const SD_BACKGROUNDS: SdBackground[] = [
   },
   {
     "name": "Barbarian",
-    "desc": "You left the horde, but it never quite left you"
+    "desc": ""
   },
   {
     "name": "Mercenary",
