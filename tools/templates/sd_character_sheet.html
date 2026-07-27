@@ -928,6 +928,7 @@ const ITEM_BONUS_TARGETS = [
 // gearSlotCount and sheetAtkBonusProfile respectively.
 let _itemBonusAC    = 0;
 let _itemBonusSlots = 0;
+let _hbBonusSlots = 0;   // gear slots granted by homebrew talents/features/ancestry
 let _itemBonusAtk   = { meleeAtk:0, meleeDmg:0, rangedAtk:0, rangedDmg:0 };
 // How much we've already baked into hp-max and each ability score input.
 let _itemBonusApplied = { hp:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 };
@@ -1365,7 +1366,7 @@ function renderTalentsView() {
     // Anything written "N/day" (Barbarian Flourish and Relentless, the 1/day
     // class talents) gets that many tick boxes. Uses are play state, not text,
     // so they live outside the box and clear on a rest.
-    const total0 = perDayCount(line);
+    const total0 = perDayCount(line) + _hbLineChargeBonus(line);
     let pips = '';
     if(total0) {
       const total = Math.min(total0, 10);
@@ -1405,6 +1406,19 @@ function perDayCount(line) {
 // Talents text so editing the text never corrupts the tally, and so the tally
 // survives the box being locked by Auto.
 let _featureUses = {};
+
+// Extra charges a feature gets from homebrew talents/features, keyed by the
+// feature's name (matched loosely against the talents-text line). Persisted.
+let _hbFeatureChargeBonus = {};
+// Extra charges for the feature described by a talents-text line, if any.
+function _hbLineChargeBonus(line){
+  const keys = Object.keys(_hbFeatureChargeBonus || {});
+  if(!keys.length) return 0;
+  const l = String(line || '').toLowerCase();
+  let bonus = 0;
+  keys.forEach(k => { const name = String(k).toLowerCase().trim(); if(name && l.indexOf(name) === 0) bonus += (parseInt(_hbFeatureChargeBonus[k]) || 0); });
+  return bonus;
+}
 
 // Click pip i → spend up to i+1 uses; click the last spent pip → give it back.
 function toggleFeatureUse(btn) {
@@ -2662,6 +2676,8 @@ function collectSheet(){
       mastery: Array.isArray(_charMastery) ? _charMastery : [],
       autoConsume: _autoConsume,
       innateAC: _innateAC,
+      hbBonusSlots: _hbBonusSlots,
+      hbFeatureCharges: _hbFeatureChargeBonus,
       spellSources: Array.isArray(_charSpellSources) ? _charSpellSources : [],
     }
   };
@@ -2772,6 +2788,8 @@ function _applySDData(d){
     _charMastery = Array.isArray(d._sheet?.mastery) ? d._sheet.mastery.slice() : [];
     _charSpellSources = Array.isArray(d._sheet?.spellSources) ? d._sheet.spellSources.slice() : [];
     if(typeof campaignRestore === 'function') campaignRestore(d._sheet?.campaign);
+    _hbBonusSlots = parseInt(d._sheet?.hbBonusSlots) || 0;
+    _hbFeatureChargeBonus = (d._sheet && d._sheet.hbFeatureCharges && typeof d._sheet.hbFeatureCharges === 'object') ? d._sheet.hbFeatureCharges : {};
     if(typeof refreshGearSlots === 'function') refreshGearSlots();
     _innateAC = parseInt(d._sheet?.innateAC) || 0;
     _autoConsume = (d._sheet?.autoConsume === undefined) ? true : !!d._sheet.autoConsume;
@@ -2979,6 +2997,7 @@ function gearSlotCount() {
     if(conMod > 0) slots += conMod;   // Hauler
   }
   slots += (parseInt(_itemBonusSlots) || 0);   // equipped magic items
+  slots += (parseInt(_hbBonusSlots) || 0);     // homebrew talents/features
   return Math.min(20, slots);
 }
 function refreshGearSlots() { ccwSetGearSlots(null); }
@@ -2990,6 +3009,7 @@ function ccwSetGearSlots(str) {
                   const cls = (document.getElementById('f-class')?.value || '').trim().toLowerCase();
                   if(cls === 'fighter') { const c = getStatMod('con'); if(c > 0) s += c; }
                   s += (parseInt(_itemBonusSlots) || 0);
+                  s += (parseInt(_hbBonusSlots) || 0);
                   return Math.min(20, s);
                 })();
   const rows = document.querySelectorAll('#gear-list > div');
@@ -4938,17 +4958,14 @@ function ccwAncestry() {
       const title = String((t && t.text) || 'Choose').split(':')[0];
       let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
       x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 '+title+' \u2014 choose one</div>';
-      effs.forEach((e, oi) => {
-        const sel = (_ccw.hbChoice && _ccw.hbChoice[ti]===oi) ? ' selected' : '';
-        const lbl = String(_hbEffOne(e) || 'Effect').replace(/&/g,'&amp;').replace(/</g,'&lt;');
-        x += '<button class="ccw-choice'+sel+'" style="width:49%;margin-right:1%;text-align:center;" onclick="ccwPickHbChoice('+ti+','+oi+')"><div class="ccw-choice-name" style="font-size:10px;">'+lbl+'</div></button>';
-      });
+      x += _hbChoiceSelect('_anc'+ti, (_ccw.hbChoice&&_ccw.hbChoice[ti]!=null)?String(_ccw.hbChoice[ti]):'', effs.map((e,oi)=>[String(oi), _hbEffOne(e)||'Effect']), '_ccwPickHbChoiceSel');
       h += x + '</div>';
     });
   }
   return h;
 }
 function ccwPickHbChoice(ti, oi) { if(!_ccw.hbChoice) _ccw.hbChoice={}; _ccw.hbChoice[ti]=oi; ccwRender(); }
+function _ccwPickHbChoiceSel(key, val){ const ti=parseInt(key.slice(4)); if(val===''){ if(_ccw.hbChoice) delete _ccw.hbChoice[ti]; ccwRender(); } else ccwPickHbChoice(ti, parseInt(val)); }
 function ccwClearAncestryChoices() { _ccw.langCommon=[]; _ccw.langRare=[]; _ccw.elfFarsight=null; _ccw.beastNatural=null; _ccw.koboldKnack=null; _ccw.hbChoice={}; }
 function ccwPickAncestry(a) { _ccw.ancestry = a; ccwClearAncestryChoices(); ccwRender(); }
 function ccwRandAncestry() { _ccw.ancestry = _rc_weighted(RC_ANCESTRY.table); ccwClearAncestryChoices(); ccwRender(); }
@@ -4992,12 +5009,12 @@ function ccwClass() {
     classChoicesH += '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:8px 10px;margin-top:10px;">';
     classChoicesH += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#c8a020;margin-bottom:4px;">Grit — choose one</div>';
     classChoicesH += '<p class="ccw-hint" style="margin:0 0 6px;font-size:10px;">Advantage on checks of that type to overcome an opposing force — kicking open a stuck door (Strength) or slipping free of rusty chains (Dexterity).</p>';
-    classChoicesH += '<div style="display:flex;gap:6px;">';
+    classChoicesH += '<select onchange="_ccw.grit=this.value;ccwRender()" style="width:100%;padding:7px 8px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;outline:none;cursor:pointer;"><option value="">— Choose one —</option>';
     ['Strength','Dexterity'].forEach(g=>{
       const sel = _ccw.grit===g ? ' selected' : '';
-      classChoicesH += '<button class="ccw-choice'+sel+'" style="flex:1;text-align:center;" onclick="_ccw.grit=\''+g+'\';ccwRender()"><div class="ccw-choice-name" style="font-size:11px;">'+g+'</div></button>';
+      classChoicesH += '<option value="'+g+'"'+sel+'>'+g+'</option>';
     });
-    classChoicesH += '</div></div>';
+    classChoicesH += '</select></div>';
   }
   // Details panel always visible, following the selected class
   const infoCls = _ccw.cls || null;
@@ -5106,13 +5123,11 @@ function _hbTalentPickerHtml(which){
   if(!info) return '';
   let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
   x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 Choose one effect</div>';
-  info.effs.forEach((e,oi)=>{
-    const sel=(chosen===oi)?' selected':'';
-    const lbl=String(_hbEffOne(e)||'Effect').replace(/&/g,'&amp;').replace(/</g,'&lt;');
-    x += '<button class="ccw-choice'+sel+'" style="width:49%;margin-right:1%;text-align:center;" onclick="ccwPickTalentEffect('+which+','+oi+')"><div class="ccw-choice-name" style="font-size:10px;">'+lbl+'</div></button>';
-  });
+  x += _hbChoiceSelect('_tp'+which, chosen==null?'':String(chosen), info.effs.map((e,oi)=>[String(oi), _hbEffOne(e)||'Effect']), '_ccwPickTalentEffectSel'+which);
   return x+'</div>';
 }
+function _ccwPickTalentEffectSel1(key, val){ ccwPickTalentEffect(1, val===''?null:parseInt(val)); }
+function _ccwPickTalentEffectSel2(key, val){ ccwPickTalentEffect(2, val===''?null:parseInt(val)); }
 function ccwPickTalentEffect(which, oi){ if(which===2){ _ccw.hbTalentChoice2=oi; } else { _ccw.hbTalentChoice=oi; } _ccw.hbTalentSpells=[]; _ccwClearChoiceKeys(which===2?"tb":"tm"); ccwRender(); }
 
 // "Learn a spell of your choice" picker for a talent slot (which=1 main, 2 bonus).
@@ -5177,6 +5192,7 @@ function _hbTalentChoicesHtml(which){
     else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">You know no spells yet.</p>';
     else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
     else if(ch.kind==='talent') x+=_hbChoiceControl('talent',ch.key,cur,talents,'ccwSetChoice');
+    else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,ch.effects.map((e,i)=>[String(i),_hbEffOne(e)]),'ccwSetChoice');
   });
   return x+'</div>';
 }
@@ -5743,6 +5759,10 @@ function ccwApply() {
   });
   // Innate AC = Beastfolk Natural Selection hide only (truly not gear).
   _innateAC = _natAC;
+  _hbBonusSlots = hbEff.gearSlots || 0;
+  _hbFeatureChargeBonus = Object.assign({}, hbEff.featureCharges || {});
+  if(typeof refreshGearSlots === 'function') refreshGearSlots();
+  if(typeof renderTalentsView === 'function') renderTalentsView();
   // Global spell check bonus field
   set('spell-gbonus', spellChkBonus > 0 ? '+'+spellChkBonus : '');
 
@@ -6051,13 +6071,10 @@ function _hbLvlTalentPickerHtml(){
   if(!info) return '';
   let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
   x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 Choose one effect</div>';
-  info.effs.forEach((e,oi)=>{
-    const sel=(_lvl.hbTalentChoice===oi)?' selected':'';
-    const lbl=String(_hbEffOne(e)||'Effect').replace(/&/g,'&amp;').replace(/</g,'&lt;');
-    x += '<button class="ccw-choice'+sel+'" style="width:49%;margin-right:1%;text-align:center;" onclick="lvlPickTalentEffect('+oi+')"><div class="ccw-choice-name" style="font-size:10px;">'+lbl+'</div></button>';
-  });
+  x += _hbChoiceSelect('_ltp', _lvl.hbTalentChoice==null?'':String(_lvl.hbTalentChoice), info.effs.map((e,oi)=>[String(oi), _hbEffOne(e)||'Effect']), '_lvlPickTalentEffectSel');
   return x+'</div>';
 }
+function _lvlPickTalentEffectSel(key, val){ lvlPickTalentEffect(val===''?null:parseInt(val)); }
 function lvlPickTalentEffect(oi){ _lvl.hbTalentChoice = oi; _lvl.hbTalentSpells = []; _lvl.hbChoices = {}; lvlRender(); }
 // Pick a level-up talent directly instead of rolling
 function lvlPickTalent(idx) {
@@ -6390,6 +6407,10 @@ function lvlApply() {
     if(agg.hp){ const hm=document.getElementById('hp-max'), hc=document.getElementById('hp-current'); if(hm) hm.value=String((parseInt(hm.value)||0)+agg.hp); if(hc) hc.value=String((parseInt(hc.value)||0)+agg.hp); }
     // AC (innate)
     if(agg.ac){ _innateAC=(parseInt(_innateAC)||0)+agg.ac; if(typeof refreshAutoAC==='function') refreshAutoAC(); }
+    // Gear slots (homebrew)
+    if(agg.gearSlots){ _hbBonusSlots=(parseInt(_hbBonusSlots)||0)+agg.gearSlots; if(typeof refreshGearSlots==='function') refreshGearSlots(); }
+    // Feature charges (homebrew)
+    if(agg.featureCharges && Object.keys(agg.featureCharges).length){ Object.keys(agg.featureCharges).forEach(fn=>{ _hbFeatureChargeBonus[fn]=(parseInt(_hbFeatureChargeBonus[fn])||0)+agg.featureCharges[fn]; }); if(typeof renderTalentsView==='function') renderTalentsView(); }
     // Spellcasting checks
     if(agg.spellCheck){ const el=document.getElementById('spell-gbonus'); if(el){ const cur=parseInt((el.value||'').replace(/^\+/,''))||0; const v=cur+agg.spellCheck; el.value=v>0?'+'+v:(v<0?String(v):''); } }
 
@@ -7734,6 +7755,7 @@ function _hbTalentText(row) {
     if(e.target === 'spellKnown') return e.spell ? 'Learn ' + e.spell : 'Learn a spell';
     if(e.target === 'advSpell') return e.spell ? 'Advantage casting ' + e.spell : 'Advantage on a spell';
     if(e.target === 'playerTalent') return 'Player Choice';
+    if(e.target === 'featureCharges') return '+' + amt + ' charge' + (amt===1?'':'s') + (e.feature ? ' to ' + e.feature : '');
     if(e.target === 'perDay') return amt + '/day';
     return (HB_TALENT_LABEL[e.target] || e.target) + ' ' + (amt>=0?'+':'') + amt;
   });
@@ -7772,8 +7794,8 @@ function _hbTalentChooseInfo(cls, roll, pick){
 }
 
 function _hbEmptyEff(){
-  return { ac:0,hp:0,meleeAtk:0,meleeDmg:0,rangedAtk:0,rangedDmg:0,spellCheck:0,
-           weaponDice:{}, learnSpells:[], advSpells:[], str:0,dex:0,con:0,int:0,wis:0,cha:0 };
+  return { ac:0,hp:0,meleeAtk:0,meleeDmg:0,rangedAtk:0,rangedDmg:0,spellCheck:0,gearSlots:0,
+           weaponDice:{}, learnSpells:[], advSpells:[], featureCharges:{}, str:0,dex:0,con:0,int:0,wis:0,cha:0 };
 }
 function _hbAccumEffect(out, e){
   if(!e || !e.target) return;
@@ -7791,6 +7813,8 @@ function _hbAccumEffect(out, e){
     case 'mrDmg': out.meleeDmg+=a; out.rangedDmg+=a; break;
     case 'mrAtkDmg': out.meleeAtk+=a; out.meleeDmg+=a; out.rangedAtk+=a; out.rangedDmg+=a; break;
     case 'spellCheck': out.spellCheck+=a; break;
+    case 'gearSlots': out.gearSlots+=a; break;
+    case 'featureCharges': { const fn=String(e.feature||'').trim(); if(fn) out.featureCharges[fn]=(out.featureCharges[fn]||0)+a; break; }
     case 'weaponDie': {
       if(!e.weapon) break;   // Player Choice — resolved via picker, not here
       const key = String(e.weapon);
@@ -7813,6 +7837,7 @@ function _hbEffOne(e){
   if(e.target==='spellKnown') return e.spell ? 'Learn '+e.spell : 'Learn a spell';
   if(e.target==='advSpell') return e.spell ? 'Advantage casting '+e.spell : 'Advantage on a spell';
   if(e.target==='playerTalent') return 'Player Choice';
+  if(e.target==='featureCharges') return '+'+amt+' charge'+(amt===1?'':'s')+(e.feature?' to '+e.feature:'');
   if(e.target==='perDay') return amt+'/day';
   return (HB_TALENT_LABEL[e.target]||e.target)+' '+(amt>=0?'+':'')+amt;
 }
@@ -8013,7 +8038,9 @@ function _hbExpandChoices(c, choices){
       const ci=RC_CLASS_INFO[ch.cls]; const idx=parseInt(val);
       if(ci&&Array.isArray(ci._talentEff)&&Array.isArray(ci._talentEff[idx])){
         if(ci._talentChoose && ci._talentChoose[idx]){
-          walk({key:ch.key+'>one', kind:'oneOf', effects:ci._talentEff[idx], label:'Choose one', cls:ch.cls});
+          const rows=(typeof ccwBuildTalentRows==='function')?ccwBuildTalentRows(ch.cls):[];
+          const rname=(rows[idx]&&rows[idx].text)?String(rows[idx].text).slice(0,40):'Chosen talent';
+          walk({key:ch.key+'>one', kind:'oneOf', effects:ci._talentEff[idx], label:rname, cls:ch.cls});
         } else {
           ci._talentEff[idx].forEach((e,ei)=>{ const s=_hbChoiceFromEffect(ch.key+'>'+ei,e,ch.cls); if(s) walk(s); });
         }
@@ -8100,9 +8127,9 @@ function _hbChoiceButtons(key, cur, opts, setter){
   });
   return x;
 }
-// Buttons for small "choose between options" sets; dropdowns for long lists.
+// All choices render as dropdowns (compact + consistent across homebrew and core).
 function _hbChoiceControl(kind, key, cur, opts, setter){
-  return (kind==='oneOf' || kind==='talent') ? _hbChoiceButtons(key, cur, opts, setter) : _hbChoiceSelect(key, cur, opts, setter);
+  return _hbChoiceSelect(key, cur, opts, setter);
 }
 // Apply a resolved choice value into an effect accumulator.
 function _hbApplyChoice(out, ch, val){

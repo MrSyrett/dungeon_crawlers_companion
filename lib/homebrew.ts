@@ -367,6 +367,7 @@ export const TALENT_TARGETS: [string, string][] = [
   ["mrAtkDmg", "Melee & Ranged Attack & Damage"],
   ["ac", "AC"],
   ["hp", "HP"],
+  ["gearSlots", "Gear Slots"],
   ["str", "Strength"],
   ["dex", "Dexterity"],
   ["con", "Constitution"],
@@ -378,6 +379,7 @@ export const TALENT_TARGETS: [string, string][] = [
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
   ["advSpell", "Advantage: Cast Spell"],
+  ["featureCharges", "Feature Charges"],
   ["playerTalent", "Player Choice"],
   ["perDay", "Per Day (uses)"],
 ];
@@ -386,7 +388,7 @@ const TALENT_TARGET_KEYS = TALENT_TARGETS.map(([k]) => k);
 // One mechanical effect shared by class talents, class features, and ancestry
 // traits. `weapon` is kept only for weaponDie; `spell` for the spell targets
 // (Learn Spell / Advantage: Cast Spell). perDay carries a uses/day count.
-export type HbEffect = { amount: number; target: string; weapon?: string; spell?: string };
+export type HbEffect = { amount: number; target: string; weapon?: string; spell?: string; feature?: string };
 function cleanEffect(raw: unknown): HbEffect | null {
   const e = (raw ?? {}) as Record<string, unknown>;
   const target = str(e.target);
@@ -394,6 +396,7 @@ function cleanEffect(raw: unknown): HbEffect | null {
   const amount = num(e.amount) ?? 0;
   if (target === "weaponDie") return { amount, target, weapon: str(e.weapon).slice(0, 60) };
   if (target === "spellKnown" || target === "advSpell") return { amount, target, spell: str(e.spell).slice(0, 80) };
+  if (target === "featureCharges") return { amount, target, feature: str(e.feature).slice(0, 80) };
   return { amount, target };
 }
 // A row of descriptive text plus a list of effects (features, traits).

@@ -42,6 +42,7 @@ function effectLabel(e: Record<string, unknown>): string {
     return sp ? `Advantage casting ${sp}` : "Advantage on a spell";
   }
   if (target === "playerTalent") return "Player Choice";
+  if (target === "featureCharges") { const f = String(e.feature ?? ""); return `+${amt} charge${amt === 1 ? "" : "s"}${f ? ` to ${f}` : ""}`; }
   return `${amt >= 0 ? "+" : ""}${amt} ${label}`;
 }
 function rollLabel(i: number, split: string): string {

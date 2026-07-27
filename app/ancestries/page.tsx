@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 type RawQuery = { q?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-type Effect = { amount: number; target: string; weapon: string; spell: string };
+type Effect = { amount: number; target: string; weapon: string; spell: string; feature?: string };
 type Trait = { text: string; effects: Effect[]; choose: boolean };
 type Row = { name: string; traits: Trait[]; languages: string; homebrew: boolean };
 
@@ -22,6 +22,7 @@ function effectLabel(e: Effect): string {
   if (e.target === "spellKnown") return e.spell ? `Learn ${e.spell}` : "Learn a spell";
   if (e.target === "advSpell") return e.spell ? `Advantage casting ${e.spell}` : "Advantage on a spell";
   if (e.target === "playerTalent") return "Player Choice";
+  if (e.target === "featureCharges") { const f = String(e.feature ?? ""); return `+${e.amount} charge${e.amount === 1 ? "" : "s"}${f ? ` to ${f}` : ""}`; }
   return `${e.amount >= 0 ? "+" : ""}${e.amount} ${label}`;
 }
 
