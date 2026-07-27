@@ -15,6 +15,10 @@ model User {
   email        String     @unique
   passwordHash String
   createdAt    DateTime   @default(now())
+  // New accounts start unapproved and can't sign in until an admin approves
+  // them (admins are auto-approved on signup). Existing accounts were backfilled
+  // to true by the migration so this gate only affects people who join later.
+  approved     Boolean    @default(false)
 
   sessions  Session[]
   documents Document[]

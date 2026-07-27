@@ -63,6 +63,12 @@ export function AuthForm({ mode, action }: Props) {
             )}
           </label>
 
+          {state.notice && (
+            <p className="rounded border border-[var(--gold)]/50 bg-[var(--gold)]/10 px-3 py-2 text-sm text-[var(--gold)]">
+              {state.notice}
+            </p>
+          )}
+
           {state.error && (
             <p className="rounded border border-[var(--red)]/50 bg-[var(--red)]/10 px-3 py-2 text-sm text-[#f0a8a3]">
               {state.error}
