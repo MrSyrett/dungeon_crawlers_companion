@@ -451,5 +451,595 @@ export const SD_CLASSES: SdClass[] = [
         "Legend"
       ]
     }
+  },
+  {
+    "name": "Knight of St. Ydris",
+    "hd": "1d6",
+    "weapons": "All melee weapons, crossbow",
+    "armor": "All armor and shields",
+    "talent": [
+      "Your Demonic Possession bonus increases by 1 point",
+      "+1 to melee or ranged attacks",
+      "+1 to melee or ranged attacks",
+      "+1 to melee or ranged attacks",
+      "+1 to melee or ranged attacks",
+      "+1 to melee or ranged attacks",
+      "+2 to Strength, Dexterity, or Constitution stat",
+      "+2 to Strength, Dexterity, or Constitution stat",
+      "+2 to Strength, Dexterity, or Constitution stat",
+      "+2 to Charisma stat or +1 to witch spellcasting checks",
+      "+2 to Charisma stat or +1 to witch spellcasting checks",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Demonic Possession: 3/day, gain a +1 bonus to your damage rolls that lasts 3 rounds. In addition, add half your level to the damage bonus (round down).",
+      "Spellcasting (CHA): Cast witch spells you know. Beginning at level 3, learn new witch spells per the Witch Spells Known table. DC is 10 + the spell's tier.",
+      "Languages: Diabolic."
+    ],
+    "caster": true,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Arbiter",
+        "Enforcer",
+        "Knight Marshal",
+        "Judge",
+        "Justiciar"
+      ],
+      "Chaotic": [
+        "Traitor",
+        "Fallen",
+        "Oathbreaker",
+        "Blackguard",
+        "Demonlord"
+      ],
+      "Neutral": [
+        "Brother/Sister",
+        "Exorcist",
+        "Reverend Knight",
+        "Inquisitor",
+        "Grand Inquisitor"
+      ]
+    }
+  },
+  {
+    "name": "Warlock",
+    "hd": "1d6",
+    "weapons": "Club, crossbow, dagger, mace, longsword",
+    "armor": "Leather armor, chainmail, and shields",
+    "talent": [
+      "Roll a Patron Boon from any patron; an unexplained gift",
+      "Add +1 point to two stats (they must be different)",
+      "Add +1 point to two stats (they must be different)",
+      "Add +1 point to two stats (they must be different)",
+      "Add +1 point to two stats (they must be different)",
+      "Add +1 point to two stats (they must be different)",
+      "+1 to melee or ranged attacks",
+      "+1 to melee or ranged attacks",
+      "+1 to melee or ranged attacks",
+      "Roll two Patron Boons and choose one to keep",
+      "Roll two Patron Boons and choose one to keep",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Patron: Choose a patron to serve (Mugdulblub, Titania, or The Willowman) — the source of your supernatural gifts. Your patron may grant or withhold its gifts at any time.",
+      "Patron Boon: At 1st level, gain a random Patron Boon talent from your patron's table. Whenever you gain a new talent roll, you may roll on your Patron Boon table instead of the Warlock Talents table.",
+      "Languages: Choose one — Celestial, Diabolic, Draconic, Primordial, or Sylvan."
+    ],
+    "caster": false,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Favored",
+        "Herald",
+        "Eminent",
+        "Exalted",
+        "Incarnation"
+      ],
+      "Chaotic": [
+        "Marked",
+        "Zealot",
+        "Occultist",
+        "Champion",
+        "Harbinger"
+      ],
+      "Neutral": [
+        "Chosen",
+        "Channeler",
+        "Prophesied",
+        "Transcendent",
+        "Avatar"
+      ]
+    }
+  },
+  {
+    "name": "Desert Rider",
+    "hd": "1d8",
+    "weapons": "Club, dagger, javelin, longsword, pike, shortbow, scimitar, spear, whip",
+    "armor": "Leather armor, shields",
+    "talent": [
+      "You can use any rider-bearing creature as your mount",
+      "You gain +1 to attacks or damage",
+      "You gain +1 to attacks or damage",
+      "You gain +1 to attacks or damage",
+      "You gain +1 to attacks or damage",
+      "You gain +1 to attacks or damage",
+      "+2 to Strength or Dexterity stat, or +1 to melee attacks",
+      "+2 to Strength or Dexterity stat, or +1 to melee attacks",
+      "+2 to Strength or Dexterity stat, or +1 to melee attacks",
+      "Gain an additional use of your Charge talent each day",
+      "Gain an additional use of your Charge talent each day",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Charge: 3/day, charge into combat by moving at least near before attacking; your melee attacks deal double damage that round.",
+      "Mount: You have a common camel or horse with a reliable or lovely demeanor. It comes when you call and never spooks. While riding, you and your mount gain a bonus to AC equal to half your level (round down); your mount has additional levels equal to half your level. You may leap on or off once per round."
+    ],
+    "caster": false,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Outrider",
+        "Sandrunner",
+        "Trailblazer",
+        "Swift Wind",
+        "Stormrunner"
+      ],
+      "Chaotic": [
+        "Bandit",
+        "Robber",
+        "Raider",
+        "Scourge",
+        "Bandit King/Queen"
+      ],
+      "Neutral": [
+        "Rat",
+        "Fox",
+        "Wolf",
+        "Tiger",
+        "Dragon"
+      ]
+    }
+  },
+  {
+    "name": "Ras-Godai",
+    "hd": "1d6",
+    "weapons": "Blowgun, bolas, dagger, razor chain, scimitar, shuriken, spear",
+    "armor": "Leather armor",
+    "talent": [
+      "You are trained in the use of poisons",
+      "Roll an additional talent on the Black Lotus Talents table",
+      "Roll an additional talent on the Black Lotus Talents table",
+      "Roll an additional talent on the Black Lotus Talents table",
+      "Roll an additional talent on the Black Lotus Talents table",
+      "Roll an additional talent on the Black Lotus Talents table",
+      "+2 to Strength or Dexterity stat, or +1 to melee attacks",
+      "+2 to Strength or Dexterity stat, or +1 to melee attacks",
+      "+2 to Strength or Dexterity stat, or +1 to melee attacks",
+      "Gain an additional use of your Smoke Step talent",
+      "Gain an additional use of your Smoke Step talent",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Assassin: Advantage on checks to sneak and hide. Your attacks deal double damage against targets that are unaware of your presence.",
+      "Smoke Step: 3/day, teleport to a location you can see within near. This does not use your action.",
+      "Black Lotus: Roll one talent on the Black Lotus Talents table (d12)."
+    ],
+    "caster": false,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Acolyte",
+        "Mirror Path",
+        "Monk",
+        "Master",
+        "White Lotus"
+      ],
+      "Chaotic": [
+        "Acolyte",
+        "Shadow Path",
+        "Monk",
+        "Assassin",
+        "Black Lotus"
+      ],
+      "Neutral": [
+        "Acolyte",
+        "Fire Path",
+        "Monk",
+        "Demon Blade",
+        "Red Lotus"
+      ]
+    }
+  },
+  {
+    "name": "Sea Wolf",
+    "hd": "1d8",
+    "weapons": "Dagger, greataxe, handaxe, longbow, longsword, spear",
+    "armor": "Leather armor, chainmail, shields",
+    "talent": [
+      "1/day, go berserk: immune to damage for 3 rounds",
+      "Your attacks deal +1 damage",
+      "Your attacks deal +1 damage",
+      "Your attacks deal +1 damage",
+      "Your attacks deal +1 damage",
+      "Your attacks deal +1 damage",
+      "+2 to Strength or Constitution stat, or +1 to attacks",
+      "+2 to Strength or Constitution stat, or +1 to attacks",
+      "+2 to Strength or Constitution stat, or +1 to attacks",
+      "Duality; choose two different Old Gods effects each day",
+      "Duality; choose two different Old Gods effects each day",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Seafarer: Advantage on checks related to navigating and crewing boats.",
+      "Old Gods: After each rest, choose one — Odin (regain 1d4 HP each time you kill an enemy); Freya (once a day, gain a luck token if you have none; each luck token adds 1d6 to your roll); Loki (advantage on checks to lie, sneak, and hide).",
+      "Shield Wall: If you wield a shield, use your action to take a defensive stance; your AC becomes 20 until your next turn."
+    ],
+    "caster": false,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Freefolk",
+        "Shieldman/maiden",
+        "Thane",
+        "Jarl",
+        "King/Queen"
+      ],
+      "Chaotic": [
+        "Rabble",
+        "Raider",
+        "Reaver",
+        "Conqueror",
+        "Usurper"
+      ],
+      "Neutral": [
+        "Wanderer",
+        "Explorer",
+        "Adventurer",
+        "Renowned",
+        "Legendary"
+      ]
+    }
+  },
+  {
+    "name": "Seer",
+    "hd": "1d6",
+    "weapons": "Dagger, stave, spear",
+    "armor": "Leather armor",
+    "talent": [
+      "Learn an additional seer spell from any tier you can cast",
+      "Gain an additional use of your Omen talent each day",
+      "Gain an additional use of your Omen talent each day",
+      "Gain an additional use of your Omen talent each day",
+      "Gain an additional use of your Omen talent each day",
+      "Gain an additional use of your Omen talent each day",
+      "+2 to WIS or CHA stat, or +1 to spellcasting checks",
+      "+2 to WIS or CHA stat, or +1 to spellcasting checks",
+      "+2 to WIS or CHA stat, or +1 to spellcasting checks",
+      "Increase the die category of your Destined talent by one",
+      "Increase the die category of your Destined talent by one",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Destined: Whenever you use a luck token, add 1d6 to the roll.",
+      "Omen: 3/day, make a DC 9 WIS check. On a success, gain a luck token (you can't have more than one at a time).",
+      "Spellcasting (WIS): Cast seer spells you know. Know one tier 1 seer spell to start; learn more per the Seer Spells Known table. DC is 10 + the spell's tier. On a natural 1, you can't cast that spell again until you complete Seer Penance."
+    ],
+    "caster": true,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Guide",
+        "Chanter",
+        "Rune Reader",
+        "Wise One",
+        "Seer of Odin"
+      ],
+      "Chaotic": [
+        "Hedge Witch",
+        "Whisperer",
+        "Bone Reader",
+        "Dreaded One",
+        "Seer of Loki"
+      ],
+      "Neutral": [
+        "Fortune Teller",
+        "Singer",
+        "Star Reader",
+        "Blessed One",
+        "Seer of Freya"
+      ]
+    }
+  },
+  {
+    "name": "Basilisk Warrior",
+    "hd": "1d8",
+    "weapons": "Boomerang, club, dagger, spear, spear-thrower",
+    "armor": "None",
+    "talent": [
+      "You find a basilisk egg; a loyal hatchling emerges in 1d4 days",
+      "+1 to weapon attacks and damage",
+      "+1 to weapon attacks and damage",
+      "+1 to weapon attacks and damage",
+      "+1 to weapon attacks and damage",
+      "+1 to weapon attacks and damage",
+      "+2 to Strength, Dexterity, or Constitution stat",
+      "+2 to Strength, Dexterity, or Constitution stat",
+      "+2 to Strength, Dexterity, or Constitution stat",
+      "+1 use per day of Petrifying Gaze",
+      "+1 use per day of Petrifying Gaze",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Basilisk Blood: Advantage on Constitution checks to avoid harmful maladies, poisons, or afflictions.",
+      "Petrifying Gaze: One creature of your level or less that meets your gaze must pass a DC 15 CON check or be petrified for 1d4 rounds (it still takes damage while petrified). Usable per day equal to your CON modifier (minimum 1).",
+      "Stone Skin: Add 2 + half your level (round down) to your AC while unarmored. Advantage on checks to hide in natural environments."
+    ],
+    "caster": false,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Stone Warrior",
+        "Strong Stone",
+        "Protector",
+        "Sun Serpent",
+        "Amber Basilisk"
+      ],
+      "Chaotic": [
+        "Stone Warrior",
+        "Sharp Stone",
+        "Slayer",
+        "Moon Serpent",
+        "Obsidian Basilisk"
+      ],
+      "Neutral": [
+        "Stone Warrior",
+        "Silent Stone",
+        "Watcher",
+        "Sky Serpent",
+        "Sapphire Basilisk"
+      ]
+    }
+  },
+  {
+    "name": "Delver",
+    "hd": "1d6",
+    "weapons": "Club, crossbow, dagger, javelin, mace, shortbow, shortsword, spear, staff",
+    "armor": "Leather armor, chainmail, shields",
+    "talent": [
+      "You gain 2 gear slots and an additional Trusty Gear",
+      "+1 to melee or ranged attacks and damage",
+      "+1 to melee or ranged attacks and damage",
+      "+1 to melee or ranged attacks and damage",
+      "+1 to melee or ranged attacks and damage",
+      "+1 to melee or ranged attacks and damage",
+      "+2 to Strength, Dexterity, or Constitution stat",
+      "+2 to Strength, Dexterity, or Constitution stat",
+      "+2 to Strength, Dexterity, or Constitution stat",
+      "Add one more point to your Scavenger success range",
+      "Add one more point to your Scavenger success range",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Languages: You know two additional common languages.",
+      "Scavenger: When you expend the last of a consumable item carried since your last rest, roll a d6. On a 5 or 6, you regain one use of that item.",
+      "Trailblazer: Advantage on Climbing, Swimming, Foraging, understanding unknown languages, and avoiding or escaping natural terrain hazards.",
+      "Trusty Gear: Choose one type of gear or weapon you can wield. Gain 1 + half your level (round down) on checks or attack rolls made with that type."
+    ],
+    "caster": false,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Explorer",
+        "Researcher",
+        "Antiquarian",
+        "Archaeologist",
+        "Professor"
+      ],
+      "Chaotic": [
+        "Intruder",
+        "Opportunist",
+        "Larcenist",
+        "Tomb Robber",
+        "Defiler"
+      ],
+      "Neutral": [
+        "Investigator",
+        "Observer",
+        "Pathfinder",
+        "Trailblazer",
+        "Pioneer"
+      ]
+    }
+  },
+  {
+    "name": "Wyrdling",
+    "hd": "1d6",
+    "weapons": "Club, crossbow, dagger, pseudopod, shortbow, shortsword, spear",
+    "armor": "Leather armor, chainmail, shields",
+    "talent": [
+      "Gain two new Corruption talents",
+      "+2 to Strength, Dexterity, or Charisma stats",
+      "+2 to Strength, Dexterity, or Charisma stats",
+      "+2 to Strength, Dexterity, or Charisma stats",
+      "+2 to Strength, Dexterity, or Charisma stats",
+      "+2 to Strength, Dexterity, or Charisma stats",
+      "Gain a new Corruption talent",
+      "Gain a new Corruption talent",
+      "Gain a new Corruption talent",
+      "Gain +1 to attacks and damage rolls with your pseudopod",
+      "Gain +1 to attacks and damage rolls with your pseudopod",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Languages: You know Primordial.",
+      "Corruption: Roll one talent on the Corruption table (d10).",
+      "Hideous Biology: You can stretch your body to fit through inch-wide cracks. It takes 3 rounds to pass through an obstacle this way.",
+      "Pseudopod: Sprout a clawed pseudopod — melee, near range, 1d6 damage, Finesse (use STR or DEX)."
+    ],
+    "caster": false,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Chosen One",
+        "Cursed",
+        "Haunted",
+        "Tortured",
+        "Crazed One"
+      ],
+      "Chaotic": [
+        "Chosen One",
+        "Blessed",
+        "Consecrated",
+        "Revered",
+        "Exalted One"
+      ],
+      "Neutral": [
+        "Chosen One",
+        "Seeker",
+        "Listener",
+        "Watcher",
+        "Learned One"
+      ]
+    }
+  },
+  {
+    "name": "Duelist",
+    "hd": "1d8",
+    "weapons": "Dagger, all swords",
+    "armor": "Leather armor, mithral chainmail",
+    "talent": [
+      "1/day, all attacks that would hit you this round miss instead",
+      "+1 to melee attacks and damage or +1 Parry per day",
+      "+1 to melee attacks and damage or +1 Parry per day",
+      "+1 to melee attacks and damage or +1 Parry per day",
+      "+1 to melee attacks and damage or +1 Parry per day",
+      "+1 to melee attacks and damage or +1 Parry per day",
+      "+2 to Strength, Dexterity, or Charisma stat",
+      "+2 to Strength, Dexterity, or Charisma stat",
+      "+2 to Strength, Dexterity, or Charisma stat",
+      "Deal +1d6 damage when you hit with a Taunt attack",
+      "Deal +1d6 damage when you hit with a Taunt attack",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": null,
+    "features": [
+      "Parry: 1/day, an attack of your choice that would hit you misses instead.",
+      "Tale Spinner: Make a DC 15 CHA check; on a pass, strangers believe you are famous and important for the rest of your interaction. The same individual can't be fooled twice.",
+      "Taunt: When an enemy misses you with an attack, you have advantage on attacks against that enemy next round."
+    ],
+    "caster": false,
+    "optional": true,
+    "titles": {
+      "Lawful": [
+        "Fencer",
+        "Defender",
+        "Mongoose",
+        "Wolf",
+        "Swordmaster"
+      ],
+      "Chaotic": [
+        "Ruffian",
+        "Heckler",
+        "Viper",
+        "Cobra",
+        "Swordmaster"
+      ],
+      "Neutral": [
+        "Student",
+        "Challenger",
+        "Mouser",
+        "Panther",
+        "Swordmaster"
+      ]
+    }
+  },
+  {
+    "name": "Roustabout",
+    "hd": "1d4",
+    "weapons": "Club, dagger, hammer, staff",
+    "armor": "Leather armor",
+    "talent": [
+      "+1 to any stat and roll another talent",
+      "Gain the ability to wield a new weapon or armor",
+      "Gain the ability to wield a new weapon or armor",
+      "Gain the ability to wield a new weapon or armor",
+      "Gain the ability to wield a new weapon or armor",
+      "Gain the ability to wield a new weapon or armor",
+      "+1 to any two stats (they can't be the same)",
+      "+1 to any two stats (they can't be the same)",
+      "+1 to any two stats (they can't be the same)",
+      "Roll an extra hit points die this level",
+      "Roll an extra hit points die this level",
+      "Learn any spell of a tier equal to half your level rounded down (min 1). Cast it using that class's spellcasting stat"
+    ],
+    "talentBands": null,
+    "features": [
+      "Knowaguy: Advantage on checks related to interacting with commoners and sourcing favors.",
+      "Lucksmith: Whenever another player uses your luck token, they have advantage on the new roll.",
+      "Surprising Guts: When reduced to half your HP or lower, make a DC 12 Wisdom check. On a success, you have advantage on your next roll."
+    ],
+    "caster": false,
+    "optional": true,
+    "titles": null
+  },
+  {
+    "name": "Necromancer",
+    "hd": "1d6",
+    "weapons": "Crossbow, dagger, longsword, scimitar, staff, stave",
+    "armor": "Leather armor, chainmail",
+    "talent": [
+      "The next time you die, you may return to life with full HP",
+      "+1 to your spellcasting checks or +1 to melee attacks",
+      "+1 to your spellcasting checks or +1 to melee attacks",
+      "+1 to your spellcasting checks or +1 to melee attacks",
+      "+1 to your spellcasting checks or +1 to melee attacks",
+      "+1 to your spellcasting checks or +1 to melee attacks",
+      "+2 to Strength, Constitution, or Charisma stat",
+      "+2 to Strength, Constitution, or Charisma stat",
+      "+2 to Strength, Constitution, or Charisma stat",
+      "Gain advantage on casting one spell you know",
+      "Gain advantage on casting one spell you know",
+      "Choose a talent or +2 points to distribute to stats"
+    ],
+    "talentBands": [
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        7
+      ],
+      [
+        8,
+        9
+      ],
+      [
+        10,
+        11
+      ],
+      [
+        12,
+        12
+      ]
+    ],
+    "features": [
+      "Death Sense: Sense the location and general nature of undead and dying creatures within near.",
+      "River of Death: You do not die at 0 CON, and you roll a d6 for your death timer instead of a d4.",
+      "Spellcasting (CHA): Cast necromancer spells you know. Know two tier 1 necromancer spells to start; learn more per the Necromancer Spells Known table. DC is 10 + the spell's tier."
+    ],
+    "caster": true,
+    "optional": true,
+    "titles": null
   }
 ];
