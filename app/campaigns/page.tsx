@@ -41,7 +41,6 @@ type SheetBlob = {
   name?: unknown;
   class?: unknown;
   level?: unknown;
-  _sheet?: { campaign?: { id?: unknown } | null } | null;
 };
 
 type PartyMember = { id: string; name: string; cls: string; level: number | null };
@@ -91,14 +90,13 @@ export default async function CampaignsPage() {
     rollStats.map((r) => [r.campaignId, { rolls: r._count._all, last: r._max.createdAt }]),
   );
 
-  // Who is actually in each party. Sheets record their link inside their own
-  // JSON, so string_contains is a DB-side prefilter (the same one the
-  // campaigns/[id]/characters API uses) and the parse below is what decides
-  // membership — a sheet that merely mentions the id doesn't count.
+  // Who is actually in each party. The campaign link is now its own indexed
+  // column (kept in sync on save), so this is an index scan; we still parse the
+  // sheet JSON for the roster's name / class / level.
   const parties = await Promise.all(
     ids.map(async (id) => {
       const docs = await prisma.document.findMany({
-        where: { tool: "sd-character", data: { path: ["sd_sheet"], string_contains: id } },
+        where: { tool: "sd-character", linkedCampaignId: id },
         select: { id: true, title: true, data: true },
         orderBy: { updatedAt: "desc" },
       });
@@ -114,7 +112,6 @@ export default async function CampaignsPage() {
         } catch {
           continue; // malformed sheet — skip rather than break the page
         }
-        if (sheet?._sheet?.campaign?.id !== id) continue;
 
         // The tools sync the character name into the document title, but the
         // sheet itself is the more direct source.
@@ -131,28 +128,30 @@ export default async function CampaignsPage() {
 
   // ── Campaigns the player has JOINED (a character is linked) but does not own ──
   // Membership is recorded inside each of the user's own sheets as
-  // _sheet.campaign.id — the same marker the roster reads. We gather those ids,
-  // drop any this user owns, and show the rest read-only.
+  // _sheet.campaign.id — now mirrored to the indexed linkedCampaignId column.
+  // We gather those ids from the column, drop any this user owns, and show the
+  // rest read-only. The sheet JSON is still parsed for the character name.
   const ownedIds = new Set(campaigns.map((c) => c.id));
   const myDocs = await prisma.document.findMany({
-    where: { userId: user.id, tool: "sd-character" },
-    select: { id: true, title: true, data: true },
+    where: { userId: user.id, tool: "sd-character", linkedCampaignId: { not: null } },
+    select: { id: true, title: true, data: true, linkedCampaignId: true },
     orderBy: { updatedAt: "desc" },
   });
 
   const joinedChars = new Map<string, string[]>(); // campaignId -> character names
   for (const doc of myDocs) {
-    const raw = (doc.data as Record<string, unknown> | null)?.sd_sheet;
-    if (typeof raw !== "string") continue;
-    let sheet: SheetBlob;
-    try {
-      sheet = JSON.parse(raw) as SheetBlob;
-    } catch {
-      continue;
-    }
-    const cid = sheet?._sheet?.campaign?.id;
+    const cid = doc.linkedCampaignId;
     if (typeof cid !== "string" || !cid || ownedIds.has(cid)) continue;
-    const name = (typeof sheet.name === "string" && sheet.name.trim()) || doc.title || "Unnamed";
+    const raw = (doc.data as Record<string, unknown> | null)?.sd_sheet;
+    let name = doc.title || "Unnamed";
+    if (typeof raw === "string") {
+      try {
+        const sheet = JSON.parse(raw) as SheetBlob;
+        name = (typeof sheet.name === "string" && sheet.name.trim()) || doc.title || "Unnamed";
+      } catch {
+        // keep the document title as the fallback name
+      }
+    }
     const list = joinedChars.get(cid) ?? [];
     list.push(name);
     joinedChars.set(cid, list);

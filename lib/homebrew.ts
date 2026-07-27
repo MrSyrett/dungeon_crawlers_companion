@@ -89,39 +89,16 @@ export const userCampaigns = cache(async function userCampaigns(
     select: { id: true, name: true, code: true },
   });
 
-  // A character sheet's campaign link lives inside its saved JSON at
-  // data.sd_sheet (a JSON string) → _sheet.campaign.id. Project just that id in
-  // SQL rather than shipping every sheet's full blob (gear, logs, spells…) to
-  // the app server on every page view. If any row's sd_sheet isn't valid JSON
-  // the cast aborts the query, so fall back to the old fetch-and-parse path —
-  // slower, but tolerant.
+  // A character sheet's campaign link now lives in the indexed linkedCampaignId
+  // column (kept in sync on every save), so the linked campaign ids are a plain
+  // index scan — no full-table JSON scan, no per-sheet parse.
+  const linkedRows = await prisma.document.findMany({
+    where: { userId, tool: "sd-character", linkedCampaignId: { not: null } },
+    select: { linkedCampaignId: true },
+    distinct: ["linkedCampaignId"],
+  });
   const linkedIds = new Set<string>();
-  try {
-    const rows = await prisma.$queryRaw<Array<{ cid: string | null }>>`
-      SELECT DISTINCT ((("data"->>'sd_sheet')::jsonb) #>> '{_sheet,campaign,id}') AS cid
-      FROM "Document"
-      WHERE "userId" = ${userId}
-        AND "tool" = 'sd-character'
-        AND ("data"->>'sd_sheet') IS NOT NULL
-    `;
-    for (const r of rows) if (typeof r.cid === "string" && r.cid) linkedIds.add(r.cid);
-  } catch {
-    const docs = await prisma.document.findMany({
-      where: { userId, tool: "sd-character" },
-      select: { data: true },
-    });
-    for (const d of docs) {
-      const raw = (d.data as Record<string, unknown> | null)?.sd_sheet;
-      if (typeof raw !== "string") continue;
-      try {
-        const sheet = JSON.parse(raw) as { _sheet?: { campaign?: { id?: unknown } | null } | null };
-        const cid = sheet?._sheet?.campaign?.id;
-        if (typeof cid === "string" && cid) linkedIds.add(cid);
-      } catch {
-        /* malformed sheet — ignore */
-      }
-    }
-  }
+  for (const r of linkedRows) if (r.linkedCampaignId) linkedIds.add(r.linkedCampaignId);
 
   const byId = new Map<string, CampaignRef>();
   for (const c of owned) byId.set(c.id, c);
@@ -143,25 +120,12 @@ async function participatesInCampaign(userId: string, campaignId: string): Promi
   const owned = await prisma.campaign.count({ where: { id: campaignId, ownerId: userId } });
   if (owned > 0) return true;
 
-  const docs = await prisma.document.findMany({
-    where: {
-      userId,
-      tool: "sd-character",
-      data: { path: ["sd_sheet"], string_contains: campaignId },
-    },
-    select: { data: true },
+  // Indexed membership check: does this user have an sd-character linked to the
+  // campaign? The link is its own column now, so this is a counted index scan.
+  const linked = await prisma.document.count({
+    where: { userId, tool: "sd-character", linkedCampaignId: campaignId },
   });
-  for (const d of docs) {
-    const raw = (d.data as Record<string, unknown> | null)?.sd_sheet;
-    if (typeof raw !== "string") continue;
-    try {
-      const sheet = JSON.parse(raw) as { _sheet?: { campaign?: { id?: unknown } | null } | null };
-      if (sheet?._sheet?.campaign?.id === campaignId) return true;
-    } catch {
-      /* ignore */
-    }
-  }
-  return false;
+  return linked > 0;
 }
 
 // ── Reads ────────────────────────────────────────────────────────────────────

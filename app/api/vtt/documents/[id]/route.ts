@@ -15,7 +15,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
   const { id } = await ctx.params;
   const doc = await prisma.document.findFirst({
     where: { id, userId: owner.id, tool: { in: CHARACTER_TOOLS } },
-    select: { id: true },
+    select: { id: true, tool: true },
   });
   if (!doc) return new Response("Not found", { status: 404 });
 
@@ -25,13 +25,45 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (!body || typeof body !== "object") return new Response("Bad request", { status: 400 });
 
   // `data` is typed as `object` to satisfy Prisma's JSON input.
-  const update: { data?: object; title?: string } = {};
+  const update: { data?: object; title?: string; linkedCampaignId?: string | null } = {};
   if (body.data !== undefined) update.data = body.data as object;
   if (typeof body.title === "string" && body.title.trim()) {
     update.title = body.title.trim().slice(0, 120);
+  }
+  // Keep the indexed campaign link in sync on the VTT save path too (only
+  // sd-character sheets carry one; see /api/documents/[id] for the rationale).
+  // Only a still-live campaign id is stored, so a stale link left in the sheet
+  // JSON (its campaign was deleted) can't trip the foreign key — it becomes null.
+  if (update.data && doc.tool === "sd-character") {
+    update.linkedCampaignId = await liveCampaignId(extractLinkedCampaignId(update.data));
   }
   if (!Object.keys(update).length) return Response.json({ ok: true });
 
   await prisma.document.update({ where: { id }, data: update });
   return Response.json({ ok: true });
+}
+
+// Narrows an extracted campaign id to one that still exists, so we never write a
+// foreign key pointing at a deleted campaign. Returns null otherwise.
+async function liveCampaignId(id: string | null): Promise<string | null> {
+  if (!id) return null;
+  const exists = await prisma.campaign.count({ where: { id } });
+  return exists > 0 ? id : null;
+}
+
+// Pulls the linked campaign id out of a saved SD character payload:
+//   { sd_sheet: "<json>" } → _sheet.campaign.id
+// Returns null when there's no valid link (also clears the column on unlink).
+function extractLinkedCampaignId(data: object): string | null {
+  try {
+    const blob = data as Record<string, unknown>;
+    if (typeof blob.sd_sheet !== "string") return null;
+    const sheet = JSON.parse(blob.sd_sheet) as {
+      _sheet?: { campaign?: { id?: unknown } | null } | null;
+    };
+    const id = sheet?._sheet?.campaign?.id;
+    return typeof id === "string" && id ? id : null;
+  } catch {
+    return null;
+  }
 }

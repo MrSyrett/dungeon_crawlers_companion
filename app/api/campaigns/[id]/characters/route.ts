@@ -5,11 +5,11 @@ import { getPlayUser } from "@/lib/vtt";
 type Ctx = { params: Promise<{ id: string }> };
 
 // A saved SD character sheet is stored as { sd_sheet: "<json string>" }. The
-// sheet records the campaign it is linked to at _sheet.campaign.{id,code,name},
-// which is how we find the party for a campaign.
+// campaign it's linked to lives in the indexed Document.linkedCampaignId column
+// (kept in sync on save); we look sheets up by that column, then hand back the
+// parsed sheet body to the caller.
 type SheetBlob = {
   name?: unknown;
-  _sheet?: { campaign?: { id?: unknown } | null } | null;
 };
 
 // GET — every character sheet linked to this campaign.
@@ -27,12 +27,13 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   });
   if (!campaign) return new Response("Not found", { status: 404 });
 
-  // Cheap DB-side prefilter: the campaign id appears verbatim in the stored
-  // sheet JSON. The parse below is what actually decides membership.
+  // Indexed lookup: the campaign link now lives in its own column, kept in sync
+  // on every save. We still parse the sheet JSON below for the sheet body the
+  // caller wants, but membership is decided by the column, not a full scan.
   const docs = await prisma.document.findMany({
     where: {
       tool: "sd-character",
-      data: { path: ["sd_sheet"], string_contains: id },
+      linkedCampaignId: id,
     },
     select: { id: true, title: true, updatedAt: true, data: true },
     orderBy: { updatedAt: "desc" },
@@ -50,8 +51,6 @@ export async function GET(req: NextRequest, ctx: Ctx) {
     } catch {
       continue; // malformed payload — skip rather than fail the whole request
     }
-
-    if (sheet?._sheet?.campaign?.id !== id) continue;
 
     characters.push({
       docId: doc.id,

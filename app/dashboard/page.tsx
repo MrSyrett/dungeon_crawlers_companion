@@ -137,23 +137,18 @@ export default async function DashboardPage() {
     orderBy: { updatedAt: "desc" },
   });
 
-  // A sheet records the campaign it's connected to inside its own saved JSON
-  // (`_sheet.campaign.id`), the same marker the campaign roster reads. Map those
-  // to their campaign's tabletop link so each linked sheet can offer Launch VTT.
-  const linkedCampaignId = (doc: { data: unknown }): string | null => {
-    const raw = (doc.data as Record<string, unknown> | null)?.sd_sheet
-      ?? (doc.data as Record<string, unknown> | null)?.dcc_sheet;
-    if (typeof raw !== "string") return null;
-    try {
-      const sheet = JSON.parse(raw) as { _sheet?: { campaign?: { id?: unknown } | null } | null };
-      const id = sheet?._sheet?.campaign?.id;
-      return typeof id === "string" && id ? id : null;
-    } catch {
-      return null; // a half-written sheet shouldn't break the dashboard
-    }
-  };
-
-  const campaignIds = [...new Set(docs.map(linkedCampaignId).filter((v: string | null): v is string => !!v))];
+  // A sheet's campaign link now lives in the indexed linkedCampaignId column
+  // (populated on save for sd-character docs; DCC sheets never carry one). We
+  // map each linked sheet to its campaign's tabletop link so it can offer
+  // Launch VTT. `docs` already holds every scalar column, so this is a field
+  // read — no extra query, no JSON parse.
+  const campaignIds = [
+    ...new Set(
+      docs
+        .map((d) => d.linkedCampaignId)
+        .filter((v: string | null): v is string => !!v),
+    ),
+  ];
   const vttByCampaign = new Map<string, string>();
   if (campaignIds.length) {
     const linked = await prisma.campaign.findMany({
@@ -171,7 +166,7 @@ export default async function DashboardPage() {
   for (const doc of docs) {
     const tool = doc.tool as ToolId;
     if (!byTool.has(tool)) continue;
-    const cid = linkedCampaignId(doc);
+    const cid = doc.linkedCampaignId;
     byTool.get(tool)!.push({ ...doc, vttUrl: cid ? vttByCampaign.get(cid) ?? null : null });
   }
 

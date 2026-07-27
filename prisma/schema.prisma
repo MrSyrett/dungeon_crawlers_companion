@@ -45,18 +45,27 @@ model Document {
   // For "gm-screen" docs this scopes the saved board to a campaign:
   //   null      → the personal "unlinked" scratch board
   //   <cuid>    → the board for that campaign (per user)
-  // Character-sheet docs leave this null; they keep their campaign link inside `data`.
+  // Character-sheet docs leave this null; their campaign link lives in
+  // `linkedCampaignId` (an indexed column) instead — see below.
   campaignId String?
+  // For "sd-character" docs: the campaign the sheet is linked to, promoted out
+  // of the sheet JSON (`data.sd_sheet` → `_sheet.campaign.id`) into an indexed
+  // column so the party roster / campaign membership lookups are index scans
+  // rather than full-table string_contains scans. Deleting the campaign nulls
+  // this (SetNull) rather than deleting the player's character (Cascade would).
+  linkedCampaignId String?
   title      String   @default("Untitled")
   data       Json     @default("{}")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign        Campaign? @relation("DocumentBoardCampaign", fields: [campaignId], references: [id], onDelete: Cascade)
+  linkedCampaign  Campaign? @relation("DocumentLinkedCampaign", fields: [linkedCampaignId], references: [id], onDelete: SetNull)
 
   @@index([userId, tool, campaignId])
   @@index([userId, tool, updatedAt])
+  @@index([tool, linkedCampaignId])
 }
 
 // A campaign links multiple players' tools together. Anyone with the join
@@ -76,7 +85,10 @@ model Campaign {
   homebrewShares HomebrewShare[]
   // Per-user GM-screen boards saved for this campaign (tool = "gm-screen").
   // Deleting the campaign removes them, so a stale board can't outlive it.
-  documents Document[]
+  documents Document[] @relation("DocumentBoardCampaign")
+  // Character sheets linked to this campaign (tool = "sd-character"). Deleting
+  // the campaign nulls their link (SetNull) rather than removing the sheets.
+  linkedDocuments Document[] @relation("DocumentLinkedCampaign")
 }
 
 // A user-owned homebrew entry: a spell, gear item, monster, class, ancestry, or
