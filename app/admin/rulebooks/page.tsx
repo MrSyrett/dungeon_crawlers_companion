@@ -50,12 +50,20 @@ export default async function AdminRulebooksPage({
             Admin · who can read each PDF
           </p>
         </div>
-        <Link
-          href="/rules"
-          className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-        >
-          ← Rulebooks
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/users"
+            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+          >
+            Members
+          </Link>
+          <Link
+            href="/rules"
+            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+          >
+            ← Rulebooks
+          </Link>
+        </div>
       </header>
 
       <p className="mb-6 text-[13px] leading-relaxed text-[var(--muted)]">

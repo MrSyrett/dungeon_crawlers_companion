@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { TOOLS, TOOL_ORDER, type ToolId } from "@/lib/tools";
 import { logout } from "@/app/actions/auth";
@@ -131,6 +132,7 @@ function DocList({
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  const isAdmin = isAdminEmail(user.email);
 
   const docs = await prisma.document.findMany({
     where: { userId: user.id },
@@ -189,6 +191,14 @@ export default async function DashboardPage() {
         <div className="flex flex-col items-end gap-3">
           <div className="flex items-center gap-4 text-sm text-[var(--muted)]">
             <span className="hidden sm:inline">{user.email}</span>
+            {isAdmin ? (
+              <Link
+                href="/admin/users"
+                className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+              >
+                Members
+              </Link>
+            ) : null}
             <form action={logout}>
               <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] hover:border-[var(--muted)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]">
                 Sign out
