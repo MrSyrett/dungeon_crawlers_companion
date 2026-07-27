@@ -238,17 +238,12 @@ export default async function ClassesPage({
         >
           Martial
         </Link>
-      </div>
-
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+        <span className="mx-1 h-4 w-px bg-[var(--border)]" aria-hidden />
+        <Link
+          href={withParams(current, { opt: opt === "0" ? "" : "0" })}
+          className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}
+        >
           Optional
-        </span>
-        <Link href={withParams(current, { opt: "" })} className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}>
-          Shown
-        </Link>
-        <Link href={withParams(current, { opt: "0" })} className={`${chipBase} ${opt === "0" ? chipOn : chipOff}`}>
-          Hidden
         </Link>
       </div>
 

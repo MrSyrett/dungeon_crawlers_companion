@@ -7,8 +7,8 @@
 export type SystemKey = "SD" | "DCC";
 
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
-  { key: "SD", name: "Shadowdark", short: "Shadowdark", accent: "var(--gold)" },
-  { key: "DCC", name: "Dungeon Crawler Carl", short: "Crawler Carl", accent: "var(--red)" },
+  { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
+  { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--red)" },
 ];
 
 const STORAGE_KEY = "dcw_system";

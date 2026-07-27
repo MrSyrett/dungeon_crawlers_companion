@@ -4276,18 +4276,16 @@ function ccwTalentChoiceUI(p, stateRef, knownSpells, cls) {
   const selStyle = 'width:100%;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:11px;padding:5px 8px;outline:none;';
 
   if(p.kind==='ortwo') {
-    p.options.forEach(opt=>{
-      const sel = p.picked===opt ? ' selected' : '';
-      h += '<button class="ccw-choice'+sel+'" style="width:100%;margin-bottom:4px;" onclick="'+setPick(opt)+'ccwRerender()"><div class="ccw-choice-name" style="font-size:10px;">'+opt+'</div></button>';
-    });
+    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">— choose —</option>';
+    p.options.forEach(opt=>{ h += '<option value="'+String(opt).replace(/"/g,'&quot;')+'"'+(p.picked===opt?' selected':'')+'>'+String(opt).replace(/</g,'&lt;')+'</option>'; });
+    h += '</select>';
   }
   else if(p.kind==='statpick') {
-    h += '<div style="display:flex;gap:4px;flex-wrap:wrap;">';
-    p.options.forEach(st=>{
-      const sel = p.picked===st ? ' selected' : '';
-      h += '<button class="ccw-choice'+sel+'" style="flex:1;text-align:center;" onclick="'+setPick(st)+'ccwRerender()"><div class="ccw-choice-name" style="font-size:10px;">+2 '+st+'</div></button>';
-    });
-    h += '</div>';
+    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">— choose —</option>';
+    p.options.forEach(st=>{ h += '<option value="'+st+'"'+(p.picked===st?' selected':'')+'>+2 '+st+'</option>'; });
+    h += '</select>';
   }
   else if(p.kind==='distribute') {
     h += '<p class="ccw-hint" style="font-size:10px;">Distribute 2 points (pick two — the same stat twice = +2):</p>';
@@ -4300,10 +4298,10 @@ function ccwTalentChoiceUI(p, stateRef, knownSpells, cls) {
     }
   }
   else if(p.kind==='meleeranged') {
-    ['melee','ranged'].forEach(m=>{
-      const sel = p.picked===m ? ' selected' : '';
-      h += '<button class="ccw-choice'+sel+'" style="width:49%;margin-right:1%;text-align:center;" onclick="'+setPick(m)+'ccwRerender()"><div class="ccw-choice-name" style="font-size:10px;">'+m.charAt(0).toUpperCase()+m.slice(1)+'</div></button>';
-    });
+    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">— choose —</option>';
+    ['melee','ranged'].forEach(m=>{ h += '<option value="'+m+'"'+(p.picked===m?' selected':'')+'>'+m.charAt(0).toUpperCase()+m.slice(1)+'</option>'; });
+    h += '</select>';
   }
   else if(p.kind==='weapon') {
     h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
@@ -4335,43 +4333,37 @@ function ccwTalentChoiceUI(p, stateRef, knownSpells, cls) {
     h += '</select>';
   }
   else if(p.kind==='armor') {
-    h += '<div style="display:flex;gap:4px;flex-wrap:wrap;">';
-    CCW_ARMOR_TYPES.forEach(a=>{
-      const sel = p.picked===a ? ' selected' : '';
-      h += '<button class="ccw-choice'+sel+'" style="flex:1;min-width:45%;text-align:center;" onclick="'+setPick(a)+'ccwRerender()"><div class="ccw-choice-name" style="font-size:10px;">'+a+'</div></button>';
-    });
-    h += '</div>';
+    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">— choose —</option>';
+    CCW_ARMOR_TYPES.forEach(a=>{ h += '<option value="'+a+'"'+(p.picked===a?' selected':'')+'>'+a+'</option>'; });
+    h += '</select>';
   }
   else if(p.kind==='remedy') {
-    h += '<div style="display:flex;gap:4px;flex-wrap:wrap;">';
-    SD_REMEDIES.forEach(r=>{
-      const rm = r.name;
-      const sel = p.picked===rm ? ' selected' : '';
-      h += '<button class="ccw-choice'+sel+'" style="flex:1 1 46%;min-width:46%;text-align:left;" onclick="'+setPick(rm)+'ccwRerender()">'
-         + '<div class="ccw-choice-name" style="font-size:10px;">'+rm+' <span style="color:#c8a020;">DC '+r.dc+'</span></div>'
-         + '<div class="ccw-choice-desc">'+r.effect+'</div></button>';
-    });
-    h += '</div>';
+    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">— choose —</option>';
+    SD_REMEDIES.forEach(r=>{ h += '<option value="'+r.name+'"'+(p.picked===r.name?' selected':'')+'>'+r.name+' (DC '+r.dc+')</option>'; });
+    h += '</select>';
   }
   else if(p.kind==='wand') {
-    ['Priest wand','Wizard wand'].forEach(w=>{
-      const sel = p.picked===w ? ' selected' : '';
-      h += '<button class="ccw-choice'+sel+'" style="width:49%;margin-right:1%;text-align:center;" onclick="'+setPick(w)+'ccwRerender()"><div class="ccw-choice-name" style="font-size:10px;">'+w+'</div></button>';
-    });
+    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">— choose —</option>';
+    ['Priest wand','Wizard wand'].forEach(w=>{ h += '<option value="'+w+'"'+(p.picked===w?' selected':'')+'>'+w+'</option>'; });
+    h += '</select>';
   }
   else if(p.kind==='meta') {
-    h += '<button class="ccw-choice'+(p.picked==='talent'?' selected':'')+'" style="width:'+(p.hasStatAlt?'49%':'100%')+';margin-right:1%;text-align:center;" onclick="'+stateRef+'.picked=\'talent\';'+stateRef+'.sub=null;ccwResolve('+stateRef+');ccwRerender()"><div class="ccw-choice-name" style="font-size:10px;">Choose a talent</div></button>';
-    if(p.hasStatAlt) {
-      h += '<button class="ccw-choice'+(p.picked==='stats'?' selected':'')+'" style="width:49%;text-align:center;" onclick="'+stateRef+'.picked=\'stats\';'+stateRef+'.sub=null;ccwResolve('+stateRef+');ccwRerender()"><div class="ccw-choice-name" style="font-size:10px;">+2 stat points</div></button>';
-    }
+    h += '<select style="'+selStyle+'" onchange="var v=this.value;'+stateRef+'.picked=v;'+stateRef+'.sub=null;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">\u2014 choose \u2014</option>';
+    h += '<option value="talent"'+(p.picked==='talent'?' selected':'')+'>Choose a talent</option>';
+    if(p.hasStatAlt) h += '<option value="stats"'+(p.picked==='stats'?' selected':'')+'>+2 stat points</option>';
+    h += '</select>';
     if(p.picked==='talent') {
       const rows = (RC_CLASS_INFO[cls]?.talent||[]);
       const opts = [rows[0], rows[1], rows[6], rows[9]].filter(Boolean);
       h += '<p class="ccw-hint" style="font-size:10px;margin-top:6px;">Pick any talent from the table:</p>';
-      opts.forEach(opt=>{
-        const sel = p.sub && p.sub.text===opt ? ' selected' : '';
-        h += '<button class="ccw-choice'+sel+'" style="width:100%;margin-bottom:4px;" onclick="'+stateRef+'.sub=ccwAnalyzeTalent(\''+opt.replace(/'/g,"\\'")+'\',\''+cls+'\');ccwResolve('+stateRef+');ccwRerender()"><div class="ccw-choice-name" style="font-size:10px;">'+opt+'</div></button>';
-      });
+      h += '<select style="'+selStyle+'" onchange="'+stateRef+'.sub=this.value?ccwAnalyzeTalent(this.value,\''+cls.replace(/'/g,"\\\\'")+'\'):null;ccwResolve('+stateRef+');ccwRerender()">';
+      h += '<option value="">\u2014 choose \u2014</option>';
+      opts.forEach(opt=>{ h += '<option value="'+String(opt).replace(/"/g,'&quot;')+'"'+(p.sub&&p.sub.text===opt?' selected':'')+'>'+String(opt).replace(/</g,'&lt;')+'</option>'; });
+      h += '</select>';
       if(p.sub) h += ccwTalentChoiceUI(p.sub, stateRef+'.sub', knownSpells, cls);
     }
     if(p.picked==='stats') {
@@ -4497,8 +4489,9 @@ function ccwChoices(){
   const spells=_hbKnownSpellsCreation(_ccw).filter(s=>s!=='Magic Missile').map(s=>[s,s]);
   const talents=_hbTalentRowOptions(_ccw.cls);
   let h='<p class="ccw-hint">A few of your abilities let you choose. Pick each one.</p>';
-  if(!list.length) return h+'<p class="ccw-hint">Nothing left to choose.</p>';
+  if(!list.some(ch=>!ch.fromChoose)) return h+'<p class="ccw-hint">Nothing left to choose.</p>';
   list.forEach(ch=>{
+    if(ch.fromChoose) return;
     h+='<div style="margin-bottom:12px;"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#c8a020;margin-bottom:4px;">'+_hbChoiceLabel(ch)+'</div>';
     const cur=_ccw.hbChoices[ch.key]||'';
     if(ch.kind==='stat') h+=_hbChoiceSelect(ch.key,cur,_HB_STAT_OPTS,'ccwSetChoice');
@@ -4639,7 +4632,7 @@ function ccwStepList() {
   const lc = _ccw.ancestry && _ccw.cls ? ccwLangChoices() : {common:0,rare:0,priest:false};
   if(lc.common || lc.rare || lc.priest) steps.push('Languages');
   steps.push('Gear & Weapons');
-  if(_hbGatherChoices(_ccw).length) steps.push('Choices');
+  if(_hbGatherChoices(_ccw).some(ch=>!ch.fromChoose)) steps.push('Choices');
   steps.push('Name & Finish');
   return steps;
 }
@@ -5058,6 +5051,23 @@ function ccwAncestry() {
       let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
       x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 '+title+' \u2014 choose one</div>';
       x += _hbChoiceSelect('_anc'+ti, (_ccw.hbChoice&&_ccw.hbChoice[ti]!=null)?String(_ccw.hbChoice[ti]):'', effs.map((e,oi)=>[String(oi), _hbEffOne(e)||'Effect']), '_ccwPickHbChoiceSel');
+      // If the chosen option is itself a player-choice, resolve it inline here so
+      // the whole trait is decided in one place (not split to the Choices step).
+      const _oi = _ccw.hbChoice && _ccw.hbChoice[ti];
+      if(_oi!=null && effs[_oi]){
+        const nested=_hbChoiceFromEffect('at'+ti+'_'+_oi, effs[_oi], _ccw.cls);
+        if(nested){
+          const cur=(_ccw.hbChoices||{})[nested.key]||'';
+          const weapons=[['Strikes','Strikes (unarmed)']].concat((_ccw.buyWeapons||[]).filter(w=>!/^strikes$/i.test(w)).map(w=>[w,w]));
+          const spells=_hbKnownSpellsCreation(_ccw).filter(s=>s!=='Magic Missile').map(s=>[s,s]);
+          let ctl='';
+          if(nested.kind==='stat') ctl=_hbChoiceSelect(nested.key,cur,_HB_STAT_OPTS,'ccwSetChoice');
+          else if(nested.kind==='advSpell') ctl= spells.length?_hbChoiceSelect(nested.key,cur,spells,'ccwSetChoice'):'<p class="ccw-hint" style="font-size:9px;color:#df6a6a;margin:6px 0 0;">You know no spells to gain advantage on \u2014 skipped.</p>';
+          else if(nested.kind==='weaponDie') ctl=_hbChoiceSelect(nested.key,cur,weapons,'ccwSetChoice');
+          else if(nested.kind==='talent') ctl=_hbChoiceControl('talent',nested.key,cur,_hbTalentRowOptions(_ccw.cls),'ccwSetChoice');
+          if(ctl) x += '<div style="margin-top:8px;"><div style="font-family:Montserrat,sans-serif;font-size:9px;color:#9a9a8a;margin-bottom:4px;">'+_hbChoiceLabel(nested)+'</div>'+ctl+'</div>';
+        }
+      }
       h += x + '</div>';
     });
   }
@@ -5073,6 +5083,7 @@ function ccwRandAncestry() { _ccw.ancestry = _ccwRandomAncestry(); ccwClearAnces
 function ccwSetClass(c){
   _ccw.cls = c;
   _ccw.spells = []; _ccw.langCommon = []; _ccw.langRare = []; _ccw.langPriest = '';
+  _ccw.spellSrc = null; _ccw.spellSrcOf = {};
   _ccw.tres = null; _ccw.tres2 = null; _ccw.talent = null; _ccw.grit = null; _ccw.mastery = null;
   _ccw.talentRoll = null; _ccw.talent2Roll = null; _ccw.talentPick = null;
   _ccw.hbTalentChoice = null; _ccw.hbTalentChoice2 = null; _ccw.hbTalentSpells = [];
@@ -8091,13 +8102,13 @@ function _hbChoiceFromEffect(key,e,cls){
 // Pending choices from ancestry traits (bonuses + non-choose trait effects).
 // Features are gathered separately and resolved at the Class step.
 function _hbGatherChoices(c){
-  const list=[]; const push=(k,e)=>{const ch=_hbChoiceFromEffect(k,e,c.cls);if(ch)list.push(ch);};
+  const list=[]; const push=(k,e,fc)=>{const ch=_hbChoiceFromEffect(k,e,c.cls);if(ch){if(fc)ch.fromChoose=true;list.push(ch);}};
   const hb=RC_ANCESTRY._hb&&RC_ANCESTRY._hb[c.ancestry];
   if(hb){
     (Array.isArray(hb.bonuses)?hb.bonuses:[]).forEach((e,i)=>push('ab'+i,e));
     (Array.isArray(hb.traits)?hb.traits:[]).forEach((t,ti)=>{
       const effs=_hbTraitEffects(t);
-      if(_hbTraitIsChoice(t)){const oi=c.hbChoice&&c.hbChoice[ti];if(oi!=null&&effs[oi])push('at'+ti+'_'+oi,effs[oi]);}
+      if(_hbTraitIsChoice(t)){const oi=c.hbChoice&&c.hbChoice[ti];if(oi!=null&&effs[oi])push('at'+ti+'_'+oi,effs[oi],true);}
       else effs.forEach((e,ei)=>push('at'+ti+'_'+ei,e));
     });
   }
@@ -8139,15 +8150,15 @@ function _hbExpandChoices(c, choices){
         if(ci._talentChoose && ci._talentChoose[idx]){
           const rows=(typeof ccwBuildTalentRows==='function')?ccwBuildTalentRows(ch.cls):[];
           const rname=(rows[idx]&&rows[idx].text)?String(rows[idx].text).slice(0,40):'Chosen talent';
-          walk({key:ch.key+'>one', kind:'oneOf', effects:ci._talentEff[idx], label:rname, cls:ch.cls});
+          walk({key:ch.key+'>one', kind:'oneOf', effects:ci._talentEff[idx], label:rname, cls:ch.cls, fromChoose:ch.fromChoose});
         } else {
-          ci._talentEff[idx].forEach((e,ei)=>{ const s=_hbChoiceFromEffect(ch.key+'>'+ei,e,ch.cls); if(s) walk(s); });
+          ci._talentEff[idx].forEach((e,ei)=>{ const s=_hbChoiceFromEffect(ch.key+'>'+ei,e,ch.cls); if(s){ if(ch.fromChoose)s.fromChoose=true; walk(s); } });
         }
       }
     } else if(ch.kind==='oneOf'){
       const e=ch.effects[parseInt(val)];
       const s=_hbChoiceFromEffect(ch.key+'>'+val, e, ch.cls);
-      if(s) walk(s);
+      if(s){ if(ch.fromChoose)s.fromChoose=true; walk(s); }
     }
   };
   (choices||[]).forEach(walk);

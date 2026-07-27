@@ -89,14 +89,8 @@ export default async function BackgroundsPage({
       </form>
 
       <div className="mb-6 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
+        <Link href={optHref(q, opt === "0" ? "" : "0")} className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}>
           Optional
-        </span>
-        <Link href={optHref(q, "")} className={`${chipBase} ${opt === "0" ? chipOff : chipOn}`}>
-          Shown
-        </Link>
-        <Link href={optHref(q, "0")} className={`${chipBase} ${opt === "0" ? chipOn : chipOff}`}>
-          Hidden
         </Link>
       </div>
 
