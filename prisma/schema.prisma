@@ -79,10 +79,11 @@ model Campaign {
   documents Document[]
 }
 
-// A user-owned homebrew spell or gear entry. `data` holds the same object shape
-// the character sheet already uses for its localStorage homebrew (a spell in
-// SD_SPELLS shape, or an item in the sheet's `_homebrewItems` shape), so a sheet
-// can merge these straight into its catalogs and use them with no translation.
+// A user-owned homebrew entry: a spell, gear item, monster, class, ancestry, or
+// background. `data` holds the same object shape the character sheet / GM screen
+// already use (a spell in SD_SPELLS shape, gear in `_homebrewItems` shape, a
+// monster in SD_MONSTERS shape, etc.), so those tools can merge it into their
+// catalogs and use it with no translation.
 //
 // Ownership is per user (the owner manages it). Sharing is a many-to-many via
 // HomebrewShare: an entry with no shares is personal; each share makes it usable
@@ -90,7 +91,7 @@ model Campaign {
 model Homebrew {
   id        String   @id @default(cuid())
   ownerId   String
-  type      String // "spell" | "gear"
+  type      String // "spell" | "gear" | "monster" | "class" | "ancestry" | "background"
   name      String
   data      Json     @default("{}")
   createdAt DateTime @default(now())
