@@ -379,7 +379,7 @@ export const TALENT_TARGETS: [string, string][] = [
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
   ["advSpell", "Advantage: Cast Spell"],
-  ["featureCharges", "Feature Charges"],
+  ["featureCharges", "Charges"],
   ["playerTalent", "Player Choice"],
   ["perDay", "Per Day (uses)"],
 ];

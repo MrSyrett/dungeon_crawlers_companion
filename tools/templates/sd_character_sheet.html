@@ -8177,7 +8177,12 @@ function injectHomebrewContent(rows) {
       // Structured feature effects (aligned with the features array) so simple
       // passive bonuses can be auto-applied at creation.
       const featureEff = (Array.isArray(d.features) ? d.features : [])
-        .map(f => (f && Array.isArray(f.effects)) ? f.effects : []);
+        .map(f => {
+          const fname = String((f && f.text) || '').split(/[:(]/)[0].trim();
+          return (f && Array.isArray(f.effects))
+            ? f.effects.map(e => (e && e.target === 'featureCharges' && !String(e.feature||'').trim()) ? Object.assign({}, e, { feature: fname }) : e)
+            : [];
+        });
       const featureChoose = (Array.isArray(d.features) ? d.features : []).map(f => !!(f && f.choose));
       const featureText = (Array.isArray(d.features) ? d.features : []).map(f => String((f && f.text) || '').split(':')[0]);
       const talentChoose = talentRows.map(r => !!(r && r.choose));

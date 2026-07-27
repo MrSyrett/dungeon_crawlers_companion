@@ -78,7 +78,7 @@ const TALENT_TARGETS: [string, string][] = [
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
   ["advSpell", "Advantage: Cast Spell"],
-  ["featureCharges", "Feature Charges"],
+  ["featureCharges", "Charges"],
   ["playerTalent", "Player Choice"],
   ["perDay", "Per Day (uses)"],
 ];
@@ -98,9 +98,8 @@ const EFFECT_CATEGORIES: [string, string][] = [
   ["spellCheck", "Spellcasting Checks"],
   ["weaponDie", "Weapon Damage Die"],
   ["advSpell", "Advantage: Cast Spell"],
-  ["featureCharges", "Feature Charges"],
+  ["featureCharges", "Charges"],
   ["playerTalent", "Player Choice"],
-  ["perDay", "Per Day (uses)"],
 ];
 const COMBAT_KINDS: [string, string][] = [
   ["atk", "Attack"],
@@ -674,7 +673,7 @@ export default function HomebrewManager({
                 <input
                   className={`${fieldBase} min-w-0 flex-1`}
                   value={e.feature}
-                  placeholder="Feature name (e.g. Rage)"
+                  placeholder="Feature name (blank = this feature)"
                   onChange={(ev) => patch(k, { feature: ev.target.value })}
                 />
               ) : null}
