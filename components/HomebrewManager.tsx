@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GEAR } from "@/lib/data/gear";
 import { SPELLS } from "@/lib/data/spells";
+import { TALENT_TARGETS } from "@/lib/effects";
 
 // Weapons available to the shared Effect Builder (Weapon Damage Die). Derived
 // from the same gear data everywhere, so every effect builder lists the same
@@ -53,35 +54,8 @@ const SPELL_RANGES = [
 // so this client component doesn't import the server module).
 const HD_DICE = ["1d4", "1d6", "1d8", "1d10", "1d12"];
 const CAST_STATS = ["INT", "WIS", "CHA"];
-// The "thing being bonused" — amount comes first in the UI, then this dropdown.
-const TALENT_TARGETS: [string, string][] = [
-  ["meleeAtk", "Melee Attacks"],
-  ["meleeDmg", "Melee Damage"],
-  ["meleeAtkDmg", "Melee Attack & Damage"],
-  ["rangedAtk", "Ranged Attacks"],
-  ["rangedDmg", "Ranged Damage"],
-  ["rangedAtkDmg", "Ranged Attack & Damage"],
-  ["mrAtk", "Melee & Ranged Attacks"],
-  ["mrDmg", "Melee & Ranged Damage"],
-  ["mrAtkDmg", "Melee & Ranged Attack & Damage"],
-  ["ac", "AC"],
-  ["hp", "HP"],
-  ["gearSlots", "Gear Slots"],
-  ["str", "Strength"],
-  ["dex", "Dexterity"],
-  ["con", "Constitution"],
-  ["int", "Intelligence"],
-  ["wis", "Wisdom"],
-  ["cha", "Charisma"],
-  ["statChoice", "Stat (player choice)"],
-  ["spellKnown", "Learn Spell"],
-  ["spellCheck", "Spellcasting Checks"],
-  ["weaponDie", "Weapon Damage Die"],
-  ["advSpell", "Advantage: Cast Spell"],
-  ["featureCharges", "Charges"],
-  ["playerTalent", "Player Choice"],
-  ["perDay", "Per Day (uses)"],
-];
+// TALENT_TARGETS (the granular "thing being bonused" list) is imported from
+// lib/effects — the single source of truth shared with the reference pages.
 
 // The Effect Builder groups the granular targets above into simple categories.
 // Combat picks a scope (Melee / Ranged / both) then a kind (Attack / Damage /

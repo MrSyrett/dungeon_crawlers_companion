@@ -403,6 +403,80 @@ const backgroundCount = emit(
   backgroundRows,
 );
 
+// ── Sheet mirror: HB_TALENT_LABEL ───────────────────────────────────────────
+// The character sheet can't import TypeScript, so it keeps a JS mirror of the
+// effect-label map (HB_TALENT_LABEL, read by _hbEffOne's fallback branch). Keep
+// it from drifting by regenerating it here from lib/effects.ts's TALENT_TARGETS
+// — the single source of truth — and rewriting the block in the template.
+function syncSheetLabelMap() {
+  const effSrc = readFileSync(join(ROOT, "lib", "effects.ts"), "utf8");
+  // Pull the TALENT_TARGETS array literal out of the TS source and evaluate it.
+  const decl = "export const TALENT_TARGETS: [string, string][] = [";
+  const start = effSrc.indexOf(decl);
+  if (start === -1) throw new Error("TALENT_TARGETS not found in lib/effects.ts");
+  const open = start + decl.length - 1; // at '['
+  const end = effSrc.indexOf("\n];", open);
+  if (end === -1) throw new Error("TALENT_TARGETS in lib/effects.ts not terminated by '\\n];'");
+  const pairs = runInNewContext(effSrc.slice(open, end + 2), Object.create(null), { timeout: 5000 });
+
+  const entries = pairs.map(([k, v]) => `${k}:${JSON.stringify(v)}`).join(", ");
+  const generated =
+    "const HB_TALENT_LABEL = {\n" +
+    "  // GENERATED from lib/effects.ts (TALENT_TARGETS) by scripts/extract-game-data.mjs.\n" +
+    "  // Edit lib/effects.ts, then re-run the extract — do not hand-edit this block.\n" +
+    `  ${entries}\n` +
+    "};";
+
+  const sheetPath = join(TEMPLATES, "sd_character_sheet.html");
+  let sheet = readFileSync(sheetPath, "utf8");
+  const re = /const HB_TALENT_LABEL = \{[\s\S]*?\n\};/;
+  if (!re.test(sheet)) throw new Error("HB_TALENT_LABEL block not found in sd_character_sheet.html");
+  const next = sheet.replace(re, generated);
+  if (next !== sheet) writeFileSync(sheetPath, next, "utf8");
+  return pairs.length;
+}
+const labelCount = syncSheetLabelMap();
+
+// ── Template mirror: SD_MONSTERS (session-prep) ─────────────────────────────
+// The bestiary (SD_MONSTERS) is owned by the GM screen. The session-prep
+// builder needs the same array; rather than keep a second hand-maintained copy
+// that silently drifts, copy the GM screen's block verbatim into the session
+// prep template on every build. Edit the bestiary in gm_screen.html only.
+function syncSessionPrepMonsters() {
+  const grab = (html, label) => {
+    const decl = "const SD_MONSTERS = [";
+    const start = html.indexOf(decl);
+    if (start === -1) throw new Error(`SD_MONSTERS not found in ${label}`);
+    const end = html.indexOf("\n];", start);
+    if (end === -1) throw new Error(`SD_MONSTERS in ${label} not terminated by '\\n];'`);
+    return { start, end: end + 3, block: html.slice(start, end + 3) };
+  };
+  const ownerBlock = grab(gmScreen, "gm_screen.html").block;
+  const banner =
+    "// GENERATED MIRROR of SD_MONSTERS from gm_screen.html (the canonical\n" +
+    "// bestiary), copied by scripts/extract-game-data.mjs. Do not hand-edit —\n" +
+    "// edit the bestiary in gm_screen.html and re-run the extract.\n";
+  const mirror = banner + ownerBlock;
+  const prepPath = join(TEMPLATES, "sd_session_prep_builder.html");
+  let prep = readFileSync(prepPath, "utf8");
+  const target = grab(prep, "sd_session_prep_builder.html");
+  // Include any existing banner immediately above the block in what we replace,
+  // so re-running doesn't stack banners.
+  let replaceStart = target.start;
+  const before = prep.slice(0, target.start);
+  const bannerMark = before.lastIndexOf("// GENERATED MIRROR of SD_MONSTERS");
+  if (bannerMark !== -1 && before.slice(bannerMark).trim().split("\n").every((l) => l.trim().startsWith("//"))) {
+    replaceStart = bannerMark;
+  }
+  const current = prep.slice(replaceStart, target.end);
+  if (current !== mirror) {
+    prep = prep.slice(0, replaceStart) + mirror + prep.slice(target.end);
+    writeFileSync(prepPath, prep, "utf8");
+  }
+  return (ownerBlock.match(/\{name:/g) || []).length;
+}
+const prepMonsterCount = syncSessionPrepMonsters();
+
 console.log(
-  `extract-game-data: ${monsterCount} monsters (${monsterTypeCount} typed), ${spellCount} spells, ${gearCount} gear, ${classCount} classes, ${ancestryCount} ancestries, ${backgroundCount} backgrounds → lib/data/`,
+  `extract-game-data: ${monsterCount} monsters (${monsterTypeCount} typed), ${spellCount} spells, ${gearCount} gear, ${classCount} classes, ${ancestryCount} ancestries, ${backgroundCount} backgrounds, ${labelCount} effect labels → lib/data/ + mirrors (sheet labels, ${prepMonsterCount} prep monsters)`,
 );

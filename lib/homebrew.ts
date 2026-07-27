@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { MONSTER_TYPES } from "@/lib/data/monster-types";
+import { TALENT_TARGETS, TALENT_TARGET_KEYS } from "@/lib/effects";
 
 // Homebrew is stored in the exact object shapes the character sheet already
 // consumes, so a sheet can merge it straight into its `_homebrewSpells` /
@@ -360,38 +361,11 @@ function normalizeAncestry(input: unknown): { name: string; data: Record<string,
 export const HD_DICE = ["1d4", "1d6", "1d8", "1d10", "1d12"] as const;
 export const CAST_STATS = ["INT", "WIS", "CHA"] as const;
 
-// Talent effect targets — the "thing being bonused". In the editor the amount
-// comes first, then this dropdown. Mirrored in HomebrewManager. Each talent row
-// (5 rows total) can carry up to two of these.
-export const TALENT_TARGETS: [string, string][] = [
-  ["meleeAtk", "Melee Attacks"],
-  ["meleeDmg", "Melee Damage"],
-  ["meleeAtkDmg", "Melee Attack & Damage"],
-  ["rangedAtk", "Ranged Attacks"],
-  ["rangedDmg", "Ranged Damage"],
-  ["rangedAtkDmg", "Ranged Attack & Damage"],
-  ["mrAtk", "Melee & Ranged Attacks"],
-  ["mrDmg", "Melee & Ranged Damage"],
-  ["mrAtkDmg", "Melee & Ranged Attack & Damage"],
-  ["ac", "AC"],
-  ["hp", "HP"],
-  ["gearSlots", "Gear Slots"],
-  ["str", "Strength"],
-  ["dex", "Dexterity"],
-  ["con", "Constitution"],
-  ["int", "Intelligence"],
-  ["wis", "Wisdom"],
-  ["cha", "Charisma"],
-  ["statChoice", "Stat (player choice)"],
-  ["spellKnown", "Learn Spell"],
-  ["spellCheck", "Spellcasting Checks"],
-  ["weaponDie", "Weapon Damage Die"],
-  ["advSpell", "Advantage: Cast Spell"],
-  ["featureCharges", "Charges"],
-  ["playerTalent", "Player Choice"],
-  ["perDay", "Per Day (uses)"],
-];
-const TALENT_TARGET_KEYS = TALENT_TARGETS.map(([k]) => k);
+// The talent effect vocabulary lives in lib/effects.ts (the single source of
+// truth shared with the reference pages and the Effect Builder). Imported at the
+// top of this file; re-exported here so existing importers of "@/lib/homebrew"
+// (which used to find TALENT_TARGETS here) keep working.
+export { TALENT_TARGETS, TALENT_TARGET_KEYS };
 
 // One mechanical effect shared by class talents, class features, and ancestry
 // traits. `weapon` is kept only for weaponDie; `spell` for the spell targets

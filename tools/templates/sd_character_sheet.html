@@ -7785,14 +7785,9 @@ function campaignStartPolling() {
 let _hbAncestryNames = [];
 const _hbInjected = { classes: [], ancestries: [], backgrounds: [] };
 const HB_TALENT_LABEL = {
-  meleeAtk:'Melee Attacks', meleeDmg:'Melee Damage', rangedAtk:'Ranged Attacks',
-  rangedDmg:'Ranged Damage', meleeAtkDmg:'Melee Attack & Damage',
-  rangedAtkDmg:'Ranged Attack & Damage',
-  mrAtk:'Melee & Ranged Attacks', mrDmg:'Melee & Ranged Damage', mrAtkDmg:'Melee & Ranged Attack & Damage',
-  ac:'AC', hp:'HP',
-  str:'Strength', dex:'Dexterity', con:'Constitution', int:'Intelligence',
-  wis:'Wisdom', cha:'Charisma', statChoice:'Stat (player choice)', spellKnown:'Learn Spell', spellCheck:'Spellcasting Checks',
-  weaponDie:'Weapon Damage Die', advSpell:'Advantage', playerTalent:'Player Choice'
+  // GENERATED from lib/effects.ts (TALENT_TARGETS) by scripts/extract-game-data.mjs.
+  // Edit lib/effects.ts, then re-run the extract — do not hand-edit this block.
+  meleeAtk:"Melee Attacks", meleeDmg:"Melee Damage", meleeAtkDmg:"Melee Attack & Damage", rangedAtk:"Ranged Attacks", rangedDmg:"Ranged Damage", rangedAtkDmg:"Ranged Attack & Damage", mrAtk:"Melee & Ranged Attacks", mrDmg:"Melee & Ranged Damage", mrAtkDmg:"Melee & Ranged Attack & Damage", ac:"AC", hp:"HP", gearSlots:"Gear Slots", str:"Strength", dex:"Dexterity", con:"Constitution", int:"Intelligence", wis:"Wisdom", cha:"Charisma", statChoice:"Stat (player choice)", spellKnown:"Learn Spell", spellCheck:"Spellcasting Checks", weaponDie:"Weapon Damage Die", advSpell:"Advantage: Cast Spell", featureCharges:"Charges", playerTalent:"Player Choice", perDay:"Per Day (uses)"
 };
 
 function _hbClearInjected() {

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SD_ANCESTRIES } from "@/lib/data/ancestries";
-import { visibleHomebrew, ownHomebrew, userCampaigns, TALENT_TARGETS } from "@/lib/homebrew";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import { effectLabel } from "@/lib/effects";
 import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
@@ -24,18 +25,6 @@ function optHref(q: string, opt: string): string {
   if (opt) sp.set("opt", opt);
   const s = sp.toString();
   return s ? `/ancestries?${s}` : "/ancestries";
-}
-
-const TALENT_LABEL = new Map(TALENT_TARGETS);
-function effectLabel(e: Effect): string {
-  const label = TALENT_LABEL.get(e.target) ?? e.target;
-  if (e.target === "perDay") return `${e.amount}/day`;
-  if (e.target === "weaponDie") return `d${e.amount} weapon damage${e.weapon ? ` (${e.weapon})` : ""}`;
-  if (e.target === "spellKnown") return (e.spell && e.spell !== "Player Choice") ? `Learn ${e.spell}` : "Learn Spell";
-  if (e.target === "advSpell") return e.spell ? `Advantage casting ${e.spell}` : "Advantage on a spell";
-  if (e.target === "playerTalent") return "Player Choice";
-  if (e.target === "featureCharges") { const f = String(e.feature ?? ""); return `+${e.amount} charge${e.amount === 1 ? "" : "s"}${f ? ` to ${f}` : ""}`; }
-  return `${e.amount >= 0 ? "+" : ""}${e.amount} ${label}`;
 }
 
 // Split "Farsight: +1 to ranged…" into the trait name and its effect.

@@ -4,7 +4,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { SD_CLASSES, type SdClass } from "@/lib/data/classes";
 import { GEAR } from "@/lib/data/gear";
 import { SPELLS } from "@/lib/data/spells";
-import { visibleHomebrew, ownHomebrew, userCampaigns, TALENT_TARGETS } from "@/lib/homebrew";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import { effectLabel } from "@/lib/effects";
 import HomebrewManager from "@/components/HomebrewManager";
 
 export const dynamic = "force-dynamic";
@@ -23,28 +24,6 @@ const SPELL_LIST_OPTIONS = [
   "Homebrew",
 ];
 
-const TALENT_LABEL = new Map(TALENT_TARGETS);
-function effectLabel(e: Record<string, unknown>): string {
-  const amt = Number(e.amount) || 0;
-  const target = String(e.target ?? "");
-  const label = TALENT_LABEL.get(target) ?? target;
-  if (target === "perDay") return `${amt}/day`;
-  if (target === "weaponDie") {
-    const w = String(e.weapon ?? "");
-    return `d${amt} weapon damage${w ? ` (${w})` : ""}`;
-  }
-  if (target === "spellKnown") {
-    const sp = String(e.spell ?? "");
-    return (sp && sp !== "Player Choice") ? `Learn ${sp}` : "Learn Spell";
-  }
-  if (target === "advSpell") {
-    const sp = String(e.spell ?? "");
-    return sp ? `Advantage casting ${sp}` : "Advantage on a spell";
-  }
-  if (target === "playerTalent") return "Player Choice";
-  if (target === "featureCharges") { const f = String(e.feature ?? ""); return `+${amt} charge${amt === 1 ? "" : "s"}${f ? ` to ${f}` : ""}`; }
-  return `${amt >= 0 ? "+" : ""}${amt} ${label}`;
-}
 function rollLabel(i: number, split: string): string {
   if (i === 0) return "2";
   if (i === 1) return split === "hi" ? "3–7" : "3–6";

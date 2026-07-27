@@ -8743,6 +8743,10 @@ try { GMCamp.onChange(() => { syncHomebrewMonsters(); }); } catch(e) {}
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncHomebrewMonsters);
 else syncHomebrewMonsters();
 
+// ── Bestiary — CANONICAL SOURCE ──────────────────────────────────────────────
+// This SD_MONSTERS array is the single owner of the bestiary. The build step
+// (scripts/extract-game-data.mjs) copies it verbatim into the session-prep
+// builder and extracts it to lib/data/monsters.ts. Edit monsters HERE only.
 const SD_MONSTERS = [
   {name:'Aboleth',                 ac:'16', hp:'39',  atk:'2 tentacle (near) +5 (1d8 + curse) or 1 tail +5 (3d6)',                                       mv:'near (swim)',                lv:'8',  al:'C', s:'+4',d:'-1',c:'+3',i:'+4',w:'+2',ch:'+2', notes:'Curse: DC 15 CON or target gains a magical curse, turning into a deep one over 2d10 days. Enslave: In place of attacks, one creature within far DC 15 WIS or the aboleth controls it for 1d4 rounds. Telepathic: Read the thoughts of all creatures within far.'},
   {name:'Acolyte',                 ac:'12', hp:'4',   atk:'1 mace +1 (1d6) or 1 spell +2',                                                               mv:'near',                       lv:'1',  al:'L', s:'+1',d:'-1',c:'+0',i:'-1',w:'+2',ch:'+0', notes:'Healing Touch (WIS DC 11): Heal one creature within close for 1d4 HP.'},
