@@ -45,9 +45,9 @@ function splitTrait(trait: string): { title: string; body: string } {
   return { title: trait.slice(0, i).trim(), body: trait.slice(i + 1).trim() };
 }
 
-// One trait record (current or legacy) → {text, effects}.
+// One trait record → {text, effects}.
 function toTrait(t: Record<string, unknown>): Trait {
-  let effects: Effect[] = Array.isArray(t.effects)
+  const effects: Effect[] = Array.isArray(t.effects)
     ? (t.effects as Record<string, unknown>[]).map((e) => ({
         amount: Number(e.amount) || 0,
         target: String(e.target ?? ""),
@@ -55,15 +55,7 @@ function toTrait(t: Record<string, unknown>): Trait {
         spell: String(e.spell ?? ""),
       }))
     : [];
-  if (!effects.length && Array.isArray(t.options)) {
-    effects = (t.options as Record<string, unknown>[])
-      .map((o) => ({ amount: Number(o.amount) || 0, target: String(o.target ?? ""), weapon: "", spell: "" }))
-      .filter((e) => e.target);
-  }
-  const u = Number(t.uses) || 0;
-  if (u > 0 && !effects.some((e) => e.target === "perDay")) effects = [{ amount: u, target: "perDay", weapon: "", spell: "" }, ...effects];
-  const choose = !!t.choose || (Array.isArray(t.options) && (t.options as unknown[]).length > 1);
-  return { text: String(t.text ?? ""), effects, choose };
+  return { text: String(t.text ?? ""), effects, choose: !!t.choose };
 }
 
 export default async function AncestriesPage({

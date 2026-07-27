@@ -119,7 +119,6 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
 
   const features = (Array.isArray(d.features) ? (d.features as unknown[]) : [])
     .map((f) => {
-      if (typeof f === "string") return f;
       const fo = (f ?? {}) as Record<string, unknown>;
       // Reference pages show the author's descriptive text only — mechanical
       // effects (charges, bonuses) live in the builder, not the printed blurb.
@@ -127,8 +126,7 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
       const text = String(fo.text ?? "");
       const effs = Array.isArray(fo.effects) ? (fo.effects as Record<string, unknown>[]) : [];
       const per = effs.find((e) => String(e.target) === "perDay");
-      const legacyUses = Number(fo.uses) || 0; // pre-effects saves
-      const uses = per ? Number(per.amount) || 0 : legacyUses;
+      const uses = per ? Number(per.amount) || 0 : 0;
       return uses > 0 ? `${text} (${uses}/day)` : text;
     })
     .filter(Boolean);

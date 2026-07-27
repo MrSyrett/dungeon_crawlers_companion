@@ -314,13 +314,10 @@ function formFromRecord(rec: HomebrewRecord): Form {
     });
     base.features = Array.isArray(d.features)
       ? (d.features as unknown[]).map((f) => {
-          if (typeof f === "string") return { text: f, effects: [], choose: false };
-          const fo = f as Record<string, unknown>;
-          let effects: Effect[] = Array.isArray(fo.effects)
+          const fo = (f ?? {}) as Record<string, unknown>;
+          const effects: Effect[] = Array.isArray(fo.effects)
             ? (fo.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon), spell: s(e.spell), feature: s(e.feature) }))
             : [];
-          const u = Number(fo.uses) || 0; // legacy uses/day → Per Day effect
-          if (!effects.length && u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "", spell: "", feature: "" }];
           return { text: s(fo.text), effects, choose: !!fo.choose };
         })
       : [];
@@ -346,25 +343,12 @@ function formFromRecord(rec: HomebrewRecord): Form {
     base.languages = s(d.languages);
     base.traits = Array.isArray(d.traits)
       ? (d.traits as Record<string, unknown>[]).map((t) => {
-          let effects: Effect[] = Array.isArray(t.effects)
+          const effects: Effect[] = Array.isArray(t.effects)
             ? (t.effects as Record<string, unknown>[]).map((e) => ({ amount: s(e.amount), target: s(e.target), weapon: s(e.weapon), spell: s(e.spell), feature: s(e.feature) }))
             : [];
-          // legacy: a "choose one" trait's options flatten into effects
-          if (!effects.length && Array.isArray(t.options)) {
-            effects = (t.options as Record<string, unknown>[])
-              .map((op) => ({ amount: s(op.amount), target: s(op.target), weapon: "", spell: "", feature: "" }))
-              .filter((e) => e.target);
-          }
-          const u = Number(t.uses) || 0; // legacy uses/day → Per Day effect
-          if (u > 0) effects = [{ amount: String(u), target: "perDay", weapon: "", spell: "", feature: "" }, ...effects];
-          // A legacy "choose one" trait had options; treat that (or an explicit
-          // choose flag) as a choice with the effects as alternatives.
-          const choose = !!t.choose || (Array.isArray(t.options) && t.options.length > 1);
-          return { text: s(t.text), effects, choose };
+          return { text: s(t.text), effects, choose: !!t.choose };
         })
-      : s(d.trait)
-        ? [{ text: s(d.trait), effects: [], choose: false }]
-        : [];
+      : [];
     base.bonuses = Array.isArray(d.bonuses)
       ? (d.bonuses as Record<string, unknown>[]).map((b) => ({ amount: s(b.amount), target: s(b.target) }))
       : [];

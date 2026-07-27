@@ -64,12 +64,6 @@ const num = (v: unknown): number | null => {
 };
 
 // Uses/day for a limited-use trait or feature. 0 = passive (no tick boxes).
-function usesPerDay(v: unknown): number {
-  const n = num(v);
-  if (n == null || n < 0) return 0;
-  return Math.min(n, 20);
-}
-
 function toRecord(r: HomebrewRow, viewerId: string): HomebrewRecord {
   return {
     id: r.id,
@@ -143,7 +137,7 @@ export const userCampaigns = cache(async function userCampaigns(
   return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, "en"));
 });
 
-export async function participatesInCampaign(userId: string, campaignId: string): Promise<boolean> {
+async function participatesInCampaign(userId: string, campaignId: string): Promise<boolean> {
   if (!campaignId) return false;
   const owned = await prisma.campaign.count({ where: { id: campaignId, ownerId: userId } });
   if (owned > 0) return true;
@@ -212,7 +206,7 @@ export async function ownHomebrew(userId: string, type?: HbType): Promise<Homebr
 
 // ── Normalisers ──────────────────────────────────────────────────────────────
 // Sanitise client input into the sheet-native shape before it's stored.
-export function normalizeSpell(input: unknown): { name: string; data: Record<string, unknown> } {
+function normalizeSpell(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew spell needs a name.");
@@ -229,7 +223,7 @@ export function normalizeSpell(input: unknown): { name: string; data: Record<str
   return { name, data };
 }
 
-export function normalizeGear(input: unknown): { name: string; data: Record<string, unknown> } {
+function normalizeGear(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew item needs a name.");
@@ -280,7 +274,7 @@ export function normalizeGear(input: unknown): { name: string; data: Record<stri
 
 // A stat block in SD_MONSTERS shape. Ability scores are stored as written
 // modifiers ("+2"), matching the book's tables and what the GM screen renders.
-export function normalizeMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+function normalizeMonster(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew monster needs a name.");
@@ -317,7 +311,7 @@ export function normalizeMonster(input: unknown): { name: string; data: Record<s
 // ── Backgrounds ──────────────────────────────────────────────────────────────
 // A background is a name + descriptive blurb (the book's are a d20 table). The
 // wizard just offers it and writes the name/blurb onto the sheet.
-export function normalizeBackground(input: unknown): { name: string; data: Record<string, unknown> } {
+function normalizeBackground(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew background needs a name.");
@@ -328,7 +322,7 @@ export function normalizeBackground(input: unknown): { name: string; data: Recor
 // A name, a trait blurb, optional languages, and optional flat bonuses the
 // wizard applies the same way it applies item/talent bonuses (e.g. Half-Orc's
 // Mighty = +1 melee attack & damage).
-export function normalizeAncestry(input: unknown): { name: string; data: Record<string, unknown> } {
+function normalizeAncestry(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew ancestry needs a name.");
@@ -345,18 +339,13 @@ export function normalizeAncestry(input: unknown): { name: string; data: Record<
         )
     : [];
 
-  // Traits: [{text, effects}] using the shared Effect Builder. Legacy shapes
-  // (uses/day, choose-one options, a single `trait` string) are migrated by
-  // cleanEffectRow so older saves keep working.
-  let traits: { text: string; effects: HbEffect[] }[] = [];
-  if (Array.isArray(o.traits)) {
-    traits = (o.traits as unknown[])
-      .map(cleanEffectRow)
-      .filter((t) => t.text)
-      .slice(0, 20);
-  } else if (str(o.trait)) {
-    traits = [{ text: str(o.trait).slice(0, 500), effects: [] }];
-  }
+  // Traits: [{text, effects}] using the shared Effect Builder.
+  const traits: { text: string; effects: HbEffect[] }[] = Array.isArray(o.traits)
+    ? (o.traits as unknown[])
+        .map(cleanEffectRow)
+        .filter((t) => t.text)
+        .slice(0, 20)
+    : [];
 
   const data: Record<string, unknown> = {
     name,
@@ -420,29 +409,17 @@ function cleanEffect(raw: unknown): HbEffect | null {
 }
 // A row of descriptive text plus a list of effects (features, traits).
 function cleanEffectRow(raw: unknown): { text: string; effects: HbEffect[] } {
-  if (typeof raw === "string") return { text: str(raw).slice(0, 500), effects: [] };
   const o = (raw ?? {}) as Record<string, unknown>;
-  let effects = Array.isArray(o.effects)
+  const effects = Array.isArray(o.effects)
     ? (o.effects as unknown[]).map(cleanEffect).filter((e): e is HbEffect => e != null).slice(0, 6)
     : [];
-  // Migrate legacy shapes: uses/day -> a Per Day effect; a "choose one" trait's
-  // options -> flat effects (the choice UI has been retired for a single builder).
-  if (!effects.length && Array.isArray(o.options)) {
-    effects = (o.options as unknown[])
-      .map((op) => cleanEffect(op))
-      .filter((e): e is HbEffect => e != null)
-      .slice(0, 6);
-  }
-  const u = usesPerDay(o.uses);
-  if (u > 0 && !effects.some((e) => e.target === "perDay")) effects = [{ amount: u, target: "perDay" }, ...effects];
   const row: { text: string; effects: HbEffect[]; choose?: boolean } = { text: str(o.text).slice(0, 500), effects };
-  // A "choose one" trait: player picks a single effect at creation. Legacy
-  // choose-one traits stored multiple `options`, so infer it from those too.
-  if (o.choose === true || (Array.isArray(o.options) && (o.options as unknown[]).length > 1)) row.choose = true;
+  // A "choose one" trait: player picks a single effect at creation.
+  if (o.choose === true) row.choose = true;
   return row;
 }
 
-export function normalizeClass(input: unknown): { name: string; data: Record<string, unknown> } {
+function normalizeClass(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew class needs a name.");

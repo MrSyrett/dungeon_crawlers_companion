@@ -8,10 +8,6 @@ import { TOOLS, TOOL_ORDER, type ToolId } from "@/lib/tools";
 // covered automatically.
 export const CHARACTER_TOOLS: ToolId[] = TOOL_ORDER.filter((id) => TOOLS[id].kind === "character");
 
-export function isCharacterTool(tool: string): tool is ToolId {
-  return (CHARACTER_TOOLS as string[]).includes(tool);
-}
-
 export function generateToken(): string {
   // 32 bytes → 43 url-safe characters. Long enough that guessing is hopeless
   // and short enough to paste into a VTT field by hand.

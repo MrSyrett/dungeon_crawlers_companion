@@ -832,16 +832,6 @@ const SD_SPELLS = [
 // SD_SPELLS itself is never modified — homebrew is concatenated on read.
 let _homebrewSpells = [];
 
-// One-time cleanup. The sheet used to keep its own homebrew library in these
-// localStorage keys; that library has moved to the account, so the stale local
-// copies are dropped rather than left to rot in every player's browser.
-(function purgeLegacyLocalHomebrew() {
-  try {
-    localStorage.removeItem('sd_homebrew');
-    localStorage.removeItem('sd_homebrew_items');
-  } catch(e) {}
-})();
-
 // Book spells + your homebrew. Use this for any lookup a player can reach.
 function allSpells() {
   const book = (typeof SD_SPELLS !== 'undefined') ? SD_SPELLS : [];
@@ -873,11 +863,6 @@ function allWeapons() {
 // The book's two ammo entries, plus anything created as homebrew ammo. Used to
 // fill the "requires ammo" picker and to decide what a shot spends.
 const BOOK_AMMO = ['Arrows', 'Crossbow bolts'];
-function allAmmo() {
-  return BOOK_AMMO.concat(
-    _homebrewItems.filter(i => i.kind === 'ammo').map(i => i.name)
-  );
-}
 
 // Homebrew body armor in AC_ARMOR shape (shields are handled in acParseItem,
 // which matches them by name so they can carry their own AC bonus).
@@ -1127,7 +1112,7 @@ function acParseItem(name) {
   return null;
 }
 
-// Innate AC bonus that isn't gear (Beastfolk Natural Selection hide, Fighter's
+// Innate AC bonus that isn't gear (homebrew ancestry/class effects, Fighter's
 // armor talent). Stored so it survives reloads and folds into the derived AC.
 let _innateAC = 0;
 
@@ -2809,14 +2794,7 @@ function _applySDData(d){
     if(typeof campaignRestore === 'function') campaignRestore(d._sheet?.campaign);
     _hbBonusSlots = parseInt(d._sheet?.hbBonusSlots) || 0;
     _hbFeatureChargeBonus = (d._sheet && d._sheet.hbFeatureCharges && typeof d._sheet.hbFeatureCharges === 'object') ? d._sheet.hbFeatureCharges : {};
-    // Base per-day uses of homebrew features. Older saves predate this map, so
-    // when it's absent fall back to the current class definition's uses.
-    if(d._sheet && d._sheet.hbFeatureBaseUses && typeof d._sheet.hbFeatureBaseUses === 'object') {
-      _hbFeatureBaseUses = d._sheet.hbFeatureBaseUses;
-    } else {
-      const _cn = d._sheet && d._sheet.cls;
-      _hbFeatureBaseUses = Object.assign({}, (_cn && RC_CLASS_INFO[_cn] && RC_CLASS_INFO[_cn]._featureUses) || {});
-    }
+    _hbFeatureBaseUses = (d._sheet && d._sheet.hbFeatureBaseUses && typeof d._sheet.hbFeatureBaseUses === 'object') ? d._sheet.hbFeatureBaseUses : {};
     if(typeof refreshGearSlots === 'function') refreshGearSlots();
     _innateAC = parseInt(d._sheet?.innateAC) || 0;
     _autoConsume = (d._sheet?.autoConsume === undefined) ? true : !!d._sheet.autoConsume;
@@ -4600,7 +4578,7 @@ function startCharWizard() {
            ancestry: null, cls: null, background: null,
            alignment: null, deity: '', talent: null, talent2: null,
            talentRoll: null, talent2Roll: null, tres: null, tres2: null, hbTalentChoice: null, hbTalentChoice2: null, hbTalentSpells: [], hbChoices: {},
-           langCommon: [], langRare: [], langPriest: '', elfFarsight: null, beastNatural: null, koboldKnack: null, hbChoice: {},
+           langCommon: [], langRare: [], langPriest: '', elfFarsight: null, koboldKnack: null, hbChoice: {},
            inclOptional: true, inclHomebrew: true,
            spells: [], spellSrc: null, spellSrcOf: {}, gold: null, buyKit: true, buyWeapons: [], buyArmor: [],
            name: '', hp: null };
@@ -4765,9 +4743,8 @@ function ccwRandomize() {
 
   // Ancestry / class / background / alignment / deity
   _ccw.ancestry  = _ccwRandomAncestry();
-  _ccw.elfFarsight = (_ccw.ancestry==='Elf' && _ancIsCoreLegacy('Elf')) ? rand(['ranged','spell']) : null;
-  _ccw.beastNatural = (_ccw.ancestry==='Beastfolk' && _ancIsCoreLegacy('Beastfolk')) ? rand(['attack','ac']) : null;
-  _ccw.koboldKnack  = (_ccw.ancestry==='Kobold' && _ancIsCoreLegacy('Kobold')) ? rand(['spell','luck']) : null;
+  _ccw.elfFarsight = _ccw.ancestry==='Elf' ? rand(['ranged','spell']) : null;
+  _ccw.koboldKnack  = _ccw.ancestry==='Kobold' ? rand(['spell','luck']) : null;
   // Homebrew ancestry "choose one" traits: roll a distinct option, resolving a
   // stat/weapon player-choice inside it with a random pick as well.
   _ccw.hbChoice = {}; _ccw.hbChoices = {}; _ccw.hbTalentSpells = [];
@@ -4888,9 +4865,8 @@ function ccwNext() {
   if(name==='Ability Scores' && !_ccw.stats) { alert('Roll your ability scores first.'); return; }
   if(name==='Ancestry') {
     if(!_ccw.ancestry) { alert('Choose an ancestry.'); return; }
-    if(_ccw.ancestry==='Elf' && _ancIsCoreLegacy('Elf') && !_ccw.elfFarsight) { alert('Choose your Farsight option.'); return; }
-    if(_ccw.ancestry==='Beastfolk' && _ancIsCoreLegacy('Beastfolk') && !_ccw.beastNatural) { alert('Choose your Natural Selection option.'); return; }
-    if(_ccw.ancestry==='Kobold' && _ancIsCoreLegacy('Kobold') && !_ccw.koboldKnack) { alert('Choose your Knack option.'); return; }
+    if(_ccw.ancestry==='Elf' && !_ccw.elfFarsight) { alert('Choose your Farsight option.'); return; }
+    if(_ccw.ancestry==='Kobold' && !_ccw.koboldKnack) { alert('Choose your Knack option.'); return; }
     const _hbA = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
     if(_hbA && Array.isArray(_hbA.traits)) {
       _hbAutoPickAncChoices(_ccw);
@@ -5071,11 +5047,9 @@ function ccwAncestry() {
     x += '<select onchange="_ccw.'+field+'=this.value||null;ccwRender()" style="width:100%;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;">'+o+'</select>';
     return x + '</div>';
   };
-  if(_ccw.ancestry==='Elf' && _ancIsCoreLegacy('Elf'))
+  if(_ccw.ancestry==='Elf')
     h += ancChoice('Farsight','elfFarsight',[['ranged','+1 to ranged attack rolls'],['spell','+1 to spellcasting checks']]);
-  if(_ccw.ancestry==='Beastfolk' && _ancIsCoreLegacy('Beastfolk'))
-    h += ancChoice('Natural Selection','beastNatural',[['attack','Strikes (unarmed) deal 1d6'],['ac','+1 to armor class']]);
-  if(_ccw.ancestry==='Kobold' && _ancIsCoreLegacy('Kobold'))
+  if(_ccw.ancestry==='Kobold')
     h += ancChoice('Knack','koboldKnack',[['spell','+1 to spellcasting checks'],['luck','Luck token each session']]);
   // Homebrew ancestries: render a picker for each "choose one" trait.
   const _hbAnc = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
@@ -5120,7 +5094,7 @@ function ccwAncestry() {
 }
 function ccwPickHbChoice(ti, oi) { if(!_ccw.hbChoice) _ccw.hbChoice={}; _ccw.hbChoice[ti]=oi; ccwRender(); }
 function _ccwPickHbChoiceSel(key, val){ const ti=parseInt(key.slice(4)); if(val===''){ if(_ccw.hbChoice) delete _ccw.hbChoice[ti]; ccwRender(); } else ccwPickHbChoice(ti, parseInt(val)); }
-function ccwClearAncestryChoices() { _ccw.langCommon=[]; _ccw.langRare=[]; _ccw.elfFarsight=null; _ccw.beastNatural=null; _ccw.koboldKnack=null; _ccw.hbChoice={}; }
+function ccwClearAncestryChoices() { _ccw.langCommon=[]; _ccw.langRare=[]; _ccw.elfFarsight=null; _ccw.koboldKnack=null; _ccw.hbChoice={}; }
 function ccwPickAncestry(a) { _ccw.ancestry = a; ccwClearAncestryChoices(); ccwRender(); }
 function ccwRandAncestry() { _ccw.ancestry = _ccwRandomAncestry(); ccwClearAncestryChoices(); ccwRender(); }
 
@@ -5284,22 +5258,6 @@ function _hbTalentPickerHtml(which){
 function _ccwPickTalentEffectSel1(key, val){ ccwPickTalentEffect(1, val===''?null:parseInt(val)); }
 function _ccwPickTalentEffectSel2(key, val){ ccwPickTalentEffect(2, val===''?null:parseInt(val)); }
 function ccwPickTalentEffect(which, oi){ if(which===2){ _ccw.hbTalentChoice2=oi; } else { _ccw.hbTalentChoice=oi; } _ccw.hbTalentSpells=[]; _ccwClearChoiceKeys(which===2?"tb":"tm"); ccwRender(); }
-
-// "Learn a spell of your choice" picker for a talent slot (which=1 main, 2 bonus).
-function _hbTalentSpellPickerHtml(which){
-  const roll = which===2 ? _ccw.talent2Roll : _ccw.talentRoll;
-  const pick = which===2 ? _ccw.talent2Pick : _ccw.talentPick;
-  const choiceIdx = which===2 ? _ccw.hbTalentChoice2 : _ccw.hbTalentChoice;
-  if(!_hbTalentLearnChoice(_ccw.cls, roll, pick, choiceIdx)) return '';
-  const cur = (which===2 ? (_ccw.hbTalentSpell2||'') : (_ccw.hbTalentSpell||'')).replace(/"/g,'&quot;');
-  const dl = 'hb-tal-spell-' + which;
-  let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
-  x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2726 Learn a spell of your choice</div>';
-  x += '<input list="'+dl+'" value="'+cur+'" placeholder="Type a spell name" oninput="ccwSetTalentSpell('+which+',this.value)" style="width:100%;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;" />';
-  x += _hbSpellDatalist(dl);
-  return x + '</div>';
-}
-function ccwSetTalentSpell(which, val){ if(which===2) _ccw.hbTalentSpell2=val; else _ccw.hbTalentSpell=val; }
 
 // Feature choices (choose-one + player-choice effects) shown at the Class step,
 // under the class that grants them. Weapons use the full list and spells the
@@ -5519,20 +5477,11 @@ function ccwToggleLang(pool, lang, max) {
   ccwRender();
 }
 
-// True when this ancestry name should use the built-in (legacy core) handling.
-// A homebrew ancestry with the same name takes precedence — e.g. Beastfolk,
-// which left the core list: a player's homebrew "Beastfolk" must not trigger
-// the leftover Natural Selection code on top of its own traits.
-function _ancIsCoreLegacy(name){ return !(RC_ANCESTRY._hb && RC_ANCESTRY._hb[name]); }
 // One-line ancestry feature, resolving any choice the player made.
 function ancestryLine(c) {
-  if(c.ancestry==='Elf' && _ancIsCoreLegacy('Elf') && c.elfFarsight)
+  if(c.ancestry==='Elf' && c.elfFarsight)
     return 'Farsight: +1 to ' + (c.elfFarsight==='ranged' ? 'ranged attack rolls' : 'spellcasting checks') + '.';
-  if(c.ancestry==='Beastfolk' && _ancIsCoreLegacy('Beastfolk') && c.beastNatural)
-    return c.beastNatural==='attack'
-      ? 'Natural Selection: Your unarmed melee attacks deal 1d6 damage.'
-      : 'Natural Selection: You gain +1 to your armor class.';
-  if(c.ancestry==='Kobold' && _ancIsCoreLegacy('Kobold') && c.koboldKnack)
+  if(c.ancestry==='Kobold' && c.koboldKnack)
     return c.koboldKnack==='spell'
       ? 'Knack: +1 to spellcasting checks.'
       : 'Knack: You begin each session with a luck token.';
@@ -5758,10 +5707,8 @@ function ccwApply() {
   set("hp-current", c.hp + hbEff.hp); set("hp-max", c.hp + hbEff.hp);
 
   // AC: base 10 + DEX; armor/shield contribution goes into the bonus box, toggled on.
-  // Beastfolk Natural Selection is hide, not gear — it can't be taken off, so it
-  // Natural Selection (Beastfolk) is hide, not gear — it can't be equipped, so
-  // it's folded on after the equipped-armor AC is computed (see gear section below).
-  const _natAC = ((c.beastNatural==='ac') ? 1 : 0) + (hbEff.ac || 0);
+  // Innate AC from homebrew effects — not gear, so it can't be taken off.
+  const _natAC = hbEff.ac || 0;
 
   // Languages line
   const extraLangs = [...c.langCommon, ...c.langRare, ...(c.langPriest?[c.langPriest]:[])];
@@ -5912,7 +5859,7 @@ function ccwApply() {
       if(el && !/^\+\d+\s/.test(el.value)) el.value = '+1 ' + el.value.trim();
     }
   });
-  // Innate AC = Beastfolk Natural Selection hide only (truly not gear).
+  // Innate AC from homebrew ancestry/class effects (truly not gear).
   _innateAC = _natAC;
   _hbBonusSlots = hbEff.gearSlots || 0;
   _hbFeatureChargeBonus = Object.assign({}, hbEff.featureCharges || {});
@@ -5947,11 +5894,10 @@ function ccwApply() {
     if(f2.range)  { const parts=w.range.split('/'); f2.range.value = parts[parts.length-1].trim(); }
     if(typeof refreshAtkDamageToggle === 'function') refreshAtkDamageToggle(row);
   };
-  // Strikes (unarmed) attack row — every character gets one. Beastfolk's
-  // Natural Selection upgrades the die to 1d6.
+  // Strikes (unarmed) attack row — every character gets one.
   const _unarmed = SD_WEAPONS.find(x=>x.name==='Strikes');
   const hasUnarmed = true;
-  const unarmedDie = c.beastNatural==='attack' ? '1d6' : (_unarmed ? _unarmed.damage : '1d4');
+  const unarmedDie = _unarmed ? _unarmed.damage : '1d4';
   _fillAtkRow('Strikes', _unarmed, unarmedDie);
   // keep Strikes as the first attack row
   const _atkBody = document.getElementById('attacks-body');
@@ -6214,15 +6160,6 @@ function _hbLvlChoicesHtml(){
   return x+'</div>';
 }
 function lvlSetChoice(key,val){ if(!_lvl.hbChoices)_lvl.hbChoices={}; _lvl.hbChoices[key]=val; Object.keys(_lvl.hbChoices).forEach(k=>{ if(k.indexOf(key+'>')===0) delete _lvl.hbChoices[k]; }); lvlRender(); }
-function _hbLvlTalentSpellPickerHtml(){
-  if(!_hbTalentLearnChoice(_lvl.cls, _lvl.talentRoll, _lvl.talentPick, _lvl.hbTalentChoice)) return '';
-  const cur = (_lvl.hbTalentSpell||'').replace(/"/g,'&quot;');
-  let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
-  x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2726 Learn a spell of your choice</div>';
-  x += '<input list="hb-lvl-tal-spell" value="'+cur+'" placeholder="Type a spell name" oninput="_lvl.hbTalentSpell=this.value" style="width:100%;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;" />';
-  x += _hbSpellDatalist('hb-lvl-tal-spell');
-  return x + '</div>';
-}
 function _hbLvlTalentPickerHtml(){
   const info = _hbTalentChooseInfo(_lvl.cls, _lvl.talentRoll, _lvl.talentPick);
   if(!info) return '';
@@ -7115,13 +7052,6 @@ function shopRender() {
 // current library (e.g. after an item's equippable flag changes or it's
 // deleted). onGearNameInput hides the box and unequips anything that's no
 // longer equippable, then applyItemBonuses recomputes the totals.
-function syncGearEquipState() {
-  document.querySelectorAll('#gear-list .gear-name').forEach(el => {
-    if(typeof onGearNameInput === 'function') onGearNameInput(el);
-  });
-  if(typeof applyItemBonuses === 'function') applyItemBonuses();
-}
-
 function shopGetItem(tab, i) {
   const items = tab==='weapons' ? SHOP_WEAPONS : tab==='armor' ? SHOP_ARMOR
               : tab==='basic' ? SHOP_BASIC : tab==='homebrew' ? homebrewShopItems()
@@ -7738,10 +7668,6 @@ function campaignError(msg) {
 // Campaigns can no longer be created from a character sheet — that now lives on
 // the Campaigns page. Players only join (by code) or leave from here. Kept as a
 // guarded stub so any stale reference fails safe instead of hitting the API.
-function campaignCreate() {
-  campaignError('Campaigns are created on the Campaigns page. From your sheet you can join with a code or leave.');
-}
-
 async function campaignJoin() {
   const code = (document.getElementById('campaign-code-input')?.value || '').trim().toUpperCase();
   if(!code) { campaignError('Enter a join code.'); return; }
@@ -7979,15 +7905,12 @@ function _hbEffOne(e){
   if(e.target==='perDay') return amt+'/day';
   return (HB_TALENT_LABEL[e.target]||e.target)+' '+(amt>=0?'+':'')+amt;
 }
-// Effects of a trait, from the current shape (effects) or legacy (options).
+// Effects of a trait.
 function _hbTraitEffects(t){
-  if(!t) return [];
-  if(Array.isArray(t.effects)) return t.effects;
-  if(Array.isArray(t.options)) return t.options;
-  return [];
+  return (t && Array.isArray(t.effects)) ? t.effects : [];
 }
 function _hbTraitIsChoice(t){
-  return !!(t && (t.choose || (Array.isArray(t.options) && t.options.length > 1)));
+  return !!(t && t.choose);
 }
 // Distinct options of a "choose one" trait. Authors sometimes enter the same
 // effect several times (e.g. two identical "Stat (player choice)" entries);
@@ -8083,10 +8006,6 @@ function _hbTalentEffective(cls, roll, pick, choiceIdx){
   return effs;
 }
 // True if that talent slot grants a "Learn Spell → Player Choice" (needs a picker).
-function _hbTalentLearnChoice(cls, roll, pick, choiceIdx){
-  return _hbTalentEffective(cls, roll, pick, choiceIdx)
-    .some(e => e && e.target === 'spellKnown' && _hbIsPlayerChoice(e.spell));
-}
 // How many "Learn Spell → Player Choice" picks come from ancestry traits + class
 // features (resolved before the Spells step, so they add to the spell count).
 function _hbAncFeatLearnPicks(c){
@@ -8108,12 +8027,6 @@ function _hbAncFeatLearnPicks(c){
     });
   }
   return n;
-}
-// A datalist of every spell name, for the "learn a spell of your choice" pickers.
-function _hbSpellDatalist(id){
-  const names = (typeof allSpells==='function' ? allSpells() : []).map(s => s.name)
-    .filter((v,i,a)=>v && a.indexOf(v)===i).sort();
-  return '<datalist id="'+id+'">' + names.map(n=>'<option value="'+String(n).replace(/"/g,'&quot;')+'"></option>').join('') + '</datalist>';
 }
 
 // ── PLAYER-CHOICE EFFECT RESOLUTION ─────────────────────────────────────────
@@ -8355,7 +8268,7 @@ function injectHomebrewContent(rows) {
         const selfCh = effs.filter(e => e && e.target === 'featureCharges'
           && (!String(e.feature||'').trim() || String(e.feature||'').trim().toLowerCase() === fname.toLowerCase()))
           .reduce((sum, e) => sum + (Number(e.amount)||0), 0);
-        const u = per ? (Number(per.amount)||0) : (selfCh || (Number(f && f.uses)||0));   // legacy uses fallback
+        const u = per ? (Number(per.amount)||0) : selfCh;
         if(fname && u > 0) featureUses[fname] = (featureUses[fname]||0) + u;
       });
       const talentChoose = talentRows.map(r => !!(r && r.choose));
@@ -8391,7 +8304,7 @@ function injectHomebrewContent(rows) {
         if(_hbTraitIsChoice(t)) return txt + ' (choose one)';
         const effs = Array.isArray(t && t.effects) ? t.effects : [];
         const per = effs.find(e => e && e.target === 'perDay');
-        const u = per ? (Number(per.amount)||0) : (Number(t && t.uses)||0);   // legacy uses fallback
+        const u = per ? (Number(per.amount)||0) : 0;
         return u > 0 ? txt + ' (' + u + '/day)' : txt;
       }).filter(Boolean).join(' \u00b7 ') || 'Homebrew ancestry.';
       RC_ANCESTRY.ability[nm] = ability;
