@@ -247,7 +247,7 @@ export const SD_CLASSES: SdClass[] = [
       "Prolific: +1d6 to learning rolls. Groups with bards +1d6 to carousing.",
       "Languages: 4 additional common + 1 rare language."
     ],
-    "caster": false,
+    "caster": true,
     "optional": false,
     "titles": {
       "Lawful": [

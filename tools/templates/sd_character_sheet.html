@@ -4248,7 +4248,10 @@ function ccwAnalyzeTalent(text, cls) {
     p.final = null; return p;
   }
   const statMatch = text.match(/\+2 to ([A-Za-z, ]+?) stat/);
-  if(statMatch && /,| or /.test(statMatch[1])) {
+  if(statMatch && /,| or /.test(statMatch[1]) && !/ stat,? or \+?\d/i.test(text)) {
+    // Pure stat pick (e.g. "+2 to Strength, Dexterity, or Constitution stat").
+    // The guard skips mixed talents like "+2 to WIS or CHA stat, or +1 to
+    // spellcasting checks", which the generic picker below handles as a whole.
     p.kind = 'statpick';
     p.options = statMatch[1].split(/,| or /).map(s=>s.trim()).filter(Boolean);
     p.final = null; return p;
@@ -4275,6 +4278,19 @@ function ccwAnalyzeTalent(text, cls) {
   }
   if(/priest or wizard wand/i.test(text)) {
     p.kind = 'wand'; p.final = null; return p;
+  }
+  // Generic either/or catch-all: any talent that still contains " or " is an
+  // unresolved choice, so offer the options as a pick and write only the
+  // selected one. Handles class talents the specific parsers above don't name
+  // individually (e.g. "+1 to your spellcasting checks or +1 to melee attacks"),
+  // so the Talents box never keeps the full "A or B" prose. A top-level ", or "
+  // separates options, so we split on that first and only fall back to a bare
+  // " or " when there's no comma — that keeps a phrase like "WIS or CHA stat"
+  // intact as a single option instead of shredding it.
+  if(/,? or /i.test(text)) {
+    const opts = (/, or /i.test(text) ? text.split(/, or /i) : text.split(/ or /i))
+      .map(s=>s.trim()).filter(Boolean);
+    if(opts.length >= 2) { p.kind = 'ortwo'; p.options = opts; p.final = null; return p; }
   }
   return p;
 }
@@ -4628,10 +4644,10 @@ function ccwSpellsNeeded() { const i = ccwCasterInfo(); return (i ? i.known : 0)
 // Caster vs martial for the class picker's two-column layout. Mirrors the
 // caster logic above but works for any class name (including homebrew, which
 // carries its caster config on RC_CLASS_INFO[c]._caster). A class counts as a
-// caster if it has a spell list: the three core casters, or anything flagged
-// with _caster.
+// caster if it has a spell list — the three core casters, or anything flagged
+// with _caster — plus the Bard, who uses scrolls and wands via Magical Dabbler.
 function _ccwIsCaster(c) {
-  if(c==='Wizard' || c==='Priest' || c==='Witch') return true;
+  if(c==='Wizard' || c==='Priest' || c==='Witch' || c==='Bard') return true;
   return !!(RC_CLASS_INFO[c] && RC_CLASS_INFO[c]._caster);
 }
 

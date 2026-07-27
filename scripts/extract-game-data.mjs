@@ -343,7 +343,11 @@ const classRows = cls.RC_CLASSES.map((name) => {
     talent: Array.isArray(info.talent) ? info.talent.map(String) : [],
     talentBands: Array.isArray(info.talentBands) ? info.talentBands : null,
     features,
-    caster: features.some((f) => /Spellcasting/i.test(f)),
+    // Mirror the character sheet's _ccwIsCaster: a class casts if a feature
+    // mentions Spellcasting, if it carries a _caster config (homebrew-style
+    // casters like Knight of St. Ydris / Seer / Necromancer), or if it's the
+    // Bard, who uses scrolls and wands via Magical Dabbler.
+    caster: features.some((f) => /Spellcasting/i.test(f)) || !!info._caster || name === "Bard",
     optional: optClasses.has(name),
     titles: titles
       ? {
