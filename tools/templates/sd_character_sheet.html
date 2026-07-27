@@ -3699,6 +3699,9 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   .ccw-roll-btn{min-height:46px!important;font-size:13px!important;}
   .ccw-choice-name{font-size:13px!important;}
   .ccw-choice-desc{font-size:11px!important;}
+  /* Two groups stay side by side (Martial | Casters), one button per column. */
+  .ccw-class-cols{gap:6px!important;}
+  .ccw-class-grid{grid-template-columns:1fr!important;}
   .ccw-hint{font-size:12px!important;}
   .ccw-stat-val{font-size:20px!important;}
   .ccw-stat-name{font-size:11px!important;}
@@ -4108,6 +4111,12 @@ function _rc_weighted(table) {
 .ccw-stat-val{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:900;color:#eee;}
 .ccw-stat-mod{font-family:'Montserrat',sans-serif;font-size:11px;color:#888;}
 .ccw-choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+/* Class picker: Martial group (left) and Casters group (right), side by side.
+   Each group is its own 2-column button grid on desktop. On mobile the two
+   groups stay side by side but each drops to a single column. */
+.ccw-class-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;}
+.ccw-class-grouphdr{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#c8a020;margin:0 0 6px;}
+.ccw-class-grid{grid-template-columns:repeat(2,1fr);}
 .ccw-choice{background:#141414;border:1px solid #2a2a2a;padding:8px 10px;cursor:pointer;text-align:left;transition:border-color .1s;}
 .ccw-choice:hover{border-color:#c8a020;}
 .ccw-choice.selected{border-color:#c8a020;background:#241f10;}
@@ -4616,6 +4625,16 @@ function ccwCasterInfo() {
 }
 function ccwSpellsNeeded() { const i = ccwCasterInfo(); return (i ? i.known : 0) + _hbAncFeatLearnPicks(_ccw); }
 
+// Caster vs martial for the class picker's two-column layout. Mirrors the
+// caster logic above but works for any class name (including homebrew, which
+// carries its caster config on RC_CLASS_INFO[c]._caster). A class counts as a
+// caster if it has a spell list: the three core casters, or anything flagged
+// with _caster.
+function _ccwIsCaster(c) {
+  if(c==='Wizard' || c==='Priest' || c==='Witch') return true;
+  return !!(RC_CLASS_INFO[c] && RC_CLASS_INFO[c]._caster);
+}
+
 function ccwStepList() {
   const steps = ['Method','Ability Scores','Ancestry','Class','Background','Alignment & Deity'];
   if(ccwSpellsNeeded() > 0) steps.push('Spells');
@@ -5112,12 +5131,19 @@ function ccwSetClass(c){
 function ccwClass() {
   let h = '<p class="ccw-hint">Choose your class, or roll randomly.</p>';
   h += '<button class="ccw-roll-btn" onclick="ccwSetClass(_ccwRandomClass())">🎲 Random</button>';
-  h += '<div class="ccw-choice-grid">';
-  CCW_CLASS_ORDER.filter(_ccwClassAllowed).forEach(c=>{
-    const ci = RC_CLASS_INFO[c];
+  const _allowed = CCW_CLASS_ORDER.filter(_ccwClassAllowed);
+  const _martial = _allowed.filter(c=>!_ccwIsCaster(c));
+  const _casters = _allowed.filter(_ccwIsCaster);
+  const _classBtn = c => {
     const sel = _ccw.cls===c ? ' selected' : '';
-    h += '<button class="ccw-choice'+sel+'" onclick="ccwSetClass(\''+c+'\')"><div class="ccw-choice-name">'+c+'</div><div class="ccw-choice-desc">HP: '+ci.hd+' / lvl · '+ci.weapons.split(',').slice(0,3).join(',')+'…</div></button>';
-  });
+    return '<button class="ccw-choice'+sel+'" onclick="ccwSetClass(\''+c+'\')"><div class="ccw-choice-name">'+c+'</div></button>';
+  };
+  const _classCol = (title, list) =>
+    '<div class="ccw-class-group"><div class="ccw-class-grouphdr">'+title+'</div>'
+    + '<div class="ccw-choice-grid ccw-class-grid">' + list.map(_classBtn).join('') + '</div></div>';
+  h += '<div class="ccw-class-cols">';
+  h += _classCol('Martial', _martial);
+  h += _classCol('Casters', _casters);
   h += '</div>';
   let classChoicesH = "";
   // Fighter: Weapon Mastery — choose a weapon type
@@ -5175,15 +5201,25 @@ function ccwClass() {
 // ── Step: Background ──
 function ccwBackground() {
   let h = '<p class="ccw-hint">Choose a background, or roll d20.</p>';
-  h += '<button class="ccw-roll-btn" onclick="_ccw.background=_ccwRandomBackground();ccwRender()">🎲 Roll d20</button>';
+  h += '<button class="ccw-roll-btn" onclick="ccwRollBackground()">🎲 Roll d20</button>';
   h += '<div class="ccw-choice-grid">';
   RC_BACKGROUNDS.filter(_ccwBgAllowed).forEach(b=>{
     const sel = _ccw.background===b ? ' selected' : '';
+    const id = _ccw.background===b ? ' id="ccw-bg-selected"' : '';
     const desc = CCW_BG_DESC[b] || '';
-    h += '<button class="ccw-choice'+sel+'" onclick="_ccw.background=\''+b.replace(/'/g,"\\'")+'\';ccwRender()"><div class="ccw-choice-name" style="font-size:11px;">'+b+'</div><div class="ccw-choice-desc">'+desc+'</div></button>';
+    h += '<button class="ccw-choice'+sel+'"'+id+' onclick="_ccw.background=\''+b.replace(/'/g,"\\'")+'\';ccwRender()"><div class="ccw-choice-name" style="font-size:11px;">'+b+'</div><div class="ccw-choice-desc">'+desc+'</div></button>';
   });
   h += '</div>';
   return h;
+}
+
+// Roll a random background, then bring the rolled card into view — with this
+// many backgrounds the winner is often well below the fold.
+function ccwRollBackground() {
+  _ccw.background = _ccwRandomBackground();
+  ccwRender();
+  const el = document.getElementById('ccw-bg-selected');
+  if(el && el.scrollIntoView) el.scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
 // Alignment drives which bonus spell list a wizard gets (Druid = neutral,
@@ -5487,18 +5523,29 @@ function ancestryLine(c) {
       : 'Knack: You begin each session with a luck token.';
   const hb = RC_ANCESTRY._hb && RC_ANCESTRY._hb[c.ancestry];
   if(hb && Array.isArray(hb.traits)) {
-    const picks = [];
+    // Build the line trait-by-trait so a resolved choice shows ONLY the pick
+    // ("Natural Selection: AC +1"), not the full options prompt followed by the
+    // pick. Non-choice traits keep their descriptive text (with any per-day
+    // suffix), matching how the ability summary is written elsewhere.
+    const parts = [];
     hb.traits.forEach((t, ti) => {
-      if(!_hbTraitIsChoice(t)) return;
-      const oi = c.hbChoice && c.hbChoice[ti];
-      const effs = _hbTraitEffects(t);
-      if(oi != null && effs[oi]) {
-        const title = String(t.text||'').split(':')[0];
-        picks.push((title ? title + ': ' : '') + _hbEffOne(effs[oi]));
+      const txt = String(t && t.text || '').trim();
+      if(_hbTraitIsChoice(t)) {
+        const oi = c.hbChoice && c.hbChoice[ti];
+        const effs = _hbTraitEffects(t);
+        if(oi != null && effs[oi]) {
+          const title = txt.split(':')[0];
+          parts.push((title ? title + ': ' : '') + _hbEffOne(effs[oi]));
+        }
+        // An unresolved choice contributes nothing to the written line.
+      } else if(txt) {
+        const effs = Array.isArray(t && t.effects) ? t.effects : [];
+        const per = effs.find(e => e && e.target === 'perDay');
+        const u = per ? (Number(per.amount) || 0) : 0;
+        parts.push(u > 0 ? txt + ' (' + u + '/day)' : txt);
       }
     });
-    const base = RC_ANCESTRY.ability[c.ancestry] || '';
-    if(picks.length) return base ? base + ' \u2014 ' + picks.join('; ') : picks.join('; ');
+    if(parts.length) return parts.join(' \u00b7 ');
   }
   return RC_ANCESTRY.ability[c.ancestry] || '';
 }
