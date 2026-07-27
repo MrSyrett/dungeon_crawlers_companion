@@ -1363,10 +1363,13 @@ function renderTalentsView() {
     const isSub = /^[ \t]{2,}/.test(raw);
     const m = /^[—–-]{1,2}\s*(.+?)\s*[—–-]{1,2}$/.exec(line);
     if(m) { h += '<div class="tv-head">' + esc(m[1]) + '</div>'; return; }
-    // Anything written "N/day" (Pit Fighter Flourish and Relentless, the 1/day
-    // class talents) gets that many tick boxes. Uses are play state, not text,
-    // so they live outside the box and clear on a rest.
-    const total0 = perDayCount(line) + _hbLineChargeBonus(line);
+    // Tick boxes for limited-use abilities. Homebrew features carry their base
+    // uses out-of-band (from the "Per Day (uses)" effect), so we count those
+    // instead of re-reading the prose — the descriptive text is display-only and
+    // must never drive mechanics. Official classes fall back to their "N/day"
+    // text. Extra charges from talents/features are added on top either way.
+    const baseUses = _hbLineBaseUses(line);
+    const total0 = (baseUses != null ? baseUses : perDayCount(line)) + _hbLineChargeBonus(line);
     let pips = '';
     if(total0) {
       const total = Math.min(total0, 10);
@@ -1410,6 +1413,21 @@ let _featureUses = {};
 // Extra charges a feature gets from homebrew talents/features, keyed by the
 // feature's name (matched loosely against the talents-text line). Persisted.
 let _hbFeatureChargeBonus = {};
+// Base per-day uses of a homebrew feature, keyed by the feature's name. Comes
+// from the feature's structured "Per Day (uses)" effect — NOT from scanning the
+// descriptive text, which is display-only. Persisted with the sheet.
+let _hbFeatureBaseUses = {};
+// Base per-day uses for the feature a talents-text line describes, if tracked.
+// Returns null (not 0) when the line isn't a tracked homebrew feature, so the
+// caller can fall back to reading an official "N/day" out of the prose.
+function _hbLineBaseUses(line){
+  const keys = Object.keys(_hbFeatureBaseUses || {});
+  if(!keys.length) return null;
+  const l = String(line || '').toLowerCase();
+  let hit = null;
+  keys.forEach(k => { const name = String(k).toLowerCase().trim(); if(name && l.indexOf(name) === 0) hit = (hit||0) + (parseInt(_hbFeatureBaseUses[k]) || 0); });
+  return hit;
+}
 // Extra charges for the feature described by a talents-text line, if any.
 function _hbLineChargeBonus(line){
   const keys = Object.keys(_hbFeatureChargeBonus || {});
@@ -2678,6 +2696,7 @@ function collectSheet(){
       innateAC: _innateAC,
       hbBonusSlots: _hbBonusSlots,
       hbFeatureCharges: _hbFeatureChargeBonus,
+      hbFeatureBaseUses: _hbFeatureBaseUses,
       spellSources: Array.isArray(_charSpellSources) ? _charSpellSources : [],
     }
   };
@@ -2790,6 +2809,14 @@ function _applySDData(d){
     if(typeof campaignRestore === 'function') campaignRestore(d._sheet?.campaign);
     _hbBonusSlots = parseInt(d._sheet?.hbBonusSlots) || 0;
     _hbFeatureChargeBonus = (d._sheet && d._sheet.hbFeatureCharges && typeof d._sheet.hbFeatureCharges === 'object') ? d._sheet.hbFeatureCharges : {};
+    // Base per-day uses of homebrew features. Older saves predate this map, so
+    // when it's absent fall back to the current class definition's uses.
+    if(d._sheet && d._sheet.hbFeatureBaseUses && typeof d._sheet.hbFeatureBaseUses === 'object') {
+      _hbFeatureBaseUses = d._sheet.hbFeatureBaseUses;
+    } else {
+      const _cn = d._sheet && d._sheet.cls;
+      _hbFeatureBaseUses = Object.assign({}, (_cn && RC_CLASS_INFO[_cn] && RC_CLASS_INFO[_cn]._featureUses) || {});
+    }
     if(typeof refreshGearSlots === 'function') refreshGearSlots();
     _innateAC = parseInt(d._sheet?.innateAC) || 0;
     _autoConsume = (d._sheet?.autoConsume === undefined) ? true : !!d._sheet.autoConsume;
@@ -4248,11 +4275,10 @@ function ccwAnalyzeTalent(text, cls) {
   if(/one spell you know/i.test(text)) {
     p.kind = 'spellknown'; p.final = null; return p;
   }
-  if(/additional wizard spell/i.test(text)) {
-    p.kind = 'wizspell'; p.final = null; return p;
-  }
-  if(/additional witch spell/i.test(text)) {
-    p.kind = 'witchspell'; p.final = null; return p;
+  if(/^Learn (an|one) additional .*spell/i.test(text)) {
+    // Wizard / Witch / Seer "learn an additional spell" rows: resolved on the
+    // Learn Spells step (the same rich picker homebrew classes use).
+    p.kind = 'learnspell'; return p;
   }
   if(/armor type/i.test(text)) {
     p.kind = 'armor'; p.final = null; return p;
@@ -4269,6 +4295,7 @@ function ccwAnalyzeTalent(text, cls) {
 // Renders the choice UI for a pending talent. stateRef is the JS path string to the pending object.
 function ccwTalentChoiceUI(p, stateRef, knownSpells, cls) {
   if(!p || p.kind==='none') return '';
+  if(p.kind==='learnspell') return '';   // resolved on the Learn Spells step
   let h = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:8px;">';
   h += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">⚑ Choose your option</div>';
 
@@ -4315,22 +4342,6 @@ function ccwTalentChoiceUI(p, stateRef, knownSpells, cls) {
     (knownSpells||[]).filter(sp=>sp!=='Magic Missile').forEach(sp=>{ h += '<option value="'+sp+'"'+(p.picked===sp?' selected':'')+'>'+sp+'</option>'; });
     h += '</select>';
     if(!(knownSpells||[]).length) h += '<p class="ccw-hint" style="font-size:9px;color:#df6a6a;">No known spells yet — you can note this later.</p>';
-  }
-  else if(p.kind==='wizspell') {
-    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
-    h += '<option value="">— Choose any wizard spell —</option>';
-    (typeof SD_SPELLS!=='undefined'?SD_SPELLS:[]).filter(s=>s.caster==='Wizard'||s.caster==='Both'||s.caster==='Druid'||s.caster==='Mage'||s.caster==='Sorcerer').forEach(s=>{
-      h += '<option value="'+s.name+'"'+(p.picked===s.name?' selected':'')+'>'+s.name+' (T'+s.tier+')</option>';
-    });
-    h += '</select>';
-  }
-  else if(p.kind==='witchspell') {
-    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
-    h += '<option value="">— Choose any witch spell —</option>';
-    (typeof SD_SPELLS!=='undefined'?SD_SPELLS:[]).filter(s=>s.caster==='Witch').forEach(s=>{
-      h += '<option value="'+s.name+'"'+(p.picked===s.name?' selected':'')+'>'+s.name+' (T'+s.tier+')</option>';
-    });
-    h += '</select>';
   }
   else if(p.kind==='armor') {
     h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
@@ -4409,7 +4420,10 @@ function ccwResolve(p) {
     case 'meleeranged':
       if(p.picked) p.final = p.text.replace(/melee or ranged/i, p.picked);
       break;
-    case 'weapon': case 'spellknown': case 'wizspell': case 'witchspell': case 'armor': case 'remedy': case 'wand':
+    case 'learnspell':
+      p.final = p.text;   // spell itself is picked on the Learn Spells step
+      break;
+    case 'weapon': case 'spellknown': case 'armor': case 'remedy': case 'wand':
       if(p.picked) p.final = p.text + ' — ' + p.picked;
       break;
     case 'meta':
@@ -4498,7 +4512,7 @@ function ccwChoices(){
     else if(ch.kind==='advSpell') h+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p class="ccw-hint" style="color:#df6a6a;">You know no spells to gain advantage on — this choice is skipped.</p>';
     else if(ch.kind==='weaponDie') h+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
     else if(ch.kind==='talent') h+=_hbChoiceControl('talent',ch.key,cur,talents,'ccwSetChoice');
-    else if(ch.kind==='oneOf') h+=_hbChoiceControl('oneOf',ch.key,cur,ch.effects.map((e,i)=>[String(i),_hbEffOne(e)]),'ccwSetChoice');
+    else if(ch.kind==='oneOf') h+=_hbChoiceControl('oneOf',ch.key,cur,_hbTraitDistinctOpts(ch.effects).map(o=>[String(o.oi),_hbEffOne(o.eff)]),'ccwSetChoice');
     h+='</div>';
   });
   return h;
@@ -4713,8 +4727,13 @@ function ccwRandResolve(p, cls, knownSpells) {
       else { p.final = p.text; return; }
       break;
     }
-    case 'wizspell':   p.picked = rand(SD_SPELLS.filter(s=>s.caster==='Wizard'||s.caster==='Both').map(s=>s.name)); break;
-    case 'witchspell': p.picked = rand(SD_SPELLS.filter(s=>s.caster==='Witch').map(s=>s.name)); break;
+    case 'learnspell': {
+      const own = (ccwCasterInfo()||{}).list || '';
+      const pool = (RC_T1_BY_SOURCE[own]||[]).filter(sp=>!(knownSpells||[]).includes(sp)&&!(_ccw.hbTalentSpells||[]).includes(sp));
+      if(!_ccw.hbTalentSpells) _ccw.hbTalentSpells = [];
+      if(pool.length) _ccw.hbTalentSpells.push(rand(pool));
+      break;
+    }
     case 'armor':      p.picked = rand(CCW_ARMOR_TYPES); break;
     case 'remedy':     p.picked = rand(CCW_REMEDIES); break;
     case 'wand':       p.picked = rand(['Priest wand','Wizard wand']); break;
@@ -4749,6 +4768,22 @@ function ccwRandomize() {
   _ccw.elfFarsight = _ccw.ancestry==='Elf' ? rand(['ranged','spell']) : null;
   _ccw.beastNatural = _ccw.ancestry==='Beastfolk' ? rand(['attack','ac']) : null;
   _ccw.koboldKnack  = _ccw.ancestry==='Kobold' ? rand(['spell','luck']) : null;
+  // Homebrew ancestry "choose one" traits: roll a distinct option, resolving a
+  // stat/weapon player-choice inside it with a random pick as well.
+  _ccw.hbChoice = {}; _ccw.hbChoices = {}; _ccw.hbTalentSpells = [];
+  const _randAnc = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
+  if(_randAnc && Array.isArray(_randAnc.traits)) {
+    _randAnc.traits.forEach((t,ti)=>{
+      if(!_hbTraitIsChoice(t)) return;
+      const dopts=_hbTraitDistinctOpts(_hbTraitEffects(t));
+      if(!dopts.length) return;
+      const pick = rand(dopts);
+      _ccw.hbChoice[ti]=pick.oi;
+      const nested=_hbChoiceFromEffect('at'+ti+'_'+pick.oi, pick.eff, _ccw.cls);
+      if(nested && nested.kind==='stat') _ccw.hbChoices[nested.key]=rand(['str','dex','con','int','wis','cha']);
+      else if(nested && nested.kind==='weaponDie') _ccw.hbChoices[nested.key]='Strikes';
+    });
+  }
   // Class follows the highest stat so builds make sense
   const CLASS_BY_STAT = {
     STR: ['Fighter','Ranger','Pit Fighter'],
@@ -4858,6 +4893,7 @@ function ccwNext() {
     if(_ccw.ancestry==='Kobold' && !_ccw.koboldKnack) { alert('Choose your Knack option.'); return; }
     const _hbA = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
     if(_hbA && Array.isArray(_hbA.traits)) {
+      _hbAutoPickAncChoices(_ccw);
       for(let ti=0; ti<_hbA.traits.length; ti++){
         if(_hbTraitIsChoice(_hbA.traits[ti]) && !(_ccw.hbChoice && _ccw.hbChoice[ti]!=null)) {
           alert('Choose an option for ' + (String(_hbA.traits[ti].text||'your ancestry trait').split(':')[0]) + '.'); return;
@@ -5044,13 +5080,22 @@ function ccwAncestry() {
   // Homebrew ancestries: render a picker for each "choose one" trait.
   const _hbAnc = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
   if(_hbAnc && Array.isArray(_hbAnc.traits)) {
+    _hbAutoPickAncChoices(_ccw);
     _hbAnc.traits.forEach((t, ti) => {
       if(!_hbTraitIsChoice(t)) return;
       const effs = _hbTraitEffects(t);
+      const dopts = _hbTraitDistinctOpts(effs);
       const title = String((t && t.text) || 'Choose').split(':')[0];
       let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
-      x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 '+title+' \u2014 choose one</div>';
-      x += _hbChoiceSelect('_anc'+ti, (_ccw.hbChoice&&_ccw.hbChoice[ti]!=null)?String(_ccw.hbChoice[ti]):'', effs.map((e,oi)=>[String(oi), _hbEffOne(e)||'Effect']), '_ccwPickHbChoiceSel');
+      if(dopts.length > 1) {
+        x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 '+title+' \u2014 choose one</div>';
+        x += _hbChoiceSelect('_anc'+ti, (_ccw.hbChoice&&_ccw.hbChoice[ti]!=null)?String(_ccw.hbChoice[ti]):'', dopts.map(o=>[String(o.oi), _hbEffOne(o.eff)||'Effect']), '_ccwPickHbChoiceSel');
+      } else {
+        // Only one distinct option \u2014 nothing to pick between, so show it
+        // resolved (any player-choice inside it still gets its control below).
+        x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">\u2691 '+title+'</div>';
+        if(dopts.length===1) x += '<div style="font-family:Montserrat,sans-serif;font-size:11px;color:#ccc;">'+(_hbEffOne(dopts[0].eff)||'Effect')+'</div>';
+      }
       // If the chosen option is itself a player-choice, resolve it inline here so
       // the whole trait is decided in one place (not split to the Choices step).
       const _oi = _ccw.hbChoice && _ccw.hbChoice[ti];
@@ -5277,7 +5322,7 @@ function _hbFeatureChoicesHtml(){
     else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">No spells available.</p>';
     else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
     else if(ch.kind==='talent') x+=_hbChoiceControl('talent',ch.key,cur,talents,'ccwSetChoice');
-    else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,ch.effects.map((e,i)=>[String(i),_hbEffOne(e)]),'ccwSetChoice');
+    else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,_hbTraitDistinctOpts(ch.effects).map(o=>[String(o.oi),_hbEffOne(o.eff)]),'ccwSetChoice');
   });
   return x+'</div>';
 }
@@ -5302,7 +5347,7 @@ function _hbTalentChoicesHtml(which){
     else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">You know no spells yet.</p>';
     else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
     else if(ch.kind==='talent') x+=_hbChoiceControl('talent',ch.key,cur,talents,'ccwSetChoice');
-    else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,ch.effects.map((e,i)=>[String(i),_hbEffOne(e)]),'ccwSetChoice');
+    else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,_hbTraitDistinctOpts(ch.effects).map(o=>[String(o.oi),_hbEffOne(o.eff)]),'ccwSetChoice');
   });
   return x+'</div>';
 }
@@ -5743,11 +5788,6 @@ function ccwApply() {
   // Player-chosen spells from "Learn Spell → Player Choice" talents (Learn Spells step).
   (c.hbTalentSpells||[]).forEach(sp => { sp = (sp||'').trim(); if(sp && !allSpells.includes(sp)) allSpells.push(sp); });
   if(c.cls==='Priest') allSpells.push('Turn Undead');
-  // Wizard talent "Learn one additional wizard spell" — add the chosen spell
-  [c.tres, c.tres2].forEach(p=>{
-    if(p && (p.kind==='wizspell'||p.kind==='witchspell') && p.picked && !allSpells.includes(p.picked)) allSpells.push(p.picked);
-    if(p && p.sub && (p.sub.kind==='wizspell'||p.sub.kind==='witchspell') && p.sub.picked && !allSpells.includes(p.sub.picked)) allSpells.push(p.sub.picked);
-  });
   allSpells.forEach(sp=>{
     _spellCount++;
     const row = addSpellRow(_spellCount);
@@ -5871,6 +5911,8 @@ function ccwApply() {
   _innateAC = _natAC;
   _hbBonusSlots = hbEff.gearSlots || 0;
   _hbFeatureChargeBonus = Object.assign({}, hbEff.featureCharges || {});
+  // Base per-day uses for this class's homebrew features (structured, not prose).
+  _hbFeatureBaseUses = Object.assign({}, (RC_CLASS_INFO[c.cls] && RC_CLASS_INFO[c.cls]._featureUses) || {});
   if(typeof refreshGearSlots === 'function') refreshGearSlots();
   if(typeof renderTalentsView === 'function') renderTalentsView();
   // Global spell check bonus field
@@ -6162,7 +6204,7 @@ function _hbLvlChoicesHtml(){
     else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'lvlSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">No spells known.</p>';
     else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'lvlSetChoice');
     else if(ch.kind==='talent') x+=_hbChoiceControl('talent',ch.key,cur,talents,'lvlSetChoice');
-    else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,ch.effects.map((e,i)=>[String(i),_hbEffOne(e)]),'lvlSetChoice');
+    else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,_hbTraitDistinctOpts(ch.effects).map(o=>[String(o.oi),_hbEffOne(o.eff)]),'lvlSetChoice');
   });
   return x+'</div>';
 }
@@ -6224,6 +6266,7 @@ function lvlSpells() {
 // How many spells the level-up talent lets you learn (direct + one nested level).
 function _hbLvlLearnCount(){
   let n=0;
+  for(let q=_lvl&&_lvl.tres; q; q=q.sub){ if(q.kind==='learnspell') n++; }
   _hbTalentEffective(_lvl.cls,_lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice).forEach(e=>{if(e&&e.target==='spellKnown'&&_hbIsPlayerChoice(e.spell))n++;});
   n += _hbNestedLearnCount({cls:_lvl.cls,hbChoices:_lvl.hbChoices||{}}, _lvl.talentRoll,_lvl.talentPick,_lvl.hbTalentChoice,'tm');
   return n;
@@ -6374,10 +6417,6 @@ function lvlApply() {
       if(el) { el.value = String((parseInt(el.value)||10) + v); el.dispatchEvent(new Event('input')); }
     });
   }
-  // Wizard talent picked spell: add to newSpells so a row is created
-  [(_lvl.tres), (_lvl.tres && _lvl.tres.sub)].forEach(p=>{
-    if(p && p.kind==='wizspell' && p.picked && !_lvl.newSpells.includes(p.picked)) _lvl.newSpells.push(p.picked);
-  });
   // New spells added as rows
   _lvl.newSpells.forEach(name=>{
     const s = findSpell(name, _lvl.spellSrcOf[name] || _lvl.cls);
@@ -7856,22 +7895,6 @@ function _hbTalentDisplay(row){
   const parts = effs.filter(e => e && e.target).map(e => _hbEffOne(e));
   return parts.join(', ') || '\u2014';
 }
-function _hbTalentText(row) {
-  const note = String(row && row.text || '').trim();
-  const effs = Array.isArray(row && row.effects) ? row.effects : [];
-  const parts = effs.filter(e => e && e.target).map(e => {
-    const amt = Number(e.amount) || 0;
-    if(e.target === 'weaponDie') return 'Weapon Damage d' + amt + (e.weapon ? ' ('+e.weapon+')' : '');
-    if(e.target === 'spellKnown') return (e.spell && !_hbIsPlayerChoice(e.spell)) ? 'Learn ' + e.spell : 'Learn Spell';
-    if(e.target === 'advSpell') return e.spell ? 'Advantage casting ' + e.spell : 'Advantage on a spell';
-    if(e.target === 'playerTalent') return 'Player Choice';
-    if(e.target === 'featureCharges') return '+' + amt + ' charge' + (amt===1?'':'s') + (e.feature ? ' to ' + e.feature : '');
-    if(e.target === 'perDay') return amt + '/day';
-    return (HB_TALENT_LABEL[e.target] || e.target) + ' ' + (amt>=0?'+':'') + amt;
-  });
-  const effStr = parts.length ? '(' + parts.join(', ') + ')' : '';
-  return [note, effStr].filter(Boolean).join(' ') || '\u2014';
-}
 
 // Effects applied to a character at creation, aggregated from homebrew ancestry
 // bonuses/choices and homebrew class talents. Targets share one vocabulary; a
@@ -7960,6 +7983,29 @@ function _hbTraitEffects(t){
 }
 function _hbTraitIsChoice(t){
   return !!(t && (t.choose || (Array.isArray(t.options) && t.options.length > 1)));
+}
+// Distinct options of a "choose one" trait. Authors sometimes enter the same
+// effect several times (e.g. two identical "Stat (player choice)" entries);
+// options that serialize identically are one real choice, so the picker
+// dedupes them \u2014 and a trait that collapses to a single distinct option is
+// resolved automatically instead of asking the player to pick between copies.
+function _hbTraitDistinctOpts(effs){
+  const seen={}; const out=[];
+  (Array.isArray(effs)?effs:[]).forEach((e,oi)=>{
+    let k; try{ k=JSON.stringify(e); }catch(err){ k='#'+oi; }
+    if(seen[k]) return; seen[k]=1; out.push({oi:oi, eff:e});
+  });
+  return out;
+}
+function _hbAutoPickAncChoices(c){
+  const hb = RC_ANCESTRY._hb && RC_ANCESTRY._hb[c.ancestry];
+  if(!hb || !Array.isArray(hb.traits)) return;
+  hb.traits.forEach((t,ti)=>{
+    if(!_hbTraitIsChoice(t)) return;
+    if(c.hbChoice && c.hbChoice[ti]!=null) return;
+    const dopts=_hbTraitDistinctOpts(_hbTraitEffects(t));
+    if(dopts.length===1){ if(!c.hbChoice)c.hbChoice={}; c.hbChoice[ti]=dopts[0].oi; }
+  });
 }
 // Ancestry: flat bonuses plus each trait's effects. A "choose one" trait applies
 // only the option the player picked; others apply all their effects.
@@ -8188,6 +8234,9 @@ function _hbNestedLearnCount(c, roll, pick, cidx, prefix){
 // How many "Learn Spell → Player Choice" picks the chosen talents grant (main + bonus).
 function _hbTalentLearnCount(c){
   let n=0;
+  // Core-class "Learn an additional ... spell" talents (Wizard/Witch/Seer),
+  // including one reached through a "Choose a talent" meta pick.
+  [c.tres, c.tres2].forEach(p=>{ for(let q=p; q; q=q.sub){ if(q.kind==='learnspell') n++; } });
   _hbTalentEffective(c.cls,c.talentRoll,c.talentPick,c.hbTalentChoice).forEach(e=>{if(e&&e.target==='spellKnown'&&_hbIsPlayerChoice(e.spell))n++;});
   n += _hbNestedLearnCount(c, c.talentRoll, c.talentPick, c.hbTalentChoice, 'tm');
   if(c.ancestry==='Human'){
@@ -8271,11 +8320,9 @@ function injectHomebrewContent(rows) {
       const talentRows = Array.isArray(d.talent) ? d.talent : [];
       const features = (Array.isArray(d.features) ? d.features : []).map(f => {
         if(typeof f === 'string') return f;
-        const t = String(f && f.text || '');
-        const effs = Array.isArray(f && f.effects) ? f.effects : [];
-        const per = effs.find(e => e && e.target === 'perDay');
-        const u = per ? (Number(per.amount)||0) : (Number(f && f.uses)||0);   // legacy uses fallback
-        return u > 0 ? t + ' (' + u + '/day)' : t;
+        // Descriptive text only — the per-day allowance is tracked structurally
+        // (_featureUses) and rendered as tick boxes, not baked into the prose.
+        return String(f && f.text || '');
       }).filter(Boolean);
       // Structured feature effects (aligned with the features array) so simple
       // passive bonuses can be auto-applied at creation.
@@ -8288,6 +8335,17 @@ function injectHomebrewContent(rows) {
         });
       const featureChoose = (Array.isArray(d.features) ? d.features : []).map(f => !!(f && f.choose));
       const featureText = (Array.isArray(d.features) ? d.features : []).map(f => String((f && f.text) || '').split(':')[0]);
+      // Base per-day uses per feature (from the "Per Day (uses)" effect), keyed
+      // by the feature's name so the sheet can render tick boxes without reading
+      // the descriptive prose. Kept structured, never appended to the text.
+      const featureUses = {};
+      (Array.isArray(d.features) ? d.features : []).forEach(f => {
+        const fname = String((f && f.text) || '').split(/[:(]/)[0].trim();
+        const effs = Array.isArray(f && f.effects) ? f.effects : [];
+        const per = effs.find(e => e && e.target === 'perDay');
+        const u = per ? (Number(per.amount)||0) : (Number(f && f.uses)||0);   // legacy uses fallback
+        if(fname && u > 0) featureUses[fname] = (featureUses[fname]||0) + u;
+      });
       const talentChoose = talentRows.map(r => !!(r && r.choose));
       const bands = d.talentSplit === 'hi'
         ? [[2,2],[3,7],[8,9],[10,11],[12,12]]
@@ -8298,7 +8356,7 @@ function injectHomebrewContent(rows) {
       // ccwBuildTalentRows order, so the wizard can auto-apply a rolled talent.
       const talentEff = [0,1,2,3,4].map(i =>
         (talentRows[i] && Array.isArray(talentRows[i].effects)) ? talentRows[i].effects : []);
-      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _talentEff: talentEff, _featureEff: featureEff, _talentChoose: talentChoose, _featureChoose: featureChoose, _featureText: featureText, _hb: true };
+      RC_CLASS_INFO[nm] = { hd: String(d.hd || '1d6'), weapons, armor, talent, talentBands: bands, features, _talentEff: talentEff, _featureEff: featureEff, _talentChoose: talentChoose, _featureChoose: featureChoose, _featureText: featureText, _featureUses: featureUses, _hb: true };
       if(d.caster && (d.caster.stat || d.caster.list)) {
         RC_CLASS_INFO[nm]._caster = {
           stat: String(d.caster.stat || 'INT').toLowerCase(),

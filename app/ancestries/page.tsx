@@ -200,6 +200,10 @@ export default async function AncestriesPage({
                   const { title, body } = splitTrait(t.text);
                   const perDay = t.effects.find((e) => e.target === "perDay");
                   const bonuses = t.effects.filter((e) => e.target !== "perDay");
+                  // Reference pages print the author's descriptive text only. The
+                  // mechanical effect list is shown solely as a fallback when a
+                  // trait has no descriptive text of its own (so it isn't blank).
+                  const showEffects = bonuses.length > 0 && !body.trim();
                   return (
                     <div key={i}>
                       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -214,8 +218,10 @@ export default async function AncestriesPage({
                           </span>
                         ) : null}
                       </div>
-                      <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">{body}</p>
-                      {bonuses.length ? (
+                      {body.trim() ? (
+                        <p className="mt-1 text-[13px] leading-relaxed text-[var(--muted)]">{body}</p>
+                      ) : null}
+                      {showEffects ? (
                         <ul className="mt-1 flex flex-col gap-1">
                           {t.choose ? (
                             <li className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--text)]">

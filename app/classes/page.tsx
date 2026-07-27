@@ -104,11 +104,16 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
   const talentRolls: string[] = [];
   talentData.forEach((row, i) => {
     const effects = Array.isArray(row.effects) ? (row.effects as Record<string, unknown>[]) : [];
-    const sep = row.choose ? " or " : ", ";
-    const effStr = effects.map(effectLabel).join(sep);
-    const text = String(row.text ?? "");
-    const prefix = row.choose && effects.length > 1 ? "choose one: " : "";
-    talent.push([text, prefix + effStr].filter(Boolean).join(" — ") || "—");
+    const text = String(row.text ?? "").trim();
+    // Show the author's descriptive text. Only when a row has no text at all do
+    // we fall back to summarising its effects, so the row isn't blank.
+    let line = text;
+    if (!line) {
+      const sep = row.choose ? " or " : ", ";
+      const prefix = row.choose && effects.length > 1 ? "choose one: " : "";
+      line = prefix + effects.map(effectLabel).join(sep);
+    }
+    talent.push(line || "—");
     talentRolls.push(rollLabel(i, split));
   });
 
@@ -116,15 +121,15 @@ function homebrewRow(d: Record<string, unknown>, fallbackName: string): Row {
     .map((f) => {
       if (typeof f === "string") return f;
       const fo = (f ?? {}) as Record<string, unknown>;
+      // Reference pages show the author's descriptive text only — mechanical
+      // effects (charges, bonuses) live in the builder, not the printed blurb.
+      // The one exception is a per-day allowance, surfaced as a compact "(N/day)".
       const text = String(fo.text ?? "");
       const effs = Array.isArray(fo.effects) ? (fo.effects as Record<string, unknown>[]) : [];
-      const parts = effs.map(effectLabel);
+      const per = effs.find((e) => String(e.target) === "perDay");
       const legacyUses = Number(fo.uses) || 0; // pre-effects saves
-      if (!effs.length && legacyUses > 0) parts.push(`${legacyUses}/day`);
-      if (!parts.length) return text;
-      const sep = fo.choose ? " or " : ", ";
-      const prefix = fo.choose && parts.length > 1 ? "choose one: " : "";
-      return `${text} (${prefix}${parts.join(sep)})`;
+      const uses = per ? Number(per.amount) || 0 : legacyUses;
+      return uses > 0 ? `${text} (${uses}/day)` : text;
     })
     .filter(Boolean);
 
