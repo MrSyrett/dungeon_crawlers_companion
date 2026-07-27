@@ -4765,9 +4765,9 @@ function ccwRandomize() {
 
   // Ancestry / class / background / alignment / deity
   _ccw.ancestry  = _ccwRandomAncestry();
-  _ccw.elfFarsight = _ccw.ancestry==='Elf' ? rand(['ranged','spell']) : null;
-  _ccw.beastNatural = _ccw.ancestry==='Beastfolk' ? rand(['attack','ac']) : null;
-  _ccw.koboldKnack  = _ccw.ancestry==='Kobold' ? rand(['spell','luck']) : null;
+  _ccw.elfFarsight = (_ccw.ancestry==='Elf' && _ancIsCoreLegacy('Elf')) ? rand(['ranged','spell']) : null;
+  _ccw.beastNatural = (_ccw.ancestry==='Beastfolk' && _ancIsCoreLegacy('Beastfolk')) ? rand(['attack','ac']) : null;
+  _ccw.koboldKnack  = (_ccw.ancestry==='Kobold' && _ancIsCoreLegacy('Kobold')) ? rand(['spell','luck']) : null;
   // Homebrew ancestry "choose one" traits: roll a distinct option, resolving a
   // stat/weapon player-choice inside it with a random pick as well.
   _ccw.hbChoice = {}; _ccw.hbChoices = {}; _ccw.hbTalentSpells = [];
@@ -4888,9 +4888,9 @@ function ccwNext() {
   if(name==='Ability Scores' && !_ccw.stats) { alert('Roll your ability scores first.'); return; }
   if(name==='Ancestry') {
     if(!_ccw.ancestry) { alert('Choose an ancestry.'); return; }
-    if(_ccw.ancestry==='Elf' && !_ccw.elfFarsight) { alert('Choose your Farsight option.'); return; }
-    if(_ccw.ancestry==='Beastfolk' && !_ccw.beastNatural) { alert('Choose your Natural Selection option.'); return; }
-    if(_ccw.ancestry==='Kobold' && !_ccw.koboldKnack) { alert('Choose your Knack option.'); return; }
+    if(_ccw.ancestry==='Elf' && _ancIsCoreLegacy('Elf') && !_ccw.elfFarsight) { alert('Choose your Farsight option.'); return; }
+    if(_ccw.ancestry==='Beastfolk' && _ancIsCoreLegacy('Beastfolk') && !_ccw.beastNatural) { alert('Choose your Natural Selection option.'); return; }
+    if(_ccw.ancestry==='Kobold' && _ancIsCoreLegacy('Kobold') && !_ccw.koboldKnack) { alert('Choose your Knack option.'); return; }
     const _hbA = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
     if(_hbA && Array.isArray(_hbA.traits)) {
       _hbAutoPickAncChoices(_ccw);
@@ -5071,11 +5071,11 @@ function ccwAncestry() {
     x += '<select onchange="_ccw.'+field+'=this.value||null;ccwRender()" style="width:100%;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;">'+o+'</select>';
     return x + '</div>';
   };
-  if(_ccw.ancestry==='Elf')
+  if(_ccw.ancestry==='Elf' && _ancIsCoreLegacy('Elf'))
     h += ancChoice('Farsight','elfFarsight',[['ranged','+1 to ranged attack rolls'],['spell','+1 to spellcasting checks']]);
-  if(_ccw.ancestry==='Beastfolk')
+  if(_ccw.ancestry==='Beastfolk' && _ancIsCoreLegacy('Beastfolk'))
     h += ancChoice('Natural Selection','beastNatural',[['attack','Strikes (unarmed) deal 1d6'],['ac','+1 to armor class']]);
-  if(_ccw.ancestry==='Kobold')
+  if(_ccw.ancestry==='Kobold' && _ancIsCoreLegacy('Kobold'))
     h += ancChoice('Knack','koboldKnack',[['spell','+1 to spellcasting checks'],['luck','Luck token each session']]);
   // Homebrew ancestries: render a picker for each "choose one" trait.
   const _hbAnc = RC_ANCESTRY._hb && RC_ANCESTRY._hb[_ccw.ancestry];
@@ -5519,15 +5519,20 @@ function ccwToggleLang(pool, lang, max) {
   ccwRender();
 }
 
+// True when this ancestry name should use the built-in (legacy core) handling.
+// A homebrew ancestry with the same name takes precedence — e.g. Beastfolk,
+// which left the core list: a player's homebrew "Beastfolk" must not trigger
+// the leftover Natural Selection code on top of its own traits.
+function _ancIsCoreLegacy(name){ return !(RC_ANCESTRY._hb && RC_ANCESTRY._hb[name]); }
 // One-line ancestry feature, resolving any choice the player made.
 function ancestryLine(c) {
-  if(c.ancestry==='Elf' && c.elfFarsight)
+  if(c.ancestry==='Elf' && _ancIsCoreLegacy('Elf') && c.elfFarsight)
     return 'Farsight: +1 to ' + (c.elfFarsight==='ranged' ? 'ranged attack rolls' : 'spellcasting checks') + '.';
-  if(c.ancestry==='Beastfolk' && c.beastNatural)
+  if(c.ancestry==='Beastfolk' && _ancIsCoreLegacy('Beastfolk') && c.beastNatural)
     return c.beastNatural==='attack'
       ? 'Natural Selection: Your unarmed melee attacks deal 1d6 damage.'
       : 'Natural Selection: You gain +1 to your armor class.';
-  if(c.ancestry==='Kobold' && c.koboldKnack)
+  if(c.ancestry==='Kobold' && _ancIsCoreLegacy('Kobold') && c.koboldKnack)
     return c.koboldKnack==='spell'
       ? 'Knack: +1 to spellcasting checks.'
       : 'Knack: You begin each session with a luck token.';
@@ -8330,7 +8335,8 @@ function injectHomebrewContent(rows) {
         .map(f => {
           const fname = String((f && f.text) || '').split(/[:(]/)[0].trim();
           return (f && Array.isArray(f.effects))
-            ? f.effects.map(e => (e && e.target === 'featureCharges' && !String(e.feature||'').trim()) ? Object.assign({}, e, { feature: fname }) : e)
+            ? f.effects.filter(e => !(e && e.target === 'featureCharges'
+                && (!String(e.feature||'').trim() || String(e.feature||'').trim().toLowerCase() === fname.toLowerCase())))
             : [];
         });
       const featureChoose = (Array.isArray(d.features) ? d.features : []).map(f => !!(f && f.choose));
@@ -8343,7 +8349,13 @@ function injectHomebrewContent(rows) {
         const fname = String((f && f.text) || '').split(/[:(]/)[0].trim();
         const effs = Array.isArray(f && f.effects) ? f.effects : [];
         const per = effs.find(e => e && e.target === 'perDay');
-        const u = per ? (Number(per.amount)||0) : (Number(f && f.uses)||0);   // legacy uses fallback
+        // A "Charges" effect on the feature itself (blank target, or naming the
+        // feature it sits on) sets that feature's own charge count — it is base,
+        // not a bonus stacked on top.
+        const selfCh = effs.filter(e => e && e.target === 'featureCharges'
+          && (!String(e.feature||'').trim() || String(e.feature||'').trim().toLowerCase() === fname.toLowerCase()))
+          .reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+        const u = per ? (Number(per.amount)||0) : (selfCh || (Number(f && f.uses)||0));   // legacy uses fallback
         if(fname && u > 0) featureUses[fname] = (featureUses[fname]||0) + u;
       });
       const talentChoose = talentRows.map(r => !!(r && r.choose));
