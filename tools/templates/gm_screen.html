@@ -123,7 +123,12 @@ body::before {
   padding: 4px 6px;
   outline: none;
   cursor: pointer;
-  flex-shrink: 0;
+  /* Fixed width so the picker stays the same size for every tool (option text
+     length no longer changes it), leaving predictable room for the toolbar. */
+  flex: 0 0 auto;
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
 }
 .pane-select option { background: var(--panel-2); color: var(--white); }
 
@@ -195,7 +200,7 @@ body::before {
    mode still gets desktop layouts. Panes flagged .narrow re-apply the
    pane-internal mobile rules so tools stack instead of overflowing. */
 .pane.narrow .pane-header { flex-wrap: wrap; gap: 4px; padding: 4px 8px; }
-.pane.narrow .pane-select { flex: 0 1 auto; min-width: 0; font-size: 10px; padding: 3px 4px; max-width: 140px; }
+.pane.narrow .pane-select { flex: 0 0 auto; font-size: 10px; padding: 3px 4px; width: 110px; min-width: 110px; max-width: 110px; }
 .pane.narrow .pane-toolbar-slot { flex-wrap: wrap; gap: 4px; width: 100%; min-width: 0; }
 .pane.narrow .pane-content { overflow-y: auto; }
 
@@ -224,6 +229,8 @@ body::before {
 .pane.narrow .cbt-body { flex-direction: column; }
 .pane.narrow .cbt-round-display { font-size: 11px; }
 .pane.narrow .npc-hp-btn, .pane.narrow .tracker-adjust-btn { width: 32px; height: 32px; }
+/* Keep the attack/damage roll button comfortably tappable even in a quarter pane. */
+.pane.narrow .npc-mon-attack { font-size: 13px; padding: 6px 11px; min-height: 34px; min-width: 54px; }
 .pane.narrow .npc-seg { min-width: 0; height: 26px; flex: 1 1 0; }
 .pane.narrow .npc-seg-num { font-size: 10px; }
 .pane.narrow .npc-seg-row { gap: 2px; }
@@ -580,14 +587,6 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .cbt-body.cbt-single .cbt-col { flex: 1; border-right: none; }
 .cbt-col { flex: 1; display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--border); overflow: hidden; }
 .cbt-col:last-child { border-right: none; }
-.cbt-col-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0;
-}
-.cbt-col-title {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 11px;
-  letter-spacing: 0.15em; text-transform: uppercase; color: var(--mid);
-}
 .cbt-tracker-list, .cbt-npc-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
 .cbt-empty { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 4px; padding: 30px; }
 .cbt-empty.show { display: flex; }
@@ -665,11 +664,18 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .npc-del { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 4px; flex-shrink: 0; }
 .npc-del:hover { color: var(--red-light); }
 
-.npc-hp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.npc-hp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
 .npc-hp-input { width: 48px; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; padding: 5px 2px; }
 .npc-hp-slash { color: var(--muted); font-size: 13px; }
-.npc-hp-adjust { display: flex; gap: 3px; margin-left: 0; }
+/* +Status sits at the end of the HP number row. */
 .npc-hp-status { margin-left: auto; flex-shrink: 0; }
+/* Second HP line: the ±HP buttons left-aligned, with the tag field beside them. */
+.npc-hp-second { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.npc-hp-adjust { display: flex; gap: 3px; margin-left: 0; justify-content: flex-start; }
+.npc-tag-inline { flex: 1 1 90px; min-width: 0; text-align: left; }
+/* Mode (Standard/DCC) select on its own line above the name, so it and the X
+   never crowd the name row / run off a narrow card. */
+.npc-mode-bar { display: flex; justify-content: flex-end; margin-bottom: 4px; }
 .npc-hp-btn {
   width: 26px; height: 26px; background: var(--panel-2); border: 1px solid var(--border); color: var(--light);
   cursor: pointer; font-size: 11px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
@@ -718,6 +724,11 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 /* Monster picker (Trackers → + Monster) */
 .mon-pick { border: 1px solid var(--gold); background: var(--panel); padding: 8px 10px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .mon-pick-controls { display: flex; gap: 6px; flex-wrap: wrap; min-width: 0; }
+/* Timer + Blank buttons under the picker controls — the single "+" toolbar
+   button opens this picker, so all "add" actions (timer, blank combatant, or a
+   bestiary monster) live here. */
+.mon-pick-add-row { display: flex; gap: 6px; }
+.mon-pick-add-row > button { flex: 1 1 0; padding: 4px 0; font-size: 11px; letter-spacing: 0.08em; }
 .mon-pick-search { flex: 1 1 120px; min-width: 0; background: var(--panel-2); border: 1px solid var(--border); color: var(--white); font-size: 12px; padding: 5px 7px; outline: none; }
 .mon-pick-type { flex: 0 1 auto; min-width: 0; background: var(--panel-2); border: 1px solid var(--border); color: var(--white); font-size: 12px; padding: 5px 7px; outline: none; }
 .mon-pick-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; border-top: 1px solid var(--border); }
@@ -797,6 +808,18 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   display: flex; flex-wrap: wrap; gap: 10px; padding: 12px 16px;
   background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
+/* Collapsible generator options (#7). The toggle bar sits above each panel's
+   .gen-controls; collapsing hides the controls so the results get the space. */
+.gen-opts-toggle {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  background: var(--panel); border: none; border-bottom: 1px solid var(--border);
+  color: var(--muted); cursor: pointer; text-align: left;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 16px; flex-shrink: 0;
+}
+.gen-opts-toggle:hover { color: var(--light); }
+.gen-opts-chevron { font-size: 9px; line-height: 1; }
+.gen-controls.collapsed { display: none; }
 .gen-label {
   font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
@@ -860,27 +883,6 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .gen-item-name { font-weight: 700; color: var(--gold); font-size: 13px; margin-bottom: 2px; }
 .gen-item-desc { font-size: 12px; color: var(--light); line-height: 1.5; }
 
-/* ═══ AUDIO TOOL ═══ */
-.aud-url-input {
-  flex: 1; max-width: 260px; background: var(--panel-2); border: 1px solid var(--border);
-  color: var(--white); font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px; padding: 4px 8px; outline: none; min-width: 0;
-}
-.aud-url-input:focus { border-color: var(--mid); }
-.aud-url-input::placeholder { color: var(--muted); }
-.aud-body { flex: 1; display: flex; flex-direction: column; min-height: 0; background: var(--black); }
-.aud-empty {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 10px; padding: 32px; text-align: center;
-}
-.aud-empty-icon { font-size: 40px; opacity: 0.4; }
-.aud-empty-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); }
-.aud-empty-sub { font-size: 12px; color: var(--muted); }
-.aud-empty-hint { font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: 4px; }
-.aud-empty-hint strong { color: var(--mid); }
-.aud-frame { flex: 1; width: 100%; border: none; min-height: 0; }
-
 /* ═══ NOTES TOOL ═══ */
 .nts-saved-indicator { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); opacity: 0; transition: opacity 0.3s; }
 .nts-saved-indicator.show { opacity: 1; color: var(--green-light); }
@@ -939,16 +941,13 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   .brand { font-size: 15px; width: 100%; }
   .pane-picker { flex: 1; min-width: 0; }
   .pane-picker-label { display: none; }
-  .pane-select { width: 100%; }
   .view-controls { margin-left: auto; }
 
   .main-area { flex-direction: column; }
   .pane { border-right: none; border-bottom: 2px solid var(--border); }
 
-  /* Pane header wraps on mobile so toolbar buttons stay visible */
-  .pane-header { flex-wrap: wrap; gap: 4px; padding: 4px 8px; }
-  .pane-select { flex: 0 1 auto; min-width: 0; font-size: 10px; padding: 3px 4px; max-width: 140px; }
-  .pane-toolbar-slot { flex-wrap: wrap; gap: 4px; }
+  /* Pane header layout on mobile is set further down (fixed-width picker + a
+     single non-wrapping toolbar row). */
   /* Make sure cbt round display and next round button don't get hidden */
   .cbt-round-display { font-size: 11px; }
 
@@ -986,8 +985,22 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   .btn.small { font-size: 13px; padding: 9px 12px; min-height: 40px; }
   .brand { font-size: 20px; }
   .bar-title { font-size: 14px; }
-  .pane-select { font-size: 14px !important; padding: 9px 8px !important; min-height: 42px; max-width: none !important; flex: 1 1 auto !important; }
-  .pane-header { padding: 6px 10px; gap: 6px; }
+  /* Tool picker is a fixed size (see the dropdowns block below for the exact
+     width); the icon buttons sit inline to its right in a single row that never
+     wraps to a new line (it scrolls horizontally if a tool ever has more buttons
+     than fit). */
+  .pane-header { flex-wrap: nowrap !important; padding: 6px 10px; gap: 6px; }
+  .pane-select { font-size: 14px !important; padding: 9px 8px !important; min-height: 42px; }
+  .pane-toolbar-slot {
+    flex: 1 1 auto; min-width: 0; flex-wrap: nowrap !important;
+    justify-content: flex-start; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  .pane-toolbar-slot > * { flex: 0 0 auto; }
+  .pane-toolbar-slot .toolbar-spacer { display: none; }
+  /* Inputs and the generator tab-select keep a usable width; the row scrolls
+     horizontally rather than wrapping if everything can't fit at once. */
+  .pane-toolbar-slot input { flex: 0 1 140px; min-width: 90px; }
+  .pane-toolbar-slot select { flex: 0 1 auto; min-width: 0; }
   .split-select, .gen-tab-select { font-size: 14px; min-height: 42px; padding: 8px 10px; }
   .session-controls .btn { min-height: 44px; }
 
@@ -997,6 +1010,9 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 
   /* Combat + tracker controls */
   .cbt-round-display { font-size: 15px; }
+  /* Save toolbar space on phones: show "RD" instead of the full "Round". */
+  .cbt-round-label { display: none; }
+  .cbt-round-display::before { content: "RD "; }
   .npc-hp-btn, .tracker-adjust-btn { width: 44px; height: 44px; font-size: 18px; }
   .dice-camp-btn, .dice-hide-btn { font-size: 14px; padding: 10px 12px; min-height: 42px; }
   .dice-pool-clear, .dice-roll-go { font-size: 14px; padding: 11px 14px; min-height: 44px; }
@@ -1125,8 +1141,6 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   /* ── (1) Combat & Trackers: real thumb-sized controls ── */
   .cbt-round-display { font-size: 15px; }
   .cbt-round-num, .trk-round-num { font-size: 20px; }
-  .cbt-col-header { padding: 10px 12px; }
-  .cbt-col-title { font-size: 13px; }
   .cbt-tracker-list, .cbt-npc-list { padding: 12px; gap: 10px; }
 
   .tracker-card, .npc-card { padding: 12px 14px; }
@@ -1225,7 +1239,6 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 
   /* ── Dropdowns / text + number inputs ── */
   select,
-  .pane-select, .pane.narrow .pane-select,
   .split-select, .gen-tab-select, .gen-select,
   .pane-toolbar-slot select, .pane.narrow .pane-toolbar-slot select {
     font-size: 16px !important;          /* 16px also stops iOS zoom-on-focus */
@@ -1233,7 +1246,17 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
     min-height: 50px !important;
     max-width: none !important;
   }
-  .pane-select, .pane.narrow .pane-select { flex: 1 1 auto !important; }
+  /* The tool picker keeps a fixed size (bigger font/tap target, same width) so it
+     never varies with the selected tool or crowds out the toolbar buttons. */
+  .pane-select, .pane.narrow .pane-select {
+    font-size: 16px !important;
+    padding: 13px 8px !important;
+    min-height: 50px !important;
+    flex: 0 0 auto !important;
+    width: 150px !important;
+    min-width: 150px !important;
+    max-width: 150px !important;
+  }
   .pane-toolbar-slot input,
   .pane.narrow .pane-toolbar-slot input {
     font-size: 16px !important; padding: 12px 10px !important;
@@ -1341,9 +1364,9 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 
   <div class="session-controls">
     <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link">🔗 Campaign</button>
-    <button class="btn small ghost" id="save-btn" onclick="saveSession()" title="Save session to file">💾 Save</button>
-    <label class="btn small ghost" title="Load a saved session" style="cursor:pointer;">
-      📂 Load
+    <button class="btn small ghost" id="save-btn" onclick="saveSession()" title="Save session" aria-label="Save session to file">💾</button>
+    <label class="btn small ghost" title="Load session" aria-label="Load a saved session" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+      📂
       <input type="file" id="load-input" accept=".json" style="display:none;" onchange="loadSession(this)">
     </label>
   </div>
@@ -1761,7 +1784,6 @@ GMScenes.renderPins();
         <option value="maps">🗺 Maps</option>
         <option value="trackers">⏱ Trackers</option>
         <option value="notes">✎ Notes</option>
-        <option value="audio">🌐 Browser</option>
         <option value="music">🎵 Music</option>
         <option value="gen">🎲 Generators</option>
         <option value="party">👥 Party</option>
@@ -1781,7 +1803,6 @@ GMScenes.renderPins();
         <option value="maps">🗺 Maps</option>
         <option value="trackers" selected>⏱ Trackers</option>
         <option value="notes">✎ Notes</option>
-        <option value="audio">🌐 Browser</option>
         <option value="music">🎵 Music</option>
         <option value="gen">🎲 Generators</option>
         <option value="party">👥 Party</option>
@@ -1800,7 +1821,6 @@ GMScenes.renderPins();
         <option value="maps">🗺 Maps</option>
         <option value="trackers">⏱ Trackers</option>
         <option value="notes" selected>✎ Notes</option>
-        <option value="audio">🌐 Browser</option>
         <option value="music">🎵 Music</option>
         <option value="gen">🎲 Generators</option>
         <option value="party">👥 Party</option>
@@ -1820,7 +1840,6 @@ GMScenes.renderPins();
         <option value="maps">🗺 Maps</option>
         <option value="trackers">⏱ Trackers</option>
         <option value="notes">✎ Notes</option>
-        <option value="audio">🌐 Browser</option>
         <option value="music">🎵 Music</option>
         <option value="gen">🎲 Generators</option>
         <option value="party">👥 Party</option>
@@ -1838,7 +1857,6 @@ GMScenes.renderPins();
 /* ═══ PARTY (player character sheets) ═══ */
 .pty-body { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 .pty-bar { display:flex; gap:8px; align-items:center; padding:8px 12px; border-bottom:1px solid var(--border); background:var(--panel); flex-shrink:0; flex-wrap:wrap; }
-.pty-search { flex:1; min-width:120px; background:var(--panel-2); border:1px solid var(--border); color:var(--white); font-family:'Montserrat',sans-serif; font-size:12px; padding:5px 8px; outline:none; }
 .pty-note { font-family:'Montserrat',sans-serif; font-size:10px; color:var(--muted); }
 .pty-list { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; }
 .pty-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; color:var(--muted); text-align:center; padding:20px; }
@@ -1890,8 +1908,8 @@ GMScenes.renderPins();
 <template id="tpl-adventure">
   <div class="tool-instance doc-tool" data-tool="adventure">
     <div class="toolbar-tpl" style="display:none">
-      <label class="btn primary small" style="cursor:pointer;">
-        Load File
+      <label class="btn primary small" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" title="Load file" aria-label="Load file">
+        &#11014;
         <input type="file" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" style="display:none;">
       </label>
       <span class="doc-filename" style="display:none"></span>
@@ -1900,7 +1918,7 @@ GMScenes.renderPins();
         <button class="btn small doc-zoom-out">−</button>
         <span class="doc-zoom-label">100%</span>
         <button class="btn small doc-zoom-in">+</button>
-        <button class="btn small ghost doc-clear">Clear</button>
+        <button class="btn small ghost doc-clear" title="Clear" aria-label="Clear">&#128465;</button>
       </div>
     </div>
     <div class="doc-body">
@@ -1916,8 +1934,8 @@ GMScenes.renderPins();
 <template id="tpl-maps">
   <div class="tool-instance doc-tool" data-tool="maps">
     <div class="toolbar-tpl" style="display:none">
-      <label class="btn primary small" style="cursor:pointer;">
-        Load File
+      <label class="btn primary small" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" title="Load file" aria-label="Load file">
+        &#11014;
         <input type="file" class="doc-file-input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" style="display:none;">
       </label>
       <span class="doc-filename" style="display:none"></span>
@@ -1926,7 +1944,7 @@ GMScenes.renderPins();
         <button class="btn small doc-zoom-out">−</button>
         <span class="doc-zoom-label">100%</span>
         <button class="btn small doc-zoom-in">+</button>
-        <button class="btn small ghost doc-clear">Clear</button>
+        <button class="btn small ghost doc-clear" title="Clear" aria-label="Clear">&#128465;</button>
       </div>
     </div>
     <div class="doc-body">
@@ -1942,19 +1960,14 @@ GMScenes.renderPins();
 <template id="tpl-trackers">
   <div class="tool-instance cbt-tool trk-tool" data-tool="trackers">
     <div class="toolbar-tpl" style="display:none">
-      <button class="btn small primary cbt-add-tracker">+ Timer</button>
-      <button class="btn small primary cbt-add-npc">+ Combat</button>
-      <button class="btn small primary cbt-add-monster">+ Monster</button>
-      <button class="btn primary small trk-next-round">Next Round &rarr;</button>
-      <span class="cbt-round-display">Round <span class="trk-round-num">1</span></span>
+      <button class="btn small primary cbt-add-monster" title="Add tracker, monster, or combatant" aria-label="Add">&#43;</button>
+      <button class="btn primary small trk-next-round" title="Next round" aria-label="Next round">&rarr;</button>
+      <span class="cbt-round-display"><span class="cbt-round-label">Round</span> <span class="trk-round-num">1</span></span>
       <div class="toolbar-spacer"></div>
-      <button class="btn small ghost trk-reset">Reset</button>
+      <button class="btn small ghost trk-reset" title="Reset" aria-label="Reset trackers">&#8635;</button>
     </div>
     <div class="cbt-body cbt-single">
       <div class="cbt-col cbt-trackers-col">
-        <div class="cbt-col-header">
-          <span class="cbt-col-title">Trackers</span>
-        </div>
         <div class="cbt-tracker-list"></div>
         <div class="cbt-empty cbt-trackers-empty">
           <div class="cbt-empty-text">Nothing tracked yet</div>
@@ -1970,12 +1983,12 @@ GMScenes.renderPins();
       <span class="nts-saved-indicator"></span>
       <div class="toolbar-spacer"></div>
       <button class="btn small ghost nts-md-toggle" title="Toggle Markdown source">MD</button>
-      <button class="btn small ghost nts-export">Export .md</button>
-      <label class="btn small ghost" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" title="Import a Markdown file">
-        Import .md
+      <button class="btn small ghost nts-export" title="Export .md" aria-label="Export Markdown">&#11015;</button>
+      <label class="btn small ghost" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" title="Import .md" aria-label="Import a Markdown file">
+        &#11014;
         <input type="file" class="nts-import-input" accept=".md,.markdown,.txt" style="display:none;">
       </label>
-      <button class="btn small ghost nts-clear">Clear</button>
+      <button class="btn small ghost nts-clear" title="Clear" aria-label="Clear">&#128465;</button>
     </div>
     <div class="nts-body">
       <div class="nts-tabs"></div>
@@ -1984,32 +1997,11 @@ GMScenes.renderPins();
     </div>
   </div>
 </template>
-<template id="tpl-audio">
-  <div class="tool-instance aud-tool" data-tool="audio">
-    <div class="toolbar-tpl" style="display:none">
-      <input class="aud-url-input" type="text" placeholder="Enter URL…" spellcheck="false">
-      <button class="btn small primary aud-load">Go</button>
-      <button class="btn small ghost aud-clear">Clear</button>
-      <button class="btn small ghost aud-tta" title="TabletopAudio">🎵 TTA</button>
-      <button class="btn small ghost aud-npc" title="NPC Generator">👤 NPC</button>
-      <button class="btn small ghost aud-wata" title="Watabou Generators">🗺 Wata</button>
-      <button class="btn small ghost aud-ds" title="DungeonScrawl">🏰 DS</button>
-    </div>
-    <div class="aud-body">
-      <div class="aud-empty">
-        <div class="aud-empty-icon">🌐</div>
-        <div class="aud-empty-title">Browser</div>
-        <div class="aud-empty-sub">Enter a URL above or use the 🎵 TTA shortcut to open TabletopAudio</div>
-      </div>
-      <iframe class="aud-frame" style="display:none;" allowtransparency="true" allow="autoplay" frameborder="0"></iframe>
-    </div>
-  </div>
-</template>
 <template id="tpl-music">
   <div class="tool-instance mus-tool" data-tool="music">
     <div class="toolbar-tpl" style="display:none">
       <div class="toolbar-spacer"></div>
-      <button class="btn small ghost mus-stopall" title="Fade out and stop everything">&#9209; Stop All</button>
+      <button class="btn small ghost mus-stopall" title="Stop All" aria-label="Fade out and stop everything">&#9209;</button>
     </div>
     <div class="mus-body">
       <div class="mus-section mus-music-section">
@@ -2075,7 +2067,7 @@ GMScenes.renderPins();
   <div class="tool-instance dice-tool" data-tool="dice">
     <div class="toolbar-tpl" style="display:none">
       <div class="toolbar-spacer"></div>
-      <button class="btn small ghost dice-clear">Clear Log</button>
+      <button class="btn small ghost dice-clear" title="Clear log" aria-label="Clear log">&#128465;</button>
     </div>
     <div class="dice-log"></div>
     <div class="dice-tray"></div>
@@ -2096,7 +2088,7 @@ GMScenes.renderPins();
         <option value="loot">💰 Treasure</option>
       </select>
       <div class="toolbar-spacer"></div>
-      <button class="btn small primary gen-roll">🎲 Generate</button>
+      <button class="btn small primary gen-roll" title="Generate" aria-label="Generate">🎲</button>
     </div>
     <div class="gen-body">
 
@@ -2462,24 +2454,22 @@ GMScenes.renderPins();
 <template id="tpl-party">
   <div class="tool-instance pty-tool" data-tool="party">
     <div class="toolbar-tpl" style="display:none">
-      <label class="btn primary small" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-        + Add Sheet
+      <label class="btn primary small" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" title="Add sheet" aria-label="Add character sheet">
+        &#11014;
         <input type="file" class="pty-file-input" accept=".json,application/json" multiple style="display:none;">
       </label>
-      <button class="btn small ghost pty-paste" title="Paste a character sheet JSON export">Paste</button>
-      <button class="btn small ghost pty-sync" title="Pull sheets shared with the linked campaign">&#8635; Sync</button>
+      <button class="btn small ghost pty-sync" title="Sync" aria-label="Pull sheets shared with the linked campaign">&#8635;</button>
       <div class="toolbar-spacer"></div>
-      <button class="btn small ghost pty-clear">Clear</button>
+      <button class="btn small ghost pty-clear" title="Clear" aria-label="Clear">&#128465;</button>
     </div>
     <div class="pty-body">
       <div class="pty-bar">
-        <input type="text" class="pty-search" placeholder="Filter party…">
         <span class="pty-note"></span>
       </div>
       <div class="pty-empty">
         <div class="pty-empty-icon">&#128101;</div>
         <div class="pty-empty-title">No Character Sheets</div>
-        <div class="pty-empty-sub">Add the .json a player exported from their character sheet (Save), paste one in, or press Sync to pull sheets shared with your linked campaign.</div>
+        <div class="pty-empty-sub">Add the .json a player exported from their character sheet (Save), or press Sync to pull sheets shared with your linked campaign.</div>
       </div>
       <div class="pty-list" style="display:none;"></div>
     </div>
@@ -2488,8 +2478,8 @@ GMScenes.renderPins();
 <template id="tpl-rules">
   <div class="tool-instance rul-tool" data-tool="rules">
     <div class="toolbar-tpl" style="display:none">
-      <button class="btn small ghost rul-refresh" title="Re-read the rulebooks on the server">&#8635; Refresh</button>
-      <a class="btn small ghost rul-newtab" href="#" target="_blank" rel="noreferrer" style="display:none;text-decoration:none;">Open &#8599;</a>
+      <button class="btn small ghost rul-refresh" title="Refresh" aria-label="Re-read the rulebooks on the server">&#8635;</button>
+      <a class="btn small ghost rul-newtab" href="#" target="_blank" rel="noreferrer" title="Open in new tab" aria-label="Open in new tab" style="display:none;text-decoration:none;">&#8599;</a>
       <div class="toolbar-spacer"></div>
       <span class="rul-note"></span>
     </div>
@@ -2517,7 +2507,7 @@ GMScenes.renderPins();
 // This is what makes loaded files / typed content persist.
 // ══════════════════════════════════════════
 
-const TOOL_TYPES = ['adventure', 'maps', 'trackers', 'notes', 'audio', 'gen', 'party', 'rules'];
+const TOOL_TYPES = ['adventure', 'maps', 'trackers', 'notes', 'gen', 'party', 'rules'];
 const instancePool = document.createElement('div');
 instancePool.style.cssText = 'position:fixed; top:0; left:-9999px; width:1px; height:1px; overflow:hidden;';
 document.body.appendChild(instancePool);
@@ -2587,7 +2577,7 @@ GM_MOBILE_MQ.addEventListener('change', () => setSplit(splitPref));
 // Each tool has a single DOM instance, so it can only live in one pane.
 // If a duplicate is found, swap that pane to the first unused tool.
 function dedupePaneTools(count) {
-  const all = ['adventure','maps','trackers','notes','audio','gen','party','rules','dice'];
+  const all = ['adventure','maps','trackers','notes','gen','party','rules','dice'];
   const used = new Set();
   for(let p = 1; p <= (count || 4); p++) {
     let tool = paneTools[p];
@@ -2725,14 +2715,8 @@ function syncToolbar(slot, toolNode) {
     ['.dice-clear',    '.dice-clear'],
     // generators
     ['.gen-roll',      '.gen-roll'],
-    ['.aud-clear',     '.aud-clear'],
-    ['.aud-tta',       '.aud-tta'],
-    ['.aud-npc',       '.aud-npc'],
-    ['.aud-wata',      '.aud-wata'],
-    ['.aud-ds',        '.aud-ds'],
     ['.mus-stopall',   '.mus-stopall'],
     // party
-    ['.pty-paste',     '.pty-paste'],
     ['.pty-sync',      '.pty-sync'],
     ['.pty-clear',     '.pty-clear'],
     // rulebooks
@@ -2832,16 +2816,6 @@ function syncToolbar(slot, toolNode) {
     cloneImportLabel.addEventListener('click', e => {
       e.preventDefault();
       liveImportInput.click();
-    });
-  }
-
-  // Audio URL input: sync typing clone→live, Enter triggers load
-  const cloneAudInput = slot.querySelector('.aud-url-input');
-  const liveAudInput = toolNode.querySelector('.aud-url-input');
-  if(cloneAudInput && liveAudInput) {
-    cloneAudInput.addEventListener('input', () => { liveAudInput.value = cloneAudInput.value; });
-    cloneAudInput.addEventListener('keydown', e => {
-      if(e.key === 'Enter') toolNode.querySelector('.aud-load')?.click();
     });
   }
 
@@ -3111,7 +3085,9 @@ function wireSessionPrepLoader(root) {
     const tb = document.createElement('button');
     tb.type = 'button';
     tb.className = 'btn small doc-load-prep';
-    tb.textContent = '📋 Session Prep';
+    tb.innerHTML = '&#128193;';
+    tb.title = 'Load Session Prep';
+    tb.setAttribute('aria-label', 'Load Session Prep');
     tb.addEventListener('click', open);
     const label = toolbarTpl.querySelector('label.btn');
     if(label && label.nextSibling) toolbarTpl.insertBefore(tb, label.nextSibling);
@@ -3249,6 +3225,9 @@ function init_trackers(root) {
   // The tag sits on the same row as the + Status button; statuses stack below.
   function statusListHtml(entity, opts) {
     const withAdd = !opts || opts.withAddButton !== false;
+    // The tag sits inline beside the HP adjust buttons for standard-mode cards;
+    // only render it here (in the status bar) when that inline spot isn't used.
+    const withTag = !opts || opts.withTag !== false;
     const rows = (entity.statuses || []).map(s => `
       <div class="status-row" data-status-id="${s.id}">
         <input type="checkbox" class="status-check" ${s.checked ? 'checked' : ''}>
@@ -3259,7 +3238,7 @@ function init_trackers(root) {
     return `
       <div class="status-bar">
         ${withAdd ? '<button class="btn small ghost status-add">+ Status</button>' : ''}
-        <input type="text" class="npc-tag-input" value="${escAttr(entity.tag || '')}" placeholder="Tag (elite, minion, ...)">
+        ${withTag ? `<input type="text" class="npc-tag-input" value="${escAttr(entity.tag || '')}" placeholder="Tag (elite, minion, ...)">` : ''}
       </div>
       <div class="status-list">${rows}</div>`;
   }
@@ -3533,12 +3512,15 @@ function init_trackers(root) {
           <span class="npc-hp-slash">/</span>
           <input type="number" class="npc-hp-input npc-hp-max" value="${n.hpMax}">
           <button class="btn small ghost status-add npc-hp-status">+ Status</button>
+        </div>
+        <div class="npc-hp-second">
           <div class="npc-hp-adjust">
             <button class="npc-hp-btn dmg npc-dmg5" title="-5 HP">&minus;5</button>
             <button class="npc-hp-btn dmg npc-dmg1" title="-1 HP">&minus;1</button>
             <button class="npc-hp-btn heal npc-heal1" title="+1 HP">+1</button>
             <button class="npc-hp-btn heal npc-heal5" title="+5 HP">+5</button>
           </div>
+          <input type="text" class="npc-tag-input npc-tag-inline" value="${escAttr(n.tag || '')}" placeholder="Tag (elite, minion, ...)">
         </div>
         <div class="npc-hp-bar-track"><div class="npc-hp-bar-fill" style="width:${pct}%;background:${npcHpColor(pct)};"></div></div>
       `;
@@ -3565,19 +3547,19 @@ function init_trackers(root) {
 
     card.className = 'npc-card' + (defeated ? ' defeated' : '');
     card.innerHTML = `
+      ${n.mon ? '' : `<div class="npc-mode-bar"><select class="card-select npc-mode-select ${mode==='dcc'?'dcc-active':'std-active'}" title="HP mode">
+        <option value="standard" ${mode==='standard'?'selected':''}>Standard</option>
+        <option value="dcc"      ${mode==='dcc'     ?'selected':''}>DCC</option>
+      </select></div>`}
       <div class="npc-top">
         ${reorderHtml(n, idx)}
         <input type="text" class="npc-name-input" value="${escAttr(n.name)}" placeholder="NPC / Monster name...">
-        ${n.mon ? '' : `<select class="card-select npc-mode-select ${mode==='dcc'?'dcc-active':'std-active'}" title="HP mode">
-          <option value="standard" ${mode==='standard'?'selected':''}>Standard</option>
-          <option value="dcc"      ${mode==='dcc'     ?'selected':''}>DCC</option>
-        </select>`}
         <button class="npc-del" title="Remove">&#10005;</button>
       </div>
       ${hpBlockHtml}
       ${defeated ? '<div class="npc-defeated-tag">Defeated</div>' : ''}
       ${monsterBlockHtml(n)}
-      ${statusListHtml(n, { withAddButton: mode !== 'standard' })}
+      ${statusListHtml(n, { withAddButton: mode !== 'standard', withTag: mode !== 'standard' })}
     `;
 
     card.querySelector('.npc-name-input').addEventListener('input', e => { n.name = e.target.value; });
@@ -3699,6 +3681,10 @@ function init_trackers(root) {
         </select>
         <button class="btn small ghost mon-pick-close">Close</button>
       </div>
+      <div class="mon-pick-add-row">
+        <button class="btn small ghost mon-pick-timer cbt-add-tracker" title="Add a timer / round tracker">&#9201; Timer</button>
+        <button class="btn small ghost mon-pick-blank cbt-add-npc" title="Add an empty combatant">Blank</button>
+      </div>
       <div class="mon-pick-list">${pickerRowsHtml()}</div>`;
     // Sits above the card list, outside the element render() rebuilds.
     list.parentNode.insertBefore(pickerEl, list);
@@ -3764,10 +3750,16 @@ function init_trackers(root) {
       updateRoundDisplay(); render();
     } else if(btn.classList.contains('cbt-add-tracker')) {
       items.push({ id: nextId++, type: 'tracker', name: '', kind: 'rounds', rounds: 1, totalSeconds: 60, remainingSeconds: 60, running: false });
-      render();
+      // The Timer button lives inside the picker — close it so the new tracker
+      // card is visible instead of staying under the open picker.
+      if(pickerEl) closePicker();
+      else render();
     } else if(btn.classList.contains('cbt-add-npc')) {
       items.push({ id: nextId++, type: 'npc', name: '', tag: '', hpMode: 'standard', hpCurrent: 10, hpMax: 10, statuses: [] });
-      render();
+      // The Blank button lives inside the monster picker — close it so the new
+      // combatant card is visible instead of staying under the open picker.
+      if(pickerEl) closePicker();
+      else render();
     } else if(btn.classList.contains('cbt-add-monster')) {
       if(pickerEl) { closePicker(); }
       else { pickerOpen = true; openPicker(); render(); }
@@ -6799,6 +6791,27 @@ window.init_gen = function(root) {
   const panels = root.querySelectorAll('.gen-panel');
   fillMonsterTypeFilter(root);   // panel markup only exists once mounted
 
+  // Make each panel's option controls (.gen-controls) collapsible so they don't
+  // take up vertical space once they're set — the results area then gets the
+  // room. A compact bar with a chevron sits above each control group; clicking
+  // it toggles just that panel's options. Each panel keeps its own state.
+  root.querySelectorAll('.gen-controls').forEach(controls => {
+    if(controls.dataset.collapsibleWired) return;
+    controls.dataset.collapsibleWired = '1';
+    const bar = document.createElement('button');
+    bar.type = 'button';
+    bar.className = 'gen-opts-toggle';
+    bar.setAttribute('aria-expanded', 'true');
+    bar.innerHTML = '<span class="gen-opts-chevron">&#9662;</span><span class="gen-opts-label">Options</span>';
+    controls.parentNode.insertBefore(bar, controls);
+    bar.addEventListener('click', () => {
+      const collapsed = controls.classList.toggle('collapsed');
+      bar.classList.toggle('collapsed', collapsed);
+      bar.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      bar.querySelector('.gen-opts-chevron').innerHTML = collapsed ? '&#9656;' : '&#9662;';
+    });
+  });
+
   // "Send to Tracker" on a generated monster card. Delegated because results are
   // re-rendered on every roll. The tracker tool is created on demand, so this
   // works even if no pane is showing it yet.
@@ -7233,12 +7246,19 @@ window.init_gen = function(root) {
     font-size: 12px; padding: 10px 14px; min-height: 40px;
   }
 
-  /* HP +/- row can't fit four 48px buttons beside two HP fields — give it
-     its own line rather than letting the buttons shrink. */
-  .npc-hp-row { flex-wrap: wrap; }
-  .npc-hp-status { margin-left: 0; }
-  .npc-hp-adjust { width: 100%; margin-left: 0; justify-content: space-between; }
-  .npc-hp-adjust .npc-hp-btn { flex: 1 1 0; }
+  /* HP +/- buttons sit on their own line, left-aligned, with the tag beside
+     them; keep the buttons a comfortable tap size without stretching full-width. */
+  .npc-hp-adjust { justify-content: flex-start; }
+  .npc-hp-adjust .npc-hp-btn { flex: 0 0 auto; min-width: 40px; }
+  .npc-tag-inline { flex: 1 1 100px; }
+
+  /* Attack / damage roll buttons are the main thing a GM taps in combat, so
+     make them large and easy to hit on a phone. */
+  .npc-mon-attack {
+    font-size: 15px; padding: 9px 14px; min-height: 40px; min-width: 64px;
+    border-radius: 6px;
+  }
+  .npc-mon-atk { gap: 8px; }
 }
 /* ══ CARD DROPDOWNS + STATUS BAR ═════════════════════════════════════════
    The Rounds/Timer and Standard/DCC segmented toggles were wider than the
@@ -7326,57 +7346,6 @@ window.init_gen = function(root) {
 
 </script>
 
-<script>
-// ══════════════════════════════════════════
-// AUDIO TOOL — TabletopAudio iframe player
-// ══════════════════════════════════════════
-function init_audio(root) {
-  const urlInput = root.querySelector('.aud-url-input');
-  const loadBtn  = root.querySelector('.aud-load');
-  const clearBtn = root.querySelector('.aud-clear');
-  const frame    = root.querySelector('.aud-frame');
-  const empty    = root.querySelector('.aud-empty');
-
-  const ttaBtn   = root.querySelector('.aud-tta');
-  const npcBtn   = root.querySelector('.aud-npc');
-  const wataBtn  = root.querySelector('.aud-wata');
-  const dsBtn    = root.querySelector('.aud-ds');
-
-  function loadUrl(url) {
-    url = url.trim();
-    if(!url) return;
-    // Normalise to https
-    url = url.replace(/^http:\/\//i, 'https://');
-    if(!url.startsWith('https://')) url = 'https://tabletopaudio.com/' + url;
-    frame.src = url;
-    frame.style.display = 'block';
-    empty.style.display = 'none';
-    urlInput.value = url; // update input to show normalised URL
-  }
-
-  function clear() {
-    frame.src = 'about:blank';
-    frame.style.display = 'none';
-    empty.style.display = 'flex';
-    urlInput.value = '';
-  }
-
-  loadBtn.addEventListener('click', () => loadUrl(urlInput.value));
-  urlInput.addEventListener('keydown', e => { if(e.key === 'Enter') loadUrl(urlInput.value); });
-  ttaBtn.addEventListener('click', () => loadUrl('https://tabletopaudio.com/'));
-  npcBtn.addEventListener('click', () => loadUrl('https://www.npcgenerator.com/'));
-  wataBtn.addEventListener('click', () => loadUrl('https://watabou.github.io/'));
-  dsBtn.addEventListener('click', () => loadUrl('https://app.dungeonscrawl.com/'));
-  clearBtn.addEventListener('click', clear);
-
-  root._loadUrl = loadUrl; // expose for other tools (e.g. dungeon map button)
-  root._getState = () => ({ url: frame.style.display !== 'none' ? frame.src : '' });
-  root._setState = (s) => {
-    if(s.url) { urlInput.value = s.url; loadUrl(s.url); }
-    else clear();
-  };
-}
-</script>
 
 <script>
 // ══════════════════════════════════════════
@@ -9346,17 +9315,14 @@ window.rollAttackToDiceTray = function(label, hitMod, dmgExpr, adv) {
 // ══════════════════════════════════════════
 function init_party(root) {
   const fileInput = root.querySelector('.pty-file-input');
-  const pasteBtn  = root.querySelector('.pty-paste');
   const syncBtn   = root.querySelector('.pty-sync');
   const clearBtn  = root.querySelector('.pty-clear');
-  const searchEl  = root.querySelector('.pty-search');
   const noteEl    = root.querySelector('.pty-note');
   const listEl    = root.querySelector('.pty-list');
   const emptyEl   = root.querySelector('.pty-empty');
 
   let chars = [];          // [{id, source, sheet}]
   let lastSync = null;
-  let filter = '';
   let openIds = new Set();
   let nextId = 1;
 
@@ -9478,17 +9444,10 @@ function init_party(root) {
   }
 
   function render() {
-    const q = filter.trim().toLowerCase();
-    const shown = chars.filter(e => !q
-      || e.sheet.name.toLowerCase().includes(q)
-      || e.sheet.cls.toLowerCase().includes(q)
-      || e.sheet.ancestry.toLowerCase().includes(q));
     const any = chars.length > 0;
     emptyEl.style.display = any ? 'none' : 'flex';
     listEl.style.display  = any ? 'flex' : 'none';
-    listEl.innerHTML = shown.length
-      ? shown.map(cardHTML).join('')
-      : '<div class="pty-line dim" style="padding:10px;">No party member matches that filter.</div>';
+    listEl.innerHTML = chars.map(cardHTML).join('');
     if(any && !noteEl.textContent) status(chars.length + ' character' + (chars.length === 1 ? '' : 's'));
   }
 
@@ -9508,8 +9467,6 @@ function init_party(root) {
     if(openIds.has(id)) openIds.delete(id); else openIds.add(id);
     render();
   });
-
-  searchEl.addEventListener('input', () => { filter = searchEl.value; render(); });
 
   fileInput.addEventListener('change', () => {
     const files = [...fileInput.files];
@@ -9531,20 +9488,6 @@ function init_party(root) {
       reader.readAsText(f);
     });
     fileInput.value = '';
-  });
-
-  pasteBtn.addEventListener('click', () => {
-    const txt = prompt('Paste the character sheet JSON:');
-    if(!txt) return;
-    try {
-      const data = JSON.parse(txt);
-      const list = Array.isArray(data) ? data : [data];
-      const ok = list.filter(d => addSheet(d, 'pasted')).length;
-      status(ok ? ok + ' sheet' + (ok === 1 ? '' : 's') + ' added' : "That JSON doesn't look like a character sheet.", !ok);
-      render();
-    } catch(err) {
-      status('That is not valid JSON.', true);
-    }
   });
 
   // Pull the party from the linked campaign. The server returns every saved
