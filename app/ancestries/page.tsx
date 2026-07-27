@@ -19,7 +19,7 @@ function effectLabel(e: Effect): string {
   const label = TALENT_LABEL.get(e.target) ?? e.target;
   if (e.target === "perDay") return `${e.amount}/day`;
   if (e.target === "weaponDie") return `d${e.amount} weapon damage${e.weapon ? ` (${e.weapon})` : ""}`;
-  if (e.target === "spellKnown") return e.spell ? `Learn ${e.spell}` : "Learn a spell";
+  if (e.target === "spellKnown") return (e.spell && e.spell !== "Player Choice") ? `Learn ${e.spell}` : "Learn Spell";
   if (e.target === "advSpell") return e.spell ? `Advantage casting ${e.spell}` : "Advantage on a spell";
   if (e.target === "playerTalent") return "Player Choice";
   if (e.target === "featureCharges") { const f = String(e.feature ?? ""); return `+${e.amount} charge${e.amount === 1 ? "" : "s"}${f ? ` to ${f}` : ""}`; }

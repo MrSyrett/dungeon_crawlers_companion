@@ -35,7 +35,7 @@ function effectLabel(e: Record<string, unknown>): string {
   }
   if (target === "spellKnown") {
     const sp = String(e.spell ?? "");
-    return sp ? `Learn ${sp}` : "Learn a spell";
+    return (sp && sp !== "Player Choice") ? `Learn ${sp}` : "Learn Spell";
   }
   if (target === "advSpell") {
     const sp = String(e.spell ?? "");

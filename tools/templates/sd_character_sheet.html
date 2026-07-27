@@ -4937,10 +4937,9 @@ function ccwAncestry() {
   const ancChoice = (title, field, opts)=>{
     let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
     x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">⚑ '+title+' — choose one</div>';
-    opts.forEach(([v,label])=>{
-      const sel = _ccw[field]===v ? ' selected' : '';
-      x += '<button class="ccw-choice'+sel+'" style="width:49%;margin-right:1%;text-align:center;" onclick="_ccw.'+field+'=\''+v+'\';ccwRender()"><div class="ccw-choice-name" style="font-size:10px;">'+label+'</div></button>';
-    });
+    let o = '<option value="">— choose —</option>';
+    opts.forEach(([v,label])=>{ o += '<option value="'+v+'"'+(_ccw[field]===v?' selected':'')+'>'+String(label).replace(/</g,'&lt;')+'</option>'; });
+    x += '<select onchange="_ccw.'+field+'=this.value||null;ccwRender()" style="width:100%;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;">'+o+'</select>';
     return x + '</div>';
   };
   if(_ccw.ancestry==='Elf')
@@ -7752,7 +7751,7 @@ function _hbTalentText(row) {
   const parts = effs.filter(e => e && e.target).map(e => {
     const amt = Number(e.amount) || 0;
     if(e.target === 'weaponDie') return 'Weapon Damage d' + amt + (e.weapon ? ' ('+e.weapon+')' : '');
-    if(e.target === 'spellKnown') return e.spell ? 'Learn ' + e.spell : 'Learn a spell';
+    if(e.target === 'spellKnown') return (e.spell && !_hbIsPlayerChoice(e.spell)) ? 'Learn ' + e.spell : 'Learn Spell';
     if(e.target === 'advSpell') return e.spell ? 'Advantage casting ' + e.spell : 'Advantage on a spell';
     if(e.target === 'playerTalent') return 'Player Choice';
     if(e.target === 'featureCharges') return '+' + amt + ' charge' + (amt===1?'':'s') + (e.feature ? ' to ' + e.feature : '');
@@ -7834,7 +7833,7 @@ function _hbEffOne(e){
   if(!e || !e.target) return '';
   const amt = Number(e.amount)||0;
   if(e.target==='weaponDie') return 'Weapon damage d'+amt+(e.weapon?' ('+e.weapon+')':'');
-  if(e.target==='spellKnown') return e.spell ? 'Learn '+e.spell : 'Learn a spell';
+  if(e.target==='spellKnown') return (e.spell && !_hbIsPlayerChoice(e.spell)) ? 'Learn '+e.spell : 'Learn Spell';
   if(e.target==='advSpell') return e.spell ? 'Advantage casting '+e.spell : 'Advantage on a spell';
   if(e.target==='playerTalent') return 'Player Choice';
   if(e.target==='featureCharges') return '+'+amt+' charge'+(amt===1?'':'s')+(e.feature?' to '+e.feature:'');
@@ -8061,7 +8060,15 @@ function _hbNestedLearnCount(c, roll, pick, cidx, prefix){
     if(e && e.target==='playerTalent'){
       const val=(c.hbChoices||{})[prefix+ei];
       if(val!=null && val!==''){ const ci=RC_CLASS_INFO[c.cls]; const idx=parseInt(val);
-        if(ci&&Array.isArray(ci._talentEff)&&Array.isArray(ci._talentEff[idx])) ci._talentEff[idx].forEach(se=>{ if(se&&se.target==='spellKnown'&&_hbIsPlayerChoice(se.spell)) n++; });
+        if(ci&&Array.isArray(ci._talentEff)&&Array.isArray(ci._talentEff[idx])){
+          if(ci._talentChoose && ci._talentChoose[idx]){
+            // Chosen talent is itself a "choose one" — only the picked option counts.
+            const oi=(c.hbChoices||{})[prefix+ei+'>one'];
+            if(oi!=null && oi!==''){ const se=ci._talentEff[idx][parseInt(oi)]; if(se && se.target==='spellKnown' && _hbIsPlayerChoice(se.spell)) n++; }
+          } else {
+            ci._talentEff[idx].forEach(se=>{ if(se&&se.target==='spellKnown'&&_hbIsPlayerChoice(se.spell)) n++; });
+          }
+        }
       }
     }
   });
@@ -8087,7 +8094,7 @@ function _hbTalentRowOptions(cls){
   rows.forEach((r,i)=>{
     const effs = ci && Array.isArray(ci._talentEff) ? ci._talentEff[i] : null;
     if(Array.isArray(effs) && effs.some(e=>e && e.target==='playerTalent')) return;   // skip choose-a-talent rows
-    out.push([String(i),(r.range?r.range+': ':'')+String(r.text||'\u2014').slice(0,50)]);
+    out.push([String(i),(r.range?r.range+': ':'')+String(r.text||'\u2014').slice(0,200)]);
   });
   return out;
 }
