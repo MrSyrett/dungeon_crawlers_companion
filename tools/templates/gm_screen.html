@@ -557,7 +557,13 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 @media (max-width: 760px) {
   .mus-btn { width: 44px; height: 40px; font-size: 16px; }
   .mus-sfx { min-height: 60px; font-size: 14px; }
-  .mus-vol { width: 100px; }
+  /* Keep each section header (Music / Soundboard / Scenes) on one line: show
+     only the section icon, don't wrap, and let the controls tighten so the
+     volume slider + icon buttons all stay inline. */
+  .mus-sec-label { display: none; }
+  .mus-sec-head { flex-wrap: nowrap; }
+  .mus-sec-actions { gap: 4px; min-width: 0; }
+  .mus-vol { width: 72px; }
 }
 
 /* ═══ COMBAT TOOL ═══ */
@@ -2043,12 +2049,12 @@ GMScenes.renderPins();
     <div class="mus-body">
       <div class="mus-section mus-music-section">
         <div class="mus-sec-head">
-          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title">&#127925; Music</span>
+          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title">&#127925; <span class="mus-sec-label">Music</span></span>
           <div class="mus-sec-actions">
             <span class="mus-vol-ico" title="Music volume">&#128266;</span>
             <input type="range" class="mus-vol mus-music-vol" min="0" max="100" value="80">
-            <button class="btn small ghost mus-add-music" title="Add local audio files">&#65291; Files</button>
-            <button class="btn small ghost mus-add-music-url" title="Add a direct audio URL">&#65291; URL</button>
+            <button class="btn small ghost mus-add-music" title="Add local audio files" aria-label="Add local audio files">&#128193;</button>
+            <button class="btn small ghost mus-add-music-url" title="Add a direct audio URL" aria-label="Add a direct audio URL">&#128279;</button>
           </div>
         </div>
         <div class="mus-now">
@@ -2067,16 +2073,16 @@ GMScenes.renderPins();
           </div>
         </div>
         <div class="mus-list mus-music-list"></div>
-        <div class="mus-empty mus-music-empty">Add tracks with &#65291; Files, or paste a direct audio URL. Toggle &#128257; on a track to loop it as background ambience.</div>
+        <div class="mus-empty mus-music-empty">Add tracks with &#128193; or &#128279;. Toggle &#128257; on a track to loop it as background ambience.</div>
       </div>
       <div class="mus-section mus-sfx-section">
         <div class="mus-sec-head">
-          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title">&#128276; Soundboard</span>
+          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title">&#128276; <span class="mus-sec-label">Soundboard</span></span>
           <div class="mus-sec-actions">
             <span class="mus-vol-ico" title="Soundboard volume">&#128266;</span>
             <input type="range" class="mus-vol mus-sfx-vol" min="0" max="100" value="90">
-            <button class="btn small ghost mus-add-sfx" title="Add local audio files">&#65291; Files</button>
-            <button class="btn small ghost mus-add-sfx-url" title="Add a direct audio URL">&#65291; URL</button>
+            <button class="btn small ghost mus-add-sfx" title="Add local audio files" aria-label="Add local audio files">&#128193;</button>
+            <button class="btn small ghost mus-add-sfx-url" title="Add a direct audio URL" aria-label="Add a direct audio URL">&#128279;</button>
           </div>
         </div>
         <div class="mus-sfx-grid"></div>
@@ -2084,11 +2090,11 @@ GMScenes.renderPins();
       </div>
       <div class="mus-section mus-scene-section">
         <div class="mus-sec-head">
-          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title">&#127916; Scenes</span>
+          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title">&#127916; <span class="mus-sec-label">Scenes</span></span>
           <div class="mus-sec-actions">
             <span class="mus-vol-ico" title="Scene volume">&#128266;</span>
             <input type="range" class="mus-vol mus-scene-vol" min="0" max="100" value="80">
-            <button class="btn small ghost mus-add-scene">&#65291; New Scene</button>
+            <button class="btn small ghost mus-add-scene" title="New Scene" aria-label="New Scene">&#65291;</button>
           </div>
         </div>
         <div class="mus-scene-list"></div>
@@ -7720,14 +7726,14 @@ function init_music(root) {
           '<input type="range" class="mus-scene-tvol" min="0" max="100" value="'+Math.round((typeof t.vol==='number'?t.vol:0.8)*100)+'" title="Track volume">' +
           '<button class="mus-scene-tdel" title="Remove track">&#10005;</button>' +
         '</div>'
-      ).join('') : '<div class="mus-scene-empty-tracks">No tracks yet &mdash; add some with &#65291; Files or &#65291; URL.</div>';
+      ).join('') : '<div class="mus-scene-empty-tracks">No tracks yet &mdash; add some with &#128193; or &#128279;.</div>';
       card.innerHTML =
         '<div class="mus-scene-head">' +
           '<button class="mus-scene-play" title="Play / stop scene">'+(playing?'&#9209;':'&#9654;')+'</button>' +
           '<input class="mus-scene-name" value="'+esc(sc.name)+'" placeholder="Scene name...">' +
           '<button class="mus-scene-pin'+(sc.pinned?' active':'')+'" title="Pin to top bar">&#128204;</button>' +
-          '<button class="btn small ghost mus-scene-add">&#65291; Files</button>' +
-          '<button class="btn small ghost mus-scene-add-url">&#65291; URL</button>' +
+          '<button class="btn small ghost mus-scene-add" title="Add local audio files" aria-label="Add local audio files">&#128193;</button>' +
+          '<button class="btn small ghost mus-scene-add-url" title="Add a direct audio URL" aria-label="Add a direct audio URL">&#128279;</button>' +
           '<button class="mus-scene-del" title="Delete scene">&#10005;</button>' +
         '</div>' +
         '<div class="mus-scene-tracks">'+tracksHtml+'</div>';
