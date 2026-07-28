@@ -37,3 +37,13 @@ body {
 .font-display {
   font-family: var(--font-cinzel), "Cinzel", serif;
 }
+
+/* Icon color policy: gold on the app's black/light surfaces, white on
+   saturated colored/red backgrounds. Icons render with fill="currentColor",
+   so setting `color` drives them. In @layer base so a `text-white` (or any
+   text-* utility) at a usage site overrides it for a colored background. */
+@layer base {
+  .dcc-ico {
+    color: var(--gold);
+  }
+}

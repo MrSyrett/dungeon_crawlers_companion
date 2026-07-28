@@ -321,6 +321,7 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 </style>
+<style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
 <body>
 <div id="roll-toast"><div class="t-label"></div><div class="t-result"></div><div class="t-detail"></div></div>
@@ -583,10 +584,10 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
     </div>
   </div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">🔗</button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">↓</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">↑<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
-    <button class="log-action-btn pdf" onclick="exportPDF()" title="Official DCC sheet PDF" aria-label="Export PDF">🖨</button>
+    <button class="log-action-btn pdf" onclick="exportPDF()" title="Official DCC sheet PDF" aria-label="Export PDF"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg></button>
   </div>
   <div class="log-entries" id="log-entries">
     <div class="log-hint">Click any stat or button to roll</div>
@@ -1410,7 +1411,7 @@ function saveSheet(quiet) {
   // Save directly to server (primary path — doesn't rely on localStorage patch)
   if(window.__ddSave) window.__ddSave({ dcc_sheet: json });
   syncDocTitle();
-  if(quiet !== true) addLog('Sheet Saved', '💾', 'Saved', 'normal');
+  if(quiet !== true) addLog('Sheet Saved', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg>', 'Saved', 'normal');
 }
 
 // Rename the document on the desk to match the character's name, so the card
@@ -1609,7 +1610,7 @@ async function exportPDF() {
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
-    addLog('Sheet Exported', '🖨', 'Official DCC sheet PDF', 'normal');
+    addLog('Sheet Exported', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg>', 'Official DCC sheet PDF', 'normal');
   } catch(err) {
     console.warn('Official-PDF export failed, falling back to print view:', err);
     exportPrintablePDF();
@@ -1849,7 +1850,7 @@ function exportPrintablePDF() {
   if(fdoc.readyState === 'complete') setTimeout(go, 120);
   else frame.onload = () => setTimeout(go, 120);
 
-  addLog('Sheet Exported', '🖨', 'Print / Save as PDF', 'normal');
+  addLog('Sheet Exported', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg>', 'Print / Save as PDF', 'normal');
 }
 
 function exportSheet() {
@@ -2274,7 +2275,7 @@ function campaignPlayerName() {
 function campaignUpdateBtn() {
   const btn = document.getElementById('campaign-btn');
   if(!btn) return;
-  btn.textContent = '🔗';   // icon only; name/state conveyed via tooltip + colour
+  btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';   // icon only; name/state conveyed via tooltip + colour
   if(_campaign) {
     btn.title = 'Campaign: ' + _campaign.name;
     btn.setAttribute('aria-label', 'Campaign: ' + _campaign.name);
@@ -2349,7 +2350,7 @@ function campaignConnected() {
   campaignUpdateBtn();
   campaignRenderModal();
   campaignStartPolling();
-  addLog('Campaign', '🔗', 'Connected to "'+_campaign.name+'" ('+_campaign.code+')', 'normal');
+  addLog('Campaign', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>', 'Connected to "'+_campaign.name+'" ('+_campaign.code+')', 'normal');
   saveSheet(true);
 }
 
@@ -2364,7 +2365,7 @@ function campaignLeave() {
   const name = _campaign ? _campaign.name : '';
   campaignLeaveSilent();
   campaignRenderModal();
-  addLog('Campaign', '🔗', 'Left "'+name+'"', 'normal');
+  addLog('Campaign', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>', 'Left "'+name+'"', 'normal');
   saveSheet(true);
 }
 

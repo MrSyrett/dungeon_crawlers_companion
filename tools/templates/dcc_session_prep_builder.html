@@ -448,6 +448,7 @@ body.flow-mode .page + .page {
   border-top: 3px solid var(--accent);
 }
 </style>
+<style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
 <body>
 
@@ -1691,7 +1692,7 @@ function buildSB(s) {
     <tr><td>${escH(s.str)}</td><td>${escH(s.int)}</td><td>${escH(s.con)}</td><td>${escH(s.dex)}</td><td>${escH(s.cha)}</td></tr></table>`;
   if(s.isnpc&&s.fullwidth) {
     div.innerHTML=`<div class="sb-name">${escH(s.name)}</div><div class="sb-type">${escH(s.type)}</div>
-      <div class="sb-warning">⚠ WARNING: This is a non-combatant NPC.</div>
+      <div class="sb-warning"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.3 3.8a1.5 1.5 0 0 0-2.6 0L2.5 18.4A1.5 1.5 0 0 0 3.8 20.6h16.4a1.5 1.5 0 0 0 1.3-2.2ZM12 8.4a1 1 0 0 1 1 1v4a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1Zm0 8.8a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"/></svg> WARNING: This is a non-combatant NPC.</div>
       <div style="display:flex;gap:12px;">
         <div style="flex:1"><div class="sb-hp-row">${pips}</div>${tables}</div>
         <div style="flex:2"><div class="sb-notes">${fmtText(s.notes)}</div></div>

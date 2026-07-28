@@ -355,6 +355,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 </style>
+<style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
 <body>
 <div id="roll-toast"><div class="t-label"></div><div class="t-result"></div><div class="t-detail"></div></div>
@@ -368,8 +369,8 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   <div class="sheet-title">
     <div class="sheet-title-text">Shadowdark</div>
     <div class="sheet-title-actions">
-      <button id="hdr-create-btn" onclick="startCharWizard()" style="padding:6px 14px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;align-self:center;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">⚒ Create</button>
-      <button onclick="takeRest()" style="padding:6px 14px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;align-self:center;" onmouseover="this.style.background='#1a5a7a';this.style.color='white'" onmouseout="this.style.background='#1a2e3a';this.style.color='#6ac8df'">🌙 Rest</button>
+      <button id="hdr-create-btn" onclick="startCharWizard()" style="padding:6px 14px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;align-self:center;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M5.5 4.2h9a1.3 1.3 0 0 1 1.3 1.3v2.2a1.3 1.3 0 0 1-1.3 1.3h-9a1.3 1.3 0 0 1-1.3-1.3V5.5a1.3 1.3 0 0 1 1.3-1.3Z"/><path d="M8.7 9h2.6l-.5 10.4a.8.8 0 0 1-1.6 0Z"/></svg> Create</button>
+      <button onclick="takeRest()" style="padding:6px 14px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;align-self:center;" onmouseover="this.style.background='#1a5a7a';this.style.color='white'" onmouseout="this.style.background='#1a2e3a';this.style.color='#6ac8df'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg> Rest</button>
     </div>
   </div>
 
@@ -479,7 +480,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <option value="cha">CHA</option>
         </select>
         <input type="text" id="spell-gbonus" placeholder="+0" title="Global bonus to all casting checks" style="width:26px;background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:2px;color:#f8f8f6;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;padding:1px 2px;outline:none;text-align:center;" onchange="saveSheet(false)">
-      </label><button onclick="_spellShopMode=null;openSpellShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">📖 Spellbook</button></div>
+      </label><button onclick="_spellShopMode=null;openSpellShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg> Spellbook</button></div>
       <div id="spells-list"></div>
     </div>
 
@@ -523,10 +524,10 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
     <button class="log-clear" onclick="clearLog()">Clear</button>
   </div>
   <div class="log-actions">
-    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign">🔗</button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export sheet as JSON" aria-label="Export">↓</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import a sheet JSON" aria-label="Import">↑<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
-    <button class="log-action-btn pdf" onclick="exportPDF()" title="Official fillable sheet PDF" aria-label="PDF">🖨</button>
+    <button class="log-action-btn pdf" onclick="exportPDF()" title="Official fillable sheet PDF" aria-label="PDF"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg></button>
   </div>
   <div class="log-entries" id="log-entries">
     <div class="log-hint">Click a stat or roll button</div>
@@ -1714,7 +1715,7 @@ function addAttackRow() {
     <td><input type="text" class="atk-range" style="width:100%;text-align:center;" placeholder="Close" title="Range — Close, Near or Far"></td>
     <td><span class="atk-dmg-cell"><input type="text" class="atk-damage" placeholder="1d8+2" oninput="refreshAtkDamageToggle(this.closest('tr'))"><button type="button" class="atk-dmg-btn" onclick="cycleAtkDamage(this)" style="display:none;"></button></span></td>
     <td><button class="atk-adv-btn" onclick="toggleAtkAdv(this)" title="Always roll with advantage">▲</button></td>
-    <td><button class="atk-roll-btn" onclick="rollAttack(this)" title="Roll Attack">⚔</button></td>
+    <td><button class="atk-roll-btn" onclick="rollAttack(this)" title="Roll Attack"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3 3.4 8 4l8.6 8.6-1.9 1.9L6.1 6 3 3.4Zm0 15.9 4-4 1.9 1.9-4 4a1.3 1.3 0 0 1-1.9-1.9Z"/><path d="M21 3.4 16 4l-3.2 3.2 1.9 1.9L21 3.4Zm0 15.9-4-4-1.9 1.9 4 4a1.3 1.3 0 0 0 1.9-1.9ZM12.8 12.7l-1.5 1.5 3.4 3.4 1.5-1.5z"/></svg></button></td>
   `;
   tbody.appendChild(tr);
   lockGeneratedFields(_autoConsume, tr);   // new rows honour the Auto lock
@@ -2275,7 +2276,7 @@ function rollAttack(btn) {
       const res = consumeAmmo(at);
       ammoNote = res.ok
         ? `  |  −1 ${res.item} (${res.left} left)`
-        : `  |  ⚠ Out of ${ammoLabel(at)}`;
+        : `  |  <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.3 3.8a1.5 1.5 0 0 0-2.6 0L2.5 18.4A1.5 1.5 0 0 0 3.8 20.6h16.4a1.5 1.5 0 0 0 1.3-2.2ZM12 8.4a1 1 0 0 1 1 1v4a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1Zm0 8.8a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"/></svg> Out of ${ammoLabel(at)}`;
     }
   }
 
@@ -2370,11 +2371,11 @@ function rollSpell(btn) {
     // the last copy is gone.
     const left = consumeSpellItem('Scroll', name);
     if(left >= 1) {
-      addLog('Scroll Used', '📜', name + ' — ' + left + ' scroll' + (left === 1 ? '' : 's') + ' left', 'normal');
+      addLog('Scroll Used', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M6.5 4h9.8a2.4 2.4 0 0 1 2.4 2.4v9.2a2.4 2.4 0 0 0 2.4 2.4.8.8 0 0 1 .8.8v.4a1.4 1.4 0 0 1-1.4 1.4H8.3a2.4 2.4 0 0 1-2.4-2.4V9.3H4.6a2.4 2.4 0 0 1 0-4.8.8.8 0 0 1 0-.5Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 8.7h6v1.6h-6zM9.5 12h6v1.6h-6z" opacity=".55"/></svg>', name + ' — ' + left + ' scroll' + (left === 1 ? '' : 's') + ' left', 'normal');
     } else {
       row.remove();
       _spellCount = Math.max(0, _spellCount - 1);
-      addLog('Scroll Consumed', '📜', name + ' — last scroll used up', 'normal');
+      addLog('Scroll Consumed', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M6.5 4h9.8a2.4 2.4 0 0 1 2.4 2.4v9.2a2.4 2.4 0 0 0 2.4 2.4.8.8 0 0 1 .8.8v.4a1.4 1.4 0 0 1-1.4 1.4H8.3a2.4 2.4 0 0 1-2.4-2.4V9.3H4.6a2.4 2.4 0 0 1 0-4.8.8.8 0 0 1 0-.5Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 8.7h6v1.6h-6zM9.5 12h6v1.6h-6z" opacity=".55"/></svg>', name + ' — last scroll used up', 'normal');
     }
     saveSheet(false);
    } else if(source === 'wand' && roll === 1) {
@@ -2382,7 +2383,7 @@ function rollSpell(btn) {
     consumeSpellItem('Wand', name);
     row.remove();
     _spellCount = Math.max(0, _spellCount - 1);
-    addLog('Wand Broken', '💥', name + ' — natural 1! the wand breaks for good', 'fumble');
+    addLog('Wand Broken', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="m12 2 2.1 5.1L19 5l-2.1 4.9L22 12l-5.1 2.1L19 19l-4.9-2.1L12 22l-2.1-5.1L5 19l2.1-4.9L2 12l5.1-2.1L5 5l4.9 2.1z"/></svg>', name + ' — natural 1! the wand breaks for good', 'fumble');
     saveSheet(false);
    } else if(source === 'wand' && !success) {
     // Shadowdark: on a (non-critical) failed spellcasting check, the wand stops
@@ -3103,7 +3104,7 @@ function takeRest() {
   }
 
   saveSheet(false);
-  addLog('Rest', '🌙', notes.length ? notes.join(', ') : 'Rested', 'normal');
+  addLog('Rest', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg>', notes.length ? notes.join(', ') : 'Rested', 'normal');
 }
 
 function saveSheet(manual=false){
@@ -3112,7 +3113,7 @@ function saveSheet(manual=false){
   const json = JSON.stringify(toSave);
   try { localStorage.setItem('sd_sheet', json); } catch(e) {}
   if(window.__ddSave) window.__ddSave({ sd_sheet: json });
-  if(manual) addLog('Sheet Saved','💾','Saved','normal');
+  if(manual) addLog('Sheet Saved','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg>','Saved','normal');
 }
 
 // ═══ PRINTER-FRIENDLY PDF EXPORT ══════════════════════════════════════════
@@ -3248,7 +3249,7 @@ async function exportPDF() {
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
-    addLog('Sheet Exported', '🖨', 'Official sheet PDF', 'normal');
+    addLog('Sheet Exported', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg>', 'Official sheet PDF', 'normal');
   } catch(err) {
     console.warn('Fillable-form export failed, falling back to print view:', err);
     exportPrintable();
@@ -3487,7 +3488,7 @@ function exportPrintable() {
   if(fdoc.readyState === 'complete') setTimeout(go, 120);
   else frame.onload = () => setTimeout(go, 120);
 
-  addLog('Sheet Exported', '🖨', 'Print / Save as PDF', 'normal');
+  addLog('Sheet Exported', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg>', 'Print / Save as PDF', 'normal');
 }
 
 function exportSheet(){
@@ -4300,7 +4301,7 @@ function ccwTalentChoiceUI(p, stateRef, knownSpells, cls) {
   if(!p || p.kind==='none') return '';
   if(p.kind==='learnspell') return '';   // resolved on the Learn Spells step
   let h = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:8px;">';
-  h += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">⚑ Choose your option</div>';
+  h += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M6 3a1 1 0 0 1 1 1v16a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1Z"/><path d="M8 4.4h10.6a.8.8 0 0 1 .6 1.3L16.8 9l2.4 3.3a.8.8 0 0 1-.6 1.3H8Z"/></svg> Choose your option</div>';
 
   const setPick  = (v) => stateRef+".picked='"+String(v).replace(/'/g,"\\'")+"';ccwResolve("+stateRef+");";
   const selStyle = 'width:100%;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:11px;padding:5px 8px;outline:none;';
@@ -4527,7 +4528,7 @@ function ccwGear() {
   if(_ccw.gold===null) {
     return '<p class="ccw-hint">Roll 2d6 × 5 for your starting gold, or take the flat 35 gp, then buy your gear.</p>'
       + '<div style="display:flex;gap:6px;">'
-      + '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollGold()">🎲 Roll 2d6 × 5 gp</button>'
+      + '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollGold()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll 2d6 × 5 gp</button>'
       + '<button style="flex:0 0 auto;margin:0;padding:0 14px;background:#1a3a4a;border:1px solid #2d6a7a;color:#8ad4e0;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="ccwTakeGold()" title="Take the average instead of rolling">Take 35 gp</button>'
       + '</div>';
   }
@@ -4716,8 +4717,8 @@ function ccwMethod() {
   h += '<label style="display:flex;align-items:center;gap:6px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#ccc;cursor:pointer;"><input type="checkbox" '+(_ccwInclOptional()?'checked':'')+' onchange="_ccw.inclOptional=this.checked;ccwRender()"> Optional Content</label>';
   h += '<label style="display:flex;align-items:center;gap:6px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#ccc;cursor:pointer;"><input type="checkbox" '+(_ccwInclHomebrew()?'checked':'')+' onchange="_ccw.inclHomebrew=this.checked;ccwRender()"> Homebrew</label>';
   h += '</div>';
-  h += '<button class="ccw-choice" style="width:100%;margin-bottom:8px;padding:14px;" onclick="ccwGoRandom()"><div class="ccw-choice-name">🎲 Random Character</div><div class="ccw-choice-desc">Instantly generate a complete character — stats, class, gear, everything rolled for you.</div></button>';
-  h += '<button class="ccw-choice" style="width:100%;padding:14px;" onclick="_ccw.step++;ccwRender()"><div class="ccw-choice-name">⚒ Design Your Own</div><div class="ccw-choice-desc">Walk through each step and make every roll and choice yourself.</div></button>';
+  h += '<button class="ccw-choice" style="width:100%;margin-bottom:8px;padding:14px;" onclick="ccwGoRandom()"><div class="ccw-choice-name"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random Character</div><div class="ccw-choice-desc">Instantly generate a complete character — stats, class, gear, everything rolled for you.</div></button>';
+  h += '<button class="ccw-choice" style="width:100%;padding:14px;" onclick="_ccw.step++;ccwRender()"><div class="ccw-choice-name"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M5.5 4.2h9a1.3 1.3 0 0 1 1.3 1.3v2.2a1.3 1.3 0 0 1-1.3 1.3h-9a1.3 1.3 0 0 1-1.3-1.3V5.5a1.3 1.3 0 0 1 1.3-1.3Z"/><path d="M8.7 9h2.6l-.5 10.4a.8.8 0 0 1-1.6 0Z"/></svg> Design Your Own</div><div class="ccw-choice-desc">Walk through each step and make every roll and choice yourself.</div></button>';
   return h;
 }
 function ccwGoRandom() {
@@ -4981,8 +4982,8 @@ function ccwNext() {
 function ccwStats() {
   let h = '<p class="ccw-hint">Roll 3d6 six times, or take the standard array. Assign in order (classic) or place each value where you want.</p>';
   h += '<div style="display:flex;gap:6px;margin-bottom:10px;">';
-  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollStats()">🎲 Roll 3d6 × 6</button>';
-  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;background:#1a3a4a;border-color:#2d6a7a;color:#8ad4e0;" onclick="ccwStandardArray()">📋 Standard Array</button>';
+  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollStats()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll 3d6 × 6</button>';
+  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;background:#1a3a4a;border-color:#2d6a7a;color:#8ad4e0;" onclick="ccwStandardArray()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9 3.4h6a1 1 0 0 1 1 1v.6h1.6a1.4 1.4 0 0 1 1.4 1.4v13.2a1.4 1.4 0 0 1-1.4 1.4H6.4A1.4 1.4 0 0 1 5 20.6V6.4A1.4 1.4 0 0 1 6.4 5H8v-.6a1 1 0 0 1 1-1Zm.6 1.8v1.4h4.8V5.2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 10h8v1.6H8zM8 13.2h8v1.6H8zM8 16.4h5v1.6H8z" opacity=".5"/></svg> Standard Array</button>';
   h += '</div>';
   if(_ccw.rolled) {
     if(!_ccw.isArray) {
@@ -5067,7 +5068,7 @@ function ccwEffStats() {
 // ── Step: Ancestry ──
 function ccwAncestry() {
   let h = '<p class="ccw-hint">Choose your ancestry, or roll randomly.</p>';
-  h += '<button class="ccw-roll-btn" onclick="ccwRandAncestry()">🎲 Random</button>';
+  h += '<button class="ccw-roll-btn" onclick="ccwRandAncestry()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random</button>';
   h += '<div class="ccw-choice-grid">';
   ['Human','Elf','Dwarf','Halfling','Half-Orc','Goblin','Kobold'].concat(_hbAncestryNames).filter(_ccwAncestryAllowed).forEach(a=>{
     const sel = _ccw.ancestry===a ? ' selected' : '';
@@ -5076,7 +5077,7 @@ function ccwAncestry() {
   h += '</div>';
   const ancChoice = (title, field, opts)=>{
     let x = '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
-    x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;">⚑ '+title+' — choose one</div>';
+    x += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin-bottom:6px;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M6 3a1 1 0 0 1 1 1v16a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1Z"/><path d="M8 4.4h10.6a.8.8 0 0 1 .6 1.3L16.8 9l2.4 3.3a.8.8 0 0 1-.6 1.3H8Z"/></svg> '+title+' — choose one</div>';
     let o = '<option value="">— choose —</option>';
     opts.forEach(([v,label])=>{ o += '<option value="'+v+'"'+(_ccw[field]===v?' selected':'')+'>'+String(label).replace(/</g,'&lt;')+'</option>'; });
     x += '<select onchange="_ccw.'+field+'=this.value||null;ccwRender()" style="width:100%;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;">'+o+'</select>';
@@ -5146,7 +5147,7 @@ function ccwSetClass(c){
 }
 function ccwClass() {
   let h = '<p class="ccw-hint">Choose your class, or roll randomly.</p>';
-  h += '<button class="ccw-roll-btn" onclick="ccwSetClass(_ccwRandomClass())">🎲 Random</button>';
+  h += '<button class="ccw-roll-btn" onclick="ccwSetClass(_ccwRandomClass())"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random</button>';
   const _allowed = CCW_CLASS_ORDER.filter(_ccwClassAllowed);
   const _martial = _allowed.filter(c=>!_ccwIsCaster(c));
   const _casters = _allowed.filter(_ccwIsCaster);
@@ -5217,7 +5218,7 @@ function ccwClass() {
 // ── Step: Background ──
 function ccwBackground() {
   let h = '<p class="ccw-hint">Choose a background, or roll d20.</p>';
-  h += '<button class="ccw-roll-btn" onclick="ccwRollBackground()">🎲 Roll d20</button>';
+  h += '<button class="ccw-roll-btn" onclick="ccwRollBackground()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll d20</button>';
   h += '<div class="ccw-choice-grid">';
   RC_BACKGROUNDS.filter(_ccwBgAllowed).forEach(b=>{
     const sel = _ccw.background===b ? ' selected' : '';
@@ -5372,11 +5373,11 @@ function ccwTalent() {
     const hit1 = _ccw.talentRoll  && _ccw.talentRoll  >= r.lo && _ccw.talentRoll  <= r.hi;
     const hit2 = _ccw.talent2Roll && _ccw.talent2Roll >= r.lo && _ccw.talent2Roll <= r.hi;
     const bg = (hit1||hit2) ? 'background:#241f10;border-left:3px solid #c8a020;' : '';
-    h += '<tr style="'+bg+'"><td style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;color:#eee;padding:5px 8px;border-bottom:1px solid #1e1e1e;vertical-align:top;">'+r.range+(hit1?' 🎲':'')+(hit2?' ✨':'')+'</td><td style="font-family:Montserrat,sans-serif;font-size:10px;color:#ccc;padding:5px 8px;border-bottom:1px solid #1e1e1e;line-height:1.4;">'+r.text+'</td></tr>';
+    h += '<tr style="'+bg+'"><td style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;color:#eee;padding:5px 8px;border-bottom:1px solid #1e1e1e;vertical-align:top;">'+r.range+(hit1?' <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg>':'')+(hit2?' <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.5c.6 3.9 2.6 5.9 6.5 6.5-3.9.6-5.9 2.6-6.5 6.5-.6-3.9-2.6-5.9-6.5-6.5 3.9-.6 5.9-2.6 6.5-6.5Z"/><path d="M18.5 14c.3 2 1.3 3 3.3 3.3-2 .3-3 1.3-3.3 3.2-.3-1.9-1.3-2.9-3.2-3.2 1.9-.3 2.9-1.3 3.2-3.3Z" opacity=".75"/></svg>':'')+'</td><td style="font-family:Montserrat,sans-serif;font-size:10px;color:#ccc;padding:5px 8px;border-bottom:1px solid #1e1e1e;line-height:1.4;">'+r.text+'</td></tr>';
   });
   h += '</table>';
   h += '<div style="display:flex;gap:6px;margin-bottom:10px;">';
-  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollTalent()">🎲 Roll Talent</button>';
+  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollTalent()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll Talent</button>';
   h += '<select onchange="ccwPickTalent(this.value)" style="flex:1;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;outline:none;cursor:pointer;">';
   h += '<option value="">— Choose a Talent —</option>';
   ccwTalentRows().forEach((r,i)=>{
@@ -5385,13 +5386,13 @@ function ccwTalent() {
   });
   h += '</select></div>';
   if(_ccw.talent) {
-    h += '<div class="ccw-result">'+(_ccw.talentRoll ? '🎲 Rolled '+_ccw.talentRoll : '✔ Chosen')+': '+_ccw.talent+'</div>';
+    h += '<div class="ccw-result">'+(_ccw.talentRoll ? '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Rolled '+_ccw.talentRoll : '✔ Chosen')+': '+_ccw.talent+'</div>';
     h += ccwTalentChoiceUI(_ccw.tres, '_ccw.tres', _ccw.spells, _ccw.cls);
     h += _hbTalentPickerHtml(1);
     h += _hbTalentChoicesHtml(1);
     if(_ccw.ancestry==='Human') {
       h += '<div style="display:flex;gap:6px;margin:10px 0;">';
-      h += '<button class="ccw-roll-btn" style="flex:1;margin:0;background:#241f10;border-color:#7a5a00;color:#c8a020;" onclick="ccwRollTalent2()">🎲 Roll Bonus Talent</button>';
+      h += '<button class="ccw-roll-btn" style="flex:1;margin:0;background:#241f10;border-color:#7a5a00;color:#c8a020;" onclick="ccwRollTalent2()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll Bonus Talent</button>';
       h += '<select onchange="ccwPickTalent2(this.value)" style="flex:1;padding:8px 10px;background:#141414;border:1px solid #7a5a00;color:#eee;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;outline:none;cursor:pointer;">';
       h += '<option value="">— Choose Bonus Talent —</option>';
       ccwTalentRows().forEach((r,i)=>{
@@ -5401,7 +5402,7 @@ function ccwTalent() {
       h += '</select></div>';
     }
     if(_ccw.talent2) {
-      h += '<div class="ccw-result" style="border-left-color:#c8a020;">✨ Bonus (Human) '+(_ccw.talent2Roll ? 'rolled '+_ccw.talent2Roll : 'chosen')+': '+_ccw.talent2+'</div>';
+      h += '<div class="ccw-result" style="border-left-color:#c8a020;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.5c.6 3.9 2.6 5.9 6.5 6.5-3.9.6-5.9 2.6-6.5 6.5-.6-3.9-2.6-5.9-6.5-6.5 3.9-.6 5.9-2.6 6.5-6.5Z"/><path d="M18.5 14c.3 2 1.3 3 3.3 3.3-2 .3-3 1.3-3.3 3.2-.3-1.9-1.3-2.9-3.2-3.2 1.9-.3 2.9-1.3 3.2-3.3Z" opacity=".75"/></svg> Bonus (Human) '+(_ccw.talent2Roll ? 'rolled '+_ccw.talent2Roll : 'chosen')+': '+_ccw.talent2+'</div>';
       h += ccwTalentChoiceUI(_ccw.tres2, '_ccw.tres2', _ccw.spells, _ccw.cls);
       h += _hbTalentPickerHtml(2);
       h += _hbTalentChoicesHtml(2);
@@ -5678,10 +5679,10 @@ function ccwFinish() {
   let h = '<p class="ccw-hint">Name your character (or roll a random '+_ccw.ancestry+' name), then roll HP.</p>';
   h += '<div style="display:flex;gap:6px;margin-bottom:10px;">';
   h += '<input type="text" id="ccw-name-input" placeholder="Character name..." value="'+(_ccw.name||'').replace(/"/g,'&quot;')+'" oninput="_ccw.name=this.value" style="flex:1;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:13px;outline:none;">';
-  h += '<button class="ccw-roll-btn" style="margin:0;" onclick="_ccw.name=_rc_roll(RC_NAMES[_ccw.ancestry]||RC_NAMES.Human);ccwRender()">🎲 Name</button>';
+  h += '<button class="ccw-roll-btn" style="margin:0;" onclick="_ccw.name=_rc_roll(RC_NAMES[_ccw.ancestry]||RC_NAMES.Human);ccwRender()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Name</button>';
   h += '</div>';
   h += '<div style="display:flex;gap:6px;align-items:stretch;margin-bottom:10px;">';
-  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollHP()">🎲 Roll HP (1'+RC_CLASS_INFO[_ccw.cls].hd.slice(1)+' '+(conMod>=0?'+':'')+conMod+' CON'+(_ccw.ancestry==='Dwarf'?' +2 Stout':'')+')</button>';
+  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollHP()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll HP (1'+RC_CLASS_INFO[_ccw.cls].hd.slice(1)+' '+(conMod>=0?'+':'')+conMod+' CON'+(_ccw.ancestry==='Dwarf'?' +2 Stout':'')+')</button>';
   h += '<button style="flex:0 0 auto;margin:0;padding:0 12px;background:#1a3a4a;border:1px solid #2d6a7a;color:#8ad4e0;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="ccwMaxHP()" title="Take the maximum die result">⬆ Max</button>';
   h += '<div style="display:flex;align-items:center;gap:5px;background:#141414;border:1px solid #2a2a2a;padding:0 8px;">';
   h += '<span style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;">HP</span>';
@@ -6005,7 +6006,7 @@ function ccwApply() {
     : [];
 
   saveSheet(false);
-  addLog('Character Created','⚒',c.name+' the '+c.ancestry+' '+c.cls,'normal');
+  addLog('Character Created','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M5.5 4.2h9a1.3 1.3 0 0 1 1.3 1.3v2.2a1.3 1.3 0 0 1-1.3 1.3h-9a1.3 1.3 0 0 1-1.3-1.3V5.5a1.3 1.3 0 0 1 1.3-1.3Z"/><path d="M8.7 9h2.6l-.5 10.4a.8.8 0 0 1-1.6 0Z"/></svg>',c.name+' the '+c.ancestry+' '+c.cls,'normal');
   ccwClose();
   if(typeof updateHeaderButton==='function') updateHeaderButton();
 }
@@ -6146,7 +6147,7 @@ function lvlHP() {
   const conMod = _rc_mod(parseInt(document.getElementById('con-val')?.value)||10);
   let h = '<p class="ccw-hint">Roll your class hit die (1'+hd.slice(1)+') '+(conMod!==0?((conMod>0?'+':'')+conMod+' CON '):'')+'and add the result to your maximum HP (minimum 1).</p>';
   h += '<div style="display:flex;gap:6px;align-items:stretch;margin-bottom:10px;">';
-  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="lvlRollHP()">🎲 Roll 1'+hd.slice(1)+'</button>';
+  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="lvlRollHP()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll 1'+hd.slice(1)+'</button>';
   h += '<button style="flex:0 0 auto;margin:0;padding:0 12px;background:#1a3a4a;border:1px solid #2d6a7a;color:#8ad4e0;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="lvlMaxHP()" title="Take the maximum die result">⬆ Max</button>';
   h += '<div style="display:flex;align-items:center;gap:5px;background:#141414;border:1px solid #2a2a2a;padding:0 8px;">';
   h += '<span style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;">+HP</span>';
@@ -6181,11 +6182,11 @@ function lvlTalent() {
   lvlTalentRows().forEach(r=>{
     const hit = _lvl.talentRoll && _lvl.talentRoll >= r.lo && _lvl.talentRoll <= r.hi;
     const bg = hit ? 'background:#241f10;border-left:3px solid #c8a020;' : '';
-    h += '<tr style="'+bg+'"><td style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;color:#eee;padding:5px 8px;border-bottom:1px solid #1e1e1e;vertical-align:top;">'+r.range+(hit?' 🎲':'')+'</td><td style="font-family:Montserrat,sans-serif;font-size:10px;color:#ccc;padding:5px 8px;border-bottom:1px solid #1e1e1e;line-height:1.4;">'+r.text+'</td></tr>';
+    h += '<tr style="'+bg+'"><td style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;color:#eee;padding:5px 8px;border-bottom:1px solid #1e1e1e;vertical-align:top;">'+r.range+(hit?' <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg>':'')+'</td><td style="font-family:Montserrat,sans-serif;font-size:10px;color:#ccc;padding:5px 8px;border-bottom:1px solid #1e1e1e;line-height:1.4;">'+r.text+'</td></tr>';
   });
   h += '</table>';
   h += '<div style="display:flex;gap:6px;margin-bottom:10px;">';
-  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="lvlRollTalent()">🎲 Roll Talent</button>';
+  h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="lvlRollTalent()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll Talent</button>';
   h += '<select onchange="lvlPickTalent(this.value)" style="flex:1;padding:8px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;outline:none;cursor:pointer;">';
   h += '<option value="">— Choose a Talent —</option>';
   lvlTalentRows().forEach((r,i)=>{
@@ -6194,7 +6195,7 @@ function lvlTalent() {
   });
   h += '</select></div>';
   if(_lvl.talent) {
-    h += '<div class="ccw-result">'+(_lvl.talentRoll ? '🎲 Rolled '+_lvl.talentRoll : '✔ Chosen')+': '+_lvl.talent+'</div>';
+    h += '<div class="ccw-result">'+(_lvl.talentRoll ? '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Rolled '+_lvl.talentRoll : '✔ Chosen')+': '+_lvl.talent+'</div>';
     const known = [...document.querySelectorAll('#spells-list .spell-row .spell-input')].map(el=>el.value.trim()).filter(Boolean);
     const allKnown = [...new Set([...known, ..._lvl.newSpells])].filter(sp=>sp!=='Magic Missile');
     h += ccwTalentChoiceUI(_lvl.tres, '_lvl.tres', allKnown, _lvl.cls);
@@ -6540,7 +6541,7 @@ function lvlApply() {
     if(m) {
       _innateAC = (parseInt(_innateAC)||0) + 1;
       if(typeof refreshAutoAC === 'function') refreshAutoAC();
-      addLog('Armor Talent', '🛡', '+1 AC (' + m[1].trim() + ')', 'normal');
+      addLog('Armor Talent', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2 4.5 5.2v6.4C4.5 16.9 8 20.6 12 22.3c4-1.7 7.5-5.4 7.5-10.7V5.2z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 5.1a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8Z" opacity=".55"/></svg>', '+1 AC (' + m[1].trim() + ')', 'normal');
     }
   })();
 
@@ -6678,7 +6679,7 @@ function updateHeaderButton() {
     btn.textContent = '⬆ Level Up';
     btn.onclick = startLevelUp;
   } else {
-    btn.textContent = '⚒ Create';
+    btn.textContent = 'Create';
     btn.onclick = startCharWizard;
   }
 }
@@ -7052,7 +7053,7 @@ function shopRender() {
   const gp = document.getElementById('coin-gp')?.value || '0';
   const sp = document.getElementById('coin-sp')?.value || '0';
   const cp = document.getElementById('coin-cp')?.value || '0';
-  document.getElementById('shop-coins').textContent = '💰 '+(gp||0)+' gp · '+(sp||0)+' sp · '+(cp||0)+' cp';
+  document.getElementById('shop-coins').innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><circle cx="15" cy="9.3" r="5.2" opacity=".65"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9 8.4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm0 1.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg> '+(gp||0)+' gp · '+(sp||0)+' sp · '+(cp||0)+' cp';
 
   // Items
   const items = _shopTab==='weapons' ? SHOP_WEAPONS
@@ -7247,7 +7248,7 @@ function shopBuy(tab, i) {
   if(gpEl) gpEl.value = String(Math.floor(left/100));
   if(spEl) spEl.value = String(Math.floor((left%100)/10));
   if(cpEl) cpEl.value = String(left%10);
-  addLog('Purchase','🛒',it.name+' — '+shopFmtCost(it),'normal');
+  addLog('Purchase','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',it.name+' — '+shopFmtCost(it),'normal');
   saveSheet(false);
   closeShop();
 }
@@ -7342,7 +7343,7 @@ function confirmEnchant() {
   // (armor) is applied correctly and stays linked to the slot.
   if(!shopAddToGear({ name: itemName })) return;
   equipShopWeapon(itemName);                     // works for weapon or armor names
-  addLog('Enchanted Item','🛒',itemName,'normal');
+  addLog('Enchanted Item','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',itemName,'normal');
   saveSheet(false);
   closeEnchantPicker();
   closeShop();
@@ -7603,7 +7604,7 @@ function learnSpell(name, caster) {
       if(ab) ab.classList.add('on');
     }
   }
-  addLog('Spell Learned','📖',s.name+' (Tier '+s.tier+')','normal');
+  addLog('Spell Learned','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg>',s.name+' (Tier '+s.tier+')','normal');
   saveSheet(false);
   closeSpellShop();
 }
@@ -7616,7 +7617,7 @@ function unlearnSpell(name) {
   if(!row) return;
   row.remove();
   _spellCount = Math.max(0, _spellCount - 1);
-  addLog('Spell Unlearned','📖',name,'normal');
+  addLog('Spell Unlearned','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg>',name,'normal');
   saveSheet(false);
   spellShopRender();
 }
@@ -7642,7 +7643,7 @@ function inscribeSpell(name, caster) {
     // Make sure it's equipped (spell row present)
     const cb = existing.querySelector('.gear-equip');
     if(cb && !cb.checked) { cb.checked = true; addEquipSpell(existing, kind); }
-    addLog(label + ' Added','🛒',s.name+' (now ' + (have + 1) + ')','normal');
+    addLog(label + ' Added','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',s.name+' (now ' + (have + 1) + ')','normal');
     saveSheet(false); closeSpellShop(); closeShop();
     return;
   }
@@ -7657,7 +7658,7 @@ function inscribeSpell(name, caster) {
     if(cb) { cb.checked = true; addEquipSpell(slot, kind); }
   }
 
-  addLog(label + ' Added','🛒',s.name+' (Tier '+s.tier+')','normal');
+  addLog(label + ' Added','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',s.name+' (Tier '+s.tier+')','normal');
   saveSheet(false); closeSpellShop(); closeShop();
 }
 
@@ -7690,11 +7691,11 @@ function campaignUpdateBtn() {
   const btn = document.getElementById('campaign-btn');
   if(!btn) return;
   if(_campaign) {
-    btn.textContent = '🔗';
+    btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';
     btn.title = 'Campaign: ' + _campaign.name + ' (' + _campaign.code + ')';
     btn.style.background = '#241f10'; btn.style.color = '#c8a020'; btn.style.borderColor = '#7a5a00';
   } else {
-    btn.textContent = '🔗';
+    btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';
     btn.title = 'Link this sheet to a campaign';
     btn.style.background = 'transparent'; btn.style.color = 'var(--muted)'; btn.style.borderColor = 'var(--rule)';
   }
@@ -7758,7 +7759,7 @@ function campaignConnected() {
   campaignUpdateBtn();
   campaignRenderModal();
   campaignStartPolling();
-  addLog('Campaign', '🔗', 'Connected to "'+_campaign.name+'" ('+_campaign.code+')', 'normal');
+  addLog('Campaign', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>', 'Connected to "'+_campaign.name+'" ('+_campaign.code+')', 'normal');
   saveSheet(false);
   syncSharedHomebrew();
 }
@@ -7770,7 +7771,7 @@ function campaignLeave() {
   _campaignLastId = 0;
   campaignUpdateBtn();
   campaignRenderModal();
-  addLog('Campaign', '🔗', 'Left "'+name+'"', 'normal');
+  addLog('Campaign', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>', 'Left "'+name+'"', 'normal');
   saveSheet(false);
   syncSharedHomebrew();
 }

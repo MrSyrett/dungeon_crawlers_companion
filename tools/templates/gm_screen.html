@@ -1359,6 +1359,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 }
 
 </style>
+<style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
 <body>
 
@@ -1374,10 +1375,10 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   <div class="scene-pins" id="scene-pins"></div>
 
   <div class="session-controls">
-    <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link">🔗 Campaign</button>
-    <button class="btn small ghost" id="save-btn" onclick="saveSession()" title="Save session" aria-label="Save session to file">💾</button>
+    <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
+    <button class="btn small ghost" id="save-btn" onclick="saveSession()" title="Save session" aria-label="Save session to file"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg></button>
     <label class="btn small ghost" title="Load session" aria-label="Load a saved session" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
-      📂
+      <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg>
       <input type="file" id="load-input" accept=".json" style="display:none;" onchange="loadSession(this)">
     </label>
   </div>
@@ -1479,7 +1480,7 @@ const GMCamp = (function() {
     const b = btn();
     if(!b) return;
     b.classList.toggle('on', !!campaign);
-    b.textContent = (campaign ? '🔗 ' + campaign.code : '🔗 Campaign') + ' ▾';
+    b.textContent = (campaign ? '' + campaign.code : 'Campaign') + ' ▾';
     b.title = campaign ? 'Campaign: ' + campaign.name + ' (' + campaign.code + ')' : 'Campaign link';
   }
 
@@ -1818,15 +1819,15 @@ GMScenes.renderPins();
   <div class="pane" id="pane-1">
     <div class="pane-header" id="pane-1-header">
       <select class="pane-select" id="pane-1-select" onchange="setPaneTool(1, this.value)">
-        <option value="adventure">📜 Adventure</option>
-        <option value="maps">🗺 Maps</option>
+        <option value="adventure">Adventure</option>
+        <option value="maps">Maps</option>
         <option value="trackers">⏱ Trackers</option>
-        <option value="notes">✎ Notes</option>
-        <option value="music">🎵 Music</option>
-        <option value="gen">🎲 Generators</option>
-        <option value="party">👥 Party</option>
-        <option value="rules">📖 Rulebooks</option>
-        <option value="dice">🎲 Dice Tray</option>
+        <option value="notes">Notes</option>
+        <option value="music">Music</option>
+        <option value="gen">Generators</option>
+        <option value="party">Party</option>
+        <option value="rules">Rulebooks</option>
+        <option value="dice">Dice Tray</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-1-toolbar"></div>
     </div>
@@ -1837,15 +1838,15 @@ GMScenes.renderPins();
   <div class="pane" id="pane-2" style="display:none;">
     <div class="pane-header" id="pane-2-header">
       <select class="pane-select pane-2-select" id="pane-2-select" onchange="setPaneTool(2, this.value)">
-        <option value="adventure">📜 Adventure</option>
-        <option value="maps">🗺 Maps</option>
+        <option value="adventure">Adventure</option>
+        <option value="maps">Maps</option>
         <option value="trackers" selected>⏱ Trackers</option>
-        <option value="notes">✎ Notes</option>
-        <option value="music">🎵 Music</option>
-        <option value="gen">🎲 Generators</option>
-        <option value="party">👥 Party</option>
-        <option value="rules">📖 Rulebooks</option>
-        <option value="dice">🎲 Dice Tray</option>
+        <option value="notes">Notes</option>
+        <option value="music">Music</option>
+        <option value="gen">Generators</option>
+        <option value="party">Party</option>
+        <option value="rules">Rulebooks</option>
+        <option value="dice">Dice Tray</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-2-toolbar"></div>
     </div>
@@ -1855,15 +1856,15 @@ GMScenes.renderPins();
   <div class="pane" id="pane-3" style="display:none;">
     <div class="pane-header" id="pane-3-header">
       <select class="pane-select" id="pane-3-select" onchange="setPaneTool(3, this.value)">
-        <option value="adventure">📜 Adventure</option>
-        <option value="maps">🗺 Maps</option>
+        <option value="adventure">Adventure</option>
+        <option value="maps">Maps</option>
         <option value="trackers">⏱ Trackers</option>
-        <option value="notes" selected>✎ Notes</option>
-        <option value="music">🎵 Music</option>
-        <option value="gen">🎲 Generators</option>
-        <option value="party">👥 Party</option>
-        <option value="rules">📖 Rulebooks</option>
-        <option value="dice">🎲 Dice Tray</option>
+        <option value="notes" selected>Notes</option>
+        <option value="music">Music</option>
+        <option value="gen">Generators</option>
+        <option value="party">Party</option>
+        <option value="rules">Rulebooks</option>
+        <option value="dice">Dice Tray</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-3-toolbar"></div>
     </div>
@@ -1874,15 +1875,15 @@ GMScenes.renderPins();
   <div class="pane" id="pane-4" style="display:none;">
     <div class="pane-header" id="pane-4-header">
       <select class="pane-select" id="pane-4-select" onchange="setPaneTool(4, this.value)">
-        <option value="adventure">📜 Adventure</option>
-        <option value="maps">🗺 Maps</option>
+        <option value="adventure">Adventure</option>
+        <option value="maps">Maps</option>
         <option value="trackers">⏱ Trackers</option>
-        <option value="notes">✎ Notes</option>
-        <option value="music">🎵 Music</option>
-        <option value="gen">🎲 Generators</option>
-        <option value="party">👥 Party</option>
-        <option value="rules">📖 Rulebooks</option>
-        <option value="dice" selected>🎲 Dice Tray</option>
+        <option value="notes">Notes</option>
+        <option value="music">Music</option>
+        <option value="gen">Generators</option>
+        <option value="party">Party</option>
+        <option value="rules">Rulebooks</option>
+        <option value="dice" selected>Dice Tray</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-4-toolbar"></div>
     </div>
@@ -1967,7 +1968,7 @@ GMScenes.renderPins();
     </div>
     <div class="doc-body">
       <div class="doc-empty">
-        <div class="doc-empty-icon">📜</div>
+        <div class="doc-empty-icon"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M6.5 4h9.8a2.4 2.4 0 0 1 2.4 2.4v9.2a2.4 2.4 0 0 0 2.4 2.4.8.8 0 0 1 .8.8v.4a1.4 1.4 0 0 1-1.4 1.4H8.3a2.4 2.4 0 0 1-2.4-2.4V9.3H4.6a2.4 2.4 0 0 1 0-4.8.8.8 0 0 1 0-.5Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9.5 8.7h6v1.6h-6zM9.5 12h6v1.6h-6z" opacity=".55"/></svg></div>
         <div class="doc-empty-title">No Adventure Loaded</div>
         <div class="doc-empty-sub">Load a PDF or image of your adventure or session prep export</div>
       </div>
@@ -1992,7 +1993,7 @@ GMScenes.renderPins();
     </div>
     <div class="doc-body">
       <div class="doc-empty">
-        <div class="doc-empty-icon">🗺</div>
+        <div class="doc-empty-icon"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9 3.6 3.4 5.9a1 1 0 0 0-.6.9v12.1a.8.8 0 0 0 1.1.7L9 17.6zM10.6 3.5v14.1l4.8 2.1V5.6zM17 5.5v14.1l3.5-1.4a1 1 0 0 0 .6-.9V5.2a.8.8 0 0 0-1.1-.7z" opacity=".9"/></svg></div>
         <div class="doc-empty-title">No Map Loaded</div>
         <div class="doc-empty-sub">Load a PDF or image of a dungeon map</div>
       </div>
@@ -2121,17 +2122,17 @@ GMScenes.renderPins();
   <div class="tool-instance gen-tool" data-tool="gen">
     <div class="toolbar-tpl" style="display:none">
       <select class="gen-tab-select" title="Generator">
-        <option value="adventure">📜 Adventure</option>
-        <option value="npc">👤 NPC</option>
-        <option value="rival">⚔ Rival Crawlers</option>
-        <option value="monster">🐉 Monster</option>
-        <option value="dungeon">🏰 Dungeon</option>
-        <option value="encounter">💀 Encounter</option>
-        <option value="shop">🏪 Shop/Tavern</option>
-        <option value="loot">💰 Treasure</option>
+        <option value="adventure">Adventure</option>
+        <option value="npc">NPC</option>
+        <option value="rival">Rival Crawlers</option>
+        <option value="monster">Monster</option>
+        <option value="dungeon">Dungeon</option>
+        <option value="encounter">Encounter</option>
+        <option value="shop">Shop/Tavern</option>
+        <option value="loot">Treasure</option>
       </select>
       <div class="toolbar-spacer"></div>
-      <button class="btn small primary gen-roll" title="Generate" aria-label="Generate">🎲</button>
+      <button class="btn small primary gen-roll" title="Generate" aria-label="Generate"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button>
     </div>
     <div class="gen-body">
 
@@ -2167,7 +2168,7 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-npc-results">
-          <div class="gen-empty">Set options and press 🎲 Generate</div>
+          <div class="gen-empty">Set options and press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Generate</div>
         </div>
       </div>
 
@@ -2194,7 +2195,7 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-rival-results">
-          <div class="gen-empty">Set options and press 🎲 Generate</div>
+          <div class="gen-empty">Set options and press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Generate</div>
         </div>
       </div>
 
@@ -2215,7 +2216,7 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-mon-results">
-          <div class="gen-empty">Set options and press 🎲 Generate</div>
+          <div class="gen-empty">Set options and press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Generate</div>
         </div>
       </div>
 
@@ -2285,12 +2286,12 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-dun-results">
-          <div class="gen-empty">Set options and press 🎲 Generate</div>
+          <div class="gen-empty">Set options and press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Generate</div>
         </div>
         <div id="gen-dun-map-bar" style="display:none;padding:10px 14px 12px;background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;align-items:center">
           <span id="gen-dun-seed-label" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:0.06em;flex:1"></span>
-          <button id="gen-dun-maps-btn" class="btn small ghost" style="white-space:nowrap">📌 Load to Maps</button>
-          <button id="gen-dun-map-btn" class="btn small primary" style="white-space:nowrap">📖 Load to Adventure</button>
+          <button id="gen-dun-maps-btn" class="btn small ghost" style="white-space:nowrap"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.2a6.4 6.4 0 0 0-6.4 6.4c0 4.6 5.5 12 5.7 12.3a.9.9 0 0 0 1.4 0c.2-.3 5.7-7.7 5.7-12.3A6.4 6.4 0 0 0 12 2.2Zm0 4.1a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Z"/></svg> Load to Maps</button>
+          <button id="gen-dun-map-btn" class="btn small primary" style="white-space:nowrap"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg> Load to Adventure</button>
         </div>
       </div>
       <div class="gen-panel" data-panel="encounter">
@@ -2340,7 +2341,7 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-enc-results">
-          <div class="gen-empty">Set options and press 🎲 Generate</div>
+          <div class="gen-empty">Set options and press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Generate</div>
         </div>
       </div>
 
@@ -2366,7 +2367,7 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-shop-results">
-          <div class="gen-empty">Set options and press 🎲 Generate</div>
+          <div class="gen-empty">Set options and press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Generate</div>
         </div>
       </div>
 
@@ -2409,7 +2410,7 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-loot-results">
-          <div class="gen-empty">Set options and press 🎲 Generate</div>
+          <div class="gen-empty">Set options and press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Generate</div>
         </div>
       </div>
 
@@ -2482,11 +2483,11 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-adv-results">
-          <div class="gen-empty">Set options and press 🎲 Generate</div>
+          <div class="gen-empty">Set options and press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Generate</div>
         </div>
         <div id="gen-adv-bar" style="display:none;padding:8px 14px;background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;align-items:center;">
-          <button id="gen-adv-load-btn" class="btn small primary" style="white-space:nowrap">📖 Load to Adventure</button>
-          <button id="gen-adv-maps-btn" class="btn small ghost" style="white-space:nowrap;display:none;">🗺 Load Map to Maps</button>
+          <button id="gen-adv-load-btn" class="btn small primary" style="white-space:nowrap"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg> Load to Adventure</button>
+          <button id="gen-adv-maps-btn" class="btn small ghost" style="white-space:nowrap;display:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9 3.6 3.4 5.9a1 1 0 0 0-.6.9v12.1a.8.8 0 0 0 1.1.7L9 17.6zM10.6 3.5v14.1l4.8 2.1V5.6zM17 5.5v14.1l3.5-1.4a1 1 0 0 0 .6-.9V5.2a.8.8 0 0 0-1.1-.7z" opacity=".9"/></svg> Load Map to Maps</button>
         </div>
       </div>
 
@@ -3103,7 +3104,7 @@ function initDocTool(root) {
     // Warn immediately if the file is too large to persist across reloads
     const MAX_SAVE_MB = 3.75; // ~5MB as base64 after encoding
     if(file.size > MAX_SAVE_MB * 1024 * 1024) {
-      filenameEl.textContent = file.name + ' ⚠ too large to auto-save (will need reloading)';
+      filenameEl.textContent = file.name + ' too large to auto-save (will need reloading)';
     }
     const reader = new FileReader();
     reader.onload = e => loadFromDataUrl(e.target.result, file.name);
@@ -3162,7 +3163,7 @@ function wireSessionPrepLoader(root) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'btn primary small doc-load-prep';
-    b.textContent = '📋 Load Session Prep';
+    b.textContent = 'Load Session Prep';
     b.style.marginTop = '4px';
     b.addEventListener('click', open);
     emptyEl.appendChild(b);
@@ -9196,12 +9197,12 @@ function init_dice(root) {
     let h = '<div class="dice-pool-row">';
     // Order: Hide · Bonus · ADV · DIS · ✕ · Roll  (the campaign link itself is in the top bar)
     const camp = GMCamp.get(), hidden = GMCamp.isHidden();
-    if(camp) h += '<button class="dice-hide-btn'+(hidden?' on':'')+'" title="'+(hidden?'Rolls hidden from campaign — click to share':'Rolls shared with campaign — click to hide')+'">'+(hidden?'🙈':'👁')+'</button>';
+    if(camp) h += '<button class="dice-hide-btn'+(hidden?' on':'')+'" title="'+(hidden?'Rolls hidden from campaign — click to share':'Rolls shared with campaign — click to hide')+'">'+(hidden?'<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4.3 3 3 4.3l2.7 2.7C4 8.3 2.8 10 2.3 11.5a1.2 1.2 0 0 0 0 1c1.4 3.1 5.1 6.3 9.7 6.3 1.7 0 3.3-.4 4.7-1.2L19.7 21 21 19.7Zm5.1 7.4 3.2 3.2a2 2 0 0 1-3.2-3.2Z"/><path d="M12 5.2c-.9 0-1.8.1-2.6.4l2.2 2.2a3.5 3.5 0 0 1 4.4 4.4l2.7 2.7c1.4-1.1 2.5-2.5 3.1-3.9a1.2 1.2 0 0 0 0-1C20.3 8.4 16.6 5.2 12 5.2Z" opacity=".7"/></svg>':'<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5.2c-4.6 0-8.3 3.2-9.7 6.3a1.2 1.2 0 0 0 0 1c1.4 3.1 5.1 6.3 9.7 6.3s8.3-3.2 9.7-6.3a1.2 1.2 0 0 0 0-1C20.3 8.4 16.6 5.2 12 5.2Zm0 3.3a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z"/></svg>')+'</button>';
     h += '<input type="number" class="dice-mod" value="'+(modifier||'')+'" placeholder="+0" title="Bonus">';
     h += '<button class="dice-advbtn'+(advMode==='adv'?' on-adv':'')+'" data-m="adv" title="Advantage (d20)">ADV</button>';
     h += '<button class="dice-advbtn'+(advMode==='dis'?' on-dis':'')+'" data-m="dis" title="Disadvantage (d20)">DIS</button>';
     h += '<button class="dice-pool-clear" title="Clear pool">✕</button>';
-    h += '<button class="dice-roll-go" title="Roll">🎲 Roll</button>';
+    h += '<button class="dice-roll-go" title="Roll"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll</button>';
     h += '</div>';
     poolEl.innerHTML = h;
     poolEl.querySelector('.dice-mod').onchange = (e)=>{ modifier = parseInt(e.target.value)||0; renderTray(); };
@@ -9668,7 +9669,7 @@ function init_party(root) {
   async function sync(quiet) {
     const camp = (typeof window.__gmCampaign === 'function') ? window.__gmCampaign() : null;
     if(!camp || !camp.id) {
-      if(!quiet) status('Link a campaign first — Dice Tray → 🔗 Campaign link.', true);
+      if(!quiet) status('Link a campaign first — Dice Tray → Campaign link.', true);
       return;
     }
     if(!quiet) status('Syncing "' + camp.name + '"…');

@@ -4,6 +4,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { AdminNav } from "@/components/AdminNav";
 import { SoundLibraryList } from "@/components/SoundLibraryList";
+import { Icon } from "@/components/icons";
 import {
   SOUND_CATEGORIES,
   SUBCATEGORY_GROUPS,
@@ -85,7 +86,7 @@ export default async function AdminSoundsPage() {
         (Ambiance · Music · Scenes), a <span className="text-[var(--text)]">Subcategory</span>{" "}
         (Location or Mood), and a <span className="text-[var(--text)]">Name</span>. Add a track, then
         open the Music tool in the GM Screen and click{" "}
-        <span className="text-[var(--text)]">📚</span> on Music, Soundboard, or a Scene to drop it in.
+        <Icon name="library" className="text-[var(--text)]" /> on Music, Soundboard, or a Scene to drop it in.
         Dropbox share links are automatically rewritten to a directly-playable form on save.
       </p>
 

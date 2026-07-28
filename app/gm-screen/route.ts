@@ -146,7 +146,7 @@ const SHIM = `
 
 // Sound Library picker. The Music tool (init_music in the template) exposes
 // `root._addLibraryTrack` / `root._addLibrarySfx`, and GMScenes exposes
-// `addLibraryTrack(sceneId, name, url)`. This injects a "📚 Library" button into
+// `addLibraryTrack(sceneId, name, url)`. This injects a "Library" button into
 // the Music header, the Soundboard header, and each Scene card, plus a modal
 // that lists the admin Sound Library (/api/sounds, admin-only) with category +
 // subcategory filters and search. Picking a track drops it into whichever
@@ -196,7 +196,7 @@ const LIBRARY_UI = `
     overlay=document.createElement('div');
     overlay.id='dd-lib-overlay';
     overlay.innerHTML='<div id="dd-lib-panel">'
-      +'<div class="dd-lib-head"><span class="dd-lib-title">📚 <span class="dd-lib-target">Sound Library</span></span>'
+      +'<div class="dd-lib-head"><span class="dd-lib-title"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 17.5h5V6.5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1zM10.2 17.5h4.6V4.8a1 1 0 0 0-1-1h-2.6a1 1 0 0 0-1 1z"/><path d="m16 17.5 4.4-.0-2.7-11a1 1 0 0 0-1.2-.7l-2.2.6a1 1 0 0 0-.7 1.1l.1.4z" opacity=".8"/><path d="M3 18.7h18v1.9H3z"/></svg> <span class="dd-lib-target">Sound Library</span></span>'
       +'<input class="dd-lib-search" type="text" placeholder="Search tracks…">'
       +'<button class="dd-lib-iconbtn dd-lib-refresh" title="Reload library">⟳</button>'
       +'<button class="dd-lib-iconbtn dd-lib-close" title="Close">✕</button></div>'
@@ -339,7 +339,7 @@ const LIBRARY_UI = `
     b.className='btn small ghost dd-lib-btn';
     b.setAttribute('data-lib-kind', kind);
     b.title='Add from your Sound Library';
-    b.innerHTML=iconOnly ? '📚' : '📚 Library';
+    b.innerHTML=iconOnly ? '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 17.5h5V6.5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1zM10.2 17.5h4.6V4.8a1 1 0 0 0-1-1h-2.6a1 1 0 0 0-1 1z"/><path d="m16 17.5 4.4-.0-2.7-11a1 1 0 0 0-1.2-.7l-2.2.6a1 1 0 0 0-.7 1.1l.1.4z" opacity=".8"/><path d="M3 18.7h18v1.9H3z"/></svg>' : '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 17.5h5V6.5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1zM10.2 17.5h4.6V4.8a1 1 0 0 0-1-1h-2.6a1 1 0 0 0-1 1z"/><path d="m16 17.5 4.4-.0-2.7-11a1 1 0 0 0-1.2-.7l-2.2.6a1 1 0 0 0-.7 1.1l.1.4z" opacity=".8"/><path d="M3 18.7h18v1.9H3z"/></svg> Library';
     return b;
   }
 
@@ -348,7 +348,7 @@ const LIBRARY_UI = `
   function injectButtons(scope){
     if(!scope || !scope.querySelectorAll) return;
     // Icon-only (like the Scene button), inserted just before the "＋ Files"
-    // button so the header reads: volume · 📚 · Files · URL.
+    // button so the header reads: volume · Library · Files · URL.
     Array.prototype.forEach.call(scope.querySelectorAll('.mus-music-section .mus-sec-actions'),function(a){
       if(!a.querySelector('.dd-lib-btn')){ var f=a.querySelector('.mus-add-music'); a.insertBefore(makeBtn('music', true), f || a.firstChild); }
     });
