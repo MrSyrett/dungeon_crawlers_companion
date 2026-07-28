@@ -192,20 +192,12 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-4 text-sm text-[var(--muted)]">
             <span className="hidden sm:inline">{user.email}</span>
             {isAdmin ? (
-              <>
-                <Link
-                  href="/admin/sounds"
-                  className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                >
-                  Sounds
-                </Link>
-                <Link
-                  href="/admin/users"
-                  className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
-                >
-                  Members
-                </Link>
-              </>
+              <Link
+                href="/admin/users"
+                className="min-h-11 rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+              >
+                Admin
+              </Link>
             ) : null}
             <form action={logout}>
               <button className="min-h-11 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] hover:border-[var(--muted)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]">

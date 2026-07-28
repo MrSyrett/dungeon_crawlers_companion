@@ -145,12 +145,13 @@ const SHIM = `
 </script>`;
 
 // Sound Library picker. The Music tool (init_music in the template) exposes
-// `root._addLibraryTrack(label, url)`; this injects a "📚 Library" button into
-// each Music section header and a modal that lists the admin Sound Library
-// (/api/sounds, admin-only) with category filters + search. Picking a track
-// drops it straight into that pane's Music list — no more re-pasting URLs.
-// Non-admins get an empty list from the API, so the button simply shows an
-// "empty library" state for them.
+// `root._addLibraryTrack` / `root._addLibrarySfx`, and GMScenes exposes
+// `addLibraryTrack(sceneId, name, url)`. This injects a "📚 Library" button into
+// the Music header, the Soundboard header, and each Scene card, plus a modal
+// that lists the admin Sound Library (/api/sounds, admin-only) with category +
+// subcategory filters and search. Picking a track drops it into whichever
+// destination the button belongs to — no more re-pasting URLs. Non-admins get
+// an empty list from the API, so the button simply shows an "empty" state.
 const LIBRARY_UI = `
 <style>
 #dd-lib-overlay{position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;background:rgba(4,4,6,.66);backdrop-filter:blur(2px);font:400 14px/1.4 system-ui,sans-serif}
@@ -162,8 +163,11 @@ const LIBRARY_UI = `
 .dd-lib-search:focus{outline:none;border-color:#c9a24b}
 .dd-lib-iconbtn{background:transparent;border:1px solid #3a3a40;border-radius:6px;color:#b7b3a8;padding:6px 9px;cursor:pointer;line-height:1}
 .dd-lib-iconbtn:hover{color:#e7e3d8;border-color:#6f6f78}
-.dd-lib-cats{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid #2a2a30}
+.dd-lib-cats,.dd-lib-subs{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid #2a2a30}
+.dd-lib-subs{padding:8px 14px;background:#0f0f13}
+.dd-lib-subs:empty{display:none}
 .dd-lib-chip{background:#0e0e12;border:1px solid #3a3a40;border-radius:999px;color:#b7b3a8;padding:4px 11px;font-size:12px;cursor:pointer;white-space:nowrap}
+.dd-lib-subs .dd-lib-chip{font-size:11px;padding:3px 9px}
 .dd-lib-chip:hover{color:#e7e3d8}
 .dd-lib-chip.active{background:rgba(201,162,75,.15);border-color:#c9a24b;color:#c9a24b}
 .dd-lib-list{overflow:auto;padding:8px}
@@ -180,8 +184,11 @@ const LIBRARY_UI = `
 </style>
 <script>
 (function(){
-  var overlay=null, listEl=null, catsEl=null, searchEl=null, emptyEl=null;
-  var currentRoot=null, cache=null, activeCat='__all__', query='';
+  var overlay=null, listEl=null, catsEl=null, subsEl=null, searchEl=null, emptyEl=null, targetEl=null;
+  var currentTarget=null, cache=null, activeCat='__all__', activeSub='__all__', query='';
+  // Canonical display order (mirrors lib/sounds.ts) so chips read tidily.
+  var CAT_ORDER=['Ambiance','Music','Scenes'];
+  var SUB_ORDER=['Cities','Lairs','Modern','Sci-fi','Ruins','Underground','Wilderness','Epic','Lighthearted','Mysterious','Peaceful','Somber','Tension','Action/Combat'];
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -189,16 +196,19 @@ const LIBRARY_UI = `
     overlay=document.createElement('div');
     overlay.id='dd-lib-overlay';
     overlay.innerHTML='<div id="dd-lib-panel">'
-      +'<div class="dd-lib-head"><span class="dd-lib-title">📚 Sound Library</span>'
+      +'<div class="dd-lib-head"><span class="dd-lib-title">📚 <span class="dd-lib-target">Sound Library</span></span>'
       +'<input class="dd-lib-search" type="text" placeholder="Search tracks…">'
       +'<button class="dd-lib-iconbtn dd-lib-refresh" title="Reload library">⟳</button>'
       +'<button class="dd-lib-iconbtn dd-lib-close" title="Close">✕</button></div>'
       +'<div class="dd-lib-cats"></div>'
+      +'<div class="dd-lib-subs"></div>'
       +'<div class="dd-lib-list"></div>'
       +'<div class="dd-lib-empty" style="display:none"></div></div>';
     document.body.appendChild(overlay);
     listEl=overlay.querySelector('.dd-lib-list');
     catsEl=overlay.querySelector('.dd-lib-cats');
+    subsEl=overlay.querySelector('.dd-lib-subs');
+    targetEl=overlay.querySelector('.dd-lib-target');
     searchEl=overlay.querySelector('.dd-lib-search');
     emptyEl=overlay.querySelector('.dd-lib-empty');
     overlay.addEventListener('click',function(e){ if(e.target===overlay) close(); });
@@ -207,18 +217,35 @@ const LIBRARY_UI = `
     searchEl.addEventListener('input',function(){ query=searchEl.value.trim().toLowerCase(); render(); });
   }
 
-  function open(root){
-    currentRoot=root;
+  // target = { kind:'music'|'sfx', root } or { kind:'scene', sceneId, sceneName }
+  function open(target){
+    currentTarget=target;
     if(!overlay) build();
+    var where = target.kind==='sfx' ? 'Soundboard'
+      : target.kind==='scene' ? ('Scene' + (target.sceneName ? ': ' + target.sceneName : ''))
+      : 'Music';
+    targetEl.textContent = 'Add to ' + where;
     overlay.classList.add('open');
     searchEl.value=''; query='';
     setTimeout(function(){ try{ searchEl.focus(); }catch(e){} },30);
     if(cache) render(); else load();
   }
+
+  // Route a picked track to the right destination for the current target.
+  function addToTarget(label, url){
+    var t=currentTarget; if(!t) return false;
+    if(t.kind==='scene'){
+      return !!(window.GMScenes && typeof window.GMScenes.addLibraryTrack==='function' && window.GMScenes.addLibraryTrack(t.sceneId, label, url));
+    }
+    var root=t.root;
+    if(!root) return false;
+    if(t.kind==='sfx') return typeof root._addLibrarySfx==='function' && root._addLibrarySfx(label, url);
+    return typeof root._addLibraryTrack==='function' && root._addLibraryTrack(label, url);
+  }
   function close(){ if(overlay) overlay.classList.remove('open'); }
 
   function load(){
-    listEl.innerHTML=''; catsEl.innerHTML='';
+    listEl.innerHTML=''; catsEl.innerHTML=''; subsEl.innerHTML='';
     emptyEl.style.display='block'; emptyEl.textContent='Loading…';
     fetch('/api/sounds',{headers:{'accept':'application/json'}})
       .then(function(r){ return r.json(); })
@@ -226,32 +253,64 @@ const LIBRARY_UI = `
       .catch(function(){ emptyEl.style.display='block'; emptyEl.textContent='Could not load the library.'; });
   }
 
-  function categories(){
-    var set={}; (cache||[]).forEach(function(s){ set[s.category||'Uncategorized']=1; });
-    return Object.keys(set).sort(function(a,b){ if(a==='Uncategorized')return 1; if(b==='Uncategorized')return -1; return a.localeCompare(b); });
+  // known-order first, custom values (alpha) next, blank bucket last.
+  function orderBy(order, arr){
+    var known=order.filter(function(x){ return arr.indexOf(x)>=0; });
+    var extra=arr.filter(function(x){ return x && order.indexOf(x)<0; }).sort();
+    return known.concat(extra).concat(arr.indexOf('')>=0?['']:[]);
   }
 
-  function renderCats(){
-    var cats=categories();
-    var html='<button class="dd-lib-chip'+(activeCat==='__all__'?' active':'')+'" data-cat="__all__">All</button>';
-    cats.forEach(function(c){ html+='<button class="dd-lib-chip'+(activeCat===c?' active':'')+'" data-cat="'+esc(c)+'">'+esc(c)+'</button>'; });
+  function topCats(){
+    var set={}; (cache||[]).forEach(function(s){ set[s.category||'Music']=1; });
+    return orderBy(CAT_ORDER, Object.keys(set));
+  }
+
+  function subsFor(cat){
+    var set={};
+    (cache||[]).forEach(function(s){
+      if(cat!=='__all__' && (s.category||'Music')!==cat) return;
+      set[s.subcategory||'']=1;
+    });
+    return orderBy(SUB_ORDER, Object.keys(set));
+  }
+
+  function chipHtml(label, key, active, attr){
+    return '<button class="dd-lib-chip'+(active?' active':'')+'" '+attr+'="'+esc(key)+'">'+esc(label)+'</button>';
+  }
+
+  function renderChips(){
+    // Category row
+    var cats=topCats();
+    var html=chipHtml('All','__all__',activeCat==='__all__','data-cat');
+    cats.forEach(function(c){ html+=chipHtml(c,c,activeCat===c,'data-cat'); });
     catsEl.innerHTML=html;
-    Array.prototype.forEach.call(catsEl.querySelectorAll('.dd-lib-chip'),function(chip){
-      chip.addEventListener('click',function(){ activeCat=chip.getAttribute('data-cat'); render(); });
+    Array.prototype.forEach.call(catsEl.querySelectorAll('.dd-lib-chip'),function(el){
+      el.addEventListener('click',function(){ activeCat=el.getAttribute('data-cat'); activeSub='__all__'; render(); });
+    });
+    // Subcategory row — only worth showing when there's a real choice to make.
+    var subs=subsFor(activeCat);
+    if(subs.length<=1){ subsEl.innerHTML=''; return; }
+    var shtml=chipHtml('All','__all__',activeSub==='__all__','data-sub');
+    subs.forEach(function(s){ shtml+=chipHtml(s||'Unsorted', s||'__none__', activeSub===(s||'__none__'), 'data-sub'); });
+    subsEl.innerHTML=shtml;
+    Array.prototype.forEach.call(subsEl.querySelectorAll('.dd-lib-chip'),function(el){
+      el.addEventListener('click',function(){ activeSub=el.getAttribute('data-sub'); render(); });
     });
   }
 
   function render(){
     if(!cache) return;
-    renderCats();
+    renderChips();
     if(!cache.length){
       listEl.innerHTML=''; emptyEl.style.display='block';
       emptyEl.innerHTML='Your Sound Library is empty. <a href="/admin/sounds" target="_blank" rel="noreferrer">Add tracks →</a>';
       return;
     }
     var items=cache.filter(function(s){
-      if(activeCat!=='__all__' && (s.category||'Uncategorized')!==activeCat) return false;
-      if(query && (s.label||'').toLowerCase().indexOf(query)<0 && (s.category||'').toLowerCase().indexOf(query)<0) return false;
+      var cat=s.category||'Music', sub=s.subcategory||'';
+      if(activeCat!=='__all__' && cat!==activeCat) return false;
+      if(activeSub!=='__all__' && sub!==(activeSub==='__none__'?'':activeSub)) return false;
+      if(query && ((s.label||'')+' '+cat+' '+sub).toLowerCase().indexOf(query)<0) return false;
       return true;
     });
     if(!items.length){ listEl.innerHTML=''; emptyEl.style.display='block'; emptyEl.textContent='No tracks match.'; return; }
@@ -260,10 +319,10 @@ const LIBRARY_UI = `
     items.forEach(function(s){
       var row=document.createElement('div');
       row.className='dd-lib-row';
-      row.innerHTML='<span class="dd-lib-plus">＋</span><span class="dd-lib-meta"><div class="dd-lib-name">'+esc(s.label)+'</div><div class="dd-lib-cat">'+esc(s.category||'Uncategorized')+'</div></span>';
+      var meta=esc(s.category||'Music')+(s.subcategory?' · '+esc(s.subcategory):'');
+      row.innerHTML='<span class="dd-lib-plus">＋</span><span class="dd-lib-meta"><div class="dd-lib-name">'+esc(s.label)+'</div><div class="dd-lib-cat">'+meta+'</div></span>';
       row.addEventListener('click',function(){
-        if(!currentRoot || typeof currentRoot._addLibraryTrack!=='function') return;
-        if(currentRoot._addLibraryTrack(s.label, s.url)){
+        if(addToTarget(s.label, s.url)){
           row.classList.add('added');
           var plus=row.querySelector('.dd-lib-plus'); plus.textContent='✓';
           if(window.__ddScheduleSave) try{ window.__ddScheduleSave(); }catch(e){}
@@ -274,17 +333,31 @@ const LIBRARY_UI = `
     });
   }
 
-  // Add a "Library" button into every Music section header (existing + future).
+  function makeBtn(kind, iconOnly){
+    var b=document.createElement('button');
+    b.type='button';
+    b.className='btn small ghost dd-lib-btn';
+    b.setAttribute('data-lib-kind', kind);
+    b.title='Add from your Sound Library';
+    b.innerHTML=iconOnly ? '📚' : '📚 Library';
+    return b;
+  }
+
+  // Add a "Library" button into the Music + Soundboard section headers and each
+  // Scene card header (existing + future, via the MutationObserver in init()).
   function injectButtons(scope){
     if(!scope || !scope.querySelectorAll) return;
     Array.prototype.forEach.call(scope.querySelectorAll('.mus-music-section .mus-sec-actions'),function(a){
-      if(a.querySelector('.dd-lib-btn')) return;
-      var b=document.createElement('button');
-      b.type='button';
-      b.className='btn small ghost dd-lib-btn';
-      b.title='Add a track from your Sound Library';
-      b.innerHTML='📚 Library';
-      a.insertBefore(b,a.firstChild);
+      if(!a.querySelector('.dd-lib-btn')) a.insertBefore(makeBtn('music', false), a.firstChild);
+    });
+    Array.prototype.forEach.call(scope.querySelectorAll('.mus-sfx-section .mus-sec-actions'),function(a){
+      if(!a.querySelector('.dd-lib-btn')) a.insertBefore(makeBtn('sfx', false), a.firstChild);
+    });
+    Array.prototype.forEach.call(scope.querySelectorAll('.mus-scene-head'),function(h){
+      if(h.querySelector('.dd-lib-btn')) return;
+      var addBtn=h.querySelector('.mus-scene-add');
+      var b=makeBtn('scene', true);
+      if(addBtn) h.insertBefore(b, addBtn); else h.appendChild(b);
     });
   }
 
@@ -301,7 +374,14 @@ const LIBRARY_UI = `
       var btn=e.target && e.target.closest ? e.target.closest('.dd-lib-btn') : null;
       if(!btn) return;
       e.preventDefault();
-      open(btn.closest('.mus-tool'));
+      var kind=btn.getAttribute('data-lib-kind') || 'music';
+      if(kind==='scene'){
+        var card=btn.closest('.mus-scene');
+        var nameInput=card ? card.querySelector('.mus-scene-name') : null;
+        open({ kind:'scene', sceneId: card ? parseInt(card.getAttribute('data-scene-id'),10) : NaN, sceneName: nameInput ? nameInput.value : '' });
+      } else {
+        open({ kind:kind, root: btn.closest('.mus-tool') });
+      }
     });
     document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
   }

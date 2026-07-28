@@ -5,6 +5,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { listRulebookFiles, prettyName } from "@/lib/rulebooks";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import { AdminNav } from "@/components/AdminNav";
 import {
   setRulebookEveryone,
   grantRulebookAccess,
@@ -43,31 +44,20 @@ export default async function AdminRulebooksPage({
 
   return (
     <div className="mx-auto w-full max-w-4xl px-5 py-10">
-      <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
-        <div>
-          <h1 className="font-display text-3xl font-black tracking-wide">Rulebook access</h1>
-          <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
-            Admin · who can read each PDF
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/users"
-            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            Members
-          </Link>
-          <Link
-            href="/admin/sounds"
-            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            Sounds
-          </Link>
+      <header className="mb-8 border-b border-[var(--border)] pb-6">
+        <AdminNav active="rulebooks" />
+        <div className="mt-5 flex items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-black tracking-wide">Rulebook access</h1>
+            <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
+              Admin · who can read each PDF
+            </p>
+          </div>
           <Link
             href="/rules"
-            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+            className="whitespace-nowrap rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
           >
-            ← Rulebooks
+            Open reader ↗
           </Link>
         </div>
       </header>

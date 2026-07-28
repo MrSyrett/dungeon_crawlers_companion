@@ -4,22 +4,51 @@
 // way at write time so what the library stores is exactly what <audio> needs —
 // no per-play fix-up, and the stored value is inspectable/portable.
 
-// Suggested categories shown as quick-pick chips in the admin UI. Free text is
-// still allowed — this is just to keep labels consistent as the shelf grows.
-export const SOUND_CATEGORIES = [
-  "Ambience",
-  "Combat",
-  "Tavern",
-  "Dungeon",
-  "Boss",
-  "Town",
-  "Travel",
-  "Tension",
-  "Uncategorized",
-] as const;
+// ── Taxonomy ─────────────────────────────────────────────────────────────────
+// Two levels. Top-level Category describes the *kind* of audio; Subcategory
+// describes the Location it depicts or the Mood it evokes. Both are stored as
+// plain strings so custom values still work, but the UI offers these as the
+// canonical set to keep the shelf tidy.
+//
+//   Ambiance — sound, no music
+//   Music    — music, no sound
+//   Scenes   — a mix of ambiance + music
+export const SOUND_CATEGORIES = ["Ambiance", "Music", "Scenes"] as const;
+export const DEFAULT_CATEGORY = "Music";
 
-export const DEFAULT_CATEGORY = "Uncategorized";
+// Subcategories, grouped for the picker/edit dropdowns. Location = where it's
+// set; Mood = how it feels. A track has one subcategory (or none).
+export const SUBCATEGORY_GROUPS: Record<string, string[]> = {
+  Location: ["Cities", "Lairs", "Modern", "Sci-fi", "Ruins", "Underground", "Wilderness"],
+  Mood: ["Epic", "Lighthearted", "Mysterious", "Peaceful", "Somber", "Tension", "Action/Combat"],
+};
 
+// Flat, display-ordered list of every canonical subcategory (Location then Mood).
+// Used for sort order and case-insensitive matching.
+export const SUBCATEGORY_ORDER: string[] = [
+  ...SUBCATEGORY_GROUPS.Location,
+  ...SUBCATEGORY_GROUPS.Mood,
+];
+
+// Snap a free-typed category to the canonical set (case-insensitive); anything
+// unrecognized falls back to the default so Category stays one of the three.
+export function canonicalCategory(raw: string): string {
+  const c = (raw || "").trim();
+  const hit = SOUND_CATEGORIES.find((x) => x.toLowerCase() === c.toLowerCase());
+  return hit || DEFAULT_CATEGORY;
+}
+
+// Snap a free-typed subcategory to the canonical set (case-insensitive). Empty
+// is allowed (an unsorted track); a non-empty custom value is kept as typed so
+// you aren't boxed in if you add a new one.
+export function canonicalSubcategory(raw: string): string {
+  const s = (raw || "").replace(/\s+/g, " ").trim();
+  if (!s) return "";
+  const hit = SUBCATEGORY_ORDER.find((x) => x.toLowerCase() === s.toLowerCase());
+  return hit || s;
+}
+
+// ── Audio URL normalization ──────────────────────────────────────────────────
 // Dropbox share links serve an HTML preview page unless raw=1 is set; they also
 // carry a short-lived `st=` token that shouldn't be persisted. Drop st/dl/raw
 // and force raw=1 so the stored URL streams the file itself. (Mirrors the GM
@@ -55,10 +84,4 @@ export function labelFromUrl(url: string): string {
   } catch {
     return "Track";
   }
-}
-
-// Normalize a free-typed category: trim, collapse spaces, fall back to default.
-export function cleanCategory(raw: string): string {
-  const c = (raw || "").replace(/\s+/g, " ").trim();
-  return c || DEFAULT_CATEGORY;
 }

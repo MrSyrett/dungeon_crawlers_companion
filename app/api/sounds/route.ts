@@ -15,8 +15,8 @@ export async function GET() {
   }
 
   const sounds = await prisma.sound.findMany({
-    orderBy: [{ category: "asc" }, { label: "asc" }],
-    select: { id: true, label: true, url: true, category: true },
+    orderBy: [{ category: "asc" }, { subcategory: "asc" }, { label: "asc" }],
+    select: { id: true, label: true, url: true, category: true, subcategory: true },
   });
 
   return Response.json(

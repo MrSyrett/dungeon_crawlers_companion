@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import { AdminNav } from "@/components/AdminNav";
 import { deleteUser, setUserApproved } from "@/app/actions/admin-users";
 
 export const dynamic = "force-dynamic";
@@ -40,33 +40,14 @@ export default async function AdminUsersPage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-5 py-10">
-      <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
-        <div>
+      <header className="mb-8 border-b border-[var(--border)] pb-6">
+        <AdminNav active="users" />
+        <div className="mt-5">
           <h1 className="font-display text-3xl font-black tracking-wide">Members</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--gold)] sm:text-[11px] sm:tracking-[0.35em]">
             Admin · {total} registered {total === 1 ? "account" : "accounts"}
             {pending.length > 0 ? ` · ${pending.length} awaiting approval` : ""}
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/admin/sounds"
-            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            Sounds
-          </Link>
-          <Link
-            href="/admin/rulebooks"
-            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            Rulebooks
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            ← Dashboard
-          </Link>
         </div>
       </header>
 

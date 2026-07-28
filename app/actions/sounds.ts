@@ -4,7 +4,12 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
-import { normalizeAudioUrl, labelFromUrl, cleanCategory } from "@/lib/sounds";
+import {
+  normalizeAudioUrl,
+  labelFromUrl,
+  canonicalCategory,
+  canonicalSubcategory,
+} from "@/lib/sounds";
 
 // The library feeds a tool the whole table can open, so every mutation here
 // independently confirms the caller is an admin — the page being admin-only is
@@ -26,13 +31,14 @@ export async function createSound(formData: FormData): Promise<void> {
 
   const rawLabel = String(formData.get("label") ?? "").trim();
   const label = rawLabel || labelFromUrl(url);
-  const category = cleanCategory(String(formData.get("category") ?? ""));
+  const category = canonicalCategory(String(formData.get("category") ?? ""));
+  const subcategory = canonicalSubcategory(String(formData.get("subcategory") ?? ""));
 
-  await prisma.sound.create({ data: { label, url, category } });
+  await prisma.sound.create({ data: { label, url, category, subcategory } });
   revalidatePath("/admin/sounds");
 }
 
-// Edit an existing track's label / URL / category in place.
+// Edit an existing track's label / URL / category / subcategory in place.
 export async function updateSound(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (!admin) return;
@@ -45,10 +51,11 @@ export async function updateSound(formData: FormData): Promise<void> {
 
   const rawLabel = String(formData.get("label") ?? "").trim();
   const label = rawLabel || labelFromUrl(url);
-  const category = cleanCategory(String(formData.get("category") ?? ""));
+  const category = canonicalCategory(String(formData.get("category") ?? ""));
+  const subcategory = canonicalSubcategory(String(formData.get("subcategory") ?? ""));
 
   await prisma.sound
-    .update({ where: { id }, data: { label, url, category } })
+    .update({ where: { id }, data: { label, url, category, subcategory } })
     .catch(() => {}); // row gone (stale form) — nothing to do
   revalidatePath("/admin/sounds");
 }
@@ -66,11 +73,12 @@ export async function deleteSound(formData: FormData): Promise<void> {
 }
 
 // Bulk add. Each non-empty line is one track, fields separated by "|":
-//   Category | Label | URL      (3 fields)
-//   Label | URL                 (2 fields)
-//   URL                         (1 field — label derived, Uncategorized)
-// This is the ingestion path for a harvested list (e.g. Dropbox links) — paste
-// the block once and it creates every valid row, skipping bad/duplicate URLs.
+//   Category | Subcategory | Name | URL   (4 fields)
+//   Category | Name | URL                 (3 fields — no subcategory)
+//   Name | URL                            (2 fields)
+//   URL                                   (1 field — name derived)
+// This is the ingestion path for a harvested list — paste the block once and it
+// creates every valid row, skipping bad/duplicate URLs.
 export async function bulkImportSounds(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (!admin) return;
@@ -84,17 +92,21 @@ export async function bulkImportSounds(formData: FormData): Promise<void> {
     (await prisma.sound.findMany({ select: { url: true } })).map((s) => s.url),
   );
 
-  const rows: { label: string; url: string; category: string }[] = [];
+  const rows: { label: string; url: string; category: string; subcategory: string }[] = [];
   const seen = new Set<string>();
 
   for (const line of lines) {
     const parts = line.split("|").map((p) => p.trim());
     let category = "";
+    let subcategory = "";
     let label = "";
     let rawUrl = "";
 
-    if (parts.length >= 3) {
-      [category, label, rawUrl] = [parts[0], parts[1], parts.slice(2).join("|")];
+    if (parts.length >= 4) {
+      [category, subcategory, label] = [parts[0], parts[1], parts[2]];
+      rawUrl = parts.slice(3).join("|");
+    } else if (parts.length === 3) {
+      [category, label, rawUrl] = parts;
     } else if (parts.length === 2) {
       [label, rawUrl] = parts;
     } else {
@@ -108,7 +120,8 @@ export async function bulkImportSounds(formData: FormData): Promise<void> {
     rows.push({
       label: label || labelFromUrl(url),
       url,
-      category: cleanCategory(category),
+      category: canonicalCategory(category),
+      subcategory: canonicalSubcategory(subcategory),
     });
   }
 

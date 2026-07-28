@@ -189,14 +189,19 @@ model CampaignRoll {
 // `url` is stored already-normalized to a directly playable form (e.g. Dropbox
 // share links rewritten to raw=1) so the picker can hand it to <audio> as-is.
 model Sound {
-  id        String   @id @default(cuid())
-  label     String
-  url       String
-  category  String   @default("Uncategorized")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  label      String
+  url        String
+  // Two-level taxonomy. `category` is the kind of audio (Ambiance | Music |
+  // Scenes); `subcategory` is the Location it depicts or Mood it evokes (e.g.
+  // Cities, Wilderness, Epic, Tension) — empty for an unsorted track. `label`
+  // is the track's display Name.
+  category    String   @default("Music")
+  subcategory String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@index([category])
+  @@index([category, subcategory])
 }
 
 // ── Rulebook access control ──────────────────────────────────────────────────
