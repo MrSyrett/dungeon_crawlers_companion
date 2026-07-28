@@ -199,9 +199,9 @@ document.addEventListener("DOMContentLoaded", function() {
   .clue-hdr { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--ink); }
 
   .p-footer { border-top: 2px solid var(--accent); margin-top: 14px; padding-top: 10px; }
-  .flowchart { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
-  .flow-node { padding: 4px 7px; border-radius: 2px; text-align: center; flex: 1; }
-  .flow-name { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 600; text-transform: uppercase; }
+  .flowchart { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 4px; }
+  .flow-node { padding: 4px 7px; border-radius: 2px; text-align: center; flex: 1 1 auto; min-width: 64px; max-width: 100%; }
+  .flow-name { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 600; text-transform: uppercase; overflow-wrap: anywhere; }
   .flow-arrow { color: var(--accent); font-size: 11px; font-weight: 700; }
 
   .map-container { margin-bottom: 14px; }
@@ -266,13 +266,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     /* Scale pages down to fit mobile viewport width */
-    /* 816px page scaled to fit ~360px screen = ~0.42 scale */
-    .page {
-      transform-origin: top center;
-      transform: scale(0.43);
-      margin-bottom: calc(-1056px * 0.57 + 8px) !important;
-      flex-shrink: 0;
-    }
+    /* Pages reflow to a single fluid column on mobile via body.flow-mode
+       (see the flow-mode block below); no fixed-page scaling here anymore. */
 
     /* Sidebar header: bigger tap targets */
     .sidebar-header { padding: 10px 12px; }
@@ -401,6 +396,57 @@ document.addEventListener("DOMContentLoaded", function() {
       #collapse-btn { display: none !important; }
     }
 
+/* ── FLOW MODE ─────────────────────────────────────────────────────────────
+   A screen-first, single-column rendering of the same content. It's toggled on
+   <body> by a small script (below the markup) whenever the viewport is narrow
+   (editing on a phone) or the page is embedded read-only (?view=preview, e.g.
+   the GM Screen's Adventure pane). It unwinds every fixed-page and two-column
+   rule so the content reflows to the available width and scrolls naturally. The
+   PDF/HTML export path is untouched: it re-inlines its own fixed 816x1056 CSS
+   and always renders the paginated pages, so print output is identical
+   regardless of what mode the preview is in. */
+body.flow-mode .preview-area {
+  align-items: stretch;
+  padding: 0;
+  gap: 0;
+  background: var(--paper);
+}
+body.flow-mode .page {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+  transform: none !important;
+  margin: 0 0 0 0 !important;
+  box-shadow: none !important;
+}
+body.flow-mode .page-cont { display: none !important; }
+body.flow-mode .page-inner {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  padding: 16px 18px 20px !important;
+}
+body.flow-mode #p1-columns { display: block !important; overflow: visible !important; }
+body.flow-mode #p1-left,
+body.flow-mode #p1-right {
+  overflow: visible !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+body.flow-mode #p-locations {
+  column-count: 1 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+body.flow-mode .sb-notes { column-count: 1 !important; }
+body.flow-mode [data-paginated-hidden] { display: revert !important; }
+body.flow-mode .page + .page {
+  border-top: 3px solid var(--accent);
+}
 </style>
 </head>
 <body>
@@ -644,11 +690,38 @@ document.addEventListener('click', function(e) {
 function autosave() { readFields(); renderPreview(); clearTimeout(saveTimer); saveTimer=setTimeout(saveState,600); }
 
 // ── PAGINATION ENGINE ──
+// ── FLOW MODE CONTROLLER ────────────────────────────────────────────────────
+// Flow mode = the single-column, screen-width rendering (see the CSS block).
+// It's on when the viewport is narrow (editing on a phone) OR the page is served
+// read-only for embedding (?view=preview injects <style id="dd-preview-style">,
+// which is our signal — the GM Screen's Adventure pane loads it at a fixed 900px
+// logical width, so a viewport media query alone wouldn't catch it).
+function _flowWanted() {
+  if (document.getElementById('dd-preview-style')) return true;      // embedded preview
+  return window.matchMedia('(max-width: 820px)').matches;           // phone-width editing
+}
+function applyFlowMode() {
+  const on = _flowWanted();
+  document.body.classList.toggle('flow-mode', on);
+  return on;
+}
+window.addEventListener('resize', () => {
+  const was = document.body.classList.contains('flow-mode');
+  const now = applyFlowMode();
+  if (was !== now && typeof renderPreview === 'function') renderPreview();
+});
+
 function paginatePages() {
+  // Always clear prior pagination artefacts first so switching modes is clean.
   document.querySelectorAll('.page-cont').forEach(p=>p.remove());
   document.querySelectorAll('[data-paginated-hidden]').forEach(el=>{
     el.style.display=''; el.removeAttribute('data-paginated-hidden');
   });
+
+  // In flow mode the content is presented as one fluid, unclipped column, so the
+  // fixed-page pagination is skipped entirely. Export/PDF force fixed mode first
+  // (see exportHTML/savePDF), so print output is unaffected.
+  if (document.body.classList.contains('flow-mode')) return;
 
   const isDark = document.getElementById('page-one').classList.contains('dark-mode');
   const PAGE_TOTAL = 1056;
@@ -1624,8 +1697,44 @@ function applyGradients() {
   });
 }
 
+// Runs `capture` with the fixed 816x1056 paginated layout in force, regardless
+// of whether the preview is currently in flow mode, then restores the previous
+// mode. This is what guarantees HTML/PDF export is always the print layout even
+// when the builder is being used on a phone. `capture` may return a Promise; the
+// previous mode is restored once it settles.
+function _withFixedLayout(capture) {
+  const wasFlow = document.body.classList.contains('flow-mode');
+  const restore = () => {
+    if (wasFlow && !document.body.classList.contains('flow-mode')) {
+      document.body.classList.add('flow-mode');
+      paginatePages(); // no-op cleanup in flow mode
+    }
+  };
+  if (wasFlow) {
+    document.body.classList.remove('flow-mode');
+    void document.body.offsetHeight; // force synchronous reflow before measuring
+    paginatePages();
+  }
+  let result;
+  try {
+    result = capture();
+  } catch (e) {
+    restore();
+    throw e;
+  }
+  if (result && typeof result.then === 'function') {
+    return Promise.resolve(result).then(
+      (v) => { restore(); return v; },
+      (e) => { restore(); throw e; }
+    );
+  }
+  restore();
+  return result;
+}
+
 function exportHTML() {
   readFields();
+  _withFixedLayout(() => {
   const isDark=document.getElementById('page-one').classList.contains('dark-mode');
   // Collect all pages in order (including continuations)
   const allPages=[...document.querySelectorAll('.preview-area .page')].map(p=>p.outerHTML).join('\n');
@@ -1655,6 +1764,7 @@ ${darkOverride}
   const a=document.createElement('a');a.href=url;
   a.download=(state.title||'adventure').replace(/[^a-z0-9]/gi,'_').toLowerCase()+'.html';
   a.click();URL.revokeObjectURL(url);
+  });
 }
 
 function importHTML(input) {
@@ -1699,38 +1809,44 @@ function savePDF() {
   const btn=document.getElementById('pdf-btn');
   btn.textContent='⏳ Generating...';
   btn.disabled=true;
-
-  const pages=[...document.querySelectorAll('.preview-area .page')].filter(p=>p.style.display!=='none');
   const filename=(state.title||'adventure').replace(/[^a-z0-9]/gi,'_').toLowerCase();
 
-  // 1.5x JPEG lands around 1-2MB and looks the same on paper. JPEG has no
-  // alpha, so each page is rasterized onto its own background color.
-  const shot = (p) => html2canvas(p, {
-    scale: 1.5,
-    useCORS: true,
-    allowTaint: true,
-    logging: false,
-    backgroundColor: getComputedStyle(p).backgroundColor || '#ffffff',
-    windowWidth: 816,
-    windowHeight: 1056
-  });
+  // Force the fixed print layout for the capture (so a phone-width, flow-mode
+  // session still yields a correct paginated PDF), then restore the view mode
+  // once the canvases are taken.
+  _withFixedLayout(() => {
+    const pages=[...document.querySelectorAll('.preview-area .page')].filter(p=>p.style.display!=='none');
 
-  Promise.all(pages.map(shot)).then(canvases=>{
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:'letter',compress:true});
-    const pageW=pdf.internal.pageSize.getWidth();
-    const pageH=pdf.internal.pageSize.getHeight();
-
-    canvases.forEach((canvas,i)=>{
-      if(i>0) pdf.addPage();
-      const img=canvas.toDataURL('image/jpeg',0.85);
-      const ratio=Math.min(pageW/canvas.width, pageH/canvas.height);
-      const w=canvas.width*ratio;
-      const h=canvas.height*ratio;
-      pdf.addImage(img,'JPEG',(pageW-w)/2,(pageH-h)/2,w,h,undefined,'FAST');
+    // 1.5x JPEG lands around 1-2MB and looks the same on paper. JPEG has no
+    // alpha, so each page is rasterized onto its own background color.
+    const shot = (p) => html2canvas(p, {
+      scale: 1.5,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      backgroundColor: getComputedStyle(p).backgroundColor || '#ffffff',
+      windowWidth: 816,
+      windowHeight: 1056
     });
 
-    pdf.save(filename+'.pdf');
+    return Promise.all(pages.map(shot)).then(canvases=>{
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:'letter',compress:true});
+      const pageW=pdf.internal.pageSize.getWidth();
+      const pageH=pdf.internal.pageSize.getHeight();
+
+      canvases.forEach((canvas,i)=>{
+        if(i>0) pdf.addPage();
+        const img=canvas.toDataURL('image/jpeg',0.85);
+        const ratio=Math.min(pageW/canvas.width, pageH/canvas.height);
+        const w=canvas.width*ratio;
+        const h=canvas.height*ratio;
+        pdf.addImage(img,'JPEG',(pageW-w)/2,(pageH-h)/2,w,h,undefined,'FAST');
+      });
+
+      pdf.save(filename+'.pdf');
+    });
+  }).then(()=>{
     btn.textContent='Save PDF';
     btn.disabled=false;
   }).catch(err=>{
@@ -1780,7 +1896,7 @@ function clearAll() {
   saveState();buildSidebarFromState();renderPreview();
 }
 
-loadState();buildSidebarFromState();renderPreview();
+loadState();buildSidebarFromState();applyFlowMode();renderPreview();
 </script>
 </body>
 </html>
