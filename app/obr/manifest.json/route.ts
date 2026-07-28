@@ -15,9 +15,9 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const manifest: Record<string, unknown> = {
     name: "Dungeon Crawler's Companion",
-    version: "1.0.0",
+    version: "1.1.0",
     manifest_version: 1,
-    description: "Open your Shadowdark and Dungeon Crawler Carl character sheets at the table.",
+    description: "Open your character sheets and tune in to your GM's shared audio, right at the table.",
     author: "Dungeon Crawler's Companion",
     icon: "/obr/icon.png",
     action: {

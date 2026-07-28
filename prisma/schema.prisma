@@ -83,10 +83,17 @@ model Campaign {
   // Link to the table's virtual tabletop room (e.g. an Owlbear Rodeo room).
   // Stored as given; only ever http(s), validated before it's written.
   vttUrl    String?
+  // Liveness heartbeat for the GM-screen → players audio broadcast. The GM bumps
+  // this every few seconds while streaming; players treat the campaign as "live"
+  // only if it was bumped within the last ~20s. Null / stale = nobody broadcasting.
+  audioBroadcastAt DateTime?
 
   owner User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   rolls CampaignRoll[]
   homebrewShares HomebrewShare[]
+  // WebRTC signaling (SDP offers/answers + ICE candidates) for the audio
+  // broadcast, exchanged campaign-scoped and polled by id like CampaignRoll.
+  signals SignalMessage[]
   // Per-user GM-screen boards saved for this campaign (tool = "gm-screen").
   // Deleting the campaign removes them, so a stale board can't outlive it.
   documents Document[] @relation("DocumentBoardCampaign")
@@ -172,6 +179,33 @@ model CampaignRoll {
   result     String
   detail     String   @default("")
   type       String   @default("normal")
+  createdAt  DateTime @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, id])
+}
+
+// ── Audio broadcast signaling ────────────────────────────────────────────────
+// The GM streams the GM-screen's mixed audio to campaign players over a WebRTC
+// mesh (GM = one send-only peer per player). This table is the signaling channel
+// that gets those peer connections established: SDP offers/answers and trickled
+// ICE candidates, campaign-scoped and polled by ascending id exactly like
+// CampaignRoll. Rows are ephemeral (a connection needs a handful) and pruned
+// aggressively; nothing here is meaningful once a peer is connected.
+model SignalMessage {
+  id         Int      @id @default(autoincrement())
+  campaignId String
+  // Random per-session key identifying the sender's peer. The GM has one key;
+  // each player generates their own on join.
+  fromKey    String
+  // Target peer key, or null for a message every peer in the campaign should
+  // see (e.g. a player's "hello" that any listening GM should answer).
+  toKey      String?
+  kind       String // "hello" | "offer" | "answer" | "ice" | "bye"
+  // JSON string carrying the SDP or ICE candidate. TEXT — an offer SDP can run
+  // to a few KB, comfortably past a varchar default.
+  payload    String   @default("")
   createdAt  DateTime @default(now())
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
