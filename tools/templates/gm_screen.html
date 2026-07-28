@@ -1906,6 +1906,13 @@ GMScenes.renderPins();
 .pty-line { font-family:'Montserrat',sans-serif; font-size:11px; color:var(--light); line-height:1.6; }
 .pty-line .dim { color:var(--muted); }
 .pty-line .lost { color:#df6a6a; text-decoration:line-through; }
+.pty-lost { font-family:'Montserrat',sans-serif; font-size:9px; font-weight:900; letter-spacing:.08em; color:#ff6a6a; border:1px solid #7a2d2d; background:#3a1414; border-radius:3px; padding:0 4px; margin-left:5px; vertical-align:middle; text-decoration:none; }
+.pty-spell-info { background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:13px; line-height:1; padding:0 3px; vertical-align:middle; }
+.pty-spell-info:hover { color:var(--white); }
+.pty-spell-desc { font-family:'Montserrat',sans-serif; font-size:10px; color:var(--muted); line-height:1.5; margin:3px 0 5px; padding:5px 8px; border-left:2px solid var(--gold); background:var(--panel); }
+.pty-gear-h { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.pty-slots { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--light); background:var(--panel); border:1px solid var(--border); border-radius:3px; padding:0 5px; margin-left:4px; }
+.pty-coins { font-family:'Montserrat',sans-serif; font-size:9px; font-weight:700; color:var(--muted); letter-spacing:0; text-transform:none; }
 /* ═══ RULEBOOKS ═══ */
 .rul-body { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 .rul-bar { display:flex; gap:6px; align-items:center; padding:6px 10px; border-bottom:1px solid var(--border); background:var(--panel); flex-shrink:0; flex-wrap:wrap; }
@@ -9402,12 +9409,42 @@ function init_party(root) {
     const st = d.stats || d.rolledStats || {};
     const pick = k => st[k] ?? st[k.toLowerCase()] ?? st[k[0] + k.slice(1).toLowerCase()] ?? 10;
     const sheetExtra = d._sheet || {};
+    // Spells: prefer our structured rows (they carry level, lost, and the full
+    // description); fall back to the comma list from a foreign exporter.
     const spellRows = Array.isArray(sheetExtra.spellData) && sheetExtra.spellData.length
-      ? sheetExtra.spellData.filter(x => x.name)
-      : String(d.spellsKnown || '').split(',').map(x => x.trim()).filter(Boolean).map(n => ({ name:n, level:'', lost:false }));
-    const talents = (d.bonuses || [])
-      .filter(b => b && b.bonusName && !String(b.name || '').startsWith('Spell:'))
-      .map(b => b.bonusName);
+      ? sheetExtra.spellData.filter(x => x.name).map(x => ({
+          name: x.name, level: x.level || '', lost: !!x.lost, desc: x.desc || ''
+        }))
+      : String(d.spellsKnown || '').split(',').map(x => x.trim()).filter(Boolean).map(n => ({ name:n, level:'', lost:false, desc:'' }));
+    // Attacks: prefer our structured rows (name / bonus / stat / range / damage);
+    // fall back to the lossy string form that drops range.
+    const attacks = Array.isArray(sheetExtra.attacks) && sheetExtra.attacks.length
+      ? sheetExtra.attacks.filter(a => a && (a.name || a.damage)).map(a => ({
+          name: a.name || '', bonus: a.bonus || '', stat: a.stat || '',
+          range: a.range || '', damage: a.damage || ''
+        }))
+      : (Array.isArray(d.attacks) ? d.attacks.filter(Boolean).map(a => (
+          typeof a === 'string' ? { name:a, bonus:'', stat:'', range:'', damage:'' } : {
+            name: a.name || '', bonus: a.bonus || '', stat: a.stat || '', range: a.range || '', damage: a.damage || ''
+          })) : []);
+    // Talents & Features: the verbatim Talents box holds every class/ancestry
+    // feature and trait the player recorded. The `bonuses` array is a lossy
+    // decomposition (drops headings and colon-less lines), so prefer the text
+    // and split it into lines; fall back to bonuses only if the text is empty.
+    const talentsText = typeof sheetExtra.talents === 'string' ? sheetExtra.talents : '';
+    let talents = talentsText.split('\n').map(s => s.trim()).filter(Boolean);
+    if(!talents.length) {
+      talents = (d.bonuses || [])
+        .filter(b => b && b.bonusName && !String(b.name || '').startsWith('Spell:'))
+        .map(b => b.bonusName);
+    }
+    const gear = (d.gear || []).map(g => ({ name:g.name, qty:g.quantity || 1, free:(g.slots ?? 1) === 0 }));
+    const strScore = parseInt(pick('STR')) || 10;
+    // Shadowdark: carrying capacity is max(10, STR). Homebrew/ancestry can grant
+    // extra; the sheet stores that separately.
+    const slotBonus = parseInt(sheetExtra.hbBonusSlots) || 0;
+    const slotsMax = Math.max(10, strScore) + slotBonus;
+    const slotsUsed = gear.filter(g => !g.free).length;
     return {
       name:      d.name || 'Unnamed',
       ancestry:  d.ancestry || '',
@@ -9425,10 +9462,12 @@ function init_party(root) {
       trackers:  Array.isArray(sheetExtra.trackers) ? sheetExtra.trackers.filter(t => typeof t === 'string' && t.trim()) : [],
       xp:        d.XP || 0,
       stats:     { STR:pick('STR'), DEX:pick('DEX'), CON:pick('CON'), INT:pick('INT'), WIS:pick('WIS'), CHA:pick('CHA') },
-      attacks:   Array.isArray(d.attacks) ? d.attacks.filter(Boolean) : [],
+      attacks,
       spells:    spellRows,
       talents,
-      gear:      (d.gear || []).map(g => ({ name:g.name, qty:g.quantity || 1, free:(g.slots ?? 1) === 0 })),
+      gear,
+      slotsUsed,
+      slotsMax,
       coins:     { gp:d.gold || 0, sp:d.silver || 0, cp:d.copper || 0 },
     };
   }
@@ -9481,25 +9520,46 @@ function init_party(root) {
       + '<div class="pty-stat-val">' + esc(c.stats[k]) + '</div></div>').join('') + '</div>';
 
     if(c.attacks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>'
-      + c.attacks.map(a => '<div class="pty-line">' + esc(a) + '</div>').join('') + '</div>';
+      + c.attacks.map(a => {
+          const bonus = a.bonus !== '' ? (String(a.bonus).trim().charAt(0) === '-' ? a.bonus : '+' + String(a.bonus).replace(/^\+/, '')) : '';
+          const bits = [
+            a.damage ? '<span class="dim">' + esc(a.damage) + '</span>' : '',
+            a.range  ? '<span class="dim">' + esc(a.range) + '</span>'  : ''
+          ].filter(Boolean).join(' · ');
+          return '<div class="pty-line"><b>' + esc(a.name || '—') + '</b>'
+            + (bonus ? ' <span class="dim">' + esc(bonus) + ' atk</span>' : '')
+            + (bits ? ' — ' + bits : '') + '</div>';
+        }).join('') + '</div>';
 
     if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div>'
-      + c.spells.map(sp => '<div class="pty-line' + (sp.lost ? ' lost' : '') + '">' + esc(sp.name)
-        + (sp.level ? ' <span class="dim">(T' + esc(sp.level) + ', DC ' + (10 + (parseInt(sp.level) || 1)) + ')</span>' : '')
-        + (sp.lost ? ' <span class="dim">— lost</span>' : '') + '</div>').join('') + '</div>';
+      + c.spells.map((sp, i) => {
+          const hasDesc = sp.desc && sp.desc.trim();
+          const info = hasDesc
+            ? '<button class="pty-spell-info" data-spell="' + entry.id + '-' + i + '" title="Show description" aria-label="Show spell description">&#9432;</button>'
+            : '';
+          return '<div class="pty-line' + (sp.lost ? ' lost' : '') + '">' + esc(sp.name)
+            + (sp.level ? ' <span class="dim">(T' + esc(sp.level) + ', DC ' + (10 + (parseInt(sp.level) || 1)) + ')</span>' : '')
+            + (sp.lost ? ' <span class="pty-lost">LOST</span>' : '')
+            + info
+            + (hasDesc ? '<div class="pty-spell-desc" data-desc="' + entry.id + '-' + i + '" style="display:none;">' + esc(sp.desc) + '</div>' : '')
+            + '</div>';
+        }).join('') + '</div>';
 
     if(c.talents.length) h += '<div class="pty-sec"><div class="pty-sec-h">Talents &amp; Features</div>'
       + c.talents.map(t => '<div class="pty-line">' + esc(t) + '</div>').join('') + '</div>';
 
     const carried = c.gear.filter(g => !g.free), free = c.gear.filter(g => g.free);
     if(c.gear.length || c.coins.gp || c.coins.sp || c.coins.cp) {
-      h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div>';
+      const coinStr = c.coins.gp + ' gp · ' + c.coins.sp + ' sp · ' + c.coins.cp + ' cp' + (c.xp ? ' · ' + c.xp + ' XP' : '');
+      h += '<div class="pty-sec"><div class="pty-sec-h pty-gear-h">'
+         + '<span>Gear <span class="pty-slots">' + c.slotsUsed + '/' + c.slotsMax + '</span></span>'
+         + '<span class="pty-coins">' + esc(coinStr) + '</span>'
+         + '</div>';
       h += '<div class="pty-line">' + (carried.length
         ? carried.map(g => esc(g.name) + (g.qty > 1 ? ' <span class="dim">×' + g.qty + '</span>' : '')).join(', ')
         : '<span class="dim">—</span>') + '</div>';
       if(free.length) h += '<div class="pty-line dim">Free to carry: ' + free.map(g => esc(g.name)).join(', ') + '</div>';
-      h += '<div class="pty-line dim">' + c.coins.gp + ' gp · ' + c.coins.sp + ' sp · ' + c.coins.cp + ' cp'
-         + (c.xp ? ' · ' + c.xp + ' XP' : '') + '</div></div>';
+      h += '</div>';
     }
     if(c.languages) h += '<div class="pty-sec"><div class="pty-sec-h">Languages</div><div class="pty-line">' + esc(c.languages) + '</div></div>';
     h += '<div class="pty-line dim" style="margin-top:8px;font-size:10px;">Source: ' + esc(entry.source) + '</div>';
@@ -9523,6 +9583,16 @@ function init_party(root) {
       openIds.delete(id);
       status('');
       render();
+      return;
+    }
+    // Spell description toggle — must run before the card-header collapse and
+    // not bubble up to it, so opening a description never closes the card.
+    const info = e.target.closest('.pty-spell-info');
+    if(info) {
+      e.stopPropagation();
+      const key = info.dataset.spell;
+      const desc = listEl.querySelector('.pty-spell-desc[data-desc="' + key + '"]');
+      if(desc) desc.style.display = desc.style.display === 'none' ? 'block' : 'none';
       return;
     }
     const hd = e.target.closest('.pty-card-hd');
@@ -9571,11 +9641,18 @@ function init_party(root) {
       if(!r.ok) throw new Error(r.status);
       const data = await r.json();
       const list = Array.isArray(data) ? data : (data.characters || []);
-      // A sync is the source of truth for campaign sheets: drop the ones that
-      // are no longer linked, keep anything added by hand.
-      chars = chars.filter(x => !String(x.source).startsWith('campaign'));
+      // A sync is the source of truth for campaign sheets. Update matching
+      // characters in place (addSheet matches by name and keeps the same id, so
+      // an expanded card stays expanded), and afterwards drop only the campaign
+      // characters that were NOT in this response.
+      const seen = new Set();
       let ok = 0;
-      list.forEach(d => { if(addSheet(d, 'campaign · ' + camp.code)) ok++; });
+      list.forEach(d => {
+        const norm = normalize(d.sheet && typeof d.sheet === 'object' ? d.sheet : d);
+        if(norm) seen.add(norm.name.toLowerCase());
+        if(addSheet(d, 'campaign · ' + camp.code)) ok++;
+      });
+      chars = chars.filter(x => !String(x.source).startsWith('campaign') || seen.has(x.sheet.name.toLowerCase()));
       lastSync = new Date();
       status(ok
         ? ok + ' character' + (ok === 1 ? '' : 's') + ' from ' + camp.code + ' · ' + lastSync.toLocaleTimeString()
