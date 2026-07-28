@@ -50,6 +50,12 @@ export default async function AdminUsersPage() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href="/admin/sounds"
+            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+          >
+            Sounds
+          </Link>
+          <Link
             href="/admin/rulebooks"
             className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
           >

@@ -179,6 +179,26 @@ model CampaignRoll {
   @@index([campaignId, id])
 }
 
+// ── Sound library ────────────────────────────────────────────────────────────
+// A shared, admin-managed shelf of labeled audio URLs for the GM Screen Music
+// tool. Instead of re-pasting a track's direct link every session, an admin
+// saves it here once (with a friendly label and a category) and the Music tool's
+// "Library" picker pulls from it. Not user-scoped: there is one library the
+// whole table draws from, and only admins (ADMIN_EMAILS) can read or edit it.
+//
+// `url` is stored already-normalized to a directly playable form (e.g. Dropbox
+// share links rewritten to raw=1) so the picker can hand it to <audio> as-is.
+model Sound {
+  id        String   @id @default(cuid())
+  label     String
+  url       String
+  category  String   @default("Uncategorized")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+}
+
 // ── Rulebook access control ──────────────────────────────────────────────────
 // Rulebook PDFs live on disk in protected/rulebooks/ (never under public/), keyed
 // by filename. These two tables gate who may read each file. Default is PRIVATE:
