@@ -188,7 +188,7 @@ const LIBRARY_UI = `
   var currentTarget=null, cache=null, activeCat='__all__', activeSub='__all__', query='';
   // Canonical display order (mirrors lib/sounds.ts) so chips read tidily.
   var CAT_ORDER=['Ambiance','Music','Scenes'];
-  var SUB_ORDER=['Cities','Lairs','Modern','Sci-fi','Ruins','Underground','Wilderness','Epic','Lighthearted','Mysterious','Peaceful','Somber','Tension','Action/Combat'];
+  var SUB_ORDER=['Civilization','Lairs','Modern','Sci-fi','Ruins','Underground','Wilderness','Epic','Lighthearted','Mysterious','Peaceful','Somber','Tension','Action/Combat'];
 
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 

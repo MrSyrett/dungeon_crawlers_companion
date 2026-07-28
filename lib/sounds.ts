@@ -19,7 +19,7 @@ export const DEFAULT_CATEGORY = "Music";
 // Subcategories, grouped for the picker/edit dropdowns. Location = where it's
 // set; Mood = how it feels. A track has one subcategory (or none).
 export const SUBCATEGORY_GROUPS: Record<string, string[]> = {
-  Location: ["Cities", "Lairs", "Modern", "Sci-fi", "Ruins", "Underground", "Wilderness"],
+  Location: ["Civilization", "Lairs", "Modern", "Sci-fi", "Ruins", "Underground", "Wilderness"],
   Mood: ["Epic", "Lighthearted", "Mysterious", "Peaceful", "Somber", "Tension", "Action/Combat"],
 };
 
