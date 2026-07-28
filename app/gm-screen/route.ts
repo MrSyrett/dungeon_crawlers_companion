@@ -347,11 +347,13 @@ const LIBRARY_UI = `
   // Scene card header (existing + future, via the MutationObserver in init()).
   function injectButtons(scope){
     if(!scope || !scope.querySelectorAll) return;
+    // Icon-only (like the Scene button), inserted just before the "＋ Files"
+    // button so the header reads: volume · 📚 · Files · URL.
     Array.prototype.forEach.call(scope.querySelectorAll('.mus-music-section .mus-sec-actions'),function(a){
-      if(!a.querySelector('.dd-lib-btn')) a.insertBefore(makeBtn('music', false), a.firstChild);
+      if(!a.querySelector('.dd-lib-btn')){ var f=a.querySelector('.mus-add-music'); a.insertBefore(makeBtn('music', true), f || a.firstChild); }
     });
     Array.prototype.forEach.call(scope.querySelectorAll('.mus-sfx-section .mus-sec-actions'),function(a){
-      if(!a.querySelector('.dd-lib-btn')) a.insertBefore(makeBtn('sfx', false), a.firstChild);
+      if(!a.querySelector('.dd-lib-btn')){ var f=a.querySelector('.mus-add-sfx'); a.insertBefore(makeBtn('sfx', true), f || a.firstChild); }
     });
     Array.prototype.forEach.call(scope.querySelectorAll('.mus-scene-head'),function(h){
       if(h.querySelector('.dd-lib-btn')) return;

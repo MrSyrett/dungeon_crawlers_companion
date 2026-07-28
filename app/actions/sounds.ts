@@ -72,16 +72,22 @@ export async function deleteSound(formData: FormData): Promise<void> {
   revalidatePath("/admin/sounds");
 }
 
-// Bulk add. Each non-empty line is one track, fields separated by "|":
-//   Category | Subcategory | Name | URL   (4 fields)
-//   Category | Name | URL                 (3 fields — no subcategory)
-//   Name | URL                            (2 fields)
-//   URL                                   (1 field — name derived)
+// Bulk add. One Category + Subcategory (chosen once, in the form) apply to every
+// pasted line, so each line only needs the Name and the URL:
+//   Name | URL
+//   URL          (name derived from the filename)
+// Per-line overrides are still honored if you include them:
+//   Category | Subcategory | Name | URL
+//   Category | Name | URL
 // This is the ingestion path for a harvested list — paste the block once and it
 // creates every valid row, skipping bad/duplicate URLs.
 export async function bulkImportSounds(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (!admin) return;
+
+  // The one-for-all defaults picked in the form.
+  const defCategory = canonicalCategory(String(formData.get("bulkCategory") ?? ""));
+  const defSubcategory = canonicalSubcategory(String(formData.get("bulkSubcategory") ?? ""));
 
   const text = String(formData.get("bulk") ?? "");
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
@@ -97,16 +103,22 @@ export async function bulkImportSounds(formData: FormData): Promise<void> {
 
   for (const line of lines) {
     const parts = line.split("|").map((p) => p.trim());
-    let category = "";
-    let subcategory = "";
+    // Default to the form-wide category/subcategory; only override when the line
+    // explicitly carries extra fields.
+    let category = defCategory;
+    let subcategory = defSubcategory;
     let label = "";
     let rawUrl = "";
 
     if (parts.length >= 4) {
-      [category, subcategory, label] = [parts[0], parts[1], parts[2]];
+      category = canonicalCategory(parts[0]);
+      subcategory = canonicalSubcategory(parts[1]);
+      label = parts[2];
       rawUrl = parts.slice(3).join("|");
     } else if (parts.length === 3) {
-      [category, label, rawUrl] = parts;
+      category = canonicalCategory(parts[0]);
+      label = parts[1];
+      rawUrl = parts[2];
     } else if (parts.length === 2) {
       [label, rawUrl] = parts;
     } else {
@@ -117,12 +129,7 @@ export async function bulkImportSounds(formData: FormData): Promise<void> {
     if (!url || existing.has(url) || seen.has(url)) continue;
     seen.add(url);
 
-    rows.push({
-      label: label || labelFromUrl(url),
-      url,
-      category: canonicalCategory(category),
-      subcategory: canonicalSubcategory(subcategory),
-    });
+    rows.push({ label: label || labelFromUrl(url), url, category, subcategory });
   }
 
   if (rows.length) {
