@@ -198,7 +198,7 @@ const LIBRARY_UI = `
     overlay.innerHTML='<div id="dd-lib-panel">'
       +'<div class="dd-lib-head"><span class="dd-lib-title"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 17.5h5V6.5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1zM10.2 17.5h4.6V4.8a1 1 0 0 0-1-1h-2.6a1 1 0 0 0-1 1z"/><path d="m16 17.5 4.4-.0-2.7-11a1 1 0 0 0-1.2-.7l-2.2.6a1 1 0 0 0-.7 1.1l.1.4z" opacity=".8"/><path d="M3 18.7h18v1.9H3z"/></svg> <span class="dd-lib-target">Sound Library</span></span>'
       +'<input class="dd-lib-search" type="text" placeholder="Search tracks…">'
-      +'<button class="dd-lib-iconbtn dd-lib-refresh" title="Reload library">⟳</button>'
+      +'<button class="dd-lib-iconbtn dd-lib-refresh" title="Reload library"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5.6a6.4 6.4 0 0 1 5.5 3.1H15.3v2.1h5.4V5.4h-2.1v1.9A8.5 8.5 0 0 0 3.6 11.2l2.1.3A6.4 6.4 0 0 1 12 5.6z"/><path d="M12 18.4a6.4 6.4 0 0 1-5.5-3.1h2.2v-2.1H3.3v5.4h2.1v-1.9A8.5 8.5 0 0 0 20.4 12.8l-2.1-.3A6.4 6.4 0 0 1 12 18.4z"/></svg></button>'
       +'<button class="dd-lib-iconbtn dd-lib-close" title="Close">✕</button></div>'
       +'<div class="dd-lib-cats"></div>'
       +'<div class="dd-lib-subs"></div>'
