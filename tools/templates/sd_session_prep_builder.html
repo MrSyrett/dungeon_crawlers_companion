@@ -697,6 +697,7 @@ body.flow-mode .page + .page {
 
 <script>
 const DEFAULT_STATE = {
+  darkMode:false,
   title:'', subtitle:'', floor:'', session:'', players:'', duration:'',
   overview:'', mappath:'', maps:[],
   randenc:[], clues:[], rewards:[], strongopen:[], locations:[], statblocks:[]
@@ -2796,11 +2797,26 @@ window.addEventListener('resize', function() {
 });
 
 function toggleDarkMode(cb) {
+  state.darkMode = cb.checked;                 // remember the choice in saved state
   document.querySelectorAll('.preview-area .page').forEach(p=>{
     p.classList.toggle('dark-mode', cb.checked);
   });
   // Re-run pagination so continuation pages also get dark mode
   requestAnimationFrame(()=>requestAnimationFrame(paginatePages));
+  autosave();                                  // persist (survives reload + carries into the GM Screen preview)
+}
+
+// Apply the saved dark-mode preference on load. This also runs inside the GM
+// Screen's read-only preview iframe, so a session opened there matches how it
+// was left in the builder.
+function applyDarkModeInit() {
+  const on = !!state.darkMode;
+  const cb = document.getElementById('dark-mode-toggle');
+  if (cb) cb.checked = on;
+  if (on) {
+    document.querySelectorAll('.preview-area .page').forEach(p=>p.classList.add('dark-mode'));
+    requestAnimationFrame(()=>requestAnimationFrame(paginatePages));
+  }
 }
 
 function clearAll() {
@@ -2817,7 +2833,7 @@ function clearAll() {
   saveState();buildSidebarFromState();renderPreview();
 }
 
-loadState();buildSidebarFromState();applyFlowMode();renderPreview();
+loadState();buildSidebarFromState();applyFlowMode();renderPreview();applyDarkModeInit();
 // Init pull-tab position
 (function(){
   const pt = document.getElementById('sidebar-pull-tab');
