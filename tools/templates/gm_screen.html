@@ -2859,7 +2859,30 @@ function initDocTool(root) {
   let savedDataUrl = ''; // base64 data URL stored for _getState
   let htmlScaler = null; // wrapper that gives the scaled iframe a real layout box
   let restoreZoom = null; // zoom to apply once an html doc finishes loading
-  const HTML_BASE_W = 900; // logical width so builders render their desktop layout
+  const HTML_BASE_W = 900; // logical width for two-column (fixed) builder layout
+  let htmlFlow = false;    // true when the embedded builder should render single-column
+  let htmlFlowSent = null; // last flow value posted to the iframe (avoid spamming)
+
+  // Does this doc pane want the single-column (flow) rendering? Yes only when the
+  // pane is cramped — the 4-panel view, or the stacked side panes in Focus. The
+  // wider views (Single / Split / Focus main) get the two-column desktop layout.
+  function paneWantsFlow() {
+    const pane = root.closest('.pane');
+    if(pane && pane.classList.contains('narrow')) return true;
+    // Fallback for any context without the class: go by measured width.
+    return frameWrap.clientWidth > 0 && frameWrap.clientWidth < 560;
+  }
+
+  // Tell the embedded builder which column layout to use (it re-flows itself).
+  function sendFlow(flow) {
+    if(htmlFlowSent === flow) return;
+    htmlFlowSent = flow;
+    try {
+      if(mediaEl && mediaEl.contentWindow) {
+        mediaEl.contentWindow.postMessage({ type: 'dd-flow', flow: flow }, '*');
+      }
+    } catch(e) { /* cross-origin can't happen here (same-origin doc) */ }
+  }
 
   function applyZoom() {
     if(!mediaEl) return;
@@ -2867,22 +2890,43 @@ function initDocTool(root) {
       mediaEl.style.width = (naturalW * zoom) + 'px';
       mediaEl.style.height = (naturalH * zoom) + 'px';
     } else if(mediaType === 'html' && htmlScaler) {
-      // Fixed logical width (desktop layout) magnified by a CSS transform; the
-      // scaler carries the scaled dimensions so the wrap scrolls correctly.
+      const wrapW = Math.max(1, frameWrap.clientWidth);
       const wrapH = Math.max(0, frameWrap.clientHeight);
-      mediaEl.style.width = HTML_BASE_W + 'px';
-      mediaEl.style.height = (wrapH / zoom) + 'px';
-      mediaEl.style.transform = 'scale(' + zoom + ')';
-      mediaEl.style.transformOrigin = 'top left';
-      htmlScaler.style.width = (HTML_BASE_W * zoom) + 'px';
-      htmlScaler.style.height = wrapH + 'px';
+      if(htmlFlow) {
+        // Single-column: render the iframe at the pane's own width so text is at
+        // a natural, readable size (no shrink-to-fit). The +/- buttons still zoom
+        // from there via the transform.
+        const logicalW = Math.max(280, wrapW / zoom);
+        mediaEl.style.width = logicalW + 'px';
+        mediaEl.style.height = (wrapH / zoom) + 'px';
+        mediaEl.style.transform = 'scale(' + zoom + ')';
+        mediaEl.style.transformOrigin = 'top left';
+        htmlScaler.style.width = (logicalW * zoom) + 'px';
+        htmlScaler.style.height = wrapH + 'px';
+      } else {
+        // Two-column: fixed logical width magnified by a transform to fit the pane.
+        mediaEl.style.width = HTML_BASE_W + 'px';
+        mediaEl.style.height = (wrapH / zoom) + 'px';
+        mediaEl.style.transform = 'scale(' + zoom + ')';
+        mediaEl.style.transformOrigin = 'top left';
+        htmlScaler.style.width = (HTML_BASE_W * zoom) + 'px';
+        htmlScaler.style.height = wrapH + 'px';
+      }
     }
   }
 
-  // Fit the logical page width into the current pane.
+  // Fit the logical page width into the current pane, choosing column layout by
+  // pane size and telling the embedded builder which to render.
   function fitHtml() {
+    htmlFlow = paneWantsFlow();
+    sendFlow(htmlFlow);
     const wrapW = Math.max(1, frameWrap.clientWidth);
-    zoom = Math.min(1.5, Math.max(0.3, wrapW / HTML_BASE_W));
+    if(htmlFlow) {
+      // Native size (single column already fits the pane width).
+      zoom = 1;
+    } else {
+      zoom = Math.min(1.5, Math.max(0.3, wrapW / HTML_BASE_W));
+    }
     applyZoom();
   }
 
@@ -2901,7 +2945,13 @@ function initDocTool(root) {
     const ro = new ResizeObserver(() => {
       if(mediaType !== 'html') return;
       clearTimeout(rzTimer);
-      rzTimer = setTimeout(applyZoom, 100);
+      rzTimer = setTimeout(() => {
+        // A view-mode change flips the pane's .narrow state. Only when the
+        // single/two-column choice actually changes do we re-fit (which resets
+        // zoom); otherwise just re-apply so a manual zoom survives a plain resize.
+        if(paneWantsFlow() !== htmlFlow) fitHtml();
+        else applyZoom();
+      }, 100);
     });
     ro.observe(frameWrap);
   }
@@ -2937,9 +2987,11 @@ function initDocTool(root) {
     savedDataUrl = dataUrl;
 
     if(ext === 'html' || ext === 'htm') {
-      // Zoomable HTML doc (e.g. a saved session prep). A fixed logical width
-      // forces the builder's desktop layout; a CSS transform on the iframe
-      // handles zoom, and the scaler wrapper gives it a scrollable layout box.
+      // Zoomable HTML doc (e.g. a saved session prep). Wide panes render the
+      // builder's two-column desktop layout scaled to fit; cramped panes (4-panel,
+      // Focus side panes) tell the builder to reflow to a single column at the
+      // pane's own width. A CSS transform handles zoom; the scaler wrapper gives
+      // the iframe a scrollable layout box.
       mediaType = 'html';
       frameWrap.classList.add('html-mode');
       const scaler = document.createElement('div');
@@ -2952,11 +3004,17 @@ function initDocTool(root) {
       frameWrap.appendChild(scaler);
       mediaEl = el;
       htmlScaler = scaler;
+      htmlFlowSent = null; // new doc: force the flow signal to be re-sent
       zoomInBtn.style.display = '';
       zoomOutBtn.style.display = '';
       el.addEventListener('load', () => {
         if(restoreZoom != null) { zoom = restoreZoom; restoreZoom = null; applyZoom(); }
         else fitHtml();
+        // The iframe registers its message listener during its own load-time
+        // script; re-post the flow signal a couple of times to beat that race.
+        htmlFlowSent = null; sendFlow(htmlFlow);
+        setTimeout(() => sendFlow(htmlFlow), 120);
+        setTimeout(() => sendFlow(htmlFlow), 400);
       });
       // Apply an initial fit even before load in case the pane is already sized
       setTimeout(() => { if(mediaType === 'html' && restoreZoom == null) fitHtml(); }, 60);
