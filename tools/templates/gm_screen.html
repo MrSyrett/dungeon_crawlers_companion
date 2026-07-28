@@ -1910,7 +1910,7 @@ GMScenes.renderPins();
 .pty-spell-info { background:transparent; border:none; color:var(--gold); cursor:pointer; font-size:13px; line-height:1; padding:0 3px; vertical-align:middle; }
 .pty-spell-info:hover { color:var(--white); }
 .pty-spell-desc { font-family:'Montserrat',sans-serif; font-size:10px; color:var(--muted); line-height:1.5; margin:3px 0 5px; padding:5px 8px; border-left:2px solid var(--gold); background:var(--panel); }
-.pty-gear-h { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.pty-gear-h { display:flex; align-items:center; justify-content:flex-start; gap:8px; flex-wrap:wrap; }
 .pty-slots { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--light); background:var(--panel); border:1px solid var(--border); border-radius:3px; padding:0 5px; margin-left:4px; }
 .pty-coins { font-family:'Montserrat',sans-serif; font-size:9px; font-weight:700; color:var(--muted); letter-spacing:0; text-transform:none; }
 /* ═══ RULEBOOKS ═══ */
@@ -9454,7 +9454,6 @@ function init_party(root) {
       alignment: d.alignment || '',
       deity:     d.deity || '',
       background:d.background || '',
-      languages: d.languages || '',
       ac:        d.armorClass || 0,
       hpMax:     d.maxHitPoints || 0,
       hpCur:     sheetExtra.hpCurrent || '',
@@ -9523,12 +9522,12 @@ function init_party(root) {
       + c.attacks.map(a => {
           const bonus = a.bonus !== '' ? (String(a.bonus).trim().charAt(0) === '-' ? a.bonus : '+' + String(a.bonus).replace(/^\+/, '')) : '';
           const bits = [
-            a.damage ? '<span class="dim">' + esc(a.damage) + '</span>' : '',
-            a.range  ? '<span class="dim">' + esc(a.range) + '</span>'  : ''
+            bonus     ? '<span class="dim">' + esc(bonus) + ' atk</span>' : '',
+            a.damage  ? '<span class="dim">' + esc(a.damage) + '</span>'  : '',
+            a.range   ? '<span class="dim">' + esc(a.range) + '</span>'   : ''
           ].filter(Boolean).join(' · ');
           return '<div class="pty-line"><b>' + esc(a.name || '—') + '</b>'
-            + (bonus ? ' <span class="dim">' + esc(bonus) + ' atk</span>' : '')
-            + (bits ? ' — ' + bits : '') + '</div>';
+            + (bits ? ' ' + bits : '') + '</div>';
         }).join('') + '</div>';
 
     if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div>'
@@ -9561,8 +9560,6 @@ function init_party(root) {
       if(free.length) h += '<div class="pty-line dim">Free to carry: ' + free.map(g => esc(g.name)).join(', ') + '</div>';
       h += '</div>';
     }
-    if(c.languages) h += '<div class="pty-sec"><div class="pty-sec-h">Languages</div><div class="pty-line">' + esc(c.languages) + '</div></div>';
-    h += '<div class="pty-line dim" style="margin-top:8px;font-size:10px;">Source: ' + esc(entry.source) + '</div>';
     h += '</div></div>';
     return h;
   }
