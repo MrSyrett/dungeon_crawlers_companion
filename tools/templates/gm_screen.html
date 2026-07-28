@@ -1755,7 +1755,7 @@ const GMScenes = (function() {
       const b = document.createElement('button');
       b.className = 'btn small ghost scene-pin' + (on ? ' active' : '');
       b.title = (on ? 'Stop scene: ' : 'Play scene: ') + s.name;
-      b.innerHTML = (on ? '&#9209; ' : '&#9654; ') + esc(s.name);
+      b.innerHTML = (on ? '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><rect x="5.2" y="5.2" width="13.6" height="13.6" rx="2"/></svg> ' : '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12-7.4a1 1 0 0 0 0-1.72l-12-7.4A1 1 0 0 0 7 4.6Z"/></svg> ') + esc(s.name);
       b.addEventListener('click', ()=> toggle(s.id));
       host.appendChild(b);
     });
@@ -1821,7 +1821,7 @@ GMScenes.renderPins();
       <select class="pane-select" id="pane-1-select" onchange="setPaneTool(1, this.value)">
         <option value="adventure">Adventure</option>
         <option value="maps">Maps</option>
-        <option value="trackers">⏱ Trackers</option>
+        <option value="trackers">Trackers</option>
         <option value="notes">Notes</option>
         <option value="music">Music</option>
         <option value="gen">Generators</option>
@@ -1840,7 +1840,7 @@ GMScenes.renderPins();
       <select class="pane-select pane-2-select" id="pane-2-select" onchange="setPaneTool(2, this.value)">
         <option value="adventure">Adventure</option>
         <option value="maps">Maps</option>
-        <option value="trackers" selected>⏱ Trackers</option>
+        <option value="trackers" selected>Trackers</option>
         <option value="notes">Notes</option>
         <option value="music">Music</option>
         <option value="gen">Generators</option>
@@ -1858,7 +1858,7 @@ GMScenes.renderPins();
       <select class="pane-select" id="pane-3-select" onchange="setPaneTool(3, this.value)">
         <option value="adventure">Adventure</option>
         <option value="maps">Maps</option>
-        <option value="trackers">⏱ Trackers</option>
+        <option value="trackers">Trackers</option>
         <option value="notes" selected>Notes</option>
         <option value="music">Music</option>
         <option value="gen">Generators</option>
@@ -1877,7 +1877,7 @@ GMScenes.renderPins();
       <select class="pane-select" id="pane-4-select" onchange="setPaneTool(4, this.value)">
         <option value="adventure">Adventure</option>
         <option value="maps">Maps</option>
-        <option value="trackers">⏱ Trackers</option>
+        <option value="trackers">Trackers</option>
         <option value="notes">Notes</option>
         <option value="music">Music</option>
         <option value="gen">Generators</option>
@@ -1963,7 +1963,7 @@ GMScenes.renderPins();
       <div class="doc-controls" style="display:none;">
         <button class="btn small doc-zoom-out">−</button>
         <button class="btn small doc-zoom-in">+</button>
-        <button class="btn small ghost doc-clear" title="Clear" aria-label="Clear">&#128465;</button>
+        <button class="btn small ghost doc-clear" title="Clear" aria-label="Clear"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.5 2.6h5a1 1 0 0 1 1 1v1.2H8.5V3.6a1 1 0 0 1 1-1Z"/><path d="M4.5 5.8h15v2h-1.2l-.9 12.1a1.6 1.6 0 0 1-1.6 1.5H8.2a1.6 1.6 0 0 1-1.6-1.5L5.7 7.8H4.5Zm4.4 3.6.4 8.6h1.5l-.3-8.6Zm5.7 0-.3 8.6h1.5l.4-8.6Z"/></svg></button>
       </div>
     </div>
     <div class="doc-body">
@@ -1988,7 +1988,7 @@ GMScenes.renderPins();
       <div class="doc-controls" style="display:none;">
         <button class="btn small doc-zoom-out">−</button>
         <button class="btn small doc-zoom-in">+</button>
-        <button class="btn small ghost doc-clear" title="Clear" aria-label="Clear">&#128465;</button>
+        <button class="btn small ghost doc-clear" title="Clear" aria-label="Clear"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.5 2.6h5a1 1 0 0 1 1 1v1.2H8.5V3.6a1 1 0 0 1 1-1Z"/><path d="M4.5 5.8h15v2h-1.2l-.9 12.1a1.6 1.6 0 0 1-1.6 1.5H8.2a1.6 1.6 0 0 1-1.6-1.5L5.7 7.8H4.5Zm4.4 3.6.4 8.6h1.5l-.3-8.6Zm5.7 0-.3 8.6h1.5l.4-8.6Z"/></svg></button>
       </div>
     </div>
     <div class="doc-body">
@@ -2032,7 +2032,7 @@ GMScenes.renderPins();
         &#11014;
         <input type="file" class="nts-import-input" accept=".md,.markdown,.txt" style="display:none;">
       </label>
-      <button class="btn small ghost nts-clear" title="Clear" aria-label="Clear">&#128465;</button>
+      <button class="btn small ghost nts-clear" title="Clear" aria-label="Clear"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.5 2.6h5a1 1 0 0 1 1 1v1.2H8.5V3.6a1 1 0 0 1 1-1Z"/><path d="M4.5 5.8h15v2h-1.2l-.9 12.1a1.6 1.6 0 0 1-1.6 1.5H8.2a1.6 1.6 0 0 1-1.6-1.5L5.7 7.8H4.5Zm4.4 3.6.4 8.6h1.5l-.3-8.6Zm5.7 0-.3 8.6h1.5l.4-8.6Z"/></svg></button>
     </div>
     <div class="nts-body">
       <div class="nts-tabs"></div>
@@ -2045,17 +2045,17 @@ GMScenes.renderPins();
   <div class="tool-instance mus-tool" data-tool="music">
     <div class="toolbar-tpl" style="display:none">
       <div class="toolbar-spacer"></div>
-      <button class="btn small ghost mus-stopall" title="Stop All" aria-label="Fade out and stop everything">&#9209;</button>
+      <button class="btn small ghost mus-stopall" title="Stop All" aria-label="Fade out and stop everything"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><rect x="5.2" y="5.2" width="13.6" height="13.6" rx="2"/></svg></button>
     </div>
     <div class="mus-body">
       <div class="mus-section mus-music-section">
         <div class="mus-sec-head">
-          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title">&#127925; <span class="mus-sec-label">Music</span></span>
+          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M18 3.4 8.6 5.7a1 1 0 0 0-.8 1v8.9A3.3 3.3 0 1 0 9.6 18V9.3l7-1.7v5.2A3.3 3.3 0 1 0 18.4 15V4.4a1 1 0 0 0-.4-1Z"/></svg> <span class="mus-sec-label">Music</span></span>
           <div class="mus-sec-actions">
-            <span class="mus-vol-ico" title="Music volume">&#128266;</span>
+            <span class="mus-vol-ico" title="Music volume"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.2v5.6h3.4L13 19V5L7.4 9.2Z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M16 9.2a4 4 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8"/></svg></span>
             <input type="range" class="mus-vol mus-music-vol" min="0" max="100" value="80">
-            <button class="btn small ghost mus-add-music" title="Add local audio files" aria-label="Add local audio files">&#128193;</button>
-            <button class="btn small ghost mus-add-music-url" title="Add a direct audio URL" aria-label="Add a direct audio URL">&#128279;</button>
+            <button class="btn small ghost mus-add-music" title="Add local audio files" aria-label="Add local audio files"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg></button>
+            <button class="btn small ghost mus-add-music-url" title="Add a direct audio URL" aria-label="Add a direct audio URL"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
           </div>
         </div>
         <div class="mus-now">
@@ -2066,40 +2066,40 @@ GMScenes.renderPins();
             <span class="mus-time mus-dur">0:00</span>
           </div>
           <div class="mus-transport">
-            <button class="mus-btn mus-prev" title="Previous">&#9198;</button>
-            <button class="mus-btn mus-play" title="Play / Pause">&#9654;</button>
-            <button class="mus-btn mus-next" title="Next">&#9197;</button>
-            <button class="mus-btn mus-loop-list active" title="Loop playlist">&#128257;</button>
-            <button class="mus-btn mus-shuffle" title="Shuffle">&#128256;</button>
+            <button class="mus-btn mus-prev" title="Previous"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M18 5.1v13.8a1 1 0 0 1-1.5.85l-9-6.9a1 1 0 0 1 0-1.7l9-6.9A1 1 0 0 1 18 5.1Z"/><rect x="5" y="4.8" width="2.6" height="14.4" rx="1"/></svg></button>
+            <button class="mus-btn mus-play" title="Play / Pause"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12-7.4a1 1 0 0 0 0-1.72l-12-7.4A1 1 0 0 0 7 4.6Z"/></svg></button>
+            <button class="mus-btn mus-next" title="Next"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M6 5.1v13.8a1 1 0 0 0 1.5.85l9-6.9a1 1 0 0 0 0-1.7l-9-6.9A1 1 0 0 0 6 5.1Z"/><rect x="16.4" y="4.8" width="2.6" height="14.4" rx="1"/></svg></button>
+            <button class="mus-btn mus-loop-list active" title="Loop playlist"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7.4 6.2h7.3V3.6l4.8 3.7-4.8 3.7V8.4H7.4a2.6 2.6 0 0 0-2.6 2.6v.8H2.6v-.8a4.8 4.8 0 0 1 4.8-4.8Z"/><path d="M16.6 17.8H9.3v2.6l-4.8-3.7 4.8-3.7v2.6h7.3a2.6 2.6 0 0 0 2.6-2.6v-.8h2.2v.8a4.8 4.8 0 0 1-4.8 4.8Z"/></svg></button>
+            <button class="mus-btn mus-shuffle" title="Shuffle"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3 6.5h3.3a3 3 0 0 1 2.5 1.3l5.2 7.6a3 3 0 0 0 2.5 1.3H20v2h-3.5a5 5 0 0 1-4.1-2.2L7.2 8.9a1 1 0 0 0-.9-.4H3Z"/><path d="M15.5 5.5 20 8.7l-4.5 3.2V9.9h-.2a3 3 0 0 0-2.5 1.3l-.7 1-1.2-1.8.3-.4a5 5 0 0 1 4.1-2.1h.2Z"/><path d="M3 15.5h3.3a5 5 0 0 0 3.4-1.3l.6-.6 1.2 1.8-.4.4A7 7 0 0 1 6.3 17.5H3Z"/><path d="M15.5 14.1 20 17.3l-4.5 3.2V18h-.2a3 3 0 0 1-.7-.1l1-1.6h-.1Z" opacity=".9"/></svg></button>
           </div>
         </div>
         <div class="mus-list mus-music-list"></div>
-        <div class="mus-empty mus-music-empty">Add tracks with &#128193; or &#128279;. Toggle &#128257; on a track to loop it as background ambience.</div>
+        <div class="mus-empty mus-music-empty">Add tracks with <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg> or <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>. Toggle <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7.4 6.2h7.3V3.6l4.8 3.7-4.8 3.7V8.4H7.4a2.6 2.6 0 0 0-2.6 2.6v.8H2.6v-.8a4.8 4.8 0 0 1 4.8-4.8Z"/><path d="M16.6 17.8H9.3v2.6l-4.8-3.7 4.8-3.7v2.6h7.3a2.6 2.6 0 0 0 2.6-2.6v-.8h2.2v.8a4.8 4.8 0 0 1-4.8 4.8Z"/></svg> on a track to loop it as background ambience.</div>
       </div>
       <div class="mus-section mus-sfx-section">
         <div class="mus-sec-head">
-          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title">&#128276; <span class="mus-sec-label">Soundboard</span></span>
+          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.4a1.5 1.5 0 0 1 1.5 1.5v.5a6 6 0 0 1 4.5 5.8v3.1l1.6 2.9a1 1 0 0 1-.9 1.5H5.3a1 1 0 0 1-.9-1.5L6 13.3v-3.1a6 6 0 0 1 4.5-5.8v-.5A1.5 1.5 0 0 1 12 2.4Z"/><path d="M9.4 19.2h5.2a2.6 2.6 0 0 1-5.2 0Z"/></svg> <span class="mus-sec-label">Soundboard</span></span>
           <div class="mus-sec-actions">
-            <span class="mus-vol-ico" title="Soundboard volume">&#128266;</span>
+            <span class="mus-vol-ico" title="Soundboard volume"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.2v5.6h3.4L13 19V5L7.4 9.2Z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M16 9.2a4 4 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8"/></svg></span>
             <input type="range" class="mus-vol mus-sfx-vol" min="0" max="100" value="90">
-            <button class="btn small ghost mus-add-sfx" title="Add local audio files" aria-label="Add local audio files">&#128193;</button>
-            <button class="btn small ghost mus-add-sfx-url" title="Add a direct audio URL" aria-label="Add a direct audio URL">&#128279;</button>
+            <button class="btn small ghost mus-add-sfx" title="Add local audio files" aria-label="Add local audio files"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg></button>
+            <button class="btn small ghost mus-add-sfx-url" title="Add a direct audio URL" aria-label="Add a direct audio URL"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
           </div>
         </div>
         <div class="mus-sfx-grid"></div>
-        <div class="mus-empty mus-sfx-empty">Add one-shot effects, then tap a pad to fire it &mdash; pads can overlap. Toggle &#128257; on a pad to make it loop.</div>
+        <div class="mus-empty mus-sfx-empty">Add one-shot effects, then tap a pad to fire it &mdash; pads can overlap. Toggle <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7.4 6.2h7.3V3.6l4.8 3.7-4.8 3.7V8.4H7.4a2.6 2.6 0 0 0-2.6 2.6v.8H2.6v-.8a4.8 4.8 0 0 1 4.8-4.8Z"/><path d="M16.6 17.8H9.3v2.6l-4.8-3.7 4.8-3.7v2.6h7.3a2.6 2.6 0 0 0 2.6-2.6v-.8h2.2v.8a4.8 4.8 0 0 1-4.8 4.8Z"/></svg> on a pad to make it loop.</div>
       </div>
       <div class="mus-section mus-scene-section">
         <div class="mus-sec-head">
-          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title">&#127916; <span class="mus-sec-label">Scenes</span></span>
+          <button class="mus-sec-toggle" title="Collapse / expand">&#9662;</button><span class="mus-sec-title"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3 9.4h18v9.1a1.6 1.6 0 0 1-1.6 1.6H4.6A1.6 1.6 0 0 1 3 18.5Z"/><path d="M3.5 4.7 20.4 7l-.4 2.4-2.9-.4.7-2-2.7-.4-.7 2-2.4-.3.7-2-2.7-.4-.7 2-2.4-.3.7-2-1.7-.2A1.6 1.6 0 0 0 3.1 6.6l-.1.5Z"/></svg> <span class="mus-sec-label">Scenes</span></span>
           <div class="mus-sec-actions">
-            <span class="mus-vol-ico" title="Scene volume">&#128266;</span>
+            <span class="mus-vol-ico" title="Scene volume"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.2v5.6h3.4L13 19V5L7.4 9.2Z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M16 9.2a4 4 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8"/></svg></span>
             <input type="range" class="mus-vol mus-scene-vol" min="0" max="100" value="80">
             <button class="btn small ghost mus-add-scene" title="New Scene" aria-label="New Scene">&#65291;</button>
           </div>
         </div>
         <div class="mus-scene-list"></div>
-        <div class="mus-empty mus-scene-empty">Build a scene from several tracks that play together &mdash; set each track's loop and volume, then &#128204; Pin it to the top bar for one-tap play.</div>
+        <div class="mus-empty mus-scene-empty">Build a scene from several tracks that play together &mdash; set each track's loop and volume, then <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.2a6.4 6.4 0 0 0-6.4 6.4c0 4.6 5.5 12 5.7 12.3a.9.9 0 0 0 1.4 0c.2-.3 5.7-7.7 5.7-12.3A6.4 6.4 0 0 0 12 2.2Zm0 4.1a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Z"/></svg> Pin it to the top bar for one-tap play.</div>
       </div>
     </div>
     <input type="file" class="mus-file-music" accept="audio/*" multiple style="display:none">
@@ -2111,7 +2111,7 @@ GMScenes.renderPins();
   <div class="tool-instance dice-tool" data-tool="dice">
     <div class="toolbar-tpl" style="display:none">
       <div class="toolbar-spacer"></div>
-      <button class="btn small ghost dice-clear" title="Clear log" aria-label="Clear log">&#128465;</button>
+      <button class="btn small ghost dice-clear" title="Clear log" aria-label="Clear log"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.5 2.6h5a1 1 0 0 1 1 1v1.2H8.5V3.6a1 1 0 0 1 1-1Z"/><path d="M4.5 5.8h15v2h-1.2l-.9 12.1a1.6 1.6 0 0 1-1.6 1.5H8.2a1.6 1.6 0 0 1-1.6-1.5L5.7 7.8H4.5Zm4.4 3.6.4 8.6h1.5l-.3-8.6Zm5.7 0-.3 8.6h1.5l.4-8.6Z"/></svg></button>
     </div>
     <div class="dice-log"></div>
     <div class="dice-tray"></div>
@@ -2504,14 +2504,14 @@ GMScenes.renderPins();
       </label>
       <button class="btn small ghost pty-sync" title="Sync" aria-label="Pull sheets shared with the linked campaign">&#8635;</button>
       <div class="toolbar-spacer"></div>
-      <button class="btn small ghost pty-clear" title="Clear" aria-label="Clear">&#128465;</button>
+      <button class="btn small ghost pty-clear" title="Clear" aria-label="Clear"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.5 2.6h5a1 1 0 0 1 1 1v1.2H8.5V3.6a1 1 0 0 1 1-1Z"/><path d="M4.5 5.8h15v2h-1.2l-.9 12.1a1.6 1.6 0 0 1-1.6 1.5H8.2a1.6 1.6 0 0 1-1.6-1.5L5.7 7.8H4.5Zm4.4 3.6.4 8.6h1.5l-.3-8.6Zm5.7 0-.3 8.6h1.5l.4-8.6Z"/></svg></button>
     </div>
     <div class="pty-body">
       <div class="pty-bar">
         <span class="pty-note"></span>
       </div>
       <div class="pty-empty">
-        <div class="pty-empty-icon">&#128101;</div>
+        <div class="pty-empty-icon"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M8.6 4.2a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2ZM3 19.2a5.6 5.6 0 0 1 11.2 0 .9.9 0 0 1-.9.9H3.9a.9.9 0 0 1-.9-.9Z"/><path d="M16 5.4a2.7 2.7 0 0 1 0 5.2 4.6 4.6 0 0 1 .4 1.1 4.4 4.4 0 0 1 4.6 4.2.9.9 0 0 1-.9.9h-3a7.5 7.5 0 0 0-2.6-5.6A4.6 4.6 0 0 0 16 5.4Z" opacity=".7"/></svg></div>
         <div class="pty-empty-title">No Character Sheets</div>
         <div class="pty-empty-sub">Add the .json a player exported from their character sheet (Save), or press Sync to pull sheets shared with your linked campaign.</div>
       </div>
@@ -2533,7 +2533,7 @@ GMScenes.renderPins();
       </div>
       <div class="rul-view">
         <div class="rul-empty">
-          <div class="pty-empty-icon">&#128214;</div>
+          <div class="pty-empty-icon"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg></div>
           <div class="pty-empty-title">No Rulebooks Found</div>
           <div class="pty-empty-sub">Rulebooks are read from the server &mdash; the same books listed on the Rulebooks page. Drop a PDF into public/rulebooks/ and press Refresh.</div>
         </div>
@@ -3163,7 +3163,7 @@ function wireSessionPrepLoader(root) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'btn primary small doc-load-prep';
-    b.textContent = 'Load Session Prep';
+    b.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg> Load Session Prep';
     b.style.marginTop = '4px';
     b.addEventListener('click', open);
     emptyEl.appendChild(b);
@@ -3175,7 +3175,7 @@ function wireSessionPrepLoader(root) {
     const tb = document.createElement('button');
     tb.type = 'button';
     tb.className = 'btn small doc-load-prep';
-    tb.innerHTML = '&#128193;';
+    tb.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg>';
     tb.title = 'Load Session Prep';
     tb.setAttribute('aria-label', 'Load Session Prep');
     tb.addEventListener('click', open);
@@ -3527,7 +3527,7 @@ function init_trackers(root) {
         </div>
       ` : `
         <div class="timer-controls">
-          <button class="tracker-adjust-btn timer-toggle">${t.running ? '&#9208;' : '&#9654;'}</button>
+          <button class="tracker-adjust-btn timer-toggle">${t.running ? '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M6.5 4.5h3.4a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H6.5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Zm7.6 0h3.4a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-3.4a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Z"/></svg>' : '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12-7.4a1 1 0 0 0 0-1.72l-12-7.4A1 1 0 0 0 7 4.6Z"/></svg>'}</button>
           <button class="tracker-adjust-btn timer-reset" title="Reset">&#8634;</button>
         </div>
         <div class="timer-set-row">
@@ -3772,7 +3772,7 @@ function init_trackers(root) {
         <button class="btn small ghost mon-pick-close">Close</button>
       </div>
       <div class="mon-pick-add-row">
-        <button class="btn small ghost mon-pick-timer cbt-add-tracker" title="Add a timer / round tracker">&#9201; Timer</button>
+        <button class="btn small ghost mon-pick-timer cbt-add-tracker" title="Add a timer / round tracker"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.2 1.8h5.6v2H9.2z"/><path d="M18.5 6.9l1.3-1.3 1.3 1.3-1.4 1.4A8.2 8.2 0 1 1 12 4.6a8 8 0 0 1 4.6 1.4l1-1 .9.9ZM12.9 8.6h-1.8v4.9l3.6 2.2.95-1.55-2.75-1.65Z"/></svg> Timer</button>
         <button class="btn small ghost mon-pick-blank cbt-add-npc" title="Add an empty combatant">Blank</button>
       </div>
       <div class="mon-pick-list">${pickerRowsHtml()}</div>`;
@@ -7624,7 +7624,7 @@ function init_music(root) {
     const t = curTrack();
     nowTitle.textContent = t ? t.name : 'Nothing playing';
     nowTitle.classList.toggle('idle', !t);
-    playBtn.innerHTML = playing ? '&#9208;' : '&#9654;';
+    playBtn.innerHTML = playing ? '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M6.5 4.5h3.4a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H6.5a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Zm7.6 0h3.4a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-3.4a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1Z"/></svg>' : '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12-7.4a1 1 0 0 0 0-1.72l-12-7.4A1 1 0 0 0 7 4.6Z"/></svg>';
     loopListBtn.classList.toggle('active', loopList);
     shuffleBtn.classList.toggle('active', shuffle);
     if(!t){ seek.value=0; curTimeEl.textContent='0:00'; durEl.textContent='0:00'; }
@@ -7637,9 +7637,9 @@ function init_music(root) {
       const row = document.createElement('div');
       row.className = 'mus-track' + (t.id===curId && playing ? ' playing' : '') + (t.needsFile ? ' needs-file' : '');
       row.innerHTML =
-        '<span class="mus-track-ico">' + (t.id===curId && playing ? '&#9654;' : '&#9834;') + '</span>' +
+        '<span class="mus-track-ico">' + (t.id===curId && playing ? '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12-7.4a1 1 0 0 0 0-1.72l-12-7.4A1 1 0 0 0 7 4.6Z"/></svg>' : '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M18 3.4 8.6 5.7a1 1 0 0 0-.8 1v8.9A3.3 3.3 0 1 0 9.6 18V9.3l7-1.7v5.2A3.3 3.3 0 1 0 18.4 15V4.4a1 1 0 0 0-.4-1Z"/></svg>') + '</span>' +
         '<span class="mus-track-name">' + esc(t.name) + (t.needsFile ? ' <span class="mus-track-warn">re-add file</span>' : '') + '</span>' +
-        '<button class="mus-track-loop' + (t.loop ? ' active' : '') + '" title="Loop this track">&#128257;</button>' +
+        '<button class="mus-track-loop' + (t.loop ? ' active' : '') + '" title="Loop this track"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7.4 6.2h7.3V3.6l4.8 3.7-4.8 3.7V8.4H7.4a2.6 2.6 0 0 0-2.6 2.6v.8H2.6v-.8a4.8 4.8 0 0 1 4.8-4.8Z"/><path d="M16.6 17.8H9.3v2.6l-4.8-3.7 4.8-3.7v2.6h7.3a2.6 2.6 0 0 0 2.6-2.6v-.8h2.2v.8a4.8 4.8 0 0 1-4.8 4.8Z"/></svg></button>' +
         '<button class="mus-track-del" title="Remove">&#10005;</button>';
       row.addEventListener('click', e=>{
         if(e.target.closest('.mus-track-loop') || e.target.closest('.mus-track-del')) return;
@@ -7662,7 +7662,7 @@ function init_music(root) {
       pad.innerHTML =
         '<span class="mus-sfx-name">' + esc(s.name) + '</span>' +
         '<span class="mus-sfx-corner">' +
-          '<span class="mus-sfx-mini mus-sfx-loop' + (s.loop ? ' active' : '') + '" title="Loop">&#128257;</span>' +
+          '<span class="mus-sfx-mini mus-sfx-loop' + (s.loop ? ' active' : '') + '" title="Loop"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7.4 6.2h7.3V3.6l4.8 3.7-4.8 3.7V8.4H7.4a2.6 2.6 0 0 0-2.6 2.6v.8H2.6v-.8a4.8 4.8 0 0 1 4.8-4.8Z"/><path d="M16.6 17.8H9.3v2.6l-4.8-3.7 4.8-3.7v2.6h7.3a2.6 2.6 0 0 0 2.6-2.6v-.8h2.2v.8a4.8 4.8 0 0 1-4.8 4.8Z"/></svg></span>' +
           '<span class="mus-sfx-mini mus-sfx-del" title="Remove">&#10005;</span>' +
         '</span>';
       pad.addEventListener('click', e=>{
@@ -7723,18 +7723,18 @@ function init_music(root) {
       const tracksHtml = sc.tracks.length ? sc.tracks.map(t=>
         '<div class="mus-scene-track' + (t.needsFile?' needs-file':'') + '" data-tid="'+t.id+'">' +
           '<span class="mus-scene-tname">'+esc(t.name)+(t.needsFile?' <span class="mus-scene-warn">re-add</span>':'')+'</span>' +
-          '<button class="mus-scene-tloop'+(t.loop?' active':'')+'" title="Loop this track">&#128257;</button>' +
+          '<button class="mus-scene-tloop'+(t.loop?' active':'')+'" title="Loop this track"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7.4 6.2h7.3V3.6l4.8 3.7-4.8 3.7V8.4H7.4a2.6 2.6 0 0 0-2.6 2.6v.8H2.6v-.8a4.8 4.8 0 0 1 4.8-4.8Z"/><path d="M16.6 17.8H9.3v2.6l-4.8-3.7 4.8-3.7v2.6h7.3a2.6 2.6 0 0 0 2.6-2.6v-.8h2.2v.8a4.8 4.8 0 0 1-4.8 4.8Z"/></svg></button>' +
           '<input type="range" class="mus-scene-tvol" min="0" max="100" value="'+Math.round((typeof t.vol==='number'?t.vol:0.8)*100)+'" title="Track volume">' +
           '<button class="mus-scene-tdel" title="Remove track">&#10005;</button>' +
         '</div>'
-      ).join('') : '<div class="mus-scene-empty-tracks">No tracks yet &mdash; add some with &#128193; or &#128279;.</div>';
+      ).join('') : '<div class="mus-scene-empty-tracks">No tracks yet &mdash; add some with <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg> or <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>.</div>';
       card.innerHTML =
         '<div class="mus-scene-head">' +
-          '<button class="mus-scene-play" title="Play / stop scene">'+(playing?'&#9209;':'&#9654;')+'</button>' +
+          '<button class="mus-scene-play" title="Play / stop scene">'+(playing?'<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><rect x="5.2" y="5.2" width="13.6" height="13.6" rx="2"/></svg>':'<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 4.6v14.8a1 1 0 0 0 1.5.86l12-7.4a1 1 0 0 0 0-1.72l-12-7.4A1 1 0 0 0 7 4.6Z"/></svg>')+'</button>' +
           '<input class="mus-scene-name" value="'+esc(sc.name)+'" placeholder="Scene name...">' +
-          '<button class="mus-scene-pin'+(sc.pinned?' active':'')+'" title="Pin to top bar">&#128204;</button>' +
-          '<button class="btn small ghost mus-scene-add" title="Add local audio files" aria-label="Add local audio files">&#128193;</button>' +
-          '<button class="btn small ghost mus-scene-add-url" title="Add a direct audio URL" aria-label="Add a direct audio URL">&#128279;</button>' +
+          '<button class="mus-scene-pin'+(sc.pinned?' active':'')+'" title="Pin to top bar"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.2a6.4 6.4 0 0 0-6.4 6.4c0 4.6 5.5 12 5.7 12.3a.9.9 0 0 0 1.4 0c.2-.3 5.7-7.7 5.7-12.3A6.4 6.4 0 0 0 12 2.2Zm0 4.1a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Z"/></svg></button>' +
+          '<button class="btn small ghost mus-scene-add" title="Add local audio files" aria-label="Add local audio files"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3.5 5.6a1.6 1.6 0 0 1 1.6-1.6h3.8l2 2h6a1.6 1.6 0 0 1 1.6 1.6v1H6.4a1.6 1.6 0 0 0-1.5 1.1L3.5 15Z"/><path d="M6.4 10.2h14.2a1 1 0 0 1 1 1.3l-1.9 6.4a1.6 1.6 0 0 1-1.5 1.1H4.6a1.6 1.6 0 0 1-1.5-2.1l1.8-5.6a1.6 1.6 0 0 1 1.5-1.1Z" opacity=".85"/></svg></button>' +
+          '<button class="btn small ghost mus-scene-add-url" title="Add a direct audio URL" aria-label="Add a direct audio URL"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>' +
           '<button class="mus-scene-del" title="Delete scene">&#10005;</button>' +
         '</div>' +
         '<div class="mus-scene-tracks">'+tracksHtml+'</div>';
@@ -9576,7 +9576,7 @@ function init_party(root) {
       + c.spells.map((sp, i) => {
           const hasDesc = sp.desc && sp.desc.trim();
           const info = hasDesc
-            ? '<button class="pty-spell-info" data-spell="' + entry.id + '-' + i + '" title="Show description" aria-label="Show spell description">&#9432;</button>'
+            ? '<button class="pty-spell-info" data-spell="' + entry.id + '-' + i + '" title="Show description" aria-label="Show spell description"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg></button>'
             : '';
           return '<div class="pty-line' + (sp.lost ? ' lost' : '') + '">' + esc(sp.name)
             + (sp.level ? ' <span class="dim">(T' + esc(sp.level) + ', DC ' + (10 + (parseInt(sp.level) || 1)) + ')</span>' : '')
