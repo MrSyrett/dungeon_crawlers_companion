@@ -2867,10 +2867,15 @@ function initDocTool(root) {
   // pane is cramped — the 4-panel view, or the stacked side panes in Focus. The
   // wider views (Single / Split / Focus main) get the two-column desktop layout.
   function paneWantsFlow() {
+    // Mobile collapses to one full-width column regardless of pane — always flow.
+    if(typeof isMobileView === 'function' && isMobileView()) return true;
+    // Desktop: trust the layout's own "cramped pane" flag. It marks exactly the
+    // 4-panel panes and the stacked Focus side panes as narrow; Single, Split,
+    // and the Focus main pane are not, so they get the two-column layout.
     const pane = root.closest('.pane');
-    if(pane && pane.classList.contains('narrow')) return true;
-    // Fallback for any context without the class: go by measured width.
-    return frameWrap.clientWidth > 0 && frameWrap.clientWidth < 560;
+    if(pane) return pane.classList.contains('narrow');
+    // No pane ancestor (unusual embedding): fall back to a conservative width.
+    return frameWrap.clientWidth > 0 && frameWrap.clientWidth < 420;
   }
 
   // Tell the embedded builder which column layout to use (it re-flows itself).
