@@ -99,12 +99,23 @@ function extractDocTitle(tool: string, data: object): string | null {
 function extractLinkedCampaignId(data: object): string | null {
   try {
     const blob = data as Record<string, unknown>;
-    if (typeof blob.sd_sheet !== "string") return null;
-    const sheet = JSON.parse(blob.sd_sheet) as {
-      _sheet?: { campaign?: { id?: unknown } | null } | null;
-    };
-    const id = sheet?._sheet?.campaign?.id;
-    return typeof id === "string" && id ? id : null;
+    // SD sheet: campaign lives under _sheet.campaign.id
+    if (typeof blob.sd_sheet === "string") {
+      const sheet = JSON.parse(blob.sd_sheet) as {
+        _sheet?: { campaign?: { id?: unknown } | null } | null;
+      };
+      const id = sheet?._sheet?.campaign?.id;
+      return typeof id === "string" && id ? id : null;
+    }
+    // DCC sheet: campaign lives at the top level (campaign.id)
+    if (typeof blob.dcc_sheet === "string") {
+      const sheet = JSON.parse(blob.dcc_sheet) as {
+        campaign?: { id?: unknown } | null;
+      };
+      const id = sheet?.campaign?.id;
+      return typeof id === "string" && id ? id : null;
+    }
+    return null;
   } catch {
     return null;
   }

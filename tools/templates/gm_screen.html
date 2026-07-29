@@ -9471,10 +9471,44 @@ function init_party(root) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const mod = v => { const m = Math.floor(((parseInt(v)||10) - 10) / 2); return (m >= 0 ? '+' : '') + m; };
 
+  // Build a Party-tool summary from a Dungeon Crawler Carl sheet's saved data.
+  // Everything the DCC card shows is computed here from the raw sheet: stat mods
+  // use the sheet's enhanced/unenhanced source, and evade/DR/mana totals mirror
+  // the sheet's own math (evade = DEX mod + buffs; DR = armor + buffs; mana max =
+  // enhanced INT). The DCC sheet stores raw fields only, so no sheet change needed.
+  function dccParty(d) {
+    const src = d.globalModSource === 'unenhanced' ? 'unenh' : 'enh';
+    const toMod = v => Math.floor(((parseInt(v) || 10) - 10) / 2);
+    const S = d.stats || {}, H = d.header || {}, C = d.combat || {};
+    const statMod = id => toMod((S[id] || {})[src]);
+    const num = v => parseInt(v) || 0;
+    return {
+      system:  'DCC',
+      name:    H['f-name'] || 'Unnamed',
+      race:    H['f-race'] || '',
+      cls:     H['f-class'] || '',
+      level:   H['f-level'] || '1',
+      crawler: H['f-crawler'] || '',
+      modSource: src === 'unenh' ? 'Unenhanced' : 'Enhanced',
+      hpPips:  Array.isArray(d.hpPips) ? d.hpPips : [],
+      stats:   [['STR','str'],['INT','int'],['CON','con'],['DEX','dex'],['CHA','cha']].map(([abbr,id]) =>
+                 ({ abbr, mod: statMod(id), enh:(S[id]||{}).enh || '', unenh:(S[id]||{}).unenh || '' })),
+      evade:   { total: statMod('dex') + num(C.evadeBuffs), move: C.evadeMove || '', step: C.evadeStep || '' },
+      dr:      { total: num(C.drArmor) + num(C.drBuffs), aiFavor: C.drAiFavor || '', size: C.drSize || '' },
+      mana:    { current: C.manaCurrentVal || '', max: (S.int || {}).enh || '' },
+      buffs:   Array.isArray(d.extBuffs) ? d.extBuffs.filter(b => b && String(b).trim()) : [],
+      debuffs: C.debuffs || '',
+      attacks: Array.isArray(d.attacks) ? d.attacks.filter(a => a && (a.name || a.dice)) : [],
+    };
+  }
+
   // Sheets come from a few exporters (our sheet, Shadowdarklings). Read defensively.
   function normalize(raw) {
     if(!raw || typeof raw !== 'object') return null;
     const d = raw.sheet && typeof raw.sheet === 'object' ? raw.sheet : raw;
+    // DCC sheets have a distinct shape (header + combat blocks) — route them to
+    // the DCC summariser instead of the Shadowdark path below.
+    if(d && d.header && d.combat) return dccParty(d);
     if(!d.name && !d.class && !d.stats) return null;
     const st = d.stats || d.rolledStats || {};
     const pick = k => st[k] ?? st[k.toLowerCase()] ?? st[k[0] + k.slice(1).toLowerCase()] ?? 10;
@@ -9556,8 +9590,72 @@ function init_party(root) {
     noteEl.style.color = isErr ? '#df6a6a' : '';
   }
 
+  // Party card for a Dungeon Crawler Carl character — its stat block and combat
+  // math differ from Shadowdark, so it gets its own layout.
+  function cardHTMLDCC(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = ['LV ' + esc(c.level), [c.race, c.cls].filter(Boolean).join(' '),
+                 c.crawler ? 'Crawler #' + esc(c.crawler) : ''].filter(Boolean).join(' · ');
+    const HPCOL = ['#c01e1e','#d23c0a','#dc6400','#c88200','#b49600','#96a000','#64aa00','#3caa00','#1e9614','#0a780a'];
+    const pips = Array.isArray(c.hpPips) ? c.hpPips : [];
+    const activeOf = i => pips.length ? (pips[i] !== 'false') : true;
+    const hpPct = pips.length ? pips.filter(x => x !== 'false').length * 10 : 100;
+    let bar = '<span style="display:inline-flex;gap:2px;flex:1;height:12px;">';
+    for(let i=0;i<10;i++) bar += '<span style="flex:1;background:'+HPCOL[i]+';opacity:'+(activeOf(i)?'1':'.16')+';"></span>';
+    bar += '</span>';
+    const mana = (c.mana && (c.mana.current !== '' || c.mana.max !== '')) ? (esc(c.mana.current||'0')+'/'+esc(c.mana.max||'0')) : '';
+    const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
+
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + sub + '</div></div>'
+       + '<span class="pty-chip">HP <b>' + hpPct + '%</b></span>'
+       + (mana ? '<span class="pty-chip">Mana <b>' + mana + '</b></span>' : '')
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+
+    h += '<div class="pty-card-bd">';
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'
+       + '<span class="pty-stat-lbl">HP</span>' + bar
+       + '<span class="pty-stat-lbl">' + hpPct + '%</span></div>';
+    h += '<div class="pty-stats">' + c.stats.map(s =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.abbr) + '</div>'
+      + '<div class="pty-stat-mod">' + (s.mod>=0?'+':'') + s.mod + '</div>'
+      + '<div class="pty-stat-val">' + esc(s.enh||'—') + '/' + esc(s.unenh||'—') + '</div></div>').join('') + '</div>';
+    h += '<div class="pty-line dim" style="margin:-4px 0 8px;font-size:9px;">Mods from ' + esc(c.modSource) + ' scores · Enh/Unenh shown</div>';
+
+    h += '<div class="pty-sec"><div class="pty-sec-h">Defense</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Evade', c.evade.total) + cell('Move', c.evade.move) + cell('Step', c.evade.step)
+       + cell('DR', c.dr.total) + cell('AI Favor', c.dr.aiFavor) + cell('Size', c.dr.size)
+       + '</div></div>';
+
+    if(c.buffs.length || (c.debuffs && c.debuffs.trim())) {
+      h += '<div class="pty-sec"><div class="pty-sec-h">Buffs &amp; Debuffs</div>';
+      if(c.buffs.length) h += '<div class="pty-line"><b>Buffs:</b> ' + c.buffs.map(esc).join(', ') + '</div>';
+      if(c.debuffs && c.debuffs.trim()) h += '<div class="pty-line"><b>Debuffs:</b> ' + esc(c.debuffs) + '</div>';
+      h += '</div>';
+    }
+
+    if(c.attacks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>'
+      + c.attacks.map(a => {
+          const st = a.stat ? ' ' + esc(String(a.stat).toUpperCase()) : '';
+          const bits = [
+            a.rank    ? '<span class="dim">Rank ' + esc(a.rank) + st + '</span>' : '',
+            a.dice    ? '<span class="dim">' + esc(a.dice) + st + '</span>' : '',
+            a.effects ? '<span class="dim">' + esc(a.effects) + '</span>' : ''
+          ].filter(Boolean).join(' · ');
+          return '<div class="pty-line"><b>' + esc(a.name || '—') + '</b>' + (bits ? ' ' + bits : '') + '</div>';
+        }).join('') + '</div>';
+
+    h += '</div></div>';
+    return h;
+  }
+
   function cardHTML(entry) {
     const c = entry.sheet;
+    if(c.system === 'DCC') return cardHTMLDCC(entry);
     const open = openIds.has(entry.id);
     const hp = c.hpCur !== '' ? esc(c.hpCur) + '/' + c.hpMax : String(c.hpMax);
     const line = [c.ancestry, c.cls].filter(Boolean).join(' ');

@@ -13,7 +13,9 @@ type SheetBlob = {
 };
 
 // GET — every character sheet linked to this campaign.
-// Returns { characters: [{ docId, title, updatedAt, sheet }] }.
+// Returns { characters: [{ docId, title, updatedAt, system, sheet }] } for both
+// Shadowdark ("sd-character" → sd_sheet) and Dungeon Crawler Carl
+// ("dcc-character" → dcc_sheet) sheets, so the GM Screen Party tool shows both.
 export async function GET(req: NextRequest, ctx: Ctx) {
   // Cookie normally; a VTT token when framed by a tabletop.
   const user = await getPlayUser(req);
@@ -32,17 +34,18 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   // caller wants, but membership is decided by the column, not a full scan.
   const docs = await prisma.document.findMany({
     where: {
-      tool: "sd-character",
+      tool: { in: ["sd-character", "dcc-character"] },
       linkedCampaignId: id,
     },
-    select: { id: true, title: true, updatedAt: true, data: true },
+    select: { id: true, title: true, updatedAt: true, data: true, tool: true },
     orderBy: { updatedAt: "desc" },
   });
 
   const characters = [];
   for (const doc of docs) {
     const blob = doc.data as Record<string, unknown> | null;
-    const raw = blob?.sd_sheet;
+    const isDcc = doc.tool === "dcc-character";
+    const raw = isDcc ? blob?.dcc_sheet : blob?.sd_sheet;
     if (typeof raw !== "string") continue;
 
     let sheet: SheetBlob;
@@ -56,6 +59,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       docId: doc.id,
       title: doc.title,
       updatedAt: doc.updatedAt,
+      system: isDcc ? "DCC" : "SD",
       sheet,
     });
   }
