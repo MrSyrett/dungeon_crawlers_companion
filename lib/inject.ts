@@ -111,6 +111,11 @@ const PREVIEW = `
   .sidebar, .sidebar-pull-tab, .sidebar-tab, #collapse-btn { display: none !important; }
   body.sidebar-collapsed .sidebar-tab { display: none !important; }
   .preview-area { flex: 1 1 auto !important; width: 100% !important; }
+  /* The DCC builder's mobile layout reserves margin-top (82px !important) for
+     its fixed sidebar header — hidden above, so drop the reservation or the
+     GM Screen's Adventure pane shows a blank band at the top. body-qualified
+     to out-specify the builder's own !important rule. */
+  body .preview-area { margin-top: 0 !important; }
   #dd-chrome { display: none !important; }
 </style>
 <script>
