@@ -663,15 +663,13 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .npc-hp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
 .npc-hp-input { width: 48px; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 14px; padding: 5px 2px; }
 .npc-hp-slash { color: var(--muted); font-size: 13px; }
-/* +Status sits at the end of the HP number row. */
-.npc-hp-status { margin-left: auto; flex-shrink: 0; }
+/* +Status sits left, right after the HP boxes; the SD/DCC mode select takes the
+   right end of the same row (where +Status used to be). */
+.npc-hp-row .npc-mode-select, .npc-seg-setup .npc-mode-select { margin-left: auto; }
 /* Second HP line: the ±HP buttons left-aligned, with the tag field beside them. */
 .npc-hp-second { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
 .npc-hp-adjust { display: flex; gap: 3px; margin-left: 0; justify-content: flex-start; }
 .npc-tag-inline { flex: 1 1 90px; min-width: 0; text-align: left; }
-/* Mode (Standard/DCC) select on its own line above the name, so it and the X
-   never crowd the name row / run off a narrow card. */
-.npc-mode-bar { display: flex; justify-content: flex-end; margin-bottom: 4px; }
 .npc-hp-btn {
   width: 26px; height: 26px; background: var(--panel-2); border: 1px solid var(--border); color: var(--light);
   cursor: pointer; font-size: 11px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
@@ -3618,6 +3616,12 @@ function init_trackers(root) {
     const card = document.createElement('div');
     card.dataset.id = n.id;
     const mode = n.hpMode || 'standard';
+    // SD/DCC mode select rides the right end of the HP row (bestiary monsters
+    // are always standard, so they don't get one).
+    const modeSelectHtml = n.mon ? '' : `<select class="card-select npc-mode-select ${mode==='dcc'?'dcc-active':'std-active'}" title="HP mode">
+        <option value="standard" ${mode==='standard'?'selected':''}>SD</option>
+        <option value="dcc"      ${mode==='dcc'     ?'selected':''}>DCC</option>
+      </select>`;
     let hpBlockHtml = '', defeated = false;
 
     if(mode === 'standard') {
@@ -3628,7 +3632,8 @@ function init_trackers(root) {
           <input type="number" class="npc-hp-input npc-hp-current" value="${n.hpCurrent}">
           <span class="npc-hp-slash">/</span>
           <input type="number" class="npc-hp-input npc-hp-max" value="${n.hpMax}">
-          <button class="btn small ghost status-add npc-hp-status">+ Status</button>
+          <button class="btn small ghost status-add">+ Status</button>
+          ${modeSelectHtml}
         </div>
         <div class="npc-hp-second">
           <div class="npc-hp-adjust">
@@ -3652,11 +3657,14 @@ function init_trackers(root) {
           </button>`).join('');
       hpBlockHtml = `
         <div class="npc-seg-setup">
-          <span class="npc-seg-setup-label">Segments</span>
-          <input type="number" class="npc-seg-count-input" min="1" max="20" value="${segCount}">
-          <span class="npc-seg-setup-label">HP Each</span>
-          <input type="number" class="npc-seg-hp-input" min="1" value="${segHp}">
-          <button class="btn small ghost npc-seg-apply">Apply</button>
+          <input type="number" class="npc-seg-count-input" min="1" max="20" value="${segCount}" title="Segments">
+          <span class="npc-hp-slash">/</span>
+          <input type="number" class="npc-seg-hp-input" min="1" value="${segHp}" title="HP per segment">
+          <button class="btn small ghost status-add">+ Status</button>
+          ${modeSelectHtml}
+        </div>
+        <div class="npc-hp-second">
+          <input type="text" class="npc-tag-input npc-tag-inline" value="${escAttr(n.tag || '')}" placeholder="Tag (elite, minion, ...)">
         </div>
         <div class="npc-seg-row">${segHtml}</div>
       `;
@@ -3664,10 +3672,6 @@ function init_trackers(root) {
 
     card.className = 'npc-card' + (defeated ? ' defeated' : '');
     card.innerHTML = `
-      ${n.mon ? '' : `<div class="npc-mode-bar"><select class="card-select npc-mode-select ${mode==='dcc'?'dcc-active':'std-active'}" title="HP mode">
-        <option value="standard" ${mode==='standard'?'selected':''}>Standard</option>
-        <option value="dcc"      ${mode==='dcc'     ?'selected':''}>DCC</option>
-      </select></div>`}
       <div class="npc-top">
         ${reorderHtml(n, idx)}
         <input type="text" class="npc-name-input" value="${escAttr(n.name)}" placeholder="NPC / Monster name...">
@@ -3676,7 +3680,7 @@ function init_trackers(root) {
       ${hpBlockHtml}
       ${defeated ? '<div class="npc-defeated-tag">Defeated</div>' : ''}
       ${monsterBlockHtml(n)}
-      ${statusListHtml(n, { withAddButton: mode !== 'standard', withTag: mode !== 'standard' })}
+      ${statusListHtml(n, { withAddButton: false, withTag: false })}
     `;
 
     card.querySelector('.npc-name-input').addEventListener('input', e => { n.name = e.target.value; });
@@ -3697,12 +3701,20 @@ function init_trackers(root) {
       card.querySelector('.npc-heal1').addEventListener('click', () => { n.hpCurrent = Math.min(n.hpMax, n.hpCurrent + 1); render(); });
       card.querySelector('.npc-heal5').addEventListener('click', () => { n.hpCurrent = Math.min(n.hpMax, n.hpCurrent + 5); render(); });
     } else {
-      card.querySelector('.npc-seg-apply').addEventListener('click', () => {
+      // Auto-apply: committing either box (blur / Enter / spinner) rebuilds the
+      // segments — same behaviour the Apply button had, minus the button.
+      const applySegSetup = () => {
         const count = Math.max(1, Math.min(20, parseInt(card.querySelector('.npc-seg-count-input').value) || 1));
         const hp = Math.max(1, parseInt(card.querySelector('.npc-seg-hp-input').value) || 1);
+        if(count === (n.segCount || 10) && hp === (n.segHp !== undefined ? n.segHp : 10)) return;
         n.segCount = count; n.segHp = hp;
         n.segments = Array.from({length: count}, () => true);
         render();
+      };
+      ['.npc-seg-count-input', '.npc-seg-hp-input'].forEach(sel => {
+        const el = card.querySelector(sel);
+        el.addEventListener('change', applySegSetup);
+        el.addEventListener('keydown', e => { if(e.key === 'Enter') e.target.blur(); });
       });
       card.querySelectorAll('.npc-seg').forEach(seg => {
         seg.addEventListener('click', () => {
@@ -7359,7 +7371,7 @@ window.init_gen = function(root) {
   .status-check { width: 20px; height: 20px; }
   .status-text  { font-size: 14px; padding: 7px 2px; }
   .status-del   { font-size: 15px; padding: 4px 6px; }
-  .status-add, .npc-seg-apply, .timer-apply {
+  .status-add, .timer-apply {
     font-size: 12px; padding: 10px 14px; min-height: 40px;
   }
 
@@ -8426,7 +8438,7 @@ document.addEventListener('click', function(e) {
   }
 });
 document.addEventListener('input', function(e) {
-  if(e.target.closest('.nts-editor, .tracker-name-input, .npc-name-input, .npc-hp-input, .npc-seg-count-input')) {
+  if(e.target.closest('.nts-editor, .tracker-name-input, .npc-name-input, .npc-hp-input, .npc-seg-count-input, .npc-seg-hp-input')) {
     if(window.__ddScheduleSave) setTimeout(window.__ddScheduleSave, 1000);
   }
 });
