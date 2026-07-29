@@ -1,16 +1,16 @@
 import { getCurrentUser } from "@/lib/auth";
-import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/sounds — the Sound Library, for the GM Screen Music tool's "Library"
-// picker. Admin-only: the library is admin-managed and only the GM uses it, so
-// non-admins get a flat empty list rather than the shelf. Sorted by category
-// then label so the picker can group without extra work.
+// picker. Readable by any signed-in user so the whole table can pull from the
+// shelf; managing it (add / edit / remove) stays admin-only, enforced separately
+// in app/actions/sounds.ts and the /admin/sounds page. Sorted by category then
+// label so the picker can group without extra work.
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user || !isAdminEmail(user.email)) {
-    // 200 with an empty shelf keeps the picker's fetch simple (no error branch)
-    // while still revealing nothing to non-admins.
+  if (!user) {
+    // 200 with an empty shelf keeps the picker's fetch simple (no error branch);
+    // a signed-out caller simply sees nothing.
     return Response.json({ sounds: [] });
   }
 
