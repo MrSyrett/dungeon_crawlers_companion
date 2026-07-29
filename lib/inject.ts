@@ -122,16 +122,14 @@ const PREVIEW = `
 })();
 </script>`;
 
-function chrome(title: string, opts: { backHref: string; backLabel: string }): string {
-  const safeTitle = title.replace(/</g, "\\u003c");
+function chrome(opts: { backHref: string; backLabel: string }): string {
   const btn = "color:#cfcabd;background:rgba(8,8,9,.7);border:1px solid #3a3a40;border-radius:5px;padding:6px 10px;text-decoration:none";
-  // Inside a VTT the sheet is stuck in whatever size the popover is, so it gets
-  // a control to widen it — the sheets are responsive, so a wider popover is
-  // what turns the phone layout into the desktop one. Hidden until the SDK
-  // confirms we're actually inside Owlbear Rodeo.
+  // Just the Home button. The character/session name used to sit here too, but
+  // it's already shown inside the sheet, so the tag was redundant and in the way.
+  // (saveTitle() still pushes the name to the server for the dashboard card; it
+  // no longer has an on-page label to update, which its `if (label)` guard allows.)
   return `<div id="dd-chrome" style="position:fixed;top:8px;left:8px;z-index:2147483647;display:flex;gap:10px;align-items:center;font:600 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase">
 <a href="${opts.backHref}" style="${btn}">&larr; ${opts.backLabel}</a>
-<span class="dd-title" style="color:#8a8a93;max-width:30vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${safeTitle}</span>
 </div>`;
 }
 
@@ -170,7 +168,7 @@ export function renderToolPage(
   // connection.
   if (!opts.vttToken && !opts.previewOnly) {
     out = out.replace(/<body[^>]*>/i, (m) =>
-      `${m}\n${chrome(opts.title, { backHref: "/dashboard", backLabel: "Home" })}`);
+      `${m}\n${chrome({ backHref: "/dashboard", backLabel: "Home" })}`);
   }
   return out;
 }
