@@ -7779,10 +7779,12 @@ function campaignLeave() {
 // Broadcast local rolls (called from inside addLog for local entries).
 // Only actual dice rolls and campaign joins are shared — sheet housekeeping
 // events (purchases, level ups, saves, etc.) stay local.
+// 'Campaign' is the join/leave confirmation: its result is a decorative link
+// SVG that the remote log escapes into visible "<svg ...>" text, so keep it local.
 const CAMPAIGN_SKIP_LABELS = new Set([
   'Character Created','Exported','Imported','Item Added','Level Up',
   'New Character','Purchase','Random Character','Rest','Sheet Exported','Sheet Saved',
-  'Spell Learned','Spell Unlearned'
+  'Spell Learned','Spell Unlearned','Campaign'
 ]);
 function campaignBroadcast(label, result, detail, type) {
   if(!_campaign) return;

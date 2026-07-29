@@ -2390,9 +2390,11 @@ function campaignLeave() {
   saveSheet(true);
 }
 
-// Only real rolls are shared — sheet housekeeping stays local.
+// Only real rolls are shared — sheet housekeeping stays local. 'Campaign' is
+// the join/leave confirmation: its result is a decorative link SVG that the
+// remote log escapes into visible "<svg ...>" text, so it must stay local.
 const CAMPAIGN_SKIP_LABELS = new Set([
-  'Sheet Saved','Sheet Exported','Exported','Imported','New Character','Item Added','Level Up','Rest'
+  'Sheet Saved','Sheet Exported','Exported','Imported','New Character','Item Added','Level Up','Rest','Campaign'
 ]);
 function campaignBroadcast(label, result, detail, type) {
   if(!_campaign) return;
