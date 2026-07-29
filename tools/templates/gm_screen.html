@@ -7610,14 +7610,15 @@ function init_music(root) {
   }
 
   function addUrl(kind){
-    const url = prompt('Direct audio URL (mp3 / ogg / wav):');
-    if(!url) return;
-    const clean = normUrl(url.trim()); if(!clean) return;
-    let name = 'Track';
-    try { name = decodeURIComponent(clean.split('/').pop().split('?')[0]) || name; } catch(e){}
-    const list = kind==='music' ? music : sfx;
-    list.push({ id:nextId++, name, url:clean, loop:false, vol:1, needsFile:false });
-    if(kind==='music') renderMusic(); else renderSfx();
+    (window.ddPromptUrl ? window.ddPromptUrl('Direct audio URL (mp3 / ogg / wav):') : Promise.resolve(prompt('Direct audio URL (mp3 / ogg / wav):'))).then(function(url){
+      if(!url) return;
+      const clean = normUrl(url.trim()); if(!clean) return;
+      let name = 'Track';
+      try { name = decodeURIComponent(clean.split('/').pop().split('?')[0]) || name; } catch(e){}
+      const list = kind==='music' ? music : sfx;
+      list.push({ id:nextId++, name, url:clean, loop:false, vol:1, needsFile:false });
+      if(kind==='music') renderMusic(); else renderSfx();
+    });
   }
 
   function renderNow(){
@@ -7743,7 +7744,7 @@ function init_music(root) {
       card.querySelector('.mus-scene-del').addEventListener('click', ()=> GMScenes.removeScene(sc.id));
       card.querySelector('.mus-scene-name').addEventListener('input', e=> GMScenes.renameScene(sc.id, e.target.value));
       card.querySelector('.mus-scene-add').addEventListener('click', ()=>{ sceneFileTarget = sc.id; fileScene.click(); });
-      card.querySelector('.mus-scene-add-url').addEventListener('click', ()=>{ const u = prompt('Direct audio URL (mp3 / ogg / wav):'); if(u) GMScenes.addTrackUrl(sc.id, u); });
+      card.querySelector('.mus-scene-add-url').addEventListener('click', ()=>{ (window.ddPromptUrl ? window.ddPromptUrl('Direct audio URL (mp3 / ogg / wav):') : Promise.resolve(prompt('Direct audio URL (mp3 / ogg / wav):'))).then(function(u){ if(u) GMScenes.addTrackUrl(sc.id, u); }); });
       card.querySelectorAll('.mus-scene-track').forEach(row=>{
         const tid = parseInt(row.dataset.tid);
         row.querySelector('.mus-scene-tloop').addEventListener('click', ()=>{ const t = sc.tracks.find(x=>x.id===tid); GMScenes.setTrackLoop(sc.id, tid, !(t && t.loop)); });
@@ -9837,6 +9838,55 @@ function init_rules(root) {
 
 window.init_party = init_party;
 window.init_rules = init_rules;
+</script>
+
+<!-- In-page URL prompt. Replaces window.prompt(), which desktop wrappers built
+     on Electron (e.g. Kenku FM) don't support. Returns a Promise<string|null>. -->
+<script>
+(function(){
+  if (window.ddPromptUrl) return;
+  var overlay, input, titleEl, okBtn, cancelBtn, resolver;
+  function build(){
+    overlay = document.createElement('div');
+    overlay.setAttribute('style','position:fixed;inset:0;z-index:2147483647;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55)');
+    var box = document.createElement('div');
+    box.setAttribute('style','width:min(90vw,440px);background:#16161a;border:1px solid #3a3a40;border-radius:8px;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.5);font:14px/1.5 system-ui,-apple-system,sans-serif;color:#e8e8e4');
+    titleEl = document.createElement('div');
+    titleEl.setAttribute('style','font-size:13px;font-weight:700;margin-bottom:10px');
+    input = document.createElement('input');
+    input.type = 'text'; input.autocomplete = 'off'; input.spellcheck = false;
+    input.setAttribute('style','width:100%;box-sizing:border-box;background:#0e0e10;border:1px solid #3a3a40;border-radius:5px;color:#e8e8e4;font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;padding:9px 10px;outline:none');
+    var row = document.createElement('div');
+    row.setAttribute('style','display:flex;justify-content:flex-end;gap:8px;margin-top:14px');
+    cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button'; cancelBtn.textContent = 'Cancel';
+    cancelBtn.setAttribute('style','background:#1b1b1f;border:1px solid #3a3a40;border-radius:5px;color:#cfcabd;font:600 12px/1 system-ui,sans-serif;padding:8px 12px;cursor:pointer');
+    okBtn = document.createElement('button');
+    okBtn.type = 'button'; okBtn.textContent = 'Add';
+    okBtn.setAttribute('style','background:rgba(200,160,32,.15);border:1px solid #c8a020;border-radius:5px;color:#c8a020;font:600 12px/1 system-ui,sans-serif;padding:8px 12px;cursor:pointer');
+    row.appendChild(cancelBtn); row.appendChild(okBtn);
+    box.appendChild(titleEl); box.appendChild(input); box.appendChild(row);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    function done(val){ overlay.style.display = 'none'; input.value = ''; var r = resolver; resolver = null; if (r) r(val); }
+    okBtn.addEventListener('click', function(){ done(input.value.trim() || null); });
+    cancelBtn.addEventListener('click', function(){ done(null); });
+    overlay.addEventListener('mousedown', function(e){ if (e.target === overlay) done(null); });
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Enter'){ e.preventDefault(); done(input.value.trim() || null); }
+      else if (e.key === 'Escape'){ e.preventDefault(); done(null); }
+    });
+  }
+  window.ddPromptUrl = function(message){
+    if (!overlay) build();
+    titleEl.textContent = message || 'Enter a URL';
+    return new Promise(function(resolve){
+      resolver = resolve;
+      overlay.style.display = 'flex';
+      setTimeout(function(){ try { input.focus(); } catch(e){} }, 30);
+    });
+  };
+})();
 </script>
 
 </body>
