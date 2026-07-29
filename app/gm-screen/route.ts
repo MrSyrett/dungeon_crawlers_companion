@@ -5,126 +5,12 @@ import { loadToolTemplate } from "@/lib/tools";
 
 const GM_TOOL = "gm-screen";
 
-// A speaker glyph as inline SVG (not an emoji) to match the icon-system policy.
-const SPK = `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.15em"><path d="M4 9.2v5.6h3.4L13 19V5L7.4 9.2Z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M16 9.2a4 4 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8"/></svg>`;
-
-// The chrome bar injected at top of <body> — matches the style from lib/inject.ts.
-// The audio-broadcast control lives here too: it's a known-safe overlay zone that
-// never collides with the GM screen's own tools.
+// The chrome bar injected at top of <body> — matches the style from lib/inject.ts
 const CHROME = `<div id="dd-chrome" style="position:fixed;top:8px;left:8px;z-index:2147483647;display:flex;gap:10px;align-items:center;font:600 11px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase">
 <a href="/dashboard" style="color:#cfcabd;background:rgba(8,8,9,.7);border:1px solid #3a3a40;border-radius:5px;padding:6px 10px;text-decoration:none">&larr; Home</a>
 <span id="dd-status" style="color:#6f6f78"></span>
-<span id="dd-cast" style="display:flex;gap:6px;align-items:center">
-  <button id="dd-cast-btn" type="button" title="Stream this tab's audio to your players in Owlbear Rodeo" style="display:flex;gap:5px;align-items:center;color:#cfcabd;background:rgba(8,8,9,.7);border:1px solid #3a3a40;border-radius:5px;padding:6px 10px;font:inherit;text-transform:uppercase;letter-spacing:.06em;cursor:pointer">${SPK}<span id="dd-cast-label">Share audio</span></button>
-  <button id="dd-cast-stop" type="button" title="Stop broadcasting" style="display:none;color:#f2d9d0;background:rgba(120,30,30,.55);border:1px solid #7a2a2a;border-radius:5px;padding:6px 10px;font:inherit;text-transform:uppercase;letter-spacing:.06em;cursor:pointer">Stop</button>
-</span>
 <a href="/gm-screen/clear" style="color:#6f6f78;font-size:9px;opacity:.5;text-decoration:none" title="Clear saved GM Screen state (use if page fails to load)">reset</a>
 </div>`;
-
-// Drives the #dd-cast control: reads the board's current campaign link, captures
-// this tab's audio on demand (getDisplayMedia), and hands the stream to the
-// broadcaster in /obr/audio.js. Tab-audio capture is Chromium-only, so the
-// button explains itself if the API is missing.
-const BROADCAST = String.raw`<script src="/obr/audio.js" defer></script>
-<script>
-(function () {
-  var bc = null, stream = null, live = false;
-  function $(id){ return document.getElementById(id); }
-
-  // The GM screen serializes its campaign link as { campaign: { campaign: {...} } };
-  // fall back to a bare { campaign: {...} } for older saves. Read the LIVE state
-  // so a mid-session campaign switch is reflected without a reload race.
-  function currentCampaign(){
-    try {
-      var s = (window.__gmScreenGetState && window.__gmScreenGetState()) || window.__gmInitialState__ || null;
-      var c = s && s.campaign ? (s.campaign.campaign || s.campaign) : null;
-      return c && c.id ? { id: String(c.id), name: c.name ? String(c.name) : "" } : null;
-    } catch (e) { return null; }
-  }
-
-  var CAN_CAST = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
-
-  function render(state, count){
-    var btn = $("dd-cast-btn"), label = $("dd-cast-label"), stop = $("dd-cast-stop");
-    if (!btn) return;
-    if (!CAN_CAST){
-      btn.disabled = true; btn.style.opacity = ".5"; btn.style.cursor = "default";
-      label.textContent = "Audio: use Chrome";
-      btn.title = "Sharing tab audio needs Chrome or Edge. Open the GM Screen there to broadcast.";
-      stop.style.display = "none"; return;
-    }
-    if (state === "live"){
-      btn.style.display = "none"; stop.style.display = "";
-      stop.textContent = "● Live" + (count ? " · " + count + " listening" : " · waiting") + " — Stop";
-      stop.style.color = "#ffd36b"; stop.style.borderColor = "#7a5a1a"; stop.style.background = "rgba(120,90,20,.35)";
-      return;
-    }
-    stop.style.display = "none"; btn.style.display = "";
-    var camp = currentCampaign();
-    if (!camp){
-      btn.disabled = true; btn.style.opacity = ".5"; btn.style.cursor = "default";
-      label.textContent = "Share audio";
-      btn.title = "Link this board to a campaign (top bar → Campaign) so players can find the broadcast.";
-    } else {
-      btn.disabled = false; btn.style.opacity = ""; btn.style.cursor = "pointer";
-      label.textContent = "Share audio";
-      btn.title = "Stream this tab's audio to " + (camp.name || "your campaign") + "'s players in Owlbear Rodeo.";
-    }
-  }
-
-  function cleanupStream(){
-    if (stream){ try { stream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){} stream = null; }
-  }
-
-  function stopLive(){
-    live = false;
-    if (bc){ bc.stop(); bc = null; }
-    cleanupStream();
-    render("idle", 0);
-  }
-
-  function goLive(){
-    var camp = currentCampaign();
-    if (!camp || !CAN_CAST) return;
-    var opts = { video: true, audio: true };
-    try { opts.preferCurrentTab = true; } catch(e){}
-    navigator.mediaDevices.getDisplayMedia(opts).then(function(s){
-      stream = s;
-      // We only want audio; drop the video track the picker forces on us.
-      s.getVideoTracks().forEach(function(t){ try { t.stop(); s.removeTrack(t); } catch(e){} });
-      if (!s.getAudioTracks().length){
-        cleanupStream();
-        alert("No audio was shared.\n\nIn the picker choose “This Tab” and turn on “Share tab audio”, then try again.");
-        render("idle", 0);
-        return;
-      }
-      // If the GM ends sharing from Chrome's own bar, tear the broadcast down too.
-      s.getAudioTracks()[0].addEventListener("ended", stopLive);
-      live = true;
-      render("live", 0);
-      bc = window.DCCAudio.createBroadcaster({
-        campaignId: camp.id,
-        stream: s,
-        onCount: function(n){ if (live) render("live", n); },
-        onError: function(){ /* transient peer errors: stay live */ },
-      });
-    }).catch(function(){ render("idle", 0); }); // user dismissed the picker
-  }
-
-  function init(){
-    var btn = $("dd-cast-btn"), stop = $("dd-cast-stop");
-    if (!btn) return;
-    btn.addEventListener("click", goLive);
-    stop.addEventListener("click", stopLive);
-    render("idle", 0);
-    // Keep the button's enabled/disabled state honest as the board (and its
-    // campaign link) loads or changes.
-    setInterval(function(){ if (!live) render("idle", 0); }, 1500);
-  }
-
-  if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", init); else init();
-})();
-</script>`;
 
 // Shim: loads the last-used board on startup, auto-saves on changes, and drives
 // the save-then-reload dance when the GM switches campaigns.
@@ -527,8 +413,8 @@ export async function GET() {
     ? `<script>window.__gmInitialState__ = ${JSON.stringify(savedState).replace(/</g, "\\u003c")};</script>\n`
     : "";
 
-  // Inject shim + state + Sound Library picker + audio broadcast before </head>
-  html = html.replace(/<\/head>/i, `${stateScript}${SHIM}\n${LIBRARY_UI}\n${BROADCAST}\n</head>`);
+  // Inject shim + state + Sound Library picker before </head>
+  html = html.replace(/<\/head>/i, `${stateScript}${SHIM}\n${LIBRARY_UI}\n</head>`);
 
   // Inject chrome (← Home button) after <body>
   html = html.replace(/<body([^>]*)>/i, (m) => `${m}\n${CHROME}`);

@@ -19,7 +19,6 @@ const PAGE = String.raw`<!doctype html>
 <title>Character Sheets</title>
 <script src="/obr/sdk.js"></script>
 <script src="/obr/size.js" defer></script>
-<script src="/obr/audio.js" defer></script>
 <style>
   :root {
     --bg: #0d0d0f; --panel: #141416; --panel-2: #1b1b1f; --border: #2e2e34;
@@ -87,21 +86,6 @@ const PAGE = String.raw`<!doctype html>
   #size-sw .knob { position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--text); transition: transform .15s ease; }
   #size-sw[aria-checked="true"] .knob { transform: translateX(13px); background: var(--bg); }
   .grow { flex: 1; min-height: 0; }
-  /* Audio broadcast bar — persistent (never toggled by show()) so playback
-     survives navigating between the character list and a sheet. */
-  #audio-bar { flex-shrink: 0; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); padding: 10px 11px; }
-  #audio-bar.live { border-color: var(--gold); }
-  #audio-bar .a-row { display: flex; align-items: center; gap: 9px; }
-  #audio-bar .a-title { flex: 1; min-width: 0; font-size: 12px; display: flex; align-items: center; gap: 7px; overflow: hidden; }
-  #audio-bar .a-title b { color: var(--gold); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  #audio-bar .a-ico { flex-shrink: 0; width: 15px; height: 15px; fill: var(--gold); }
-  #audio-bar .a-state { font-size: 11px; color: var(--muted); letter-spacing: .04em; }
-  #audio-bar .a-state.err { color: var(--red); }
-  #audio-bar .a-state.ok { color: var(--gold); }
-  #audio-bar .btn.sm { padding: 6px 9px; }
-  #audio-vol { flex: 1; min-width: 60px; accent-color: var(--gold); cursor: pointer; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; box-shadow: 0 0 0 0 rgba(200,160,32,.6); animation: pulse 1.8s infinite; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(200,160,32,.55); } 70% { box-shadow: 0 0 0 6px rgba(200,160,32,0); } 100% { box-shadow: 0 0 0 0 rgba(200,160,32,0); } }
 </style>
 </head>
 <body>
@@ -152,25 +136,6 @@ const PAGE = String.raw`<!doctype html>
     </button>
   </div>
   <iframe id="sheet-frame" title="Character sheet"></iframe>
-</section>
-
-<!-- Audio broadcast bar: persistent so playback survives list⇄sheet navigation. -->
-<section id="audio-bar" class="hide">
-  <div id="audio-offer" class="a-row hide">
-    <span class="a-title">
-      <svg class="a-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.2v5.6h3.4L13 19V5L7.4 9.2Z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M16 9.2a4 4 0 0 1 0 5.6M18.6 6.6a7.6 7.6 0 0 1 0 10.8"/></svg>
-      <span><b id="audio-camp">Your table</b> is sharing audio</span>
-    </span>
-    <button class="btn primary sm" id="audio-join">Join</button>
-  </div>
-  <div id="audio-active" class="a-row hide">
-    <span class="dot" id="audio-dot"></span>
-    <span class="a-state ok" id="audio-state">Connecting&hellip;</span>
-    <input id="audio-vol" type="range" min="0" max="100" value="80" title="Volume" aria-label="Volume">
-    <button class="btn sm" id="audio-mute" title="Mute">Mute</button>
-    <button class="btn sm" id="audio-leave" title="Leave the broadcast">Leave</button>
-  </div>
-  <audio id="audio-el" autoplay playsinline></audio>
 </section>
 
 <p id="loading" class="note">Loading&hellip;</p>
@@ -280,117 +245,6 @@ const PAGE = String.raw`<!doctype html>
       });
   }
 
-  // ── Audio broadcast (player side) ─────────────────────────────────────────
-  // Discovers a live campaign broadcast via /api/vtt/audio and, on the player's
-  // tap, joins it as a receive-only WebRTC peer. The bar lives outside show()'s
-  // section toggling so audio keeps playing while the player browses a sheet.
-  var AUDIO = (function () {
-    var rx = null;          // active receiver handle
-    var poll = null;        // discovery interval
-    var wired = false;
-    var curToken = null;
-    var joinedId = null;    // campaign id we're connected to (null = not joined)
-    var liveCamp = null;    // {id,name} currently broadcasting, from discovery
-
-    function a(id) { return document.getElementById(id); }
-
-    // Single source of truth for what the bar shows. Joined → the active
-    // controls; a live campaign we haven't joined → the offer; nothing → hidden.
-    function render() {
-      var bar = a("audio-bar"), offer = a("audio-offer"), active = a("audio-active");
-      if (joinedId) {
-        bar.classList.remove("hide"); bar.classList.add("live");
-        offer.classList.add("hide"); active.classList.remove("hide");
-      } else if (liveCamp) {
-        a("audio-camp").textContent = liveCamp.name || "Your table";
-        bar.classList.remove("hide", "live");
-        offer.classList.remove("hide"); active.classList.add("hide");
-      } else {
-        bar.classList.add("hide"); bar.classList.remove("live");
-        offer.classList.add("hide"); active.classList.add("hide");
-      }
-    }
-    function setState(txt, cls) {
-      var el = a("audio-state"); el.textContent = txt; el.className = "a-state" + (cls ? " " + cls : "");
-    }
-
-    function onState(s) {
-      if (s === "connected") setState("Live", "ok");
-      else if (s === "connecting") setState("Connecting…", "");
-      else if (s === "reconnecting") setState("Reconnecting…", "");
-      else if (s === "needs-tap") setState("Tap here to play", "");
-      else if (s === "failed") setState("Couldn't connect", "err");
-      else if (s === "ended") end();   // GM stopped broadcasting
-      // "stopped" is our own teardown — nothing to show.
-    }
-
-    function teardown() { if (rx) { rx.stop(); rx = null; } joinedId = null; }
-
-    function join() {
-      if (!liveCamp || !window.DCCAudio || joinedId) return;
-      joinedId = liveCamp.id;
-      setState("Connecting…", "");
-      render();
-      var el = a("audio-el");
-      el.volume = (parseInt(a("audio-vol").value, 10) || 80) / 100;
-      rx = window.DCCAudio.createReceiver({
-        campaignId: liveCamp.id, audioEl: el, token: curToken, onState: onState, onError: function () {},
-      });
-    }
-
-    // User clicked Leave: drop the connection but, if still live, re-offer a rejoin.
-    function leave() { teardown(); render(); }
-    // GM ended (or the campaign fell off "live"): drop and let discovery decide.
-    function end() { teardown(); liveCamp = null; render(); }
-
-    function discover() {
-      if (!curToken) return;
-      fetch("/api/vtt/audio", { headers: { "x-vtt-token": curToken } })
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (d) {
-          if (!d) return;
-          var liveList = (d.campaigns || []).filter(function (c) { return c.live; });
-          var camp = liveList.length ? liveList[0] : null;
-          if (joinedId) {
-            // Only react if OUR campaign stopped being live; otherwise leave the
-            // live connection untouched.
-            if (!(camp && camp.id === joinedId)) end();
-            return;
-          }
-          liveCamp = camp;
-          render();
-        })
-        .catch(function () {});
-    }
-
-    function wire() {
-      a("audio-join").addEventListener("click", join);
-      a("audio-leave").addEventListener("click", leave);
-      a("audio-mute").addEventListener("click", function () {
-        var el = a("audio-el"); el.muted = !el.muted;
-        a("audio-mute").textContent = el.muted ? "Unmute" : "Mute";
-      });
-      a("audio-vol").addEventListener("input", function () { a("audio-el").volume = this.value / 100; });
-      // If autoplay was blocked, the state reads "Tap here to play" — tapping it
-      // is the gesture that lets it through.
-      a("audio-state").addEventListener("click", function () { if (rx && rx.retryPlay) rx.retryPlay(); });
-    }
-
-    function start(token) {
-      curToken = token;
-      if (!wired) { wire(); wired = true; }
-      if (poll) return;
-      discover();
-      poll = setInterval(discover, 5000);
-    }
-    function stop() {
-      teardown();
-      if (poll) { clearInterval(poll); poll = null; }
-      liveCamp = null; curToken = null; render();
-    }
-    return { start: start, stop: stop };
-  })();
-
   $("connect").addEventListener("click", function () {
     var t = $("tok").value.trim();
     if (!t) { $("setup-err").textContent = "Paste your code first."; return; }
@@ -399,17 +253,16 @@ const PAGE = String.raw`<!doctype html>
     $("loading").classList.remove("hide");
     $("setup").classList.add("hide");
     load(t);
-    AUDIO.start(t);
   });
   $("tok").addEventListener("keydown", function (e) { if (e.key === "Enter") $("connect").click(); });
-  $("forget").addEventListener("click", function () { AUDIO.stop(); forget(); show("setup"); });
+  $("forget").addEventListener("click", function () { forget(); show("setup"); });
   $("back").addEventListener("click", function () {
     $("sheet-frame").removeAttribute("src");   // stop the sheet polling in the background
     show("list");
   });
 
   var token = readToken();
-  if (token) { load(token); AUDIO.start(token); } else show("setup");
+  if (token) load(token); else show("setup");
 })();
 </script>
 </body>
