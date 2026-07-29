@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     const campaigns = await prisma.campaign.findMany({
       where: { ownerId: user.id },
       orderBy: { createdAt: "desc" },
-      select: { id: true, name: true, code: true },
+      select: { id: true, name: true, code: true, vttUrl: true },
     });
     return Response.json(campaigns);
   }
