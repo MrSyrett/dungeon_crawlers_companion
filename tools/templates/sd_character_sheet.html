@@ -1538,7 +1538,7 @@ const SD_TRACKERS = ['Light','Focused','Invisible','Exhausted','Dying',
 // These read as states you want, so they're highlighted amber rather than red.
 const SD_TRACKERS_GOOD = ['Light','Focused','Invisible'];
 
-let _trackers = ['Light'];    // active on the sheet
+let _trackers = [];    // active on the sheet — none on by default
 let _customTrackers = [];     // extra names this player has invented
 
 const _trkEsc = t => String(t == null ? '' : t)
@@ -6044,6 +6044,8 @@ function ccwApply() {
 
   document.querySelectorAll('#spells-list .spell-row').forEach(row => row.remove());
   _spellCount = 0;
+  _trackers = [];   // a freshly built character starts with no trackers
+  if(typeof renderTrackers === 'function') renderTrackers();
   const tbody = document.getElementById('attacks-body');
   if(tbody) tbody.innerHTML = '';
 
