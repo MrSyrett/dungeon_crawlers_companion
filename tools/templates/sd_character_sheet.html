@@ -1088,6 +1088,28 @@ function trustyWeaponAtkBonus(weaponName) {
   return 2 + Math.floor(lvl/2);
 }
 
+// Roustabout "wield a new weapon or armor" talents grant extra proficiencies
+// beyond the class list. Persisted, and merged into the builder's weapon/armor
+// pickers. Populated from resolved talents ("...wield <name>", value "weapon:X"
+// or "armor:X" on the tres).
+let _charExtraWeapons = [];
+let _charExtraArmor = [];
+// Walk resolved talent objects (and their sub-talents) and fold every wieldnew
+// pick into the extra-proficiency lists.
+function collectWieldNew(tresList) {
+  (tresList||[]).forEach(function walk(p){
+    if(!p) return;
+    if(p.kind === 'wieldnew' && p.picked) {
+      const i = p.picked.indexOf(':');
+      const kind = i>0 ? p.picked.slice(0,i) : 'weapon';
+      const name = i>0 ? p.picked.slice(i+1) : p.picked;
+      const list = kind === 'armor' ? _charExtraArmor : _charExtraWeapons;
+      if(name && !list.includes(name)) list.push(name);
+    }
+    if(p.sub) walk(p.sub);
+  });
+}
+
 function getStatMod(id) {
   const val = document.getElementById(id+'-val')?.value;
   return statToMod(val) ?? 0;
@@ -2829,6 +2851,8 @@ function collectSheet(){
       campaign: _campaign ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
       mastery: Array.isArray(_charMastery) ? _charMastery : [],
       trusty: _charTrusty || null,
+      extraWeapons: Array.isArray(_charExtraWeapons) ? _charExtraWeapons : [],
+      extraArmor: Array.isArray(_charExtraArmor) ? _charExtraArmor : [],
       autoConsume: _autoConsume,
       innateAC: _innateAC,
       hbBonusSlots: _hbBonusSlots,
@@ -2943,6 +2967,8 @@ function _applySDData(d){
     if(spellGBEl) spellGBEl.value = d._sheet?.spellGBonus || '';
     _charMastery = Array.isArray(d._sheet?.mastery) ? d._sheet.mastery.slice() : [];
     _charTrusty = (d._sheet && d._sheet.trusty && d._sheet.trusty.value) ? d._sheet.trusty : null;
+    _charExtraWeapons = Array.isArray(d._sheet?.extraWeapons) ? d._sheet.extraWeapons.slice() : [];
+    _charExtraArmor = Array.isArray(d._sheet?.extraArmor) ? d._sheet.extraArmor.slice() : [];
     _charSpellSources = Array.isArray(d._sheet?.spellSources) ? d._sheet.spellSources.slice() : [];
     if(typeof campaignRestore === 'function') campaignRestore(d._sheet?.campaign);
     _hbBonusSlots = parseInt(d._sheet?.hbBonusSlots) || 0;
@@ -4385,6 +4411,16 @@ function ccwAnalyzeTalent(text, cls) {
   if(/\+2 points? to (distribute to )?(any )?stats/i.test(text)) {
     p.kind = 'distribute'; p.final = null; return p;
   }
+  // Roustabout: "+1 to any stat and roll another talent" — +1 to a chosen stat,
+  // then a second talent from the table.
+  if(/\+1 to any stat and roll another talent/i.test(text)) { p.kind = 'statplustalent'; p.final = null; return p; }
+  // Roustabout / Warlock: "+1 to any two stats" / "Add +1 point to two stats (must be different)".
+  if(/\+1 (point )?to (any )?two stats/i.test(text) || /two stats \(they (can't be the same|must be different)\)/i.test(text)) { p.kind = 'twostats'; p.final = null; return p; }
+  // Roustabout: "Gain the ability to wield a new weapon or armor" (must precede
+  // the generic " or " catch-all, which would otherwise split "weapon or armor").
+  if(/wield a new weapon or armor/i.test(text)) { p.kind = 'wieldnew'; p.final = null; return p; }
+  // Roustabout: "Roll an extra hit points die this level" — no pick; the HP step reads it.
+  if(/extra hit points? die/i.test(text)) { p.kind = 'extrahd'; p.final = text; return p; }
   // Pit Fighter: "+2 to Strength or Constitution stat, or +1 to melee attacks" — 3-way pick
   if(/^\+2 to Strength or Constitution stat, or \+1 to melee attacks/i.test(text)) {
     p.kind = 'ortwo';
@@ -4519,6 +4555,42 @@ function ccwTalentChoiceUI(p, stateRef, knownSpells, cls) {
     ['Priest wand','Wizard wand'].forEach(w=>{ h += '<option value="'+w+'"'+(p.picked===w?' selected':'')+'>'+w+'</option>'; });
     h += '</select>';
   }
+  else if(p.kind==='twostats') {
+    h += '<p class="ccw-hint" style="font-size:10px;">Pick two different stats (+1 each):</p>';
+    for(let n=1;n<=2;n++){
+      const cur = n===1 ? p.picked : p.picked2;
+      h += '<select style="'+selStyle+'margin-bottom:4px;" onchange="'+stateRef+'.'+(n===1?'picked':'picked2')+'=this.value;ccwResolve('+stateRef+');ccwRerender()">';
+      h += '<option value="">— +1 to... —</option>';
+      CCW_ALL_STATS.forEach(st=>{ h += '<option value="'+st+'"'+(cur===st?' selected':'')+'>'+st+'</option>'; });
+      h += '</select>';
+    }
+  }
+  else if(p.kind==='statplustalent') {
+    h += '<p class="ccw-hint" style="font-size:10px;">+1 to a stat:</p>';
+    h += '<select style="'+selStyle+'margin-bottom:6px;" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">— +1 to... —</option>';
+    CCW_ALL_STATS.forEach(st=>{ h += '<option value="'+st+'"'+(p.picked===st?' selected':'')+'>'+st+'</option>'; });
+    h += '</select>';
+    const rows = (RC_CLASS_INFO[cls]?.talent||[]);
+    const opts = [rows[1], rows[6], rows[9]].filter(Boolean);   // skip self (row 0) to avoid recursion
+    h += '<p class="ccw-hint" style="font-size:10px;">Then roll/choose another talent:</p>';
+    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.sub=this.value?ccwAnalyzeTalent(this.value,\''+cls.replace(/'/g,"\\\\'")+'\'):null;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">— choose —</option>';
+    opts.forEach(opt=>{ h += '<option value="'+String(opt).replace(/"/g,'&quot;')+'"'+(p.sub&&p.sub.text===opt?' selected':'')+'>'+String(opt).replace(/</g,'&lt;')+'</option>'; });
+    h += '</select>';
+    if(p.sub) h += ccwTalentChoiceUI(p.sub, stateRef+'.sub', knownSpells, cls);
+  }
+  else if(p.kind==='wieldnew') {
+    h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
+    h += '<option value="">— Choose a weapon or armor —</option><optgroup label="Weapon">';
+    (typeof SD_WEAPONS!=='undefined'?SD_WEAPONS:[]).filter(w=>w.name!=='Strikes').forEach(w=>{ const v='weapon:'+w.name; h += '<option value="'+v+'"'+(p.picked===v?' selected':'')+'>'+w.name+' ('+w.damage+')</option>'; });
+    h += '</optgroup><optgroup label="Armor">';
+    CCW_ARMOR_TYPES.forEach(a=>{ const v='armor:'+a; h += '<option value="'+v+'"'+(p.picked===v?' selected':'')+'>'+a+'</option>'; });
+    h += '</optgroup></select>';
+  }
+  else if(p.kind==='extrahd') {
+    h += '<p class="ccw-hint" style="font-size:10px;">You’ll roll an extra Hit Die for this level’s HP.</p>';
+  }
   else if(p.kind==='meta') {
     h += '<select style="'+selStyle+'" onchange="var v=this.value;'+stateRef+'.picked=v;'+stateRef+'.sub=null;ccwResolve('+stateRef+');ccwRerender()">';
     h += '<option value="">\u2014 choose \u2014</option>';
@@ -4584,6 +4656,29 @@ function ccwResolve(p) {
     case 'weapon': case 'spellknown': case 'armor': case 'remedy': case 'wand':
       if(p.picked) p.final = p.text + ' — ' + p.picked;
       break;
+    case 'twostats':
+      if(p.picked && p.picked2 && p.picked !== p.picked2) {
+        p.final = '+1 '+p.picked+', +1 '+p.picked2;
+        p.statBoost[p.picked] = (p.statBoost[p.picked]||0)+1;
+        p.statBoost[p.picked2] = (p.statBoost[p.picked2]||0)+1;
+      }
+      break;
+    case 'statplustalent':
+      if(p.picked && p.sub) {
+        ccwResolve(p.sub);
+        if(p.sub.final) {
+          p.statBoost[p.picked] = (p.statBoost[p.picked]||0)+1;
+          Object.entries(p.sub.statBoost||{}).forEach(([k,v])=>{ p.statBoost[k]=(p.statBoost[k]||0)+v; });
+          p.final = '+1 '+p.picked+' and '+p.sub.final;
+        }
+      }
+      break;
+    case 'wieldnew':
+      if(p.picked) { const i=p.picked.indexOf(':'); p.final = 'Gain the ability to wield '+(i>0?p.picked.slice(i+1):p.picked); }
+      break;
+    case 'extrahd':
+      p.final = p.text;
+      break;
     case 'meta':
       if(p.picked==='talent' && p.sub) {
         ccwResolve(p.sub);
@@ -4642,20 +4737,25 @@ function ccwClassWeapons(cls) {
   if(w.includes('all ranged weapons')) all.filter(isRanged).forEach(x=>allowed.add(x.name));
   if(w.includes('all swords'))         all.filter(isSword).forEach(x=>allowed.add(x.name));
   names.forEach(n=>{ if(w.includes(n.toLowerCase())) allowed.add(n); });   // individually named
+  (_charExtraWeapons||[]).forEach(n=>{ if(names.includes(n)) allowed.add(n); });   // Roustabout "wield new weapon"
   return names.filter(n=>allowed.has(n));                                  // keep SD_WEAPONS order
 }
 // Which armor a class may wear
 function ccwClassArmor(cls) {
   const a = (RC_CLASS_INFO[cls]?.armor||'').toLowerCase();
+  const order = ['Leather armor','Chainmail','Plate mail','Shield'];
+  let out;
   if(a.includes('all armor')) {
-    return a.includes('shield') ? ['Leather armor','Chainmail','Plate mail','Shield'] : ['Leather armor','Chainmail','Plate mail'];
+    out = a.includes('shield') ? ['Leather armor','Chainmail','Plate mail','Shield'] : ['Leather armor','Chainmail','Plate mail'];
+  } else {
+    out = [];
+    if(a.includes('leather')) out.push('Leather armor');
+    if(a.includes('chainmail')) out.push('Chainmail');
+    if(a.includes('plate')) out.push('Plate mail');
+    if(a.includes('shield')) out.push('Shield');
   }
-  const out = [];
-  if(a.includes('leather')) out.push('Leather armor');
-  if(a.includes('chainmail')) out.push('Chainmail');
-  if(a.includes('plate')) out.push('Plate mail');
-  if(a.includes('shield')) out.push('Shield');
-  return out;
+  (_charExtraArmor||[]).forEach(n=>{ if(!out.includes(n)) out.push(n); });   // Roustabout "wield new armor"
+  return order.filter(n=>out.includes(n));
 }
 
 // ── Step: Gear & Weapons ──
@@ -4919,6 +5019,10 @@ function ccwRandResolve(p, cls, knownSpells) {
     case 'armor':      p.picked = rand(CCW_ARMOR_TYPES); break;
     case 'remedy':     p.picked = rand(CCW_REMEDIES); break;
     case 'wand':       p.picked = rand(['Priest wand','Wizard wand']); break;
+    case 'twostats': { const a=rand(CCW_ALL_STATS); let b=rand(CCW_ALL_STATS); if(b===a) b=CCW_ALL_STATS[(CCW_ALL_STATS.indexOf(a)+1)%CCW_ALL_STATS.length]; p.picked=a; p.picked2=b; break; }
+    case 'statplustalent': { p.picked=rand(CCW_ALL_STATS); const rows=(RC_CLASS_INFO[cls]?.talent||[]); const opts=[rows[1],rows[6],rows[9]].filter(Boolean); p.sub=ccwAnalyzeTalent(rand(opts),cls); ccwRandResolve(p.sub,cls,knownSpells); break; }
+    case 'wieldnew':   p.picked='weapon:'+rand(SD_WEAPONS.filter(w=>w.name!=='Strikes').map(w=>w.name)); break;
+    case 'extrahd':    break;
     case 'meta':
       if(p.hasStatAlt && Math.random()<0.5) {
         p.picked = 'stats'; p.pickedA = rand(CCW_ALL_STATS); p.pickedB = rand(CCW_ALL_STATS);
@@ -5960,7 +6064,11 @@ function ccwApply() {
   Object.entries(statIds).forEach(([k,id])=>{ set(id, eff[k] + (hbEff[k.toLowerCase()]||0)); });
   document.querySelectorAll('.stat-val').forEach(el=>el.dispatchEvent(new Event('input')));
 
-  set("hp-current", c.hp + hbEff.hp); set("hp-max", c.hp + hbEff.hp);
+  // Roustabout "roll an extra hit points die this level" — rare at level 1 (only
+  // via a "roll another talent" sub-pick), but honor it if present.
+  let _extraHp = 0;
+  [c.tres, c.tres2].forEach(function chk(p){ if(!p) return; if(p.kind==='extrahd'){ const hd=parseInt((RC_CLASS_INFO[c.cls]?.hd||'1d4').split('d')[1])||4; _extraHp += Math.max(1, Math.ceil(Math.random()*hd)); } if(p.sub) chk(p.sub); });
+  set("hp-current", c.hp + hbEff.hp + _extraHp); set("hp-max", c.hp + hbEff.hp + _extraHp);
 
   // AC: base 10 + DEX; armor/shield contribution goes into the bonus box, toggled on.
   // Innate AC from homebrew effects — not gear, so it can't be taken off.
@@ -6126,6 +6234,8 @@ function ccwApply() {
   // Innate AC from homebrew ancestry/class effects (truly not gear).
   _innateAC = _natAC;
   _charTrusty = (c.trusty && c.trusty.value) ? c.trusty : null;   // Delver Trusty Gear
+  _charExtraWeapons = []; _charExtraArmor = [];                    // Roustabout "wield new weapon/armor"
+  collectWieldNew([c.tres, c.tres2]);
   _hbBonusSlots = hbEff.gearSlots || 0;
   _hbFeatureChargeBonus = Object.assign({}, hbEff.featureCharges || {});
   // Base per-day uses for this class's homebrew features (structured, not prose).
@@ -6267,7 +6377,7 @@ function startLevelUp() {
     hpRoll: null,
     gainsTalent: newLevel % 2 === 1, // talents at odd levels (3,5,7,9)
     talent: null, talentRoll: null, talentPick: null, hbTalentChoice: null, hbTalentSpells: [], hbChoices: {}, tres: null,
-    newSpells: [], spellSrc: null, spellSrcOf: {}, spellsNeeded: 0, spellTiers: [],
+    newSpells: [], spellSrc: null, spellSrcOf: {}, spellsNeeded: 0, spellTiers: [], spellTierCap: 0, extraHd: null,
   };
   // Spell gains for casters
   const table = clsKey==='Priest' ? CCW_PRIEST_SPELLS_KNOWN : clsKey==='Wizard' ? CCW_WIZARD_SPELLS_KNOWN : clsKey==='Witch' ? CCW_WITCH_SPELLS_KNOWN : null;
@@ -6279,6 +6389,14 @@ function startLevelUp() {
       for(let g=0;g<gain;g++) _lvl.spellTiers.push(t+1);
     }
     _lvl.spellsNeeded = _lvl.spellTiers.length;
+  } else if(clsKey === 'Knight of St. Ydris') {
+    // Knight of St. Ydris: no spell until level 3, then one new spell each level.
+    // The player picks any tier up to the level cap — tier 1 (L3–5), 2 (L6–8),
+    // 3 (L9+) — rather than a forced tier (see cap mode in the New Spells step).
+    if(newLevel >= 3) {
+      _lvl.spellsNeeded = 1;
+      _lvl.spellTierCap = Math.min(3, Math.floor(newLevel/3));
+    }
   } else if(RC_CLASS_INFO[clsKey] && RC_CLASS_INFO[clsKey]._caster) {
     // Homebrew casters learn one new spell per level, at the highest tier their
     // level unlocks (tier = ceil(level/2), capped at 5).
@@ -6465,6 +6583,7 @@ function lvlRollTalent() {
   _lvl.talent = r ? r.text : '';
   _lvl.hbTalentSpells = [];
   _lvl.hbChoices = {};
+  _lvl.extraHd = null;   // re-rolled talent → re-roll any extra Hit Die
   _lvl.tres = ccwAnalyzeTalent(_lvl.talent, _lvl.cls);
   ccwResolve(_lvl.tres);
   lvlRender();
@@ -6526,6 +6645,31 @@ function _lvlSpellsBody() {
   const own = _lc ? _lc.list : ({ Wizard:'Wizard', Priest:'Priest', Witch:'Witch' }[cls] || '');
   // Already-known spells (from the sheet)
   const known = [...document.querySelectorAll('#spells-list .spell-row .spell-input')].map(el=>el.value.trim()).filter(Boolean);
+  // Cap mode (Knight of St. Ydris): pick any spellsNeeded spells of tier ≤ cap,
+  // rather than a fixed per-tier composition.
+  if(_lvl.spellTierCap) {
+    const cap = _lvl.spellTierCap;
+    let hc = '<p class="ccw-hint">You gain '+_lvl.spellsNeeded+' new spell'+(_lvl.spellsNeeded>1?'s':'')+' of tier '+(cap>1?('1–'+cap):'1')+'. ('+_lvl.newSpells.length+'/'+_lvl.spellsNeeded+' selected)</p>';
+    hc += spellSourceBar(_lvl.spellSrc, cls, 'lvlToggleSpellSrc');
+    for(let tier=1; tier<=cap; tier++){
+      const seen=new Set();
+      const rows=allSpells()
+        .filter(s=>s.tier===String(tier) && spellInSources(s,_lvl.spellSrc) && !known.includes(s.name))
+        .sort((a,b)=>{const ao=(a.caster===own||a.caster==='Both')?0:1;const bo=(b.caster===own||b.caster==='Both')?0:1;return ao-bo;})
+        .filter(s=>{if(seen.has(s.name))return false;seen.add(s.name);return true;});
+      if(!rows.length) continue;
+      hc+='<p class="ccw-hint" style="margin-top:8px;color:#c8a020;font-weight:700;">Tier '+tier+'</p><div class="ccw-choice-grid">';
+      rows.forEach(s=>{
+        const sel=_lvl.newSpells.includes(s.name)?' selected':'';
+        const meta=[s.range?'Range: '+s.range:'',s.duration?'Dur: '+s.duration:'',s.damage?'Dmg: '+s.damage:''].filter(Boolean).join(' · ');
+        const foreign=(s.caster!==own&&s.caster!=='Both');
+        const tag=foreign?'<span style="color:#8a7ac8;font-size:8px;font-weight:700;"> · '+s.caster+'</span>':'';
+        hc+='<button class="ccw-choice'+sel+'" onclick="lvlToggleSpell(\''+s.name.replace(/'/g,"\\'")+'\',\''+tier+'\',\''+s.caster+'\')"><div class="ccw-choice-name" style="font-size:11px;">'+s.name+tag+'</div>'+(meta?'<div class="ccw-choice-desc" style="color:#6ac8df;font-size:8px;">'+meta+'</div>':'')+'<div class="ccw-choice-desc">'+(s.desc||'')+'</div></button>';
+      });
+      hc+='</div>';
+    }
+    return hc;
+  }
   const tierCounts = {};
   _lvl.spellTiers.forEach(t=>{ tierCounts[t]=(tierCounts[t]||0)+1; });
   let h = '<p class="ccw-hint">You gain '+_lvl.spellsNeeded+' new spell'+(_lvl.spellsNeeded>1?'s':'')+': '+Object.entries(tierCounts).map(([t,c])=>c+' × Tier '+t).join(', ')+'. ('+_lvl.newSpells.length+'/'+_lvl.spellsNeeded+' selected)</p>';
@@ -6568,6 +6712,15 @@ function lvlToggleSpellSrc(name, on) {
 function lvlToggleSpell(name, tier, caster) {
   const i = _lvl.newSpells.indexOf(name);
   if(i >= 0) { _lvl.newSpells.splice(i,1); delete _lvl.spellSrcOf[name]; lvlRender(); return; }
+  // Cap mode (Knight): any tier ≤ cap, limited only by the total spellsNeeded.
+  if(_lvl.spellTierCap) {
+    if((parseInt(tier)||1) > _lvl.spellTierCap) return;
+    if(_lvl.newSpells.length >= _lvl.spellsNeeded) return;
+    _lvl.newSpells.push(name);
+    if(caster) _lvl.spellSrcOf[name] = caster;
+    lvlRender();
+    return;
+  }
   // Count how many of this tier already selected (resolve each pick against
   // the list it actually came from — names can repeat across spell lists)
   const tierNeeded = _lvl.spellTiers.filter(t=>String(t)===String(tier)).length;
@@ -6590,7 +6743,14 @@ function lvlFinish() {
   const oldTitle = document.getElementById('f-title')?.value.trim() || '';
   _lvl.newTitle = newTitle;
   let h = '<div class="ccw-summary"><div class="ccw-summary-title">Level '+_lvl.newLevel+' Summary</div>';
-  h += '<div>+'+_lvl.hpRoll+' max HP</div>';
+  // Roustabout: roll the extra Hit Die once, so the summary and applied HP agree.
+  if(_lvl.tres && _lvl.tres.kind==='extrahd' && _lvl.extraHd==null){
+    const _hdN = parseInt(RC_CLASS_INFO[_lvl.cls].hd.split('d')[1]);
+    _lvl.extraHd = Math.max(1, Math.ceil(Math.random()*_hdN));
+  } else if(!(_lvl.tres && _lvl.tres.kind==='extrahd')) {
+    _lvl.extraHd = null;
+  }
+  h += '<div>+'+(_lvl.hpRoll + (_lvl.extraHd||0))+' max HP'+(_lvl.extraHd?' (includes an extra Hit Die)':'')+'</div>';
   if(_lvl.talent) h += '<div>New Talent: '+((_lvl.tres&&_lvl.tres.final)||_lvl.talent)+'</div>';
   if(_lvl.newSpells.length) h += '<div>New Spells: '+_lvl.newSpells.join(', ')+'</div>';
   if(newTitle && newTitle!==oldTitle) h += '<div>New Title: '+newTitle+'</div>';
@@ -6607,9 +6767,9 @@ function lvlApply() {
   refreshXpNext();                // XP-to-next = 10 × new level
   // XP reset
   set('xp-current', '0');
-  // HP
+  // HP (Roustabout "roll an extra hit points die" adds a second die — see _lvl.extraHd)
   const hpMaxEl = document.getElementById('hp-max');
-  const newMax = (parseInt(hpMaxEl?.value)||0) + _lvl.hpRoll;
+  const newMax = (parseInt(hpMaxEl?.value)||0) + _lvl.hpRoll + (_lvl.extraHd||0);
   set('hp-max', newMax);
   set('hp-current', newMax);
   // Title
@@ -6632,6 +6792,8 @@ function lvlApply() {
       if(el) { el.value = String((parseInt(el.value)||10) + v); el.dispatchEvent(new Event('input')); }
     });
   }
+  // Roustabout "wield a new weapon or armor" — persist the new proficiency.
+  collectWieldNew([_lvl.tres]);
   // New spells added as rows
   _lvl.newSpells.forEach(name=>{
     const s = findSpell(name, _lvl.spellSrcOf[name] || _lvl.cls);
