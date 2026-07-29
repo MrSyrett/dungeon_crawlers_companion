@@ -1041,9 +1041,21 @@ function rollSkill(btn) {
 }
 
 // ── DARK MODE ──
+// Applies the theme to the DOM without persisting — shared by the toggle and
+// by applySheet() so a loaded sheet restores its saved theme.
+function setDarkMode(isDark) {
+  document.body.classList.toggle('dark', isDark);
+  const tog = document.getElementById('dm-toggle');
+  if(tog) tog.classList.toggle('on', isDark);
+}
 function toggleDarkMode() {
-  const isDark = document.body.classList.toggle('dark');
-  document.getElementById('dm-toggle').classList.toggle('on', isDark);
+  const isDark = !document.body.classList.contains('dark');
+  setDarkMode(isDark);
+  // Persist the choice. localStorage is unreliable in the app/VTT webview
+  // (see lib/inject.ts), so the durable copy rides in the saved sheet state;
+  // localStorage stays as a standalone-mode fallback + pre-load flash guard.
+  try { localStorage.setItem('dcc_dark', isDark ? '1' : '0'); } catch(e) {}
+  saveSheet(true);
   }
 
 // ── ADVANTAGE / DISADVANTAGE ──
@@ -1218,6 +1230,9 @@ function collectSheet() {
   data.campaign = (typeof _campaign !== 'undefined' && _campaign)
     ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null;
 
+  // Theme (dark/light) — persisted so it survives close/reopen
+  data.darkMode = document.body.classList.contains('dark');
+
   return data;
 }
 
@@ -1334,6 +1349,10 @@ function applySheet(data) {
 
   // Campaign link
   if(typeof campaignRestore === 'function') campaignRestore(data.campaign);
+
+  // Theme — only override when the save actually carried a choice, so older
+  // saves (no darkMode field) keep the localStorage-driven default.
+  if(typeof data.darkMode === 'boolean') setDarkMode(data.darkMode);
 }
 
 function newCharacter() {
@@ -1912,7 +1931,9 @@ buildHotlist();
 buildAccessories();
 buildSkills();
 buildInventory();
-autoLoad();
+// autoLoad() is deferred to the end of the campaign <script> block below, so
+// campaignRestore() is defined by the time applySheet() calls it. Running it
+// here (before that block parses) silently skipped campaign restore.
 </script>
 
 <style>
@@ -2442,6 +2463,10 @@ function campaignRestore(saved) {
   campaignUpdateBtn();
 }
 campaignUpdateBtn();
+
+// Load the saved sheet now that every function it needs — including
+// campaignRestore() above — is defined, so the campaign link is restored too.
+autoLoad();
 </script>
 </body>
 </html>
