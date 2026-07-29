@@ -952,6 +952,12 @@ function reapplyEquippedWeaponAttacks() {
     const kind = (typeof gearItemKind === 'function')
       ? gearItemKind(row.querySelector('.gear-name')?.value) : null;
     if(kind !== 'weapon') return;
+    // Skip weapons whose derived attack row hasn't actually changed — otherwise
+    // the destructive remove+add below makes equipped-weapon attacks visibly
+    // "reload" on every applyItemBonuses() call. The async shared-homebrew sync
+    // fires one such call ~1s after the sheet is already on screen, which is what
+    // the player was seeing on page open.
+    if(typeof equipAttackUnchanged === 'function' && equipAttackUnchanged(row)) return;
     removeEquipAttack(row);
     addEquipAttack(row);
   });
@@ -1572,24 +1578,17 @@ function sheetArmorTalentTypes() {
   return set;
 }
 
-// Create an attack row for an equipped weapon, linked back to the gear slot.
-function addEquipAttack(row) {
+// Derive the attack-row values for an equipped weapon gear slot WITHOUT touching
+// the DOM. Returns null if the slot isn't a recognised weapon. addEquipAttack()
+// (which builds the row) and equipAttackUnchanged() (which diffs it) both read
+// from here, so a build and a diff can never disagree.
+function deriveEquipWeapon(row) {
   const raw = (row.querySelector('.gear-name')?.value || '').trim();
   const m = /^\+(\d+)\s+/.exec(raw);
   const bonus = m ? (parseInt(m[1])||0) : 0;
   const type = raw.replace(/^\+\d+\s+/, '');
   const w = (typeof SD_WEAPONS!=='undefined') ? allWeapons().find(x=>x.name.toLowerCase()===type.toLowerCase()) : null;
-  if(!w) return;
-  if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
-  const eqId = row.dataset.eqId;
-  // Avoid duplicates
-  if(document.querySelector('#attacks-body tr[data-eq="'+eqId+'"]')) return;
-  addAttackRow();
-  const tbody = document.getElementById('attacks-body');
-  const tr = tbody ? tbody.lastElementChild : null;
-  if(!tr) return;
-  tr.dataset.eq = eqId;
-  const f = atkFields(tr);
+  if(!w) return null;
   const isFinesse = (w.props||'').toLowerCase().includes('finesse');
   const useDex = (w.type==='R') || (isFinesse && getStatMod('dex') > getStatMod('str'));
 
@@ -1613,12 +1612,36 @@ function addEquipAttack(row) {
     return d;
   };
   const hitStr = hitBonus > 0 ? '+'+hitBonus : (hitBonus < 0 ? String(hitBonus) : '');
+  const rparts = (w.range||'').split('/');
+  return {
+    w, raw, applyDmg,
+    name:   raw,                                 // name (with +N)
+    bonus:  hitStr,                              // to-hit bonus
+    damage: applyDmg(w.damage),                  // damage
+    stat:   useDex ? 'DEX' : 'STR',
+    range:  rparts[rparts.length-1].trim(),
+  };
+}
 
-  if(f.name)   f.name.value   = raw;                                // name (with +N)
-  if(f.bonus)  f.bonus.value  = hitStr;                             // to-hit bonus
-  if(f.damage) f.damage.value = applyDmg(w.damage);                 // damage
-  if(f.stat)   f.stat.value   = useDex ? 'DEX' : 'STR';
-  if(f.range)  { const parts=(w.range||'').split('/'); f.range.value = parts[parts.length-1].trim(); }
+// Create an attack row for an equipped weapon, linked back to the gear slot.
+function addEquipAttack(row) {
+  const dv = deriveEquipWeapon(row);
+  if(!dv) return;
+  if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
+  const eqId = row.dataset.eqId;
+  // Avoid duplicates
+  if(document.querySelector('#attacks-body tr[data-eq="'+eqId+'"]')) return;
+  addAttackRow();
+  const tbody = document.getElementById('attacks-body');
+  const tr = tbody ? tbody.lastElementChild : null;
+  if(!tr) return;
+  tr.dataset.eq = eqId;
+  const f = atkFields(tr);
+  if(f.name)   f.name.value   = dv.name;
+  if(f.bonus)  f.bonus.value  = dv.bonus;
+  if(f.damage) f.damage.value = dv.damage;
+  if(f.stat)   f.stat.value   = dv.stat;
+  if(f.range)  f.range.value  = dv.range;
   refreshAtkDamageToggle(tr);
 
   // Thief: also add a linked Backstab row for this weapon.
@@ -1636,15 +1659,40 @@ function addEquipAttack(row) {
       bsRow.dataset.eq = eqId;                 // linked so unequip removes it too
       bsRow.dataset.eqBackstab = '1';
       const bf = atkFields(bsRow);
-      if(bf.name)   bf.name.value   = 'Backstab ('+w.name+')';
-      if(bf.bonus)  bf.bonus.value  = hitStr;
-      if(bf.damage) bf.damage.value = applyDmg(w.damage.replace(/1d/g, bsDice+'d'));
-      if(bf.stat)   bf.stat.value   = useDex ? 'DEX' : 'STR';
-      if(bf.range)  { const parts=(w.range||'').split('/'); bf.range.value = parts[parts.length-1].trim(); }
+      if(bf.name)   bf.name.value   = 'Backstab ('+dv.w.name+')';
+      if(bf.bonus)  bf.bonus.value  = dv.bonus;
+      if(bf.damage) bf.damage.value = dv.applyDmg(dv.w.damage.replace(/1d/g, bsDice+'d'));
+      if(bf.stat)   bf.stat.value   = dv.stat;
+      if(bf.range)  bf.range.value  = dv.range;
       refreshAtkDamageToggle(bsRow);
     }
   }
   saveSheet(false);
+}
+
+// True when an equipped weapon's existing attack row still matches what
+// deriveEquipWeapon() would produce, so reapplyEquippedWeaponAttacks() can leave
+// it in place instead of doing the destructive remove+add that made weapon
+// attacks flicker/reload after the sheet had already loaded.
+function equipAttackUnchanged(row) {
+  const eqId = row.dataset.eqId;
+  if(!eqId) return false;                                   // never built yet
+  const dv = deriveEquipWeapon(row);
+  if(!dv) return false;
+  const rows = [...document.querySelectorAll('#attacks-body tr[data-eq="'+eqId+'"]')];
+  const mainTr = rows.find(tr => tr.dataset.eqBackstab !== '1');
+  if(!mainTr) return false;                                 // main row missing
+  const f = atkFields(mainTr);
+  const same = (f.name?.value||'')   === dv.name
+            && (f.bonus?.value||'')  === dv.bonus
+            && (f.damage?.value||'') === dv.damage
+            && (f.stat?.value||'')   === dv.stat
+            && (f.range?.value||'')  === dv.range;
+  if(!same) return false;
+  // The Thief backstab row must match presence too (class can change mid-play).
+  const isThief = (document.getElementById('f-class')?.value.trim().toLowerCase() === 'thief');
+  const hasBs = rows.some(tr => tr.dataset.eqBackstab === '1');
+  return isThief === hasBs;
 }
 
 // Remove the attack row(s) linked to a gear slot (weapon + any Backstab).
