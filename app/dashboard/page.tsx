@@ -140,10 +140,10 @@ export default async function DashboardPage() {
   });
 
   // A sheet's campaign link now lives in the indexed linkedCampaignId column
-  // (populated on save for sd-character docs; DCC sheets never carry one). We
-  // map each linked sheet to its campaign's tabletop link so it can offer
-  // Launch VTT. `docs` already holds every scalar column, so this is a field
-  // read — no extra query, no JSON parse.
+  // (populated on save for both sd-character and dcc-character docs). We map each
+  // linked sheet to its campaign's tabletop link so it can offer Launch VTT.
+  // `docs` already holds every scalar column, so this is a field read — no extra
+  // query, no JSON parse.
   const campaignIds = [
     ...new Set(
       docs

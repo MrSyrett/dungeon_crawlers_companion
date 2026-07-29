@@ -46,6 +46,42 @@ type SheetBlob = {
 
 type PartyMember = { id: string; name: string; cls: string; level: number | null };
 
+// Pull {name, cls, level} out of a saved character document — Shadowdark
+// (sd_sheet: top-level name/class/level) or Dungeon Crawler Carl (dcc_sheet:
+// header['f-name'/'f-class'/'f-level']). Returns null for anything unreadable.
+function readCharMeta(
+  data: unknown,
+  fallbackTitle: string,
+): { name: string; cls: string; level: number | null } | null {
+  const blob = (data ?? null) as Record<string, unknown> | null;
+  try {
+    const sd = blob?.sd_sheet;
+    if (typeof sd === "string") {
+      const s = JSON.parse(sd) as SheetBlob;
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls: typeof s.class === "string" ? s.class : "",
+        level: typeof s.level === "number" ? s.level : null,
+      };
+    }
+    const dcc = blob?.dcc_sheet;
+    if (typeof dcc === "string") {
+      const s = JSON.parse(dcc) as { header?: Record<string, unknown> };
+      const h = s.header || {};
+      const nm = h["f-name"], cl = h["f-class"];
+      const lv = parseInt(String(h["f-level"] ?? ""), 10);
+      return {
+        name: (typeof nm === "string" && nm.trim()) || fallbackTitle || "Unnamed",
+        cls: typeof cl === "string" ? cl : "",
+        level: Number.isNaN(lv) ? null : lv,
+      };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 function formatDate(d: Date): string {
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(d);
 }
@@ -97,30 +133,16 @@ export default async function CampaignsPage() {
   const parties = await Promise.all(
     ids.map(async (id) => {
       const docs = await prisma.document.findMany({
-        where: { tool: "sd-character", linkedCampaignId: id },
+        where: { tool: { in: ["sd-character", "dcc-character"] }, linkedCampaignId: id },
         select: { id: true, title: true, data: true },
         orderBy: { updatedAt: "desc" },
       });
 
       const members: PartyMember[] = [];
       for (const doc of docs) {
-        const raw = (doc.data as Record<string, unknown> | null)?.sd_sheet;
-        if (typeof raw !== "string") continue;
-
-        let sheet: SheetBlob;
-        try {
-          sheet = JSON.parse(raw) as SheetBlob;
-        } catch {
-          continue; // malformed sheet — skip rather than break the page
-        }
-
-        // The tools sync the character name into the document title, but the
-        // sheet itself is the more direct source.
-        const name =
-          (typeof sheet.name === "string" && sheet.name.trim()) || doc.title || "Unnamed";
-        const cls = typeof sheet.class === "string" ? sheet.class : "";
-        const level = typeof sheet.level === "number" ? sheet.level : null;
-        members.push({ id: doc.id, name, cls, level });
+        const meta = readCharMeta(doc.data, doc.title || "");
+        if (!meta) continue; // no readable character sheet — skip
+        members.push({ id: doc.id, name: meta.name, cls: meta.cls, level: meta.level });
       }
       return [id, members] as const;
     }),
@@ -134,7 +156,11 @@ export default async function CampaignsPage() {
   // rest read-only. The sheet JSON is still parsed for the character name.
   const ownedIds = new Set(campaigns.map((c) => c.id));
   const myDocs = await prisma.document.findMany({
-    where: { userId: user.id, tool: "sd-character", linkedCampaignId: { not: null } },
+    where: {
+      userId: user.id,
+      tool: { in: ["sd-character", "dcc-character"] },
+      linkedCampaignId: { not: null },
+    },
     select: { id: true, title: true, data: true, linkedCampaignId: true },
     orderBy: { updatedAt: "desc" },
   });
@@ -143,16 +169,8 @@ export default async function CampaignsPage() {
   for (const doc of myDocs) {
     const cid = doc.linkedCampaignId;
     if (typeof cid !== "string" || !cid || ownedIds.has(cid)) continue;
-    const raw = (doc.data as Record<string, unknown> | null)?.sd_sheet;
-    let name = doc.title || "Unnamed";
-    if (typeof raw === "string") {
-      try {
-        const sheet = JSON.parse(raw) as SheetBlob;
-        name = (typeof sheet.name === "string" && sheet.name.trim()) || doc.title || "Unnamed";
-      } catch {
-        // keep the document title as the fallback name
-      }
-    }
+    const meta = readCharMeta(doc.data, doc.title || "");
+    const name = meta ? meta.name : doc.title || "Unnamed";
     const list = joinedChars.get(cid) ?? [];
     list.push(name);
     joinedChars.set(cid, list);

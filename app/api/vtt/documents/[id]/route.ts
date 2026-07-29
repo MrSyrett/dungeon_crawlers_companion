@@ -30,11 +30,11 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (typeof body.title === "string" && body.title.trim()) {
     update.title = body.title.trim().slice(0, 120);
   }
-  // Keep the indexed campaign link in sync on the VTT save path too (only
-  // sd-character sheets carry one; see /api/documents/[id] for the rationale).
+  // Keep the indexed campaign link in sync on the VTT save path too (both
+  // sd-character and dcc-character sheets carry one; see /api/documents/[id]).
   // Only a still-live campaign id is stored, so a stale link left in the sheet
   // JSON (its campaign was deleted) can't trip the foreign key — it becomes null.
-  if (update.data && doc.tool === "sd-character") {
+  if (update.data && (doc.tool === "sd-character" || doc.tool === "dcc-character")) {
     update.linkedCampaignId = await liveCampaignId(extractLinkedCampaignId(update.data));
   }
   if (!Object.keys(update).length) return Response.json({ ok: true });

@@ -32,13 +32,13 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   }
 
   // Keep the indexed campaign link in sync with the sheet's own record of it
-  // (data.sd_sheet → _sheet.campaign.id). Only sd-character docs carry this;
-  // for anything else it stays null. Writing it here means the column tracks
-  // every save without the client shim needing to know about it. We only store
-  // an id that still points at a live campaign — a sheet can hold a stale link
-  // in its JSON (e.g. the campaign was since deleted), and writing that would
-  // trip the foreign key, so an orphaned reference is stored as null.
-  if (update.data && existing.tool === "sd-character") {
+  // (SD: data.sd_sheet → _sheet.campaign.id; DCC: data.dcc_sheet → campaign.id).
+  // Both character systems carry this; for anything else it stays null. Writing
+  // it here means the column tracks every save without the client shim needing to
+  // know about it. We only store an id that still points at a live campaign — a
+  // sheet can hold a stale link in its JSON (e.g. the campaign was since deleted),
+  // and writing that would trip the foreign key, so an orphaned reference is null.
+  if (update.data && (existing.tool === "sd-character" || existing.tool === "dcc-character")) {
     update.linkedCampaignId = await liveCampaignId(extractLinkedCampaignId(update.data));
   }
 
