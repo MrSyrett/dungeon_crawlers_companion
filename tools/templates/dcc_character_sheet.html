@@ -665,6 +665,9 @@ function toggleGlobalModSource() {
   syncEvadeDex();
   syncMana();
   updateHpPips();
+  // Button click — no input/change event, so persist the toggle explicitly
+  // (it drives every mod the Party tool shows).
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
 }
 
 function buildStats() {
@@ -773,6 +776,9 @@ function buildHpBar() {
     div.addEventListener('click', () => {
       div.dataset.active = div.dataset.active==='true'?'false':'true';
       div.classList.toggle('dimmed', div.dataset.active==='false');
+      // A pip is a div, so its click fires no input/change — save explicitly or
+      // the GM Screen's Party healthbar goes stale until the sheet closes.
+      if(typeof scheduleAutosave === 'function') scheduleAutosave();
     });
     pips.appendChild(div);
   });
@@ -2257,17 +2263,18 @@ document.addEventListener('click', function(e) {
 // Keep the title in step as soon as the name is typed
 document.getElementById('f-name')?.addEventListener('change', syncDocTitle);
 
-// Auto-save 1.5s after any input — primary save strategy on mobile
-(function() {
-  var t = null;
-  function go() {
-    if(!_pageReady) return;
-    if(t) clearTimeout(t);
-    t = setTimeout(function() { try { saveSheet(true); } catch(e) {} }, 1500);   // silent autosave
-  }
-  document.addEventListener('input', go);
-  document.addEventListener('change', go);
-})();
+// Auto-save 1.5s after any input — primary save strategy on mobile.
+// Named (not an IIFE-local) so click-driven state changes that never fire
+// input/change — HP pips, the ENH/UNENH toggle — can schedule a save too.
+// That's what keeps the GM Screen's Party tool current mid-session.
+var _autoSaveTimer = null;
+function scheduleAutosave() {
+  if(!_pageReady) return;
+  if(_autoSaveTimer) clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(function() { try { saveSheet(true); } catch(e) {} }, 1500);   // silent autosave
+}
+document.addEventListener('input', scheduleAutosave);
+document.addEventListener('change', scheduleAutosave);
 </script>
 
 <div id="campaign-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">

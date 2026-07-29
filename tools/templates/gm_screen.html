@@ -9627,8 +9627,9 @@ function init_party(root) {
     h += '<div class="pty-line dim" style="margin:-4px 0 8px;font-size:9px;">Mods from ' + esc(c.modSource) + ' scores · Enh/Unenh shown</div>';
 
     h += '<div class="pty-sec"><div class="pty-sec-h">Defense</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
-       + cell('Evade', c.evade.total) + cell('Move', c.evade.move) + cell('Step', c.evade.step)
-       + cell('DR', c.dr.total) + cell('AI Favor', c.dr.aiFavor) + cell('Size', c.dr.size)
+       + cell('Evade', c.evade.total) + cell('DR', c.dr.total)
+       + cell('Move', c.evade.move) + cell('Step', c.evade.step)
+       + cell('AI Favor', c.dr.aiFavor) + cell('Size', c.dr.size)
        + '</div></div>';
 
     if(c.buffs.length || (c.debuffs && c.debuffs.trim())) {
