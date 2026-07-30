@@ -44,6 +44,14 @@
   .grp{padding:12px 14px;border-bottom:1px solid var(--line)}
   .grp.flush{border-bottom:none}
   .grp-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .grp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .grp-head .grp-title{margin:0}
+  /* Rooms ⟷ Shapes segmented toggle */
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:0 0 auto}
+  .seg button{background:var(--panel2);color:var(--muted);border:0;padding:3px 9px;cursor:pointer;
+    font:600 10px/1.5 "Montserrat",system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+  .seg button + button{border-left:1px solid var(--line)}
+  .seg button.on{background:var(--gold);color:#1a1508}
   .tools{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
   .tool{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px;
     background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--ink);
@@ -96,10 +104,16 @@
      (or one finger on empty space with Select) to pan. Not applied when the
      tool is embedded read-only (the shim hides the sidebar). */
   @media (max-width: 640px){
-    body:not(.embed) .app{ flex-direction: column; }
-    body:not(.embed) .preview-area{ order:1; flex:0 0 auto; height:56vh; }
+    /* Use the DYNAMIC viewport (dvh) so the layout tracks the phone browser's
+       collapsing address/nav bars — 100vh is the *large* viewport, which pushes
+       the bottom of the sidebar (the Export/PNG buttons) under the browser
+       chrome. The sidebar is the scroll container; the safe-area + extra
+       bottom padding guarantees the last buttons clear the chrome. */
+    body:not(.embed) .app{ flex-direction: column; height:100dvh; }
+    body:not(.embed) .preview-area{ order:1; flex:0 0 auto; height:52dvh; }
     body:not(.embed) .sidebar{ order:2; width:auto; flex:1 1 auto; min-height:0;
-      border-right:none; border-top:1px solid var(--line); }
+      border-right:none; border-top:1px solid var(--line);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); }
   }
 </style>
 </head>
@@ -112,18 +126,24 @@
     </div>
 
     <div class="grp">
-      <p class="grp-title">Tools</p>
+      <div class="grp-head">
+        <p class="grp-title">Tools</p>
+        <div class="seg" id="modeSeg" title="Rooms: Square/Circle/Polygon draw rooms, Wall draws interior walls. Shapes: the same tools draw thin interior shapes (pillars, dais, tables, pits). Doors and stairs are unaffected either way.">
+          <button type="button" data-mode="rooms" class="on">Rooms</button>
+          <button type="button" data-mode="shapes">Shapes</button>
+        </div>
+      </div>
       <div class="tools" id="toolbar">
         <div class="tool active" data-tool="select" title="Select / move (V)">
           <svg viewBox="0 0 24 24"><path d="M5 3l6 16 2-6 6-2z"/></svg>Select</div>
-        <div class="tool" data-tool="rect" title="Rectangular room (R)">
+        <div class="tool" data-tool="rect" title="Rectangle (R) — room, or thin interior shape in Shapes mode">
           <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/></svg>Square</div>
-        <div class="tool" data-tool="circle" title="Round room (C)">
+        <div class="tool" data-tool="circle" title="Circle (C) — round room, or a perfect thin circle in Shapes mode">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>Circle</div>
-        <div class="tool" data-tool="polygon" title="Polygon room (P) — click points, Enter/dbl-click to close">
+        <div class="tool" data-tool="polygon" title="Polygon (P) — room or interior shape · click points, Enter/dbl-click to close">
           <svg viewBox="0 0 24 24"><path d="M12 3l8 6-3 10H7L4 9z"/></svg>Polygon</div>
-        <div class="tool" data-tool="wall" title="Interior wall (W)">
-          <svg viewBox="0 0 24 24"><path d="M4 18L20 6"/><circle cx="4" cy="18" r="1.6" fill="currentColor"/><circle cx="20" cy="6" r="1.6" fill="currentColor"/></svg>Wall</div>
+        <div class="tool" data-tool="wall" title="Wall (W) — 3 clicks: start, end, curve. Thin line in Shapes mode.">
+          <svg viewBox="0 0 24 24"><path d="M4 19C9 7 15 7 20 5"/><circle cx="4" cy="19" r="1.6" fill="currentColor"/><circle cx="20" cy="5" r="1.6" fill="currentColor"/></svg>Wall</div>
         <div class="tool" data-tool="door" title="Door (D)">
           <svg viewBox="0 0 24 24"><path d="M6 4h9v16H6z"/><path d="M15 9l4 3-4 3"/></svg>Door</div>
         <div class="tool" data-tool="stair" title="Stairs (S)">
@@ -241,6 +261,7 @@
   // ── State ─────────────────────────────────────────────────────────
   let map = blankMap();
   let tool = "select";
+  let drawMode = "rooms";                    // "rooms" | "shapes" — Square/Circle/Polygon/Wall target
   let snapOn = true;                        // snap-to-grid toggle
   let cam = { x: 0, y: 0, scale: 1 };     // world→screen: s = (w - cam)*scale ... (see helpers)
   let history = [], future = [];
@@ -465,7 +486,7 @@
       // floor mask (white union)
       const m=buf.mask.getContext("2d"); m.setTransform(1,0,0,1,0,0);
       m.clearRect(0,0,W,H); m.fillStyle="#fff"; m.beginPath();
-      for(const sh of shapes) shapePath(m, sh); m.fill("nonzero");
+      for(const sh of shapes){ if(sh.deco) continue; shapePath(m, sh); } m.fill("nonzero");
       // floor colour
       const tc=buf.tint.getContext("2d"); tc.setTransform(1,0,0,1,0,0);
       tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over"; tc.drawImage(buf.mask,0,0);
@@ -491,6 +512,7 @@
     }
 
     drawInteriorWalls();
+    drawDecoShapes();
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
   }
@@ -597,7 +619,7 @@
     const halfW=Math.max(1.3,1.7*cam.scale);
     const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
     wc.globalCompositeOperation="source-over"; wc.fillStyle=C.ink;
-    for(const sh of map.shapes) roughRing(wc, shapeOutline(sh), halfW);
+    for(const sh of map.shapes){ if(sh.deco) continue; roughRing(wc, shapeOutline(sh), halfW); }
     // Erase mask = union of each shape's fill INSET individually (not the eroded
     // union). A wall is removed only where it lies inside *another* shape's
     // interior (a real overlap). Two shapes that merely share an edge each inset
@@ -605,7 +627,7 @@
     const ec=buf.erode.getContext("2d"); ec.setTransform(1,0,0,1,0,0); ec.clearRect(0,0,W,H);
     ec.globalCompositeOperation="source-over"; ec.fillStyle="#fff";
     const inset=(halfW+1.4)/wpx();                     // inset in world units, > wall half-width
-    for(const sh of map.shapes) fillInsetShape(ec, sh, inset);
+    for(const sh of map.shapes){ if(sh.deco) continue; fillInsetShape(ec, sh, inset); }
     wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
     for(const d of map.doors) punchDoorQuad(wc, d);   // transparent gap for each door
     // soft drop shadow taken from the real wall shape (round under circles)
@@ -614,9 +636,49 @@
     ctx.drawImage(buf.wall,0,0);
   }
 
+  // Sample a wall's quadratic-Bézier curve (control cx,cy) into world points.
+  function wallSamples(wl){
+    const x1=wl.x1,y1=wl.y1,x2=wl.x2,y2=wl.y2, cx=wl.cx, cy=wl.cy;
+    const chord=Math.hypot(x2-x1,y2-y1), bow=Math.hypot(cx-(x1+x2)/2, cy-(y1+y2)/2);
+    const N=Math.max(6, Math.min(80, Math.round((chord+bow*2)*5)));
+    const pts=[];
+    for(let i=0;i<=N;i++){ const t=i/N, u=1-t;
+      pts.push([u*u*x1+2*u*t*cx+t*t*x2, u*u*y1+2*u*t*cy+t*t*y2]); }
+    return pts;
+  }
+  // A rough-edged ribbon along an open world polyline (curved wall / shape line).
+  function roughCurve(c, worldPts, halfW){
+    const n=worldPts.length; if(n<2) return;
+    const S=worldPts.map(p=>toScreen(p[0],p[1]));
+    const top=[], bot=[];
+    for(let i=0;i<n;i++){
+      const a=S[Math.max(0,i-1)], b=S[Math.min(n-1,i+1)];
+      const dx=b[0]-a[0], dy=b[1]-a[1]; const l=Math.hypot(dx,dy)||1; const nx=-dy/l, ny=dx/l;
+      const w=worldPts[i];
+      const at=halfW*(0.7+seeded(w[0]*29,w[1]*29)()*0.7), ab=halfW*(0.7+seeded(w[0]*29+13,w[1]*29+7)()*0.7);
+      top.push([S[i][0]+nx*at, S[i][1]+ny*at]); bot.push([S[i][0]-nx*ab, S[i][1]-ny*ab]);
+    }
+    c.beginPath(); c.moveTo(top[0][0],top[0][1]);
+    for(let i=1;i<n;i++) c.lineTo(top[i][0],top[i][1]);
+    for(let i=n-1;i>=0;i--) c.lineTo(bot[i][0],bot[i][1]);
+    c.closePath(); c.fill();
+    c.beginPath(); c.arc(S[0][0],S[0][1],halfW*1.02,0,6.2832); c.fill();
+    c.beginPath(); c.arc(S[n-1][0],S[n-1][1],halfW*1.02,0,6.2832); c.fill();
+  }
   function drawInteriorWalls(){ if(!map.walls.length) return; ctx.save(); ctx.fillStyle=C.ink;
-    const halfW=Math.max(1.3,1.7*cam.scale);
-    for(const wl of map.walls) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2],halfW);
+    const normal=Math.max(1.3,1.7*cam.scale), thin=Math.max(0.6,0.85*cam.scale);
+    for(const wl of map.walls){ const hw = wl.thin ? thin : normal;
+      if(wl.cx===undefined || wl.cy===undefined) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2], hw);
+      else roughCurve(ctx, wallSamples(wl), hw); }
+    ctx.restore(); }
+
+  // Interior "shapes" (deco: pillars, dais, tables, pits) — thin rough OUTLINES
+  // on top of the floor. They add no floor, no rock wall, no interior punch; a
+  // Circle-tool shape is a perfect round outline. shapeOutline samples arcs.
+  function drawDecoShapes(){
+    let any=false; for(const s of map.shapes){ if(s.deco){ any=true; break; } } if(!any) return;
+    ctx.save(); ctx.fillStyle=C.ink; const thin=Math.max(0.6,0.85*cam.scale);
+    for(const sh of map.shapes){ if(!sh.deco) continue; roughRing(ctx, shapeOutline(sh), thin); }
     ctx.restore(); }
 
   // Doors: {x,y,a,len} — a is the wall direction; a thin leaf sits in the opening.
@@ -706,6 +768,15 @@
         ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); ctx.restore(); };
       if(placing.tool==="door"){
         const end=pts[1]||hv; if(end) drawDoor(doorFromPts(pts[0], end)); dash(pts[0], end);
+      } else if(placing.tool==="wall"){
+        const thinMode=(drawMode==="shapes");
+        if(pts.length===1){ dash(pts[0], hv); }                        // dragging out the straight span
+        else if(pts.length===2){                                       // span fixed, aiming the curve apex
+          const wl=wallFromPts(pts[0], pts[1], hv, thinMode);
+          if(wl){ ctx.save(); ctx.fillStyle=C.ink; const hw = thinMode ? Math.max(0.6,0.85*cam.scale) : Math.max(1.3,1.7*cam.scale);
+            if(wl.cx===undefined) roughSeg(ctx,[wl.x1,wl.y1],[wl.x2,wl.y2],hw); else roughCurve(ctx, wallSamples(wl), hw); ctx.restore(); }
+          dash([(pts[0][0]+pts[1][0])/2,(pts[0][1]+pts[1][1])/2], hv); // handle from chord midpoint to the apex
+        }
       } else {
         if(pts.length===1){ dash(pts[0], hv); }                        // setting the width edge
         else if(pts.length===2){ const g=stairFromPts(pts[0], pts[1], hv);
@@ -745,8 +816,9 @@
       if(o.type==="polygon"){ const xs=o.pts.map(p=>p[0]),ys=o.pts.map(p=>p[1]);
         const x=Math.min(...xs),y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y}; }
     }
-    if(kind==="wall") return {x:Math.min(o.x1,o.x2),y:Math.min(o.y1,o.y2),
-      w:Math.abs(o.x2-o.x1),h:Math.abs(o.y2-o.y1)};
+    if(kind==="wall"){ const xs=[o.x1,o.x2], ys=[o.y1,o.y2];
+      if(o.cx!==undefined){ xs.push(0.25*o.x1+0.5*o.cx+0.25*o.x2); ys.push(0.25*o.y1+0.5*o.cy+0.25*o.y2); }
+      const x=Math.min(...xs), y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y}; }
     if(kind==="door"){ const l=(o.len||1)/2+0.3; return {x:o.x-l,y:o.y-l,w:l*2,h:l*2}; }
     if(kind==="stair"){
       if(o.ax!==undefined){ const xs=[o.ax,o.bx,o.tx], ys=[o.ay,o.by,o.ty];
@@ -786,8 +858,9 @@
       else if(Math.abs(wx-s.x)<=(s.w||2)/2 && Math.abs(wy-s.y)<=(s.h||3)/2) return {kind:"stair",idx:i,obj:s}; }
     for(let i=map.doors.length-1;i>=0;i--){ const d=map.doors[i];
       if(Math.hypot(wx-d.x,wy-d.y)<=(d.len||1)/2+0.35) return {kind:"door",idx:i,obj:d}; }
-    for(let i=map.walls.length-1;i>=0;i--){ const w=map.walls[i];
-      if(distToSeg(wx,wy,w.x1,w.y1,w.x2,w.y2)<=0.35) return {kind:"wall",idx:i,obj:w}; }
+    for(let i=map.walls.length-1;i>=0;i--){ const w=map.walls[i]; const tol=w.thin?0.28:0.4;
+      if(w.cx===undefined||w.cy===undefined){ if(distToSeg(wx,wy,w.x1,w.y1,w.x2,w.y2)<=tol) return {kind:"wall",idx:i,obj:w}; }
+      else { const s=wallSamples(w); for(let k=0;k<s.length-1;k++){ if(distToSeg(wx,wy,s[k][0],s[k][1],s[k+1][0],s[k+1][1])<=tol){ return {kind:"wall",idx:i,obj:w}; } } } }
     for(let i=map.shapes.length-1;i>=0;i--){ if(pointInShape(wx,wy,map.shapes[i]))
       return {kind:"shape",idx:i,obj:map.shapes[i]}; }
     return null;
@@ -840,9 +913,10 @@
       if(polyPts.length>2 && Math.hypot(gx-polyPts[0][0],gy-polyPts[0][1])<0.6){ finishPolygon(); return; }
       polyPts.push([gx,gy]); render(); return;
     }
-    if(tool==="door"||tool==="stair"){
-      const gp=[snapHalf(wx),snapHalf(wy)];
-      const need = tool==="stair" ? 3 : 2;
+    if(tool==="door"||tool==="stair"||tool==="wall"){
+      const lineTool = (tool==="wall");                   // wall snaps to the grid; door/stair to half-grid
+      const gp = lineTool ? snapPt(wx,wy) : [snapHalf(wx),snapHalf(wy)];
+      const need = tool==="door" ? 2 : 3;                 // door=2, stair/wall/shape=3 (3rd = curve)
       if(!placing){ placing={tool, pts:[gp], hover:gp.slice()}; render(); }
       else { placing.pts.push(gp); if(placing.pts.length>=need) commitPlacing(); else render(); }
       return;
@@ -856,7 +930,7 @@
     if(gesture){ if(pointers.size>=2) updatePinch(); return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
     if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); render(); return; }
-    if(placing){ placing.hover=[snapHalf(wx),snapHalf(wy)]; render(); return; }
+    if(placing){ placing.hover = (placing.tool==="wall") ? snapPt(wx,wy) : [snapHalf(wx),snapHalf(wy)]; render(); return; }
     if(polyPts){ hoverPt=snapPt(wx,wy); render(); }
     if(dragObj){ moved=true; moveObj(dragObj, wx-dragObj.ox, wy-dragObj.oy); render(); return; }
     if(!dragStart) return;
@@ -880,8 +954,8 @@
     if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
     if(!dragStart){ return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
-    if(tool==="rect" && draft){ pushHistory(); draft.id=uid(); map.shapes.push(draft); commit(); }
-    else if(tool==="circle" && draft){ pushHistory(); draft.id=uid(); map.shapes.push(draft); commit(); }
+    if(tool==="rect" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true; map.shapes.push(draft); commit(); }
+    else if(tool==="circle" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true; map.shapes.push(draft); commit(); }
     else if(tool==="wall" && draft && (draft.x1!==draft.x2||draft.y1!==draft.y2)){
       pushHistory(); map.walls.push({id:uid(),x1:draft.x1,y1:draft.y1,x2:draft.x2,y2:draft.y2}); commit(); }
     draft=null; dragStart=null;
@@ -912,16 +986,33 @@
     const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2;
     if(Math.hypot(tip[0]-mx, tip[1]-my)<0.2) return null;
     return {ax:a[0],ay:a[1], bx:b[0],by:b[1], tx:tip[0],ty:tip[1]}; }
+  // Build a wall/shape object from start, end and the curve-apex click. The 3rd
+  // click is the point the wall should bow THROUGH: for a quadratic Bézier that
+  // passes through apex Q at t=0.5, the control point is 2Q − midpoint. If Q sits
+  // on the chord (no bow), it stays a straight wall (no control point stored).
+  function wallFromPts(a, b, apex, thin){
+    if(!a||!b) return null;
+    if(Math.hypot(b[0]-a[0], b[1]-a[1])<0.1) return null;
+    const wl={ x1:a[0], y1:a[1], x2:b[0], y2:b[1] };
+    if(apex){ const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2;
+      if(distToSeg(apex[0],apex[1], a[0],a[1], b[0],b[1]) > 0.2){ wl.cx=2*apex[0]-mx; wl.cy=2*apex[1]-my; } }
+    if(thin) wl.thin=true;
+    return wl;
+  }
   function commitPlacing(){
     if(placing.tool==="door"){ const g=doorFromPts(placing.pts[0], placing.pts[1]);
       pushHistory(); g.id=uid(); map.doors.push(g); commit(); }
+    else if(placing.tool==="wall"){
+      const wl=wallFromPts(placing.pts[0], placing.pts[1], placing.pts[2], drawMode==="shapes");
+      if(wl){ pushHistory(); wl.id=uid(); map.walls.push(wl); commit(); } }
     else { const g=stairFromPts(placing.pts[0], placing.pts[1], placing.pts[2]);
       if(g){ pushHistory(); g.id=uid(); map.stairs.push(g); commit(); } }
     placing=null;
   }
 
   function finishPolygon(){ if(polyPts.length>2){ pushHistory();
-      map.shapes.push({id:uid(),type:"polygon",pts:polyPts.slice()}); commit(); }
+      const poly={id:uid(),type:"polygon",pts:polyPts.slice()}; if(drawMode==="shapes") poly.deco=true;
+      map.shapes.push(poly); commit(); }
     polyPts=null; hoverPt=null; render(); }
 
   // move / snapshot / remove object helpers
@@ -935,7 +1026,8 @@
       else if(o.type==="circle"){ o.cx=s.cx+gdx; o.cy=s.cy+gdy; }
       else if(o.type==="polygon"){ o.pts=s.pts.map(p=>[p[0]+gdx,p[1]+gdy]); }
       markGeom();
-    } else if(dragObj.h.kind==="wall"){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy; }
+    } else if(dragObj.h.kind==="wall"){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy;
+      if(s.cx!==undefined){ o.cx=s.cx+gdx; o.cy=s.cy+gdy; } }
     else if(dragObj.h.kind==="door"){ o.x=s.x+hd(dx); o.y=s.y+hd(dy); }
     else if(dragObj.h.kind==="stair"){
       if(s.ax!==undefined){ o.ax=s.ax+gdx;o.ay=s.ay+gdy;o.bx=s.bx+gdx;o.by=s.by+gdy;o.tx=s.tx+gdx;o.ty=s.ty+gdy; }
@@ -1315,7 +1407,8 @@
   function contentBounds(){
     const pts=[];
     for(const s of map.shapes){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
-    for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]); }
+    for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]);
+      if(w.cx!==undefined) pts.push([0.25*w.x1+0.5*w.cx+0.25*w.x2, 0.25*w.y1+0.5*w.cy+0.25*w.y2]); }
     for(const d of map.doors) pts.push([d.x,d.y]);
     for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
       else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
@@ -1369,10 +1462,11 @@
   function setTool(t){ tool=t;
     document.querySelectorAll(".tool").forEach(el=>el.classList.toggle("active",el.dataset.tool===t));
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
-    if(t!=="door"&&t!=="stair"&&placing){ placing=null; render(); }
+    if(placing){ placing=null; render(); }
     cv.style.cursor = t==="select"?"default":(t==="erase"?"cell":"crosshair");
     const tips={rect:"Drag to draw a rectangular room.",circle:"Drag out a circular room.",
-      polygon:"Click to drop corners · Enter or double-click to close.",wall:"Drag to draw an interior wall.",
+      polygon:"Click to drop corners · Enter or double-click to close.",
+      wall:"Click start, click end, then click to bow the curve (click the line for a straight wall).",
       door:"Click to start, move to aim, click again to place the door.",
       stair:"Click a base corner, click to set width, click the tip to place.",
       erase:"Click anything to delete it.",select:"Click to select · drag to move."};
@@ -1380,6 +1474,17 @@
   }
   document.getElementById("toolbar").addEventListener("click", e=>{
     const t=e.target.closest(".tool"); if(t) setTool(t.dataset.tool); });
+
+  // Rooms ⟷ Shapes: flip what Square/Circle/Polygon/Wall produce. Doors/stairs
+  // are unaffected. In Shapes mode those tools make thin interior shapes (deco).
+  const modeSeg=document.getElementById("modeSeg");
+  function setMode(m){ drawMode=m;
+    modeSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.mode===m));
+    if(placing){ placing=null; } if(draft){ draft=null; } render();
+    toast(m==="shapes"
+      ? "Shapes mode — Square / Circle / Polygon / Wall now draw thin interior shapes."
+      : "Rooms mode — Square / Circle / Polygon draw rooms; Wall draws interior walls."); }
+  modeSeg.addEventListener("click", e=>{ const b=e.target.closest("button"); if(b) setMode(b.dataset.mode); });
 
   let tipTimer=null;
   function toast(msg){ const el=$("tip"); if(!el||!msg) return; el.textContent=msg; el.classList.add("show");
@@ -1416,6 +1521,7 @@
     if(e.key==="Enter"&&polyPts){ finishPolygon(); return; }
     if(e.key==="Escape"){ polyPts=null; draft=null; dragStart=null; sel=null; placing=null; render(); return; }
     if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
+    if(e.key==="g"||e.key==="G"){ setMode(drawMode==="rooms"?"shapes":"rooms"); return; }  // toggle Rooms/Shapes
     const keys={v:"select",r:"rect",c:"circle",p:"polygon",w:"wall",d:"door",s:"stair",e:"erase"};
     if(keys[e.key]) setTool(keys[e.key]);
   });

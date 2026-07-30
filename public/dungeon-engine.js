@@ -71,7 +71,8 @@ window.DungeonEngine = (function(){
   function contentBounds(){
     const pts=[];
     for(const s of map.shapes){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
-    for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]); }
+    for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]);
+      if(w.cx!==undefined) pts.push([0.25*w.x1+0.5*w.cx+0.25*w.x2, 0.25*w.y1+0.5*w.cy+0.25*w.y2]); }
     for(const d of map.doors) pts.push([d.x,d.y]);
     for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
       else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
@@ -108,7 +109,7 @@ window.DungeonEngine = (function(){
       // floor mask (white union)
       const m=buf.mask.getContext("2d"); m.setTransform(1,0,0,1,0,0);
       m.clearRect(0,0,W,H); m.fillStyle="#fff"; m.beginPath();
-      for(const sh of shapes) shapePath(m, sh); m.fill("nonzero");
+      for(const sh of shapes){ if(sh.deco) continue; shapePath(m, sh); } m.fill("nonzero");
       // floor colour
       const tc=buf.tint.getContext("2d"); tc.setTransform(1,0,0,1,0,0);
       tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over"; tc.drawImage(buf.mask,0,0);
@@ -130,6 +131,7 @@ window.DungeonEngine = (function(){
       drawWalls();
     }
     drawInteriorWalls();
+    drawDecoShapes();
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
   }
@@ -208,11 +210,11 @@ window.DungeonEngine = (function(){
     const halfW=Math.max(1.3,1.7*cam.scale);
     const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
     wc.globalCompositeOperation="source-over"; wc.fillStyle=C.ink;
-    for(const sh of map.shapes) roughRing(wc, shapeOutline(sh), halfW);
+    for(const sh of map.shapes){ if(sh.deco) continue; roughRing(wc, shapeOutline(sh), halfW); }
     const ec=buf.erode.getContext("2d"); ec.setTransform(1,0,0,1,0,0); ec.clearRect(0,0,W,H);
     ec.globalCompositeOperation="source-over"; ec.fillStyle="#fff";
     const inset=(halfW+1.4)/wpx();
-    for(const sh of map.shapes) fillInsetShape(ec, sh, inset);
+    for(const sh of map.shapes){ if(sh.deco) continue; fillInsetShape(ec, sh, inset); }
     wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
     for(const d of map.doors) punchDoorQuad(wc, d);
     if(!noRock){ const o=Math.min(2,cam.scale); ctx.save(); ctx.globalAlpha=.16;
@@ -220,9 +222,49 @@ window.DungeonEngine = (function(){
     ctx.drawImage(buf.wall,0,0);
   }
 
+  // Sample a wall's quadratic-Bézier curve (control point cx,cy) into world points.
+  function wallSamples(wl){
+    const x1=wl.x1,y1=wl.y1,x2=wl.x2,y2=wl.y2, cx=wl.cx, cy=wl.cy;
+    const chord=Math.hypot(x2-x1,y2-y1), bow=Math.hypot(cx-(x1+x2)/2, cy-(y1+y2)/2);
+    const N=Math.max(6, Math.min(80, Math.round((chord+bow*2)*5)));
+    const pts=[];
+    for(let i=0;i<=N;i++){ const t=i/N, u=1-t;
+      pts.push([u*u*x1+2*u*t*cx+t*t*x2, u*u*y1+2*u*t*cy+t*t*y2]); }
+    return pts;
+  }
+  // A rough-edged ribbon along an open world polyline (curved walls / shape lines).
+  function roughCurve(c, worldPts, halfW){
+    const n=worldPts.length; if(n<2) return;
+    const S=worldPts.map(p=>toScreen(p[0],p[1]));
+    const top=[], bot=[];
+    for(let i=0;i<n;i++){
+      const a=S[Math.max(0,i-1)], b=S[Math.min(n-1,i+1)];
+      const dx=b[0]-a[0], dy=b[1]-a[1]; const l=Math.hypot(dx,dy)||1; const nx=-dy/l, ny=dx/l;
+      const w=worldPts[i];
+      const at=halfW*(0.7+seeded(w[0]*29,w[1]*29)()*0.7), ab=halfW*(0.7+seeded(w[0]*29+13,w[1]*29+7)()*0.7);
+      top.push([S[i][0]+nx*at, S[i][1]+ny*at]); bot.push([S[i][0]-nx*ab, S[i][1]-ny*ab]);
+    }
+    c.beginPath(); c.moveTo(top[0][0],top[0][1]);
+    for(let i=1;i<n;i++) c.lineTo(top[i][0],top[i][1]);
+    for(let i=n-1;i>=0;i--) c.lineTo(bot[i][0],bot[i][1]);
+    c.closePath(); c.fill();
+    c.beginPath(); c.arc(S[0][0],S[0][1],halfW*1.02,0,6.2832); c.fill();
+    c.beginPath(); c.arc(S[n-1][0],S[n-1][1],halfW*1.02,0,6.2832); c.fill();
+  }
   function drawInteriorWalls(){ if(!map.walls.length) return; ctx.save(); ctx.fillStyle=C.ink;
-    const halfW=Math.max(1.3,1.7*cam.scale);
-    for(const wl of map.walls) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2],halfW);
+    const normal=Math.max(1.3,1.7*cam.scale), thin=Math.max(0.6,0.85*cam.scale);
+    for(const wl of map.walls){ const hw = wl.thin ? thin : normal;
+      if(wl.cx===undefined || wl.cy===undefined) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2], hw);
+      else roughCurve(ctx, wallSamples(wl), hw); }
+    ctx.restore(); }
+
+  // Interior "shapes" (deco: pillars, dais, tables, pits) — drawn as thin rough
+  // OUTLINES on top of the floor, never as rooms: they add no floor, no rock wall
+  // ring, no interior punch. shapeOutline samples circles as true arcs ⇒ round.
+  function drawDecoShapes(){
+    let any=false; for(const s of map.shapes){ if(s.deco){ any=true; break; } } if(!any) return;
+    ctx.save(); ctx.fillStyle=C.ink; const thin=Math.max(0.6,0.85*cam.scale);
+    for(const sh of map.shapes){ if(!sh.deco) continue; roughRing(ctx, shapeOutline(sh), thin); }
     ctx.restore(); }
 
   function doorGeom(d){
