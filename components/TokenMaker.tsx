@@ -271,8 +271,13 @@ export default function TokenMaker() {
   const onPointerMove = (e: React.PointerEvent) => {
     const st = dragState.current;
     if (!st) return;
-    const dx = (e.clientX - st.startX) / PREVIEW_SIZE;
-    const dy = (e.clientY - st.startY) / PREVIEW_SIZE;
+    // Normalize by the canvas's actual on-screen size so panning stays 1:1 even
+    // when the preview is scaled down on small screens.
+    const rect = canvasRef.current?.getBoundingClientRect();
+    const w = rect?.width || PREVIEW_SIZE;
+    const h = rect?.height || PREVIEW_SIZE;
+    const dx = (e.clientX - st.startX) / w;
+    const dy = (e.clientY - st.startY) / h;
     setOffset({ x: st.ox + dx, y: st.oy + dy });
   };
   const onPointerUp = (e: React.PointerEvent) => {
@@ -329,7 +334,7 @@ export default function TokenMaker() {
   return (
     <div className="grid gap-8 lg:grid-cols-[440px_1fr]">
       {/* ── Preview ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex w-full min-w-0 flex-col items-center gap-4">
         <div
           onDragOver={(e) => {
             e.preventDefault();
@@ -341,8 +346,11 @@ export default function TokenMaker() {
             dropActive ? "border-[var(--gold)]" : "border-[var(--border)]"
           }`}
           style={{
-            width: PREVIEW_SIZE,
-            height: PREVIEW_SIZE,
+            // Responsive: fill the column but never exceed PREVIEW_SIZE, and
+            // stay square. A fixed px width here overflowed narrow phones.
+            width: "100%",
+            maxWidth: PREVIEW_SIZE,
+            aspectRatio: "1 / 1",
             // Checkerboard so PNG transparency is visible in the preview.
             backgroundColor: "#1a1a1d",
             backgroundImage:
