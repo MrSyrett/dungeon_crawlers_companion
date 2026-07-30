@@ -1683,10 +1683,28 @@ const GMScenes = (function() {
     params.push('raw=1');
     return base + '?' + params.join('&');
   }
+  // One shared fade ticker for all elements (alive only while fades run) —
+  // the old version spawned a 25Hz setInterval PER audio element, so a
+  // six-track scene crossfade ran twelve concurrent timers. Time-based, so
+  // background-tab throttling just coarsens the curve without stalling the
+  // fade or its completion callback (which pause() relies on).
+  const _fades = new Set();
+  let _fadeTimer = null;
+  function _fadeTick(){
+    const now = performance.now();
+    _fades.forEach(f => {
+      const k = f.ms > 0 ? Math.min(1, (now - f.start)/f.ms) : 1;
+      try { f.a.volume = clamp01(f.from + (f.to - f.from)*k); } catch(e){}
+      if(k >= 1){ _fades.delete(f); if(f.a._ramp === f) f.a._ramp = null; if(f.done) f.done(); }
+    });
+    if(!_fades.size){ clearInterval(_fadeTimer); _fadeTimer = null; }
+  }
   function ramp(a, to, ms, done){
-    if(a._ramp){ clearInterval(a._ramp); a._ramp=null; }
-    to = clamp01(to); const steps = Math.max(1, Math.round(ms/40)); const from = a.volume; let i=0;
-    a._ramp = setInterval(()=>{ i++; try{ a.volume = clamp01(from+(to-from)*(i/steps)); }catch(e){} if(i>=steps){ clearInterval(a._ramp); a._ramp=null; if(done) done(); } }, 40);
+    if(a._ramp){ _fades.delete(a._ramp); a._ramp = null; }   // supersede a running fade (its done is dropped, as before)
+    const f = { a: a, from: a.volume, to: clamp01(to), ms: ms, start: performance.now(), done: done };
+    a._ramp = f;   // stays truthy while fading — volume-knob code checks this
+    _fades.add(f);
+    if(!_fadeTimer) _fadeTimer = setInterval(_fadeTick, 40);
   }
   const scene = id => scenes.find(s=>s.id===id) || null;
   const tvol = t => clamp01(masterVol * (typeof t.vol==='number'?t.vol:0.8));
@@ -2765,6 +2783,18 @@ function renderPane(paneNum) {
 // Wire cloned toolbar elements to the live tool instance elements.
 // Each cloned element gets its events proxied to the matching live element.
 function syncToolbar(slot, toolNode) {
+  // Listeners/observers attached to the CLONE die with it on the next render,
+  // but anything attached to the LIVE tool node (which persists across pane
+  // re-renders) used to accumulate — one more observer + change listener per
+  // view switch, forever. Tear down the previous call's live-node attachments
+  // before adding this call's.
+  if(toolNode._toolbarCleanup) toolNode._toolbarCleanup();
+  const _cleanups = [];
+  toolNode._toolbarCleanup = () => {
+    _cleanups.forEach(fn => { try { fn(); } catch(e) {} });
+    toolNode._toolbarCleanup = null;
+  };
+
   // Map by class selector — each cloned element routes to its live twin
   const pairs = [
     // doc tools
@@ -2818,7 +2848,7 @@ function syncToolbar(slot, toolNode) {
         liveInput.click();
       });
       // Update filename display in clone when a file is picked
-      liveInput.addEventListener('change', () => {
+      const onLivePick = () => {
         const cloneFilename = slot.querySelector('.doc-filename');
         const liveFilename = toolNode.querySelector('.doc-filename');
         if(cloneFilename && liveFilename) {
@@ -2832,7 +2862,9 @@ function syncToolbar(slot, toolNode) {
             }
           }, 200);
         }
-      });
+      };
+      liveInput.addEventListener('change', onLivePick);
+      _cleanups.push(() => liveInput.removeEventListener('change', onLivePick));
     }
   }
 
@@ -2851,6 +2883,7 @@ function syncToolbar(slot, toolNode) {
     const mirror = () => { cloneOpen.href = liveOpen.href; cloneOpen.style.display = liveOpen.style.display; };
     mirror();
     toolNode.addEventListener('rul-book-change', mirror);
+    _cleanups.push(() => toolNode.removeEventListener('rul-book-change', mirror));
   }
 
   // Notes import: cloned label click triggers live file input
@@ -2883,6 +2916,7 @@ function syncToolbar(slot, toolNode) {
       cloneSaved.className = liveSaved.className;
     });
     obs.observe(liveSaved, { attributes: true, childList: true, characterData: true, subtree: true });
+    _cleanups.push(() => obs.disconnect());
   }
 }
 </script>
@@ -3847,17 +3881,28 @@ function init_trackers(root) {
     });
   }
 
-  // Running timers tick once a second (only re-render if something changed).
+  // Running timers tick once a second. A tick only touches the ticking card's
+  // readout text in place — the old full render() rebuilt every card (and
+  // re-attached all their listeners) once per second while any timer ran. A
+  // full render still happens when a timer expires, since that changes the
+  // card's class, label and play/pause button.
   setInterval(() => {
-    let dirty = false;
+    let needsRender = false;
     items.forEach(it => {
       if(it.type === 'tracker' && it.kind === 'timer' && it.running && it.remainingSeconds > 0) {
         it.remainingSeconds = Math.max(0, it.remainingSeconds - 1);
-        if(it.remainingSeconds === 0) it.running = false;
-        dirty = true;
+        if(it.remainingSeconds === 0) {
+          it.running = false;
+          needsRender = true;
+          return;
+        }
+        const card = list.querySelector('.tracker-card[data-id="' + it.id + '"]');
+        const disp = card && card.querySelector('.timer-display');
+        if(disp) disp.textContent = fmtTime(it.remainingSeconds);
+        else needsRender = true;   // card missing (mid-rebuild) — do it properly
       }
     });
-    if(dirty) render();
+    if(needsRender) render();
   }, 1000);
 
   function onClick(e) {
@@ -7536,15 +7581,25 @@ function init_music(root) {
   function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
   function fmt(t){ if(!isFinite(t)||t<0) t=0; const m=Math.floor(t/60), s=Math.floor(t%60); return m+':'+String(s).padStart(2,'0'); }
 
+  // Shared fade ticker (see the scenes player above for rationale): one 40ms
+  // interval alive only while fades are running, instead of one per element.
+  const _fades = new Set();
+  let _fadeTimer = null;
+  function _fadeTick(){
+    const now = performance.now();
+    _fades.forEach(f => {
+      const k = f.ms > 0 ? Math.min(1, (now - f.start)/f.ms) : 1;
+      try { f.a.volume = clamp01(f.from + (f.to - f.from)*k); } catch(e){}
+      if(k >= 1){ _fades.delete(f); if(f.a._ramp === f) f.a._ramp = null; if(f.done) f.done(); }
+    });
+    if(!_fades.size){ clearInterval(_fadeTimer); _fadeTimer = null; }
+  }
   function ramp(a, to, ms, done){
-    if(a._ramp){ clearInterval(a._ramp); a._ramp=null; }
-    to = clamp01(to);
-    const steps = Math.max(1, Math.round(ms/40));
-    const from = a.volume; let i=0;
-    a._ramp = setInterval(()=>{
-      i++; try { a.volume = clamp01(from+(to-from)*(i/steps)); } catch(e){}
-      if(i>=steps){ clearInterval(a._ramp); a._ramp=null; if(done) done(); }
-    }, 40);
+    if(a._ramp){ _fades.delete(a._ramp); a._ramp = null; }
+    const f = { a: a, from: a.volume, to: clamp01(to), ms: ms, start: performance.now(), done: done };
+    a._ramp = f;
+    _fades.add(f);
+    if(!_fadeTimer) _fadeTimer = setInterval(_fadeTick, 40);
   }
 
   const curTrack = () => music.find(t=>t.id===curId) || null;
@@ -9191,6 +9246,7 @@ function init_party(root) {
 
   let chars = [];          // [{id, source, sheet}]
   let lastSync = null;
+  let _lastSyncPayload = null;  // raw last response — lets quiet syncs skip identical rosters
   let openIds = new Set();
   let nextId = 1;
 
@@ -9474,6 +9530,8 @@ function init_party(root) {
       const id = parseInt(rm.dataset.remove);
       chars = chars.filter(x => x.id !== id);
       openIds.delete(id);
+      // Local state diverged from the server's — see the clear button below.
+      _lastSyncPayload = null;
       status('');
       render();
       return;
@@ -9532,7 +9590,13 @@ function init_party(root) {
       if(r.status === 401) { status('Signed out — reload the page and sign in again.', true); return; }
       if(r.status === 404) { status('That campaign no longer exists on the server.', true); return; }
       if(!r.ok) throw new Error(r.status);
-      const data = await r.json();
+      const text = await r.text();
+      // Auto-sync (every 30s): if the server sent back exactly what it sent
+      // last time, nothing changed — skip the re-normalize and full re-render.
+      // Manual sync always processes, so the button stays a reliable refresh.
+      if(quiet && text === _lastSyncPayload) return;
+      _lastSyncPayload = text;
+      const data = JSON.parse(text);
       const list = Array.isArray(data) ? data : (data.characters || []);
       // A sync is the source of truth for campaign sheets. Update matching
       // characters in place (addSheet matches by name and keeps the same id, so
@@ -9573,6 +9637,9 @@ function init_party(root) {
 
   clearBtn.addEventListener('click', () => {
     if(chars.length && !confirm('Remove all character sheets from the party view?')) return;
+    // Local state diverged from the server's — forget the last payload so the
+    // next quiet sync doesn't skip as "unchanged" and leave the list empty.
+    _lastSyncPayload = null;
     chars = []; openIds = new Set(); status(''); render();
   });
 
@@ -9608,10 +9675,17 @@ function init_rules(root) {
   const esc = t => String(t == null ? '' : t)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
+  // The browser's PDF viewer is expensive to spin up (it re-downloads and
+  // re-parses the whole book), so each book's <object> is created once and
+  // kept; switching tabs just toggles which one is visible — which also
+  // preserves the reader's scroll position in each book.
+  const _bookFrames = new Map();   // file → <object>
+
   function showBook() {
     const b = books.find(x => x.file === activeFile) || books[0];
-    frameWrap.innerHTML = '';
     if(!b) {
+      _bookFrames.forEach(el => el.remove());
+      _bookFrames.clear();
       frameWrap.style.display = 'none';
       newTabLink.style.display = 'none';
       root.dispatchEvent(new Event('rul-book-change'));
@@ -9623,16 +9697,21 @@ function init_rules(root) {
 
     // <object> lets the browser's own PDF viewer handle scrolling and search,
     // with an iframe (then a plain link) behind it for the browsers that can't.
-    const obj = document.createElement('object');
-    obj.type = 'application/pdf';
-    obj.data = b.url;
-    obj.className = 'rul-frame';
-    const frame = document.createElement('iframe');
-    frame.className = 'rul-frame';
-    frame.src = b.url;
-    frame.title = b.title;
-    obj.appendChild(frame);
-    frameWrap.appendChild(obj);
+    let obj = _bookFrames.get(b.file);
+    if(!obj) {
+      obj = document.createElement('object');
+      obj.type = 'application/pdf';
+      obj.data = b.url;
+      obj.className = 'rul-frame';
+      const frame = document.createElement('iframe');
+      frame.className = 'rul-frame';
+      frame.src = b.url;
+      frame.title = b.title;
+      obj.appendChild(frame);
+      _bookFrames.set(b.file, obj);
+      frameWrap.appendChild(obj);
+    }
+    _bookFrames.forEach(el => { el.style.display = el === obj ? '' : 'none'; });
 
     newTabLink.href = b.url;
     newTabLink.style.display = '';
@@ -9644,8 +9723,9 @@ function init_rules(root) {
       '<button class="rul-booktab' + (b.file === activeFile ? ' on' : '') + '" data-file="' + esc(b.file) + '">'
       + esc(b.title) + '</button>').join('');
     if(!books.length) {
+      _bookFrames.forEach(el => el.remove());
+      _bookFrames.clear();
       frameWrap.style.display = 'none';
-      frameWrap.innerHTML = '';
       newTabLink.style.display = 'none';
       emptyEl.style.display = 'flex';
       return;
@@ -9660,6 +9740,12 @@ function init_rules(root) {
       if(!r.ok) throw new Error(r.status);
       const data = await r.json();
       books = (data.books || []).filter(b => b && b.url && b.file);
+      // Manual refresh means "re-read from the server" — drop every cached
+      // viewer so the PDFs really reload. Quiet loads just prune viewers for
+      // books that no longer exist.
+      _bookFrames.forEach((el, file) => {
+        if(!quiet || !books.some(b => b.file === file)) { el.remove(); _bookFrames.delete(file); }
+      });
       if(!books.some(b => b.file === activeFile)) activeFile = books.length ? books[0].file : '';
       loaded = true;
       noteEl.textContent = books.length ? books.length + ' book' + (books.length === 1 ? '' : 's') : '';
