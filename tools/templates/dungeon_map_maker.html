@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Dungeon Map Maker</title>
+<!-- Shared generator + renderer. When served by the app this is the single source
+     of truth (the GM Screen + Session Prep use it too). If it fails to load (e.g.
+     the file opened standalone / offline), the tool falls back to its own inlined
+     copy below, so it still works on its own. -->
+<script src="/dungeon-engine.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
@@ -422,7 +427,20 @@
     return out;
   }
 
+  // Render entry point. The MAP itself (floors/walls/doors/stairs/grid/dots) is
+  // drawn by the shared DungeonEngine when it's loaded (single source of truth,
+  // shared with the GM Screen + Session Prep); otherwise by the inlined
+  // renderLocalMap() fallback. Tool-preview + selection overlays are always drawn
+  // here on top.
   function render(){
+    if(window.DungeonEngine && window.DungeonEngine.renderTo){
+      window.DungeonEngine.renderTo(ctx, map, {cam, W, H, DPR, theme, transparent:noRock});
+    } else {
+      renderLocalMap();
+    }
+    if(!exporting){ drawPreview(); drawSelection(); }
+  }
+  function renderLocalMap(){
     // Work in CSS-pixel logical space; scale once for crisp HiDPI output.
     ctx.setTransform(DPR,0,0,DPR,0,0);
     ctx.clearRect(0,0,W,H);
@@ -463,7 +481,6 @@
     drawInteriorWalls();
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
-    if(!exporting){ drawPreview(); drawSelection(); }
   }
 
   function drawDotGrid(){ const p=wpx(); if(p<13) return; ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.8;
@@ -908,18 +925,39 @@
   function rng(){ rngState=(rngState*1664525+1013904223)>>>0; return rngState/4294967296; }
   function ri(a,b){ return a+Math.floor(rng()*(b-a+1)); }
 
+  // Generate entry point. The map is built by the shared DungeonEngine when it's
+  // loaded (single source of truth, shared with the GM Screen + Session Prep);
+  // otherwise by the inlined generateLocal() fallback. Either way this wrapper
+  // owns the surrounding UI concerns (history, name/grid, commit + fit).
   function generate(){
-    const nRooms=+$("rooms").value;
-    const [smin,smax]=SIZE_MAP[+$("rsize").value];
-    const spread=+$("spread").value;
-    const doCorr=$("corridors").checked;
-    const roundOk=$("roundish").checked;
-    const nEntrances=+$("entrances").value;
-    rngState=(Date.now()^(Math.floor(Math.random()*1e9)))>>>0;
-
+    const opts = {
+      rooms: +$("rooms").value,
+      size: +$("rsize").value,
+      layout: +$("spread").value,
+      entrances: +$("entrances").value,
+      corridors: $("corridors").checked,
+      roundRooms: $("roundish").checked,
+      theme: theme
+    };
     pushHistory();
-    const keepName=map.name;
-    map=blankMap(); map.name=keepName; map.grid=$("gridToggle").checked; map.theme=theme;
+    const keepName = map.name;
+    map = (window.DungeonEngine && window.DungeonEngine.generate)
+      ? window.DungeonEngine.generate(opts)
+      : generateLocal(opts);
+    map.name = keepName; map.grid = $("gridToggle").checked; map.theme = theme;
+    commit(); fitView();
+  }
+  // Inlined fallback generator (used only when DungeonEngine isn't loaded, e.g.
+  // the tool opened standalone). Builds into the module `map` and returns it.
+  function generateLocal(opts){
+    const nRooms=opts.rooms;
+    const [smin,smax]=SIZE_MAP[opts.size];
+    const spread=opts.layout;
+    const doCorr=opts.corridors;
+    const roundOk=opts.roundRooms;
+    const nEntrances=opts.entrances;
+    rngState=(Date.now()^(Math.floor(Math.random()*1e9)))>>>0;
+    map=blankMap(); map.theme=opts.theme;
 
     // Field size derives from a target packing density (rooms fill ~this
     // fraction of the bounding area). Tighter layouts pack denser.
@@ -973,7 +1011,7 @@
     // lead out of the whole dungeon (0 ⇒ none, e.g. stairs are the way in/out).
     placeEntrances(nEntrances);
     // Stairs are NOT auto-placed — drop them by hand with the Stairs tool.
-    commit(); fitView();
+    return map;
   }
   // Final pass over every generated door: measure the actual opening in the wall
   // it sits in, snap it onto the grid, size it to span that opening, and reject

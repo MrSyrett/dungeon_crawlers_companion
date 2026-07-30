@@ -16,9 +16,9 @@ import SystemToggle from "@/components/SystemToggle";
 // tab they sit after the Shadowdark reference pages (see SD_REFERENCE); on the
 // DCC tab they're the only toolbar links.
 const SHARED_NAV: { href: string; label: string }[] = [
-  { href: "/vtt", label: "Virtual Tabletop" },
-  { href: "/token-maker", label: "Token Maker" },
-  { href: "/dungeon-map", label: "Map Maker" },
+  { href: "/vtt", label: "VTT" },
+  { href: "/token-maker", label: "Tokens" },
+  { href: "/dungeon-map", label: "Maps" },
   { href: "/campaigns", label: "Campaigns" },
   { href: "/gm-screen", label: "GM Screen" },
 ];

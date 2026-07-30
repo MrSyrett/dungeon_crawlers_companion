@@ -6,6 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dungeon Crawler's Companion — GM Screen</title>
+<script src="/dungeon-engine.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Barlow+Condensed:wght@400;500;600;700;900&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -2318,14 +2319,32 @@ GMScenes.renderPins();
               <option value="20">20</option>
             </select>
           </label>
-          <label class="gen-label">Map Style
-            <select class="gen-select" id="gen-dun-style">
-              <option value="nodes">Nodes</option>
-              <option value="hud">HUD</option>
-              <option value="parchment">Dungeon</option>
-              <option value="cave">Cave</option>
-              <option value="none">None (Rooms Only)</option>
+          <label class="gen-label">Room Size
+            <select class="gen-select" id="gen-dun-size">
+              <option value="1">Tiny</option><option value="2">Small</option>
+              <option value="3" selected>Medium</option><option value="4">Large</option><option value="5">Huge</option>
             </select>
+          </label>
+          <label class="gen-label">Layout
+            <select class="gen-select" id="gen-dun-layout">
+              <option value="1">Tight</option><option value="2">Cozy</option>
+              <option value="3" selected>Balanced</option><option value="4">Sprawling</option><option value="5">Vast</option>
+            </select>
+          </label>
+          <label class="gen-label">Entrances
+            <select class="gen-select" id="gen-dun-entrances">
+              <option value="0">0</option><option value="1">1</option><option value="2" selected>2</option>
+              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+            </select>
+          </label>
+          <label class="gen-label">Corridors
+            <select class="gen-select" id="gen-dun-corr"><option value="1" selected>Yes</option><option value="0">No (shared walls)</option></select>
+          </label>
+          <label class="gen-label">Round Rooms
+            <select class="gen-select" id="gen-dun-round"><option value="0" selected>No</option><option value="1">Allow</option></select>
+          </label>
+          <label class="gen-label">Look
+            <select class="gen-select" id="gen-dun-look"><option value="light" selected>Light</option><option value="dark">Dark</option></select>
           </label>
         </div>
         <div class="gen-results" id="gen-dun-results">
@@ -2500,13 +2519,32 @@ GMScenes.renderPins();
               <option value="12">12</option><option value="15">15</option><option value="20">20</option>
             </select>
           </label>
-          <label class="gen-label">Map Style
-            <select class="gen-select" id="gen-adv-mapstyle">
-              <option value="parchment">Dungeon</option>
-              <option value="nodes">Nodes</option>
-              <option value="cave">Cave</option>
-              <option value="hud">HUD</option>
+          <label class="gen-label">Room Size
+            <select class="gen-select" id="gen-adv-size">
+              <option value="1">Tiny</option><option value="2">Small</option>
+              <option value="3" selected>Medium</option><option value="4">Large</option><option value="5">Huge</option>
             </select>
+          </label>
+          <label class="gen-label">Layout
+            <select class="gen-select" id="gen-adv-layout">
+              <option value="1">Tight</option><option value="2">Cozy</option>
+              <option value="3" selected>Balanced</option><option value="4">Sprawling</option><option value="5">Vast</option>
+            </select>
+          </label>
+          <label class="gen-label">Entrances
+            <select class="gen-select" id="gen-adv-entrances">
+              <option value="0">0</option><option value="1">1</option><option value="2" selected>2</option>
+              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+            </select>
+          </label>
+          <label class="gen-label">Corridors
+            <select class="gen-select" id="gen-adv-corr"><option value="1" selected>Yes</option><option value="0">No (shared walls)</option></select>
+          </label>
+          <label class="gen-label">Round Rooms
+            <select class="gen-select" id="gen-adv-round"><option value="0" selected>No</option><option value="1">Allow</option></select>
+          </label>
+          <label class="gen-label">Look
+            <select class="gen-select" id="gen-adv-look"><option value="light" selected>Light</option><option value="dark">Dark</option></select>
           </label>
           <label class="gen-label">Monsters
             <select class="gen-select" id="gen-adv-nmon"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option></select>
@@ -7068,7 +7106,6 @@ window.init_gen = function(root) {
       const motif   = motifSel === 'random'
         ? R(['Abandoned','Undead','Aberrant','Giant','Vermin','Infernal','Caves','Crypts','Ruins','Dungeon','Mansion','Tower'])
         : motifSel;
-      const mapstyle = root.querySelector('#gen-adv-mapstyle').value;
       const res = root.querySelector('#gen-adv-results');
       res.innerHTML = '';
       res.style.cssText = 'overflow-y:auto;display:block;padding:0;';
@@ -7102,15 +7139,22 @@ window.init_gen = function(root) {
       if(!dungRooms.children.length) dungRooms.appendChild(dungEl);
       dungeonWrap.appendChild(dungRooms);
 
-      // Map — below the rooms, centred, free to use the height it needs
-      if(window._genDungeonMap) {
-        const mapResult = window._genDungeonMap(nRooms, mapstyle);
-        root._mapSvg = mapResult.svg;
+      // Map — generated by the shared Dungeon Engine (same look as the Map Maker)
+      if(window.DungeonEngine) {
+        const q = id => root.querySelector('#gen-adv-'+id);
+        const gen = window.DungeonEngine.generateToPNG({
+          rooms: nRooms,
+          size: +((q('size')||{}).value||3),
+          layout: +((q('layout')||{}).value||3),
+          entrances: +((q('entrances')||{}).value||2),
+          corridors: ((q('corr')||{}).value||'1') !== '0',
+          roundRooms: ((q('round')||{}).value||'0') === '1',
+          theme: (q('look')||{}).value||'light'
+        });
+        root._mapPng = gen.png;
         const mapWrap = document.createElement('div');
         mapWrap.style.cssText = 'display:flex;justify-content:center;width:100%;';
-        mapWrap.innerHTML = mapResult.svg;
-        const svgEl = mapWrap.querySelector('svg');
-        if(svgEl){ svgEl.style.width='100%'; svgEl.style.height='auto'; svgEl.style.maxHeight='none'; }
+        mapWrap.innerHTML = '<img src="'+gen.png+'" alt="Dungeon Map" style="width:100%;height:auto;display:block;">';
         dungeonWrap.appendChild(mapWrap);
       }
       res.appendChild(dungeonWrap);
@@ -7165,7 +7209,7 @@ window.init_gen = function(root) {
       const advBar = root.querySelector('#gen-adv-bar');
       if(advBar) advBar.style.display = 'flex';
       const advMapsBtn = root.querySelector('#gen-adv-maps-btn');
-      if(advMapsBtn) advMapsBtn.style.display = root._mapSvg ? '' : 'none';
+      if(advMapsBtn) advMapsBtn.style.display = root._mapPng ? '' : 'none';
 
       // ── 2 NPCs ──
       {
@@ -7205,16 +7249,14 @@ window.init_gen = function(root) {
       const level  = root.querySelector('#gen-dun-level').value;
       const motif  = root.querySelector('#gen-dun-motif').value;
       const rooms  = parseInt(root.querySelector('#gen-dun-rooms').value)||5;
-      const style  = root.querySelector('#gen-dun-style').value;
       const res    = root.querySelector('#gen-dun-results');
       const mapBar = root.querySelector('#gen-dun-map-bar');
       res.innerHTML = '';
 
       // Store params for export
       root._dunRooms  = rooms;
-      root._dunStyle  = style;
       root._dunMotif  = motif;
-      root._mapSvg    = null;
+      root._mapPng    = null;
       root._mapWidth  = null;
       root._mapHeight = null;
 
@@ -7224,30 +7266,36 @@ window.init_gen = function(root) {
         res.appendChild(dungeonEl);
       }
 
-      // Generate map below the rooms (unless style=none means rooms only)
-      if(style !== 'none' && window._genDungeonMap) {
-        const mapResult = window._genDungeonMap(rooms, style);
-        root._mapSvg    = mapResult.svg;
-        root._mapWidth  = mapResult.width;
-        root._mapHeight = mapResult.height;
-        // Show map preview below rooms
+      // Generate the map below the rooms via the shared Dungeon Engine.
+      if(window.DungeonEngine) {
+        const q = id => root.querySelector('#gen-dun-'+id);
+        const gen = window.DungeonEngine.generateToPNG({
+          rooms,
+          size: +((q('size')||{}).value||3),
+          layout: +((q('layout')||{}).value||3),
+          entrances: +((q('entrances')||{}).value||2),
+          corridors: ((q('corr')||{}).value||'1') !== '0',
+          roundRooms: ((q('round')||{}).value||'0') === '1',
+          theme: (q('look')||{}).value||'light'
+        });
+        root._mapPng    = gen.png;
+        root._mapWidth  = gen.width;
+        root._mapHeight = gen.height;
         const wrap = document.createElement('div');
         wrap.style.cssText = 'width:100%;overflow:auto;display:flex;justify-content:center;padding:10px;flex-shrink:0';
-        wrap.innerHTML = mapResult.svg;
-        const svgEl = wrap.querySelector('svg');
-        if(svgEl){ svgEl.style.maxWidth='100%'; svgEl.style.height='auto'; }
+        wrap.innerHTML = '<img src="'+gen.png+'" style="max-width:100%;height:auto;display:block;">';
         res.appendChild(wrap);
       }
 
       if(res.children.length === 0) {
-        res.innerHTML = '<div class="gen-empty">Nothing generated — select a Motif and/or Map Style.</div>';
+        res.innerHTML = '<div class="gen-empty">Nothing generated.</div>';
       }
 
       // Show action bar, update Load to Maps button visibility
       if(mapBar) {
         mapBar.style.display = 'flex';
         const mapsBtn = root.querySelector('#gen-dun-maps-btn');
-        if(mapsBtn) mapsBtn.style.display = root._mapSvg ? '' : 'none';
+        if(mapsBtn) mapsBtn.style.display = root._mapPng ? '' : 'none';
       }
     }
   });
@@ -7259,10 +7307,9 @@ window.init_gen = function(root) {
     const mapsBtn = root.querySelector('#gen-dun-maps-btn');
     if(!mapsBtn) return;
     mapsBtn.addEventListener('click', () => {
-      const svg = root._mapSvg;
-      if(!svg) return;
-      const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
-      loadIntoTool('maps', dataUrl, 'dungeon-map.svg');
+      const png = root._mapPng;
+      if(!png) return;
+      loadIntoTool('maps', png, 'dungeon-map.png');
     });
   })();
 
@@ -7277,8 +7324,8 @@ window.init_gen = function(root) {
 
       const cards    = res.querySelectorAll('.gen-card');
       const hasRooms = Array.from(cards).some(c => c.querySelector('.gen-item-desc'));
-      const hasSvg   = !!root._mapSvg;
-      if(!hasRooms && !hasSvg) return;
+      const hasMap   = !!root._mapPng;
+      if(!hasRooms && !hasMap) return;
 
       // Build room cards HTML
       let cardsHtml = '';
@@ -7298,9 +7345,8 @@ window.init_gen = function(root) {
 
       // Build map section
       let mapHtml = '';
-      if(hasSvg) {
-        const svgB64 = btoa(unescape(encodeURIComponent(root._mapSvg)));
-        mapHtml = `<div class="map-wrap"><img src="data:image/svg+xml;base64,${svgB64}" alt="Dungeon Map" style="max-width:100%;height:auto;display:block;margin:0 auto;"></div>`;
+      if(hasMap) {
+        mapHtml = `<div class="map-wrap"><img src="${root._mapPng}" alt="Dungeon Map" style="max-width:100%;height:auto;display:block;margin:0 auto;"></div>`;
       }
 
       // Title from first card header
@@ -7346,10 +7392,9 @@ window.init_gen = function(root) {
     const advMapsBtn = root.querySelector('#gen-adv-maps-btn');
     if(!advMapsBtn) return;
     advMapsBtn.addEventListener('click', () => {
-      const svg = root._mapSvg;
-      if(!svg) return;
-      const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
-      loadIntoTool('maps', dataUrl, 'adventure-map.svg');
+      const png = root._mapPng;
+      if(!png) return;
+      loadIntoTool('maps', png, 'adventure-map.png');
     });
   })();
 
@@ -7385,6 +7430,7 @@ window.init_gen = function(root) {
   .gen-item-name { font-weight:700; color:#c8a020; font-size:12px; margin-bottom:2px; }
   .gen-item-desc { font-size:11px; color:#ccc; line-height:1.5; }
   svg { max-width:100%; height:auto; }
+  img { max-width:100%; height:auto; display:block; }
 
 /* ══ TRACKER + COMBAT CARDS — final sizing ═══════════════════════════════
    Desktop: a light polish on the original compact design (the toggles and
