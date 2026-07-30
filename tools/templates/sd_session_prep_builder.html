@@ -98,8 +98,9 @@
   .checkbox-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
   .checkbox-row label { font-family: 'Montserrat', sans-serif; font-size: 9px; color: var(--ui-muted); text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; margin: 0; }
 
-  /* Dark mode toggle */
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+  /* Dark mode toggle — label right beside the switch, both pushed to the right
+     edge of the header so the fixed "← Home" button (top-left) can't cover them. */
+  .toggle-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex: 1 1 auto; }
   .toggle-label { font-family: 'Montserrat', sans-serif; font-size: 9px; color: var(--ui-muted); letter-spacing: 0.08em; text-transform: uppercase; }
   .toggle { position: relative; width: 34px; height: 18px; }
   .toggle input { opacity: 0; width: 0; height: 0; }
@@ -402,12 +403,6 @@ body.flow-mode .page + .page {
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-header">
-    <div class="sidebar-header-row" style="align-items:center;">
-      <div style="flex:1;min-width:0;">
-        <div class="sidebar-title" style="white-space:nowrap;visibility:hidden;">Session Prep Builder</div>
-        <div class="sidebar-sub" style="visibility:hidden;">Shadowdark RPG</div>
-      </div>
-    </div>
     <div class="toggle-row">
       <span class="toggle-label">Dark Mode</span>
       <label class="toggle">

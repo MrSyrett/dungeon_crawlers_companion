@@ -98,8 +98,11 @@ document.addEventListener("DOMContentLoaded", function() {
   .checkbox-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
   .checkbox-row label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--ui-muted); text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; margin: 0; }
 
-  /* Dark mode toggle */
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+  /* Dark mode toggle — label right beside the switch, both pushed to the right
+     edge of the header so the fixed "← Home" button (top-left) can't cover them.
+     flex:1 makes the row span the header-row (its ◀ sibling is display:none
+     everywhere), so flex-end lands the pair at the sidebar's right edge. */
+  .toggle-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex: 1 1 auto; }
   .toggle-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--ui-muted); letter-spacing: 0.08em; text-transform: uppercase; }
   .toggle { position: relative; width: 34px; height: 18px; }
   .toggle input { opacity: 0; width: 0; height: 0; }
@@ -455,16 +458,15 @@ body.flow-mode .page + .page {
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-header">
-    <div class="sidebar-header-row">
-      <div style="min-height:32px;"></div>
+    <div class="sidebar-header-row" style="align-items:center;">
+      <div class="toggle-row">
+        <span class="toggle-label">Dark Mode</span>
+        <label class="toggle">
+          <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
       <button class="collapse-btn" id="collapse-btn" onclick="toggleSidebar()" title="Hide controls">◀</button>
-    </div>
-    <div class="toggle-row">
-      <span class="toggle-label">Dark Mode</span>
-      <label class="toggle">
-        <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this)">
-        <span class="toggle-slider"></span>
-      </label>
     </div>
   </div>
   <div class="sidebar-tabs">
