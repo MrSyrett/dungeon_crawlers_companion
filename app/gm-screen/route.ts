@@ -18,6 +18,10 @@ const SHIM = `
 (function () {
   var API = "/api/gm-screen";
   var timer = null, saving = false, dirty = false;
+  // Serialized form of the last state we successfully sent. Lets the periodic
+  // fallback save (and any other flush) skip the network + DB write entirely
+  // when nothing actually changed since the last save.
+  var lastSent = null;
   function status(s) { var el = document.getElementById("dd-status"); if (el) el.textContent = s; }
 
   function getState() {
@@ -39,12 +43,17 @@ const SHIM = `
     dirty = false; saving = true;
     var data = getState();
     if (!data) { saving = false; return; }
+    var payload = JSON.stringify(data);
+    // Nothing changed since the last successful save — skip the request. This
+    // is what keeps the 30s fallback save from re-uploading a multi-MB board
+    // (attached maps/PDFs ride inside the state) when the GM is just idle.
+    if (payload === lastSent) { saving = false; status(""); return; }
     fetch(API, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(data)
+      body: payload
     })
-      .then(function(r) { if (!r.ok) throw new Error(r.status); status("Saved"); })
+      .then(function(r) { if (!r.ok) throw new Error(r.status); lastSent = payload; status("Saved"); })
       .catch(function() { dirty = true; status("Save failed — retrying"); })
       .finally(function() { saving = false; if (dirty) setTimeout(schedule, 2000); });
   }
@@ -108,8 +117,15 @@ const SHIM = `
       .then(function(saved) { applyInitial(saved); activatePending(); hookManualSave(); })
       .catch(function() { activatePending(); hookManualSave(); });
 
-    // Poll for state changes every 30s as a fallback
-    setInterval(schedule, 30000);
+    // Fallback save every 30s, for any change path that misses the explicit
+    // hooks. Skipped while the tab is hidden (nothing can have changed and the
+    // GM isn't looking), and flush() itself skips the upload when the
+    // serialized state is identical to what was last sent.
+    setInterval(function() {
+      if (document.hidden || window.__ddCampaignSwitching) return;
+      dirty = true;
+      flush();
+    }, 30000);
   });
 
   // ── Campaign-switch hooks (called by the GM screen's campaign picker) ──
@@ -120,11 +136,12 @@ const SHIM = `
     var data = getState();
     if (!data) return Promise.resolve();
     dirty = false;
+    var payload = JSON.stringify(data);
     return fetch(API, {
       method: "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(data)
-    }).then(function() { status("Saved"); }).catch(function() {});
+      body: payload
+    }).then(function() { lastSent = payload; status("Saved"); }).catch(function() {});
   };
 
   // Mark a campaign as the one to open after the reload (bumps it to last-used,
@@ -364,10 +381,22 @@ const LIBRARY_UI = `
 
   function init(){
     injectButtons(document);
+    // Only music-tool DOM changes matter here, but new .mus-tool instances can
+    // appear anywhere (panes are created/destroyed as the GM rearranges the
+    // screen), so we still observe the whole body — with a cheap pre-filter so
+    // unrelated churn (dice log, trackers, party list) doesn't pay for three
+    // querySelectorAll sweeps on every added node.
+    function touchesMusic(n){
+      if(!n || n.nodeType!==1) return false;
+      // Added inside an existing music tool (new scene card, section re-render)…
+      if(n.closest && n.closest('.mus-tool')) return true;
+      // …or a subtree that brings a music tool with it (new pane render).
+      return !!(n.querySelector && n.querySelector('.mus-tool'));
+    }
     var obs=new MutationObserver(function(muts){
       for(var i=0;i<muts.length;i++){
         var added=muts[i].addedNodes;
-        for(var j=0;j<added.length;j++){ if(added[j].nodeType===1) injectButtons(added[j]); }
+        for(var j=0;j<added.length;j++){ if(touchesMusic(added[j])) injectButtons(added[j]); }
       }
     });
     obs.observe(document.body,{childList:true,subtree:true});

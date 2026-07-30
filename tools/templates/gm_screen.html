@@ -8431,15 +8431,23 @@ window.__gmScreenSetState = function(data) {
 // it restores state on load via __gmScreenSetState and saves via __ddScheduleSave
 // (PATCH /api/gm-screen) + beforeunload. The view-mode / pane-tool changes below
 // call __ddScheduleSave so those edits are captured too.
-// Trigger auto-save whenever Next Round is clicked or notes are edited
+// Trigger auto-save whenever Next Round is clicked or notes are edited.
+// One shared debounced timer — previously every keystroke queued its own
+// setTimeout (typing 200 characters queued 200 timers and 200 saves).
+var _ddSaveTimer = null;
+function ddQueueSave(delay) {
+  if(!window.__ddScheduleSave) return;
+  if(_ddSaveTimer) clearTimeout(_ddSaveTimer);
+  _ddSaveTimer = setTimeout(function() { _ddSaveTimer = null; window.__ddScheduleSave(); }, delay);
+}
 document.addEventListener('click', function(e) {
   if(e.target.closest('.cbt-next-round, .cbt-reset, .cbt-add-tracker, .cbt-add-npc, .nts-clear')) {
-    if(window.__ddScheduleSave) setTimeout(window.__ddScheduleSave, 300);
+    ddQueueSave(300);
   }
 });
 document.addEventListener('input', function(e) {
   if(e.target.closest('.nts-editor, .tracker-name-input, .npc-name-input, .npc-hp-input, .npc-seg-count-input, .npc-seg-hp-input')) {
-    if(window.__ddScheduleSave) setTimeout(window.__ddScheduleSave, 1000);
+    ddQueueSave(1000);
   }
 });
 
@@ -9197,6 +9205,15 @@ function init_dice(root) {
   // The connection itself lives in GMCamp (top bar). The tray only sends its
   // rolls out and folds incoming ones into the log.
   GMCamp.onChange(() => renderPool());   // link connected/left → show or hide the eye
+  // Incoming rolls arrive in bursts (the poll replays the whole history when a
+  // campaign link (re)activates), so coalesce to one renderLog() per frame
+  // instead of rebuilding the 100-entry list once per roll.
+  let _logRenderQueued = false;
+  function queueRenderLog() {
+    if(_logRenderQueued) return;
+    _logRenderQueued = true;
+    requestAnimationFrame(() => { _logRenderQueued = false; renderLog(); });
+  }
   GMCamp.onRoll(roll => {
     // The poll re-fetches the campaign's history from id 0 whenever the link
     // (re)activates, so skip any roll already in the log by its server id.
@@ -9205,7 +9222,7 @@ function init_dice(root) {
                   crit: roll.type === 'normal' ? '' : roll.type, adv: 'none',
                   remote: true, source: roll.source });
     if(log.length > 100) log.length = 100;
-    renderLog();
+    queueRenderLog();
   });
 
   const DICE = [2, 4, 6, 8, 10, 12, 20, 100];
@@ -9843,8 +9860,11 @@ function init_party(root) {
 
   syncBtn.addEventListener('click', () => sync(false));
 
-  // While a campaign is linked, keep the party fresh on its own.
+  // While a campaign is linked, keep the party fresh on its own. Skipped while
+  // the tab is hidden — nobody is looking, and refocusing triggers plenty of
+  // other refresh paths.
   setInterval(() => {
+    if(document.hidden) return;
     const camp = (typeof window.__gmCampaign === 'function') ? window.__gmCampaign() : null;
     if(camp && camp.id) sync(true);
   }, 30000);

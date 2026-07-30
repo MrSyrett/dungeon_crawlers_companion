@@ -748,7 +748,17 @@ document.addEventListener('click', function(e) {
   const a = e.target.closest && e.target.closest('a[href]');
   if (a && !a.target && !a.href.startsWith('javascript:')) saveOnExit();
 }, true);
-function autosave() { readFields(); renderPreview(); clearTimeout(saveTimer); saveTimer=setTimeout(saveState,600); }
+// Debounced: while typing, the full preview rebuild (readFields + renderPreview
+// + pagination) runs once ~150ms after the last change instead of on every
+// keystroke. renderNow() flushes a pending rebuild for anything that needs the
+// preview current immediately (e.g. the PDF export).
+let renderTimer = null;
+function renderNow() { clearTimeout(renderTimer); renderTimer = null; readFields(); renderPreview(); }
+function autosave() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(renderNow, 150);
+  clearTimeout(saveTimer); saveTimer = setTimeout(saveState, 600);
+}
 
 // ── PAGINATION ENGINE ──
 // ── FLOW MODE CONTROLLER ────────────────────────────────────────────────────
@@ -903,8 +913,6 @@ function measureAndPaginateColumn(containerId, maxH, key, isDark, preview, sourc
   });
   const totalH = heights.reduce((a,b) => a+b, 0);
   pageInner.removeChild(wrap);
-
-  console.log('[SPB]', containerId, 'kids:', kids.length, 'heights:', heights, 'totalH:', totalH, 'maxTotal:', maxTotal, 'overflow:', totalH > maxTotal);
 
   if(totalH <= maxTotal) return;
 
@@ -2664,6 +2672,7 @@ function importHTML(input) {
   reader.readAsText(file);
 }
 function captureScreenshot() {
+  if (renderTimer) renderNow();   // flush any pending debounced preview rebuild
   const btn = document.getElementById('screenshot-btn');
   btn.textContent = '⏳ Capturing...';
   btn.disabled = true;
@@ -2697,6 +2706,7 @@ function captureScreenshot() {
 }
 
 function savePDF() {
+  if (renderTimer) renderNow();   // flush any pending debounced preview rebuild
   const btn=document.getElementById('pdf-btn');
   btn.textContent='⏳ Generating...';
   btn.disabled=true;

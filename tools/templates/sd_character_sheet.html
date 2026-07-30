@@ -2206,6 +2206,9 @@ function addLog(label, result, detail, type='normal') {
   div.innerHTML = `<div class="roll-label">${label}${advLabel}</div><div class="roll-result">${result}</div><div class="roll-detail">${detail}</div>`;
   if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
   entries.insertBefore(div, entries.firstChild);
+  // Same cap the remote-roll path uses — without it a long session accumulates
+  // thousands of log nodes and every insert re-lays-out all of them.
+  while(entries.children.length > 60) entries.removeChild(entries.lastChild);
   entries.scrollTop = 0;
   showRollToast(label, result, detail, type);
   clearAdv();
@@ -3286,13 +3289,29 @@ function takeRest() {
   addLog('Rest', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg>', notes.length ? notes.join(', ') : 'Rested', 'normal');
 }
 
-function saveSheet(manual=false){
+// The real save: full collect + stringify + localStorage + network PATCH.
+// Expensive, so interactive call sites go through the debounced saveSheet()
+// below — only manual saves and exit saves run this immediately.
+function _saveSheetNow(manual=false){
+  if(_saveSheetTimer){ clearTimeout(_saveSheetTimer); _saveSheetTimer = null; }
   const data = collectSheet();
   const toSave = {...data, _sheet: {...(data._sheet||{}), portrait: ''}};
   const json = JSON.stringify(toSave);
   try { localStorage.setItem('sd_sheet', json); } catch(e) {}
   if(window.__ddSave) window.__ddSave({ sd_sheet: json });
   if(manual) addLog('Sheet Saved','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg>','Saved','normal');
+}
+
+// Debounced wrapper: ~36 interactive call sites invoke saveSheet() directly
+// (checkbox toggles, gear edits, spell-description typing). Coalescing them
+// means one save ~400ms after the burst instead of a full collect + stringify
+// + PATCH per click/keystroke. A manual save (the Save button) still runs
+// immediately and logs its confirmation.
+var _saveSheetTimer = null;
+function saveSheet(manual=false){
+  if(manual){ _saveSheetNow(true); return; }
+  if(_saveSheetTimer) clearTimeout(_saveSheetTimer);
+  _saveSheetTimer = setTimeout(function(){ _saveSheetTimer = null; try { _saveSheetNow(); } catch(e) {} }, 400);
 }
 
 // ═══ PRINTER-FRIENDLY PDF EXPORT ══════════════════════════════════════════
@@ -3728,10 +3747,9 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
 (function wireAutoAC(){
   const dex = document.getElementById('dex-val');
   if(dex) dex.addEventListener('change', refreshAutoAC);
-  const list = document.getElementById('gear-list');
-  if(list) list.addEventListener('input', e => {
-    if(e.target && e.target.classList.contains('gear-name')) refreshAutoAC();
-  });
+  // (No gear-list input listener here: each .gear-name input's own
+  // oninput="onGearNameInput(this)" already ends in refreshAutoAC(), so a
+  // delegated listener recomputed AC twice per keystroke.)
   refreshAutoAC();
 })();
 </script>
@@ -3978,7 +3996,8 @@ renderTrackers();
 
 function autoSaveOnExit() {
   if(!_pageReady) return;
-  try { saveSheet(); } catch(e) {}
+  // Immediate — a debounced save would be cancelled by the page going away.
+  try { _saveSheetNow(); } catch(e) {}
 }
 window.addEventListener('beforeunload', autoSaveOnExit);
 document.addEventListener('visibilitychange', function() {

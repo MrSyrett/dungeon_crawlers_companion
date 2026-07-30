@@ -17,7 +17,13 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     return new Response("Bad request", { status: 400 });
   }
 
-  const existing = await prisma.document.findFirst({ where: { id, userId: user.id } });
+  // Select only what the checks below read — without the select this pulled the
+  // document's entire `data` blob (potentially MBs) out of the DB on every
+  // autosave just to verify ownership.
+  const existing = await prisma.document.findFirst({
+    where: { id, userId: user.id },
+    select: { id: true, tool: true, title: true },
+  });
   if (!existing) return new Response("Not found", { status: 404 });
 
   const update: { data?: object; title?: string; linkedCampaignId?: string | null } = {};

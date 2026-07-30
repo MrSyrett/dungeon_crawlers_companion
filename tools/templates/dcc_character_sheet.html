@@ -937,6 +937,9 @@ function addLog(label, result, detail, type='normal') {
   div.innerHTML = `<div class="roll-label">${label}${advLabel}</div><div class="roll-result">${result}</div><div class="roll-detail">${detail}</div>`;
   if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
   entries.insertBefore(div, entries.firstChild);
+  // Same cap the remote-roll path uses — without it a long session accumulates
+  // thousands of log nodes and every insert re-lays-out all of them.
+  while(entries.children.length > 60) entries.removeChild(entries.lastChild);
   entries.scrollTop = 0;
   showRollToast(label, result, detail, type);
   clearAdv();
