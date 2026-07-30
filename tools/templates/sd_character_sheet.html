@@ -833,10 +833,19 @@ const SD_SPELLS = [
 // SD_SPELLS itself is never modified — homebrew is concatenated on read.
 let _homebrewSpells = [];
 
+// The all*() catalog helpers below used to rebuild their concat array on every
+// call — and they're called inside per-row loops and per-keystroke paths
+// (computeAC walks 20 gear rows, each consulting allArmorAC()). Book data and
+// homebrew only change when the homebrew sync runs, so the merged arrays are
+// cached and invalidated there (see syncSharedHomebrew).
+let _catalogCache = { spells: null, weapons: null, armor: null };
+function invalidateCatalogs() { _catalogCache = { spells: null, weapons: null, armor: null }; }
+
 // Book spells + your homebrew. Use this for any lookup a player can reach.
 function allSpells() {
+  if (_catalogCache.spells) return _catalogCache.spells;
   const book = (typeof SD_SPELLS !== 'undefined') ? SD_SPELLS : [];
-  return book.concat(Array.isArray(_homebrewSpells) ? _homebrewSpells : []);
+  return (_catalogCache.spells = book.concat(Array.isArray(_homebrewSpells) ? _homebrewSpells : []));
 }
 
 // ── HOMEBREW ITEMS ──────────────────────────────────────────────────────────
@@ -851,14 +860,15 @@ let _homebrewItems = [];
 
 // Homebrew weapons in SD_WEAPONS shape, so they equip and roll like any weapon.
 function allWeapons() {
+  if (_catalogCache.weapons) return _catalogCache.weapons;
   const book = (typeof SD_WEAPONS !== 'undefined') ? SD_WEAPONS : [];
-  return book.concat(_homebrewItems.filter(i => i.kind === 'weapon').map(i => ({
+  return (_catalogCache.weapons = book.concat(_homebrewItems.filter(i => i.kind === 'weapon').map(i => ({
     name:   i.name,
     type:   i.wtype || 'M',
     range:  i.range || 'Close',
     damage: i.damage || '1d4',
     props:  i.props || ''
-  })));
+  }))));
 }
 
 // The book's two ammo entries, plus anything created as homebrew ammo. Used to
@@ -868,12 +878,13 @@ const BOOK_AMMO = ['Arrows', 'Crossbow bolts'];
 // Homebrew body armor in AC_ARMOR shape (shields are handled in acParseItem,
 // which matches them by name so they can carry their own AC bonus).
 function allArmorAC() {
+  if (_catalogCache.armor) return _catalogCache.armor;
   const book = (typeof AC_ARMOR !== 'undefined') ? AC_ARMOR : [];
-  return book.concat(_homebrewItems.filter(i => i.kind === 'armor').map(i => ({
+  return (_catalogCache.armor = book.concat(_homebrewItems.filter(i => i.kind === 'armor').map(i => ({
     match: String(i.name || '').toLowerCase(),
     base:  parseInt(i.acBase) || 10,
     dex:   !!i.acDex
-  })));
+  }))));
 }
 
 function findHomebrewItem(name) {
@@ -2650,8 +2661,11 @@ function collectSheet(){
   });
 
   const gearItems = [];
+  // One query for the qty column, not one full-document query per row (this
+  // runs on every save).
+  const _gearQtyEls = document.querySelectorAll('#gear-list .gear-qty');
   document.querySelectorAll('#gear-list .gear-name').forEach((el, i) => {
-    const qty = document.querySelectorAll('#gear-list .gear-qty')[i]?.value || '1';
+    const qty = _gearQtyEls[i]?.value || '1';
     if(el.value.trim()) gearItems.push({
       instanceId: 'sheet'+(i+1),
       gearId: 'g'+(i+1),
@@ -5705,6 +5719,7 @@ async function syncSharedHomebrew() {
 
   _homebrewSpells = nextSpells;
   _homebrewItems  = nextItems;
+  invalidateCatalogs();   // the merged book+homebrew arrays are cached — see allSpells()
 
   // Convert homebrew classes/ancestries/backgrounds into the wizard's reference
   // shapes so they're selectable and apply their core mechanics.

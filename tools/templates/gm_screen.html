@@ -8879,8 +8879,11 @@ function monsterTypeOf(name) {
 let _homebrewMonsters = [];
 
 // Book bestiary + homebrew. Use this anywhere a monster can be picked or rolled.
+// Cached — this gets called inside per-type filters and per-keystroke picker
+// search, and the ~350-entry merge only changes when homebrew re-syncs.
+let _allMonstersCache = null;
 function allMonsters() {
-  return SD_MONSTERS.concat(_homebrewMonsters);
+  return _allMonstersCache || (_allMonstersCache = SD_MONSTERS.concat(_homebrewMonsters));
 }
 
 async function syncHomebrewMonsters() {
@@ -8917,6 +8920,7 @@ async function syncHomebrewMonsters() {
     });
   });
   _homebrewMonsters = next;
+  _allMonstersCache = null;   // merged array is cached — see allMonsters()
 
   // Refresh anything already on screen that lists monsters.
   try { if(typeof window._refreshMonsterConsumers === 'function') window._refreshMonsterConsumers(); } catch(e) {}
@@ -9247,6 +9251,7 @@ function init_party(root) {
   let chars = [];          // [{id, source, sheet}]
   let lastSync = null;
   let _lastSyncPayload = null;  // raw last response — lets quiet syncs skip identical rosters
+  let _lastSyncToken = null;    // server change-token — lets the server skip building the roster at all
   let openIds = new Set();
   let nextId = 1;
 
@@ -9532,6 +9537,7 @@ function init_party(root) {
       openIds.delete(id);
       // Local state diverged from the server's — see the clear button below.
       _lastSyncPayload = null;
+      _lastSyncToken = null;
       status('');
       render();
       return;
@@ -9586,17 +9592,24 @@ function init_party(root) {
     }
     if(!quiet) status('Syncing "' + camp.name + '"…');
     try {
-      const r = await fetch('/api/campaigns/' + camp.id + '/characters', { credentials: 'same-origin' });
+      // Quiet polls hand the server our last change-token so an unchanged
+      // roster comes back as a tiny { unchanged } instead of every sheet.
+      let url = '/api/campaigns/' + camp.id + '/characters';
+      if(quiet && _lastSyncToken) url += '?ifUnchanged=' + encodeURIComponent(_lastSyncToken);
+      const r = await fetch(url, { credentials: 'same-origin' });
       if(r.status === 401) { status('Signed out — reload the page and sign in again.', true); return; }
       if(r.status === 404) { status('That campaign no longer exists on the server.', true); return; }
       if(!r.ok) throw new Error(r.status);
       const text = await r.text();
+      const data = JSON.parse(text);
+      // Server-side short-circuit: the roster hasn't changed since our token.
+      if(quiet && data && data.unchanged) return;
+      if(data && data.syncToken) _lastSyncToken = data.syncToken;
       // Auto-sync (every 30s): if the server sent back exactly what it sent
       // last time, nothing changed — skip the re-normalize and full re-render.
       // Manual sync always processes, so the button stays a reliable refresh.
       if(quiet && text === _lastSyncPayload) return;
       _lastSyncPayload = text;
-      const data = JSON.parse(text);
       const list = Array.isArray(data) ? data : (data.characters || []);
       // A sync is the source of truth for campaign sheets. Update matching
       // characters in place (addSheet matches by name and keeps the same id, so
@@ -9637,9 +9650,11 @@ function init_party(root) {
 
   clearBtn.addEventListener('click', () => {
     if(chars.length && !confirm('Remove all character sheets from the party view?')) return;
-    // Local state diverged from the server's — forget the last payload so the
-    // next quiet sync doesn't skip as "unchanged" and leave the list empty.
+    // Local state diverged from the server's — forget the last payload and
+    // token so the next quiet sync doesn't skip as "unchanged" and leave the
+    // list empty.
     _lastSyncPayload = null;
+    _lastSyncToken = null;
     chars = []; openIds = new Set(); status(''); render();
   });
 

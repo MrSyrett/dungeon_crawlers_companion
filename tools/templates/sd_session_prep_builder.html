@@ -716,10 +716,16 @@ function loadState() {
   if (state.mappath === '__has_map__') state.mappath = '';
   state.maps = (state.maps||[]).filter(m => m && m.src && m.src !== '__has_map__');
 }
+let _lastSavedFull = null;
 function saveState() {
   // Server gets the real state, images and all, so maps survive a reload.
   // localStorage only gets a stripped copy — base64 maps blow its ~5MB quota.
   const full = JSON.stringify(state);
+  // Unchanged since the last save (common for the visibilitychange / link-click
+  // exit saves) — skip the second stringify, the localStorage write and the
+  // network PATCH entirely.
+  if (full === _lastSavedFull) return;
+  _lastSavedFull = full;
   const stripped = JSON.stringify({...state, mappath:state.mappath?'__has_map__':'', maps:(state.maps||[]).map(m=>({...m,src:m.src?'__has_map__':''}))});
   try { localStorage.setItem('dcw_builder_v5', stripped); } catch(e) {}
   if (window.__ddSave) window.__ddSave({ 'sd_session': full });
@@ -1380,6 +1386,12 @@ function addMap(data={}) {
   const div = document.createElement('div');
   div.className = 'entity-card';
   const uid = 'map'+Date.now()+Math.random().toString(36).slice(2);
+  // The image data lives in the _MAPSRC registry, keyed by the card's uid —
+  // NOT in a hidden input. Keeping ~MB base64 strings out of the DOM means
+  // readFields()/collectMaps() stop copying and re-escaping them on every
+  // debounced rebuild.
+  div.dataset.mapUid = uid;
+  if (data.src) _MAPSRC[uid] = data.src;
   div.innerHTML = `
     <div class="entity-card-header">
       <input class="entity-name-input map-title-input" type="text" placeholder="Map Title (optional)" value="${escA(data.title||'')}" oninput="autosave()">
@@ -1390,7 +1402,6 @@ function addMap(data={}) {
     </label>
     <input type="file" id="mapfile-${uid}" accept="image/*" style="display:none" onchange="handleMapFileUpload(this)">
     <div class="map-img-status" style="font-family:'Montserrat',sans-serif;font-size:8px;color:${data.src?'#4caf7d':'var(--ui-muted)'};letter-spacing:0.06em;">${data.src?'✓ Image loaded':'No image loaded'}</div>
-    <input type="hidden" class="map-src-input" value="${escA(data.src||'')}">
   `;
   list.appendChild(div);
 }
@@ -1399,12 +1410,18 @@ function addMap(data={}) {
 // VTT exports are often 4000px+, which bloats both the saved document and the
 // exported PDF for no visible gain at print size.
 const MAP_MAX_PX = 1600;
+// Byte ceiling on the stored data URL: the old dimension-only guard let a
+// detailed 1600px scan still weigh multiple MB, and that string rides inside
+// every save. Quality steps down until it fits (or we accept the last try).
+const MAP_MAX_CHARS = 600000;   // ~440KB of image data
+// Registry of uploaded map images, keyed by card uid (see addMap).
+const _MAPSRC = Object.create(null);
 function downscaleImage(dataUrl) {
   return new Promise(resolve => {
     const img = new Image();
     img.onload = () => {
       const scale = Math.min(1, MAP_MAX_PX / Math.max(img.width, img.height));
-      if(scale === 1 && dataUrl.length < 900000) { resolve(dataUrl); return; }
+      if(scale === 1 && dataUrl.length < MAP_MAX_CHARS) { resolve(dataUrl); return; }
       const c = document.createElement('canvas');
       c.width  = Math.round(img.width  * scale);
       c.height = Math.round(img.height * scale);
@@ -1412,7 +1429,14 @@ function downscaleImage(dataUrl) {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, c.width, c.height);
       ctx.drawImage(img, 0, 0, c.width, c.height);
-      try { resolve(c.toDataURL('image/jpeg', 0.82)); }
+      try {
+        let out = null;
+        for (const q of [0.82, 0.7, 0.58, 0.48]) {
+          out = c.toDataURL('image/jpeg', q);
+          if (out.length <= MAP_MAX_CHARS) break;
+        }
+        resolve(out || dataUrl);
+      }
       catch(err) { resolve(dataUrl); }
     };
     img.onerror = () => resolve(dataUrl);
@@ -1427,7 +1451,7 @@ function handleMapFileUpload(input) {
   reader.onload = async (e) => {
     const card = input.closest('.entity-card');
     const src = await downscaleImage(e.target.result);
-    card.querySelector('.map-src-input').value = src;
+    _MAPSRC[card.dataset.mapUid] = src;
     const lbl = card.querySelector('label');
     const status = card.querySelector('.map-img-status');
     lbl.textContent = 'Click to replace image';
@@ -1820,9 +1844,10 @@ function randMap() {
 }
 
 function collectMaps() {
+  // src comes from the registry by uid — same string reference, no copy.
   return [...document.querySelectorAll('#maps-list .entity-card')].map(c=>({
     title: c.querySelector('.map-title-input')?.value.trim()||'',
-    src: c.querySelector('.map-src-input')?.value||''
+    src: _MAPSRC[c.dataset.mapUid]||''
   })).filter(m=>m.src);
 }
 
@@ -2163,16 +2188,23 @@ function renderPreview() {
   if(_p4) _p4.style.display = 'none'; // stat blocks now render inline on main pages
 
   // Maps - render each map on page 3
+  // Only rebuilt when the map set actually changed — rebuilding re-escapes the
+  // base64 srcs and forces the browser to re-decode every image (cheap
+  // signature: title + src length + src prefix per map).
   const mapsContainer=document.getElementById('p-maps-container');
   if(mapsContainer){
-    if(state.maps&&state.maps.length>0){
-      mapsContainer.innerHTML=state.maps.map(m=>`
-        <div style="margin-bottom:16px;break-inside:avoid;">
-          ${m.title?`<div class="sl" style="margin-bottom:6px;">${escH(m.title)}</div>`:''}
-          <img src="${escA(m.src)}" alt="${escA(m.title||'Map')}" style="width:100%;height:auto;display:block;border:2px solid var(--accent);">
-        </div>`).join('');
-    } else {
-      mapsContainer.innerHTML=`<div class="map-placeholder">MAP IMAGES WILL APPEAR HERE</div>`;
+    const mapsSig=(state.maps||[]).map(m=>m.title+'|'+(m.src?m.src.length+'|'+m.src.slice(0,40):'')).join(';');
+    if(mapsContainer._sig!==mapsSig){
+      mapsContainer._sig=mapsSig;
+      if(state.maps&&state.maps.length>0){
+        mapsContainer.innerHTML=state.maps.map(m=>`
+          <div style="margin-bottom:16px;break-inside:avoid;">
+            ${m.title?`<div class="sl" style="margin-bottom:6px;">${escH(m.title)}</div>`:''}
+            <img src="${escA(m.src)}" alt="${escA(m.title||'Map')}" style="width:100%;height:auto;display:block;border:2px solid var(--accent);">
+          </div>`).join('');
+      } else {
+        mapsContainer.innerHTML=`<div class="map-placeholder">MAP IMAGES WILL APPEAR HERE</div>`;
+      }
     }
   }
 
@@ -2857,8 +2889,11 @@ function fillMonster(m, card) {
 let _hbMonsters = [];
 let _monTypes = { types: [], byName: {} };
 
+// Cached — called on every keystroke of the monster search; the merge only
+// changes when homebrew re-syncs.
+let _allPrepMonstersCache = null;
 function allPrepMonsters() {
-  return SD_MONSTERS.concat(_hbMonsters);
+  return _allPrepMonstersCache || (_allPrepMonstersCache = SD_MONSTERS.concat(_hbMonsters));
 }
 
 function monsterTypeOf(m) {
@@ -2904,6 +2939,7 @@ async function syncHomebrewMonsters() {
     });
   });
   _hbMonsters = next;
+  _allPrepMonstersCache = null;   // merged array is cached — see allPrepMonsters()
   refreshTypeDropdowns();
 }
 
