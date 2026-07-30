@@ -780,7 +780,7 @@ export const SD_CLASSES: SdClass[] = [
     "features": [
       "Basilisk Blood: Advantage on Constitution checks to avoid harmful maladies, poisons, or afflictions.",
       "Petrifying Gaze: One creature of your level or less that meets your gaze must pass a DC 15 CON check or be petrified for 1d4 rounds (it still takes damage while petrified). Usable per day equal to your CON modifier (minimum 1).",
-      "Stone Skin: Add 2 + half your level (round down) to your AC while unarmored. Advantage on checks to hide in natural environments."
+      "Stone Skin: Add 3 + half your level (round down) to your AC while unarmored. Advantage on checks to hide in natural environments."
     ],
     "caster": false,
     "optional": true,
@@ -832,7 +832,7 @@ export const SD_CLASSES: SdClass[] = [
       "Languages: You know two additional common languages.",
       "Scavenger: When you expend the last of a consumable item carried since your last rest, roll a d6. On a 5 or 6, you regain one use of that item.",
       "Trailblazer: Advantage on Climbing, Swimming, Foraging, understanding unknown languages, and avoiding or escaping natural terrain hazards.",
-      "Trusty Gear: Choose one type of gear or weapon you can wield. Gain 1 + half your level (round down) on checks or attack rolls made with that type."
+      "Trusty Gear: Choose one type of gear or weapon you can wield. Gain 2 + half your level (round down) on checks or attack rolls made with that type."
     ],
     "caster": false,
     "optional": true,

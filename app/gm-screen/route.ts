@@ -436,10 +436,20 @@ export async function GET() {
 
   let html = await loadToolTemplate("gm_screen.html");
 
-  // Inject saved state so the shim can restore it immediately on load
-  const stateScript = savedState
-    ? `<script>window.__gmInitialState__ = ${JSON.stringify(savedState).replace(/</g, "\\u003c")};</script>\n`
-    : "";
+  // Inject saved state so the shim can restore it immediately on load — but
+  // only when it's reasonably small. A board with attached maps/PDFs carries
+  // them as base64 inside the state; inlining megabytes of JSON into the HTML
+  // makes every page load download AND synchronously parse all of it before
+  // first paint. Past the cap we skip the inline copy and the shim falls back
+  // to fetching /api/gm-screen after load (a path it already has).
+  const MAX_INLINE_STATE = 512 * 1024;
+  const stateJson = savedState
+    ? JSON.stringify(savedState).replace(/</g, "\\u003c")
+    : null;
+  const stateScript =
+    stateJson && stateJson.length <= MAX_INLINE_STATE
+      ? `<script>window.__gmInitialState__ = ${stateJson};</script>\n`
+      : "";
 
   // Inject shim + state + Sound Library picker before </head>
   html = html.replace(/<\/head>/i, `${stateScript}${SHIM}\n${LIBRARY_UI}\n</head>`);

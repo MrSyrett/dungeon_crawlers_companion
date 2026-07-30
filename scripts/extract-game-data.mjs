@@ -95,8 +95,12 @@ export const ${constName}: ${typeName}[] = ${JSON.stringify(rows, null, 2)};
 
 const gmScreen = readFileSync(join(TEMPLATES, "gm_screen.html"), "utf8");
 const sdSheet = readFileSync(join(TEMPLATES, "sd_character_sheet.html"), "utf8");
+// The bestiary's canonical source: a static file both the GM Screen and the
+// session-prep builder load via <script src="/tools-data/sd-monsters.js">
+// (they used to each carry an inline copy, mirrored by this script).
+const monstersJs = readFileSync(join(ROOT, "public", "tools-data", "sd-monsters.js"), "utf8");
 
-const monsters = extractArray(gmScreen, "SD_MONSTERS", "gm_screen.html");
+const monsters = extractArray(monstersJs, "SD_MONSTERS", "public/tools-data/sd-monsters.js");
 const spells = extractArray(sdSheet, "SD_SPELLS", "sd_character_sheet.html");
 
 mkdirSync(OUT_DIR, { recursive: true });
@@ -441,46 +445,10 @@ function syncSheetLabelMap() {
 }
 const labelCount = syncSheetLabelMap();
 
-// ── Template mirror: SD_MONSTERS (session-prep) ─────────────────────────────
-// The bestiary (SD_MONSTERS) is owned by the GM screen. The session-prep
-// builder needs the same array; rather than keep a second hand-maintained copy
-// that silently drifts, copy the GM screen's block verbatim into the session
-// prep template on every build. Edit the bestiary in gm_screen.html only.
-function syncSessionPrepMonsters() {
-  const grab = (html, label) => {
-    const decl = "const SD_MONSTERS = [";
-    const start = html.indexOf(decl);
-    if (start === -1) throw new Error(`SD_MONSTERS not found in ${label}`);
-    const end = html.indexOf("\n];", start);
-    if (end === -1) throw new Error(`SD_MONSTERS in ${label} not terminated by '\\n];'`);
-    return { start, end: end + 3, block: html.slice(start, end + 3) };
-  };
-  const ownerBlock = grab(gmScreen, "gm_screen.html").block;
-  const banner =
-    "// GENERATED MIRROR of SD_MONSTERS from gm_screen.html (the canonical\n" +
-    "// bestiary), copied by scripts/extract-game-data.mjs. Do not hand-edit —\n" +
-    "// edit the bestiary in gm_screen.html and re-run the extract.\n";
-  const mirror = banner + ownerBlock;
-  const prepPath = join(TEMPLATES, "sd_session_prep_builder.html");
-  let prep = readFileSync(prepPath, "utf8");
-  const target = grab(prep, "sd_session_prep_builder.html");
-  // Include any existing banner immediately above the block in what we replace,
-  // so re-running doesn't stack banners.
-  let replaceStart = target.start;
-  const before = prep.slice(0, target.start);
-  const bannerMark = before.lastIndexOf("// GENERATED MIRROR of SD_MONSTERS");
-  if (bannerMark !== -1 && before.slice(bannerMark).trim().split("\n").every((l) => l.trim().startsWith("//"))) {
-    replaceStart = bannerMark;
-  }
-  const current = prep.slice(replaceStart, target.end);
-  if (current !== mirror) {
-    prep = prep.slice(0, replaceStart) + mirror + prep.slice(target.end);
-    writeFileSync(prepPath, prep, "utf8");
-  }
-  return (ownerBlock.match(/\{name:/g) || []).length;
-}
-const prepMonsterCount = syncSessionPrepMonsters();
+// (The old SD_MONSTERS template-mirror step is gone: both the GM Screen and
+// the session-prep builder now load the bestiary from the same static file,
+// public/tools-data/sd-monsters.js, so there is nothing to copy.)
 
 console.log(
-  `extract-game-data: ${monsterCount} monsters (${monsterTypeCount} typed), ${spellCount} spells, ${gearCount} gear, ${classCount} classes, ${ancestryCount} ancestries, ${backgroundCount} backgrounds, ${labelCount} effect labels → lib/data/ + mirrors (sheet labels, ${prepMonsterCount} prep monsters)`,
+  `extract-game-data: ${monsterCount} monsters (${monsterTypeCount} typed), ${spellCount} spells, ${gearCount} gear, ${classCount} classes, ${ancestryCount} ancestries, ${backgroundCount} backgrounds, ${labelCount} effect labels → lib/data/ + mirrors (sheet labels)`,
 );

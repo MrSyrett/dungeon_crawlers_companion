@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Session Prep Builder — Dungeon Crawler Carl RPG</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- html2canvas + jsPDF (~550KB) load on demand in loadExportLibs() when an
+     export button is first clicked, instead of blocking first paint here. -->
 <script>
 // Mobile init: collapse sidebar and move tab to body so it stays visible
 document.addEventListener("DOMContentLoaded", function() {
@@ -23,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -1839,6 +1839,24 @@ function importHTML(input) {
   };
   reader.readAsText(file);
 }
+// Load html2canvas + jsPDF on first use (they were render-blocking in <head>).
+// Failures reset the promise so a flaky connection can retry on the next click.
+let _exportLibsPromise = null;
+function loadExportLibs() {
+  if (window.html2canvas && window.jspdf) return Promise.resolve();
+  if (_exportLibsPromise) return _exportLibsPromise;
+  const add = (src) => new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res;
+    s.onerror = () => rej(new Error('could not load export libraries — check your connection'));
+    document.head.appendChild(s);
+  });
+  _exportLibsPromise = Promise.all([
+    add('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+    add('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'),
+  ]).catch(err => { _exportLibsPromise = null; throw err; });
+  return _exportLibsPromise;
+}
 function savePDF() {
   if (renderTimer) renderNow();   // flush any pending debounced preview rebuild
   const btn=document.getElementById('pdf-btn');
@@ -1849,7 +1867,7 @@ function savePDF() {
   // Force the fixed print layout for the capture (so a phone-width, flow-mode
   // session still yields a correct paginated PDF), then restore the view mode
   // once the canvases are taken.
-  _withFixedLayout(() => {
+  loadExportLibs().then(() => _withFixedLayout(() => {
     const pages=[...document.querySelectorAll('.preview-area .page')].filter(p=>p.style.display!=='none');
 
     // 1.5x JPEG lands around 1-2MB and looks the same on paper. JPEG has no
@@ -1881,7 +1899,7 @@ function savePDF() {
 
       pdf.save(filename+'.pdf');
     });
-  }).then(()=>{
+  })).then(()=>{
     btn.textContent='Save PDF';
     btn.disabled=false;
   }).catch(err=>{
