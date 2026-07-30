@@ -17,7 +17,6 @@ import SystemToggle from "@/components/SystemToggle";
 // DCC tab they're the only toolbar links.
 const SHARED_NAV: { href: string; label: string }[] = [
   { href: "/vtt", label: "Virtual Tabletop" },
-  { href: "/token-maker", label: "Token Maker" },
   { href: "/campaigns", label: "Campaigns" },
   { href: "/gm-screen", label: "GM Screen" },
 ];
@@ -176,6 +175,22 @@ export default async function DashboardPage() {
   // Split tools by kind
   const charSheetIds = TOOL_ORDER.filter((id) => TOOLS[id].kind === "character");
   const sessionPrepIds = TOOL_ORDER.filter((id) => TOOLS[id].kind === "session");
+  const mapIds = TOOL_ORDER.filter((id) => TOOLS[id].kind === "map");
+
+  // Dungeon maps aren't tied to a ruleset, so the same section shows on both
+  // system tabs. SystemTabs only ever mounts one tab at a time, so referencing
+  // this single element in both branches is safe.
+  const mapsSection =
+    mapIds.length > 0 ? (
+      <section className="mt-10 border-t border-[var(--border)] pt-8">
+        <ColumnHeading>Dungeon Maps</ColumnHeading>
+        <div className="flex flex-col gap-6 md:max-w-xl">
+          {mapIds.map((id) => (
+            <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
+          ))}
+        </div>
+      </section>
+    ) : null;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
@@ -241,32 +256,36 @@ export default async function DashboardPage() {
                 </div>
               </section>
             </div>
+            {mapsSection}
           </>
         }
         dcc={
-          <div className="grid gap-10 md:grid-cols-2">
-            <section>
-              <ColumnHeading>Character Sheets</ColumnHeading>
-              <div className="flex flex-col gap-6">
-                {charSheetIds
-                  .filter((id) => TOOLS[id].system === "DCC")
-                  .map((id) => (
-                    <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
-                  ))}
-              </div>
-            </section>
+          <>
+            <div className="grid gap-10 md:grid-cols-2">
+              <section>
+                <ColumnHeading>Character Sheets</ColumnHeading>
+                <div className="flex flex-col gap-6">
+                  {charSheetIds
+                    .filter((id) => TOOLS[id].system === "DCC")
+                    .map((id) => (
+                      <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
+                    ))}
+                </div>
+              </section>
 
-            <section>
-              <ColumnHeading>Session Prep</ColumnHeading>
-              <div className="flex flex-col gap-6">
-                {sessionPrepIds
-                  .filter((id) => TOOLS[id].system === "DCC")
-                  .map((id) => (
-                    <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
-                  ))}
-              </div>
-            </section>
-          </div>
+              <section>
+                <ColumnHeading>Session Prep</ColumnHeading>
+                <div className="flex flex-col gap-6">
+                  {sessionPrepIds
+                    .filter((id) => TOOLS[id].system === "DCC")
+                    .map((id) => (
+                      <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
+                    ))}
+                </div>
+              </section>
+            </div>
+            {mapsSection}
+          </>
         }
       />
     </div>

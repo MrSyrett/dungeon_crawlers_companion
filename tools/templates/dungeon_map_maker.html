@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Dungeon Map Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0e11; --panel:#17171b; --panel2:#1e1e24; --line:#33333c;
+    --ink:#e8e2d4; --muted:#9a948a; --gold:#c9a94a; --gold-dim:#8f7a35;
+    --active:#2a2a33; --danger:#b5533f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:"Montserrat",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
+  .app{display:flex;height:100vh;width:100vw}
+
+  /* ── Sidebar (hidden by the server's preview shim) ────────────────── */
+  .sidebar{width:250px;flex:0 0 250px;background:var(--panel);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;overflow-y:auto;z-index:5}
+  .sidebar h1{font-family:"Cinzel",Georgia,serif;font-size:15px;letter-spacing:.06em;
+    color:var(--gold);margin:0;padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+  .grp{padding:12px 14px;border-bottom:1px solid var(--line)}
+  .grp-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .tools{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+  .tool{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px;
+    background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--ink);
+    cursor:pointer;font-size:10.5px;letter-spacing:.03em;user-select:none;transition:.12s}
+  .tool:hover{border-color:var(--gold-dim)}
+  .tool.active{background:var(--active);border-color:var(--gold);color:var(--gold)}
+  .tool svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;
+    stroke-linecap:round;stroke-linejoin:round}
+  .row{display:flex;gap:6px}
+  .btn{flex:1;padding:8px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;
+    color:var(--ink);cursor:pointer;font-size:11px;letter-spacing:.03em;transition:.12s;text-align:center}
+  .btn:hover{border-color:var(--gold-dim)}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn.gold{background:linear-gradient(180deg,#c9a94a,#a9882f);border-color:var(--gold);
+    color:#1a1508;font-weight:600}
+  .btn.gold:hover{filter:brightness(1.07)}
+  .btn.wide{width:100%}
+  label.fld{display:block;font-size:11px;color:var(--muted);margin:10px 0 4px}
+  label.fld b{color:var(--ink);font-weight:600;float:right}
+  input[type=range]{width:100%;accent-color:var(--gold);margin:0}
+  input[type=number],input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line);
+    border-radius:6px;color:var(--ink);padding:7px 8px;font-size:12px;font-family:inherit}
+  input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--gold)}
+  .chk{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);cursor:pointer;margin-top:10px}
+  .chk input{accent-color:var(--gold);width:15px;height:15px}
+  .hint{font-size:10.5px;color:var(--muted);line-height:1.5;margin:8px 0 0}
+  .spacer{flex:1}
+  .save-state{font-size:10px;color:var(--muted);padding:8px 14px;letter-spacing:.04em}
+
+  /* ── Canvas area ──────────────────────────────────────────────────── */
+  .preview-area{flex:1;position:relative;overflow:hidden;background:#d9d0bd}
+  #map{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair;touch-action:none}
+  .float{position:absolute;z-index:6;background:rgba(16,16,19,.82);border:1px solid var(--line);
+    border-radius:8px;backdrop-filter:blur(4px);color:var(--ink)}
+  .zoombar{bottom:14px;right:14px;display:flex;align-items:center;gap:2px;padding:4px}
+  .zoombar button{width:30px;height:30px;background:none;border:none;color:var(--ink);font-size:17px;
+    cursor:pointer;border-radius:6px}
+  .zoombar button:hover{background:var(--active)}
+  .zoombar span{font-size:11px;color:var(--muted);min-width:42px;text-align:center}
+  .tip{top:12px;left:50%;transform:translateX(-50%);padding:7px 14px;font-size:11.5px;
+    color:var(--muted);letter-spacing:.02em;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+  .tip.show{opacity:1}
+  /* When embedded read-only (GM Screen / session prep preview) the shim hides
+     the sidebar; make the canvas fill and disable editing affordances. */
+  body.embed #map{cursor:default}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <h1>⚔ Dungeon Map Maker</h1>
+
+    <div class="grp">
+      <p class="grp-title">Tools</p>
+      <div class="tools" id="toolbar">
+        <div class="tool active" data-tool="select" title="Select / move (V)">
+          <svg viewBox="0 0 24 24"><path d="M5 3l6 16 2-6 6-2z"/></svg>Select</div>
+        <div class="tool" data-tool="rect" title="Rectangular room (R)">
+          <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/></svg>Square</div>
+        <div class="tool" data-tool="circle" title="Round room (C)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>Circle</div>
+        <div class="tool" data-tool="polygon" title="Polygon room (P) — click points, Enter/dbl-click to close">
+          <svg viewBox="0 0 24 24"><path d="M12 3l8 6-3 10H7L4 9z"/></svg>Polygon</div>
+        <div class="tool" data-tool="wall" title="Interior wall (W)">
+          <svg viewBox="0 0 24 24"><path d="M4 18L20 6"/><circle cx="4" cy="18" r="1.6" fill="currentColor"/><circle cx="20" cy="6" r="1.6" fill="currentColor"/></svg>Wall</div>
+        <div class="tool" data-tool="door" title="Door (D)">
+          <svg viewBox="0 0 24 24"><path d="M6 4h9v16H6z"/><path d="M15 9l4 3-4 3"/></svg>Door</div>
+        <div class="tool" data-tool="stair" title="Stairs (S)">
+          <svg viewBox="0 0 24 24"><path d="M4 20h4v-4h4v-4h4V8h4"/></svg>Stairs</div>
+        <div class="tool" data-tool="erase" title="Erase (E)">
+          <svg viewBox="0 0 24 24"><path d="M4 15l7-7 6 6-4 4H8z"/><path d="M9 20h11"/></svg>Erase</div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
+        <button class="btn" id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
+      </div>
+    </div>
+
+    <div class="grp">
+      <p class="grp-title">Random Dungeon</p>
+      <label class="fld">Rooms <b id="roomsV">8</b></label>
+      <input type="range" id="rooms" min="2" max="24" value="8">
+      <label class="fld">Room size <b id="sizeV">Medium</b></label>
+      <input type="range" id="rsize" min="1" max="5" value="3">
+      <label class="fld">Layout <b id="spreadV">Balanced</b></label>
+      <input type="range" id="spread" min="1" max="5" value="3">
+      <label class="fld">Entrances <b id="entrancesV">2</b></label>
+      <input type="range" id="entrances" min="0" max="6" value="2">
+      <label class="chk"><input type="checkbox" id="corridors" checked> Connect with corridors</label>
+      <label class="chk"><input type="checkbox" id="roundish"> Allow round rooms</label>
+      <button class="btn gold wide" id="generate" style="margin-top:12px">🎲 Generate Dungeon</button>
+      <p class="hint">Replaces the current map. Everything stays fully editable afterward.</p>
+    </div>
+
+    <div class="grp">
+      <p class="grp-title">Map</p>
+      <input type="text" id="mapName" placeholder="Map name…" maxlength="80">
+      <label class="chk"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
+      <label class="chk"><input type="checkbox" id="gridToggle" checked> Show grid</label>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="clear">Clear</button>
+        <button class="btn" id="fit">Fit view</button>
+      </div>
+    </div>
+
+    <div class="grp">
+      <p class="grp-title">Export &amp; Save</p>
+      <button class="btn gold wide" id="save">💾 Save to campaign</button>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="png">⬇ PNG</button>
+        <button class="btn" id="pngT" title="Transparent background — floors only">⬇ PNG (transp.)</button>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="save-state" id="saveState"></div>
+  </aside>
+
+  <div class="preview-area">
+    <canvas id="map"></canvas>
+    <div class="float tip" id="tip"></div>
+    <div class="float zoombar">
+      <button id="zoomOut">−</button>
+      <span id="zoomPct">100%</span>
+      <button id="zoomIn">+</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+(function(){
+/* ════════════════════════════════════════════════════════════════════
+   DUNGEON MAP MAKER — a compact, classic hatched-ink dungeon drawer.
+   Self-contained. Saves via window.__ddSave (campaign document) with a
+   localStorage fallback under key "dcc_map". Renders the same in the
+   server's read-only preview mode used by the GM Screen / session prep.
+   ════════════════════════════════════════════════════════════════════ */
+
+  // ── Palette (classic ink on parchment) ────────────────────────────
+  const C = {
+    rock:   "#e9e0cd",   // solid stone base
+    rockHi: "#efe8d7",   // parchment background
+    hatch:  "#33302a",   // scattered pen hatching along exterior walls
+    floor:  "#f4efe3",   // room floor
+    grid:   "#cabd9f",   // faint grid inside rooms
+    dot:    "#c3b699",   // faint dot grid on the rock
+    ink:    "#14120d",   // walls, doors, stairs (near-black ink)
+    sel:    "#c9a94a",   // selection accent
+  };
+  const CELL = 32;                 // world px per grid cell at scale 1
+  const SIZE_MAP = {1:[3,4],2:[4,6],3:[5,8],4:[7,11],5:[9,15]};
+  const SIZE_LBL = {1:"Tiny",2:"Small",3:"Medium",4:"Large",5:"Huge"};
+  const SPREAD_LBL = {1:"Tight",2:"Cozy",3:"Balanced",4:"Sprawling",5:"Vast"};
+
+  // ── State ─────────────────────────────────────────────────────────
+  let map = blankMap();
+  let tool = "select";
+  let snapOn = true;                        // snap-to-grid toggle
+  let cam = { x: 0, y: 0, scale: 1 };     // world→screen: s = (w - cam)*scale ... (see helpers)
+  let history = [], future = [];
+  let embed = false;                       // read-only preview
+
+  const cv = document.getElementById("map");
+  const ctx = cv.getContext("2d");
+  let W = 0, H = 0, DPR = 1;
+
+  function blankMap(){
+    return { version:1, name:"", grid:true,
+             shapes:[], walls:[], doors:[], stairs:[], seedId:1 };
+  }
+  function uid(){ return map.seedId++; }
+
+  // ── Coordinate helpers (world cells ↔ screen px) ──────────────────
+  function wpx(){ return CELL * cam.scale; }                 // screen px per cell
+  function toScreen(wx, wy){ return [ (wx - cam.x)*wpx() + W/2, (wy - cam.y)*wpx() + H/2 ]; }
+  function toWorld(sx, sy){ return [ (sx - W/2)/wpx() + cam.x, (sy - H/2)/wpx() + cam.y ]; }
+  function snap(v){ return snapOn? Math.round(v): v; }
+  function snapPt(wx, wy){ return [ snap(wx), snap(wy) ]; }
+
+  // ════════════════════════════════════════════════════════════════
+  // RENDER
+  // ════════════════════════════════════════════════════════════════
+  // offscreen scratch buffers (CSS-px sized) for the floor fill & grid clip
+  function oc(){ return document.createElement("canvas"); }
+  const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc() };
+  function sizeBufs(){ for(const k in buf){ if(buf[k].width!==W||buf[k].height!==H){ buf[k].width=W; buf[k].height=H; } } }
+
+  // draw a single floor shape's path into a 2d context (screen space)
+  function shapePath(c, sh){
+    const p = wpx();
+    if(sh.type==="rect"){
+      const [x,y]=toScreen(sh.x, sh.y);
+      c.rect(x, y, sh.w*p, sh.h*p);
+    } else if(sh.type==="circle"){
+      const [x,y]=toScreen(sh.cx, sh.cy);
+      c.moveTo(x+sh.r*p, y);
+      c.arc(x, y, sh.r*p, 0, Math.PI*2);
+    } else if(sh.type==="polygon" && sh.pts.length>1){
+      const [x0,y0]=toScreen(sh.pts[0][0], sh.pts[0][1]);
+      c.moveTo(x0,y0);
+      for(let i=1;i<sh.pts.length;i++){ const [x,y]=toScreen(sh.pts[i][0], sh.pts[i][1]); c.lineTo(x,y); }
+      c.closePath();
+    }
+  }
+
+  // stable pseudo-random from a world position — keeps wobble & hatch from
+  // shimmering as the camera moves.
+  function hash2(x,y){ const h=Math.sin(x*127.1 + y*311.7)*43758.5453; return h-Math.floor(h); }
+  function seeded(x,y){ let s=(Math.floor(x*8191)^Math.floor(y*131071))>>>0; s=(s^0x9e3779b9)>>>0;
+    return function(){ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+  function pointInAny(wx,wy){ const S=map.shapes; for(let i=0;i<S.length;i++) if(pointInShape(wx,wy,S[i])) return true; return false; }
+
+  // ── Union boundary as VECTOR contours (marching squares over a world grid).
+  // Camera-independent, so it is cached and only rebuilt when geometry changes.
+  let contours=[], hatchStrokes=[], geomDirty=true;
+  function markGeom(){ geomDirty=true; }
+  function ensureGeom(){ if(geomDirty){ geomDirty=false; buildGeometry(); } }
+
+  function buildGeometry(){
+    // Crosshatching was removed per request, and walls now render per-shape
+    // (drawWalls) rather than from a union contour — so no geometry to build.
+    contours=[]; hatchStrokes=[];
+    return;
+    /* eslint-disable no-unreachable */
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; const S=map.shapes;
+    for(const s of S){ const b=bounds(s,"shape"); if(b){ x0=Math.min(x0,b.x); y0=Math.min(y0,b.y); x1=Math.max(x1,b.x+b.w); y1=Math.max(y1,b.y+b.h); } }
+    const res=0.5;                                          // trace on the half-cell grid
+    x0=Math.floor(x0/res)*res - res; y0=Math.floor(y0/res)*res - res;
+    x1=Math.ceil(x1/res)*res + res;  y1=Math.ceil(y1/res)*res + res;
+    const gw=Math.round((x1-x0)/res), gh=Math.round((y1-y0)/res);
+    // Cell occupancy by centre test. Rooms are grid-aligned, so their edges fall
+    // exactly on grid lines ⇒ the traced walls stay ON the grid and never drift.
+    const occ=new Uint8Array(gw*gh);
+    for(let j=0;j<gh;j++){ const cy=y0+(j+0.5)*res; for(let i=0;i<gw;i++){ occ[j*gw+i]=pointInAny(x0+(i+0.5)*res, cy)?1:0; } }
+    const O=(i,j)=> (i<0||j<0||i>=gw||j>=gh)?0:occ[j*gw+i];
+    const P=(i,j)=>[x0+i*res, y0+j*res];
+    // Boundary = the cell edges that sit between an occupied and an empty cell —
+    // axis-aligned unit segments on grid lines.
+    const segs=[];
+    for(let j=0;j<gh;j++) for(let i=0;i<gw;i++){ if(!O(i,j)) continue;
+      if(!O(i,j-1)) segs.push([P(i,j),   P(i+1,j)]);        // top
+      if(!O(i,j+1)) segs.push([P(i,j+1), P(i+1,j+1)]);      // bottom
+      if(!O(i-1,j)) segs.push([P(i,j),   P(i,j+1)]);        // left
+      if(!O(i+1,j)) segs.push([P(i+1,j), P(i+1,j+1)]);      // right
+    }
+    const loops=stitch(segs);
+    // Merge collinear runs (drop mid-edge points, keep corners exactly on-grid;
+    // also smooths circle/polygon stairsteps into chords).
+    for(let lp of loops){ lp=rdp(lp, res*0.9); if(lp.length>=4) contours.push(lp); }
+    hatchStrokes=buildHatchStrokes(contours);
+  }
+
+  function stitch(segs){
+    const key=p=>Math.round(p[0]*1000)+"|"+Math.round(p[1]*1000);
+    const adj=new Map(), pos=new Map();
+    for(const [a,b] of segs){ const ka=key(a),kb=key(b); if(ka===kb) continue;
+      pos.set(ka,a); pos.set(kb,b);
+      (adj.get(ka)||adj.set(ka,[]).get(ka)).push(kb);
+      (adj.get(kb)||adj.set(kb,[]).get(kb)).push(ka); }
+    const usedEdge=new Set(), loops=[];
+    const eid=(a,b)=> a<b? a+">"+b : b+">"+a;
+    for(const start of adj.keys()){
+      let has=false; for(const n of adj.get(start)) if(!usedEdge.has(eid(start,n))){ has=true; break; }
+      if(!has) continue;
+      let cur=start, prev=null; const loop=[]; let guard=0;
+      while(cur && guard++<200000){
+        loop.push(pos.get(cur));
+        const nbrs=adj.get(cur)||[]; let nxt=null;
+        for(const n of nbrs){ if(!usedEdge.has(eid(cur,n)) && n!==prev){ nxt=n; break; } }
+        if(!nxt){ for(const n of nbrs){ if(!usedEdge.has(eid(cur,n))){ nxt=n; break; } } }
+        if(!nxt) break;
+        usedEdge.add(eid(cur,nxt)); prev=cur; cur=nxt;
+        if(cur===start) break;
+      }
+      if(loop.length>=3) loops.push(loop);
+    }
+    return loops;
+  }
+
+  function perpDist(p,a,b){ const dx=b[0]-a[0],dy=b[1]-a[1]; const l=Math.hypot(dx,dy)||1;
+    return Math.abs((p[0]-a[0])*dy-(p[1]-a[1])*dx)/l; }
+  function rdp(pts,eps){
+    if(pts.length<4) return pts;
+    const keep=new Array(pts.length).fill(false); keep[0]=keep[pts.length-1]=true;
+    const stack=[[0,pts.length-1]];
+    while(stack.length){ const [s,e]=stack.pop(); let dmax=0,idx=-1;
+      for(let i=s+1;i<e;i++){ const d=perpDist(pts[i],pts[s],pts[e]); if(d>dmax){ dmax=d; idx=i; } }
+      if(dmax>eps && idx>0){ keep[idx]=true; stack.push([s,idx],[idx,e]); } }
+    const out=[]; for(let i=0;i<pts.length;i++) if(keep[i]) out.push(pts[i]);
+    const f=out[0], l=out[out.length-1];
+    if(f && (f[0]!==l[0]||f[1]!==l[1])) out.push([f[0],f[1]]);
+    return out;
+  }
+
+  // True crosshatching. A dense base layer of bundles roots on the wall and
+  // leans outward. Each later generation spawns from points ALONG existing lines
+  // (not their tips) and runs PERPENDICULAR to that line — so successive families
+  // cross at right angles, weaving a proper crosshatch. Everything stays exterior.
+  function buildHatchStrokes(loops){
+    const out=[];        // [x1,y1,x2,y2]
+    const strokes=[];    // {a:[x,y], b:[x,y]}
+    const skew=0.5;      // outward lean of the base combs (radians off the normal)
+    const ca=Math.cos(skew), sa=Math.sin(skew);
+    const bundleGap=0.6, lineGap=0.14;
+    // base layer — rooted on the wall
+    for(const loop of loops){
+      let carry=0.25;
+      for(let i=0;i<loop.length-1;i++){
+        const a=loop[i], b=loop[i+1];
+        const dx=b[0]-a[0], dy=b[1]-a[1]; const segLen=Math.hypot(dx,dy); if(segLen<1e-4) continue;
+        const tx=dx/segLen, ty=dy/segLen; let nx=-ty, ny=tx;
+        const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2;
+        if(pointInAny(mx+nx*0.15, my+ny*0.15)){ nx=-nx; ny=-ny; }   // outward
+        const hx=nx*ca - ny*sa, hy=nx*sa + ny*ca;
+        let d=carry;
+        while(d<segLen){
+          const bx=a[0]+tx*d, by=a[1]+ty*d;
+          const r=seeded(bx*7.0, by*7.0);
+          const N=3+Math.floor(r()*3);            // 3..5 lines per bundle
+          const L=0.55 + r()*0.25;
+          for(let k=0;k<N;k++){
+            const o=(k-(N-1)/2)*lineGap;
+            const sx=bx + tx*o, sy=by + ty*o;      // root ON the wall
+            const ex=sx + hx*L, ey=sy + hy*L;
+            if(pointInAny(ex,ey)) continue;
+            const st={a:[sx,sy], b:[ex,ey]}; strokes.push(st); out.push([sx,sy,ex,ey]);
+          }
+          d += bundleGap;
+        }
+        carry = d - segLen;
+      }
+    }
+    // crossing generations — spawn along each line, perpendicular to it
+    let front=strokes, depth=0; const maxDepth=2;
+    while(depth<maxDepth && front.length){
+      const next=[];
+      for(const s of front){
+        const dx=s.b[0]-s.a[0], dy=s.b[1]-s.a[1]; const len=Math.hypot(dx,dy)||1;
+        const px=-dy/len, py=dx/len;               // perpendicular to this line
+        for(const f of [0.32, 0.6, 0.84]){          // points ALONG the line (not the tips)
+          const cx=s.a[0]+dx*f, cy=s.a[1]+dy*f;
+          const r=seeded(cx*17.0 + depth*2.3, cy*17.0);
+          if(r()<0.4) continue;
+          const dir = r()<0.5 ? 1 : -1;
+          const L=0.34 + r()*0.26;
+          const ex=cx + px*dir*L, ey=cy + py*dir*L;
+          if(pointInAny(ex,ey) || pointInAny((cx+ex)/2,(cy+ey)/2)) continue;   // exterior only
+          const st={a:[cx,cy], b:[ex,ey]}; next.push(st); out.push([cx,cy,ex,ey]);
+        }
+      }
+      front=next; depth++;
+    }
+    return out;
+  }
+
+  function render(){
+    // Work in CSS-pixel logical space; scale once for crisp HiDPI output.
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.clearRect(0,0,W,H);
+    if(!noRock){ ctx.fillStyle=C.rockHi; ctx.fillRect(0,0,W,H); drawDotGrid(); }
+
+    const shapes = map.shapes;
+    if(shapes.length){
+      ensureGeom();
+      sizeBufs();
+      // floor mask (white union)
+      const m=buf.mask.getContext("2d"); m.setTransform(1,0,0,1,0,0);
+      m.clearRect(0,0,W,H); m.fillStyle="#fff"; m.beginPath();
+      for(const sh of shapes) shapePath(m, sh); m.fill("nonzero");
+      // floor colour
+      const tc=buf.tint.getContext("2d"); tc.setTransform(1,0,0,1,0,0);
+      tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over"; tc.drawImage(buf.mask,0,0);
+      tc.globalCompositeOperation="source-in"; tc.fillStyle=C.floor; tc.fillRect(0,0,W,H);
+      tc.globalCompositeOperation="source-over";
+      ctx.drawImage(buf.tint,0,0);
+      // grid inside floor
+      if(map.grid && wpx()>7){
+        const gc=buf.grid.getContext("2d"); gc.setTransform(1,0,0,1,0,0);
+        gc.clearRect(0,0,W,H); gc.globalCompositeOperation="source-over";
+        gc.strokeStyle=C.grid; gc.lineWidth=1; gc.globalAlpha=.8;
+        const p=wpx(); const [ox,oy]=toScreen(0,0); gc.beginPath();
+        for(let x=ox%p;x<=W;x+=p){ gc.moveTo(x+.5,0); gc.lineTo(x+.5,H); }
+        for(let y=oy%p;y<=H;y+=p){ gc.moveTo(0,y+.5); gc.lineTo(W,y+.5); }
+        gc.stroke(); gc.globalAlpha=1;
+        gc.globalCompositeOperation="destination-in"; gc.drawImage(buf.mask,0,0);
+        ctx.drawImage(buf.grid,0,0);
+      }
+      drawWalls();                       // rough-edged room walls (round circles), drop shadow
+    }
+
+    drawInteriorWalls();
+    for(const d of map.doors) drawDoor(d);
+    for(const s of map.stairs) drawStair(s);
+    if(!exporting){ drawPreview(); drawSelection(); }
+  }
+
+  function drawDotGrid(){ const p=wpx(); if(p<13) return; ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.5;
+    const [ox,oy]=toScreen(0,0); const r=Math.max(0.6,0.85*Math.min(2,cam.scale));
+    for(let x=ox%p;x<W;x+=p) for(let y=oy%p;y<H;y+=p){ ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fill(); }
+    ctx.restore(); }
+
+  function drawHatch(){ if(!hatchStrokes.length) return; ctx.save();
+    ctx.strokeStyle=C.hatch; ctx.lineCap="round"; ctx.lineWidth=Math.max(0.8,1.05*cam.scale); ctx.globalAlpha=.5;
+    ctx.beginPath();
+    for(const s of hatchStrokes){ const [a,b]=toScreen(s[0],s[1]); const [c,d]=toScreen(s[2],s[3]);
+      ctx.moveTo(a,b); ctx.lineTo(c,d); }
+    ctx.stroke(); ctx.restore(); }
+
+  // straight polyline through the actual contour vertices (used by the shadow)
+  function strokeLoop(loop){ ctx.beginPath();
+    for(let i=0;i<loop.length;i++){ const [sx,sy]=toScreen(loop[i][0],loop[i][1]);
+      if(i===0) ctx.moveTo(sx,sy); else ctx.lineTo(sx,sy); }
+    ctx.stroke(); }
+
+  function drawWallShadow(){ ctx.save(); ctx.strokeStyle="rgba(20,17,12,.18)"; ctx.lineJoin="round"; ctx.lineCap="round";
+    ctx.lineWidth=Math.max(3.5,5*cam.scale); const o=Math.min(2,cam.scale); ctx.translate(2.4*o,3*o);
+    for(const loop of contours) strokeLoop(loop); ctx.restore(); }
+
+  // A straight wall segment rendered as a FILLED ribbon whose centreline stays
+  // exactly on the segment (no drift) but whose two long edges wander — the rough
+  // marker/pen edge. Seeded by world position ⇒ stable. Used for interior walls.
+  function roughSeg(c, aw, bw, halfW){
+    const [ax,ay]=toScreen(aw[0],aw[1]), [bx,by]=toScreen(bw[0],bw[1]);
+    const dx=bx-ax, dy=by-ay; const len=Math.hypot(dx,dy); if(len<0.5) return;
+    const nx=-dy/len, ny=dx/len;
+    const steps=Math.max(2, Math.round(len/Math.max(3,4*cam.scale)));
+    c.beginPath();
+    for(let k=0;k<=steps;k++){ const f=k/steps;
+      const wx=aw[0]+(bw[0]-aw[0])*f, wy=aw[1]+(bw[1]-aw[1])*f;
+      const amp=halfW*(0.7 + seeded(wx*29, wy*29)()*0.7);
+      const px=ax+dx*f + nx*amp, py=ay+dy*f + ny*amp;
+      if(k===0) c.moveTo(px,py); else c.lineTo(px,py);
+    }
+    for(let k=steps;k>=0;k--){ const f=k/steps;
+      const wx=aw[0]+(bw[0]-aw[0])*f, wy=aw[1]+(bw[1]-aw[1])*f;
+      const amp=halfW*(0.7 + seeded(wx*29+13, wy*29+7)()*0.7);
+      const px=ax+dx*f - nx*amp, py=ay+dy*f - ny*amp;
+      c.lineTo(px,py);
+    }
+    c.closePath(); c.fill();
+    c.beginPath(); c.arc(ax,ay,halfW*1.02,0,6.2832); c.fill();
+    c.beginPath(); c.arc(bx,by,halfW*1.02,0,6.2832); c.fill();
+  }
+
+  // A rough-edged ring around a closed world polyline. Densifies each edge, so
+  // circles (sampled as real arcs) come out ROUND while rects stay crisp; both
+  // get the wandering rough edge. Filled as an annulus (evenodd).
+  function roughRing(c, pts, halfW){
+    const dp=[]; const n=pts.length;
+    for(let i=0;i<n;i++){ const a=pts[i], b=pts[(i+1)%n];
+      const dx=b[0]-a[0], dy=b[1]-a[1]; const len=Math.hypot(dx,dy); if(len<1e-6) continue;
+      const steps=Math.max(1, Math.round(len/0.16));
+      for(let k=0;k<steps;k++){ const f=k/steps; dp.push([a[0]+dx*f, a[1]+dy*f]); } }
+    const m=dp.length; if(m<3) return;
+    const outer=[], inner=[];
+    for(let i=0;i<m;i++){
+      const p=dp[i], pa=dp[(i-1+m)%m], pb=dp[(i+1)%m];
+      const ex=pb[0]-pa[0], ey=pb[1]-pa[1]; const l=Math.hypot(ex,ey)||1; const nx=-ey/l, ny=ex/l;
+      const ao=halfW*(0.72 + seeded(p[0]*29, p[1]*29)()*0.66);
+      const ai=halfW*(0.72 + seeded(p[0]*29+11, p[1]*29+5)()*0.66);
+      const [sx,sy]=toScreen(p[0],p[1]);
+      outer.push([sx+nx*ao, sy+ny*ao]); inner.push([sx-nx*ai, sy-ny*ai]);
+    }
+    c.beginPath();
+    c.moveTo(outer[0][0],outer[0][1]); for(let i=1;i<m;i++) c.lineTo(outer[i][0],outer[i][1]); c.closePath();
+    c.moveTo(inner[0][0],inner[0][1]); for(let i=1;i<m;i++) c.lineTo(inner[i][0],inner[i][1]); c.closePath();
+    c.fill("evenodd");
+  }
+  // closed world outline for a shape (circle sampled as a true arc → round)
+  function shapeOutline(sh){
+    if(sh.type==="rect") return [[sh.x,sh.y],[sh.x+sh.w,sh.y],[sh.x+sh.w,sh.y+sh.h],[sh.x,sh.y+sh.h]];
+    if(sh.type==="circle"){ const K=Math.max(28, Math.round(sh.r*8)); const o=[];
+      for(let i=0;i<K;i++){ const a=i/K*Math.PI*2; o.push([sh.cx+Math.cos(a)*sh.r, sh.cy+Math.sin(a)*sh.r]); } return o; }
+    if(sh.type==="polygon") return sh.pts.slice();
+    return [];
+  }
+  // fill a shape's interior INSET inward by `e` (world units) onto ctx `c`
+  function fillInsetShape(c, sh, e){
+    if(sh.type==="rect"){ if(sh.w>2*e && sh.h>2*e){ const [x,y]=toScreen(sh.x+e, sh.y+e);
+      c.fillRect(x, y, (sh.w-2*e)*wpx(), (sh.h-2*e)*wpx()); } }
+    else if(sh.type==="circle"){ const rr=sh.r-e; if(rr>0){ const [x,y]=toScreen(sh.cx,sh.cy);
+      c.beginPath(); c.arc(x,y, rr*wpx(), 0, 6.2832); c.fill(); } }
+    else if(sh.type==="polygon"){ const pts=sh.pts; if(pts.length<3) return;
+      let cx=0,cy=0; for(const p of pts){ cx+=p[0]; cy+=p[1]; } cx/=pts.length; cy/=pts.length;
+      c.beginPath();
+      for(let i=0;i<pts.length;i++){ let dx=pts[i][0]-cx, dy=pts[i][1]-cy; const l=Math.hypot(dx,dy)||1;
+        const [sx,sy]=toScreen(pts[i][0]-dx/l*e, pts[i][1]-dy/l*e); if(i===0)c.moveTo(sx,sy); else c.lineTo(sx,sy); }
+      c.closePath(); c.fill(); }
+  }
+
+  // Walls = each room's true outline (round circles!) rendered rough, then the
+  // union interior (eroded) is punched out so overlaps merge and corridor mouths
+  // stay open — the classic no-internal-walls union, but with real curves.
+  function drawWalls(){
+    if(!map.shapes.length) return;
+    const halfW=Math.max(1.3,1.7*cam.scale);
+    const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
+    wc.globalCompositeOperation="source-over"; wc.fillStyle=C.ink;
+    for(const sh of map.shapes) roughRing(wc, shapeOutline(sh), halfW);
+    // Erase mask = union of each shape's fill INSET individually (not the eroded
+    // union). A wall is removed only where it lies inside *another* shape's
+    // interior (a real overlap). Two shapes that merely share an edge each inset
+    // away from that edge, leaving a gap there, so the shared wall survives.
+    const ec=buf.erode.getContext("2d"); ec.setTransform(1,0,0,1,0,0); ec.clearRect(0,0,W,H);
+    ec.globalCompositeOperation="source-over"; ec.fillStyle="#fff";
+    const inset=(halfW+1.4)/wpx();                     // inset in world units, > wall half-width
+    for(const sh of map.shapes) fillInsetShape(ec, sh, inset);
+    wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
+    for(const d of map.doors) punchDoorQuad(wc, d);   // transparent gap for each door
+    // soft drop shadow taken from the real wall shape (round under circles)
+    if(!noRock){ const o=Math.min(2,cam.scale); ctx.save(); ctx.globalAlpha=.16;
+      ctx.drawImage(buf.wall, 2.3*o, 2.9*o); ctx.restore(); }
+    ctx.drawImage(buf.wall,0,0);
+  }
+
+  function drawInteriorWalls(){ if(!map.walls.length) return; ctx.save(); ctx.fillStyle=C.ink;
+    const halfW=Math.max(1.3,1.7*cam.scale);
+    for(const wl of map.walls) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2],halfW);
+    ctx.restore(); }
+
+  // Doors: {x,y,a,len} — a is the wall direction; a thin leaf sits in the opening.
+  // world-space frame for a door. `len` is the FULL span between the two
+  // placement clicks (the stub tips); the rectangle is inset from the tips by
+  // the stub length, so the clicked points are the tips of the connector stubs.
+  function doorGeom(d){
+    const a=d.a||0, stub=0.13, hl=(d.len||1)/2;
+    return { cx:d.x, cy:d.y, alx:Math.cos(a), aly:Math.sin(a), acx:-Math.sin(a), acy:Math.cos(a),
+             hl, rhl:Math.max(0.12, hl-stub), ht:0.15, stub };   // hl=tip, rhl=rectangle half-length, ht=half thickness
+  }
+  // Clear the wall ONLY under the rectangle + the thin stub lines — everything
+  // else in the door's footprint stays transparent so the walls aren't cut off.
+  function punchDoorQuad(wc, d){
+    const g=doorGeom(d);
+    const rect=(sl0,sl1,st)=>{ const c=(sl,s)=>toScreen(g.cx+g.alx*sl+g.acx*s, g.cy+g.aly*sl+g.acy*s);
+      const p1=c(sl0,-st),p2=c(sl1,-st),p3=c(sl1,st),p4=c(sl0,st);
+      wc.beginPath(); wc.moveTo(p1[0],p1[1]); wc.lineTo(p2[0],p2[1]); wc.lineTo(p3[0],p3[1]); wc.lineTo(p4[0],p4[1]); wc.closePath(); wc.fill(); };
+    rect(-g.rhl, g.rhl, g.ht*1.1);                       // the rectangle opening
+    const sh=Math.max(0.05, (1.7*cam.scale)/wpx());      // stub strip ≈ the stub line's width
+    rect(-g.hl, -g.rhl, sh);                              // left stub
+    rect( g.rhl, g.hl, sh);                               // right stub
+  }
+  // Door = a filled leaf RECTANGLE (rough outline, all four sides), inset from the
+  // stub tips, with a short wall-connector stub out of the CENTRE of each short
+  // side reaching to the tips (which are the placement start/end points).
+  function drawDoor(d){
+    const g=doorGeom(d), halfW=Math.max(1.1,1.5*cam.scale);
+    const w=(sl,st)=>[g.cx+g.alx*sl+g.acx*st, g.cy+g.aly*sl+g.acy*st];
+    const s=(sl,st)=>toScreen(g.cx+g.alx*sl+g.acx*st, g.cy+g.aly*sl+g.acy*st);
+    ctx.save();
+    // filled leaf interior (outside the rectangle stays transparent)
+    const A=s(-g.rhl,-g.ht),B=s(g.rhl,-g.ht),C2=s(g.rhl,g.ht),D=s(-g.rhl,g.ht);
+    ctx.fillStyle="#fbf8f0";
+    ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.lineTo(C2[0],C2[1]); ctx.lineTo(D[0],D[1]); ctx.closePath(); ctx.fill();
+    // rough black rectangle outline + centre stubs reaching to the tips
+    ctx.fillStyle=C.ink;
+    roughSeg(ctx, w(-g.rhl,-g.ht), w( g.rhl,-g.ht), halfW);   // long side
+    roughSeg(ctx, w(-g.rhl, g.ht), w( g.rhl, g.ht), halfW);   // long side
+    roughSeg(ctx, w(-g.rhl,-g.ht), w(-g.rhl, g.ht), halfW);   // short side
+    roughSeg(ctx, w( g.rhl,-g.ht), w( g.rhl, g.ht), halfW);   // short side
+    roughSeg(ctx, w(-g.rhl,0), w(-g.hl,0), halfW);            // left stub → tip
+    roughSeg(ctx, w( g.rhl,0), w( g.hl,0), halfW);            // right stub → tip
+    ctx.restore();
+  }
+
+  // Stairs = a triangle of rough rungs. base A→B is the wide starting edge, tip is
+  // the apex; each rung runs parallel to the base and tapers in length toward the
+  // tip. ~5–6 rungs per cell of run; rungs share the walls' rough-edge look.
+  function drawStair(s){
+    let a,b,tip;
+    if(s.ax!==undefined){ a=[s.ax,s.ay]; b=[s.bx,s.by]; tip=[s.tx,s.ty]; }
+    else if(s.x1!==undefined){                          // back-compat: old run+width schema
+      const dx=s.x2-s.x1, dy=s.y2-s.y1, len=Math.hypot(dx,dy)||1, nx=-dy/len, ny=dx/len, hw=(s.w||2)/2;
+      a=[s.x1+nx*hw, s.y1+ny*hw]; b=[s.x1-nx*hw, s.y1-ny*hw]; tip=[s.x2,s.y2];
+    } else return;
+    const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2;
+    const travel=Math.hypot(tip[0]-mx, tip[1]-my);
+    const steps=Math.max(2, Math.round(travel/0.18));   // ~5–6 rungs per cell of run
+    const halfW=Math.max(0.7,1.0*cam.scale);
+    ctx.save(); ctx.fillStyle=C.ink;
+    for(let i=0;i<=steps;i++){ const t=i/steps;
+      const la=[a[0]+(tip[0]-a[0])*t, a[1]+(tip[1]-a[1])*t];
+      const lb=[b[0]+(tip[0]-b[0])*t, b[1]+(tip[1]-b[1])*t];
+      if(Math.hypot(lb[0]-la[0], lb[1]-la[1])<0.06) continue;   // skip degenerate rung at the tip
+      roughSeg(ctx, la, lb, halfW);
+    }
+    ctx.restore(); }
+
+  // ── live tool preview ─────────────────────────────────────────────
+  let draft = null;        // in-progress shape while dragging
+  let polyPts = null;      // polygon vertices being placed
+  let placing = null;      // {tool,start,end} — click-move-click door/stair
+  function drawPreview(){
+    ctx.save(); ctx.globalAlpha=.85;
+    if(draft){
+      ctx.setLineDash([5,4]); ctx.strokeStyle=C.sel; ctx.lineWidth=1.6; ctx.beginPath();
+      if(draft.kind==="wall"){ const [a,b]=toScreen(draft.x1,draft.y1),[c,d]=toScreen(draft.x2,draft.y2);
+        ctx.moveTo(a,b); ctx.lineTo(c,d); }
+      else shapePath(ctx, draft);
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    if(placing){
+      const pts=placing.pts, hv=placing.hover;
+      const dash=(a,b)=>{ if(!a||!b) return; const [ax,ay]=toScreen(a[0],a[1]),[bx,by]=toScreen(b[0],b[1]);
+        ctx.save(); ctx.setLineDash([4,4]); ctx.strokeStyle=C.sel; ctx.lineWidth=1.2;
+        ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); ctx.restore(); };
+      if(placing.tool==="door"){
+        const end=pts[1]||hv; if(end) drawDoor(doorFromPts(pts[0], end)); dash(pts[0], end);
+      } else {
+        if(pts.length===1){ dash(pts[0], hv); }                        // setting the width edge
+        else if(pts.length===2){ const g=stairFromPts(pts[0], pts[1], hv);
+          if(g) drawStair(g); dash(pts[0], pts[1]); }                  // base edge fixed, aiming the tip
+      }
+      ctx.fillStyle=C.sel;
+      for(const p of pts){ const [sx,sy]=toScreen(p[0],p[1]); ctx.beginPath(); ctx.arc(sx,sy,3.5,0,7); ctx.fill(); }
+    }
+    if(polyPts && polyPts.length){
+      ctx.strokeStyle=C.sel; ctx.fillStyle="rgba(201,169,74,.15)"; ctx.lineWidth=1.6;
+      ctx.beginPath(); const [x0,y0]=toScreen(polyPts[0][0],polyPts[0][1]); ctx.moveTo(x0,y0);
+      for(let i=1;i<polyPts.length;i++){ const [x,y]=toScreen(polyPts[i][0],polyPts[i][1]); ctx.lineTo(x,y); }
+      if(hoverPt){ const [hx,hy]=toScreen(hoverPt[0],hoverPt[1]); ctx.lineTo(hx,hy); }
+      ctx.stroke();
+      for(const pt of polyPts){ const [x,y]=toScreen(pt[0],pt[1]);
+        ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(x,y,3.5,0,7); ctx.fill(); }
+    }
+    ctx.restore();
+  }
+  function drawSelection(){
+    if(sel==null) return;
+    const o=objAt(sel);
+    if(!o) return;
+    ctx.save(); ctx.strokeStyle=C.sel; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+    const b=bounds(o.obj,o.kind);
+    if(b){ const [x,y]=toScreen(b.x,b.y); ctx.strokeRect(x-4,y-4,b.w*wpx()+8,b.h*wpx()+8); }
+    ctx.restore();
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // GEOMETRY / HIT TESTING
+  // ════════════════════════════════════════════════════════════════
+  function bounds(o,kind){
+    if(kind==="shape"){
+      if(o.type==="rect") return {x:o.x,y:o.y,w:o.w,h:o.h};
+      if(o.type==="circle") return {x:o.cx-o.r,y:o.cy-o.r,w:o.r*2,h:o.r*2};
+      if(o.type==="polygon"){ const xs=o.pts.map(p=>p[0]),ys=o.pts.map(p=>p[1]);
+        const x=Math.min(...xs),y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y}; }
+    }
+    if(kind==="wall") return {x:Math.min(o.x1,o.x2),y:Math.min(o.y1,o.y2),
+      w:Math.abs(o.x2-o.x1),h:Math.abs(o.y2-o.y1)};
+    if(kind==="door"){ const l=(o.len||1)/2+0.3; return {x:o.x-l,y:o.y-l,w:l*2,h:l*2}; }
+    if(kind==="stair"){
+      if(o.ax!==undefined){ const xs=[o.ax,o.bx,o.tx], ys=[o.ay,o.by,o.ty];
+        const x=Math.min(...xs), y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x, h:Math.max(...ys)-y}; }
+      if(o.x1!==undefined){ const wm=(o.w||2)/2;
+        return {x:Math.min(o.x1,o.x2)-wm,y:Math.min(o.y1,o.y2)-wm,w:Math.abs(o.x2-o.x1)+wm*2,h:Math.abs(o.y2-o.y1)+wm*2}; }
+      return {x:o.x-(o.w||2)/2,y:o.y-(o.h||3)/2,w:(o.w||2),h:(o.h||3)}; }
+    return null;
+  }
+  function pointInShape(wx,wy,sh){
+    if(sh.type==="rect") return wx>=sh.x&&wx<=sh.x+sh.w&&wy>=sh.y&&wy<=sh.y+sh.h;
+    if(sh.type==="circle") return Math.hypot(wx-sh.cx,wy-sh.cy)<=sh.r;
+    if(sh.type==="polygon"){ let c=false,pts=sh.pts;
+      for(let i=0,j=pts.length-1;i<pts.length;j=i++){
+        if(((pts[i][1]>wy)!=(pts[j][1]>wy)) &&
+           (wx<(pts[j][0]-pts[i][0])*(wy-pts[i][1])/(pts[j][1]-pts[i][1])+pts[i][0])) c=!c; }
+      return c; }
+    return false;
+  }
+  function distToSeg(px,py,x1,y1,x2,y2){
+    const dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy;
+    let t=l2?((px-x1)*dx+(py-y1)*dy)/l2:0; t=Math.max(0,Math.min(1,t));
+    return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));
+  }
+  // returns {kind,idx,obj} of topmost object under a world point
+  function pointInTri(px,py, ax,ay, bx,by, cx,cy){
+    const d1=(px-bx)*(ay-by)-(ax-bx)*(py-by);
+    const d2=(px-cx)*(by-cy)-(bx-cx)*(py-cy);
+    const d3=(px-ax)*(cy-ay)-(cx-ax)*(py-ay);
+    const neg=(d1<0)||(d2<0)||(d3<0), pos=(d1>0)||(d2>0)||(d3>0);
+    return !(neg&&pos);
+  }
+  function hitTest(wx,wy){
+    for(let i=map.stairs.length-1;i>=0;i--){ const s=map.stairs[i];
+      if(s.ax!==undefined){ if(pointInTri(wx,wy, s.ax,s.ay, s.bx,s.by, s.tx,s.ty)) return {kind:"stair",idx:i,obj:s}; }
+      else if(s.x1!==undefined){ if(distToSeg(wx,wy,s.x1,s.y1,s.x2,s.y2)<=(s.w||2)/2+0.2) return {kind:"stair",idx:i,obj:s}; }
+      else if(Math.abs(wx-s.x)<=(s.w||2)/2 && Math.abs(wy-s.y)<=(s.h||3)/2) return {kind:"stair",idx:i,obj:s}; }
+    for(let i=map.doors.length-1;i>=0;i--){ const d=map.doors[i];
+      if(Math.hypot(wx-d.x,wy-d.y)<=(d.len||1)/2+0.35) return {kind:"door",idx:i,obj:d}; }
+    for(let i=map.walls.length-1;i>=0;i--){ const w=map.walls[i];
+      if(distToSeg(wx,wy,w.x1,w.y1,w.x2,w.y2)<=0.35) return {kind:"wall",idx:i,obj:w}; }
+    for(let i=map.shapes.length-1;i>=0;i--){ if(pointInShape(wx,wy,map.shapes[i]))
+      return {kind:"shape",idx:i,obj:map.shapes[i]}; }
+    return null;
+  }
+  let sel=null;                    // {kind,idx}
+  function objAt(s){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs})[s.kind];
+    return arr&&arr[s.idx]?{kind:s.kind,obj:arr[s.idx]}:null; }
+
+  // ════════════════════════════════════════════════════════════════
+  // POINTER INTERACTION
+  // ════════════════════════════════════════════════════════════════
+  let dragStart=null, dragObj=null, panning=null, hoverPt=null, moved=false;
+
+  cv.addEventListener("pointerdown", e=>{
+    cv.setPointerCapture(e.pointerId);
+    const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
+    moved=false;
+    // middle mouse or space = pan; also pan in embed mode
+    if(e.button===1 || e.button===2 || spaceDown || embed){ panning={sx,sy,cx:cam.x,cy:cam.y}; return; }
+    if(embed) return;
+
+    if(tool==="select"){
+      const h=hitTest(wx,wy);
+      if(h){ sel={kind:h.kind,idx:h.idx};
+        dragObj={h, ox:wx, oy:wy, snap:objSnapshot(h)}; }
+      else sel=null;
+      render(); return;
+    }
+    if(tool==="erase"){ const h=hitTest(wx,wy); if(h){ pushHistory(); removeHit(h); commit(); } return; }
+    if(tool==="polygon"){
+      if(!polyPts) polyPts=[];
+      const [gx,gy]=snapPt(wx,wy);
+      if(polyPts.length>2 && Math.hypot(gx-polyPts[0][0],gy-polyPts[0][1])<0.6){ finishPolygon(); return; }
+      polyPts.push([gx,gy]); render(); return;
+    }
+    if(tool==="door"||tool==="stair"){
+      const gp=[snapHalf(wx),snapHalf(wy)];
+      const need = tool==="stair" ? 3 : 2;
+      if(!placing){ placing={tool, pts:[gp], hover:gp.slice()}; render(); }
+      else { placing.pts.push(gp); if(placing.pts.length>=need) commitPlacing(); else render(); }
+      return;
+    }
+    // rect / circle / wall — start a drag
+    dragStart=snapPt(wx,wy);
+  });
+
+  cv.addEventListener("pointermove", e=>{
+    const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
+    if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); render(); return; }
+    if(placing){ placing.hover=[snapHalf(wx),snapHalf(wy)]; render(); return; }
+    if(polyPts){ hoverPt=snapPt(wx,wy); render(); }
+    if(dragObj){ moved=true; moveObj(dragObj, wx-dragObj.ox, wy-dragObj.oy); render(); return; }
+    if(!dragStart) return;
+    moved=true;
+    const [gx,gy]=snapPt(wx,wy);
+    if(tool==="rect") draft={type:"rect",x:Math.min(dragStart[0],gx),y:Math.min(dragStart[1],gy),
+      w:Math.abs(gx-dragStart[0])||1,h:Math.abs(gy-dragStart[1])||1};
+    else if(tool==="circle"){ const r=Math.max(1,Math.round(Math.hypot(gx-dragStart[0],gy-dragStart[1])));
+      draft={type:"circle",cx:dragStart[0],cy:dragStart[1],r}; }
+    else if(tool==="wall") draft={kind:"wall",x1:dragStart[0],y1:dragStart[1],x2:gx,y2:gy};
+    else if(tool==="stair"){ const hx=snapHalf(wx),hy=snapHalf(wy);
+      draft={type:"rect",x:Math.min(dragStart[0],hx),y:Math.min(dragStart[1],hy),
+             w:Math.abs(hx-dragStart[0])||1,h:Math.abs(hy-dragStart[1])||1}; }
+    render();
+  });
+
+  cv.addEventListener("pointerup", e=>{
+    if(panning){ panning=null; return; }
+    if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
+    if(!dragStart){ return; }
+    const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
+    if(tool==="rect" && draft){ pushHistory(); draft.id=uid(); map.shapes.push(draft); commit(); }
+    else if(tool==="circle" && draft){ pushHistory(); draft.id=uid(); map.shapes.push(draft); commit(); }
+    else if(tool==="wall" && draft && (draft.x1!==draft.x2||draft.y1!==draft.y2)){
+      pushHistory(); map.walls.push({id:uid(),x1:draft.x1,y1:draft.y1,x2:draft.x2,y2:draft.y2}); commit(); }
+    draft=null; dragStart=null;
+  });
+
+  cv.addEventListener("dblclick", ()=>{ if(polyPts&&polyPts.length>2) finishPolygon(); });
+  cv.addEventListener("contextmenu", e=>e.preventDefault());
+  cv.addEventListener("wheel", e=>{ e.preventDefault();
+    const [sx,sy]=rel(e); const [bwx,bwy]=toWorld(sx,sy);
+    const f=e.deltaY<0?1.12:1/1.12; cam.scale=Math.max(0.15,Math.min(6,cam.scale*f));
+    const [awx,awy]=toWorld(sx,sy); cam.x+=bwx-awx; cam.y+=bwy-awy; render(); updateZoom();
+  },{passive:false});
+
+  function rel(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
+  function snapHalf(v){ return snapOn? Math.round(v*2)/2 : v; }
+
+  // ── multi-click placement: door = 2 points (start, direction), stair = 3
+  // points (base A, base B = starting width, tip = apex) ──────────────
+  function doorFromPts(a, end){ const dx=end[0]-a[0], dy=end[1]-a[1], dist=Math.hypot(dx,dy);
+    if(dist<0.2) return {x:a[0], y:a[1], a:0, len:1};
+    return {x:a[0]+dx/2, y:a[1]+dy/2, a:Math.atan2(dy,dx), len:Math.max(0.6,dist)}; }
+  function stairFromPts(a, b, tip){
+    if(!a||!b||!tip) return null;
+    if(Math.hypot(b[0]-a[0], b[1]-a[1])<0.2) return null;
+    const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2;
+    if(Math.hypot(tip[0]-mx, tip[1]-my)<0.2) return null;
+    return {ax:a[0],ay:a[1], bx:b[0],by:b[1], tx:tip[0],ty:tip[1]}; }
+  function commitPlacing(){
+    if(placing.tool==="door"){ const g=doorFromPts(placing.pts[0], placing.pts[1]);
+      pushHistory(); g.id=uid(); map.doors.push(g); commit(); }
+    else { const g=stairFromPts(placing.pts[0], placing.pts[1], placing.pts[2]);
+      if(g){ pushHistory(); g.id=uid(); map.stairs.push(g); commit(); } }
+    placing=null;
+  }
+
+  function finishPolygon(){ if(polyPts.length>2){ pushHistory();
+      map.shapes.push({id:uid(),type:"polygon",pts:polyPts.slice()}); commit(); }
+    polyPts=null; hoverPt=null; render(); }
+
+  // move / snapshot / remove object helpers
+  function objSnapshot(h){ return JSON.parse(JSON.stringify(h.obj)); }
+  function moveObj(dragObj, dx, dy){
+    const o=dragObj.h.obj, s=dragObj.snap;
+    const sd=v=> snapOn?Math.round(v):v, hd=v=> snapOn?Math.round(v*2)/2:v;
+    const gdx=sd(dx), gdy=sd(dy);
+    if(dragObj.h.kind==="shape"){
+      if(o.type==="rect"){ o.x=s.x+gdx; o.y=s.y+gdy; }
+      else if(o.type==="circle"){ o.cx=s.cx+gdx; o.cy=s.cy+gdy; }
+      else if(o.type==="polygon"){ o.pts=s.pts.map(p=>[p[0]+gdx,p[1]+gdy]); }
+      markGeom();
+    } else if(dragObj.h.kind==="wall"){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy; }
+    else if(dragObj.h.kind==="door"){ o.x=s.x+hd(dx); o.y=s.y+hd(dy); }
+    else if(dragObj.h.kind==="stair"){
+      if(s.ax!==undefined){ o.ax=s.ax+gdx;o.ay=s.ay+gdy;o.bx=s.bx+gdx;o.by=s.by+gdy;o.tx=s.tx+gdx;o.ty=s.ty+gdy; }
+      else if(s.x1!==undefined){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy; }
+      else { o.x=s.x+gdx; o.y=s.y+gdy; } }
+  }
+  function removeHit(h){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs})[h.kind];
+    arr.splice(h.idx,1); sel=null; }
+  function nearestWallAngle(wx,wy){
+    let best=1e9,ang=0;
+    for(const w of map.walls){ const d=distToSeg(wx,wy,w.x1,w.y1,w.x2,w.y2);
+      if(d<best){ best=d; ang=Math.atan2(w.y2-w.y1,w.x2-w.x1); } }
+    // also consider room edges (axis-aligned) — snap to nearest of 0 / 90°
+    if(best>1.2){ return 0; }
+    return ang;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // RANDOM DUNGEON GENERATOR
+  // ════════════════════════════════════════════════════════════════
+  // Deterministic PRNG so a "seed" could be added later; seeded from counter.
+  let rngState=0;
+  function rng(){ rngState=(rngState*1664525+1013904223)>>>0; return rngState/4294967296; }
+  function ri(a,b){ return a+Math.floor(rng()*(b-a+1)); }
+
+  function generate(){
+    const nRooms=+$("rooms").value;
+    const [smin,smax]=SIZE_MAP[+$("rsize").value];
+    const spread=+$("spread").value;
+    const doCorr=$("corridors").checked;
+    const roundOk=$("roundish").checked;
+    const nEntrances=+$("entrances").value;
+    rngState=(Date.now()^(Math.floor(Math.random()*1e9)))>>>0;
+
+    pushHistory();
+    const keepName=map.name;
+    map=blankMap(); map.name=keepName; map.grid=$("gridToggle").checked;
+
+    // Field size derives from a target packing density (rooms fill ~this
+    // fraction of the bounding area). Tighter layouts pack denser.
+    const avg=(smin+smax)/2;
+    const density=[0.5,0.4,0.32,0.25,0.18][spread-1];
+    const field=Math.max(avg, Math.round(avg*Math.sqrt(nRooms/density)/2));
+    const rooms=[];
+    if(!doCorr){
+      // Adjacency mode: every room butts flush against another, sharing a wall,
+      // so no room floats alone. Rectangular only — a round room can only ever
+      // touch a straight wall at a single point, never share a segment.
+      placeAdjacentRooms(rooms, nRooms, smin, smax);
+    } else {
+      let tries=0, guard=nRooms*220;
+      while(rooms.length<nRooms && tries++<guard){
+        const round = roundOk && rng()<0.28;
+        const w=ri(smin,smax), h=round?w:ri(smin,smax);
+        const x=ri(-field, field), y=ri(-field, field);
+        const gap=1;
+        const nb={x:x-gap,y:y-gap,w:w+gap*2,h:h+gap*2};
+        if(rooms.some(r=>rectsOverlap(nb,{x:r.x,y:r.y,w:r.w,h:r.h}))) continue;
+        rooms.push({x,y,w,h,round,cx:x+w/2,cy:y+h/2});
+      }
+    }
+    // add rooms as shapes
+    for(const r of rooms){
+      if(r.round){ const rad=Math.max(r.w,r.h)/2; map.shapes.push({id:uid(),type:"circle",cx:r.cx,cy:r.cy,r:Math.round(rad)}); }
+      else map.shapes.push({id:uid(),type:"rect",x:r.x,y:r.y,w:r.w,h:r.h});
+    }
+    // connect via nearest-neighbour spanning tree, carve corridors + doors
+    if(doCorr && rooms.length>1){
+      const connected=[0], pending=rooms.map((_,i)=>i).slice(1);
+      while(pending.length){
+        let bi=-1,bj=-1,bd=1e9;
+        for(const ci of connected) for(const pj of pending){
+          const d=Math.hypot(rooms[ci].cx-rooms[pj].cx, rooms[ci].cy-rooms[pj].cy);
+          if(d<bd){ bd=d; bi=ci; bj=pj; } }
+        carveCorridor(rooms[bi], rooms[bj]);
+        connected.push(bj); pending.splice(pending.indexOf(bj),1);
+      }
+      // a few extra loops for interesting layouts
+      const extra=Math.floor(rooms.length*0.15);
+      for(let k=0;k<extra;k++){ const a=ri(0,rooms.length-1),b=ri(0,rooms.length-1);
+        if(a!==b && Math.hypot(rooms[a].cx-rooms[b].cx,rooms[a].cy-rooms[b].cy)<avg*5) carveCorridor(rooms[a],rooms[b]); }
+    }
+    else if(rooms.length>1){ addAdjacencyDoors(rooms); }
+    // Snap each generated door to the grid, fit it to the real wall opening it
+    // sits in, and drop any that don't span a visible, corridor-width wall.
+    map.doors = finalizeDoors();
+    // Then add the requested number of entrances — doors on EXTERIOR walls that
+    // lead out of the whole dungeon (0 ⇒ none, e.g. stairs are the way in/out).
+    placeEntrances(nEntrances);
+    // Stairs are NOT auto-placed — drop them by hand with the Stairs tool.
+    commit(); fitView();
+  }
+  // Final pass over every generated door: measure the actual opening in the wall
+  // it sits in, snap it onto the grid, size it to span that opening, and reject
+  // anything that isn't a real, visible, corridor-width doorway. This is what
+  // guarantees doors are (a) on the grid, (b) on a visible wall, and (c) fully
+  // spanning 1- and 2-cell corridors — regardless of how they were first placed.
+  function finalizeDoors(){
+    const s2=v=>Math.round(v*2)/2;
+    // both sides across the wall are floor ⇒ an open passage at this point
+    const cross=(x,y,vx,vy)=> pointInAny(x+vx*0.5,y+vy*0.5) && pointInAny(x-vx*0.5,y-vy*0.5);
+    const fitted=[];
+    for(const d of map.doors){
+      const a=d.a||0, ux=Math.cos(a),uy=Math.sin(a), vx=-Math.sin(a),vy=Math.cos(a);
+      // Adjacency doors sit on a known-good shared wall where BOTH sides are floor
+      // for the whole segment, so the opening-measure below can't judge them —
+      // pass them through (already grid-snapped when placed).
+      if(d._adj){ fitted.push({id:d.id, x:d.x, y:d.y, a, len:d.len||1}); continue; }
+      // Nudge the centre onto the passage if it isn't quite there.
+      let cx=d.x, cy=d.y;
+      if(!cross(cx,cy,vx,vy)){
+        let found=false;
+        for(let t=0.25;t<=1.5 && !found;t+=0.25){
+          if(cross(cx+ux*t,cy+uy*t,vx,vy)){ cx+=ux*t; cy+=uy*t; found=true; }
+          else if(cross(cx-ux*t,cy-uy*t,vx,vy)){ cx-=ux*t; cy-=uy*t; found=true; }
+        }
+        if(!found) continue;                                   // no passage anywhere near → drop
+      }
+      // Walk along the wall to find the contiguous open run (the doorway gap).
+      let lo=0; for(let t=-0.15;t>=-2.4;t-=0.15){ if(cross(cx+ux*t,cy+uy*t,vx,vy)) lo=t; else break; }
+      let hi=0; for(let t=0.15;t<=2.4;t+=0.15){ if(cross(cx+ux*t,cy+uy*t,vx,vy)) hi=t; else break; }
+      const width=hi-lo, mid=(lo+hi)/2;
+      if(width<0.6 || width>2.4) continue;                     // no opening, or wider than a 2-cell corridor (hidden/merged wall)
+      // Recentre on the opening; snap the ALONG coordinate to the grid (the
+      // ACROSS coordinate already sits on the wall — a straight edge or the circle).
+      let mx=cx+ux*mid, my=cy+uy*mid;
+      if(Math.abs(ux)>=Math.abs(uy)) mx=s2(mx); else my=s2(my);
+      const len=Math.min(2,Math.max(1,Math.round(width))), hl=len/2;
+      // Both ends must butt into wall (passage CLOSED just past each end); if the
+      // floor keeps going, the door is floating in open space, not in a wall.
+      if(cross(mx+ux*(hl+0.35),my+uy*(hl+0.35),vx,vy)) continue;
+      if(cross(mx-ux*(hl+0.35),my-uy*(hl+0.35),vx,vy)) continue;
+      fitted.push({id:d.id, x:mx, y:my, a, len});
+    }
+    return dedupeDoors(fitted);
+  }
+  // Drop overlapping doors: parallel doors whose footprints overlap along the
+  // wall, or any two doors sitting almost on the same spot.
+  function dedupeDoors(arr){
+    const out=[];
+    for(const d of arr){ const dl=(d.len||1)/2;
+      const dup=out.some(o=>{ const dist=Math.hypot(o.x-d.x,o.y-d.y), ol=(o.len||1)/2;
+        const parallel=Math.abs(Math.sin((o.a||0)-(d.a||0)))<0.4;
+        return dist < (parallel ? Math.max(0.6,(dl+ol)*0.85) : 0.4); });
+      if(!dup) out.push(d); }
+    return out;
+  }
+  // Add up to `n` ENTRANCE doors — doors on exterior walls (floor inside, empty
+  // outside) that lead in/out of the whole dungeon. Runs AFTER finalizeDoors
+  // because an entrance is a one-sided opening, not a two-sided passage, so it
+  // can't go through the passage validator. Candidates are grid-aligned points on
+  // straight rect edges (or a circle's N/S/E/W extremes) whose outside is empty.
+  // Each candidate is tagged with its room, and NO two entrances share a room —
+  // once a room gets an entrance, the rest of its candidates are dropped.
+  function placeEntrances(n){
+    if(n<=0) return;
+    const floor=(x,y)=>pointInAny(x,y), empty=(x,y)=>!pointInAny(x,y);
+    const cand=[];
+    for(const sh of map.shapes){
+      if(sh.corridor) continue;                                   // never on a corridor stub
+      const room=sh.id;                                           // which room this candidate belongs to
+      if(sh.type==="rect"){
+        for(let x=sh.x+0.5; x<=sh.x+sh.w-0.5; x+=1){
+          if(floor(x,sh.y+0.5)      && empty(x-0.5,sh.y-0.5)      && empty(x+0.5,sh.y-0.5))
+            cand.push({x, y:sh.y, a:0, room});                    // top edge (outside = up)
+          if(floor(x,sh.y+sh.h-0.5) && empty(x-0.5,sh.y+sh.h+0.5) && empty(x+0.5,sh.y+sh.h+0.5))
+            cand.push({x, y:sh.y+sh.h, a:0, room});               // bottom edge
+        }
+        for(let y=sh.y+0.5; y<=sh.y+sh.h-0.5; y+=1){
+          if(floor(sh.x+0.5,y)      && empty(sh.x-0.5,y-0.5)      && empty(sh.x-0.5,y+0.5))
+            cand.push({x:sh.x, y, a:Math.PI/2, room});            // left edge (outside = left)
+          if(floor(sh.x+sh.w-0.5,y) && empty(sh.x+sh.w+0.5,y-0.5) && empty(sh.x+sh.w+0.5,y+0.5))
+            cand.push({x:sh.x+sh.w, y, a:Math.PI/2, room});       // right edge
+        }
+      } else if(sh.type==="circle"){
+        const r=sh.r, s2=v=>Math.round(v*2)/2;
+        const ext=[[sh.cx+r,sh.cy,Math.PI/2,1,0],[sh.cx-r,sh.cy,Math.PI/2,-1,0],
+                   [sh.cx,sh.cy+r,0,0,1],[sh.cx,sh.cy-r,0,0,-1]];
+        for(const [px,py,a,ox,oy] of ext){
+          if(empty(px+ox*0.6,py+oy*0.6) && floor(px-ox*0.5,py-oy*0.5))
+            cand.push(a===0 ? {x:s2(px), y:py, a, room} : {x:px, y:s2(py), a, room});
+        }
+      }
+    }
+    let pool=cand.filter(c=> !map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2));
+    let placed=0;
+    while(placed<n && pool.length){
+      const c=pool.splice(Math.floor(rng()*pool.length),1)[0];
+      map.doors.push({id:uid(), x:c.x, y:c.y, a:c.a, len:1});
+      pool=pool.filter(o=> o.room!==c.room && Math.hypot(o.x-c.x,o.y-c.y)>3);  // one per room, and spread apart
+      placed++;
+    }
+  }
+  function rectsOverlap(a,b){ return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y; }
+  // Accretion placement: seed one room, then grow each new room flush against a
+  // random side of an already-placed room so it SHARES that wall (overlap ≥2 so a
+  // door fits). Edge-butting isn't an interior overlap, so rectsOverlap stays
+  // false against the anchor; we reject only rooms whose interior crosses another.
+  function placeAdjacentRooms(rooms, nRooms, smin, smax){
+    const w0=ri(smin,smax), h0=ri(smin,smax);
+    rooms.push({x:0,y:0,w:w0,h:h0,round:false,cx:w0/2,cy:h0/2});
+    let tries=0, guard=nRooms*500;
+    while(rooms.length<nRooms && tries++<guard){
+      const base=rooms[ri(0,rooms.length-1)];
+      const w=ri(smin,smax), h=ri(smin,smax);
+      let nx,ny;
+      switch(ri(0,3)){
+        case 0: nx=base.x+base.w;  ny=base.y+ri(-(h-2), base.h-2); break;   // right of base
+        case 1: nx=base.x-w;       ny=base.y+ri(-(h-2), base.h-2); break;   // left of base
+        case 2: ny=base.y+base.h;  nx=base.x+ri(-(w-2), base.w-2); break;   // below base
+        default:ny=base.y-h;       nx=base.x+ri(-(w-2), base.w-2); break;   // above base
+      }
+      const cand={x:nx,y:ny,w,h,round:false,cx:nx+w/2,cy:ny+h/2};
+      if(rooms.some(r=>rectsOverlap(cand,r))) continue;                     // interior collision
+      rooms.push(cand);
+    }
+  }
+  // Put one door on every shared wall segment (≥2 cells long) between two rooms.
+  // The accretion tree guarantees each room shares a wall with the map, so this
+  // connects everything without corridors.
+  function addAdjacencyDoors(rooms){
+    const s2=v=>Math.round(v*2)/2, EPS=1e-6;
+    for(let i=0;i<rooms.length;i++) for(let j=i+1;j<rooms.length;j++){
+      const a=rooms[i], b=rooms[j]; let door=null;
+      if(Math.abs((a.x+a.w)-b.x)<EPS || Math.abs((b.x+b.w)-a.x)<EPS){        // vertical shared wall
+        const y0=Math.max(a.y,b.y), y1=Math.min(a.y+a.h,b.y+b.h);
+        if(y1-y0>=2){ const x=Math.abs((a.x+a.w)-b.x)<EPS ? a.x+a.w : a.x;
+          door={x, y:s2((y0+y1)/2), a:Math.PI/2}; }
+      } else if(Math.abs((a.y+a.h)-b.y)<EPS || Math.abs((b.y+b.h)-a.y)<EPS){ // horizontal shared wall
+        const x0=Math.max(a.x,b.x), x1=Math.min(a.x+a.w,b.x+b.w);
+        if(x1-x0>=2){ const y=Math.abs((a.y+a.h)-b.y)<EPS ? a.y+a.h : a.y;
+          door={x:s2((x0+x1)/2), y, a:0}; }
+      }
+      if(door){ door.id=uid(); door.len=(rng()<0.5?1:2); door._adj=true; map.doors.push(door); }
+    }
+  }
+  function carveCorridor(A,B){
+    // L-shaped corridor (random elbow order). Door goes on the wall each leg
+    // actually passes through, so doors land at real thresholds.
+    const ax=Math.round(A.cx),ay=Math.round(A.cy),bx=Math.round(B.cx),by=Math.round(B.cy);
+    const horizFirst=rng()<0.5;
+    const cw=rng()<0.5?1:2;                          // corridor width: 1 or 2 cells
+    // Opening centre = leg start + cw/2, so the door lands on the wall line
+    // centred in the gap; door length is sized to the corridor width.
+    if(horizFirst){
+      map.shapes.push(hall(Math.min(ax,bx),ay,Math.abs(bx-ax)+cw,cw));
+      map.shapes.push(hall(bx,Math.min(ay,by),cw,Math.abs(by-ay)+cw));
+      addDoor(A,"h",ay+cw/2,Math.sign(bx-ax)||1, bx,ay, cw);       // A exits left/right (elbow = bx,ay)
+      addDoor(B,"v",bx+cw/2,Math.sign(ay-by)||1, bx,ay, cw);       // B entered top/bottom
+    } else {
+      map.shapes.push(hall(ax,Math.min(ay,by),cw,Math.abs(by-ay)+cw));
+      map.shapes.push(hall(Math.min(ax,bx),by,Math.abs(bx-ax)+cw,cw));
+      addDoor(A,"v",ax+cw/2,Math.sign(by-ay)||1, ax,by, cw);       // A exits top/bottom (elbow = ax,by)
+      addDoor(B,"h",by+cw/2,Math.sign(ax-bx)||1, ax,by, cw);       // B entered left/right
+    }
+  }
+  function hall(x,y,w,h){ return {id:uid(),type:"rect",x,y,w:Math.max(1,w),h:Math.max(1,h),corridor:true}; }
+  // Place a door on `room` where a corridor leg crosses its wall. axis "h" ⇒
+  // left/right wall (leaf vertical, a=π/2); "v" ⇒ top/bottom wall (leaf a=0).
+  // `line` is the crossing coordinate; `side` picks which wall. Round rooms get
+  // a radial door toward (tcx,tcy).
+  function addDoor(room, axis, line, side, tcx, tcy, len){
+    len = len || 1; const m=len/2;
+    if(room.round){
+      // Seat the door at the corridor mouth. The corridor centreline (`line`) is
+      // grid-aligned, so the door's ALONG coordinate is on the grid; the ACROSS
+      // coordinate is put exactly on the circle boundary, so the door meets the
+      // visible curved wall instead of floating off it. finalizeDoors then fits
+      // its length to the real opening and validates it like any other door.
+      const cx=room.cx, cy=room.cy, r=Math.max(room.w,room.h)/2;
+      if(axis==="h"){                                  // horizontal corridor → door on E/W arc (a=π/2, along=y)
+        const y=Math.max(cy-r+0.4, Math.min(cy+r-0.4, line));
+        const off=Math.sqrt(Math.max(0.04, r*r-(y-cy)*(y-cy)));
+        map.doors.push({id:uid(), x:cx+(side>0?off:-off), y, a:Math.PI/2, len});
+      } else {                                         // vertical corridor → door on N/S arc (a=0, along=x)
+        const x=Math.max(cx-r+0.4, Math.min(cx+r-0.4, line));
+        const off=Math.sqrt(Math.max(0.04, r*r-(x-cx)*(x-cx)));
+        map.doors.push({id:uid(), x, y:cy+(side>0?off:-off), a:0, len});
+      }
+      return;
+    }
+    if(axis==="h"){ const x=side>0?room.x+room.w:room.x, y=Math.min(room.y+room.h-m,Math.max(room.y+m,line));
+      map.doors.push({id:uid(), x, y, a:Math.PI/2, len}); }
+    else { const y=side>0?room.y+room.h:room.y, x=Math.min(room.x+room.w-m,Math.max(room.x+m,line));
+      map.doors.push({id:uid(), x, y, a:0, len}); }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // HISTORY / PERSISTENCE
+  // ════════════════════════════════════════════════════════════════
+  function snapshot(){ return JSON.stringify(map); }
+  function pushHistory(){ history.push(snapshot()); if(history.length>60) history.shift(); future.length=0; syncUndo(); }
+  function commit(){ markGeom(); render(); scheduleSave(); syncUndo(); }
+  function undo(){ if(!history.length) return; future.push(snapshot()); map=JSON.parse(history.pop()); afterLoad(); syncUndo(); scheduleSave(); }
+  function redo(){ if(!future.length) return; history.push(snapshot()); map=JSON.parse(future.pop()); afterLoad(); syncUndo(); scheduleSave(); }
+  function syncUndo(){ $("undo").disabled=!history.length; $("redo").disabled=!future.length; }
+  function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; markGeom();
+    $("mapName").value=map.name||""; $("gridToggle").checked=!!map.grid; render(); }
+
+  let saveTimer=null;
+  function scheduleSave(){ if(embed) return; clearTimeout(saveTimer); setSaveState("Saving…");
+    saveTimer=setTimeout(doSave,700); }
+  function doSave(){
+    try{ localStorage.setItem("dcc_map", snapshot()); }catch(e){}
+    try{ if(typeof window.__ddSave==="function") window.__ddSave(map); }catch(e){}
+    try{ if(map.name && typeof window.__ddSaveTitle==="function") window.__ddSaveTitle(map.name); }catch(e){}
+    setSaveState("Saved ✓");
+  }
+  function setSaveState(t){ const el=$("saveState"); if(el) el.textContent=t; }
+
+  function load(){
+    let data=null;
+    if(window.__ddState && (window.__ddState.shapes||window.__ddState.version)) data=window.__ddState;
+    else { try{ const s=localStorage.getItem("dcc_map"); if(s) data=JSON.parse(s); }catch(e){} }
+    if(data && (data.shapes||data.walls)){
+      map=Object.assign(blankMap(), data);
+      map.shapes=data.shapes||[]; map.walls=data.walls||[]; map.doors=data.doors||[]; map.stairs=data.stairs||[];
+      if(!map.seedId) map.seedId=1+Math.max(0,...allIds());
+    }
+  }
+  function allIds(){ return [...map.shapes,...map.walls,...map.doors,...map.stairs].map(o=>o.id||0); }
+
+  // ════════════════════════════════════════════════════════════════
+  // VIEW
+  // ════════════════════════════════════════════════════════════════
+  function contentBounds(){
+    const pts=[];
+    for(const s of map.shapes){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
+    for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]); }
+    for(const d of map.doors) pts.push([d.x,d.y]);
+    for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
+      else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
+    if(!pts.length) return null;
+    const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+    return {x:Math.min(...xs),y:Math.min(...ys),X:Math.max(...xs),Y:Math.max(...ys)};
+  }
+  function fitView(){
+    const b=contentBounds();
+    if(!b){ cam={x:0,y:0,scale:1}; render(); updateZoom(); return; }
+    const cw=b.X-b.x||10, ch=b.Y-b.y||10, pad=2;
+    const scale=Math.min(W/((cw+pad*2)*CELL), H/((ch+pad*2)*CELL));
+    cam.scale=Math.max(0.15,Math.min(4,scale));
+    cam.x=(b.x+b.X)/2; cam.y=(b.y+b.Y)/2;
+    render(); updateZoom();
+  }
+  function updateZoom(){ $("zoomPct").textContent=Math.round(cam.scale*100)+"%"; }
+
+  // ════════════════════════════════════════════════════════════════
+  // PNG EXPORT
+  // ════════════════════════════════════════════════════════════════
+  let exporting=false, noRock=false;
+  function exportPNG(transparent){
+    const b=contentBounds(); if(!b){ toast("Nothing to export yet."); return; }
+    const pad=1.5, res=2;                        // cells of margin, px multiplier
+    const cw=(b.X-b.x+pad*2), ch=(b.Y-b.y+pad*2);
+    const outW=Math.round(cw*CELL*res), outH=Math.round(ch*CELL*res);
+    // stash view, retarget the visible canvas to export framing, grab pixels
+    const savedCam={...cam}, savedW=W, savedH=H, savedDPR=DPR;
+    DPR=1; W=outW; H=outH; cv.width=outW; cv.height=outH;
+    cam=Object.assign({},cam,{scale:res, x:(b.x+b.X)/2, y:(b.y+b.Y)/2});
+    exporting=true; noRock=!!transparent;
+    render();
+    exporting=false; noRock=false;
+    const url=cv.toDataURL("image/png");
+    // restore live view
+    cam=savedCam; DPR=savedDPR; resize();
+    const a=document.createElement("a"); a.href=url;
+    a.download=(map.name?slug(map.name):"dungeon-map")+(transparent?"-transparent":"")+".png";
+    a.click();
+    toast("PNG exported.");
+  }
+  function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"map"; }
+
+  // ════════════════════════════════════════════════════════════════
+  // UI WIRING
+  // ════════════════════════════════════════════════════════════════
+  function $(id){ return document.getElementById(id); }
+  let spaceDown=false;
+
+  function setTool(t){ tool=t;
+    document.querySelectorAll(".tool").forEach(el=>el.classList.toggle("active",el.dataset.tool===t));
+    if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
+    if(t!=="door"&&t!=="stair"&&placing){ placing=null; render(); }
+    cv.style.cursor = t==="select"?"default":(t==="erase"?"cell":"crosshair");
+    const tips={rect:"Drag to draw a rectangular room.",circle:"Drag out a circular room.",
+      polygon:"Click to drop corners · Enter or double-click to close.",wall:"Drag to draw an interior wall.",
+      door:"Click to start, move to aim, click again to place the door.",
+      stair:"Click a base corner, click to set width, click the tip to place.",
+      erase:"Click anything to delete it.",select:"Click to select · drag to move."};
+    toast(tips[t]||"");
+  }
+  document.getElementById("toolbar").addEventListener("click", e=>{
+    const t=e.target.closest(".tool"); if(t) setTool(t.dataset.tool); });
+
+  let tipTimer=null;
+  function toast(msg){ const el=$("tip"); if(!el||!msg) return; el.textContent=msg; el.classList.add("show");
+    clearTimeout(tipTimer); tipTimer=setTimeout(()=>el.classList.remove("show"),2600); }
+
+  // generator controls
+  $("rooms").oninput=e=>$("roomsV").textContent=e.target.value;
+  $("rsize").oninput=e=>$("sizeV").textContent=SIZE_LBL[+e.target.value];
+  $("spread").oninput=e=>$("spreadV").textContent=SPREAD_LBL[+e.target.value];
+  $("entrances").oninput=e=>$("entrancesV").textContent=e.target.value;
+  $("generate").onclick=generate;
+
+  $("mapName").oninput=e=>{ map.name=e.target.value; scheduleSave(); };
+  $("gridToggle").onchange=e=>{ map.grid=e.target.checked; render(); scheduleSave(); };
+  $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; scheduleSave(); };
+  $("clear").onclick=()=>{ if(!map.shapes.length&&!map.walls.length){return;}
+    if(confirm("Clear the whole map?")){ pushHistory(); const n=map.name; map=blankMap(); map.name=n; afterLoad(); commit(); } };
+  $("fit").onclick=fitView;
+  $("undo").onclick=undo; $("redo").onclick=redo;
+  $("save").onclick=()=>{ doSave(); toast("Saved to campaign."); };
+  $("png").onclick=()=>exportPNG(false);
+  $("pngT").onclick=()=>exportPNG(true);
+  $("zoomIn").onclick=()=>{ cam.scale=Math.min(6,cam.scale*1.2); render(); updateZoom(); };
+  $("zoomOut").onclick=()=>{ cam.scale=Math.max(0.15,cam.scale/1.2); render(); updateZoom(); };
+
+  // keyboard
+  window.addEventListener("keydown", e=>{
+    if(e.target.tagName==="INPUT") return;
+    if(e.code==="Space"){ spaceDown=true; cv.style.cursor="grab"; }
+    if((e.ctrlKey||e.metaKey)&&e.key==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
+    if((e.ctrlKey||e.metaKey)&&e.key==="y"){ e.preventDefault(); redo(); return; }
+    if(e.key==="Enter"&&polyPts){ finishPolygon(); return; }
+    if(e.key==="Escape"){ polyPts=null; draft=null; dragStart=null; sel=null; placing=null; render(); return; }
+    if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
+    const keys={v:"select",r:"rect",c:"circle",p:"polygon",w:"wall",d:"door",s:"stair",e:"erase"};
+    if(keys[e.key]) setTool(keys[e.key]);
+  });
+  window.addEventListener("keyup", e=>{ if(e.code==="Space"){ spaceDown=false; cv.style.cursor= tool==="select"?"default":"crosshair"; } });
+
+  // ── resize ────────────────────────────────────────────────────────
+  function resize(){
+    const r=cv.parentElement.getBoundingClientRect();
+    DPR=Math.min(window.devicePixelRatio||1,2);
+    W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));   // CSS-px logical size
+    cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+    cv.style.width=W+"px"; cv.style.height=H+"px";
+    render();
+  }
+  window.addEventListener("resize", resize);
+
+  // ════════════════════════════════════════════════════════════════
+  // BOOT
+  // ════════════════════════════════════════════════════════════════
+  function detectEmbed(){
+    // The server's preview shim hides the sidebar; if it's not visible we are
+    // embedded read-only (GM Screen / session prep). Check after layout.
+    const sb=document.querySelector(".sidebar");
+    const hidden = sb && getComputedStyle(sb).display==="none";
+    embed = hidden;
+    if(embed) document.body.classList.add("embed");
+  }
+  function boot(){
+    load();
+    detectEmbed();
+    resize();
+    $("mapName").value=map.name||"";
+    $("gridToggle").checked=map.grid!==false;
+    snapOn=map.snap!==false; $("snapToggle").checked=snapOn;
+    syncUndo();
+    if(map.shapes.length||map.walls.length) fitView(); else render();
+    if(!embed && !map.shapes.length) toast("Pick a tool, or roll a random dungeon →");
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+
+  // expose a tiny API for the host page if ever needed
+  window.DungeonMap = { get:()=>map, load:(d)=>{ map=Object.assign(blankMap(),d); afterLoad(); fitView(); }, render, fitView };
+})();
+</script>
+</body>
+</html>

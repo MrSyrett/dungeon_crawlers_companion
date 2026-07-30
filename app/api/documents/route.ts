@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   let tools: string[] | undefined;
   if (tool && isToolId(tool)) {
     tools = [tool];
-  } else if (kind === "session" || kind === "character") {
+  } else if (kind === "session" || kind === "character" || kind === "map") {
     tools = Object.values(TOOLS)
       .filter((t) => t.kind === kind)
       .map((t) => t.id);

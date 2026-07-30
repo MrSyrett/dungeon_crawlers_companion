@@ -92,6 +92,12 @@ function extractDocTitle(tool: string, data: object): string | null {
       const prep = JSON.parse(blob[sessionKey] as string) as { title?: unknown };
       if (typeof prep.title === "string" && prep.title.trim()) return prep.title.trim();
     }
+
+    // The dungeon map stores its map object directly as the document data; its
+    // display name is the top-level `name` field the tool writes.
+    if (tool === "dungeon-map" && typeof blob.name === "string" && blob.name.trim()) {
+      return blob.name.trim();
+    }
   } catch {
     // Malformed payloads simply keep the existing title
   }
