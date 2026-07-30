@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Dungeon Map Maker</title>
+<title>Map Maker</title>
 <!-- Shared generator + renderer. When served by the app this is the single source
      of truth (the GM Screen + Session Prep use it too). If it fails to load (e.g.
      the file opened standalone / offline), the tool falls back to its own inlined
@@ -89,13 +89,25 @@
   /* When embedded read-only (GM Screen / session prep preview) the shim hides
      the sidebar; make the canvas fill and disable editing affordances. */
   body.embed #map{cursor:default}
+
+  /* ── Phone layout ──────────────────────────────────────────────────
+     Stack the canvas on top (big enough to draw on) with the controls in a
+     scrollable panel below. Draw with one finger; pinch to zoom, two fingers
+     (or one finger on empty space with Select) to pan. Not applied when the
+     tool is embedded read-only (the shim hides the sidebar). */
+  @media (max-width: 640px){
+    body:not(.embed) .app{ flex-direction: column; }
+    body:not(.embed) .preview-area{ order:1; flex:0 0 auto; height:56vh; }
+    body:not(.embed) .sidebar{ order:2; width:auto; flex:1 1 auto; min-height:0;
+      border-right:none; border-top:1px solid var(--line); }
+  }
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
     <div class="hdr">
-      <h1>⚔ Dungeon Map Maker</h1>
+      <h1>⚔ Map Maker</h1>
       <label class="switch" title="Dark mode — darkens the background only"><input type="checkbox" id="darkToggle"><span class="slider"></span></label>
     </div>
 
@@ -788,9 +800,26 @@
   // POINTER INTERACTION
   // ════════════════════════════════════════════════════════════════
   let dragStart=null, dragObj=null, panning=null, hoverPt=null, moved=false;
+  // Touch: track active pointers so TWO fingers = pinch-zoom + two-finger pan.
+  const pointers=new Map();        // pointerId → [screenX, screenY]
+  let gesture=null;                // { d0, scale0, worldMid }
+  function startPinch(){ const p=[...pointers.values()], a=p[0], b=p[1];
+    const d0=Math.hypot(a[0]-b[0],a[1]-b[1])||1, mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+    gesture={ d0, scale0:cam.scale, worldMid:toWorld(mid[0],mid[1]) }; }
+  function updatePinch(){ const p=[...pointers.values()], a=p[0], b=p[1];
+    const d=Math.hypot(a[0]-b[0],a[1]-b[1])||1, mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+    cam.scale=Math.max(0.15,Math.min(6, gesture.scale0*(d/gesture.d0)));
+    const wp=wpx();                                    // pin the start world-midpoint under the moving finger-midpoint
+    cam.x=gesture.worldMid[0]-(mid[0]-W/2)/wp; cam.y=gesture.worldMid[1]-(mid[1]-H/2)/wp;
+    render(); updateZoom(); }
 
   cv.addEventListener("pointerdown", e=>{
     cv.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, rel(e));
+    // Second finger down → start a pinch/two-finger-pan gesture; abandon any
+    // single-finger draft so a zoom never leaves a half-drawn shape.
+    if(pointers.size===2){ draft=null; dragStart=null; dragObj=null; panning=null; hoverPt=null; startPinch(); render(); return; }
+    if(pointers.size>2) return;
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
     moved=false;
     // middle mouse or space = pan; also pan in embed mode
@@ -801,7 +830,7 @@
       const h=hitTest(wx,wy);
       if(h){ sel={kind:h.kind,idx:h.idx};
         dragObj={h, ox:wx, oy:wy, snap:objSnapshot(h)}; }
-      else sel=null;
+      else { sel=null; panning={sx,sy,cx:cam.x,cy:cam.y}; }   // drag empty space to pan (one-finger on touch)
       render(); return;
     }
     if(tool==="erase"){ const h=hitTest(wx,wy); if(h){ pushHistory(); removeHit(h); commit(); } return; }
@@ -823,6 +852,8 @@
   });
 
   cv.addEventListener("pointermove", e=>{
+    if(pointers.has(e.pointerId)) pointers.set(e.pointerId, rel(e));
+    if(gesture){ if(pointers.size>=2) updatePinch(); return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
     if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); render(); return; }
     if(placing){ placing.hover=[snapHalf(wx),snapHalf(wy)]; render(); return; }
@@ -843,6 +874,8 @@
   });
 
   cv.addEventListener("pointerup", e=>{
+    pointers.delete(e.pointerId);
+    if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
     if(panning){ panning=null; return; }
     if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
     if(!dragStart){ return; }
@@ -854,6 +887,9 @@
     draft=null; dragStart=null;
   });
 
+  cv.addEventListener("pointercancel", e=>{ pointers.delete(e.pointerId);
+    if(pointers.size<2) gesture=null;
+    if(pointers.size===0){ panning=null; draft=null; dragStart=null; } });
   cv.addEventListener("dblclick", ()=>{ if(polyPts&&polyPts.length>2) finishPolygon(); });
   cv.addEventListener("contextmenu", e=>e.preventDefault());
   cv.addEventListener("wheel", e=>{ e.preventDefault();
