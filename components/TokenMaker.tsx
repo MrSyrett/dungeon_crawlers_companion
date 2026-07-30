@@ -410,7 +410,7 @@ export default function TokenMaker() {
       </div>
 
       {/* ── Controls ────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-7">
+      <div className="flex min-w-0 flex-col gap-7">
         <div>
           <ControlHeading>Ring style</ControlHeading>
           <div className="grid grid-cols-3 gap-2">

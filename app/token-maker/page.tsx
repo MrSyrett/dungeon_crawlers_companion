@@ -22,9 +22,9 @@ export default async function TokenMakerPage() {
         </div>
         <Link
           href="/dashboard"
-          className="min-h-11 shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] sm:min-h-0 sm:px-3 sm:py-1.5 sm:text-[11px]"
+          className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
         >
-          Dashboard
+          &larr; Home
         </Link>
       </header>
 
