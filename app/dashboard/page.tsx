@@ -178,7 +178,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <header className="mb-10 flex items-start justify-between gap-4 border-b border-[var(--border)] pb-6">
+      <header className="mb-5 flex items-start justify-between gap-4 border-b border-[var(--border)] pb-6">
         <div className="flex items-center gap-3">
           <Image src="/logo-white.png" alt="" width={72} height={72} priority className="h-10 w-10 shrink-0 sm:h-14 sm:w-14" />
           <div>
