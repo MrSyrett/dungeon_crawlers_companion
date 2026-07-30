@@ -9,20 +9,13 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-export type ToolId =
-  | "dcc-character"
-  | "dcc-session"
-  | "sd-character"
-  | "sd-session"
-  | "dungeon-map";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session";
 
-export type ToolKind = "character" | "session" | "map";
+export type ToolKind = "character" | "session";
 
 export interface ToolDef {
   id: ToolId;
-  // "GEN" = system-neutral (a dungeon map isn't tied to a ruleset); it shows on
-  // both system tabs and carries no system badge.
-  system: "DCC" | "SD" | "GEN";
+  system: "DCC" | "SD";
   systemName: string;
   kind: ToolKind;
   label: string;
@@ -67,24 +60,9 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "sd_session_prep_builder.html",
     keys: ["sd_session"],
   },
-  "dungeon-map": {
-    id: "dungeon-map",
-    system: "GEN",
-    systemName: "Dungeon",
-    kind: "map",
-    label: "Dungeon Map",
-    file: "dungeon_map_maker.html",
-    keys: ["dcc_map"],
-  },
 };
 
-export const TOOL_ORDER: ToolId[] = [
-  "dcc-character",
-  "dcc-session",
-  "sd-character",
-  "sd-session",
-  "dungeon-map",
-];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session"];
 
 export function isToolId(value: string): value is ToolId {
   return Object.prototype.hasOwnProperty.call(TOOLS, value);

@@ -124,6 +124,7 @@
       <input type="text" id="mapName" placeholder="Map name…" maxlength="80">
       <label class="chk"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
       <label class="chk"><input type="checkbox" id="gridToggle" checked> Show grid</label>
+      <label class="chk"><input type="checkbox" id="darkToggle"> Dark mode</label>
       <div class="row" style="margin-top:10px">
         <button class="btn" id="clear">Clear</button>
         <button class="btn" id="fit">Fit view</button>
@@ -131,16 +132,23 @@
     </div>
 
     <div class="grp">
-      <p class="grp-title">Export &amp; Save</p>
-      <button class="btn gold wide" id="save">💾 Save to campaign</button>
-      <div class="row" style="margin-top:8px">
+      <p class="grp-title">Editable file</p>
+      <div class="row">
+        <button class="btn" id="export" title="Download an editable map file (.json) you can re-open later">⬇ Export</button>
+        <button class="btn" id="import" title="Open a previously exported map file">⬆ Import</button>
+      </div>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+    </div>
+
+    <div class="grp">
+      <p class="grp-title">Final image</p>
+      <div class="row">
         <button class="btn" id="png">⬇ PNG</button>
         <button class="btn" id="pngT" title="Transparent background — floors only">⬇ PNG (transp.)</button>
       </div>
     </div>
 
     <div class="spacer"></div>
-    <div class="save-state" id="saveState"></div>
   </aside>
 
   <div class="preview-area">
@@ -158,23 +166,46 @@
 "use strict";
 (function(){
 /* ════════════════════════════════════════════════════════════════════
-   DUNGEON MAP MAKER — a compact, classic hatched-ink dungeon drawer.
-   Self-contained. Saves via window.__ddSave (campaign document) with a
-   localStorage fallback under key "dcc_map". Renders the same in the
-   server's read-only preview mode used by the GM Screen / session prep.
+   DUNGEON MAP MAKER — a compact, clean hand-drawn-ink dungeon drawer.
+   Self-contained. Nothing is saved to a server: work is kept in the
+   browser (localStorage key "dcc_map") so a refresh doesn't lose it, and
+   a map is persisted / shared with Export & Import (.json) or the two PNG
+   exports. Light + dark (blue-grey) themes via the Dark mode toggle.
    ════════════════════════════════════════════════════════════════════ */
 
-  // ── Palette (classic ink on parchment) ────────────────────────────
-  const C = {
-    rock:   "#e9e0cd",   // solid stone base
-    rockHi: "#efe8d7",   // parchment background
-    hatch:  "#33302a",   // scattered pen hatching along exterior walls
-    floor:  "#f4efe3",   // room floor
-    grid:   "#cabd9f",   // faint grid inside rooms
-    dot:    "#c3b699",   // faint dot grid on the rock
-    ink:    "#14120d",   // walls, doors, stairs (near-black ink)
-    sel:    "#c9a94a",   // selection accent
+  // ── Palette / theme (light parchment vs. dark blue-grey) ───────────
+  // Grid + dots are deliberately darker than v1 so they read clearly.
+  const THEMES = {
+    light: {
+      bg:"#d9d0bd",       // canvas area behind the map (CSS)
+      rockHi:"#efe8d7",   // exterior background fill
+      floor:"#f4efe3",    // room floor
+      grid:"#b09f7d",     // grid inside rooms (darkened)
+      dot:"#a5966b",      // dot grid on the exterior background (darkened)
+      hatch:"#33302a",
+      ink:"#14120d",      // walls, doors, stairs (near-black ink)
+      doorFill:"#fbf8f0", // door leaf interior
+      shadow:"rgba(20,17,12,.18)",
+      sel:"#c9a94a",
+    },
   };
+  // Dark mode changes ONLY the exterior background (and the dots on it, so they
+  // stay visible). Everything the map itself is made of — walls, interior floors,
+  // interior grid, doors, stairs — is identical to light mode.
+  THEMES.dark = Object.assign({}, THEMES.light, {
+    bg:"#171a21",         // dark bluish grey backdrop
+    rockHi:"#232833",     // dark bluish grey exterior
+    dot:"#414c60",        // lighter dots so they read on the dark exterior
+  });
+  const C = Object.assign({}, THEMES.light);   // active palette, mutated by setTheme
+  let theme = "light";
+  function setThemeColors(t){
+    theme = (t === "dark") ? "dark" : "light";
+    Object.assign(C, THEMES[theme]);
+    const pa = document.querySelector(".preview-area");
+    if(pa) pa.style.background = THEMES[theme].bg;
+  }
+  function setTheme(t){ setThemeColors(t); map.theme = theme; scheduleSave(); render(); }
   const CELL = 32;                 // world px per grid cell at scale 1
   const SIZE_MAP = {1:[3,4],2:[4,6],3:[5,8],4:[7,11],5:[9,15]};
   const SIZE_LBL = {1:"Tiny",2:"Small",3:"Medium",4:"Large",5:"Huge"};
@@ -405,7 +436,7 @@
       if(map.grid && wpx()>7){
         const gc=buf.grid.getContext("2d"); gc.setTransform(1,0,0,1,0,0);
         gc.clearRect(0,0,W,H); gc.globalCompositeOperation="source-over";
-        gc.strokeStyle=C.grid; gc.lineWidth=1; gc.globalAlpha=.8;
+        gc.strokeStyle=C.grid; gc.lineWidth=1; gc.globalAlpha=.95;
         const p=wpx(); const [ox,oy]=toScreen(0,0); gc.beginPath();
         for(let x=ox%p;x<=W;x+=p){ gc.moveTo(x+.5,0); gc.lineTo(x+.5,H); }
         for(let y=oy%p;y<=H;y+=p){ gc.moveTo(0,y+.5); gc.lineTo(W,y+.5); }
@@ -422,7 +453,7 @@
     if(!exporting){ drawPreview(); drawSelection(); }
   }
 
-  function drawDotGrid(){ const p=wpx(); if(p<13) return; ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.5;
+  function drawDotGrid(){ const p=wpx(); if(p<13) return; ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.8;
     const [ox,oy]=toScreen(0,0); const r=Math.max(0.6,0.85*Math.min(2,cam.scale));
     for(let x=ox%p;x<W;x+=p) for(let y=oy%p;y<H;y+=p){ ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fill(); }
     ctx.restore(); }
@@ -440,7 +471,7 @@
       if(i===0) ctx.moveTo(sx,sy); else ctx.lineTo(sx,sy); }
     ctx.stroke(); }
 
-  function drawWallShadow(){ ctx.save(); ctx.strokeStyle="rgba(20,17,12,.18)"; ctx.lineJoin="round"; ctx.lineCap="round";
+  function drawWallShadow(){ ctx.save(); ctx.strokeStyle=C.shadow; ctx.lineJoin="round"; ctx.lineCap="round";
     ctx.lineWidth=Math.max(3.5,5*cam.scale); const o=Math.min(2,cam.scale); ctx.translate(2.4*o,3*o);
     for(const loop of contours) strokeLoop(loop); ctx.restore(); }
 
@@ -577,7 +608,7 @@
     ctx.save();
     // filled leaf interior (outside the rectangle stays transparent)
     const A=s(-g.rhl,-g.ht),B=s(g.rhl,-g.ht),C2=s(g.rhl,g.ht),D=s(-g.rhl,g.ht);
-    ctx.fillStyle="#fbf8f0";
+    ctx.fillStyle=C.doorFill;
     ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.lineTo(C2[0],C2[1]); ctx.lineTo(D[0],D[1]); ctx.closePath(); ctx.fill();
     // rough black rectangle outline + centre stubs reaching to the tips
     ctx.fillStyle=C.ink;
@@ -875,7 +906,7 @@
 
     pushHistory();
     const keepName=map.name;
-    map=blankMap(); map.name=keepName; map.grid=$("gridToggle").checked;
+    map=blankMap(); map.name=keepName; map.grid=$("gridToggle").checked; map.theme=theme;
 
     // Field size derives from a target packing density (rooms fill ~this
     // fraction of the bounding area). Tighter layouts pack denser.
@@ -1136,30 +1167,61 @@
   function redo(){ if(!future.length) return; history.push(snapshot()); map=JSON.parse(future.pop()); afterLoad(); syncUndo(); scheduleSave(); }
   function syncUndo(){ $("undo").disabled=!history.length; $("redo").disabled=!future.length; }
   function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; markGeom();
-    $("mapName").value=map.name||""; $("gridToggle").checked=!!map.grid; render(); }
+    $("mapName").value=map.name||"";
+    $("gridToggle").checked=map.grid!==false;
+    snapOn=map.snap!==false; if($("snapToggle")) $("snapToggle").checked=snapOn;
+    if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
+    setThemeColors(map.theme==="dark" ? "dark" : "light");
+    render(); }
 
+  // Work is kept only in this browser (localStorage) so a refresh doesn't lose
+  // it — nothing is saved to the site. Sharing / keeping a map is via Export.
   let saveTimer=null;
-  function scheduleSave(){ if(embed) return; clearTimeout(saveTimer); setSaveState("Saving…");
-    saveTimer=setTimeout(doSave,700); }
-  function doSave(){
-    try{ localStorage.setItem("dcc_map", snapshot()); }catch(e){}
-    try{ if(typeof window.__ddSave==="function") window.__ddSave(map); }catch(e){}
-    try{ if(map.name && typeof window.__ddSaveTitle==="function") window.__ddSaveTitle(map.name); }catch(e){}
-    setSaveState("Saved ✓");
-  }
-  function setSaveState(t){ const el=$("saveState"); if(el) el.textContent=t; }
+  function scheduleSave(){ if(embed) return; clearTimeout(saveTimer); saveTimer=setTimeout(doSave,700); }
+  function doSave(){ try{ localStorage.setItem("dcc_map", snapshot()); }catch(e){} }
 
   function load(){
     let data=null;
     if(window.__ddState && (window.__ddState.shapes||window.__ddState.version)) data=window.__ddState;
     else { try{ const s=localStorage.getItem("dcc_map"); if(s) data=JSON.parse(s); }catch(e){} }
-    if(data && (data.shapes||data.walls)){
-      map=Object.assign(blankMap(), data);
-      map.shapes=data.shapes||[]; map.walls=data.walls||[]; map.doors=data.doors||[]; map.stairs=data.stairs||[];
-      if(!map.seedId) map.seedId=1+Math.max(0,...allIds());
-    }
+    if(data && (data.shapes||data.walls)) adoptMap(data);
+  }
+  // Replace the working map with a loaded/imported one, filling any gaps.
+  function adoptMap(data){
+    map=Object.assign(blankMap(), data);
+    map.shapes=data.shapes||[]; map.walls=data.walls||[]; map.doors=data.doors||[]; map.stairs=data.stairs||[];
+    if(!map.seedId) map.seedId=1+Math.max(0,...allIds());
   }
   function allIds(){ return [...map.shapes,...map.walls,...map.doors,...map.stairs].map(o=>o.id||0); }
+
+  // ── Editable-file export / import ─────────────────────────────────
+  // Export writes the full map object as a .json file the user keeps on their
+  // own drive; Import reads one back. This is the only way to persist/share a
+  // map (there is no server save).
+  function safeName(){ return ((map.name||"").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").slice(0,60)) || "dungeon-map"; }
+  function exportMap(){
+    const blob=new Blob([JSON.stringify(map)], {type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download=safeName()+".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    toast("Exported "+safeName()+".json");
+  }
+  function importMapFile(file){
+    const rd=new FileReader();
+    rd.onload=()=>{
+      let data=null;
+      try{ data=JSON.parse(rd.result); }catch(e){}
+      if(!data || !(data.shapes||data.walls)){ toast("That file isn’t a map export."); return; }
+      pushHistory();
+      adoptMap(data);
+      afterLoad();
+      fitView();
+      toast("Imported "+(file.name||"map"));
+    };
+    rd.onerror=()=>toast("Couldn’t read that file.");
+    rd.readAsText(file);
+  }
 
   // ════════════════════════════════════════════════════════════════
   // VIEW
@@ -1247,11 +1309,14 @@
   $("mapName").oninput=e=>{ map.name=e.target.value; scheduleSave(); };
   $("gridToggle").onchange=e=>{ map.grid=e.target.checked; render(); scheduleSave(); };
   $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; scheduleSave(); };
+  $("darkToggle").onchange=e=>setTheme(e.target.checked ? "dark" : "light");
   $("clear").onclick=()=>{ if(!map.shapes.length&&!map.walls.length){return;}
-    if(confirm("Clear the whole map?")){ pushHistory(); const n=map.name; map=blankMap(); map.name=n; afterLoad(); commit(); } };
+    if(confirm("Clear the whole map?")){ pushHistory(); const n=map.name; map=blankMap(); map.name=n; map.theme=theme; afterLoad(); commit(); } };
   $("fit").onclick=fitView;
   $("undo").onclick=undo; $("redo").onclick=redo;
-  $("save").onclick=()=>{ doSave(); toast("Saved to campaign."); };
+  $("export").onclick=exportMap;
+  $("import").onclick=()=>$("importFile").click();
+  $("importFile").onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f) importMapFile(f); e.target.value=""; };
   $("png").onclick=()=>exportPNG(false);
   $("pngT").onclick=()=>exportPNG(true);
   $("zoomIn").onclick=()=>{ cam.scale=Math.min(6,cam.scale*1.2); render(); updateZoom(); };
@@ -1300,6 +1365,8 @@
     $("mapName").value=map.name||"";
     $("gridToggle").checked=map.grid!==false;
     snapOn=map.snap!==false; $("snapToggle").checked=snapOn;
+    $("darkToggle").checked = map.theme==="dark";
+    setThemeColors(map.theme==="dark" ? "dark" : "light");
     syncUndo();
     if(map.shapes.length||map.walls.length) fitView(); else render();
     if(!embed && !map.shapes.length) toast("Pick a tool, or roll a random dungeon →");
