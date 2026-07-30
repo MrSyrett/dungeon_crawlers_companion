@@ -94,11 +94,25 @@ export const ${constName}: ${typeName}[] = ${JSON.stringify(rows, null, 2)};
 }
 
 const gmScreen = readFileSync(join(TEMPLATES, "gm_screen.html"), "utf8");
-const sdSheet = readFileSync(join(TEMPLATES, "sd_character_sheet.html"), "utf8");
+const sdSheetHtml = readFileSync(join(TEMPLATES, "sd_character_sheet.html"), "utf8");
 // The bestiary's canonical source: a static file both the GM Screen and the
 // session-prep builder load via <script src="/tools-data/sd-monsters.js">
 // (they used to each carry an inline copy, mirrored by this script).
 const monstersJs = readFileSync(join(ROOT, "public", "tools-data", "sd-monsters.js"), "utf8");
+
+// Parts of the character sheet now live in static files under
+// public/tools-data/ (loaded by the page via <script src>): the random-
+// character rules data (RC_*), the creation wizard (CCW_*), and the shop data
+// (SHOP_MAGIC, SD_SPELL_FULL). For extraction purposes the "sheet" is the
+// concatenation of the template and those files — every const this script
+// looks up has exactly one declaration across the set, so the searches below
+// don't care which file it landed in.
+const sdSheet = [
+  sdSheetHtml,
+  readFileSync(join(ROOT, "public", "tools-data", "sd-sheet-rc-data.js"), "utf8"),
+  readFileSync(join(ROOT, "public", "tools-data", "sd-sheet-ccw.js"), "utf8"),
+  readFileSync(join(ROOT, "public", "tools-data", "sd-sheet-shop-data.js"), "utf8"),
+].join("\n");
 
 const monsters = extractArray(monstersJs, "SD_MONSTERS", "public/tools-data/sd-monsters.js");
 const spells = extractArray(sdSheet, "SD_SPELLS", "sd_character_sheet.html");
