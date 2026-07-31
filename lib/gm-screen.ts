@@ -460,6 +460,146 @@ function tokenFetchPatch(vttToken: string): string {
 </script>`;
 }
 
+// iOS volume fix for the Music + Scenes tools.
+//
+// The tools set `HTMLAudioElement.volume` to mix tracks and drive the master
+// sliders. On iOS/WebKit that property is read-only (the OS owns volume), so
+// every write is ignored — tracks play at full and the sliders do nothing. The
+// only way to control volume on iOS is the Web Audio API, so this wraps
+// `window.Audio` to route each sound through a GainNode and redirect the tools'
+// existing `.volume` writes to it.
+//
+// It is a NO-OP wherever `.volume` already works (desktop, Android): the feature
+// probe returns early and `window.Audio` is left untouched, so those platforms
+// keep their exact current behaviour.
+//
+// Web Audio can only read CORS-clean media. We set crossOrigin='anonymous' and
+// only build the graph after a 'canplay' — which fires only if the CORS fetch
+// succeeded, so createMediaElementSource can never produce a tainted/silent
+// node. A host without CORS headers errors first; we then drop crossOrigin and
+// reload plain so the track still plays (at uncontrolled volume on iOS, exactly
+// as before this fix) rather than going silent. Injected in <head> so the
+// wrapper is installed before the template's audio code ever calls `new Audio`.
+const AUDIO_VOLUME_FIX = `<script>
+(function () {
+  var Native = window.Audio;
+  if (!Native) return;
+
+  // Leave everything untouched where the platform honours .volume.
+  try {
+    var probe = new Native();
+    probe.volume = 0.375;
+    if (Math.abs(probe.volume - 0.375) < 0.02) return;
+  } catch (e) { return; }
+
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+
+  var mediaProto = window.HTMLMediaElement && window.HTMLMediaElement.prototype;
+  var srcDesc = mediaProto && Object.getOwnPropertyDescriptor(mediaProto, "src");
+  if (!srcDesc || !srcDesc.get || !srcDesc.set) return;
+
+  var ctx = null;
+  function context() {
+    if (!ctx) { try { ctx = new AC(); } catch (e) { ctx = null; } }
+    return ctx;
+  }
+  function resume() {
+    if (ctx && ctx.state === "suspended") { try { ctx.resume(); } catch (e) {} }
+  }
+  // iOS starts the context suspended; resume on the first user gestures.
+  ["touchend", "mousedown", "keydown", "click"].forEach(function (ev) {
+    window.addEventListener(ev, function () { context(); resume(); }, true);
+  });
+
+  function wire(a) {
+    var v = 1;        // logical volume the tools read/write
+    var gain = null;  // GainNode once the graph is built
+    var state = 0;    // 0 = not built, 1 = graphed (CORS ok), 2 = plain fallback
+
+    function apply() { if (gain) { try { gain.gain.value = v; } catch (e) {} } }
+
+    // MediaElementSource -> Gain -> destination. Only called from a canplay/
+    // loadeddata handler, i.e. after a successful CORS-clean load, so the source
+    // node can't be tainted (silent).
+    function build() {
+      if (state) return;
+      var c = context(); if (!c) return;
+      try {
+        var node = c.createMediaElementSource(a);
+        gain = c.createGain();
+        gain.gain.value = v;
+        node.connect(gain);
+        gain.connect(c.destination);
+        state = 1;
+        resume();
+      } catch (e) { state = 2; }
+    }
+
+    try {
+      Object.defineProperty(a, "volume", {
+        configurable: true,
+        get: function () { return v; },
+        set: function (val) {
+          val = +val;
+          if (val !== val) return;                 // NaN guard
+          v = val < 0 ? 0 : (val > 1 ? 1 : val);
+          apply();
+        }
+      });
+    } catch (e) { return a; }   // couldn't shadow the native accessor; leave native
+
+    // Re-arm a CORS attempt for each new src while the element isn't graphed yet
+    // (covers the Music tool's two reused crossfade elements). A graphed element
+    // keeps crossOrigin; a plain-fallback element retries CORS on its next track.
+    try {
+      Object.defineProperty(a, "src", {
+        configurable: true,
+        get: function () { return srcDesc.get.call(a); },
+        set: function (u) {
+          if (state !== 1) {
+            state = 0;
+            try { a.setAttribute("crossorigin", "anonymous"); } catch (e) {}
+          }
+          srcDesc.set.call(a, u);
+        }
+      });
+    } catch (e) {}
+
+    a.addEventListener("canplay", build);
+    a.addEventListener("loadeddata", build);
+    a.addEventListener("error", function () {
+      // A CORS-less host rejects the crossOrigin load. Drop crossOrigin and
+      // reload (bypassing the src setter, so it stays plain and can't loop) so
+      // the track still plays. Meaningless once graphed: a graphed element that
+      // later loads a non-CORS src is the one documented edge — mixing CORS and
+      // non-CORS tracks in a single playlist on iOS.
+      if (state === 1) return;
+      if (a.getAttribute("crossorigin") == null) return;
+      var s = a.currentSrc || srcDesc.get.call(a);
+      state = 2;
+      try { a.removeAttribute("crossorigin"); } catch (e) {}
+      if (s) { try { srcDesc.set.call(a, s); a.load(); } catch (e) {} }
+    });
+
+    // Keep the context running whenever the tools start playback.
+    var nativePlay = a.play;
+    a.play = function () { context(); resume(); return nativePlay.apply(a, arguments); };
+
+    return a;
+  }
+
+  function Wrapped(src) {
+    var a = new Native();
+    wire(a);
+    if (src != null) { try { a.src = src; } catch (e) {} }   // src setter arms crossOrigin
+    return a;
+  }
+  Wrapped.prototype = Native.prototype;
+  window.Audio = Wrapped;
+})();
+</script>`;
+
 /**
  * Build the GM Screen page. Pass `vttToken` to render the framed, token-auth
  * variant (fetch-patch + embed chrome); omit it for the cookie full-page variant.
@@ -480,10 +620,12 @@ export async function buildGmScreenHtml(opts: {
 
   const tokenScript = opts.vttToken ? `${tokenFetchPatch(opts.vttToken)}\n` : "";
 
-  // Inject (token patch →) state → shim → Sound Library picker before </head>.
+  // Inject (audio fix → token patch →) state → shim → Sound Library picker
+  // before </head>. The audio fix goes first so window.Audio is wrapped before
+  // any of the template's music code runs.
   html = html.replace(
     /<\/head>/i,
-    `${tokenScript}${stateScript}${SHIM}\n${LIBRARY_UI}\n</head>`,
+    `${AUDIO_VOLUME_FIX}\n${tokenScript}${stateScript}${SHIM}\n${LIBRARY_UI}\n</head>`,
   );
 
   // Inject chrome after <body>: Home + status (cookie) or status-only (embed).
