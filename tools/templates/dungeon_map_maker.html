@@ -1954,6 +1954,9 @@
     out=fn(o); t.oncomplete=()=>res(out && ("result" in out) ? out.result : out);
     t.onerror=()=>rej(t.error); })); }
   const idbPut = (store,k,v)=> idbTx(store,"readwrite",o=>o.put(v,k));
+  // One transaction for many blobs — a per-file transaction is the other half of
+  // why importing a large pack crawled.
+  const idbPutMany = (store,pairs)=> idbTx(store,"readwrite",o=>{ for(const [k,v] of pairs) o.put(v,k); });
   const idbDel = (store,k)  => idbTx(store,"readwrite",o=>o.delete(k));
   const idbGet = (store,k)  => idbTx(store,"readonly", o=>o.get(k));
   const idbAll = (store)    => idbTx(store,"readonly", o=>o.getAll());
@@ -1967,27 +1970,46 @@
     if(u8.length<100 || String.fromCharCode(u8[0],u8[1],u8[2],u8[3])!=="GDPC")
       throw new Error("That isn't a Dungeondraft pack (no GDPC header).");
     let o=4; const fmt=dv.getUint32(o,true); o+=4;
-    if(fmt!==1) throw new Error("Unsupported pack format v"+fmt+" — this reads the Godot 3 format Dungeondraft writes.");
+    if(fmt!==1 && fmt!==2)
+      throw new Error("Unsupported pack format v"+fmt+" (this reads Godot 3 and Godot 4 PCKs).");
     o+=12;                                   // engine major/minor/rev
+    let base=0;
+    if(fmt===2){                             // Godot 4 adds pack flags + a file base
+      const packFlags=dv.getUint32(o,true); o+=4;
+      base=Number(dv.getBigUint64(o,true)); o+=8;
+      if(packFlags & 1) throw new Error("That pack is encrypted — Dungeondraft can open it, this can't.");
+    }
     o+=16*4;                                 // reserved
     const n=dv.getUint32(o,true); o+=4;
     const out=[];
     for(let i=0;i<n;i++){
       const len=dv.getUint32(o,true); o+=4;
       const path=dec.decode(u8.subarray(o,o+len)).replace(/\0+$/,""); o+=len;
-      const off=Number(dv.getBigUint64(o,true)); o+=8;
+      let off=Number(dv.getBigUint64(o,true)); o+=8;
       const size=Number(dv.getBigUint64(o,true)); o+=8;
-      o+=16;
-      if(off+size<=u8.length) out.push({path,off,size});
+      o+=16;                                 // md5
+      if(fmt===2){ o+=4; off+=base; }        // per-file flags; offsets are base-relative
+      if(off>=0 && off+size<=u8.length) out.push({path,off,size});
     }
     return out;
   }
   // Which entries are usable as a floor fill: Dungeondraft's seamless terrain
   // and pattern textures. Objects/walls are sprites, not tiles — a later slice.
-  const TILEABLE=/\/textures\/(terrain|patterns)\//i;
+  // Floors: terrain/ and patterns/ are the plain seamless tiles. materials/ ships
+  // a "<name>_tile" alongside a "<name>_border" — the tile half is a plain
+  // repeating texture, the border isn't. Smart tilesets are counted and skipped:
+  // they're a GRID of edge/corner variants, so tiling one looks like nonsense.
+  const TILEABLE=/\/textures\/(terrain|patterns)\/|\/textures\/materials\/.*_tile\.(webp|png|jpe?g)$/i;
+  const TILESET=/\/textures\/tilesets\//i;
   // `..._wall.webp` is Dungeondraft's repeating wall strip. The `_wall_end` caps
   // are excluded by requiring the extension right after "_wall".
-  const WALLSTRIP=/\/textures\/walls\/.*_wall\.(webp|png|jpe?g)$/i;
+  // Anything under textures/walls/ that isn't an end cap. Packs name these
+  // inconsistently — "NAME_wall.webp", "basicbuilding_wall - stone.png" — so
+  // matching on a "_wall" suffix (as this used to) silently drops whole packs'
+  // worth of walls. Mirrors the rule in extract-pack.py.
+  const WALLSTRIP=/\/textures\/walls\/.*\.(webp|png|jpe?g)$/i;
+  const WALLEND=/_end\.(webp|png|jpe?g)$/i;
+  const isWall=p=>WALLSTRIP.test(p) && !WALLEND.test(p);
   const OBJECT=/\/textures\/objects\/.*\.(webp|png|jpe?g)$/i;
   // "- Colorable" are greyscale masks for Dungeondraft's colour picker, "- End"
   // are wall end-caps the wall tool consumes, "Demo" is marketing art.
@@ -1997,7 +2019,11 @@
   // clutter in the palette. The " - " separator matters: /^Wall\b/ would also eat
   // real props like "Wall buzzsaw" and "Wall spikes".
   const SKIP_WALL_OBJ=/^(Wall|Rail)\s*[-,]\s|^(Inside|Outside)\s+bend\b|Wall\s+End$/i;
-  const MAX_IMPORT_OBJECTS=400;
+  // Big commercial packs run to thousands of sprites. Nothing is decoded at
+  // import any more (see imageSize + lazy thumbnails), so this ceiling exists
+  // only to bound IndexedDB use, not CPU.
+  const MAX_IMPORT_OBJECTS=4000;
+  const MAX_GRID_CELLS=600;          // DOM cells rendered at once; filter to see more
   // Floors/walls: drop the pack-name prefix, which is repeated on every file in
   // a pack ("Dungeon Room Builder - Dark" -> "Dark").
   function packLabel(p){ return p.split("/").pop().replace(/\.(webp|png|jpe?g)$/i,"")
@@ -2047,34 +2073,47 @@
     const j=entries.find(e=>/\/pack\.json$/i.test(e.path));
     if(j){ try{ meta=Object.assign(meta, JSON.parse(new TextDecoder().decode(new Uint8Array(buf,j.off,j.size)))); }catch(e){} }
     const packId="pack:"+(meta.id || meta.name).replace(/[^A-Za-z0-9_-]+/g,"");
-    let objs=entries.filter(e=>OBJECT.test(e.path) && !SKIP_OBJ.test(e.path)
-                                && !SKIP_WALL_OBJ.test(objLabel(e.path)));
+    const allObjs=entries.filter(e=>OBJECT.test(e.path) && !SKIP_OBJ.test(e.path));
+    let objs=allObjs.filter(e=>!SKIP_WALL_OBJ.test(objLabel(e.path)));
+    const wallKit=allObjs.length-objs.length;
     let dropped=0;
     if(objs.length>MAX_IMPORT_OBJECTS){ dropped=objs.length-MAX_IMPORT_OBJECTS; objs=objs.slice(0,MAX_IMPORT_OBJECTS); }
-    const tiles=entries.filter(e=>TILEABLE.test(e.path)||WALLSTRIP.test(e.path)).concat(objs);
+    const tilesets=entries.filter(e=>TILESET.test(e.path)).length;
+    const tiles=entries.filter(e=>TILEABLE.test(e.path)||isWall(e.path)).concat(objs);
     if(!tiles.length){ toast("No usable textures in that pack."); return; }
-    const made=[], seen=new Set();
+    const made=[], seen=new Set(), skip={dupe:0, unreadable:0};
+    let batch=[], done=0;
+    const flush=async()=>{ if(batch.length){ await idbPutMany("files", batch); batch=[]; } };
     for(const e of tiles){
       // Packs often ship the same tile under both terrain/ and patterns/ —
       // keep one entry per distinct file so the picker isn't full of duplicates.
-      const k=packLabel(e.path)+"|"+e.size; if(seen.has(k)) continue; seen.add(k);
-      let blob=new Blob([new Uint8Array(buf,e.off,e.size)], {type:"image/webp"});
+      const k=packLabel(e.path)+"|"+e.size;
+      if(seen.has(k)){ skip.dupe++; continue; }
+      seen.add(k);
+      const bytes=new Uint8Array(buf, e.off, e.size);
       const id=packId+"/"+e.path;
       if(OBJECT.test(e.path)){
-        const meta=await objectMeta(blob); if(!meta) continue;
-        await idbPut("files", id, blob);
-        await idbPut("files", id+"#thumb", meta.thumb);
-        made.push({id, name:objLabel(e.path), kind:"object", w:meta.w, h:meta.h,
-                   thumbKey:id+"#thumb", pack:packId});
-      } else if(WALLSTRIP.test(e.path)){
-        const cr=await cropWallStrip(blob); if(!cr) continue;
-        await idbPut("files", id, cr.blob);
+        // Header-only size read: nothing is decoded and no thumbnail is built
+        // here. Thumbnails are made on first display and cached (ensureThumb).
+        const sz=imageSize(bytes);
+        if(!sz || !sz.w || !sz.h){ skip.unreadable++; continue; }
+        batch.push([id, new Blob([bytes], {type:mimeOf(e.path)})]);
+        made.push({id, name:objLabel(e.path), kind:"object",
+                   w:+(sz.w/256).toFixed(3), h:+(sz.h/256).toFixed(3), pack:packId});
+      } else if(isWall(e.path)){
+        const cr=await cropWallStrip(new Blob([bytes], {type:mimeOf(e.path)}));
+        if(!cr){ skip.unreadable++; continue; }
+        batch.push([id, cr.blob]);
         made.push({id, name:packLabel(e.path), kind:"wall", thick:cr.thick, tile:cr.tile, pack:packId});
       } else {
-        await idbPut("files", id, blob);
+        const blob=new Blob([bytes], {type:mimeOf(e.path)});
+        batch.push([id, blob]);
         made.push({id, name:packLabel(e.path), kind:"floor", cells:await tileCells(blob), pack:packId});
       }
+      if(batch.length>=200){ await flush(); }
+      if(++done % 250 === 0) toast("Importing "+meta.name+"… "+done+"/"+tiles.length);
     }
+    await flush();
     await idbPut("packs", packId, {id:packId, name:meta.name, textures:made});
     registerPack({id:packId, name:meta.name, textures:made});
     await refreshPackList();
@@ -2084,8 +2123,14 @@
     if(cnt("floor")) bits.push(cnt("floor")+" floor"+(cnt("floor")===1?"":"s"));
     if(cnt("wall"))  bits.push(cnt("wall")+" wall"+(cnt("wall")===1?"":"s"));
     if(cnt("object"))bits.push(cnt("object")+" object"+(cnt("object")===1?"":"s"));
+    const notes=[];
+    if(dropped) notes.push(dropped+" over the "+MAX_IMPORT_OBJECTS+" cap");
+    if(skip.dupe) notes.push(skip.dupe+" duplicate");
+    if(skip.unreadable) notes.push(skip.unreadable+" unreadable");
+    if(wallKit) notes.push(wallKit+" wall-kit sprites");
+    if(tilesets) notes.push(tilesets+" smart tilesets (not plain tiling textures)");
     toast("Loaded "+meta.name+" — "+bits.join(" + ")
-          + (dropped ? " (skipped "+dropped+" objects over the "+MAX_IMPORT_OBJECTS+" cap)" : "")+".");
+          + (notes.length ? " (skipped "+notes.join(", ")+")" : "")+".");
   }
   // Dungeondraft draws terrain at 256 px per grid cell, so the tile's cell span
   // is just its width / 256 (falling back to 4 for anything unexpected).
@@ -2100,6 +2145,58 @@
   // Read an object sprite's native size (Dungeondraft draws at 256 px/cell) and
   // bake a small palette thumbnail, so importing a large pack doesn't mean
   // decoding hundreds of full-resolution sprites just to draw the picker.
+  const MIME={webp:"image/webp", png:"image/png", jpg:"image/jpeg", jpeg:"image/jpeg"};
+  const mimeOf=p=>MIME[(p.split(".").pop()||"").toLowerCase()] || "application/octet-stream";
+
+  // Pixel dimensions straight out of the file header — no decode, no canvas.
+  // This is the difference between importing a 71 MB pack in a second and
+  // decoding several thousand sprites one at a time.
+  //   PNG  8-byte signature, then IHDR: two big-endian u32s at 16 and 20
+  //   WebP RIFF….WEBP, then a VP8X / VP8L / VP8 chunk, each with its own layout
+  //   JPEG walk the segment markers to the first SOFn
+  function imageSize(b){
+    if(b.length>24 && b[0]===0x89 && b[1]===0x50 && b[2]===0x4E && b[3]===0x47){
+      const dv=new DataView(b.buffer, b.byteOffset, b.length);
+      return {w:dv.getUint32(16,false), h:dv.getUint32(20,false)};
+    }
+    if(b.length>30 && b[0]===0x52&&b[1]===0x49&&b[2]===0x46&&b[3]===0x46
+       && b[8]===0x57&&b[9]===0x45&&b[10]===0x42&&b[11]===0x50){
+      const tag=String.fromCharCode(b[12],b[13],b[14],b[15]);
+      if(tag==="VP8X") return {w:1+(b[24]|b[25]<<8|b[26]<<16), h:1+(b[27]|b[28]<<8|b[29]<<16)};
+      if(tag==="VP8L"){ const v=(b[21]|b[22]<<8|b[23]<<16|b[24]<<24)>>>0;
+        return {w:1+(v&0x3FFF), h:1+((v>>>14)&0x3FFF)}; }
+      if(tag==="VP8 ") return {w:(b[26]|b[27]<<8)&0x3FFF, h:(b[28]|b[29]<<8)&0x3FFF};
+    }
+    if(b.length>4 && b[0]===0xFF && b[1]===0xD8){
+      let i=2;
+      while(i+9<b.length){
+        if(b[i]!==0xFF){ i++; continue; }
+        const m=b[i+1], len=(b[i+2]<<8)|b[i+3];
+        if(m>=0xC0 && m<=0xCF && m!==0xC4 && m!==0xC8 && m!==0xCC)
+          return {h:(b[i+5]<<8)|b[i+6], w:(b[i+7]<<8)|b[i+8]};
+        if(len<2) break;
+        i+=2+len;
+      }
+    }
+    return null;
+  }
+  // Build a palette thumbnail from a full-size sprite. Called lazily, once, when
+  // a cell first scrolls into view — never during import.
+  function makeThumb(blob){
+    return new Promise(res=>{
+      const u=URL.createObjectURL(blob), im=new Image();
+      im.onload=()=>{
+        const sc=Math.min(1, 96/Math.max(im.naturalWidth, im.naturalHeight));
+        const cv=document.createElement("canvas");
+        cv.width=Math.max(1,Math.round(im.naturalWidth*sc));
+        cv.height=Math.max(1,Math.round(im.naturalHeight*sc));
+        cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);
+        cv.toBlob(t=>{ URL.revokeObjectURL(u); res(t); }, "image/webp", 0.8);
+      };
+      im.onerror=()=>{ URL.revokeObjectURL(u); res(null); };
+      im.src=u;
+    });
+  }
   function objectMeta(blob){
     return new Promise(res=>{
       const u=URL.createObjectURL(blob), im=new Image();
@@ -2119,7 +2216,7 @@
   function registerPack(p){
     for(const t of p.textures){
       texReg.set(t.id, {id:t.id, name:p.name+" · "+t.name, kind:t.kind||"floor", cells:t.cells,
-                        thick:t.thick, tile:t.tile, w:t.w, h:t.h, thumbKey:t.thumbKey,
+                        thick:t.thick, tile:t.tile, w:t.w, h:t.h,
                         pack:p.id, url:null, img:null, lazy:true});
     }
   }
@@ -2130,15 +2227,26 @@
   // useless order to discover art in.
   function ensureThumb(t, el){
     if(t.thumb){ if(el) el.src=t.thumb; return; }
-    if(!t.thumbKey) return;
+    if(String(t.id).indexOf("pack:")!==0) return;        // bundled art uses the atlas
     if(t._thumbWait){ if(el) t._thumbWait.push(el); return; }   // one read, many waiters
     t._thumbWait = el ? [el] : [];
-    idbGet("files", t.thumbKey).then(b=>{
-      const waiting=t._thumbWait; t._thumbWait=null;
-      if(!b) return;
-      t.thumb=URL.createObjectURL(b);
-      for(const e of (waiting||[])) if(e) e.src=t.thumb;
-    }).catch(()=>{ t._thumbWait=null; });
+    const finish=(url)=>{ const w=t._thumbWait; t._thumbWait=null;
+      if(!url) return; t.thumb=url; for(const e of (w||[])) if(e) e.src=url; };
+    const key=t.id+"#thumb";
+    idbGet("files", key).then(b=>{
+      if(b) return finish(URL.createObjectURL(b));
+      // Not cached: build it once from the full sprite and keep it. Import
+      // deliberately doesn't do this — decoding thousands of sprites up front is
+      // what made a large pack take minutes.
+      return idbGet("files", t.id).then(full=>{
+        if(!full) return finish(null);
+        return makeThumb(full).then(tb=>{
+          if(!tb) return finish(null);
+          idbPut("files", key, tb).catch(()=>{});
+          finish(URL.createObjectURL(tb));
+        });
+      });
+    }).catch(()=>finish(null));
   }
   // Pack textures live as blobs; mint the full-size object URL the first time the
   // map actually uses one.
@@ -2174,7 +2282,7 @@
   }
   async function removePack(p){
     for(const t of p.textures){ try{ await idbDel("files", t.id); }catch(e){}
-      if(t.thumbKey){ try{ await idbDel("files", t.thumbKey); }catch(e){} }
+      try{ await idbDel("files", t.id+"#thumb"); }catch(e){}   // cached lazily, may or may not exist
       texReg.delete(t.id);
       for(const o of (map.objects||[])) if(o.tex===t.id) o.tex="";
     }
@@ -2302,8 +2410,20 @@
 
   // ── object palette ────────────────────────────────────────────────
   let armedObj=null;                       // texture id armed for placement
+  let thumbObs=null;
+  function observeThumb(el, id){
+    if(!("IntersectionObserver" in window)){ const t=texReg.get(id); if(t) ensureThumb(t, el); return; }
+    if(!thumbObs) thumbObs=new IntersectionObserver(es=>{
+      for(const en of es){ if(!en.isIntersecting) continue;
+        thumbObs.unobserve(en.target);
+        const t=texReg.get(en.target.dataset.tid); if(t) ensureThumb(t, en.target); }
+    }, {root:$("objGrid"), rootMargin:"150px"});
+    el.dataset.tid=id;
+    thumbObs.observe(el);
+  }
   function buildObjGrid(){
     const g=$("objGrid"); if(!g) return;
+    if(thumbObs){ thumbObs.disconnect(); thumbObs=null; }
     const q=(($("objFilter")||{}).value||"").trim().toLowerCase();
     g.innerHTML="";
     let n=0;
@@ -2330,13 +2450,18 @@
         const im=document.createElement("img");
         im.loading="lazy"; im.alt="";
         if(t.thumb) im.src=t.thumb;
-        else if(t.thumbKey) ensureThumb(t, im);      // imported: comes from IndexedDB
-        else if(t.url) im.src=t.url;
+        else observeThumb(im, t.id);       // imported: decoded on first scroll into view
         b.appendChild(im);
       }
       b.onclick=()=>{ armedObj = (armedObj===t.id) ? null : t.id;
         setTool(armedObj ? "object" : "select"); buildObjGrid(); };
-      g.appendChild(b); n++;
+      g.appendChild(b);
+      if(++n>=MAX_GRID_CELLS) break;
+    }
+    if(n>=MAX_GRID_CELLS){
+      const more=document.createElement("div"); more.className="none";
+      more.textContent="Showing the first "+MAX_GRID_CELLS+" — type in the filter to narrow it down.";
+      g.appendChild(more);
     }
     sizeObjThumbs();
     if(!n){ const d=document.createElement("div"); d.className="none";
