@@ -74,17 +74,18 @@ const PAGE = String.raw`<!doctype html>
   .sheet-bar { display: flex; align-items: center; gap: 8px; }
   .sheet-bar .name { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #sheet-frame { flex: 1; min-height: 0; width: 100%; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); }
-  /* Icon-only switch: phone on the left, monitor on the right. */
-  #size-sw {
+  /* Icon-only switch: phone on the left, monitor on the right. Shared (class,
+     not id) by the sheet bar and the tab bar so both stay in sync via size.js. */
+  .size-sw {
     display: flex; align-items: center; gap: 6px; flex-shrink: 0; cursor: pointer;
     background: var(--panel); border: 1px solid var(--border); border-radius: 5px; padding: 5px 8px; color: var(--muted);
   }
-  #size-sw svg { display: block; width: 13px; height: 13px; fill: currentColor; transition: color .15s ease; }
-  #size-sw[aria-checked="false"] .i-m, #size-sw[aria-checked="true"] .i-d { color: var(--text); }
-  #size-sw .track { position: relative; width: 28px; height: 15px; border-radius: 8px; background: var(--border); flex-shrink: 0; transition: background .15s ease; }
-  #size-sw[aria-checked="true"] .track { background: var(--gold); }
-  #size-sw .knob { position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--text); transition: transform .15s ease; }
-  #size-sw[aria-checked="true"] .knob { transform: translateX(13px); background: var(--bg); }
+  .size-sw svg { display: block; width: 13px; height: 13px; fill: currentColor; transition: color .15s ease; }
+  .size-sw[aria-checked="false"] .i-m, .size-sw[aria-checked="true"] .i-d { color: var(--text); }
+  .size-sw .track { position: relative; width: 28px; height: 15px; border-radius: 8px; background: var(--border); flex-shrink: 0; transition: background .15s ease; }
+  .size-sw[aria-checked="true"] .track { background: var(--gold); }
+  .size-sw .knob { position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--text); transition: transform .15s ease; }
+  .size-sw[aria-checked="true"] .knob { transform: translateX(13px); background: var(--bg); }
   .grow { flex: 1; min-height: 0; }
   /* Top-level switch between Characters and the GM Screen. */
   #tabs { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
@@ -103,6 +104,15 @@ const PAGE = String.raw`<!doctype html>
   <button class="btn tab" id="tab-chars" type="button" aria-selected="true">Characters</button>
   <button class="btn tab" id="tab-gm" type="button" aria-selected="false">GM Screen</button>
   <span class="spacer"></span>
+  <!-- Same phone/desktop switch as the character sheet. size.js wires every
+       [data-vtt-size] and resizes the whole popover, so the GM Screen (responsive
+       at 760px) reflows to its desktop layout just like the sheets do. Kept in
+       sync with the sheet's switch automatically. -->
+  <button id="size-sw-tabs" class="size-sw" data-vtt-size hidden role="switch" aria-checked="false" title="Phone or desktop layout">
+    <svg class="i-m" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 1h10a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zm0 4v14h10V5H7z"/></svg>
+    <span class="track"><span class="knob"></span></span>
+    <svg class="i-d" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-7v2h3v2H7v-2h3v-2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v10h16V5H4z"/></svg>
+  </button>
   <button class="btn" id="forget" title="Remove this code from this browser">Sign out</button>
 </nav>
 
@@ -147,7 +157,7 @@ const PAGE = String.raw`<!doctype html>
   <div class="sheet-bar">
     <button class="btn" id="back">&larr; Characters</button>
     <span class="name" id="sheet-name"></span>
-    <button id="size-sw" data-vtt-size hidden role="switch" aria-checked="false" title="Phone or desktop layout">
+    <button id="size-sw" class="size-sw" data-vtt-size hidden role="switch" aria-checked="false" title="Phone or desktop layout">
       <svg class="i-m" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 1h10a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zm0 4v14h10V5H7z"/></svg>
       <span class="track"><span class="knob"></span></span>
       <svg class="i-d" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-7v2h3v2H7v-2h3v-2H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v10h16V5H4z"/></svg>
