@@ -1859,13 +1859,22 @@
   const texReg = new Map();                       // id -> {id,name,kind,url,cells|thick|tile,img}
   let bundledPacks = [];                          // [{id,name,textures:[…]}] once the manifest lands
   let bundledError = null;                        // surfaced in the palette so a bad deploy is obvious
+  let bundledCounts = null;                       // what the manifest actually contained
+  let assetV = "";                                // ?v=<content hash> appended to every asset URL
   async function loadBundled(){
     let m;
     try{
-      const r = await fetch(BUNDLED_URL, {cache:"force-cache"});
+      // NOT force-cache: that serves a cached copy WITHOUT revalidating, so a
+      // freshly uploaded manifest can stay invisible for as long as the browser
+      // keeps the old one. no-cache revalidates and takes a 304 when unchanged.
+      const r = await fetch(BUNDLED_URL, {cache:"no-cache"});
       if(!r.ok) throw new Error("HTTP "+r.status);
       m = await r.json();
     }catch(e){ bundledError=e.message||String(e); buildObjGrid(); return; }
+    assetV = m.version ? ("?v="+m.version) : "";
+    bundledCounts = {};
+    for(const p of (m.packs||[])) for(const t of (p.textures||[]))
+      bundledCounts[t.kind]=(bundledCounts[t.kind]||0)+1;
     bundledPacks = m.packs || [];
     for(const p of bundledPacks) for(const t of p.textures)
       texReg.set(t.id, {id:t.id, name:t.name, kind:t.kind, pack:p.id, packName:p.name,
@@ -1874,7 +1883,7 @@
                         // {sheet,x,y,w,h,sw,sh} rects. Floors and walls stay whole files
                         // because they're used as repeating patterns.
                         atlas:t.atlas||null, thumbRect:t.thumb||null,
-                        url:"/packs/bundled/"+(t.atlas ? t.atlas.sheet : t.file), img:null});
+                        url:"/packs/bundled/"+(t.atlas ? t.atlas.sheet : t.file)+assetV, img:null});
     buildTexSelects(); buildObjGrid();
     render();
   }
@@ -2217,7 +2226,7 @@
         const S=46, f=Math.min(S/r.w, S/r.h);
         const d=document.createElement("span"); d.className="th";
         d.style.width=(r.w*f)+"px"; d.style.height=(r.h*f)+"px";
-        d.style.backgroundImage='url("/packs/bundled/'+r.sheet+'")';
+        d.style.backgroundImage='url("/packs/bundled/'+r.sheet+assetV+'")';
         d.style.backgroundSize=(r.sw*f)+"px "+(r.sh*f)+"px";
         d.style.backgroundPosition=(-r.x*f)+"px "+(-r.y*f)+"px";
         b.appendChild(d);
@@ -2231,10 +2240,14 @@
       g.appendChild(b); n++;
     }
     if(!n){ const d=document.createElement("div"); d.className="none";
-      d.textContent = q ? "No objects match that."
-        : (bundledError ? "Couldn't load /packs/bundled/bundled.json — is the pack folder uploaded?"
-        : !bundledPacks.length ? "Loading asset packs…"
-        : "The manifest loaded but lists no objects.");
+      if(q) d.textContent="No objects match that.";
+      else if(bundledError) d.textContent="Couldn't load /packs/bundled/bundled.json ("+bundledError+") — is the pack folder uploaded?";
+      else if(!bundledPacks.length) d.textContent="Loading asset packs…";
+      else {
+        const c=bundledCounts||{};
+        d.textContent="bundled.json has "+(c.floor||0)+" floors and "+(c.wall||0)+" walls but no objects"
+          + " — public/packs/bundled/ is from an older build. Re-upload it (and hard-refresh).";
+      }
       g.appendChild(d); }
   }
   function placeObject(wx,wy){
