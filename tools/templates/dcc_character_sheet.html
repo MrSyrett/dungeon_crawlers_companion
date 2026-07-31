@@ -918,9 +918,14 @@ function showRollToast(label, result, detail, type) {
   if (!log || !log.classList.contains('collapsed')) return;
   var t = document.getElementById('roll-toast');
   if (!t) return;
+  // Housekeeping entries (campaign join/leave, rest…) pass a decorative SVG icon
+  // as their "result". That markup renders fine in the log via innerHTML, but the
+  // toast writes result as textContent, so it would show the raw "<svg …>" source
+  // as a string of code. Blank the result for those so only the label + detail show.
+  var isMarkup = /[<>]/.test(String(result == null ? '' : result));
   t.className = 'show' + (type === 'crit' ? ' crit' : type === 'fumble' ? ' fumble' : '');
   t.querySelector('.t-label').textContent = label;
-  t.querySelector('.t-result').textContent = result;
+  t.querySelector('.t-result').textContent = isMarkup ? '' : result;
   t.querySelector('.t-detail').textContent = detail;
   if (_toastTimer) clearTimeout(_toastTimer);
   _toastTimer = setTimeout(function() { t.className = ''; }, 3500);
