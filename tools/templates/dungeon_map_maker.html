@@ -211,6 +211,8 @@
           <svg viewBox="0 0 24 24"><path d="M6 4h9v16H6z"/><path d="M15 9l4 3-4 3"/></svg>Door</div>
         <div class="tool" data-tool="stair" title="Stairs (S)">
           <svg viewBox="0 0 24 24"><path d="M4 20h4v-4h4v-4h4V8h4"/></svg>Stairs</div>
+        <div class="tool" data-tool="shadow" title="Shadow (H) — a soft contact shadow to sit under an object (Advanced Mode)">
+          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="8" ry="4.2"/><path d="M8 15a4 2.2 0 0 0 8 0" opacity=".55"/></svg>Shadow</div>
         <div class="tool" data-tool="light" title="Light (L) — turn Lights on under Advanced first">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>Light</div>
       </div>
@@ -279,6 +281,18 @@
           <input type="range" id="lightBright" min="5" max="100" value="85">
           <p class="hint" id="lightScope" style="margin:6px 0 0"></p>
         </div>
+        <div class="grp-head" style="margin-top:14px">
+          <p class="grp-title" style="font-size:11px;margin:0">Shadows</p>
+        </div>
+        <label class="fld">Width <b id="shwV">1.6 sq</b></label>
+        <input type="range" id="shW" min="2" max="120" value="16">
+        <label class="fld">Height <b id="shhV">1.1 sq</b></label>
+        <input type="range" id="shH" min="2" max="120" value="11">
+        <label class="fld">Softness <b id="shsV">55%</b></label>
+        <input type="range" id="shSoft" min="0" max="100" value="55">
+        <label class="fld">Strength <b id="shtV">60%</b></label>
+        <input type="range" id="shStr" min="5" max="100" value="60">
+        <p class="hint" id="shadowScope" style="margin:6px 0 0"></p>
         
         
       </div>
@@ -396,7 +410,7 @@
 
   function blankMap(){
     return { version:1, name:"", grid:true, gridOpacity:1, style:DEFAULT_STYLE(),
-             lit:false, darkness:0.55, lights:[],
+             lit:false, darkness:0.55, lights:[], shadows:[],
              shapes:[], walls:[], doors:[], stairs:[], objects:[], seedId:1 };
   }
   function uid(){ return map.seedId++; }
@@ -700,8 +714,45 @@
     drawDecoShapes();
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
+    drawShadows();
     drawObjects();
     drawLights();
+  }
+
+  // ══════════════════════ SHADOWS (Advanced Mode) ══════════════════════
+  // Hand-placed contact shadows — soft ellipses drawn UNDER the objects so a
+  // barrel reads as standing on the floor instead of floating on it.
+  //   map.shadows[] = { id, x, y, w, h, rot, soft (0..1), strength (0..1) }
+  // STATIC by design: they do not track the lights. See claude/map-maker-lights.md.
+  // Composited with `multiply` so the floor texture darkens instead of being
+  // greyed out by a flat black wash — a 60% black ellipse over stone reads as a
+  // hole punched in the floor, the same trap the door leaf hit in classic mode.
+  // Deliberately NOT clipped to the floor mask: clipping would cut a hard edge
+  // along every room boundary, which looks far worse than a little spill.
+  function drawShadows(){
+    if(!tex || !map) return;                        // Advanced Mode only
+    const list=map.shadows||[]; if(!list.length) return;
+    ctx.save(); ctx.globalCompositeOperation="multiply";
+    for(let i=0;i<list.length;i++){
+      const s=list[i];
+      const a=Math.max(0, Math.min(1, s.strength==null ? 0.6 : s.strength));
+      if(a<=0) continue;
+      const rx=Math.max(0.05, s.w||1.6)/2*wpx(), ry=Math.max(0.05, s.h||1.1)/2*wpx();
+      if(rx<0.4 || ry<0.4) continue;
+      const soft=Math.max(0, Math.min(1, s.soft==null ? 0.55 : s.soft));
+      const core=0.92*(1-soft);                     // fully opaque out to here, then fade
+      const p=toScreen(s.x,s.y);
+      ctx.save();
+      ctx.translate(p[0],p[1]); ctx.rotate(s.rot||0); ctx.scale(rx,ry);
+      const g=ctx.createRadialGradient(0,0,0,0,0,1);
+      g.addColorStop(0, "rgba(6,8,14,"+a+")");
+      if(core>0.001) g.addColorStop(core, "rgba(6,8,14,"+a+")");
+      g.addColorStop(core+(1-core)*0.55, "rgba(6,8,14,"+(a*0.35).toFixed(4)+")");
+      g.addColorStop(1, "rgba(6,8,14,0)");
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,1,0,6.2832); ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
   }
 
   // ══════════════════════ LIGHTS (Advanced Mode) ══════════════════════
@@ -719,13 +770,47 @@
   // soft rather than geometric. Doors are deliberately NOT cut out of the
   // occluders — a door is closed, so it contains the light in its room.
   let lightSegs = null;                       // occluder cache, rebuilt per render
+  // ⚠ A room edge that lies INSIDE another room is not a wall. The interior punch
+  // (the union of per-shape inset fills) erases it so the two rooms read as one
+  // space — a corridor meeting a room, two overlapping rooms. Blocking light on
+  // those buried edges casts shadows off walls that are not on the map. Each edge
+  // is therefore walked in short steps and only the runs that stay OUTSIDE every
+  // other room survive, so a half-buried edge still occludes along the half you
+  // can see. Interior walls (map.walls) always draw on top, so they are kept whole.
   function lightOccluders(){
     if(lightSegs) return lightSegs;
     lightSegs=[];
-    for(const sh of map.shapes){ if(sh.deco) continue;      // deco shapes are decoration, not walls
-      const o=shapeOutline(sh);
-      for(let i=0;i<o.length;i++){ const a=o[i], b=o[(i+1)%o.length];
-        lightSegs.push([a[0],a[1],b[0],b[1]]); } }
+    const rooms=[], rb=[];
+    for(const sh of map.shapes){ if(sh.deco) continue; rooms.push(sh); rb.push(bounds(sh,"shape")); }
+    const hits=(bx0,by0,bx1,by1,i)=>{ const b=rb[i];
+      return !!b && bx0<=b.x+b.w && bx1>=b.x && by0<=b.y+b.h && by1>=b.y; };
+    for(let si=0; si<rooms.length; si++){
+      const sh=rooms[si], o=shapeOutline(sh);
+      for(let i=0;i<o.length;i++){
+        const a=o[i], b=o[(i+1)%o.length];
+        const dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
+        if(len<1e-6) continue;
+        // Only edges overlapping another room's box can be buried — skip the walk
+        // entirely otherwise, which is the common case.
+        const ex0=Math.min(a[0],b[0]), ex1=Math.max(a[0],b[0]);
+        const ey0=Math.min(a[1],b[1]), ey1=Math.max(a[1],b[1]);
+        const cand=[];
+        for(let j=0;j<rooms.length;j++) if(j!==si && hits(ex0,ey0,ex1,ey1,j)) cand.push(rooms[j]);
+        if(!cand.length){ lightSegs.push([a[0],a[1],b[0],b[1]]); continue; }
+        const n=Math.max(1, Math.min(64, Math.ceil(len/0.35)));
+        let s0=null;
+        const at=t=>[a[0]+dx*t, a[1]+dy*t];
+        for(let k=0;k<n;k++){
+          const tm=(k+0.5)/n, m=at(tm);
+          let vis=true;
+          for(let j=0;j<cand.length;j++) if(pointInShape(m[0],m[1],cand[j])){ vis=false; break; }
+          if(vis && s0===null) s0=k/n;
+          else if(!vis && s0!==null){ const p=at(s0), q=at(k/n);
+            lightSegs.push([p[0],p[1],q[0],q[1]]); s0=null; }
+        }
+        if(s0!==null){ const p=at(s0); lightSegs.push([p[0],p[1],b[0],b[1]]); }
+      }
+    }
     for(const w of map.walls){
       const s=(w.cx!==undefined&&w.cy!==undefined) ? wallSamples(w) : [[w.x1,w.y1],[w.x2,w.y2]];
       for(let i=0;i<s.length-1;i++) lightSegs.push([s[i][0],s[i][1],s[i+1][0],s[i+1][1]]); }
@@ -783,7 +868,7 @@
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
   const lmaskCv = oc();
   function drawLights(){
-    if(!map || !map.lit) return;
+    if(!tex || !map || !map.lit) return;   // Advanced Mode only, like the textures
     const lights=map.lights||[];
     const dark=Math.max(0, Math.min(1, map.darkness==null ? 0 : map.darkness));
     if(!lights.length && dark<=0) return;
@@ -1421,7 +1506,7 @@
       ctx.setLineDash([]); ctx.beginPath(); ctx.arc(p[0],p[1],8,0,6.2832); ctx.stroke();
       ctx.restore(); return;
     }
-    if(o.kind==="object"){
+    if(o.kind==="object" || o.kind==="shadow"){
       const H=objHandles(o.obj);
       ctx.save(); ctx.strokeStyle=C.sel; ctx.lineWidth=1.6; ctx.setLineDash([5,4]);
       ctx.beginPath(); ctx.moveTo(H.corners[0][0],H.corners[0][1]);
@@ -1453,7 +1538,7 @@
       // a circular arc can bow outside the triangle of its 3 points — measure the samples
       if(o.cx!==undefined) for(const p of wallSamples(o)){ xs.push(p[0]); ys.push(p[1]); }
       const x=Math.min(...xs), y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y}; }
-    if(kind==="object") return objBox(o);
+    if(kind==="object" || kind==="shadow") return objBox(o);
     if(kind==="door"){ const l=(o.len||1)/2+0.3; return {x:o.x-l,y:o.y-l,w:l*2,h:l*2}; }
     if(kind==="light") return {x:o.x-0.4,y:o.y-0.4,w:0.8,h:0.8};
     if(kind==="stair"){
@@ -1499,6 +1584,13 @@
       const dx=wx-o.x, dy=wy-o.y;
       const lx=dx*c-dy*sn, ly=dx*sn+dy*c;
       if(Math.abs(lx)<=(o.w||1)/2 && Math.abs(ly)<=(o.h||1)/2) return {kind:"object",idx:i,obj:o}; }
+    // Shadows sit UNDER the objects, so the object on top wins the click. Tested
+    // as a true ellipse in the shadow's own rotated frame.
+    for(let i=(map.shadows||[]).length-1;i>=0;i--){ const sd=map.shadows[i];
+      const r=-(sd.rot||0), c=Math.cos(r), sn=Math.sin(r);
+      const dx=wx-sd.x, dy=wy-sd.y;
+      const lx=(dx*c-dy*sn)/Math.max(0.05,(sd.w||1.6)/2), ly=(dx*sn+dy*c)/Math.max(0.05,(sd.h||1.1)/2);
+      if(lx*lx+ly*ly<=1) return {kind:"shadow",idx:i,obj:sd}; }
     for(let i=map.stairs.length-1;i>=0;i--){ const s=map.stairs[i];
       if(s.ax!==undefined){ if(pointInTri(wx,wy, s.ax,s.ay, s.bx,s.by, s.tx,s.ty)) return {kind:"stair",idx:i,obj:s}; }
       else if(s.x1!==undefined){ if(distToSeg(wx,wy,s.x1,s.y1,s.x2,s.y2)<=(s.w||2)/2+0.2) return {kind:"stair",idx:i,obj:s}; }
@@ -1514,7 +1606,7 @@
   }
   let sel=null;                    // {kind,idx}
   let handle=null;                 // object scale/rotate handle drag
-  function objAt(s){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects,light:map.lights})[s.kind];
+  function objAt(s){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects,light:map.lights,shadow:map.shadows})[s.kind];
     return arr&&arr[s.idx]?{kind:s.kind,obj:arr[s.idx]}:null; }
 
   // ════════════════════════════════════════════════════════════════
@@ -1549,7 +1641,7 @@
 
     if(tool==="select"){
       // A selected object's handles take priority over anything under them.
-      if(sel && sel.kind==="object"){
+      if(sel && (sel.kind==="object" || sel.kind==="shadow")){
         const cur=objAt(sel);
         if(cur){ const H=objHandles(cur.obj), near=(p)=>Math.hypot(sx-p[0],sy-p[1])<12;
           if(near(H.scale) || near(H.rotate)){
@@ -1565,6 +1657,7 @@
     }
     if(tool==="object"){ if(armedObj) placeObject(wx,wy,e.shiftKey); return; }
     if(tool==="light"){ placeLight(wx,wy,e.shiftKey); return; }
+    if(tool==="shadow"){ placeShadow(wx,wy,e.shiftKey); return; }
     if(tool==="erase"){ const h=hitTest(wx,wy); if(h){ pushHistory(); removeHit(h); commit(); } return; }
     if(tool==="polygon"){
       if(!polyPts) polyPts=[];
@@ -1706,13 +1799,14 @@
       markGeom();
     } else if(dragObj.h.kind==="wall"){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy;
       if(s.cx!==undefined){ o.cx=s.cx+gdx; o.cy=s.cy+gdy; } }
-    else if(dragObj.h.kind==="door" || dragObj.h.kind==="object" || dragObj.h.kind==="light"){ o.x=s.x+hd(dx); o.y=s.y+hd(dy); }
+    else if(dragObj.h.kind==="door" || dragObj.h.kind==="object" || dragObj.h.kind==="light"
+         || dragObj.h.kind==="shadow"){ o.x=s.x+hd(dx); o.y=s.y+hd(dy); }
     else if(dragObj.h.kind==="stair"){
       if(s.ax!==undefined){ o.ax=s.ax+gdx;o.ay=s.ay+gdy;o.bx=s.bx+gdx;o.by=s.by+gdy;o.tx=s.tx+gdx;o.ty=s.ty+gdy; }
       else if(s.x1!==undefined){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy; }
       else { o.x=s.x+gdx; o.y=s.y+gdy; } }
   }
-  function removeHit(h){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects,light:map.lights})[h.kind];
+  function removeHit(h){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects,light:map.lights,shadow:map.shadows})[h.kind];
     if(arr) arr.splice(h.idx,1); setSel(null); }
   function nearestWallAngle(wx,wy){
     let best=1e9,ang=0;
@@ -1759,7 +1853,8 @@
     if(keepStyle) map.style = keepStyle;
     if(keepGridOp!=null) map.gridOpacity = keepGridOp;
     if(keepSnap!=null) map.snap = keepSnap;
-    map.lit = !!keepLit; map.darkness = (keepDark==null) ? 0.55 : keepDark; map.lights = [];
+    map.lit = !!keepLit; map.darkness = (keepDark==null) ? 0.55 : keepDark;
+    map.lights = []; map.shadows = [];
     commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); fitView();
   }
   // Inlined fallback generator (used only when DungeonEngine isn't loaded, e.g.
@@ -2034,8 +2129,9 @@
   function syncUndo(){ $("undo").disabled=!history.length; $("redo").disabled=!future.length; }
   function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; markGeom();
     if(!Array.isArray(map.lights)) map.lights=[];        // maps exported before v37
+    if(!Array.isArray(map.shadows)) map.shadows=[];      // …and before v38
     if(map.darkness==null) map.darkness=0.55;
-    syncGridOp(); syncZUI(); syncLightUI();
+    syncGridOp(); syncZUI(); syncLightUI(); syncShadowUI();
     $("gridToggle").checked=map.grid!==false;
     snapOn=map.snap!==false; if($("snapToggle")) $("snapToggle").checked=snapOn;
     if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
@@ -2582,7 +2678,7 @@
     if(o.kind==="wall") return {kind:"wall", obj:o.obj};
     return null;
   }
-  function setSel(v){ sel=v; syncStyleScope(); syncZUI(); syncLightUI(); }
+  function setSel(v){ sel=v; syncStyleScope(); syncZUI(); syncLightUI(); syncShadowUI(); }
 
   // Style scope, in priority order:
   //   • a DRAWING tool is active  -> the pickers set `pending`, the style that new
@@ -2963,6 +3059,82 @@
                           $("lightBright").onchange=endLightEdit; }
     syncLightUI();
   }
+  // ── SHADOWS (Advanced Mode) ───────────────────────────────────────
+  // Placed like a light, edited like an object: the scale/rotate handles and the
+  // [ ] lattice both work on a selected shadow, and the sliders below follow the
+  // same scope rule — selected shadow if there is one, otherwise the next one.
+  let newShadow={ w:1.6, h:1.1, soft:0.55, strength:0.6 };
+  let shadowGesture=false;
+  function advOn(){ return !!(map.style && map.style.mode==="textured"); }
+  function shadowTarget(){
+    if(sel==null || sel.kind!=="shadow") return null;
+    const o=objAt(sel); return o ? o.obj : null;
+  }
+  function syncShadowUI(){
+    const t=shadowTarget();
+    const w  = t ? (t.w||newShadow.w) : newShadow.w;
+    const h  = t ? (t.h||newShadow.h) : newShadow.h;
+    const so = t ? (t.soft==null?newShadow.soft:t.soft) : newShadow.soft;
+    const st = t ? (t.strength==null?newShadow.strength:t.strength) : newShadow.strength;
+    if($("shW"))    $("shW").value=Math.round(w*10);
+    if($("shwV"))   $("shwV").textContent=w.toFixed(1)+" sq";
+    if($("shH"))    $("shH").value=Math.round(h*10);
+    if($("shhV"))   $("shhV").textContent=h.toFixed(1)+" sq";
+    if($("shSoft")) $("shSoft").value=Math.round(so*100);
+    if($("shsV"))   $("shsV").textContent=Math.round(so*100)+"%";
+    if($("shStr"))  $("shStr").value=Math.round(st*100);
+    if($("shtV"))   $("shtV").textContent=Math.round(st*100)+"%";
+    const sb=document.querySelector('.tool[data-tool="shadow"]');
+    if(sb) sb.classList.toggle("off", !advOn());
+    if($("shadowScope")) $("shadowScope").textContent = t
+      ? "Editing the selected shadow — drag its handles to resize or turn it."
+      : "Next shadow: click an object and it sizes itself to fit, or click bare floor for a free one.";
+  }
+  function liveShadow(patch){
+    const t=shadowTarget();
+    if(!t){ for(const k in patch) newShadow[k]=patch[k]; syncShadowUI(); return; }
+    if(!shadowGesture){ pushHistory(); shadowGesture=true; }
+    for(const k in patch) t[k]=patch[k];
+    commit(); syncShadowUI();
+  }
+  function endShadowEdit(){ shadowGesture=false; }
+  // Topmost OBJECT under a world point (hitTest would hand back lights/shadows too).
+  function objectUnder(wx,wy){
+    for(let i=(map.objects||[]).length-1;i>=0;i--){ const o=map.objects[i];
+      const r=-(o.rot||0), c=Math.cos(r), sn=Math.sin(r);
+      const dx=wx-o.x, dy=wy-o.y;
+      const lx=dx*c-dy*sn, ly=dx*sn+dy*c;
+      if(Math.abs(lx)<=(o.w||1)/2 && Math.abs(ly)<=(o.h||1)/2) return o; }
+    return null;
+  }
+  function placeShadow(wx,wy,keepPlacing){
+    if(!advOn()) return;
+    if(!Array.isArray(map.shadows)) map.shadows=[];
+    // Drop it on an object and it sizes itself to that object's footprint and
+    // angle. Objects are drawn ON TOP of shadows, so a shadow smaller than the
+    // sprite is completely invisible — the default 1.6×1.1 would vanish under
+    // most furniture. Softness/strength still come from the sliders.
+    const u=objectUnder(wx,wy);
+    const W_=u ? Math.max(0.3,(u.w||1)*1.45) : newShadow.w;
+    const H_=u ? Math.max(0.3,(u.h||1)*1.40) : newShadow.h;
+    pushHistory();
+    map.shadows.push({ id:uid(), x: u?u.x:snapHalf(wx), y: u?u.y:snapHalf(wy),
+                       w:W_, h:H_, rot: u ? (u.rot||0) : 0,
+                       soft:newShadow.soft, strength:newShadow.strength });
+    commit();
+    if(u) toast("Shadow sized to the object under it — drag the handles to adjust.");
+    if(!keepPlacing){ setSel({kind:"shadow", idx:map.shadows.length-1}); setTool("select"); }
+    else syncShadowUI();
+  }
+  function initShadows(){
+    const bind=(id,f)=>{ const el=$(id); if(!el) return;
+      el.oninput=e=>f(+e.target.value); el.onchange=endShadowEdit; };
+    bind("shW",    v=>liveShadow({w:v/10}));
+    bind("shH",    v=>liveShadow({h:v/10}));
+    bind("shSoft", v=>liveShadow({soft:v/100}));
+    bind("shStr",  v=>liveShadow({strength:v/100}));
+    syncShadowUI();
+  }
   function syncGridOp(){
     const v = (map.gridOpacity==null) ? 1 : Math.max(0, Math.min(1, map.gridOpacity));
     if($("gridOp")) $("gridOp").value = Math.round(v*100);
@@ -2979,7 +3151,8 @@
     const st=map.style||(map.style=DEFAULT_STYLE());
     if($("advToggle")) $("advToggle").onchange=e=>{
       map.style.mode = e.target.checked ? "textured" : "classic";
-      syncAdvancedUI(); commit();
+      if(!advOn() && (tool==="shadow"||tool==="light")) setTool("select");
+      syncAdvancedUI(); syncShadowUI(); commit();
     };
     for(const kind in PICKERS){
       const b=$(PICKERS[kind].el);
@@ -2997,7 +3170,7 @@
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
-    syncAdvancedUI(); syncStyleScope(); initLights();
+    syncAdvancedUI(); syncStyleScope(); initLights(); initShadows();
     loadBundled().catch(()=>{});
     loadPacks().catch(()=>{});
   }
@@ -3013,6 +3186,7 @@
     for(const o of (map.objects||[])){ const b=objBox(o); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
     for(const d of map.doors) pts.push([d.x,d.y]);
     if(map.lit) for(const L of (map.lights||[])) pts.push([L.x,L.y]);
+    for(const sd of (map.shadows||[])){ const b=objBox(sd); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
     for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
       else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
     if(!pts.length) return null;
@@ -3065,6 +3239,7 @@
   function setTool(t){
     // The Light tool needs somewhere to put light — Advanced Mode with Lights on.
     if(t==="light" && !map.lit){ toast("Turn Lights on under Advanced first."); return; }
+    if(t==="shadow" && !advOn()){ toast("Shadows need Advanced Mode — switch it on first."); return; }
     tool=t;
     document.querySelectorAll(".tool").forEach(el=>el.classList.toggle("active",el.dataset.tool===t));
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
@@ -3079,7 +3254,8 @@
       stair:"Click a base corner, click to set width, click the tip to place.",
       erase:"Click anything to delete it.",select:"Click to select · drag to move.",
       object:"Click the map to place it. Keep clicking to place more.",
-      light:"Click to drop a light. Shift-click to keep placing more."};
+      light:"Click to drop a light. Shift-click to keep placing more.",
+      shadow:"Click an object to shadow it, or bare floor for a free shadow. Shift-click to keep placing."};
     toast(tips[t]||"");
   }
   document.getElementById("toolbar").addEventListener("click", e=>{
@@ -3143,7 +3319,7 @@
     if(e.key==="Escape"){ if(pickOpen){ closePicker(); return; }
       polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; render(); return; }
     if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
-    if(sel && sel.kind==="object"){
+    if(sel && (sel.kind==="object" || sel.kind==="shadow")){
       const o=objAt(sel); if(o){
         // [ and ] step around a 45° lattice and SNAP to it, so repeated presses
         // always land on clean orientations even if the object was free-rotated
@@ -3163,7 +3339,7 @@
       }
     }
     if(e.key==="g"||e.key==="G"){ setMode(drawMode==="rooms"?"shapes":"rooms"); return; }  // toggle Rooms/Shapes
-    const keys={v:"select",r:"rect",c:"circle",p:"polygon",w:"wall",d:"door",s:"stair",e:"erase",l:"light"};
+    const keys={v:"select",r:"rect",c:"circle",p:"polygon",w:"wall",d:"door",s:"stair",e:"erase",l:"light",h:"shadow"};
     if(keys[e.key]) setTool(keys[e.key]);
   });
   window.addEventListener("keyup", e=>{ if(e.code==="Space"){ spaceDown=false; cv.style.cursor= tool==="select"?"default":"crosshair"; } });

@@ -199,8 +199,45 @@ window.DungeonEngine = (function(){
     drawDecoShapes();
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
+    drawShadows();
     drawObjects();
     drawLights();
+  }
+
+  // ══════════════════════ SHADOWS (Advanced Mode) ══════════════════════
+  // Hand-placed contact shadows — soft ellipses drawn UNDER the objects so a
+  // barrel reads as standing on the floor instead of floating on it.
+  //   map.shadows[] = { id, x, y, w, h, rot, soft (0..1), strength (0..1) }
+  // STATIC by design: they do not track the lights. See claude/map-maker-lights.md.
+  // Composited with `multiply` so the floor texture darkens instead of being
+  // greyed out by a flat black wash — a 60% black ellipse over stone reads as a
+  // hole punched in the floor, the same trap the door leaf hit in classic mode.
+  // Deliberately NOT clipped to the floor mask: clipping would cut a hard edge
+  // along every room boundary, which looks far worse than a little spill.
+  function drawShadows(){
+    if(!tex || !map) return;                        // Advanced Mode only
+    const list=map.shadows||[]; if(!list.length) return;
+    ctx.save(); ctx.globalCompositeOperation="multiply";
+    for(let i=0;i<list.length;i++){
+      const s=list[i];
+      const a=Math.max(0, Math.min(1, s.strength==null ? 0.6 : s.strength));
+      if(a<=0) continue;
+      const rx=Math.max(0.05, s.w||1.6)/2*wpx(), ry=Math.max(0.05, s.h||1.1)/2*wpx();
+      if(rx<0.4 || ry<0.4) continue;
+      const soft=Math.max(0, Math.min(1, s.soft==null ? 0.55 : s.soft));
+      const core=0.92*(1-soft);                     // fully opaque out to here, then fade
+      const p=toScreen(s.x,s.y);
+      ctx.save();
+      ctx.translate(p[0],p[1]); ctx.rotate(s.rot||0); ctx.scale(rx,ry);
+      const g=ctx.createRadialGradient(0,0,0,0,0,1);
+      g.addColorStop(0, "rgba(6,8,14,"+a+")");
+      if(core>0.001) g.addColorStop(core, "rgba(6,8,14,"+a+")");
+      g.addColorStop(core+(1-core)*0.55, "rgba(6,8,14,"+(a*0.35).toFixed(4)+")");
+      g.addColorStop(1, "rgba(6,8,14,0)");
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,1,0,6.2832); ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
   }
 
   // ══════════════════════ LIGHTS (Advanced Mode) ══════════════════════
@@ -218,13 +255,47 @@ window.DungeonEngine = (function(){
   // soft rather than geometric. Doors are deliberately NOT cut out of the
   // occluders — a door is closed, so it contains the light in its room.
   let lightSegs = null;                       // occluder cache, rebuilt per render
+  // ⚠ A room edge that lies INSIDE another room is not a wall. The interior punch
+  // (the union of per-shape inset fills) erases it so the two rooms read as one
+  // space — a corridor meeting a room, two overlapping rooms. Blocking light on
+  // those buried edges casts shadows off walls that are not on the map. Each edge
+  // is therefore walked in short steps and only the runs that stay OUTSIDE every
+  // other room survive, so a half-buried edge still occludes along the half you
+  // can see. Interior walls (map.walls) always draw on top, so they are kept whole.
   function lightOccluders(){
     if(lightSegs) return lightSegs;
     lightSegs=[];
-    for(const sh of map.shapes){ if(sh.deco) continue;      // deco shapes are decoration, not walls
-      const o=shapeOutline(sh);
-      for(let i=0;i<o.length;i++){ const a=o[i], b=o[(i+1)%o.length];
-        lightSegs.push([a[0],a[1],b[0],b[1]]); } }
+    const rooms=[], rb=[];
+    for(const sh of map.shapes){ if(sh.deco) continue; rooms.push(sh); rb.push(bounds(sh,"shape")); }
+    const hits=(bx0,by0,bx1,by1,i)=>{ const b=rb[i];
+      return !!b && bx0<=b.x+b.w && bx1>=b.x && by0<=b.y+b.h && by1>=b.y; };
+    for(let si=0; si<rooms.length; si++){
+      const sh=rooms[si], o=shapeOutline(sh);
+      for(let i=0;i<o.length;i++){
+        const a=o[i], b=o[(i+1)%o.length];
+        const dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
+        if(len<1e-6) continue;
+        // Only edges overlapping another room's box can be buried — skip the walk
+        // entirely otherwise, which is the common case.
+        const ex0=Math.min(a[0],b[0]), ex1=Math.max(a[0],b[0]);
+        const ey0=Math.min(a[1],b[1]), ey1=Math.max(a[1],b[1]);
+        const cand=[];
+        for(let j=0;j<rooms.length;j++) if(j!==si && hits(ex0,ey0,ex1,ey1,j)) cand.push(rooms[j]);
+        if(!cand.length){ lightSegs.push([a[0],a[1],b[0],b[1]]); continue; }
+        const n=Math.max(1, Math.min(64, Math.ceil(len/0.35)));
+        let s0=null;
+        const at=t=>[a[0]+dx*t, a[1]+dy*t];
+        for(let k=0;k<n;k++){
+          const tm=(k+0.5)/n, m=at(tm);
+          let vis=true;
+          for(let j=0;j<cand.length;j++) if(pointInShape(m[0],m[1],cand[j])){ vis=false; break; }
+          if(vis && s0===null) s0=k/n;
+          else if(!vis && s0!==null){ const p=at(s0), q=at(k/n);
+            lightSegs.push([p[0],p[1],q[0],q[1]]); s0=null; }
+        }
+        if(s0!==null){ const p=at(s0); lightSegs.push([p[0],p[1],b[0],b[1]]); }
+      }
+    }
     for(const w of map.walls){
       const s=(w.cx!==undefined&&w.cy!==undefined) ? wallSamples(w) : [[w.x1,w.y1],[w.x2,w.y2]];
       for(let i=0;i<s.length-1;i++) lightSegs.push([s[i][0],s[i][1],s[i+1][0],s[i+1][1]]); }
@@ -282,7 +353,7 @@ window.DungeonEngine = (function(){
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
   const lmaskCv = oc();
   function drawLights(){
-    if(!map || !map.lit) return;
+    if(!tex || !map || !map.lit) return;   // Advanced Mode only, like the textures
     const lights=map.lights||[];
     const dark=Math.max(0, Math.min(1, map.darkness==null ? 0 : map.darkness));
     if(!lights.length && dark<=0) return;
