@@ -303,7 +303,8 @@
       dot:"#8a8a8a",      // medium-grey dot grid
       hatch:"#33302a",
       ink:"#14120d",      // walls, doors, stairs (near-black ink)
-      doorFill:"#fbf8f0", // door leaf interior
+      doorFill:"#fbf8f0", // door leaf interior (classic)
+      doorWood:"#8b5e3c", // …and in Advanced Mode, so it reads as a wooden door
       shadow:"rgba(20,17,12,.18)",
       sel:"#c9a94a",
     },
@@ -1080,7 +1081,10 @@
     ctx.save();
     // filled leaf interior (outside the rectangle stays transparent)
     const A=s(-g.rhl,-g.ht),B=s(g.rhl,-g.ht),C2=s(g.rhl,g.ht),D=s(-g.rhl,g.ht);
-    ctx.fillStyle=C.doorFill;
+    // Advanced Mode gets a wood-brown leaf; the near-white classic fill reads as a
+    // hole punched in the wall once everything around it is textured stone.
+    // `tex` is only set in textured mode, so classic output is untouched.
+    ctx.fillStyle = tex ? C.doorWood : C.doorFill;
     ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.lineTo(C2[0],C2[1]); ctx.lineTo(D[0],D[1]); ctx.closePath(); ctx.fill();
     // rough black rectangle outline + centre stubs reaching to the tips
     ctx.fillStyle=C.ink;

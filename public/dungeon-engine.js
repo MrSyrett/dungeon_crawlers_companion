@@ -27,7 +27,7 @@ window.DungeonEngine = (function(){
     light: {
       bg:"#d9d0bd", rockHi:"#efe8d7", floor:"#f4efe3",
       grid:"#8a8a8a", dot:"#8a8a8a", hatch:"#33302a",
-      ink:"#14120d", doorFill:"#fbf8f0", shadow:"rgba(20,17,12,.18)", sel:"#c9a94a",
+      ink:"#14120d", doorFill:"#fbf8f0", doorWood:"#8b5e3c", shadow:"rgba(20,17,12,.18)", sel:"#c9a94a",
     },
   };
   // Dark mode changes ONLY the exterior background (rooms/walls/floors/etc. stay).
@@ -593,7 +593,10 @@ window.DungeonEngine = (function(){
     const s=(sl,st)=>toScreen(g.cx+g.alx*sl+g.acx*st, g.cy+g.aly*sl+g.acy*st);
     ctx.save();
     const A=s(-g.rhl,-g.ht),B=s(g.rhl,-g.ht),C2=s(g.rhl,g.ht),D=s(-g.rhl,g.ht);
-    ctx.fillStyle=C.doorFill;
+    // Advanced Mode gets a wood-brown leaf; the near-white classic fill reads as a
+    // hole punched in the wall once everything around it is textured stone.
+    // `tex` is only set in textured mode, so classic output is untouched.
+    ctx.fillStyle = tex ? C.doorWood : C.doorFill;
     ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.lineTo(C2[0],C2[1]); ctx.lineTo(D[0],D[1]); ctx.closePath(); ctx.fill();
     ctx.fillStyle=C.ink;
     roughSeg(ctx, w(-g.rhl,-g.ht), w( g.rhl,-g.ht), halfW);
