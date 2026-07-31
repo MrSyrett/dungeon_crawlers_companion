@@ -59,6 +59,38 @@
       "kind": "bg",
       "file": "bg-rock-light.webp",
       "cells": 4
+    },
+    {
+      "id": "starter:wallstone",
+      "name": "Cut stone",
+      "kind": "wall",
+      "file": "wall-stone.webp",
+      "thick": 0.4,
+      "tile": 6.4
+    },
+    {
+      "id": "starter:walldark",
+      "name": "Dark slate",
+      "kind": "wall",
+      "file": "wall-dark.webp",
+      "thick": 0.4,
+      "tile": 6.4
+    },
+    {
+      "id": "starter:wallrubble",
+      "name": "Rubble",
+      "kind": "wall",
+      "file": "wall-rubble.webp",
+      "thick": 0.4,
+      "tile": 6.4
+    },
+    {
+      "id": "starter:walltimber",
+      "name": "Timber",
+      "kind": "wall",
+      "file": "wall-timber.webp",
+      "thick": 0.4,
+      "tile": 6.4
     }
   ]
 }
