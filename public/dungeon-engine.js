@@ -534,6 +534,16 @@ window.DungeonEngine = (function(){
     return {x, y, w:Math.max.apply(null,xs)-x, h:Math.max.apply(null,ys)-y};
   }
 
+  // A Shapes-mode outline follows the shape's WALL texture, at half thickness —
+  // the same treatment the thin Wall tool gets, so a pillar or dais reads as a
+  // thin course of the same masonry rather than an ink line on a textured map.
+  // Falls back to the rough ink ring when there's no texture.
+  function drawDecoRing(c, sh, inkHalf){
+    const wt=shapeWallTex(sh);
+    if(wt && stripPath(c, outlineDense(sh), true, wt, Math.max(1, halfPxFor(wt)*0.5))) return;
+    roughRing(c, shapeOutline(sh), inkHalf);
+  }
+
   function drawDecoShapes(){
     let any=false, floor=false;
     for(const s of map.shapes){ if(s.deco) any=true; else floor=true; }
@@ -541,7 +551,7 @@ window.DungeonEngine = (function(){
     const thin=Math.max(0.6,0.85*cam.scale);
     // No rooms at all ⇒ nothing to clip against, draw the outlines as-is.
     if(!floor){ ctx.save(); ctx.fillStyle=C.ink;
-      for(const sh of map.shapes){ if(sh.deco) roughRing(ctx, shapeOutline(sh), thin); }
+      for(const sh of map.shapes){ if(sh.deco) drawDecoRing(ctx, sh, thin); }
       ctx.restore(); return; }
     // Otherwise a deco shape is CLIPPED to the dungeon interior: draw the thin
     // outlines to a scratch buffer, then keep only the pixels that land on the
@@ -551,7 +561,7 @@ window.DungeonEngine = (function(){
     sizeBufs();
     const dc=buf.deco.getContext("2d"); dc.setTransform(1,0,0,1,0,0); dc.clearRect(0,0,W,H);
     dc.globalCompositeOperation="source-over"; dc.fillStyle=C.ink;
-    for(const sh of map.shapes){ if(!sh.deco) continue; roughRing(dc, shapeOutline(sh), thin); }
+    for(const sh of map.shapes){ if(!sh.deco) continue; drawDecoRing(dc, sh, thin); }
     const cc=buf.decoClip.getContext("2d"); cc.setTransform(1,0,0,1,0,0); cc.clearRect(0,0,W,H);
     cc.globalCompositeOperation="source-over"; cc.fillStyle="#fff";
     for(const sh of map.shapes){ if(sh.deco) continue;
