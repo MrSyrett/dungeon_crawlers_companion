@@ -24,9 +24,12 @@ ATLAS       = 2048       # atlas sheet size
 # Atlases also mean one decode and one request instead of hundreds.
 
 SOURCES = [
-    # file, pack id, display name, credit
-    ('welcome.pack',     '2mtw', '2MT Welcome',       '2-Minute Tabletop'),
-    ('roombuilder.pack', '2mtd', '2MT Room Builder',  '2-Minute Tabletop'),
+    # file, pack id, display name, credit   — CC BY-NC 4.0 packs ONLY (see the
+    # licensing section of claude/map-maker-advanced-mode.md before adding one)
+    ('welcome.pack',     '2mtw', '2MT Welcome',        '2-Minute Tabletop'),
+    ('roombuilder.pack', '2mtd', '2MT Room Builder',   '2-Minute Tabletop'),
+    ('traps.pack',       '2mtt', '2MT Trap Tokens',    '2-Minute Tabletop'),
+    ('building.pack',    '2mtb', '2MT Basic Building', '2-Minute Tabletop'),
 ]
 # The same strips appear under BOTH textures/paths/ and textures/walls/ — take one.
 # Dungeondraft also ships near-identical Concave/Convex variants of each wall
@@ -37,6 +40,14 @@ SKIP_WALL = re.compile(r' - Concave_wall\.', re.I)
 #   "- End"        wall/path end caps, consumed by the wall tool not placed by hand
 #   "Demo"         the pack's marketing render
 SKIP_OBJ = re.compile(r'( - Colorable| - End)\.(webp|png|jpe?g)$|Demo\.(webp|png|jpe?g)$', re.I)
+# Packs ship their wall kit as loose sprites too — straight runs, inside/outside
+# corners, half circles, ribbons, railings. The Map Maker's wall tool draws all
+# of that properly from a strip, so these are 60 sprites of pure clutter in the
+# object palette. Dropped by NAME because they sit in textures/objects/ like any
+# other prop.
+# The " - " separator matters: `^Wall\b` also eats real props like "Wall buzzsaw",
+# "Wall chomper" and "Wall spikes" from the trap pack — 11 of them.
+SKIP_WALL_OBJ = re.compile(r'^(Wall|Rail)\s+-\s', re.I)
 
 def parse(path):
     d = open(path, 'rb').read()
@@ -55,6 +66,9 @@ def slug(s):
 
 def clean(name, keep_size=False):
     n = re.sub(r'\.(webp|png|jpe?g)$', '', name.split('/')[-1])
+    n = re.sub(r'^[a-z0-9]+_', '', n)                 # e.g. "basicbuilding_door - wide"
+    if n and n[0].islower():
+        n = n[0].upper() + n[1:]
     n = re.sub(r'^Texture\s*-\s*', '', n)
     n = re.sub(r'_wall$', '', n)
     n = re.sub(r'\s*-\s*Convex$', '', n)
@@ -111,9 +125,12 @@ packs = []
 for fname, pid, pname, credit in SOURCES:
     d, files = parse(fname)
     entries = []
+    seen_floor = set()
     for path, fo, fs in files:
         blob = d[fo:fo+fs]
-        if '/textures/terrain/' in path:                       # floors (patterns/ is a duplicate)
+        if ('/textures/terrain/' in path or '/textures/patterns/' in path) \
+                and clean(path) not in seen_floor:                 # terrain and patterns/ duplicate
+            seen_floor.add(clean(path))
             im = Image.open(io.BytesIO(blob)).convert('RGB')
             cells = max(1, round(im.width / 256))
             side = min(MAX_DIM, cells * PX_PER_CELL)
@@ -122,7 +139,8 @@ for fname, pid, pname, credit in SOURCES:
             im.save(f'{OUT}/{fid}.webp', 'WEBP', quality=88, method=6)
             entries.append({'id': f'bundled:{fid}', 'name': clean(path), 'kind': 'floor',
                             'file': f'{fid}.webp', 'cells': cells})
-        elif '/textures/objects/' in path and not SKIP_OBJ.search(path):
+        elif '/textures/objects/' in path and not SKIP_OBJ.search(path) \
+                and not SKIP_WALL_OBJ.search(clean(path, True)):
             im = Image.open(io.BytesIO(blob)).convert('RGBA')
             wc, hc = im.width/256, im.height/256          # native size in grid cells
             if wc < 0.15 or hc < 0.15:
@@ -133,7 +151,8 @@ for fname, pid, pname, credit in SOURCES:
             pending.append({'id': f'bundled:{pid}-obj-{slug(clean(path, True))}',
                             'name': clean(path, True), 'kind': 'object',
                             'w': round(wc, 3), 'h': round(hc, 3), 'img': full, 'th': th})
-        elif '/textures/walls/' in path and path.endswith('_wall.webp') and not SKIP_WALL.search(path):
+        elif '/textures/walls/' in path and re.search(r'\.(webp|png|jpe?g)$', path) \
+                and not re.search(r'_end\.(webp|png|jpe?g)$', path) and not SKIP_WALL.search(path):
             im = Image.open(io.BytesIO(blob)).convert('RGBA')
             a = np.asarray(im)
             rows = np.where(a[:, :, 3].mean(axis=1) > 8)[0]     # crop the transparent padding

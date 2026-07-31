@@ -1,5 +1,5 @@
 {
-  "version": "1f0e50edba",
+  "version": "32a0d18b35",
   "note": "Bundled Creative-Commons map assets. Attribution is REQUIRED and is rendered statically in the Map Maker sidebar, not from this file.",
   "credits": [
     {
@@ -145,17 +145,17 @@
           "h": 4.816,
           "atlas": {
             "sheet": "objects-0.webp",
-            "x": 1033,
-            "y": 0,
+            "x": 0,
+            "y": 1138,
             "w": 496,
             "h": 462,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 196,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 98,
             "w": 96,
             "h": 90,
             "sw": 1024,
@@ -170,8 +170,8 @@
           "h": 1.93,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1298,
-            "y": 194,
+            "x": 140,
+            "y": 1847,
             "w": 129,
             "h": 185,
             "sw": 2048,
@@ -179,8 +179,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 786,
-            "y": 196,
+            "x": 932,
+            "y": 686,
             "w": 67,
             "h": 96,
             "sw": 1024,
@@ -194,9 +194,9 @@
           "w": 1.828,
           "h": 2.016,
           "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 0,
-            "y": 1538,
+            "sheet": "objects-2.webp",
+            "x": 418,
+            "y": 870,
             "w": 176,
             "h": 194,
             "sw": 2048,
@@ -204,8 +204,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 855,
-            "y": 196,
+            "x": 0,
+            "y": 784,
             "w": 87,
             "h": 96,
             "sw": 1024,
@@ -220,8 +220,8 @@
           "h": 1.914,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1429,
-            "y": 194,
+            "x": 271,
+            "y": 1847,
             "w": 121,
             "h": 184,
             "sw": 2048,
@@ -229,8 +229,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 944,
-            "y": 196,
+            "x": 89,
+            "y": 784,
             "w": 63,
             "h": 96,
             "sw": 1024,
@@ -245,8 +245,8 @@
           "h": 1.965,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1158,
-            "y": 194,
+            "x": 0,
+            "y": 1847,
             "w": 138,
             "h": 189,
             "sw": 2048,
@@ -254,8 +254,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 294,
+            "x": 154,
+            "y": 784,
             "w": 70,
             "h": 96,
             "sw": 1024,
@@ -269,9 +269,9 @@
           "w": 1.113,
           "h": 1.156,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 574,
-            "y": 661,
+            "sheet": "objects-3.webp",
+            "x": 575,
+            "y": 0,
             "w": 107,
             "h": 111,
             "sw": 2048,
@@ -279,8 +279,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 72,
-            "y": 294,
+            "x": 226,
+            "y": 784,
             "w": 92,
             "h": 96,
             "sw": 1024,
@@ -294,9 +294,9 @@
           "w": 1.023,
           "h": 1.062,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1721,
-            "y": 888,
+            "sheet": "objects-3.webp",
+            "x": 866,
+            "y": 0,
             "w": 98,
             "h": 102,
             "sw": 2048,
@@ -304,8 +304,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 166,
-            "y": 294,
+            "x": 320,
+            "y": 784,
             "w": 92,
             "h": 96,
             "sw": 1024,
@@ -319,18 +319,18 @@
           "w": 0.598,
           "h": 0.348,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 749,
-            "y": 1093,
+            "sheet": "objects-3.webp",
+            "x": 485,
+            "y": 510,
             "w": 57,
             "h": 33,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 262,
-            "y": 906,
+            "sheet": "objthumbs-1.webp",
+            "x": 360,
+            "y": 416,
             "w": 96,
             "h": 56,
             "sw": 1024,
@@ -344,9 +344,9 @@
           "w": 0.512,
           "h": 0.629,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1414,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1061,
+            "y": 413,
             "w": 49,
             "h": 60,
             "sw": 2048,
@@ -354,8 +354,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 260,
-            "y": 294,
+            "x": 414,
+            "y": 784,
             "w": 78,
             "h": 96,
             "sw": 1024,
@@ -369,18 +369,18 @@
           "w": 0.566,
           "h": 0.484,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1732,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1379,
+            "y": 413,
             "w": 54,
             "h": 46,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 196,
-            "y": 681,
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 190,
             "w": 96,
             "h": 82,
             "sw": 1024,
@@ -394,18 +394,18 @@
           "w": 0.559,
           "h": 0.422,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 57,
-            "y": 1093,
+            "sheet": "objects-3.webp",
+            "x": 1744,
+            "y": 413,
             "w": 54,
             "h": 40,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 752,
-            "y": 681,
+            "sheet": "objthumbs-1.webp",
+            "x": 556,
+            "y": 190,
             "w": 96,
             "h": 73,
             "sw": 1024,
@@ -419,18 +419,18 @@
           "w": 0.816,
           "h": 0.699,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1334,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 981,
+            "y": 413,
             "w": 78,
             "h": 67,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 294,
-            "y": 681,
+            "sheet": "objthumbs-1.webp",
+            "x": 98,
+            "y": 190,
             "w": 96,
             "h": 82,
             "sw": 1024,
@@ -444,18 +444,18 @@
           "w": 0.551,
           "h": 0.477,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1788,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1435,
+            "y": 413,
             "w": 53,
             "h": 46,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 681,
+            "sheet": "objthumbs-1.webp",
+            "x": 784,
+            "y": 98,
             "w": 96,
             "h": 83,
             "sw": 1024,
@@ -469,18 +469,18 @@
           "w": 0.684,
           "h": 0.512,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1565,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1212,
+            "y": 413,
             "w": 66,
             "h": 49,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 686,
-            "y": 766,
+            "sheet": "objthumbs-1.webp",
+            "x": 392,
+            "y": 274,
             "w": 96,
             "h": 72,
             "sw": 1024,
@@ -494,18 +494,18 @@
           "w": 1.012,
           "h": 0.488,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1633,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1280,
+            "y": 413,
             "w": 97,
             "h": 47,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 98,
-            "y": 972,
+            "sheet": "objthumbs-1.webp",
+            "x": 588,
+            "y": 532,
             "w": 96,
             "h": 46,
             "sw": 1024,
@@ -519,18 +519,18 @@
           "w": 0.57,
           "h": 0.449,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 1093,
+            "sheet": "objects-3.webp",
+            "x": 1687,
+            "y": 413,
             "w": 55,
             "h": 43,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 654,
-            "y": 681,
+            "sheet": "objthumbs-1.webp",
+            "x": 458,
+            "y": 190,
             "w": 96,
             "h": 76,
             "sw": 1024,
@@ -544,9 +544,9 @@
           "w": 0.512,
           "h": 0.516,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1465,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1112,
+            "y": 413,
             "w": 49,
             "h": 50,
             "sw": 2048,
@@ -554,8 +554,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 340,
-            "y": 294,
+            "x": 494,
+            "y": 784,
             "w": 95,
             "h": 96,
             "sw": 1024,
@@ -569,9 +569,9 @@
           "w": 0.445,
           "h": 0.992,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 196,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1750,
+            "y": 315,
             "w": 43,
             "h": 95,
             "sw": 2048,
@@ -579,8 +579,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 437,
-            "y": 294,
+            "x": 591,
+            "y": 784,
             "w": 43,
             "h": 96,
             "sw": 1024,
@@ -594,18 +594,18 @@
           "w": 1.098,
           "h": 0.812,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1093,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 740,
+            "y": 413,
             "w": 105,
             "h": 78,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 784,
-            "y": 766,
+            "sheet": "objthumbs-1.webp",
+            "x": 490,
+            "y": 274,
             "w": 96,
             "h": 71,
             "sw": 1024,
@@ -619,18 +619,18 @@
           "w": 1.145,
           "h": 0.988,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 241,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1795,
+            "y": 315,
             "w": 110,
             "h": 95,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 98,
-            "y": 681,
+            "sheet": "objthumbs-1.webp",
+            "x": 882,
+            "y": 98,
             "w": 96,
             "h": 83,
             "sw": 1024,
@@ -644,9 +644,9 @@
           "w": 1.066,
           "h": 1.172,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1625,
-            "y": 388,
+            "sheet": "objects-3.webp",
+            "x": 471,
+            "y": 0,
             "w": 102,
             "h": 112,
             "sw": 2048,
@@ -654,8 +654,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 482,
-            "y": 294,
+            "x": 636,
+            "y": 784,
             "w": 87,
             "h": 96,
             "sw": 1024,
@@ -669,18 +669,18 @@
           "w": 1.078,
           "h": 1.008,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1899,
-            "y": 888,
+            "sheet": "objects-3.webp",
+            "x": 1044,
+            "y": 0,
             "w": 104,
             "h": 97,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 294,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 98,
+            "y": 98,
             "w": 96,
             "h": 90,
             "sw": 1024,
@@ -694,18 +694,18 @@
           "w": 1.078,
           "h": 0.406,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 158,
-            "y": 1093,
+            "sheet": "objects-3.webp",
+            "x": 1845,
+            "y": 413,
             "w": 104,
             "h": 39,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 882,
-            "y": 972,
+            "sheet": "objthumbs-1.webp",
+            "x": 294,
+            "y": 582,
             "w": 96,
             "h": 36,
             "sw": 1024,
@@ -719,18 +719,18 @@
           "w": 1.266,
           "h": 1.215,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1154,
-            "y": 388,
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 0,
             "w": 122,
             "h": 117,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 736,
-            "y": 490,
+            "sheet": "objthumbs-1.webp",
+            "x": 629,
+            "y": 0,
             "w": 96,
             "h": 92,
             "sw": 1024,
@@ -745,17 +745,17 @@
           "h": 3.578,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 1238,
-            "y": 0,
+            "x": 0,
+            "y": 1170,
             "w": 362,
             "h": 344,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 834,
-            "y": 490,
+            "sheet": "objthumbs-1.webp",
+            "x": 727,
+            "y": 0,
             "w": 96,
             "h": 91,
             "sw": 1024,
@@ -769,18 +769,18 @@
           "w": 2.562,
           "h": 2.285,
           "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1312,
-            "y": 1256,
+            "sheet": "objects-2.webp",
+            "x": 1602,
+            "y": 580,
             "w": 246,
             "h": 219,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 784,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 588,
+            "y": 98,
             "w": 96,
             "h": 86,
             "sw": 1024,
@@ -795,8 +795,8 @@
           "h": 1.812,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1803,
-            "y": 194,
+            "x": 645,
+            "y": 1847,
             "w": 168,
             "h": 174,
             "sw": 2048,
@@ -804,8 +804,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 571,
-            "y": 294,
+            "x": 725,
+            "y": 784,
             "w": 93,
             "h": 96,
             "sw": 1024,
@@ -819,9 +819,9 @@
           "w": 6.004,
           "h": 0.316,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1386,
-            "y": 1093,
+            "sheet": "objects-3.webp",
+            "x": 1122,
+            "y": 510,
             "w": 576,
             "h": 30,
             "sw": 2048,
@@ -829,8 +829,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 21,
+            "x": 882,
+            "y": 582,
             "w": 96,
             "h": 5,
             "sw": 1024,
@@ -844,9 +844,9 @@
           "w": 6.0,
           "h": 0.312,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 0,
-            "y": 1138,
+            "y": 546,
             "w": 576,
             "h": 30,
             "sw": 2048,
@@ -854,8 +854,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 21,
+            "x": 0,
+            "y": 622,
             "w": 96,
             "h": 5,
             "sw": 1024,
@@ -869,9 +869,9 @@
           "w": 6.0,
           "h": 0.328,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 808,
-            "y": 1093,
+            "sheet": "objects-3.webp",
+            "x": 544,
+            "y": 510,
             "w": 576,
             "h": 32,
             "sw": 2048,
@@ -879,8 +879,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 21,
+            "x": 98,
+            "y": 622,
             "w": 96,
             "h": 5,
             "sw": 1024,
@@ -894,9 +894,9 @@
           "w": 0.676,
           "h": 0.707,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1200,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 847,
+            "y": 413,
             "w": 65,
             "h": 68,
             "sw": 2048,
@@ -904,8 +904,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 666,
-            "y": 294,
+            "x": 820,
+            "y": 784,
             "w": 92,
             "h": 96,
             "sw": 1024,
@@ -919,9 +919,9 @@
           "w": 0.676,
           "h": 0.707,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1267,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 914,
+            "y": 413,
             "w": 65,
             "h": 68,
             "sw": 2048,
@@ -929,8 +929,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 760,
-            "y": 294,
+            "x": 914,
+            "y": 784,
             "w": 92,
             "h": 96,
             "sw": 1024,
@@ -944,9 +944,9 @@
           "w": 0.75,
           "h": 0.824,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1019,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 666,
+            "y": 413,
             "w": 72,
             "h": 79,
             "sw": 2048,
@@ -954,8 +954,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 854,
-            "y": 294,
+            "x": 0,
+            "y": 882,
             "w": 87,
             "h": 96,
             "sw": 1024,
@@ -969,18 +969,18 @@
           "w": 0.25,
           "h": 0.316,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 578,
-            "y": 1138,
+            "y": 546,
             "w": 24,
             "h": 30,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 392,
-            "y": 681,
+            "sheet": "objthumbs-1.webp",
+            "x": 196,
+            "y": 190,
             "w": 64,
             "h": 81,
             "sw": 1024,
@@ -994,18 +994,18 @@
           "w": 0.25,
           "h": 0.238,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 604,
-            "y": 1138,
+            "y": 546,
             "w": 24,
             "h": 23,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
+            "sheet": "objthumbs-1.webp",
             "x": 196,
-            "y": 906,
+            "y": 416,
             "w": 64,
             "h": 61,
             "sw": 1024,
@@ -1020,8 +1020,8 @@
           "h": 1.273,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 572,
-            "y": 388,
+            "x": 1387,
+            "y": 1847,
             "w": 109,
             "h": 122,
             "sw": 2048,
@@ -1029,8 +1029,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 392,
+            "x": 89,
+            "y": 882,
             "w": 85,
             "h": 96,
             "sw": 1024,
@@ -1045,8 +1045,8 @@
           "h": 1.273,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 683,
-            "y": 388,
+            "x": 1498,
+            "y": 1847,
             "w": 109,
             "h": 122,
             "sw": 2048,
@@ -1054,8 +1054,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 87,
-            "y": 392,
+            "x": 176,
+            "y": 882,
             "w": 85,
             "h": 96,
             "sw": 1024,
@@ -1069,9 +1069,9 @@
           "w": 5.027,
           "h": 0.352,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 264,
-            "y": 1093,
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 510,
             "w": 483,
             "h": 34,
             "sw": 2048,
@@ -1079,8 +1079,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 21,
+            "x": 784,
+            "y": 582,
             "w": 96,
             "h": 7,
             "sw": 1024,
@@ -1094,18 +1094,18 @@
           "w": 2.238,
           "h": 2.027,
           "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1761,
-            "y": 1256,
+            "sheet": "objects-2.webp",
+            "x": 201,
+            "y": 870,
             "w": 215,
             "h": 195,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 686,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 490,
+            "y": 98,
             "w": 96,
             "h": 87,
             "sw": 1024,
@@ -1119,18 +1119,18 @@
           "w": 2.262,
           "h": 1.215,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1278,
-            "y": 388,
+            "sheet": "objects-3.webp",
+            "x": 124,
+            "y": 0,
             "w": 217,
             "h": 117,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 360,
-            "y": 906,
+            "sheet": "objthumbs-1.webp",
+            "x": 458,
+            "y": 416,
             "w": 96,
             "h": 52,
             "sw": 1024,
@@ -1144,9 +1144,9 @@
           "w": 2.07,
           "h": 2.074,
           "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1560,
-            "y": 1256,
+            "sheet": "objects-2.webp",
+            "x": 0,
+            "y": 870,
             "w": 199,
             "h": 199,
             "sw": 2048,
@@ -1154,8 +1154,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 174,
-            "y": 392,
+            "x": 263,
+            "y": 882,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -1169,18 +1169,18 @@
           "w": 1.309,
           "h": 1.215,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1497,
-            "y": 388,
+            "sheet": "objects-3.webp",
+            "x": 343,
+            "y": 0,
             "w": 126,
             "h": 117,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 490,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 294,
+            "y": 98,
             "w": 96,
             "h": 89,
             "sw": 1024,
@@ -1195,17 +1195,17 @@
           "h": 1.352,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 172,
-            "y": 388,
+            "x": 987,
+            "y": 1847,
             "w": 134,
             "h": 130,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 442,
-            "y": 490,
+            "sheet": "objthumbs-1.webp",
+            "x": 335,
+            "y": 0,
             "w": 96,
             "h": 93,
             "sw": 1024,
@@ -1219,9 +1219,9 @@
           "w": 0.766,
           "h": 1.148,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1156,
-            "y": 775,
+            "sheet": "objects-3.webp",
+            "x": 684,
+            "y": 0,
             "w": 74,
             "h": 110,
             "sw": 2048,
@@ -1229,8 +1229,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 272,
-            "y": 392,
+            "x": 361,
+            "y": 882,
             "w": 64,
             "h": 96,
             "sw": 1024,
@@ -1245,17 +1245,17 @@
           "h": 1.867,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1552,
-            "y": 194,
+            "x": 394,
+            "y": 1847,
             "w": 249,
             "h": 179,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 882,
-            "y": 766,
+            "sheet": "objthumbs-1.webp",
+            "x": 588,
+            "y": 274,
             "w": 96,
             "h": 69,
             "sw": 1024,
@@ -1269,18 +1269,18 @@
           "w": 1.941,
           "h": 0.992,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 353,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 413,
             "w": 186,
             "h": 95,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 556,
-            "y": 906,
+            "sheet": "objthumbs-1.webp",
+            "x": 654,
+            "y": 416,
             "w": 96,
             "h": 49,
             "sw": 1024,
@@ -1295,17 +1295,17 @@
           "h": 1.238,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 794,
-            "y": 388,
+            "x": 1609,
+            "y": 1847,
             "w": 222,
             "h": 119,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 458,
-            "y": 906,
+            "sheet": "objthumbs-1.webp",
+            "x": 556,
+            "y": 416,
             "w": 96,
             "h": 51,
             "sw": 1024,
@@ -1319,18 +1319,18 @@
           "w": 1.102,
           "h": 0.887,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 820,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 467,
+            "y": 413,
             "w": 106,
             "h": 85,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 458,
-            "y": 681,
+            "sheet": "objthumbs-1.webp",
+            "x": 262,
+            "y": 190,
             "w": 96,
             "h": 77,
             "sw": 1024,
@@ -1344,18 +1344,18 @@
           "w": 0.445,
           "h": 0.422,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 113,
-            "y": 1093,
+            "sheet": "objects-3.webp",
+            "x": 1800,
+            "y": 413,
             "w": 43,
             "h": 40,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 825,
+            "y": 0,
             "w": 96,
             "h": 91,
             "sw": 1024,
@@ -1369,9 +1369,9 @@
           "w": 0.797,
           "h": 1.035,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1821,
-            "y": 888,
+            "sheet": "objects-3.webp",
+            "x": 966,
+            "y": 0,
             "w": 76,
             "h": 99,
             "sw": 2048,
@@ -1379,8 +1379,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 338,
-            "y": 392,
+            "x": 427,
+            "y": 882,
             "w": 74,
             "h": 96,
             "sw": 1024,
@@ -1394,18 +1394,18 @@
           "w": 1.016,
           "h": 0.457,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1843,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1490,
+            "y": 413,
             "w": 98,
             "h": 44,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 392,
-            "y": 972,
+            "sheet": "objthumbs-1.webp",
+            "x": 882,
+            "y": 532,
             "w": 96,
             "h": 43,
             "sw": 1024,
@@ -1419,18 +1419,18 @@
           "w": 0.992,
           "h": 0.453,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1943,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1590,
+            "y": 413,
             "w": 95,
             "h": 44,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 294,
-            "y": 972,
+            "sheet": "objthumbs-1.webp",
+            "x": 784,
+            "y": 532,
             "w": 96,
             "h": 44,
             "sw": 1024,
@@ -1444,18 +1444,18 @@
           "w": 0.926,
           "h": 0.898,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 541,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 188,
+            "y": 413,
             "w": 89,
             "h": 86,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 540,
-            "y": 490,
+            "sheet": "objthumbs-1.webp",
+            "x": 433,
+            "y": 0,
             "w": 96,
             "h": 93,
             "sw": 1024,
@@ -1469,9 +1469,9 @@
           "w": 0.492,
           "h": 0.52,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1516,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 1163,
+            "y": 413,
             "w": 47,
             "h": 50,
             "sw": 2048,
@@ -1479,8 +1479,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 414,
-            "y": 392,
+            "x": 503,
+            "y": 882,
             "w": 91,
             "h": 96,
             "sw": 1024,
@@ -1494,18 +1494,18 @@
           "w": 1.934,
           "h": 0.898,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 632,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 279,
+            "y": 413,
             "w": 186,
             "h": 86,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 196,
-            "y": 972,
+            "sheet": "objthumbs-1.webp",
+            "x": 686,
+            "y": 532,
             "w": 96,
             "h": 45,
             "sw": 1024,
@@ -1519,18 +1519,18 @@
           "w": 0.926,
           "h": 0.879,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 928,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 575,
+            "y": 413,
             "w": 89,
             "h": 84,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 98,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 923,
+            "y": 0,
             "w": 96,
             "h": 91,
             "sw": 1024,
@@ -1544,9 +1544,9 @@
           "w": 1.082,
           "h": 1.125,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1232,
-            "y": 775,
+            "sheet": "objects-3.webp",
+            "x": 760,
+            "y": 0,
             "w": 104,
             "h": 108,
             "sw": 2048,
@@ -1554,8 +1554,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 507,
-            "y": 392,
+            "x": 596,
+            "y": 882,
             "w": 92,
             "h": 96,
             "sw": 1024,
@@ -1569,18 +1569,18 @@
           "w": 3.441,
           "h": 2.762,
           "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 855,
-            "y": 1256,
+            "sheet": "objects-2.webp",
+            "x": 1145,
+            "y": 580,
             "w": 330,
             "h": 265,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 556,
-            "y": 681,
+            "sheet": "objthumbs-1.webp",
+            "x": 360,
+            "y": 190,
             "w": 96,
             "h": 77,
             "sw": 1024,
@@ -1595,17 +1595,17 @@
           "h": 1.633,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 388,
+            "x": 815,
+            "y": 1847,
             "w": 170,
             "h": 157,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 588,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 392,
+            "y": 98,
             "w": 96,
             "h": 89,
             "sw": 1024,
@@ -1619,18 +1619,18 @@
           "w": 2.848,
           "h": 2.812,
           "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 580,
-            "y": 1256,
+            "sheet": "objects-2.webp",
+            "x": 870,
+            "y": 580,
             "w": 273,
             "h": 270,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 148,
-            "y": 490,
+            "sheet": "objthumbs-1.webp",
+            "x": 237,
+            "y": 0,
             "w": 96,
             "h": 95,
             "sw": 1024,
@@ -1644,18 +1644,18 @@
           "w": 4.375,
           "h": 4.121,
           "atlas": {
-            "sheet": "objects-0.webp",
+            "sheet": "objects-1.webp",
             "x": 0,
-            "y": 560,
+            "y": 0,
             "w": 420,
             "h": 396,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 392,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 196,
+            "y": 98,
             "w": 96,
             "h": 90,
             "sw": 1024,
@@ -1671,7 +1671,7 @@
           "atlas": {
             "sheet": "objects-0.webp",
             "x": 0,
-            "y": 0,
+            "y": 578,
             "w": 525,
             "h": 558,
             "sw": 2048,
@@ -1679,8 +1679,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 699,
-            "y": 392,
+            "x": 788,
+            "y": 882,
             "w": 90,
             "h": 96,
             "sw": 1024,
@@ -1695,8 +1695,8 @@
           "h": 4.191,
           "atlas": {
             "sheet": "objects-0.webp",
-            "x": 1531,
-            "y": 0,
+            "x": 1244,
+            "y": 1602,
             "w": 390,
             "h": 402,
             "sw": 2048,
@@ -1704,8 +1704,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 791,
-            "y": 392,
+            "x": 880,
+            "y": 882,
             "w": 93,
             "h": 96,
             "sw": 1024,
@@ -1721,16 +1721,16 @@
           "atlas": {
             "sheet": "objects-0.webp",
             "x": 527,
-            "y": 0,
+            "y": 578,
             "w": 504,
             "h": 555,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 886,
-            "y": 392,
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 0,
             "w": 87,
             "h": 96,
             "sw": 1024,
@@ -1745,17 +1745,17 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 870,
-            "y": 0,
+            "x": 1544,
+            "y": 784,
             "w": 366,
             "h": 384,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 490,
+            "sheet": "objthumbs-1.webp",
+            "x": 89,
+            "y": 0,
             "w": 92,
             "h": 96,
             "sw": 1024,
@@ -1770,17 +1770,17 @@
           "h": 1.238,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1018,
-            "y": 388,
+            "x": 1833,
+            "y": 1847,
             "w": 134,
             "h": 119,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 882,
-            "y": 588,
+            "sheet": "objthumbs-1.webp",
+            "x": 686,
+            "y": 98,
             "w": 96,
             "h": 85,
             "sw": 1024,
@@ -1795,8 +1795,8 @@
           "h": 1.312,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 444,
-            "y": 388,
+            "x": 1259,
+            "y": 1847,
             "w": 126,
             "h": 126,
             "sw": 2048,
@@ -1804,8 +1804,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 601,
-            "y": 392,
+            "x": 690,
+            "y": 882,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -1820,17 +1820,17 @@
           "h": 1.355,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 308,
-            "y": 388,
+            "x": 1123,
+            "y": 1847,
             "w": 134,
             "h": 130,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 638,
-            "y": 490,
+            "sheet": "objthumbs-1.webp",
+            "x": 531,
+            "y": 0,
             "w": 96,
             "h": 93,
             "sw": 1024,
@@ -1844,320 +1844,20 @@
           "w": 1.277,
           "h": 2.375,
           "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1187,
-            "y": 1256,
+            "sheet": "objects-2.webp",
+            "x": 1477,
+            "y": 580,
             "w": 123,
             "h": 228,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 94,
-            "y": 490,
+            "sheet": "objthumbs-1.webp",
+            "x": 183,
+            "y": 0,
             "w": 52,
             "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-daub-a-concave-ribbon",
-          "name": "Wall - Daub A - Concave - Ribbon",
-          "kind": "object",
-          "w": 5.992,
-          "h": 1.094,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1338,
-            "y": 775,
-            "w": 575,
-            "h": 105,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 0,
-            "w": 96,
-            "h": 18,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-daub-a-convex-ribbon",
-          "name": "Wall - Daub A - Convex - Ribbon",
-          "kind": "object",
-          "w": 5.992,
-          "h": 1.094,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 888,
-            "w": 575,
-            "h": 105,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 0,
-            "w": 96,
-            "h": 18,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-daub-b-concave-ribbon",
-          "name": "Wall - Daub B - Concave - Ribbon",
-          "kind": "object",
-          "w": 5.934,
-          "h": 1.094,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 577,
-            "y": 888,
-            "w": 570,
-            "h": 105,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 0,
-            "w": 96,
-            "h": 18,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-daub-b-convex-ribbon",
-          "name": "Wall - Daub B - Convex - Ribbon",
-          "kind": "object",
-          "w": 5.934,
-          "h": 1.094,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1149,
-            "y": 888,
-            "w": 570,
-            "h": 105,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 0,
-            "w": 96,
-            "h": 18,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-stone-a-concave-ribbon",
-          "name": "Wall - Stone A - Concave - Ribbon",
-          "kind": "object",
-          "w": 5.996,
-          "h": 1.152,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 683,
-            "y": 661,
-            "w": 576,
-            "h": 111,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 0,
-            "w": 96,
-            "h": 18,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-stone-a-convex-ribbon",
-          "name": "Wall - Stone A - Convex - Ribbon",
-          "kind": "object",
-          "w": 5.996,
-          "h": 1.152,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1261,
-            "y": 661,
-            "w": 576,
-            "h": 111,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 0,
-            "w": 96,
-            "h": 18,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-stone-b-concave-ribbon",
-          "name": "Wall - Stone B - Concave - Ribbon",
-          "kind": "object",
-          "w": 5.996,
-          "h": 1.152,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 775,
-            "w": 576,
-            "h": 111,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 21,
-            "w": 96,
-            "h": 18,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-stone-b-convex-ribbon",
-          "name": "Wall - Stone B - Convex - Ribbon",
-          "kind": "object",
-          "w": 5.996,
-          "h": 1.152,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 578,
-            "y": 775,
-            "w": 576,
-            "h": 111,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 21,
-            "w": 96,
-            "h": 18,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-wood-a-concave-ribbon",
-          "name": "Wall - Wood A - Concave - Ribbon",
-          "kind": "object",
-          "w": 5.957,
-          "h": 1.172,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 547,
-            "w": 572,
-            "h": 112,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 0,
-            "w": 96,
-            "h": 19,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-wood-a-convex-ribbon",
-          "name": "Wall - Wood A - Convex - Ribbon",
-          "kind": "object",
-          "w": 5.957,
-          "h": 1.172,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 574,
-            "y": 547,
-            "w": 572,
-            "h": 112,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 0,
-            "w": 96,
-            "h": 19,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-wood-b-concave-ribbon",
-          "name": "Wall - Wood B - Concave - Ribbon",
-          "kind": "object",
-          "w": 5.957,
-          "h": 1.172,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1148,
-            "y": 547,
-            "w": 572,
-            "h": 112,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 0,
-            "w": 96,
-            "h": 19,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtw-obj-wall-wood-b-convex-ribbon",
-          "name": "Wall - Wood B - Convex - Ribbon",
-          "kind": "object",
-          "w": 5.957,
-          "h": 1.172,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 661,
-            "w": 572,
-            "h": 112,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 0,
-            "w": 96,
-            "h": 19,
             "sw": 1024,
             "sh": 1024
           }
@@ -2231,9 +1931,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 194,
+            "y": 217,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2241,8 +1941,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 0,
+            "x": 100,
+            "y": 294,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -2256,9 +1956,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 98,
-            "y": 995,
+            "sheet": "objects-3.webp",
+            "x": 292,
+            "y": 217,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2266,185 +1966,10 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 98,
-            "y": 0,
+            "x": 198,
+            "y": 294,
             "w": 96,
             "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-rail-half-circle-inside-4x3",
-          "name": "Rail - Half Circle - Inside (4x3)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1602,
-            "y": 0,
-            "w": 384,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 850,
-            "y": 681,
-            "w": 96,
-            "h": 72,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-rail-half-circle-inside-6x4",
-          "name": "Rail - Half Circle - Inside (6x4)",
-          "kind": "object",
-          "w": 6.0,
-          "h": 4.0,
-          "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 422,
-            "y": 560,
-            "w": 576,
-            "h": 384,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-rail-half-circle-outside-4x3",
-          "name": "Rail - Half Circle - Outside (4x3)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 0,
-            "y": 386,
-            "w": 384,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 766,
-            "w": 96,
-            "h": 72,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-rail-half-circle-outside-6x4",
-          "name": "Rail - Half Circle - Outside (6x4)",
-          "kind": "object",
-          "w": 6.0,
-          "h": 4.0,
-          "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 1000,
-            "y": 560,
-            "w": 576,
-            "h": 384,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 98,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-rail-straight-3x2",
-          "name": "Rail - Straight (3x2)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 178,
-            "y": 1538,
-            "w": 288,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 196,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-rail-straight-4x2",
-          "name": "Rail - Straight (4x2)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 468,
-            "y": 1538,
-            "w": 384,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 654,
-            "y": 906,
-            "w": 96,
-            "h": 48,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-rail-straight-5x2",
-          "name": "Rail - Straight (5x2)",
-          "kind": "object",
-          "w": 5.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 854,
-            "y": 1538,
-            "w": 480,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 490,
-            "y": 972,
-            "w": 96,
-            "h": 38,
             "sw": 1024,
             "sh": 1024
           }
@@ -2456,9 +1981,9 @@
           "w": 3.0,
           "h": 3.0,
           "atlas": {
-            "sheet": "objects-1.webp",
+            "sheet": "objects-2.webp",
             "x": 386,
-            "y": 386,
+            "y": 290,
             "w": 288,
             "h": 288,
             "sw": 2048,
@@ -2466,8 +1991,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 196,
-            "y": 0,
+            "x": 296,
+            "y": 294,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -2481,9 +2006,9 @@
           "w": 3.0,
           "h": 4.0,
           "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 1578,
-            "y": 560,
+            "sheet": "objects-1.webp",
+            "x": 1580,
+            "y": 0,
             "w": 288,
             "h": 384,
             "sw": 2048,
@@ -2491,8 +2016,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 294,
-            "y": 0,
+            "x": 394,
+            "y": 294,
             "w": 72,
             "h": 96,
             "sw": 1024,
@@ -2506,9 +2031,9 @@
           "w": 3.0,
           "h": 3.0,
           "atlas": {
-            "sheet": "objects-1.webp",
+            "sheet": "objects-2.webp",
             "x": 676,
-            "y": 386,
+            "y": 290,
             "w": 288,
             "h": 288,
             "sw": 2048,
@@ -2516,8 +2041,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 368,
-            "y": 0,
+            "x": 468,
+            "y": 294,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -2531,9 +2056,9 @@
           "w": 3.0,
           "h": 3.0,
           "atlas": {
-            "sheet": "objects-1.webp",
+            "sheet": "objects-2.webp",
             "x": 966,
-            "y": 386,
+            "y": 290,
             "w": 288,
             "h": 288,
             "sw": 2048,
@@ -2541,8 +2066,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 466,
-            "y": 0,
+            "x": 566,
+            "y": 294,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -2556,9 +2081,9 @@
           "w": 3.0,
           "h": 3.0,
           "atlas": {
-            "sheet": "objects-1.webp",
+            "sheet": "objects-2.webp",
             "x": 1256,
-            "y": 386,
+            "y": 290,
             "w": 288,
             "h": 288,
             "sw": 2048,
@@ -2566,1035 +2091,10 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 564,
-            "y": 0,
+            "x": 664,
+            "y": 294,
             "w": 96,
             "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-corner-inside-1-2x2",
-          "name": "Wall - Corner - Inside - 1 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1336,
-            "y": 1538,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 662,
-            "y": 0,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-corner-inside-2-2x2",
-          "name": "Wall - Corner - Inside - 2 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1530,
-            "y": 1538,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 760,
-            "y": 0,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-corner-inside-3-2x2",
-          "name": "Wall - Corner - Inside - 3 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1724,
-            "y": 1538,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 858,
-            "y": 0,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-corner-inside-diagonal-3x3",
-          "name": "Wall - Corner - Inside - Diagonal (3x3)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1546,
-            "y": 386,
-            "w": 288,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-corner-outside-1-2x2",
-          "name": "Wall - Corner - Outside - 1 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 0,
-            "y": 1734,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 98,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-corner-outside-2-2x2",
-          "name": "Wall - Corner - Outside - 2 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 194,
-            "y": 1734,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 196,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-corner-outside-3-2x2",
-          "name": "Wall - Corner - Outside - 3 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 388,
-            "y": 1734,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 294,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-corner-outside-diagonal-3x3",
-          "name": "Wall - Corner - Outside - Diagonal (3x3)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 2.922,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 0,
-            "y": 1256,
-            "w": 288,
-            "h": 280,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 246,
-            "y": 490,
-            "w": 96,
-            "h": 94,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-half-circle-inside-3x3",
-          "name": "Wall - Half Circle - Inside (3x3)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 0,
-            "y": 676,
-            "w": 288,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 392,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-half-circle-inside-4x3",
-          "name": "Wall - Half Circle - Inside (4x3)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 290,
-            "y": 676,
-            "w": 384,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 98,
-            "y": 766,
-            "w": 96,
-            "h": 72,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-half-circle-inside-6x4",
-          "name": "Wall - Half Circle - Inside (6x4)",
-          "kind": "object",
-          "w": 6.0,
-          "h": 4.0,
-          "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 0,
-            "y": 958,
-            "w": 576,
-            "h": 384,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 294,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-half-circle-outside-3x3",
-          "name": "Wall - Half Circle - Outside (3x3)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 676,
-            "y": 676,
-            "w": 288,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 490,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-half-circle-outside-4x3",
-          "name": "Wall - Half Circle - Outside (4x3)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 966,
-            "y": 676,
-            "w": 384,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 196,
-            "y": 766,
-            "w": 96,
-            "h": 72,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-half-circle-outside-6x4",
-          "name": "Wall - Half Circle - Outside (6x4)",
-          "kind": "object",
-          "w": 6.0,
-          "h": 4.0,
-          "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 578,
-            "y": 958,
-            "w": 576,
-            "h": 384,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 392,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-corner-inside-1-2x2",
-          "name": "Wall - Light - Corner - Inside - 1 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 582,
-            "y": 1734,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 588,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-corner-inside-2-2x2",
-          "name": "Wall - Light - Corner - Inside - 2 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 776,
-            "y": 1734,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 686,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-corner-inside-3-2x2",
-          "name": "Wall - Light - Corner - Inside - 3 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 970,
-            "y": 1734,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 784,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-corner-inside-diagonal-3x3",
-          "name": "Wall - Light - Corner - Inside - Diagonal (3x3)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1352,
-            "y": 676,
-            "w": 288,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 882,
-            "y": 98,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-corner-outside-1-2x2",
-          "name": "Wall - Light - Corner - Outside - 1 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1164,
-            "y": 1734,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 196,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-corner-outside-2-2x2",
-          "name": "Wall - Light - Corner - Outside - 2 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1358,
-            "y": 1734,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 98,
-            "y": 196,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-corner-outside-3-2x2",
-          "name": "Wall - Light - Corner - Outside - 3 (2x2)",
-          "kind": "object",
-          "w": 2.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1552,
-            "y": 1734,
-            "w": 192,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 196,
-            "y": 196,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-corner-outside-diagonal-3x3",
-          "name": "Wall - Light - Corner - Outside - Diagonal (3x3)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 2.922,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 290,
-            "y": 1256,
-            "w": 288,
-            "h": 280,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 344,
-            "y": 490,
-            "w": 96,
-            "h": 94,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-half-circle-inside-3x3",
-          "name": "Wall - Light - Half Circle - Inside (3x3)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1642,
-            "y": 676,
-            "w": 288,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 294,
-            "y": 196,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-half-circle-inside-4x3",
-          "name": "Wall - Light - Half Circle - Inside (4x3)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 0,
-            "y": 966,
-            "w": 384,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 294,
-            "y": 766,
-            "w": 96,
-            "h": 72,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-half-circle-inside-6x4",
-          "name": "Wall - Light - Half Circle - Inside (6x4)",
-          "kind": "object",
-          "w": 6.0,
-          "h": 4.0,
-          "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 1156,
-            "y": 958,
-            "w": 576,
-            "h": 384,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 490,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-half-circle-outside-3x3",
-          "name": "Wall - Light - Half Circle - Outside (3x3)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 386,
-            "y": 966,
-            "w": 288,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 392,
-            "y": 196,
-            "w": 96,
-            "h": 96,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-half-circle-outside-4x3",
-          "name": "Wall - Light - Half Circle - Outside (4x3)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 676,
-            "y": 966,
-            "w": 384,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 392,
-            "y": 766,
-            "w": 96,
-            "h": 72,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-half-circle-outside-6x4",
-          "name": "Wall - Light - Half Circle - Outside (6x4)",
-          "kind": "object",
-          "w": 6.0,
-          "h": 4.0,
-          "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 0,
-            "y": 1344,
-            "w": 576,
-            "h": 384,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 588,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-straight-3x2",
-          "name": "Wall - Light - Straight (3x2)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1746,
-            "y": 1734,
-            "w": 288,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 686,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-straight-4x2",
-          "name": "Wall - Light - Straight (4x2)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 0,
-            "w": 384,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 752,
-            "y": 906,
-            "w": 96,
-            "h": 48,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-light-straight-5x2",
-          "name": "Wall - Light - Straight (5x2)",
-          "kind": "object",
-          "w": 5.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 386,
-            "y": 0,
-            "w": 480,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 588,
-            "y": 972,
-            "w": 96,
-            "h": 38,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-straight-3x2",
-          "name": "Wall - Straight (3x2)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 868,
-            "y": 0,
-            "w": 288,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 784,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-straight-4x2",
-          "name": "Wall - Straight (4x2)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1158,
-            "y": 0,
-            "w": 384,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 850,
-            "y": 906,
-            "w": 96,
-            "h": 48,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-straight-5x2",
-          "name": "Wall - Straight (5x2)",
-          "kind": "object",
-          "w": 5.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 1544,
-            "y": 0,
-            "w": 480,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 686,
-            "y": 972,
-            "w": 96,
-            "h": 38,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-thin-half-circle-1-4x3",
-          "name": "Wall - Thin - Half Circle - 1 (4x3)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1062,
-            "y": 966,
-            "w": 384,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 490,
-            "y": 766,
-            "w": 96,
-            "h": 72,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-thin-half-circle-1-6x4",
-          "name": "Wall - Thin - Half Circle - 1 (6x4)",
-          "kind": "object",
-          "w": 6.0,
-          "h": 4.0,
-          "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 578,
-            "y": 1344,
-            "w": 576,
-            "h": 384,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 882,
-            "y": 840,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-thin-half-circle-2-4x3",
-          "name": "Wall - Thin - Half Circle - 2 (4x3)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 3.0,
-          "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1448,
-            "y": 966,
-            "w": 384,
-            "h": 288,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 588,
-            "y": 766,
-            "w": 96,
-            "h": 72,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-thin-half-circle-2-6x4",
-          "name": "Wall - Thin - Half Circle - 2 (6x4)",
-          "kind": "object",
-          "w": 6.0,
-          "h": 4.0,
-          "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 1156,
-            "y": 1344,
-            "w": 576,
-            "h": 384,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 906,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-thin-straight-3x2",
-          "name": "Wall - Thin - Straight (3x2)",
-          "kind": "object",
-          "w": 3.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 194,
-            "w": 288,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 98,
-            "y": 906,
-            "w": 96,
-            "h": 64,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-thin-straight-4x2",
-          "name": "Wall - Thin - Straight (4x2)",
-          "kind": "object",
-          "w": 4.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 290,
-            "y": 194,
-            "w": 384,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 0,
-            "y": 972,
-            "w": 96,
-            "h": 48,
-            "sw": 1024,
-            "sh": 1024
-          }
-        },
-        {
-          "id": "bundled:2mtd-obj-wall-thin-straight-5x2",
-          "name": "Wall - Thin - Straight (5x2)",
-          "kind": "object",
-          "w": 5.0,
-          "h": 2.0,
-          "atlas": {
-            "sheet": "objects-2.webp",
-            "x": 676,
-            "y": 194,
-            "w": 480,
-            "h": 192,
-            "sw": 2048,
-            "sh": 2048
-          },
-          "thumb": {
-            "sheet": "objthumbs-0.webp",
-            "x": 784,
-            "y": 972,
-            "w": 96,
-            "h": 38,
             "sw": 1024,
             "sh": 1024
           }
@@ -3606,9 +2106,9 @@
           "w": 3.0,
           "h": 4.0,
           "atlas": {
-            "sheet": "objects-0.webp",
-            "x": 1734,
-            "y": 1344,
+            "sheet": "objects-1.webp",
+            "x": 0,
+            "y": 398,
             "w": 288,
             "h": 384,
             "sw": 2048,
@@ -3616,8 +2116,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 490,
-            "y": 196,
+            "x": 762,
+            "y": 294,
             "w": 72,
             "h": 96,
             "sw": 1024,
@@ -3632,8 +2132,8 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 0,
-            "y": 0,
+            "x": 290,
+            "y": 398,
             "w": 384,
             "h": 384,
             "sw": 2048,
@@ -3641,8 +2141,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 564,
-            "y": 196,
+            "x": 836,
+            "y": 294,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -3657,8 +2157,8 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 386,
-            "y": 0,
+            "x": 676,
+            "y": 398,
             "w": 192,
             "h": 384,
             "sw": 2048,
@@ -3666,8 +2166,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 662,
-            "y": 196,
+            "x": 934,
+            "y": 294,
             "w": 48,
             "h": 96,
             "sw": 1024,
@@ -3682,7 +2182,2135 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
+            "x": 870,
+            "y": 398,
+            "w": 288,
+            "h": 384,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 0,
+            "y": 392,
+            "w": 72,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        }
+      ]
+    },
+    {
+      "id": "2mtt",
+      "name": "2MT Trap Tokens",
+      "credit": "2-Minute Tabletop",
+      "textures": [
+        {
+          "id": "bundled:2mtt-obj-acid-cloud-2x2",
+          "name": "Acid cloud (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 874,
+            "y": 1459,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 74,
+            "y": 392,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-acid-mushroom-1x1",
+          "name": "Acid mushroom (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 390,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 172,
+            "y": 392,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-acid-spray-4x2",
+          "name": "Acid spray (4x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 4.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 1160,
+            "y": 398,
+            "w": 192,
+            "h": 384,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 270,
+            "y": 392,
+            "w": 48,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-ball-bearings-2x2",
+          "name": "Ball bearings (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1068,
+            "y": 1459,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 320,
+            "y": 392,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-bear-trap-1x1",
+          "name": "Bear trap (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 488,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 418,
+            "y": 392,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-bomb-1x1",
+          "name": "Bomb (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 586,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 516,
+            "y": 392,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-boulder-2x2",
+          "name": "Boulder (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1262,
+            "y": 1459,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 614,
+            "y": 392,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-caltrops-2x2",
+          "name": "Caltrops (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1456,
+            "y": 1459,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 712,
+            "y": 392,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-cat-1x1",
+          "name": "Cat (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 684,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 810,
+            "y": 392,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-ceiling-fan-2x2",
+          "name": "Ceiling fan (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1650,
+            "y": 1459,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 908,
+            "y": 392,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-cracked-floor-4x4",
+          "name": "Cracked floor (4x4)",
+          "kind": "object",
+          "w": 4.0,
+          "h": 4.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 1354,
+            "y": 398,
+            "w": 384,
+            "h": 384,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 0,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-danger-slit-1x3",
+          "name": "Danger slit (1x3)",
+          "kind": "object",
+          "w": 3.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 782,
+            "y": 217,
+            "w": 288,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 392,
+            "y": 582,
+            "w": 96,
+            "h": 32,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-dragon-bust-1x1",
+          "name": "Dragon bust (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1072,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 98,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-electricity-burst-3x2",
+          "name": "Electricity burst (3x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1546,
+            "y": 290,
+            "w": 192,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 196,
+            "y": 490,
+            "w": 64,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-explosion-2x2",
+          "name": "Explosion (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1844,
+            "y": 1459,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 262,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-eyeball-1x1",
+          "name": "Eyeball (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1170,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 360,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-eyeball-wall-1x1",
+          "name": "Eyeball, wall (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1268,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 458,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-fire-4x4",
+          "name": "Fire (4x4)",
+          "kind": "object",
+          "w": 4.0,
+          "h": 4.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 0,
+            "y": 784,
+            "w": 384,
+            "h": 384,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 556,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-fire-gout-3x2",
+          "name": "Fire gout (3x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1740,
+            "y": 290,
+            "w": 192,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 654,
+            "y": 490,
+            "w": 64,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-floor-flesh-3x3",
+          "name": "Floor flesh (3x3)",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 0,
+            "y": 580,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 720,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-hand-warmer-1x1",
+          "name": "Hand warmer (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1366,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 818,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-iron-boulder-2x2",
+          "name": "Iron Boulder (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 0,
+            "y": 1653,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 916,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-log-rolling-swinging-1x3",
+          "name": "Log, rolling, swinging (1x3)",
+          "kind": "object",
+          "w": 3.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1464,
+            "y": 217,
+            "w": 288,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 490,
+            "y": 582,
+            "w": 96,
+            "h": 32,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-mystery-sack-1x1",
+          "name": "Mystery sack (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1754,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 0,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-obvious-pressure-pad-1x1",
+          "name": "Obvious pressure pad (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1852,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 98,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-pit-4x4",
+          "name": "Pit (4x4)",
+          "kind": "object",
+          "w": 4.0,
+          "h": 4.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 386,
+            "y": 784,
+            "w": 384,
+            "h": 384,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 196,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-pit-acid-2x2",
+          "name": "Pit acid (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 194,
+            "y": 1653,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 294,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-pit-lava-2x2",
+          "name": "Pit lava (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 388,
+            "y": 1653,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 490,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-pit-spikes-2x2",
+          "name": "Pit spikes (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 582,
+            "y": 1653,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 588,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-pit-water-2x2",
+          "name": "Pit water (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 776,
+            "y": 1653,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 686,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-pit-collapsed-4x4",
+          "name": "Pit, collapsed (4x4)",
+          "kind": "object",
+          "w": 4.0,
+          "h": 4.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 772,
+            "y": 784,
+            "w": 384,
+            "h": 384,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 392,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-rolling-pin-of-doom-3x4",
+          "name": "Rolling pin of doom (3x4)",
+          "kind": "object",
+          "w": 4.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 290,
+            "y": 580,
+            "w": 384,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 294,
+            "y": 274,
+            "w": 96,
+            "h": 72,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-scythe-2x2",
+          "name": "Scythe (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 970,
+            "y": 1653,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 784,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-sliding-spikes-3x2",
+          "name": "Sliding spikes (3x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 676,
+            "y": 580,
+            "w": 192,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 882,
+            "y": 588,
+            "w": 64,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-spider-web-2x3",
+          "name": "Spider web (2x3)",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1164,
+            "y": 1653,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 416,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-suit-of-armor-1x1",
+          "name": "Suit of armor (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1950,
+            "y": 217,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 0,
+            "y": 686,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-swinging-blade-1x3",
+          "name": "Swinging blade (1x3)",
+          "kind": "object",
+          "w": 3.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 315,
+            "w": 288,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 588,
+            "y": 582,
+            "w": 96,
+            "h": 32,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-swinging-blade-floor-1x3",
+          "name": "Swinging blade, floor (1x3)",
+          "kind": "object",
+          "w": 3.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 290,
+            "y": 315,
+            "w": 288,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 686,
+            "y": 582,
+            "w": 96,
+            "h": 32,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-tilting-floor-4x4",
+          "name": "Tilting floor (4x4)",
+          "kind": "object",
+          "w": 4.0,
+          "h": 4.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 1158,
+            "y": 784,
+            "w": 384,
+            "h": 384,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 98,
+            "y": 686,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-trip-wire-1x2",
+          "name": "Trip wire (1x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
             "x": 580,
+            "y": 315,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 294,
+            "y": 532,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-unskilled-spider-s-web-2x3",
+          "name": "Unskilled spider's web (2x3)",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1454,
+            "y": 1653,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 98,
+            "y": 416,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-buzzsaw-1x1",
+          "name": "Wall buzzsaw (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 774,
+            "y": 315,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 196,
+            "y": 686,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-chomper-2x2",
+          "name": "Wall chomper (2x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1744,
+            "y": 1653,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 294,
+            "y": 686,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-crystal-1x1",
+          "name": "Wall crystal (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 872,
+            "y": 315,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 392,
+            "y": 686,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-cutter-2x1",
+          "name": "Wall cutter (2x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1938,
+            "y": 1653,
+            "w": 96,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 490,
+            "y": 686,
+            "w": 48,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-flesh-1x2",
+          "name": "Wall flesh (1x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 970,
+            "y": 315,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 392,
+            "y": 532,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-hatch-1x1",
+          "name": "Wall hatch (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1164,
+            "y": 315,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 540,
+            "y": 686,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-hatch-open-1x1",
+          "name": "Wall hatch, open (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1262,
+            "y": 315,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 638,
+            "y": 686,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-holes-1x1",
+          "name": "Wall holes (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1360,
+            "y": 315,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 736,
+            "y": 686,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-spikes-1x2",
+          "name": "Wall spikes (1x2)",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1458,
+            "y": 315,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 490,
+            "y": 532,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtt-obj-wall-vent-1x1",
+          "name": "Wall vent (1x1)",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1652,
+            "y": 315,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 834,
+            "y": 686,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        }
+      ]
+    },
+    {
+      "id": "2mtb",
+      "name": "2MT Basic Building",
+      "credit": "2-Minute Tabletop",
+      "textures": [
+        {
+          "id": "bundled:2mtb-floor-flagstone-tiling",
+          "name": "Floor - flagstone - tiling",
+          "kind": "floor",
+          "file": "2mtb-floor-flagstone-tiling.webp",
+          "cells": 4
+        },
+        {
+          "id": "bundled:2mtb-wall-railing-stone",
+          "name": "Railing - stone",
+          "kind": "wall",
+          "file": "2mtb-wall-railing-stone.webp",
+          "thick": 0.2773,
+          "tile": 4.0
+        },
+        {
+          "id": "bundled:2mtb-wall-railing-wood",
+          "name": "Railing - wood",
+          "kind": "wall",
+          "file": "2mtb-wall-railing-wood.webp",
+          "thick": 0.2656,
+          "tile": 4.0
+        },
+        {
+          "id": "bundled:2mtb-wall-wall-stone",
+          "name": "Wall - stone",
+          "kind": "wall",
+          "file": "2mtb-wall-wall-stone.webp",
+          "thick": 0.3008,
+          "tile": 4.0
+        },
+        {
+          "id": "bundled:2mtb-wall-wall-wood",
+          "name": "Wall - wood",
+          "kind": "wall",
+          "file": "2mtb-wall-wall-wood.webp",
+          "thick": 0.3047,
+          "tile": 4.0
+        },
+        {
+          "id": "bundled:2mtb-obj-door-collapsed-1x2",
+          "name": "Door - collapsed - 1x2",
+          "kind": "object",
+          "w": 1.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 596,
+            "y": 870,
+            "w": 96,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 0,
+            "y": 0,
+            "w": 48,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-door-narrow-1x2",
+          "name": "Door - narrow - 1x2",
+          "kind": "object",
+          "w": 1.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 694,
+            "y": 870,
+            "w": 96,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 50,
+            "y": 0,
+            "w": 48,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-door-wide-3x2",
+          "name": "Door - wide - 3x2",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 792,
+            "y": 870,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 98,
+            "y": 348,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-5x2",
+          "name": "Hole - roof - 5x2",
+          "kind": "object",
+          "w": 5.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1082,
+            "y": 870,
+            "w": 480,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 582,
+            "w": 96,
+            "h": 38,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-1-2x1",
+          "name": "Hole - roof 1 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1150,
+            "y": 0,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 752,
+            "y": 416,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-2-2x1",
+          "name": "Hole - roof 2 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1344,
+            "y": 0,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 850,
+            "y": 416,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-3x2",
+          "name": "Hole - roof glow - 3x2",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 678,
+            "y": 1071,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 392,
+            "y": 348,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-5x3",
+          "name": "Hole - roof glow - 5x3",
+          "kind": "object",
+          "w": 5.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 944,
+            "y": 1170,
+            "w": 480,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 262,
+            "y": 416,
+            "w": 96,
+            "h": 58,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-6x3",
+          "name": "Hole - roof glow - 6x3",
+          "kind": "object",
+          "w": 6.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 1426,
+            "y": 1170,
+            "w": 576,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 294,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-1-2x1",
+          "name": "Hole - roof glow 1 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1538,
+            "y": 0,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-1-2x2",
+          "name": "Hole - roof glow 1 - 2x2",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1564,
+            "y": 870,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 100,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-1-3x2",
+          "name": "Hole - roof glow 1 - 3x2",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1758,
+            "y": 870,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 196,
+            "y": 348,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-1-3x3",
+          "name": "Hole - roof glow 1 - 3x3",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 364,
+            "y": 1170,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 198,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-2-2x1",
+          "name": "Hole - roof glow 2 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1732,
+            "y": 0,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 98,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-2-2x2",
+          "name": "Hole - roof glow 2 - 2x2",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 0,
+            "y": 1071,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 296,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-2-3x3",
+          "name": "Hole - roof glow 2 - 3x3",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 654,
+            "y": 1170,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 394,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-3-2x1",
+          "name": "Hole - roof glow 3 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 119,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 196,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-3-2x2",
+          "name": "Hole - roof glow 3 - 2x2",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 194,
+            "y": 1071,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 492,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-roof-glow-3-3x2",
+          "name": "Hole - roof glow 3 - 3x2",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 388,
+            "y": 1071,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 294,
+            "y": 348,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-stone-2x2",
+          "name": "Hole - stone - 2x2",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 968,
+            "y": 1071,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 590,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-stone-3x3",
+          "name": "Hole - stone - 3x3",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 0,
+            "y": 1516,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 688,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-stone-6x4",
+          "name": "Hole - stone - 6x4",
+          "kind": "object",
+          "w": 6.0,
+          "h": 4.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 422,
+            "y": 0,
+            "w": 576,
+            "h": 384,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 490,
+            "y": 348,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-wood-2x2",
+          "name": "Hole - wood - 2x2",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1162,
+            "y": 1071,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 786,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-wood-3x3",
+          "name": "Hole - wood - 3x3",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 290,
+            "y": 1516,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 884,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-wood-1-2x1",
+          "name": "Hole - wood 1 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 194,
+            "y": 119,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 392,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-wood-2-2x1",
+          "name": "Hole - wood 2 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 388,
+            "y": 119,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 490,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-hole-wood-3-2x1",
+          "name": "Hole - wood 3 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 582,
+            "y": 119,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 588,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-misc-chimney-1x1",
+          "name": "Misc - chimney - 1x1",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 776,
+            "y": 119,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 0,
+            "y": 98,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-misc-ladder-1x1",
+          "name": "Misc - ladder - 1x1",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 874,
+            "y": 119,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 98,
+            "y": 98,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-misc-trap-door-3x3",
+          "name": "Misc - trap door - 3x3",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 580,
+            "y": 1516,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 196,
+            "y": 98,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-misc-weather-vane-1x1",
+          "name": "Misc - weather vane - 1x1",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 972,
+            "y": 119,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 294,
+            "y": 98,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-platform-horizontal-3x4",
+          "name": "Platform - horizontal - 3x4",
+          "kind": "object",
+          "w": 3.0,
+          "h": 4.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 1000,
             "y": 0,
             "w": 288,
             "h": 384,
@@ -3691,9 +4319,1009 @@
           },
           "thumb": {
             "sheet": "objthumbs-0.webp",
-            "x": 712,
-            "y": 196,
+            "x": 392,
+            "y": 98,
             "w": 72,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-platform-horizontal-4x5",
+          "name": "Platform - horizontal - 4x5",
+          "kind": "object",
+          "w": 4.0,
+          "h": 5.0,
+          "atlas": {
+            "sheet": "objects-0.webp",
+            "x": 1033,
+            "y": 578,
+            "w": 384,
+            "h": 480,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 466,
+            "y": 98,
+            "w": 77,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-platform-horizontal-5x6",
+          "name": "Platform - horizontal - 5x6",
+          "kind": "object",
+          "w": 5.0,
+          "h": 6.0,
+          "atlas": {
+            "sheet": "objects-0.webp",
+            "x": 0,
+            "y": 0,
+            "w": 480,
+            "h": 576,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 545,
+            "y": 98,
+            "w": 80,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-platform-vertical-3x4",
+          "name": "Platform - vertical - 3x4",
+          "kind": "object",
+          "w": 3.0,
+          "h": 4.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 1290,
+            "y": 0,
+            "w": 288,
+            "h": 384,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 627,
+            "y": 98,
+            "w": 72,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-platform-vertical-4x5",
+          "name": "Platform - vertical - 4x5",
+          "kind": "object",
+          "w": 4.0,
+          "h": 5.0,
+          "atlas": {
+            "sheet": "objects-0.webp",
+            "x": 1419,
+            "y": 578,
+            "w": 384,
+            "h": 480,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 701,
+            "y": 98,
+            "w": 77,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-platform-vertical-5x6",
+          "name": "Platform - vertical - 5x6",
+          "kind": "object",
+          "w": 5.0,
+          "h": 6.0,
+          "atlas": {
+            "sheet": "objects-0.webp",
+            "x": 482,
+            "y": 0,
+            "w": 480,
+            "h": 576,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 780,
+            "y": 98,
+            "w": 80,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-railing-stone-3x2",
+          "name": "Railing - stone - 3x2",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1356,
+            "y": 1071,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 588,
+            "y": 348,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-railing-stone-4x2",
+          "name": "Railing - stone - 4x2",
+          "kind": "object",
+          "w": 4.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1646,
+            "y": 1071,
+            "w": 384,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 686,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-railing-stone-5x2",
+          "name": "Railing - stone - 5x2",
+          "kind": "object",
+          "w": 5.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 0,
+            "y": 1265,
+            "w": 480,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 98,
+            "y": 582,
+            "w": 96,
+            "h": 38,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-railing-wood-3x2",
+          "name": "Railing - wood - 3x2",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 482,
+            "y": 1265,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 686,
+            "y": 348,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-railing-wood-4x2",
+          "name": "Railing - wood - 4x2",
+          "kind": "object",
+          "w": 4.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 772,
+            "y": 1265,
+            "w": 384,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 784,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-railing-wood-5x2",
+          "name": "Railing - wood - 5x2",
+          "kind": "object",
+          "w": 5.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1158,
+            "y": 1265,
+            "w": 480,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 196,
+            "y": 582,
+            "w": 96,
+            "h": 38,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-roof-premade-8x6",
+          "name": "Roof - premade - 8x6",
+          "kind": "object",
+          "w": 8.0,
+          "h": 6.0,
+          "atlas": {
+            "sheet": "objects-0.webp",
+            "x": 964,
+            "y": 0,
+            "w": 768,
+            "h": 576,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 654,
+            "y": 190,
+            "w": 96,
+            "h": 72,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-roof-thatch-6x4",
+          "name": "Roof - thatch - 6x4",
+          "kind": "object",
+          "w": 6.461,
+          "h": 4.473,
+          "atlas": {
+            "sheet": "objects-0.webp",
+            "x": 0,
+            "y": 1602,
+            "w": 620,
+            "h": 429,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 882,
+            "y": 274,
+            "w": 96,
+            "h": 66,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-roof-thatch-6x4-shaded",
+          "name": "Roof - thatch - 6x4 - shaded",
+          "kind": "object",
+          "w": 6.461,
+          "h": 4.473,
+          "atlas": {
+            "sheet": "objects-0.webp",
+            "x": 622,
+            "y": 1602,
+            "w": 620,
+            "h": 429,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 348,
+            "w": 96,
+            "h": 66,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-roof-tiled-6x4",
+          "name": "Roof - tiled - 6x4",
+          "kind": "object",
+          "w": 6.52,
+          "h": 4.543,
+          "atlas": {
+            "sheet": "objects-0.webp",
+            "x": 498,
+            "y": 1138,
+            "w": 626,
+            "h": 436,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 686,
+            "y": 274,
+            "w": 96,
+            "h": 67,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-roof-tiled-6x4-shaded",
+          "name": "Roof - tiled - 6x4 - shaded",
+          "kind": "object",
+          "w": 6.52,
+          "h": 4.543,
+          "atlas": {
+            "sheet": "objects-0.webp",
+            "x": 1126,
+            "y": 1138,
+            "w": 626,
+            "h": 436,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 784,
+            "y": 274,
+            "w": 96,
+            "h": 67,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-collapsed-wall-3x2",
+          "name": "Rubble - collapsed wall - 3x2",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1640,
+            "y": 1265,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 784,
+            "y": 348,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-mixed-3x2",
+          "name": "Rubble - mixed - 3x2",
+          "kind": "object",
+          "w": 3.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 0,
+            "y": 1459,
+            "w": 288,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 882,
+            "y": 348,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-mixed-3x3",
+          "name": "Rubble - mixed - 3x3",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 870,
+            "y": 1516,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 862,
+            "y": 98,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-planks-1-2x1",
+          "name": "Rubble - planks 1 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1070,
+            "y": 119,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 882,
+            "y": 482,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-planks-2-2x1",
+          "name": "Rubble - planks 2 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1264,
+            "y": 119,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 532,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-planks-3-2x1",
+          "name": "Rubble - planks 3 - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1458,
+            "y": 119,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 98,
+            "y": 532,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-scuff-1-1x1",
+          "name": "Rubble - scuff 1 - 1x1",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1652,
+            "y": 119,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 0,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-scuff-2-1x1",
+          "name": "Rubble - scuff 2 - 1x1",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1750,
+            "y": 119,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 98,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-scuff-3-1x1",
+          "name": "Rubble - scuff 3 - 1x1",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1848,
+            "y": 119,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 196,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-stone-pile-4x3",
+          "name": "Rubble - stone pile - 4x3",
+          "kind": "object",
+          "w": 4.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 1160,
+            "y": 1516,
+            "w": 384,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 752,
+            "y": 190,
+            "w": 96,
+            "h": 72,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-wood-1x1",
+          "name": "Rubble - wood - 1x1",
+          "kind": "object",
+          "w": 1.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1946,
+            "y": 119,
+            "w": 96,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 392,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-wood-2x1",
+          "name": "Rubble - wood - 2x1",
+          "kind": "object",
+          "w": 2.0,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 217,
+            "w": 192,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 196,
+            "y": 532,
+            "w": 96,
+            "h": 48,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-wood-1-2x2",
+          "name": "Rubble - wood 1 - 2x2",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 290,
+            "y": 1459,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 294,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-rubble-wood-2-2x2",
+          "name": "Rubble - wood 2 -  2x2",
+          "kind": "object",
+          "w": 2.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 484,
+            "y": 1459,
+            "w": 192,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 490,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-stairs-stone-down",
+          "name": "Stairs - stone - down",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 1546,
+            "y": 1516,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 588,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-stairs-stone-down-long",
+          "name": "Stairs - stone - down - long",
+          "kind": "object",
+          "w": 4.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 0,
+            "y": 0,
+            "w": 384,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 850,
+            "y": 190,
+            "w": 96,
+            "h": 72,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-stairs-stone-up",
+          "name": "Stairs - stone - up",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 386,
+            "y": 0,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 686,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-stairs-stone-up-down",
+          "name": "Stairs - stone - up-down",
+          "kind": "object",
+          "w": 4.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 676,
+            "y": 0,
+            "w": 384,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 274,
+            "w": 96,
+            "h": 72,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-stairs-wood-down",
+          "name": "Stairs - wood - down",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1062,
+            "y": 0,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 784,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-stairs-wood-down-long",
+          "name": "Stairs - wood - down - long",
+          "kind": "object",
+          "w": 4.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1352,
+            "y": 0,
+            "w": 384,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 98,
+            "y": 274,
+            "w": 96,
+            "h": 72,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-stairs-wood-up",
+          "name": "Stairs - wood - up",
+          "kind": "object",
+          "w": 3.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1738,
+            "y": 0,
+            "w": 288,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 882,
+            "y": 196,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-stairs-wood-up-down",
+          "name": "Stairs - wood - up-down",
+          "kind": "object",
+          "w": 4.0,
+          "h": 3.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 0,
+            "y": 290,
+            "w": 384,
+            "h": 288,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 196,
+            "y": 274,
+            "w": 96,
+            "h": 72,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-window-narrow-1x2",
+          "name": "Window - narrow - 1x2",
+          "kind": "object",
+          "w": 1.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 678,
+            "y": 1459,
+            "w": 96,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 0,
+            "y": 294,
+            "w": 48,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:2mtb-obj-window-wide-1x2",
+          "name": "Window - wide - 1x2",
+          "kind": "object",
+          "w": 1.0,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 776,
+            "y": 1459,
+            "w": 96,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-0.webp",
+            "x": 50,
+            "y": 294,
+            "w": 48,
             "h": 96,
             "sw": 1024,
             "sh": 1024

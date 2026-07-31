@@ -1976,9 +1976,21 @@
   // "- Colorable" are greyscale masks for Dungeondraft's colour picker, "- End"
   // are wall end-caps the wall tool consumes, "Demo" is marketing art.
   const SKIP_OBJ=/( - Colorable| - End)\.(webp|png|jpe?g)$|Demo\.(webp|png|jpe?g)$/i;
+  // Packs ship their wall kit as loose sprites too — straight runs, corners, half
+  // circles, railings. The wall tool draws all of that properly, so they'd just be
+  // clutter in the palette. The " - " separator matters: /^Wall\b/ would also eat
+  // real props like "Wall buzzsaw" and "Wall spikes".
+  const SKIP_WALL_OBJ=/^(Wall|Rail)\s+-\s/i;
   const MAX_IMPORT_OBJECTS=400;
+  // Floors/walls: drop the pack-name prefix, which is repeated on every file in
+  // a pack ("Dungeon Room Builder - Dark" -> "Dark").
   function packLabel(p){ return p.split("/").pop().replace(/\.(webp|png|jpe?g)$/i,"")
     .replace(/^Texture\s*-\s*/i,"").replace(/_wall$/i,"").replace(/^.*?\s-\s/,""); }
+  // Objects keep their FULL name — stripping to the first " - " would turn
+  // "Wall - Straight (3x2)" into "Straight (3x2)", which both reads worse and
+  // hides the prefix SKIP_WALL_OBJ needs to match on.
+  function objLabel(p){ return p.split("/").pop().replace(/\.(webp|png|jpe?g)$/i,"")
+    .replace(/^[a-z0-9]+_/,""); }
 
   // A pack wall strip is a wide image with the wall band somewhere inside a lot
   // of transparent padding. Crop to the opaque rows so the renderer can stretch
@@ -2019,7 +2031,8 @@
     const j=entries.find(e=>/\/pack\.json$/i.test(e.path));
     if(j){ try{ meta=Object.assign(meta, JSON.parse(new TextDecoder().decode(new Uint8Array(buf,j.off,j.size)))); }catch(e){} }
     const packId="pack:"+(meta.id || meta.name).replace(/[^A-Za-z0-9_-]+/g,"");
-    let objs=entries.filter(e=>OBJECT.test(e.path) && !SKIP_OBJ.test(e.path));
+    let objs=entries.filter(e=>OBJECT.test(e.path) && !SKIP_OBJ.test(e.path)
+                                && !SKIP_WALL_OBJ.test(objLabel(e.path)));
     let dropped=0;
     if(objs.length>MAX_IMPORT_OBJECTS){ dropped=objs.length-MAX_IMPORT_OBJECTS; objs=objs.slice(0,MAX_IMPORT_OBJECTS); }
     const tiles=entries.filter(e=>TILEABLE.test(e.path)||WALLSTRIP.test(e.path)).concat(objs);
@@ -2035,7 +2048,7 @@
         const meta=await objectMeta(blob); if(!meta) continue;
         await idbPut("files", id, blob);
         await idbPut("files", id+"#thumb", meta.thumb);
-        made.push({id, name:packLabel(e.path), kind:"object", w:meta.w, h:meta.h,
+        made.push({id, name:objLabel(e.path), kind:"object", w:meta.w, h:meta.h,
                    thumbKey:id+"#thumb", pack:packId});
       } else if(WALLSTRIP.test(e.path)){
         const cr=await cropWallStrip(blob); if(!cr) continue;
