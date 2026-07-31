@@ -114,6 +114,24 @@
   .objgrid img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
   .objgrid .th{display:block;background-repeat:no-repeat;pointer-events:none}
   .objgrid .none{grid-column:1/-1;font-size:10.5px;color:var(--muted);text-align:center;padding:16px 4px}
+  /* swatch pickers */
+  .pick{display:flex;align-items:center;gap:8px;width:100%;padding:5px 8px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:7px;color:var(--ink);font:inherit;font-size:11.5px;
+    cursor:pointer;text-align:left}
+  .pick:hover{border-color:var(--gold-dim)}
+  .pick .pl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pick .ca{color:var(--muted);font-size:10px}
+  .sw{width:34px;height:22px;flex:0 0 auto;border-radius:4px;border:1px solid var(--line);
+    background-repeat:no-repeat;background-position:center;background-color:#0f0f13}
+  .pickpop{position:fixed;z-index:60;background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.55);overflow:auto;padding:4px}
+  .pickpop .gl{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+    padding:7px 8px 3px}
+  .pickpop .opt{display:flex;align-items:center;gap:8px;width:100%;padding:5px 7px;background:none;
+    border:0;border-radius:6px;color:var(--ink);font:inherit;font-size:11.5px;cursor:pointer;text-align:left}
+  .pickpop .opt:hover{background:var(--panel2)}
+  .pickpop .opt.on{background:var(--active);color:var(--gold)}
+  .pickpop .opt span:last-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .spacer{flex:1}
   .save-state{font-size:10px;color:var(--muted);padding:8px 14px;letter-spacing:.04em}
 
@@ -218,12 +236,12 @@
       </div>
       <div id="advBody" style="display:none">
         <p class="hint" id="styleScope" style="margin:0 0 2px"></p>
-        <label class="fld" for="wallSel">Walls</label>
-        <select class="sel" id="wallSel"></select>
-        <label class="fld" for="floorSel">Floor</label>
-        <select class="sel" id="floorSel"></select>
-        <label class="fld" for="bgSel">Background</label>
-        <select class="sel" id="bgSel"></select>
+        <label class="fld">Walls</label>
+        <button class="pick" id="wallSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
+        <label class="fld">Floor</label>
+        <button class="pick" id="floorSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
+        <label class="fld">Background</label>
+        <button class="pick" id="bgSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <div class="row" style="margin-top:10px">
           <button class="btn" id="packAdd">+ Asset pack</button>
         </div>
@@ -269,6 +287,8 @@
 
     <div class="spacer"></div>
   </aside>
+  <!-- One shared picker popup, position:fixed so the scrolling sidebar can't clip it. -->
+  <div id="pickPop" class="pickpop" hidden></div>
 
   <div class="preview-area">
     <canvas id="map"></canvas>
@@ -2377,40 +2397,120 @@
     toast(toFront ? "Brought to front" : "Sent to back");
   }
 
+  // ── swatch pickers ────────────────────────────────────────────────
+  // Native <select> can't show art, and you can't judge a floor or a wall by its
+  // name. These are custom pickers: a button showing the current swatch, and one
+  // shared position:fixed popup listing every option WITH its swatch. Fixed
+  // rather than absolute because the sidebar scrolls and would clip it.
+  const BG_LIST=[{id:"bg:theme", name:"Classic (theme)", col:"#efe8d7"},
+                 {id:"bg:slate", name:"Slate (solid)",   col:"#171a21"},
+                 {id:"bg:black", name:"Black (solid)",   col:"#08080a"},
+                 {id:"bg:parch", name:"Parchment (solid)", col:"#efe8d7"}];
+  const PICKERS={ wall:{el:"wallSel", none:"Classic ink"},
+                  floor:{el:"floorSel", none:"Classic parchment"},
+                  bg:{el:"bgSel", none:null} };
+
+  // Paint a texture's swatch onto an element: an atlas crop for bundled art, a
+  // lazily-built thumbnail for imported art, a flat colour for the solid bgs.
+  function paintSwatch(el, id){
+    el.style.backgroundImage=""; el.style.backgroundColor="#0f0f13"; el.style.backgroundSize="";
+    if(!id){ el.style.backgroundColor="#f4efe3"; return; }              // classic
+    const solid=BG_LIST.find(o=>o.id===id);
+    if(solid){ el.style.backgroundColor=solid.col; return; }
+    const t=texReg.get(id); if(!t) return;
+    const r=t.thumbRect;
+    if(r){
+      const W=34, H=22, f=Math.max(W/r.w, H/r.h);                        // cover the swatch
+      el.style.backgroundImage='url("/packs/bundled/'+r.sheet+assetV+'")';
+      el.style.backgroundSize=(r.sw*f)+"px "+(r.sh*f)+"px";
+      el.style.backgroundPosition=(-r.x*f + (W-r.w*f)/2)+"px "+(-r.y*f + (H-r.h*f)/2)+"px";
+    } else {
+      ensureThumb(t, {set src(v){ el.style.backgroundImage='url("'+v+'")';
+                                  el.style.backgroundSize="cover"; }});
+    }
+  }
+  function pickList(kind){
+    const out=[];
+    if(kind==="bg"){
+      out.push({label:"", list:BG_LIST.map(o=>({id:o.id, name:o.name}))});
+      // any floor tile also makes a good exterior
+    } else if(PICKERS[kind].none!=null){
+      out.push({label:"", list:[{id:"", name:PICKERS[kind].none}]});
+    }
+    const want = kind==="bg" ? "floor" : kind;
+    for(const p of bundledPacks){
+      const list=[...texReg.values()].filter(t=>t.kind===want && t.pack===p.id)
+                                     .map(t=>({id:t.id, name:t.name}));
+      if(list.length) out.push({label:p.name, list});
+    }
+    const imported=[...texReg.values()].filter(t=>t.kind===want && String(t.id).indexOf("pack:")===0)
+                                       .map(t=>({id:t.id, name:t.name}));
+    if(imported.length) out.push({label:"Imported packs", list:imported});
+    return out;
+  }
+  function currentPick(kind){
+    const st=map.style||{}, sc=styleScope();
+    if(kind==="bg") return st.bg||"bg:theme";
+    if(sc.kind==="new") return pendingStyle()[kind]||"";
+    if(sc.kind==="sel"){ const o=sc.target.obj;
+      return o[kind]!==undefined ? o[kind] : (st[kind]||""); }
+    return st[kind]||"";
+  }
+  function labelFor(kind, id){
+    if(!id) return PICKERS[kind].none || "—";
+    const solid=BG_LIST.find(o=>o.id===id); if(solid) return solid.name;
+    const t=texReg.get(id);
+    return t ? t.name : "(missing — load its pack)";
+  }
   function buildTexSelects(){
-    const st=map.style||{}, sc=styleScope(), tgt=(sc.kind==="sel") ? sc.target : null;
-    const pick=(k)=> sc.kind==="new" ? (pendingStyle()[k]||"")
-                   : tgt && tgt.obj[k]!==undefined ? tgt.obj[k] : (st[k]||"");
-    const fs=$("floorSel"), bs=$("bgSel"), ws=$("wallSel"); if(!fs||!bs) return;
-    // Options are grouped by source pack so a long list stays readable.
-    const opts=(sel, groups, cur)=>{ sel.innerHTML="";
-      for(const g of groups){
-        if(!g.list.length) continue;
-        const parent = g.label ? document.createElement("optgroup") : sel;
-        if(g.label){ parent.label=g.label; sel.appendChild(parent); }
-        for(const o of g.list){ const e=document.createElement("option");
-          e.value=o.id; e.textContent=o.name; parent.appendChild(e); } }
-      sel.value=cur; if(!sel.value) sel.value="";
-    };
-    const byKind=(kind)=>{
-      const g=[];
-      for(const p of bundledPacks) g.push({label:p.name, list:[...texReg.values()]
-        .filter(t=>t.kind===kind && t.pack===p.id).map(t=>({id:t.id,name:t.name}))});
-      const imported=[...texReg.values()].filter(t=>t.kind===kind && String(t.id).indexOf("pack:")===0);
-      if(imported.length) g.push({label:"Imported packs", list:imported.map(t=>({id:t.id,name:t.name}))});
-      return g;
-    };
-    opts(fs, [{label:"", list:[{id:"", name:"Classic parchment"}]}].concat(byKind("floor")),
-         (sc.kind==="new" || (tgt&&tgt.kind==="shape")) ? pick("floor") : (st.floor||""));
-    if(ws) opts(ws, [{label:"", list:[{id:"", name:"Classic ink"}]}].concat(byKind("wall")),
-                (sc.kind==="new" || tgt) ? pick("wall") : (st.wall||""));
-    // Background: the solid fills, plus any floor tile — a stone or dirt tile
-    // makes a better exterior than a flat colour.
-    opts(bs, [{label:"", list:[{id:"bg:theme", name:"Classic (theme)"},
-                               {id:"bg:slate", name:"Slate (solid)"},
-                               {id:"bg:black", name:"Black (solid)"},
-                               {id:"bg:parch", name:"Parchment (solid)"}]}].concat(byKind("floor")),
-         st.bg||"bg:theme");
+    for(const kind in PICKERS){
+      const b=$(PICKERS[kind].el); if(!b) continue;
+      const id=currentPick(kind);
+      b.querySelector(".pl").textContent=labelFor(kind,id);
+      paintSwatch(b.querySelector(".sw"), id);
+    }
+    const sc=styleScope();
+    const fs=$("floorSel");
+    if(fs) fs.disabled = !!(sc.kind==="sel" && sc.target.kind==="wall");
+  }
+  let pickOpen=null;
+  function closePicker(){ const p=$("pickPop"); if(p) p.hidden=true; pickOpen=null; }
+  function openPicker(kind){
+    const btn=$(PICKERS[kind].el), pop=$("pickPop");
+    if(!btn || !pop || btn.disabled) return;
+    if(pickOpen===kind){ closePicker(); return; }
+    pickOpen=kind;
+    const cur=currentPick(kind);
+    pop.innerHTML="";
+    for(const g of pickList(kind)){
+      if(g.label){ const h=document.createElement("div"); h.className="gl"; h.textContent=g.label; pop.appendChild(h); }
+      for(const o of g.list){
+        const r=document.createElement("button"); r.type="button";
+        r.className="opt"+(o.id===cur?" on":"");
+        const sw=document.createElement("span"); sw.className="sw";
+        const nm=document.createElement("span"); nm.textContent=o.name;
+        r.appendChild(sw); r.appendChild(nm);
+        paintSwatch(sw, o.id);
+        r.onclick=()=>{ closePicker(); setStyleKey(kind, o.id); };
+        pop.appendChild(r);
+      }
+    }
+    const rc=btn.getBoundingClientRect();
+    pop.hidden=false;
+    const below=window.innerHeight-rc.bottom-12, above=rc.top-12;
+    const h=Math.min(340, Math.max(below, above));
+    pop.style.width=rc.width+"px";
+    pop.style.left=rc.left+"px";
+    pop.style.maxHeight=h+"px";
+    pop.style.top = (below>=Math.min(340,above) ? rc.bottom+4 : Math.max(8, rc.top-4-h))+"px";
+  }
+  function setStyleKey(kind, val){
+    if(kind==="bg"){ map.style.bg=val; commit(); buildTexSelects(); return; }
+    const sc=styleScope();
+    if(sc.kind==="new"){ pendingStyle()[kind]=val; syncStyleScope(); return; }   // map untouched
+    if(sc.kind==="sel"){ pushHistory(); sc.target.obj[kind]=val; commit(); syncStyleScope(); return; }
+    map.style[kind]=val; pendingStyle()[kind]=val;   // default and "next draw" stay in step
+    commit(); syncStyleScope();
   }
   function syncStyleScope(){
     const el=$("styleScope"); if(!el) return;
@@ -2539,16 +2639,16 @@
       map.style.mode = e.target.checked ? "textured" : "classic";
       syncAdvancedUI(); commit();
     };
-    const setStyleKey=(key,val)=>{
-      const sc=styleScope();
-      if(sc.kind==="new"){ pendingStyle()[key]=val; syncStyleScope(); return; }   // map untouched
-      if(sc.kind==="sel"){ pushHistory(); sc.target.obj[key]=val; commit(); return; }
-      map.style[key]=val; pendingStyle()[key]=val;   // default and "next draw" stay in step
-      commit();
-    };
-    if($("wallSel"))  $("wallSel").onchange =e=>setStyleKey("wall",  e.target.value);
-    if($("floorSel")) $("floorSel").onchange=e=>setStyleKey("floor", e.target.value);
-    if($("bgSel"))    $("bgSel").onchange   =e=>{ map.style.bg   =e.target.value; commit(); };
+    for(const kind in PICKERS){
+      const b=$(PICKERS[kind].el);
+      if(b) b.onclick=(e)=>{ e.stopPropagation(); openPicker(kind); };
+    }
+    document.addEventListener("click", e=>{
+      const pop=$("pickPop");
+      if(pickOpen && pop && !pop.contains(e.target)) closePicker();
+    });
+    window.addEventListener("resize", closePicker);
+    const sb=document.querySelector(".sidebar"); if(sb) sb.addEventListener("scroll", closePicker);
     if($("objFilter")) $("objFilter").oninput=()=>buildObjGrid();
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
@@ -2691,7 +2791,8 @@
     if((e.ctrlKey||e.metaKey)&&e.key==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
     if((e.ctrlKey||e.metaKey)&&e.key==="y"){ e.preventDefault(); redo(); return; }
     if(e.key==="Enter"&&polyPts){ finishPolygon(); return; }
-    if(e.key==="Escape"){ polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; render(); return; }
+    if(e.key==="Escape"){ if(pickOpen){ closePicker(); return; }
+      polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; render(); return; }
     if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
     if(sel && sel.kind==="object"){
       const o=objAt(sel); if(o){
