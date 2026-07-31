@@ -37,12 +37,12 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <a
-            href="https://www.owlbear.rodeo/"
+            href="https://www.owlbear.rodeo/profile"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded border border-[var(--gold)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--gold)] hover:bg-[var(--panel-2)] sm:px-3 sm:py-1.5 sm:text-[11px]"
           >
-            Open Owlbear Rodeo ↗
+            Open VTT ↗
           </a>
           <Link
             href="/dashboard"
