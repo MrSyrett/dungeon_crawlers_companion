@@ -78,6 +78,9 @@
   .chk{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);cursor:pointer;margin-top:10px}
   .chk input{accent-color:var(--gold);width:15px;height:15px}
   .hint{font-size:10.5px;color:var(--muted);line-height:1.5;margin:8px 0 0}
+  .credit{font-size:10px;color:var(--muted);line-height:1.7;margin:12px 0 0;text-align:center}
+  .credit a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+  .credit a:hover{color:var(--gold)}
   .sel{width:100%;padding:7px 8px;background:var(--panel2);border:1px solid var(--line);
     border-radius:7px;color:var(--ink);font:inherit;font-size:11.5px;cursor:pointer}
   .sel:focus{outline:none;border-color:var(--gold-dim)}
@@ -229,6 +232,8 @@
         <button class="btn" id="png">⬇ PNG</button>
         <button class="btn" id="pngT" title="Transparent background — floors only">⬇ PNG (transp.)</button>
       </div>
+      <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a><br>
+        <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a></p>
     </div>
 
     <div class="spacer"></div>
@@ -307,7 +312,7 @@
   let W = 0, H = 0, DPR = 1;
 
   function blankMap(){
-    return { version:1, name:"", grid:true, gridOpacity:1, style:{mode:"classic", floor:"starter:flagstone", wall:"starter:wallstone", bg:"starter:rockdark"},
+    return { version:1, name:"", grid:true, gridOpacity:1, style:DEFAULT_STYLE(),
              shapes:[], walls:[], doors:[], stairs:[], seedId:1 };
   }
   function uid(){ return map.seedId++; }
@@ -1605,6 +1610,11 @@
   // Replace the working map with a loaded/imported one, filling any gaps.
   function adoptMap(data){
     map=Object.assign(blankMap(), data);
+    if(map.style){ map.style.floor=unalias(map.style.floor); map.style.wall=unalias(map.style.wall);
+                   map.style.bg=unalias(map.style.bg); }
+    for(const sh of map.shapes){ if(sh.floor!==undefined) sh.floor=unalias(sh.floor);
+                                 if(sh.wall!==undefined) sh.wall=unalias(sh.wall); }
+    for(const wl of map.walls) if(wl.wall!==undefined) wl.wall=unalias(wl.wall);
     map.shapes=data.shapes||[]; map.walls=data.walls||[]; map.doors=data.doors||[]; map.stairs=data.stairs||[];
     if(!map.seedId) map.seedId=1+Math.max(0,...allIds());
   }
@@ -1652,26 +1662,44 @@
   // `map.style = {mode, floor, bg}` stores ids, not pixels. If an id can't be
   // resolved (pack not loaded in this browser, or the tool opened offline) the
   // renderer just falls back to the classic flat colours — never an error.
-  const STARTER = [
-    {id:"starter:flagstone", name:"Flagstone",   kind:"floor", url:"/packs/starter/floor-flagstone.webp", cells:4},
-    {id:"starter:cobble",    name:"Cobblestone", kind:"floor", url:"/packs/starter/floor-cobble.webp",    cells:4},
-    {id:"starter:tile",      name:"Cut tile",    kind:"floor", url:"/packs/starter/floor-tile.webp",      cells:4},
-    {id:"starter:planks",    name:"Wood planks", kind:"floor", url:"/packs/starter/floor-planks.webp",    cells:4},
-    {id:"starter:cavern",    name:"Cavern rock", kind:"floor", url:"/packs/starter/floor-cavern.webp",    cells:4},
-    {id:"starter:sand",      name:"Sand",        kind:"floor", url:"/packs/starter/floor-sand.webp",      cells:4},
-    {id:"starter:rockdark",  name:"Dark rock",   kind:"bg",    url:"/packs/starter/bg-rock-dark.webp",    cells:4},
-    {id:"starter:rocklight", name:"Light rock",  kind:"bg",    url:"/packs/starter/bg-rock-light.webp",   cells:4},
-    // Wall strips carry `thick` (wall thickness in cells) and `tile` (length of
-    // one repeat in cells) instead of `cells` — they're laid along a path, not
-    // tiled across an area. 1024x64 art at thick .4 / tile 6.4 draws undistorted.
-    {id:"starter:wallstone", name:"Cut stone",   kind:"wall", url:"/packs/starter/wall-stone.webp",  thick:0.4, tile:6.4},
-    {id:"starter:walldark",  name:"Dark slate",  kind:"wall", url:"/packs/starter/wall-dark.webp",   thick:0.4, tile:6.4},
-    {id:"starter:wallrubble",name:"Rubble",      kind:"wall", url:"/packs/starter/wall-rubble.webp", thick:0.4, tile:6.4},
-    {id:"starter:walltimber",name:"Timber",      kind:"wall", url:"/packs/starter/wall-timber.webp", thick:0.4, tile:6.4},
-  ];
+  // Bundled art is described by /packs/bundled/bundled.json so adding or
+  // swapping packs is a data change, not a code change. Only CREATIVE-COMMONS
+  // packs belong in there — anything bundled is redistributed by the site.
+  // (See public/packs/bundled/extract-pack.py.) Attribution is rendered
+  // statically in the sidebar, never from this fetch, so it can't go missing.
+  const BUNDLED_URL = "/packs/bundled/bundled.json";
+  // Maps saved against the old generated placeholder set are migrated on load
+  // to the nearest real texture, so existing work doesn't come back blank.
+  const ALIAS = {
+    "starter:flagstone":"bundled:2mtw-stone-paving", "starter:cobble":"bundled:2mtw-stone",
+    "starter:tile":"bundled:2mtd-classic-stone-floor","starter:planks":"bundled:2mtw-floorboards-a",
+    "starter:cavern":"bundled:2mtw-dirt",            "starter:sand":"bundled:2mtw-dirt",
+    "starter:rockdark":"bg:slate",                   "starter:rocklight":"bg:parch",
+    "starter:wallstone":"bundled:2mtw-wall-wall-stone-a",
+    "starter:walldark":"bundled:2mtd-wall-dark",
+    "starter:wallrubble":"bundled:2mtw-wall-wall-stone-b",
+    "starter:walltimber":"bundled:2mtw-wall-wall-wood-a",
+  };
+  // A function DECLARATION, not a const: blankMap() runs while the module is
+  // still initialising (`let map = blankMap()`), so a const here would be in the
+  // temporal dead zone and every boot would throw.
+  function DEFAULT_STYLE(){ return {mode:"classic", floor:"bundled:2mtd-classic-stone-floor",
+                                    wall:"bundled:2mtd-wall-dark", bg:"bg:slate"}; }
+  function unalias(id){ return (id && ALIAS[id]) || id; }
+
   const BG_SOLID = { "bg:theme":null, "bg:black":"#08080a", "bg:slate":"#171a21", "bg:parch":"#efe8d7" };
-  const texReg = new Map();                       // id -> {id,name,kind,url,cells,img,failed}
-  STARTER.forEach(t=>texReg.set(t.id,t));
+  const texReg = new Map();                       // id -> {id,name,kind,url,cells|thick|tile,img}
+  let bundledPacks = [];                          // [{id,name,textures:[…]}] once the manifest lands
+  async function loadBundled(){
+    let m; try{ m = await (await fetch(BUNDLED_URL, {cache:"force-cache"})).json(); }catch(e){ return; }
+    bundledPacks = m.packs || [];
+    for(const p of bundledPacks) for(const t of p.textures)
+      texReg.set(t.id, {id:t.id, name:t.name, kind:t.kind, pack:p.id, packName:p.name,
+                        cells:t.cells, thick:t.thick, tile:t.tile,
+                        url:"/packs/bundled/"+t.file, img:null});
+    buildTexSelects();
+    render();
+  }
 
   // Kick off a load the first time a texture is asked for; re-render when it
   // arrives. Returns the entry only once it's actually drawable.
@@ -1865,34 +1893,13 @@
     for(const t of p.textures){ try{ await idbDel("files", t.id); }catch(e){} texReg.delete(t.id); }
     try{ await idbDel("packs", p.id); }catch(e){}
     const st=map.style||{};
-    if(st.floor && st.floor.indexOf(p.id)===0) st.floor="starter:flagstone";
-    if(st.wall  && st.wall.indexOf(p.id)===0)  st.wall ="starter:wallstone";
+    if(st.floor && st.floor.indexOf(p.id)===0) st.floor=DEFAULT_STYLE().floor;
+    if(st.wall  && st.wall.indexOf(p.id)===0)  st.wall =DEFAULT_STYLE().wall;
     await refreshPackList(); buildTexSelects(); commit();
     toast("Removed "+p.name+".");
   }
 
   // ── selects ───────────────────────────────────────────────────────
-  function buildTexSelects(){
-    const st=map.style||{}, tgt=styleTarget();
-    const pick=(k)=> tgt && tgt.obj[k]!==undefined ? tgt.obj[k] : (st[k]||"");
-    const fs=$("floorSel"), bs=$("bgSel"); if(!fs||!bs) return;
-    const opts=(sel, list, cur)=>{ sel.innerHTML="";
-      for(const o of list){ const e=document.createElement("option"); e.value=o.id; e.textContent=o.name; sel.appendChild(e); }
-      sel.value=cur; if(!sel.value && list.length) sel.value=list[0].id; };
-    const floors=[{id:"", name:"Classic parchment"}];
-    for(const t of texReg.values()) if(t.kind==="floor") floors.push({id:t.id, name:t.name});
-    opts(fs, floors, (tgt&&tgt.kind==="shape") ? pick("floor") : (st.floor||""));
-    const ws=$("wallSel");
-    if(ws){ const walls=[{id:"", name:"Classic ink"}];
-      for(const t of texReg.values()) if(t.kind==="wall") walls.push({id:t.id, name:t.name});
-      opts(ws, walls, tgt ? pick("wall") : (st.wall||"")); }
-    opts(bs, [{id:"bg:theme", name:"Classic (theme)"},
-              {id:"starter:rockdark",  name:"Dark rock"},
-              {id:"starter:rocklight", name:"Light rock"},
-              {id:"bg:slate", name:"Slate (solid)"},
-              {id:"bg:black", name:"Black (solid)"},
-              {id:"bg:parch", name:"Parchment (solid)"}], st.bg||"bg:theme");
-  }
   // New shapes/walls CAPTURE the current picker choice, so changing the picker
   // afterwards doesn't restyle what you already drew. Generated rooms are left
   // unstamped on purpose — they inherit map.style, so one picker change restyles
@@ -1914,6 +1921,41 @@
     return null;
   }
   function setSel(v){ sel=v; syncStyleScope(); }
+
+  function buildTexSelects(){
+    const st=map.style||{}, tgt=styleTarget();
+    const pick=(k)=> tgt && tgt.obj[k]!==undefined ? tgt.obj[k] : (st[k]||"");
+    const fs=$("floorSel"), bs=$("bgSel"), ws=$("wallSel"); if(!fs||!bs) return;
+    // Options are grouped by source pack so a long list stays readable.
+    const opts=(sel, groups, cur)=>{ sel.innerHTML="";
+      for(const g of groups){
+        if(!g.list.length) continue;
+        const parent = g.label ? document.createElement("optgroup") : sel;
+        if(g.label){ parent.label=g.label; sel.appendChild(parent); }
+        for(const o of g.list){ const e=document.createElement("option");
+          e.value=o.id; e.textContent=o.name; parent.appendChild(e); } }
+      sel.value=cur; if(!sel.value) sel.value="";
+    };
+    const byKind=(kind)=>{
+      const g=[];
+      for(const p of bundledPacks) g.push({label:p.name, list:[...texReg.values()]
+        .filter(t=>t.kind===kind && t.pack===p.id).map(t=>({id:t.id,name:t.name}))});
+      const imported=[...texReg.values()].filter(t=>t.kind===kind && String(t.id).indexOf("pack:")===0);
+      if(imported.length) g.push({label:"Imported packs", list:imported.map(t=>({id:t.id,name:t.name}))});
+      return g;
+    };
+    opts(fs, [{label:"", list:[{id:"", name:"Classic parchment"}]}].concat(byKind("floor")),
+         (tgt&&tgt.kind==="shape") ? pick("floor") : (st.floor||""));
+    if(ws) opts(ws, [{label:"", list:[{id:"", name:"Classic ink"}]}].concat(byKind("wall")),
+                tgt ? pick("wall") : (st.wall||""));
+    // Background: the solid fills, plus any floor tile — a stone or dirt tile
+    // makes a better exterior than a flat colour.
+    opts(bs, [{label:"", list:[{id:"bg:theme", name:"Classic (theme)"},
+                               {id:"bg:slate", name:"Slate (solid)"},
+                               {id:"bg:black", name:"Black (solid)"},
+                               {id:"bg:parch", name:"Parchment (solid)"}]}].concat(byKind("floor")),
+         st.bg||"bg:theme");
+  }
   function syncStyleScope(){
     const el=$("styleScope"); if(!el) return;
     const t=styleTarget();
@@ -1929,14 +1971,14 @@
     if($("gridOpV")) $("gridOpV").textContent = Math.round(v*100)+"%";
   }
   function syncAdvancedUI(){
-    const st=map.style||(map.style={mode:"classic",floor:"starter:flagstone",wall:"starter:wallstone",bg:"starter:rockdark"});
+    const st=map.style||(map.style=DEFAULT_STYLE());
     const on=st.mode==="textured";
     if($("advToggle")) $("advToggle").checked=on;
     if($("advBody")) $("advBody").style.display = on ? "" : "none";
     buildTexSelects();
   }
   function initAdvanced(){
-    const st=map.style||(map.style={mode:"classic",floor:"starter:flagstone",wall:"starter:wallstone",bg:"starter:rockdark"});
+    const st=map.style||(map.style=DEFAULT_STYLE());
     if($("advToggle")) $("advToggle").onchange=e=>{
       map.style.mode = e.target.checked ? "textured" : "classic";
       syncAdvancedUI(); commit();
@@ -1951,6 +1993,7 @@
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
     syncAdvancedUI(); syncStyleScope();
+    loadBundled().catch(()=>{});
     loadPacks().catch(()=>{});
   }
 

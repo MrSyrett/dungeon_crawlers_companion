@@ -1,0 +1,204 @@
+{
+  "note": "Bundled Creative-Commons map assets. Attribution is REQUIRED and is rendered statically in the Map Maker sidebar, not from this file.",
+  "credits": [
+    {
+      "name": "2-Minute Tabletop",
+      "url": "https://2minutetabletop.com/",
+      "license": "CC BY-NC 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-nc/4.0/"
+    }
+  ],
+  "packs": [
+    {
+      "id": "2mtw",
+      "name": "2MT Welcome",
+      "credit": "2-Minute Tabletop",
+      "textures": [
+        {
+          "id": "bundled:2mtw-dirt",
+          "name": "Dirt",
+          "kind": "floor",
+          "file": "2mtw-dirt.webp",
+          "cells": 15
+        },
+        {
+          "id": "bundled:2mtw-floorboards-a",
+          "name": "Floorboards A",
+          "kind": "floor",
+          "file": "2mtw-floorboards-a.webp",
+          "cells": 6
+        },
+        {
+          "id": "bundled:2mtw-grass",
+          "name": "Grass",
+          "kind": "floor",
+          "file": "2mtw-grass.webp",
+          "cells": 12
+        },
+        {
+          "id": "bundled:2mtw-stone",
+          "name": "Stone",
+          "kind": "floor",
+          "file": "2mtw-stone.webp",
+          "cells": 15
+        },
+        {
+          "id": "bundled:2mtw-stone-paving",
+          "name": "Stone Paving",
+          "kind": "floor",
+          "file": "2mtw-stone-paving.webp",
+          "cells": 6
+        },
+        {
+          "id": "bundled:2mtw-water",
+          "name": "Water",
+          "kind": "floor",
+          "file": "2mtw-water.webp",
+          "cells": 8
+        },
+        {
+          "id": "bundled:2mtw-wall-interior-wall-stone-a",
+          "name": "Interior Wall - Stone A",
+          "kind": "wall",
+          "file": "2mtw-wall-interior-wall-stone-a.webp",
+          "thick": 0.2852,
+          "tile": 6.0039
+        },
+        {
+          "id": "bundled:2mtw-wall-interior-wall-stone-b",
+          "name": "Interior Wall - Stone B",
+          "kind": "wall",
+          "file": "2mtw-wall-interior-wall-stone-b.webp",
+          "thick": 0.2852,
+          "tile": 6.0
+        },
+        {
+          "id": "bundled:2mtw-wall-interior-wall-wood-a",
+          "name": "Interior Wall - Wood A",
+          "kind": "wall",
+          "file": "2mtw-wall-interior-wall-wood-a.webp",
+          "thick": 0.2734,
+          "tile": 6.0
+        },
+        {
+          "id": "bundled:2mtw-wall-low-wall",
+          "name": "Low wall",
+          "kind": "wall",
+          "file": "2mtw-wall-low-wall.webp",
+          "thick": 0.3086,
+          "tile": 5.0273
+        },
+        {
+          "id": "bundled:2mtw-wall-wall-daub-a",
+          "name": "Wall - Daub A",
+          "kind": "wall",
+          "file": "2mtw-wall-wall-daub-a.webp",
+          "thick": 0.5625,
+          "tile": 5.9922
+        },
+        {
+          "id": "bundled:2mtw-wall-wall-daub-b",
+          "name": "Wall - Daub B",
+          "kind": "wall",
+          "file": "2mtw-wall-wall-daub-b.webp",
+          "thick": 0.5586,
+          "tile": 5.9336
+        },
+        {
+          "id": "bundled:2mtw-wall-wall-stone-a",
+          "name": "Wall - Stone A",
+          "kind": "wall",
+          "file": "2mtw-wall-wall-stone-a.webp",
+          "thick": 0.5508,
+          "tile": 5.9961
+        },
+        {
+          "id": "bundled:2mtw-wall-wall-stone-b",
+          "name": "Wall - Stone B",
+          "kind": "wall",
+          "file": "2mtw-wall-wall-stone-b.webp",
+          "thick": 0.5508,
+          "tile": 5.9961
+        },
+        {
+          "id": "bundled:2mtw-wall-wall-wood-a",
+          "name": "Wall - Wood A",
+          "kind": "wall",
+          "file": "2mtw-wall-wall-wood-a.webp",
+          "thick": 0.5586,
+          "tile": 5.957
+        },
+        {
+          "id": "bundled:2mtw-wall-wall-wood-b",
+          "name": "Wall - Wood B",
+          "kind": "wall",
+          "file": "2mtw-wall-wall-wood-b.webp",
+          "thick": 0.5586,
+          "tile": 5.957
+        }
+      ]
+    },
+    {
+      "id": "2mtd",
+      "name": "2MT Room Builder",
+      "credit": "2-Minute Tabletop",
+      "textures": [
+        {
+          "id": "bundled:2mtd-classic-stone-floor",
+          "name": "Classic Stone Floor",
+          "kind": "floor",
+          "file": "2mtd-classic-stone-floor.webp",
+          "cells": 8
+        },
+        {
+          "id": "bundled:2mtd-wall-dark",
+          "name": "Dark",
+          "kind": "wall",
+          "file": "2mtd-wall-dark.webp",
+          "thick": 0.6016,
+          "tile": 11.9023
+        },
+        {
+          "id": "bundled:2mtd-wall-dark-cropped",
+          "name": "Dark - Cropped",
+          "kind": "wall",
+          "file": "2mtd-wall-dark-cropped.webp",
+          "thick": 0.4453,
+          "tile": 11.5117
+        },
+        {
+          "id": "bundled:2mtd-wall-dark-thin",
+          "name": "Dark - Thin",
+          "kind": "wall",
+          "file": "2mtd-wall-dark-thin.webp",
+          "thick": 0.3047,
+          "tile": 8.5117
+        },
+        {
+          "id": "bundled:2mtd-wall-light",
+          "name": "Light",
+          "kind": "wall",
+          "file": "2mtd-wall-light.webp",
+          "thick": 0.5977,
+          "tile": 8.7148
+        },
+        {
+          "id": "bundled:2mtd-wall-rail",
+          "name": "Rail",
+          "kind": "wall",
+          "file": "2mtd-wall-rail.webp",
+          "thick": 0.3047,
+          "tile": 9.1953
+        },
+        {
+          "id": "bundled:2mtd-wall-wood-rail",
+          "name": "Wood Rail",
+          "kind": "wall",
+          "file": "2mtd-wall-wood-rail.webp",
+          "thick": 0.332,
+          "tile": 9.6719
+        }
+      ]
+    }
+  ]
+}

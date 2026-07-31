@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""Extract the tileable floor and wall textures from Creative-Commons Dungeondraft
+packs into public/packs/bundled/ plus a manifest.
+
+Only CC-licensed packs belong here — anything bundled is redistributed by the
+site. Packs a user owns privately go through the Map Maker's in-browser import
+instead, which keeps them in that browser only.
+
+Usage: python3 extract.py <out_dir>
+"""
+import struct, io, json, os, re, sys
+import numpy as np
+from PIL import Image
+
+OUT = sys.argv[1] if len(sys.argv) > 1 else '/root/dcc/public/packs/bundled'
+PX_PER_CELL = 128        # floors are resampled to this; 2x the export resolution
+MAX_DIM     = 2048       # …and capped, so a 15x15 tile can't blow up memory
+
+SOURCES = [
+    # file, pack id, display name, credit
+    ('welcome.pack',     '2mtw', '2MT Welcome',       '2-Minute Tabletop'),
+    ('roombuilder.pack', '2mtd', '2MT Room Builder',  '2-Minute Tabletop'),
+]
+# The same strips appear under BOTH textures/paths/ and textures/walls/ — take one.
+# Dungeondraft also ships near-identical Concave/Convex variants of each wall
+# (measured mean difference 0.4-2.7 of 255). Keep one.
+SKIP_WALL = re.compile(r' - Concave_wall\.', re.I)
+
+def parse(path):
+    d = open(path, 'rb').read()
+    off = 20 + 16*4
+    (count,) = struct.unpack_from('<I', d, off); off += 4
+    files = []
+    for _ in range(count):
+        (plen,) = struct.unpack_from('<I', d, off); off += 4
+        p = d[off:off+plen].rstrip(b'\x00').decode('utf-8', 'replace'); off += plen
+        fo, fs = struct.unpack_from('<QQ', d, off); off += 16; off += 16
+        files.append((p, fo, fs))
+    return d, files
+
+def slug(s):
+    return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
+
+def clean(name):
+    n = re.sub(r'\.(webp|png|jpe?g)$', '', name.split('/')[-1])
+    n = re.sub(r'^Texture\s*-\s*', '', n)
+    n = re.sub(r'_wall$', '', n)
+    n = re.sub(r'\s*-\s*Convex$', '', n)
+    n = re.sub(r'^Dungeon Room Builder\s*-\s*', '', n)
+    n = re.sub(r'\s*[-(]\s*\d+x\d+\s*\)?$', '', n)     # drop the "- 15x15" size suffix
+    return n.strip()
+
+os.makedirs(OUT, exist_ok=True)
+packs = []
+for fname, pid, pname, credit in SOURCES:
+    d, files = parse(fname)
+    entries = []
+    for path, fo, fs in files:
+        blob = d[fo:fo+fs]
+        if '/textures/terrain/' in path:                       # floors (patterns/ is a duplicate)
+            im = Image.open(io.BytesIO(blob)).convert('RGB')
+            cells = max(1, round(im.width / 256))
+            side = min(MAX_DIM, cells * PX_PER_CELL)
+            im = im.resize((side, side), Image.LANCZOS)
+            fid = f'{pid}-{slug(clean(path))}'
+            im.save(f'{OUT}/{fid}.webp', 'WEBP', quality=88, method=6)
+            entries.append({'id': f'bundled:{fid}', 'name': clean(path), 'kind': 'floor',
+                            'file': f'{fid}.webp', 'cells': cells})
+        elif '/textures/walls/' in path and path.endswith('_wall.webp') and not SKIP_WALL.search(path):
+            im = Image.open(io.BytesIO(blob)).convert('RGBA')
+            a = np.asarray(im)
+            rows = np.where(a[:, :, 3].mean(axis=1) > 8)[0]     # crop the transparent padding
+            if not len(rows):
+                continue
+            top, bot = int(rows.min()), int(rows.max())
+            crop = im.crop((0, top, im.width, bot+1))
+            fid = f'{pid}-wall-{slug(clean(path))}'
+            crop.save(f'{OUT}/{fid}.webp', 'WEBP', quality=90, method=6)
+            entries.append({'id': f'bundled:{fid}', 'name': clean(path), 'kind': 'wall',
+                            'file': f'{fid}.webp',
+                            'thick': round(crop.height/256, 4),   # wall thickness in grid cells
+                            'tile':  round(crop.width/256, 4)})   # length of one repeat, in cells
+    entries.sort(key=lambda e: (e['kind'], e['name']))
+    packs.append({'id': pid, 'name': pname, 'credit': credit, 'textures': entries})
+    print(f'{pname}: {sum(1 for e in entries if e["kind"]=="floor")} floors, '
+          f'{sum(1 for e in entries if e["kind"]=="wall")} walls')
+
+manifest = {
+    'note': 'Bundled Creative-Commons map assets. Attribution is REQUIRED and is '
+            'rendered statically in the Map Maker sidebar, not from this file.',
+    'credits': [{'name': '2-Minute Tabletop', 'url': 'https://2minutetabletop.com/',
+                 'license': 'CC BY-NC 4.0',
+                 'licenseUrl': 'https://creativecommons.org/licenses/by-nc/4.0/'}],
+    'packs': packs,
+}
+json.dump(manifest, open(f'{OUT}/bundled.json', 'w'), indent=2)
+tot = sum(os.path.getsize(f'{OUT}/{f}') for f in os.listdir(OUT))
+print(f'-> {OUT}  ({len(os.listdir(OUT))} files, {tot/1024/1024:.2f} MB)')
