@@ -38,7 +38,7 @@ window.DungeonEngine = (function(){
   let exporting = true, noRock = false, ctx = null;
   const C = Object.assign({}, THEMES.light);
   function oc(){ return document.createElement("canvas"); }
-  const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc() };
+  const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc(), deco:oc(), decoClip:oc() };
   function sizeBufs(){ for(const k in buf){ if(buf[k].width!==W||buf[k].height!==H){ buf[k].width=W; buf[k].height=H; } } }
   function setThemeColors(t){ Object.assign(C, THEMES[(t==="dark")?"dark":"light"]); }
   const clamp = (v,lo,hi)=> Math.max(lo, Math.min(hi, v));
@@ -72,7 +72,7 @@ window.DungeonEngine = (function(){
     const pts=[];
     for(const s of map.shapes){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
     for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]);
-      if(w.cx!==undefined) pts.push([0.25*w.x1+0.5*w.cx+0.25*w.x2, 0.25*w.y1+0.5*w.cy+0.25*w.y2]); }
+      if(w.cx!==undefined) for(const p of wallSamples(w)) pts.push(p); }   // arc can bow past its ends
     for(const d of map.doors) pts.push([d.x,d.y]);
     for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
       else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
@@ -222,14 +222,29 @@ window.DungeonEngine = (function(){
     ctx.drawImage(buf.wall,0,0);
   }
 
-  // Sample a wall's quadratic-Bézier curve (control point cx,cy) into world points.
+  // Sample a curved wall into world points as the CIRCULAR ARC through
+  // start → apex → end. `cx,cy` is stored Bézier-style (C = 2Q − midpoint) so the
+  // clicked apex is Q = (C + midpoint)/2. A true arc (not a quadratic Bézier) means
+  // an apex pulled out to half the chord gives an exact HALF CIRCLE.
   function wallSamples(wl){
-    const x1=wl.x1,y1=wl.y1,x2=wl.x2,y2=wl.y2, cx=wl.cx, cy=wl.cy;
-    const chord=Math.hypot(x2-x1,y2-y1), bow=Math.hypot(cx-(x1+x2)/2, cy-(y1+y2)/2);
-    const N=Math.max(6, Math.min(80, Math.round((chord+bow*2)*5)));
+    const x1=wl.x1,y1=wl.y1,x2=wl.x2,y2=wl.y2;
+    const mx=(x1+x2)/2, my=(y1+y2)/2;
+    const qx=(wl.cx+mx)/2, qy=(wl.cy+my)/2;              // the apex the wall bows through
+    // circumcircle of start / apex / end
+    const d=2*(x1*(qy-y2) + qx*(y2-y1) + x2*(y1-qy));
+    if(Math.abs(d)<1e-9) return [[x1,y1],[x2,y2]];        // degenerate ⇒ straight
+    const s1=x1*x1+y1*y1, sq=qx*qx+qy*qy, s2=x2*x2+y2*y2;
+    const ux=(s1*(qy-y2) + sq*(y2-y1) + s2*(y1-qy))/d;
+    const uy=(s1*(x2-qx) + sq*(x1-x2) + s2*(qx-x1))/d;
+    const R=Math.hypot(x1-ux, y1-uy);
+    const TAU=Math.PI*2, norm=a=>((a%TAU)+TAU)%TAU;
+    const a0=Math.atan2(y1-uy, x1-ux);
+    const dq=norm(Math.atan2(qy-uy, qx-ux)-a0);           // where the apex sits going CCW
+    let sweep=norm(Math.atan2(y2-uy, x2-ux)-a0);
+    if(dq>sweep) sweep-=TAU;                              // apex is the other way ⇒ sweep CW (major arc)
+    const N=Math.max(10, Math.min(140, Math.round(Math.abs(sweep)*R*6)));
     const pts=[];
-    for(let i=0;i<=N;i++){ const t=i/N, u=1-t;
-      pts.push([u*u*x1+2*u*t*cx+t*t*x2, u*u*y1+2*u*t*cy+t*t*y2]); }
+    for(let i=0;i<=N;i++){ const a=a0+sweep*i/N; pts.push([ux+Math.cos(a)*R, uy+Math.sin(a)*R]); }
     return pts;
   }
   // A rough-edged ribbon along an open world polyline (curved walls / shape lines).
@@ -262,10 +277,29 @@ window.DungeonEngine = (function(){
   // OUTLINES on top of the floor, never as rooms: they add no floor, no rock wall
   // ring, no interior punch. shapeOutline samples circles as true arcs ⇒ round.
   function drawDecoShapes(){
-    let any=false; for(const s of map.shapes){ if(s.deco){ any=true; break; } } if(!any) return;
-    ctx.save(); ctx.fillStyle=C.ink; const thin=Math.max(0.6,0.85*cam.scale);
-    for(const sh of map.shapes){ if(!sh.deco) continue; roughRing(ctx, shapeOutline(sh), thin); }
-    ctx.restore(); }
+    let any=false, floor=false;
+    for(const s of map.shapes){ if(s.deco) any=true; else floor=true; }
+    if(!any) return;
+    const thin=Math.max(0.6,0.85*cam.scale);
+    // No rooms at all ⇒ nothing to clip against, draw the outlines as-is.
+    if(!floor){ ctx.save(); ctx.fillStyle=C.ink;
+      for(const sh of map.shapes){ if(sh.deco) roughRing(ctx, shapeOutline(sh), thin); }
+      ctx.restore(); return; }
+    // Otherwise a deco shape is CLIPPED to the dungeon interior: draw the thin
+    // outlines to a scratch buffer, then keep only the pixels that land on the
+    // floor union (inset by the room-wall half-width, so an outline stops at the
+    // wall's inner edge instead of bleeding across it). Half a circle placed on an
+    // exterior wall therefore shows only the half that is inside the room.
+    sizeBufs();
+    const dc=buf.deco.getContext("2d"); dc.setTransform(1,0,0,1,0,0); dc.clearRect(0,0,W,H);
+    dc.globalCompositeOperation="source-over"; dc.fillStyle=C.ink;
+    for(const sh of map.shapes){ if(!sh.deco) continue; roughRing(dc, shapeOutline(sh), thin); }
+    const cc=buf.decoClip.getContext("2d"); cc.setTransform(1,0,0,1,0,0); cc.clearRect(0,0,W,H);
+    cc.globalCompositeOperation="source-over"; cc.fillStyle="#fff";
+    const inset=(Math.max(1.3,1.7*cam.scale)+1.4)/wpx();
+    for(const sh of map.shapes){ if(sh.deco) continue; fillInsetShape(cc, sh, inset); }
+    dc.globalCompositeOperation="destination-in"; dc.drawImage(buf.decoClip,0,0);
+    ctx.drawImage(buf.deco,0,0); }
 
   function doorGeom(d){
     const a=d.a||0, stub=0.13, hl=(d.len||1)/2;
