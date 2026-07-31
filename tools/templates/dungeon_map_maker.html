@@ -97,6 +97,7 @@
   .objgrid button:hover{border-color:var(--gold-dim)}
   .objgrid button.on{border-color:var(--gold);background:var(--active)}
   .objgrid img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+  .objgrid .th{display:block;background-repeat:no-repeat;pointer-events:none}
   .objgrid .none{grid-column:1/-1;font-size:10.5px;color:var(--muted);text-align:center;padding:16px 4px}
   .spacer{flex:1}
   .save-state{font-size:10px;color:var(--muted);padding:8px 14px;letter-spacing:.04em}
@@ -978,7 +979,9 @@
       ctx.translate(p[0],p[1]);
       if(o.rot) ctx.rotate(o.rot);
       if(o.flip) ctx.scale(-1,1);
-      ctx.drawImage(t.img, -w/2, -h/2, w, h);
+      const a=t.atlas;
+      if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);  // bundled: atlas sub-rect
+      else  ctx.drawImage(t.img, -w/2, -h/2, w, h);                      // imported: whole file
       ctx.restore();
     }
   }
@@ -1855,29 +1858,48 @@
   const BG_SOLID = { "bg:theme":null, "bg:black":"#08080a", "bg:slate":"#171a21", "bg:parch":"#efe8d7" };
   const texReg = new Map();                       // id -> {id,name,kind,url,cells|thick|tile,img}
   let bundledPacks = [];                          // [{id,name,textures:[…]}] once the manifest lands
+  let bundledError = null;                        // surfaced in the palette so a bad deploy is obvious
   async function loadBundled(){
-    let m; try{ m = await (await fetch(BUNDLED_URL, {cache:"force-cache"})).json(); }catch(e){ return; }
+    let m;
+    try{
+      const r = await fetch(BUNDLED_URL, {cache:"force-cache"});
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      m = await r.json();
+    }catch(e){ bundledError=e.message||String(e); buildObjGrid(); return; }
     bundledPacks = m.packs || [];
     for(const p of bundledPacks) for(const t of p.textures)
       texReg.set(t.id, {id:t.id, name:t.name, kind:t.kind, pack:p.id, packName:p.name,
                         cells:t.cells, thick:t.thick, tile:t.tile, w:t.w, h:t.h,
-                        thumb:t.thumb ? "/packs/bundled/"+t.thumb : null,
-                        url:"/packs/bundled/"+t.file, img:null});
+                        // Objects live in shared sprite ATLASES: `atlas`/`thumb` are
+                        // {sheet,x,y,w,h,sw,sh} rects. Floors and walls stay whole files
+                        // because they're used as repeating patterns.
+                        atlas:t.atlas||null, thumbRect:t.thumb||null,
+                        url:"/packs/bundled/"+(t.atlas ? t.atlas.sheet : t.file), img:null});
     buildTexSelects(); buildObjGrid();
     render();
   }
 
   // Kick off a load the first time a texture is asked for; re-render when it
   // arrives. Returns the entry only once it's actually drawable.
+  // Many object entries point at the SAME atlas sheet, so images are cached by
+  // URL — otherwise 140 sprites would mean 140 downloads and decodes of 3 files.
+  const sheets=new Map();
+  function sheetImg(url, onload){
+    let im=sheets.get(url);
+    if(!im){ im=new Image(); sheets.set(url,im);
+      im.onload=()=>{ if(onload) onload(); };
+      im.onerror=()=>{ im.broken=true; };
+      im.src=url; }
+    return im;
+  }
   function texGet(id){
     const t=texReg.get(id); if(!t || t.failed) return null;
     if(!t.img){
-      const im=new Image(); t.img=im;
-      im.onload =()=>{ render(); };
-      im.onerror=()=>{ t.failed=true; t.img=null; };
-      im.src=t.url;
+      if(!t.url) return null;
+      t.img=sheetImg(t.url, ()=>render());
     }
-    return (t.img && t.img.complete && t.img.naturalWidth) ? t : null;
+    if(t.img.broken){ t.failed=true; return null; }
+    return (t.img.complete && t.img.naturalWidth) ? t : null;
   }
   function applyStyle(){
     const st=(map && map.style) || null;
@@ -2188,15 +2210,31 @@
       const b=document.createElement("button");
       b.title=t.name+"  ("+(t.w||1)+"×"+(t.h||1)+" cells)";
       if(t.id===armedObj) b.className="on";
-      const im=document.createElement("img");
-      im.loading="lazy"; im.alt=""; im.src=t.thumb || t.url || "";
-      b.appendChild(im);
+      const r=t.thumbRect;
+      if(r){
+        // Crop the sprite out of the shared thumb atlas with background-position,
+        // scaled to fit the cell — one image request for the whole palette.
+        const S=46, f=Math.min(S/r.w, S/r.h);
+        const d=document.createElement("span"); d.className="th";
+        d.style.width=(r.w*f)+"px"; d.style.height=(r.h*f)+"px";
+        d.style.backgroundImage='url("/packs/bundled/'+r.sheet+'")';
+        d.style.backgroundSize=(r.sw*f)+"px "+(r.sh*f)+"px";
+        d.style.backgroundPosition=(-r.x*f)+"px "+(-r.y*f)+"px";
+        b.appendChild(d);
+      } else {
+        const im=document.createElement("img");
+        im.loading="lazy"; im.alt=""; im.src=t.thumb || t.url || "";
+        b.appendChild(im);
+      }
       b.onclick=()=>{ armedObj = (armedObj===t.id) ? null : t.id;
         setTool(armedObj ? "object" : "select"); buildObjGrid(); };
       g.appendChild(b); n++;
     }
     if(!n){ const d=document.createElement("div"); d.className="none";
-      d.textContent = q ? "No objects match that." : "No object art loaded.";
+      d.textContent = q ? "No objects match that."
+        : (bundledError ? "Couldn't load /packs/bundled/bundled.json — is the pack folder uploaded?"
+        : !bundledPacks.length ? "Loading asset packs…"
+        : "The manifest loaded but lists no objects.");
       g.appendChild(d); }
   }
   function placeObject(wx,wy){

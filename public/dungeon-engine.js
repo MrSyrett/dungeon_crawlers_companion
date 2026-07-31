@@ -518,7 +518,9 @@ window.DungeonEngine = (function(){
       ctx.translate(p[0],p[1]);
       if(o.rot) ctx.rotate(o.rot);
       if(o.flip) ctx.scale(-1,1);
-      ctx.drawImage(t.img, -w/2, -h/2, w, h);
+      const a=t.atlas;
+      if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);  // bundled: atlas sub-rect
+      else  ctx.drawImage(t.img, -w/2, -h/2, w, h);                      // imported: whole file
       ctx.restore();
     }
   }

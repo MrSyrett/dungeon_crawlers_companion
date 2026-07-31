@@ -13,9 +13,15 @@ import numpy as np
 from PIL import Image
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else '/root/dcc/public/packs/bundled'
-PX_PER_CELL = 128        # floors/objects are resampled to this; 2x the export resolution
+PX_PER_CELL = 128        # floors are resampled to this; 2x the export resolution
+OBJ_PER_CELL = 96        # objects a little leaner — they pack into shared atlases
 MAX_DIM     = 2048       # …and capped, so a 15x15 tile can't blow up memory
-THUMB       = 96         # palette thumbnails, so 180 sprites don't all decode at full size
+THUMB       = 96         # palette thumbnails
+ATLAS       = 2048       # atlas sheet size
+# Objects are packed into a few ATLAS sheets rather than written one file each.
+# 140 sprites + 140 thumbnails is 280 files, and GitHub's web uploader refuses
+# more than 100 at a time — which is how the object art silently failed to ship.
+# Atlases also mean one decode and one request instead of hundreds.
 
 SOURCES = [
     # file, pack id, display name, credit
@@ -60,7 +66,47 @@ def clean(name, keep_size=False):
     return n.strip()
 
 os.makedirs(OUT, exist_ok=True)
-os.makedirs(f'{OUT}/thumbs', exist_ok=True)
+
+def pack_shelf(items, size, pad=2):
+    """Shelf bin-packer: sort by height, lay rows left to right. Good enough for
+    static art and dependency-free. Returns [(sheet_index, x, y), …]."""
+    order = sorted(range(len(items)), key=lambda i: -items[i][1])
+    places = [None]*len(items)
+    sheet = x = y = shelf_h = 0
+    for i in order:
+        w, h = items[i]
+        if w+pad > size or h+pad > size:
+            raise SystemExit(f'sprite {w}x{h} does not fit a {size}px atlas')
+        if x + w + pad > size:                     # next shelf
+            x = 0; y += shelf_h + pad; shelf_h = 0
+        if y + h + pad > size:                     # next sheet
+            sheet += 1; x = y = shelf_h = 0
+        places[i] = (sheet, x, y)
+        x += w + pad
+        shelf_h = max(shelf_h, h)
+    return places
+
+def write_atlas(objs, prefix, key, size, quality):
+    """Pack objs[*][key] into `prefix-N.webp` sheets; returns rects per object."""
+    boxes = [(o[key].width, o[key].height) for o in objs]
+    places = pack_shelf(boxes, size)
+    sheets = {}
+    for o, (sh, x, y) in zip(objs, places):
+        sheets.setdefault(sh, []).append((o, x, y))
+    out = []
+    for sh, members in sorted(sheets.items()):
+        canvas = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        for o, x, y in members:
+            canvas.paste(o[key], (x, y))
+        canvas.save(f'{OUT}/{prefix}-{sh}.webp', 'WEBP', quality=quality, method=4)
+    for o, (sh, x, y) in zip(objs, places):
+        out.append({'sheet': f'{prefix}-{sh}.webp', 'x': x, 'y': y,
+                    'w': o[key].width, 'h': o[key].height,
+                    'sw': size, 'sh': size})     # sheet dims, so CSS can scale a thumb
+    return out
+
+pending = []
+pack_pending = []
 packs = []
 for fname, pid, pname, credit in SOURCES:
     d, files = parse(fname)
@@ -81,15 +127,12 @@ for fname, pid, pname, credit in SOURCES:
             wc, hc = im.width/256, im.height/256          # native size in grid cells
             if wc < 0.15 or hc < 0.15:
                 continue
-            sc = min(1.0, PX_PER_CELL*wc/im.width, MAX_DIM/im.width, MAX_DIM/im.height)
+            sc = min(1.0, OBJ_PER_CELL*wc/im.width, MAX_DIM/im.width, MAX_DIM/im.height)
             full = im.resize((max(1,round(im.width*sc)), max(1,round(im.height*sc))), Image.LANCZOS)
-            fid = f'{pid}-obj-{slug(clean(path, True))}'
-            full.save(f'{OUT}/{fid}.webp', 'WEBP', quality=86, method=4)
             th = im.copy(); th.thumbnail((THUMB, THUMB), Image.LANCZOS)
-            th.save(f'{OUT}/thumbs/{fid}.webp', 'WEBP', quality=80, method=4)
-            entries.append({'id': f'bundled:{fid}', 'name': clean(path, True), 'kind': 'object',
-                            'file': f'{fid}.webp', 'thumb': f'thumbs/{fid}.webp',
-                            'w': round(wc, 3), 'h': round(hc, 3)})
+            pending.append({'id': f'bundled:{pid}-obj-{slug(clean(path, True))}',
+                            'name': clean(path, True), 'kind': 'object',
+                            'w': round(wc, 3), 'h': round(hc, 3), 'img': full, 'th': th})
         elif '/textures/walls/' in path and path.endswith('_wall.webp') and not SKIP_WALL.search(path):
             im = Image.open(io.BytesIO(blob)).convert('RGBA')
             a = np.asarray(im)
@@ -105,9 +148,27 @@ for fname, pid, pname, credit in SOURCES:
                             'thick': round(crop.height/256, 4),   # wall thickness in grid cells
                             'tile':  round(crop.width/256, 4)})   # length of one repeat, in cells
     entries.sort(key=lambda e: (e['kind'], e['name']))
+    pack_pending.append((len(packs), pending)); pending = []
     packs.append({'id': pid, 'name': pname, 'credit': credit, 'textures': entries})
     n = lambda k: sum(1 for e in entries if e['kind']==k)
     print(f'{pname}: {n("floor")} floors, {n("wall")} walls, {n("object")} objects')
+
+# One atlas set across ALL packs, so sheets stay full.
+allobjs = [o for _, lst in pack_pending for o in lst]
+if allobjs:
+    allobjs.sort(key=lambda o: o['id'])
+    full  = write_atlas(allobjs, 'objects', 'img', ATLAS, 86)
+    thumb = write_atlas(allobjs, 'objthumbs', 'th', 1024, 80)
+    by_pack = {}
+    for o, f, t in zip(allobjs, full, thumb):
+        by_pack.setdefault(o['id'].split(':')[1].split('-obj-')[0], []).append(
+            {'id': o['id'], 'name': o['name'], 'kind': 'object',
+             'w': o['w'], 'h': o['h'], 'atlas': f, 'thumb': t})
+    for p in packs:
+        p['textures'] = [e for e in p['textures'] if e['kind'] != 'object'] + \
+                        sorted(by_pack.get(p['id'], []), key=lambda e: e['name'])
+    print(f'atlases: {len(set(f["sheet"] for f in full))} object sheets, '
+          f'{len(set(t["sheet"] for t in thumb))} thumb sheets')
 
 manifest = {
     'note': 'Bundled Creative-Commons map assets. Attribution is REQUIRED and is '
