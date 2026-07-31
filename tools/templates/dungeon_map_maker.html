@@ -1996,7 +1996,7 @@
   // circles, railings. The wall tool draws all of that properly, so they'd just be
   // clutter in the palette. The " - " separator matters: /^Wall\b/ would also eat
   // real props like "Wall buzzsaw" and "Wall spikes".
-  const SKIP_WALL_OBJ=/^(Wall|Rail)\s+-\s/i;
+  const SKIP_WALL_OBJ=/^(Wall|Rail)\s*[-,]\s|^(Inside|Outside)\s+bend\b|Wall\s+End$/i;
   const MAX_IMPORT_OBJECTS=400;
   // Floors/walls: drop the pack-name prefix, which is repeated on every file in
   // a pack ("Dungeon Room Builder - Dark" -> "Dark").
@@ -2123,13 +2123,30 @@
                         pack:p.id, url:null, img:null, lazy:true});
     }
   }
-  // Pack textures live as blobs; mint the object URL the first time one is used.
+  // Mint an imported object's THUMBNAIL blob URL and drop it straight into the
+  // <img> that asked for it. This has to be independent of texGet: texGet only
+  // runs for textures the MAP references, so before this existed an imported
+  // prop's thumbnail only appeared once you had already placed one — which is a
+  // useless order to discover art in.
+  function ensureThumb(t, el){
+    if(t.thumb){ if(el) el.src=t.thumb; return; }
+    if(!t.thumbKey) return;
+    if(t._thumbWait){ if(el) t._thumbWait.push(el); return; }   // one read, many waiters
+    t._thumbWait = el ? [el] : [];
+    idbGet("files", t.thumbKey).then(b=>{
+      const waiting=t._thumbWait; t._thumbWait=null;
+      if(!b) return;
+      t.thumb=URL.createObjectURL(b);
+      for(const e of (waiting||[])) if(e) e.src=t.thumb;
+    }).catch(()=>{ t._thumbWait=null; });
+  }
+  // Pack textures live as blobs; mint the full-size object URL the first time the
+  // map actually uses one.
   const _texGet = texGet;
   texGet = function(id){
     const t=texReg.get(id);
     if(t && t.lazy && !t.url){
       t.lazy=false;
-      if(t.thumbKey) idbGet("files", t.thumbKey).then(b=>{ if(b){ t.thumb=URL.createObjectURL(b); buildObjGrid(); } }).catch(()=>{});
       idbGet("files", id).then(b=>{ if(b){ t.url=URL.createObjectURL(b); render(); } else { t.failed=true; } })
                          .catch(()=>{ t.failed=true; });
       return null;
@@ -2290,8 +2307,12 @@
     const q=(($("objFilter")||{}).value||"").trim().toLowerCase();
     g.innerHTML="";
     let n=0;
-    for(const t of texReg.values()){
-      if(t.kind!=="object") continue;
+    // Imported packs come FIRST. They're registered after the bundled set, so in
+    // plain insertion order a freshly imported pack lands ~215 cells down and
+    // reads as "nothing happened".
+    const all=[...texReg.values()].filter(t=>t.kind==="object");
+    const isImported=t=>String(t.id).indexOf("pack:")===0;
+    for(const t of all.filter(isImported).concat(all.filter(t=>!isImported(t)))){
       if(q && t.name.toLowerCase().indexOf(q)<0) continue;
       const b=document.createElement("button");
       b.title=t.name+"  ("+(t.w||1)+"×"+(t.h||1)+" cells)";
@@ -2307,7 +2328,10 @@
         b.appendChild(d);
       } else {
         const im=document.createElement("img");
-        im.loading="lazy"; im.alt=""; im.src=t.thumb || t.url || "";
+        im.loading="lazy"; im.alt="";
+        if(t.thumb) im.src=t.thumb;
+        else if(t.thumbKey) ensureThumb(t, im);      // imported: comes from IndexedDB
+        else if(t.url) im.src=t.url;
         b.appendChild(im);
       }
       b.onclick=()=>{ armedObj = (armedObj===t.id) ? null : t.id;

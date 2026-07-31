@@ -30,6 +30,7 @@ SOURCES = [
     ('roombuilder.pack', '2mtd', '2MT Room Builder',   '2-Minute Tabletop'),
     ('traps.pack',       '2mtt', '2MT Trap Tokens',    '2-Minute Tabletop'),
     ('building.pack',    '2mtb', '2MT Basic Building', '2-Minute Tabletop'),
+    ('cave.pack',        '2mtc', '2MT Cave Room Builder', '2-Minute Tabletop'),
 ]
 # The same strips appear under BOTH textures/paths/ and textures/walls/ — take one.
 # Dungeondraft also ships near-identical Concave/Convex variants of each wall
@@ -45,9 +46,12 @@ SKIP_OBJ = re.compile(r'( - Colorable| - End)\.(webp|png|jpe?g)$|Demo\.(webp|png
 # of that properly from a strip, so these are 60 sprites of pure clutter in the
 # object palette. Dropped by NAME because they sit in textures/objects/ like any
 # other prop.
-# The " - " separator matters: `^Wall\b` also eats real props like "Wall buzzsaw",
-# "Wall chomper" and "Wall spikes" from the trap pack — 11 of them.
-SKIP_WALL_OBJ = re.compile(r'^(Wall|Rail)\s+-\s', re.I)
+# Every pack names its wall kit differently: dungeon packs use "Wall - Straight",
+# the cave pack uses "Inside bend"/"Outside bend"/"Wall, short". The separator
+# after Wall/Rail is load-bearing — a plain `^Wall\b` also eats real props like
+# "Wall buzzsaw", "Wall chomper" and "Wall spikes" from the trap pack.
+# Always diff a candidate filter against the full name list before committing.
+SKIP_WALL_OBJ = re.compile(r'^(Wall|Rail)\s*[-,]\s|^(Inside|Outside)\s+bend\b|Wall\s+End$', re.I)
 
 def parse(path):
     d = open(path, 'rb').read()
