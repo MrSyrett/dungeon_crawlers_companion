@@ -26,7 +26,7 @@ window.DungeonEngine = (function(){
   const THEMES = {
     light: {
       bg:"#d9d0bd", rockHi:"#efe8d7", floor:"#f4efe3",
-      grid:"#8a8a8a", dot:"#8a8a8a", hatch:"#33302a",
+      grid:"#1b2028", dot:"#8a8a8a", hatch:"#33302a",   // grid = near-black blue-grey
       ink:"#14120d", doorFill:"#fbf8f0", doorWood:"#8b5e3c", shadow:"rgba(20,17,12,.18)", sel:"#c9a94a",
     },
   };
