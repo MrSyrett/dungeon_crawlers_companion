@@ -1,0 +1,64 @@
+{
+  "name": "Map Maker Starter",
+  "id": "starter",
+  "note": "Generated procedurally for Dungeon Crawler's Companion. No third-party art.",
+  "cell": 128,
+  "textures": [
+    {
+      "id": "starter:flagstone",
+      "name": "Flagstone",
+      "kind": "floor",
+      "file": "floor-flagstone.webp",
+      "cells": 4
+    },
+    {
+      "id": "starter:cobble",
+      "name": "Cobblestone",
+      "kind": "floor",
+      "file": "floor-cobble.webp",
+      "cells": 4
+    },
+    {
+      "id": "starter:tile",
+      "name": "Cut tile",
+      "kind": "floor",
+      "file": "floor-tile.webp",
+      "cells": 4
+    },
+    {
+      "id": "starter:planks",
+      "name": "Wood planks",
+      "kind": "floor",
+      "file": "floor-planks.webp",
+      "cells": 4
+    },
+    {
+      "id": "starter:cavern",
+      "name": "Cavern rock",
+      "kind": "floor",
+      "file": "floor-cavern.webp",
+      "cells": 4
+    },
+    {
+      "id": "starter:sand",
+      "name": "Sand",
+      "kind": "floor",
+      "file": "floor-sand.webp",
+      "cells": 4
+    },
+    {
+      "id": "starter:rockdark",
+      "name": "Dark rock",
+      "kind": "bg",
+      "file": "bg-rock-dark.webp",
+      "cells": 4
+    },
+    {
+      "id": "starter:rocklight",
+      "name": "Light rock",
+      "kind": "bg",
+      "file": "bg-rock-light.webp",
+      "cells": 4
+    }
+  ]
+}

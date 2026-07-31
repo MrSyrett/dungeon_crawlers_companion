@@ -36,6 +36,11 @@ window.DungeonEngine = (function(){
   // ── per-render state (module-scoped; (re)set before each render) ──
   let map = null, cam = {x:0,y:0,scale:1}, W = 0, H = 0, DPR = 1;
   let exporting = true, noRock = false, ctx = null;
+  // Advanced-Mode textures. The HOST (Map Maker) owns loading/caching and hands
+  // in ready <img> elements; the engine only turns them into aligned patterns.
+  // Absent ⇒ classic flat-colour render, which is what GM Screen / Session Prep
+  // get since they never pass any.
+  let tex = null;
   const C = Object.assign({}, THEMES.light);
   function oc(){ return document.createElement("canvas"); }
   const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc(), deco:oc(), decoClip:oc() };
@@ -45,6 +50,20 @@ window.DungeonEngine = (function(){
 
   // ── coordinate helpers (world cells ↔ output px) ──
   function wpx(){ return CELL * cam.scale; }
+
+  // A repeating world-aligned pattern for a texture tile that is `cells` grid
+  // cells wide: scaled so one tile spans exactly that many cells at the current
+  // zoom, and translated so the tile grid lines up with world (0,0) — the same
+  // origin the square grid uses, so texture and grid never drift apart.
+  function patFor(c, t){
+    if(!t || !t.img) return null;
+    const img=t.img; if(!img.complete || !img.naturalWidth) return null;
+    let p; try { p=c.createPattern(img, "repeat"); } catch(e){ return null; }
+    if(!p || !p.setTransform || typeof DOMMatrix==="undefined") return null;
+    const s=(wpx()*(t.cells||4))/img.naturalWidth, o=toScreen(0,0);
+    try { p.setTransform(new DOMMatrix([s,0,0,s,o[0],o[1]])); } catch(e){ return null; }
+    return p;
+  }
   function toScreen(wx, wy){ return [ (wx - cam.x)*wpx() + W/2, (wy - cam.y)*wpx() + H/2 ]; }
 
   // ── geometry / hit test ──
@@ -101,7 +120,11 @@ window.DungeonEngine = (function(){
   function render(){
     ctx.setTransform(DPR,0,0,DPR,0,0);
     ctx.clearRect(0,0,W,H);
-    if(!noRock){ ctx.fillStyle=C.rockHi; ctx.fillRect(0,0,W,H); drawDotGrid(); }
+    if(!noRock){
+      const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
+      ctx.fillStyle = bgPat || bgCol || C.rockHi; ctx.fillRect(0,0,W,H);
+      if(!bgPat && !bgCol) drawDotGrid();   // dots would just fight a rock texture
+    }
 
     const shapes = map.shapes;
     if(shapes.length){
@@ -113,7 +136,8 @@ window.DungeonEngine = (function(){
       // floor colour
       const tc=buf.tint.getContext("2d"); tc.setTransform(1,0,0,1,0,0);
       tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over"; tc.drawImage(buf.mask,0,0);
-      tc.globalCompositeOperation="source-in"; tc.fillStyle=C.floor; tc.fillRect(0,0,W,H);
+      tc.globalCompositeOperation="source-in";
+      tc.fillStyle = patFor(tc, tex && tex.floor) || C.floor; tc.fillRect(0,0,W,H);
       tc.globalCompositeOperation="source-over";
       ctx.drawImage(buf.tint,0,0);
       // grid inside floor
@@ -582,6 +606,7 @@ window.DungeonEngine = (function(){
     ctx = cv.getContext("2d");
     cam = { x:(b.x+b.X)/2, y:(b.y+b.Y)/2, scale:res };
     exporting = true; noRock = !!opts.transparent;
+    tex = opts.tex || null;
     render();
     return cv.toDataURL("image/png");
   }
@@ -610,6 +635,7 @@ window.DungeonEngine = (function(){
     setThemeColors(opts.theme || mapData.theme || "light");
     exporting = true;                 // never draw preview/selection here
     noRock = !!opts.transparent;
+    tex = opts.tex || null;           // Advanced-Mode textures, host-supplied
     render();
   }
 

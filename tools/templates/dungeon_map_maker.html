@@ -78,6 +78,15 @@
   .chk{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);cursor:pointer;margin-top:10px}
   .chk input{accent-color:var(--gold);width:15px;height:15px}
   .hint{font-size:10.5px;color:var(--muted);line-height:1.5;margin:8px 0 0}
+  .sel{width:100%;padding:7px 8px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:7px;color:var(--ink);font:inherit;font-size:11.5px;cursor:pointer}
+  .sel:focus{outline:none;border-color:var(--gold-dim)}
+  .packs{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+  .packs .pk{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);
+    background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 7px}
+  .packs .pk span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .packs .pk button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:0 2px}
+  .packs .pk button:hover{color:#e88}
   .spacer{flex:1}
   .save-state{font-size:10px;color:var(--muted);padding:8px 14px;letter-spacing:.04em}
 
@@ -165,6 +174,27 @@
       <div class="row" style="margin-top:10px">
         <button class="btn" id="clear">Clear</button>
         <button class="btn" id="fit">Fit view</button>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="grp-head">
+        <p class="grp-title">Advanced</p>
+        <label class="switch" title="Textured floors and background instead of the classic ink-on-parchment look">
+          <input type="checkbox" id="advToggle"><span class="slider"></span></label>
+      </div>
+      <div id="advBody" style="display:none">
+        <label class="fld" for="floorSel">Floor</label>
+        <select class="sel" id="floorSel"></select>
+        <label class="fld" for="bgSel">Background</label>
+        <select class="sel" id="bgSel"></select>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="packAdd">+ Asset pack</button>
+        </div>
+        <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
+        <div id="packList" class="packs"></div>
+        <p class="hint">Packs are stored in this browser only &mdash; nothing is uploaded. A map records the
+          texture&rsquo;s name, so it needs the same pack loaded here to look right elsewhere.</p>
       </div>
     </div>
 
@@ -272,13 +302,29 @@
   let W = 0, H = 0, DPR = 1;
 
   function blankMap(){
-    return { version:1, name:"", grid:true,
+    return { version:1, name:"", grid:true, style:{mode:"classic", floor:"starter:flagstone", bg:"starter:rockdark"},
              shapes:[], walls:[], doors:[], stairs:[], seedId:1 };
   }
   function uid(){ return map.seedId++; }
 
   // ── Coordinate helpers (world cells ↔ screen px) ──────────────────
   function wpx(){ return CELL * cam.scale; }                 // screen px per cell
+
+  // A repeating world-aligned pattern for a texture tile that is `cells` grid
+  // cells wide: scaled so one tile spans exactly that many cells at the current
+  // zoom, and translated so the tile grid lines up with world (0,0) — the same
+  // origin the square grid uses, so texture and grid never drift apart.
+  // `tex` is set by applyStyle(); null ⇒ classic flat-colour render.
+  let tex = null;
+  function patFor(c, t){
+    if(!t || !t.img) return null;
+    const img=t.img; if(!img.complete || !img.naturalWidth) return null;
+    let p; try { p=c.createPattern(img, "repeat"); } catch(e){ return null; }
+    if(!p || !p.setTransform || typeof DOMMatrix==="undefined") return null;
+    const s=(wpx()*(t.cells||4))/img.naturalWidth, o=toScreen(0,0);
+    try { p.setTransform(new DOMMatrix([s,0,0,s,o[0],o[1]])); } catch(e){ return null; }
+    return p;
+  }
   function toScreen(wx, wy){ return [ (wx - cam.x)*wpx() + W/2, (wy - cam.y)*wpx() + H/2 ]; }
   function toWorld(sx, sy){ return [ (sx - W/2)/wpx() + cam.x, (sy - H/2)/wpx() + cam.y ]; }
   function snap(v){ return snapOn? Math.round(v): v; }
@@ -466,8 +512,9 @@
   // renderLocalMap() fallback. Tool-preview + selection overlays are always drawn
   // here on top.
   function render(){
+    applyStyle();
     if(window.DungeonEngine && window.DungeonEngine.renderTo){
-      window.DungeonEngine.renderTo(ctx, map, {cam, W, H, DPR, theme, transparent:noRock});
+      window.DungeonEngine.renderTo(ctx, map, {cam, W, H, DPR, theme, transparent:noRock, tex});
     } else {
       renderLocalMap();
     }
@@ -477,7 +524,11 @@
     // Work in CSS-pixel logical space; scale once for crisp HiDPI output.
     ctx.setTransform(DPR,0,0,DPR,0,0);
     ctx.clearRect(0,0,W,H);
-    if(!noRock){ ctx.fillStyle=C.rockHi; ctx.fillRect(0,0,W,H); drawDotGrid(); }
+    if(!noRock){
+      const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
+      ctx.fillStyle = bgPat || bgCol || C.rockHi; ctx.fillRect(0,0,W,H);
+      if(!bgPat && !bgCol) drawDotGrid();   // dots would just fight a rock texture
+    }
 
     const shapes = map.shapes;
     if(shapes.length){
@@ -490,7 +541,8 @@
       // floor colour
       const tc=buf.tint.getContext("2d"); tc.setTransform(1,0,0,1,0,0);
       tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over"; tc.drawImage(buf.mask,0,0);
-      tc.globalCompositeOperation="source-in"; tc.fillStyle=C.floor; tc.fillRect(0,0,W,H);
+      tc.globalCompositeOperation="source-in";
+      tc.fillStyle = patFor(tc, tex && tex.floor) || C.floor; tc.fillRect(0,0,W,H);
       tc.globalCompositeOperation="source-over";
       ctx.drawImage(buf.tint,0,0);
       // grid inside floor
@@ -1387,6 +1439,7 @@
     snapOn=map.snap!==false; if($("snapToggle")) $("snapToggle").checked=snapOn;
     if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
     setThemeColors(map.theme==="dark" ? "dark" : "light");
+    syncAdvancedUI();
     render(); }
 
   // Work is kept only in this browser (localStorage) so a refresh doesn't lose
@@ -1436,6 +1489,222 @@
     };
     rd.onerror=()=>toast("Couldn’t read that file.");
     rd.readAsText(file);
+  }
+
+
+  // ════════════════════════════════════════════════════════════════
+  // ADVANCED MODE — textured floors & background
+  // ════════════════════════════════════════════════════════════════
+  // Two texture sources, deliberately kept apart:
+  //   • STARTER  — tiles generated for this site and served from /packs/starter.
+  //                Safe to ship, always available, no import step.
+  //   • packs    — a .dungeondraft_pack the user loads from their own machine.
+  //                Parsed in the browser and stored in IndexedDB ONLY; nothing
+  //                is uploaded and no third-party art lives in the repo.
+  // `map.style = {mode, floor, bg}` stores ids, not pixels. If an id can't be
+  // resolved (pack not loaded in this browser, or the tool opened offline) the
+  // renderer just falls back to the classic flat colours — never an error.
+  const STARTER = [
+    {id:"starter:flagstone", name:"Flagstone",   kind:"floor", url:"/packs/starter/floor-flagstone.webp", cells:4},
+    {id:"starter:cobble",    name:"Cobblestone", kind:"floor", url:"/packs/starter/floor-cobble.webp",    cells:4},
+    {id:"starter:tile",      name:"Cut tile",    kind:"floor", url:"/packs/starter/floor-tile.webp",      cells:4},
+    {id:"starter:planks",    name:"Wood planks", kind:"floor", url:"/packs/starter/floor-planks.webp",    cells:4},
+    {id:"starter:cavern",    name:"Cavern rock", kind:"floor", url:"/packs/starter/floor-cavern.webp",    cells:4},
+    {id:"starter:sand",      name:"Sand",        kind:"floor", url:"/packs/starter/floor-sand.webp",      cells:4},
+    {id:"starter:rockdark",  name:"Dark rock",   kind:"bg",    url:"/packs/starter/bg-rock-dark.webp",    cells:4},
+    {id:"starter:rocklight", name:"Light rock",  kind:"bg",    url:"/packs/starter/bg-rock-light.webp",   cells:4},
+  ];
+  const BG_SOLID = { "bg:theme":null, "bg:black":"#08080a", "bg:slate":"#171a21", "bg:parch":"#efe8d7" };
+  const texReg = new Map();                       // id -> {id,name,kind,url,cells,img,failed}
+  STARTER.forEach(t=>texReg.set(t.id,t));
+
+  // Kick off a load the first time a texture is asked for; re-render when it
+  // arrives. Returns the entry only once it's actually drawable.
+  function texGet(id){
+    const t=texReg.get(id); if(!t || t.failed) return null;
+    if(!t.img){
+      const im=new Image(); t.img=im;
+      im.onload =()=>{ render(); };
+      im.onerror=()=>{ t.failed=true; t.img=null; };
+      im.src=t.url;
+    }
+    return (t.img && t.img.complete && t.img.naturalWidth) ? t : null;
+  }
+  function applyStyle(){
+    const st=(map && map.style) || null;
+    if(!st || st.mode!=="textured"){ tex=null; return; }
+    tex = { floor: texGet(st.floor), bg: texGet(st.bg),
+            bgColor: Object.prototype.hasOwnProperty.call(BG_SOLID, st.bg) ? BG_SOLID[st.bg] : null };
+  }
+
+  // ── IndexedDB: pack metadata + the texture blobs we kept ───────────
+  const DB="dcc_packs";
+  function idb(){ return new Promise((res,rej)=>{
+    let r; try{ r=indexedDB.open(DB,1); }catch(e){ return rej(e); }
+    r.onupgradeneeded=()=>{ const d=r.result;
+      if(!d.objectStoreNames.contains("packs")) d.createObjectStore("packs");
+      if(!d.objectStoreNames.contains("files")) d.createObjectStore("files"); };
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+  function idbTx(store, mode, fn){ return idb().then(d=>new Promise((res,rej)=>{
+    const t=d.transaction(store,mode), o=t.objectStore(store); let out;
+    out=fn(o); t.oncomplete=()=>res(out && ("result" in out) ? out.result : out);
+    t.onerror=()=>rej(t.error); })); }
+  const idbPut = (store,k,v)=> idbTx(store,"readwrite",o=>o.put(v,k));
+  const idbDel = (store,k)  => idbTx(store,"readwrite",o=>o.delete(k));
+  const idbGet = (store,k)  => idbTx(store,"readonly", o=>o.get(k));
+  const idbAll = (store)    => idbTx(store,"readonly", o=>o.getAll());
+
+  // ── Godot PCK reader (.dungeondraft_pack is a Godot 3 .pck) ────────
+  // Header: "GDPC", pack format version, engine major/minor/rev, 16 reserved
+  // u32s, then a file count and one entry per file: path length, path,
+  // u64 offset, u64 size, 16-byte md5. File data follows at absolute offsets.
+  function parsePack(ab){
+    const dv=new DataView(ab), u8=new Uint8Array(ab), dec=new TextDecoder();
+    if(u8.length<100 || String.fromCharCode(u8[0],u8[1],u8[2],u8[3])!=="GDPC")
+      throw new Error("That isn't a Dungeondraft pack (no GDPC header).");
+    let o=4; const fmt=dv.getUint32(o,true); o+=4;
+    if(fmt!==1) throw new Error("Unsupported pack format v"+fmt+" — this reads the Godot 3 format Dungeondraft writes.");
+    o+=12;                                   // engine major/minor/rev
+    o+=16*4;                                 // reserved
+    const n=dv.getUint32(o,true); o+=4;
+    const out=[];
+    for(let i=0;i<n;i++){
+      const len=dv.getUint32(o,true); o+=4;
+      const path=dec.decode(u8.subarray(o,o+len)).replace(/\0+$/,""); o+=len;
+      const off=Number(dv.getBigUint64(o,true)); o+=8;
+      const size=Number(dv.getBigUint64(o,true)); o+=8;
+      o+=16;
+      if(off+size<=u8.length) out.push({path,off,size});
+    }
+    return out;
+  }
+  // Which entries are usable as a floor fill: Dungeondraft's seamless terrain
+  // and pattern textures. Objects/walls are sprites, not tiles — a later slice.
+  const TILEABLE=/\/textures\/(terrain|patterns)\//i;
+  function packLabel(p){ return p.split("/").pop().replace(/\.(webp|png|jpe?g)$/i,"").replace(/^Texture\s*-\s*/i,""); }
+
+  async function importPackFile(file){
+    toast("Reading "+file.name+"…");
+    const buf=await file.arrayBuffer();
+    let entries;
+    try { entries=parsePack(buf); }
+    catch(e){ toast(e.message||"Couldn't read that pack."); return; }
+    let meta={name:file.name.replace(/\.dungeondraft_pack$/i,""), id:null};
+    const j=entries.find(e=>/\/pack\.json$/i.test(e.path));
+    if(j){ try{ meta=Object.assign(meta, JSON.parse(new TextDecoder().decode(new Uint8Array(buf,j.off,j.size)))); }catch(e){} }
+    const packId="pack:"+(meta.id || meta.name).replace(/[^A-Za-z0-9_-]+/g,"");
+    const tiles=entries.filter(e=>TILEABLE.test(e.path));
+    if(!tiles.length){ toast("No tileable floor textures in that pack."); return; }
+    const made=[], seen=new Set();
+    for(const e of tiles){
+      // Packs often ship the same tile under both terrain/ and patterns/ —
+      // keep one entry per distinct file so the picker isn't full of duplicates.
+      const k=packLabel(e.path)+"|"+e.size; if(seen.has(k)) continue; seen.add(k);
+      const blob=new Blob([new Uint8Array(buf,e.off,e.size)], {type:"image/webp"});
+      const cells=await tileCells(blob);
+      const id=packId+"/"+e.path;
+      await idbPut("files", id, blob);
+      made.push({id, name:packLabel(e.path), kind:"floor", cells, pack:packId});
+    }
+    await idbPut("packs", packId, {id:packId, name:meta.name, textures:made});
+    registerPack({id:packId, name:meta.name, textures:made});
+    await refreshPackList();
+    buildTexSelects();
+    toast("Loaded "+meta.name+" — "+made.length+" floor texture"+(made.length===1?"":"s")+".");
+  }
+  // Dungeondraft draws terrain at 256 px per grid cell, so the tile's cell span
+  // is just its width / 256 (falling back to 4 for anything unexpected).
+  function tileCells(blob){
+    return new Promise(res=>{
+      const u=URL.createObjectURL(blob), im=new Image();
+      im.onload=()=>{ URL.revokeObjectURL(u); res(Math.max(1, Math.round(im.naturalWidth/256)) || 4); };
+      im.onerror=()=>{ URL.revokeObjectURL(u); res(4); };
+      im.src=u;
+    });
+  }
+  function registerPack(p){
+    for(const t of p.textures){
+      texReg.set(t.id, {id:t.id, name:p.name+" · "+t.name, kind:"floor", cells:t.cells, pack:p.id,
+                        url:null, img:null, lazy:true});
+    }
+  }
+  // Pack textures live as blobs; mint the object URL the first time one is used.
+  const _texGet = texGet;
+  texGet = function(id){
+    const t=texReg.get(id);
+    if(t && t.lazy && !t.url){
+      t.lazy=false;
+      idbGet("files", id).then(b=>{ if(b){ t.url=URL.createObjectURL(b); render(); } else { t.failed=true; } })
+                         .catch(()=>{ t.failed=true; });
+      return null;
+    }
+    return _texGet(id);
+  };
+
+  async function loadPacks(){
+    let packs=[]; try{ packs=await idbAll("packs")||[]; }catch(e){ return; }
+    packs.forEach(registerPack);
+    await refreshPackList();
+    buildTexSelects();
+  }
+  async function refreshPackList(){
+    const el=$("packList"); if(!el) return;
+    let packs=[]; try{ packs=await idbAll("packs")||[]; }catch(e){}
+    el.innerHTML="";
+    for(const p of packs){
+      const d=document.createElement("div"); d.className="pk";
+      d.innerHTML='<span></span><button title="Remove from this browser">&times;</button>';
+      d.querySelector("span").textContent=p.name+" ("+p.textures.length+")";
+      d.querySelector("button").onclick=()=>removePack(p);
+      el.appendChild(d);
+    }
+  }
+  async function removePack(p){
+    for(const t of p.textures){ try{ await idbDel("files", t.id); }catch(e){} texReg.delete(t.id); }
+    try{ await idbDel("packs", p.id); }catch(e){}
+    const st=map.style||{};
+    if(st.floor && st.floor.indexOf(p.id)===0){ st.floor="starter:flagstone"; }
+    await refreshPackList(); buildTexSelects(); commit();
+    toast("Removed "+p.name+".");
+  }
+
+  // ── selects ───────────────────────────────────────────────────────
+  function buildTexSelects(){
+    const st=map.style||{};
+    const fs=$("floorSel"), bs=$("bgSel"); if(!fs||!bs) return;
+    const opts=(sel, list, cur)=>{ sel.innerHTML="";
+      for(const o of list){ const e=document.createElement("option"); e.value=o.id; e.textContent=o.name; sel.appendChild(e); }
+      sel.value=cur; if(!sel.value && list.length) sel.value=list[0].id; };
+    const floors=[{id:"", name:"Classic parchment"}];
+    for(const t of texReg.values()) if(t.kind==="floor") floors.push({id:t.id, name:t.name});
+    opts(fs, floors, st.floor||"");
+    opts(bs, [{id:"bg:theme", name:"Classic (theme)"},
+              {id:"starter:rockdark",  name:"Dark rock"},
+              {id:"starter:rocklight", name:"Light rock"},
+              {id:"bg:slate", name:"Slate (solid)"},
+              {id:"bg:black", name:"Black (solid)"},
+              {id:"bg:parch", name:"Parchment (solid)"}], st.bg||"bg:theme");
+  }
+  function syncAdvancedUI(){
+    const st=map.style||(map.style={mode:"classic",floor:"starter:flagstone",bg:"starter:rockdark"});
+    const on=st.mode==="textured";
+    if($("advToggle")) $("advToggle").checked=on;
+    if($("advBody")) $("advBody").style.display = on ? "" : "none";
+    buildTexSelects();
+  }
+  function initAdvanced(){
+    const st=map.style||(map.style={mode:"classic",floor:"starter:flagstone",bg:"starter:rockdark"});
+    if($("advToggle")) $("advToggle").onchange=e=>{
+      map.style.mode = e.target.checked ? "textured" : "classic";
+      syncAdvancedUI(); commit();
+    };
+    if($("floorSel")) $("floorSel").onchange=e=>{ map.style.floor=e.target.value; commit(); };
+    if($("bgSel"))    $("bgSel").onchange   =e=>{ map.style.bg   =e.target.value; commit(); };
+    if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
+    if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
+      e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
+    syncAdvancedUI();
+    loadPacks().catch(()=>{});
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -1594,6 +1863,7 @@
     snapOn=map.snap!==false; $("snapToggle").checked=snapOn;
     $("darkToggle").checked = map.theme==="dark";
     setThemeColors(map.theme==="dark" ? "dark" : "light");
+    initAdvanced();
     syncUndo();
     if(map.shapes.length||map.walls.length) fitView(); else render();
     if(!embed && !map.shapes.length) toast("Pick a tool, or roll a random dungeon →");
