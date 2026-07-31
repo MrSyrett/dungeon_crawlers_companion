@@ -119,6 +119,7 @@ window.DungeonEngine = (function(){
   // ════════════════════════════════ RENDER ════════════════════════════════
   function render(){
     ctx.setTransform(DPR,0,0,DPR,0,0);
+    doorHalf=null;                      // per-door wall thickness, recomputed per frame
     ctx.clearRect(0,0,W,H);
     if(!noRock){
       const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
@@ -133,18 +134,48 @@ window.DungeonEngine = (function(){
       const m=buf.mask.getContext("2d"); m.setTransform(1,0,0,1,0,0);
       m.clearRect(0,0,W,H); m.fillStyle="#fff"; m.beginPath();
       for(const sh of shapes){ if(sh.deco) continue; shapePath(m, sh); } m.fill("nonzero");
-      // floor colour
+      // Floors are PER-SHAPE. Walk the shapes in z-order and batch CONSECUTIVE
+      // runs that share a fill: the common single-floor map still costs one pass
+      // (and renders byte-identically to before), while a mixed map stays correct
+      // — a later shape paints over an earlier one exactly as it was drawn.
+      const runs=[];
+      for(const sh of shapes){ if(sh.deco) continue;
+        const ft=shapeFloorTex(sh), last=runs[runs.length-1];
+        if(last && last.t===ft) last.list.push(sh); else runs.push({t:ft, list:[sh]});
+      }
       const tc=buf.tint.getContext("2d"); tc.setTransform(1,0,0,1,0,0);
-      tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over"; tc.drawImage(buf.mask,0,0);
-      tc.globalCompositeOperation="source-in";
-      tc.fillStyle = patFor(tc, tex && tex.floor) || C.floor; tc.fillRect(0,0,W,H);
-      tc.globalCompositeOperation="source-over";
+      tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over";
+      // Untextured floors keep the original mask + `source-in` path so the classic
+      // render stays byte-identical. Anything with a texture — one run or twenty —
+      // goes through the clipped-fill path below, which is both faster and the
+      // only way mixed floors can be composited cheaply.
+      if(runs.length<=1 && !(runs.length && runs[0].t)){
+        tc.drawImage(buf.mask,0,0);
+        tc.globalCompositeOperation="source-in";
+        tc.fillStyle = patFor(tc, runs.length?runs[0].t:null) || C.floor; tc.fillRect(0,0,W,H);
+        tc.globalCompositeOperation="source-over";
+      } else {
+        // One CLIPPED pattern fill per run — no composite modes, no scratch
+        // buffers. The obvious mask + `source-in` approach is a trap here:
+        // source-in is defined over the WHOLE canvas (everything outside the
+        // source is cleared), so it costs a full-canvas pass per run even when
+        // the fill is tiny — ~180 ms on an 18-room, four-style map. Clipping
+        // costs only the run's own box.
+        for(const r of runs){
+          const bb=runBox(r.list); if(!bb) continue;
+          tc.save();
+          tc.beginPath(); for(const sh of r.list) shapePath(tc, sh); tc.clip("nonzero");
+          tc.fillStyle = patFor(tc, r.t) || C.floor;
+          tc.fillRect(bb.x,bb.y,bb.w,bb.h);
+          tc.restore();
+        }
+      }
       ctx.drawImage(buf.tint,0,0);
       // grid inside floor
-      if(map.grid!==false && wpx()>7){
+      if(map.grid!==false && gridOp()>0 && wpx()>7){
         const gc=buf.grid.getContext("2d"); gc.setTransform(1,0,0,1,0,0);
         gc.clearRect(0,0,W,H); gc.globalCompositeOperation="source-over";
-        gc.strokeStyle=C.grid; gc.lineWidth=Math.max(1,1.5*cam.scale); gc.globalAlpha=.85;
+        gc.strokeStyle=C.grid; gc.lineWidth=Math.max(1,1.5*cam.scale); gc.globalAlpha=.85*gridOp();
         const p=wpx(); const [ox,oy]=toScreen(0,0); gc.beginPath();
         for(let x=ox%p;x<=W;x+=p){ gc.moveTo(x+.5,0); gc.lineTo(x+.5,H); }
         for(let y=oy%p;y<=H;y+=p){ gc.moveTo(0,y+.5); gc.lineTo(W,y+.5); }
@@ -160,7 +191,8 @@ window.DungeonEngine = (function(){
     for(const s of map.stairs) drawStair(s);
   }
 
-  function drawDotGrid(){ const p=wpx(); if(p<13) return; ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.8;
+  function drawDotGrid(){ const p=wpx(); if(p<13) return; const go=gridOp(); if(go<=0) return;
+    ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.8*go;
     const [ox,oy]=toScreen(0,0); const r=Math.max(0.6,0.85*Math.min(2,cam.scale));
     for(let x=ox%p;x<W;x+=p) for(let y=oy%p;y<H;y+=p){ ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fill(); }
     ctx.restore(); }
@@ -231,12 +263,65 @@ window.DungeonEngine = (function(){
 
 
   // ── textured walls (Advanced Mode) ────────────────────────────────
-  // Wall half-thickness in SCREEN px. Returns exactly the classic ink value when
-  // no wall texture is active, so the classic render stays byte-identical.
-  function wallHalfPx(){ const wt=tex&&tex.wall;
-    return wt ? Math.max(1, 0.5*(wt.thick||0.4)*wpx()) : Math.max(1.3,1.7*cam.scale); }
-  // …and in world cells, or 0 in classic mode (used as a "textured?" test too).
-  function wallHalfCells(){ const wt=tex&&tex.wall; return wt ? 0.5*(wt.thick||0.4) : 0; }
+  // Per-object styling: a shape/wall may carry its own `floor`/`wall` texture id.
+  //   undefined ⇒ inherit the map default (so a generated dungeon restyles wholesale)
+  //   ""        ⇒ explicitly classic ink / parchment
+  //   an id     ⇒ that texture, resolved through the host-supplied tex.byId table
+  function texOf(id, dflt){
+    if(id===undefined || id===null) return dflt || null;
+    if(id==="") return null;
+    return (tex && tex.byId && tex.byId[id]) || null;
+  }
+  function shapeFloorTex(sh){ return tex ? texOf(sh.floor, tex.floor) : null; }
+  function shapeWallTex(sh){  return tex ? texOf(sh.wall,  tex.wall)  : null; }
+
+  // Wall half-thickness for a given wall texture, in SCREEN px. With no texture
+  // this returns exactly the classic ink value, so classic stays byte-identical.
+  // User-controllable grid opacity (map.gridOpacity, 0..1, default 1). It scales
+  // BOTH the in-floor grid and the exterior dot grid, so the default of 1 leaves
+  // the classic render untouched.
+  function gridOp(){ const v = map && map.gridOpacity; return (v==null) ? 1 : Math.max(0, Math.min(1, v)); }
+  // Screen-space bounding box of a group of shapes, clamped to the canvas.
+  function runBox(list){
+    let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+    for(const sh of list){ const b=bounds(sh,"shape"); if(!b) continue;
+      const p=toScreen(b.x,b.y), q=toScreen(b.x+b.w,b.y+b.h);
+      if(p[0]<x0)x0=p[0]; if(p[1]<y0)y0=p[1]; if(q[0]>x1)x1=q[0]; if(q[1]>y1)y1=q[1]; }
+    if(!isFinite(x0)) return null;
+    x0=Math.max(0,Math.floor(x0-6)); y0=Math.max(0,Math.floor(y0-6));
+    x1=Math.min(W,Math.ceil(x1+6));  y1=Math.min(H,Math.ceil(y1+6));
+    return (x1<=x0||y1<=y0) ? null : {x:x0,y:y0,w:x1-x0,h:y1-y0};
+  }
+  function halfPxFor(t){ return t ? Math.max(1, 0.5*(t.thick||0.4)*wpx()) : Math.max(1.3,1.7*cam.scale); }
+  // …and in world cells, or 0 for classic ink (also used as a "textured?" test).
+  function halfCellsFor(t){ return t ? 0.5*(t.thick||0.4) : 0; }
+  function wallHalfPx(){ return halfPxFor(tex && tex.wall); }
+
+  // Doors take the thickness of the wall they actually sit in — the outline they
+  // are nearest to — so a door in a thin wall doesn't get a fat leaf just because
+  // some other room is thick. Rebuilt once per render.
+  let doorHalf = null;
+  function segDist(px,py,x1,y1,x2,y2){
+    const dx=x2-x1, dy=y2-y1, l2=dx*dx+dy*dy;
+    let t = l2 ? ((px-x1)*dx+(py-y1)*dy)/l2 : 0; t = t<0?0:(t>1?1:t);
+    return Math.hypot(px-(x1+t*dx), py-(y1+t*dy));
+  }
+  function wallHalfCellsAt(d){
+    if(!tex) return 0;
+    if(!doorHalf){
+      doorHalf = new Map();
+      for(const dd of map.doors){
+        let best=null, bd=Infinity;
+        for(const sh of map.shapes){ if(sh.deco) continue;
+          const o=shapeOutline(sh);
+          for(let i=0;i<o.length;i++){ const a=o[i], b=o[(i+1)%o.length];
+            const q=segDist(dd.x,dd.y,a[0],a[1],b[0],b[1]);
+            if(q<bd){ bd=q; best=sh; } } }
+        doorHalf.set(dd, halfCellsFor(best ? shapeWallTex(best) : (tex && tex.wall)));
+      }
+    }
+    return doorHalf.get(d) || 0;
+  }
 
   // Lay a wall strip along a world polyline. One rotated, clipped quad per
   // segment, with a running distance `s` so the texture flows continuously
@@ -272,18 +357,18 @@ window.DungeonEngine = (function(){
 
   function drawWalls(){
     if(!map.shapes.length) return;
-    const wt=tex&&tex.wall, halfW=wallHalfPx();
     const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
     wc.globalCompositeOperation="source-over"; wc.fillStyle=C.ink;
-    // Per-shape outlines (exact circles), then the inset-union erase below drops
-    // wall that lies inside another room — same merge rule as the ink renderer.
+    // Per-shape outlines (exact circles) stroked with THAT shape's wall texture,
+    // then the inset-union erase below drops wall that lies inside another room —
+    // same merge rule as the ink renderer.
     for(const sh of map.shapes){ if(sh.deco) continue;
-      const o=shapeOutline(sh);
-      if(!(wt && stripPath(wc, o, true, wt, halfW))) roughRing(wc, o, halfW); }
+      const o=shapeOutline(sh), wt=shapeWallTex(sh), hp=halfPxFor(wt);
+      if(!(wt && stripPath(wc, o, true, wt, hp))) roughRing(wc, o, hp); }
     const ec=buf.erode.getContext("2d"); ec.setTransform(1,0,0,1,0,0); ec.clearRect(0,0,W,H);
     ec.globalCompositeOperation="source-over"; ec.fillStyle="#fff";
-    const inset=(halfW+1.4)/wpx();
-    for(const sh of map.shapes){ if(sh.deco) continue; fillInsetShape(ec, sh, inset); }
+    for(const sh of map.shapes){ if(sh.deco) continue;
+      fillInsetShape(ec, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
     wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
     for(const d of map.doors) punchDoorQuad(wc, d);   // opening scales with wall thickness
     if(!noRock){ const o=Math.min(2,cam.scale); ctx.save(); ctx.globalAlpha=.16;
@@ -335,11 +420,11 @@ window.DungeonEngine = (function(){
     c.beginPath(); c.arc(S[n-1][0],S[n-1][1],halfW*1.02,0,6.2832); c.fill();
   }
   function drawInteriorWalls(){ if(!map.walls.length) return; ctx.save(); ctx.fillStyle=C.ink;
-    const wt=tex&&tex.wall;
     const normal=Math.max(1.3,1.7*cam.scale), thin=Math.max(0.6,0.85*cam.scale);
     for(const wl of map.walls){
+      const wt = tex ? texOf(wl.wall, tex.wall) : null;
       const pts = (wl.cx===undefined || wl.cy===undefined) ? [[wl.x1,wl.y1],[wl.x2,wl.y2]] : wallSamples(wl);
-      if(wt && stripPath(ctx, pts, false, wt, wallHalfPx()*(wl.thin?0.5:1))) continue;
+      if(wt && stripPath(ctx, pts, false, wt, halfPxFor(wt)*(wl.thin?0.5:1))) continue;
       const hw = wl.thin ? thin : normal;
       if(wl.cx===undefined || wl.cy===undefined) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2], hw);
       else roughCurve(ctx, pts, hw); }
@@ -368,8 +453,8 @@ window.DungeonEngine = (function(){
     for(const sh of map.shapes){ if(!sh.deco) continue; roughRing(dc, shapeOutline(sh), thin); }
     const cc=buf.decoClip.getContext("2d"); cc.setTransform(1,0,0,1,0,0); cc.clearRect(0,0,W,H);
     cc.globalCompositeOperation="source-over"; cc.fillStyle="#fff";
-    const inset=(wallHalfPx()+1.4)/wpx();
-    for(const sh of map.shapes){ if(sh.deco) continue; fillInsetShape(cc, sh, inset); }
+    for(const sh of map.shapes){ if(sh.deco) continue;
+      fillInsetShape(cc, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
     dc.globalCompositeOperation="destination-in"; dc.drawImage(buf.decoClip,0,0);
     ctx.drawImage(buf.deco,0,0); }
 
@@ -379,7 +464,7 @@ window.DungeonEngine = (function(){
     // wall (punchDoorQuad), so a thick textured wall gets a matching thick door
     // rather than a gap around a too-thin leaf. 0 in classic ⇒ 0.15 as before.
     return { cx:d.x, cy:d.y, alx:Math.cos(a), aly:Math.sin(a), acx:-Math.sin(a), acy:Math.cos(a),
-             hl, rhl:Math.max(0.12, hl-stub), ht:Math.max(0.15, wallHalfCells()), stub };
+             hl, rhl:Math.max(0.12, hl-stub), ht:Math.max(0.15, wallHalfCellsAt(d)), stub };
   }
   function punchDoorQuad(wc, d){
     const g=doorGeom(d);
@@ -387,7 +472,7 @@ window.DungeonEngine = (function(){
       const p1=c(sl0,-st),p2=c(sl1,-st),p3=c(sl1,st),p4=c(sl0,st);
       wc.beginPath(); wc.moveTo(p1[0],p1[1]); wc.lineTo(p2[0],p2[1]); wc.lineTo(p3[0],p3[1]); wc.lineTo(p4[0],p4[1]); wc.closePath(); wc.fill(); };
     rect(-g.rhl, g.rhl, g.ht*1.1);
-    const sh=Math.max(0.05, wallHalfCells() || (1.7*cam.scale)/wpx());
+    const sh=Math.max(0.05, wallHalfCellsAt(d) || (1.7*cam.scale)/wpx());
     rect(-g.hl, -g.rhl, sh);
     rect( g.rhl, g.hl, sh);
   }

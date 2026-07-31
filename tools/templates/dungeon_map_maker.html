@@ -171,6 +171,8 @@
         <label class="chk"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
         <label class="chk"><input type="checkbox" id="gridToggle" checked> Show grid</label>
       </div>
+      <label class="fld">Grid opacity <b id="gridOpV">100%</b></label>
+      <input type="range" id="gridOp" min="0" max="100" value="100">
       <div class="row" style="margin-top:10px">
         <button class="btn" id="clear">Clear</button>
         <button class="btn" id="fit">Fit view</button>
@@ -184,6 +186,7 @@
           <input type="checkbox" id="advToggle"><span class="slider"></span></label>
       </div>
       <div id="advBody" style="display:none">
+        <p class="hint" id="styleScope" style="margin:0 0 2px"></p>
         <label class="fld" for="wallSel">Walls</label>
         <select class="sel" id="wallSel"></select>
         <label class="fld" for="floorSel">Floor</label>
@@ -304,7 +307,7 @@
   let W = 0, H = 0, DPR = 1;
 
   function blankMap(){
-    return { version:1, name:"", grid:true, style:{mode:"classic", floor:"starter:flagstone", wall:"starter:wallstone", bg:"starter:rockdark"},
+    return { version:1, name:"", grid:true, gridOpacity:1, style:{mode:"classic", floor:"starter:flagstone", wall:"starter:wallstone", bg:"starter:rockdark"},
              shapes:[], walls:[], doors:[], stairs:[], seedId:1 };
   }
   function uid(){ return map.seedId++; }
@@ -523,6 +526,7 @@
     if(!exporting){ drawPreview(); drawSelection(); }
   }
   function renderLocalMap(){
+    doorHalf=null;                      // per-door wall thickness, recomputed per frame
     // Work in CSS-pixel logical space; scale once for crisp HiDPI output.
     ctx.setTransform(DPR,0,0,DPR,0,0);
     ctx.clearRect(0,0,W,H);
@@ -540,21 +544,51 @@
       const m=buf.mask.getContext("2d"); m.setTransform(1,0,0,1,0,0);
       m.clearRect(0,0,W,H); m.fillStyle="#fff"; m.beginPath();
       for(const sh of shapes){ if(sh.deco) continue; shapePath(m, sh); } m.fill("nonzero");
-      // floor colour
+      // Floors are PER-SHAPE. Walk the shapes in z-order and batch CONSECUTIVE
+      // runs that share a fill: the common single-floor map still costs one pass
+      // (and renders byte-identically to before), while a mixed map stays correct
+      // — a later shape paints over an earlier one exactly as it was drawn.
+      const runs=[];
+      for(const sh of shapes){ if(sh.deco) continue;
+        const ft=shapeFloorTex(sh), last=runs[runs.length-1];
+        if(last && last.t===ft) last.list.push(sh); else runs.push({t:ft, list:[sh]});
+      }
       const tc=buf.tint.getContext("2d"); tc.setTransform(1,0,0,1,0,0);
-      tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over"; tc.drawImage(buf.mask,0,0);
-      tc.globalCompositeOperation="source-in";
-      tc.fillStyle = patFor(tc, tex && tex.floor) || C.floor; tc.fillRect(0,0,W,H);
-      tc.globalCompositeOperation="source-over";
+      tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over";
+      // Untextured floors keep the original mask + `source-in` path so the classic
+      // render stays byte-identical. Anything with a texture — one run or twenty —
+      // goes through the clipped-fill path below, which is both faster and the
+      // only way mixed floors can be composited cheaply.
+      if(runs.length<=1 && !(runs.length && runs[0].t)){
+        tc.drawImage(buf.mask,0,0);
+        tc.globalCompositeOperation="source-in";
+        tc.fillStyle = patFor(tc, runs.length?runs[0].t:null) || C.floor; tc.fillRect(0,0,W,H);
+        tc.globalCompositeOperation="source-over";
+      } else {
+        // One CLIPPED pattern fill per run — no composite modes, no scratch
+        // buffers. The obvious mask + `source-in` approach is a trap here:
+        // source-in is defined over the WHOLE canvas (everything outside the
+        // source is cleared), so it costs a full-canvas pass per run even when
+        // the fill is tiny — ~180 ms on an 18-room, four-style map. Clipping
+        // costs only the run's own box.
+        for(const r of runs){
+          const bb=runBox(r.list); if(!bb) continue;
+          tc.save();
+          tc.beginPath(); for(const sh of r.list) shapePath(tc, sh); tc.clip("nonzero");
+          tc.fillStyle = patFor(tc, r.t) || C.floor;
+          tc.fillRect(bb.x,bb.y,bb.w,bb.h);
+          tc.restore();
+        }
+      }
       ctx.drawImage(buf.tint,0,0);
       // grid inside floor
-      if(map.grid && wpx()>7){
+      if(map.grid && gridOp()>0 && wpx()>7){
         const gc=buf.grid.getContext("2d"); gc.setTransform(1,0,0,1,0,0);
         gc.clearRect(0,0,W,H); gc.globalCompositeOperation="source-over";
         // Width scales with zoom so it's a constant fraction of a cell: 3px at
         // export scale (res=2, the look Michael liked) and correspondingly thinner
         // in the live preview instead of a fixed 3px that looks heavy there.
-        gc.strokeStyle=C.grid; gc.lineWidth=Math.max(1,1.5*cam.scale); gc.globalAlpha=.85;
+        gc.strokeStyle=C.grid; gc.lineWidth=Math.max(1,1.5*cam.scale); gc.globalAlpha=.85*gridOp();
         const p=wpx(); const [ox,oy]=toScreen(0,0); gc.beginPath();
         for(let x=ox%p;x<=W;x+=p){ gc.moveTo(x+.5,0); gc.lineTo(x+.5,H); }
         for(let y=oy%p;y<=H;y+=p){ gc.moveTo(0,y+.5); gc.lineTo(W,y+.5); }
@@ -571,7 +605,8 @@
     for(const s of map.stairs) drawStair(s);
   }
 
-  function drawDotGrid(){ const p=wpx(); if(p<13) return; ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.8;
+  function drawDotGrid(){ const p=wpx(); if(p<13) return; const go=gridOp(); if(go<=0) return;
+    ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.8*go;
     const [ox,oy]=toScreen(0,0); const r=Math.max(0.6,0.85*Math.min(2,cam.scale));
     for(let x=ox%p;x<W;x+=p) for(let y=oy%p;y<H;y+=p){ ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fill(); }
     ctx.restore(); }
@@ -670,12 +705,60 @@
   // stay open — the classic no-internal-walls union, but with real curves.
 
   // ── textured walls (Advanced Mode) ────────────────────────────────
-  // Wall half-thickness in SCREEN px. Returns exactly the classic ink value when
-  // no wall texture is active, so the classic render stays byte-identical.
-  function wallHalfPx(){ const wt=tex&&tex.wall;
-    return wt ? Math.max(1, 0.5*(wt.thick||0.4)*wpx()) : Math.max(1.3,1.7*cam.scale); }
-  // …and in world cells, or 0 in classic mode (used as a "textured?" test too).
-  function wallHalfCells(){ const wt=tex&&tex.wall; return wt ? 0.5*(wt.thick||0.4) : 0; }
+  // Per-object styling: a shape/wall may carry its own `floor`/`wall` texture id.
+  //   undefined ⇒ inherit the map default (so a generated dungeon restyles wholesale)
+  //   ""        ⇒ explicitly classic ink / parchment
+  //   an id     ⇒ that texture, resolved through tex.byId
+  function texOf(id, dflt){
+    if(id===undefined || id===null) return dflt || null;
+    if(id==="") return null;
+    return (tex && tex.byId && tex.byId[id]) || null;
+  }
+  function shapeFloorTex(sh){ return tex ? texOf(sh.floor, tex.floor) : null; }
+  function shapeWallTex(sh){  return tex ? texOf(sh.wall,  tex.wall)  : null; }
+
+  // Wall half-thickness for a given wall texture, in SCREEN px. With no texture
+  // this returns exactly the classic ink value, so classic stays byte-identical.
+  // User-controllable grid opacity (map.gridOpacity, 0..1, default 1). It scales
+  // BOTH the in-floor grid and the exterior dot grid, so the default of 1 leaves
+  // the classic render untouched.
+  function gridOp(){ const v = map && map.gridOpacity; return (v==null) ? 1 : Math.max(0, Math.min(1, v)); }
+  // Screen-space bounding box of a group of shapes, clamped to the canvas.
+  function runBox(list){
+    let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+    for(const sh of list){ const b=bounds(sh,"shape"); if(!b) continue;
+      const p=toScreen(b.x,b.y), q=toScreen(b.x+b.w,b.y+b.h);
+      if(p[0]<x0)x0=p[0]; if(p[1]<y0)y0=p[1]; if(q[0]>x1)x1=q[0]; if(q[1]>y1)y1=q[1]; }
+    if(!isFinite(x0)) return null;
+    x0=Math.max(0,Math.floor(x0-6)); y0=Math.max(0,Math.floor(y0-6));
+    x1=Math.min(W,Math.ceil(x1+6));  y1=Math.min(H,Math.ceil(y1+6));
+    return (x1<=x0||y1<=y0) ? null : {x:x0,y:y0,w:x1-x0,h:y1-y0};
+  }
+  function halfPxFor(t){ return t ? Math.max(1, 0.5*(t.thick||0.4)*wpx()) : Math.max(1.3,1.7*cam.scale); }
+  // …and in world cells, or 0 for classic ink (also used as a "textured?" test).
+  function halfCellsFor(t){ return t ? 0.5*(t.thick||0.4) : 0; }
+  function wallHalfPx(){ return halfPxFor(tex && tex.wall); }
+
+  // Doors take the thickness of the wall they actually sit in — the outline they
+  // are nearest to — so a door in a thin wall doesn't get a fat leaf just because
+  // some other room is thick. Rebuilt once per render.
+  let doorHalf = null;
+  function wallHalfCellsAt(d){
+    if(!tex) return 0;
+    if(!doorHalf){
+      doorHalf = new Map();
+      for(const dd of map.doors){
+        let best=null, bd=Infinity;
+        for(const sh of map.shapes){ if(sh.deco) continue;
+          const o=shapeOutline(sh);
+          for(let i=0;i<o.length;i++){ const a=o[i], b=o[(i+1)%o.length];
+            const q=distToSeg(dd.x,dd.y,a[0],a[1],b[0],b[1]);
+            if(q<bd){ bd=q; best=sh; } } }
+        doorHalf.set(dd, halfCellsFor(best ? shapeWallTex(best) : (tex && tex.wall)));
+      }
+    }
+    return doorHalf.get(d) || 0;
+  }
 
   // Lay a wall strip along a world polyline. One rotated, clipped quad per
   // segment, with a running distance `s` so the texture flows continuously
@@ -711,22 +794,22 @@
 
   function drawWalls(){
     if(!map.shapes.length) return;
-    const wt=tex&&tex.wall, halfW=wallHalfPx();
     const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
     wc.globalCompositeOperation="source-over"; wc.fillStyle=C.ink;
-    // Per-shape outlines (exact circles), then the inset-union erase below drops
-    // wall that lies inside another room — same merge rule as the ink renderer.
+    // Per-shape outlines (exact circles) stroked with THAT shape's wall texture,
+    // then the inset-union erase below drops wall that lies inside another room —
+    // same merge rule as the ink renderer.
     for(const sh of map.shapes){ if(sh.deco) continue;
-      const o=shapeOutline(sh);
-      if(!(wt && stripPath(wc, o, true, wt, halfW))) roughRing(wc, o, halfW); }
+      const o=shapeOutline(sh), wt=shapeWallTex(sh), hp=halfPxFor(wt);
+      if(!(wt && stripPath(wc, o, true, wt, hp))) roughRing(wc, o, hp); }
     // Erase mask = union of each shape's fill INSET individually (not the eroded
     // union). A wall is removed only where it lies inside *another* shape's
     // interior (a real overlap). Two shapes that merely share an edge each inset
     // away from that edge, leaving a gap there, so the shared wall survives.
     const ec=buf.erode.getContext("2d"); ec.setTransform(1,0,0,1,0,0); ec.clearRect(0,0,W,H);
     ec.globalCompositeOperation="source-over"; ec.fillStyle="#fff";
-    const inset=(halfW+1.4)/wpx();                     // inset in world units, > wall half-width
-    for(const sh of map.shapes){ if(sh.deco) continue; fillInsetShape(ec, sh, inset); }
+    for(const sh of map.shapes){ if(sh.deco) continue;   // inset > that shape's own wall half-width
+      fillInsetShape(ec, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
     wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
     for(const d of map.doors) punchDoorQuad(wc, d);   // opening scales with wall thickness   // transparent gap for each door
     // soft drop shadow taken from the real wall shape (round under circles)
@@ -779,11 +862,11 @@
     c.beginPath(); c.arc(S[n-1][0],S[n-1][1],halfW*1.02,0,6.2832); c.fill();
   }
   function drawInteriorWalls(){ if(!map.walls.length) return; ctx.save(); ctx.fillStyle=C.ink;
-    const wt=tex&&tex.wall;
     const normal=Math.max(1.3,1.7*cam.scale), thin=Math.max(0.6,0.85*cam.scale);
     for(const wl of map.walls){
+      const wt = tex ? texOf(wl.wall, tex.wall) : null;
       const pts = (wl.cx===undefined || wl.cy===undefined) ? [[wl.x1,wl.y1],[wl.x2,wl.y2]] : wallSamples(wl);
-      if(wt && stripPath(ctx, pts, false, wt, wallHalfPx()*(wl.thin?0.5:1))) continue;
+      if(wt && stripPath(ctx, pts, false, wt, halfPxFor(wt)*(wl.thin?0.5:1))) continue;
       const hw = wl.thin ? thin : normal;
       if(wl.cx===undefined || wl.cy===undefined) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2], hw);
       else roughCurve(ctx, pts, hw); }
@@ -812,8 +895,8 @@
     for(const sh of map.shapes){ if(!sh.deco) continue; roughRing(dc, shapeOutline(sh), thin); }
     const cc=buf.decoClip.getContext("2d"); cc.setTransform(1,0,0,1,0,0); cc.clearRect(0,0,W,H);
     cc.globalCompositeOperation="source-over"; cc.fillStyle="#fff";
-    const inset=(wallHalfPx()+1.4)/wpx();
-    for(const sh of map.shapes){ if(sh.deco) continue; fillInsetShape(cc, sh, inset); }
+    for(const sh of map.shapes){ if(sh.deco) continue;
+      fillInsetShape(cc, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
     dc.globalCompositeOperation="destination-in"; dc.drawImage(buf.decoClip,0,0);
     ctx.drawImage(buf.deco,0,0); }
 
@@ -827,7 +910,7 @@
     // wall (punchDoorQuad), so a thick textured wall gets a matching thick door
     // rather than a gap around a too-thin leaf. 0 in classic ⇒ 0.15 as before.
     return { cx:d.x, cy:d.y, alx:Math.cos(a), aly:Math.sin(a), acx:-Math.sin(a), acy:Math.cos(a),
-             hl, rhl:Math.max(0.12, hl-stub), ht:Math.max(0.15, wallHalfCells()), stub };   // hl=tip, rhl=rectangle half-length, ht=half thickness
+             hl, rhl:Math.max(0.12, hl-stub), ht:Math.max(0.15, wallHalfCellsAt(d)), stub };   // hl=tip, rhl=rectangle half-length, ht=half thickness
   }
   // Clear the wall ONLY under the rectangle + the thin stub lines — everything
   // else in the door's footprint stays transparent so the walls aren't cut off.
@@ -837,7 +920,7 @@
       const p1=c(sl0,-st),p2=c(sl1,-st),p3=c(sl1,st),p4=c(sl0,st);
       wc.beginPath(); wc.moveTo(p1[0],p1[1]); wc.lineTo(p2[0],p2[1]); wc.lineTo(p3[0],p3[1]); wc.lineTo(p4[0],p4[1]); wc.closePath(); wc.fill(); };
     rect(-g.rhl, g.rhl, g.ht*1.1);                       // the rectangle opening
-    const sh=Math.max(0.05, wallHalfCells() || (1.7*cam.scale)/wpx());      // stub strip ≈ the stub line's width
+    const sh=Math.max(0.05, wallHalfCellsAt(d) || (1.7*cam.scale)/wpx());      // stub strip ≈ the stub line's width
     rect(-g.hl, -g.rhl, sh);                              // left stub
     rect( g.rhl, g.hl, sh);                               // right stub
   }
@@ -1041,9 +1124,9 @@
 
     if(tool==="select"){
       const h=hitTest(wx,wy);
-      if(h){ sel={kind:h.kind,idx:h.idx};
+      if(h){ setSel({kind:h.kind,idx:h.idx});
         dragObj={h, ox:wx, oy:wy, snap:objSnapshot(h)}; }
-      else { sel=null; panning={sx,sy,cx:cam.x,cy:cam.y}; }   // drag empty space to pan (one-finger on touch)
+      else { setSel(null); panning={sx,sy,cx:cam.x,cy:cam.y}; }   // drag empty space to pan (one-finger on touch)
       render(); return;
     }
     if(tool==="erase"){ const h=hitTest(wx,wy); if(h){ pushHistory(); removeHit(h); commit(); } return; }
@@ -1097,10 +1180,12 @@
     if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
     if(!dragStart){ return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
-    if(tool==="rect" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true; map.shapes.push(draft); commit(); }
-    else if(tool==="circle" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true; map.shapes.push(draft); commit(); }
+    if(tool==="rect" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true;
+      map.shapes.push(stampStyle(draft,"shape")); commit(); }
+    else if(tool==="circle" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true;
+      map.shapes.push(stampStyle(draft,"shape")); commit(); }
     else if(tool==="wall" && draft && (draft.x1!==draft.x2||draft.y1!==draft.y2)){
-      pushHistory(); map.walls.push({id:uid(),x1:draft.x1,y1:draft.y1,x2:draft.x2,y2:draft.y2}); commit(); }
+      pushHistory(); map.walls.push(stampStyle({id:uid(),x1:draft.x1,y1:draft.y1,x2:draft.x2,y2:draft.y2},"wall")); commit(); }
     draft=null; dragStart=null;
   });
 
@@ -1147,7 +1232,7 @@
       pushHistory(); g.id=uid(); map.doors.push(g); commit(); }
     else if(placing.tool==="wall"){
       const wl=wallFromPts(placing.pts[0], placing.pts[1], placing.pts[2], drawMode==="shapes");
-      if(wl){ pushHistory(); wl.id=uid(); map.walls.push(wl); commit(); } }
+      if(wl){ pushHistory(); wl.id=uid(); map.walls.push(stampStyle(wl,"wall")); commit(); } }
     else { const g=stairFromPts(placing.pts[0], placing.pts[1], placing.pts[2]);
       if(g){ pushHistory(); g.id=uid(); map.stairs.push(g); commit(); } }
     placing=null;
@@ -1155,6 +1240,7 @@
 
   function finishPolygon(){ if(polyPts.length>2){ pushHistory();
       const poly={id:uid(),type:"polygon",pts:polyPts.slice()}; if(drawMode==="shapes") poly.deco=true;
+      stampStyle(poly,"shape");
       map.shapes.push(poly); commit(); }
     polyPts=null; hoverPt=null; render(); }
 
@@ -1178,7 +1264,7 @@
       else { o.x=s.x+gdx; o.y=s.y+gdy; } }
   }
   function removeHit(h){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs})[h.kind];
-    arr.splice(h.idx,1); sel=null; }
+    arr.splice(h.idx,1); setSel(null); }
   function nearestWallAngle(wx,wy){
     let best=1e9,ang=0;
     for(const w of map.walls){ const d=distToSeg(wx,wy,w.x1,w.y1,w.x2,w.y2);
@@ -1211,12 +1297,19 @@
       theme: theme
     };
     pushHistory();
-    const keepName = map.name;
+    // The engine returns a brand-new map object, so carry the user's settings
+    // across — otherwise rolling a dungeon silently resets Advanced Mode, the
+    // chosen textures and the grid opacity. Generated ROOMS stay unstyled on
+    // purpose, so they follow map.style and can be restyled in one move.
+    const keepName = map.name, keepStyle = map.style, keepGridOp = map.gridOpacity, keepSnap = map.snap;
     map = (window.DungeonEngine && window.DungeonEngine.generate)
       ? window.DungeonEngine.generate(opts)
       : generateLocal(opts);
     map.name = keepName; map.grid = $("gridToggle").checked; map.theme = theme;
-    commit(); fitView();
+    if(keepStyle) map.style = keepStyle;
+    if(keepGridOp!=null) map.gridOpacity = keepGridOp;
+    if(keepSnap!=null) map.snap = keepSnap;
+    commit(); syncAdvancedUI(); syncStyleScope(); fitView();
   }
   // Inlined fallback generator (used only when DungeonEngine isn't loaded, e.g.
   // the tool opened standalone). Builds into the module `map` and returns it.
@@ -1489,6 +1582,7 @@
   function redo(){ if(!future.length) return; history.push(snapshot()); map=JSON.parse(future.pop()); afterLoad(); syncUndo(); scheduleSave(); }
   function syncUndo(){ $("undo").disabled=!history.length; $("redo").disabled=!future.length; }
   function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; markGeom();
+    syncGridOp();
     $("gridToggle").checked=map.grid!==false;
     snapOn=map.snap!==false; if($("snapToggle")) $("snapToggle").checked=snapOn;
     if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
@@ -1594,7 +1688,14 @@
   function applyStyle(){
     const st=(map && map.style) || null;
     if(!st || st.mode!=="textured"){ tex=null; return; }
-    tex = { floor: texGet(st.floor), bg: texGet(st.bg), wall: texGet(st.wall),
+    // byId carries every texture the map actually references, so the engine can
+    // resolve a per-shape `floor`/`wall` id without knowing anything about
+    // loading. floor/wall stay the map-wide defaults for unstyled shapes.
+    const byId={}, want=id=>{ if(id) byId[id]=texGet(id); };
+    want(st.floor); want(st.wall);
+    for(const sh of map.shapes){ want(sh.floor); want(sh.wall); }
+    for(const wl of map.walls) want(wl.wall);
+    tex = { floor: texGet(st.floor), bg: texGet(st.bg), wall: texGet(st.wall), byId,
             bgColor: Object.prototype.hasOwnProperty.call(BG_SOLID, st.bg) ? BG_SOLID[st.bg] : null };
   }
 
@@ -1772,24 +1873,60 @@
 
   // ── selects ───────────────────────────────────────────────────────
   function buildTexSelects(){
-    const st=map.style||{};
+    const st=map.style||{}, tgt=styleTarget();
+    const pick=(k)=> tgt && tgt.obj[k]!==undefined ? tgt.obj[k] : (st[k]||"");
     const fs=$("floorSel"), bs=$("bgSel"); if(!fs||!bs) return;
     const opts=(sel, list, cur)=>{ sel.innerHTML="";
       for(const o of list){ const e=document.createElement("option"); e.value=o.id; e.textContent=o.name; sel.appendChild(e); }
       sel.value=cur; if(!sel.value && list.length) sel.value=list[0].id; };
     const floors=[{id:"", name:"Classic parchment"}];
     for(const t of texReg.values()) if(t.kind==="floor") floors.push({id:t.id, name:t.name});
-    opts(fs, floors, st.floor||"");
+    opts(fs, floors, (tgt&&tgt.kind==="shape") ? pick("floor") : (st.floor||""));
     const ws=$("wallSel");
     if(ws){ const walls=[{id:"", name:"Classic ink"}];
       for(const t of texReg.values()) if(t.kind==="wall") walls.push({id:t.id, name:t.name});
-      opts(ws, walls, st.wall||""); }
+      opts(ws, walls, tgt ? pick("wall") : (st.wall||"")); }
     opts(bs, [{id:"bg:theme", name:"Classic (theme)"},
               {id:"starter:rockdark",  name:"Dark rock"},
               {id:"starter:rocklight", name:"Light rock"},
               {id:"bg:slate", name:"Slate (solid)"},
               {id:"bg:black", name:"Black (solid)"},
               {id:"bg:parch", name:"Parchment (solid)"}], st.bg||"bg:theme");
+  }
+  // New shapes/walls CAPTURE the current picker choice, so changing the picker
+  // afterwards doesn't restyle what you already drew. Generated rooms are left
+  // unstamped on purpose — they inherit map.style, so one picker change restyles
+  // a whole generated dungeon at once.
+  function stampStyle(o, kind){
+    const st=map.style||{};
+    if(st.mode!=="textured") return o;
+    if(kind==="shape"){ if(!o.deco){ o.floor=st.floor||""; o.wall=st.wall||""; } }
+    else o.wall=st.wall||"";
+    return o;
+  }
+  // The Floor / Walls pickers edit the SELECTED room (or interior wall) when
+  // there is one, and the map-wide default otherwise.
+  function styleTarget(){
+    if(sel==null) return null;
+    const o=objAt(sel); if(!o) return null;
+    if(o.kind==="shape" && !o.obj.deco) return {kind:"shape", obj:o.obj};
+    if(o.kind==="wall") return {kind:"wall", obj:o.obj};
+    return null;
+  }
+  function setSel(v){ sel=v; syncStyleScope(); }
+  function syncStyleScope(){
+    const el=$("styleScope"); if(!el) return;
+    const t=styleTarget();
+    el.textContent = t ? ("Editing the selected "+(t.kind==="shape"?"room":"wall")+" — Esc to edit defaults again")
+                       : "Editing the default for new rooms (and any unstyled ones)";
+    const fs=$("floorSel"); if(fs) fs.disabled = !!(t && t.kind==="wall");
+    buildTexSelects();
+  }
+
+  function syncGridOp(){
+    const v = (map.gridOpacity==null) ? 1 : Math.max(0, Math.min(1, map.gridOpacity));
+    if($("gridOp")) $("gridOp").value = Math.round(v*100);
+    if($("gridOpV")) $("gridOpV").textContent = Math.round(v*100)+"%";
   }
   function syncAdvancedUI(){
     const st=map.style||(map.style={mode:"classic",floor:"starter:flagstone",wall:"starter:wallstone",bg:"starter:rockdark"});
@@ -1804,13 +1941,16 @@
       map.style.mode = e.target.checked ? "textured" : "classic";
       syncAdvancedUI(); commit();
     };
-    if($("wallSel"))  $("wallSel").onchange =e=>{ map.style.wall =e.target.value; commit(); };
-    if($("floorSel")) $("floorSel").onchange=e=>{ map.style.floor=e.target.value; commit(); };
+    if($("wallSel"))  $("wallSel").onchange =e=>{ const t=styleTarget();
+      if(t){ pushHistory(); t.obj.wall=e.target.value; } else map.style.wall=e.target.value; commit(); };
+    if($("floorSel")) $("floorSel").onchange=e=>{ const t=styleTarget();
+      if(t && t.kind==="shape"){ pushHistory(); t.obj.floor=e.target.value; } else map.style.floor=e.target.value;
+      commit(); };
     if($("bgSel"))    $("bgSel").onchange   =e=>{ map.style.bg   =e.target.value; commit(); };
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
-    syncAdvancedUI();
+    syncAdvancedUI(); syncStyleScope();
     loadPacks().catch(()=>{});
   }
 
@@ -1932,7 +2072,7 @@
     if((e.ctrlKey||e.metaKey)&&e.key==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
     if((e.ctrlKey||e.metaKey)&&e.key==="y"){ e.preventDefault(); redo(); return; }
     if(e.key==="Enter"&&polyPts){ finishPolygon(); return; }
-    if(e.key==="Escape"){ polyPts=null; draft=null; dragStart=null; sel=null; placing=null; render(); return; }
+    if(e.key==="Escape"){ polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; render(); return; }
     if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
     if(e.key==="g"||e.key==="G"){ setMode(drawMode==="rooms"?"shapes":"rooms"); return; }  // toggle Rooms/Shapes
     const keys={v:"select",r:"rect",c:"circle",p:"polygon",w:"wall",d:"door",s:"stair",e:"erase"};
@@ -1971,6 +2111,8 @@
     $("darkToggle").checked = map.theme==="dark";
     setThemeColors(map.theme==="dark" ? "dark" : "light");
     initAdvanced();
+    syncGridOp();
+    if($("gridOp")) $("gridOp").oninput=e=>{ map.gridOpacity=(+e.target.value)/100; syncGridOp(); commit(); };
     syncUndo();
     if(map.shapes.length||map.walls.length) fitView(); else render();
     if(!embed && !map.shapes.length) toast("Pick a tool, or roll a random dungeon →");
