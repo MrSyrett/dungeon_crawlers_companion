@@ -471,26 +471,38 @@ function tokenFetchPatch(vttToken: string): string {
 //
 // It is a NO-OP wherever `.volume` already works (desktop, Android): the feature
 // probe returns early and `window.Audio` is left untouched, so those platforms
-// keep their exact current behaviour.
+// keep their exact current behaviour and never touch the proxy.
 //
-// Web Audio can only read CORS-clean media. We set crossOrigin='anonymous' and
-// only build the graph after a 'canplay' — which fires only if the CORS fetch
-// succeeded, so createMediaElementSource can never produce a tainted/silent
-// node. A host without CORS headers errors first; we then drop crossOrigin and
-// reload plain so the track still plays (at uncontrolled volume on iOS, exactly
-// as before this fix) rather than going silent. Injected in <head> so the
-// wrapper is installed before the template's audio code ever calls `new Audio`.
-const AUDIO_VOLUME_FIX = `<script>
+// Web Audio can only read same-origin (or CORS-clean) media, and the tools' hosts
+// (Dropbox etc.) send no CORS headers — so cross-origin http(s) tracks are routed
+// through our same-origin proxy (/api/audio-proxy), which makes them readable
+// without CORS. blob:/data:/same-origin URLs are already readable and pass
+// through untouched. The GainNode graph is built on 'canplay' (the media loaded
+// fine); if the proxy itself fails, we fall back to the original URL played plain
+// so the track still sounds (uncontrolled volume, as before) rather than dropping.
+//
+// Injected in <head> so the wrapper is installed before the template's audio code
+// ever calls `new Audio`. Parameterised by the VTT token: framed in the Owlbear
+// popover there's no cookie, so the proxy URL has to carry ?t=<token> (audio
+// loads as element src, which the fetch-patch can't reach). Empty in cookie mode.
+function audioVolumeFix(vttToken: string): string {
+  return `<script>
 (function () {
   var Native = window.Audio;
   if (!Native) return;
 
-  // Leave everything untouched where the platform honours .volume.
-  try {
-    var probe = new Native();
-    probe.volume = 0.375;
-    if (Math.abs(probe.volume - 0.375) < 0.02) return;
-  } catch (e) { return; }
+  var ua = navigator.userAgent || "";
+  var iOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1);
+
+  // Engage only where .volume is actually ignored. The probe catches iOS
+  // (its getter returns 1.0, not the value we set); the explicit iOS check is a
+  // belt-and-suspenders in case a future WebKit reflects the value. Anywhere
+  // .volume works and it isn't iOS (desktop, Android) we bail — window.Audio is
+  // left untouched and nothing is ever proxied.
+  var probeWorks = true;
+  try { var pr = new Native(); pr.volume = 0.375; probeWorks = Math.abs(pr.volume - 0.375) < 0.02; }
+  catch (e) { probeWorks = false; }
+  if (probeWorks && !iOS) return;
 
   var AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
@@ -498,6 +510,22 @@ const AUDIO_VOLUME_FIX = `<script>
   var mediaProto = window.HTMLMediaElement && window.HTMLMediaElement.prototype;
   var srcDesc = mediaProto && Object.getOwnPropertyDescriptor(mediaProto, "src");
   if (!srcDesc || !srcDesc.get || !srcDesc.set) return;
+
+  var PROXY = "/api/audio-proxy";
+  var TOKEN = ${JSON.stringify(vttToken || "")};
+
+  // Cross-origin http(s) -> same-origin proxy so Web Audio can read it. Anything
+  // already readable (blob:, data:, same-origin, relative) is left as-is.
+  function playable(url) {
+    if (typeof url !== "string" || !url) return { src: url, proxied: false };
+    if (/^(blob:|data:)/i.test(url)) return { src: url, proxied: false };
+    var abs;
+    try { abs = new URL(url, location.href); } catch (e) { return { src: url, proxied: false }; }
+    if (abs.protocol !== "http:" && abs.protocol !== "https:") return { src: url, proxied: false };
+    if (abs.origin === location.origin) return { src: url, proxied: false };
+    var p = PROXY + "?u=" + encodeURIComponent(abs.href) + (TOKEN ? "&t=" + encodeURIComponent(TOKEN) : "");
+    return { src: p, proxied: true };
+  }
 
   var ctx = null;
   function context() {
@@ -515,13 +543,13 @@ const AUDIO_VOLUME_FIX = `<script>
   function wire(a) {
     var v = 1;        // logical volume the tools read/write
     var gain = null;  // GainNode once the graph is built
-    var state = 0;    // 0 = not built, 1 = graphed (CORS ok), 2 = plain fallback
+    var state = 0;    // 0 = not built, 1 = graphed, 2 = plain fallback
 
     function apply() { if (gain) { try { gain.gain.value = v; } catch (e) {} } }
 
     // MediaElementSource -> Gain -> destination. Only called from a canplay/
-    // loadeddata handler, i.e. after a successful CORS-clean load, so the source
-    // node can't be tainted (silent).
+    // loadeddata handler (the media loaded); the source is same-origin (direct
+    // or proxied), so it can't be a tainted/silent node.
     function build() {
       if (state) return;
       var c = context(); if (!c) return;
@@ -549,19 +577,19 @@ const AUDIO_VOLUME_FIX = `<script>
       });
     } catch (e) { return a; }   // couldn't shadow the native accessor; leave native
 
-    // Re-arm a CORS attempt for each new src while the element isn't graphed yet
-    // (covers the Music tool's two reused crossfade elements). A graphed element
-    // keeps crossOrigin; a plain-fallback element retries CORS on its next track.
+    // Rewrite each src to the proxy (for cross-origin hosts). The getter returns
+    // the ORIGINAL url the tools set, so nothing in the template sees the proxy.
     try {
       Object.defineProperty(a, "src", {
         configurable: true,
-        get: function () { return srcDesc.get.call(a); },
+        get: function () { return a._origSrc != null ? a._origSrc : srcDesc.get.call(a); },
         set: function (u) {
-          if (state !== 1) {
-            state = 0;
-            try { a.setAttribute("crossorigin", "anonymous"); } catch (e) {}
-          }
-          srcDesc.set.call(a, u);
+          a._origSrc = u;
+          var pl = playable(u);
+          a._proxied = pl.proxied;
+          a._reverted = false;
+          if (state !== 1) state = 0;   // a fresh same-origin src can graph on canplay
+          srcDesc.set.call(a, pl.src);
         }
       });
     } catch (e) {}
@@ -569,17 +597,13 @@ const AUDIO_VOLUME_FIX = `<script>
     a.addEventListener("canplay", build);
     a.addEventListener("loadeddata", build);
     a.addEventListener("error", function () {
-      // A CORS-less host rejects the crossOrigin load. Drop crossOrigin and
-      // reload (bypassing the src setter, so it stays plain and can't loop) so
-      // the track still plays. Meaningless once graphed: a graphed element that
-      // later loads a non-CORS src is the one documented edge — mixing CORS and
-      // non-CORS tracks in a single playlist on iOS.
-      if (state === 1) return;
-      if (a.getAttribute("crossorigin") == null) return;
-      var s = a.currentSrc || srcDesc.get.call(a);
-      state = 2;
-      try { a.removeAttribute("crossorigin"); } catch (e) {}
-      if (s) { try { srcDesc.set.call(a, s); a.load(); } catch (e) {} }
+      // The proxy failed (network/auth). Fall back to the original URL played
+      // plain so the track still sounds — uncontrolled volume on iOS, i.e. the
+      // pre-fix behaviour — instead of dropping out. Not proxied → nothing to do.
+      if (!a._proxied || a._reverted) return;
+      a._reverted = true;
+      if (state !== 1) state = 2;
+      try { srcDesc.set.call(a, a._origSrc); a.load(); } catch (e) {}
     });
 
     // Keep the context running whenever the tools start playback.
@@ -592,13 +616,14 @@ const AUDIO_VOLUME_FIX = `<script>
   function Wrapped(src) {
     var a = new Native();
     wire(a);
-    if (src != null) { try { a.src = src; } catch (e) {} }   // src setter arms crossOrigin
+    if (src != null) { try { a.src = src; } catch (e) {} }   // src setter routes to the proxy
     return a;
   }
   Wrapped.prototype = Native.prototype;
   window.Audio = Wrapped;
 })();
 </script>`;
+}
 
 /**
  * Build the GM Screen page. Pass `vttToken` to render the framed, token-auth
@@ -619,13 +644,14 @@ export async function buildGmScreenHtml(opts: {
       : "";
 
   const tokenScript = opts.vttToken ? `${tokenFetchPatch(opts.vttToken)}\n` : "";
+  const audioScript = audioVolumeFix(opts.vttToken || "");
 
   // Inject (audio fix → token patch →) state → shim → Sound Library picker
   // before </head>. The audio fix goes first so window.Audio is wrapped before
   // any of the template's music code runs.
   html = html.replace(
     /<\/head>/i,
-    `${AUDIO_VOLUME_FIX}\n${tokenScript}${stateScript}${SHIM}\n${LIBRARY_UI}\n</head>`,
+    `${audioScript}\n${tokenScript}${stateScript}${SHIM}\n${LIBRARY_UI}\n</head>`,
   );
 
   // Inject chrome after <body>: Home + status (cookie) or status-only (embed).
