@@ -111,8 +111,15 @@ window.DungeonEngine = (function(){
     if(sh.type==="rect"){ const [x,y]=toScreen(sh.x, sh.y); c.rect(x, y, sh.w*p, sh.h*p); }
     else if(sh.type==="circle"){ const [x,y]=toScreen(sh.cx, sh.cy); c.moveTo(x+sh.r*p, y); c.arc(x, y, sh.r*p, 0, Math.PI*2); }
     else if(sh.type==="polygon" && sh.pts.length>1){
-      const [x0,y0]=toScreen(sh.pts[0][0], sh.pts[0][1]); c.moveTo(x0,y0);
-      for(let i=1;i<sh.pts.length;i++){ const [x,y]=toScreen(sh.pts[i][0], sh.pts[i][1]); c.lineTo(x,y); }
+      // Emit with the SAME winding as rect()/arc() (positive shoelace). These
+      // subpaths are unioned via fill/clip "nonzero"; a polygon the user happened
+      // to click the other way round winds −1, cancels against its neighbour and
+      // punches a HOLE in the floor wherever two rooms overlap.
+      const pts=sh.pts, n=pts.length; let a2=0;
+      for(let i=0;i<n;i++){ const q=pts[(i+1)%n]; a2 += pts[i][0]*q[1] - q[0]*pts[i][1]; }
+      const rev = a2 < 0;
+      for(let i=0;i<n;i++){ const q = pts[rev ? n-1-i : i];
+        const [x,y]=toScreen(q[0], q[1]); if(i===0) c.moveTo(x,y); else c.lineTo(x,y); }
       c.closePath();
     }
   }
