@@ -92,6 +92,7 @@ window.DungeonEngine = (function(){
     for(const s of map.shapes){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
     for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]);
       if(w.cx!==undefined) for(const p of wallSamples(w)) pts.push(p); }   // arc can bow past its ends
+    for(const o of (map.objects||[])){ const b=objBox(o); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
     for(const d of map.doors) pts.push([d.x,d.y]);
     for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
       else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
@@ -189,6 +190,7 @@ window.DungeonEngine = (function(){
     drawDecoShapes();
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
+    drawObjects();
   }
 
   function drawDotGrid(){ const p=wpx(); if(p<13) return; const go=gridOp(); if(go<=0) return;
@@ -331,26 +333,92 @@ window.DungeonEngine = (function(){
   // Tiles alternate normal / mirrored: pack wall strips are NOT pixel-seamless
   // end-to-end (2MT's Dark strip differs by ~66/255 across the join), and
   // mirroring makes every repeat boundary exact by construction.
+  // Insert points so no gap along a screen-space polyline exceeds `maxPx`. Used
+  // to smooth curved interior walls for the strip renderer WITHOUT touching
+  // wallSamples(), whose sampling the ink renderer's roughness is seeded from.
+  function densify(pts, maxPx){
+    const out=[]; const px=wpx();
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i], b=pts[i+1];
+      const d=Math.hypot(b[0]-a[0], b[1]-a[1])*px;
+      const n=Math.max(1, Math.min(64, Math.ceil(d/maxPx)));
+      for(let k=0;k<n;k++) out.push([a[0]+(b[0]-a[0])*k/n, a[1]+(b[1]-a[1])*k/n]);
+    }
+    out.push(pts[pts.length-1]);
+    return out;
+  }
+  // A shape outline sampled by SCREEN arc length — a vertex roughly every 5 px —
+  // so a round room's textured wall stays smooth at any zoom. The ink renderer
+  // keeps shapeOutline()'s fixed sampling, so classic output is unchanged.
+  function outlineDense(sh){
+    if(sh.type!=="circle") return shapeOutline(sh);
+    const K=Math.max(32, Math.min(400, Math.round(2*Math.PI*sh.r*wpx()/5)));
+    const o=[];
+    for(let i=0;i<K;i++){ const a=i/K*Math.PI*2; o.push([sh.cx+Math.cos(a)*sh.r, sh.cy+Math.sin(a)*sh.r]); }
+    return o;
+  }
+
   function stripPath(c, pts, closed, t, halfPx){
     if(!t || !t.img || !t.img.complete || !t.img.naturalWidth) return false;
-    const S=pts.map(p=>toScreen(p[0],p[1])); if(S.length<2) return false;
-    if(closed) S.push(S[0]);
-    const tileW=Math.max(8,(t.tile||6.4)*wpx()), per=2*tileW;
+    const P=pts.map(p=>toScreen(p[0],p[1]));
+    let n=P.length;
+    if(closed && n>1 && P[0][0]===P[n-1][0] && P[0][1]===P[n-1][1]){ P.pop(); n--; }
+    if(n<2) return false;
+    const segN = closed ? n : n-1;
+    const dir=[], len=[];
+    for(let i=0;i<segN;i++){
+      const a=P[i], b=P[(i+1)%n];
+      const dx=b[0]-a[0], dy=b[1]-a[1], L=Math.hypot(dx,dy);
+      dir.push(L>1e-6 ? [dx/L,dy/L] : null); len.push(L);
+    }
+    // MITRE JOINS. Each segment is clipped by the angle bisector at both ends, so
+    // neighbouring quads tile the ribbon exactly — no notch on the outside of a
+    // turn and no double-drawn overlap on the inside (the old code extended every
+    // quad by the half-width and let them overlap, which left a visible mismatch
+    // where the two rotations met). `k` is the cut line's slope in the segment's
+    // own frame: local x = k*y, so the cut corners sit at (∓k·h, ∓h).
+    const ML=4;                                     // miter limit, in half-widths
+    // The mitre line through a vertex is the bisector of (−incoming) and
+    // (outgoing) — one line, shared by both segments that meet there. `frame` is
+    // the segment we're expressing it FOR, and it must be that segment's own
+    // direction: a segment's END cut measured in the NEXT segment's frame comes
+    // out sign-flipped (the frames differ by the turn angle), which cuts every
+    // corner backwards — outer edge pulling back, inner edge overhanging.
+    const cutK=(prev,next,frame)=>{
+      if(!prev || !next) return 0;                  // open end ⇒ square cap
+      let wx=next[0]-prev[0], wy=next[1]-prev[1];
+      const wl=Math.hypot(wx,wy); if(wl<1e-6) return 0;
+      wx/=wl; wy/=wl;
+      const nx=-frame[1], ny=frame[0];
+      const ly=wx*nx+wy*ny; if(Math.abs(ly)<1e-6) return 0;
+      const k=(wx*frame[0]+wy*frame[1])/ly;
+      return Math.max(-ML, Math.min(ML, k));
+    };
+    const tileW=Math.max(8,(t.tile||6)*wpx()), per=2*tileW;
     let s=0;
-    for(let i=0;i<S.length-1;i++){
-      const a=S[i], b=S[i+1], dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
-      if(len<0.01) continue;
+    for(let i=0;i<segN;i++){
+      const u=dir[i], L=len[i];
+      if(!u || L<0.01) continue;
+      const prev = closed ? dir[(i-1+segN)%segN] : (i>0 ? dir[i-1] : null);
+      const next = closed ? dir[(i+1)%segN]      : (i<segN-1 ? dir[i+1] : null);
+      let kS=cutK(prev,u,u), kE=cutK(u,next,u);   // both in THIS segment's frame
+      // Guard against a bow-tie when the segment is short relative to its cuts.
+      const spread=Math.abs(kS-kE)*halfPx;
+      if(spread > L*0.95 && spread>0){ const f=(L*0.95)/spread; kS*=f; kE*=f; }
+      const h=halfPx, ext=(Math.abs(kS)+Math.abs(kE))*h+2;
       c.save();
-      c.translate(a[0],a[1]); c.rotate(Math.atan2(dy,dx));
-      c.beginPath(); c.rect(-halfPx,-halfPx,len+2*halfPx,2*halfPx); c.clip();
-      let x=-(s%per); while(x>-halfPx) x-=per;
-      for(; x<len+halfPx; x+=per){
-        c.drawImage(t.img, x, -halfPx, tileW, 2*halfPx);
+      c.translate(P[i][0],P[i][1]); c.rotate(Math.atan2(u[1],u[0]));
+      c.beginPath();
+      c.moveTo(-kS*h,-h); c.lineTo(L-kE*h,-h); c.lineTo(L+kE*h,h); c.lineTo(kS*h,h);
+      c.closePath(); c.clip();
+      let x=-(s%per); while(x>-ext) x-=per;
+      for(; x<L+ext; x+=per){
+        c.drawImage(t.img, x, -h, tileW, 2*h);
         c.save(); c.translate(x+per,0); c.scale(-1,1);
-        c.drawImage(t.img, 0, -halfPx, tileW, 2*halfPx); c.restore();
+        c.drawImage(t.img, 0, -h, tileW, 2*h); c.restore();
       }
       c.restore();
-      s+=len;
+      s+=L;
     }
     return true;
   }
@@ -363,8 +431,9 @@ window.DungeonEngine = (function(){
     // then the inset-union erase below drops wall that lies inside another room —
     // same merge rule as the ink renderer.
     for(const sh of map.shapes){ if(sh.deco) continue;
-      const o=shapeOutline(sh), wt=shapeWallTex(sh), hp=halfPxFor(wt);
-      if(!(wt && stripPath(wc, o, true, wt, hp))) roughRing(wc, o, hp); }
+      const wt=shapeWallTex(sh), hp=halfPxFor(wt);
+      if(wt && stripPath(wc, outlineDense(sh), true, wt, hp)) continue;
+      roughRing(wc, shapeOutline(sh), hp); }
     const ec=buf.erode.getContext("2d"); ec.setTransform(1,0,0,1,0,0); ec.clearRect(0,0,W,H);
     ec.globalCompositeOperation="source-over"; ec.fillStyle="#fff";
     for(const sh of map.shapes){ if(sh.deco) continue;
@@ -424,7 +493,7 @@ window.DungeonEngine = (function(){
     for(const wl of map.walls){
       const wt = tex ? texOf(wl.wall, tex.wall) : null;
       const pts = (wl.cx===undefined || wl.cy===undefined) ? [[wl.x1,wl.y1],[wl.x2,wl.y2]] : wallSamples(wl);
-      if(wt && stripPath(ctx, pts, false, wt, halfPxFor(wt)*(wl.thin?0.5:1))) continue;
+      if(wt && stripPath(ctx, densify(pts,5), false, wt, halfPxFor(wt)*(wl.thin?0.5:1))) continue;
       const hw = wl.thin ? thin : normal;
       if(wl.cx===undefined || wl.cy===undefined) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2], hw);
       else roughCurve(ctx, pts, hw); }
@@ -433,6 +502,36 @@ window.DungeonEngine = (function(){
   // Interior "shapes" (deco: pillars, dais, tables, pits) — drawn as thin rough
   // OUTLINES on top of the floor, never as rooms: they add no floor, no rock wall
   // ring, no interior punch. shapeOutline samples circles as true arcs ⇒ round.
+  // ── objects (Advanced Mode) ───────────────────────────────────────
+  // map.objects[] = { id, tex, x, y, w, h, rot, flip }
+  //   x,y = CENTRE in world cells · w,h = size in cells · rot = radians
+  // Drawn last, on top of floors, walls, doors and stairs — a prop sits on the
+  // map. Resolved through tex.byId like every other texture, so objects appear
+  // only in Advanced Mode and classic output stays pure ink by construction.
+  function drawObjects(){
+    if(!tex || !map.objects || !map.objects.length) return;
+    for(const o of map.objects){
+      const t=texOf(o.tex, null);
+      if(!t || !t.img || !t.img.complete || !t.img.naturalWidth) continue;
+      const p=toScreen(o.x,o.y), w=(o.w||1)*wpx(), h=(o.h||1)*wpx();
+      ctx.save();
+      ctx.translate(p[0],p[1]);
+      if(o.rot) ctx.rotate(o.rot);
+      if(o.flip) ctx.scale(-1,1);
+      ctx.drawImage(t.img, -w/2, -h/2, w, h);
+      ctx.restore();
+    }
+  }
+  // World-space AABB of a (possibly rotated) object.
+  function objBox(o){
+    const hw=(o.w||1)/2, hh=(o.h||1)/2, r=o.rot||0, c=Math.cos(r), s=Math.sin(r);
+    const xs=[], ys=[];
+    for(const [dx,dy] of [[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]]){
+      xs.push(o.x+dx*c-dy*s); ys.push(o.y+dx*s+dy*c); }
+    const x=Math.min.apply(null,xs), y=Math.min.apply(null,ys);
+    return {x, y, w:Math.max.apply(null,xs)-x, h:Math.max.apply(null,ys)-y};
+  }
+
   function drawDecoShapes(){
     let any=false, floor=false;
     for(const s of map.shapes){ if(s.deco) any=true; else floor=true; }
@@ -517,7 +616,7 @@ window.DungeonEngine = (function(){
   let rngState = 0;
   function rng(){ rngState=(rngState*1664525+1013904223)>>>0; return rngState/4294967296; }
   function ri(a,b){ return a+Math.floor(rng()*(b-a+1)); }
-  function blankMap(){ return { version:1, name:"", grid:true, shapes:[], walls:[], doors:[], stairs:[], seedId:1 }; }
+  function blankMap(){ return { version:1, name:"", grid:true, shapes:[], walls:[], doors:[], stairs:[], objects:[], seedId:1 }; }
   function uid(){ return map.seedId++; }
 
   function generate(opts){

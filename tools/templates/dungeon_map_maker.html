@@ -90,6 +90,14 @@
   .packs .pk span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .packs .pk button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:0 2px}
   .packs .pk button:hover{color:#e88}
+  .objgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-height:186px;overflow:auto;
+    margin-top:6px;padding:4px;background:var(--panel2);border:1px solid var(--line);border-radius:7px}
+  .objgrid button{aspect-ratio:1;background:#0f0f13;border:1px solid transparent;border-radius:5px;
+    cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center}
+  .objgrid button:hover{border-color:var(--gold-dim)}
+  .objgrid button.on{border-color:var(--gold);background:var(--active)}
+  .objgrid img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+  .objgrid .none{grid-column:1/-1;font-size:10.5px;color:var(--muted);text-align:center;padding:16px 4px}
   .spacer{flex:1}
   .save-state{font-size:10px;color:var(--muted);padding:8px 14px;letter-spacing:.04em}
 
@@ -201,6 +209,12 @@
         </div>
         <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
         <div id="packList" class="packs"></div>
+        <label class="fld" for="objFilter">Objects</label>
+        <input class="sel" id="objFilter" type="text" placeholder="Filter objects…" autocomplete="off">
+        <div id="objGrid" class="objgrid"></div>
+        <p class="hint" id="objHint">Pick one, then click the map to place it. Select it to drag;
+          the square handle scales, the round one rotates. <b>[</b> / <b>]</b> rotate, <b>X</b> flips,
+          <b>Delete</b> removes.</p>
         <p class="hint">Packs are stored in this browser only &mdash; nothing is uploaded. A map records the
           texture&rsquo;s name, so it needs the same pack loaded here to look right elsewhere.</p>
       </div>
@@ -313,7 +327,7 @@
 
   function blankMap(){
     return { version:1, name:"", grid:true, gridOpacity:1, style:DEFAULT_STYLE(),
-             shapes:[], walls:[], doors:[], stairs:[], seedId:1 };
+             shapes:[], walls:[], doors:[], stairs:[], objects:[], seedId:1 };
   }
   function uid(){ return map.seedId++; }
 
@@ -608,6 +622,7 @@
     drawDecoShapes();
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
+    drawObjects();
   }
 
   function drawDotGrid(){ const p=wpx(); if(p<13) return; const go=gridOp(); if(go<=0) return;
@@ -773,26 +788,92 @@
   // Tiles alternate normal / mirrored: pack wall strips are NOT pixel-seamless
   // end-to-end (2MT's Dark strip differs by ~66/255 across the join), and
   // mirroring makes every repeat boundary exact by construction.
+  // Insert points so no gap along a screen-space polyline exceeds `maxPx`. Used
+  // to smooth curved interior walls for the strip renderer WITHOUT touching
+  // wallSamples(), whose sampling the ink renderer's roughness is seeded from.
+  function densify(pts, maxPx){
+    const out=[]; const px=wpx();
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i], b=pts[i+1];
+      const d=Math.hypot(b[0]-a[0], b[1]-a[1])*px;
+      const n=Math.max(1, Math.min(64, Math.ceil(d/maxPx)));
+      for(let k=0;k<n;k++) out.push([a[0]+(b[0]-a[0])*k/n, a[1]+(b[1]-a[1])*k/n]);
+    }
+    out.push(pts[pts.length-1]);
+    return out;
+  }
+  // A shape outline sampled by SCREEN arc length — a vertex roughly every 5 px —
+  // so a round room's textured wall stays smooth at any zoom. The ink renderer
+  // keeps shapeOutline()'s fixed sampling, so classic output is unchanged.
+  function outlineDense(sh){
+    if(sh.type!=="circle") return shapeOutline(sh);
+    const K=Math.max(32, Math.min(400, Math.round(2*Math.PI*sh.r*wpx()/5)));
+    const o=[];
+    for(let i=0;i<K;i++){ const a=i/K*Math.PI*2; o.push([sh.cx+Math.cos(a)*sh.r, sh.cy+Math.sin(a)*sh.r]); }
+    return o;
+  }
+
   function stripPath(c, pts, closed, t, halfPx){
     if(!t || !t.img || !t.img.complete || !t.img.naturalWidth) return false;
-    const S=pts.map(p=>toScreen(p[0],p[1])); if(S.length<2) return false;
-    if(closed) S.push(S[0]);
-    const tileW=Math.max(8,(t.tile||6.4)*wpx()), per=2*tileW;
+    const P=pts.map(p=>toScreen(p[0],p[1]));
+    let n=P.length;
+    if(closed && n>1 && P[0][0]===P[n-1][0] && P[0][1]===P[n-1][1]){ P.pop(); n--; }
+    if(n<2) return false;
+    const segN = closed ? n : n-1;
+    const dir=[], len=[];
+    for(let i=0;i<segN;i++){
+      const a=P[i], b=P[(i+1)%n];
+      const dx=b[0]-a[0], dy=b[1]-a[1], L=Math.hypot(dx,dy);
+      dir.push(L>1e-6 ? [dx/L,dy/L] : null); len.push(L);
+    }
+    // MITRE JOINS. Each segment is clipped by the angle bisector at both ends, so
+    // neighbouring quads tile the ribbon exactly — no notch on the outside of a
+    // turn and no double-drawn overlap on the inside (the old code extended every
+    // quad by the half-width and let them overlap, which left a visible mismatch
+    // where the two rotations met). `k` is the cut line's slope in the segment's
+    // own frame: local x = k*y, so the cut corners sit at (∓k·h, ∓h).
+    const ML=4;                                     // miter limit, in half-widths
+    // The mitre line through a vertex is the bisector of (−incoming) and
+    // (outgoing) — one line, shared by both segments that meet there. `frame` is
+    // the segment we're expressing it FOR, and it must be that segment's own
+    // direction: a segment's END cut measured in the NEXT segment's frame comes
+    // out sign-flipped (the frames differ by the turn angle), which cuts every
+    // corner backwards — outer edge pulling back, inner edge overhanging.
+    const cutK=(prev,next,frame)=>{
+      if(!prev || !next) return 0;                  // open end ⇒ square cap
+      let wx=next[0]-prev[0], wy=next[1]-prev[1];
+      const wl=Math.hypot(wx,wy); if(wl<1e-6) return 0;
+      wx/=wl; wy/=wl;
+      const nx=-frame[1], ny=frame[0];
+      const ly=wx*nx+wy*ny; if(Math.abs(ly)<1e-6) return 0;
+      const k=(wx*frame[0]+wy*frame[1])/ly;
+      return Math.max(-ML, Math.min(ML, k));
+    };
+    const tileW=Math.max(8,(t.tile||6)*wpx()), per=2*tileW;
     let s=0;
-    for(let i=0;i<S.length-1;i++){
-      const a=S[i], b=S[i+1], dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
-      if(len<0.01) continue;
+    for(let i=0;i<segN;i++){
+      const u=dir[i], L=len[i];
+      if(!u || L<0.01) continue;
+      const prev = closed ? dir[(i-1+segN)%segN] : (i>0 ? dir[i-1] : null);
+      const next = closed ? dir[(i+1)%segN]      : (i<segN-1 ? dir[i+1] : null);
+      let kS=cutK(prev,u,u), kE=cutK(u,next,u);   // both in THIS segment's frame
+      // Guard against a bow-tie when the segment is short relative to its cuts.
+      const spread=Math.abs(kS-kE)*halfPx;
+      if(spread > L*0.95 && spread>0){ const f=(L*0.95)/spread; kS*=f; kE*=f; }
+      const h=halfPx, ext=(Math.abs(kS)+Math.abs(kE))*h+2;
       c.save();
-      c.translate(a[0],a[1]); c.rotate(Math.atan2(dy,dx));
-      c.beginPath(); c.rect(-halfPx,-halfPx,len+2*halfPx,2*halfPx); c.clip();
-      let x=-(s%per); while(x>-halfPx) x-=per;
-      for(; x<len+halfPx; x+=per){
-        c.drawImage(t.img, x, -halfPx, tileW, 2*halfPx);
+      c.translate(P[i][0],P[i][1]); c.rotate(Math.atan2(u[1],u[0]));
+      c.beginPath();
+      c.moveTo(-kS*h,-h); c.lineTo(L-kE*h,-h); c.lineTo(L+kE*h,h); c.lineTo(kS*h,h);
+      c.closePath(); c.clip();
+      let x=-(s%per); while(x>-ext) x-=per;
+      for(; x<L+ext; x+=per){
+        c.drawImage(t.img, x, -h, tileW, 2*h);
         c.save(); c.translate(x+per,0); c.scale(-1,1);
-        c.drawImage(t.img, 0, -halfPx, tileW, 2*halfPx); c.restore();
+        c.drawImage(t.img, 0, -h, tileW, 2*h); c.restore();
       }
       c.restore();
-      s+=len;
+      s+=L;
     }
     return true;
   }
@@ -805,8 +886,9 @@
     // then the inset-union erase below drops wall that lies inside another room —
     // same merge rule as the ink renderer.
     for(const sh of map.shapes){ if(sh.deco) continue;
-      const o=shapeOutline(sh), wt=shapeWallTex(sh), hp=halfPxFor(wt);
-      if(!(wt && stripPath(wc, o, true, wt, hp))) roughRing(wc, o, hp); }
+      const wt=shapeWallTex(sh), hp=halfPxFor(wt);
+      if(wt && stripPath(wc, outlineDense(sh), true, wt, hp)) continue;
+      roughRing(wc, shapeOutline(sh), hp); }
     // Erase mask = union of each shape's fill INSET individually (not the eroded
     // union). A wall is removed only where it lies inside *another* shape's
     // interior (a real overlap). Two shapes that merely share an edge each inset
@@ -871,7 +953,7 @@
     for(const wl of map.walls){
       const wt = tex ? texOf(wl.wall, tex.wall) : null;
       const pts = (wl.cx===undefined || wl.cy===undefined) ? [[wl.x1,wl.y1],[wl.x2,wl.y2]] : wallSamples(wl);
-      if(wt && stripPath(ctx, pts, false, wt, halfPxFor(wt)*(wl.thin?0.5:1))) continue;
+      if(wt && stripPath(ctx, densify(pts,5), false, wt, halfPxFor(wt)*(wl.thin?0.5:1))) continue;
       const hw = wl.thin ? thin : normal;
       if(wl.cx===undefined || wl.cy===undefined) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2], hw);
       else roughCurve(ctx, pts, hw); }
@@ -880,6 +962,36 @@
   // Interior "shapes" (deco: pillars, dais, tables, pits) — thin rough OUTLINES
   // on top of the floor. They add no floor, no rock wall, no interior punch; a
   // Circle-tool shape is a perfect round outline. shapeOutline samples arcs.
+  // ── objects (Advanced Mode) ───────────────────────────────────────
+  // map.objects[] = { id, tex, x, y, w, h, rot, flip }
+  //   x,y = CENTRE in world cells · w,h = size in cells · rot = radians
+  // Drawn last, on top of floors, walls, doors and stairs — a prop sits on the
+  // map. Resolved through tex.byId like every other texture, so objects appear
+  // only in Advanced Mode and classic output stays pure ink by construction.
+  function drawObjects(){
+    if(!tex || !map.objects || !map.objects.length) return;
+    for(const o of map.objects){
+      const t=texOf(o.tex, null);
+      if(!t || !t.img || !t.img.complete || !t.img.naturalWidth) continue;
+      const p=toScreen(o.x,o.y), w=(o.w||1)*wpx(), h=(o.h||1)*wpx();
+      ctx.save();
+      ctx.translate(p[0],p[1]);
+      if(o.rot) ctx.rotate(o.rot);
+      if(o.flip) ctx.scale(-1,1);
+      ctx.drawImage(t.img, -w/2, -h/2, w, h);
+      ctx.restore();
+    }
+  }
+  // World-space AABB of a (possibly rotated) object.
+  function objBox(o){
+    const hw=(o.w||1)/2, hh=(o.h||1)/2, r=o.rot||0, c=Math.cos(r), s=Math.sin(r);
+    const xs=[], ys=[];
+    for(const [dx,dy] of [[-hw,-hh],[hw,-hh],[hw,hh],[-hw,hh]]){
+      xs.push(o.x+dx*c-dy*s); ys.push(o.y+dx*s+dy*c); }
+    const x=Math.min.apply(null,xs), y=Math.min.apply(null,ys);
+    return {x, y, w:Math.max.apply(null,xs)-x, h:Math.max.apply(null,ys)-y};
+  }
+
   function drawDecoShapes(){
     let any=false, floor=false;
     for(const s of map.shapes){ if(s.deco) any=true; else floor=true; }
@@ -1023,10 +1135,31 @@
     }
     ctx.restore();
   }
+  // Screen positions of an object's outline and its two drag handles.
+  function objHandles(o){
+    const c=toScreen(o.x,o.y), s=wpx(), r=o.rot||0;
+    const hw=(o.w||1)*s/2, hh=(o.h||1)*s/2, co=Math.cos(r), si=Math.sin(r);
+    const P=(x,y)=>[c[0]+x*co-y*si, c[1]+x*si+y*co];
+    return { c, hw, hh,
+             corners:[P(-hw,-hh),P(hw,-hh),P(hw,hh),P(-hw,hh)],
+             scale:P(hw,hh), rotate:P(0,-hh-22) };
+  }
   function drawSelection(){
     if(sel==null) return;
     const o=objAt(sel);
     if(!o) return;
+    if(o.kind==="object"){
+      const H=objHandles(o.obj);
+      ctx.save(); ctx.strokeStyle=C.sel; ctx.lineWidth=1.6; ctx.setLineDash([5,4]);
+      ctx.beginPath(); ctx.moveTo(H.corners[0][0],H.corners[0][1]);
+      for(let i=1;i<4;i++) ctx.lineTo(H.corners[i][0],H.corners[i][1]);
+      ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(H.c[0],H.c[1]); ctx.lineTo(H.rotate[0],H.rotate[1]); ctx.stroke();
+      ctx.fillStyle=C.sel;
+      ctx.beginPath(); ctx.arc(H.rotate[0],H.rotate[1],5.5,0,7); ctx.fill();      // rotate
+      ctx.fillRect(H.scale[0]-5,H.scale[1]-5,10,10);                              // scale
+      ctx.restore(); return;
+    }
     ctx.save(); ctx.strokeStyle=C.sel; ctx.lineWidth=2; ctx.setLineDash([6,4]);
     const b=bounds(o.obj,o.kind);
     if(b){ const [x,y]=toScreen(b.x,b.y); ctx.strokeRect(x-4,y-4,b.w*wpx()+8,b.h*wpx()+8); }
@@ -1047,6 +1180,7 @@
       // a circular arc can bow outside the triangle of its 3 points — measure the samples
       if(o.cx!==undefined) for(const p of wallSamples(o)){ xs.push(p[0]); ys.push(p[1]); }
       const x=Math.min(...xs), y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y}; }
+    if(kind==="object") return objBox(o);
     if(kind==="door"){ const l=(o.len||1)/2+0.3; return {x:o.x-l,y:o.y-l,w:l*2,h:l*2}; }
     if(kind==="stair"){
       if(o.ax!==undefined){ const xs=[o.ax,o.bx,o.tx], ys=[o.ay,o.by,o.ty];
@@ -1080,6 +1214,13 @@
     return !(neg&&pos);
   }
   function hitTest(wx,wy){
+    // Objects are drawn last, so they're hit first. Test in the object's own
+    // rotated frame rather than against its AABB.
+    for(let i=(map.objects||[]).length-1;i>=0;i--){ const o=map.objects[i];
+      const r=-(o.rot||0), c=Math.cos(r), sn=Math.sin(r);
+      const dx=wx-o.x, dy=wy-o.y;
+      const lx=dx*c-dy*sn, ly=dx*sn+dy*c;
+      if(Math.abs(lx)<=(o.w||1)/2 && Math.abs(ly)<=(o.h||1)/2) return {kind:"object",idx:i,obj:o}; }
     for(let i=map.stairs.length-1;i>=0;i--){ const s=map.stairs[i];
       if(s.ax!==undefined){ if(pointInTri(wx,wy, s.ax,s.ay, s.bx,s.by, s.tx,s.ty)) return {kind:"stair",idx:i,obj:s}; }
       else if(s.x1!==undefined){ if(distToSeg(wx,wy,s.x1,s.y1,s.x2,s.y2)<=(s.w||2)/2+0.2) return {kind:"stair",idx:i,obj:s}; }
@@ -1094,7 +1235,8 @@
     return null;
   }
   let sel=null;                    // {kind,idx}
-  function objAt(s){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs})[s.kind];
+  let handle=null;                 // object scale/rotate handle drag
+  function objAt(s){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects})[s.kind];
     return arr&&arr[s.idx]?{kind:s.kind,obj:arr[s.idx]}:null; }
 
   // ════════════════════════════════════════════════════════════════
@@ -1128,12 +1270,22 @@
     if(embed) return;
 
     if(tool==="select"){
+      // A selected object's handles take priority over anything under them.
+      if(sel && sel.kind==="object"){
+        const cur=objAt(sel);
+        if(cur){ const H=objHandles(cur.obj), near=(p)=>Math.hypot(sx-p[0],sy-p[1])<12;
+          if(near(H.scale) || near(H.rotate)){
+            const o=cur.obj, ang=Math.atan2(wy-o.y, wx-o.x), d=Math.hypot(wx-o.x, wy-o.y);
+            handle={mode:near(H.rotate)?"rotate":"scale", o, a0:ang, d0:Math.max(0.05,d),
+                    rot0:o.rot||0, w0:o.w||1, h0:o.h||1, snap:objSnapshot({obj:o})};
+            return; } } }
       const h=hitTest(wx,wy);
       if(h){ setSel({kind:h.kind,idx:h.idx});
         dragObj={h, ox:wx, oy:wy, snap:objSnapshot(h)}; }
       else { setSel(null); panning={sx,sy,cx:cam.x,cy:cam.y}; }   // drag empty space to pan (one-finger on touch)
       render(); return;
     }
+    if(tool==="object"){ if(armedObj) placeObject(wx,wy); return; }
     if(tool==="erase"){ const h=hitTest(wx,wy); if(h){ pushHistory(); removeHit(h); commit(); } return; }
     if(tool==="polygon"){
       if(!polyPts) polyPts=[];
@@ -1158,6 +1310,18 @@
     if(gesture){ if(pointers.size>=2) updatePinch(); return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
     if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); render(); return; }
+    if(handle){
+      const o=handle.o;
+      if(handle.mode==="rotate"){
+        let r=handle.rot0 + (Math.atan2(wy-o.y, wx-o.x) - handle.a0);
+        if(snapOn) r=Math.round(r/(Math.PI/12))*(Math.PI/12);   // 15° steps while snap is on
+        o.rot=r;
+      } else {
+        const f=Math.max(0.1, Math.hypot(wx-o.x, wy-o.y)/handle.d0);
+        o.w=Math.max(0.1, handle.w0*f); o.h=Math.max(0.1, handle.h0*f);
+      }
+      moved=true; render(); return;
+    }
     if(placing){ placing.hover = (placing.tool==="wall") ? snapPt(wx,wy) : [snapHalf(wx),snapHalf(wy)]; render(); return; }
     if(polyPts){ hoverPt=snapPt(wx,wy); render(); }
     if(dragObj){ moved=true; moveObj(dragObj, wx-dragObj.ox, wy-dragObj.oy); render(); return; }
@@ -1181,6 +1345,7 @@
   cv.addEventListener("pointerup", e=>{
     pointers.delete(e.pointerId);
     if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
+    if(handle){ if(moved){ pushHistory(handle.snap); commit(); } handle=null; return; }
     if(panning){ panning=null; return; }
     if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
     if(!dragStart){ return; }
@@ -1262,13 +1427,13 @@
       markGeom();
     } else if(dragObj.h.kind==="wall"){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy;
       if(s.cx!==undefined){ o.cx=s.cx+gdx; o.cy=s.cy+gdy; } }
-    else if(dragObj.h.kind==="door"){ o.x=s.x+hd(dx); o.y=s.y+hd(dy); }
+    else if(dragObj.h.kind==="door" || dragObj.h.kind==="object"){ o.x=s.x+hd(dx); o.y=s.y+hd(dy); }
     else if(dragObj.h.kind==="stair"){
       if(s.ax!==undefined){ o.ax=s.ax+gdx;o.ay=s.ay+gdy;o.bx=s.bx+gdx;o.by=s.by+gdy;o.tx=s.tx+gdx;o.ty=s.ty+gdy; }
       else if(s.x1!==undefined){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy; }
       else { o.x=s.x+gdx; o.y=s.y+gdy; } }
   }
-  function removeHit(h){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs})[h.kind];
+  function removeHit(h){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects})[h.kind];
     arr.splice(h.idx,1); setSel(null); }
   function nearestWallAngle(wx,wy){
     let best=1e9,ang=0;
@@ -1695,9 +1860,10 @@
     bundledPacks = m.packs || [];
     for(const p of bundledPacks) for(const t of p.textures)
       texReg.set(t.id, {id:t.id, name:t.name, kind:t.kind, pack:p.id, packName:p.name,
-                        cells:t.cells, thick:t.thick, tile:t.tile,
+                        cells:t.cells, thick:t.thick, tile:t.tile, w:t.w, h:t.h,
+                        thumb:t.thumb ? "/packs/bundled/"+t.thumb : null,
                         url:"/packs/bundled/"+t.file, img:null});
-    buildTexSelects();
+    buildTexSelects(); buildObjGrid();
     render();
   }
 
@@ -1723,6 +1889,7 @@
     want(st.floor); want(st.wall);
     for(const sh of map.shapes){ want(sh.floor); want(sh.wall); }
     for(const wl of map.walls) want(wl.wall);
+    for(const o of (map.objects||[])) want(o.tex);
     tex = { floor: texGet(st.floor), bg: texGet(st.bg), wall: texGet(st.wall), byId,
             bgColor: Object.prototype.hasOwnProperty.call(BG_SOLID, st.bg) ? BG_SOLID[st.bg] : null };
   }
@@ -1774,6 +1941,11 @@
   // `..._wall.webp` is Dungeondraft's repeating wall strip. The `_wall_end` caps
   // are excluded by requiring the extension right after "_wall".
   const WALLSTRIP=/\/textures\/walls\/.*_wall\.(webp|png|jpe?g)$/i;
+  const OBJECT=/\/textures\/objects\/.*\.(webp|png|jpe?g)$/i;
+  // "- Colorable" are greyscale masks for Dungeondraft's colour picker, "- End"
+  // are wall end-caps the wall tool consumes, "Demo" is marketing art.
+  const SKIP_OBJ=/( - Colorable| - End)\.(webp|png|jpe?g)$|Demo\.(webp|png|jpe?g)$/i;
+  const MAX_IMPORT_OBJECTS=400;
   function packLabel(p){ return p.split("/").pop().replace(/\.(webp|png|jpe?g)$/i,"")
     .replace(/^Texture\s*-\s*/i,"").replace(/_wall$/i,"").replace(/^.*?\s-\s/,""); }
 
@@ -1816,8 +1988,11 @@
     const j=entries.find(e=>/\/pack\.json$/i.test(e.path));
     if(j){ try{ meta=Object.assign(meta, JSON.parse(new TextDecoder().decode(new Uint8Array(buf,j.off,j.size)))); }catch(e){} }
     const packId="pack:"+(meta.id || meta.name).replace(/[^A-Za-z0-9_-]+/g,"");
-    const tiles=entries.filter(e=>TILEABLE.test(e.path)||WALLSTRIP.test(e.path));
-    if(!tiles.length){ toast("No usable floor or wall textures in that pack."); return; }
+    let objs=entries.filter(e=>OBJECT.test(e.path) && !SKIP_OBJ.test(e.path));
+    let dropped=0;
+    if(objs.length>MAX_IMPORT_OBJECTS){ dropped=objs.length-MAX_IMPORT_OBJECTS; objs=objs.slice(0,MAX_IMPORT_OBJECTS); }
+    const tiles=entries.filter(e=>TILEABLE.test(e.path)||WALLSTRIP.test(e.path)).concat(objs);
+    if(!tiles.length){ toast("No usable textures in that pack."); return; }
     const made=[], seen=new Set();
     for(const e of tiles){
       // Packs often ship the same tile under both terrain/ and patterns/ —
@@ -1825,7 +2000,13 @@
       const k=packLabel(e.path)+"|"+e.size; if(seen.has(k)) continue; seen.add(k);
       let blob=new Blob([new Uint8Array(buf,e.off,e.size)], {type:"image/webp"});
       const id=packId+"/"+e.path;
-      if(WALLSTRIP.test(e.path)){
+      if(OBJECT.test(e.path)){
+        const meta=await objectMeta(blob); if(!meta) continue;
+        await idbPut("files", id, blob);
+        await idbPut("files", id+"#thumb", meta.thumb);
+        made.push({id, name:packLabel(e.path), kind:"object", w:meta.w, h:meta.h,
+                   thumbKey:id+"#thumb", pack:packId});
+      } else if(WALLSTRIP.test(e.path)){
         const cr=await cropWallStrip(blob); if(!cr) continue;
         await idbPut("files", id, cr.blob);
         made.push({id, name:packLabel(e.path), kind:"wall", thick:cr.thick, tile:cr.tile, pack:packId});
@@ -1837,10 +2018,14 @@
     await idbPut("packs", packId, {id:packId, name:meta.name, textures:made});
     registerPack({id:packId, name:meta.name, textures:made});
     await refreshPackList();
-    buildTexSelects();
-    const nw=made.filter(m=>m.kind==="wall").length, nf=made.length-nw;
-    const bits=[]; if(nf) bits.push(nf+" floor"+(nf===1?"":"s")); if(nw) bits.push(nw+" wall"+(nw===1?"":"s"));
-    toast("Loaded "+meta.name+" — "+bits.join(" + ")+".");
+    buildTexSelects(); buildObjGrid();
+    const cnt=k=>made.filter(m=>m.kind===k).length;
+    const bits=[];
+    if(cnt("floor")) bits.push(cnt("floor")+" floor"+(cnt("floor")===1?"":"s"));
+    if(cnt("wall"))  bits.push(cnt("wall")+" wall"+(cnt("wall")===1?"":"s"));
+    if(cnt("object"))bits.push(cnt("object")+" object"+(cnt("object")===1?"":"s"));
+    toast("Loaded "+meta.name+" — "+bits.join(" + ")
+          + (dropped ? " (skipped "+dropped+" objects over the "+MAX_IMPORT_OBJECTS+" cap)" : "")+".");
   }
   // Dungeondraft draws terrain at 256 px per grid cell, so the tile's cell span
   // is just its width / 256 (falling back to 4 for anything unexpected).
@@ -1852,10 +2037,30 @@
       im.src=u;
     });
   }
+  // Read an object sprite's native size (Dungeondraft draws at 256 px/cell) and
+  // bake a small palette thumbnail, so importing a large pack doesn't mean
+  // decoding hundreds of full-resolution sprites just to draw the picker.
+  function objectMeta(blob){
+    return new Promise(res=>{
+      const u=URL.createObjectURL(blob), im=new Image();
+      im.onload=()=>{
+        const w=im.naturalWidth, h=im.naturalHeight;
+        const sc=Math.min(1, 96/Math.max(w,h));
+        const cv=document.createElement("canvas");
+        cv.width=Math.max(1,Math.round(w*sc)); cv.height=Math.max(1,Math.round(h*sc));
+        cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);
+        cv.toBlob(t=>{ URL.revokeObjectURL(u);
+          res({w:+(w/256).toFixed(3), h:+(h/256).toFixed(3), thumb:t}); }, "image/webp", 0.8);
+      };
+      im.onerror=()=>{ URL.revokeObjectURL(u); res(null); };
+      im.src=u;
+    });
+  }
   function registerPack(p){
     for(const t of p.textures){
       texReg.set(t.id, {id:t.id, name:p.name+" · "+t.name, kind:t.kind||"floor", cells:t.cells,
-                        thick:t.thick, tile:t.tile, pack:p.id, url:null, img:null, lazy:true});
+                        thick:t.thick, tile:t.tile, w:t.w, h:t.h, thumbKey:t.thumbKey,
+                        pack:p.id, url:null, img:null, lazy:true});
     }
   }
   // Pack textures live as blobs; mint the object URL the first time one is used.
@@ -1864,6 +2069,7 @@
     const t=texReg.get(id);
     if(t && t.lazy && !t.url){
       t.lazy=false;
+      if(t.thumbKey) idbGet("files", t.thumbKey).then(b=>{ if(b){ t.thumb=URL.createObjectURL(b); buildObjGrid(); } }).catch(()=>{});
       idbGet("files", id).then(b=>{ if(b){ t.url=URL.createObjectURL(b); render(); } else { t.failed=true; } })
                          .catch(()=>{ t.failed=true; });
       return null;
@@ -1875,7 +2081,7 @@
     let packs=[]; try{ packs=await idbAll("packs")||[]; }catch(e){ return; }
     packs.forEach(registerPack);
     await refreshPackList();
-    buildTexSelects();
+    buildTexSelects(); buildObjGrid();
   }
   async function refreshPackList(){
     const el=$("packList"); if(!el) return;
@@ -1890,12 +2096,16 @@
     }
   }
   async function removePack(p){
-    for(const t of p.textures){ try{ await idbDel("files", t.id); }catch(e){} texReg.delete(t.id); }
+    for(const t of p.textures){ try{ await idbDel("files", t.id); }catch(e){}
+      if(t.thumbKey){ try{ await idbDel("files", t.thumbKey); }catch(e){} }
+      texReg.delete(t.id);
+      for(const o of (map.objects||[])) if(o.tex===t.id) o.tex="";
+    }
     try{ await idbDel("packs", p.id); }catch(e){}
     const st=map.style||{};
     if(st.floor && st.floor.indexOf(p.id)===0) st.floor=DEFAULT_STYLE().floor;
     if(st.wall  && st.wall.indexOf(p.id)===0)  st.wall =DEFAULT_STYLE().wall;
-    await refreshPackList(); buildTexSelects(); commit();
+    await refreshPackList(); buildTexSelects(); buildObjGrid(); commit();
     toast("Removed "+p.name+".");
   }
 
@@ -1965,6 +2175,40 @@
     buildTexSelects();
   }
 
+  // ── object palette ────────────────────────────────────────────────
+  let armedObj=null;                       // texture id armed for placement
+  function buildObjGrid(){
+    const g=$("objGrid"); if(!g) return;
+    const q=(($("objFilter")||{}).value||"").trim().toLowerCase();
+    g.innerHTML="";
+    let n=0;
+    for(const t of texReg.values()){
+      if(t.kind!=="object") continue;
+      if(q && t.name.toLowerCase().indexOf(q)<0) continue;
+      const b=document.createElement("button");
+      b.title=t.name+"  ("+(t.w||1)+"×"+(t.h||1)+" cells)";
+      if(t.id===armedObj) b.className="on";
+      const im=document.createElement("img");
+      im.loading="lazy"; im.alt=""; im.src=t.thumb || t.url || "";
+      b.appendChild(im);
+      b.onclick=()=>{ armedObj = (armedObj===t.id) ? null : t.id;
+        setTool(armedObj ? "object" : "select"); buildObjGrid(); };
+      g.appendChild(b); n++;
+    }
+    if(!n){ const d=document.createElement("div"); d.className="none";
+      d.textContent = q ? "No objects match that." : "No object art loaded.";
+      g.appendChild(d); }
+  }
+  function placeObject(wx,wy){
+    const t=texReg.get(armedObj); if(!t) return;
+    pushHistory();
+    if(!map.objects) map.objects=[];
+    map.objects.push({id:uid(), tex:t.id, x:snapHalf(wx), y:snapHalf(wy),
+                      w:t.w||1, h:t.h||1, rot:0});
+    setSel({kind:"object", idx:map.objects.length-1});
+    commit();                              // stays armed, so you can place a run
+  }
+
   function syncGridOp(){
     const v = (map.gridOpacity==null) ? 1 : Math.max(0, Math.min(1, map.gridOpacity));
     if($("gridOp")) $("gridOp").value = Math.round(v*100);
@@ -1989,6 +2233,7 @@
       if(t && t.kind==="shape"){ pushHistory(); t.obj.floor=e.target.value; } else map.style.floor=e.target.value;
       commit(); };
     if($("bgSel"))    $("bgSel").onchange   =e=>{ map.style.bg   =e.target.value; commit(); };
+    if($("objFilter")) $("objFilter").oninput=()=>buildObjGrid();
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
@@ -2005,6 +2250,7 @@
     for(const s of map.shapes){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
     for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]);
       if(w.cx!==undefined) for(const p of wallSamples(w)) pts.push(p); }   // arc can bow past its ends
+    for(const o of (map.objects||[])){ const b=objBox(o); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
     for(const d of map.doors) pts.push([d.x,d.y]);
     for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
       else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
@@ -2059,13 +2305,15 @@
     document.querySelectorAll(".tool").forEach(el=>el.classList.toggle("active",el.dataset.tool===t));
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
     if(placing){ placing=null; render(); }
+    if(t!=="object" && armedObj){ armedObj=null; buildObjGrid(); }
     cv.style.cursor = t==="select"?"default":(t==="erase"?"cell":"crosshair");
     const tips={rect:"Drag to draw a rectangular room.",circle:"Drag out a circular room.",
       polygon:"Click to drop corners · Enter or double-click to close.",
       wall:"Click start, click end, then click to bow the curve (click the line for a straight wall).",
       door:"Click to start, move to aim, click again to place the door.",
       stair:"Click a base corner, click to set width, click the tip to place.",
-      erase:"Click anything to delete it.",select:"Click to select · drag to move."};
+      erase:"Click anything to delete it.",select:"Click to select · drag to move.",
+      object:"Click the map to place it. Keep clicking to place more."};
     toast(tips[t]||"");
   }
   document.getElementById("toolbar").addEventListener("click", e=>{
@@ -2117,6 +2365,14 @@
     if(e.key==="Enter"&&polyPts){ finishPolygon(); return; }
     if(e.key==="Escape"){ polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; render(); return; }
     if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
+    if(sel && sel.kind==="object"){
+      const o=objAt(sel); if(o){
+        const step=(e.shiftKey?5:15)*Math.PI/180;
+        if(e.key==="["){ pushHistory(); o.obj.rot=(o.obj.rot||0)-step; commit(); return; }
+        if(e.key==="]"){ pushHistory(); o.obj.rot=(o.obj.rot||0)+step; commit(); return; }
+        if(e.key==="x"||e.key==="X"){ pushHistory(); o.obj.flip=!o.obj.flip; commit(); return; }
+      }
+    }
     if(e.key==="g"||e.key==="G"){ setMode(drawMode==="rooms"?"shapes":"rooms"); return; }  // toggle Rooms/Shapes
     const keys={v:"select",r:"rect",c:"circle",p:"polygon",w:"wall",d:"door",s:"stair",e:"erase"};
     if(keys[e.key]) setTool(keys[e.key]);
