@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { getPlayUser } from "@/lib/vtt";
 import { prisma } from "@/lib/prisma";
 
 const GM_TOOL = "gm-screen";
@@ -47,7 +48,9 @@ function stripBigFiles(body: any): any {
 // GET ?campaignId=<cuid>   → that campaign's board.
 // GET ?campaignId=__none__ → the personal (unlinked) board.
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
+  // getPlayUser resolves the session cookie normally, or the VTT token when the
+  // screen is framed inside the Owlbear popover (no cookie there).
+  const user = await getPlayUser(req);
   if (!user) return new Response("Unauthorized", { status: 401 });
 
   const campaignId = parseCampaignId(req);
@@ -71,7 +74,7 @@ export async function GET(req: NextRequest) {
 // campaign link, so an autosave while linked to campaign A writes A's row, and
 // the pre-switch save (fired while still on A) also lands on A — not the new one.
 export async function PATCH(req: NextRequest) {
-  const user = await getCurrentUser();
+  const user = await getPlayUser(req);
   if (!user) return new Response("Unauthorized", { status: 401 });
 
   const body = stripBigFiles(await req.json());
@@ -99,7 +102,7 @@ export async function PATCH(req: NextRequest) {
 // link, so the reload opens connected to it rather than blank/unlinked.
 // Body: { campaign: { id, code, name } | null }.
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
+  const user = await getPlayUser(req);
   if (!user) return new Response("Unauthorized", { status: 401 });
 
   const body = (await req.json().catch(() => null)) as { campaign?: { id?: unknown } } | null;

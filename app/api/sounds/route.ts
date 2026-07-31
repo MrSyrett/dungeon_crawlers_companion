@@ -1,13 +1,14 @@
-import { getCurrentUser } from "@/lib/auth";
+import { getPlayUser } from "@/lib/vtt";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/sounds — the Sound Library, for the GM Screen Music tool's "Library"
 // picker. Readable by any signed-in user so the whole table can pull from the
 // shelf; managing it (add / edit / remove) stays admin-only, enforced separately
 // in app/actions/sounds.ts and the /admin/sounds page. Sorted by category then
-// label so the picker can group without extra work.
-export async function GET() {
-  const user = await getCurrentUser();
+// label so the picker can group without extra work. Accepts the VTT token too so
+// the picker works when the GM Screen runs framed inside the Owlbear popover.
+export async function GET(req: Request) {
+  const user = await getPlayUser(req);
   if (!user) {
     // 200 with an empty shelf keeps the picker's fetch simple (no error branch);
     // a signed-out caller simply sees nothing.

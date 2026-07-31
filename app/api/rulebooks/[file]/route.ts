@@ -3,15 +3,18 @@ import { readdir, stat } from "node:fs/promises";
 import { Readable } from "node:stream";
 import path from "node:path";
 import type { NextRequest } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { getPlayUser } from "@/lib/vtt";
 import { canAccessRulebook, RULEBOOK_DIR } from "@/lib/rulebooks";
 
 export const dynamic = "force-dynamic";
 
 type Ctx = { params: Promise<{ file: string }> };
 
-export async function GET(_req: NextRequest, ctx: Ctx) {
-  const user = await getCurrentUser();
+export async function GET(req: NextRequest, ctx: Ctx) {
+  // Cookie session, or the VTT token (?t= in the <object>/<iframe> src) when the
+  // PDF loads framed inside the Owlbear popover. Per-file access is still gated
+  // below by canAccessRulebook.
+  const user = await getPlayUser(req);
   if (!user) return new Response("Unauthorized", { status: 401 });
 
   const { file: rawParam } = await ctx.params;

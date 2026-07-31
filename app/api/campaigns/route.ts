@@ -37,8 +37,10 @@ export async function GET(req: NextRequest) {
 
   // No code → list the campaigns this account owns (newest first). This is the
   // same query the /campaigns page runs, in the shape the picker expects.
+  // Cookie normally; a VTT token when the GM Screen's campaign picker runs framed
+  // in the Owlbear popover (read-only list of the token owner's own campaigns).
   if (!code) {
-    const user = await getCurrentUser();
+    const user = await getPlayUser(req);
     if (!user) return new Response("Unauthorized", { status: 401 });
 
     const campaigns = await prisma.campaign.findMany({

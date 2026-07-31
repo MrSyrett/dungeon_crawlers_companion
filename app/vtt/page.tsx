@@ -80,11 +80,11 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
           <li>
             <span className="text-[var(--text)]">3.</span> Enable the extension when creating or
             editing a room, then click the{" "}
-            <span className="text-[var(--text)]">Character Sheet</span> action in the room.
+            <span className="text-[var(--text)]">Companion</span> action in the room.
           </li>
           <li>
             <span className="text-[var(--text)]">4.</span> Paste an access code from below. Your
-            sheets open right inside the tabletop and save as you play.
+            character sheets and GM Screen open right inside the tabletop and save as you play.
           </li>
         </ol>
       </section>
@@ -105,9 +105,10 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
         </div>
 
         <p className="mb-4 text-[13px] leading-relaxed text-[var(--muted)]">
-          A code only opens your <span className="text-[var(--text)]">character sheets</span> and
-          lets them save. It cannot reach campaigns, homebrew, or delete anything. Make one per
-          device so you can revoke a single one without disturbing the others.
+          A code opens your <span className="text-[var(--text)]">character sheets</span> and{" "}
+          <span className="text-[var(--text)]">GM Screen</span> at the table and lets them save. It
+          can&apos;t change your account settings or delete anything. Make one per device so you can
+          revoke a single one without disturbing the others.
         </p>
 
         {tokens.length === 0 ? (

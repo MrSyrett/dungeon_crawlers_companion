@@ -16,7 +16,7 @@ const PAGE = String.raw`<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Character Sheets</title>
+<title>Dungeon Crawler's Companion</title>
 <script src="/obr/sdk.js"></script>
 <script src="/obr/size.js" defer></script>
 <style>
@@ -86,9 +86,25 @@ const PAGE = String.raw`<!doctype html>
   #size-sw .knob { position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--text); transition: transform .15s ease; }
   #size-sw[aria-checked="true"] .knob { transform: translateX(13px); background: var(--bg); }
   .grow { flex: 1; min-height: 0; }
+  /* Top-level switch between Characters and the GM Screen. */
+  #tabs { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .tab[aria-selected="true"] { border-color: var(--gold); color: var(--gold); background: var(--panel-2); }
+  #tabs .spacer { flex: 1; }
+  /* GM Screen embedded in the panel — the whole workspace, framed and token-authed. */
+  #gm-view { display: flex; flex-direction: column; }
+  #gm-frame { flex: 1; min-height: 0; width: 100%; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); }
 </style>
 </head>
 <body>
+
+<!-- Top-level switch, shown once connected. Sign-out lives here so it's reachable
+     from both Characters and the GM Screen. -->
+<nav id="tabs" class="hide">
+  <button class="btn tab" id="tab-chars" type="button" aria-selected="true">Characters</button>
+  <button class="btn tab" id="tab-gm" type="button" aria-selected="false">GM Screen</button>
+  <span class="spacer"></span>
+  <button class="btn" id="forget" title="Remove this code from this browser">Sign out</button>
+</nav>
 
 <!-- Token entry -->
 <section id="setup" class="hide grow" style="flex-direction:column;gap:12px;display:flex">
@@ -106,21 +122,23 @@ const PAGE = String.raw`<!doctype html>
   </div>
   <p class="note">
     Create a code in Dungeon Crawler&rsquo;s Companion under <strong>Virtual Tabletop</strong>,
-    then paste it here. It only opens your character sheets &mdash; nothing else on your account.
+    then paste it here. It opens your character sheets and GM&nbsp;Screen at the table &mdash; it
+    can&rsquo;t change your account or delete anything.
   </p>
 </section>
 
 <!-- Character list -->
 <section id="list" class="hide grow" style="flex-direction:column;gap:10px;display:flex">
-  <div class="row">
-    <div>
-      <h1>Characters</h1>
-      <p class="sub" id="account"></p>
-    </div>
-    <button class="btn" id="forget" title="Remove this code from this browser">Sign out</button>
-  </div>
+  <p class="sub" id="account"></p>
   <ol id="sheets" class="grow"></ol>
   <p class="note" id="empty" class="hide"></p>
+</section>
+
+<!-- GM Screen: the full workspace, framed and authenticated by the same access
+     code. It never navigates the top window, so the Owlbear connection (owned by
+     this popover) stays alive; its own campaign switches just reload this frame. -->
+<section id="gm-view" class="hide grow">
+  <iframe id="gm-frame" title="GM Screen"></iframe>
 </section>
 
 <!-- Sheet view: this page never navigates, so the Owlbear connection (which
@@ -144,12 +162,22 @@ const PAGE = String.raw`<!doctype html>
 (function () {
   var KEY = "dcw_vtt_token";
   var $ = function (id) { return document.getElementById(id); };
+  // The connected code, kept so the GM Screen tab can build its src on demand.
+  var activeToken = null;
 
   function show(which) {
     $("loading").classList.add("hide");
     $("setup").classList.toggle("hide", which !== "setup");
     $("list").classList.toggle("hide", which !== "list");
+    $("gm-view").classList.toggle("hide", which !== "gm");
     $("sheet-view").classList.toggle("hide", which !== "sheet");
+    // Tabs belong to the two top-level connected views, not setup or a drilled-in sheet.
+    var withTabs = which === "list" || which === "gm";
+    $("tabs").classList.toggle("hide", !withTabs);
+    if (withTabs) {
+      $("tab-chars").setAttribute("aria-selected", which === "list" ? "true" : "false");
+      $("tab-gm").setAttribute("aria-selected", which === "gm" ? "true" : "false");
+    }
   }
 
   function readToken() {
@@ -188,6 +216,7 @@ const PAGE = String.raw`<!doctype html>
   }
 
   function load(token) {
+    activeToken = token;
     fetch("/api/vtt/sheets", { headers: { "x-vtt-token": token } })
       .then(function (r) {
         if (r.status === 401) { forget(); show("setup"); $("setup-err").textContent = "That code was revoked."; return null; }
@@ -255,10 +284,27 @@ const PAGE = String.raw`<!doctype html>
     load(t);
   });
   $("tok").addEventListener("keydown", function (e) { if (e.key === "Enter") $("connect").click(); });
-  $("forget").addEventListener("click", function () { forget(); show("setup"); });
+  $("forget").addEventListener("click", function () {
+    forget();
+    activeToken = null;
+    $("gm-frame").removeAttribute("src");       // drop the GM Screen so a new code loads fresh
+    show("setup");
+  });
   $("back").addEventListener("click", function () {
     $("sheet-frame").removeAttribute("src");   // stop the sheet polling in the background
     show("list");
+  });
+
+  // Top-level tabs. The GM Screen frame is built lazily the first time it's
+  // opened and then kept, so switching back and forth doesn't reload the whole
+  // workspace (or re-download a large board).
+  $("tab-chars").addEventListener("click", function () { show("list"); });
+  $("tab-gm").addEventListener("click", function () {
+    var f = $("gm-frame");
+    if (activeToken && !f.getAttribute("src")) {
+      f.setAttribute("src", "/vtt/gm-screen?t=" + encodeURIComponent(activeToken));
+    }
+    show("gm");
   });
 
   var token = readToken();

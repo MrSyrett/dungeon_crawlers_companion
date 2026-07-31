@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { getPlayUser } from "@/lib/vtt";
 import { prisma } from "@/lib/prisma";
 import { TOOLS, isToolId, type ToolKind } from "@/lib/tools";
 
@@ -12,7 +12,9 @@ import { TOOLS, isToolId, type ToolKind } from "@/lib/tools";
 // bodies (`data`) are intentionally omitted — the picker only needs to know
 // what exists; the content loads via the tool route when one is chosen.
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
+  // Cookie session normally, or the VTT token when the GM Screen's "Load Session
+  // Prep" picker runs framed inside the Owlbear popover. Read-only, own docs.
+  const user = await getPlayUser(req);
   if (!user) return new Response("Unauthorized", { status: 401 });
 
   const { searchParams } = new URL(req.url);
