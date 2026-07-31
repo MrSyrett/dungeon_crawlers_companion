@@ -13,8 +13,9 @@ import numpy as np
 from PIL import Image
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else '/root/dcc/public/packs/bundled'
-PX_PER_CELL = 128        # floors are resampled to this; 2x the export resolution
+PX_PER_CELL = 128        # floors/objects are resampled to this; 2x the export resolution
 MAX_DIM     = 2048       # …and capped, so a 15x15 tile can't blow up memory
+THUMB       = 96         # palette thumbnails, so 180 sprites don't all decode at full size
 
 SOURCES = [
     # file, pack id, display name, credit
@@ -25,6 +26,11 @@ SOURCES = [
 # Dungeondraft also ships near-identical Concave/Convex variants of each wall
 # (measured mean difference 0.4-2.7 of 255). Keep one.
 SKIP_WALL = re.compile(r' - Concave_wall\.', re.I)
+# Object sprites we don't want in the palette:
+#   "- Colorable"  greyscale masks for Dungeondraft's colour picker, useless here
+#   "- End"        wall/path end caps, consumed by the wall tool not placed by hand
+#   "Demo"         the pack's marketing render
+SKIP_OBJ = re.compile(r'( - Colorable| - End)\.(webp|png|jpe?g)$|Demo\.(webp|png|jpe?g)$', re.I)
 
 def parse(path):
     d = open(path, 'rb').read()
@@ -41,16 +47,20 @@ def parse(path):
 def slug(s):
     return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
 
-def clean(name):
+def clean(name, keep_size=False):
     n = re.sub(r'\.(webp|png|jpe?g)$', '', name.split('/')[-1])
     n = re.sub(r'^Texture\s*-\s*', '', n)
     n = re.sub(r'_wall$', '', n)
     n = re.sub(r'\s*-\s*Convex$', '', n)
     n = re.sub(r'^Dungeon Room Builder\s*-\s*', '', n)
-    n = re.sub(r'\s*[-(]\s*\d+x\d+\s*\)?$', '', n)     # drop the "- 15x15" size suffix
+    # Floors/walls drop the "- 15x15" size suffix; objects KEEP their "(4x3)"
+    # because it's what tells two otherwise identically-named sprites apart.
+    if not keep_size:
+        n = re.sub(r'\s*[-(]\s*\d+x\d+\s*\)?$', '', n)
     return n.strip()
 
 os.makedirs(OUT, exist_ok=True)
+os.makedirs(f'{OUT}/thumbs', exist_ok=True)
 packs = []
 for fname, pid, pname, credit in SOURCES:
     d, files = parse(fname)
@@ -66,6 +76,20 @@ for fname, pid, pname, credit in SOURCES:
             im.save(f'{OUT}/{fid}.webp', 'WEBP', quality=88, method=6)
             entries.append({'id': f'bundled:{fid}', 'name': clean(path), 'kind': 'floor',
                             'file': f'{fid}.webp', 'cells': cells})
+        elif '/textures/objects/' in path and not SKIP_OBJ.search(path):
+            im = Image.open(io.BytesIO(blob)).convert('RGBA')
+            wc, hc = im.width/256, im.height/256          # native size in grid cells
+            if wc < 0.15 or hc < 0.15:
+                continue
+            sc = min(1.0, PX_PER_CELL*wc/im.width, MAX_DIM/im.width, MAX_DIM/im.height)
+            full = im.resize((max(1,round(im.width*sc)), max(1,round(im.height*sc))), Image.LANCZOS)
+            fid = f'{pid}-obj-{slug(clean(path, True))}'
+            full.save(f'{OUT}/{fid}.webp', 'WEBP', quality=86, method=4)
+            th = im.copy(); th.thumbnail((THUMB, THUMB), Image.LANCZOS)
+            th.save(f'{OUT}/thumbs/{fid}.webp', 'WEBP', quality=80, method=4)
+            entries.append({'id': f'bundled:{fid}', 'name': clean(path, True), 'kind': 'object',
+                            'file': f'{fid}.webp', 'thumb': f'thumbs/{fid}.webp',
+                            'w': round(wc, 3), 'h': round(hc, 3)})
         elif '/textures/walls/' in path and path.endswith('_wall.webp') and not SKIP_WALL.search(path):
             im = Image.open(io.BytesIO(blob)).convert('RGBA')
             a = np.asarray(im)
@@ -82,8 +106,8 @@ for fname, pid, pname, credit in SOURCES:
                             'tile':  round(crop.width/256, 4)})   # length of one repeat, in cells
     entries.sort(key=lambda e: (e['kind'], e['name']))
     packs.append({'id': pid, 'name': pname, 'credit': credit, 'textures': entries})
-    print(f'{pname}: {sum(1 for e in entries if e["kind"]=="floor")} floors, '
-          f'{sum(1 for e in entries if e["kind"]=="wall")} walls')
+    n = lambda k: sum(1 for e in entries if e['kind']==k)
+    print(f'{pname}: {n("floor")} floors, {n("wall")} walls, {n("object")} objects')
 
 manifest = {
     'note': 'Bundled Creative-Commons map assets. Attribution is REQUIRED and is '
@@ -94,5 +118,8 @@ manifest = {
     'packs': packs,
 }
 json.dump(manifest, open(f'{OUT}/bundled.json', 'w'), indent=2)
-tot = sum(os.path.getsize(f'{OUT}/{f}') for f in os.listdir(OUT))
-print(f'-> {OUT}  ({len(os.listdir(OUT))} files, {tot/1024/1024:.2f} MB)')
+tot = n = 0
+for root, _, fs in os.walk(OUT):
+    for f in fs:
+        tot += os.path.getsize(os.path.join(root, f)); n += 1
+print(f'-> {OUT}  ({n} files, {tot/1024/1024:.2f} MB)')
