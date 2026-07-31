@@ -306,9 +306,10 @@ window.DungeonEngine = (function(){
   function halfCellsFor(t){ return t ? 0.5*(t.thick||0.4) : 0; }
   function wallHalfPx(){ return halfPxFor(tex && tex.wall); }
 
-  // Doors take the thickness of the wall they actually sit in — the outline they
-  // are nearest to — so a door in a thin wall doesn't get a fat leaf just because
-  // some other room is thick. Rebuilt once per render.
+  // How thick is the wall a door actually sits in? (nearest room outline). The
+  // door LEAF no longer uses this — it is a fixed DOOR_HALF — but the OPENING
+  // still cuts the full depth of the wall, so a door in a thick wall reads as a
+  // real gap with the leaf hung in it. Memoised, rebuilt once per render.
   let doorHalf = null;
   function segDist(px,py,x1,y1,x2,y2){
     const dx=x2-x1, dy=y2-y1, l2=dx*dx+dy*dy;
@@ -446,7 +447,7 @@ window.DungeonEngine = (function(){
     for(const sh of map.shapes){ if(sh.deco) continue;
       fillInsetShape(ec, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
     wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
-    for(const d of map.doors) punchDoorQuad(wc, d);   // opening scales with wall thickness
+    for(const d of map.doors) punchDoorQuad(wc, d);   // opening cuts the full wall depth
     if(!noRock){ const o=Math.min(2,cam.scale); ctx.save(); ctx.globalAlpha=.16;
       ctx.drawImage(buf.wall, 2.3*o, 2.9*o); ctx.restore(); }
     ctx.drawImage(buf.wall,0,0);
@@ -576,20 +577,25 @@ window.DungeonEngine = (function(){
     dc.globalCompositeOperation="destination-in"; dc.drawImage(buf.decoClip,0,0);
     ctx.drawImage(buf.deco,0,0); }
 
+  // Door LEAF half-thickness, in world cells — CONSTANT. It deliberately does not
+  // follow the wall it sits in: a 1.5-cell cave wall used to grow a door leaf five
+  // times fatter than the same door in a railing. Only `len` varies now.
+  const DOOR_HALF = 0.15;
   function doorGeom(d){
     const a=d.a||0, stub=0.13, hl=(d.len||1)/2;
-    // `ht` drives BOTH the leaf (drawDoor) and the opening punched through the
-    // wall (punchDoorQuad), so a thick textured wall gets a matching thick door
-    // rather than a gap around a too-thin leaf. 0 in classic ⇒ 0.15 as before.
+    // `ht` = the leaf (drawDoor), FIXED. `wt` = how deep the opening is cut through
+    // the wall (punchDoorQuad), which still tracks wall thickness so the doorway is
+    // a real full-depth gap — the leaf just hangs in the middle of it.
     return { cx:d.x, cy:d.y, alx:Math.cos(a), aly:Math.sin(a), acx:-Math.sin(a), acy:Math.cos(a),
-             hl, rhl:Math.max(0.12, hl-stub), ht:Math.max(0.15, wallHalfCellsAt(d)), stub };
+             hl, rhl:Math.max(0.12, hl-stub), ht:DOOR_HALF,
+             wt:Math.max(DOOR_HALF, wallHalfCellsAt(d)), stub };
   }
   function punchDoorQuad(wc, d){
     const g=doorGeom(d);
     const rect=(sl0,sl1,st)=>{ const c=(sl,s)=>toScreen(g.cx+g.alx*sl+g.acx*s, g.cy+g.aly*sl+g.acy*s);
       const p1=c(sl0,-st),p2=c(sl1,-st),p3=c(sl1,st),p4=c(sl0,st);
       wc.beginPath(); wc.moveTo(p1[0],p1[1]); wc.lineTo(p2[0],p2[1]); wc.lineTo(p3[0],p3[1]); wc.lineTo(p4[0],p4[1]); wc.closePath(); wc.fill(); };
-    rect(-g.rhl, g.rhl, g.ht*1.1);
+    rect(-g.rhl, g.rhl, g.wt*1.1);
     const sh=Math.max(0.05, wallHalfCellsAt(d) || (1.7*cam.scale)/wpx());
     rect(-g.hl, -g.rhl, sh);
     rect( g.rhl, g.hl, sh);
