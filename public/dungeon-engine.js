@@ -43,7 +43,8 @@ window.DungeonEngine = (function(){
   let tex = null;
   const C = Object.assign({}, THEMES.light);
   function oc(){ return document.createElement("canvas"); }
-  const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc(), deco:oc(), decoClip:oc() };
+  const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc(), deco:oc(), decoClip:oc(),
+                 light:oc(), ltint:oc() };
   function sizeBufs(){ for(const k in buf){ if(buf[k].width!==W||buf[k].height!==H){ buf[k].width=W; buf[k].height=H; } } }
   function setThemeColors(t){ Object.assign(C, THEMES[(t==="dark")?"dark":"light"]); }
   const clamp = (v,lo,hi)=> Math.max(lo, Math.min(hi, v));
@@ -128,6 +129,7 @@ window.DungeonEngine = (function(){
   function render(){
     ctx.setTransform(DPR,0,0,DPR,0,0);
     doorHalf=null;                      // per-door wall thickness, recomputed per frame
+    lightSegs=null;                     // light occluders, likewise
     ctx.clearRect(0,0,W,H);
     if(!noRock){
       const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
@@ -198,8 +200,160 @@ window.DungeonEngine = (function(){
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
     drawObjects();
+    drawLights();
   }
 
+  // ══════════════════════ LIGHTS (Advanced Mode) ══════════════════════
+  // A darkness wash laid over the finished map that every light carves a pool
+  // out of, plus an additive colour tint on top. `map.darkness` (0..1) is the
+  // one control: at 0 this is pure coloured glow on a fully lit map, at 1 it is
+  // near-black outside the lights.
+  //
+  //   map.lit       — master switch, nothing here runs when it is off
+  //   map.darkness  — 0..1 wash strength
+  //   map.lights[]  — { id, x, y, r (cells), color, bright (0..1) }
+  //
+  // Shadows: each light gets a VISIBILITY POLYGON ray-marched against room
+  // outlines and interior walls, which is then blurred so the shadow edges are
+  // soft rather than geometric. Doors are deliberately NOT cut out of the
+  // occluders — a door is closed, so it contains the light in its room.
+  let lightSegs = null;                       // occluder cache, rebuilt per render
+  function lightOccluders(){
+    if(lightSegs) return lightSegs;
+    lightSegs=[];
+    for(const sh of map.shapes){ if(sh.deco) continue;      // deco shapes are decoration, not walls
+      const o=shapeOutline(sh);
+      for(let i=0;i<o.length;i++){ const a=o[i], b=o[(i+1)%o.length];
+        lightSegs.push([a[0],a[1],b[0],b[1]]); } }
+    for(const w of map.walls){
+      const s=(w.cx!==undefined&&w.cy!==undefined) ? wallSamples(w) : [[w.x1,w.y1],[w.x2,w.y2]];
+      for(let i=0;i<s.length-1;i++) lightSegs.push([s[i][0],s[i][1],s[i+1][0],s[i+1][1]]); }
+    return lightSegs;
+  }
+  // Distance from the ray origin to a segment, or -1. Parametric solve; `u` is
+  // the position ALONG the segment so it must stay inside [0,1].
+  function rayHitT(px,py,dx,dy,s){
+    const ax=s[0], ay=s[1], bx=s[2]-s[0], by=s[3]-s[1];
+    const den=dx*by - dy*bx; if(den>-1e-12 && den<1e-12) return -1;
+    const t=((ax-px)*by - (ay-py)*bx)/den; if(t<=1e-9) return -1;
+    const u=((ax-px)*dy - (ay-py)*dx)/den;
+    return (u>=0 && u<=1) ? t : -1;
+  }
+  function segNear(s,px,py,r){
+    const dx=s[2]-s[0], dy=s[3]-s[1], l2=dx*dx+dy*dy;
+    let t=l2 ? ((px-s[0])*dx+(py-s[1])*dy)/l2 : 0; t=t<0?0:(t>1?1:t);
+    const qx=px-(s[0]+t*dx), qy=py-(s[1]+t*dy);
+    return qx*qx+qy*qy <= r*r;
+  }
+  // A uniform angular sweep (degrades gracefully, never misses a caster) PLUS
+  // three rays at every occluder endpoint (so the shadow boundary lands exactly
+  // on the corner that cast it instead of being rounded off by the sweep).
+  function visPoly(L){
+    const R=Math.max(0.4, L.r||6), near=lightOccluders().filter(s=>segNear(s,L.x,L.y,R));
+    const N=Math.max(64, Math.min(288, Math.round(R*22)));
+    const angs=new Array(N);
+    for(let i=0;i<N;i++) angs[i]=i/N*Math.PI*2 - Math.PI;
+    for(const s of near){
+      for(let k=0;k<4;k+=2){
+        const dx=s[k]-L.x, dy=s[k+1]-L.y;
+        if(dx*dx+dy*dy > R*R) continue;
+        const a=Math.atan2(dy,dx);
+        angs.push(a-2e-4, a, a+2e-4);
+      }
+    }
+    angs.sort(function(a,b){ return a-b; });
+    const pts=[];
+    for(let i=0;i<angs.length;i++){
+      const a=angs[i], dx=Math.cos(a), dy=Math.sin(a);
+      let t=R;
+      for(let j=0;j<near.length;j++){ const h=rayHitT(L.x,L.y,dx,dy,near[j]); if(h>0 && h<t) t=h; }
+      pts.push([L.x+dx*t, L.y+dy*t]);
+    }
+    return pts;
+  }
+  function lightFalloff(c, cx, cy, rpx, a){
+    const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
+    g.addColorStop(0,    "rgba(255,255,255,"+a+")");
+    g.addColorStop(0.42, "rgba(255,255,255,"+(a*0.78).toFixed(4)+")");
+    g.addColorStop(0.72, "rgba(255,255,255,"+(a*0.36).toFixed(4)+")");
+    g.addColorStop(1,    "rgba(255,255,255,0)");
+    return g;
+  }
+  const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
+  const lmaskCv = oc();
+  function drawLights(){
+    if(!map || !map.lit) return;
+    const lights=map.lights||[];
+    const dark=Math.max(0, Math.min(1, map.darkness==null ? 0 : map.darkness));
+    if(!lights.length && dark<=0) return;
+    sizeBufs();
+    const lc=buf.light.getContext("2d"), gc=buf.ltint.getContext("2d"), mc=lmaskCv.getContext("2d");
+    for(let i=0;i<2;i++){ const c=[lc,gc][i];
+      c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none"; c.globalCompositeOperation="source-over"; }
+    lc.clearRect(0,0,W,H); gc.clearRect(0,0,W,H);
+    if(dark>0){ lc.fillStyle="rgba(5,7,13,"+dark+")"; lc.fillRect(0,0,W,H); }
+    // Feather scales with zoom so shadows stay equally soft at any scale.
+    const blur=Math.max(2.5, Math.min(22, 0.18*wpx()));
+    let ux0=Infinity, uy0=Infinity, ux1=-Infinity, uy1=-Infinity;   // union of lit boxes
+    for(let li=0; li<lights.length; li++){
+      const L=lights[li]; if(L.on===false) continue;
+      const R=Math.max(0.4, L.r||6);
+      const a=Math.max(0, Math.min(1, L.bright==null ? 0.85 : L.bright));
+      if(a<=0) continue;
+      const cs=toScreen(L.x,L.y), cx=cs[0], cy=cs[1], rpx=R*wpx();
+      // Everything stays inside the light's own box — a full-canvas pass per
+      // light is the same trap that made the mixed-floor composite slow.
+      const pad=blur*2+6;
+      const bx=Math.max(0,Math.floor(cx-rpx-pad)), by=Math.max(0,Math.floor(cy-rpx-pad));
+      const bw=Math.min(W,Math.ceil(cx+rpx+pad))-bx, bh=Math.min(H,Math.ceil(cy+rpx+pad))-by;
+      if(bw<=0 || bh<=0) continue;                       // entirely off-screen
+      // ⚠ PERF: the mask is a soft blob, so it is built at REDUCED resolution and
+      // scaled back up. Canvas blur costs per pixel — a 540 px light box blurred
+      // at full size was ~36 ms EACH (5 lights = 200 ms/frame); capped at 192 px
+      // it is a few. Upscaling a blurred mask is visually free.
+      const k=Math.min(1, LMASK_MAX/Math.max(bw,bh));
+      const mw=Math.max(1,Math.round(bw*k)), mh=Math.max(1,Math.round(bh*k));
+      if(lmaskCv.width!==mw || lmaskCv.height!==mh){ lmaskCv.width=mw; lmaskCv.height=mh; }
+      else mc.clearRect(0,0,mw,mh);
+      mc.setTransform(1,0,0,1,0,0); mc.globalAlpha=1; mc.globalCompositeOperation="source-over";
+      // 1 — the visibility polygon, feathered into soft shadow edges
+      const poly=visPoly(L);
+      mc.save(); mc.filter="blur("+(blur*k).toFixed(2)+"px)"; mc.fillStyle="#fff"; mc.beginPath();
+      for(let i=0;i<poly.length;i++){ const p=toScreen(poly[i][0],poly[i][1]);
+        const mx=(p[0]-bx)*k, my=(p[1]-by)*k;
+        if(i===0) mc.moveTo(mx,my); else mc.lineTo(mx,my); }
+      mc.closePath(); mc.fill(); mc.restore();
+      // 2 — multiply in the radial falloff
+      mc.globalCompositeOperation="destination-in";
+      mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a); mc.fillRect(0,0,mw,mh);
+      // 3 — punch the lit pool out of the darkness
+      lc.globalCompositeOperation="destination-out";
+      lc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
+      lc.globalCompositeOperation="source-over";
+      // 4 — recolour the same mask and accumulate it as additive tint
+      mc.globalCompositeOperation="source-in";
+      mc.fillStyle=L.color||"#ffb457"; mc.fillRect(0,0,mw,mh);
+      mc.globalCompositeOperation="source-over";
+      gc.globalCompositeOperation="lighter"; gc.globalAlpha=0.5;
+      gc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
+      gc.globalAlpha=1; gc.globalCompositeOperation="source-over";
+      if(bx<ux0)ux0=bx; if(by<uy0)uy0=by;
+      if(bx+bw>ux1)ux1=bx+bw; if(by+bh>uy1)uy1=by+bh;
+    }
+    if(dark>0){
+      // A transparent PNG should not come back as a sheet of dark grey — keep
+      // the wash inside the floors, which is the only thing being exported.
+      if(noRock && map.shapes.length){
+        lc.globalCompositeOperation="destination-in"; lc.drawImage(buf.mask,0,0);
+        lc.globalCompositeOperation="source-over";
+      }
+      ctx.drawImage(buf.light,0,0);
+    }
+    // The tint only exists inside the lit boxes; compositing the rest is waste.
+    if(ux1>ux0){ ctx.save(); ctx.globalCompositeOperation="lighter";
+      ctx.drawImage(buf.ltint, ux0,uy0,ux1-ux0,uy1-uy0, ux0,uy0,ux1-ux0,uy1-uy0);
+      ctx.restore(); }
+  }
   function drawDotGrid(){ const p=wpx(); if(p<13) return; const go=gridOp(); if(go<=0) return;
     ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.8*go;
     const [ox,oy]=toScreen(0,0); const r=Math.max(0.6,0.85*Math.min(2,cam.scale));

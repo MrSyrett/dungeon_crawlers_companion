@@ -169,6 +169,13 @@
       border-right:none; border-top:1px solid var(--line);
       padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); }
   }
+  /* light colour presets */
+  .lpre{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin-top:4px}
+  .lpre button{height:24px;border-radius:5px;border:1px solid rgba(0,0,0,.45);cursor:pointer;padding:0}
+  .lpre button.on{outline:2px solid var(--gold);outline-offset:1px}
+  .lcol{width:46px;height:26px;padding:0;border:1px solid var(--line);border-radius:6px;
+        background:none;cursor:pointer;flex:0 0 auto}
+  .tool.off{opacity:.4}
 </style>
 </head>
 <body>
@@ -204,6 +211,8 @@
           <svg viewBox="0 0 24 24"><path d="M6 4h9v16H6z"/><path d="M15 9l4 3-4 3"/></svg>Door</div>
         <div class="tool" data-tool="stair" title="Stairs (S)">
           <svg viewBox="0 0 24 24"><path d="M4 20h4v-4h4v-4h4V8h4"/></svg>Stairs</div>
+        <div class="tool" data-tool="light" title="Light (L) — turn Lights on under Advanced first">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>Light</div>
       </div>
       <div class="row" style="margin-top:8px">
         <button class="btn" id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
@@ -250,6 +259,26 @@
         <label class="fld" for="objFilter">Objects</label>
         <input class="sel" id="objFilter" type="text" placeholder="Filter objects…" autocomplete="off">
         <div id="objGrid" class="objgrid"></div>
+        <div class="grp-head" style="margin-top:14px">
+          <p class="grp-title" style="font-size:11px;margin:0">Lights</p>
+          <label class="switch" title="Coloured lights that cast soft shadows off walls">
+            <input type="checkbox" id="lightToggle"><span class="slider"></span></label>
+        </div>
+        <div id="lightBody" style="display:none">
+          <label class="fld">Darkness <b id="darkV">55%</b></label>
+          <input type="range" id="darkness" min="0" max="100" value="55">
+          <label class="fld">Colour</label>
+          <div class="lpre" id="lightPresets"></div>
+          <div class="row" style="margin-top:6px;align-items:center;gap:8px">
+            <input type="color" id="lightColor" value="#ff9a3c" class="lcol" title="Custom colour">
+            <span class="hint" id="lightColorName" style="margin:0">Torch</span>
+          </div>
+          <label class="fld">Radius <b id="lrV">6 sq</b></label>
+          <input type="range" id="lightRadius" min="1" max="40" value="6">
+          <label class="fld">Brightness <b id="lbV">85%</b></label>
+          <input type="range" id="lightBright" min="5" max="100" value="85">
+          <p class="hint" id="lightScope" style="margin:6px 0 0"></p>
+        </div>
         
         
       </div>
@@ -367,6 +396,7 @@
 
   function blankMap(){
     return { version:1, name:"", grid:true, gridOpacity:1, style:DEFAULT_STYLE(),
+             lit:false, darkness:0.55, lights:[],
              shapes:[], walls:[], doors:[], stairs:[], objects:[], seedId:1 };
   }
   function uid(){ return map.seedId++; }
@@ -399,7 +429,8 @@
   // ════════════════════════════════════════════════════════════════
   // offscreen scratch buffers (CSS-px sized) for the floor fill & grid clip
   function oc(){ return document.createElement("canvas"); }
-  const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc(), deco:oc(), decoClip:oc() };
+  const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc(), deco:oc(), decoClip:oc(),
+                 light:oc(), ltint:oc() };
   function sizeBufs(){ for(const k in buf){ if(buf[k].width!==W||buf[k].height!==H){ buf[k].width=W; buf[k].height=H; } } }
 
   // draw a single floor shape's path into a 2d context (screen space)
@@ -588,12 +619,13 @@
     } else {
       renderLocalMap();
     }
-    if(!exporting){ drawPreview(); drawSelection(); }
+    if(!exporting){ drawPreview(); drawLightMarkers(); drawSelection(); }
   }
   function renderLocalMap(){
     // Work in CSS-pixel logical space; scale once for crisp HiDPI output.
     ctx.setTransform(DPR,0,0,DPR,0,0);
     doorHalf=null;                      // per-door wall thickness, recomputed per frame
+    lightSegs=null;                     // light occluders, likewise
     ctx.clearRect(0,0,W,H);
     if(!noRock){
       const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
@@ -669,8 +701,160 @@
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
     drawObjects();
+    drawLights();
   }
 
+  // ══════════════════════ LIGHTS (Advanced Mode) ══════════════════════
+  // A darkness wash laid over the finished map that every light carves a pool
+  // out of, plus an additive colour tint on top. `map.darkness` (0..1) is the
+  // one control: at 0 this is pure coloured glow on a fully lit map, at 1 it is
+  // near-black outside the lights.
+  //
+  //   map.lit       — master switch, nothing here runs when it is off
+  //   map.darkness  — 0..1 wash strength
+  //   map.lights[]  — { id, x, y, r (cells), color, bright (0..1) }
+  //
+  // Shadows: each light gets a VISIBILITY POLYGON ray-marched against room
+  // outlines and interior walls, which is then blurred so the shadow edges are
+  // soft rather than geometric. Doors are deliberately NOT cut out of the
+  // occluders — a door is closed, so it contains the light in its room.
+  let lightSegs = null;                       // occluder cache, rebuilt per render
+  function lightOccluders(){
+    if(lightSegs) return lightSegs;
+    lightSegs=[];
+    for(const sh of map.shapes){ if(sh.deco) continue;      // deco shapes are decoration, not walls
+      const o=shapeOutline(sh);
+      for(let i=0;i<o.length;i++){ const a=o[i], b=o[(i+1)%o.length];
+        lightSegs.push([a[0],a[1],b[0],b[1]]); } }
+    for(const w of map.walls){
+      const s=(w.cx!==undefined&&w.cy!==undefined) ? wallSamples(w) : [[w.x1,w.y1],[w.x2,w.y2]];
+      for(let i=0;i<s.length-1;i++) lightSegs.push([s[i][0],s[i][1],s[i+1][0],s[i+1][1]]); }
+    return lightSegs;
+  }
+  // Distance from the ray origin to a segment, or -1. Parametric solve; `u` is
+  // the position ALONG the segment so it must stay inside [0,1].
+  function rayHitT(px,py,dx,dy,s){
+    const ax=s[0], ay=s[1], bx=s[2]-s[0], by=s[3]-s[1];
+    const den=dx*by - dy*bx; if(den>-1e-12 && den<1e-12) return -1;
+    const t=((ax-px)*by - (ay-py)*bx)/den; if(t<=1e-9) return -1;
+    const u=((ax-px)*dy - (ay-py)*dx)/den;
+    return (u>=0 && u<=1) ? t : -1;
+  }
+  function segNear(s,px,py,r){
+    const dx=s[2]-s[0], dy=s[3]-s[1], l2=dx*dx+dy*dy;
+    let t=l2 ? ((px-s[0])*dx+(py-s[1])*dy)/l2 : 0; t=t<0?0:(t>1?1:t);
+    const qx=px-(s[0]+t*dx), qy=py-(s[1]+t*dy);
+    return qx*qx+qy*qy <= r*r;
+  }
+  // A uniform angular sweep (degrades gracefully, never misses a caster) PLUS
+  // three rays at every occluder endpoint (so the shadow boundary lands exactly
+  // on the corner that cast it instead of being rounded off by the sweep).
+  function visPoly(L){
+    const R=Math.max(0.4, L.r||6), near=lightOccluders().filter(s=>segNear(s,L.x,L.y,R));
+    const N=Math.max(64, Math.min(288, Math.round(R*22)));
+    const angs=new Array(N);
+    for(let i=0;i<N;i++) angs[i]=i/N*Math.PI*2 - Math.PI;
+    for(const s of near){
+      for(let k=0;k<4;k+=2){
+        const dx=s[k]-L.x, dy=s[k+1]-L.y;
+        if(dx*dx+dy*dy > R*R) continue;
+        const a=Math.atan2(dy,dx);
+        angs.push(a-2e-4, a, a+2e-4);
+      }
+    }
+    angs.sort(function(a,b){ return a-b; });
+    const pts=[];
+    for(let i=0;i<angs.length;i++){
+      const a=angs[i], dx=Math.cos(a), dy=Math.sin(a);
+      let t=R;
+      for(let j=0;j<near.length;j++){ const h=rayHitT(L.x,L.y,dx,dy,near[j]); if(h>0 && h<t) t=h; }
+      pts.push([L.x+dx*t, L.y+dy*t]);
+    }
+    return pts;
+  }
+  function lightFalloff(c, cx, cy, rpx, a){
+    const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
+    g.addColorStop(0,    "rgba(255,255,255,"+a+")");
+    g.addColorStop(0.42, "rgba(255,255,255,"+(a*0.78).toFixed(4)+")");
+    g.addColorStop(0.72, "rgba(255,255,255,"+(a*0.36).toFixed(4)+")");
+    g.addColorStop(1,    "rgba(255,255,255,0)");
+    return g;
+  }
+  const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
+  const lmaskCv = oc();
+  function drawLights(){
+    if(!map || !map.lit) return;
+    const lights=map.lights||[];
+    const dark=Math.max(0, Math.min(1, map.darkness==null ? 0 : map.darkness));
+    if(!lights.length && dark<=0) return;
+    sizeBufs();
+    const lc=buf.light.getContext("2d"), gc=buf.ltint.getContext("2d"), mc=lmaskCv.getContext("2d");
+    for(let i=0;i<2;i++){ const c=[lc,gc][i];
+      c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none"; c.globalCompositeOperation="source-over"; }
+    lc.clearRect(0,0,W,H); gc.clearRect(0,0,W,H);
+    if(dark>0){ lc.fillStyle="rgba(5,7,13,"+dark+")"; lc.fillRect(0,0,W,H); }
+    // Feather scales with zoom so shadows stay equally soft at any scale.
+    const blur=Math.max(2.5, Math.min(22, 0.18*wpx()));
+    let ux0=Infinity, uy0=Infinity, ux1=-Infinity, uy1=-Infinity;   // union of lit boxes
+    for(let li=0; li<lights.length; li++){
+      const L=lights[li]; if(L.on===false) continue;
+      const R=Math.max(0.4, L.r||6);
+      const a=Math.max(0, Math.min(1, L.bright==null ? 0.85 : L.bright));
+      if(a<=0) continue;
+      const cs=toScreen(L.x,L.y), cx=cs[0], cy=cs[1], rpx=R*wpx();
+      // Everything stays inside the light's own box — a full-canvas pass per
+      // light is the same trap that made the mixed-floor composite slow.
+      const pad=blur*2+6;
+      const bx=Math.max(0,Math.floor(cx-rpx-pad)), by=Math.max(0,Math.floor(cy-rpx-pad));
+      const bw=Math.min(W,Math.ceil(cx+rpx+pad))-bx, bh=Math.min(H,Math.ceil(cy+rpx+pad))-by;
+      if(bw<=0 || bh<=0) continue;                       // entirely off-screen
+      // ⚠ PERF: the mask is a soft blob, so it is built at REDUCED resolution and
+      // scaled back up. Canvas blur costs per pixel — a 540 px light box blurred
+      // at full size was ~36 ms EACH (5 lights = 200 ms/frame); capped at 192 px
+      // it is a few. Upscaling a blurred mask is visually free.
+      const k=Math.min(1, LMASK_MAX/Math.max(bw,bh));
+      const mw=Math.max(1,Math.round(bw*k)), mh=Math.max(1,Math.round(bh*k));
+      if(lmaskCv.width!==mw || lmaskCv.height!==mh){ lmaskCv.width=mw; lmaskCv.height=mh; }
+      else mc.clearRect(0,0,mw,mh);
+      mc.setTransform(1,0,0,1,0,0); mc.globalAlpha=1; mc.globalCompositeOperation="source-over";
+      // 1 — the visibility polygon, feathered into soft shadow edges
+      const poly=visPoly(L);
+      mc.save(); mc.filter="blur("+(blur*k).toFixed(2)+"px)"; mc.fillStyle="#fff"; mc.beginPath();
+      for(let i=0;i<poly.length;i++){ const p=toScreen(poly[i][0],poly[i][1]);
+        const mx=(p[0]-bx)*k, my=(p[1]-by)*k;
+        if(i===0) mc.moveTo(mx,my); else mc.lineTo(mx,my); }
+      mc.closePath(); mc.fill(); mc.restore();
+      // 2 — multiply in the radial falloff
+      mc.globalCompositeOperation="destination-in";
+      mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a); mc.fillRect(0,0,mw,mh);
+      // 3 — punch the lit pool out of the darkness
+      lc.globalCompositeOperation="destination-out";
+      lc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
+      lc.globalCompositeOperation="source-over";
+      // 4 — recolour the same mask and accumulate it as additive tint
+      mc.globalCompositeOperation="source-in";
+      mc.fillStyle=L.color||"#ffb457"; mc.fillRect(0,0,mw,mh);
+      mc.globalCompositeOperation="source-over";
+      gc.globalCompositeOperation="lighter"; gc.globalAlpha=0.5;
+      gc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
+      gc.globalAlpha=1; gc.globalCompositeOperation="source-over";
+      if(bx<ux0)ux0=bx; if(by<uy0)uy0=by;
+      if(bx+bw>ux1)ux1=bx+bw; if(by+bh>uy1)uy1=by+bh;
+    }
+    if(dark>0){
+      // A transparent PNG should not come back as a sheet of dark grey — keep
+      // the wash inside the floors, which is the only thing being exported.
+      if(noRock && map.shapes.length){
+        lc.globalCompositeOperation="destination-in"; lc.drawImage(buf.mask,0,0);
+        lc.globalCompositeOperation="source-over";
+      }
+      ctx.drawImage(buf.light,0,0);
+    }
+    // The tint only exists inside the lit boxes; compositing the rest is waste.
+    if(ux1>ux0){ ctx.save(); ctx.globalCompositeOperation="lighter";
+      ctx.drawImage(buf.ltint, ux0,uy0,ux1-ux0,uy1-uy0, ux0,uy0,ux1-ux0,uy1-uy0);
+      ctx.restore(); }
+  }
   function drawDotGrid(){ const p=wpx(); if(p<13) return; const go=gridOp(); if(go<=0) return;
     ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.8*go;
     const [ox,oy]=toScreen(0,0); const r=Math.max(0.6,0.85*Math.min(2,cam.scale));
@@ -1211,10 +1395,32 @@
              corners:[P(-hw,-hh),P(hw,-hh),P(hw,hh),P(-hw,hh)],
              scale:P(hw,hh), rotate:P(0,-hh-22) };
   }
+  // Lights are invisible geometry — only their effect shows — so mark each one
+  // with a dot on screen. Drawn from render()'s overlay pass, which is skipped
+  // while exporting, so markers never reach a PNG.
+  function drawLightMarkers(){
+    if(!map.lit) return;
+    const ls=map.lights||[]; if(!ls.length) return;
+    ctx.save();
+    for(const L of ls){
+      const p=toScreen(L.x,L.y);
+      ctx.beginPath(); ctx.arc(p[0],p[1],5,0,6.2832);
+      ctx.fillStyle=L.color||"#ffb457"; ctx.fill();
+      ctx.lineWidth=1.5; ctx.strokeStyle="rgba(0,0,0,.7)"; ctx.stroke();
+    }
+    ctx.restore();
+  }
   function drawSelection(){
     if(sel==null) return;
     const o=objAt(sel);
     if(!o) return;
+    if(o.kind==="light"){
+      const L=o.obj, p=toScreen(L.x,L.y), rp=Math.max(1,(L.r||6))*wpx();
+      ctx.save(); ctx.strokeStyle=C.sel; ctx.lineWidth=1.6; ctx.setLineDash([6,5]);
+      ctx.beginPath(); ctx.arc(p[0],p[1],rp,0,6.2832); ctx.stroke();      // reach
+      ctx.setLineDash([]); ctx.beginPath(); ctx.arc(p[0],p[1],8,0,6.2832); ctx.stroke();
+      ctx.restore(); return;
+    }
     if(o.kind==="object"){
       const H=objHandles(o.obj);
       ctx.save(); ctx.strokeStyle=C.sel; ctx.lineWidth=1.6; ctx.setLineDash([5,4]);
@@ -1249,6 +1455,7 @@
       const x=Math.min(...xs), y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y}; }
     if(kind==="object") return objBox(o);
     if(kind==="door"){ const l=(o.len||1)/2+0.3; return {x:o.x-l,y:o.y-l,w:l*2,h:l*2}; }
+    if(kind==="light") return {x:o.x-0.4,y:o.y-0.4,w:0.8,h:0.8};
     if(kind==="stair"){
       if(o.ax!==undefined){ const xs=[o.ax,o.bx,o.tx], ys=[o.ay,o.by,o.ty];
         const x=Math.min(...xs), y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x, h:Math.max(...ys)-y}; }
@@ -1281,6 +1488,10 @@
     return !(neg&&pos);
   }
   function hitTest(wx,wy){
+    // Lights composite over the whole map, so they take the click first. The
+    // tolerance is in SCREEN px so a light stays grabbable at any zoom.
+    if(map.lit) for(let i=(map.lights||[]).length-1;i>=0;i--){ const L=map.lights[i];
+      if(Math.hypot(wx-L.x,wy-L.y) <= Math.max(0.3, 10/wpx())) return {kind:"light",idx:i,obj:L}; }
     // Objects are drawn last, so they're hit first. Test in the object's own
     // rotated frame rather than against its AABB.
     for(let i=(map.objects||[]).length-1;i>=0;i--){ const o=map.objects[i];
@@ -1303,7 +1514,7 @@
   }
   let sel=null;                    // {kind,idx}
   let handle=null;                 // object scale/rotate handle drag
-  function objAt(s){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects})[s.kind];
+  function objAt(s){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects,light:map.lights})[s.kind];
     return arr&&arr[s.idx]?{kind:s.kind,obj:arr[s.idx]}:null; }
 
   // ════════════════════════════════════════════════════════════════
@@ -1353,6 +1564,7 @@
       render(); return;
     }
     if(tool==="object"){ if(armedObj) placeObject(wx,wy,e.shiftKey); return; }
+    if(tool==="light"){ placeLight(wx,wy,e.shiftKey); return; }
     if(tool==="erase"){ const h=hitTest(wx,wy); if(h){ pushHistory(); removeHit(h); commit(); } return; }
     if(tool==="polygon"){
       if(!polyPts) polyPts=[];
@@ -1494,14 +1706,14 @@
       markGeom();
     } else if(dragObj.h.kind==="wall"){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy;
       if(s.cx!==undefined){ o.cx=s.cx+gdx; o.cy=s.cy+gdy; } }
-    else if(dragObj.h.kind==="door" || dragObj.h.kind==="object"){ o.x=s.x+hd(dx); o.y=s.y+hd(dy); }
+    else if(dragObj.h.kind==="door" || dragObj.h.kind==="object" || dragObj.h.kind==="light"){ o.x=s.x+hd(dx); o.y=s.y+hd(dy); }
     else if(dragObj.h.kind==="stair"){
       if(s.ax!==undefined){ o.ax=s.ax+gdx;o.ay=s.ay+gdy;o.bx=s.bx+gdx;o.by=s.by+gdy;o.tx=s.tx+gdx;o.ty=s.ty+gdy; }
       else if(s.x1!==undefined){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy; }
       else { o.x=s.x+gdx; o.y=s.y+gdy; } }
   }
-  function removeHit(h){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects})[h.kind];
-    arr.splice(h.idx,1); setSel(null); }
+  function removeHit(h){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects,light:map.lights})[h.kind];
+    if(arr) arr.splice(h.idx,1); setSel(null); }
   function nearestWallAngle(wx,wy){
     let best=1e9,ang=0;
     for(const w of map.walls){ const d=distToSeg(wx,wy,w.x1,w.y1,w.x2,w.y2);
@@ -1539,6 +1751,7 @@
     // chosen textures and the grid opacity. Generated ROOMS stay unstyled on
     // purpose, so they follow map.style and can be restyled in one move.
     const keepName = map.name, keepStyle = map.style, keepGridOp = map.gridOpacity, keepSnap = map.snap;
+    const keepLit = map.lit, keepDark = map.darkness;      // lights themselves belong to the old map
     map = (window.DungeonEngine && window.DungeonEngine.generate)
       ? window.DungeonEngine.generate(opts)
       : generateLocal(opts);
@@ -1546,7 +1759,8 @@
     if(keepStyle) map.style = keepStyle;
     if(keepGridOp!=null) map.gridOpacity = keepGridOp;
     if(keepSnap!=null) map.snap = keepSnap;
-    commit(); syncAdvancedUI(); syncStyleScope(); fitView();
+    map.lit = !!keepLit; map.darkness = (keepDark==null) ? 0.55 : keepDark; map.lights = [];
+    commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); fitView();
   }
   // Inlined fallback generator (used only when DungeonEngine isn't loaded, e.g.
   // the tool opened standalone). Builds into the module `map` and returns it.
@@ -1819,7 +2033,9 @@
   function redo(){ if(!future.length) return; history.push(snapshot()); map=JSON.parse(future.pop()); afterLoad(); syncUndo(); scheduleSave(); }
   function syncUndo(){ $("undo").disabled=!history.length; $("redo").disabled=!future.length; }
   function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; markGeom();
-    syncGridOp(); syncZUI();
+    if(!Array.isArray(map.lights)) map.lights=[];        // maps exported before v37
+    if(map.darkness==null) map.darkness=0.55;
+    syncGridOp(); syncZUI(); syncLightUI();
     $("gridToggle").checked=map.grid!==false;
     snapOn=map.snap!==false; if($("snapToggle")) $("snapToggle").checked=snapOn;
     if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
@@ -2366,7 +2582,7 @@
     if(o.kind==="wall") return {kind:"wall", obj:o.obj};
     return null;
   }
-  function setSel(v){ sel=v; syncStyleScope(); syncZUI(); }
+  function setSel(v){ sel=v; syncStyleScope(); syncZUI(); syncLightUI(); }
 
   // Style scope, in priority order:
   //   • a DRAWING tool is active  -> the pickers set `pending`, the style that new
@@ -2487,13 +2703,20 @@
     const fs=$("floorSel");
     if(fs) fs.disabled = !!(sc.kind==="sel" && sc.target.kind==="wall");
   }
-  let pickOpen=null;
+  let pickOpen=null, pickScrollTop=0;
   function closePicker(){ const p=$("pickPop"); if(p) p.hidden=true; pickOpen=null; }
   function openPicker(kind){
     const btn=$(PICKERS[kind].el), pop=$("pickPop");
     if(!btn || !pop || btn.disabled) return;
     if(pickOpen===kind){ closePicker(); return; }
     pickOpen=kind;
+    // The popup is position:fixed, so it must close when the sidebar scrolls —
+    // but scroll events are delivered a frame LATE. Clicking a picker that had
+    // to be scrolled into view therefore opened it and then immediately shut it
+    // again on the stale event. Remember where we were and only close on a real
+    // move. (Only started biting once the sidebar grew tall enough to scroll.)
+    const sb0=document.querySelector(".sidebar");
+    pickScrollTop = sb0 ? sb0.scrollTop : 0;
     const cur=currentPick(kind);
     pop.innerHTML="";
     for(const g of pickList(kind)){
@@ -2635,6 +2858,111 @@
     commit();
   }
 
+  // ── LIGHTS (Advanced Mode) ────────────────────────────────────────
+  // Rendering lives in the engine (and its inlined twin); this is just the
+  // controls. Scope mirrors the Floor/Walls pickers: with a light SELECTED the
+  // sliders edit that light, otherwise they set what the next one will be.
+  const LIGHT_PRESETS=[
+    {name:"Torch",     col:"#ff9a3c"},
+    {name:"Lantern",   col:"#ffd08a"},
+    {name:"Candle",    col:"#ffc46b"},
+    {name:"Moonlight", col:"#9fc4ff"},
+    {name:"Arcane",    col:"#8f7bff"},
+    {name:"Necrotic",  col:"#63ffab"},
+  ];
+  let newLight={ col:"#ff9a3c", r:6, bright:0.85 };   // session-only, like `pending`
+  let lightGesture=false;                             // one undo entry per slider DRAG
+  function lightTarget(){
+    if(sel==null || sel.kind!=="light") return null;
+    const o=objAt(sel); return o ? o.obj : null;
+  }
+  function syncLightUI(){
+    const on=!!map.lit;
+    if($("lightToggle")) $("lightToggle").checked=on;
+    if($("lightBody"))   $("lightBody").style.display = on ? "" : "none";
+    const lt=document.querySelector('.tool[data-tool="light"]');
+    if(lt) lt.classList.toggle("off", !on);
+    const d=Math.round((map.darkness==null?0:map.darkness)*100);
+    if($("darkness")) $("darkness").value=d;
+    if($("darkV"))    $("darkV").textContent=d+"%";
+    const t=lightTarget();
+    const col = t ? (t.color||newLight.col) : newLight.col;
+    const r   = t ? (t.r||newLight.r)       : newLight.r;
+    const br  = t ? (t.bright==null?newLight.bright:t.bright) : newLight.bright;
+    if($("lightColor"))  $("lightColor").value=col;
+    if($("lightRadius")) $("lightRadius").value=Math.round(r);
+    if($("lrV"))         $("lrV").textContent=Math.round(r)+" sq";
+    if($("lightBright")) $("lightBright").value=Math.round(br*100);
+    if($("lbV"))         $("lbV").textContent=Math.round(br*100)+"%";
+    const lc=String(col).toLowerCase();
+    const pre=LIGHT_PRESETS.filter(p=>p.col.toLowerCase()===lc)[0];
+    if($("lightColorName")) $("lightColorName").textContent = pre ? pre.name : "Custom";
+    const row=$("lightPresets");
+    if(row) row.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.col.toLowerCase()===lc));
+    if($("lightScope")) $("lightScope").textContent = t
+      ? "Editing the selected light."
+      : "Settings for the next light — pick the Light tool (L) and click the map.";
+  }
+  // Live edit while a slider is being dragged: mutate + redraw every tick, but
+  // only ONE history entry per gesture (endLightEdit closes it on `change`).
+  function liveLight(patch){
+    const t=lightTarget();
+    if(!t){
+      if(patch.color!=null)  newLight.col=patch.color;
+      if(patch.r!=null)      newLight.r=patch.r;
+      if(patch.bright!=null) newLight.bright=patch.bright;
+      syncLightUI(); return;
+    }
+    if(!lightGesture){ pushHistory(); lightGesture=true; }
+    if(patch.color!=null)  t.color=patch.color;
+    if(patch.r!=null)      t.r=patch.r;
+    if(patch.bright!=null) t.bright=patch.bright;
+    commit(); syncLightUI();
+  }
+  function endLightEdit(){ lightGesture=false; }
+  function placeLight(wx,wy,keepPlacing){
+    if(!map.lit) return;
+    if(!Array.isArray(map.lights)) map.lights=[];
+    pushHistory();
+    map.lights.push({ id:uid(), x:snapHalf(wx), y:snapHalf(wy),
+                      r:newLight.r, color:newLight.col, bright:newLight.bright });
+    commit();
+    // Same rule as objects: auto-select and drop back to Select unless Shift.
+    if(!keepPlacing){ setSel({kind:"light", idx:map.lights.length-1}); setTool("select"); }
+    else syncLightUI();
+  }
+  function initLights(){
+    const row=$("lightPresets");
+    if(row && !row.childElementCount){
+      for(const p of LIGHT_PRESETS){
+        const b=document.createElement("button");
+        b.type="button"; b.dataset.col=p.col; b.title=p.name; b.style.background=p.col;
+        b.onclick=()=>{ liveLight({color:p.col}); endLightEdit(); };
+        row.appendChild(b);
+      }
+    }
+    if($("lightToggle")) $("lightToggle").onchange=e=>{
+      map.lit=e.target.checked;
+      if(!map.lit && tool==="light") setTool("select");
+      syncLightUI(); commit();
+    };
+    if($("darkness")){
+      // Same one-entry-per-drag rule as the per-light sliders: snapshot BEFORE
+      // the first mutation, close the gesture on `change`.
+      $("darkness").oninput=e=>{
+        if(!lightGesture){ pushHistory(); lightGesture=true; }
+        map.darkness=(+e.target.value)/100; syncLightUI(); commit();
+      };
+      $("darkness").onchange=endLightEdit;
+    }
+    if($("lightColor")){ $("lightColor").oninput=e=>liveLight({color:e.target.value});
+                         $("lightColor").onchange=endLightEdit; }
+    if($("lightRadius")){ $("lightRadius").oninput=e=>liveLight({r:+e.target.value});
+                          $("lightRadius").onchange=endLightEdit; }
+    if($("lightBright")){ $("lightBright").oninput=e=>liveLight({bright:(+e.target.value)/100});
+                          $("lightBright").onchange=endLightEdit; }
+    syncLightUI();
+  }
   function syncGridOp(){
     const v = (map.gridOpacity==null) ? 1 : Math.max(0, Math.min(1, map.gridOpacity));
     if($("gridOp")) $("gridOp").value = Math.round(v*100);
@@ -2662,12 +2990,14 @@
       if(pickOpen && pop && !pop.contains(e.target)) closePicker();
     });
     window.addEventListener("resize", closePicker);
-    const sb=document.querySelector(".sidebar"); if(sb) sb.addEventListener("scroll", closePicker);
+    const sb=document.querySelector(".sidebar");
+    if(sb) sb.addEventListener("scroll", ()=>{
+      if(pickOpen && Math.abs(sb.scrollTop - pickScrollTop) > 2) closePicker(); });
     if($("objFilter")) $("objFilter").oninput=()=>buildObjGrid();
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
-    syncAdvancedUI(); syncStyleScope();
+    syncAdvancedUI(); syncStyleScope(); initLights();
     loadBundled().catch(()=>{});
     loadPacks().catch(()=>{});
   }
@@ -2682,6 +3012,7 @@
       if(w.cx!==undefined) for(const p of wallSamples(w)) pts.push(p); }   // arc can bow past its ends
     for(const o of (map.objects||[])){ const b=objBox(o); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
     for(const d of map.doors) pts.push([d.x,d.y]);
+    if(map.lit) for(const L of (map.lights||[])) pts.push([L.x,L.y]);
     for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
       else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
     if(!pts.length) return null;
@@ -2731,7 +3062,10 @@
   function $(id){ return document.getElementById(id); }
   let spaceDown=false;
 
-  function setTool(t){ tool=t;
+  function setTool(t){
+    // The Light tool needs somewhere to put light — Advanced Mode with Lights on.
+    if(t==="light" && !map.lit){ toast("Turn Lights on under Advanced first."); return; }
+    tool=t;
     document.querySelectorAll(".tool").forEach(el=>el.classList.toggle("active",el.dataset.tool===t));
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
     if(placing){ placing=null; render(); }
@@ -2744,7 +3078,8 @@
       door:"Click to start, move to aim, click again to place the door.",
       stair:"Click a base corner, click to set width, click the tip to place.",
       erase:"Click anything to delete it.",select:"Click to select · drag to move.",
-      object:"Click the map to place it. Keep clicking to place more."};
+      object:"Click the map to place it. Keep clicking to place more.",
+      light:"Click to drop a light. Shift-click to keep placing more."};
     toast(tips[t]||"");
   }
   document.getElementById("toolbar").addEventListener("click", e=>{
@@ -2828,7 +3163,7 @@
       }
     }
     if(e.key==="g"||e.key==="G"){ setMode(drawMode==="rooms"?"shapes":"rooms"); return; }  // toggle Rooms/Shapes
-    const keys={v:"select",r:"rect",c:"circle",p:"polygon",w:"wall",d:"door",s:"stair",e:"erase"};
+    const keys={v:"select",r:"rect",c:"circle",p:"polygon",w:"wall",d:"door",s:"stair",e:"erase",l:"light"};
     if(keys[e.key]) setTool(keys[e.key]);
   });
   window.addEventListener("keyup", e=>{ if(e.code==="Space"){ spaceDown=false; cv.style.cursor= tool==="select"?"default":"crosshair"; } });
