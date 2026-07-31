@@ -222,29 +222,28 @@ window.DungeonEngine = (function(){
     ctx.drawImage(buf.wall,0,0);
   }
 
-  // Sample a curved wall into world points as the CIRCULAR ARC through
-  // start → apex → end. `cx,cy` is stored Bézier-style (C = 2Q − midpoint) so the
-  // clicked apex is Q = (C + midpoint)/2. A true arc (not a quadratic Bézier) means
-  // an apex pulled out to half the chord gives an exact HALF CIRCLE.
+  // Sample a curved wall into world points as a HALF-ELLIPSE: the chord is the full
+  // major axis and the clicked apex sets the minor axis. `cx,cy` is stored
+  // Bézier-style (C = 2Q − midpoint) so the apex is Q = (C + midpoint)/2.
+  // Why an ellipse and not the circle through the 3 points: an ellipse leaves the
+  // curve PERPENDICULAR to the chord at BOTH ends for any apex depth, so two
+  // mirrored walls on the same two endpoints meet tangent-to-tangent and close into
+  // one smooth oval — a half circle when the apex depth equals half the chord.
   function wallSamples(wl){
     const x1=wl.x1,y1=wl.y1,x2=wl.x2,y2=wl.y2;
     const mx=(x1+x2)/2, my=(y1+y2)/2;
     const qx=(wl.cx+mx)/2, qy=(wl.cy+my)/2;              // the apex the wall bows through
-    // circumcircle of start / apex / end
-    const d=2*(x1*(qy-y2) + qx*(y2-y1) + x2*(y1-qy));
-    if(Math.abs(d)<1e-9) return [[x1,y1],[x2,y2]];        // degenerate ⇒ straight
-    const s1=x1*x1+y1*y1, sq=qx*qx+qy*qy, s2=x2*x2+y2*y2;
-    const ux=(s1*(qy-y2) + sq*(y2-y1) + s2*(y1-qy))/d;
-    const uy=(s1*(x2-qx) + sq*(x1-x2) + s2*(qx-x1))/d;
-    const R=Math.hypot(x1-ux, y1-uy);
-    const TAU=Math.PI*2, norm=a=>((a%TAU)+TAU)%TAU;
-    const a0=Math.atan2(y1-uy, x1-ux);
-    const dq=norm(Math.atan2(qy-uy, qx-ux)-a0);           // where the apex sits going CCW
-    let sweep=norm(Math.atan2(y2-uy, x2-ux)-a0);
-    if(dq>sweep) sweep-=TAU;                              // apex is the other way ⇒ sweep CW (major arc)
-    const N=Math.max(10, Math.min(140, Math.round(Math.abs(sweep)*R*6)));
+    const dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy);
+    if(L<1e-9) return [[x1,y1],[x2,y2]];
+    const a=L/2, ux=dx/L, uy=dy/L, nx=-uy, ny=ux;        // semi-chord + unit chord/normal axes
+    const h=(qx-mx)*nx + (qy-my)*ny;                     // signed apex depth (either side)
+    if(Math.abs(h)<1e-9) return [[x1,y1],[x2,y2]];       // apex on the chord ⇒ straight
+    // Half-ellipse: semi-axis `a` along the chord, `h` along the normal, swept
+    // t = π → 0 so it runs start → apex → end.
+    const N=Math.max(12, Math.min(160, Math.round((a+Math.abs(h))*14)));
     const pts=[];
-    for(let i=0;i<=N;i++){ const a=a0+sweep*i/N; pts.push([ux+Math.cos(a)*R, uy+Math.sin(a)*R]); }
+    for(let i=0;i<=N;i++){ const t=Math.PI*(1-i/N), c=Math.cos(t), s=Math.sin(t);
+      pts.push([mx + a*c*ux + h*s*nx, my + a*c*uy + h*s*ny]); }
     return pts;
   }
   // A rough-edged ribbon along an open world polyline (curved walls / shape lines).
