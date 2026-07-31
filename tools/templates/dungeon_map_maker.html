@@ -242,10 +242,14 @@
         </div>
         <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
         <div id="packList" class="packs"></div>
-        <label class="fld" for="objFilter">Objects</label>
-        <input class="sel" id="objFilter" type="text" placeholder="Filter objects…" autocomplete="off">
-        <div id="objGrid" class="objgrid"></div>
       </div>
+    </div>
+
+    <div class="grp">
+      <p class="grp-title">Objects</p>
+      <p class="hint" id="objScope" style="margin:0 0 6px"></p>
+      <input class="sel" id="objFilter" type="text" placeholder="Filter objects…" autocomplete="off">
+      <div id="objGrid" class="objgrid"></div>
     </div>
 
     <div class="grp">
@@ -275,7 +279,12 @@
     </div>
 
     <div class="grp">
-      <p class="grp-title">Shadows</p>
+      <div class="grp-head">
+        <p class="grp-title">Shadows</p>
+        <label class="switch" title="Soft contact shadows you place under objects">
+          <input type="checkbox" id="shadowToggle"><span class="slider"></span></label>
+      </div>
+      <div id="shadowBody" style="display:none">
       <label class="fld">Width <b id="shwV">1.6 sq</b></label>
       <input type="range" id="shW" min="2" max="120" value="16">
       <label class="fld">Height <b id="shhV">1.1 sq</b></label>
@@ -288,6 +297,7 @@
         <button class="btn" id="shadowReset" title="Put the selected shadow back to the default softness and strength, re-fitted to whatever object it sits on">↺ Reset shadow</button>
       </div>
       <p class="hint" id="shadowScope" style="margin:6px 0 0"></p>
+      </div>
     </div>
 
     <div class="grp">
@@ -295,8 +305,8 @@
         <label class="chk" title="Toggle with Shift+S"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
         <label class="chk"><input type="checkbox" id="gridToggle" checked> Show grid</label>
       </div>
-      <label class="fld">Grid opacity <b id="gridOpV">100%</b></label>
-      <input type="range" id="gridOp" min="0" max="100" value="100">
+      <label class="fld">Grid opacity <b id="gridOpV">50%</b></label>
+      <input type="range" id="gridOp" min="0" max="100" value="50">
       <div class="row" style="margin-top:10px">
         <button class="btn" id="clear">Clear</button>
         <button class="btn" id="fit">Fit view</button>
@@ -329,8 +339,10 @@
         <button class="btn" id="png">⬇ PNG</button>
         <button class="btn" id="pngT" title="Transparent background — floors only">⬇ PNG (transp.)</button>
       </div>
-      <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a><br>
-        <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a></p>
+      <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a>
+        (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a>)<br>
+        and <a href="https://axebane.com/" target="_blank" rel="noopener noreferrer">Axebane Games</a>
+        (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>)</p>
     </div>
 
     <div class="spacer"></div>
@@ -414,8 +426,8 @@
   let W = 0, H = 0, DPR = 1;
 
   function blankMap(){
-    return { version:1, name:"", grid:true, gridOpacity:1, style:DEFAULT_STYLE(),
-             lit:false, darkness:0.55, lights:[], shadows:[],
+    return { version:1, name:"", grid:true, gridOpacity:0.5, style:DEFAULT_STYLE(),
+             lit:false, darkness:0.55, lights:[], shadowsOn:false, shadows:[],
              shapes:[], walls:[], doors:[], stairs:[], objects:[], seedId:1 };
   }
   function uid(){ return map.seedId++; }
@@ -735,7 +747,9 @@
   // Deliberately NOT clipped to the floor mask: clipping would cut a hard edge
   // along every room boundary, which looks far worse than a little spill.
   function drawShadows(){
-    if(!map) return;                                // works in classic mode too (v39)
+    // v41: master switch, mirroring map.lit. Only an explicit false hides them, so
+    // a caller that never sets the flag (or a map saved before v41) still draws.
+    if(!map || map.shadowsOn===false) return;       // works in classic mode too (v39)
     const list=map.shadows||[]; if(!list.length) return;
     ctx.save(); ctx.globalCompositeOperation="multiply";
     for(let i=0;i<list.length;i++){
@@ -1054,6 +1068,12 @@
     if(id==="") return null;
     return (tex && tex.byId && tex.byId[id]) || null;
   }
+  // `tex` is also handed in for OBJECT sprites alone — objects work in normal
+  // mode, where floors/walls/background stay classic ink — so a non-null `tex`
+  // no longer means "textured map". The host says which it is with `objectsOnly`.
+  // Do NOT infer it from tex.floor/tex.wall being set: per-shape styling leaves
+  // both empty on a fully textured map, and doors lose their wood leaf.
+  function textured(){ return !!(tex && !tex.objectsOnly); }
   function shapeFloorTex(sh){ return tex ? texOf(sh.floor, tex.floor) : null; }
   function shapeWallTex(sh){  return tex ? texOf(sh.wall,  tex.wall)  : null; }
 
@@ -1392,7 +1412,7 @@
     // Advanced Mode gets a wood-brown leaf; the near-white classic fill reads as a
     // hole punched in the wall once everything around it is textured stone.
     // `tex` is only set in textured mode, so classic output is untouched.
-    ctx.fillStyle = tex ? C.doorWood : C.doorFill;
+    ctx.fillStyle = textured() ? C.doorWood : C.doorFill;
     ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.lineTo(C2[0],C2[1]); ctx.lineTo(D[0],D[1]); ctx.closePath(); ctx.fill();
     // rough black rectangle outline + centre stubs reaching to the tips
     ctx.fillStyle=C.ink;
@@ -1850,7 +1870,7 @@
     // chosen textures and the grid opacity. Generated ROOMS stay unstyled on
     // purpose, so they follow map.style and can be restyled in one move.
     const keepName = map.name, keepStyle = map.style, keepGridOp = map.gridOpacity, keepSnap = map.snap;
-    const keepLit = map.lit, keepDark = map.darkness;      // lights themselves belong to the old map
+    const keepLit = map.lit, keepDark = map.darkness, keepShadowsOn = map.shadowsOn;
     map = (window.DungeonEngine && window.DungeonEngine.generate)
       ? window.DungeonEngine.generate(opts)
       : generateLocal(opts);
@@ -1859,6 +1879,7 @@
     if(keepGridOp!=null) map.gridOpacity = keepGridOp;
     if(keepSnap!=null) map.snap = keepSnap;
     map.lit = !!keepLit; map.darkness = (keepDark==null) ? 0.55 : keepDark;
+    map.shadowsOn = !!keepShadowsOn;                       // the entities belong to the old map
     map.lights = []; map.shadows = [];
     commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); fitView();
   }
@@ -2135,6 +2156,9 @@
   function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; markGeom();
     if(!Array.isArray(map.lights)) map.lights=[];        // maps exported before v37
     if(!Array.isArray(map.shadows)) map.shadows=[];      // …and before v38
+    // Maps made before the switch existed keep their shadows on, so nothing
+    // silently disappears; a map with none starts with it off, like Lights.
+    if(map.shadowsOn==null) map.shadowsOn = map.shadows.length>0;
     if(map.darkness==null) map.darkness=0.55;
     syncGridOp(); syncZUI(); syncLightUI(); syncShadowUI();
     $("gridToggle").checked=map.grid!==false;
@@ -2165,6 +2189,12 @@
                                  if(sh.wall!==undefined) sh.wall=unalias(sh.wall); }
     for(const wl of map.walls) if(wl.wall!==undefined) wl.wall=unalias(wl.wall);
     map.shapes=data.shapes||[]; map.walls=data.walls||[]; map.doors=data.doors||[]; map.stairs=data.stairs||[];
+    map.shadows=data.shadows||[]; map.lights=data.lights||[];
+    // ⚠ A map saved before the Shadows switch existed carries shadows but no flag,
+    // and blankMap()'s default of `false` would silently hide every one of them.
+    // This has to live HERE, not only in afterLoad(): boot() goes load() ->
+    // adoptMap() and never touches afterLoad().
+    if(data.shadowsOn==null) map.shadowsOn = map.shadows.length>0;
     if(!map.seedId) map.seedId=1+Math.max(0,...allIds());
   }
   function allIds(){ return [...map.shapes,...map.walls,...map.doors,...map.stairs].map(o=>o.id||0); }
@@ -2259,6 +2289,9 @@
     bundledPacks = m.packs || [];
     for(const p of bundledPacks) for(const t of p.textures)
       texReg.set(t.id, {id:t.id, name:t.name, kind:t.kind, pack:p.id, packName:p.name,
+                        // `basic` packs are the set offered in NORMAL mode; the
+                        // rest belong to Advanced Mode. The two never mix.
+                        basic:!!p.basic,
                         cells:t.cells, thick:t.thick, tile:t.tile, w:t.w, h:t.h,
                         // Objects live in shared sprite ATLASES: `atlas`/`thumb` are
                         // {sheet,x,y,w,h,sw,sh} rects. Floors and walls stay whole files
@@ -2293,11 +2326,20 @@
   }
   function applyStyle(){
     const st=(map && map.style) || null;
-    if(!st || st.mode!=="textured"){ tex=null; return; }
     // byId carries every texture the map actually references, so the engine can
     // resolve a per-shape `floor`/`wall` id without knowing anything about
     // loading. floor/wall stay the map-wide defaults for unstyled shapes.
     const byId={}, want=id=>{ if(id) byId[id]=texGet(id); };
+    if(!st || st.mode!=="textured"){
+      // NORMAL MODE still needs object sprites — the basic Axebane set is offered
+      // here. Hand the engine a tex carrying ONLY byId, so every surface stays
+      // classic ink. `null` when the map has no objects at all, which keeps the
+      // classic render byte-identical by construction.
+      for(const o of (map.objects||[])) want(o.tex);
+      tex = Object.keys(byId).length
+        ? {objectsOnly:true, floor:null, bg:null, wall:null, bgColor:null, byId} : null;
+      return;
+    }
     want(st.floor); want(st.wall);
     for(const sh of map.shapes){ want(sh.floor); want(sh.wall); }
     for(const wl of map.walls) want(wl.wall);
@@ -2877,15 +2919,27 @@
   }
   function buildObjGrid(){
     const g=$("objGrid"); if(!g) return;
+    // Switching mode can hide whatever was armed — disarm it rather than leave a
+    // loaded cursor pointing at a sprite that is no longer in the palette.
+    if(armedObj){ const a=texReg.get(armedObj);
+      const im=String(armedObj).indexOf("pack:")===0;
+      const ok = a && (advOn() ? (im || !a.basic) : (!im && !!a.basic));
+      if(!ok){ armedObj=null; if(tool==="object") setTool("select"); } }
     if(thumbObs){ thumbObs.disconnect(); thumbObs=null; }
     const q=(($("objFilter")||{}).value||"").trim().toLowerCase();
     g.innerHTML="";
     let n=0;
+    // Two DISJOINT sets. Normal mode offers the `basic` bundled art only;
+    // Advanced Mode offers everything else — the CC BY-NC packs and anything the
+    // user imported. Placed objects are untouched either way: this filters the
+    // palette, not the map, so a map built in one mode still renders in the other.
+    const adv=advOn();
+    const isImported=t=>String(t.id).indexOf("pack:")===0;
+    const inMode=t=> adv ? (isImported(t) || !t.basic) : (!isImported(t) && !!t.basic);
+    const all=[...texReg.values()].filter(t=>t.kind==="object" && inMode(t));
     // Imported packs come FIRST. They're registered after the bundled set, so in
     // plain insertion order a freshly imported pack lands ~215 cells down and
     // reads as "nothing happened".
-    const all=[...texReg.values()].filter(t=>t.kind==="object");
-    const isImported=t=>String(t.id).indexOf("pack:")===0;
     for(const t of all.filter(isImported).concat(all.filter(t=>!isImported(t)))){
       if(q && t.name.toLowerCase().indexOf(q)<0) continue;
       const b=document.createElement("button");
@@ -2917,17 +2971,24 @@
       more.textContent="Showing the first "+MAX_GRID_CELLS+" — type in the filter to narrow it down.";
       g.appendChild(more);
     }
-    sizeObjThumbs();
+    sizeObjThumbs(); syncObjScope();
     if(!n){ const d=document.createElement("div"); d.className="none";
       if(q) d.textContent="No objects match that.";
       else if(bundledError) d.textContent="Couldn't load /packs/bundled/bundled.json ("+bundledError+") — is the pack folder uploaded?";
       else if(!bundledPacks.length) d.textContent="Loading asset packs…";
+      else if(!advOn()) d.textContent="No basic objects loaded — re-upload public/packs/bundled/.";
       else {
         const c=bundledCounts||{};
         d.textContent="bundled.json has "+(c.floor||0)+" floors and "+(c.wall||0)+" walls but no objects"
           + " — public/packs/bundled/ is from an older build. Re-upload it (and hard-refresh).";
       }
       g.appendChild(d); }
+  }
+  function syncObjScope(){
+    const el=$("objScope"); if(!el) return;
+    el.textContent = advOn()
+      ? "Advanced packs — 2-Minute Tabletop plus anything you have imported."
+      : "Basic set — Axebane Games. Switch Advanced Mode on for the full packs.";
   }
   // Scale each atlas crop to the cell the grid actually gave it. Measured rather
   // than assumed, so it stays right at any sidebar width — including the stacked
@@ -3086,11 +3147,17 @@
   const SHADOW_DEFAULTS={ w:1.6, h:1.1, soft:0.55, strength:0.6 };
   let newShadow=Object.assign({}, SHADOW_DEFAULTS);
   let shadowGesture=false;
+  function advOn(){ return !!(map.style && map.style.mode==="textured"); }
   function shadowTarget(){
     if(sel==null || sel.kind!=="shadow") return null;
     const o=objAt(sel); return o ? o.obj : null;
   }
   function syncShadowUI(){
+    const on=!!map.shadowsOn;
+    if($("shadowToggle")) $("shadowToggle").checked=on;
+    if($("shadowBody"))   $("shadowBody").style.display = on ? "" : "none";
+    const btn=document.querySelector('.tool[data-tool="shadow"]');
+    if(btn) btn.classList.toggle("off", !on);
     const t=shadowTarget();
     const w  = t ? (t.w||newShadow.w) : newShadow.w;
     const h  = t ? (t.h||newShadow.h) : newShadow.h;
@@ -3143,6 +3210,7 @@
     return null;
   }
   function placeShadow(wx,wy,keepPlacing){
+    if(!map.shadowsOn) return;
     if(!Array.isArray(map.shadows)) map.shadows=[];
     // Drop it on an object and it sizes itself to that object's footprint and
     // angle. Objects are drawn ON TOP of shadows, so a shadow smaller than the
@@ -3168,6 +3236,11 @@
     bind("shSoft", v=>liveShadow({soft:v/100}));
     bind("shStr",  v=>liveShadow({strength:v/100}));
     if($("shadowReset")) $("shadowReset").onclick=resetShadow;
+    if($("shadowToggle")) $("shadowToggle").onchange=e=>{
+      map.shadowsOn=e.target.checked;
+      if(!map.shadowsOn && tool==="shadow") setTool("select");
+      syncShadowUI(); commit();
+    };
     syncShadowUI();
   }
   function syncGridOp(){
@@ -3180,7 +3253,7 @@
     const on=st.mode==="textured";
     if($("advToggle")) $("advToggle").checked=on;
     if($("advBody")) $("advBody").style.display = on ? "" : "none";
-    buildTexSelects();
+    buildTexSelects(); buildObjGrid();
   }
   function initAdvanced(){
     const st=map.style||(map.style=DEFAULT_STYLE());
@@ -3272,7 +3345,8 @@
 
   function setTool(t){
     // The Light tool needs somewhere to put light — Advanced Mode with Lights on.
-    if(t==="light" && !map.lit){ toast("Turn Lights on under Advanced first."); return; }
+    if(t==="light" && !map.lit){ toast("Switch Lights on first — the panel is in the sidebar."); return; }
+    if(t==="shadow" && !map.shadowsOn){ toast("Switch Shadows on first — the panel is in the sidebar."); return; }
     tool=t;
     document.querySelectorAll(".tool").forEach(el=>el.classList.toggle("active",el.dataset.tool===t));
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }

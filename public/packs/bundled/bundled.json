@@ -1,5 +1,5 @@
 {
-  "version": "e7a5ed5568",
+  "version": "a63a4196df",
   "note": "Bundled Creative-Commons map assets. Attribution is REQUIRED and is rendered statically in the Map Maker sidebar, not from this file.",
   "credits": [
     {
@@ -7,6 +7,12 @@
       "url": "https://2minutetabletop.com/",
       "license": "CC BY-NC 4.0",
       "licenseUrl": "https://creativecommons.org/licenses/by-nc/4.0/"
+    },
+    {
+      "name": "Axebane Games",
+      "url": "https://axebane.com/",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
     }
   ],
   "packs": [
@@ -23,8 +29,8 @@
           "cells": 15,
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 54,
-            "y": 98,
+            "x": 662,
+            "y": 588,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -39,8 +45,8 @@
           "cells": 6,
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 152,
-            "y": 98,
+            "x": 760,
+            "y": 588,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -55,8 +61,8 @@
           "cells": 12,
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 250,
-            "y": 98,
+            "x": 858,
+            "y": 588,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -71,8 +77,8 @@
           "cells": 15,
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 348,
-            "y": 98,
+            "x": 0,
+            "y": 686,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -87,8 +93,8 @@
           "cells": 6,
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 446,
-            "y": 98,
+            "x": 98,
+            "y": 686,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -103,8 +109,8 @@
           "cells": 8,
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 544,
-            "y": 98,
+            "x": 196,
+            "y": 686,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -119,9 +125,9 @@
           "thick": 0.2852,
           "tile": 6.0039,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 882,
+            "y": 809,
             "w": 96,
             "h": 11,
             "sw": 1024,
@@ -136,9 +142,9 @@
           "thick": 0.2852,
           "tile": 6.0,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 832,
             "w": 96,
             "h": 11,
             "sw": 1024,
@@ -153,9 +159,9 @@
           "thick": 0.2734,
           "tile": 6.0,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 876,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 832,
             "w": 96,
             "h": 10,
             "sw": 1024,
@@ -170,9 +176,9 @@
           "thick": 0.3086,
           "tile": 5.0273,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 809,
             "w": 96,
             "h": 12,
             "sw": 1024,
@@ -187,9 +193,9 @@
           "thick": 0.5625,
           "tile": 5.9922,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 490,
+            "y": 780,
             "w": 96,
             "h": 22,
             "sw": 1024,
@@ -204,9 +210,9 @@
           "thick": 0.5586,
           "tile": 5.9336,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 588,
+            "y": 780,
             "w": 96,
             "h": 21,
             "sw": 1024,
@@ -221,9 +227,9 @@
           "thick": 0.5508,
           "tile": 5.9961,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 686,
+            "y": 780,
             "w": 96,
             "h": 21,
             "sw": 1024,
@@ -238,9 +244,9 @@
           "thick": 0.5508,
           "tile": 5.9961,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 784,
+            "y": 780,
             "w": 96,
             "h": 21,
             "sw": 1024,
@@ -255,9 +261,9 @@
           "thick": 0.5586,
           "tile": 5.957,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 882,
+            "y": 780,
             "w": 96,
             "h": 21,
             "sw": 1024,
@@ -272,9 +278,9 @@
           "thick": 0.5586,
           "tile": 5.957,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 809,
             "w": 96,
             "h": 21,
             "sw": 1024,
@@ -298,8 +304,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 196,
+            "x": 686,
+            "y": 880,
             "w": 96,
             "h": 90,
             "sw": 1024,
@@ -314,8 +320,8 @@
           "h": 1.93,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 432,
-            "y": 388,
+            "x": 1225,
+            "y": 776,
             "w": 129,
             "h": 185,
             "sw": 2048,
@@ -339,8 +345,8 @@
           "h": 2.016,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1709,
-            "y": 1160,
+            "x": 1429,
+            "y": 1450,
             "w": 176,
             "h": 194,
             "sw": 2048,
@@ -364,8 +370,8 @@
           "h": 1.914,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 563,
-            "y": 388,
+            "x": 1356,
+            "y": 776,
             "w": 121,
             "h": 184,
             "sw": 2048,
@@ -389,8 +395,8 @@
           "h": 1.965,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 292,
-            "y": 388,
+            "x": 395,
+            "y": 776,
             "w": 138,
             "h": 189,
             "sw": 2048,
@@ -414,8 +420,8 @@
           "h": 1.156,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 935,
-            "y": 582,
+            "x": 213,
+            "y": 1559,
             "w": 107,
             "h": 111,
             "sw": 2048,
@@ -439,8 +445,8 @@
           "h": 1.062,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1540,
-            "y": 582,
+            "x": 362,
+            "y": 1673,
             "w": 98,
             "h": 102,
             "sw": 2048,
@@ -463,18 +469,18 @@
           "w": 0.598,
           "h": 0.348,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1156,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 1504,
+            "y": 374,
             "w": 57,
             "h": 33,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 458,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 377,
+            "y": 527,
             "w": 96,
             "h": 56,
             "sw": 1024,
@@ -488,9 +494,9 @@
           "w": 0.512,
           "h": 0.629,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1804,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 848,
+            "y": 293,
             "w": 49,
             "h": 60,
             "sw": 2048,
@@ -513,18 +519,18 @@
           "w": 0.566,
           "h": 0.484,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 99,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 248,
+            "y": 374,
             "w": 54,
             "h": 46,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 293,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 91,
             "w": 96,
             "h": 82,
             "sw": 1024,
@@ -538,18 +544,18 @@
           "w": 0.559,
           "h": 0.422,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 464,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 734,
+            "y": 374,
             "w": 54,
             "h": 40,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 458,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 181,
+            "y": 175,
             "w": 96,
             "h": 73,
             "sw": 1024,
@@ -563,18 +569,18 @@
           "w": 0.816,
           "h": 0.699,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1724,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 622,
+            "y": 293,
             "w": 78,
             "h": 67,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 91,
             "w": 96,
             "h": 82,
             "sw": 1024,
@@ -588,18 +594,18 @@
           "w": 0.551,
           "h": 0.477,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 155,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 304,
+            "y": 374,
             "w": 53,
             "h": 46,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 293,
+            "sheet": "objthumbs-2.webp",
+            "x": 684,
+            "y": 0,
             "w": 96,
             "h": 83,
             "sw": 1024,
@@ -613,18 +619,18 @@
           "w": 0.684,
           "h": 0.512,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1955,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1905,
+            "y": 293,
             "w": 66,
             "h": 49,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 469,
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 253,
             "w": 96,
             "h": 72,
             "sw": 1024,
@@ -638,18 +644,18 @@
           "w": 1.012,
           "h": 0.488,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 0,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 149,
+            "y": 374,
             "w": 97,
             "h": 47,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 690,
             "w": 96,
             "h": 46,
             "sw": 1024,
@@ -663,18 +669,18 @@
           "w": 0.57,
           "h": 0.449,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 407,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 556,
+            "y": 374,
             "w": 55,
             "h": 43,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 360,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 924,
+            "y": 91,
             "w": 96,
             "h": 76,
             "sw": 1024,
@@ -688,9 +694,9 @@
           "w": 0.512,
           "h": 0.516,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1855,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1709,
+            "y": 293,
             "w": 49,
             "h": 50,
             "sw": 2048,
@@ -713,9 +719,9 @@
           "w": 0.445,
           "h": 0.992,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 586,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1945,
+            "y": 98,
             "w": 43,
             "h": 95,
             "sw": 2048,
@@ -738,18 +744,18 @@
           "w": 1.098,
           "h": 0.812,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1483,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 71,
+            "y": 293,
             "w": 105,
             "h": 78,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 469,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 253,
             "w": 96,
             "h": 71,
             "sw": 1024,
@@ -763,18 +769,18 @@
           "w": 1.145,
           "h": 0.988,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 631,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 0,
+            "y": 196,
             "w": 110,
             "h": 95,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 293,
+            "sheet": "objthumbs-2.webp",
+            "x": 782,
+            "y": 0,
             "w": 96,
             "h": 83,
             "sw": 1024,
@@ -789,8 +795,8 @@
           "h": 1.172,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 831,
-            "y": 582,
+            "x": 0,
+            "y": 1559,
             "w": 102,
             "h": 112,
             "sw": 2048,
@@ -814,8 +820,8 @@
           "h": 1.008,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1718,
-            "y": 582,
+            "x": 891,
+            "y": 1783,
             "w": 104,
             "h": 97,
             "sw": 2048,
@@ -823,8 +829,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 293,
+            "x": 784,
+            "y": 880,
             "w": 96,
             "h": 90,
             "sw": 1024,
@@ -838,18 +844,18 @@
           "w": 1.078,
           "h": 0.406,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 565,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 835,
+            "y": 374,
             "w": 104,
             "h": 39,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 375,
+            "y": 740,
             "w": 96,
             "h": 36,
             "sw": 1024,
@@ -864,8 +870,8 @@
           "h": 1.215,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 360,
-            "y": 582,
+            "x": 826,
+            "y": 1435,
             "w": 122,
             "h": 117,
             "sw": 2048,
@@ -873,8 +879,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 196,
+            "x": 580,
+            "y": 784,
             "w": 96,
             "h": 92,
             "sw": 1024,
@@ -898,8 +904,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 196,
+            "x": 98,
+            "y": 880,
             "w": 96,
             "h": 91,
             "sw": 1024,
@@ -914,17 +920,17 @@
           "h": 2.285,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 732,
-            "y": 1160,
+            "x": 0,
+            "y": 1450,
             "w": 246,
             "h": 219,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 293,
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 0,
             "w": 96,
             "h": 86,
             "sw": 1024,
@@ -939,8 +945,8 @@
           "h": 1.812,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 937,
-            "y": 388,
+            "x": 0,
+            "y": 970,
             "w": 168,
             "h": 174,
             "sw": 2048,
@@ -963,18 +969,18 @@
           "w": 6.004,
           "h": 0.316,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 0,
-            "y": 1144,
+            "sheet": "objects-4.webp",
+            "x": 692,
+            "y": 424,
             "w": 576,
             "h": 30,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 876,
+            "sheet": "objthumbs-2.webp",
+            "x": 490,
+            "y": 832,
             "w": 96,
             "h": 5,
             "sw": 1024,
@@ -988,18 +994,18 @@
           "w": 6.0,
           "h": 0.312,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 578,
-            "y": 1144,
+            "sheet": "objects-4.webp",
+            "x": 1270,
+            "y": 424,
             "w": 576,
             "h": 30,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 876,
+            "sheet": "objthumbs-2.webp",
+            "x": 588,
+            "y": 832,
             "w": 96,
             "h": 5,
             "sw": 1024,
@@ -1013,18 +1019,18 @@
           "w": 6.0,
           "h": 0.328,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1215,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 0,
+            "y": 424,
             "w": 576,
             "h": 32,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 876,
+            "sheet": "objthumbs-2.webp",
+            "x": 686,
+            "y": 832,
             "w": 96,
             "h": 5,
             "sw": 1024,
@@ -1038,9 +1044,9 @@
           "w": 0.676,
           "h": 0.707,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1590,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 488,
+            "y": 293,
             "w": 65,
             "h": 68,
             "sw": 2048,
@@ -1063,9 +1069,9 @@
           "w": 0.676,
           "h": 0.707,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1657,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 555,
+            "y": 293,
             "w": 65,
             "h": 68,
             "sw": 2048,
@@ -1088,9 +1094,9 @@
           "w": 0.75,
           "h": 0.824,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1409,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1911,
+            "y": 196,
             "w": 72,
             "h": 79,
             "sw": 2048,
@@ -1113,18 +1119,18 @@
           "w": 0.25,
           "h": 0.316,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1156,
-            "y": 1144,
+            "sheet": "objects-4.webp",
+            "x": 1848,
+            "y": 424,
             "w": 24,
             "h": 30,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 270,
+            "y": 91,
             "w": 64,
             "h": 81,
             "sw": 1024,
@@ -1138,18 +1144,18 @@
           "w": 0.25,
           "h": 0.238,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1182,
-            "y": 1144,
+            "sheet": "objects-4.webp",
+            "x": 1989,
+            "y": 424,
             "w": 24,
             "h": 23,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 462,
             "w": 64,
             "h": 61,
             "sw": 1024,
@@ -1164,8 +1170,8 @@
           "h": 1.273,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1679,
-            "y": 388,
+            "x": 1893,
+            "y": 1301,
             "w": 109,
             "h": 122,
             "sw": 2048,
@@ -1189,8 +1195,8 @@
           "h": 1.273,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1790,
-            "y": 388,
+            "x": 0,
+            "y": 1435,
             "w": 109,
             "h": 122,
             "sw": 2048,
@@ -1213,18 +1219,18 @@
           "w": 5.027,
           "h": 0.352,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 671,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 1019,
+            "y": 374,
             "w": 483,
             "h": 34,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 876,
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 832,
             "w": 96,
             "h": 7,
             "sw": 1024,
@@ -1239,17 +1245,17 @@
           "h": 2.027,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1492,
-            "y": 1160,
+            "x": 1015,
+            "y": 1450,
             "w": 215,
             "h": 195,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 293,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 0,
             "w": 96,
             "h": 87,
             "sw": 1024,
@@ -1264,17 +1270,17 @@
           "h": 1.215,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 484,
-            "y": 582,
+            "x": 950,
+            "y": 1435,
             "w": 217,
             "h": 117,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 654,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 789,
+            "y": 527,
             "w": 96,
             "h": 52,
             "sw": 1024,
@@ -1289,8 +1295,8 @@
           "h": 2.074,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1291,
-            "y": 1160,
+            "x": 559,
+            "y": 1450,
             "w": 199,
             "h": 199,
             "sw": 2048,
@@ -1314,17 +1320,17 @@
           "h": 1.215,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 703,
-            "y": 582,
+            "x": 1169,
+            "y": 1435,
             "w": 126,
             "h": 117,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 293,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 0,
             "w": 96,
             "h": 89,
             "sw": 1024,
@@ -1339,8 +1345,8 @@
           "h": 1.352,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1279,
-            "y": 388,
+            "x": 332,
+            "y": 1301,
             "w": 134,
             "h": 130,
             "sw": 2048,
@@ -1349,7 +1355,7 @@
           "thumb": {
             "sheet": "objthumbs-1.webp",
             "x": 98,
-            "y": 196,
+            "y": 784,
             "w": 96,
             "h": 93,
             "sw": 1024,
@@ -1364,8 +1370,8 @@
           "h": 1.148,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1164,
-            "y": 582,
+            "x": 610,
+            "y": 1559,
             "w": 74,
             "h": 110,
             "sw": 2048,
@@ -1389,17 +1395,17 @@
           "h": 1.867,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 686,
-            "y": 388,
+            "x": 1730,
+            "y": 776,
             "w": 249,
             "h": 179,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
+            "sheet": "objthumbs-2.webp",
             "x": 490,
-            "y": 469,
+            "y": 253,
             "w": 96,
             "h": 69,
             "sw": 1024,
@@ -1413,18 +1419,18 @@
           "w": 1.941,
           "h": 0.992,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 743,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 112,
+            "y": 196,
             "w": 186,
             "h": 95,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 850,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 587,
             "w": 96,
             "h": 49,
             "sw": 1024,
@@ -1439,17 +1445,17 @@
           "h": 1.238,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 0,
-            "y": 582,
+            "x": 234,
+            "y": 1435,
             "w": 222,
             "h": 119,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 752,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 587,
             "w": 96,
             "h": 51,
             "sw": 1024,
@@ -1463,18 +1469,18 @@
           "w": 1.102,
           "h": 0.887,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1210,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1105,
+            "y": 196,
             "w": 106,
             "h": 85,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 164,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 630,
+            "y": 91,
             "w": 96,
             "h": 77,
             "sw": 1024,
@@ -1488,9 +1494,9 @@
           "w": 0.445,
           "h": 0.422,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 520,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 790,
+            "y": 374,
             "w": 43,
             "h": 40,
             "sw": 2048,
@@ -1498,8 +1504,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 196,
+            "x": 196,
+            "y": 880,
             "w": 96,
             "h": 91,
             "sw": 1024,
@@ -1514,8 +1520,8 @@
           "h": 1.035,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1640,
-            "y": 582,
+            "x": 713,
+            "y": 1673,
             "w": 76,
             "h": 99,
             "sw": 2048,
@@ -1538,18 +1544,18 @@
           "w": 1.016,
           "h": 0.457,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 210,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 359,
+            "y": 374,
             "w": 98,
             "h": 44,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 714,
+            "y": 690,
             "w": 96,
             "h": 43,
             "sw": 1024,
@@ -1563,18 +1569,18 @@
           "w": 0.992,
           "h": 0.453,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 310,
-            "y": 1095,
+            "sheet": "objects-4.webp",
+            "x": 459,
+            "y": 374,
             "w": 95,
             "h": 44,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 567,
+            "y": 690,
             "w": 96,
             "h": 44,
             "sw": 1024,
@@ -1588,9 +1594,9 @@
           "w": 0.926,
           "h": 0.898,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 931,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 826,
+            "y": 196,
             "w": 89,
             "h": 86,
             "sw": 2048,
@@ -1599,7 +1605,7 @@
           "thumb": {
             "sheet": "objthumbs-1.webp",
             "x": 196,
-            "y": 196,
+            "y": 784,
             "w": 96,
             "h": 93,
             "sw": 1024,
@@ -1613,9 +1619,9 @@
           "w": 0.492,
           "h": 0.52,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1906,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1760,
+            "y": 293,
             "w": 47,
             "h": 50,
             "sw": 2048,
@@ -1638,18 +1644,18 @@
           "w": 1.934,
           "h": 0.898,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1022,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 917,
+            "y": 196,
             "w": 186,
             "h": 86,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 690,
             "w": 96,
             "h": 45,
             "sw": 1024,
@@ -1663,9 +1669,9 @@
           "w": 0.926,
           "h": 0.879,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1318,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1213,
+            "y": 196,
             "w": 89,
             "h": 84,
             "sw": 2048,
@@ -1673,8 +1679,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 196,
+            "x": 294,
+            "y": 880,
             "w": 96,
             "h": 91,
             "sw": 1024,
@@ -1689,8 +1695,8 @@
           "h": 1.125,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1434,
-            "y": 582,
+            "x": 1330,
+            "y": 1559,
             "w": 104,
             "h": 108,
             "sw": 2048,
@@ -1714,7 +1720,7 @@
           "h": 2.762,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 275,
+            "x": 469,
             "y": 1160,
             "w": 330,
             "h": 265,
@@ -1722,9 +1728,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 262,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 728,
+            "y": 91,
             "w": 96,
             "h": 77,
             "sw": 1024,
@@ -1739,17 +1745,17 @@
           "h": 1.633,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1107,
-            "y": 388,
+            "x": 1516,
+            "y": 970,
             "w": 170,
             "h": 157,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 293,
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 0,
             "w": 96,
             "h": 89,
             "sw": 1024,
@@ -1764,7 +1770,7 @@
           "h": 2.812,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 0,
+            "x": 194,
             "y": 1160,
             "w": 273,
             "h": 270,
@@ -1773,8 +1779,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 196,
+            "x": 588,
+            "y": 686,
             "w": 96,
             "h": 95,
             "sw": 1024,
@@ -1798,8 +1804,8 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 293,
+            "x": 882,
+            "y": 880,
             "w": 96,
             "h": 90,
             "sw": 1024,
@@ -1914,17 +1920,17 @@
           "h": 1.238,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 224,
-            "y": 582,
+            "x": 458,
+            "y": 1435,
             "w": 134,
             "h": 119,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 293,
+            "sheet": "objthumbs-2.webp",
+            "x": 488,
+            "y": 0,
             "w": 96,
             "h": 85,
             "sw": 1024,
@@ -1939,8 +1945,8 @@
           "h": 1.312,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1551,
-            "y": 388,
+            "x": 1143,
+            "y": 1301,
             "w": 126,
             "h": 126,
             "sw": 2048,
@@ -1964,8 +1970,8 @@
           "h": 1.355,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1415,
-            "y": 388,
+            "x": 468,
+            "y": 1301,
             "w": 134,
             "h": 130,
             "sw": 2048,
@@ -1974,7 +1980,7 @@
           "thumb": {
             "sheet": "objthumbs-1.webp",
             "x": 294,
-            "y": 196,
+            "y": 784,
             "w": 96,
             "h": 93,
             "sw": 1024,
@@ -1989,7 +1995,7 @@
           "h": 2.375,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 607,
+            "x": 1780,
             "y": 1160,
             "w": 123,
             "h": 228,
@@ -2021,8 +2027,8 @@
           "cells": 8,
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 642,
-            "y": 98,
+            "x": 294,
+            "y": 686,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -2037,9 +2043,9 @@
           "thick": 0.6016,
           "tile": 11.9023,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 780,
             "w": 96,
             "h": 23,
             "sw": 1024,
@@ -2054,9 +2060,9 @@
           "thick": 0.4453,
           "tile": 11.5117,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 809,
             "w": 96,
             "h": 17,
             "sw": 1024,
@@ -2071,9 +2077,9 @@
           "thick": 0.3047,
           "tile": 8.5117,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 490,
+            "y": 809,
             "w": 96,
             "h": 12,
             "sw": 1024,
@@ -2088,9 +2094,9 @@
           "thick": 0.5977,
           "tile": 8.7148,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 780,
             "w": 96,
             "h": 23,
             "sw": 1024,
@@ -2105,9 +2111,9 @@
           "thick": 0.3047,
           "tile": 9.1953,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 588,
+            "y": 809,
             "w": 96,
             "h": 12,
             "sw": 1024,
@@ -2122,9 +2128,9 @@
           "thick": 0.332,
           "tile": 9.6719,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 809,
             "w": 96,
             "h": 13,
             "sw": 1024,
@@ -2138,9 +2144,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1072,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 292,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2163,9 +2169,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1170,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 390,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2189,7 +2195,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1352,
+            "x": 1642,
             "y": 580,
             "w": 288,
             "h": 288,
@@ -2214,7 +2220,7 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 98,
+            "x": 388,
             "y": 842,
             "w": 288,
             "h": 384,
@@ -2239,8 +2245,8 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1642,
-            "y": 580,
+            "x": 0,
+            "y": 870,
             "w": 288,
             "h": 288,
             "sw": 2048,
@@ -2264,7 +2270,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 0,
+            "x": 290,
             "y": 870,
             "w": 288,
             "h": 288,
@@ -2289,7 +2295,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 290,
+            "x": 580,
             "y": 870,
             "w": 288,
             "h": 288,
@@ -2314,7 +2320,7 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 388,
+            "x": 678,
             "y": 842,
             "w": 288,
             "h": 384,
@@ -2339,7 +2345,7 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 678,
+            "x": 968,
             "y": 842,
             "w": 384,
             "h": 384,
@@ -2364,7 +2370,7 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 1064,
+            "x": 1354,
             "y": 842,
             "w": 192,
             "h": 384,
@@ -2389,7 +2395,7 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 1258,
+            "x": 1548,
             "y": 842,
             "w": 288,
             "h": 384,
@@ -2422,7 +2428,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 1068,
-            "y": 0,
+            "y": 388,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -2445,9 +2451,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1268,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 488,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2471,7 +2477,7 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 1548,
+            "x": 1838,
             "y": 842,
             "w": 192,
             "h": 384,
@@ -2497,7 +2503,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 1262,
-            "y": 0,
+            "y": 388,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -2520,9 +2526,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1366,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 586,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2545,9 +2551,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1464,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 684,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2572,7 +2578,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 1456,
-            "y": 0,
+            "y": 388,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -2597,7 +2603,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 1650,
-            "y": 0,
+            "y": 388,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -2620,9 +2626,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1562,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 782,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2647,7 +2653,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 1844,
-            "y": 0,
+            "y": 388,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -2695,18 +2701,18 @@
           "w": 3.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1660,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 880,
+            "y": 0,
             "w": 288,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 473,
+            "y": 740,
             "w": 96,
             "h": 32,
             "sw": 1024,
@@ -2720,9 +2726,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1950,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 1170,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2746,7 +2752,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 580,
+            "x": 870,
             "y": 870,
             "w": 192,
             "h": 288,
@@ -2772,7 +2778,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 0,
-            "y": 194,
+            "y": 582,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -2795,9 +2801,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 0,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 1268,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2820,9 +2826,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 98,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 1366,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2871,7 +2877,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 774,
+            "x": 1064,
             "y": 870,
             "w": 192,
             "h": 288,
@@ -2896,7 +2902,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 968,
+            "x": 1258,
             "y": 870,
             "w": 288,
             "h": 288,
@@ -2920,9 +2926,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 196,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 1464,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -2947,7 +2953,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 194,
-            "y": 194,
+            "y": 582,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -2970,18 +2976,18 @@
           "w": 3.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 294,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 1562,
+            "y": 0,
             "w": 288,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 571,
+            "y": 740,
             "w": 96,
             "h": 32,
             "sw": 1024,
@@ -2995,9 +3001,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 584,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 1852,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -3020,9 +3026,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 682,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 1950,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -3072,7 +3078,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 388,
-            "y": 194,
+            "y": 582,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -3097,7 +3103,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 582,
-            "y": 194,
+            "y": 582,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -3122,7 +3128,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 776,
-            "y": 194,
+            "y": 582,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -3147,7 +3153,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 970,
-            "y": 194,
+            "y": 582,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -3196,7 +3202,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1258,
+            "x": 1548,
             "y": 870,
             "w": 384,
             "h": 288,
@@ -3204,9 +3210,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 469,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 253,
             "w": 96,
             "h": 72,
             "sw": 1024,
@@ -3222,7 +3228,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 1164,
-            "y": 194,
+            "y": 582,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -3246,8 +3252,8 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1644,
-            "y": 870,
+            "x": 0,
+            "y": 1160,
             "w": 192,
             "h": 288,
             "sw": 2048,
@@ -3272,16 +3278,16 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 1358,
-            "y": 194,
+            "y": 582,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 396,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -3295,9 +3301,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 780,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 0,
+            "y": 98,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -3320,18 +3326,18 @@
           "w": 3.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 878,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 98,
+            "y": 98,
             "w": 288,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 669,
+            "y": 740,
             "w": 96,
             "h": 32,
             "sw": 1024,
@@ -3345,18 +3351,18 @@
           "w": 3.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1168,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 388,
+            "y": 98,
             "w": 288,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 823,
+            "sheet": "objthumbs-2.webp",
+            "x": 767,
+            "y": 740,
             "w": 96,
             "h": 32,
             "sw": 1024,
@@ -3395,18 +3401,18 @@
           "w": 2.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1458,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 678,
+            "y": 98,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 690,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -3422,16 +3428,16 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 1648,
-            "y": 194,
+            "y": 582,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 490,
+            "y": 396,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -3445,9 +3451,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1652,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 872,
+            "y": 98,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -3472,7 +3478,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 0,
-            "y": 388,
+            "y": 776,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -3495,9 +3501,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1750,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 970,
+            "y": 98,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -3522,7 +3528,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 194,
-            "y": 388,
+            "y": 776,
             "w": 96,
             "h": 192,
             "sw": 2048,
@@ -3545,18 +3551,18 @@
           "w": 2.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 1848,
-            "y": 899,
+            "sheet": "objects-4.webp",
+            "x": 1068,
+            "y": 98,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 690,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -3570,9 +3576,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 0,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1262,
+            "y": 98,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -3595,9 +3601,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 98,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1360,
+            "y": 98,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -3620,9 +3626,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 196,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1458,
+            "y": 98,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -3645,18 +3651,18 @@
           "w": 2.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 294,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1556,
+            "y": 98,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 690,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -3670,9 +3676,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 488,
-            "y": 997,
+            "sheet": "objects-4.webp",
+            "x": 1750,
+            "y": 98,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -3703,8 +3709,8 @@
           "cells": 4,
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 740,
-            "y": 98,
+            "x": 392,
+            "y": 686,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -3719,9 +3725,9 @@
           "thick": 0.2773,
           "tile": 4.0,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 832,
             "w": 96,
             "h": 11,
             "sw": 1024,
@@ -3736,9 +3742,9 @@
           "thick": 0.2656,
           "tile": 4.0,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 876,
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 832,
             "w": 96,
             "h": 10,
             "sw": 1024,
@@ -3753,9 +3759,9 @@
           "thick": 0.3008,
           "tile": 4.0,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 686,
+            "y": 809,
             "w": 96,
             "h": 12,
             "sw": 1024,
@@ -3770,9 +3776,9 @@
           "thick": 0.3047,
           "tile": 4.0,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 857,
+            "sheet": "objthumbs-2.webp",
+            "x": 784,
+            "y": 809,
             "w": 96,
             "h": 12,
             "sw": 1024,
@@ -3787,8 +3793,8 @@
           "h": 2.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1887,
-            "y": 1160,
+            "x": 1736,
+            "y": 1450,
             "w": 96,
             "h": 192,
             "sw": 2048,
@@ -3812,8 +3818,8 @@
           "h": 2.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 0,
-            "y": 1432,
+            "x": 1834,
+            "y": 1450,
             "w": 96,
             "h": 192,
             "sw": 2048,
@@ -3837,17 +3843,17 @@
           "h": 2.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 98,
-            "y": 1432,
+            "x": 0,
+            "y": 1671,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 490,
+            "y": 327,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -3862,17 +3868,17 @@
           "h": 2.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 388,
-            "y": 1432,
+            "x": 290,
+            "y": 1671,
             "w": 480,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 740,
             "w": 96,
             "h": 38,
             "sw": 1024,
@@ -3887,17 +3893,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1824,
-            "y": 582,
+            "x": 997,
+            "y": 1783,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 587,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -3912,17 +3918,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 0,
-            "y": 703,
+            "x": 1191,
+            "y": 1783,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 587,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -3936,18 +3942,18 @@
           "w": 3.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 0,
-            "y": 1626,
+            "y": 0,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 784,
+            "y": 327,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -3961,18 +3967,18 @@
           "w": 5.0,
           "h": 3.0,
           "atlas": {
-            "sheet": "objects-1.webp",
-            "x": 1312,
-            "y": 1614,
+            "sheet": "objects-2.webp",
+            "x": 0,
+            "y": 0,
             "w": 480,
             "h": 288,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 262,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 900,
+            "y": 462,
             "w": 96,
             "h": 58,
             "sw": 1024,
@@ -3987,7 +3993,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 0,
+            "x": 482,
             "y": 0,
             "w": 576,
             "h": 288,
@@ -3995,9 +4001,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 784,
+            "y": 587,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -4012,17 +4018,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 194,
-            "y": 703,
+            "x": 1385,
+            "y": 1783,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 490,
+            "y": 587,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -4037,8 +4043,8 @@
           "h": 2.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 870,
-            "y": 1432,
+            "x": 772,
+            "y": 1671,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -4062,17 +4068,17 @@
           "h": 2.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1064,
-            "y": 1432,
+            "x": 966,
+            "y": 1671,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 588,
+            "y": 327,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -4087,7 +4093,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 732,
+            "x": 1034,
             "y": 1614,
             "w": 288,
             "h": 288,
@@ -4112,17 +4118,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 388,
-            "y": 703,
+            "x": 1579,
+            "y": 1783,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 588,
+            "y": 587,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -4137,8 +4143,8 @@
           "h": 2.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1354,
-            "y": 1432,
+            "x": 1256,
+            "y": 1671,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -4162,7 +4168,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 1022,
+            "x": 1324,
             "y": 1614,
             "w": 288,
             "h": 288,
@@ -4187,17 +4193,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 582,
-            "y": 703,
+            "x": 1773,
+            "y": 1783,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 686,
+            "y": 587,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -4212,8 +4218,8 @@
           "h": 2.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1548,
-            "y": 1432,
+            "x": 1450,
+            "y": 1671,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -4237,17 +4243,17 @@
           "h": 2.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1742,
-            "y": 1432,
+            "x": 1644,
+            "y": 1671,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 686,
+            "y": 327,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -4261,9 +4267,9 @@
           "w": 2.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 290,
-            "y": 1626,
+            "y": 0,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -4287,7 +4293,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 578,
+            "x": 1060,
             "y": 0,
             "w": 288,
             "h": 288,
@@ -4312,7 +4318,7 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 814,
+            "x": 1050,
             "y": 438,
             "w": 576,
             "h": 384,
@@ -4320,9 +4326,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 882,
+            "y": 327,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -4336,9 +4342,9 @@
           "w": 2.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 484,
-            "y": 1626,
+            "y": 0,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -4362,7 +4368,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 868,
+            "x": 1350,
             "y": 0,
             "w": 288,
             "h": 288,
@@ -4387,17 +4393,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 776,
-            "y": 703,
+            "x": 0,
+            "y": 1883,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 882,
+            "y": 587,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -4412,17 +4418,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 970,
-            "y": 703,
+            "x": 194,
+            "y": 1883,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -4437,17 +4443,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1164,
-            "y": 703,
+            "x": 388,
+            "y": 1883,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -4462,8 +4468,8 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1358,
-            "y": 703,
+            "x": 582,
+            "y": 1883,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -4487,8 +4493,8 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1456,
-            "y": 703,
+            "x": 680,
+            "y": 1883,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -4512,7 +4518,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1158,
+            "x": 1640,
             "y": 0,
             "w": 288,
             "h": 288,
@@ -4537,8 +4543,8 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1554,
-            "y": 703,
+            "x": 778,
+            "y": 1883,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -4562,7 +4568,7 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 1392,
+            "x": 1628,
             "y": 438,
             "w": 288,
             "h": 384,
@@ -4637,8 +4643,8 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 1682,
-            "y": 438,
+            "x": 0,
+            "y": 842,
             "w": 288,
             "h": 384,
             "sw": 2048,
@@ -4711,18 +4717,18 @@
           "w": 3.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 678,
-            "y": 1626,
+            "y": 0,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 396,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -4736,18 +4742,18 @@
           "w": 4.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 968,
-            "y": 1626,
+            "y": 0,
             "w": 384,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 675,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -4761,18 +4767,18 @@
           "w": 5.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 1354,
-            "y": 1626,
+            "y": 0,
             "w": 480,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 740,
             "w": 96,
             "h": 38,
             "sw": 1024,
@@ -4786,18 +4792,18 @@
           "w": 3.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 0,
-            "y": 1820,
+            "y": 194,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 396,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -4811,18 +4817,18 @@
           "w": 4.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 290,
-            "y": 1820,
+            "y": 194,
             "w": 384,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -4836,18 +4842,18 @@
           "w": 5.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 676,
-            "y": 1820,
+            "y": 194,
             "w": 480,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 775,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 740,
             "w": 96,
             "h": 38,
             "sw": 1024,
@@ -4870,9 +4876,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 556,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 377,
+            "y": 175,
             "w": 96,
             "h": 72,
             "sw": 1024,
@@ -4895,9 +4901,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 469,
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 327,
             "w": 96,
             "h": 66,
             "sw": 1024,
@@ -4920,9 +4926,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 882,
-            "y": 469,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 327,
             "w": 96,
             "h": 66,
             "sw": 1024,
@@ -4945,9 +4951,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 469,
+            "sheet": "objthumbs-2.webp",
+            "x": 858,
+            "y": 253,
             "w": 96,
             "h": 67,
             "sw": 1024,
@@ -4970,9 +4976,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 469,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 327,
             "w": 96,
             "h": 67,
             "sw": 1024,
@@ -4986,18 +4992,18 @@
           "w": 3.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 1158,
-            "y": 1820,
+            "y": 194,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 686,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 396,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -5011,18 +5017,18 @@
           "w": 3.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 1448,
-            "y": 1820,
+            "y": 194,
             "w": 288,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 543,
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 396,
             "w": 96,
             "h": 64,
             "sw": 1024,
@@ -5037,8 +5043,8 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1448,
-            "y": 0,
+            "x": 0,
+            "y": 290,
             "w": 288,
             "h": 288,
             "sw": 2048,
@@ -5062,17 +5068,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1652,
-            "y": 703,
+            "x": 876,
+            "y": 1883,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -5087,17 +5093,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1846,
-            "y": 703,
+            "x": 1070,
+            "y": 1883,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 196,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 490,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -5112,17 +5118,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 0,
-            "y": 801,
+            "x": 1264,
+            "y": 1883,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 294,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 588,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -5137,8 +5143,8 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 194,
-            "y": 801,
+            "x": 1458,
+            "y": 1883,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -5162,8 +5168,8 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 292,
-            "y": 801,
+            "x": 1556,
+            "y": 1883,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -5187,8 +5193,8 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 390,
-            "y": 801,
+            "x": 1654,
+            "y": 1883,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -5212,7 +5218,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 0,
+            "x": 290,
             "y": 290,
             "w": 384,
             "h": 288,
@@ -5220,9 +5226,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 654,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 475,
+            "y": 175,
             "w": 96,
             "h": 72,
             "sw": 1024,
@@ -5237,8 +5243,8 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 488,
-            "y": 801,
+            "x": 1752,
+            "y": 1883,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -5262,17 +5268,17 @@
           "h": 1.0,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 586,
-            "y": 801,
+            "x": 1850,
+            "y": 1883,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 392,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 686,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -5286,9 +5292,9 @@
           "w": 2.0,
           "h": 2.0,
           "atlas": {
-            "sheet": "objects-2.webp",
+            "sheet": "objects-3.webp",
             "x": 1738,
-            "y": 1820,
+            "y": 194,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -5313,7 +5319,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 0,
-            "y": 0,
+            "y": 388,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -5337,7 +5343,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 386,
+            "x": 676,
             "y": 290,
             "w": 288,
             "h": 288,
@@ -5362,7 +5368,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 676,
+            "x": 966,
             "y": 290,
             "w": 384,
             "h": 288,
@@ -5370,9 +5376,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 752,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 573,
+            "y": 175,
             "w": 96,
             "h": 72,
             "sw": 1024,
@@ -5387,7 +5393,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1062,
+            "x": 1352,
             "y": 290,
             "w": 288,
             "h": 288,
@@ -5412,7 +5418,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1352,
+            "x": 1642,
             "y": 290,
             "w": 384,
             "h": 288,
@@ -5420,9 +5426,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 850,
-            "y": 385,
+            "sheet": "objthumbs-2.webp",
+            "x": 671,
+            "y": 175,
             "w": 96,
             "h": 72,
             "sw": 1024,
@@ -5437,8 +5443,8 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1738,
-            "y": 290,
+            "x": 0,
+            "y": 580,
             "w": 288,
             "h": 288,
             "sw": 2048,
@@ -5462,7 +5468,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 0,
+            "x": 290,
             "y": 580,
             "w": 384,
             "h": 288,
@@ -5470,9 +5476,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 0,
-            "y": 469,
+            "sheet": "objthumbs-2.webp",
+            "x": 769,
+            "y": 175,
             "w": 96,
             "h": 72,
             "sw": 1024,
@@ -5487,7 +5493,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 386,
+            "x": 676,
             "y": 580,
             "w": 288,
             "h": 288,
@@ -5512,7 +5518,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 676,
+            "x": 966,
             "y": 580,
             "w": 384,
             "h": 288,
@@ -5520,9 +5526,9 @@
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 469,
+            "sheet": "objthumbs-2.webp",
+            "x": 867,
+            "y": 175,
             "w": 96,
             "h": 72,
             "sw": 1024,
@@ -5538,7 +5544,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 194,
-            "y": 0,
+            "y": 388,
             "w": 96,
             "h": 192,
             "sw": 2048,
@@ -5563,7 +5569,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 292,
-            "y": 0,
+            "y": 388,
             "w": 96,
             "h": 192,
             "sw": 2048,
@@ -5594,8 +5600,8 @@
           "cells": 24,
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 838,
-            "y": 98,
+            "x": 490,
+            "y": 686,
             "w": 96,
             "h": 96,
             "sw": 1024,
@@ -5610,9 +5616,9 @@
           "thick": 1.4844,
           "tile": 6.0,
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 360,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 279,
+            "y": 527,
             "w": 96,
             "h": 57,
             "sw": 1024,
@@ -5653,7 +5659,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 390,
-            "y": 0,
+            "y": 388,
             "w": 96,
             "h": 192,
             "sw": 2048,
@@ -5677,7 +5683,7 @@
           "h": 4.0,
           "atlas": {
             "sheet": "objects-1.webp",
-            "x": 0,
+            "x": 290,
             "y": 842,
             "w": 96,
             "h": 384,
@@ -5726,9 +5732,9 @@
           "w": 1.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 780,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 0,
+            "y": 0,
             "w": 96,
             "h": 96,
             "sw": 2048,
@@ -5751,18 +5757,18 @@
           "w": 2.0,
           "h": 1.0,
           "atlas": {
-            "sheet": "objects-3.webp",
-            "x": 878,
-            "y": 801,
+            "sheet": "objects-4.webp",
+            "x": 98,
+            "y": 0,
             "w": 192,
             "h": 96,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 490,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 784,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -5778,7 +5784,7 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 488,
-            "y": 0,
+            "y": 388,
             "w": 192,
             "h": 192,
             "sw": 2048,
@@ -5802,7 +5808,7 @@
           "h": 3.0,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 1062,
+            "x": 1352,
             "y": 580,
             "w": 288,
             "h": 288,
@@ -5828,16 +5834,16 @@
           "atlas": {
             "sheet": "objects-3.webp",
             "x": 682,
-            "y": 0,
+            "y": 388,
             "w": 384,
             "h": 192,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 588,
-            "y": 725,
+            "sheet": "objthumbs-2.webp",
+            "x": 882,
+            "y": 640,
             "w": 96,
             "h": 48,
             "sw": 1024,
@@ -5852,17 +5858,17 @@
           "h": 2.109,
           "atlas": {
             "sheet": "objects-2.webp",
-            "x": 980,
-            "y": 1160,
+            "x": 248,
+            "y": 1450,
             "w": 309,
             "h": 202,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 98,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 462,
             "w": 96,
             "h": 63,
             "sw": 1024,
@@ -5877,17 +5883,17 @@
           "h": 1.121,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1240,
-            "y": 582,
+            "x": 1136,
+            "y": 1559,
             "w": 192,
             "h": 108,
             "sw": 2048,
             "sh": 2048
           },
           "thumb": {
-            "sheet": "objthumbs-1.webp",
-            "x": 556,
-            "y": 609,
+            "sheet": "objthumbs-2.webp",
+            "x": 475,
+            "y": 527,
             "w": 96,
             "h": 54,
             "sw": 1024,
@@ -5902,8 +5908,8 @@
           "h": 1.145,
           "atlas": {
             "sheet": "objects-3.webp",
-            "x": 1044,
-            "y": 582,
+            "x": 490,
+            "y": 1559,
             "w": 118,
             "h": 110,
             "sw": 2048,
@@ -5911,10 +5917,3145 @@
           },
           "thumb": {
             "sheet": "objthumbs-1.webp",
-            "x": 784,
-            "y": 196,
+            "x": 588,
+            "y": 880,
             "w": 96,
             "h": 90,
+            "sw": 1024,
+            "sh": 1024
+          }
+        }
+      ]
+    },
+    {
+      "id": "axb",
+      "name": "Axebane Fantasy Stock Art",
+      "credit": "Axebane Games",
+      "basic": true,
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "textures": [
+        {
+          "id": "bundled:axb-obj-barrels-1",
+          "name": "Barrels 1",
+          "kind": "object",
+          "w": 1.88,
+          "h": 1.13,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1436,
+            "y": 1559,
+            "w": 180,
+            "h": 108,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 527,
+            "w": 96,
+            "h": 58,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-barrels-2",
+          "name": "Barrels 2",
+          "kind": "object",
+          "w": 1.79,
+          "h": 1.2,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1401,
+            "y": 1435,
+            "w": 172,
+            "h": 115,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 588,
+            "y": 396,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-barrels-3",
+          "name": "Barrels 3",
+          "kind": "object",
+          "w": 1.85,
+          "h": 1.64,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1688,
+            "y": 970,
+            "w": 178,
+            "h": 157,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 586,
+            "y": 0,
+            "w": 96,
+            "h": 85,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-bed-1",
+          "name": "Bed 1",
+          "kind": "object",
+          "w": 1.08,
+          "h": 1.72,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 745,
+            "y": 970,
+            "w": 104,
+            "h": 165,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 54,
+            "y": 98,
+            "w": 60,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-bed-2",
+          "name": "Bed 2",
+          "kind": "object",
+          "w": 0.98,
+          "h": 1.4,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1555,
+            "y": 1146,
+            "w": 94,
+            "h": 134,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 116,
+            "y": 98,
+            "w": 67,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-bed-3",
+          "name": "Bed 3",
+          "kind": "object",
+          "w": 1.72,
+          "h": 1.94,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 900,
+            "y": 776,
+            "w": 165,
+            "h": 186,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 185,
+            "y": 98,
+            "w": 85,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-bones-1",
+          "name": "Bones 1",
+          "kind": "object",
+          "w": 1.13,
+          "h": 0.72,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 378,
+            "y": 293,
+            "w": 108,
+            "h": 69,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 458,
+            "y": 462,
+            "w": 96,
+            "h": 61,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-bones-2",
+          "name": "Bones 2",
+          "kind": "object",
+          "w": 1.34,
+          "h": 1.28,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1401,
+            "y": 1301,
+            "w": 129,
+            "h": 123,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 678,
+            "y": 784,
+            "w": 96,
+            "h": 92,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-bones-3",
+          "name": "Bones 3",
+          "kind": "object",
+          "w": 1.33,
+          "h": 1.34,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 795,
+            "y": 1301,
+            "w": 128,
+            "h": 129,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 272,
+            "y": 98,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-bones-4",
+          "name": "Bones 4",
+          "kind": "object",
+          "w": 1.13,
+          "h": 1.24,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 594,
+            "y": 1435,
+            "w": 108,
+            "h": 119,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 369,
+            "y": 98,
+            "w": 87,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-bookshelf-1",
+          "name": "Bookshelf 1",
+          "kind": "object",
+          "w": 1.76,
+          "h": 1.14,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 965,
+            "y": 1559,
+            "w": 169,
+            "h": 109,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 462,
+            "w": 96,
+            "h": 62,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-bookshelf-2",
+          "name": "Bookshelf 2",
+          "kind": "object",
+          "w": 1.89,
+          "h": 1.18,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1653,
+            "y": 1435,
+            "w": 181,
+            "h": 113,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 654,
+            "y": 462,
+            "w": 96,
+            "h": 60,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-broken-shield",
+          "name": "Broken shield",
+          "kind": "object",
+          "w": 0.72,
+          "h": 0.82,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 0,
+            "y": 293,
+            "w": 69,
+            "h": 79,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 91,
+            "w": 72,
+            "h": 82,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-broken-sword",
+          "name": "Broken sword",
+          "kind": "object",
+          "w": 0.76,
+          "h": 1.18,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1836,
+            "y": 1435,
+            "w": 73,
+            "h": 113,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 458,
+            "y": 98,
+            "w": 62,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-cabinet-1",
+          "name": "Cabinet 1",
+          "kind": "object",
+          "w": 1.2,
+          "h": 1.18,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1911,
+            "y": 1435,
+            "w": 115,
+            "h": 113,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 784,
+            "y": 686,
+            "w": 96,
+            "h": 94,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-cabinet-2",
+          "name": "Cabinet 2",
+          "kind": "object",
+          "w": 1.16,
+          "h": 1.11,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 148,
+            "y": 1673,
+            "w": 111,
+            "h": 107,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 776,
+            "y": 784,
+            "w": 96,
+            "h": 92,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-cabinet-3",
+          "name": "Cabinet 3",
+          "kind": "object",
+          "w": 1.74,
+          "h": 1.15,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 686,
+            "y": 1559,
+            "w": 167,
+            "h": 110,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 462,
+            "w": 96,
+            "h": 63,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-cabinet-4",
+          "name": "Cabinet 4",
+          "kind": "object",
+          "w": 2.3,
+          "h": 1.54,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 356,
+            "y": 1146,
+            "w": 221,
+            "h": 148,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 686,
+            "y": 396,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-cabinet-5",
+          "name": "Cabinet 5",
+          "kind": "object",
+          "w": 1.88,
+          "h": 1.43,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1246,
+            "y": 1146,
+            "w": 180,
+            "h": 137,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 279,
+            "y": 175,
+            "w": 96,
+            "h": 73,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-campfire-1",
+          "name": "Campfire 1",
+          "kind": "object",
+          "w": 1.36,
+          "h": 1.38,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1787,
+            "y": 1146,
+            "w": 131,
+            "h": 132,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 522,
+            "y": 98,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-campfire-2",
+          "name": "Campfire 2",
+          "kind": "object",
+          "w": 1.46,
+          "h": 1.58,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 214,
+            "y": 1146,
+            "w": 140,
+            "h": 152,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 619,
+            "y": 98,
+            "w": 89,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-clay-pot-1",
+          "name": "Clay pot 1",
+          "kind": "object",
+          "w": 0.99,
+          "h": 1.0,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1848,
+            "y": 98,
+            "w": 95,
+            "h": 96,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 710,
+            "y": 98,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-clay-pot-2",
+          "name": "Clay pot 2",
+          "kind": "object",
+          "w": 1.03,
+          "h": 1.1,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 261,
+            "y": 1673,
+            "w": 99,
+            "h": 106,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 807,
+            "y": 98,
+            "w": 90,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-crystal-1",
+          "name": "Crystal 1",
+          "kind": "object",
+          "w": 1.3,
+          "h": 1.43,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1428,
+            "y": 1146,
+            "w": 125,
+            "h": 137,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 899,
+            "y": 98,
+            "w": 87,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-crystal-2",
+          "name": "Crystal 2",
+          "kind": "object",
+          "w": 1.59,
+          "h": 1.73,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 590,
+            "y": 970,
+            "w": 153,
+            "h": 166,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 196,
+            "w": 88,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-daggers-1",
+          "name": "Daggers 1",
+          "kind": "object",
+          "w": 0.94,
+          "h": 0.86,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1304,
+            "y": 196,
+            "w": 90,
+            "h": 83,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 0,
+            "w": 94,
+            "h": 86,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-debris-pile-1",
+          "name": "Debris pile 1",
+          "kind": "object",
+          "w": 1.13,
+          "h": 1.15,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 855,
+            "y": 1559,
+            "w": 108,
+            "h": 110,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 90,
+            "y": 196,
+            "w": 94,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-debris-pile-2",
+          "name": "Debris pile 2",
+          "kind": "object",
+          "w": 1.7,
+          "h": 1.97,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 535,
+            "y": 776,
+            "w": 163,
+            "h": 189,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 186,
+            "y": 196,
+            "w": 83,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-debris-pile-3",
+          "name": "Debris pile 3",
+          "kind": "object",
+          "w": 1.45,
+          "h": 1.69,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1185,
+            "y": 970,
+            "w": 139,
+            "h": 162,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 271,
+            "y": 196,
+            "w": 82,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-debris-pile-4",
+          "name": "Debris pile 4",
+          "kind": "object",
+          "w": 1.16,
+          "h": 1.92,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1479,
+            "y": 776,
+            "w": 111,
+            "h": 184,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 355,
+            "y": 196,
+            "w": 58,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-debris-pile-5",
+          "name": "Debris pile 5",
+          "kind": "object",
+          "w": 1.75,
+          "h": 1.76,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 170,
+            "y": 970,
+            "w": 168,
+            "h": 169,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 415,
+            "y": 196,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-door-1",
+          "name": "Door 1",
+          "kind": "object",
+          "w": 1.23,
+          "h": 0.81,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 178,
+            "y": 293,
+            "w": 118,
+            "h": 78,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 462,
+            "w": 96,
+            "h": 63,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-door-2",
+          "name": "Door 2",
+          "kind": "object",
+          "w": 0.79,
+          "h": 1.19,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1575,
+            "y": 1435,
+            "w": 76,
+            "h": 114,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 512,
+            "y": 196,
+            "w": 64,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-door-3",
+          "name": "Door 3",
+          "kind": "object",
+          "w": 2.0,
+          "h": 0.83,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1396,
+            "y": 196,
+            "w": 192,
+            "h": 80,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 812,
+            "y": 690,
+            "w": 96,
+            "h": 40,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-door-4",
+          "name": "Door 4",
+          "kind": "object",
+          "w": 0.8,
+          "h": 1.94,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1067,
+            "y": 776,
+            "w": 77,
+            "h": 186,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 578,
+            "y": 196,
+            "w": 40,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-door-locked-1",
+          "name": "Door locked 1",
+          "kind": "object",
+          "w": 1.3,
+          "h": 0.83,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1590,
+            "y": 196,
+            "w": 125,
+            "h": 80,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 556,
+            "y": 462,
+            "w": 96,
+            "h": 61,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-door-locked-2",
+          "name": "Door locked 2",
+          "kind": "object",
+          "w": 0.82,
+          "h": 1.28,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1532,
+            "y": 1301,
+            "w": 79,
+            "h": 123,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 620,
+            "y": 196,
+            "w": 61,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-door-locked-3",
+          "name": "Door locked 3",
+          "kind": "object",
+          "w": 2.0,
+          "h": 0.83,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1717,
+            "y": 196,
+            "w": 192,
+            "h": 80,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 910,
+            "y": 690,
+            "w": 96,
+            "h": 40,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-door-locked-4",
+          "name": "Door locked 4",
+          "kind": "object",
+          "w": 0.8,
+          "h": 1.94,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1146,
+            "y": 776,
+            "w": 77,
+            "h": 186,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 683,
+            "y": 196,
+            "w": 40,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-downward-stairs-1",
+          "name": "Downward stairs 1",
+          "kind": "object",
+          "w": 1.02,
+          "h": 0.98,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 300,
+            "y": 196,
+            "w": 98,
+            "h": 94,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 874,
+            "y": 784,
+            "w": 96,
+            "h": 92,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-downward-stairs-2",
+          "name": "Downward stairs 2",
+          "kind": "object",
+          "w": 1.67,
+          "h": 1.72,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 851,
+            "y": 970,
+            "w": 160,
+            "h": 165,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 725,
+            "y": 196,
+            "w": 93,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-firewood-1",
+          "name": "Firewood 1",
+          "kind": "object",
+          "w": 1.11,
+          "h": 1.17,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 104,
+            "y": 1559,
+            "w": 107,
+            "h": 112,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 820,
+            "y": 196,
+            "w": 91,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-firewood-2",
+          "name": "Firewood 2",
+          "kind": "object",
+          "w": 1.97,
+          "h": 1.35,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 604,
+            "y": 1301,
+            "w": 189,
+            "h": 130,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 327,
+            "w": 96,
+            "h": 66,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-food-1",
+          "name": "Food 1",
+          "kind": "object",
+          "w": 0.76,
+          "h": 0.64,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 773,
+            "y": 293,
+            "w": 73,
+            "h": 61,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 784,
+            "y": 396,
+            "w": 76,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-food-2",
+          "name": "Food 2",
+          "kind": "object",
+          "w": 0.68,
+          "h": 0.6,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 899,
+            "y": 293,
+            "w": 65,
+            "h": 58,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 752,
+            "y": 462,
+            "w": 68,
+            "h": 60,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-food-3",
+          "name": "Food 3",
+          "kind": "object",
+          "w": 0.57,
+          "h": 0.53,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1384,
+            "y": 293,
+            "w": 55,
+            "h": 51,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 730,
+            "y": 527,
+            "w": 57,
+            "h": 53,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-food-4",
+          "name": "Food 4",
+          "kind": "object",
+          "w": 0.72,
+          "h": 0.68,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 702,
+            "y": 293,
+            "w": 69,
+            "h": 65,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 686,
+            "y": 253,
+            "w": 72,
+            "h": 68,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-gold-pile-1",
+          "name": "Gold pile 1",
+          "kind": "object",
+          "w": 0.81,
+          "h": 0.76,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 298,
+            "y": 293,
+            "w": 78,
+            "h": 73,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 175,
+            "w": 81,
+            "h": 76,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-gold-pile-2",
+          "name": "Gold pile 2",
+          "kind": "object",
+          "w": 0.47,
+          "h": 0.44,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 687,
+            "y": 374,
+            "w": 45,
+            "h": 42,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 665,
+            "y": 690,
+            "w": 47,
+            "h": 44,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-gold-pile-3",
+          "name": "Gold pile 3",
+          "kind": "object",
+          "w": 0.57,
+          "h": 0.54,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1327,
+            "y": 293,
+            "w": 55,
+            "h": 52,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 573,
+            "y": 527,
+            "w": 57,
+            "h": 54,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-gold-pile-4",
+          "name": "Gold pile 4",
+          "kind": "object",
+          "w": 0.81,
+          "h": 0.57,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1041,
+            "y": 293,
+            "w": 78,
+            "h": 55,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 527,
+            "w": 81,
+            "h": 57,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-gold-pile-5",
+          "name": "Gold pile 5",
+          "kind": "object",
+          "w": 0.88,
+          "h": 0.93,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 740,
+            "y": 196,
+            "w": 84,
+            "h": 89,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 392,
+            "y": 784,
+            "w": 88,
+            "h": 93,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-ingots",
+          "name": "Ingots",
+          "kind": "object",
+          "w": 1.92,
+          "h": 1.13,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1618,
+            "y": 1559,
+            "w": 184,
+            "h": 108,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 181,
+            "y": 527,
+            "w": 96,
+            "h": 57,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-mushrooms-1",
+          "name": "Mushrooms 1",
+          "kind": "object",
+          "w": 1.27,
+          "h": 1.04,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 589,
+            "y": 1673,
+            "w": 122,
+            "h": 100,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 336,
+            "y": 91,
+            "w": 96,
+            "h": 79,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-mushrooms-2",
+          "name": "Mushrooms 2",
+          "kind": "object",
+          "w": 2.21,
+          "h": 1.59,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 1146,
+            "w": 212,
+            "h": 153,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 588,
+            "y": 253,
+            "w": 96,
+            "h": 69,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-1",
+          "name": "Number 1",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 894,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 913,
+            "y": 196,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-10",
+          "name": "Number 10",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 993,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-11",
+          "name": "Number 11",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1092,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 97,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-12",
+          "name": "Number 12",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1191,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 194,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-13",
+          "name": "Number 13",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1290,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 291,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-14",
+          "name": "Number 14",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1389,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 388,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-15",
+          "name": "Number 15",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1488,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 485,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-16",
+          "name": "Number 16",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1587,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 582,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-17",
+          "name": "Number 17",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1686,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 679,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-18",
+          "name": "Number 18",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1785,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 776,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-19",
+          "name": "Number 19",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1884,
+            "y": 1673,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 873,
+            "y": 294,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-2",
+          "name": "Number 2",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 1783,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 392,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-20",
+          "name": "Number 20",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 99,
+            "y": 1783,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 97,
+            "y": 392,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-3",
+          "name": "Number 3",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 198,
+            "y": 1783,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 194,
+            "y": 392,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-4",
+          "name": "Number 4",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 297,
+            "y": 1783,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 291,
+            "y": 392,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-5",
+          "name": "Number 5",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 396,
+            "y": 1783,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 388,
+            "y": 392,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-6",
+          "name": "Number 6",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 495,
+            "y": 1783,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 485,
+            "y": 392,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-7",
+          "name": "Number 7",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 594,
+            "y": 1783,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 582,
+            "y": 392,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-8",
+          "name": "Number 8",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 693,
+            "y": 1783,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 679,
+            "y": 392,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-number-9",
+          "name": "Number 9",
+          "kind": "object",
+          "w": 1.01,
+          "h": 1.02,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 792,
+            "y": 1783,
+            "w": 97,
+            "h": 98,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 776,
+            "y": 392,
+            "w": 95,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-rocks-pile-1",
+          "name": "Rocks pile 1",
+          "kind": "object",
+          "w": 2.06,
+          "h": 1.96,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 700,
+            "y": 776,
+            "w": 198,
+            "h": 188,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 392,
+            "y": 880,
+            "w": 96,
+            "h": 91,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-rocks-pile-2",
+          "name": "Rocks pile 2",
+          "kind": "object",
+          "w": 1.42,
+          "h": 1.89,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1592,
+            "y": 776,
+            "w": 136,
+            "h": 181,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 873,
+            "y": 392,
+            "w": 72,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-rocks-pile-3",
+          "name": "Rocks pile 3",
+          "kind": "object",
+          "w": 1.26,
+          "h": 1.25,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 111,
+            "y": 1435,
+            "w": 121,
+            "h": 120,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 686,
+            "y": 686,
+            "w": 96,
+            "h": 95,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-rocks-pile-4",
+          "name": "Rocks pile 4",
+          "kind": "object",
+          "w": 1.33,
+          "h": 1.29,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1271,
+            "y": 1301,
+            "w": 128,
+            "h": 124,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 482,
+            "y": 784,
+            "w": 96,
+            "h": 93,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-sacks-1",
+          "name": "Sacks 1",
+          "kind": "object",
+          "w": 2.08,
+          "h": 1.48,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 954,
+            "y": 1146,
+            "w": 200,
+            "h": 142,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 760,
+            "y": 253,
+            "w": 96,
+            "h": 68,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-sacks-2",
+          "name": "Sacks 2",
+          "kind": "object",
+          "w": 1.29,
+          "h": 1.32,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1017,
+            "y": 1301,
+            "w": 124,
+            "h": 127,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 490,
+            "w": 94,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-sarcophagus-1",
+          "name": "Sarcophagus 1",
+          "kind": "object",
+          "w": 1.32,
+          "h": 2.01,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1607,
+            "y": 1450,
+            "w": 127,
+            "h": 193,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 96,
+            "y": 490,
+            "w": 63,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-sarcophagus-2",
+          "name": "Sarcophagus 2",
+          "kind": "object",
+          "w": 1.08,
+          "h": 1.54,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 579,
+            "y": 1146,
+            "w": 104,
+            "h": 148,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 161,
+            "y": 490,
+            "w": 67,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-secret-room",
+          "name": "Secret room",
+          "kind": "object",
+          "w": 1.71,
+          "h": 1.37,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 1301,
+            "w": 164,
+            "h": 132,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 826,
+            "y": 91,
+            "w": 96,
+            "h": 77,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-secret-room-large",
+          "name": "Secret room large",
+          "kind": "object",
+          "w": 1.71,
+          "h": 1.62,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1868,
+            "y": 970,
+            "w": 164,
+            "h": 156,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 490,
+            "y": 880,
+            "w": 96,
+            "h": 91,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-secret-wall-1",
+          "name": "Secret wall 1",
+          "kind": "object",
+          "w": 1.75,
+          "h": 0.95,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 570,
+            "y": 196,
+            "w": 168,
+            "h": 91,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 887,
+            "y": 527,
+            "w": 96,
+            "h": 52,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-secret-wall-2",
+          "name": "Secret wall 2",
+          "kind": "object",
+          "w": 1.75,
+          "h": 0.98,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 400,
+            "y": 196,
+            "w": 168,
+            "h": 94,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 632,
+            "y": 527,
+            "w": 96,
+            "h": 54,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-sewer-grate-1",
+          "name": "Sewer grate 1",
+          "kind": "object",
+          "w": 1.4,
+          "h": 1.4,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1651,
+            "y": 1146,
+            "w": 134,
+            "h": 134,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 230,
+            "y": 490,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-sewer-grate-2",
+          "name": "Sewer grate 2",
+          "kind": "object",
+          "w": 0.94,
+          "h": 1.33,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 925,
+            "y": 1301,
+            "w": 90,
+            "h": 128,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 328,
+            "y": 490,
+            "w": 68,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-statue",
+          "name": "Statue",
+          "kind": "object",
+          "w": 0.96,
+          "h": 1.37,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 166,
+            "y": 1301,
+            "w": 92,
+            "h": 132,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 398,
+            "y": 490,
+            "w": 67,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-stoneblocks-1",
+          "name": "Stoneblocks 1",
+          "kind": "object",
+          "w": 1.36,
+          "h": 1.52,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 685,
+            "y": 1146,
+            "w": 131,
+            "h": 146,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 467,
+            "y": 490,
+            "w": 86,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-stoneblocks-2",
+          "name": "Stoneblocks 2",
+          "kind": "object",
+          "w": 1.96,
+          "h": 1.69,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1326,
+            "y": 970,
+            "w": 188,
+            "h": 162,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 880,
+            "y": 0,
+            "w": 96,
+            "h": 83,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-table-and-chairs-1",
+          "name": "Table and chairs 1",
+          "kind": "object",
+          "w": 3.13,
+          "h": 3.46,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 732,
+            "y": 1614,
+            "w": 300,
+            "h": 332,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 555,
+            "y": 490,
+            "w": 87,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-table-and-chairs-2",
+          "name": "Table and chairs 2",
+          "kind": "object",
+          "w": 2.44,
+          "h": 4.07,
+          "atlas": {
+            "sheet": "objects-1.webp",
+            "x": 814,
+            "y": 438,
+            "w": 234,
+            "h": 391,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 644,
+            "y": 490,
+            "w": 58,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-table-and-chairs-3",
+          "name": "Table and chairs 3",
+          "kind": "object",
+          "w": 2.64,
+          "h": 2.05,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 760,
+            "y": 1450,
+            "w": 253,
+            "h": 197,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 83,
+            "y": 175,
+            "w": 96,
+            "h": 75,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-table-and-chairs-4",
+          "name": "Table and chairs 4",
+          "kind": "object",
+          "w": 2.41,
+          "h": 2.54,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1380,
+            "y": 1160,
+            "w": 231,
+            "h": 244,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 704,
+            "y": 490,
+            "w": 91,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-table-and-chairs-5",
+          "name": "Table and chairs 5",
+          "kind": "object",
+          "w": 1.73,
+          "h": 1.28,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1613,
+            "y": 1301,
+            "w": 166,
+            "h": 123,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 253,
+            "w": 96,
+            "h": 71,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-table-and-chairs-6",
+          "name": "Table and chairs 6",
+          "kind": "object",
+          "w": 1.25,
+          "h": 1.23,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 704,
+            "y": 1435,
+            "w": 120,
+            "h": 118,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 882,
+            "y": 686,
+            "w": 96,
+            "h": 94,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-trap-arrow",
+          "name": "Trap arrow",
+          "kind": "object",
+          "w": 1.15,
+          "h": 1.28,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1781,
+            "y": 1301,
+            "w": 110,
+            "h": 123,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 797,
+            "y": 490,
+            "w": 86,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-trap-pit-1",
+          "name": "Trap pit 1",
+          "kind": "object",
+          "w": 1.05,
+          "h": 1.03,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 791,
+            "y": 1673,
+            "w": 101,
+            "h": 99,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 784,
+            "w": 96,
+            "h": 94,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-trap-pit-2",
+          "name": "Trap pit 2",
+          "kind": "object",
+          "w": 1.77,
+          "h": 1.7,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1013,
+            "y": 970,
+            "w": 170,
+            "h": 163,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 880,
+            "w": 96,
+            "h": 92,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-trap-pit-3",
+          "name": "Trap pit 3",
+          "kind": "object",
+          "w": 1.72,
+          "h": 2.48,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1613,
+            "y": 1160,
+            "w": 165,
+            "h": 238,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 885,
+            "y": 490,
+            "w": 67,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-trap-spear",
+          "name": "Trap spear",
+          "kind": "object",
+          "w": 1.06,
+          "h": 1.22,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1297,
+            "y": 1435,
+            "w": 102,
+            "h": 117,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 0,
+            "y": 588,
+            "w": 83,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-treasure-chest-1",
+          "name": "Treasure chest 1",
+          "kind": "object",
+          "w": 1.36,
+          "h": 1.12,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1804,
+            "y": 1559,
+            "w": 131,
+            "h": 108,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 434,
+            "y": 91,
+            "w": 96,
+            "h": 79,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-treasure-chest-2",
+          "name": "Treasure chest 2",
+          "kind": "object",
+          "w": 1.3,
+          "h": 1.05,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 462,
+            "y": 1673,
+            "w": 125,
+            "h": 101,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 532,
+            "y": 91,
+            "w": 96,
+            "h": 78,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-alcove-1",
+          "name": "Wall alcove 1",
+          "kind": "object",
+          "w": 1.18,
+          "h": 0.31,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1874,
+            "y": 424,
+            "w": 113,
+            "h": 30,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 196,
+            "y": 780,
+            "w": 96,
+            "h": 25,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-alcove-2",
+          "name": "Wall alcove 2",
+          "kind": "object",
+          "w": 1.17,
+          "h": 0.33,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 578,
+            "y": 424,
+            "w": 112,
+            "h": 32,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 0,
+            "y": 780,
+            "w": 96,
+            "h": 27,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-axes",
+          "name": "Wall axes",
+          "kind": "object",
+          "w": 0.76,
+          "h": 0.59,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 966,
+            "y": 293,
+            "w": 73,
+            "h": 57,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 822,
+            "y": 462,
+            "w": 76,
+            "h": 59,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-banners",
+          "name": "Wall banners",
+          "kind": "object",
+          "w": 2.77,
+          "h": 0.53,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1441,
+            "y": 293,
+            "w": 266,
+            "h": 51,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 809,
+            "w": 96,
+            "h": 18,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-broken",
+          "name": "Wall broken",
+          "kind": "object",
+          "w": 1.52,
+          "h": 1.13,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 0,
+            "y": 1673,
+            "w": 146,
+            "h": 108,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 253,
+            "w": 96,
+            "h": 71,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-curtain-1",
+          "name": "Wall curtain 1",
+          "kind": "object",
+          "w": 1.53,
+          "h": 0.5,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 0,
+            "y": 374,
+            "w": 147,
+            "h": 48,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 865,
+            "y": 740,
+            "w": 96,
+            "h": 31,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-curtain-2",
+          "name": "Wall curtain 2",
+          "kind": "object",
+          "w": 2.13,
+          "h": 0.57,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1121,
+            "y": 293,
+            "w": 204,
+            "h": 55,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 780,
+            "w": 96,
+            "h": 26,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-grate",
+          "name": "Wall grate",
+          "kind": "object",
+          "w": 0.79,
+          "h": 0.38,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 941,
+            "y": 374,
+            "w": 76,
+            "h": 36,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 294,
+            "y": 740,
+            "w": 79,
+            "h": 38,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-lever",
+          "name": "Wall lever",
+          "kind": "object",
+          "w": 0.75,
+          "h": 0.45,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 613,
+            "y": 374,
+            "w": 72,
+            "h": 43,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 490,
+            "y": 690,
+            "w": 75,
+            "h": 45,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wall-swords",
+          "name": "Wall swords",
+          "kind": "object",
+          "w": 0.98,
+          "h": 0.52,
+          "atlas": {
+            "sheet": "objects-4.webp",
+            "x": 1809,
+            "y": 293,
+            "w": 94,
+            "h": 50,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 98,
+            "y": 587,
+            "w": 96,
+            "h": 51,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-water-pool-1",
+          "name": "Water pool 1",
+          "kind": "object",
+          "w": 2.65,
+          "h": 2.71,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1001,
+            "y": 1160,
+            "w": 254,
+            "h": 260,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 85,
+            "y": 588,
+            "w": 94,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-water-pool-2",
+          "name": "Water pool 2",
+          "kind": "object",
+          "w": 2.03,
+          "h": 2.03,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1232,
+            "y": 1450,
+            "w": 195,
+            "h": 195,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 181,
+            "y": 588,
+            "w": 96,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-water-pool-3",
+          "name": "Water pool 3",
+          "kind": "object",
+          "w": 2.06,
+          "h": 2.75,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 801,
+            "y": 1160,
+            "w": 198,
+            "h": 264,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 279,
+            "y": 588,
+            "w": 72,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-water-pool-4",
+          "name": "Water pool 4",
+          "kind": "object",
+          "w": 1.26,
+          "h": 2.62,
+          "atlas": {
+            "sheet": "objects-2.webp",
+            "x": 1257,
+            "y": 1160,
+            "w": 121,
+            "h": 252,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 353,
+            "y": 588,
+            "w": 46,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-water-pool-5",
+          "name": "Water pool 5",
+          "kind": "object",
+          "w": 1.05,
+          "h": 2.0,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 292,
+            "y": 776,
+            "w": 101,
+            "h": 192,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 401,
+            "y": 588,
+            "w": 50,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wooden-crates-1",
+          "name": "Wooden crates 1",
+          "kind": "object",
+          "w": 1.73,
+          "h": 1.16,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 322,
+            "y": 1559,
+            "w": 166,
+            "h": 111,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 862,
+            "y": 396,
+            "w": 96,
+            "h": 64,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wooden-crates-2",
+          "name": "Wooden crates 2",
+          "kind": "object",
+          "w": 2.58,
+          "h": 1.76,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 340,
+            "y": 970,
+            "w": 248,
+            "h": 169,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-2.webp",
+            "x": 392,
+            "y": 327,
+            "w": 96,
+            "h": 65,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wooden-planks-1",
+          "name": "Wooden planks 1",
+          "kind": "object",
+          "w": 1.4,
+          "h": 1.49,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 818,
+            "y": 1146,
+            "w": 134,
+            "h": 143,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 453,
+            "y": 588,
+            "w": 90,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wooden-planks-2",
+          "name": "Wooden planks 2",
+          "kind": "object",
+          "w": 0.92,
+          "h": 1.44,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 1156,
+            "y": 1146,
+            "w": 88,
+            "h": 138,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 545,
+            "y": 588,
+            "w": 61,
+            "h": 96,
+            "sw": 1024,
+            "sh": 1024
+          }
+        },
+        {
+          "id": "bundled:axb-obj-wooden-planks-3",
+          "name": "Wooden planks 3",
+          "kind": "object",
+          "w": 0.73,
+          "h": 1.36,
+          "atlas": {
+            "sheet": "objects-3.webp",
+            "x": 260,
+            "y": 1301,
+            "w": 70,
+            "h": 131,
+            "sw": 2048,
+            "sh": 2048
+          },
+          "thumb": {
+            "sheet": "objthumbs-1.webp",
+            "x": 608,
+            "y": 588,
+            "w": 52,
+            "h": 96,
             "sw": 1024,
             "sh": 1024
           }

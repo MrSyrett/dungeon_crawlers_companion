@@ -23,6 +23,17 @@ ATLAS       = 2048       # atlas sheet size
 # more than 100 at a time — which is how the object art silently failed to ship.
 # Atlases also mean one decode and one request instead of hundreds.
 
+# Folders of LOOSE stock art (not Dungeondraft packs). These carry no grid
+# metadata at all, so the scale has to be stated: `px_cell` is how many pixels of
+# the source art make one grid square. `basic` marks a pack as the set offered in
+# NORMAL mode — the Map Maker shows basic packs when Advanced Mode is off and
+# every other pack when it is on, so the two sets never mix.
+FOLDER_SOURCES = [
+    # dir, pack id, display name, credit, px_cell, basic, licence
+    ('axebane', 'axb', 'Axebane Fantasy Stock Art', 'Axebane Games', 100, True,
+     'CC BY 4.0', 'https://creativecommons.org/licenses/by/4.0/'),
+]
+
 SOURCES = [
     # file, pack id, display name, credit   — CC BY-NC 4.0 packs ONLY (see the
     # licensing section of claude/map-maker-advanced-mode.md before adding one)
@@ -64,6 +75,13 @@ def parse(path):
         fo, fs = struct.unpack_from('<QQ', d, off); off += 16; off += 16
         files.append((p, fo, fs))
     return d, files
+
+def folder_name(fn):
+    """barrels1.png -> 'Barrels 1', table_and_chairs1.png -> 'Table and chairs 1'."""
+    n = re.sub(r'\.(webp|png|jpe?g)$', '', fn)
+    n = n.replace('_', ' ').strip()
+    n = re.sub(r'(?<=[a-z])(\d+)$', r' \1', n)        # trailing index gets a space
+    return (n[0].upper() + n[1:]) if n else n
 
 def slug(s):
     return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
@@ -184,6 +202,26 @@ for fname, pid, pname, credit in SOURCES:
     n = lambda k: sum(1 for e in entries if e['kind']==k)
     print(f'{pname}: {n("floor")} floors, {n("wall")} walls, {n("object")} objects')
 
+for folder, pid, pname, credit, px_cell, basic, lic, licurl in FOLDER_SOURCES:
+    names = sorted(f for f in os.listdir(folder)
+                   if re.search(r'\.(png|webp|jpe?g)$', f, re.I))
+    for fn in names:
+        im = Image.open(os.path.join(folder, fn)).convert('RGBA')
+        wc, hc = im.width/px_cell, im.height/px_cell       # native size in grid cells
+        if wc < 0.15 or hc < 0.15:
+            continue
+        sc = min(1.0, OBJ_PER_CELL*wc/im.width, MAX_DIM/im.width, MAX_DIM/im.height)
+        full = im.resize((max(1,round(im.width*sc)), max(1,round(im.height*sc))), Image.LANCZOS)
+        th = im.copy(); th.thumbnail((THUMB, THUMB), Image.LANCZOS)
+        nice = folder_name(fn)
+        pending.append({'id': f'bundled:{pid}-obj-{slug(nice)}', 'name': nice,
+                        'kind': 'object', 'w': round(wc, 3), 'h': round(hc, 3),
+                        'img': full, 'th': th})
+    pack_pending.append((len(packs), pending)); pending = []
+    packs.append({'id': pid, 'name': pname, 'credit': credit, 'basic': bool(basic),
+                  'license': lic, 'licenseUrl': licurl, 'textures': []})
+    print(f'{pname}: {len(names)} objects (loose art @ {px_cell}px/cell)')
+
 # One atlas set across ALL packs, so sheets stay full.
 allobjs = [o for _, lst in pack_pending for o in lst]
 # Floor/wall swatches ride in the same thumb atlas, so opening a picker costs no
@@ -227,7 +265,10 @@ manifest = {
             'rendered statically in the Map Maker sidebar, not from this file.',
     'credits': [{'name': '2-Minute Tabletop', 'url': 'https://2minutetabletop.com/',
                  'license': 'CC BY-NC 4.0',
-                 'licenseUrl': 'https://creativecommons.org/licenses/by-nc/4.0/'}],
+                 'licenseUrl': 'https://creativecommons.org/licenses/by-nc/4.0/'},
+                {'name': 'Axebane Games', 'url': 'https://axebane.com/',
+                 'license': 'CC BY 4.0',
+                 'licenseUrl': 'https://creativecommons.org/licenses/by/4.0/'}],
     'packs': packs,
 }
 json.dump(manifest, open(f'{OUT}/bundled.json', 'w'), indent=2)

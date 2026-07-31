@@ -215,7 +215,9 @@ window.DungeonEngine = (function(){
   // Deliberately NOT clipped to the floor mask: clipping would cut a hard edge
   // along every room boundary, which looks far worse than a little spill.
   function drawShadows(){
-    if(!map) return;                                // works in classic mode too (v39)
+    // v41: master switch, mirroring map.lit. Only an explicit false hides them, so
+    // a caller that never sets the flag (or a map saved before v41) still draws.
+    if(!map || map.shadowsOn===false) return;       // works in classic mode too (v39)
     const list=map.shadows||[]; if(!list.length) return;
     ctx.save(); ctx.globalCompositeOperation="multiply";
     for(let i=0;i<list.length;i++){
@@ -506,6 +508,12 @@ window.DungeonEngine = (function(){
     if(id==="") return null;
     return (tex && tex.byId && tex.byId[id]) || null;
   }
+  // `tex` is also handed in for OBJECT sprites alone — objects work in normal
+  // mode, where floors/walls/background stay classic ink — so a non-null `tex`
+  // no longer means "textured map". The host says which it is with `objectsOnly`.
+  // Do NOT infer it from tex.floor/tex.wall being set: per-shape styling leaves
+  // both empty on a fully textured map, and doors lose their wood leaf.
+  function textured(){ return !!(tex && !tex.objectsOnly); }
   function shapeFloorTex(sh){ return tex ? texOf(sh.floor, tex.floor) : null; }
   function shapeWallTex(sh){  return tex ? texOf(sh.wall,  tex.wall)  : null; }
 
@@ -834,7 +842,7 @@ window.DungeonEngine = (function(){
     // Advanced Mode gets a wood-brown leaf; the near-white classic fill reads as a
     // hole punched in the wall once everything around it is textured stone.
     // `tex` is only set in textured mode, so classic output is untouched.
-    ctx.fillStyle = tex ? C.doorWood : C.doorFill;
+    ctx.fillStyle = textured() ? C.doorWood : C.doorFill;
     ctx.beginPath(); ctx.moveTo(A[0],A[1]); ctx.lineTo(B[0],B[1]); ctx.lineTo(C2[0],C2[1]); ctx.lineTo(D[0],D[1]); ctx.closePath(); ctx.fill();
     ctx.fillStyle=C.ink;
     roughSeg(ctx, w(-g.rhl,-g.ht), w( g.rhl,-g.ht), halfW);
