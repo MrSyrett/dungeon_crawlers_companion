@@ -42,6 +42,8 @@ SOURCES = [
     ('traps.pack',       '2mtt', '2MT Trap Tokens',    '2-Minute Tabletop'),
     ('building.pack',    '2mtb', '2MT Basic Building', '2-Minute Tabletop'),
     ('cave.pack',        '2mtc', '2MT Cave Room Builder', '2-Minute Tabletop'),
+    ('treasure.pack',    '2mtr', '2MT Treasure',       '2-Minute Tabletop'),
+    ('furniture.pack',   '2mtf', '2MT Furniture',      '2-Minute Tabletop'),
 ]
 # The same strips appear under BOTH textures/paths/ and textures/walls/ — take one.
 # Dungeondraft also ships near-identical Concave/Convex variants of each wall
@@ -144,6 +146,13 @@ def write_atlas(objs, prefix, key, size, quality):
 pending = []
 pack_pending = []
 packs = []
+# The Welcome pack is a SAMPLER: 40 of its objects are byte-identical copies of
+# sprites in the Furniture pack (verified pixel-equal). Bundling both would put 40
+# duplicate cells in the palette. Dedupe by cleaned name, keeping the FIRST pack in
+# SOURCES order — which is Welcome, so ids already referenced by saved maps
+# (bundled:2mtw-obj-bed-pattern-1-d …) keep resolving. Dropping the earlier copy
+# instead would silently break every map that used one.
+seen_obj = set()
 for fname, pid, pname, credit in SOURCES:
     d, files = parse(fname)
     entries = []
@@ -168,10 +177,14 @@ for fname, pid, pname, credit in SOURCES:
                             'file': f'{fid}.webp', 'cells': cells, '_sw': sw})
         elif '/textures/objects/' in path and not SKIP_OBJ.search(path) \
                 and not SKIP_WALL_OBJ.search(clean(path, True)):
+            oname = clean(path, True)
+            if oname in seen_obj:
+                continue                                  # sampler duplicate, see above
             im = Image.open(io.BytesIO(blob)).convert('RGBA')
             wc, hc = im.width/256, im.height/256          # native size in grid cells
             if wc < 0.15 or hc < 0.15:
                 continue
+            seen_obj.add(oname)
             sc = min(1.0, OBJ_PER_CELL*wc/im.width, MAX_DIM/im.width, MAX_DIM/im.height)
             full = im.resize((max(1,round(im.width*sc)), max(1,round(im.height*sc))), Image.LANCZOS)
             th = im.copy(); th.thumbnail((THUMB, THUMB), Image.LANCZOS)

@@ -2430,7 +2430,11 @@
   // import any more (see imageSize + lazy thumbnails), so this ceiling exists
   // only to bound IndexedDB use, not CPU.
   const MAX_IMPORT_OBJECTS=4000;
-  const MAX_GRID_CELLS=600;          // DOM cells rendered at once; filter to see more
+  // DOM cells rendered at once; filter to see more. Advanced Mode is at 578 with
+  // seven 2MT packs — a cap of 600 was one pack away from silently truncating the
+  // palette. Thumbnails are CSS crops of shared atlases, so a cell costs DOM and
+  // nothing else; measured ~40 ms to build 578.
+  const MAX_GRID_CELLS=1400;
   // Floors/walls: drop the pack-name prefix, which is repeated on every file in
   // a pack ("Dungeon Room Builder - Dark" -> "Dark").
   function packLabel(p){ return p.split("/").pop().replace(/\.(webp|png|jpe?g)$/i,"")
