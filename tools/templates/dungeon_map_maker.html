@@ -26,6 +26,17 @@
   /* ── Sidebar (hidden by the server's preview shim) ────────────────── */
   .sidebar{width:250px;flex:0 0 250px;background:var(--panel);border-right:1px solid var(--line);
     display:flex;flex-direction:column;overflow-y:auto;z-index:5}
+  /* Slim, low-contrast scrollbars. scrollbar-gutter:stable reserves the track so
+     a grid's last column can't get clipped when the bar appears. */
+  .sidebar, .objgrid{scrollbar-width:thin; scrollbar-color:#3d3d47 transparent; scrollbar-gutter:stable}
+  .sidebar::-webkit-scrollbar, .objgrid::-webkit-scrollbar{width:8px;height:8px}
+  .sidebar::-webkit-scrollbar-track, .objgrid::-webkit-scrollbar-track{background:transparent}
+  .sidebar::-webkit-scrollbar-thumb, .objgrid::-webkit-scrollbar-thumb{
+    background:#3d3d47;border-radius:8px;border:2px solid transparent;background-clip:content-box}
+  .sidebar:hover::-webkit-scrollbar-thumb, .objgrid:hover::-webkit-scrollbar-thumb{background:#55555f;
+    background-clip:content-box}
+  .sidebar::-webkit-scrollbar-thumb:active, .objgrid::-webkit-scrollbar-thumb:active{background:var(--gold-dim);
+    background-clip:content-box}
   .hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
     padding:12px 16px;border-bottom:1px solid var(--line)}
   .sidebar h1{font-family:"Cinzel",Georgia,serif;font-size:14px;letter-spacing:.04em;
@@ -90,7 +101,11 @@
   .packs .pk span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .packs .pk button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;padding:0 2px}
   .packs .pk button:hover{color:#e88}
-  .objgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-height:186px;overflow:auto;
+  /* minmax(0,1fr), not 1fr: a plain 1fr track has an AUTO minimum, so fixed-size
+     thumbnails inside push the columns wider than the container and the last one
+     gets clipped. With a 0 minimum the tracks divide the space and the thumbs are
+     sized to fit them (see buildObjGrid). */
+  .objgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;max-height:214px;overflow:auto;
     margin-top:6px;padding:4px;background:var(--panel2);border:1px solid var(--line);border-radius:7px}
   .objgrid button{aspect-ratio:1;background:#0f0f13;border:1px solid transparent;border-radius:5px;
     cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center}
@@ -176,11 +191,15 @@
         <button class="btn" id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
         <button class="btn" id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
       </div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="toFront" title="Bring the selected room / object in front of the others (F)" disabled>⬆ Front</button>
+        <button class="btn" id="toBack" title="Send the selected room / object behind the others (B)" disabled>⬇ Back</button>
+      </div>
     </div>
 
     <div class="grp">
       <div class="chk-row">
-        <label class="chk"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
+        <label class="chk" title="Toggle with Shift+S"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
         <label class="chk"><input type="checkbox" id="gridToggle" checked> Show grid</label>
       </div>
       <label class="fld">Grid opacity <b id="gridOpV">100%</b></label>
@@ -1755,7 +1774,7 @@
   function redo(){ if(!future.length) return; history.push(snapshot()); map=JSON.parse(future.pop()); afterLoad(); syncUndo(); scheduleSave(); }
   function syncUndo(){ $("undo").disabled=!history.length; $("redo").disabled=!future.length; }
   function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; markGeom();
-    syncGridOp();
+    syncGridOp(); syncZUI();
     $("gridToggle").checked=map.grid!==false;
     snapOn=map.snap!==false; if($("snapToggle")) $("snapToggle").checked=snapOn;
     if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
@@ -2174,7 +2193,30 @@
     if(o.kind==="wall") return {kind:"wall", obj:o.obj};
     return null;
   }
-  function setSel(v){ sel=v; syncStyleScope(); }
+  function setSel(v){ sel=v; syncStyleScope(); syncZUI(); }
+  function syncZUI(){
+    const arr = sel && ({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects})[sel.kind];
+    const on = !!(arr && arr.length>1);
+    if($("toFront")) $("toFront").disabled=!on;
+    if($("toBack"))  $("toBack").disabled=!on;
+  }
+  // Draw order IS z-order: later in the array paints on top. For rooms that
+  // decides whose floor texture wins in an overlap and which wall strokes sit
+  // above; for objects it is the usual stacking. The inset-union wall erase is
+  // order-independent, so raising a room never changes which walls survive.
+  function reorderSel(toFront){
+    if(sel==null) return;
+    const o=objAt(sel); if(!o) return;
+    const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects})[sel.kind];
+    if(!arr || arr.length<2) return;
+    pushHistory();
+    const item=arr.splice(sel.idx,1)[0];
+    if(toFront) arr.push(item); else arr.unshift(item);
+    markGeom();
+    setSel({kind:sel.kind, idx: toFront ? arr.length-1 : 0});
+    commit();
+    toast(toFront ? "Brought to front" : "Sent to back");
+  }
 
   function buildTexSelects(){
     const st=map.style||{}, tgt=styleTarget();
@@ -2234,14 +2276,12 @@
       if(t.id===armedObj) b.className="on";
       const r=t.thumbRect;
       if(r){
-        // Crop the sprite out of the shared thumb atlas with background-position,
-        // scaled to fit the cell — one image request for the whole palette.
-        const S=46, f=Math.min(S/r.w, S/r.h);
+        // Crop the sprite out of the shared thumb atlas with background-position —
+        // one image request for the whole palette. The actual pixel size is applied
+        // in sizeObjThumbs() once the grid has been laid out and a cell has a width.
         const d=document.createElement("span"); d.className="th";
-        d.style.width=(r.w*f)+"px"; d.style.height=(r.h*f)+"px";
         d.style.backgroundImage='url("/packs/bundled/'+r.sheet+assetV+'")';
-        d.style.backgroundSize=(r.sw*f)+"px "+(r.sh*f)+"px";
-        d.style.backgroundPosition=(-r.x*f)+"px "+(-r.y*f)+"px";
+        d.dataset.r=[r.x,r.y,r.w,r.h,r.sw,r.sh].join(",");
         b.appendChild(d);
       } else {
         const im=document.createElement("img");
@@ -2252,6 +2292,7 @@
         setTool(armedObj ? "object" : "select"); buildObjGrid(); };
       g.appendChild(b); n++;
     }
+    sizeObjThumbs();
     if(!n){ const d=document.createElement("div"); d.className="none";
       if(q) d.textContent="No objects match that.";
       else if(bundledError) d.textContent="Couldn't load /packs/bundled/bundled.json ("+bundledError+") — is the pack folder uploaded?";
@@ -2262,6 +2303,22 @@
           + " — public/packs/bundled/ is from an older build. Re-upload it (and hard-refresh).";
       }
       g.appendChild(d); }
+  }
+  // Scale each atlas crop to the cell the grid actually gave it. Measured rather
+  // than assumed, so it stays right at any sidebar width — including the stacked
+  // phone layout.
+  function sizeObjThumbs(){
+    const g=$("objGrid"); if(!g) return;
+    const cells=g.querySelectorAll("button"); if(!cells.length) return;
+    const inner=Math.max(16, cells[0].clientWidth-4);            // 2px padding each side
+    for(const cell of cells){
+      const d=cell.querySelector(".th"); if(!d || !d.dataset.r) continue;
+      const [x,y,w,h,sw,sh]=d.dataset.r.split(",").map(Number);
+      const f=Math.min(inner/w, inner/h);
+      d.style.width=(w*f)+"px"; d.style.height=(h*f)+"px";
+      d.style.backgroundSize=(sw*f)+"px "+(sh*f)+"px";
+      d.style.backgroundPosition=(-x*f)+"px "+(-y*f)+"px";
+    }
   }
   function placeObject(wx,wy){
     const t=texReg.get(armedObj); if(!t) return;
@@ -2407,11 +2464,17 @@
 
   $("gridToggle").onchange=e=>{ map.grid=e.target.checked; render(); scheduleSave(); };
   $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; scheduleSave(); };
+  // Shift+S rather than plain S, which is already the Stairs tool.
+  function toggleSnap(){ snapOn=!snapOn; map.snap=snapOn;
+    if($("snapToggle")) $("snapToggle").checked=snapOn;
+    scheduleSave(); toast("Snap to grid "+(snapOn?"on":"off")); }
   $("darkToggle").onchange=e=>setTheme(e.target.checked ? "dark" : "light");
   $("clear").onclick=()=>{ if(!map.shapes.length&&!map.walls.length){return;}
     if(confirm("Clear the whole map?")){ pushHistory(); const n=map.name; map=blankMap(); map.name=n; map.theme=theme; afterLoad(); commit(); } };
   $("fit").onclick=fitView;
   $("undo").onclick=undo; $("redo").onclick=redo;
+  if($("toFront")) $("toFront").onclick=()=>reorderSel(true);
+  if($("toBack"))  $("toBack").onclick =()=>reorderSel(false);
   $("export").onclick=exportMap;
   $("import").onclick=()=>$("importFile").click();
   $("importFile").onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f) importMapFile(f); e.target.value=""; };
@@ -2423,6 +2486,11 @@
   // keyboard
   window.addEventListener("keydown", e=>{
     if(e.target.tagName==="INPUT") return;
+    if(!e.ctrlKey && !e.metaKey && !e.altKey){                 // never steal Ctrl+F / Cmd+B etc.
+      if(e.key==="S"){ toggleSnap(); return; }                 // Shift+S — plain S is the Stairs tool
+      if((e.key==="f"||e.key==="F")&&sel){ reorderSel(true); return; }
+      if((e.key==="b"||e.key==="B")&&sel){ reorderSel(false); return; }
+    }
     if(e.code==="Space"){ spaceDown=true; cv.style.cursor="grab"; }
     if((e.ctrlKey||e.metaKey)&&e.key==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
     if((e.ctrlKey||e.metaKey)&&e.key==="y"){ e.preventDefault(); redo(); return; }
@@ -2474,7 +2542,7 @@
     $("darkToggle").checked = map.theme==="dark";
     setThemeColors(map.theme==="dark" ? "dark" : "light");
     initAdvanced();
-    syncGridOp();
+    syncGridOp(); syncZUI();
     if($("gridOp")) $("gridOp").oninput=e=>{ map.gridOpacity=(+e.target.value)/100; syncGridOp(); commit(); };
     syncUndo();
     if(map.shapes.length||map.walls.length) fitView(); else render();
