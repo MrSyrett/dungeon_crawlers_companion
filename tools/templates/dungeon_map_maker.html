@@ -232,11 +232,8 @@
         <label class="fld" for="objFilter">Objects</label>
         <input class="sel" id="objFilter" type="text" placeholder="Filter objects…" autocomplete="off">
         <div id="objGrid" class="objgrid"></div>
-        <p class="hint" id="objHint">Pick one, then click the map to place it. Select it to drag;
-          the square handle scales, the round one rotates. <b>[</b> / <b>]</b> rotate, <b>X</b> flips,
-          <b>Delete</b> removes.</p>
-        <p class="hint">Packs are stored in this browser only &mdash; nothing is uploaded. A map records the
-          texture&rsquo;s name, so it needs the same pack loaded here to look right elsewhere.</p>
+        
+        
       </div>
     </div>
 
@@ -1307,7 +1304,7 @@
       else { setSel(null); panning={sx,sy,cx:cam.x,cy:cam.y}; }   // drag empty space to pan (one-finger on touch)
       render(); return;
     }
-    if(tool==="object"){ if(armedObj) placeObject(wx,wy); return; }
+    if(tool==="object"){ if(armedObj) placeObject(wx,wy,e.shiftKey); return; }
     if(tool==="erase"){ const h=hitTest(wx,wy); if(h){ pushHistory(); removeHit(h); commit(); } return; }
     if(tool==="polygon"){
       if(!polyPts) polyPts=[];
@@ -2180,8 +2177,9 @@
   function stampStyle(o, kind){
     const st=map.style||{};
     if(st.mode!=="textured") return o;
-    if(kind==="shape"){ if(!o.deco){ o.floor=st.floor||""; o.wall=st.wall||""; } }
-    else o.wall=st.wall||"";
+    const p=pendingStyle();
+    if(kind==="shape"){ if(!o.deco){ o.floor=p.floor||""; o.wall=p.wall||""; } }
+    else o.wall=p.wall||"";
     return o;
   }
   // The Floor / Walls pickers edit the SELECTED room (or interior wall) when
@@ -2194,6 +2192,26 @@
     return null;
   }
   function setSel(v){ sel=v; syncStyleScope(); syncZUI(); }
+
+  // Style scope, in priority order:
+  //   • a DRAWING tool is active  -> the pickers set `pending`, the style that new
+  //     shapes get stamped with. map.style is untouched, so you can choose
+  //     materials for the next room WITHOUT restyling a generated dungeon.
+  //   • Select + something selected -> edit that object in place.
+  //   • Select + nothing selected   -> edit map.style, the inherited default that
+  //     every unstamped (generated) room follows.
+  // `pending` is session-only on purpose: it's a "what am I about to draw with"
+  // preference, not part of the map.
+  let pending = null;
+  function pendingStyle(){
+    if(!pending){ const st=map.style||{}; pending={floor:st.floor||"", wall:st.wall||""}; }
+    return pending;
+  }
+  function styleScope(){
+    if(tool!=="select") return {kind:"new"};
+    const t=styleTarget();
+    return t ? {kind:"sel", target:t} : {kind:"default"};
+  }
   function syncZUI(){
     const arr = sel && ({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects})[sel.kind];
     const on = !!(arr && arr.length>1);
@@ -2219,8 +2237,9 @@
   }
 
   function buildTexSelects(){
-    const st=map.style||{}, tgt=styleTarget();
-    const pick=(k)=> tgt && tgt.obj[k]!==undefined ? tgt.obj[k] : (st[k]||"");
+    const st=map.style||{}, sc=styleScope(), tgt=(sc.kind==="sel") ? sc.target : null;
+    const pick=(k)=> sc.kind==="new" ? (pendingStyle()[k]||"")
+                   : tgt && tgt.obj[k]!==undefined ? tgt.obj[k] : (st[k]||"");
     const fs=$("floorSel"), bs=$("bgSel"), ws=$("wallSel"); if(!fs||!bs) return;
     // Options are grouped by source pack so a long list stays readable.
     const opts=(sel, groups, cur)=>{ sel.innerHTML="";
@@ -2241,9 +2260,9 @@
       return g;
     };
     opts(fs, [{label:"", list:[{id:"", name:"Classic parchment"}]}].concat(byKind("floor")),
-         (tgt&&tgt.kind==="shape") ? pick("floor") : (st.floor||""));
+         (sc.kind==="new" || (tgt&&tgt.kind==="shape")) ? pick("floor") : (st.floor||""));
     if(ws) opts(ws, [{label:"", list:[{id:"", name:"Classic ink"}]}].concat(byKind("wall")),
-                tgt ? pick("wall") : (st.wall||""));
+                (sc.kind==="new" || tgt) ? pick("wall") : (st.wall||""));
     // Background: the solid fills, plus any floor tile — a stone or dirt tile
     // makes a better exterior than a flat colour.
     opts(bs, [{label:"", list:[{id:"bg:theme", name:"Classic (theme)"},
@@ -2254,10 +2273,13 @@
   }
   function syncStyleScope(){
     const el=$("styleScope"); if(!el) return;
-    const t=styleTarget();
-    el.textContent = t ? ("Editing the selected "+(t.kind==="shape"?"room":"wall")+" — Esc to edit defaults again")
-                       : "Editing the default for new rooms (and any unstyled ones)";
-    const fs=$("floorSel"); if(fs) fs.disabled = !!(t && t.kind==="wall");
+    const sc=styleScope();
+    el.textContent =
+      sc.kind==="new"  ? "Setting the style for what you draw next — the rest of the map is untouched"
+    : sc.kind==="sel"  ? ("Editing the selected "+(sc.target.kind==="shape"?"room":"wall")+" — Esc to edit defaults again")
+    :                    "Editing the default for new rooms (and any unstyled ones)";
+    const fs=$("floorSel");
+    if(fs) fs.disabled = !!(sc.kind==="sel" && sc.target.kind==="wall");
     buildTexSelects();
   }
 
@@ -2320,14 +2342,18 @@
       d.style.backgroundPosition=(-x*f)+"px "+(-y*f)+"px";
     }
   }
-  function placeObject(wx,wy){
+  function placeObject(wx,wy,keepArmed){
     const t=texReg.get(armedObj); if(!t) return;
     pushHistory();
     if(!map.objects) map.objects=[];
     map.objects.push({id:uid(), tex:t.id, x:snapHalf(wx), y:snapHalf(wy),
                       w:t.w||1, h:t.h||1, rot:0});
-    setSel({kind:"object", idx:map.objects.length-1});
-    commit();                              // stays armed, so you can place a run
+    const idx=map.objects.length-1;
+    // A plain click hands you the object ready to nudge, rotate or scale.
+    // SHIFT-click keeps the palette armed so you can lay down a run of them.
+    if(!keepArmed) setTool("select");
+    setSel({kind:"object", idx});
+    commit();
   }
 
   function syncGridOp(){
@@ -2348,11 +2374,15 @@
       map.style.mode = e.target.checked ? "textured" : "classic";
       syncAdvancedUI(); commit();
     };
-    if($("wallSel"))  $("wallSel").onchange =e=>{ const t=styleTarget();
-      if(t){ pushHistory(); t.obj.wall=e.target.value; } else map.style.wall=e.target.value; commit(); };
-    if($("floorSel")) $("floorSel").onchange=e=>{ const t=styleTarget();
-      if(t && t.kind==="shape"){ pushHistory(); t.obj.floor=e.target.value; } else map.style.floor=e.target.value;
-      commit(); };
+    const setStyleKey=(key,val)=>{
+      const sc=styleScope();
+      if(sc.kind==="new"){ pendingStyle()[key]=val; syncStyleScope(); return; }   // map untouched
+      if(sc.kind==="sel"){ pushHistory(); sc.target.obj[key]=val; commit(); return; }
+      map.style[key]=val; pendingStyle()[key]=val;   // default and "next draw" stay in step
+      commit();
+    };
+    if($("wallSel"))  $("wallSel").onchange =e=>setStyleKey("wall",  e.target.value);
+    if($("floorSel")) $("floorSel").onchange=e=>setStyleKey("floor", e.target.value);
     if($("bgSel"))    $("bgSel").onchange   =e=>{ map.style.bg   =e.target.value; commit(); };
     if($("objFilter")) $("objFilter").oninput=()=>buildObjGrid();
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
@@ -2427,6 +2457,7 @@
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
     if(placing){ placing=null; render(); }
     if(t!=="object" && armedObj){ armedObj=null; buildObjGrid(); }
+    syncStyleScope();          // picker scope follows the active tool
     cv.style.cursor = t==="select"?"default":(t==="erase"?"cell":"crosshair");
     const tips={rect:"Drag to draw a rectangular room.",circle:"Drag out a circular room.",
       polygon:"Click to drop corners · Enter or double-click to close.",
