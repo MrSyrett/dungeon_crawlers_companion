@@ -2798,9 +2798,20 @@
     if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
     if(sel && sel.kind==="object"){
       const o=objAt(sel); if(o){
-        const step=(e.shiftKey?5:15)*Math.PI/180;
-        if(e.key==="["){ pushHistory(); o.obj.rot=(o.obj.rot||0)-step; commit(); return; }
-        if(e.key==="]"){ pushHistory(); o.obj.rot=(o.obj.rot||0)+step; commit(); return; }
+        // [ and ] step around a 45° lattice and SNAP to it, so repeated presses
+        // always land on clean orientations even if the object was free-rotated
+        // with the handle first. Shift gives a free 5° nudge instead.
+        const S45=Math.PI/4, EPS=1e-6;
+        const spin=(dir)=>{
+          const r=o.obj.rot||0;
+          if(e.shiftKey) return r + dir*5*Math.PI/180;
+          return dir>0 ? (Math.floor(r/S45 + EPS)+1)*S45
+                       : (Math.ceil (r/S45 - EPS)-1)*S45;
+        };
+        // Accept the shifted characters too: Shift+] emits "}" on a real keyboard,
+        // so matching only "]" would make the fine nudge silently do nothing.
+        if(e.key==="["||e.key==="{"){ pushHistory(); o.obj.rot=spin(-1); commit(); return; }
+        if(e.key==="]"||e.key==="}"){ pushHistory(); o.obj.rot=spin(+1); commit(); return; }
         if(e.key==="x"||e.key==="X"){ pushHistory(); o.obj.flip=!o.obj.flip; commit(); return; }
       }
     }
