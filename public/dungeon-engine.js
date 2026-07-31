@@ -215,7 +215,7 @@ window.DungeonEngine = (function(){
   // Deliberately NOT clipped to the floor mask: clipping would cut a hard edge
   // along every room boundary, which looks far worse than a little spill.
   function drawShadows(){
-    if(!tex || !map) return;                        // Advanced Mode only
+    if(!map) return;                                // works in classic mode too (v39)
     const list=map.shadows||[]; if(!list.length) return;
     ctx.save(); ctx.globalCompositeOperation="multiply";
     for(let i=0;i<list.length;i++){
@@ -353,7 +353,7 @@ window.DungeonEngine = (function(){
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
   const lmaskCv = oc();
   function drawLights(){
-    if(!tex || !map || !map.lit) return;   // Advanced Mode only, like the textures
+    if(!map || !map.lit) return;          // works in classic mode too (v39)
     const lights=map.lights||[];
     const dark=Math.max(0, Math.min(1, map.darkness==null ? 0 : map.darkness));
     if(!lights.length && dark<=0) return;

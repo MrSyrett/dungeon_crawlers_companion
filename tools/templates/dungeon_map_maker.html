@@ -194,6 +194,11 @@
           <button type="button" data-mode="shapes">Shapes</button>
         </div>
       </div>
+      <div class="grp-head" style="margin:-2px 0 8px">
+        <p class="grp-title" style="margin:0">Advanced</p>
+        <label class="switch" title="Textured floors, walls and background instead of the classic ink-on-parchment look">
+          <input type="checkbox" id="advToggle"><span class="slider"></span></label>
+      </div>
       <div class="tools" id="toolbar">
         <div class="tool active" data-tool="select" title="Select / move (V)">
           <svg viewBox="0 0 24 24"><path d="M5 3l6 16 2-6 6-2z"/></svg>Select</div>
@@ -211,10 +216,10 @@
           <svg viewBox="0 0 24 24"><path d="M6 4h9v16H6z"/><path d="M15 9l4 3-4 3"/></svg>Door</div>
         <div class="tool" data-tool="stair" title="Stairs (S)">
           <svg viewBox="0 0 24 24"><path d="M4 20h4v-4h4v-4h4V8h4"/></svg>Stairs</div>
-        <div class="tool" data-tool="shadow" title="Shadow (H) — a soft contact shadow to sit under an object (Advanced Mode)">
-          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="8" ry="4.2"/><path d="M8 15a4 2.2 0 0 0 8 0" opacity=".55"/></svg>Shadow</div>
-        <div class="tool" data-tool="light" title="Light (L) — turn Lights on under Advanced first">
+        <div class="tool" data-tool="light" title="Light (L) — switch Lights on below, then click the map">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>Light</div>
+        <div class="tool" data-tool="shadow" title="Shadow (H) — a soft contact shadow to sit under an object">
+          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="8" ry="4.2"/><path d="M8 15a4 2.2 0 0 0 8 0" opacity=".55"/></svg>Shadow</div>
       </div>
       <div class="row" style="margin-top:8px">
         <button class="btn" id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
@@ -224,28 +229,7 @@
         <button class="btn" id="toFront" title="Bring the selected room / object in front of the others (F)" disabled>⬆ Front</button>
         <button class="btn" id="toBack" title="Send the selected room / object behind the others (B)" disabled>⬇ Back</button>
       </div>
-    </div>
-
-    <div class="grp">
-      <div class="chk-row">
-        <label class="chk" title="Toggle with Shift+S"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
-        <label class="chk"><input type="checkbox" id="gridToggle" checked> Show grid</label>
-      </div>
-      <label class="fld">Grid opacity <b id="gridOpV">100%</b></label>
-      <input type="range" id="gridOp" min="0" max="100" value="100">
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="clear">Clear</button>
-        <button class="btn" id="fit">Fit view</button>
-      </div>
-    </div>
-
-    <div class="grp">
-      <div class="grp-head">
-        <p class="grp-title">Advanced</p>
-        <label class="switch" title="Textured floors and background instead of the classic ink-on-parchment look">
-          <input type="checkbox" id="advToggle"><span class="slider"></span></label>
-      </div>
-      <div id="advBody" style="display:none">
+      <div id="advBody" style="display:none;margin-top:14px">
         <p class="hint" id="styleScope" style="margin:0 0 2px"></p>
         <label class="fld">Walls</label>
         <button class="pick" id="wallSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
@@ -261,40 +245,61 @@
         <label class="fld" for="objFilter">Objects</label>
         <input class="sel" id="objFilter" type="text" placeholder="Filter objects…" autocomplete="off">
         <div id="objGrid" class="objgrid"></div>
-        <div class="grp-head" style="margin-top:14px">
-          <p class="grp-title" style="font-size:11px;margin:0">Lights</p>
-          <label class="switch" title="Coloured lights that cast soft shadows off walls">
-            <input type="checkbox" id="lightToggle"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="grp">
+      <div class="grp-head">
+        <p class="grp-title">Lights</p>
+        <label class="switch" title="Coloured lights that cast soft shadows off walls. Works in classic mode too.">
+          <input type="checkbox" id="lightToggle"><span class="slider"></span></label>
+      </div>
+      <div id="lightBody" style="display:none">
+        <label class="fld">Darkness <b id="darkV">55%</b></label>
+        <input type="range" id="darkness" min="0" max="100" value="55">
+        <label class="fld">Colour</label>
+        <div class="lpre" id="lightPresets"></div>
+        <div class="row" style="margin-top:6px;align-items:center;gap:8px">
+          <input type="color" id="lightColor" value="#ff9a3c" class="lcol" title="Custom colour">
+          <span class="hint" id="lightColorName" style="margin:0">Torch</span>
         </div>
-        <div id="lightBody" style="display:none">
-          <label class="fld">Darkness <b id="darkV">55%</b></label>
-          <input type="range" id="darkness" min="0" max="100" value="55">
-          <label class="fld">Colour</label>
-          <div class="lpre" id="lightPresets"></div>
-          <div class="row" style="margin-top:6px;align-items:center;gap:8px">
-            <input type="color" id="lightColor" value="#ff9a3c" class="lcol" title="Custom colour">
-            <span class="hint" id="lightColorName" style="margin:0">Torch</span>
-          </div>
-          <label class="fld">Radius <b id="lrV">6 sq</b></label>
-          <input type="range" id="lightRadius" min="1" max="40" value="6">
-          <label class="fld">Brightness <b id="lbV">85%</b></label>
-          <input type="range" id="lightBright" min="5" max="100" value="85">
-          <p class="hint" id="lightScope" style="margin:6px 0 0"></p>
+        <label class="fld">Radius <b id="lrV">6 sq</b></label>
+        <input type="range" id="lightRadius" min="1" max="40" value="6">
+        <label class="fld">Brightness <b id="lbV">85%</b></label>
+        <input type="range" id="lightBright" min="5" max="100" value="85">
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="lightReset" title="Put the selected light back to a standard torch — or, with nothing selected, reset the settings for the next one. Darkness is left alone.">↺ Reset light</button>
         </div>
-        <div class="grp-head" style="margin-top:14px">
-          <p class="grp-title" style="font-size:11px;margin:0">Shadows</p>
-        </div>
-        <label class="fld">Width <b id="shwV">1.6 sq</b></label>
-        <input type="range" id="shW" min="2" max="120" value="16">
-        <label class="fld">Height <b id="shhV">1.1 sq</b></label>
-        <input type="range" id="shH" min="2" max="120" value="11">
-        <label class="fld">Softness <b id="shsV">55%</b></label>
-        <input type="range" id="shSoft" min="0" max="100" value="55">
-        <label class="fld">Strength <b id="shtV">60%</b></label>
-        <input type="range" id="shStr" min="5" max="100" value="60">
-        <p class="hint" id="shadowScope" style="margin:6px 0 0"></p>
-        
-        
+        <p class="hint" id="lightScope" style="margin:6px 0 0"></p>
+      </div>
+    </div>
+
+    <div class="grp">
+      <p class="grp-title">Shadows</p>
+      <label class="fld">Width <b id="shwV">1.6 sq</b></label>
+      <input type="range" id="shW" min="2" max="120" value="16">
+      <label class="fld">Height <b id="shhV">1.1 sq</b></label>
+      <input type="range" id="shH" min="2" max="120" value="11">
+      <label class="fld">Softness <b id="shsV">55%</b></label>
+      <input type="range" id="shSoft" min="0" max="100" value="55">
+      <label class="fld">Strength <b id="shtV">60%</b></label>
+      <input type="range" id="shStr" min="5" max="100" value="60">
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="shadowReset" title="Put the selected shadow back to the default softness and strength, re-fitted to whatever object it sits on">↺ Reset shadow</button>
+      </div>
+      <p class="hint" id="shadowScope" style="margin:6px 0 0"></p>
+    </div>
+
+    <div class="grp">
+      <div class="chk-row">
+        <label class="chk" title="Toggle with Shift+S"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
+        <label class="chk"><input type="checkbox" id="gridToggle" checked> Show grid</label>
+      </div>
+      <label class="fld">Grid opacity <b id="gridOpV">100%</b></label>
+      <input type="range" id="gridOp" min="0" max="100" value="100">
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="clear">Clear</button>
+        <button class="btn" id="fit">Fit view</button>
       </div>
     </div>
 
@@ -730,7 +735,7 @@
   // Deliberately NOT clipped to the floor mask: clipping would cut a hard edge
   // along every room boundary, which looks far worse than a little spill.
   function drawShadows(){
-    if(!tex || !map) return;                        // Advanced Mode only
+    if(!map) return;                                // works in classic mode too (v39)
     const list=map.shadows||[]; if(!list.length) return;
     ctx.save(); ctx.globalCompositeOperation="multiply";
     for(let i=0;i<list.length;i++){
@@ -868,7 +873,7 @@
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
   const lmaskCv = oc();
   function drawLights(){
-    if(!tex || !map || !map.lit) return;   // Advanced Mode only, like the textures
+    if(!map || !map.lit) return;          // works in classic mode too (v39)
     const lights=map.lights||[];
     const dark=Math.max(0, Math.min(1, map.darkness==null ? 0 : map.darkness));
     if(!lights.length && dark<=0) return;
@@ -2966,7 +2971,10 @@
     {name:"Arcane",    col:"#8f7bff"},
     {name:"Necrotic",  col:"#63ffab"},
   ];
-  let newLight={ col:"#ff9a3c", r:6, bright:0.85 };   // session-only, like `pending`
+  // Factory settings — Reset restores these, NOT whatever the sliders happen to
+  // hold. `newLight` is a mutable copy (session-only, like `pending`).
+  const LIGHT_DEFAULTS={ col:"#ff9a3c", r:6, bright:0.85 };
+  let newLight=Object.assign({}, LIGHT_DEFAULTS);
   let lightGesture=false;                             // one undo entry per slider DRAG
   function lightTarget(){
     if(sel==null || sel.kind!=="light") return null;
@@ -3016,6 +3024,17 @@
     commit(); syncLightUI();
   }
   function endLightEdit(){ lightGesture=false; }
+  // Reset: the SELECTED light back to a standard torch, or — with nothing
+  // selected — the settings the next light will be born with. `map.darkness` is
+  // map-wide, not a property of any one light, so it is deliberately left alone.
+  function resetLight(){
+    const t=lightTarget();
+    if(t){ pushHistory();
+      t.color=LIGHT_DEFAULTS.col; t.r=LIGHT_DEFAULTS.r; t.bright=LIGHT_DEFAULTS.bright;
+      commit(); toast("Light reset to a standard torch."); }
+    else { newLight=Object.assign({}, LIGHT_DEFAULTS); toast("New-light settings reset."); }
+    endLightEdit(); syncLightUI();
+  }
   function placeLight(wx,wy,keepPlacing){
     if(!map.lit) return;
     if(!Array.isArray(map.lights)) map.lights=[];
@@ -3057,15 +3076,16 @@
                           $("lightRadius").onchange=endLightEdit; }
     if($("lightBright")){ $("lightBright").oninput=e=>liveLight({bright:(+e.target.value)/100});
                           $("lightBright").onchange=endLightEdit; }
+    if($("lightReset")) $("lightReset").onclick=resetLight;
     syncLightUI();
   }
   // ── SHADOWS (Advanced Mode) ───────────────────────────────────────
   // Placed like a light, edited like an object: the scale/rotate handles and the
   // [ ] lattice both work on a selected shadow, and the sliders below follow the
   // same scope rule — selected shadow if there is one, otherwise the next one.
-  let newShadow={ w:1.6, h:1.1, soft:0.55, strength:0.6 };
+  const SHADOW_DEFAULTS={ w:1.6, h:1.1, soft:0.55, strength:0.6 };
+  let newShadow=Object.assign({}, SHADOW_DEFAULTS);
   let shadowGesture=false;
-  function advOn(){ return !!(map.style && map.style.mode==="textured"); }
   function shadowTarget(){
     if(sel==null || sel.kind!=="shadow") return null;
     const o=objAt(sel); return o ? o.obj : null;
@@ -3084,8 +3104,6 @@
     if($("shsV"))   $("shsV").textContent=Math.round(so*100)+"%";
     if($("shStr"))  $("shStr").value=Math.round(st*100);
     if($("shtV"))   $("shtV").textContent=Math.round(st*100)+"%";
-    const sb=document.querySelector('.tool[data-tool="shadow"]');
-    if(sb) sb.classList.toggle("off", !advOn());
     if($("shadowScope")) $("shadowScope").textContent = t
       ? "Editing the selected shadow — drag its handles to resize or turn it."
       : "Next shadow: click an object and it sizes itself to fit, or click bare floor for a free one.";
@@ -3098,6 +3116,23 @@
     commit(); syncShadowUI();
   }
   function endShadowEdit(){ shadowGesture=false; }
+  // Reset a shadow to the default softness/strength. Size goes back to the
+  // default too — EXCEPT when it is sitting on an object, where it re-fits that
+  // object's footprint, because the plain default is smaller than most sprites
+  // and the shadow would simply vanish underneath one.
+  function resetShadow(){
+    const t=shadowTarget();
+    if(t){ pushHistory();
+      const u=objectUnder(t.x,t.y);
+      t.w = u ? Math.max(0.3,(u.w||1)*1.45) : SHADOW_DEFAULTS.w;
+      t.h = u ? Math.max(0.3,(u.h||1)*1.40) : SHADOW_DEFAULTS.h;
+      t.rot = u ? (u.rot||0) : 0;
+      t.soft=SHADOW_DEFAULTS.soft; t.strength=SHADOW_DEFAULTS.strength;
+      commit(); toast(u ? "Shadow reset and re-fitted to the object under it."
+                        : "Shadow reset to defaults."); }
+    else { newShadow=Object.assign({}, SHADOW_DEFAULTS); toast("New-shadow settings reset."); }
+    endShadowEdit(); syncShadowUI();
+  }
   // Topmost OBJECT under a world point (hitTest would hand back lights/shadows too).
   function objectUnder(wx,wy){
     for(let i=(map.objects||[]).length-1;i>=0;i--){ const o=map.objects[i];
@@ -3108,7 +3143,6 @@
     return null;
   }
   function placeShadow(wx,wy,keepPlacing){
-    if(!advOn()) return;
     if(!Array.isArray(map.shadows)) map.shadows=[];
     // Drop it on an object and it sizes itself to that object's footprint and
     // angle. Objects are drawn ON TOP of shadows, so a shadow smaller than the
@@ -3133,6 +3167,7 @@
     bind("shH",    v=>liveShadow({h:v/10}));
     bind("shSoft", v=>liveShadow({soft:v/100}));
     bind("shStr",  v=>liveShadow({strength:v/100}));
+    if($("shadowReset")) $("shadowReset").onclick=resetShadow;
     syncShadowUI();
   }
   function syncGridOp(){
@@ -3151,8 +3186,7 @@
     const st=map.style||(map.style=DEFAULT_STYLE());
     if($("advToggle")) $("advToggle").onchange=e=>{
       map.style.mode = e.target.checked ? "textured" : "classic";
-      if(!advOn() && (tool==="shadow"||tool==="light")) setTool("select");
-      syncAdvancedUI(); syncShadowUI(); commit();
+      syncAdvancedUI(); commit();
     };
     for(const kind in PICKERS){
       const b=$(PICKERS[kind].el);
@@ -3239,7 +3273,6 @@
   function setTool(t){
     // The Light tool needs somewhere to put light — Advanced Mode with Lights on.
     if(t==="light" && !map.lit){ toast("Turn Lights on under Advanced first."); return; }
-    if(t==="shadow" && !advOn()){ toast("Shadows need Advanced Mode — switch it on first."); return; }
     tool=t;
     document.querySelectorAll(".tool").forEach(el=>el.classList.toggle("active",el.dataset.tool===t));
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
