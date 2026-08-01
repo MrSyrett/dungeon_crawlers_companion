@@ -176,6 +176,7 @@
   .lcol{width:46px;height:26px;padding:0;border:1px solid var(--line);border-radius:6px;
         background:none;cursor:pointer;flex:0 0 auto}
   .tool.off{opacity:.4}
+  .seg.wide button{flex:1;font-size:10.5px;padding:5px 2px}
 </style>
 </head>
 <body>
@@ -260,16 +261,22 @@
       <div id="lightBody" style="display:none">
         <label class="fld">Darkness <b id="darkV">55%</b></label>
         <input type="range" id="darkness" min="0" max="100" value="55">
+        <label class="fld">Pattern</label>
+        <div class="seg wide" id="lightPat" title="Soft: an even wash. Hard: a small bright core with a sharp shoulder. Textured: rings, like light through ribbed glass.">
+          <button type="button" data-pat="soft" class="on">Soft</button>
+          <button type="button" data-pat="hard">Hard</button>
+          <button type="button" data-pat="textured">Textured</button>
+        </div>
         <label class="fld">Colour</label>
         <div class="lpre" id="lightPresets"></div>
         <div class="row" style="margin-top:6px;align-items:center;gap:8px">
           <input type="color" id="lightColor" value="#ff9a3c" class="lcol" title="Custom colour">
           <span class="hint" id="lightColorName" style="margin:0">Torch</span>
         </div>
-        <label class="fld">Radius <b id="lrV">6 sq</b></label>
-        <input type="range" id="lightRadius" min="1" max="40" value="6">
-        <label class="fld">Brightness <b id="lbV">85%</b></label>
-        <input type="range" id="lightBright" min="5" max="100" value="85">
+        <label class="fld">Radius <b id="lrV">2 sq</b></label>
+        <input type="range" id="lightRadius" min="1" max="80" value="4">
+        <label class="fld">Brightness <b id="lbV">50%</b></label>
+        <input type="range" id="lightBright" min="5" max="100" value="50">
         <div class="row" style="margin-top:10px">
           <button class="btn" id="lightReset" title="Put the selected light back to a standard torch — or, with nothing selected, reset the settings for the next one. Darkness is left alone.">↺ Reset light</button>
         </div>
@@ -291,6 +298,8 @@
       <input type="range" id="shSoft" min="0" max="100" value="55">
       <label class="fld">Strength <b id="shtV">60%</b></label>
       <input type="range" id="shStr" min="5" max="100" value="60">
+      <label class="fld" title="A soft dark band inside every room wall — it is what makes a room read as a room. Applies to the whole map.">Wall shadow <b id="shwsV">55%</b></label>
+      <input type="range" id="wallShadow" min="0" max="100" value="55">
       <div class="row" style="margin-top:10px">
         <button class="btn" id="shadowReset" title="Put the selected shadow back to the default softness and strength, re-fitted to whatever object it sits on">↺ Reset shadow</button>
       </div>
@@ -423,7 +432,7 @@
 
   function blankMap(){
     return { version:1, name:"", grid:true, gridOpacity:0.5, style:DEFAULT_STYLE(),
-             lit:false, darkness:0.55, lights:[], shadowsOn:false, shadows:[],
+             lit:false, darkness:0.55, lights:[], shadowsOn:false, shadows:[], wallShadow:0.55,
              shapes:[], walls:[], doors:[], stairs:[], objects:[], seedId:1 };
   }
   function uid(){ return map.seedId++; }
@@ -457,7 +466,7 @@
   // offscreen scratch buffers (CSS-px sized) for the floor fill & grid clip
   function oc(){ return document.createElement("canvas"); }
   const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc(), deco:oc(), decoClip:oc(),
-                 light:oc(), ltint:oc() };
+                 light:oc(), ltint:oc(), wsh:oc() };
   function sizeBufs(){ for(const k in buf){ if(buf[k].width!==W||buf[k].height!==H){ buf[k].width=W; buf[k].height=H; } } }
 
   // draw a single floor shape's path into a 2d context (screen space)
@@ -720,6 +729,7 @@
         gc.globalCompositeOperation="destination-in"; gc.drawImage(buf.mask,0,0);
         ctx.drawImage(buf.grid,0,0);
       }
+      drawWallInnerShadow();             // soft band inside every wall (Shadows switch)
       drawWalls();                       // rough-edged room walls (round circles), drop shadow
     }
 
@@ -730,6 +740,42 @@
     drawShadows();
     drawObjects();
     drawLights();
+  }
+
+  // ── WALL SHADOW ────────────────────────────────────────────────────
+  // A soft dark band hugging the INSIDE of every room wall — the trick that
+  // makes a room read as a room rather than a texture swatch. Rides with the
+  // Shadows switch; `map.wallShadow` (0..1) is its strength, 0 turns it off.
+  // Drawn under the wall art so the band tucks beneath the stonework.
+  const WALL_SHADOW_CELLS = 0.35;                 // band depth, between a quarter and a half square
+  function drawWallInnerShadow(){
+    if(!map || !map.shadowsOn) return;
+    const amt = map.wallShadow==null ? 0.55 : Math.max(0, Math.min(1, map.wallShadow));
+    if(amt<=0) return;
+    const px = WALL_SHADOW_CELLS*wpx();
+    if(px < 1.5) return;                          // too zoomed out to read as anything
+    let any=false;
+    for(const sh of map.shapes) if(!sh.deco){ any=true; break; }
+    if(!any) return;
+    sizeBufs();
+    const c=buf.wsh.getContext("2d");
+    c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none";
+    c.globalCompositeOperation="source-over"; c.clearRect(0,0,W,H);
+    c.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; c.fillRect(0,0,W,H);
+    c.globalCompositeOperation="destination-in"; c.drawImage(buf.mask,0,0);   // floors only
+    // …then carve the middle of the room back out with a blurred inset fill,
+    // which leaves exactly the feathered band along the boundary.
+    c.globalCompositeOperation="destination-out";
+    c.filter="blur("+(px*0.38).toFixed(2)+"px)";
+    c.fillStyle="#fff";
+    // Inset by the WALL's own half-thickness as well, so the band is measured from
+    // the wall's inner face inward. Insetting by the band alone puts most of it
+    // underneath the stonework and only a sliver survives — and a thick cave wall
+    // would swallow it entirely.
+    for(const sh of map.shapes){ if(sh.deco) continue;
+      fillInsetShape(c, sh, halfCellsFor(shapeWallTex(sh)) + WALL_SHADOW_CELLS); }
+    c.filter="none"; c.globalCompositeOperation="source-over";
+    ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
   }
 
   // ══════════════════════ SHADOWS (Advanced Mode) ══════════════════════
@@ -872,12 +918,42 @@
     }
     return pts;
   }
-  function lightFalloff(c, cx, cy, rpx, a){
+  // Three falloff PROFILES (L.pattern), modelled on Dungeondraft's:
+  //   soft      — smooth even wash, the original
+  //   hard      — a small intense core, a sharp shoulder, then a long steady
+  //                plateau; reads as a focused lamp rather than a glow
+  //   textured  — the soft curve with concentric rings over it, like light
+  //                through ribbed glass; broken up further by lightMottle()
+  function lightFalloff(c, cx, cy, rpx, a, pat){
     const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
-    g.addColorStop(0,    "rgba(255,255,255,"+a+")");
-    g.addColorStop(0.42, "rgba(255,255,255,"+(a*0.78).toFixed(4)+")");
-    g.addColorStop(0.72, "rgba(255,255,255,"+(a*0.36).toFixed(4)+")");
-    g.addColorStop(1,    "rgba(255,255,255,0)");
+    const S=(t,v)=>g.addColorStop(t, "rgba(255,255,255,"+Math.max(0,Math.min(1,v)).toFixed(4)+")");
+    if(pat==="hard"){
+      S(0,a); S(0.15,a); S(0.23,a*0.40); S(0.55,a*0.29); S(0.86,a*0.14); S(1,0);
+    } else if(pat==="textured"){
+      const N=30;
+      for(let i=0;i<=N;i++){
+        const t=i/N;
+        const base=Math.pow(1-t, 1.55);                    // roughly the soft curve
+        const ring=1 + 0.24*Math.cos(t*Math.PI*2*3.2);     // ribs
+        S(t, i===N ? 0 : a*base*ring);
+      }
+    } else {
+      S(0,a); S(0.42,a*0.78); S(0.72,a*0.36); S(1,0);
+    }
+    return g;
+  }
+  // Angular wobble for the textured pattern, so the rings aren't a perfect
+  // bullseye. Seeded from the light's id — a frame-varying seed would shimmer.
+  // createConicGradient is recent; without it the rings alone still read fine.
+  function lightMottle(c, cx, cy, seed){
+    if(typeof c.createConicGradient!=="function") return null;
+    let g; try{ g=c.createConicGradient(0, cx, cy); }catch(e){ return null; }
+    const N=16, s=(seed||0)*1.7;
+    for(let i=0;i<=N;i++){
+      const t=i/N;
+      const v=0.82 + 0.18*(0.5+0.5*Math.sin(t*Math.PI*2*3 + s));
+      g.addColorStop(t, "rgba(255,255,255,"+v.toFixed(3)+")");
+    }
     return g;
   }
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
@@ -926,7 +1002,11 @@
       mc.closePath(); mc.fill(); mc.restore();
       // 2 — multiply in the radial falloff
       mc.globalCompositeOperation="destination-in";
-      mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a); mc.fillRect(0,0,mw,mh);
+      mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a,L.pattern); mc.fillRect(0,0,mw,mh);
+      if(L.pattern==="textured"){
+        const mot=lightMottle(mc,(cx-bx)*k,(cy-by)*k,L.id);
+        if(mot){ mc.fillStyle=mot; mc.fillRect(0,0,mw,mh); }   // still destination-in
+      }
       // 3 — punch the lit pool out of the darkness
       lc.globalCompositeOperation="destination-out";
       lc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
@@ -974,9 +1054,9 @@
       if(i===0) ctx.moveTo(sx,sy); else ctx.lineTo(sx,sy); }
     ctx.stroke(); }
 
-  function drawWallShadow(){ ctx.save(); ctx.strokeStyle=C.shadow; ctx.lineJoin="round"; ctx.lineCap="round";
-    ctx.lineWidth=Math.max(3.5,5*cam.scale); const o=Math.min(2,cam.scale); ctx.translate(2.4*o,3*o);
-    for(const loop of contours) strokeLoop(loop); ctx.restore(); }
+  // (Retired: the marching-squares drop shadow that went with buildGeometry().
+  // It had no call site, but its NAME collided with the new drawWallInnerShadow
+  // and hoisting made the dead copy win — see claude/map-maker-lights.md.)
 
   // A straight wall segment rendered as a FILLED ribbon whose centreline stays
   // exactly on the segment (no drift) but whose two long edges wander — the rough
@@ -2191,6 +2271,7 @@
     // This has to live HERE, not only in afterLoad(): boot() goes load() ->
     // adoptMap() and never touches afterLoad().
     if(data.shadowsOn==null) map.shadowsOn = map.shadows.length>0;
+    if(data.wallShadow==null) map.wallShadow = 0.55;
     if(!map.seedId) map.seedId=1+Math.max(0,...allIds());
   }
   function allIds(){ return [...map.shapes,...map.walls,...map.doors,...map.stairs].map(o=>o.id||0); }
@@ -3065,7 +3146,7 @@
   ];
   // Factory settings — Reset restores these, NOT whatever the sliders happen to
   // hold. `newLight` is a mutable copy (session-only, like `pending`).
-  const LIGHT_DEFAULTS={ col:"#ff9a3c", r:6, bright:0.85 };
+  const LIGHT_DEFAULTS={ col:"#ff9a3c", r:2, bright:0.5, pattern:"soft" };
   let newLight=Object.assign({}, LIGHT_DEFAULTS);
   let lightGesture=false;                             // one undo entry per slider DRAG
   function lightTarget(){
@@ -3083,11 +3164,15 @@
     if($("darkV"))    $("darkV").textContent=d+"%";
     const t=lightTarget();
     const col = t ? (t.color||newLight.col) : newLight.col;
+    const pat = (t ? (t.pattern||"soft") : newLight.pattern) || "soft";
+    const seg = $("lightPat");
+    if(seg) seg.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.pat===pat));
     const r   = t ? (t.r||newLight.r)       : newLight.r;
     const br  = t ? (t.bright==null?newLight.bright:t.bright) : newLight.bright;
     if($("lightColor"))  $("lightColor").value=col;
-    if($("lightRadius")) $("lightRadius").value=Math.round(r);
-    if($("lrV"))         $("lrV").textContent=Math.round(r)+" sq";
+    // The slider counts HALF squares, so 2.5 / 3 / 3.5 are all reachable.
+    if($("lightRadius")) $("lightRadius").value=Math.round(r*2);
+    if($("lrV"))         $("lrV").textContent=(Math.round(r*2)/2)+" sq";
     if($("lightBright")) $("lightBright").value=Math.round(br*100);
     if($("lbV"))         $("lbV").textContent=Math.round(br*100)+"%";
     const lc=String(col).toLowerCase();
@@ -3107,12 +3192,14 @@
       if(patch.color!=null)  newLight.col=patch.color;
       if(patch.r!=null)      newLight.r=patch.r;
       if(patch.bright!=null) newLight.bright=patch.bright;
+      if(patch.pattern!=null) newLight.pattern=patch.pattern;
       syncLightUI(); return;
     }
     if(!lightGesture){ pushHistory(); lightGesture=true; }
     if(patch.color!=null)  t.color=patch.color;
     if(patch.r!=null)      t.r=patch.r;
     if(patch.bright!=null) t.bright=patch.bright;
+    if(patch.pattern!=null) t.pattern=patch.pattern;
     commit(); syncLightUI();
   }
   function endLightEdit(){ lightGesture=false; }
@@ -3123,6 +3210,7 @@
     const t=lightTarget();
     if(t){ pushHistory();
       t.color=LIGHT_DEFAULTS.col; t.r=LIGHT_DEFAULTS.r; t.bright=LIGHT_DEFAULTS.bright;
+      t.pattern=LIGHT_DEFAULTS.pattern;
       commit(); toast("Light reset to a standard torch."); }
     else { newLight=Object.assign({}, LIGHT_DEFAULTS); toast("New-light settings reset."); }
     endLightEdit(); syncLightUI();
@@ -3131,8 +3219,8 @@
     if(!map.lit) return;
     if(!Array.isArray(map.lights)) map.lights=[];
     pushHistory();
-    map.lights.push({ id:uid(), x:snapHalf(wx), y:snapHalf(wy),
-                      r:newLight.r, color:newLight.col, bright:newLight.bright });
+    map.lights.push({ id:uid(), x:snapHalf(wx), y:snapHalf(wy), r:newLight.r,
+                      color:newLight.col, bright:newLight.bright, pattern:newLight.pattern });
     commit();
     // Same rule as objects: auto-select and drop back to Select unless Shift.
     if(!keepPlacing){ setSel({kind:"light", idx:map.lights.length-1}); setTool("select"); }
@@ -3164,10 +3252,14 @@
     }
     if($("lightColor")){ $("lightColor").oninput=e=>liveLight({color:e.target.value});
                          $("lightColor").onchange=endLightEdit; }
-    if($("lightRadius")){ $("lightRadius").oninput=e=>liveLight({r:+e.target.value});
+    if($("lightRadius")){ $("lightRadius").oninput=e=>liveLight({r:(+e.target.value)/2});
                           $("lightRadius").onchange=endLightEdit; }
     if($("lightBright")){ $("lightBright").oninput=e=>liveLight({bright:(+e.target.value)/100});
                           $("lightBright").onchange=endLightEdit; }
+    const seg=$("lightPat");
+    if(seg) seg.addEventListener("click", e=>{
+      const b=e.target.closest("button"); if(!b) return;
+      liveLight({pattern:b.dataset.pat}); endLightEdit(); });
     if($("lightReset")) $("lightReset").onclick=resetLight;
     syncLightUI();
   }
@@ -3185,6 +3277,9 @@
   }
   function syncShadowUI(){
     const on=!!map.shadowsOn;
+    const ws=(map.wallShadow==null)?0.55:map.wallShadow;
+    if($("wallShadow")) $("wallShadow").value=Math.round(ws*100);
+    if($("shwsV"))      $("shwsV").textContent=Math.round(ws*100)+"%";
     if($("shadowToggle")) $("shadowToggle").checked=on;
     if($("shadowBody"))   $("shadowBody").style.display = on ? "" : "none";
     const btn=document.querySelector('.tool[data-tool="shadow"]');
@@ -3266,6 +3361,15 @@
     bind("shH",    v=>liveShadow({h:v/10}));
     bind("shSoft", v=>liveShadow({soft:v/100}));
     bind("shStr",  v=>liveShadow({strength:v/100}));
+    if($("wallShadow")){
+      $("wallShadow").oninput=e=>{
+        if(!shadowGesture){ pushHistory(); shadowGesture=true; }
+        map.wallShadow=(+e.target.value)/100;
+        if($("shwsV")) $("shwsV").textContent=Math.round(map.wallShadow*100)+"%";
+        commit();
+      };
+      $("wallShadow").onchange=endShadowEdit;
+    }
     if($("shadowReset")) $("shadowReset").onclick=resetShadow;
     if($("shadowToggle")) $("shadowToggle").onchange=e=>{
       map.shadowsOn=e.target.checked;

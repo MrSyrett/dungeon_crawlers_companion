@@ -44,7 +44,7 @@ window.DungeonEngine = (function(){
   const C = Object.assign({}, THEMES.light);
   function oc(){ return document.createElement("canvas"); }
   const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc(), deco:oc(), decoClip:oc(),
-                 light:oc(), ltint:oc() };
+                 light:oc(), ltint:oc(), wsh:oc() };
   function sizeBufs(){ for(const k in buf){ if(buf[k].width!==W||buf[k].height!==H){ buf[k].width=W; buf[k].height=H; } } }
   function setThemeColors(t){ Object.assign(C, THEMES[(t==="dark")?"dark":"light"]); }
   const clamp = (v,lo,hi)=> Math.max(lo, Math.min(hi, v));
@@ -193,6 +193,7 @@ window.DungeonEngine = (function(){
         gc.globalCompositeOperation="destination-in"; gc.drawImage(buf.mask,0,0);
         ctx.drawImage(buf.grid,0,0);
       }
+      drawWallInnerShadow();
       drawWalls();
     }
     drawInteriorWalls();
@@ -202,6 +203,42 @@ window.DungeonEngine = (function(){
     drawShadows();
     drawObjects();
     drawLights();
+  }
+
+  // ── WALL SHADOW ────────────────────────────────────────────────────
+  // A soft dark band hugging the INSIDE of every room wall — the trick that
+  // makes a room read as a room rather than a texture swatch. Rides with the
+  // Shadows switch; `map.wallShadow` (0..1) is its strength, 0 turns it off.
+  // Drawn under the wall art so the band tucks beneath the stonework.
+  const WALL_SHADOW_CELLS = 0.35;                 // band depth, between a quarter and a half square
+  function drawWallInnerShadow(){
+    if(!map || !map.shadowsOn) return;
+    const amt = map.wallShadow==null ? 0.55 : Math.max(0, Math.min(1, map.wallShadow));
+    if(amt<=0) return;
+    const px = WALL_SHADOW_CELLS*wpx();
+    if(px < 1.5) return;                          // too zoomed out to read as anything
+    let any=false;
+    for(const sh of map.shapes) if(!sh.deco){ any=true; break; }
+    if(!any) return;
+    sizeBufs();
+    const c=buf.wsh.getContext("2d");
+    c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none";
+    c.globalCompositeOperation="source-over"; c.clearRect(0,0,W,H);
+    c.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; c.fillRect(0,0,W,H);
+    c.globalCompositeOperation="destination-in"; c.drawImage(buf.mask,0,0);   // floors only
+    // …then carve the middle of the room back out with a blurred inset fill,
+    // which leaves exactly the feathered band along the boundary.
+    c.globalCompositeOperation="destination-out";
+    c.filter="blur("+(px*0.38).toFixed(2)+"px)";
+    c.fillStyle="#fff";
+    // Inset by the WALL's own half-thickness as well, so the band is measured from
+    // the wall's inner face inward. Insetting by the band alone puts most of it
+    // underneath the stonework and only a sliver survives — and a thick cave wall
+    // would swallow it entirely.
+    for(const sh of map.shapes){ if(sh.deco) continue;
+      fillInsetShape(c, sh, halfCellsFor(shapeWallTex(sh)) + WALL_SHADOW_CELLS); }
+    c.filter="none"; c.globalCompositeOperation="source-over";
+    ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
   }
 
   // ══════════════════════ SHADOWS (Advanced Mode) ══════════════════════
@@ -344,12 +381,42 @@ window.DungeonEngine = (function(){
     }
     return pts;
   }
-  function lightFalloff(c, cx, cy, rpx, a){
+  // Three falloff PROFILES (L.pattern), modelled on Dungeondraft's:
+  //   soft      — smooth even wash, the original
+  //   hard      — a small intense core, a sharp shoulder, then a long steady
+  //                plateau; reads as a focused lamp rather than a glow
+  //   textured  — the soft curve with concentric rings over it, like light
+  //                through ribbed glass; broken up further by lightMottle()
+  function lightFalloff(c, cx, cy, rpx, a, pat){
     const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
-    g.addColorStop(0,    "rgba(255,255,255,"+a+")");
-    g.addColorStop(0.42, "rgba(255,255,255,"+(a*0.78).toFixed(4)+")");
-    g.addColorStop(0.72, "rgba(255,255,255,"+(a*0.36).toFixed(4)+")");
-    g.addColorStop(1,    "rgba(255,255,255,0)");
+    const S=(t,v)=>g.addColorStop(t, "rgba(255,255,255,"+Math.max(0,Math.min(1,v)).toFixed(4)+")");
+    if(pat==="hard"){
+      S(0,a); S(0.15,a); S(0.23,a*0.40); S(0.55,a*0.29); S(0.86,a*0.14); S(1,0);
+    } else if(pat==="textured"){
+      const N=30;
+      for(let i=0;i<=N;i++){
+        const t=i/N;
+        const base=Math.pow(1-t, 1.55);                    // roughly the soft curve
+        const ring=1 + 0.24*Math.cos(t*Math.PI*2*3.2);     // ribs
+        S(t, i===N ? 0 : a*base*ring);
+      }
+    } else {
+      S(0,a); S(0.42,a*0.78); S(0.72,a*0.36); S(1,0);
+    }
+    return g;
+  }
+  // Angular wobble for the textured pattern, so the rings aren't a perfect
+  // bullseye. Seeded from the light's id — a frame-varying seed would shimmer.
+  // createConicGradient is recent; without it the rings alone still read fine.
+  function lightMottle(c, cx, cy, seed){
+    if(typeof c.createConicGradient!=="function") return null;
+    let g; try{ g=c.createConicGradient(0, cx, cy); }catch(e){ return null; }
+    const N=16, s=(seed||0)*1.7;
+    for(let i=0;i<=N;i++){
+      const t=i/N;
+      const v=0.82 + 0.18*(0.5+0.5*Math.sin(t*Math.PI*2*3 + s));
+      g.addColorStop(t, "rgba(255,255,255,"+v.toFixed(3)+")");
+    }
     return g;
   }
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
@@ -398,7 +465,11 @@ window.DungeonEngine = (function(){
       mc.closePath(); mc.fill(); mc.restore();
       // 2 — multiply in the radial falloff
       mc.globalCompositeOperation="destination-in";
-      mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a); mc.fillRect(0,0,mw,mh);
+      mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a,L.pattern); mc.fillRect(0,0,mw,mh);
+      if(L.pattern==="textured"){
+        const mot=lightMottle(mc,(cx-bx)*k,(cy-by)*k,L.id);
+        if(mot){ mc.fillStyle=mot; mc.fillRect(0,0,mw,mh); }   // still destination-in
+      }
       // 3 — punch the lit pool out of the darkness
       lc.globalCompositeOperation="destination-out";
       lc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
