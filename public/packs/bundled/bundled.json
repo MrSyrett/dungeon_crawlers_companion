@@ -1,5 +1,5 @@
 {
-  "version": "c972ad4b98",
+  "version": "1084e9a678",
   "note": "Bundled Creative-Commons map assets. Attribution is REQUIRED and is rendered statically in the Map Maker sidebar, not from this file.",
   "credits": [
     {
@@ -13,9 +13,332 @@
       "url": "https://axebane.com/",
       "license": "CC BY 4.0",
       "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+      "name": "Dungeon Crawler's Companion (original stock textures)",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
     }
   ],
   "packs": [
+    {
+      "id": "stock",
+      "name": "Stock",
+      "credit": "Original / user-provided (CC0)",
+      "basic": false,
+      "textures": [
+        {
+          "id": "bundled:stock-floor-grass",
+          "name": "Grass",
+          "kind": "floor",
+          "file": "stock-floor-grass.webp",
+          "cells": 8,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 288,
+            "y": 96,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-dirt",
+          "name": "Dirt",
+          "kind": "floor",
+          "file": "stock-floor-dirt.webp",
+          "cells": 8,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 0,
+            "y": 192,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-stone",
+          "name": "Stone",
+          "kind": "floor",
+          "file": "stock-floor-stone.webp",
+          "cells": 10,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 0,
+            "y": 96,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-paved-stone",
+          "name": "Paved Stone",
+          "kind": "floor",
+          "file": "stock-floor-paved-stone.webp",
+          "cells": 8,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 96,
+            "y": 192,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-gravel",
+          "name": "Gravel",
+          "kind": "floor",
+          "file": "stock-floor-gravel.webp",
+          "cells": 10,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 96,
+            "y": 96,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-wood",
+          "name": "Wood Floor",
+          "kind": "floor",
+          "file": "stock-floor-wood.webp",
+          "cells": 6,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 192,
+            "y": 192,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-snow",
+          "name": "Snow",
+          "kind": "floor",
+          "file": "stock-floor-snow.webp",
+          "cells": 10,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 384,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-ice",
+          "name": "Ice",
+          "kind": "floor",
+          "file": "stock-floor-ice.webp",
+          "cells": 10,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 192,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-sand",
+          "name": "Sand",
+          "kind": "floor",
+          "file": "stock-floor-sand.webp",
+          "cells": 10,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 288,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-water",
+          "name": "Water",
+          "kind": "floor",
+          "file": "stock-floor-water.webp",
+          "cells": 8,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 384,
+            "y": 96,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-lava",
+          "name": "Lava",
+          "kind": "floor",
+          "file": "stock-floor-lava.webp",
+          "cells": 10,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 0,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-acid",
+          "name": "Acid",
+          "kind": "floor",
+          "file": "stock-floor-acid.webp",
+          "cells": 10,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 96,
+            "y": 0,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-floor-space",
+          "name": "Space",
+          "kind": "floor",
+          "file": "stock-floor-space.webp",
+          "cells": 10,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 192,
+            "y": 96,
+            "w": 96,
+            "h": 96,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-wall-stone",
+          "name": "Stone",
+          "kind": "wall",
+          "file": "stock-wall-stone.webp",
+          "thick": 0.3047,
+          "tile": 13.6875,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 0,
+            "y": 288,
+            "w": 96,
+            "h": 9,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-wall-wood",
+          "name": "Wood",
+          "kind": "wall",
+          "file": "stock-wall-wood.webp",
+          "thick": 0.2891,
+          "tile": 13.6875,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 384,
+            "y": 192,
+            "w": 96,
+            "h": 8,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-wall-cave",
+          "name": "Cave",
+          "kind": "wall",
+          "file": "stock-wall-cave.webp",
+          "thick": 0.5,
+          "tile": 6.0,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 192,
+            "y": 288,
+            "w": 96,
+            "h": 29,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-wall-cliff",
+          "name": "Cliff",
+          "kind": "wall",
+          "file": "stock-wall-cliff.webp",
+          "thick": 0.5391,
+          "tile": 13.6719,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 96,
+            "y": 288,
+            "w": 96,
+            "h": 16,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-wall-ledge",
+          "name": "Ledge",
+          "kind": "wall",
+          "file": "stock-wall-ledge.webp",
+          "thick": 0.3164,
+          "tile": 6.0,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 288,
+            "y": 288,
+            "w": 96,
+            "h": 19,
+            "sw": 480,
+            "sh": 384
+          }
+        },
+        {
+          "id": "bundled:stock-wall-metal",
+          "name": "Metal",
+          "kind": "wall",
+          "file": "stock-wall-metal.webp",
+          "thick": 0.3047,
+          "tile": 13.6875,
+          "thumb": {
+            "sheet": "stockthumbs-0.webp",
+            "x": 288,
+            "y": 192,
+            "w": 96,
+            "h": 9,
+            "sw": 480,
+            "sh": 384
+          }
+        }
+      ]
+    },
     {
       "id": "2mtw",
       "name": "2MT Welcome",
