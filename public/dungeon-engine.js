@@ -91,8 +91,7 @@ window.DungeonEngine = (function(){
   function contentBounds(){
     const pts=[];
     for(const s of map.shapes){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
-    for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]);
-      if(w.cx!==undefined) for(const p of wallSamples(w)) pts.push(p); }   // arc can bow past its ends
+    for(const w of map.walls){ for(const p of wallPts(w)) pts.push(p); }   // arc/freehand can bow past its ends
     for(const o of (map.objects||[])){ const b=objBox(o); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
     for(const d of map.doors) pts.push([d.x,d.y]);
     for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
@@ -335,8 +334,7 @@ window.DungeonEngine = (function(){
         if(s0!==null){ const p=at(s0); lightSegs.push([p[0],p[1],b[0],b[1]]); }
       }
     }
-    for(const w of map.walls){
-      const s=(w.cx!==undefined&&w.cy!==undefined) ? wallSamples(w) : [[w.x1,w.y1],[w.x2,w.y2]];
+    for(const w of map.walls){ const s=wallPts(w);
       for(let i=0;i<s.length-1;i++) lightSegs.push([s[i][0],s[i][1],s[i+1][0],s[i+1][1]]); }
     return lightSegs;
   }
@@ -789,17 +787,49 @@ window.DungeonEngine = (function(){
     if(sh.type==="polygon") return sh.pts.slice();
     return [];
   }
+  // Shrink a closed polygon by `e` cells. Every EDGE slides along its own inward
+  // normal and the neighbouring offset lines are re-intersected (mitre join,
+  // bevelled once the corner gets too sharp to mitre sanely).
+  //
+  // This replaces a centroid pull — "drag every vertex `e` towards the middle" —
+  // which is only right for a regular polygon. A long thin room inset unevenly,
+  // and a CONCAVE outline (which every freehand cave is, in dozens of places)
+  // inset *outwards* wherever the boundary bulged away from the centroid. Where
+  // the offset over-runs a narrow neck the stray loop winds the other way and
+  // cancels under the nonzero fill the callers already use.
+  function insetPolyPts(pts, e){
+    const n=pts.length; if(n<3) return null;
+    let a2=0; for(let i=0;i<n;i++){ const q=pts[(i+1)%n]; a2 += pts[i][0]*q[1] - q[0]*pts[i][1]; }
+    if(!a2) return null;
+    const s = a2>0 ? 1 : -1;                       // which side of an edge is "inside"
+    const N=[];                                    // unit inward normal per edge i → i+1
+    for(let i=0;i<n;i++){ const a=pts[i], b=pts[(i+1)%n];
+      const dx=b[0]-a[0], dy=b[1]-a[1], l=Math.hypot(dx,dy);
+      N.push(l<1e-9 ? null : [s*(-dy/l), s*(dx/l)]); }
+    const out=[];
+    for(let i=0;i<n;i++){
+      const n1=N[(i-1+n)%n], n2=N[i];              // the two edges meeting at vertex i
+      const p=pts[i];
+      if(!n1 || !n2){ const m=n1||n2; if(m) out.push([p[0]+m[0]*e, p[1]+m[1]*e]); continue; }
+      const dot=n1[0]*n2[0]+n1[1]*n2[1];
+      if(dot < -0.9){                              // a near-reversal: mitre runs to infinity
+        out.push([p[0]+n1[0]*e, p[1]+n1[1]*e]);
+        out.push([p[0]+n2[0]*e, p[1]+n2[1]*e]); continue; }
+      const t = e/(1+dot);                         // (X−p)·n1 = (X−p)·n2 = e  along n1+n2
+      out.push([p[0]+(n1[0]+n2[0])*t, p[1]+(n1[1]+n2[1])*t]);
+    }
+    return out;
+  }
   function fillInsetShape(c, sh, e){
     if(sh.type==="rect"){ if(sh.w>2*e && sh.h>2*e){ const [x,y]=toScreen(sh.x+e, sh.y+e);
       c.fillRect(x, y, (sh.w-2*e)*wpx(), (sh.h-2*e)*wpx()); } }
     else if(sh.type==="circle"){ const rr=sh.r-e; if(rr>0){ const [x,y]=toScreen(sh.cx,sh.cy);
       c.beginPath(); c.arc(x,y, rr*wpx(), 0, 6.2832); c.fill(); } }
-    else if(sh.type==="polygon"){ const pts=sh.pts; if(pts.length<3) return;
-      let cx=0,cy=0; for(const p of pts){ cx+=p[0]; cy+=p[1]; } cx/=pts.length; cy/=pts.length;
+    else if(sh.type==="polygon"){ const q=insetPolyPts(sh.pts, e); if(!q) return;
       c.beginPath();
-      for(let i=0;i<pts.length;i++){ let dx=pts[i][0]-cx, dy=pts[i][1]-cy; const l=Math.hypot(dx,dy)||1;
-        const [sx,sy]=toScreen(pts[i][0]-dx/l*e, pts[i][1]-dy/l*e); if(i===0)c.moveTo(sx,sy); else c.lineTo(sx,sy); }
-      c.closePath(); c.fill(); }
+      for(let i=0;i<q.length;i++){ const [sx,sy]=toScreen(q[i][0], q[i][1]);
+        if(i===0)c.moveTo(sx,sy); else c.lineTo(sx,sy); }
+      c.closePath(); c.fill("nonzero"); }
   }
 
 
@@ -1015,6 +1045,17 @@ window.DungeonEngine = (function(){
       pts.push([mx + a*c*ux + h*s*nx, my + a*c*uy + h*s*ny]); }
     return pts;
   }
+  // The world polyline a wall actually follows. Three storage forms, oldest first:
+  //   x1,y1 → x2,y2                straight span
+  //   + cx,cy                      half-ellipse (3-click Wall tool, legacy maps)
+  //   + pts[]                      an arbitrary chain — a freehand stroke that was
+  //                                never closed, or an unclosed Polygon run
+  // `pts` wins when present; x1/y1/x2/y2 stay in sync as its endpoints so hit
+  // testing, bounds and every older reader keep working.
+  function wallPts(wl){
+    if(wl.pts && wl.pts.length>1) return wl.pts;
+    return (wl.cx===undefined || wl.cy===undefined) ? [[wl.x1,wl.y1],[wl.x2,wl.y2]] : wallSamples(wl);
+  }
   // A rough-edged ribbon along an open world polyline (curved walls / shape lines).
   function roughCurve(c, worldPts, halfW){
     const n=worldPts.length; if(n<2) return;
@@ -1038,10 +1079,10 @@ window.DungeonEngine = (function(){
     const normal=Math.max(1.3,1.7*cam.scale), thin=Math.max(0.6,0.85*cam.scale);
     for(const wl of map.walls){
       const wt = tex ? texOf(wl.wall, tex.wall) : null;
-      const pts = (wl.cx===undefined || wl.cy===undefined) ? [[wl.x1,wl.y1],[wl.x2,wl.y2]] : wallSamples(wl);
+      const pts = wallPts(wl);
       if(wt && stripPath(ctx, densify(pts,5), false, wt, halfPxFor(wt)*(wl.thin?0.5:1))) continue;
       const hw = wl.thin ? thin : normal;
-      if(wl.cx===undefined || wl.cy===undefined) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2], hw);
+      if(pts.length===2) roughSeg(ctx, pts[0], pts[1], hw);
       else roughCurve(ctx, pts, hw); }
     ctx.restore(); }
 

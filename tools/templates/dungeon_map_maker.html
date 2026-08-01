@@ -208,10 +208,10 @@
           <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/></svg>Square</div>
         <div class="tool" data-tool="circle" title="Circle (C) — round room, or a perfect thin circle in Shapes mode">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>Circle</div>
-        <div class="tool" data-tool="polygon" title="Polygon (P) — room or interior shape · click points, Enter/dbl-click to close">
+        <div class="tool" data-tool="polygon" title="Polygon (P) — click points · click the first point to close a room · Enter or double-click leaves it open as a wall">
           <svg viewBox="0 0 24 24"><path d="M12 3l8 6-3 10H7L4 9z"/></svg>Polygon</div>
-        <div class="tool" data-tool="wall" title="Wall (W) — 3 clicks: start, end, curve. Thin line in Shapes mode.">
-          <svg viewBox="0 0 24 24"><path d="M4 19C9 7 15 7 20 5"/><circle cx="4" cy="19" r="1.6" fill="currentColor"/><circle cx="20" cy="5" r="1.6" fill="currentColor"/></svg>Wall</div>
+        <div class="tool" data-tool="draw" title="Draw (N) — freehand caves, water and organic rooms · release near where you started to close a room, anywhere else to leave a wall">
+          <svg viewBox="0 0 24 24"><path d="M3 19c2.2-6.2 4.8-7 6.6-4.2s3.4 1.6 4.6-2.4S17 3.8 21 4.6"/><circle cx="3" cy="19" r="1.8" fill="currentColor" stroke="none"/></svg>Draw</div>
         <div class="tool" data-tool="door" title="Door (D)">
           <svg viewBox="0 0 24 24"><path d="M6 4h9v16H6z"/><path d="M15 9l4 3-4 3"/></svg>Door</div>
         <div class="tool" data-tool="stair" title="Stairs (S)">
@@ -880,8 +880,7 @@
         if(s0!==null){ const p=at(s0); lightSegs.push([p[0],p[1],b[0],b[1]]); }
       }
     }
-    for(const w of map.walls){
-      const s=(w.cx!==undefined&&w.cy!==undefined) ? wallSamples(w) : [[w.x1,w.y1],[w.x2,w.y2]];
+    for(const w of map.walls){ const s=wallPts(w);
       for(let i=0;i<s.length-1;i++) lightSegs.push([s[i][0],s[i][1],s[i+1][0],s[i+1][1]]); }
     return lightSegs;
   }
@@ -1358,18 +1357,50 @@
     if(sh.type==="polygon") return sh.pts.slice();
     return [];
   }
+  // Shrink a closed polygon by `e` cells. Every EDGE slides along its own inward
+  // normal and the neighbouring offset lines are re-intersected (mitre join,
+  // bevelled once the corner gets too sharp to mitre sanely).
+  //
+  // This replaces a centroid pull — "drag every vertex `e` towards the middle" —
+  // which is only right for a regular polygon. A long thin room inset unevenly,
+  // and a CONCAVE outline (which every freehand cave is, in dozens of places)
+  // inset *outwards* wherever the boundary bulged away from the centroid. Where
+  // the offset over-runs a narrow neck the stray loop winds the other way and
+  // cancels under the nonzero fill the callers already use.
+  function insetPolyPts(pts, e){
+    const n=pts.length; if(n<3) return null;
+    let a2=0; for(let i=0;i<n;i++){ const q=pts[(i+1)%n]; a2 += pts[i][0]*q[1] - q[0]*pts[i][1]; }
+    if(!a2) return null;
+    const s = a2>0 ? 1 : -1;                       // which side of an edge is "inside"
+    const N=[];                                    // unit inward normal per edge i → i+1
+    for(let i=0;i<n;i++){ const a=pts[i], b=pts[(i+1)%n];
+      const dx=b[0]-a[0], dy=b[1]-a[1], l=Math.hypot(dx,dy);
+      N.push(l<1e-9 ? null : [s*(-dy/l), s*(dx/l)]); }
+    const out=[];
+    for(let i=0;i<n;i++){
+      const n1=N[(i-1+n)%n], n2=N[i];              // the two edges meeting at vertex i
+      const p=pts[i];
+      if(!n1 || !n2){ const m=n1||n2; if(m) out.push([p[0]+m[0]*e, p[1]+m[1]*e]); continue; }
+      const dot=n1[0]*n2[0]+n1[1]*n2[1];
+      if(dot < -0.9){                              // a near-reversal: mitre runs to infinity
+        out.push([p[0]+n1[0]*e, p[1]+n1[1]*e]);
+        out.push([p[0]+n2[0]*e, p[1]+n2[1]*e]); continue; }
+      const t = e/(1+dot);                         // (X−p)·n1 = (X−p)·n2 = e  along n1+n2
+      out.push([p[0]+(n1[0]+n2[0])*t, p[1]+(n1[1]+n2[1])*t]);
+    }
+    return out;
+  }
   // fill a shape's interior INSET inward by `e` (world units) onto ctx `c`
   function fillInsetShape(c, sh, e){
     if(sh.type==="rect"){ if(sh.w>2*e && sh.h>2*e){ const [x,y]=toScreen(sh.x+e, sh.y+e);
       c.fillRect(x, y, (sh.w-2*e)*wpx(), (sh.h-2*e)*wpx()); } }
     else if(sh.type==="circle"){ const rr=sh.r-e; if(rr>0){ const [x,y]=toScreen(sh.cx,sh.cy);
       c.beginPath(); c.arc(x,y, rr*wpx(), 0, 6.2832); c.fill(); } }
-    else if(sh.type==="polygon"){ const pts=sh.pts; if(pts.length<3) return;
-      let cx=0,cy=0; for(const p of pts){ cx+=p[0]; cy+=p[1]; } cx/=pts.length; cy/=pts.length;
+    else if(sh.type==="polygon"){ const q=insetPolyPts(sh.pts, e); if(!q) return;
       c.beginPath();
-      for(let i=0;i<pts.length;i++){ let dx=pts[i][0]-cx, dy=pts[i][1]-cy; const l=Math.hypot(dx,dy)||1;
-        const [sx,sy]=toScreen(pts[i][0]-dx/l*e, pts[i][1]-dy/l*e); if(i===0)c.moveTo(sx,sy); else c.lineTo(sx,sy); }
-      c.closePath(); c.fill(); }
+      for(let i=0;i<q.length;i++){ const [sx,sy]=toScreen(q[i][0], q[i][1]);
+        if(i===0)c.moveTo(sx,sy); else c.lineTo(sx,sy); }
+      c.closePath(); c.fill("nonzero"); }
   }
 
   // Walls = each room's true outline (round circles!) rendered rough, then the
@@ -1607,14 +1638,25 @@
     c.beginPath(); c.arc(S[0][0],S[0][1],halfW*1.02,0,6.2832); c.fill();
     c.beginPath(); c.arc(S[n-1][0],S[n-1][1],halfW*1.02,0,6.2832); c.fill();
   }
+  // The world polyline a wall actually follows. Three storage forms, oldest first:
+  //   x1,y1 → x2,y2                straight span
+  //   + cx,cy                      half-ellipse (legacy 3-click Wall tool)
+  //   + pts[]                      an arbitrary chain — a freehand stroke that was
+  //                                never closed, or an unclosed Polygon run
+  // `pts` wins when present; x1/y1/x2/y2 stay in sync as its endpoints so hit
+  // testing, bounds and every older reader keep working.
+  function wallPts(wl){
+    if(wl.pts && wl.pts.length>1) return wl.pts;
+    return (wl.cx===undefined || wl.cy===undefined) ? [[wl.x1,wl.y1],[wl.x2,wl.y2]] : wallSamples(wl);
+  }
   function drawInteriorWalls(){ if(!map.walls.length) return; ctx.save(); ctx.fillStyle=C.ink;
     const normal=Math.max(1.3,1.7*cam.scale), thin=Math.max(0.6,0.85*cam.scale);
     for(const wl of map.walls){
       const wt = tex ? texOf(wl.wall, tex.wall) : null;
-      const pts = (wl.cx===undefined || wl.cy===undefined) ? [[wl.x1,wl.y1],[wl.x2,wl.y2]] : wallSamples(wl);
+      const pts = wallPts(wl);
       if(wt && stripPath(ctx, densify(pts,5), false, wt, halfPxFor(wt)*(wl.thin?0.5:1))) continue;
       const hw = wl.thin ? thin : normal;
-      if(wl.cx===undefined || wl.cy===undefined) roughSeg(ctx, [wl.x1,wl.y1],[wl.x2,wl.y2], hw);
+      if(pts.length===2) roughSeg(ctx, pts[0], pts[1], hw);
       else roughCurve(ctx, pts, hw); }
     ctx.restore(); }
 
@@ -1770,6 +1812,12 @@
   let draft = null;        // in-progress shape while dragging
   let polyPts = null;      // polygon vertices being placed
   let placing = null;      // {tool,start,end} — click-move-click door/stair
+  let stroke = null;       // raw freehand points (world cells, never snapped)
+  // How close the end of a gesture has to come to its start before it counts as
+  // "closed". A cave is drawn fast and sloppily, so this is generous — a full
+  // grid square — and the preview shows a filled start dot the moment you're
+  // inside it, so there is never any doubt which of the two you're about to get.
+  const CLOSE_CELLS = 1.0;
   function drawPreview(){
     ctx.save(); ctx.globalAlpha=.85;
     if(draft){
@@ -1811,6 +1859,28 @@
       ctx.stroke();
       for(const pt of polyPts){ const [x,y]=toScreen(pt[0],pt[1]);
         ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(x,y,3.5,0,7); ctx.fill(); }
+      // Closing is now a real fork — click the first point for a ROOM, Enter or
+      // double-click anywhere else for an open WALL — so say which one is armed.
+      if(polyPts.length>2 && hoverPt &&
+         Math.hypot(hoverPt[0]-polyPts[0][0], hoverPt[1]-polyPts[0][1])<0.6){
+        ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(x0,y0,7.5,0,7); ctx.fill();
+        ctx.strokeStyle="rgba(255,255,255,.85)"; ctx.lineWidth=1.4; ctx.stroke();
+      }
+    }
+    if(stroke && stroke.length>1){
+      const S=stroke.map(p=>toScreen(p[0],p[1]));
+      const last=stroke[stroke.length-1];
+      const willClose = stroke.length>6 &&
+        Math.hypot(last[0]-stroke[0][0], last[1]-stroke[0][1])<=CLOSE_CELLS;
+      ctx.lineJoin="round"; ctx.lineCap="round"; ctx.lineWidth=2.2; ctx.strokeStyle=C.sel;
+      ctx.beginPath(); ctx.moveTo(S[0][0],S[0][1]);
+      for(let i=1;i<S.length;i++) ctx.lineTo(S[i][0],S[i][1]);
+      if(willClose){ ctx.closePath(); ctx.fillStyle="rgba(201,169,74,.18)"; ctx.fill(); }
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(S[0][0],S[0][1], willClose?7.5:4.5, 0, 7);
+      if(willClose){ ctx.fillStyle=C.sel; ctx.fill();
+        ctx.strokeStyle="rgba(255,255,255,.85)"; ctx.lineWidth=1.4; ctx.stroke(); }
+      else ctx.stroke();
     }
     ctx.restore();
   }
@@ -1887,9 +1957,10 @@
       if(o.type==="polygon"){ const xs=o.pts.map(p=>p[0]),ys=o.pts.map(p=>p[1]);
         const x=Math.min(...xs),y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y}; }
     }
-    if(kind==="wall"){ const xs=[o.x1,o.x2], ys=[o.y1,o.y2];
-      // a circular arc can bow outside the triangle of its 3 points — measure the samples
-      if(o.cx!==undefined) for(const p of wallSamples(o)){ xs.push(p[0]); ys.push(p[1]); }
+    if(kind==="wall"){ const xs=[], ys=[];
+      // an arc bows outside the triangle of its 3 points and a freehand chain
+      // goes wherever it likes — measure the polyline, not the endpoints
+      for(const p of wallPts(o)){ xs.push(p[0]); ys.push(p[1]); }
       const x=Math.min(...xs), y=Math.min(...ys); return {x,y,w:Math.max(...xs)-x,h:Math.max(...ys)-y}; }
     if(kind==="object" || kind==="shadow") return objBox(o);
     if(kind==="door"){ const l=(o.len||1)/2+0.3; return {x:o.x-l,y:o.y-l,w:l*2,h:l*2}; }
@@ -1951,8 +2022,8 @@
     for(let i=map.doors.length-1;i>=0;i--){ const d=map.doors[i];
       if(Math.hypot(wx-d.x,wy-d.y)<=(d.len||1)/2+0.35) return {kind:"door",idx:i,obj:d}; }
     for(let i=map.walls.length-1;i>=0;i--){ const w=map.walls[i]; const tol=w.thin?0.28:0.4;
-      if(w.cx===undefined||w.cy===undefined){ if(distToSeg(wx,wy,w.x1,w.y1,w.x2,w.y2)<=tol) return {kind:"wall",idx:i,obj:w}; }
-      else { const s=wallSamples(w); for(let k=0;k<s.length-1;k++){ if(distToSeg(wx,wy,s[k][0],s[k][1],s[k+1][0],s[k+1][1])<=tol){ return {kind:"wall",idx:i,obj:w}; } } } }
+      const s=wallPts(w);
+      for(let k=0;k<s.length-1;k++){ if(distToSeg(wx,wy,s[k][0],s[k][1],s[k+1][0],s[k+1][1])<=tol) return {kind:"wall",idx:i,obj:w}; } }
     for(let i=map.shapes.length-1;i>=0;i--){ if(pointInShape(wx,wy,map.shapes[i]))
       return {kind:"shape",idx:i,obj:map.shapes[i]}; }
     return null;
@@ -1971,6 +2042,7 @@
   let gesture=null;                // { d0, scale0, worldMid }
   function startPinch(){ const p=[...pointers.values()], a=p[0], b=p[1];
     const d0=Math.hypot(a[0]-b[0],a[1]-b[1])||1, mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+    stroke=null;                     // a second finger means "zoom", not "keep tracing"
     gesture={ d0, scale0:cam.scale, worldMid:toWorld(mid[0],mid[1]) }; }
   function updatePinch(){ const p=[...pointers.values()], a=p[0], b=p[1];
     const d=Math.hypot(a[0]-b[0],a[1]-b[1])||1, mid=[(a[0]+b[0])/2,(a[1]+b[1])/2];
@@ -2020,10 +2092,13 @@
     if(tool==="light"){ placeLight(wx,wy,e.shiftKey); return; }
     if(tool==="shadow"){ placeShadow(wx,wy,e.shiftKey); return; }
     if(tool==="erase"){ const h=hitTest(wx,wy); if(h){ pushHistory(); removeHit(h); commit(); } return; }
+    if(tool==="draw"){ stroke=[[wx,wy]]; moved=false; render(); return; }
     if(tool==="polygon"){
       if(!polyPts) polyPts=[];
       const [gx,gy]=snapPt(wx,wy);
-      if(polyPts.length>2 && Math.hypot(gx-polyPts[0][0],gy-polyPts[0][1])<0.6){ finishPolygon(); return; }
+      // Landing back on the first point CLOSES the run into a room. Ending it any
+      // other way (Enter, double-click) leaves it open and it becomes a wall.
+      if(polyPts.length>2 && Math.hypot(gx-polyPts[0][0],gy-polyPts[0][1])<0.6){ finishPolygon(true); return; }
       polyPts.push([gx,gy]); render(); return;
     }
     if(tool==="door"||tool==="stair"||tool==="wall"){
@@ -2055,6 +2130,12 @@
       }
       moved=true; render(); return;
     }
+    if(stroke){ const p=stroke[stroke.length-1];
+      // 0.06 cells between samples: fine enough that the line under the cursor
+      // never lags, coarse enough that a slow careful trace doesn't log hundreds
+      // of near-duplicate points for the simplifier to chew through.
+      if(Math.hypot(wx-p[0],wy-p[1])>0.06){ stroke.push([wx,wy]); moved=true; render(); }
+      return; }
     if(placing){ placing.hover = (placing.tool==="wall") ? snapPt(wx,wy) : [snapHalf(wx),snapHalf(wy)]; render(); return; }
     if(polyPts){ hoverPt=snapPt(wx,wy); render(); }
     if(dragObj){ moved=true; moveObj(dragObj, wx-dragObj.ox, wy-dragObj.oy); render(); return; }
@@ -2078,6 +2159,7 @@
   cv.addEventListener("pointerup", e=>{
     pointers.delete(e.pointerId);
     if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
+    if(stroke){ finishStroke(); return; }
     if(handle){ if(moved){ pushHistory(handle.snap); commit(); } handle=null; return; }
     if(panning){ panning=null; return; }
     if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
@@ -2094,8 +2176,8 @@
 
   cv.addEventListener("pointercancel", e=>{ pointers.delete(e.pointerId);
     if(pointers.size<2) gesture=null;
-    if(pointers.size===0){ panning=null; draft=null; dragStart=null; } });
-  cv.addEventListener("dblclick", ()=>{ if(polyPts&&polyPts.length>2) finishPolygon(); });
+    if(pointers.size===0){ panning=null; draft=null; dragStart=null; stroke=null; render(); } });
+  cv.addEventListener("dblclick", ()=>{ if(polyPts&&polyPts.length>1) finishPolygon(false); });
   cv.addEventListener("contextmenu", e=>e.preventDefault());
   cv.addEventListener("wheel", e=>{ e.preventDefault();
     const [sx,sy]=rel(e); const [bwx,bwy]=toWorld(sx,sy);
@@ -2141,11 +2223,113 @@
     placing=null;
   }
 
-  function finishPolygon(){ if(polyPts.length>2){ pushHistory();
-      const poly={id:uid(),type:"polygon",pts:polyPts.slice()}; if(drawMode==="shapes") poly.deco=true;
+  // Finish the polygon run. `close` = the user landed back on the first point, so
+  // it becomes a ROOM. Anything else (Enter, double-click) leaves the run OPEN and
+  // it becomes a wall chain instead — which is what the old 3-click Wall tool was
+  // for, except you get as many segments as you like in one gesture.
+  function finishPolygon(close){
+    let pts = polyPts ? polyPts.slice() : [];
+    // A double-click drops a point on the first of its two downs, so the run
+    // usually ends with a duplicate. Strip it or a 2-click line becomes a 1-point
+    // nothing and a triangle becomes a degenerate quad.
+    while(pts.length>1 && Math.hypot(pts[pts.length-1][0]-pts[pts.length-2][0],
+                                     pts[pts.length-1][1]-pts[pts.length-2][1]) < 1e-6) pts.pop();
+    if(close && pts.length>2){
+      pushHistory();
+      const poly={id:uid(),type:"polygon",pts}; if(drawMode==="shapes") poly.deco=true;
       stampStyle(poly,"shape");
-      map.shapes.push(poly); commit(); }
+      map.shapes.push(poly); commit();
+    } else if(!close && pts.length>1){
+      pushHistory(); map.walls.push(stampStyle(wallFromChain(pts),"wall")); commit();
+    }
     polyPts=null; hoverPt=null; render(); }
+
+  // ── freehand ──────────────────────────────────────────────────────
+  // An open chain of world points as a wall. Two points is stored as a plain
+  // straight span so it is byte-identical to what the old Wall tool produced;
+  // anything longer carries `pts` and renders through roughCurve/stripPath.
+  function wallFromChain(pts){
+    const n=pts.length;
+    const wl={ id:uid(), x1:pts[0][0], y1:pts[0][1], x2:pts[n-1][0], y2:pts[n-1][1] };
+    if(n>2) wl.pts=pts;
+    if(drawMode==="shapes") wl.thin=true;
+    return wl;
+  }
+  // Ramer–Douglas–Peucker. A traced stroke arrives with a point every 0.06 cells;
+  // kept as-is it would bloat the saved map and make the rough-ink edge shimmer,
+  // so drop every point that sits within `tol` of the line its neighbours make.
+  function simplifyPath(pts, tol){
+    const n=pts.length; if(n<3) return pts.slice();
+    const keep=new Uint8Array(n); keep[0]=1; keep[n-1]=1;
+    const stack=[[0,n-1]];
+    while(stack.length){
+      const seg=stack.pop(), a=seg[0], b=seg[1];
+      let idx=-1, dmax=0;
+      for(let i=a+1;i<b;i++){
+        const d=distToSeg(pts[i][0],pts[i][1], pts[a][0],pts[a][1], pts[b][0],pts[b][1]);
+        if(d>dmax){ dmax=d; idx=i; } }
+      if(idx>0 && dmax>tol){ keep[idx]=1; stack.push([a,idx],[idx,b]); }
+    }
+    const out=[]; for(let i=0;i<n;i++) if(keep[i]) out.push(pts[i]);
+    return out;
+  }
+  // Chaikin corner cutting — replace each corner with the two points a quarter of
+  // the way along its edges. Two passes turn the simplified polyline back into
+  // something that reads as a smooth cave wall rather than a faceted one.
+  function chaikin(pts, closed, iters){
+    let p=pts;
+    for(let it=0; it<iters; it++){
+      const n=p.length; if(n<3) break;
+      const q=[];
+      if(!closed) q.push(p[0]);
+      const segs = closed ? n : n-1;
+      for(let i=0;i<segs;i++){ const a=p[i], b=p[(i+1)%n];
+        q.push([a[0]*0.75+b[0]*0.25, a[1]*0.75+b[1]*0.25]);
+        q.push([a[0]*0.25+b[0]*0.75, a[1]*0.25+b[1]*0.75]); }
+      if(!closed) q.push(p[n-1]);
+      p=q;
+    }
+    return p;
+  }
+  const round3=(pts)=>pts.map(p=>[Math.round(p[0]*1000)/1000, Math.round(p[1]*1000)/1000]);
+  // Safety valve. A normal cave lands around 30–80 points; a very slow trace
+  // across a whole map can run into the hundreds, and every vertex is paid for
+  // again on each frame by the rough ink ring, the textured wall ribbon and the
+  // light occluder walk. Back the tolerance off until it fits.
+  const MAX_PTS = 200;
+  function capPoints(pts, closed){
+    let tol=0.04, out=simplifyPath(pts, tol);
+    while(out.length>MAX_PTS && tol<2){ tol*=1.8; out=simplifyPath(pts, tol); }
+    return (closed && out.length<3) ? pts : out;
+  }
+  // Turn the raw trace into geometry. Simplify hard, smooth, then simplify gently
+  // again — Chaikin quadruples the point count and most of what it adds is
+  // redundant on the straighter runs.
+  function finishStroke(){
+    const raw=stroke; stroke=null; moved=false;
+    if(!raw || raw.length<3){ render(); return; }
+    let pts=simplifyPath(raw, 0.12);
+    const closed = raw.length>6 &&
+      Math.hypot(raw[raw.length-1][0]-raw[0][0], raw[raw.length-1][1]-raw[0][1]) <= CLOSE_CELLS;
+    if(closed){
+      // The tail is about to be joined to the head anyway; a point sitting almost
+      // on top of the first one only makes a spike.
+      while(pts.length>3 && Math.hypot(pts[pts.length-1][0]-pts[0][0],
+                                       pts[pts.length-1][1]-pts[0][1]) < 0.5) pts.pop();
+      if(pts.length<3){ render(); return; }
+      pts=round3(capPoints(chaikin(pts, true, 2), true));
+      if(pts.length<3){ render(); return; }
+      pushHistory();
+      const poly={id:uid(), type:"polygon", pts};
+      if(drawMode==="shapes") poly.deco=true;
+      map.shapes.push(stampStyle(poly,"shape")); commit();
+    } else {
+      pts=round3(capPoints(chaikin(pts, false, 2), false));
+      if(pts.length<2){ render(); return; }
+      pushHistory(); map.walls.push(stampStyle(wallFromChain(pts),"wall")); commit();
+    }
+    render();
+  }
 
   // move / snapshot / remove object helpers
   function objSnapshot(h){ return JSON.parse(JSON.stringify(h.obj)); }
@@ -2159,7 +2343,8 @@
       else if(o.type==="polygon"){ o.pts=s.pts.map(p=>[p[0]+gdx,p[1]+gdy]); }
       markGeom();
     } else if(dragObj.h.kind==="wall"){ o.x1=s.x1+gdx;o.y1=s.y1+gdy;o.x2=s.x2+gdx;o.y2=s.y2+gdy;
-      if(s.cx!==undefined){ o.cx=s.cx+gdx; o.cy=s.cy+gdy; } }
+      if(s.cx!==undefined){ o.cx=s.cx+gdx; o.cy=s.cy+gdy; }
+      if(s.pts) o.pts=s.pts.map(p=>[p[0]+gdx,p[1]+gdy]); }
     else if(dragObj.h.kind==="door" || dragObj.h.kind==="object" || dragObj.h.kind==="light"
          || dragObj.h.kind==="shadow"){ o.x=s.x+hd(dx); o.y=s.y+hd(dy); }
     else if(dragObj.h.kind==="stair"){
@@ -2489,7 +2674,7 @@
   function undo(){ if(!history.length) return; future.push(snapshot()); map=JSON.parse(history.pop()); afterLoad(); syncUndo(); scheduleSave(); }
   function redo(){ if(!future.length) return; history.push(snapshot()); map=JSON.parse(future.pop()); afterLoad(); syncUndo(); scheduleSave(); }
   function syncUndo(){ $("undo").disabled=!history.length; $("redo").disabled=!future.length; }
-  function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; markGeom();
+  function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; stroke=null; markGeom();
     if(!Array.isArray(map.lights)) map.lights=[];        // maps exported before v37
     if(!Array.isArray(map.shadows)) map.shadows=[];      // …and before v38
     // Maps made before the switch existed keep their shadows on, so nothing
@@ -3740,8 +3925,7 @@
   function contentBounds(){
     const pts=[];
     for(const s of map.shapes){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
-    for(const w of map.walls){ pts.push([w.x1,w.y1],[w.x2,w.y2]);
-      if(w.cx!==undefined) for(const p of wallSamples(w)) pts.push(p); }   // arc can bow past its ends
+    for(const w of map.walls){ for(const p of wallPts(w)) pts.push(p); }   // arc/freehand can bow past its ends
     for(const o of (map.objects||[])){ const b=objBox(o); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
     for(const d of map.doors) pts.push([d.x,d.y]);
     if(map.lit) for(const L of (map.lights||[])) pts.push([L.x,L.y]);
@@ -3800,12 +3984,14 @@
     tool=t;
     document.querySelectorAll(".tool").forEach(el=>el.classList.toggle("active",el.dataset.tool===t));
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
+    if(t!=="draw"&&stroke){ stroke=null; render(); }
     if(placing){ placing=null; render(); }
     if(t!=="object" && armedObj){ armedObj=null; buildObjGrid(); }
     syncStyleScope();          // picker scope follows the active tool
     cv.style.cursor = t==="select"?"default":(t==="erase"?"cell":"crosshair");
     const tips={rect:"Drag to draw a rectangular room.",circle:"Drag out a circular room.",
-      polygon:"Click to drop corners · Enter or double-click to close.",
+      polygon:"Click corners · click the first one again to close a room · Enter leaves it open as a wall.",
+      draw:"Drag to trace. Finish near where you started for a room, anywhere else for a wall.",
       wall:"Click start, click end, then click to bow the curve (click the line for a straight wall).",
       door:"Click to start, move to aim, click again to place the door.",
       stair:"Click a base corner, click to set width, click the tip to place.",
@@ -3825,8 +4011,8 @@
     modeSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.mode===m));
     if(placing){ placing=null; } if(draft){ draft=null; } render();
     toast(m==="shapes"
-      ? "Shapes mode — Square / Circle / Polygon / Wall now draw thin interior shapes."
-      : "Rooms mode — Square / Circle / Polygon draw rooms; Wall draws interior walls."); }
+      ? "Shapes mode — Square / Circle / Polygon / Draw now make thin interior shapes."
+      : "Rooms mode — Square / Circle / Polygon / Draw make rooms; leave a run open and it becomes a wall."); }
   modeSeg.addEventListener("click", e=>{ const b=e.target.closest("button"); if(b) setMode(b.dataset.mode); });
 
   let tipTimer=null;
@@ -3880,9 +4066,9 @@
     if(e.code==="Space"){ spaceDown=true; cv.style.cursor="grab"; }
     if((e.ctrlKey||e.metaKey)&&e.key==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
     if((e.ctrlKey||e.metaKey)&&e.key==="y"){ e.preventDefault(); redo(); return; }
-    if(e.key==="Enter"&&polyPts){ finishPolygon(); return; }
+    if(e.key==="Enter"&&polyPts){ finishPolygon(false); return; }
     if(e.key==="Escape"){ if(pickOpen){ closePicker(); return; }
-      polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; render(); return; }
+      polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; stroke=null; render(); return; }
     if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
     if(sel && (sel.kind==="object" || sel.kind==="shadow" || sel.kind==="light")){
       const o=objAt(sel); if(o){
@@ -3904,7 +4090,9 @@
       }
     }
     if(e.key==="g"||e.key==="G"){ setMode(drawMode==="rooms"?"shapes":"rooms"); return; }  // toggle Rooms/Shapes
-    const keys={v:"select",r:"rect",c:"circle",p:"polygon",w:"wall",d:"door",s:"stair",e:"erase",l:"light",h:"shadow"};
+    // No `w` any more: the Wall tool is gone. An unclosed Polygon run gives the
+    // same straight chain in one gesture, and Draw gives any curve at all.
+    const keys={v:"select",r:"rect",c:"circle",p:"polygon",n:"draw",d:"door",s:"stair",e:"erase",l:"light",h:"shadow"};
     if(keys[e.key]) setTool(keys[e.key]);
   });
   window.addEventListener("keyup", e=>{ if(e.code==="Space"){ spaceDown=false; cv.style.cursor= tool==="select"?"default":"crosshair"; } });
