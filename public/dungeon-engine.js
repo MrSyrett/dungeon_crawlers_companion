@@ -1481,23 +1481,32 @@ window.DungeonEngine = (function(){
     const ax=A.cx,ay=A.cy,bx=B.cx,by=B.cy;
     const dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy)||1;
     const ux=dx/L,uy=dy/L,nx=-uy,ny=ux;
-    const hw=0.65+rng()*0.5;
+    // Half-width 0.95–1.25 ⇒ full 1.9–2.5 cells. The rough ink wall eats ~0.15
+    // cell per side, so the passable floor stays ≥1 square even at the narrowest
+    // and on bends. w2 is floored so width variation can't pinch it shut.
+    const hw=0.95+rng()*0.3;
     const amp=Math.min(L*0.16,2.4)*(rng()<0.5?1:-1);
     const waves=1+Math.floor(rng()*2);
     const ph=rng()*6.283;
     const M=Math.max(8,Math.round(L*1.2));
+    // 1) build the wavy centreline, 2) offset along the LOCAL normal so bends
+    // keep full perpendicular width instead of pinching (a global normal did).
+    const C=[];
+    for(let i=0;i<=M;i++){
+      const t=i/M, wig=amp*Math.sin(t*waves*Math.PI*2+ph)*Math.sin(Math.PI*t);
+      C.push([ax+ux*(t*L)+nx*wig, ay+uy*(t*L)+ny*wig]);
+    }
     const left=[],right=[];
     for(let i=0;i<=M;i++){
-      const t=i/M, taper=Math.sin(Math.PI*t);
-      const wig=amp*Math.sin(t*waves*Math.PI*2+ph)*taper;
-      const w2=hw*(0.85+0.3*Math.sin(t*5+ph));
-      const cxp=ax+ux*(t*L)+nx*wig, cyp=ay+uy*(t*L)+ny*wig;
-      left.push([cxp+nx*w2, cyp+ny*w2]); right.push([cxp-nx*w2, cyp-ny*w2]);
+      const p=C[Math.max(0,i-1)], q=C[Math.min(M,i+1)];
+      let tx=q[0]-p[0], ty=q[1]-p[1]; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
+      const lnx=-ty, lny=tx;                                  // local normal
+      let w2=hw*(0.92+0.1*Math.sin(i/M*5+ph)); if(w2<0.9) w2=0.9;
+      left.push([C[i][0]+lnx*w2, C[i][1]+lny*w2]); right.push([C[i][0]-lnx*w2, C[i][1]-lny*w2]);
     }
     map.shapes.push({id:uid(),type:"polygon",pts:left.concat(right.reverse()),corridor:true});
-    const wig=amp*Math.sin(0.5*waves*Math.PI*2+ph)*Math.sin(Math.PI*0.5);
-    const mx=ax+ux*(0.5*L)+nx*wig, my=ay+uy*(0.5*L)+ny*wig;
-    map.doors.push({id:uid(), x:mx, y:my, a:Math.atan2(-ux,uy), len:Math.min(2,Math.max(1,Math.round(hw*2)))});
+    const mid=C[Math.round(M/2)];
+    map.doors.push({id:uid(), x:mid[0], y:mid[1], a:Math.atan2(-ux,uy), len:2});
   }
   function addDoor(room, axis, line, side, tcx, tcy, len){
     len = len || 1; const m=len/2;
