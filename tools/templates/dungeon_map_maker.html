@@ -57,6 +57,12 @@
   .grp-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
   .grp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
   .grp-head .grp-title{margin:0}
+  /* collapsible section headers (Objects, Random Dungeon) */
+  .grp-head.sec{cursor:pointer;user-select:none}
+  .grp-head.sec:hover .grp-title,.grp-head.sec:hover .caret{color:var(--gold)}
+  .caret{color:var(--muted);font-size:11px;line-height:1;display:inline-block;
+    transition:transform .15s ease}
+  .caret.closed{transform:rotate(-90deg)}
   /* Rooms ⟷ Shapes segmented toggle */
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:0 0 auto}
   .seg button{background:var(--panel2);color:var(--muted);border:0;padding:3px 9px;cursor:pointer;
@@ -250,10 +256,14 @@
     </div>
 
     <div class="grp" id="objGroup">
-      <p class="grp-title">Objects</p>
-      <select class="sel" id="objPack" style="margin-bottom:6px"></select>
-      <input class="sel" id="objFilter" type="text" placeholder="Search" autocomplete="off">
-      <div id="objGrid" class="objgrid"></div>
+      <div class="grp-head sec" data-sec="obj" role="button" tabindex="0" aria-expanded="true">
+        <p class="grp-title">Objects</p><span class="caret">&#9662;</span>
+      </div>
+      <div id="objBody">
+        <select class="sel" id="objPack" style="margin-bottom:6px"></select>
+        <input class="sel" id="objFilter" type="text" placeholder="Search" autocomplete="off">
+        <div id="objGrid" class="objgrid"></div>
+      </div>
     </div>
 
     <div class="grp">
@@ -333,7 +343,10 @@
     </div>
 
     <div class="grp">
-      <p class="grp-title">Random Dungeon</p>
+      <div class="grp-head sec" data-sec="gen" role="button" tabindex="0" aria-expanded="true">
+        <p class="grp-title">Random Dungeon</p><span class="caret">&#9662;</span>
+      </div>
+      <div id="genBody">
       <label class="fld">Rooms <b id="roomsV">8</b></label>
       <input type="range" id="rooms" min="2" max="24" value="8">
       <label class="fld">Room size <b id="sizeV">Medium</b></label>
@@ -345,6 +358,7 @@
       <label class="chk"><input type="checkbox" id="corridors" checked> Connect with corridors</label>
       <label class="chk"><input type="checkbox" id="roundish"> Allow round rooms</label>
       <button class="btn gold wide" id="generate" style="margin-top:12px">🎲 Generate Dungeon</button>
+      </div>
     </div>
 
     <div class="grp flush">
@@ -668,7 +682,40 @@
     } else {
       renderLocalMap();
     }
-    if(!exporting){ drawPreview(); drawLightMarkers(); drawSelection(); }
+    if(!exporting){
+      // With an object armed the ghost moves far more often than the map changes,
+      // and a lit textured map costs ~83 ms a frame. Keep a copy of the bare map
+      // layer so a ghost-only frame is a blit (~1 ms) instead of a re-render. Only
+      // while armed — the copy is a full-canvas drawImage and shouldn't be paid
+      // for on every ordinary render.
+      // …and DROP it the moment nothing is armed, or the next arm would blit a
+      // map cached before whatever happened in between. Nothing renders on arming
+      // itself, so a null cache makes the first ghost frame fall back to a full
+      // render — which refills it.
+      if(armedObj) snapMap(); else mapSnap=null;
+      drawPreview(); drawLightMarkers(); drawSelection();
+    }
+  }
+  let mapSnap=null;
+  function snapMap(){
+    if(!mapSnap) mapSnap=document.createElement("canvas");
+    if(mapSnap.width!==cv.width || mapSnap.height!==cv.height){
+      mapSnap.width=cv.width; mapSnap.height=cv.height; }
+    const g=mapSnap.getContext("2d");
+    g.setTransform(1,0,0,1,0,0);
+    g.clearRect(0,0,mapSnap.width,mapSnap.height);
+    g.drawImage(cv,0,0);
+  }
+  // Repaint the overlays over the cached map. Anything that actually changes the
+  // map goes through render(), which refreshes the cache, so this can never show
+  // a stale map — it just can't be used before the first armed render.
+  function renderGhostOnly(){
+    if(!mapSnap || mapSnap.width!==cv.width || mapSnap.height!==cv.height){ render(); return; }
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.drawImage(mapSnap,0,0);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    drawPreview(); drawLightMarkers(); drawSelection();
   }
   function renderLocalMap(){
     // Work in CSS-pixel logical space; scale once for crisp HiDPI output.
@@ -1872,6 +1919,31 @@
         ctx.strokeStyle="rgba(255,255,255,.85)"; ctx.lineWidth=1.4; ctx.stroke();
       }
     }
+    // The armed palette object rides the cursor, so you can see how big it is and
+    // which way round it is BEFORE dropping it. texGet() also hydrates an imported
+    // sprite's blob URL on first sight and re-renders, so the ghost appears for
+    // pack art that has never been placed.
+    if(tool==="object" && armedObj && ghostPt){
+      const base=texReg.get(armedObj);
+      if(base){
+        const w=(base.w||1)*armScale*wpx(), h=(base.h||1)*armScale*wpx();
+        const g=toScreen(ghostPt[0], ghostPt[1]);
+        const t=texGet(armedObj);
+        ctx.save(); ctx.translate(g[0],g[1]); if(armRot) ctx.rotate(armRot);
+        if(t && t.img && t.img.complete && t.img.naturalWidth){
+          ctx.globalAlpha=0.62;
+          ctx.save(); if(armFlip) ctx.scale(-1,1);
+          const a=t.atlas;
+          if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);
+          else  ctx.drawImage(t.img, -w/2, -h/2, w, h);
+          ctx.restore();
+          ctx.globalAlpha=1;
+        }
+        ctx.setLineDash([5,4]); ctx.strokeStyle=C.sel; ctx.lineWidth=1.4;
+        ctx.strokeRect(-w/2,-h/2,w,h); ctx.setLineDash([]);
+        ctx.restore();
+      }
+    }
     if(stroke && stroke.length>1){
       const S=stroke.map(p=>toScreen(p[0],p[1]));
       const last=stroke[stroke.length-1];
@@ -2135,6 +2207,15 @@
       }
       moved=true; render(); return;
     }
+    if(tool==="object" && armedObj){
+      // A full render per mousemove is far too much on a lit textured map, where
+      // one frame is tens of milliseconds. Two guards: the ghost sits on the
+      // half-grid, so with snap on most moves don't change it at all and cost
+      // nothing; and when snap is off, coalesce to one render per frame.
+      const g=[snapHalf(wx), snapHalf(wy)];
+      if(!ghostPt || ghostPt[0]!==g[0] || ghostPt[1]!==g[1]){ ghostPt=g; ghostRender(); }
+      return;
+    }
     if(stroke){ const p=stroke[stroke.length-1];
       // 0.06 cells between samples: fine enough that the line under the cursor
       // never lags, coarse enough that a slow careful trace doesn't log hundreds
@@ -2179,6 +2260,8 @@
     draft=null; dragStart=null;
   });
 
+  // Leaving the canvas drops the ghost, so it doesn't sit frozen at the edge.
+  cv.addEventListener("pointerleave", ()=>{ if(ghostPt){ ghostPt=null; render(); } });
   cv.addEventListener("pointercancel", e=>{ pointers.delete(e.pointerId);
     if(pointers.size<2) gesture=null;
     if(pointers.size===0){ panning=null; draft=null; dragStart=null; stroke=null; render(); } });
@@ -3633,6 +3716,17 @@
 
   // ── object palette ────────────────────────────────────────────────
   let armedObj=null;                       // texture id armed for placement
+  // How the NEXT object will be placed. The ghost preview under the cursor draws
+  // with these, and [ ] X + − edit them, so a prop can be turned and sized before
+  // it is committed rather than placed-then-fixed. Reset when a different sprite
+  // is armed (a carried-over size means nothing across a different base size),
+  // kept while the same one stays armed so a rotated run can be laid in one go.
+  let armRot=0, armScale=1, armFlip=false;
+  let ghostPt=null;                        // world position of the cursor, or null
+  function resetArm(){ armRot=0; armScale=1; armFlip=false; }
+  let ghostRaf=0;
+  function ghostRender(){ if(ghostRaf) return;
+    ghostRaf=requestAnimationFrame(()=>{ ghostRaf=0; renderGhostOnly(); }); }
   let thumbObs=null;
   function observeThumb(el, id){
     if(!("IntersectionObserver" in window)){ const t=texReg.get(id); if(t) ensureThumb(t, el); return; }
@@ -3651,7 +3745,7 @@
     if(armedObj){ const a=texReg.get(armedObj);
       const im=String(armedObj).indexOf("pack:")===0;
       const ok = a && (advOn() ? (im || !a.basic) : (!im && !!a.basic));
-      if(!ok){ armedObj=null; if(tool==="object") setTool("select"); } }
+      if(!ok){ armedObj=null; ghostPt=null; resetArm(); if(tool==="object") setTool("select"); } }
     if(thumbObs){ thumbObs.disconnect(); thumbObs=null; }
     const q=(($("objFilter")||{}).value||"").trim().toLowerCase();
     g.innerHTML="";
@@ -3696,7 +3790,10 @@
         else observeThumb(im, t.id);       // imported: decoded on first scroll into view
         b.appendChild(im);
       }
-      b.onclick=()=>{ armedObj = (armedObj===t.id) ? null : t.id;
+      b.onclick=()=>{ const was=armedObj;
+        armedObj = (armedObj===t.id) ? null : t.id;
+        if(armedObj!==was) resetArm();
+        ghostPt=null;
         setTool(armedObj ? "object" : "select"); buildObjGrid(); };
       g.appendChild(b);
       if(++n>=MAX_GRID_CELLS) break;
@@ -3762,12 +3859,41 @@
       d.style.backgroundPosition=(-x*f)+"px "+(-y*f)+"px";
     }
   }
+  // `[` / `]` snap to a 45 lattice; Shift gives a free 5 nudge. Shared by the
+  // armed ghost and a placed selection so both feel the same.
+  function spinStep(r, dir, fine){
+    const S45=Math.PI/4, EPS=1e-6;
+    if(fine) return r + dir*5*Math.PI/180;
+    return dir>0 ? (Math.floor(r/S45 + EPS)+1)*S45
+                 : (Math.ceil (r/S45 - EPS)-1)*S45;
+  }
+  // `+` / `-` step the LARGER side to the next quarter cell, aspect preserved, so
+  // repeated presses land on sizes that line up with the grid instead of drifting
+  // off it the way a fixed percentage would. Shift gives a free 5% nudge, the same
+  // shape as the rotate keys. Returns null when the step would leave the range.
+  function stepSize(w, h, dir, fine){
+    w=w||1; h=h||1;
+    const m=Math.max(w,h);
+    let f;
+    if(fine) f = dir>0 ? 1.05 : 1/1.05;
+    else {
+      const Q=0.25, EPS=1e-6;
+      const m2 = dir>0 ? (Math.floor(m/Q + EPS)+1)*Q : (Math.ceil(m/Q - EPS)-1)*Q;
+      if(m2 < Q-EPS) return null;
+      f = m2/m;
+    }
+    const nw=w*f, nh=h*f;
+    if(Math.min(nw,nh) < 0.08 || Math.max(nw,nh) > 80) return null;
+    return [nw, nh];
+  }
   function placeObject(wx,wy,keepArmed){
     const t=texReg.get(armedObj); if(!t) return;
     pushHistory();
     if(!map.objects) map.objects=[];
-    map.objects.push({id:uid(), tex:t.id, x:snapHalf(wx), y:snapHalf(wy),
-                      w:t.w||1, h:t.h||1, rot:0});
+    const o={id:uid(), tex:t.id, x:snapHalf(wx), y:snapHalf(wy),
+             w:(t.w||1)*armScale, h:(t.h||1)*armScale, rot:armRot};
+    if(armFlip) o.flip=true;
+    map.objects.push(o);
     const idx=map.objects.length-1;
     // A plain click hands you the object ready to nudge, rotate or scale.
     // SHIFT-click keeps the palette armed so you can lay down a run of them.
@@ -4137,7 +4263,8 @@
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
     if(t!=="draw"&&stroke){ stroke=null; render(); }
     if(placing){ placing=null; render(); }
-    if(t!=="object" && armedObj){ armedObj=null; buildObjGrid(); }
+    if(t!=="object" && armedObj){ armedObj=null; resetArm(); buildObjGrid(); }
+    if(t!=="object" && ghostPt){ ghostPt=null; render(); }
     syncStyleScope();          // picker scope follows the active tool
     cv.style.cursor = t==="select"?"default":(t==="erase"?"cell":"crosshair");
     const tips={rect:"Drag to draw a rectangular room.",circle:"Drag out a circular room.",
@@ -4147,7 +4274,7 @@
       door:"Click to start, move to aim, click again to place the door.",
       stair:"Click a base corner, click to set width, click the tip to place.",
       erase:"Click anything to delete it.",select:"Click to select · drag to move.",
-      object:"Click the map to place it. Keep clicking to place more.",
+      object:"Click to place. [ ] turn it, + − size it, X flips — all before you drop it.",
       light:"Click to drop a light. Shift-click to keep placing more.",
       shadow:"Click an object to shadow it, or bare floor for a free shadow. Shift-click to keep placing."};
     toast(tips[t]||"");
@@ -4165,6 +4292,38 @@
       ? "Shapes mode — Square / Circle / Polygon / Draw now make thin interior shapes."
       : "Rooms mode — Square / Circle / Polygon / Draw make rooms; leave a run open and it becomes a wall."); }
   modeSeg.addEventListener("click", e=>{ const b=e.target.closest("button"); if(b) setMode(b.dataset.mode); });
+
+  // ── collapsible sidebar sections ──────────────────────────────────
+  // A UI preference, not map data: its own localStorage key, so it survives Clear
+  // and never rides along in an exported .json.
+  const SECTIONS={ obj:"objBody", gen:"genBody" };
+  let secShut={};
+  try{ secShut=JSON.parse(localStorage.getItem("dcc_sections")||"{}")||{}; }catch(e){ secShut={}; }
+  function syncSections(){
+    for(const k in SECTIONS){
+      const body=$(SECTIONS[k]), head=document.querySelector('.grp-head.sec[data-sec="'+k+'"]');
+      if(!body || !head) continue;
+      const shut=!!secShut[k];
+      body.style.display = shut ? "none" : "";
+      head.setAttribute("aria-expanded", shut ? "false" : "true");
+      const c=head.querySelector(".caret"); if(c) c.classList.toggle("closed", shut);
+    }
+  }
+  function toggleSection(k){
+    if(!(k in SECTIONS)) return;
+    secShut[k]=!secShut[k];
+    try{ localStorage.setItem("dcc_sections", JSON.stringify(secShut)); }catch(e){}
+    syncSections();
+    // The object grid sizes its thumbnails from a cell's measured width, which is
+    // 0 while the section is display:none — redo it once it has been laid out.
+    if(k==="obj" && !secShut.obj) requestAnimationFrame(sizeObjThumbs);
+  }
+  document.querySelectorAll(".grp-head.sec").forEach(h=>{
+    h.addEventListener("click", ()=>toggleSection(h.dataset.sec));
+    h.addEventListener("keydown", e=>{
+      if(e.key==="Enter" || e.key===" "){ e.preventDefault(); toggleSection(h.dataset.sec); } });
+  });
+  syncSections();
 
   let tipTimer=null;
   function toast(msg){ const el=$("tip"); if(!el||!msg) return; el.textContent=msg; el.classList.add("show");
@@ -4217,22 +4376,39 @@
     if(e.code==="Space"){ spaceDown=true; cv.style.cursor="grab"; }
     if((e.ctrlKey||e.metaKey)&&e.key==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
     if((e.ctrlKey||e.metaKey)&&e.key==="y"){ e.preventDefault(); redo(); return; }
+    if(e.key==="\\"){ fitView(); return; }                        // \ = Fit view
     if(e.key==="Enter"&&polyPts){ finishPolygon(false); return; }
     if(e.key==="Escape"){ if(pickOpen){ closePicker(); return; }
       polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; stroke=null; render(); return; }
     if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
+    if(tool==="object" && armedObj){
+      const base=texReg.get(armedObj);
+      if(base){
+        if(e.key==="["||e.key==="{"){ armRot=spinStep(armRot,-1,e.shiftKey); renderGhostOnly(); return; }
+        if(e.key==="]"||e.key==="}"){ armRot=spinStep(armRot,+1,e.shiftKey); renderGhostOnly(); return; }
+        if(e.key==="x"||e.key==="X"){ armFlip=!armFlip; renderGhostOnly(); return; }
+        if(e.key==="+"||e.key==="="||e.key==="-"||e.key==="_"){
+          const dir=(e.key==="+"||e.key==="=") ? 1 : -1;
+          const n=stepSize((base.w||1)*armScale, (base.h||1)*armScale, dir, e.shiftKey);
+          if(n){ armScale = n[0]/(base.w||1); renderGhostOnly(); }
+          return;
+        }
+      }
+    }
+    if((e.key==="+"||e.key==="="||e.key==="-"||e.key==="_") &&
+       sel && (sel.kind==="object" || sel.kind==="shadow")){
+      const o=objAt(sel);
+      if(o){ const dir=(e.key==="+"||e.key==="=") ? 1 : -1;
+        const n=stepSize(o.obj.w, o.obj.h, dir, e.shiftKey);
+        if(n){ pushHistory(); o.obj.w=n[0]; o.obj.h=n[1]; commit(); } }
+      return;
+    }
     if(sel && (sel.kind==="object" || sel.kind==="shadow" || sel.kind==="light")){
       const o=objAt(sel); if(o){
         // [ and ] step around a 45° lattice and SNAP to it, so repeated presses
         // always land on clean orientations even if the object was free-rotated
         // with the handle first. Shift gives a free 5° nudge instead.
-        const S45=Math.PI/4, EPS=1e-6;
-        const spin=(dir)=>{
-          const r=o.obj.rot||0;
-          if(e.shiftKey) return r + dir*5*Math.PI/180;
-          return dir>0 ? (Math.floor(r/S45 + EPS)+1)*S45
-                       : (Math.ceil (r/S45 - EPS)-1)*S45;
-        };
+        const spin=(dir)=>spinStep(o.obj.rot||0, dir, e.shiftKey);
         // Accept the shifted characters too: Shift+] emits "}" on a real keyboard,
         // so matching only "]" would make the fine nudge silently do nothing.
         if(e.key==="["||e.key==="{"){ pushHistory(); o.obj.rot=spin(-1); commit(); return; }
