@@ -392,32 +392,93 @@ window.DungeonEngine = (function(){
     const S=(t,v)=>g.addColorStop(t, "rgba(255,255,255,"+Math.max(0,Math.min(1,v)).toFixed(4)+")");
     if(pat==="hard"){
       S(0,a); S(0.15,a); S(0.23,a*0.40); S(0.55,a*0.29); S(0.86,a*0.14); S(1,0);
-    } else if(pat==="textured"){
-      const N=30;
-      for(let i=0;i<=N;i++){
-        const t=i/N;
-        const base=Math.pow(1-t, 1.55);                    // roughly the soft curve
-        const ring=1 + 0.24*Math.cos(t*Math.PI*2*3.2);     // ribs
-        S(t, i===N ? 0 : a*base*ring);
-      }
     } else {
       S(0,a); S(0.42,a*0.78); S(0.72,a*0.36); S(1,0);
     }
     return g;
   }
-  // Angular wobble for the textured pattern, so the rings aren't a perfect
-  // bullseye. Seeded from the light's id — a frame-varying seed would shimmer.
-  // createConicGradient is recent; without it the rings alone still read fine.
-  function lightMottle(c, cx, cy, seed){
-    if(typeof c.createConicGradient!=="function") return null;
-    let g; try{ g=c.createConicGradient(0, cx, cy); }catch(e){ return null; }
-    const N=16, s=(seed||0)*1.7;
+  // ── PATTERNED LIGHT PROFILES ───────────────────────────────────────
+  // `textured` and `energy` can't be expressed as a radial gradient — they need
+  // ANGULAR structure — so they are painted into a scratch canvas and applied to
+  // the mask with destination-in, exactly where the gradient would have gone.
+  const lprofCv = oc();
+  // A closed circle whose radius wanders with angle: three harmonics, so the edge
+  // reads as flame licks rather than a wavy ellipse. Seeded per light per ring.
+  function wobblyCircle(c, cx, cy, R, seed, amp){
+    // High harmonics carry the "fire" — with only 3/7/13 the edge undulates like
+    // a wobbly balloon. 5/11/19/31 with weight kept on the fast terms gives the
+    // licked, spiky boundary. N must out-resolve the fastest term or it aliases.
+    const N=192;
+    c.beginPath();
     for(let i=0;i<=N;i++){
-      const t=i/N;
-      const v=0.82 + 0.18*(0.5+0.5*Math.sin(t*Math.PI*2*3 + s));
-      g.addColorStop(t, "rgba(255,255,255,"+v.toFixed(3)+")");
+      const t=i/N*Math.PI*2;
+      const w = 1 + amp*(0.40*Math.sin(5*t+seed)
+                       + 0.26*Math.sin(11*t+seed*1.7)
+                       + 0.20*Math.sin(19*t+seed*2.3)
+                       + 0.14*Math.sin(31*t+seed*3.1));
+      const r=R*w, x=cx+Math.cos(t)*r, y=cy+Math.sin(t)*r;
+      if(i===0) c.moveTo(x,y); else c.lineTo(x,y);
     }
-    return g;
+    c.closePath();
+  }
+  function lightProfile(mw, mh, cx, cy, rpx, a, pat, seed){
+    if(lprofCv.width!==mw || lprofCv.height!==mh){ lprofCv.width=mw; lprofCv.height=mh; }
+    const c=lprofCv.getContext("2d");
+    c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none";
+    c.globalCompositeOperation="source-over"; c.clearRect(0,0,mw,mh);
+    c.fillStyle="#fff";
+    if(pat==="textured"){
+      // Three TERRACES, each strictly dimmer going out — never brighter again.
+      // (The first attempt modulated the falloff with a cosine, which alternated
+      // light and dark and read as a bullseye. Steps only ever step down.)
+      const R=[1.0, 0.62, 0.33], L=[0.26, 0.60, 1.0], AMP=[0.135, 0.125, 0.115];
+      // Painted as overlapping DISCS from the outside in, with each alpha solved
+      // so the composite lands exactly on the target level. Annuli would leave
+      // anti-aliased seams at every shared boundary.
+      let acc=0;
+      for(let i=0;i<3;i++){
+        const target=a*L[i];
+        const alpha = acc>=1 ? 0 : (target-acc)/(1-acc);
+        if(alpha>0.001){
+          c.globalAlpha=Math.min(1,alpha);
+          wobblyCircle(c, cx, cy, rpx*R[i], seed*1.3 + i*2.1, AMP[i]);
+          c.fill();
+        }
+        acc=target;
+      }
+      c.globalAlpha=1;
+    } else if(pat==="energy"){
+      // A dim halo, jagged filaments crackling out of the middle, and a hot core.
+      const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
+      g.addColorStop(0,    "rgba(255,255,255,"+(a*0.44).toFixed(4)+")");
+      g.addColorStop(0.38, "rgba(255,255,255,"+(a*0.20).toFixed(4)+")");
+      g.addColorStop(1,    "rgba(255,255,255,0)");
+      c.fillStyle=g; c.fillRect(0,0,mw,mh);
+      const rnd=seeded(seed*13.7+1, seed*7.3+1);
+      c.globalCompositeOperation="lighter";
+      c.lineCap="round"; c.lineJoin="round";
+      const N=9;
+      for(let k=0;k<N;k++){
+        let ang=(k/N)*Math.PI*2 + rnd()*0.6;
+        const len=rpx*(0.5+rnd()*0.5), steps=5;
+        let px=cx, py=cy;
+        for(let s=1;s<=steps;s++){
+          ang += (rnd()-0.5)*0.6;
+          const r=len*s/steps, x=cx+Math.cos(ang)*r, y=cy+Math.sin(ang)*r;
+          const f=1-(s-1)/steps;                       // taper outward
+          c.strokeStyle="rgba(255,255,255,"+(a*0.45*f).toFixed(4)+")";
+          c.lineWidth=Math.max(0.8, rpx*0.055*f);
+          c.beginPath(); c.moveTo(px,py); c.lineTo(x,y); c.stroke();
+          px=x; py=y;
+        }
+      }
+      const cg=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx*0.2));
+      cg.addColorStop(0,"rgba(255,255,255,"+a.toFixed(4)+")");
+      cg.addColorStop(1,"rgba(255,255,255,0)");
+      c.fillStyle=cg; c.fillRect(0,0,mw,mh);
+      c.globalCompositeOperation="source-over";
+    }
+    return lprofCv;
   }
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
   const lmaskCv = oc();
@@ -465,10 +526,16 @@ window.DungeonEngine = (function(){
       mc.closePath(); mc.fill(); mc.restore();
       // 2 — multiply in the radial falloff
       mc.globalCompositeOperation="destination-in";
-      mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a,L.pattern); mc.fillRect(0,0,mw,mh);
-      if(L.pattern==="textured"){
-        const mot=lightMottle(mc,(cx-bx)*k,(cy-by)*k,L.id);
-        if(mot){ mc.fillStyle=mot; mc.fillRect(0,0,mw,mh); }   // still destination-in
+      if(L.pattern==="textured" || L.pattern==="energy"){
+        // Painted profile — it carries angular structure a gradient cannot. The
+        // blur here softens the terrace edges just enough that they read as
+        // ragged rather than vector-cut; too much and the steps disappear.
+        lightProfile(mw, mh, (cx-bx)*k, (cy-by)*k, rpx*k, a, L.pattern, (L.id||li)+1);
+        mc.filter="blur("+(L.pattern==="energy" ? 1.0 : 0.9).toFixed(2)+"px)";
+        mc.drawImage(lprofCv,0,0);
+        mc.filter="none";
+      } else {
+        mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a,L.pattern); mc.fillRect(0,0,mw,mh);
       }
       // 3 — punch the lit pool out of the darkness
       lc.globalCompositeOperation="destination-out";
