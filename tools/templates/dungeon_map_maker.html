@@ -2545,13 +2545,57 @@
   // own drive; Import reads one back. This is the only way to persist/share a
   // map (there is no server save).
   function safeName(){ return ((map.name||"").trim().replace(/[^\w\- ]+/g,"").replace(/\s+/g,"-").slice(0,60)) || "dungeon-map"; }
-  function exportMap(){
-    const blob=new Blob([JSON.stringify(map)], {type:"application/json"});
+  // ── SAVING A FILE ──────────────────────────────────────────────────
+  // There are two mechanisms and the wrong one fails SILENTLY. `<a download>` is
+  // correct on desktop; **iOS Safari does not honour it** — the click does
+  // nothing, or opens a viewer, while the toast cheerfully claimed success. The
+  // Web Share API with `files` is the only route to "Save to Files" there.
+  //
+  // ⚠ navigator.share() MUST be reached synchronously from the user gesture. Do
+  // not await anything before calling it (that includes canvas.toBlob) or iOS
+  // rejects the call as untrusted — which looks exactly like the original bug.
+  const COARSE = (function(){ try{ return matchMedia("(pointer:coarse)").matches; }catch(e){ return false; } })();
+  const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent||"")
+           || (navigator.platform==="MacIntel" && (navigator.maxTouchPoints||0) > 1);   // iPadOS lies
+  function downloadFallback(blob, filename, label){
     const url=URL.createObjectURL(blob);
-    const a=document.createElement("a"); a.href=url; a.download=safeName()+".json";
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 1500);
-    toast("Exported "+safeName()+".json");
+    const a=document.createElement("a");
+    a.href=url; a.download=filename; a.rel="noopener";
+    document.body.appendChild(a); a.click(); a.remove();      // must be IN the document for Firefox
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000); // Safari needs the URL alive past the click
+    toast(label+" "+filename);
+  }
+  function saveFile(blob, filename, label){
+    let file=null;
+    try{ file=new File([blob], filename, {type:blob.type||"application/octet-stream"}); }catch(e){}
+    if(file && (IOS||COARSE) && navigator.share && navigator.canShare){
+      let ok=false;
+      try{ ok=navigator.canShare({files:[file]}); }catch(e){ ok=false; }
+      if(ok){
+        navigator.share({files:[file], title:filename})
+          .then(function(){ toast("Saved "+filename); })
+          .catch(function(err){
+            if(err && err.name==="AbortError") return;         // user dismissed the sheet
+            downloadFallback(blob, filename, label);           // share refused — try the old way
+          });
+        return;
+      }
+    }
+    downloadFallback(blob, filename, label);
+  }
+  // data: URL -> Blob, SYNCHRONOUSLY. canvas.toBlob() is async and awaiting it
+  // would spend the user gesture that navigator.share needs.
+  function dataURLToBlob(u){
+    const i=u.indexOf(","), meta=u.slice(0,i), body=u.slice(i+1);
+    const mime=(meta.match(/:(.*?)[;,]/)||[,"application/octet-stream"])[1];
+    if(meta.indexOf("base64")<0) return new Blob([decodeURIComponent(body)], {type:mime});
+    const bin=atob(body), n=bin.length, arr=new Uint8Array(n);
+    for(let k=0;k<n;k++) arr[k]=bin.charCodeAt(k);
+    return new Blob([arr], {type:mime});
+  }
+  function exportMap(){
+    saveFile(new Blob([JSON.stringify(map)], {type:"application/json"}),
+             safeName()+".json", "Exported");
   }
   function importMapFile(file){
     const rd=new FileReader();
@@ -3738,10 +3782,8 @@
     const url=cv.toDataURL("image/png");
     // restore live view
     cam=savedCam; DPR=savedDPR; resize();
-    const a=document.createElement("a"); a.href=url;
-    a.download=(map.name?slug(map.name):"dungeon-map")+(transparent?"-transparent":"")+".png";
-    a.click();
-    toast("PNG exported.");
+    const name=(map.name?slug(map.name):"dungeon-map")+(transparent?"-transparent":"")+".png";
+    saveFile(dataURLToBlob(url), name, "Exported");
   }
   function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"map"; }
 
