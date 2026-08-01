@@ -3219,12 +3219,27 @@
     let dropped=0;
     if(objs.length>MAX_IMPORT_OBJECTS){ dropped=objs.length-MAX_IMPORT_OBJECTS; objs=objs.slice(0,MAX_IMPORT_OBJECTS); }
     const tilesets=entries.filter(e=>TILESET.test(e.path)).length;
+    // A pack that draws with the path tool keeps its cliffs and walls in paths/.
+    // Some ALSO ship a caves/ brush whose wall/floor is the SAME art at a lower,
+    // blend-edged resolution: 2MT's Natural Walls has caves/"Dark - Cave Wall 1"
+    // that is the paths/ strip "Cave Wall 1 - Dark" re-cut. Those are not
+    // byte-identical, so the content dedupe below can't collapse them, and the
+    // pack ends up with six near-duplicate cave walls (and their floors named
+    // after the wall folder). Drop a caves/ asset when a paths/ strip carries the
+    // same set of words — but keep a lone cave with no path twin (a "Sea Cave"),
+    // which is a genuine, unique asset. FA has no caves/, so this never fires
+    // there. Mirrors the same rule in pack-inspector.html and packfolders.js.
+    const wordKey=s=>s.toLowerCase().replace(/\.(webp|png|jpe?g)$/,"")
+                      .split(/[^a-z0-9]+/i).filter(Boolean).sort().join(" ");
+    const pathKeys=new Set(entries.filter(e=>PATHSTRIP.test(e.path)).map(e=>wordKey(packLabel(e.path))));
+    const caveDupe=e=>(CAVEWALL.test(e.path)||CAVEFLOOR.test(e.path)) && pathKeys.has(wordKey(packLabel(e.path)));
+    const caveDupes=entries.filter(e=>caveDupe(e) && IMGEXT.test(e.path)).length;
     // Wall strips come from three folders and packs ship byte-identical copies
     // across them, so take walls/ first, then caves/, then paths/ — the order
     // decides which copy's id ends up in saved maps.
-    const strips=entries.filter(e=>isWall(e.path))
+    const strips=entries.filter(e=>isWall(e.path) && !caveDupe(e))
                         .sort((a,b)=>wallFolder(a.path)-wallFolder(b.path));
-    const tiles=entries.filter(e=>isFloor(e.path)).concat(strips).concat(objs);
+    const tiles=entries.filter(e=>isFloor(e.path) && !caveDupe(e)).concat(strips).concat(objs);
     // Anything left over that is an image under textures/ matched no rule at
     // all. That is how the paths/ folder went missing for months, so the import
     // report now names the folders rather than staying quiet about them.
@@ -3234,6 +3249,7 @@
       if(claimed.has(e.path) || !IMGEXT.test(e.path)) continue;
       if(TILESET.test(e.path) || WALLEND.test(e.path) || BORDER.test(e.path)) continue;
       if(NORMALMAP.test(e.path)) continue;
+      if(caveDupe(e)) continue;                               // caves/ twin of a paths/ strip
       if(OBJECT.test(e.path)) continue;                       // colorable / demo / wall kit
       const n=e.path.replace(/^res:\/\//,"").replace(/^packs\/[^/]+\//,"");
       const d=n.indexOf("/")<0 ? "(root)" : n.slice(0, n.lastIndexOf("/")).split("/").slice(0,2).join("/");
@@ -3318,6 +3334,7 @@
     if(wallKit) notes.push(wallKit+" wall-kit sprites");
     if(tilesets) notes.push(tilesets+" smart tilesets (not plain tiling textures)");
     if(normals) notes.push(normals+" normal maps");
+    if(caveDupes) notes.push(caveDupes+" cave-brush duplicates");
     const od=Object.keys(orphanDirs).sort((a,b)=>orphanDirs[b]-orphanDirs[a]);
     if(od.length) notes.push(od.map(d=>orphanDirs[d]+" in "+d).join(", ")+" (no rule matches)");
     toast("Loaded "+meta.name+" — "+bits.join(" + ")
