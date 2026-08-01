@@ -474,6 +474,7 @@
   // `tex` is set by applyStyle(); null ⇒ classic flat-colour render.
   let tex = null;
   function patFor(c, t){
+    if(t && t.solid) return t.solid;   // a solid-colour "texture" (Slate/Black floor) fills flat
     if(!t || !t.img) return null;
     const img=t.img; if(!img.complete || !img.naturalWidth) return null;
     let p; try { p=c.createPattern(img, "repeat"); } catch(e){ return null; }
@@ -1602,11 +1603,17 @@
       // Guard against a bow-tie when the segment is short relative to its cuts.
       const spread=Math.abs(kS-kE)*halfPx;
       if(spread > L*0.95 && spread>0){ const f=(L*0.95)/spread; kS*=f; kE*=f; }
-      const h=halfPx, ext=(Math.abs(kS)+Math.abs(kE))*h+2;
+      // Extend each segment's clip a hair past the mitre line at both ends (`ov`)
+      // so neighbouring quads OVERLAP by ~1px instead of merely abutting. Two
+      // abutting anti-aliased clip edges each cover <100% at the join, leaving a
+      // 1px gap that shows the floor through — a bright vertical line at every
+      // chain vertex (worst on Draw/Polygon walls, which have many joints). The
+      // texture runs continuously (`s`), so the tiny overlap is invisible.
+      const h=halfPx, ov=1.2, ext=(Math.abs(kS)+Math.abs(kE))*h+2+ov;
       c.save();
       c.translate(P[i][0],P[i][1]); c.rotate(Math.atan2(u[1],u[0]));
       c.beginPath();
-      c.moveTo(-kS*h,-h); c.lineTo(L-kE*h,-h); c.lineTo(L+kE*h,h); c.lineTo(kS*h,h);
+      c.moveTo(-kS*h-ov,-h); c.lineTo(L-kE*h+ov,-h); c.lineTo(L+kE*h+ov,h); c.lineTo(kS*h-ov,h);
       c.closePath(); c.clip();
       let x=-(s%per); while(x>-ext) x-=per;
       for(; x<L+ext; x+=per){
@@ -1758,29 +1765,17 @@
   }
 
   function drawDecoShapes(){
-    let any=false, floor=false;
-    for(const s of map.shapes){ if(s.deco) any=true; else floor=true; }
+    let any=false;
+    for(const s of map.shapes){ if(s.deco){ any=true; break; } }
     if(!any) return;
     const thin=Math.max(0.6,0.85*cam.scale);
-    // No rooms at all ⇒ nothing to clip against, draw the outlines as-is.
-    if(!floor){ ctx.save(); ctx.fillStyle=C.ink;
-      for(const sh of map.shapes){ if(sh.deco) drawDecoRing(ctx, sh, thin); }
-      ctx.restore(); return; }
-    // Otherwise a deco shape is CLIPPED to the dungeon interior: draw the thin
-    // outlines to a scratch buffer, then keep only the pixels that land on the
-    // floor union (inset by the room-wall half-width, so an outline stops at the
-    // wall's inner edge instead of bleeding across it). Half a circle placed on an
-    // exterior wall therefore shows only the half that is inside the room.
-    sizeBufs();
-    const dc=buf.deco.getContext("2d"); dc.setTransform(1,0,0,1,0,0); dc.clearRect(0,0,W,H);
-    dc.globalCompositeOperation="source-over"; dc.fillStyle=C.ink;
-    for(const sh of map.shapes){ if(!sh.deco) continue; drawDecoRing(dc, sh, thin); }
-    const cc=buf.decoClip.getContext("2d"); cc.setTransform(1,0,0,1,0,0); cc.clearRect(0,0,W,H);
-    cc.globalCompositeOperation="source-over"; cc.fillStyle="#fff";
-    for(const sh of map.shapes){ if(sh.deco) continue;
-      fillInsetShape(cc, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
-    dc.globalCompositeOperation="destination-in"; dc.drawImage(buf.decoClip,0,0);
-    ctx.drawImage(buf.deco,0,0); }
+    // Deco (Shapes-mode) shapes draw wherever they're placed — inside a room or
+    // out in the open. The old build clipped them to the room interior (a shape
+    // entirely outside a room drew nothing), which was useful before the Draw
+    // tool existed but blocks exterior maps; Michael asked to drop that clip.
+    ctx.save(); ctx.fillStyle=C.ink;
+    for(const sh of map.shapes){ if(sh.deco) drawDecoRing(ctx, sh, thin); }
+    ctx.restore(); }
 
   // Doors: {x,y,a,len} — a is the wall direction; a thin leaf sits in the opening.
   // world-space frame for a door. `len` is the FULL span between the two
@@ -1870,20 +1865,34 @@
   // grid square — and the preview shows a filled start dot the moment you're
   // inside it, so there is never any doubt which of the two you're about to get.
   const CLOSE_CELLS = 1.0;
+  // Preview outlines — a shape being dragged out, the freehand trail, the polygon
+  // run, the object ghost — are drawn in the gold selection colour, which nearly
+  // vanishes over the light parchment theme and pale floor textures. Give every
+  // preview stroke a dark halo underneath so it reads on ANY background: the same
+  // path is stroked once wider in translucent dark, then again in gold on top.
+  // `build` only lays the path down — it must not begin or stroke itself.
+  function ghostStroke(build, opt){
+    const dash=(opt&&opt.dash)||[5,4], width=(opt&&opt.width)||1.6;
+    ctx.save(); ctx.lineCap="round"; ctx.lineJoin="round"; ctx.setLineDash(dash);
+    ctx.strokeStyle="rgba(0,0,0,.5)"; ctx.lineWidth=width+2;
+    ctx.beginPath(); build(); ctx.stroke();
+    ctx.strokeStyle=C.sel; ctx.lineWidth=width;
+    ctx.beginPath(); build(); ctx.stroke();
+    ctx.restore();
+  }
   function drawPreview(){
     ctx.save(); ctx.globalAlpha=.85;
     if(draft){
-      ctx.setLineDash([5,4]); ctx.strokeStyle=C.sel; ctx.lineWidth=1.6; ctx.beginPath();
-      if(draft.kind==="wall"){ const [a,b]=toScreen(draft.x1,draft.y1),[c,d]=toScreen(draft.x2,draft.y2);
-        ctx.moveTo(a,b); ctx.lineTo(c,d); }
-      else shapePath(ctx, draft);
-      ctx.stroke(); ctx.setLineDash([]);
+      ghostStroke(()=>{
+        if(draft.kind==="wall"){ const [a,b]=toScreen(draft.x1,draft.y1),[c,d]=toScreen(draft.x2,draft.y2);
+          ctx.moveTo(a,b); ctx.lineTo(c,d); }
+        else shapePath(ctx, draft);
+      }, {dash:[5,4], width:1.6});
     }
     if(placing){
       const pts=placing.pts, hv=placing.hover;
       const dash=(a,b)=>{ if(!a||!b) return; const [ax,ay]=toScreen(a[0],a[1]),[bx,by]=toScreen(b[0],b[1]);
-        ctx.save(); ctx.setLineDash([4,4]); ctx.strokeStyle=C.sel; ctx.lineWidth=1.2;
-        ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); ctx.restore(); };
+        ghostStroke(()=>{ ctx.moveTo(ax,ay); ctx.lineTo(bx,by); }, {dash:[4,4], width:1.2}); };
       if(placing.tool==="door"){
         const end=pts[1]||hv; if(end) drawDoor(doorFromPts(pts[0], end)); dash(pts[0], end);
       } else if(placing.tool==="wall"){
@@ -1904,11 +1913,10 @@
       for(const p of pts){ const [sx,sy]=toScreen(p[0],p[1]); ctx.beginPath(); ctx.arc(sx,sy,3.5,0,7); ctx.fill(); }
     }
     if(polyPts && polyPts.length){
-      ctx.strokeStyle=C.sel; ctx.fillStyle="rgba(201,169,74,.15)"; ctx.lineWidth=1.6;
-      ctx.beginPath(); const [x0,y0]=toScreen(polyPts[0][0],polyPts[0][1]); ctx.moveTo(x0,y0);
-      for(let i=1;i<polyPts.length;i++){ const [x,y]=toScreen(polyPts[i][0],polyPts[i][1]); ctx.lineTo(x,y); }
-      if(hoverPt){ const [hx,hy]=toScreen(hoverPt[0],hoverPt[1]); ctx.lineTo(hx,hy); }
-      ctx.stroke();
+      const [x0,y0]=toScreen(polyPts[0][0],polyPts[0][1]);
+      ghostStroke(()=>{ ctx.moveTo(x0,y0);
+        for(let i=1;i<polyPts.length;i++){ const [x,y]=toScreen(polyPts[i][0],polyPts[i][1]); ctx.lineTo(x,y); }
+        if(hoverPt){ const [hx,hy]=toScreen(hoverPt[0],hoverPt[1]); ctx.lineTo(hx,hy); } }, {dash:[], width:1.6});
       for(const pt of polyPts){ const [x,y]=toScreen(pt[0],pt[1]);
         ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(x,y,3.5,0,7); ctx.fill(); }
       // Closing is now a real fork — click the first point for a ROOM, Enter or
@@ -1939,8 +1947,7 @@
           ctx.restore();
           ctx.globalAlpha=1;
         }
-        ctx.setLineDash([5,4]); ctx.strokeStyle=C.sel; ctx.lineWidth=1.4;
-        ctx.strokeRect(-w/2,-h/2,w,h); ctx.setLineDash([]);
+        ghostStroke(()=>{ ctx.rect(-w/2,-h/2,w,h); }, {dash:[5,4], width:1.4});
         ctx.restore();
       }
     }
@@ -1949,15 +1956,15 @@
       const last=stroke[stroke.length-1];
       const willClose = stroke.length>6 &&
         Math.hypot(last[0]-stroke[0][0], last[1]-stroke[0][1])<=CLOSE_CELLS;
-      ctx.lineJoin="round"; ctx.lineCap="round"; ctx.lineWidth=2.2; ctx.strokeStyle=C.sel;
-      ctx.beginPath(); ctx.moveTo(S[0][0],S[0][1]);
-      for(let i=1;i<S.length;i++) ctx.lineTo(S[i][0],S[i][1]);
-      if(willClose){ ctx.closePath(); ctx.fillStyle="rgba(201,169,74,.18)"; ctx.fill(); }
-      ctx.stroke();
+      const trail=()=>{ ctx.moveTo(S[0][0],S[0][1]);
+        for(let i=1;i<S.length;i++) ctx.lineTo(S[i][0],S[i][1]);
+        if(willClose) ctx.closePath(); };
+      if(willClose){ ctx.beginPath(); trail(); ctx.fillStyle="rgba(201,169,74,.18)"; ctx.fill(); }
+      ghostStroke(trail, {dash:[], width:2.2});
       ctx.beginPath(); ctx.arc(S[0][0],S[0][1], willClose?7.5:4.5, 0, 7);
       if(willClose){ ctx.fillStyle=C.sel; ctx.fill();
         ctx.strokeStyle="rgba(255,255,255,.85)"; ctx.lineWidth=1.4; ctx.stroke(); }
-      else ctx.stroke();
+      else { ctx.strokeStyle=C.sel; ctx.lineWidth=2.2; ctx.stroke(); }
     }
     ctx.restore();
   }
@@ -2974,6 +2981,10 @@
     return im;
   }
   function texGet(id){
+    // A bg:* id resolves to a solid-colour "texture" — used for solid Slate/Black
+    // FLOORS (and, as before, the background). patFor() renders {solid} as a flat
+    // fill, so per-shape floor solids flow through the same path as patterns.
+    if(BG_SOLID.hasOwnProperty(id)){ const c=BG_SOLID[id]; return c ? {solid:c} : null; }
     const t=texReg.get(id); if(!t || t.failed) return null;
     if(!t.img){
       if(!t.url) return null;
@@ -3527,7 +3538,10 @@
   function styleTarget(){
     if(sel==null) return null;
     const o=objAt(sel); if(!o) return null;
-    if(o.kind==="shape" && !o.obj.deco) return {kind:"shape", obj:o.obj};
+    // Deco (Shapes-mode) shapes are editable too — they carry a wall texture, so
+    // selecting one and changing the Walls picker must restyle THAT shape rather
+    // than the map default. Their floor is ignored (deco shapes have none).
+    if(o.kind==="shape") return {kind:"shape", obj:o.obj};
     if(o.kind==="wall") return {kind:"wall", obj:o.obj};
     return null;
   }
@@ -3614,7 +3628,11 @@
       out.push({label:"", list:BG_LIST.map(o=>({id:o.id, name:o.name}))});
       // any floor tile also makes a good exterior
     } else if(PICKERS[kind].none!=null){
-      out.push({label:"", list:[{id:"", name:PICKERS[kind].none}]});
+      const first=[{id:"", name:PICKERS[kind].none}];
+      // Solid-colour floors (fill the room with a flat colour, like a void or a
+      // black pit) live at the top of the Floor picker alongside "classic".
+      if(kind==="floor") first.push({id:"bg:slate", name:"Slate (solid)"}, {id:"bg:black", name:"Black (solid)"});
+      out.push({label:"", list:first});
     }
     const want = kind==="bg" ? "floor" : kind;
     for(const p of bundledPacks){

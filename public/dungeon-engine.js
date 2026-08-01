@@ -57,6 +57,7 @@ window.DungeonEngine = (function(){
   // zoom, and translated so the tile grid lines up with world (0,0) — the same
   // origin the square grid uses, so texture and grid never drift apart.
   function patFor(c, t){
+    if(t && t.solid) return t.solid;   // a solid-colour "texture" (Slate/Black floor) fills flat
     if(!t || !t.img) return null;
     const img=t.img; if(!img.complete || !img.naturalWidth) return null;
     let p; try { p=c.createPattern(img, "repeat"); } catch(e){ return null; }
@@ -981,11 +982,14 @@ window.DungeonEngine = (function(){
       // Guard against a bow-tie when the segment is short relative to its cuts.
       const spread=Math.abs(kS-kE)*halfPx;
       if(spread > L*0.95 && spread>0){ const f=(L*0.95)/spread; kS*=f; kE*=f; }
-      const h=halfPx, ext=(Math.abs(kS)+Math.abs(kE))*h+2;
+      // Overlap neighbouring quads by ~1px (`ov`) so the anti-aliased clip seam at
+      // each chain vertex doesn't leave a bright gap showing the floor through
+      // (worst on Draw/Polygon walls). Texture runs continuously, so it's unseen.
+      const h=halfPx, ov=1.2, ext=(Math.abs(kS)+Math.abs(kE))*h+2+ov;
       c.save();
       c.translate(P[i][0],P[i][1]); c.rotate(Math.atan2(u[1],u[0]));
       c.beginPath();
-      c.moveTo(-kS*h,-h); c.lineTo(L-kE*h,-h); c.lineTo(L+kE*h,h); c.lineTo(kS*h,h);
+      c.moveTo(-kS*h-ov,-h); c.lineTo(L-kE*h+ov,-h); c.lineTo(L+kE*h+ov,h); c.lineTo(kS*h-ov,h);
       c.closePath(); c.clip();
       let x=-(s%per); while(x>-ext) x-=per;
       for(; x<L+ext; x+=per){
@@ -1132,29 +1136,16 @@ window.DungeonEngine = (function(){
   }
 
   function drawDecoShapes(){
-    let any=false, floor=false;
-    for(const s of map.shapes){ if(s.deco) any=true; else floor=true; }
+    let any=false;
+    for(const s of map.shapes){ if(s.deco){ any=true; break; } }
     if(!any) return;
     const thin=Math.max(0.6,0.85*cam.scale);
-    // No rooms at all ⇒ nothing to clip against, draw the outlines as-is.
-    if(!floor){ ctx.save(); ctx.fillStyle=C.ink;
-      for(const sh of map.shapes){ if(sh.deco) drawDecoRing(ctx, sh, thin); }
-      ctx.restore(); return; }
-    // Otherwise a deco shape is CLIPPED to the dungeon interior: draw the thin
-    // outlines to a scratch buffer, then keep only the pixels that land on the
-    // floor union (inset by the room-wall half-width, so an outline stops at the
-    // wall's inner edge instead of bleeding across it). Half a circle placed on an
-    // exterior wall therefore shows only the half that is inside the room.
-    sizeBufs();
-    const dc=buf.deco.getContext("2d"); dc.setTransform(1,0,0,1,0,0); dc.clearRect(0,0,W,H);
-    dc.globalCompositeOperation="source-over"; dc.fillStyle=C.ink;
-    for(const sh of map.shapes){ if(!sh.deco) continue; drawDecoRing(dc, sh, thin); }
-    const cc=buf.decoClip.getContext("2d"); cc.setTransform(1,0,0,1,0,0); cc.clearRect(0,0,W,H);
-    cc.globalCompositeOperation="source-over"; cc.fillStyle="#fff";
-    for(const sh of map.shapes){ if(sh.deco) continue;
-      fillInsetShape(cc, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
-    dc.globalCompositeOperation="destination-in"; dc.drawImage(buf.decoClip,0,0);
-    ctx.drawImage(buf.deco,0,0); }
+    // Deco (Shapes-mode) shapes draw wherever placed — inside a room or out in the
+    // open. The old build clipped them to the room interior (a shape entirely
+    // outside drew nothing), which blocked exterior maps; that clip was dropped.
+    ctx.save(); ctx.fillStyle=C.ink;
+    for(const sh of map.shapes){ if(sh.deco) drawDecoRing(ctx, sh, thin); }
+    ctx.restore(); }
 
   // Door LEAF half-thickness, in world cells — CONSTANT. It deliberately does not
   // follow the wall it sits in: a 1.5-cell cave wall used to grow a door leaf five
