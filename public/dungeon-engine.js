@@ -462,33 +462,45 @@ window.DungeonEngine = (function(){
       }
       c.globalAlpha=1;
     } else if(pat==="swirl"){
-      // Fire's brightness banding stirred into Starry-Night eddies: a soft base
-      // with spiral arms brushed over it. The arms are LOG spirals so they curl
-      // tighter toward the middle, and each is stroked segment by segment so the
-      // width and alpha can taper along its length.
-      c.fillStyle=softGrad(0.80); c.fillRect(0,0,mw,mh);
+      // A Starry Night STAR. The first version drew long log-spiral arms and read
+      // as a pinwheel; what the painting actually shows is a hot core wrapped in
+      // concentric HALOES built from short tangential brush dabs. So: bands of
+      // little arcs circling the centre, each jittered in radius, length, width
+      // and brightness, drifting slightly in or out so the ring never closes into
+      // a clean circle.
+      c.fillStyle=softGrad(0.30); c.fillRect(0,0,mw,mh);
       c.globalCompositeOperation="lighter";
       c.lineCap="round"; c.lineJoin="round";
-      const ARMS=5, TURN=2.3;
-      for(let k=0;k<ARMS;k++){
-        const a0=(k/ARMS)*Math.PI*2 + seed*0.9;
-        let px=null, py=null;
-        const STEPS=26;
-        for(let s=0;s<=STEPS;s++){
-          const t=s/STEPS;
-          const th=a0 + t*TURN;
-          // wobble keeps the arms from looking like clip-art spirals
-          const r=rpx*(0.10 + 0.88*t) * (1 + 0.075*Math.sin(4*th+seed) + 0.04*Math.sin(9*th+seed*1.6));
-          const x=cx+Math.cos(th)*r, y=cy+Math.sin(th)*r;
-          if(px!==null){
-            const f=1-t;
-            c.strokeStyle="rgba(255,255,255,"+(a*0.26*(0.30+0.70*f)).toFixed(4)+")";
-            c.lineWidth=Math.max(1, rpx*0.17*(0.45+0.55*f));
-            c.beginPath(); c.moveTo(px,py); c.lineTo(x,y); c.stroke();
+      const BANDS=6;
+      const ox=cx+(rnd()-0.5)*rpx*0.10, oy=cy+(rnd()-0.5)*rpx*0.10;
+      for(let bd=0; bd<BANDS; bd++){
+        const t=(bd+0.5)/BANDS * (0.86+rnd()*0.28);    // 0..1 outward, unevenly spaced
+        const rr=rpx*t;
+        const level=a*(0.30*Math.pow(1-t,0.9)+0.05);   // dabs fade outward
+        const dabs=Math.max(9, Math.round(12+t*34));
+        const wid=Math.max(1, rpx*0.15*(1-0.40*t));
+        for(let d=0; d<dabs; d++){
+          const th0=(d/dabs)*Math.PI*2 + rnd()*0.6 + bd*0.8;
+          const span=0.17+rnd()*0.30;                  // radians of arc per dab
+          const rj=rr*(1+(rnd()-0.5)*0.30);
+          const drift=(rnd()-0.5)*0.13*rpx;            // in/out lean = the swirl
+          c.strokeStyle="rgba(255,255,255,"+(level*(0.55+rnd()*0.85)).toFixed(4)+")";
+          c.lineWidth=wid*(0.55+rnd()*0.8);
+          c.beginPath();
+          const N=8;
+          for(let i=0;i<=N;i++){
+            const u=i/N, th=th0+span*u, r=rj+drift*u;
+            const x=ox+Math.cos(th)*r, y=oy+Math.sin(th)*r;
+            if(i===0) c.moveTo(x,y); else c.lineTo(x,y);
           }
-          px=x; py=y;
+          c.stroke();
         }
       }
+      const sg=c.createRadialGradient(ox,oy,0,ox,oy,Math.max(1,rpx*0.28));
+      sg.addColorStop(0,   "rgba(255,255,255,"+a.toFixed(4)+")");
+      sg.addColorStop(0.5, "rgba(255,255,255,"+(a*0.72).toFixed(4)+")");
+      sg.addColorStop(1,   "rgba(255,255,255,0)");
+      c.fillStyle=sg; c.fillRect(0,0,mw,mh);
       c.globalCompositeOperation="source-over";
     } else if(pat==="spotted"){
       // Dappled light — sun through a canopy. A soft pool with irregular GAPS
@@ -545,7 +557,7 @@ window.DungeonEngine = (function(){
   }
   // How hard to feather each painted profile: enough that the edges aren't
   // vector-cut, little enough that the structure survives.
-  const PROFILE_BLUR = { fire:0.9, swirl:2.6, spotted:1.5, energy:1.0 };
+  const PROFILE_BLUR = { fire:0.9, swirl:1.4, spotted:1.5, energy:1.0 };
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
   const lmaskCv = oc();
   function drawLights(){
