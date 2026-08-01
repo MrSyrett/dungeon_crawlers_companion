@@ -2976,7 +2976,13 @@
   // a "<name>_tile" alongside a "<name>_border" — the tile half is a plain
   // repeating texture, the border isn't. Smart tilesets are counted and skipped:
   // they're a GRID of edge/corner variants, so tiling one looks like nonsense.
-  const TILEABLE=/\/textures\/(terrain|patterns)\/|\/textures\/materials\/.*_tile\.(webp|png|jpe?g)$/i;
+  const IMGEXT=/\.(webp|png|jpe?g)$/i;
+  const TILEABLE=/\/textures\/(terrain|patterns)\/.*\.(webp|png|jpe?g)$|\/textures\/materials\/.*_tile\.(webp|png|jpe?g)$/i;
+  // `textures/patterns/normal/` is the NORMAL-MAP half of a pattern: a bump map,
+  // not colour art. 2MT gets away with shipping the colour image there verbatim
+  // (so it deduped away harmlessly), but Forgotten Adventures ships real normal
+  // maps — 30 of them, which imported as 30 lilac "floors" nobody could use.
+  const NORMALMAP=/\/textures\/patterns\/normal\//i;
   const TILESET=/\/textures\/tilesets\//i;
   // `..._wall.webp` is Dungeondraft's repeating wall strip. The `_wall_end` caps
   // are excluded by requiring the extension right after "_wall".
@@ -2986,11 +2992,44 @@
   // worth of walls. Mirrors the rule in extract-pack.py.
   const WALLSTRIP=/\/textures\/walls\/.*\.(webp|png|jpe?g)$/i;
   const WALLEND=/_end\.(webp|png|jpe?g)$/i;
-  const isWall=p=>WALLSTRIP.test(p) && !WALLEND.test(p);
-  const OBJECT=/\/textures\/objects\/.*\.(webp|png|jpe?g)$/i;
+  // ── Dungeondraft has more than three texture roots ──────────────────
+  // `textures/walls/` is only where the WALL tool's art lives. The PATH tool has
+  // its own folder, and cliffs, ledges, shorelines, roads and borders are drawn
+  // with the path tool — so a cliff-edge pack puts nearly all its linear art in
+  // `textures/paths/` and this importer used to throw the entire folder away.
+  // (2MT's own Cave Room Builder loses "Cave Room Builder Ledge" that way, and
+  // the Welcome pack loses "Low Wall".) A path texture is the same thing as a
+  // wall texture as far as this renderer cares: a horizontal repeating strip at
+  // 256 px per cell, so it imports as a wall.
+  //
+  // `textures/caves/<name>/{floor,wall}.webp` is Dungeondraft's cave asset type
+  // — a floor and a wall under a shared folder whose NAME is the asset's name,
+  // so the file names alone ("wall.webp") are useless as labels.
+  //
+  // `textures/portals/` is doors and windows: real placeable sprites.
+  const PATHSTRIP=/\/textures\/paths\/.*\.(webp|png|jpe?g)$/i;
+  const CAVEWALL =/\/textures\/caves\/[^/]+\/wall\.(webp|png|jpe?g)$/i;
+  const CAVEFLOOR=/\/textures\/caves\/[^/]+\/floor\.(webp|png|jpe?g)$/i;
+  // `_border` is the non-tiling half of a materials/ pair — its `_tile` twin is
+  // already taken as a floor, so this is a deliberate skip, not a miss.
+  const BORDER=/_border\.(webp|png|jpe?g)$/i;
+  const isWall=p=>(WALLSTRIP.test(p) || PATHSTRIP.test(p) || CAVEWALL.test(p))
+                  && !WALLEND.test(p) && !BORDER.test(p);
+  const isFloor=p=>(TILEABLE.test(p) || CAVEFLOOR.test(p)) && !BORDER.test(p) && !NORMALMAP.test(p);
+  // Which of the three wall folders an entry came from, best first. Packs ship
+  // byte-identical copies of the same strip under walls/ AND paths/ (15 of the
+  // Welcome pack's 16 paths are exact duplicates), so the copies have to be
+  // dropped — see the content dedupe in importPackFile — and this order decides
+  // which copy survives, which decides the NAME. caves/ comes last on purpose:
+  // its name has to be taken from the folder, and 2MT's Natural Cliffs pack
+  // names the same six strips "Dark - Cave Wall 1" there and "Cave Wall 1 - Dark"
+  // under paths/, where the other 42 already follow the second style.
+  const wallFolder=p=>WALLSTRIP.test(p) ? 0 : PATHSTRIP.test(p) ? 1 : 2;
+  const OBJECT=/\/textures\/(objects|portals)\/.*\.(webp|png|jpe?g)$/i;
   // "- Colorable" are greyscale masks for Dungeondraft's colour picker, "- End"
   // are wall end-caps the wall tool consumes, "Demo" is marketing art.
-  const SKIP_OBJ=/( - Colorable| - End)\.(webp|png|jpe?g)$|Demo\.(webp|png|jpe?g)$/i;
+  // …and a whole `colorable64/` folder of them in FA's packs.
+  const SKIP_OBJ=/( - Colorable| - End)\.(webp|png|jpe?g)$|Demo\.(webp|png|jpe?g)$|\/colorable\d*\//i;
   // Packs ship their wall kit as loose sprites too — straight runs, corners, half
   // circles, railings. The wall tool draws all of that properly, so they'd just be
   // clutter in the palette. The " - " separator matters: /^Wall\b/ would also eat
@@ -3007,8 +3046,40 @@
   const MAX_GRID_CELLS=1400;
   // Floors/walls: drop the pack-name prefix, which is repeated on every file in
   // a pack ("Dungeon Room Builder - Dark" -> "Dark").
-  function packLabel(p){ return p.split("/").pop().replace(/\.(webp|png|jpe?g)$/i,"")
-    .replace(/^Texture\s*-\s*/i,"").replace(/_wall$/i,"").replace(/^.*?\s-\s/,""); }
+  function packLabel(p){
+    // A cave asset is `textures/caves/<NAME>/wall.webp` — the file name is
+    // literally "wall", so the label has to come from the parent folder.
+    const cave=p.match(/\/textures\/caves\/([^/]+)\/(floor|wall)\.(webp|png|jpe?g)$/i);
+    if(cave) return cave[1];
+    // This used to cut everything before the first " - ", on the theory that a
+    // pack repeats its own name there ("Dungeon Room Builder - Dark"). It does
+    // not always: "Cliff Edge - Granite" became "Granite" and, once the
+    // "Texture - " prefix was gone, "Dirt - 15x15" became "15x15". The repeated
+    // prefix is now found by agreement across the group instead — see
+    // stripCommonPrefix. Same cleanup as extract-pack.py's clean().
+    let n=p.split("/").pop().replace(/\.(webp|png|jpe?g)$/i,"");
+    n=n.replace(/^[a-z0-9]+_/,"");                  // basicbuilding_door - wide
+    if(n && n[0]!==n[0].toUpperCase()) n=n[0].toUpperCase()+n.slice(1);
+    n=n.replace(/^Texture\s*-\s*/i,"");
+    n=n.replace(/_(wall|path|tile)$/i,"");
+    n=n.replace(/\s*-\s*Convex$/i,"");
+    n=n.replace(/\s*[-(]\s*\d+x\d+\s*\)?$/,"");    // "- 15x15" is the tile size
+    return n.trim() || p.split("/").pop(); }
+  // Floors and walls in one pack usually all carry the pack's own name up front.
+  // Strip it only when MOST of the group agrees on it, so a lone
+  // "Cliff Edge - Granite" keeps the half of its name that means something.
+  function stripCommonPrefix(list){
+    if(list.length<4) return;                       // too few to call it a pattern
+    const pre={};
+    for(const t of list){ const m=t.name.match(/^(.+?)\s-\s/); if(m) pre[m[1]]=(pre[m[1]]||0)+1; }
+    const best=Object.keys(pre).sort((a,b)=>pre[b]-pre[a])[0];
+    if(!best || pre[best] < 3 || pre[best] < list.length*0.6) return;
+    for(const t of list){
+      if(t.name.indexOf(best+" - ")!==0) continue;
+      const rest=t.name.slice(best.length+3).trim();
+      if(rest) t.name=rest;
+    }
+  }
   // Objects keep their FULL name — stripping to the first " - " would turn
   // "Wall - Straight (3x2)" into "Straight (3x2)", which both reads worse and
   // hides the prefix SKIP_WALL_OBJ needs to match on.
@@ -3060,17 +3131,63 @@
     let dropped=0;
     if(objs.length>MAX_IMPORT_OBJECTS){ dropped=objs.length-MAX_IMPORT_OBJECTS; objs=objs.slice(0,MAX_IMPORT_OBJECTS); }
     const tilesets=entries.filter(e=>TILESET.test(e.path)).length;
-    const tiles=entries.filter(e=>TILEABLE.test(e.path)||isWall(e.path)).concat(objs);
+    // Wall strips come from three folders and packs ship byte-identical copies
+    // across them, so take walls/ first, then caves/, then paths/ — the order
+    // decides which copy's id ends up in saved maps.
+    const strips=entries.filter(e=>isWall(e.path))
+                        .sort((a,b)=>wallFolder(a.path)-wallFolder(b.path));
+    const tiles=entries.filter(e=>isFloor(e.path)).concat(strips).concat(objs);
+    // Anything left over that is an image under textures/ matched no rule at
+    // all. That is how the paths/ folder went missing for months, so the import
+    // report now names the folders rather than staying quiet about them.
+    const claimed=new Set(tiles.map(e=>e.path));
+    const orphanDirs={};
+    for(const e of entries){
+      if(claimed.has(e.path) || !IMGEXT.test(e.path)) continue;
+      if(TILESET.test(e.path) || WALLEND.test(e.path) || BORDER.test(e.path)) continue;
+      if(NORMALMAP.test(e.path)) continue;
+      if(OBJECT.test(e.path)) continue;                       // colorable / demo / wall kit
+      const n=e.path.replace(/^res:\/\//,"").replace(/^packs\/[^/]+\//,"");
+      const d=n.indexOf("/")<0 ? "(root)" : n.slice(0, n.lastIndexOf("/")).split("/").slice(0,2).join("/");
+      if(!/^textures\//.test(d)) continue;                    // preview.png etc.
+      orphanDirs[d]=(orphanDirs[d]||0)+1;
+    }
     if(!tiles.length){ toast("No usable textures in that pack."); return; }
+    const normals=entries.filter(e=>NORMALMAP.test(e.path) && IMGEXT.test(e.path)).length;
     const made=[], seen=new Set(), skip={dupe:0, unreadable:0};
+    // Everything dedupes ACROSS folders by CONTENT. The same strip appears under
+    // walls/ and paths/ with a different name in some packs and different
+    // capitalisation in others, so neither the name nor the size alone is a
+    // reliable test — but the bytes are, and comparing two 100 KB buffers costs
+    // nothing next to decoding one.
+    //
+    // This crosses KINDS on purpose: 2MT's Natural Walls and Cliffs ships all 48
+    // of its path strips a second time under textures/objects/, byte for byte,
+    // which is why every cliff and ledge in that pack turned up in the object
+    // palette. Floors and walls are collected first, so the strip wins and the
+    // redundant sprite goes. Two genuinely different props cannot be byte
+    // identical, so nothing real is ever merged. The trade is that a strip can
+    // no longer also be hand-stamped as a sprite — the Edge and corner pieces,
+    // which are unique files, are untouched.
+    const bySize=new Map();              // size → [offsets already accepted]
+    const sameBytes=(a,b,n)=>{
+      const x=new Uint8Array(buf,a,n), y=new Uint8Array(buf,b,n);
+      for(let i=0;i<n;i++) if(x[i]!==y[i]) return false;
+      return true; };
     let batch=[], done=0;
     const flush=async()=>{ if(batch.length){ await idbPutMany("files", batch); batch=[]; } };
     for(const e of tiles){
       // Packs often ship the same tile under both terrain/ and patterns/ —
       // keep one entry per distinct file so the picker isn't full of duplicates.
-      const k=packLabel(e.path)+"|"+e.size;
-      if(seen.has(k)){ skip.dupe++; continue; }
-      seen.add(k);
+      if(OBJECT.test(e.path)){        // cheap guard first: same name, same size
+        const k=objLabel(e.path).toLowerCase()+"|"+e.size;
+        if(seen.has(k)){ skip.dupe++; continue; }
+        seen.add(k);
+      }
+      let bucket=bySize.get(e.size);
+      if(bucket && bucket.some(off=>sameBytes(off, e.off, e.size))){ skip.dupe++; continue; }
+      if(!bucket){ bucket=[]; bySize.set(e.size, bucket); }
+      bucket.push(e.off);
       const bytes=new Uint8Array(buf, e.off, e.size);
       const id=packId+"/"+e.path;
       if(OBJECT.test(e.path)){
@@ -3095,6 +3212,8 @@
       if(++done % 250 === 0) toast("Importing "+meta.name+"… "+done+"/"+tiles.length);
     }
     await flush();
+    stripCommonPrefix(made.filter(m=>m.kind==="floor"));
+    stripCommonPrefix(made.filter(m=>m.kind==="wall"));
     await idbPut("packs", packId, {id:packId, name:meta.name, textures:made});
     registerPack({id:packId, name:meta.name, textures:made});
     await refreshPackList();
@@ -3110,6 +3229,9 @@
     if(skip.unreadable) notes.push(skip.unreadable+" unreadable");
     if(wallKit) notes.push(wallKit+" wall-kit sprites");
     if(tilesets) notes.push(tilesets+" smart tilesets (not plain tiling textures)");
+    if(normals) notes.push(normals+" normal maps");
+    const od=Object.keys(orphanDirs).sort((a,b)=>orphanDirs[b]-orphanDirs[a]);
+    if(od.length) notes.push(od.map(d=>orphanDirs[d]+" in "+d).join(", ")+" (no rule matches)");
     toast("Loaded "+meta.name+" — "+bits.join(" + ")
           + (notes.length ? " (skipped "+notes.join(", ")+")" : "")+".");
   }
