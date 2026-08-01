@@ -423,16 +423,21 @@ window.DungeonEngine = (function(){
   }
   // Patterns that are PAINTED rather than expressed as a gradient. Anything with
   // angular structure has to live here — a radial gradient has no way to say it.
-  const PAINTED = { fire:1, swirl:1, spotted:1, energy:1 };
+  const PAINTED = { fire:1, swirl:1, caustic:1, spotted:1, energy:1, beam:1 };
   // `textured` was renamed to `fire` in v46; old maps still carry the old value.
   function patOf(L){ const p=(L && L.pattern) || "soft"; return p==="textured" ? "fire" : p; }
-  function lightProfile(mw, mh, cx, cy, rpx, a, pat, seed){
+  function lightProfile(mw, mh, cx, cy, rpx, a, pat, seed, rot, spread){
     if(lprofCv.width!==mw || lprofCv.height!==mh){ lprofCv.width=mw; lprofCv.height=mh; }
     const c=lprofCv.getContext("2d");
     c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none";
     c.globalCompositeOperation="source-over"; c.clearRect(0,0,mw,mh);
     c.fillStyle="#fff";
     const rnd=seeded(seed*13.7+1, seed*7.3+1);
+    rot=rot||0;
+    // Stamped patterns rotate by spinning the canvas about the light. The
+    // per-pixel ones (caustic, beam) can't — they rotate their own coordinates.
+    const spin = rot && pat!=="caustic" && pat!=="beam";
+    if(spin){ c.save(); c.translate(cx,cy); c.rotate(rot); c.translate(-cx,-cy); }
     const softGrad=(mul)=>{
       const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
       g.addColorStop(0,    "rgba(255,255,255,"+(a*mul).toFixed(4)+")");
@@ -502,6 +507,90 @@ window.DungeonEngine = (function(){
       sg.addColorStop(1,   "rgba(255,255,255,0)");
       c.fillStyle=sg; c.fillRect(0,0,mw,mh);
       c.globalCompositeOperation="source-over";
+    } else if(pat==="caustic"){
+      // The rippling net of light on a pool floor. Unlike every other pattern this
+      // one is PER-PIXEL — a caustic web is an interference field, not something
+      // you can stroke or stamp. It is only affordable because the profile is
+      // built at the reduced mask resolution (<=192px, ~37k pixels).
+      //
+      // Three plane waves at different angles are summed; the bright filaments are
+      // where that sum crosses ZERO, so `1-|s|` gives ridges and cubing thins them
+      // into the characteristic thin, wandering lines with dark cells between.
+      const img=c.createImageData(mw,mh), d=img.data;
+      const f=7.0/Math.max(4,rpx);                    // wave scale, in radii
+      const p1=rnd()*6.283, p2=rnd()*6.283, p3=rnd()*6.283;
+      const inv=1/Math.max(1,rpx), r2px=rpx*rpx;
+      const rc=Math.cos(-rot), rs=Math.sin(-rot);
+      // Radial falloff via a 65-entry LUT rather than a pow() per pixel.
+      const FALL=new Float32Array(65);
+      for(let i=0;i<65;i++) FALL[i]=Math.pow(1-i/64, 0.85);
+      for(let y=0;y<mh;y++){
+        const dy=y-cy, hh=r2px-dy*dy;
+        if(hh<=0) continue;                           // whole row outside the disc
+        const half=Math.sqrt(hh);
+        const xa=Math.max(0, Math.ceil(cx-half)), xb=Math.min(mw-1, Math.floor(cx+half));
+        const vy=dy*f;
+        // w1's inner sin depends only on y — hoist it out of the x loop.
+        const k1=Math.sin(vy*1.30 + p1)*1.70 + p2, k2=vy*0.92 + p1;
+        const dy2=dy*dy;
+        for(let x=xa;x<=xb;x++){
+          const dx=x-cx;
+          const rr=Math.sqrt(dx*dx+dy2)*inv;
+          if(rr>=1) continue;
+          // rotate into the field's frame (k1/k2 were hoisted for rot=0 rows,
+          // so with a rotation we pay the full two-axis transform per pixel)
+          const fx=rot ? (dx*rc - dy*rs) : dx, fy=rot ? (dx*rs + dy*rc) : dy;
+          const u=fx*f;
+          const s = rot
+            ? Math.sin(u + Math.sin(fy*f*1.30 + p1)*1.70 + p2)
+              + Math.sin(fy*f*0.92 + p1 + Math.sin(u*1.15 + p3)*1.50)
+            : Math.sin(u + k1) + Math.sin(k2 + Math.sin(u*1.15 + p3)*1.50);
+          const a1=Math.abs(Math.sin(s*2.15)), a2=Math.abs(Math.sin(s*4.6 + 1.3));
+          const q1=a1*a1, q2=a2*a2;                   // pow() by multiplication
+          const t=0.76*(q1*q1*a1) + 0.24*(q2*q2*q2*q2);
+          const al=a*(0.28 + 0.72*t)*FALL[(rr*64)|0];
+          const o=((y*mw+x)<<2);
+          d[o]=255; d[o+1]=255; d[o+2]=255;
+          d[o+3]=al<=0 ? 0 : (al>=1 ? 255 : (al*255)|0);
+        }
+      }
+      c.putImageData(img,0,0);                        // ignores composite ops — fine, it is first
+    } else if(pat==="beam"){
+      // A directional cone. Per-pixel like the caustic, but the only trig in the
+      // loop is a divide: cos(angle from the axis) is just the dot product of the
+      // pixel direction with the beam axis, so there is no atan2 anywhere.
+      const img=c.createImageData(mw,mh), d=img.data;
+      const half=Math.max(0.05, Math.min(Math.PI, (spread==null?1.05:spread)/2));
+      const ux=Math.cos(rot), uy=Math.sin(rot);
+      const cosIn=Math.cos(Math.max(0.02, half*0.72)), cosOut=Math.cos(half);
+      const span=Math.max(1e-4, cosIn-cosOut);
+      const inv=1/Math.max(1,rpx), r2px=rpx*rpx;
+      const FALL=new Float32Array(65);
+      for(let i=0;i<65;i++){ const t=i/64; FALL[i]=(1-t)*(0.35+0.65*(1-t)); }
+      for(let y=0;y<mh;y++){
+        const dy=y-cy, hh=r2px-dy*dy;
+        if(hh<=0) continue;
+        const w=Math.sqrt(hh);
+        const xa=Math.max(0,Math.ceil(cx-w)), xb=Math.min(mw-1,Math.floor(cx+w));
+        for(let x=xa;x<=xb;x++){
+          const dx=x-cx, rl=Math.sqrt(dx*dx+dy*dy);
+          const rr=rl*inv; if(rr>=1) continue;
+          let ang;
+          if(rl<1e-3) ang=1;
+          else {
+            const cs=(dx*ux+dy*uy)/rl;
+            ang = cs>=cosIn ? 1 : (cs<=cosOut ? 0 : (cs-cosOut)/span);
+            ang = ang*ang*(3-2*ang);                  // smoothstep the cone edge
+          }
+          // a little bulb glow at the source, so the emitter itself reads as lit
+          const bulb=rr<0.16 ? (1-rr/0.16)*0.55 : 0;
+          const al=a*FALL[(rr*64)|0]*Math.min(1, ang+bulb);
+          const o=((y*mw+x)<<2);
+          d[o]=255; d[o+1]=255; d[o+2]=255;
+          d[o+3]=al<=0 ? 0 : (al>=1 ? 255 : (al*255)|0);
+        }
+      }
+      c.putImageData(img,0,0);
     } else if(pat==="spotted"){
       // Dappled light — sun through a canopy. A soft pool with irregular GAPS
       // punched out of it, not bright blobs added on: the gaps are what make it
@@ -553,11 +642,12 @@ window.DungeonEngine = (function(){
       c.fillStyle=cg; c.fillRect(0,0,mw,mh);
       c.globalCompositeOperation="source-over";
     }
+    if(spin) c.restore();
     return lprofCv;
   }
   // How hard to feather each painted profile: enough that the edges aren't
   // vector-cut, little enough that the structure survives.
-  const PROFILE_BLUR = { fire:0.9, swirl:1.4, spotted:1.5, energy:1.0 };
+  const PROFILE_BLUR = { fire:0.9, swirl:1.4, caustic:0.7, spotted:1.5, energy:1.0, beam:1.1 };
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
   const lmaskCv = oc();
   function drawLights(){
@@ -607,7 +697,7 @@ window.DungeonEngine = (function(){
       const pat=patOf(L);
       if(PAINTED[pat]){
         // Painted profile — it carries angular structure a gradient cannot.
-        lightProfile(mw, mh, (cx-bx)*k, (cy-by)*k, rpx*k, a, pat, (L.id||li)+1);
+        lightProfile(mw, mh, (cx-bx)*k, (cy-by)*k, rpx*k, a, pat, (L.id||li)+1, L.rot||0, L.spread);
         mc.filter="blur("+(PROFILE_BLUR[pat]||1).toFixed(2)+"px)";
         mc.drawImage(lprofCv,0,0);
         mc.filter="none";
