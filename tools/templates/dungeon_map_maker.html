@@ -230,7 +230,6 @@
         <button class="btn" id="toBack" title="Send the selected room / object behind the others (B)" disabled>⬇ Back</button>
       </div>
       <div id="advBody" style="display:none;margin-top:14px">
-        <p class="hint" id="styleScope" style="margin:0 0 2px"></p>
         <label class="fld">Walls</label>
         <button class="pick" id="wallSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <label class="fld">Floor</label>
@@ -245,10 +244,10 @@
       </div>
     </div>
 
-    <div class="grp">
+    <div class="grp" id="objGroup">
       <p class="grp-title">Objects</p>
-      <p class="hint" id="objScope" style="margin:0 0 6px"></p>
-      <input class="sel" id="objFilter" type="text" placeholder="Filter objects…" autocomplete="off">
+      <select class="sel" id="objPack" style="margin-bottom:6px"></select>
+      <input class="sel" id="objFilter" type="text" placeholder="Search" autocomplete="off">
       <div id="objGrid" class="objgrid"></div>
     </div>
 
@@ -274,7 +273,6 @@
         <div class="row" style="margin-top:10px">
           <button class="btn" id="lightReset" title="Put the selected light back to a standard torch — or, with nothing selected, reset the settings for the next one. Darkness is left alone.">↺ Reset light</button>
         </div>
-        <p class="hint" id="lightScope" style="margin:6px 0 0"></p>
       </div>
     </div>
 
@@ -296,7 +294,6 @@
       <div class="row" style="margin-top:10px">
         <button class="btn" id="shadowReset" title="Put the selected shadow back to the default softness and strength, re-fitted to whatever object it sits on">↺ Reset shadow</button>
       </div>
-      <p class="hint" id="shadowScope" style="margin:6px 0 0"></p>
       </div>
     </div>
 
@@ -326,7 +323,6 @@
       <label class="chk"><input type="checkbox" id="corridors" checked> Connect with corridors</label>
       <label class="chk"><input type="checkbox" id="roundish"> Allow round rooms</label>
       <button class="btn gold wide" id="generate" style="margin-top:12px">🎲 Generate Dungeon</button>
-      <p class="hint">Replaces the current map. Everything stays fully editable afterward.</p>
     </div>
 
     <div class="grp flush">
@@ -2628,7 +2624,7 @@
     for(const t of p.textures){
       texReg.set(t.id, {id:t.id, name:p.name+" · "+t.name, kind:t.kind||"floor", cells:t.cells,
                         thick:t.thick, tile:t.tile, w:t.w, h:t.h,
-                        pack:p.id, url:null, img:null, lazy:true});
+                        pack:p.id, packName:p.name, imported:true, url:null, img:null, lazy:true});
     }
   }
   // Mint an imported object's THUMBNAIL blob URL and drop it straight into the
@@ -2897,9 +2893,13 @@
     commit(); syncStyleScope();
   }
   function syncStyleScope(){
-    const el=$("styleScope"); if(!el) return;
+    // The visible hint paragraphs were removed by request. The scope they
+    // described is still real — a picker edits the selection, the next shape, or
+    // the map default — so it lives on as the panel's tooltip rather than
+    // disappearing entirely.
+    const el=$("advBody"); if(!el) return;
     const sc=styleScope();
-    el.textContent =
+    el.title =
       sc.kind==="new"  ? "Setting the style for what you draw next — the rest of the map is untouched"
     : sc.kind==="sel"  ? ("Editing the selected "+(sc.target.kind==="shape"?"room":"wall")+" — Esc to edit defaults again")
     :                    "Editing the default for new rooms (and any unstyled ones)";
@@ -2940,7 +2940,13 @@
     const adv=advOn();
     const isImported=t=>String(t.id).indexOf("pack:")===0;
     const inMode=t=> adv ? (isImported(t) || !t.basic) : (!isImported(t) && !!t.basic);
-    const all=[...texReg.values()].filter(t=>t.kind==="object" && inMode(t));
+    let all=[...texReg.values()].filter(t=>t.kind==="object" && inMode(t));
+    // Pack filter: "all", "default" (everything that ships with the tool, i.e.
+    // not imported) or one pack id. Rebuilt from THIS list, so the options only
+    // ever offer packs that are actually available in the current mode.
+    buildPackFilter(all, isImported);
+    if(objPack==="default")   all=all.filter(t=>!isImported(t));
+    else if(objPack!=="all")  all=all.filter(t=>t.pack===objPack);
     // Imported packs come FIRST. They're registered after the bundled set, so in
     // plain insertion order a freshly imported pack lands ~215 cells down and
     // reads as "nothing happened".
@@ -2977,7 +2983,7 @@
     }
     sizeObjThumbs(); syncObjScope();
     if(!n){ const d=document.createElement("div"); d.className="none";
-      if(q) d.textContent="No objects match that.";
+      if(q || objPack!=="all") d.textContent="No objects match that.";
       else if(bundledError) d.textContent="Couldn't load /packs/bundled/bundled.json ("+bundledError+") — is the pack folder uploaded?";
       else if(!bundledPacks.length) d.textContent="Loading asset packs…";
       else if(!advOn()) d.textContent="No basic objects loaded — re-upload public/packs/bundled/.";
@@ -2988,9 +2994,30 @@
       }
       g.appendChild(d); }
   }
+  // Session-only, like `pending`: which pack the palette is narrowed to.
+  let objPack="all";
+  function buildPackFilter(list, isImported){
+    const sel=$("objPack"); if(!sel) return;
+    const seen=new Map();
+    for(const t of list) if(!seen.has(t.pack)) seen.set(t.pack, t.packName||t.pack);
+    const opts=[["all","All"],["default","Default"]];
+    for(const [id,name] of seen) opts.push([id,name]);
+    // Rebuild only when the option set actually changed, or every palette
+    // rebuild would blow away the user's open dropdown and their selection.
+    const sig=opts.map(o=>o[0]).join("|");
+    if(sel.dataset.sig!==sig){
+      sel.dataset.sig=sig;
+      sel.innerHTML="";
+      for(const [id,name] of opts){
+        const o=document.createElement("option"); o.value=id; o.textContent=name; sel.appendChild(o); }
+    }
+    // A pack that just went out of scope (mode switch, pack removed) falls back.
+    if(objPack!=="all" && objPack!=="default" && !seen.has(objPack)) objPack="all";
+    sel.value=objPack;
+  }
   function syncObjScope(){
-    const el=$("objScope"); if(!el) return;
-    el.textContent = advOn()
+    const el=$("objGroup"); if(!el) return;
+    el.title = advOn()
       ? "Advanced packs — 2-Minute Tabletop plus anything you have imported."
       : "Basic set — Axebane Games. Switch Advanced Mode on for the full packs.";
   }
@@ -3068,7 +3095,7 @@
     if($("lightColorName")) $("lightColorName").textContent = pre ? pre.name : "Custom";
     const row=$("lightPresets");
     if(row) row.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.col.toLowerCase()===lc));
-    if($("lightScope")) $("lightScope").textContent = t
+    if($("lightBody")) $("lightBody").title = t
       ? "Editing the selected light."
       : "Settings for the next light — pick the Light tool (L) and click the map.";
   }
@@ -3175,7 +3202,7 @@
     if($("shsV"))   $("shsV").textContent=Math.round(so*100)+"%";
     if($("shStr"))  $("shStr").value=Math.round(st*100);
     if($("shtV"))   $("shtV").textContent=Math.round(st*100)+"%";
-    if($("shadowScope")) $("shadowScope").textContent = t
+    if($("shadowBody")) $("shadowBody").title = t
       ? "Editing the selected shadow — drag its handles to resize or turn it."
       : "Next shadow: click an object and it sizes itself to fit, or click bare floor for a free one.";
   }
@@ -3278,6 +3305,7 @@
     if(sb) sb.addEventListener("scroll", ()=>{
       if(pickOpen && Math.abs(sb.scrollTop - pickScrollTop) > 2) closePicker(); });
     if($("objFilter")) $("objFilter").oninput=()=>buildObjGrid();
+    if($("objPack"))   $("objPack").onchange=e=>{ objPack=e.target.value; buildObjGrid(); };
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
@@ -3392,7 +3420,15 @@
   $("rsize").oninput=e=>$("sizeV").textContent=SIZE_LBL[+e.target.value];
   $("spread").oninput=e=>$("spreadV").textContent=SPREAD_LBL[+e.target.value];
   $("entrances").oninput=e=>$("entrancesV").textContent=e.target.value;
-  $("generate").onclick=generate;
+  // Same guard as Clear: rolling a dungeon throws the current map away, and it
+  // is the one destructive button people hit by accident while experimenting.
+  $("generate").onclick=()=>{
+    const busy = map.shapes.length || map.walls.length || map.doors.length ||
+                 map.stairs.length || (map.objects||[]).length ||
+                 (map.lights||[]).length || (map.shadows||[]).length;
+    if(busy && !confirm("Generate a new dungeon? This replaces everything on the map.")) return;
+    generate();
+  };
 
   $("gridToggle").onchange=e=>{ map.grid=e.target.checked; render(); scheduleSave(); };
   $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; scheduleSave(); };
