@@ -596,6 +596,12 @@ body.flow-mode .page + .page {
         <select id="mapgen-round" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="0" selected>Round rooms: off</option><option value="1">Round rooms: on</option>
         </select>
+        <select id="mapgen-organic" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+          <option value="0" selected>Organic: off</option><option value="1">Organic (caves): on</option>
+        </select>
+        <select id="mapgen-doors" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+          <option value="1" selected>Doors: on</option><option value="0">Doors: off</option>
+        </select>
         <select id="mapgen-look" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="light" selected>Light</option><option value="dark">Dark</option>
         </select>
@@ -1858,6 +1864,8 @@ function randMap() {
     entrances: +(v('mapgen-entrances')?.value || 2),
     corridors: (v('mapgen-corr')?.value || '1') !== '0',
     roundRooms: (v('mapgen-round')?.value || '0') === '1',
+    organic: (v('mapgen-organic')?.value || '0') === '1',
+    doors: (v('mapgen-doors')?.value || '1') !== '0',
     theme: v('mapgen-look')?.value || 'light'
   });
   if(!gen || !gen.png) return;

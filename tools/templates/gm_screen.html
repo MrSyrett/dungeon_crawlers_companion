@@ -2343,6 +2343,12 @@ GMScenes.renderPins();
           <label class="gen-label">Round Rooms
             <select class="gen-select" id="gen-dun-round"><option value="0" selected>No</option><option value="1">Allow</option></select>
           </label>
+          <label class="gen-label">Organic (caves)
+            <select class="gen-select" id="gen-dun-organic"><option value="0" selected>No</option><option value="1">Yes</option></select>
+          </label>
+          <label class="gen-label">Doors
+            <select class="gen-select" id="gen-dun-doors"><option value="1" selected>Yes</option><option value="0">No</option></select>
+          </label>
           <label class="gen-label">Look
             <select class="gen-select" id="gen-dun-look"><option value="light" selected>Light</option><option value="dark">Dark</option></select>
           </label>
@@ -2542,6 +2548,12 @@ GMScenes.renderPins();
           </label>
           <label class="gen-label">Round Rooms
             <select class="gen-select" id="gen-adv-round"><option value="0" selected>No</option><option value="1">Allow</option></select>
+          </label>
+          <label class="gen-label">Organic (caves)
+            <select class="gen-select" id="gen-adv-organic"><option value="0" selected>No</option><option value="1">Yes</option></select>
+          </label>
+          <label class="gen-label">Doors
+            <select class="gen-select" id="gen-adv-doors"><option value="1" selected>Yes</option><option value="0">No</option></select>
           </label>
           <label class="gen-label">Look
             <select class="gen-select" id="gen-adv-look"><option value="light" selected>Light</option><option value="dark">Dark</option></select>
@@ -7149,6 +7161,8 @@ window.init_gen = function(root) {
           entrances: +((q('entrances')||{}).value||2),
           corridors: ((q('corr')||{}).value||'1') !== '0',
           roundRooms: ((q('round')||{}).value||'0') === '1',
+          organic: ((q('organic')||{}).value||'0') === '1',
+          doors: ((q('doors')||{}).value||'1') !== '0',
           theme: (q('look')||{}).value||'light'
         });
         root._mapPng = gen.png;
@@ -7276,6 +7290,8 @@ window.init_gen = function(root) {
           entrances: +((q('entrances')||{}).value||2),
           corridors: ((q('corr')||{}).value||'1') !== '0',
           roundRooms: ((q('round')||{}).value||'0') === '1',
+          organic: ((q('organic')||{}).value||'0') === '1',
+          doors: ((q('doors')||{}).value||'1') !== '0',
           theme: (q('look')||{}).value||'light'
         });
         root._mapPng    = gen.png;

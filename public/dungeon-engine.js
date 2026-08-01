@@ -1225,6 +1225,8 @@ window.DungeonEngine = (function(){
     const spread = clamp(opts.layout!=null?+opts.layout:3, 1, 5);
     const doCorr = opts.corridors !== false;
     const roundOk = !!opts.roundRooms;
+    const organic = !!opts.organic;           // irregular cave "blob" chambers
+    const wantDoors = opts.doors !== false;    // place interior doors (default on)
     const nEntrances = clamp(opts.entrances!=null?+opts.entrances:2, 0, 20);
     const th = (opts.theme==="dark") ? "dark" : "light";
     rngState = (opts.seed!=null) ? (opts.seed>>>0)
@@ -1236,7 +1238,13 @@ window.DungeonEngine = (function(){
     const density=[0.5,0.4,0.32,0.25,0.18][spread-1];
     const field=Math.max(avg, Math.round(avg*Math.sqrt(nRooms/density)/2));
     const rooms=[];
-    if(!doCorr){
+    if(organic){
+      // Cave chambers: irregular polygon "blobs". With corridors ON they are
+      // spread out and joined by winding tunnels; with corridors OFF they are
+      // grown overlapping into one merged cavern (each new blob touches an
+      // existing one, so the union is always connected).
+      placeBlobs(rooms, nRooms, smin, smax, field, !doCorr);
+    } else if(!doCorr){
       placeAdjacentRooms(rooms, nRooms, smin, smax);
     } else {
       let tries=0, guard=nRooms*220;
@@ -1251,25 +1259,30 @@ window.DungeonEngine = (function(){
       }
     }
     for(const r of rooms){
-      if(r.round){ const rad=Math.max(r.w,r.h)/2; map.shapes.push({id:uid(),type:"circle",cx:r.cx,cy:r.cy,r:Math.round(rad)}); }
+      if(r.pts) map.shapes.push({id:uid(),type:"polygon",pts:r.pts});
+      else if(r.round){ const rad=Math.max(r.w,r.h)/2; map.shapes.push({id:uid(),type:"circle",cx:r.cx,cy:r.cy,r:Math.round(rad)}); }
       else map.shapes.push({id:uid(),type:"rect",x:r.x,y:r.y,w:r.w,h:r.h});
     }
-    if(doCorr && rooms.length>1){
+    // Connect. Organic ⇒ winding tunnels (carveTunnel); classic ⇒ rect corridors.
+    // Organic + corridors OFF is already one merged cavern, so it needs no links.
+    const connect = organic ? carveTunnel : carveCorridor;
+    if(rooms.length>1 && !(organic && !doCorr) && (doCorr || organic)){
       const connected=[0], pending=rooms.map((_,i)=>i).slice(1);
       while(pending.length){
         let bi=-1,bj=-1,bd=1e9;
         for(const ci of connected) for(const pj of pending){
           const d=Math.hypot(rooms[ci].cx-rooms[pj].cx, rooms[ci].cy-rooms[pj].cy);
           if(d<bd){ bd=d; bi=ci; bj=pj; } }
-        carveCorridor(rooms[bi], rooms[bj]);
+        connect(rooms[bi], rooms[bj]);
         connected.push(bj); pending.splice(pending.indexOf(bj),1);
       }
-      const extra=Math.floor(rooms.length*0.15);
+      const extra=Math.floor(rooms.length*(organic?0.2:0.15));
       for(let k=0;k<extra;k++){ const a=ri(0,rooms.length-1),b=ri(0,rooms.length-1);
-        if(a!==b && Math.hypot(rooms[a].cx-rooms[b].cx,rooms[a].cy-rooms[b].cy)<avg*5) carveCorridor(rooms[a],rooms[b]); }
+        if(a!==b && Math.hypot(rooms[a].cx-rooms[b].cx,rooms[a].cy-rooms[b].cy)<avg*5) connect(rooms[a],rooms[b]); }
     }
-    else if(rooms.length>1){ addAdjacencyDoors(rooms); }
-    map.doors = finalizeDoors();
+    else if(!organic && !doCorr && rooms.length>1){ addAdjacencyDoors(rooms); }
+    // Doors OFF ⇒ skip interior doors entirely (entrances still honour their slider).
+    map.doors = wantDoors ? finalizeDoors() : [];
     placeEntrances(nEntrances);
     return map;
   }
@@ -1340,6 +1353,21 @@ window.DungeonEngine = (function(){
           if(empty(px+ox*0.6,py+oy*0.6) && floor(px-ox*0.5,py-oy*0.5))
             cand.push(a===0 ? {x:s2(px), y:py, a, room} : {x:px, y:s2(py), a, room});
         }
+      } else if(sh.type==="polygon" && sh.pts && sh.pts.length>2){
+        // Cave chamber: sample each edge midpoint; if it opens to empty space
+        // outside and floor just inside, it's an entrance spot. Leaf runs along
+        // the edge; the outward normal points into open air.
+        const pts=sh.pts, m=pts.length;
+        let gx=0,gy=0; for(const p of pts){ gx+=p[0]; gy+=p[1]; } gx/=m; gy/=m;
+        for(let i=0;i<m;i++){
+          const p=pts[i], q=pts[(i+1)%m];
+          const mx=(p[0]+q[0])/2, my=(p[1]+q[1])/2;
+          let ex=q[0]-p[0], ey=q[1]-p[1]; const el=Math.hypot(ex,ey)||1; ex/=el; ey/=el;
+          let ox=ey, oy=-ex;                                   // an edge normal
+          if((mx-gx)*ox+(my-gy)*oy < 0){ ox=-ox; oy=-oy; }     // force it outward
+          if(empty(mx+ox*0.8,my+oy*0.8) && floor(mx-ox*0.4,my-oy*0.4))
+            cand.push({x:mx, y:my, a:Math.atan2(ey,ex), room});
+        }
       }
     }
     let pool=cand.filter(c=> !map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2));
@@ -1404,6 +1432,67 @@ window.DungeonEngine = (function(){
     }
   }
   function hall(x,y,w,h){ return {id:uid(),type:"rect",x,y,w:Math.max(1,w),h:Math.max(1,h),corridor:true}; }
+  // ─── Organic / cave generation ───────────────────────────────────────────
+  // An irregular closed ring around (cx,cy). Radius wobbles via three low
+  // harmonics with random phase, so it's lumpy but never spiky. Returns pts[].
+  function blobPts(cx,cy,rx,ry){
+    const n=12+ri(0,5);
+    const p1=rng()*6.283,p2=rng()*6.283,p3=rng()*6.283;
+    const a1=0.10+rng()*0.14, a2=0.05+rng()*0.10, a3=0.03+rng()*0.06;
+    const pts=[];
+    for(let i=0;i<n;i++){
+      const t=i/n*6.283;
+      let rr=1+a1*Math.sin(t+p1)+a2*Math.sin(2*t+p2)+a3*Math.sin(3*t+p3);
+      if(rr<0.6) rr=0.6;
+      pts.push([ Math.round((cx+Math.cos(t)*rx*rr)*4)/4, Math.round((cy+Math.sin(t)*ry*rr)*4)/4 ]);
+    }
+    return pts;
+  }
+  // Place cave chambers. `merge` ⇒ grow each new blob off an existing one so
+  // they overlap into a single connected cavern; otherwise spread them apart.
+  function placeBlobs(rooms, nRooms, smin, smax, field, merge){
+    let tries=0, guard=nRooms*300;
+    while(rooms.length<nRooms && tries++<guard){
+      const R=ri(smin,smax)/2*(0.9+rng()*0.35);
+      const rx=R*(0.8+rng()*0.5), ry=R*(0.8+rng()*0.5);
+      let x,y;
+      if(merge && rooms.length){
+        const base=rooms[ri(0,rooms.length-1)];
+        const ang=rng()*6.283, dist=(Math.max(base.rx,base.ry)+Math.max(rx,ry))*(0.5+rng()*0.4);
+        x=Math.round(base.cx+Math.cos(ang)*dist); y=Math.round(base.cy+Math.sin(ang)*dist);
+      } else { x=ri(-field,field); y=ri(-field,field); }
+      const bb={x:x-rx,y:y-ry,w:rx*2,h:ry*2};
+      const overlaps=rooms.some(r=>rectsOverlap(bb,{x:r.cx-r.rx,y:r.cy-r.ry,w:r.rx*2,h:r.ry*2}));
+      if(!merge && overlaps) continue;   // spread mode keeps chambers apart
+      rooms.push({cx:x,cy:y,rx,ry,w:rx*2,h:ry*2,round:false,pts:blobPts(x,y,rx,ry)});
+    }
+  }
+  // A winding cave tunnel from chamber A's centre to B's centre: a wavy ribbon
+  // (centreline wiggle tapered to 0 at both ends) emitted as one polygon. Ends
+  // sit inside each chamber so the union merges. Pushes a door candidate at the
+  // narrow mid-point (kept only if Doors is on — see the finalizeDoors gate).
+  function carveTunnel(A,B){
+    const ax=A.cx,ay=A.cy,bx=B.cx,by=B.cy;
+    const dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy)||1;
+    const ux=dx/L,uy=dy/L,nx=-uy,ny=ux;
+    const hw=0.65+rng()*0.5;
+    const amp=Math.min(L*0.16,2.4)*(rng()<0.5?1:-1);
+    const waves=1+Math.floor(rng()*2);
+    const ph=rng()*6.283;
+    const M=Math.max(8,Math.round(L*1.2));
+    const left=[],right=[];
+    for(let i=0;i<=M;i++){
+      const t=i/M, taper=Math.sin(Math.PI*t);
+      const wig=amp*Math.sin(t*waves*Math.PI*2+ph)*taper;
+      const w2=hw*(0.85+0.3*Math.sin(t*5+ph));
+      const cxp=ax+ux*(t*L)+nx*wig, cyp=ay+uy*(t*L)+ny*wig;
+      left.push([cxp+nx*w2, cyp+ny*w2]); right.push([cxp-nx*w2, cyp-ny*w2]);
+    }
+    map.shapes.push({id:uid(),type:"polygon",pts:left.concat(right.reverse()),corridor:true});
+    const wig=amp*Math.sin(0.5*waves*Math.PI*2+ph)*Math.sin(Math.PI*0.5);
+    const mx=ax+ux*(0.5*L)+nx*wig, my=ay+uy*(0.5*L)+ny*wig;
+    map.doors.push({id:uid(), x:mx, y:my, a:Math.atan2(-ux,uy), len:Math.min(2,Math.max(1,Math.round(hw*2)))});
+  }
   function addDoor(room, axis, line, side, tcx, tcy, len){
     len = len || 1; const m=len/2;
     if(room.round){
