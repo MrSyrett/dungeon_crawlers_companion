@@ -421,13 +421,27 @@ window.DungeonEngine = (function(){
     }
     c.closePath();
   }
+  // Patterns that are PAINTED rather than expressed as a gradient. Anything with
+  // angular structure has to live here — a radial gradient has no way to say it.
+  const PAINTED = { fire:1, swirl:1, spotted:1, energy:1 };
+  // `textured` was renamed to `fire` in v46; old maps still carry the old value.
+  function patOf(L){ const p=(L && L.pattern) || "soft"; return p==="textured" ? "fire" : p; }
   function lightProfile(mw, mh, cx, cy, rpx, a, pat, seed){
     if(lprofCv.width!==mw || lprofCv.height!==mh){ lprofCv.width=mw; lprofCv.height=mh; }
     const c=lprofCv.getContext("2d");
     c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none";
     c.globalCompositeOperation="source-over"; c.clearRect(0,0,mw,mh);
     c.fillStyle="#fff";
-    if(pat==="textured"){
+    const rnd=seeded(seed*13.7+1, seed*7.3+1);
+    const softGrad=(mul)=>{
+      const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
+      g.addColorStop(0,    "rgba(255,255,255,"+(a*mul).toFixed(4)+")");
+      g.addColorStop(0.42, "rgba(255,255,255,"+(a*mul*0.78).toFixed(4)+")");
+      g.addColorStop(0.72, "rgba(255,255,255,"+(a*mul*0.36).toFixed(4)+")");
+      g.addColorStop(1,    "rgba(255,255,255,0)");
+      return g;
+    };
+    if(pat==="fire"){
       // Three TERRACES, each strictly dimmer going out — never brighter again.
       // (The first attempt modulated the falloff with a cosine, which alternated
       // light and dark and read as a bullseye. Steps only ever step down.)
@@ -447,14 +461,63 @@ window.DungeonEngine = (function(){
         acc=target;
       }
       c.globalAlpha=1;
+    } else if(pat==="swirl"){
+      // Fire's brightness banding stirred into Starry-Night eddies: a soft base
+      // with spiral arms brushed over it. The arms are LOG spirals so they curl
+      // tighter toward the middle, and each is stroked segment by segment so the
+      // width and alpha can taper along its length.
+      c.fillStyle=softGrad(0.80); c.fillRect(0,0,mw,mh);
+      c.globalCompositeOperation="lighter";
+      c.lineCap="round"; c.lineJoin="round";
+      const ARMS=5, TURN=2.3;
+      for(let k=0;k<ARMS;k++){
+        const a0=(k/ARMS)*Math.PI*2 + seed*0.9;
+        let px=null, py=null;
+        const STEPS=26;
+        for(let s=0;s<=STEPS;s++){
+          const t=s/STEPS;
+          const th=a0 + t*TURN;
+          // wobble keeps the arms from looking like clip-art spirals
+          const r=rpx*(0.10 + 0.88*t) * (1 + 0.075*Math.sin(4*th+seed) + 0.04*Math.sin(9*th+seed*1.6));
+          const x=cx+Math.cos(th)*r, y=cy+Math.sin(th)*r;
+          if(px!==null){
+            const f=1-t;
+            c.strokeStyle="rgba(255,255,255,"+(a*0.26*(0.30+0.70*f)).toFixed(4)+")";
+            c.lineWidth=Math.max(1, rpx*0.17*(0.45+0.55*f));
+            c.beginPath(); c.moveTo(px,py); c.lineTo(x,y); c.stroke();
+          }
+          px=x; py=y;
+        }
+      }
+      c.globalCompositeOperation="source-over";
+    } else if(pat==="spotted"){
+      // Dappled light — sun through a canopy. A soft pool with irregular GAPS
+      // punched out of it, not bright blobs added on: the gaps are what make it
+      // read as leaf shadow rather than confetti.
+      c.fillStyle=softGrad(1); c.fillRect(0,0,mw,mh);
+      c.globalCompositeOperation="destination-out";
+      const N=170;
+      for(let i=0;i<N;i++){
+        // rejection-free polar placement, sqrt for even area density
+        const th=rnd()*Math.PI*2, rr=Math.sqrt(rnd())*rpx*1.02;
+        const bx=cx+Math.cos(th)*rr, by=cy+Math.sin(th)*rr;
+        const br=rpx*(0.035+rnd()*0.105);
+        const g=c.createRadialGradient(bx,by,0,bx,by,Math.max(1,br));
+        const st=(0.25+rnd()*0.45).toFixed(3);
+        g.addColorStop(0,   "rgba(0,0,0,"+st+")");
+        g.addColorStop(0.6, "rgba(0,0,0,"+(st*0.7).toFixed(3)+")");
+        g.addColorStop(1,   "rgba(0,0,0,0)");
+        c.fillStyle=g;
+        // squash each blob a little so they aren't all perfect circles
+        c.save(); c.translate(bx,by); c.rotate(rnd()*Math.PI);
+        c.scale(1, 0.6+rnd()*0.7); c.translate(-bx,-by);
+        c.fillRect(bx-br*2, by-br*2, br*4, br*4);
+        c.restore();
+      }
+      c.globalCompositeOperation="source-over";
     } else if(pat==="energy"){
       // A dim halo, jagged filaments crackling out of the middle, and a hot core.
-      const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
-      g.addColorStop(0,    "rgba(255,255,255,"+(a*0.44).toFixed(4)+")");
-      g.addColorStop(0.38, "rgba(255,255,255,"+(a*0.20).toFixed(4)+")");
-      g.addColorStop(1,    "rgba(255,255,255,0)");
-      c.fillStyle=g; c.fillRect(0,0,mw,mh);
-      const rnd=seeded(seed*13.7+1, seed*7.3+1);
+      c.fillStyle=softGrad(0.44); c.fillRect(0,0,mw,mh);
       c.globalCompositeOperation="lighter";
       c.lineCap="round"; c.lineJoin="round";
       const N=9;
@@ -480,6 +543,9 @@ window.DungeonEngine = (function(){
     }
     return lprofCv;
   }
+  // How hard to feather each painted profile: enough that the edges aren't
+  // vector-cut, little enough that the structure survives.
+  const PROFILE_BLUR = { fire:0.9, swirl:2.6, spotted:1.5, energy:1.0 };
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
   const lmaskCv = oc();
   function drawLights(){
@@ -526,16 +592,15 @@ window.DungeonEngine = (function(){
       mc.closePath(); mc.fill(); mc.restore();
       // 2 — multiply in the radial falloff
       mc.globalCompositeOperation="destination-in";
-      if(L.pattern==="textured" || L.pattern==="energy"){
-        // Painted profile — it carries angular structure a gradient cannot. The
-        // blur here softens the terrace edges just enough that they read as
-        // ragged rather than vector-cut; too much and the steps disappear.
-        lightProfile(mw, mh, (cx-bx)*k, (cy-by)*k, rpx*k, a, L.pattern, (L.id||li)+1);
-        mc.filter="blur("+(L.pattern==="energy" ? 1.0 : 0.9).toFixed(2)+"px)";
+      const pat=patOf(L);
+      if(PAINTED[pat]){
+        // Painted profile — it carries angular structure a gradient cannot.
+        lightProfile(mw, mh, (cx-bx)*k, (cy-by)*k, rpx*k, a, pat, (L.id||li)+1);
+        mc.filter="blur("+(PROFILE_BLUR[pat]||1).toFixed(2)+"px)";
         mc.drawImage(lprofCv,0,0);
         mc.filter="none";
       } else {
-        mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a,L.pattern); mc.fillRect(0,0,mw,mh);
+        mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a,pat); mc.fillRect(0,0,mw,mh);
       }
       // 3 — punch the lit pool out of the darkness
       lc.globalCompositeOperation="destination-out";
