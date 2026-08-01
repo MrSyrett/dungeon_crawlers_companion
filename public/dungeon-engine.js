@@ -1281,9 +1281,9 @@ window.DungeonEngine = (function(){
         if(a!==b && Math.hypot(rooms[a].cx-rooms[b].cx,rooms[a].cy-rooms[b].cy)<avg*5) connect(rooms[a],rooms[b]); }
     }
     else if(!organic && !doCorr && rooms.length>1){ addAdjacencyDoors(rooms); }
-    // Doors OFF ⇒ skip interior doors entirely (entrances still honour their slider).
+    // Doors OFF ⇒ no interior doors AND no entrance doors.
     map.doors = wantDoors ? finalizeDoors() : [];
-    placeEntrances(nEntrances);
+    if(wantDoors) placeEntrances(nEntrances);
     return map;
   }
 
@@ -1435,15 +1435,20 @@ window.DungeonEngine = (function(){
   // ─── Organic / cave generation ───────────────────────────────────────────
   // An irregular closed ring around (cx,cy). Radius wobbles via three low
   // harmonics with random phase, so it's lumpy but never spiky. Returns pts[].
-  function blobPts(cx,cy,rx,ry){
-    const n=12+ri(0,5);
-    const p1=rng()*6.283,p2=rng()*6.283,p3=rng()*6.283;
-    const a1=0.10+rng()*0.14, a2=0.05+rng()*0.10, a3=0.03+rng()*0.06;
+  // `wob` scales how ragged the outline is (≈0.9 ≈ the original gentle look,
+  // ≈2 = jagged rock). It's a pure radial function of θ, so the polygon is always
+  // simple (star-shaped) however high wob goes.
+  function blobPts(cx,cy,rx,ry,wob){
+    wob = wob==null ? 1 : wob;
+    const n=14+ri(0,8);
+    const p1=rng()*6.283,p2=rng()*6.283,p3=rng()*6.283,p4=rng()*6.283;
+    const a1=(0.10+rng()*0.13)*wob, a2=(0.06+rng()*0.11)*wob,
+          a3=(0.04+rng()*0.08)*wob, a4=(0.02+rng()*0.05)*wob;
     const pts=[];
     for(let i=0;i<n;i++){
       const t=i/n*6.283;
-      let rr=1+a1*Math.sin(t+p1)+a2*Math.sin(2*t+p2)+a3*Math.sin(3*t+p3);
-      if(rr<0.6) rr=0.6;
+      let rr=1+a1*Math.sin(t+p1)+a2*Math.sin(2*t+p2)+a3*Math.sin(3*t+p3)+a4*Math.sin(5*t+p4);
+      if(rr<0.45) rr=0.45;
       pts.push([ Math.round((cx+Math.cos(t)*rx*rr)*4)/4, Math.round((cy+Math.sin(t)*ry*rr)*4)/4 ]);
     }
     return pts;
@@ -1464,7 +1469,8 @@ window.DungeonEngine = (function(){
       const bb={x:x-rx,y:y-ry,w:rx*2,h:ry*2};
       const overlaps=rooms.some(r=>rectsOverlap(bb,{x:r.cx-r.rx,y:r.cy-r.ry,w:r.rx*2,h:r.ry*2}));
       if(!merge && overlaps) continue;   // spread mode keeps chambers apart
-      rooms.push({cx:x,cy:y,rx,ry,w:rx*2,h:ry*2,round:false,pts:blobPts(x,y,rx,ry)});
+      const wob=0.9+rng()*1.3;           // per-chamber: mix of gentle & jagged
+      rooms.push({cx:x,cy:y,rx,ry,w:rx*2,h:ry*2,round:false,pts:blobPts(x,y,rx,ry,wob)});
     }
   }
   // A winding cave tunnel from chamber A's centre to B's centre: a wavy ribbon
