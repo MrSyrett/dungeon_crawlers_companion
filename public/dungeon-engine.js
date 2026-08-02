@@ -741,6 +741,11 @@ window.DungeonEngine = (function(){
           sb.globalCompositeOperation="source-over"; sb.clearRect(0,0,W,H);
           sb.fillStyle="rgba(5,7,13,"+dark+")"; sb.fillRect(0,0,W,H);
           sb.globalCompositeOperation="destination-in"; sb.drawImage(buf.mask,0,0); sb.globalCompositeOperation="source-over";
+          // RESET the veil under this floor to a UNIFORM `dark`: clear it first (removes
+          // the lower light's hole entirely), then refill. Source-over alone would stack
+          // on the veil still present outside the hole, leaving the punched pool
+          // comparatively bright — a dim ghost ring of the lower light on this floor.
+          lc.globalCompositeOperation="destination-out"; lc.drawImage(buf.mask,0,0);
           lc.globalCompositeOperation="source-over"; lc.drawImage(buf.wsh,0,0);
         }
         gc.globalCompositeOperation="destination-out"; gc.drawImage(buf.mask,0,0); gc.globalCompositeOperation="source-over";
