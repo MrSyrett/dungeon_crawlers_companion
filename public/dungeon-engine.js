@@ -141,6 +141,10 @@ window.DungeonEngine = (function(){
     if(!noClear) ctx.clearRect(0,0,W,H);
     if(!noRock){
       const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
+      // Opaque base first: an imported background texture (e.g. Forgotten
+      // Adventures) carries an alpha channel, so its black regions are transparent
+      // and would otherwise show nothing through. Same fix as textured floors.
+      if(bgPat){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }
       ctx.fillStyle = bgPat || bgCol || C.rockHi; ctx.fillRect(0,0,W,H);
       if(!bgPat && !bgCol) drawDotGrid();   // dots would just fight a rock texture
     }
@@ -664,9 +668,15 @@ window.DungeonEngine = (function(){
   const lmaskCv = oc();
   function drawLights(){
     if(!map || !map.lit) return;          // works in classic mode too (v39)
-    const lights=map.lights||[];
+    // Per-layer light groups: each group's lights are occluded by that group's OWN
+    // shapes/walls, so a light inside a building keeps to the building's walls
+    // instead of being "buried" under the island room on the layer beneath it.
+    // Flat callers (GM Screen / Session Prep / plain toPNG) get one group.
+    const groups = Array.isArray(map.lightLayers) ? map.lightLayers
+                 : [{lights:map.lights||[], shapes:map.shapes, walls:map.walls}];
     const dark=Math.max(0, Math.min(1, map.darkness==null ? 0 : map.darkness));
-    if(!lights.length && dark<=0) return;
+    const totalLights = groups.reduce((n,g)=>n+((g.lights&&g.lights.length)||0),0);
+    if(!totalLights && dark<=0) return;
     sizeBufs();
     const lc=buf.light.getContext("2d"), gc=buf.ltint.getContext("2d"), mc=lmaskCv.getContext("2d");
     for(let i=0;i<2;i++){ const c=[lc,gc][i];
@@ -676,7 +686,11 @@ window.DungeonEngine = (function(){
     // Feather scales with zoom so shadows stay equally soft at any scale.
     const blur=Math.max(2.5, Math.min(22, 0.18*wpx()));
     let ux0=Infinity, uy0=Infinity, ux1=-Infinity, uy1=-Infinity;   // union of lit boxes
-    for(let li=0; li<lights.length; li++){
+    const _svS=map.shapes, _svW=map.walls;
+    for(const _g of groups){
+      map.shapes=_g.shapes||[]; map.walls=_g.walls||[]; lightSegs=null;   // occluders for THIS group only
+      const lights=_g.lights||[];
+      for(let li=0; li<lights.length; li++){
       const L=lights[li]; if(L.on===false) continue;
       const R=Math.max(0.4, L.r||6);
       const a=Math.max(0, Math.min(1, L.bright==null ? 0.85 : L.bright));
@@ -729,7 +743,9 @@ window.DungeonEngine = (function(){
       gc.globalAlpha=1; gc.globalCompositeOperation="source-over";
       if(bx<ux0)ux0=bx; if(by<uy0)uy0=by;
       if(bx+bw>ux1)ux1=bx+bw; if(by+bh>uy1)uy1=by+bh;
+      }
     }
+    map.shapes=_svS; map.walls=_svW; lightSegs=null;
     if(dark>0){
       // A transparent PNG should not come back as a sheet of dark grey — keep
       // the wash inside the floors, which is the only thing being exported.

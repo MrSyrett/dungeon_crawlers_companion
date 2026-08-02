@@ -211,17 +211,25 @@
     </div>
 
     <div class="grp">
+      <div class="grp-head" style="margin-bottom:10px">
+        <p class="grp-title" style="margin:0">Advanced</p>
+        <label class="switch" title="Textured floors, walls and background instead of the classic ink-on-parchment look">
+          <input type="checkbox" id="advToggle"><span class="slider"></span></label>
+      </div>
+      <div class="grp-head">
+        <p class="grp-title">Layers</p>
+        <button class="btn" id="layerAdd" title="Add a new layer on top" style="padding:2px 9px;font-size:12px">+ Add</button>
+      </div>
+      <div id="layerList" class="layers"></div>
+    </div>
+
+    <div class="grp">
       <div class="grp-head">
         <p class="grp-title">Tools</p>
         <div class="seg" id="modeSeg" title="Rooms: Square/Circle/Polygon draw rooms, Wall draws interior walls. Shapes: the same tools draw thin interior shapes (pillars, dais, tables, pits). Doors and stairs are unaffected either way.">
           <button type="button" data-mode="rooms" class="on">Rooms</button>
           <button type="button" data-mode="shapes">Shapes</button>
         </div>
-      </div>
-      <div class="grp-head" style="margin:-2px 0 8px">
-        <p class="grp-title" style="margin:0">Advanced</p>
-        <label class="switch" title="Textured floors, walls and background instead of the classic ink-on-parchment look">
-          <input type="checkbox" id="advToggle"><span class="slider"></span></label>
       </div>
       <div class="tools" id="toolbar">
         <div class="tool active" data-tool="select" title="Select / move (V)">
@@ -267,14 +275,6 @@
         <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
         <div id="packList" class="packs"></div>
       </div>
-    </div>
-
-    <div class="grp">
-      <div class="grp-head">
-        <p class="grp-title">Layers</p>
-        <button class="btn" id="layerAdd" title="Add a new layer on top" style="padding:2px 9px;font-size:12px">+ Add</button>
-      </div>
-      <div id="layerList" class="layers"></div>
     </div>
 
     <div class="grp" id="objGroup">
@@ -506,12 +506,13 @@
   function mkLayer(name, src){
     return { id:uid(), name:name||"Layer", visible:true,
              shapes:(src&&src.shapes)||[], walls:(src&&src.walls)||[],
-             doors:(src&&src.doors)||[], stairs:(src&&src.stairs)||[], objects:(src&&src.objects)||[] };
+             doors:(src&&src.doors)||[], stairs:(src&&src.stairs)||[], objects:(src&&src.objects)||[],
+             lights:(src&&src.lights)||[] };
   }
   function repointActive(){
     let L=map.layers.find(x=>x.id===map.activeLayer);
     if(!L){ L=map.layers[map.layers.length-1]; map.activeLayer=L.id; }
-    map.shapes=L.shapes; map.walls=L.walls; map.doors=L.doors; map.stairs=L.stairs; map.objects=L.objects;
+    map.shapes=L.shapes; map.walls=L.walls; map.doors=L.doors; map.stairs=L.stairs; map.objects=L.objects; map.lights=L.lights;
     return L;
   }
   // The single funnel — call wherever `map` is (re)assigned. Wraps a legacy flat
@@ -519,17 +520,17 @@
   // layer, and repoints the top-level arrays. Idempotent.
   function installLayers(m){
     if(!Array.isArray(m.layers) || !m.layers.length){
-      m.layers = [ mkLayer("Base", {shapes:m.shapes,walls:m.walls,doors:m.doors,stairs:m.stairs,objects:m.objects}) ];
+      m.layers = [ mkLayer("Base", {shapes:m.shapes,walls:m.walls,doors:m.doors,stairs:m.stairs,objects:m.objects,lights:m.lights}) ];
     }
     for(const L of m.layers){
       if(L.id==null) L.id=uid();
       if(L.name==null) L.name="Layer";
       if(L.visible==null) L.visible=true;
-      for(const k of ["shapes","walls","doors","stairs","objects"]) if(!Array.isArray(L[k])) L[k]=[];
+      for(const k of ["shapes","walls","doors","stairs","objects","lights"]) if(!Array.isArray(L[k])) L[k]=[];
     }
     if(!m.layers.some(L=>L.id===m.activeLayer)) m.activeLayer=m.layers[m.layers.length-1].id;
     const A=m.layers.find(L=>L.id===m.activeLayer);
-    m.shapes=A.shapes; m.walls=A.walls; m.doors=A.doors; m.stairs=A.stairs; m.objects=A.objects;
+    m.shapes=A.shapes; m.walls=A.walls; m.doors=A.doors; m.stairs=A.stairs; m.objects=A.objects; m.lights=A.lights;
   }
   function setActiveLayer(id){
     if(!map.layers || !map.layers.some(L=>L.id===id) || id===map.activeLayer){ syncLayersUI(); return; }
@@ -851,8 +852,9 @@
     // One global lights/shadows overlay over the finished stack, occluded by the
     // union of every visible layer's walls/shapes.
     if(map.lit || (map.shadowsOn && (map.shadows||[]).length)){
-      const occ=unionOccluders(vis);
-      const sub=Object.assign({}, map, {shapes:occ.shapes, walls:occ.walls, doors:[], stairs:[], objects:[]});
+      // Lights per visible layer, each occluded by its OWN walls; shadows global.
+      const sub=Object.assign({}, map, {shapes:[], walls:[], doors:[], stairs:[], objects:[], lights:[],
+        lightLayers: vis.map(L=>({lights:L.lights||[], shapes:L.shapes||[], walls:L.walls||[]}))});
       const opt={cam,W,H,DPR,theme, tex, overlayOnly:true};
       if(useEngine) window.DungeonEngine.renderTo(ctx, sub, opt);
       else drawLocal(sub, opt);
@@ -901,6 +903,7 @@
     if(!renderNoClear) ctx.clearRect(0,0,W,H);
     if(!noRock){
       const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
+      if(bgPat){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }   // opaque base under an imported (FA) bg texture's alpha
       ctx.fillStyle = bgPat || bgCol || C.rockHi; ctx.fillRect(0,0,W,H);
       if(!bgPat && !bgCol) drawDotGrid();   // dots would just fight a rock texture
     }
@@ -1429,9 +1432,14 @@
   const lmaskCv = oc();
   function drawLights(){
     if(!map || !map.lit) return;          // works in classic mode too (v39)
-    const lights=map.lights||[];
+    // Per-layer light groups (mirror of dungeon-engine.js): each group's lights are
+    // occluded by that group's OWN shapes/walls, so a light in a building isn't
+    // buried under the island room below it. Flat callers get one group.
+    const groups = Array.isArray(map.lightLayers) ? map.lightLayers
+                 : [{lights:map.lights||[], shapes:map.shapes, walls:map.walls}];
     const dark=Math.max(0, Math.min(1, map.darkness==null ? 0 : map.darkness));
-    if(!lights.length && dark<=0) return;
+    const totalLights = groups.reduce((n,g)=>n+((g.lights&&g.lights.length)||0),0);
+    if(!totalLights && dark<=0) return;
     sizeBufs();
     const lc=buf.light.getContext("2d"), gc=buf.ltint.getContext("2d"), mc=lmaskCv.getContext("2d");
     for(let i=0;i<2;i++){ const c=[lc,gc][i];
@@ -1441,7 +1449,11 @@
     // Feather scales with zoom so shadows stay equally soft at any scale.
     const blur=Math.max(2.5, Math.min(22, 0.18*wpx()));
     let ux0=Infinity, uy0=Infinity, ux1=-Infinity, uy1=-Infinity;   // union of lit boxes
-    for(let li=0; li<lights.length; li++){
+    const _svS=map.shapes, _svW=map.walls;
+    for(const _g of groups){
+      map.shapes=_g.shapes||[]; map.walls=_g.walls||[]; lightSegs=null;   // occluders for THIS group only
+      const lights=_g.lights||[];
+      for(let li=0; li<lights.length; li++){
       const L=lights[li]; if(L.on===false) continue;
       const R=Math.max(0.4, L.r||6);
       const a=Math.max(0, Math.min(1, L.bright==null ? 0.85 : L.bright));
@@ -1494,7 +1506,9 @@
       gc.globalAlpha=1; gc.globalCompositeOperation="source-over";
       if(bx<ux0)ux0=bx; if(by<uy0)uy0=by;
       if(bx+bw>ux1)ux1=bx+bw; if(by+bh>uy1)uy1=by+bh;
+      }
     }
+    map.shapes=_svS; map.walls=_svW; lightSegs=null;
     if(dark>0){
       // A transparent PNG should not come back as a sheet of dark grey — keep
       // the wash inside the floors, which is the only thing being exported.
@@ -3054,7 +3068,7 @@
   function serializeMap(){
     // Persist layers as the source of truth; the top-level shapes/walls/doors/
     // stairs/objects are only references to the active layer, so strip them.
-    const {shapes,walls,doors,stairs,objects, ...rest}=map;
+    const {shapes,walls,doors,stairs,objects,lights, ...rest}=map;   // all derived from the active layer
     return JSON.stringify(rest);
   }
   function snapshot(){ return serializeMap(); }
@@ -3117,7 +3131,7 @@
   function allIds(){
     const ids=[];
     for(const L of (map.layers||[map])){
-      for(const o of [...(L.shapes||[]),...(L.walls||[]),...(L.doors||[]),...(L.stairs||[]),...(L.objects||[])]) ids.push(o.id||0);
+      for(const o of [...(L.shapes||[]),...(L.walls||[]),...(L.doors||[]),...(L.stairs||[]),...(L.objects||[]),...(L.lights||[])]) ids.push(o.id||0);
       if(L.id!=null) ids.push(L.id);              // layer ids share the uid() space
     }
     return ids;
@@ -4570,9 +4584,9 @@
       for(const d of (L.doors||[])) pts.push([d.x,d.y]);
       for(const s of (L.stairs||[])){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
         else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
+      if(map.lit) for(const lt of (L.lights||[])) pts.push([lt.x,lt.y]);         // lights are per-layer now
     }
-    if(map.lit) for(const L of (map.lights||[])) pts.push([L.x,L.y]);            // lights/shadows are global
-    for(const sd of (map.shadows||[])){ const b=objBox(sd); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
+    for(const sd of (map.shadows||[])){ const b=objBox(sd); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }   // shadows still global
     if(!pts.length) return null;
     const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
     return {x:Math.min(...xs),y:Math.min(...ys),X:Math.max(...xs),Y:Math.max(...ys)};
