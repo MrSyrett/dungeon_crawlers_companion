@@ -25,7 +25,21 @@ model User {
   campaigns Campaign[]
   homebrew  Homebrew[]
   vttTokens VttToken[]
+  passwordResetTokens PasswordResetToken[]
   rulebookAccess RulebookAccess[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Session {
