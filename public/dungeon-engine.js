@@ -155,13 +155,14 @@ window.DungeonEngine = (function(){
       // floor mask (white union)
       const m=buf.mask.getContext("2d"); m.setTransform(1,0,0,1,0,0);
       m.clearRect(0,0,W,H); m.fillStyle="#fff"; m.beginPath();
-      for(const sh of shapes){ if(sh.deco) continue; shapePath(m, sh); } m.fill("nonzero");
+      for(const sh of shapes){ if(!shHasFloor(sh)) continue; shapePath(m, sh); } m.fill("nonzero");
       // Floors are PER-SHAPE. Walk the shapes in z-order and batch CONSECUTIVE
       // runs that share a fill: the common single-floor map still costs one pass
       // (and renders byte-identically to before), while a mixed map stays correct
-      // — a later shape paints over an earlier one exactly as it was drawn.
+      // — a later shape paints over an earlier one exactly as it was drawn. Floor-
+      // bearing deco shapes (a dais, a rug) paint here too, in z-order.
       const runs=[];
-      for(const sh of shapes){ if(sh.deco) continue;
+      for(const sh of shapes){ if(!shHasFloor(sh)) continue;
         const ft=shapeFloorTex(sh), last=runs[runs.length-1];
         if(last && last.t===ft) last.list.push(sh); else runs.push({t:ft, list:[sh]});
       }
@@ -234,15 +235,24 @@ window.DungeonEngine = (function(){
     if(amt<=0) return;
     const px = WALL_SHADOW_CELLS*wpx();
     if(px < 1.5) return;                          // too zoomed out to read as anything
+    // Only shapes that have BOTH a wall and a floor get an inner band — a floor-only
+    // shape has no wall to cast it, a wall-only shape no floor to cast it onto.
+    const banded=sh=>shHasWall(sh)&&shHasFloor(sh);
     let any=false;
-    for(const sh of map.shapes) if(!sh.deco){ any=true; break; }
+    for(const sh of map.shapes) if(banded(sh)){ any=true; break; }
     if(!any) return;
     sizeBufs();
+    // Its own floor mask (the render mask now includes wall-less floors), built into
+    // buf.erode (free until drawWalls runs after this).
+    const fm=buf.erode.getContext("2d"); fm.setTransform(1,0,0,1,0,0); fm.globalAlpha=1; fm.filter="none";
+    fm.globalCompositeOperation="source-over"; fm.clearRect(0,0,W,H);
+    fm.fillStyle="#fff"; fm.beginPath();
+    for(const sh of map.shapes){ if(banded(sh)) shapePath(fm, sh); } fm.fill("nonzero");
     const c=buf.wsh.getContext("2d");
     c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none";
     c.globalCompositeOperation="source-over"; c.clearRect(0,0,W,H);
     c.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; c.fillRect(0,0,W,H);
-    c.globalCompositeOperation="destination-in"; c.drawImage(buf.mask,0,0);   // floors only
+    c.globalCompositeOperation="destination-in"; c.drawImage(buf.erode,0,0);   // walled floors only
     // …then carve the middle of the room back out with a blurred inset fill,
     // which leaves exactly the feathered band along the boundary.
     c.globalCompositeOperation="destination-out";
@@ -252,7 +262,7 @@ window.DungeonEngine = (function(){
     // the wall's inner face inward. Insetting by the band alone puts most of it
     // underneath the stonework and only a sliver survives — and a thick cave wall
     // would swallow it entirely.
-    for(const sh of map.shapes){ if(sh.deco) continue;
+    for(const sh of map.shapes){ if(!banded(sh)) continue;
       fillInsetShape(c, sh, halfCellsFor(shapeWallTex(sh)) + WALL_SHADOW_CELLS); }
     c.filter="none"; c.globalCompositeOperation="source-over";
     ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
@@ -354,7 +364,7 @@ window.DungeonEngine = (function(){
     if(lightSegs) return lightSegs;
     lightSegs=[];
     const rooms=[], rb=[];
-    for(const sh of map.shapes){ if(sh.deco) continue; rooms.push(sh); rb.push(bounds(sh,"shape")); }
+    for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue; rooms.push(sh); rb.push(bounds(sh,"shape")); }
     const hits=(bx0,by0,bx1,by1,i)=>{ const b=rb[i];
       return !!b && bx0<=b.x+b.w && bx1>=b.x && by0<=b.y+b.h && by1>=b.y; };
     for(let si=0; si<rooms.length; si++){
@@ -735,7 +745,7 @@ window.DungeonEngine = (function(){
         const fmc=buf.mask.getContext("2d"); fmc.setTransform(1,0,0,1,0,0); fmc.globalAlpha=1; fmc.filter="none";
         fmc.globalCompositeOperation="source-over"; fmc.clearRect(0,0,W,H);
         fmc.fillStyle="#fff"; fmc.beginPath();
-        for(const sh of (_g.shapes||[])){ if(sh.deco) continue; shapePath(fmc, sh); } fmc.fill("nonzero");
+        for(const sh of (_g.shapes||[])){ if(!shHasFloor(sh)) continue; shapePath(fmc, sh); } fmc.fill("nonzero");
         if(dark>0){
           const sb=buf.wsh.getContext("2d"); sb.setTransform(1,0,0,1,0,0); sb.globalAlpha=1; sb.filter="none";
           sb.globalCompositeOperation="source-over"; sb.clearRect(0,0,W,H);
@@ -815,7 +825,7 @@ window.DungeonEngine = (function(){
         const um=buf.mask.getContext("2d"); um.setTransform(1,0,0,1,0,0); um.globalAlpha=1; um.filter="none";
         um.globalCompositeOperation="source-over"; um.clearRect(0,0,W,H);
         um.fillStyle="#fff"; um.beginPath();
-        for(const sh of map.shapes){ if(sh.deco) continue; shapePath(um, sh); } um.fill("nonzero");
+        for(const sh of map.shapes){ if(!shHasFloor(sh)) continue; shapePath(um, sh); } um.fill("nonzero");
         lc.globalCompositeOperation="destination-in"; lc.drawImage(buf.mask,0,0);
         lc.globalCompositeOperation="source-over";
       }
@@ -986,7 +996,7 @@ window.DungeonEngine = (function(){
       doorHalf = new Map();
       for(const dd of map.doors){
         let best=null, bd=Infinity;
-        for(const sh of map.shapes){ if(sh.deco) continue;
+        for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue;
           const o=shapeOutline(sh);
           for(let i=0;i<o.length;i++){ const a=o[i], b=o[(i+1)%o.length];
             const q=segDist(dd.x,dd.y,a[0],a[1],b[0],b[1]);
@@ -1098,20 +1108,27 @@ window.DungeonEngine = (function(){
     return true;
   }
 
+  // Fill / stroke of a shape, independent of the Rooms/Shapes (deco) axis:
+  //   sh.fill = "both" (floor+wall) | "wall" (stroke only) | "floor" (fill only)
+  // Legacy shapes carry no `fill`: a room (non-deco) is floor+wall, a deco shape is
+  // wall-only — so the defaults reproduce the old behaviour exactly.
+  function shHasFloor(sh){ return sh.fill ? sh.fill!=="wall"  : !sh.deco; }
+  function shHasWall(sh){  return sh.fill ? sh.fill!=="floor" : true; }
   function drawWalls(){
     if(!map.shapes.length) return;
     const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
     wc.globalCompositeOperation="source-over"; wc.fillStyle=C.ink;
     // Per-shape outlines (exact circles) stroked with THAT shape's wall texture,
     // then the inset-union erase below drops wall that lies inside another room —
-    // same merge rule as the ink renderer.
-    for(const sh of map.shapes){ if(sh.deco) continue;
+    // same merge rule as the ink renderer. Occluding (Room) walls only; deco shape
+    // walls draw in drawDecoShapes, and a floor-only shape has no wall at all.
+    for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue;
       const wt=shapeWallTex(sh), hp=halfPxFor(wt);
       if(wt && stripPath(wc, outlineDense(sh), true, wt, hp)) continue;
       roughRing(wc, shapeOutline(sh), hp); }
     const ec=buf.erode.getContext("2d"); ec.setTransform(1,0,0,1,0,0); ec.clearRect(0,0,W,H);
     ec.globalCompositeOperation="source-over"; ec.fillStyle="#fff";
-    for(const sh of map.shapes){ if(sh.deco) continue;
+    for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue;
       fillInsetShape(ec, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
     wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
     for(const d of map.doors) punchDoorQuad(wc, d);   // opening cuts the full wall depth
@@ -1220,26 +1237,25 @@ window.DungeonEngine = (function(){
     return {x, y, w:Math.max.apply(null,xs)-x, h:Math.max.apply(null,ys)-y};
   }
 
-  // A Shapes-mode outline follows the shape's WALL texture, at half thickness —
-  // the same treatment the thin Wall tool gets, so a pillar or dais reads as a
-  // thin course of the same masonry rather than an ink line on a textured map.
-  // Falls back to the rough ink ring when there's no texture.
-  function drawDecoRing(c, sh, inkHalf){
+  // A Shapes-mode outline follows the shape's WALL texture — now at the SAME
+  // thickness as a room wall (Michael asked that shape walls match rooms), so a
+  // divider or pillar reads as a full course of the same masonry. Falls back to the
+  // rough ink ring (at the room-wall thickness) when there's no texture.
+  function drawDecoRing(c, sh){
     const wt=shapeWallTex(sh);
-    if(wt && stripPath(c, outlineDense(sh), true, wt, Math.max(1, halfPxFor(wt)*0.5))) return;
-    roughRing(c, shapeOutline(sh), inkHalf);
+    if(wt && stripPath(c, outlineDense(sh), true, wt, halfPxFor(wt))) return;
+    roughRing(c, shapeOutline(sh), halfPxFor(wt));   // wt null ⇒ room-wall ink thickness
   }
 
   function drawDecoShapes(){
     let any=false;
-    for(const s of map.shapes){ if(s.deco){ any=true; break; } }
+    for(const s of map.shapes){ if(s.deco && shHasWall(s)){ any=true; break; } }
     if(!any) return;
-    const thin=Math.max(0.6,0.85*cam.scale);
     // Deco (Shapes-mode) shapes draw wherever placed — inside a room or out in the
-    // open. The old build clipped them to the room interior (a shape entirely
-    // outside drew nothing), which blocked exterior maps; that clip was dropped.
+    // open. Their floor (if any) is painted in the base floor pass; here we draw the
+    // non-occluding wall outline for the ones that have a wall.
     ctx.save(); ctx.fillStyle=C.ink;
-    for(const sh of map.shapes){ if(sh.deco) drawDecoRing(ctx, sh, thin); }
+    for(const sh of map.shapes){ if(sh.deco && shHasWall(sh)) drawDecoRing(ctx, sh); }
     ctx.restore(); }
 
   // Door LEAF half-thickness, in world cells — CONSTANT. It deliberately does not

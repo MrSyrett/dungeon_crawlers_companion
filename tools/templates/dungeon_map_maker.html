@@ -236,6 +236,12 @@
       <div class="grp-head">
         <p class="grp-title">Edit</p>
       </div>
+      <label class="fld" style="margin-top:0" title="What a new room or shape is made of: Both (floor + wall), Walls only (a stroke — a divider or pillar), or Floors only (a fill — floor with no wall).">Draw as</label>
+      <div class="seg" id="fillSeg" style="display:flex;width:100%;margin-bottom:8px">
+        <button type="button" data-fill="both" class="on" style="flex:1">Both</button>
+        <button type="button" data-fill="wall" style="flex:1">Walls</button>
+        <button type="button" data-fill="floor" style="flex:1">Floors</button>
+      </div>
       <div class="row">
         <button class="btn" id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
         <button class="btn" id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
@@ -502,7 +508,8 @@
   // ── State ─────────────────────────────────────────────────────────
   let map = blankMap();
   let tool = "select";
-  let drawMode = "rooms";                    // "rooms" | "shapes" — Square/Circle/Polygon/Wall target
+  let drawMode = "rooms";                    // "rooms" | "shapes" — occlusion axis (rooms occlude light)
+  let fillMode = "both";                     // "both" | "wall" | "floor" — fill/stroke of a new shape
   let snapOn = true;                        // snap-to-grid toggle
   let cam = { x: 0, y: 0, scale: 1 };     // world→screen: s = (w - cam)*scale ... (see helpers)
   let history = [], future = [];
@@ -949,13 +956,14 @@
       // floor mask (white union)
       const m=buf.mask.getContext("2d"); m.setTransform(1,0,0,1,0,0);
       m.clearRect(0,0,W,H); m.fillStyle="#fff"; m.beginPath();
-      for(const sh of shapes){ if(sh.deco) continue; shapePath(m, sh); } m.fill("nonzero");
+      for(const sh of shapes){ if(!shHasFloor(sh)) continue; shapePath(m, sh); } m.fill("nonzero");
       // Floors are PER-SHAPE. Walk the shapes in z-order and batch CONSECUTIVE
       // runs that share a fill: the common single-floor map still costs one pass
       // (and renders byte-identically to before), while a mixed map stays correct
-      // — a later shape paints over an earlier one exactly as it was drawn.
+      // — a later shape paints over an earlier one exactly as it was drawn. Floor-
+      // bearing deco shapes (a dais, a rug) paint here too, in z-order.
       const runs=[];
-      for(const sh of shapes){ if(sh.deco) continue;
+      for(const sh of shapes){ if(!shHasFloor(sh)) continue;
         const ft=shapeFloorTex(sh), last=runs[runs.length-1];
         if(last && last.t===ft) last.list.push(sh); else runs.push({t:ft, list:[sh]});
       }
@@ -1032,15 +1040,24 @@
     if(amt<=0) return;
     const px = WALL_SHADOW_CELLS*wpx();
     if(px < 1.5) return;                          // too zoomed out to read as anything
+    // Only shapes that have BOTH a wall and a floor get an inner band — a floor-only
+    // shape has no wall to cast it, a wall-only shape no floor to cast it onto.
+    const banded=sh=>shHasWall(sh)&&shHasFloor(sh);
     let any=false;
-    for(const sh of map.shapes) if(!sh.deco){ any=true; break; }
+    for(const sh of map.shapes) if(banded(sh)){ any=true; break; }
     if(!any) return;
     sizeBufs();
+    // Its own floor mask (the render mask now includes wall-less floors), built into
+    // buf.erode (free until drawWalls runs after this).
+    const fm=buf.erode.getContext("2d"); fm.setTransform(1,0,0,1,0,0); fm.globalAlpha=1; fm.filter="none";
+    fm.globalCompositeOperation="source-over"; fm.clearRect(0,0,W,H);
+    fm.fillStyle="#fff"; fm.beginPath();
+    for(const sh of map.shapes){ if(banded(sh)) shapePath(fm, sh); } fm.fill("nonzero");
     const c=buf.wsh.getContext("2d");
     c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none";
     c.globalCompositeOperation="source-over"; c.clearRect(0,0,W,H);
     c.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; c.fillRect(0,0,W,H);
-    c.globalCompositeOperation="destination-in"; c.drawImage(buf.mask,0,0);   // floors only
+    c.globalCompositeOperation="destination-in"; c.drawImage(buf.erode,0,0);   // walled floors only
     // …then carve the middle of the room back out with a blurred inset fill,
     // which leaves exactly the feathered band along the boundary.
     c.globalCompositeOperation="destination-out";
@@ -1050,7 +1067,7 @@
     // the wall's inner face inward. Insetting by the band alone puts most of it
     // underneath the stonework and only a sliver survives — and a thick cave wall
     // would swallow it entirely.
-    for(const sh of map.shapes){ if(sh.deco) continue;
+    for(const sh of map.shapes){ if(!banded(sh)) continue;
       fillInsetShape(c, sh, halfCellsFor(shapeWallTex(sh)) + WALL_SHADOW_CELLS); }
     c.filter="none"; c.globalCompositeOperation="source-over";
     ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
@@ -1152,7 +1169,7 @@
     if(lightSegs) return lightSegs;
     lightSegs=[];
     const rooms=[], rb=[];
-    for(const sh of map.shapes){ if(sh.deco) continue; rooms.push(sh); rb.push(bounds(sh,"shape")); }
+    for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue; rooms.push(sh); rb.push(bounds(sh,"shape")); }
     const hits=(bx0,by0,bx1,by1,i)=>{ const b=rb[i];
       return !!b && bx0<=b.x+b.w && bx1>=b.x && by0<=b.y+b.h && by1>=b.y; };
     for(let si=0; si<rooms.length; si++){
@@ -1532,7 +1549,7 @@
         const fmc=buf.mask.getContext("2d"); fmc.setTransform(1,0,0,1,0,0); fmc.globalAlpha=1; fmc.filter="none";
         fmc.globalCompositeOperation="source-over"; fmc.clearRect(0,0,W,H);
         fmc.fillStyle="#fff"; fmc.beginPath();
-        for(const sh of (_g.shapes||[])){ if(sh.deco) continue; shapePath(fmc, sh); } fmc.fill("nonzero");
+        for(const sh of (_g.shapes||[])){ if(!shHasFloor(sh)) continue; shapePath(fmc, sh); } fmc.fill("nonzero");
         if(dark>0){
           const sb=buf.wsh.getContext("2d"); sb.setTransform(1,0,0,1,0,0); sb.globalAlpha=1; sb.filter="none";
           sb.globalCompositeOperation="source-over"; sb.clearRect(0,0,W,H);
@@ -1612,7 +1629,7 @@
         const um=buf.mask.getContext("2d"); um.setTransform(1,0,0,1,0,0); um.globalAlpha=1; um.filter="none";
         um.globalCompositeOperation="source-over"; um.clearRect(0,0,W,H);
         um.fillStyle="#fff"; um.beginPath();
-        for(const sh of map.shapes){ if(sh.deco) continue; shapePath(um, sh); } um.fill("nonzero");
+        for(const sh of map.shapes){ if(!shHasFloor(sh)) continue; shapePath(um, sh); } um.fill("nonzero");
         lc.globalCompositeOperation="destination-in"; lc.drawImage(buf.mask,0,0);
         lc.globalCompositeOperation="source-over";
       }
@@ -1806,7 +1823,7 @@
       doorHalf = new Map();
       for(const dd of map.doors){
         let best=null, bd=Infinity;
-        for(const sh of map.shapes){ if(sh.deco) continue;
+        for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue;
           const o=shapeOutline(sh);
           for(let i=0;i<o.length;i++){ const a=o[i], b=o[(i+1)%o.length];
             const q=distToSeg(dd.x,dd.y,a[0],a[1],b[0],b[1]);
@@ -1921,14 +1938,21 @@
     return true;
   }
 
+  // Fill / stroke of a shape, independent of the Rooms/Shapes (deco) axis:
+  //   sh.fill = "both" (floor+wall) | "wall" (stroke only) | "floor" (fill only)
+  // Legacy shapes carry no `fill`: a room (non-deco) is floor+wall, a deco shape is
+  // wall-only — so the defaults reproduce the old behaviour exactly.
+  function shHasFloor(sh){ return sh.fill ? sh.fill!=="wall"  : !sh.deco; }
+  function shHasWall(sh){  return sh.fill ? sh.fill!=="floor" : true; }
   function drawWalls(){
     if(!map.shapes.length) return;
     const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
     wc.globalCompositeOperation="source-over"; wc.fillStyle=C.ink;
     // Per-shape outlines (exact circles) stroked with THAT shape's wall texture,
     // then the inset-union erase below drops wall that lies inside another room —
-    // same merge rule as the ink renderer.
-    for(const sh of map.shapes){ if(sh.deco) continue;
+    // same merge rule as the ink renderer. Occluding (Room) walls only; deco shape
+    // walls draw in drawDecoShapes, and a floor-only shape has no wall at all.
+    for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue;
       const wt=shapeWallTex(sh), hp=halfPxFor(wt);
       if(wt && stripPath(wc, outlineDense(sh), true, wt, hp)) continue;
       roughRing(wc, shapeOutline(sh), hp); }
@@ -1938,7 +1962,7 @@
     // away from that edge, leaving a gap there, so the shared wall survives.
     const ec=buf.erode.getContext("2d"); ec.setTransform(1,0,0,1,0,0); ec.clearRect(0,0,W,H);
     ec.globalCompositeOperation="source-over"; ec.fillStyle="#fff";
-    for(const sh of map.shapes){ if(sh.deco) continue;   // inset > that shape's own wall half-width
+    for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue;   // inset > that shape's own wall half-width
       fillInsetShape(ec, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
     wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
     for(const d of map.doors) punchDoorQuad(wc, d);   // opening cuts the full wall depth
@@ -2052,23 +2076,21 @@
   // the same treatment the thin Wall tool gets, so a pillar or dais reads as a
   // thin course of the same masonry rather than an ink line on a textured map.
   // Falls back to the rough ink ring when there's no texture.
-  function drawDecoRing(c, sh, inkHalf){
+  function drawDecoRing(c, sh){
     const wt=shapeWallTex(sh);
-    if(wt && stripPath(c, outlineDense(sh), true, wt, Math.max(1, halfPxFor(wt)*0.5))) return;
-    roughRing(c, shapeOutline(sh), inkHalf);
+    if(wt && stripPath(c, outlineDense(sh), true, wt, halfPxFor(wt))) return;
+    roughRing(c, shapeOutline(sh), halfPxFor(wt));   // wt null ⇒ room-wall ink thickness
   }
 
   function drawDecoShapes(){
     let any=false;
-    for(const s of map.shapes){ if(s.deco){ any=true; break; } }
+    for(const s of map.shapes){ if(s.deco && shHasWall(s)){ any=true; break; } }
     if(!any) return;
-    const thin=Math.max(0.6,0.85*cam.scale);
-    // Deco (Shapes-mode) shapes draw wherever they're placed — inside a room or
-    // out in the open. The old build clipped them to the room interior (a shape
-    // entirely outside a room drew nothing), which was useful before the Draw
-    // tool existed but blocks exterior maps; Michael asked to drop that clip.
+    // Deco (Shapes-mode) shapes draw wherever they're placed — inside a room or out
+    // in the open. Their floor (if any) is painted in the base floor pass; here we
+    // draw the non-occluding wall outline, now at full room-wall thickness.
     ctx.save(); ctx.fillStyle=C.ink;
-    for(const sh of map.shapes){ if(sh.deco) drawDecoRing(ctx, sh, thin); }
+    for(const sh of map.shapes){ if(sh.deco && shHasWall(sh)) drawDecoRing(ctx, sh); }
     ctx.restore(); }
 
   // Doors: {x,y,a,len} — a is the wall direction; a thin leaf sits in the opening.
@@ -2566,9 +2588,9 @@
     if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
     if(!dragStart){ return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
-    if(tool==="rect" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true;
+    if(tool==="rect" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true; draft.fill=fillMode;
       map.shapes.push(stampStyle(draft,"shape")); commit(); }
-    else if(tool==="circle" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true;
+    else if(tool==="circle" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true; draft.fill=fillMode;
       map.shapes.push(stampStyle(draft,"shape")); commit(); }
     else if(tool==="wall" && draft && (draft.x1!==draft.x2||draft.y1!==draft.y2)){
       pushHistory(); map.walls.push(stampStyle({id:uid(),x1:draft.x1,y1:draft.y1,x2:draft.x2,y2:draft.y2},"wall")); commit(); }
@@ -2639,7 +2661,7 @@
                                      pts[pts.length-1][1]-pts[pts.length-2][1]) < 1e-6) pts.pop();
     if(close && pts.length>2){
       pushHistory();
-      const poly={id:uid(),type:"polygon",pts}; if(drawMode==="shapes") poly.deco=true;
+      const poly={id:uid(),type:"polygon",pts}; if(drawMode==="shapes") poly.deco=true; poly.fill=fillMode;
       stampStyle(poly,"shape");
       map.shapes.push(poly); commit();
     } else if(!close && pts.length>1){
@@ -2724,7 +2746,7 @@
       if(pts.length<3){ render(); return; }
       pushHistory();
       const poly={id:uid(), type:"polygon", pts};
-      if(drawMode==="shapes") poly.deco=true;
+      if(drawMode==="shapes") poly.deco=true; poly.fill=fillMode;
       map.shapes.push(stampStyle(poly,"shape")); commit();
     } else {
       pts=round3(capPoints(chaikin(pts, false, 2), false));
@@ -3981,9 +4003,9 @@
     const st=map.style||{};
     if(st.mode!=="textured") return o;
     const p=pendingStyle();
-    // Deco shapes have no floor, but they DO take the wall texture now, so they
-    // get stamped with it like any other shape.
-    if(kind==="shape"){ o.wall=p.wall||""; if(!o.deco) o.floor=p.floor||""; }
+    // A shape takes the wall texture only if it HAS a wall, and the floor texture
+    // only if it HAS a floor — set by the Both/Walls/Floors selector via `o.fill`.
+    if(kind==="shape"){ if(shHasWall(o)) o.wall=p.wall||""; if(shHasFloor(o)) o.floor=p.floor||""; }
     else o.wall=p.wall||"";
     return o;
   }
@@ -4786,6 +4808,15 @@
       ? "Shapes mode — Square / Circle / Polygon / Draw now make thin interior shapes."
       : "Rooms mode — Square / Circle / Polygon / Draw make rooms; leave a run open and it becomes a wall."); }
   modeSeg.addEventListener("click", e=>{ const b=e.target.closest("button"); if(b) setMode(b.dataset.mode); });
+
+  // Fill / stroke of the next shape: Both (floor+wall), Walls (stroke), Floors (fill).
+  const fillSeg=document.getElementById("fillSeg");
+  function setFill(f){ fillMode=f;
+    if(fillSeg) fillSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.fill===f));
+    toast(f==="wall" ? "Walls only — the next room/shape draws just its wall (no floor)."
+        : f==="floor" ? "Floors only — the next room/shape draws just its floor (no wall)."
+        : "Both — the next room/shape draws floor and wall."); }
+  if(fillSeg) fillSeg.addEventListener("click", e=>{ const b=e.target.closest("button"); if(b) setFill(b.dataset.fill); });
 
   // ── collapsible sidebar sections ──────────────────────────────────
   // A UI preference, not map data: its own localStorage key, so it survives Clear
