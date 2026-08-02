@@ -259,16 +259,18 @@ window.DungeonEngine = (function(){
   }
 
   // ══════════════════════ SHADOWS (Advanced Mode) ══════════════════════
-  // Hand-placed shadows are DARK LIGHTS. Each casts a pool from its own point of
-  // origin, ray-marched against this layer's room outlines + walls exactly like a
-  // light (via visPoly), so an adjoining wall, a drawn wall and a polygon wall all
-  // occlude it — and, because it is NOT clipped to the floor, it stops at the wall
-  // it can't see past yet spills into the open as an exterior shadow. The pool keeps
-  // the width/height/rotation the handles set (an elliptical falloff) and can take a
-  // light PATTERN. Accumulated into a scratch buffer, then multiplied over the scene
-  // so it darkens the floor texture instead of greying it out.
-  //   map.shadows[] = { id, x, y, w, h, rot, soft (0..1), strength (0..1),
-  //                     pattern?, color? }
+  // Hand-placed shadows are DARK LIGHTS — the exact same machinery as a light, just
+  // dark and multiplied instead of bright and punched-out. Each casts a radial pool
+  // from its own point of origin, ray-marched against this layer's room outlines +
+  // walls (via visPoly), so an adjoining wall, a drawn wall and a polygon wall all
+  // occlude it — and, because it is NOT clipped to the floor, it stops at the wall it
+  // can't see past yet spills into the open as an exterior shadow. Same falloff
+  // PATTERNS as a light (soft/hard/fire/beam/…), the same radius, and a Beam pattern
+  // that aims by S.rot / S.spread. Accumulated into a scratch buffer, then multiplied
+  // over the scene so it darkens the floor texture instead of greying it out.
+  //   map.shadows[] = { id, x, y, r (cells), strength (0..1 = darkness),
+  //                     pattern?, rot?, spread?, color? }
+  // Legacy ellipse shadows (w/h/soft, no r) still load: r = max(w,h)/2.
   // Drawn per layer, inside the layer's own pass, so a lower layer's shadow never
   // lands on the layers above it (the upper layer's opaque floor paints over it).
   function drawShadows(){
@@ -285,12 +287,11 @@ window.DungeonEngine = (function(){
     let any=false;
     for(let si=0;si<list.length;si++){
       const S=list[si];
+      if(S.on===false) continue;
       const a=Math.max(0, Math.min(1, S.strength==null ? 0.6 : S.strength));
       if(a<=0) continue;
-      const Rw=Math.max(0.05, (S.w||1.6)/2), Rh=Math.max(0.05, (S.h||1.1)/2);
-      const R=Math.max(Rw,Rh);                        // occlusion reach = the pool's larger radius
+      const R=Math.max(0.4, S.r!=null ? S.r : Math.max((S.w||1.6),(S.h||1.1))/2);
       const cs=toScreen(S.x,S.y), cx=cs[0], cy=cs[1], rpx=R*wpx();
-      if(rpx<0.6) continue;
       const pad=blur*2+6;
       const bx=Math.max(0,Math.floor(cx-rpx-pad)), by=Math.max(0,Math.floor(cy-rpx-pad));
       const bw=Math.min(W,Math.ceil(cx+rpx+pad))-bx, bh=Math.min(H,Math.ceil(cy+rpx+pad))-by;
@@ -307,14 +308,14 @@ window.DungeonEngine = (function(){
         const mx=(p[0]-bx)*k, my=(p[1]-by)*k;
         if(i===0) mc.moveTo(mx,my); else mc.lineTo(mx,my); }
       mc.closePath(); mc.fill(); mc.restore();
-      // 2 — clip the pool to its falloff: a rotated ellipse, or a painted pattern
+      // 2 — multiply in the radial falloff (or a painted / beam pattern)
       mc.globalCompositeOperation="destination-in";
       const pat=patOf(S);
       if(PAINTED[pat]){
         lightProfile(mw, mh, (cx-bx)*k, (cy-by)*k, rpx*k, a, pat, (S.id||si)+1, S.rot||0, S.spread);
         mc.filter="blur("+(PROFILE_BLUR[pat]||1).toFixed(2)+"px)"; mc.drawImage(lprofCv,0,0); mc.filter="none";
       } else {
-        shadowFalloff(mc, (cx-bx)*k, (cy-by)*k, Rw*wpx()*k, Rh*wpx()*k, S.rot||0, a, S.soft==null?0.55:S.soft);
+        mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a,pat); mc.fillRect(0,0,mw,mh);
       }
       // 3 — recolour to the shadow's own dark tone and accumulate
       mc.globalCompositeOperation="source-in";
@@ -325,22 +326,6 @@ window.DungeonEngine = (function(){
     }
     if(!any) return;
     ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
-  }
-  // Elliptical, rotated soft falloff for a hand-placed shadow — painted as a white
-  // mask (alpha carries strength; the caller recolours it). Kept separate from
-  // lightFalloff because a shadow is elliptical (w×h handles) where a light is round.
-  function shadowFalloff(c, cx, cy, rxpx, rypx, rot, a, soft){
-    soft=Math.max(0, Math.min(1, soft));
-    const core=0.92*(1-soft);                         // opaque out to here, then fade
-    c.save(); c.translate(cx,cy); if(rot) c.rotate(rot);
-    c.scale(Math.max(0.001,rxpx), Math.max(0.001,rypx));
-    const g=c.createRadialGradient(0,0,0,0,0,1);
-    g.addColorStop(0, "rgba(255,255,255,"+a.toFixed(4)+")");
-    if(core>0.001) g.addColorStop(core, "rgba(255,255,255,"+a.toFixed(4)+")");
-    g.addColorStop(core+(1-core)*0.55, "rgba(255,255,255,"+(a*0.5).toFixed(4)+")");
-    g.addColorStop(1, "rgba(255,255,255,0)");
-    c.fillStyle=g; c.beginPath(); c.arc(0,0,1,0,6.2832); c.fill();
-    c.restore();
   }
 
   // ══════════════════════ LIGHTS (Advanced Mode) ══════════════════════
