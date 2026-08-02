@@ -87,6 +87,9 @@
   .btn.gold:hover{filter:brightness(1.07)}
   .btn.wide{width:100%}
   label.fld{display:block;font-size:11px;color:var(--muted);margin:10px 0 4px}
+  .asset-count{font-size:10.5px;color:var(--muted);margin:10px 0 6px;letter-spacing:.02em}
+  .asset-count.warn{color:var(--gold)}
+  .asset-count.over{color:#e0705a}
   label.fld b{color:var(--ink);font-weight:600;float:right}
   input[type=range]{width:100%;accent-color:var(--gold);margin:0}
   input[type=number],input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line);
@@ -247,7 +250,8 @@
         <button class="pick" id="floorSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <label class="fld">Background</label>
         <button class="pick" id="bgSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
-        <div class="row" style="margin-top:10px">
+        <div id="assetCount" class="asset-count" title="Objects imported across all loaded packs, against the per-pack import cap">Objects loaded: 0 / 60,000</div>
+        <div class="row">
           <button class="btn" id="packAdd">+ Asset pack</button>
         </div>
         <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
@@ -344,29 +348,30 @@
 
     <div class="grp">
       <div class="grp-head sec" data-sec="gen" role="button" tabindex="0" aria-expanded="true">
-        <p class="grp-title">Random Dungeon</p><span class="caret">&#9662;</span>
+        <p class="grp-title">Random Map</p><span class="caret">&#9662;</span>
       </div>
       <div id="genBody">
-      <label class="fld">Rooms <b id="roomsV">8</b></label>
+      <label class="fld">Rooms/Areas <b id="roomsV">8</b></label>
       <input type="range" id="rooms" min="2" max="24" value="8">
-      <label class="fld">Room size <b id="sizeV">Medium</b></label>
+      <label class="fld">Room/Area size <b id="sizeV">Medium</b></label>
       <input type="range" id="rsize" min="1" max="5" value="3">
       <label class="fld">Layout <b id="spreadV">Balanced</b></label>
       <input type="range" id="spread" min="1" max="5" value="3">
       <label class="fld">Entrances <b id="entrancesV">2</b></label>
       <input type="range" id="entrances" min="0" max="6" value="2">
       <div class="chk-row">
-        <label class="chk" title="Connect rooms with passages (winding tunnels in Organic mode)"><input type="checkbox" id="corridors" checked> Corridors</label>
-        <label class="chk" title="Allow round rooms (classic mode only)"><input type="checkbox" id="roundish"> Round</label>
+        <label class="chk" title="Connect areas with passages (winding tunnels in Organic mode)"><input type="checkbox" id="corridors" checked> Corridors</label>
+        <label class="chk" title="Areas butt up against each other (in Organic mode, blobs merge into one cavern). Off = areas sit apart as separate islands."><input type="checkbox" id="structure"> Structure</label>
       </div>
       <div class="chk-row">
         <label class="chk" title="Irregular cave chambers instead of rooms — organic caverns"><input type="checkbox" id="organic"> Organic</label>
-        <label class="chk" title="Place doors in passage openings"><input type="checkbox" id="doorsChk" checked> Doors</label>
+        <label class="chk" title="Allow round rooms (classic mode only)"><input type="checkbox" id="roundish"> Round</label>
       </div>
       <div class="chk-row">
         <label class="chk" title="Face all generated textured walls outward (counter-clockwise). Off = inward (clockwise). Keeps a generated cave's walls all facing the same way."><input type="checkbox" id="exterior"> Exterior</label>
+        <label class="chk" title="Place doors in passage openings"><input type="checkbox" id="doorsChk" checked> Doors</label>
       </div>
-      <button class="btn gold wide" id="generate" style="margin-top:12px">🎲 Generate Dungeon</button>
+      <button class="btn gold wide" id="generate" style="margin-top:12px">🎲 Generate Map</button>
       </div>
     </div>
 
@@ -2491,6 +2496,7 @@
       layout: +$("spread").value,
       entrances: +$("entrances").value,
       corridors: $("corridors").checked,
+      structure: $("structure").checked,
       roundRooms: $("roundish").checked,
       organic: $("organic").checked,
       doors: $("doorsChk").checked,
@@ -2536,6 +2542,9 @@
     const [smin,smax]=SIZE_MAP[opts.size];
     const spread=opts.layout;
     const doCorr=opts.corridors;
+    // Structure (butt/merge) decoupled from Corridors (passages); legacy callers
+    // fall back to the old coupling. Mirror of the engine — keep in sync.
+    const structure = (opts.structure !== undefined) ? !!opts.structure : !doCorr;
     const roundOk=opts.roundRooms;
     const organic=!!opts.organic;
     const wantDoors=opts.doors!==false;
@@ -2550,10 +2559,10 @@
     const field=Math.max(avg, Math.round(avg*Math.sqrt(nRooms/density)/2));
     const rooms=[];
     if(organic){
-      // Cave chambers: irregular blobs. Corridors ON ⇒ spread + winding tunnels;
-      // OFF ⇒ grown overlapping into one merged cavern.
-      placeBlobs(rooms, nRooms, smin, smax, field, !doCorr);
-    } else if(!doCorr){
+      // Cave chambers: irregular blobs. Structure ON ⇒ merged overlapping cavern;
+      // OFF ⇒ scattered islands (Corridors then joins them with winding tunnels).
+      placeBlobs(rooms, nRooms, smin, smax, field, structure);
+    } else if(structure){
       // Adjacency mode: every room butts flush against another, sharing a wall,
       // so no room floats alone. Rectangular only — a round room can only ever
       // touch a straight wall at a single point, never share a segment.
@@ -2577,9 +2586,9 @@
       else map.shapes.push({id:uid(),type:"rect",x:r.x,y:r.y,w:r.w,h:r.h});
     }
     // connect via nearest-neighbour spanning tree (winding tunnels for caves,
-    // rect corridors otherwise). Organic + corridors OFF is already merged.
+    // rect corridors otherwise). Skip when it's already one merged organic cavern.
     const connect = organic ? carveTunnel : carveCorridor;
-    if(rooms.length>1 && !(organic && !doCorr) && (doCorr || organic)){
+    if(doCorr && rooms.length>1 && !(organic && structure)){
       const connected=[0], pending=rooms.map((_,i)=>i).slice(1);
       while(pending.length){
         let bi=-1,bj=-1,bd=1e9;
@@ -2594,7 +2603,7 @@
       for(let k=0;k<extra;k++){ const a=ri(0,rooms.length-1),b=ri(0,rooms.length-1);
         if(a!==b && Math.hypot(rooms[a].cx-rooms[b].cx,rooms[a].cy-rooms[b].cy)<avg*5) connect(rooms[a],rooms[b]); }
     }
-    else if(!organic && !doCorr && rooms.length>1){ addAdjacencyDoors(rooms); }
+    if(!organic && structure && rooms.length>1){ addAdjacencyDoors(rooms); }
     // Snap each generated door to the grid, fit it to the real wall opening it
     // sits in, and drop any that don't span a visible, corridor-width wall.
     // Doors OFF ⇒ no interior doors AND no entrance doors.
@@ -3625,6 +3634,15 @@
       d.querySelector("span").textContent=p.name+" ("+p.textures.length+")";
       d.querySelector("button").onclick=()=>removePack(p);
       el.appendChild(d);
+    }
+    // Live "objects loaded" gauge against the per-pack import cap, so the total
+    // across all loaded packs is visible before storage gets close to the limit.
+    const ac=$("assetCount");
+    if(ac){
+      const totalObj = packs.reduce((n,p)=>n + (p.textures||[]).reduce((m,t)=>m+(t.kind==="object"?1:0),0), 0);
+      ac.textContent = "Objects loaded: "+totalObj.toLocaleString()+" / "+MAX_IMPORT_OBJECTS.toLocaleString();
+      ac.classList.toggle("warn", totalObj>=MAX_IMPORT_OBJECTS*0.9 && totalObj<=MAX_IMPORT_OBJECTS);
+      ac.classList.toggle("over", totalObj>MAX_IMPORT_OBJECTS);
     }
   }
   async function removePack(p){

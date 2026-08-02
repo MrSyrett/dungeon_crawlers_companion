@@ -1246,6 +1246,11 @@ window.DungeonEngine = (function(){
     const [smin,smax] = SIZE_MAP[sizeIdx];
     const spread = clamp(opts.layout!=null?+opts.layout:3, 1, 5);
     const doCorr = opts.corridors !== false;
+    // Structure (areas butt together / merge) is decoupled from Corridors (which
+    // now only adds passages). Older callers — GM Screen, Session Prep — don't
+    // pass `structure`, so fall back to the legacy coupling (corridors OFF used to
+    // force butting) and stay byte-for-byte identical. The Map Maker passes it.
+    const structure = (opts.structure !== undefined) ? !!opts.structure : !doCorr;
     const roundOk = !!opts.roundRooms;
     const organic = !!opts.organic;           // irregular cave "blob" chambers
     const wantDoors = opts.doors !== false;    // place interior doors (default on)
@@ -1261,12 +1266,12 @@ window.DungeonEngine = (function(){
     const field=Math.max(avg, Math.round(avg*Math.sqrt(nRooms/density)/2));
     const rooms=[];
     if(organic){
-      // Cave chambers: irregular polygon "blobs". With corridors ON they are
-      // spread out and joined by winding tunnels; with corridors OFF they are
-      // grown overlapping into one merged cavern (each new blob touches an
-      // existing one, so the union is always connected).
-      placeBlobs(rooms, nRooms, smin, smax, field, !doCorr);
-    } else if(!doCorr){
+      // Cave chambers: irregular polygon "blobs". Structure ON grows them
+      // overlapping into one merged cavern (each new blob touches an existing
+      // one, so the union is connected); Structure OFF scatters them as separate
+      // islands, which Corridors can then join with winding tunnels.
+      placeBlobs(rooms, nRooms, smin, smax, field, structure);
+    } else if(structure){
       placeAdjacentRooms(rooms, nRooms, smin, smax);
     } else {
       let tries=0, guard=nRooms*220;
@@ -1286,9 +1291,10 @@ window.DungeonEngine = (function(){
       else map.shapes.push({id:uid(),type:"rect",x:r.x,y:r.y,w:r.w,h:r.h});
     }
     // Connect. Organic ⇒ winding tunnels (carveTunnel); classic ⇒ rect corridors.
-    // Organic + corridors OFF is already one merged cavern, so it needs no links.
+    // Corridors adds passages between areas; skip only when they're already one
+    // merged organic cavern (organic + structure), where tunnels are redundant.
     const connect = organic ? carveTunnel : carveCorridor;
-    if(rooms.length>1 && !(organic && !doCorr) && (doCorr || organic)){
+    if(doCorr && rooms.length>1 && !(organic && structure)){
       const connected=[0], pending=rooms.map((_,i)=>i).slice(1);
       while(pending.length){
         let bi=-1,bj=-1,bd=1e9;
@@ -1302,7 +1308,8 @@ window.DungeonEngine = (function(){
       for(let k=0;k<extra;k++){ const a=ri(0,rooms.length-1),b=ri(0,rooms.length-1);
         if(a!==b && Math.hypot(rooms[a].cx-rooms[b].cx,rooms[a].cy-rooms[b].cy)<avg*5) connect(rooms[a],rooms[b]); }
     }
-    else if(!organic && !doCorr && rooms.length>1){ addAdjacencyDoors(rooms); }
+    // Structure (classic): butting rooms share walls, so link them with doors.
+    if(!organic && structure && rooms.length>1){ addAdjacencyDoors(rooms); }
     // Doors OFF ⇒ no interior doors AND no entrance doors.
     map.doors = wantDoors ? finalizeDoors() : [];
     if(wantDoors) placeEntrances(nEntrances);

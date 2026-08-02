@@ -2309,7 +2309,7 @@ GMScenes.renderPins();
               </optgroup>
             </select>
           </label>
-          <label class="gen-label">Rooms
+          <label class="gen-label">Rooms/Areas
             <select class="gen-select" id="gen-dun-rooms">
               <option value="5" selected>5 (Classic)</option>
               <option value="8">8</option>
@@ -2319,7 +2319,7 @@ GMScenes.renderPins();
               <option value="20">20</option>
             </select>
           </label>
-          <label class="gen-label">Room Size
+          <label class="gen-label">Room/Area Size
             <select class="gen-select" id="gen-dun-size">
               <option value="1">Tiny</option><option value="2">Small</option>
               <option value="3" selected>Medium</option><option value="4">Large</option><option value="5">Huge</option>
@@ -2338,13 +2338,19 @@ GMScenes.renderPins();
             </select>
           </label>
           <label class="gen-label">Corridors
-            <select class="gen-select" id="gen-dun-corr"><option value="1" selected>Yes</option><option value="0">No (shared walls)</option></select>
+            <select class="gen-select" id="gen-dun-corr"><option value="1" selected>Yes</option><option value="0">No</option></select>
+          </label>
+          <label class="gen-label">Structure
+            <select class="gen-select" id="gen-dun-struct"><option value="0" selected>No (separate)</option><option value="1">Yes (shared walls)</option></select>
+          </label>
+          <label class="gen-label">Organic (caves)
+            <select class="gen-select" id="gen-dun-organic"><option value="0" selected>No</option><option value="1">Yes</option></select>
           </label>
           <label class="gen-label">Round Rooms
             <select class="gen-select" id="gen-dun-round"><option value="0" selected>No</option><option value="1">Allow</option></select>
           </label>
-          <label class="gen-label">Organic (caves)
-            <select class="gen-select" id="gen-dun-organic"><option value="0" selected>No</option><option value="1">Yes</option></select>
+          <label class="gen-label">Exterior
+            <select class="gen-select" id="gen-dun-ext"><option value="0" selected>No (inward)</option><option value="1">Yes (outward)</option></select>
           </label>
           <label class="gen-label">Doors
             <select class="gen-select" id="gen-dun-doors"><option value="1" selected>Yes</option><option value="0">No</option></select>
@@ -2518,14 +2524,14 @@ GMScenes.renderPins();
               </optgroup>
             </select>
           </label>
-          <label class="gen-label">Rooms
+          <label class="gen-label">Rooms/Areas
             <select class="gen-select" id="gen-adv-rooms">
               <option value="5" selected>5 (Classic)</option>
               <option value="8">8</option><option value="10">10</option>
               <option value="12">12</option><option value="15">15</option><option value="20">20</option>
             </select>
           </label>
-          <label class="gen-label">Room Size
+          <label class="gen-label">Room/Area Size
             <select class="gen-select" id="gen-adv-size">
               <option value="1">Tiny</option><option value="2">Small</option>
               <option value="3" selected>Medium</option><option value="4">Large</option><option value="5">Huge</option>
@@ -2544,13 +2550,19 @@ GMScenes.renderPins();
             </select>
           </label>
           <label class="gen-label">Corridors
-            <select class="gen-select" id="gen-adv-corr"><option value="1" selected>Yes</option><option value="0">No (shared walls)</option></select>
+            <select class="gen-select" id="gen-adv-corr"><option value="1" selected>Yes</option><option value="0">No</option></select>
+          </label>
+          <label class="gen-label">Structure
+            <select class="gen-select" id="gen-adv-struct"><option value="0" selected>No (separate)</option><option value="1">Yes (shared walls)</option></select>
+          </label>
+          <label class="gen-label">Organic (caves)
+            <select class="gen-select" id="gen-adv-organic"><option value="0" selected>No</option><option value="1">Yes</option></select>
           </label>
           <label class="gen-label">Round Rooms
             <select class="gen-select" id="gen-adv-round"><option value="0" selected>No</option><option value="1">Allow</option></select>
           </label>
-          <label class="gen-label">Organic (caves)
-            <select class="gen-select" id="gen-adv-organic"><option value="0" selected>No</option><option value="1">Yes</option></select>
+          <label class="gen-label">Exterior
+            <select class="gen-select" id="gen-adv-ext"><option value="0" selected>No (inward)</option><option value="1">Yes (outward)</option></select>
           </label>
           <label class="gen-label">Doors
             <select class="gen-select" id="gen-adv-doors"><option value="1" selected>Yes</option><option value="0">No</option></select>
@@ -7160,8 +7172,10 @@ window.init_gen = function(root) {
           layout: +((q('layout')||{}).value||3),
           entrances: +((q('entrances')||{}).value||2),
           corridors: ((q('corr')||{}).value||'1') !== '0',
+          structure: ((q('struct')||{}).value||'0') === '1',
           roundRooms: ((q('round')||{}).value||'0') === '1',
           organic: ((q('organic')||{}).value||'0') === '1',
+          exterior: ((q('ext')||{}).value||'0') === '1',
           doors: ((q('doors')||{}).value||'1') !== '0',
           theme: (q('look')||{}).value||'light'
         });
@@ -7289,8 +7303,10 @@ window.init_gen = function(root) {
           layout: +((q('layout')||{}).value||3),
           entrances: +((q('entrances')||{}).value||2),
           corridors: ((q('corr')||{}).value||'1') !== '0',
+          structure: ((q('struct')||{}).value||'0') === '1',
           roundRooms: ((q('round')||{}).value||'0') === '1',
           organic: ((q('organic')||{}).value||'0') === '1',
+          exterior: ((q('ext')||{}).value||'0') === '1',
           doors: ((q('doors')||{}).value||'1') !== '0',
           theme: (q('look')||{}).value||'light'
         });
