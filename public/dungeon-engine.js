@@ -259,48 +259,88 @@ window.DungeonEngine = (function(){
   }
 
   // ══════════════════════ SHADOWS (Advanced Mode) ══════════════════════
-  // Hand-placed contact shadows — soft ellipses drawn UNDER the objects so a
-  // barrel reads as standing on the floor instead of floating on it.
-  //   map.shadows[] = { id, x, y, w, h, rot, soft (0..1), strength (0..1) }
-  // STATIC by design: they do not track the lights. See claude/map-maker-lights.md.
-  // Composited with `multiply` so the floor texture darkens instead of being
-  // greyed out by a flat black wash — a 60% black ellipse over stone reads as a
-  // hole punched in the floor, the same trap the door leaf hit in classic mode.
-  // Deliberately NOT clipped to the floor mask: clipping would cut a hard edge
-  // along every room boundary, which looks far worse than a little spill.
+  // Hand-placed shadows are DARK LIGHTS. Each casts a pool from its own point of
+  // origin, ray-marched against this layer's room outlines + walls exactly like a
+  // light (via visPoly), so an adjoining wall, a drawn wall and a polygon wall all
+  // occlude it — and, because it is NOT clipped to the floor, it stops at the wall
+  // it can't see past yet spills into the open as an exterior shadow. The pool keeps
+  // the width/height/rotation the handles set (an elliptical falloff) and can take a
+  // light PATTERN. Accumulated into a scratch buffer, then multiplied over the scene
+  // so it darkens the floor texture instead of greying it out.
+  //   map.shadows[] = { id, x, y, w, h, rot, soft (0..1), strength (0..1),
+  //                     pattern?, color? }
+  // Drawn per layer, inside the layer's own pass, so a lower layer's shadow never
+  // lands on the layers above it (the upper layer's opaque floor paints over it).
   function drawShadows(){
     // v41: master switch, mirroring map.lit. Only an explicit false hides them, so
     // a caller that never sets the flag (or a map saved before v41) still draws.
     if(!map || map.shadowsOn===false) return;       // works in classic mode too (v39)
     const list=map.shadows||[]; if(!list.length) return;
-    let hasFloor=false; for(const s of map.shapes){ if(!s.deco){ hasFloor=true; break; } }
-    if(!hasFloor) return;                            // nothing on this layer to cast onto
-    // Draw into a scratch buffer, clip to THIS layer's floor mask, then multiply —
-    // so a layer's shadows stay on its own floor and never darken other layers.
+    sizeBufs();
     const sc=buf.wsh.getContext("2d");
     sc.setTransform(1,0,0,1,0,0); sc.globalAlpha=1; sc.filter="none"; sc.globalCompositeOperation="source-over";
     sc.clearRect(0,0,W,H);
-    for(let i=0;i<list.length;i++){
-      const s=list[i];
-      const a=Math.max(0, Math.min(1, s.strength==null ? 0.6 : s.strength));
+    const mc=lmaskCv.getContext("2d");
+    const blur=Math.max(2.5, Math.min(22, 0.18*wpx()));
+    let any=false;
+    for(let si=0;si<list.length;si++){
+      const S=list[si];
+      const a=Math.max(0, Math.min(1, S.strength==null ? 0.6 : S.strength));
       if(a<=0) continue;
-      const rx=Math.max(0.05, s.w||1.6)/2*wpx(), ry=Math.max(0.05, s.h||1.1)/2*wpx();
-      if(rx<0.4 || ry<0.4) continue;
-      const soft=Math.max(0, Math.min(1, s.soft==null ? 0.55 : s.soft));
-      const core=0.92*(1-soft);                     // fully opaque out to here, then fade
-      const p=toScreen(s.x,s.y);
-      sc.save();
-      sc.translate(p[0],p[1]); sc.rotate(s.rot||0); sc.scale(rx,ry);
-      const g=sc.createRadialGradient(0,0,0,0,0,1);
-      g.addColorStop(0, "rgba(6,8,14,"+a+")");
-      if(core>0.001) g.addColorStop(core, "rgba(6,8,14,"+a+")");
-      g.addColorStop(core+(1-core)*0.55, "rgba(6,8,14,"+(a*0.35).toFixed(4)+")");
-      g.addColorStop(1, "rgba(6,8,14,0)");
-      sc.fillStyle=g; sc.beginPath(); sc.arc(0,0,1,0,6.2832); sc.fill();
-      sc.restore();
+      const Rw=Math.max(0.05, (S.w||1.6)/2), Rh=Math.max(0.05, (S.h||1.1)/2);
+      const R=Math.max(Rw,Rh);                        // occlusion reach = the pool's larger radius
+      const cs=toScreen(S.x,S.y), cx=cs[0], cy=cs[1], rpx=R*wpx();
+      if(rpx<0.6) continue;
+      const pad=blur*2+6;
+      const bx=Math.max(0,Math.floor(cx-rpx-pad)), by=Math.max(0,Math.floor(cy-rpx-pad));
+      const bw=Math.min(W,Math.ceil(cx+rpx+pad))-bx, bh=Math.min(H,Math.ceil(cy+rpx+pad))-by;
+      if(bw<=0 || bh<=0) continue;                    // entirely off-screen
+      const k=Math.min(1, LMASK_MAX/Math.max(bw,bh));
+      const mw=Math.max(1,Math.round(bw*k)), mh=Math.max(1,Math.round(bh*k));
+      if(lmaskCv.width!==mw || lmaskCv.height!==mh){ lmaskCv.width=mw; lmaskCv.height=mh; }
+      else mc.clearRect(0,0,mw,mh);
+      mc.setTransform(1,0,0,1,0,0); mc.globalAlpha=1; mc.globalCompositeOperation="source-over";
+      // 1 — visibility polygon (occluded by this layer's walls), feathered
+      const poly=visPoly({x:S.x, y:S.y, r:R});
+      mc.save(); mc.filter="blur("+(blur*k).toFixed(2)+"px)"; mc.fillStyle="#fff"; mc.beginPath();
+      for(let i=0;i<poly.length;i++){ const p=toScreen(poly[i][0],poly[i][1]);
+        const mx=(p[0]-bx)*k, my=(p[1]-by)*k;
+        if(i===0) mc.moveTo(mx,my); else mc.lineTo(mx,my); }
+      mc.closePath(); mc.fill(); mc.restore();
+      // 2 — clip the pool to its falloff: a rotated ellipse, or a painted pattern
+      mc.globalCompositeOperation="destination-in";
+      const pat=patOf(S);
+      if(PAINTED[pat]){
+        lightProfile(mw, mh, (cx-bx)*k, (cy-by)*k, rpx*k, a, pat, (S.id||si)+1, S.rot||0, S.spread);
+        mc.filter="blur("+(PROFILE_BLUR[pat]||1).toFixed(2)+"px)"; mc.drawImage(lprofCv,0,0); mc.filter="none";
+      } else {
+        shadowFalloff(mc, (cx-bx)*k, (cy-by)*k, Rw*wpx()*k, Rh*wpx()*k, S.rot||0, a, S.soft==null?0.55:S.soft);
+      }
+      // 3 — recolour to the shadow's own dark tone and accumulate
+      mc.globalCompositeOperation="source-in";
+      mc.fillStyle=S.color||"#05070d"; mc.fillRect(0,0,mw,mh);
+      mc.globalCompositeOperation="source-over";
+      sc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
+      any=true;
     }
-    sc.globalCompositeOperation="destination-in"; sc.drawImage(buf.mask,0,0); sc.globalCompositeOperation="source-over";
+    if(!any) return;
     ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
+  }
+  // Elliptical, rotated soft falloff for a hand-placed shadow — painted as a white
+  // mask (alpha carries strength; the caller recolours it). Kept separate from
+  // lightFalloff because a shadow is elliptical (w×h handles) where a light is round.
+  function shadowFalloff(c, cx, cy, rxpx, rypx, rot, a, soft){
+    soft=Math.max(0, Math.min(1, soft));
+    const core=0.92*(1-soft);                         // opaque out to here, then fade
+    c.save(); c.translate(cx,cy); if(rot) c.rotate(rot);
+    c.scale(Math.max(0.001,rxpx), Math.max(0.001,rypx));
+    const g=c.createRadialGradient(0,0,0,0,0,1);
+    g.addColorStop(0, "rgba(255,255,255,"+a.toFixed(4)+")");
+    if(core>0.001) g.addColorStop(core, "rgba(255,255,255,"+a.toFixed(4)+")");
+    g.addColorStop(core+(1-core)*0.55, "rgba(255,255,255,"+(a*0.5).toFixed(4)+")");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    c.fillStyle=g; c.beginPath(); c.arc(0,0,1,0,6.2832); c.fill();
+    c.restore();
   }
 
   // ══════════════════════ LIGHTS (Advanced Mode) ══════════════════════
