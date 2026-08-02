@@ -15,31 +15,13 @@ model User {
   email        String     @unique
   passwordHash String
   createdAt    DateTime   @default(now())
-  // New accounts start unapproved and can't sign in until an admin approves
-  // them (admins are auto-approved on signup). Existing accounts were backfilled
-  // to true by the migration so this gate only affects people who join later.
-  approved     Boolean    @default(false)
 
-  sessions  Session[]
-  documents Document[]
-  campaigns Campaign[]
-  homebrew  Homebrew[]
-  vttTokens VttToken[]
+  sessions            Session[]
+  documents           Document[]
+  campaigns           Campaign[]
+  homebrew            Homebrew[]
+  vttTokens           VttToken[]
   passwordResetTokens PasswordResetToken[]
-  rulebookAccess RulebookAccess[]
-}
-
-model PasswordResetToken {
-  id        String    @id @default(cuid())
-  userId    String
-  tokenHash String    @unique
-  expiresAt DateTime
-  usedAt    DateTime?
-  createdAt DateTime  @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model Session {
@@ -53,37 +35,39 @@ model Session {
   @@index([userId])
 }
 
+// A single-use, expiring token for resetting a forgotten password.
+//
+// Same posture as VttToken: only a SHA-256 HASH of the token is stored. The raw
+// token exists only inside the emailed reset link, so a database leak can't be
+// turned into account takeovers. A token is good for one hour and one use.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 // One saved sheet / session-prep document. `data` holds the tool's JSON blob
 // (the same shape the original tool wrote to localStorage), keyed in the app
 // by the localStorage key(s) that tool uses.
 model Document {
   id        String   @id @default(cuid())
   userId    String
-  tool      String // "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "gm-screen"
-  // For "gm-screen" docs this scopes the saved board to a campaign:
-  //   null      → the personal "unlinked" scratch board
-  //   <cuid>    → the board for that campaign (per user)
-  // Character-sheet docs leave this null; their campaign link lives in
-  // `linkedCampaignId` (an indexed column) instead — see below.
-  campaignId String?
-  // For "sd-character" docs: the campaign the sheet is linked to, promoted out
-  // of the sheet JSON (`data.sd_sheet` → `_sheet.campaign.id`) into an indexed
-  // column so the party roster / campaign membership lookups are index scans
-  // rather than full-table string_contains scans. Deleting the campaign nulls
-  // this (SetNull) rather than deleting the player's character (Cascade would).
-  linkedCampaignId String?
-  title      String   @default("Untitled")
-  data       Json     @default("{}")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  tool      String // "dcc-character" | "dcc-session" | "sd-character" | "sd-session"
+  title     String   @default("Untitled")
+  data      Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  campaign        Campaign? @relation("DocumentBoardCampaign", fields: [campaignId], references: [id], onDelete: Cascade)
-  linkedCampaign  Campaign? @relation("DocumentLinkedCampaign", fields: [linkedCampaignId], references: [id], onDelete: SetNull)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, tool, campaignId])
-  @@index([userId, tool, updatedAt])
-  @@index([tool, linkedCampaignId])
+  @@index([userId, tool])
 }
 
 // A campaign links multiple players' tools together. Anyone with the join
@@ -101,19 +85,12 @@ model Campaign {
   owner User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   rolls CampaignRoll[]
   homebrewShares HomebrewShare[]
-  // Per-user GM-screen boards saved for this campaign (tool = "gm-screen").
-  // Deleting the campaign removes them, so a stale board can't outlive it.
-  documents Document[] @relation("DocumentBoardCampaign")
-  // Character sheets linked to this campaign (tool = "sd-character"). Deleting
-  // the campaign nulls their link (SetNull) rather than removing the sheets.
-  linkedDocuments Document[] @relation("DocumentLinkedCampaign")
 }
 
-// A user-owned homebrew entry: a spell, gear item, monster, class, ancestry, or
-// background. `data` holds the same object shape the character sheet / GM screen
-// already use (a spell in SD_SPELLS shape, gear in `_homebrewItems` shape, a
-// monster in SD_MONSTERS shape, etc.), so those tools can merge it into their
-// catalogs and use it with no translation.
+// A user-owned homebrew spell or gear entry. `data` holds the same object shape
+// the character sheet already uses for its localStorage homebrew (a spell in
+// SD_SPELLS shape, or an item in the sheet's `_homebrewItems` shape), so a sheet
+// can merge these straight into its catalogs and use them with no translation.
 //
 // Ownership is per user (the owner manages it). Sharing is a many-to-many via
 // HomebrewShare: an entry with no shares is personal; each share makes it usable
@@ -121,7 +98,7 @@ model Campaign {
 model Homebrew {
   id        String   @id @default(cuid())
   ownerId   String
-  type      String // "spell" | "gear" | "monster" | "class" | "ancestry" | "background"
+  type      String // "spell" | "gear"
   name      String
   data      Json     @default("{}")
   createdAt DateTime @default(now())
@@ -147,11 +124,6 @@ model VttToken {
   id        String    @id @default(cuid())
   userId    String
   tokenHash String    @unique
-  // The code in plain form, so the VTT page can show it again on demand. This is
-  // a convenience/security trade-off: a leaked DB now exposes usable codes (each
-  // grants only read + save on its owner's character sheets). Null for codes
-  // created before this was stored — those can only be revoked and remade.
-  token     String?
   // First few characters, so the owner can tell tokens apart in the UI.
   prefix    String
   label     String
@@ -191,57 +163,4 @@ model CampaignRoll {
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId, id])
-}
-
-// ── Sound library ────────────────────────────────────────────────────────────
-// A shared, admin-managed shelf of labeled audio URLs for the GM Screen Music
-// tool. Instead of re-pasting a track's direct link every session, an admin
-// saves it here once (with a friendly label and a category) and the Music tool's
-// "Library" picker pulls from it. Not user-scoped: there is one library the
-// whole table draws from, and only admins (ADMIN_EMAILS) can read or edit it.
-//
-// `url` is stored already-normalized to a directly playable form (e.g. Dropbox
-// share links rewritten to raw=1) so the picker can hand it to <audio> as-is.
-model Sound {
-  id         String   @id @default(cuid())
-  label      String
-  url        String
-  // Two-level taxonomy. `category` is the kind of audio (Ambiance | Music |
-  // Scenes); `subcategory` is the Location it depicts or Mood it evokes (e.g.
-  // Cities, Wilderness, Epic, Tension) — empty for an unsorted track. `label`
-  // is the track's display Name.
-  category    String   @default("Music")
-  subcategory String   @default("")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([category, subcategory])
-}
-
-// ── Rulebook access control ──────────────────────────────────────────────────
-// Rulebook PDFs live on disk in protected/rulebooks/ (never under public/), keyed
-// by filename. These two tables gate who may read each file. Default is PRIVATE:
-// a file with no Rulebook row and no grants is visible only to admins
-// (ADMIN_EMAILS) — the safe default for copyrighted material.
-
-// Per-file visibility switch. everyone=true opens a file to any signed-in user;
-// otherwise access is admin-only plus whoever has an explicit grant below.
-model Rulebook {
-  file      String   @id // filename in protected/rulebooks/
-  everyone  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// A grant: this user may read this rulebook file. Deleting the user removes it.
-model RulebookAccess {
-  file      String
-  userId    String
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([file, userId])
-  @@index([userId])
-  @@index([file])
 }
