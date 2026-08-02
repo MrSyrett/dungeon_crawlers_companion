@@ -397,7 +397,6 @@
         <button class="btn" id="png">⬇ PNG</button>
         <button class="btn" id="pngT" title="Transparent background — floors only">⬇ PNG (transp.)</button>
       </div>
-      <label class="chk" id="perLayerWrap" title="Save one PNG per visible layer, all framed the same so they stack in register — e.g. a building's floors exported separately" style="display:none;margin-top:8px;font-size:11px"><input type="checkbox" id="perLayer"> Each layer as its own PNG</label>
       <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a>
         (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a>)<br>
         and <a href="https://axebane.com/" target="_blank" rel="noopener noreferrer">Axebane Games</a>
@@ -624,7 +623,6 @@
       row.append(eye,nm,up,dn,del);
       el.appendChild(row);
     }
-    const plw=$("perLayerWrap"); if(plw) plw.style.display=(map.layers&&map.layers.length>1)?"flex":"none";
   }
 
   // ── Coordinate helpers (world cells ↔ screen px) ──────────────────
@@ -4854,14 +4852,38 @@
   $("export").onclick=exportMap;
   $("import").onclick=()=>$("importFile").click();
   $("importFile").onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f) importMapFile(f); e.target.value=""; };
-  $("png").onclick=()=>exportPNG(false, $("perLayer")&&$("perLayer").checked);
-  $("pngT").onclick=()=>exportPNG(true, $("perLayer")&&$("perLayer").checked);
+  // Flat vs per-layer is asked at export time (only when >1 layer is visible), rather
+  // than being a checkbox you have to notice and set beforehand.
+  function pngExport(transparent){
+    const nVis=(map.layers||[]).filter(L=>L.visible!==false).length;
+    let perLayer=false;
+    if(nVis>1){
+      perLayer = !confirm(
+        "This map has "+nVis+" visible layers — how should it export?\n\n"+
+        "OK  —  one flat, combined PNG\n"+
+        "Cancel  —  one PNG per layer (all framed the same, so they stack in register)");
+    }
+    exportPNG(transparent, perLayer);
+  }
+  $("png").onclick=()=>pngExport(false);
+  $("pngT").onclick=()=>pngExport(true);
   $("zoomIn").onclick=()=>{ cam.scale=Math.min(6,cam.scale*1.2); render(); updateZoom(); };
   $("zoomOut").onclick=()=>{ cam.scale=Math.max(0.15,cam.scale/1.2); render(); updateZoom(); };
 
   // keyboard
   window.addEventListener("keydown", e=>{
     if(e.target.tagName==="INPUT") return;
+    // Tab toggles Rooms / Shapes (same as G). Guarded above so it still tabs out of inputs.
+    if(e.key==="Tab" && !e.ctrlKey && !e.metaKey && !e.altKey){
+      e.preventDefault(); setMode(drawMode==="rooms"?"shapes":"rooms"); return;
+    }
+    // 1–9 select the matching layer, counted from the TOP of the layer list (1 = top).
+    if(!e.ctrlKey && !e.metaKey && !e.altKey && e.key>="1" && e.key<="9"){
+      const layers=map.layers||[], n=+e.key;
+      if(n<=layers.length){ const L=layers[layers.length-n];
+        if(L){ setActiveLayer(L.id); toast("Layer: "+L.name); } }
+      return;
+    }
     if(!e.ctrlKey && !e.metaKey && !e.altKey){                 // never steal Ctrl+F / Cmd+B etc.
       if(e.key==="S"){ toggleSnap(); return; }                 // Shift+S — plain S is the Stairs tool
       if((e.key==="f"||e.key==="F")&&sel){ reorderSel(true); return; }
