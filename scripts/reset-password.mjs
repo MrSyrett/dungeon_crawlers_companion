@@ -1,18 +1,22 @@
-// reset-password.mjs
-// Reset a Dungeon Crawler's Companion user's password directly in the DB.
-// Matches the scrypt hashing scheme in lib/auth.ts exactly.
+// scripts/reset-password.mjs
 //
-// Usage (run from the repo root, with DATABASE_URL set to the PROD database):
-//   node reset-password.mjs someone@example.com "TheirNewPassword123"
+// Admin-only: reset a user's password directly in the database, hashing it the
+// same way lib/auth.ts does (scrypt, salt:key format).
 //
-// Then hand the dev that email + new password. He logs in at /login and is back in.
+// This talks to Postgres via `pg` directly (already present through
+// @prisma/adapter-pg) rather than the generated Prisma client — the client in
+// this project is emitted to generated/prisma and constructed with a driver
+// adapter, so it isn't importable from a plain Node script. Raw pg avoids all
+// of that and needs nothing but DATABASE_URL.
+//
+// Usage (run from the repo root, DATABASE_URL pointed at the TARGET database):
+//   node scripts/reset-password.mjs someone@example.com "TheirNewPassword123"
 
 import { scrypt as _scrypt, randomBytes } from "node:crypto";
 import { promisify } from "node:util";
-import { PrismaClient } from "@prisma/client";
+import pg from "pg";
 
 const scrypt = promisify(_scrypt);
-const prisma = new PrismaClient();
 
 async function hashPassword(password) {
   const salt = randomBytes(16).toString("hex");
@@ -25,35 +29,39 @@ async function main() {
   const email = (emailArg ?? "").trim().toLowerCase();
 
   if (!email || !password) {
-    console.error('Usage: node reset-password.mjs <email> "<new password>"');
+    console.error('Usage: node scripts/reset-password.mjs <email> "<new password>"');
     process.exit(1);
   }
   if (password.length < 8) {
     console.error("Password must be at least 8 characters (matches the signup rule).");
     process.exit(1);
   }
-
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    console.error(`No user found with email: ${email}`);
+  if (!process.env.DATABASE_URL) {
+    console.error("DATABASE_URL is not set. Point it at the target database first.");
     process.exit(1);
   }
 
-  await prisma.user.update({
-    where: { email },
-    data: { passwordHash: await hashPassword(password) },
-  });
-
-  // Optional but recommended: clear any stale sessions for this user so only
-  // the new login is valid. Comment out if you'd rather leave sessions alone.
-  await prisma.session.deleteMany({ where: { userId: user.id } });
-
-  console.log(`✅ Password reset for ${email}. They can now sign in at /login with the new password.`);
+  const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+  await client.connect();
+  try {
+    const { rows } = await client.query(
+      'UPDATE "User" SET "passwordHash" = $1 WHERE email = $2 RETURNING id',
+      [await hashPassword(password), email],
+    );
+    if (rows.length === 0) {
+      console.error(`No user found with email: ${email}`);
+      process.exitCode = 1;
+      return;
+    }
+    // Invalidate existing sessions so only the new password grants access.
+    await client.query('DELETE FROM "Session" WHERE "userId" = $1', [rows[0].id]);
+    console.log(`✅ Password reset for ${email}. Existing sessions cleared.`);
+  } finally {
+    await client.end();
+  }
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

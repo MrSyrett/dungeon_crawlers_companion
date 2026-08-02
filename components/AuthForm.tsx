@@ -63,10 +63,14 @@ export function AuthForm({ mode, action }: Props) {
             )}
           </label>
 
-          {state.notice && (
-            <p className="rounded border border-[var(--gold)]/50 bg-[var(--gold)]/10 px-3 py-2 text-sm text-[var(--gold)]">
-              {state.notice}
-            </p>
+          {/* Forgot-password link — only on the sign-in form. */}
+          {!isSignup && (
+            <Link
+              href="/forgot-password"
+              className="-mt-1 self-end text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)] transition hover:text-[var(--gold)] hover:underline"
+            >
+              Forgot password?
+            </Link>
           )}
 
           {state.error && (

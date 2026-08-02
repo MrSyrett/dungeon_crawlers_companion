@@ -1,0 +1,30 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// SCHEMA CHANGES for the "forgot password" feature.
+// This file is NOT used by Prisma — it just documents exactly what to add to
+// your real prisma/schema.prisma. See APPLY.md step 1.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// 1) Add ONE line to the existing `model User { ... }` block, alongside the
+//    other relation fields (sessions, documents, campaigns, homebrew, vttTokens):
+//
+//        passwordResetTokens PasswordResetToken[]
+
+// 2) Add this NEW model anywhere in the file (e.g. right after `model Session`):
+
+// A single-use, expiring token for resetting a forgotten password.
+//
+// Same posture as VttToken: only a SHA-256 HASH of the token is stored. The raw
+// token exists only inside the emailed reset link, so a database leak can't be
+// turned into account takeovers. A token is good for one hour and one use.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
