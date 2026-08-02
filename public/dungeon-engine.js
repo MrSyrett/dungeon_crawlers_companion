@@ -175,6 +175,11 @@ window.DungeonEngine = (function(){
           const bb=runBox(r.list); if(!bb) continue;
           tc.save();
           tc.beginPath(); for(const sh of r.list) shapePath(tc, sh); tc.clip("nonzero");
+          // Opaque backdrop under the pattern: imported floor tiles (e.g. Forgotten
+          // Adventures) carry an alpha channel, so their black regions are transparent
+          // and would let the rock background show through. Painting black first keeps
+          // those regions black. Opaque tiles (2MT, bundled) cover it — no visible change.
+          if(r.t && r.t.img){ tc.fillStyle="#000"; tc.fillRect(bb.x,bb.y,bb.w,bb.h); }
           tc.fillStyle = patFor(tc, r.t) || C.floor;
           tc.fillRect(bb.x,bb.y,bb.w,bb.h);
           tc.restore();
@@ -1217,6 +1222,23 @@ window.DungeonEngine = (function(){
   function blankMap(){ return { version:1, name:"", grid:true, shapes:[], walls:[], doors:[], stairs:[], objects:[], seedId:1 }; }
   function uid(){ return map.seedId++; }
 
+  // Force every generated polygon shape (cave chambers + tunnels) to one winding.
+  // The textured-wall renderer flows an asymmetric wall strip (cliff/ledge) along
+  // each edge in its traversal direction, so winding decides which way that strip
+  // "faces" — clockwise (shoelace>0 in screen/y-down space) reads inward, counter-
+  // clockwise outward. The generator naturally emits chambers and tunnels with
+  // opposite winding, which is why organic caves face both ways; normalising here
+  // makes them all match. `cw=true` ⇒ clockwise/inward, `false` ⇒ ccw/outward.
+  // Geometry is unchanged (same edges, reversed order), so floors, doors and the
+  // flat-ink renderer are unaffected — only the asymmetric wall strip's direction.
+  function orientPolygons(shapes, cw){
+    for(const sh of shapes){
+      if(sh.type!=="polygon" || !sh.pts || sh.pts.length<3) continue;
+      let a2=0; const p=sh.pts, n=p.length;
+      for(let i=0;i<n;i++){ const q=p[(i+1)%n]; a2 += p[i][0]*q[1] - q[0]*p[i][1]; }
+      if((a2>0) !== !!cw) sh.pts.reverse();
+    }
+  }
   function generate(opts){
     opts = opts || {};
     const nRooms = clamp(opts.rooms!=null?+opts.rooms:8, 2, 40);
@@ -1284,6 +1306,10 @@ window.DungeonEngine = (function(){
     // Doors OFF ⇒ no interior doors AND no entrance doors.
     map.doors = wantDoors ? finalizeDoors() : [];
     if(wantDoors) placeEntrances(nEntrances);
+    // Exterior toggle: normalise every polygon's winding so their textured walls
+    // all face the same way. Off (default) ⇒ clockwise/inward (matches classic
+    // rooms); on ⇒ counter-clockwise/outward. Only affects organic (polygon) maps.
+    orientPolygons(map.shapes, !opts.exterior);
     return map;
   }
 

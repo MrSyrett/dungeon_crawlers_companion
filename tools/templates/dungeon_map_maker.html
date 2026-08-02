@@ -363,6 +363,9 @@
         <label class="chk" title="Irregular cave chambers instead of rooms — organic caverns"><input type="checkbox" id="organic"> Organic</label>
         <label class="chk" title="Place doors in passage openings"><input type="checkbox" id="doorsChk" checked> Doors</label>
       </div>
+      <div class="chk-row">
+        <label class="chk" title="Face all generated textured walls outward (counter-clockwise). Off = inward (clockwise). Keeps a generated cave's walls all facing the same way."><input type="checkbox" id="exterior"> Exterior</label>
+      </div>
       <button class="btn gold wide" id="generate" style="margin-top:12px">🎲 Generate Dungeon</button>
       </div>
     </div>
@@ -775,6 +778,11 @@
           const bb=runBox(r.list); if(!bb) continue;
           tc.save();
           tc.beginPath(); for(const sh of r.list) shapePath(tc, sh); tc.clip("nonzero");
+          // Opaque backdrop under the pattern: imported floor tiles (e.g. Forgotten
+          // Adventures) carry an alpha channel, so their black regions are transparent
+          // and would let the rock background show through. Painting black first keeps
+          // those regions black. Opaque tiles (2MT, bundled) cover it — no visible change.
+          if(r.t && r.t.img){ tc.fillStyle="#000"; tc.fillRect(bb.x,bb.y,bb.w,bb.h); }
           tc.fillStyle = patFor(tc, r.t) || C.floor;
           tc.fillRect(bb.x,bb.y,bb.w,bb.h);
           tc.restore();
@@ -2486,6 +2494,7 @@
       roundRooms: $("roundish").checked,
       organic: $("organic").checked,
       doors: $("doorsChk").checked,
+      exterior: $("exterior").checked,
       theme: theme
     };
     pushHistory();
@@ -2506,6 +2515,19 @@
     map.shadowsOn = !!keepShadowsOn;                       // the entities belong to the old map
     map.lights = []; map.shadows = [];
     commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); fitView();
+  }
+  // Force every generated polygon (cave chambers + tunnels) to one winding so
+  // their textured walls all face the same way. The wall strip flows along each
+  // edge in its traversal direction, so winding sets which way an asymmetric
+  // cliff/ledge strip faces — clockwise (shoelace>0) inward, ccw outward.
+  // Mirror of the engine's orientPolygons; keep the two in sync.
+  function orientPolygons(shapes, cw){
+    for(const sh of shapes){
+      if(sh.type!=="polygon" || !sh.pts || sh.pts.length<3) continue;
+      let a2=0; const p=sh.pts, n=p.length;
+      for(let i=0;i<n;i++){ const q=p[(i+1)%n]; a2 += p[i][0]*q[1] - q[0]*p[i][1]; }
+      if((a2>0) !== !!cw) sh.pts.reverse();
+    }
   }
   // Inlined fallback generator (used only when DungeonEngine isn't loaded, e.g.
   // the tool opened standalone). Builds into the module `map` and returns it.
@@ -2580,6 +2602,9 @@
     // Entrances are doors on EXTERIOR walls leading out of the whole dungeon;
     // the Doors toggle governs them too.
     if(wantDoors) placeEntrances(nEntrances);
+    // Exterior toggle: normalise polygon winding so generated cave walls all face
+    // one way. Off (default) ⇒ clockwise/inward; on ⇒ counter-clockwise/outward.
+    orientPolygons(map.shapes, !opts.exterior);
     // Stairs are NOT auto-placed — drop them by hand with the Stairs tool.
     return map;
   }
