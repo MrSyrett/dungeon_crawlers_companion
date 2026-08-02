@@ -36,6 +36,11 @@ window.DungeonEngine = (function(){
   // ── per-render state (module-scoped; (re)set before each render) ──
   let map = null, cam = {x:0,y:0,scale:1}, W = 0, H = 0, DPR = 1;
   let exporting = true, noRock = false, ctx = null;
+  // Layers (Map Maker): noClear keeps a render pass from wiping the canvas, so
+  // visible layers can be composited bottom-to-top; overlayOnly draws ONLY the
+  // global lights + contact shadows over the finished geometry stack, using the
+  // supplied shapes/walls purely as occluders.
+  let noClear = false, overlayOnly = false;
   // Advanced-Mode textures. The HOST (Map Maker) owns loading/caching and hands
   // in ready <img> elements; the engine only turns them into aligned patterns.
   // Absent ⇒ classic flat-colour render, which is what GM Screen / Session Prep
@@ -130,7 +135,10 @@ window.DungeonEngine = (function(){
     ctx.setTransform(DPR,0,0,DPR,0,0);
     doorHalf=null;                      // per-door wall thickness, recomputed per frame
     lightSegs=null;                     // light occluders, likewise
-    ctx.clearRect(0,0,W,H);
+    if(overlayOnly){                    // one global lights/shadows pass over the composited layer stack
+      drawShadows(); drawLights(); return;
+    }
+    if(!noClear) ctx.clearRect(0,0,W,H);
     if(!noRock){
       const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
       ctx.fillStyle = bgPat || bgCol || C.rockHi; ctx.fillRect(0,0,W,H);
@@ -1577,6 +1585,7 @@ window.DungeonEngine = (function(){
     ctx = cv.getContext("2d");
     cam = { x:(b.x+b.X)/2, y:(b.y+b.Y)/2, scale:res };
     exporting = true; noRock = !!opts.transparent;
+    noClear = false; overlayOnly = false;   // plain single-pass export
     tex = opts.tex || null;
     render();
     return cv.toDataURL("image/png");
@@ -1606,8 +1615,11 @@ window.DungeonEngine = (function(){
     setThemeColors(opts.theme || mapData.theme || "light");
     exporting = true;                 // never draw preview/selection here
     noRock = !!opts.transparent;
+    noClear = !!opts.noClear;         // layers: don't wipe lower passes
+    overlayOnly = !!opts.overlayOnly; // layers: lights/shadows-only pass
     tex = opts.tex || null;           // Advanced-Mode textures, host-supplied
     render();
+    noClear = false; overlayOnly = false;   // reset so plain toPNG/generateToPNG stay unaffected
   }
 
   return { generate, toPNG, generateToPNG, renderTo, THEMES, CELL };

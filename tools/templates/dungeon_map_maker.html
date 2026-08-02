@@ -87,6 +87,16 @@
   .btn.gold:hover{filter:brightness(1.07)}
   .btn.wide{width:100%}
   label.fld{display:block;font-size:11px;color:var(--muted);margin:10px 0 4px}
+  .layers{display:flex;flex-direction:column;gap:3px;margin-top:8px}
+  .lyr{display:flex;align-items:center;gap:3px;padding:3px 5px;border:1px solid var(--line);border-radius:5px;background:var(--panel);font-size:12px}
+  .lyr.active{border-color:var(--gold);background:#22221b}
+  .lyr.hidden .lyr-name{opacity:.45;text-decoration:line-through}
+  .lyr-name{flex:1;color:var(--ink);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 2px}
+  .lyr.active .lyr-name{color:var(--gold)}
+  .lyr-eye,.lyr-btn{background:none;border:0;color:var(--muted);cursor:pointer;font-size:12px;padding:1px 3px;line-height:1}
+  .lyr-eye:hover,.lyr-btn:hover{color:var(--gold)}
+  .lyr-btn:disabled{opacity:.3;cursor:default}
+  .lyr-del:hover{color:var(--danger)}
   .asset-count{font-size:10.5px;color:var(--muted);margin:10px 0 6px;letter-spacing:.02em}
   .asset-count.warn{color:var(--gold)}
   .asset-count.over{color:#e0705a}
@@ -257,6 +267,14 @@
         <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
         <div id="packList" class="packs"></div>
       </div>
+    </div>
+
+    <div class="grp">
+      <div class="grp-head">
+        <p class="grp-title">Layers</p>
+        <button class="btn" id="layerAdd" title="Add a new layer on top" style="padding:2px 9px;font-size:12px">+ Add</button>
+      </div>
+      <div id="layerList" class="layers"></div>
     </div>
 
     <div class="grp" id="objGroup">
@@ -478,6 +496,111 @@
   }
   function uid(){ return map.seedId++; }
 
+  // ── LAYERS ─────────────────────────────────────────────────────────
+  // Geometry lives in map.layers[] — each layer has its own shapes/walls/doors/
+  // stairs/objects; map.activeLayer is the one being edited. The top-level
+  // map.shapes/walls/doors/stairs/objects are kept POINTING at the active layer's
+  // arrays, so every existing editing / hit-test / creation / z-order path targets
+  // the active layer with no changes. Lights + shadows stay map-global (drawn once
+  // over the composited stack). render() composites the visible layers bottom→top.
+  function mkLayer(name, src){
+    return { id:uid(), name:name||"Layer", visible:true,
+             shapes:(src&&src.shapes)||[], walls:(src&&src.walls)||[],
+             doors:(src&&src.doors)||[], stairs:(src&&src.stairs)||[], objects:(src&&src.objects)||[] };
+  }
+  function repointActive(){
+    let L=map.layers.find(x=>x.id===map.activeLayer);
+    if(!L){ L=map.layers[map.layers.length-1]; map.activeLayer=L.id; }
+    map.shapes=L.shapes; map.walls=L.walls; map.doors=L.doors; map.stairs=L.stairs; map.objects=L.objects;
+    return L;
+  }
+  // The single funnel — call wherever `map` is (re)assigned. Wraps a legacy flat
+  // map into one "Base" layer, normalises every layer, ensures a valid active
+  // layer, and repoints the top-level arrays. Idempotent.
+  function installLayers(m){
+    if(!Array.isArray(m.layers) || !m.layers.length){
+      m.layers = [ mkLayer("Base", {shapes:m.shapes,walls:m.walls,doors:m.doors,stairs:m.stairs,objects:m.objects}) ];
+    }
+    for(const L of m.layers){
+      if(L.id==null) L.id=uid();
+      if(L.name==null) L.name="Layer";
+      if(L.visible==null) L.visible=true;
+      for(const k of ["shapes","walls","doors","stairs","objects"]) if(!Array.isArray(L[k])) L[k]=[];
+    }
+    if(!m.layers.some(L=>L.id===m.activeLayer)) m.activeLayer=m.layers[m.layers.length-1].id;
+    const A=m.layers.find(L=>L.id===m.activeLayer);
+    m.shapes=A.shapes; m.walls=A.walls; m.doors=A.doors; m.stairs=A.stairs; m.objects=A.objects;
+  }
+  function setActiveLayer(id){
+    if(!map.layers || !map.layers.some(L=>L.id===id) || id===map.activeLayer){ syncLayersUI(); return; }
+    map.activeLayer=id; repointActive(); setSel(null); markGeom(); syncLayersUI(); render(); scheduleSave();
+  }
+  function addLayer(){
+    pushHistory();
+    const L=mkLayer("Layer "+(map.layers.length+1));
+    map.layers.push(L); map.activeLayer=L.id; repointActive(); setSel(null);
+    syncLayersUI(); commit(); toast("Added "+L.name);
+  }
+  function deleteLayer(id){
+    if(map.layers.length<=1){ toast("Can’t delete the last layer."); return; }
+    const i=map.layers.findIndex(L=>L.id===id); if(i<0) return;
+    pushHistory();
+    map.layers.splice(i,1);
+    if(map.activeLayer===id) map.activeLayer=map.layers[Math.max(0,i-1)].id;
+    repointActive(); setSel(null); syncLayersUI(); commit();
+  }
+  function renameLayer(id,name){
+    const L=map.layers.find(x=>x.id===id); if(!L) return;
+    const nm=(name||"").trim(); if(!nm||nm===L.name){ syncLayersUI(); return; }
+    pushHistory(); L.name=nm.slice(0,40); syncLayersUI(); commit();
+  }
+  function moveLayer(id,dir){
+    const i=map.layers.findIndex(L=>L.id===id); if(i<0) return;
+    const j=i+dir; if(j<0||j>=map.layers.length) return;
+    pushHistory();
+    const t=map.layers[i]; map.layers[i]=map.layers[j]; map.layers[j]=t;
+    syncLayersUI(); commit();
+  }
+  function toggleLayerVis(id){
+    const L=map.layers.find(x=>x.id===id); if(!L) return;
+    L.visible=!L.visible; syncLayersUI(); render(); scheduleSave();
+  }
+  // Any content on any layer (or global lights/shadows)? Used by the destructive
+  // Clear / Generate guards, which must see all layers, not just the active one.
+  function mapHasContent(){
+    for(const L of (map.layers||[map]))
+      if((L.shapes||[]).length||(L.walls||[]).length||(L.doors||[]).length||(L.stairs||[]).length||(L.objects||[]).length) return true;
+    return (map.lights||[]).length>0 || (map.shadows||[]).length>0;
+  }
+  // Rebuild the Layers panel. Top of the stack (last in the array — drawn on top)
+  // is listed FIRST, so the visual order matches what sits above what.
+  function syncLayersUI(){
+    const el=$("layerList"); if(!el || !map.layers) return;
+    el.innerHTML="";
+    for(let i=map.layers.length-1;i>=0;i--){
+      const L=map.layers[i];
+      const row=document.createElement("div");
+      row.className="lyr"+(L.id===map.activeLayer?" active":"")+(L.visible===false?" hidden":"");
+      const eye=document.createElement("button"); eye.className="lyr-eye";
+      eye.textContent=L.visible===false?"🚫":"👁"; eye.title="Show / hide layer";
+      eye.onclick=e=>{ e.stopPropagation(); toggleLayerVis(L.id); };
+      const nm=document.createElement("span"); nm.className="lyr-name"; nm.textContent=L.name;
+      nm.title="Click to edit this layer · double-click to rename";
+      nm.onclick=()=>setActiveLayer(L.id);
+      nm.ondblclick=()=>{ const v=prompt("Rename layer:", L.name); if(v!=null) renameLayer(L.id,v); };
+      const up=document.createElement("button"); up.className="lyr-btn"; up.textContent="↑"; up.title="Move up (toward front)";
+      up.disabled=(i===map.layers.length-1); up.onclick=e=>{ e.stopPropagation(); moveLayer(L.id,1); };
+      const dn=document.createElement("button"); dn.className="lyr-btn"; dn.textContent="↓"; dn.title="Move down (toward back)";
+      dn.disabled=(i===0); dn.onclick=e=>{ e.stopPropagation(); moveLayer(L.id,-1); };
+      const del=document.createElement("button"); del.className="lyr-btn lyr-del"; del.textContent="✕"; del.title="Delete layer";
+      del.onclick=e=>{ e.stopPropagation();
+        if(map.layers.length<=1){ toast("Can’t delete the last layer."); return; }
+        if(confirm("Delete layer “"+L.name+"”?")) deleteLayer(L.id); };
+      row.append(eye,nm,up,dn,del);
+      el.appendChild(row);
+    }
+  }
+
   // ── Coordinate helpers (world cells ↔ screen px) ──────────────────
   function wpx(){ return CELL * cam.scale; }                 // screen px per cell
 
@@ -690,12 +813,49 @@
   // shared with the GM Screen + Session Prep); otherwise by the inlined
   // renderLocalMap() fallback. Tool-preview + selection overlays are always drawn
   // here on top.
+  // Layers render state for the inlined fallback (renderLocalMap): mirror of the
+  // engine's noClear/overlayOnly. drawLocal sets/restores these around each pass.
+  let renderNoClear=false, renderOverlay=false;
+  function layerSubMap(L){
+    // Share every map-wide field (style/grid/theme/shadowsOn/…); swap the geometry
+    // for this layer's; suppress lighting (drawn once globally afterwards).
+    return Object.assign({}, map, { shapes:L.shapes||[], walls:L.walls||[], doors:L.doors||[],
+      stairs:L.stairs||[], objects:L.objects||[], lit:false, lights:[], shadows:[] });
+  }
+  function unionOccluders(vis){
+    const shapes=[], walls=[];
+    for(const L of vis){ for(const s of (L.shapes||[])) shapes.push(s); for(const w of (L.walls||[])) walls.push(w); }
+    return { shapes, walls };
+  }
+  // Fallback path (no engine): render a sub-map by briefly repointing module state.
+  function drawLocal(sub, opt){
+    const sm=map, sr=noRock, sc=renderNoClear, so=renderOverlay;
+    map=sub; noRock=!!opt.transparent; renderNoClear=!!opt.noClear; renderOverlay=!!opt.overlayOnly;
+    renderLocalMap();
+    map=sm; noRock=sr; renderNoClear=sc; renderOverlay=so;
+  }
   function render(){
     applyStyle();
-    if(window.DungeonEngine && window.DungeonEngine.renderTo){
-      window.DungeonEngine.renderTo(ctx, map, {cam, W, H, DPR, theme, transparent:noRock, tex});
-    } else {
-      renderLocalMap();
+    const useEngine = window.DungeonEngine && window.DungeonEngine.renderTo;
+    const vis = (map.layers||[]).filter(L=>L.visible!==false);
+    // Composite visible layers bottom→top: the first clears + draws rock, the rest
+    // draw transparent over it without wiping (noClear). Isolated per layer, so a
+    // building's walls never merge into the island floor beneath.
+    const passes = vis.length ? vis : [{shapes:[],walls:[],doors:[],stairs:[],objects:[]}];
+    passes.forEach((L,i)=>{
+      const sub=layerSubMap(L);
+      const opt={cam,W,H,DPR,theme, transparent:(i>0)||noRock, noClear:(i>0), tex};
+      if(useEngine) window.DungeonEngine.renderTo(ctx, sub, opt);
+      else drawLocal(sub, opt);
+    });
+    // One global lights/shadows overlay over the finished stack, occluded by the
+    // union of every visible layer's walls/shapes.
+    if(map.lit || (map.shadowsOn && (map.shadows||[]).length)){
+      const occ=unionOccluders(vis);
+      const sub=Object.assign({}, map, {shapes:occ.shapes, walls:occ.walls, doors:[], stairs:[], objects:[]});
+      const opt={cam,W,H,DPR,theme, tex, overlayOnly:true};
+      if(useEngine) window.DungeonEngine.renderTo(ctx, sub, opt);
+      else drawLocal(sub, opt);
     }
     if(!exporting){
       // With an object armed the ghost moves far more often than the map changes,
@@ -737,7 +897,8 @@
     ctx.setTransform(DPR,0,0,DPR,0,0);
     doorHalf=null;                      // per-door wall thickness, recomputed per frame
     lightSegs=null;                     // light occluders, likewise
-    ctx.clearRect(0,0,W,H);
+    if(renderOverlay){ drawShadows(); drawLights(); return; }   // global lights/shadows pass
+    if(!renderNoClear) ctx.clearRect(0,0,W,H);
     if(!noRock){
       const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
       ctx.fillStyle = bgPat || bgCol || C.rockHi; ctx.fillRect(0,0,W,H);
@@ -2520,7 +2681,8 @@
     map.lit = !!keepLit; map.darkness = (keepDark==null) ? 0.55 : keepDark;
     map.shadowsOn = !!keepShadowsOn;                       // the entities belong to the old map
     map.lights = []; map.shadows = [];
-    commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); fitView();
+    installLayers(map);                 // a fresh roll replaces the whole map with one Base layer
+    commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); syncLayersUI(); fitView();
   }
   // Force every generated polygon (cave chambers + tunnels) to one winding so
   // their textured walls all face the same way. The wall strip flows along each
@@ -2889,20 +3051,27 @@
   // ════════════════════════════════════════════════════════════════
   // HISTORY / PERSISTENCE
   // ════════════════════════════════════════════════════════════════
-  function snapshot(){ return JSON.stringify(map); }
+  function serializeMap(){
+    // Persist layers as the source of truth; the top-level shapes/walls/doors/
+    // stairs/objects are only references to the active layer, so strip them.
+    const {shapes,walls,doors,stairs,objects, ...rest}=map;
+    return JSON.stringify(rest);
+  }
+  function snapshot(){ return serializeMap(); }
   function pushHistory(){ history.push(snapshot()); if(history.length>60) history.shift(); future.length=0; syncUndo(); }
   function commit(){ markGeom(); render(); scheduleSave(); syncUndo(); }
   function undo(){ if(!history.length) return; future.push(snapshot()); map=JSON.parse(history.pop()); afterLoad(); syncUndo(); scheduleSave(); }
   function redo(){ if(!future.length) return; history.push(snapshot()); map=JSON.parse(future.pop()); afterLoad(); syncUndo(); scheduleSave(); }
   function syncUndo(){ $("undo").disabled=!history.length; $("redo").disabled=!future.length; }
   function afterLoad(){ sel=null; polyPts=null; draft=null; placing=null; stroke=null; markGeom();
+    installLayers(map);                                  // rebuild layer refs after undo/redo/import
     if(!Array.isArray(map.lights)) map.lights=[];        // maps exported before v37
     if(!Array.isArray(map.shadows)) map.shadows=[];      // …and before v38
     // Maps made before the switch existed keep their shadows on, so nothing
     // silently disappears; a map with none starts with it off, like Lights.
     if(map.shadowsOn==null) map.shadowsOn = map.shadows.length>0;
     if(map.darkness==null) map.darkness=0.55;
-    syncGridOp(); syncZUI(); syncLightUI(); syncShadowUI();
+    syncGridOp(); syncZUI(); syncLightUI(); syncShadowUI(); syncLayersUI();
     $("gridToggle").checked=map.grid!==false;
     snapOn=map.snap!==false; if($("snapToggle")) $("snapToggle").checked=snapOn;
     if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
@@ -2920,7 +3089,7 @@
     let data=null;
     if(window.__ddState && (window.__ddState.shapes||window.__ddState.version)) data=window.__ddState;
     else { try{ const s=localStorage.getItem("dcc_map"); if(s) data=JSON.parse(s); }catch(e){} }
-    if(data && (data.shapes||data.walls)) adoptMap(data);
+    if(data && (data.shapes||data.walls||data.layers)) adoptMap(data);
   }
   // Replace the working map with a loaded/imported one, filling any gaps.
   function adoptMap(data){
@@ -2943,8 +3112,16 @@
       if(L.rot==null) L.rot=0;                           // rotatable since v49
     }
     if(!map.seedId) map.seedId=1+Math.max(0,...allIds());
+    installLayers(map);                 // wrap legacy flat maps into a Base layer; repoint
   }
-  function allIds(){ return [...map.shapes,...map.walls,...map.doors,...map.stairs].map(o=>o.id||0); }
+  function allIds(){
+    const ids=[];
+    for(const L of (map.layers||[map])){
+      for(const o of [...(L.shapes||[]),...(L.walls||[]),...(L.doors||[]),...(L.stairs||[]),...(L.objects||[])]) ids.push(o.id||0);
+      if(L.id!=null) ids.push(L.id);              // layer ids share the uid() space
+    }
+    return ids;
+  }
 
   // ── Editable-file export / import ─────────────────────────────────
   // Export writes the full map object as a .json file the user keeps on their
@@ -3000,7 +3177,7 @@
     return new Blob([arr], {type:mime});
   }
   function exportMap(){
-    saveFile(new Blob([JSON.stringify(map)], {type:"application/json"}),
+    saveFile(new Blob([serializeMap()], {type:"application/json"}),
              safeName()+".json", "Exported");
   }
   function importMapFile(file){
@@ -3008,7 +3185,7 @@
     rd.onload=()=>{
       let data=null;
       try{ data=JSON.parse(rd.result); }catch(e){}
-      if(!data || !(data.shapes||data.walls)){ toast("That file isn’t a map export."); return; }
+      if(!data || !(data.shapes||data.walls||data.layers)){ toast("That file isn’t a map export."); return; }
       pushHistory();
       adoptMap(data);
       afterLoad();
@@ -3130,15 +3307,19 @@
       // here. Hand the engine a tex carrying ONLY byId, so every surface stays
       // classic ink. `null` when the map has no objects at all, which keeps the
       // classic render byte-identical by construction.
-      for(const o of (map.objects||[])) want(o.tex);
+      for(const L of (map.layers||[map])) for(const o of (L.objects||[])) want(o.tex);
       tex = Object.keys(byId).length
         ? {objectsOnly:true, floor:null, bg:null, wall:null, bgColor:null, byId} : null;
       return;
     }
     want(st.floor); want(st.wall);
-    for(const sh of map.shapes){ want(sh.floor); want(sh.wall); }
-    for(const wl of map.walls) want(wl.wall);
-    for(const o of (map.objects||[])) want(o.tex);
+    // Every layer's textures — the composited render draws them all, so byId must
+    // carry ids from hidden/other layers too, not just the active one.
+    for(const L of (map.layers||[map])){
+      for(const sh of (L.shapes||[])){ want(sh.floor); want(sh.wall); }
+      for(const wl of (L.walls||[])) want(wl.wall);
+      for(const o of (L.objects||[])) want(o.tex);
+    }
     tex = { floor: texGet(st.floor), bg: texGet(st.bg), wall: texGet(st.wall), byId,
             bgColor: Object.prototype.hasOwnProperty.call(BG_SOLID, st.bg) ? BG_SOLID[st.bg] : null };
   }
@@ -3649,7 +3830,11 @@
     for(const t of p.textures){ try{ await idbDel("files", t.id); }catch(e){}
       try{ await idbDel("files", t.id+"#thumb"); }catch(e){}   // cached lazily, may or may not exist
       texReg.delete(t.id);
-      for(const o of (map.objects||[])) if(o.tex===t.id) o.tex="";
+      for(const L of (map.layers||[map])){                 // clear refs on every layer
+        for(const o of (L.objects||[])) if(o.tex===t.id) o.tex="";
+        for(const sh of (L.shapes||[])){ if(sh.floor===t.id) sh.floor=""; if(sh.wall===t.id) sh.wall=""; }
+        for(const wl of (L.walls||[])) if(wl.wall===t.id) wl.wall="";
+      }
     }
     try{ await idbDel("packs", p.id); }catch(e){}
     const st=map.style||{};
@@ -4375,16 +4560,19 @@
   // ════════════════════════════════════════════════════════════════
   // VIEW
   // ════════════════════════════════════════════════════════════════
-  function contentBounds(){
+  function contentBounds(visibleOnly){
     const pts=[];
-    for(const s of map.shapes){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
-    for(const w of map.walls){ for(const p of wallPts(w)) pts.push(p); }   // arc/freehand can bow past its ends
-    for(const o of (map.objects||[])){ const b=objBox(o); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
-    for(const d of map.doors) pts.push([d.x,d.y]);
-    if(map.lit) for(const L of (map.lights||[])) pts.push([L.x,L.y]);
+    for(const L of (map.layers||[map])){
+      if(visibleOnly && L.visible===false) continue;
+      for(const s of (L.shapes||[])){ const b=bounds(s,"shape"); if(b){pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]);} }
+      for(const w of (L.walls||[])){ for(const p of wallPts(w)) pts.push(p); }   // arc/freehand can bow past its ends
+      for(const o of (L.objects||[])){ const b=objBox(o); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
+      for(const d of (L.doors||[])) pts.push([d.x,d.y]);
+      for(const s of (L.stairs||[])){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
+        else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
+    }
+    if(map.lit) for(const L of (map.lights||[])) pts.push([L.x,L.y]);            // lights/shadows are global
     for(const sd of (map.shadows||[])){ const b=objBox(sd); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }
-    for(const s of map.stairs){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
-      else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
     if(!pts.length) return null;
     const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
     return {x:Math.min(...xs),y:Math.min(...ys),X:Math.max(...xs),Y:Math.max(...ys)};
@@ -4405,7 +4593,7 @@
   // ════════════════════════════════════════════════════════════════
   let exporting=false, noRock=false;
   function exportPNG(transparent){
-    const b=contentBounds(); if(!b){ toast("Nothing to export yet."); return; }
+    const b=contentBounds(true); if(!b){ toast("Nothing to export yet."); return; }   // visible layers only
     const pad=1.5, res=2;                        // cells of margin, px multiplier
     const cw=(b.X-b.x+pad*2), ch=(b.Y-b.y+pad*2);
     const outW=Math.round(cw*CELL*res), outH=Math.round(ch*CELL*res);
@@ -4513,10 +4701,7 @@
   // Same guard as Clear: rolling a dungeon throws the current map away, and it
   // is the one destructive button people hit by accident while experimenting.
   $("generate").onclick=()=>{
-    const busy = map.shapes.length || map.walls.length || map.doors.length ||
-                 map.stairs.length || (map.objects||[]).length ||
-                 (map.lights||[]).length || (map.shadows||[]).length;
-    if(busy && !confirm("Generate a new dungeon? This replaces everything on the map.")) return;
+    if(mapHasContent() && !confirm("Generate a new map? This replaces everything, including all layers.")) return;
     generate();
   };
 
@@ -4527,9 +4712,10 @@
     if($("snapToggle")) $("snapToggle").checked=snapOn;
     scheduleSave(); toast("Snap to grid "+(snapOn?"on":"off")); }
   $("darkToggle").onchange=e=>setTheme(e.target.checked ? "dark" : "light");
-  $("clear").onclick=()=>{ if(!map.shapes.length&&!map.walls.length){return;}
+  $("clear").onclick=()=>{ if(!mapHasContent()){return;}
     if(confirm("Clear the whole map?")){ pushHistory(); const n=map.name; map=blankMap(); map.name=n; map.theme=theme; afterLoad(); commit(); } };
   $("fit").onclick=fitView;
+  if($("layerAdd")) $("layerAdd").onclick=addLayer;
   $("undo").onclick=undo; $("redo").onclick=redo;
   if($("toFront")) $("toFront").onclick=()=>reorderSel(true);
   if($("toBack"))  $("toBack").onclick =()=>reorderSel(false);
@@ -4624,6 +4810,7 @@
   }
   function boot(){
     load();
+    installLayers(map);                 // ensure the initial/loaded map has layer refs
     detectEmbed();
     resize();
     $("gridToggle").checked=map.grid!==false;
@@ -4633,9 +4820,9 @@
     initAdvanced();
     syncGridOp(); syncZUI();
     if($("gridOp")) $("gridOp").oninput=e=>{ map.gridOpacity=(+e.target.value)/100; syncGridOp(); commit(); };
-    syncUndo();
-    if(map.shapes.length||map.walls.length) fitView(); else render();
-    if(!embed && !map.shapes.length) toast("Pick a tool, or roll a random dungeon →");
+    syncUndo(); syncLayersUI();
+    if(mapHasContent()) fitView(); else render();
+    if(!embed && !mapHasContent()) toast("Pick a tool, or roll a random dungeon →");
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 
