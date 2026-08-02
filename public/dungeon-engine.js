@@ -724,8 +724,27 @@ window.DungeonEngine = (function(){
     const blur=Math.max(2.5, Math.min(22, 0.18*wpx()));
     let ux0=Infinity, uy0=Infinity, ux1=-Infinity, uy1=-Infinity;   // union of lit boxes
     const _svS=map.shapes, _svW=map.walls;
-    for(const _g of groups){
+    for(let gi=0; gi<groups.length; gi++){
+      const _g=groups[gi];
       map.shapes=_g.shapes||[]; map.walls=_g.walls||[]; lightSegs=null;   // occluders for THIS group only
+      if(gi>0){
+        // ONE global darkness wash covers the whole scene, but an upper layer's floor
+        // must HIDE the lights + tint of the layers beneath it (a lower torch can't
+        // light an upper building). Before this group's own lights punch through, re-
+        // darken the veil and clear the tint wherever this layer's floor covers them.
+        const fmc=buf.mask.getContext("2d"); fmc.setTransform(1,0,0,1,0,0); fmc.globalAlpha=1; fmc.filter="none";
+        fmc.globalCompositeOperation="source-over"; fmc.clearRect(0,0,W,H);
+        fmc.fillStyle="#fff"; fmc.beginPath();
+        for(const sh of (_g.shapes||[])){ if(sh.deco) continue; shapePath(fmc, sh); } fmc.fill("nonzero");
+        if(dark>0){
+          const sb=buf.wsh.getContext("2d"); sb.setTransform(1,0,0,1,0,0); sb.globalAlpha=1; sb.filter="none";
+          sb.globalCompositeOperation="source-over"; sb.clearRect(0,0,W,H);
+          sb.fillStyle="rgba(5,7,13,"+dark+")"; sb.fillRect(0,0,W,H);
+          sb.globalCompositeOperation="destination-in"; sb.drawImage(buf.mask,0,0); sb.globalCompositeOperation="source-over";
+          lc.globalCompositeOperation="source-over"; lc.drawImage(buf.wsh,0,0);
+        }
+        gc.globalCompositeOperation="destination-out"; gc.drawImage(buf.mask,0,0); gc.globalCompositeOperation="source-over";
+      }
       const lights=_g.lights||[];
       for(let li=0; li<lights.length; li++){
       const L=lights[li]; if(L.on===false) continue;
@@ -784,9 +803,14 @@ window.DungeonEngine = (function(){
     }
     map.shapes=_svS; map.walls=_svW; lightSegs=null;
     if(dark>0){
-      // A transparent PNG should not come back as a sheet of dark grey — keep
-      // the wash inside the floors, which is the only thing being exported.
-      if(noRock && map.shapes.length){
+      // A transparent PNG should not come back as a sheet of dark grey — keep the
+      // wash inside the floors (the union of the visible layers, since the group loop
+      // left buf.mask holding only the top group's floor).
+      if(noRock && map.shapes && map.shapes.length){
+        const um=buf.mask.getContext("2d"); um.setTransform(1,0,0,1,0,0); um.globalAlpha=1; um.filter="none";
+        um.globalCompositeOperation="source-over"; um.clearRect(0,0,W,H);
+        um.fillStyle="#fff"; um.beginPath();
+        for(const sh of map.shapes){ if(sh.deco) continue; shapePath(um, sh); } um.fill("nonzero");
         lc.globalCompositeOperation="destination-in"; lc.drawImage(buf.mask,0,0);
         lc.globalCompositeOperation="source-over";
       }
