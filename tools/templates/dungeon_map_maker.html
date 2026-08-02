@@ -3253,8 +3253,14 @@
   const SKIP_WALL_OBJ=/^(Wall|Rail)\s*[-,]\s|^(Inside|Outside)\s+bend\b|Wall\s+End$/i;
   // Big commercial packs run to thousands of sprites. Nothing is decoded at
   // import any more (see imageSize + lazy thumbnails), so this ceiling exists
-  // only to bound IndexedDB use, not CPU.
-  const MAX_IMPORT_OBJECTS=4000;
+  // ONLY to bound IndexedDB use, not CPU — rendering only draws PLACED objects.
+  // Raised 4000→60000 (2026-08-02) so Michael's size-split FA packs import in
+  // full: the biggest (Decor, Building Structures) hold ~30k objects, the rest
+  // 1k–10k. He loads/unloads packs per map rather than keeping the whole library
+  // resident, so browser storage stays well clear of quota. A finite ceiling
+  // (vs none) still stops an accidental un-split multi-GB pack from trying to
+  // write 100k+ objects and blowing the quota in one import.
+  const MAX_IMPORT_OBJECTS=60000;
   // DOM cells rendered at once; filter to see more. Advanced Mode is at 578 with
   // seven 2MT packs — a cap of 600 was one pack away from silently truncating the
   // palette. Thumbnails are CSS crops of shared atlases, so a cell costs DOM and
