@@ -172,6 +172,15 @@
   .tip{top:12px;left:50%;transform:translateX(-50%);padding:7px 14px;font-size:11.5px;
     color:var(--muted);letter-spacing:.02em;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
   .tip.show{opacity:1}
+  /* Floating tool dock along the bottom of the canvas — icons only, names on hover. */
+  .tooldock{left:50%;transform:translateX(-50%);bottom:14px;display:flex;align-items:center;
+    gap:6px;padding:5px 7px;max-width:calc(100% - 120px);flex-wrap:wrap;justify-content:center}
+  .tooldock .tools{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+  .tooldock .tool{padding:7px;gap:0;font-size:0;border-radius:6px}
+  .tooldock .tool svg{width:21px;height:21px}
+  .tooldock .seg{font-size:11px}
+  .dock-div{align-self:stretch;width:1px;background:var(--line);margin:2px}
+  body.embed #toolDock{display:none}   /* read-only preview embeds show no tools */
   /* When embedded read-only (GM Screen / session prep preview) the shim hides
      the sidebar; make the canvas fill and disable editing affordances. */
   body.embed #map{cursor:default}
@@ -225,35 +234,9 @@
 
     <div class="grp">
       <div class="grp-head">
-        <p class="grp-title">Tools</p>
-        <div class="seg" id="modeSeg" title="Rooms: Square/Circle/Polygon draw rooms, Wall draws interior walls. Shapes: the same tools draw thin interior shapes (pillars, dais, tables, pits). Doors and stairs are unaffected either way.">
-          <button type="button" data-mode="rooms" class="on">Rooms</button>
-          <button type="button" data-mode="shapes">Shapes</button>
-        </div>
+        <p class="grp-title">Edit</p>
       </div>
-      <div class="tools" id="toolbar">
-        <div class="tool active" data-tool="select" title="Select / move (V)">
-          <svg viewBox="0 0 24 24"><path d="M5 3l6 16 2-6 6-2z"/></svg>Select</div>
-        <div class="tool" data-tool="erase" title="Erase (E)">
-          <svg viewBox="0 0 24 24"><path d="M4 15l7-7 6 6-4 4H8z"/><path d="M9 20h11"/></svg>Erase</div>
-        <div class="tool" data-tool="rect" title="Rectangle (R) — room, or thin interior shape in Shapes mode">
-          <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/></svg>Square</div>
-        <div class="tool" data-tool="circle" title="Circle (C) — round room, or a perfect thin circle in Shapes mode">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>Circle</div>
-        <div class="tool" data-tool="polygon" title="Polygon (P) — click points · click the first point to close a room · Enter or double-click leaves it open as a wall">
-          <svg viewBox="0 0 24 24"><path d="M12 3l8 6-3 10H7L4 9z"/></svg>Polygon</div>
-        <div class="tool" data-tool="draw" title="Draw (N) — freehand caves, water and organic rooms · release near where you started to close a room, anywhere else to leave a wall">
-          <svg viewBox="0 0 24 24"><path d="M3 19c2.2-6.2 4.8-7 6.6-4.2s3.4 1.6 4.6-2.4S17 3.8 21 4.6"/><circle cx="3" cy="19" r="1.8" fill="currentColor" stroke="none"/></svg>Draw</div>
-        <div class="tool" data-tool="door" title="Door (D)">
-          <svg viewBox="0 0 24 24"><path d="M6 4h9v16H6z"/><path d="M15 9l4 3-4 3"/></svg>Door</div>
-        <div class="tool" data-tool="stair" title="Stairs (S)">
-          <svg viewBox="0 0 24 24"><path d="M4 20h4v-4h4v-4h4V8h4"/></svg>Stairs</div>
-        <div class="tool" data-tool="light" title="Light (L) — switch Lights on below, then click the map">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>Light</div>
-        <div class="tool" data-tool="shadow" title="Shadow (H) — a dark light: a pool of shade cast from a point, occluded by walls just like a light">
-          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="8" ry="4.2"/><path d="M8 15a4 2.2 0 0 0 8 0" opacity=".55"/></svg>Shadow</div>
-      </div>
-      <div class="row" style="margin-top:8px">
+      <div class="row">
         <button class="btn" id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
         <button class="btn" id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
       </div>
@@ -262,18 +245,18 @@
         <button class="btn" id="toBack" title="Send the selected room / object behind the others (B)" disabled>⬇ Back</button>
       </div>
       <div id="advBody" style="display:none;margin-top:14px">
-        <label class="fld">Walls</label>
-        <button class="pick" id="wallSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
-        <label class="fld">Floor</label>
-        <button class="pick" id="floorSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
-        <label class="fld">Background</label>
-        <button class="pick" id="bgSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <div id="assetCount" class="asset-count" title="Objects imported across all loaded packs, against the per-pack import cap">Objects loaded: 0 / 60,000</div>
         <div class="row">
           <button class="btn" id="packAdd">+ Asset pack</button>
         </div>
         <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
-        <div id="packList" class="packs"></div>
+        <div id="packList" class="packs" style="margin-bottom:10px"></div>
+        <label class="fld">Background</label>
+        <button class="pick" id="bgSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
+        <label class="fld">Floor</label>
+        <button class="pick" id="floorSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
+        <label class="fld">Walls</label>
+        <button class="pick" id="wallSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
       </div>
     </div>
 
@@ -429,6 +412,35 @@
   <div class="preview-area">
     <canvas id="map"></canvas>
     <div class="float tip" id="tip"></div>
+    <div class="float tooldock" id="toolDock">
+      <div class="seg" id="modeSeg" title="Rooms: Square/Circle/Polygon draw rooms, Wall draws interior walls. Shapes: the same tools draw thin interior shapes (pillars, dais, tables, pits). Doors and stairs are unaffected either way.">
+        <button type="button" data-mode="rooms" class="on">Rooms</button>
+        <button type="button" data-mode="shapes">Shapes</button>
+      </div>
+      <span class="dock-div"></span>
+      <div class="tools" id="toolbar">
+        <div class="tool active" data-tool="select" title="Select / move (V)">
+          <svg viewBox="0 0 24 24"><path d="M5 3l6 16 2-6 6-2z"/></svg>Select</div>
+        <div class="tool" data-tool="erase" title="Erase (E)">
+          <svg viewBox="0 0 24 24"><path d="M4 15l7-7 6 6-4 4H8z"/><path d="M9 20h11"/></svg>Erase</div>
+        <div class="tool" data-tool="rect" title="Rectangle (R) — room, or thin interior shape in Shapes mode">
+          <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1"/></svg>Square</div>
+        <div class="tool" data-tool="circle" title="Circle (C) — round room, or a perfect thin circle in Shapes mode">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>Circle</div>
+        <div class="tool" data-tool="polygon" title="Polygon (P) — click points · click the first point to close a room · Enter or double-click leaves it open as a wall">
+          <svg viewBox="0 0 24 24"><path d="M12 3l8 6-3 10H7L4 9z"/></svg>Polygon</div>
+        <div class="tool" data-tool="draw" title="Draw (N) — freehand caves, water and organic rooms · release near where you started to close a room, anywhere else to leave a wall">
+          <svg viewBox="0 0 24 24"><path d="M3 19c2.2-6.2 4.8-7 6.6-4.2s3.4 1.6 4.6-2.4S17 3.8 21 4.6"/><circle cx="3" cy="19" r="1.8" fill="currentColor" stroke="none"/></svg>Draw</div>
+        <div class="tool" data-tool="door" title="Door (D)">
+          <svg viewBox="0 0 24 24"><path d="M6 4h9v16H6z"/><path d="M15 9l4 3-4 3"/></svg>Door</div>
+        <div class="tool" data-tool="stair" title="Stairs (S)">
+          <svg viewBox="0 0 24 24"><path d="M4 20h4v-4h4v-4h4V8h4"/></svg>Stairs</div>
+        <div class="tool" data-tool="light" title="Light (L) — switch Lights on below, then click the map">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>Light</div>
+        <div class="tool" data-tool="shadow" title="Shadow (H) — a dark light: a pool of shade cast from a point, occluded by walls just like a light">
+          <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="8" ry="4.2"/><path d="M8 15a4 2.2 0 0 0 8 0" opacity=".55"/></svg>Shadow</div>
+      </div>
+    </div>
     <div class="float zoombar">
       <button id="zoomOut">−</button>
       <span id="zoomPct">100%</span>
