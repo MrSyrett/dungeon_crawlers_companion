@@ -403,6 +403,7 @@
         <button class="btn" id="png">⬇ PNG</button>
         <button class="btn" id="pngT" title="Transparent background — floors only">⬇ PNG (transp.)</button>
       </div>
+      <label class="chk" id="perLayerWrap" title="Save one PNG per visible layer, all framed the same so they stack in register — e.g. a building's floors exported separately" style="display:none;margin-top:8px;font-size:11px"><input type="checkbox" id="perLayer"> Each layer as its own PNG</label>
       <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a>
         (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a>)<br>
         and <a href="https://axebane.com/" target="_blank" rel="noopener noreferrer">Axebane Games</a>
@@ -507,12 +508,12 @@
     return { id:uid(), name:name||"Layer", visible:true,
              shapes:(src&&src.shapes)||[], walls:(src&&src.walls)||[],
              doors:(src&&src.doors)||[], stairs:(src&&src.stairs)||[], objects:(src&&src.objects)||[],
-             lights:(src&&src.lights)||[] };
+             lights:(src&&src.lights)||[], shadows:(src&&src.shadows)||[] };
   }
   function repointActive(){
     let L=map.layers.find(x=>x.id===map.activeLayer);
     if(!L){ L=map.layers[map.layers.length-1]; map.activeLayer=L.id; }
-    map.shapes=L.shapes; map.walls=L.walls; map.doors=L.doors; map.stairs=L.stairs; map.objects=L.objects; map.lights=L.lights;
+    map.shapes=L.shapes; map.walls=L.walls; map.doors=L.doors; map.stairs=L.stairs; map.objects=L.objects; map.lights=L.lights; map.shadows=L.shadows;
     return L;
   }
   // The single funnel — call wherever `map` is (re)assigned. Wraps a legacy flat
@@ -520,17 +521,17 @@
   // layer, and repoints the top-level arrays. Idempotent.
   function installLayers(m){
     if(!Array.isArray(m.layers) || !m.layers.length){
-      m.layers = [ mkLayer("Base", {shapes:m.shapes,walls:m.walls,doors:m.doors,stairs:m.stairs,objects:m.objects,lights:m.lights}) ];
+      m.layers = [ mkLayer("Base", {shapes:m.shapes,walls:m.walls,doors:m.doors,stairs:m.stairs,objects:m.objects,lights:m.lights,shadows:m.shadows}) ];
     }
     for(const L of m.layers){
       if(L.id==null) L.id=uid();
       if(L.name==null) L.name="Layer";
       if(L.visible==null) L.visible=true;
-      for(const k of ["shapes","walls","doors","stairs","objects","lights"]) if(!Array.isArray(L[k])) L[k]=[];
+      for(const k of ["shapes","walls","doors","stairs","objects","lights","shadows"]) if(!Array.isArray(L[k])) L[k]=[];
     }
     if(!m.layers.some(L=>L.id===m.activeLayer)) m.activeLayer=m.layers[m.layers.length-1].id;
     const A=m.layers.find(L=>L.id===m.activeLayer);
-    m.shapes=A.shapes; m.walls=A.walls; m.doors=A.doors; m.stairs=A.stairs; m.objects=A.objects; m.lights=A.lights;
+    m.shapes=A.shapes; m.walls=A.walls; m.doors=A.doors; m.stairs=A.stairs; m.objects=A.objects; m.lights=A.lights; m.shadows=A.shadows;
   }
   function setActiveLayer(id){
     if(!map.layers || !map.layers.some(L=>L.id===id) || id===map.activeLayer){ syncLayersUI(); return; }
@@ -600,6 +601,7 @@
       row.append(eye,nm,up,dn,del);
       el.appendChild(row);
     }
+    const plw=$("perLayerWrap"); if(plw) plw.style.display=(map.layers&&map.layers.length>1)?"flex":"none";
   }
 
   // ── Coordinate helpers (world cells ↔ screen px) ──────────────────
@@ -817,11 +819,15 @@
   // Layers render state for the inlined fallback (renderLocalMap): mirror of the
   // engine's noClear/overlayOnly. drawLocal sets/restores these around each pass.
   let renderNoClear=false, renderOverlay=false;
+  let soloLayer=null;   // when set, render() draws ONLY this layer (per-layer PNG export)
   function layerSubMap(L){
     // Share every map-wide field (style/grid/theme/shadowsOn/…); swap the geometry
     // for this layer's; suppress lighting (drawn once globally afterwards).
+    // Each layer is lit by its OWN lights (occluded by its own walls) and draws its
+    // own shadows, inside its own pass — so a lower layer's light/shadow can't reach
+    // the layers above it, and an upper layer relights its own floor over the lower.
     return Object.assign({}, map, { shapes:L.shapes||[], walls:L.walls||[], doors:L.doors||[],
-      stairs:L.stairs||[], objects:L.objects||[], lit:false, lights:[], shadows:[] });
+      stairs:L.stairs||[], objects:L.objects||[], shadows:L.shadows||[], lights:L.lights||[], lit:map.lit });
   }
   function unionOccluders(vis){
     const shapes=[], walls=[];
@@ -838,7 +844,8 @@
   function render(){
     applyStyle();
     const useEngine = window.DungeonEngine && window.DungeonEngine.renderTo;
-    const vis = (map.layers||[]).filter(L=>L.visible!==false);
+    const vis = soloLayer ? (map.layers||[]).filter(L=>L.id===soloLayer)
+                          : (map.layers||[]).filter(L=>L.visible!==false);
     // Composite visible layers bottom→top: the first clears + draws rock, the rest
     // draw transparent over it without wiping (noClear). Isolated per layer, so a
     // building's walls never merge into the island floor beneath.
@@ -851,14 +858,6 @@
     });
     // One global lights/shadows overlay over the finished stack, occluded by the
     // union of every visible layer's walls/shapes.
-    if(map.lit || (map.shadowsOn && (map.shadows||[]).length)){
-      // Lights per visible layer, each occluded by its OWN walls; shadows global.
-      const sub=Object.assign({}, map, {shapes:[], walls:[], doors:[], stairs:[], objects:[], lights:[],
-        lightLayers: vis.map(L=>({lights:L.lights||[], shapes:L.shapes||[], walls:L.walls||[]}))});
-      const opt={cam,W,H,DPR,theme, tex, overlayOnly:true};
-      if(useEngine) window.DungeonEngine.renderTo(ctx, sub, opt);
-      else drawLocal(sub, opt);
-    }
     if(!exporting){
       // With an object armed the ghost moves far more often than the map changes,
       // and a lit textured map costs ~83 ms a frame. Keep a copy of the bare map
@@ -899,7 +898,7 @@
     ctx.setTransform(DPR,0,0,DPR,0,0);
     doorHalf=null;                      // per-door wall thickness, recomputed per frame
     lightSegs=null;                     // light occluders, likewise
-    if(renderOverlay){ drawShadows(); drawLights(); return; }   // global lights/shadows pass
+    if(renderOverlay){ drawLights(); return; }   // global lights pass (shadows draw per-layer)
     if(!renderNoClear) ctx.clearRect(0,0,W,H);
     if(!noRock){
       const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
@@ -1037,7 +1036,13 @@
     // a caller that never sets the flag (or a map saved before v41) still draws.
     if(!map || map.shadowsOn===false) return;       // works in classic mode too (v39)
     const list=map.shadows||[]; if(!list.length) return;
-    ctx.save(); ctx.globalCompositeOperation="multiply";
+    let hasFloor=false; for(const s of map.shapes){ if(!s.deco){ hasFloor=true; break; } }
+    if(!hasFloor) return;                            // nothing on this layer to cast onto
+    // Draw into a scratch buffer, clip to THIS layer's floor mask, then multiply —
+    // so a layer's shadows stay on its own floor and never darken other layers.
+    const sc=buf.wsh.getContext("2d");
+    sc.setTransform(1,0,0,1,0,0); sc.globalAlpha=1; sc.filter="none"; sc.globalCompositeOperation="source-over";
+    sc.clearRect(0,0,W,H);
     for(let i=0;i<list.length;i++){
       const s=list[i];
       const a=Math.max(0, Math.min(1, s.strength==null ? 0.6 : s.strength));
@@ -1047,17 +1052,18 @@
       const soft=Math.max(0, Math.min(1, s.soft==null ? 0.55 : s.soft));
       const core=0.92*(1-soft);                     // fully opaque out to here, then fade
       const p=toScreen(s.x,s.y);
-      ctx.save();
-      ctx.translate(p[0],p[1]); ctx.rotate(s.rot||0); ctx.scale(rx,ry);
-      const g=ctx.createRadialGradient(0,0,0,0,0,1);
+      sc.save();
+      sc.translate(p[0],p[1]); sc.rotate(s.rot||0); sc.scale(rx,ry);
+      const g=sc.createRadialGradient(0,0,0,0,0,1);
       g.addColorStop(0, "rgba(6,8,14,"+a+")");
       if(core>0.001) g.addColorStop(core, "rgba(6,8,14,"+a+")");
       g.addColorStop(core+(1-core)*0.55, "rgba(6,8,14,"+(a*0.35).toFixed(4)+")");
       g.addColorStop(1, "rgba(6,8,14,0)");
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,1,0,6.2832); ctx.fill();
-      ctx.restore();
+      sc.fillStyle=g; sc.beginPath(); sc.arc(0,0,1,0,6.2832); sc.fill();
+      sc.restore();
     }
-    ctx.restore();
+    sc.globalCompositeOperation="destination-in"; sc.drawImage(buf.mask,0,0); sc.globalCompositeOperation="source-over";
+    ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
   }
 
   // ══════════════════════ LIGHTS (Advanced Mode) ══════════════════════
@@ -1105,10 +1111,15 @@
         const n=Math.max(1, Math.min(64, Math.ceil(len/0.35)));
         let s0=null;
         const at=t=>[a[0]+dx*t, a[1]+dy*t];
+        const bc=rb[si], ccx=bc.x+bc.w/2, ccy=bc.y+bc.h/2;
         for(let k=0;k<n;k++){
           const tm=(k+0.5)/n, m=at(tm);
+          // Nudge the test point a hair INTO this room's interior: a wall SHARED with
+          // an adjoining room sits exactly on the neighbour's boundary and must still
+          // occlude. Only a wall STRICTLY inside another room (overlap) is buried.
+          let vx=ccx-m[0], vy=ccy-m[1]; const vl=Math.hypot(vx,vy)||1; const px=m[0]+vx/vl*0.06, py=m[1]+vy/vl*0.06;
           let vis=true;
-          for(let j=0;j<cand.length;j++) if(pointInShape(m[0],m[1],cand[j])){ vis=false; break; }
+          for(let j=0;j<cand.length;j++) if(pointInShape(px,py,cand[j])){ vis=false; break; }
           if(vis && s0===null) s0=k/n;
           else if(!vis && s0!==null){ const p=at(s0), q=at(k/n);
             lightSegs.push([p[0],p[1],q[0],q[1]]); s0=null; }
@@ -3068,7 +3079,7 @@
   function serializeMap(){
     // Persist layers as the source of truth; the top-level shapes/walls/doors/
     // stairs/objects are only references to the active layer, so strip them.
-    const {shapes,walls,doors,stairs,objects,lights, ...rest}=map;   // all derived from the active layer
+    const {shapes,walls,doors,stairs,objects,lights,shadows, ...rest}=map;   // all derived from the active layer
     return JSON.stringify(rest);
   }
   function snapshot(){ return serializeMap(); }
@@ -3131,7 +3142,7 @@
   function allIds(){
     const ids=[];
     for(const L of (map.layers||[map])){
-      for(const o of [...(L.shapes||[]),...(L.walls||[]),...(L.doors||[]),...(L.stairs||[]),...(L.objects||[]),...(L.lights||[])]) ids.push(o.id||0);
+      for(const o of [...(L.shapes||[]),...(L.walls||[]),...(L.doors||[]),...(L.stairs||[]),...(L.objects||[]),...(L.lights||[]),...(L.shadows||[])]) ids.push(o.id||0);
       if(L.id!=null) ids.push(L.id);              // layer ids share the uid() space
     }
     return ids;
@@ -4584,9 +4595,9 @@
       for(const d of (L.doors||[])) pts.push([d.x,d.y]);
       for(const s of (L.stairs||[])){ if(s.ax!==undefined){ pts.push([s.ax,s.ay],[s.bx,s.by],[s.tx,s.ty]); }
         else if(s.x1!==undefined){ pts.push([s.x1,s.y1],[s.x2,s.y2]); } else pts.push([s.x,s.y]); }
-      if(map.lit) for(const lt of (L.lights||[])) pts.push([lt.x,lt.y]);         // lights are per-layer now
+      if(map.lit) for(const lt of (L.lights||[])) pts.push([lt.x,lt.y]);         // lights per-layer
+      for(const sd of (L.shadows||[])){ const bb=objBox(sd); pts.push([bb.x,bb.y],[bb.x+bb.w,bb.y+bb.h]); }   // shadows per-layer
     }
-    for(const sd of (map.shadows||[])){ const b=objBox(sd); pts.push([b.x,b.y],[b.x+b.w,b.y+b.h]); }   // shadows still global
     if(!pts.length) return null;
     const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
     return {x:Math.min(...xs),y:Math.min(...ys),X:Math.max(...xs),Y:Math.max(...ys)};
@@ -4606,23 +4617,38 @@
   // PNG EXPORT
   // ════════════════════════════════════════════════════════════════
   let exporting=false, noRock=false;
-  function exportPNG(transparent){
-    const b=contentBounds(true); if(!b){ toast("Nothing to export yet."); return; }   // visible layers only
+  function exportPNG(transparent, perLayer){
+    const b=contentBounds(true); if(!b){ toast("Nothing to export yet."); return; }   // visible-map bounds (all exports share this framing so layers align)
     const pad=1.5, res=2;                        // cells of margin, px multiplier
     const cw=(b.X-b.x+pad*2), ch=(b.Y-b.y+pad*2);
     const outW=Math.round(cw*CELL*res), outH=Math.round(ch*CELL*res);
     // stash view, retarget the visible canvas to export framing, grab pixels
-    const savedCam={...cam}, savedW=W, savedH=H, savedDPR=DPR;
+    const savedCam={...cam}, savedDPR=DPR;
     DPR=1; W=outW; H=outH; cv.width=outW; cv.height=outH;
     cam=Object.assign({},cam,{scale:res, x:(b.x+b.X)/2, y:(b.y+b.Y)/2});
-    exporting=true; noRock=!!transparent;
+    exporting=true;
+    const base=(map.name?slug(map.name):"dungeon-map");
+    const restore=()=>{ soloLayer=null; exporting=false; noRock=false; cam=savedCam; DPR=savedDPR; resize(); };
+    if(perLayer && map.layers && map.layers.length>1){
+      // One PNG per VISIBLE layer, all sharing the same framing so they stack in
+      // register. Downloads are staggered — browsers throttle rapid ones.
+      const layers=map.layers.filter(L=>L.visible!==false);
+      noRock=!!transparent;
+      let i=0;
+      const next=()=>{
+        if(i>=layers.length){ restore(); toast("Exported "+layers.length+" layers"); return; }
+        const L=layers[i++]; soloLayer=L.id; render();
+        saveFile(dataURLToBlob(cv.toDataURL("image/png")), base+"__"+slug(L.name||("layer-"+i))+(transparent?"-transparent":"")+".png", null);
+        setTimeout(next, 600);
+      };
+      next();
+      return;
+    }
+    noRock=!!transparent;
     render();
-    exporting=false; noRock=false;
     const url=cv.toDataURL("image/png");
-    // restore live view
-    cam=savedCam; DPR=savedDPR; resize();
-    const name=(map.name?slug(map.name):"dungeon-map")+(transparent?"-transparent":"")+".png";
-    saveFile(dataURLToBlob(url), name, "Exported");
+    restore();
+    saveFile(dataURLToBlob(url), base+(transparent?"-transparent":"")+".png", "Exported");
   }
   function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"map"; }
 
@@ -4736,8 +4762,8 @@
   $("export").onclick=exportMap;
   $("import").onclick=()=>$("importFile").click();
   $("importFile").onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f) importMapFile(f); e.target.value=""; };
-  $("png").onclick=()=>exportPNG(false);
-  $("pngT").onclick=()=>exportPNG(true);
+  $("png").onclick=()=>exportPNG(false, $("perLayer")&&$("perLayer").checked);
+  $("pngT").onclick=()=>exportPNG(true, $("perLayer")&&$("perLayer").checked);
   $("zoomIn").onclick=()=>{ cam.scale=Math.min(6,cam.scale*1.2); render(); updateZoom(); };
   $("zoomOut").onclick=()=>{ cam.scale=Math.max(0.15,cam.scale/1.2); render(); updateZoom(); };
 

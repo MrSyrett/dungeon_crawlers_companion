@@ -135,8 +135,8 @@ window.DungeonEngine = (function(){
     ctx.setTransform(DPR,0,0,DPR,0,0);
     doorHalf=null;                      // per-door wall thickness, recomputed per frame
     lightSegs=null;                     // light occluders, likewise
-    if(overlayOnly){                    // one global lights/shadows pass over the composited layer stack
-      drawShadows(); drawLights(); return;
+    if(overlayOnly){                    // one global lights pass over the composited layer stack (shadows draw per-layer)
+      drawLights(); return;
     }
     if(!noClear) ctx.clearRect(0,0,W,H);
     if(!noRock){
@@ -273,7 +273,13 @@ window.DungeonEngine = (function(){
     // a caller that never sets the flag (or a map saved before v41) still draws.
     if(!map || map.shadowsOn===false) return;       // works in classic mode too (v39)
     const list=map.shadows||[]; if(!list.length) return;
-    ctx.save(); ctx.globalCompositeOperation="multiply";
+    let hasFloor=false; for(const s of map.shapes){ if(!s.deco){ hasFloor=true; break; } }
+    if(!hasFloor) return;                            // nothing on this layer to cast onto
+    // Draw into a scratch buffer, clip to THIS layer's floor mask, then multiply —
+    // so a layer's shadows stay on its own floor and never darken other layers.
+    const sc=buf.wsh.getContext("2d");
+    sc.setTransform(1,0,0,1,0,0); sc.globalAlpha=1; sc.filter="none"; sc.globalCompositeOperation="source-over";
+    sc.clearRect(0,0,W,H);
     for(let i=0;i<list.length;i++){
       const s=list[i];
       const a=Math.max(0, Math.min(1, s.strength==null ? 0.6 : s.strength));
@@ -283,17 +289,18 @@ window.DungeonEngine = (function(){
       const soft=Math.max(0, Math.min(1, s.soft==null ? 0.55 : s.soft));
       const core=0.92*(1-soft);                     // fully opaque out to here, then fade
       const p=toScreen(s.x,s.y);
-      ctx.save();
-      ctx.translate(p[0],p[1]); ctx.rotate(s.rot||0); ctx.scale(rx,ry);
-      const g=ctx.createRadialGradient(0,0,0,0,0,1);
+      sc.save();
+      sc.translate(p[0],p[1]); sc.rotate(s.rot||0); sc.scale(rx,ry);
+      const g=sc.createRadialGradient(0,0,0,0,0,1);
       g.addColorStop(0, "rgba(6,8,14,"+a+")");
       if(core>0.001) g.addColorStop(core, "rgba(6,8,14,"+a+")");
       g.addColorStop(core+(1-core)*0.55, "rgba(6,8,14,"+(a*0.35).toFixed(4)+")");
       g.addColorStop(1, "rgba(6,8,14,0)");
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,1,0,6.2832); ctx.fill();
-      ctx.restore();
+      sc.fillStyle=g; sc.beginPath(); sc.arc(0,0,1,0,6.2832); sc.fill();
+      sc.restore();
     }
-    ctx.restore();
+    sc.globalCompositeOperation="destination-in"; sc.drawImage(buf.mask,0,0); sc.globalCompositeOperation="source-over";
+    ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
   }
 
   // ══════════════════════ LIGHTS (Advanced Mode) ══════════════════════
@@ -341,10 +348,15 @@ window.DungeonEngine = (function(){
         const n=Math.max(1, Math.min(64, Math.ceil(len/0.35)));
         let s0=null;
         const at=t=>[a[0]+dx*t, a[1]+dy*t];
+        const bc=rb[si], ccx=bc.x+bc.w/2, ccy=bc.y+bc.h/2;
         for(let k=0;k<n;k++){
           const tm=(k+0.5)/n, m=at(tm);
+          // Nudge the test point a hair INTO this room's interior: a wall SHARED with
+          // an adjoining room sits exactly on the neighbour's boundary and must still
+          // occlude. Only a wall STRICTLY inside another room (overlap) is buried.
+          let vx=ccx-m[0], vy=ccy-m[1]; const vl=Math.hypot(vx,vy)||1; const px=m[0]+vx/vl*0.06, py=m[1]+vy/vl*0.06;
           let vis=true;
-          for(let j=0;j<cand.length;j++) if(pointInShape(m[0],m[1],cand[j])){ vis=false; break; }
+          for(let j=0;j<cand.length;j++) if(pointInShape(px,py,cand[j])){ vis=false; break; }
           if(vis && s0===null) s0=k/n;
           else if(!vis && s0!==null){ const p=at(s0), q=at(k/n);
             lightSegs.push([p[0],p[1],q[0],q[1]]); s0=null; }
