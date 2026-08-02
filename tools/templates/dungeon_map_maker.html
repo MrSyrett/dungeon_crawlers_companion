@@ -956,14 +956,15 @@
       // floor mask (white union)
       const m=buf.mask.getContext("2d"); m.setTransform(1,0,0,1,0,0);
       m.clearRect(0,0,W,H); m.fillStyle="#fff"; m.beginPath();
-      for(const sh of shapes){ if(!shHasFloor(sh)) continue; shapePath(m, sh); } m.fill("nonzero");
+      for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue; shapePath(m, sh); } m.fill("nonzero");
       // Floors are PER-SHAPE. Walk the shapes in z-order and batch CONSECUTIVE
       // runs that share a fill: the common single-floor map still costs one pass
       // (and renders byte-identically to before), while a mixed map stays correct
-      // — a later shape paints over an earlier one exactly as it was drawn. Floor-
-      // bearing deco shapes (a dais, a rug) paint here too, in z-order.
+      // — a later shape paints over an earlier one exactly as it was drawn. Deco
+      // (Shapes) floors are NOT here — they draw as a unit in drawDecoShapes, above
+      // the room walls, so a Shape sits on top of a room instead of mixing with it.
       const runs=[];
-      for(const sh of shapes){ if(!shHasFloor(sh)) continue;
+      for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue;
         const ft=shapeFloorTex(sh), last=runs[runs.length-1];
         if(last && last.t===ft) last.list.push(sh); else runs.push({t:ft, list:[sh]});
       }
@@ -1020,9 +1021,9 @@
     }
 
     drawInteriorWalls();
-    drawDecoShapes();
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
+    drawDecoShapes();               // Shapes render above all room geometry, below shadows/objects/lights
     drawShadows();
     drawObjects();
     drawLights();
@@ -1040,9 +1041,10 @@
     if(amt<=0) return;
     const px = WALL_SHADOW_CELLS*wpx();
     if(px < 1.5) return;                          // too zoomed out to read as anything
-    // Only shapes that have BOTH a wall and a floor get an inner band — a floor-only
-    // shape has no wall to cast it, a wall-only shape no floor to cast it onto.
-    const banded=sh=>shHasWall(sh)&&shHasFloor(sh);
+    // Only ROOM shapes that have BOTH a wall and a floor get an inner band — a
+    // floor-only shape has no wall to cast it, a wall-only shape no floor to cast it
+    // onto, and deco shapes draw their own floor on top later (which would bury it).
+    const banded=sh=>!sh.deco&&shHasWall(sh)&&shHasFloor(sh);
     let any=false;
     for(const sh of map.shapes) if(banded(sh)){ any=true; break; }
     if(!any) return;
@@ -2084,11 +2086,20 @@
 
   function drawDecoShapes(){
     let any=false;
-    for(const s of map.shapes){ if(s.deco && shHasWall(s)){ any=true; break; } }
+    for(const s of map.shapes){ if(s.deco){ any=true; break; } }
     if(!any) return;
-    // Deco (Shapes-mode) shapes draw wherever they're placed — inside a room or out
-    // in the open. Their floor (if any) is painted in the base floor pass; here we
-    // draw the non-occluding wall outline, now at full room-wall thickness.
+    // Deco (Shapes) shapes render as a UNIT above all room geometry: each shape's
+    // FLOOR first, then its non-occluding wall ring, in z-order — so a Shape sits
+    // cleanly on top of a room's floor AND walls instead of the floor sliding under
+    // the room wall. (Called after doors/stairs, before shadows/objects/lights.)
+    for(const sh of map.shapes){
+      if(!sh.deco || !shHasFloor(sh)) continue;
+      const ft=shapeFloorTex(sh), pat=patFor(ctx, ft);
+      ctx.save(); ctx.beginPath(); shapePath(ctx, sh); ctx.clip("nonzero");
+      if(pat && ft && ft.img){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }   // opaque under an alpha (FA) texture
+      ctx.fillStyle = pat || C.floor; ctx.fillRect(0,0,W,H);
+      ctx.restore();
+    }
     ctx.save(); ctx.fillStyle=C.ink;
     for(const sh of map.shapes){ if(sh.deco && shHasWall(sh)) drawDecoRing(ctx, sh); }
     ctx.restore(); }
