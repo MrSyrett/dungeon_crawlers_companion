@@ -1,9 +1,7 @@
 import { scrypt as _scrypt, randomBytes, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
-import { cache } from "react";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { isAdminEmail } from "@/lib/admin";
 
 const scrypt = promisify(_scrypt);
 
@@ -41,24 +39,14 @@ export async function createSession(userId: string): Promise<void> {
   });
 }
 
-// Memoized per request (React cache): several server components and helpers ask
-// for the current user during one render; only the first call hits the DB.
-// Only id + email are ever read off the result, so we select just those (plus
-// the approval flag we gate on) rather than hydrating the whole user row
-// (passwordHash included) on every request — this runs on the 4-second roll
-// poll for every connected tool.
-export const getCurrentUser = cache(async function getCurrentUser() {
+export async function getCurrentUser() {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(COOKIE_NAME)?.value;
   if (!sessionId) return null;
 
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
-    select: {
-      id: true,
-      expiresAt: true,
-      user: { select: { id: true, email: true, approved: true } },
-    },
+    include: { user: true },
   });
   if (!session) return null;
 
@@ -66,18 +54,15 @@ export const getCurrentUser = cache(async function getCurrentUser() {
     await prisma.session.delete({ where: { id: session.id } }).catch(() => {});
     return null;
   }
+  return session.user;
+}
 
-  // If approval was revoked after they signed in, treat them as logged out so
-  // the change takes effect without waiting for the session to expire. Admins
-  // are always allowed regardless of the flag.
-  if (!session.user.approved && !isAdminEmail(session.user.email)) {
-    await prisma.session.delete({ where: { id: session.id } }).catch(() => {});
-    return null;
-  }
-
-  const { id, email } = session.user;
-  return { id, email };
-});
+// The id of the caller's current session, if any. Lets a password change keep
+// *this* session alive while signing out every other one.
+export async function getCurrentSessionId(): Promise<string | null> {
+  const cookieStore = await cookies();
+  return cookieStore.get(COOKIE_NAME)?.value ?? null;
+}
 
 export async function destroySession(): Promise<void> {
   const cookieStore = await cookies();
