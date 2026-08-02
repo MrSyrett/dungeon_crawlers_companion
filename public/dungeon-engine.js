@@ -1265,6 +1265,21 @@ window.DungeonEngine = (function(){
       ctx.fillStyle = pat || C.floor; ctx.fillRect(0,0,W,H);
       ctx.restore();
     }
+    // Grid over the deco floors — same lines as the room grid, clipped to the deco
+    // floor union (buf.decoClip) so a Shape's floor reads on the grid like a room.
+    if(map.grid!==false && gridOp()>0 && wpx()>7){
+      const dc=buf.decoClip.getContext("2d"); dc.setTransform(1,0,0,1,0,0); dc.clearRect(0,0,W,H);
+      dc.globalCompositeOperation="source-over"; dc.fillStyle="#fff"; dc.beginPath();
+      for(const sh of map.shapes){ if(sh.deco && shHasFloor(sh)) shapePath(dc, sh); } dc.fill("nonzero");
+      const gc=buf.grid.getContext("2d"); gc.setTransform(1,0,0,1,0,0); gc.clearRect(0,0,W,H);
+      gc.globalCompositeOperation="source-over"; gc.strokeStyle=C.grid; gc.lineWidth=Math.max(1,1.5*cam.scale); gc.globalAlpha=.85*gridOp();
+      const p=wpx(); const [ox,oy]=toScreen(0,0); gc.beginPath();
+      for(let x=ox%p;x<=W;x+=p){ gc.moveTo(x+.5,0); gc.lineTo(x+.5,H); }
+      for(let y=oy%p;y<=H;y+=p){ gc.moveTo(0,y+.5); gc.lineTo(W,y+.5); }
+      gc.stroke(); gc.globalAlpha=1;
+      gc.globalCompositeOperation="destination-in"; gc.drawImage(buf.decoClip,0,0);
+      ctx.drawImage(buf.grid,0,0);
+    }
     ctx.save(); ctx.fillStyle=C.ink;
     for(const sh of map.shapes){ if(sh.deco && shHasWall(sh)) drawDecoRing(ctx, sh); }
     ctx.restore(); }
