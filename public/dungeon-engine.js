@@ -10,6 +10,7 @@
      generate(opts) -> mapData
        opts: { rooms=8, size=3 (1..5), layout=3 (1..5), entrances=2,
                corridors=true, roundRooms=false, theme='light'|'dark',
+               gridInterior=false (grid on interiors only, not exterior),
                seed?=uint }
      toPNG(mapData, { theme, transparent=false, pad=1.5, res=2 }) -> dataURL
      generateToPNG(opts) -> { png, mapData, width, height }
@@ -850,7 +851,7 @@ window.DungeonEngine = (function(){
   // in-floor grid; room and deco floors repaint their own grid on top afterwards,
   // so the result reads as one unbroken grid running under the walls.
   function drawFullGrid(){
-    if(map.grid===false || gridOp()<=0 || wpx()<=7) return;
+    if(map.grid===false || gridOp()<=0 || wpx()<=7 || map.gridInterior) return;   // gridInterior ⇒ grid on floors only
     ctx.save();
     ctx.strokeStyle=C.grid; ctx.lineWidth=Math.max(1,1.5*cam.scale); ctx.globalAlpha=.85*gridOp();
     const p=wpx(); const [ox,oy]=toScreen(0,0); ctx.beginPath();
@@ -1407,6 +1408,7 @@ window.DungeonEngine = (function(){
                                  : ((Date.now() ^ (Math.floor(Math.random()*1e9))) >>> 0);
 
     map = blankMap(); map.theme = th;
+    map.gridInterior = !!opts.gridInterior;   // generators can request grid on interiors only
 
     const avg=(smin+smax)/2;
     const density=[0.5,0.4,0.32,0.25,0.18][spread-1];

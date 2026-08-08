@@ -2352,6 +2352,9 @@ GMScenes.renderPins();
           <label class="gen-label">Exterior
             <select class="gen-select" id="gen-dun-ext"><option value="0" selected>No (inward)</option><option value="1">Yes (outward)</option></select>
           </label>
+          <label class="gen-label">Grid
+            <select class="gen-select" id="gen-dun-gridint"><option value="0" selected>Everywhere</option><option value="1">Interior only</option></select>
+          </label>
           <label class="gen-label">Doors
             <select class="gen-select" id="gen-dun-doors"><option value="1" selected>Yes</option><option value="0">No</option></select>
           </label>
@@ -2563,6 +2566,9 @@ GMScenes.renderPins();
           </label>
           <label class="gen-label">Exterior
             <select class="gen-select" id="gen-adv-ext"><option value="0" selected>No (inward)</option><option value="1">Yes (outward)</option></select>
+          </label>
+          <label class="gen-label">Grid
+            <select class="gen-select" id="gen-adv-gridint"><option value="0" selected>Everywhere</option><option value="1">Interior only</option></select>
           </label>
           <label class="gen-label">Doors
             <select class="gen-select" id="gen-adv-doors"><option value="1" selected>Yes</option><option value="0">No</option></select>
@@ -7176,6 +7182,7 @@ window.init_gen = function(root) {
           roundRooms: ((q('round')||{}).value||'0') === '1',
           organic: ((q('organic')||{}).value||'0') === '1',
           exterior: ((q('ext')||{}).value||'0') === '1',
+          gridInterior: ((q('gridint')||{}).value||'0') === '1',
           doors: ((q('doors')||{}).value||'1') !== '0',
           theme: (q('look')||{}).value||'light'
         });
@@ -7307,6 +7314,7 @@ window.init_gen = function(root) {
           roundRooms: ((q('round')||{}).value||'0') === '1',
           organic: ((q('organic')||{}).value||'0') === '1',
           exterior: ((q('ext')||{}).value||'0') === '1',
+          gridInterior: ((q('gridint')||{}).value||'0') === '1',
           doors: ((q('doors')||{}).value||'1') !== '0',
           theme: (q('look')||{}).value||'light'
         });

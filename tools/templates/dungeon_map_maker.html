@@ -354,7 +354,7 @@
     <div class="grp">
       <div class="chk-row">
         <label class="chk" title="Toggle with Shift+S"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
-        <label class="chk"><input type="checkbox" id="gridToggle" checked> Show grid</label>
+        <label class="chk" title="Draw the grid only over room interiors, not the exterior background. Use the Grid opacity slider (0%) to hide the grid entirely."><input type="checkbox" id="gridInteriorToggle"> Interior only</label>
       </div>
       <label class="fld">Grid opacity <b id="gridOpV">50%</b></label>
       <input type="range" id="gridOp" min="0" max="100" value="50">
@@ -520,7 +520,7 @@
   let W = 0, H = 0, DPR = 1;
 
   function blankMap(){
-    return { version:1, name:"", grid:true, gridOpacity:0.5, style:DEFAULT_STYLE(),
+    return { version:1, name:"", grid:true, gridInterior:false, gridOpacity:0.5, style:DEFAULT_STYLE(),
              lit:false, darkness:0.55, lights:[], shadowsOn:false, shadows:[], wallShadow:0.55,
              shapes:[], walls:[], doors:[], stairs:[], objects:[], seedId:1 };
   }
@@ -1654,7 +1654,7 @@
   // in-floor grid; room and deco floors repaint their own grid on top afterwards,
   // so the result reads as one unbroken grid running under the walls.
   function drawFullGrid(){
-    if(map.grid===false || gridOp()<=0 || wpx()<=7) return;
+    if(map.grid===false || gridOp()<=0 || wpx()<=7 || map.gridInterior) return;   // gridInterior ⇒ grid on floors only
     ctx.save();
     ctx.strokeStyle=C.grid; ctx.lineWidth=Math.max(1,1.5*cam.scale); ctx.globalAlpha=.85*gridOp();
     const p=wpx(); const [ox,oy]=toScreen(0,0); ctx.beginPath();
@@ -2865,7 +2865,7 @@
     map = (window.DungeonEngine && window.DungeonEngine.generate)
       ? window.DungeonEngine.generate(opts)
       : generateLocal(opts);
-    map.name = keepName; map.grid = $("gridToggle").checked; map.theme = theme;
+    map.name = keepName; map.grid = true; map.gridInterior = $("gridInteriorToggle").checked; map.theme = theme;
     if(keepStyle) map.style = keepStyle;
     if(keepGridOp!=null) map.gridOpacity = keepGridOp;
     if(keepSnap!=null) map.snap = keepSnap;
@@ -3263,7 +3263,7 @@
     if(map.shadowsOn==null) map.shadowsOn = map.shadows.length>0;
     if(map.darkness==null) map.darkness=0.55;
     syncGridOp(); syncZUI(); syncLightUI(); syncShadowUI(); syncLayersUI();
-    $("gridToggle").checked=map.grid!==false;
+    $("gridInteriorToggle").checked=!!map.gridInterior;
     snapOn=map.snap!==false; if($("snapToggle")) $("snapToggle").checked=snapOn;
     if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
     setThemeColors(map.theme==="dark" ? "dark" : "light");
@@ -3285,6 +3285,10 @@
   // Replace the working map with a loaded/imported one, filling any gaps.
   function adoptMap(data){
     map=Object.assign(blankMap(), data);
+    // The "Show grid" checkbox is gone — grid on/off is now the opacity slider.
+    // A map saved with grid:false (old checkbox unchecked) migrates to opacity 0
+    // so its "no grid" intent survives without a toggle to restore it.
+    if(map.grid===false){ map.gridOpacity=0; map.grid=true; }
     if(map.style){ map.style.floor=unalias(map.style.floor); map.style.wall=unalias(map.style.wall);
                    map.style.bg=unalias(map.style.bg); }
     for(const sh of map.shapes){ if(sh.floor!==undefined) sh.floor=unalias(sh.floor);
@@ -4907,7 +4911,7 @@
     generate();
   };
 
-  $("gridToggle").onchange=e=>{ map.grid=e.target.checked; render(); scheduleSave(); };
+  $("gridInteriorToggle").onchange=e=>{ map.gridInterior=e.target.checked; render(); scheduleSave(); };
   $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; scheduleSave(); };
   // Shift+S rather than plain S, which is already the Stairs tool.
   function toggleSnap(){ snapOn=!snapOn; map.snap=snapOn;
@@ -5048,7 +5052,7 @@
     installLayers(map);                 // ensure the initial/loaded map has layer refs
     detectEmbed();
     resize();
-    $("gridToggle").checked=map.grid!==false;
+    $("gridInteriorToggle").checked=!!map.gridInterior;
     snapOn=map.snap!==false; $("snapToggle").checked=snapOn;
     $("darkToggle").checked = map.theme==="dark";
     setThemeColors(map.theme==="dark" ? "dark" : "light");

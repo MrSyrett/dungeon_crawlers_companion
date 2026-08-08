@@ -605,6 +605,9 @@ body.flow-mode .page + .page {
         <select id="mapgen-ext" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="0" selected>Exterior: off (inward)</option><option value="1">Exterior: on (outward)</option>
         </select>
+        <select id="mapgen-gridint" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
+          <option value="0" selected>Grid: everywhere</option><option value="1">Grid: interior only</option>
+        </select>
         <select id="mapgen-doors" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="1" selected>Doors: on</option><option value="0">Doors: off</option>
         </select>
@@ -1873,6 +1876,7 @@ function randMap() {
     roundRooms: (v('mapgen-round')?.value || '0') === '1',
     organic: (v('mapgen-organic')?.value || '0') === '1',
     exterior: (v('mapgen-ext')?.value || '0') === '1',
+    gridInterior: (v('mapgen-gridint')?.value || '0') === '1',
     doors: (v('mapgen-doors')?.value || '1') !== '0',
     theme: v('mapgen-look')?.value || 'light'
   });
