@@ -146,7 +146,7 @@ window.DungeonEngine = (function(){
       // and would otherwise show nothing through. Same fix as textured floors.
       if(bgPat){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }
       ctx.fillStyle = bgPat || bgCol || C.rockHi; ctx.fillRect(0,0,W,H);
-      if(!bgPat && !bgCol) drawDotGrid();   // dots would just fight a rock texture
+      drawFullGrid();   // square grid across the WHOLE canvas — background AND interiors
     }
 
     const shapes = map.shapes;
@@ -160,8 +160,8 @@ window.DungeonEngine = (function(){
       // runs that share a fill: the common single-floor map still costs one pass
       // (and renders byte-identically to before), while a mixed map stays correct
       // — a later shape paints over an earlier one exactly as it was drawn. Deco
-      // (Shapes) floors are NOT here — they draw as a unit in drawDecoShapes, above
-      // the room walls, so a Shape sits on top of a room instead of mixing with it.
+      // (Shapes) floors are NOT here — they draw as a unit in drawDecoShapes, on
+      // top of the room floors but below the walls, so a Shape sits on the floor.
       const runs=[];
       for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue;
         const ft=shapeFloorTex(sh), last=runs[runs.length-1];
@@ -213,12 +213,12 @@ window.DungeonEngine = (function(){
         ctx.drawImage(buf.grid,0,0);
       }
       drawWallInnerShadow();
+      drawDecoShapes();             // Shapes sit ON room floors but UNDER the walls (above floors, below walls)
       drawWalls();
     }
     drawInteriorWalls();
     for(const d of map.doors) drawDoor(d);
     for(const s of map.stairs) drawStair(s);
-    drawDecoShapes();               // Shapes render above all room geometry, below shadows/objects/lights
     drawShadows();
     drawObjects();
     drawLights();
@@ -844,6 +844,21 @@ window.DungeonEngine = (function(){
     for(let x=ox%p;x<W;x+=p) for(let y=oy%p;y<H;y+=p){ ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fill(); }
     ctx.restore(); }
 
+  // The square grid drawn UNCLIPPED across the whole canvas, so interior and
+  // exterior share one continuous lattice (Michael: grid visible everywhere, to
+  // design interior AND exterior maps). Same lines/colour/opacity/gating as the
+  // in-floor grid; room and deco floors repaint their own grid on top afterwards,
+  // so the result reads as one unbroken grid running under the walls.
+  function drawFullGrid(){
+    if(map.grid===false || gridOp()<=0 || wpx()<=7) return;
+    ctx.save();
+    ctx.strokeStyle=C.grid; ctx.lineWidth=Math.max(1,1.5*cam.scale); ctx.globalAlpha=.85*gridOp();
+    const p=wpx(); const [ox,oy]=toScreen(0,0); ctx.beginPath();
+    for(let x=ox%p;x<=W;x+=p){ ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,H); }
+    for(let y=oy%p;y<=H;y+=p){ ctx.moveTo(0,y+.5); ctx.lineTo(W,y+.5); }
+    ctx.stroke();
+    ctx.restore(); }
+
   function roughSeg(c, aw, bw, halfW){
     const [ax,ay]=toScreen(aw[0],aw[1]), [bx,by]=toScreen(bw[0],bw[1]);
     const dx=bx-ax, dy=by-ay; const len=Math.hypot(dx,dy); if(len<0.5) return;
@@ -1253,10 +1268,10 @@ window.DungeonEngine = (function(){
     let any=false;
     for(const s of map.shapes){ if(s.deco){ any=true; break; } }
     if(!any) return;
-    // Deco (Shapes) shapes render as a UNIT above all room geometry: each shape's
-    // FLOOR first, then its non-occluding wall ring, in z-order — so a Shape sits
-    // cleanly on top of a room's floor AND walls instead of the floor sliding under
-    // the room wall. (Called after doors/stairs, before shadows/objects/lights.)
+    // Deco (Shapes) shapes render as a UNIT sitting ON room floors but UNDER the
+    // walls: each shape's FLOOR first, then its non-occluding wall ring, in z-order
+    // — so a Shape lies on top of a room's floor while the room's (and interior)
+    // walls draw over it. (Called after floors + inner shadow, before drawWalls.)
     for(const sh of map.shapes){
       if(!sh.deco || !shHasFloor(sh)) continue;
       const ft=shapeFloorTex(sh), pat=patFor(ctx, ft);
