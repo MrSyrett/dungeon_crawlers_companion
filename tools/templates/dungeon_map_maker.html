@@ -127,9 +127,15 @@
   .objgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;max-height:214px;overflow:auto;
     margin-top:6px;padding:4px;background:var(--panel2);border:1px solid var(--line);border-radius:7px}
   .objgrid button{aspect-ratio:1;background:#0f0f13;border:1px solid transparent;border-radius:5px;
-    cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center}
+    cursor:pointer;padding:2px;display:flex;align-items:center;justify-content:center;position:relative}
   .objgrid button:hover{border-color:var(--gold-dim)}
   .objgrid button.on{border-color:var(--gold);background:var(--active)}
+  /* per-image delete on custom "My Images" cells — shows on hover */
+  .objgrid .del{position:absolute;top:1px;right:1px;width:15px;height:15px;line-height:13px;
+    border-radius:50%;background:rgba(18,18,22,.85);color:#fff;font-size:12px;text-align:center;
+    border:1px solid rgba(255,255,255,.28);display:none;cursor:pointer;z-index:2;padding:0}
+  .objgrid button:hover .del,.objgrid .del:hover{display:block}
+  .objgrid .del:hover{background:#a3322b;border-color:#c9564d}
   .objgrid img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
   .objgrid .th{display:block;background-repeat:no-repeat;pointer-events:none}
   .objgrid .none{grid-column:1/-1;font-size:10.5px;color:var(--muted);text-align:center;padding:16px 4px}
@@ -253,9 +259,13 @@
       <div id="advBody" style="display:none;margin-top:14px">
         <div id="assetCount" class="asset-count" title="Objects imported across all loaded packs, against the per-pack import cap">Objects loaded: 0 / 60,000</div>
         <div class="row">
-          <button class="btn" id="packAdd">+ Asset pack</button>
+          <button class="btn" id="packAdd" title="Import a Dungeondraft .dungeondraft_pack">+ Asset pack</button>
+          <button class="btn" id="imgAdd" title="Import PNG/JPG/WebP/GIF images as placeable custom objects (grouped under 'My Images')">+ Image objects</button>
         </div>
         <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
+        <input type="file" id="imgFile" accept="image/png,image/jpeg,image/webp,image/gif,.png,.jpg,.jpeg,.webp,.gif" multiple style="display:none">
+        <label class="fld" title="How many image pixels make one grid square when importing images as objects. 256 matches Dungeondraft and objects exported at that scale; lower makes imported images larger on the grid. You can still resize each object after placing.">Image px / square</label>
+        <input class="sel" id="imgPPS" type="number" value="256" min="8" max="4096" step="8" style="margin-bottom:8px">
         <div id="packList" class="packs" style="margin-bottom:10px"></div>
         <label class="fld">Background</label>
         <button class="pick" id="bgSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
@@ -3473,6 +3483,8 @@
 
   const BG_SOLID = { "bg:theme":null, "bg:black":"#08080a", "bg:slate":"#171a21", "bg:parch":"#efe8d7" };
   const texReg = new Map();                       // id -> {id,name,kind,url,cells|thick|tile,img}
+  const CUSTOM_PACK = "pack:custom-images";       // synthetic pack that holds user-imported image objects ("My Images")
+  let customSeq = 0;                              // disambiguates ids minted in the same millisecond
   let bundledPacks = [];                          // [{id,name,textures:[…]}] once the manifest lands
   let bundledError = null;                        // surfaced in the palette so a bad deploy is obvious
   let bundledCounts = null;                       // what the manifest actually contained
@@ -3762,6 +3774,78 @@
       im.onerror=()=>{ URL.revokeObjectURL(u); res(null); };
       im.src=u;
     });
+  }
+
+  // ── Custom image objects ("My Images") ──────────────────────────────
+  // Import plain images (a prefab exported as a PNG, a token, any sprite) as
+  // placeable objects. They live in ONE synthetic pack, CUSTOM_PACK, so they
+  // flow through the exact same machinery as an imported Dungeondraft pack:
+  // blob in IDB "files" under the texture id, the pack row in IDB "packs",
+  // registerPack() + the lazy texGet override mint the object URL on first use,
+  // ensureThumb() bakes the palette thumbnail, and removePack() still removes
+  // the whole set. Per-image delete (the × on each cell) is removeCustomImage().
+  const IMG_NAME = /\.(png|jpe?g|webp|gif|bmp|avif)$/i;
+  // Pixels-per-grid-square used to size an imported image. 256 = Dungeondraft's
+  // convention (and what this tool's objects use), adjustable in the sidebar.
+  function imgPxPerSquare(){ const v=parseFloat(($("imgPPS")||{}).value); return (v>0 && isFinite(v)) ? v : 256; }
+  // Decode just far enough to read the pixel dimensions. Users import a handful
+  // of files, not thousands, so a real decode here is fine (unlike pack import).
+  function imageDims(blob){
+    return new Promise(res=>{
+      const u=URL.createObjectURL(blob), im=new Image();
+      im.onload=()=>{ URL.revokeObjectURL(u); res({w:im.naturalWidth, h:im.naturalHeight}); };
+      im.onerror=()=>{ URL.revokeObjectURL(u); res(null); };
+      im.src=u;
+    });
+  }
+  async function importImageFiles(files){
+    const list=[...files].filter(f=>IMG_NAME.test(f.name) || /^image\//.test(f.type||""));
+    if(!list.length){ toast("No image files selected."); return; }
+    const per=imgPxPerSquare();
+    let pack;
+    try{ pack=await idbGet("packs", CUSTOM_PACK); }catch(e){}
+    if(!pack) pack={id:CUSTOM_PACK, name:"My Images", textures:[], custom:true};
+    let added=0, failed=0;
+    for(const f of list){
+      const dim=await imageDims(f);
+      // A file we can't decode (e.g. a broken or unsupported image) is skipped.
+      if(!dim || !dim.w || !dim.h){ failed++; continue; }
+      const base=(f.name||"image").replace(/\.[^.]+$/,"").slice(0,60) || "image";
+      const id=CUSTOM_PACK+"/"+Date.now().toString(36)+"-"+(customSeq++)+"-"
+               +base.replace(/[^A-Za-z0-9_-]+/g,"_");
+      try{ await idbPut("files", id, f); }catch(e){ failed++; continue; }
+      const tex={ id, name:base, kind:"object", pack:CUSTOM_PACK, custom:true,
+                  w:Math.max(0.05,+(dim.w/per).toFixed(3)), h:Math.max(0.05,+(dim.h/per).toFixed(3)) };
+      pack.textures.push(tex);
+      added++;
+    }
+    if(added){
+      try{ await idbPut("packs", CUSTOM_PACK, pack); }catch(e){}
+      registerPack(pack);                 // idempotent: re-registers the whole set
+      await refreshPackList();
+      buildTexSelects(); buildObjGrid();
+    }
+    toast(added ? ("Added "+added+" image"+(added===1?"":"s")+" to My Images"
+                   +(failed?" ("+failed+" skipped)":"")+".")
+                : "Couldn't read those image"+(list.length===1?"":"s")+".");
+  }
+  // Remove a single imported image from My Images: its blob + thumb, its texReg
+  // entry, its row in the pack, and any placed instance's reference (blanked,
+  // exactly as removePack does). If it was the last one, the pack row goes too.
+  async function removeCustomImage(id){
+    try{ await idbDel("files", id); }catch(e){}
+    try{ await idbDel("files", id+"#thumb"); }catch(e){}
+    texReg.delete(id);
+    if(armedObj===id){ armedObj=null; ghostPt=null; resetArm(); if(tool==="object") setTool("select"); }
+    for(const L of (map.layers||[map])) for(const o of (L.objects||[])) if(o.tex===id) o.tex="";
+    let pack; try{ pack=await idbGet("packs", CUSTOM_PACK); }catch(e){}
+    if(pack){
+      pack.textures=(pack.textures||[]).filter(x=>x.id!==id);
+      try{ if(pack.textures.length) await idbPut("packs", CUSTOM_PACK, pack);
+           else await idbDel("packs", CUSTOM_PACK); }catch(e){}
+    }
+    await refreshPackList();
+    buildTexSelects(); buildObjGrid(); commit();
   }
 
   async function importPackFile(file){
@@ -4393,6 +4477,14 @@
         if(armedObj!==was) resetArm();
         ghostPt=null;
         setTool(armedObj ? "object" : "select"); buildObjGrid(); };
+      // Per-image delete for user-imported images ("My Images"). A <span>, not a
+      // nested <button> (which is invalid inside the cell button).
+      if(t.pack===CUSTOM_PACK){
+        const del=document.createElement("span"); del.className="del"; del.textContent="×";
+        del.title="Remove this image from My Images";
+        del.onclick=ev=>{ ev.stopPropagation(); removeCustomImage(t.id); };
+        b.appendChild(del);
+      }
       g.appendChild(b);
       if(++n>=MAX_GRID_CELLS) break;
     }
@@ -4776,6 +4868,9 @@
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
+    if($("imgAdd"))   $("imgAdd").onclick   =()=>$("imgFile").click();
+    if($("imgFile"))  $("imgFile").onchange =e=>{ const fs=[...e.target.files];   // copy BEFORE clearing (FileList is live)
+      e.target.value=""; if(fs.length) importImageFiles(fs).catch(err=>toast(err.message||"Import failed.")); };
     syncAdvancedUI(); syncStyleScope(); initLights(); initShadows();
     loadBundled().catch(()=>{});
     loadPacks().catch(()=>{});
