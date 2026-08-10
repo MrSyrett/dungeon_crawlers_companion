@@ -2237,6 +2237,29 @@
     ctx.beginPath(); build(); ctx.stroke();
     ctx.restore();
   }
+  // Format a cell count for the live size readout: whole numbers plain, otherwise
+  // one decimal (snap off can yield fractional spans). e.g. 3, 4.5, 2.3.
+  function fmtCells(n){ const r=Math.round(n*10)/10; return Number.isInteger(r)? String(r) : r.toFixed(1); }
+  // A small dark pill showing the in-progress shape's size, anchored near the
+  // cursor/corner and nudged to stay on-canvas. Drawn opaque, on top of everything.
+  function drawSizeTag(text, ax, ay){
+    ctx.save();
+    ctx.globalAlpha=1; ctx.setLineDash([]);
+    ctx.font="600 12px ui-sans-serif,-apple-system,'Segoe UI',Roboto,sans-serif";
+    ctx.textBaseline="middle";
+    const padX=6, h=18, tw=ctx.measureText(text).width, w=tw+padX*2, r=h/2;
+    let x=ax+14, y=ay-24;                         // up-right of the anchor by default
+    if(x+w>W-4) x=ax-14-w;                        // flip left if it would run off the right
+    if(x<4) x=4; if(y<4) y=ay+10; if(y+h>H-4) y=H-4-h;
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+    ctx.fillStyle="rgba(18,18,22,.88)"; ctx.fill();
+    ctx.strokeStyle="rgba(255,255,255,.20)"; ctx.lineWidth=1; ctx.stroke();
+    ctx.fillStyle="#fff"; ctx.textAlign="left";
+    ctx.fillText(text, x+padX, y+h/2+0.5);
+    ctx.restore();
+  }
   function drawPreview(){
     ctx.save(); ctx.globalAlpha=.85;
     if(draft){
@@ -2322,6 +2345,25 @@
       if(willClose){ ctx.fillStyle=C.sel; ctx.fill();
         ctx.strokeStyle="rgba(255,255,255,.85)"; ctx.lineWidth=1.4; ctx.stroke(); }
       else { ctx.strokeStyle=C.sel; ctx.lineWidth=2.2; ctx.stroke(); }
+    }
+    // ── Live size readout ── so you can see the exact dimensions before you
+    // commit. Rect room/shape → (w, h); circle → (diameter); polygon → the
+    // length of the segment currently being dragged out. Updates every frame.
+    if(draft && draft.type==="rect" && tool==="rect"){
+      // Anchor on the moving corner (the one that isn't the drag origin), so the
+      // tag tracks the cursor.
+      const cx = (dragStart && Math.abs(dragStart[0]-draft.x)<1e-6) ? draft.x+draft.w : draft.x;
+      const cy = (dragStart && Math.abs(dragStart[1]-draft.y)<1e-6) ? draft.y+draft.h : draft.y;
+      const [sx,sy]=toScreen(cx,cy);
+      drawSizeTag("("+fmtCells(draft.w)+", "+fmtCells(draft.h)+")", sx, sy);
+    } else if(draft && draft.type==="circle" && tool==="circle"){
+      const [sx,sy]=toScreen(draft.cx, draft.cy-draft.r);   // above the circle
+      drawSizeTag("("+fmtCells(draft.r*2)+")", sx, sy);
+    } else if(polyPts && polyPts.length && hoverPt && tool==="polygon"){
+      const a=polyPts[polyPts.length-1];                    // segment = last vertex → cursor
+      const len=Math.hypot(hoverPt[0]-a[0], hoverPt[1]-a[1]);
+      const [sx,sy]=toScreen(hoverPt[0],hoverPt[1]);
+      drawSizeTag("("+fmtCells(len)+")", sx, sy);
     }
     ctx.restore();
   }
