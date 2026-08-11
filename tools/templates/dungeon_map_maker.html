@@ -4971,7 +4971,7 @@
       const rx=d.x-A[0], ry=d.y-A[1];
       if(Math.abs(rx*nx + ry*ny) > 0.35) continue;         // door centre not on this wall line
       const tc=rx*ux+ry*uy;                                 // door centre along the segment
-      let t0=tc-hl-0.02, t1=tc+hl+0.02;                     // tiny pad → clean opening
+      let t0=tc-hl, t1=tc+hl;                                // gap == door span, so the wall meets the door ends exactly
       if(t1<=0 || t0>=L) continue;                          // door falls outside the segment
       cuts.push([Math.max(0,t0), Math.min(L,t1)]);
     }
@@ -4982,6 +4982,28 @@
     const at=t=>[A[0]+ux*t, A[1]+uy*t], out=[]; let cur=0;
     for(const [c0,c1] of merged){ if(c0>cur+1e-6) out.push([at(cur), at(c0)]); cur=Math.max(cur,c1); }
     if(cur<L-1e-6) out.push([at(cur), at(L)]);
+    return out;
+  }
+  // Clip a wall segment [x0,y0,x1,y1] where a HIGHER layer's floor paints over it,
+  // returning the exposed pieces as [[ax,ay],[bx,by]]. A point is "covered" only
+  // when BOTH sides of the wall are inside a covering room — so a wall that merely
+  // coincides with an upper room's boundary (a genuinely shared wall) is kept,
+  // while a wall buried under an upper floor is dropped, matching the render.
+  function subtractCover(s, cover){
+    if(!cover.length) return [[[s[0],s[1]],[s[2],s[3]]]];
+    const dx=s[2]-s[0], dy=s[3]-s[1], len=Math.hypot(dx,dy);
+    if(len<1e-6) return [];
+    const l=len||1, nx=-dy/l, ny=dx/l, eps=0.06;
+    const at=t=>[s[0]+dx*t, s[1]+dy*t];
+    const coveredAt=(mx,my)=>{ for(const r of cover){
+        if(pointInShape(mx+nx*eps, my+ny*eps, r) && pointInShape(mx-nx*eps, my-ny*eps, r)) return true; }
+      return false; };
+    const n=Math.max(1, Math.min(80, Math.ceil(len/0.25)));
+    const out=[]; let run=null;
+    for(let k=0;k<n;k++){ const m=at((k+0.5)/n);
+      if(!coveredAt(m[0],m[1])){ if(run===null) run=k/n; }
+      else if(run!==null){ out.push([at(run), at(k/n)]); run=null; } }
+    if(run!==null) out.push([at(run), at(1)]);
     return out;
   }
   function exportUniversalVTT(){
@@ -5016,15 +5038,30 @@
     //    phantom inner walls that were making rooms unusable. Union the visible
     //    layers' geometry first (so multi-layer maps merge across layers), then cut
     //    a gap at each door. Emitted as independent 2-point polylines.
+    // Faithful to how the render composites LAYERS bottom→top:
+    //  (a) occluders are computed PER LAYER, so the interior-punch burial that hides a
+    //      wall inside another room only applies WITHIN a layer. Unioning all layers
+    //      first (the old way) made a wall shared with a room on ANOTHER layer look
+    //      "buried" and dropped it — a room's north wall vanishing because the layer
+    //      beneath overlapped it.
+    //  (b) each layer's wall is then clipped where a HIGHER layer's floor paints over
+    //      it (subtractCover), exactly as an upper opaque floor hides a lower wall.
     const savedShapes=map.shapes, savedWalls=map.walls;
-    const uShapes=[], uWalls=[];
-    for(const L of layers){ for(const s of (L.shapes||[])) uShapes.push(s); for(const w of (L.walls||[])) uWalls.push(w); }
-    map.shapes=uShapes; map.walls=uWalls; lightSegs=null;      // force a rebuild over the union
-    const occ=lightOccluders().map(s=>s.slice());              // [x0,y0,x1,y1] world cells, buried edges already removed
+    const pieces=[];
+    for(let li=0; li<layers.length; li++){
+      map.shapes=layers[li].shapes||[]; map.walls=layers[li].walls||[]; lightSegs=null;
+      const cover=[];   // floor-bearing rooms on the layers ABOVE this one
+      for(let lj=li+1; lj<layers.length; lj++) for(const sh of (layers[lj].shapes||[])) if(shHasFloor(sh)) cover.push(sh);
+      for(const s of lightOccluders()){ for(const sub of subtractCover(s, cover)) pieces.push(sub); }
+    }
     map.shapes=savedShapes; map.walls=savedWalls; lightSegs=null;   // restore + let the live render rebuild
+    // Cut a gap at each door, then drop coincident duplicates (layers can share a wall).
     const segs=[];
-    for(const s of occ){ for(const piece of cutWallSeg([s[0],s[1]],[s[2],s[3]],doors)) segs.push(piece); }
-    const line_of_sight=segs.map(s=>[V(s[0][0],s[0][1]), V(s[1][0],s[1][1])]);
+    for(const p of pieces){ for(const q of cutWallSeg(p[0], p[1], doors)) segs.push(q); }
+    const seen=new Set(), uniq=[], rr=v=>Math.round(v*100)/100;
+    for(const s of segs){ const a=rr(s[0][0])+","+rr(s[0][1]), b=rr(s[1][0])+","+rr(s[1][1]);
+      const k=a<b ? a+"|"+b : b+"|"+a; if(seen.has(k)) continue; seen.add(k); uniq.push(s); }
+    const line_of_sight=uniq.map(s=>[V(s[0][0],s[0][1]), V(s[1][0],s[1][1])]);
 
     // 3) doors → portals (centre, the two endpoints, along-wall rotation)
     const portals=doors.map(d=>{ const a=d.a||0, hl=(d.len||1)/2, ca=Math.cos(a), sa=Math.sin(a);
