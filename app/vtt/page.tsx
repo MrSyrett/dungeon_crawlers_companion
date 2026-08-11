@@ -67,7 +67,7 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
       ) : null}
 
       <section className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5">
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.15em]">Set up the extension</h2>
+        <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.15em]">Character Sheet/GM Screen</h2>
         <ol className="flex flex-col gap-2 text-[13px] leading-relaxed text-[var(--muted)]">
           <li>
             <span className="text-[var(--text)]">1.</span> In Owlbear Rodeo, open your profile and

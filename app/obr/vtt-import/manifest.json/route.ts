@@ -16,8 +16,9 @@ export async function GET(req: Request) {
     name: "Universal VTT Importer",
     version: "1.0.0",
     manifest_version: 1,
+    // Owlbear Rodeo rejects manifests whose description is >= 128 chars.
     description:
-      "Import Universal VTT (.dd2vtt / .uvtt / .df2vtt) maps as a ready-to-play scene with walls, openable doors and lights for the Dynamic Fog extension.",
+      "Import Universal VTT maps (.dd2vtt/.uvtt/.df2vtt) as a scene with walls, doors and lights for Dynamic Fog.",
     author: "Dungeon Crawler's Companion",
     icon: "/obr/vtt-import/icon.svg",
     action: {
