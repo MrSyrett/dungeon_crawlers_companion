@@ -257,31 +257,18 @@
       <div class="grp-head">
         <p class="grp-title">Edit</p>
       </div>
+      <label class="fld" style="margin-top:0" title="Rooms occlude light and export walls to VTTs (dungeon interiors). Shapes are non-occluding decoration — pillars, dais, water, islands — and export no walls. With a room or shape selected, toggling here converts it to the other kind.">Draw mode</label>
+      <div class="seg" id="modeSeg" style="display:flex;width:100%;margin-bottom:8px" title="Rooms: Square/Circle/Polygon draw rooms, Wall draws interior walls. Shapes: the same tools draw non-occluding shapes (pillars, dais, tables, pits, islands) that export no walls. Doors and stairs are unaffected either way. With a room or shape selected, toggling converts it.">
+        <button type="button" data-mode="rooms" class="on" style="flex:1">Rooms</button>
+        <button type="button" data-mode="shapes" style="flex:1">Shapes</button>
+      </div>
       <label class="fld" style="margin-top:0" title="What a new room or shape is made of: Both (floor + wall), Walls only (a stroke — a divider or pillar), or Floors only (a fill — floor with no wall).">Draw as</label>
       <div class="seg" id="fillSeg" style="display:flex;width:100%;margin-bottom:8px">
         <button type="button" data-fill="both" class="on" style="flex:1">Both</button>
         <button type="button" data-fill="wall" style="flex:1">Walls</button>
         <button type="button" data-fill="floor" style="flex:1">Floors</button>
       </div>
-      <div class="row">
-        <button class="btn" id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
-        <button class="btn" id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
-      </div>
-      <div class="row" style="margin-top:6px">
-        <button class="btn" id="toFront" title="Bring the selected room / object in front of the others (F)" disabled>⬆ Front</button>
-        <button class="btn" id="toBack" title="Send the selected room / object behind the others (B)" disabled>⬇ Back</button>
-      </div>
       <div id="advBody" style="display:none;margin-top:14px">
-        <div id="assetCount" class="asset-count" title="Objects imported across all loaded packs, against the per-pack import cap">Objects loaded: 0 / 60,000</div>
-        <div class="row">
-          <button class="btn" id="packAdd" title="Import a Dungeondraft .dungeondraft_pack">+ Asset pack</button>
-          <button class="btn" id="imgAdd" title="Import PNG/JPG/WebP/GIF images as placeable custom objects (grouped under 'My Images')">+ Image objects</button>
-        </div>
-        <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
-        <input type="file" id="imgFile" accept="image/png,image/jpeg,image/webp,image/gif,.png,.jpg,.jpeg,.webp,.gif" multiple style="display:none">
-        <label class="fld" title="How many image pixels make one grid square when importing images as objects. 256 matches Dungeondraft and objects exported at that scale; lower makes imported images larger on the grid. You can still resize each object after placing.">Image px / square</label>
-        <input class="sel" id="imgPPS" type="number" value="256" min="8" max="4096" step="8" style="margin-bottom:8px">
-        <div id="packList" class="packs" style="margin-bottom:10px"></div>
         <label class="fld">Background</label>
         <button class="pick" id="bgSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <label class="fld">Floor</label>
@@ -296,6 +283,14 @@
         <p class="grp-title">Objects</p><span class="caret">&#9662;</span>
       </div>
       <div id="objBody">
+        <div id="assetCount" class="asset-count" title="Objects imported across all loaded packs, against the per-pack import cap">Objects loaded: 0 / 60,000</div>
+        <div class="row">
+          <button class="btn" id="packAdd" title="Import a Dungeondraft .dungeondraft_pack">+ Asset pack</button>
+          <button class="btn" id="imgAdd" title="Import PNG/JPG/WebP/GIF images as placeable custom objects (grouped under 'My Images'), sized at the Dungeondraft standard of 256 px per grid square">+ Image objects</button>
+        </div>
+        <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
+        <input type="file" id="imgFile" accept="image/png,image/jpeg,image/webp,image/gif,.png,.jpg,.jpeg,.webp,.gif" multiple style="display:none">
+        <div id="packList" class="packs" style="margin-bottom:10px"></div>
         <select class="sel" id="objPack" style="margin-bottom:6px"></select>
         <input class="sel" id="objFilter" type="text" placeholder="Search" autocomplete="off">
         <div id="objGrid" class="objgrid"></div>
@@ -384,6 +379,14 @@
       <label class="fld">Grid opacity <b id="gridOpV">50%</b></label>
       <input type="range" id="gridOp" min="0" max="100" value="50">
       <div class="row" style="margin-top:10px">
+        <button class="btn" id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
+        <button class="btn" id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="toFront" title="Bring the selected room / object in front of the others (F)" disabled>⬆ Front</button>
+        <button class="btn" id="toBack" title="Send the selected room / object behind the others (B)" disabled>⬇ Back</button>
+      </div>
+      <div class="row" style="margin-top:10px">
         <button class="btn" id="clear">Clear</button>
         <button class="btn" id="fit">Fit view</button>
       </div>
@@ -446,11 +449,6 @@
     <canvas id="map"></canvas>
     <div class="float tip" id="tip"></div>
     <div class="float tooldock" id="toolDock">
-      <div class="seg" id="modeSeg" title="Rooms: Square/Circle/Polygon draw rooms, Wall draws interior walls. Shapes: the same tools draw thin interior shapes (pillars, dais, tables, pits). Doors and stairs are unaffected either way.">
-        <button type="button" data-mode="rooms" class="on">Rooms</button>
-        <button type="button" data-mode="shapes">Shapes</button>
-      </div>
-      <span class="dock-div"></span>
       <div class="tools" id="toolbar">
         <div class="tool active" data-tool="select" title="Select / move (V)">
           <svg viewBox="0 0 24 24"><path d="M5 3l6 16 2-6 6-2z"/></svg>Select</div>
@@ -2958,6 +2956,17 @@
     map.shadowsOn = !!keepShadowsOn;                       // the entities belong to the old map
     map.lights = []; map.shadows = [];
     installLayers(map);                 // a fresh roll replaces the whole map with one Base layer
+    // Option B — rolling the map in Shapes mode brings the whole layer in as
+    // non-occluding shapes (deco): floor + visible outline still render, but no
+    // walls export to VTTs and nothing blocks light. Perfect for islands, water
+    // and open terrain. Doors and interior walls need real room walls, so they
+    // are dropped. (Rooms mode is unchanged.)
+    if(drawMode==="shapes"){
+      for(const L of map.layers){
+        for(const sh of L.shapes){ sh.deco=true; if(!sh.fill) sh.fill="both"; }
+        L.walls.length=0; L.doors.length=0;
+      }
+    }
     commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); syncLayersUI(); fitView();
   }
   // Force every generated polygon (cave chambers + tunnels) to one winding so
@@ -3822,7 +3831,10 @@
   const IMG_NAME = /\.(png|jpe?g|webp|gif|bmp|avif)$/i;
   // Pixels-per-grid-square used to size an imported image. 256 = Dungeondraft's
   // convention (and what this tool's objects use), adjustable in the sidebar.
-  function imgPxPerSquare(){ const v=parseFloat(($("imgPPS")||{}).value); return (v>0 && isFinite(v)) ? v : 256; }
+  // Imported images are sized at the Dungeondraft standard of 256 px per grid
+  // square (was a user field; now fixed). Each object can still be resized after
+  // placing.
+  function imgPxPerSquare(){ return 256; }
   // Decode just far enough to read the pixel dimensions. Users import a handful
   // of files, not thousands, so a real decode here is fine (unlike pack import).
   function imageDims(blob){
@@ -5318,12 +5330,29 @@
   // Rooms ⟷ Shapes: flip what Square/Circle/Polygon/Wall produce. Doors/stairs
   // are unaffected. In Shapes mode those tools make thin interior shapes (deco).
   const modeSeg=document.getElementById("modeSeg");
-  function setMode(m){ drawMode=m;
+  function setMode(m){ if(m!=="rooms"&&m!=="shapes") return; drawMode=m;
     modeSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("on", b.dataset.mode===m));
+    // Convert-on-toggle: if a room/shape is selected, flipping the mode converts it
+    // to the other kind (room ⟷ shape) instead of only changing what the next draw makes.
+    let converted=false;
+    if(sel && sel.kind==="shape"){
+      const sh=(objAt(sel)||{}).obj;
+      if(sh){ const want=(m==="shapes"); if(!!sh.deco!==want){
+        pushHistory();
+        // Preserve exactly how it renders now (floor / wall) across the flip.
+        const hadFloor=shHasFloor(sh), hadWall=shHasWall(sh);
+        sh.fill = hadFloor&&hadWall ? "both" : hadFloor ? "floor" : "wall";
+        if(want) sh.deco=true; else delete sh.deco;
+        converted=true; commit(); if(typeof syncStyleScope==="function") syncStyleScope();
+      } }
+    }
     if(placing){ placing=null; } if(draft){ draft=null; } render();
-    toast(m==="shapes"
-      ? "Shapes mode — Square / Circle / Polygon / Draw now make thin interior shapes."
-      : "Rooms mode — Square / Circle / Polygon / Draw make rooms; leave a run open and it becomes a wall."); }
+    toast(converted
+      ? (m==="shapes" ? "Converted to a shape — non-occluding, no walls exported."
+                      : "Converted to a room — occludes light and exports walls.")
+      : (m==="shapes"
+        ? "Shapes mode — Square / Circle / Polygon / Draw now make non-occluding shapes (no walls exported)."
+        : "Rooms mode — Square / Circle / Polygon / Draw make rooms; leave a run open and it becomes a wall.")); }
   modeSeg.addEventListener("click", e=>{ const b=e.target.closest("button"); if(b) setMode(b.dataset.mode); });
 
   // Fill / stroke of the next shape: Both (floor+wall), Walls (stroke), Floors (fill).
