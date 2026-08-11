@@ -17,6 +17,13 @@ const barlow = Barlow_Condensed({
 export const metadata: Metadata = {
   title: "Dungeon Crawler's Companion",
   description: "TTRPG digital toolkit — character sheets and session prep, saved to your account.",
+  // The label under the home-screen icon. Without this iOS uses `title`, which
+  // truncates to something like "Dungeon Crawler'…". Nothing else about the
+  // icon needs code — `app/apple-icon.png` is a Next file convention and the
+  // <link rel="apple-touch-icon"> tag is emitted automatically.
+  appleWebApp: {
+    title: "DCCompanion",
+  },
 };
 
 export default function RootLayout({
