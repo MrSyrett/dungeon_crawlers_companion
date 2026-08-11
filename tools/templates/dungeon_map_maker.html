@@ -413,6 +413,9 @@
         <button class="btn" id="png">⬇ PNG</button>
         <button class="btn" id="pngT" title="Transparent background — floors only">⬇ PNG (transp.)</button>
       </div>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="vtt" title="Export a UniversalVTT (.dd2vtt) file — the battlemap image plus wall, door and light data, so a VTT like Foundry can set up dynamic walls, doors and lighting automatically">⬇ UniversalVTT</button>
+      </div>
       <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a>
         (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a>)<br>
         and <a href="https://axebane.com/" target="_blank" rel="noopener noreferrer">Axebane Games</a>
@@ -4944,6 +4947,108 @@
     restore();
     saveFile(dataURLToBlob(url), base+(transparent?"-transparent":"")+".png", "Exported");
   }
+
+  // ════════════════════════════════════════════════════════════════
+  // UNIVERSAL VTT EXPORT (.dd2vtt, format 0.3) — the battlemap image PLUS
+  // wall / door / light DATA, so a VTT (Foundry, etc.) can auto-place dynamic
+  // walls, doors and lights. Same file Dungeondraft exports. All coordinates
+  // are in GRID CELLS relative to the exported image's top-left corner.
+  // ════════════════════════════════════════════════════════════════
+  // Remove any door openings that lie ALONG a straight wall segment A→B,
+  // returning the pieces that remain (0, 1 or 2). A door counts as being on the
+  // segment when it runs parallel to it and its centre sits within ~1/3 cell of
+  // the wall line — exactly how doors are placed (their centre is on the wall
+  // centreline). This is what turns a solid wall loop into one with a real gap
+  // at each door, so the VTT's portal is the only thing in the doorway.
+  function cutWallSeg(A, B, doors){
+    const dx=B[0]-A[0], dy=B[1]-A[1], L=Math.hypot(dx,dy);
+    if(L<1e-6) return [];
+    const ux=dx/L, uy=dy/L, nx=-uy, ny=ux;      // unit along + normal
+    const cuts=[];
+    for(const d of doors){
+      const a=d.a||0, hl=(d.len||1)/2, ca=Math.cos(a), sa=Math.sin(a);
+      if(Math.abs(ca*uy - sa*ux) > 0.08) continue;         // door not parallel to this wall
+      const rx=d.x-A[0], ry=d.y-A[1];
+      if(Math.abs(rx*nx + ry*ny) > 0.35) continue;         // door centre not on this wall line
+      const tc=rx*ux+ry*uy;                                 // door centre along the segment
+      let t0=tc-hl-0.02, t1=tc+hl+0.02;                     // tiny pad → clean opening
+      if(t1<=0 || t0>=L) continue;                          // door falls outside the segment
+      cuts.push([Math.max(0,t0), Math.min(L,t1)]);
+    }
+    if(!cuts.length) return [[A,B]];
+    cuts.sort((p,q)=>p[0]-q[0]);
+    const merged=[]; for(const c of cuts){ const last=merged[merged.length-1];
+      if(last && c[0]<=last[1]+1e-6) last[1]=Math.max(last[1],c[1]); else merged.push(c.slice()); }
+    const at=t=>[A[0]+ux*t, A[1]+uy*t], out=[]; let cur=0;
+    for(const [c0,c1] of merged){ if(c0>cur+1e-6) out.push([at(cur), at(c0)]); cur=Math.max(cur,c1); }
+    if(cur<L-1e-6) out.push([at(cur), at(L)]);
+    return out;
+  }
+  function exportUniversalVTT(){
+    const b=contentBounds(true); if(!b){ toast("Nothing to export yet."); return; }
+    // Frame to WHOLE cells (+ a margin) so the VTT grid lines up with the map grid.
+    const pad=2;
+    const x0=Math.floor(b.x)-pad, y0=Math.floor(b.y)-pad;
+    const x1=Math.ceil(b.X)+pad,  y1=Math.ceil(b.Y)+pad;
+    const mapW=Math.max(1,x1-x0), mapH=Math.max(1,y1-y0);
+    const PPG=70, res=PPG/CELL;                    // 70 px per cell (Dungeondraft's default)
+    const outW=Math.round(mapW*PPG), outH=Math.round(mapH*PPG);
+    // 1) render the battlemap image at exactly this framing (lighting baked in if lit)
+    const savedCam={...cam}, savedDPR=DPR;
+    DPR=1; W=outW; H=outH; cv.width=outW; cv.height=outH;
+    cam=Object.assign({},cam,{scale:res, x:(x0+x1)/2, y:(y0+y1)/2});
+    exporting=true; noRock=false; soloLayer=null;
+    render();
+    const dataURL=cv.toDataURL("image/png");
+    exporting=false; noRock=false; cam=savedCam; DPR=savedDPR; resize();
+    const image=dataURL.slice(dataURL.indexOf(",")+1);   // strip the data-URL prefix
+
+    // World cells → VTT cells (relative to the framed top-left).
+    const V=(wx,wy)=>({x:+(wx-x0).toFixed(3), y:+(wy-y0).toFixed(3)});
+    const layers=(map.layers||[map]).filter(L=>L.visible!==false);
+    const doors=[]; for(const L of layers) for(const d of (L.doors||[])) doors.push(d);
+
+    // 2) walls → line_of_sight. Occluding ROOM walls (not deco, has a wall) as
+    //    closed loops + interior walls as open chains, each straight segment cut
+    //    where a door crosses it. Emitted as independent 2-point polylines.
+    const segs=[];
+    const chain=(pts, closed)=>{ const n=pts.length; if(n<2) return; const m=closed?n:n-1;
+      for(let i=0;i<m;i++){ for(const s of cutWallSeg(pts[i], pts[(i+1)%n], doors)) segs.push(s); } };
+    for(const L of layers){
+      for(const sh of (L.shapes||[])) if(!sh.deco && shHasWall(sh)){ const o=shapeOutline(sh); if(o.length>=2) chain(o, true); }
+      for(const wl of (L.walls||[])){ const p=wallPts(wl); if(p.length>=2) chain(p, false); }
+    }
+    const line_of_sight=segs.map(s=>[V(s[0][0],s[0][1]), V(s[1][0],s[1][1])]);
+
+    // 3) doors → portals (centre, the two endpoints, along-wall rotation)
+    const portals=doors.map(d=>{ const a=d.a||0, hl=(d.len||1)/2, ca=Math.cos(a), sa=Math.sin(a);
+      return { position:V(d.x,d.y),
+               bounds:[V(d.x-hl*ca, d.y-hl*sa), V(d.x+hl*ca, d.y+hl*sa)],
+               rotation:+a.toFixed(6), closed:true, freestanding:false }; });
+
+    // 4) lights → position, range (cells), intensity, color (aarrggbb)
+    const hex2=n=>('0'+Math.max(0,Math.min(255,Math.round(n))).toString(16)).slice(-2);
+    const lcolor=c=>{ let h=String(c||"#ffffff").replace(/^#/,"");
+      if(h.length===3) h=h.split("").map(x=>x+x).join("");
+      if(!/^[0-9a-fA-F]{6}$/.test(h)) h="ffffff"; return "ff"+h.toLowerCase(); };
+    const lights=[]; for(const L of layers) for(const lt of (L.lights||[])) lights.push({
+      position:V(lt.x, lt.y), range:+(+(lt.r||4)).toFixed(3),
+      // our brightness is 0..1 (0.5 = normal); VTT intensity ~1 = normal, so ×2.
+      intensity:+Math.max(0.1, Math.min(2, (lt.bright==null?0.5:lt.bright)*2)).toFixed(3),
+      color:lcolor(lt.color), shadows:true });
+
+    // 5) environment — ambient tracks the map's darkness when lighting is on.
+    const dk=(map.darkness==null?0.55:Math.max(0,Math.min(1,map.darkness)));
+    const ambient=map.lit ? ("ff"+hex2((1-dk)*255).repeat(3)) : "ffffffff";
+
+    const out={ format:0.3,
+      resolution:{ map_origin:{x:0,y:0}, map_size:{x:mapW, y:mapH}, pixels_per_grid:PPG },
+      line_of_sight, objects_line_of_sight:[], portals,
+      environment:{ baked_lighting:!!map.lit, ambient_light:ambient },
+      lights, image };
+    const base=(map.name?slug(map.name):"dungeon-map");
+    saveFile(new Blob([JSON.stringify(out)], {type:"application/json"}), base+".dd2vtt", "Exported UniversalVTT");
+  }
   function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"map"; }
 
   // ════════════════════════════════════════════════════════════════
@@ -5080,6 +5185,7 @@
   }
   $("png").onclick=()=>pngExport(false);
   $("pngT").onclick=()=>pngExport(true);
+  if($("vtt")) $("vtt").onclick=()=>{ try{ exportUniversalVTT(); }catch(e){ toast(e.message||"VTT export failed."); } };
   $("zoomIn").onclick=()=>{ cam.scale=Math.min(6,cam.scale*1.2); render(); updateZoom(); };
   $("zoomOut").onclick=()=>{ cam.scale=Math.max(0.15,cam.scale/1.2); render(); updateZoom(); };
 
