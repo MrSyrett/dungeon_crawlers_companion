@@ -2945,11 +2945,21 @@
     // purpose, so they follow map.style and can be restyled in one move.
     const keepName = map.name, keepStyle = map.style, keepGridOp = map.gridOpacity, keepSnap = map.snap;
     const keepLit = map.lit, keepDark = map.darkness, keepShadowsOn = map.shadowsOn;
+    // Floor/wall pickers write to the ACTIVE layer's override (L.floor/L.wall),
+    // not map.style. A fresh roll makes one unstyled Base layer, so unless we fold
+    // the current effective floor/wall into the seed here, the new map would snap
+    // back to the map.style default and lose the textures you were looking at.
+    const AL0 = activeLayer();
+    const keepFloor = (AL0 && AL0.floor!=null) ? AL0.floor : (keepStyle && keepStyle.floor);
+    const keepWall  = (AL0 && AL0.wall !=null) ? AL0.wall  : (keepStyle && keepStyle.wall);
     map = (window.DungeonEngine && window.DungeonEngine.generate)
       ? window.DungeonEngine.generate(opts)
       : generateLocal(opts);
     map.name = keepName; map.grid = true; map.gridInterior = $("gridInteriorToggle").checked; map.theme = theme;
     if(keepStyle) map.style = keepStyle;
+    // Bake the effective floor/wall into the seed so the new Base layer inherits
+    // exactly what was on screen before the roll.
+    if(map.style){ if(keepFloor!=null) map.style.floor = keepFloor; if(keepWall!=null) map.style.wall = keepWall; }
     if(keepGridOp!=null) map.gridOpacity = keepGridOp;
     if(keepSnap!=null) map.snap = keepSnap;
     map.lit = !!keepLit; map.darkness = (keepDark==null) ? 0.55 : keepDark;
@@ -3058,6 +3068,9 @@
     // Entrances are doors on EXTERIOR walls leading out of the whole dungeon;
     // the Doors toggle governs them too.
     if(wantDoors) placeEntrances(nEntrances);
+    // Smooth organic outlines so cave transitions aren't torn by spikes (mirror
+    // of the engine; keep in sync). Before winding is normalised.
+    if(organic) smoothOrganicShapes(map.shapes);
     // Exterior toggle: normalise polygon winding so generated cave walls all face
     // one way. Off (default) ⇒ clockwise/inward; on ⇒ counter-clockwise/outward.
     orientPolygons(map.shapes, !opts.exterior);
@@ -3302,6 +3315,30 @@
     map.shapes.push({id:uid(),type:"polygon",pts:left.concat(right.reverse()),corridor:true});
     const mid=C[Math.round(M/2)];
     map.doors.push({id:uid(), x:mid[0], y:mid[1], a:Math.atan2(-ux,uy), len:2});
+  }
+  // Mirror of the engine's smoothing (keep the two in sync): soften the jagged
+  // self-notches an organic tunnel/chamber outline leaves at bends and junctions,
+  // so cave transitions are smooth in the render AND the VTT wall export. De-spike
+  // (drop sharp, short-edged folds) then Taubin-smooth (shrink+inflate, no net
+  // size change so tunnels keep reaching into their chambers).
+  function smoothClosedPoly(pts){
+    const ang=(p,q,r)=>{ const ax=p[0]-q[0],ay=p[1]-q[1],bx=r[0]-q[0],by=r[1]-q[1];
+      const la=Math.hypot(ax,ay),lb=Math.hypot(bx,by); if(la<1e-6||lb<1e-6) return Math.PI;
+      let c=(ax*bx+ay*by)/(la*lb); c=Math.max(-1,Math.min(1,c)); return Math.acos(c); };
+    let p=pts.map(q=>[q[0],q[1]]);
+    for(let guard=0; guard<40 && p.length>6; guard++){ let hit=-1;
+      for(let i=0;i<p.length;i++){ const n=p.length, a=p[(i-1+n)%n], b=p[i], c=p[(i+1)%n];
+        const e1=Math.hypot(b[0]-a[0],b[1]-a[1]), e2=Math.hypot(c[0]-b[0],c[1]-b[1]);
+        if(ang(a,b,c)<0.7 && Math.min(e1,e2)<0.5){ hit=i; break; } }
+      if(hit<0) break; p.splice(hit,1); }
+    const n=p.length; if(n<4) return p;
+    const relax=f=>{ const out=new Array(n); for(let i=0;i<n;i++){ const a=p[(i-1+n)%n], b=p[i], c=p[(i+1)%n];
+        out[i]=[ b[0]+f*(0.5*(a[0]+c[0])-b[0]), b[1]+f*(0.5*(a[1]+c[1])-b[1]) ]; } for(let i=0;i<n;i++) p[i]=out[i]; };
+    for(let it=0; it<3; it++){ relax(0.5); relax(-0.52); }
+    return p.map(q=>[Math.round(q[0]*100)/100, Math.round(q[1]*100)/100]);
+  }
+  function smoothOrganicShapes(shapes){
+    for(const sh of shapes){ if(sh.type==="polygon" && sh.pts && sh.pts.length>=6) sh.pts=smoothClosedPoly(sh.pts); }
   }
   // Place a door on `room` where a corridor leg crosses its wall. axis "h" ⇒
   // left/right wall (leaf vertical, a=π/2); "v" ⇒ top/bottom wall (leaf a=0).
@@ -5059,6 +5096,59 @@
     for(const w of walls){ const s=wallPts(w); for(let i=0;i<s.length-1;i++) segs.push([s[i][0],s[i][1],s[i+1][0],s[i+1][1]]); }
     return segs;
   }
+  // Cave-only occluder. For overlapping ORGANIC blobs the per-neighbour burial in
+  // exportOccluders leaves stray stubs: a junction point can sit shallowly inside
+  // two different blobs (well inside their UNION) yet not deep enough in any one,
+  // so the wall survives poking into open floor. Here we test the UNION directly:
+  // a wall point is real silhouette only if the ROCK side of it (a step OUTWARD
+  // from this shape, away from its own interior) is NOT floor of some other shape.
+  // Where the outside is another blob's floor the edge is interior → dropped. This
+  // merges overlapping caverns into one clean outline (no stubs, no doubled walls).
+  // Used only for cave-type layers (all-polygon floors, no doors) — the rectangle
+  // + door path keeps exportOccluders, whose "shared walls survive" is what rooms
+  // and doorways need.
+  function exportOccludersUnion(shapes, walls){
+    const floors=[], fb=[];
+    for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue; floors.push(sh); fb.push(bounds(sh,"shape")); }
+    const emit=[]; for(const sh of shapes){ if(!sh.deco && shHasWall(sh)) emit.push(sh); }
+    const eIn=0.06, eOut=0.10, STEP=0.2;
+    const coveredExcept=(x,y,self)=>{ for(let k=0;k<floors.length;k++){ if(floors[k]===self) continue;
+        const b=fb[k]; if(!b || x<b.x||x>b.x+b.w||y<b.y||y>b.y+b.h) continue;
+        if(pointInShape(x,y,floors[k])) return true; } return false; };
+    const segs=[];
+    for(const S of emit){
+      const o=shapeOutline(S);
+      for(let i=0;i<o.length;i++){
+        const a=o[i], b=o[(i+1)%o.length], dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
+        if(len<1e-6) continue;
+        const nx=-dy/len, ny=dx/len, at=t=>[a[0]+dx*t, a[1]+dy*t];
+        const n=Math.max(1, Math.min(400, Math.ceil(len/STEP)));
+        let s0=null;
+        for(let k=0;k<n;k++){
+          const m=at((k+0.5)/n);
+          const inP=pointInShape(m[0]+nx*eIn, m[1]+ny*eIn, S);
+          const inM=pointInShape(m[0]-nx*eIn, m[1]-ny*eIn, S);
+          let vis;
+          if(inP && !inM){ vis=!coveredExcept(m[0]-nx*eOut, m[1]-ny*eOut, S); }      // interior is +n; rock side is −n
+          else if(inM && !inP){ vis=!coveredExcept(m[0]+nx*eOut, m[1]+ny*eOut, S); } // interior is −n; rock side is +n
+          else vis=false;                                                            // self-touch / spike tip → drop
+          if(vis && s0===null) s0=k/n;
+          else if(!vis && s0!==null){ const p=at(s0), q=at(k/n); segs.push([p[0],p[1],q[0],q[1]]); s0=null; }
+        }
+        if(s0!==null){ const p=at(s0); segs.push([p[0],p[1],b[0],b[1]]); }
+      }
+    }
+    for(const w of walls){ const s=wallPts(w); for(let i=0;i<s.length-1;i++) segs.push([s[i][0],s[i][1],s[i+1][0],s[i+1][1]]); }
+    return segs;
+  }
+  // Cave-type layer = every floor-bearing, non-deco shape is a polygon and the
+  // layer carries no doors. That's exactly an organic/freehand cavern, where the
+  // union tracer wins; anything with rects/circles or doors keeps the tuned path.
+  function isCaveLayer(L){
+    const shapes=L.shapes||[]; let any=false;
+    for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue; any=true; if(sh.type!=="polygon") return false; }
+    return any && !(L.doors && L.doors.length);
+  }
   // ════════════════════════════════════════════════════════════════
   // Remove any door openings that lie ALONG a straight wall segment A→B,
   // returning the pieces that remain (0, 1 or 2). A door counts as being on the
@@ -5229,12 +5319,20 @@
     //      beneath overlapped it.
     //  (b) each layer's wall is then clipped where a HIGHER layer's floor paints over
     //      it (subtractCover), exactly as an upper opaque floor hides a lower wall.
-    const pieces=[];
+    // Cave layers already trace a clean floor-UNION contour, so they bypass the
+    // door-cut + shared-wall cleanup (that pass is tuned for rectangular rooms and
+    // would weld/heal an organic outline into new stubs). Non-cave layers keep it.
+    const pieces=[], cavePieces=[];
     for(let li=0; li<layers.length; li++){
       const cover=[];   // floor-bearing rooms on the layers ABOVE this one
       for(let lj=li+1; lj<layers.length; lj++) for(const sh of (layers[lj].shapes||[])) if(shHasFloor(sh)) cover.push(sh);
-      for(const s of exportOccluders(layers[li].shapes||[], layers[li].walls||[], 0.05)){
-        for(const sub of subtractCover(s, cover)) pieces.push(sub);
+      const cave = isCaveLayer(layers[li]);
+      const occ = cave
+        ? exportOccludersUnion(layers[li].shapes||[], layers[li].walls||[])
+        : exportOccluders(layers[li].shapes||[], layers[li].walls||[], 0.05);
+      const dst = cave ? cavePieces : pieces;
+      for(const s of occ){
+        for(const sub of subtractCover(s, cover)) dst.push(sub);
       }
     }
     // Cut a gap at each door, then run the cleanup that heals the shared-wall
@@ -5243,7 +5341,9 @@
     for(const p of pieces){ for(const q of cutWallSeg(p[0], p[1], doors)) segs.push(q); }
     const doorSegs=doors.map(d=>{ const a=d.a||0, hl=(d.len||1)/2, ca=Math.cos(a), sa=Math.sin(a);
       return [[d.x-hl*ca, d.y-hl*sa],[d.x+hl*ca, d.y+hl*sa]]; });
-    const line_of_sight=cleanupWalls(segs, doorSegs).map(s=>[V(s[0][0],s[0][1]), V(s[1][0],s[1][1])]);
+    const line_of_sight=cleanupWalls(segs, doorSegs)
+      .concat(cavePieces)                              // clean cave contours, emitted as-is
+      .map(s=>[V(s[0][0],s[0][1]), V(s[1][0],s[1][1])]);
 
     // 3) doors → portals (centre, the two endpoints, along-wall rotation)
     const portals=doors.map(d=>{ const a=d.a||0, hl=(d.len||1)/2, ca=Math.cos(a), sa=Math.sin(a);
