@@ -89,6 +89,43 @@ export default async function VttPage({ searchParams }: { searchParams: Promise<
         </ol>
       </section>
 
+      <section className="mb-8 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-5">
+        <h2 className="mb-1 text-sm font-bold uppercase tracking-[0.15em]">
+          Map Importer <span className="text-[var(--muted)]">· GMs</span>
+        </h2>
+        <p className="mb-3 text-[13px] leading-relaxed text-[var(--muted)]">
+          A separate extension that imports{" "}
+          <span className="text-[var(--text)]">Universal VTT</span> maps (.dd2vtt / .uvtt / .df2vtt
+          from Dungeondraft, DungeonFog and similar) as a ready-to-play scene with the map, grid,
+          walls, openable doors and lights. No access code needed.
+        </p>
+        <ol className="flex flex-col gap-2 text-[13px] leading-relaxed text-[var(--muted)]">
+          <li>
+            <span className="text-[var(--text)]">1.</span> Add this second extension in Owlbear
+            Rodeo the same way — <span className="text-[var(--text)]">Add Extension</span>, then
+            paste this install link:
+            <CopyField value="/obr/vtt-import/manifest.json" absolute />
+          </li>
+          <li>
+            <span className="text-[var(--text)]">2.</span> Also install the free official{" "}
+            <a
+              href="https://extensions.owlbear.rodeo/dynamic-fog"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--gold)] hover:underline"
+            >
+              Dynamic Fog
+            </a>{" "}
+            extension — the importer builds its walls, doors and lights for it.
+          </li>
+          <li>
+            <span className="text-[var(--text)]">3.</span> Open the{" "}
+            <span className="text-[var(--text)]">VTT Import</span> action in your room, drop a
+            Universal VTT file, and open the new scene it creates.
+          </li>
+        </ol>
+      </section>
+
       <section>
         <div className="mb-4 flex items-end justify-between gap-4">
           <h2 className="text-sm font-bold uppercase tracking-[0.15em]">Access codes</h2>
