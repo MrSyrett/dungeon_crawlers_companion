@@ -1462,6 +1462,9 @@ window.DungeonEngine = (function(){
     // Doors OFF ⇒ no interior doors AND no entrance doors.
     map.doors = wantDoors ? finalizeDoors() : [];
     if(wantDoors) placeEntrances(nEntrances);
+    // Smooth the organic outlines (tunnels + chambers) so room↔corridor
+    // transitions aren't torn up by spikes — before winding is normalised.
+    if(organic) smoothOrganicShapes(map.shapes);
     // Exterior toggle: normalise every polygon's winding so their textured walls
     // all face the same way. Off (default) ⇒ clockwise/inward (matches classic
     // rooms); on ⇒ counter-clockwise/outward. Only affects organic (polygon) maps.
@@ -1689,6 +1692,37 @@ window.DungeonEngine = (function(){
     map.shapes.push({id:uid(),type:"polygon",pts:left.concat(right.reverse()),corridor:true});
     const mid=C[Math.round(M/2)];
     map.doors.push({id:uid(), x:mid[0], y:mid[1], a:Math.atan2(-ux,uy), len:2});
+  }
+  // Soften the jagged self-notches a wavy tunnel ribbon leaves on tight bends
+  // and where it meets a chamber — so cave transitions read as smooth rock in the
+  // render AND in the VTT wall export that traces the same outline, instead of
+  // torn zig-zag spikes poking into the passage. Two gentle, shape-preserving
+  // passes per organic polygon:
+  //   • de-spike — drop a vertex whose turn is very sharp (<~40°) AND whose two
+  //     edges are both short: the near-degenerate triangle a ribbon folds into on
+  //     a hairpin. Iterated (each removal can expose another).
+  //   • Taubin smoothing (λ shrink, then μ inflate) — a low-pass on the outline
+  //     WITHOUT the net shrink a plain Laplacian causes, so rooms keep their size
+  //     and tunnels keep reaching into their chambers (connectivity survives),
+  //     while the remaining sharp corners round off.
+  function smoothClosedPoly(pts){
+    const ang=(p,q,r)=>{ const ax=p[0]-q[0],ay=p[1]-q[1],bx=r[0]-q[0],by=r[1]-q[1];
+      const la=Math.hypot(ax,ay),lb=Math.hypot(bx,by); if(la<1e-6||lb<1e-6) return Math.PI;
+      let c=(ax*bx+ay*by)/(la*lb); c=Math.max(-1,Math.min(1,c)); return Math.acos(c); };
+    let p=pts.map(q=>[q[0],q[1]]);
+    for(let guard=0; guard<40 && p.length>6; guard++){ let hit=-1;
+      for(let i=0;i<p.length;i++){ const n=p.length, a=p[(i-1+n)%n], b=p[i], c=p[(i+1)%n];
+        const e1=Math.hypot(b[0]-a[0],b[1]-a[1]), e2=Math.hypot(c[0]-b[0],c[1]-b[1]);
+        if(ang(a,b,c)<0.7 && Math.min(e1,e2)<0.5){ hit=i; break; } }
+      if(hit<0) break; p.splice(hit,1); }
+    const n=p.length; if(n<4) return p;
+    const relax=f=>{ const out=new Array(n); for(let i=0;i<n;i++){ const a=p[(i-1+n)%n], b=p[i], c=p[(i+1)%n];
+        out[i]=[ b[0]+f*(0.5*(a[0]+c[0])-b[0]), b[1]+f*(0.5*(a[1]+c[1])-b[1]) ]; } for(let i=0;i<n;i++) p[i]=out[i]; };
+    for(let it=0; it<3; it++){ relax(0.5); relax(-0.52); }
+    return p.map(q=>[Math.round(q[0]*100)/100, Math.round(q[1]*100)/100]);
+  }
+  function smoothOrganicShapes(shapes){
+    for(const sh of shapes){ if(sh.type==="polygon" && sh.pts && sh.pts.length>=6) sh.pts=smoothClosedPoly(sh.pts); }
   }
   function addDoor(room, axis, line, side, tcx, tcy, len){
     len = len || 1; const m=len/2;
