@@ -1444,18 +1444,42 @@ window.DungeonEngine = (function(){
     // merged organic cavern (organic + structure), where tunnels are redundant.
     const connect = organic ? carveTunnel : carveCorridor;
     if(doCorr && rooms.length>1 && !(organic && structure)){
+      // Track each carved centreline so we can keep tunnels from piling up. Two
+      // tunnels that run alongside each other (not just meeting at a shared room)
+      // are what turn a cave's middle into a rubble tangle, so extra/loop links
+      // that would parallel an existing tunnel are skipped — only the spanning
+      // tree (needed for connectivity) and shortcuts that take their OWN route
+      // survive. Branching is fine: overlap is ignored near a link's own rooms.
+      const carved=[];
+      const segDist=(px,py,x1,y1,x2,y2)=>{ const dx=x2-x1,dy=y2-y1,l2=dx*dx+dy*dy;
+        let t=l2?((px-x1)*dx+(py-y1)*dy)/l2:0; t=Math.max(0,Math.min(1,t));
+        return Math.hypot(px-(x1+t*dx),py-(y1+t*dy)); };
+      const overlapFrac=(A,B)=>{ const D=2.6, branchR=3.5, N=16; let close=0, counted=0;
+        for(let k=0;k<=N;k++){ const t=k/N, px=A.cx+(B.cx-A.cx)*t, py=A.cy+(B.cy-A.cy)*t;
+          if(Math.hypot(px-A.cx,py-A.cy)<branchR || Math.hypot(px-B.cx,py-B.cy)<branchR) continue;
+          counted++;
+          for(const e of carved){ if(segDist(px,py,e.x1,e.y1,e.x2,e.y2)<D){ close++; break; } } }
+        return counted ? close/counted : 0; };
+      const linked=(a,b)=>carved.some(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a));
+      const doConnect=(ci,pj)=>{ connect(rooms[ci], rooms[pj]);
+        carved.push({a:ci,b:pj,x1:rooms[ci].cx,y1:rooms[ci].cy,x2:rooms[pj].cx,y2:rooms[pj].cy}); };
       const connected=[0], pending=rooms.map((_,i)=>i).slice(1);
       while(pending.length){
         let bi=-1,bj=-1,bd=1e9;
         for(const ci of connected) for(const pj of pending){
           const d=Math.hypot(rooms[ci].cx-rooms[pj].cx, rooms[ci].cy-rooms[pj].cy);
           if(d<bd){ bd=d; bi=ci; bj=pj; } }
-        connect(rooms[bi], rooms[bj]);
+        doConnect(bi,bj);
         connected.push(bj); pending.splice(pending.indexOf(bj),1);
       }
-      const extra=Math.floor(rooms.length*(organic?0.2:0.15));
-      for(let k=0;k<extra;k++){ const a=ri(0,rooms.length-1),b=ri(0,rooms.length-1);
-        if(a!==b && Math.hypot(rooms[a].cx-rooms[b].cx,rooms[a].cy-rooms[b].cy)<avg*5) connect(rooms[a],rooms[b]); }
+      const extra=Math.floor(rooms.length*(organic?0.12:0.15));
+      let added=0;
+      for(let k=0; k<extra*5 && added<extra; k++){ const a=ri(0,rooms.length-1), b=ri(0,rooms.length-1);
+        if(a===b || linked(a,b)) continue;
+        if(Math.hypot(rooms[a].cx-rooms[b].cx,rooms[a].cy-rooms[b].cy)>=avg*5) continue;
+        if(organic && overlapFrac(rooms[a],rooms[b])>0.22) continue;   // would run alongside an existing tunnel
+        doConnect(a,b); added++;
+      }
     }
     // Structure (classic): butting rooms share walls, so link them with doors.
     if(!organic && structure && rooms.length>1){ addAdjacencyDoors(rooms); }
@@ -1682,11 +1706,16 @@ window.DungeonEngine = (function(){
       C.push([ax+ux*(t*L)+nx*wig, ay+uy*(t*L)+ny*wig]);
     }
     const left=[],right=[];
+    // Balloon the ends: within ~FL cells of each chamber the passage flares up to
+    // ~1+FLARE× wide, so a tunnel opens into a room as a smooth trumpet instead of
+    // spearing a narrow slot through its wall. Middle keeps its normal width.
+    const FLARE=0.85, FL=2.6;
     for(let i=0;i<=M;i++){
       const p=C[Math.max(0,i-1)], q=C[Math.min(M,i+1)];
       let tx=q[0]-p[0], ty=q[1]-p[1]; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
       const lnx=-ty, lny=tx;                                  // local normal
-      let w2=hw*(0.92+0.1*Math.sin(i/M*5+ph)); if(w2<0.9) w2=0.9;
+      const along=(i/M)*L, flare=1+FLARE*(Math.exp(-along/FL)+Math.exp(-(L-along)/FL));
+      let w2=hw*(0.92+0.1*Math.sin(i/M*5+ph))*flare; if(w2<0.9) w2=0.9;
       left.push([C[i][0]+lnx*w2, C[i][1]+lny*w2]); right.push([C[i][0]-lnx*w2, C[i][1]-lny*w2]);
     }
     map.shapes.push({id:uid(),type:"polygon",pts:left.concat(right.reverse()),corridor:true});
