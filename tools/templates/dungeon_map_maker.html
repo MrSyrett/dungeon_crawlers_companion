@@ -5008,16 +5008,22 @@
     const layers=(map.layers||[map]).filter(L=>L.visible!==false);
     const doors=[]; for(const L of layers) for(const d of (L.doors||[])) doors.push(d);
 
-    // 2) walls → line_of_sight. Occluding ROOM walls (not deco, has a wall) as
-    //    closed loops + interior walls as open chains, each straight segment cut
-    //    where a door crosses it. Emitted as independent 2-point polylines.
+    // 2) walls → line_of_sight. Use the engine's OCCLUDER segments, NOT the raw
+    //    shape outlines: `lightOccluders()` already drops the buried part of a room
+    //    edge that lies inside another room — the same "interior punch" that erases
+    //    those walls in the render — and keeps interior walls (map.walls) whole. So
+    //    overlapping / merged rooms export their real outer wall only, never the
+    //    phantom inner walls that were making rooms unusable. Union the visible
+    //    layers' geometry first (so multi-layer maps merge across layers), then cut
+    //    a gap at each door. Emitted as independent 2-point polylines.
+    const savedShapes=map.shapes, savedWalls=map.walls;
+    const uShapes=[], uWalls=[];
+    for(const L of layers){ for(const s of (L.shapes||[])) uShapes.push(s); for(const w of (L.walls||[])) uWalls.push(w); }
+    map.shapes=uShapes; map.walls=uWalls; lightSegs=null;      // force a rebuild over the union
+    const occ=lightOccluders().map(s=>s.slice());              // [x0,y0,x1,y1] world cells, buried edges already removed
+    map.shapes=savedShapes; map.walls=savedWalls; lightSegs=null;   // restore + let the live render rebuild
     const segs=[];
-    const chain=(pts, closed)=>{ const n=pts.length; if(n<2) return; const m=closed?n:n-1;
-      for(let i=0;i<m;i++){ for(const s of cutWallSeg(pts[i], pts[(i+1)%n], doors)) segs.push(s); } };
-    for(const L of layers){
-      for(const sh of (L.shapes||[])) if(!sh.deco && shHasWall(sh)){ const o=shapeOutline(sh); if(o.length>=2) chain(o, true); }
-      for(const wl of (L.walls||[])){ const p=wallPts(wl); if(p.length>=2) chain(p, false); }
-    }
+    for(const s of occ){ for(const piece of cutWallSeg([s[0],s[1]],[s[2],s[3]],doors)) segs.push(piece); }
     const line_of_sight=segs.map(s=>[V(s[0][0],s[0][1]), V(s[1][0],s[1][1])]);
 
     // 3) doors → portals (centre, the two endpoints, along-wall rotation)
