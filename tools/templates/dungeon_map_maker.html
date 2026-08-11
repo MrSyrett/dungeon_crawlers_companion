@@ -878,6 +878,18 @@
   // engine's noClear/overlayOnly. drawLocal sets/restores these around each pass.
   let renderNoClear=false, renderOverlay=false;
   let soloLayer=null;   // when set, render() draws ONLY this layer (per-layer PNG export)
+  function activeLayer(){ return (map.layers||[]).find(L=>L.id===map.activeLayer) || null; }
+  // Per-layer floor/wall default. A layer may carry its own `floor`/`wall` texture id
+  // (set by the pickers) so styling one layer never restyles another's unstamped
+  // rooms; if it doesn't, it falls back to the map-wide seed (map.style, baked into
+  // `tex` by applyStyle). Returns a shallow clone of the global `tex` with floor/wall
+  // swapped, or the global `tex` unchanged when the layer has no override.
+  function layerTex(L){
+    if(!tex || !L || (L.floor==null && L.wall==null)) return tex;
+    return Object.assign({}, tex, {
+      floor: L.floor!=null ? texGet(L.floor) : tex.floor,
+      wall:  L.wall!=null  ? texGet(L.wall)  : tex.wall });
+  }
   function layerSubMap(L){
     // Share every map-wide field (style/grid/theme/shadowsOn/…); swap the geometry
     // for this layer's; suppress lighting (drawn once globally afterwards).
@@ -910,9 +922,10 @@
     const passes = vis.length ? vis : [{shapes:[],walls:[],doors:[],stairs:[],objects:[]}];
     passes.forEach((L,i)=>{
       const sub=layerSubMap(L); sub.lit=false;   // lighting/darkness is one global overlay pass now
-      const opt={cam,W,H,DPR,theme, transparent:(i>0)||noRock, noClear:(i>0), tex};
+      const ltex=layerTex(L);                     // this layer's own floor/wall default
+      const opt={cam,W,H,DPR,theme, transparent:(i>0)||noRock, noClear:(i>0), tex:ltex};
       if(useEngine) window.DungeonEngine.renderTo(ctx, sub, opt);
-      else drawLocal(sub, opt);
+      else { const st0=tex; tex=ltex; drawLocal(sub, opt); tex=st0; }   // local path reads the module `tex`
     });
     // ONE global lights + darkness overlay over the finished stack. Each visible layer
     // is a light group occluded by its OWN walls; an upper layer's floor hides the
@@ -3583,8 +3596,10 @@
     }
     want(st.floor); want(st.wall);
     // Every layer's textures — the composited render draws them all, so byId must
-    // carry ids from hidden/other layers too, not just the active one.
+    // carry ids from hidden/other layers too, not just the active one. Per-layer
+    // floor/wall defaults (L.floor/L.wall) count too.
     for(const L of (map.layers||[map])){
+      want(L.floor); want(L.wall);
       for(const sh of (L.shapes||[])){ want(sh.floor); want(sh.wall); }
       for(const wl of (L.walls||[])) want(wl.wall);
       for(const o of (L.objects||[])) want(o.tex);
@@ -4172,6 +4187,8 @@
       try{ await idbDel("files", t.id+"#thumb"); }catch(e){}   // cached lazily, may or may not exist
       texReg.delete(t.id);
       for(const L of (map.layers||[map])){                 // clear refs on every layer
+        if(L.floor===t.id) L.floor=DEFAULT_STYLE().floor;   // per-layer default referenced it
+        if(L.wall===t.id)  L.wall =DEFAULT_STYLE().wall;
         for(const o of (L.objects||[])) if(o.tex===t.id) o.tex="";
         for(const sh of (L.shapes||[])){ if(sh.floor===t.id) sh.floor=""; if(sh.wall===t.id) sh.wall=""; }
         for(const wl of (L.walls||[])) if(wl.wall===t.id) wl.wall="";
@@ -4326,7 +4343,8 @@
     if(sc.kind==="new") return pendingStyle()[kind]||"";
     if(sc.kind==="sel"){ const o=sc.target.obj;
       return o[kind]!==undefined ? o[kind] : (st[kind]||""); }
-    return st[kind]||"";
+    const AL=activeLayer();                       // default scope = the active layer's default
+    return (AL && AL[kind]!=null) ? AL[kind] : (st[kind]||"");
   }
   function labelFor(kind, id){
     if(!id) return PICKERS[kind].none || "—";
@@ -4397,7 +4415,13 @@
     const sc=styleScope();
     if(sc.kind==="new"){ pendingStyle()[kind]=val; syncStyleScope(); return; }   // map untouched
     if(sc.kind==="sel"){ pushHistory(); sc.target.obj[kind]=val; commit(); syncStyleScope(); return; }
-    map.style[kind]=val; pendingStyle()[kind]=val;   // default and "next draw" stay in step
+    // Default scope edits the ACTIVE layer's floor/wall (not the map-wide style), so
+    // restyling one layer's unstamped rooms never touches another layer's. map.style
+    // stays the seed that layers without an override fall back to. `pending` (the
+    // next-draw preference) follows along so a room you draw next matches.
+    pushHistory();
+    const AL=activeLayer(); if(AL) AL[kind]=val; else map.style[kind]=val;
+    pendingStyle()[kind]=val;
     commit(); syncStyleScope();
   }
   function syncStyleScope(){
@@ -4410,7 +4434,7 @@
     el.title =
       sc.kind==="new"  ? "Setting the style for what you draw next — the rest of the map is untouched"
     : sc.kind==="sel"  ? ("Editing the selected "+(sc.target.kind==="shape"?"room":"wall")+" — Esc to edit defaults again")
-    :                    "Editing the default for new rooms (and any unstyled ones)";
+    :                    "Editing this layer's default — its unstyled/generated rooms; other layers are untouched";
     const fs=$("floorSel");
     if(fs) fs.disabled = !!(sc.kind==="sel" && sc.target.kind==="wall");
     buildTexSelects();
