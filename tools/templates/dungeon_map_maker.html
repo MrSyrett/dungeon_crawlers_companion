@@ -186,6 +186,13 @@
   .tooldock .tool svg{width:21px;height:21px}
   .tooldock .seg{font-size:11px}
   .dock-div{align-self:stretch;width:1px;background:var(--line);margin:2px}
+  /* Compact tool <select> — hidden on desktop (icon grid shown), swapped in on small
+     screens so the dock stays one short row instead of a wrapping wall of buttons. */
+  .tool-select{display:none;background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+    border-radius:6px;padding:8px 26px 8px 10px;font:inherit;font-size:13px;line-height:1;cursor:pointer;
+    -webkit-appearance:none;appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23c9a94a' stroke-width='1.6'/></svg>");
+    background-repeat:no-repeat;background-position:right 9px center}
   body.embed #toolDock{display:none}   /* read-only preview embeds show no tools */
   /* When embedded read-only (GM Screen / session prep preview) the shim hides
      the sidebar; make the canvas fill and disable editing affordances. */
@@ -207,6 +214,14 @@
     body:not(.embed) .sidebar{ order:2; width:auto; flex:1 1 auto; min-height:0;
       border-right:none; border-top:1px solid var(--line);
       padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); }
+  }
+  /* Small screens — portrait phones (narrow) OR landscape phones (short): drop the
+     10-icon grid, which either eats the map (portrait) or runs off-screen (landscape),
+     and use the compact tool dropdown. The Rooms/Shapes toggle stays in the dock. */
+  @media (max-width: 640px), (max-height: 540px){
+    body:not(.embed) .tooldock .tools{ display:none; }
+    body:not(.embed) .tooldock .tool-select{ display:block; }
+    body:not(.embed) .tooldock{ max-width:calc(100% - 24px); bottom:12px; }
   }
   /* light colour presets */
   .lpre{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin-top:4px}
@@ -458,6 +473,8 @@
         <div class="tool" data-tool="shadow" title="Shadow (H) — a dark light: a pool of shade cast from a point, occluded by walls just like a light">
           <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="8" ry="4.2"/><path d="M8 15a4 2.2 0 0 0 8 0" opacity=".55"/></svg>Shadow</div>
       </div>
+      <!-- Compact tool picker shown instead of the icon grid on small screens (see CSS). -->
+      <select class="tool-select" id="toolSelect" aria-label="Tool"></select>
     </div>
     <div class="float zoombar">
       <button id="zoomOut">−</button>
@@ -5235,6 +5252,10 @@
     if(t==="shadow" && !map.shadowsOn){ toast("Switch Shadows on first — the panel is in the sidebar."); return; }
     tool=t;
     document.querySelectorAll(".tool").forEach(el=>el.classList.toggle("active",el.dataset.tool===t));
+    // Keep the compact tool dropdown in sync (only for tools it lists — not `object`,
+    // which is armed from the palette, or `wall`).
+    const ts=document.getElementById("toolSelect");
+    if(ts && ts.value!==t && [...ts.options].some(o=>o.value===t)) ts.value=t;
     if(t!=="polygon"&&polyPts){ polyPts=null; render(); }
     if(t!=="draw"&&stroke){ stroke=null; render(); }
     if(placing){ placing=null; render(); }
@@ -5256,6 +5277,19 @@
   }
   document.getElementById("toolbar").addEventListener("click", e=>{
     const t=e.target.closest(".tool"); if(t) setTool(t.dataset.tool); });
+  // Build the compact tool dropdown (shown instead of the icon grid on small screens)
+  // from the same .tool buttons, so its labels and order always match. On change →
+  // setTool; if setTool refuses (Light/Shadow off), snap back to the active tool.
+  (function(){
+    const ts=document.getElementById("toolSelect"); if(!ts) return;
+    document.querySelectorAll("#toolbar .tool").forEach(el=>{
+      const o=document.createElement("option");
+      o.value=el.dataset.tool; o.textContent=(el.textContent||el.dataset.tool).trim();
+      ts.appendChild(o);
+    });
+    ts.value=tool;
+    ts.onchange=e=>{ setTool(e.target.value); ts.value=tool; };
+  })();
 
   // Rooms ⟷ Shapes: flip what Square/Circle/Polygon/Wall produce. Doors/stairs
   // are unaffected. In Shapes mode those tools make thin interior shapes (deco).
