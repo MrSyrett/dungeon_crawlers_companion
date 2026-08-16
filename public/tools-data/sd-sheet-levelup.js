@@ -493,10 +493,9 @@ function lvlApply() {
     const rows = [...document.querySelectorAll('#attacks-body tr')];
 
     // Melee / ranged attack bonuses
-    let mB=0, rB=0, mD=0, rD=0;
-    if(/\+1 to melee and ranged attacks/i.test(f) || /\+1 to melee\/ranged attacks/i.test(f)) { mB=1; rB=1; }
-    else if(/\+1 to melee attacks/i.test(f)) { mB=1; if(/and damage/i.test(f)) mD=1; }
-    else if(/\+1 to ranged attacks/i.test(f)) { rB=1; if(/and damage/i.test(f)) rD=1; }
+    const e = (typeof talentLineEffects==='function') ? talentLineEffects(f)
+            : {melee:0,ranged:0,meleeDmg:0,rangedDmg:0,spellCheck:0};
+    let mB=e.melee, rB=e.ranged, mD=e.meleeDmg, rD=e.rangedDmg;
     if(mB||rB) rows.forEach(row=>{
       const t = rowWeaponType(row);
       const bEl = row.querySelector('.atk-bonus'), dEl = row.querySelector('.atk-damage');
@@ -507,8 +506,8 @@ function lvlApply() {
     });
 
     // Spellcasting check bonus
-    if(/\+1 to (priest |witch )?spellcasting checks/i.test(f) || /Magical Dabbler/i.test(f)) {
-      bumpVal(document.getElementById('spell-gbonus'), 1);
+    if(e.spellCheck) {
+      bumpVal(document.getElementById('spell-gbonus'), e.spellCheck);
     }
 
     // Weapon Mastery (talent) — newly mastered weapon gains its full value now:

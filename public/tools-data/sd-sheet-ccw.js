@@ -76,7 +76,7 @@ const CCW_ALL_STATS    = ['STR','DEX','CON','INT','WIS','CHA'];
 // ── Talent choice resolver ─────────────────────────────────────────────────
 // Analyzes talent text and returns a "pending" object describing needed choices
 function ccwAnalyzeTalent(text, cls) {
-  const p = { text: text, kind: 'none', options: [], picked: null, picked2: null, final: text, statBoost: {}, sub: null };
+  const p = { text: text, cls: cls, kind: 'none', options: [], picked: null, picked2: null, final: text, statBoost: {}, sub: null };
   if(!text) return p;
   // Homebrew classes resolve their talents through the effect-based pickers
   // (choose-one, learn spell, and the Choices step). Skip the official text
@@ -108,10 +108,16 @@ function ccwAnalyzeTalent(text, cls) {
     p.options = ['+2 to Strength stat', '+2 to Constitution stat', '+1 to melee attacks'];
     p.final = null; return p;
   }
-  if(/ stat or \+1 to /i.test(text)) {
-    // e.g. "+2 to Intelligence stat or +1 to spellcasting checks"
-    const parts = text.split(/ or /);
-    p.kind = 'ortwo'; p.options = [parts[0].trim(), parts.slice(1).join(' or ').trim()];
+  // Mixed "<stat option> or <flat bonus>" rows — "+2 to Intelligence stat or +1
+  // to spellcasting checks", "+2 to Strength or Constitution stat, or +1 to
+  // attacks". Split at the " or " that introduces the bonus (the one followed by
+  // a number) rather than at every " or ", so a two-stat list survives as one
+  // option and ccwOptionChoice can turn it into its own picker. Works with or
+  // without the comma, which is the only thing that varies between classes.
+  const mixed = / stat/i.test(text) ? text.match(/,?\s+or\s+\+\d/i) : null;
+  if(mixed && mixed.index > 0) {
+    p.kind = 'ortwo';
+    p.options = [text.slice(0, mixed.index).trim(), text.slice(mixed.index).replace(/^,?\s*or\s+/i, '').trim()];
     p.final = null; return p;
   }
   if(/attacks or \+1 to Magical Dabbler/i.test(text)) {
@@ -162,9 +168,34 @@ function ccwAnalyzeTalent(text, cls) {
   if(/,? or /i.test(text)) {
     const opts = (/, or /i.test(text) ? text.split(/, or /i) : text.split(/ or /i))
       .map(s=>s.trim()).filter(Boolean);
-    if(opts.length >= 2) { p.kind = 'ortwo'; p.options = opts; p.final = null; return p; }
+    if(opts.length >= 2) {
+      // "You gain +1 to attacks or damage" splits into "…attacks" and a bare
+      // "damage", which is meaningless on its own in the Talents box and matches
+      // no effect parser. When a later option carries no bonus of its own, hand
+      // it the leading "<verb> +N to " from the first one so both options read
+      // as full talents.
+      const lead = opts[0].match(/^(.*?\+\d+\s+to\s+)\S/i);
+      if(lead) for(let i=1;i<opts.length;i++) if(!/\+\d/.test(opts[i])) opts[i] = lead[1] + opts[i];
+      p.kind = 'ortwo'; p.options = opts; p.final = null; return p;
+    }
   }
   return p;
+}
+
+// A picked either/or option can itself still hide a choice — the Sea Wolf's
+// "+2 to Strength or Constitution stat, or +1 to attacks" splits at the top-level
+// ", or " into an option that STILL needs a stat named. Re-analyze the chosen
+// option and hand back a nested pending object when one is needed, so no class's
+// wording has to be special-cased the way the Pit Fighter's row was.
+// Returns null when the option is already final.
+function ccwOptionChoice(text, cls) {
+  if(!text) return null;
+  const sub = ccwAnalyzeTalent(text, cls);
+  if(!sub || sub.kind === 'none') return null;
+  // Refuse a split that made no progress (an option that re-analyzes to itself),
+  // which is what would let the nesting recurse forever.
+  if(sub.kind === 'ortwo' && (sub.options.length < 2 || sub.options.some(o => o === text))) return null;
+  return sub;
 }
 
 // Renders the choice UI for a pending talent. stateRef is the JS path string to the pending object.
@@ -182,6 +213,9 @@ function ccwTalentChoiceUI(p, stateRef, knownSpells, cls) {
     h += '<option value="">— choose —</option>';
     p.options.forEach(opt=>{ h += '<option value="'+String(opt).replace(/"/g,'&quot;')+'"'+(p.picked===opt?' selected':'')+'>'+String(opt).replace(/</g,'&lt;')+'</option>'; });
     h += '</select>';
+    // The chosen option may need a choice of its own ("+2 to Strength or
+    // Constitution stat") — ccwResolve builds it, we just draw it here.
+    if(p.sub) h += ccwTalentChoiceUI(p.sub, stateRef+'.sub', knownSpells, cls);
   }
   else if(p.kind==='statpick') {
     h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
@@ -313,10 +347,19 @@ function ccwResolve(p) {
     case 'none': p.final = p.text; break;
     case 'ortwo':
       if(p.picked) {
+        // Rebuild the nested choice whenever the pick changes, then defer to it.
+        // final stays null until the sub is answered, so Next still blocks and
+        // the stat boost isn't silently dropped.
+        if(!p.sub || p.sub.text !== p.picked) p.sub = ccwOptionChoice(p.picked, p.cls);
+        if(p.sub) {
+          ccwResolve(p.sub);
+          if(p.sub.final) { p.final = p.sub.final; p.statBoost = Object.assign({}, p.sub.statBoost||{}); }
+          break;
+        }
         p.final = p.picked;
         const m = p.picked.match(/\+2 to (\w+) stat/);
         if(m) { const st = m[1].slice(0,3).toUpperCase(); p.statBoost[st] = 2; }
-      }
+      } else { p.sub = null; }
       break;
     case 'statpick':
       if(p.picked) { p.final = '+2 to '+p.picked+' stat'; p.statBoost[p.picked.slice(0,3).toUpperCase()] = 2; }
@@ -473,11 +516,12 @@ function ccwChoices(){
 function ccwSetChoice(key,val){ if(!_ccw.hbChoices)_ccw.hbChoices={}; _ccw.hbChoices[key]=val; Object.keys(_ccw.hbChoices).forEach(k=>{ if(k.indexOf(key+'>')===0) delete _ccw.hbChoices[k]; }); ccwRender(); }
 function _ccwClearChoiceKeys(prefix){ if(_ccw && _ccw.hbChoices) Object.keys(_ccw.hbChoices).forEach(k=>{ if(k.indexOf(prefix)===0) delete _ccw.hbChoices[k]; }); }
 
+const CCW_DICE_ICO = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg>';
 function ccwGear() {
   if(_ccw.gold===null) {
     return '<p class="ccw-hint">Roll 2d6 × 5 for your starting gold, or take the flat 35 gp, then buy your gear.</p>'
       + '<div style="display:flex;gap:6px;">'
-      + '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollGold()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll 2d6 × 5 gp</button>'
+      + '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollGold()">' + CCW_DICE_ICO + ' Roll 2d6 × 5 gp</button>'
       + '<button style="flex:0 0 auto;margin:0;padding:0 14px;background:#1a3a4a;border:1px solid #2d6a7a;color:#8ad4e0;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="ccwTakeGold()" title="Take the average instead of rolling">Take 35 gp</button>'
       + '</div>';
   }
@@ -485,6 +529,15 @@ function ccwGear() {
   const left = Math.round((_ccw.gold - spent)*100)/100;
   let h = '<p class="ccw-hint">Starting gold: <b style="color:#c8a020;">'+_ccw.gold+' gp</b> · Spent: '+(Math.round(spent*100)/100)+' gp · <b style="color:'+(left<0?'#df6a6a':'#4caf7d')+';">Remaining: '+left+' gp</b></p>';
   if(left<0) h += '<p class="ccw-hint" style="color:#df6a6a;">You\'ve overspent — remove something.</p>';
+
+  // Rolling gold used to be one-way: once _ccw.gold was set the roll / take-35
+  // buttons vanished with the rest of the pre-roll block. Keep them here so a
+  // roll can always be redone or swapped for the flat 35 gp. Spending is left
+  // alone — the Remaining line turns red and Next blocks if a reroll goes low.
+  h += '<div style="display:flex;gap:6px;margin:-4px 0 10px;">'
+    + '<button class="ccw-roll-btn" style="flex:1;margin:0;padding:5px;font-size:10px;" onclick="ccwRollGold()" title="Roll your starting gold again">' + CCW_DICE_ICO + ' Reroll 2d6 × 5</button>'
+    + '<button style="flex:0 0 auto;margin:0;padding:0 14px;background:'+(_ccw.gold===35?'#241f10':'#1a3a4a')+';border:1px solid '+(_ccw.gold===35?'#7a5a00':'#2d6a7a')+';color:'+(_ccw.gold===35?'#c8a020':'#8ad4e0')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="ccwTakeGold()" title="Take the average instead of rolling">Take 35 gp</button>'
+    + '</div>';
 
   // Crawling kit
   h += '<button class="ccw-choice'+(_ccw.buyKit?' selected':'')+'" style="width:100%;margin-bottom:8px;" onclick="_ccw.buyKit=!_ccw.buyKit;ccwRender()"><div class="ccw-choice-name" style="font-size:11px;">Crawling Kit — 7 gp '+(_ccw.buyKit?'✓':'')+'</div><div class="ccw-choice-desc">Backpack, flint & steel, 2 torches, 3 rations, 10 iron spikes, grappling hook, 60\' rope</div></button>';
@@ -679,7 +732,11 @@ function ccwRandResolve(p, cls, knownSpells) {
   if(!p || p.kind==='none') return;
   const rand = (arr) => arr[Math.floor(Math.random()*arr.length)];
   switch(p.kind) {
-    case 'ortwo':      p.picked = rand(p.options); break;
+    case 'ortwo':
+      p.picked = rand(p.options);
+      p.sub = ccwOptionChoice(p.picked, cls);
+      if(p.sub) ccwRandResolve(p.sub, cls, knownSpells);
+      break;
     case 'statpick':   p.picked = rand(p.options); break;
     case 'distribute': p.picked = rand(CCW_ALL_STATS); p.picked2 = rand(CCW_ALL_STATS); break;
     case 'meleeranged':p.picked = rand(['melee','ranged']); break;
@@ -1890,10 +1947,11 @@ function ccwApply() {
   spellChkBonus += hbEff.spellCheck;
   [c.tres, c.tres2].forEach(p=>{
     const f = (p && p.final) || '';
-    if(/\+1 to melee and ranged attacks/i.test(f) || /\+1 to melee\/ranged attacks/i.test(f)) { atkBonus.melee+=1; atkBonus.ranged+=1; }
-    else if(/\+1 to melee attacks/i.test(f)) { atkBonus.melee+=1; if(/and damage/i.test(f)) atkBonus.meleeDmg+=1; }
-    else if(/\+1 to ranged attacks/i.test(f)) { atkBonus.ranged+=1; if(/and damage/i.test(f)) atkBonus.rangedDmg+=1; }
-    if(/\+1 to (priest |witch )?spellcasting checks/i.test(f) || /Magical Dabbler/i.test(f)) spellChkBonus += 1;
+    const e = (typeof talentLineEffects==='function') ? talentLineEffects(f)
+            : {melee:0,ranged:0,meleeDmg:0,rangedDmg:0,spellCheck:0};
+    atkBonus.melee += e.melee; atkBonus.ranged += e.ranged;
+    atkBonus.meleeDmg += e.meleeDmg; atkBonus.rangedDmg += e.rangedDmg;
+    spellChkBonus += e.spellCheck;
     if(/Backstab deals \+1 dice/i.test(f)) backstabExtraDice += 1;
     let m = f.match(/Weapon Mastery with one additional weapon type — (.+)$/i);
     if(m) masterySet.add(m[1].trim());
