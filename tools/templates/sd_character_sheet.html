@@ -1366,6 +1366,40 @@ function refreshScalingHeals() {
     if(dmgEl.value.trim() === '' || /^\d+d6$/i.test(dmgEl.value.trim())) dmgEl.value = want;
   });
 }
+// ── Talent prose → attack / damage / spellcasting numbers ───────────────────
+// The class tables word the same bonus a dozen ways: "+1 to melee and ranged
+// attacks" (Fighter), "You gain +1 to attacks" (Desert Rider), "Your attacks
+// deal +1 damage" (Sea Wolf), "+1 to weapon attacks and damage" (Basilisk),
+// "+1 to your spellcasting checks" (Necromancer). Creation, level-up and the
+// mid-play gear helpers all read them through THIS function, so a phrasing
+// can't work in one place and quietly do nothing in another. Returns the deltas
+// for one line; callers accumulate across the Talents box.
+// Lines that qualify the bonus with "with <something>" (the Wyrdling's
+// pseudopod, the Duelist's Taunt, Weapon Mastery) are left alone — those are
+// weapon-specific and have their own handling.
+function talentLineEffects(line) {
+  const f = String(line || '');
+  const out = { melee:0, ranged:0, meleeDmg:0, rangedDmg:0, spellCheck:0 };
+  if(/\bwith\b/i.test(f)) return out;
+  const andDamage = /and damage/i.test(f);
+  const bothAtk = () => { out.melee += 1; out.ranged += 1; };
+  const bothDmg = () => { out.meleeDmg += 1; out.rangedDmg += 1; };
+
+  if(/\+1 to melee and ranged attacks/i.test(f) || /\+1 to melee\/ranged attacks/i.test(f)) { bothAtk(); if(andDamage) bothDmg(); }
+  else if(/\+1 to melee attacks/i.test(f))  { out.melee  += 1; if(andDamage) out.meleeDmg  += 1; }
+  else if(/\+1 to ranged attacks/i.test(f)) { out.ranged += 1; if(andDamage) out.rangedDmg += 1; }
+  // Unqualified "attacks" means every attack you make.
+  else if(/\+1 to (weapon )?attacks/i.test(f)) { bothAtk(); if(andDamage) bothDmg(); }
+
+  if(!out.meleeDmg && !out.rangedDmg) {
+    if(/\+1 to melee (weapon )?damage/i.test(f))       out.meleeDmg  += 1;
+    else if(/\+1 to ranged (weapon )?damage/i.test(f)) out.rangedDmg += 1;
+    else if(/attacks deal \+1 damage/i.test(f) || /\+1 to damage/i.test(f)) bothDmg();
+  }
+
+  if(/\+1 to (your )?(\w+ )?spellcasting checks/i.test(f) || /Magical Dabbler/i.test(f)) out.spellCheck += 1;
+  return out;
+}
 function sheetAtkBonusProfile() {
   const prof = { melee:0, ranged:0, meleeDmg:0, rangedDmg:0, mastery:new Set(), d12:new Set() };
   // Equipped magic items (folded in first so they stack with talents/ancestry).
@@ -1382,9 +1416,9 @@ function sheetAtkBonusProfile() {
   // Talent lines from the Talents box (same phrasings creation writes there).
   const text = document.getElementById('talents-text')?.value || '';
   text.split('\n').forEach(f => {
-    if(/\+1 to melee and ranged attacks/i.test(f) || /\+1 to melee\/ranged attacks/i.test(f)) { prof.melee+=1; prof.ranged+=1; }
-    else if(/\+1 to melee attacks/i.test(f)) { prof.melee+=1; if(/and damage/i.test(f)) prof.meleeDmg+=1; }
-    else if(/\+1 to ranged attacks/i.test(f)) { prof.ranged+=1; if(/and damage/i.test(f)) prof.rangedDmg+=1; }
+    const e = talentLineEffects(f);
+    prof.melee += e.melee; prof.ranged += e.ranged;
+    prof.meleeDmg += e.meleeDmg; prof.rangedDmg += e.rangedDmg;
     let m = f.match(/d12 damage with one weapon type you choose — (.+)$/i);
     if(m) prof.d12.add(m[1].trim());
     m = f.match(/Weapon Mastery with one additional weapon type — (.+)$/i);
@@ -1408,7 +1442,11 @@ function _builtinLineChargeBonus(line){
   const name = String(line||'').split(':')[0].trim();
   if(!name) return 0;
   const nm = name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  const re = new RegExp('(?:additional|extra|another|\\+\\s*1)\\s+use(?:s)?\\s+(?:per\\s+day\\s+)?of(?:\\s+your)?\\s+'+nm+'\\b','i');
+  // Two phrasings in the tables: "gain an additional use of your <Feature>"
+  // (Desert Rider, Ras-Godai, Basilisk, Seer) and the Duelist's terser
+  // "+1 <Feature> per day".
+  const re = new RegExp('(?:additional|extra|another|\\+\\s*1)\\s+use(?:s)?\\s+(?:per\\s+day\\s+)?of(?:\\s+your)?\\s+'+nm+'\\b'
+                      + '|\\+\\s*1\\s+'+nm+'\\s+per\\s+day\\b','i');
   const ta = document.getElementById('talents-text');
   if(!ta) return 0;
   let bonus = 0;
