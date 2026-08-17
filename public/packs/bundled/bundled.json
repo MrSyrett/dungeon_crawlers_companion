@@ -1,5 +1,5 @@
 {
- "version": "612440e628",
+ "version": "b5ee2ecee5",
  "note": "Bundled Creative-Commons map assets. Attribution is REQUIRED and is rendered statically in the Map Maker sidebar, not from this file.",
  "credits": [
   {
@@ -308,7 +308,7 @@
      "name": "Ledge",
      "kind": "wall",
      "file": "stock-wall-ledge.webp",
-     "thick": 0.4062,
+     "thick": 0.3047,
      "tile": 8.5938,
      "thumb": {
       "sheet": "stockthumbs-0.webp",
@@ -325,7 +325,7 @@
      "name": "Slope",
      "kind": "wall",
      "file": "stock-wall-slope.webp",
-     "thick": 0.4688,
+     "thick": 0.2344,
      "tile": 8.5938,
      "thumb": {
       "sheet": "stockthumbs-0.webp",
@@ -359,7 +359,7 @@
      "name": "Iron Fence",
      "kind": "wall",
      "file": "stock-wall-fence.webp",
-     "thick": 0.3594,
+     "thick": 0.25,
      "tile": 1.0,
      "thumb": {
       "sheet": "stockthumbs-0.webp",
