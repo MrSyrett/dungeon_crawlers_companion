@@ -257,35 +257,44 @@ window.DungeonEngine = (function(){
     c.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; c.fillRect(0,0,W,H);
     c.globalCompositeOperation="destination-in"; c.drawImage(buf.erode,0,0);   // walled floors only
     // …then carve the middle of the room back out with a blurred inset fill,
-    // which leaves exactly the feathered band along the boundary.
+    // which leaves exactly the feathered band along the boundary. Per-shape, so a
+    // wall SHARED by two merely-abutting rooms keeps its band on both sides (each
+    // insets away from the shared edge). This is correct everywhere EXCEPT it also
+    // leaves a phantom band in the SEAM where two rooms genuinely OVERLAP — the
+    // shared wall there is erased, so its band is cleaned up in the second pass.
     c.globalCompositeOperation="destination-out";
     c.filter="blur("+(px*0.38).toFixed(2)+"px)";
     c.fillStyle="#fff";
-    // Inset by the WALL's own half-thickness as well, so the band is measured from
-    // the wall's inner face inward. Insetting by the band alone puts most of it
-    // underneath the stonework and only a sliver survives — and a thick cave wall
-    // would swallow it entirely.
     for(const sh of map.shapes){ if(!banded(sh)) continue;
       fillInsetShape(c, sh, halfCellsFor(shapeWallTex(sh)) + WALL_SHADOW_CELLS); }
-    // Where two rooms OVERLAP, the shared wall is erased (they merge into one
-    // space) — so the inner band must go there too. The per-shape carve above
-    // can't: each room insets AWAY from the shared edge, leaving a phantom band
-    // in the seam (worst at a shallow 1-square overlap, where the seam is thinner
-    // than the carve inset). Carve out the overlap region — anything inside 2+
-    // banded rooms — so the seam band disappears exactly where the wall did. The
-    // overlap is interior, so this never touches a room's real outer band.
-    { const uni=oc(), ov=oc(), tmp=oc();
-      uni.width=ov.width=tmp.width=W; uni.height=ov.height=tmp.height=H;
-      const uc=uni.getContext("2d"), ovc=ov.getContext("2d"), tc=tmp.getContext("2d");
+    c.filter="none";
+    // Second pass — drop the phantom seam band ONLY in the deep interior of a real
+    // overlap: (rooms overlapping, i.e. inside 2+) ∩ (union interior, eroded off
+    // the outer wall by the band depth). Intersecting with the eroded union is what
+    // spares a real wall that merely crosses an overlap — a T-top, an L elbow — and
+    // abutting rooms never enter this pass at all (their interiors don't intersect).
+    { const ov=oc(), run=oc(), tmp=oc(), er=oc();
+      ov.width=run.width=tmp.width=er.width=W; ov.height=run.height=tmp.height=er.height=H;
+      const ovc=ov.getContext("2d"), rc=run.getContext("2d"), tc=tmp.getContext("2d"), erc=er.getContext("2d");
       for(const sh of map.shapes){ if(!banded(sh)) continue;
         tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
         tc.fillStyle="#fff"; tc.beginPath(); shapePath(tc, sh); tc.fill("nonzero");
-        tc.globalCompositeOperation="destination-in"; tc.drawImage(uni,0,0);      // sh ∩ (rooms so far) = new overlap
+        tc.globalCompositeOperation="destination-in"; tc.drawImage(run,0,0);      // sh ∩ (rooms so far) = new overlap
         ovc.globalCompositeOperation="source-over"; ovc.drawImage(tmp,0,0);        // accumulate every overlap
-        uc.globalCompositeOperation="source-over"; uc.fillStyle="#fff"; uc.beginPath(); shapePath(uc, sh); uc.fill("nonzero"); }
+        rc.globalCompositeOperation="source-over"; rc.fillStyle="#fff"; rc.beginPath(); shapePath(rc, sh); rc.fill("nonzero"); }
+      // eroded union: intersect the union with copies of itself shifted around a
+      // ring of radius (thickest wall half + band), so what's left is the interior
+      // more than the band-depth inside the union everywhere (off every outer wall).
+      let repHalf=0; for(const sh of map.shapes){ if(banded(sh)) repHalf=Math.max(repHalf, halfCellsFor(shapeWallTex(sh))); }
+      const dPx=(repHalf + WALL_SHADOW_CELLS)*wpx();
+      erc.setTransform(1,0,0,1,0,0); erc.filter="none"; erc.globalCompositeOperation="source-over"; erc.clearRect(0,0,W,H);
+      erc.drawImage(buf.erode,0,0);
+      erc.globalCompositeOperation="destination-in";
+      const RN=20; for(let i=0;i<RN;i++){ const a=(i/RN)*Math.PI*2; erc.drawImage(buf.erode, Math.cos(a)*dPx, Math.sin(a)*dPx); }
+      erc.drawImage(ov,0,0);                              // seam = overlap ∩ eroded-union interior
       c.globalCompositeOperation="destination-out";
-      c.filter="blur("+(px*0.30).toFixed(2)+"px)";                                 // feather so merged straight walls keep a smooth band
-      c.drawImage(ov,0,0); }
+      c.filter="blur("+(px*0.30).toFixed(2)+"px)";
+      c.drawImage(er,0,0); }
     c.filter="none"; c.globalCompositeOperation="source-over";
     ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
   }
