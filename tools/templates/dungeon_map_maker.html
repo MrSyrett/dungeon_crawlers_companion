@@ -1112,6 +1112,25 @@
     // would swallow it entirely.
     for(const sh of map.shapes){ if(!banded(sh)) continue;
       fillInsetShape(c, sh, halfCellsFor(shapeWallTex(sh)) + WALL_SHADOW_CELLS); }
+    // Where two rooms OVERLAP, the shared wall is erased (they merge into one
+    // space) — so the inner band must go there too. The per-shape carve above
+    // can't: each room insets AWAY from the shared edge, leaving a phantom band
+    // in the seam (worst at a shallow 1-square overlap, where the seam is thinner
+    // than the carve inset). Carve out the overlap region — anything inside 2+
+    // banded rooms — so the seam band disappears exactly where the wall did. The
+    // overlap is interior, so this never touches a room's real outer band.
+    { const uni=oc(), ov=oc(), tmp=oc();
+      uni.width=ov.width=tmp.width=W; uni.height=ov.height=tmp.height=H;
+      const uc=uni.getContext("2d"), ovc=ov.getContext("2d"), tc=tmp.getContext("2d");
+      for(const sh of map.shapes){ if(!banded(sh)) continue;
+        tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
+        tc.fillStyle="#fff"; tc.beginPath(); shapePath(tc, sh); tc.fill("nonzero");
+        tc.globalCompositeOperation="destination-in"; tc.drawImage(uni,0,0);      // sh ∩ (rooms so far) = new overlap
+        ovc.globalCompositeOperation="source-over"; ovc.drawImage(tmp,0,0);        // accumulate every overlap
+        uc.globalCompositeOperation="source-over"; uc.fillStyle="#fff"; uc.beginPath(); shapePath(uc, sh); uc.fill("nonzero"); }
+      c.globalCompositeOperation="destination-out";
+      c.filter="blur("+(px*0.30).toFixed(2)+"px)";                                 // feather so merged straight walls keep a smooth band
+      c.drawImage(ov,0,0); }
     c.filter="none"; c.globalCompositeOperation="source-over";
     ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
   }
