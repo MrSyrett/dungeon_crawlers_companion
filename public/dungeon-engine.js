@@ -1735,16 +1735,33 @@ window.DungeonEngine = (function(){
       let yc=1;
       const cells=[];
       for(let p2=0;p2<pairs;p2++){
-        const cw=ri(3, smax), ch=ri(3, Math.min(5,smax));
-        cells.push({x:-naveW/2-cw, y:yc, w:cw, h:ch, round:false, cx:-naveW/2-cw/2, cy:yc+ch/2});
-        cells.push({x: naveW/2,    y:yc, w:cw, h:ch, round:false, cx: naveW/2+cw/2, cy:yc+ch/2});
-        yc += ch + 1;
+        if(rng()<0.35){
+          // ROUND pair: mirrored rotundas. They overlap the nave wall by 0.6
+          // cells so the wall-merge opens them as archways — a merely TANGENT
+          // circle shares no wall segment and would be sealed off.
+          const r=ri(2, Math.max(2, Math.min(3, Math.floor(smax/2))));
+          const off=naveW/2 + r - 0.6;
+          cells.push({x:-off-r, y:yc, w:2*r, h:2*r, round:true, cx:-off, cy:yc+r});
+          cells.push({x: off-r, y:yc, w:2*r, h:2*r, round:true, cx: off, cy:yc+r});
+          yc += 2*r + 1;
+        } else {
+          const cw=ri(3, smax), ch=ri(3, Math.min(5,smax));
+          cells.push({x:-naveW/2-cw, y:yc, w:cw, h:ch, round:false, cx:-naveW/2-cw/2, cy:yc+ch/2});
+          cells.push({x: naveW/2,    y:yc, w:cw, h:ch, round:false, cx: naveW/2+cw/2, cy:yc+ch/2});
+          yc += ch + 1;
+        }
       }
       const naveH = yc + 2;
       rooms.push({x:-naveW/2, y:0, w:naveW, h:naveH, round:false, cx:0, cy:naveH/2});
       for(const c2 of cells) rooms.push(c2);
-      const aw=naveW+2*ri(1,2), ah=ri(3, Math.min(6,smax+1));
-      rooms.push({x:-aw/2, y:-ah, w:aw, h:ah, round:false, cx:0, cy:-ah/2});
+      if(rng()<0.5){
+        // ROUND apse — a rotunda at the head of the nave, overlapped for the arch
+        const r=ri(2, Math.min(4, Math.max(2, Math.floor((naveW+4)/2))));
+        rooms.push({x:-r, y:0.6-2*r, w:2*r, h:2*r, round:true, cx:0, cy:0.6-r});
+      } else {
+        const aw=naveW+2*ri(1,2), ah=ri(3, Math.min(6,smax+1));
+        rooms.push({x:-aw/2, y:-ah, w:aw, h:ah, round:false, cx:0, cy:-ah/2});
+      }
     } else if(opts.tower){
       // TOWER (v3, modelled on the user's example): ONE round shell PARTITIONED
       // by interior WALLS that run shell-to-shell — a horizontal chord plus a
