@@ -1788,88 +1788,54 @@
     ctx.restore(); }
 
   // ── hand-drawn exterior hatching (classic maps, Interior-Only) ────────
-  // Mirror of the engine's drawExteriorHatch/hatchPattern; keep in sync. Woven
-  // "basket-weave" bundles of short parallel ink strokes filling an irregular
-  // rock collar around every exterior wall. Classic mode only, Interior-Only
-  // grid only, skipped when zoomed too far out. Pattern is anchored to the
-  // WORLD origin and the collar is seeded off WORLD position ⇒ no shimmer.
-  let xhatchPat=null, xhatchKey="";
-  function hatchPattern(c){
-    const px=wpx();
-    const key=Math.round(px*4)+"|"+C.ink;
-    if(xhatchPat && xhatchKey===key) return xhatchPat;
-    const T=Math.max(24, Math.round(px*2));        // one tile = 2×2 cells
-    const t=oc(); t.width=T; t.height=T; const g=t.getContext("2d");
-    g.clearRect(0,0,T,T);
-    g.strokeStyle=C.ink; g.lineCap="round"; g.lineWidth=Math.max(0.8, 0.045*px);
-    const rnd=seeded(19.37, 42.11);
-    const NG=6, cellT=T/NG;                        // 6×6 jittered-grid bundles ⇒ even weave
-    g.beginPath();
-    for(let gy=0;gy<NG;gy++) for(let gx=0;gx<NG;gx++){
-      const cx=(gx+0.5)*cellT+(rnd()-0.5)*0.5*cellT, cy=(gy+0.5)*cellT+(rnd()-0.5)*0.5*cellT;
-      const ang=rnd()*Math.PI;
-      const k=4+Math.floor(rnd()*2);
-      const len=(0.34+rnd()*0.16)*px, gap=0.072*px;
-      const dx=Math.cos(ang), dy=Math.sin(ang), nx=-dy, ny=dx;
-      for(let j=0;j<k;j++){
-        const off=(j-(k-1)/2)*gap;
-        const hl=len*(0.82+rnd()*0.36)/2;
-        const bx=cx+nx*off, by=cy+ny*off;
-        for(let wx=-T;wx<=T;wx+=T) for(let wy=-T;wy<=T;wy+=T){   // wrap ⇒ seamless
-          g.moveTo(bx-dx*hl+wx, by-dy*hl+wy); g.lineTo(bx+dx*hl+wx, by+dy*hl+wy);
-        }
-      }
-    }
-    g.stroke();
-    xhatchPat=c.createPattern(t,"repeat"); xhatchKey=key;
-    return xhatchPat;
-  }
+  // Mirror of the engine's drawExteriorHatch; keep in sync. v4: complete woven
+  // bundles drawn directly — never clipped by a mask — with drop probability
+  // falling off with distance from the wall, so the band's outer edge is whole
+  // strokes ending naturally. Seeded off WORLD position ⇒ no shimmer.
   function drawExteriorHatch(){
     if(!map || textured() || !map.gridInterior || noRock || renderOverlay) return;
     const shapes=map.shapes||[]; if(!shapes.length) return;
     const px=wpx(); if(px < 12) return;
     const hb=oc(); hb.width=W; hb.height=H; const hc=hb.getContext("2d");
     hc.setTransform(1,0,0,1,0,0); hc.clearRect(0,0,W,H);
-    // 1) collar mask: jittered blobby stamps along every wall outline.
-    hc.fillStyle="#fff"; hc.beginPath();
-    const stepW=0.22;
+    hc.strokeStyle=C.ink; hc.lineCap="round"; hc.lineWidth=Math.max(0.8, 0.045*px);
+    const EPS=0.05, step=0.34;
+    hc.beginPath();
+    const bundle=(cx,cy,rnd)=>{                    // one COMPLETE woven bundle
+      const ang=rnd()*Math.PI, k=4+Math.floor(rnd()*2);
+      const len=(0.30+rnd()*0.16)*px, gap=0.072*px;
+      const dx=Math.cos(ang), dy=Math.sin(ang), bx2=-dy, by2=dx;
+      for(let j=0;j<k;j++){
+        const off=(j-(k-1)/2)*gap, hl=len*(0.82+rnd()*0.36)/2;
+        const bx=cx+bx2*off, by=cy+by2*off;
+        hc.moveTo(bx-dx*hl, by-dy*hl); hc.lineTo(bx+dx*hl, by+dy*hl);
+      }
+    };
     for(const S of shapes){
       if(S.deco || !shHasWall(S)) continue;
       const o=outlineDense(S); const n=o.length; if(n<2) continue;
       for(let i=0;i<n;i++){
         const a=o[i], b=o[(i+1)%n];
-        const ex=b[0]-a[0], ey=b[1]-a[1]; const segL=Math.hypot(ex,ey); if(segL<1e-6) continue;
-        const roots=Math.max(1, Math.round(segL/stepW));
-        for(let k=0;k<roots;k++){
-          const f=(k+0.5)/roots;
+        const ex=b[0]-a[0], ey=b[1]-a[1]; const L=Math.hypot(ex,ey); if(L<1e-6) continue;
+        const tx=ex/L, ty=ey/L; let nx=-ty, ny=tx;
+        if(pointInShape(a[0]+ex*0.5+nx*EPS, a[1]+ey*0.5+ny*EPS, S)){ nx=-nx; ny=-ny; }
+        const roots=Math.max(1, Math.round(L/step));
+        for(let k2=0;k2<roots;k2++){
+          const f=(k2+0.5)/roots;
           const wx=a[0]+ex*f, wy=a[1]+ey*f;
           const rnd=seeded(wx*53.3, wy*53.3);
-          const r=(0.30+rnd()*0.50)*px;
           const [sx,sy]=toScreen(wx,wy);
-          const jx=(rnd()-0.5)*0.30*px, jy=(rnd()-0.5)*0.30*px;
-          hc.moveTo(sx+jx+r,sy+jy); hc.arc(sx+jx,sy+jy,r,0,6.2832);
+          const put=(dist)=>{ const along=(rnd()-0.5)*0.34*px;
+            bundle(sx+nx*dist*px+tx*along, sy+ny*dist*px+ty*along, rnd); };
+          put(0.14+rnd()*0.14);                    // hugging the wall — always
+          if(rnd()<0.85) put(0.34+rnd()*0.18);     // middle band — usually
+          if(rnd()<0.45) put(0.58+rnd()*0.22);     // outer strays — sometimes
         }
       }
     }
-    hc.fill("nonzero");
-    // 1b) soften the OUTER boundary: blur the mask into itself so the weave fades
-    //     out over ~half a cell instead of ending on a hard bubble edge. The wall
-    //     side is re-cut sharp by the floor clear below. (Mirror of the engine.)
-    { const fb=oc(); fb.width=W; fb.height=H; const fc=fb.getContext("2d");
-      fc.setTransform(1,0,0,1,0,0); fc.clearRect(0,0,W,H);
-      fc.filter="blur("+(0.26*px).toFixed(1)+"px)";
-      fc.drawImage(hb,0,0); fc.drawImage(hb,0,0);
-      fc.filter="none";
-      hc.globalCompositeOperation="copy"; hc.drawImage(fb,0,0);
-      hc.globalCompositeOperation="source-over"; }
-    // 2) clear room interiors (interior walls between two rooms come out clean).
+    hc.stroke();
     hc.globalCompositeOperation="destination-out"; hc.fillStyle="#000"; hc.beginPath();
     for(const S of shapes){ if(S.deco || !shHasFloor(S)) continue; shapePath(hc,S); } hc.fill("nonzero");
-    // 3) ink the collar with the woven pattern, anchored to the world origin.
-    const pat=hatchPattern(hc); if(!pat) return;
-    hc.globalCompositeOperation="source-in";
-    const [ox,oy]=toScreen(0,0);
-    hc.save(); hc.translate(ox,oy); hc.fillStyle=pat; hc.fillRect(-ox,-oy,W,H); hc.restore();
     ctx.drawImage(hb,0,0);
   }
 
@@ -2336,15 +2302,17 @@
         const f=(k+0.5)/roots;
         const wx=a[0]+ex*f, wy=a[1]+ey*f;
         const rnd=seeded(wx*71.3, wy*71.3);
-        const nd=1+Math.floor(rnd()*3);
         const [sx,sy]=toScreen(wx,wy);
-        for(let d2=0;d2<nd;d2++){
-          const dist=(0.10 + Math.pow(rnd(),1.6)*0.40)*px;
-          const along=(rnd()-0.5)*0.14*px;
-          const dx=sx+nx*dist+tx*along, dy=sy+ny*dist+ty*along;
+        // Strong density gradient (mirror of the engine): packed at the wall,
+        // thinner mid band, occasional strays.
+        const dot=(dist)=>{ const along=(rnd()-0.5)*0.14*px;
+          const dx=sx+nx*dist*px+tx*along, dy=sy+ny*dist*px+ty*along;
           const r=Math.max(0.55, (0.018+rnd()*0.02)*px);
-          c.moveTo(dx+r,dy); c.arc(dx,dy,r,0,6.2832);
-        }
+          c.moveTo(dx+r,dy); c.arc(dx,dy,r,0,6.2832); };
+        dot(0.06+rnd()*0.12);
+        dot(0.07+rnd()*0.13);
+        if(rnd()<0.60) dot(0.19+rnd()*0.15);
+        if(rnd()<0.22) dot(0.32+rnd()*0.22);
       }
     }
     c.fill(); c.restore();
