@@ -950,63 +950,87 @@ window.DungeonEngine = (function(){
     ctx.restore(); }
 
   // ── hand-drawn exterior hatching (classic maps, Interior-Only) ────────
-  // The Cryptocartographer / graph-paper look: short ink strokes fanning OUT
-  // from the outside of every wall so the rock around the dungeon reads as solid.
-  // Gated to classic mode (never over textures), and only when the exterior is
-  // meant to be solid rock — the Interior-Only grid toggle. Skipped when zoomed
-  // too far out to read. Every stroke is seeded off its WORLD position, so the
-  // hatch is stable and never shimmers as you pan or zoom.
+  // The woven "basket-weave" rock hatch from the user's reference swatches:
+  // small BUNDLES of 4–5 short parallel ink strokes, each bundle at its own
+  // angle, densely interlocking. Rendered as a seamless procedural pattern tile
+  // (seeded ⇒ identical every build), then stamped into an irregular collar
+  // masked around every exterior wall. The pattern is anchored to the WORLD
+  // origin, so it never slides under the map on pan and rescales with zoom.
+  // Gated to classic mode (never over textures) + the Interior-Only grid toggle
+  // (exterior-is-solid-rock), and skipped when zoomed too far out to read.
+  let xhatchPat=null, xhatchKey="";
+  function hatchPattern(c){
+    const px=wpx();
+    const key=Math.round(px*4)+"|"+C.ink;
+    if(xhatchPat && xhatchKey===key) return xhatchPat;
+    const T=Math.max(24, Math.round(px*2));        // one tile = 2×2 cells
+    const t=oc(); t.width=T; t.height=T; const g=t.getContext("2d");
+    g.clearRect(0,0,T,T);
+    g.strokeStyle=C.ink; g.lineCap="round"; g.lineWidth=Math.max(0.8, 0.045*px);
+    const rnd=seeded(19.37, 42.11);                // fixed seed ⇒ same weave every build
+    // Bundles sit on a jittered GRID (not thrown randomly) so the weave covers
+    // evenly, edge to edge, exactly like the reference swatches — random drop
+    // positions clump and leave holes.
+    const NG=6, cellT=T/NG;                        // 6×6 bundles per 2×2-cell tile
+    g.beginPath();
+    for(let gy=0;gy<NG;gy++) for(let gx=0;gx<NG;gx++){
+      const cx=(gx+0.5)*cellT+(rnd()-0.5)*0.5*cellT, cy=(gy+0.5)*cellT+(rnd()-0.5)*0.5*cellT;
+      const ang=rnd()*Math.PI;
+      const k=4+Math.floor(rnd()*2);               // 4–5 parallel strokes
+      const len=(0.34+rnd()*0.16)*px, gap=0.072*px;
+      const dx=Math.cos(ang), dy=Math.sin(ang), nx=-dy, ny=dx;
+      for(let j=0;j<k;j++){
+        const off=(j-(k-1)/2)*gap;
+        const hl=len*(0.82+rnd()*0.36)/2;          // ragged ends
+        const bx=cx+nx*off, by=cy+ny*off;
+        for(let wx=-T;wx<=T;wx+=T) for(let wy=-T;wy<=T;wy+=T){   // wrap ⇒ seamless
+          g.moveTo(bx-dx*hl+wx, by-dy*hl+wy); g.lineTo(bx+dx*hl+wx, by+dy*hl+wy);
+        }
+      }
+    }
+    g.stroke();
+    xhatchPat=c.createPattern(t,"repeat"); xhatchKey=key;
+    return xhatchPat;
+  }
   function drawExteriorHatch(){
     if(!map || textured() || !map.gridInterior || noRock || overlayOnly) return;
     const shapes=map.shapes||[]; if(!shapes.length) return;
     const px=wpx(); if(px < 12) return;
-    sizeBufs();
     const hb=oc(); hb.width=W; hb.height=H; const hc=hb.getContext("2d");
     hc.setTransform(1,0,0,1,0,0); hc.clearRect(0,0,W,H);
-    hc.strokeStyle=C.ink; hc.lineCap="round"; hc.lineWidth=Math.max(0.8, 0.05*px);
-    const stepW=0.16;                              // root spacing along the wall (world cells)
-    const halfW=Math.max(1.3, 1.7*cam.scale);      // classic wall half-thickness (px)
-    const EPS=0.04;
-    hc.beginPath();
+    // 1) collar mask: blobby stamps along every wall outline — an irregular rock
+    //    band ~⅓–¾ cell deep, seeded off WORLD position so it never shimmers.
+    hc.fillStyle="#fff"; hc.beginPath();
+    const stepW=0.22;
     for(const S of shapes){
       if(S.deco || !shHasWall(S)) continue;
       const o=outlineDense(S); const n=o.length; if(n<2) continue;
       for(let i=0;i<n;i++){
         const a=o[i], b=o[(i+1)%n];
         const ex=b[0]-a[0], ey=b[1]-a[1]; const segL=Math.hypot(ex,ey); if(segL<1e-6) continue;
-        const tx=ex/segL, ty=ey/segL;              // unit tangent (world)
-        let nx=-ty, ny=tx;                          // candidate outward normal
-        if(pointInShape(a[0]+ex*0.5+nx*EPS, a[1]+ey*0.5+ny*EPS, S)){ nx=-nx; ny=-ny; }
         const roots=Math.max(1, Math.round(segL/stepW));
         for(let k=0;k<roots;k++){
           const f=(k+0.5)/roots;
-          const wx=a[0]+ex*f, wy=a[1]+ey*f;         // world root on the outline
+          const wx=a[0]+ex*f, wy=a[1]+ey*f;
           const rnd=seeded(wx*53.3, wy*53.3);
-          if(rnd()<0.12) continue;                  // broken — drop some
+          const r=(0.30+rnd()*0.50)*px;
           const [sx,sy]=toScreen(wx,wy);
-          const gap=halfW*(0.55 + rnd()*0.7);       // start just outside the wall (true normal)
-          const x0=sx+nx*gap, y0=sy+ny*gap;
-          const jit=(rnd()-0.5)*0.9;                // fan angle ±~0.45 rad
-          const ca=Math.cos(jit), sa=Math.sin(jit);
-          const ox=nx*ca-ny*sa, oy=nx*sa+ny*ca;
-          const len=(0.26 + rnd()*0.42)*px;
-          hc.moveTo(x0,y0); hc.lineTo(x0+ox*len, y0+oy*len);
-          if(rnd()<0.55){                            // a shorter companion stroke → denser bundle
-            const j2=(rnd()-0.5)*0.9, c2=Math.cos(j2), s2=Math.sin(j2);
-            const o2x=nx*c2-ny*s2, o2y=nx*s2+ny*c2, l2=(0.18+rnd()*0.32)*px;
-            const off=(rnd()-0.5)*0.10*px;           // shift along the wall
-            const bx=x0+tx*off, by=y0+ty*off;
-            hc.moveTo(bx,by); hc.lineTo(bx+o2x*l2, by+o2y*l2);
-          }
+          const jx=(rnd()-0.5)*0.30*px, jy=(rnd()-0.5)*0.30*px;   // break the scallop rhythm
+          hc.moveTo(sx+jx+r,sy+jy); hc.arc(sx+jx,sy+jy,r,0,6.2832);
         }
       }
     }
-    hc.stroke();
-    // Keep the hatch OUTSIDE room interiors — also trims any stroke that reached a
-    // neighbouring room's floor.
+    hc.fill("nonzero");
+    // 2) clear room interiors — the collar stays OUTSIDE floors, and an interior
+    //    wall between two rooms comes out clean (both of its sides are floor).
     hc.globalCompositeOperation="destination-out"; hc.fillStyle="#000"; hc.beginPath();
     for(const S of shapes){ if(S.deco || !shHasFloor(S)) continue; shapePath(hc,S); } hc.fill("nonzero");
-    ctx.globalAlpha=0.9; ctx.drawImage(hb,0,0); ctx.globalAlpha=1;
+    // 3) ink the collar with the woven pattern, anchored to the world origin.
+    const pat=hatchPattern(hc); if(!pat) return;
+    hc.globalCompositeOperation="source-in";
+    const [ox,oy]=toScreen(0,0);
+    hc.save(); hc.translate(ox,oy); hc.fillStyle=pat; hc.fillRect(-ox,-oy,W,H); hc.restore();
+    ctx.drawImage(hb,0,0);
   }
 
   function roughSeg(c, aw, bw, halfW){
