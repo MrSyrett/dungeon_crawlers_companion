@@ -406,12 +406,14 @@
       <label class="fld">Entrances <b id="entrancesV">2</b></label>
       <input type="range" id="entrances" min="0" max="6" value="2">
       <label class="fld">Map type</label>
-      <select class="sel" id="mapType" title="Dungeon: rooms joined by corridors, with doors. Cave: organic caverns joined by winding tunnels, no doors. Islands: separate organic land masses, walls facing outward. Neighborhood: detached buildings with entrance doors. Building: one large structure with the rooms nested inside it.">
+      <select class="sel" id="mapType" title="Dungeon: rooms joined by corridors, with doors. Castle: a dungeon with round towers mixed in. Cave: organic caverns joined by winding tunnels, no doors. Islands: separate organic land masses, walls facing outward. Neighborhood: detached buildings — the Entrances slider sets doors PER building. Building: rooms connected by shared walls (some nested). Dwelling: one large structure with all the rooms nested inside it.">
         <option value="dungeon">Dungeon</option>
+        <option value="castle">Castle</option>
         <option value="cave">Cave</option>
         <option value="islands">Islands</option>
         <option value="neighborhood">Neighborhood</option>
         <option value="building">Building</option>
+        <option value="dwelling">Dwelling</option>
       </select>
       <button class="btn gold wide" id="generate" style="margin-top:12px">🎲 Generate Map</button>
       </div>
@@ -1156,6 +1158,7 @@
       // (Mirror of the engine; keep in sync.)
       const nested=[];
       for(let i2=0;i2<bnd.length;i2++){
+        if(bnd[i2].corridor) continue;   // corridors merge into rooms — never nested
         for(let j2=0;j2<bnd.length;j2++){ if(j2!==i2 && contains(bnd[j2],bnd[i2])){ nested.push(bnd[i2]); break; } } }
       if(nested.length){
         const nb=oc(); nb.width=W; nb.height=H; const nbc=nb.getContext("2d");
@@ -2128,6 +2131,7 @@
     { const contains=(A,B)=>{ const o=outlineDense(B); for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
       const rmz=[]; for(const sh of map.shapes){ if(!sh.deco && shHasWall(sh)) rmz.push(sh); }
       for(const S of rmz){ let nested=false;
+        if(S.corridor) continue;   // a corridor swallowed by a room is a MERGE, not a nested room
         for(const T of rmz){ if(T!==S && contains(T,S)){ nested=true; break; } }
         if(!nested) continue;
         const wt=shapeWallTex(S), hp=halfPxFor(wt);
@@ -3098,16 +3102,21 @@
   // otherwise by the inlined generateLocal() fallback. Either way this wrapper
   // owns the surrounding UI concerns (history, name/grid, commit + fit).
   // The old Corridors/Structure/Organic/Round/Exterior/Doors checkboxes are now
-  // hidden presets behind one "Map type" dropdown.
+  // hidden presets behind one "Map type" dropdown. The canonical preset table
+  // lives in the ENGINE (DungeonEngine.MAP_TYPES — shared with the GM Screen and
+  // Session Prep); this local copy only backs the no-engine fallback.
   const MAP_TYPES = {
-    dungeon:      {corridors:true,  structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false},
-    cave:         {corridors:true,  structure:false, organic:true,  roundRooms:false, exterior:false, doors:false, building:false},
-    islands:      {corridors:false, structure:false, organic:true,  roundRooms:false, exterior:true,  doors:false, building:false},
-    neighborhood: {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false},
-    building:     {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:true},
+    dungeon:      {corridors:true,  structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false},
+    castle:       {corridors:true,  structure:false, organic:false, roundRooms:true,  exterior:false, doors:true,  building:false, perRoomEntrances:false},
+    cave:         {corridors:true,  structure:false, organic:true,  roundRooms:false, exterior:false, doors:false, building:false, perRoomEntrances:false},
+    islands:      {corridors:false, structure:false, organic:true,  roundRooms:false, exterior:true,  doors:false, building:false, perRoomEntrances:false},
+    neighborhood: {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:true},
+    building:     {corridors:false, structure:true,  organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false},
+    dwelling:     {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:true,  perRoomEntrances:false},
   };
   function generate(){
-    const preset = MAP_TYPES[($("mapType")&&$("mapType").value)||"dungeon"] || MAP_TYPES.dungeon;
+    const TYPES = (window.DungeonEngine && window.DungeonEngine.MAP_TYPES) || MAP_TYPES;
+    const preset = TYPES[($("mapType")&&$("mapType").value)||"dungeon"] || TYPES.dungeon;
     const opts = Object.assign({
       rooms: +$("rooms").value,
       size: +$("rsize").value,
@@ -3283,7 +3292,7 @@
     map.doors = wantDoors ? finalizeDoors() : [];
     // Entrances are doors on EXTERIOR walls leading out of the whole dungeon;
     // the Doors toggle governs them too.
-    if(wantDoors) placeEntrances(nEntrances);
+    if(wantDoors){ if(opts.perRoomEntrances) placeEntrancesPerRoom(nEntrances); else placeEntrances(nEntrances); }
     // Smooth organic outlines so cave transitions aren't torn by spikes (mirror
     // of the engine; keep in sync). Before winding is normalised.
     if(organic) smoothOrganicShapes(map.shapes);
@@ -3355,8 +3364,9 @@
   // straight rect edges (or a circle's N/S/E/W extremes) whose outside is empty.
   // Each candidate is tagged with its room, and NO two entrances share a room —
   // once a room gets an entrance, the rest of its candidates are dropped.
-  function placeEntrances(n){
-    if(n<=0) return;
+  // All viable exterior-door spots, tagged with the room they open into.
+  // (Mirror of the engine; keep in sync.)
+  function entranceCands(){
     const floor=(x,y)=>pointInAny(x,y), empty=(x,y)=>!pointInAny(x,y);
     const cand=[];
     for(const sh of map.shapes){
@@ -3399,13 +3409,36 @@
         }
       }
     }
-    let pool=cand.filter(c=> !map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2));
+    return cand;
+  }
+  function placeEntrances(n){
+    if(n<=0) return;
+    let pool=entranceCands().filter(c=> !map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2));
     let placed=0;
     while(placed<n && pool.length){
       const c=pool.splice(Math.floor(rng()*pool.length),1)[0];
       map.doors.push({id:uid(), x:c.x, y:c.y, a:c.a, len:1});
       pool=pool.filter(o=> o.room!==c.room && Math.hypot(o.x-c.x,o.y-c.y)>3);  // one per room, and spread apart
       placed++;
+    }
+  }
+  // Neighborhood: `n` is entrances PER building. (Mirror of the engine.)
+  function placeEntrancesPerRoom(n){
+    if(n<=0) return;
+    const byRoom=new Map();
+    for(const c of entranceCands()){
+      if(!byRoom.has(c.room)) byRoom.set(c.room, []);
+      byRoom.get(c.room).push(c);
+    }
+    for(const list of byRoom.values()){
+      const placed=[]; let guard=n*40;
+      while(placed.length<n && guard-->0 && list.length){
+        const c=list.splice(Math.floor(rng()*list.length),1)[0];
+        if(placed.some(p=>Math.hypot(p.x-c.x,p.y-c.y)<2)) continue;
+        if(map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2)) continue;
+        map.doors.push({id:uid(), x:c.x, y:c.y, a:c.a, len:1});
+        placed.push(c);
+      }
     }
   }
   function rectsOverlap(a,b){ return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y; }

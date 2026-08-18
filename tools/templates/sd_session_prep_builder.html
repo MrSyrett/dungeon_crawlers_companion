@@ -590,26 +590,14 @@ body.flow-mode .page + .page {
           <option value="0">0 entrances</option><option value="1">1 entrance</option><option value="2" selected>2 entrances</option>
           <option value="3">3 entrances</option><option value="4">4 entrances</option><option value="5">5 entrances</option><option value="6">6 entrances</option>
         </select>
-        <select id="mapgen-corr" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
-          <option value="1" selected>Corridors: on</option><option value="0">Corridors: off</option>
-        </select>
-        <select id="mapgen-struct" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
-          <option value="0" selected>Structure: off (separate)</option><option value="1">Structure: on (shared walls)</option>
-        </select>
-        <select id="mapgen-organic" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
-          <option value="0" selected>Organic: off</option><option value="1">Organic (caves): on</option>
-        </select>
-        <select id="mapgen-round" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
-          <option value="0" selected>Round rooms: off</option><option value="1">Round rooms: on</option>
-        </select>
-        <select id="mapgen-ext" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
-          <option value="0" selected>Exterior: off (inward)</option><option value="1">Exterior: on (outward)</option>
+        <select id="mapgen-type" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;" title="Dungeon: rooms + corridors + doors. Castle: dungeon with round towers. Cave: organic caverns, no doors. Islands: separate land masses. Neighborhood: detached buildings, entrances per building. Building: rooms joined by shared walls. Dwelling: one structure, rooms nested inside.">
+          <option value="dungeon" selected>Type: Dungeon</option><option value="castle">Type: Castle</option>
+          <option value="cave">Type: Cave</option><option value="islands">Type: Islands</option>
+          <option value="neighborhood">Type: Neighborhood</option><option value="building">Type: Building</option>
+          <option value="dwelling">Type: Dwelling</option>
         </select>
         <select id="mapgen-gridint" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="0" selected>Grid: everywhere</option><option value="1">Grid: interior only</option>
-        </select>
-        <select id="mapgen-doors" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
-          <option value="1" selected>Doors: on</option><option value="0">Doors: off</option>
         </select>
         <select id="mapgen-look" style="background:#141414;border:1px solid #2a2a2a;border-radius:3px;color:#ccc;font-family:'Montserrat',sans-serif;font-size:10px;padding:4px 6px;outline:none;">
           <option value="light" selected>Light</option><option value="dark">Dark</option>
@@ -1871,13 +1859,8 @@ function randMap() {
     size: +(v('mapgen-size')?.value || 3),
     layout: +(v('mapgen-layout')?.value || 3),
     entrances: +(v('mapgen-entrances')?.value || 2),
-    corridors: (v('mapgen-corr')?.value || '1') !== '0',
-    structure: (v('mapgen-struct')?.value || '0') === '1',
-    roundRooms: (v('mapgen-round')?.value || '0') === '1',
-    organic: (v('mapgen-organic')?.value || '0') === '1',
-    exterior: (v('mapgen-ext')?.value || '0') === '1',
+    mapType: v('mapgen-type')?.value || 'dungeon',
     gridInterior: (v('mapgen-gridint')?.value || '0') === '1',
-    doors: (v('mapgen-doors')?.value || '1') !== '0',
     theme: v('mapgen-look')?.value || 'light'
   });
   if(!gen || !gen.png) return;

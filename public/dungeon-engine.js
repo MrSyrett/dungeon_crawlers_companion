@@ -319,6 +319,7 @@ window.DungeonEngine = (function(){
       // room sharing a wall with its container reads single-strength, not doubled.
       const nested=[];
       for(let i2=0;i2<bnd.length;i2++){
+        if(bnd[i2].corridor) continue;   // corridors merge into rooms — never nested
         for(let j2=0;j2<bnd.length;j2++){ if(j2!==i2 && contains(bnd[j2],bnd[i2])){ nested.push(bnd[i2]); break; } } }
       if(nested.length){
         const nb=oc(); nb.width=W; nb.height=H; const nbc=nb.getContext("2d");
@@ -1265,6 +1266,7 @@ window.DungeonEngine = (function(){
     { const contains=(A,B)=>{ const o=outlineDense(B); for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
       const rmz=[]; for(const sh of map.shapes){ if(!sh.deco && shHasWall(sh)) rmz.push(sh); }
       for(const S of rmz){ let nested=false;
+        if(S.corridor) continue;   // a corridor swallowed by a room is a MERGE, not a nested room
         for(const T of rmz){ if(T!==S && contains(T,S)){ nested=true; break; } }
         if(!nested) continue;
         const wt=shapeWallTex(S), hp=halfPxFor(wt);
@@ -1579,8 +1581,21 @@ window.DungeonEngine = (function(){
       if((a2>0) !== !!cw) sh.pts.reverse();
     }
   }
+  // One shared preset table for the "Map type" dropdowns (Map Maker, GM Screen,
+  // Session Prep). Pass `opts.mapType` to generate() and the preset overrides
+  // the individual flags, so every tool stays in sync from one place.
+  const MAP_TYPES = {
+    dungeon:      {corridors:true,  structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false},
+    castle:       {corridors:true,  structure:false, organic:false, roundRooms:true,  exterior:false, doors:true,  building:false, perRoomEntrances:false},
+    cave:         {corridors:true,  structure:false, organic:true,  roundRooms:false, exterior:false, doors:false, building:false, perRoomEntrances:false},
+    islands:      {corridors:false, structure:false, organic:true,  roundRooms:false, exterior:true,  doors:false, building:false, perRoomEntrances:false},
+    neighborhood: {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:true},
+    building:     {corridors:false, structure:true,  organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false},
+    dwelling:     {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:true,  perRoomEntrances:false},
+  };
   function generate(opts){
     opts = opts || {};
+    if(opts.mapType && MAP_TYPES[opts.mapType]) opts = Object.assign({}, opts, MAP_TYPES[opts.mapType]);
     const nRooms = clamp(opts.rooms!=null?+opts.rooms:8, 2, 40);
     const sizeIdx = clamp(opts.size!=null?+opts.size:3, 1, 5);
     const [smin,smax] = SIZE_MAP[sizeIdx];
@@ -1695,7 +1710,7 @@ window.DungeonEngine = (function(){
     if(!organic && (structure||building) && rooms.length>1){ addAdjacencyDoors(rooms); }
     // Doors OFF ⇒ no interior doors AND no entrance doors.
     map.doors = wantDoors ? finalizeDoors() : [];
-    if(wantDoors) placeEntrances(nEntrances);
+    if(wantDoors){ if(opts.perRoomEntrances) placeEntrancesPerRoom(nEntrances); else placeEntrances(nEntrances); }
     // Smooth the organic outlines (tunnels + chambers) so room↔corridor
     // transitions aren't torn up by spikes — before winding is normalised.
     if(organic) smoothOrganicShapes(map.shapes);
@@ -1744,8 +1759,8 @@ window.DungeonEngine = (function(){
       if(!dup) out.push(d); }
     return out;
   }
-  function placeEntrances(n){
-    if(n<=0) return;
+  // All viable exterior-door spots, tagged with the room they open into.
+  function entranceCands(){
     const floor=(x,y)=>pointInAny(x,y), empty=(x,y)=>!pointInAny(x,y);
     const cand=[];
     for(const sh of map.shapes){
@@ -1789,13 +1804,37 @@ window.DungeonEngine = (function(){
         }
       }
     }
-    let pool=cand.filter(c=> !map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2));
+    return cand;
+  }
+  function placeEntrances(n){
+    if(n<=0) return;
+    let pool=entranceCands().filter(c=> !map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2));
     let placed=0;
     while(placed<n && pool.length){
       const c=pool.splice(Math.floor(rng()*pool.length),1)[0];
       map.doors.push({id:uid(), x:c.x, y:c.y, a:c.a, len:1});
       pool=pool.filter(o=> o.room!==c.room && Math.hypot(o.x-c.x,o.y-c.y)>3);
       placed++;
+    }
+  }
+  // Neighborhood: `n` is entrances PER building — every room gets its own doors
+  // (spaced ≥2 cells apart within a room), instead of n spread across the map.
+  function placeEntrancesPerRoom(n){
+    if(n<=0) return;
+    const byRoom=new Map();
+    for(const c of entranceCands()){
+      if(!byRoom.has(c.room)) byRoom.set(c.room, []);
+      byRoom.get(c.room).push(c);
+    }
+    for(const list of byRoom.values()){
+      const placed=[]; let guard=n*40;
+      while(placed.length<n && guard-->0 && list.length){
+        const c=list.splice(Math.floor(rng()*list.length),1)[0];
+        if(placed.some(p=>Math.hypot(p.x-c.x,p.y-c.y)<2)) continue;
+        if(map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2)) continue;
+        map.doors.push({id:uid(), x:c.x, y:c.y, a:c.a, len:1});
+        placed.push(c);
+      }
     }
   }
   function rectsOverlap(a,b){ return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y; }
@@ -2115,5 +2154,5 @@ window.DungeonEngine = (function(){
     noClear = false; overlayOnly = false;   // reset so plain toPNG/generateToPNG stay unaffected
   }
 
-  return { generate, toPNG, generateToPNG, renderTo, THEMES, CELL };
+  return { generate, toPNG, generateToPNG, renderTo, THEMES, CELL, MAP_TYPES };
 })();

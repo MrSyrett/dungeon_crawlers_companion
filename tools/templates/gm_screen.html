@@ -2337,26 +2337,16 @@ GMScenes.renderPins();
               <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
             </select>
           </label>
-          <label class="gen-label">Corridors
-            <select class="gen-select" id="gen-dun-corr"><option value="1" selected>Yes</option><option value="0">No</option></select>
-          </label>
-          <label class="gen-label">Structure
-            <select class="gen-select" id="gen-dun-struct"><option value="0" selected>No (separate)</option><option value="1">Yes (shared walls)</option></select>
-          </label>
-          <label class="gen-label">Organic (caves)
-            <select class="gen-select" id="gen-dun-organic"><option value="0" selected>No</option><option value="1">Yes</option></select>
-          </label>
-          <label class="gen-label">Round Rooms
-            <select class="gen-select" id="gen-dun-round"><option value="0" selected>No</option><option value="1">Allow</option></select>
-          </label>
-          <label class="gen-label">Exterior
-            <select class="gen-select" id="gen-dun-ext"><option value="0" selected>No (inward)</option><option value="1">Yes (outward)</option></select>
+          <label class="gen-label">Map type
+            <select class="gen-select" id="gen-dun-type" title="Dungeon: rooms + corridors + doors. Castle: dungeon with round towers. Cave: organic caverns, tunnels, no doors. Islands: separate land masses, outward walls. Neighborhood: detached buildings, entrances per building. Building: rooms joined by shared walls. Dwelling: one structure, rooms nested inside.">
+              <option value="dungeon" selected>Dungeon</option><option value="castle">Castle</option>
+              <option value="cave">Cave</option><option value="islands">Islands</option>
+              <option value="neighborhood">Neighborhood</option><option value="building">Building</option>
+              <option value="dwelling">Dwelling</option>
+            </select>
           </label>
           <label class="gen-label">Grid
             <select class="gen-select" id="gen-dun-gridint"><option value="0" selected>Everywhere</option><option value="1">Interior only</option></select>
-          </label>
-          <label class="gen-label">Doors
-            <select class="gen-select" id="gen-dun-doors"><option value="1" selected>Yes</option><option value="0">No</option></select>
           </label>
           <label class="gen-label">Look
             <select class="gen-select" id="gen-dun-look"><option value="light" selected>Light</option><option value="dark">Dark</option></select>
@@ -2552,26 +2542,16 @@ GMScenes.renderPins();
               <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
             </select>
           </label>
-          <label class="gen-label">Corridors
-            <select class="gen-select" id="gen-adv-corr"><option value="1" selected>Yes</option><option value="0">No</option></select>
-          </label>
-          <label class="gen-label">Structure
-            <select class="gen-select" id="gen-adv-struct"><option value="0" selected>No (separate)</option><option value="1">Yes (shared walls)</option></select>
-          </label>
-          <label class="gen-label">Organic (caves)
-            <select class="gen-select" id="gen-adv-organic"><option value="0" selected>No</option><option value="1">Yes</option></select>
-          </label>
-          <label class="gen-label">Round Rooms
-            <select class="gen-select" id="gen-adv-round"><option value="0" selected>No</option><option value="1">Allow</option></select>
-          </label>
-          <label class="gen-label">Exterior
-            <select class="gen-select" id="gen-adv-ext"><option value="0" selected>No (inward)</option><option value="1">Yes (outward)</option></select>
+          <label class="gen-label">Map type
+            <select class="gen-select" id="gen-adv-type" title="Dungeon: rooms + corridors + doors. Castle: dungeon with round towers. Cave: organic caverns, tunnels, no doors. Islands: separate land masses, outward walls. Neighborhood: detached buildings, entrances per building. Building: rooms joined by shared walls. Dwelling: one structure, rooms nested inside.">
+              <option value="dungeon" selected>Dungeon</option><option value="castle">Castle</option>
+              <option value="cave">Cave</option><option value="islands">Islands</option>
+              <option value="neighborhood">Neighborhood</option><option value="building">Building</option>
+              <option value="dwelling">Dwelling</option>
+            </select>
           </label>
           <label class="gen-label">Grid
             <select class="gen-select" id="gen-adv-gridint"><option value="0" selected>Everywhere</option><option value="1">Interior only</option></select>
-          </label>
-          <label class="gen-label">Doors
-            <select class="gen-select" id="gen-adv-doors"><option value="1" selected>Yes</option><option value="0">No</option></select>
           </label>
           <label class="gen-label">Look
             <select class="gen-select" id="gen-adv-look"><option value="light" selected>Light</option><option value="dark">Dark</option></select>
@@ -7177,13 +7157,8 @@ window.init_gen = function(root) {
           size: +((q('size')||{}).value||3),
           layout: +((q('layout')||{}).value||3),
           entrances: +((q('entrances')||{}).value||2),
-          corridors: ((q('corr')||{}).value||'1') !== '0',
-          structure: ((q('struct')||{}).value||'0') === '1',
-          roundRooms: ((q('round')||{}).value||'0') === '1',
-          organic: ((q('organic')||{}).value||'0') === '1',
-          exterior: ((q('ext')||{}).value||'0') === '1',
+          mapType: (q('type')||{}).value||'dungeon',
           gridInterior: ((q('gridint')||{}).value||'0') === '1',
-          doors: ((q('doors')||{}).value||'1') !== '0',
           theme: (q('look')||{}).value||'light'
         });
         root._mapPng = gen.png;
@@ -7309,13 +7284,8 @@ window.init_gen = function(root) {
           size: +((q('size')||{}).value||3),
           layout: +((q('layout')||{}).value||3),
           entrances: +((q('entrances')||{}).value||2),
-          corridors: ((q('corr')||{}).value||'1') !== '0',
-          structure: ((q('struct')||{}).value||'0') === '1',
-          roundRooms: ((q('round')||{}).value||'0') === '1',
-          organic: ((q('organic')||{}).value||'0') === '1',
-          exterior: ((q('ext')||{}).value||'0') === '1',
+          mapType: (q('type')||{}).value||'dungeon',
           gridInterior: ((q('gridint')||{}).value||'0') === '1',
-          doors: ((q('doors')||{}).value||'1') !== '0',
           theme: (q('look')||{}).value||'light'
         });
         root._mapPng    = gen.png;
