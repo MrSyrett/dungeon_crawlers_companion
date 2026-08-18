@@ -276,12 +276,24 @@ window.DungeonEngine = (function(){
     { const ov=oc(), run=oc(), tmp=oc(), er=oc();
       ov.width=run.width=tmp.width=er.width=W; ov.height=run.height=tmp.height=er.height=H;
       const ovc=ov.getContext("2d"), rc=run.getContext("2d"), tc=tmp.getContext("2d"), erc=er.getContext("2d");
-      for(const sh of map.shapes){ if(!banded(sh)) continue;
+      // Overlap = union of (i ∩ j) only over pairs that CROSS (partial overlap,
+      // neither contains the other). A NESTED room (fully inside another) is NOT a
+      // merge seam, so its band is spared — the nested room keeps its wall shadow.
+      const bnd=[]; for(const sh of map.shapes){ if(banded(sh)) bnd.push(sh); }
+      const bb=bnd.map(s=>bounds(s,"shape"));
+      const contains=(A,B)=>{ const o=outlineDense(B); for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+      ovc.setTransform(1,0,0,1,0,0); ovc.globalCompositeOperation="source-over"; ovc.clearRect(0,0,W,H);
+      for(let i2=0;i2<bnd.length;i2++) for(let j2=i2+1;j2<bnd.length;j2++){
+        const bi=bb[i2], bj=bb[j2];
+        if(bi.x>bj.x+bj.w||bj.x>bi.x+bi.w||bi.y>bj.y+bj.h||bj.y>bi.y+bi.h) continue;    // no overlap
+        if(contains(bnd[i2],bnd[j2])||contains(bnd[j2],bnd[i2])) continue;              // nested -> keep both bands
         tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
-        tc.fillStyle="#fff"; tc.beginPath(); shapePath(tc, sh); tc.fill("nonzero");
-        tc.globalCompositeOperation="destination-in"; tc.drawImage(run,0,0);      // sh ∩ (rooms so far) = new overlap
-        ovc.globalCompositeOperation="source-over"; ovc.drawImage(tmp,0,0);        // accumulate every overlap
-        rc.globalCompositeOperation="source-over"; rc.fillStyle="#fff"; rc.beginPath(); shapePath(rc, sh); rc.fill("nonzero"); }
+        tc.fillStyle="#fff"; tc.beginPath(); shapePath(tc,bnd[i2]); tc.fill("nonzero");
+        rc.setTransform(1,0,0,1,0,0); rc.filter="none"; rc.globalCompositeOperation="source-over"; rc.clearRect(0,0,W,H);
+        rc.fillStyle="#fff"; rc.beginPath(); shapePath(rc,bnd[j2]); rc.fill("nonzero");
+        tc.globalCompositeOperation="destination-in"; tc.drawImage(run,0,0);            // i ∩ j
+        ovc.globalCompositeOperation="source-over"; ovc.drawImage(tmp,0,0);
+      }
       // eroded union: intersect the union with copies of itself shifted around a
       // ring of radius (thickest wall half + band), so what's left is the interior
       // more than the band-depth inside the union everywhere (off every outer wall).
@@ -398,6 +410,15 @@ window.DungeonEngine = (function(){
     for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue; rooms.push(sh); rb.push(bounds(sh,"shape")); }
     const hits=(bx0,by0,bx1,by1,i)=>{ const b=rb[i];
       return !!b && bx0<=b.x+b.w && bx1>=b.x && by0<=b.y+b.h && by1>=b.y; };
+    // A room fully INSIDE another must still occlude light — its wall isn't buried,
+    // it's a nested wall. Precompute each room's containers so we never bury against
+    // one. (Empty on normal maps.)
+    const rContains=(A,B)=>{ const o=outlineDense(B); for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+    const containers=rooms.map(()=>null);
+    for(let a=0;a<rooms.length;a++){ const ba=rb[a];
+      for(let b2=0;b2<rooms.length;b2++){ if(a===b2) continue; const bb2=rb[b2];
+        if(ba.x>=bb2.x && ba.y>=bb2.y && ba.x+ba.w<=bb2.x+bb2.w && ba.y+ba.h<=bb2.y+bb2.h && rContains(rooms[b2],rooms[a])){
+          (containers[a]||(containers[a]=[])).push(b2); } } }
     for(let si=0; si<rooms.length; si++){
       const sh=rooms[si], o=shapeOutline(sh);
       for(let i=0;i<o.length;i++){
@@ -408,8 +429,8 @@ window.DungeonEngine = (function(){
         // entirely otherwise, which is the common case.
         const ex0=Math.min(a[0],b[0]), ex1=Math.max(a[0],b[0]);
         const ey0=Math.min(a[1],b[1]), ey1=Math.max(a[1],b[1]);
-        const cand=[];
-        for(let j=0;j<rooms.length;j++) if(j!==si && hits(ex0,ey0,ex1,ey1,j)) cand.push(rooms[j]);
+        const cand=[]; const cont=containers[si];
+        for(let j=0;j<rooms.length;j++) if(j!==si && hits(ex0,ey0,ex1,ey1,j) && !(cont && cont.indexOf(j)>=0)) cand.push(rooms[j]);
         if(!cand.length){ lightSegs.push([a[0],a[1],b[0],b[1]]); continue; }
         const n=Math.max(1, Math.min(64, Math.ceil(len/0.35)));
         let s0=null;
