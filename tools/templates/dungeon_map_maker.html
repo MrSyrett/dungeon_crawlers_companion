@@ -1131,7 +1131,7 @@
       // wall-shadow band. (Mirror of the engine.)
       const bnd=[]; for(const sh of map.shapes){ if(banded(sh)) bnd.push(sh); }
       const bb=bnd.map(s=>bounds(s,"shape"));
-      const contains=(A,B)=>{ const o=outlineDense(B); for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+      const contains=shapeContains;
       ovc.setTransform(1,0,0,1,0,0); ovc.globalCompositeOperation="source-over"; ovc.clearRect(0,0,W,H);
       for(let i2=0;i2<bnd.length;i2++) for(let j2=i2+1;j2<bnd.length;j2++){
         const bi=bb[i2], bj=bb[j2];
@@ -1299,7 +1299,7 @@
       return !!b && bx0<=b.x+b.w && bx1>=b.x && by0<=b.y+b.h && by1>=b.y; };
     // A room fully INSIDE another still occludes light (nested wall, not buried).
     // (Mirror of the engine.)
-    const rContains=(A,B)=>{ const o=outlineDense(B); for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+    const rContains=shapeContains;
     const containers=rooms.map(()=>null);
     for(let a=0;a<rooms.length;a++){ const ba=rb[a];
       for(let b2=0;b2<rooms.length;b2++){ if(a===b2) continue; const bb2=rb[b2];
@@ -2034,6 +2034,17 @@
     for(let i=0;i<K;i++){ const a=i/K*Math.PI*2; o.push([sh.cx+Math.cos(a)*sh.r, sh.cy+Math.sin(a)*sh.r]); }
     return o;
   }
+  // B fully inside A — TOLERANT of B's outline lying exactly ON A's boundary
+  // (a ship cabin anchored to the hull wall, a room flush with a shell): each
+  // sample is pulled 2% toward B's centroid before testing, so ray-casting
+  // ambiguity on polygon edges can't flip the verdict. Rect/circle containment
+  // was already inclusive; polygons were the trap (cabins "disappearing").
+  function shapeContains(A,B){
+    const o=outlineDense(B); if(!o.length) return false;
+    let gx=0,gy=0; for(const p of o){ gx+=p[0]; gy+=p[1]; } gx/=o.length; gy/=o.length;
+    for(const p of o){ if(!pointInShape(p[0]+(gx-p[0])*0.02, p[1]+(gy-p[1])*0.02, A)) return false; }
+    return true;
+  }
 
   function stripPath(c, pts, closed, t, halfPx){
     if(!t || !t.img || !t.img.complete || !t.img.naturalWidth) return false;
@@ -2136,7 +2147,7 @@
     // A room fully INSIDE another was erased by the union too — re-add its wall so a
     // nested room keeps its wall, like Shapes. (No-op on normal maps. Mirror of the engine.)
     wc.globalCompositeOperation="source-over";
-    { const contains=(A,B)=>{ const o=outlineDense(B); for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+    { const contains=shapeContains;
       const rmz=[]; for(const sh of map.shapes){ if(!sh.deco && shHasWall(sh)) rmz.push(sh); }
       for(const S of rmz){ let nested=false;
         if(S.corridor) continue;   // a corridor swallowed by a room is a MERGE, not a nested room
@@ -2338,8 +2349,7 @@
     // (Mirror of the engine; keep in sync.)
     const dW = map.shapes.filter(s=>s.deco && shHasWall(s));
     if(dW.length){
-      const containsFully=(A,B)=>{ const o=outlineDense(B);
-        for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+      const containsFully=shapeContains;
       const bxs=dW.map(s=>bounds(s,"shape"));
       const dcx=buf.deco.getContext("2d"), mcx=buf.decoClip.getContext("2d");
       for(let i=0;i<dW.length;i++){
@@ -3248,13 +3258,23 @@
     } else if(opts.village){
       // VILLAGE: detached multi-room houses. (Mirror of the engine.)
       let tries=0, guard=nRooms*300, house=0;
+      var nestedKids=[];
       while(house<nRooms && tries++<guard){
-        const w=ri(smin,smax), h=ri(smin,smax);
+        // A MIX: about half the houses are little DWELLINGS (one footprint with
+        // interior rooms nested inside), the rest shared-wall room clusters.
+        const dwelling=rng()<0.5;
+        const w=dwelling ? ri(Math.max(7,smin+2), smax+4) : ri(smin,smax);
+        const h=dwelling ? ri(Math.max(7,smin+2), smax+4) : ri(smin,smax);
         const x=ri(-field,field), y=ri(-field,field);
         const nb={x:x-2,y:y-2,w:w+4,h:h+4};
         if(rooms.some(r=>rectsOverlap(nb,{x:r.x,y:r.y,w:r.w,h:r.h}))) continue;
-        const mine=[{x,y,w,h,round:false,cx:x+w/2,cy:y+h/2,house}];
-        const extra=ri(1,4);                        // 2–5 rooms per house — small dwellings
+        const first={x,y,w,h,round:false,cx:x+w/2,cy:y+h/2,house};
+        const mine=[first];
+        if(dwelling){
+          for(const K of collectBuildingRooms(first, ri(2,4), Math.max(3,smin-2), Math.min(smax, Math.min(w,h)-3)))
+            nestedKids.push(K);
+        } else {
+        const extra=ri(1,4);                        // 2–5 rooms per house
         for(let e=0;e<extra;e++){
           for(let t2=0;t2<20;t2++){
             const base=mine[ri(0,mine.length-1)];
@@ -3272,6 +3292,7 @@
             if(rooms.some(r=>rectsOverlap(nb2,{x:r.x,y:r.y,w:r.w,h:r.h}))) continue;
             mine.push(cand); break;
           }
+        }
         }
         for(const r of mine) rooms.push(r);
         house++;
@@ -3308,33 +3329,72 @@
       const aw=naveW+2*ri(1,2), ah=ri(3, Math.min(6,smax+1));
       rooms.push({x:-aw/2, y:-ah, w:aw, h:ah, round:false, cx:0, cy:-ah/2});
     } else if(opts.tower){
-      // TOWER: round shell + nested rooms + a stair when the middle is open. (Mirror.)
+      // TOWER (v3, modelled on the user's example): ONE round shell PARTITIONED
+      // by interior WALLS that run shell-to-shell — a horizontal chord plus a
+      // vertical wall above and below it — cutting the floor into pie sections,
+      // each with a door punched in its wall. Optionally one rect room, and a
+      // stair by the top wall. No nested boxes floating in the middle.
       const R=Math.max(5, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*0.55));
       rooms.push({x:-R,y:-R,w:2*R,h:2*R,round:true,cx:0,cy:0});
-      // Rooms subdivide the INSCRIBED SQUARE, dwelling-style — corner/edge
-      // anchored, butting each other, reaching out to the round wall — instead
-      // of small squares floating in the middle.
-      const s=Math.max(4, Math.floor(2*R*0.70));
-      const P={x:-Math.floor(s/2), y:-Math.floor(s/2), w:s, h:s};
-      var nestedKids = collectBuildingRooms(P, Math.max(2,nRooms-1), Math.max(3,smin-1), Math.min(smax, s-3));
-      if(!nestedKids.some(k=> 0>k.x-0.5 && 0<k.x+k.w+0.5 && 0>k.y-0.5 && 0<k.y+k.h+0.5))
-        map.stairs.push({id:uid(), x1:-1.2, y1:0, x2:1.2, y2:0, w:2});
+      const r2=v=>Math.round(v*100)/100, s2=v=>Math.round(v*2)/2;
+      // horizontal chord wall
+      const ry=ri(-Math.round(R*0.3), Math.round(R*0.3));
+      const hx=r2(Math.sqrt(R*R-ry*ry)*0.99);
+      map.walls.push({id:uid(), x1:-hx, y1:ry, x2:hx, y2:ry});
+      map.doors.push({id:uid(), x:s2(ri(-Math.round(hx-2), Math.round(hx-3))+0.5), y:ry, a:0, len:2, _adj:true});
+      // vertical wall from the top shell down to the chord
+      const vx=ri(-Math.round(R*0.35), Math.round(R*0.35));
+      const ty=r2(-Math.sqrt(R*R-vx*vx)*0.99);
+      map.walls.push({id:uid(), x1:vx, y1:ty, x2:vx, y2:ry});
+      map.doors.push({id:uid(), x:vx, y:s2((ty+ry)/2), a:Math.PI/2, len:1, _adj:true});
+      // vertical wall from the chord down to the bottom shell
+      const vx2=ri(-Math.round(R*0.35), Math.round(R*0.35));
+      const by=r2(Math.sqrt(R*R-vx2*vx2)*0.99);
+      map.walls.push({id:uid(), x1:vx2, y1:ry, x2:vx2, y2:by});
+      map.doors.push({id:uid(), x:vx2, y:s2((ry+by)/2), a:Math.PI/2, len:(rng()<0.5?1:2), _adj:true});
+      // one rect room straddling the partitions (60%), doors on two walls
+      if(rng()<0.6){
+        const kw=ri(4, Math.max(4,Math.min(6,R-1))), kh=ri(3, Math.max(3,Math.min(5,R-1)));
+        const kx=ri(-Math.round(kw*0.7), 0), ky=ri(-Math.round(kh*0.7), 0);
+        const m2=R-1.2;
+        if(Math.hypot(kx,ky)<=m2 && Math.hypot(kx+kw,ky)<=m2 && Math.hypot(kx,ky+kh)<=m2 && Math.hypot(kx+kw,ky+kh)<=m2){
+          const K={x:kx,y:ky,w:kw,h:kh,round:false,cx:kx+kw/2,cy:ky+kh/2};
+          rooms.push(K);
+          const bb={x:-R,y:-R,w:2*R,h:2*R};
+          addNestedDoor(K, bb); addNestedDoor(K, bb);
+        }
+      }
+      // stair by the top wall (like the example), skipped if a room covers it
+      { const sy=r2(-R+1);
+        const hit=rooms.some(k=>!k.round && 1>=k.x-0.5 && -1<=k.x+(k.w||0)+0.5 && sy+2>=k.y-0.5 && sy<=k.y+(k.h||0)+0.5);
+        if(!hit) map.stairs.push({id:uid(), ax:1, ay:sy, bx:1, by:r2(sy+2), tx:-1, ty:r2(sy+1)}); }
     } else if(opts.ship){
-      // SHIP: pointed hull + stern cabins. (Mirror of the engine.)
-      const L=Math.max(18, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*1.7));
-      const B=Math.max(7, Math.round(L*0.30));
-      // STRAIGHT parallel sides; only the bow and stern curve. Cabins subdivide
-      // the straight midsection dwelling-style (anchored to the side walls,
-      // butting each other); the curved bow and stern stay open deck.
-      const bl=Math.round(B*1.1), Ls=Math.round(B*0.5), Lb=L-bl;
-      const hull=[
-        [Ls*0.35,-B*0.42],[Ls,-B/2],[Lb,-B/2],
-        [Lb+bl*0.5,-B*0.40],[Lb+bl*0.85,-B*0.22],[L,0],[Lb+bl*0.85,B*0.22],[Lb+bl*0.5,B*0.40],
-        [Lb,B/2],[Ls,B/2],[Ls*0.35,B*0.42],[0,B*0.20],[0,-B*0.20]
-      ].map(p=>[Math.round(p[0]*2)/2, Math.round(p[1]*2)/2]);
-      rooms.push({pts:hull, cx:L*0.45, cy:0, w:L, h:B, x:0, y:-B/2});
-      const P={x:Ls, y:-B/2, w:Lb-Ls, h:B};
-      var nestedKids = collectBuildingRooms(P, Math.max(2,nRooms-1), Math.max(3,smin-2), Math.min(smax, Math.max(4,B-3)));
+      // SHIP (v3, modelled on the user's example): a RECT midsection with a
+      // 45°-CHAMFERED stern and bow butted onto its ends (three rooms whose
+      // shared seams merge into one hull), cabins subdividing the midsection
+      // dwelling-style, a door on each seam, and a stair on the top deck.
+      const B=Math.max(6, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*0.55));
+      const midW=Math.round(B*2.1);
+      const c2=Math.max(1, Math.round(B*0.25));
+      const sternL=Math.max(3, Math.round(B*0.75));
+      const bowC=Math.max(2, Math.round(B*0.375)), bowL=Math.max(bowC+2, B-1);
+      const shoulder=Math.max(1, bowL-bowC-1);
+      const s2=v=>Math.round(v*2)/2;
+      const mid={x:0, y:0, w:midW, h:B, round:false, cx:midW/2, cy:B/2};
+      rooms.push(mid);
+      rooms.push({pts:[[0,0],[0,B],[-(sternL-2),B],[-sternL,B-c2],[-sternL,c2],[-(sternL-2),0]],
+                  x:-sternL, y:0, w:sternL, h:B, cx:-sternL/2, cy:B/2});
+      rooms.push({pts:[[midW,0],[midW+shoulder,0],[midW+bowL,bowC],[midW+bowL,B-bowC],[midW+shoulder,B],[midW,B]],
+                  x:midW, y:0, w:bowL, h:B, cx:midW+bowL/2, cy:B/2});
+      // seam doors: mid↔stern and mid↔bow, like the example
+      map.doors.push({id:uid(), x:0,    y:s2(B/2), a:Math.PI/2, len:2, _adj:true});
+      map.doors.push({id:uid(), x:midW, y:s2(B/2), a:Math.PI/2, len:2, _adj:true});
+      // cabins fill the midsection, anchored to its walls
+      var nestedKids = collectBuildingRooms(mid, Math.max(2,nRooms-1), Math.max(2,smin-2), Math.min(smax, Math.max(4,B-2)));
+      // stair on the top deck near the middle, skipped if a cabin covers it
+      { const sx=s2(Math.round(midW*0.45))+0.5;
+        const hit=nestedKids.some(k=> sx+1.5>=k.x-0.5 && sx-0.5<=k.x+k.w+0.5 && 2>=k.y-0.5 && 0<=k.y+k.h+0.5);
+        if(!hit) map.stairs.push({id:uid(), ax:sx, ay:0, bx:sx, by:2, tx:sx+1.5, ty:1}); }
     } else if(structure){
       // Adjacency mode: every room butts flush against another, sharing a wall,
       // so no room floats alone. Rectangular only — a round room can only ever
@@ -5561,7 +5621,7 @@
     for(const sh of shapes){ if(sh.deco || !shHasWall(sh)) continue; rooms.push(sh); rb.push(bounds(sh,"shape")); }
     const hits=(bx0,by0,bx1,by1,i)=>{ const b=rb[i]; return !!b && bx0<=b.x+b.w && bx1>=b.x && by0<=b.y+b.h && by1>=b.y; };
     // A room fully INSIDE another exports its wall too (nested wall, not buried).
-    const rContains=(A,B)=>{ const o=outlineDense(B); for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+    const rContains=shapeContains;
     const containers=rooms.map(()=>null);
     for(let a2=0;a2<rooms.length;a2++){ const ba=rb[a2];
       for(let b2=0;b2<rooms.length;b2++){ if(a2===b2) continue; const bb2=rb[b2];
