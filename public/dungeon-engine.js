@@ -1592,14 +1592,25 @@ window.DungeonEngine = (function(){
     neighborhood: {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:true},
     building:     {corridors:false, structure:true,  organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false},
     dwelling:     {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:true,  perRoomEntrances:false},
+    // v2 additions:
+    mine:         {corridors:true,  structure:false, organic:false, roundRooms:false, exterior:false, doors:false, building:false, perRoomEntrances:false, mineTunnels:true},
+    nest:         {corridors:true,  structure:false, organic:true,  roundRooms:false, exterior:false, doors:false, building:false, perRoomEntrances:false, sizeAdj:-2, roomsScale:1.6, layoutAdj:-1},
+    keep:         {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false, keep:true, adjDoors:true},
+    village:      {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false, village:true, adjDoors:true},
+    sewers:       {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:false, building:false, perRoomEntrances:false, sewers:true},
+    crypt:        {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false, crypt:true, adjDoors:true},
+    tower:        {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false, tower:true, adjDoors:true},
+    ship:         {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false, ship:true, adjDoors:true},
   };
   function generate(opts){
     opts = opts || {};
     if(opts.mapType && MAP_TYPES[opts.mapType]) opts = Object.assign({}, opts, MAP_TYPES[opts.mapType]);
-    const nRooms = clamp(opts.rooms!=null?+opts.rooms:8, 2, 40);
-    const sizeIdx = clamp(opts.size!=null?+opts.size:3, 1, 5);
+    // roomsScale / sizeAdj / layoutAdj let a preset rescale the shared sliders
+    // (e.g. Nest = many tiny chambers packed tight) without extra UI.
+    const nRooms = clamp(Math.round((opts.rooms!=null?+opts.rooms:8)*(opts.roomsScale||1)), 2, 40);
+    const sizeIdx = clamp((opts.size!=null?+opts.size:3)+(opts.sizeAdj||0), 1, 5);
     const [smin,smax] = SIZE_MAP[sizeIdx];
-    const spread = clamp(opts.layout!=null?+opts.layout:3, 1, 5);
+    const spread = clamp((opts.layout!=null?+opts.layout:3)+(opts.layoutAdj||0), 1, 5);
     const doCorr = opts.corridors !== false;
     // Structure (areas butt together / merge) is decoupled from Corridors (which
     // now only adds passages). Older callers — GM Screen, Session Prep — don't
@@ -1629,12 +1640,120 @@ window.DungeonEngine = (function(){
       // islands, which Corridors can then join with winding tunnels.
       placeBlobs(rooms, nRooms, smin, smax, field, structure);
     } else if(building){
-      // BUILDING: one large, roughly square shell with (nearly) all the areas
-      // as interior rooms nested inside it — the map-type dropdown's "Building".
+      // DWELLING: one large, roughly square shell with (nearly) all the areas
+      // as interior rooms nested inside it.
       const side=Math.max(smax+4, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*1.05));
       const w0=side+ri(-2,2), h0=side+ri(-2,2);
       rooms.push({x:0,y:0,w:w0,h:h0,round:false,cx:w0/2,cy:h0/2});
       var nestedKids = collectBuildingRooms(rooms[0], nRooms, smin, smax);
+    } else if(opts.keep){
+      // KEEP: a curtain-wall shell with ROUND towers pinned to its corners, a
+      // mostly-open courtyard, and a few interior buildings hugging the walls.
+      const side=Math.max(smax+6, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*1.15));
+      const w0=side+ri(-2,2), h0=side+ri(-2,2);
+      const shell={x:0,y:0,w:w0,h:h0,round:false,cx:w0/2,cy:h0/2};
+      rooms.push(shell);
+      const rt=Math.max(2, Math.round(smin*0.6));
+      for(const t of [[0,0],[w0,0],[0,h0],[w0,h0]])
+        rooms.push({x:t[0]-rt,y:t[1]-rt,w:2*rt,h:2*rt,round:true,cx:t[0],cy:t[1]});
+      var nestedKids = collectBuildingRooms(shell, nRooms, smin, smax, true);   // dwelling-dense interior
+    } else if(opts.village){
+      // VILLAGE: detached HOUSES (1–3 rooms sharing walls each) scattered with
+      // gaps between houses. `rooms` slider = number of houses; the Entrances
+      // slider is doors PER HOUSE (grouped, below).
+      let tries=0, guard=nRooms*300, house=0;
+      while(house<nRooms && tries++<guard){
+        const w=ri(smin,smax), h=ri(smin,smax);
+        const x=ri(-field,field), y=ri(-field,field);
+        const nb={x:x-2,y:y-2,w:w+4,h:h+4};
+        if(rooms.some(r=>rectsOverlap(nb,{x:r.x,y:r.y,w:r.w,h:r.h}))) continue;
+        const mine=[{x,y,w,h,round:false,cx:x+w/2,cy:y+h/2,house}];
+        const extra=ri(1,4);                        // 2–5 rooms per house — small dwellings
+        for(let e=0;e<extra;e++){
+          for(let t2=0;t2<20;t2++){
+            const base=mine[ri(0,mine.length-1)];
+            const w2=ri(Math.max(3,smin-1),smax), h2=ri(Math.max(3,smin-1),smax);
+            let nx,ny;
+            switch(ri(0,3)){
+              case 0: nx=base.x+base.w;  ny=base.y+ri(-(h2-2), base.h-2); break;
+              case 1: nx=base.x-w2;      ny=base.y+ri(-(h2-2), base.h-2); break;
+              case 2: ny=base.y+base.h;  nx=base.x+ri(-(w2-2), base.w-2); break;
+              default:ny=base.y-h2;      nx=base.x+ri(-(w2-2), base.w-2); break;
+            }
+            const cand={x:nx,y:ny,w:w2,h:h2,round:false,cx:nx+w2/2,cy:ny+h2/2,house};
+            if(rooms.some(r=>rectsOverlap(cand,r)) || mine.some(r=>rectsOverlap(cand,r))) continue;
+            const nb2={x:nx-2,y:ny-2,w:w2+4,h:h2+4};
+            if(rooms.some(r=>rectsOverlap(nb2,{x:r.x,y:r.y,w:r.w,h:r.h}))) continue;
+            mine.push(cand); break;
+          }
+        }
+        for(const r of mine) rooms.push(r);
+        house++;
+      }
+    } else if(opts.sewers){
+      // SEWERS: round junction cisterns on a loose ring, joined into a LOOPING
+      // network (ring + chords) instead of a spanning tree. Carved after the
+      // shapes are pushed, below.
+      const k=Math.max(3,nRooms);
+      const Rx=Math.max(8, Math.round(avg*Math.sqrt(k)*0.8)), Ry=Math.max(6, Math.round(Rx*0.72));
+      let i2=0, tries=0;
+      while(i2<k && tries++<k*40){
+        const ang=(i2/k)*6.283 + (rng()-0.5)*3.0/k;
+        const jr=0.8+rng()*0.4;
+        const cx=Math.round(Math.cos(ang)*Rx*jr), cy=Math.round(Math.sin(ang)*Ry*jr);
+        const r=ri(2,3);
+        if(rooms.some(o=>Math.hypot(o.cx-cx,o.cy-cy) < (Math.max(o.w,o.h)/2 + r + 2))) continue;
+        rooms.push({x:cx-r,y:cy-r,w:2*r,h:2*r,round:true,cx,cy});
+        i2++;
+      }
+    } else if(opts.crypt){
+      // CRYPT: symmetric — a central nave with MIRRORED burial-cell pairs down
+      // both sides (same size at the same height) and an apse across the top.
+      const naveW = sizeIdx>=4 ? 6 : 4;
+      const pairs = Math.max(1, Math.floor((nRooms-1)/2));
+      let yc=1;
+      const cells=[];
+      for(let p2=0;p2<pairs;p2++){
+        const cw=ri(3, smax), ch=ri(3, Math.min(5,smax));
+        cells.push({x:-naveW/2-cw, y:yc, w:cw, h:ch, round:false, cx:-naveW/2-cw/2, cy:yc+ch/2});
+        cells.push({x: naveW/2,    y:yc, w:cw, h:ch, round:false, cx: naveW/2+cw/2, cy:yc+ch/2});
+        yc += ch + 1;
+      }
+      const naveH = yc + 2;
+      rooms.push({x:-naveW/2, y:0, w:naveW, h:naveH, round:false, cx:0, cy:naveH/2});
+      for(const c2 of cells) rooms.push(c2);
+      const aw=naveW+2*ri(1,2), ah=ri(3, Math.min(6,smax+1));
+      rooms.push({x:-aw/2, y:-ah, w:aw, h:ah, round:false, cx:0, cy:-ah/2});
+    } else if(opts.tower){
+      // TOWER: one round shell, rooms nested inside it, a stair near the middle
+      // when the middle is open.
+      const R=Math.max(5, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*0.55));
+      rooms.push({x:-R,y:-R,w:2*R,h:2*R,round:true,cx:0,cy:0});
+      // Rooms subdivide the INSCRIBED SQUARE, dwelling-style — corner/edge
+      // anchored, butting each other, reaching out to the round wall — instead
+      // of small squares floating in the middle.
+      const s=Math.max(4, Math.floor(2*R*0.70));
+      const P={x:-Math.floor(s/2), y:-Math.floor(s/2), w:s, h:s};
+      var nestedKids = collectBuildingRooms(P, Math.max(2,nRooms-1), Math.max(3,smin-1), Math.min(smax, s-3));
+      if(!nestedKids.some(k=> 0>k.x-0.5 && 0<k.x+k.w+0.5 && 0>k.y-0.5 && 0<k.y+k.h+0.5))
+        map.stairs.push({id:uid(), x1:-1.2, y1:0, x2:1.2, y2:0, w:2});
+    } else if(opts.ship){
+      // SHIP: a pointed-hull polygon (stern at x=0, bow at x=L) with cabins
+      // nested toward the stern; the bow stays open deck.
+      const L=Math.max(18, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*1.7));
+      const B=Math.max(7, Math.round(L*0.30));
+      // STRAIGHT parallel sides; only the bow and stern curve. Cabins subdivide
+      // the straight midsection dwelling-style (anchored to the side walls,
+      // butting each other); the curved bow and stern stay open deck.
+      const bl=Math.round(B*1.1), Ls=Math.round(B*0.5), Lb=L-bl;
+      const hull=[
+        [Ls*0.35,-B*0.42],[Ls,-B/2],[Lb,-B/2],
+        [Lb+bl*0.5,-B*0.40],[Lb+bl*0.85,-B*0.22],[L,0],[Lb+bl*0.85,B*0.22],[Lb+bl*0.5,B*0.40],
+        [Lb,B/2],[Ls,B/2],[Ls*0.35,B*0.42],[0,B*0.20],[0,-B*0.20]
+      ].map(p=>[Math.round(p[0]*2)/2, Math.round(p[1]*2)/2]);
+      rooms.push({pts:hull, cx:L*0.45, cy:0, w:L, h:B, x:0, y:-B/2});
+      const P={x:Ls, y:-B/2, w:Lb-Ls, h:B};
+      var nestedKids = collectBuildingRooms(P, Math.max(2,nRooms-1), Math.max(3,smin-2), Math.min(smax, Math.max(4,B-3)));
     } else if(structure){
       placeAdjacentRooms(rooms, nRooms, smin, smax);
       var nestedKids = collectNestedRooms(rooms, smin, smax);   // rooms-within-rooms (houses)
@@ -1647,7 +1766,13 @@ window.DungeonEngine = (function(){
         const gap=1;
         const nb={x:x-gap,y:y-gap,w:w+gap*2,h:h+gap*2};
         if(rooms.some(r=>rectsOverlap(nb,{x:r.x,y:r.y,w:r.w,h:r.h}))) continue;
-        rooms.push({x,y,w,h,round,cx:x+w/2,cy:y+h/2});
+        if(opts.mineTunnels && rng()<0.5){
+          // MINE: about half the chambers are organic blobs — hewn caverns
+          // between the squared-off worked rooms.
+          const rx=w/2*(0.85+rng()*0.4), ry=h/2*(0.85+rng()*0.4);
+          const cx0=x+w/2, cy0=y+h/2;
+          rooms.push({cx:cx0,cy:cy0,rx,ry,w:rx*2,h:ry*2,x:cx0-rx,y:cy0-ry,round:false,pts:blobPts(cx0,cy0,rx,ry,1.1)});
+        } else rooms.push({x,y,w,h,round,cx:x+w/2,cy:y+h/2});
       }
     }
     for(const r of rooms){
@@ -1658,7 +1783,7 @@ window.DungeonEngine = (function(){
     // Connect. Organic ⇒ winding tunnels (carveTunnel); classic ⇒ rect corridors.
     // Corridors adds passages between areas; skip only when they're already one
     // merged organic cavern (organic + structure), where tunnels are redundant.
-    const connect = organic ? carveTunnel : carveCorridor;
+    const connect = (organic || opts.mineTunnels) ? carveTunnel : carveCorridor;   // Mine: rect chambers + winding tunnels
     if(doCorr && rooms.length>1 && !(organic && structure)){
       // Track each carved centreline so we can keep tunnels from piling up. Two
       // tunnels that run alongside each other (not just meeting at a shared room)
@@ -1707,13 +1832,32 @@ window.DungeonEngine = (function(){
         addNestedDoor(K, K.nestedIn); }
     }
     // Structure (classic): butting rooms share walls, so link them with doors.
-    if(!organic && (structure||building) && rooms.length>1){ addAdjacencyDoors(rooms); }
+    // SEWERS: carve the looping network — ring plus a few chords — ourselves
+    // (the generic pass is a spanning TREE, which reads as a dungeon, not sewers).
+    if(opts.sewers && rooms.length>2){
+      const k=rooms.length;
+      for(let i2=0;i2<k;i2++) carveCorridor(rooms[i2], rooms[(i2+1)%k]);
+      const chords=Math.max(1, Math.round(k/4));
+      for(let c2=0;c2<chords;c2++){ const a2=ri(0,k-1), b2=(a2+2+ri(0,Math.max(0,k-4)))%k;
+        if(a2!==b2) carveCorridor(rooms[a2], rooms[b2]); }
+    }
+    if(!organic && (structure||building||opts.adjDoors) && rooms.length>1){ addAdjacencyDoors(rooms); }
     // Doors OFF ⇒ no interior doors AND no entrance doors.
     map.doors = wantDoors ? finalizeDoors() : [];
-    if(wantDoors){ if(opts.perRoomEntrances) placeEntrancesPerRoom(nEntrances); else placeEntrances(nEntrances); }
+    if(wantDoors){
+      if(opts.village){
+        // Entrances slider = doors PER HOUSE: group each house's rooms together.
+        const groupOf={};
+        for(let i2=0;i2<rooms.length && i2<map.shapes.length;i2++)
+          if(rooms[i2].house!=null) groupOf[map.shapes[i2].id]=rooms[i2].house;
+        placeEntrancesPerGroup(nEntrances, groupOf);
+      }
+      else if(opts.perRoomEntrances) placeEntrancesPerRoom(nEntrances);
+      else placeEntrances(nEntrances);
+    }
     // Smooth the organic outlines (tunnels + chambers) so room↔corridor
     // transitions aren't torn up by spikes — before winding is normalised.
-    if(organic) smoothOrganicShapes(map.shapes);
+    if(organic || opts.mineTunnels) smoothOrganicShapes(map.shapes);   // tunnels need smoothing even between rect rooms
     // Exterior toggle: normalise every polygon's winding so their textured walls
     // all face the same way. Off (default) ⇒ clockwise/inward (matches classic
     // rooms); on ⇒ counter-clockwise/outward. Only affects organic (polygon) maps.
@@ -1817,6 +1961,27 @@ window.DungeonEngine = (function(){
       placed++;
     }
   }
+  // Village: `n` entrances per GROUP of rooms (a multi-room house counts once).
+  // groupOf maps shape id → group key; rooms without a group are skipped.
+  function placeEntrancesPerGroup(n, groupOf){
+    if(n<=0) return;
+    const byGroup=new Map();
+    for(const c of entranceCands()){
+      const g=groupOf[c.room]; if(g==null) continue;
+      if(!byGroup.has(g)) byGroup.set(g, []);
+      byGroup.get(g).push(c);
+    }
+    for(const list of byGroup.values()){
+      const placed=[]; let guard=n*40;
+      while(placed.length<n && guard-->0 && list.length){
+        const c=list.splice(Math.floor(rng()*list.length),1)[0];
+        if(placed.some(p=>Math.hypot(p.x-c.x,p.y-c.y)<2)) continue;
+        if(map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2)) continue;
+        map.doors.push({id:uid(), x:c.x, y:c.y, a:c.a, len:1});
+        placed.push(c);
+      }
+    }
+  }
   // Neighborhood: `n` is entrances PER building — every room gets its own doors
   // (spaced ≥2 cells apart within a room), instead of n spread across the map.
   function placeEntrancesPerRoom(n){
@@ -1876,12 +2041,12 @@ window.DungeonEngine = (function(){
   // BUILDING: fill one shell with n interior rooms — same corner/edge/floating
   // anchors as collectNestedRooms, but the count comes from the Rooms slider
   // instead of the parent's area, so the whole map is one subdivided footprint.
-  function collectBuildingRooms(P, n, smin, smax){
+  function collectBuildingRooms(P, n, smin, smax, noCorners){
     const kids=[]; let tries=0, guard=Math.max(40, n*80);
     while(kids.length<n && tries++<guard){
       const cw=ri(smin, Math.max(smin, Math.min(smax, P.w-3)));
       const ch=ri(smin, Math.max(smin, Math.min(smax, P.h-3)));
-      const m=ri(0,8); let x,y;                     // 0–3 corner · 4–7 edge · 8 floating
+      const m=noCorners ? ri(4,8) : ri(0,8); let x,y;   // 0–3 corner · 4–7 edge · 8 floating (Keep skips corners — its towers live there)
       if(m===0){ x=P.x; y=P.y; }
       else if(m===1){ x=P.x+P.w-cw; y=P.y; }
       else if(m===2){ x=P.x; y=P.y+P.h-ch; }
