@@ -1146,7 +1146,24 @@
       erc.drawImage(ov,0,0);                              // seam = overlap ∩ eroded-union interior
       c.globalCompositeOperation="destination-out";
       c.filter="blur("+(px*0.30).toFixed(2)+"px)";
-      c.drawImage(er,0,0); }
+      c.drawImage(er,0,0);
+      // Re-add bands for NESTED rooms. A room fully inside another sits deep in the
+      // container's interior, so the first-pass global inset carve (destination-out
+      // over the union) erased its band along with the container's middle. Rebuild
+      // each nested room's own band (room ∩ NOT its inset) and paint it back.
+      // (Mirror of the engine; keep in sync.)
+      for(let i2=0;i2<bnd.length;i2++){
+        let nested=false;
+        for(let j2=0;j2<bnd.length;j2++){ if(j2!==i2 && contains(bnd[j2],bnd[i2])){ nested=true; break; } }
+        if(!nested) continue;
+        const S=bnd[i2];
+        tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
+        tc.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; tc.beginPath(); shapePath(tc,S); tc.fill("nonzero");
+        tc.globalCompositeOperation="destination-out"; tc.filter="blur("+(px*0.38).toFixed(2)+"px)";
+        tc.fillStyle="#fff"; fillInsetShape(tc, S, halfCellsFor(shapeWallTex(S)) + WALL_SHADOW_CELLS);
+        tc.filter="none";
+        c.globalCompositeOperation="source-over"; c.drawImage(tmp,0,0);
+      } }
     c.filter="none"; c.globalCompositeOperation="source-over";
     ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
   }
