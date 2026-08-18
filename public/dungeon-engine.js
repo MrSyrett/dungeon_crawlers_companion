@@ -1177,6 +1177,18 @@ window.DungeonEngine = (function(){
     for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue;
       fillInsetShape(ec, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
     wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
+    // Overlapping rooms merge (above). But a room fully INSIDE another was erased by
+    // the union too — re-add its wall so a nested room keeps its wall, exactly like
+    // Shapes. (No-op on normal maps, where rooms never nest.)
+    wc.globalCompositeOperation="source-over";
+    { const contains=(A,B)=>{ const o=outlineDense(B); for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+      const rmz=[]; for(const sh of map.shapes){ if(!sh.deco && shHasWall(sh)) rmz.push(sh); }
+      for(const S of rmz){ let nested=false;
+        for(const T of rmz){ if(T!==S && contains(T,S)){ nested=true; break; } }
+        if(!nested) continue;
+        const wt=shapeWallTex(S), hp=halfPxFor(wt);
+        if(!(wt && stripPath(wc, outlineDense(S), true, wt, hp))) roughRing(wc, shapeOutline(S), hp); } }
+    wc.globalCompositeOperation="destination-out";
     for(const d of map.doors) punchDoorQuad(wc, d);   // opening cuts the full wall depth
     if(!noRock){ const o=Math.min(2,cam.scale); ctx.save(); ctx.globalAlpha=.16;
       ctx.drawImage(buf.wall, 2.3*o, 2.9*o); ctx.restore(); }
@@ -1301,11 +1313,20 @@ window.DungeonEngine = (function(){
     // walls: each shape's FLOOR first, then its non-occluding wall ring, in z-order
     // — so a Shape lies on top of a room's floor while the room's (and interior)
     // walls draw over it. (Called after floors + inner shadow, before drawWalls.)
+    // Opaque BLACK under alpha (FA) floor textures — filled ONCE over the UNION of
+    // the textured deco floors, not per shape. Per shape it left a faint dark seam
+    // (the black bleeding at each shape's clip edge) tracing every shape's outline
+    // where two overlapped — a hairline the wall used to hide, now exposed once the
+    // shapes merge.
+    { let anyTex=false; ctx.save(); ctx.beginPath();
+      for(const sh of map.shapes){ if(!sh.deco || !shHasFloor(sh)) continue;
+        const ft=shapeFloorTex(sh); if(ft && ft.img && patFor(ctx,ft)){ shapePath(ctx, sh); anyTex=true; } }
+      if(anyTex){ ctx.clip("nonzero"); ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }
+      ctx.restore(); }
     for(const sh of map.shapes){
       if(!sh.deco || !shHasFloor(sh)) continue;
       const ft=shapeFloorTex(sh), pat=patFor(ctx, ft);
       ctx.save(); ctx.beginPath(); shapePath(ctx, sh); ctx.clip("nonzero");
-      if(pat && ft && ft.img){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }   // opaque under an alpha (FA) texture
       ctx.fillStyle = pat || C.floor; ctx.fillRect(0,0,W,H);
       ctx.restore();
     }
