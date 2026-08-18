@@ -148,6 +148,7 @@ window.DungeonEngine = (function(){
       if(bgPat){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }
       ctx.fillStyle = bgPat || bgCol || C.rockHi; ctx.fillRect(0,0,W,H);
       drawFullGrid();   // square grid across the WHOLE canvas — background AND interiors
+      drawExteriorHatch();   // hand-drawn rock hatching around walls (classic + Interior-Only)
     }
 
     const shapes = map.shapes;
@@ -947,6 +948,66 @@ window.DungeonEngine = (function(){
     for(let y=oy%p;y<=H;y+=p){ ctx.moveTo(0,y+.5); ctx.lineTo(W,y+.5); }
     ctx.stroke();
     ctx.restore(); }
+
+  // ── hand-drawn exterior hatching (classic maps, Interior-Only) ────────
+  // The Cryptocartographer / graph-paper look: short ink strokes fanning OUT
+  // from the outside of every wall so the rock around the dungeon reads as solid.
+  // Gated to classic mode (never over textures), and only when the exterior is
+  // meant to be solid rock — the Interior-Only grid toggle. Skipped when zoomed
+  // too far out to read. Every stroke is seeded off its WORLD position, so the
+  // hatch is stable and never shimmers as you pan or zoom.
+  function drawExteriorHatch(){
+    if(!map || textured() || !map.gridInterior || noRock || overlayOnly) return;
+    const shapes=map.shapes||[]; if(!shapes.length) return;
+    const px=wpx(); if(px < 12) return;
+    sizeBufs();
+    const hb=oc(); hb.width=W; hb.height=H; const hc=hb.getContext("2d");
+    hc.setTransform(1,0,0,1,0,0); hc.clearRect(0,0,W,H);
+    hc.strokeStyle=C.ink; hc.lineCap="round"; hc.lineWidth=Math.max(0.8, 0.05*px);
+    const stepW=0.16;                              // root spacing along the wall (world cells)
+    const halfW=Math.max(1.3, 1.7*cam.scale);      // classic wall half-thickness (px)
+    const EPS=0.04;
+    hc.beginPath();
+    for(const S of shapes){
+      if(S.deco || !shHasWall(S)) continue;
+      const o=outlineDense(S); const n=o.length; if(n<2) continue;
+      for(let i=0;i<n;i++){
+        const a=o[i], b=o[(i+1)%n];
+        const ex=b[0]-a[0], ey=b[1]-a[1]; const segL=Math.hypot(ex,ey); if(segL<1e-6) continue;
+        const tx=ex/segL, ty=ey/segL;              // unit tangent (world)
+        let nx=-ty, ny=tx;                          // candidate outward normal
+        if(pointInShape(a[0]+ex*0.5+nx*EPS, a[1]+ey*0.5+ny*EPS, S)){ nx=-nx; ny=-ny; }
+        const roots=Math.max(1, Math.round(segL/stepW));
+        for(let k=0;k<roots;k++){
+          const f=(k+0.5)/roots;
+          const wx=a[0]+ex*f, wy=a[1]+ey*f;         // world root on the outline
+          const rnd=seeded(wx*53.3, wy*53.3);
+          if(rnd()<0.12) continue;                  // broken — drop some
+          const [sx,sy]=toScreen(wx,wy);
+          const gap=halfW*(0.55 + rnd()*0.7);       // start just outside the wall (true normal)
+          const x0=sx+nx*gap, y0=sy+ny*gap;
+          const jit=(rnd()-0.5)*0.9;                // fan angle ±~0.45 rad
+          const ca=Math.cos(jit), sa=Math.sin(jit);
+          const ox=nx*ca-ny*sa, oy=nx*sa+ny*ca;
+          const len=(0.26 + rnd()*0.42)*px;
+          hc.moveTo(x0,y0); hc.lineTo(x0+ox*len, y0+oy*len);
+          if(rnd()<0.55){                            // a shorter companion stroke → denser bundle
+            const j2=(rnd()-0.5)*0.9, c2=Math.cos(j2), s2=Math.sin(j2);
+            const o2x=nx*c2-ny*s2, o2y=nx*s2+ny*c2, l2=(0.18+rnd()*0.32)*px;
+            const off=(rnd()-0.5)*0.10*px;           // shift along the wall
+            const bx=x0+tx*off, by=y0+ty*off;
+            hc.moveTo(bx,by); hc.lineTo(bx+o2x*l2, by+o2y*l2);
+          }
+        }
+      }
+    }
+    hc.stroke();
+    // Keep the hatch OUTSIDE room interiors — also trims any stroke that reached a
+    // neighbouring room's floor.
+    hc.globalCompositeOperation="destination-out"; hc.fillStyle="#000"; hc.beginPath();
+    for(const S of shapes){ if(S.deco || !shHasFloor(S)) continue; shapePath(hc,S); } hc.fill("nonzero");
+    ctx.globalAlpha=0.9; ctx.drawImage(hb,0,0); ctx.globalAlpha=1;
+  }
 
   function roughSeg(c, aw, bw, halfW){
     const [ax,ay]=toScreen(aw[0],aw[1]), [bx,by]=toScreen(bw[0],bw[1]);
