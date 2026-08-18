@@ -2195,9 +2195,32 @@
       gc.globalCompositeOperation="destination-in"; gc.drawImage(buf.decoClip,0,0);
       ctx.drawImage(buf.grid,0,0);
     }
-    ctx.save(); ctx.fillStyle=C.ink;
-    for(const sh of map.shapes){ if(sh.deco && shHasWall(sh)) drawDecoRing(ctx, sh); }
-    ctx.restore(); }
+    // Deco (Shapes) walls interact like room walls: shapes that PARTIALLY overlap
+    // (outlines cross) erase the wall inside each other and merge into one outline;
+    // a shape fully INSIDE another (outlines never cross) keeps its whole wall.
+    // (Mirror of the engine; keep in sync.)
+    const dW = map.shapes.filter(s=>s.deco && shHasWall(s));
+    if(dW.length){
+      const containsFully=(A,B)=>{ const o=outlineDense(B);
+        for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+      const bxs=dW.map(s=>bounds(s,"shape"));
+      const dcx=buf.deco.getContext("2d"), mcx=buf.decoClip.getContext("2d");
+      for(let i=0;i<dW.length;i++){
+        const S=dW[i], bS=bxs[i];
+        dcx.setTransform(1,0,0,1,0,0); dcx.globalCompositeOperation="source-over"; dcx.globalAlpha=1; dcx.filter="none"; dcx.clearRect(0,0,W,H);
+        dcx.save(); dcx.fillStyle=C.ink; drawDecoRing(dcx, S); dcx.restore();
+        let hasMask=false;
+        mcx.setTransform(1,0,0,1,0,0); mcx.globalCompositeOperation="source-over"; mcx.globalAlpha=1; mcx.filter="none"; mcx.clearRect(0,0,W,H); mcx.fillStyle="#fff";
+        for(let j=0;j<dW.length;j++){ if(j===i) continue;
+          const T=dW[j], bT=bxs[j];
+          if(bS.x>bT.x+bT.w||bT.x>bS.x+bS.w||bS.y>bT.y+bT.h||bT.y>bS.y+bS.h) continue;
+          if(containsFully(T,S)||containsFully(S,T)) continue;
+          fillInsetShape(mcx, T, (halfPxFor(shapeWallTex(T))+1.4)/wpx()); hasMask=true;
+        }
+        if(hasMask){ dcx.globalCompositeOperation="destination-out"; dcx.drawImage(buf.decoClip,0,0); }
+        ctx.drawImage(buf.deco,0,0);
+      }
+    } }
 
   // Doors: {x,y,a,len} — a is the wall direction; a thin leaf sits in the opening.
   // world-space frame for a door. `len` is the FULL span between the two
