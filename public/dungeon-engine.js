@@ -1324,9 +1324,34 @@ window.DungeonEngine = (function(){
       gc.globalCompositeOperation="destination-in"; gc.drawImage(buf.decoClip,0,0);
       ctx.drawImage(buf.grid,0,0);
     }
-    ctx.save(); ctx.fillStyle=C.ink;
-    for(const sh of map.shapes){ if(sh.deco && shHasWall(sh)) drawDecoRing(ctx, sh); }
-    ctx.restore(); }
+    // Deco (Shapes) walls interact like room walls: where two shapes PARTIALLY
+    // overlap (their outlines cross), the wall lying inside the other shape is
+    // erased, so they merge into one outline. A shape fully INSIDE another (their
+    // outlines never cross) keeps its whole wall, so nested shapes still read.
+    // Each shape's ring is drawn to a buffer and erased only against the shapes
+    // that CROSS it (overlap without either containing the other).
+    const dW = map.shapes.filter(s=>s.deco && shHasWall(s));
+    if(dW.length){
+      const containsFully=(A,B)=>{ const o=outlineDense(B);
+        for(const p of o){ if(!pointInShape(p[0],p[1],A)) return false; } return true; };
+      const bxs=dW.map(s=>bounds(s,"shape"));
+      const dcx=buf.deco.getContext("2d"), mcx=buf.decoClip.getContext("2d");
+      for(let i=0;i<dW.length;i++){
+        const S=dW[i], bS=bxs[i];
+        dcx.setTransform(1,0,0,1,0,0); dcx.globalCompositeOperation="source-over"; dcx.globalAlpha=1; dcx.filter="none"; dcx.clearRect(0,0,W,H);
+        dcx.save(); dcx.fillStyle=C.ink; drawDecoRing(dcx, S); dcx.restore();
+        let hasMask=false;
+        mcx.setTransform(1,0,0,1,0,0); mcx.globalCompositeOperation="source-over"; mcx.globalAlpha=1; mcx.filter="none"; mcx.clearRect(0,0,W,H); mcx.fillStyle="#fff";
+        for(let j=0;j<dW.length;j++){ if(j===i) continue;
+          const T=dW[j], bT=bxs[j];
+          if(bS.x>bT.x+bT.w||bT.x>bS.x+bS.w||bS.y>bT.y+bT.h||bT.y>bS.y+bS.h) continue;   // no overlap at all
+          if(containsFully(T,S)||containsFully(S,T)) continue;                            // nested (no cross) -> keep both
+          fillInsetShape(mcx, T, (halfPxFor(shapeWallTex(T))+1.4)/wpx()); hasMask=true;   // same erode as rooms
+        }
+        if(hasMask){ dcx.globalCompositeOperation="destination-out"; dcx.drawImage(buf.decoClip,0,0); }
+        ctx.drawImage(buf.deco,0,0);
+      }
+    } }
 
   // Door LEAF half-thickness, in world cells — CONSTANT. It deliberately does not
   // follow the wall it sits in: a 1.5-cell cave wall used to grow a door leaf five
