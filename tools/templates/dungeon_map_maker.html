@@ -1852,6 +1852,16 @@
       }
     }
     hc.fill("nonzero");
+    // 1b) soften the OUTER boundary: blur the mask into itself so the weave fades
+    //     out over ~half a cell instead of ending on a hard bubble edge. The wall
+    //     side is re-cut sharp by the floor clear below. (Mirror of the engine.)
+    { const fb=oc(); fb.width=W; fb.height=H; const fc=fb.getContext("2d");
+      fc.setTransform(1,0,0,1,0,0); fc.clearRect(0,0,W,H);
+      fc.filter="blur("+(0.26*px).toFixed(1)+"px)";
+      fc.drawImage(hb,0,0); fc.drawImage(hb,0,0);
+      fc.filter="none";
+      hc.globalCompositeOperation="copy"; hc.drawImage(fb,0,0);
+      hc.globalCompositeOperation="source-over"; }
     // 2) clear room interiors (interior walls between two rooms come out clean).
     hc.globalCompositeOperation="destination-out"; hc.fillStyle="#000"; hc.beginPath();
     for(const S of shapes){ if(S.deco || !shHasFloor(S)) continue; shapePath(hc,S); } hc.fill("nonzero");
@@ -2309,6 +2319,36 @@
     if(wt && stripPath(c, outlineDense(sh), true, wt, halfPxFor(wt))) return;
     roughRing(c, shapeOutline(sh), halfPxFor(wt));   // wt null ⇒ room-wall ink thickness
   }
+  // Classic-mode stipple around a Shape's exterior wall — the dotted "debris"
+  // band from the reference .ai. (Mirror of the engine; keep in sync.)
+  function stippleRing(c, sh){
+    const px=wpx();
+    const o=outlineDense(sh); const n=o.length; if(n<2) return;
+    c.save(); c.fillStyle=C.ink; c.beginPath();
+    const EPS=0.05, step=0.09;
+    for(let i=0;i<n;i++){
+      const a=o[i], b=o[(i+1)%n];
+      const ex=b[0]-a[0], ey=b[1]-a[1]; const L=Math.hypot(ex,ey); if(L<1e-6) continue;
+      const tx=ex/L, ty=ey/L; let nx=-ty, ny=tx;
+      if(pointInShape(a[0]+ex*0.5+nx*EPS, a[1]+ey*0.5+ny*EPS, sh)){ nx=-nx; ny=-ny; }
+      const roots=Math.max(1, Math.round(L/step));
+      for(let k=0;k<roots;k++){
+        const f=(k+0.5)/roots;
+        const wx=a[0]+ex*f, wy=a[1]+ey*f;
+        const rnd=seeded(wx*71.3, wy*71.3);
+        const nd=1+Math.floor(rnd()*3);
+        const [sx,sy]=toScreen(wx,wy);
+        for(let d2=0;d2<nd;d2++){
+          const dist=(0.10 + Math.pow(rnd(),1.6)*0.40)*px;
+          const along=(rnd()-0.5)*0.14*px;
+          const dx=sx+nx*dist+tx*along, dy=sy+ny*dist+ty*along;
+          const r=Math.max(0.55, (0.018+rnd()*0.02)*px);
+          c.moveTo(dx+r,dy); c.arc(dx,dy,r,0,6.2832);
+        }
+      }
+    }
+    c.fill(); c.restore();
+  }
 
   function drawDecoShapes(){
     let any=false;
@@ -2362,6 +2402,7 @@
         const S=dW[i], bS=bxs[i];
         dcx.setTransform(1,0,0,1,0,0); dcx.globalCompositeOperation="source-over"; dcx.globalAlpha=1; dcx.filter="none"; dcx.clearRect(0,0,W,H);
         dcx.save(); dcx.fillStyle=C.ink; drawDecoRing(dcx, S); dcx.restore();
+        if(!textured() && wpx()>=12) stippleRing(dcx, S);   // classic: dotted band outside the wall
         let hasMask=false;
         mcx.setTransform(1,0,0,1,0,0); mcx.globalCompositeOperation="source-over"; mcx.globalAlpha=1; mcx.filter="none"; mcx.clearRect(0,0,W,H); mcx.fillStyle="#fff";
         for(let j=0;j<dW.length;j++){ if(j===i) continue;
@@ -3172,10 +3213,15 @@
     // and open terrain. Doors and interior walls need real room walls, so they
     // are dropped. (Rooms mode is unchanged.)
     if(drawMode==="shapes"){
+      let hadDoors=false;
       for(const L of map.layers){
         for(const sh of L.shapes){ sh.deco=true; if(!sh.fill) sh.fill="both"; }
+        if(L.doors.length) hadDoors=true;
         L.walls.length=0; L.doors.length=0;
       }
+      // Silently eating the Doors checkbox reads as a bug — say why they vanished.
+      if(hadDoors && $("doorsChk") && $("doorsChk").checked)
+        toast("Shapes mode: doors dropped — Shapes have no real walls. Roll in Rooms mode to keep doors.");
     }
     commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); syncLayersUI(); fitView();
   }
@@ -3224,6 +3270,7 @@
       // so no room floats alone. Rectangular only — a round room can only ever
       // touch a straight wall at a single point, never share a segment.
       placeAdjacentRooms(rooms, nRooms, smin, smax);
+      var nestedKids = collectNestedRooms(rooms, smin, smax);   // rooms-within-rooms (mirror of engine)
     } else {
       let tries=0, guard=nRooms*220;
       while(rooms.length<nRooms && tries++<guard){
@@ -3278,6 +3325,12 @@
         if(organic && overlapFrac(rooms[a],rooms[b])>0.22) continue;
         doConnect(a,b); added++;
       }
+    }
+    // Nested sub-rooms join AFTER the corridor pass (mirror of the engine).
+    if(typeof nestedKids!=="undefined" && nestedKids){
+      for(const K of nestedKids){ rooms.push(K);
+        map.shapes.push({id:uid(),type:"rect",x:K.x,y:K.y,w:K.w,h:K.h});
+        addNestedDoor(K, K.nestedIn); }
     }
     if(!organic && structure && rooms.length>1){ addAdjacencyDoors(rooms); }
     // Snap each generated door to the grid, fit it to the real wall opening it
@@ -3412,6 +3465,54 @@
     }
   }
   function rectsOverlap(a,b){ return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y; }
+  // Structure: rooms-within-rooms (house/mansion interiors). Mirror of the
+  // engine's collectNestedRooms/addNestedDoor; keep in sync.
+  function collectNestedRooms(rooms, smin, smax){
+    const kids=[];
+    for(const P of rooms){
+      if(P.round || P.pts || P.w<7 || P.h<7) continue;
+      if(rng()<0.25) continue;
+      const mine=[];
+      const nWant=ri(1, Math.max(1, Math.min(4, Math.floor(P.w*P.h/55))));
+      let tries=0;
+      while(mine.length<nWant && tries++<30){
+        const cw=ri(3, Math.min(smax, P.w-3));
+        const ch=ri(3, Math.min(smax, P.h-3));
+        const m=ri(0,8); let x,y;                     // 0–3 corner · 4–7 edge · 8 floating
+        if(m===0){ x=P.x; y=P.y; }
+        else if(m===1){ x=P.x+P.w-cw; y=P.y; }
+        else if(m===2){ x=P.x; y=P.y+P.h-ch; }
+        else if(m===3){ x=P.x+P.w-cw; y=P.y+P.h-ch; }
+        else if(m===4){ x=P.x; y=P.y+ri(1,P.h-ch-1); }
+        else if(m===5){ x=P.x+P.w-cw; y=P.y+ri(1,P.h-ch-1); }
+        else if(m===6){ x=P.x+ri(1,P.w-cw-1); y=P.y; }
+        else if(m===7){ x=P.x+ri(1,P.w-cw-1); y=P.y+P.h-ch; }
+        else { x=P.x+ri(1,P.w-cw-1); y=P.y+ri(1,P.h-ch-1); }
+        const cand={x,y,w:cw,h:ch,round:false,cx:x+cw/2,cy:y+ch/2,nestedIn:P,nested:true};
+        if(mine.some(k=>rectsOverlap(cand,k))) continue;
+        mine.push(cand);
+      }
+      for(const K of mine) kids.push(K);
+    }
+    return kids;
+  }
+  function addNestedDoor(K, P){
+    const s2=v=>Math.round(v*2)/2;
+    const edges=[];
+    if(K.x     > P.x    ) edges.push({v:1, x:K.x,     y0:K.y, y1:K.y+K.h});
+    if(K.x+K.w < P.x+P.w) edges.push({v:1, x:K.x+K.w, y0:K.y, y1:K.y+K.h});
+    if(K.y     > P.y    ) edges.push({v:0, y:K.y,     x0:K.x, x1:K.x+K.w});
+    if(K.y+K.h < P.y+P.h) edges.push({v:0, y:K.y+K.h, x0:K.x, x1:K.x+K.w});
+    if(!edges.length) return;
+    for(let t=0;t<8;t++){
+      const e=edges[ri(0,edges.length-1)];
+      const len=(rng()<0.5?1:2);
+      if(e.v){ const lo=e.y0+0.5+len/2, hi=e.y1-0.5-len/2; if(hi<lo) continue;
+        map.doors.push({id:uid(), x:e.x, y:s2(lo+rng()*(hi-lo)), a:Math.PI/2, len, _adj:true}); return; }
+      else   { const lo=e.x0+0.5+len/2, hi=e.x1-0.5-len/2; if(hi<lo) continue;
+        map.doors.push({id:uid(), x:s2(lo+rng()*(hi-lo)), y:e.y, a:0, len, _adj:true}); return; }
+    }
+  }
   // Accretion placement: seed one room, then grow each new room flush against a
   // random side of an already-placed room so it SHARES that wall (overlap ≥2 so a
   // door fits). Edge-butting isn't an interior overlap, so rectsOverlap stays

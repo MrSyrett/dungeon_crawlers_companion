@@ -1021,6 +1021,17 @@ window.DungeonEngine = (function(){
       }
     }
     hc.fill("nonzero");
+    // 1b) soften the OUTER boundary: blur the mask into itself so the weave fades
+    //     out over ~half a cell instead of ending on a hard bubble edge. The wall
+    //     side is re-cut sharp by the floor clear below, so only the outer edge
+    //     fades. Boost the core alpha back to solid with two over-draws.
+    { const fb=oc(); fb.width=W; fb.height=H; const fc=fb.getContext("2d");
+      fc.setTransform(1,0,0,1,0,0); fc.clearRect(0,0,W,H);
+      fc.filter="blur("+(0.26*px).toFixed(1)+"px)";
+      fc.drawImage(hb,0,0); fc.drawImage(hb,0,0);
+      fc.filter="none";
+      hc.globalCompositeOperation="copy"; hc.drawImage(fb,0,0);
+      hc.globalCompositeOperation="source-over"; }
     // 2) clear room interiors — the collar stays OUTSIDE floors, and an interior
     //    wall between two rooms comes out clean (both of its sides are floor).
     hc.globalCompositeOperation="destination-out"; hc.fillStyle="#000"; hc.beginPath();
@@ -1449,6 +1460,40 @@ window.DungeonEngine = (function(){
     if(wt && stripPath(c, outlineDense(sh), true, wt, halfPxFor(wt))) return;
     roughRing(c, shapeOutline(sh), halfPxFor(wt));   // wt null ⇒ room-wall ink thickness
   }
+  // Classic-mode stipple around a Shape's exterior wall — the dotted "debris"
+  // band from the reference .ai (a structure standing on ground/floor). Dots are
+  // densest against the wall and thin out over ~half a cell; every dot is seeded
+  // off its WORLD position, so the stipple never shimmers on pan/zoom. Drawn into
+  // the same per-shape buffer as the ring, so the shape-vs-shape wall merge
+  // erases stipple inside a crossing sibling exactly like it erases the wall.
+  function stippleRing(c, sh){
+    const px=wpx();
+    const o=outlineDense(sh); const n=o.length; if(n<2) return;
+    c.save(); c.fillStyle=C.ink; c.beginPath();
+    const EPS=0.05, step=0.09;
+    for(let i=0;i<n;i++){
+      const a=o[i], b=o[(i+1)%n];
+      const ex=b[0]-a[0], ey=b[1]-a[1]; const L=Math.hypot(ex,ey); if(L<1e-6) continue;
+      const tx=ex/L, ty=ey/L; let nx=-ty, ny=tx;
+      if(pointInShape(a[0]+ex*0.5+nx*EPS, a[1]+ey*0.5+ny*EPS, sh)){ nx=-nx; ny=-ny; }
+      const roots=Math.max(1, Math.round(L/step));
+      for(let k=0;k<roots;k++){
+        const f=(k+0.5)/roots;
+        const wx=a[0]+ex*f, wy=a[1]+ey*f;
+        const rnd=seeded(wx*71.3, wy*71.3);
+        const nd=1+Math.floor(rnd()*3);                    // 1–3 dots per root
+        const [sx,sy]=toScreen(wx,wy);
+        for(let d2=0;d2<nd;d2++){
+          const dist=(0.10 + Math.pow(rnd(),1.6)*0.40)*px; // biased toward the wall
+          const along=(rnd()-0.5)*0.14*px;
+          const dx=sx+nx*dist+tx*along, dy=sy+ny*dist+ty*along;
+          const r=Math.max(0.55, (0.018+rnd()*0.02)*px);
+          c.moveTo(dx+r,dy); c.arc(dx,dy,r,0,6.2832);
+        }
+      }
+    }
+    c.fill(); c.restore();
+  }
 
   function drawDecoShapes(){
     let any=false;
@@ -1506,6 +1551,7 @@ window.DungeonEngine = (function(){
         const S=dW[i], bS=bxs[i];
         dcx.setTransform(1,0,0,1,0,0); dcx.globalCompositeOperation="source-over"; dcx.globalAlpha=1; dcx.filter="none"; dcx.clearRect(0,0,W,H);
         dcx.save(); dcx.fillStyle=C.ink; drawDecoRing(dcx, S); dcx.restore();
+        if(!textured() && wpx()>=12) stippleRing(dcx, S);   // classic: dotted band outside the wall
         let hasMask=false;
         mcx.setTransform(1,0,0,1,0,0); mcx.globalCompositeOperation="source-over"; mcx.globalAlpha=1; mcx.filter="none"; mcx.clearRect(0,0,W,H); mcx.fillStyle="#fff";
         for(let j=0;j<dW.length;j++){ if(j===i) continue;
@@ -1641,6 +1687,7 @@ window.DungeonEngine = (function(){
       placeBlobs(rooms, nRooms, smin, smax, field, structure);
     } else if(structure){
       placeAdjacentRooms(rooms, nRooms, smin, smax);
+      var nestedKids = collectNestedRooms(rooms, smin, smax);   // rooms-within-rooms (houses)
     } else {
       let tries=0, guard=nRooms*220;
       while(rooms.length<nRooms && tries++<guard){
@@ -1699,6 +1746,15 @@ window.DungeonEngine = (function(){
         if(organic && overlapFrac(rooms[a],rooms[b])>0.22) continue;   // would run alongside an existing tunnel
         doConnect(a,b); added++;
       }
+    }
+    // Nested sub-rooms join AFTER the corridor pass (they'd otherwise be corridor
+    // targets and carve passages through their own parent). Appended last so a
+    // kid's floor paints over its parent's in z-order, and included in the
+    // adjacency-door pass so butted siblings get doors too.
+    if(typeof nestedKids!=="undefined" && nestedKids){
+      for(const K of nestedKids){ rooms.push(K);
+        map.shapes.push({id:uid(),type:"rect",x:K.x,y:K.y,w:K.w,h:K.h});
+        addNestedDoor(K, K.nestedIn); }
     }
     // Structure (classic): butting rooms share walls, so link them with doors.
     if(!organic && structure && rooms.length>1){ addAdjacencyDoors(rooms); }
@@ -1808,6 +1864,61 @@ window.DungeonEngine = (function(){
     }
   }
   function rectsOverlap(a,b){ return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y; }
+  // Structure: subdivide the larger footprint rooms with ROOMS-WITHIN-ROOMS — a
+  // house / mansion interior. Children anchor to the parent's corners and edges
+  // (sharing its walls) or float inside; they may butt each other but never
+  // overlap. Kids are collected here and appended to rooms/shapes AFTER the
+  // corridor pass; each gets a door on a wall that faces the parent's interior
+  // (addNestedDoor), and butted siblings pick up doors from addAdjacencyDoors.
+  function collectNestedRooms(rooms, smin, smax){
+    const kids=[];
+    for(const P of rooms){
+      if(P.round || P.pts || P.w<7 || P.h<7) continue;
+      if(rng()<0.25) continue;                        // some halls stay open
+      const mine=[];
+      const nWant=ri(1, Math.max(1, Math.min(4, Math.floor(P.w*P.h/55))));
+      let tries=0;
+      while(mine.length<nWant && tries++<30){
+        const cw=ri(3, Math.min(smax, P.w-3));
+        const ch=ri(3, Math.min(smax, P.h-3));
+        const m=ri(0,8); let x,y;                     // 0–3 corner · 4–7 edge · 8 floating
+        if(m===0){ x=P.x; y=P.y; }
+        else if(m===1){ x=P.x+P.w-cw; y=P.y; }
+        else if(m===2){ x=P.x; y=P.y+P.h-ch; }
+        else if(m===3){ x=P.x+P.w-cw; y=P.y+P.h-ch; }
+        else if(m===4){ x=P.x; y=P.y+ri(1,P.h-ch-1); }
+        else if(m===5){ x=P.x+P.w-cw; y=P.y+ri(1,P.h-ch-1); }
+        else if(m===6){ x=P.x+ri(1,P.w-cw-1); y=P.y; }
+        else if(m===7){ x=P.x+ri(1,P.w-cw-1); y=P.y+P.h-ch; }
+        else { x=P.x+ri(1,P.w-cw-1); y=P.y+ri(1,P.h-ch-1); }
+        const cand={x,y,w:cw,h:ch,round:false,cx:x+cw/2,cy:y+ch/2,nestedIn:P,nested:true};
+        if(mine.some(k=>rectsOverlap(cand,k))) continue;
+        mine.push(cand);
+      }
+      for(const K of mine) kids.push(K);
+    }
+    return kids;
+  }
+  // A door for a nested child, on one of its walls that faces the PARENT'S
+  // interior (never a wall shared with the parent's own boundary). _adj doors
+  // pass through finalizeDoors untouched, so x/y/len are placed exactly.
+  function addNestedDoor(K, P){
+    const s2=v=>Math.round(v*2)/2;
+    const edges=[];
+    if(K.x     > P.x    ) edges.push({v:1, x:K.x,     y0:K.y, y1:K.y+K.h});
+    if(K.x+K.w < P.x+P.w) edges.push({v:1, x:K.x+K.w, y0:K.y, y1:K.y+K.h});
+    if(K.y     > P.y    ) edges.push({v:0, y:K.y,     x0:K.x, x1:K.x+K.w});
+    if(K.y+K.h < P.y+P.h) edges.push({v:0, y:K.y+K.h, x0:K.x, x1:K.x+K.w});
+    if(!edges.length) return;
+    for(let t=0;t<8;t++){
+      const e=edges[ri(0,edges.length-1)];
+      const len=(rng()<0.5?1:2);
+      if(e.v){ const lo=e.y0+0.5+len/2, hi=e.y1-0.5-len/2; if(hi<lo) continue;
+        map.doors.push({id:uid(), x:e.x, y:s2(lo+rng()*(hi-lo)), a:Math.PI/2, len, _adj:true}); return; }
+      else   { const lo=e.x0+0.5+len/2, hi=e.x1-0.5-len/2; if(hi<lo) continue;
+        map.doors.push({id:uid(), x:s2(lo+rng()*(hi-lo)), y:e.y, a:0, len, _adj:true}); return; }
+    }
+  }
   function placeAdjacentRooms(rooms, nRooms, smin, smax){
     const w0=ri(smin,smax), h0=ri(smin,smax);
     rooms.push({x:0,y:0,w:w0,h:h0,round:false,cx:w0/2,cy:h0/2});
