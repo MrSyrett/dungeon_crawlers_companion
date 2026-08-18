@@ -1147,22 +1147,44 @@
       c.globalCompositeOperation="destination-out";
       c.filter="blur("+(px*0.30).toFixed(2)+"px)";
       c.drawImage(er,0,0);
-      // Re-add bands for NESTED rooms. A room fully inside another sits deep in the
-      // container's interior, so the first-pass global inset carve (destination-out
-      // over the union) erased its band along with the container's middle. Rebuild
-      // each nested room's own band (room ∩ NOT its inset) and paint it back.
+      // ── NESTED ROOMS: rebuild their bands correctly ───────────────────
+      // A room fully inside another was carved twice by the passes above: the
+      // container's interior inset erased the nested room's INNER band, and the
+      // nested room also has an EXTERIOR that sits on the container's floor — its
+      // wall should throw a shadow OUTWARD too, like any structure standing in a
+      // room. Build both rings for every nested room into one feathered mask,
+      // unioned with "lighten" so overlaps never double, clip it to the floor,
+      // then ERASE that footprint out of `c` before stamping it once — so a nested
+      // room sharing a wall with its container reads single-strength, not doubled.
       // (Mirror of the engine; keep in sync.)
+      const nested=[];
       for(let i2=0;i2<bnd.length;i2++){
-        let nested=false;
-        for(let j2=0;j2<bnd.length;j2++){ if(j2!==i2 && contains(bnd[j2],bnd[i2])){ nested=true; break; } }
-        if(!nested) continue;
-        const S=bnd[i2];
-        tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
-        tc.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; tc.beginPath(); shapePath(tc,S); tc.fill("nonzero");
-        tc.globalCompositeOperation="destination-out"; tc.filter="blur("+(px*0.38).toFixed(2)+"px)";
-        tc.fillStyle="#fff"; fillInsetShape(tc, S, halfCellsFor(shapeWallTex(S)) + WALL_SHADOW_CELLS);
-        tc.filter="none";
-        c.globalCompositeOperation="source-over"; c.drawImage(tmp,0,0);
+        for(let j2=0;j2<bnd.length;j2++){ if(j2!==i2 && contains(bnd[j2],bnd[i2])){ nested.push(bnd[i2]); break; } } }
+      if(nested.length){
+        const nb=oc(); nb.width=W; nb.height=H; const nbc=nb.getContext("2d");
+        nbc.setTransform(1,0,0,1,0,0); nbc.globalCompositeOperation="source-over"; nbc.clearRect(0,0,W,H);
+        for(const S of nested){
+          const hpPx=halfPxFor(shapeWallTex(S)), reach=hpPx + px;
+          rc.setTransform(1,0,0,1,0,0); rc.filter="none"; rc.globalCompositeOperation="source-over"; rc.clearRect(0,0,W,H);
+          rc.fillStyle="#fff"; rc.beginPath(); shapePath(rc,S); rc.fill("nonzero");
+          // INNER ring: S minus its inset, feathered inward.
+          tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
+          tc.drawImage(run,0,0);
+          tc.globalCompositeOperation="destination-out"; tc.filter="blur("+(px*0.38).toFixed(2)+"px)";
+          tc.fillStyle="#fff"; fillInsetShape(tc, S, halfCellsFor(shapeWallTex(S)) + WALL_SHADOW_CELLS);
+          tc.filter="none";
+          nbc.globalCompositeOperation="lighten"; nbc.filter="none"; nbc.drawImage(tmp,0,0);
+          // EXTERIOR ring: a thick stroke straddling the outline, minus S, so only
+          // the outward half survives — the shadow cast onto the container floor.
+          tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
+          tc.strokeStyle="#fff"; tc.lineJoin="round"; tc.lineWidth=2*reach; tc.beginPath(); shapePath(tc,S); tc.stroke();
+          tc.globalCompositeOperation="destination-out"; tc.drawImage(run,0,0);
+          nbc.globalCompositeOperation="lighten"; nbc.filter="blur("+(px*0.30).toFixed(2)+"px)"; nbc.drawImage(tmp,0,0); nbc.filter="none";
+        }
+        nbc.globalCompositeOperation="destination-in"; nbc.drawImage(buf.erode,0,0);          // keep only what lands on floor
+        c.globalCompositeOperation="destination-out"; c.filter="none"; c.drawImage(nb,0,0);   // clear the footprint (kills doubling)
+        nbc.globalCompositeOperation="source-in"; nbc.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; nbc.fillRect(0,0,W,H);
+        c.globalCompositeOperation="source-over"; c.drawImage(nb,0,0);
       } }
     c.filter="none"; c.globalCompositeOperation="source-over";
     ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
