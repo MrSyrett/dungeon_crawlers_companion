@@ -949,15 +949,13 @@ window.DungeonEngine = (function(){
     ctx.stroke();
     ctx.restore(); }
 
-  // ── hand-drawn exterior hatching (classic maps, Interior-Only) ────────
-  // The woven "basket-weave" rock hatch from the user's reference swatches:
-  // small BUNDLES of 4–5 short parallel ink strokes, each at its own angle.
-  // v4: bundles are drawn DIRECTLY and always COMPLETE — never clipped by a
-  // collar mask — with drop probability falling off with distance from the
-  // wall. The band's outer boundary is therefore made of whole strokes simply
-  // stopping, like a hand losing interest, instead of a mask edge cutting or
-  // fading them (both read as artificial). Everything is seeded off WORLD
-  // position, so the hatch is rock-solid under pan/zoom. Gated to classic mode
+  // ── hand-drawn exterior stipple (classic maps, Interior-Only) ────────
+  // v5: the exterior rock marking around ROOM walls is the same dotted stipple
+  // band the deco Shapes use (stippleRing) — the user preferred the dots over
+  // every crosshatch variant. Dots are packed against the wall and thin out
+  // over ~half a cell; identical by construction to the Shape stipple. Room
+  // interiors are cleared afterwards, so interior walls between rooms stay
+  // clean and strays never land on a neighbouring floor. Gated to classic mode
   // + the Interior-Only grid toggle; skipped when zoomed too far out to read.
   function drawExteriorHatch(){
     if(!map || textured() || !map.gridInterior || noRock || overlayOnly) return;
@@ -965,45 +963,7 @@ window.DungeonEngine = (function(){
     const px=wpx(); if(px < 12) return;
     const hb=oc(); hb.width=W; hb.height=H; const hc=hb.getContext("2d");
     hc.setTransform(1,0,0,1,0,0); hc.clearRect(0,0,W,H);
-    hc.strokeStyle=C.ink; hc.lineCap="round"; hc.lineWidth=Math.max(0.8, 0.045*px);
-    const EPS=0.05, step=0.34;                     // root spacing along the wall (cells)
-    hc.beginPath();
-    const bundle=(cx,cy,rnd)=>{                    // one COMPLETE woven bundle
-      const ang=rnd()*Math.PI, k=4+Math.floor(rnd()*2);
-      const len=(0.30+rnd()*0.16)*px, gap=0.072*px;
-      const dx=Math.cos(ang), dy=Math.sin(ang), bx2=-dy, by2=dx;
-      for(let j=0;j<k;j++){
-        const off=(j-(k-1)/2)*gap, hl=len*(0.82+rnd()*0.36)/2;   // ragged ends
-        const bx=cx+bx2*off, by=cy+by2*off;
-        hc.moveTo(bx-dx*hl, by-dy*hl); hc.lineTo(bx+dx*hl, by+dy*hl);
-      }
-    };
-    for(const S of shapes){
-      if(S.deco || !shHasWall(S)) continue;
-      const o=outlineDense(S); const n=o.length; if(n<2) continue;
-      for(let i=0;i<n;i++){
-        const a=o[i], b=o[(i+1)%n];
-        const ex=b[0]-a[0], ey=b[1]-a[1]; const L=Math.hypot(ex,ey); if(L<1e-6) continue;
-        const tx=ex/L, ty=ey/L; let nx=-ty, ny=tx;
-        if(pointInShape(a[0]+ex*0.5+nx*EPS, a[1]+ey*0.5+ny*EPS, S)){ nx=-nx; ny=-ny; }
-        const roots=Math.max(1, Math.round(L/step));
-        for(let k2=0;k2<roots;k2++){
-          const f=(k2+0.5)/roots;
-          const wx=a[0]+ex*f, wy=a[1]+ey*f;
-          const rnd=seeded(wx*53.3, wy*53.3);
-          const [sx,sy]=toScreen(wx,wy);
-          const put=(dist)=>{ const along=(rnd()-0.5)*0.34*px;
-            bundle(sx+nx*dist*px+tx*along, sy+ny*dist*px+ty*along, rnd); };
-          put(0.14+rnd()*0.14);                    // hugging the wall — always
-          if(rnd()<0.85) put(0.34+rnd()*0.18);     // middle band — usually
-          if(rnd()<0.45) put(0.58+rnd()*0.22);     // outer strays — sometimes
-        }
-      }
-    }
-    hc.stroke();
-    // Clear room interiors — trims the wall side clean (the wall ink covers the
-    // seam) and drops anything that reached a neighbouring room's floor, so an
-    // interior wall between two rooms stays clean.
+    for(const S of shapes){ if(S.deco || !shHasWall(S)) continue; stippleRing(hc, S); }
     hc.globalCompositeOperation="destination-out"; hc.fillStyle="#000"; hc.beginPath();
     for(const S of shapes){ if(S.deco || !shHasFloor(S)) continue; shapePath(hc,S); } hc.fill("nonzero");
     ctx.drawImage(hb,0,0);
@@ -1633,6 +1593,7 @@ window.DungeonEngine = (function(){
     const structure = (opts.structure !== undefined) ? !!opts.structure : !doCorr;
     const roundOk = !!opts.roundRooms;
     const organic = !!opts.organic;           // irregular cave "blob" chambers
+    const building = !!opts.building;         // one large shell, rooms nested inside
     const wantDoors = opts.doors !== false;    // place interior doors (default on)
     const nEntrances = clamp(opts.entrances!=null?+opts.entrances:2, 0, 20);
     const th = (opts.theme==="dark") ? "dark" : "light";
@@ -1652,6 +1613,13 @@ window.DungeonEngine = (function(){
       // one, so the union is connected); Structure OFF scatters them as separate
       // islands, which Corridors can then join with winding tunnels.
       placeBlobs(rooms, nRooms, smin, smax, field, structure);
+    } else if(building){
+      // BUILDING: one large, roughly square shell with (nearly) all the areas
+      // as interior rooms nested inside it — the map-type dropdown's "Building".
+      const side=Math.max(smax+4, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*1.05));
+      const w0=side+ri(-2,2), h0=side+ri(-2,2);
+      rooms.push({x:0,y:0,w:w0,h:h0,round:false,cx:w0/2,cy:h0/2});
+      var nestedKids = collectBuildingRooms(rooms[0], nRooms, smin, smax);
     } else if(structure){
       placeAdjacentRooms(rooms, nRooms, smin, smax);
       var nestedKids = collectNestedRooms(rooms, smin, smax);   // rooms-within-rooms (houses)
@@ -1724,7 +1692,7 @@ window.DungeonEngine = (function(){
         addNestedDoor(K, K.nestedIn); }
     }
     // Structure (classic): butting rooms share walls, so link them with doors.
-    if(!organic && structure && rooms.length>1){ addAdjacencyDoors(rooms); }
+    if(!organic && (structure||building) && rooms.length>1){ addAdjacencyDoors(rooms); }
     // Doors OFF ⇒ no interior doors AND no entrance doors.
     map.doors = wantDoors ? finalizeDoors() : [];
     if(wantDoors) placeEntrances(nEntrances);
@@ -1863,6 +1831,30 @@ window.DungeonEngine = (function(){
         mine.push(cand);
       }
       for(const K of mine) kids.push(K);
+    }
+    return kids;
+  }
+  // BUILDING: fill one shell with n interior rooms — same corner/edge/floating
+  // anchors as collectNestedRooms, but the count comes from the Rooms slider
+  // instead of the parent's area, so the whole map is one subdivided footprint.
+  function collectBuildingRooms(P, n, smin, smax){
+    const kids=[]; let tries=0, guard=Math.max(40, n*80);
+    while(kids.length<n && tries++<guard){
+      const cw=ri(smin, Math.max(smin, Math.min(smax, P.w-3)));
+      const ch=ri(smin, Math.max(smin, Math.min(smax, P.h-3)));
+      const m=ri(0,8); let x,y;                     // 0–3 corner · 4–7 edge · 8 floating
+      if(m===0){ x=P.x; y=P.y; }
+      else if(m===1){ x=P.x+P.w-cw; y=P.y; }
+      else if(m===2){ x=P.x; y=P.y+P.h-ch; }
+      else if(m===3){ x=P.x+P.w-cw; y=P.y+P.h-ch; }
+      else if(m===4){ x=P.x; y=P.y+ri(1,P.h-ch-1); }
+      else if(m===5){ x=P.x+P.w-cw; y=P.y+ri(1,P.h-ch-1); }
+      else if(m===6){ x=P.x+ri(1,P.w-cw-1); y=P.y; }
+      else if(m===7){ x=P.x+ri(1,P.w-cw-1); y=P.y+P.h-ch; }
+      else { x=P.x+ri(1,P.w-cw-1); y=P.y+ri(1,P.h-ch-1); }
+      const cand={x,y,w:cw,h:ch,round:false,cx:x+cw/2,cy:y+ch/2,nestedIn:P,nested:true};
+      if(kids.some(k=>rectsOverlap(cand,k))) continue;
+      kids.push(cand);
     }
     return kids;
   }

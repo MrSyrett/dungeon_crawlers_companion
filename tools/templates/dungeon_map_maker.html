@@ -405,18 +405,14 @@
       <input type="range" id="spread" min="1" max="5" value="3">
       <label class="fld">Entrances <b id="entrancesV">2</b></label>
       <input type="range" id="entrances" min="0" max="6" value="2">
-      <div class="chk-row">
-        <label class="chk" title="Connect areas with passages (winding tunnels in Organic mode)"><input type="checkbox" id="corridors" checked> Corridors</label>
-        <label class="chk" title="Areas butt up against each other (in Organic mode, blobs merge into one cavern). Off = areas sit apart as separate islands."><input type="checkbox" id="structure"> Structure</label>
-      </div>
-      <div class="chk-row">
-        <label class="chk" title="Irregular cave chambers instead of rooms — organic caverns"><input type="checkbox" id="organic"> Organic</label>
-        <label class="chk" title="Allow round rooms (classic mode only)"><input type="checkbox" id="roundish"> Round</label>
-      </div>
-      <div class="chk-row">
-        <label class="chk" title="Face all generated textured walls outward (counter-clockwise). Off = inward (clockwise). Keeps a generated cave's walls all facing the same way."><input type="checkbox" id="exterior"> Exterior</label>
-        <label class="chk" title="Place doors in passage openings"><input type="checkbox" id="doorsChk" checked> Doors</label>
-      </div>
+      <label class="fld">Map type</label>
+      <select class="sel" id="mapType" title="Dungeon: rooms joined by corridors, with doors. Cave: organic caverns joined by winding tunnels, no doors. Islands: separate organic land masses, walls facing outward. Neighborhood: detached buildings with entrance doors. Building: one large structure with the rooms nested inside it.">
+        <option value="dungeon">Dungeon</option>
+        <option value="cave">Cave</option>
+        <option value="islands">Islands</option>
+        <option value="neighborhood">Neighborhood</option>
+        <option value="building">Building</option>
+      </select>
       <button class="btn gold wide" id="generate" style="margin-top:12px">🎲 Generate Map</button>
       </div>
     </div>
@@ -1787,53 +1783,21 @@
     ctx.stroke();
     ctx.restore(); }
 
-  // ── hand-drawn exterior hatching (classic maps, Interior-Only) ────────
-  // Mirror of the engine's drawExteriorHatch; keep in sync. v4: complete woven
-  // bundles drawn directly — never clipped by a mask — with drop probability
-  // falling off with distance from the wall, so the band's outer edge is whole
-  // strokes ending naturally. Seeded off WORLD position ⇒ no shimmer.
+  // ── hand-drawn exterior stipple (classic maps, Interior-Only) ────────
+  // v5: the exterior rock marking around ROOM walls is the same dotted stipple
+  // band the deco Shapes use (stippleRing) — the user preferred the dots over
+  // every crosshatch variant. Dots are packed against the wall and thin out
+  // over ~half a cell; identical by construction to the Shape stipple. Room
+  // interiors are cleared afterwards, so interior walls between rooms stay
+  // clean and strays never land on a neighbouring floor. Gated to classic mode
+  // + the Interior-Only grid toggle; skipped when zoomed too far out to read.
   function drawExteriorHatch(){
     if(!map || textured() || !map.gridInterior || noRock || renderOverlay) return;
     const shapes=map.shapes||[]; if(!shapes.length) return;
     const px=wpx(); if(px < 12) return;
     const hb=oc(); hb.width=W; hb.height=H; const hc=hb.getContext("2d");
     hc.setTransform(1,0,0,1,0,0); hc.clearRect(0,0,W,H);
-    hc.strokeStyle=C.ink; hc.lineCap="round"; hc.lineWidth=Math.max(0.8, 0.045*px);
-    const EPS=0.05, step=0.34;
-    hc.beginPath();
-    const bundle=(cx,cy,rnd)=>{                    // one COMPLETE woven bundle
-      const ang=rnd()*Math.PI, k=4+Math.floor(rnd()*2);
-      const len=(0.30+rnd()*0.16)*px, gap=0.072*px;
-      const dx=Math.cos(ang), dy=Math.sin(ang), bx2=-dy, by2=dx;
-      for(let j=0;j<k;j++){
-        const off=(j-(k-1)/2)*gap, hl=len*(0.82+rnd()*0.36)/2;
-        const bx=cx+bx2*off, by=cy+by2*off;
-        hc.moveTo(bx-dx*hl, by-dy*hl); hc.lineTo(bx+dx*hl, by+dy*hl);
-      }
-    };
-    for(const S of shapes){
-      if(S.deco || !shHasWall(S)) continue;
-      const o=outlineDense(S); const n=o.length; if(n<2) continue;
-      for(let i=0;i<n;i++){
-        const a=o[i], b=o[(i+1)%n];
-        const ex=b[0]-a[0], ey=b[1]-a[1]; const L=Math.hypot(ex,ey); if(L<1e-6) continue;
-        const tx=ex/L, ty=ey/L; let nx=-ty, ny=tx;
-        if(pointInShape(a[0]+ex*0.5+nx*EPS, a[1]+ey*0.5+ny*EPS, S)){ nx=-nx; ny=-ny; }
-        const roots=Math.max(1, Math.round(L/step));
-        for(let k2=0;k2<roots;k2++){
-          const f=(k2+0.5)/roots;
-          const wx=a[0]+ex*f, wy=a[1]+ey*f;
-          const rnd=seeded(wx*53.3, wy*53.3);
-          const [sx,sy]=toScreen(wx,wy);
-          const put=(dist)=>{ const along=(rnd()-0.5)*0.34*px;
-            bundle(sx+nx*dist*px+tx*along, sy+ny*dist*px+ty*along, rnd); };
-          put(0.14+rnd()*0.14);                    // hugging the wall — always
-          if(rnd()<0.85) put(0.34+rnd()*0.18);     // middle band — usually
-          if(rnd()<0.45) put(0.58+rnd()*0.22);     // outer strays — sometimes
-        }
-      }
-    }
-    hc.stroke();
+    for(const S of shapes){ if(S.deco || !shHasWall(S)) continue; stippleRing(hc, S); }
     hc.globalCompositeOperation="destination-out"; hc.fillStyle="#000"; hc.beginPath();
     for(const S of shapes){ if(S.deco || !shHasFloor(S)) continue; shapePath(hc,S); } hc.fill("nonzero");
     ctx.drawImage(hb,0,0);
@@ -3133,20 +3097,24 @@
   // loaded (single source of truth, shared with the GM Screen + Session Prep);
   // otherwise by the inlined generateLocal() fallback. Either way this wrapper
   // owns the surrounding UI concerns (history, name/grid, commit + fit).
+  // The old Corridors/Structure/Organic/Round/Exterior/Doors checkboxes are now
+  // hidden presets behind one "Map type" dropdown.
+  const MAP_TYPES = {
+    dungeon:      {corridors:true,  structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false},
+    cave:         {corridors:true,  structure:false, organic:true,  roundRooms:false, exterior:false, doors:false, building:false},
+    islands:      {corridors:false, structure:false, organic:true,  roundRooms:false, exterior:true,  doors:false, building:false},
+    neighborhood: {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false},
+    building:     {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:true},
+  };
   function generate(){
-    const opts = {
+    const preset = MAP_TYPES[($("mapType")&&$("mapType").value)||"dungeon"] || MAP_TYPES.dungeon;
+    const opts = Object.assign({
       rooms: +$("rooms").value,
       size: +$("rsize").value,
       layout: +$("spread").value,
       entrances: +$("entrances").value,
-      corridors: $("corridors").checked,
-      structure: $("structure").checked,
-      roundRooms: $("roundish").checked,
-      organic: $("organic").checked,
-      doors: $("doorsChk").checked,
-      exterior: $("exterior").checked,
       theme: theme
-    };
+    }, preset);
     pushHistory();
     // The engine returns a brand-new map object, so carry the user's settings
     // across — otherwise rolling a dungeon silently resets Advanced Mode, the
@@ -3188,7 +3156,7 @@
         L.walls.length=0; L.doors.length=0;
       }
       // Silently eating the Doors checkbox reads as a bug — say why they vanished.
-      if(hadDoors && $("doorsChk") && $("doorsChk").checked)
+      if(hadDoors)
         toast("Shapes mode: doors dropped — Shapes have no real walls. Roll in Rooms mode to keep doors.");
     }
     commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); syncLayersUI(); fitView();
@@ -3218,6 +3186,7 @@
     const structure = (opts.structure !== undefined) ? !!opts.structure : !doCorr;
     const roundOk=opts.roundRooms;
     const organic=!!opts.organic;
+    const building=!!opts.building;               // one large shell, rooms nested inside
     const wantDoors=opts.doors!==false;
     const nEntrances=opts.entrances;
     rngState=(Date.now()^(Math.floor(Math.random()*1e9)))>>>0;
@@ -3233,6 +3202,13 @@
       // Cave chambers: irregular blobs. Structure ON ⇒ merged overlapping cavern;
       // OFF ⇒ scattered islands (Corridors then joins them with winding tunnels).
       placeBlobs(rooms, nRooms, smin, smax, field, structure);
+    } else if(building){
+      // BUILDING: one large, roughly square shell with (nearly) all the areas
+      // as interior rooms nested inside it. (Mirror of the engine.)
+      const side=Math.max(smax+4, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*1.05));
+      const w0=side+ri(-2,2), h0=side+ri(-2,2);
+      rooms.push({x:0,y:0,w:w0,h:h0,round:false,cx:w0/2,cy:h0/2});
+      var nestedKids = collectBuildingRooms(rooms[0], nRooms, smin, smax);
     } else if(structure){
       // Adjacency mode: every room butts flush against another, sharing a wall,
       // so no room floats alone. Rectangular only — a round room can only ever
@@ -3300,7 +3276,7 @@
         map.shapes.push({id:uid(),type:"rect",x:K.x,y:K.y,w:K.w,h:K.h});
         addNestedDoor(K, K.nestedIn); }
     }
-    if(!organic && structure && rooms.length>1){ addAdjacencyDoors(rooms); }
+    if(!organic && (structure||building) && rooms.length>1){ addAdjacencyDoors(rooms); }
     // Snap each generated door to the grid, fit it to the real wall opening it
     // sits in, and drop any that don't span a visible, corridor-width wall.
     // Doors OFF ⇒ no interior doors AND no entrance doors.
@@ -3461,6 +3437,28 @@
         mine.push(cand);
       }
       for(const K of mine) kids.push(K);
+    }
+    return kids;
+  }
+  // BUILDING: fill one shell with n interior rooms. (Mirror of the engine.)
+  function collectBuildingRooms(P, n, smin, smax){
+    const kids=[]; let tries=0, guard=Math.max(40, n*80);
+    while(kids.length<n && tries++<guard){
+      const cw=ri(smin, Math.max(smin, Math.min(smax, P.w-3)));
+      const ch=ri(smin, Math.max(smin, Math.min(smax, P.h-3)));
+      const m=ri(0,8); let x,y;                     // 0–3 corner · 4–7 edge · 8 floating
+      if(m===0){ x=P.x; y=P.y; }
+      else if(m===1){ x=P.x+P.w-cw; y=P.y; }
+      else if(m===2){ x=P.x; y=P.y+P.h-ch; }
+      else if(m===3){ x=P.x+P.w-cw; y=P.y+P.h-ch; }
+      else if(m===4){ x=P.x; y=P.y+ri(1,P.h-ch-1); }
+      else if(m===5){ x=P.x+P.w-cw; y=P.y+ri(1,P.h-ch-1); }
+      else if(m===6){ x=P.x+ri(1,P.w-cw-1); y=P.y; }
+      else if(m===7){ x=P.x+ri(1,P.w-cw-1); y=P.y+P.h-ch; }
+      else { x=P.x+ri(1,P.w-cw-1); y=P.y+ri(1,P.h-ch-1); }
+      const cand={x,y,w:cw,h:ch,round:false,cx:x+cw/2,cy:y+ch/2,nestedIn:P,nested:true};
+      if(kids.some(k=>rectsOverlap(cand,k))) continue;
+      kids.push(cand);
     }
     return kids;
   }
