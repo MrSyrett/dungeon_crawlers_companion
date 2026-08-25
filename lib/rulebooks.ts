@@ -8,6 +8,17 @@ export const RULEBOOK_DIR = path.join(process.cwd(), "protected", "rulebooks");
 
 export type RbUser = { id: string; email: string } | null;
 
+// Which game system's Rulebooks list shows a file. Display-only — it hides
+// books behind the dashboard's Shadowdark/DCC toggle, it never gates access.
+export type RulebookSystem = "SD" | "DCC" | "BOTH";
+
+export type RulebookInfo = { file: string; system: RulebookSystem };
+
+// Anything unexpected in the DB column degrades to BOTH (never hides a book).
+export function normalizeSystem(value: string | undefined | null): RulebookSystem {
+  return value === "SD" || value === "DCC" ? value : "BOTH";
+}
+
 // "shadowdark-core-rules.pdf" -> "Shadowdark Core Rules"
 export function prettyName(file: string): string {
   return file
@@ -27,22 +38,39 @@ export async function listRulebookFiles(): Promise<string[]> {
   }
 }
 
-// The files a given user is allowed to see. Admins see all; everyone else sees
-// only files opened to all (everyone=true) or granted to them explicitly.
-export async function visibleRulebookFiles(user: RbUser): Promise<string[]> {
+// The books a given user is allowed to see, each with its system tag. Admins
+// see all; everyone else sees only files opened to all (everyone=true) or
+// granted to them explicitly. Files with no Rulebook row are tagged BOTH.
+export async function visibleRulebooks(user: RbUser): Promise<RulebookInfo[]> {
   const files = await listRulebookFiles();
-  if (!user || files.length === 0) return user && isAdminEmail(user.email) ? files : [];
-  if (isAdminEmail(user.email)) return files;
+  if (!user || files.length === 0) return [];
 
-  const [openRows, grantRows] = await Promise.all([
-    prisma.rulebook.findMany({ where: { everyone: true, file: { in: files } }, select: { file: true } }),
-    prisma.rulebookAccess.findMany({ where: { userId: user.id, file: { in: files } }, select: { file: true } }),
-  ]);
+  const rows = await prisma.rulebook.findMany({
+    where: { file: { in: files } },
+    select: { file: true, everyone: true, system: true },
+  });
+  const systemFor = new Map(rows.map((r) => [r.file, normalizeSystem(r.system)]));
+  const withSystem = (file: string): RulebookInfo => ({
+    file,
+    system: systemFor.get(file) ?? "BOTH",
+  });
+
+  if (isAdminEmail(user.email)) return files.map(withSystem);
+
+  const grantRows = await prisma.rulebookAccess.findMany({
+    where: { userId: user.id, file: { in: files } },
+    select: { file: true },
+  });
 
   const allowed = new Set<string>();
-  for (const r of openRows) allowed.add(r.file);
+  for (const r of rows) if (r.everyone) allowed.add(r.file);
   for (const r of grantRows) allowed.add(r.file);
-  return files.filter((f) => allowed.has(f));
+  return files.filter((f) => allowed.has(f)).map(withSystem);
+}
+
+// The filenames a given user is allowed to see (system-agnostic callers).
+export async function visibleRulebookFiles(user: RbUser): Promise<string[]> {
+  return (await visibleRulebooks(user)).map((b) => b.file);
 }
 
 // Whether a user may read one specific file. Used by the streaming route.

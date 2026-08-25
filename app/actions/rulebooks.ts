@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
-import { listRulebookFiles } from "@/lib/rulebooks";
+import { listRulebookFiles, normalizeSystem } from "@/lib/rulebooks";
 
 // Every action here mutates who can reach copyrighted PDFs, so each independently
 // confirms the caller is an admin — the UI being admin-only is not enough.
@@ -19,22 +19,27 @@ async function isRealFile(file: string): Promise<boolean> {
   return (await listRulebookFiles()).includes(file);
 }
 
-// Open a file to all signed-in users, or make it private again.
-export async function setRulebookEveryone(formData: FormData): Promise<void> {
+// Save a file's settings: open to all signed-in users (or private again), and
+// which system's Rulebooks list shows it (Shadowdark / DCC / both). The system
+// tag only hides the book behind the dashboard toggle — it never grants access.
+export async function saveRulebookSettings(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   if (!admin) return;
 
   const file = String(formData.get("file") ?? "");
   const everyone = String(formData.get("everyone") ?? "") === "on";
+  // Anything unexpected (or missing) becomes BOTH — the never-hide default.
+  const system = normalizeSystem(String(formData.get("system") ?? ""));
   if (!file || !(await isRealFile(file))) return;
 
   await prisma.rulebook.upsert({
     where: { file },
-    update: { everyone },
-    create: { file, everyone },
+    update: { everyone, system },
+    create: { file, everyone, system },
   });
 
   revalidatePath("/admin/rulebooks");
+  revalidatePath("/rules");
 }
 
 // Grant a specific account access to a file, looked up by email.

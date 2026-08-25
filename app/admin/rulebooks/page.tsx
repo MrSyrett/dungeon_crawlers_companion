@@ -3,16 +3,24 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
-import { listRulebookFiles, prettyName } from "@/lib/rulebooks";
+import { listRulebookFiles, prettyName, normalizeSystem } from "@/lib/rulebooks";
+import type { RulebookSystem } from "@/lib/rulebooks";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { AdminNav } from "@/components/AdminNav";
 import {
-  setRulebookEveryone,
+  saveRulebookSettings,
   grantRulebookAccess,
   revokeRulebookAccess,
 } from "@/app/actions/rulebooks";
 
 export const dynamic = "force-dynamic";
+
+// Matches the dashboard's system toggle (components/systemStore.ts).
+const SYSTEM_LABEL: Record<RulebookSystem, string> = {
+  SD: "Shadowdark",
+  DCC: "Dungeon Crawler Carl",
+  BOTH: "Both systems",
+};
 
 export default async function AdminRulebooksPage({
   searchParams,
@@ -27,7 +35,7 @@ export default async function AdminRulebooksPage({
 
   const files = await listRulebookFiles();
   const [rulebooks, grants] = await Promise.all([
-    prisma.rulebook.findMany({ select: { file: true, everyone: true } }),
+    prisma.rulebook.findMany({ select: { file: true, everyone: true, system: true } }),
     prisma.rulebookAccess.findMany({
       select: { file: true, userId: true, user: { select: { email: true } } },
       orderBy: { createdAt: "asc" },
@@ -35,6 +43,7 @@ export default async function AdminRulebooksPage({
   ]);
 
   const everyoneFor = new Map(rulebooks.map((r) => [r.file, r.everyone]));
+  const systemFor = new Map(rulebooks.map((r) => [r.file, normalizeSystem(r.system)]));
   const grantsFor = new Map<string, { userId: string; email: string }[]>();
   for (const g of grants) {
     const list = grantsFor.get(g.file) ?? [];
@@ -69,7 +78,9 @@ export default async function AdminRulebooksPage({
         <code className="rounded bg-[var(--panel-2)] px-1.5 py-0.5 text-[var(--text)]">
           ADMIN_EMAILS
         </code>{" "}
-        environment variable.
+        environment variable. &ldquo;Shown on&rdquo; picks which system&apos;s Rulebooks list a book
+        appears in (it follows the Shadowdark / Crawler Carl toggle) — it hides, it doesn&apos;t
+        grant.
       </p>
 
       {nouser ? (
@@ -91,6 +102,7 @@ export default async function AdminRulebooksPage({
         <ul className="flex flex-col gap-4">
           {files.map((file) => {
             const everyone = everyoneFor.get(file) ?? false;
+            const system = systemFor.get(file) ?? "BOTH";
             const fileGrants = grantsFor.get(file) ?? [];
             return (
               <li
@@ -101,24 +113,35 @@ export default async function AdminRulebooksPage({
                   <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[var(--gold)]">
                     {prettyName(file)}
                   </h2>
-                  <span
-                    className={`text-[10px] font-bold uppercase tracking-[0.15em] ${
-                      everyone ? "text-[#8fd19e]" : "text-[var(--muted)]"
-                    }`}
-                  >
-                    {everyone ? "· everyone signed in" : "· private"}
+                  <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">
+                    <span className={everyone ? "text-[#8fd19e]" : undefined}>
+                      {everyone ? "· everyone signed in" : "· private"}
+                    </span>{" "}
+                    · {SYSTEM_LABEL[system]}
                   </span>
                 </div>
                 <div className="mt-0.5 text-[11px] text-[var(--muted)]">{file}</div>
 
                 <form
-                  action={setRulebookEveryone}
-                  className="mt-3 flex items-center gap-2 border-t border-[var(--border)] pt-3"
+                  action={saveRulebookSettings}
+                  className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[var(--border)] pt-3"
                 >
                   <input type="hidden" name="file" value={file} />
                   <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
                     <input type="checkbox" name="everyone" defaultChecked={everyone} className="h-4 w-4" />
                     Visible to everyone signed in
+                  </label>
+                  <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
+                    Shown on
+                    <select
+                      name="system"
+                      defaultValue={system}
+                      className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1.5 text-[13px] text-[var(--text)] outline-none focus:border-[var(--gold)]"
+                    >
+                      <option value="BOTH">Both systems</option>
+                      <option value="SD">Shadowdark</option>
+                      <option value="DCC">Dungeon Crawler Carl</option>
+                    </select>
                   </label>
                   <button className="ml-auto shrink-0 rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]">
                     Save

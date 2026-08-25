@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { isAdminEmail } from "@/lib/admin";
-import { visibleRulebookFiles, prettyName } from "@/lib/rulebooks";
+import { visibleRulebooks, prettyName } from "@/lib/rulebooks";
+import RulebookGrid from "@/components/RulebookGrid";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,15 @@ export default async function RulesPage({
   if (!user) redirect("/login");
 
   const isAdmin = isAdminEmail(user.email);
-  // Only the books this user is allowed to see.
-  const books = await visibleRulebookFiles({ id: user.id, email: user.email });
+  // Only the books this user is allowed to see (with their system tags — the
+  // grid below hides non-matching ones behind the Shadowdark/DCC toggle).
+  const books = await visibleRulebooks({ id: user.id, email: user.email });
   const { book } = await searchParams;
 
-  // Only ever serve a file we actually listed — never trust the query string
-  const selected = book && books.includes(book) ? book : null;
+  // Only ever serve a file we actually listed — never trust the query string.
+  // Deliberately checked against ALL visible books, not the system-filtered
+  // list: the tag hides cards, it doesn't revoke access to a direct link.
+  const selected = book && books.some((b) => b.file === book) ? book : null;
 
   if (selected) {
     const src = `/api/rulebooks/${encodeURIComponent(selected)}`;
@@ -117,24 +121,9 @@ export default async function RulesPage({
           </p>
         </div>
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2">
-          {books.map((file) => (
-            <li key={file}>
-              <Link
-                href={`/rules?book=${encodeURIComponent(file)}`}
-                className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--panel)] px-5 py-5 transition-colors hover:border-[var(--gold)] hover:bg-[var(--panel-2)]"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-base font-bold uppercase tracking-[0.12em]">
-                    {prettyName(file)}
-                  </div>
-                  <div className="mt-1 text-[11px] text-[var(--muted)]">PDF</div>
-                </div>
-                <span className="ml-6 shrink-0 text-xl text-[var(--muted)]">→</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <RulebookGrid
+          books={books.map((b) => ({ file: b.file, title: prettyName(b.file), system: b.system }))}
+        />
       )}
     </div>
   );

@@ -234,6 +234,11 @@ model Sound {
 model Rulebook {
   file      String   @id // filename in protected/rulebooks/
   everyone  Boolean  @default(false)
+  // Which game system's Rulebooks list shows this file: "SD" (Shadowdark),
+  // "DCC" (Dungeon Crawler Carl), or "BOTH". Display-only — it hides books on
+  // the /rules list when the other system is toggled; it does NOT gate access
+  // (that stays with `everyone` + RulebookAccess). Files with no row are BOTH.
+  system    String   @default("BOTH")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
