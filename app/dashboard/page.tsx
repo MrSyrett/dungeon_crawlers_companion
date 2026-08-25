@@ -16,6 +16,9 @@ import SystemToggle from "@/components/SystemToggle";
 // tab they sit after the Shadowdark reference pages (see SD_REFERENCE); on the
 // DCC tab they're the only toolbar links.
 const SHARED_NAV: { href: string; label: string }[] = [
+  // Leads the shared links so the Shadowdark tab keeps its old order (reference
+  // pages, then Rulebooks) and the DCC tab starts with it.
+  { href: "/rules", label: "Rulebooks" },
   { href: "/vtt", label: "VTT" },
   { href: "/token-maker", label: "Tokens" },
   { href: "/dungeon-map", label: "Maps" },
@@ -32,7 +35,6 @@ const SD_REFERENCE: { href: string; label: string }[] = [
   { href: "/spells", label: "Spells" },
   { href: "/gear", label: "Gear" },
   { href: "/bestiary", label: "Bestiary" },
-  { href: "/rules", label: "Rulebooks" },
 ];
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {
