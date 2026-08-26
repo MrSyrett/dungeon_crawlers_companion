@@ -124,6 +124,19 @@ export interface DccBackground {
   source: DccSource;
 }
 
+// ── Experiences (Third-Floor+ fast-forward creation) ────────────────────────
+export interface DccExperience {
+  name: string;        // the entry's short title
+  table: string;       // its source table, e.g. "Interactions with Other Crawlers"
+  /** Floor the events represent: 2 = tutorial tables (usable at F3+), 3 = Third Floor Events, 4 = Fourth Floor Events. */
+  floor: number;
+  roll?: number;       // 1d12 index on its table
+  skills: string[];    // the 4 candidate skills (the crawler picks 2)
+  desc?: string;       // short narrative
+  page: number;
+  source: DccSource;
+}
+
 // ── Bestiary (Mob / Boss / Rival stat blocks) ───────────────────────────────
 export type DccMonsterRole =
   | "Mob"

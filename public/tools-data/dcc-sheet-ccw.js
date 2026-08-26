@@ -37,6 +37,28 @@
   const BASIC_SPELLS = ["Dirt Clod", "Fire Fingers", "Frost Scar", "Shock Treatment", "Soul Collector"];
   const SIZE_NAME = { 1: "Tiny", 2: "Small", 3: "Petite", 4: "Medium", 5: "Large", 6: "Huge", 7: "Colossal", 8: "Gargantuan" };
 
+  // ── Third-Floor+ fast-forward (Core pp.115-118) ─────────────────────────────
+  // level, total stat points to distribute, and number of Experiences by floor.
+  const FLOOR_CFG = { 3: { level: 10, statPoints: 27, experiences: 6 }, 4: { level: 20, statPoints: 57, experiences: 8 }, 5: { level: 30, statPoints: 87, experiences: 10 } };
+  // Table 25 starting-loot rows: each gives a Weapon / Armor / Item / Consumable at a tier.
+  const LOOT_ROWS = [
+    { row: 1, weapon: "Platinum", armor: "Gold", item: "Silver", consumable: "Bronze" },
+    { row: 2, weapon: "Bronze", armor: "Platinum", item: "Gold", consumable: "Silver" },
+    { row: 3, weapon: "Silver", armor: "Bronze", item: "Platinum", consumable: "Gold" },
+    { row: 4, weapon: "Gold", armor: "Silver", item: "Bronze", consumable: "Platinum" },
+  ];
+  const TIER_DR = { Bronze: 1, Silver: 2, Gold: 3, Platinum: 4 };            // armor DR by tier
+  const TIER_WEAPON_SKILL = { Bronze: 0, Silver: 1, Gold: 1, Platinum: 2 };  // primary-weapon rank bonus by tier
+  const LOOT_WEAPON = { Bronze: "a funny d6 non-magical weapon (AI Favor 2 vs Bosses)", Silver: "+1 Weapon Skill and a +1 damage buff", Gold: "+1 Weapon Skill and a Scroll of Upgrade", Platinum: "+2 Weapon Skill, +3 STR or DEX, and a Scroll of Upgrade" };
+  const LOOT_ARMOR = { Bronze: "mundane armor: +1 DR", Silver: "+2 DR and Anti-Piercing", Gold: "+3 DR and resistance to an uncommon damage type", Platinum: "+4 DR, +5 CON, +3 Catcher or Taunt" };
+  const LOOT_ITEM = { Bronze: "50 ft rope / bicycle / canoe / hang glider", Silver: "Friendship Bracelet of a Race kind", Gold: "accessory: +3 to a stat + skill pairing", Platinum: "+3 Skill Potion (permanent)" };
+  const LOOT_CONS = { Bronze: "10 Healing Potions / Bandages / Torches, or 1 dynamite", Silver: "2 Antidotes, a Good Healing Potion, or Goblin Dynamite", Gold: "a Rank-5 Spell Scroll or a Gold Healing Potion", Platinum: "a Scratcher ticket (p.218)" };
+
+  function classByName(n) { return (typeof DCC_CLASSES !== "undefined" ? DCC_CLASSES : []).find((c) => c.name === n) || null; }
+  function availExperiences() { return (typeof DCC_EXPERIENCES !== "undefined" ? DCC_EXPERIENCES : []).filter((e) => e.floor <= (W.floor - 1)); }
+  function statPointsSpent() { return STAT_IDS.reduce((n, k) => n + (parseInt(W.statPoints[k], 10) || 0), 0); }
+  function isThird() { return W.path === "thirdfloor"; }
+
   // ── helpers ────────────────────────────────────────────────────────────────
   const d = (n) => Math.floor(Math.random() * n) + 1;
   function rollStat() { let r = d(6); while (r === 1) r = d(6); return r; } // reroll 1s
@@ -96,30 +118,39 @@
   function freshState() {
     return {
       step: 0,
-      path: "tutorial", // 'tutorial' | 'thirdfloor' (WIP)
+      path: "tutorial", // 'tutorial' | 'thirdfloor'
+      floor: 3,         // thirdfloor only: 3 / 4 / 5
       basics: { name: "", gender: "", crawler: String(500000 + Math.floor(Math.random() * 12400000)) },
       race: "Human",
+      class: "",        // thirdfloor only
       statMethod: "array", // 'array' | 'roll'
       statVals: { str: "", int: "", con: "", dex: "", cha: "" }, // pre-race base
+      statPoints: { str: 0, int: 0, con: 0, dex: 0, cha: 0 },     // thirdfloor distribution
       bg: {}, // era -> { base: string|null, custom: bool, name: string, skills: [] }
       info: {}, // skillName -> bool (show its description)
       combat: { type: "weapon", weapon: "", weaponName: "", spell: "", spellName: "" },
+      experiences: [],  // thirdfloor: [{ exp: name, skills: [] }]
+      loot: "",         // thirdfloor: Table-25 row "1".."4"
       story: { trauma: "", loose: "", regret: "" },
       gear: { clothes: "", useful: "", junk: "", weapon: "", extra: "" },
       gearInit: false,
     };
   }
 
-  const STEPS = [
-    { key: "basics", title: "Basics" },
-    { key: "race", title: "Race" },
-    { key: "stats", title: "Stats" },
-    { key: "background", title: "Background" },
-    { key: "combat", title: "Combat" },
-    { key: "story", title: "Story" },
-    { key: "gear", title: "Gear" },
-    { key: "review", title: "Review" },
-  ];
+  // Step list depends on the path. The Third-Floor fast-forward inserts Class,
+  // Experiences, Stat Points, and Loot between the base steps.
+  const STEP_DEFS = {
+    basics: "Basics", race: "Race", class: "Class", stats: "Stats", background: "Background",
+    combat: "Combat", experiences: "Experiences", statpoints: "Stat Points", loot: "Loot",
+    story: "Story", gear: "Gear", review: "Review",
+  };
+  function steps() {
+    const keys = isThird()
+      ? ["basics", "race", "class", "stats", "background", "combat", "experiences", "statpoints", "loot", "story", "gear", "review"]
+      : ["basics", "race", "stats", "background", "combat", "story", "gear", "review"];
+    return keys.map((k) => ({ key: k, title: STEP_DEFS[k] }));
+  }
+  function clampStep() { const n = steps().length; if (W.step > n - 1) W.step = n - 1; }
 
   // ── CSS ────────────────────────────────────────────────────────────────────
   function injectCss() {
@@ -202,10 +233,13 @@
   function render() {
     const ov = document.getElementById("dccw-overlay");
     if (!ov || !W) return;
+    clampStep();
+    const STEPS = steps();
     const key = STEPS[W.step].key;
     const body = ({
-      basics: renderBasics, race: renderRace, stats: renderStats, background: renderBackground,
-      combat: renderCombat, story: renderStory, gear: renderGear, review: renderReview,
+      basics: renderBasics, race: renderRace, class: renderClass, stats: renderStats, background: renderBackground,
+      combat: renderCombat, experiences: renderExperiences, statpoints: renderStatPoints, loot: renderLoot,
+      story: renderStory, gear: renderGear, review: renderReview,
     })[key]();
     const pips = STEPS.map((st, i) =>
       `<span class="dccw-pip ${i === W.step ? "on" : i < W.step ? "done" : ""}">${i + 1}. ${st.title}</span>`
@@ -241,12 +275,16 @@
         </div>
         <div class="dccw-field"><label>Starting point</label>
           <div class="dccw-seg">
-            <button class="${W.path === "tutorial" ? "on" : ""}" onclick="DCCW.set('path','tutorial')">Tutorial (Lvl 1)</button>
-            <button class="${W.path === "thirdfloor" ? "on" : ""}" onclick="DCCW.set('path','thirdfloor')">Third Floor+</button>
+            <button class="${W.path === "tutorial" ? "on" : ""}" onclick="DCCW.setPath('tutorial')">Tutorial (Lvl 1)</button>
+            <button class="${W.path === "thirdfloor" ? "on" : ""}" onclick="DCCW.setPath('thirdfloor')">Third Floor+</button>
           </div>
         </div>
       </div>
-      ${W.path === "thirdfloor" ? `<p class="dccw-warn">The Third-Floor fast-forward (start at Level 10/20/30 with Experiences) is coming later. For now the wizard builds a Level-1 tutorial crawler. Switch back to <b>Tutorial</b> to continue.</p>` : ""}`;
+      ${isThird() ? `
+      <div class="dccw-row"><div class="dccw-field"><label>Starting floor</label><div class="dccw-seg">
+        ${[3, 4, 5].map((f) => `<button class="${W.floor === f ? "on" : ""}" onclick="DCCW.setFloor(${f})">Floor ${f} · Lvl ${FLOOR_CFG[f].level}</button>`).join("")}
+      </div></div></div>
+      <p class="dccw-sub">Fast-forward: you'll build the crawler's foundation, then jump to <b>Level ${FLOOR_CFG[W.floor].level}</b> — add a Class, ${FLOOR_CFG[W.floor].experiences} Experiences, ${FLOOR_CFG[W.floor].statPoints} stat points, and starting loot. Skills and your attack get their fast-forward rank boosts automatically.</p>` : ""}`;
   }
 
   // ── step: race ────────────────────────────────────────────────────────────────
@@ -274,6 +312,98 @@
       </div>` : ""}`;
   }
 
+  // ── step: class (Third-Floor+) ──────────────────────────────────────────────
+  function renderClass() {
+    if (typeof DCC_CLASSES === "undefined") return `<h3>Choose a class</h3><p class="dccw-warn">The class list didn't load. Reopen the sheet from the app so /tools-data/dcc-classes.js is available.</p>`;
+    const classes = DCC_CLASSES.slice().sort((a, b) => a.name.localeCompare(b.name));
+    const opts = ['<option value="">— choose a class —</option>'].concat(classes.map((c) => `<option value="${attr(c.name)}" ${c.name === W.class ? "selected" : ""}>${esc(c.name)}</option>`)).join("");
+    const cls = classByName(W.class);
+    const mods = cls ? raceStatMods(cls) : ZERO_MODS;
+    const modLine = STAT_IDS.filter((k) => mods[k]).map((k) => `${STAT_ABBR[k]} ${mods[k] > 0 ? "+" : ""}${mods[k]}`).join(", ") || "no stat changes";
+    return `
+      <h3>Choose a class</h3>
+      <p class="dccw-hint">At Floor 3 and beyond your crawler has a Class. Read its benefits — its stat bonuses apply to your sheet on the next step.</p>
+      <div class="dccw-row"><div class="dccw-field"><label>Class</label><select onchange="DCCW.setClass(this.value)">${opts}</select></div></div>
+      ${cls ? `<div class="dccw-card">
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;margin-bottom:4px;">
+          <b style="color:#f0a8a3;text-transform:uppercase;letter-spacing:.04em;">${esc(cls.name)}</b>
+          <span class="dccw-sub">${esc(cls.categories.join(" / "))}${cls.earthClass ? " · Earth Class" : ""} · Stat mods: ${modLine}</span>
+        </div>
+        ${cls.prerequisites ? `<p class="dccw-sub" style="margin-bottom:6px;">Prerequisite: ${esc(cls.prerequisites)}</p>` : ""}
+        <ul class="dccw-grants">${cls.grants.map((g) => `<li>${esc(g)}</li>`).join("")}</ul>
+      </div>` : `<p class="dccw-warn">Choose a class to continue.</p>`}`;
+  }
+
+  // ── step: experiences (Third-Floor+) ────────────────────────────────────────
+  function ensureExpSlots() {
+    const n = FLOOR_CFG[W.floor].experiences;
+    while (W.experiences.length < n) W.experiences.push({ exp: "", skills: [] });
+    if (W.experiences.length > n) W.experiences.length = n;
+  }
+  function renderExperiences() {
+    if (typeof DCC_EXPERIENCES === "undefined") return `<h3>Experiences</h3><p class="dccw-warn">The experiences list didn't load. Reopen the sheet from the app so /tools-data/dcc-experiences.js is available.</p>`;
+    ensureExpSlots();
+    const avail = availExperiences();
+    const tables = [...new Set(avail.map((e) => e.table))];
+    const n = W.experiences.length;
+    let h = `<h3>Experiences</h3><p class="dccw-hint">Pick <b>${n}</b> defining moments from your climb. For each, choose an experience, then take <b>2</b> of its skills — their ranks (1d4 &amp; 1d2) are rolled when you finish. Tap <span class="dccw-i" style="cursor:default;">i</span> to read a skill.</p>`;
+    W.experiences.forEach((slot, idx) => {
+      const opts = ['<option value="">— choose an experience —</option>'].concat(tables.map((t) =>
+        `<optgroup label="${esc(t)}">` + avail.filter((e) => e.table === t).map((e) => `<option value="${attr(e.name)}" ${slot.exp === e.name ? "selected" : ""}>${esc(e.name)}</option>`).join("") + `</optgroup>`)).join("");
+      h += `<div class="dccw-card"><div class="dccw-field" style="margin-bottom:6px;"><label>Experience ${idx + 1}</label><select onchange="DCCW.setExp(${idx},this.value)">${opts}</select></div>`;
+      const e = avail.find((x) => x.name === slot.exp);
+      if (e) {
+        if (e.desc) h += `<p class="dccw-sub" style="margin-bottom:6px;">${esc(e.desc)}</p>`;
+        h += `<div>` + e.skills.map((sk) => {
+          const on = (slot.skills || []).includes(sk);
+          return `<span class="dccw-chip ${on ? "on" : ""}"><span onclick="DCCW.toggleExpSkill(${idx},'${attr(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span><span class="dccw-i" title="Skill info" onclick="event.stopPropagation();DCCW.toggleInfo('${attr(sk)}')">i</span></span>`;
+        }).join("") + `</div>`;
+        h += e.skills.filter((sk) => W.info[sk]).map(skillDesc).join("");
+        if ((slot.skills || []).length !== 2) h += `<p class="dccw-warn">Pick exactly 2 skills.</p>`;
+      }
+      h += `</div>`;
+    });
+    return h;
+  }
+
+  // ── step: stat points (Third-Floor+) ────────────────────────────────────────
+  function renderStatPoints() {
+    const budget = FLOOR_CFG[W.floor].statPoints;
+    const remain = budget - statPointsSpent();
+    const fin = finalStats();
+    let h = `<h3>Distribute stat points</h3><p class="dccw-hint">Spend <b>${budget}</b> points across your stats (added to your Unenhanced scores). <b>${remain}</b> left.</p>`;
+    h += `<div class="dccw-row">` + STAT_IDS.map((k) => {
+      const pv = parseInt(W.statPoints[k], 10) || 0;
+      return `<div class="dccw-statbox" style="flex:1;min-width:120px;">
+        <div class="k">${STAT_ABBR[k]}</div><div class="v">${fin[k]}</div><div class="m">mod ${statMod(fin[k]) >= 0 ? "+" : ""}${statMod(fin[k])}</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;">
+          <button class="dccw-btn" style="padding:2px 10px;" onclick="DCCW.pt('${k}',-1)" ${pv <= 0 ? "disabled" : ""}>−</button>
+          <span style="min-width:22px;">+${pv}</span>
+          <button class="dccw-btn" style="padding:2px 10px;" onclick="DCCW.pt('${k}',1)" ${remain <= 0 ? "disabled" : ""}>+</button>
+        </div></div>`;
+    }).join("") + `</div>`;
+    if (remain !== 0) h += `<p class="dccw-warn">Spend all ${budget} points (${remain} remaining) to continue.</p>`;
+    return h;
+  }
+
+  // ── step: loot (Third-Floor+) ───────────────────────────────────────────────
+  function renderLoot() {
+    let h = `<h3>Acquired loot</h3><p class="dccw-hint">On the climb to Floor ${W.floor} you found starting gear. Pick one spread — you get a Weapon, Armor, an Item, and a Consumable at the tiers shown. The headline effects (armor DR, weapon skill bonus) are applied to your sheet; resolve the full options with your GM.</p>`;
+    LOOT_ROWS.forEach((r) => {
+      const on = String(W.loot) === String(r.row);
+      h += `<div class="dccw-card" style="cursor:pointer;border-color:${on ? "#b82018" : "#2a2a2e"};" onclick="DCCW.setLoot('${r.row}')">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span class="dccw-i" style="border-color:${on ? "#b82018" : "#3a3a40"};color:${on ? "#f0a8a3" : "#8a8a93"};">${on ? "✓" : r.row}</span><b style="color:${on ? "#f0a8a3" : "#ece9e1"};">Spread ${r.row}</b></div>
+        <ul class="dccw-list">
+          <li><b>${r.weapon} Weapon</b> — ${esc(LOOT_WEAPON[r.weapon])}</li>
+          <li><b>${r.armor} Armor</b> — ${esc(LOOT_ARMOR[r.armor])}</li>
+          <li><b>${r.item} Item</b> — ${esc(LOOT_ITEM[r.item])}</li>
+          <li><b>${r.consumable} Consumable</b> — ${esc(LOOT_CONS[r.consumable])}</li>
+        </ul></div>`;
+    });
+    if (!W.loot) h += `<p class="dccw-warn">Pick a loot spread to continue.</p>`;
+    return h;
+  }
+
   // ── step: stats ───────────────────────────────────────────────────────────────
   function statsAssigned() {
     if (W.statMethod === "array") {
@@ -282,12 +412,16 @@
     }
     return STAT_IDS.every((k) => W.statVals[k] !== "");
   }
+  const ZERO_MODS = { str: 0, int: 0, con: 0, dex: 0, cha: 0 };
   function finalStats() {
-    const mods = raceStatMods(raceByName(W.race));
+    const rmods = raceStatMods(raceByName(W.race));
+    const cmods = isThird() && W.class ? raceStatMods(classByName(W.class)) : ZERO_MODS;
+    const pts = isThird() ? W.statPoints : ZERO_MODS;
     const out = {};
     STAT_IDS.forEach((k) => {
       const base = parseInt(W.statVals[k], 10);
-      out[k] = Math.max(1, (isNaN(base) ? 0 : base) + (mods[k] || 0)); // score = base + race mod; floor 1
+      // score = base + race mod + class mod + distributed points; the mod is derived, floor 1.
+      out[k] = Math.max(1, (isNaN(base) ? 0 : base) + (rmods[k] || 0) + (cmods[k] || 0) + (parseInt(pts[k], 10) || 0));
     });
     return out;
   }
@@ -485,6 +619,44 @@
     return items;
   }
 
+  // Skills + attacks with fast-forward rank boosts applied (Third-Floor+ only).
+  // Rolls happen here, so only call at finish (never during render — it'd flicker).
+  function buildSkillsAndAttacks() {
+    const third = isThird();
+    const b1 = () => (third ? d(4) : 0);           // +1d4
+    const bP = () => (third ? d(4) + d(4) : 0);    // +2d4 to the primary attack
+    const skillRank = {}; // key -> { name, rank, stat, checkType, notes }
+    function addSkill(name, rank, note) {
+      const key = String(name).toLowerCase();
+      if (!skillRank[key]) {
+        const sd = skillByName(name);
+        skillRank[key] = { name, rank: 0, stat: skillStatLc(name), checkType: sd && sd.passive ? "Passive" : "Active", notes: "" };
+      }
+      skillRank[key].rank = Math.min(10, skillRank[key].rank + rank);
+      if (note && skillRank[key].notes.indexOf(note) === -1) skillRank[key].notes = skillRank[key].notes ? skillRank[key].notes + "; " + note : note;
+    }
+    ERAS.forEach((era) => { const c = W.bg[era]; if (!c) return; (c.skills || []).forEach((name) => addSkill(name, ERA_RANK[era] + b1(), bgDisplayName(era))); });
+    addSkill("Heal", 1, "Spell · heals 2 HB slots, 2 Mana");
+    if (third) W.experiences.forEach((slot) => { const p = slot.skills || []; if (p[0]) addSkill(p[0], d(4), "Experience"); if (p[1]) addSkill(p[1], d(2), "Experience"); });
+    const skills = Object.values(skillRank).map((s) => ({ name: s.name, rank: String(s.rank), stat: s.stat, checkType: s.checkType, notes: s.notes, checked: false }));
+
+    const atks = [{ name: "Unarmed Combat", rank: String(Math.min(10, 3 + b1())), dice: "1d4", stat: "str", effects: "" }];
+    if (W.combat.type === "weapon" && W.combat.weapon) {
+      const sd = skillByName(W.combat.weapon), disp = combatDisplayName() || W.combat.weapon;
+      atks.push({ name: disp, rank: String(Math.min(10, 3 + bP())), dice: sd && sd.damage ? sd.damage : "", stat: (sd && sd.stat ? String(sd.stat).toLowerCase() : "str"), effects: (disp !== W.combat.weapon ? W.combat.weapon + " skill" : "") });
+    } else if (W.combat.type === "spell" && W.combat.spell) {
+      const sp = basicSpells().find((s) => s.name === W.combat.spell), disp = combatDisplayName() || W.combat.spell;
+      atks.push({ name: disp + " (Spell)", rank: String(Math.min(10, 3 + bP())), dice: "", stat: (sp ? String(sp.stat).toLowerCase() : "int"), effects: [sp ? sp.mana + " Mana" : "", disp !== W.combat.spell ? W.combat.spell : ""].filter(Boolean).join(" · ") });
+    }
+    // Loot: the tiered weapon adds Weapon-Skill ranks to the primary attack.
+    if (third && W.loot && atks[1]) {
+      const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
+      const bonus = lr ? (TIER_WEAPON_SKILL[lr.weapon] || 0) : 0;
+      if (bonus) atks[1].rank = String(Math.min(10, (parseInt(atks[1].rank, 10) || 0) + bonus));
+    }
+    return { skills, atks };
+  }
+
   // ── step: review ──────────────────────────────────────────────────────────────
   function renderReview() {
     const fin = finalStats();
@@ -495,54 +667,101 @@
       const dups = [...new Set(names.filter((n, i) => names.indexOf(n) !== i))];
       return dups.length ? `<p class="dccw-warn">Duplicate skills (${dups.join(", ")}) — that's allowed; the ranks stack.</p>` : "";
     })();
+    const third = isThird();
+    const cfg = third ? FLOOR_CFG[W.floor] : null;
+    const level = third ? cfg.level : 1;
+    let extra = "";
+    if (third) {
+      const chosen = W.experiences.filter((s) => s.exp).map((s) => s.exp);
+      extra = `<div class="dccw-card"><b>Fast-forward — Floor ${W.floor}:</b><ul class="dccw-list">
+        <li>Class: ${esc(W.class || "—")}</li>
+        <li>${W.experiences.length} Experiences: ${esc(chosen.join(", ") || "—")}</li>
+        <li>${cfg.statPoints} stat points distributed · Popularity ${statMod(fin.cha) * (W.floor - 1)}</li>
+        <li>Loot spread ${esc(String(W.loot || "—"))}</li>
+        <li>Skill &amp; attack ranks get their boosts on create (primary +2d4, others +1d4, plus Experience ranks).</li>
+        ${W.floor > 3 ? `<li style="color:#e9b24c;">Then apply the Floor ${W.floor} extra boosts on the sheet (choose ${W.floor === 4 ? 6 : 8} skills, +2d2/+1d2).</li>` : ""}
+      </ul></div>`;
+    }
     return `<h3>Meet your crawler</h3>
-      <div class="dccw-card"><b>${esc(W.basics.name || "(unnamed)")}</b> · ${esc(W.race)} · Size ${race ? race.size + " (" + (SIZE_NAME[race.size] || "") + ")" : "—"} · Level 1 · Crawler #${esc(W.basics.crawler)}${W.basics.gender ? " · " + esc(W.basics.gender) : ""}</div>
+      <div class="dccw-card"><b>${esc(W.basics.name || "(unnamed)")}</b> · ${esc(W.race)}${third && W.class ? " " + esc(W.class) : ""} · Size ${race ? race.size + " (" + (SIZE_NAME[race.size] || "") + ")" : "—"} · Level ${level} · Crawler #${esc(W.basics.crawler)}${W.basics.gender ? " · " + esc(W.basics.gender) : ""}</div>
       <div class="dccw-statgrid">${STAT_IDS.map((k) => `<div class="dccw-statbox"><div class="k">${STAT_ABBR[k]}</div><div class="v">${fin[k]}</div><div class="m">mod ${statMod(fin[k]) >= 0 ? "+" : ""}${statMod(fin[k])}</div></div>`).join("")}</div>
-      <p class="dccw-sub" style="margin-top:8px;">Health ${statMod(fin.con) * 10} · Mana ${fin.int} · Evade d20+${statMod(fin.dex)} · AI Favor 1</p>
-      <div class="dccw-card" style="margin-top:12px;"><b>Attacks (Rank 3):</b><ul class="dccw-list">${atks.map((a) => `<li>${esc(a.name)} — ${esc(a.dice || "—")} ${a.stat ? esc(a.stat.toUpperCase()) : ""}</li>`).join("")}</ul></div>
-      <div class="dccw-card"><b>Skills:</b><ul class="dccw-list">${skills.map((s) => `<li>${esc(s.name)} — Rank ${esc(s.rank)}${s.stat ? " (" + esc(s.stat.toUpperCase()) + ")" : ""}</li>`).join("")}</ul></div>
+      <p class="dccw-sub" style="margin-top:8px;">Health ${statMod(fin.con) * 10} · Mana ${fin.int} · Evade d20+${statMod(fin.dex)} · AI Favor ${third ? "1d2 (rolled)" : "1"}</p>
+      ${extra}
+      <div class="dccw-card" style="margin-top:12px;"><b>Attacks:</b><ul class="dccw-list">${atks.map((a) => `<li>${esc(a.name)} — ${esc(a.dice || "—")} ${a.stat ? esc(a.stat.toUpperCase()) : ""}${third ? "" : " · Rank " + esc(a.rank)}</li>`).join("")}</ul></div>
+      <div class="dccw-card"><b>Skills${third ? " (before boosts)" : ""}:</b><ul class="dccw-list">${skills.map((s) => `<li>${esc(s.name)} — Rank ${esc(s.rank)}${s.stat ? " (" + esc(s.stat.toUpperCase()) + ")" : ""}</li>`).join("")}</ul></div>
       ${dupWarn}
       <p class="dccw-hint" style="margin-top:12px;">Creating will <b>overwrite the current sheet</b>. Export first if you want to keep it.</p>`;
   }
 
   // ── validation ────────────────────────────────────────────────────────────────
   function canAdvance() {
-    const key = STEPS[W.step].key;
-    if (key === "basics") return W.path === "tutorial";
+    const key = steps()[W.step].key;
+    if (key === "class") return !!W.class;
     if (key === "stats") return statsAssigned();
     if (key === "background") return ERAS.every((e) => W.bg[e] && (W.bg[e].skills || []).length === 2);
     if (key === "combat") return W.combat.type === "weapon" ? !!W.combat.weapon : (finalStats().int >= 4 && !!W.combat.spell);
+    if (key === "experiences") { ensureExpSlots(); return W.experiences.every((s) => s.exp && (s.skills || []).length === 2); }
+    if (key === "statpoints") return statPointsSpent() === FLOOR_CFG[W.floor].statPoints;
+    if (key === "loot") return !!W.loot;
     return true;
   }
 
   // ── build final data + apply ────────────────────────────────────────────────────
   function buildData() {
     initGear(); // ensure clothes + weapon boxes have their defaults even if never rendered
+    const third = isThird();
+    const cfg = third ? FLOOR_CFG[W.floor] : null;
     const fin = finalStats();
     const race = raceByName(W.race);
+    const { skills, atks } = buildSkillsAndAttacks();
     const data = {};
-    data.header = { "f-name": W.basics.name, "f-race": W.race, "f-gender": W.basics.gender, "f-level": "1", "f-crawler": W.basics.crawler, "f-class": "" };
+    data.header = { "f-name": W.basics.name, "f-race": W.race, "f-gender": W.basics.gender, "f-level": third ? String(cfg.level) : "1", "f-crawler": W.basics.crawler, "f-class": third ? W.class : "" };
     data.stats = {};
     STAT_IDS.forEach((k) => { data.stats[k] = { enh: String(fin[k]), unenh: String(fin[k]) }; });
+    // AI Favor: 1 fresh; 1d2 (+weapon/spell AI-Favor bonus) on the fast-forward.
+    let aiFavor = 1;
+    if (third) {
+      aiFavor = d(2);
+      if (W.combat.type === "spell") { const sp = basicSpells().find((s) => s.name === W.combat.spell); const rt = sp && sp.aiFavor ? sp.aiFavor : 0; if (rt === 1) aiFavor += d(2); else if (rt === 2) aiFavor += d(2) + d(2); }
+    }
+    // Armor DR from the chosen loot spread.
+    let drArmor = "";
+    if (third && W.loot) { const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot)); if (lr) drArmor = String(TIER_DR[lr.armor] || ""); }
     data.combat = {
-      evadeBuffs: "", evadeMove: "20", evadeStep: "10", drArmor: "", drBuffs: "",
-      drAiFavor: "1",                               // AI Favor -> its own box, not notes
-      drSize: race ? String(race.size) : "",        // Character Size from race
+      evadeBuffs: "", evadeMove: "20", evadeStep: "10", drArmor: drArmor, drBuffs: "",
+      drAiFavor: String(aiFavor),                    // AI Favor -> its own box, not notes
+      drSize: race ? String(race.size) : "",         // Character Size from race
       manaCurrentVal: String(fin.int), debuffs: "",
     };
     data.hpPips = new Array(10).fill("true");
-    data.attacks = assembledAttacks();
+    data.attacks = atks;
     const hot = ["Heal — 2 Mana: heal 2 HB slots (Interrupt)"];
     if (W.combat.type === "spell" && W.combat.spell) hot.push(combatDisplayName() + " — attack spell", "Mana Potion ×5");
     data.hotlist = hot;
     data.extBuffs = [];
     data.gear = [];
     data.accessories = [];
-    data.skills = assembledSkills();
-    data.inventory = gearItems().map((item) => ({ item, qty: "1", notes: "" }));
-    const notes = `Created with the Crawler Wizard. Knows Heal (Rank 1, 2 Mana, heal 2 slots, Interrupt).` +
-      (W.combat.type === "spell" ? " Started with an attack spell (+5 Mana Potions)." : "");
-    data.background = ["", W.story.trauma, W.story.loose, W.story.regret, notes];  // [Popularity, Trauma, Loose, Regret, Notes]
+    data.skills = skills;
+    // Inventory: the gear boxes, plus the four loot items on the fast-forward.
+    const inv = gearItems().map((item) => ({ item, qty: "1", notes: "" }));
+    if (third && W.loot) {
+      const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
+      if (lr) {
+        inv.push({ item: lr.weapon + " Weapon", qty: "1", notes: LOOT_WEAPON[lr.weapon] });
+        inv.push({ item: lr.armor + " Armor", qty: "1", notes: LOOT_ARMOR[lr.armor] });
+        inv.push({ item: lr.item + " Item", qty: "1", notes: LOOT_ITEM[lr.item] });
+        inv.push({ item: lr.consumable + " Consumable", qty: "1", notes: LOOT_CONS[lr.consumable] });
+      }
+    }
+    data.inventory = inv;
+    const popularity = third ? String(statMod(fin.cha) * (W.floor - 1)) : "";
+    const notes = third
+      ? `Created with the Crawler Wizard — Floor ${W.floor}, Level ${cfg.level}, Class ${W.class}. Skill ranks include the fast-forward boosts (primary +2d4, others +1d4) and Experience ranks.` +
+        (W.floor > 3 ? ` Still to apply on the sheet: the Floor ${W.floor} extra skill boosts (choose ${W.floor === 4 ? 6 : 8} skills, +2d2 if Rank ≤4 else +1d2).` : "") +
+        (W.combat.type === "spell" ? " Started with an attack spell (+5 Mana Potions)." : "")
+      : `Created with the Crawler Wizard. Knows Heal (Rank 1, 2 Mana, heal 2 slots, Interrupt).` +
+        (W.combat.type === "spell" ? " Started with an attack spell (+5 Mana Potions)." : "");
+    data.background = [popularity, W.story.trauma, W.story.loose, W.story.regret, notes];  // [Popularity, Trauma, Loose, Regret, Notes]
     data.campaign = (typeof _campaign !== "undefined" && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null;
     return data;
   }
@@ -598,6 +817,30 @@
     setCombat(k, v) { W.combat[k] = v; if (k === "weapon" || k === "spell") render(); },
     setStory(k, v) { W.story[k] = v; },
     setGear(k, v) { W.gear[k] = v; },
+    // Third-Floor+ ------------------------------------------------------------
+    setPath(p) { W.path = p; clampStep(); render(); },
+    setFloor(f) { W.floor = f; W.experiences = []; render(); },
+    setClass(v) { W.class = v; render(); },
+    setExp(idx, name) { if (W.experiences[idx]) { W.experiences[idx] = { exp: name, skills: [] }; render(); } },
+    toggleExpSkill(idx, sk) {
+      const slot = W.experiences[idx]; if (!slot) return;
+      slot.skills = slot.skills || [];
+      const i = slot.skills.indexOf(sk);
+      if (i >= 0) slot.skills.splice(i, 1);
+      else if (slot.skills.length < 2) slot.skills.push(sk);
+      render();
+    },
+    pt(k, delta) {
+      const budget = FLOOR_CFG[W.floor].statPoints;
+      const cur = parseInt(W.statPoints[k], 10) || 0;
+      let nv = cur + delta;
+      if (nv < 0) nv = 0;
+      const others = statPointsSpent() - cur;
+      if (others + nv > budget) nv = budget - others;
+      W.statPoints[k] = nv;
+      render();
+    },
+    setLoot(row) { W.loot = String(row); render(); },
   };
 
   window.DCCW = API;

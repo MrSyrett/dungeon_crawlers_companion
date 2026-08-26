@@ -37,6 +37,7 @@ const DATASETS = [
   { json: "classes.json",     kind: "array",  constName: "DCC_CLASSES",     type: "DccClass",      base: "dcc-classes" },
   { json: "deities.json",     kind: "array",  constName: "DCC_DEITIES",     type: "DccDeity",      base: "dcc-deities" },
   { json: "backgrounds.json", kind: "array",  constName: "DCC_BACKGROUNDS", type: "DccBackground", base: "dcc-backgrounds" },
+  { json: "experiences.json", kind: "array",  constName: "DCC_EXPERIENCES", type: "DccExperience", base: "dcc-experiences" },
   { json: "monsters.json",    kind: "array",  constName: "DCC_MONSTERS",    type: "DccMonster",    base: "dcc-monsters" },
 ];
 
