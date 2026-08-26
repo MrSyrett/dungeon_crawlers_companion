@@ -37,6 +37,14 @@ const SD_REFERENCE: { href: string; label: string }[] = [
   { href: "/bestiary", label: "Bestiary" },
 ];
 
+// DCC reference pages — they read Dungeon Crawler Carl data and lead the toolbar
+// on the DCC tab only. Grows as each reference page ships (roadmap Phase 1);
+// links are added here only once their route exists so nothing points at a 404.
+const DCC_REFERENCE: { href: string; label: string }[] = [
+  { href: "/dcc/skills", label: "Skills" },
+  { href: "/dcc/spells", label: "Spells" },
+];
+
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {
   return (
     <>
@@ -219,6 +227,7 @@ export default async function DashboardPage() {
            on the SD tab and are dropped on the DCC tab. */
         nav={<NavLinks links={SHARED_NAV} />}
         sdNav={<NavLinks links={SD_REFERENCE} />}
+        dccNav={<NavLinks links={DCC_REFERENCE} />}
         shadowdark={
           <>
             <div className="grid gap-10 md:grid-cols-2">

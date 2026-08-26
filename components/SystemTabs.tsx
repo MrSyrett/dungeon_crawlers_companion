@@ -17,6 +17,7 @@ export default function SystemTabs({
   dcc,
   nav,
   sdNav,
+  dccNav,
 }: {
   shadowdark: ReactNode;
   dcc: ReactNode;
@@ -24,6 +25,8 @@ export default function SystemTabs({
   nav?: ReactNode;
   /** Shadowdark-only links, shown ahead of `nav` on that tab. */
   sdNav?: ReactNode;
+  /** DCC-only links, shown ahead of `nav` on that tab. */
+  dccNav?: ReactNode;
 }) {
   const active = useSyncExternalStore(subscribeSystem, getSystemSnapshot, getSystemServerSnapshot);
 
@@ -32,9 +35,9 @@ export default function SystemTabs({
       {/* The toolbar now owns the full width (the toggle moved to the header),
           so the reference links wrap freely instead of running off the edge.
           Centered on both system tabs. */}
-      {nav || sdNav ? (
+      {nav || sdNav || dccNav ? (
         <nav className="mb-8 flex flex-wrap justify-center gap-2 border-b border-[var(--border)] pb-5">
-          {active === "SD" ? sdNav : null}
+          {active === "SD" ? sdNav : dccNav}
           {nav}
         </nav>
       ) : null}

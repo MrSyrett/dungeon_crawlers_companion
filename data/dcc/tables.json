@@ -1,0 +1,57 @@
+{
+  "statMods": [
+    { "min": 1, "max": 2, "mod": 1 },
+    { "min": 3, "max": 5, "mod": 2 },
+    { "min": 6, "max": 9, "mod": 3 },
+    { "min": 10, "max": 19, "mod": 4 },
+    { "min": 20, "max": 49, "mod": 5 },
+    { "min": 50, "max": 99, "mod": 6 },
+    { "min": 100, "max": 149, "mod": 7 },
+    { "min": 150, "max": 199, "mod": 8 },
+    { "min": 200, "max": 299, "mod": 9 },
+    { "min": 300, "max": null, "mod": 10 }
+  ],
+  "rankDamage": [
+    { "minRank": 1, "maxRank": 1, "dice": "+1" },
+    { "minRank": 2, "maxRank": 3, "dice": "+1d2" },
+    { "minRank": 4, "maxRank": 5, "dice": "+1d4" },
+    { "minRank": 6, "maxRank": 7, "dice": "+1d6" },
+    { "minRank": 8, "maxRank": 9, "dice": "+1d8" },
+    { "minRank": 10, "maxRank": 11, "dice": "+1d10" },
+    { "minRank": 12, "maxRank": 13, "dice": "+1d12" },
+    { "minRank": 14, "maxRank": 15, "dice": "+1d8 & +1d6" },
+    { "minRank": 16, "maxRank": 17, "dice": "+2d8" },
+    { "minRank": 18, "maxRank": 19, "dice": "+1d10 & +1d8" },
+    { "minRank": 20, "maxRank": 20, "dice": "+2d10" }
+  ],
+  "sizes": [
+    { "size": 1, "name": "Tiny", "examples": "Scatterer, Rat" },
+    { "size": 2, "name": "Small", "examples": "Cat, Raccoon" },
+    { "size": 3, "name": "Petite", "examples": "Goblin, Boar" },
+    { "size": 4, "name": "Medium", "examples": "Human, Wolf" },
+    { "size": 5, "name": "Large", "examples": "Horse, Mantaur" },
+    { "size": 6, "name": "Huge", "examples": "Elephant, Rhino" },
+    { "size": 7, "name": "Colossal", "examples": "Dinosaur, Dragon" },
+    { "size": 8, "name": "Gargantuan", "examples": "Kaiju" }
+  ],
+  "coreStats": [
+    { "key": "STR", "name": "Strength", "role": "Physical power; brawn skills and physical combat; melee to-hit and damage. Lift limit = STR score x 15 lb." },
+    { "key": "INT", "name": "Intelligence", "role": "Smarts; wit and knowledge skills; determines Mana at 1:1 with the INT score; most spells use INT to hit and damage." },
+    { "key": "CON", "name": "Constitution", "role": "Toughness; stamina skills; determines Health (CON Mod per Health Bar slot) and the Dying countdown." },
+    { "key": "DEX", "name": "Dexterity", "role": "Agility; speed and nimbleness skills; drives Evade and ranged to-hit; PvP initiative." },
+    { "key": "CHA", "name": "Charisma", "role": "Presence; influence skills; attracting viewers and fans (Popularity)." }
+  ],
+  "degrees": [
+    { "result": "Critical Hit", "margin": "Natural 20", "attack": "Roll twice as many base damage dice, then add your Stat Mod and other bonuses. Always hits.", "evade": "Evade the attack, and gain Advantage on your next Attack Action against that foe.", "nonCombat": "You achieve the best possible result." },
+    { "result": "Amazing Success", "margin": "Succeed by 10+", "attack": "Deal bonus damage equal to the Floor Number.", "evade": "Evade the attack, and gain Advantage on your next Attack Action against that foe.", "nonCombat": "You did it quickly, quietly, and left no trace." },
+    { "result": "Standard Success", "margin": "Succeed by 0-9", "attack": "Your attack hits; roll damage. No bonuses.", "evade": "You avoid the attack.", "nonCombat": "Your action worked. No bonuses." },
+    { "result": "Near Miss Fail", "margin": "Fail by 1-2", "attack": "GM announces \"Near Miss,\" encouraging allies to use an Intervene Action.", "evade": "You get hit (a Near Miss can be saved by an Intervene).", "nonCombat": "Fail, or succeed with complications." },
+    { "result": "Standard Fail", "margin": "Fail by 3-9", "attack": "You miss.", "evade": "You get hit.", "nonCombat": "Fail, or succeed with consequences." },
+    { "result": "Major Fail", "margin": "Fail by 10+", "attack": "You miss badly - drop an item, need to reload, or suffer the Take Down Debuff.", "evade": "Take additional damage equal to the Floor Number and gain a Minor Injury after combat.", "nonCombat": "Fail with a real consequence; you cannot retry that skill this scene." },
+    { "result": "Critical Fail", "margin": "Natural 1", "attack": "The worst outcome - hit an ally, break a weapon, gain a Debuff. Always misses.", "evade": "Take twice as much damage and gain a Major Injury after combat.", "nonCombat": "The worst possible outcome." }
+  ],
+  "damageTypes": {
+    "common": ["Bludgeoning", "Fire", "Piercing", "Poison", "Slashing"],
+    "uncommon": ["Acid", "Electric", "Force", "Holy", "Ice", "Necrotic", "Psychic", "Sonic"]
+  }
+}
