@@ -6,18 +6,14 @@
 // globals (DCC_RACES, DCC_SKILLS, DCC_BACKGROUNDS, DCC_SPELLS, DCC_TABLES) that
 // the sheet also loads from /tools-data/dcc-*.js.
 //
-// One launch button, three jobs, chosen by where the crawler is (crawlerState):
+// One launch button, two jobs, chosen by whether a crawler exists (crawlerExists):
 //   • create   — a new crawler: tutorial Level 1, or the Third-Floor+ fast-forward.
 //   • upgrade  — a played tutorial crawler reaching Floor 3: adds Race, Class and the
 //                banked (Level−1)×3 stat points on top of what they earned in play.
-//   • advance  — a Floor-3+ crawler in a saferoom: spend +3 points per level gained
-//                and roll Skill Advancement Checks (1d20 ≥ Rank → +1, max 15).
 // This system has no random character generator; every path is guided.
 //
 // Rules refs (Core Rulebook): character creation pp. 100-115; stat mods Table 2
-// (p. 57); background tables 12-15 (pp. 104-106); combat training pp. 108-109;
-// crawler advancement pp. 168-171 (level-up = +3 banked points; skills rise only by
-// their own Advancement Checks); Human racial bonus check p. 135.
+// (p. 57); background tables 12-15 (pp. 104-106); combat training pp. 108-109.
 //
 // IMPORTANT: the sheet's skill/attack stat <select> options are LOWERCASE
 // (str/int/con/dex/cha). Always write the linked stat lowercased or it silently
@@ -66,24 +62,15 @@
   // Upgrade budget = accumulated level-up points, unspendable until Floor 3:
   // 3 × current level − 3 (level 1 doesn't count). Fast-forward create = floor table.
   function upgradeLevel() { const l = parseInt(W.existing && W.existing.header && W.existing.header["f-level"], 10); return l > 0 ? l : 10; }
-  // Saferoom advancement: the crawler's current level (from the sheet) plus the
-  // levels gained this session; capped at the system max of 250.
-  function advLevelCount() { return Math.max(0, parseInt(W.advLevels, 10) || 0); }
-  function advNewLevel() { return Math.min(250, upgradeLevel() + advLevelCount()); }
-  function statBudget() {
-    if (isAdvance()) return 3 * advLevelCount();      // +3 stat points per level gained
-    return isUpgrade() ? Math.max(0, 3 * upgradeLevel() - 3) : FLOOR_CFG[W.floor].statPoints;
-  }
+  function statBudget() { return isUpgrade() ? Math.max(0, 3 * upgradeLevel() - 3) : FLOOR_CFG[W.floor].statPoints; }
   // "Third-floor rules apply": true for the fast-forward path AND the upgrade flow —
-  // both newly grant racial/class bonuses and distribute stat points. Advancement is
-  // a separate mode: race/class are already baked into the crawler's scores.
+  // both newly grant racial/class bonuses and distribute stat points.
   function isThird() { return W.mode === "upgrade" || W.path === "thirdfloor"; }
   function isUpgrade() { return W.mode === "upgrade"; }
-  function isAdvance() { return W.mode === "advance"; }
   // Base (pre-mod) stat: the assigned value when creating; the existing Unenhanced
-  // score when upgrading or advancing an already-built crawler.
+  // score when upgrading an already-built crawler.
   function baseStatVal(k) {
-    if (isUpgrade() || isAdvance()) { const s = W.existing && W.existing.stats && W.existing.stats[k]; return parseInt(s ? s.unenh : 0, 10) || 0; }
+    if (isUpgrade()) { const s = W.existing && W.existing.stats && W.existing.stats[k]; return parseInt(s ? s.unenh : 0, 10) || 0; }
     return parseInt(W.statVals[k], 10) || 0;
   }
 
@@ -162,11 +149,8 @@
   function freshState() {
     return {
       step: 0,
-      mode: "create",   // 'create' | 'upgrade' (reach Floor 3) | 'advance' (saferoom level-up)
-      existing: null,   // upgrade/advance: the sheet state read at launch (collectSheet())
-      advLevels: 1,     // advance: levels gained this saferoom (each = +3 stat points)
-      advChecks: {},    // advance: rowKey -> { kind, idx, name, rank0, rolled, adv, success }
-      advHumanPick: "", // advance: rowKey selected for the Human racial bonus check
+      mode: "create",   // 'create' | 'upgrade' (reach Floor 3)
+      existing: null,   // upgrade: the sheet state read at launch (collectSheet())
       path: "tutorial", // create: 'tutorial' | 'thirdfloor'
       floor: 3,         // fast-forward / upgrade target floor
       basics: { name: "", gender: "", crawler: String(500000 + Math.floor(Math.random() * 12400000)) },
@@ -193,12 +177,10 @@
     intro: "Upgrade", basics: "Basics", race: "Race", class: "Class", stats: "Stats", background: "Background",
     combat: "Combat", experiences: "Experiences", statpoints: "Stat Points", loot: "Loot",
     story: "Story", gear: "Gear", review: "Review",
-    advintro: "Level Up", advchecks: "Skill Checks", advreview: "Review",
   };
   function steps() {
     let keys;
-    if (isAdvance()) keys = ["advintro", "statpoints", "advchecks", "advreview"];
-    else if (isUpgrade()) keys = ["intro", "race", "class", "statpoints", "review"];
+    if (isUpgrade()) keys = ["intro", "race", "class", "statpoints", "review"];
     else if (W.path === "thirdfloor") keys = ["basics", "race", "class", "stats", "background", "combat", "experiences", "statpoints", "loot", "story", "gear", "review"];
     else keys = ["basics", "race", "stats", "background", "combat", "story", "gear", "review"];
     return keys.map((k) => ({ key: k, title: STEP_DEFS[k] }));
@@ -309,31 +291,9 @@
     ensureOverlay();
     render();
   }
-  // Saferoom advancement: a crawler who has already reached the Third Floor spends
-  // their banked level-up stat points and resolves Skill Advancement Checks. Reads the
-  // current sheet and only nudges level, stats and the ranks they roll up — everything
-  // else is kept exactly as played.
-  function openAdvance() {
-    injectCss();
-    if (!haveData()) { alert("The wizard needs the DCC data files. Open this sheet from the app so /tools-data/dcc-*.js can load."); return; }
-    if (typeof collectSheet !== "function") { alert("Couldn't read the current sheet to level it up. Try reloading."); return; }
-    W = freshState();
-    W.mode = "advance";
-    W.floor = 3;
-    W.existing = collectSheet();
-    W.race = (W.existing.header && W.existing.header["f-race"]) || "Human";
-    W.class = (W.existing.header && W.existing.header["f-class"]) || "";
-    W.advLevels = 1;
-    W.advChecks = {};
-    ensureOverlay();
-    render();
-  }
   function close() { const ov = document.getElementById("dccw-overlay"); if (ov) ov.style.display = "none"; W = null; }
 
-  // ── single launch button, three states by where the crawler is ──────────────
-  //   none    → Create (✨)   · blank sheet
-  //   tutorial→ Upgrade (⬆)   · a played Level-1–9 crawler reaching Floor 3
-  //   floor3+ → Advance (⏫)   · has a Class or is Level 10+ → saferoom level-ups
+  // ── single launch button: Create when the sheet is blank, Upgrade once a crawler exists ──
   function crawlerExists() {
     try {
       if (typeof collectSheet !== "function") return false;
@@ -343,30 +303,13 @@
       return false;
     } catch (e) { return false; }
   }
-  function crawlerState() {
-    if (!crawlerExists()) return "create";
-    try {
-      const s = collectSheet();
-      const cls = s.header && s.header["f-class"] && String(s.header["f-class"]).trim();
-      const lvl = parseInt(s.header && s.header["f-level"], 10) || 0;
-      if (cls || lvl >= 10) return "advance";
-    } catch (e) {}
-    return "upgrade";
-  }
-  function launch() {
-    const st = crawlerState();
-    if (st === "advance") openAdvance();
-    else if (st === "upgrade") openUpgrade();
-    else open();
-  }
+  function launch() { if (crawlerExists()) openUpgrade(); else open(); }
   function refreshButton() {
     const btn = document.getElementById("dccw-launch-btn");
     if (!btn) return;
-    const st = crawlerState();
-    btn.textContent = st === "advance" ? "⏫" : st === "upgrade" ? "⬆" : "✨";
-    btn.title = st === "advance" ? "Level up this crawler in a saferoom"
-      : st === "upgrade" ? "Upgrade this crawler to the Third Floor"
-      : "Create a character with the wizard";
+    const up = crawlerExists();
+    btn.textContent = up ? "⬆" : "✨";
+    btn.title = up ? "Upgrade this crawler to the Third Floor" : "Create a character with the wizard";
     btn.setAttribute("aria-label", btn.title);
   }
 
@@ -389,118 +332,6 @@
       <p class="dccw-sub">Tip: export the sheet first if you want a backup of the pre-Floor-3 version.</p>`;
   }
 
-  // ── saferoom advancement (Core pp.168-171) ─────────────────────────────────
-  function isHumanCrawler() { return String(W.race || "").trim().toLowerCase() === "human"; }
-  function humanBonusUsed() { return Object.keys(W.advChecks).some((k) => W.advChecks[k] && W.advChecks[k].adv); }
-  function advSkillRows() {
-    const ex = W.existing || {};
-    return (ex.skills || []).map((s, i) => ({ kind: "skill", idx: i, name: s.name, rank0: parseInt(s.rank, 10) || 0, passive: /passive/i.test(s.checkType || ""), stat: s.stat || "" }))
-      .filter((r) => String(r.name).trim());
-  }
-  function advAttackRows() {
-    const ex = W.existing || {};
-    return (ex.attacks || []).map((a, i) => ({ kind: "attack", idx: i, name: a.name, rank0: parseInt(a.rank, 10) || 0, passive: false, stat: a.stat || "" }))
-      .filter((r) => String(r.name).trim());
-  }
-  function advAllRows() { return advAttackRows().concat(advSkillRows()); }
-  function rowKey(r) { return r.kind + ":" + r.idx; }
-  function findAdvRow(key) { return advAllRows().find((r) => rowKey(r) === key) || null; }
-  // A row can roll an Advancement Check if it's not Passive and sits at Rank 1-14
-  // (Rank 15 is the normal cap; Rank 16+ only activates from the Sixth Floor).
-  function advRollable(r) { return r && !r.passive && r.rank0 >= 1 && r.rank0 <= 14; }
-  function advNewRank(c) { return c && c.success ? Math.min(15, c.rank0 + 1) : (c ? c.rank0 : 0); }
-
-  function advCheckBadge(key) {
-    const c = W.advChecks[key];
-    if (!c) return "";
-    const dice = c.adv ? `2d20 ${c.rolled.join("/")} → ${c.best}` : `d20 ${c.best}`;
-    const res = c.success
-      ? `<span style="color:#7fd18a;">✓ ${dice} ≥ ${c.rank0} → Rank ${advNewRank(c)}</span>`
-      : `<span style="color:#e08a84;">✗ ${dice} &lt; ${c.rank0} · no change</span>`;
-    return `<span class="dccw-sub" style="margin-left:8px;">${res}${c.adv ? ' <b style="color:#f0a8a3;">(Advantage)</b>' : ""}</span>
-      <button class="dccw-btn" style="padding:2px 8px;margin-left:6px;" onclick="DCCW.clearCheck('${attr(key)}')" title="Re-roll this check">↺</button>`;
-  }
-  function advRowLine(r) {
-    const key = rowKey(r);
-    const rolled = !!W.advChecks[key];
-    if (!advRollable(r)) {
-      const why = r.passive ? "Passive · advances via magic or Race/Class, not use"
-        : r.rank0 >= 15 ? "Rank 15 · at the cap (Rank 16+ needs the Sixth Floor)"
-          : "Rank 0 · train it first";
-      return `<div class="dccw-row" style="margin-bottom:6px;align-items:center;">
-        <div style="flex:1;min-width:180px;color:#8a8a93;">${esc(r.name)} <span class="dccw-sub">· Rank ${r.rank0}</span></div>
-        <div class="dccw-sub" style="flex:2;min-width:160px;">${why}</div></div>`;
-    }
-    return `<div class="dccw-row" style="margin-bottom:6px;align-items:center;">
-      <div style="flex:1;min-width:150px;"><b>${esc(r.name)}</b> <span class="dccw-sub">· Rank ${r.rank0}${r.stat ? " (" + esc(String(r.stat).toUpperCase()) + ")" : ""}</span></div>
-      <div style="flex:2;min-width:170px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
-        ${rolled ? advCheckBadge(key) : `<button class="dccw-btn" style="padding:4px 12px;" onclick="DCCW.rollCheck('${attr(key)}')">🎲 Roll (need ${r.rank0}+)</button>`}
-      </div></div>`;
-  }
-  function renderAdvChecks() {
-    const atk = advAttackRows(), sk = advSkillRows();
-    const rollableCount = advAllRows().filter(advRollable).length;
-    const rolledCount = Object.keys(W.advChecks).length;
-    const gained = Object.keys(W.advChecks).filter((k) => W.advChecks[k].success).length;
-    let h = `<h3>Skill Advancement Checks</h3>
-      <p class="dccw-hint">Back in a saferoom you resolve the Skills you <b>marked</b> in play. Each rolls <b>1d20 vs. its current Rank</b> — meet or beat the Rank and it climbs +1 (max 15). Marked skills are pre-flagged below; roll the ones you actually used. Passive skills don't roll.</p>`;
-    if (!rollableCount) { h += `<p class="dccw-sub">This crawler has no rollable skills yet.</p>`; }
-    // Marked-skill nudge: the sheet's advancement checkboxes tell us which the player used.
-    const markedNames = advSkillRows().filter((r) => { const s = (W.existing.skills || [])[r.idx]; return s && s.checked; }).map((r) => r.name);
-    if (markedNames.length) h += `<p class="dccw-sub" style="margin-bottom:10px;">Marked on the sheet: <b style="color:#f0a8a3;">${esc(markedNames.join(", "))}</b>.</p>`;
-    if (atk.length) { h += `<div class="dccw-card"><b style="color:#f0a8a3;">Attack Skills</b>` + atk.map(advRowLine).join("") + `</div>`; }
-    if (sk.length) { h += `<div class="dccw-card"><b style="color:#f0a8a3;">Skills</b>` + sk.map(advRowLine).join("") + `</div>`; }
-    if (isHumanCrawler()) {
-      const elig = advAllRows().filter((r) => advRollable(r) && r.rank0 <= 9);
-      const used = humanBonusUsed();
-      h += `<div class="dccw-card" style="border-color:#b82018;">
-        <b style="color:#f0a8a3;">Human racial bonus</b> <span class="dccw-sub">— one extra Advancement Check with Advantage on a Skill at Rank 9 or lower (Core p.135).</span>`;
-      if (used) {
-        h += `<p class="dccw-sub" style="margin-top:6px;">Used — clear the ✓ (Advantage) check above to take it back.</p>`;
-      } else if (!elig.length) {
-        h += `<p class="dccw-sub" style="margin-top:6px;">No eligible skill (all are Rank 10+, Passive, or capped).</p>`;
-      } else {
-        const pick = W.advHumanPick && elig.some((r) => rowKey(r) === W.advHumanPick) ? W.advHumanPick : rowKey(elig[0]);
-        const opts = elig.map((r) => `<option value="${attr(rowKey(r))}" ${rowKey(r) === pick ? "selected" : ""}>${esc(r.name)} (Rank ${r.rank0})</option>`).join("");
-        h += `<div class="dccw-row" style="margin-top:8px;align-items:flex-end;">
-          <div class="dccw-field"><label>Skill</label><select onchange="DCCW.setHumanPick(this.value)">${opts}</select></div>
-          <button class="dccw-btn primary" style="flex:0 0 auto;" onclick="DCCW.rollHuman('${attr(pick)}')">🎲🎲 Roll with Advantage</button>
-        </div>`;
-      }
-      h += `</div>`;
-    }
-    h += `<p class="dccw-sub" style="margin-top:6px;">${rolledCount} check(s) rolled, <b style="color:#7fd18a;">${gained}</b> Rank(s) gained. It's fine to skip this — you can roll later.</p>`;
-    return h;
-  }
-
-  function renderAdvIntro() {
-    const ex = W.existing || {};
-    const name = (ex.header && ex.header["f-name"]) || "This crawler";
-    const cur = upgradeLevel();
-    const race = (ex.header && ex.header["f-race"]) || "—";
-    const cls = (ex.header && ex.header["f-class"]) || "";
-    const statLine = STAT_IDS.map((k) => `${STAT_ABBR[k]} ${ex.stats && ex.stats[k] ? ex.stats[k].unenh || "—" : "—"}`).join(" · ");
-    const lv = advLevelCount();
-    return `
-      <h3>Saferoom level-up</h3>
-      <p class="dccw-hint">You only spend banked Stat points and roll Skill Advancement Checks in a <b>saferoom</b>. Levels come from play (1 per 2 hours) — tell me how many you've gained, and each hands you <b>+3 Stat points</b> to distribute next.</p>
-      <div class="dccw-card">
-        <div style="margin-bottom:6px;"><b style="color:#f0a8a3;">${esc(name)}</b> <span class="dccw-sub">· ${esc(race)}${cls ? " " + esc(cls) : ""} · currently Level ${cur}</span></div>
-        <div class="dccw-sub">Unenhanced stats: ${esc(statLine)}</div>
-      </div>
-      <div class="dccw-row" style="margin-top:12px;align-items:flex-end;">
-        <div class="dccw-field" style="max-width:220px;"><label>Levels gained</label>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <button class="dccw-btn" style="padding:4px 12px;" onclick="DCCW.advLevel(-1)" ${lv <= 0 ? "disabled" : ""}>−</button>
-            <span style="min-width:28px;text-align:center;font-size:18px;font-weight:800;color:#fff;">${lv}</span>
-            <button class="dccw-btn" style="padding:4px 12px;" onclick="DCCW.advLevel(1)" ${cur + lv >= 250 ? "disabled" : ""}>+</button>
-          </div>
-        </div>
-        <div class="dccw-field"><label>Result</label><div class="dccw-sub" style="padding:8px 0;">Level ${cur} → <b style="color:#f0a8a3;">${advNewLevel()}</b> · <b>${statBudget()}</b> Stat points to spend</div></div>
-      </div>
-      <p class="dccw-sub" style="margin-top:8px;">Nothing else is touched automatically — leveling doesn't raise Skills (that's the next step) and grants no HP or Mana beyond what your new CON and INT derive.</p>`;
-  }
-
   // ── render shell ──────────────────────────────────────────────────────────────
   function render() {
     const ov = document.getElementById("dccw-overlay");
@@ -512,14 +343,13 @@
       intro: renderUpgradeIntro, basics: renderBasics, race: renderRace, class: renderClass, stats: renderStats, background: renderBackground,
       combat: renderCombat, experiences: renderExperiences, statpoints: renderStatPoints, loot: renderLoot,
       story: renderStory, gear: renderGear, review: renderReview,
-      advintro: renderAdvIntro, advchecks: renderAdvChecks, advreview: renderReview,
     })[key]();
     const pips = STEPS.map((st, i) =>
       `<span class="dccw-pip ${i === W.step ? "on" : i < W.step ? "done" : ""}">${i + 1}. ${st.title}</span>`
     ).join("");
     const last = W.step === STEPS.length - 1;
-    const title = isAdvance() ? "Saferoom Level-Up" : isUpgrade() ? "Reach the Third Floor" : "Crawler Creation";
-    const finishLabel = isAdvance() ? "✓ Apply Level-Up" : isUpgrade() ? "✓ Apply Upgrade" : "✓ Create Character";
+    const title = isUpgrade() ? "Reach the Third Floor" : "Crawler Creation";
+    const finishLabel = isUpgrade() ? "✓ Apply Upgrade" : "✓ Create Character";
     ov.innerHTML = `
       <div class="dccw-modal" role="dialog" aria-label="Crawler Wizard">
         <div class="dccw-head"><h2 class="dccw-title">${title}</h2>
@@ -705,13 +535,11 @@
   const ZERO_MODS = { str: 0, int: 0, con: 0, dex: 0, cha: 0 };
   function finalStats() {
     // Racial/class stat mods are applied when they're first unlocked — the Third-Floor
-    // fast-forward and the upgrade flow. On the tutorial floors race is flavor; in the
-    // advancement flow the mods are already baked into the crawler's Unenhanced scores,
-    // so only the newly distributed points move the numbers.
-    const applyRaceClass = isThird() && !isAdvance();
-    const rmods = applyRaceClass ? raceStatMods(raceByName(W.race)) : ZERO_MODS;
-    const cmods = applyRaceClass && W.class ? raceStatMods(classByName(W.class)) : ZERO_MODS;
-    const pts = (isThird() || isAdvance()) ? W.statPoints : ZERO_MODS;
+    // fast-forward and the upgrade flow. On the tutorial floors race is flavor and grants
+    // nothing.
+    const rmods = isThird() ? raceStatMods(raceByName(W.race)) : ZERO_MODS;
+    const cmods = isThird() && W.class ? raceStatMods(classByName(W.class)) : ZERO_MODS;
+    const pts = isThird() ? W.statPoints : ZERO_MODS;
     const out = {};
     STAT_IDS.forEach((k) => {
       // score = base + race mod + class mod + distributed points; the mod is derived, floor 1.
@@ -956,27 +784,6 @@
   // ── step: review ──────────────────────────────────────────────────────────────
   function renderReview() {
     const fin = finalStats();
-    if (isAdvance()) {
-      const ex = W.existing || {};
-      const name = (ex.header && ex.header["f-name"]) || "(unnamed)";
-      const gains = Object.keys(W.advChecks).filter((k) => W.advChecks[k].success)
-        .map((k) => { const c = W.advChecks[k]; return `${esc(c.name)} → Rank ${advNewRank(c)}${c.adv ? " (Adv)" : ""}`; });
-      const lv = advLevelCount();
-      return `<h3>Confirm the level-up</h3>
-        <div class="dccw-card"><b>${esc(name)}</b> · Level ${upgradeLevel()} → <b style="color:#f0a8a3;">${advNewLevel()}</b>${lv ? ` (+${lv})` : ""}</div>
-        <div class="dccw-statgrid">${STAT_IDS.map((k) => {
-          const before = baseStatVal(k);
-          const add = parseInt(W.statPoints[k], 10) || 0;
-          return `<div class="dccw-statbox"><div class="k">${STAT_ABBR[k]}</div><div class="v">${fin[k]}</div><div class="m">mod ${statMod(fin[k]) >= 0 ? "+" : ""}${statMod(fin[k])}</div><div class="brk">${add ? before + " + " + add : String(before)}</div></div>`;
-        }).join("")}</div>
-        <p class="dccw-sub" style="margin-top:8px;">Health ${statMod(fin.con) * 10} (10 × CON mod) · Mana ${fin.int} (= INT)</p>
-        <div class="dccw-card" style="margin-top:12px;"><b>Applied when you finish:</b><ul class="dccw-list">
-          <li>New Level ${advNewLevel()} and ${statBudget()} distributed Stat point(s) (in the scores above)</li>
-          <li>${gains.length ? "Rank gains: " + gains.join(", ") : "No Skill Rank changes"}</li>
-          <li><b>Kept as-is:</b> everything else — attacks, other skills, gear, loot, Popularity and AI Favor</li>
-        </ul></div>
-        <p class="dccw-hint" style="margin-top:12px;">This updates the sheet in place. Export first if you want a backup.</p>`;
-    }
     if (isUpgrade()) {
       const ex = W.existing || {};
       const name = (ex.header && ex.header["f-name"]) || "(unnamed)";
@@ -1036,8 +843,6 @@
     if (key === "experiences") { ensureExpSlots(); return W.experiences.every((s) => s.exp && (s.skills || []).length === 2); }
     if (key === "statpoints") return statPointsSpent() === statBudget();
     if (key === "loot") return !!W.loot;
-    if (key === "advintro") return advLevelCount() >= 0;   // 0 levels = skill-checks-only visit is allowed
-    if (key === "advchecks") return true;                  // rolling checks is optional
     return true;
   }
 
@@ -1050,7 +855,7 @@
     const race = raceByName(W.race);
     const { skills, atks } = buildSkillsAndAttacks();
     const data = {};
-    data.header = { "f-name": W.basics.name, "f-race": W.race, "f-gender": W.basics.gender, "f-level": third ? String(cfg.level) : "1", "f-crawler": W.basics.crawler, "f-class": third ? W.class : "" };
+    data.header = { "f-name": W.basics.name, "f-race": W.race, "f-gender": W.basics.gender, "f-level": third ? String(cfg.level) : "1", "f-floor": third ? String(W.floor) : "1", "f-crawler": W.basics.crawler, "f-class": third ? W.class : "" };
     data.stats = {};
     STAT_IDS.forEach((k) => { data.stats[k] = { enh: String(fin[k]), unenh: String(fin[k]) }; });
     // AI Favor: 1 fresh; 1d2 (+weapon/spell AI-Favor bonus) on the fast-forward.
@@ -1129,6 +934,7 @@
       darkMode: ex.darkMode,
     };
     data.header["f-level"] = String(upgradeLevel()); // keeps their level (or 10 if blank)
+    data.header["f-floor"] = String(W.floor);        // reaching the Third Floor sets F = 3
     data.header["f-race"] = W.race;
     data.header["f-class"] = W.class;
     // stats: unenh = new score (existing + race + class + points); enh preserves any gear/buff delta.
@@ -1145,82 +951,28 @@
     return data;
   }
 
-  // Saferoom level-up on an already-Floor-3 crawler. Keeps the whole sheet and only
-  // nudges: the Level, the Unenhanced stat scores (by the distributed points), Mana
-  // (derived from INT), and the Ranks of any Skills/attacks that rolled a successful
-  // Advancement Check. Race, Class, Popularity, AI Favor, gear and loot are untouched.
-  function buildAdvanceData() {
-    const ex = W.existing || {};
-    const fin = finalStats(); // existing Unenhanced + distributed points
-    const data = {
-      header: Object.assign({}, ex.header || {}),
-      stats: {},
-      globalModSource: ex.globalModSource,
-      combat: Object.assign({}, ex.combat || {}),
-      hpPips: (ex.hpPips || new Array(10).fill("true")).slice(),
-      attacks: (ex.attacks || []).map((a) => Object.assign({}, a)),
-      hotlist: (ex.hotlist || []).slice(),
-      extBuffs: (ex.extBuffs || []).slice(),
-      gear: (ex.gear || []).slice(),
-      accessories: (ex.accessories || []).slice(),
-      skills: (ex.skills || []).map((s) => Object.assign({}, s)),
-      inventory: (ex.inventory || []).map((i) => Object.assign({}, i)),
-      background: (ex.background || ["", "", "", "", ""]).slice(),
-      campaign: ex.campaign || null,
-      darkMode: ex.darkMode,
-    };
-    data.header["f-level"] = String(advNewLevel());
-    // stats: unenh = existing + distributed points; enh preserves any gear/buff delta.
-    STAT_IDS.forEach((k) => {
-      const oe = parseInt(ex.stats && ex.stats[k] ? ex.stats[k].enh : 0, 10) || 0;
-      const ou = parseInt(ex.stats && ex.stats[k] ? ex.stats[k].unenh : 0, 10) || 0;
-      data.stats[k] = { unenh: String(fin[k]), enh: String(fin[k] + (oe - ou)) };
-    });
-    data.combat.manaCurrentVal = String(fin.int);
-    // Apply successful Advancement Checks to the matching skill/attack row, and clear
-    // the sheet's advancement mark on any skill we resolved (marks erase after a check).
-    const gains = [];
-    Object.keys(W.advChecks).forEach((key) => {
-      const c = W.advChecks[key];
-      if (!c) return;
-      const row = c.kind === "skill" ? data.skills[c.idx] : data.attacks[c.idx];
-      if (!row) return;
-      if (c.success) { row.rank = String(advNewRank(c)); gains.push(`${c.name} R${c.rank0}→${advNewRank(c)}`); }
-      if (c.kind === "skill" && "checked" in row) row.checked = false;
-    });
-    const lv = advLevelCount();
-    const note = `Saferoom level-up: Level ${upgradeLevel()}→${advNewLevel()}${lv ? " (+" + lv + ")" : ""}, spent ${statBudget()} stat point(s).` +
-      (gains.length ? ` Advancement: ${gains.join(", ")}.` : " No skill ranks changed.");
-    data.background[4] = data.background[4] ? data.background[4] + " | " + note : note;
-    return data;
-  }
-
   function finish() {
     if (typeof applySheet !== "function" || typeof saveSheet !== "function") {
       alert("Couldn't reach the sheet to apply the character. Try reloading.");
       return;
     }
     const nm = (W.existing && W.existing.header && W.existing.header["f-name"]) || "Crawler";
-    let data;
-    if (isAdvance()) data = buildAdvanceData();
-    else if (isUpgrade()) data = buildUpgradeData();
-    else data = buildData();
-    applySheet(data);
+    const upgrade = isUpgrade();
+    applySheet(upgrade ? buildUpgradeData() : buildData());
     saveSheet();
     try {
       if (typeof addLog === "function") {
-        if (isAdvance()) addLog("Level Up", "⏫ Saferoom", nm + " → Lvl " + advNewLevel(), "normal");
-        else if (isUpgrade()) addLog("Level Up", "⬆ Floor 3", nm + " → Lvl " + upgradeLevel(), "normal");
+        if (upgrade) addLog("Level Up", "⬆ Floor 3", nm + " → Lvl " + upgradeLevel(), "normal");
         else addLog("New Character", "✨ Wizard", (W.basics.name || "Crawler") + " · " + W.race, "normal");
       }
     } catch (e) {}
     close();
-    try { refreshButton(); } catch (e) {} // create -> Upgrade -> Advance as the crawler progresses
+    try { refreshButton(); } catch (e) {} // create -> the button becomes Upgrade
   }
 
   // ── public API ────────────────────────────────────────────────────────────────
   const API = {
-    open, openUpgrade, openAdvance, close, finish, launch, refreshButton,
+    open, openUpgrade, close, finish, launch, refreshButton,
     back() { if (W.step > 0) { W.step--; render(); } },
     next() { if (!canAdvance()) { render(); return; } W.step++; render(); },
     set(key, val) { W[key] = val; render(); },
@@ -1291,33 +1043,6 @@
       render();
     },
     setLoot(row) { W.loot = String(row); render(); },
-    // Saferoom advancement ----------------------------------------------------
-    advLevel(delta) {
-      const cur = upgradeLevel();
-      let nv = advLevelCount() + delta;
-      if (nv < 0) nv = 0;
-      if (cur + nv > 250) nv = Math.max(0, 250 - cur);
-      W.advLevels = nv;
-      // dropping levels can overspend the point budget — trim it back down
-      let over = statPointsSpent() - statBudget();
-      if (over > 0) for (const k of STAT_IDS) { if (over <= 0) break; const t = Math.min(over, parseInt(W.statPoints[k], 10) || 0); W.statPoints[k] = (parseInt(W.statPoints[k], 10) || 0) - t; over -= t; }
-      render();
-    },
-    setHumanPick(key) { W.advHumanPick = key; render(); },
-    rollCheck(key) {
-      const r = findAdvRow(key); if (!advRollable(r)) return;
-      const roll = d(20);
-      W.advChecks[key] = { kind: r.kind, idx: r.idx, name: r.name, rank0: r.rank0, rolled: [roll], best: roll, adv: false, success: roll >= r.rank0 };
-      render();
-    },
-    rollHuman(key) {
-      if (!isHumanCrawler() || humanBonusUsed()) return;
-      const r = findAdvRow(key); if (!advRollable(r) || r.rank0 > 9) return;
-      const a = d(20), b = d(20), best = Math.max(a, b);
-      W.advChecks[key] = { kind: r.kind, idx: r.idx, name: r.name, rank0: r.rank0, rolled: [a, b], best, adv: true, success: best >= r.rank0 };
-      render();
-    },
-    clearCheck(key) { delete W.advChecks[key]; render(); },
   };
 
   window.DCCW = API;

@@ -342,6 +342,7 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
       <div class="hdr-field"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
       <div class="hdr-field"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
       <div class="hdr-field"><label>Level</label><input type="text" id="f-level" placeholder="1"></div>
+      <div class="hdr-field"><label>Floor</label><input type="text" id="f-floor" placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’."></div>
       <div class="hdr-field"><label>Crawler #</label><input type="text" id="f-crawler"></div>
       <div class="hdr-field"><label>Class</label><input type="text" id="f-class"></div>
     </div>
@@ -446,11 +447,11 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
                 </div>
               </div>
               <div style="height:1px;background:var(--rule);margin:2px 0;"></div>
-              <!-- External Buffs -->
-              <span style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">External Buffs</span>
-              <div class="ext-buff-row"><span class="ext-buff-num">1.</span><input type="text" class="ext-buff-input"></div>
-              <div class="ext-buff-row"><span class="ext-buff-num">2.</span><input type="text" class="ext-buff-input"></div>
-              <div class="ext-buff-row"><span class="ext-buff-num">3.</span><input type="text" class="ext-buff-input"></div>
+              <!-- Buffs (＋ button and chips injected by dcc-sheet-buffs.js) -->
+              <div class="buffs-field" style="display:flex;align-items:center;gap:5px;">
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Buffs</span>
+                <input type="text" class="ext-buff-input" id="buffs" style="flex:1;" placeholder="add or type…">
+              </div>
             </div>
 
           </div>
@@ -719,6 +720,14 @@ function updateMod(id) {
 function getStatMod(id) {
   const val = document.getElementById(id+'-'+(globalModSource==='enhanced'?'enh':'unenh'))?.value;
   return statToMod(val) ?? 0;
+}
+
+// Current dungeon floor (F). Many rulebook values read as "X + F" (Evade, natural
+// attacks, DR = F, etc.); this exposes the number so future automation can use it.
+// Defaults to 1 when the field is blank or non-numeric.
+function getFloor() {
+  const v = parseInt((document.getElementById('f-floor')?.value || '').trim(), 10);
+  return (isNaN(v) || v < 1) ? 1 : v;
 }
 
 // Sync DEX Mod → Evade DEX field and recalc total
@@ -1195,7 +1204,7 @@ function collectSheet() {
 
   // Header fields
   data.header = {};
-  ['f-name','f-race','f-gender','f-level','f-crawler','f-class'].forEach(id => {
+  ['f-name','f-race','f-gender','f-level','f-floor','f-crawler','f-class'].forEach(id => {
     data.header[id] = document.getElementById(id)?.value || '';
   });
 
@@ -1241,8 +1250,11 @@ function collectSheet() {
   // Hotlist
   data.hotlist = [...document.querySelectorAll('#hotlist-grid textarea')].map(t => t.value);
 
-  // External buffs
-  data.extBuffs = [...document.querySelectorAll('.ext-buff-input')].map(i => i.value);
+  // Buffs — one field managed by the buffs tracker; also mirror to the legacy
+  // extBuffs array so the PDF/print exports keep rendering.
+  const buffsStr = document.getElementById('buffs')?.value || '';
+  data.buffs = buffsStr;
+  data.extBuffs = buffsStr ? buffsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
 
   // Gear slots
   data.gear = [...document.querySelectorAll('.gear-slot input')].map(i => i.value);
@@ -1350,10 +1362,13 @@ function applySheet(data) {
     document.querySelectorAll('#hotlist-grid textarea').forEach((t,i) => { t.value = data.hotlist[i]||''; });
   }
 
-  // Ext buffs
-  if(data.extBuffs) {
-    document.querySelectorAll('.ext-buff-input').forEach((el,i) => { el.value = data.extBuffs[i]||''; });
+  // Buffs — prefer the new single field; fall back to the legacy extBuffs array.
+  const buffsEl = document.getElementById('buffs');
+  if(buffsEl) {
+    if(typeof data.buffs === 'string') buffsEl.value = data.buffs;
+    else if(Array.isArray(data.extBuffs)) buffsEl.value = data.extBuffs.filter(Boolean).join(', ');
   }
+  try { if(window.DCCBuffs) window.DCCBuffs.refresh(); } catch(e) {}
 
   // Gear
   if(data.gear) {
@@ -1409,7 +1424,7 @@ function newCharacter() {
   if(!confirm('Clear the entire sheet and start a new character?\n\nMake sure to Export first if you want to save your current character.')) return;
 
   // Clear header fields
-  ['f-name','f-race','f-gender','f-level','f-crawler','f-class'].forEach(id => {
+  ['f-name','f-race','f-gender','f-level','f-floor','f-crawler','f-class'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = '';
   });
 
@@ -1447,8 +1462,9 @@ function newCharacter() {
   // Clear hotlist
   document.querySelectorAll('#hotlist-grid textarea').forEach(t => t.value = '');
 
-  // Clear external buffs
+  // Clear buffs
   document.querySelectorAll('.ext-buff-input').forEach(el => el.value = '');
+  try { if(window.DCCBuffs) window.DCCBuffs.refresh(); } catch(e) {}
 
   // Clear gear
   document.querySelectorAll('.gear-slot input').forEach(el => el.value = '');
@@ -1810,7 +1826,7 @@ function exportPrintablePDF() {
       <h1>${esc(name)}</h1>
       <div class="sub-title">${esc([d.header['f-race'], d.header['f-class'], d.header['f-gender']].filter(Boolean).join(' · ')) || '&nbsp;'}</div>
     </div>
-    <div class="lvl">Level ${esc(d.header['f-level'] || '1')}${d.header['f-crawler'] ? '<br>Crawler #' + esc(d.header['f-crawler']) : ''}</div>
+    <div class="lvl">Level ${esc(d.header['f-level'] || '1')}${d.header['f-floor'] ? ' · Floor ' + esc(d.header['f-floor']) : ''}${d.header['f-crawler'] ? '<br>Crawler #' + esc(d.header['f-crawler']) : ''}</div>
   </header>
 
   <div class="row">
@@ -1867,7 +1883,7 @@ function exportPrintablePDF() {
   </section>
 
   ${hots.length ? `<section><h2>Hotlist</h2><ul class="plain">${hots.map(h => `<li>${nl(h)}</li>`).join('')}</ul></section>` : ''}
-  ${buffs.length ? `<section><h2>External Buffs</h2><ul class="plain">${buffs.map(b => `<li>${esc(b)}</li>`).join('')}</ul></section>` : ''}
+  ${buffs.length ? `<section><h2>Buffs</h2><ul class="plain">${buffs.map(b => `<li>${esc(b)}</li>`).join('')}</ul></section>` : ''}
 
   <div class="cols">
     <div class="col">
@@ -2531,7 +2547,9 @@ autoLoad();
   <script src="/tools-data/dcc-classes.js"></script>
   <script src="/tools-data/dcc-experiences.js"></script>
   <script src="/tools-data/dcc-debuffs.js"></script>
+  <script src="/tools-data/dcc-buffs.js"></script>
   <script src="/tools-data/dcc-sheet-ccw.js"></script>
   <script src="/tools-data/dcc-sheet-debuffs.js"></script>
+  <script src="/tools-data/dcc-sheet-buffs.js"></script>
 </body>
 </html>

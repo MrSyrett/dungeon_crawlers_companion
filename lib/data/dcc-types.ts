@@ -189,6 +189,15 @@ export interface DccDebuff {
   stackable: boolean;
 }
 
+// ── Buffs (positive conditions; Core p.95-96) ───────────────────────────────
+export interface DccBuff {
+  name: string;
+  /** Internal = always-on personal effect; External = trigger-activated, Rule of Three (max 3). */
+  kind: "internal" | "external";
+  effect: string;
+  duration?: string;
+}
+
 // ── Reference tables (the ladders that drive sheet automation) ──────────────
 export interface DccStatModRow {
   min: number;

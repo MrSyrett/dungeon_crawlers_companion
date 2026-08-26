@@ -31,6 +31,7 @@ const JS_DIR = join(ROOT, "public", "tools-data");
 const DATASETS = [
   { json: "tables.json",      kind: "object", constName: "DCC_TABLES",      type: "DccTables",     base: "dcc-tables" },
   { json: "debuffs.json",     kind: "array",  constName: "DCC_DEBUFFS",     type: "DccDebuff",     base: "dcc-debuffs" },
+  { json: "buffs.json",       kind: "array",  constName: "DCC_BUFFS",       type: "DccBuff",       base: "dcc-buffs" },
   { json: "spells.json",      kind: "array",  constName: "DCC_SPELLS",      type: "DccSpell",      base: "dcc-spells" },
   { json: "skills.json",      kind: "array",  constName: "DCC_SKILLS",      type: "DccSkill",      base: "dcc-skills" },
   { json: "races.json",       kind: "array",  constName: "DCC_RACES",       type: "DccRace",       base: "dcc-races" },

@@ -1,0 +1,85 @@
+// GENERATED FILE - do not edit by hand.
+// Source: data/dcc/buffs.json - regenerate with: node scripts/build-dcc-data.mjs
+
+import type { DccBuff } from "./dcc-types";
+
+export const DCC_BUFFS: DccBuff[] = [
+  {
+    "name": "Anti-Piercing",
+    "kind": "internal",
+    "effect": "Your armor's Damage Resistance also applies against Armor-Piercing attacks.",
+    "duration": "While the source is held or worn."
+  },
+  {
+    "name": "Good Sleep",
+    "kind": "internal",
+    "effect": "+Floor Number (F) to all Stats.",
+    "duration": "30 hours."
+  },
+  {
+    "name": "Invisible",
+    "kind": "internal",
+    "effect": "Can't be targeted by sight; you gain the Unseen Attacker benefits.",
+    "duration": "Until you fail a Hide check, take an Attack Action, or reveal yourself."
+  },
+  {
+    "name": "Iron Skin",
+    "kind": "internal",
+    "effect": "Doubles your Damage Resistance (DR).",
+    "duration": "30 minutes (Iron Skin Potion)."
+  },
+  {
+    "name": "Recovery",
+    "kind": "internal",
+    "effect": "Restores your Health Bar to full.",
+    "duration": "Once per 5 hours."
+  },
+  {
+    "name": "Replenish",
+    "kind": "internal",
+    "effect": "+INT Mana every 10 minutes.",
+    "duration": "While the source is held or worn."
+  },
+  {
+    "name": "Restore",
+    "kind": "internal",
+    "effect": "Restores your Mana to full.",
+    "duration": "Once per 5 hours."
+  },
+  {
+    "name": "Rooted in Place",
+    "kind": "internal",
+    "effect": "Immune to forced movement.",
+    "duration": "While active."
+  },
+  {
+    "name": "Sticky Feet",
+    "kind": "internal",
+    "effect": "Gain a Climb Move (walk on walls/ceilings).",
+    "duration": "DEX minutes."
+  },
+  {
+    "name": "Damage Reflection",
+    "kind": "external",
+    "effect": "When you lose N Health Bar slots in a single blow, the attacker loses 1 slot (ratio N:1 set by the source).",
+    "duration": "Trigger-activated; counts toward the Rule of Three."
+  },
+  {
+    "name": "Resistance",
+    "kind": "external",
+    "effect": "On-demand resistance (damage of the chosen type halved).",
+    "duration": "Trigger-activated; counts toward the Rule of Three."
+  },
+  {
+    "name": "Immunity",
+    "kind": "external",
+    "effect": "On-demand immunity (no damage from the chosen type).",
+    "duration": "Trigger-activated; counts toward the Rule of Three."
+  },
+  {
+    "name": "Safe Fall",
+    "kind": "external",
+    "effect": "Negate falling damage.",
+    "duration": "Trigger-activated; counts toward the Rule of Three."
+  }
+];
