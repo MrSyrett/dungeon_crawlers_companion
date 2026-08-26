@@ -180,6 +180,102 @@
     "source": "GM Toolkit"
   },
   {
+    "source": "Core",
+    "name": "Girtablullu",
+    "role": "City Boss",
+    "size": 5,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 80,
+    "hbSlots": [
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7
+    ],
+    "surprise": "17+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 100,
+        "mod": 7
+      },
+      "INT": {
+        "score": 100,
+        "mod": 7
+      },
+      "CON": {
+        "score": 100,
+        "mod": 7
+      },
+      "DEX": {
+        "score": 75,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 50,
+        "mod": 6
+      }
+    },
+    "attacks": [
+      {
+        "name": "Litigate Spell",
+        "toHit": "17+F",
+        "damage": "7d8+7*",
+        "damageType": "Psychic",
+        "range": "100ft range",
+        "rider": "Before damage is rolled, the target has the option to \"settle\" and take the average damage of the dice (39) instead of having it rolled."
+      },
+      {
+        "name": "Pincers",
+        "toHit": "17+F",
+        "damage": "6d8+7",
+        "damageType": "Bludgeoning",
+        "range": "10ft range",
+        "rider": "Any hit crawler gains the Held Debuff."
+      },
+      {
+        "name": "Tail Strike",
+        "toHit": "17+F",
+        "damage": "6d6+7",
+        "damageType": "Piercing",
+        "range": "15ft range",
+        "rider": "Any hit crawler gains the Poisoned Debuff."
+      }
+    ],
+    "notes": [
+      "Care for an Argument?—A crawler can exploit Girtablullu’s propensity to argue. The crawler must make an INT-Opposed Deception Skill Check. On Success, Girtablullu loses 2 Actions in the following round. After this happens twice, the Boss asks for a continuance and the AI grants it, negating further use of this ability.",
+      "Objection!—Once he falls to 40% HB or less, Girtablullu can yell \"Objection!\" as an Interrupt Action. One, and only one, crawler must make an INT Stat Check vs. Difficulty 22 (unless someone has a Lawyer Up Skill). On Fail, each crawler loses one Action that round. Girtablullu can do this only twice per combat. On Success, the objection is overruled by the AI, and they gain the Litigant Pro Se achievement.",
+      "Poison Blood—If Girtablullu loses 2+ HB slots from a melee attack, the crawler gains the Poisoned Debuff.",
+      "Professional Courtesy—Crawlers holding a legal text in one hand roll Evade Checks with Advantage."
+    ],
+    "page": 548
+  },
+  {
     "name": "Station Mimic",
     "role": "City Boss",
     "size": 8,
@@ -283,6 +379,99 @@
     ],
     "page": 438,
     "source": "Core"
+  },
+  {
+    "source": "Core",
+    "name": "Lusca",
+    "role": "City Boss",
+    "size": 8,
+    "tags": [
+      "Octo-Shark"
+    ],
+    "level": 82,
+    "hbSlots": [
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8
+    ],
+    "surprise": "15+F",
+    "evade": "16+F",
+    "move": "50+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 177,
+        "mod": 8
+      },
+      "INT": {
+        "score": 24,
+        "mod": 5
+      },
+      "CON": {
+        "score": 158,
+        "mod": 8
+      },
+      "DEX": {
+        "score": 50,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 25,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Rush",
+        "toHit": "18+F",
+        "damage": "6d8+8",
+        "damageType": "Bludgeoning",
+        "range": "50ft Line",
+        "rider": "Crawlers adjacent to Lusca can spend an Action as an Interrupt to make a STR Stat Check when Lusca does a Rush attack. On Success, they move with Lusca and have Advantage on their next attack. On Fail, the crawler does not move with her (and may be in the Line path)."
+      },
+      {
+        "name": "Bite",
+        "toHit": "18+F",
+        "damage": "5d10+8",
+        "damageType": "Piercing",
+        "range": "15ft range",
+        "rider": "Any hit crawler ends up in Lusca’s ginormous mouth, and gains the Fish Food Debuff: Take 1d12+F Piercing at the end of each round. Interior attacks are vs. 0 DR."
+      },
+      {
+        "name": "Flipper",
+        "toHit": "18+F",
+        "damage": "6d10+8",
+        "damageType": "Bludgeoning",
+        "range": "30ft range",
+        "rider": "Any hit crawler slides 5ft for each HB slot lost."
+      }
+    ],
+    "notes": [
+      "Mouth Sores—If any crawler deals 3+ HB slots of damage to Lusca in one shot, the juvenile sharks cause Lusca to lose 1 HB slot at the end of each round, and the Fish Food Debuff is removed."
+    ],
+    "page": 580
   },
   {
     "name": "Ringmaster Grimaldi",
@@ -718,6 +907,106 @@
     "source": "Core"
   },
   {
+    "source": "Core",
+    "name": "Temple Guardian",
+    "role": "Borough Boss",
+    "size": 6,
+    "tags": [
+      "Insane Guardian"
+    ],
+    "level": 63,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "12+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 50,
+        "mod": 6
+      },
+      "INT": {
+        "score": 5,
+        "mod": 2
+      },
+      "CON": {
+        "score": 60,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 50,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 5,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Stone Shot",
+        "toHit": "16+F",
+        "damage": "5d12+6",
+        "damageType": "Piercing",
+        "range": "50ft range"
+      },
+      {
+        "name": "Stone Drop",
+        "toHit": "15+5",
+        "damage": "7d8",
+        "damageType": "Piercing",
+        "range": "30ft range"
+      },
+      {
+        "name": "Earthquake Stomp",
+        "toHit": "15+F",
+        "damage": "5d6+6",
+        "damageType": "Bludgeoning",
+        "range": "20ft Burst radius",
+        "rider": "Any hit crawler gains the Take Down Debuff."
+      },
+      {
+        "name": "Stone Stampede",
+        "toHit": "15+F",
+        "damage": "5d6+6",
+        "damageType": "Bludgeoning",
+        "range": "20ft Line",
+        "rider": "This attack automatically hits any crawler with the Take Down Debuff."
+      },
+      {
+        "name": "Summon Temple Guard",
+        "toHit": "",
+        "damage": "",
+        "rider": "One Temple Guard appears at the end of the Mob Action Resolution, maneuvers into position, but does not attack this turn."
+      }
+    ],
+    "notes": [
+      "Fit to be Untied—A crawler can attempt to cut one of the ropes holding the Temple Guardian together by making an Attack with Disadvantage vs. Difficulty 16. On Success, they sever the rope, and the Temple Guardian loses 2 HB slots."
+    ],
+    "page": 620
+  },
+  {
     "name": "Fowl Player",
     "role": "Borough Boss",
     "size": 5,
@@ -814,6 +1103,90 @@
     ],
     "page": 399,
     "source": "Core"
+  },
+  {
+    "source": "Core",
+    "name": "Kensington",
+    "role": "Borough Boss",
+    "size": 6,
+    "tags": [
+      "Tree",
+      "Feral"
+    ],
+    "level": 69,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "16+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 60,
+        "mod": 6
+      },
+      "INT": {
+        "score": 51,
+        "mod": 6
+      },
+      "CON": {
+        "score": 54,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 24,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 102,
+        "mod": 7
+      }
+    },
+    "attacks": [
+      {
+        "name": "Branch Manager",
+        "toHit": "16+F+F",
+        "damage": "6d10+6+F",
+        "damageType": "Bludgeoning",
+        "range": "100ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler falls into a deep depression and can do nothing but stare blankly into the abyss until the end of the current round."
+      },
+      {
+        "name": "Putrid Pear",
+        "toHit": "15+F+F",
+        "damage": "5d6+5+F",
+        "damageType": "Necrotic",
+        "range": "100ft range, 10ft Blast radius +10ft Splash",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Sepsis Debuff."
+      }
+    ],
+    "notes": [
+      "So Tragic—Crawlers wearing goth clothing have Resistance to the Branch Manager attack, because they’re already depressed.",
+      "The Tower—Kensington’s own Area Attack causes damage to the tower (marble flakes with each hit). Dealing 100 total damage brings the tower down; Kensington falls in slow motion, then lands and takes 12d10 damage.",
+      "Feral—All to-hit and damage values include an extra +F (included above).",
+      "Aura of Despair—All creatures within 100 feet gain the Despondent Debuff: at the beginning of each round each crawler makes a CHA Stat Check at Difficulty 22. Amazing Success: act normally and grant an ally a Standard Success. Standard Success: act normally. Near Miss: -1 to all rolls this round. Standard Fail: Disadvantage on all rolls this round. Major Fail or worse: gains the Resigned to Die Debuff (1 HB slot damage at the end of each round until a Standard Success or better; dropping from 10% to 0% this way is instant death)."
+    ],
+    "page": 600
   },
   {
     "name": "More Dread",
@@ -2310,6 +2683,514 @@
     "source": "Core"
   },
   {
+    "source": "Core",
+    "name": "Countess Kesla",
+    "role": "Neighborhood Boss",
+    "size": 4,
+    "tags": [
+      "Undead Humanoid"
+    ],
+    "level": 60,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 50,
+        "mod": 6
+      },
+      "INT": {
+        "score": 28,
+        "mod": 5
+      },
+      "CON": {
+        "score": 42,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 35,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 50,
+        "mod": 6
+      }
+    },
+    "attacks": [
+      {
+        "name": "Pet Ghast Release Spell",
+        "toHit": "",
+        "damage": "",
+        "rider": "A Ghast is released from the wall, joining the combat."
+      },
+      {
+        "name": "Blood Boil Spell",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Necrotic",
+        "range": "50ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Fatigued Debuff."
+      },
+      {
+        "name": "Feral Bite",
+        "toHit": "16+F",
+        "damage": "5d6+6",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "For every 2 HB slots lost to this attack, Countess Kesla heals 1 HB slot."
+      }
+    ],
+    "notes": [
+      "Blood Makes Noise—At 60% and at 20% or less HB, Countess Kesla gains 1 Action, typically to release more Pet Ghasts to save her (if she has her pendant).",
+      "Pendant—A crawler may roll a melee attack with Disadvantage to cut or swipe the pendant off her neck. If she loses it, she can’t release any Pet Ghasts."
+    ],
+    "page": 568
+  },
+  {
+    "source": "Core",
+    "name": "Unbound Will",
+    "role": "Neighborhood Boss",
+    "size": 7,
+    "tags": [
+      "Killer Whale"
+    ],
+    "level": 60,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "14+F",
+    "evade": "14+F",
+    "move": "35+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 75,
+        "mod": 6
+      },
+      "INT": {
+        "score": 16,
+        "mod": 4
+      },
+      "CON": {
+        "score": 80,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 18,
+        "mod": 4
+      },
+      "CHA": {
+        "score": 16,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Tsharknami!",
+        "toHit": "14+F",
+        "damage": "7d12+6",
+        "damageType": "Piercing",
+        "range": "30ft range"
+      },
+      {
+        "name": "Bite",
+        "toHit": "16+F",
+        "damage": "6d6+6",
+        "damageType": "Piercing",
+        "range": "10ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Swallowed Debuff: The crawler is swallowed whole and cannot be attacked. When an attack against the Unbound Will results in an Amazing Success or better (or it dies), all crawlers remove the Swallowed Debuff. Swallowed crawlers take 1d10+F Acid at the end of each round. Swallowed crawlers attack with Disadvantage vs. 0 DR, and Slashing attacks deal x2 damage."
+      },
+      {
+        "name": "Tail Whip",
+        "toHit": "16+F",
+        "damage": "5d8+6",
+        "damageType": "Bludgeoning",
+        "range": "20ft Cone",
+        "rider": "Any hit crawler is pushed 5ft for each HB slot lost."
+      }
+    ],
+    "notes": [
+      "Blood In the Water—Each time another creature in the area is killed, Unbound Will spends 1 Action moving toward the blood. If the number of dead creatures is equal to the crawler party size or more in the area, the sharks spend all of their Actions feeding, leaving the party alone, and the Tsharknami! attack cannot be used."
+    ],
+    "page": 578
+  },
+  {
+    "source": "Core",
+    "name": "Admiral Stoma",
+    "role": "Neighborhood Boss",
+    "size": 1,
+    "tags": [
+      "Insectoid"
+    ],
+    "level": 61,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 76,
+        "mod": 6
+      },
+      "INT": {
+        "score": 41,
+        "mod": 5
+      },
+      "CON": {
+        "score": 23,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 53,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 15,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Dactyl Smash",
+        "toHit": "16+F",
+        "damage": "6d8+6",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "If a crawler loses 4+ HB slots this way, they are thrown overboard (through a window if need be)."
+      },
+      {
+        "name": "Grappling Gun",
+        "toHit": "15+F",
+        "damage": "7d4",
+        "damageType": "Piercing",
+        "range": "50ft range",
+        "rider": "Any hit crawler is pulled 15 feet toward Stoma."
+      },
+      {
+        "name": "Boil the Air",
+        "toHit": "15+F",
+        "damage": "4d6",
+        "damageType": "Fire",
+        "range": "20ft Burst radius",
+        "rider": "Any hit crawler gains the Scalded Debuff: Take 1d8+F at the end of each round for the next 2 rounds."
+      }
+    ],
+    "notes": [
+      "Overboard—Crawlers thrown overboard must make an Unopposed Swimming Skill Check or gain the Drowning Debuff. Make an Unopposed Climbing Skill Check to get back up. If a rope ladder is lowered, roll with Advantage."
+    ],
+    "page": 590
+  },
+  {
+    "source": "Core",
+    "name": "Snow Shifter",
+    "role": "Neighborhood Boss",
+    "size": 6,
+    "tags": [
+      "Shapeshifter"
+    ],
+    "level": 62,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "16+F",
+    "evade": "16+F",
+    "move": "30+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 80,
+        "mod": 6
+      },
+      "INT": {
+        "score": 60,
+        "mod": 6
+      },
+      "CON": {
+        "score": 80,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 85,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 30,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Snake Bite",
+        "toHit": "16+F",
+        "damage": "7d10+6",
+        "damageType": "Ice",
+        "range": "10ft range (only in snake form)"
+      },
+      {
+        "name": "Snowman Crush",
+        "toHit": "16+F",
+        "damage": "6d8+6",
+        "damageType": "Ice",
+        "range": "10ft range (only in snowman form)",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Take Down Debuff."
+      },
+      {
+        "name": "Snowburst",
+        "toHit": "16+F",
+        "damage": "5d6+6",
+        "damageType": "Ice",
+        "range": "30ft Burst (only in avalanche form)",
+        "rider": "For every 2 HB slots lost to this attack, the crawler gains one stack of the Freezing to Death Debuff (stackable): Take 1d6+F Ice at the end of each round of combat."
+      },
+      {
+        "name": "Blizzard Spell",
+        "toHit": "15+F",
+        "damage": "5d6+6",
+        "damageType": "Ice",
+        "range": "30ft range, 10ft Blast radius",
+        "rider": "Any crawler who loses 3+ HB slots to this attack gains the Paralyzed Debuff."
+      }
+    ],
+    "notes": [
+      "Hot Poker Vulnerability—Piercing and non-Spell Fire attacks deal x2 damage.",
+      "Not So Shifty—When Snow Shifter changes form, he takes a -2 penalty to his Evade score that round.",
+      "Snowman Form—At 50% HB, it changes form into a snowman with a hard outer shell, gaining +5 DR.",
+      "Avalanche Form—At 20% HB, it changes form into a living avalanche, where it has Resistance to ALL damage types, but has 0 DR. (It still has Immunity to Spell damage.)"
+    ],
+    "page": 610
+  },
+  {
+    "source": "Core",
+    "name": "Propper",
+    "role": "Neighborhood Boss",
+    "size": 5,
+    "tags": [
+      "Spring-Operated Chicken Hawk Sentinel"
+    ],
+    "level": 70,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "15+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 50,
+        "mod": 6
+      },
+      "INT": {
+        "score": 20,
+        "mod": 5
+      },
+      "CON": {
+        "score": 65,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 70,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 30,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Dive Bomb",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Fire",
+        "range": "30ft range, 10ft Blast radius",
+        "rider": "Propper only uses this explosive attack during the first round of the combat, or when at 50% HB or less, when he will use it at least once per round."
+      },
+      {
+        "name": "Downwash",
+        "toHit": "15+F",
+        "damage": "6d10+5",
+        "damageType": "Force",
+        "range": "60ft range, 20ft Splash",
+        "rider": "Any hit crawler slides 5ft for each HB slot lost. (Splash is half damage, and this is all Splash.)"
+      },
+      {
+        "name": "Propeller Blast",
+        "toHit": "15+F",
+        "damage": "7d8+5",
+        "damageType": "Force",
+        "range": "60ft range",
+        "rider": "Any hit crawler is pushed 5ft for each HB slot lost."
+      }
+    ],
+    "notes": [
+      "Flying High—Propper remains 60ft off the ground, making melee weapons nearly useless.",
+      "Jammed—To jam a rotor, a sturdy object of at least Petite (3) size must be used. If any of its propellers are jammed, Propper immediately loses 2 HB slots and 20 feet of altitude.",
+      "Off the Cliff—If a crawler falls over the cliff edge, they fall for two rounds and can perform actions before SPLAT (Death!)."
+    ],
+    "page": 558
+  },
+  {
+    "source": "Core",
+    "name": "Aurion",
+    "role": "Neighborhood Boss",
+    "size": 7,
+    "tags": [
+      "Beast"
+    ],
+    "level": 75,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "16+F",
+    "evade": "16+F",
+    "move": "40+S",
+    "dr": 8,
+    "stats": {
+      "STR": {
+        "score": 50,
+        "mod": 6
+      },
+      "INT": {
+        "score": 50,
+        "mod": 6
+      },
+      "CON": {
+        "score": 50,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 50,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 50,
+        "mod": 6
+      }
+    },
+    "attacks": [
+      {
+        "name": "Mind Dirge Spell",
+        "toHit": "16+F",
+        "damage": "No damage",
+        "range": "20ft Burst radius",
+        "rider": "Any hit crawler gains the Angry Debuff: They must save at least one action to attack their nearest ally this round. After doing so, the attacker gains the Insight Buff: +2 to hit against Aurion (stackable)."
+      },
+      {
+        "name": "Ride the Lightning Spell",
+        "toHit": "16+F",
+        "damage": "6d8+6",
+        "damageType": "Electric",
+        "range": "200ft Line",
+        "rider": "Aurion can Move 200ft along with this attack. He never uses this more than once per round."
+      },
+      {
+        "name": "Talon",
+        "toHit": "16+F",
+        "damage": "7d10+6",
+        "damageType": "Slashing",
+        "range": "10ft range",
+        "rider": "On an Evade Major Fail or worse, crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Flight—Aurion can move through the air as though on the ground.",
+      "Ducky Destruction—Every point of damage an Area of Effect Spell deals to the sea of rubber ducks (vs. an Evade of 16 and 0 DR) destroys one of them. For every 25 damage dealt, Aurion loses 1 DR for the remainder of the fight, and targets those crawlers with at least 2 attacks the following round."
+    ],
+    "page": 632
+  },
+  {
     "name": "Kibril Atheras Darkoak",
     "role": "Quest Boss",
     "size": 4,
@@ -2818,6 +3699,396 @@
     ],
     "page": 341,
     "source": "Core"
+  },
+  {
+    "source": "Core",
+    "name": "Mellow Surfer",
+    "role": "Rival Crawler",
+    "size": 4,
+    "tags": [
+      "Human"
+    ],
+    "level": 36,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "13+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": "F",
+    "stats": {
+      "STR": {
+        "score": 20,
+        "mod": 5
+      },
+      "INT": {
+        "score": 16,
+        "mod": 3
+      },
+      "CON": {
+        "score": 20,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 50,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 22,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "High Five",
+        "toHit": "152+F",
+        "damage": "5d4+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      }
+    ],
+    "notes": [],
+    "page": 525
+  },
+  {
+    "source": "Core",
+    "name": "Human Gunslinger",
+    "role": "Rival Crawler",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 37,
+    "hbSlots": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "surprise": "18+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 20,
+        "mod": 5
+      },
+      "INT": {
+        "score": 20,
+        "mod": 5
+      },
+      "CON": {
+        "score": 15,
+        "mod": 4
+      },
+      "DEX": {
+        "score": 31,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 30,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Punch",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "NES Zapper",
+        "toHit": "15+F",
+        "damage": "4d8",
+        "damageType": "Force",
+        "range": "40ft range",
+        "rider": "Any hit crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Stat block for the crawler Renato Martin (Crawler #7,329,912)."
+    ],
+    "page": 557
+  },
+  {
+    "source": "Core",
+    "name": "Human Swashbuckler",
+    "role": "Rival Crawler",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 37,
+    "hbSlots": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 20,
+        "mod": 5
+      },
+      "INT": {
+        "score": 20,
+        "mod": 5
+      },
+      "CON": {
+        "score": 15,
+        "mod": 4
+      },
+      "DEX": {
+        "score": 31,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 30,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Saber",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Blunderbuss",
+        "toHit": "15+F",
+        "damage": "4d8",
+        "damageType": "Piercing",
+        "range": "25ft Cone",
+        "rider": "Any crawler who fails to Evade gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Stat block for the crawler Jerry Madd (Crawler #7,329,880)."
+    ],
+    "page": 557
+  },
+  {
+    "source": "Core",
+    "name": "Bomb Tosser",
+    "role": "Rival Crawler",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 38,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": "F",
+    "stats": {
+      "STR": {
+        "score": 21,
+        "mod": 5
+      },
+      "INT": {
+        "score": 30,
+        "mod": 5
+      },
+      "CON": {
+        "score": 21,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 50,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 12,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Chomp",
+        "toHit": "14+F",
+        "damage": "5d8+5",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Blood Trail Debuff."
+      },
+      {
+        "name": "Drop the Bomb",
+        "toHit": "15+F",
+        "damage": "2d8",
+        "damageType": "Force",
+        "range": "30ft range, 10ft Blast radius",
+        "rider": "Any crawler who fails to Evade gains the Staggered Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 525
+  },
+  {
+    "source": "Core",
+    "name": "Doppelganger Saboteur",
+    "role": "Rival Crawler",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 41,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": "F",
+    "stats": {
+      "STR": {
+        "score": 51,
+        "mod": 6
+      },
+      "INT": {
+        "score": 27,
+        "mod": 5
+      },
+      "CON": {
+        "score": 21,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 24,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 20,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Fist Mass",
+        "toHit": "16+F",
+        "damage": "5d6+6",
+        "damageType": "Bludgeoning",
+        "range": "10ft range"
+      }
+    ],
+    "notes": [
+      "Mass Shift—This crawler can shift their mass into any shape so long as their mass remains the same. They lose 10% of their health each time they transform.",
+      "Slippery—Crawlers have Disadvantage when grappling or restraining this Doppelganger.",
+      "Stat block for the crawler Shelly G (Crawler #569,892)."
+    ],
+    "page": 630
+  },
+  {
+    "source": "Core",
+    "name": "Roller Derby Jammer",
+    "role": "Rival Crawler",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 43,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": "F",
+    "stats": {
+      "STR": {
+        "score": 25,
+        "mod": 5
+      },
+      "INT": {
+        "score": 24,
+        "mod": 5
+      },
+      "CON": {
+        "score": 25,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 50,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 10,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Body Check",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "If the Roller Derby Jammer moved 10ft this round, any hit crawler gains the Take Down Debuff."
+      }
+    ],
+    "notes": [
+      "Skater—While moving on skates, foes attack the Roller Derby Jammer with Disadvantage."
+    ],
+    "page": 535
   },
   {
     "name": "Krakaren Crotch Dumpling",
@@ -8570,6 +9841,76 @@
     "source": "Core"
   },
   {
+    "source": "Core",
+    "name": "Bolt Hawk",
+    "role": "Mob",
+    "size": 2,
+    "tags": [
+      "Beast"
+    ],
+    "level": 30,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "12+F",
+    "evade": "15+F",
+    "move": "30+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 21,
+        "mod": 5
+      },
+      "INT": {
+        "score": 5,
+        "mod": 2
+      },
+      "CON": {
+        "score": 22,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 35,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 12,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Ride the Lightning Spell",
+        "toHit": "12+F",
+        "damage": "4d8+2",
+        "damageType": "Electric",
+        "range": "100ft Line",
+        "rider": "Bolt Hawks can Move 100ft along with this attack and can use this attack every other round."
+      },
+      {
+        "name": "Talons",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Slashing",
+        "range": "5ft range",
+        "rider": "Any hit crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Flight—Can move through air as if on the ground."
+    ],
+    "page": 623
+  },
+  {
     "name": "Clurichaun Aspirant",
     "role": "Mob",
     "size": 3,
@@ -8636,6 +9977,546 @@
     ],
     "page": 502,
     "source": "Core"
+  },
+  {
+    "source": "Core",
+    "name": "Dirigible Gnome",
+    "role": "Mob",
+    "size": 3,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 30,
+    "hbSlots": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 25,
+        "mod": 5
+      },
+      "INT": {
+        "score": 26,
+        "mod": 5
+      },
+      "CON": {
+        "score": 9,
+        "mod": 3
+      },
+      "DEX": {
+        "score": 25,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 10,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Gnomish Knock-Knocks",
+        "toHit": "15+F",
+        "damage": "4d8",
+        "damageType": "Fire",
+        "range": "50ft range, 10ft Blast radius +10ft Splash",
+        "rider": "Any crawler who fails to Evade gains the Burned Debuff. On an Evade Amazing Success or better, this unstable fuel lands in the cockpit, detonating on the crew."
+      },
+      {
+        "name": "Nose-Dive",
+        "toHit": "15+F",
+        "damage": "5d10",
+        "damageType": "Bludgeoning",
+        "range": "15ft Burst radius",
+        "rider": "This is a last resort attack that kills the Dirigible Gnomes."
+      }
+    ],
+    "notes": [
+      "Flight—Can move through the air as if it were on the ground. They stay aloft so melee attacks are difficult."
+    ],
+    "page": 602
+  },
+  {
+    "source": "Core",
+    "name": "Juvenile Octo-Shark",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Beast"
+    ],
+    "level": 30,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "13+F",
+    "evade": "15+F",
+    "move": "25+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 43,
+        "mod": 5
+      },
+      "INT": {
+        "score": 6,
+        "mod": 3
+      },
+      "CON": {
+        "score": 35,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 25,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 16,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Bite",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Blood Trail Debuff."
+      },
+      {
+        "name": "Tentacle",
+        "toHit": "15+F",
+        "damage": "3d6+5",
+        "damageType": "Bludgeoning",
+        "range": "10ft range",
+        "rider": "Any hit crawler gains the Held Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 572
+  },
+  {
+    "source": "Core",
+    "name": "Frost Maidens",
+    "role": "Mob",
+    "size": 3,
+    "tags": [
+      "Ice Fairy"
+    ],
+    "level": 33,
+    "hbSlots": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "30+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 9,
+        "mod": 3
+      },
+      "INT": {
+        "score": 25,
+        "mod": 5
+      },
+      "CON": {
+        "score": 10,
+        "mod": 4
+      },
+      "DEX": {
+        "score": 30,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 30,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Ice Shard",
+        "toHit": "13+F",
+        "damage": "5d8+3",
+        "damageType": "Ice",
+        "range": "5ft range"
+      },
+      {
+        "name": "Ice Blast Spell",
+        "toHit": "15+F",
+        "damage": "3d10+5",
+        "damageType": "Ice",
+        "range": "20ft Cone",
+        "rider": "Any hit crawler gets pushed 5ft for every 2 HB slots lost."
+      }
+    ],
+    "notes": [
+      "Thermally Biased—Frost Maidens are Immune to Ice damage and take x2 damage from Fire damage."
+    ],
+    "page": 603
+  },
+  {
+    "source": "Core",
+    "name": "Skyfowl Raiders",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Aerial Ambusher"
+    ],
+    "level": 33,
+    "hbSlots": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 30,
+        "mod": 5
+      },
+      "INT": {
+        "score": 18,
+        "mod": 4
+      },
+      "CON": {
+        "score": 15,
+        "mod": 4
+      },
+      "DEX": {
+        "score": 30,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 11,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Crossbow",
+        "toHit": "15+F",
+        "damage": "5d8",
+        "damageType": "Piercing",
+        "range": "50ft range"
+      },
+      {
+        "name": "Talon",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Slashing",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 604
+  },
+  {
+    "source": "Core",
+    "name": "Glimmermote Swarm",
+    "role": "Mob",
+    "size": 1,
+    "tags": [
+      "Celestial Janitor"
+    ],
+    "level": 34,
+    "hbSlots": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "surprise": "15+F",
+    "evade": "14+F",
+    "move": "20+S",
+    "dr": 0,
+    "stats": {
+      "STR": {
+        "score": 1,
+        "mod": 1
+      },
+      "INT": {
+        "score": 22,
+        "mod": 5
+      },
+      "CON": {
+        "score": 10,
+        "mod": 4
+      },
+      "DEX": {
+        "score": 10,
+        "mod": 4
+      },
+      "CHA": {
+        "score": 64,
+        "mod": 6
+      }
+    },
+    "attacks": [
+      {
+        "name": "Fade Away",
+        "toHit": "15+F",
+        "damage": "4d6+6",
+        "damageType": "Psychic",
+        "range": "5ft range",
+        "rider": "On an Evade Fail or worse, the crawler gains the rather-hard-to-remove Fading Debuff: A part of their body turns a little transparent, like it’s slowly disappearing from existence. At the end of each day that the crawler has this Debuff, replace one of their External Buffs with a +1 Evade Buff (some attacks pass through). Once all three lines are filled, the crawler fades completely out of existence at the end of the following day. This Debuff can only be removed by a priest devoted to a deity of life… or the deity itself."
+      }
+    ],
+    "notes": [],
+    "page": 594
+  },
+  {
+    "source": "Core",
+    "name": "Male Thorny Devil",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Reptile"
+    ],
+    "level": 34,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "13+F",
+    "evade": "15+F",
+    "move": "30+S",
+    "dr": 6,
+    "stats": {
+      "STR": {
+        "score": 25,
+        "mod": 5
+      },
+      "INT": {
+        "score": 6,
+        "mod": 3
+      },
+      "CON": {
+        "score": 50,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 20,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 6,
+        "mod": 3
+      }
+    },
+    "attacks": [
+      {
+        "name": "Chomp",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "Walking Pincushion",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "Any hit crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Spikes All Over—On a melee attack Near Miss Fail against this Mob, the crawler takes 2d6+F Piercing damage. Add 1 die for each degree of Failure worse than that."
+    ],
+    "page": 538
+  },
+  {
+    "source": "Core",
+    "name": "Crocodilian Roid-Soldier",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 35,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 6,
+    "stats": {
+      "STR": {
+        "score": 39,
+        "mod": 5
+      },
+      "INT": {
+        "score": 12,
+        "mod": 4
+      },
+      "CON": {
+        "score": 28,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 21,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 10,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Vicious Bite",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Piercing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Harpoon Gun",
+        "toHit": "15+F",
+        "damage": "3d6",
+        "damageType": "Piercing",
+        "range": "30ft range",
+        "rider": "Any hit crawler gains the Pinned to a Surface Debuff: The crawler is Held against a surface like a wall, tree, or whatever is nearby (the ground as a last resort)."
+      }
+    ],
+    "notes": [
+      "Roid Rage—Buffs have triple the effect on Roid-Soldiers."
+    ],
+    "page": 572
+  },
+  {
+    "source": "Core",
+    "name": "Giant Dragonfish",
+    "role": "Mob",
+    "size": 3,
+    "tags": [
+      "Beast"
+    ],
+    "level": 35,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "40+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 39,
+        "mod": 5
+      },
+      "INT": {
+        "score": 12,
+        "mod": 4
+      },
+      "CON": {
+        "score": 28,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 21,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 10,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Bite",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Piercing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Lure Spell",
+        "toHit": "14+F",
+        "damage": "No damage",
+        "range": "50ft range",
+        "rider": "Any hit crawler must spend actions moving until they are adjacent to the Dragonfish."
+      }
+    ],
+    "notes": [
+      "Glowing Lure—The first time each crawler would make a melee attack against the Dragonfish, if they don’t say “I don’t look at the light,” they must make an INT Stat Check. On Fail, they lose that action."
+    ],
+    "page": 573
   },
   {
     "name": "Gristle Gang Member",
@@ -8793,6 +10674,215 @@
     "source": "Core"
   },
   {
+    "source": "Core",
+    "name": "Pet Ghast",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Undead"
+    ],
+    "level": 35,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "12+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 37,
+        "mod": 5
+      },
+      "INT": {
+        "score": 5,
+        "mod": 2
+      },
+      "CON": {
+        "score": 31,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 36,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 1,
+        "mod": 1
+      }
+    },
+    "attacks": [
+      {
+        "name": "Bite",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Necrotic",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Poisoned Debuff."
+      },
+      {
+        "name": "Putrid Vomit",
+        "toHit": "14+F",
+        "damage": "3d6",
+        "damageType": "Acid",
+        "range": "15ft Cone",
+        "rider": "Any hit crawler gains the Acid Debuff: Takes 1d8+F Acid at the end of each round for 2 rounds."
+      }
+    ],
+    "notes": [
+      "New Unlife—When a foe dies to one of the above attacks, it becomes a Ghast and joins the commune."
+    ],
+    "page": 561
+  },
+  {
+    "source": "Core",
+    "name": "Rainbow Sprite",
+    "role": "Mob",
+    "size": 1,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 35,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 7,
+    "stats": {
+      "STR": {
+        "score": 18,
+        "mod": 4
+      },
+      "INT": {
+        "score": 19,
+        "mod": 4
+      },
+      "CON": {
+        "score": 29,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 43,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 9,
+        "mod": 3
+      }
+    },
+    "attacks": [
+      {
+        "name": "Light Lance Spell",
+        "toHit": "14+F",
+        "damage": "4d8+4",
+        "damageType": "Force",
+        "range": "40ft range"
+      },
+      {
+        "name": "Dust Blast Spell",
+        "toHit": "14+F",
+        "damage": "4d6+4",
+        "damageType": "Force",
+        "range": "30ft range, 5ft Blast radius",
+        "rider": "Any crawler who loses 2+ HB slots gains the Dusted Debuff: Disadvantage on Attacks and Skill Checks requiring sight until an Action is spent to wipe their eyes clean. Invisible creatures are revealed until the end of combat."
+      }
+    ],
+    "notes": [
+      "Flight—Rainbow Sprites move through the air as though on the ground and hover in place."
+    ],
+    "page": 625
+  },
+  {
+    "source": "Core",
+    "name": "Snowgrave",
+    "role": "Mob",
+    "size": 2,
+    "tags": [
+      "Goblinoid Phantom"
+    ],
+    "level": 35,
+    "hbSlots": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 40,
+        "mod": 5
+      },
+      "INT": {
+        "score": 15,
+        "mod": 4
+      },
+      "CON": {
+        "score": 15,
+        "mod": 4
+      },
+      "DEX": {
+        "score": 35,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 5,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Talon",
+        "toHit": "15+F",
+        "damage": "5d10+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Grapple",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "Any hit crawler gains the Held Debuff."
+      }
+    ],
+    "notes": [
+      "Snow Swimming—Snowgraves can move through the snow as though on the ground.",
+      "Under Snow Tow—Any Held crawler is dragged under the snow the following round and gains the Suffocating Debuff: Take 1d6+F damage at the end of each round (until they make an Unopposed Swimming Skill Check)."
+    ],
+    "page": 604
+  },
+  {
     "name": "Tape Head",
     "role": "Mob",
     "size": 2,
@@ -8920,6 +11010,202 @@
     ],
     "page": 512,
     "source": "Core"
+  },
+  {
+    "source": "Core",
+    "name": "Nude Glaber",
+    "role": "Mob",
+    "size": 3,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 36,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "16+F",
+    "evade": "14+F",
+    "move": "20+S",
+    "dr": 0,
+    "stats": {
+      "STR": {
+        "score": 8,
+        "mod": 3
+      },
+      "INT": {
+        "score": 57,
+        "mod": 6
+      },
+      "CON": {
+        "score": 32,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 15,
+        "mod": 4
+      },
+      "CHA": {
+        "score": 1,
+        "mod": 1
+      }
+    },
+    "attacks": [
+      {
+        "name": "Claw",
+        "toHit": "13+F",
+        "damage": "5d6+3",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Gagging Gaze",
+        "toHit": "16+F",
+        "damage": "4d6+6",
+        "damageType": "Force",
+        "range": "30ft range",
+        "rider": "Any hit crawler gains the You Stanky! Debuff: Disadvantage on all Charisma Skill Checks until you take a long rest and wash up."
+      }
+    ],
+    "notes": [
+      "Re-Mole-deling—Heals 1 HB slot at the end of each round, and regrows a limb if it takes no damage during a round of combat."
+    ],
+    "page": 593
+  },
+  {
+    "source": "Core",
+    "name": "Pistol Pangolin",
+    "role": "Mob",
+    "size": 3,
+    "tags": [
+      "Steamborg"
+    ],
+    "level": 38,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "40+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 20,
+        "mod": 5
+      },
+      "INT": {
+        "score": 20,
+        "mod": 5
+      },
+      "CON": {
+        "score": 36,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 31,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 12,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Pistoleg",
+        "toHit": "15+F",
+        "damage": "5d8",
+        "damageType": "Piercing",
+        "range": "50ft range"
+      },
+      {
+        "name": "Roly-Poly",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Bludgeoning",
+        "range": "25ft Line",
+        "rider": "Any crawler who fails to Evade slides 5 feet in a direction of the GM's choice."
+      }
+    ],
+    "notes": [],
+    "page": 541
+  },
+  {
+    "source": "Core",
+    "name": "Big Boy Blue",
+    "role": "Mob",
+    "size": 6,
+    "tags": [
+      "Beast"
+    ],
+    "level": 40,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "13+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 43,
+        "mod": 5
+      },
+      "INT": {
+        "score": 6,
+        "mod": 3
+      },
+      "CON": {
+        "score": 35,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 25,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 16,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Sting",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Piercing",
+        "range": "30ft Line",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Poisoned Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 571
   },
   {
     "name": "Gelatinous Boob",
@@ -9052,6 +11338,68 @@
     "source": "Core"
   },
   {
+    "source": "Core",
+    "name": "Phosphenmenologist",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 40,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 18,
+        "mod": 4
+      },
+      "INT": {
+        "score": 90,
+        "mod": 6
+      },
+      "CON": {
+        "score": 18,
+        "mod": 4
+      },
+      "DEX": {
+        "score": 42,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 16,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Pillow Fight",
+        "toHit": "14+F",
+        "damage": "5d6+6",
+        "damageType": "Bludgeoning",
+        "range": "30ft range",
+        "rider": "On hit, target gains the Fatigued Debuff."
+      }
+    ],
+    "notes": [
+      "Stat block for the crawler \"Sven Gal\" (Crawler #5,555,556); printed with a Mob type line."
+    ],
+    "page": 546
+  },
+  {
     "name": "Pooka Goal Digger",
     "role": "Mob",
     "size": 2,
@@ -9137,6 +11485,1094 @@
     "source": "Core"
   },
   {
+    "source": "Core",
+    "name": "Purifier Vulture",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Avian Janitor"
+    ],
+    "level": 40,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "16+F",
+    "evade": "15+F",
+    "move": "30+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 10,
+        "mod": 4
+      },
+      "INT": {
+        "score": 52,
+        "mod": 6
+      },
+      "CON": {
+        "score": 32,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 30,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 1,
+        "mod": 1
+      }
+    },
+    "attacks": [
+      {
+        "name": "Feeling Peckish",
+        "toHit": "14+F",
+        "damage": "5d8+4",
+        "damageType": "Piercing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Searing Blast",
+        "toHit": "16+F",
+        "damage": "4d6+6",
+        "damageType": "Fire",
+        "range": "100ft range, 10ft Blast radius",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Burned Debuff."
+      }
+    ],
+    "notes": [
+      "Flight—Can move through the air as if it were on the ground."
+    ],
+    "page": 541
+  },
+  {
+    "source": "Core",
+    "name": "Concierge Shark",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Beast"
+    ],
+    "level": 41,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "13+F",
+    "evade": "15+F",
+    "move": "35+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 47,
+        "mod": 5
+      },
+      "INT": {
+        "score": 6,
+        "mod": 3
+      },
+      "CON": {
+        "score": 42,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 25,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 8,
+        "mod": 3
+      }
+    },
+    "attacks": [
+      {
+        "name": "Bite",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Feeding Frenzy—If a shark-foe drops to 50% HB or less or gains the Blood Trail Debuff, Concierge Sharks may use their Move Action to attack."
+    ],
+    "page": 572
+  },
+  {
+    "source": "Core",
+    "name": "Pudding Pal",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Ooze"
+    ],
+    "level": 41,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 0,
+    "stats": {
+      "STR": {
+        "score": 33,
+        "mod": 5
+      },
+      "INT": {
+        "score": 10,
+        "mod": 4
+      },
+      "CON": {
+        "score": 33,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 27,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 25,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Pudding Punch",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains a Pudding Debuff (see below)."
+      },
+      {
+        "name": "Pudding Blast",
+        "toHit": "15+F",
+        "damage": "3d6+5",
+        "damageType": "Force",
+        "range": "25ft range, 5ft Blast radius",
+        "rider": "Any hit crawler gains a Pudding Debuff (see below)."
+      }
+    ],
+    "notes": [
+      "Pudding Debuff—Each flavor of Pudding Pal gives a different Debuff. Lemon Pudding: Take 1d10+5 Acid at the end of each round until the end of the combat. Vanilla Pudding: Roll Charisma Skill Checks with Disadvantage for the rest of the day. Chocolate Pudding: You poop yourself. Butterscotch Pudding: Cannot take Steps until the end of the combat."
+    ],
+    "page": 594
+  },
+  {
+    "source": "Core",
+    "name": "Giant Frenzied Gerbil (Summoned)",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Critter"
+    ],
+    "level": 42,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 25,
+        "mod": 5
+      },
+      "INT": {
+        "score": 16,
+        "mod": 4
+      },
+      "CON": {
+        "score": 24,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 53,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 13,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Scratch",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Gnaw",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Sepsis Debuff."
+      }
+    ],
+    "notes": [
+      "Frenzied—Frenzied Gerbils have a Step distance of 20ft instead of 10ft.",
+      "This is the allied/summonable Level 42 version printed beside Tatera (see Royal War Horn, p. 527/533)."
+    ],
+    "page": 535
+  },
+  {
+    "source": "Core",
+    "name": "Crocodilian Clawpad",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 43,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 30,
+        "mod": 5
+      },
+      "INT": {
+        "score": 24,
+        "mod": 5
+      },
+      "CON": {
+        "score": 40,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 20,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 20,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Claws",
+        "toHit": "15+F",
+        "damage": "4d8+5",
+        "damageType": "Slashing",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Blood Trail Debuff."
+      },
+      {
+        "name": "Harpoon Gun",
+        "toHit": "15+F",
+        "damage": "3d10",
+        "damageType": "Piercing",
+        "range": "50ft range",
+        "rider": "Any hit crawler gains the Stiff Legs Debuff."
+      }
+    ],
+    "notes": [
+      "Ambush Predator—Any Crocodilian Clawpad that is not surprised attacks with Advantage during the first round of combat."
+    ],
+    "page": 613
+  },
+  {
+    "source": "Core",
+    "name": "Lutin Bounty Hunter",
+    "role": "Mob",
+    "size": 3,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 44,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 27,
+        "mod": 5
+      },
+      "INT": {
+        "score": 35,
+        "mod": 5
+      },
+      "CON": {
+        "score": 20,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 35,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 20,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Knife",
+        "toHit": "15+F",
+        "damage": "5d4+5",
+        "damageType": "Piercing",
+        "range": "5ft range, Armor-Piercing"
+      },
+      {
+        "name": "Repeating Crossbow",
+        "toHit": "15+F",
+        "damage": "5d8",
+        "damageType": "Piercing",
+        "range": "60ft range",
+        "rider": "A Lutin Bounty Hunter may use their Move Action to attack a second time in the same round, but may only do this every other round."
+      }
+    ],
+    "notes": [
+      "Buff Dudes—A Lutin Bounty Hunter can cast a Spell to give half of them a +1 Buff to one of the following values: Attack, Damage, or Evade."
+    ],
+    "page": 614
+  },
+  {
+    "source": "Core",
+    "name": "Flesh Farrago",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Undead"
+    ],
+    "level": 45,
+    "hbSlots": [
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7,
+      7
+    ],
+    "surprise": "12+F",
+    "evade": "14+F",
+    "move": "20+S",
+    "dr": 0,
+    "stats": {
+      "STR": {
+        "score": 25,
+        "mod": 5
+      },
+      "INT": {
+        "score": 3,
+        "mod": 2
+      },
+      "CON": {
+        "score": 101,
+        "mod": 7
+      },
+      "DEX": {
+        "score": 10,
+        "mod": 4
+      },
+      "CHA": {
+        "score": 1,
+        "mod": 1
+      }
+    },
+    "attacks": [
+      {
+        "name": "Mushroom Stamp",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "Spores",
+        "toHit": "12+F",
+        "damage": "3d8+2",
+        "damageType": "Poison",
+        "range": "15ft Burst radius",
+        "rider": "Any crawler who fails to Evade gains the Woozy Debuff."
+      }
+    ],
+    "notes": [
+      "Fast-Growing—Heals 1 HB slot at the end of each round."
+    ],
+    "page": 593
+  },
+  {
+    "source": "Core",
+    "name": "Yard Mantis",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Insectoid"
+    ],
+    "level": 45,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 40,
+        "mod": 5
+      },
+      "INT": {
+        "score": 10,
+        "mod": 4
+      },
+      "CON": {
+        "score": 30,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 55,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 5,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Bite",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Piercing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Spinning Scythe",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Slashing",
+        "range": "5ft Burst radius",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Sudden Burst—Any Mantis that is not surprised can travel twice its Move in the first round of combat."
+    ],
+    "page": 528
+  },
+  {
+    "source": "Core",
+    "name": "Bubble Beluga",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Whale"
+    ],
+    "level": 46,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 31,
+        "mod": 5
+      },
+      "INT": {
+        "score": 38,
+        "mod": 5
+      },
+      "CON": {
+        "score": 29,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 35,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 10,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Air Bubble",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Force",
+        "range": "30ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Staggered Debuff."
+      },
+      {
+        "name": "Headbutt",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "The Bubble Beluga must be able to move 20ft in a straight line toward the target to make this attack. Any hit crawler is pushed 10 feet. If the target is a ship, all aboard must make an Unopposed Balance Skill Check or slide 5 feet toward the closest water space."
+      }
+    ],
+    "notes": [],
+    "page": 583
+  },
+  {
+    "source": "Core",
+    "name": "Yard Beetle",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Insectoid"
+    ],
+    "level": 46,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "12+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 7,
+    "stats": {
+      "STR": {
+        "score": 45,
+        "mod": 5
+      },
+      "INT": {
+        "score": 5,
+        "mod": 2
+      },
+      "CON": {
+        "score": 53,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 30,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 10,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Slam",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Take Down Debuff."
+      },
+      {
+        "name": "Trample",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Bludgeoning",
+        "range": "15ft Line",
+        "rider": "Any hit crawler gains the Sore as Shit Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 527
+  },
+  {
+    "source": "Core",
+    "name": "Razor Fox (Jubei)",
+    "role": "Mob",
+    "size": 3,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 47,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 21,
+        "mod": 5
+      },
+      "INT": {
+        "score": 22,
+        "mod": 5
+      },
+      "CON": {
+        "score": 23,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 54,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 26,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Katana",
+        "toHit": "15+F",
+        "damage": "5d8+4",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Throwing Star",
+        "toHit": "16+F",
+        "damage": "4d6+4",
+        "damageType": "Piercing",
+        "range": "30ft range"
+      }
+    ],
+    "notes": [
+      "Outfoxy—Razor Foxes can also wield other ninja equipment like smoke bombs, poison, or climbing claws.",
+      "Named stat block for the NPC Jubei (Razor Fox, Level 47)."
+    ],
+    "page": 546
+  },
+  {
+    "source": "Core",
+    "name": "Sangoma",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 47,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "17+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 8,
+        "mod": 3
+      },
+      "INT": {
+        "score": 101,
+        "mod": 7
+      },
+      "CON": {
+        "score": 21,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 42,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 16,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Shuriken",
+        "toHit": "15+F",
+        "damage": "5d4+3",
+        "damageType": "Piercing",
+        "range": "40ft range"
+      },
+      {
+        "name": "Heal Others",
+        "toHit": "",
+        "damage": "",
+        "range": "30ft range",
+        "rider": "Target heals 2d6 HB."
+      }
+    ],
+    "notes": [
+      "Divining the Truth—Once per long rest, the Sangoma can look into the future and choose to give themselves or a party member Advantage on their next Evade check.",
+      "Stat block for the crawler \"Adama Mb\" (Crawler #13,297,594); printed with a Mob type line."
+    ],
+    "page": 546
+  },
+  {
+    "source": "Core",
+    "name": "Yard Spider",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Arachnid"
+    ],
+    "level": 49,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 42,
+        "mod": 5
+      },
+      "INT": {
+        "score": 17,
+        "mod": 4
+      },
+      "CON": {
+        "score": 41,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 49,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 3,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Fangs",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "Any hit crawler gains the Poisoned Debuff."
+      },
+      {
+        "name": "Leg Sweep",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Bludgeoning",
+        "range": "10ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Take Down Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 528
+  },
+  {
+    "source": "Core",
+    "name": "Arachnid Arcanist",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 50,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "16+F",
+    "evade": "15+F",
+    "move": "40+S",
+    "dr": 0,
+    "stats": {
+      "STR": {
+        "score": 20,
+        "mod": 5
+      },
+      "INT": {
+        "score": 52,
+        "mod": 6
+      },
+      "CON": {
+        "score": 33,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 30,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 20,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Butt Blast Spell",
+        "toHit": "16+F",
+        "damage": "5d6+6",
+        "damageType": "Necrotic",
+        "range": "30ft range",
+        "rider": "Any hit crawler gains the But, Butt, Buu… Debuff: The crawler is marked until the end of combat. When hit by this Spell again, it becomes a different random attack Spell in every way (except range), dealing 5dX, and adding its Rank 10 Upgrade (if applicable)."
+      }
+    ],
+    "notes": [],
+    "page": 595
+  },
+  {
+    "source": "Core",
+    "name": "Arachnid Grappler",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 50,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "40+S",
+    "dr": 0,
+    "stats": {
+      "STR": {
+        "score": 52,
+        "mod": 6
+      },
+      "INT": {
+        "score": 25,
+        "mod": 5
+      },
+      "CON": {
+        "score": 33,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 30,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 15,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Grappling",
+        "toHit": "16+F",
+        "damage": "4d8+6",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "Any hit crawler gains the Held Debuff."
+      },
+      {
+        "name": "Web-Shooting",
+        "toHit": "15+F",
+        "damage": "5d6+6",
+        "damageType": "Bludgeoning",
+        "range": "30ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Held Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 595
+  },
+  {
+    "source": "Core",
+    "name": "Crocodilian Mob Boss",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 50,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 6,
+    "stats": {
+      "STR": {
+        "score": 29,
+        "mod": 5
+      },
+      "INT": {
+        "score": 27,
+        "mod": 5
+      },
+      "CON": {
+        "score": 58,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 21,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 20,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Vicious Bite",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Piercing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Harpoon Gun",
+        "toHit": "15+F",
+        "damage": "3d10",
+        "damageType": "Piercing",
+        "range": "30ft range",
+        "rider": "Any hit crawler gains the Pinned to a Surface Debuff: The crawler is Held against a surface like a wall, tree, or whatever is nearby (the ground as a last resort)."
+      }
+    ],
+    "notes": [
+      "Boss’s Orders—At the beginning of each turn, the Mob Boss points out a target, and that target suffers Disadvantage on Evade Checks from the Boss’s underlings.",
+      "Named stat block for the NPC Don Jackson DeVille (Crocodilian Mob Boss, Level 50)."
+    ],
+    "page": 577
+  },
+  {
     "name": "Graffiti Mimic",
     "role": "Mob",
     "size": 5,
@@ -9213,6 +12649,68 @@
     ],
     "page": 510,
     "source": "Core"
+  },
+  {
+    "source": "Core",
+    "name": "Lutin Priest",
+    "role": "Mob",
+    "size": 3,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 50,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 25,
+        "mod": 5
+      },
+      "INT": {
+        "score": 35,
+        "mod": 5
+      },
+      "CON": {
+        "score": 20,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 35,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 40,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Unarmed Combat",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      }
+    ],
+    "notes": [
+      "Even Buffer Dudes—A Lutin Priest can cast a Spell to give themselves and a Weak group of their party a +1 Buff to any two of the following Checks: Attack, Damage, or Evade.",
+      "Spell Bound—Lutin Priests know the following Spells at Rank 10: Heal Others, Holy Aura, Smite, Shield, and Turn Undead."
+    ],
+    "page": 614
   },
   {
     "name": "Pooka Harmacist",
@@ -9293,6 +12791,430 @@
     "source": "Core"
   },
   {
+    "source": "Core",
+    "name": "Thorny Devil Queen",
+    "role": "Mob",
+    "size": 6,
+    "tags": [
+      "Reptile"
+    ],
+    "level": 50,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 8,
+    "stats": {
+      "STR": {
+        "score": 50,
+        "mod": 6
+      },
+      "INT": {
+        "score": 30,
+        "mod": 5
+      },
+      "CON": {
+        "score": 50,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 20,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 30,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Chomp",
+        "toHit": "16+F",
+        "damage": "5d8+6",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "Fiendish Flop",
+        "toHit": "15+F",
+        "damage": "4d6+6",
+        "damageType": "Piercing",
+        "range": "10ft Burst radius",
+        "rider": "Any hit crawler gains the Held Debuff, and the Skewered Debuff: Each failed escape from being Held subjects the crawler to Spikes All Over (see below)."
+      }
+    ],
+    "notes": [
+      "Spikes All Over—On any melee attack (or attempt to escape being Skewered) Near Miss Fail against this Mob, the crawler takes 2d8+F Piercing damage. Add 1 die for each degree of failure worse than that."
+    ],
+    "page": 539
+  },
+  {
+    "source": "Core",
+    "name": "Nerodia Water Snake",
+    "role": "Mob",
+    "size": 6,
+    "tags": [
+      "Reptile"
+    ],
+    "level": 51,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 48,
+        "mod": 5
+      },
+      "INT": {
+        "score": 14,
+        "mod": 4
+      },
+      "CON": {
+        "score": 42,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 49,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 5,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Bite",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Piercing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Constrict",
+        "toHit": "15+F",
+        "damage": "3d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "Any hit crawler gains the Held Debuff."
+      },
+      {
+        "name": "Swallow",
+        "toHit": "15+F",
+        "damage": "3d12+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "This attack may only be made against Held foes. Any hit crawler gains the Swallowed Debuff: Swallowed crawlers take 1d10+F Acid at the end of each round and cannot be attacked. Swallowed crawlers attack with Disadvantage vs. 0 DR, and Slashing attacks deal x2 damage. When an attack against the Nerodia Water Snake results in an Amazing Success or better (or it dies), all crawlers remove the Swallowed Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 527
+  },
+  {
+    "source": "Core",
+    "name": "Pain Amplifier Jellyfish",
+    "role": "Mob",
+    "size": 3,
+    "tags": [
+      "Cnidaria"
+    ],
+    "level": 51,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "13+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 51,
+        "mod": 6
+      },
+      "INT": {
+        "score": 6,
+        "mod": 3
+      },
+      "CON": {
+        "score": 35,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 58,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 2,
+        "mod": 1
+      }
+    },
+    "attacks": [
+      {
+        "name": "Tentacles",
+        "toHit": "16+F",
+        "damage": "5d6+6",
+        "damageType": "Piercing",
+        "range": "30ft Cone",
+        "rider": "Any hit crawler gains The Taint Debuff. On an Evade Major Fail or worse, the crawler gains the Shocked Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 584
+  },
+  {
+    "source": "Core",
+    "name": "Crocodilian Deathroller",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 52,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 30,
+        "mod": 5
+      },
+      "INT": {
+        "score": 30,
+        "mod": 5
+      },
+      "CON": {
+        "score": 40,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 20,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 41,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Bite",
+        "toHit": "15+5",
+        "damage": "4d10+5",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "Any hit crawler gains the Held Debuff."
+      },
+      {
+        "name": "Roll the Bones!",
+        "toHit": "15+F",
+        "damage": "5d10+5",
+        "range": "100ft range",
+        "rider": "Roll a 1d6 to determine the type of damage: 1—Electric, 2—Fire, 3—Force, 4—Ice, 5—Psychic, 6—Sonic."
+      }
+    ],
+    "notes": [
+      "Death-Roll—Any Held crawler is subjected to a violent, spinning motion the following round (as an Action) and gains the Shredded Debuff: Take 1d6+F Slashing at the end of each round until the Held Debuff is removed or the Crocodilian Deathroller is killed."
+    ],
+    "page": 613
+  },
+  {
+    "source": "Core",
+    "name": "Pirate",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 52,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 39,
+        "mod": 5
+      },
+      "INT": {
+        "score": 26,
+        "mod": 5
+      },
+      "CON": {
+        "score": 29,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 38,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 29,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Cutlass",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Pistol",
+        "toHit": "15+F",
+        "damage": "4d8",
+        "damageType": "Piercing",
+        "range": "40ft range"
+      },
+      {
+        "name": "Liquor Flamethrower",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Fire",
+        "range": "15ft Cone",
+        "rider": "The Pirate takes a swig of grog, lights a match, and blows flame. Any hit crawler gains the Burned Debuff."
+      }
+    ],
+    "notes": [
+      "Ghostly—If the Pirate is Ghost, it can only be harmed by enchanted weapons and Spells, and all its attacks are considered magical for the purposes of overcoming Resistances and Immunities."
+    ],
+    "page": 584
+  },
+  {
+    "source": "Core",
+    "name": "Cannonback Tortoise",
+    "role": "Mob",
+    "size": 5,
+    "tags": [
+      "Reptilian"
+    ],
+    "level": 55,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "14+F",
+    "evade": "16+F",
+    "move": "10+S",
+    "dr": 7,
+    "stats": {
+      "STR": {
+        "score": 27,
+        "mod": 5
+      },
+      "INT": {
+        "score": 12,
+        "mod": 4
+      },
+      "CON": {
+        "score": 61,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 65,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 5,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Grapeshot",
+        "toHit": "15+F",
+        "damage": "4d6",
+        "damageType": "Piercing",
+        "range": "30ft Cone"
+      },
+      {
+        "name": "Cannonball",
+        "toHit": "16+F",
+        "damage": "5d8",
+        "damageType": "Bludgeoning",
+        "range": "50ft range",
+        "rider": "Any hit crawler is pushed 5 feet for each HB slot lost."
+      },
+      {
+        "name": "Self-Destruct",
+        "toHit": "15+F",
+        "damage": "4d12",
+        "damageType": "Bludgeoning",
+        "range": "10ft Burst radius",
+        "rider": "If the Cannonback Tortoise is reduced to 20% HB or less, it blows itself up and dies."
+      }
+    ],
+    "notes": [],
+    "page": 583
+  },
+  {
     "name": "Clurichaun Aspirant Super Duper Star",
     "role": "Mob",
     "size": 3,
@@ -9371,6 +13293,269 @@
     ],
     "page": 503,
     "source": "Core"
+  },
+  {
+    "source": "Core",
+    "name": "Giant Frenzied Gerbil",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Critter"
+    ],
+    "level": 55,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 45,
+        "mod": 5
+      },
+      "INT": {
+        "score": 18,
+        "mod": 4
+      },
+      "CON": {
+        "score": 37,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 55,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 15,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Scratch",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Gnaw",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Sepsis Debuff."
+      }
+    ],
+    "notes": [
+      "Frenzied—Frenzied Gerbils have a Step distance of 20ft instead of 10ft."
+    ],
+    "page": 527
+  },
+  {
+    "source": "Core",
+    "name": "Temple Guard",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Stony Phantasm"
+    ],
+    "level": 55,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "12+F",
+    "evade": "16+F",
+    "move": "25+S",
+    "dr": 7,
+    "stats": {
+      "STR": {
+        "score": 50,
+        "mod": 6
+      },
+      "INT": {
+        "score": 5,
+        "mod": 2
+      },
+      "CON": {
+        "score": 60,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 50,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 5,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Stone Fist",
+        "toHit": "16+F",
+        "damage": "5d8+6",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "Stone Shot",
+        "toHit": "16+F",
+        "damage": "5d6+6",
+        "damageType": "Bludgeoning",
+        "range": "60ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Woozy Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 615
+  },
+  {
+    "source": "Core",
+    "name": "Thing Too Horrible to Name",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "Spirit"
+    ],
+    "level": 55,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "17+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 0,
+    "stats": {
+      "STR": {
+        "score": 1,
+        "mod": 1
+      },
+      "INT": {
+        "score": 110,
+        "mod": 7
+      },
+      "CON": {
+        "score": 24,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 30,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 5,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Psychic Bolt Spell",
+        "toHit": "17+F",
+        "damage": "5d6+7",
+        "damageType": "Psychic",
+        "range": "40ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Terrified Debuff, seeing the thing that most torments them."
+      }
+    ],
+    "notes": [],
+    "page": 596
+  },
+  {
+    "source": "Core",
+    "name": "Guard Dwarf",
+    "role": "Mob",
+    "size": 4,
+    "tags": [
+      "City Guard"
+    ],
+    "level": 75,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "15+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 60,
+        "mod": 6
+      },
+      "INT": {
+        "score": 30,
+        "mod": 5
+      },
+      "CON": {
+        "score": 60,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 50,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 30,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Stiletto",
+        "toHit": "16+F",
+        "damage": "7d8+6",
+        "damageType": "Piercing",
+        "range": "5ft range, Armor-Piercing"
+      },
+      {
+        "name": "Grapple",
+        "toHit": "16+F",
+        "damage": "6d6+6",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "Any hit crawler gains the Held Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 605
   },
   {
     "name": "Village Guard",
@@ -10455,6 +14640,681 @@
     "source": "Core"
   },
   {
+    "source": "Core",
+    "name": "Ursine Edge Member",
+    "role": "NPC",
+    "size": 4,
+    "tags": [
+      "Beastly"
+    ],
+    "level": 32,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "14+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 29,
+        "mod": 5
+      },
+      "INT": {
+        "score": 14,
+        "mod": 4
+      },
+      "CON": {
+        "score": 29,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 15,
+        "mod": 4
+      },
+      "CHA": {
+        "score": 14,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Club",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "Spreading Scent",
+        "toHit": "14+F",
+        "damage": "4d6+4",
+        "damageType": "Acid",
+        "range": "20ft Cone",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Tagged Debuff: A new Ursa Edge Member shows and seeks to mate with you."
+      }
+    ],
+    "notes": [],
+    "page": 625
+  },
+  {
+    "source": "Core",
+    "name": "Bune Lieutenant",
+    "role": "NPC",
+    "size": 3,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 35,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 21,
+        "mod": 5
+      },
+      "INT": {
+        "score": 41,
+        "mod": 5
+      },
+      "CON": {
+        "score": 23,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 37,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 13,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Claw",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      }
+    ],
+    "notes": [
+      "Rainbow Magic—Bune Lieutenants can cast the following Spells at Rank 10, each of which has rainbow-like visual effects: Dirt Clod, Heal Critter, Hole, Magic Missile, and Shield."
+    ],
+    "page": 624
+  },
+  {
+    "source": "Core",
+    "name": "City Elf Trapper",
+    "role": "NPC",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 35,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 20,
+        "mod": 5
+      },
+      "INT": {
+        "score": 20,
+        "mod": 5
+      },
+      "CON": {
+        "score": 30,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 30,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 10,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Hunting Knife",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Duck Call",
+        "toHit": "15+F",
+        "damage": "4d6",
+        "damageType": "Sonic",
+        "range": "15ft Cone",
+        "rider": "Any hit crawler attracts the attention of an annoying duck, who pecks at the crawler’s ears and ankles (the crawler gains the Sore as Shit Debuff). Any attack against the duck that is not a Critical Fail kills or scares it off."
+      }
+    ],
+    "notes": [],
+    "page": 551
+  },
+  {
+    "source": "Core",
+    "name": "Igneous",
+    "role": "NPC",
+    "size": 5,
+    "tags": [
+      "Earth Elemental"
+    ],
+    "level": 37,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "14+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 34,
+        "mod": 5
+      },
+      "INT": {
+        "score": 21,
+        "mod": 5
+      },
+      "CON": {
+        "score": 27,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 19,
+        "mod": 4
+      },
+      "CHA": {
+        "score": 15,
+        "mod": 4
+      }
+    },
+    "attacks": [
+      {
+        "name": "Stones Throw",
+        "toHit": "14+F",
+        "damage": "5d8+5",
+        "damageType": "Bludgeoning",
+        "range": "30ft range"
+      },
+      {
+        "name": "Rocky Rumble",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "Any hit crawler is pushed 5 feet for every HB slot lost."
+      }
+    ],
+    "notes": [
+      "Hot Stuff—When a crawler adjacent to an Igneous makes two attacks in a round, they take 1d10+F Fire damage."
+    ],
+    "page": 562
+  },
+  {
+    "source": "Core",
+    "name": "Pterolykos Hunter",
+    "role": "NPC",
+    "size": 4,
+    "tags": [
+      "Winged Guardian"
+    ],
+    "level": 37,
+    "hbSlots": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "surprise": "18+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 20,
+        "mod": 5
+      },
+      "INT": {
+        "score": 20,
+        "mod": 5
+      },
+      "CON": {
+        "score": 15,
+        "mod": 4
+      },
+      "DEX": {
+        "score": 31,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 30,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Claw",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Mom's Rifle",
+        "toHit": "15+F",
+        "damage": "4d8",
+        "damageType": "Piercing",
+        "range": "200ft range",
+        "rider": "Any hit crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Aerial Ambush—Each Pterolykos Hunter that is not surprised attacks with Advantage during the first round of combat."
+    ],
+    "page": 552
+  },
+  {
+    "source": "Core",
+    "name": "Bune Light Guard",
+    "role": "NPC",
+    "size": 3,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 38,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 6,
+    "stats": {
+      "STR": {
+        "score": 26,
+        "mod": 5
+      },
+      "INT": {
+        "score": 19,
+        "mod": 4
+      },
+      "CON": {
+        "score": 31,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 35,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 9,
+        "mod": 3
+      }
+    },
+    "attacks": [
+      {
+        "name": "Lightsword",
+        "toHit": "15+F",
+        "damage": "3d8+5",
+        "damageType": "Force",
+        "range": "5ft range, Armor-Piercing"
+      }
+    ],
+    "notes": [
+      "Golden Armor—This armor grants Bune Light Guard the ability to use the Wisp Armor Spell at Rank 5, once per combat."
+    ],
+    "page": 624
+  },
+  {
+    "source": "Core",
+    "name": "City Elf Mechanic",
+    "role": "NPC",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 39,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 30,
+        "mod": 5
+      },
+      "INT": {
+        "score": 30,
+        "mod": 5
+      },
+      "CON": {
+        "score": 30,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 30,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 2,
+        "mod": 1
+      }
+    },
+    "attacks": [
+      {
+        "name": "Wrench",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "Explosive Exit",
+        "toHit": "15+F",
+        "damage": "4d6",
+        "damageType": "Fire",
+        "range": "10ft Burst radius",
+        "rider": "Any hit crawler gains the Burned Debuff. A City Elf Mechanic uses this if at 20% HB or less, and only if the crawlers outnumber them. Then the Elf dies."
+      }
+    ],
+    "notes": [
+      "See Patterns—City Elf Mechanics can see invisible entities. If crawlers are benefiting from the Tactics Skill, those effects last for only one round."
+    ],
+    "page": 551
+  },
+  {
+    "source": "Core",
+    "name": "Pazuzu Punk",
+    "role": "NPC",
+    "size": 5,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 40,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "13+F",
+    "evade": "15+F",
+    "move": "30+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 35,
+        "mod": 5
+      },
+      "INT": {
+        "score": 8,
+        "mod": 3
+      },
+      "CON": {
+        "score": 52,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 22,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 8,
+        "mod": 3
+      }
+    },
+    "attacks": [
+      {
+        "name": "Guitar Smash",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "Molotov Cocktail",
+        "toHit": "14+F",
+        "damage": "3d6",
+        "damageType": "Fire",
+        "range": "25ft range, 10ft Blast radius",
+        "rider": "Any hit crawler gains the Burned Debuff."
+      },
+      {
+        "name": "Tail Strike",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Piercing",
+        "range": "10ft range",
+        "rider": "Any hit crawler gains the Poisoned Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 540
+  },
+  {
+    "source": "Core",
+    "name": "Night Elf Hunter",
+    "role": "NPC",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 42,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 34,
+        "mod": 5
+      },
+      "INT": {
+        "score": 20,
+        "mod": 5
+      },
+      "CON": {
+        "score": 21,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 35,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 21,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Katana",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Crossbow",
+        "toHit": "14+F",
+        "damage": "3d8",
+        "damageType": "Piercing",
+        "range": "30ft range",
+        "rider": "Any hit crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "UV Fungus—Night Elf Hunters increase their damage die type to d10s instead of d8s vs the Undead."
+    ],
+    "page": 562
+  },
+  {
+    "source": "Core",
+    "name": "Pazuzu Bootlicker",
+    "role": "NPC",
+    "size": 5,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 42,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "13+F",
+    "evade": "15+F",
+    "move": "30+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 41,
+        "mod": 5
+      },
+      "INT": {
+        "score": 8,
+        "mod": 3
+      },
+      "CON": {
+        "score": 52,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 22,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 8,
+        "mod": 3
+      }
+    },
+    "attacks": [
+      {
+        "name": "Pincers",
+        "toHit": "15+F",
+        "damage": "4d8+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range",
+        "rider": "Any hit crawler gains the Held Debuff."
+      },
+      {
+        "name": "Tail Strike",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Piercing",
+        "range": "10ft range",
+        "rider": "Any hit crawler gains the Poisoned Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 540
+  },
+  {
     "name": "Cyborg Mechanic",
     "role": "NPC",
     "size": 6,
@@ -10531,6 +15391,75 @@
     ],
     "page": 405,
     "source": "Core"
+  },
+  {
+    "source": "Core",
+    "name": "Elven Clear-Cutter",
+    "role": "NPC",
+    "size": 6,
+    "tags": [
+      "Construct"
+    ],
+    "level": 45,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "12+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 7,
+    "stats": {
+      "STR": {
+        "score": 55,
+        "mod": 6
+      },
+      "INT": {
+        "score": 5,
+        "mod": 2
+      },
+      "CON": {
+        "score": 55,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 20,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 5,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Buzzsaw",
+        "toHit": "14+F",
+        "damage": "4d8+6",
+        "damageType": "Slashing",
+        "range": "5ft Burst radius"
+      },
+      {
+        "name": "Arm Blades",
+        "toHit": "16+F",
+        "damage": "5d6+6",
+        "damageType": "Slashing",
+        "range": "15ft range",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Many-Armed—Elven Clear-Cutter may spend its Move Action to attack."
+    ],
+    "page": 552
   },
   {
     "name": "Pebbles",
@@ -10834,6 +15763,351 @@
     "source": "Core"
   },
   {
+    "source": "Core",
+    "name": "Dominic Hawthorne",
+    "role": "NPC",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 50,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 42,
+        "mod": 5
+      },
+      "INT": {
+        "score": 23,
+        "mod": 5
+      },
+      "CON": {
+        "score": 36,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 24,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 52,
+        "mod": 6
+      }
+    },
+    "attacks": [
+      {
+        "name": "Chain of Woe",
+        "toHit": "15+F",
+        "damage": "5d10+5",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "Sorrowful Blast",
+        "toHit": "15+F",
+        "damage": "5d8+5",
+        "damageType": "Sonic",
+        "range": "20ft Cone",
+        "rider": "Any hit crawler is pushed 10 feet."
+      }
+    ],
+    "notes": [
+      "Former Vocalist—Dominic Hawthorne can cast the following Spells at Rank 5: Earworm, Hot Stuff Aura, and Panty Dropper."
+    ],
+    "page": 626
+  },
+  {
+    "source": "Core",
+    "name": "Pterolykos Elder",
+    "role": "NPC",
+    "size": 4,
+    "tags": [
+      "Winged Guardian"
+    ],
+    "level": 50,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "18+F",
+    "evade": "16+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 25,
+        "mod": 5
+      },
+      "INT": {
+        "score": 25,
+        "mod": 5
+      },
+      "CON": {
+        "score": 20,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 52,
+        "mod": 6
+      },
+      "CHA": {
+        "score": 33,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Claws",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Slashing",
+        "range": "5ft range"
+      },
+      {
+        "name": "Rifle",
+        "toHit": "15+F",
+        "damage": "4d8",
+        "damageType": "Piercing",
+        "range": "200ft range",
+        "rider": "Any hit crawler gains the Blood Trail Debuff."
+      }
+    ],
+    "notes": [
+      "Aerial Ambush—Each Pterolykos that is not surprised attacks with Advantage during the first round of combat.",
+      "Named stat block for the NPC Elder Silkpaw (Pterolykos, Level 50)."
+    ],
+    "page": 556
+  },
+  {
+    "source": "Core",
+    "name": "Whisper",
+    "role": "NPC",
+    "size": 4,
+    "tags": [
+      "Humanoid"
+    ],
+    "level": 50,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+2",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 51,
+        "mod": 6
+      },
+      "INT": {
+        "score": 40,
+        "mod": 5
+      },
+      "CON": {
+        "score": 31,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 32,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 26,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Light Lance",
+        "toHit": "16+F",
+        "damage": "5d8+5",
+        "damageType": "Force",
+        "range": "50ft range"
+      },
+      {
+        "name": "Polychrome Vortex Spell",
+        "toHit": "15+F",
+        "damage": "4d6+5",
+        "damageType": "Force",
+        "range": "60ft range, 15ft Blast radius",
+        "rider": "On an Evade Major Fail or worse, the crawler gains the Blinded Debuff."
+      }
+    ],
+    "notes": [
+      "Flight—Whisper can move through the air as though on the ground.",
+      "Named stat block for the NPC Whisper (Bune Polychromatic Lightcaster, Level 50). Move printed as \"20+2\" (likely 20+S)."
+    ],
+    "page": 626
+  },
+  {
+    "source": "Core",
+    "name": "Ghommid",
+    "role": "NPC",
+    "size": 5,
+    "tags": [
+      "Undead"
+    ],
+    "level": 53,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "14+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 51,
+        "mod": 6
+      },
+      "INT": {
+        "score": 15,
+        "mod": 4
+      },
+      "CON": {
+        "score": 52,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 41,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 5,
+        "mod": 2
+      }
+    },
+    "attacks": [
+      {
+        "name": "Claw",
+        "toHit": "16+F",
+        "damage": "5d8+6",
+        "damageType": "Bludgeoning",
+        "range": "5ft range"
+      },
+      {
+        "name": "Intestinal Tentacle",
+        "toHit": "15+F",
+        "damage": "4d6+6",
+        "damageType": "Bludgeoning",
+        "range": "10ft range",
+        "rider": "Any hit crawler gains the Held Debuff."
+      }
+    ],
+    "notes": [],
+    "page": 561
+  },
+  {
+    "source": "Core",
+    "name": "Vampire",
+    "role": "NPC",
+    "size": 4,
+    "tags": [
+      "Undead"
+    ],
+    "level": 55,
+    "hbSlots": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5,
+      5
+    ],
+    "surprise": "15+F",
+    "evade": "15+F",
+    "move": "20+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 38,
+        "mod": 5
+      },
+      "INT": {
+        "score": 22,
+        "mod": 5
+      },
+      "CON": {
+        "score": 36,
+        "mod": 5
+      },
+      "DEX": {
+        "score": 35,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 39,
+        "mod": 5
+      }
+    },
+    "attacks": [
+      {
+        "name": "Vampiric Embrace",
+        "toHit": "15+F",
+        "damage": "5d6+5",
+        "damageType": "Piercing",
+        "range": "5ft range",
+        "rider": "For every 3 HB slots lost to this attack, Vampire heals 1 HB slot."
+      },
+      {
+        "name": "Hypnotism Spell",
+        "toHit": "15+F",
+        "damage": "No damage",
+        "range": "20ft range",
+        "rider": "Can Evade (look away). Any hit crawler must make an INT Stat Check. On Fail, they gain the Hypnotized Debuff (this counts as mind control): Cannot attack or Evade until the Spell is broken. Spend 1 Action each round making the same Stat Check to break the Spell."
+      }
+    ],
+    "notes": [
+      "Ghastly Unlife—If a crawler is killed by a Vampire, they rise as a Pet Ghast bound to Kesla’s Soul Crystal pendant."
+    ],
+    "page": 562
+  },
+  {
     "name": "Superior Forge Sprite",
     "role": "NPC",
     "size": 3,
@@ -10894,5 +16168,76 @@
     ],
     "page": 452,
     "source": "Core"
+  },
+  {
+    "source": "Core",
+    "name": "Ancient Cloud Dragon",
+    "role": "NPC",
+    "size": 7,
+    "tags": [
+      "Dragon"
+    ],
+    "level": 80,
+    "hbSlots": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "surprise": "16+F",
+    "evade": "15+F",
+    "move": "30+S",
+    "dr": 5,
+    "stats": {
+      "STR": {
+        "score": 55,
+        "mod": 6
+      },
+      "INT": {
+        "score": 55,
+        "mod": 6
+      },
+      "CON": {
+        "score": 55,
+        "mod": 6
+      },
+      "DEX": {
+        "score": 25,
+        "mod": 5
+      },
+      "CHA": {
+        "score": 55,
+        "mod": 6
+      }
+    },
+    "attacks": [
+      {
+        "name": "Bite",
+        "toHit": "16+F",
+        "damage": "6d8+6",
+        "damageType": "Piercing",
+        "range": "15ft range",
+        "rider": "If a crawler does not successfully Evade, they gain the Swallowed Debuff: The crawler is swallowed whole and cannot be attacked. When an attack against the Ancient Cloud Dragon results in an Amazing Success or better (or it dies), all crawlers remove the Swallowed Debuff. Swallowed crawlers take 1d10+F Acid at the end of each round. Swallowed crawlers attack with Disadvantage vs 0 DR, and Slashing attacks deal x2 damage."
+      },
+      {
+        "name": "Flatulence Windstorm",
+        "toHit": "16+F",
+        "damage": "7d8+5",
+        "damageType": "Sonic",
+        "range": "20ft Cone",
+        "rider": "Any hit crawler is pushed back 10ft and gains the Queasy Debuff."
+      }
+    ],
+    "notes": [
+      "Flight—Ancient Cloud Dragons can move through the air as though on the ground.",
+      "Named stat block for the NPC Cirrus (Antediluvian Cloud Dragon, Level 80)."
+    ],
+    "page": 630
   }
 ]

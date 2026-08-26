@@ -158,7 +158,7 @@ export interface DccMonster {
   surprise: string;       // "N+F"
   evade: string;          // "N+F"
   move: string;           // "N+S" or a plain number
-  dr: number;
+  dr: number | string;    // usually a number; a few blocks print "F" (DR = Floor Number)
   stats: Record<DccStat, { score: number; mod: number }>;
   attacks: DccMonsterAttack[];
   notes: string[];        // named passive abilities
