@@ -133,6 +133,8 @@ export type DccMonsterRole =
   | "Province Boss"
   | "Country Boss"
   | "Floor Boss"
+  | "Quest Boss"      // used in the Core adventure chapters
+  | "Elite"           // used in the Core adventure chapters
   | "Rival Crawler"
   | "NPC";
 

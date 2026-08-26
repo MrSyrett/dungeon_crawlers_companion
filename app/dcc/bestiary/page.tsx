@@ -6,9 +6,9 @@ import type { DccMonster, DccStat } from "@/lib/data/dcc-types";
 
 export const dynamic = "force-dynamic";
 
-// Homebrew is not wired for DCC yet (roadmap Phase 6). This page is also a SEED
-// bestiary (~18 blocks); the full ~90-creature GM Toolkit set gets extracted
-// later and dropped straight into data/dcc/monsters.json.
+// Homebrew is not wired for DCC yet (roadmap Phase 6). The bestiary is built
+// from the GM Toolkit Threat Appendix, Par for the Course, and the Core Rulebook
+// adventure chapters (Ch.7-8 so far; Ch.9/The Bubbles still to add).
 
 type Query = { q?: string; role?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
@@ -31,8 +31,9 @@ const MONSTERS_SORTED = [...DCC_MONSTERS].sort(
 // Group the many boss tiers into one "Boss" filter plus Mob / Rival Crawler.
 const ROLE_FILTERS: { key: string; label: string; test: (r: DccMonster["role"]) => boolean }[] = [
   { key: "mob", label: "Mobs", test: (r) => r === "Mob" },
-  { key: "boss", label: "Bosses", test: (r) => r.endsWith("Boss") },
+  { key: "boss", label: "Bosses", test: (r) => r.endsWith("Boss") || r === "Elite" },
   { key: "rival", label: "Rival Crawlers", test: (r) => r === "Rival Crawler" },
+  { key: "npc", label: "NPCs", test: (r) => r === "NPC" },
 ];
 
 function withParams(current: Query, patch: Query): string {
@@ -89,7 +90,7 @@ export default async function DccBestiaryPage({
         <div>
           <h1 className="font-display text-3xl font-black tracking-wide">Bestiary</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--red)] sm:text-[11px] sm:tracking-[0.35em]">
-            {DCC_MONSTERS.length} mobs &amp; bosses · starter set
+            {DCC_MONSTERS.length} mobs, bosses &amp; NPCs
           </p>
         </div>
         <Link
