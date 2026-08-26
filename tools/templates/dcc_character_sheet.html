@@ -55,9 +55,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hdr-logo{background:var(--section-hdr);padding:10px 14px;display:flex;align-items:center;justify-content:center;min-width:100px;}
 .hdr-logo-text{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;color:var(--red);letter-spacing:.08em;text-align:center;line-height:1.2;}
 .hdr-logo-text span{display:block;font-size:18px;color:white;letter-spacing:.04em;}
-.hdr-fields{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;border-left:2px solid var(--border);}
-.hdr-field{padding:4px 8px 6px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);}
-.hdr-field:nth-child(3),.hdr-field:nth-child(6){border-right:none;}
+.hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);border-left:2px solid var(--border);}
+.hdr-field{padding:4px 8px 6px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);min-width:0;}
+/* Row 1 ends at Gender (child 3), row 2 ends at Crawler # (child 7). */
+.hdr-field:nth-child(3),.hdr-field:nth-child(7){border-right:none;}
 .hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
 .hdr-field input{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;color:var(--ink);outline:none;padding:2px 0;}
 
@@ -180,6 +181,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .skill-check{width:18px;height:18px;cursor:pointer;accent-color:var(--red);}
 .skill-roll-btn{height:24px;min-width:32px;padding:0 7px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;}
 .skill-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
+.skill-info-btn{height:24px;width:22px;margin-right:3px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-style:italic;font-family:'Barlow',serif;font-size:12px;color:var(--muted);vertical-align:middle;}
+.skill-info-btn:hover{border-color:var(--red);color:var(--red);}
 .skill-del-btn{padding:1px 4px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-size:10px;color:var(--muted);}
 .skill-del-btn:hover{background:#c0251e;border-color:#c0251e;color:white;}
 
@@ -338,13 +341,13 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
       <div class="hdr-logo-text"><span>DCC</span>ROLEPLAYING<br>GAME</div>
     </div>
     <div class="hdr-fields">
-      <div class="hdr-field"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
-      <div class="hdr-field"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
-      <div class="hdr-field"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
-      <div class="hdr-field"><label>Level</label><input type="text" id="f-level" placeholder="1"></div>
-      <div class="hdr-field"><label>Floor</label><input type="text" id="f-floor" placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’."></div>
-      <div class="hdr-field"><label>Crawler #</label><input type="text" id="f-crawler"></div>
-      <div class="hdr-field"><label>Class</label><input type="text" id="f-class"></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="text-align:center;"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Floor</label><input type="text" id="f-floor" placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’." style="text-align:center;"></div>
+      <div class="hdr-field" style="grid-column:span 5;"><label>Class</label><input type="text" id="f-class"></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Crawler #</label><input type="text" id="f-crawler"></div>
     </div>
   </div>
 
@@ -527,7 +530,7 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
       </thead>
       <tbody id="skills-body"></tbody>
     </table>
-    <button class="add-btn" onclick="addSkillRow()">+ Add Skill</button>
+    <button class="add-btn" onclick="if(window.DCCSkills){DCCSkills.openPicker()}else{addSkillRow()}">+ Add Skill</button>
   </div>
 
   <!-- TAB: GEAR -->
@@ -913,7 +916,7 @@ function addSkillRow() {
     <td><input type="text" placeholder="Active/Passive"></td>
     <td><input type="text" placeholder="Notes..."></td>
     <td style="text-align:center;"><input type="checkbox" class="skill-check"></td>
-    <td><button class="skill-roll-btn" onclick="rollSkill(this)" title="Roll skill" aria-label="Roll skill"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button></td>
+    <td style="white-space:nowrap;"><button class="skill-info-btn" onclick="if(window.DCCSkills)DCCSkills.infoRow(this)" title="Look up this skill/spell" aria-label="Skill info">i</button><button class="skill-roll-btn" onclick="rollSkill(this)" title="Roll skill" aria-label="Roll skill"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button></td>
   `;
   tbody.appendChild(tr);
 }
@@ -2551,5 +2554,6 @@ autoLoad();
   <script src="/tools-data/dcc-sheet-ccw.js"></script>
   <script src="/tools-data/dcc-sheet-debuffs.js"></script>
   <script src="/tools-data/dcc-sheet-buffs.js"></script>
+  <script src="/tools-data/dcc-sheet-skills.js"></script>
 </body>
 </html>

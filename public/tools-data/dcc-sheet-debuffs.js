@@ -109,6 +109,11 @@
       ".dccd-item .bd{color:#8a8a93;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-left:6px;}",
       ".dccd-item .ef{color:#c9c9cf;font-size:12px;line-height:1.45;margin-top:3px;}",
       ".dccd-item .du{color:#8a8a93;font-size:11px;margin-top:3px;}",
+      ".dccd-custom{display:flex;gap:8px;padding:10px 18px 16px;border-top:1px solid #2a2a2e;}",
+      ".dccd-custom input{flex:1;background:#0e0e10;border:1px solid #2a2a2e;border-radius:6px;color:#ece9e1;padding:8px 10px;font-size:13px;font-family:inherit;}",
+      ".dccd-custom input:focus{outline:none;border-color:#b82018;}",
+      ".dccd-btn{border:1px solid #2a2a2e;background:#1c1516;color:#f0a8a3;border-radius:6px;padding:0 14px;font-size:12px;font-weight:700;cursor:pointer;}",
+      ".dccd-btn:hover{border-color:#b82018;}",
     ].join("\n");
     document.head.appendChild(st);
   }
@@ -173,6 +178,7 @@
         '<div class="dccd-head"><h3>Add a Debuff</h3><button class="dccd-x" onclick="DCCDebuffs.closePicker()" aria-label="Close">✕</button></div>' +
         '<div class="dccd-search"><input id="dccd-search-input" type="search" placeholder="Search debuffs…" value="' + attr(query) + '" oninput="DCCDebuffs.search(this.value)"></div>' +
         '<div class="dccd-list">' + rows + '</div>' +
+        '<div class="dccd-custom"><input id="dccd-custom-input" type="text" placeholder="Add a custom debuff…" onkeydown="if(event.key===\'Enter\')DCCDebuffs.addCustom()"><button class="dccd-btn" onclick="DCCDebuffs.addCustom()">Add</button></div>' +
       '</div>';
     var s = document.getElementById("dccd-search-input");
     if (s) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }
@@ -184,6 +190,7 @@
     if (!el || el.dataset.dccdMounted) return;
     injectCss();
     el.dataset.dccdMounted = "1";
+    el.style.display = "none";       // badges-only: the chips are the display; the field just stores
     // ＋ button, next to the field inside the debuff group
     var add = document.createElement("button");
     add.type = "button";
@@ -230,6 +237,16 @@
       var existing = active.find(function (a) { return !a.custom && a.name === k.name; });
       if (existing) { if (k.stackable) existing.count += 1; }
       else { active.push({ name: k.name, count: 1, custom: false }); }
+      writeBack(); renderChips(); renderPicker();
+    },
+    addCustom: function () {
+      var inp = document.getElementById("dccd-custom-input");
+      if (!inp) return;
+      var name = String(inp.value || "").trim();
+      if (!name) return;
+      if (known(name)) { this.pick(known(name).name); inp.value = ""; return; }
+      if (!active.some(function (a) { return a.name.toLowerCase() === name.toLowerCase(); })) active.push({ name: name, count: 1, custom: true });
+      inp.value = "";
       writeBack(); renderChips(); renderPicker();
     },
     remove: function (i) { active.splice(i, 1); infoOpen = {}; writeBack(); renderChips(); },
