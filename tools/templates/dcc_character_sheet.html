@@ -142,6 +142,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .atk-formula{display:flex;align-items:center;gap:2px;justify-content:center;}
 .atk-formula input{width:30px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;}
 .atk-plus{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--muted);}
+.atk-calc{display:block;text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);opacity:.85;margin-top:1px;white-space:nowrap;}
 .atk-roll-btn{height:24px;min-width:34px;padding:0 8px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--muted);transition:all .1s;}
 .atk-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
 
@@ -666,6 +667,7 @@ function toggleGlobalModSource() {
   syncEvadeDex();
   syncMana();
   updateHpPips();
+  if(typeof recalcAllAttacks === 'function') recalcAllAttacks();
   // Button click — no input/change event, so persist the toggle explicitly
   // (it drives every mod the Party tool shows).
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
@@ -705,6 +707,7 @@ function onStatChange(id) {
   if(id === 'dex') syncEvadeDex();
   if(id === 'int') syncMana();
   if(id === 'con') updateHpPips();
+  if(typeof recalcAllAttacks === 'function') recalcAllAttacks();
 }
 
 function updateMod(id) {
@@ -803,27 +806,57 @@ function addAttackRow(tbody) {
   if(!tbody) tbody = document.getElementById('attacks-body');
   const statOpts = `<option value="">—</option><option value="str">STR</option><option value="int">INT</option><option value="con">CON</option><option value="dex">DEX</option><option value="cha">CHA</option>`;
   const tr = document.createElement('tr');
+  const recalc = "recalcAttackRow(this.closest('tr'))";
   tr.innerHTML = `
     <td><input type="text" placeholder="Attack name..."></td>
     <td>
       <div class="atk-formula">
-        <input type="text" placeholder="Rank" style="width:36px;">
+        <input type="text" placeholder="Rank" style="width:36px;" oninput="${recalc}">
+      </div>
+      <span class="atk-calc" data-atk="hit" title="d20 + Rank + Stat Mod vs the target's Evade">d20+0</span>
+    </td>
+    <td>
+      <div class="atk-formula">
+        <select class="skill-stat-sel atk-stat-sel" style="width:52px;" title="Stat Mod (applies to both To Hit and Damage)" onchange="${recalc}">${statOpts}</select>
       </div>
     </td>
     <td>
       <div class="atk-formula">
-        <select class="skill-stat-sel atk-stat-sel" style="width:52px;" title="Stat Mod (applies to both To Hit and Damage)">${statOpts}</select>
+        <input type="text" placeholder="Dice" style="width:44px;" oninput="${recalc}">
       </div>
-    </td>
-    <td>
-      <div class="atk-formula">
-        <input type="text" placeholder="Dice" style="width:44px;">
-      </div>
+      <span class="atk-calc" data-atk="dmg" title="Damage dice + Stat Mod">—</span>
     </td>
     <td><input type="text" placeholder="Effects..."></td>
     <td><button class="atk-roll-btn" onclick="rollAttack(this)" title="Roll attack" aria-label="Roll attack"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button></td>
   `;
   tbody.appendChild(tr);
+  recalcAttackRow(tr);
+}
+
+// ── Auto attack-math: live To Hit / Damage from Rank + linked Stat Mod ──
+// To Hit  = d20 + Rank + Stat Mod (rolled vs the target's Evade = 10 + DEX + Floor).
+// Damage  = the dice + Stat Mod. The stat select feeds both. Recomputed on every
+// row edit, on any stat-score change, and when the ENH/UNENH mod source toggles.
+function recalcAttackRow(tr) {
+  if(!tr) return;
+  const inputs = tr.querySelectorAll('input[type="text"]');
+  const sel = tr.querySelector('select');
+  const rank = parseMod(inputs[1] ? inputs[1].value : '');
+  const statId = sel ? sel.value : '';
+  const sm = statId ? getStatMod(statId) : 0;
+  const sign = (n) => (n >= 0 ? '+' : '−') + Math.abs(n);
+  const hitEl = tr.querySelector('[data-atk="hit"]');
+  if(hitEl) hitEl.textContent = 'd20' + sign(rank + sm);
+  const dmgEl = tr.querySelector('[data-atk="dmg"]');
+  if(dmgEl) {
+    const diceStr = (inputs[2] ? inputs[2].value : '').trim();
+    const m = diceStr.match(/^(\d*)d(\d+)$/i);
+    if(m) dmgEl.textContent = diceStr + (sm ? ' ' + sign(sm) : '');
+    else dmgEl.textContent = sm ? sign(sm) : '—';
+  }
+}
+function recalcAllAttacks() {
+  document.querySelectorAll('#attacks-body tr').forEach(recalcAttackRow);
 }
 
 // ── HOTLIST ──
@@ -1308,6 +1341,7 @@ function applySheet(data) {
       inputs[2].value = a.dice;
       sels[0].value = atkStatOf(a);              // one stat; tolerates older saves
       inputs[3].value = a.effects;
+      recalcAttackRow(tr);                        // fill the live To Hit / Damage readouts
     });
   }
 
