@@ -116,10 +116,12 @@ export interface DccDeity {
 export interface DccBackground {
   name: string;
   era: "Childhood" | "Adolescence" | "Career" | "Hobby";
+  /** Human crawlers vs animal crawlers draw from different background tables. */
+  kind: "human" | "animal";
   /** The three skills the background offers; the player takes two. */
   skills: string[];
   rank: number;
-  roll?: number;          // its 1d12 index on the era table
+  roll?: number;          // its 1d12 (human) or 1d6 (animal) index on the era table
   page: number;
   source: DccSource;
 }

@@ -57,6 +57,10 @@
   function classByName(n) { return (typeof DCC_CLASSES !== "undefined" ? DCC_CLASSES : []).find((c) => c.name === n) || null; }
   function availExperiences() { return (typeof DCC_EXPERIENCES !== "undefined" ? DCC_EXPERIENCES : []).filter((e) => e.floor <= (W.floor - 1)); }
   function statPointsSpent() { return STAT_IDS.reduce((n, k) => n + (parseInt(W.statPoints[k], 10) || 0), 0); }
+  // Upgrade budget = accumulated level-up points, unspendable until Floor 3:
+  // 3 × current level − 3 (level 1 doesn't count). Fast-forward create = floor table.
+  function upgradeLevel() { const l = parseInt(W.existing && W.existing.header && W.existing.header["f-level"], 10); return l > 0 ? l : 10; }
+  function statBudget() { return isUpgrade() ? Math.max(0, 3 * upgradeLevel() - 3) : FLOOR_CFG[W.floor].statPoints; }
   // "Third-floor rules apply": true for the fast-forward path AND the upgrade flow —
   // both grant racial/class bonuses and distribute stat points.
   function isThird() { return W.mode === "upgrade" || W.path === "thirdfloor"; }
@@ -109,12 +113,28 @@
   }
   // Governing stat for a skill, lowercased for the sheet's selects; "" if none.
   function skillStatLc(name) { const sd = skillByName(name); return sd && sd.stat ? String(sd.stat).toLowerCase() : ""; }
-  function attackSkills() { return (typeof DCC_SKILLS !== "undefined" ? DCC_SKILLS : []).filter((s) => s.category === "attack" && s.group !== "Damage Effect" && s.group !== "Animal/Pet Strike"); }
+  // Weapon-skill choices, minus the passive Damage Effects. Humans wield the human
+  // weapon groups; animal crawlers pick a natural attack (Animal/Pet Strike, minus
+  // their free Slice Attack).
+  function attackSkills() {
+    const all = (typeof DCC_SKILLS !== "undefined" ? DCC_SKILLS : []).filter((s) => s.category === "attack" && s.group !== "Damage Effect");
+    if (W.kind === "animal") return all.filter((s) => s.group === "Animal/Pet Strike" && s.name !== "Slice Attack");
+    return all.filter((s) => s.group !== "Animal/Pet Strike");
+  }
+  // The free Rank-3 base attack: Unarmed Combat (human) or Slice Attack (animal).
+  function baseAttack() {
+    const name = W.kind === "animal" ? "Slice Attack" : "Unarmed Combat";
+    const sd = skillByName(name);
+    return { name, dice: sd && sd.damage ? sd.damage : "1d4", stat: sd && sd.stat ? String(sd.stat).toLowerCase() : "str" };
+  }
   function basicSpells() {
     const all = (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []);
     return BASIC_SPELLS.map((n) => all.find((s) => s.name === n)).filter(Boolean);
   }
-  function bgByEra(era) { return (typeof DCC_BACKGROUNDS !== "undefined" ? DCC_BACKGROUNDS : []).filter((b) => b.era === era); }
+  function bgByEra(era) { return (typeof DCC_BACKGROUNDS !== "undefined" ? DCC_BACKGROUNDS : []).filter((b) => b.era === era && (b.kind || "human") === W.kind); }
+  // Human vs animal crawlers use different life-stage labels (Core pp.104-107).
+  const ERA_LABEL = { human: { Childhood: "Childhood", Adolescence: "Adolescence", Career: "Career", Hobby: "Hobby" }, animal: { Childhood: "Youth", Adolescence: "Training", Career: "Adult", Hobby: "Quirk" } };
+  function eraLabel(era) { return (ERA_LABEL[W.kind] || ERA_LABEL.human)[era] || era; }
   // Every distinct skill offered anywhere in an era's table (for Custom picks).
   function eraSkillPool(era) {
     const set = [];
@@ -133,6 +153,7 @@
       floor: 3,         // fast-forward / upgrade target floor
       basics: { name: "", gender: "", crawler: String(500000 + Math.floor(Math.random() * 12400000)) },
       race: "Human",
+      kind: "human",    // tutorial: 'human' | 'animal' — picks the background/combat tables
       class: "",        // thirdfloor only
       statMethod: "array", // 'array' | 'roll'
       statVals: { str: "", int: "", con: "", dex: "", cha: "" }, // pre-race base
@@ -157,7 +178,7 @@
   };
   function steps() {
     let keys;
-    if (isUpgrade()) keys = ["intro", "race", "class", "statpoints", "experiences", "loot", "review"];
+    if (isUpgrade()) keys = ["intro", "race", "class", "statpoints", "review"];
     else if (W.path === "thirdfloor") keys = ["basics", "race", "class", "stats", "background", "combat", "experiences", "statpoints", "loot", "story", "gear", "review"];
     else keys = ["basics", "race", "stats", "background", "combat", "story", "gear", "review"];
     return keys.map((k) => ({ key: k, title: STEP_DEFS[k] }));
@@ -270,6 +291,26 @@
   }
   function close() { const ov = document.getElementById("dccw-overlay"); if (ov) ov.style.display = "none"; W = null; }
 
+  // ── single launch button: Create when the sheet is blank, Upgrade once a crawler exists ──
+  function crawlerExists() {
+    try {
+      if (typeof collectSheet !== "function") return false;
+      const s = collectSheet();
+      if (s.header && s.header["f-name"] && String(s.header["f-name"]).trim()) return true;
+      if (s.stats && STAT_IDS.some((k) => s.stats[k] && String(s.stats[k].unenh || "").trim())) return true;
+      return false;
+    } catch (e) { return false; }
+  }
+  function launch() { if (crawlerExists()) openUpgrade(); else open(); }
+  function refreshButton() {
+    const btn = document.getElementById("dccw-launch-btn");
+    if (!btn) return;
+    const up = crawlerExists();
+    btn.textContent = up ? "⬆" : "✨";
+    btn.title = up ? "Upgrade this crawler to the Third Floor" : "Create a character with the wizard";
+    btn.setAttribute("aria-label", btn.title);
+  }
+
   // ── step: upgrade intro ─────────────────────────────────────────────────────
   function renderUpgradeIntro() {
     const ex = W.existing || {};
@@ -279,14 +320,14 @@
     const nSkills = (ex.skills || []).filter((s) => s.name).length;
     const nAtk = (ex.attacks || []).filter((a) => a.name).length;
     return `
-      <h3>Upgrade to the Third Floor</h3>
-      <p class="dccw-hint">This keeps <b>${esc(name)}</b> as-is and layers on everything a crawler gains reaching Floor 3 (Level 10). Nothing you've written is erased — stats, skills and gear are kept and boosted.</p>
+      <h3>Reach the Third Floor</h3>
+      <p class="dccw-hint">This crawler has been played, so their skills, attacks, gear and loot are kept exactly as they are. Reaching Floor 3 just unlocks the things that were waiting: a real <b>Race</b> and <b>Class</b>, and the level-up <b>stat points</b> you couldn't spend on the tutorial floors.</p>
       <div class="dccw-card">
         <div style="margin-bottom:6px;"><b style="color:#f0a8a3;">${esc(name)}</b> <span class="dccw-sub">· currently Level ${esc(lvl)} · ${nAtk} attack(s), ${nSkills} skill(s)</span></div>
         <div class="dccw-sub">Unenhanced stats: ${esc(statLine)}</div>
       </div>
-      <p class="dccw-hint" style="margin-top:12px;">Next you'll <b>choose a Race and Class</b> (their bonuses now apply), <b>distribute 27 stat points</b>, add <b>6 Experiences</b>, and pick your <b>starting loot</b>. On finish it sets Level 10, applies your racial Size, rolls AI Favor, sets Popularity, and boosts your skills (primary attack +2d4, everything else +1d4).</p>
-      <p class="dccw-sub">Tip: export the sheet first if you want a backup of the Level-1 version.</p>`;
+      <p class="dccw-hint" style="margin-top:12px;">Next you'll <b>choose a Race and Class</b> (their bonuses now apply) and <b>distribute ${statBudget()} stat points</b> (3 × Level ${upgradeLevel()} − 3). On finish it applies your racial Size and sets your starting Popularity. No new skills or loot are added — you already have those.</p>
+      <p class="dccw-sub">Tip: export the sheet first if you want a backup of the pre-Floor-3 version.</p>`;
   }
 
   // ── render shell ──────────────────────────────────────────────────────────────
@@ -350,12 +391,19 @@
   // ── step: race ────────────────────────────────────────────────────────────────
   function renderRace() {
     if (!isThird()) {
-      // Tutorial floors: racial benefits/stat bonuses don't kick in until Floor 3,
-      // so race is just a flavor label (Human by default). No mods, Size stays Medium.
+      // Tutorial floors: racial stat bonuses don't apply yet, but human vs animal
+      // changes which Background tables and base attack you use.
       return `
-        <h3>Race</h3>
-        <p class="dccw-hint">On the tutorial floors your race is flavor only — racial <b>benefits and stat bonuses don't kick in until you reach the Third Floor</b>. Note what you are (Human by default); you'll pick a race with real benefits when you upgrade at Floor 3.</p>
-        <div class="dccw-row"><div class="dccw-field"><label>Race</label><input type="text" value="${esc(W.race)}" oninput="DCCW.setRaceText(this.value)" placeholder="Human"></div></div>`;
+        <h3>Human or Animal?</h3>
+        <p class="dccw-hint">On the tutorial floors racial stat bonuses don't apply yet — but <b>animal crawlers</b> draw from different Background tables and start combat with <b>Slice Attack</b> instead of Unarmed Combat. Pick your kind; you'll choose a full Race with real benefits when you upgrade at Floor 3.</p>
+        <div class="dccw-row">
+          <div class="dccw-field"><label>Kind</label><div class="dccw-seg">
+            <button class="${W.kind === "human" ? "on" : ""}" onclick="DCCW.setKind('human')">Human</button>
+            <button class="${W.kind === "animal" ? "on" : ""}" onclick="DCCW.setKind('animal')">Animal</button>
+          </div></div>
+          <div class="dccw-field"><label>Name it (optional)</label><input type="text" value="${esc(W.race)}" oninput="DCCW.setRaceText(this.value)" placeholder="${W.kind === "animal" ? "e.g. Cat, Corgi, Axolotl" : "Human"}"></div>
+        </div>
+        ${W.kind === "animal" ? `<p class="dccw-sub">Animal crawlers use Youth / Training / Adult / Quirk backgrounds and natural attacks (Back Claw, Bite). AI Favor starts at 0 instead of 1.</p>` : ""}`;
     }
     const races = DCC_RACES.slice().sort((a, b) => (a.group === b.group ? a.name.localeCompare(b.name) : a.group.localeCompare(b.group)));
     const opts = ["Earth", "Alien"].map((grp) =>
@@ -436,7 +484,7 @@
 
   // ── step: stat points (Third-Floor+) ────────────────────────────────────────
   function renderStatPoints() {
-    const budget = FLOOR_CFG[W.floor].statPoints;
+    const budget = statBudget();
     const remain = budget - statPointsSpent();
     const fin = finalStats();
     let h = `<h3>Distribute stat points</h3><p class="dccw-hint">Spend <b>${budget}</b> points across your stats (added to your Unenhanced scores). <b>${remain}</b> left.</p>`;
@@ -552,7 +600,7 @@
         .concat(list.map((b) => `<option value="${attr(b.name)}" ${sel === b.name ? "selected" : ""}>${esc(b.name)}</option>`))
         .concat([`<option value="__custom__" ${sel === "__custom__" ? "selected" : ""}>✎ Custom…</option>`]).join("");
       h += `<div class="dccw-card"><div class="dccw-row" style="margin-bottom:6px;align-items:flex-end;">
-        <div class="dccw-field"><label>${era} · Rank ${ERA_RANK[era]}</label><select onchange="DCCW.setBg('${era}',this.value)">${bgOpts}</select></div>`;
+        <div class="dccw-field"><label>${eraLabel(era)} · Rank ${ERA_RANK[era]}</label><select onchange="DCCW.setBg('${era}',this.value)">${bgOpts}</select></div>`;
       if (chosen) {
         h += `<div class="dccw-field"><label>${isCustom ? "Custom name" : "Rename (optional)"}</label><input type="text" value="${esc(chosen.name)}" oninput="DCCW.setBgName('${era}',this.value)" placeholder="${isCustom ? "e.g. Feral Street Prophet" : esc(chosen.base)}"></div>`;
       }
@@ -574,7 +622,7 @@
   function renderCombat() {
     const fin = finalStats();
     const canSpell = fin.int >= 4;
-    let h = `<h3>Combat training</h3><p class="dccw-hint">Every crawler starts with <b>Unarmed Combat at Rank 3</b>. Then choose one specialty at Rank 3. You can rename your pick for flavor.</p>`;
+    let h = `<h3>Combat training</h3><p class="dccw-hint">Every crawler starts with <b>${baseAttack().name} at Rank 3</b>. Then choose one specialty at Rank 3. You can rename your pick.</p>`;
     h += `<div class="dccw-row"><div class="dccw-field"><label>Specialty</label><div class="dccw-seg">
       <button class="${W.combat.type === "weapon" ? "on" : ""}" onclick="DCCW.setCombatType('weapon')">Weapon Skill</button>
       <button class="${W.combat.type === "spell" ? "on" : ""}" onclick="DCCW.setCombatType('spell')">Attack Spell</button>
@@ -658,7 +706,7 @@
           name, rank: String(ERA_RANK[era]),
           stat: skillStatLc(name),                                  // lowercase for the sheet select
           checkType: sd && sd.passive ? "Passive" : "Active",
-          notes: era + " — " + bgDisplayName(era), checked: false,
+          notes: eraLabel(era) + " — " + bgDisplayName(era), checked: false,
         });
       });
     });
@@ -666,7 +714,8 @@
     return rows;
   }
   function assembledAttacks() {
-    const atks = [{ name: "Unarmed Combat", rank: "3", dice: "1d4", stat: "str", effects: "" }];
+    const _b = baseAttack();
+    const atks = [{ name: _b.name, rank: "3", dice: _b.dice, stat: _b.stat, effects: "" }];
     if (W.combat.type === "weapon" && W.combat.weapon) {
       const sd = skillByName(W.combat.weapon);
       const disp = combatDisplayName() || W.combat.weapon;
@@ -704,12 +753,13 @@
       skillRank[key].rank = Math.min(10, skillRank[key].rank + rank);
       if (note && skillRank[key].notes.indexOf(note) === -1) skillRank[key].notes = skillRank[key].notes ? skillRank[key].notes + "; " + note : note;
     }
-    ERAS.forEach((era) => { const c = W.bg[era]; if (!c) return; (c.skills || []).forEach((name) => addSkill(name, ERA_RANK[era] + b1(), bgDisplayName(era))); });
+    ERAS.forEach((era) => { const c = W.bg[era]; if (!c) return; (c.skills || []).forEach((name) => addSkill(name, ERA_RANK[era] + b1(), eraLabel(era) + " — " + bgDisplayName(era))); });
     addSkill("Heal", 1, "Spell · heals 2 HB slots, 2 Mana");
     if (third) W.experiences.forEach((slot) => { const p = slot.skills || []; if (p[0]) addSkill(p[0], d(4), "Experience"); if (p[1]) addSkill(p[1], d(2), "Experience"); });
     const skills = Object.values(skillRank).map((s) => ({ name: s.name, rank: String(s.rank), stat: s.stat, checkType: s.checkType, notes: s.notes, checked: false }));
 
-    const atks = [{ name: "Unarmed Combat", rank: String(Math.min(10, 3 + b1())), dice: "1d4", stat: "str", effects: "" }];
+    const _b = baseAttack();
+    const atks = [{ name: _b.name, rank: String(Math.min(10, 3 + b1())), dice: _b.dice, stat: _b.stat, effects: "" }];
     if (W.combat.type === "weapon" && W.combat.weapon) {
       const sd = skillByName(W.combat.weapon), disp = combatDisplayName() || W.combat.weapon;
       atks.push({ name: disp, rank: String(Math.min(10, 3 + bP())), dice: sd && sd.damage ? sd.damage : "", stat: (sd && sd.stat ? String(sd.stat).toLowerCase() : "str"), effects: (disp !== W.combat.weapon ? W.combat.weapon + " skill" : "") });
@@ -732,19 +782,17 @@
     if (isUpgrade()) {
       const ex = W.existing || {};
       const name = (ex.header && ex.header["f-name"]) || "(unnamed)";
-      const chosen = W.experiences.filter((s) => s.exp).map((s) => s.exp);
       const race = raceByName(W.race);
       return `<h3>Confirm the upgrade</h3>
-        <div class="dccw-card"><b>${esc(name)}</b> → ${esc(W.race)}${W.class ? " " + esc(W.class) : ""} · Size ${race ? race.size + " (" + (SIZE_NAME[race.size] || "") + ")" : "—"} · <b>Level 10</b></div>
+        <div class="dccw-card"><b>${esc(name)}</b> → ${esc(W.race)}${W.class ? " " + esc(W.class) : ""} · Size ${race ? race.size + " (" + (SIZE_NAME[race.size] || "") + ")" : "—"} · <b>Level ${upgradeLevel()}</b></div>
         <div class="dccw-statgrid">${STAT_IDS.map((k) => `<div class="dccw-statbox"><div class="k">${STAT_ABBR[k]}</div><div class="v">${fin[k]}</div><div class="m">mod ${statMod(fin[k]) >= 0 ? "+" : ""}${statMod(fin[k])}</div></div>`).join("")}</div>
-        <p class="dccw-sub" style="margin-top:8px;">Health ${statMod(fin.con) * 10} · Mana ${fin.int} · Popularity ${statMod(fin.cha) * 2} · AI Favor 1d2 (rolled)</p>
-        <div class="dccw-card" style="margin-top:12px;"><b>Layered on when you finish:</b><ul class="dccw-list">
-          <li>Race + Class bonuses and 27 stat points (already in the scores above)</li>
-          <li>${chosen.length} Experiences: ${esc(chosen.join(", ") || "—")}</li>
-          <li>Loot spread ${esc(String(W.loot || "—"))} — armor DR, weapon skill, and items</li>
-          <li>Skill boosts: primary attack +2d4, every other skill +1d4 (capped at Rank 10)</li>
+        <p class="dccw-sub" style="margin-top:8px;">Health ${statMod(fin.con) * 10} · Mana ${fin.int} · Popularity ${statMod(fin.cha) * 2}</p>
+        <div class="dccw-card" style="margin-top:12px;"><b>Applied when you finish:</b><ul class="dccw-list">
+          <li>Race + Class bonuses and ${statBudget()} stat points (already in the scores above)</li>
+          <li>Racial Size, and starting Popularity (CHA mod × 2)</li>
+          <li><b>Kept as-is:</b> your skills, attacks, gear, loot and AI Favor</li>
         </ul></div>
-        <p class="dccw-hint" style="margin-top:12px;">Your existing name, skills, gear and story are kept — this updates the sheet in place.</p>`;
+        <p class="dccw-hint" style="margin-top:12px;">Nothing you've earned is erased — this updates the sheet in place.</p>`;
     }
     const race = raceByName(W.race);
     const skills = assembledSkills(), atks = assembledAttacks();
@@ -788,7 +836,7 @@
     if (key === "background") return ERAS.every((e) => W.bg[e] && (W.bg[e].skills || []).length === 2);
     if (key === "combat") return W.combat.type === "weapon" ? !!W.combat.weapon : (finalStats().int >= 4 && !!W.combat.spell);
     if (key === "experiences") { ensureExpSlots(); return W.experiences.every((s) => s.exp && (s.skills || []).length === 2); }
-    if (key === "statpoints") return statPointsSpent() === FLOOR_CFG[W.floor].statPoints;
+    if (key === "statpoints") return statPointsSpent() === statBudget();
     if (key === "loot") return !!W.loot;
     return true;
   }
@@ -806,7 +854,7 @@
     data.stats = {};
     STAT_IDS.forEach((k) => { data.stats[k] = { enh: String(fin[k]), unenh: String(fin[k]) }; });
     // AI Favor: 1 fresh; 1d2 (+weapon/spell AI-Favor bonus) on the fast-forward.
-    let aiFavor = 1;
+    let aiFavor = W.kind === "animal" ? 0 : 1;
     if (third) {
       aiFavor = d(2);
       if (W.combat.type === "spell") { const sp = basicSpells().find((s) => s.name === W.combat.spell); const rt = sp && sp.aiFavor ? sp.aiFavor : 0; if (rt === 1) aiFavor += d(2); else if (rt === 2) aiFavor += d(2) + d(2); }
@@ -853,11 +901,15 @@
     return data;
   }
 
-  // Upgrade an existing crawler to Floor 3: keep everything, layer on race/class
-  // bonuses, +27 points, skill boosts, experiences and loot.
+  // Upgrade an already-played crawler to Floor 3. A LIGHT touch: their skills,
+  // attacks, gear, loot and AI Favor are earned in play and left untouched. We
+  // only apply the things Floor 3 newly grants — the Race and Class (bonuses now
+  // count), the accumulated level-up stat points they finally get to spend, the
+  // racial Size, and their starting Popularity. No experiences, no loot, no
+  // skill-rank boosts (those model a fresh crawler's off-screen history).
   function buildUpgradeData() {
     const ex = W.existing || {};
-    const fin = finalStats(); // existing Unenhanced + race + class + points
+    const fin = finalStats(); // existing Unenhanced + race + class + distributed points
     const race = raceByName(W.race);
     const data = {
       header: Object.assign({}, ex.header || {}),
@@ -865,70 +917,30 @@
       globalModSource: ex.globalModSource,
       combat: Object.assign({}, ex.combat || {}),
       hpPips: (ex.hpPips || new Array(10).fill("true")).slice(),
-      attacks: (ex.attacks || []).map((a) => Object.assign({}, a)),
+      attacks: (ex.attacks || []).map((a) => Object.assign({}, a)),      // untouched
       hotlist: (ex.hotlist || []).slice(),
       extBuffs: (ex.extBuffs || []).slice(),
       gear: (ex.gear || []).slice(),
       accessories: (ex.accessories || []).slice(),
-      skills: (ex.skills || []).map((s) => Object.assign({}, s)),
-      inventory: (ex.inventory || []).map((i) => Object.assign({}, i)),
+      skills: (ex.skills || []).map((s) => Object.assign({}, s)),        // untouched
+      inventory: (ex.inventory || []).map((i) => Object.assign({}, i)),  // keeps their loot
       background: (ex.background || ["", "", "", "", ""]).slice(),
       campaign: ex.campaign || null,
       darkMode: ex.darkMode,
     };
-    data.header["f-level"] = "10";
+    data.header["f-level"] = String(upgradeLevel()); // keeps their level (or 10 if blank)
     data.header["f-race"] = W.race;
     data.header["f-class"] = W.class;
-    // stats: unenh = new score; enh preserves any existing gear/buff delta.
+    // stats: unenh = new score (existing + race + class + points); enh preserves any gear/buff delta.
     STAT_IDS.forEach((k) => {
       const oe = parseInt(ex.stats && ex.stats[k] ? ex.stats[k].enh : 0, 10) || 0;
       const ou = parseInt(ex.stats && ex.stats[k] ? ex.stats[k].unenh : 0, 10) || 0;
       data.stats[k] = { unenh: String(fin[k]), enh: String(fin[k] + (oe - ou)) };
     });
-    if (race) data.combat.drSize = String(race.size);
+    if (race) data.combat.drSize = String(race.size); // racial Size now applies
     data.combat.manaCurrentVal = String(fin.int);
-    data.combat.drAiFavor = String(d(2)); // 1d2 at Floor 3 (weapon/spell bonus is left for the player)
-    const lr = W.loot ? LOOT_ROWS.find((r) => String(r.row) === String(W.loot)) : null;
-    if (lr) data.combat.drArmor = String(((parseInt(ex.combat && ex.combat.drArmor, 10) || 0)) + (TIER_DR[lr.armor] || 0));
-
-    // Attacks: the first non-Unarmed attack is the primary (+2d4); Unarmed and any
-    // others get +1d4. All capped at Rank 10.
-    let primaryDone = false;
-    data.attacks = data.attacks.map((a) => {
-      const unarmed = /unarmed/i.test(a.name || "");
-      let boost;
-      if (!unarmed && !primaryDone) { boost = d(4) + d(4); primaryDone = true; } else boost = d(4);
-      return Object.assign({}, a, { rank: String(Math.min(10, (parseInt(a.rank, 10) || 0) + boost)) });
-    });
-    if (lr) { const pi = data.attacks.findIndex((a) => !/unarmed/i.test(a.name || "")); if (pi >= 0) { const b = TIER_WEAPON_SKILL[lr.weapon] || 0; if (b) data.attacks[pi].rank = String(Math.min(10, (parseInt(data.attacks[pi].rank, 10) || 0) + b)); } }
-
-    // Skills: every existing skill +1d4; then fold in the Experience skills.
-    data.skills = data.skills.map((s) => Object.assign({}, s, { rank: String(Math.min(10, (parseInt(s.rank, 10) || 0) + d(4))) }));
-    const skMap = {};
-    data.skills.forEach((s, i) => { if (s.name) skMap[s.name.toLowerCase()] = i; });
-    W.experiences.forEach((slot) => {
-      (slot.skills || []).forEach((name, idx) => {
-        if (!name) return;
-        const add = idx === 0 ? d(4) : d(2);
-        const key = name.toLowerCase();
-        if (skMap[key] !== undefined) {
-          const row = data.skills[skMap[key]];
-          row.rank = String(Math.min(10, (parseInt(row.rank, 10) || 0) + add));
-        } else {
-          const sd = skillByName(name);
-          data.skills.push({ name, rank: String(Math.min(10, add)), stat: skillStatLc(name), checkType: sd && sd.passive ? "Passive" : "Active", notes: "Experience", checked: false });
-          skMap[key] = data.skills.length - 1;
-        }
-      });
-    });
-    if (lr) {
-      data.inventory.push({ item: lr.weapon + " Weapon", qty: "1", notes: LOOT_WEAPON[lr.weapon] });
-      data.inventory.push({ item: lr.armor + " Armor", qty: "1", notes: LOOT_ARMOR[lr.armor] });
-      data.inventory.push({ item: lr.item + " Item", qty: "1", notes: LOOT_ITEM[lr.item] });
-      data.inventory.push({ item: lr.consumable + " Consumable", qty: "1", notes: LOOT_CONS[lr.consumable] });
-    }
     data.background[0] = String(statMod(fin.cha) * 2); // Popularity = CHA mod × 2 at Floor 3
-    const note = `Upgraded to Floor 3 (Level 10): race ${W.race}, class ${W.class}, +27 stat points, +${W.experiences.length} experiences, loot, skill boosts (primary +2d4, others +1d4).`;
+    const note = `Reached Floor 3 (Level ${upgradeLevel()}): chose race ${W.race} and class ${W.class}, distributed ${statBudget()} stat points. Existing skills, attacks and loot kept as-is.`;
     data.background[4] = data.background[4] ? data.background[4] + " | " + note : note;
     return data;
   }
@@ -948,11 +960,12 @@
       }
     } catch (e) {}
     close();
+    try { refreshButton(); } catch (e) {} // create -> the button becomes Upgrade
   }
 
   // ── public API ────────────────────────────────────────────────────────────────
   const API = {
-    open, openUpgrade, close, finish,
+    open, openUpgrade, close, finish, launch, refreshButton,
     back() { if (W.step > 0) { W.step--; render(); } },
     next() { if (!canAdvance()) { render(); return; } W.step++; render(); },
     set(key, val) { W[key] = val; render(); },
@@ -960,6 +973,14 @@
     rollCrawler() { W.basics.crawler = String(500000 + Math.floor(Math.random() * 12400000)); render(); },
     setRace(v) { W.race = v; render(); },
     setRaceText(v) { W.race = v; }, // tutorial free-text race — no re-render (keeps input focus)
+    setKind(k) {
+      if (W.kind === k) return;
+      W.kind = k;
+      if (!W.race || W.race === "Human" || W.race === "Animal") W.race = k === "animal" ? "Animal" : "Human";
+      W.bg = {};            // human/animal background tables differ
+      W.combat.weapon = ""; // human/animal weapon lists differ
+      render();
+    },
     setStatMethod(m) { W.statMethod = m; STAT_IDS.forEach((k) => (W.statVals[k] = "")); if (m === "roll") STAT_IDS.forEach((k) => (W.statVals[k] = String(rollStat()))); render(); },
     setStat(k, v) {
       if (W.statMethod === "array" && v !== "") {
@@ -1005,7 +1026,7 @@
       render();
     },
     pt(k, delta) {
-      const budget = FLOOR_CFG[W.floor].statPoints;
+      const budget = statBudget();
       const cur = parseInt(W.statPoints[k], 10) || 0;
       let nv = cur + delta;
       if (nv < 0) nv = 0;
@@ -1019,4 +1040,7 @@
 
   window.DCCW = API;
   window.startCharWizard = open;
+  // Set the launch button's mode once the sheet has loaded its saved state.
+  try { refreshButton(); } catch (e) {}
+  try { window.addEventListener("load", () => { try { refreshButton(); } catch (e) {} }); } catch (e) {}
 })();

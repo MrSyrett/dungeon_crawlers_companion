@@ -13,7 +13,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 1,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Crafty Kid",
@@ -26,7 +27,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 2,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Excitable Kid",
@@ -39,7 +41,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 3,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Gymnast",
@@ -52,7 +55,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 4,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Military Brat",
@@ -65,7 +69,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 5,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "MMO Kid",
@@ -78,7 +83,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 6,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Only Child",
@@ -91,7 +97,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 7,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Outdoor Kid",
@@ -104,7 +111,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 8,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Problem Child",
@@ -117,7 +125,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 9,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Scamp",
@@ -130,7 +139,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 10,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Teacher's Pet",
@@ -143,7 +153,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 11,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Wild Child",
@@ -156,7 +167,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 12,
     "page": 104,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Family Farm",
@@ -169,7 +181,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 1,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Drama Nerd",
@@ -182,7 +195,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 2,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Drop-Out",
@@ -195,7 +209,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 3,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Greek Life",
@@ -208,7 +223,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 4,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Influencer",
@@ -221,7 +237,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 5,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Jock",
@@ -234,7 +251,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 6,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "McJob",
@@ -247,7 +265,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 7,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Popular",
@@ -260,7 +279,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 8,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Religious",
@@ -273,7 +293,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 9,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Student Government",
@@ -286,7 +307,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 10,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Nerd",
@@ -299,7 +321,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 11,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Weirdo",
@@ -312,7 +335,8 @@ const DCC_BACKGROUNDS = [
     "rank": 1,
     "roll": 12,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Criminal",
@@ -325,7 +349,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 1,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Service Industry",
@@ -338,7 +363,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 2,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Small Business Owner",
@@ -351,7 +377,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 3,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Medical",
@@ -364,7 +391,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 4,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Law Enforcement",
@@ -377,7 +405,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 5,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Gig Worker",
@@ -390,7 +419,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 6,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Teacher",
@@ -403,7 +433,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 7,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Office Drone",
@@ -416,7 +447,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 8,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Entertainer",
@@ -429,7 +461,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 9,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Unhoused",
@@ -442,7 +475,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 10,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Middle Manager",
@@ -455,7 +489,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 11,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Military",
@@ -468,7 +503,8 @@ const DCC_BACKGROUNDS = [
     "rank": 3,
     "roll": 12,
     "page": 105,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Collector",
@@ -481,7 +517,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 1,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Cosplay",
@@ -494,7 +531,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 2,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Drinker",
@@ -507,7 +545,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 3,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Gamer",
@@ -520,7 +559,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 4,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Gym Rat",
@@ -533,7 +573,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 5,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Hunting",
@@ -546,7 +587,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 6,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Music",
@@ -559,7 +601,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 7,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Motorsports",
@@ -572,7 +615,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 8,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Climber",
@@ -585,7 +629,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 9,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Pop Culture",
@@ -598,7 +643,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 10,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Tinkering",
@@ -611,7 +657,8 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 11,
     "page": 106,
-    "source": "Core"
+    "source": "Core",
+    "kind": "human"
   },
   {
     "name": "Travel",
@@ -624,6 +671,343 @@ const DCC_BACKGROUNDS = [
     "rank": 2,
     "roll": 12,
     "page": 106,
+    "source": "Core",
+    "kind": "human"
+  },
+  {
+    "name": "Abandoned",
+    "era": "Childhood",
+    "kind": "animal",
+    "skills": [
+      "Hide in Shadows",
+      "Endurance",
+      "Survival"
+    ],
+    "rank": 1,
+    "roll": 1,
+    "page": 106,
+    "source": "Core"
+  },
+  {
+    "name": "Farmed",
+    "era": "Childhood",
+    "kind": "animal",
+    "skills": [
+      "Escape Artist",
+      "Climbing",
+      "Light on Your Feet"
+    ],
+    "rank": 1,
+    "roll": 2,
+    "page": 106,
+    "source": "Core"
+  },
+  {
+    "name": "Litter-Raised",
+    "era": "Childhood",
+    "kind": "animal",
+    "skills": [
+      "Animal Handling",
+      "Detect Lies",
+      "Back Claw"
+    ],
+    "rank": 1,
+    "roll": 3,
+    "page": 106,
+    "source": "Core"
+  },
+  {
+    "name": "Pampered",
+    "era": "Childhood",
+    "kind": "animal",
+    "skills": [
+      "Negotiation",
+      "Good First Impression",
+      "Persuasion"
+    ],
+    "rank": 1,
+    "roll": 4,
+    "page": 106,
+    "source": "Core"
+  },
+  {
+    "name": "Runt",
+    "era": "Childhood",
+    "kind": "animal",
+    "skills": [
+      "Hide in Shadows",
+      "Escape Artist",
+      "Stealth"
+    ],
+    "rank": 1,
+    "roll": 5,
+    "page": 106,
+    "source": "Core"
+  },
+  {
+    "name": "Stray",
+    "era": "Childhood",
+    "kind": "animal",
+    "skills": [
+      "Back Claw",
+      "Streetwise",
+      "Survival"
+    ],
+    "rank": 1,
+    "roll": 6,
+    "page": 106,
+    "source": "Core"
+  },
+  {
+    "name": "Clever",
+    "era": "Adolescence",
+    "kind": "animal",
+    "skills": [
+      "Investigation",
+      "Detect Lies",
+      "Dodge"
+    ],
+    "rank": 1,
+    "roll": 1,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Free Range",
+    "era": "Adolescence",
+    "kind": "animal",
+    "skills": [
+      "Escape Artist",
+      "Survival",
+      "Tracking"
+    ],
+    "rank": 1,
+    "roll": 2,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Pack Mentality",
+    "era": "Adolescence",
+    "kind": "animal",
+    "skills": [
+      "Animal Handling",
+      "Persuasion",
+      "Tactics"
+    ],
+    "rank": 1,
+    "roll": 3,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Mischievous",
+    "era": "Adolescence",
+    "kind": "animal",
+    "skills": [
+      "Deception",
+      "Persuasion",
+      "Sleight of Hand"
+    ],
+    "rank": 1,
+    "roll": 4,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Watcher",
+    "era": "Adolescence",
+    "kind": "animal",
+    "skills": [
+      "Ambush",
+      "Investigation",
+      "Perception"
+    ],
+    "rank": 1,
+    "roll": 5,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Well-Trained",
+    "era": "Adolescence",
+    "kind": "animal",
+    "skills": [
+      "Light on Your Feet",
+      "Catcher",
+      "Performance"
+    ],
+    "rank": 1,
+    "roll": 6,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Chow Hound",
+    "era": "Hobby",
+    "kind": "animal",
+    "skills": [
+      "Dumpster Diving",
+      "Investigation",
+      "Intimidate"
+    ],
+    "rank": 2,
+    "roll": 1,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Cuddly",
+    "era": "Hobby",
+    "kind": "animal",
+    "skills": [
+      "Good First Impression",
+      "Persuasion",
+      "Negotiation"
+    ],
+    "rank": 2,
+    "roll": 2,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Curious",
+    "era": "Hobby",
+    "kind": "animal",
+    "skills": [
+      "Climbing",
+      "Perception",
+      "Swimming"
+    ],
+    "rank": 2,
+    "roll": 3,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Hunter",
+    "era": "Hobby",
+    "kind": "animal",
+    "skills": [
+      "Hide in Shadows",
+      "Stealth",
+      "Tracking"
+    ],
+    "rank": 2,
+    "roll": 4,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Playful",
+    "era": "Hobby",
+    "kind": "animal",
+    "skills": [
+      "Persuasion",
+      "Dodge",
+      "Intimidate"
+    ],
+    "rank": 2,
+    "roll": 5,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Social",
+    "era": "Hobby",
+    "kind": "animal",
+    "skills": [
+      "Animal Handling",
+      "Taunt",
+      "Perception"
+    ],
+    "rank": 2,
+    "roll": 6,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Guard",
+    "era": "Career",
+    "kind": "animal",
+    "skills": [
+      "Catcher",
+      "Perception",
+      "Taunt"
+    ],
+    "rank": 3,
+    "roll": 1,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Pile of Floof",
+    "era": "Career",
+    "kind": "animal",
+    "skills": [
+      "Escape Artist",
+      "Deception",
+      "Persuasion"
+    ],
+    "rank": 3,
+    "roll": 2,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Scrapper",
+    "era": "Career",
+    "kind": "animal",
+    "skills": [
+      "Light on Your Feet",
+      "Streetwise",
+      "Survival"
+    ],
+    "rank": 3,
+    "roll": 3,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Show Animal",
+    "era": "Career",
+    "kind": "animal",
+    "skills": [
+      "Good First Impression",
+      "Light on Your Feet",
+      "Performance"
+    ],
+    "rank": 3,
+    "roll": 4,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Support Animal",
+    "era": "Career",
+    "kind": "animal",
+    "skills": [
+      "Determine Value",
+      "First Aid",
+      "Perception"
+    ],
+    "rank": 3,
+    "roll": 5,
+    "page": 107,
+    "source": "Core"
+  },
+  {
+    "name": "Working",
+    "era": "Career",
+    "kind": "animal",
+    "skills": [
+      "Animal Handling",
+      "Endurance",
+      "Perception"
+    ],
+    "rank": 3,
+    "roll": 6,
+    "page": 107,
     "source": "Core"
   }
 ];
