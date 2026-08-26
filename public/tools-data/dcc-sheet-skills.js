@@ -182,8 +182,25 @@
   function infoRow(btn) {
     var tr = btn && btn.closest ? btn.closest("tr") : null;
     if (!tr) return;
-    var nameInput = tr.querySelector('input[type="text"]');
-    info(nameInput ? nameInput.value : "");
+    var texts = tr.querySelectorAll('input[type="text"]');
+    var name = texts[0] ? texts[0].value : "";
+    // Try, in order: the name minus a trailing "(Spell)"/parenthetical, the raw name,
+    // then — for attack rows — the Effects field, which may name the source skill/spell
+    // for a renamed weapon (e.g. "Longsword skill") or spell.
+    var cands = [];
+    var stripped = String(name).replace(/\s*\([^)]*\)\s*$/, "").trim();
+    if (stripped) cands.push(stripped);
+    if (name && name !== stripped) cands.push(name);
+    var isAttack = tr.closest && tr.closest("#attacks-body");
+    if (isAttack && texts[3] && texts[3].value) {
+      String(texts[3].value).split(/[·,;]/).forEach(function (p) {
+        var t = p.replace(/\bskill\b/i, "").trim();
+        if (t) cands.push(t);
+      });
+    }
+    var hit = null;
+    for (var i = 0; i < cands.length && !hit; i++) { if (lookup(cands[i])) hit = cands[i]; }
+    info(hit || name);
   }
 
   // ── add a filled / blank row to the Skills table ────────────────────────────
