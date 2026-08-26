@@ -77,17 +77,25 @@
       ".dccs-search{margin:12px 18px 4px;}",
       ".dccs-search input{width:100%;background:#0e0e10;border:1px solid #2a2a2e;border-radius:6px;color:#ece9e1;padding:8px 10px;font-size:13px;font-family:inherit;}",
       ".dccs-search input:focus{outline:none;border-color:#b82018;}",
-      ".dccs-list{max-height:56vh;overflow:auto;padding:6px 18px 10px;}",
+      ".dccs-filters{display:flex;flex-wrap:wrap;gap:6px;padding:8px 18px 2px;}",
+      ".dccs-chip{border:1px solid #2a2a2e;background:transparent;color:#8a8a93;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}",
+      ".dccs-chip:hover{border-color:#b82018;color:#f0a8a3;}",
+      ".dccs-chip.on{border-color:#b82018;background:#1c1516;color:#f0a8a3;}",
+      ".dccs-list{max-height:52vh;overflow:auto;padding:6px 18px 10px;}",
       ".dccs-grp{color:#8a8a93;font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin:12px 0 2px;}",
-      ".dccs-item{display:flex;align-items:flex-start;gap:8px;border:1px solid #2a2a2e;border-radius:8px;padding:8px 10px;margin-top:8px;}",
+      ".dccs-item{border:1px solid #2a2a2e;border-radius:8px;padding:8px 10px;margin-top:8px;}",
+      ".dccs-item .row{display:flex;align-items:flex-start;gap:8px;}",
       ".dccs-item .body{flex:1;min-width:0;cursor:pointer;}",
-      ".dccs-item:hover{border-color:#b82018;}",
+      ".dccs-item:hover,.dccs-item.open{border-color:#b82018;}",
       ".dccs-item .nm{font-weight:700;color:#f0a8a3;font-size:13px;}",
       ".dccs-item .mt{color:#8a8a93;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}",
-      ".dccs-item .ef{color:#c9c9cf;font-size:12px;line-height:1.45;margin-top:4px;}",
-      ".dccs-item .up{color:#9a9aa2;font-size:11px;line-height:1.4;margin-top:3px;}",
+      ".dccs-item .detail{margin-top:8px;padding-top:8px;border-top:1px solid #2a2a2e;}",
+      ".dccs-item .detail .ef{color:#d8d5cc;font-size:12.5px;line-height:1.5;}",
+      ".dccs-item .detail .uprow{margin-top:6px;font-size:11.5px;color:#c9c9cf;line-height:1.45;}",
+      ".dccs-item .detail .uprow b{color:#f0a8a3;}",
       ".dccs-i{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:1px solid #3a3a40;background:transparent;color:#8a8a93;font-size:11px;font-style:italic;cursor:pointer;}",
-      ".dccs-i:hover{border-color:#b82018;color:#f0a8a3;}",
+      ".dccs-i:hover,.dccs-i.on{border-color:#b82018;color:#f0a8a3;}",
+      ".dccs-i.on{background:#1c1516;}",
       ".dccs-foot{display:flex;gap:8px;padding:10px 18px 16px;border-top:1px solid #2a2a2e;}",
       ".dccs-foot input{flex:1;background:#0e0e10;border:1px solid #2a2a2e;border-radius:6px;color:#ece9e1;padding:8px 10px;font-size:13px;font-family:inherit;}",
       ".dccs-btn{border:1px solid #2a2a2e;background:#1c1516;color:#f0a8a3;border-radius:6px;padding:0 14px;font-size:12px;font-weight:700;cursor:pointer;}",
@@ -118,22 +126,38 @@
 
   // ── picker ────────────────────────────────────────────────────────────────────
   var query = "";
+  var filterKind = "all";   // 'all' | 'utility' | 'attack' | 'spell'
+  var expanded = {};        // kind:name -> inline detail open in the picker
+  var FILTERS = [
+    { key: "all", label: "All" },
+    { key: "utility", label: "Utility" },
+    { key: "attack", label: "Attack" },
+    { key: "spell", label: "Spells" },
+  ];
+  function ekey(e) { return e.kind + ":" + e.name; }
   function openPicker() {
     if (!haveData()) { alert("The skill and spell lists didn't load. Open this sheet from the app so /tools-data/dcc-skills.js and dcc-spells.js are available."); return; }
     injectCss();
+    expanded = {};
     overlay("dccs-overlay");
     renderPicker();
     var s = document.getElementById("dccs-search-input");
     if (s) s.focus();
   }
-  function closePicker() { var ov = document.getElementById("dccs-overlay"); if (ov) ov.style.display = "none"; query = ""; }
+  function closePicker() { var ov = document.getElementById("dccs-overlay"); if (ov) ov.style.display = "none"; query = ""; expanded = {}; }
   function itemHtml(e) {
-    return '<div class="dccs-item">' +
-      '<div class="body" onclick="DCCSkills.add(\'' + attr(e.name) + '\')" title="Add to your skills">' +
-        '<div class="nm">' + esc(e.name) + '</div>' +
-        '<div class="mt">' + esc(metaLine(e)) + '</div>' +
-      '</div>' +
-      '<button class="dccs-i" title="What does it do?" onclick="DCCSkills.info(\'' + attr(e.name) + '\')">i</button>' +
+    var open = !!expanded[ekey(e)];
+    var detail = open
+      ? '<div class="detail"><div class="ef">' + esc(e.desc || "No description on file.") + '</div>' + upgradesHtml(e) + '</div>'
+      : "";
+    return '<div class="dccs-item' + (open ? " open" : "") + '">' +
+      '<div class="row">' +
+        '<div class="body" onclick="DCCSkills.add(\'' + attr(e.name) + '\')" title="Add to your skills">' +
+          '<div class="nm">' + esc(e.name) + '</div>' +
+          '<div class="mt">' + esc(metaLine(e)) + '</div>' +
+        '</div>' +
+        '<button class="dccs-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCSkills.toggle(\'' + attr(e.kind) + '\',\'' + attr(e.name) + '\')">i</button>' +
+      '</div>' + detail +
     '</div>';
   }
   function renderPicker() {
@@ -145,14 +169,21 @@
     var atk = all.filter(function (e) { return e.kind === "attack"; });
     var spells = all.filter(function (e) { return e.kind === "spell"; });
     var rows = "";
-    if (util.length) rows += '<div class="dccs-grp">Utility Skills</div>' + util.map(itemHtml).join("");
-    if (atk.length) rows += '<div class="dccs-grp">Attack Skills</div>' + atk.map(itemHtml).join("");
-    if (spells.length) rows += '<div class="dccs-grp">Spells</div>' + spells.map(itemHtml).join("");
-    if (!all.length) rows = '<div class="dccs-grp">No skill or spell matches “' + esc(query) + '”.</div>';
+    var showU = filterKind === "all" || filterKind === "utility";
+    var showA = filterKind === "all" || filterKind === "attack";
+    var showS = filterKind === "all" || filterKind === "spell";
+    if (showU && util.length) rows += '<div class="dccs-grp">Utility Skills</div>' + util.map(itemHtml).join("");
+    if (showA && atk.length) rows += '<div class="dccs-grp">Attack Skills</div>' + atk.map(itemHtml).join("");
+    if (showS && spells.length) rows += '<div class="dccs-grp">Spells</div>' + spells.map(itemHtml).join("");
+    if (!rows) rows = '<div class="dccs-grp">No ' + (filterKind === "all" ? "skill or spell" : filterKind) + ' matches' + (query ? ' “' + esc(query) + '”' : "") + '.</div>';
+    var chips = FILTERS.map(function (f) {
+      return '<button class="dccs-chip' + (filterKind === f.key ? " on" : "") + '" onclick="DCCSkills.filter(\'' + f.key + '\')">' + esc(f.label) + '</button>';
+    }).join("");
     ov.innerHTML =
       '<div class="dccs-modal" role="dialog" aria-label="Add a skill or spell">' +
         '<div class="dccs-head"><h3>Add a Skill or Spell</h3><button class="dccs-x" onclick="DCCSkills.closePicker()" aria-label="Close">✕</button></div>' +
         '<div class="dccs-search"><input id="dccs-search-input" type="search" placeholder="Search skills &amp; spells…" value="' + attr(query) + '" oninput="DCCSkills.search(this.value)"></div>' +
+        '<div class="dccs-filters">' + chips + '</div>' +
         '<div class="dccs-list">' + rows + '</div>' +
         '<div class="dccs-foot"><input id="dccs-custom-input" type="text" placeholder="…or type a custom skill name" onkeydown="if(event.key===\'Enter\')DCCSkills.addCustom()">' +
           '<button class="dccs-btn" onclick="DCCSkills.addCustom()">Add</button>' +
@@ -184,10 +215,12 @@
     if (!tr) return;
     var texts = tr.querySelectorAll('input[type="text"]');
     var name = texts[0] ? texts[0].value : "";
-    // Try, in order: the name minus a trailing "(Spell)"/parenthetical, the raw name,
-    // then — for attack rows — the Effects field, which may name the source skill/spell
-    // for a renamed weapon (e.g. "Longsword skill") or spell.
+    // Try, in order: the stored rulebook original (a reskinned/renamed skill keeps it in
+    // data-src), the name minus a trailing "(Spell)"/parenthetical, the raw name, then —
+    // for attack rows — the Effects field, which may name the source skill/spell for a
+    // renamed weapon (e.g. "Longsword skill") or spell.
     var cands = [];
+    if (tr.dataset && tr.dataset.src) cands.push(tr.dataset.src);
     var stripped = String(name).replace(/\s*\([^)]*\)\s*$/, "").trim();
     if (stripped) cands.push(stripped);
     if (name && name !== stripped) cands.push(name);
@@ -223,6 +256,7 @@
     var sel = tr.querySelector("select");
     if (inputs[0]) inputs[0].value = name;
     if (e) {
+      tr.dataset.src = e.name;   // remember the rulebook original so a rename still looks it up
       if (sel && e.stat) sel.value = String(e.stat).toLowerCase();
       if (inputs[2]) inputs[2].value = checkTypeOf(e);
       if (inputs[3]) inputs[3].value = e.kind === "spell" ? ((e.mana != null ? e.mana + " Mana" : "") + (e.type ? " · " + e.type : "")) : (e.group || "");
@@ -236,6 +270,8 @@
     openPicker: openPicker,
     closePicker: closePicker,
     search: function (v) { query = v; renderPicker(); },
+    filter: function (kind) { filterKind = kind; renderPicker(); },
+    toggle: function (kind, name) { var k = kind + ":" + name; expanded[k] = !expanded[k]; renderPicker(); },
     info: info,
     closeInfo: closeInfo,
     infoRow: infoRow,
