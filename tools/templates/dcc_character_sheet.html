@@ -1283,6 +1283,7 @@ function applySheet(data) {
     set('dr-aifavor', c.drAiFavor); set('dr-size', c.drSize);
     set('mana-current', c.manaCurrentVal);
     set('debuffs', c.debuffs);
+    try { if (window.DCCDebuffs) window.DCCDebuffs.refresh(); } catch(e) {}
   }
 
   // HP pips
@@ -1396,6 +1397,7 @@ function newCharacter() {
     const el = document.getElementById(id); if(el) el.value = '';
   });
   calcEvadeTotal(); calcDR();
+  try { if (window.DCCDebuffs) window.DCCDebuffs.refresh(); } catch(e) {}
 
   // Reset HP pips
   document.querySelectorAll('.hp-pip').forEach(pip => {
@@ -2494,6 +2496,8 @@ autoLoad();
   <script src="/tools-data/dcc-backgrounds.js"></script>
   <script src="/tools-data/dcc-classes.js"></script>
   <script src="/tools-data/dcc-experiences.js"></script>
+  <script src="/tools-data/dcc-debuffs.js"></script>
   <script src="/tools-data/dcc-sheet-ccw.js"></script>
+  <script src="/tools-data/dcc-sheet-debuffs.js"></script>
 </body>
 </html>
