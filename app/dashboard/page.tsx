@@ -41,8 +41,12 @@ const SD_REFERENCE: { href: string; label: string }[] = [
 // on the DCC tab only. Grows as each reference page ships (roadmap Phase 1);
 // links are added here only once their route exists so nothing points at a 404.
 const DCC_REFERENCE: { href: string; label: string }[] = [
+  { href: "/dcc/classes", label: "Classes" },
+  { href: "/dcc/races", label: "Races" },
   { href: "/dcc/skills", label: "Skills" },
   { href: "/dcc/spells", label: "Spells" },
+  { href: "/dcc/deities", label: "Deities" },
+  { href: "/dcc/bestiary", label: "Bestiary" },
 ];
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

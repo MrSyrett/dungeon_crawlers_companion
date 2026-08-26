@@ -1,0 +1,885 @@
+[
+  {
+    "name": "Boring Ol' Arcanist",
+    "categories": ["Arcanist"],
+    "grants": [
+      "+3 Intelligence",
+      "+2 Dexterity",
+      "+5 Arcane Skill",
+      "+3 Salvage Skill",
+      "+2 in a crafting Skill of your choice",
+      "+1 in a crafting Skill of your choice",
+      "Tier 1 Arcanist table",
+      "Arcane and one crafting Skill can be raised to Rank 20"
+    ],
+    "earthClass": false,
+    "page": 142,
+    "source": "Core"
+  },
+  {
+    "name": "Alchemist",
+    "categories": ["Arcanist"],
+    "grants": [
+      "+3 Constitution and Intelligence",
+      "+5 Alchemy Skill",
+      "+3 Infusion Skill",
+      "Immunity to Poison",
+      "Tier 1 Alchemy table",
+      "At the end of each floor, add 1 to your Skill Advancement Checks for Alchemy and Infusion",
+      "Alchemy Skill can be raised to Rank 20"
+    ],
+    "earthClass": false,
+    "page": 142,
+    "source": "Core"
+  },
+  {
+    "name": "Douchy Wizard School Wand-Maker",
+    "categories": ["Arcanist"],
+    "grants": [
+      "+5 Intelligence",
+      "+1 Strength and Dexterity",
+      "-2 Charisma",
+      "+5 Arcane Skill",
+      "+2 Lore, Negotiation, and Salvage Skills",
+      "Tier-1 crafting table of your choice",
+      "Arcanist Skill can be raised to Rank 20",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 142,
+    "source": "Core"
+  },
+  {
+    "name": "Infernocrafter",
+    "categories": ["Arcanist"],
+    "grants": [
+      "+3 Strength and Constitution",
+      "+1 Dexterity",
+      "+5 Arcane Skill",
+      "+3 Smithing Skill",
+      "Resistance to Fire damage",
+      "Tier 1 Arcanist table",
+      "Tier 1 Smithing table",
+      "Arcane Skill can be raised to Rank 20"
+    ],
+    "earthClass": false,
+    "page": 143,
+    "source": "Core"
+  },
+  {
+    "name": "Prison Tattoo Artist",
+    "categories": ["Arcanist"],
+    "grants": [
+      "+3 Constitution and Dexterity",
+      "+2 Intelligence",
+      "+5 Tattoo Artistry Skill",
+      "+3 Calligraphy Skill",
+      "+2 Dagger Skill",
+      "Tier 1 Tattoo chair (table)",
+      "Tattoo Artistry Skill can be raised to Rank 20",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 143,
+    "source": "Core"
+  },
+  {
+    "name": "Boring Ol' Barbarian",
+    "categories": ["Barbarian"],
+    "grants": [
+      "+6 Strength",
+      "+5 Constitution",
+      "+3 in a Weapon Skill of your choice",
+      "+2 Endurance Skill",
+      "+1 Intimidate Skill",
+      "Rage (Benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost",
+      "+2 DR Buff"
+    ],
+    "earthClass": false,
+    "page": 144,
+    "source": "Core"
+  },
+  {
+    "name": "Gladiator",
+    "categories": ["Barbarian", "Bard"],
+    "grants": [
+      "+3 Strength, Constitution, and Charisma",
+      "+2 in a Weapon Skill of your choice",
+      "+2 Performance and Intimidation Skills",
+      "+1 Attack of Opportunity Skill",
+      "Rage (Benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost",
+      "+1 DR Buff",
+      "Once per combat, after you kill an enemy, you can make an Unopposed Performance Skill Check. On an Amazing Success or better, gain +1 Popularity",
+      "One Weapon Skill can be raised to Rank 20"
+    ],
+    "earthClass": false,
+    "page": 144,
+    "source": "Core"
+  },
+  {
+    "name": "Harii",
+    "categories": ["Barbarian", "Rogue"],
+    "grants": [
+      "+1 Strength, Dexterity, and Intelligence",
+      "+4 Ambush and Stealth Skills",
+      "+2 in one Weapon Skill of your choice",
+      "Rage (Benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost",
+      "+1 DR Buff",
+      "Can see in total darkness",
+      "Access to the Desperado Club",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 144,
+    "source": "Core"
+  },
+  {
+    "name": "Feral Cat Berserker",
+    "categories": ["Barbarian"],
+    "grants": [
+      "+2 Dexterity, Strength, and Charisma",
+      "+3 Slice Attack and Unarmed Combat Skills",
+      "+2 Dodge Skill",
+      "+1 Ambush Skill",
+      "Rage (Benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost",
+      "+1 DR Buff",
+      "Can see in total darkness",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "prerequisites": "Only available to cat-based Races, such as Cat, Cat Girl, and Tigran",
+    "earthClass": true,
+    "page": 144,
+    "source": "Core"
+  },
+  {
+    "name": "Shieldmaiden",
+    "categories": ["Barbarian", "Fighter"],
+    "grants": [
+      "+3 Strength, Dexterity, and Charisma",
+      "-2 Intelligence",
+      "+5 Shield Block Skill",
+      "+2 in one Weapon Skill of your choice",
+      "Rage (Benefit): Your melee attacks deal +1 damage for each Health Bar slot you have lost",
+      "+1 DR Buff",
+      "One Weapon Skill can be raised to Rank 20",
+      "Add your STR Mod a second time to your melee attack damage against males",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "prerequisites": "Only available to female crawlers",
+    "earthClass": true,
+    "page": 144,
+    "source": "Core"
+  },
+  {
+    "name": "Boring Ol' Bard",
+    "categories": ["Bard"],
+    "grants": [
+      "+3 Charisma",
+      "+3 Performance Skill",
+      "+1 in a Weapon Skill of your choice",
+      "+2 in a Spell of your choice",
+      "+2 Diplomacy Skill",
+      "+1 Good First Impression and Lore Skills",
+      "Access to all membership-based clubs, regardless of current memberships",
+      "Membership in the Dungeon Book of the Floor Club (all Spells)",
+      "Free room at all saferooms",
+      "You may gain access to a Patron",
+      "You pay +1 Mana to cast Spells that are not \"Favored: Bard\""
+    ],
+    "earthClass": false,
+    "page": 145,
+    "source": "Core"
+  },
+  {
+    "name": "Artist Alley Mogul",
+    "categories": ["Bard"],
+    "grants": [
+      "+5 Dexterity",
+      "+5 Charisma",
+      "+2 Dodge, Negotiation, and Pathfinder Skills",
+      "+2 Shield Spell",
+      "A 25% discount at all stores plus a 15% bonus to money earned from sales",
+      "10% interest earned on all coins upon descent to the next floor",
+      "Dodge Skill can be raised to Rank 20",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 145,
+    "source": "Core"
+  },
+  {
+    "name": "Former Child Actor",
+    "categories": ["Bard"],
+    "grants": [
+      "+10 Charisma",
+      "+3 Character Actor Skill (increases in Rank only upon descent to the next floor)",
+      "+2 Cockroach Skill",
+      "Add 1 to your Skill Advancement Checks for Charisma-based Skills",
+      "Immunity to Poison and all diseases",
+      "The Manager Benefit",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "prerequisites": "Must have Popularity 3+ and have received the \"Cut!\" achievement (reached at least one trillion views)",
+    "earthClass": true,
+    "page": 145,
+    "source": "Core"
+  },
+  {
+    "name": "NecroBard",
+    "categories": ["Bard"],
+    "grants": [
+      "+3 to Intelligence, Constitution, and Charisma",
+      "-2 Strength",
+      "+4 Performance Skill",
+      "+3 Turn Undead and Panty Dropper Spells",
+      "Access to all membership-based clubs, regardless of current memberships",
+      "Free room at all saferooms",
+      "You pay +1 Mana to cast Spells that are not \"Favored: Bard\" or that don't deal Necrotic damage"
+    ],
+    "earthClass": false,
+    "page": 146,
+    "source": "Core"
+  },
+  {
+    "name": "Poet Laureate",
+    "categories": ["Bard"],
+    "grants": [
+      "+3 Intelligence",
+      "+2 Charisma",
+      "+5 Performance Skill with the written word specialty",
+      "+2 Earworm (as spoken word poetry), Heal Others, and Shield Spells",
+      "Access to all membership-based clubs, regardless of current memberships",
+      "You pay +1 Mana to cast Spells that are not \"Favored: Bard\"",
+      "Performance Skill can be raised to Rank 20",
+      "You must choose a Patron. The GM will give you a choice of at least two options when you select this class.",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 146,
+    "source": "Core"
+  },
+  {
+    "name": "Professional Roadie",
+    "categories": ["Bard", "Rogue"],
+    "grants": [
+      "+8 split between Strength, Constitution, and Charisma",
+      "+4 Performance Skill, with a guitar specialty",
+      "+3 Negotiation Skill",
+      "+1 Iron Stomach and Repair Skills",
+      "Advantage on Checks against Poison or effects that give the Shit-Faced Debuff",
+      "At the start of each combat, you may declare that all the damage you deal is Sonic damage",
+      "Roll with Advantage when making a Repair Skill Check",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 146,
+    "source": "Core"
+  },
+  {
+    "name": "Spellbinder",
+    "categories": ["Bard"],
+    "grants": [
+      "+2 Charisma and Intelligence",
+      "+2 Good First Impression, Lore, and Performance Skills",
+      "+2 in Hot Stuff Aura and Panty Dropper Spells",
+      "Add your CHA Mod a second time when making a CHA Skill Check during a potentially hostile situation",
+      "Access to the Spellbook of the Floor club (\"Favored: Bard\" Spells only)",
+      "Once per day, you can draw the attention of everyone on the battlefield for a round, preventing them from attacking (this includes party members, Mobs, and minions, but not Bosses)"
+    ],
+    "earthClass": false,
+    "page": 147,
+    "source": "Core"
+  },
+  {
+    "name": "Boring Ol' Cleric",
+    "categories": ["Cleric"],
+    "grants": [
+      "+4 Charisma",
+      "+3 Intelligence",
+      "+2 in a Weapon Skill of your choice",
+      "+3 Religion Skill",
+      "+2 Heal Others, Shield, and Turn Undead Spells",
+      "Access to the Spell Book of the Level club (\"Favored: Cleric\" Spells only)",
+      "Access to Club Vanquisher",
+      "Must worship a deity (see Deities & Worship, p. 163)",
+      "You cannot choose a Cleric-type Class if you have access to the Desperado Club"
+    ],
+    "earthClass": false,
+    "page": 148,
+    "source": "Core"
+  },
+  {
+    "name": "Black Inquisitor General",
+    "categories": ["Cleric", "Mage", "Paladin"],
+    "grants": [
+      "+3 Strength and Intelligence",
+      "+1 Charisma",
+      "-2 Constitution",
+      "+3 Find Trap Skill",
+      "+3 in a Weapon Skill of your choice",
+      "+2 Trap Engineer Skill",
+      "+2 in a Spell of your choice",
+      "+1 Religion Skill",
+      "Can see in total darkness",
+      "Must worship a deity (see Deities & Worship, p. 163)",
+      "Access to all membership-based clubs, regardless of current memberships"
+    ],
+    "earthClass": false,
+    "page": 148,
+    "source": "Core"
+  },
+  {
+    "name": "Santero",
+    "categories": ["Cleric"],
+    "grants": [
+      "+3 Strength and Charisma",
+      "+2 Constitution",
+      "-2 Intelligence",
+      "+2 Heal Others, Shield, and Soul Collector Spells",
+      "+2 in a Weapon Skill of your choice",
+      "+2 Religion Skill",
+      "+1 Endurance Skill",
+      "Access to the Dungeon Book of the Floor club (\"Favored: Cleric\" Spells only)",
+      "Access to Club Vanquisher",
+      "Must worship a deity (see Deities & Worship, p. 163)",
+      "You cannot choose this Class if you have access to the Desperado Club"
+    ],
+    "earthClass": false,
+    "page": 148,
+    "source": "Core"
+  },
+  {
+    "name": "Boring Ol' Druid",
+    "categories": ["Druid"],
+    "grants": [
+      "+2 Intelligence, Constitution, and Dexterity",
+      "+3 Nature's Breath Spell",
+      "+3 in a Spell of your choice",
+      "+2 in a Spell of your choice",
+      "+2 Survival Skill",
+      "Your Mana recovers at twice the normal rate in a natural environment",
+      "Access to the Dungeon Book of the Floor club (\"Favored: Druid\" Spells only)"
+    ],
+    "earthClass": false,
+    "page": 148,
+    "source": "Core"
+  },
+  {
+    "name": "Herbalist",
+    "categories": ["Arcanist", "Druid"],
+    "grants": [
+      "+2 Constitution and Intelligence",
+      "+2 Alchemy, Cooking, First Aid, and Survival Skills",
+      "+2 Nature's Breath and Dirt Clod Spells",
+      "Your Mana recovers at twice the normal rate in a natural environment",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 149,
+    "source": "Core"
+  },
+  {
+    "name": "Lifebringer",
+    "categories": ["Druid"],
+    "grants": [
+      "+2 Constitution",
+      "+1 Intelligence",
+      "+2 First Aid, Pathfinder, Regeneration, and Survival Skills",
+      "+2 Nature's Breath Spell",
+      "+1 Rank in all Spells with the Heal keyword",
+      "Once per day, you can grant Regeneration at your Skill Rank to all party members within 30 feet for 10 minutes"
+    ],
+    "earthClass": false,
+    "page": 149,
+    "source": "Core"
+  },
+  {
+    "name": "PHysicker",
+    "categories": ["Druid"],
+    "grants": [
+      "+3 Constitution and Intelligence",
+      "+3 Nature's Breath and Oakhide Spells",
+      "+2 Rootfoot and Solsplash Spells",
+      "Double Mana regeneration when outdoors",
+      "Able to grant +1 DR to your party for 1 scene, once per day"
+    ],
+    "earthClass": false,
+    "page": 149,
+    "source": "Core"
+  },
+  {
+    "name": "Shepherd",
+    "categories": ["Druid"],
+    "grants": [
+      "+2 Intelligence, Charisma, and Constitution",
+      "+3 Animal Handling Skill",
+      "+2 Pathfinder Skill",
+      "+2 Nature's Breath and Drain Life Spells",
+      "You can see twice as far as most creatures",
+      "Your Mana recovers at twice the normal rate in a natural environment",
+      "The Shepherd may not use melee weapons other than Herding Weapons (see p. 182)",
+      "Gain a friendly Pet",
+      "Pets in your Herd gain +2 DR",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 150,
+    "source": "Core"
+  },
+  {
+    "name": "Boring Ol' Fighter",
+    "categories": ["Fighter"],
+    "grants": [
+      "+2 Strength and Constitution",
+      "+5 in a Weapon Skill of your choice",
+      "+3 Dodge Skill",
+      "+2 to your choice of two of the following Skills: Aiming, Attack of Opportunity, Catcher, Shield Block, or Zone of Control",
+      "Can access any Weapon Training Guild. Upon arrival on each floor, you receive a coupon good for one free training at a Weapon Training Guild"
+    ],
+    "earthClass": false,
+    "page": 150,
+    "source": "Core"
+  },
+  {
+    "name": "Pit Fighter",
+    "categories": ["Fighter"],
+    "grants": [
+      "+3 Dexterity",
+      "+2 Intelligence",
+      "+1 Strength",
+      "+3 Attack of Opportunity and Dirty Fighting Skills",
+      "+2 Dodge and Improvised Weapons Skills",
+      "+2 DR Buff",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 150,
+    "source": "Core"
+  },
+  {
+    "name": "Shotgun Messenger",
+    "categories": ["Fighter"],
+    "grants": [
+      "+2 Strength, Constitution, and Dexterity",
+      "-2 Charisma",
+      "+5 in a Ranged Weapon Skill",
+      "+2 Aiming and Intimidate Skills",
+      "+1 in all muscle-powered movement-related Skills",
+      "Can access any Weapon Training Guild. Each floor, you receive a coupon good for one free training at a Weapon Training Guild",
+      "Access to the Desperado Club",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 150,
+    "source": "Core"
+  },
+  {
+    "name": "Straight-to-DVD Action Hero",
+    "categories": ["Fighter"],
+    "grants": [
+      "+3 Strength, Constitution, Dexterity, and Charisma",
+      "-2 Intelligence",
+      "+2 Unarmed Combat Skill",
+      "+1 Driving, Running, and Performance Skills",
+      "Take no damage from falling",
+      "+1 DR",
+      "The Manager Benefit",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 151,
+    "source": "Core"
+  },
+  {
+    "name": "Sword and Boarder",
+    "categories": ["Fighter"],
+    "grants": [
+      "+2 Strength, Constitution, and Dexterity",
+      "-2 Intelligence",
+      "+5 Shield Block Skill",
+      "+3 in an Edged Weapon Skill of your choice",
+      "+2 Attack of Opportunity and Catcher Skills",
+      "Access to the Desperado Club"
+    ],
+    "earthClass": false,
+    "page": 151,
+    "source": "Core"
+  },
+  {
+    "name": "Monster Truck Driver",
+    "categories": ["Fighter"],
+    "grants": [
+      "+4 Constitution",
+      "+2 Dexterity",
+      "-2 Strength",
+      "-2 Intelligence",
+      "+3 Gear Head, Driving, and Pathfinder Skills",
+      "While moving in combat, you have a CON Mod bonus in your Health Bar slots (only) equal to 1/10th of the Move value of your means of conveyance. If on foot, you must have spent a Move Action during the previous round to gain this bonus",
+      "You bolt across the room and slam through each entity in the way. [Rank = Floor Number] + DEX to hit, 1d12 Bludgeoning, 2d10+3ft Line, then you gain the Fatigued Debuff. Critical Fail on a Natural 4 or less. Cooldown: 30 hours. Add 1d at Rank 5, 10, and 15. Rank only increases by Floor",
+      "Once per combat, roll 1d2 when you lose 2+ Health Bar slots. On a 1, the attacker loses 1 Health Bar slot",
+      "Resistance to Force damage",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "prerequisites": "Only available to crawlers who have Rank 5+ in the Driving Skill",
+    "earthClass": true,
+    "page": 152,
+    "source": "Core"
+  },
+  {
+    "name": "Zulu Warrior",
+    "categories": ["Fighter"],
+    "grants": [
+      "+3 Strength, Constitution, and Dexterity",
+      "+3 in one Melee Weapon Skill of your choice",
+      "+2 Attack of Opportunity, Endurance, and Running Skills",
+      "+1 DR",
+      "One Weapon Skill can be raised to Rank 20",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 152,
+    "source": "Core"
+  },
+  {
+    "name": "Boring Ol' Mage",
+    "categories": ["Mage"],
+    "grants": [
+      "+5 Intelligence and Charisma",
+      "-2 Strength and Dexterity",
+      "+3 in a Fire Spell",
+      "+2 in one Force Spell and one Sonic Spell",
+      "+2 in two different Passive Spells",
+      "+2 Lore Skill",
+      "+1 Arcane Skill",
+      "-3 Ranks in all Dexterity Skills (to a minimum of 1 Rank if you have any Ranks)",
+      "-3 Ranks in all Strength Skills (to a minimum of 1 Rank if you have any Ranks)"
+    ],
+    "earthClass": false,
+    "page": 152,
+    "source": "Core"
+  },
+  {
+    "name": "Blizzardmancer",
+    "categories": ["Mage"],
+    "grants": [
+      "+4 Intelligence",
+      "+3 Dexterity",
+      "-2 Strength",
+      "+4 Ice Blast and Frost Scar Spells",
+      "+2 Aiming Skill",
+      "Resistance to Ice damage",
+      "You can use the Aiming Skill for single-target Ice Spells"
+    ],
+    "earthClass": false,
+    "page": 153,
+    "source": "Core"
+  },
+  {
+    "name": "Crisper",
+    "categories": ["Mage"],
+    "grants": [
+      "+3 Intelligence",
+      "+2 Dexterity",
+      "-2 Constitution",
+      "+3 Wall of Fire and Fire Fingers Spells",
+      "+2 Fireball and Wilbur's Slow-Build Fireblast Spells",
+      "+2 Lore Skill",
+      "Resistance to Fire damage",
+      "No DR against Ice or water-based damage"
+    ],
+    "earthClass": false,
+    "page": 153,
+    "source": "Core"
+  },
+  {
+    "name": "Fire Spiritualist",
+    "categories": ["Bard", "Mage"],
+    "grants": [
+      "+2 Intelligence and Charisma",
+      "+2 Holy Aura and Hot Stuff Aura Spells",
+      "+2 Heal Others and Intimate Touches Spells",
+      "Heal Others Spell can be raised to Rank 20",
+      "Ethereal Hug: Once per day for one scene, you can grant your party +1 DR, Rank 4 Regeneration (as per the Skill), +1 to hit on Weapon and Spell Skill Checks, and add 1d4 bonus when they deal damage",
+      "Vulnerable to Ice damage"
+    ],
+    "earthClass": false,
+    "page": 153,
+    "source": "Core"
+  },
+  {
+    "name": "Forsaken Aerialist",
+    "categories": ["Mage"],
+    "grants": [
+      "+5 Intelligence",
+      "-2 Charisma",
+      "+3 Drain Life and Soul Collector Spells",
+      "+1 Alchemy, Infusion, and Tactics Skills",
+      "Double the duration of your Rank 5 and lower Spells that have a duration",
+      "Your Spells can be applied to a creature without it realizing it is under a Spell effect"
+    ],
+    "earthClass": false,
+    "page": 153,
+    "source": "Core"
+  },
+  {
+    "name": "Necromancer",
+    "categories": ["Mage"],
+    "grants": [
+      "+2 Intelligence and Dexterity",
+      "-2 Constitution and Charisma",
+      "+4 Soul Collector and Rise, Dead Minion! Spells",
+      "+2 Drain Life and Second Chance Spells",
+      "Once per rest, you can ask the corpse of a dead creature a number of questions equal to your INT. The creature answers as truthfully as it can based on what it knew in life",
+      "Whenever you kill an undead Mob, you heal 1 Health Bar, up to 5 Health Bar per combat"
+    ],
+    "earthClass": false,
+    "page": 154,
+    "source": "Core"
+  },
+  {
+    "name": "Boring Ol' Monk",
+    "categories": ["Monk"],
+    "grants": [
+      "+3 Constitution and Dexterity",
+      "+1 Strength",
+      "+3 Unarmed Combat Skill",
+      "+1 Foot Soldier, Iron Punch, Powerful Strike, Pugilism, and Smush Skills",
+      "+1 in Dexterity-based Weapon Skills",
+      "Unarmed Combat Skill can be raised to Rank 20"
+    ],
+    "earthClass": false,
+    "page": 154,
+    "source": "Core"
+  },
+  {
+    "name": "Elemental Monk",
+    "categories": ["Mage", "Monk"],
+    "grants": [
+      "+2 Intelligence and Dexterity",
+      "+3 Unarmed Combat Skill",
+      "+1 Dirt Clod, Fire Fingers, and Frost Scar Spells",
+      "+1 in all Spells with the Electric, Fire, and Ice damage types",
+      "Advantage when attacking elemental creatures",
+      "The ability to breathe underwater",
+      "The ability to burrow",
+      "The ability to fly"
+    ],
+    "earthClass": false,
+    "page": 154,
+    "source": "Core"
+  },
+  {
+    "name": "Prizefighter",
+    "categories": ["Bard", "Monk"],
+    "grants": [
+      "+5 Constitution",
+      "+2 Strength",
+      "-2 Intelligence and Charisma",
+      "+5 Pugilism and Iron Punch Skills",
+      "1 x Floor Number gold for every Mob you kill with a Pugilism or Unarmed Combat Skill attack",
+      "When you kill a foe with a Pugilism or Unarmed Combat Skill attack, +1 Popularity",
+      "Pugilism Skill can be raised to Rank 20",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "prerequisites": "Only available to crawlers who have Rank 5+ in the Pugilism Skill",
+    "earthClass": true,
+    "page": 154,
+    "source": "Core"
+  },
+  {
+    "name": "Spirit Healer",
+    "categories": ["Druid", "Monk"],
+    "grants": [
+      "+3 Strength and Constitution",
+      "+1 Dexterity",
+      "+3 Drain Life Spell",
+      "+3 Smush Skill",
+      "+2 Heal Others and Heal Self Spells",
+      "Your healing Skills and Spells heal 1 additional Health Bar slot when targeting a single individual",
+      "Heal Others Spell can be raised to Rank 20",
+      "Access to Club Vanquisher",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 155,
+    "source": "Core"
+  },
+  {
+    "name": "Street Monk",
+    "categories": ["Fighter", "Monk"],
+    "grants": [
+      "+2 Dexterity",
+      "+1 Strength and Charisma",
+      "+2 Dirty Fighting Skill",
+      "+2 Streetwise and Unarmed Combat Skills",
+      "+1 Pugilism Skill",
+      "+1 in Dexterity-based Weapon Skills",
+      "+3 DR Buff",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 155,
+    "source": "Core"
+  },
+  {
+    "name": "Boring Ol' Paladin",
+    "categories": ["Paladin"],
+    "grants": [
+      "+2 Charisma",
+      "+1 Charisma",
+      "+3 Protective Shell, Heal Others, and Holy Aura Spells",
+      "+3 in a Weapon Skill of your choice",
+      "+2 Catcher or Shield Block Skills",
+      "Access to Club Vanquisher",
+      "Must worship a deity",
+      "You cannot choose this Class if you have access to the Desperado Club"
+    ],
+    "earthClass": false,
+    "page": 155,
+    "source": "Core"
+  },
+  {
+    "name": "Cavalier",
+    "categories": ["Fighter", "Paladin"],
+    "grants": [
+      "+2 Strength and Constitution",
+      "+2 Catcher, Riding, and Lance Skills",
+      "+2 Shield and Smite Spells",
+      "When protecting someone under your code by using Catcher, gain the benefit of Playing to the Cameras (no Disadvantage, as this is a Passive Skill). This counts as your \"once per session\" usage",
+      "Gain a bonded Mount one size bigger than you with Move 40, barding with DR 10, a Trample attack, and a pet carrier for it",
+      "When you or your Mount is the target of an Attack, your fancy riding allows you to redirect an attack at your Mount to yourself or vice versa",
+      "Access to Club Vanquisher",
+      "Must worship a deity"
+    ],
+    "earthClass": false,
+    "page": 156,
+    "source": "Core"
+  },
+  {
+    "name": "Sacred Paladin",
+    "categories": ["Paladin"],
+    "grants": [
+      "+3 Strength",
+      "+2 Charisma",
+      "+2 Catcher Skill",
+      "+2 in a Weapon Skill of your choice",
+      "+2 Heal Others, Smite, and Turn Undead Spells",
+      "Access to the Dungeon Book of the Floor club (Favored: Cleric or Paladin Spells only)",
+      "+2 DR Buff",
+      "Access to Club Vanquisher",
+      "Must worship a deity",
+      "You cannot choose this Class if you have access to the Desperado Club"
+    ],
+    "earthClass": false,
+    "page": 156,
+    "source": "Core"
+  },
+  {
+    "name": "Boring Ol' Rogue",
+    "categories": ["Rogue"],
+    "grants": [
+      "+1 Intelligence, Dexterity, and Charisma",
+      "+3 Stealth Skill",
+      "+2 Dagger, Detect Trap, Dodge, and Lockpicking Skills",
+      "+1 Ambush Skill",
+      "Can see in total darkness",
+      "1 x Floor Number gold for every Mob killed with a melee weapon",
+      "Access to the Desperado Club",
+      "Cannot choose this Class if you have access to Club Vanquisher"
+    ],
+    "earthClass": false,
+    "page": 156,
+    "source": "Core"
+  },
+  {
+    "name": "Bomb Squad Tech",
+    "categories": ["Rogue"],
+    "grants": [
+      "+2 Dexterity",
+      "+1 Constitution",
+      "-2 Intelligence",
+      "+3 Bomb Surgeon and Find Trap Skills",
+      "+2 in all Explosive-based Skills",
+      "+1 DR Buff",
+      "Limb Regeneration Benefit: In 12 days minus your CON Mod, one limb fully regrows",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "prerequisites": "Only available to crawlers who've earned the Boom! Achievement",
+    "earthClass": true,
+    "page": 156,
+    "source": "Core"
+  },
+  {
+    "name": "Compensated Anarchist",
+    "categories": ["Monk", "Rogue"],
+    "grants": [
+      "+5 Charisma",
+      "+1 Intelligence",
+      "+2 Backfire, Escape Plan, and Find Trap Skills",
+      "+1 Bomb Surgeon, Hide in Shadows, Trap Engineer, and Unarmed Combat Skills",
+      "+1 Fear Spell",
+      "Add no Stat Mod bonus damage when using Edged Weapons",
+      "You pay +3 Mana to cast damage-dealing Spells",
+      "At the end of each floor, add 1 to one of your trap-related Skill Advancement Checks",
+      "At the end of each floor, add 1 to one of your bomb-related Skill Advancement Checks",
+      "Access to the Desperado Club",
+      "Access to the Naughty Boys Employment Agency",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "prerequisites": "Only available to crawlers who have Popularity 3 or higher and have Rank 5+ in the Explosives Handling Skill",
+    "earthClass": true,
+    "page": 157,
+    "source": "Core"
+  },
+  {
+    "name": "High Rise Grifter",
+    "categories": ["Rogue"],
+    "grants": [
+      "+1 Intelligence and Charisma",
+      "+4 Deception and Stealth Skills",
+      "+2 Dagger and Escape Plan Skills",
+      "+1 Determine Value and Negotiation Skills",
+      "Access to the Desperado Club",
+      "Cannot choose this Class if you have access to Club Vanquisher",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 157,
+    "source": "Core"
+  },
+  {
+    "name": "Identity Thief",
+    "categories": ["Rogue"],
+    "grants": [
+      "+4 Charisma",
+      "+3 Dexterity",
+      "+5 Deception Skill",
+      "+3 Dagger Skill",
+      "+2 Investigation Skill",
+      "Tier 3 Makeup Table",
+      "Access to the Desperado Club",
+      "Cannot choose this Class if you have access to Club Vanquisher",
+      "Silver Earth Box, with guaranteed Earth Hobby Potion"
+    ],
+    "earthClass": true,
+    "page": 157,
+    "source": "Core"
+  },
+  {
+    "name": "Swashbuckler",
+    "categories": ["Bard", "Fighter", "Rogue"],
+    "grants": [
+      "+3 Dexterity and Charisma",
+      "+3 Rapier or Longsword Skill",
+      "+2 Balance and Dodge Skills",
+      "+1 Performance Skill",
+      "+1 Light on Your Feet Skill",
+      "Rapier or Longsword Skill can be raised to Rank 20",
+      "You have Advantage when using a melee attack from a higher position than your opponent",
+      "Once per combat, after you kill an enemy, you can make an Unopposed Performance Skill Check. On an Amazing Success or better, gain +1 Popularity"
+    ],
+    "earthClass": false,
+    "page": 158,
+    "source": "Core"
+  }
+]
