@@ -2749,6 +2749,7 @@ GMScenes.renderPins();
      and the Trackers monster picker. Generated from data/dcc/*.json. -->
 <script src="/tools-data/dcc-monsters.js"></script>
 <script src="/tools-data/dcc-items.js"></script>
+<script src="/tools-data/dcc-gear-sd.js"></script>
 <script src="/tools-data/dcc-loot.js"></script>
 <script src="/tools-data/dcc-spells.js"></script>
 <script src="/tools-data/dcc-skills.js"></script>
@@ -6188,9 +6189,14 @@ function genDccMagicItem(tierKey, forcedType) {
 }
 
 // ── DCC Item generator (random draw from the catalog) ──────────────────────
+function dccItemPool() {
+  const a = (typeof DCC_ITEMS !== 'undefined' ? DCC_ITEMS : []);
+  const b = (typeof DCC_GEAR_SD !== 'undefined' ? DCC_GEAR_SD : []);   // converted SD gear (Homebrew)
+  return a.concat(b);
+}
 function genDccItem(cat, tier) {
   if(typeof DCC_ITEMS === 'undefined') return card('<div class="gen-empty">DCC item catalog didn’t load. Open the GM screen from the app.</div>');
-  const pool = DCC_ITEMS.filter(it => (!cat || it.category === cat) && (!tier || it.tier === tier));
+  const pool = dccItemPool().filter(it => (!cat || it.category === cat) && (!tier || it.tier === tier));
   if(!pool.length) return card('<div class="gen-empty">No catalog item matches those filters.</div>');
   const it = pool[Math.floor(Math.random() * pool.length)];
   const tagBits = [it.category, it.slot, it.tier].filter(Boolean).join(' · ');

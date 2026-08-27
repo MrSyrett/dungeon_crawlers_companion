@@ -24,7 +24,8 @@ export type DccSource =
   | "GM Toolkit"      // Gamemaster's Campaign Toolkit
   | "Survival"        // Rules for Survival
   | "Par"             // Par for the Course
-  | "Atlas";          // Atlas: Tutorial Floors
+  | "Atlas"           // Atlas: Tutorial Floors
+  | "Homebrew";       // user homebrew, or content converted/adapted for DCC
 
 /** A rank-gated upgrade a skill or spell picks up at Rank 5 / 10 / 15. */
 export interface DccUpgrade {

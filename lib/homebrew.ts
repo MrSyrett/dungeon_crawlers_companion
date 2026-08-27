@@ -10,9 +10,9 @@ import { TALENT_TARGET_KEYS } from "@/lib/effects";
 //   • a gear entry is a sheet `_homebrewItems`-shaped object (its own `kind`)
 //   • a monster entry is an SD_MONSTERS-shaped stat block (plus `ctype`), so the
 //     GM screen can drop it straight into the bestiary pool
-export type HbType = "spell" | "gear" | "monster" | "class" | "ancestry" | "background";
+export type HbType = "spell" | "gear" | "monster" | "class" | "ancestry" | "background" | "dcc-item";
 
-const HB_TYPES = ["spell", "gear", "monster", "class", "ancestry", "background"] as const;
+const HB_TYPES = ["spell", "gear", "monster", "class", "ancestry", "background", "dcc-item"] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
 }
@@ -45,6 +45,20 @@ type HomebrewRow = {
 };
 
 const GEAR_KINDS = ["gear", "weapon", "armor", "shield", "magic", "ammo"] as const;
+
+// ── Dungeon Crawler Carl items ───────────────────────────────────────────────
+// A homebrew item stored in DccItem shape (lib/data/dcc-types.ts) so the Loot &
+// Gear page and the DCC tools can consume it exactly like a book item.
+export const DCC_ITEM_CATEGORIES = [
+  "consumable", "weapon", "armor", "accessory", "scroll", "tome", "mundane", "tool", "material",
+] as const;
+export const DCC_ITEM_TIERS = [
+  "Mundane", "Bronze", "Silver", "Gold", "Platinum", "Legendary", "Celestial",
+] as const;
+// The book's equip-slot vocabulary (offered as suggestions; slot stays free text).
+export const DCC_ITEM_SLOTS = [
+  "Head", "Torso", "Arms", "Legs", "Feet", "Hands/Holding", "Accessory",
+] as const;
 
 // Mirrors the range picker in the sheet's own homebrew weapon editor.
 export const WEAPON_RANGES = ["Close", "Near", "Far", "Close/Near", "Close/Far"] as const;
@@ -93,7 +107,7 @@ export const userCampaigns = cache(async function userCampaigns(
   // column (kept in sync on every save), so the linked campaign ids are a plain
   // index scan — no full-table JSON scan, no per-sheet parse.
   const linkedRows = await prisma.document.findMany({
-    where: { userId, tool: "sd-character", linkedCampaignId: { not: null } },
+    where: { userId, tool: { in: ["sd-character", "dcc-character"] }, linkedCampaignId: { not: null } },
     select: { linkedCampaignId: true },
     distinct: ["linkedCampaignId"],
   });
@@ -123,7 +137,7 @@ async function participatesInCampaign(userId: string, campaignId: string): Promi
   // Indexed membership check: does this user have an sd-character linked to the
   // campaign? The link is its own column now, so this is a counted index scan.
   const linked = await prisma.document.count({
-    where: { userId, tool: "sd-character", linkedCampaignId: campaignId },
+    where: { userId, tool: { in: ["sd-character", "dcc-character"] }, linkedCampaignId: campaignId },
   });
   return linked > 0;
 }
@@ -434,6 +448,29 @@ function normalizeClass(input: unknown): { name: string; data: Record<string, un
   return { name, data };
 }
 
+// A Dungeon Crawler Carl item: name, category, optional tier/slot/price, effect.
+// Stored in DccItem shape with source "Homebrew" so the loot page and tools can
+// merge it straight into their catalog.
+function normalizeDccItem(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew item needs a name.");
+  const category = (DCC_ITEM_CATEGORIES as readonly string[]).includes(str(o.category))
+    ? str(o.category) : "mundane";
+  const data: Record<string, unknown> = {
+    name,
+    category,
+    effect: str(o.effect).slice(0, 4000),
+    source: "Homebrew",
+  };
+  const tier = str(o.tier);
+  if ((DCC_ITEM_TIERS as readonly string[]).includes(tier)) data.tier = tier;
+  if (str(o.slot)) data.slot = str(o.slot).slice(0, 60);
+  const price = num(o.price);
+  if (price != null && price > 0) data.price = price;
+  return { name, data };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -442,6 +479,7 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "class": return normalizeClass(data);
     case "ancestry": return normalizeAncestry(data);
     case "background": return normalizeBackground(data);
+    case "dcc-item": return normalizeDccItem(data);
   }
 }
 

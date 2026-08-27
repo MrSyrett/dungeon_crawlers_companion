@@ -42,6 +42,9 @@ const DATASETS = [
   { json: "monsters.json",    kind: "array",  constName: "DCC_MONSTERS",    type: "DccMonster",    base: "dcc-monsters" },
   { json: "items.json",       kind: "array",  constName: "DCC_ITEMS",       type: "DccItem",       base: "dcc-items" },
   { json: "loot.json",        kind: "object", constName: "DCC_LOOT",        type: "DccLoot",       base: "dcc-loot" },
+  // Shadowdark Basic Gear / Weapons / Armor converted to DccItem shape and tagged
+  // source "Homebrew" — extra standard gear options for DCC (magic + ammo excluded).
+  { json: "gear-sd.json",     kind: "array",  constName: "DCC_GEAR_SD",     type: "DccItem",       base: "dcc-gear-sd" },
 ];
 
 const BANNER =

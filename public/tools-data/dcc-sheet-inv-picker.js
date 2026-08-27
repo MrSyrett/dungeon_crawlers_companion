@@ -34,8 +34,15 @@
   }
   var TIER_ORDER = ["Bronze", "Silver", "Gold", "Platinum", "Legendary", "Celestial"];
 
+  // Catalog = the official DCC items plus the converted Shadowdark gear
+  // (DCC_GEAR_SD, tagged source "Homebrew"), when that dataset is loaded.
+  function itemCatalog() {
+    var a = (typeof DCC_ITEMS !== "undefined" ? DCC_ITEMS : []);
+    var b = (typeof DCC_GEAR_SD !== "undefined" ? DCC_GEAR_SD : []);
+    return a.concat(b);
+  }
   function itemsAZ() {
-    return (typeof DCC_ITEMS !== "undefined" ? DCC_ITEMS : []).slice().sort(function (a, b) {
+    return itemCatalog().slice().sort(function (a, b) {
       return String(a.name).localeCompare(String(b.name), "en");
     });
   }
