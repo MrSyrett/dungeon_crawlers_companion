@@ -91,10 +91,23 @@
   // both newly grant racial/class bonuses and distribute stat points.
   function isThird() { return W.mode === "upgrade" || W.path === "thirdfloor"; }
   function isUpgrade() { return W.mode === "upgrade"; }
-  // Base (pre-mod) stat: the assigned value when creating; the existing Unenhanced
-  // score when upgrading an already-built crawler.
+  // The existing crawler's stat as {base, enh}: base = the Unenhanced score if the
+  // player filled it, otherwise the Enhanced score (many crawlers only fill Enh, and
+  // reading Unenh alone would wrongly treat the base as 0). enh is the raw Enhanced.
+  function existingScore(k) {
+    const s = W.existing && W.existing.stats && W.existing.stats[k];
+    if (!s) return { base: 0, enh: 0 };
+    const enh = parseInt(s.enh, 10) || 0;
+    const uStr = String(s.unenh == null ? "" : s.unenh).trim();
+    const u = parseInt(uStr, 10);
+    const base = (uStr !== "" && !isNaN(u)) ? u : enh;
+    return { base: base, enh: enh };
+  }
+
+  // Base (pre-mod) stat: the assigned value when creating; the existing score
+  // (Unenhanced, or Enhanced when Unenhanced is blank) when upgrading.
   function baseStatVal(k) {
-    if (isUpgrade()) { const s = W.existing && W.existing.stats && W.existing.stats[k]; return parseInt(s ? s.unenh : 0, 10) || 0; }
+    if (isUpgrade()) return existingScore(k).base;
     return parseInt(W.statVals[k], 10) || 0;
   }
 
@@ -327,7 +340,7 @@
       if (typeof collectSheet !== "function") return false;
       const s = collectSheet();
       if (s.header && s.header["f-name"] && String(s.header["f-name"]).trim()) return true;
-      if (s.stats && STAT_IDS.some((k) => s.stats[k] && String(s.stats[k].unenh || "").trim())) return true;
+      if (s.stats && STAT_IDS.some((k) => s.stats[k] && (String(s.stats[k].unenh || "").trim() || String(s.stats[k].enh || "").trim()))) return true;
       return false;
     } catch (e) { return false; }
   }
@@ -346,7 +359,7 @@
     const ex = W.existing || {};
     const name = (ex.header && ex.header["f-name"]) || "This crawler";
     const lvl = (ex.header && ex.header["f-level"]) || "1";
-    const statLine = STAT_IDS.map((k) => `${STAT_ABBR[k]} ${ex.stats && ex.stats[k] ? ex.stats[k].unenh || "—" : "—"}`).join(" · ");
+    const statLine = STAT_IDS.map((k) => { const b = existingScore(k).base; return `${STAT_ABBR[k]} ${b || "—"}`; }).join(" · ");
     const nSkills = (ex.skills || []).filter((s) => s.name).length;
     const nAtk = (ex.attacks || []).filter((a) => a.name).length;
     return `
@@ -354,7 +367,7 @@
       <p class="dccw-hint">This crawler has been played, so their skills, attacks, gear and loot are kept exactly as they are. Reaching Floor 3 just unlocks the things that were waiting: a real <b>Race</b> and <b>Class</b>, and the level-up <b>stat points</b> you couldn't spend on the tutorial floors.</p>
       <div class="dccw-card">
         <div style="margin-bottom:6px;"><b style="color:#f0a8a3;">${esc(name)}</b> <span class="dccw-sub">· currently Level ${esc(lvl)} · ${nAtk} attack(s), ${nSkills} skill(s)</span></div>
-        <div class="dccw-sub">Unenhanced stats: ${esc(statLine)}</div>
+        <div class="dccw-sub">Current base stats: ${esc(statLine)}</div>
       </div>
       <p class="dccw-hint" style="margin-top:12px;">Next you'll <b>choose a Race and Class</b> (their bonuses now apply) and <b>distribute ${statBudget()} stat points</b> (3 × Level ${upgradeLevel()} − 3). On finish it applies your racial Size and sets your starting Popularity. No new skills or loot are added — you already have those.</p>
       <p class="dccw-sub">Tip: export the sheet first if you want a backup of the pre-Floor-3 version.</p>`;
@@ -984,11 +997,13 @@
     data.header["f-floor"] = String(W.floor);        // reaching the Third Floor sets F = 3
     data.header["f-race"] = W.race;
     data.header["f-class"] = W.class;
-    // stats: unenh = new score (existing + race + class + points); enh preserves any gear/buff delta.
+    // stats: unenh = new score (existing base + race + class + points); enh preserves
+    // any gear/buff delta (Enhanced − base). When the crawler only filled Enhanced,
+    // base == Enhanced so the delta is 0 and enh tracks the new score (no double-count).
     STAT_IDS.forEach((k) => {
-      const oe = parseInt(ex.stats && ex.stats[k] ? ex.stats[k].enh : 0, 10) || 0;
-      const ou = parseInt(ex.stats && ex.stats[k] ? ex.stats[k].unenh : 0, 10) || 0;
-      data.stats[k] = { unenh: String(fin[k]), enh: String(fin[k] + (oe - ou)) };
+      const s = existingScore(k);
+      const delta = s.enh - s.base;
+      data.stats[k] = { unenh: String(fin[k]), enh: String(fin[k] + delta) };
     });
     if (race) data.combat.drSize = String(race.size); // racial Size now applies
     data.combat.manaCurrentVal = String(fin.int);
