@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
 import {
   BENEFIT_TIERS, DETRIMENT_TIERS, menuEntry, selectionCost, selectionGrant,
@@ -62,7 +62,7 @@ type Schema = {
   summary: (data: Data) => string; // right-hand meta on the list row
   derive?: (f: Data) => Data; // optional: fill computed defaults (monsters)
   deriveLabel?: string;
-  Body?: (props: BodyProps) => JSX.Element; // custom form body (point-buy builders)
+  Body?: (props: BodyProps) => ReactElement; // custom form body (point-buy builders)
 };
 
 const STATS = ["STR", "INT", "CON", "DEX", "CHA"] as const;
