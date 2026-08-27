@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_ITEMS } from "@/lib/data/dcc-items";
-import { DCC_GEAR_SD } from "@/lib/data/dcc-gear-sd";
 import type { DccItem } from "@/lib/data/dcc-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DccHomebrew from "@/components/DccHomebrew";
@@ -92,11 +91,9 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
   ]);
 
   const hbRows: Row[] = hbVisible.map((h) => hbToRow(h.data as Record<string, unknown>, h.name));
-  // Converted Shadowdark Basic Gear / Weapons / Armor, tagged Homebrew.
-  const convertedRows: Row[] = DCC_GEAR_SD.map((it) => ({ ...it, homebrew: true }));
   const bookRows: Row[] = DCC_ITEMS.map((it) => ({ ...it, homebrew: false }));
-  const ALL_ROWS: Row[] = [...hbRows, ...convertedRows, ...bookRows].sort((a, b) => a.name.localeCompare(b.name, "en"));
-  const homebrewCount = hbRows.length + convertedRows.length;
+  const ALL_ROWS: Row[] = [...hbRows, ...bookRows].sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const homebrewCount = hbRows.length;
   const TIERS = TIER_ORDER.filter((t) => ALL_ROWS.some((i) => i.tier === t));
 
   const raw = await searchParams;

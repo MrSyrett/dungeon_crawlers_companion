@@ -3,19 +3,15 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_SPELLS } from "@/lib/data/dcc-spells";
 import type { DccSpell } from "@/lib/data/dcc-types";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import DccHomebrewEditor from "@/components/DccHomebrewEditor";
 
 export const dynamic = "force-dynamic";
 
-// Homebrew is not wired for DCC yet (roadmap Phase 6). When it is, merge visible
-// homebrew spells into ALL_ROWS here the way /spells (Shadowdark) does and add a
-// "Homebrew" chip to the Type filter — the card already has a badge slot for it.
-
-type Query = { q?: string; type?: string; stat?: string };
+type Query = { q?: string; type?: string; stat?: string; src?: string };
 // A repeated key (?q=a&q=b) arrives as an array; collapse so a hand-built URL can't crash us.
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
-
-const SPELLS_AZ = [...DCC_SPELLS].sort((a, b) => a.name.localeCompare(b.name, "en"));
 
 // The three spell types, in display order, with their singular/plural nouns.
 const TYPES: { key: DccSpell["type"]; label: string; noun: string; plural: string }[] = [
@@ -24,22 +20,22 @@ const TYPES: { key: DccSpell["type"]; label: string; noun: string; plural: strin
   { key: "utility", label: "Utility", noun: "utility spell", plural: "utility spells" },
 ];
 
-// Stats that actually appear as a spell's casting stat (most are INT; a few CHA/CON).
-const STATS = [...new Set(DCC_SPELLS.map((s) => s.stat))].sort();
-
 function withParams(current: Query, patch: Query): string {
   const next = { ...current, ...patch };
   const sp = new URLSearchParams();
   if (next.q) sp.set("q", next.q);
   if (next.type) sp.set("type", next.type);
   if (next.stat) sp.set("stat", next.stat);
+  if (next.src) sp.set("src", next.src);
   const s = sp.toString();
   return s ? `/dcc/spells?${s}` : "/dcc/spells";
 }
 
-function matches(s: DccSpell, q: string, type: string, stat: string): boolean {
+function matches(s: DccSpell, q: string, type: string, stat: string, src: string): boolean {
   if (type && s.type !== type) return false;
   if (stat && s.stat !== stat) return false;
+  if (src === "hb" && s.source !== "Homebrew") return false;
+  if (src === "book" && s.source === "Homebrew") return false;
   if (!q) return true;
   return s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q);
 }
@@ -51,6 +47,8 @@ const chipOff =
 const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
 const badge =
   "rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold tracking-[0.08em] text-[var(--muted)]";
+const hbBadge =
+  "rounded border border-[var(--red)] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#f0a8a3]";
 
 export default async function DccSpellsPage({
   searchParams,
@@ -60,17 +58,31 @@ export default async function DccSpellsPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  const [hbVisible, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "dcc-spell" }),
+    ownHomebrew(user.id, "dcc-spell"),
+    userCampaigns(user.id),
+  ]);
+  const hbRows = hbVisible.map((h) => h.data as unknown as DccSpell);
+  const ALL_SPELLS = [...hbRows, ...DCC_SPELLS].sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const homebrewCount = hbRows.length;
+
+  // Stats that actually appear as a spell's casting stat (most are INT; a few CHA/CON).
+  const STATS = [...new Set(ALL_SPELLS.map((s) => s.stat))].sort();
+
   const raw = await searchParams;
   const q = one(raw.q);
   const type = one(raw.type);
   const stat = one(raw.stat);
+  const src = one(raw.src);
   const needle = q.trim().toLowerCase();
   const activeType = TYPES.some((t) => t.key === type) ? type : "";
   const activeStat = STATS.includes(stat as DccSpell["stat"]) ? stat : "";
+  const activeSrc = src === "hb" || src === "book" ? src : "";
 
-  const results = SPELLS_AZ.filter((s) => matches(s, needle, activeType, activeStat));
-  const filtered = Boolean(needle || activeType || activeStat);
-  const current: Query = { q: q.trim(), type: activeType, stat: activeStat };
+  const results = ALL_SPELLS.filter((s) => matches(s, needle, activeType, activeStat, activeSrc));
+  const filtered = Boolean(needle || activeType || activeStat || activeSrc);
+  const current: Query = { q: q.trim(), type: activeType, stat: activeStat, src: activeSrc };
   const activeMeta = TYPES.find((t) => t.key === activeType);
   const noun = activeMeta?.noun ?? "spell";
   const plural = activeMeta?.plural ?? "spells";
@@ -81,7 +93,7 @@ export default async function DccSpellsPage({
         <div>
           <h1 className="font-display text-3xl font-black tracking-wide">Spells</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--red)] sm:text-[11px] sm:tracking-[0.35em]">
-            {DCC_SPELLS.length} Dungeon Crawler Carl spells
+            {DCC_SPELLS.length} spells{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}
           </p>
         </div>
         <Link
@@ -91,6 +103,8 @@ export default async function DccSpellsPage({
           ← Home
         </Link>
       </header>
+
+      <DccHomebrewEditor kind="dcc-spell" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/dcc/spells" className="mb-4 flex gap-2">
         <input
@@ -102,6 +116,7 @@ export default async function DccSpellsPage({
         />
         {activeType ? <input type="hidden" name="type" value={activeType} /> : null}
         {activeStat ? <input type="hidden" name="stat" value={activeStat} /> : null}
+        {activeSrc ? <input type="hidden" name="src" value={activeSrc} /> : null}
         <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]">
           Search
         </button>
@@ -125,7 +140,7 @@ export default async function DccSpellsPage({
         ))}
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Stat
         </span>
@@ -141,6 +156,13 @@ export default async function DccSpellsPage({
             {st}
           </Link>
         ))}
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Source</span>
+        <Link href={withParams(current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
+        <Link href={withParams(current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
+        <Link href={withParams(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
@@ -169,9 +191,10 @@ export default async function DccSpellsPage({
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
           {results.map((s, i) => {
             const typeLabel = TYPES.find((t) => t.key === s.type)?.label ?? s.type;
+            const hb = s.source === "Homebrew";
             return (
               <li
-                key={`${s.name}-${i}`}
+                key={`${hb ? "hb" : "bk"}-${s.name}-${i}`}
                 className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4"
               >
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -182,6 +205,7 @@ export default async function DccSpellsPage({
                 </div>
 
                 <div className="mt-2 flex flex-wrap gap-1.5">
+                  {hb ? <span className={hbBadge}>Homebrew</span> : null}
                   {s.passive ? (
                     <span className={badge}>
                       <span className="text-[var(--text)]">Passive</span>

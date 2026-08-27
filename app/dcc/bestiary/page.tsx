@@ -3,14 +3,12 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_MONSTERS } from "@/lib/data/dcc-monsters";
 import type { DccMonster, DccStat } from "@/lib/data/dcc-types";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import DccHomebrewEditor from "@/components/DccHomebrewEditor";
 
 export const dynamic = "force-dynamic";
 
-// Homebrew is not wired for DCC yet (roadmap Phase 6). The bestiary is built
-// from the GM Toolkit Threat Appendix, Par for the Course, and the Core Rulebook
-// adventure chapters (Ch.7-8 so far; Ch.9/The Bubbles still to add).
-
-type Query = { q?: string; role?: string };
+type Query = { q?: string; role?: string; src?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -24,9 +22,8 @@ const ROLE_RANK: Record<string, number> = {
   "Floor Boss": 0, "Country Boss": 1, "Province Boss": 2, "City Boss": 3,
   "Borough Boss": 4, "Neighborhood Boss": 5, "Rival Crawler": 6, "Mob": 7, "NPC": 8,
 };
-const MONSTERS_SORTED = [...DCC_MONSTERS].sort(
-  (a, b) => (ROLE_RANK[a.role] ?? 9) - (ROLE_RANK[b.role] ?? 9) || a.level - b.level || a.name.localeCompare(b.name, "en"),
-);
+const byMonster = (a: DccMonster, b: DccMonster) =>
+  (ROLE_RANK[a.role] ?? 9) - (ROLE_RANK[b.role] ?? 9) || a.level - b.level || a.name.localeCompare(b.name, "en");
 
 // Group the many boss tiers into one "Boss" filter plus Mob / Rival Crawler.
 const ROLE_FILTERS: { key: string; label: string; test: (r: DccMonster["role"]) => boolean }[] = [
@@ -41,15 +38,18 @@ function withParams(current: Query, patch: Query): string {
   const sp = new URLSearchParams();
   if (next.q) sp.set("q", next.q);
   if (next.role) sp.set("role", next.role);
+  if (next.src) sp.set("src", next.src);
   const s = sp.toString();
   return s ? `/dcc/bestiary?${s}` : "/dcc/bestiary";
 }
 
-function matches(m: DccMonster, q: string, roleKey: string): boolean {
+function matches(m: DccMonster, q: string, roleKey: string, src: string): boolean {
   if (roleKey) {
     const f = ROLE_FILTERS.find((r) => r.key === roleKey);
     if (f && !f.test(m.role)) return false;
   }
+  if (src === "hb" && m.source !== "Homebrew") return false;
+  if (src === "book" && m.source === "Homebrew") return false;
   if (!q) return true;
   return (
     m.name.toLowerCase().includes(q) ||
@@ -65,6 +65,8 @@ const chipBase =
 const chipOff =
   "border-[var(--border)] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]";
 const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
+const hbBadge =
+  "rounded border border-[var(--red)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#f0a8a3]";
 
 // Health-bar segment colour, red→orange→yellow→green across the bar — mirrors the
 // GM screen tracker's dccSegColor so a creature reads the same in both places.
@@ -81,15 +83,26 @@ export default async function DccBestiaryPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  const [hbVisible, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "dcc-monster" }),
+    ownHomebrew(user.id, "dcc-monster"),
+    userCampaigns(user.id),
+  ]);
+  const hbRows = hbVisible.map((h) => h.data as unknown as DccMonster);
+  const ALL_MONSTERS = [...hbRows, ...DCC_MONSTERS].sort(byMonster);
+  const homebrewCount = hbRows.length;
+
   const raw = await searchParams;
   const q = one(raw.q);
   const role = one(raw.role);
+  const src = one(raw.src);
   const needle = q.trim().toLowerCase();
   const activeRole = ROLE_FILTERS.some((r) => r.key === role) ? role : "";
+  const activeSrc = src === "hb" || src === "book" ? src : "";
 
-  const results = MONSTERS_SORTED.filter((m) => matches(m, needle, activeRole));
-  const filtered = Boolean(needle || activeRole);
-  const current: Query = { q: q.trim(), role: activeRole };
+  const results = ALL_MONSTERS.filter((m) => matches(m, needle, activeRole, activeSrc));
+  const filtered = Boolean(needle || activeRole || activeSrc);
+  const current: Query = { q: q.trim(), role: activeRole, src: activeSrc };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -97,7 +110,7 @@ export default async function DccBestiaryPage({
         <div>
           <h1 className="font-display text-3xl font-black tracking-wide">Bestiary</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--red)] sm:text-[11px] sm:tracking-[0.35em]">
-            {DCC_MONSTERS.length} mobs, bosses &amp; NPCs
+            {DCC_MONSTERS.length} mobs, bosses &amp; NPCs{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}
           </p>
         </div>
         <Link
@@ -108,6 +121,8 @@ export default async function DccBestiaryPage({
         </Link>
       </header>
 
+      <DccHomebrewEditor kind="dcc-monster" campaigns={campaigns} initial={hbOwn} />
+
       <form method="get" action="/dcc/bestiary" className="mb-4 flex gap-2">
         <input
           type="search"
@@ -117,12 +132,13 @@ export default async function DccBestiaryPage({
           className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--red)]"
         />
         {activeRole ? <input type="hidden" name="role" value={activeRole} /> : null}
+        {activeSrc ? <input type="hidden" name="src" value={activeSrc} /> : null}
         <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]">
           Search
         </button>
       </form>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
         <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
           Role
         </span>
@@ -138,6 +154,13 @@ export default async function DccBestiaryPage({
             {r.label}
           </Link>
         ))}
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Source</span>
+        <Link href={withParams(current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
+        <Link href={withParams(current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
+        <Link href={withParams(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
@@ -165,13 +188,15 @@ export default async function DccBestiaryPage({
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
           {results.map((m, i) => {
+            const hb = m.source === "Homebrew";
             return (
-              <li key={`${m.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
+              <li key={`${hb ? "hb" : "bk"}-${m.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">{m.name}</h2>
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
                     {m.role} · {SIZE_NAMES[m.size] ?? `Size ${m.size}`} · Level {m.level}
                   </span>
+                  {hb ? <span className={hbBadge}>Homebrew</span> : null}
                 </div>
 
                 {m.tags.length ? (
@@ -195,22 +220,24 @@ export default async function DccBestiaryPage({
 
                 {/* Health Bar — read-only segments (each box = one slot's HP), coloured
                     like the GM tracker. Not interactive. */}
-                <div className="mt-2">
-                  <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
-                    Health Bar · {m.hbSlots.length} {m.hbSlots.length === 1 ? "slot" : "slots"}
+                {m.hbSlots.length ? (
+                  <div className="mt-2">
+                    <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+                      Health Bar · {m.hbSlots.length} {m.hbSlots.length === 1 ? "slot" : "slots"}
+                    </div>
+                    <div className="flex flex-wrap gap-1" aria-label={`Health Bar, ${m.hbSlots.length} slots`}>
+                      {m.hbSlots.map((hp, si) => (
+                        <div
+                          key={si}
+                          className="flex h-6 min-w-[24px] flex-1 items-center justify-center rounded-sm text-[10px] font-bold text-black"
+                          style={{ backgroundColor: segColor(si, m.hbSlots.length) }}
+                        >
+                          {hp}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1" aria-label={`Health Bar, ${m.hbSlots.length} slots`}>
-                    {m.hbSlots.map((hp, si) => (
-                      <div
-                        key={si}
-                        className="flex h-6 min-w-[24px] flex-1 items-center justify-center rounded-sm text-[10px] font-bold text-black"
-                        style={{ backgroundColor: segColor(si, m.hbSlots.length) }}
-                      >
-                        {hp}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                ) : null}
 
                 {/* Stat block */}
                 <div className="mt-2 grid grid-cols-5 gap-1.5 text-center">

@@ -19,23 +19,36 @@
 
   function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function attr(s) { return esc(s).replace(/'/g, "&#39;"); }
-  function haveData() { return typeof DCC_SKILLS !== "undefined" || typeof DCC_SPELLS !== "undefined"; }
+  function haveData() {
+    return typeof DCC_SKILLS !== "undefined" || typeof DCC_SPELLS !== "undefined" ||
+      (Array.isArray(window.__DCC_HB_SKILLS) && window.__DCC_HB_SKILLS.length) ||
+      (Array.isArray(window.__DCC_HB_SPELLS) && window.__DCC_HB_SPELLS.length);
+  }
+
+  // The user's saved homebrew skills/spells (own + campaign-shared), pulled from
+  // the app once on load. Stored in the exact DCC_SKILLS / DCC_SPELLS shape, so
+  // they slot straight into the index below. Empty when opened standalone.
+  function hbSkills() { return Array.isArray(window.__DCC_HB_SKILLS) ? window.__DCC_HB_SKILLS : []; }
+  function hbSpells() { return Array.isArray(window.__DCC_HB_SPELLS) ? window.__DCC_HB_SPELLS : []; }
 
   // ── unified index of skills + spells ────────────────────────────────────────
   function entries() {
     var out = [];
-    (typeof DCC_SKILLS !== "undefined" ? DCC_SKILLS : []).forEach(function (s) {
+    var skills = (typeof DCC_SKILLS !== "undefined" ? DCC_SKILLS : []).concat(hbSkills());
+    var spells = (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []).concat(hbSpells());
+    skills.forEach(function (s) {
       out.push({
         kind: s.category === "attack" ? "attack" : "skill",
         name: s.name, stat: s.stat || "", passive: !!s.passive, interrupt: !!s.interrupt,
         group: s.group || "", desc: s.desc || "", upgrades: s.upgrades || [],
-        damage: s.damage || "", range: s.range || "", src: s,
+        damage: s.damage || "", range: s.range || "", homebrew: s.source === "Homebrew", src: s,
       });
     });
-    (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []).forEach(function (sp) {
+    spells.forEach(function (sp) {
       out.push({
         kind: "spell", name: sp.name, stat: sp.stat || "", passive: !!sp.passive,
-        mana: sp.mana, type: sp.type || "", desc: sp.desc || "", upgrades: sp.upgrades || [], src: sp,
+        mana: sp.mana, type: sp.type || "", desc: sp.desc || "", upgrades: sp.upgrades || [],
+        homebrew: sp.source === "Homebrew", src: sp,
       });
     });
     return out;
@@ -59,6 +72,7 @@
     else { bits.push(e.kind === "attack" ? "Attack" : "Utility"); if (e.group) bits.push(e.group); if (e.passive) bits.push("Passive"); if (e.interrupt) bits.push("Interrupt"); }
     if (e.stat) bits.push(String(e.stat).toUpperCase());
     if (e.damage) bits.push(e.damage + (e.range ? " · " + e.range : ""));
+    if (e.homebrew) bits.push("Homebrew");
     return bits.join(" · ");
   }
 
@@ -354,4 +368,23 @@
       return rows.length > 0;
     },
   };
+
+  // Pull the user's saved homebrew skills & spells so the picker lists them too.
+  (function () {
+    function pull(type, slot) {
+      try {
+        fetch("/api/homebrew?type=" + type, { credentials: "same-origin" })
+          .then(function (r) { return r && r.ok ? r.json() : null; })
+          .then(function (j) {
+            if (!j || !Array.isArray(j.items)) return;
+            window[slot] = j.items.map(function (it) { return it && it.data; }).filter(function (d) { return d && d.name; });
+            var ov = document.getElementById("dccs-overlay");
+            if (ov && ov.style.display === "flex") renderPicker();  // refresh if open
+          })
+          .catch(function () {});
+      } catch (e) {}
+    }
+    pull("dcc-skill", "__DCC_HB_SKILLS");
+    pull("dcc-spell", "__DCC_HB_SPELLS");
+  })();
 })();

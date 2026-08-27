@@ -3,21 +3,19 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_SKILLS } from "@/lib/data/dcc-skills";
 import type { DccSkill } from "@/lib/data/dcc-types";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import DccHomebrewEditor from "@/components/DccHomebrewEditor";
 
 export const dynamic = "force-dynamic";
 
-// Homebrew is not wired for DCC yet (roadmap Phase 6). When it is, merge visible
-// homebrew skills into ALL_ROWS the way the Shadowdark reference pages do.
-
-type Query = { q?: string; cat?: string; group?: string };
+type Query = { q?: string; cat?: string; group?: string; src?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
 // Attack skills lead (they carry damage), then utility; A–Z within each.
 const CAT_RANK: Record<DccSkill["category"], number> = { attack: 0, utility: 1 };
-const SKILLS_SORTED = [...DCC_SKILLS].sort(
-  (a, b) => CAT_RANK[a.category] - CAT_RANK[b.category] || a.name.localeCompare(b.name, "en"),
-);
+const bySkill = (a: DccSkill, b: DccSkill) =>
+  CAT_RANK[a.category] - CAT_RANK[b.category] || a.name.localeCompare(b.name, "en");
 
 const CATEGORIES: { key: DccSkill["category"]; label: string; noun: string; plural: string }[] = [
   { key: "attack", label: "Attack", noun: "attack skill", plural: "attack skills" },
@@ -35,13 +33,6 @@ const GROUP_ORDER = [
   "Ranged",
   "Animal/Pet Strike",
 ];
-const GROUPS = [...new Set(DCC_SKILLS.map((s) => s.group).filter((g): g is string => !!g))].sort(
-  (a, b) => {
-    const ia = GROUP_ORDER.indexOf(a);
-    const ib = GROUP_ORDER.indexOf(b);
-    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib) || a.localeCompare(b, "en");
-  },
-);
 
 function withParams(current: Query, patch: Query): string {
   const next = { ...current, ...patch };
@@ -49,13 +40,16 @@ function withParams(current: Query, patch: Query): string {
   if (next.q) sp.set("q", next.q);
   if (next.cat) sp.set("cat", next.cat);
   if (next.group) sp.set("group", next.group);
+  if (next.src) sp.set("src", next.src);
   const s = sp.toString();
   return s ? `/dcc/skills?${s}` : "/dcc/skills";
 }
 
-function matches(s: DccSkill, q: string, cat: string, group: string): boolean {
+function matches(s: DccSkill, q: string, cat: string, group: string, src: string): boolean {
   if (cat && s.category !== cat) return false;
   if (group && s.group !== group) return false;
+  if (src === "hb" && s.source !== "Homebrew") return false;
+  if (src === "book" && s.source === "Homebrew") return false;
   if (!q) return true;
   return (
     s.name.toLowerCase().includes(q) ||
@@ -71,6 +65,8 @@ const chipOff =
 const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
 const badge =
   "rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold tracking-[0.08em] text-[var(--muted)]";
+const hbBadge =
+  "rounded border border-[var(--red)] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#f0a8a3]";
 
 function Badge({ label, value }: { label: string; value: string }) {
   return (
@@ -88,18 +84,36 @@ export default async function DccSkillsPage({
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  const [hbVisible, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "dcc-skill" }),
+    ownHomebrew(user.id, "dcc-skill"),
+    userCampaigns(user.id),
+  ]);
+  const hbRows = hbVisible.map((h) => h.data as unknown as DccSkill);
+  const ALL_SKILLS = [...hbRows, ...DCC_SKILLS].sort(bySkill);
+  const homebrewCount = hbRows.length;
+
+  // Groups from both book and homebrew skills, ordered by the book's grouping.
+  const GROUPS = [...new Set(ALL_SKILLS.map((s) => s.group).filter((g): g is string => !!g))].sort((a, b) => {
+    const ia = GROUP_ORDER.indexOf(a);
+    const ib = GROUP_ORDER.indexOf(b);
+    return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib) || a.localeCompare(b, "en");
+  });
+
   const raw = await searchParams;
   const q = one(raw.q);
   const cat = one(raw.cat);
   const group = one(raw.group);
+  const src = one(raw.src);
   const needle = q.trim().toLowerCase();
   const activeCat = CATEGORIES.some((c) => c.key === cat) ? cat : "";
   // The group filter only makes sense alongside attack skills; ignore it otherwise.
   const activeGroup = GROUPS.includes(group) && activeCat !== "utility" ? group : "";
+  const activeSrc = src === "hb" || src === "book" ? src : "";
 
-  const results = SKILLS_SORTED.filter((s) => matches(s, needle, activeCat, activeGroup));
-  const filtered = Boolean(needle || activeCat || activeGroup);
-  const current: Query = { q: q.trim(), cat: activeCat, group: activeGroup };
+  const results = ALL_SKILLS.filter((s) => matches(s, needle, activeCat, activeGroup, activeSrc));
+  const filtered = Boolean(needle || activeCat || activeGroup || activeSrc);
+  const current: Query = { q: q.trim(), cat: activeCat, group: activeGroup, src: activeSrc };
   const activeMeta = CATEGORIES.find((c) => c.key === activeCat);
   const noun = activeMeta?.noun ?? "skill";
   const plural = activeMeta?.plural ?? "skills";
@@ -110,7 +124,7 @@ export default async function DccSkillsPage({
         <div>
           <h1 className="font-display text-3xl font-black tracking-wide">Skills</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--red)] sm:text-[11px] sm:tracking-[0.35em]">
-            {DCC_SKILLS.length} Dungeon Crawler Carl skills
+            {DCC_SKILLS.length} skills{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}
           </p>
         </div>
         <Link
@@ -120,6 +134,8 @@ export default async function DccSkillsPage({
           ← Home
         </Link>
       </header>
+
+      <DccHomebrewEditor kind="dcc-skill" campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/dcc/skills" className="mb-4 flex gap-2">
         <input
@@ -131,6 +147,7 @@ export default async function DccSkillsPage({
         />
         {activeCat ? <input type="hidden" name="cat" value={activeCat} /> : null}
         {activeGroup ? <input type="hidden" name="group" value={activeGroup} /> : null}
+        {activeSrc ? <input type="hidden" name="src" value={activeSrc} /> : null}
         <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]">
           Search
         </button>
@@ -157,8 +174,8 @@ export default async function DccSkillsPage({
         ))}
       </div>
 
-      {activeCat !== "utility" ? (
-        <div className="mb-6 flex flex-wrap items-center gap-1.5">
+      {activeCat !== "utility" && GROUPS.length ? (
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
           <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">
             Weapon group
           </span>
@@ -179,6 +196,13 @@ export default async function DccSkillsPage({
           ))}
         </div>
       ) : null}
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Source</span>
+        <Link href={withParams(current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
+        <Link href={withParams(current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
+        <Link href={withParams(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
+      </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
         <span>
@@ -207,14 +231,16 @@ export default async function DccSkillsPage({
           {results.map((s, i) => {
             const catLabel = CATEGORIES.find((c) => c.key === s.category)?.label ?? s.category;
             const metaBits = [catLabel, s.group, s.stat ?? undefined].filter(Boolean).join(" · ");
+            const hb = s.source === "Homebrew";
             return (
-              <li key={`${s.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
+              <li key={`${hb ? "hb" : "bk"}-${s.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a8a3]">{s.name}</h2>
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">{metaBits}</span>
                 </div>
 
                 <div className="mt-2 flex flex-wrap gap-1.5">
+                  {hb ? <span className={hbBadge}>Homebrew</span> : null}
                   {s.passive ? <span className={badge}><span className="text-[var(--text)]">Passive</span></span> : null}
                   {s.interrupt ? <span className={badge}><span className="text-[var(--text)]">Interrupt</span></span> : null}
                   {s.damage ? <Badge label="Damage" value={s.damage + (s.damageType ? ` ${s.damageType}` : "")} /> : null}

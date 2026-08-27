@@ -80,7 +80,19 @@
     };
   }
 
-  function classByName(n) { return (typeof DCC_CLASSES !== "undefined" ? DCC_CLASSES : []).find((c) => c.name === n) || null; }
+  // Book data + the user's saved homebrew (own + campaign-shared). Homebrew is
+  // stored in the exact DccClass / DccRace shape, so it merges with no mapping.
+  function allClasses() {
+    const book = (typeof DCC_CLASSES !== "undefined" ? DCC_CLASSES : []);
+    const hb = Array.isArray(window.__DCC_HB_CLASSES) ? window.__DCC_HB_CLASSES : [];
+    return book.concat(hb);
+  }
+  function allRaces() {
+    const book = (typeof DCC_RACES !== "undefined" ? DCC_RACES : []);
+    const hb = Array.isArray(window.__DCC_HB_RACES) ? window.__DCC_HB_RACES : [];
+    return book.concat(hb);
+  }
+  function classByName(n) { return allClasses().find((c) => c.name === n) || null; }
   function availExperiences() { return (typeof DCC_EXPERIENCES !== "undefined" ? DCC_EXPERIENCES : []).filter((e) => e.floor <= (W.floor - 1)); }
   function statPointsSpent() { return STAT_IDS.reduce((n, k) => n + (parseInt(W.statPoints[k], 10) || 0), 0); }
   // Upgrade budget = accumulated level-up points, unspendable until Floor 3:
@@ -143,7 +155,7 @@
     return mods;
   }
 
-  function raceByName(n) { return (typeof DCC_RACES !== "undefined" ? DCC_RACES : []).find((r) => r.name === n) || null; }
+  function raceByName(n) { return allRaces().find((r) => r.name === n) || null; }
   function skillByName(n) {
     if (typeof DCC_SKILLS === "undefined") return null;
     const t = String(n).toLowerCase();
@@ -457,10 +469,10 @@
         </div>
         ${W.kind === "animal" ? `<p class="dccw-sub">Animal crawlers use Youth / Training / Adult / Quirk backgrounds and natural attacks (Back Claw, Bite). AI Favor starts at 0 instead of 1.</p>` : ""}`;
     }
-    const races = DCC_RACES.slice().sort((a, b) => (a.group === b.group ? a.name.localeCompare(b.name) : a.group.localeCompare(b.group)));
+    const races = allRaces().slice().sort((a, b) => (a.group === b.group ? a.name.localeCompare(b.name) : a.group.localeCompare(b.group)));
     const opts = ["Earth", "Alien"].map((grp) =>
       `<optgroup label="${grp}-based">` + races.filter((r) => r.group === grp).map((r) =>
-        `<option value="${attr(r.name)}" ${r.name === W.race ? "selected" : ""}>${esc(r.name)}</option>`).join("") + `</optgroup>`
+        `<option value="${attr(r.name)}" ${r.name === W.race ? "selected" : ""}>${esc(r.name)}${r.source === "Homebrew" ? " (Homebrew)" : ""}</option>`).join("") + `</optgroup>`
     ).join("");
     const race = raceByName(W.race);
     const mods = raceStatMods(race);
@@ -482,9 +494,9 @@
 
   // ── step: class (Third-Floor+) ──────────────────────────────────────────────
   function renderClass() {
-    if (typeof DCC_CLASSES === "undefined") return `<h3>Choose a class</h3><p class="dccw-warn">The class list didn't load. Reopen the sheet from the app so /tools-data/dcc-classes.js is available.</p>`;
-    const classes = DCC_CLASSES.slice().sort((a, b) => a.name.localeCompare(b.name));
-    const opts = ['<option value="">— choose a class —</option>'].concat(classes.map((c) => `<option value="${attr(c.name)}" ${c.name === W.class ? "selected" : ""}>${esc(c.name)}</option>`)).join("");
+    if (typeof DCC_CLASSES === "undefined" && !allClasses().length) return `<h3>Choose a class</h3><p class="dccw-warn">The class list didn't load. Reopen the sheet from the app so /tools-data/dcc-classes.js is available.</p>`;
+    const classes = allClasses().slice().sort((a, b) => a.name.localeCompare(b.name));
+    const opts = ['<option value="">— choose a class —</option>'].concat(classes.map((c) => `<option value="${attr(c.name)}" ${c.name === W.class ? "selected" : ""}>${esc(c.name)}${c.source === "Homebrew" ? " (Homebrew)" : ""}</option>`)).join("");
     const cls = classByName(W.class);
     const mods = cls ? raceStatMods(cls) : ZERO_MODS;
     const modLine = STAT_IDS.filter((k) => mods[k]).map((k) => `${STAT_ABBR[k]} ${mods[k] > 0 ? "+" : ""}${mods[k]}`).join(", ") || "no stat changes";
@@ -1111,6 +1123,29 @@
 
   window.DCCW = API;
   window.startCharWizard = open;
+
+  // Pull the user's saved homebrew races & classes so the wizard offers them.
+  (function () {
+    function pull(type, slot) {
+      try {
+        fetch("/api/homebrew?type=" + type, { credentials: "same-origin" })
+          .then((r) => (r && r.ok ? r.json() : null))
+          .then((j) => {
+            if (!j || !Array.isArray(j.items)) return;
+            window[slot] = j.items.map((it) => it && it.data).filter((d) => d && d.name);
+            // Repaint only if the wizard is open on the step that lists them.
+            try {
+              const ov = document.getElementById("dccw-overlay");
+              const key = W && steps()[W.step] ? steps()[W.step].key : "";
+              if (ov && (key === "race" || key === "class")) render();
+            } catch (e) {}
+          })
+          .catch(() => {});
+      } catch (e) {}
+    }
+    pull("dcc-race", "__DCC_HB_RACES");
+    pull("dcc-class", "__DCC_HB_CLASSES");
+  })();
   // Set the launch button's mode once the sheet has loaded its saved state.
   try { refreshButton(); } catch (e) {}
   try { window.addEventListener("load", () => { try { refreshButton(); } catch (e) {} }); } catch (e) {}

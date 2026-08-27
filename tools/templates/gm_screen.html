@@ -2749,26 +2749,29 @@ GMScenes.renderPins();
      and the Trackers monster picker. Generated from data/dcc/*.json. -->
 <script src="/tools-data/dcc-monsters.js"></script>
 <script src="/tools-data/dcc-items.js"></script>
-<script src="/tools-data/dcc-gear-sd.js"></script>
 <script src="/tools-data/dcc-loot.js"></script>
 <script src="/tools-data/dcc-spells.js"></script>
 <script src="/tools-data/dcc-skills.js"></script>
 <script src="/tools-data/dcc-buffs.js"></script>
 <script>
-// Pull the user's saved homebrew items (own + campaign-shared) from the app so
-// the DCC Item generator can draw them too. Empty when opened standalone.
+// Pull the user's saved homebrew (own + campaign-shared) from the app so the DCC
+// generators and the bestiary picker can draw them too. Empty when standalone.
 (function () {
-  try {
-    fetch("/api/homebrew?type=dcc-item", { credentials: "same-origin" })
-      .then(function (r) { return r && r.ok ? r.json() : null; })
-      .then(function (j) {
-        if (j && Array.isArray(j.items)) {
-          window.__DCC_HB_ITEMS = j.items.map(function (it) { return it && it.data; })
-            .filter(function (d) { return d && d.name; });
-        }
-      })
-      .catch(function () {});
-  } catch (e) {}
+  function pull(type, slot) {
+    try {
+      fetch("/api/homebrew?type=" + type, { credentials: "same-origin" })
+        .then(function (r) { return r && r.ok ? r.json() : null; })
+        .then(function (j) {
+          if (j && Array.isArray(j.items)) {
+            window[slot] = j.items.map(function (it) { return it && it.data; })
+              .filter(function (d) { return d && d.name; });
+          }
+        })
+        .catch(function () {});
+    } catch (e) {}
+  }
+  pull("dcc-item", "__DCC_HB_ITEMS");       // → DCC Item generator pool
+  pull("dcc-monster", "__DCC_HB_MONSTERS"); // → bestiary picker (add to tracker)
 })();
 </script>
 
@@ -4060,7 +4063,11 @@ function init_trackers(root) {
   let pickerOpen = false, pickerQuery = '', pickerType = '';
   // Which bestiary the picker draws from. This is the DCC companion, so default
   // to the DCC bestiary when its data is loaded; the GM can flip to SD.
-  function dccBestiary() { return (typeof DCC_MONSTERS !== 'undefined' && Array.isArray(DCC_MONSTERS)) ? DCC_MONSTERS : []; }
+  function dccBestiary() {
+    const book = (typeof DCC_MONSTERS !== 'undefined' && Array.isArray(DCC_MONSTERS)) ? DCC_MONSTERS : [];
+    const hb = Array.isArray(window.__DCC_HB_MONSTERS) ? window.__DCC_HB_MONSTERS : [];  // user's saved homebrew
+    return hb.concat(book);
+  }
   let pickerSource = dccBestiary().length ? 'dcc' : 'sd';
 
   function pickerMatches() {
@@ -6208,9 +6215,8 @@ function genDccMagicItem(tierKey, forcedType) {
 // ── DCC Item generator (random draw from the catalog) ──────────────────────
 function dccItemPool() {
   const a = (typeof DCC_ITEMS !== 'undefined' ? DCC_ITEMS : []);
-  const b = (typeof DCC_GEAR_SD !== 'undefined' ? DCC_GEAR_SD : []);   // converted SD gear (Homebrew)
   const c = (Array.isArray(window.__DCC_HB_ITEMS) ? window.__DCC_HB_ITEMS : []);  // user's saved homebrew
-  return a.concat(b).concat(c);
+  return a.concat(c);
 }
 function genDccItem(cat, tier) {
   if(typeof DCC_ITEMS === 'undefined') return card('<div class="gen-empty">DCC item catalog didn’t load. Open the GM screen from the app.</div>');

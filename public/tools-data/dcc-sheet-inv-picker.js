@@ -51,12 +51,10 @@
     } catch (e) {}
   }
 
-  // Catalog = the official DCC items, the converted Shadowdark gear (DCC_GEAR_SD,
-  // tagged "Homebrew"), and the user's saved homebrew items.
+  // Catalog = the official DCC items plus the user's saved homebrew items.
   function itemCatalog() {
     var a = (typeof DCC_ITEMS !== "undefined" ? DCC_ITEMS : []);
-    var b = (typeof DCC_GEAR_SD !== "undefined" ? DCC_GEAR_SD : []);
-    return a.concat(b).concat(hbItems || []);
+    return a.concat(hbItems || []);
   }
   function itemsAZ() {
     return itemCatalog().slice().sort(function (a, b) {

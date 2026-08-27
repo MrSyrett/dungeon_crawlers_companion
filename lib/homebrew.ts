@@ -10,9 +10,14 @@ import { TALENT_TARGET_KEYS } from "@/lib/effects";
 //   • a gear entry is a sheet `_homebrewItems`-shaped object (its own `kind`)
 //   • a monster entry is an SD_MONSTERS-shaped stat block (plus `ctype`), so the
 //     GM screen can drop it straight into the bestiary pool
-export type HbType = "spell" | "gear" | "monster" | "class" | "ancestry" | "background" | "dcc-item";
+export type HbType =
+  | "spell" | "gear" | "monster" | "class" | "ancestry" | "background"
+  | "dcc-item" | "dcc-monster" | "dcc-skill" | "dcc-spell" | "dcc-class" | "dcc-race";
 
-const HB_TYPES = ["spell", "gear", "monster", "class", "ancestry", "background", "dcc-item"] as const;
+const HB_TYPES = [
+  "spell", "gear", "monster", "class", "ancestry", "background",
+  "dcc-item", "dcc-monster", "dcc-skill", "dcc-spell", "dcc-class", "dcc-race",
+] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
 }
@@ -59,6 +64,24 @@ export const DCC_ITEM_TIERS = [
 export const DCC_ITEM_SLOTS = [
   "Head", "Torso", "Arms", "Legs", "Feet", "Hands/Holding", "Accessory",
 ] as const;
+
+// ── Dungeon Crawler Carl vocabularies (shared with the homebrew editors) ─────
+export const DCC_STATS = ["STR", "INT", "CON", "DEX", "CHA"] as const;
+export const DCC_MONSTER_ROLES = [
+  "Mob", "Neighborhood Boss", "Borough Boss", "City Boss", "Province Boss",
+  "Country Boss", "Floor Boss", "Quest Boss", "Elite", "Rival Crawler", "NPC",
+] as const;
+export const DCC_SKILL_CATEGORIES = ["attack", "utility"] as const;
+export const DCC_SPELL_TYPES = ["attack", "utility", "heal"] as const;
+export const DCC_RACE_GROUPS = ["Earth", "Alien"] as const;
+// Upgrade ranks a skill/spell can pick up (Rank 5 / 10 / 15).
+export const DCC_UPGRADE_RANKS = [5, 10, 15] as const;
+// Health-Bar slot counts bosses get by tier (Table 50, before the +F floor
+// bonus). Mobs instead get one slot per Level, capped at 10 (p. 270).
+export const DCC_BOSS_HB_BASE: Record<string, number> = {
+  "Neighborhood Boss": 10, "Borough Boss": 15, "City Boss": 20,
+  "Province Boss": 25, "Country Boss": 30, "Floor Boss": 40,
+};
 
 // Mirrors the range picker in the sheet's own homebrew weapon editor.
 export const WEAPON_RANGES = ["Close", "Near", "Far", "Close/Near", "Close/Far"] as const;
@@ -471,6 +494,253 @@ function normalizeDccItem(input: unknown): { name: string; data: Record<string, 
   return { name, data };
 }
 
+// ── Dungeon Crawler Carl homebrew (bestiary / skills / spells / classes / races) ──
+// Each normaliser produces the exact lib/data/dcc-types shape its book dataset
+// uses (source forced to "Homebrew"), so the reference pages and the HTML tools
+// merge homebrew straight into their DCC_* pools with no translation.
+
+// A trimmed, capped list of non-empty strings (grants, tags, notes…).
+function strList(v: unknown, maxItems: number, maxLen: number): string[] {
+  return Array.isArray(v)
+    ? (v as unknown[]).map((x) => str(x).slice(0, maxLen)).filter(Boolean).slice(0, maxItems)
+    : [];
+}
+
+// Rank-gated upgrades: [{rank: 5|10|15, text}] kept in ascending rank order.
+function upgradesFrom(v: unknown): { rank: number; text: string }[] {
+  if (!Array.isArray(v)) return [];
+  const ranks = DCC_UPGRADE_RANKS as readonly number[];
+  return (v as unknown[])
+    .map((u) => {
+      const o = (u ?? {}) as Record<string, unknown>;
+      const rank = num(o.rank);
+      return { rank: rank != null && ranks.includes(rank) ? rank : 5, text: str(o.text).slice(0, 600) };
+    })
+    .filter((u) => u.text)
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, 3);
+}
+
+// One DccStat "score → mod" cell. Score defaults to 1, mod to 0.
+function statCell(v: unknown): { score: number; mod: number } {
+  const o = (v ?? {}) as Record<string, unknown>;
+  const score = num(o.score);
+  const mod = num(o.mod);
+  return { score: score != null && score > 0 ? score : 1, mod: mod ?? 0 };
+}
+
+// A homebrew Mob / Boss stat block (DccMonster shape). Health-Bar slots derive
+// from the rulebook (Mob = Level slots capped at 10, each = CON Mod; Bosses use
+// Table 50 by tier) when the client sends slotCount/hpPerSlot, but an explicit
+// hbSlots array (hand-tuned in the editor) always wins.
+function normalizeDccMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew monster needs a name.");
+
+  const roles = DCC_MONSTER_ROLES as readonly string[];
+  const role = roles.includes(str(o.role)) ? str(o.role) : "Mob";
+  const size = Math.min(8, Math.max(1, num(o.size) ?? 4));
+  const level = Math.max(1, num(o.level) ?? 1);
+
+  const stats: Record<string, { score: number; mod: number }> = {};
+  const statsIn = (o.stats ?? {}) as Record<string, unknown>;
+  for (const k of DCC_STATS) stats[k] = statCell(statsIn[k]);
+
+  // Health-Bar slots: explicit array if provided, else slotCount × hpPerSlot.
+  let hbSlots: number[];
+  if (Array.isArray(o.hbSlots) && o.hbSlots.length) {
+    hbSlots = (o.hbSlots as unknown[]).map((n) => Math.max(0, num(n) ?? 0)).slice(0, 40);
+  } else {
+    const count = Math.min(40, Math.max(1, num(o.slotCount) ?? Math.min(level, 10)));
+    const hp = Math.max(1, num(o.hpPerSlot) ?? (stats.CON.mod || 1));
+    hbSlots = Array.from({ length: count }, () => hp);
+  }
+
+  const attacks = Array.isArray(o.attacks)
+    ? (o.attacks as unknown[])
+        .map((a) => {
+          const ao = (a ?? {}) as Record<string, unknown>;
+          const an = str(ao.name).slice(0, 120);
+          const out: Record<string, unknown> = {
+            name: an,
+            toHit: str(ao.toHit).slice(0, 40),
+            damage: str(ao.damage).slice(0, 60),
+          };
+          if (str(ao.damageType)) out.damageType = str(ao.damageType).slice(0, 40);
+          if (str(ao.range)) out.range = str(ao.range).slice(0, 80);
+          if (str(ao.rider)) out.rider = str(ao.rider).slice(0, 600);
+          return out;
+        })
+        .filter((a) => a.name)
+        .slice(0, 12)
+    : [];
+
+  // DR is usually a number but a few blocks print "F" (DR = Floor Number).
+  const drRaw = str(o.dr);
+  const drNum = num(o.dr);
+  const dr: number | string = drRaw.toUpperCase() === "F" ? "F" : drNum != null ? drNum : 2;
+
+  return {
+    name,
+    data: {
+      name,
+      role,
+      size,
+      tags: strList(o.tags, 12, 40),
+      level,
+      hbSlots,
+      surprise: str(o.surprise).slice(0, 20) || `${10 + level}+F`,
+      evade: str(o.evade).slice(0, 20) || `${10 + level}+F`,
+      move: str(o.move).slice(0, 20) || "20+S",
+      dr,
+      stats,
+      attacks,
+      notes: strList(o.notes, 20, 800),
+      page: num(o.page) ?? 0,
+      source: "Homebrew",
+    },
+  };
+}
+
+// A homebrew Skill (DccSkill shape). Attack skills carry damage/range fields;
+// utility skills leave them blank. `stat` is a DccStat or null (pure passive).
+function normalizeDccSkill(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew skill needs a name.");
+
+  const category = (DCC_SKILL_CATEGORIES as readonly string[]).includes(str(o.category))
+    ? str(o.category) : "utility";
+  const statRaw = str(o.stat).toUpperCase();
+  const stat = (DCC_STATS as readonly string[]).includes(statRaw) ? statRaw : null;
+
+  const data: Record<string, unknown> = {
+    name,
+    category,
+    stat,
+    passive: !!o.passive,
+    interrupt: !!o.interrupt,
+    desc: str(o.desc).slice(0, 4000),
+    upgrades: upgradesFrom(o.upgrades),
+    page: num(o.page) ?? 0,
+    source: "Homebrew",
+  };
+  if (str(o.group)) data.group = str(o.group).slice(0, 60);
+  if (category === "attack") {
+    if (str(o.damage)) data.damage = str(o.damage).slice(0, 60);
+    if (str(o.damageType)) data.damageType = str(o.damageType).slice(0, 40);
+    if (str(o.range)) data.range = str(o.range).slice(0, 60);
+    if (str(o.cooldown)) data.cooldown = str(o.cooldown).slice(0, 60);
+  }
+  if (str(o.limitations)) data.limitations = str(o.limitations).slice(0, 200);
+  return { name, data };
+}
+
+// A homebrew Spell (DccSpell shape). Mana cost + governing stat + rank upgrades.
+function normalizeDccSpell(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew spell needs a name.");
+
+  const type = (DCC_SPELL_TYPES as readonly string[]).includes(str(o.type)) ? str(o.type) : "utility";
+  const statRaw = str(o.stat).toUpperCase();
+  const stat = (DCC_STATS as readonly string[]).includes(statRaw) ? statRaw : "INT";
+
+  const data: Record<string, unknown> = {
+    name,
+    mana: Math.max(0, num(o.mana) ?? 1),
+    type,
+    stat,
+    passive: !!o.passive,
+    desc: str(o.desc).slice(0, 4000),
+    upgrades: upgradesFrom(o.upgrades),
+    page: num(o.page) ?? 0,
+    source: "Homebrew",
+  };
+  const aiFavor = num(o.aiFavor);
+  if (aiFavor != null) data.aiFavor = aiFavor;
+  return { name, data };
+}
+
+// Races & classes carry their stat bonuses the way the book does: as grant
+// bullets like "+2 Strength" that the creation wizard parses into stat mods
+// (raceStatMods). This folds the editor's structured `statBonuses` control AND
+// any single-stat bonus a user typed by hand into one canonical, de-duplicated
+// set of "+N <FullStat>" bullets (book style, so the wizard applies them), then
+// appends the remaining free-text grants (compound bonuses like "+1 Strength and
+// Dexterity" are left as-is — the wizard already understands those).
+const DCC_STAT_FULL: Record<string, string> = {
+  str: "Strength", int: "Intelligence", con: "Constitution", dex: "Dexterity", cha: "Charisma",
+};
+const DCC_STAT_TOKEN: Record<string, string> = {
+  str: "str", strength: "str", int: "int", intelligence: "int", con: "con", constitution: "con",
+  dex: "dex", dexterity: "dex", cha: "cha", charisma: "cha",
+};
+function dccStatGrants(o: Record<string, unknown>): string[] {
+  const order = ["str", "int", "con", "dex", "cha"];
+  const mods: Record<string, number> = { str: 0, int: 0, con: 0, dex: 0, cha: 0 };
+
+  const sb = (o.statBonuses ?? {}) as Record<string, unknown>;
+  for (const k of order) { const n = num(sb[k]); if (n) mods[k] += n; }
+
+  // Pull single-stat bonus bullets out of the free-text grants and merge them.
+  const free: string[] = [];
+  const rows = Array.isArray(o.grants) ? (o.grants as unknown[]) : [];
+  for (const g of rows) {
+    const s = str(g).slice(0, 400);
+    const m = s.match(/^\s*([+-]\d+)\s+([A-Za-z]+)\s*$/);
+    const id = m ? DCC_STAT_TOKEN[m[2].toLowerCase()] : undefined;
+    if (m && id) mods[id] += parseInt(m[1], 10);
+    else if (s) free.push(s);
+  }
+
+  const bullets = order
+    .filter((k) => mods[k])
+    .map((k) => `${mods[k] > 0 ? "+" : ""}${mods[k]} ${DCC_STAT_FULL[k]}`);
+  return [...bullets, ...free].slice(0, 24);
+}
+
+// A homebrew Race (DccRace shape): a size, a group (Earth/Alien), and the
+// bullet list of mechanical grants the reference page and wizard show.
+function normalizeDccRace(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew race needs a name.");
+
+  const group = (DCC_RACE_GROUPS as readonly string[]).includes(str(o.group)) ? str(o.group) : "Earth";
+  const data: Record<string, unknown> = {
+    name,
+    group,
+    size: Math.min(8, Math.max(1, num(o.size) ?? 4)),
+    grants: dccStatGrants(o),
+    page: num(o.page) ?? 0,
+    source: "Homebrew",
+  };
+  if (str(o.prerequisites)) data.prerequisites = str(o.prerequisites).slice(0, 300);
+  return { name, data };
+}
+
+// A homebrew Class (DccClass shape): base category tags, the grants list, and
+// whether picking it hands out a Silver Earth Box (Earth Class).
+function normalizeDccClass(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew class needs a name.");
+
+  const categories = strList(o.categories, 6, 60);
+  const data: Record<string, unknown> = {
+    name,
+    categories: categories.length ? categories : [name],
+    grants: dccStatGrants(o),
+    earthClass: !!o.earthClass,
+    page: num(o.page) ?? 0,
+    source: "Homebrew",
+  };
+  if (str(o.prerequisites)) data.prerequisites = str(o.prerequisites).slice(0, 300);
+  return { name, data };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -480,6 +750,11 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "ancestry": return normalizeAncestry(data);
     case "background": return normalizeBackground(data);
     case "dcc-item": return normalizeDccItem(data);
+    case "dcc-monster": return normalizeDccMonster(data);
+    case "dcc-skill": return normalizeDccSkill(data);
+    case "dcc-spell": return normalizeDccSpell(data);
+    case "dcc-class": return normalizeDccClass(data);
+    case "dcc-race": return normalizeDccRace(data);
   }
 }
 
