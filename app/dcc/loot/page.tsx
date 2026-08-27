@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_ITEMS } from "@/lib/data/dcc-items";
-import { DCC_LOOT } from "@/lib/data/dcc-loot";
 import type { DccItem } from "@/lib/data/dcc-types";
 
 export const dynamic = "force-dynamic";
@@ -164,76 +163,6 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
         </ul>
       )}
 
-      {/* ── Loot boxes reference ─────────────────────────────────────────── */}
-      <section className="mt-12 border-t border-[var(--border)] pt-8">
-        <h2 className="font-display text-2xl font-black tracking-wide">Loot Boxes</h2>
-        <p className="mt-1 mb-5 text-[12px] uppercase tracking-[0.2em] text-[var(--muted)]">
-          Contents scale by tier — gold, gear enchant rolls, and consumables
-        </p>
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
-          {DCC_LOOT.tiers.map((t) => (
-            <li key={t.tier} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-              <div className="flex flex-wrap items-baseline gap-x-3">
-                <h3 className="text-base font-bold uppercase tracking-[0.12em]" style={{ color: TIER_COLOR[t.tier] ?? "#f0a8a3" }}>{t.tier}</h3>
-                <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
-                  {t.gearRolls} gear roll{t.gearRolls === 1 ? "" : "s"} · Gold {t.gold}
-                </span>
-              </div>
-              <p className="mt-1 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">Enchant X: {t.xValue}</p>
-              <ul className="mt-2 flex flex-col gap-0.5">
-                {t.contents.map((c, ci) => (
-                  <li key={ci} className="text-[12px] leading-relaxed text-[var(--muted)]">· {c}</li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-
-        <h3 className="mt-8 mb-3 text-base font-bold uppercase tracking-[0.15em]">Magic-item generator</h3>
-        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
-          {DCC_LOOT.tables.map((tbl) => (
-            <li key={tbl.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-              <div className="flex items-baseline justify-between gap-2">
-                <h4 className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#f0a8a3]">{tbl.name}</h4>
-                <span className={badge}>{tbl.die}</span>
-              </div>
-              <table className="mt-2 w-full text-[12px]">
-                <tbody>
-                  {tbl.rows.map((r, ri) => (
-                    <tr key={ri} className="border-t border-[var(--border)]">
-                      <td className="py-1 pr-3 align-top font-semibold tabular-nums text-[var(--text)] whitespace-nowrap">{r.roll}</td>
-                      <td className="py-1 text-[var(--muted)]">{r.result}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <h4 className="text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Mob gold by floor</h4>
-              <ul className="mt-2 flex flex-col gap-0.5">
-                {DCC_LOOT.goldByFloor.map((g) => (
-                  <li key={g.floor} className="text-[12px] text-[var(--muted)]">
-                    <span className="text-[var(--text)]">{g.floor} Floor:</span> {g.gold}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-[12px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">Notes</h4>
-              <ul className="mt-2 flex flex-col gap-1">
-                {DCC_LOOT.notes.map((n, ni) => (
-                  <li key={ni} className="text-[12px] leading-relaxed text-[var(--muted)]">· {n}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
