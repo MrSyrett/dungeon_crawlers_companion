@@ -57,6 +57,26 @@
       all.find(function (it) { return it.name.toLowerCase().replace(/[^a-z]/g, "") === t.replace(/[^a-z]/g, ""); }) || null;
   }
 
+  // ── spell-bearing items (a spell can be written on them) ─────────────────────
+  // Spell Scroll, Magic Tome, Spellbook (and homebrew whose name carries those
+  // words) hold a specific spell — after you pick the item you pick the spell.
+  function carriesSpell(it) { return !!it && /\b(spell scroll|magic tome|spellbook|grimoire)\b/i.test(it.name); }
+  function spellsAZ() {
+    return (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []).slice().sort(function (a, b) {
+      return String(a.name).localeCompare(String(b.name), "en");
+    });
+  }
+  function spellMeta(sp) {
+    var bits = ["Spell"];
+    if (sp.type) bits.push(sp.type);
+    if (sp.mana != null) bits.push(sp.mana + " Mana");
+    if (sp.stat) bits.push(String(sp.stat).toUpperCase());
+    return bits.join(" · ");
+  }
+  // The finished inventory row for a spell item, once the spell is chosen.
+  function spellItemName(it, spellName) { return it.name + ": " + spellName; }
+  function spellItemNotes(it, spellName) { return (it.effect ? it.effect + " — " : "") + "Spell: " + spellName; }
+
   // ── CSS (mirrors the skill picker's dccs- styling with a dcci- prefix) ───────
   function injectCss() {
     if (document.getElementById("dcci-css")) return;
@@ -145,17 +165,25 @@
   var query = "";
   var filterKey = "all";
   var expanded = {};
+  var view = "items";        // 'items' | 'spell'
+  var spellFor = null;       // the item we're choosing a spell for
+  var spellQuery = "";
+  var spellExpanded = {};
 
   function openPicker() {
     if (!haveData()) { alert("The item catalog didn't load. Open this sheet from the app so /tools-data/dcc-items.js is available."); return; }
     injectCss();
     expanded = {};
+    view = "items"; spellFor = null; spellQuery = ""; spellExpanded = {};
     overlay("dcci-overlay");
     renderPicker();
     var s = document.getElementById("dcci-search-input");
     if (s) s.focus();
   }
-  function closePicker() { var ov = document.getElementById("dcci-overlay"); if (ov) ov.style.display = "none"; query = ""; expanded = {}; }
+  function closePicker() {
+    var ov = document.getElementById("dcci-overlay"); if (ov) ov.style.display = "none";
+    query = ""; expanded = {}; view = "items"; spellFor = null; spellQuery = ""; spellExpanded = {};
+  }
 
   function itemHtml(it) {
     var open = !!expanded[it.name];
@@ -173,6 +201,7 @@
     '</div>';
   }
   function renderPicker() {
+    if (view === "spell") return renderSpellPicker();
     var ov = document.getElementById("dcci-overlay");
     if (!ov) return;
     var q = query.trim().toLowerCase();
@@ -208,22 +237,87 @@
     if (s) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }
   }
 
+  // ── spell chooser (shown after picking a spell-bearing item) ────────────────
+  function spellHtml(sp) {
+    var open = !!spellExpanded[sp.name];
+    var detail = open ? '<div class="detail"><div class="ef">' + esc(sp.desc || "No description on file.") + '</div></div>' : "";
+    return '<div class="dcci-item' + (open ? " open" : "") + '">' +
+      '<div class="row">' +
+        '<div class="body" onclick="DCCItems.chooseSpell(\'' + attr(sp.name) + '\')" title="Write this spell on the item">' +
+          '<div class="nm">' + esc(sp.name) + '</div>' +
+          '<div class="mt">' + esc(spellMeta(sp)) + '</div>' +
+        '</div>' +
+        '<button class="dcci-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCItems.toggleSpell(\'' + attr(sp.name) + '\')">i</button>' +
+      '</div>' + detail +
+    '</div>';
+  }
+  function renderSpellPicker() {
+    var ov = document.getElementById("dcci-overlay");
+    if (!ov || !spellFor) return;
+    var q = spellQuery.trim().toLowerCase();
+    var list = spellsAZ().filter(function (sp) {
+      if (!q) return true;
+      return sp.name.toLowerCase().indexOf(q) >= 0 || (sp.desc && sp.desc.toLowerCase().indexOf(q) >= 0) || (sp.type && sp.type.toLowerCase().indexOf(q) >= 0);
+    });
+    var rows = list.length ? list.map(spellHtml).join("")
+      : '<div class="dcci-grp">No spell matches' + (spellQuery ? ' “' + esc(spellQuery) + '”' : "") + '.</div>';
+    ov.innerHTML =
+      '<div class="dcci-modal" role="dialog" aria-label="Choose the spell">' +
+        '<div class="dcci-head"><h3>Spell on the ' + esc(spellFor.name) + '</h3><button class="dcci-x" onclick="DCCItems.closePicker()" aria-label="Close">✕</button></div>' +
+        '<div class="dcci-search"><input id="dcci-spell-search" type="search" placeholder="Search spells…" value="' + attr(spellQuery) + '" oninput="DCCItems.searchSpell(this.value)"></div>' +
+        '<div class="dcci-list">' + rows + '</div>' +
+        '<div class="dcci-foot"><input id="dcci-spell-custom" type="text" placeholder="…or type a custom spell name" onkeydown="if(event.key===\'Enter\')DCCItems.chooseSpellCustom()">' +
+          '<button class="dcci-btn" onclick="DCCItems.chooseSpellCustom()">Add</button>' +
+          '<button class="dcci-btn plain" onclick="DCCItems.skipSpell()">No spell yet</button>' +
+          '<button class="dcci-btn plain" onclick="DCCItems.backToItems()">← Items</button></div>' +
+      '</div>';
+    var s = document.getElementById("dcci-spell-search");
+    if (s) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }
+  }
+  function finalizeSpell(spellName) {
+    var it = spellFor;
+    if (!it) return;
+    if (spellName) fillRow(newInvRow(), spellItemName(it, spellName), spellItemNotes(it, spellName));
+    else fillRow(newInvRow(), it.name, notesOf(it));   // "No spell yet" → plain item row
+    try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {}
+    view = "items"; spellFor = null; spellQuery = ""; spellExpanded = {};
+    renderPicker();
+  }
+
   window.DCCItems = {
     openPicker: openPicker,
     closePicker: closePicker,
     search: function (v) { query = v; renderPicker(); },
     filter: function (key) { filterKey = key; renderPicker(); },
     toggle: function (name) { expanded[name] = !expanded[name]; renderPicker(); },
-    add: function (name) { var it = lookup(name); addToSheet(it, it ? it.name : name); },
+    add: function (name) {
+      var it = lookup(name);
+      // A spell-bearing item opens the spell chooser instead of adding straight away.
+      if (it && carriesSpell(it)) { view = "spell"; spellFor = it; spellQuery = ""; spellExpanded = {}; renderPicker(); return; }
+      addToSheet(it, it ? it.name : name);
+    },
     addCustom: function () {
       var inp = document.getElementById("dcci-custom-input");
       var name = inp ? String(inp.value || "").trim() : "";
       if (!name) return;
       var it = lookup(name);
+      if (it && carriesSpell(it)) { view = "spell"; spellFor = it; spellQuery = ""; spellExpanded = {}; renderPicker(); if (inp) inp.value = ""; return; }
       addToSheet(it, it ? it.name : name);
       if (inp) inp.value = "";
       closePicker();
     },
     addBlank: function () { newInvRow(); closePicker(); },
+    // spell chooser
+    searchSpell: function (v) { spellQuery = v; renderSpellPicker(); },
+    toggleSpell: function (name) { spellExpanded[name] = !spellExpanded[name]; renderSpellPicker(); },
+    chooseSpell: function (name) { finalizeSpell(name); },
+    chooseSpellCustom: function () {
+      var inp = document.getElementById("dcci-spell-custom");
+      var name = inp ? String(inp.value || "").trim() : "";
+      if (!name) return;
+      finalizeSpell(name);
+    },
+    skipSpell: function () { finalizeSpell(""); },
+    backToItems: function () { view = "items"; spellFor = null; spellQuery = ""; spellExpanded = {}; renderPicker(); },
   };
 })();
