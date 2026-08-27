@@ -15,7 +15,9 @@ const EFFECT_SPELLS = Array.from(new Set(SPELLS.map((s) => s.name))).sort((a, b)
 
 // Mirror of lib/homebrew's public shapes (kept local so this client component
 // doesn't pull in the server module). Must stay in sync with lib/homebrew's HbType.
-type HbType = "spell" | "gear" | "monster" | "class" | "ancestry" | "background";
+// "dcc-item" is served by the separate DccHomebrew component, never this SD manager,
+// but the union must stay wide enough to accept the shared HomebrewRecord the pages pass.
+type HbType = "spell" | "gear" | "monster" | "class" | "ancestry" | "background" | "dcc-item";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {
   id: string;

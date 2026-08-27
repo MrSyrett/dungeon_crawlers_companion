@@ -34,12 +34,29 @@
   }
   var TIER_ORDER = ["Bronze", "Silver", "Gold", "Platinum", "Legendary", "Celestial"];
 
-  // Catalog = the official DCC items plus the converted Shadowdark gear
-  // (DCC_GEAR_SD, tagged source "Homebrew"), when that dataset is loaded.
+  // The user's saved homebrew items (own + campaign-shared), fetched from the app
+  // at load. Empty when the sheet is opened standalone (no /api).
+  var hbItems = [];
+  function fetchHomebrew() {
+    try {
+      fetch("/api/homebrew?type=dcc-item", { credentials: "same-origin" })
+        .then(function (r) { return r && r.ok ? r.json() : null; })
+        .then(function (j) {
+          if (!j || !Array.isArray(j.items)) return;
+          hbItems = j.items.map(function (it) { return it && it.data; }).filter(function (d) { return d && d.name; });
+          var ov = document.getElementById("dcci-overlay");
+          if (ov && ov.style.display === "flex") renderPicker();   // refresh if open
+        })
+        .catch(function () {});
+    } catch (e) {}
+  }
+
+  // Catalog = the official DCC items, the converted Shadowdark gear (DCC_GEAR_SD,
+  // tagged "Homebrew"), and the user's saved homebrew items.
   function itemCatalog() {
     var a = (typeof DCC_ITEMS !== "undefined" ? DCC_ITEMS : []);
     var b = (typeof DCC_GEAR_SD !== "undefined" ? DCC_GEAR_SD : []);
-    return a.concat(b);
+    return a.concat(b).concat(hbItems || []);
   }
   function itemsAZ() {
     return itemCatalog().slice().sort(function (a, b) {
@@ -54,6 +71,7 @@
     if (it.slot) bits.push(it.slot);
     if (it.tier) bits.push(it.tier);
     if (typeof it.price === "number") bits.push(it.price.toLocaleString("en") + " g");
+    if (it.source === "Homebrew") bits.push("Homebrew");
     return bits.join(" · ");
   }
   function lookup(name) {
@@ -326,5 +344,9 @@
     },
     skipSpell: function () { finalizeSpell(""); },
     backToItems: function () { view = "items"; spellFor = null; spellQuery = ""; spellExpanded = {}; renderPicker(); },
+    refreshHomebrew: fetchHomebrew,
   };
+
+  // Pull the user's saved homebrew items once the module is ready.
+  fetchHomebrew();
 })();
