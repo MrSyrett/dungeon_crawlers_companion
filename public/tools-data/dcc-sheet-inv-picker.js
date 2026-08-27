@@ -180,7 +180,11 @@
     try { tr.scrollIntoView({ block: "nearest" }); } catch (_) {}
   }
   function addToSheet(it, name) {
-    fillRow(newInvRow(), name || (it ? it.name : ""), it ? notesOf(it) : "");
+    var tr = newInvRow();
+    fillRow(tr, name || (it ? it.name : ""), it ? notesOf(it) : "");
+    // Stamp category/slot/effect so the row's radial can equip it (works for
+    // homebrew armor/accessories too, which a name lookup wouldn't find).
+    if (tr && it) { tr.dataset.cat = it.category || ""; if (it.slot) tr.dataset.slot = it.slot; if (it.effect) tr.dataset.effect = it.effect; }
     try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {}
   }
 

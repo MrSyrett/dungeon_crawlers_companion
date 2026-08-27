@@ -78,6 +78,9 @@
     if (!btn || !btn.closest) return;
     var tr = btn.closest("tr");
     var inInv = tr.closest && tr.closest("#inv-body");
+    // Armor/Accessory inventory rows use the radial to EQUIP, not to pin — hand
+    // their radial's state to the equip module and leave it alone here.
+    if (inInv && window.DCCEquip && window.DCCEquip.isEquipType(tr)) { window.DCCEquip.refreshRow(btn); return; }
     var name = norm(rowNameOf(btn));
     // Hide the pin on blank rows, and on non-spell skill rows.
     if (!name || (!inInv && !skillRowIsSpell(tr))) { btn.style.visibility = "hidden"; btn.classList.remove("on"); return; }

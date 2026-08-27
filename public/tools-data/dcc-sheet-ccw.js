@@ -164,6 +164,81 @@
   }
   // Governing stat for a skill, lowercased for the sheet's selects; "" if none.
   function skillStatLc(name) { const sd = skillByName(name); return sd && sd.stat ? String(sd.stat).toLowerCase() : ""; }
+  function spellByName(n) {
+    if (typeof DCC_SPELLS === "undefined") return null;
+    const t = String(n).trim().toLowerCase();
+    if (!t) return null;
+    return DCC_SPELLS.find((s) => s.name.toLowerCase() === t) ||
+      DCC_SPELLS.find((s) => s.name.toLowerCase().replace(/[^a-z]/g, "") === t.replace(/[^a-z]/g, "")) || null;
+  }
+  // A spell as a Skills-list row (spells live on the Skills list). `src` = the
+  // rulebook name so the row's (i) info button resolves it, exactly like adding it
+  // from "+ Add Skill".
+  function spellRow(sp, rank) {
+    return {
+      name: sp.name, rank: String(Math.max(1, Math.min(10, rank || 1))),
+      stat: String(sp.stat || "int").toLowerCase(), checkType: "Spell",
+      notes: [(sp.mana != null ? sp.mana + " Mana" : ""), sp.type || ""].filter(Boolean).join(" · "),
+      src: sp.name, checked: false,
+    };
+  }
+
+  // ── Race/Class grant router ─────────────────────────────────────────────────
+  // The wizard already applies stat bonuses (via finalStats/raceStatMods). This
+  // routes every OTHER grant: a named Spell → a full spell row (details + info),
+  // a named Skill → a skill row, and anything it can't resolve (passives, clubs,
+  // resistances, "of your choice", boxes) → a Notes line, so nothing is silently
+  // dropped. `addSkill(name, rank)`, `addSpell(spellObj, rank)`, `notes[]`.
+  function splitGrantNames(s) {
+    return String(s).split(/\s*(?:\/|,| and | & )\s*/i).map((x) => x.trim()).filter(Boolean);
+  }
+  function classifyGrant(g, addSkill, addSpell, notes) {
+    const raw = String(g || "").trim();
+    if (!raw) return;
+    const sm = raw.match(/^([+-]\d+)\s+(.+)$/);
+    // A pure stat bonus/penalty is already baked into the scores — skip it.
+    if (sm) {
+      const rest = sm[2];
+      const leftover = rest
+        .replace(/\b(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/gi, "")
+        .replace(/to all stats|all stats/gi, "").replace(/\band\b|,/gi, "").replace(/\s+/g, "");
+      const hasStat = /(strength|intelligence|constitution|dexterity|charisma|\bstr\b|\bint\b|\bcon\b|\bdex\b|\bcha\b|all stats)/i.test(rest);
+      if (hasStat && leftover === "") return;
+    }
+    const amount = sm ? Math.abs(parseInt(sm[1], 10)) : 1;
+    const subject = sm ? sm[2] : raw;
+    const vague = /of your choice|a chosen|chosen|as you please|split|\bor\b/i.test(subject);
+    const isSpell = /\bspells?\b/i.test(subject);
+    const isSkill = /\bskills?\b/i.test(subject);
+    const body = subject.replace(/\b(spells?|skills?)\b/gi, "").trim();
+    const noteMiss = (miss, suffix) => { if (miss.length) notes.push(`+${amount} ${miss.join("/")}${suffix}`); };
+
+    if (isSpell && !vague) { // "+N X/Y Spell(s)" — resolve each named spell
+      const parts = splitGrantNames(body), miss = [];
+      parts.forEach((p) => { const sp = spellByName(p); if (sp) addSpell(sp, amount); else miss.push(p); });
+      if (parts.length) { noteMiss(miss, " Spell"); return; }
+    }
+    if (isSkill && !vague) { // "+N X and Y Skills"
+      const parts = splitGrantNames(body), miss = [];
+      parts.forEach((p) => { const sd = skillByName(p); if (sd) addSkill(sd.name, amount); else miss.push(p); });
+      if (parts.length) { noteMiss(miss, " Skill"); return; }
+    }
+    if (sm && !vague) { // "+N Name" (no Skill/Spell word) — try matching a Skill
+      const parts = splitGrantNames(subject), miss = []; let any = false;
+      parts.forEach((p) => { const sd = skillByName(p); if (sd) { addSkill(sd.name, amount); any = true; } else miss.push(p); });
+      if (any) { noteMiss(miss, ""); return; }
+    }
+    if (!sm) { // a bare grant that IS a known spell/skill name
+      const sp = spellByName(raw); if (sp) { addSpell(sp, 1); return; }
+      const sd = skillByName(raw); if (sd) { addSkill(sd.name, 1); return; }
+    }
+    notes.push(raw);
+  }
+  // All grant strings for the chosen race + class.
+  function grantStrings() {
+    const race = raceByName(W.race), cls = classByName(W.class);
+    return [...(race && race.grants ? race.grants : []), ...(cls && cls.grants ? cls.grants : [])];
+  }
   // Weapon-skill choices, minus the passive Damage Effects. Humans wield the human
   // weapon groups; animal crawlers pick a natural attack (Animal/Pet Strike, minus
   // their free Slice Attack).
@@ -830,7 +905,23 @@
     addSkill(_b.name, baseRank, "Base attack");                 // Unarmed Combat / Slice Attack — just under Heal
     ERAS.forEach((era) => { const c = W.bg[era]; if (!c) return; (c.skills || []).forEach((name) => addSkill(name, ERA_RANK[era] + b1(), eraLabel(era) + " — " + bgDisplayName(era))); });
     if (third) W.experiences.forEach((slot) => { const p = slot.skills || []; if (p[0]) addSkill(p[0], d(4), "Experience"); if (p[1]) addSkill(p[1], d(2), "Experience"); });
+
+    // Race/Class grants (they count from the Third Floor). Named Skills stack into
+    // the skill map; named Spells become full spell rows (details + info button);
+    // anything unresolved is collected for the Background Notes.
+    const grantNotes = [];
+    const grantSpells = [];
+    if (third) {
+      grantStrings().forEach((g) => classifyGrant(
+        g,
+        (name, rank) => addSkill(name, rank, "Race/Class grant"),
+        (sp, rank) => { const k = sp.name.toLowerCase(); if (!skillRank[k] && !grantSpells.some((x) => x.name.toLowerCase() === k)) grantSpells.push(Object.assign(spellRow(sp, rank), { _spell: sp })); },
+        grantNotes,
+      ));
+    }
+
     const skills = Object.values(skillRank).map((s) => ({ name: s.name, rank: String(s.rank), stat: s.stat, checkType: s.checkType, notes: s.notes, checked: false }));
+    grantSpells.forEach((gs) => { const { _spell, ...row } = gs; skills.push(row); });
 
     const atks = [{ name: _b.name, rank: String(baseRank), dice: _b.dice, stat: _b.stat, effects: "" }];
     // The chosen combat specialty goes in BOTH the Attacks section and the Skills list
@@ -846,13 +937,19 @@
       atks.push({ name: disp + " (Spell)", rank: String(primaryRank), dice: "", stat: st, effects: [sp ? sp.mana + " Mana" : "", disp !== W.combat.spell ? W.combat.spell : ""].filter(Boolean).join(" · "), src: W.combat.spell });
       skills.push({ name: disp, rank: String(primaryRank), stat: st, checkType: "Spell", notes: [sp ? sp.mana + " Mana" : "", sp && sp.type ? sp.type : ""].filter(Boolean).join(" · "), checked: false, src: W.combat.spell });
     }
+    // Attack-type granted spells also get an Attacks row (attack spells live in both).
+    grantSpells.forEach((gs) => {
+      if (gs._spell && gs._spell.type === "attack") {
+        atks.push({ name: gs.name + " (Spell)", rank: gs.rank, dice: "", stat: gs.stat, effects: (gs._spell.mana != null ? gs._spell.mana + " Mana" : ""), src: gs.name });
+      }
+    });
     // Loot: the tiered weapon adds Weapon-Skill ranks to the primary attack.
     if (third && W.loot && atks[1]) {
       const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
       const bonus = lr ? (TIER_WEAPON_SKILL[lr.weapon] || 0) : 0;
       if (bonus) atks[1].rank = String(Math.min(10, (parseInt(atks[1].rank, 10) || 0) + bonus));
     }
-    return { skills, atks };
+    return { skills, atks, notes: grantNotes };
   }
 
   // ── step: review ──────────────────────────────────────────────────────────────
@@ -927,7 +1024,7 @@
     const cfg = third ? FLOOR_CFG[W.floor] : null;
     const fin = finalStats();
     const race = raceByName(W.race);
-    const { skills, atks } = buildSkillsAndAttacks();
+    const { skills, atks, notes: grantNotes } = buildSkillsAndAttacks();
     const data = {};
     data.header = { "f-name": W.basics.name, "f-race": W.race, "f-gender": W.basics.gender, "f-level": third ? String(cfg.level) : "1", "f-floor": third ? String(W.floor) : "1", "f-crawler": W.basics.crawler, "f-class": third ? W.class : "" };
     data.stats = {};
@@ -973,7 +1070,11 @@
         (W.combat.type === "spell" ? " Started with an attack spell (+5 Mana Potions)." : "")
       : `Created with the Crawler Wizard. Knows Heal (Rank 1, 2 Mana, heal 2 slots, Interrupt).` +
         (W.combat.type === "spell" ? " Started with an attack spell (+5 Mana Potions)." : "");
-    data.background = [popularity, W.story.trauma, W.story.loose, W.story.regret, notes];  // [Popularity, Trauma, Loose, Regret, Notes]
+    // Grants the wizard couldn't auto-apply to the sheet land in Notes so nothing is lost.
+    const notesFull = (grantNotes && grantNotes.length)
+      ? notes + " Race/Class grants to apply yourself: " + grantNotes.join("; ") + "."
+      : notes;
+    data.background = [popularity, W.story.trauma, W.story.loose, W.story.regret, notesFull];  // [Popularity, Trauma, Loose, Regret, Notes]
     data.campaign = (typeof _campaign !== "undefined" && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null;
     return data;
   }
@@ -1020,7 +1121,25 @@
     if (race) data.combat.drSize = String(race.size); // racial Size now applies
     data.combat.manaCurrentVal = String(fin.int);
     data.background[0] = String(statMod(fin.cha) * 2); // Popularity = CHA mod × 2 at Floor 3
-    const note = `Reached Floor 3 (Level ${upgradeLevel()}): chose race ${W.race} and class ${W.class}, distributed ${statBudget()} stat points. Existing skills, attacks and loot kept as-is.`;
+
+    // Race/Class grants: stack named Skills onto existing rows (up to Rank 10), add
+    // named Spells as full spell rows (details + info), and note the rest. Nothing
+    // the crawler already earned is disturbed.
+    const gNotes = [];
+    const findRow = (nm) => data.skills.find((s) => String(s.name).toLowerCase() === String(nm).toLowerCase());
+    grantStrings().forEach((g) => classifyGrant(
+      g,
+      (name, rank) => {
+        const ex = findRow(name);
+        if (ex) ex.rank = String(Math.min(10, (parseInt(ex.rank, 10) || 0) + rank));
+        else { const sd = skillByName(name); data.skills.push({ name: sd ? sd.name : name, rank: String(Math.min(10, rank)), stat: skillStatLc(name), checkType: sd && sd.passive ? "Passive" : "Active", notes: "Race/Class grant", checked: false, src: sd ? sd.name : "" }); }
+      },
+      (sp, rank) => { if (!findRow(sp.name)) data.skills.push(spellRow(sp, rank)); },
+      gNotes,
+    ));
+
+    const note = `Reached Floor 3 (Level ${upgradeLevel()}): chose race ${W.race} and class ${W.class}, distributed ${statBudget()} stat points. Existing skills, attacks and loot kept as-is.` +
+      (gNotes.length ? ` Race/Class grants to apply yourself: ${gNotes.join("; ")}.` : "");
     data.background[4] = data.background[4] ? data.background[4] + " | " + note : note;
     return data;
   }
