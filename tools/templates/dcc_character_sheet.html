@@ -68,7 +68,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hp-section{padding:10px 12px;border-bottom:2px solid var(--border);}
 .hp-bar-wrap{display:flex;gap:4px;align-items:center;}
 .hp-bar-label{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);width:80px;flex-shrink:0;}
-.hp-pips{display:flex;gap:3px;flex:1;}
+.hp-stack{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;}
+.hp-pips{display:flex;gap:3px;}
+/* Shield Spell markers — one thin toggle above each Health-Bar slot. Off = outline,
+   on = light blue. */
+.hp-shields{display:flex;gap:3px;}
+.hp-shield{flex:1;min-width:0;height:8px;border:1px solid var(--border);background:transparent;border-radius:2px;cursor:pointer;transition:background .1s,border-color .1s;}
+.hp-shield:hover{border-color:#4aa8e0;}
+.hp-shield.on{background:#7fd0ff;border-color:#4aa8e0;}
+body.dark .hp-shield{border-color:var(--rule);}
+body.dark .hp-shield.on{background:#5bb8ec;border-color:#7fd0ff;}
 .hp-pip{flex:1;height:32px;border:2px solid var(--border);cursor:pointer;position:relative;transition:all .1s;display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;}
 .hp-pip:hover{transform:scaleY(1.05);}
 .hp-pip-label{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:700;color:rgba(255,255,255,.6);text-align:center;line-height:1;}
@@ -219,6 +228,32 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .notes-box{border:2px solid var(--border);background:var(--input-bg);}
 .notes-box label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);background:var(--box);padding:3px 6px;border-bottom:1px solid var(--rule);}
 .notes-box textarea{width:100%;height:80px;border:none;background:transparent;resize:none;font-family:'Barlow',sans-serif;font-size:11px;outline:none;padding:4px 6px;}
+
+/* Background — extra sections (Personal Space, Killed, Clubs, Deity, Sponsor) */
+.bg-extra-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+
+/* Pets & Abilities tab */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;}
+.comp-box{border:2px solid var(--border);background:var(--input-bg);}
+.comp-hdr{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#fff;background:var(--section-hdr);padding:4px 8px;}
+.comp-hb{display:flex;gap:2px;padding:6px;border-bottom:1px solid var(--rule);}
+.comp-hb-cell{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;}
+.comp-hb-cell input{width:100%;min-width:0;height:22px;border:1px solid var(--rule);background:var(--box);text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--ink);outline:none;}
+.comp-hb-cell span{font-family:'Barlow Condensed',sans-serif;font-size:7px;color:var(--muted);}
+.comp-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:8px;}
+.comp-stats.cols4{grid-template-columns:repeat(4,1fr);}
+.comp-stats > div{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.comp-stats label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.comp-stats input{width:100%;min-width:0;height:26px;border:1px solid var(--input-border);background:var(--input-bg);text-align:center;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--ink);outline:none;}
+.comp-rows{border-top:1px solid var(--rule);}
+.comp-row{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--rule);padding:2px 8px;}
+.comp-row label{flex:0 0 64px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.comp-row input{flex:1;min-width:0;border:none;background:transparent;font-family:'Barlow',sans-serif;font-size:12px;color:var(--ink);outline:none;padding:3px 0;}
+.comp-acc{padding:8px;}
+.comp-acc label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px;}
+.comp-acc textarea{width:100%;height:56px;border:1px solid var(--rule);background:var(--box);resize:none;font-family:'Barlow',sans-serif;font-size:11px;color:var(--ink);outline:none;padding:4px 6px;}
+body.dark .comp-box{background:var(--input-bg);}
+body.dark .comp-hb-cell input,body.dark .comp-stats input,body.dark .comp-row input,body.dark .comp-acc textarea{color:var(--ink);}
 
 /* ADD/REMOVE buttons */
 .add-btn{margin-top:6px;padding:4px 12px;background:var(--section-hdr);color:white;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;}
@@ -374,7 +409,10 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
   <div class="hp-section">
     <div class="hp-bar-wrap">
       <div class="hp-bar-label">Health Bar</div>
-      <div class="hp-pips" id="hp-pips"></div>
+      <div class="hp-stack">
+        <div class="hp-shields" id="hp-shields" title="Shield Spell — tap a box to mark a shielded slot"></div>
+        <div class="hp-pips" id="hp-pips"></div>
+      </div>
     </div>
   </div>
 
@@ -526,10 +564,11 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 
   <!-- TABS -->
   <div class="tabs-row">
-    <button class="tab-btn active" onclick="switchTab('skills')">Skills</button>
-    <button class="tab-btn" onclick="switchTab('inventory')">Inventory</button>
-    <button class="tab-btn" onclick="switchTab('gear')">Gear</button>
-    <button class="tab-btn" onclick="switchTab('background')">Background</button>
+    <button class="tab-btn active" data-tab="skills" onclick="switchTab('skills')">Skills</button>
+    <button class="tab-btn" data-tab="inventory" onclick="switchTab('inventory')">Inventory</button>
+    <button class="tab-btn" data-tab="gear" onclick="switchTab('gear')">Gear</button>
+    <button class="tab-btn" data-tab="companions" onclick="switchTab('companions')">Pets &amp; Abilities</button>
+    <button class="tab-btn" data-tab="background" onclick="switchTab('background')">Background</button>
   </div>
 
   <!-- TAB: SKILLS -->
@@ -584,6 +623,50 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
     </div>
   </div>
 
+  <!-- TAB: PETS & ABILITIES -->
+  <div class="tab-panel" id="tab-companions">
+    <div class="comp-grid">
+      <!-- PET -->
+      <div class="comp-box">
+        <div class="comp-hdr">Pet</div>
+        <div class="comp-hb" id="pet-hb"></div>
+        <div class="comp-stats">
+          <div><label>STR</label><input type="text" id="pet-str"></div>
+          <div><label>INT</label><input type="text" id="pet-int"></div>
+          <div><label>CON</label><input type="text" id="pet-con"></div>
+          <div><label>DEX</label><input type="text" id="pet-dex"></div>
+          <div><label>CHA</label><input type="text" id="pet-cha"></div>
+          <div><label>Level</label><input type="text" id="pet-level"></div>
+          <div><label>DR</label><input type="text" id="pet-dr"></div>
+          <div><label>Evade</label><input type="text" id="pet-evade"></div>
+          <div><label>Move</label><input type="text" id="pet-move"></div>
+          <div><label>Size</label><input type="text" id="pet-size"></div>
+        </div>
+        <div class="comp-rows">
+          <div class="comp-row"><label>Attack</label><input type="text" id="pet-atk1"></div>
+          <div class="comp-row"><label>Attack</label><input type="text" id="pet-atk2"></div>
+          <div class="comp-row"><label>Special</label><input type="text" id="pet-special"></div>
+        </div>
+      </div>
+      <!-- MOUNT / VEHICLE -->
+      <div class="comp-box">
+        <div class="comp-hdr">Mount / Vehicle</div>
+        <div class="comp-hb" id="mount-hb"></div>
+        <div class="comp-stats cols4">
+          <div><label>Size</label><input type="text" id="mount-size"></div>
+          <div><label>Occupants</label><input type="text" id="mount-occ"></div>
+          <div><label>Move</label><input type="text" id="mount-move"></div>
+          <div><label>DR</label><input type="text" id="mount-dr"></div>
+        </div>
+        <div class="comp-acc"><label>Accessories</label><textarea id="mount-acc"></textarea></div>
+      </div>
+      <!-- RACIAL ABILITIES -->
+      <div class="notes-box"><label>Racial Abilities</label><textarea id="racial-abilities" style="height:240px;" placeholder="One ability per line…"></textarea></div>
+      <!-- CLASS ABILITIES -->
+      <div class="notes-box"><label>Class Abilities</label><textarea id="class-abilities" style="height:240px;" placeholder="One ability per line…"></textarea></div>
+    </div>
+  </div>
+
   <!-- TAB: BACKGROUND -->
   <div class="tab-panel" id="tab-background">
     <div class="bg-notes-grid">
@@ -591,6 +674,15 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
       <div class="notes-box"><label>Past Trauma</label><textarea placeholder=""></textarea></div>
       <div class="notes-box"><label>Loose Ends</label><textarea placeholder=""></textarea></div>
       <div class="notes-box"><label>Regrets</label><textarea placeholder=""></textarea></div>
+    </div>
+    <div class="bg-extra-grid">
+      <div class="notes-box"><label>Personal Space</label><textarea id="bg-personal" placeholder="Tier / Size / Amenities…"></textarea></div>
+      <div class="notes-box"><label>Important Things I&rsquo;ve Killed</label><textarea id="bg-killed" placeholder=""></textarea></div>
+      <div class="notes-box"><label>Clubs, Societies, Guilds, Etc</label><textarea id="bg-clubs" placeholder=""></textarea></div>
+      <div class="notes-box"><label>Deity</label><textarea id="bg-deity" placeholder=""></textarea></div>
+      <div class="notes-box" style="grid-column:1/-1;"><label>Sponsor(s)</label><textarea id="bg-sponsor" placeholder=""></textarea></div>
+    </div>
+    <div class="bg-notes-grid">
       <div class="notes-box" style="grid-column:1/-1;"><label>Notes</label><textarea style="height:110px;" placeholder=""></textarea></div>
     </div>
   </div>
@@ -960,6 +1052,40 @@ function buildAccessories() {
   }
 }
 
+// Shield Spell markers: one thin toggle above each Health-Bar slot (off by default).
+function buildShields() {
+  const wrap = document.getElementById('hp-shields');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  for(let i=0;i<10;i++) {
+    const cell = document.createElement('div');
+    cell.className = 'hp-shield';
+    cell.dataset.active = 'false';
+    cell.title = 'Shield Spell';
+    cell.addEventListener('click', () => {
+      cell.dataset.active = cell.dataset.active === 'true' ? 'false' : 'true';
+      cell.classList.toggle('on', cell.dataset.active === 'true');
+      if(typeof scheduleAutosave === 'function') scheduleAutosave();
+    });
+    wrap.appendChild(cell);
+  }
+}
+
+// Pet & Mount Health Bars: 10 slots each (write the slot's HP; clear to cross off).
+function buildCompanions() {
+  [['pet-hb'],['mount-hb']].forEach(([id]) => {
+    const wrap = document.getElementById(id);
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    for(let i=0;i<10;i++) {
+      const cell = document.createElement('div');
+      cell.className = 'comp-hb-cell';
+      cell.innerHTML = `<input type="text" maxlength="3"><span>${(i+1)*10}%</span>`;
+      wrap.appendChild(cell);
+    }
+  });
+}
+
 // ── SKILLS ──
 function addSkillRow() {
   const tbody = document.getElementById('skills-body');
@@ -1039,10 +1165,13 @@ function buildInventory() {
 // ── TABS ──
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent.trim().toLowerCase() === name);
+    // Prefer an explicit data-tab (lets a button carry a multi-word label).
+    const key = b.dataset.tab || b.textContent.trim().toLowerCase();
+    b.classList.toggle('active', key === name);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
+  const panel = document.getElementById('tab-'+name);
+  if(panel) panel.classList.add('active');
 }
 
 // ── DICE ──
@@ -1434,8 +1563,9 @@ function collectSheet() {
     debuffs:    document.getElementById('debuffs')?.value || '',
   };
 
-  // HP pips
+  // HP pips + Shield Spell markers
   data.hpPips = [...document.querySelectorAll('.hp-pip')].map(p => p.dataset.active);
+  data.hpShields = [...document.querySelectorAll('.hp-shield')].map(s => s.dataset.active);
 
   // Attacks
   data.attacks = [...document.querySelectorAll('#attacks-body tr')].map(tr => {
@@ -1493,8 +1623,28 @@ function collectSheet() {
     return rec;
   });
 
-  // Background
-  data.background = [...document.querySelectorAll('#tab-background textarea')].map(t => t.value);
+  // Background — the original 5 boxes only (Popularity, Trauma, Loose, Regrets,
+  // Notes), scoped to .bg-notes-grid so the indices stay stable as sections are
+  // added between Regrets and Notes.
+  data.background = [...document.querySelectorAll('#tab-background .bg-notes-grid textarea')].map(t => t.value);
+  // Background — extra sections added above Notes.
+  const val = (id) => document.getElementById(id)?.value || '';
+  data.bgExtra = {
+    personal: val('bg-personal'), killed: val('bg-killed'), clubs: val('bg-clubs'),
+    deity: val('bg-deity'), sponsor: val('bg-sponsor'),
+  };
+
+  // Pets & Abilities tab
+  const petHB = [...document.querySelectorAll('#pet-hb input')].map(i => i.value);
+  const mountHB = [...document.querySelectorAll('#mount-hb input')].map(i => i.value);
+  data.companions = {
+    petHB, mountHB,
+    pet: { str: val('pet-str'), int: val('pet-int'), con: val('pet-con'), dex: val('pet-dex'), cha: val('pet-cha'),
+      level: val('pet-level'), dr: val('pet-dr'), evade: val('pet-evade'), move: val('pet-move'), size: val('pet-size'),
+      atk1: val('pet-atk1'), atk2: val('pet-atk2'), special: val('pet-special') },
+    mount: { size: val('mount-size'), occupants: val('mount-occ'), move: val('mount-move'), dr: val('mount-dr'), accessories: val('mount-acc') },
+    racialAbilities: val('racial-abilities'), classAbilities: val('class-abilities'),
+  };
 
   // Campaign link
   data.campaign = (typeof _campaign !== 'undefined' && _campaign)
@@ -1549,6 +1699,12 @@ function applySheet(data) {
       pip.classList.toggle('dimmed', !active);
     });
   }
+  // Shield Spell markers (default off when absent)
+  document.querySelectorAll('.hp-shield').forEach((s, i) => {
+    const on = data.hpShields && data.hpShields[i] === 'true';
+    s.dataset.active = on ? 'true' : 'false';
+    s.classList.toggle('on', on);
+  });
 
   // Attacks
   if(data.attacks) {
@@ -1626,9 +1782,30 @@ function applySheet(data) {
     });
   }
 
-  // Background
+  // Background — original 5 boxes (scoped to .bg-notes-grid so extra sections don't shift them)
   if(data.background) {
-    document.querySelectorAll('#tab-background textarea').forEach((t,i) => { t.value = data.background[i]||''; });
+    document.querySelectorAll('#tab-background .bg-notes-grid textarea').forEach((t,i) => { t.value = data.background[i]||''; });
+  }
+  // Background — extra sections
+  if(data.bgExtra) {
+    const setId = (id,v) => { const el=document.getElementById(id); if(el) el.value = v||''; };
+    setId('bg-personal', data.bgExtra.personal); setId('bg-killed', data.bgExtra.killed);
+    setId('bg-clubs', data.bgExtra.clubs); setId('bg-deity', data.bgExtra.deity); setId('bg-sponsor', data.bgExtra.sponsor);
+  }
+
+  // Pets & Abilities
+  if(data.companions) {
+    const co = data.companions;
+    const setId = (id,v) => { const el=document.getElementById(id); if(el) el.value = v||''; };
+    (co.petHB||[]).forEach((v,i) => { const el=document.querySelectorAll('#pet-hb input')[i]; if(el) el.value=v||''; });
+    (co.mountHB||[]).forEach((v,i) => { const el=document.querySelectorAll('#mount-hb input')[i]; if(el) el.value=v||''; });
+    const p = co.pet||{};
+    setId('pet-str',p.str); setId('pet-int',p.int); setId('pet-con',p.con); setId('pet-dex',p.dex); setId('pet-cha',p.cha);
+    setId('pet-level',p.level); setId('pet-dr',p.dr); setId('pet-evade',p.evade); setId('pet-move',p.move); setId('pet-size',p.size);
+    setId('pet-atk1',p.atk1); setId('pet-atk2',p.atk2); setId('pet-special',p.special);
+    const m = co.mount||{};
+    setId('mount-size',m.size); setId('mount-occ',m.occupants); setId('mount-move',m.move); setId('mount-dr',m.dr); setId('mount-acc',m.accessories);
+    setId('racial-abilities', co.racialAbilities); setId('class-abilities', co.classAbilities);
   }
 
   // Campaign link
@@ -1674,6 +1851,8 @@ function newCharacter() {
     pip.dataset.active = 'true';
     pip.classList.remove('dimmed');
   });
+  // Reset Shield Spell markers to off
+  document.querySelectorAll('.hp-shield').forEach(s => { s.dataset.active = 'false'; s.classList.remove('on'); });
 
   // Clear attacks and rebuild empty rows
   const atBody = document.getElementById('attacks-body');
@@ -1702,8 +1881,9 @@ function newCharacter() {
   invBody.innerHTML = '';
   for(let i=0;i<16;i++) addInvRow();
 
-  // Clear background
+  // Clear background (all textareas incl. the extra sections) + Pets & Abilities tab
   document.querySelectorAll('#tab-background textarea').forEach(t => t.value = '');
+  document.querySelectorAll('#tab-companions input, #tab-companions textarea').forEach(el => el.value = '');
 
   // Clear localStorage
   localStorage.removeItem('dcc_sheet');
@@ -2215,9 +2395,11 @@ if(localStorage.getItem('dcc_dark') === '1') {
 }
 buildStats();
 buildHpBar();
+buildShields();
 buildAttacks();
 buildHotlist();
 buildAccessories();
+buildCompanions();
 buildSkills();
 buildInventory();
 document.getElementById('skills-body').addEventListener('input', refreshSkillRowRules);
@@ -2333,6 +2515,8 @@ refreshSkillRowRules();
   .gear-grid { grid-template-columns: 1fr; }
   .gear-slot { border-right: none !important; }
   .bg-notes-grid { grid-template-columns: 1fr; }
+  .bg-extra-grid { grid-template-columns: 1fr; }
+  .comp-grid { grid-template-columns: 1fr; }
   .dice-btn { font-size: 12px !important; padding: 8px 2px !important; min-height: 40px; }
   .adv-btn { font-size: 12px !important; min-height: 40px; padding: 8px 4px !important; }
 
