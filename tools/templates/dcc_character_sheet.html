@@ -236,10 +236,13 @@ body.dark .hp-shield.on{background:#5bb8ec;border-color:#7fd0ff;}
 .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;}
 .comp-box{border:2px solid var(--border);background:var(--input-bg);}
 .comp-hdr{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#fff;background:var(--section-hdr);padding:4px 8px;}
-.comp-hb{display:flex;gap:2px;padding:6px;border-bottom:1px solid var(--rule);}
-.comp-hb-cell{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;}
-.comp-hb-cell input{width:100%;min-width:0;height:22px;border:1px solid var(--rule);background:var(--box);text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--ink);outline:none;}
-.comp-hb-cell span{font-family:'Barlow Condensed',sans-serif;font-size:7px;color:var(--muted);}
+.comp-hb{display:flex;gap:3px;padding:6px;border-bottom:1px solid var(--rule);}
+.comp-hb-pip{flex:1;height:34px;border:2px solid rgba(0,0,0,.3);cursor:pointer;position:relative;transition:all .1s;}
+.comp-hb-pip:hover{transform:scaleY(1.06);}
+.comp-hb-pip.dimmed{background:#555!important;opacity:.35;}
+.comp-hb-val{position:absolute;top:0;left:0;width:100%;height:100%;background:transparent;border:none;text-align:center;font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:rgba(255,255,255,.95);outline:none;padding:0 0 9px;text-shadow:0 1px 2px rgba(0,0,0,.6);cursor:text;}
+.comp-hb-label{position:absolute;bottom:2px;left:0;width:100%;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:700;color:rgba(255,255,255,.85);line-height:1;text-shadow:0 1px 2px rgba(0,0,0,.5);pointer-events:none;}
+body.dark .comp-hb-pip.dimmed{background:#333!important;}
 .comp-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:8px;}
 .comp-stats.cols4{grid-template-columns:repeat(4,1fr);}
 .comp-stats > div{display:flex;flex-direction:column;align-items:center;gap:2px;}
@@ -253,7 +256,7 @@ body.dark .hp-shield.on{background:#5bb8ec;border-color:#7fd0ff;}
 .comp-acc label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:3px;}
 .comp-acc textarea{width:100%;height:56px;border:1px solid var(--rule);background:var(--box);resize:none;font-family:'Barlow',sans-serif;font-size:11px;color:var(--ink);outline:none;padding:4px 6px;}
 body.dark .comp-box{background:var(--input-bg);}
-body.dark .comp-hb-cell input,body.dark .comp-stats input,body.dark .comp-row input,body.dark .comp-acc textarea{color:var(--ink);}
+body.dark .comp-stats input,body.dark .comp-row input,body.dark .comp-acc textarea{color:var(--ink);}
 
 /* ADD/REMOVE buttons */
 .add-btn{margin-top:6px;padding:4px 12px;background:var(--section-hdr);color:white;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;}
@@ -1071,18 +1074,42 @@ function buildShields() {
   }
 }
 
-// Pet & Mount Health Bars: 10 slots each (write the slot's HP; clear to cross off).
+// Pet & Mount Health Bars: 10 colored, clickable slots each — same red→green
+// gradient and click-to-cross-off behavior as the main Health Bar.
 function buildCompanions() {
-  [['pet-hb'],['mount-hb']].forEach(([id]) => {
+  const pcts = [10,20,30,40,50,60,70,80,90,100];
+  const colors = [
+    [192, 30,  30], [210, 60,  10], [220, 100,  0], [200, 130,  0], [180, 150,  0],
+    [150, 160,  0], [100, 170,  0], [ 60, 170,  0], [ 30, 150,  20], [ 10, 120,  10],
+  ];
+  ['pet-hb','mount-hb'].forEach(id => {
     const wrap = document.getElementById(id);
     if(!wrap) return;
     wrap.innerHTML = '';
-    for(let i=0;i<10;i++) {
+    pcts.forEach((p, i) => {
+      const [r,g,b] = colors[i];
       const cell = document.createElement('div');
-      cell.className = 'comp-hb-cell';
-      cell.innerHTML = `<input type="text" maxlength="3"><span>${(i+1)*10}%</span>`;
+      cell.className = 'comp-hb-pip';
+      cell.style.background = `rgb(${r},${g},${b})`;
+      cell.dataset.pct = p;
+      cell.dataset.active = 'true';
+      cell.title = `${p}%`;
+      cell.innerHTML = `<input class="comp-hb-val" type="text" maxlength="3" inputmode="numeric" title="HP per slot"><span class="comp-hb-label">${p}%</span>`;
+      // Click the pip body (not the number) to cross the slot off / restore it.
+      cell.addEventListener('click', (e) => {
+        if(e.target.closest('.comp-hb-val')) return;
+        cell.dataset.active = cell.dataset.active==='true'?'false':'true';
+        cell.classList.toggle('dimmed', cell.dataset.active==='false');
+        if(typeof scheduleAutosave === 'function') scheduleAutosave();
+      });
+      // The per-slot HP number fills every pip in this bar (like the main Health Bar).
+      const inp = cell.querySelector('.comp-hb-val');
+      inp.addEventListener('input', () => {
+        wrap.querySelectorAll('.comp-hb-val').forEach(o => { if(o!==inp) o.value = inp.value; });
+        if(typeof scheduleAutosave === 'function') scheduleAutosave();
+      });
       wrap.appendChild(cell);
-    }
+    });
   });
 }
 
@@ -1635,10 +1662,12 @@ function collectSheet() {
   };
 
   // Pets & Abilities tab
-  const petHB = [...document.querySelectorAll('#pet-hb input')].map(i => i.value);
-  const mountHB = [...document.querySelectorAll('#mount-hb input')].map(i => i.value);
+  const petHB = [...document.querySelectorAll('#pet-hb .comp-hb-pip')].map(p => p.dataset.active);
+  const mountHB = [...document.querySelectorAll('#mount-hb .comp-hb-pip')].map(p => p.dataset.active);
+  const petHBVal = (document.querySelector('#pet-hb .comp-hb-val')||{}).value || '';
+  const mountHBVal = (document.querySelector('#mount-hb .comp-hb-val')||{}).value || '';
   data.companions = {
-    petHB, mountHB,
+    petHB, mountHB, petHBVal, mountHBVal,
     pet: { str: val('pet-str'), int: val('pet-int'), con: val('pet-con'), dex: val('pet-dex'), cha: val('pet-cha'),
       level: val('pet-level'), dr: val('pet-dr'), evade: val('pet-evade'), move: val('pet-move'), size: val('pet-size'),
       atk1: val('pet-atk1'), atk2: val('pet-atk2'), special: val('pet-special') },
@@ -1797,8 +1826,11 @@ function applySheet(data) {
   if(data.companions) {
     const co = data.companions;
     const setId = (id,v) => { const el=document.getElementById(id); if(el) el.value = v||''; };
-    (co.petHB||[]).forEach((v,i) => { const el=document.querySelectorAll('#pet-hb input')[i]; if(el) el.value=v||''; });
-    (co.mountHB||[]).forEach((v,i) => { const el=document.querySelectorAll('#mount-hb input')[i]; if(el) el.value=v||''; });
+    const setPip = (el,v) => { if(!el) return; const active = v!=='false'; el.dataset.active = active?'true':'false'; el.classList.toggle('dimmed', !active); };
+    (co.petHB||[]).forEach((v,i) => setPip(document.querySelectorAll('#pet-hb .comp-hb-pip')[i], v));
+    (co.mountHB||[]).forEach((v,i) => setPip(document.querySelectorAll('#mount-hb .comp-hb-pip')[i], v));
+    document.querySelectorAll('#pet-hb .comp-hb-val').forEach(el => el.value = co.petHBVal || '');
+    document.querySelectorAll('#mount-hb .comp-hb-val').forEach(el => el.value = co.mountHBVal || '');
     const p = co.pet||{};
     setId('pet-str',p.str); setId('pet-int',p.int); setId('pet-con',p.con); setId('pet-dex',p.dex); setId('pet-cha',p.cha);
     setId('pet-level',p.level); setId('pet-dr',p.dr); setId('pet-evade',p.evade); setId('pet-move',p.move); setId('pet-size',p.size);
@@ -1853,6 +1885,9 @@ function newCharacter() {
   });
   // Reset Shield Spell markers to off
   document.querySelectorAll('.hp-shield').forEach(s => { s.dataset.active = 'false'; s.classList.remove('on'); });
+  // Reset Pet & Mount health bars to full and clear per-slot HP
+  document.querySelectorAll('.comp-hb-pip').forEach(pip => { pip.dataset.active = 'true'; pip.classList.remove('dimmed'); });
+  document.querySelectorAll('.comp-hb-val').forEach(el => { el.value = ''; });
 
   // Clear attacks and rebuild empty rows
   const atBody = document.getElementById('attacks-body');
