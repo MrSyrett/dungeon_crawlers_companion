@@ -119,12 +119,6 @@
   }
 
   // ── chips render ──────────────────────────────────────────────────────────────
-  // Only one condition's info shows at a time, across both the Buffs and Debuffs
-  // trackers. Opening one broadcasts "dcc-cond-info" so the other closes its panel.
-  var MYID = "debuffs";
-  var openIdx = -1;
-  function broadcastInfo() { try { document.dispatchEvent(new CustomEvent("dcc-cond-info", { detail: { src: MYID } })); } catch (e) {} }
-  try { document.addEventListener("dcc-cond-info", function (e) { if (e && e.detail && e.detail.src !== MYID && openIdx !== -1) { openIdx = -1; renderChips(); } }); } catch (e) {}
   function chipsEl() { return document.getElementById("dccd-chips"); }
   function renderChips() {
     var box = chipsEl();
@@ -139,8 +133,7 @@
       var info = (k ? '<span class="ico" title="What does it do?" onclick="DCCDebuffs.info(' + i + ')">i</span>' : "");
       return '<span class="dccd-chip ' + (a.custom ? "custom" : "") + '">' +
         esc(a.name) + counter + info +
-        '<button class="rm" title="Remove" onclick="DCCDebuffs.remove(' + i + ')">✕</button></span>' +
-        (openIdx === i && k ? '<span class="dccd-none" style="flex-basis:100%;font-style:normal;color:var(--ink,#26211a);">' + esc(k.effect) + ' <em style="color:var(--muted,#7a7266);">(' + esc(k.duration) + ')</em></span>' : "");
+        '<button class="rm" title="Remove" onclick="DCCDebuffs.remove(' + i + ')">✕</button></span>';
     }).join("");
   }
 
@@ -224,11 +217,33 @@
     if (!el) return;
     if (el.value === lastSerialized && active.length) { renderChips(); return; }
     active = parse(el.value);
-    openIdx = -1;
     lastSerialized = serialize();
     // normalise the field to the canonical form so ×N counts read cleanly
     if (el.value !== lastSerialized) { el.value = lastSerialized; }
     renderChips();
+  }
+
+  // ── info popup (matches the skill/spell info button) ────────────────────────
+  function closeInfo() { var ov = document.getElementById("dccd-info-overlay"); if (ov) ov.style.display = "none"; }
+  function showInfo(i) {
+    var a = active[i]; if (!a) return;
+    var k = known(a.name); if (!k) return;
+    injectCss();
+    var ov = document.getElementById("dccd-info-overlay");
+    if (!ov) {
+      ov = document.createElement("div");
+      ov.id = "dccd-info-overlay";
+      ov.className = "dccd-overlay";
+      ov.addEventListener("mousedown", function (e) { if (e.target === ov) closeInfo(); });
+      document.body.appendChild(ov);
+    }
+    ov.style.display = "flex";
+    ov.innerHTML =
+      '<div class="dccd-modal" role="dialog" aria-label="Debuff info">' +
+        '<div class="dccd-head"><h3>' + esc(k.name) + '</h3><button class="dccd-x" onclick="DCCDebuffs.closeInfo()" aria-label="Close">✕</button></div>' +
+        '<div style="padding:16px 18px 18px;"><div style="color:#e6e3da;font-size:13px;line-height:1.55;">' + esc(k.effect) + '</div>' +
+          '<div style="color:#8a8a93;font-size:11px;margin-top:8px;">' + esc(k.duration) + (k.stackable ? " · Stacks" : "") + '</div></div>' +
+      '</div>';
   }
 
   // ── public API ────────────────────────────────────────────────────────────────
@@ -256,10 +271,11 @@
       inp.value = "";
       writeBack(); renderChips(); renderPicker();
     },
-    remove: function (i) { active.splice(i, 1); openIdx = -1; writeBack(); renderChips(); },
+    remove: function (i) { active.splice(i, 1); writeBack(); renderChips(); },
     inc: function (i) { if (active[i]) { active[i].count += 1; writeBack(); renderChips(); } },
     dec: function (i) { if (active[i]) { active[i].count -= 1; if (active[i].count <= 0) active.splice(i, 1); writeBack(); renderChips(); } },
-    info: function (i) { if (openIdx === i) { openIdx = -1; } else { openIdx = i; broadcastInfo(); } renderChips(); },
+    info: showInfo,
+    closeInfo: closeInfo,
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);

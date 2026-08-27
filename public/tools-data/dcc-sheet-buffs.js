@@ -19,12 +19,6 @@
   var FIELD_ID = "buffs";
   var active = [];        // [{ name, kind, custom }]
   var lastSerialized = null;
-  // Only one condition's info shows at a time, shared across the Buffs and Debuffs
-  // trackers via the "dcc-cond-info" event.
-  var MYID = "buffs";
-  var openIdx = -1;
-  function broadcastInfo() { try { document.dispatchEvent(new CustomEvent("dcc-cond-info", { detail: { src: MYID } })); } catch (e) {} }
-  try { document.addEventListener("dcc-cond-info", function (e) { if (e && e.detail && e.detail.src !== MYID && openIdx !== -1) { openIdx = -1; renderChips(); } }); } catch (e) {}
 
   function haveData() { return typeof DCC_BUFFS !== "undefined" && Array.isArray(DCC_BUFFS); }
   function field() { return document.getElementById(FIELD_ID); }
@@ -99,6 +93,7 @@
       ".dccb-item{border:1px solid #2a2a2e;border-radius:8px;padding:9px 11px;margin-top:8px;cursor:pointer;}",
       ".dccb-item:hover{border-color:#2f7d55;}",
       ".dccb-item.on{border-color:#2f7d55;background:#141c17;}",
+      ".dccb-item.blocked{opacity:.45;cursor:not-allowed;}",
       ".dccb-item .nm{font-weight:700;color:#8fd7ac;font-size:13px;}",
       ".dccb-item .bd{color:#8a8a93;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-left:6px;}",
       ".dccb-item .ef{color:#c9c9cf;font-size:12px;line-height:1.45;margin-top:3px;}",
@@ -126,16 +121,39 @@
     var html = active.map(function (a, i) {
       var k = a.custom ? null : known(a.name);
       var info = (k ? '<span class="ico" title="What does it do?" onclick="DCCBuffs.info(' + i + ')">i</span>' : "");
-      var detail = (openIdx === i && k)
-        ? '<span class="dccb-none" style="flex-basis:100%;font-style:normal;color:var(--ink,#26211a);">' + esc(k.effect) + (k.duration ? ' <em style="color:var(--muted,#7a7266);">(' + esc(k.duration) + ')</em>' : "") + '</span>'
-        : "";
       return '<span class="dccb-chip ' + (a.custom ? "custom" : a.kind === "external" ? "ext" : "") + '">' +
         esc(a.name) + info +
-        '<button class="rm" title="Remove" onclick="DCCBuffs.remove(' + i + ')">✕</button></span>' + detail;
+        '<button class="rm" title="Remove" onclick="DCCBuffs.remove(' + i + ')">✕</button></span>';
     }).join("");
     box.innerHTML = html;
   }
-  var MAX_BUFFS = 3;   // you can only ever have 3 buffs active at once
+  // ── info popup (matches the skill/spell info button) ────────────────────────
+  function closeInfo() { var ov = document.getElementById("dccb-info-overlay"); if (ov) ov.style.display = "none"; }
+  function showInfo(i) {
+    var a = active[i]; if (!a) return;
+    var k = known(a.name); if (!k) return;
+    injectCss();
+    var ov = document.getElementById("dccb-info-overlay");
+    if (!ov) {
+      ov = document.createElement("div");
+      ov.id = "dccb-info-overlay";
+      ov.className = "dccb-overlay";
+      ov.addEventListener("mousedown", function (e) { if (e.target === ov) closeInfo(); });
+      document.body.appendChild(ov);
+    }
+    ov.style.display = "flex";
+    ov.innerHTML =
+      '<div class="dccb-modal" role="dialog" aria-label="Buff info">' +
+        '<div class="dccb-head"><h3>' + esc(k.name) + '</h3><button class="dccb-x" onclick="DCCBuffs.closeInfo()" aria-label="Close">✕</button></div>' +
+        '<div style="padding:16px 18px 18px;"><div style="color:#8a8a93;font-size:10px;text-transform:uppercase;letter-spacing:.06em;">' + (k.kind === "external" ? "External" : "Internal") + '</div>' +
+          '<div style="color:#e6e3da;font-size:13px;line-height:1.55;margin-top:6px;">' + esc(k.effect) + '</div>' +
+          (k.duration ? '<div style="color:#8a8a93;font-size:11px;margin-top:8px;">' + esc(k.duration) + '</div>' : "") + '</div>' +
+      '</div>';
+  }
+  // Rule of Three (Core p.96): at most 3 EXTERNAL buffs active at once. Internal buffs
+  // (and unknown custom ones) are unlimited.
+  var MAX_EXTERNAL = 3;
+  function externalFull() { return extCount() >= MAX_EXTERNAL; }
 
   // ── picker modal ──────────────────────────────────────────────────────────────
   var query = "";
@@ -156,9 +174,12 @@
   function closePicker() { var ov = document.getElementById("dccb-overlay"); if (ov) ov.style.display = "none"; query = ""; }
   function itemHtml(b) {
     var on = active.some(function (a) { return !a.custom && a.name === b.name; });
-    return '<div class="dccb-item ' + (on ? "on" : "") + '" onclick="DCCBuffs.pick(\'' + attr(b.name) + '\')">' +
+    var blocked = b.kind === "external" && !on && externalFull();
+    var click = blocked ? "" : ' onclick="DCCBuffs.pick(\'' + attr(b.name) + '\')"';
+    return '<div class="dccb-item ' + (on ? "on" : "") + (blocked ? " blocked" : "") + '"' + click + '>' +
       '<div><span class="nm">' + esc(b.name) + (on ? " ✓" : "") + '</span>' +
-      '<span class="bd">' + (b.kind === "external" ? "External" : "Internal") + '</span></div>' +
+      '<span class="bd">' + (b.kind === "external" ? "External" : "Internal") + '</span>' +
+      (blocked ? '<span class="bd" style="color:#c8892a;">· Rule of Three full</span>' : "") + '</div>' +
       '<div class="ef">' + esc(b.effect) + '</div>' +
       (b.duration ? '<div class="du">' + esc(b.duration) + '</div>' : "") + '</div>';
   }
@@ -173,17 +194,17 @@
     if (internal.length) rows += '<div class="dccb-grp">Internal — always-on</div>' + internal.map(itemHtml).join("");
     if (external.length) rows += '<div class="dccb-grp">External — trigger-activated (Rule of Three)</div>' + external.map(itemHtml).join("");
     if (!list.length) rows = '<div class="dccb-none" style="color:#8a8a93;padding:10px 0;">No buff matches “' + esc(query) + '”.</div>';
-    var full = active.length >= MAX_BUFFS;
-    var cap = full
-      ? '<div class="dccb-cap">You can have at most ' + MAX_BUFFS + ' buffs — remove one to add another.</div>'
-      : '<div class="dccb-cap ok">' + active.length + ' / ' + MAX_BUFFS + ' buffs active.</div>';
+    var ext = extCount();
+    var cap = ext >= MAX_EXTERNAL
+      ? '<div class="dccb-cap">' + ext + ' / ' + MAX_EXTERNAL + ' External buffs — the Rule of Three is full. Internal buffs are unlimited.</div>'
+      : '<div class="dccb-cap ok">' + ext + ' / ' + MAX_EXTERNAL + ' External buffs · Internal buffs unlimited.</div>';
     ov.innerHTML =
       '<div class="dccb-modal" role="dialog" aria-label="Add buff">' +
         '<div class="dccb-head"><h3>Add a Buff</h3><button class="dccb-x" onclick="DCCBuffs.closePicker()" aria-label="Close">✕</button></div>' +
         cap +
         '<div class="dccb-search"><input id="dccb-search-input" type="search" placeholder="Search buffs…" value="' + attr(query) + '" oninput="DCCBuffs.search(this.value)"></div>' +
         '<div class="dccb-list">' + rows + '</div>' +
-        '<div class="dccb-custom"><input id="dccb-custom-input" type="text" placeholder="Add a custom buff…" onkeydown="if(event.key===\'Enter\')DCCBuffs.addCustom()"' + (full ? " disabled" : "") + '><button class="dccb-btn" onclick="DCCBuffs.addCustom()"' + (full ? " disabled" : "") + '>Add</button></div>' +
+        '<div class="dccb-custom"><input id="dccb-custom-input" type="text" placeholder="Add a custom buff…" onkeydown="if(event.key===\'Enter\')DCCBuffs.addCustom()"><button class="dccb-btn" onclick="DCCBuffs.addCustom()">Add</button></div>' +
       '</div>';
     var s = document.getElementById("dccb-search-input");
     if (s) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }
@@ -220,8 +241,12 @@
     if (!el) return;
     if (el.value === lastSerialized && active.length) { renderChips(); return; }
     active = parse(el.value);
-    if (active.length > MAX_BUFFS) active = active.slice(0, MAX_BUFFS);  // enforce the cap on load
-    openIdx = -1;
+    // Rule of Three on load: keep all internal/custom buffs, cap externals at 3.
+    var extSeen = 0;
+    active = active.filter(function (a) {
+      if (!a.custom && a.kind === "external") { extSeen++; return extSeen <= MAX_EXTERNAL; }
+      return true;
+    });
     lastSerialized = serialize();
     if (el.value !== lastSerialized) { el.value = lastSerialized; }
     renderChips();
@@ -238,7 +263,7 @@
       var k = known(name);
       if (!k) return;
       if (active.some(function (a) { return !a.custom && a.name === k.name; })) return; // already active
-      if (active.length >= MAX_BUFFS) { renderPicker(); return; }                        // hard cap of 3
+      if (k.kind === "external" && externalFull()) { renderPicker(); return; }           // Rule of Three
       active.push({ name: k.name, kind: k.kind, custom: false });
       writeBack(); renderChips(); renderPicker();
     },
@@ -249,13 +274,13 @@
       if (!name) return;
       if (known(name)) { inp.value = ""; this.pick(known(name).name); return; }
       if (active.some(function (a) { return a.name.toLowerCase() === name.toLowerCase(); })) { inp.value = ""; return; }
-      if (active.length >= MAX_BUFFS) { renderPicker(); return; }                         // hard cap of 3
-      active.push({ name: name, kind: "", custom: true });
+      active.push({ name: name, kind: "", custom: true });   // custom kind unknown → unlimited
       inp.value = "";
       writeBack(); renderChips(); renderPicker();
     },
-    remove: function (i) { active.splice(i, 1); openIdx = -1; writeBack(); renderChips(); },
-    info: function (i) { if (openIdx === i) { openIdx = -1; } else { openIdx = i; broadcastInfo(); } renderChips(); },
+    remove: function (i) { active.splice(i, 1); writeBack(); renderChips(); },
+    info: showInfo,
+    closeInfo: closeInfo,
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
