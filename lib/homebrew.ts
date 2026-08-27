@@ -2,6 +2,9 @@ import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { MONSTER_TYPES } from "@/lib/data/monster-types";
 import { TALENT_TARGET_KEYS } from "@/lib/effects";
+import {
+  sanitizeSelections, summarizeBuild, dccStatMod, statBase, hbSlotCount,
+} from "@/lib/dcc-build-menu";
 
 // Homebrew is stored in the exact object shapes the character sheet already
 // consumes, so a sheet can merge it straight into its `_homebrewSpells` /
@@ -529,10 +532,12 @@ function statCell(v: unknown): { score: number; mod: number } {
   return { score: score != null && score > 0 ? score : 1, mod: mod ?? 0 };
 }
 
-// A homebrew Mob / Boss stat block (DccMonster shape). Health-Bar slots derive
-// from the rulebook (Mob = Level slots capped at 10, each = CON Mod; Bosses use
-// Table 50 by tier) when the client sends slotCount/hpPerSlot, but an explicit
-// hbSlots array (hand-tuned in the editor) always wins.
+// A homebrew Mob / Boss stat block (DccMonster shape). The guided builder sends
+// per-stat SCORES (point-bought: Mob base 1 + 3/Level; Boss base 5 + Table-50/Level)
+// and a Floor; stat mods, Health-Bar slots (Mob = Level max 10 / Boss = Table 50 +
+// F, each slot = CON Mod) and defences derive from the rulebook here so a saved
+// build is correct even if the GM never clicks "Apply". An explicit stats/hbSlots
+// block (hand-edited) still wins.
 function normalizeDccMonster(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 120);
@@ -542,17 +547,29 @@ function normalizeDccMonster(input: unknown): { name: string; data: Record<strin
   const role = roles.includes(str(o.role)) ? str(o.role) : "Mob";
   const size = Math.min(8, Math.max(1, num(o.size) ?? 4));
   const level = Math.max(1, num(o.level) ?? 1);
+  const floor = Math.max(0, num(o.floor) ?? 0);
 
+  // Stats: derive score→mod from the builder's `scores`; fall back to an explicit
+  // {score,mod} block from a hand-edited/legacy entry.
   const stats: Record<string, { score: number; mod: number }> = {};
+  const scoresIn = (o.scores ?? null) as Record<string, unknown> | null;
   const statsIn = (o.stats ?? {}) as Record<string, unknown>;
-  for (const k of DCC_STATS) stats[k] = statCell(statsIn[k]);
+  for (const k of DCC_STATS) {
+    if (scoresIn && scoresIn[k.toLowerCase()] != null) {
+      const sc = Math.max(statBase(role), num(scoresIn[k.toLowerCase()]) ?? statBase(role));
+      stats[k] = { score: sc, mod: dccStatMod(sc) };
+    } else {
+      stats[k] = statCell(statsIn[k]);
+    }
+  }
 
-  // Health-Bar slots: explicit array if provided, else slotCount × hpPerSlot.
+  // Health-Bar slots: explicit array wins; else slotCount × hpPerSlot; else the
+  // rulebook count for this role/level/floor, each slot = CON Mod.
   let hbSlots: number[];
   if (Array.isArray(o.hbSlots) && o.hbSlots.length) {
-    hbSlots = (o.hbSlots as unknown[]).map((n) => Math.max(0, num(n) ?? 0)).slice(0, 40);
+    hbSlots = (o.hbSlots as unknown[]).map((n) => Math.max(0, num(n) ?? 0)).slice(0, 60);
   } else {
-    const count = Math.min(40, Math.max(1, num(o.slotCount) ?? Math.min(level, 10)));
+    const count = Math.min(60, Math.max(1, num(o.slotCount) ?? hbSlotCount(role, level, floor)));
     const hp = Math.max(1, num(o.hpPerSlot) ?? (stats.CON.mod || 1));
     hbSlots = Array.from({ length: count }, () => hp);
   }
@@ -577,9 +594,10 @@ function normalizeDccMonster(input: unknown): { name: string; data: Record<strin
     : [];
 
   // DR is usually a number but a few blocks print "F" (DR = Floor Number).
+  // Default DR = the Floor Number (p. 272).
   const drRaw = str(o.dr);
   const drNum = num(o.dr);
-  const dr: number | string = drRaw.toUpperCase() === "F" ? "F" : drNum != null ? drNum : 2;
+  const dr: number | string = drRaw.toUpperCase() === "F" ? "F" : drNum != null ? drNum : Math.max(1, floor);
 
   return {
     name,
@@ -590,8 +608,8 @@ function normalizeDccMonster(input: unknown): { name: string; data: Record<strin
       tags: strList(o.tags, 12, 40),
       level,
       hbSlots,
-      surprise: str(o.surprise).slice(0, 20) || `${10 + level}+F`,
-      evade: str(o.evade).slice(0, 20) || `${10 + level}+F`,
+      surprise: str(o.surprise).slice(0, 20) || `${10 + stats.INT.mod}+F`,
+      evade: str(o.evade).slice(0, 20) || `${10 + stats.DEX.mod}+F`,
       move: str(o.move).slice(0, 20) || "20+S",
       dr,
       stats,
@@ -701,6 +719,23 @@ function dccStatGrants(o: Record<string, unknown>): string[] {
   return [...bullets, ...free].slice(0, 24);
 }
 
+// Race/Class point-buy → the stored `grants` (book-shaped bullets, incl. "+N Stat"
+// the wizard applies) plus the structured `build` (validated selections + spend
+// totals) the editor reloads. Falls back to the legacy grant/statBonuses path when
+// an entry has no point-buy build (a free-form entry from the earlier editor).
+function dccBuild(o: Record<string, unknown>): { grants: string[]; build?: Record<string, unknown> } {
+  const raw = (o.build as { selections?: unknown } | undefined)?.selections;
+  if (Array.isArray(raw)) {
+    const selections = sanitizeSelections(raw);
+    const res = summarizeBuild(selections);
+    return {
+      grants: res.grants,
+      build: { selections, spent: res.spent, detriments: res.detrimentPoints, net: res.net },
+    };
+  }
+  return { grants: dccStatGrants(o) };
+}
+
 // A homebrew Race (DccRace shape): a size, a group (Earth/Alien), and the
 // bullet list of mechanical grants the reference page and wizard show.
 function normalizeDccRace(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -709,14 +744,16 @@ function normalizeDccRace(input: unknown): { name: string; data: Record<string, 
   if (!name) throw new Error("A homebrew race needs a name.");
 
   const group = (DCC_RACE_GROUPS as readonly string[]).includes(str(o.group)) ? str(o.group) : "Earth";
+  const b = dccBuild(o);
   const data: Record<string, unknown> = {
     name,
     group,
     size: Math.min(8, Math.max(1, num(o.size) ?? 4)),
-    grants: dccStatGrants(o),
+    grants: b.grants,
     page: num(o.page) ?? 0,
     source: "Homebrew",
   };
+  if (b.build) data.build = b.build;
   if (str(o.prerequisites)) data.prerequisites = str(o.prerequisites).slice(0, 300);
   return { name, data };
 }
@@ -729,14 +766,16 @@ function normalizeDccClass(input: unknown): { name: string; data: Record<string,
   if (!name) throw new Error("A homebrew class needs a name.");
 
   const categories = strList(o.categories, 6, 60);
+  const b = dccBuild(o);
   const data: Record<string, unknown> = {
     name,
     categories: categories.length ? categories : [name],
-    grants: dccStatGrants(o),
+    grants: b.grants,
     earthClass: !!o.earthClass,
     page: num(o.page) ?? 0,
     source: "Homebrew",
   };
+  if (b.build) data.build = b.build;
   if (str(o.prerequisites)) data.prerequisites = str(o.prerequisites).slice(0, 300);
   return { name, data };
 }

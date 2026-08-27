@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  BENEFIT_TIERS, DETRIMENT_TIERS, menuEntry, selectionCost, selectionGrant,
+  summarizeBuild, budgetFor, DETRIMENT_CAP, RACE_POINTS, CLASS_POINTS,
+  STAT_IDS, STAT_ABBR,
+  BOSS_SEVERITY, bossSeverity, damageDiceForLevel, dccStatMod,
+  statBase, statBudget, hbSlotCount,
+  type Selection, type MenuEntry,
+} from "@/lib/dcc-build-menu";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A single, schema-driven homebrew editor shared by every DCC reference page
@@ -43,6 +51,7 @@ type Field =
   | (BaseField & { type: "stats" })
   | (BaseField & { type: "statBonuses" });
 
+type BodyProps = { form: Data; setForm: (u: Data | ((f: Data) => Data)) => void };
 type Schema = {
   kind: string;
   title: string; // accordion header ("My Homebrew Monsters")
@@ -53,26 +62,16 @@ type Schema = {
   summary: (data: Data) => string; // right-hand meta on the list row
   derive?: (f: Data) => Data; // optional: fill computed defaults (monsters)
   deriveLabel?: string;
+  Body?: (props: BodyProps) => JSX.Element; // custom form body (point-buy builders)
 };
 
 const STATS = ["STR", "INT", "CON", "DEX", "CHA"] as const;
 
-// ── shared vocab (mirrors lib/homebrew's exported constants) ─────────────────
-const MONSTER_ROLES: readonly Opt[] = [
-  ["Mob", "Mob"], ["Neighborhood Boss", "Neighborhood Boss"], ["Borough Boss", "Borough Boss"],
-  ["City Boss", "City Boss"], ["Province Boss", "Province Boss"], ["Country Boss", "Country Boss"],
-  ["Floor Boss", "Floor Boss"], ["Quest Boss", "Quest Boss"], ["Elite", "Elite"],
-  ["Rival Crawler", "Rival Crawler"], ["NPC", "NPC"],
-];
-const BOSS_HB_BASE: Record<string, number> = {
-  "Neighborhood Boss": 10, "Borough Boss": 15, "City Boss": 20,
-  "Province Boss": 25, "Country Boss": 30, "Floor Boss": 40,
-};
+// ── shared vocab (skill/spell selects) ───────────────────────────────────────
 const STAT_OPTS: readonly Opt[] = STATS.map((s) => [s, s] as Opt);
 const RANK_OPTS: readonly Opt[] = [["5", "Rank 5"], ["10", "Rank 10"], ["15", "Rank 15"]];
 const SKILL_CAT_OPTS: readonly Opt[] = [["utility", "Utility"], ["attack", "Attack"]];
 const SPELL_TYPE_OPTS: readonly Opt[] = [["utility", "Utility"], ["attack", "Attack"], ["heal", "Heal"]];
-const RACE_GROUP_OPTS: readonly Opt[] = [["Earth", "Earth-born"], ["Alien", "Alien"]];
 
 const s = (d: Data, k: string): string => {
   const v = d[k];
@@ -86,78 +85,39 @@ const SCHEMAS: Record<string, Schema> = {
     title: "My Homebrew Monsters",
     noun: "Monster",
     summary: (d) => [s(d, "role"), `Lvl ${s(d, "level")}`].filter(Boolean).join(" · "),
+    fields: [],
+    Body: MonsterBody,
     blank: () => ({
-      name: "", role: "Mob", size: "4", level: "1", tags: [],
-      slotCount: "1", hpPerSlot: "1",
-      surprise: "", evade: "", move: "20+S", dr: "2",
-      stats: Object.fromEntries(STATS.map((k) => [k, { score: "1", mod: "0" }])),
-      attacks: [], notes: [], page: "",
+      name: "", role: "Mob", size: "4", level: "1", floor: "1", tags: [],
+      scores: Object.fromEntries(STATS.map((k) => [k.toLowerCase(), "1"])),
+      slotCount: "", hpPerSlot: "", surprise: "", evade: "", move: "20+S", dr: "",
+      stats: {}, attacks: [], notes: [],
     }),
     toForm: (d) => {
       const hb = Array.isArray(d.hbSlots) ? (d.hbSlots as unknown[]) : [];
-      const stats: Data = {};
-      const sd = (d.stats ?? {}) as Record<string, unknown>;
-      for (const k of STATS) {
-        const c = (sd[k] ?? {}) as Record<string, unknown>;
-        stats[k] = { score: c.score == null ? "1" : String(c.score), mod: c.mod == null ? "0" : String(c.mod) };
-      }
+      const sd = (d.stats ?? {}) as Record<string, { score?: unknown }>;
+      const scores: Data = {};
+      for (const k of STATS) scores[k.toLowerCase()] = String(sd[k]?.score ?? "1");
+      const drStr = s(d, "dr");
       return {
         name: s(d, "name"),
         role: s(d, "role") || "Mob",
         size: s(d, "size") || "4",
         level: s(d, "level") || "1",
+        floor: /^\d+$/.test(drStr) ? drStr : "1",
         tags: Array.isArray(d.tags) ? (d.tags as string[]) : [],
-        slotCount: String(hb.length || 1),
-        hpPerSlot: String(hb[0] ?? 1),
+        scores,
+        stats: d.stats ?? {},
+        slotCount: String(hb.length || ""),
+        hpPerSlot: String(hb[0] ?? ""),
         surprise: s(d, "surprise"),
         evade: s(d, "evade"),
         move: s(d, "move") || "20+S",
-        dr: s(d, "dr") || "2",
-        stats,
+        dr: drStr,
         attacks: Array.isArray(d.attacks) ? (d.attacks as Data[]) : [],
         notes: Array.isArray(d.notes) ? (d.notes as string[]) : [],
-        page: s(d, "page"),
       };
     },
-    derive: (f) => {
-      const role = s(f, "role");
-      const level = parseInt(s(f, "level"), 10) || 1;
-      const stats = (f.stats ?? {}) as Record<string, { score?: unknown; mod?: unknown }>;
-      const conMod = parseInt(String(stats.CON?.mod ?? "0"), 10) || 0;
-      const base = BOSS_HB_BASE[role];
-      // Mob: one slot per Level, capped at 10 (p.270). Boss: Table 50 base by
-      // tier (the +F floor bonus is left for the GM to add). Each slot = CON Mod.
-      const count = base != null ? base : Math.min(level, 10);
-      return { ...f, slotCount: String(count), hpPerSlot: String(Math.max(1, conMod)) };
-    },
-    deriveLabel: "Derive Health Bar (Mob = Level, Boss = Table 50; HP = CON mod)",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, placeholder: "Monster name…", maxLength: 120 },
-      { key: "role", label: "Role", type: "select", options: MONSTER_ROLES },
-      { key: "size", label: "Size (1–8)", type: "number" },
-      { key: "level", label: "Level", type: "number" },
-      { key: "tags", label: "Type tags", type: "stringList", placeholder: "e.g. Humanoid", addLabel: "+ Tag" },
-      { key: "slotCount", label: "Health-Bar slots", type: "number", help: "Mob = Level (max 10); Boss = Table 50 by tier." },
-      { key: "hpPerSlot", label: "HP per slot", type: "number", help: "The book uses the monster's CON modifier." },
-      { key: "surprise", label: "Surprise", type: "text", placeholder: "e.g. 12+F" },
-      { key: "evade", label: "Evade", type: "text", placeholder: "e.g. 13+F" },
-      { key: "move", label: "Move", type: "text", placeholder: "e.g. 20+S" },
-      { key: "dr", label: "DR", type: "text", placeholder: 'number, or "F"' },
-      { key: "stats", label: "Stats", type: "stats", full: true },
-      {
-        key: "attacks", label: "Attacks", type: "objectList", full: true, addLabel: "+ Attack",
-        fields: [
-          { key: "name", label: "Name", type: "text", full: true, placeholder: "e.g. Claw" },
-          { key: "toHit", label: "To hit", type: "text", placeholder: "e.g. 13+F" },
-          { key: "damage", label: "Damage", type: "text", placeholder: "e.g. 2d6+3" },
-          { key: "damageType", label: "Damage type", type: "text", placeholder: "e.g. Slashing" },
-          { key: "range", label: "Range", type: "text", placeholder: "e.g. 5ft range" },
-          { key: "rider", label: "Rider / on-hit effect", type: "textarea", full: true, placeholder: "e.g. On an Evade Major Fail, the crawler gains…" },
-        ],
-      },
-      { key: "notes", label: "Notes (named abilities)", type: "stringList", full: true, placeholder: "Ability — rules text…", addLabel: "+ Note" },
-      { key: "page", label: "Page (optional)", type: "number" },
-    ],
   },
 
   "dcc-skill": {
@@ -256,85 +216,51 @@ const SCHEMAS: Record<string, Schema> = {
     noun: "Class",
     summary: (d) => {
       const cats = Array.isArray(d.categories) ? (d.categories as string[]).join("/") : "";
-      return [cats, d.earthClass ? "Earth Class" : ""].filter(Boolean).join(" · ");
+      const pts = (d.build as { spent?: unknown })?.spent;
+      return [cats, d.earthClass ? "Earth Class" : "", pts != null ? `${pts}/${CLASS_POINTS} pts` : ""].filter(Boolean).join(" · ");
     },
-    blank: () => ({ name: "", categories: [], statBonuses: { str: "", int: "", con: "", dex: "", cha: "" }, grants: [], earthClass: false, prerequisites: "", page: "" }),
-    toForm: (d) => {
-      const split = splitStatGrants(d.grants);
-      return {
-        name: s(d, "name"),
-        categories: Array.isArray(d.categories) ? (d.categories as string[]) : [],
-        statBonuses: split.bonuses,
-        grants: split.grants,
-        earthClass: !!d.earthClass,
-        prerequisites: s(d, "prerequisites"),
-        page: s(d, "page"),
-      };
-    },
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, placeholder: "Class name…", maxLength: 120 },
-      { key: "categories", label: "Base categories", type: "stringList", full: true, placeholder: "e.g. Fighter", addLabel: "+ Category", help: "Blank = uses the class name. Two+ = a hybrid." },
-      { key: "earthClass", label: "Earth Class (grants a Silver Earth Box)", type: "checkbox" },
-      { key: "prerequisites", label: "Prerequisites (optional)", type: "text", full: true, placeholder: "e.g. Race must be…" },
-      { key: "statBonuses", label: "Stat bonuses", type: "statBonuses", full: true, help: "Applied to a crawler's stats at creation, like a book class. Leave blank for none." },
-      { key: "grants", label: "Other grants", type: "stringList", full: true, placeholder: "A mechanical benefit…", addLabel: "+ Grant" },
-      { key: "page", label: "Page (optional)", type: "number" },
-    ],
+    fields: [],
+    Body: (p) => <RaceClassBody kind="dcc-class" {...p} />,
+    blank: () => ({ name: "", categories: [], earthClass: false, prerequisites: "", build: { selections: [] } }),
+    toForm: (d) => ({
+      name: s(d, "name"),
+      categories: Array.isArray(d.categories) ? (d.categories as string[]) : [],
+      earthClass: !!d.earthClass,
+      prerequisites: s(d, "prerequisites"),
+      build: { selections: buildSelections(d) },
+    }),
   },
 
   "dcc-race": {
     kind: "dcc-race",
     title: "My Homebrew Races",
     noun: "Race",
-    summary: (d) => [s(d, "group"), `Size ${s(d, "size")}`].filter(Boolean).join(" · "),
-    blank: () => ({ name: "", group: "Earth", size: "4", statBonuses: { str: "", int: "", con: "", dex: "", cha: "" }, grants: [], prerequisites: "", page: "" }),
-    toForm: (d) => {
-      const split = splitStatGrants(d.grants);
-      return {
-        name: s(d, "name"),
-        group: s(d, "group") || "Earth",
-        size: s(d, "size") || "4",
-        statBonuses: split.bonuses,
-        grants: split.grants,
-        prerequisites: s(d, "prerequisites"),
-        page: s(d, "page"),
-      };
+    summary: (d) => {
+      const pts = (d.build as { spent?: unknown })?.spent;
+      return [s(d, "group"), `Size ${s(d, "size")}`, pts != null ? `${pts}/${RACE_POINTS} pts` : ""].filter(Boolean).join(" · ");
     },
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, placeholder: "Race name…", maxLength: 120 },
-      { key: "group", label: "Group", type: "select", options: RACE_GROUP_OPTS },
-      { key: "size", label: "Size (1–8)", type: "number" },
-      { key: "prerequisites", label: "Prerequisites (optional)", type: "text", full: true, placeholder: "e.g. GM approval…" },
-      { key: "statBonuses", label: "Stat bonuses", type: "statBonuses", full: true, help: "Applied to a crawler's stats at creation, like a book race. Leave blank for none." },
-      { key: "grants", label: "Other grants", type: "stringList", full: true, placeholder: "A mechanical benefit…", addLabel: "+ Grant" },
-      { key: "page", label: "Page (optional)", type: "number" },
-    ],
+    fields: [],
+    Body: (p) => <RaceClassBody kind="dcc-race" {...p} />,
+    blank: () => ({ name: "", group: "Earth", size: "4", prerequisites: "", build: { selections: [] } }),
+    toForm: (d) => ({
+      name: s(d, "name"),
+      group: s(d, "group") || "Earth",
+      size: s(d, "size") || "4",
+      prerequisites: s(d, "prerequisites"),
+      build: { selections: buildSelections(d) },
+    }),
   },
 };
 
-// Split a stored grants list (book style) into the structured stat-bonus control
-// and the remaining free-text grants. A single-stat bonus bullet like
-// "+2 Strength" / "-1 DEX" becomes a stat-bonus value; compound or non-stat
-// grants ("+1 Strength and Dexterity", "Darkvision") stay as free-text grants.
-const BONUS_TOKEN: Record<string, string> = {
-  str: "str", strength: "str", int: "int", intelligence: "int", con: "con", constitution: "con",
-  dex: "dex", dexterity: "dex", cha: "cha", charisma: "cha",
-};
-function splitStatGrants(v: unknown): { bonuses: Data; grants: string[] } {
-  const bonuses: Data = { str: "", int: "", con: "", dex: "", cha: "" };
-  const grants: string[] = [];
-  (Array.isArray(v) ? (v as unknown[]) : []).forEach((g) => {
-    const s = typeof g === "string" ? g : String(g ?? "");
-    const m = s.match(/^\s*([+-]\d+)\s+([A-Za-z]+)\s*$/);
-    const id = m ? BONUS_TOKEN[m[2].toLowerCase()] : undefined;
-    if (m && id) {
-      const prev = parseInt(String(bonuses[id] || "0"), 10) || 0;
-      bonuses[id] = String(prev + parseInt(m[1], 10));
-    } else if (s.trim()) {
-      grants.push(s);
-    }
-  });
-  return { bonuses, grants };
+// Reconstruct the builder's selection list from a stored entry. New entries carry
+// `build.selections`; a legacy free-form entry has only `grants`, so we keep each
+// grant as an unpriced custom benefit (0 pts) — nothing is lost and the same
+// grants regenerate on save; the user can re-price them against the menu.
+function buildSelections(d: Data): Selection[] {
+  const b = d.build as { selections?: unknown } | undefined;
+  if (Array.isArray(b?.selections)) return b!.selections as Selection[];
+  const grants = Array.isArray(d.grants) ? (d.grants as unknown[]) : [];
+  return grants.map((g) => ({ id: "custom", kind: "benefit" as const, tier: "Minor", cost: 0, text: String(g) }));
 }
 
 function upgradesToForm(v: unknown): Data[] {
@@ -491,26 +417,30 @@ export default function DccHomebrewEditor({
                 </button>
               ) : null}
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {schema.fields.map((f) => (
-                  <FieldView key={f.key} field={f} value={form[f.key]} onChange={(v) => setField(f.key, v)} />
-                ))}
+              {schema.Body ? (
+                <schema.Body form={form} setForm={setForm} />
+              ) : (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {schema.fields.map((f) => (
+                    <FieldView key={f.key} field={f} value={form[f.key]} onChange={(v) => setField(f.key, v)} />
+                  ))}
+                </div>
+              )}
 
-                {campaigns.length ? (
-                  <div className="sm:col-span-2">
-                    <label className={labelCls}>Share with campaigns</label>
-                    <div className="flex flex-wrap gap-3">
-                      {campaigns.map((c) => (
-                        <label key={c.id} className="flex items-center gap-2 text-[13px] text-[var(--text)]">
-                          <input type="checkbox" checked={campaignIds.includes(c.id)} onChange={() => toggleCampaign(c.id)} />
-                          {c.name}
-                        </label>
-                      ))}
-                    </div>
-                    <p className="mt-1 text-[11px] text-[var(--muted)]">Unchecked = personal (only you see it).</p>
+              {campaigns.length ? (
+                <div className="mt-3">
+                  <label className={labelCls}>Share with campaigns</label>
+                  <div className="flex flex-wrap gap-3">
+                    {campaigns.map((c) => (
+                      <label key={c.id} className="flex items-center gap-2 text-[13px] text-[var(--text)]">
+                        <input type="checkbox" checked={campaignIds.includes(c.id)} onChange={() => toggleCampaign(c.id)} />
+                        {c.name}
+                      </label>
+                    ))}
                   </div>
-                ) : null}
-              </div>
+                  <p className="mt-1 text-[11px] text-[var(--muted)]">Unchecked = personal (only you see it).</p>
+                </div>
+              ) : null}
 
               {error ? <p className="mt-3 text-[13px] text-[#f0a8a3]">{error}</p> : null}
 
@@ -667,6 +597,347 @@ function ScalarView({
           )}
         </>
       )}
+    </div>
+  );
+}
+
+// ── Race / Class point-buy builder (Core Rulebook pp. 158–162) ───────────────
+const chipTiny =
+  "rounded border border-[var(--border)] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]";
+
+function getSelections(form: Data): Selection[] {
+  const b = form.build as { selections?: unknown } | undefined;
+  return Array.isArray(b?.selections) ? (b!.selections as Selection[]) : [];
+}
+
+function RaceClassBody({ kind, form, setForm }: BodyProps & { kind: "dcc-race" | "dcc-class" }) {
+  const isRace = kind === "dcc-race";
+  const selections = getSelections(form);
+  const budget = budgetFor(kind);
+  const sum = summarizeBuild(selections);
+  const remaining = budget + sum.detrimentPoints - sum.benefitPoints;
+  const over = remaining < 0;
+
+  const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+  const setSel = (next: Selection[]) => setForm((f) => ({ ...f, build: { selections: next } }));
+  const addEntry = (e: MenuEntry, k: "benefit" | "detriment", tier: string, cost: number) =>
+    setSel([...selections, { id: e.id, kind: k, tier, cost, ...(e.repeatable ? { amount: 1 } : {}) }]);
+  const addCustom = (k: "benefit" | "detriment", tier: string, cost: number) =>
+    setSel([...selections, { id: "custom", kind: k, tier, cost, text: "" }]);
+  const updateSel = (i: number, patch: Partial<Selection>) =>
+    setSel(selections.map((s, j) => (j === i ? { ...s, ...patch } : s)));
+  const removeSel = (i: number) => setSel(selections.filter((_, j) => j !== i));
+
+  const categories = Array.isArray(form.categories) ? (form.categories as string[]) : [];
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* identity */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <label className={labelCls}>Name</label>
+          <input className={`${fieldBase} w-full`} value={String(form.name ?? "")} maxLength={120}
+            placeholder={isRace ? "Race name…" : "Class name…"} onChange={(e) => set("name", e.target.value)} />
+        </div>
+        {isRace ? (
+          <>
+            <div>
+              <label className={labelCls}>Group</label>
+              <select className={`${fieldBase} w-full`} value={String(form.group ?? "Earth")} onChange={(e) => set("group", e.target.value)}>
+                <option value="Earth">Earth-born</option>
+                <option value="Alien">Alien</option>
+              </select>
+            </div>
+            <div>
+              <label className={labelCls}>Size (1–8)</label>
+              <input className={`${fieldBase} w-full`} inputMode="numeric" value={String(form.size ?? "4")}
+                onChange={(e) => set("size", e.target.value.replace(/[^\d]/g, ""))} />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="sm:col-span-2">
+              <label className={labelCls}>Base categories</label>
+              <input className={`${fieldBase} w-full`} value={categories.join(", ")} placeholder="e.g. Fighter, Rogue"
+                onChange={(e) => set("categories", e.target.value.split(",").map((x) => x.trim()).filter(Boolean))} />
+              <p className="mt-1 text-[11px] text-[var(--muted)]">Comma-separated. Blank = uses the class name.</p>
+            </div>
+            <label className="flex items-center gap-2 text-[13px] text-[var(--text)]">
+              <input type="checkbox" checked={!!form.earthClass} onChange={(e) => set("earthClass", e.target.checked)} />
+              Earth Class (grants a Silver Earth Box)
+            </label>
+          </>
+        )}
+        <div className="sm:col-span-2">
+          <label className={labelCls}>Prerequisites (optional)</label>
+          <input className={`${fieldBase} w-full`} value={String(form.prerequisites ?? "")} placeholder="e.g. Popularity 3+"
+            onChange={(e) => set("prerequisites", e.target.value)} />
+        </div>
+      </div>
+
+      {/* budget bar */}
+      <div className={`rounded border ${over ? "border-[var(--red)]" : "border-[var(--border)]"} bg-[var(--panel)] px-3 py-2`}>
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[12px]">
+          <span className="font-bold uppercase tracking-[0.1em] text-[var(--muted)]">Build Points</span>
+          <span>Budget <b className="text-[var(--text)]">{budget}</b></span>
+          <span>Spent <b className="text-[var(--text)]">{sum.benefitPoints}</b></span>
+          <span>Detriments <b className="text-[var(--text)]">+{sum.detrimentPoints}</b>{sum.detrimentPoints >= DETRIMENT_CAP ? <span className="text-[var(--muted)]"> (cap)</span> : null}</span>
+          <span className={over ? "text-[#f0a8a3] font-bold" : ""}>Remaining <b>{remaining}</b></span>
+        </div>
+        {over ? <p className="mt-1 text-[11px] text-[#f0a8a3]">Over budget by {-remaining} — remove a benefit or add a detriment. The book says leftover points are lost and you can’t overspend.</p> : null}
+      </div>
+
+      {/* selected */}
+      <div>
+        <label className={labelCls}>This build ({selections.length})</label>
+        {selections.length ? (
+          <ul className="flex flex-col gap-1.5">
+            {selections.map((sel, i) => {
+              const entry = menuEntry(sel.id);
+              const param = sel.id === "custom" ? "text" : entry?.param;
+              const label = sel.id === "custom" ? `Custom ${sel.tier}` : entry?.label ?? sel.id;
+              const cost = selectionCost(sel);
+              return (
+                <li key={i} className="rounded border border-[var(--border)] bg-[var(--panel)] p-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${sel.kind === "detriment" ? "text-[#8fce8f]" : "text-[#f0a8a3]"}`}>
+                      {sel.kind === "detriment" ? `+${cost}` : `−${cost}`} pt
+                    </span>
+                    <span className="text-[12px] text-[var(--text)]">{label}</span>
+                    <button type="button" className={`${miniBtn} ml-auto`} onClick={() => removeSel(i)}>✕</button>
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    {entry?.repeatable ? (
+                      <label className="flex items-center gap-1 text-[11px] text-[var(--muted)]">
+                        ×<input className={`${fieldBase} w-14 px-1.5 py-1`} inputMode="numeric" value={String(sel.amount ?? 1)}
+                          onChange={(e) => updateSel(i, { amount: Math.max(1, parseInt(e.target.value.replace(/[^\d]/g, ""), 10) || 1) })} />
+                      </label>
+                    ) : null}
+                    {param === "stat" ? (
+                      <select className={`${fieldBase} px-2 py-1`} value={String(sel.stat ?? "")} onChange={(e) => updateSel(i, { stat: e.target.value })}>
+                        <option value="">— stat —</option>
+                        {STAT_IDS.map((s) => <option key={s} value={s}>{STAT_ABBR[s]}</option>)}
+                      </select>
+                    ) : null}
+                    {param === "skill" ? (
+                      <input className={`${fieldBase} min-w-0 flex-1 px-2 py-1`} value={String(sel.skill ?? "")} placeholder="Skill / Spell name"
+                        onChange={(e) => updateSel(i, { skill: e.target.value })} />
+                    ) : null}
+                    {param === "damageType" ? (
+                      <input className={`${fieldBase} px-2 py-1`} value={String(sel.damageType ?? "")} placeholder="damage type"
+                        onChange={(e) => updateSel(i, { damageType: e.target.value })} />
+                    ) : null}
+                    {param === "text" ? (
+                      <input className={`${fieldBase} min-w-0 flex-1 px-2 py-1`} value={String(sel.text ?? "")} placeholder={entry?.help || "detail…"}
+                        onChange={(e) => updateSel(i, { text: e.target.value })} />
+                    ) : null}
+                  </div>
+                  <p className="mt-1 text-[11px] text-[var(--muted)]">→ {selectionGrant(sel)}</p>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="text-[12px] text-[var(--muted)]">Nothing yet — add benefits from the menu below.</p>
+        )}
+      </div>
+
+      {/* menu */}
+      <MenuBox title="Benefits — spend points" tiers={BENEFIT_TIERS} onAdd={addEntry} onCustom={addCustom} />
+      <MenuBox title="Detriments — refund points (max +5)" tiers={DETRIMENT_TIERS} onAdd={addEntry} onCustom={addCustom} />
+    </div>
+  );
+}
+
+function MenuBox({
+  title, tiers, onAdd, onCustom,
+}: {
+  title: string;
+  tiers: typeof BENEFIT_TIERS;
+  onAdd: (e: MenuEntry, k: "benefit" | "detriment", tier: string, cost: number) => void;
+  onCustom: (k: "benefit" | "detriment", tier: string, cost: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [customTier, setCustomTier] = useState(0);
+  return (
+    <div className="rounded border border-[var(--border)] bg-[var(--panel)]">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between px-3 py-2 text-left">
+        <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">{title}</span>
+        <span className="text-[var(--muted)]">{open ? "▾" : "▸"}</span>
+      </button>
+      {open ? (
+        <div className="max-h-[280px] overflow-y-auto border-t border-[var(--border)] px-3 py-2">
+          {tiers.map((t) => (
+            <div key={t.tier} className="mb-2">
+              <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+                {t.tier} · {t.cost} pt{t.cost === 1 ? "" : "s"}
+              </div>
+              <div className="flex flex-col gap-1">
+                {t.entries.map((e) => (
+                  <div key={e.id} className="flex items-start gap-2">
+                    <button type="button" className={`${chipTiny} shrink-0`} onClick={() => onAdd(e, t.kind, t.tier, t.cost)}>+ Add</button>
+                    <span className="text-[12px] leading-snug text-[var(--text)]">
+                      {e.label}
+                      {e.help ? <span className="text-[var(--muted)]"> — {e.help}</span> : null}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          <div className="mt-2 flex items-center gap-2 border-t border-[var(--border)] pt-2">
+            <span className="text-[11px] text-[var(--muted)]">Custom at</span>
+            <select className={`${fieldBase} px-2 py-1`} value={customTier} onChange={(e) => setCustomTier(Number(e.target.value))}>
+              {tiers.map((t, i) => <option key={t.tier} value={i}>{t.tier} ({t.cost})</option>)}
+            </select>
+            <button type="button" className={chipTiny}
+              onClick={() => { const t = tiers[customTier]; onCustom(t.kind, t.tier, t.cost); }}>
+              + Add custom
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// ── Mob / Boss guided builder (Core Rulebook pp. 270–273) ────────────────────
+function MonsterBody({ form, setForm }: BodyProps) {
+  const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
+  const role = String(form.role ?? "Mob");
+  const level = Math.max(1, parseInt(String(form.level ?? "1"), 10) || 1);
+  const floor = parseInt(String(form.floor ?? "1"), 10) || 0;
+  const boss = bossSeverity(role);
+
+  const scores = (form.scores ?? {}) as Record<string, unknown>;
+  const scoreOf = (k: string) => Math.max(statBase(role), parseInt(String(scores[k] ?? statBase(role)), 10) || statBase(role));
+  const spent = STAT_IDS.reduce((n, k) => n + (scoreOf(k) - statBase(role)), 0);
+  const budget = statBudget(role, level);
+  const statsLeft = budget - spent;
+
+  const conMod = dccStatMod(scoreOf("con"));
+  const intMod = dccStatMod(scoreOf("int"));
+  const dexMod = dccStatMod(scoreOf("dex"));
+  const slots = hbSlotCount(role, level, floor);
+  const dice = damageDiceForLevel(level);
+
+  const setScore = (k: string, v: string) => set("scores", { ...scores, [k]: v.replace(/[^\d]/g, "") });
+
+  const applyDerived = () => {
+    const st: Record<string, { score: number; mod: number }> = {};
+    for (const k of STAT_IDS) { const sc = scoreOf(k); st[k.toUpperCase()] = { score: sc, mod: dccStatMod(sc) }; }
+    setForm((f) => ({
+      ...f,
+      stats: st,
+      slotCount: String(slots),
+      hpPerSlot: String(Math.max(1, conMod)),
+      surprise: `${10 + intMod}+F`,
+      evade: `${10 + dexMod}+F`,
+      dr: String(Math.max(1, floor)),
+    }));
+  };
+
+  const tags = Array.isArray(form.tags) ? (form.tags as string[]) : [];
+  const attacks = Array.isArray(form.attacks) ? (form.attacks as Data[]) : [];
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <label className={labelCls}>Name</label>
+          <input className={`${fieldBase} w-full`} value={String(form.name ?? "")} maxLength={120} placeholder="Monster name…"
+            onChange={(e) => set("name", e.target.value)} />
+        </div>
+        <div>
+          <label className={labelCls}>Role</label>
+          <select className={`${fieldBase} w-full`} value={role} onChange={(e) => set("role", e.target.value)}>
+            <option value="Mob">Mob</option>
+            {BOSS_SEVERITY.map((b) => <option key={b.role} value={b.role}>{b.role}</option>)}
+            <option value="Rival Crawler">Rival Crawler</option>
+            <option value="NPC">NPC</option>
+          </select>
+        </div>
+        <div>
+          <label className={labelCls}>Type tags</label>
+          <input className={`${fieldBase} w-full`} value={tags.join(", ")} placeholder="e.g. Humanoid, Undead"
+            onChange={(e) => set("tags", e.target.value.split(",").map((x) => x.trim()).filter(Boolean))} />
+        </div>
+        <div>
+          <label className={labelCls}>Level</label>
+          <input className={`${fieldBase} w-full`} inputMode="numeric" value={String(form.level ?? "1")}
+            onChange={(e) => set("level", e.target.value.replace(/[^\d]/g, ""))} />
+        </div>
+        <div>
+          <label className={labelCls}>Floor (F)</label>
+          <input className={`${fieldBase} w-full`} inputMode="numeric" value={String(form.floor ?? "1")}
+            onChange={(e) => set("floor", e.target.value.replace(/[^\d]/g, ""))} />
+        </div>
+        <div>
+          <label className={labelCls}>Size (1–8)</label>
+          <input className={`${fieldBase} w-full`} inputMode="numeric" value={String(form.size ?? "4")}
+            onChange={(e) => set("size", e.target.value.replace(/[^\d]/g, ""))} />
+        </div>
+      </div>
+
+      {/* stat point-buy */}
+      <div className="rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2">
+        <div className="mb-1 flex flex-wrap items-baseline gap-x-4 text-[12px]">
+          <span className="font-bold uppercase tracking-[0.1em] text-[var(--muted)]">Stat points</span>
+          <span>Base <b className="text-[var(--text)]">{statBase(role)}</b> each</span>
+          <span>Budget <b className="text-[var(--text)]">{budget}</b> ({boss ? `${boss.statsPerLevel}/Level, Boss` : "3/Level, Mob"})</span>
+          <span className={statsLeft < 0 ? "text-[#f0a8a3] font-bold" : ""}>Left <b>{statsLeft}</b></span>
+        </div>
+        <div className="grid grid-cols-5 gap-1.5">
+          {STAT_IDS.map((k) => {
+            const sc = scoreOf(k);
+            return (
+              <div key={k} className="rounded border border-[var(--border)] p-1.5 text-center">
+                <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{STAT_ABBR[k]}</div>
+                <input className={`${fieldBase} w-full px-1 py-1 text-center`} inputMode="numeric" value={String(scores[k] ?? statBase(role))}
+                  onChange={(e) => setScore(k, e.target.value)} />
+                <div className="mt-0.5 text-[10px] text-[var(--muted)]">mod {dccStatMod(sc) >= 0 ? "+" : ""}{dccStatMod(sc)}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* derived */}
+      <div className="rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2 text-[12px]">
+        <div className="mb-1 font-bold uppercase tracking-[0.1em] text-[var(--muted)]">Derived (from the rules)</div>
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          <span>HB slots <b className="text-[var(--text)]">{slots}</b> × {Math.max(1, conMod)} HP {boss ? "(Table 50 + F)" : "(Level, max 10)"}</span>
+          <span>Surprise <b className="text-[var(--text)]">{10 + intMod}+F</b></span>
+          <span>Evade <b className="text-[var(--text)]">{10 + dexMod}+F</b></span>
+          <span>DR <b className="text-[var(--text)]">{Math.max(1, floor)}</b> (Floor)</span>
+          <span>Main attack <b className="text-[var(--text)]">{dice}d</b>{boss ? " (build a row down for a Boss)" : ""} · area/rider −1d</span>
+        </div>
+        <button type="button" className={`${miniBtn} mt-2`} onClick={applyDerived}>Apply derived stats, HB & defences</button>
+        <p className="mt-1 text-[11px] text-[var(--muted)]">Fills the stat block below; you can still hand-edit Move, DR, and any value.</p>
+      </div>
+
+      {/* editable stat block (Move/DR/HB overrides + attacks + notes) */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <FieldView field={{ key: "move", label: "Move", type: "text", placeholder: "e.g. 20+S" }} value={form.move} onChange={(v) => set("move", v)} />
+        <FieldView field={{ key: "dr", label: "DR", type: "text", placeholder: 'number or "F"' }} value={form.dr} onChange={(v) => set("dr", v)} />
+        <FieldView field={{ key: "slotCount", label: "Health-Bar slots", type: "number" }} value={form.slotCount} onChange={(v) => set("slotCount", v)} />
+        <FieldView field={{ key: "hpPerSlot", label: "HP per slot", type: "number" }} value={form.hpPerSlot} onChange={(v) => set("hpPerSlot", v)} />
+        <FieldView field={{ key: "surprise", label: "Surprise", type: "text", placeholder: "e.g. 12+F" }} value={form.surprise} onChange={(v) => set("surprise", v)} />
+        <FieldView field={{ key: "evade", label: "Evade", type: "text", placeholder: "e.g. 13+F" }} value={form.evade} onChange={(v) => set("evade", v)} />
+        <FieldView
+          field={{ key: "attacks", label: `Attacks (main = ${dice}d, area/rider −1d)`, type: "objectList", full: true, addLabel: "+ Attack",
+            fields: [
+              { key: "name", label: "Name", type: "text", full: true, placeholder: "e.g. Claw" },
+              { key: "toHit", label: "To hit", type: "text", placeholder: "e.g. 13+F" },
+              { key: "damage", label: "Damage", type: "text", placeholder: `e.g. ${dice}d6+${Math.max(1, conMod)}` },
+              { key: "damageType", label: "Damage type", type: "text", placeholder: "e.g. Slashing" },
+              { key: "range", label: "Range", type: "text", placeholder: "e.g. 5ft range" },
+              { key: "rider", label: "Rider / on-hit effect", type: "textarea", full: true, placeholder: "e.g. On an Evade Major Fail, the crawler gains…" },
+            ] }}
+          value={attacks} onChange={(v) => set("attacks", v)} />
+        <FieldView field={{ key: "notes", label: "Notes (named abilities)", type: "stringList", full: true, placeholder: "Ability — rules text…", addLabel: "+ Note" }}
+          value={form.notes} onChange={(v) => set("notes", v)} />
+      </div>
     </div>
   );
 }
