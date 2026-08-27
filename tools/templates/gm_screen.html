@@ -2530,7 +2530,7 @@ GMScenes.renderPins();
           </label>
           <label class="gen-label">Type
             <select class="gen-select" id="gen-dccmagic-type">
-              <option value="">Roll Type (Table 38)</option>
+              <option value="">Random</option>
               <option value="39">Mundane Item / Weapon</option>
               <option value="40">Clothing</option>
               <option value="41">Accessory</option>
@@ -2751,6 +2751,8 @@ GMScenes.renderPins();
 <script src="/tools-data/dcc-items.js"></script>
 <script src="/tools-data/dcc-loot.js"></script>
 <script src="/tools-data/dcc-spells.js"></script>
+<script src="/tools-data/dcc-skills.js"></script>
+<script src="/tools-data/dcc-buffs.js"></script>
 
 <script>
 // ══════════════════════════════════════════
@@ -6070,6 +6072,59 @@ function dccRollX(spec) {
   if(r) { const a = +r[1], b = +r[2]; return sign + (a + Math.floor(Math.random() * (b - a + 1))); }
   return sign + s;
 }
+// Concrete-value pickers so a magic item names its actual stat / skill / buff /
+// spell / damage type instead of leaving "+X Skill", "A Buff", etc. abstract.
+const DCC_STAT_NAMES = ['STR', 'INT', 'CON', 'DEX', 'CHA'];
+const DCC_DMG_UNCOMMON = ['Acid', 'Cold', 'Fire', 'Lightning', 'Poison', 'Necrotic', 'Psychic', 'Radiant', 'Force', 'Sonic'];
+const DCC_BASE_ITEMS = {
+  '39': ['Longsword', 'Dagger', 'Warhammer', 'Spear', 'Mace', 'Battleaxe', 'Shortbow', 'Greatsword', 'Club', 'Crossbow'],
+  '40': ['Cap', 'Vest', 'Gloves', 'Boots', 'Cloak', 'Robe', 'Hood', 'Sash'],
+  '41': ['Ring', 'Amulet', 'Belt', 'Bracelet', 'Pendant', 'Circlet', 'Earring', 'Brooch'],
+};
+function dccPick(arr) { return arr && arr.length ? arr[Math.floor(Math.random() * arr.length)] : null; }
+function dccRandomStat() { return dccPick(DCC_STAT_NAMES); }
+function dccRandomSkillName(passiveOnly) {
+  if(typeof DCC_SKILLS === 'undefined' || !DCC_SKILLS.length) return null;
+  const pool = passiveOnly ? DCC_SKILLS.filter(s => s.passive) : DCC_SKILLS;
+  const s = dccPick(pool.length ? pool : DCC_SKILLS);
+  return s ? s.name : null;
+}
+function dccRandomBuff() {
+  if(typeof DCC_BUFFS === 'undefined' || !DCC_BUFFS.length) return null;
+  return dccPick(DCC_BUFFS);
+}
+// Turn a raw Table 39/40/41 property into a concrete enchantment line.
+function dccResolveProperty(propText, tierKey, typeTableNum) {
+  const parsed = dccParseX(tierKey && dccLootTier(tierKey) ? dccLootTier(tierKey).xValue : '');
+  const p = String(propText || '');
+  if(/\bX\b/.test(p)) {
+    const isSkill = /skill/i.test(p);
+    const rolled = parsed ? dccRollX(isSkill ? parsed.skill : parsed.stat) : '+?';
+    if(isSkill) { const sk = dccRandomSkillName(false); return rolled + ' to <b>' + (sk ? esc(sk) : 'a Skill') + '</b> <span style="opacity:.7">(Skill Rank)</span>'; }
+    const st = dccRandomStat(); return rolled + ' to <b>' + esc(st) + '</b>';
+  }
+  if(/^a buff/i.test(p) || /^a buff \(not/i.test(p)) {
+    const b = dccRandomBuff();
+    return b ? ('Grants the <b>' + esc(b.name) + '</b> buff <span style="opacity:.7">— ' + esc(b.effect) + '</span>') : 'Grants a Buff';
+  }
+  if(/passive skill/i.test(p)) {
+    const sk = dccRandomSkillName(true);
+    return 'Passive <b>' + (sk ? esc(sk) : 'Skill') + '</b> at Rank = Floor Number';
+  }
+  if(/inherent spell/i.test(p)) {
+    const sp = dccRandomSpell();
+    return 'Inherent Spell: <b>' + (sp ? esc(sp.name) : 'a Spell') + '</b> <span style="opacity:.7">(no Mana; GM-set cooldown)</span>';
+  }
+  if(/resistance to an uncommon damage type/i.test(p)) {
+    return 'Resistance to <b>' + esc(dccPick(DCC_DMG_UNCOMMON)) + '</b> damage';
+  }
+  if(/external buff of recovery/i.test(p)) {
+    return Math.random() < 0.5
+      ? 'External Buff of <b>Recovery</b> (full Health) once per Floor'
+      : 'External Buff of <b>Restore</b> (full Mana) once per Floor';
+  }
+  return esc(p);   // literal (e.g. "+1 Damage Resistance")
+}
 function genDccMagicItem(tierKey, forcedType) {
   const t38 = dccLootTable('38');
   if(!t38) return card('<div class="gen-empty">DCC loot tables didn’t load. Open the GM screen from the app.</div>');
@@ -6084,34 +6139,51 @@ function genDccMagicItem(tierKey, forcedType) {
     typeLabel = tr ? String(tr.result).replace(/\s*\(Table \d+\)\s*/, '') : (TYPE_LABELS[typeTableNum] || 'Enchanted Item');
   }
   const typeTable = dccLootTable(typeTableNum);
-  const prop = dccRollRow(typeTable);
   const tier = dccLootTier(tierKey);
   const xVal = tier ? tier.xValue : '';
-  let propText = prop ? prop.result : '';
-  let guidance = '';
-  // Roll a concrete X: "+X Skill Bonus" at Gold → "+2 Skill Bonus". Skill vs Stat
-  // picks the matching spec from the tier's guidance; percentages stay as-is.
-  if(/\bX\b/.test(propText)) {
-    const parsed = dccParseX(xVal);
-    if(parsed) {
-      const rolled = dccRollX(/skill/i.test(propText) ? parsed.skill : parsed.stat);
-      if(rolled) propText = propText.replace(/\+?X/, rolled);
-      guidance = ` <span style="opacity:.6">(${esc(tierKey)}: ${esc(xVal)})</span>`;
-    } else if(xVal) {
-      guidance = ` <span style="opacity:.6">(X = ${esc(xVal)})</span>`;
+  // Number of enchantment rolls scales with rarity (Silver 1 … Celestial 5, per the
+  // book's "rolls per gear item by box rarity"). All rolls are on the item's type table.
+  const nRolls = Math.max(1, (tier && typeof tier.gearRolls === 'number') ? tier.gearRolls : 1);
+  const base = dccPick(DCC_BASE_ITEMS[typeTableNum] || DCC_BASE_ITEMS['41']) || 'Item';
+  const seen = new Set();
+  const lines = [];       // { label, html }
+  let usedX = false, isUnique = false, forfeited = 0;
+  for(let i = 0; i < nRolls; i++) {
+    let prop = dccRollRow(typeTable);
+    const raw = prop ? prop.result : '';
+    // "Something Unique" (Table 42) — roll once and stop; the forfeited rolls
+    // concentrate its power (unique on roll 1 of 3 ≈ ×3).
+    if(/Something Unique|Table 42/i.test(raw)) {
+      const u = dccRollRow(dccLootTable('42'));
+      forfeited = nRolls - i - 1;
+      const mult = forfeited > 0 ? ` <span style="opacity:.7">(power ×${forfeited + 1} — ${forfeited} roll${forfeited === 1 ? '' : 's'} forfeited)</span>` : '';
+      lines.push({ label: 'Unique', html: (u ? esc(u.result) : 'Something Unique') + mult });
+      isUnique = true;
+      break;
     }
+    // Resolve concretely; re-roll an exact-duplicate property (can't apply the same one twice).
+    let html = dccResolveProperty(raw, tierKey, typeTableNum);
+    let tries = 0;
+    while(seen.has(html) && tries < 6) { prop = dccRollRow(typeTable); html = dccResolveProperty(prop ? prop.result : '', tierKey, typeTableNum); tries++; }
+    seen.add(html);
+    if(/\bstat\b|\bskill\b/i.test(raw)) usedX = true;
+    lines.push({ label: 'Enchantment', html: html });
   }
-  let unique = '';
-  if(prop && /Something Unique|Table 42/i.test(prop.result)) {
-    const u = dccRollRow(dccLootTable('42'));
-    if(u) unique = `<div class="gen-card-row"><span class="gen-card-row-label">Unique</span><span>${esc(u.result)}</span></div>`;
-  }
+  const multi = lines.filter(l => l.label === 'Enchantment').length > 1;
+  let n = 0;
+  const rowsHtml = lines.map(l => {
+    const lbl = (l.label === 'Enchantment' && multi) ? ('#' + (++n)) : l.label;
+    return `<div class="gen-card-row"><span class="gen-card-row-label">${esc(lbl)}</span><span>${l.html}</span></div>`;
+  }).join('');
+  const guidance = (usedX && xVal)
+    ? `<div class="gen-item-desc" style="opacity:.55;text-transform:none;">${esc(tierKey)} guideline: ${esc(xVal)}</div>` : '';
   const pageNote = (typeTable && typeTable.page) ? ' · p.' + esc(String(typeTable.page)) : '';
+  const countTag = isUnique ? 'Unique' : (nRolls + ' enchantment' + (nRolls === 1 ? '' : 's'));
   return card(
-    `<div class="gen-card-header"><span class="gen-card-name">${esc(tierKey)} Magic Item</span><span class="gen-card-tag">${esc(typeLabel || 'Enchanted Item')}</span></div>` +
-    `<div class="gen-card-row"><span class="gen-card-row-label">Property</span><span><b>${esc(propText)}</b>${guidance}</span></div>` +
-    unique +
-    `<div class="gen-item-desc" style="opacity:.7;text-transform:none;">Apply to a base item the party would use (Tables 38&ndash;42${pageNote}).</div>`
+    `<div class="gen-card-header"><span class="gen-card-name">Enchanted ${esc(base)}</span><span class="gen-card-tag">${esc(tierKey)} · ${esc(typeLabel || 'Enchanted Item')} · ${esc(countTag)}</span></div>` +
+    rowsHtml +
+    guidance +
+    `<div class="gen-item-desc" style="opacity:.6;text-transform:none;">Tables 38&ndash;42${pageNote} · rename to taste.</div>`
   );
 }
 
@@ -9755,6 +9827,29 @@ function init_party(root) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const mod = v => { const m = Math.floor(((parseInt(v)||10) - 10) / 2); return (m >= 0 ? '+' : '') + m; };
 
+  // Look up a DCC skill or spell for its details (spells ARE skills in DCC). Tries
+  // the reskin `src` first, then the name (parenthetical-stripped, then raw).
+  function dccDetail(name, src) {
+    const norm = t => String(t || '').toLowerCase().replace(/[^a-z]/g, '');
+    const cands = [src, String(name || '').replace(/\s*\([^)]*\)\s*$/, '').trim(), name].filter(Boolean);
+    const find = arr => {
+      for(const c of cands) { const n = norm(c); const hit = arr.find(x => norm(x.name) === n); if(hit) return hit; }
+      return null;
+    };
+    let e = (typeof DCC_SKILLS !== 'undefined') ? find(DCC_SKILLS) : null;
+    let kind = 'skill';
+    if(!e && typeof DCC_SPELLS !== 'undefined') { e = find(DCC_SPELLS); kind = 'spell'; }
+    if(!e) return '';
+    const bits = [];
+    if(kind === 'spell') { bits.push('Spell'); if(e.type) bits.push(e.type); if(e.mana != null) bits.push(e.mana + ' Mana'); }
+    else { bits.push(e.category === 'attack' ? 'Attack' : 'Utility'); if(e.group) bits.push(e.group); if(e.passive) bits.push('Passive'); if(e.interrupt) bits.push('Interrupt'); }
+    if(e.stat) bits.push(String(e.stat).toUpperCase());
+    if(e.damage) bits.push(e.damage + (e.range ? ' · ' + e.range : ''));
+    const meta = bits.length ? '<b>' + esc(bits.join(' · ')) + '</b><br>' : '';
+    const ups = (e.upgrades || []).map(u => '<br><b>Rank ' + esc(u.rank) + ':</b> ' + esc(u.text)).join('');
+    return meta + esc(e.desc || 'No description on file.') + ups;
+  }
+
   // Build a Party-tool summary from a Dungeon Crawler Carl sheet's saved data.
   // Everything the DCC card shows is computed here from the raw sheet: stat mods
   // use the sheet's enhanced/unenhanced source, and evade/DR/mana totals mirror
@@ -9788,7 +9883,7 @@ function init_party(root) {
       // (with rank + linked stat) so the GM can see what each crawler can do.
       skills:  Array.isArray(d.skills) ? d.skills
                  .filter(s => s && String(s.name || '').trim())
-                 .map(s => ({ name: s.name, rank: s.rank || '', stat: s.stat || '' })) : [],
+                 .map(s => ({ name: s.name, rank: s.rank || '', stat: s.stat || '', src: s.src || '' })) : [],
     };
   }
 
@@ -9956,11 +10051,16 @@ function init_party(root) {
     }
 
     if(c.skills && c.skills.length) {
-      const rows = c.skills.map(s => {
+      const rows = c.skills.map((s, i) => {
         const st = s.stat ? ' ' + esc(String(s.stat).toUpperCase()) : '';
         const rank = String(s.rank).trim();
         const meta = [rank ? 'Rank ' + esc(rank) : 'Untrained', st.trim()].filter(Boolean).join(' · ');
-        return '<div class="pty-line"><b>' + esc(s.name) + '</b> <span class="dim">' + meta + '</span></div>';
+        const det = dccDetail(s.name, s.src);
+        const key = entry.id + '-sk-' + i;
+        const info = det
+          ? '<button class="pty-spell-info" data-spell="' + key + '" title="Show details" aria-label="Show skill details">ⓘ</button>' : '';
+        return '<div class="pty-line"><b>' + esc(s.name) + '</b>' + info + ' <span class="dim">' + meta + '</span></div>'
+             + (det ? '<div class="pty-spell-desc" data-desc="' + key + '" style="display:none;">' + det + '</div>' : '');
       }).join('');
       h += secBlock('Skills', c.skills.length, rows);
     }
