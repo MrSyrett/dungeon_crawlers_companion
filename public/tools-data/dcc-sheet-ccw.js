@@ -764,13 +764,20 @@
     const skills = Object.values(skillRank).map((s) => ({ name: s.name, rank: String(s.rank), stat: s.stat, checkType: s.checkType, notes: s.notes, checked: false }));
 
     const _b = baseAttack();
+    const primaryRank = Math.min(10, 3 + bP());   // one roll — shared by the attack row and its skill entry
     const atks = [{ name: _b.name, rank: String(Math.min(10, 3 + b1())), dice: _b.dice, stat: _b.stat, effects: "" }];
+    // The chosen combat specialty goes in BOTH the Attacks section and the Skills list
+    // (attack skills live in both; Core p.176), linked by `src` to its rulebook original.
     if (W.combat.type === "weapon" && W.combat.weapon) {
       const sd = skillByName(W.combat.weapon), disp = combatDisplayName() || W.combat.weapon;
-      atks.push({ name: disp, rank: String(Math.min(10, 3 + bP())), dice: sd && sd.damage ? sd.damage : "", stat: (sd && sd.stat ? String(sd.stat).toLowerCase() : "str"), effects: (disp !== W.combat.weapon ? W.combat.weapon + " skill" : "") });
+      const st = (sd && sd.stat ? String(sd.stat).toLowerCase() : "str");
+      atks.push({ name: disp, rank: String(primaryRank), dice: sd && sd.damage ? sd.damage : "", stat: st, effects: (disp !== W.combat.weapon ? W.combat.weapon + " skill" : ""), src: W.combat.weapon });
+      skills.push({ name: disp, rank: String(primaryRank), stat: st, checkType: "Active", notes: (sd && sd.group ? sd.group : "Weapon Skill"), checked: false, src: W.combat.weapon });
     } else if (W.combat.type === "spell" && W.combat.spell) {
       const sp = basicSpells().find((s) => s.name === W.combat.spell), disp = combatDisplayName() || W.combat.spell;
-      atks.push({ name: disp + " (Spell)", rank: String(Math.min(10, 3 + bP())), dice: "", stat: (sp ? String(sp.stat).toLowerCase() : "int"), effects: [sp ? sp.mana + " Mana" : "", disp !== W.combat.spell ? W.combat.spell : ""].filter(Boolean).join(" · ") });
+      const st = (sp ? String(sp.stat).toLowerCase() : "int");
+      atks.push({ name: disp + " (Spell)", rank: String(primaryRank), dice: "", stat: st, effects: [sp ? sp.mana + " Mana" : "", disp !== W.combat.spell ? W.combat.spell : ""].filter(Boolean).join(" · "), src: W.combat.spell });
+      skills.push({ name: disp, rank: String(primaryRank), stat: st, checkType: "Spell", notes: [sp ? sp.mana + " Mana" : "", sp && sp.type ? sp.type : ""].filter(Boolean).join(" · "), checked: false, src: W.combat.spell });
     }
     // Loot: the tiered weapon adds Weapon-Skill ranks to the primary attack.
     if (third && W.loot && atks[1]) {
