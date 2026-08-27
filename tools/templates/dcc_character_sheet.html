@@ -579,7 +579,7 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
       <tbody id="inv-body"></tbody>
     </table>
     <div class="skill-actions-row">
-      <button class="add-btn" onclick="addInvRow()">+ Add Item</button>
+      <button class="add-btn" onclick="if(window.DCCItems){DCCItems.openPicker()}else{addInvRow()}">+ Add Item</button>
       <button class="add-btn" style="background:#8a5a2f;" onclick="if(window.DCCLoot)DCCLoot.open()" title="Roll a loot box: gold, consumables and gear added to your inventory">🎁 Loot Box</button>
     </div>
   </div>
@@ -2768,5 +2768,6 @@ autoLoad();
   <script src="/tools-data/dcc-sheet-skills.js"></script>
   <script src="/tools-data/dcc-sheet-hotlist.js"></script>
   <script src="/tools-data/dcc-sheet-loot.js"></script>
+  <script src="/tools-data/dcc-sheet-inv-picker.js"></script>
 </body>
 </html>
