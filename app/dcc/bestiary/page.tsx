@@ -66,6 +66,13 @@ const chipOff =
   "border-[var(--border)] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]";
 const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
 
+// Health-bar segment colour, red→orange→yellow→green across the bar — mirrors the
+// GM screen tracker's dccSegColor so a creature reads the same in both places.
+const HB_BANDS = ["#b82018", "#c08020", "#c8a020", "#4caf50"];
+function segColor(i: number, total: number): string {
+  return HB_BANDS[Math.min(3, Math.floor((i * 4) / Math.max(1, total)))];
+}
+
 export default async function DccBestiaryPage({
   searchParams,
 }: {
@@ -158,7 +165,6 @@ export default async function DccBestiaryPage({
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 items-start">
           {results.map((m, i) => {
-            const isBoss = m.role.endsWith("Boss");
             return (
               <li key={`${m.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -172,20 +178,38 @@ export default async function DccBestiaryPage({
                   <div className="mt-1 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">{m.tags.join(" · ")}</div>
                 ) : null}
 
-                {/* Derived line: Surprise / Evade / Move / DR / HB slots */}
-                <div className="mt-2 grid grid-cols-5 gap-1.5 text-center">
+                {/* Derived line: Surprise / Evade / Move / DR */}
+                <div className="mt-2 grid grid-cols-4 gap-1.5 text-center">
                   {[
                     ["Surprise", m.surprise],
                     ["Evade", m.evade],
                     ["Move", m.move],
                     ["DR", String(m.dr)],
-                    ["HB", `${m.hbSlots.length}`],
                   ].map(([label, value]) => (
                     <div key={label} className="rounded border border-[var(--border)] px-1 py-1.5">
                       <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">{label}</div>
                       <div className="text-[13px] font-semibold tabular-nums text-[var(--text)]">{value}</div>
                     </div>
                   ))}
+                </div>
+
+                {/* Health Bar — read-only segments (each box = one slot's HP), coloured
+                    like the GM tracker. Not interactive. */}
+                <div className="mt-2">
+                  <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+                    Health Bar · {m.hbSlots.length} {m.hbSlots.length === 1 ? "slot" : "slots"}
+                  </div>
+                  <div className="flex flex-wrap gap-1" aria-label={`Health Bar, ${m.hbSlots.length} slots`}>
+                    {m.hbSlots.map((hp, si) => (
+                      <div
+                        key={si}
+                        className="flex h-6 min-w-[24px] flex-1 items-center justify-center rounded-sm text-[10px] font-bold text-black"
+                        style={{ backgroundColor: segColor(si, m.hbSlots.length) }}
+                      >
+                        {hp}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Stat block */}
@@ -227,11 +251,6 @@ export default async function DccBestiaryPage({
                   </ul>
                 ) : null}
 
-                {isBoss ? (
-                  <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
-                    Boss · {m.hbSlots.length} Health Bar slots
-                  </p>
-                ) : null}
               </li>
             );
           })}
