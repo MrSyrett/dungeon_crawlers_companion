@@ -149,6 +149,7 @@
   function freshState() {
     return {
       step: 0,
+      maxStep: 0,       // furthest step validly reached (for pip navigation)
       mode: "create",   // 'create' | 'upgrade' (reach Floor 3)
       existing: null,   // upgrade: the sheet state read at launch (collectSheet())
       path: "tutorial", // create: 'tutorial' | 'thirdfloor'
@@ -203,6 +204,8 @@
     .dccw-pip{font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:4px 8px;border-radius:5px;border:1px solid #2a2a2e;color:#8a8a93;}
     .dccw-pip.on{border-color:#b82018;color:#f0a8a3;background:#1c1516;}
     .dccw-pip.done{color:#ece9e1;}
+    .dccw-pip.nav{cursor:pointer;}
+    .dccw-pip.nav:hover{border-color:#b82018;color:#f0a8a3;}
     .dccw-body{padding:20px;min-height:240px;}
     .dccw-body h3{margin:0 0 4px;font-size:15px;color:#fff;text-transform:uppercase;letter-spacing:.03em;}
     .dccw-hint{color:#8a8a93;font-size:12px;margin:0 0 14px;line-height:1.5;}
@@ -338,15 +341,20 @@
     if (!ov || !W) return;
     clampStep();
     const STEPS = steps();
+    if (W.maxStep == null || W.maxStep < W.step) W.maxStep = W.step;   // furthest validly reached
+    if (W.maxStep > STEPS.length - 1) W.maxStep = STEPS.length - 1;
     const key = STEPS[W.step].key;
     const body = ({
       intro: renderUpgradeIntro, basics: renderBasics, race: renderRace, class: renderClass, stats: renderStats, background: renderBackground,
       combat: renderCombat, experiences: renderExperiences, statpoints: renderStatPoints, loot: renderLoot,
       story: renderStory, gear: renderGear, review: renderReview,
     })[key]();
-    const pips = STEPS.map((st, i) =>
-      `<span class="dccw-pip ${i === W.step ? "on" : i < W.step ? "done" : ""}">${i + 1}. ${st.title}</span>`
-    ).join("");
+    // Pips are clickable to jump to any step already reached (≤ maxStep).
+    const pips = STEPS.map((st, i) => {
+      const cls = i === W.step ? "on" : i < W.step ? "done" : "";
+      const nav = i <= W.maxStep && i !== W.step;
+      return `<span class="dccw-pip ${cls}${nav ? " nav" : ""}"${nav ? ` onclick="DCCW.goto(${i})"` : ""}>${i + 1}. ${st.title}</span>`;
+    }).join("");
     const last = W.step === STEPS.length - 1;
     const title = isUpgrade() ? "Reach the Third Floor" : "Crawler Creation";
     const finishLabel = isUpgrade() ? "✓ Apply Upgrade" : "✓ Create Character";
@@ -379,16 +387,17 @@
           <div style="display:flex;gap:6px;"><input type="text" value="${esc(W.basics.crawler)}" oninput="DCCW.setBasic('crawler',this.value)"><button class="dccw-btn" onclick="DCCW.rollCrawler()" title="New number">🎲</button></div>
         </div>
         <div class="dccw-field"><label>Starting point</label>
-          <div class="dccw-seg">
-            <button class="${W.path === "tutorial" ? "on" : ""}" onclick="DCCW.setPath('tutorial')">Tutorial (Lvl 1)</button>
-            <button class="${W.path === "thirdfloor" ? "on" : ""}" onclick="DCCW.setPath('thirdfloor')">Third Floor+</button>
-          </div>
+          <select onchange="DCCW.setPath(this.value)">
+            <option value="tutorial" ${W.path === "tutorial" ? "selected" : ""}>Tutorial (Lvl 1)</option>
+            <option value="thirdfloor" ${W.path === "thirdfloor" ? "selected" : ""}>Third Floor+</option>
+          </select>
         </div>
       </div>
       ${isThird() ? `
-      <div class="dccw-row"><div class="dccw-field"><label>Starting floor</label><div class="dccw-seg">
-        ${[3, 4, 5].map((f) => `<button class="${W.floor === f ? "on" : ""}" onclick="DCCW.setFloor(${f})">Floor ${f} · Lvl ${FLOOR_CFG[f].level}</button>`).join("")}
-      </div></div></div>
+      <div class="dccw-row"><div class="dccw-field"><label>Starting floor</label>
+        <select onchange="DCCW.setFloor(parseInt(this.value,10))">
+        ${[3, 4, 5].map((f) => `<option value="${f}" ${W.floor === f ? "selected" : ""}>Floor ${f} · Lvl ${FLOOR_CFG[f].level}</option>`).join("")}
+        </select></div></div>
       <p class="dccw-sub">Fast-forward: you'll build the crawler's foundation, then jump to <b>Level ${FLOOR_CFG[W.floor].level}</b> — add a Class, ${FLOOR_CFG[W.floor].experiences} Experiences, ${FLOOR_CFG[W.floor].statPoints} stat points, and starting loot. Skills and your attack get their fast-forward rank boosts automatically.</p>` : ""}`;
   }
 
@@ -401,10 +410,11 @@
         <h3>Human or Animal?</h3>
         <p class="dccw-hint">On the tutorial floors racial stat bonuses don't apply yet — but <b>animal crawlers</b> draw from different Background tables and start combat with <b>Slice Attack</b> instead of Unarmed Combat. Pick your kind; you'll choose a full Race with real benefits when you upgrade at Floor 3.</p>
         <div class="dccw-row">
-          <div class="dccw-field"><label>Kind</label><div class="dccw-seg">
-            <button class="${W.kind === "human" ? "on" : ""}" onclick="DCCW.setKind('human')">Human</button>
-            <button class="${W.kind === "animal" ? "on" : ""}" onclick="DCCW.setKind('animal')">Animal</button>
-          </div></div>
+          <div class="dccw-field"><label>Kind</label>
+            <select onchange="DCCW.setKind(this.value)">
+              <option value="human" ${W.kind === "human" ? "selected" : ""}>Human</option>
+              <option value="animal" ${W.kind === "animal" ? "selected" : ""}>Animal</option>
+            </select></div>
           <div class="dccw-field"><label>Name it (optional)</label><input type="text" value="${esc(W.race)}" oninput="DCCW.setRaceText(this.value)" placeholder="${W.kind === "animal" ? "e.g. Cat, Corgi, Axolotl" : "Human"}"></div>
         </div>
         ${W.kind === "animal" ? `<p class="dccw-sub">Animal crawlers use Youth / Training / Adult / Quirk backgrounds and natural attacks (Back Claw, Bite). AI Favor starts at 0 instead of 1.</p>` : ""}`;
@@ -573,10 +583,11 @@
     }).join("") + `</div>`;
     return `
       <h3>Roll up your stats</h3>
-      <div class="dccw-row"><div class="dccw-field"><label>Method</label><div class="dccw-seg">
-        <button class="${W.statMethod === "array" ? "on" : ""}" onclick="DCCW.setStatMethod('array')">Standard Array</button>
-        <button class="${W.statMethod === "roll" ? "on" : ""}" onclick="DCCW.setStatMethod('roll')">Roll 1d6</button>
-      </div></div></div>
+      <div class="dccw-row"><div class="dccw-field"><label>Method</label>
+        <select onchange="DCCW.setStatMethod(this.value)">
+          <option value="array" ${W.statMethod === "array" ? "selected" : ""}>Standard Array</option>
+          <option value="roll" ${W.statMethod === "roll" ? "selected" : ""}>Roll 1d6</option>
+        </select></div></div>
       ${assign}
       <p class="dccw-sub">Big number = your <b>Score</b>${isThird() ? ` (base + ${esc(W.race)} race + class mods, shown small)` : ""}. The <b>mod</b> is derived from the score — they aren't added together.</p>
       ${grid}
@@ -628,10 +639,11 @@
     const fin = finalStats();
     const canSpell = fin.int >= 4;
     let h = `<h3>Combat training</h3><p class="dccw-hint">Every crawler starts with <b>${baseAttack().name} at Rank 3</b>. Then choose one specialty at Rank 3. You can rename your pick.</p>`;
-    h += `<div class="dccw-row"><div class="dccw-field"><label>Specialty</label><div class="dccw-seg">
-      <button class="${W.combat.type === "weapon" ? "on" : ""}" onclick="DCCW.setCombatType('weapon')">Weapon Skill</button>
-      <button class="${W.combat.type === "spell" ? "on" : ""}" onclick="DCCW.setCombatType('spell')">Attack Spell</button>
-    </div></div></div>`;
+    h += `<div class="dccw-row"><div class="dccw-field"><label>Specialty</label>
+      <select onchange="DCCW.setCombatType(this.value)">
+        <option value="weapon" ${W.combat.type === "weapon" ? "selected" : ""}>Weapon Skill</option>
+        <option value="spell" ${W.combat.type === "spell" ? "selected" : ""}>Attack Spell</option>
+      </select></div></div>`;
     if (W.combat.type === "weapon") {
       const weapons = attackSkills();
       const groups = [...new Set(weapons.map((w) => w.group))];
@@ -758,8 +770,8 @@
       skillRank[key].rank = Math.min(10, skillRank[key].rank + rank);
       if (note && skillRank[key].notes.indexOf(note) === -1) skillRank[key].notes = skillRank[key].notes ? skillRank[key].notes + "; " + note : note;
     }
+    addSkill("Heal", 1, "Spell · heals 2 HB slots, 2 Mana");   // always first, capped at Rank 1
     ERAS.forEach((era) => { const c = W.bg[era]; if (!c) return; (c.skills || []).forEach((name) => addSkill(name, ERA_RANK[era] + b1(), eraLabel(era) + " — " + bgDisplayName(era))); });
-    addSkill("Heal", 1, "Spell · heals 2 HB slots, 2 Mana");
     if (third) W.experiences.forEach((slot) => { const p = slot.skills || []; if (p[0]) addSkill(p[0], d(4), "Experience"); if (p[1]) addSkill(p[1], d(2), "Experience"); });
     const skills = Object.values(skillRank).map((s) => ({ name: s.name, rank: String(s.rank), stat: s.stat, checkType: s.checkType, notes: s.notes, checked: false }));
 
@@ -981,7 +993,8 @@
   const API = {
     open, openUpgrade, close, finish, launch, refreshButton,
     back() { if (W.step > 0) { W.step--; render(); } },
-    next() { if (!canAdvance()) { render(); return; } W.step++; render(); },
+    next() { if (!canAdvance()) { render(); return; } W.step++; W.maxStep = Math.max(W.maxStep || 0, W.step); render(); },
+    goto(i) { if (i >= 0 && i <= (W.maxStep || 0) && i < steps().length) { W.step = i; render(); } },
     set(key, val) { W[key] = val; render(); },
     setBasic(k, v) { W.basics[k] = v; },
     rollCrawler() { W.basics.crawler = String(500000 + Math.floor(Math.random() * 12400000)); render(); },
@@ -1027,7 +1040,7 @@
     setStory(k, v) { W.story[k] = v; },
     setGear(k, v) { W.gear[k] = v; },
     // Third-Floor+ ------------------------------------------------------------
-    setPath(p) { W.path = p; clampStep(); render(); },
+    setPath(p) { W.path = p; W.maxStep = W.step; clampStep(); render(); },
     setFloor(f) { W.floor = f; W.experiences = []; render(); },
     setClass(v) { W.class = v; render(); },
     setExp(idx, name) { if (W.experiences[idx]) { W.experiences[idx] = { exp: name, skills: [] }; render(); } },

@@ -94,8 +94,18 @@
     if (!tr) return;
     var name = norm(rowNameOf(btn));
     if (!name) return;
-    if (isPinned(name)) remove(name);
-    else if (!addText(pinnedText(tr))) { try { alert("The Hotlist is full (10 slots). Clear one to add another."); } catch (e) {} }
+    var inInv = tr.closest && tr.closest("#inv-body");
+    var wasPinned = isPinned(name);
+    if (wasPinned) remove(name);
+    else if (!addText(pinnedText(tr))) { try { alert("The Hotlist is full (10 slots). Clear one to add another."); } catch (e) {} refreshAll(); return; }
+    // A spell's Hotlist state mirrors its Attacks row: pinning adds one, unpinning
+    // removes it (only for attack spells — utility/heal spells have no attack row).
+    if (!inInv && window.DCCSkills) {
+      try {
+        if (wasPinned) DCCSkills.removeAttackForRow(tr);
+        else DCCSkills.addAttackForRow(tr);
+      } catch (e) {}
+    }
     refreshAll();
   }
 

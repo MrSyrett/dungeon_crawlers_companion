@@ -293,6 +293,25 @@
   function addToSheet(name, e) {
     fillRow(newRow(), name, e);                                  // always goes on the Skills list
     if (isAttackEntry(e)) fillAttackRow(newAttackRow(), name, e); // …and the Attacks section too
+    if (typeof floatHealToTop === "function") { try { floatHealToTop(); } catch (_) {} }
+  }
+
+  // ── attack rows keyed to a Skills-tab row (used by the Hotlist spell pin) ───
+  function attackRowMatches(tr, keys) {
+    var texts = tr.querySelectorAll('input[type="text"]');
+    var nm = texts[0] ? String(texts[0].value) : "";
+    var nmStripped = nm.replace(/\s*\(spell\)\s*$/i, "").trim().toLowerCase();
+    var src = (tr.dataset && tr.dataset.src ? tr.dataset.src : "").toLowerCase();
+    return keys.some(function (k) { k = String(k || "").toLowerCase(); return !!k && (k === src || k === nmStripped || k === nm.toLowerCase()); });
+  }
+  function findAttackRows(keys) {
+    return [].slice.call(document.querySelectorAll("#attacks-body tr")).filter(function (tr) { return attackRowMatches(tr, keys); });
+  }
+  function rowKeys(tr) {
+    var texts = tr.querySelectorAll('input[type="text"]');
+    var name = texts[0] ? String(texts[0].value).trim() : "";
+    var src = tr.dataset && tr.dataset.src ? tr.dataset.src : "";
+    return [src, name].filter(Boolean);
   }
 
   window.DCCSkills = {
@@ -315,5 +334,24 @@
       closePicker();
     },
     addBlank: function () { newRow(); closePicker(); },
+    // Mirror a Skills-tab spell into the Attacks section (used by the Hotlist pin).
+    // Only attack skills/spells get an attack row; no-op for utility/heal or duplicates.
+    addAttackForRow: function (tr) {
+      if (!tr) return false;
+      var texts = tr.querySelectorAll('input[type="text"]');
+      var name = texts[0] ? String(texts[0].value).trim() : "";
+      var src = tr.dataset && tr.dataset.src ? tr.dataset.src : "";
+      var e = lookup(src) || lookup(name);
+      if (!isAttackEntry(e)) return false;
+      if (findAttackRows(rowKeys(tr)).length) return false;   // already present
+      fillAttackRow(newAttackRow(), name || e.name, e);
+      return true;
+    },
+    removeAttackForRow: function (tr) {
+      if (!tr) return false;
+      var rows = findAttackRows(rowKeys(tr));
+      rows.forEach(function (r) { r.remove(); });
+      return rows.length > 0;
+    },
   };
 })();

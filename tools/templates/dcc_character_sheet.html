@@ -937,6 +937,33 @@ function buildSkills() {
   for(let i=0;i<12;i++) addSkillRow();
 }
 
+// Heal is capped at Rank 1 and never advances, so its row shows no advancement
+// checkbox. Any Heal row is also floated to the very top of the list.
+function isFixedSkill(name) { return String(name||'').trim().toLowerCase() === 'heal'; }
+function refreshSkillRowRules() {
+  const tbody = document.getElementById('skills-body');
+  if(!tbody) return;
+  tbody.querySelectorAll('tr').forEach(tr => {
+    const nameInp = tr.querySelector('input[type="text"]');
+    const chk = tr.querySelector('input[type="checkbox"]');
+    if(!chk) return;
+    const fixed = isFixedSkill(nameInp ? nameInp.value : '');
+    chk.style.visibility = fixed ? 'hidden' : '';
+    if(fixed && chk.checked) chk.checked = false;
+  });
+}
+// Float any Heal row to the very top. Called on load / after adds — NOT on every
+// keystroke, which would yank a row the player is mid-typing.
+function floatHealToTop() {
+  const tbody = document.getElementById('skills-body');
+  if(!tbody) return;
+  const healRow = [...tbody.querySelectorAll('tr')].find(tr => {
+    const n = tr.querySelector('input[type="text"]'); return n && isFixedSkill(n.value);
+  });
+  if(healRow && tbody.firstElementChild !== healRow) tbody.insertBefore(healRow, tbody.firstElementChild);
+  refreshSkillRowRules();
+}
+
 // ── INVENTORY ──
 function addInvRow() {
   const tbody = document.getElementById('inv-body');
@@ -1105,7 +1132,7 @@ function rollAttack(btn) {
   const statLabel = statId ? `+${statId.toUpperCase()}(${statMod})` : '';
   const diceStr = inputs[2].value || 'd6';
 
-  const {result: hitRoll, detail: advDetail} = rollWithAdv(20);
+  const {result: hitRoll, detail: advDetail} = rollWithAdv(20, untrainedDis(inputs[1]));
   const hitTotal = hitRoll + rank + statMod;
   const hitStatLabel = statLabel;
   let type = hitRoll===20?'crit':hitRoll===1?'fumble':'normal';
@@ -1141,7 +1168,7 @@ function rollSkill(btn) {
   const statId = sel?.value||'';
   const statMod = statId ? getStatMod(statId) : 0;
   const totalMod = rank + statMod;
-  const {result: roll, detail: advDetail} = rollWithAdv(20);
+  const {result: roll, detail: advDetail} = rollWithAdv(20, untrainedDis(inputs[1]));
   const total = roll + totalMod;
   let type = roll===20?'crit':roll===1?'fumble':'normal';
   const statLabel = statId ? ` + ${statId.toUpperCase()}(${statMod})` : '';
@@ -1225,16 +1252,24 @@ function clearAdv() {
 }
 
 // Roll a single die with optional adv/dis applied (only for d20s)
-function rollWithAdv(sides) {
+function rollWithAdv(sides, extra) {
+  // `extra` forces a state for this roll (e.g. 'disadvantage' for an untrained skill).
+  // A forced state combines with the global toggle: matching stacks, opposite cancels.
+  let mode = advState || null;
+  if(extra) mode = !mode ? extra : (mode === extra ? mode : null);
   const r1 = Math.floor(Math.random()*sides)+1;
-  if(sides !== 20 || !advState) return { result: r1, detail: null };
+  if(sides !== 20 || !mode) {
+    return { result: r1, detail: (extra && !mode ? `(adv+dis cancel) ${r1}` : null) };
+  }
   const r2 = Math.floor(Math.random()*sides)+1;
-  if(advState === 'advantage') {
+  if(mode === 'advantage') {
     return { result: Math.max(r1,r2), detail: `adv[${r1},${r2}]→${Math.max(r1,r2)}` };
   } else {
     return { result: Math.min(r1,r2), detail: `dis[${r1},${r2}]→${Math.min(r1,r2)}` };
   }
 }
+// Untrained = no positive Rank (blank or 0) → the check rolls at Disadvantage (Core p.173).
+function untrainedDis(rankInput) { return (parseInt(rankInput ? rankInput.value : '', 10) > 0) ? null : 'disadvantage'; }
 
 // ── DICE TRAY ──
 let dicePool = []; // array of sides e.g. [20, 6, 6, 4]
@@ -1512,6 +1547,7 @@ function applySheet(data) {
   // Theme — only override when the save actually carried a choice, so older
   // saves (no darkMode field) keep the localStorage-driven default.
   if(typeof data.darkMode === 'boolean') setDarkMode(data.darkMode);
+  try { floatHealToTop(); } catch(e) {}                                    // Heal to top, hide its checkbox
   try { if(window.DCCHotlist) window.DCCHotlist.refresh(); } catch(e) {}   // sync Hotlist pin states
 }
 
@@ -2094,6 +2130,8 @@ buildHotlist();
 buildAccessories();
 buildSkills();
 buildInventory();
+document.getElementById('skills-body').addEventListener('input', refreshSkillRowRules);
+refreshSkillRowRules();
 // autoLoad() is deferred to the end of the campaign <script> block below, so
 // campaignRestore() is defined by the time applySheet() calls it. Running it
 // here (before that block parses) silently skipped campaign restore.
