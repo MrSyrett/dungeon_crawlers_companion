@@ -2174,6 +2174,9 @@ GMScenes.renderPins();
         <option value="encounter">Encounter</option>
         <option value="shop">Shop/Tavern</option>
         <option value="loot">Treasure</option>
+        <option value="dccloot">DCC Loot Box</option>
+        <option value="dccmagic">DCC Magic Item</option>
+        <option value="dccitem">DCC Item</option>
       </select>
       <div class="toolbar-spacer"></div>
       <button class="btn small primary gen-roll" title="Generate" aria-label="Generate"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button>
@@ -2485,6 +2488,103 @@ GMScenes.renderPins();
         </div>
       </div>
 
+      <!-- DCC LOOT BOX PANEL -->
+      <div class="gen-panel" data-panel="dccloot">
+        <div class="gen-controls">
+          <label class="gen-label">Loot Box Tier
+            <select class="gen-select" id="gen-dccloot-tier">
+              <option value="Bronze">Bronze</option>
+              <option value="Silver">Silver</option>
+              <option value="Gold">Gold</option>
+              <option value="Platinum">Platinum</option>
+              <option value="Legendary">Legendary</option>
+              <option value="Celestial">Celestial</option>
+            </select>
+          </label>
+          <label class="gen-label">Boxes
+            <select class="gen-select" id="gen-dccloot-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dccloot-results">
+          <div class="gen-empty">Pick a tier and press Generate &mdash; gold, consumables, and the tier&rsquo;s gear are drawn from the DCC catalog.</div>
+        </div>
+      </div>
+
+      <!-- DCC MAGIC ITEM PANEL (Tables 38–42 randomized magic-item generator) -->
+      <div class="gen-panel" data-panel="dccmagic">
+        <div class="gen-controls">
+          <label class="gen-label">Rarity (X value)
+            <select class="gen-select" id="gen-dccmagic-tier">
+              <option value="Silver">Silver</option>
+              <option value="Gold">Gold</option>
+              <option value="Platinum">Platinum</option>
+              <option value="Legendary">Legendary</option>
+              <option value="Celestial">Celestial</option>
+            </select>
+          </label>
+          <label class="gen-label">Type
+            <select class="gen-select" id="gen-dccmagic-type">
+              <option value="">Roll Type (Table 38)</option>
+              <option value="39">Mundane Item / Weapon</option>
+              <option value="40">Clothing</option>
+              <option value="41">Accessory</option>
+            </select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-dccmagic-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dccmagic-results">
+          <div class="gen-empty">Rolls a random enchanted property (Tables 38&ndash;42) at the chosen rarity &mdash; put it on a base item the party would use.</div>
+        </div>
+      </div>
+
+      <!-- DCC ITEM PANEL (random draw from the item catalog) -->
+      <div class="gen-panel" data-panel="dccitem">
+        <div class="gen-controls">
+          <label class="gen-label">Category
+            <select class="gen-select" id="gen-dccitem-cat">
+              <option value="">Any Category</option>
+              <option value="consumable">Consumables</option>
+              <option value="weapon">Weapons</option>
+              <option value="armor">Armor</option>
+              <option value="accessory">Accessories</option>
+              <option value="scroll">Scrolls</option>
+              <option value="tome">Tomes</option>
+              <option value="mundane">Mundane</option>
+              <option value="tool">Tools</option>
+              <option value="material">Materials</option>
+            </select>
+          </label>
+          <label class="gen-label">Tier
+            <select class="gen-select" id="gen-dccitem-tier">
+              <option value="">Any Tier</option>
+              <option value="Bronze">Bronze</option>
+              <option value="Silver">Silver</option>
+              <option value="Gold">Gold</option>
+              <option value="Platinum">Platinum</option>
+              <option value="Legendary">Legendary</option>
+              <option value="Celestial">Celestial</option>
+            </select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-dccitem-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dccitem-results">
+          <div class="gen-empty">Draws random named items from the DCC catalog &mdash; filter by category and/or tier.</div>
+        </div>
+      </div>
+
       <!-- SHOP / TAVERN PANEL -->
 
       <!-- ADVENTURE GENERATOR PANEL -->
@@ -2641,6 +2741,12 @@ GMScenes.renderPins();
     </div>
   </div>
 </template>
+
+<!-- DCC data layer — bestiary, items, and loot tables for the DCC generators
+     and the Trackers monster picker. Generated from data/dcc/*.json. -->
+<script src="/tools-data/dcc-monsters.js"></script>
+<script src="/tools-data/dcc-items.js"></script>
+<script src="/tools-data/dcc-loot.js"></script>
 
 <script>
 // ══════════════════════════════════════════
@@ -3493,6 +3599,91 @@ function init_trackers(root) {
     };
   }
 
+  // ── DCC bestiary creatures as combatants ──
+  // A DCC creature becomes a DCC-mode NPC card: its Health Bar slots drive the
+  // card's segments (each slot = its HP), and a `dmon` snapshot carries the DCC
+  // stat block (Evade / DR / Surprise / Move, the five stats, attacks + riders,
+  // and special notes). Mirrors monsterItem(), but for the DCC data shape.
+  function dccMonsterItem(m) {
+    const slots = Array.isArray(m.hbSlots) && m.hbSlots.length ? m.hbSlots : [10];
+    // Segments share one HP value in the UI, so use the most common slot size.
+    const counts = {};
+    slots.forEach(v => { counts[v] = (counts[v] || 0) + 1; });
+    const segHp = parseInt(Object.keys(counts).sort((a,b) => counts[b] - counts[a])[0], 10) || 10;
+    const totalHp = slots.reduce((a,v) => a + (parseInt(v,10) || 0), 0);
+    return {
+      id: nextId++, type: 'npc',
+      name: m.name || 'Monster',
+      tag: m.role || '',
+      hpMode: 'dcc',
+      segCount: slots.length,
+      segHp: segHp,
+      segments: slots.map(() => true),
+      statuses: [],
+      statsOpen: true, traitsOpen: false,
+      dmon: {
+        role: m.role || '', level: (m.level != null ? m.level : ''), size: (m.size != null ? m.size : ''),
+        tags: Array.isArray(m.tags) ? m.tags.slice() : [],
+        surprise: m.surprise || '', evade: m.evade || '', move: m.move || '', dr: (m.dr != null ? m.dr : ''),
+        totalHp: totalHp, slotCount: slots.length, slotHp: segHp,
+        stats: m.stats || {}, attacks: Array.isArray(m.attacks) ? m.attacks : [],
+        notes: Array.isArray(m.notes) ? m.notes : (m.notes ? [m.notes] : []),
+        page: m.page || '', source: m.source || ''
+      }
+    };
+  }
+
+  function dccMonsterBlockHtml(n) {
+    const mo = n.dmon;
+    if(!mo) return '';
+    const meta = [
+      (mo.level !== '' && mo.level != null) ? monStat('LV', mo.level) : '',
+      mo.role ? monStat('Role', mo.role) : '',
+      (mo.size !== '' && mo.size != null) ? monStat('Size', mo.size) : '',
+      (mo.tags && mo.tags.length) ? monStat('Tags', mo.tags.join(', ')) : ''
+    ].join('');
+    const def = [
+      monStat('Evade', mo.evade), monStat('DR', mo.dr),
+      monStat('Surprise', mo.surprise), monStat('Move', mo.move),
+      monStat('HP', mo.totalHp + ' (' + mo.slotCount + '×' + mo.slotHp + ')')
+    ].join('');
+    const S = mo.stats || {};
+    const statCell = (abbr, key) => {
+      const st = S[key]; if(!st) return '';
+      const mod = (st.mod != null ? st.mod : '');
+      const modStr = mod === '' ? '' : ((mod >= 0 ? '+' : '') + mod);
+      return monRollStat(abbr, modStr);
+    };
+    const abil = ['STR','INT','CON','DEX','CHA'].map(k => statCell(k, k)).join('');
+    const statsOpen = n.statsOpen !== false;
+    const stats = `<button class="npc-mon-stats-btn">${statsOpen ? '&#9662;' : '&#9656;'} Stats</button>` +
+      (statsOpen ? `<div class="npc-mon-stats-wrap">
+        <div class="npc-mon-stats">${meta}</div>
+        <div class="npc-mon-stats">${def}</div>
+        <div class="npc-mon-stats">${abil}</div>
+      </div>` : '');
+    // Attacks — each rolls to-hit + damage into the dice tray (reusing the
+    // .npc-mon-attack wiring). Riders/effects sit under the roll button.
+    const atks = (mo.attacks || []).map(a => {
+      const hit = a.toHit ? String(a.toHit) : '';
+      const dmg = (a.damage && !/^no damage/i.test(String(a.damage))) ? String(a.damage) : '';
+      const face = [a.name, [hit, dmg].filter(Boolean).join(' / ')].filter(Boolean).join(': ');
+      const extra = [a.damageType, a.range].filter(Boolean).join(' · ');
+      const rider = a.rider ? `<div class="npc-mon-atk-text" style="opacity:.8">${escAttr(a.rider)}</div>` : '';
+      const face_ = face || 'attack';
+      const btn = (hit || dmg)
+        ? `<button class="npc-mon-btn npc-mon-attack" data-hit="${escAttr(hit)}" data-dmg="${escAttr(dmg)}" data-atkname="${escAttr(a.name || 'attack')}" title="Roll attack and damage">${escAttr(face_)}</button>`
+        : `<span class="npc-mon-atk-text">${escAttr(face_)}</span>`;
+      return `<div class="npc-mon-atk">${btn}${extra ? `<span class="npc-mon-atk-text" style="opacity:.7"> ${escAttr(extra)}</span>` : ''}${rider}</div>`;
+    }).join('');
+    const atkBlock = atks ? `<div class="npc-mon-atks"><span class="npc-mon-label">ATK</span>${atks}</div>` : '';
+    const traits = (mo.notes && mo.notes.length)
+      ? `<button class="npc-mon-traits-btn">${n.traitsOpen ? '&#9662;' : '&#9656;'} Traits</button>` +
+        (n.traitsOpen ? `<div class="npc-mon-traits">${mo.notes.map(t => `<div class="npc-mon-trait">${escAttr(t)}</div>`).join('')}</div>` : '')
+      : '';
+    return `<div class="npc-mon">${stats}${atkBlock}${traits}</div>`;
+  }
+
   function monStat(label, val) {
     if(!val && val !== 0) return '';
     return `<div class="npc-mon-stat"><span class="npc-mon-label">${escAttr(label)}</span><span>${escAttr(String(val))}</span></div>`;
@@ -3708,7 +3899,7 @@ function init_trackers(root) {
     const mode = n.hpMode || 'standard';
     // SD/DCC mode select rides the right end of the HP row (bestiary monsters
     // are always standard, so they don't get one).
-    const modeSelectHtml = n.mon ? '' : `<select class="card-select npc-mode-select ${mode==='dcc'?'dcc-active':'std-active'}" title="HP mode">
+    const modeSelectHtml = (n.mon || n.dmon) ? '' : `<select class="card-select npc-mode-select ${mode==='dcc'?'dcc-active':'std-active'}" title="HP mode">
         <option value="standard" ${mode==='standard'?'selected':''}>SD</option>
         <option value="dcc"      ${mode==='dcc'     ?'selected':''}>DCC</option>
       </select>`;
@@ -3747,7 +3938,7 @@ function init_trackers(root) {
           </button>`).join('');
       hpBlockHtml = `
         <div class="npc-seg-setup">
-          <input type="number" class="npc-seg-count-input" min="1" max="20" value="${segCount}" title="Segments">
+          <input type="number" class="npc-seg-count-input" min="1" max="40" value="${segCount}" title="Segments">
           <span class="npc-hp-slash">/</span>
           <input type="number" class="npc-seg-hp-input" min="1" value="${segHp}" title="HP per segment">
           <button class="btn small ghost status-add">+ Status</button>
@@ -3769,7 +3960,7 @@ function init_trackers(root) {
       </div>
       ${hpBlockHtml}
       ${defeated ? '<div class="npc-defeated-tag">Defeated</div>' : ''}
-      ${monsterBlockHtml(n)}
+      ${n.dmon ? dccMonsterBlockHtml(n) : monsterBlockHtml(n)}
       ${statusListHtml(n, { withAddButton: false, withTag: false })}
     `;
 
@@ -3794,7 +3985,7 @@ function init_trackers(root) {
       // Auto-apply: committing either box (blur / Enter / spinner) rebuilds the
       // segments — same behaviour the Apply button had, minus the button.
       const applySegSetup = () => {
-        const count = Math.max(1, Math.min(20, parseInt(card.querySelector('.npc-seg-count-input').value) || 1));
+        const count = Math.max(1, Math.min(40, parseInt(card.querySelector('.npc-seg-count-input').value) || 1));
         const hp = Math.max(1, parseInt(card.querySelector('.npc-seg-hp-input').value) || 1);
         if(count === (n.segCount || 10) && hp === (n.segHp !== undefined ? n.segHp : 10)) return;
         n.segCount = count; n.segHp = hp;
@@ -3843,10 +4034,22 @@ function init_trackers(root) {
   // ── Monster picker ──
   // Opens above the list; pick a monster and it joins the fight with its stats.
   let pickerOpen = false, pickerQuery = '', pickerType = '';
+  // Which bestiary the picker draws from. This is the DCC companion, so default
+  // to the DCC bestiary when its data is loaded; the GM can flip to SD.
+  function dccBestiary() { return (typeof DCC_MONSTERS !== 'undefined' && Array.isArray(DCC_MONSTERS)) ? DCC_MONSTERS : []; }
+  let pickerSource = dccBestiary().length ? 'dcc' : 'sd';
 
   function pickerMatches() {
-    if(typeof allMonsters !== 'function') return [];
     const q = pickerQuery.trim().toLowerCase();
+    if(pickerSource === 'dcc') {
+      return dccBestiary().filter(m => {
+        if(pickerType && String(m.role || '') !== pickerType) return false;
+        if(!q) return true;
+        return String(m.name).toLowerCase().includes(q) ||
+               (Array.isArray(m.tags) && m.tags.some(t => String(t).toLowerCase().includes(q)));
+      });
+    }
+    if(typeof allMonsters !== 'function') return [];
     return allMonsters().filter(m => {
       if(pickerType && (typeof monsterTypeOf === 'function') && monsterTypeOf(m.name) !== pickerType) return false;
       if(!q) return true;
@@ -3858,11 +4061,16 @@ function init_trackers(root) {
 
   function pickerRowsHtml() {
     const found = pickerMatches();
-    const rows = found.slice(0, 60).map(m => `
-      <button class="mon-pick-item" data-mon="${escAttr(m.name)}">
+    const rows = found.slice(0, 60).map(m => {
+      const meta = pickerSource === 'dcc'
+        ? ('LV ' + escAttr(String(m.level != null ? m.level : '?')) + ' &middot; ' + escAttr(m.role || 'Mob') +
+           ' &middot; ' + escAttr(String(Array.isArray(m.hbSlots) ? m.hbSlots.length : '?')) + ' slots')
+        : ('LV ' + escAttr(m.lv) + ' &middot; HP ' + escAttr(m.hp) + ' &middot; AC ' + escAttr(m.ac));
+      return `<button class="mon-pick-item" data-mon="${escAttr(m.name)}">
         <span class="mon-pick-item-name">${escAttr(m.name)}</span>
-        <span class="mon-pick-item-meta">LV ${escAttr(m.lv)} &middot; HP ${escAttr(m.hp)} &middot; AC ${escAttr(m.ac)}</span>
-      </button>`).join('');
+        <span class="mon-pick-item-meta">${meta}</span>
+      </button>`;
+    }).join('');
     return (rows || '<div class="mon-pick-empty">No monster matches that search.</div>') +
       (found.length > 60 ? `<div class="mon-pick-empty">Showing 60 of ${found.length} &mdash; keep typing to narrow it down.</div>` : '');
   }
@@ -3870,8 +4078,13 @@ function init_trackers(root) {
   function wirePickerRows() {
     pickerEl?.querySelectorAll('.mon-pick-item').forEach(btn => {
       btn.addEventListener('click', () => {
-        const m = allMonsters().find(x => x.name === btn.dataset.mon);
-        if(m) { items.push(monsterItem(m)); render(); }
+        if(pickerSource === 'dcc') {
+          const m = dccBestiary().find(x => x.name === btn.dataset.mon);
+          if(m) { items.push(dccMonsterItem(m)); render(); }
+        } else {
+          const m = allMonsters().find(x => x.name === btn.dataset.mon);
+          if(m) { items.push(monsterItem(m)); render(); }
+        }
       });
     });
   }
@@ -3887,15 +4100,24 @@ function init_trackers(root) {
 
   function openPicker() {
     if(pickerEl) return;
-    const types = (typeof SD_MONSTER_TYPE_LIST !== 'undefined' && typeof monsterTypeOf === 'function')
-      ? SD_MONSTER_TYPE_LIST.filter(t => allMonsters().some(m => monsterTypeOf(m.name) === t)) : [];
+    const dccAvail = dccBestiary().length > 0;
+    const types = pickerSource === 'dcc'
+      ? [...new Set(dccBestiary().map(m => m.role).filter(Boolean))]
+      : ((typeof SD_MONSTER_TYPE_LIST !== 'undefined' && typeof monsterTypeOf === 'function')
+          ? SD_MONSTER_TYPE_LIST.filter(t => allMonsters().some(m => monsterTypeOf(m.name) === t)) : []);
+    const sourceSel = dccAvail
+      ? `<select class="mon-pick-source" title="Bestiary">
+           <option value="dcc" ${pickerSource === 'dcc' ? 'selected' : ''}>DCC</option>
+           <option value="sd"  ${pickerSource === 'sd'  ? 'selected' : ''}>SD</option>
+         </select>` : '';
     pickerEl = document.createElement('div');
     pickerEl.className = 'mon-pick';
     pickerEl.innerHTML = `
       <div class="mon-pick-controls">
+        ${sourceSel}
         <input type="text" class="mon-pick-search" placeholder="Search the bestiary..." value="${escAttr(pickerQuery)}">
         <select class="mon-pick-type">
-          <option value="">Any Type</option>
+          <option value="">${pickerSource === 'dcc' ? 'Any Role' : 'Any Type'}</option>
           ${types.map(t => `<option value="${escAttr(t)}" ${t === pickerType ? 'selected' : ''}>${escAttr(t)}</option>`).join('')}
         </select>
         <button class="btn small ghost mon-pick-close">Close</button>
@@ -3914,6 +4136,14 @@ function init_trackers(root) {
     pickerEl.querySelector('.mon-pick-type').addEventListener('change', e => {
       pickerType = e.target.value;
       refreshPickerRows();
+    });
+    // Switching bestiary source repopulates the Role/Type dropdown, so rebuild
+    // the whole picker (keeping the search text) rather than just the rows.
+    pickerEl.querySelector('.mon-pick-source')?.addEventListener('change', e => {
+      pickerSource = e.target.value;
+      pickerType = '';
+      pickerEl.remove(); pickerEl = null;
+      openPicker();
     });
     pickerEl.querySelector('.mon-pick-close').addEventListener('click', closePicker);
     wirePickerRows();
@@ -5722,6 +5952,128 @@ function genTreasure(tierKey, type) {
   return card(`<div class="gen-item-name">${esc(item.name)}</div><div class="gen-item-desc">${esc(item.desc)}</div>`);
 }
 
+// ── DCC Loot Box ───────────────────────────────────────────────────────────
+// Rolls a DCC loot box of the chosen tier: gold (per the tier's formula), a
+// consumable or two, and the tier's gear — all drawn at random from DCC_ITEMS.
+// Mirrors the on-sheet Loot Box roller, but renders a GM-screen result card.
+function dccLootTier(t) {
+  if(typeof DCC_LOOT === 'undefined') return null;
+  const tiers = DCC_LOOT.tiers || [];
+  return tiers.find(x => x.tier === t) || tiers[0] || null;
+}
+function dccItemsOfTier(t, cats) {
+  if(typeof DCC_ITEMS === 'undefined') return [];
+  return DCC_ITEMS.filter(it => it.tier === t && cats.indexOf(it.category) >= 0);
+}
+function dccRollGold(formula) {
+  const f = String(formula || '');
+  if(/none|nuthin/i.test(f)) return 0;
+  const m = f.match(/(\d+)\s*d\s*(\d+)/i);
+  if(!m) return 0;
+  let total = 0; const num = +m[1], sides = +m[2];
+  for(let i = 0; i < num; i++) total += 1 + Math.floor(Math.random() * sides);
+  const mult = f.match(/[x×]\s*([\d,]+)/i);
+  if(mult) total *= (parseInt(mult[1].replace(/,/g, ''), 10) || 1);
+  return total;
+}
+function dccPickN(arr, n) {
+  const pool = arr.slice(), out = [];
+  while(out.length < n && pool.length) out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  return out;
+}
+function genDccLootBox(tierKey) {
+  const td = dccLootTier(tierKey);
+  if(!td) return card('<div class="gen-empty">DCC loot data didn’t load. Open the GM screen from the app.</div>');
+  const gold = dccRollGold(td.gold);
+  const consumables = dccItemsOfTier(td.tier, ['consumable', 'scroll', 'tome', 'material', 'mundane']);
+  const gear = dccItemsOfTier(td.tier, ['weapon', 'armor', 'accessory']);
+  const picks = [];
+  dccPickN(consumables, 1 + (Math.random() < 0.5 ? 1 : 0)).forEach(it => picks.push(it));
+  const g = dccPickN(gear, td.gearRolls || 0);
+  g.forEach(it => picks.push(it));
+  const missing = (td.gearRolls || 0) - g.length;   // Celestial / empty catalog → GM discretion
+  const lines = picks.map(it =>
+    `<div class="gen-card-row"><span class="gen-card-row-label">${esc(it.category)}</span>` +
+    `<span><b>${esc(it.name)}</b><br><span style="opacity:.75">${esc((it.slot ? it.slot + ' — ' : '') + it.effect)}</span></span></div>`).join('');
+  const disc = missing > 0
+    ? `<div class="gen-card-row"><span class="gen-card-row-label">GM</span><span>${missing} more ${esc(td.tier)} item(s) at GM&rsquo;s discretion — enchant guideline: ${esc(td.xValue)}</span></div>`
+    : '';
+  const goldStr = gold ? gold.toLocaleString('en') + ' gold' : 'No gold';
+  return card(
+    `<div class="gen-card-header"><span class="gen-card-name">${esc(td.tier)} Loot Box</span><span class="gen-card-tag">${esc(String(td.gearRolls || 0))} gear</span></div>` +
+    `<div class="gen-card-row"><span class="gen-card-row-label">Gold</span><span><b>${esc(goldStr)}</b></span></div>` +
+    ((lines || disc) ? '<hr class="gen-card-divider">' : '') + lines + disc
+  );
+}
+
+// ── DCC Magic-Item generator (Core Tables 38–42) ───────────────────────────
+// Rolls a random enchanted property: item type (Table 38 → 39/40/41), then the
+// property, substituting the rarity's X value; a "Something Unique" result rolls
+// Table 42 as well. The GM applies the property to a base item the party uses.
+function dccLootTable(num) {
+  if(typeof DCC_LOOT === 'undefined') return null;
+  return (DCC_LOOT.tables || []).find(t => new RegExp('Table ' + num + '\\b').test(t.name || '')) || null;
+}
+function dccRollRow(table) {
+  if(!table || !Array.isArray(table.rows) || !table.rows.length) return null;
+  const sides = parseInt(String(table.die || 'd6').replace(/\D/g, ''), 10) || table.rows.length;
+  const r = 1 + Math.floor(Math.random() * sides);
+  const inRange = spec => {
+    const s = String(spec).replace(/[–—]/g, '-');
+    const m = s.match(/^(\d+)\s*-\s*(\d+)$/);
+    return m ? (r >= +m[1] && r <= +m[2]) : (parseInt(s, 10) === r);
+  };
+  const row = table.rows.find(x => inRange(x.roll)) || table.rows[table.rows.length - 1];
+  return { roll: r, result: row.result };
+}
+function genDccMagicItem(tierKey, forcedType) {
+  const t38 = dccLootTable('38');
+  if(!t38) return card('<div class="gen-empty">DCC loot tables didn’t load. Open the GM screen from the app.</div>');
+  let typeTableNum, typeLabel;
+  const TYPE_LABELS = { '39': 'Enchanted Mundane Item or Weapon', '40': 'Enchanted Clothing', '41': 'Enchanted Accessory' };
+  if(forcedType && TYPE_LABELS[forcedType]) {
+    typeTableNum = forcedType; typeLabel = TYPE_LABELS[forcedType];
+  } else {
+    const tr = dccRollRow(t38);                       // e.g. "Enchanted Clothing (Table 40)"
+    const m = tr && String(tr.result).match(/Table (\d+)/);
+    typeTableNum = m ? m[1] : '39';
+    typeLabel = tr ? String(tr.result).replace(/\s*\(Table \d+\)\s*/, '') : (TYPE_LABELS[typeTableNum] || 'Enchanted Item');
+  }
+  const typeTable = dccLootTable(typeTableNum);
+  const prop = dccRollRow(typeTable);
+  const tier = dccLootTier(tierKey);
+  const xVal = tier ? tier.xValue : '';
+  const propText = prop ? prop.result : '';
+  const xNote = (/\bX\b/.test(propText) && xVal) ? ` <span style="opacity:.75">(X = ${esc(xVal)})</span>` : '';
+  let unique = '';
+  if(prop && /Something Unique|Table 42/i.test(prop.result)) {
+    const u = dccRollRow(dccLootTable('42'));
+    if(u) unique = `<div class="gen-card-row"><span class="gen-card-row-label">Unique</span><span>${esc(u.result)}</span></div>`;
+  }
+  const pageNote = (typeTable && typeTable.page) ? ' · p.' + esc(String(typeTable.page)) : '';
+  return card(
+    `<div class="gen-card-header"><span class="gen-card-name">${esc(tierKey)} Magic Item</span><span class="gen-card-tag">${esc(typeLabel || 'Enchanted Item')}</span></div>` +
+    `<div class="gen-card-row"><span class="gen-card-row-label">Property</span><span><b>${esc(propText)}</b>${xNote}</span></div>` +
+    unique +
+    `<div class="gen-item-desc" style="opacity:.7;text-transform:none;">Apply to a base item the party would use (Tables 38&ndash;42${pageNote}).</div>`
+  );
+}
+
+// ── DCC Item generator (random draw from the catalog) ──────────────────────
+function genDccItem(cat, tier) {
+  if(typeof DCC_ITEMS === 'undefined') return card('<div class="gen-empty">DCC item catalog didn’t load. Open the GM screen from the app.</div>');
+  const pool = DCC_ITEMS.filter(it => (!cat || it.category === cat) && (!tier || it.tier === tier));
+  if(!pool.length) return card('<div class="gen-empty">No catalog item matches those filters.</div>');
+  const it = pool[Math.floor(Math.random() * pool.length)];
+  const tagBits = [it.category, it.slot, it.tier].filter(Boolean).join(' · ');
+  const price = (typeof it.price === 'number') ? `<span class="gen-card-tag">${it.price.toLocaleString('en')} g</span>` : '';
+  return card(
+    `<div class="gen-card-header"><span class="gen-card-name">${esc(it.name)}</span>${price}</div>` +
+    `<div class="gen-item-desc" style="opacity:.85;text-transform:none;">${esc(tagBits)}</div>` +
+    `<div class="gen-item-desc">${esc(it.effect || '')}</div>`
+  );
+}
+
 // ── Shop/Tavern ──────────────────────────────────────────────────────────
 function genShop(type, tier) {
   const t = type==='random'?R(['Shop','Tavern']):type;
@@ -7262,6 +7614,26 @@ window.init_gen = function(root) {
       const count=parseInt(root.querySelector('#gen-loot-count').value)||1;
       const res=root.querySelector('#gen-loot-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genTreasure(tier,type));
+
+    } else if(activeTab==='dccloot') {
+      const tier=root.querySelector('#gen-dccloot-tier').value;
+      const count=parseInt(root.querySelector('#gen-dccloot-count').value)||1;
+      const res=root.querySelector('#gen-dccloot-results'); res.innerHTML='';
+      for(let i=0;i<count;i++) res.appendChild(genDccLootBox(tier));
+
+    } else if(activeTab==='dccmagic') {
+      const tier=root.querySelector('#gen-dccmagic-tier').value;
+      const type=root.querySelector('#gen-dccmagic-type').value;
+      const count=parseInt(root.querySelector('#gen-dccmagic-count').value)||1;
+      const res=root.querySelector('#gen-dccmagic-results'); res.innerHTML='';
+      for(let i=0;i<count;i++) res.appendChild(genDccMagicItem(tier, type));
+
+    } else if(activeTab==='dccitem') {
+      const cat=root.querySelector('#gen-dccitem-cat').value;
+      const tier=root.querySelector('#gen-dccitem-tier').value;
+      const count=parseInt(root.querySelector('#gen-dccitem-count').value)||1;
+      const res=root.querySelector('#gen-dccitem-results'); res.innerHTML='';
+      for(let i=0;i<count;i++) res.appendChild(genDccItem(cat, tier));
 
     } else if(activeTab==='dungeon') {
       const level  = root.querySelector('#gen-dun-level').value;
@@ -9340,6 +9712,7 @@ function init_party(root) {
       race:    H['f-race'] || '',
       cls:     H['f-class'] || '',
       level:   H['f-level'] || '1',
+      floor:   H['f-floor'] || '',
       crawler: H['f-crawler'] || '',
       modSource: src === 'unenh' ? 'Unenhanced' : 'Enhanced',
       hpPips:  Array.isArray(d.hpPips) ? d.hpPips : [],
@@ -9351,6 +9724,11 @@ function init_party(root) {
       buffs:   Array.isArray(d.extBuffs) ? d.extBuffs.filter(b => b && String(b).trim()) : [],
       debuffs: C.debuffs || '',
       attacks: Array.isArray(d.attacks) ? d.attacks.filter(a => a && (a.name || a.dice)) : [],
+      // Skills are a first-class part of the DCC sheet now; surface named ones
+      // (with rank + linked stat) so the GM can see what each crawler can do.
+      skills:  Array.isArray(d.skills) ? d.skills
+                 .filter(s => s && String(s.name || '').trim())
+                 .map(s => ({ name: s.name, rank: s.rank || '', stat: s.stat || '' })) : [],
     };
   }
 
@@ -9447,7 +9825,8 @@ function init_party(root) {
   function cardHTMLDCC(entry) {
     const c = entry.sheet;
     const open = openIds.has(entry.id);
-    const sub = ['LV ' + esc(c.level), [c.race, c.cls].filter(Boolean).join(' '),
+    const sub = ['LV ' + esc(c.level), c.floor ? 'Floor ' + esc(c.floor) : '',
+                 [c.race, c.cls].filter(Boolean).join(' '),
                  c.crawler ? 'Crawler #' + esc(c.crawler) : ''].filter(Boolean).join(' · ');
     const HPCOL = ['#c01e1e','#d23c0a','#dc6400','#c88200','#b49600','#96a000','#64aa00','#3caa00','#1e9614','#0a780a'];
     const pips = Array.isArray(c.hpPips) ? c.hpPips : [];
@@ -9500,6 +9879,14 @@ function init_party(root) {
             a.effects ? '<span class="dim">' + esc(a.effects) + '</span>' : ''
           ].filter(Boolean).join(' · ');
           return '<div class="pty-line"><b>' + esc(a.name || '—') + '</b>' + (bits ? ' ' + bits : '') + '</div>';
+        }).join('') + '</div>';
+
+    if(c.skills && c.skills.length) h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div>'
+      + c.skills.map(s => {
+          const st = s.stat ? ' ' + esc(String(s.stat).toUpperCase()) : '';
+          const rank = String(s.rank).trim();
+          const meta = [rank ? 'Rank ' + esc(rank) : 'Untrained', st.trim()].filter(Boolean).join(' · ');
+          return '<div class="pty-line"><b>' + esc(s.name) + '</b> <span class="dim">' + meta + '</span></div>';
         }).join('') + '</div>';
 
     h += '</div></div>';
