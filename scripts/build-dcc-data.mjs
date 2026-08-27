@@ -40,6 +40,8 @@ const DATASETS = [
   { json: "backgrounds.json", kind: "array",  constName: "DCC_BACKGROUNDS", type: "DccBackground", base: "dcc-backgrounds" },
   { json: "experiences.json", kind: "array",  constName: "DCC_EXPERIENCES", type: "DccExperience", base: "dcc-experiences" },
   { json: "monsters.json",    kind: "array",  constName: "DCC_MONSTERS",    type: "DccMonster",    base: "dcc-monsters" },
+  { json: "items.json",       kind: "array",  constName: "DCC_ITEMS",       type: "DccItem",       base: "dcc-items" },
+  { json: "loot.json",        kind: "object", constName: "DCC_LOOT",        type: "DccLoot",       base: "dcc-loot" },
 ];
 
 const BANNER =

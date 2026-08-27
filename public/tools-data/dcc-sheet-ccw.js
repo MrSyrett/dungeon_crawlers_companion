@@ -770,14 +770,16 @@
       skillRank[key].rank = Math.min(10, skillRank[key].rank + rank);
       if (note && skillRank[key].notes.indexOf(note) === -1) skillRank[key].notes = skillRank[key].notes ? skillRank[key].notes + "; " + note : note;
     }
+    const _b = baseAttack();
+    const baseRank = Math.min(10, 3 + b1());      // one roll — shared by the base attack row and its skill
+    const primaryRank = Math.min(10, 3 + bP());   // one roll — shared by the specialty attack row and its skill
     addSkill("Heal", 1, "Spell · heals 2 HB slots, 2 Mana");   // always first, capped at Rank 1
+    addSkill(_b.name, baseRank, "Base attack");                 // Unarmed Combat / Slice Attack — just under Heal
     ERAS.forEach((era) => { const c = W.bg[era]; if (!c) return; (c.skills || []).forEach((name) => addSkill(name, ERA_RANK[era] + b1(), eraLabel(era) + " — " + bgDisplayName(era))); });
     if (third) W.experiences.forEach((slot) => { const p = slot.skills || []; if (p[0]) addSkill(p[0], d(4), "Experience"); if (p[1]) addSkill(p[1], d(2), "Experience"); });
     const skills = Object.values(skillRank).map((s) => ({ name: s.name, rank: String(s.rank), stat: s.stat, checkType: s.checkType, notes: s.notes, checked: false }));
 
-    const _b = baseAttack();
-    const primaryRank = Math.min(10, 3 + bP());   // one roll — shared by the attack row and its skill entry
-    const atks = [{ name: _b.name, rank: String(Math.min(10, 3 + b1())), dice: _b.dice, stat: _b.stat, effects: "" }];
+    const atks = [{ name: _b.name, rank: String(baseRank), dice: _b.dice, stat: _b.stat, effects: "" }];
     // The chosen combat specialty goes in BOTH the Attacks section and the Skills list
     // (attack skills live in both; Core p.176), linked by `src` to its rulebook original.
     if (W.combat.type === "weapon" && W.combat.weapon) {

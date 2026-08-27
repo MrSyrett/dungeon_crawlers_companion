@@ -1156,6 +1156,30 @@ function rollAttack(btn) {
     + (dmgDetail ? `  |  ${dmgDetail}` : '');
 
   addLog(`${name}` + (hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''), resultStr, detailStr, type);
+  markSkillForAttack(row);   // attack skills also mark their Skills-list entry for advancement
+}
+
+// Find the Skills-list row that matches an attack (by stored source or by name,
+// ignoring a trailing "(Spell)") and tick its advancement box.
+function markSkillForAttack(attackRow) {
+  const at = attackRow.querySelectorAll('input[type="text"]');   // [name, rank, dice, effects]
+  const aName = String(at[0] ? at[0].value : '').replace(/\s*\(spell\)\s*$/i, '').trim().toLowerCase();
+  const aSrc = String(attackRow.dataset.src || '').toLowerCase();
+  const rows = document.querySelectorAll('#skills-body tr');
+  for(const tr of rows) {
+    const s = tr.querySelectorAll('input[type="text"]');        // [name, rank, checkType, notes]
+    const sName = String(s[0] ? s[0].value : '').trim().toLowerCase();
+    const sSrc = String(tr.dataset.src || '').toLowerCase();
+    const hit = (aSrc && (aSrc === sSrc || aSrc === sName)) || (aName && (aName === sName || (sSrc && aName === sSrc)));
+    if(hit) {
+      const chk = tr.querySelector('input[type="checkbox"]');
+      if(chk && chk.style.visibility !== 'hidden' && !chk.checked) {
+        chk.checked = true;
+        try { chk.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
+      }
+      return;
+    }
+  }
 }
 
 function rollSkill(btn) {

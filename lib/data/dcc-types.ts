@@ -198,6 +198,49 @@ export interface DccBuff {
   duration?: string;
 }
 
+// ── Loot & items (Core ch.4b) ───────────────────────────────────────────────
+export type DccItemCategory =
+  | "consumable" | "weapon" | "armor" | "accessory"
+  | "mundane" | "tool" | "material" | "scroll" | "tome";
+
+export type DccLootTier =
+  | "Mundane" | "Bronze" | "Silver" | "Gold" | "Platinum" | "Legendary" | "Celestial";
+
+export interface DccItem {
+  name: string;
+  category: DccItemCategory;
+  tier?: DccLootTier;
+  /** Equip slot for wearable gear. */
+  slot?: string;
+  effect: string;
+  price?: number;         // gold, where the rulebook gives one
+  page?: number;
+  source: DccSource;
+}
+
+export interface DccLootTierRow {
+  tier: DccLootTier;
+  gearRolls: number;      // enchant rolls per gear item (Table 38)
+  gold: string;           // gold formula, e.g. "1d10 ×100"
+  xValue: string;         // enchant X-value guideline
+  contents: string[];     // sample contents
+  page: number;
+  source: DccSource;
+}
+export interface DccLootTableRow { roll: string; result: string; }
+export interface DccLootTable {
+  name: string;
+  die: string;            // e.g. "d6"
+  rows: DccLootTableRow[];
+  page: number;
+}
+export interface DccLoot {
+  tiers: DccLootTierRow[];
+  tables: DccLootTable[];               // Tables 38-42
+  goldByFloor: { floor: string; gold: string }[];
+  notes: string[];
+}
+
 // ── Reference tables (the ladders that drive sheet automation) ──────────────
 export interface DccStatModRow {
   min: number;
