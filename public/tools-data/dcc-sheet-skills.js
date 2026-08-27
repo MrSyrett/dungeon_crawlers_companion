@@ -266,6 +266,35 @@
     var rank = inputs[1]; if (rank) { try { rank.focus(); } catch (_) {} }
   }
 
+  // An attack skill / attack spell also belongs in the Attacks section (Core p.176:
+  // write attack skills in BOTH the Attacks block and the Skills list). Add a matching
+  // attack row so the To Hit / Damage math is available too.
+  function isAttackEntry(e) { return !!e && (e.kind === "attack" || (e.kind === "spell" && e.type === "attack")); }
+  function newAttackRow() {
+    if (typeof addAttackRow !== "function") return null;
+    addAttackRow();
+    var body = document.getElementById("attacks-body");
+    return body ? body.lastElementChild : null;
+  }
+  function fillAttackRow(tr, name, e) {
+    if (!tr) return;
+    var inputs = tr.querySelectorAll('input[type="text"]'); // [name, rank, dice, effects]
+    var sel = tr.querySelector("select");
+    if (inputs[0]) inputs[0].value = name;
+    if (e) {
+      tr.dataset.src = e.name;                                   // keep the original for lookups
+      if (sel && e.stat) sel.value = String(e.stat).toLowerCase();
+      if (inputs[2] && e.damage) inputs[2].value = e.damage;     // attack skills carry base dice
+      if (inputs[3]) inputs[3].value = e.kind === "spell" ? ((e.mana != null ? e.mana + " Mana" : "") + (e.type ? " · " + e.type : "")) : "";
+    }
+    if (typeof recalcAttackRow === "function") { try { recalcAttackRow(tr); } catch (_) {} }
+    fireInput(inputs[0]);
+  }
+  function addToSheet(name, e) {
+    fillRow(newRow(), name, e);                                  // always goes on the Skills list
+    if (isAttackEntry(e)) fillAttackRow(newAttackRow(), name, e); // …and the Attacks section too
+  }
+
   window.DCCSkills = {
     openPicker: openPicker,
     closePicker: closePicker,
@@ -275,13 +304,13 @@
     info: info,
     closeInfo: closeInfo,
     infoRow: infoRow,
-    add: function (name) { var e = lookup(name); fillRow(newRow(), e ? e.name : name, e); },
+    add: function (name) { var e = lookup(name); addToSheet(e ? e.name : name, e); },
     addCustom: function () {
       var inp = document.getElementById("dccs-custom-input");
       var name = inp ? String(inp.value || "").trim() : "";
       if (!name) return;
       var e = lookup(name);
-      fillRow(newRow(), e ? e.name : name, e);
+      addToSheet(e ? e.name : name, e);
       if (inp) inp.value = "";
       closePicker();
     },

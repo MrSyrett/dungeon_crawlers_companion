@@ -19,7 +19,12 @@
   var FIELD_ID = "buffs";
   var active = [];        // [{ name, kind, custom }]
   var lastSerialized = null;
-  var infoOpen = {};
+  // Only one condition's info shows at a time, shared across the Buffs and Debuffs
+  // trackers via the "dcc-cond-info" event.
+  var MYID = "buffs";
+  var openIdx = -1;
+  function broadcastInfo() { try { document.dispatchEvent(new CustomEvent("dcc-cond-info", { detail: { src: MYID } })); } catch (e) {} }
+  try { document.addEventListener("dcc-cond-info", function (e) { if (e && e.detail && e.detail.src !== MYID && openIdx !== -1) { openIdx = -1; renderChips(); } }); } catch (e) {}
 
   function haveData() { return typeof DCC_BUFFS !== "undefined" && Array.isArray(DCC_BUFFS); }
   function field() { return document.getElementById(FIELD_ID); }
@@ -121,7 +126,7 @@
     var html = active.map(function (a, i) {
       var k = a.custom ? null : known(a.name);
       var info = (k ? '<span class="ico" title="What does it do?" onclick="DCCBuffs.info(' + i + ')">i</span>' : "");
-      var detail = (infoOpen[i] && k)
+      var detail = (openIdx === i && k)
         ? '<span class="dccb-none" style="flex-basis:100%;font-style:normal;color:var(--ink,#26211a);">' + esc(k.effect) + (k.duration ? ' <em style="color:var(--muted,#7a7266);">(' + esc(k.duration) + ')</em>' : "") + '</span>'
         : "";
       return '<span class="dccb-chip ' + (a.custom ? "custom" : a.kind === "external" ? "ext" : "") + '">' +
@@ -202,8 +207,10 @@
     var chips = document.createElement("div");
     chips.id = "dccb-chips";
     chips.className = "dccb-chips";
-    var host = el.closest(".buffs-field") || el.parentNode;
-    host.parentNode.insertBefore(chips, host.nextSibling);
+    chips.style.flex = "1";
+    chips.style.minWidth = "0";
+    chips.style.margin = "0";
+    el.parentNode.appendChild(chips);   // chips inline, to the RIGHT of the ＋ button
     el.addEventListener("change", function () { refresh(); });
     refresh();
   }
@@ -214,7 +221,7 @@
     if (el.value === lastSerialized && active.length) { renderChips(); return; }
     active = parse(el.value);
     if (active.length > MAX_BUFFS) active = active.slice(0, MAX_BUFFS);  // enforce the cap on load
-    infoOpen = {};
+    openIdx = -1;
     lastSerialized = serialize();
     if (el.value !== lastSerialized) { el.value = lastSerialized; }
     renderChips();
@@ -247,8 +254,8 @@
       inp.value = "";
       writeBack(); renderChips(); renderPicker();
     },
-    remove: function (i) { active.splice(i, 1); infoOpen = {}; writeBack(); renderChips(); },
-    info: function (i) { infoOpen[i] = !infoOpen[i]; renderChips(); },
+    remove: function (i) { active.splice(i, 1); openIdx = -1; writeBack(); renderChips(); },
+    info: function (i) { if (openIdx === i) { openIdx = -1; } else { openIdx = i; broadcastInfo(); } renderChips(); },
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);

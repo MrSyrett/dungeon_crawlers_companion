@@ -125,6 +125,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 
 .mana-row{display:flex;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid var(--rule);}
 .mana-group{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+/* Buffs / Debuffs condition rows: label · ＋ · chips (chips grow to the right, wrap below) */
+.cond-row{display:flex;flex-direction:column;gap:5px;padding:6px 10px;border-bottom:1px solid var(--rule);}
+.cond-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.cond-label{width:52px;flex:0 0 auto;}
 .debuff-group{display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin-left:10px;}
 .mana-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);}
 .mana-input{width:44px;height:28px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;outline:none;}
@@ -450,25 +454,25 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
                 </div>
               </div>
               <div style="height:1px;background:var(--rule);margin:2px 0;"></div>
-              <!-- Buffs (＋ button and chips injected by dcc-sheet-buffs.js) -->
-              <div class="buffs-field" style="display:flex;align-items:center;gap:5px;">
-                <span style="font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Buffs</span>
-                <input type="text" class="ext-buff-input" id="buffs" style="flex:1;" placeholder="add or type…">
+              <!-- Mana (moved here from the row below) -->
+              <div class="mana-group" style="justify-content:center;">
+                <span class="mana-label">Mana</span>
+                <input type="text" class="mana-input" id="mana-current" placeholder="0">
+                <span class="mana-slash">/</span>
+                <input type="text" class="mana-input" id="mana-max" readonly placeholder="0" title="Equals Enhanced INT" style="background:var(--box);cursor:default;">
               </div>
             </div>
 
           </div>
 
-          <!-- MANA / DEBUFFS -->
-          <div class="mana-row">
-            <div class="mana-group">
-              <span class="mana-label">Mana</span>
-              <input type="text" class="mana-input" id="mana-current" placeholder="0">
-              <span class="mana-slash">/</span>
-              <input type="text" class="mana-input" id="mana-max" readonly placeholder="0" title="Equals Enhanced INT" style="background:var(--box);cursor:default;">
+          <!-- BUFFS / DEBUFFS (＋ buttons and chips injected by dcc-sheet-buffs.js / dcc-sheet-debuffs.js) -->
+          <div class="cond-row">
+            <div class="buffs-field cond-line">
+              <span class="mana-label cond-label">Buffs</span>
+              <input type="text" class="ext-buff-input" id="buffs" placeholder="add or type…">
             </div>
-            <div class="debuff-group">
-              <span class="mana-label">Debuffs</span>
+            <div class="cond-line">
+              <span class="mana-label cond-label">Debuffs</span>
               <input type="text" class="debuff-input" id="debuffs" placeholder="">
             </div>
           </div>
@@ -1045,8 +1049,38 @@ function atkStatOf(a) {
   return (a && (a.stat || a.toHitStat || a.dmgStat)) || '';
 }
 
+// Casting a spell spends its Mana. The cost comes from the row's "N Mana" note
+// (Attacks: Effects field; Skills: Notes field), falling back to the spell's rulebook
+// cost via the row's stored source name. Non-spell rows read 0 and are left alone.
+function spellManaOf(row) {
+  const texts = row.querySelectorAll('input[type="text"]');
+  const note = texts[3] ? texts[3].value : '';
+  const m = String(note).match(/(\d+)\s*mana/i);
+  if(m) return parseInt(m[1], 10) || 0;
+  const src = row.dataset.src || (texts[0] ? texts[0].value : '');
+  if(typeof DCC_SPELLS !== 'undefined' && src) {
+    const t = String(src).toLowerCase();
+    const sp = DCC_SPELLS.find(s => s.name.toLowerCase() === t);
+    if(sp && sp.mana) return sp.mana;
+  }
+  return 0;
+}
+function consumeSpellMana(row) {
+  const cost = spellManaOf(row);
+  if(cost <= 0) return;
+  const el = document.getElementById('mana-current');
+  if(!el) return;
+  const cur = parseInt(el.value, 10) || 0;
+  const next = Math.max(0, cur - cost);
+  el.value = String(next);
+  try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
+  const nm = (row.querySelector('input[type="text"]') || {}).value || 'Spell';
+  if(typeof addLog === 'function') addLog(nm + ' — cast', '−' + cost + ' Mana', next + ' Mana left' + (cur < cost ? ' (over-spent)' : ''), cur < cost ? 'fumble' : 'normal');
+}
+
 function rollAttack(btn) {
   const row = btn.closest('tr');
+  consumeSpellMana(row);
   const inputs = row.querySelectorAll('input[type="text"]');
   const sels = row.querySelectorAll('select');
   const name = inputs[0].value || 'Attack';
@@ -1084,6 +1118,7 @@ function rollAttack(btn) {
 
 function rollSkill(btn) {
   const row = btn.closest('tr');
+  consumeSpellMana(row);
   const inputs = row.querySelectorAll('input[type="text"]');
   const sel = row.querySelector('select');
   const name = inputs[0].value||'Skill';
@@ -1247,6 +1282,7 @@ function collectSheet() {
       dice: inputs[2]?.value||'',
       stat: sels[0]?.value||'',        // one stat drives both To Hit and Damage
       effects: inputs[3]?.value||'',
+      src: tr.dataset.src||'',         // original rulebook name behind a reskinned attack
     };
   });
 
@@ -1357,6 +1393,7 @@ function applySheet(data) {
       inputs[2].value = a.dice;
       sels[0].value = atkStatOf(a);              // one stat; tolerates older saves
       inputs[3].value = a.effects;
+      if(a.src) tr.dataset.src = a.src; else delete tr.dataset.src;
       recalcAttackRow(tr);                        // fill the live To Hit / Damage readouts
     });
   }

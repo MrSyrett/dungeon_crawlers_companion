@@ -119,7 +119,12 @@
   }
 
   // ── chips render ──────────────────────────────────────────────────────────────
-  var infoOpen = {}; // index -> bool
+  // Only one condition's info shows at a time, across both the Buffs and Debuffs
+  // trackers. Opening one broadcasts "dcc-cond-info" so the other closes its panel.
+  var MYID = "debuffs";
+  var openIdx = -1;
+  function broadcastInfo() { try { document.dispatchEvent(new CustomEvent("dcc-cond-info", { detail: { src: MYID } })); } catch (e) {} }
+  try { document.addEventListener("dcc-cond-info", function (e) { if (e && e.detail && e.detail.src !== MYID && openIdx !== -1) { openIdx = -1; renderChips(); } }); } catch (e) {}
   function chipsEl() { return document.getElementById("dccd-chips"); }
   function renderChips() {
     var box = chipsEl();
@@ -135,7 +140,7 @@
       return '<span class="dccd-chip ' + (a.custom ? "custom" : "") + '">' +
         esc(a.name) + counter + info +
         '<button class="rm" title="Remove" onclick="DCCDebuffs.remove(' + i + ')">✕</button></span>' +
-        (infoOpen[i] && k ? '<span class="dccd-none" style="flex-basis:100%;font-style:normal;color:var(--ink,#26211a);">' + esc(k.effect) + ' <em style="color:var(--muted,#7a7266);">(' + esc(k.duration) + ')</em></span>' : "");
+        (openIdx === i && k ? '<span class="dccd-none" style="flex-basis:100%;font-style:normal;color:var(--ink,#26211a);">' + esc(k.effect) + ' <em style="color:var(--muted,#7a7266);">(' + esc(k.duration) + ')</em></span>' : "");
     }).join("");
   }
 
@@ -200,12 +205,14 @@
     add.setAttribute("aria-label", add.title);
     add.addEventListener("click", openPicker);
     el.parentNode.appendChild(add);
-    // chips row after the mana-row (or after the debuff group as a fallback)
+    // chips sit inline, to the RIGHT of the ＋ button (they wrap; info drops below)
     var chips = document.createElement("div");
     chips.id = "dccd-chips";
     chips.className = "dccd-chips";
-    var row = el.closest(".mana-row") || el.parentNode;
-    row.parentNode.insertBefore(chips, row.nextSibling);
+    chips.style.flex = "1";
+    chips.style.minWidth = "0";
+    chips.style.margin = "0";
+    el.parentNode.appendChild(chips);
     // re-parse if the player edits the raw field by hand
     el.addEventListener("change", function () { refresh(); });
     refresh();
@@ -217,7 +224,7 @@
     if (!el) return;
     if (el.value === lastSerialized && active.length) { renderChips(); return; }
     active = parse(el.value);
-    infoOpen = {};
+    openIdx = -1;
     lastSerialized = serialize();
     // normalise the field to the canonical form so ×N counts read cleanly
     if (el.value !== lastSerialized) { el.value = lastSerialized; }
@@ -249,10 +256,10 @@
       inp.value = "";
       writeBack(); renderChips(); renderPicker();
     },
-    remove: function (i) { active.splice(i, 1); infoOpen = {}; writeBack(); renderChips(); },
+    remove: function (i) { active.splice(i, 1); openIdx = -1; writeBack(); renderChips(); },
     inc: function (i) { if (active[i]) { active[i].count += 1; writeBack(); renderChips(); } },
     dec: function (i) { if (active[i]) { active[i].count -= 1; if (active[i].count <= 0) active.splice(i, 1); writeBack(); renderChips(); } },
-    info: function (i) { infoOpen[i] = !infoOpen[i]; renderChips(); },
+    info: function (i) { if (openIdx === i) { openIdx = -1; } else { openIdx = i; broadcastInfo(); } renderChips(); },
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
