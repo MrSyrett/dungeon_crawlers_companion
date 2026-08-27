@@ -55,6 +55,30 @@
   const LOOT_ARMOR = { Bronze: "mundane armor: +1 DR", Silver: "+2 DR and Anti-Piercing", Gold: "+3 DR and resistance to an uncommon damage type", Platinum: "+4 DR, +5 CON, +3 Catcher or Taunt" };
   const LOOT_ITEM = { Bronze: "50 ft rope / bicycle / canoe / hang glider", Silver: "Friendship Bracelet of a Race kind", Gold: "accessory: +3 to a stat + skill pairing", Platinum: "+3 Skill Potion (permanent)" };
   const LOOT_CONS = { Bronze: "10 Healing Potions / Bandages / Torches, or 1 dynamite", Silver: "2 Antidotes, a Good Healing Potion, or Goblin Dynamite", Gold: "a Rank-5 Spell Scroll or a Gold Healing Potion", Platinum: "a Scratcher ticket (p.218)" };
+  // Table-25 starting loot rolls a real item per slot from the item catalog (Phase 4),
+  // falling back to the tier guideline when the catalog has nothing at that tier/category.
+  const LOOT_SLOTS = [
+    { key: "weapon", label: "Weapon", cats: ["weapon"], generic: LOOT_WEAPON },
+    { key: "armor", label: "Armor", cats: ["armor"], generic: LOOT_ARMOR },
+    { key: "item", label: "Item", cats: ["accessory", "mundane", "tool", "material"], generic: LOOT_ITEM },
+    { key: "consumable", label: "Consumable", cats: ["consumable", "scroll", "tome"], generic: LOOT_CONS },
+  ];
+  function lootCatalog() { return typeof DCC_ITEMS !== "undefined" ? DCC_ITEMS : []; }
+  function rollLootItem(slot, tier) {
+    const pool = lootCatalog().filter((it) => slot.cats.indexOf(it.category) >= 0 && it.tier === tier);
+    if (pool.length) { const it = pool[Math.floor(Math.random() * pool.length)]; return { name: it.name, notes: (it.slot ? it.slot + " — " : "") + it.effect, tier: tier, real: true }; }
+    return { name: tier + " " + slot.label, notes: (slot.generic[tier] || ""), tier: tier, real: false };
+  }
+  function rollLoot() {
+    const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
+    if (!lr) { W.lootRolled = null; return; }
+    W.lootRolled = {
+      weapon: rollLootItem(LOOT_SLOTS[0], lr.weapon),
+      armor: rollLootItem(LOOT_SLOTS[1], lr.armor),
+      item: rollLootItem(LOOT_SLOTS[2], lr.item),
+      consumable: rollLootItem(LOOT_SLOTS[3], lr.consumable),
+    };
+  }
 
   function classByName(n) { return (typeof DCC_CLASSES !== "undefined" ? DCC_CLASSES : []).find((c) => c.name === n) || null; }
   function availExperiences() { return (typeof DCC_EXPERIENCES !== "undefined" ? DCC_EXPERIENCES : []).filter((e) => e.floor <= (W.floor - 1)); }
@@ -166,6 +190,7 @@
       combat: { type: "weapon", weapon: "", weaponName: "", spell: "", spellName: "" },
       experiences: [],  // thirdfloor: [{ exp: name, skills: [] }]
       loot: "",         // thirdfloor: Table-25 row "1".."4"
+      lootRolled: null, // thirdfloor: concrete rolled items per slot { weapon, armor, item, consumable }
       story: { trauma: "", loose: "", regret: "" },
       gear: { clothes: "", useful: "", junk: "", weapon: "", extra: "" },
       gearInit: false,
@@ -518,19 +543,22 @@
 
   // ── step: loot (Third-Floor+) ───────────────────────────────────────────────
   function renderLoot() {
-    let h = `<h3>Acquired loot</h3><p class="dccw-hint">On the climb to Floor ${W.floor} you found starting gear. Pick one spread — you get a Weapon, Armor, an Item, and a Consumable at the tiers shown. The headline effects (armor DR, weapon skill bonus) are applied to your sheet; resolve the full options with your GM.</p>`;
+    let h = `<h3>Acquired loot</h3><p class="dccw-hint">On the climb to Floor ${W.floor} you found starting gear. Pick a spread — each gives a Weapon, Armor, an Item and a Consumable at the tiers shown, and the wizard rolls a real item for each. Armor DR and the weapon-skill bonus are applied to your sheet.</p>`;
     LOOT_ROWS.forEach((r) => {
       const on = String(W.loot) === String(r.row);
       h += `<div class="dccw-card" style="cursor:pointer;border-color:${on ? "#b82018" : "#2a2a2e"};" onclick="DCCW.setLoot('${r.row}')">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span class="dccw-i" style="border-color:${on ? "#b82018" : "#3a3a40"};color:${on ? "#f0a8a3" : "#8a8a93"};">${on ? "✓" : r.row}</span><b style="color:${on ? "#f0a8a3" : "#ece9e1"};">Spread ${r.row}</b></div>
-        <ul class="dccw-list">
-          <li><b>${r.weapon} Weapon</b> — ${esc(LOOT_WEAPON[r.weapon])}</li>
-          <li><b>${r.armor} Armor</b> — ${esc(LOOT_ARMOR[r.armor])}</li>
-          <li><b>${r.item} Item</b> — ${esc(LOOT_ITEM[r.item])}</li>
-          <li><b>${r.consumable} Consumable</b> — ${esc(LOOT_CONS[r.consumable])}</li>
-        </ul></div>`;
+        <div style="display:flex;align-items:center;gap:8px;"><span class="dccw-i" style="border-color:${on ? "#b82018" : "#3a3a40"};color:${on ? "#f0a8a3" : "#8a8a93"};">${on ? "✓" : r.row}</span>
+          <b style="color:${on ? "#f0a8a3" : "#ece9e1"};">Spread ${r.row}</b>
+          <span class="dccw-sub">Weapon ${r.weapon} · Armor ${r.armor} · Item ${r.item} · Consumable ${r.consumable}</span></div>
+      </div>`;
     });
-    if (!W.loot) h += `<p class="dccw-warn">Pick a loot spread to continue.</p>`;
+    if (!W.loot) { h += `<p class="dccw-warn">Pick a loot spread to continue.</p>`; return h; }
+    if (!W.lootRolled) rollLoot();
+    const R = W.lootRolled;
+    const line = (o) => `<li><b>${esc(o.name)}</b> <span class="dccw-sub">(${o.tier}${o.real ? "" : " · GM's discretion"})</span><br><span class="dccw-sub">${esc(o.notes)}</span></li>`;
+    h += `<div class="dccw-card" style="margin-top:10px;border-color:#b82018;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;"><b style="color:#f0a8a3;">Your loot — Spread ${esc(String(W.loot))}</b><button class="dccw-btn" onclick="DCCW.rerollLoot()">🎲 Reroll</button></div>
+      <ul class="dccw-list">${line(R.weapon)}${line(R.armor)}${line(R.item)}${line(R.consumable)}</ul></div>`;
     return h;
   }
 
@@ -837,7 +865,7 @@
         <li>Class: ${esc(W.class || "—")}</li>
         <li>${W.experiences.length} Experiences: ${esc(chosen.join(", ") || "—")}</li>
         <li>${cfg.statPoints} stat points distributed · Popularity ${statMod(fin.cha) * (W.floor - 1)}</li>
-        <li>Loot spread ${esc(String(W.loot || "—"))}</li>
+        <li>Loot (Spread ${esc(String(W.loot || "—"))}): ${esc(W.lootRolled ? [W.lootRolled.weapon, W.lootRolled.armor, W.lootRolled.item, W.lootRolled.consumable].map((o) => o.name).join(", ") : "—")}</li>
         <li>Skill &amp; attack ranks get their boosts on create (primary +2d4, others +1d4, plus Experience ranks).</li>
         ${W.floor > 3 ? `<li style="color:#e9b24c;">Then apply the Floor ${W.floor} extra boosts on the sheet (choose ${W.floor === 4 ? 6 : 8} skills, +2d2/+1d2).</li>` : ""}
       </ul></div>`;
@@ -906,12 +934,10 @@
     // Inventory: the gear boxes, plus the four loot items on the fast-forward.
     const inv = gearItems().map((item) => ({ item, qty: "1", notes: "" }));
     if (third && W.loot) {
-      const lr = LOOT_ROWS.find((r) => String(r.row) === String(W.loot));
-      if (lr) {
-        inv.push({ item: lr.weapon + " Weapon", qty: "1", notes: LOOT_WEAPON[lr.weapon] });
-        inv.push({ item: lr.armor + " Armor", qty: "1", notes: LOOT_ARMOR[lr.armor] });
-        inv.push({ item: lr.item + " Item", qty: "1", notes: LOOT_ITEM[lr.item] });
-        inv.push({ item: lr.consumable + " Consumable", qty: "1", notes: LOOT_CONS[lr.consumable] });
+      if (!W.lootRolled) rollLoot();
+      const R = W.lootRolled;
+      if (R) {
+        [R.weapon, R.armor, R.item, R.consumable].forEach((o) => { if (o) inv.push({ item: o.name, qty: "1", notes: o.notes }); });
       }
     }
     data.inventory = inv;
@@ -1064,7 +1090,8 @@
       W.statPoints[k] = nv;
       render();
     },
-    setLoot(row) { W.loot = String(row); render(); },
+    setLoot(row) { W.loot = String(row); rollLoot(); render(); },
+    rerollLoot() { rollLoot(); render(); },
   };
 
   window.DCCW = API;
