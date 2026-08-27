@@ -57,8 +57,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hdr-logo-text span{display:block;font-size:18px;color:white;letter-spacing:.04em;}
 .hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);border-left:2px solid var(--border);}
 .hdr-field{padding:4px 8px 6px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);min-width:0;}
-/* Row 1 ends at Gender (child 3), row 2 ends at Crawler # (child 7). */
-.hdr-field:nth-child(3),.hdr-field:nth-child(7){border-right:none;}
+/* Row 1 ends at Rest (child 3), row 2 ends at Floor (child 8). */
+.hdr-field:nth-child(3),.hdr-field:nth-child(8){border-right:none;}
+.rest-btn{flex:1;min-width:0;background:var(--section-hdr);color:#fff;border:none;border-radius:3px;padding:4px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.rest-btn:hover{background:var(--red);}
 .hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
 .hdr-field input{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;color:var(--ink);outline:none;padding:2px 0;}
 
@@ -354,11 +356,17 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
     <div class="hdr-fields">
       <div class="hdr-field" style="grid-column:span 4;"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
       <div class="hdr-field" style="grid-column:span 4;"><label>Race</label><input type="text" id="f-race" placeholder="Human, Bune..."></div>
-      <div class="hdr-field" style="grid-column:span 4;"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Rest</label>
+        <div style="display:flex;gap:4px;">
+          <button type="button" class="rest-btn" onclick="rest('short')" title="Short Rest (2 hrs): heal 5 Health Bar slots and regain half your Mana.">Short Rest</button>
+          <button type="button" class="rest-btn" onclick="rest('long')" title="Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.">Long Rest</button>
+        </div>
+      </div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Class</label><input type="text" id="f-class"></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Gender / Pronouns</label><input type="text" id="f-gender"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Crawler #</label><input type="text" id="f-crawler"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="text-align:center;"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Floor</label><input type="text" id="f-floor" placeholder="1" title="Current dungeon floor (F). Many effects read as ‘X + F’." style="text-align:center;"></div>
-      <div class="hdr-field" style="grid-column:span 5;"><label>Class</label><input type="text" id="f-class"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Crawler #</label><input type="text" id="f-crawler"></div>
     </div>
   </div>
 
@@ -819,6 +827,49 @@ function updateHpPips() {
     const valEl = pip.querySelector('.hp-pip-val');
     if(valEl) valEl.textContent = m > 0 ? m : '—';
   });
+}
+
+// ── REST (Core p.76) ──
+// Short Rest (2 hrs): heal 5 Health Bar slots + regain half total Mana (round down).
+// Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.
+function rest(kind) {
+  const long = kind === 'long';
+  const pips = [...document.querySelectorAll('.hp-pip')];
+  if(long) {
+    pips.forEach(p => { p.dataset.active = 'true'; p.classList.remove('dimmed'); });
+  } else {
+    // Heal 5 slots: re-activate the 5 lowest-% lost slots (fill upward from where you are).
+    pips.filter(p => p.dataset.active === 'false')
+      .sort((a, b) => (+a.dataset.pct) - (+b.dataset.pct))
+      .slice(0, 5)
+      .forEach(p => { p.dataset.active = 'true'; p.classList.remove('dimmed'); });
+  }
+  const el = document.getElementById('mana-current');
+  const max = parseInt(document.getElementById('mana-max')?.value, 10) || 0;
+  if(el) {
+    const cur = parseInt(el.value, 10) || 0;
+    el.value = String(long ? max : Math.min(max, cur + Math.floor(max / 2)));
+    try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
+  }
+  let clearedFat = false;
+  if(long) {
+    const df = document.getElementById('debuffs');
+    if(df && df.value) {
+      const kept = df.value.split(',').map(s => s.trim())
+        .filter(t => t && !/^fatigued(\s*[x×]\s*\d+)?$/i.test(t));
+      const joined = kept.join(', ');
+      if(joined !== df.value.trim()) {
+        df.value = joined; clearedFat = true;
+        try { df.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
+        try { if(window.DCCDebuffs) window.DCCDebuffs.refresh(); } catch(e) {}
+      }
+    }
+  }
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+  if(typeof addLog === 'function') {
+    if(long) addLog('Long Rest', 'Full HP & Mana', 'Full Health Bar, full Mana' + (clearedFat ? ', Fatigued cleared' : ''), 'normal');
+    else addLog('Short Rest', '+5 HB · +½ Mana', 'Healed 5 Health Bar slots, regained half Mana', 'normal');
+  }
 }
 
 // ── ATTACKS ──
