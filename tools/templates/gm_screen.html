@@ -1085,6 +1085,10 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .dice-hide-btn { padding: 6px 9px; background: rgba(45,122,45,0.12); color: #6dbf6d; border: 1px solid #2d7a2d; border-radius: 4px; cursor: pointer; font-size: 12px; line-height: 1; white-space: nowrap; }
 .dice-hide-btn.on { background: rgba(122,45,45,0.15); color: #df8a8a; border-color: #7a2d2d; }
 .dice-camp-panel { padding: 6px 0 2px; }
+/* System toggle (SD / DCC) — top bar, next to Campaign */
+.gm-sys-select { padding: 6px 8px; background: var(--panel-2); color: var(--white); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 12px; line-height: 1; white-space: nowrap; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; outline: none; }
+.gm-sys-select:hover { border-color: var(--mid); }
+.gm-sys-select option { background: var(--panel); color: var(--white); }
 /* Campaign link — top bar button + popover */
 #camp-btn.on { background: rgba(200,160,32,0.12); color: var(--gold); border-color: var(--gold); }
 #camp-popover {
@@ -1376,6 +1380,10 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   <div class="scene-pins" id="scene-pins"></div>
 
   <div class="session-controls">
+    <select class="gm-sys-select" id="gm-system-toggle" title="Game system — hides the other system's generators and bestiary" aria-label="Game system" onchange="setGmSystem(this.value)">
+      <option value="DCC">DCC</option>
+      <option value="SD">Shadowdark</option>
+    </select>
     <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
     <a class="btn small ghost vtt-launch" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg> VTT</a>
     <button class="btn small ghost" id="save-btn" onclick="saveSession()" title="Save session" aria-label="Save session to file"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4 9.5a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v1H4Z"/><path d="M3.6 12h16.8v6a1.5 1.5 0 0 1-1.5 1.5H5.1A1.5 1.5 0 0 1 3.6 18Zm7.1 0v2.2a1.3 1.3 0 0 0 2.6 0V12Z"/></svg></button>
@@ -1398,6 +1406,55 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 
 <!-- Campaign link popover — anchored under the top bar -->
 <div id="camp-popover" style="display:none;"></div>
+
+<script>
+// ══════════════════════════════════════════
+// SYSTEM TOGGLE (SD / DCC)
+// A top-bar switch that hides the other system's Generators (and defaults the
+// combat-tracker's monster picker to the matching bestiary). Purely a display
+// filter — both systems' data stays loaded. Persisted per browser.
+// ══════════════════════════════════════════
+(function () {
+  const SD_GENS  = ['adventure','npc','rival','monster','dungeon','encounter','shop','loot'];
+  const DCC_GENS = ['dccnpc','dccneighborhood','dccmonster','dccencounter','dccloot','dccitem'];
+  function readSys() { try { return localStorage.getItem('gm_system') === 'SD' ? 'SD' : 'DCC'; } catch (e) { return 'DCC'; } }
+  let SYS = readSys();
+  window.GM_SYSTEM = SYS;
+
+  function applyToSelect(sel) {
+    const hideSD = SYS === 'DCC', hideDCC = SYS === 'SD';
+    let curHidden = false, firstVisible = null;
+    [].slice.call(sel.options).forEach(o => {
+      const v = o.value;
+      const isSD = SD_GENS.indexOf(v) >= 0, isDCC = DCC_GENS.indexOf(v) >= 0;
+      const hide = (isSD && hideSD) || (isDCC && hideDCC);
+      o.hidden = hide;
+      o.disabled = hide;                 // belt-and-suspenders for browsers that ignore hidden
+      if (!hide && firstVisible === null) firstVisible = v;
+      if (o.selected && hide) curHidden = true;
+    });
+    if (curHidden && firstVisible) { sel.value = firstVisible; sel.dispatchEvent(new Event('change', { bubbles: true })); }
+  }
+  // Filter every Generators dropdown (the live tool + any toolbar clones) under root.
+  window.applyGmSystemToGenerators = function (root) {
+    (root || document).querySelectorAll('.gen-tab-select').forEach(applyToSelect);
+  };
+  window.setGmSystem = function (v) {
+    SYS = (v === 'SD') ? 'SD' : 'DCC';
+    window.GM_SYSTEM = SYS;
+    try { localStorage.setItem('gm_system', SYS); } catch (e) {}
+    document.querySelectorAll('#gm-system-toggle').forEach(s => { s.value = SYS; });
+    window.applyGmSystemToGenerators(document);
+    if (typeof window.setGmMonsterSource === 'function') window.setGmMonsterSource(SYS === 'SD' ? 'sd' : 'dcc');
+  };
+  function initSys() {
+    document.querySelectorAll('#gm-system-toggle').forEach(s => { s.value = SYS; });
+    window.applyGmSystemToGenerators(document);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSys);
+  else initSys();
+})();
+</script>
 
 <script>
 // ══════════════════════════════════════════
@@ -4164,7 +4221,9 @@ function init_trackers(root) {
     const hb = Array.isArray(window.__DCC_HB_MONSTERS) ? window.__DCC_HB_MONSTERS : [];  // user's saved homebrew
     return hb.concat(book);
   }
-  let pickerSource = dccBestiary().length ? 'dcc' : 'sd';
+  // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
+  // when its data is loaded, else SD.
+  let pickerSource = (window.GM_SYSTEM === 'SD') ? 'sd' : (dccBestiary().length ? 'dcc' : 'sd');
 
   function pickerMatches() {
     const q = pickerQuery.trim().toLowerCase();
@@ -4283,6 +4342,15 @@ function init_trackers(root) {
     pickerOpen = false;
     render();
   }
+
+  // Driven by the top-bar SD/DCC toggle: switch the picker's default bestiary and,
+  // if it's open, rebuild it in place.
+  window.setGmMonsterSource = function(src) {
+    const s = (src === 'sd') ? 'sd' : 'dcc';
+    if(s === pickerSource) return;
+    pickerSource = s; pickerType = '';
+    if(pickerOpen && pickerEl) { pickerEl.remove(); pickerEl = null; openPicker(); }
+  };
 
   function render() {
     list.innerHTML = '';
@@ -7897,6 +7965,9 @@ window.init_gen = function(root) {
     tabSelect.addEventListener('change', () => showGenPanel(tabSelect.value));
   }
   showGenPanel(activeTab);
+  // Honor the SD/DCC toggle: hide the other system's options and, if the default
+  // tab ('adventure') belongs to the hidden system, switch to the first visible one.
+  if(typeof window.applyGmSystemToGenerators === 'function') window.applyGmSystemToGenerators(root);
 
   rollBtn.addEventListener('click', () => {
     if(activeTab==='npc') {
