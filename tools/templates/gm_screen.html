@@ -4131,8 +4131,14 @@ function init_trackers(root) {
     card.querySelectorAll('.npc-mon-attack').forEach(b => {
       b.addEventListener('click', () => {
         const label = (n.name ? n.name + ' · ' : '') + (b.dataset.atkname || 'attack');
-        if(typeof window.rollAttackToDiceTray === 'function') {
-          window.rollAttackToDiceTray(label, b.dataset.hit || null, b.dataset.dmg || null);
+        const hit = b.dataset.hit || null, dmg = b.dataset.dmg || null;
+        // DCC monsters don't roll to hit, and their "X+F" Evade DC stays hidden
+        // from players (the log is shared), so roll only the damage. SD monsters
+        // keep the d20 to-hit (rolled vs the player's AC).
+        if(n.hpMode === 'dcc') {
+          if(typeof window.rollDccAttackToDiceTray === 'function') window.rollDccAttackToDiceTray(label, dmg);
+        } else if(typeof window.rollAttackToDiceTray === 'function') {
+          window.rollAttackToDiceTray(label, hit, dmg);
         }
       });
     });
@@ -10106,6 +10112,34 @@ function init_dice(root) {
     return entry;
   };
 
+  // A DCC monster attack. The GM never rolls to hit, and the attack's "X+F" Evade
+  // DC must stay hidden from players — the roll log is broadcast to the whole
+  // campaign — so we roll and show ONLY the damage. The GM reads the DC off the
+  // monster card's own attack button.
+  root._dccAttackRoll = (label, dmgExpr, adv) => {
+    let dmgTotal = null; const detailParts = [];
+    if(dmgExpr) {
+      const { dice, mod: dmod } = parseFormula(dmgExpr);
+      if(dice.length || dmod) {
+        dmgTotal = dmod; const bits = [];
+        dice.forEach(([sides, count]) => {
+          const rolls = [];
+          for(let i = 0; i < count; i++) rolls.push(1 + Math.floor(Math.random() * sides));
+          dmgTotal += rolls.reduce((a, b) => a + b, 0);
+          bits.push(`${count}d${sides}(${rolls.join(',')})`);
+        });
+        if(dmod) bits.push((dmod > 0 ? '+' : '') + dmod);
+        detailParts.push(`${bits.join(' ')}=${dmgTotal}`);
+      }
+    }
+    const entry = { label: label || 'Attack', adv: 'none', detail: detailParts.join('  |  '), total: dmgTotal !== null ? ('Dmg: ' + dmgTotal) : '—', crit: '' };
+    log.unshift(entry);
+    if(log.length > 100) log.length = 100;
+    renderLog();
+    GMCamp.broadcast(entry);
+    return entry;
+  };
+
   // Collapse duplicate remote rolls when restoring a saved log: by server id
   // when present, or by a content signature for older entries saved before ids
   // were tracked. Local (GM) rolls are never collapsed — identical ones are kept.
@@ -10154,6 +10188,15 @@ window.rollAttackToDiceTray = function(label, hitMod, dmgExpr, adv) {
   try {
     const node = getOrCreateInstance('dice');
     if(node && typeof node._attackRoll === 'function') return !!node._attackRoll(label, hitMod, dmgExpr, adv);
+  } catch(e) {}
+  return false;
+};
+
+// DCC monster attack: damage only (no d20 to-hit; the Evade DC stays hidden).
+window.rollDccAttackToDiceTray = function(label, dmgExpr, adv) {
+  try {
+    const node = getOrCreateInstance('dice');
+    if(node && typeof node._dccAttackRoll === 'function') return !!node._dccAttackRoll(label, dmgExpr, adv);
   } catch(e) {}
   return false;
 };
