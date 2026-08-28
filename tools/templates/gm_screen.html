@@ -2182,9 +2182,7 @@ GMScenes.renderPins();
         <option value="dccmonster">DCC Monster</option>
         <option value="dccencounter">DCC Encounter</option>
         <option value="dccloot">DCC Loot Box</option>
-        <option value="dccmagic">DCC Magic Item</option>
         <option value="dccitem">DCC Item</option>
-        <option value="dccdebuff">DCC Debuff</option>
       </select>
       <div class="toolbar-spacer"></div>
       <button class="btn small primary gen-roll" title="Generate" aria-label="Generate"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button>
@@ -2521,56 +2519,32 @@ GMScenes.renderPins();
         </div>
       </div>
 
-      <!-- DCC MAGIC ITEM PANEL (Tables 38–42 randomized magic-item generator) -->
-      <div class="gen-panel" data-panel="dccmagic">
-        <div class="gen-controls">
-          <label class="gen-label">Rarity (X value)
-            <select class="gen-select" id="gen-dccmagic-tier">
-              <option value="Silver">Silver</option>
-              <option value="Gold">Gold</option>
-              <option value="Platinum">Platinum</option>
-              <option value="Legendary">Legendary</option>
-              <option value="Celestial">Celestial</option>
-            </select>
-          </label>
-          <label class="gen-label">Type
-            <select class="gen-select" id="gen-dccmagic-type">
-              <option value="">Random</option>
-              <option value="39">Mundane Item / Weapon</option>
-              <option value="40">Clothing</option>
-              <option value="41">Accessory</option>
-            </select>
-          </label>
-          <label class="gen-label">Count
-            <select class="gen-select" id="gen-dccmagic-count">
-              <option value="1">1</option><option value="2">2</option>
-              <option value="3">3</option><option value="5">5</option>
-            </select>
-          </label>
-        </div>
-        <div class="gen-results" id="gen-dccmagic-results">
-          <div class="gen-empty">Rolls a random enchanted property (Tables 38&ndash;42) at the chosen rarity &mdash; put it on a base item the party would use.</div>
-        </div>
-      </div>
-
-      <!-- DCC ITEM PANEL (random draw from the item catalog) -->
+      <!-- DCC ITEM PANEL (catalog items + magic properties, Tables 38–42) -->
       <div class="gen-panel" data-panel="dccitem">
         <div class="gen-controls">
-          <label class="gen-label">Category
+          <label class="gen-label">What
             <select class="gen-select" id="gen-dccitem-cat">
-              <option value="">Any Category</option>
-              <option value="consumable">Consumables</option>
-              <option value="weapon">Weapons</option>
-              <option value="armor">Armor</option>
-              <option value="accessory">Accessories</option>
-              <option value="scroll">Scrolls</option>
-              <option value="tome">Tomes</option>
-              <option value="mundane">Mundane</option>
-              <option value="tool">Tools</option>
-              <option value="material">Materials</option>
+              <optgroup label="Catalog item">
+                <option value="">Any Category</option>
+                <option value="consumable">Consumables</option>
+                <option value="weapon">Weapons</option>
+                <option value="armor">Armor</option>
+                <option value="accessory">Accessories</option>
+                <option value="scroll">Scrolls</option>
+                <option value="tome">Tomes</option>
+                <option value="mundane">Mundane</option>
+                <option value="tool">Tools</option>
+                <option value="material">Materials</option>
+              </optgroup>
+              <optgroup label="Magic property (Tables 38–42)">
+                <option value="magic">Magic: random type</option>
+                <option value="magic:39">Magic: Item / Weapon</option>
+                <option value="magic:40">Magic: Clothing</option>
+                <option value="magic:41">Magic: Accessory</option>
+              </optgroup>
             </select>
           </label>
-          <label class="gen-label">Tier
+          <label class="gen-label">Tier / Rarity
             <select class="gen-select" id="gen-dccitem-tier">
               <option value="">Any Tier</option>
               <option value="Bronze">Bronze</option>
@@ -2589,7 +2563,7 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-dccitem-results">
-          <div class="gen-empty">Draws random named items from the DCC catalog &mdash; filter by category and/or tier.</div>
+          <div class="gen-empty">Draws a named item from the DCC catalog, or &mdash; pick a &ldquo;Magic property&rdquo; under <b>What</b> &mdash; rolls a random enchanted property (Tables 38&ndash;42) at the chosen rarity.</div>
         </div>
       </div>
 
@@ -2699,21 +2673,6 @@ GMScenes.renderPins();
         </div>
         <div class="gen-results" id="gen-dccenc-results">
           <div class="gen-empty">Assembles a group of DCC mobs near the chosen level, optionally led by an Elite or Boss. Send the whole group, or any single member, to the tracker.</div>
-        </div>
-      </div>
-
-      <!-- DCC DEBUFF PANEL (Table 11 conditions: roll one, or list all) -->
-      <div class="gen-panel" data-panel="dccdebuff">
-        <div class="gen-controls">
-          <label class="gen-label">How many
-            <select class="gen-select" id="gen-dccdebuff-count">
-              <option value="1">Roll 1</option><option value="2">Roll 2</option>
-              <option value="3">Roll 3</option><option value="all">List all (reference)</option>
-            </select>
-          </label>
-        </div>
-        <div class="gen-results" id="gen-dccdebuff-results">
-          <div class="gen-empty">Rolls a random debuff from Table 11, or lists all of them as a quick reference. <span style="opacity:.7">F = the current Floor Number.</span></div>
         </div>
       </div>
 
@@ -6397,6 +6356,22 @@ function dccMonSize(m) {
 function dccSendAttr(v) {
   return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
+// A static (non-interactive) Health-Bar strip: one colored segment per HB slot,
+// red→green left to right, each labelled with that slot's HP. Mobs have 10, Bosses
+// up to 13. Purely visual — GMs cross slots off on the tracker, not here.
+const DCC_HB_COLORS = [[192,30,30],[210,60,10],[220,100,0],[200,130,0],[180,150,0],[150,160,0],[100,170,0],[60,170,0],[30,150,20],[10,120,10]];
+function dccHbBar(slots) {
+  if(!Array.isArray(slots) || !slots.length) return '';
+  const n = slots.length, last = DCC_HB_COLORS.length - 1;
+  const segs = slots.map((v, i) => {
+    const c = DCC_HB_COLORS[n <= 1 ? last : Math.round(i / (n - 1) * last)];
+    return '<div title="' + esc(String(v)) + ' HP" style="flex:1 1 0;min-width:0;height:18px;display:flex;align-items:center;justify-content:center;' +
+      'background:rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ');border:1px solid rgba(0,0,0,.35);' +
+      'font-family:\'Barlow Condensed\',sans-serif;font-size:9px;font-weight:700;color:rgba(255,255,255,.92);text-shadow:0 1px 1px rgba(0,0,0,.5);">' +
+      esc(String(v)) + '</div>';
+  }).join('');
+  return '<div style="display:flex;gap:2px;margin:5px 0 2px;">' + segs + '</div>';
+}
 // Full stat-block card for one DCC creature; opts.send adds a Send-to-Tracker button.
 function dccMonGenCard(m, opts) {
   const S = m.stats || {};
@@ -6422,6 +6397,7 @@ function dccMonGenCard(m, opts) {
     '<div class="gen-card-header"><span class="gen-card-name">' + esc(m.name) + '</span>' +
       '<span class="gen-card-tag">' + esc(m.role || 'Monster') + ' · LV ' + esc(m.level) + '</span></div>' +
     '<div class="gen-card-stats">' + monsterStat('Size', dccMonSize(m)) + monsterStat('Evade', m.evade) + monsterStat('DR', m.dr) + monsterStat('Surprise', m.surprise) + monsterStat('Move', m.move) + monsterStat('HP', hpStr) + '</div>' +
+    dccHbBar(slots) +
     (abil ? '<div class="gen-card-stats">' + abil + '</div>' : '') +
     ((Array.isArray(m.tags) && m.tags.length) ? '<div class="gen-card-row"><span class="gen-card-row-label">Tags</span><span>' + esc(m.tags.join(', ')) + '</span></div>' : '') +
     (atks ? '<hr class="gen-card-divider">' + atks : '') +
@@ -6462,26 +6438,6 @@ function genDccEncounter(level, sizeKey, bossKey) {
     '<div class="gen-card-actions"><button class="btn small primary gen-send-tracker-all" data-src="dcc" data-mons="' + dccSendAttr(names.join('|')) + '">Send all to Tracker</button></div>' +
     '<hr class="gen-card-divider">' + rows
   );
-}
-function dccDebuffCard(d) {
-  const tag = d.stackable ? '<span class="gen-card-tag">Stackable</span>' : '';
-  return card(
-    '<div class="gen-card-header"><span class="gen-card-name">' + esc(d.name) + '</span>' + tag + '</div>' +
-    '<div class="gen-item-desc" style="text-transform:none;">' + esc(d.effect) + '</div>' +
-    '<div class="gen-card-row"><span class="gen-card-row-label">Duration</span><span>' + esc(d.duration) + '</span></div>'
-  );
-}
-function genDccDebuffInto(container, countKey) {
-  if(typeof DCC_DEBUFFS === 'undefined' || !DCC_DEBUFFS.length) {
-    container.appendChild(card('<div class="gen-empty">DCC debuff data didn’t load. Open the GM screen from the app.</div>'));
-    return;
-  }
-  if(countKey === 'all') {
-    [...DCC_DEBUFFS].sort((a, b) => a.name.localeCompare(b.name, 'en')).forEach(d => container.appendChild(dccDebuffCard(d)));
-    return;
-  }
-  const n = parseInt(countKey, 10) || 1;
-  dccPickN(DCC_DEBUFFS, Math.min(n, DCC_DEBUFFS.length)).forEach(d => container.appendChild(dccDebuffCard(d)));
 }
 
 // ── DCC NPC generator (Core Ch.6 Dungeon NPCs) ─────────────────────────────
@@ -8131,19 +8087,19 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccloot-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccLootBox(tier));
 
-    } else if(activeTab==='dccmagic') {
-      const tier=root.querySelector('#gen-dccmagic-tier').value;
-      const type=root.querySelector('#gen-dccmagic-type').value;
-      const count=parseInt(root.querySelector('#gen-dccmagic-count').value)||1;
-      const res=root.querySelector('#gen-dccmagic-results'); res.innerHTML='';
-      for(let i=0;i<count;i++) res.appendChild(genDccMagicItem(tier, type));
-
     } else if(activeTab==='dccitem') {
       const cat=root.querySelector('#gen-dccitem-cat').value;
       const tier=root.querySelector('#gen-dccitem-tier').value;
       const count=parseInt(root.querySelector('#gen-dccitem-count').value)||1;
       const res=root.querySelector('#gen-dccitem-results'); res.innerHTML='';
-      for(let i=0;i<count;i++) res.appendChild(genDccItem(cat, tier));
+      if(cat.indexOf('magic')===0) {
+        // Magic property (Tables 38–42). Magic starts at Silver, so treat Any/Bronze as Silver.
+        const mtype = cat.indexOf(':')>=0 ? cat.split(':')[1] : '';
+        const mtier = (tier && tier!=='Bronze') ? tier : 'Silver';
+        for(let i=0;i<count;i++) res.appendChild(genDccMagicItem(mtier, mtype));
+      } else {
+        for(let i=0;i<count;i++) res.appendChild(genDccItem(cat, tier));
+      }
 
     } else if(activeTab==='dccmonster') {
       const role=root.querySelector('#gen-dccmon-role').value;
@@ -8158,11 +8114,6 @@ window.init_gen = function(root) {
       const boss=root.querySelector('#gen-dccenc-boss').value;
       const res=root.querySelector('#gen-dccenc-results'); res.innerHTML='';
       res.appendChild(genDccEncounter(level, size, boss));
-
-    } else if(activeTab==='dccdebuff') {
-      const cnt=root.querySelector('#gen-dccdebuff-count').value;
-      const res=root.querySelector('#gen-dccdebuff-results'); res.innerHTML='';
-      genDccDebuffInto(res, cnt);
 
     } else if(activeTab==='dccnpc') {
       const role=root.querySelector('#gen-dccnpc-role').value;
