@@ -2240,6 +2240,7 @@ GMScenes.renderPins();
         <option value="dccencounter">DCC Encounter</option>
         <option value="dccloot">DCC Loot Box</option>
         <option value="dccitem">DCC Item</option>
+        <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
       <button class="btn small primary gen-roll" title="Generate" aria-label="Generate"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button>
@@ -2730,6 +2731,62 @@ GMScenes.renderPins();
         </div>
         <div class="gen-results" id="gen-dccenc-results">
           <div class="gen-empty">Assembles a group of DCC mobs near the chosen level, optionally led by an Elite or Boss. Send the whole group, or any single member, to the tracker.</div>
+        </div>
+      </div>
+
+      <!-- MAP GENERATOR PANEL (system-neutral — same engine as the Dungeon/Adventure map) -->
+      <div class="gen-panel" data-panel="map">
+        <div class="gen-controls">
+          <label class="gen-label">Map type
+            <select class="gen-select" id="gen-map-type" title="Dungeon: rooms + corridors + doors. Castle: dungeon with round towers. Cave: organic caverns, tunnels, no doors. Islands: separate land masses. Building: rooms joined by shared walls. Dwelling: one structure, rooms nested inside.">
+              <option value="dungeon" selected>Dungeon</option><option value="castle">Castle</option>
+              <option value="crypt">Crypt</option><option value="mine">Mine</option>
+              <option value="cave">Cave</option><option value="nest">Nest</option>
+              <option value="sewers">Sewers</option><option value="keep">Keep</option>
+              <option value="tower">Tower</option><option value="building">Building</option>
+              <option value="dwelling">Dwelling</option><option value="village">Village</option>
+              <option value="islands">Islands</option>
+              <option value="ship">Ship</option>
+            </select>
+          </label>
+          <label class="gen-label">Rooms/Areas
+            <select class="gen-select" id="gen-map-rooms">
+              <option value="5">5</option><option value="8" selected>8</option>
+              <option value="10">10</option><option value="12">12</option>
+              <option value="15">15</option><option value="20">20</option>
+            </select>
+          </label>
+          <label class="gen-label">Room/Area Size
+            <select class="gen-select" id="gen-map-size">
+              <option value="1">Tiny</option><option value="2">Small</option>
+              <option value="3" selected>Medium</option><option value="4">Large</option><option value="5">Huge</option>
+            </select>
+          </label>
+          <label class="gen-label">Layout
+            <select class="gen-select" id="gen-map-layout">
+              <option value="1">Tight</option><option value="2">Cozy</option>
+              <option value="3" selected>Balanced</option><option value="4">Sprawling</option><option value="5">Vast</option>
+            </select>
+          </label>
+          <label class="gen-label">Entrances
+            <select class="gen-select" id="gen-map-entrances">
+              <option value="0">0</option><option value="1">1</option><option value="2" selected>2</option>
+              <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+            </select>
+          </label>
+          <label class="gen-label">Grid
+            <select class="gen-select" id="gen-map-gridint"><option value="0" selected>Everywhere</option><option value="1">Interior only</option></select>
+          </label>
+          <label class="gen-label">Look
+            <select class="gen-select" id="gen-map-look"><option value="light" selected>Light</option><option value="dark">Dark</option></select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-map-results">
+          <div class="gen-empty">Set options and press Generate — a battle map you can Load straight to the Maps pane. Same engine as the Adventure/Dungeon map.</div>
+        </div>
+        <div id="gen-map-bar" style="display:none;padding:10px 14px 12px;background:var(--panel);border-top:1px solid var(--border);flex-shrink:0;align-items:center;gap:8px">
+          <span id="gen-map-seed-label" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:0.06em;flex:1"></span>
+          <button id="gen-map-load-btn" class="btn small primary" style="white-space:nowrap"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 2.2a6.4 6.4 0 0 0-6.4 6.4c0 4.6 5.5 12 5.7 12.3a.9.9 0 0 0 1.4 0c.2-.3 5.7-7.7 5.7-12.3A6.4 6.4 0 0 0 12 2.2Zm0 4.1a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Z"/></svg> Load to Maps</button>
         </div>
       </div>
 
@@ -4286,21 +4343,16 @@ function init_trackers(root) {
 
   function openPicker() {
     if(pickerEl) return;
-    const dccAvail = dccBestiary().length > 0;
+    // The bestiary follows the top-bar SD/DCC master toggle — no per-picker source select.
+    pickerSource = (window.GM_SYSTEM === 'SD') ? 'sd' : 'dcc';
     const types = pickerSource === 'dcc'
       ? [...new Set(dccBestiary().map(m => m.role).filter(Boolean))]
       : ((typeof SD_MONSTER_TYPE_LIST !== 'undefined' && typeof monsterTypeOf === 'function')
           ? SD_MONSTER_TYPE_LIST.filter(t => allMonsters().some(m => monsterTypeOf(m.name) === t)) : []);
-    const sourceSel = dccAvail
-      ? `<select class="mon-pick-source" title="Bestiary">
-           <option value="dcc" ${pickerSource === 'dcc' ? 'selected' : ''}>DCC</option>
-           <option value="sd"  ${pickerSource === 'sd'  ? 'selected' : ''}>SD</option>
-         </select>` : '';
     pickerEl = document.createElement('div');
     pickerEl.className = 'mon-pick';
     pickerEl.innerHTML = `
       <div class="mon-pick-controls">
-        ${sourceSel}
         <input type="text" class="mon-pick-search" placeholder="Search the bestiary..." value="${escAttr(pickerQuery)}">
         <select class="mon-pick-type">
           <option value="">${pickerSource === 'dcc' ? 'Any Role' : 'Any Type'}</option>
@@ -4322,14 +4374,6 @@ function init_trackers(root) {
     pickerEl.querySelector('.mon-pick-type').addEventListener('change', e => {
       pickerType = e.target.value;
       refreshPickerRows();
-    });
-    // Switching bestiary source repopulates the Role/Type dropdown, so rebuild
-    // the whole picker (keeping the search text) rather than just the rows.
-    pickerEl.querySelector('.mon-pick-source')?.addEventListener('change', e => {
-      pickerSource = e.target.value;
-      pickerType = '';
-      pickerEl.remove(); pickerEl = null;
-      openPicker();
     });
     pickerEl.querySelector('.mon-pick-close').addEventListener('click', closePicker);
     wirePickerRows();
@@ -8204,6 +8248,34 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccnbhd-results'); res.innerHTML='';
       res.appendChild(genDccNeighborhood(kind, level));
 
+    } else if(activeTab==='map') {
+      // Map-only generator (system-neutral). Same Dungeon Engine as the
+      // Adventure/Dungeon map, minus the room-contents pass.
+      const res    = root.querySelector('#gen-map-results');
+      const mapBar = root.querySelector('#gen-map-bar');
+      res.innerHTML = '';
+      root._mapPng = null; root._mapWidth = null; root._mapHeight = null;
+      if(window.DungeonEngine) {
+        const q = id => root.querySelector('#gen-map-'+id);
+        const gen = window.DungeonEngine.generateToPNG({
+          rooms: parseInt((q('rooms')||{}).value)||8,
+          size: +((q('size')||{}).value||3),
+          layout: +((q('layout')||{}).value||3),
+          entrances: +((q('entrances')||{}).value||2),
+          mapType: (q('type')||{}).value||'dungeon',
+          gridInterior: ((q('gridint')||{}).value||'0') === '1',
+          theme: (q('look')||{}).value||'light'
+        });
+        root._mapPng = gen.png; root._mapWidth = gen.width; root._mapHeight = gen.height;
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'width:100%;overflow:auto;display:flex;justify-content:center;padding:10px;flex-shrink:0';
+        wrap.innerHTML = '<img src="'+gen.png+'" alt="Generated map" style="max-width:100%;height:auto;display:block;">';
+        res.appendChild(wrap);
+      } else {
+        res.innerHTML = '<div class="gen-empty">Map engine didn’t load. Open the GM screen from the app.</div>';
+      }
+      if(mapBar) mapBar.style.display = root._mapPng ? 'flex' : 'none';
+
     } else if(activeTab==='dungeon') {
       const level  = root.querySelector('#gen-dun-level').value;
       const motif  = root.querySelector('#gen-dun-motif').value;
@@ -8269,6 +8341,15 @@ window.init_gen = function(root) {
       const png = root._mapPng;
       if(!png) return;
       loadIntoTool('maps', png, 'dungeon-map.png');
+    });
+  })();
+
+  // Wire the standalone Map generator's Load to Maps button
+  (function() {
+    const btn = root.querySelector('#gen-map-load-btn');
+    if(!btn) return;
+    btn.addEventListener('click', () => {
+      if(root._mapPng) loadIntoTool('maps', root._mapPng, 'map.png');
     });
   })();
 
