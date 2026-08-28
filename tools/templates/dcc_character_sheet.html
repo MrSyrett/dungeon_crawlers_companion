@@ -1155,8 +1155,13 @@ function refreshSkillRowRules() {
   const tbody = document.getElementById('skills-body');
   if(!tbody) return;
   tbody.querySelectorAll('tr').forEach(tr => {
-    const nameInp = tr.querySelector('input[type="text"]');
+    const texts = tr.querySelectorAll('input[type="text"]');  // [name, rank, active/passive, notes]
+    const nameInp = texts[0];
     const chk = tr.querySelector('input[type="checkbox"]');
+    // Passive skills can't be rolled — hide the roll button when the
+    // Active/Passive field reads "Passive".
+    const rollBtn = tr.querySelector('.skill-roll-btn');
+    if(rollBtn) rollBtn.style.display = /passive/i.test(texts[2] ? texts[2].value : '') ? 'none' : '';
     if(!chk) return;
     const fixed = isFixedSkill(nameInp ? nameInp.value : '');
     chk.style.visibility = fixed ? 'hidden' : '';

@@ -813,18 +813,21 @@
   function initGear() {
     if (W.gearInit) return;
     if (!W.gear.clothes) W.gear.clothes = "The clothes on your back";
-    if (!W.gear.weapon) W.gear.weapon = W.combat.type === "spell" ? "5 Mana Potions" : (combatDisplayName() || "Starting weapon");
+    // The weapon comes from the Combat step (the player renames it there) and
+    // casters' Mana Potions are a fixed inventory item, so the gear step no
+    // longer shows a weapon box. Carry the weapon name to inventory for
+    // weapon-users; casters get a "Mana Potion" ×5 row added at finish instead.
+    if (!W.gear.weapon && W.combat.type !== "spell") W.gear.weapon = combatDisplayName() || "";
     W.gearInit = true;
   }
   function renderGear() {
     initGear();
-    return `<h3>What you walked in with</h3><p class="dccw-hint">Your starting kit: clothes, one genuinely useful item, some weird junk, and either your weapon or (for casters) 5 Mana Potions. The last box is for anything else your GM lets you start with — one item per line.</p>
+    return `<h3>What you walked in with</h3><p class="dccw-hint">Your starting kit: the clothes on your back, one genuinely useful item, and some weird junk. Your weapon${W.combat.type === "spell" ? " (plus 5 Mana Potions)" : ""} comes from your Combat choice. The last box is for anything else your GM lets you start with — one item per line.</p>
       <div class="dccw-row">
         <div class="dccw-field"><label>Clothes</label><input type="text" value="${esc(W.gear.clothes)}" oninput="DCCW.setGear('clothes',this.value)"></div>
-        <div class="dccw-field"><label>${W.combat.type === "spell" ? "Mana Potions" : "Starting weapon"}</label><input type="text" value="${esc(W.gear.weapon)}" oninput="DCCW.setGear('weapon',this.value)"></div>
+        <div class="dccw-field"><label>Useful item</label><input type="text" value="${esc(W.gear.useful)}" oninput="DCCW.setGear('useful',this.value)" placeholder="something handy"></div>
       </div>
       <div class="dccw-row">
-        <div class="dccw-field"><label>Useful item</label><input type="text" value="${esc(W.gear.useful)}" oninput="DCCW.setGear('useful',this.value)" placeholder="something handy"></div>
         <div class="dccw-field"><label>Weird junk</label><input type="text" value="${esc(W.gear.junk)}" oninput="DCCW.setGear('junk',this.value)" placeholder="whatever was in your pockets"></div>
       </div>
       <div class="dccw-field"><label>Additional items (GM-allowed, one per line)</label><textarea rows="4" oninput="DCCW.setGear('extra',this.value)" placeholder="one item per line">${esc(W.gear.extra)}</textarea></div>`;
@@ -1055,6 +1058,8 @@
     data.skills = skills;
     // Inventory: the gear boxes, plus the four loot items on the fast-forward.
     const inv = gearItems().map((item) => ({ item, qty: "1", notes: "" }));
+    // Casters start with Mana Potions — one item, quantity 5 (not "5 Mana Potions").
+    if (W.combat.type === "spell") inv.push({ item: "Mana Potion", qty: "5", notes: "" });
     if (third && W.loot) {
       if (!W.lootRolled) rollLoot();
       const R = W.lootRolled;
