@@ -1182,7 +1182,7 @@ function addInvRow() {
   tr.innerHTML = `
     <td style="text-align:center;"><button class="hot-pin" onclick="if(window.DCCEquip)DCCEquip.click(this);else if(window.DCCHotlist)DCCHotlist.toggleRow(this)" title="Equip / Hotlist" aria-label="Equip or Hotlist">○</button></td>
     <td><input type="text" placeholder="Item name..."></td>
-    <td><input type="text" style="text-align:center;"></td>
+    <td><input type="text" placeholder="Qty" style="text-align:center;"></td>
     <td><input type="text" placeholder="Notes..."></td>
     <td style="text-align:right;"><button class="inv-del-btn" onclick="this.closest('tr').remove()" title="Remove item" aria-label="Remove item">✕</button></td>
   `;
@@ -2520,37 +2520,65 @@ refreshSkillRowRules();
   .tabs-row { overflow-x: auto; }
   .tab-btn { flex-shrink: 0; font-size: 10px; padding: 8px 10px; white-space: nowrap; }
   .tab-panel { padding: 8px; }
-  /* Skills on mobile: lay each row out as a grid so every field (Stat included)
-     stays visible, and Notes & Upgrades drops to its own full-width line for
-     room. The header row is hidden because the grid no longer lines up with a
-     table header — each input's placeholder labels it instead. */
+  /* ── Skills on mobile ──
+     The desktop row is 7 cells, and the last cell bundles delete + advancement
+     tick + info + roll together. On a phone we lay each row out as a compact
+     card: the skill name gets a full-width top line, Rank/Check/Stat share the
+     next, Notes gets its own line, and the whole action bundle drops to a final
+     right-aligned row with comfortable tap targets. The header is hidden — each
+     field's placeholder labels it. Nothing runs off the screen. */
   .skills-table thead { display: none; }
   .skills-table, .skills-table tbody { display: block; width: 100%; }
   .skills-table tr {
     display: grid;
-    grid-template-columns: 30px minmax(0,1.6fr) 40px 50px minmax(0,1fr) 26px 46px;
+    grid-template-columns: 50px 1fr 84px;
     grid-template-areas:
-      "del name rank stat check tick roll"
-      "notes notes notes notes notes notes notes";
+      "pin   name   name"
+      "rank  check  stat"
+      "notes notes  notes"
+      "acts  acts   acts";
     align-items: center;
-    column-gap: 4px;
-    row-gap: 5px;
-    padding: 7px 2px;
+    column-gap: 6px;
+    row-gap: 6px;
+    padding: 9px 8px;
     border-bottom: 2px solid var(--rule);
   }
   .skills-table td { border-bottom: none; padding: 0; }
-  .skills-table td:nth-child(1) { grid-area: del; }
+  .skills-table td:nth-child(1) { grid-area: pin; justify-self: center; }
   .skills-table td:nth-child(2) { grid-area: name; }
   .skills-table td:nth-child(3) { grid-area: rank; }
   .skills-table td:nth-child(4) { grid-area: stat; }
   .skills-table td:nth-child(5) { grid-area: check; }
   .skills-table td:nth-child(6) { grid-area: notes; }
-  .skills-table td:nth-child(7) { grid-area: tick; justify-self: center; }
-  .skills-table td:nth-child(8) { grid-area: roll; }
+  .skills-table td:nth-child(7) { grid-area: acts; display: flex; justify-content: flex-end; align-items: center; gap: 14px; }
   .skills-table .skill-stat-sel { width: 100%; }
-  .skills-table .skill-del-btn { width: 100%; }
-  .skills-table .skill-roll-btn { min-width: 0; width: 100%; padding: 8px 4px !important; }
-  .skills-table th { font-size: 9px; padding: 3px 3px; }
+  .skills-table td input[type="text"] { padding: 7px 5px; }
+
+  /* ── Inventory on mobile ──
+     Item name + Qty + delete share the top line; Notes drops to its own line.
+     Header hidden; placeholders label each field. */
+  .inv-table thead { display: none; }
+  .inv-table, .inv-table tbody { display: block; width: 100%; }
+  .inv-table tr {
+    display: grid;
+    grid-template-columns: 46px 1fr 64px 40px;
+    grid-template-areas:
+      "pin   item  qty  del"
+      "notes notes notes notes";
+    align-items: center;
+    column-gap: 6px;
+    row-gap: 5px;
+    padding: 9px 8px;
+    border-bottom: 2px solid var(--rule);
+  }
+  .inv-table td { border-bottom: none; padding: 0; }
+  .inv-table td:nth-child(1) { grid-area: pin; justify-self: center; }
+  .inv-table td:nth-child(2) { grid-area: item; }
+  .inv-table td:nth-child(3) { grid-area: qty; }
+  .inv-table td:nth-child(4) { grid-area: notes; }
+  .inv-table td:nth-child(5) { grid-area: del; justify-self: end; }
+  .inv-table td input { padding: 7px 5px; }
+
   .gear-grid { grid-template-columns: 1fr; }
   .gear-slot { border-right: none !important; }
   .bg-notes-grid { grid-template-columns: 1fr; }
