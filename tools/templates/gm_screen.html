@@ -2177,9 +2177,12 @@ GMScenes.renderPins();
         <option value="encounter">Encounter</option>
         <option value="shop">Shop/Tavern</option>
         <option value="loot">Treasure</option>
+        <option value="dccmonster">DCC Monster</option>
+        <option value="dccencounter">DCC Encounter</option>
         <option value="dccloot">DCC Loot Box</option>
         <option value="dccmagic">DCC Magic Item</option>
         <option value="dccitem">DCC Item</option>
+        <option value="dccdebuff">DCC Debuff</option>
       </select>
       <div class="toolbar-spacer"></div>
       <button class="btn small primary gen-roll" title="Generate" aria-label="Generate"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button>
@@ -2588,6 +2591,87 @@ GMScenes.renderPins();
         </div>
       </div>
 
+      <!-- DCC MONSTER PANEL (random creature from the DCC bestiary) -->
+      <div class="gen-panel" data-panel="dccmonster">
+        <div class="gen-controls">
+          <label class="gen-label">Role
+            <select class="gen-select" id="gen-dccmon-role">
+              <option value="">Any Role</option>
+              <option value="Mob">Mob</option>
+              <option value="Elite">Elite</option>
+              <option value="Boss">Boss (any tier)</option>
+              <option value="Rival Crawler">Rival Crawler</option>
+              <option value="NPC">NPC</option>
+            </select>
+          </label>
+          <label class="gen-label">Level
+            <select class="gen-select" id="gen-dccmon-level">
+              <option value="">Any Level</option>
+              <option value="1-3">1&ndash;3</option>
+              <option value="4-8">4&ndash;8</option>
+              <option value="9-15">9&ndash;15</option>
+              <option value="16-30">16&ndash;30</option>
+              <option value="31-99">31+</option>
+            </select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-dccmon-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dccmon-results">
+          <div class="gen-empty">Rolls a random creature from the DCC bestiary (plus your homebrew). Each card can be sent straight to the combat tracker.</div>
+        </div>
+      </div>
+
+      <!-- DCC ENCOUNTER PANEL (a scaled group of DCC monsters) -->
+      <div class="gen-panel" data-panel="dccencounter">
+        <div class="gen-controls">
+          <label class="gen-label">Party Level
+            <select class="gen-select" id="gen-dccenc-level">
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+              <option value="8">8</option><option value="10">10</option><option value="12">12</option>
+              <option value="16">16</option><option value="20">20</option><option value="30">30</option>
+            </select>
+          </label>
+          <label class="gen-label">Size
+            <select class="gen-select" id="gen-dccenc-size">
+              <option value="skirmish">Skirmish (2&ndash;3)</option>
+              <option value="standard" selected>Standard (4&ndash;6)</option>
+              <option value="horde">Horde (8&ndash;12)</option>
+            </select>
+          </label>
+          <label class="gen-label">Boss
+            <select class="gen-select" id="gen-dccenc-boss">
+              <option value="">No boss</option>
+              <option value="elite">Add an Elite</option>
+              <option value="boss">Add a Boss</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dccenc-results">
+          <div class="gen-empty">Assembles a group of DCC mobs near the chosen level, optionally led by an Elite or Boss. Send the whole group, or any single member, to the tracker.</div>
+        </div>
+      </div>
+
+      <!-- DCC DEBUFF PANEL (Table 11 conditions: roll one, or list all) -->
+      <div class="gen-panel" data-panel="dccdebuff">
+        <div class="gen-controls">
+          <label class="gen-label">How many
+            <select class="gen-select" id="gen-dccdebuff-count">
+              <option value="1">Roll 1</option><option value="2">Roll 2</option>
+              <option value="3">Roll 3</option><option value="all">List all (reference)</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dccdebuff-results">
+          <div class="gen-empty">Rolls a random debuff from Table 11, or lists all of them as a quick reference. <span style="opacity:.7">F = the current Floor Number.</span></div>
+        </div>
+      </div>
+
       <!-- SHOP / TAVERN PANEL -->
 
       <!-- ADVENTURE GENERATOR PANEL -->
@@ -2753,6 +2837,7 @@ GMScenes.renderPins();
 <script src="/tools-data/dcc-spells.js"></script>
 <script src="/tools-data/dcc-skills.js"></script>
 <script src="/tools-data/dcc-buffs.js"></script>
+<script src="/tools-data/dcc-debuffs.js"></script>
 <script>
 // Pull the user's saved homebrew (own + campaign-shared) from the app so the DCC
 // generators and the bestiary picker can draw them too. Empty when standalone.
@@ -4264,7 +4349,9 @@ function init_trackers(root) {
   // Used by the Monster generator's "Send to Tracker" button.
   root._addMonster = (m) => {
     if(!m) return null;
-    const item = monsterItem(m);
+    // DCC bestiary entries carry an hbSlots array; build a segmented-HP DCC
+    // combatant for those, and a standard SD combatant otherwise.
+    const item = (m && Array.isArray(m.hbSlots)) ? dccMonsterItem(m) : monsterItem(m);
     items.push(item);
     render();
     return item;
@@ -6233,6 +6320,124 @@ function genDccItem(cat, tier) {
   );
 }
 
+// ── DCC Monster / Encounter / Debuff generators ────────────────────────────
+// Draw from the DCC bestiary (DCC_MONSTERS + the user's saved homebrew). Cards
+// can be sent to the combat tracker, which builds a proper DCC segmented-HP
+// combatant (see _addMonster's DCC branch + dccMonsterItem in the tracker).
+const DCC_SIZE_NAMES = { 1:'Tiny', 2:'Small', 3:'Petite', 4:'Medium', 5:'Large', 6:'Huge', 7:'Colossal', 8:'Gargantuan' };
+function dccGenBestiary() {
+  const book = (typeof DCC_MONSTERS !== 'undefined' && Array.isArray(DCC_MONSTERS)) ? DCC_MONSTERS : [];
+  const hb = Array.isArray(window.__DCC_HB_MONSTERS) ? window.__DCC_HB_MONSTERS : [];
+  return hb.concat(book);
+}
+function dccRoleMatch(m, role) {
+  if(!role) return true;
+  if(role === 'Boss') return /Boss$/.test(String(m.role || ''));   // any boss tier
+  return String(m.role || '') === role;
+}
+function dccLevelMatch(m, band) {
+  if(!band) return true;
+  const p = band.split('-').map(Number);
+  const lv = parseInt(m.level, 10) || 0;
+  return lv >= p[0] && lv <= (p[1] || p[0]);
+}
+function dccMonTotalHp(m) {
+  return (Array.isArray(m.hbSlots) ? m.hbSlots : []).reduce((a, v) => a + (parseInt(v, 10) || 0), 0);
+}
+function dccMonSize(m) {
+  const n = parseInt(m.size, 10);
+  return DCC_SIZE_NAMES[n] ? DCC_SIZE_NAMES[n] + ' (' + n + ')' : (m.size != null ? String(m.size) : '');
+}
+function dccSendAttr(v) {
+  return String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+// Full stat-block card for one DCC creature; opts.send adds a Send-to-Tracker button.
+function dccMonGenCard(m, opts) {
+  const S = m.stats || {};
+  const abil = ['STR','INT','CON','DEX','CHA'].map(k => {
+    const st = S[k]; if(!st) return '';
+    const mod = (st.mod != null) ? ((st.mod >= 0 ? '+' : '') + st.mod) : '';
+    return monsterStat(k, mod);
+  }).join('');
+  const slots = Array.isArray(m.hbSlots) ? m.hbSlots : [];
+  const hpStr = dccMonTotalHp(m) + (slots.length ? ' (' + slots.length + '×HB)' : '');
+  const atks = (m.attacks || []).map(a => {
+    const bits = [a.toHit ? 'to hit ' + a.toHit : '', a.damage ? a.damage + (a.damageType ? ' ' + a.damageType : '') : '', a.range || ''].filter(Boolean).join(' · ');
+    const rider = a.rider ? ' — ' + a.rider : '';
+    return '<div class="gen-card-row"><span class="gen-card-row-label">' + esc(a.name || 'Attack') + '</span><span>' + esc(bits + rider) + '</span></div>';
+  }).join('');
+  const notes = (m.notes && m.notes.length)
+    ? '<div class="gen-card-row"><span class="gen-card-row-label">Traits</span><span>' + m.notes.map(esc).join('<br>') + '</span></div>'
+    : '';
+  const send = (opts && opts.send)
+    ? '<div class="gen-card-actions"><button class="btn small primary gen-send-tracker" data-src="dcc" data-mon="' + dccSendAttr(m.name) + '">Send to Tracker</button></div>'
+    : '';
+  return card(
+    '<div class="gen-card-header"><span class="gen-card-name">' + esc(m.name) + '</span>' +
+      '<span class="gen-card-tag">' + esc(m.role || 'Monster') + ' · LV ' + esc(m.level) + '</span></div>' +
+    '<div class="gen-card-stats">' + monsterStat('Size', dccMonSize(m)) + monsterStat('Evade', m.evade) + monsterStat('DR', m.dr) + monsterStat('Surprise', m.surprise) + monsterStat('Move', m.move) + monsterStat('HP', hpStr) + '</div>' +
+    (abil ? '<div class="gen-card-stats">' + abil + '</div>' : '') +
+    ((Array.isArray(m.tags) && m.tags.length) ? '<div class="gen-card-row"><span class="gen-card-row-label">Tags</span><span>' + esc(m.tags.join(', ')) + '</span></div>' : '') +
+    (atks ? '<hr class="gen-card-divider">' + atks : '') +
+    notes + send
+  );
+}
+function genDccMonster(role, band) {
+  const pool = dccGenBestiary().filter(m => dccRoleMatch(m, role) && dccLevelMatch(m, band));
+  if(!pool.length) return card('<div class="gen-empty">No DCC creature matches those filters.</div>');
+  return dccMonGenCard(pool[Math.floor(Math.random() * pool.length)], { send: true });
+}
+function dccEncSizeRange(key) {
+  return key === 'skirmish' ? [2, 3] : key === 'horde' ? [8, 12] : [4, 6];
+}
+function dccNearestByLevel(level, role) {
+  return dccGenBestiary().filter(m => dccRoleMatch(m, role))
+    .map(m => ({ m, d: Math.abs((parseInt(m.level, 10) || 0) - level) }))
+    .sort((a, b) => a.d - b.d).map(x => x.m);
+}
+function genDccEncounter(level, sizeKey, bossKey) {
+  const rng = dccEncSizeRange(sizeKey);
+  const n = rng[0] + Math.floor(Math.random() * (rng[1] - rng[0] + 1));
+  const near = dccNearestByLevel(level, 'Mob').slice(0, Math.max(6, n * 3));   // closest-in-level pool
+  const group = [];
+  for(let i = 0; i < n && near.length; i++) group.push(near[Math.floor(Math.random() * near.length)]);
+  if(bossKey === 'elite') { const el = dccNearestByLevel(level, 'Elite')[0]; if(el) group.unshift(el); }
+  else if(bossKey === 'boss') { const bs = dccNearestByLevel(level, 'Boss')[0]; if(bs) group.unshift(bs); }
+  if(!group.length) return card('<div class="gen-empty">No DCC monsters available to build an encounter.</div>');
+  const names = group.map(m => m.name);
+  const rows = group.map(m =>
+    '<div class="gen-card-row"><span class="gen-card-row-label">' + esc(m.role || 'Mob') + '</span>' +
+    '<span><b>' + esc(m.name) + '</b> <span style="opacity:.6">LV ' + esc(m.level) + ' · ' + esc(dccMonTotalHp(m)) + ' HP</span> ' +
+    '<button class="btn small ghost gen-send-tracker" data-src="dcc" data-mon="' + dccSendAttr(m.name) + '" style="margin-left:4px;">Send</button></span></div>'
+  ).join('');
+  return card(
+    '<div class="gen-card-header"><span class="gen-card-name">Encounter · LV ' + esc(level) + '</span>' +
+      '<span class="gen-card-tag">' + group.length + ' creature' + (group.length === 1 ? '' : 's') + '</span></div>' +
+    '<div class="gen-card-actions"><button class="btn small primary gen-send-tracker-all" data-src="dcc" data-mons="' + dccSendAttr(names.join('|')) + '">Send all to Tracker</button></div>' +
+    '<hr class="gen-card-divider">' + rows
+  );
+}
+function dccDebuffCard(d) {
+  const tag = d.stackable ? '<span class="gen-card-tag">Stackable</span>' : '';
+  return card(
+    '<div class="gen-card-header"><span class="gen-card-name">' + esc(d.name) + '</span>' + tag + '</div>' +
+    '<div class="gen-item-desc" style="text-transform:none;">' + esc(d.effect) + '</div>' +
+    '<div class="gen-card-row"><span class="gen-card-row-label">Duration</span><span>' + esc(d.duration) + '</span></div>'
+  );
+}
+function genDccDebuffInto(container, countKey) {
+  if(typeof DCC_DEBUFFS === 'undefined' || !DCC_DEBUFFS.length) {
+    container.appendChild(card('<div class="gen-empty">DCC debuff data didn’t load. Open the GM screen from the app.</div>'));
+    return;
+  }
+  if(countKey === 'all') {
+    [...DCC_DEBUFFS].sort((a, b) => a.name.localeCompare(b.name, 'en')).forEach(d => container.appendChild(dccDebuffCard(d)));
+    return;
+  }
+  const n = parseInt(countKey, 10) || 1;
+  dccPickN(DCC_DEBUFFS, Math.min(n, DCC_DEBUFFS.length)).forEach(d => container.appendChild(dccDebuffCard(d)));
+}
+
 // ── Shop/Tavern ──────────────────────────────────────────────────────────
 function genShop(type, tier) {
   const t = type==='random'?R(['Shop','Tavern']):type;
@@ -7556,18 +7761,40 @@ window.init_gen = function(root) {
   // "Send to Tracker" on a generated monster card. Delegated because results are
   // re-rendered on every roll. The tracker tool is created on demand, so this
   // works even if no pane is showing it yet.
+  // Resolve a generated card's monster by name from the right bestiary: the DCC
+  // pool when the button is tagged data-src="dcc", else the SD bestiary.
+  function resolveGenMon(name, src) {
+    if(src === 'dcc') return dccGenBestiary().find(x => x.name === name) || null;
+    return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
+  }
   root.addEventListener('click', (e) => {
+    // "Send all to Tracker" on a DCC encounter \u2014 send every listed creature.
+    const all = e.target.closest('.gen-send-tracker-all');
+    if(all && root.contains(all)) {
+      const names = String(all.dataset.mons || '').split('|').filter(Boolean);
+      let sent = 0;
+      names.forEach(nm => {
+        const m = resolveGenMon(nm, all.dataset.src);
+        if(m && typeof window.sendMonsterToTracker === 'function' && window.sendMonsterToTracker(m)) sent++;
+      });
+      const label = all.textContent;
+      all.textContent = sent ? ('Sent ' + sent + ' \u2713') : 'Could not send';
+      all.disabled = true;
+      setTimeout(() => { all.textContent = label; all.disabled = false; }, 1400);
+      return;
+    }
     const btn = e.target.closest('.gen-send-tracker');
     if(!btn || !root.contains(btn)) return;
-    const m = (typeof allMonsters === 'function')
-      ? allMonsters().find(x => x.name === btn.dataset.mon) : null;
+    const m = resolveGenMon(btn.dataset.mon, btn.dataset.src);
     const ok = m && typeof window.sendMonsterToTracker === 'function'
       ? window.sendMonsterToTracker(m) : false;
     // Confirm in place: the tracker may be in another pane (or not open yet),
-    // so a silent success would look like nothing happened.
+    // so a silent success would look like nothing happened. Restore the button's
+    // own original label (cards say "Send to Tracker", encounter rows say "Send").
+    const label = btn.textContent;
     btn.textContent = ok ? 'Sent \u2713' : 'Could not send';
     btn.disabled = true;
-    setTimeout(() => { btn.textContent = 'Send to Tracker'; btn.disabled = false; }, 1400);
+    setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 1400);
   });
   const rollBtn = root.querySelector('.gen-roll');
   let activeTab = 'adventure';
@@ -7793,6 +8020,25 @@ window.init_gen = function(root) {
       const count=parseInt(root.querySelector('#gen-dccitem-count').value)||1;
       const res=root.querySelector('#gen-dccitem-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccItem(cat, tier));
+
+    } else if(activeTab==='dccmonster') {
+      const role=root.querySelector('#gen-dccmon-role').value;
+      const band=root.querySelector('#gen-dccmon-level').value;
+      const count=parseInt(root.querySelector('#gen-dccmon-count').value)||1;
+      const res=root.querySelector('#gen-dccmon-results'); res.innerHTML='';
+      for(let i=0;i<count;i++) res.appendChild(genDccMonster(role, band));
+
+    } else if(activeTab==='dccencounter') {
+      const level=parseInt(root.querySelector('#gen-dccenc-level').value)||1;
+      const size=root.querySelector('#gen-dccenc-size').value;
+      const boss=root.querySelector('#gen-dccenc-boss').value;
+      const res=root.querySelector('#gen-dccenc-results'); res.innerHTML='';
+      res.appendChild(genDccEncounter(level, size, boss));
+
+    } else if(activeTab==='dccdebuff') {
+      const cnt=root.querySelector('#gen-dccdebuff-count').value;
+      const res=root.querySelector('#gen-dccdebuff-results'); res.innerHTML='';
+      genDccDebuffInto(res, cnt);
 
     } else if(activeTab==='dungeon') {
       const level  = root.querySelector('#gen-dun-level').value;
