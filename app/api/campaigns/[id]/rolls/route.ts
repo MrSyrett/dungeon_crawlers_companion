@@ -7,8 +7,14 @@ type Ctx = { params: Promise<{ id: string }> };
 const clip = (v: unknown, max: number, fallback = ""): string =>
   typeof v === "string" ? v.slice(0, max) : fallback;
 
+// Roll types the log understands. Beyond dice results (crit/fumble/normal),
+// the GM's "System AI" console broadcasts achievements, free-form system
+// messages, and loot boxes; a player's sheet broadcasts a loot-box claim back.
+const ROLL_TYPES = ["crit", "fumble", "normal", "achievement", "system", "lootbox", "lootclaim"];
+
 // POST — broadcast a roll to the campaign.
 // Body: { clientKey, source, label, result, detail, type }
+// `detail` carries a small JSON payload for loot boxes/claims, so it's roomier.
 export async function POST(req: NextRequest, ctx: Ctx) {
   // Cookie normally; a VTT token when framed by a tabletop.
   const user = await getPlayUser(req);
@@ -28,8 +34,8 @@ export async function POST(req: NextRequest, ctx: Ctx) {
       source: clip(body.source, 60, "Player") || "Player",
       label: clip(body.label, 200, "Roll") || "Roll",
       result: clip(body.result, 40),
-      detail: clip(body.detail, 400),
-      type: ["crit", "fumble"].includes(body.type as string) ? (body.type as string) : "normal",
+      detail: clip(body.detail, 2000),
+      type: ROLL_TYPES.includes(body.type as string) ? (body.type as string) : "normal",
     },
     select: { id: true },
   });

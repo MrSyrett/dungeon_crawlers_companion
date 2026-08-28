@@ -860,6 +860,43 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   min-width: 64px; flex-shrink: 0; padding-top: 1px;
 }
 .gen-card-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+
+/* ── System AI console (message composer + loot-box builder) ─────────────── */
+.ai-tool { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.ai-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 14px 16px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ai-section { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--gold); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ai-sec-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold);
+}
+.ai-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.ai-row > .ai-select, .ai-row > .ai-input { flex: 1; min-width: 0; }
+.ai-input, .ai-select {
+  background: var(--panel-2); border: 1px solid var(--border); color: var(--white);
+  font-family: 'Barlow', sans-serif; font-size: 13px; padding: 7px 9px; outline: none;
+  width: 100%; border-radius: 3px;
+}
+.ai-select { font-family: 'Barlow Condensed', sans-serif; cursor: pointer; }
+.ai-input:focus, .ai-select:focus { border-color: var(--mid); }
+textarea.ai-input { resize: vertical; line-height: 1.4; }
+.ai-select option { background: var(--panel-2); color: var(--white); }
+.ai-cat-results { display: none; flex-direction: column; max-height: 180px; overflow-y: auto; border: 1px solid var(--border); background: var(--panel-2); }
+.ai-cat-results.open { display: flex; }
+.ai-cat-item { padding: 6px 9px; cursor: pointer; font-size: 12px; color: var(--light); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; }
+.ai-cat-item:last-child { border-bottom: none; }
+.ai-cat-item:hover { background: var(--panel); color: var(--white); }
+.ai-cat-item .ai-cat-tier { font-size: 10px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .06em; flex-shrink: 0; }
+.ai-cat-empty { padding: 8px 9px; font-size: 11px; font-style: italic; color: var(--muted); }
+.ai-items { width: 100%; border-collapse: collapse; }
+.ai-items td { padding: 3px 4px; vertical-align: middle; }
+.ai-items .ai-it-name { width: 46%; } .ai-items .ai-it-qty { width: 46px; } .ai-items .ai-it-notes { width: auto; }
+.ai-items .ai-input { font-size: 12px; padding: 5px 7px; }
+.ai-items .ai-it-del { background: transparent; border: 1px solid var(--border); color: var(--mid); cursor: pointer; border-radius: 3px; padding: 4px 7px; font-size: 12px; line-height: 1; }
+.ai-items .ai-it-del:hover { color: var(--red-light); border-color: var(--red-light); }
+.ai-status { font-size: 11px; min-height: 14px; color: var(--mid); }
+.ai-status.ok { color: var(--green-light); } .ai-status.err { color: var(--red-light); }
+.pane.narrow .ai-scroll { padding: 10px 11px; }
+
 /* Stat pairs (AC/HP/MV, STR–CHA) as a responsive grid: six pairs on one line in
    a full-width pane, folding to two or three lines in a quarter-width one, so
    nothing runs off the edge in Four-pane mode. */
@@ -1492,6 +1529,24 @@ const GMCamp = (function() {
     }).catch(() => {});
   }
 
+  // Deliberate broadcast (achievements, system messages, loot boxes). Unlike
+  // broadcast(), this ignores hideRolls — these are intentional sends to players.
+  function send(payload) {
+    if(!campaign) return false;
+    fetch('/api/campaigns/' + campaign.id + '/rolls', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        clientKey, source: 'GM',
+        label: String(payload.label || ''),
+        result: String(payload.result == null ? '' : payload.result),
+        detail: String(payload.detail || ''),
+        type: payload.type || 'normal'
+      })
+    }).catch(() => {});
+    return true;
+  }
+
   async function poll() {
     if(!campaign) return;
     try {
@@ -1679,6 +1734,7 @@ const GMCamp = (function() {
     onRoll,
     onChange,
     broadcast,
+    send,
     toggleHide,
     togglePanel,
     isHidden: () => hideRolls,
@@ -1929,6 +1985,7 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice">Dice Tray</option>
+        <option value="ai">System AI</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-1-toolbar"></div>
     </div>
@@ -1948,6 +2005,7 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice">Dice Tray</option>
+        <option value="ai">System AI</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-2-toolbar"></div>
     </div>
@@ -1966,6 +2024,7 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice">Dice Tray</option>
+        <option value="ai">System AI</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-3-toolbar"></div>
     </div>
@@ -1985,6 +2044,7 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice" selected>Dice Tray</option>
+        <option value="ai">System AI</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-4-toolbar"></div>
     </div>
@@ -2947,6 +3007,56 @@ GMScenes.renderPins();
   </div>
 </template>
 
+<template id="tpl-ai">
+  <div class="tool-instance ai-tool" data-tool="ai">
+    <div class="ai-scroll">
+      <!-- ── Message ── -->
+      <div class="ai-section">
+        <div class="ai-sec-title">Message to the Roll Log</div>
+        <div class="ai-row">
+          <select class="ai-select ai-msg-type">
+            <option value="achievement">🏆 New Achievement</option>
+            <option value="system">💬 System Message</option>
+          </select>
+          <button class="btn small ghost ai-snark-btn" type="button" title="Roll a random snarky line">🎲 Snark</button>
+        </div>
+        <input type="text" class="ai-input ai-msg-title" placeholder="Achievement name (e.g. Bloodbath)">
+        <textarea class="ai-input ai-msg-body" rows="3" placeholder="The System AI's snarky remark…"></textarea>
+        <button class="btn small primary ai-send-msg" type="button">Send to Players</button>
+        <div class="ai-status ai-msg-status"></div>
+      </div>
+
+      <!-- ── Loot Box ── -->
+      <div class="ai-section">
+        <div class="ai-sec-title">Loot Box</div>
+        <input type="text" class="ai-input ai-box-name" placeholder="Box name (e.g. Gold Loot Box)">
+        <div class="ai-row">
+          <select class="ai-select ai-box-tier">
+            <option value="Bronze">Bronze</option><option value="Silver">Silver</option>
+            <option value="Gold" selected>Gold</option><option value="Platinum">Platinum</option>
+            <option value="Legendary">Legendary</option><option value="Celestial">Celestial</option>
+          </select>
+          <button class="btn small ghost ai-roll-tier" type="button" title="Fill the box from the DCC loot generator">🎲 Roll tier</button>
+        </div>
+        <input type="text" class="ai-input ai-cat-search" placeholder="Search the item catalog to add…">
+        <div class="ai-cat-results"></div>
+        <table class="ai-items"><tbody class="ai-items-body"></tbody></table>
+        <button class="btn small ghost ai-add-row" type="button">+ Add item</button>
+        <div class="ai-row" style="margin-top:8px">
+          <select class="ai-select ai-box-mode" title="Who can open this box">
+            <option value="copies">Everyone gets a copy</option>
+            <option value="named">Only a named player</option>
+            <option value="claim">First to claim it</option>
+          </select>
+          <input type="text" class="ai-input ai-box-to" placeholder="Player / character name" style="display:none;">
+        </div>
+        <button class="btn small primary ai-send-box" type="button">Send Loot Box</button>
+        <div class="ai-status ai-box-status"></div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <!-- DCC data layer — bestiary, items, and loot tables for the DCC generators
      and the Trackers monster picker. Generated from data/dcc/*.json. -->
 <script src="/tools-data/dcc-monsters.js"></script>
@@ -2987,7 +3097,7 @@ GMScenes.renderPins();
 // This is what makes loaded files / typed content persist.
 // ══════════════════════════════════════════
 
-const TOOL_TYPES = ['adventure', 'maps', 'trackers', 'notes', 'gen', 'party', 'rules'];
+const TOOL_TYPES = ['adventure', 'maps', 'trackers', 'notes', 'gen', 'party', 'rules', 'ai'];
 const instancePool = document.createElement('div');
 instancePool.style.cssText = 'position:fixed; top:0; left:-9999px; width:1px; height:1px; overflow:hidden;';
 document.body.appendChild(instancePool);
@@ -10988,6 +11098,190 @@ function init_rules(root) {
   load(true);
 }
 
+// ══════════════════════════════════════════
+// SYSTEM AI CONSOLE  (init_ai)
+// The GM's broadcast desk: fire an Achievement or free-form System message into
+// the shared Roll Log, or build a Loot Box (catalog pick / DCC-tier roll / by
+// hand) and send it so players can open it and drop the items on their sheet.
+// Loot helpers are replicated locally because dccLootTier/etc. live inside the
+// generators IIFE and aren't reachable here; they read the same DCC_* globals.
+// ══════════════════════════════════════════
+function init_ai(root) {
+  const esc = t => String(t == null ? '' : t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const R = arr => arr[Math.floor(Math.random() * arr.length)];
+  const pickN = (arr, n) => { const p = arr.slice(), out = []; while(out.length < n && p.length) out.push(p.splice(Math.floor(Math.random()*p.length),1)[0]); return out; };
+  const canSend = () => (typeof GMCamp !== 'undefined' && GMCamp.get());
+
+  // ── Message composer ──
+  const msgType   = root.querySelector('.ai-msg-type');
+  const snarkBtn  = root.querySelector('.ai-snark-btn');
+  const msgTitle  = root.querySelector('.ai-msg-title');
+  const msgBody   = root.querySelector('.ai-msg-body');
+  const sendMsg   = root.querySelector('.ai-send-msg');
+  const msgStatus = root.querySelector('.ai-msg-status');
+
+  function syncMsgType() {
+    const ach = msgType.value === 'achievement';
+    msgTitle.placeholder = ach ? 'Achievement name (e.g. Bloodbath)' : 'Message header (e.g. SYSTEM ALERT)';
+    msgBody.placeholder  = ach ? 'The System AI’s snarky remark…' : 'The System AI’s message…';
+    sendMsg.textContent  = ach ? 'Send Achievement' : 'Send Message';
+  }
+  msgType.addEventListener('change', syncMsgType);
+  syncMsgType();
+
+  snarkBtn.addEventListener('click', () => {
+    const pool = (typeof DCC_PREP !== 'undefined' && Array.isArray(DCC_PREP.aiBlurbs)) ? DCC_PREP.aiBlurbs : [];
+    if(!pool.length) { setStatus(msgStatus, 'No snark table loaded.', 'err'); return; }
+    msgBody.value = R(pool);
+    msgBody.focus();
+  });
+
+  function setStatus(el, msg, kind) {
+    el.textContent = msg || '';
+    el.className = 'ai-status' + (msg ? (msg && kind === 'ok' ? ' ok' : kind === 'err' ? ' err' : '') : '');
+    if(msg && kind === 'ok') { clearTimeout(el._t); el._t = setTimeout(() => { el.textContent = ''; el.className = 'ai-status'; }, 4000); }
+  }
+
+  sendMsg.addEventListener('click', () => {
+    if(!canSend()) { setStatus(msgStatus, 'Link a campaign first (top bar) to broadcast.', 'err'); return; }
+    const ach = msgType.value === 'achievement';
+    const title = msgTitle.value.trim();
+    const body  = msgBody.value.trim();
+    if(!title && !body) { setStatus(msgStatus, 'Add a name or a message first.', 'err'); return; }
+    const payload = ach
+      ? { type: 'achievement', label: 'NEW ACHIEVEMENT', result: title || 'Achievement', detail: body }
+      : { type: 'system',      label: title || 'SYSTEM',   result: '',                     detail: body };
+    GMCamp.send(payload);
+    setStatus(msgStatus, (ach ? 'Achievement' : 'Message') + ' sent to players.', 'ok');
+    msgTitle.value = ''; msgBody.value = '';
+  });
+
+  // ── Loot box ──
+  const boxName   = root.querySelector('.ai-box-name');
+  const boxTier   = root.querySelector('.ai-box-tier');
+  const rollTier  = root.querySelector('.ai-roll-tier');
+  const catSearch = root.querySelector('.ai-cat-search');
+  const catResults= root.querySelector('.ai-cat-results');
+  const itemsBody = root.querySelector('.ai-items-body');
+  const addRow    = root.querySelector('.ai-add-row');
+  const boxMode   = root.querySelector('.ai-box-mode');
+  const boxTo     = root.querySelector('.ai-box-to');
+  const sendBox   = root.querySelector('.ai-send-box');
+  const boxStatus = root.querySelector('.ai-box-status');
+
+  function addItemRow(name, qty, notes) {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="ai-it-name"><input type="text" class="ai-input" placeholder="Item"></td>' +
+      '<td class="ai-it-qty"><input type="text" class="ai-input" placeholder="Qty"></td>' +
+      '<td class="ai-it-notes"><input type="text" class="ai-input" placeholder="Notes"></td>' +
+      '<td class="ai-it-x"><button type="button" class="ai-it-del" title="Remove">✕</button></td>';
+    const inp = tr.querySelectorAll('input');
+    inp[0].value = name || ''; inp[1].value = (qty == null ? '' : String(qty)); inp[2].value = notes || '';
+    tr.querySelector('.ai-it-del').addEventListener('click', () => tr.remove());
+    itemsBody.appendChild(tr);
+    return tr;
+  }
+  function readItems() {
+    const out = [];
+    itemsBody.querySelectorAll('tr').forEach(tr => {
+      const inp = tr.querySelectorAll('input');
+      const item = (inp[0].value || '').trim();
+      if(!item) return;
+      const qty = (inp[1].value || '').trim();
+      const notes = (inp[2].value || '').trim().slice(0, 160);
+      out.push({ item: item.slice(0, 80), qty: qty || 1, notes });
+    });
+    return out;
+  }
+
+  addRow.addEventListener('click', () => addItemRow('', '', ''));
+
+  // Local mirrors of the generator loot helpers (read the same DCC_* globals).
+  function lootTier(t) {
+    if(typeof DCC_LOOT === 'undefined') return null;
+    const tiers = DCC_LOOT.tiers || [];
+    return tiers.find(x => x.tier === t) || tiers[0] || null;
+  }
+  function itemsOfTier(t, cats) {
+    if(typeof DCC_ITEMS === 'undefined') return [];
+    return DCC_ITEMS.filter(it => it.tier === t && cats.indexOf(it.category) >= 0);
+  }
+  function rollGold(formula) {
+    const f = String(formula || '');
+    if(/none|nuthin/i.test(f)) return 0;
+    const m = f.match(/(\d+)\s*d\s*(\d+)/i);
+    if(!m) return 0;
+    let total = 0; const num = +m[1], sides = +m[2];
+    for(let i = 0; i < num; i++) total += 1 + Math.floor(Math.random() * sides);
+    const mult = f.match(/[x×]\s*([\d,]+)/i);
+    if(mult) total *= (parseInt(mult[1].replace(/,/g, ''), 10) || 1);
+    return total;
+  }
+
+  rollTier.addEventListener('click', () => {
+    const key = boxTier.value;
+    const td = lootTier(key);
+    if(!td) { setStatus(boxStatus, 'DCC loot data didn’t load — open from the app.', 'err'); return; }
+    itemsBody.innerHTML = '';
+    const gold = rollGold(td.gold);
+    if(gold) addItemRow(gold.toLocaleString('en') + ' gold', '', key + ' loot box');
+    const consumables = itemsOfTier(td.tier, ['consumable','scroll','tome','material','mundane']);
+    const gear = itemsOfTier(td.tier, ['weapon','armor','accessory']);
+    pickN(consumables, 1 + (Math.random() < 0.5 ? 1 : 0)).forEach(it => addItemRow(it.name, 1, it.effect || ''));
+    pickN(gear, td.gearRolls || 0).forEach(it => addItemRow(it.name, 1, (it.slot ? it.slot + ' — ' : '') + (it.effect || '')));
+    if(!boxName.value.trim()) boxName.value = key + ' Loot Box';
+    setStatus(boxStatus, 'Rolled a ' + key + ' box — tweak it, then send.', 'ok');
+  });
+
+  // Catalog search — filter DCC_ITEMS by name, click to add a row.
+  function renderCat() {
+    const q = (catSearch.value || '').trim().toLowerCase();
+    if(!q) { catResults.className = 'ai-cat-results'; catResults.innerHTML = ''; return; }
+    const all = (typeof DCC_ITEMS !== 'undefined') ? DCC_ITEMS : [];
+    const hits = all.filter(it => (it.name || '').toLowerCase().indexOf(q) >= 0).slice(0, 40);
+    catResults.className = 'ai-cat-results open';
+    if(!hits.length) { catResults.innerHTML = '<div class="ai-cat-empty">No items match “' + esc(q) + '”.</div>'; return; }
+    catResults.innerHTML = hits.map((it, i) =>
+      '<div class="ai-cat-item" data-i="' + i + '"><span>' + esc(it.name) + '</span>' +
+      '<span class="ai-cat-tier">' + esc(it.tier || '') + '</span></div>').join('');
+    catResults._hits = hits;
+  }
+  catSearch.addEventListener('input', renderCat);
+  catResults.addEventListener('click', e => {
+    const el = e.target.closest('.ai-cat-item');
+    if(!el || !catResults._hits) return;
+    const it = catResults._hits[+el.dataset.i];
+    if(!it) return;
+    addItemRow(it.name, 1, (it.slot ? it.slot + ' — ' : '') + (it.effect || ''));
+    catSearch.value = ''; catResults.className = 'ai-cat-results'; catResults.innerHTML = '';
+    setStatus(boxStatus, 'Added “' + it.name + '”.', 'ok');
+  });
+
+  function syncMode() { boxTo.style.display = (boxMode.value === 'named') ? '' : 'none'; }
+  boxMode.addEventListener('change', syncMode);
+  syncMode();
+
+  sendBox.addEventListener('click', () => {
+    if(!canSend()) { setStatus(boxStatus, 'Link a campaign first (top bar) to send loot.', 'err'); return; }
+    const items = readItems().slice(0, 12);   // keep the JSON detail under the 2000-char cap
+    if(!items.length) { setStatus(boxStatus, 'Add at least one item to the box.', 'err'); return; }
+    const mode = boxMode.value;
+    const to = (mode === 'named') ? boxTo.value.trim() : '';
+    if(mode === 'named' && !to) { setStatus(boxStatus, 'Name the player who can open it.', 'err'); return; }
+    const name = boxName.value.trim() || 'Loot Box';
+    const boxId = 'lb-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const detail = JSON.stringify({ boxId, mode, to, items });
+    if(detail.length > 2000) { setStatus(boxStatus, 'Too many items — remove a few and resend.', 'err'); return; }
+    GMCamp.send({ type: 'lootbox', label: 'LOOT BOX', result: name, detail });
+    const who = mode === 'named' ? ('for ' + to) : mode === 'claim' ? '(first to claim)' : '(a copy for everyone)';
+    setStatus(boxStatus, 'Sent “' + name + '” ' + who + '.', 'ok');
+    itemsBody.innerHTML = ''; boxName.value = ''; if(mode === 'named') boxTo.value = '';
+  });
+}
+
+window.init_ai = init_ai;
 window.init_party = init_party;
 window.init_rules = init_rules;
 </script>

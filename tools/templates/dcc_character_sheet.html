@@ -41,6 +41,27 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-entry.crit .roll-result{color:#ffd700;}.log-entry.fumble .roll-result{color:#ff4444;}
 .log-entry.remote{border-left:3px solid #8a7ac8;background:#1c1a24;}
 .log-entry.crit{border-color:#ffd700;}.log-entry.fumble{border-color:#ff4444;}
+/* System-AI broadcasts: achievements, system messages, and loot boxes. */
+.log-achievement{border-left:3px solid #ffd700;background:#221f14;}
+.ach-banner{font-family:'Barlow Condensed',sans-serif;color:#ffd700;font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;}
+.ach-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:#ffe9a8;margin-top:2px;}
+.ach-snark{font-size:11px;color:#b7a98a;margin-top:3px;font-style:italic;line-height:1.4;}
+.log-system{border-left:3px solid #4aa3ff;background:#161c24;}
+.sys-head{font-family:'Barlow Condensed',sans-serif;color:#8ac0ff;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
+.sys-sub{font-size:13px;color:#dfeaff;margin-top:2px;}
+.sys-body{font-size:11px;color:#9fb2c8;margin-top:3px;line-height:1.4;}
+.log-lootbox{border-left:3px solid #c8a020;background:#20211a;}
+.lb-head{font-family:'Barlow Condensed',sans-serif;color:#e0c060;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
+.lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#f0e2b0;margin-top:2px;}
+.lb-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9a9a78;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.lb-desc{font-size:11px;color:#b7a98a;margin-top:3px;line-height:1.4;}
+.lb-items{margin:5px 0 0;padding-left:16px;font-size:11px;color:#cfc6a8;}
+.lb-items li{margin:1px 0;}
+.lb-note{color:#8a8570;font-style:italic;}
+.lb-actions{margin-top:6px;}
+.lb-btn{background:#c8a020;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.lb-btn:hover:not(:disabled){background:#e0b83a;}
+.lb-btn:disabled{background:#3a3a30;color:#8a8570;cursor:default;}
 .log-hint{color:#444;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
 
 /* SHEET */
@@ -2958,22 +2979,145 @@ function campaignBroadcast(label, result, detail, type) {
   }).catch(()=>{});
 }
 
+const _lootEsc = (s)=>String(s==null?'':s).replace(/</g,'&lt;');
+
+// ── Loot-box state (per browser) — so opened/claimed boxes survive a reload
+// and don't get re-added when the roll history replays. ──
+function _lootRead(key){ try { return JSON.parse(localStorage.getItem(key)||'{}'); } catch(e){ return {}; } }
+function _lootWrite(key,obj){ try { localStorage.setItem(key, JSON.stringify(obj)); } catch(e){} }
+function _lootOpened(){ return _lootRead('dcc_loot_opened'); }
+function _lootClaimed(){ return _lootRead('dcc_loot_claimed'); }
+function _markOpened(boxId){ const o=_lootOpened(); o[boxId]=1; _lootWrite('dcc_loot_opened',o); }
+function _markClaimed(boxId,by){ const c=_lootClaimed(); c[boxId]=by; _lootWrite('dcc_loot_claimed',c); }
+
+// Add a loot box's items straight into the Inventory tab.
+function lootAddItems(items){
+  (items||[]).forEach(it=>{
+    addInvRow();
+    const rows = document.querySelectorAll('#inv-body tr');
+    const tr = rows[rows.length-1];
+    const inp = tr.querySelectorAll('input[type="text"]');
+    if(inp[0]) inp[0].value = it.item || '';
+    if(inp[1]) inp[1].value = (it.qty!=null ? String(it.qty) : '');
+    if(inp[2]) inp[2].value = it.notes || '';
+  });
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+
+function renderNormalRemote(roll){
+  const div = document.createElement('div');
+  div.className = 'log-entry remote' + (roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
+  div.innerHTML = '<div class="roll-label"><span style="color:#8a7ac8;">'+_lootEsc(roll.source)+'</span> · '+_lootEsc(roll.label)+'</div>'
+    + '<div class="roll-result">'+_lootEsc(roll.result)+'</div>'
+    + (roll.detail?'<div class="roll-detail">'+_lootEsc(roll.detail)+'</div>':'');
+  return div;
+}
+function renderAchievementEntry(roll){
+  const div = document.createElement('div');
+  div.className = 'log-entry remote log-achievement';
+  div.innerHTML = '<div class="ach-banner">🏆 '+_lootEsc(roll.label||'NEW ACHIEVEMENT')+'</div>'
+    + (roll.result?'<div class="ach-name">'+_lootEsc(roll.result)+'</div>':'')
+    + (roll.detail?'<div class="ach-snark">'+_lootEsc(roll.detail)+'</div>':'');
+  return div;
+}
+function renderSystemEntry(roll){
+  const div = document.createElement('div');
+  div.className = 'log-entry remote log-system';
+  div.innerHTML = '<div class="sys-head">'+_lootEsc(roll.label||'SYSTEM')+'</div>'
+    + (roll.result?'<div class="sys-sub">'+_lootEsc(roll.result)+'</div>':'')
+    + (roll.detail?'<div class="sys-body">'+_lootEsc(roll.detail)+'</div>':'');
+  return div;
+}
+function renderLootBoxEntry(roll){
+  let p={}; try { p = JSON.parse(roll.detail||'{}'); } catch(e){ p={}; }
+  const items = Array.isArray(p.items) ? p.items : [];
+  const boxId = p.boxId || ('lb-'+(roll.id||Math.random().toString(36).slice(2)));
+  const mode  = p.mode || 'copies';
+  const to    = String(p.to||'').trim();
+  const me    = campaignPlayerName();
+  const opened = !!_lootOpened()[boxId];
+  const claimedBy = _lootClaimed()[boxId];
+  const div = document.createElement('div');
+  div.className = 'log-entry remote log-lootbox';
+  div.dataset.boxId = boxId;
+  div._lootItems = items;
+  div._lootName  = roll.result || 'Loot Box';
+  const itemsHtml = items.map(it =>
+    '<li>'+_lootEsc(it.item||'?')+(it.qty!=null && String(it.qty)!=='1' && String(it.qty)!==''?' ×'+_lootEsc(it.qty):'')
+    + (it.notes?' <span class="lb-note">'+_lootEsc(it.notes)+'</span>':'')+'</li>').join('');
+  let forLabel='', btn='';
+  if(mode==='named'){
+    forLabel = to ? '<div class="lb-for">For: '+_lootEsc(to)+'</div>' : '';
+    const mine = to && me && to.toLowerCase()===me.toLowerCase();
+    if(opened) btn='<button class="lb-btn" disabled>Opened ✓</button>';
+    else if(mine) btn='<button class="lb-btn lb-open">Open</button>';
+    else btn='<button class="lb-btn" disabled>'+(to?('For '+_lootEsc(to)):'Not for you')+'</button>';
+  } else if(mode==='claim'){
+    if(opened) btn='<button class="lb-btn" disabled>You claimed this ✓</button>';
+    else if(claimedBy) btn='<button class="lb-btn" disabled>Claimed by '+_lootEsc(claimedBy)+'</button>';
+    else btn='<button class="lb-btn lb-claim">Claim</button>';
+  } else { // copies — everyone opens their own
+    btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>';
+  }
+  div.innerHTML = '<div class="lb-head">🎁 '+_lootEsc(roll.label||'LOOT BOX')+'</div>'
+    + (roll.result?'<div class="lb-name">'+_lootEsc(roll.result)+'</div>':'')
+    + forLabel
+    + (p.note?'<div class="lb-desc">'+_lootEsc(p.note)+'</div>':'')
+    + (itemsHtml?'<ul class="lb-items">'+itemsHtml+'</ul>':'')
+    + '<div class="lb-actions">'+btn+'</div>';
+  return div;
+}
+// A claim broadcast from another player locks the box on everyone else's log.
+function applyLootClaim(roll){
+  let p={}; try { p = JSON.parse(roll.detail||'{}'); } catch(e){ return; }
+  if(!p.boxId) return;
+  _markClaimed(p.boxId, p.by || roll.source || 'Someone');
+  const card = document.querySelector('.log-lootbox[data-box-id="'+(window.CSS&&CSS.escape?CSS.escape(p.boxId):p.boxId)+'"]');
+  if(card && !_lootOpened()[p.boxId]){
+    const act = card.querySelector('.lb-actions');
+    if(act) act.innerHTML = '<button class="lb-btn" disabled>Claimed by '+_lootEsc(p.by||'Someone')+'</button>';
+  }
+}
+
 // Remote entries render directly (never through addLog, so they don't rebroadcast)
 function campaignAddRemote(roll) {
   const entries = document.getElementById('log-entries');
   if(!entries) return;
+  if(roll.type==='lootclaim'){ applyLootClaim(roll); return; }  // updates an existing card, no new entry
   const hint = entries.querySelector('.log-hint');
   if(hint) hint.remove();
-  const div = document.createElement('div');
-  div.className = 'log-entry remote' + (roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
-  const esc = (s)=>String(s).replace(/</g,'&lt;');
-  div.innerHTML = '<div class="roll-label"><span style="color:#8a7ac8;">'+esc(roll.source)+'</span> · '+esc(roll.label)+'</div>'
-    + '<div class="roll-result">'+esc(roll.result)+'</div>'
-    + (roll.detail?'<div class="roll-detail">'+esc(roll.detail)+'</div>':'');
+  let div;
+  if(roll.type==='lootbox')      div = renderLootBoxEntry(roll);
+  else if(roll.type==='achievement') div = renderAchievementEntry(roll);
+  else if(roll.type==='system')  div = renderSystemEntry(roll);
+  else                           div = renderNormalRemote(roll);
   entries.insertBefore(div, entries.firstChild);
   entries.scrollTop = 0;
   while(entries.children.length > 60) entries.removeChild(entries.lastChild);
 }
+
+// One delegated handler for Open / Claim on loot-box cards.
+(function(){
+  const entries = document.getElementById('log-entries');
+  if(!entries || entries.dataset.lootWired) return;
+  entries.dataset.lootWired = '1';
+  entries.addEventListener('click', function(e){
+    const card = e.target.closest('.log-lootbox'); if(!card) return;
+    const boxId = card.dataset.boxId;
+    if(e.target.closest('.lb-open')){
+      lootAddItems(card._lootItems||[]);
+      _markOpened(boxId);
+      const act = card.querySelector('.lb-actions');
+      if(act) act.innerHTML = '<button class="lb-btn" disabled>Opened ✓</button>';
+    } else if(e.target.closest('.lb-claim')){
+      lootAddItems(card._lootItems||[]);
+      _markOpened(boxId); _markClaimed(boxId, campaignPlayerName());
+      const act = card.querySelector('.lb-actions');
+      if(act) act.innerHTML = '<button class="lb-btn" disabled>You claimed this ✓</button>';
+      if(typeof campaignBroadcast==='function') campaignBroadcast('CLAIMED', card._lootName||'Loot Box', JSON.stringify({boxId, by: campaignPlayerName()}), 'lootclaim');
+    }
+  });
+})();
 
 async function campaignPoll() {
   if(!_campaign) return;
