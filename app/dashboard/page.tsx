@@ -46,8 +46,8 @@ const DCC_REFERENCE: { href: string; label: string }[] = [
   { href: "/dcc/skills", label: "Skills" },
   { href: "/dcc/spells", label: "Spells" },
   { href: "/dcc/loot", label: "Loot & Gear" },
-  { href: "/dcc/deities", label: "Deities" },
   { href: "/dcc/bestiary", label: "Bestiary" },
+  { href: "/dcc/options", label: "Options" },
 ];
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {
