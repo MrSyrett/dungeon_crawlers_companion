@@ -2177,6 +2177,8 @@ GMScenes.renderPins();
         <option value="encounter">Encounter</option>
         <option value="shop">Shop/Tavern</option>
         <option value="loot">Treasure</option>
+        <option value="dccnpc">DCC NPC</option>
+        <option value="dccneighborhood">DCC Neighborhood/Quest</option>
         <option value="dccmonster">DCC Monster</option>
         <option value="dccencounter">DCC Encounter</option>
         <option value="dccloot">DCC Loot Box</option>
@@ -2591,6 +2593,49 @@ GMScenes.renderPins();
         </div>
       </div>
 
+      <!-- DCC NPC PANEL (dungeon NPCs, Core Ch.6) -->
+      <div class="gen-panel" data-panel="dccnpc">
+        <div class="gen-controls">
+          <label class="gen-label">Type
+            <select class="gen-select" id="gen-dccnpc-role">
+              <option value="">Any Type</option>
+            </select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-dccnpc-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dccnpc-results">
+          <div class="gen-empty">Rolls a dungeon NPC — race, role, what they want, a quirk, and a disposition, with a snarky System-AI read.</div>
+        </div>
+      </div>
+
+      <!-- DCC NEIGHBORHOOD / QUEST PANEL (Core Ch.7 prep loop) -->
+      <div class="gen-panel" data-panel="dccneighborhood">
+        <div class="gen-controls">
+          <label class="gen-label">Kind
+            <select class="gen-select" id="gen-dccnbhd-kind">
+              <option value="neighborhood">Neighborhood</option>
+              <option value="quest">Quest</option>
+            </select>
+          </label>
+          <label class="gen-label">Floor / Level
+            <select class="gen-select" id="gen-dccnbhd-level">
+              <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+              <option value="8">8</option><option value="10">10</option><option value="12">12</option>
+              <option value="16">16</option><option value="20">20</option><option value="30">30</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dccnbhd-results">
+          <div class="gen-empty">Builds a parbaked scenario: a themed area (or staged Quest), its Mobs and a Boss drawn from the bestiary, plus reward, failure, and the ever-ticking clock.</div>
+        </div>
+      </div>
+
       <!-- DCC MONSTER PANEL (random creature from the DCC bestiary) -->
       <div class="gen-panel" data-panel="dccmonster">
         <div class="gen-controls">
@@ -2838,6 +2883,7 @@ GMScenes.renderPins();
 <script src="/tools-data/dcc-skills.js"></script>
 <script src="/tools-data/dcc-buffs.js"></script>
 <script src="/tools-data/dcc-debuffs.js"></script>
+<script src="/tools-data/dcc-prep-tables.js"></script>
 <script>
 // Pull the user's saved homebrew (own + campaign-shared) from the app so the DCC
 // generators and the bestiary picker can draw them too. Empty when standalone.
@@ -6438,6 +6484,73 @@ function genDccDebuffInto(container, countKey) {
   dccPickN(DCC_DEBUFFS, Math.min(n, DCC_DEBUFFS.length)).forEach(d => container.appendChild(dccDebuffCard(d)));
 }
 
+// ── DCC NPC generator (Core Ch.6 Dungeon NPCs) ─────────────────────────────
+function dccPrepReady() { return typeof DCC_PREP !== 'undefined' && DCC_PREP && Array.isArray(DCC_PREP.npcRoles); }
+function genDccNpc(roleFilter) {
+  if(!dccPrepReady()) return card('<div class="gen-empty">DCC prep tables didn’t load. Open the GM screen from the app.</div>');
+  const P = DCC_PREP;
+  const roleObj = roleFilter ? (P.npcRoles.find(r => r.role === roleFilter) || R(P.npcRoles)) : R(P.npcRoles);
+  return card(
+    '<div class="gen-card-header"><span class="gen-card-name">' + esc(R(P.npcNames)) + '</span>' +
+      '<span class="gen-card-tag">' + esc(R(P.npcRaces)) + ' · ' + esc(R(P.npcDisposition)) + '</span></div>' +
+    '<div class="gen-item-desc" style="text-transform:none;opacity:.85;">' + esc(roleObj.role) + ' — ' + esc(roleObj.note) + '</div>' +
+    row('Wants', R(P.npcWants)) +
+    row('Quirk', R(P.npcQuirks)) +
+    '<hr class="gen-card-divider">' +
+    '<div class="gen-card-row"><span class="gen-card-row-label">System</span><span style="font-style:italic;opacity:.8">' + esc(R(P.aiBlurbs)) + '</span></div>'
+  );
+}
+
+// ── DCC Neighborhood / Quest generator (Core Ch.7 prep loop) ───────────────
+// A parbaked scenario: theme + hook, Mobs and a Boss pulled from the bestiary,
+// environment/complication flavor, and (for Quests) a staged spine with a
+// reward, a failure clause, and the floor-collapse clock.
+function dccScenarioMobs(level, n) {
+  const near = dccNearestByLevel(level, 'Mob').slice(0, Math.max(6, n * 3));
+  const out = [], seen = {};
+  for(let i = 0; i < near.length && out.length < n; i++) { const m = near[i]; if(seen[m.name]) continue; seen[m.name] = 1; out.push(m); }
+  return out;
+}
+function dccScenarioBoss(level) {
+  return dccNearestByLevel(level, 'Boss')[0] || dccNearestByLevel(level, 'Elite')[0] || null;
+}
+function dccMobLine(label, m) {
+  return '<div class="gen-card-row"><span class="gen-card-row-label">' + label + '</span>' +
+    '<span><b>' + esc(m.name) + '</b> <span style="opacity:.6">' + (label === 'Boss' ? esc(m.role) + ' · ' : '') + 'LV ' + esc(m.level) + ' · ' + esc(dccMonTotalHp(m)) + ' HP</span> ' +
+    '<button class="btn small ghost gen-send-tracker" data-src="dcc" data-mon="' + dccSendAttr(m.name) + '" style="margin-left:4px;">Send</button></span></div>';
+}
+function genDccNeighborhood(kind, level) {
+  if(!dccPrepReady()) return card('<div class="gen-empty">DCC prep tables didn’t load. Open the GM screen from the app.</div>');
+  const P = DCC_PREP;
+  const mobs = dccScenarioMobs(level, 3);
+  const boss = dccScenarioBoss(level);
+  const allNames = mobs.map(m => m.name).concat(boss ? [boss.name] : []);
+  const sendAll = allNames.length
+    ? '<div class="gen-card-actions"><button class="btn small primary gen-send-tracker-all" data-src="dcc" data-mons="' + dccSendAttr(allNames.join('|')) + '">Send all to Tracker</button></div>'
+    : '';
+  const roster = '<hr class="gen-card-divider">' + sendAll + mobs.map(m => dccMobLine('Mob', m)).join('') +
+    (boss ? dccMobLine('Boss', boss) : '<div class="gen-card-row"><span class="gen-card-row-label">Boss</span><span style="opacity:.6">— pick one to suit the theme —</span></div>');
+  if(kind === 'quest') {
+    const stages = [].concat(P.questStages).sort(() => Math.random() - 0.5).slice(0, 4)
+      .map((s, i) => '<div class="gen-card-row"><span class="gen-card-row-label">Stage ' + (i + 1) + '</span><span>' + esc(s) + '</span></div>').join('');
+    return card(
+      '<div class="gen-card-header"><span class="gen-card-name">Quest: ' + esc(R(P.questNames)) + '</span><span class="gen-card-tag">Floor ' + esc(level) + '</span></div>' +
+      '<div class="gen-item-desc" style="text-transform:none;opacity:.85;">' + esc(R(P.questThemes)) + '</div>' +
+      row('Objective', R(P.questObjectives)) + row('Power player', R(P.questPowerPlayers)) + row('Strong start', R(P.strongStarts)) +
+      '<hr class="gen-card-divider">' + stages +
+      '<hr class="gen-card-divider">' + row('Reward', R(P.questRewards)) + row('If they fail', R(P.questFailures)) + row('Clock', R(P.timers)) +
+      roster
+    );
+  }
+  return card(
+    '<div class="gen-card-header"><span class="gen-card-name">Neighborhood: ' + esc(R(P.nbhdNames)) + '</span><span class="gen-card-tag">Floor ' + esc(level) + '</span></div>' +
+    '<div class="gen-item-desc" style="text-transform:none;opacity:.85;">Theme: ' + esc(R(P.nbhdThemes)) + '</div>' +
+    row('Vibe', R(P.nbhdVibes)) + row('Strong start', R(P.strongStarts)) + row('Environment', R(P.environments)) +
+    row('Grinding snag', R(P.grindComplications)) + row('Mood beat', R(P.moods)) +
+    roster
+  );
+}
+
 // ── Shop/Tavern ──────────────────────────────────────────────────────────
 function genShop(type, tier) {
   const t = type==='random'?R(['Shop','Tavern']):type;
@@ -6490,6 +6603,16 @@ function fillMonsterTypeFilter(root) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   sel.innerHTML = '<option value="">Any Type</option>' +
     present.map(t => `<option value="${safe(t)}">${safe(t)}</option>`).join('');
+  sel.value = keep || '';
+}
+// Populate the DCC NPC generator's Type filter from DCC_PREP.npcRoles.
+function fillDccNpcRoleFilter(root) {
+  const sel = (root || document).querySelector('#gen-dccnpc-role');
+  if(!sel || typeof DCC_PREP === 'undefined' || !Array.isArray(DCC_PREP.npcRoles)) return;
+  const keep = sel.value;
+  const safe = (v) => String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  sel.innerHTML = '<option value="">Any Type</option>' +
+    DCC_PREP.npcRoles.map(r => `<option value="${safe(r.role)}">${safe(r.role)}</option>`).join('');
   sel.value = keep || '';
 }
 // ── Bestiary stat block ───────────────────────────────────────────────────
@@ -7736,6 +7859,7 @@ window.init_gen = function(root) {
   const tabSelect = root.querySelector('.gen-tab-select');
   const panels = root.querySelectorAll('.gen-panel');
   fillMonsterTypeFilter(root);   // panel markup only exists once mounted
+  fillDccNpcRoleFilter(root);    // DCC NPC generator's Type filter
 
   // Make each panel's option controls (.gen-controls) collapsible so they don't
   // take up vertical space once they're set — the results area then gets the
@@ -8039,6 +8163,18 @@ window.init_gen = function(root) {
       const cnt=root.querySelector('#gen-dccdebuff-count').value;
       const res=root.querySelector('#gen-dccdebuff-results'); res.innerHTML='';
       genDccDebuffInto(res, cnt);
+
+    } else if(activeTab==='dccnpc') {
+      const role=root.querySelector('#gen-dccnpc-role').value;
+      const count=parseInt(root.querySelector('#gen-dccnpc-count').value)||1;
+      const res=root.querySelector('#gen-dccnpc-results'); res.innerHTML='';
+      for(let i=0;i<count;i++) res.appendChild(genDccNpc(role));
+
+    } else if(activeTab==='dccneighborhood') {
+      const kind=root.querySelector('#gen-dccnbhd-kind').value;
+      const level=parseInt(root.querySelector('#gen-dccnbhd-level').value)||1;
+      const res=root.querySelector('#gen-dccnbhd-results'); res.innerHTML='';
+      res.appendChild(genDccNeighborhood(kind, level));
 
     } else if(activeTab==='dungeon') {
       const level  = root.querySelector('#gen-dun-level').value;
