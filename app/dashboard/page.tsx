@@ -62,11 +62,22 @@ const ACE_REFERENCE: { href: string; label: string }[] = [
   { href: "/ace/settings", label: "Settings" },
 ];
 
+// Kids on Bikes / Brooms / Capes reference pages — one tab, three books.
+const KOB_REFERENCE: { href: string; label: string }[] = [
+  { href: "/kob/tropes", label: "Tropes" },
+  { href: "/kob/strengths", label: "Strengths & Flaws" },
+  { href: "/kob/questions", label: "Questions" },
+  { href: "/kob/magic", label: "Magic" },
+  { href: "/kob/capes", label: "Capes & Powers" },
+  { href: "/kob/rules", label: "Rules" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
   DCC: DCC_REFERENCE,
   ACE: ACE_REFERENCE,
+  KOB: KOB_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

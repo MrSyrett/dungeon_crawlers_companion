@@ -10,7 +10,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character";
 
 export type ToolKind = "character" | "session";
 
@@ -70,9 +70,18 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "ace_character_sheet.html",
     keys: ["ace_sheet"],
   },
+  "kob-character": {
+    id: "kob-character",
+    system: "KOB",
+    systemName: "Kids on Bikes",
+    kind: "character",
+    label: "Character Sheet",
+    file: "kob_character_sheet.html",
+    keys: ["kob_sheet"],
+  },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "kob-character"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

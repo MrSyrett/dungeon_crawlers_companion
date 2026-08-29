@@ -65,8 +65,8 @@ function extractLinkedCampaignId(data: object): string | null {
       const id = sheet?._sheet?.campaign?.id;
       return typeof id === "string" && id ? id : null;
     }
-    // DCC and ACE sheets: campaign lives at the top level (campaign.id)
-    for (const key of ["dcc_sheet", "ace_sheet"]) {
+    // DCC, ACE and KoB sheets: campaign lives at the top level (campaign.id)
+    for (const key of ["dcc_sheet", "ace_sheet", "kob_sheet"]) {
       if (typeof blob[key] !== "string") continue;
       const sheet = JSON.parse(blob[key] as string) as {
         campaign?: { id?: unknown } | null;

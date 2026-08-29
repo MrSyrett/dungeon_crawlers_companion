@@ -58,6 +58,7 @@ const PAGE = String.raw`<!doctype html>
   .sd { color: var(--gold); }
   .dcc { color: var(--red); }
   .ace { color: #3aa8e0; }
+  .kob { color: #a56ee8; }
   .group { display: flex; flex-direction: column; gap: 7px; }
   .group + .group { margin-top: 14px; }
   .group-head {
@@ -67,6 +68,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.sd { color: var(--gold); }
   .group-head.dcc { color: var(--red); }
   .group-head.ace { color: #3aa8e0; }
+  .group-head.kob { color: #a56ee8; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
@@ -247,7 +249,8 @@ const PAGE = String.raw`<!doctype html>
           var GROUPS = [
             { key: "SD", name: "Shadowdark", cls: "sd" },
             { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" },
-            { key: "ACE", name: "ACE!", cls: "ace" }
+            { key: "ACE", name: "ACE!", cls: "ace" },
+            { key: "KOB", name: "Kids on Bikes", cls: "kob" }
           ];
           var seen = {};
           var html = "";

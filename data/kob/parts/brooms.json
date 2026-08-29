@@ -1,0 +1,548 @@
+{
+  "book": {
+    "key": "brooms",
+    "name": "Kids on Brooms",
+    "tagline": "Magic school adventures for students and faculty alike.",
+    "blurb": "Kids on Brooms is a collaborative roleplaying game about a magical school, built on the Kids on Bikes engine. Every character is a caster with a wand, a broom and a familiar; there are no spell lists—if it could be done with magic, you can try to do it with magic, and the GM builds each spell's difficulty from its magnitude, area, duration and your experience with it.",
+    "ageGroups": [
+      {
+        "name": "Underclass",
+        "range": "14 years old and younger",
+        "statBonus": ["Flight", "Charm"],
+        "freeStrength": "Innocence",
+        "notes": "Fast and likeable. Write your favorite class on your sheet and name the teacher who teaches it. Cannot start the game with Master of…; could be Studied in… one type of magic by spending both Strengths."
+      },
+      {
+        "name": "Upperclass",
+        "range": "15 to 20 years old",
+        "statBonus": ["Fight", "Brawn"],
+        "freeStrength": "Trained in…",
+        "notes": "Pugnacious and in their prime. Trained in… one type of magic of your choice. Write your favorite class and name its teacher. Could start as Master of… a type of magic by spending both Strengths."
+      },
+      {
+        "name": "Faculty",
+        "range": "21 years and older",
+        "statBonus": ["Brains", "Grit"],
+        "freeStrength": "Studied in…",
+        "notes": "Studied in… one type of magic of your choice. Write your favorite class to teach (or your favorite class as a student) and name your best student. Could gain Master of… by spending one Strength at creation."
+      }
+    ],
+    "rideLabel": "Broom",
+    "bagLabel": "Schoolbag",
+    "rules": [
+      "Begin the game with 3 Adversity Tokens; add 1 each time you fail a roll.",
+      "You start with your grade Strength (Innocence / Trained in… / Studied in…) and two more, plus two Flaws.",
+      "Grade bonuses: Underclass +1 Flight & Charm; Upperclass +1 Fight & Brawn; Faculty +1 Brains & Grit. Bonuses never cause a Lucky Break.",
+      "Every spell is a Spell Check: roll the Stat Die for that type of magic plus a d4 Magic Die, add wand and Strength bonuses, and compare to a difficulty the GM builds from magnitude + area + duration + experience.",
+      "The GM must tell you a spell's difficulty before you decide whether to cast it.",
+      "Your wand gives +1 to two different types of magic: one from its wood, one from its core.",
+      "Your broom's benefit only applies while you are physically riding it.",
+      "Familiars allow limited one-way psychic communication and can carry out simple tasks, decided narratively.",
+      "Class Schedule: pick 3 classes; take up to 2 marks per session. 2 marks = Trained in… (+1), 6 marks = Studied in… (+3), 10 marks = Master of… (+5).",
+      "Casting magic on an unwilling PC or NPC is a contested Spell Check; killing another character other than in self defense turns your character into an NPC.",
+      "Species other than human are mechanically identical to humans; they change only how you roleplay."
+    ]
+  },
+  "tropes": [
+    {
+      "name": "Aloof Teacher",
+      "book": "brooms",
+      "dice": { "Flight": 20, "Brains": 12, "Grit": 10, "Charm": 8, "Brawn": 6, "Fight": 4 },
+      "ages": ["Faculty"],
+      "suggestedStrengths": ["Cool Under Pressure", "Easygoing", "Lucky", "Gifted"],
+      "suggestedFlaws": ["Clumsy", "Conspicuous", "Blunt"],
+      "questions": [
+        "How much of your aloof persona is sincere and how much of it is affected?",
+        "Who do you feel a real connection with, and do they know?"
+      ],
+      "page": 82
+    },
+    {
+      "name": "Bullheaded Muscle",
+      "book": "brooms",
+      "dice": { "Brawn": 20, "Fight": 12, "Grit": 10, "Flight": 8, "Brains": 6, "Charm": 4 },
+      "ages": ["Underclass", "Upperclass"],
+      "suggestedStrengths": ["Gross", "Guardian", "Resilient", "Tough"],
+      "suggestedFlaws": ["Reckless", "Conspicuous", "Hotheaded"],
+      "questions": [
+        "What's your go-to way of showing just how strong you are?",
+        "Despite your muscle and reputation, you're incredibly gentle in which one part of your life?"
+      ],
+      "page": 82
+    },
+    {
+      "name": "Charismatic Slacker",
+      "book": "brooms",
+      "dice": { "Charm": 20, "Flight": 12, "Grit": 10, "Fight": 8, "Brawn": 6, "Brains": 4 },
+      "ages": ["Underclass", "Upperclass"],
+      "suggestedStrengths": ["Easygoing", "Cool Under Pressure", "Unassuming", "Intuitive"],
+      "suggestedFlaws": ["Spoiled", "Narcissistic", "Dishonest"],
+      "questions": [
+        "Why don't you want to work as hard as everyone else seems to want to?",
+        "What's one part of your life where you do put in much more effort?"
+      ],
+      "page": 82
+    },
+    {
+      "name": "Daring Athlete",
+      "book": "brooms",
+      "dice": { "Brawn": 20, "Flight": 12, "Fight": 10, "Charm": 8, "Grit": 6, "Brains": 4 },
+      "ages": ["Upperclass"],
+      "suggestedStrengths": ["Gifted", "Heroic", "Tough", "Loyal"],
+      "suggestedFlaws": ["Cocky", "Reckless", "Haughty"],
+      "questions": [
+        "What's your greatest athletic achievement?",
+        "What's the worst injury you've caused someone else to suffer?"
+      ],
+      "page": 83
+    },
+    {
+      "name": "Doting Caretaker",
+      "book": "brooms",
+      "dice": { "Grit": 20, "Fight": 12, "Brawn": 10, "Brains": 8, "Charm": 6, "Flight": 4 },
+      "ages": ["Faculty"],
+      "suggestedStrengths": ["Wild Speak", "Guardian", "Prepared", "Treasure Hunter"],
+      "suggestedFlaws": ["Clumsy", "Cursed", "Loudmouth"],
+      "questions": [
+        "What non-teaching role do you play at the school?",
+        "What did you do that barred you from teaching magic at the school?"
+      ],
+      "page": 83
+    },
+    {
+      "name": "Famous Teacher",
+      "book": "brooms",
+      "dice": { "Charm": 20, "Fight": 12, "Brains": 10, "Flight": 8, "Brawn": 6, "Grit": 4 },
+      "ages": ["Faculty"],
+      "suggestedStrengths": ["Spell Slinger", "Gifted", "Lucky", "Wealthy"],
+      "suggestedFlaws": ["Cocky", "Haughty", "Competitive"],
+      "questions": [
+        "What earned you your fame?",
+        "What aspects of your fame are unwarranted?"
+      ],
+      "page": 83
+    },
+    {
+      "name": "Firstborn Caster",
+      "book": "brooms",
+      "dice": { "Grit": 20, "Brains": 12, "Flight": 10, "Fight": 8, "Charm": 6, "Brawn": 4 },
+      "ages": ["Underclass", "Upperclass", "Faculty"],
+      "suggestedStrengths": ["Intuitive", "Lucky", "Unassuming", "Heroic"],
+      "suggestedFlaws": ["Timid", "Tempted", "Naive"],
+      "questions": [
+        "How did you first discover your magical powers?",
+        "How did your non-magical family react when you manifested your powers?"
+      ],
+      "page": 84
+    },
+    {
+      "name": "Funny Klutz",
+      "book": "brooms",
+      "dice": { "Charm": 20, "Flight": 12, "Grit": 10, "Brains": 8, "Brawn": 6, "Fight": 4 },
+      "ages": ["Underclass", "Upperclass"],
+      "suggestedStrengths": ["Cool Under Pressure", "Gross", "Resilient", "Unassuming"],
+      "suggestedFlaws": ["Clumsy", "Irrational", "Reckless"],
+      "questions": [
+        "What's your go-to joke?",
+        "Who do you wish would take you more seriously than they do?"
+      ],
+      "page": 84
+    },
+    {
+      "name": "Golden Child",
+      "book": "brooms",
+      "dice": { "Brains": 20, "Brawn": 12, "Charm": 10, "Fight": 8, "Grit": 6, "Flight": 4 },
+      "ages": ["Underclass", "Upperclass"],
+      "suggestedStrengths": ["Heroic", "Guardian", "Psychic Link", "Gifted"],
+      "suggestedFlaws": ["Judgmental", "Haughty", "Spoiled"],
+      "questions": [
+        "Some people think you're the chosen one. Why do you know they're wrong?",
+        "Even though almost everyone loves you, who seems to despise you?"
+      ],
+      "page": 84
+    },
+    {
+      "name": "Haughty Descendant",
+      "book": "brooms",
+      "dice": { "Fight": 20, "Charm": 12, "Brains": 10, "Flight": 8, "Brawn": 6, "Grit": 4 },
+      "ages": ["Underclass", "Upperclass"],
+      "suggestedStrengths": ["Spell Slinger", "Intuitive", "Wealthy", "Lucky"],
+      "suggestedFlaws": ["Haughty", "Tempted", "Greedy"],
+      "questions": [
+        "What famous or infamous thing is your family known for in the magic world?",
+        "Why are you afraid you won't be able to live up to your family's reputation?"
+      ],
+      "page": 85
+    },
+    {
+      "name": "Haunted Survivor",
+      "book": "brooms",
+      "dice": { "Fight": 20, "Flight": 12, "Grit": 10, "Brains": 8, "Brawn": 6, "Charm": 4 },
+      "ages": ["Upperclass", "Faculty"],
+      "suggestedStrengths": ["Guardian", "Resilient", "Psychic Link", "Lucky"],
+      "suggestedFlaws": ["Timid", "Cursed", "Blunt"],
+      "questions": [
+        "What is the tragedy that haunts you?",
+        "What strength has that tragedy given you that most others lack?"
+      ],
+      "page": 85
+    },
+    {
+      "name": "Offbeat Eccentric",
+      "book": "brooms",
+      "dice": { "Flight": 20, "Grit": 12, "Brains": 10, "Charm": 8, "Brawn": 6, "Fight": 4 },
+      "ages": ["Underclass", "Upperclass", "Faculty"],
+      "suggestedStrengths": ["Easygoing", "Treasure Hunter", "Unassuming", "Wild Speak"],
+      "suggestedFlaws": ["Rash", "Blunt", "Reckless"],
+      "questions": [
+        "What do you believe in that no one else seems to?",
+        "What would it mean to find someone who believes you?"
+      ],
+      "page": 85
+    },
+    {
+      "name": "Perfect Prefect",
+      "book": "brooms",
+      "dice": { "Brains": 20, "Charm": 12, "Fight": 10, "Grit": 8, "Brawn": 6, "Flight": 4 },
+      "ages": ["Upperclass"],
+      "suggestedStrengths": ["Prepared", "Spell Slinger", "Gifted", "Resilient"],
+      "suggestedFlaws": ["Cocky", "Judgmental", "Hotheaded"],
+      "questions": [
+        "What do you love about getting to guide younger students in your house?",
+        "What part of being a prefect do you still struggle with?"
+      ],
+      "page": 86
+    },
+    {
+      "name": "Reliable Bestie",
+      "book": "brooms",
+      "dice": { "Charm": 20, "Grit": 12, "Flight": 10, "Brains": 8, "Fight": 6, "Brawn": 4 },
+      "ages": ["Underclass", "Upperclass"],
+      "suggestedStrengths": ["Guardian", "Loyal", "Heroic", "Tough"],
+      "suggestedFlaws": ["Loudmouth", "Naive", "Cursed"],
+      "questions": [
+        "Why are you so bonded to your best friend?",
+        "When do you wish you were the center of attention rather than the sidekick?"
+      ],
+      "page": 86
+    },
+    {
+      "name": "Teacher's Pet",
+      "book": "brooms",
+      "dice": { "Brains": 20, "Grit": 12, "Charm": 10, "Brawn": 8, "Fight": 6, "Flight": 4 },
+      "ages": ["Underclass", "Upperclass"],
+      "suggestedStrengths": ["Loyal", "Skilled at...", "Prepared", "Psychic Link"],
+      "suggestedFlaws": ["Timid", "Judgmental", "Narcissistic"],
+      "questions": [
+        "What tricks do you use to get teachers to like you?",
+        "Which teacher seems to despise you?"
+      ],
+      "page": 86
+    },
+    {
+      "name": "Unlikely Ally",
+      "book": "brooms",
+      "dice": { "Fight": 20, "Grit": 12, "Brawn": 10, "Charm": 8, "Brains": 6, "Flight": 4 },
+      "ages": ["Underclass", "Upperclass", "Faculty"],
+      "suggestedStrengths": ["Spell Slinger", "Handy", "Lucky", "Gifted"],
+      "suggestedFlaws": ["Timid", "Spoiled", "Hotheaded"],
+      "questions": [
+        "Why is it surprising that you're working with this group?",
+        "Why do they think you're working with them? Why are you actually working with them?"
+      ],
+      "page": 87
+    },
+    {
+      "name": "Reluctant Oracle",
+      "book": "brooms",
+      "dice": { "Brains": 20, "Fight": 12, "Flight": 10, "Grit": 8, "Charm": 6, "Brawn": 4 },
+      "ages": ["Underclass", "Upperclass", "Faculty"],
+      "suggestedStrengths": ["Intuitive", "Treasure Hunter", "Psychic Link", "Gifted"],
+      "suggestedFlaws": ["Cursed", "Irrational", "Naive"],
+      "questions": [
+        "What troubles have your visions prevented?",
+        "What confusing vision of the future haunts you?"
+      ],
+      "page": 87
+    },
+    {
+      "name": "Wacky Prankster",
+      "book": "brooms",
+      "dice": { "Flight": 20, "Charm": 12, "Brains": 10, "Brawn": 8, "Fight": 6, "Grit": 4 },
+      "ages": ["Underclass", "Upperclass"],
+      "suggestedStrengths": ["Cool Under Pressure", "Lucky", "Prepared", "Treasure Hunter"],
+      "suggestedFlaws": ["Greedy", "Reckless", "Rash"],
+      "questions": [
+        "What's the best prank you've ever pulled?",
+        "Why do you wish people will take you seriously?"
+      ],
+      "page": 87
+    },
+    {
+      "name": "Withdrawn Bookworm",
+      "book": "brooms",
+      "dice": { "Brains": 20, "Flight": 12, "Fight": 10, "Grit": 8, "Charm": 6, "Brawn": 4 },
+      "ages": ["Underclass", "Upperclass"],
+      "suggestedStrengths": ["Spell Slinger", "Intuitive", "Loyal", "Unassuming"],
+      "suggestedFlaws": ["Blunt", "Haughty", "Timid"],
+      "questions": [
+        "Why do you love studying by yourself?",
+        "How have your recent attempts to spend time with others backfired?"
+      ],
+      "page": 88
+    }
+  ],
+  "strengths": [
+    { "name": "Cool Under Pressure", "book": "brooms", "cost": "1 AT", "description": "You may spend an Adversity Token to take half of your die's value instead of rolling on a Snap Decision.", "page": 90 },
+    { "name": "Easygoing", "book": "brooms", "cost": "Always active", "description": "Gain 2 Adversity Tokens when you fail a check.", "page": 90 },
+    { "name": "Gifted", "book": "brooms", "cost": "1 AT", "description": "If you make a check involving the Magic Die that fails, you may spend 1 AT to reroll the Magic Die.", "page": 90 },
+    { "name": "Gross", "book": "brooms", "cost": "Always active", "description": "You have some kind of gross trick or spell (loud, quiet, smelly… up to you) that you can do on command.", "page": 90 },
+    { "name": "Guardian", "book": "brooms", "cost": "Always active", "description": "When defending another player or an NPC, always roll both your stat die and the magic die, then add them together, even if you're not using magic to do it. If your check fails, you may reroll the magic die.", "page": 90 },
+    { "name": "Handy", "book": "brooms", "cost": "Always active", "description": "You gain the benefits of using your wand without having to wield it.", "page": 90 },
+    { "name": "Heroic", "book": "brooms", "cost": "Always active", "description": "You do not need GM's permission to spend Adversity Tokens to ignore Fears.", "page": 90 },
+    { "name": "Innocence", "book": "brooms", "cost": "2 AT", "description": "Once per session at the GM's discretion, you may spend 2 AT to convince an adult to not get you in trouble for a minor transgression.", "page": 90 },
+    { "name": "Intuitive", "book": "brooms", "cost": "1 AT", "description": "You can spend 1 AT to ask the GM about your surroundings, an NPC, or the like. The GM must answer honestly.", "page": 90 },
+    { "name": "Loyal", "book": "brooms", "cost": "Always active", "description": "Each of the AT you spend to help your friends gives them a +2 instead of a +1.", "page": 90 },
+    { "name": "Lucky", "book": "brooms", "cost": "2 AT", "description": "You may spend 2 AT to reroll a stat check. It does not allow you to reroll the Magic Die.", "page": 90 },
+    { "name": "Prepared", "book": "brooms", "cost": "2 AT", "description": "Spend 2 AT to just happen to have one commonplace item with you (GM's discretion).", "page": 90 },
+    { "name": "Psychic Link", "book": "brooms", "cost": "Always active", "description": "You have complete two-way psychic communication with your familiar at any distance.", "page": 90 },
+    { "name": "Resilient", "book": "brooms", "cost": "Always active", "description": "When spending AT to boost a check against a spell that targets you, each AT is worth +2 instead of +1.", "page": 90 },
+    { "name": "Skilled at...", "book": "brooms", "cost": "Always active", "description": "Choose a skill (GM's discretion). You are assumed to succeed when making even moderately difficult checks involving this skill. If the GM determines that you do need to roll for a more difficult check, add up to +3 to your roll.", "page": 90 },
+    { "name": "Spell Slinger", "book": "brooms", "cost": "Always active", "description": "If you fail a spell check, add +3 to the negative number. You will still lose the roll no matter what but could reduce your loss to -1.", "page": 90 },
+    { "name": "Trained in...", "book": "brooms", "cost": "Always active", "description": "Choose one type of magic. Gain +1 to all spells of that type.", "page": 91 },
+    { "name": "Studied in...", "book": "brooms", "cost": "Always active", "description": "Choose a type of magic that you are already Trained in. Gain +3 to all spells of that type. This bonus is not cumulative with the bonus for the \"Trained in...\" Strength.", "page": 91 },
+    { "name": "Master of...", "book": "brooms", "cost": "Always active", "description": "Choose a type of magic that you are already Studied in. Gain +5 to all spells in that type. This bonus is not cumulative with the bonus for the \"Trained in...\" or \"Studied in...\" Strengths.", "page": 91 },
+    { "name": "Tough", "book": "brooms", "cost": "Always active", "description": "If you lose a combat roll, add +3 to the negative number. You will still lose the roll, but can reduce your loss up to -1.", "page": 91 },
+    { "name": "Treasure Hunter", "book": "brooms", "cost": "1 AT", "description": "Spend 1 AT to find a mundane but useful item in your surroundings.", "page": 91 },
+    { "name": "Unassuming", "book": "brooms", "cost": "2 AT", "description": "You can spend 2 AT to not be seen, within reason (GM's discretion).", "page": 91 },
+    { "name": "Wealthy", "book": "brooms", "cost": "Always active", "description": "May spend money as though they were a higher Age Bracket. A wealthy underclass student has the disposable income of a typical upperclass student; a wealthy upperclass student has that of a typical faculty member. Wealthy adults don't have to worry too much about money—they can buy anything they need and can likely spend their way out of a lot of situations.", "page": 91 },
+    { "name": "Wild Speak", "book": "brooms", "cost": "Always active", "description": "You can communicate with any animal whose species you have knowledge of.", "page": 91 }
+  ],
+  "flaws": [
+    { "name": "Blunt", "book": "brooms", "page": 89 },
+    { "name": "Clumsy", "book": "brooms", "page": 89 },
+    { "name": "Cocky", "book": "brooms", "page": 89 },
+    { "name": "Competitive", "book": "brooms", "page": 89 },
+    { "name": "Conspicuous", "book": "brooms", "page": 89 },
+    { "name": "Cursed", "book": "brooms", "page": 89 },
+    { "name": "Dishonest", "book": "brooms", "page": 89 },
+    { "name": "Greedy", "book": "brooms", "page": 89 },
+    { "name": "Haughty", "book": "brooms", "page": 89 },
+    { "name": "Hotheaded", "book": "brooms", "page": 89 },
+    { "name": "Irrational", "book": "brooms", "page": 89 },
+    { "name": "Judgmental", "book": "brooms", "page": 89 },
+    { "name": "Loudmouth", "book": "brooms", "page": 89 },
+    { "name": "Naive", "book": "brooms", "page": 89 },
+    { "name": "Narcissistic", "book": "brooms", "page": 89 },
+    { "name": "Rash", "book": "brooms", "page": 89 },
+    { "name": "Reckless", "book": "brooms", "page": 89 },
+    { "name": "Spoiled", "book": "brooms", "page": 89 },
+    { "name": "Tempted", "book": "brooms", "page": 89 },
+    { "name": "Timid", "book": "brooms", "page": 89 }
+  ],
+  "questions": [
+    { "book": "brooms", "kind": "positive", "n": 1, "text": "This character once protected you from something dangerous. What happened?" },
+    { "book": "brooms", "kind": "positive", "n": 2, "text": "Why did you spend the summer at this character's home instead of your own?" },
+    { "book": "brooms", "kind": "positive", "n": 3, "text": "What amazing secret have you learned about this person that they haven't told anyone else?" },
+    { "book": "brooms", "kind": "positive", "n": 4, "text": "You and this character once cut class together. Why?" },
+    { "book": "brooms", "kind": "positive", "n": 5, "text": "What spell did this character teach you that you've never forgotten?" },
+    { "book": "brooms", "kind": "positive", "n": 6, "text": "This character has seen you at your worst. How did they help you overcome it?" },
+    { "book": "brooms", "kind": "positive", "n": 7, "text": "How did this character stop a bad rumor about you from spreading?" },
+    { "book": "brooms", "kind": "positive", "n": 8, "text": "How did this character cover for you when you made a big mistake?" },
+    { "book": "brooms", "kind": "positive", "n": 9, "text": "How did this character stand up for you in your time of need?" },
+    { "book": "brooms", "kind": "positive", "n": 10, "text": "This character reminds you of someone that you've recently lost or left behind. Who is it?" },
+    { "book": "brooms", "kind": "positive", "n": 11, "text": "What wonderful, unforgettable experience did you and this character have together?" },
+    { "book": "brooms", "kind": "positive", "n": 12, "text": "Why do you feel safest when this character is around?" },
+    { "book": "brooms", "kind": "positive", "n": 13, "text": "What magical event did the two of you experience that nobody else believes happened?" },
+    { "book": "brooms", "kind": "positive", "n": 14, "text": "You and this character first experienced something profoundly emotional together. What was it?" },
+    { "book": "brooms", "kind": "positive", "n": 15, "text": "You share a common interest in something weird and non-magical. What is it?" },
+    { "book": "brooms", "kind": "positive", "n": 16, "text": "What about this character do you admire that they don't see in themselves?" },
+    { "book": "brooms", "kind": "positive", "n": 17, "text": "You saw this character do something nice for someone without making it about them. What was it?" },
+    { "book": "brooms", "kind": "positive", "n": 18, "text": "When did you realize you loved this character, either romantically or platonically?" },
+    { "book": "brooms", "kind": "positive", "n": 19, "text": "You and this character have somewhere secret in the school you go to that you think only the two of you know about. Where is it?" },
+    { "book": "brooms", "kind": "positive", "n": 20, "text": "What meaningful or important object did this character give you?" },
+    { "book": "brooms", "kind": "negative", "n": 1, "text": "What spell did this character cast on you, intentionally or accidentally, that embarrassed you?" },
+    { "book": "brooms", "kind": "negative", "n": 2, "text": "What secret do you need to keep from this character to protect yourself?" },
+    { "book": "brooms", "kind": "negative", "n": 3, "text": "What magical object does this character have that you want to take from them?" },
+    { "book": "brooms", "kind": "negative", "n": 4, "text": "When was the last time you betrayed this character?" },
+    { "book": "brooms", "kind": "negative", "n": 5, "text": "What bad rumor have you heard about this character that you don't think could possibly be true?" },
+    { "book": "brooms", "kind": "negative", "n": 6, "text": "What rumor, either true or untrue, did this character start about you?" },
+    { "book": "brooms", "kind": "negative", "n": 7, "text": "What ambition does this character have that scares you?" },
+    { "book": "brooms", "kind": "negative", "n": 8, "text": "What part of this character's personality scares you?" },
+    { "book": "brooms", "kind": "negative", "n": 9, "text": "What is this character planning that you need to stop them from carrying out?" },
+    { "book": "brooms", "kind": "negative", "n": 10, "text": "How is this character putting you both at risk of being kicked out?" },
+    { "book": "brooms", "kind": "negative", "n": 11, "text": "What do both of you hate about the school?" },
+    { "book": "brooms", "kind": "negative", "n": 12, "text": "What forbidden spell do you know this character has been researching?" },
+    { "book": "brooms", "kind": "negative", "n": 13, "text": "What forbidden spell does this character know you've been researching?" },
+    { "book": "brooms", "kind": "negative", "n": 14, "text": "Why won't you be alone in a classroom with this character?" },
+    { "book": "brooms", "kind": "negative", "n": 15, "text": "What curse has this character not fully recovered from yet?" },
+    { "book": "brooms", "kind": "negative", "n": 16, "text": "During classes, what do you do to intentionally distract this character?" },
+    { "book": "brooms", "kind": "negative", "n": 17, "text": "What aspect of your academic life is this character making more difficult?" },
+    { "book": "brooms", "kind": "negative", "n": 18, "text": "You hurt this character years ago. Why can't you apologize?" },
+    { "book": "brooms", "kind": "negative", "n": 19, "text": "How far along are you in your plan to get this character removed from the school?" },
+    { "book": "brooms", "kind": "negative", "n": 20, "text": "What's the last thing you stole from this character?" },
+    { "book": "brooms", "kind": "unknown", "n": 1, "text": "What good thing have you heard about this character that you can't believe is true?" },
+    { "book": "brooms", "kind": "unknown", "n": 2, "text": "Why do some students seek out this character?" },
+    { "book": "brooms", "kind": "unknown", "n": 3, "text": "What wonderful thing did this character do that the whole school was talking about?" },
+    { "book": "brooms", "kind": "unknown", "n": 4, "text": "What charming habit is this character known for in the school?" },
+    { "book": "brooms", "kind": "unknown", "n": 5, "text": "What strange record does this character hold in the school?" },
+    { "book": "brooms", "kind": "unknown", "n": 6, "text": "Why is this character's family so important to the school?" },
+    { "book": "brooms", "kind": "unknown", "n": 7, "text": "Why was your only brief interaction with this character so positive?" },
+    { "book": "brooms", "kind": "unknown", "n": 8, "text": "Based on what you know, how is this character different from the rest of their family?" },
+    { "book": "brooms", "kind": "unknown", "n": 9, "text": "What amazing magical ability have you heard that this character has?" },
+    { "book": "brooms", "kind": "unknown", "n": 10, "text": "How far would you go to get to know this character and why?" },
+    { "book": "brooms", "kind": "unknown", "n": 11, "text": "What bad thing have you heard about this character that you can't believe is true?" },
+    { "book": "brooms", "kind": "unknown", "n": 12, "text": "What do you hope to gain by humiliating this relative stranger?" },
+    { "book": "brooms", "kind": "unknown", "n": 13, "text": "What bad reputation does this character have around the school?" },
+    { "book": "brooms", "kind": "unknown", "n": 14, "text": "Who does this character have a very public feud with?" },
+    { "book": "brooms", "kind": "unknown", "n": 15, "text": "Why are so many students afraid of this character?" },
+    { "book": "brooms", "kind": "unknown", "n": 16, "text": "What terrible loss did this character suffer?" },
+    { "book": "brooms", "kind": "unknown", "n": 17, "text": "What do you hope to learn about this character to manipulate them?" },
+    { "book": "brooms", "kind": "unknown", "n": 18, "text": "What is this character doing to threaten their family's reputation in the school?" },
+    { "book": "brooms", "kind": "unknown", "n": 19, "text": "What scandal in the school was this character involved with?" },
+    { "book": "brooms", "kind": "unknown", "n": 20, "text": "Why don't you want to associate with this character?" }
+  ],
+  "items": [
+    { "book": "brooms", "kind": "wand-wood", "name": "Wisteria", "stat": "Brains", "benefit": "+1 to Brains magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Hawthorn", "stat": "Brains", "benefit": "+1 to Brains magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Pine", "stat": "Brawn", "benefit": "+1 to Brawn magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Oak", "stat": "Brawn", "benefit": "+1 to Brawn magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Crabapple", "stat": "Fight", "benefit": "+1 to Fight magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Dogwood", "stat": "Fight", "benefit": "+1 to Fight magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Birch", "stat": "Flight", "benefit": "+1 to Flight magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Bamboo", "stat": "Flight", "benefit": "+1 to Flight magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Ironwood", "stat": "Grit", "benefit": "+1 to Grit magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Maple", "stat": "Grit", "benefit": "+1 to Grit magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Lilac", "stat": "Charm", "benefit": "+1 to Charm magic checks", "page": 22 },
+    { "book": "brooms", "kind": "wand-wood", "name": "Cherry", "stat": "Charm", "benefit": "+1 to Charm magic checks", "page": 22 },
+
+    { "book": "brooms", "kind": "wand-core", "name": "Parchment", "stat": "Brains", "benefit": "+1 to Brains magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Phoenix's feather", "stat": "Brains", "benefit": "+1 to Brains magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Owl's feather", "stat": "Brains", "benefit": "+1 to Brains magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Gorilla's fur", "stat": "Brawn", "benefit": "+1 to Brawn magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Ogre's fingernail", "stat": "Brawn", "benefit": "+1 to Brawn magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Hippo's tooth", "stat": "Brawn", "benefit": "+1 to Brawn magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Dragon's heartstring", "stat": "Fight", "benefit": "+1 to Fight magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Wolf's tooth", "stat": "Fight", "benefit": "+1 to Fight magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Elk's antler", "stat": "Fight", "benefit": "+1 to Fight magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Hawk's feather", "stat": "Flight", "benefit": "+1 to Flight magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Air", "stat": "Flight", "benefit": "+1 to Flight magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Bat's bone", "stat": "Flight", "benefit": "+1 to Flight magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Changeling's hair", "stat": "Charm", "benefit": "+1 to Charm magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Gold", "stat": "Charm", "benefit": "+1 to Charm magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Mirror", "stat": "Charm", "benefit": "+1 to Charm magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Steel", "stat": "Grit", "benefit": "+1 to Grit magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Diamond", "stat": "Grit", "benefit": "+1 to Grit magic checks (must differ from the wood's type)", "page": 22 },
+    { "book": "brooms", "kind": "wand-core", "name": "Lion's mane", "stat": "Grit", "benefit": "+1 to Grit magic checks (must differ from the wood's type)", "page": 22 },
+
+    { "book": "brooms", "kind": "broom", "name": "The Blocker's Broom", "tag": "Defensive", "benefit": "Gain the Guardian Strength.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "Bolting 4000", "tag": "Fast", "benefit": "You get +1 to Flight checks.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "The Bruiser", "tag": "Intense", "benefit": "You get +1 to Fight checks.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "Cunning Captain's Cruiser", "tag": "Natural Leader", "benefit": "You may treat Snap Decisions as Planned Actions unless you are facing a fear.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "Daredevil's Duster", "tag": "Flashy", "benefit": "If you perform a stunt, you get +3 to Charm checks against any characters who witness the stunt.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "The Daring Dodger 3000", "tag": "Ambitious", "benefit": "Each Adversity Token you spend during a check adds +2 to your roll, instead of +1.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "Heartwood's Helper", "tag": "Outgoing", "benefit": "Each time you succeed at a check, an ally of your choice receives one Adversity Token.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "Mapmaker's Friend", "tag": "Level-Headed", "benefit": "If you know the area, you cannot get lost.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "The Mastermind's Sweeper", "tag": "Confident", "benefit": "You get +1 to Brains checks.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "The Strong Sweep 2500", "tag": "Strong", "benefit": "You get +1 to Brawn checks.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "The Suave Sweeper", "tag": "Trustworthy", "benefit": "You get +1 to Charm checks.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "The Tough Break", "tag": "Tough", "benefit": "You get +1 to Grit checks.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "Valiance 2400", "tag": "Brave", "benefit": "You may ignore your fears.", "page": 25 },
+    { "book": "brooms", "kind": "broom", "name": "Weasel's Whisk", "tag": "Sneaky", "benefit": "Gain the Unassuming Strength.", "page": 25 },
+
+    { "book": "brooms", "kind": "familiar", "name": "Birds, especially owls or ravens", "page": 26 },
+    { "book": "brooms", "kind": "familiar", "name": "Cats", "page": 26 },
+    { "book": "brooms", "kind": "familiar", "name": "Small dogs", "page": 26 },
+    { "book": "brooms", "kind": "familiar", "name": "Frogs or toads", "page": 26 },
+    { "book": "brooms", "kind": "familiar", "name": "Small rodents", "page": 26 },
+    { "book": "brooms", "kind": "familiar", "name": "Snakes", "page": 26 },
+
+    { "book": "brooms", "kind": "class", "name": "Defense Against Malicious Magic", "tag": "Fight, Flight, Grit", "description": "This class teaches the basics of defending yourself against hexes, jinxes, and other malicious forms of magic.", "page": 37 },
+    { "book": "brooms", "kind": "class", "name": "History of Magic", "tag": "Fight, Flight, Brains, Brawn, Charm, Grit", "description": "This class is an overview of the important discoveries and figures of the magical world.", "page": 37 },
+    { "book": "brooms", "kind": "class", "name": "Potions", "tag": "Fight, Charm, Grit", "description": "This class covers the ingredients and techniques required to create magical potions and tinctures.", "page": 37 },
+    { "book": "brooms", "kind": "class", "name": "Divination", "tag": "Brains, Grit", "description": "This class provides insight into the many various methods of seeing into the future. Advanced studies can also involve sharing your own visions and memories with them.", "page": 37 },
+    { "book": "brooms", "kind": "class", "name": "Astronomy", "tag": "Brains, Grit", "description": "This class covers the heavenly bodies, their movements, and the impact they have on the magical world.", "page": 37 },
+    { "book": "brooms", "kind": "class", "name": "Numerology", "tag": "Brains, Charm", "description": "This class teaches the magical properties of numbers and their sequences, and how they're used to understand the theoretical building blocks of magic.", "page": 37 },
+    { "book": "brooms", "kind": "class", "name": "Charms", "tag": "Brawn, Charm, Brains", "description": "This class covers the use of magic on inanimate objects and the use of non-harmful magic on people.", "page": 37 },
+    { "book": "brooms", "kind": "class", "name": "Brooms", "tag": "Flight, Brawn", "description": "This class focuses on the use of magical brooms in transportation and sport.", "page": 37 },
+    { "book": "brooms", "kind": "class", "name": "Summoning", "tag": "Brains, Charm, Grit", "description": "This class teaches the methods and dangers of using magic to summon objects or creatures from nothing.", "page": 37 },
+    { "book": "brooms", "kind": "class", "name": "Transfiguration", "tag": "Charm, Flight", "description": "This class covers the proper spells used to transform both inanimate objects and living beings into other things.", "page": 37 },
+
+    { "book": "brooms", "kind": "motivation", "name": "Curiosity", "tag": "Underclass", "description": "Typically, underclass students will be motivated by their curiosity.", "page": 34 },
+    { "book": "brooms", "kind": "motivation", "name": "Fitting in or a romantic relationship", "tag": "Upperclass", "description": "Upperclass students will often be motivated by social factors like fitting in or finding and maintaining a romantic relationship.", "page": 34 },
+    { "book": "brooms", "kind": "motivation", "name": "Protecting what they have", "tag": "Faculty", "description": "Faculty will be motivated by holding on to or protecting what they have, whether that's a business or family.", "page": 34 },
+    { "book": "brooms", "kind": "motivation", "name": "Something or someone lost", "tag": "Any", "description": "All grades can be motivated by something or someone that they've lost.", "page": 34 },
+    { "book": "brooms", "kind": "fear", "name": "The unknown and what they can't see", "tag": "Underclass", "description": "Underclass students usually fear things that, rationally, they shouldn't and don't fear things that they ought to. Kids are generally not ashamed of their fears.", "page": 34 },
+    { "book": "brooms", "kind": "fear", "name": "Social isolation, losing friends, embarrassment", "tag": "Upperclass", "description": "Upperclass students are all over the place; some keep childhood fears but are tight-lipped about them. Often they're more scared of social isolation, losing friends, or embarrassing themselves.", "page": 34 },
+    { "book": "brooms", "kind": "fear", "name": "Things being taken from them", "tag": "Faculty", "description": "Adults are typically afraid of things being taken from them—their families, their homes, or their livelihoods—and of realistic things going wrong.", "page": 34 }
+  ],
+  "capes": [],
+  "tables": {
+    "spell": {
+      "magnitude": [
+        { "name": "Natural", "mod": 1, "text": "Could naturally happen" },
+        { "name": "Unnatural", "mod": 3, "text": "Could happen, but not naturally" },
+        { "name": "Reality-Bending", "mod": 5, "text": "Bends the rules of reality" },
+        { "name": "Reality-Breaking", "mod": 7, "text": "Breaks the rules of reality" }
+      ],
+      "area": [
+        { "name": "Tiny", "mod": 1, "text": "A book or smaller" },
+        { "name": "Small", "mod": 3, "text": "A person or smaller" },
+        { "name": "Big", "mod": 5, "text": "Bigger than a person, smaller than a classroom" },
+        { "name": "Massive", "mod": 7, "text": "A classroom or bigger" }
+      ],
+      "duration": [
+        { "name": "Instantaneous", "mod": 0, "text": "Instantaneous" },
+        { "name": "Minute-Long", "mod": 1, "text": "A few minutes" },
+        { "name": "Hour-Long", "mod": 2, "text": "One hour" },
+        { "name": "Day-Long", "mod": 3, "text": "One day" },
+        { "name": "Week-Long", "mod": 4, "text": "One week" },
+        { "name": "Permanent", "mod": 6, "text": "Permanent" }
+      ],
+      "experience": [
+        { "name": "Mastered", "mod": 0, "text": "You've cast this spell many times before." },
+        { "name": "Cast", "mod": 1, "text": "You've cast this spell a few times before." },
+        { "name": "Witnessed", "mod": 3, "text": "You've seen someone else cast it or you've read about it." },
+        { "name": "Inexperienced", "mod": 5, "text": "You've never seen anyone cast this spell or read about it." }
+      ],
+      "magicTypes": [
+        { "stat": "Fight", "text": "Attack enemies, break curses, or blast through obstacles. Common spells include disarming an opponent, causing a target harm, or making something explode.", "classes": "Defense Against Malicious Magic, History of Magic, Potions" },
+        { "stat": "Flight", "text": "Hide yourself, avoid being hurt, or use your broom to navigate. Common spells include deflecting dangerous magic, moving in magical ways, or blending into your surroundings.", "classes": "Defense Against Malicious Magic, Transfiguration, History of Magic, Brooms" },
+        { "stat": "Brains", "text": "Reveal something hidden, understand something mysterious, or see into a different place in space or time. Common spells include finding hidden passages, astral projection, or decoding magical messages.", "classes": "History of Magic, Divination, Astronomy" },
+        { "stat": "Brawn", "text": "Move an object or keep something protected. Common spells include levitation, magically locking doors, or binding opponents.", "classes": "History of Magic, Charms, Brooms" },
+        { "stat": "Charm", "text": "Influence someone's thinking, create an illusion, or modify your appearance. Common spells include disguising yourself, being allowed into somewhere you normally aren't, or projecting images from your mind into reality. Magically influencing an unwilling person's emotions is against the rules at most schools.", "classes": "History of Magic, Charms, Transfiguration" },
+        { "stat": "Grit", "text": "Keep someone safe either mentally or physically. Common spells include blocking your mind from being peered into, dispelling magic that's already been cast, or healing someone who has been hurt.", "classes": "History of Magic, Potions, Defense Against Malicious Magic" }
+      ],
+      "failure": [
+        { "range": "+10 or higher", "text": "The character seems to cast the spell effortlessly, like this is a spell they could do in their sleep. The spell functions perfectly." },
+        { "range": "+5 to +9", "text": "The character casts the spell quite impressively; to anyone watching it seems like a spell they have mastered. The spell functions perfectly." },
+        { "range": "+1 to +4", "text": "The character casts the spell but not impressively. It works, but it's clear they put serious effort into making it succeed. The spell functions as expected." },
+        { "range": "0", "text": "The character casts the spell—but just barely. The strain is clear to everyone watching, and the spell might not function perfectly, but it gets the job done." },
+        { "range": "-1 to -4", "text": "The spell simply fails. It may appear about to work but then does not. No impact on the story beyond the caster not achieving their stated goal." },
+        { "range": "-5 to -9", "text": "The spell fails in a benign burst of magic. At the GM's discretion there may be minor, incredibly brief unexpected effects—slightly embarrassing if anyone is there to witness them." },
+        { "range": "-10 to -14", "text": "The spell fails in a dangerous burst of magic. There will be minor effects as above and, at the GM's discretion, the spell might work but on the wrong target. Some short-term impact on the direction of the game." },
+        { "range": "-15 or lower", "text": "The spell fails in an incredibly dangerous way. Bad effects as above and perhaps quite a bit worse; such a failure should alter the course of the game. This only happens when a character is incredibly reckless with magic." }
+      ]
+    },
+    "quickRules": [
+      { "book": "brooms", "title": "Grades", "text": "Underclass (14 & younger): +1 Flight & Charm, free Innocence. Upperclass (15–20): +1 Fight & Brawn, free Trained in… one type of magic. Faculty (21+): +1 Brains & Grit, free Studied in… one type of magic. Grade bonuses apply to stat checks and never cause a Lucky Break." },
+      { "book": "brooms", "title": "Starting Character", "text": "Pick a Trope (or build from scratch), choose your grade, your grade Strength plus two more Strengths, two Flaws, a familiar, a wand, a broom, a favorite class, a motivation, a fear and your Schoolbag. Start with 3 Adversity Tokens." },
+      { "book": "brooms", "title": "Types of Magic", "text": "Every spell uses one stat: Fight (attack, break curses), Flight (hide, evade, broom flying), Brains (reveal, understand, scry), Brawn (move or protect objects), Charm (influence, illusion, appearance), Grit (protect minds and bodies, dispel, heal). The GM decides which type a spell is." },
+      { "book": "brooms", "title": "Wands", "text": "Choose a wood and a core. Each gives +1 to magic checks of one type, and the core's type must differ from the wood's. Any two-part focus object can stand in for a wand. Handy lets you use the wand's benefits without wielding it." },
+      { "book": "brooms", "title": "Brooms", "text": "Each brand has a rider adjective and a mechanical benefit (see the broom table, p.25). The benefit only lasts while you are physically on the broom, and a damaged broom won't work as well. Flying where non-casters can see you exposes magic to the outside world." },
+      { "book": "brooms", "title": "Familiars", "text": "Any animal small enough to carry (GM's permission for anything unusual). You have limited one-way psychic communication and it can perform simple tasks, decided narratively rather than by rolls. Psychic Link upgrades this to two-way at any distance." },
+      { "book": "brooms", "title": "Spell Checks", "text": "1) Describe what the spell does. 2) The GM sets the type of magic and builds the difficulty: magnitude + area + duration + experience (one modifier from each table). 3) Roll the Stat Die for that type plus the d4 Magic Die and add wand, Strength, grade and Adversity Token bonuses. 4) Meet or beat the difficulty and the spell does exactly what you wanted; there is no extra benefit for beating it by a lot." },
+      { "book": "brooms", "title": "Magic Die", "text": "Every Spell Check adds a d4 Magic Die to the stat die. Gifted lets you spend 1 AT to reroll it after a failed magic check; Lucky rerolls the stat check but never the Magic Die. Guardian always adds the Magic Die when defending someone, even without magic." },
+      { "book": "brooms", "title": "Know the Difficulty First", "text": "Because failed spells can go badly wrong, the GM must tell you the spell's difficulty before you decide whether to cast it. Spell Checks are normally rolled, not taken as Planned Actions." },
+      { "book": "brooms", "title": "Spell Failure", "text": "Compare (roll + modifiers) − difficulty on the spell results chart (p.56–57). −1 to −4 simply fails; −5 to −9 a benign burst; −10 to −14 a dangerous burst that may hit the wrong target; −15 or lower an incredibly dangerous failure that alters the game. Spell Slinger adds +3 to the negative number, to a minimum loss of −1." },
+      { "book": "brooms", "title": "Magic Against Living Creatures", "text": "Casting on an unwilling PC or NPC: both caster and target make a Spell Check for the same spell and the difference is read on the Injuries chart. Unprovoked magical attacks are among the gravest crimes; killing another character other than in self defense makes your character an NPC. Supervised duels cap injury at 'attacker greater by 3'." },
+      { "book": "brooms", "title": "Injuries", "text": "Defender's roll ≥ attacker's: uninjured, defender narrates. Attacker +1 to +3: hurt but temporary. +4 to +6: fairly hurt, needs medical attention soon. +7 to +9: badly hurt, straight to the infirmary or permanent damage. +10 or more: dead or nearly dead, attacker controls the narrative. There are no hit points and no pulled punches." },
+      { "book": "brooms", "title": "Potions", "text": "With time and a lab, brew a magical effect for later. The GM sets a difficulty (+5 without components) and may add requirements: a rare ingredient, brewing time, exhaustion, or a specialized lab. Roll as a Snap Decision; the GM may allow a Planned Action for simple potions you've studied or have a recipe for. Using a potion erases it from your Schoolbag." },
+      { "book": "brooms", "title": "Class Schedule", "text": "Choose 3 classes. After each session take up to 2 marks (max 1 per class) in classes you used. 2 marks: Trained in… (+1) a magic type the class teaches. 6 marks: replace with Studied in… (+3). 10 marks: replace with Master of… (+5) and the class is complete. Bonuses don't stack." },
+      { "book": "brooms", "title": "Fears", "text": "When faced with your fear you must make Snap Decisions, cannot spend AT to help friends, and may suffer up to −3 on all checks (−1 persistent but irrelevant, −2 persistent and possibly relevant, −3 persistent and overwhelming). With GM permission (or Heroic) spend 1 AT per −1 penalty to ignore the fear for the scene. Valiance 2400 riders ignore fears." },
+      { "book": "brooms", "title": "Schoolbag", "text": "A lightweight magical pouch that compresses small objects: spell supplies, potions, even a broom—nothing bigger fits. Figuratively, also list the advantages you 'hold' over others (family prestige, resilience) as roleplaying cues without mechanical effect." },
+      { "book": "brooms", "title": "Money", "text": "Underclass students have almost no money beyond what they're given. Upperclass students can cover necessities for a few days and maybe a top-of-the-line broom. Faculty can, within reason, buy what they want. Anyone wealthy—even a well-paid adult—must take the Wealthy Strength." },
+      { "book": "brooms", "title": "Safety", "text": "Set boundaries before play and use a safety tool: the book recommends a modified X-card (knock on the table), Script Change (rewind / pause / fast forward) or Lines & Veils, and checking in with everyone whenever the table seems frustrated." }
+    ]
+  }
+}

@@ -10579,12 +10579,36 @@ function init_party(root) {
     };
   }
 
+  // Build a Party-tool summary from a Kids on Bikes / Brooms / Capes sheet.
+  function kobParty(d) {
+    const S = d.stats || {}, M = d.mods || {};
+    const n = v => parseInt(v) || 0;
+    const BOOK = { bikes:'Kids on Bikes', brooms:'Kids on Brooms', capes:'Kids in Capes' };
+    const C = d.capes || {}, B = d.brooms || {}, K = d.bike || {};
+    return {
+      system: 'KOB',
+      name: [d.name, d.lastName].filter(Boolean).join(' ') || 'Unnamed',
+      book: d.book || 'bikes', bookName: BOOK[d.book] || 'Kids on Bikes',
+      trope: d.trope || '', age: d.age || '',
+      stats: ['Brains','Brawn','Fight','Flight','Charm','Grit'].map(id => ({ id, die: n(S[id]) || 8, mod: n(M[id]) })),
+      at: typeof d.at === 'number' ? d.at : 3,
+      stress: typeof d.stress === 'number' ? d.stress : 0,
+      strengths: (d.strengths || []).filter(s => s && s.name).map(s => s.name + (s.note ? ' (' + s.note + ')' : '')),
+      flaw: d.flaw || '', fear: d.fear || '', knack: d.knack || '',
+      ride: d.book === 'bikes' ? [K.color, K.accessory].filter(Boolean).join(' · ') : d.book === 'brooms' ? [B.broom, B.wood && ('wand: ' + B.wood), B.familiar && ('familiar: ' + B.familiar)].filter(Boolean).join(' · ') : '',
+      cape: d.book === 'capes' ? [C.cape, C.power].filter(Boolean).join(' · ') : '',
+      powerDie: d.book === 'capes' ? n(C.powerDie) : 0,
+      gp: d.book === 'capes' ? n(C.gp) : 0,
+    };
+  }
+
   // Sheets come from a few exporters (our sheet, Shadowdarklings). Read defensively.
   function normalize(raw) {
     if(!raw || typeof raw !== 'object') return null;
     const d = raw.sheet && typeof raw.sheet === 'object' ? raw.sheet : raw;
-    // ACE! cards tag themselves; DCC sheets have a distinct shape (header +
-    // combat blocks). Route each to its own summariser, else Shadowdark below.
+    // ACE! and KoB sheets tag themselves; DCC sheets have a distinct shape
+    // (header + combat blocks). Route each to its own summariser, else Shadowdark.
+    if(d && d.system === 'KOB') return kobParty(d);
     if(d && d.system === 'ACE') return aceParty(d);
     if(d && d.header && d.combat) return dccParty(d);
     if(!d.name && !d.class && !d.stats) return null;
@@ -10792,8 +10816,39 @@ function init_party(root) {
     return h;
   }
 
+  function cardHTMLKOB(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = [c.trope, c.age, c.bookName].filter(Boolean).join(' · ');
+    const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip">AT <b>' + esc(c.at) + '</b></span>'
+       + (c.book === 'capes' ? '<span class="pty-chip">Stress <b>' + esc(c.stress) + '</b></span>' : '')
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats">' + c.stats.map(s =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id.slice(0,3)) + '</div>'
+      + '<div class="pty-stat-mod">d' + s.die + '</div>'
+      + '<div class="pty-stat-val">' + (s.mod ? (s.mod > 0 ? '+' : '') + s.mod : '') + '</div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Adversity', c.at) + (c.book === 'capes' ? cell('Stress', c.stress + '/13') + cell('Power Die', c.powerDie ? 'd' + c.powerDie : 'none') + cell('GP', c.gp) : '')
+       + (c.fear ? cell('Fear', c.fear) : '') + (c.knack ? cell('Knack', c.knack) : '')
+       + '</div></div>';
+    if(c.strengths.length) h += '<div class="pty-sec"><div class="pty-sec-h">Strengths</div>' + c.strengths.map(s => '<div class="pty-line">' + esc(s) + '</div>').join('') + '</div>';
+    if(c.flaw) h += '<div class="pty-sec"><div class="pty-sec-h">Flaw</div><div class="pty-line">' + esc(c.flaw) + '</div></div>';
+    if(c.cape) h += '<div class="pty-sec"><div class="pty-sec-h">Cape &amp; Power</div><div class="pty-line">' + esc(c.cape) + '</div></div>';
+    if(c.ride) h += '<div class="pty-sec"><div class="pty-sec-h">' + (c.book === 'brooms' ? 'Broom, wand &amp; familiar' : 'Bike') + '</div><div class="pty-line dim">' + esc(c.ride) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
   function cardHTML(entry) {
     const c = entry.sheet;
+    if(c.system === 'KOB') return cardHTMLKOB(entry);
     if(c.system === 'ACE') return cardHTMLACE(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);
     const open = openIds.has(entry.id);

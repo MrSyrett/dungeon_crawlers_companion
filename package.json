@@ -14,7 +14,8 @@
     "db:studio": "prisma studio",
     "prebuild": "node scripts/clean-binary-sources.mjs && node scripts/extract-game-data.mjs",
     "data:dcc": "node scripts/build-dcc-data.mjs",
-    "data:ace": "node scripts/build-ace-data.mjs"
+    "data:ace": "node scripts/build-ace-data.mjs",
+    "data:kob": "node scripts/build-kob-data.mjs"
   },
   "engines": {
     "node": ">=20"

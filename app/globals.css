@@ -11,6 +11,8 @@
   --red: #b82018;
   /* ACE! accent — the comic-book sky blue of the omnibus covers. */
   --ace: #3aa8e0;
+  /* Kids on Bikes accent — the books' purple. */
+  --kob: #a56ee8;
 }
 
 @theme inline {
@@ -23,6 +25,7 @@
   --color-gold: var(--gold);
   --color-red: var(--red);
   --color-ace: var(--ace);
+  --color-kob: var(--kob);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }

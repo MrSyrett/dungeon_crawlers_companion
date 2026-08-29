@@ -8,12 +8,15 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB";
 
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
   { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--red)" },
   { key: "ACE", name: "ACE!", short: "ACE", accent: "var(--ace)" },
+  // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
+  // same system (one sheet, one shelf, one tab).
+  { key: "KOB", name: "Kids on Bikes", short: "KoB", accent: "var(--kob)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";

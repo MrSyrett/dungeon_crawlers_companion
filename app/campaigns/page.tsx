@@ -77,6 +77,18 @@ function readCharMeta(
         level: Number.isNaN(lv) ? null : lv,
       };
     }
+    // Kids on Bikes: no levels — the roster shows the Trope (and book) as the class.
+    const kob = blob?.kob_sheet;
+    if (typeof kob === "string") {
+      const s = JSON.parse(kob) as { name?: unknown; trope?: unknown; book?: unknown };
+      const bookName = { bikes: "Bikes", brooms: "Brooms", capes: "Capes" }[String(s.book ?? "")] ?? "";
+      const cls = [typeof s.trope === "string" ? s.trope : "", bookName].filter(Boolean).join(" · ");
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: null,
+      };
+    }
     // ACE! Hero ID Card: no levels — the roster shows "Trait Role" as the class.
     const ace = blob?.ace_sheet;
     if (typeof ace === "string") {

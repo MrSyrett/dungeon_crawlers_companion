@@ -1,0 +1,2261 @@
+{
+  "book": {
+    "key": "capes",
+    "name": "Kids in Capes",
+    "tagline": "Young heroes discovering their powers and learning to be a team.",
+    "blurb": "Kids in Capes uses the Kids on Bikes engine to tell the story of a group of kids, teens, or adults who gain superpowers, pick a role on the team (their Cape) and a signature Power, and grow toward a Capstone ability. Combat adds Risks, Stress, Power Dice and Clock Dice; between sessions heroes spend Growth Points on their Cape and Power Skill Trees.",
+    "ageGroups": [
+      {
+        "name": "Child",
+        "range": "12 & younger",
+        "statBonus": [
+          "Charm",
+          "Flight"
+        ],
+        "freeStrength": "Just Having Fun",
+        "notes": "At the end of every combat, reduce your Stress by 1 before determining the effects of Stress."
+      },
+      {
+        "name": "Teen",
+        "range": "13 to 19 years",
+        "statBonus": [
+          "Brawn",
+          "Fight"
+        ],
+        "freeStrength": "Rebellious",
+        "notes": "+3 when persuading or resisting persuasion from children; +3 when resisting persuasion from adults."
+      },
+      {
+        "name": "Adult",
+        "range": "20 & older",
+        "statBonus": [
+          "Brains",
+          "Grit"
+        ],
+        "freeStrength": "Skilled at…",
+        "notes": "Choose a skill the character has learned from their life experiences or employment."
+      }
+    ],
+    "rideLabel": null,
+    "bagLabel": "Utility Belt",
+    "rules": [
+      "Creation order: choose and share your eventual Cape and Power; select a Trope and fill in your sheet; introduce your character and answer relationship questions; add finishing touches (p.17).",
+      "Choose two Strengths and one Flaw from your Trope's lists; you may reassign Stat dice (one die per stat) and, with GM permission, take an off-list Strength or Flaw (p.24-25).",
+      "Pick a Stress-Boosted Stat and a Stress-Reduced Stat (they cannot be the same stat); Stress modifies them during and after combat (p.28).",
+      "Age sets two +1 stats and a free Strength: Child +1 Charm/Flight (Just Having Fun), Teen +1 Brawn/Fight (Rebellious), Adult +1 Brains/Grit (Skilled at…) (p.29).",
+      "Finishing touches: three Extracurriculars (Forever, Long-Term, Recent), a Motivation, an Obligation, an optional Weak Point, and a Utility Belt of things you're never without (p.36-38).",
+      "You start powerless. When powers manifest you gain a Starting Cape Ability (+1 to one Cape Stat, used when superheroing) and a Starting Power Ability with a d4 Power Die, then answer the Secret Identity questions (p.50-53).",
+      "Failing any roll made with your Power costs 1 Stress; every combat check risks at least 1 Stress; after all heroes act each round, everyone takes 1 Stress (p.43, 57, 66).",
+      "At 13 Stress you must immediately remove yourself from combat. After combat apply Fallout, then reduce Stress by 4. Sleep -2 per night, 2+ hours of an extracurricular -2 per day, professional help -4 (p.58, 73-74).",
+      "Growth Points buy Cape Skills, Cape Stat bonuses, Power Die increases, new ways to use your Power, Team Tactics, and finally your Capstone—after which you play only one more session or short arc (p.85-90)."
+    ]
+  },
+  "tropes": [
+    {
+      "name": "Ambitious Wannabe",
+      "book": "capes",
+      "dice": {
+        "Brains": 6,
+        "Brawn": 4,
+        "Fight": 8,
+        "Flight": 20,
+        "Charm": 10,
+        "Grit": 12
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Intuitive",
+        "Loyal",
+        "Protective",
+        "Skilled at…",
+        "Team Player",
+        "Unassuming"
+      ],
+      "suggestedFlaws": [
+        "Boastful",
+        "Deceitful",
+        "Envious",
+        "Gullible",
+        "Insecure",
+        "Reckless",
+        "Weak-Willed"
+      ],
+      "questions": [
+        "What would it mean to be one of the popular kids?",
+        "What would you sacrifice to be one of the cool kids?"
+      ],
+      "page": 134
+    },
+    {
+      "name": "Class Clown",
+      "book": "capes",
+      "dice": {
+        "Brains": 4,
+        "Brawn": 12,
+        "Fight": 6,
+        "Flight": 10,
+        "Charm": 20,
+        "Grit": 8
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Easygoing",
+        "Gross",
+        "Protective",
+        "Skilled at…",
+        "Treasure Hunter",
+        "Trouble Maker"
+      ],
+      "suggestedFlaws": [
+        "Blunt",
+        "Clumsy",
+        "Envious",
+        "Flippant",
+        "Insecure",
+        "Self-Centered",
+        "Rude"
+      ],
+      "questions": [
+        "What do you do that always lightens your friends' moods?",
+        "Whose attention do you wish you really received?"
+      ],
+      "page": 134
+    },
+    {
+      "name": "Conspiracy Theorist",
+      "book": "capes",
+      "dice": {
+        "Brains": 20,
+        "Brawn": 6,
+        "Fight": 12,
+        "Flight": 8,
+        "Charm": 4,
+        "Grit": 10
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Heroic",
+        "Intuitive",
+        "Mechanic",
+        "Prepared",
+        "Treasure Hunter",
+        "Unassuming"
+      ],
+      "suggestedFlaws": [
+        "Blunt",
+        "Callous",
+        "Lazy",
+        "Paranoid",
+        "Patronizing",
+        "Reckless",
+        "Weak-Willed"
+      ],
+      "questions": [
+        "What are you sure is happening in the town that no one else knows about?",
+        "How far will you go to have others believe in you?"
+      ],
+      "page": 134
+    },
+    {
+      "name": "Escaped Experiment",
+      "book": "capes",
+      "dice": {
+        "Brains": 8,
+        "Brawn": 12,
+        "Fight": 20,
+        "Flight": 10,
+        "Charm": 4,
+        "Grit": 6
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Gross",
+        "Protective",
+        "Skilled at…",
+        "Tough",
+        "Treasure Hunter",
+        "Trouble Maker"
+      ],
+      "suggestedFlaws": [
+        "Blunt",
+        "Callous",
+        "Impatient",
+        "Insecure",
+        "Paranoid",
+        "Reckless",
+        "Rude"
+      ],
+      "questions": [
+        "What is one thing you miss about your life before this happened?",
+        "How do you find beauty in yourself as you are now?"
+      ],
+      "page": 135
+    },
+    {
+      "name": "Family's Protector",
+      "book": "capes",
+      "dice": {
+        "Brains": 8,
+        "Brawn": 12,
+        "Fight": 6,
+        "Flight": 4,
+        "Charm": 10,
+        "Grit": 20
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Easygoing",
+        "Protective",
+        "Skilled at…",
+        "Team Player",
+        "Tough",
+        "Unassuming"
+      ],
+      "suggestedFlaws": [
+        "Blunt",
+        "Callous",
+        "Envious",
+        "Deceitful",
+        "Demanding",
+        "Impatient",
+        "Paranoid"
+      ],
+      "questions": [
+        "How has working to support your family improved you as a person?",
+        "What have you had to sacrifice to support your family?"
+      ],
+      "page": 135
+    },
+    {
+      "name": "Former Sidekick",
+      "book": "capes",
+      "dice": {
+        "Brains": 12,
+        "Brawn": 10,
+        "Fight": 20,
+        "Flight": 6,
+        "Charm": 8,
+        "Grit": 4
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Cool Under Pressure",
+        "Heroic",
+        "Loyal",
+        "Mechanic",
+        "Skilled at…",
+        "Technocrat"
+      ],
+      "suggestedFlaws": [
+        "Demanding",
+        "Dogmatic",
+        "Envious",
+        "Gullible",
+        "Impatient",
+        "Lazy",
+        "Self-Centered"
+      ],
+      "questions": [
+        "Who taught you everything you know now?",
+        "What about being in the \"sidekick\" role frustrated you?"
+      ],
+      "page": 135
+    },
+    {
+      "name": "Goody Goody",
+      "book": "capes",
+      "dice": {
+        "Brains": 10,
+        "Brawn": 6,
+        "Fight": 4,
+        "Flight": 8,
+        "Charm": 20,
+        "Grit": 12
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Loyal",
+        "Lucky",
+        "Prepared",
+        "Skilled at…",
+        "Team Player",
+        "Unassuming"
+      ],
+      "suggestedFlaws": [
+        "Boastful",
+        "Clumsy",
+        "Demanding",
+        "Gullible",
+        "Impatient",
+        "Patronizing",
+        "Weak-Willed"
+      ],
+      "questions": [
+        "Why does approval from adults mean so much to you?",
+        "Who did you recently hurt by seeking adults' approval?"
+      ],
+      "page": 136
+    },
+    {
+      "name": "Honorable Scout",
+      "book": "capes",
+      "dice": {
+        "Brains": 20,
+        "Brawn": 12,
+        "Fight": 4,
+        "Flight": 6,
+        "Charm": 8,
+        "Grit": 10
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Cool Under Pressure",
+        "Intuitive",
+        "Mechanic",
+        "Prepared",
+        "Skilled at…",
+        "Treasure Hunter"
+      ],
+      "suggestedFlaws": [
+        "Absent-Minded",
+        "Clumsy",
+        "Dogmatic",
+        "Gullible",
+        "Patronizing",
+        "Weak-Willed"
+      ],
+      "questions": [
+        "Who first got you into Scouting (or more generally, the great outdoors)?",
+        "What do you have to give up to spend as much time in nature as you do?"
+      ],
+      "page": 136
+    },
+    {
+      "name": "Hotshot Athlete",
+      "book": "capes",
+      "dice": {
+        "Brains": 4,
+        "Brawn": 20,
+        "Fight": 8,
+        "Flight": 12,
+        "Charm": 6,
+        "Grit": 10
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Gross",
+        "Heroic",
+        "Loyal",
+        "Protective",
+        "Skilled at…",
+        "Tough"
+      ],
+      "suggestedFlaws": [
+        "Blunt",
+        "Boastful",
+        "Callous",
+        "Demanding",
+        "Gullible",
+        "Impatient",
+        "Self-Centered"
+      ],
+      "questions": [
+        "Why do you get so much satisfaction from being excellent at your sport?",
+        "What have you sacrificed to be so good in this sport?"
+      ],
+      "page": 136
+    },
+    {
+      "name": "Laidback Slacker",
+      "book": "capes",
+      "dice": {
+        "Brains": 4,
+        "Brawn": 20,
+        "Fight": 8,
+        "Flight": 10,
+        "Charm": 12,
+        "Grit": 6
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Cool Under Pressure",
+        "Easygoing",
+        "Skilled at…",
+        "Treasure Hunter",
+        "Trouble Maker",
+        "Unassuming",
+        "Wealthy"
+      ],
+      "suggestedFlaws": [
+        "Absent-Minded",
+        "Clumsy",
+        "Deceitful",
+        "Flippant",
+        "Lazy",
+        "Rude",
+        "Weak-Willed"
+      ],
+      "questions": [
+        "What do you think of all the try-hards around you?",
+        "What are you willing to go the extra mile for?"
+      ],
+      "page": 137
+    },
+    {
+      "name": "Misunderstood Punk",
+      "book": "capes",
+      "dice": {
+        "Brains": 6,
+        "Brawn": 10,
+        "Fight": 12,
+        "Flight": 8,
+        "Charm": 4,
+        "Grit": 20
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Gross",
+        "Intuitive",
+        "Skilled at…",
+        "Tough",
+        "Treasure Hunter",
+        "Trouble Maker"
+      ],
+      "suggestedFlaws": [
+        "Boastful",
+        "Callous",
+        "Demanding",
+        "Flippant",
+        "Impatient",
+        "Lazy",
+        "Rude"
+      ],
+      "questions": [
+        "Why are you so angry?",
+        "Who do you most want to listen to you?"
+      ],
+      "page": 137
+    },
+    {
+      "name": "Not of This World",
+      "book": "capes",
+      "dice": {
+        "Brains": 12,
+        "Brawn": 20,
+        "Fight": 8,
+        "Flight": 4,
+        "Charm": 10,
+        "Grit": 6
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Cool Under Pressure",
+        "Mechanic",
+        "Skilled at…",
+        "Technocrat",
+        "Team Player",
+        "Treasure Hunter"
+      ],
+      "suggestedFlaws": [
+        "Absent-Minded",
+        "Clumsy",
+        "Gullible",
+        "Insecure",
+        "Paranoid",
+        "Reckless",
+        "Weak-Willed"
+      ],
+      "questions": [
+        "What is one thing you miss from home?",
+        "What aspect of Earth life have you not quite been able to adjust to yet?"
+      ],
+      "page": 137
+    },
+    {
+      "name": "Overshadowed Relative",
+      "book": "capes",
+      "dice": {
+        "Brains": 20,
+        "Brawn": 8,
+        "Fight": 10,
+        "Flight": 6,
+        "Charm": 12,
+        "Grit": 4
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Gross",
+        "Loyal",
+        "Lucky",
+        "Protective",
+        "Unassuming",
+        "Wealthy"
+      ],
+      "suggestedFlaws": [
+        "Deceitful",
+        "Demanding",
+        "Envious",
+        "Flippant",
+        "Insecure",
+        "Paranoid",
+        "Rude"
+      ],
+      "questions": [
+        "Who is that person who was always in the limelight?",
+        "What do you need to prove to yourself?"
+      ],
+      "page": 138
+    },
+    {
+      "name": "Popular Kid",
+      "book": "capes",
+      "dice": {
+        "Brains": 10,
+        "Brawn": 6,
+        "Fight": 4,
+        "Flight": 12,
+        "Charm": 20,
+        "Grit": 8
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Cool Under Pressure",
+        "Intuitive",
+        "Lucky",
+        "Prepared",
+        "Skilled at…",
+        "Wealthy"
+      ],
+      "suggestedFlaws": [
+        "Boastful",
+        "Deceitful",
+        "Flippant",
+        "Lazy",
+        "Paranoid",
+        "Self-Centered",
+        "Weak-Willed"
+      ],
+      "questions": [
+        "Beyond people wanting to impress you and the social capital that brings, what do you like about being popular?",
+        "How do you treat the unpopular kids?"
+      ],
+      "page": 138
+    },
+    {
+      "name": "Redemption Seeker",
+      "book": "capes",
+      "dice": {
+        "Brains": 12,
+        "Brawn": 8,
+        "Fight": 10,
+        "Flight": 4,
+        "Charm": 6,
+        "Grit": 20
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Cool Under Pressure",
+        "Heroic",
+        "Loyal",
+        "Prepared",
+        "Tough",
+        "Unassuming"
+      ],
+      "suggestedFlaws": [
+        "Blunt",
+        "Dogmatic",
+        "Paranoid",
+        "Patronizing",
+        "Reckless",
+        "Rude",
+        "Self-Centered"
+      ],
+      "questions": [
+        "Why are you seeking redemption?",
+        "Whose respect are you trying to earn?"
+      ],
+      "page": 138
+    },
+    {
+      "name": "Science Geek",
+      "book": "capes",
+      "dice": {
+        "Brains": 20,
+        "Brawn": 4,
+        "Fight": 6,
+        "Flight": 12,
+        "Charm": 8,
+        "Grit": 10
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Gross",
+        "Intuitive",
+        "Mechanic",
+        "Prepared",
+        "Technocrat",
+        "Wealthy"
+      ],
+      "suggestedFlaws": [
+        "Absent-Minded",
+        "Boastful",
+        "Clumsy",
+        "Dogmatic",
+        "Envious",
+        "Flippant",
+        "Gullible"
+      ],
+      "questions": [
+        "Why do you get so much satisfaction from your academic excellence?",
+        "What have you sacrificed to be so good in school?"
+      ],
+      "page": 139
+    },
+    {
+      "name": "Show Boat",
+      "book": "capes",
+      "dice": {
+        "Brains": 6,
+        "Brawn": 4,
+        "Fight": 10,
+        "Flight": 20,
+        "Charm": 12,
+        "Grit": 8
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Cool Under Pressure",
+        "Easygoing",
+        "Intuitive",
+        "Lucky",
+        "Skilled at…",
+        "Wealthy"
+      ],
+      "suggestedFlaws": [
+        "Absent-Minded",
+        "Boastful",
+        "Demanding",
+        "Flippant",
+        "Patronizing",
+        "Reckless",
+        "Self-Centered"
+      ],
+      "questions": [
+        "What skill do you love showing off?",
+        "Who are you actually trying to impress?"
+      ],
+      "page": 139
+    },
+    {
+      "name": "Silver Spoon",
+      "book": "capes",
+      "dice": {
+        "Brains": 10,
+        "Brawn": 8,
+        "Fight": 12,
+        "Flight": 20,
+        "Charm": 6,
+        "Grit": 4
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Intuitive",
+        "Lucky",
+        "Prepared",
+        "Treasure Hunter",
+        "Unassuming",
+        "Wealthy"
+      ],
+      "suggestedFlaws": [
+        "Absent-Minded",
+        "Boastful",
+        "Impatient",
+        "Insecure",
+        "Lazy",
+        "Rude",
+        "Self-Centered"
+      ],
+      "questions": [
+        "What advantages has your wealth given you?",
+        "How does your family exploit the town to make its money?"
+      ],
+      "page": 139
+    },
+    {
+      "name": "Sole Survivor",
+      "book": "capes",
+      "dice": {
+        "Brains": 8,
+        "Brawn": 6,
+        "Fight": 10,
+        "Flight": 12,
+        "Charm": 4,
+        "Grit": 20
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Heroic",
+        "Mechanic",
+        "Skilled at…",
+        "Tough",
+        "Treasure Hunter"
+      ],
+      "suggestedFlaws": [
+        "Blunt",
+        "Callous",
+        "Deceitful",
+        "Dogmatic",
+        "Impatient",
+        "Patronizing",
+        "Rude"
+      ],
+      "questions": [
+        "How did you become who you are now?",
+        "What is one trinket you always wear to give you strength?"
+      ],
+      "page": 140
+    },
+    {
+      "name": "Unlikely Ally",
+      "book": "capes",
+      "dice": {
+        "Brains": 8,
+        "Brawn": 10,
+        "Fight": 20,
+        "Flight": 4,
+        "Charm": 6,
+        "Grit": 12
+      },
+      "ages": [
+        "Any"
+      ],
+      "suggestedStrengths": [
+        "Easygoing",
+        "Gross",
+        "Heroic",
+        "Skilled at…",
+        "Team Player",
+        "Tough"
+      ],
+      "suggestedFlaws": [
+        "Callous",
+        "Clumsy",
+        "Dogmatic",
+        "Envious",
+        "Flippant",
+        "Insecure",
+        "Reckless"
+      ],
+      "questions": [
+        "What makes it so surprising that you're working with this group?",
+        "Despite your aloof exterior, what do you genuinely care about?"
+      ],
+      "page": 140
+    }
+  ],
+  "strengths": [
+    {
+      "name": "Cool Under Pressure",
+      "book": "capes",
+      "cost": "1 AT",
+      "description": "May spend 1 Adversity Token to take half of your die's value instead of rolling on a Snap Decision.",
+      "page": 141
+    },
+    {
+      "name": "Easygoing",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "Gain 2 Adversity Tokens when you fail, instead of 1.",
+      "page": 141
+    },
+    {
+      "name": "Gross",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "You have some kind of gross bodily trick (loud, quiet, smelly… up to you) that you can do on command.",
+      "page": 141
+    },
+    {
+      "name": "Heroic",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "You do not need the GM's permission to spend Adversity Tokens to ignore fears.",
+      "page": 141
+    },
+    {
+      "name": "Intuitive",
+      "book": "capes",
+      "cost": "1 AT",
+      "description": "May spend 1 Adversity Token to ask the GM about your surroundings, an NPC, or the like. The GM must answer honestly.",
+      "page": 141
+    },
+    {
+      "name": "Loyal",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "Each of the Adversity Tokens you spend to help your friends give them a +2 instead of a +1.",
+      "page": 141
+    },
+    {
+      "name": "Lucky",
+      "book": "capes",
+      "cost": "2 AT",
+      "description": "May spend 2 Adversity Tokens to reroll a stat check.",
+      "page": 141
+    },
+    {
+      "name": "Mechanic",
+      "book": "capes",
+      "cost": "1 AT",
+      "description": "Spend an Adversity Token to easily fix, break, or break into basic mechanical items without a roll. If the GM requires a roll for something more complex, add +3 to your check without spending any AT.",
+      "page": 141
+    },
+    {
+      "name": "Prepared",
+      "book": "capes",
+      "cost": "2 AT",
+      "description": "May spend 2 AT to happen to have a commonplace item with you (at the GM's discretion).",
+      "page": 141
+    },
+    {
+      "name": "Protective",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "Add +3 to rolls when defending one of your teammates.",
+      "page": 141
+    },
+    {
+      "name": "Just Having Fun",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "(Free for children and available only to children) Before determining the effects of Stress at the end of combat, reduce your Stress by 1.",
+      "page": 141
+    },
+    {
+      "name": "Rebellious",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "(Free for teens and available only to teens) When persuading or resisting persuasion from children, add +3 to rolls. When resisting persuasion from adults, add +3 to rolls.",
+      "page": 141
+    },
+    {
+      "name": "Skilled at…",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "Choose a skill (GM's discretion). You are assumed to succeed when making even moderately difficult checks (9 or less) involving this skill. If the GM determines that you do need to roll for a more difficult check, add up to +3 to your roll. (Free for adults.)",
+      "page": 141
+    },
+    {
+      "name": "Team Player",
+      "book": "capes",
+      "cost": "1 AT",
+      "description": "Once per fight, spend an Adversity Token to support their teammates by giving them a +3 to any roll in a fight.",
+      "page": 141
+    },
+    {
+      "name": "Technocrat",
+      "book": "capes",
+      "cost": "1 AT",
+      "description": "Spend an Adversity Token to easily fix, break, or break into basic technology items without a roll. If the GM requires a roll for something more complex, add +3 to your check without spending any AT.",
+      "page": 141
+    },
+    {
+      "name": "Tough",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "If you lose a roll when defending in combat, add +3 to the negative number. You still lose the roll no matter what, but could reduce your loss to -1.",
+      "page": 142
+    },
+    {
+      "name": "Treasure Hunter",
+      "book": "capes",
+      "cost": "1 AT",
+      "description": "May spend 1 Adversity Token to find a useful item in your surroundings.",
+      "page": 142
+    },
+    {
+      "name": "Trouble Maker",
+      "book": "capes",
+      "cost": "1 AT",
+      "description": "Spend an Adversity Token to locate and receive help, within reason and without making any stat checks, from the \"bad kids\" of the town.",
+      "page": 142
+    },
+    {
+      "name": "Unassuming",
+      "book": "capes",
+      "cost": "2 AT",
+      "description": "May spend 2 Adversity Tokens to not be seen, within reason (GM's discretion).",
+      "page": 142
+    },
+    {
+      "name": "Wealthy",
+      "book": "capes",
+      "cost": "Always active",
+      "description": "May spend money as though you were in a higher age bracket. A wealthy child is considered to have the disposable income of a typical teen, and a wealthy teen is considered to have the disposable income of a typical adult. A wealthy adult is considered to not have to worry too much about money—they would certainly be able to buy anything they need, and likely able to spend their way out of a lot of situations.",
+      "page": 142
+    }
+  ],
+  "flaws": [
+    {
+      "name": "Absent-Minded",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Blunt",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Boastful",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Callous",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Clumsy",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Deceitful",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Demanding",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Dogmatic",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Envious",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Flippant",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Gullible",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Impatient",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Insecure",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Lazy",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Paranoid",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Patronizing",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Reckless",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Rude",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Self-Centered",
+      "book": "capes",
+      "page": 142
+    },
+    {
+      "name": "Weak-Willed",
+      "book": "capes",
+      "page": 142
+    }
+  ],
+  "questions": [
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 1,
+      "text": "Once, this character saw you at your worst. How did they help you to become a better person after that?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 2,
+      "text": "This character is keeping one of your deepest secrets for you. How has their commitment to keeping it impressed you?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 3,
+      "text": "This character was ready to go against their morals to help you. Why wouldn't you let them?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 4,
+      "text": "What are you sacrificing to protect this character, and why are you so willing to make that sacrifice?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 5,
+      "text": "What is your private nickname for this character, and why?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 6,
+      "text": "What part of this character's personality do you realize is exceptional that they do not?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 7,
+      "text": "What superhero or celebrity are you and this character both obsessed with?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 8,
+      "text": "What team or club are you both part of at school?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 9,
+      "text": "What tremendous act of bravery did you recently see this character do?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 10,
+      "text": "When did this character surprise you with how far they'd go to help you?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 11,
+      "text": "Why do you and this character both hold the same teacher at your school in such contempt?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 12,
+      "text": "Why do you and this character both love the same subject in school?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 13,
+      "text": "You and this character both have suspicions about one of the teachers at your school. What do you think they might be up to?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 14,
+      "text": "You and this character both recently witnessed an injustice in the town. What plan did you make together to right the wrong?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 15,
+      "text": "You and this character both want to be the same thing when you grow up. What is it?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 16,
+      "text": "You and this character both witnessed an important figure in local politics doing something shady, but not downright evil. Why has what you saw continued to concern you?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 17,
+      "text": "You often feel the need to stand up for this character. Why are you willing to go so far for them?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 18,
+      "text": "You recently had an incredibly vivid dream about this character. The next day, what made you think that, maybe, it's more of a premonition?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 19,
+      "text": "You're struggling with something at school, either academically or socially. How is this character trying to help you?"
+    },
+    {
+      "book": "capes",
+      "kind": "positive",
+      "n": 20,
+      "text": "You've been in awe of this character since you met them. How did they make such a strong first impression?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 1,
+      "text": "At a recent party, this character accidentally embarrassed you. Why do you suspect it may have been intentional?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 2,
+      "text": "During a recent field trip, this character got both of you in serious trouble. What would they have to do to make it up to you?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 3,
+      "text": "How does this character keep putting you both at risk? Why do you think they do that?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 4,
+      "text": "Since elementary school, you and this character have had a rivalry. How did it start?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 5,
+      "text": "There's a local politician who's rumored to be corrupt. How is this character connected to them?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 6,
+      "text": "This character often corrects you. Why do you think that is?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 7,
+      "text": "This character recently stood up to a bully. Why did they really stand up to them, and how did you find out?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 8,
+      "text": "What part of this character's personality scares you? What does that say about you?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 9,
+      "text": "What secret are you keeping from this character, and who would be devastated if they found out?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 10,
+      "text": "Why did you leave a sport or club you love because of this character?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 11,
+      "text": "Why does one of your teachers seem to love this character but hate you?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 12,
+      "text": "Why have you always hoped you'd grow closer to this character than you have?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 13,
+      "text": "You and this character both ran for a leadership position at your school. Who got it, and why is there still resentment about it?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 14,
+      "text": "You and this character played a game recently that went too far. What happened?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 15,
+      "text": "You hurt this character years ago. Why can't you apologize?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 16,
+      "text": "You recently did something that was morally ambiguous. How did this character cause it to become a bigger deal than you hoped it would be?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 17,
+      "text": "You recently discovered something strange in town and wanted to explore it, but this character stopped you. Why do you still resent them for that?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 18,
+      "text": "You started a rumor to try to help this character. How did it backfire?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 19,
+      "text": "You're struggling with something at school, academically or socially. How is this character unintentionally making it worse?"
+    },
+    {
+      "book": "capes",
+      "kind": "negative",
+      "n": 20,
+      "text": "You're sure this character is hiding something from you. How do you feel knowing they're deceiving you?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 1,
+      "text": "Based on what you know, how have you heard that this character is different from the rest of their family?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 2,
+      "text": "During class, you saw this character reading a comic book. Why does that make you want to get to know them?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 3,
+      "text": "In the past month, this character has come into your after-school job multiple times. Beyond frequenting the business, why do you think they're coming in so often?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 4,
+      "text": "Just over two decades ago, this character's family was involved in a very public scandal. What echoes of that scandal still reverberate in the town?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 5,
+      "text": "One of your friends told you they saw this character do something awful. Why don't you fully believe your friend?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 6,
+      "text": "Recently, stories have been floating around about something amazing this character did. In what ways do these stories conflict?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 7,
+      "text": "Recently, this character did something great for the town. Why was it so surprising?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 8,
+      "text": "Recently, this character has started hanging out at your favorite spot in town. Why do you think they've started doing that?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 9,
+      "text": "There's a rumor around the school about how this character keeps their grades up. Why are you seeking out more about this rumor?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 10,
+      "text": "This character has asked you for help in a class you're in together. Though you helped them, why did you hesitate?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 11,
+      "text": "What strange record does this character hold in the town?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 12,
+      "text": "What superhero or celebrity did you recently find out this character is obsessed with, and why does that make you want to get to know them?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 13,
+      "text": "Who does this character sit with at lunch, and why does that surprise you?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 14,
+      "text": "Why did you confront this relative stranger about the strange location you recently saw them leaving?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 15,
+      "text": "You and this character share a friend. What did they recently do for that mutual friend that impressed you?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 16,
+      "text": "You cracked a joke about a public figure recently. How did this character's response surprise you?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 17,
+      "text": "You know that this character is interested in getting to know you. How did you find that out?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 18,
+      "text": "You recently moved to this town under mysterious circumstances. How did this character find out about why you really moved here?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 19,
+      "text": "You think you saw this character picking on another student, but you can't be sure. What do you believe you saw?"
+    },
+    {
+      "book": "capes",
+      "kind": "unknown",
+      "n": 20,
+      "text": "You've been a member of a club or sports team for years. Why do you think this character just recently got involved with it?"
+    }
+  ],
+  "items": [
+    {
+      "book": "capes",
+      "kind": "power-category",
+      "name": "Body Control",
+      "description": "Superhuman things with your body: stretching limbs, growing to a ten-story giant or shrinking smaller than a proton, shapeshifting into an animal, an unknown form, or another person's appearance. Can also cover a character trained so extensively they have transcended expected human limits.",
+      "page": 21
+    },
+    {
+      "book": "capes",
+      "kind": "power-category",
+      "name": "Companions",
+      "description": "You're linked with a companion—a tiny fire-breathing dragon from a crashed object, a symbiote that bonded to you—and you look out for each other when the going gets tough. A good option for a character without innate powers.",
+      "page": 21
+    },
+    {
+      "book": "capes",
+      "kind": "power-category",
+      "name": "Energy Control",
+      "description": "Control over light, radiation, electricity, or even fire. As simple as firing blasts from your hands, or creating walls of fire, altering the flow of electricity in a circuit, or radiating energy from your whole body so you glow or appear engulfed in flames.",
+      "page": 21
+    },
+    {
+      "book": "capes",
+      "kind": "power-category",
+      "name": "Matter Control",
+      "description": "Project matter over a distance—firing it from your hands or throwing boulders—shape matter into shields or simple objects by force of will, or at the complex end, transform matter from one element to another.",
+      "page": 22
+    },
+    {
+      "book": "capes",
+      "kind": "power-category",
+      "name": "Mental Control",
+      "description": "Abilities most people would call psychic: reading minds, controlling others' minds, tricking them with illusions, telekinesis, psychometry (learning about someone from an object they touched), empathy, or the like.",
+      "page": 22
+    },
+    {
+      "book": "capes",
+      "kind": "power-category",
+      "name": "Objects",
+      "description": "An inherited magical weapon of divine origin, a shield of rare superpowered metal that ignores the normal laws of physics, or a utility belt full of crime-fighting tools. A good power for a character without innate powers.",
+      "page": 22
+    },
+    {
+      "book": "capes",
+      "kind": "power-category",
+      "name": "Stealth",
+      "description": "Superhuman abilities to avoid detection: turning invisible, walking through solid matter as easily as air, or mystical training that lets you merge with shadows.",
+      "page": 22
+    },
+    {
+      "book": "capes",
+      "kind": "power-category",
+      "name": "Travel Power",
+      "description": "Your main power is a unique mode of transportation that grants several abilities: super speed, teleportation (usable in combat too), travelling through mirrors, walking on walls, swinging on ropes or vines. Your imagination is the only limit.",
+      "page": 22
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "First way to use your Power in combat",
+      "benefit": "Your Starting Power Ability: the first inkling of your Capstone, worked out with the GM. Power Die starts at d4. Unlocked free when your powers manifest.",
+      "tag": "Starting",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "Increase Power Die to d6",
+      "benefit": "Spend 1 Growth Point to permanently increase your Power Die from d4 to d6.",
+      "tag": "Starting",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "Additional way to use your Power in combat",
+      "benefit": "Add an entry to your Power Skill Tree for something you already do in combat (or a step toward your Capstone). Once listed, you make the check at standard difficulty.",
+      "tag": "Starting",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "+1 on all Power Die rolls",
+      "benefit": "Add +1 to your Power Die roll (the book describes this as d8 becoming d8+1). Only a natural maximum still counts as a Lucky Break.",
+      "tag": "Intermediate",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "Increase Power Die to d8",
+      "benefit": "Spend 1 Growth Point to permanently increase your Power Die to d8.",
+      "tag": "Intermediate",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "Additional way to use your Power in combat",
+      "benefit": "Another practiced use of your Power that you can now attempt at standard difficulty.",
+      "tag": "Intermediate",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "Team Tactic",
+      "benefit": "You and one other hero each spend 1 GP to unlock a go-to move you do together. Both make checks; if both succeed you gain your normal benefits plus an extra success (or ongoing effect); if either fails, both fail. Up to two Team Tactics, each with a different teammate.",
+      "tag": "Intermediate",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "Increase Power Die to d10 and new way your Power manifests approaching Capstone",
+      "benefit": "Requires both Intermediate abilities that lead into it. Power Die becomes d10 and you add a new manifestation of your Power that approaches your Capstone.",
+      "tag": "Advanced",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "Team Tactic",
+      "benefit": "A second Team Tactic with a different teammate (each hero spends 1 GP).",
+      "tag": "Advanced",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "power-skill",
+      "name": "Capstone: additional +1 on all Power Die rolls and increase Power Die to d12",
+      "benefit": "Requires both Advanced abilities. Your Capstone is a unique fusion of Cape and Power agreed with the GM—mechanics are up to you and the GM. Power Die becomes d12 (the maximum) with a further +1. You play only one session (or short arc) after unlocking it.",
+      "tag": "Final",
+      "page": 158
+    },
+    {
+      "book": "capes",
+      "kind": "motivation",
+      "name": "Find out what happened to my uncle after he vanished two years ago",
+      "page": 37
+    },
+    {
+      "book": "capes",
+      "kind": "motivation",
+      "name": "Get Salma to go on a date with me",
+      "page": 37
+    },
+    {
+      "book": "capes",
+      "kind": "motivation",
+      "name": "Get into a good college",
+      "page": 37
+    },
+    {
+      "book": "capes",
+      "kind": "motivation",
+      "name": "Look cool",
+      "page": 37
+    },
+    {
+      "book": "capes",
+      "kind": "motivation",
+      "name": "Make sure no one finds out I'm the one who set fire to the school",
+      "page": 37
+    },
+    {
+      "book": "capes",
+      "kind": "motivation",
+      "name": "Keep my parents from finding out that I've been sneaking out at night",
+      "page": 37
+    },
+    {
+      "book": "capes",
+      "kind": "obligation",
+      "name": "Go to school and keep your room clean",
+      "page": 37
+    },
+    {
+      "book": "capes",
+      "kind": "obligation",
+      "name": "Care for your younger siblings overnight when your single father works a double at the factory",
+      "page": 37
+    },
+    {
+      "book": "capes",
+      "kind": "obligation",
+      "name": "Live up to the expectations your family has set for you",
+      "page": 37
+    },
+    {
+      "book": "capes",
+      "kind": "obligation",
+      "name": "Support and care for others who depend on you (adults)",
+      "page": 37
+    }
+  ],
+  "capes": [
+    {
+      "name": "Brawler",
+      "description": "Your classic close-up fighter. They may be a martial artist, a cybernetically enhanced mutant, or anything in between. Your role on the team is to get up close and personal when things get rough. Cape Stats: Brawn, Fight, Flight.",
+      "skills": [
+        {
+          "name": "Stick and Move",
+          "kind": "Constant",
+          "description": "+X bonus to your defense rolls in close combat.",
+          "tiers": {
+            "starting": "+2",
+            "intermediate": "+4",
+            "advanced": "+6"
+          }
+        },
+        {
+          "name": "Grapple",
+          "kind": "Action",
+          "description": "Instead of hitting opponent, you may grapple them.",
+          "tiers": {
+            "starting": "Keeps them from moving; they can still attack.",
+            "intermediate": "Prevents them from attacking.",
+            "advanced": "Gives teammates +3 on attacks against them."
+          }
+        },
+        {
+          "name": "Combo Strike",
+          "kind": "Action",
+          "description": "Take 1 Stress to attack X additional times.",
+          "tiers": {
+            "starting": "1",
+            "intermediate": "2",
+            "advanced": "3"
+          }
+        },
+        {
+          "name": "Strike Back",
+          "kind": "Reaction",
+          "description": "When hit, you may counterattack.",
+          "tiers": {
+            "starting": "Only when you take Stress from an attack.",
+            "intermediate": "Take 1 Stress to activate even if you defend successfully.",
+            "advanced": "Activate when attacked without taking Stress."
+          }
+        },
+        {
+          "name": "Knockout Blow",
+          "kind": "Constant",
+          "description": "On high enough attack rolls, you immediately knock out an opponent (if narratively appropriate).",
+          "tiers": {
+            "starting": "+10 or higher.",
+            "intermediate": "+8 or higher.",
+            "advanced": "+5 or higher."
+          }
+        },
+        {
+          "name": "Spot Weakness",
+          "kind": "Constant",
+          "description": "Once per combat per enemy, you may make a Brains check to spot that enemy's weakness, difficulty 10. If successful, +X bonus to attack rolls against that enemy for the rest of combat.",
+          "tiers": {
+            "starting": "3",
+            "intermediate": "5",
+            "advanced": "7"
+          }
+        }
+      ],
+      "page": 149
+    },
+    {
+      "name": "Cryptic",
+      "description": "Wields mysterious powers that allow them to see and manipulate reality in a way that looks like magic to most people—ancient mystic arts, or powers to read or affect other creatures' minds. Your role will be one of stealth and manipulation, swinging the battle in your team's favor. Cape Stats: Brawn, Charm, Flight.",
+      "skills": [
+        {
+          "name": "Deflect",
+          "kind": "Reaction",
+          "description": "Take less stress when attacked.",
+          "tiers": {
+            "starting": "Not available.",
+            "intermediate": "Reduce all attacks against you by 1 Stress.",
+            "advanced": "…and once per round, ignore all Stress from an attack against you."
+          }
+        },
+        {
+          "name": "Evade",
+          "kind": "Constant",
+          "description": "You get limited invisibility. +X bonus to all defense rolls.",
+          "tiers": {
+            "starting": "1",
+            "intermediate": "2",
+            "advanced": "3"
+          }
+        },
+        {
+          "name": "Illusion",
+          "kind": "Action",
+          "description": "You create an illusion. When an enemy tries to attack you, you make a Charm or Flight check at the indicated difficulty. On a success, your enemy targets the illusion, automatically hitting it and dispelling it.",
+          "tiers": {
+            "starting": "12",
+            "intermediate": "9",
+            "advanced": "6"
+          }
+        },
+        {
+          "name": "Stun",
+          "kind": "Action",
+          "description": "Before a henchperson acts, you make a Brawn, Charm, or Flight check at the indicated difficulty. If successful, they cannot act during the Villain Action.",
+          "tiers": {
+            "starting": "12",
+            "intermediate": "9",
+            "advanced": "6"
+          }
+        },
+        {
+          "name": "Shield",
+          "kind": "Reaction",
+          "description": "(Limited) Prevent all teammates from taking 1 Stress at the end of the turn.",
+          "tiers": {
+            "starting": "Once per combat.",
+            "intermediate": "Twice per combat.",
+            "advanced": "Prevent all teammates from taking 1 Stress at the end of the Hero Actions."
+          }
+        },
+        {
+          "name": "Dimensional Step",
+          "kind": "Reaction",
+          "description": "Teleport a short distance. You cannot use this to avoid being hit in combat.",
+          "tiers": {
+            "starting": "5 feet.",
+            "intermediate": "10 feet.",
+            "advanced": "20 feet."
+          }
+        }
+      ],
+      "page": 150
+    },
+    {
+      "name": "Guardian",
+      "description": "Supports other team members or the team as a whole—in addition to some offense. A superior athlete with armor and a shield, or someone who manipulates force fields to block villains' attacks. Your role will be more one of supporting other team members in a fight. Cape Stats: Brains, Charm, Grit.",
+      "skills": [
+        {
+          "name": "Aid",
+          "kind": "Reaction",
+          "description": "After a teammate attempts to attack or defend, you may add a bonus to their roll.",
+          "tiers": {
+            "starting": "+2",
+            "intermediate": "Roll Power Die and use result.",
+            "advanced": "Roll Power Die twice and use either result."
+          }
+        },
+        {
+          "name": "Force Field",
+          "kind": "Constant",
+          "description": "+X bonus to another character's defense rolls in combat.",
+          "tiers": {
+            "starting": "2",
+            "intermediate": "4",
+            "advanced": "6"
+          }
+        },
+        {
+          "name": "Defend",
+          "kind": "Reaction",
+          "description": "Help defend teammates. You roll an appropriate defense check when they do at the same difficulty.",
+          "tiers": {
+            "starting": "If you are successful, add the amount you are over your check to theirs. If you fail, take 1 Stress.",
+            "intermediate": "If you are successful, add the amount +2 you are over your check to theirs.",
+            "advanced": "If you are successful, add the amount +5 you are over your check to theirs."
+          }
+        },
+        {
+          "name": "Fast Thinking",
+          "kind": "Constant",
+          "description": "Allow yourself or another player to make a Snap Decision as a Planned Action. You may only do this as many times as indicated in the level of this ability.",
+          "tiers": {
+            "starting": "Once per combat.",
+            "intermediate": "Three times per combat.",
+            "advanced": "Once per round."
+          }
+        },
+        {
+          "name": "Reassure",
+          "kind": "Action",
+          "description": "Once per combat, decrease the Stress of all teammates by X.",
+          "tiers": {
+            "starting": "1",
+            "intermediate": "2",
+            "advanced": "4"
+          }
+        },
+        {
+          "name": "Shield",
+          "kind": "Reaction",
+          "description": "(Limited) Prevent all teammates from taking 1 Stress at the end of the turn.",
+          "tiers": {
+            "starting": "Once per combat.",
+            "intermediate": "Twice per combat.",
+            "advanced": "Prevent all teammates from taking 1 Stress at the end of the Hero Actions."
+          }
+        }
+      ],
+      "page": 152
+    },
+    {
+      "name": "Shooter",
+      "description": "To ranged combat as the Brawler is to close combat—wielding mysterious cosmic radiation or hurling massive rains of rock at your foes. Your role is to bring the offense from a distance with any variety of projected powers. Cape Stats: Brains, Fight, Grit.",
+      "skills": [
+        {
+          "name": "Burst Shot",
+          "kind": "Action",
+          "description": "Hit all combatants in an area.",
+          "tiers": {
+            "starting": "1 Success against all enemies in area. 3 Stress to all teammates in area.",
+            "intermediate": "1 Success against all enemies in area. 1 Stress to all teammates in area.",
+            "advanced": "1 Success against all enemies in area."
+          }
+        },
+        {
+          "name": "Combo Strike",
+          "kind": "Action",
+          "description": "Take 1 Stress to make X additional attacks.",
+          "tiers": {
+            "starting": "1",
+            "intermediate": "2",
+            "advanced": "3"
+          }
+        },
+        {
+          "name": "Blast",
+          "kind": "Action",
+          "description": "Damage something in the environment, causing a mechanical impact that applies to a number of enemies until the end of the next Villains' Actions.",
+          "tiers": {
+            "starting": "Applies to up to 3 enemies.",
+            "intermediate": "Applies to up to 6 enemies.",
+            "advanced": "Applies to all enemies."
+          }
+        },
+        {
+          "name": "Indirect",
+          "kind": "Action",
+          "description": "Make an attack against a foe in range that you can't see. The attack passes through walls, or other solid objects without damaging them. You have to know that the foe is there.",
+          "tiers": {
+            "starting": "Difficulty for the attack is Standard Difficulty +6.",
+            "intermediate": "Difficulty for the attack is Standard Difficulty +3.",
+            "advanced": "Difficulty for the attack is Standard Difficulty."
+          }
+        },
+        {
+          "name": "Suppressing Fire",
+          "kind": "Action",
+          "description": "Make an attack against a henchperson. If successful, remove that henchperson from combat and…",
+          "tiers": {
+            "starting": "…prevent 1 other henchperson from attacking during the next Villain Actions.",
+            "intermediate": "…prevent 3 other henchpeople from attacking during the next Villain Actions.",
+            "advanced": "…prevent all henchpeople from attacking during the next Villain Actions."
+          }
+        },
+        {
+          "name": "Take Cover",
+          "kind": "Constant",
+          "description": "After attacking, if cover is available…",
+          "tiers": {
+            "starting": "…+3 to your defense rolls during the Villain Actions.",
+            "intermediate": "…+5 to your defense rolls during the Villain Actions.",
+            "advanced": "…+5 to your defense rolls during the Villain action and counterattack for free, even if you are not the target."
+          }
+        }
+      ],
+      "page": 153
+    },
+    {
+      "name": "Tactician",
+      "description": "Leads the team. They may be the most powerful member of the team or just a regular person with technology and the mind of the world's greatest detective. Your role will be to make critical calls, generally on the fly, in tough situations. Cape Stats: Brains, Charm, Flight.",
+      "skills": [
+        {
+          "name": "Aid",
+          "kind": "Reaction",
+          "description": "After a teammate attempts to attack or defend, you may add a bonus to their roll.",
+          "tiers": {
+            "starting": "+2",
+            "intermediate": "Roll Power Die and use result.",
+            "advanced": "Roll Power Die twice and use either result."
+          }
+        },
+        {
+          "name": "Fast Thinking",
+          "kind": "Constant",
+          "description": "Allow yourself or another player to make a Snap Decision as a Planned Action. You may only do this as many times as indicated in the level of this ability.",
+          "tiers": {
+            "starting": "Once per combat.",
+            "intermediate": "Three times per combat.",
+            "advanced": "Once per round."
+          }
+        },
+        {
+          "name": "Reassure",
+          "kind": "Action",
+          "description": "Once per combat, decrease the Stress of all teammates by X.",
+          "tiers": {
+            "starting": "1",
+            "intermediate": "2",
+            "advanced": "4"
+          }
+        },
+        {
+          "name": "Spot Weakness",
+          "kind": "Constant",
+          "description": "Once per combat per enemy, you may make a Brains check to spot that enemy's weakness, difficulty 10. If successful, +X bonus to attack rolls against that enemy for the rest of combat.",
+          "tiers": {
+            "starting": "3",
+            "intermediate": "5",
+            "advanced": "7"
+          }
+        },
+        {
+          "name": "Stick and Move",
+          "kind": "Constant",
+          "description": "+X bonus to your defense rolls in close combat.",
+          "tiers": {
+            "starting": "+2",
+            "intermediate": "+4",
+            "advanced": "+6"
+          }
+        },
+        {
+          "name": "Teach",
+          "kind": "Constant",
+          "description": "Transfer AT to a teammate.",
+          "tiers": {
+            "starting": "Spend 1 AT to give 1 AT to a teammate.",
+            "intermediate": "Spend up to 5 AT to give that many AT to a teammate.",
+            "advanced": "Spend up to 4 AT to give twice that many AT to that teammate."
+          }
+        }
+      ],
+      "page": 155
+    },
+    {
+      "name": "Tank",
+      "description": "Anchors the group in battle. Generally easy to spot by their size—but not always. What is always true is their ability to take a lot of damage from extremely tough armor or the ability to redirect it away from team members. Your role will be to draw attacks away from other team members to yourself. Cape Stats: Brawn, Fight, Grit.",
+      "skills": [
+        {
+          "name": "Aggro Foe",
+          "kind": "Reaction",
+          "description": "Instead of hitting your opponent, redirect an attack to you.",
+          "tiers": {
+            "starting": "Make defense check at -3. If unsuccessful, you both suffer penalty as normal.",
+            "intermediate": "Make defense check. If unsuccessful, you suffer penalty as normal, but original target takes only 1 Stress.",
+            "advanced": "Make defense check at +5. Original target takes no Stress, even if you are unsuccessful."
+          }
+        },
+        {
+          "name": "Defend",
+          "kind": "Reaction",
+          "description": "Help defend teammates. You roll an appropriate defense check when they do at the same difficulty.",
+          "tiers": {
+            "starting": "If you are successful, add the amount you are over your check to theirs. If you fail, take 1 Stress.",
+            "intermediate": "If you are successful, add the amount +2 you are over your check to theirs.",
+            "advanced": "If you are successful, add the amount +5 you are over your check to theirs."
+          }
+        },
+        {
+          "name": "Grapple",
+          "kind": "Action",
+          "description": "Instead of hitting opponent, you may grapple them.",
+          "tiers": {
+            "starting": "Keeps them from moving; they can still attack.",
+            "intermediate": "Prevents them from attacking.",
+            "advanced": "Gives teammates +3 on attacks against them."
+          }
+        },
+        {
+          "name": "Heavy Hitter",
+          "kind": "Constant",
+          "description": "+X bonus to your attack rolls in close combat.",
+          "tiers": {
+            "starting": "2",
+            "intermediate": "4",
+            "advanced": "6"
+          }
+        },
+        {
+          "name": "Deflect",
+          "kind": "Reaction",
+          "description": "Take less stress when attacked.",
+          "tiers": {
+            "starting": "Not available.",
+            "intermediate": "Reduce all attacks against you by 1 Stress.",
+            "advanced": "…and once per round, ignore all Stress from an attack against you."
+          }
+        },
+        {
+          "name": "Shelter Teammate",
+          "kind": "Reaction",
+          "description": "At the start of Villain Actions each round, pick one teammate. During this round of Villain Actions, you make defense checks any time that teammate would.",
+          "tiers": {
+            "starting": "If either of you is successful, you take any Stress they would have. They take no Stress. If both of you are unsuccessful, you both take Stress based on your rolls.",
+            "intermediate": "If both of you are successful, you take the Stress from the better result. They take no Stress. Otherwise, you take any Stress they would have. They take no Stress.",
+            "advanced": "If only one of you is successful, you take 1 Stress. They take no Stress. If both of you are successful, neither of you takes Stress."
+          }
+        }
+      ],
+      "page": 156
+    }
+  ],
+  "tables": {
+    "capes": {
+      "stress": [
+        {
+          "range": "0 to 4",
+          "narrative": "\"You're doing great, kid!\"",
+          "effect": "No effect"
+        },
+        {
+          "range": "5 to 7",
+          "narrative": "\"Everyone gets a little busted up.\"",
+          "effect": "+1 to Stress-Boosted Stat, -1 to Stress-Reduced Stat"
+        },
+        {
+          "range": "8 to 9",
+          "narrative": "\"Roll with those punches.\"",
+          "effect": "+2 to Stress-Boosted Stat, -2 to Stress-Reduced Stat"
+        },
+        {
+          "range": "10 to 11",
+          "narrative": "\"This is a rough one. I remember those.\"",
+          "effect": "+3 to Stress-Boosted Stat, -3 to Stress-Reduced Stat, +1 on all Power Die rolls"
+        },
+        {
+          "range": "12",
+          "narrative": "\"What're you still doin' here, kid?\"",
+          "effect": "+5 to Stress-Boosted Stat, -5 to Stress-Reduced Stat, +2 on all Power Die rolls"
+        },
+        {
+          "range": "13",
+          "narrative": "\"Get outta here!\"",
+          "effect": "You must immediately remove yourself from combat—fleeing the scene, getting thrown too far away to get back, or being knocked out."
+        }
+      ],
+      "degrees": [
+        {
+          "range": "+13 or more (\"You're almost ready to be a full-time hero!\")",
+          "attacking": "3 Successes against a villain who requires multiple successes to take down",
+          "takeHit": "Avoid the Risk AND Counterattack",
+          "dodge": "The next hero to act in combat gets a +3 on their next check."
+        },
+        {
+          "range": "+9 to +12 (\"Way to prove yourself out there!\")",
+          "attacking": "2 Successes against a villain who requires multiple successes to take down",
+          "takeHit": "Avoid the Risk OR Take 1 Stress AND Counterattack",
+          "dodge": "The next hero to act in combat gets a +1 to their next check."
+        },
+        {
+          "range": "+5 to +8 (\"Good work out there, kid!\")",
+          "attacking": "1 Success",
+          "takeHit": "Avoid the Risk",
+          "dodge": "Avoid the Risk"
+        },
+        {
+          "range": "+1 to +4 (\"Well, you got it done.\")",
+          "attacking": "1 Success",
+          "takeHit": "Suffer the Risk: 1 Stress",
+          "dodge": "Avoid the Risk"
+        },
+        {
+          "range": "0 (\"I guess that works, but that's not how heroes do it.\")",
+          "attacking": "1 Success",
+          "takeHit": "Suffer the Risk: 1 Stress",
+          "dodge": "Suffer the Risk: 1 Stress"
+        },
+        {
+          "range": "-1 to -4 (\"Can't win 'em all, kid.\")",
+          "attacking": "No Successes (Take 1 Stress if using your Power)",
+          "takeHit": "Suffer the Risk (Take 1 additional Stress if using your Power)",
+          "dodge": "Suffer the Risk (Take 1 additional Stress if using your Power)"
+        },
+        {
+          "range": "-5 to -8 (\"I remember having days like that.\")",
+          "attacking": "No Successes and Take 1 Stress (Take 1 additional Stress if using your Power)",
+          "takeHit": "Suffer the Risk (Take 1 additional Stress if using your Power)",
+          "dodge": "Suffer the Risk + 1 Stress (Take 1 additional Stress if using your Power)"
+        },
+        {
+          "range": "-9 or worse (\"Not everybody's cut out for this, sport.\")",
+          "attacking": "No Successes and Take 2 Stress (Take 1 additional Stress if using your Power)",
+          "takeHit": "Suffer the Risk + 1 Stress (Take 1 additional Stress if using your Power)",
+          "dodge": "Suffer the Risk + 2 Stress (Take 1 additional Stress if using your Power)"
+        }
+      ],
+      "combatSequence": [
+        "Starting Combat: the GM asks \"Are we entering combat?\"—every player must agree (clockwise from the GM) or the situation doesn't escalate. Be clear what you hope to gain and risk; the GM sets Clock Dice.",
+        "Element of Surprise Actions: anyone who can narrate using their Powers to surprise the villains gets a round of Heroes' Actions before the villains act (Action and/or Constant Powers; doesn't count against later uses).",
+        "Villains' Actions: villains act first (henchpeople act together). The GM announces what they do and the Risk (base 2 Stress); each hero Takes the Hit (Brawn/Grit) or Dodges (Fight/Flight/Brains). High results let you Counterattack or boost the next hero. Reaction Powers are free once per round; each extra use costs 1 Stress.",
+        "Heroes' Actions: act in any order (suggested: biggest Flight die first). Declare your action, stat, Powers and any Cape/Power Ability; the GM sets difficulty and Risk (at least 1 Stress). One Action Power per turn plus a Constant Power (1 Stress if you already used that Constant during the Villains' Actions). One success takes out one henchperson or scores one hit on a supervillain; +6 difficulty per extra henchperson targeted.",
+        "End of round: once everyone has acted, each hero takes 1 Stress; Reaction and Constant Powers reset. A new round begins with the Villains' Actions.",
+        "Ending Combat: victory or defeat when the GM's pre-set condition is met (successes, rounds, or successes before N rounds). Any player may end a fight with \"Walk away, team\" (heroes count as defeated); the GM may end it with \"Walk away, heroes\" (heroes count as victorious)."
+      ],
+      "powerDie": [
+        {
+          "die": 4,
+          "cost": "Starting: free when your powers manifest"
+        },
+        {
+          "die": 6,
+          "cost": "1 Growth Point (Starting tier of the Power Skill Tree)"
+        },
+        {
+          "die": 8,
+          "cost": "1 Growth Point (Intermediate tier); a further Intermediate GP adds +1 to all Power Die rolls (d8+1)—only a natural 8 is a Lucky Break"
+        },
+        {
+          "die": 10,
+          "cost": "1 Growth Point (Advanced tier), together with a new way your Power manifests approaching your Capstone"
+        },
+        {
+          "die": 12,
+          "cost": "Capstone (Final tier): d12 is the largest Power Die, with an additional +1 on all Power Die rolls"
+        }
+      ],
+      "growth": [
+        {
+          "name": "Cape Skill",
+          "text": "Take a Cape Skill from Appendix I (recommended for your Cape; another Cape's skill at GM discretion). To take a skill you already have at a higher level, move it up and pick a new lower-level skill for free. No duplicates."
+        },
+        {
+          "name": "Cape Stat bonus",
+          "text": "+1 to one of your Cape Stats (Brawler: Brawn/Fight/Flight; Cryptic: Brawn/Charm/Flight; Guardian: Brains/Charm/Grit; Shooter: Brains/Fight/Grit; Tactician: Brains/Charm/Flight; Tank: Brawn/Fight/Grit). You can't boost the same stat twice, but you may raise an existing bonus and move the lower bonus to another Cape Stat. The tree goes +1 → +2 → +3 → all three Cape Stats at +3."
+        },
+        {
+          "name": "Power Die increase",
+          "text": "Raise your Power Die one step (d4 → d6 → d8 → d8+1 → d10 → d12). d12 is the maximum."
+        },
+        {
+          "name": "Additional way to use your Power",
+          "text": "Add something you already do in combat (or a step toward your Capstone) to your Power Skill Tree; from then on you make that check at standard difficulty."
+        },
+        {
+          "name": "Team Tactic",
+          "text": "From Intermediate, you and one teammate each spend 1 GP to unlock a combined move. Both roll; if both succeed you get your normal benefits plus an extra success (or ongoing effect); if either fails, both fail. Up to two Team Tactics, each with a different hero."
+        },
+        {
+          "name": "Capstone",
+          "text": "Requires both Advanced abilities. A unique fusion of Cape and Power whose form and mechanics you agree with the GM. You play only one session (or short arc) after unlocking it—coordinate with the group."
+        },
+        {
+          "name": "Tree structure",
+          "text": "Each Cape and Power tree has 2 Starting abilities (one unlocked free), 4 Intermediate (need the Starting ability they stem from), 2 Advanced (need both Intermediates leading in) and a Capstone (needs both Advanced). The GM says how many Growth Points you earn per session."
+        }
+      ],
+      "fallout": [
+        {
+          "range": "0 to 4",
+          "text": "You'll need a few moments to recollect yourself, but you'll be fine and can keep this combat a secret easily. No effect."
+        },
+        {
+          "range": "5 to 7",
+          "text": "Okay tomorrow, a bit out of sorts today. -1 to your next Secret Identity check; +1 Stress-Boosted Stat, -1 Stress-Reduced Stat."
+        },
+        {
+          "range": "8 to 9",
+          "text": "Okay after a good night's sleep; the rest of the day is a blur. -3 to your next Secret Identity check; +2 Stress-Boosted Stat, -2 Stress-Reduced Stat."
+        },
+        {
+          "range": "10 to 11",
+          "text": "It will take time to recover and it's hard to hide from those closest to you today. -5 to your next Secret Identity check; +3 Stress-Boosted Stat, -3 Stress-Reduced Stat; +1 on all Power Die rolls; you cannot use ATs to help others."
+        },
+        {
+          "range": "12",
+          "text": "You almost broke; stay away from loved ones for a few days and you'll likely need professional help. -8 to your next Secret Identity check; +5 Stress-Boosted Stat, -5 Stress-Reduced Stat; +2 on all Power Die rolls; you cannot use ATs to help others."
+        },
+        {
+          "range": "13",
+          "text": "Out of the fight and needing professional help almost immediately; impossible to hide from someone you don't want knowing your identity. Automatic failure on your next Secret Identity check; you fail all Stat checks and cannot use ATs to help others."
+        }
+      ]
+    },
+    "quickRules": [
+      {
+        "book": "capes",
+        "title": "Cape & Power",
+        "text": "Pick your eventual team role (Brawler, Cryptic, Guardian, Shooter, Tactician, Tank) and a Power category at creation, but you start powerless. When powers manifest you get a Starting Cape Ability (+1 to one of your Cape Stats while superheroing) and a Starting Power Ability. Abilities are Action (once per round, uses your action), Reaction (free once per round, 1 Stress per extra use) or Constant (always on)."
+      },
+      {
+        "book": "capes",
+        "title": "Power Die",
+        "text": "When your Power applies, roll your Power Die (starts d4, max d12) and add it to your Stat Die. You must always roll the Power Die—even on a Planned Action, where you may only take half your Stat Die. Failing a roll made with your Power costs 1 Stress."
+      },
+      {
+        "book": "capes",
+        "title": "Stress-Boosted / Stress-Reduced",
+        "text": "Choose one stat that rises and one that falls as you get stressed (not the same stat). At 5-7 Stress: ±1; 8-9: ±2; 10-11: ±3 and +1 on Power Die rolls; 12: ±5 and +2 on Power Die rolls; 13: you must leave the fight."
+      },
+      {
+        "book": "capes",
+        "title": "Risks & Stress",
+        "text": "Every combat check has a Risk of at least 1 Stress (villain attacks usually 2). The greater the success, the less Risk you suffer; the worse the failure, the more Stress you take. Some Risks cost Stress no matter how you roll."
+      },
+      {
+        "book": "capes",
+        "title": "Combat rounds",
+        "text": "Everyone must agree to enter combat. Villains act first (unless surprised), then heroes in any order. Defend by Taking the Hit (Brawn/Grit) or Dodging (Fight/Flight/Brains). Attacking uses any stat you can justify. At the end of each round every hero takes 1 Stress and Reaction/Constant Powers reset."
+      },
+      {
+        "book": "capes",
+        "title": "Element of Surprise",
+        "text": "If you can narrate using your Powers to get the drop on the villains, you get a round of Heroes' Actions before the villains act (still risking at least 1 Stress). You may use an Action Power and/or a Constant Power, and it doesn't count against their normal per-round use."
+      },
+      {
+        "book": "capes",
+        "title": "Counterattack",
+        "text": "Defend by +9 to +12 while Taking the Hit: avoid the Risk, or take 1 Stress and counterattack. Defend by +13 or more: avoid the Risk AND counterattack. A counterattack is a bonus attack against the enemy who attacked you (with Powers or a plain punch). Dodging by +9/+13 instead gives the next hero +1/+3 on their next check."
+      },
+      {
+        "book": "capes",
+        "title": "Successes & Clocks",
+        "text": "One success takes out one henchperson or lands one hit on a supervillain; hitting a multi-success villain by +9 counts 2 successes, +13 counts 3. Targeting extra henchpeople adds +6 difficulty each. The GM tracks needed successes on Clock Dice (public or private); when a Clock fills or hits zero, something dramatic happens."
+      },
+      {
+        "book": "capes",
+        "title": "Ending combat",
+        "text": "The fight ends on the GM's pre-set condition (successes, rounds, or both). Any player can call \"Walk away, team\" (no veto; heroes are defeated); the GM can call \"Walk away, heroes\" (heroes win). Safety tools can change a fight without ending it."
+      },
+      {
+        "book": "capes",
+        "title": "Fallout from Stress",
+        "text": "After combat, apply the Fallout table (Secret Identity penalties, stat shifts, AT restrictions), then reduce Stress by 4. Recover 2 Stress per full night's sleep, 2 for 2+ hours of an extracurricular (once per day), 4 for proper professional help—which may endanger your secret identity."
+      },
+      {
+        "book": "capes",
+        "title": "Secret Identity check",
+        "text": "Once you hold an Intermediate ability, roll a stat of your choice at the start of each session against a hidden difficulty (base 1-10; +2 daylight fight, +4 fought before people who know you, +8 missing part of your disguise, +10 identity exposed). Failures pay off later in the session: -1 to -5 near misses, -6 to -10 real complications, -11 or worse someone learns your identity."
+      },
+      {
+        "book": "capes",
+        "title": "Growth Points",
+        "text": "The GM awards Growth Points at session end. Spend one on a Cape Skill, a Cape Stat bonus, a Power Die step, a new way to use your Power, or (with a teammate) a Team Tactic. Trees run Starting → Intermediate → Advanced → Capstone; each tier needs the abilities leading into it. Explain how you gained the ability and how it manifests."
+      },
+      {
+        "book": "capes",
+        "title": "Team Tactics",
+        "text": "From Intermediate, two heroes each spend 1 GP to create a shared move. Both roll; two successes earn the normal benefits plus a bonus success (or ongoing effect); one failure fails both. Maximum two Team Tactics, each with a different teammate."
+      },
+      {
+        "book": "capes",
+        "title": "Capstone",
+        "text": "The final ability: a fusion of Cape and Power designed with the GM, mechanics included. Requires both Advanced abilities. After unlocking it you play one more session or short arc, so time it with the group."
+      },
+      {
+        "book": "capes",
+        "title": "End of session",
+        "text": "Optional Secret Identity check, free talk and decompression, Stars and Wishes, then Narrative Growth (how did each hero and the team grow or grow apart?) before Mechanical Growth."
+      },
+      {
+        "book": "capes",
+        "title": "Clocks",
+        "text": "Clock Dice (a die turned down as henchpeople fall or a villain nears defeat) suit combat; segmented Clocks suit multi-session objectives. Public Clocks sit on the table; private Clocks stay behind the screen. Size a Clock by the steps required and how long you want it to take, and make something happen when it fills."
+      },
+      {
+        "book": "capes",
+        "title": "Safety",
+        "text": "Fill out the Appendix A safety list (Lines, Veils, Ask First, Not For Me, romance preferences) in Session Zero and use the storytelling tools (pause, veil, script change, retcon) at any time."
+      }
+    ]
+  }
+}
