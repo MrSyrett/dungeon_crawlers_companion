@@ -630,7 +630,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Plasma Dagger",
+    "name": "Vibroblade",
     "category": "weapon",
     "tier": "Mundane",
     "slot": "Hand",
@@ -801,7 +801,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Beam Greatsword",
+    "name": "Buster Sword",
     "category": "weapon",
     "tier": "Mundane",
     "slot": "Hands/Holding",
@@ -972,7 +972,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Laser Pistol",
+    "name": "Blaster",
     "category": "weapon",
     "tier": "Mundane",
     "slot": "Holding",
@@ -990,7 +990,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Foam Dart Blaster",
+    "name": "Nerf Blaster",
     "category": "weapon",
     "tier": "Mundane",
     "slot": "Holding",
@@ -1107,7 +1107,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Superhero Cowl",
+    "name": "Batman Cowl",
     "category": "armor",
     "tier": "Mundane",
     "slot": "Head",
@@ -1242,7 +1242,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Powered Chest Plate",
+    "name": "Iron Man Chestplate",
     "category": "armor",
     "tier": "Mundane",
     "slot": "Torso",
@@ -1260,7 +1260,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Sequined Jumpsuit",
+    "name": "Elvis Jumpsuit",
     "category": "armor",
     "tier": "Mundane",
     "slot": "Torso",
@@ -1323,7 +1323,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Power Gauntlet Sleeves",
+    "name": "Mandalorian Vambraces",
     "category": "armor",
     "tier": "Mundane",
     "slot": "Arms",
@@ -1395,7 +1395,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Grappling Wrist-Launchers",
+    "name": "Web-Shooters",
     "category": "armor",
     "tier": "Mundane",
     "slot": "Hands",
@@ -1782,7 +1782,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Glowing Visor",
+    "name": "Cyclops Visor",
     "category": "accessory",
     "tier": "Mundane",
     "slot": "Accessory",
@@ -2260,7 +2260,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Photon Blade",
+    "name": "Lightsaber",
     "category": "weapon",
     "tier": "Mundane",
     "slot": "Hand",
@@ -2359,7 +2359,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Power Loader Claw",
+    "name": "Power Loader",
     "category": "weapon",
     "tier": "Mundane",
     "slot": "Hands/Holding",
@@ -2989,7 +2989,7 @@ export const DCC_ITEMS: DccItem[] = [
     "source": "Base"
   },
   {
-    "name": "Power Ring",
+    "name": "Green Lantern Ring",
     "category": "accessory",
     "tier": "Mundane",
     "slot": "Accessory",
