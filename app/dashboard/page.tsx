@@ -58,8 +58,8 @@ const ACE_REFERENCE: { href: string; label: string }[] = [
   { href: "/ace/focuses", label: "Focuses" },
   { href: "/ace/traits", label: "Traits" },
   { href: "/ace/gear", label: "Gear" },
-  { href: "/ace/extras", label: "Extras" },
-  { href: "/ace/settings", label: "Settings" },
+  { href: "/ace/extras", label: "Bestiary" },
+  { href: "/ace/settings", label: "Rules" },
 ];
 
 // Kids on Bikes / Brooms / Capes reference pages — one tab, three books.

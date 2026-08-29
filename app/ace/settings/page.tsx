@@ -26,7 +26,7 @@ export default async function AceSettingsPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <AceHeader title="Settings & Rules" subtitle={`${ACE_SETTINGS.length} genre settings · one engine`} />
+      <AceHeader title="Rules" subtitle={`${ACE_SETTINGS.length} genre settings · one engine`} />
       <p className="mb-6 text-sm leading-relaxed text-[var(--muted)]">
         The Awfully Cheerful Engine is one small ruleset that hops genres: ghost hunters, artefact hunters,
         starship crews, dungeon delvers, waste warriors, monster hunters and cartoon animals all use the
