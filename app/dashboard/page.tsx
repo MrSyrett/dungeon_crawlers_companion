@@ -277,7 +277,7 @@ export default async function DashboardPage() {
 
       {/* System picker on its own row, centred, so the tab strip has room
           for six systems without crowding the sign-out controls. */}
-      <div className="mb-8 flex justify-center">
+      <div className="mb-8 flex justify-center border-b border-[var(--border)] pb-6">
         <SystemToggle />
       </div>
 

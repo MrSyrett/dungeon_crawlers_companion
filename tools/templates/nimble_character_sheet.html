@@ -225,6 +225,20 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 }
 textarea{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 textarea::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track{background:transparent;}
+
+/* Found-loot drops broadcast from the GM screen (claim one item each). */
+.log-foundloot{border-left:3px solid #c8a020 !important;background:#221f16 !important;}
+.log-system{border-left:3px solid #c8a020 !important;background:#241f14 !important;}
+.fl-head,.sys-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#e0c060;}
+.fl-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:#f0e2b0;margin-top:2px;}
+.fl-desc,.sys-body{font-size:11px;color:#b7a98a;margin-top:2px;line-height:1.4;}
+.fl-items{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
+.fl-item{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:11px;color:#cfc6a8;}
+.fl-item-name{flex:1;min-width:0;}
+.fl-note{color:#8a8570;font-style:italic;}
+.fl-btn{flex:0 0 auto;background:#c8a020;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.fl-btn:hover:not(:disabled){background:#e0b83a;}
+.fl-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
 </style>
 </head>
 <body>
@@ -812,7 +826,75 @@ function campaignLeaveSilent() { if(_campaignTimer) { clearInterval(_campaignTim
 function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', '🔗', 'Left "' + name + '"', 'normal'); saveSheet(true); }
 const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Hero Builder']);
 function campaignBroadcast(label, result, detail, type) { if(!_campaign || CAMPAIGN_SKIP_LABELS.has(String(label))) return; fetch('/api/campaigns/' + _campaign.id + '/rolls', { method:'POST', credentials:'same-origin', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ clientKey:_campaignClientKey, source: campaignPlayerName(), label:String(label), result:String(result), detail:String(detail || ''), type: type || 'normal' }) }).catch(() => {}); }
-function campaignAddRemote(roll) { const entries = $('log-entries'); if(!entries || roll.type === 'lootclaim' || roll.type === 'lootbox') return; const hint = entries.querySelector('.log-hint'); if(hint) hint.remove(); const div = document.createElement('div'); div.className = 'log-entry remote' + (roll.type === 'crit' ? ' crit' : roll.type === 'fumble' ? ' fumble' : ''); div.innerHTML = '<div class="roll-label">' + esc(roll.source) + ' · ' + esc(roll.label) + '</div><div class="roll-result">' + esc(roll.result) + '</div><div class="roll-detail">' + esc(roll.detail) + '</div>'; entries.insertBefore(div, entries.firstChild); entries.scrollTop = 0; while(entries.children.length > 60) entries.removeChild(entries.lastChild); }
+function campaignAddRemote(roll) {
+  const entries = $('log-entries'); if(!entries) return;
+  if(roll.type === 'lootclaim') { applyFoundClaim(roll); return; }
+  if(roll.type === 'lootbox') return; // DCC-only broadcast
+  const hint = entries.querySelector('.log-hint'); if(hint) hint.remove();
+  let div;
+  if(roll.type === 'foundloot') div = renderFoundLoot(roll);
+  else if(roll.type === 'system' || roll.type === 'achievement') div = renderSystemEntry(roll);
+  else { div = document.createElement('div'); div.className = 'log-entry remote' + (roll.type === 'crit' ? ' crit' : roll.type === 'fumble' ? ' fumble' : ''); div.innerHTML = '<div class="roll-label">' + esc(roll.source) + ' · ' + esc(roll.label) + '</div><div class="roll-result">' + esc(roll.result) + '</div><div class="roll-detail">' + esc(roll.detail) + '</div>'; }
+  entries.insertBefore(div, entries.firstChild); entries.scrollTop = 0; while(entries.children.length > 60) entries.removeChild(entries.lastChild);
+}
+
+// ═══ FOUND LOOT (drops from the GM screen; claim one item each) ═══════════
+// Claim state lives in memory and mirrors to localStorage when it's available.
+const _flMem = {};
+function _flRead(k){ if(!_flMem[k]) { try { _flMem[k] = JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch(e) { _flMem[k] = {}; } } return _flMem[k]; }
+function _flWrite(k, v){ _flMem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+function _flClaimed(dropId){ const all = _flRead('nimble_found_claimed'); return all[dropId] || {}; }
+function _flMarkClaimed(dropId, idx, by){ const all = _flRead('nimble_found_claimed'); (all[dropId] = all[dropId] || {})[idx] = by; _flWrite('nimble_found_claimed', all); }
+function renderFoundLoot(roll){
+  let p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e) { p = {}; }
+  const items = Array.isArray(p.items) ? p.items : [];
+  const dropId = p.dropId || ('fl-' + (roll.id || Math.random().toString(36).slice(2)));
+  const claimed = _flClaimed(dropId), me = campaignPlayerName();
+  const div = document.createElement('div');
+  div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div._flItems = items;
+  const rows = items.map((it, i) => {
+    const by = claimed[i];
+    const label = esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '');
+    const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + esc(by)) + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
+    return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
+  }).join('');
+  div.innerHTML = '<div class="fl-head">🎁 ' + esc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (p.note ? '<div class="fl-desc">' + esc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  return div;
+}
+function renderSystemEntry(roll){
+  const div = document.createElement('div'); div.className = 'log-entry remote log-system';
+  div.innerHTML = '<div class="sys-head">' + esc(roll.label || 'MESSAGE') + '</div>' + (roll.result ? '<div class="fl-name">' + esc(roll.result) + '</div>' : '') + (roll.detail ? '<div class="sys-body">' + esc(roll.detail) + '</div>' : '');
+  return div;
+}
+function applyFoundClaim(roll){
+  let p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e) { return; }
+  if(!p.dropId || p.itemIndex == null) return;
+  _flMarkClaimed(p.dropId, p.itemIndex, p.by || roll.source || 'Someone'); _flRefreshCard(p.dropId);
+}
+function _flRefreshCard(dropId){
+  const card = [...document.querySelectorAll('.log-foundloot')].find(c => c.dataset.dropId === dropId); if(!card) return;
+  const claimed = _flClaimed(dropId), me = campaignPlayerName();
+  card.querySelectorAll('.fl-item').forEach(li => { const i = parseInt(li.dataset.idx, 10), by = claimed[i], cur = li.querySelector('.fl-btn');
+    if(by && cur && !cur.disabled) cur.outerHTML = '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + esc(by)) + '</button>'; });
+}
+$('log-entries').addEventListener('click', function(e) {
+  const btn = e.target.closest('.fl-claim'); if(!btn) return;
+  const card = btn.closest('.log-foundloot'); if(!card) return;
+  const dropId = card.dataset.dropId, idx = parseInt(btn.dataset.idx, 10);
+  if(_flClaimed(dropId)[idx]) return;
+  const it = (card._flItems || [])[idx]; if(!it) return;
+  if(claimLootItem(it) === false) return;
+  const me = campaignPlayerName(); _flMarkClaimed(dropId, idx, me); _flRefreshCard(dropId);
+  if(typeof campaignBroadcast === 'function') campaignBroadcast('CLAIMED', it.item || 'Item', JSON.stringify({ dropId, itemIndex: idx, by: me }), 'lootclaim');
+  scheduleAutosave();
+});
+// A claimed drop lands like an equipment-list add; gold goes to the gp box.
+function claimLootItem(it){
+  if(it.cat === 'gold' || /^gold$/i.test(it.item || '')) { $('f-gold').value = num($('f-gold').value) + (parseInt(it.qty, 10) || 0); addLog('Claimed', '🪙', (it.qty || 0) + ' gp', 'normal'); recalc(); return true; }
+  const known = findItem(it.item);
+  if(known) addInvFromItem(known.name); else addInvRow({ name: it.item, slots: 1, note: it.notes || '' });
+  addLog('Claimed', '🎁', it.item, 'normal'); recalc(); return true;
+}
 async function campaignPoll() { if(!_campaign) return; try { const r = await fetch('/api/campaigns/' + _campaign.id + '/rolls' + (_campaignLastId ? '?since=' + _campaignLastId : ''), { credentials:'same-origin' }); if(!r.ok) return; const data = await r.json(); (data.rolls || []).forEach(roll => { if(roll.clientKey !== _campaignClientKey) campaignAddRemote(roll); }); if(data.last) _campaignLastId = data.last; } catch(e) {} }
 function campaignPollDelay() { return document.hidden ? 20000 : 4000; }
 function campaignStartPolling() { if(_campaignTimer) clearInterval(_campaignTimer); campaignPoll(); _campaignTimer = setInterval(campaignPoll, campaignPollDelay()); }
