@@ -1124,6 +1124,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .dice-log-entry .fl-body { font-size: 11px; color: #d8d2c0; margin-top: 3px; line-height: 1.45; }
 .dice-log-entry .fl-items { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
 .dice-log-entry .fl-item { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; font-size: 11px; color: #cfc6a8; }
+.dice-log-entry .fl-sent { font-weight: 400; letter-spacing: .04em; color: #6f6b5c; text-transform: none; margin-left: 4px; }
 .dice-log-entry .fl-for { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; color: #9a9a78; text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
 .dice-log-entry .fl-note { color: #8a8570; font-style: italic; }
 .dice-log-entry .fl-by { flex: 0 0 auto; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8a8570; border: 1px solid #4a463a; border-radius: 3px; padding: 2px 6px; }
@@ -1571,17 +1572,24 @@ const GMCamp = (function() {
   // broadcast(), this ignores hideRolls — these are intentional sends to players.
   function send(payload) {
     if(!campaign) return false;
+    const body = {
+      clientKey, source: 'GM',
+      label: String(payload.label || ''),
+      result: String(payload.result == null ? '' : payload.result),
+      detail: String(payload.detail || ''),
+      type: payload.type || 'normal'
+    };
     fetch('/api/campaigns/' + campaign.id + '/rolls', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        clientKey, source: 'GM',
-        label: String(payload.label || ''),
-        result: String(payload.result == null ? '' : payload.result),
-        detail: String(payload.detail || ''),
-        type: payload.type || 'normal'
-      })
+      body: JSON.stringify(body)
     }).catch(() => {});
+    // The poll skips this client's own rolls, so echo the send straight into the
+    // Roll Log — the GM sees the drop / message exactly as the players do, and
+    // player claims on it land on this same card.
+    const echo = Object.assign({ local: true }, body);
+    if(listeners.size) listeners.forEach(fn => { try { fn(echo); } catch(e) {} });
+    else { pending.push(echo); if(pending.length > 100) pending.shift(); }
     return true;
   }
 
@@ -10678,10 +10686,17 @@ function init_dice(root) {
     const special = roll.type === 'foundloot' || roll.type === 'lootbox' || roll.type === 'system' || roll.type === 'achievement';
     let payload = null;
     if(roll.type === 'foundloot' || roll.type === 'lootbox') { try { payload = JSON.parse(roll.detail || '{}'); } catch(e) { payload = {}; } }
+    // A drop this screen sent is already in the log as its local echo; when the
+    // same drop comes back from the server (a reload gives the page a fresh
+    // clientKey) just attach the server id instead of adding a second card.
+    if(payload && (payload.dropId || payload.boxId)) {
+      const dup = log.find(e => e.payload && ((payload.dropId && e.payload.dropId === payload.dropId) || (payload.boxId && e.payload.boxId === payload.boxId)));
+      if(dup) { if(roll.id != null && dup.id == null) dup.id = roll.id; return; }
+    }
     log.unshift({ id: roll ? roll.id : undefined, label: roll.label, detail: roll.detail, total: roll.result,
                   crit: (roll.type === 'normal' || special) ? '' : roll.type, adv: 'none',
                   type: special ? roll.type : '', payload,
-                  remote: true, source: roll.source });
+                  remote: !roll.local, local: !!roll.local, source: roll.source });
     if(log.length > 100) log.length = 100;
     queueRenderLog();
   });
@@ -10794,12 +10809,12 @@ function init_dice(root) {
             : '<span class="fl-by' + (by ? '' : ' open') + '">' + (by ? (e.type === 'lootbox' && mode !== 'claim' ? 'Opened by ' : 'Claimed by ') + esc(by) : 'Unclaimed') + '</span>';
           return '<li class="fl-item"><span>' + esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + '</span>' + chip + '</li>';
         }).join('');
-        return '<div class="dice-log-entry foundloot"><div class="fl-head">🎁 ' + esc(e.source ? e.source + ' · ' : '') + esc(e.label || 'FOUND LOOT') + '</div>'
+        return '<div class="dice-log-entry foundloot"><div class="fl-head">🎁 ' + esc(e.source ? e.source + ' · ' : '') + esc(e.label || 'FOUND LOOT') + (e.local ? ' <span class="fl-sent">sent</span>' : '') + '</div>'
           + (e.total ? '<div class="fl-name">' + esc(e.total) + '</div>' : '') + forLine + (p.note ? '<div class="fl-body">' + esc(p.note) + '</div>' : '')
           + (rows ? '<ul class="fl-items">' + rows + '</ul>' : (e.type === 'lootbox' ? '<div class="fl-body">' + esc(e.detail) + '</div>' : '')) + '</div>';
       }
       if(e.type === 'system' || e.type === 'achievement') {
-        return '<div class="dice-log-entry system"><div class="fl-head">' + esc(e.source ? e.source + ' · ' : '') + esc(e.label || 'MESSAGE') + '</div>'
+        return '<div class="dice-log-entry system"><div class="fl-head">' + esc(e.source ? e.source + ' · ' : '') + esc(e.label || 'MESSAGE') + (e.local ? ' <span class="fl-sent">sent</span>' : '') + '</div>'
           + (e.total ? '<div class="fl-name">' + esc(e.total) + '</div>' : '') + (e.detail ? '<div class="fl-body">' + esc(e.detail) + '</div>' : '') + '</div>';
       }
       const critTag = e.nat==='crit' ? ' ★ NAT 20' : e.nat==='fumble' ? ' ✗ NAT 1' : '';
