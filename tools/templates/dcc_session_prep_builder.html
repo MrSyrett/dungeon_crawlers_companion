@@ -577,9 +577,9 @@ body.flow-mode .page + .page {
     <!-- MONSTERS/NPCS -->
     <div class="tab-panel" id="tab-monsters">
       <div class="section-divider">Stat Blocks</div>
-      <div style="display:flex;gap:6px;margin-bottom:4px;">
-        <input type="text" id="mobpick-search" placeholder="Search the DCC Bestiary…" autocomplete="off" oninput="dccMobSearch()" onfocus="dccMobSearch()">
-        <button class="btn-add" style="flex:0 0 auto;border-color:#e8c84a;color:#e8c84a;" onclick="dccRandomMob()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random Mob</button>
+      <div style="display:flex;gap:6px;margin-bottom:4px;" id="mobpick-row">
+        <input type="text" id="mobpick-search" style="flex:1;min-width:0;" placeholder="Search the DCC Bestiary…" autocomplete="off" oninput="mobSearch()" onfocus="mobSearch()">
+        <button class="btn-add" style="flex:0 0 auto;width:auto;border-color:#e8c84a;color:#e8c84a;" onclick="mobRandom()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random Mob</button>
       </div>
       <div id="mobpick-list" class="mob-pick-list"></div>
       <div id="statblocks-list" class="entity-list"></div>
@@ -684,7 +684,7 @@ body.flow-mode .page + .page {
 
 <!-- Shared dungeon-map engine (Map generator) + the DCC bestiary (mob picker). -->
 <script src="/dungeon-engine.js"></script>
-<script src="/tools-data/dcc-monsters.js"></script>
+<!-- MOB_DATA_START --><script src="/tools-data/dcc-monsters.js"></script><!-- MOB_DATA_END -->
 
 <script>
 
@@ -1186,17 +1186,8 @@ function readFields() {
     type:c.querySelector('.sb-type-input')?.value.trim()||'',
     flavor:c.querySelector('.sb-flavor-input')?.value.trim()||'',
     hpval:c.querySelector('.sb-hp-val')?.value.trim()||'',
-    hpcount:c.querySelector('.sb-hp-count')?.value.trim()||'10',
-    level:c.querySelector('.sb-level')?.value.trim()||'',
-    surprise:c.querySelector('.sb-surprise')?.value.trim()||'',
-    evade:c.querySelector('.sb-evade')?.value.trim()||'',
-    move:c.querySelector('.sb-move')?.value.trim()||'',
-    dr:c.querySelector('.sb-dr')?.value.trim()||'',
-    str:c.querySelector('.sb-str')?.value.trim()||'',
-    int:c.querySelector('.sb-int')?.value.trim()||'',
-    con:c.querySelector('.sb-con')?.value.trim()||'',
-    dex:c.querySelector('.sb-dex')?.value.trim()||'',
-    cha:c.querySelector('.sb-cha')?.value.trim()||'',
+    hpcount:c.querySelector('.sb-hp-count')?.value.trim()||(SB_CONFIG.hp?'10':''),
+    ...sbFieldValues(c),
     abilities:c.querySelector('.sb-abilities-input')?.value.trim()||'',
     isnpc:c.querySelector('.sb-isnpc')?.checked||false,
     fullwidth:c.querySelector('.sb-fullwidth')?.checked||false,
@@ -1512,9 +1503,22 @@ function updateLocCardColor(radio) {
   radio.closest('.location-card').style.borderLeftColor=colors[radio.value]||colors.combat;
 }
 
-// ── DCC Bestiary mob picker + Random Mob (NPCs/Mobs tab) ────────────────────
+// ── Stat-block schema ─────────────────────────────────────────────────────────
+// The card's stat rows, the preview tables and the bestiary picker are all
+// driven by SB_CONFIG so scripts/make-session-builders.mjs can swap it per
+// system (the block between the SB_CONFIG markers is replaced wholesale).
+/* SB_CONFIG_START */
+const SB_CONFIG = {
+  typePlaceholder: 'MOB // PETITE (3) // HUMANOID',
+  hp: { valueLabel: 'HP Value', countLabel: 'HP Count' },   // pip row; null = no pips
+  rows: [
+    [{ key:'level', label:'LVL', th:'Level' }, { key:'surprise', label:'SURP', th:'Surprise' }, { key:'evade', label:'EVADE', th:'Evade' }, { key:'move', label:'MOVE', th:'Move' }, { key:'dr', label:'DR', th:'DR' }],
+    [{ key:'str', label:'STR' }, { key:'int', label:'INT' }, { key:'con', label:'CON' }, { key:'dex', label:'DEX' }, { key:'cha', label:'CHA' }],
+  ],
+  abilitiesLabel: 'Abilities', abilitiesPlaceholder: 'One per line — Name: stats, range, effect',
+  mobs: { placeholder: 'Search the DCC Bestiary…', pool: () => (typeof DCC_MONSTERS !== 'undefined' && Array.isArray(DCC_MONSTERS)) ? DCC_MONSTERS : [], toCard: m => dccMobToCard(m), sub: m => String(m.role||'') + (m.level!=null ? ' · L'+m.level : '') },
+};
 const _DCC_SIZE_NAMES = {1:'Tiny',2:'Small',3:'Petite',4:'Medium',5:'Large',6:'Huge',7:'Colossal',8:'Gargantuan'};
-function dccMobPool() { return (typeof DCC_MONSTERS !== 'undefined' && Array.isArray(DCC_MONSTERS)) ? DCC_MONSTERS : []; }
 // Map a DCC bestiary entry onto the stat-block card fields.
 function dccMobToCard(m) {
   const role = String(m.role || 'Mob');
@@ -1537,30 +1541,40 @@ function dccMobToCard(m) {
     abilities: [...atkLines, ...(m.notes||[])].join('\n')
   };
 }
-function dccRandomMob() {
-  const p = dccMobPool(); if(!p.length) return;
-  addStatBlock(dccMobToCard(p[Math.floor(Math.random()*p.length)]));
+/* SB_CONFIG_END */
+// Values of the schema-driven stat fields on a card, keyed by field key.
+function sbFieldValues(card) {
+  const out = {};
+  SB_CONFIG.rows.forEach(row => row.forEach(f => { out[f.key] = card.querySelector('.sb-f-' + f.key)?.value.trim() || ''; }));
+  return out;
+}
+function mobPool() { return SB_CONFIG.mobs ? SB_CONFIG.mobs.pool() : []; }
+function mobRandom() {
+  const p = mobPool(); if(!p.length) return;
+  addStatBlock(SB_CONFIG.mobs.toCard(p[Math.floor(Math.random()*p.length)]));
   autosave();
 }
-function dccMobSearch() {
+function mobSearch() {
   const box = document.getElementById('mobpick-search'), list = document.getElementById('mobpick-list');
-  if(!box || !list) return;
+  if(!box || !list || !SB_CONFIG.mobs) return;
   const q = box.value.trim().toLowerCase();
-  const pool = dccMobPool();
+  const pool = mobPool();
   const hits = (q ? pool.filter(m => (m.name||'').toLowerCase().includes(q)) : pool).slice(0, 80);
-  if(!hits.length) { list.innerHTML = '<div class="mob-pick-empty">No monster matches.</div>'; list.classList.add('show'); return; }
+  if(!hits.length) { list.innerHTML = '<div class="mob-pick-empty">No match.</div>'; list.classList.add('show'); return; }
   list.innerHTML = hits.map(m =>
-    '<button type="button" class="mob-pick-item" data-mon="'+escA(m.name)+'" onclick="dccAddMob(this.dataset.mon)">'+
-    escH(m.name)+' <span style="opacity:.55">— '+escH(String(m.role||''))+(m.level!=null?' · L'+escH(String(m.level)):'')+'</span></button>'
+    '<button type="button" class="mob-pick-item" data-mon="'+escA(m.name)+'" onclick="mobAdd(this.dataset.mon)">'+
+    escH(m.name)+' <span style="opacity:.55">— '+escH(SB_CONFIG.mobs.sub(m))+'</span></button>'
   ).join('');
   list.classList.add('show');
 }
-function dccAddMob(name) {
-  const m = dccMobPool().find(x => x.name === name); if(!m) return;
-  addStatBlock(dccMobToCard(m)); autosave();
+function mobAdd(name) {
+  const m = mobPool().find(x => x.name === name); if(!m) return;
+  addStatBlock(SB_CONFIG.mobs.toCard(m)); autosave();
   const box = document.getElementById('mobpick-search'); if(box) box.value = '';
   const list = document.getElementById('mobpick-list'); if(list) { list.classList.remove('show'); list.innerHTML = ''; }
 }
+// Hide the picker row when the system has no bestiary.
+(function() { const row = document.getElementById('mobpick-row'); if(!row) return; if(!SB_CONFIG.mobs) row.style.display = 'none'; else { const box = document.getElementById('mobpick-search'); if(box) box.placeholder = SB_CONFIG.mobs.placeholder; } })();
 // Close the picker list on an outside click.
 document.addEventListener('click', e => {
   const list = document.getElementById('mobpick-list');
@@ -1597,33 +1611,21 @@ function addStatBlock(data={}) {
     </div>
     <div class="field-group">
       <label class="field-label">Type Line</label>
-      <input type="text" class="sb-type-input" placeholder="MOB // PETITE (3) // HUMANOID" value="${escA(data.type||'')}" oninput="autosave()">
+      <input type="text" class="sb-type-input" placeholder="${escA(SB_CONFIG.typePlaceholder)}" value="${escA(data.type||'')}" oninput="autosave()">
     </div>
     <div class="field-group">
       <label class="field-label">Flavor Text</label>
       <textarea class="sb-flavor-input short" placeholder="Flavor description..." oninput="autosave()">${escH(data.flavor||'')}</textarea>
     </div>
-    <div style="display:flex;gap:6px;" class="field-group">
-      <div style="flex:1"><label class="field-label">HP Value</label><input type="text" class="sb-hp-val" placeholder="2" value="${escA(data.hpval||'')}" oninput="autosave()"></div>
-      <div style="flex:1"><label class="field-label">HP Count</label><input type="text" class="sb-hp-count" placeholder="10" value="${escA(data.hpcount||'10')}" oninput="autosave()"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;" class="field-group">
-      <div><label class="field-label" style="font-size:8px">LVL</label><input type="text" class="sb-level" value="${escA(data.level||'')}" oninput="autosave()"></div>
-      <div><label class="field-label" style="font-size:8px">SURP</label><input type="text" class="sb-surprise" value="${escA(data.surprise||'')}" oninput="autosave()"></div>
-      <div><label class="field-label" style="font-size:8px">EVADE</label><input type="text" class="sb-evade" value="${escA(data.evade||'')}" oninput="autosave()"></div>
-      <div><label class="field-label" style="font-size:8px">MOVE</label><input type="text" class="sb-move" value="${escA(data.move||'')}" oninput="autosave()"></div>
-      <div><label class="field-label" style="font-size:8px">DR</label><input type="text" class="sb-dr" value="${escA(data.dr||'')}" oninput="autosave()"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;" class="field-group">
-      <div><label class="field-label" style="font-size:8px">STR</label><input type="text" class="sb-str" value="${escA(data.str||'')}" oninput="autosave()"></div>
-      <div><label class="field-label" style="font-size:8px">INT</label><input type="text" class="sb-int" value="${escA(data.int||'')}" oninput="autosave()"></div>
-      <div><label class="field-label" style="font-size:8px">CON</label><input type="text" class="sb-con" value="${escA(data.con||'')}" oninput="autosave()"></div>
-      <div><label class="field-label" style="font-size:8px">DEX</label><input type="text" class="sb-dex" value="${escA(data.dex||'')}" oninput="autosave()"></div>
-      <div><label class="field-label" style="font-size:8px">CHA</label><input type="text" class="sb-cha" value="${escA(data.cha||'')}" oninput="autosave()"></div>
-    </div>
+    ${SB_CONFIG.hp ? `<div style="display:flex;gap:6px;" class="field-group">
+      <div style="flex:1"><label class="field-label">${escH(SB_CONFIG.hp.valueLabel)}</label><input type="text" class="sb-hp-val" placeholder="2" value="${escA(data.hpval||'')}" oninput="autosave()"></div>
+      <div style="flex:1"><label class="field-label">${escH(SB_CONFIG.hp.countLabel)}</label><input type="text" class="sb-hp-count" placeholder="10" value="${escA(data.hpcount||'10')}" oninput="autosave()"></div>
+    </div>` : ''}
+    ${SB_CONFIG.rows.map(row => `<div style="display:grid;grid-template-columns:repeat(${row.length},1fr);gap:4px;" class="field-group">` +
+      row.map(f => `<div><label class="field-label" style="font-size:8px">${escH(f.label)}</label><input type="text" class="sb-f-${f.key}" placeholder="${escA(f.ph||'')}" value="${escA(data[f.key]||'')}" oninput="autosave()"></div>`).join('') + '</div>').join('')}
     <div class="field-group">
-      <label class="field-label accent">Abilities</label>
-      <textarea class="sb-abilities-input short" placeholder="One per line — Name: stats, range, effect" oninput="autosave()">${escH(data.abilities||'')}</textarea>
+      <label class="field-label accent">${escH(SB_CONFIG.abilitiesLabel)}</label>
+      <textarea class="sb-abilities-input short" placeholder="${escA(SB_CONFIG.abilitiesPlaceholder)}" oninput="autosave()">${escH(data.abilities||'')}</textarea>
     </div>
     <div style="background:var(--ui-panel);padding:6px;border-radius:3px;" class="field-group">
       <div class="checkbox-row">
@@ -1856,28 +1858,26 @@ function buildSB(s) {
   const borderColor=sbtypeColors[s.sbtype]||sbtypeColors.mob;
   div.className='stat-block'+(s.fullwidth?' full-width':'');
   div.style.borderTopColor=borderColor;
-  const hpCount=parseInt(s.hpcount)||1;
+  const hpCount=SB_CONFIG.hp ? (parseInt(s.hpcount)||1) : 0;
   let pips=''; for(let i=0;i<hpCount;i++) pips+=`<div class="hp-pip">${escH(s.hpval||'1')}</div>`;
   const abilities=(s.abilities||'').split('\n').filter(Boolean).map(a=>{
     const idx=a.indexOf(':');
     return idx>0?`<div class="sb-ability"><strong>${escH(a.slice(0,idx))}:</strong> ${escH(a.slice(idx+1).trim())}</div>`:`<div class="sb-ability">${escH(a)}</div>`;
   }).join('');
-  const tables=`
-    <table class="sb-table"><tr><th>Level</th><th>Surprise</th><th>Evade</th><th>Move</th><th>DR</th></tr>
-    <tr><td>${escH(s.level)}</td><td>${escH(s.surprise)}</td><td>${escH(s.evade)}</td><td>${escH(s.move)}</td><td>${escH(s.dr)}</td></tr></table>
-    <table class="sb-table"><tr><th>STR</th><th>INT</th><th>CON</th><th>DEX</th><th>CHA</th></tr>
-    <tr><td>${escH(s.str)}</td><td>${escH(s.int)}</td><td>${escH(s.con)}</td><td>${escH(s.dex)}</td><td>${escH(s.cha)}</td></tr></table>`;
+  const tables=SB_CONFIG.rows.map(row => `
+    <table class="sb-table"><tr>${row.map(f => '<th>'+escH(f.th||f.label)+'</th>').join('')}</tr>
+    <tr>${row.map(f => '<td>'+escH(s[f.key]||'')+'</td>').join('')}</tr></table>`).join('');
   if(s.isnpc&&s.fullwidth) {
     div.innerHTML=`<div class="sb-name">${escH(s.name)}</div><div class="sb-type">${escH(s.type)}</div>
       <div class="sb-warning"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.3 3.8a1.5 1.5 0 0 0-2.6 0L2.5 18.4A1.5 1.5 0 0 0 3.8 20.6h16.4a1.5 1.5 0 0 0 1.3-2.2ZM12 8.4a1 1 0 0 1 1 1v4a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1Zm0 8.8a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"/></svg> WARNING: This is a non-combatant NPC.</div>
       <div style="display:flex;gap:12px;">
-        <div style="flex:1"><div class="sb-hp-row">${pips}</div>${tables}</div>
+        <div style="flex:1">${pips?`<div class="sb-hp-row">${pips}</div>`:``}${tables}</div>
         <div style="flex:2"><div class="sb-notes">${fmtText(s.notes)}</div></div>
       </div>`;
   } else {
     div.innerHTML=`<div class="sb-name">${escH(s.name)}</div><div class="sb-type">${escH(s.type)}</div>
       ${s.flavor?`<div class="sb-flavor">${fmtText(s.flavor)}</div>`:''}
-      <div class="sb-hp-row">${pips}</div>${tables}
+      ${pips?`<div class="sb-hp-row">${pips}</div>`:``}${tables}
       ${abilities?`<hr class="sb-divider">${abilities}`:''}
       ${s.isnpc&&s.notes?`<hr class="sb-divider"><div style="font-size:8.5px;color:var(--ink);line-height:1.6">${fmtText(s.notes)}</div>`:''}`;
   }
