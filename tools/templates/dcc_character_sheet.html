@@ -3315,7 +3315,18 @@ document.getElementById('log-entries').addEventListener('click', function(e) {
 });
 
 // Remote entries render directly (never through addLog, so they don't rebroadcast)
+// A server that doesn't know a loot type stores it as 'normal'; recover the real
+// type from the JSON payload so a drop never renders as raw code.
+function _sniffRollType(roll){
+  if(!roll || (roll.type && roll.type !== 'normal')) return roll;
+  const d = String(roll.detail || '').trim(); if(d.charAt(0) !== '{') return roll;
+  let p = null; try { p = JSON.parse(d); } catch(e) { return roll; }
+  if(!p || typeof p !== 'object') return roll;
+  const t = (p.boxId && !Array.isArray(p.items)) ? 'lootclaim' : (p.dropId && p.itemIndex != null) ? 'lootclaim' : p.boxId ? 'lootbox' : (p.dropId || Array.isArray(p.items)) ? 'foundloot' : null;
+  return t ? Object.assign({}, roll, { type: t }) : roll;
+}
 function campaignAddRemote(roll) {
+  roll = _sniffRollType(roll);
   const entries = document.getElementById('log-entries');
   if(!entries) return;
   if(roll.type==='lootclaim'){ applyLootClaim(roll); return; }  // updates an existing card, no new entry

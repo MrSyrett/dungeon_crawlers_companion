@@ -921,7 +921,18 @@ function campaignBroadcast(label, result, detail, type) {
   if(!_campaign || CAMPAIGN_SKIP_LABELS.has(String(label))) return;
   fetch('/api/campaigns/' + _campaign.id + '/rolls', { method:'POST', credentials:'same-origin', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ clientKey:_campaignClientKey, source: campaignPlayerName(), label:String(label), result:String(result), detail:String(detail || ''), type: type || 'normal' }) }).catch(() => {});
 }
+// A server that doesn't know a loot type stores it as 'normal'; recover the real
+// type from the JSON payload so a drop never renders as raw code.
+function _sniffRollType(roll){
+  if(!roll || (roll.type && roll.type !== 'normal')) return roll;
+  const d = String(roll.detail || '').trim(); if(d.charAt(0) !== '{') return roll;
+  let p = null; try { p = JSON.parse(d); } catch(e) { return roll; }
+  if(!p || typeof p !== 'object') return roll;
+  const t = (p.boxId && !Array.isArray(p.items)) ? 'lootclaim' : (p.dropId && p.itemIndex != null) ? 'lootclaim' : p.boxId ? 'lootbox' : (p.dropId || Array.isArray(p.items)) ? 'foundloot' : null;
+  return t ? Object.assign({}, roll, { type: t }) : roll;
+}
 function campaignAddRemote(roll) {
+  roll = _sniffRollType(roll);
   const entries = $('log-entries'); if(!entries) return;
   if(roll.type === 'lootclaim') { applyFoundClaim(roll); return; }
   const hint = entries.querySelector('.log-hint'); if(hint) hint.remove();

@@ -10667,7 +10667,18 @@ function init_dice(root) {
     _logRenderQueued = true;
     requestAnimationFrame(() => { _logRenderQueued = false; renderLog(); });
   }
+  // A server that doesn't know a loot type stores it as 'normal'; recover the
+  // real type from the JSON payload so the card never renders as raw code.
+  function sniffRollType(roll) {
+    if(!roll || (roll.type && roll.type !== 'normal')) return roll;
+    const d = String(roll.detail || '').trim(); if(d.charAt(0) !== '{') return roll;
+    let p = null; try { p = JSON.parse(d); } catch(e) { return roll; }
+    if(!p || typeof p !== 'object') return roll;
+    const t = (p.boxId && p.itemIndex == null && !Array.isArray(p.items)) ? 'lootclaim' : (p.dropId && p.itemIndex != null) ? 'lootclaim' : p.boxId ? 'lootbox' : p.dropId || Array.isArray(p.items) ? 'foundloot' : null;
+    return t ? Object.assign({}, roll, { type: t }) : roll;
+  }
   GMCamp.onRoll(roll => {
+    roll = sniffRollType(roll);
     // The poll re-fetches the campaign's history from id 0 whenever the link
     // (re)activates, so skip any roll already in the log by its server id.
     if(roll && roll.id != null && log.some(e => e.id === roll.id)) return;
