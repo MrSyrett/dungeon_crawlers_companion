@@ -6346,6 +6346,13 @@ function dccItemsOfTier(t, cats) {
   if(typeof DCC_ITEMS === 'undefined') return [];
   return DCC_ITEMS.filter(it => it.tier === t && cats.indexOf(it.category) >= 0);
 }
+// The base (mundane, un-tiered) gear library — the chassis the magic tables
+// enchant into tiered versions. Includes the user's saved homebrew items.
+function dccBasePool(cats) {
+  const all = (typeof DCC_ITEMS !== 'undefined' ? DCC_ITEMS : [])
+    .concat(Array.isArray(window.__DCC_HB_ITEMS) ? window.__DCC_HB_ITEMS : []);
+  return all.filter(it => cats.indexOf(it.category) >= 0 && (!it.tier || it.tier === 'Mundane'));
+}
 function dccRollGold(formula) {
   const f = String(formula || '');
   if(/none|nuthin/i.test(f)) return 0;
@@ -6394,11 +6401,24 @@ function genDccLootBox(tierKey) {
   dccPickN(consumables, 1 + (Math.random() < 0.5 ? 1 : 0)).forEach(it => picks.push(it));
   const g = dccPickN(gear, td.gearRolls || 0);
   g.forEach(it => picks.push(it));
-  const missing = (td.gearRolls || 0) - g.length;   // Celestial / empty catalog → GM discretion
+  let missing = (td.gearRolls || 0) - g.length;
   const lines = picks.map(it =>
     `<div class="gen-card-row"><span class="gen-card-row-label">${esc(it.category)}</span>` +
     `<span><b>${esc(it.name)}</b><br><span style="opacity:.75">${esc((it.slot ? it.slot + ' — ' : '') + it.effect)}</span>` +
     dccItemSpellLine(it, td.tier) + `</span></div>`).join('');
+  // Fill any remaining gear rolls with enchanted base gear from the library —
+  // a random chassis (weapon/armor/accessory) tagged with the tier's enchant
+  // guideline, so a box always yields concrete gear instead of "GM's discretion".
+  let fill = '';
+  if(missing > 0) {
+    const baseGear = dccPickN(dccBasePool(['weapon', 'armor', 'accessory']), missing);
+    baseGear.forEach(b => {
+      missing--;
+      fill += `<div class="gen-card-row"><span class="gen-card-row-label">${esc(b.category)}</span>` +
+        `<span><b>${esc(td.tier)} ${esc(b.name)}</b><br><span style="opacity:.75">` +
+        `${esc((b.slot ? b.slot + ' — ' : '') + 'Enchant: ' + td.xValue)}</span></span></div>`;
+    });
+  }
   const disc = missing > 0
     ? `<div class="gen-card-row"><span class="gen-card-row-label">GM</span><span>${missing} more ${esc(td.tier)} item(s) at GM&rsquo;s discretion — enchant guideline: ${esc(td.xValue)}</span></div>`
     : '';
@@ -6406,7 +6426,7 @@ function genDccLootBox(tierKey) {
   return card(
     `<div class="gen-card-header"><span class="gen-card-name">${esc(td.tier)} Loot Box</span><span class="gen-card-tag">${esc(String(td.gearRolls || 0))} gear</span></div>` +
     `<div class="gen-card-row"><span class="gen-card-row-label">Gold</span><span><b>${esc(goldStr)}</b></span></div>` +
-    ((lines || disc) ? '<hr class="gen-card-divider">' : '') + lines + disc
+    ((lines || fill || disc) ? '<hr class="gen-card-divider">' : '') + lines + fill + disc
   );
 }
 
@@ -6451,11 +6471,20 @@ function dccRollX(spec) {
 // spell / damage type instead of leaving "+X Skill", "A Buff", etc. abstract.
 const DCC_STAT_NAMES = ['STR', 'INT', 'CON', 'DEX', 'CHA'];
 const DCC_DMG_UNCOMMON = ['Acid', 'Cold', 'Fire', 'Lightning', 'Poison', 'Necrotic', 'Psychic', 'Radiant', 'Force', 'Sonic'];
+// Fallback chassis names if the base library hasn't loaded (standalone use).
 const DCC_BASE_ITEMS = {
   '39': ['Longsword', 'Dagger', 'Warhammer', 'Spear', 'Mace', 'Battleaxe', 'Shortbow', 'Greatsword', 'Club', 'Crossbow'],
   '40': ['Cap', 'Vest', 'Gloves', 'Boots', 'Cloak', 'Robe', 'Hood', 'Sash'],
   '41': ['Ring', 'Amulet', 'Belt', 'Bracelet', 'Pendant', 'Circlet', 'Earring', 'Brooch'],
 };
+// The chassis an enchantment is applied to, drawn from the base gear library by
+// the Table 38 type (39 = weapon/mundane, 40 = clothing/armor, 41 = accessory).
+// Falls back to the small hardcoded list when the library isn't available.
+function dccBaseChassisNames(tableNum) {
+  const cats = tableNum === '40' ? ['armor'] : tableNum === '41' ? ['accessory'] : ['weapon', 'mundane'];
+  const names = dccBasePool(cats).map(it => it.name);
+  return names.length ? names : (DCC_BASE_ITEMS[tableNum] || DCC_BASE_ITEMS['41']);
+}
 function dccPick(arr) { return arr && arr.length ? arr[Math.floor(Math.random() * arr.length)] : null; }
 function dccRandomStat() { return dccPick(DCC_STAT_NAMES); }
 function dccRandomSkillName(passiveOnly) {
@@ -6519,7 +6548,7 @@ function genDccMagicItem(tierKey, forcedType) {
   // Number of enchantment rolls scales with rarity (Silver 1 … Celestial 5, per the
   // book's "rolls per gear item by box rarity"). All rolls are on the item's type table.
   const nRolls = Math.max(1, (tier && typeof tier.gearRolls === 'number') ? tier.gearRolls : 1);
-  const base = dccPick(DCC_BASE_ITEMS[typeTableNum] || DCC_BASE_ITEMS['41']) || 'Item';
+  const base = dccPick(dccBaseChassisNames(typeTableNum)) || 'Item';
   const seen = new Set();
   const lines = [];       // { label, html }
   let usedX = false, isUnique = false, forfeited = 0;

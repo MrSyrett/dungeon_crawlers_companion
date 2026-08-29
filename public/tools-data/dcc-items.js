@@ -410,5 +410,1743 @@ const DCC_ITEMS = [
     "effect": "+10% STR, +3 DR, unbreakable grip.",
     "page": 219,
     "source": "Core"
+  },
+  {
+    "name": "Longsword",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Shortsword",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Dagger",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Rapier",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Scimitar",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Mace",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Hand Axe",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Club",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Sickle",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Cutlass",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "War Pick",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Flail",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Combat Knife",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Machete",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Baseball Bat",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Crowbar",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Brass Knuckles",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Frying Pan",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Tire Iron",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Nightstick",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Katana",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Cattle Prod",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Fire Poker",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Broken Bottle",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Plasma Dagger",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Energy Sword",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Rubber Chicken",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Foam Sword",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hand",
+    "effect": "One-handed melee weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Greatsword",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Battleaxe",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Warhammer",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Greataxe",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Halberd",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Quarterstaff",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Spear",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Pike",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Maul",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Sledgehammer",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Fire Axe",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Chainsaw",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Pool Cue",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Pipe Wrench",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Shovel",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Beam Greatsword",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Giant Foam Finger",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Pool Noodle",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Hands/Holding",
+    "effect": "Two-handed melee weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Shortbow",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Longbow",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Crossbow",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Sling",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Throwing Knives",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Javelin",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Blowgun",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Pistol",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Revolver",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Shotgun",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Hunting Rifle",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Submachine Gun",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Nail Gun",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Taser",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Slingshot",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Flare Gun",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Laser Pistol",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Ray Gun",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Foam Dart Blaster",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Boomerang",
+    "category": "weapon",
+    "tier": "Mundane",
+    "slot": "Holding",
+    "effect": "Ranged weapon.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Leather Cap",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Iron Helm",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Great Helm",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Wizard Hat",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Hood",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Baseball Cap",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Motorcycle Helmet",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Hard Hat",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Beanie",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Gas Mask",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Foam Crown",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Superhero Cowl",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Mascot Head",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Head",
+    "effect": "Headgear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Leather Jerkin",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Chainmail Shirt",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Breastplate",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Wizard Robe",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Padded Gambeson",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Scale Mail",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Hoodie",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Leather Jacket",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Kevlar Vest",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Flannel Shirt",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Denim Jacket",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Lab Coat",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Trench Coat",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Powered Chest Plate",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Onesie",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Sequined Jumpsuit",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Torso",
+    "effect": "Body armor / clothing.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Leather Bracers",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Arms",
+    "effect": "Arm protection.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Iron Vambraces",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Arms",
+    "effect": "Arm protection.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Arm Guards",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Arms",
+    "effect": "Arm protection.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Elbow Pads",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Arms",
+    "effect": "Arm protection.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Arm Warmers",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Arms",
+    "effect": "Arm protection.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Tactical Sleeves",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Arms",
+    "effect": "Arm protection.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Power Gauntlet Sleeves",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Arms",
+    "effect": "Arm protection.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Leather Gloves",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Hands",
+    "effect": "Handwear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Gauntlets",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Hands",
+    "effect": "Handwear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Mailed Gloves",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Hands",
+    "effect": "Handwear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Work Gloves",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Hands",
+    "effect": "Handwear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Oven Mitts",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Hands",
+    "effect": "Handwear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Tactical Gloves",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Hands",
+    "effect": "Handwear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Fingerless Gloves",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Hands",
+    "effect": "Handwear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Grappling Wrist-Launchers",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Hands",
+    "effect": "Handwear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Leather Leggings",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Chain Leggings",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Plated Greaves",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Cloth Trousers",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Blue Jeans",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Cargo Pants",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Sweatpants",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Tactical Pants",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Kneepads",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Armored Leg Plates",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Legs",
+    "effect": "Leg armor / clothing.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Leather Boots",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Plated Sabatons",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Sandals",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Sneakers",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Steel-Toe Boots",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Combat Boots",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Cowboy Boots",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Flip-Flops",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Rocket Boots",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Clown Shoes",
+    "category": "armor",
+    "tier": "Mundane",
+    "slot": "Feet",
+    "effect": "Footwear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Ring",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Amulet",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Pendant",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Circlet",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Signet Ring",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Brooch",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Talisman",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Torc",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Wristwatch",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Sunglasses",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Dog Tags",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Fanny Pack",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Lanyard",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Monocle",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Pocket Watch",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Bandana",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Scarf",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Fitness Tracker",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Class Ring",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Mood Ring",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Championship Belt",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Novelty Medallion",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Glowing Visor",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Cape",
+    "category": "accessory",
+    "tier": "Mundane",
+    "slot": "Accessory",
+    "effect": "Worn accessory.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Rope (50 ft, coil)",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Grappling Hook",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Lantern",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Torch",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Bedroll",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Waterskin",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Rations (1 day)",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Tinderbox",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Chalk",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Manacles",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Ten-Foot Pole",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Caltrops",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Spyglass",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Lockpicks",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Whetstone",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Empty Sack",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Wineskin",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Iron Spikes",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Fantasy",
+    "source": "Base"
+  },
+  {
+    "name": "Flashlight",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Duct Tape",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "First Aid Kit",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Binoculars",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Compass",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Bolt Cutters",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Zip Ties",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Glow Sticks",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Road Flare",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Energy Drink",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Smoke Bomb",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Walkie-Talkie",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Bear Trap",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Fire Extinguisher",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Multitool",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Lighter",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Superglue",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Modern",
+    "source": "Base"
+  },
+  {
+    "name": "Boombox",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Megaphone",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Deck of Playing Cards",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Fake Mustache",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Whoopee Cushion",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Bag of Marbles",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Air Horn",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Selfie Stick",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Pop Culture",
+    "source": "Base"
+  },
+  {
+    "name": "Novelty Foam Hand",
+    "category": "mundane",
+    "tier": "Mundane",
+    "effect": "Adventuring gear.",
+    "theme": "Pop Culture",
+    "source": "Base"
   }
 ];

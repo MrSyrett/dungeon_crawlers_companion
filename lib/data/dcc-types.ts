@@ -25,6 +25,7 @@ export type DccSource =
   | "Survival"        // Rules for Survival
   | "Par"             // Par for the Course
   | "Atlas"           // Atlas: Tutorial Floors
+  | "Base"            // base (mundane) gear library — chassis for the magic tables
   | "Homebrew";       // user homebrew, or content converted/adapted for DCC
 
 /** A rank-gated upgrade a skill or spell picks up at Rank 5 / 10 / 15. */
@@ -217,6 +218,8 @@ export interface DccItem {
   price?: number;         // gold, where the rulebook gives one
   page?: number;
   source: DccSource;
+  /** Flavor origin for base gear: "Fantasy" | "Modern" | "Pop Culture". */
+  theme?: string;
 }
 
 export interface DccLootTierRow {
