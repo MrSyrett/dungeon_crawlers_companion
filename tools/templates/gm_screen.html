@@ -3072,10 +3072,14 @@ GMScenes.renderPins();
         <div class="ai-sec-title">Found Loot</div>
         <input type="text" class="ai-input ai-fl-name" placeholder="Where it's found (e.g. Chest by the altar)">
         <div class="ai-row">
-          <button class="btn small ghost ai-fl-roll" type="button" title="Roll a random spread of found loot">🎲 Roll random loot</button>
+          <select class="ai-select ai-fl-tier" title="Treasure tier">
+            <option value="1">Tier 1–3</option><option value="4">Tier 4–6</option>
+            <option value="7">Tier 7–9</option><option value="10">Tier 10+</option>
+          </select>
+          <button class="btn small ghost ai-fl-roll" type="button" title="Roll a treasure spread (like the Treasure Generator)">🎲 Roll treasure</button>
         </div>
         <div class="ai-cat-filters ai-fl-filters"></div>
-        <input type="text" class="ai-input ai-fl-search" placeholder="Search Gear &amp; treasure to add…">
+        <input type="text" class="ai-input ai-fl-search" placeholder="Search treasure to add…">
         <div class="ai-cat-results ai-fl-results"></div>
         <table class="ai-items"><tbody class="ai-fl-body"></tbody></table>
         <button class="btn small ghost ai-fl-add" type="button">+ Add custom item</button>
@@ -3090,7 +3094,6 @@ GMScenes.renderPins();
      and the Trackers monster picker. Generated from data/dcc/*.json. -->
 <script src="/tools-data/dcc-monsters.js"></script>
 <script src="/tools-data/dcc-items.js"></script>
-<script src="/tools-data/dcc-gear-sd.js"></script>
 <script src="/tools-data/dcc-loot.js"></script>
 <script src="/tools-data/dcc-spells.js"></script>
 <script src="/tools-data/dcc-skills.js"></script>
@@ -6332,6 +6335,27 @@ function genTreasure(tierKey, type) {
   const item = R(pool);
   return card(`<div class="gen-item-name">${esc(item.name)}</div><div class="gen-item-desc">${esc(item.desc)}</div>`);
 }
+
+// Expose the Treasure Generator's data as a roller + catalog so the Message
+// tool's SD Found Loot produces the SAME treasure (magic items, gems, mundane
+// loot, luxury items, treasure-table rolls). Published on window from inside
+// this IIFE, where the pools (MAGIC_ITEM_POOLS/GEMS/…) actually live.
+window.sdTreasureRoll = function(tierKey) {
+  const type = R(['random','random','Weapon','Armor','Wand','Ring','Cloak','Boots','Potion','Scroll','table','mundane','gem','luxury']);
+  if(type==='table') { const tier = TREASURE_TIERS[tierKey] || TREASURE_T1; return { item: R(tier), qty: 1, notes: 'Treasure — Tier ' + (tierKey || '1') }; }
+  if(type==='mundane') { return { item: R(MUNDANE_LOOT), qty: 1, notes: 'Mundane loot' }; }
+  if(type==='gem') { const gem = R(GEMS); const giant = Math.random() < 0.15; const name = (giant ? 'Giant ' : '') + gem.name; const val = String(gem.value).replace(/^(\d+)/, n => giant ? n*2 : n); return { item: name, qty: 1, notes: 'Gemstone — value ' + val }; }
+  if(type==='luxury') { const feat = R(LUX_FEAT), pool = R(LUX_ITEM_POOLS), it = R(pool); return { item: feat + ' ' + it, qty: 1, notes: 'Luxury item' }; }
+  const pool = type==='random' ? MAGIC_ITEM_POOLS[R(LOOT_TYPES)] : (MAGIC_ITEM_POOLS[type] || POTIONS);
+  const it = R(pool); return { item: it.name, qty: 1, notes: it.desc || '' };
+};
+window.sdTreasureCatalog = function() {
+  const out = [];
+  LOOT_TYPES.forEach(t => (MAGIC_ITEM_POOLS[t] || []).forEach(it => out.push({ name: it.name, category: t.toLowerCase(), effect: it.desc || '' })));
+  GEMS.forEach(g => out.push({ name: g.name, category: 'gem', effect: 'Value ' + g.value }));
+  MUNDANE_LOOT.forEach(m => out.push({ name: m, category: 'mundane', effect: 'Mundane loot' }));
+  return out;
+};
 
 // ── DCC Loot Box ───────────────────────────────────────────────────────────
 // Rolls a DCC loot box of the chosen tier: gold (per the tier's formula), a
@@ -11576,17 +11600,16 @@ function init_ai(root) {
 
   // ══ Shadowdark Found Loot ══ (visible drop, each item claimed first-come)
   const SD_GROUPS = [
-    { key:'all',label:'All',cats:null },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'weapon',label:'Weapons',cats:['weapon'] },
-    { key:'armor',label:'Armor',cats:['armor'] },{ key:'magic',label:'Magic',cats:['magic'] },{ key:'potion',label:'Potions',cats:['potion'] },
-    { key:'scroll',label:'Scrolls',cats:['scroll'] },{ key:'gem',label:'Gems',cats:['gem'] },
+    { key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },
+    { key:'wand',label:'Wands & Rings',cats:['wand','ring'] },{ key:'cloak',label:'Cloaks & Boots',cats:['cloak','boots'] },
+    { key:'potion',label:'Potions',cats:['potion'] },{ key:'scroll',label:'Scrolls',cats:['scroll'] },
+    { key:'gem',label:'Gems',cats:['gem'] },{ key:'mundane',label:'Mundane',cats:['mundane'] },
   ];
+  // Shadowdark found-loot catalog = the Treasure Generator's items (magic items,
+  // gems, mundane loot). window.sdTreasureCatalog is published from the generators
+  // IIFE where the pools live, so this is reliable and matches that generator.
   function sdCatalog(){
-    const out=[];
-    const gear=(typeof DCC_GEAR_SD!=='undefined')?DCC_GEAR_SD:[];
-    gear.forEach(it=>{ const c=it.category; const cat=(c==='weapon')?'weapon':(c==='armor'||c==='shield')?'armor':'gear'; out.push({name:it.name,category:cat,effect:it.effect||'',tier:''}); });
-    if(typeof MAGIC_ITEM_POOLS!=='undefined') Object.keys(MAGIC_ITEM_POOLS).forEach(k=>{ const cat=(k==='Potion')?'potion':(k==='Scroll')?'scroll':'magic'; (MAGIC_ITEM_POOLS[k]||[]).forEach(it=>out.push({name:it.name,category:cat,effect:it.desc||''})); });
-    if(typeof GEMS!=='undefined') GEMS.forEach(g=>out.push({name:g.name,category:'gem',effect:'Value: '+g.value}));
-    return out;
+    return (typeof window.sdTreasureCatalog === 'function') ? window.sdTreasureCatalog() : [];
   }
   const flName=root.querySelector('.ai-fl-name'), flRoll=root.querySelector('.ai-fl-roll');
   const flBody=root.querySelector('.ai-fl-body'), flAdd=root.querySelector('.ai-fl-add');
@@ -11594,14 +11617,16 @@ function init_ai(root) {
   flAdd.addEventListener('click', ()=>makeRow(flBody,'','',''));
   buildPicker({ filters:root.querySelector('.ai-fl-filters'), search:root.querySelector('.ai-fl-search'), results:root.querySelector('.ai-fl-results'), groups:SD_GROUPS,
     catalog: sdCatalog, onAdd:(name,notes)=>{ makeRow(flBody,name,1,notes); setStatus(flStatus,'Added “'+name+'”.','ok'); } });
+  const flTier = root.querySelector('.ai-fl-tier');
   flRoll.addEventListener('click', ()=>{
-    const cat=sdCatalog();
-    if(!cat.length){ setStatus(flStatus,'Shadowdark gear/treasure didn’t load — open from the app.','err'); return; }
+    if(typeof window.sdTreasureRoll !== 'function'){ setStatus(flStatus,'Treasure tables didn’t load — open from the app.','err'); return; }
     flBody.innerHTML='';
+    const tier = flTier ? flTier.value : '1';
     let coins=0; for(let i=0;i<3;i++) coins+=1+Math.floor(Math.random()*6); coins*=(5+Math.floor(Math.random()*20));
     makeRow(flBody, coins+' gp','','coins');
-    pickN(cat, 2+Math.floor(Math.random()*3)).forEach(it=>makeRow(flBody,it.name,1,it.effect||''));
-    setStatus(flStatus,'Rolled a random drop — tweak it, then send.','ok');
+    const n = 2+Math.floor(Math.random()*3);
+    for(let i=0;i<n;i++){ const t=window.sdTreasureRoll(tier); makeRow(flBody, t.item, t.qty||1, t.notes||''); }
+    setStatus(flStatus,'Rolled treasure — tweak it, then send.','ok');
   });
   flSend.addEventListener('click', ()=>{
     if(!canSend()){ setStatus(flStatus,'Link a campaign first (top bar) to send loot.','err'); return; }
