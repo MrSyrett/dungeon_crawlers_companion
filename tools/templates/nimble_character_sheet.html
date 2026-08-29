@@ -223,6 +223,8 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   .blk-grid,.vitals{grid-template-columns:1fr;}
   .vital{border-right:none;}
 }
+textarea{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
+textarea::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track{background:transparent;}
 </style>
 </head>
 <body>
@@ -248,39 +250,43 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
     <div class="stats-col">
       <div class="section-bar green"><span>Stats &amp; Saves</span></div>
       <div class="stats-grid" id="stats-grid"></div>
-      <div class="pts-note"><span>Skill points <b id="sk-used">0</b> / <b id="sk-max">4</b> <span id="sk-flag"></span></span><span>4 at level 1, +1 per level</span></div>
+      <div class="pts-note"><span>Skill points <b id="sk-used">0</b> / <b id="sk-max">4</b> <span id="sk-flag"></span></span></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
 
       <div class="vitals">
         <div class="vital">
-          <div class="vlbl"><span>Hit Points</span><small>Max from class + level-ups</small></div>
+          <div class="vlbl"><span>Hit Points</span></div>
           <div class="vbig"><input type="number" id="hp-cur" value="10" oninput="recalc()"><span class="sep">/</span><input type="number" id="hp-max" value="10" oninput="recalc()"></div>
-          <div class="vline">temp <input type="number" id="hp-temp" value="0" oninput="recalc()"><button class="small-btn ghost" onclick="damage()">Damage</button><button class="small-btn ghost" onclick="heal()">Heal</button><input type="number" id="hp-amt" value="1" min="1" title="amount"><span id="ko-flag"></span></div>
+          <div class="vline">temp <input type="number" id="hp-temp" value="0" oninput="recalc()"><span id="ko-flag"></span></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Wounds</span><small>dead at max (usually 6)</small></div>
+          <div class="vlbl"><span>Wounds</span></div>
           <div class="pips" id="wound-pips"></div>
-          <div class="vline">max <input type="number" id="wounds-max" value="6" oninput="recalc()"><button class="small-btn ghost" onclick="woundChange(1)">+ Wound</button><button class="small-btn ghost" onclick="woundChange(-1)">Heal 1</button></div>
+          <div class="vline">max <input type="number" id="wounds-max" value="6" oninput="recalc()"></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Hit Dice</span><small id="hd-lbl">d8 · +STR each</small></div>
+          <div class="vlbl"><span>Hit Dice</span><small id="hd-lbl"></small></div>
           <div class="vbig"><input type="number" id="hd-cur" value="1" oninput="recalc()"><span class="sep">/</span><input type="number" id="hd-max" value="1" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn" onclick="catchBreath()" title="Spend 1 Hit Die: roll it + STR">Catch Breath</button><button class="small-btn" onclick="makeCamp()" title="Spend 1 Hit Die at max value + STR">Make Camp</button><button class="small-btn green" onclick="safeRest()" title="Recover all HP, Hit Dice, mana; heal 1 Wound">Safe Rest</button></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Armor · Initiative · Speed</span><small>armor = DEX unarmored</small></div>
-          <div class="vbig"><span id="armor-val">0</span><span class="sep">·</span><span id="init-val">+0</span><span class="sep">·</span><span id="speed-val">6</span></div>
-          <div class="vline">armor <input type="text" id="f-armor" list="dl-armor" placeholder="Chain Shirt" style="width:104px;text-align:left;" oninput="recalc()"> shield <input type="text" id="f-shield" list="dl-shield" placeholder="—" style="width:84px;text-align:left;" oninput="recalc()"> +<input type="number" id="armor-bonus" value="0" oninput="recalc()"><button class="small-btn ghost" onclick="rollInitiative()">Roll Init</button></div>
-        </div>
-        <div class="vital">
-          <div class="vlbl"><span>Actions</span><small>3 per turn · reactions cost 1</small></div>
+          <div class="vlbl"><span>Actions</span></div>
           <div class="pips" id="action-pips"></div>
-          <div class="vline"><button class="small-btn ghost" onclick="resetActions()">New turn</button><span>Defend: reduce damage by your Armor</span></div>
+          <div class="vline"><button class="small-btn ghost" onclick="resetActions()">New turn</button></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Mana</span><small id="mana-lbl">casters only</small></div>
+          <div class="vlbl"><span>Armor</span></div>
+          <div class="vbig"><span id="armor-val">0</span></div>
+          <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="Armor" style="width:100px;text-align:left;" oninput="recalc()"><input type="text" id="f-shield" list="dl-shield" placeholder="Shield" style="width:80px;text-align:left;" oninput="recalc()"> +<input type="number" id="armor-bonus" value="0" oninput="recalc()"></div>
+        </div>
+        <div class="vital">
+          <div class="vlbl"><span>Initiative · Speed</span></div>
+          <div class="vbig"><span id="init-val">+0</span><span class="sep">·</span><span id="speed-val">6</span><button class="small-btn ghost" style="margin-left:8px;align-self:center;" onclick="rollInitiative()" title="Roll initiative">🎲</button></div>
+          <div class="vline">init +<input type="number" id="init-bonus" value="0" oninput="recalc()"> speed +<input type="number" id="speed-bonus" value="0" oninput="recalc()"> size <input type="text" id="f-size" value="Medium" style="width:64px;text-align:left;"></div>
+        </div>
+        <div class="vital" style="grid-column:span 2;">
+          <div class="vlbl"><span>Mana</span><small id="mana-lbl"></small></div>
           <div class="vbig"><input type="number" id="mana-cur" value="0" oninput="recalc()"><span class="sep">/</span><input type="number" id="mana-max" value="0" oninput="recalc()"></div>
-          <div class="vline">size <input type="text" id="f-size" value="Medium" style="width:70px;text-align:left;"> speed +<input type="number" id="speed-bonus" value="0" oninput="recalc()"> init +<input type="number" id="init-bonus" value="0" oninput="recalc()"></div>
         </div>
       </div>
     </div>
@@ -322,10 +328,6 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
       <div class="section-bar"><span>Notes</span></div>
       <div class="notes-box"><textarea id="f-notes"></textarea></div>
     </div>
-  </div>
-  <div class="sheet-foot">
-    <span>Skill checks & saves: d20 + bonus vs DC (8 easy · 12 medium · 15 challenging · 18 very difficult · 20+). A 1 always fails, a 20 always succeeds.</span>
-    <span>At 0 HP you're Dying (1 action, Concentration breaks) and gain a Wound. 6 Wounds = death.</span>
   </div>
 </div>
 </div>
@@ -453,13 +455,13 @@ function recalc() {
   $('sk-flag').className = used > max ? 'bad' : used === max ? 'good' : ''; $('sk-flag').textContent = used > max ? '· over' : used === max ? '✓' : '';
   $('armor-val').textContent = armorValue(); $('init-val').textContent = (initBonus() >= 0 ? '+' : '') + initBonus(); $('speed-val').textContent = speedValue();
   const c = cls();
-  $('hd-lbl').textContent = (c ? 'd' + c.hitDie : 'd8') + ' · +STR each · max ' + hdMax();
+  $('hd-lbl').textContent = c ? 'd' + c.hitDie : '';
   if(num($('hd-max').value) !== hdMax() && !$('hd-max').dataset.manual) $('hd-max').value = hdMax();
   const wm = 6 + (/\+1 max Wounds/i.test(ancestryText()) ? 1 : 0) - (/–1 max Wounds|-1 max Wounds/.test(D.backgrounds().find(b => norm(b.name) === norm($('f-background').value))?.description || '') ? 1 : 0);
   if(!$('wounds-max').dataset.manual) $('wounds-max').value = wm;
   renderWounds(); renderActions();
   const mm = manaMax();
-  $('mana-lbl').textContent = mm === null ? (c && c.spellcasting ? 'see class' : 'casters only') : 'max ' + mm + ' (from class)';
+  $('mana-lbl').textContent = '';
   if(mm !== null && !$('mana-max').dataset.manual) $('mana-max').value = mm;
   $('slots-note').textContent = 'slots ' + slotsUsed() + ' / ' + (10 + stat('STR'));
   const hp = num($('hp-cur').value);
@@ -472,23 +474,11 @@ function renderWounds() {
   const max = num($('wounds-max').value) || 6; const wrap = $('wound-pips'); wrap.innerHTML = '';
   for(let i = 1; i <= max; i++) { const p = document.createElement('div'); p.className = 'pip wound' + (i <= wounds ? ' on' : ''); p.textContent = i; p.onclick = () => { wounds = i === wounds ? i - 1 : i; recalc(); scheduleAutosave(); }; wrap.appendChild(p); }
 }
-function woundChange(d) { wounds = Math.max(0, Math.min(num($('wounds-max').value) || 6, wounds + d)); recalc(); if(wounds >= (num($('wounds-max').value) || 6)) addLog('Wounds', '☠', 'That is the last Wound. Your hero has died.', 'fumble'); scheduleAutosave(); }
 function renderActions() { const wrap = $('action-pips'); wrap.innerHTML = ''; for(let i = 1; i <= 3; i++) { const p = document.createElement('div'); p.className = 'pip act' + (i > actions ? ' spent' : ''); p.textContent = i; p.onclick = () => { actions = i > actions ? i : i - 1; renderActions(); }; wrap.appendChild(p); } }
 function spendAction() { if(actions > 0) { actions -= 1; renderActions(); } }
 function resetActions() { actions = 3; renderActions(); }
 
 // ═══ HP / RESTS ═══════════════════════════════════════════════════════════
-function damage() {
-  let n = num($('hp-amt').value) || 1; let temp = num($('hp-temp').value); let hp = num($('hp-cur').value);
-  const dying = hp <= 0;
-  if(temp > 0) { const t = Math.min(temp, n); temp -= t; n -= t; }
-  hp = Math.max(0, hp - n);
-  $('hp-temp').value = temp; $('hp-cur').value = hp;
-  if(dying) { wounds += 2; addLog('Damaged while Dying', '+2 Wounds', 'crits cause 3', 'fumble'); }
-  else if(hp === 0) { wounds += 1; addLog('Dropped to 0 HP', '+1 Wound', 'Dying: 1 action, Concentration broken', 'fumble'); }
-  recalc(); scheduleAutosave();
-}
-function heal() { const n = num($('hp-amt').value) || 1; $('hp-cur').value = Math.min(num($('hp-max').value), num($('hp-cur').value) + n); recalc(); scheduleAutosave(); }
 function spendHD(maxed) {
   const c = cls(); const die = c ? c.hitDie : 8;
   if(num($('hd-cur').value) <= 0) { addLog('Hit Dice', '0', 'No Hit Dice left — take a Safe Rest.', 'fumble'); return; }

@@ -249,6 +249,8 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 .alloc .a-code{font-family:'Share Tech Mono',monospace;font-size:12px;color:#ddd;min-width:52px;text-align:right;}
 .alloc button{width:24px;height:22px;background:#222;border:1px solid #444;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
 .alloc button:disabled{opacity:.3;cursor:default;}
+textarea{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
+textarea::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track{background:transparent;}
 </style>
 </head>
 <body>
@@ -276,7 +278,7 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
     <div class="stats-col">
       <div class="section-bar gold"><span>Attributes</span></div>
       <div class="stats-grid" id="stats-grid"></div>
-      <div class="pts-note"><span>Skill dice <b id="sk-used">0D</b> / <b>7D</b> <span id="sk-flag"></span></span><span>max +2D per skill at creation</span></div>
+      <div class="pts-note"><span>Skill dice <b id="sk-used">0D</b> / <b>7D</b> <span id="sk-flag"></span></span></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
       <div class="add-row"><select id="skill-pick"><option value="">Add a skill…</option></select><button class="small-btn ghost" onclick="addSkillPick()">+ Add</button><button class="small-btn ghost" onclick="addSkillRow({name:'',attr:'Dexterity',adds:0})" title="Blank row for a new skill">+ Custom</button></div>
 
@@ -284,20 +286,19 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
         <div class="vital" style="grid-column:span 2;">
           <div class="vlbl"><span>Wounds</span><small id="wound-note">unhurt</small></div>
           <div class="wound-track" id="wound-track"></div>
-          <div class="vline"><button class="small-btn ghost" onclick="takeDamage()">Roll damage vs STR</button> dmg <input type="text" id="dmg-code" class="code" value="4D" style="width:52px;text-align:center;" title="Damage code of the hit"><button class="small-btn ghost" onclick="setWound('none')">Heal</button></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Force Points</span><small>doubles your dice</small></div>
+          <div class="vlbl"><span>Force Points</span></div>
           <div class="vbig"><input type="number" id="f-fp" value="1" min="0" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn gold" id="fp-btn" onclick="toggleForcePoint()">Use Force Point</button></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Dark Side</span><small>6+ = at risk</small></div>
+          <div class="vlbl"><span>Dark Side</span></div>
           <div class="vbig"><input type="number" id="f-ds" value="0" min="0" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn ghost" onclick="callDarkSide()">Call on the Dark Side</button></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Skill Points</span><small>unspent</small></div>
+          <div class="vlbl"><span>Skill Points</span></div>
           <div class="vbig"><input type="number" id="f-sp" value="0" min="0"></div>
         </div>
         <div class="vital">
@@ -305,12 +306,12 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
           <div class="vbig"><input type="text" id="f-credits" placeholder="1,000" style="width:100%;text-align:left;font-size:16px;"></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Armor</span><small>adds to Strength vs damage</small></div>
+          <div class="vlbl"><span>Armor</span></div>
           <div class="vbig"><input type="text" id="f-armor-pips" class="code" placeholder="+1D" style="width:64px;" oninput="recalc()"></div>
           <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="none" style="width:100%;text-align:left;" oninput="recalc()"></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Move</span><small>meters per round</small></div>
+          <div class="vlbl"><span>Move</span></div>
           <div class="vbig"><input type="number" id="f-move" value="10" oninput="recalc()"></div>
         </div>
       </div>
@@ -358,10 +359,6 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
       <div class="section-bar"><span>Notes</span></div>
       <div class="notes-box"><textarea id="f-notes"></textarea></div>
     </div>
-  </div>
-  <div class="sheet-foot">
-    <span>Roll the skill (or attribute) and beat the difficulty: Very Easy 3–5 · Easy 6–10 · Moderate 11–15 · Difficult 16–20 · Very Difficult 21–30.</span>
-    <span>Each extra action in a round: −1D to everything. Wounded: −1D. Stunned: −1D this round and next.</span>
   </div>
 </div>
 </div>
@@ -550,18 +547,6 @@ function rollCode(label, basePips, opts) {
 function rollAttr(a) { rollCode(a, attr(a)); }
 function rollSkillRow(tr) { const name = tr.querySelector('.sk-name-in').value.trim() || 'Skill'; rollCode(name, rowTotal(tr)); }
 function rollLoose(n) { const r = rollDice(n * 3); addLog(n + 'D', r.total, '[' + r.rolls.join(' ') + ']', 'normal'); }
-function takeDamage() {
-  const dmg = fromCode($('dmg-code').value); if(dmg === null) { addLog('Damage', '✗', 'Enter the damage code (e.g. 4D)', 'fumble'); return; }
-  const str = attr('Strength') + (fromCode($('f-armor-pips').value) || 0);
-  const dr = rollDice(dmg), sr = rollDice(str);
-  let result = 'No effect', k = wound;
-  if(dr.total >= sr.total * 3) { result = 'Mortally wounded'; k = 'mortal'; }
-  else if(dr.total >= sr.total * 2) { result = 'Incapacitated'; k = 'incapacitated'; }
-  else if(dr.total >= sr.total) { result = wound === 'wounded' ? 'Wounded again → Incapacitated' : 'Wounded'; k = wound === 'wounded' ? 'incapacitated' : 'wounded'; }
-  else if(dr.total * 2 >= sr.total) { result = 'Stunned'; k = wound === 'none' ? 'stunned' : wound; }
-  addLog('Damage ' + toCode(dmg) + ' vs STR ' + toCode(str), result, 'damage ' + dr.total + ' [' + dr.rolls.join(' ') + '] vs strength ' + sr.total + ' [' + sr.rolls.join(' ') + ']', result === 'No effect' ? 'crit' : 'fumble');
-  const order = ['none','stunned','wounded','incapacitated','mortal']; if(order.indexOf(k) > order.indexOf(wound)) { wound = k; renderWoundTrack(); updateModNote(); scheduleAutosave(); }
-}
 function callDarkSide() {
   $('f-ds').value = num($('f-ds').value) + 1; $('f-fp').value = num($('f-fp').value) + 1;
   addLog('Dark Side', '☠', 'You gain a Force Point to spend now and a Dark Side Point. At 6+ the GM rolls 1D each time you call on the Force; a 1 and your character turns to the dark side.', 'fumble'); scheduleAutosave();

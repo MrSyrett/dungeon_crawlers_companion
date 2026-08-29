@@ -241,6 +241,8 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
   .stat-row,.stats-head{grid-template-columns:80px 60px 30px 44px 1fr;padding-left:6px;padding-right:6px;}
   .blk-grid{grid-template-columns:1fr;}
 }
+textarea{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
+textarea::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track{background:transparent;}
 </style>
 </head>
 <body data-book="bikes">
@@ -271,12 +273,11 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
     <!-- LEFT -->
     <div class="stats-col">
       <div class="section-bar purple"><span>Stats</span></div>
-      <div class="die-preview"><span>Dice <b id="dice-check"></b></span><span id="age-bonus-note"></span></div>
       <div class="stats-head"><span>Stat</span><span>Die</span><span title="Age/grade bonus">+</span><span title="Other modifiers (bike, wand, Skilled at…)">Mod</span><span></span></div>
       <div id="stats-list"></div>
 
       <div class="tok-wrap">
-        <div class="derived-lbl"><span>Adversity Tokens</span><small>fail a check → +1 · acting on your Flaw → +1 more · spend +1 each</small></div>
+        <div class="derived-lbl"><span>Adversity Tokens</span></div>
         <div class="tok-line">
           <span class="tok-big" id="at-val">3</span>
           <div class="tok-pips" id="at-pips"></div>
@@ -288,7 +289,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
 
       <!-- CAPES: Stress / Power -->
       <div class="tok-wrap book-only capes-only">
-        <div class="derived-lbl"><span>Stress <span id="stress-val" style="font-family:'Share Tech Mono',monospace;font-size:18px;">0</span></span><small>+1 every round of combat · 13 = out of the fight</small></div>
+        <div class="derived-lbl"><span>Stress <span id="stress-val" style="font-family:'Share Tech Mono',monospace;font-size:18px;">0</span></span></div>
         <div class="stress-track" id="stress-track"></div>
         <div class="stress-effect" id="stress-effect"></div>
         <div class="tok-line">
@@ -306,7 +307,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
 
       <!-- BROOMS: Wand / Broom / Familiar -->
       <div class="tok-wrap book-only brooms-only">
-        <div class="derived-lbl"><span>Wand &amp; Broom</span><small>wood = +1 to one type of magic · broom benefit only while riding</small></div>
+        <div class="derived-lbl"><span>Wand &amp; Broom</span></div>
         <div class="blk-grid" style="margin-top:6px;">
           <div class="fld"><label>Wand wood</label><input type="text" id="f-wand-wood" list="dl-wand-wood" placeholder="Wisteria" oninput="recalc()"></div>
           <div class="fld"><label>Wand core</label><input type="text" id="f-wand-core" list="dl-wand-core" placeholder="Dragon heartstring"></div>
@@ -327,7 +328,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
       <div class="add-row"><button class="small-btn ghost" onclick="addStrengthRow()">+ Strength</button></div>
       <div class="blk">
         <div class="blk-grid">
-          <div class="fld"><label>Flaw</label><input type="text" id="f-flaw" list="dl-flaws" placeholder="Clumsy"><div class="hint">Act on it and fail → an extra Adversity Token.</div></div>
+          <div class="fld"><label>Flaw</label><input type="text" id="f-flaw" list="dl-flaws" placeholder="Clumsy"></div>
           <div class="fld bikes-only book-only"><label>Knack</label><input type="text" id="f-knack" placeholder="Take a 10 instead of rolling when it applies"></div>
           <div class="fld capes-only book-only"><label>Cape (team role)</label><input type="text" id="f-cape" list="dl-capes" placeholder="Brawler" oninput="recalc()"><div class="hint" id="cape-hint"></div></div>
           <div class="fld capes-only book-only"><label>Power</label><input type="text" id="f-power-cat" list="dl-power-cat" placeholder="Energy Control — describe it"></div>
@@ -383,10 +384,6 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
     </div>
   </div>
 
-  <div class="sheet-foot">
-    <span>Roll the stat's die (+ bonuses) against the difficulty. Max value → Lucky Break: roll again and add. After rolling, spend Adversity Tokens for +1 each.</span>
-    <span>Planned Action: take half the die's maximum instead of rolling. Knack: take a 10.</span>
-  </div>
 </div>
 </div>
 
@@ -480,7 +477,7 @@ function buildStats() {
       `<select class="die-sel" id="die-${s.id}" onchange="recalc()">${DICE.map(d => '<option value="' + d + '"' + (d === 8 ? ' selected' : '') + '>d' + d + '</option>').join('')}</select>` +
       `<div class="stat-bonus" id="ab-${s.id}"></div>` +
       `<input class="stat-mod" id="mod-${s.id}" type="number" value="0" title="Other modifiers" oninput="recalc()">` +
-      `<div class="stat-btns"><button class="stat-roll" onclick="rollStat('${s.id}')" title="Roll (Snap Decision)">🎲 Roll</button><button class="stat-roll plan" onclick="planStat('${s.id}')" title="Planned Action: take half the die's maximum">½ Plan</button><button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">⚡</button></div>`;
+      `<div class="stat-btns"><button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">⚡</button></div>`;
     list.appendChild(row);
   });
   const opts = STATS.map(s => '<option value="' + s.id + '">' + s.id + '</option>').join('');
@@ -515,12 +512,6 @@ function bonusOf(id) {
   return b;
 }
 function recalc() {
-  // dice-set check: a character should have exactly one of each die
-  const used = STATS.map(s => dieOf(s.id)).sort((a, b) => a - b).join(',');
-  const ok = used === DICE.join(',');
-  $('dice-check').innerHTML = ok ? '<span class="good">one of each ✓</span>' : '<span class="bad">' + STATS.map(s => 'd' + dieOf(s.id)).join(' ') + '</span>';
-  const a = ageGroup();
-  $('age-bonus-note').textContent = a ? '+1 ' + a.statBonus.join(' & ') + ' · free: ' + a.freeStrength : '';
   STATS.forEach(s => { const b = bonusOf(s.id); $('ab-' + s.id).textContent = b ? (b > 0 ? '+' + b : String(b)) : ''; $('ab-' + s.id).title = 'Total bonus on ' + s.id + ' checks'; });
   // book chrome
   const info = bookInfo();
