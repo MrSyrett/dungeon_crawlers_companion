@@ -178,6 +178,10 @@ body.dark .hp-shield.on{background:#5bb8ec;border-color:#7fd0ff;}
 .attacks-table td input{width:100%;border:none;background:transparent;font-family:'Barlow',sans-serif;font-size:12px;outline:none;padding:3px 2px;color:var(--ink);}
 .atk-formula{display:flex;align-items:center;gap:2px;justify-content:center;}
 .atk-formula input{width:30px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;}
+/* Fields driven by a linked skill/spell (Rank + Damage) — read-only, tinted so
+   it reads as "auto" not "disabled". Cursor help hints there's a tooltip. */
+.atk-formula input[readonly]{cursor:help;color:#7fb0d8;border-color:transparent;background:transparent;}
+body.dark .atk-formula input[readonly]{color:#8fc4ec;}
 .atk-plus{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--muted);}
 .atk-calc{display:block;text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);opacity:.85;margin-top:1px;white-space:nowrap;}
 .atk-roll-btn{height:24px;min-width:34px;padding:0 8px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--muted);transition:all .1s;}
@@ -1056,6 +1060,93 @@ function recalcAllAttacks() {
   document.querySelectorAll('#attacks-body tr').forEach(recalcAttackRow);
 }
 
+// ── LINK ATTACKS TO THEIR SKILL/SPELL ──
+// An attack is "linked" when its name (or stored data-src) resolves to a rulebook
+// skill/spell that deals damage. A linked attack's Rank follows the matching
+// Skills-list row, and its Damage dice are recomputed from the entry's base dice
+// plus every rank-gated upgrade unlocked at that Rank — DCC skills & spells gain
+// extra damage dice (and new abilities) at Ranks 5/10/15 (Core p.176/204+). The
+// managed Rank/Damage fields are shown read-only so it's clear they auto-update;
+// use the (i) button to see which rank abilities have unlocked.
+function dccCombatEntry(name) {
+  const key = String(name || '').replace(/\s*\(spell\)\s*$/i, '').trim();
+  if(!key) return null;
+  const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const nk = norm(key), lk = key.toLowerCase();
+  const find = arr => (arr && arr.length) ? (arr.find(e => String(e.name).toLowerCase() === lk) || arr.find(e => norm(e.name) === nk)) : null;
+  const sk = find(typeof DCC_SKILLS !== 'undefined' ? DCC_SKILLS : null);
+  if(sk && sk.damage) return { kind: 'skill', name: sk.name, base: sk.damage, upgrades: sk.upgrades || [] };
+  const sp = find(typeof DCC_SPELLS !== 'undefined' ? DCC_SPELLS : null);
+  if(sp) { const m = String(sp.desc || '').match(/Base Damage:\s*(\d*d\d+)/i); if(m) return { kind: 'spell', name: sp.name, base: m[1], upgrades: sp.upgrades || [] }; }
+  return null;
+}
+// base "NdM" + every "+KdM base damage" from upgrades unlocked at this Rank. Every
+// DCC entry's damage upgrades use the same die as its base, so they sum cleanly.
+function dccDiceAtRank(base, upgrades, rank) {
+  const bm = String(base || '').match(/(\d*)d(\d+)/i);
+  if(!bm) return '';
+  let count = parseInt(bm[1] || '1', 10); const die = bm[2];
+  (upgrades || []).forEach(u => {
+    if(Number(u.rank) > rank) return;
+    const re = /\+\s*(\d*)d(\d+)\s*base damage/ig; let m;
+    while((m = re.exec(u.text || ''))) { if(m[2] === die) count += parseInt(m[1] || '1', 10); }
+  });
+  return count + 'd' + die;
+}
+// Non-damage clauses of the upgrades unlocked at this Rank (debuffs, riders, etc.),
+// for the row's hover title so the extra abilities are visible at a glance.
+function dccAbilitiesAtRank(upgrades, rank) {
+  const out = [];
+  (upgrades || []).forEach(u => {
+    if(Number(u.rank) > rank) return;
+    const extra = String(u.text || '').replace(/\+\s*\d*d\d+\s*base damage[,.]?\s*/ig, '').replace(/^and\s+/i, '').trim();
+    if(extra) out.push('R' + u.rank + ': ' + extra);
+  });
+  return out;
+}
+// The Rank of the Skills-list row that matches this entry (null if none exists).
+function dccSkillRankFor(entry) {
+  const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const target = norm(entry.name);
+  let found = null;
+  document.querySelectorAll('#skills-body tr').forEach(tr => {
+    if(found !== null) return;
+    const t = tr.querySelectorAll('input[type="text"]');
+    const nm = norm(t[0] ? t[0].value : ''), src = norm(tr.dataset.src || '');
+    if(nm === target || src === target) found = parseMod(t[1] ? t[1].value : '');
+  });
+  return found;
+}
+function syncLinkedAttacks() {
+  document.querySelectorAll('#attacks-body tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input[type="text"]');   // [name, rank, dice, effects]
+    if(inputs.length < 3) return;
+    const entry = dccCombatEntry(tr.dataset.src || inputs[0].value);
+    // Default: nothing managed — restore editability.
+    inputs[1].readOnly = false; inputs[2].readOnly = false;
+    inputs[1].removeAttribute('title'); inputs[2].removeAttribute('title');
+    if(!entry) { tr.classList.remove('atk-linked'); tr.removeAttribute('title'); return; }
+    tr.classList.add('atk-linked');
+    if(!tr.dataset.src) tr.dataset.src = entry.name;   // remember the link across saves/renames
+    const skillRank = dccSkillRankFor(entry);
+    let rank;
+    if(skillRank !== null) {
+      rank = skillRank;
+      inputs[1].value = String(skillRank);
+      inputs[1].readOnly = true;
+      inputs[1].title = 'Follows the ' + entry.name + ' skill Rank';
+    } else {
+      rank = parseMod(inputs[1].value);              // attack-only: driven by its own Rank
+    }
+    inputs[2].value = dccDiceAtRank(entry.base, entry.upgrades, rank);
+    inputs[2].readOnly = true;
+    inputs[2].title = 'Damage scales with the ' + entry.name + ' Rank (' + entry.base + ' base)';
+    const abil = dccAbilitiesAtRank(entry.upgrades, rank);
+    tr.title = abil.length ? (entry.name + ' — unlocked ' + abil.join(' · ')) : (entry.name + ' — Rank ' + rank);
+  });
+}
+window.syncLinkedAttacks = syncLinkedAttacks;
+
 // ── HOTLIST ──
 function buildHotlist() {
   const grid = document.getElementById('hotlist-grid');
@@ -1825,6 +1916,9 @@ function applySheet(data) {
       if(sk.src) tr.dataset.src = sk.src; else delete tr.dataset.src;
     });
   }
+  // Now that both Attacks and Skills are populated, link them so each attack's
+  // Rank + Damage reflect its skill/spell (and any Rank 5/10/15 upgrades).
+  if(typeof syncLinkedAttacks === 'function') syncLinkedAttacks();
 
   // Inventory
   if(data.inventory) {
@@ -2471,8 +2565,13 @@ buildAccessories();
 buildCompanions();
 buildSkills();
 buildInventory();
-document.getElementById('skills-body').addEventListener('input', refreshSkillRowRules);
+document.getElementById('skills-body').addEventListener('input', () => { refreshSkillRowRules(); syncLinkedAttacks(); });
+// A linked attack's name can be typed/changed directly too — re-sync on that.
+document.getElementById('attacks-body').addEventListener('input', e => {
+  if(e.target && e.target.matches('input[type="text"]:not([readonly])')) syncLinkedAttacks();
+});
 refreshSkillRowRules();
+syncLinkedAttacks();
 // autoLoad() is deferred to the end of the campaign <script> block below, so
 // campaignRestore() is defined by the time applySheet() calls it. Running it
 // here (before that block parses) silently skipped campaign restore.

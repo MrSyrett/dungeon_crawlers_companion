@@ -119,6 +119,12 @@
       ".dccs-info .ef{color:#e6e3da;font-size:13px;line-height:1.55;margin-top:8px;}",
       ".dccs-info .uprow{margin-top:8px;font-size:12px;color:#c9c9cf;line-height:1.5;}",
       ".dccs-info .uprow b{color:#f0a8a3;}",
+      ".dccs-info .uphdr{margin-top:14px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a8a93;border-top:1px solid #2a2a2e;padding-top:10px;}",
+      ".dccs-info .uphdr .upnow{color:#e6c15a;text-transform:none;letter-spacing:0;}",
+      ".dccs-info .uprow.on{color:#e6e3da;}",
+      ".dccs-info .uprow.on b{color:#8fd18f;}",
+      ".dccs-info .uprow.off{opacity:.55;}",
+      ".dccs-info .uprow .upmark{display:inline-block;width:1.3em;}",
       ".dccs-info .mt{color:#8a8a93;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}",
       ".dccs-info-body{padding:16px 18px 18px;}",
     ].join("\n");
@@ -208,17 +214,23 @@
   }
 
   // ── info panel (shared by picker and per-row (i) buttons) ───────────────────
-  function upgradesHtml(e) {
+  function upgradesHtml(e, rank) {
     if (!e.upgrades || !e.upgrades.length) return "";
-    return e.upgrades.map(function (u) { return '<div class="uprow"><b>Rank ' + esc(u.rank) + ':</b> ' + esc(u.text) + '</div>'; }).join("");
+    var haveRank = typeof rank === "number" && !isNaN(rank);
+    return '<div class="uphdr">Rank Upgrades' + (haveRank ? ' <span class="upnow">(at Rank ' + rank + ')</span>' : "") + '</div>' +
+      e.upgrades.map(function (u) {
+        var on = haveRank && Number(u.rank) <= rank;
+        var mark = haveRank ? '<span class="upmark">' + (on ? "✓" : "🔒") + "</span> " : "";
+        return '<div class="uprow' + (on ? " on" : (haveRank ? " off" : "")) + '">' + mark + '<b>Rank ' + esc(u.rank) + ':</b> ' + esc(u.text) + '</div>';
+      }).join("");
   }
-  function info(name) {
+  function info(name, rank) {
     injectCss();
     var e = lookup(name);
     var ov = overlay("dccs-info-overlay");
     var inner = e
       ? '<div class="dccs-head"><h3>' + esc(e.name) + '</h3><button class="dccs-x" onclick="DCCSkills.closeInfo()" aria-label="Close">✕</button></div>' +
-        '<div class="dccs-info-body dccs-info"><div class="mt">' + esc(metaLine(e)) + '</div><div class="ef">' + esc(e.desc || "No description on file.") + '</div>' + upgradesHtml(e) + '</div>'
+        '<div class="dccs-info-body dccs-info"><div class="mt">' + esc(metaLine(e)) + '</div><div class="ef">' + esc(e.desc || "No description on file.") + '</div>' + upgradesHtml(e, rank) + '</div>'
       : '<div class="dccs-head"><h3>' + esc(name || "Skill") + '</h3><button class="dccs-x" onclick="DCCSkills.closeInfo()" aria-label="Close">✕</button></div>' +
         '<div class="dccs-info-body"><div class="dccs-grp">No rulebook entry matches “' + esc(name || "") + '”. It may be a custom or renamed skill.</div></div>';
     ov.innerHTML = '<div class="dccs-modal dccs-info" role="dialog" aria-label="Skill info">' + inner + '</div>';
@@ -247,7 +259,24 @@
     }
     var hit = null;
     for (var i = 0; i < cands.length && !hit; i++) { if (lookup(cands[i])) hit = cands[i]; }
-    info(hit || name);
+    // Current Rank drives which upgrades show as unlocked. An attack row's own Rank
+    // may be blank/linked, so prefer the matching Skills-list row's Rank.
+    var rank = NaN;
+    var t1 = texts[1] ? parseInt(texts[1].value, 10) : NaN;
+    var hitName = String(hit || name).replace(/\s*\([^)]*\)\s*$/, "").trim().toLowerCase();
+    var srcName = (tr.dataset && tr.dataset.src ? tr.dataset.src : "").toLowerCase();
+    [].slice.call(document.querySelectorAll("#skills-body tr")).some(function (r) {
+      var rt = r.querySelectorAll('input[type="text"]');
+      var nm = rt[0] ? String(rt[0].value).trim().toLowerCase() : "";
+      var sc = (r.dataset && r.dataset.src ? r.dataset.src : "").toLowerCase();
+      if ((hitName && (nm === hitName || sc === hitName)) || (srcName && (nm === srcName || sc === srcName))) {
+        var rv = rt[1] ? parseInt(rt[1].value, 10) : NaN;
+        if (!isNaN(rv)) { rank = rv; return true; }
+      }
+      return false;
+    });
+    if (isNaN(rank) && !isNaN(t1)) rank = t1;   // fall back to this row's own Rank
+    info(hit || name, isNaN(rank) ? undefined : rank);
   }
 
   // ── add a filled / blank row to the Skills table ────────────────────────────
@@ -308,6 +337,8 @@
     fillRow(newRow(), name, e);                                  // always goes on the Skills list
     if (isAttackEntry(e)) fillAttackRow(newAttackRow(), name, e); // …and the Attacks section too
     if (typeof floatHealToTop === "function") { try { floatHealToTop(); } catch (_) {} }
+    // Link the new attack to its skill so Rank + damage upgrades track together.
+    if (typeof window.syncLinkedAttacks === "function") { try { window.syncLinkedAttacks(); } catch (_) {} }
   }
 
   // ── attack rows keyed to a Skills-tab row (used by the Hotlist spell pin) ───
