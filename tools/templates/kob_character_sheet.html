@@ -270,7 +270,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
   <div class="body-row">
     <!-- LEFT -->
     <div class="stats-col">
-      <div class="section-bar purple"><span>Stats</span><span class="sb-note">d20 superb → d4 terrible · max roll = Lucky Break</span></div>
+      <div class="section-bar purple"><span>Stats</span></div>
       <div class="die-preview"><span>Dice <b id="dice-check"></b></span><span id="age-bonus-note"></span></div>
       <div class="stats-head"><span>Stat</span><span>Die</span><span title="Age/grade bonus">+</span><span title="Other modifiers (bike, wand, Skilled at…)">Mod</span><span></span></div>
       <div id="stats-list"></div>
@@ -304,7 +304,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
         </div>
       </div>
 
-      <!-- BROOMS: Wand / Broom / Familiar + spell calculator -->
+      <!-- BROOMS: Wand / Broom / Familiar -->
       <div class="tok-wrap book-only brooms-only">
         <div class="derived-lbl"><span>Wand &amp; Broom</span><small>wood = +1 to one type of magic · broom benefit only while riding</small></div>
         <div class="blk-grid" style="margin-top:6px;">
@@ -314,24 +314,12 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
           <div class="fld"><label>Familiar</label><input type="text" id="f-familiar" placeholder="Name — animal"></div>
           <div class="fld"><label>Favorite class · teacher</label><input type="text" id="f-class" list="dl-class" placeholder="Transfiguration · Prof. …"></div>
         </div>
-        <div class="derived-lbl" style="margin-top:10px;"><span>Spell Check</span><small>Stat die + d4 Magic Die + bonuses vs difficulty</small></div>
-        <div class="tok-line">
-          <select class="inline-sel" id="sp-stat" style="min-width:80px;"></select>
-          <select class="inline-sel" id="sp-mag" onchange="spellDifficulty()"></select>
-          <select class="inline-sel" id="sp-area" onchange="spellDifficulty()"></select>
-        </div>
-        <div class="tok-line">
-          <select class="inline-sel" id="sp-dur" onchange="spellDifficulty()"></select>
-          <select class="inline-sel" id="sp-exp" onchange="spellDifficulty()"></select>
-          <span class="hint" style="margin:0;">Difficulty <b id="sp-diff" style="font-family:'Share Tech Mono',monospace;font-size:16px;">0</b></span>
-          <button class="small-btn purple" onclick="castSpell()">✨ Cast</button>
-        </div>
       </div>
     </div>
 
     <!-- CENTER -->
     <div class="center-col">
-      <div class="section-bar"><span>Strengths &amp; Flaw</span><span class="sb-note" id="sf-note">Two Strengths + one free from your age · one Flaw</span></div>
+      <div class="section-bar"><span>Strengths &amp; Flaw</span></div>
       <table class="tbl">
         <thead><tr><th style="width:34%;">Strength</th><th style="width:70px;">Cost</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
         <tbody id="strengths-body"></tbody>
@@ -348,7 +336,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
 
       <!-- CAPES: skills -->
       <div class="book-only capes-only">
-        <div class="section-bar teal"><span>Cape &amp; Power Skills</span><span class="sb-note">Spend Growth Points · Starting → Intermediate → Advanced</span></div>
+        <div class="section-bar teal"><span>Cape &amp; Power Skills</span></div>
         <table class="tbl">
           <thead><tr><th style="width:34%;">Skill</th><th style="width:110px;">Tier</th><th>Effect</th><th style="width:26px;"></th></tr></thead>
           <tbody id="skills-body"></tbody>
@@ -356,7 +344,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
         <div class="add-row"><button class="small-btn ghost" onclick="addSkillRow()">+ Skill</button></div>
       </div>
 
-      <div class="section-bar"><span>Motivations, Fear &amp; Obligations</span><span class="sb-note">Fear: −1 to −3 on checks near it · spend AT to ignore</span></div>
+      <div class="section-bar"><span>Motivations, Fear &amp; Obligations</span></div>
       <div class="blk">
         <div class="blk-grid">
           <div class="fld"><label>Motivations</label><textarea id="f-motivations" placeholder="What does your character want?"></textarea></div>
@@ -364,7 +352,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span id="bag-title">Backpack</span><span class="sb-note" id="ride-note">Bike: colour gives a bonus, accessory gives a trick</span></div>
+      <div class="section-bar"><span id="bag-title">Backpack</span></div>
       <div class="blk">
         <div class="blk-grid">
           <div class="fld"><label id="bag-label">Backpack</label><textarea id="f-bag" placeholder="One item per line" style="min-height:70px;"></textarea></div>
@@ -377,7 +365,7 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span>Relationships</span><span class="sb-note">Answer questions about the other characters</span></div>
+      <div class="section-bar"><span>Relationships</span></div>
       <table class="tbl">
         <thead><tr><th style="width:24%;">Character</th><th style="width:20%;">Relationship</th><th>Question &amp; answer</th><th style="width:26px;"></th></tr></thead>
         <tbody id="rel-body"></tbody>
@@ -389,7 +377,8 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
         <button class="small-btn ghost" onclick="drawQuestion('unknown')">Draw “don't know”</button>
       </div>
 
-      <div class="section-bar"><span>Notes</span><span class="sb-note" id="trope-q-note"></span></div>
+      <div class="section-bar"><span>Notes</span></div>
+      <div class="hint" id="trope-q-note" style="padding:6px 10px 0;margin:0;"></div>
       <div class="notes-box"><textarea id="f-notes" placeholder="Trope questions, injuries, secrets, what happened last session…"></textarea></div>
     </div>
   </div>
@@ -495,7 +484,7 @@ function buildStats() {
     list.appendChild(row);
   });
   const opts = STATS.map(s => '<option value="' + s.id + '">' + s.id + '</option>').join('');
-  ['f-stress-boost', 'f-stress-reduce', 'sp-stat'].forEach(id => { $(id).innerHTML = opts; });
+  ['f-stress-boost', 'f-stress-reduce'].forEach(id => { $(id).innerHTML = opts; });
   $('f-stress-reduce').value = 'Brawn';
 }
 function dieOf(id) { return num($('die-' + id).value) || 4; }
@@ -540,16 +529,14 @@ function recalc() {
   $('age-label').textContent = book() === 'brooms' ? 'Grade' : 'Age';
   $('bag-title').textContent = info ? info.bagLabel : 'Backpack';
   $('bag-label').textContent = info ? info.bagLabel : 'Backpack';
-  $('ride-note').textContent = book() === 'bikes' ? 'Bike: colour gives a bonus, accessory gives a trick' : book() === 'brooms' ? 'Your broom only helps while you are on it' : 'Utility belt · costume · who knows your secret';
-  $('sf-note').textContent = book() === 'brooms' ? 'Two Strengths + one free from your grade · one Flaw' : 'Two Strengths + one free from your age · one Flaw';
   // hints
   const t = D.tropes().find(x => x.book === book() && norm(x.name) === norm($('f-trope').value));
-  $('trope-q-note').textContent = t ? 'Trope questions: ' + t.questions.join(' / ') : '';
+  $('trope-q-note').textContent = t ? 'Trope questions: ' + t.questions.join(' / ') : ''; $('trope-q-note').style.display = t ? '' : 'none';
   const bc = findItem('bike-color', $('f-bike-color').value); $('bike-color-hint').textContent = bc ? (bc.benefit || bc.description || '') : '';
   const ba = findItem('bike-accessory', $('f-bike-acc').value); $('bike-acc-hint').textContent = ba ? (ba.benefit || ba.description || '') : '';
   const br = findItem('broom', $('f-broom').value); $('broom-hint').textContent = br ? (br.tag ? br.tag + ' — ' : '') + (br.benefit || '') : '';
   const cape = D.capes().find(c => norm(c.name) === norm($('f-cape').value)); $('cape-hint').textContent = cape ? cape.description.slice(0, 160) + (cape.description.length > 160 ? '…' : '') : '';
-  renderAT(); renderStress(); refreshStrengthRows(); refreshSkillRows(); spellDifficulty();
+  renderAT(); renderStress(); refreshStrengthRows(); refreshSkillRows();
 }
 function onBookChange() {
   document.body.dataset.book = book();
@@ -666,27 +653,6 @@ function rollPower(id) {
   const pd = num($('f-power-die').value);
   if(!pd) { addLog('Power', '—', 'No Power Die yet — your powers haven\'t manifested.', 'normal'); return; }
   doCheck(id + ' + Power', dieOf(id), bonusOf(id), { extra: { sides: pd, label: 'Power', bonus: num($('f-power-bonus').value) + stressMods().power } });
-}
-
-// ═══ BROOMS: SPELL CHECK ══════════════════════════════════════════════════
-function fillSpellSelects() {
-  const T = D.tables(); if(!T || !T.spell) return;
-  const mk = (id, rows, label) => { $(id).innerHTML = rows.map((r, i) => '<option value="' + i + '">' + esc(label) + ': ' + esc(r.name) + ' +' + r.mod + '</option>').join(''); };
-  mk('sp-mag', T.spell.magnitude, 'Magnitude'); mk('sp-area', T.spell.area, 'Area'); mk('sp-dur', T.spell.duration, 'Duration'); mk('sp-exp', T.spell.experience, 'Experience');
-}
-function spellDifficulty() {
-  const T = D.tables(); if(!T || !T.spell || !$('sp-mag').options.length) return 0;
-  const pick = (id, rows) => rows[num($(id).value)] || { mod:0 };
-  const d = pick('sp-mag', T.spell.magnitude).mod + pick('sp-area', T.spell.area).mod + pick('sp-dur', T.spell.duration).mod + pick('sp-exp', T.spell.experience).mod;
-  $('sp-diff').textContent = d;
-  return d;
-}
-function wandBonus(id) { const w = findItem('wand-wood', $('f-wand-wood').value); return w && w.stat === id ? 1 : 0; }
-function castSpell() {
-  const id = $('sp-stat').value;
-  const diff = spellDifficulty();
-  const bonus = bonusOf(id) + wandBonus(id);
-  doCheck('Spell (' + id + ' magic)', dieOf(id), bonus, { tn: diff, extra: { sides: 4, label: 'Magic Die' }, note: wandBonus(id) ? 'wand +1' : '' });
 }
 
 // ═══ STRENGTHS / SKILLS / RELATIONSHIPS ═══════════════════════════════════
@@ -967,7 +933,6 @@ campaignUpdateBtn();
 <script src="/tools-data/kob-capes.js"></script>
 <script src="/tools-data/kob-sheet-builder.js"></script>
 <script>
-fillSpellSelects();
 fillAgeOptions();
 fillDatalists();
 autoLoad();

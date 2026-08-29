@@ -286,7 +286,7 @@ body.dark .karma-pip.spent{border-color:#4a4a52;}
   <div class="body-row">
     <!-- LEFT: STATS + DERIVED + KARMA -->
     <div class="stats-col">
-      <div class="section-bar blue"><span>Stats &amp; Focuses</span><span class="sb-note">Roll Stat · +2 dice with Focus</span></div>
+      <div class="section-bar blue"><span>Stats &amp; Focuses</span></div>
       <div class="points-note"><span>Stat points <b id="pts-used">0</b> / <b id="pts-max">12</b> <span id="pts-flag"></span></span><span>Each Stat 2–5 at creation</span></div>
       <div class="stats-head"><span>Stat</span><span style="text-align:center;">Dice</span><span>Focus</span><span style="text-align:center;">Dice</span><span></span></div>
       <div id="stats-list"></div>
@@ -328,7 +328,7 @@ body.dark .karma-pip.spent{border-color:#4a4a52;}
 
     <!-- CENTER: ROLE / TRAIT / ATTACKS / GEAR / NOTES -->
     <div class="center-col">
-      <div class="section-bar"><span>Role Ability &amp; Trait</span><span class="sb-note">One special ability · one complication</span></div>
+      <div class="section-bar"><span>Role Ability &amp; Trait</span></div>
       <div class="rt-grid">
         <div class="rt-cell">
           <div class="derived-lbl"><span id="ability-title">Role ability</span><button class="small-btn ghost" onclick="lookupAbility()" title="Fill from the Roles list">Look up</button></div>
@@ -342,23 +342,23 @@ body.dark .karma-pip.spent{border-color:#4a4a52;}
         </div>
       </div>
 
-      <div class="section-bar"><span>Attacks</span><span class="sb-note">Melee = Brawn (+Brawling) · Ranged = Moves (+Shooting) · vs Defence</span></div>
+      <div class="section-bar"><span>Attacks</span></div>
       <table class="attacks-table">
         <thead><tr><th style="width:38%;">Weapon</th><th>Kind</th><th style="width:60px;">Dmg</th><th>Dice</th><th style="width:74px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
       </table>
       <div class="add-row"><button class="small-btn ghost" onclick="addAttackRow()">+ Weapon</button> <button class="small-btn ghost" onclick="addAttackRow({name:'Unarmed',kind:'melee',damage:''})">+ Unarmed</button></div>
 
-      <div class="section-bar"><span>Gear</span><span class="sb-note">You have what your Role suggests. Money isn't tracked.</span></div>
+      <div class="section-bar"><span>Gear</span></div>
       <table class="gear-table"><tbody id="gear-body"></tbody></table>
-      <div class="add-row"><button class="small-btn ghost" onclick="addGearRow()">+ Item</button></div>
+      <div class="add-row"><button class="small-btn ghost" onclick="addGearRow()">+ Item</button><select id="gear-pick" onchange="if(this.value){addGearFromData(this.value);this.value='';}"><option value="">Add from the gear list…</option></select></div>
       <div class="wealth-row">
         Buy something: roll Style (+Wealth) vs
         <select id="wealth-tn"><option value="10">10 — up to 1,000</option><option value="20">20 — up to 10,000</option><option value="30">30 — up to 100,000</option><option value="40">40 — up to 1,000,000</option></select>
         <button class="small-btn" onclick="rollWealth()">Roll (costs 1 Karma)</button>
       </div>
 
-      <div class="section-bar"><span>Notes &amp; Advancement</span><span class="sb-note">Each adventure: +1 to a Stat or a new Focus</span></div>
+      <div class="section-bar"><span>Notes &amp; Advancement</span></div>
       <div class="notes-box"><textarea id="f-notes" placeholder="Backstory, catchphrases, sworn enemies, the names of your parrot…"></textarea></div>
     </div>
   </div>
@@ -747,6 +747,20 @@ function addGearRow(g) {
                  `<td style="width:24px;"><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button></td>`;
   $('gear-body').appendChild(tr);
 }
+// Adds a gear-list item with its description (and damage) as the note; an
+// empty first row is reused so the sheet doesn't start with a blank line.
+function addGearFromData(name) {
+  const g = D.gear().find(x => x.name === name); if(!g) return;
+  const note = [g.description, g.damage ? g.damage + ' damage' : '', g.tier && g.tier !== 'Normal' ? g.tier : ''].filter(Boolean).join(' · ');
+  const blank = [...document.querySelectorAll('#gear-body tr')].find(tr => !tr.querySelector('.gear-name').value && !tr.querySelector('.gear-note').value);
+  if(blank) { blank.querySelector('.gear-name').value = g.name; blank.querySelector('.gear-note').value = note; } else addGearRow({ name: g.name, note });
+  scheduleAutosave();
+}
+function fillGearPick() {
+  const sel = $('gear-pick'); if(!sel) return;
+  const cats = [...new Set(D.gear().map(g => g.category))];
+  sel.innerHTML = '<option value="">Add from the gear list…</option>' + cats.map(c => '<optgroup label="' + esc(c) + '">' + D.gear().filter(g => g.category === c).map(g => '<option value="' + esc(g.name) + '">' + esc(g.name) + (g.setting && g.setting !== 'core' ? ' (' + esc(g.setting) + ')' : '') + '</option>').join('') + '</optgroup>').join('');
+}
 
 // ═══ HINTS FROM THE DATA LAYER ════════════════════════════════════════════
 function findRole(name) { const n = norm(name); if(!n) return null; return D.roles().find(r => norm(r.name) === n) || null; }
@@ -770,7 +784,7 @@ function lookupAbility() {
 }
 function fillDatalists() {
   const fill = (id, names) => { const dl = $(id); if(!dl) return; dl.innerHTML = [...new Set(names)].sort().map(n => '<option value="' + esc(n) + '">').join(''); };
-  fill('dl-traits', D.traits().map(t => t.name));
+  fill('dl-traits', D.traits().map(t => t.name)); fillGearPick();
   fill('dl-roles', D.roles().map(r => r.name));
   STATS.forEach(s => fill('dl-focus-' + s.id, D.focuses().filter(f => norm(f.stat) === s.id).map(f => f.name)));
   let dlw = $('dl-weapons'); if(!dlw) { dlw = document.createElement('datalist'); dlw.id = 'dl-weapons'; document.body.appendChild(dlw); }

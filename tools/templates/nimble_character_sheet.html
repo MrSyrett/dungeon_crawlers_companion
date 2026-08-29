@@ -246,7 +246,7 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="section-bar green"><span>Stats &amp; Saves</span><span class="sb-note">▲ advantaged save · ▼ disadvantaged · click to roll</span></div>
+      <div class="section-bar green"><span>Stats &amp; Saves</span></div>
       <div class="stats-grid" id="stats-grid"></div>
       <div class="pts-note"><span>Skill points <b id="sk-used">0</b> / <b id="sk-max">4</b> <span id="sk-flag"></span></span><span>4 at level 1, +1 per level</span></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
@@ -286,40 +286,40 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
     </div>
 
     <div class="center-col">
-      <div class="section-bar"><span>Attacks</span><span class="sb-note">Primary die: 1 misses · max explodes (crit) · rushed attacks stack disadvantage</span></div>
+      <div class="section-bar"><span>Attacks</span></div>
       <table class="tbl">
         <thead><tr><th style="width:32%;">Weapon / spell</th><th style="width:26%;">Damage</th><th>Properties</th><th style="width:96px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
       </table>
       <div class="add-row"><button class="small-btn ghost" onclick="addAttackRow()">+ Attack</button><select id="weapon-pick" onchange="if(this.value){addAttackFromItem(this.value);this.value='';}"><option value="">Add a weapon…</option></select></div>
 
-      <div class="section-bar"><span>Class Features</span><span class="sb-note" id="class-note">Pick a class</span></div>
+      <div class="section-bar"><span>Class Features</span></div>
       <div id="features-list"></div>
       <div class="blk" id="pool-block" style="display:none;">
         <table class="tbl"><thead><tr><th style="width:36%;" id="pool-title">Abilities</th><th>Effect</th><th style="width:26px;"></th></tr></thead><tbody id="picks-body"></tbody></table>
         <div class="add-row"><select id="pool-pick"><option value="">Choose an ability…</option></select><button class="small-btn ghost" onclick="addPick()">+ Add</button></div>
       </div>
 
-      <div class="section-bar"><span>Spells</span><span class="sb-note" id="spell-note">Mana cost = tier · cantrips are free · upcast up to your highest tier</span></div>
+      <div class="section-bar"><span>Spells</span></div>
       <table class="tbl">
         <thead><tr><th style="width:30%;">Spell</th><th style="width:60px;">Tier</th><th>Effect</th><th style="width:96px;"></th></tr></thead>
         <tbody id="spells-body"></tbody>
       </table>
       <div class="add-row"><select id="spell-pick"><option value="">Add a spell…</option></select><button class="small-btn ghost" onclick="addSpellPick()">+ Add</button></div>
 
-      <div class="section-bar"><span>Inventory</span><span class="sb-note" id="slots-note">10 + STR slots</span></div>
+      <div class="section-bar"><span>Inventory</span></div>
       <table class="tbl">
         <thead><tr><th>Item</th><th style="width:54px;">Slots</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
         <tbody id="inv-body"></tbody>
       </table>
-      <div class="add-row"><button class="small-btn ghost" onclick="addInvRow()">+ Item</button><select id="item-pick" onchange="if(this.value){addInvFromItem(this.value);this.value='';}"><option value="">Add from equipment list…</option></select><span class="hint" style="margin:0 0 0 auto;">gold <input type="number" id="f-gold" value="50" style="width:70px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> gp</span></div>
+      <div class="add-row"><button class="small-btn ghost" onclick="addInvRow()">+ Item</button><select id="item-pick" onchange="if(this.value){addInvFromItem(this.value);this.value='';}"><option value="">Add from equipment list…</option></select><span class="hint" style="margin:0 0 0 auto;" id="slots-note"></span><span class="hint">gold <input type="number" id="f-gold" value="50" style="width:70px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> gp</span></div>
 
       <div class="blk"><div class="blk-grid">
         <div class="fld"><label>Ancestry &amp; background traits</label><textarea id="f-traits" placeholder="Filled by Look up / the builder"></textarea></div>
         <div class="fld"><label>Languages</label><input type="text" id="f-languages" placeholder="Common"><label style="margin-top:6px;">Height · weight</label><input type="text" id="f-body" placeholder="5'10, 160 lb"></div>
       </div></div>
 
-      <div class="section-bar"><span>Notes</span><span class="sb-note">Boons, allies, quests, the name of your horse</span></div>
+      <div class="section-bar"><span>Notes</span></div>
       <div class="notes-box"><textarea id="f-notes"></textarea></div>
     </div>
   </div>
@@ -462,7 +462,6 @@ function recalc() {
   $('mana-lbl').textContent = mm === null ? (c && c.spellcasting ? 'see class' : 'casters only') : 'max ' + mm + ' (from class)';
   if(mm !== null && !$('mana-max').dataset.manual) $('mana-max').value = mm;
   $('slots-note').textContent = 'slots ' + slotsUsed() + ' / ' + (10 + stat('STR'));
-  $('class-note').textContent = c ? c.name + ' · ' + c.keyStats.join('/') + ' · d' + c.hitDie + ' · ' + c.armor : 'Pick a class';
   const hp = num($('hp-cur').value);
   $('ko-flag').innerHTML = hp <= 0 ? '<span class="ko-banner">Dying — 1 action, DC 10 STR save to attack</span>' : '';
   renderFeatures(); refreshAttackRows(); refreshSpellRows();

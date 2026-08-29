@@ -88,8 +88,7 @@ const SW_REFERENCE: { href: string; label: string }[] = [
   { href: "/sw/skills", label: "Skills" },
   { href: "/sw/equipment", label: "Equipment" },
   { href: "/sw/starships", label: "Starships" },
-  { href: "/sw/characters", label: "Characters" },
-  { href: "/sw/force", label: "The Force" },
+  { href: "/sw/characters", label: "Bestiary" },
   { href: "/sw/rules", label: "Rules" },
 ];
 
@@ -258,8 +257,7 @@ export default async function DashboardPage() {
           </p>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-3">
-          <div className="flex items-center gap-4 text-sm text-[var(--muted)]">
+        <div className="flex items-center gap-4 text-sm text-[var(--muted)]">
             <span className="hidden sm:inline">{user.email}</span>
             {isAdmin ? (
               <Link
@@ -274,10 +272,14 @@ export default async function DashboardPage() {
                 Sign out
               </button>
             </form>
-          </div>
-          <SystemToggle />
         </div>
       </header>
+
+      {/* System picker on its own row, centred, so the tab strip has room
+          for six systems without crowding the sign-out controls. */}
+      <div className="mb-8 flex justify-center">
+        <SystemToggle />
+      </div>
 
       {/* One system at a time; Shadowdark by default. Each system gets the
           same two columns (its character sheets and its session-prep docs),

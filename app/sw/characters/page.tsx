@@ -18,7 +18,7 @@ export default async function SwCharactersPage({ searchParams }: { searchParams:
   const results = SW_CHARACTERS.filter((c) => (!group || c.group === group) && (!needle || [c.name, c.group, c.description ?? "", c.skills.join(" "), c.equipment.join(" "), c.notes ?? ""].join(" ").toLowerCase().includes(needle)));
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <SwHeader title="Characters, Aliens & Droids" subtitle={`${SW_CHARACTERS.length} gamemaster stat blocks`} />
+      <SwHeader title="Bestiary" subtitle={`${SW_CHARACTERS.length} gamemaster stat blocks · Imperials, aliens, Droids & creatures`} />
       <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Stock Imperials, civilians, Droids and creatures from the rulebook and its adventures. Anything without a listed skill uses its attribute; a &ldquo;standard&rdquo; block is the GM&rsquo;s baseline for anyone the players meet.</p>
       <SearchForm base={BASE} q={q} placeholder="Search characters…" hidden={{ group }} />
       <ChipRow label="Group" base={BASE} current={current} param="group" options={GROUPS} active={group} />

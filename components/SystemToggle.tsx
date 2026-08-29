@@ -9,9 +9,9 @@ import {
   getSystemServerSnapshot,
 } from "./systemStore";
 
-// The game-system switch (one tab per entry in SYSTEMS). Lives in the dashboard header (under the
-// Sign-out button) and shares state with SystemTabs, which renders the matching
-// panels below.
+// The game-system switch (one tab per entry in SYSTEMS). Sits centred on its
+// own row under the dashboard header and shares state with SystemTabs, which
+// renders the matching panels below.
 export default function SystemToggle() {
   const active = useSyncExternalStore(subscribeSystem, getSystemSnapshot, getSystemServerSnapshot);
 
@@ -19,7 +19,7 @@ export default function SystemToggle() {
     <div
       role="tablist"
       aria-label="Game system"
-      className="flex gap-2 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1.5"
+      className="flex flex-wrap justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1.5"
     >
       {SYSTEMS.map((s) => {
         const on = active === s.key;

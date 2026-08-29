@@ -274,7 +274,7 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="section-bar gold"><span>Attributes</span><span class="sb-note">die codes · click a name to roll</span></div>
+      <div class="section-bar gold"><span>Attributes</span></div>
       <div class="stats-grid" id="stats-grid"></div>
       <div class="pts-note"><span>Skill dice <b id="sk-used">0D</b> / <b>7D</b> <span id="sk-flag"></span></span><span>max +2D per skill at creation</span></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
@@ -282,56 +282,63 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 
       <div class="vitals">
         <div class="vital" style="grid-column:span 2;">
-          <div class="vlbl"><span>Wound status</span><small id="wound-note">unhurt</small></div>
+          <div class="vlbl"><span>Wounds</span><small id="wound-note">unhurt</small></div>
           <div class="wound-track" id="wound-track"></div>
           <div class="vline"><button class="small-btn ghost" onclick="takeDamage()">Roll damage vs STR</button> dmg <input type="text" id="dmg-code" class="code" value="4D" style="width:52px;text-align:center;" title="Damage code of the hit"><button class="small-btn ghost" onclick="setWound('none')">Heal</button></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Force Points</span><small>spend: double all dice this round</small></div>
+          <div class="vlbl"><span>Force Points</span><small>doubles your dice</small></div>
           <div class="vbig"><input type="number" id="f-fp" value="1" min="0" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn gold" id="fp-btn" onclick="toggleForcePoint()">Use Force Point</button></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Dark Side Points</span><small>at 6+ the GM rolls each time you call on the Force</small></div>
+          <div class="vlbl"><span>Dark Side</span><small>6+ = at risk</small></div>
           <div class="vbig"><input type="number" id="f-ds" value="0" min="0" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn ghost" onclick="callDarkSide()">Call on the Dark Side</button></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Skill Points</span><small>unspent · raise a pip: cost = number before the D</small></div>
+          <div class="vlbl"><span>Skill Points</span><small>unspent</small></div>
           <div class="vbig"><input type="number" id="f-sp" value="0" min="0"></div>
-          <div class="vline">credits <input type="text" id="f-credits" style="width:80px;" placeholder="1,000"></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Armor · Move</span><small>armor adds to STR vs damage</small></div>
-          <div class="vbig"><span id="armor-val">—</span><span class="sep">·</span><span id="move-val">10</span><span class="sep">m</span></div>
-          <div class="vline">armor <input type="text" id="f-armor" list="dl-armor" placeholder="none" style="width:110px;text-align:left;" oninput="recalc()"> <input type="text" id="f-armor-pips" class="code" placeholder="+1D" style="width:44px;" oninput="recalc()"> move <input type="number" id="f-move" value="10" oninput="recalc()"></div>
+          <div class="vlbl"><span>Credits</span></div>
+          <div class="vbig"><input type="text" id="f-credits" placeholder="1,000" style="width:100%;text-align:left;font-size:16px;"></div>
+        </div>
+        <div class="vital">
+          <div class="vlbl"><span>Armor</span><small>adds to Strength vs damage</small></div>
+          <div class="vbig"><input type="text" id="f-armor-pips" class="code" placeholder="+1D" style="width:64px;" oninput="recalc()"></div>
+          <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="none" style="width:100%;text-align:left;" oninput="recalc()"></div>
+        </div>
+        <div class="vital">
+          <div class="vlbl"><span>Move</span><small>meters per round</small></div>
+          <div class="vbig"><input type="number" id="f-move" value="10" oninput="recalc()"></div>
         </div>
       </div>
     </div>
 
     <div class="center-col">
-      <div class="section-bar"><span>Weapons</span><span class="sb-note">Attack rolls the skill vs the range difficulty · damage vs the target's Strength</span></div>
+      <div class="section-bar"><span>Weapons</span></div>
       <table class="tbl">
         <thead><tr><th style="width:26%;">Weapon</th><th style="width:22%;">Skill</th><th style="width:70px;">Damage</th><th style="width:20%;">Range</th><th>Notes</th><th style="width:110px;"></th></tr></thead>
         <tbody id="weapons-body"></tbody>
       </table>
       <div class="add-row"><button class="small-btn ghost" onclick="addWeaponRow()">+ Weapon</button><select id="weapon-pick" onchange="if(this.value){addWeaponFromData(this.value);this.value='';}"><option value="">Add from the weapon charts…</option></select></div>
 
-      <div class="section-bar"><span>The Force</span><span class="sb-note" id="force-note">Force skills: Control · Sense · Alter — add them in the skill list</span></div>
+      <div class="section-bar"><span>The Force</span></div>
       <table class="tbl">
         <thead><tr><th style="width:28%;">Power</th><th style="width:22%;">Skill(s)</th><th>Difficulty</th><th style="width:110px;"></th></tr></thead>
         <tbody id="force-body"></tbody>
       </table>
       <div class="add-row"><select id="force-pick"><option value="">Add a Force power…</option></select><button class="small-btn ghost" onclick="addForcePick()">+ Add</button></div>
 
-      <div class="section-bar"><span>Equipment</span><span class="sb-note">Everything you own that isn't a weapon</span></div>
+      <div class="section-bar"><span>Equipment</span></div>
       <table class="tbl">
         <thead><tr><th style="width:36%;">Item</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
         <tbody id="gear-body"></tbody>
       </table>
       <div class="add-row"><button class="small-btn ghost" onclick="addGearRow()">+ Item</button><select id="gear-pick" onchange="if(this.value){addGearFromData(this.value);this.value='';}"><option value="">Add from the equipment list…</option></select></div>
 
-      <div class="section-bar"><span>Ship / Vehicle</span><span class="sb-note">Space speed · maneuverability · hull · shields</span></div>
+      <div class="section-bar"><span>Ship / Vehicle</span></div>
       <div class="blk"><div class="blk-grid">
         <div class="fld"><label>Name</label><input type="text" id="sh-name" placeholder="The one you owe money on"></div>
         <div class="fld"><label>Craft</label><input type="text" id="sh-craft" list="dl-ships" placeholder="Stock light freighter" onchange="fillShipFromData()"></div>
@@ -348,7 +355,7 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
         <div class="fld"><label>Special abilities</label><input type="text" id="f-special" placeholder="Wookiee: berserker rage, climbing…"></div>
       </div></div>
 
-      <div class="section-bar"><span>Notes</span><span class="sb-note">Contacts, debts, the Empire's opinion of you</span></div>
+      <div class="section-bar"><span>Notes</span></div>
       <div class="notes-box"><textarea id="f-notes"></textarea></div>
     </div>
   </div>
@@ -492,11 +499,6 @@ function recalc() {
   });
   $('sk-used').textContent = toCode(used);
   $('sk-flag').className = used > 21 ? 'bad' : used === 21 ? 'good' : ''; $('sk-flag').textContent = used > 21 ? '· over' : used === 21 ? '✓' : '';
-  const ap = fromCode($('f-armor-pips').value); const an = $('f-armor').value.trim();
-  $('armor-val').textContent = an ? (ap ? '+' + toCode(ap) : an) : '—';
-  $('move-val').textContent = num($('f-move').value) || 10;
-  const hasForce = skillRows().some(tr => tr.dataset.attr === 'Force');
-  $('force-note').textContent = hasForce ? 'Roll the power\'s skill(s) against its difficulty · each power used is an action' : 'Force skills: Control · Sense · Alter — add them in the skill list';
   refreshWeaponRows(); updateModNote();
 }
 function onTemplateChange() {
