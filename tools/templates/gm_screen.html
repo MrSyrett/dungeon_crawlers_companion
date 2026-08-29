@@ -3069,6 +3069,42 @@ GMScenes.renderPins();
   }
   pull("dcc-item", "__DCC_HB_ITEMS");       // → DCC Item generator pool
   pull("dcc-monster", "__DCC_HB_MONSTERS"); // → bestiary picker (add to tracker)
+
+  // Shadowdark gear homebrew → the Treasure generator's list (same items the SD
+  // character-sheet shop shows). Mapped into the SD_GEAR row shape and scoped to
+  // the linked campaign, then re-pulled whenever the campaign link changes.
+  window.__SD_HB_GEAR = window.__SD_HB_GEAR || [];
+  function mapSdHbGear(d) {
+    if (!d || !d.name) return null;
+    var kind = String(d.kind || 'gear');
+    var category = kind === 'weapon' ? 'weapon'
+      : (kind === 'armor' || kind === 'shield') ? 'armor'
+      : kind === 'ammo' ? 'ammo'
+      : kind === 'magic' ? 'magic' : 'basic';
+    var row = { name: String(d.name), category: category,
+      cost: (d.gp != null && d.gp !== '') ? (d.gp + ' gp') : '',
+      desc: String(d.note || ''), homebrew: true };
+    if (category === 'weapon') { row.damage = String(d.damage || ''); row.range = String(d.range || ''); row.props = String(d.props || ''); }
+    if (kind === 'armor' && !row.desc) row.desc = 'AC ' + (d.acBase || 10) + (d.acDex ? ' + DEX' : '');
+    if (kind === 'shield' && !row.desc) row.desc = '+' + (d.acBonus || 0) + ' AC';
+    return row;
+  }
+  function pullSdHbGear() {
+    try {
+      var camp = (typeof GMCamp !== 'undefined' && GMCamp.get) ? GMCamp.get() : null;
+      var url = "/api/homebrew?type=gear" + (camp && camp.id ? ("&campaign=" + encodeURIComponent(camp.id)) : "");
+      fetch(url, { credentials: "same-origin" })
+        .then(function (r) { return r && r.ok ? r.json() : null; })
+        .then(function (j) {
+          if (j && Array.isArray(j.items)) {
+            window.__SD_HB_GEAR = j.items.map(function (it) { return mapSdHbGear(it && it.data); }).filter(Boolean);
+          }
+        })
+        .catch(function () {});
+    } catch (e) {}
+  }
+  pullSdHbGear();
+  if (typeof GMCamp !== 'undefined' && GMCamp.onChange) GMCamp.onChange(pullSdHbGear);
 })();
 </script>
 
@@ -11667,7 +11703,10 @@ function wireAiConsole(root) {
   // ══ Treasure ══ (merged random spread + hand-picked items + magic +X, all from
   // the unified SD gear list; sends a claimable drop to the roll log).
   if(root.querySelector('.ai-fl-name')) {
-  const gearList = () => (typeof SD_GEAR !== 'undefined' && Array.isArray(SD_GEAR)) ? SD_GEAR : [];
+  // The unified gear list = the book catalog (SD_GEAR) + the user's shared gear
+  // homebrew, exactly like the SD character-sheet item shop.
+  const gearList = () => ((typeof SD_GEAR !== 'undefined' && Array.isArray(SD_GEAR)) ? SD_GEAR : [])
+    .concat(Array.isArray(window.__SD_HB_GEAR) ? window.__SD_HB_GEAR : []);
   const gearDesc = g => !g ? '' : (g.category === 'weapon' ? [g.damage, g.range, g.props].filter(Boolean).join(', ') : (g.desc || ''));
   const SD_GROUPS = [
     { key:'all',label:'All',cats:null },
@@ -11703,7 +11742,7 @@ function wireAiConsole(root) {
     if(!gearList().length){ setStatus(flStatus,'Gear list didn’t load — open from the app.','err'); return; }
     flBody.innerHTML='';
     const tier=flTier?flTier.value:'1', type=flType?flType.value:'random_all', count=Math.max(1,parseInt(flCount&&flCount.value,10)||1);
-    makeRow(flBody, 'Gold', rollGold(tier), 'coins', {category:'gold'});   // gold amount in the Qty column
+    makeRow(flBody, 'Gold', rollGold(tier), 'GP', {category:'gold'});   // gold amount in the Qty column; "GP" so it lands in the sheet's GP on claim
     if(type!=='coins'){
       for(let i=0;i<count;i++){
         let cat = (type==='random_all') ? R(['weapon','armor','basic','magic']) : type;
