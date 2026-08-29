@@ -41,14 +41,18 @@ registered in `lib/tools.ts`.
 | `ace-character` | ACE!                 | `ace_sheet`      |
 | `kob-character` | Kids on Bikes        | `kob_sheet`      |
 | `nimble-character` | Nimble            | `nimble_sheet`   |
-| `ace-session` / `kob-session` / `nimble-session` | ACE! / Kids on Bikes / Nimble | `ace_session` / `kob_session` / `nimble_session` (generated from the DCC builder by `scripts/make-session-builders.mjs`) |
+| `sw-character`  | Star Wars (WEG 1e)   | `sw_sheet`       |
+| `ace-session` / `kob-session` / `nimble-session` / `sw-session` | ACE! / Kids on Bikes / Nimble / Star Wars | `ace_session` / `kob_session` / `nimble_session` / `sw_session` (generated from the DCC builder by `scripts/make-session-builders.mjs`) |
 
 ## Game systems
 
 The dashboard, the `/rules` shelf and the tool registry are keyed by
-`SystemKey` in `components/systemStore.ts` (`"SD" | "DCC" | "ACE" | "KOB" | "NIM"`).
+`SystemKey` in `components/systemStore.ts` (`"SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW"`).
 Kids on Bikes, Kids on Brooms and Kids in Capes share the `KOB` system: one
-sheet with a per-character book switch, one data layer tagged by book. To add a
+sheet with a per-character book switch, one data layer tagged by book. Star Wars
+(`SW`) is the 1987 WEG rulebook with the 1989 Rules Companion layered on as a
+revision: `scripts/build-sw-data.mjs` lets a Companion entry replace a core one
+by name (the original is kept under `superseded`). To add a
 system: add its key and accent to `SYSTEMS`, register its tools in
 `lib/tools.ts`, and add its reference links to `SYSTEM_REFERENCE` in
 `app/dashboard/page.tsx`. Everything else (rulebook tagging, campaign rosters,
@@ -56,7 +60,7 @@ VTT tokens, the documents API) reads those two tables.
 
 Rulebook content lives as curated JSON under `data/<system>/` and is fanned out
 to typed `lib/data/*.ts` (Next pages) and `public/tools-data/*.js` (the HTML
-tools) by `npm run data:dcc` / `npm run data:ace` / `npm run data:kob` / `npm run data:nimble`. The generated files are
+tools) by `npm run data:dcc` / `npm run data:ace` / `npm run data:kob` / `npm run data:nimble` / `npm run data:sw`. The generated files are
 committed; re-run after editing the JSON.
 
 > Note: portrait images are intentionally not persisted (the original tools strip

@@ -88,6 +88,17 @@ function readCharMeta(
         level: Number.isNaN(lv) ? null : lv,
       };
     }
+    // Star Wars: no levels — the roster shows the template as the class.
+    const sw = blob?.sw_sheet;
+    if (typeof sw === "string") {
+      const s = JSON.parse(sw) as { name?: unknown; template?: unknown; species?: unknown };
+      const cls = [s.species, s.template].filter((v) => typeof v === "string" && v.trim()).join(" · ");
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: null,
+      };
+    }
     // Kids on Bikes: no levels — the roster shows the Trope (and book) as the class.
     const kob = blob?.kob_sheet;
     if (typeof kob === "string") {

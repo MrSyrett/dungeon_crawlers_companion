@@ -1,0 +1,1618 @@
+{
+ "skills": [
+  {
+   "name": "Blaster",
+   "attribute": "Dexterity",
+   "description": "Used to fire blasters. A successful skill roll means you've hit your target. This skill can be used with blaster pistols, blaster rifles, heavy blasters, and anything in between. It doesn't apply to fixed or multi-crew blaster weapons (use the heavy weapons skill instead), or to weapons mounted on starships (use the gunnery skill).",
+   "time": "one combat round",
+   "book": "core",
+   "page": 31
+  },
+  {
+   "name": "Brawling Parry",
+   "attribute": "Dexterity",
+   "description": "Used to parry another character's attack in hand-to-hand combat without weapons. This is a reaction skill. Brawling parry only works against brawling attacks, not melee attacks.",
+   "time": "instantaneous",
+   "book": "core",
+   "page": 31,
+   "reaction": true
+  },
+  {
+   "name": "Dodge",
+   "attribute": "Dexterity",
+   "description": "Used to dodge blaster fire, other fire weapons, and grenades. This is a reaction skill. When someone fires at you, roll your dodge dice; the number rolled is added to the firer's difficulty number. A dodge affects all fire and grenade attacks in the same action segment. Dodge doesn't affect brawling or melee attacks.",
+   "time": "instantaneous",
+   "book": "core",
+   "page": 31,
+   "reaction": true
+  },
+  {
+   "name": "Grenade",
+   "attribute": "Dexterity",
+   "description": "Make a skill roll when a character throws a grenade. Success means the grenade has hit its target; failure means it scatters (roll one die on the scatter diagram for direction and 3D for meters).",
+   "time": "one combat round",
+   "book": "core",
+   "page": 31
+  },
+  {
+   "name": "Heavy Weapons",
+   "attribute": "Dexterity",
+   "description": "Used to fire vehicle-mounted blasters (such as those on speeder bikes), turbolasers, lasercannon, and the like — any weapon which is not hand-held, and not fired in space. For hand-held weapons, use the blaster skill; for those fired in space, use gunnery.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 31
+  },
+  {
+   "name": "Melee Parry",
+   "attribute": "Dexterity",
+   "description": "Used to parry with a melee weapon. This is a reaction skill. Only characters carrying melee weapons can use melee parry; it can parry melee attacks and brawling attacks.",
+   "time": "instantaneous",
+   "book": "core",
+   "page": 31,
+   "reaction": true
+  },
+  {
+   "name": "Melee Weapons",
+   "attribute": "Dexterity",
+   "description": "This skill is used when a character uses a weapon in hand-to-hand combat — whether a blaster butt, a gaderffii, a bayonet — whatever. Damage is the weapon's code plus the character's strength.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 31
+  },
+  {
+   "name": "Lightsaber",
+   "attribute": "Dexterity",
+   "description": "An archaic weapon skill printed on some templates. Lightsabers are used with the lightsaber skill, not melee weapons. A lightsaber's damage does not depend on strength; a character with the control skill adds his control dice to its 5D damage. Only another lightsaber can parry a lightsaber. Characters can learn archaic or unusual weapons during the game by writing the weapon on the blank Dexterity skill line; the starting code equals dexterity.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 31
+  },
+  {
+   "name": "Wookiee Bowcaster",
+   "attribute": "Dexterity",
+   "description": "Archaic weapon skill printed on the Wookiee template. Used in the same way as other weapon skills, but applies only to the bowcaster. Reloading (after six shots) costs 1D from all die codes but does not take an action segment.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 31
+  },
+  {
+   "name": "Black-Powder Pistol",
+   "attribute": "Dexterity",
+   "description": "Archaic weapon skill printed on the Tough Native template. Used in the same way as other weapon skills, but applies only to the black-powder pistol. Reloading takes a full combat round.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 31
+  },
+  {
+   "name": "Alien Races",
+   "attribute": "Knowledge",
+   "description": "Knowledge of non-human sapient species (or, for alien characters, knowledge of humans and other aliens). Includes knowledge of customs and societies as well as physical appearance, modes of thought and the like. Knowledge difficulties: Very Easy 5, Easy (common knowledge) 10, Moderate (no secret, but not widely known) 15, Difficult (specialized knowledge) 20, Very Difficult (only an expert would know) 30.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 32
+  },
+  {
+   "name": "Bureaucracy",
+   "attribute": "Knowledge",
+   "description": "Knowledge of bureaucracies and their procedures. Used as a knowledge skill (how to get the right form), or as a persuasion skill to obtain cooperation from a bureaucracy. Base difficulty by how restricted the request is: available to all 5; to almost anyone 10; to anyone who qualifies 15; somewhat restricted 20; extremely restricted 30. Modify +10 for extremely unusual requests, +10 for a poorly funded or mismanaged bureaucracy, +10 if officials have reason to distrust the character. Success means the character gets what he wants in short order.",
+   "time": "one combat round as knowledge; one day as persuasion",
+   "book": "core",
+   "page": 32
+  },
+  {
+   "name": "Cultures",
+   "attribute": "Knowledge",
+   "description": "Knowledge of the customs, histories, arts and politics of various human cultures within the Empire. It is used like other knowledge skills.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 33
+  },
+  {
+   "name": "Languages",
+   "attribute": "Knowledge",
+   "description": "Used to determine whether a character can understand what someone says in a language other than Basic. Realistic method — difficulty by language: dialect or slang of Basic 5; common language related to Basic 10; common language 15; obscure language (Wookiee) 20; extremely obscure or unpronounceable language 30; a success means the character knows the language. Simple method — difficulty by complexity of the statement: very simple 5; simple 10; average 15; complex 20; complex technical terms 30; anyone who rolls higher understands the statement.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 33
+  },
+  {
+   "name": "Planetary Systems",
+   "attribute": "Knowledge",
+   "description": "Knowledge of the geography, weather, life forms, trade products, and so on of different planets and systems. Used like other knowledge skills.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 33
+  },
+  {
+   "name": "Streetwise",
+   "attribute": "Knowledge",
+   "description": "Used to make a contact in the criminal underworld, purchase illegal goods or services, or find someone to do anything illegal. Difficulty by how common the goods or skills are: very common (a lawyer, a blaster) 5; common (a petty thief, drugs) 10; moderate (a good pickpocket, rare drugs) 15; difficult (an expert safecracker, heavy weapons) 20; very difficult (a renowned jewel thief, unregistered spacecraft) 30. Modify +10 for strict local law enforcement, +10 if the character has no contacts in the area, +10 if the underworld distrusts him. Success finds what he wants — getting it still requires bargaining.",
+   "time": "one combat round to one day",
+   "book": "core",
+   "page": 33
+  },
+  {
+   "name": "Survival",
+   "attribute": "Knowledge",
+   "description": "Knowing how to survive in hostile environments — deserts, jungles, oceans, asteroid belts, etc. Used as a knowledge skill about the natural world; to see whether a character immediately makes the right move when threatened by nature; and to find the necessities of life. Difficulty by familiarity with the environment: intimately familiar 5; familiar 10; somewhat familiar 15; unfamiliar 20; completely unfamiliar 30. Let players use their own knowledge when their plan is plausible.",
+   "time": "one combat round for knowledge or reacting to danger; one hour when searching for necessities",
+   "book": "core",
+   "page": 33
+  },
+  {
+   "name": "Technology",
+   "attribute": "Knowledge",
+   "description": "Knowledge of different kinds of equipment — capabilities, model numbers, fair-market prices, etc. Used like other knowledge skills.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 34
+  },
+  {
+   "name": "Astrogation",
+   "attribute": "Mechanical",
+   "description": "Used to plot a course for a starship from one star system to another. A standard-duration trip is difficulty 15 (30 without a nav computer); +1 per day saved, -1 per extra day taken; doubled for hasty entry; +5 if the ship is lightly damaged, +10 if heavily damaged. Failure means a mishap.",
+   "time": "a minute on a common route with known coordinates (one round in emergencies); a few hours for a new destination; one day if the ship's position must first be fixed",
+   "book": "core",
+   "page": 35
+  },
+  {
+   "name": "Beast Riding",
+   "attribute": "Mechanical",
+   "description": "Used to ride animals. Each riding animal has an orneriness code. When a character mounts a riding animal, roll the animal's orneriness dice and the character's skill dice; if the character's roll is equal or greater, he establishes control. If the animal's roll is higher, it runs away or bucks him off. Roll again whenever something spooks the beast. Also used to retain control, like vehicle operation skills; the animal's speed code is used in chases.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 35
+  },
+  {
+   "name": "Repulsorlift Craft Operation",
+   "attribute": "Mechanical",
+   "description": "Used to operate all kinds of repulsorlift craft — landspeeders, speeder bikes, sail barges, and all sorts of air, ground and water vehicles that use repulsorlift (antigravity) technology. Call for a roll only for dangerous, risky or difficult maneuvers: very easy 5 (tight corner at moderate speed); easy 10 (tight corner at high speed); moderate 15 (following another vehicle around a corner at top speed); difficult 20 (following a speeder bike through the forests of Endor); very difficult 30 (the Falcon through an asteroid field while evading fire). In chases, add the vehicle's speed roll to the driver's skill roll each round.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 36
+  },
+  {
+   "name": "Starship Gunnery",
+   "attribute": "Mechanical",
+   "description": "Used to fire a starship's guns in combat. The operator rolls his gunnery dice plus the weapon's fire control dice against a difficulty of 5 at point-blank, 10 short, 15 medium, 20 long range, modified by the target's evasion.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 36
+  },
+  {
+   "name": "Starship Piloting",
+   "attribute": "Mechanical",
+   "description": "Used to operate starships. In combat, the pilot can add his piloting roll to the ship's speed roll, and can evade enemy fire by rolling the ship's maneuverability dice plus his piloting dice and adding the total to the firer's difficulty number. For purposes of evasion, piloting is a reaction skill.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 36,
+   "reaction": true
+  },
+  {
+   "name": "Starship Shields",
+   "attribute": "Mechanical",
+   "description": "Used to operate a starship's shields in combat. Starship shields is a reaction skill; a separate roll is needed for each attack shielded against. Difficulty is 10 at long range, 15 at medium, 20 at short. Success adds the ship's shield dice to its hull roll against that attack.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 36,
+   "reaction": true
+  },
+  {
+   "name": "Bargain",
+   "attribute": "Perception",
+   "description": "Persuasion skill used when a player character bargains with an NPC — haggling over a price, diplomatic negotiations, bribes. Resolved as an opposed roll of bargain skills; the higher roller gets the better part of the deal. Price: PC roll at least three times the NPC's — half of average cost; at least twice — three-quarters; higher — up to 10% off; tied — average; NPC higher — up to 10% more; NPC at least double — 50% more; NPC at least triple — double. For bribes, use a difficulty by the target's honesty (5 corrupt judge, 10 maitre d', 15 planetary official, 20 Imperial official, 30 Imperial Naval officer), modified by the size of the bribe (1,000,000 credits -20; 100,000 -15; 10,000 -10; 1,000 -5; 100 0; 10 +5; 1 +15). Stormtroopers cannot be bribed. Not used against player characters.",
+   "time": "a minute",
+   "book": "core",
+   "page": 36
+  },
+  {
+   "name": "Command",
+   "attribute": "Perception",
+   "description": "Persuasion skill used to make an NPC do what the user wants — by ordering him in a persuasive and authentic tone. Difficulty: NPCs have every reason to obey 5; some reason to obey 10; no reason to disobey 15; skeptical or suspicious 20; every reason to be suspicious 30. A roll equal to or higher than the difficulty means the targets do as requested. Not used against player characters.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 41
+  },
+  {
+   "name": "Con",
+   "attribute": "Perception",
+   "description": "Persuasion skill used to persuade an NPC to do something that isn't in the NPC's best interests, by reasoned argument, false logic, or a verbal smokescreen. Difficulty by how likely the target is to believe the character: your own grandmother 5; a naive teenager 10; a stormtrooper without contrary orders 15; a customs inspector 20; Jabba the Hutt 30. Modify +10 if the target distrusts or hates the character, +10 if what they are asked to do risks their lives. Stormtroopers can be conned.",
+   "time": "one combat round to several minutes",
+   "book": "core",
+   "page": 41
+  },
+  {
+   "name": "Gambling",
+   "attribute": "Perception",
+   "description": "Used to increase your odds of winning at gambling if playing honestly — and to cheat. Purely random games are decided randomly. In a skill game played honestly, roll each participant's gambling dice; the highest wins. A cheater automatically wins; anyone who rolls higher than the cheater on a gambling roll knows he's cheating. If several cheat, the highest cheater wins.",
+   "time": "one minute",
+   "book": "core",
+   "page": 41
+  },
+  {
+   "name": "Hide/Sneak",
+   "attribute": "Perception",
+   "description": "Roll when a character tries to hide himself, camouflage something, sneak past someone, or disguise himself — any time he is trying to avoid detection. If no one is actively looking, difficulty: very easy 5 (a prepared shelter in the forests of Endor); easy 10 (from sand people in a canyon); moderate 15 (a doorway in Mos Eisley); difficult 20 (behind a power pylon on the Death Star while searched for); very difficult 30 (the icy wastes of Hoth on a clear day). If someone is searching, the hide roll is added to the searcher's difficulty number, like a dodge.",
+   "time": "one round",
+   "book": "core",
+   "page": 42
+  },
+  {
+   "name": "Search",
+   "attribute": "Perception",
+   "description": "Used when trying to locate someone or something. If the target is not actively hidden, difficulty: exact location known 5; approximate location known 10; information a few days old 15; a cold trail of weeks or months 20; nobody has seen it in years 30. If the target is hidden, the hider's hide/sneak roll increases the searcher's difficulty number.",
+   "time": "one round in the immediate vicinity; minutes for a computer search or days of detective work",
+   "book": "core",
+   "page": 42
+  },
+  {
+   "name": "Brawling",
+   "attribute": "Strength",
+   "description": "Combat skill used when a character fights another hand-to-hand without any weapons. When a brawling character hits, use his strength code in lieu of a damage code.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 42
+  },
+  {
+   "name": "Climbing/Jumping",
+   "attribute": "Strength",
+   "description": "Roll when a character tries to leap a wide gap; climb a tree, wall or cliff; or jump up and grab something. Difficulty: very easy 5 (Ewok rope walkways); easy 10 (jumping between rooftops); moderate 15 (grabbing a rising entry ramp); difficult 20 (swinging across a Death Star shaft with a princess in your arms); very difficult 30 (springing from the carbon freeze pit).",
+   "time": "one combat round",
+   "book": "core",
+   "page": 42
+  },
+  {
+   "name": "Lifting",
+   "attribute": "Strength",
+   "description": "Used when a character tries to lift or carry a heavy object. Difficulty: very easy 5 (putting on a 20 kilogram pack); easy 10 (picking up a 3PO unit); moderate 15 (carrying a 20 kilogram pack for 10 kilometers); difficult 20 (carrying a buddy's body for a kilometer); very difficult 30 (moving an X-wing off your foot).",
+   "time": "one combat round",
+   "book": "core",
+   "page": 43
+  },
+  {
+   "name": "Stamina",
+   "attribute": "Strength",
+   "description": "When a character exerts himself for a long time, roll stamina to see whether he tires. Difficulty: very easy 5 (running 100 meters, a day's normal work); easy 10 (running 1 kilometer, a hard day's work); moderate 15 (running 10 kilometers, a day's hard labor); difficult 20 (recovering from carbon freeze); very difficult 30 (swimming for hours in icy water). Also rolled for extreme cold or heat. A character who fails becomes fatigued: all skill and attribute rolls are reduced by 1D. Only call for stamina rolls when a character does something out of the ordinary.",
+   "time": "one combat round to one day",
+   "book": "core",
+   "page": 43
+  },
+  {
+   "name": "Swimming",
+   "attribute": "Strength",
+   "description": "Roll when a character swims. Difficulty: very easy 5 (a calm lake on a good day); easy 10 (calm ocean); moderate 15 (riptides or other dangers); difficult 20 (a storm); very difficult 30 (a gale). If the roll is less than the difficulty, the character begins to drown — roll 2D each round as for a mortally wounded character. A rescuer makes two rolls, one to swim and one (difficulty 15) to rescue the drowner.",
+   "time": "one combat round",
+   "book": "core",
+   "page": 43
+  },
+  {
+   "name": "Computer Programming/Repair",
+   "attribute": "Technical",
+   "description": "Used to repair and program computers, and to defeat computer security. Difficulty for access: public data 5; easy to access 10; private data 15; secret data 20; top-secret data 30. Success gets the data; a roll of half the difficulty or less means the intrusion is detected. Repairs follow the general repair rules: difficulty 10 for light damage, 20 heavy, 30 severe; +10 without tools or spare parts; a failed roll reduces the remaining difficulty by the amount rolled.",
+   "time": "repair: fifteen minutes, then one day, then two days; data access: one minute (one combat round at double difficulty)",
+   "book": "core",
+   "page": 44
+  },
+  {
+   "name": "Demolition",
+   "attribute": "Technical",
+   "description": "Used to set and blow explosives; the user needs explosives and a detonator (wire, timer, or communicator). Difficulty by the barrier or object: very flimsy (plywood door) 5; flimsy (hard wooden door) 10; average (bolted steel door) 15; lightly armored (blast door) 20; heavily armored (the hull of the Millennium Falcon) 30. Failure means the charge blew without enough power to breach. A cube of detonite does 1D damage, as for grenades.",
+   "time": "about a minute (one combat round at double difficulty)",
+   "book": "core",
+   "page": 44
+  },
+  {
+   "name": "Droid Programming/Repair",
+   "attribute": "Technical",
+   "description": "Used to repair Droids (normal repair rules) and to reprogram them from scratch, which wipes the Droid's personality and memory and requires a linked computer. Reprogramming difficulty: very simple Droid 5; simple Droid 10; sapient Droid 15; sophisticated Droid (medical Droid, 3PO or R2 unit) 20; Droid of unknown origin 30.",
+   "time": "repair: fifteen minutes, then one day, then two days; reprogramming: one day",
+   "book": "core",
+   "page": 44
+  },
+  {
+   "name": "Medicine",
+   "attribute": "Technical",
+   "description": "Few humans have in-depth medical knowledge; this skill is used primarily for first aid and emergency care — chiefly the operation of medpacs. Medpac difficulty is 10 for a wounded character, 15 incapacitated, 20 mortally wounded; success reduces the wound status by one degree (once per character per day).",
+   "time": "one combat round",
+   "book": "core",
+   "page": 45
+  },
+  {
+   "name": "Repulsorlift Repair",
+   "attribute": "Technical",
+   "description": "Used to repair repulsor ground, water and air vehicles, including individual, multi-passenger and freight craft. Repair difficulty: light damage 10, heavy 20, severe 30; +10 without proper tools and parts.",
+   "time": "fifteen minutes, then one day, then two days",
+   "book": "core",
+   "page": 45
+  },
+  {
+   "name": "Security",
+   "attribute": "Technical",
+   "description": "Knowledge of security locks and how to jigger them, and alarm systems and how to defeat them. Difficulty: standard lock 5; regular security lock or civilian alarm 10; high-quality lock or sophisticated alarm 15; bank vault lock or high-security alarm 20; top-secret base locks 30. A roll of half the difficulty or lower sets off an alarm.",
+   "time": "normally one minute (one combat round at double difficulty)",
+   "book": "core",
+   "page": 45
+  },
+  {
+   "name": "Starship Repair",
+   "attribute": "Technical",
+   "description": "Used to repair starships. Repair difficulty: light damage 10, heavy 20, severe 30; +10 without proper tools and parts. The starship repair skill can also be used to increase a ship's codes, up to the repairer's skill code, at one week per pip.",
+   "time": "fifteen minutes, then one day, then two days",
+   "book": "core",
+   "page": 45
+  }
+ ],
+ "templates": [
+  {
+   "name": "Alien Student of the Force",
+   "attributes": {
+    "Dexterity": 7,
+    "Knowledge": 10,
+    "Mechanical": 6,
+    "Perception": 7,
+    "Strength": 9,
+    "Technical": 6
+   },
+   "background": "In its long and peaceful history, your species has learned much about the universe and the nature of existence. You yourself have contributed but little to this knowledge, but you have meditated long and hard on reality, and especially on that quality that humans call the Force. You have what humans call Jedi powers in some small degree, as do others of your species. Your race prefers its solitary existence, and has never seen reason to have commerce with the rest of the galaxy. But you have decided to leave your native planet. Perhaps you seek the true Jedi, hoping to learn more about the Force from them. Perhaps you are simply curious. Perhaps the Empire has committed atrocities on your planet. Choose any of these motivations, or invent another (but clear your motivation with your gamemaster if you make up your own).",
+   "personality": "Think of yourself as a mystic, one of a tradition different from that followed by the Jedi, but of similar nature. Like Yoda, Kenobi or the fully-trained Luke Skywalker, you are calm, a little humble, and treat every living being with respect.",
+   "quote": "I am a servant of the Light and of the life which infuses it.",
+   "connection": "You might agree to accept a Brash Pilot or another character as a student. You might be eager to learn from a Failed or Minor Jedi. You might have befriended a Laconic Scout, Smuggler or Gambler in your travels.",
+   "specialRule": "Force skills: Control (1D), Sense (1D), Alter (1D). A Note: You may choose whatever appearance you wish. Your species is rarely encountered in the galaxy, so your appearance is not commonly known or identified. However, strange-looking aliens are common enough that your appearance is rarely remarked upon.",
+   "equipment": [
+    "one statuette, amulet or other trinket of obscure mystical import",
+    "250 credits standard"
+   ],
+   "credits": "250 credits standard",
+   "page": 123
+  },
+  {
+   "name": "Arrogant Noble",
+   "attributes": {
+    "Dexterity": 10,
+    "Knowledge": 10,
+    "Mechanical": 8,
+    "Perception": 12,
+    "Strength": 8,
+    "Technical": 6
+   },
+   "background": "That scum Palpatine. How he became Emperor is beyond you. Why, the man's an upstart! The idea that Palpatine should be your sovereign is completely intolerable. Everyone in your family shares your detestation for the swine. You joined the Rebellion as soon as you had the chance. There are some drawbacks to the Rebellion, of course. All this democracy bit is quite tiresome. It's really rather annoying to have all these aliens and members of the lower orders as your equals in the Rebellion's military hierarchy. Still, you must steel yourself to the task — noblesse oblige and all that. It is unfortunate, though, that you'll miss out on this year's social season at the galactic core.",
+   "personality": "Gracious with those who acknowledge themselves as your inferiors; slightly to insufferably arrogant with anyone else. You feel obligated to follow a strict moral code — always to honor debts, always to fight fair, never to let anyone impugn your honor. You have no patience with commercial motives and cannot, yourself, be bothered to keep track of money or expenditures.",
+   "quote": "My good man — I realize cloaks of that cut are fashionable this season, but there is such a thing as too much.",
+   "connection": "Another Senatorial — you're related, or a long-time political ally, or a long-time political enemy now united in hostility to the Empire. Loyal Retainer — he or she is your liegeman. Retired Captain — you know him or her by reputation. The Merc — you hired his or her Company once. Any other character — perhaps one or several come from your planet.",
+   "equipment": [
+    "several changes of clothing in the latest styles",
+    "hold-out blaster",
+    "one melee weapon of choice",
+    "personal landspeeder",
+    "2000 credits standard"
+   ],
+   "credits": "2000 credits standard",
+   "page": 123
+  },
+  {
+   "name": "Armchair Historian",
+   "attributes": {
+    "Dexterity": 9,
+    "Knowledge": 12,
+    "Mechanical": 8,
+    "Perception": 11,
+    "Strength": 8,
+    "Technical": 6
+   },
+   "background": "You were a petty bureaucrat in a department (e.g., the Floater Vehicles Department) of the (Planet) government until (Planet) was occupied by Imperial stormtroopers. The Imperials purged the planetary government of anyone whose loyalty was tainted — including you, although you can't imagine why. You barely got warning in time to flee. You're a military hobbyist. You've never seen action, but you've read everything on military history you could get your hands on, you've viewed all the popular vidshows on military affairs, and you've followed naval procurement policies closely. In your daydreams, you've always seen yourself as a leader of soldiers — a major contrast to the mundane dreariness of life in an overgrown bureaucracy. You're not particularly excited about the Rebellion — it doesn't look to you like they've got much of a chance — but, well, any port in a storm.",
+   "personality": "Dry, a little dull. Although deficient in weapons skills, you're likely to keep your head under fire, and may eventually become a useful soldier.",
+   "quote": "If Kreuge had only swept farther with the right wing at Salvara instead of turning when he did, the whole history of the Clone Wars would be different!",
+   "connection": "You might have been a citizen of any Noble's or Senatorial's planet. You might have suspended a Brash Pilot's landspeeder license. You might have known the Outlaw's family. You have a real love/hate relationship with any military character (Merc, Retired Captain, etc.): you admire the character for his or her expertise, but you are convinced you know more about military strategy and can do better.",
+   "equipment": [
+    "Rebel uniform",
+    "blaster",
+    "comlink",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 123
+  },
+  {
+   "name": "Bounty Hunter",
+   "attributes": {
+    "Dexterity": 12,
+    "Knowledge": 8,
+    "Mechanical": 8,
+    "Perception": 9,
+    "Strength": 11,
+    "Technical": 6
+   },
+   "background": "Blaster for hire. That's you. You're still young at this game, but already you've killed twenty-three people — but who's counting? The galaxy stinks, but a (wo)man's gotta make a living. Some say you've got no morals at all. That's not true. You live by a strict code. A contract is a contract, that's all. You do your job. When someone hires you, you keep up your side of the bargain — no matter what it takes. Sometimes what it takes isn't pretty — but if you were squeamish, you wouldn't be in this line of business. The Empire hired you. You did the job. A good man died. You fulfilled your side of the deal. The Empire didn't. You could have taken them to court — but they own the courts. They laughed at you. But not for long. Usually you work for a thousand a day. Plus expenses. But this time, it's personal. You've got a contract. With the Rebellion. For the duration. Your pay is a credit a day. And you fulfill your contracts.",
+   "personality": "You don't talk much. When you do you mean what you say. You're dangerous. You're dependable. You're smart. You don't like being conned. If people play straight with you, you'll play straight with them.",
+   "quote": "Don't try it, buddy. I'm only going to tell you once.",
+   "connection": "Anyone could have hired you once — or perhaps you're employed by another character at the moment. You could easily have met any of the other \"lowlife\" characters — Smuggler, Gambler, Pirate, etc.",
+   "equipment": [
+    "heavy blaster",
+    "hold-out blaster",
+    "blaster pistol",
+    "thermal detonator",
+    "knife",
+    "another knife",
+    "protective vest",
+    "jet pack",
+    "two medpacs",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 125
+  },
+  {
+   "name": "Brash Pilot",
+   "attributes": {
+    "Dexterity": 9,
+    "Knowledge": 6,
+    "Mechanical": 12,
+    "Perception": 9,
+    "Strength": 9,
+    "Technical": 9
+   },
+   "background": "You thought you'd never get off that hick planet! Ever since you were a kid, you've read about starships and generals and heroic battles. Ever since you can remember, you've wanted to be a starship pilot. Your parents wanted you to be a farmer (or a lawyer or a doctor or a miner — who cares which?) But the Imperial Naval Academy has been your goal since the first time you heard of it! Well, with this war on, it doesn't look like you'll ever get to the Academy — nor do you want to. When the Empire occupied your planet, everything fell to pieces. Friends and neighbors are dead. But you've got your chance to be a pilot! Sometimes things look pretty grim for the Rebellion — but you've got a hunch your story is just beginning!",
+   "personality": "Enthusiastic, loyal, energetic and committed. Uses lots of exclamation points.",
+   "quote": "Heck, that flying wasn't so fancy! Back home, I used to outmaneuver X-P 38's with my old Mobquet landspeeder!",
+   "connection": "A Senatorial or the Retired Imperial Captain might have sponsored you for the Naval Academy. Almost anyone might be a brother or sister.",
+   "equipment": [
+    "blaster",
+    "Rebel uniform",
+    "medpac",
+    "vacuum suit",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 125
+  },
+  {
+   "name": "Ewok",
+   "attributes": {
+    "Dexterity": 11,
+    "Knowledge": 6,
+    "Mechanical": 8,
+    "Perception": 12,
+    "Strength": 9,
+    "Technical": 8
+   },
+   "background": "You used to live on Endor, the Forest Moon. Then, one day, a big shiny spaceship landed. You investigated. It was filled with fascinating, shiny things and good things to eat. All of a sudden, everything shook. You didn't realize it then, but the ship had taken off, and you couldn't go home. At first, you were frightened. When you learned you couldn't go home, you were sad. But then you made friends with the humans on the ship. They were from something called the Rebellion, and fight bad people called the Empire. Humans seem to find Ewoks cute. This is very useful; you've never had any problem finding food or shelter. You've picked up a little bit of the human language. You don't really understand the strange machines they use, but you've become a little more comfortable with them. Life out here in the galaxy is endlessly fascinating and fun. You've decided to stay with your Rebel friends and help them out.",
+   "personality": "You like humans. You like good things to eat. You like playing with shiny things. You're cheerful, inquisitive and have a habit of getting yourself — and sometimes your companions — into more trouble than you (or they!) can handle.",
+   "quote": "Kaiya! Gyeesh?",
+   "connection": "Choose any other player character you like; you've adopted him as your mentor. You follow him around and try to get him to play with you. If he consistently ignores you, you can switch to another character later on.",
+   "equipment": [
+    "spear",
+    "leather backpack",
+    "a collection of shiny objects"
+   ],
+   "page": 125
+  },
+  {
+   "name": "Failed Jedi",
+   "attributes": {
+    "Dexterity": 8,
+    "Knowledge": 10,
+    "Mechanical": 6,
+    "Perception": 10,
+    "Strength": 8,
+    "Technical": 6
+   },
+   "background": "A long, long time ago, back in the days of the Old Republic, you were an aspiring Jedi. Sure, you remember Skywalker and Kenobi and all that crew. But you failed. You couldn't hack it. The Dark Side kept calling, and things never worked quite the way you wanted them to. You turned to drink, and things went downhill from there. Then, the Empire came, and suddenly it wasn't healthy to be a Jedi, or even to know anything about them. You spent a lot of years drinking heavily. It's not very pleasant to remember. Okay. You've got one more chance. You've got a kid who wants to learn about the Force. You're not sure you can teach him much, but you can try... try to do something worthwhile before you die.",
+   "personality": "Cynical, foul-mouthed, and pessimistic — but with a heart of gold.",
+   "quote": "Kids. Gah. Kids. You wanna learn how to use the Force? Listen when I talk to you. (Wheeze). Damn kids. Where's the whiskey?",
+   "specialRule": "Force skills: Control (1D), Sense (1D). Special Rule: Choose another player character as your student (by mutual agreement).",
+   "equipment": [
+    "lightsaber",
+    "robes",
+    "bottle of rotgut",
+    "250 credits standard"
+   ],
+   "credits": "250 credits standard",
+   "page": 127
+  },
+  {
+   "name": "Gambler",
+   "attributes": {
+    "Dexterity": 11,
+    "Knowledge": 9,
+    "Mechanical": 7,
+    "Perception": 12,
+    "Strength": 8,
+    "Technical": 7
+   },
+   "background": "The galaxy is your oyster. You can go anywhere, do anything. You're never down and out permanently — all you have to do is find an honest game of chance, and there's gambling everywhere. Money comes and money goes, but the game goes on. Love 'em and leave 'em, that's your philosophy. You've never seen any point in settling down, not when there's a starship leaving in an hour, a gambling table in the lounge and new worlds to explore at the other end of the journey. It's a good life. There's always something new to do, always another game, always a fine meal or a top-notch wine. You've seen the cream of society and the dregs of the galaxy, and you're comfortable with both. How'd you get mixed up with the Rebellion? Well, it's more that you got mixed up with the Empire. A little misunderstanding, and presto! You're wanted on thirty planets. Tough to handle. Well, why not? The Rebellion looks pretty hopeless right now, but it's always got a chance... Hey, you're a gambler, right?",
+   "personality": "Charming, unfailingly polite, insouciant, and insincere. You do extremely well with members of the opposite sex.",
+   "quote": "Anyone for an honest game of chance?",
+   "connection": "You've kicked around the galaxy a lot, and could have become friends with — or swindled — any one of them.",
+   "equipment": [
+    "deck of cards",
+    "hold-out blaster",
+    "two sets of flashy clothes",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 127
+  },
+  {
+   "name": "Kid",
+   "attributes": {
+    "Dexterity": 11,
+    "Knowledge": 8,
+    "Mechanical": 9,
+    "Perception": 11,
+    "Strength": 7,
+    "Technical": 8
+   },
+   "background": "You're somewhere between 8 and 12. You've got a big brother or sister in the Rebellion, or maybe you're an orphan who's been semi-adopted by another character. You never let anyone leave you behind, and whenever the danger is greatest, you charge the enemy and butt them with your head, or bite them in the leg or beat them with your arms. You're a regular little hellion whom no one can discipline. The bad guys never take you seriously, which is why you get away with so much.",
+   "personality": "Constantly cheerful, you always side with the underdog. You're completely loyal to one other character (you choose which) and tag along with him.",
+   "quote": "Oh, boy! Let's get 'em. C'mon guys!",
+   "specialRule": "Special Rule: Choose another player character as your older sibling/adopted parent/idol/whatever. You don't have to get the other player's permission. In fact, if he or she is annoyed, that's entirely appropriate for the character — who likes having a kid brother or sister tag along?",
+   "equipment": [
+    "two bottles of fizzyglug",
+    "one packet candy",
+    "a small stone",
+    "length of string",
+    "a small animal (dead or alive — your choice)",
+    "250 credits standard"
+   ],
+   "credits": "250 credits standard",
+   "page": 127
+  },
+  {
+   "name": "Laconic Scout",
+   "attributes": {
+    "Dexterity": 8,
+    "Knowledge": 12,
+    "Mechanical": 9,
+    "Perception": 6,
+    "Strength": 9,
+    "Technical": 10
+   },
+   "background": "Never talked much. Never seen much reason to. Fact is, most of the time you don't have anyone to talk to. You're out under the high, wide skies of a virgin planet, pitting yourself against the wilderness. After you come the settlers, the big corporations, the traders — civilization. But you're the one to open planets. You find out what the dangers are, and how to deal with them. You find out how to survive the strange weather, dangerous beasts and rugged terrain of a whole new world. You'd be doing that still. But they won't let you. The Empire has cut back on exploration; says it's too expensive. You know the truth, though; freedom is an artifact of a frontier. You can't control people when they can always up and move. If, say, one wanted to impose tyranny on a galaxy, there's only one way to do it: stop them from upping and moving. Close the frontier. Okay. So the Emperor wants to destroy your livelihood. He doesn't leave you with any alternative but joining the Rebellion, does he? You'll be an asset, you know. You know a dozen planets like the back of your hand, and you know how to survive — in comfort — anywhere. Need to set up a base on, say, an ice planet? You know how.",
+   "personality": "You're laconic. Close-mouthed. You have a strong sense of humor, which shows through frequently. You're tough. Proud of your abilities. You take a perverse delight in tormenting \"greenies.\"",
+   "quote": "You call these bugs? Back on Danos V, they got sting insects the size of a house.",
+   "connection": "Anyone from a recently-settled planet (like the Brash Pilot) might know you as the Scout who opened his or her world for settlement. You might have met and made friends with any of the lowlife characters (Gambler, Merc, Smuggler, Pirate, Bounty Hunter) between jobs.",
+   "equipment": [
+    "2 medpacs",
+    "blaster pistol",
+    "backpack",
+    "week's concentrated rations",
+    "knife",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 129
+  },
+  {
+   "name": "Loyal Retainer",
+   "attributes": {
+    "Dexterity": 9,
+    "Knowledge": 8,
+    "Mechanical": 9,
+    "Perception": 9,
+    "Strength": 10,
+    "Technical": 9
+   },
+   "background": "For centuries, your family has served the House of (Demesne). The (Lords) of (Demesne) have ruled your planet for as long or longer, and they have been good to their people. The planet has achieved prosperity, peace and plenty under their wise and beneficent rule. Yet evil has fallen upon the galaxy; an evil man has usurped the Imperial throne, and both peace and the nobility are endangered. Your liege has chosen to join the Rebellion. Your whole planet may suffer for that choice, yet you know it is the correct one — and you know your planet will loyally stand with their (Lord) when the shooting begins.",
+   "personality": "Hard-headed, sensible about money matters, loyal unto death, and sometimes a bit overprotective. Your loyalty is to your lord, not to the Rebellion.",
+   "quote": "Certainly, m'lord. Yes, m'lord. As you say, m'lord.",
+   "specialRule": "Special Rule: Ask the gamemaster for the name of the family to which you are loyal and their title (\"Demesne\" and \"Lord\" are just examples). If another player character is a noble, you may be his or her personal servant. Otherwise you are on detached duty, under orders from your lord to serve the Rebellion.",
+   "equipment": [
+    "several changes of clothing for just about any occasion",
+    "hold-out blaster",
+    "comlink",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 129
+  },
+  {
+   "name": "The Merc",
+   "attributes": {
+    "Dexterity": 11,
+    "Knowledge": 8,
+    "Mechanical": 8,
+    "Perception": 7,
+    "Strength": 11,
+    "Technical": 9
+   },
+   "background": "The Company meant everything to you. You joined up as a kid, raw off the farm, eager to find the camaraderie you'd only known from vidshows. It was everything you thought it would be. You fought with the Company through two grueling battles, surviving more by luck and with the help of friends than by skill. Blooded in combat, you became a full-fledged member of the finest body of men and women in the galaxy — loyal, dependable, and true. Someday, you hoped to be everything that they were. Then came the battle. The Empire hired you to defend a base and told you there'd be reinforcements if there was trouble. Then the Rebels came. You fought desperately. Men and women died. Again and again the call went out for reinforcements. They never came. Later, you learned you'd been betrayed. They never planned to rescue you. Mercenaries, they figured, were expendable. So many friends gone. So much lost forever. Your whole future — destroyed. This time, you won't fight for pay. This time, you'll fight for revenge.",
+   "personality": "Inclined to depression and nostalgia for lost comrades. You're an individualist (the Company taught you that), but you work smoothly as part of an organization (the Company taught you that, too). You get along well with just about everyone.",
+   "quote": "Sergeant Harbon told me something about a time like this on Ferton.",
+   "connection": "You might have been hired by the family of any Senatorial or Noble at some time. You might have helped occupy the planet of the Armchair Historian, Brash Pilot, Outlaw, or Mon Calamari. Your Company may have hired the Smuggler or Bounty Hunter at one time, or have been swindled by the Gambler.",
+   "equipment": [
+    "uniform of your unit",
+    "blaster rifle",
+    "melee weapon of your choice",
+    "comlink",
+    "backpack",
+    "protective helmet",
+    "2000 credits standard"
+   ],
+   "credits": "2000 credits standard",
+   "page": 129
+  },
+  {
+   "name": "Minor Jedi",
+   "attributes": {
+    "Dexterity": 9,
+    "Knowledge": 11,
+    "Mechanical": 6,
+    "Perception": 10,
+    "Strength": 8,
+    "Technical": 7
+   },
+   "background": "You'd like to call yourself a Jedi Knight, but you are not, really. The flame of that great order has gone out of the galaxy. You received a little training at the hands of one of the last of the Jedi, one of the less powerful of that order, before he was betrayed and executed by the Empire. Since then, you've lived the life of a fugitive. At times, you are convinced that the Empire, Darth Vader in particular, is hunting you fiercely. At others, you're convinced they've decided you aren't worth the trouble. In a way, not being hunted would be as bad as being hunted — because that would mean that the Empire has such contempt for your abilities that they don't think finding you is important. Still, you have the fondest memories of your master. And there's still a chance, no matter how slim, that the Rebellion can overthrow the Emperor and his minion Vader. You'll work to help that happen, and you hope that, one day, you can help reestablish the Jedi Knights and pass on the little knowledge you possess.",
+   "personality": "Tired, a little cynical, but still completely faithful to the Jedi Code (see page 69). You're a little paranoid about being pursued by the Empire.",
+   "quote": "Scoff if you like, but it's true. The Force surrounds us, holds us, binds everything together.",
+   "connection": "You're happy to serve the Rebellion in whatever capacity. You'd gladly accept a Brash Pilot or another character as a student. You'd be fascinated by the Alien Student of the Force's alien view of the Force, and be eager to learn from the Failed Jedi. You could easily have become friends with any of the other characters.",
+   "specialRule": "Force skills: Control (1D).",
+   "equipment": [
+    "lightsaber",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 131
+  },
+  {
+   "name": "Mon Calamari",
+   "attributes": {
+    "Dexterity": 10,
+    "Knowledge": 10,
+    "Mechanical": 7,
+    "Perception": 7,
+    "Strength": 9,
+    "Technical": 11
+   },
+   "background": "It was the Empire that taught your people the meaning of war. The Mon Calamari are a peaceful and gentle race. Your civilization stretches back thousands of years, back to the first beginnings of agriculture in your native swamplands. Over the centuries, you gradually built a technical civilization and a high culture. Exploration of nearby stars was well underway — and then the Empire came. They saw only an undefended prize — an advanced technology that could be forced to feed the Imperial war machine. They invaded — and enslaved your people. At first, you did not understand what had been done. The idea of slavery was incomprehensible — and the brutal efficiency with which the Empire went about its task left no time to learn. You tried to appease the invaders, but nothing worked. Eventually, Calamari began to fight back — and when they did, the Empire reacted with incredible ferocity. Whole cities were obliterated. Then, virtually the whole Mon Calamari rose as one, and destroyed the occupiers. The war industries the Empire had forced its slave laborers to build are now used for another purpose — to fuel the Rebellion. You were on Calamari when the Empire came, and when the uprising succeeded. Now, you are part of the Calamarian armed forces, a part of the Rebel Alliance against the Empire. You work well with aliens (including humans), and are frequently assigned to fight with small, irregular groups.",
+   "personality": "In general, Calamari are gentle, reasonable, and soft-spoken, but there is as much variety among them as among humans.",
+   "quote": "Our people have a saying: do not dive before testing the depths.",
+   "connection": "You could have seen action with any of the other characters before the game begins. A Gambler, Smuggler or other low-lifes might have visited your planet before or during the Imperial occupation.",
+   "equipment": [
+    "blaster pistol",
+    "comlink",
+    "uniform",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 131
+  },
+  {
+   "name": "Old Senatorial",
+   "attributes": {
+    "Dexterity": 9,
+    "Knowledge": 12,
+    "Mechanical": 9,
+    "Perception": 12,
+    "Strength": 6,
+    "Technical": 6
+   },
+   "background": "You're getting too old, too old for this nonsense. You've been a Senator for more years than you care to count; you've gotten white-haired and dried up in that time. It seems like your struggle with Palpatine and his henchmen has gone on forever. A never-ending struggle for the very soul of the Senate and the galaxy, a struggle which consumed the years of youth like butterflies in a flame. You'll not give up yet! The fight has passed beyond the Senate chamber into the hard vacuum of space. You can't fly a starship or fire a laser cannon, but determination, an understanding of your adversaries, and an ability to command still count for something. Still, still... you yearn for the old days, for men like Talon, Kenobi, and (heaven help us) Skywalker. There were giants in those days...",
+   "personality": "You're no-nonsense, brisk, brusque and capable. You can talk your way past a barricade and have stormtroopers saluting the August Senator in no time. Your stamina isn't what it used to be, and you have no stomach for violence — but you never display weakness.",
+   "quote": "And snap to it, young man!",
+   "connection": "You may know the Retired Captain or other Senatorials or Nobles socially and politically. You may know the Bounty Hunter or Merc as a former employee. Practically any character might come from the planet you represented as Senator.",
+   "equipment": [
+    "hold-out blaster",
+    "spartan clothing",
+    "comlink",
+    "2000 credits standard"
+   ],
+   "credits": "2000 credits standard",
+   "page": 131
+  },
+  {
+   "name": "The Outlaw",
+   "attributes": {
+    "Dexterity": 12,
+    "Knowledge": 9,
+    "Mechanical": 8,
+    "Perception": 6,
+    "Strength": 10,
+    "Technical": 9
+   },
+   "background": "They killed your family — clean wiped 'em out. They torched your house. They destroyed your life. You'll make them pay for what they done. You killed those who did you dirt. But they're only a part. The whole rotten structure has got to fall. Ultimately, the Emperor is responsible. And you won't rest until he's dead — dead for what he done.",
+   "personality": "You're deadly, dangerous, and deranged. You're driven by revenge. You have no fear and no pity; you have nothing to live for and no reason not to risk your life.",
+   "quote": "The Empire made only one mistake. They didn't finish the job.",
+   "connection": "If there's any emotion you can still feel, it's parental love. Younger characters (Kids, Brash Pilots, etc.) may be adopted as surrogate children. You may feel a bleak kinship with similarly driven characters, like the Merc and the Bounty Hunter, which might ripen into true trust and affection.",
+   "equipment": [
+    "heavy blaster pistol",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 133
+  },
+  {
+   "name": "Pirate",
+   "attributes": {
+    "Dexterity": 11,
+    "Knowledge": 6,
+    "Mechanical": 11,
+    "Perception": 9,
+    "Strength": 8,
+    "Technical": 9
+   },
+   "background": "You were just a kid, and when you were offered a position in the crew of the (Ship), you jumped at the chance. Finally, a way off the hick planet where you grew up! You realized the ship was a little disreputable but you hadn't realized you were hooking up with the genuine article — desperate, grizzled pirates thirsting for gold and the blood of innocents. Arrrr, matey. Well, it isn't quite like that, actually; pirates are not much like the vidshow stereotype. No one actually says \"Arrr, matey.\" Certainly no one wears an eyepatch or a wooden leg — give modern medicine some credit. And you've never known a pirate who made anyone \"walk the airlock.\" After all, the point of piracy is to make a profit, not cause bloodshed. Atrocities might make a captured ship's crew resist. Maybe piracy isn't the most honorable profession in the world, but Imperial oppression has driven most of the small traders out of business. Spacers who don't work for the big corporations don't have many options: bankruptcy, retirement, or... piracy. The Empire creates pirates — and then destroys them. Most of your shipmates are in the spice mines of Kessel now. You barely escaped by the skin of your teeth. You plan to revenge them. You hope that one day, you'll be captain of your own ship — a privateer in the service of the Rebellion.",
+   "personality": "Wears colorful clothes, laughs a lot, likes to carouse, cheerfully amoral.",
+   "quote": "Arrr, matey. Make 'em walk the airlock, har har har. (Chuckle.)",
+   "connection": "You might once have raided the ship of any of the other characters. A Retired Imperial Captain or Bounty Hunter might once have pursued you. A Smuggler might have out-run you. You might be related to a Brash Pilot or Kid — or you might be the black sheep of a Senatorial's family.",
+   "equipment": [
+    "flashy clothes",
+    "lots of rings & things",
+    "blaster",
+    "saber (just for show — damage code is strength+1D+1)",
+    "comlink",
+    "vacuum suit",
+    "2000 credits standard"
+   ],
+   "credits": "2000 credits standard",
+   "page": 133
+  },
+  {
+   "name": "Quixotic Jedi",
+   "attributes": {
+    "Dexterity": 11,
+    "Knowledge": 7,
+    "Mechanical": 8,
+    "Perception": 9,
+    "Strength": 9,
+    "Technical": 7
+   },
+   "background": "You claim to be a Jedi. Actually, you're not. You've read all about the exploits of the great Jedi Knights — so much so that you don't quite realize they no longer exist. If truth be told, you're a little crazy. You've learned of the atrocities of the Empire and of Darth Vader, and have decided to leave your comfortable existence and venture forth into the galaxy on a great quest to restore the Jedi. You've read as much as you can about the Jedi training methods and their powers, and you've tried to train yourself as best you can. Everyone thinks you're crazy. They think the Jedi were legendary, that it's all a bunch of hokey pseudo-religious nonsense. But sometimes — just sometimes — you can feel the Force. Sometimes — when you're in great danger, or when things are breaking your way — you can use Jedi powers. In any event, you fight for the Rebellion and try to right individual injustices whenever you come across them. You're basically a good fellow, so who cares if you're a little touched?",
+   "personality": "Elaborately courteous, unfailingly cheerful, and basically nuts. You come up with complicated, hare-brained schemes which invariably fail. You adhere to the Jedi Code (see page 69).",
+   "quote": "I feel... a disturbance in the Force. (Yeah, sure, pal.)",
+   "connection": "A Brash Pilot or Tongue-Tied Engineer might actually believe in you. He'd apprentice himself to you, and fiercely defend you against the sarcasm and scepticism of others. An Alien Student might scoff, but offer to teach you. A Failed Jedi might become close friends, and may give you a few pointers. A Smuggler or Pirate might keep you around for amusement value.",
+   "specialRule": "Force skills: Sense (1D) — self-taught; knows sense but not control.",
+   "equipment": [
+    "duelling sword (it'll have to do until you find a real lightsaber — damage code is strength+1D+1)",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 133
+  },
+  {
+   "name": "Retired Imperial Captain",
+   "attributes": {
+    "Dexterity": 8,
+    "Knowledge": 9,
+    "Mechanical": 11,
+    "Perception": 10,
+    "Strength": 7,
+    "Technical": 9
+   },
+   "background": "You gave your life to the service, and gave it gladly. The Imperial Navy was your job, your life, and your passion. You rose through its ranks, from enlisted swab to petty officer to command of a starship. You saw action several times and were highly decorated, but you remember the times of peace better than the times of war — the calm routine of shipboard life, the riotous shore leaves, the hard study, the unexpected dangers of galactic exploration. It was a sad day when you retired, but you were glad, in a way. Your spouse had suffered for your frequent absences, and your children grew up strangers. It was a shock to discover upon your retirement how people thought of the Empire; something that had been clean and virtuous in your youth had gone very wrong, and you hadn't noticed. Things have gone from bad to worse and now, you hear, that madman Vader is running things. You wouldn't like to be under his command. Your spouse is dead now, and you're getting bored. You can only sit and read in your garden for so long. You've got a few years left, and you'd like to do something worthwhile — maybe something to fight the monster the Empire has become. Maybe the Rebellion can find a use for this old soldier.",
+   "personality": "Soft-spoken, intelligent in command. You're extremely knowledgeable about antiquated military equipment, somewhat less so about modern weapon systems.",
+   "quote": "Orders of the day, gentlemen?",
+   "connection": "You may have seen action with the Merc, or have sponsored the Brash Pilot for the Naval Academy. You may know any Noble or Senatorial by reputation, or socially. You may be irritated by the Armchair Historian. You may have been outrun by the Smuggler or Pirate.",
+   "equipment": [
+    "Imperial Navy uniform (slightly out of date)",
+    "blaster",
+    "2000 credits standard"
+   ],
+   "credits": "2000 credits standard",
+   "page": 135
+  },
+  {
+   "name": "Smuggler",
+   "attributes": {
+    "Dexterity": 10,
+    "Knowledge": 7,
+    "Mechanical": 11,
+    "Perception": 9,
+    "Strength": 9,
+    "Technical": 8
+   },
+   "background": "Your parents called it \"gallivanting around the galaxy,\" but as far as you're concerned there's no better life than a free trader's. Travelling as your fancy takes you, trading a little here and a little there, looking for a sharp deal, bargaining and selling... New worlds to see, always a new planet at the end of the journey. That's how it's supposed to be, anyway. But... the Empire is more and more restrictive by the day. Goods that used to be legal are now contraband. Even contraband is harder and harder to come by. Customs inspectors are like bloodhounds. Bribes have become your major expense. You keep on dreaming of making one big killing and getting out... but you don't want to get out. To you, your ship is home, transportation, and freedom, all in one package. The idea of losing it kills you. But you may very well lose it. To keep on operating, you had to borrow money from a mobster, a real slimeball crime king. You're pretty deep in debt now, and they keep on making nasty jokes about breaking your kneecaps. Damn the Empire, anyway! It's their laws and their corruption that brought this all about.",
+   "personality": "You're tough, smart, good-looking and cynical. You're a fine pilot and a good businessman. Mostly you want to hit it big and be left alone by scum, both criminal and official.",
+   "quote": "I don't have the money with me.",
+   "connection": "You need at least one other person to run your ship, a partner. This could be the Alien Student, the Brash Pilot, the Gambler, the Merc, the Minor Jedi, the Mon Calamari, the Wookiee, or anyone with decent mechanical skills. You could have encountered virtually any of the other characters in the course of your (frequently shady) business dealings.",
+   "equipment": [
+    "stock light freighter",
+    "heavy blaster pistol",
+    "comlink",
+    "2000 credits standard",
+    "25,000 credits in debt to a crime boss"
+   ],
+   "credits": "2000 credits standard (25,000 credits in debt to a crime boss)",
+   "page": 135
+  },
+  {
+   "name": "Tongue-Tied Engineer",
+   "attributes": {
+    "Dexterity": 7,
+    "Knowledge": 12,
+    "Mechanical": 8,
+    "Perception": 7,
+    "Strength": 8,
+    "Technical": 12
+   },
+   "background": "You carry a pocket computer at all time. Your clothes always look bulky and awkward. You're clumsy and drop things a lot. The idea of shooting a blaster at someone makes you distinctly nervous. You have difficulty holding a conversation — any conversation — unless it's about math, machines or computers. You find it easier to deal with Droids than with humans — Droids are predictable and stable. People don't pay much attention to you — until something needs to be fixed, or they need to know something, or they need someone to break into a computer. You can do any of that in nothing flat.",
+   "personality": "Clumsy, awkward, painfully shy, but with a flair for technology.",
+   "quote": "The integral over the surface rho with respect to v is, umm, let's see, del cross negative B, plus the partial derivative of...",
+   "connection": "You might be related to the Brash Pilot or Kid. A Smuggler, Merc, Laconic Scout, or Outlaw might have taken you in tow. You can have fallen (secretly and inarticulately) in love with any of the younger and more glamorous characters (Young Senatorial, Smuggler, Brash Pilot, Gambler). One of the characters with Force powers might have decided to train you.",
+   "equipment": [
+    "pocket computer",
+    "R2 unit",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 135
+  },
+  {
+   "name": "Young Senatorial",
+   "attributes": {
+    "Dexterity": 9,
+    "Knowledge": 12,
+    "Mechanical": 8,
+    "Perception": 10,
+    "Strength": 9,
+    "Technical": 6
+   },
+   "background": "For three centuries your family served the Republic. Innumerable senators have borne your name. For centuries, your family has selflessly sacrificed for the good of the state and society. You have served loyally and well, and because of it, the citizens of your home planet are loyal to your house. Since the Empire was established, your family has tried to fend off its evil ways, to hold the Emperor to his promise to promote the public good. Even now, you are reluctant to turn against the galactic government which your family helped establish so many years ago. Yet you have no choice. The Empire has truly become a tyranny. Your home planet is occupied by stormtroopers. If civilization is to be saved, you must act now. Your family will provide leadership to the Rebellion, as once it did to the Republic.",
+   "personality": "Intelligent, confident, and energetic. You are more interested in getting things done than in theory. Sometimes others are awed by your lineage, and you are proud of it; yet you do not consider yourself class conscious. Great men and women come from all walks of life, and everyone can contribute to the Rebel Alliance.",
+   "quote": "Here's the plan.",
+   "connection": "You could know any Senatorial or Noble socially or by reputation (the Retired Imperial Captain as well). Since you're well known in the Alliance, a Mon Calamari or Merc might have served with you before. Since you're attractive, intelligent and rich, people have an annoying habit of falling in love with you, but you haven't found anyone with whom the feelings are reciprocal.",
+   "equipment": [
+    "stylish clothing",
+    "hold-out blaster",
+    "comlink",
+    "1000 credits standard"
+   ],
+   "credits": "1000 credits standard",
+   "page": 137
+  },
+  {
+   "name": "Wookiee",
+   "attributes": {
+    "Dexterity": 8,
+    "Knowledge": 6,
+    "Mechanical": 9,
+    "Perception": 6,
+    "Strength": 15,
+    "Technical": 10
+   },
+   "background": "You're big. You're furry. You talk in grunts and stuff. Your race lives a long time — centuries, even. You hate to lose. You like to rip the heads off stormtroopers (heh, heh).",
+   "personality": "You're extremely loyal to your comrades. You get frustrated sometimes and bang things. Since you don't realize the full extent of your strength, this can be a problem. Someday you'd like to return to your home planet and mate, but in the meantime you'll stick with your friends.",
+   "quote": "Roooarrgh ur roo. (Translation: \"I have a bad feeling about this.\")",
+   "specialRule": "Extra Dexterity skill printed on the card: Wookiee Bowcaster. Special Rule: Choose one other player character as your friend and partner. He or she speaks your language. When he's around, you can talk with the other players freely (assume that your friend is translating). Protocol Droids (like C-3PO) can also translate. When no translator is handy: 1. Make a noise like Chewbacca. 2. That's a sign to the other players that you're trying to say something. Anyone who wants to can make a Languages skill roll; the gamemaster assigns a difficulty number — normally 15, higher or lower for complex or simple statements. 3. If anyone makes a successful language roll, you can tell him (in English) what you're trying to say. If everyone fails, too bad.",
+   "equipment": [
+    "bowcaster (see page 52)",
+    "250 credits standard"
+   ],
+   "credits": "250 credits standard",
+   "page": 137
+  },
+  {
+   "name": "Tough Native",
+   "attributes": {
+    "Dexterity": 11,
+    "Knowledge": 6,
+    "Mechanical": 7,
+    "Perception": 11,
+    "Strength": 12,
+    "Technical": 7
+   },
+   "background": "Your native planet was settled a thousand years ago by shipwrecked spacers. It lost contact with the galaxy, and its technology regressed. Only a few years ago, your planet was rediscovered by free traders — smugglers, actually. You're a little dazzled by all these starships and rayguns and such — you're much more at home with honest technologies that normal human beings can understand, like sailing ships, rifles, zeppelins and gas lamps. You grew up as an honest farmer's child, taught to fear the deity, love your parents, and serve your monarch. You joined the Queen's Own Grenadiers as a youth, and saw a little action on one campaign. Your Queen sent you (and others of her servants) to find out more about the galaxy and what contact with it might mean. You send her reports weekly — but you're increasingly worried. The Empire would crush your planet like an insect. Joining the Rebellion may be your planet's only hope.",
+   "personality": "Loyal to your Queen; pious; and more than a little flamboyant. You get into fights frequently, which you enjoy, and also enjoy drinking others under the table.",
+   "quote": "En garde!",
+   "connection": "A Smuggler or Pirate might have visited your planet, or transported you from it. Any noble or senatorial might have visited it on a diplomatic mission. You might have met any of the lowlife characters (Gambler, Bounty Hunter, Smuggler, Pirate, etc.) in a bar. The Laconic Scout might have discovered your planet. You might be nobility on your planet, and the Loyal Retainer yours.",
+   "specialRule": "Extra Dexterity skill printed on the card: Black-Powder Pistol.",
+   "equipment": [
+    "sword (damage code is strength+1D+1)",
+    "black-powder pistol (see page 52)",
+    "powder horn",
+    "large, floppy hat",
+    "extravagant clothing",
+    "500 credits standard"
+   ],
+   "credits": "500 credits standard",
+   "page": 137
+  }
+ ],
+ "weapons": [],
+ "gear": [],
+ "vehicles": [],
+ "characters": [],
+ "force": [
+  {
+   "name": "Control Pain",
+   "attribute": "Control",
+   "difficulty": "5 for wounded characters; 10 for incapacitated but conscious characters; 20 for mortally wounded but conscious ones.",
+   "time": "one combat round",
+   "description": "A wounded character who controls pain can act as if unwounded — starting with the round after his control roll is made, his die codes are not reduced by 1D. The wound is not healed, just ignored; a wounded character who controls pain and is wounded again becomes incapacitated. Pain from other causes can likewise be ignored. If he remains conscious, an incapacitated or mortally wounded character can attempt to control pain and then act any number of times without lapsing into unconsciousness — but is treated as wounded (-1D). Mortally wounded characters must still roll each round to avoid dying.",
+   "book": "core",
+   "page": 71
+  },
+  {
+   "name": "Remain Conscious",
+   "attribute": "Control",
+   "difficulty": "10 for incapacitated characters, 20 for mortally wounded ones.",
+   "time": "one combat round",
+   "description": "On the round after a character is incapacitated or mortally wounded, he may use this power to attempt to remain conscious; if he fails, he falls unconscious as usual. A conscious incapacitated character may take one action (at -1D) and then lapses into unconsciousness. A mortally wounded character who remains conscious may not perform any action other than attempting to control pain. A character who remains conscious and then controls pain may perform any number of actions without lapsing into unconsciousness.",
+   "book": "core",
+   "page": 72
+  },
+  {
+   "name": "Hibernation Trance",
+   "attribute": "Control",
+   "difficulty": "20.",
+   "time": "one combat round",
+   "description": "The character falls into a trance: heartbeat slows to a few beats per minute, breathing drops to a minimum, and he is unconscious and appears dead unless tested closely (a character with sense can detect his Force). Useful for playing dead or when food or air is low: he consumes about one tenth the air of a sleeper; can hibernate a week in a dry atmosphere or a month in a wet one before dying of thirst (indefinitely with an intravenous drip), and three months before starving (a year with a sugar drip). The player states what will wake him — a time or a stimulus. Waking him otherwise is tough and may take hours; another Force user can use place in hibernation trance in reverse to wake him in a few rounds.",
+   "book": "core",
+   "page": 72
+  },
+  {
+   "name": "Accelerate Healing",
+   "attribute": "Control",
+   "difficulty": "5.",
+   "time": "one combat round",
+   "description": "If successful, the character may make two natural healing rolls for the current day with +2 to each roll.",
+   "book": "core",
+   "page": 72
+  },
+  {
+   "name": "Contort/Escape",
+   "attribute": "Control",
+   "difficulty": "Loose bonds: 5. Handcuffs: 10. Serious restraints: 15. Maximum security: 20. Houdini: 30.",
+   "time": "one combat round",
+   "description": "The character escapes his bonds by contorting in painful and difficult but physically possible ways — for example, dislocating the thumb and pinky to slip handcuffs. A trained Jedi can resist the pain and damage with proper bodily control; with enough time, training and will, it is possible to escape from virtually any set of restraints.",
+   "book": "core",
+   "page": 72
+  },
+  {
+   "name": "Detoxify Poison",
+   "attribute": "Control",
+   "difficulty": "Alcohol: 5. Mild poison: 10. Average poison: 15. Virulent poison: 20. Neurotoxin: 30.",
+   "time": "one combat round",
+   "description": "Allows the character to detoxify poisons or eject them from the body in a much shorter time than would normally be possible. If the character makes his skill roll, he is not affected by the poison. Alcohol is a mild poison, and one use of the power is to remain sober while drinking large quantities.",
+   "book": "core",
+   "page": 72
+  },
+  {
+   "name": "Control Disease",
+   "attribute": "Control",
+   "difficulty": "Mild infection (cold): 5. High fever (bad flu): 10. Serious sickness (gangrene): 15. Life-threatening disease (tuberculosis): 20. Massive long-standing disease (lung cancer): 30.",
+   "time": "at least half an hour; weeks or months for serious disease",
+   "description": "Allows the character to direct and control the antibodies and healing resources of his body to throw off an infection or to attack the diseased parts of the body. The character must spend at least half an hour meditating while directing his body; if the disease is life-threatening or long-standing, repeated attempts over weeks or months may be required to cure it entirely.",
+   "book": "core",
+   "page": 77
+  },
+  {
+   "name": "Absorb/Dissipate Energy",
+   "attribute": "Control",
+   "difficulty": "Sunburn: 5. Intense sun: 10. Solar wind: 15. Radiation storm: 20. Blaster bolt: 15 plus the blaster's damage roll.",
+   "time": "one combat round",
+   "description": "Absorbs or dissipates energy to which the character is subjected — light and heat, microwave or other electromagnetic radiation, hard radiation, and blaster bolts. When used to absorb a blaster bolt, make a damage roll for the blaster; the control difficulty is 15 plus that roll. A successful roll means the energy is dissipated and does not injure the character. Against continuous radiation the power may be kept up.",
+   "book": "core",
+   "page": 77
+  },
+  {
+   "name": "Receptive Telepathy",
+   "attribute": "Sense",
+   "difficulty": "If the target is friendly and does not resist, base 5, modified by proximity and relationship. If the target resists, his perception (or control) roll, plus the modifiers for proximity and relationship.",
+   "time": "one combat round",
+   "description": "If the user's roll is equal to or greater than the difficulty, he can read the target's thoughts as well as emotions — he hears what the target is thinking, but cannot probe deeper. If the roll is at least double the difficulty, he can rifle through the target's mind and memories for the information he wants. Normally used one round at a time, but can be kept up to keep monitoring. Each person read counts as a separate power use. Works on animals as well as sapients; alien emotions may be hard to interpret. May not be used on Droids.",
+   "book": "core",
+   "page": 77
+  },
+  {
+   "name": "Magnify Senses",
+   "attribute": "Sense",
+   "difficulty": "Base 5, modified by proximity.",
+   "time": "one combat round",
+   "description": "The character can sense something that would be impossible with unaided senses — hear something beyond the range of the human ear, see something that would normally require binoculars, read microfilm with the naked eye, hear a very faint sound.",
+   "book": "core",
+   "page": 77
+  },
+  {
+   "name": "Life Sense",
+   "attribute": "Sense",
+   "difficulty": "Base 5, modified by target proximity and relationship.",
+   "time": "one combat round",
+   "description": "The user can sense the presence and identity of the person for whom he searches, and how badly wounded, diseased or otherwise physically disturbed the target is. If the user keeps the power up, he can use it to track a target. If the target has the control skill, he may use it to hide from the senser; his control roll is added to the senser's difficulty number.",
+   "book": "core",
+   "page": 77
+  },
+  {
+   "name": "Instinctive Astrogation",
+   "attribute": "Sense",
+   "difficulty": "15.",
+   "time": "one combat round",
+   "description": "Normally the difficulty for astrogating a ship without a nav computer is 30 for a standard duration trip. By using sense to plot his trip through hyperspace, a character can reduce the astrogation difficulty number to 5 for a standard duration trip.",
+   "book": "core",
+   "page": 77
+  },
+  {
+   "name": "Projective Telepathy",
+   "attribute": "Control & Sense",
+   "difficulty": "Control: 5, modified by proximity; +5 if the user cannot verbalize the thoughts he is transmitting. Sense: if the target is friendly and does not resist, 5, modified by relationship; if the target resists, his perception (or control) roll, modified by relationship.",
+   "time": "one combat round",
+   "description": "The target hears the thoughts and feels the emotions of the user, and knows that they are not his own but belong to the user of the power. This power is not used to control minds, but to communicate.",
+   "book": "core",
+   "page": 78
+  },
+  {
+   "name": "Farseeing",
+   "attribute": "Control & Sense",
+   "difficulty": "Control: 5, modified by proximity; +5 to see the past, +10 to see the future. Sense: if the target is friendly and does not resist, 5, modified by relationship; if the target resists, his perception (or control) roll, modified by relationship.",
+   "time": "one combat round",
+   "description": "The user sees the place or person he wishes to see in his mind, as it appears now, along with the immediate surroundings — so he can know when a friend is in danger, or what has happened on his home planet in his absence. It can also be used to see the past or future; any vision of the future is of a possible future only, and the character's own actions can alter things. Farseeing is the only power usable at the +20 (same star system) and +30 (different star system) proximity ranges.",
+   "book": "core",
+   "page": 78
+  },
+  {
+   "name": "Telekinesis",
+   "attribute": "Alter",
+   "difficulty": "5 for objects of 1 kilogram or less; 10 for 1-10 kg; 15 for 11-100 kg; 20 for 101 kg to 1 metric ton; +5 for each additional factor of 10. Modified by proximity.",
+   "time": "one combat round",
+   "description": "Levitates and moves objects with the naked mind; the object moves as the user desires and continues to move if the power is kept up. Using levitated objects to injure or attack other characters is possible — but anyone who does so gains a Dark Side point. Can levitate oneself or others, or even serve as a primitive space drive in emergencies; an unwilling target adds his perception or control roll to the difficulty. Each object levitated at once is a separate power use.",
+   "book": "core",
+   "page": 78
+  },
+  {
+   "name": "Injure/Kill",
+   "attribute": "Alter",
+   "difficulty": "The target's perception or control roll, modified by proximity.",
+   "time": "one combat round",
+   "description": "Warning: a character who uses this power immediately gains a Dark Side point. The user alters part of the target's body, intending to injure or kill. Roll alter dice like a combat skill: three times the difficulty mortally wounds the target; at least twice incapacitates; and so on. It never stuns — if the alter roll is less than the difficulty, the target is not affected.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Control Another's Pain",
+   "attribute": "Control & Alter",
+   "difficulty": "Control: 5, modified by target proximity and relationship. Alter: 5 for wounded characters; 10 for incapacitated ones; 20 for mortally wounded ones.",
+   "time": "one combat round",
+   "description": "Has the same effect on the target as control pain does on its user.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Inflict Pain",
+   "attribute": "Control & Alter",
+   "difficulty": "Control: 5, modified by target proximity. Alter: the target's perception or control roll, modified by proximity, multiplied by two.",
+   "time": "one combat round",
+   "description": "Warning: a character who uses this power immediately gains a Dark Side point. The target experiences great agony. He is stunned for as long as the user keeps the power up, and two rounds thereafter. If the target has Force skills, he can use control pain to ignore the effects.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Return to Consciousness",
+   "attribute": "Control & Alter",
+   "difficulty": "Control: 5, modified by target proximity. Alter: 10 for incapacitated characters, 20 for mortally wounded ones.",
+   "time": "one combat round",
+   "description": "The target becomes conscious again. The description for remain conscious explains what conscious incapacitated and mortally wounded characters can do.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Place in Hibernation Trance",
+   "attribute": "Control & Alter",
+   "difficulty": "Control: 10, modified by the target's relationship. Alter: 10, modified by proximity.",
+   "time": "one combat round",
+   "description": "The user puts another character into a hibernation trance. The affected character must agree to be shut down — the power cannot be used as an attack to knock others unconscious — and must be in physical contact with the user of the power. Used in reverse, it wakes a hibernating character in a few rounds.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Accelerate Another's Healing",
+   "attribute": "Control & Alter",
+   "difficulty": "Control: 5, modified by relationship. Alter: 5, modified by proximity.",
+   "time": "one combat round",
+   "description": "The target may make two natural healing rolls for the current day each at +2.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Detoxify Poison in Another",
+   "attribute": "Control & Alter",
+   "difficulty": "Control: 5, modified by relationship. Alter: same as detoxify poison, modified by target proximity.",
+   "time": "one combat round",
+   "description": "Follows the same rules as detoxify poison.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Control Another's Disease",
+   "attribute": "Control & Alter",
+   "difficulty": "Control: 5, modified by relationship. Alter: same as control disease, modified by proximity.",
+   "time": "at least half an hour; weeks or months for serious disease",
+   "description": "Works in the same way as control disease.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Transfer Force",
+   "attribute": "Control & Alter",
+   "difficulty": "Control: 5, modified by relationship. Alter: 5, modified by proximity.",
+   "time": "one combat round",
+   "description": "If both skill rolls succeed, the user must spend a Force point to use this power (he'll get it back; using the power is inherently heroic). The user transfers a portion of his own life force into the body of the subject, usually a mortally wounded one. Don't roll the 2D death check for a mortally wounded character to whom Force is transferred; the target goes into a hibernation and will die only after hours or days — plenty of time to get him to a rejuvenation tank.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Affect Mind",
+   "attribute": "Control, Sense & Alter",
+   "difficulty": "Control: 5 for perceptions, 10 for memories, 15 for conclusions, modified by proximity. Sense: the target's perception or control roll, modified by relationship. Alter: 5 for slight momentary misperceptions, minor changes to distant memories, or a conclusion the target doesn't care about; 10 for brief visible phenomena, memories less than a year old, or a conclusion the target has some feeling about; 15 for short hallucinations, memories less than a day old, or strict orders about the conclusion; 20 for slight disguises to facial features or hallucinations sensed by two senses, memories less than a minute old, or an extremely important conclusion; 30 for hallucinations sensed by all senses, a major memory change (misremembering your own name), or a conclusion where the logic is absolutely clear.",
+   "time": "one combat round",
+   "description": "Used to alter a character's perception so that he senses an illusion or fails to see what the user does not want him to see; to alter his memories permanently so that he remembers incorrectly or fails to remember; or to alter his conclusions so that he comes to an incorrect decision (\"These aren't the Droids we're looking for\"). The user must describe the exact effect before rolling. Normally affects one target; two or more targets require the power to be used two or more times. A hallucination sensed by all senses can be felt, but causes no damage. Affect mind cannot fool Droids or recording devices.",
+   "book": "core",
+   "page": 79
+  },
+  {
+   "name": "Telekinetic Kill",
+   "attribute": "Control, Sense & Alter",
+   "difficulty": "Control: 5, modified by proximity. Sense: the target's perception or control roll. Alter: 10 for wound, 20 for incapacitation, 30 for mortal wound; subtract the target's relationship modifier, so killing a complete stranger is easier than killing a close relative.",
+   "time": "one combat round",
+   "description": "Warning: a character who uses this power immediately gains a Dark Side point. The user uses his telekinetic ability to injure or kill the target — stirring the brain, squeezing the heart, or (Darth Vader's favorite) collapsing the trachea.",
+   "book": "core",
+   "page": 80
+  }
+ ],
+ "tables": {
+  "attributes": [
+   {
+    "name": "Dexterity",
+    "description": "A measure of a character's coordination, balance, and physical finesse. A character with high dexterity is good at dodging blaster fire while balancing on a beam; a character with low dexterity is clumsy."
+   },
+   {
+    "name": "Knowledge",
+    "description": "A character's education and knowledge of facts and data. Used whenever you want to find out whether a character knows something; the difficulty depends on the obscurity of the information and the character's familiarity with the subject."
+   },
+   {
+    "name": "Mechanical",
+    "description": "Short for mechanical aptitude — the instinctive ability to control vehicles and other complex machines. A character with high mechanical makes a hot pilot."
+   },
+   {
+    "name": "Perception",
+    "description": "Measures the sharpness of a character's senses, his ability to interpret the behavior of others, and his powers of observation. Used when a character might overlook something he sees or hears, and when he attempts to persuade non-player characters."
+   },
+   {
+    "name": "Strength",
+    "description": "A measure of physical prowess including stamina, the ability to heal, and athletic abilities as well as raw physical strength. Rolled to resist damage."
+   },
+   {
+    "name": "Technical",
+    "description": "Short for technical aptitude — an instinctive feel for technology. Used whenever a character tries to figure out what something does, how it works, or how to fix it."
+   }
+  ],
+  "difficulties": [
+   {
+    "name": "Very Easy",
+    "range": "5",
+    "text": "Firing a blaster at point-blank range. Knowing that Wookiees are called Wookiees. Putting a restraining bolt on a Droid."
+   },
+   {
+    "name": "Easy",
+    "range": "10",
+    "text": "A little tougher, but most characters should be able to do it most of the time. Firing a blaster at short range. Knowing that Wookiees use bowcasters. Replacing a Droid's visual sensors."
+   },
+   {
+    "name": "Moderate",
+    "range": "15",
+    "text": "Requires a little skill and effort. Firing a blaster at medium range. Knowing that Wookiees like to win. Fixing a Droid's servomotors."
+   },
+   {
+    "name": "Difficult",
+    "range": "20",
+    "text": "Pretty tough — really requires a lot of skill and maybe a little luck. Firing a blaster at long range. Knowing the customs and eating habits of Wookiees. Reconditioning a badly-worn and damaged Droid."
+   },
+   {
+    "name": "Very Difficult",
+    "range": "30",
+    "text": "Requires great expertise, real effort, and complete dedication. Firing a blaster at long range at someone dodging. Eating a meal with Wookiees while obeying all their customs. Rebuilding a Droid blown to smithereens."
+   }
+  ],
+  "woundLevels": [
+   {
+    "name": "Stunned",
+    "text": "Strength roll greater than damage roll. The character falls prone and can't do anything for the rest of the combat round."
+   },
+   {
+    "name": "Wounded",
+    "text": "Damage roll equal to or greater than the strength roll, but less than twice it. The character falls prone and can't act for the rest of the round; all skill and attribute codes are reduced by 1D until healed. A wounded character who is wounded again is incapacitated."
+   },
+   {
+    "name": "Incapacitated",
+    "text": "Damage roll at least twice the strength roll, but less than three times. The character falls prone and is unconscious; he can't do anything until healed. Wounded or incapacitated again: mortally wounded."
+   },
+   {
+    "name": "Mortally Wounded",
+    "text": "Damage roll at least three times the strength roll. Unconscious and cannot be roused. At the end of every combat round roll 2D; if the roll is less than the number of rounds since the character was mortally wounded, he dies — unless he reaches a medical Droid, rejuvenation tank, or is treated with a medpac."
+   },
+   {
+    "name": "Healing: medpac",
+    "text": "Medicine roll, difficulty 10 (wounded), 15 (incapacitated), 20 (mortally wounded). Success reduces wound status by one degree; a character can only be treated once, and not again the same day. A wounded character treating himself rolls at -1D. The medpac is expended."
+   },
+   {
+    "name": "Healing: rejuvenation tank",
+    "text": "Bacta tank. Wounded: healed in 2D hours. Incapacitated: 2D days. Mortally wounded: 2D weeks."
+   },
+   {
+    "name": "Healing: natural",
+    "text": "Strength roll once per day starting the day after injury. Wounded: 2-6 incapacitated, 7-11 no change, 12+ healed. Incapacitated: 2-8 dead, 9-13 no change, 14+ wounded."
+   }
+  ],
+  "damageResults": [
+   {
+    "range": "Strength roll > damage roll",
+    "text": "Stunned — falls prone, loses the rest of the round. Blaster set on stun: no effect."
+   },
+   {
+    "range": "Damage roll >= strength roll, < 2x",
+    "text": "Wounded — -1D to all rolls until healed. Blaster set on stun: stunned for two combat rounds."
+   },
+   {
+    "range": "Damage roll >= 2x strength roll, < 3x",
+    "text": "Incapacitated — unconscious until healed. Blaster set on stun: knocked unconscious."
+   },
+   {
+    "range": "Damage roll >= 3x strength roll",
+    "text": "Mortally wounded — unconscious, roll 2D each round to avoid death. Blaster set on stun: knocked unconscious."
+   },
+   {
+    "range": "Vehicles and objects (hull code)",
+    "text": "Stun = light damage (repair 10); wound = heavy damage, speed reduced 1D (repair 20); incapacitate = severe damage, vehicle stops and operator rolls to avoid a crash (repair 30); kill = destroyed. Objects: 1D hull if delicate, 2D normal, 3D+ armored."
+   }
+  ],
+  "ranges": [
+   {
+    "name": "Point-Blank",
+    "modifier": "5",
+    "text": "Anything within 3 meters, regardless of weapon."
+   },
+   {
+    "name": "Short",
+    "modifier": "10",
+    "text": "Up to the weapon's short range in meters (e.g. 10 m for a blaster pistol, 30 m for a blaster rifle). Most combat indoors."
+   },
+   {
+    "name": "Medium",
+    "modifier": "15",
+    "text": "Up to the weapon's medium range. Most combat out of doors."
+   },
+   {
+    "name": "Long",
+    "modifier": "20",
+    "text": "Up to the weapon's long range. Usually only when sniping from great distances."
+   },
+   {
+    "name": "Grenade blast",
+    "modifier": "5/10/15/20",
+    "text": "When a grenade explodes, each character within 10 meters (20 for a thermal detonator) is at point-blank (3 m), short (3-4 m), medium (5-6 m) or long (7-10 m) range; roll 4D for the grenade against that difficulty plus any dodge. Damage 5D/4D/3D/2D by range."
+   }
+  ],
+  "combatModifiers": [
+   {
+    "name": "Preparing",
+    "text": "Spend one round doing nothing, then use a single skill in the next round at +1D. Lost if you use two or more skills or a reaction skill in either round; not available for skills that take longer than a round."
+   },
+   {
+    "name": "Running",
+    "text": "A running character (up to 10 meters, one 90-degree turn) reduces all skill codes by 1D. Walking (5 meters, any turn) has no penalty. Crawling (2 meters, prone) also -1D."
+   },
+   {
+    "name": "Wounded",
+    "text": "All skill and attribute codes reduced by 1D."
+   },
+   {
+    "name": "Multiple actions",
+    "text": "Every skill use after the first in a round costs 1D from all codes used that round: two uses -1D, three -2D, four -3D, and so on. Reaction skills (dodge, parries) count as extra uses but only affect rolls made after them."
+   },
+   {
+    "name": "Dodge / parry",
+    "text": "Add the dodge (or parry) roll to the attacker's difficulty number. One dodge affects all fire and grenade attacks in that segment. Melee parry works against melee and brawling attacks; brawling parry only against brawling; dodge doesn't affect hand-to-hand attacks."
+   },
+   {
+    "name": "Cover",
+    "text": "Target protected by a wall or other obstruction: +5 to the difficulty."
+   },
+   {
+    "name": "Prone target",
+    "text": "+5 to the difficulty, unless at point-blank range."
+   },
+   {
+    "name": "Drawing a weapon / setting stun / reloading",
+    "text": "Costs 1D from all skill and attribute codes that round, but does not take an action segment."
+   },
+   {
+    "name": "Armor",
+    "text": "Adds its code to strength for damage resistance only, and reduces dexterity (and dexterity skills) by the same amount."
+   },
+   {
+    "name": "Hand-to-hand",
+    "text": "Attacks only within two meters. Base difficulty is set by the weapon (Weapon Chart), plus the defender's parry roll. Brawling damage is strength; melee damage is the weapon's code plus strength."
+   },
+   {
+    "name": "Lightsaber parry",
+    "text": "A melee weapon that hits above its base difficulty but below the lightsaber-modified difficulty is cut in half; a brawler in the same case is wounded. Only a lightsaber can parry a lightsaber."
+   },
+   {
+    "name": "Surprise (optional)",
+    "text": "Ambushers get one action segment of surprise; targets cannot move, use skills, or dodge in it."
+   },
+   {
+    "name": "Grenades in enclosed areas (optional)",
+    "text": "+1D damage in an enclosed area; -1D through a door or window, -2D through a slit, -1D in vacuum; no effect through walls."
+   },
+   {
+    "name": "Force point",
+    "text": "All skill and attribute codes are doubled for the round; the character ignores being stunned that round."
+   }
+  ],
+  "creation": {
+   "attributeDice": "Fixed by template (attribute codes cannot be changed)",
+   "skillDice": 7,
+   "templateNote": "Choose one of the 24 character templates. Every skill starts at the code of the attribute it is printed under. Allocate 7D among skills; no skill may be increased by more than 2D. Force skills printed on a template (1D) may also be raised with these dice. Fill in name, height, weight, sex, age and appearance; note starting equipment and credits. Work out a connection with at least one other character.",
+   "forcePoints": 1,
+   "skillPointsNote": "Skill points are awarded at the end of an adventure (usually 3 to 10 per character, at most about 15). Raising a skill one pip costs the number before the D (raising 5D+1 costs 5); 1D costs three times that number. Attributes can never be raised. Points can be saved."
+  },
+  "advancement": [
+   {
+    "name": "Skill point cost",
+    "text": "To raise a skill by one pip, spend skill points equal to the number before the D: 2D to 2D+1 costs 2; 5D+1 to 5D+2 costs 5. +2 goes to the next full D. Raising a skill by a full D costs three times the number (4D to 5D = 12; 5D to 6D = 15)."
+   },
+   {
+    "name": "Attributes",
+    "text": "You can never increase your attribute codes."
+   },
+   {
+    "name": "Saving points",
+    "text": "Skill points may be saved and spent at the end of any session of play."
+   },
+   {
+    "name": "Awards",
+    "text": "Establish an average award of 3 to 10 points per character per adventure, plus bonuses for doing well, individual contribution, cooperation, entertaining the table, and playing in character — about 15 per adventure at the very most. Awards do not grow with skill level, so advancement slows as characters improve."
+   },
+   {
+    "name": "Force points",
+    "text": "A Force point spent heroically returns at the end of the adventure; spent heroically at the dramatically appropriate moment, the gamemaster may award another point as well. A character who starts with one point and loses it still gets one back."
+   },
+   {
+    "name": "Force skills",
+    "text": "Learned only from a master; each takes one week of intensive study and starts at 1D at no skill point cost. A pupil may raise a Force skill with skill points up to his master's level at normal cost; above it (or without a master) at double cost. Starting Force characters have learned all their masters can teach and pay double."
+   },
+   {
+    "name": "New skills",
+    "text": "Write a new specialized skill (an archaic weapon, a vehicle type, a field of knowledge) on the blank line under its attribute; it starts at the attribute code and may be raised with skill dice or skill points."
+   },
+   {
+    "name": "Improving ships",
+    "text": "A ship's owner may spend skill points to raise any ship code (speed, hull, maneuverability, shields, fire control, damage) at the same cost as a skill, plus either 100 credits per point at a spacedock (1 day per pip) or his own starship repair skill (1 week per pip, 10 credits per point, up to his repair code). Hyperdrive x2 to x1 costs 20 points; x1 to x1/2 costs 40. A new weapon at 1D/1D costs 6 points."
+   }
+  ],
+  "force": [
+   {
+    "name": "Force points",
+    "text": "Every player character begins with one Force point. Spending one doubles all skill and attribute codes for that combat round, and the character ignores being stunned that round. A character cannot spend more Force points in an adventure than he possesses."
+   },
+   {
+    "name": "Four results",
+    "text": "Doing wrong (killing or injuring except in defense, gaining power, acting in anger or hate): the point is lost permanently and the character gains a Dark Side point. Unheroic (avoiding danger, saving your own butt, gaining money): the point is lost. Heroic (great danger, sacrifice for others, big risks for the Alliance): the point returns at the end of the adventure. Heroic at the dramatically appropriate moment: the point returns and the gamemaster may award another."
+   },
+   {
+    "name": "Dark Side points",
+    "text": "Whenever a character gains a Dark Side point, the gamemaster rolls 1D; if the roll is less than the character's total Dark Side points, he goes over to the Dark Side and becomes a gamemaster character. Always warn a player before he earns one."
+   },
+   {
+    "name": "Atonement",
+    "text": "A character who consciously attempts to atone — announcing it and clearly avoiding wrongful acts — for five sessions of play reduces his Dark Side total by one. Any questionable act restarts the count."
+   },
+   {
+    "name": "The Jedi Code",
+    "text": "There is no emotion; there is peace. There is no ignorance; there is knowledge. There is no passion; there is serenity. There is no death; there is the Force. A Jedi may not kill except in self-defense or the defense of others; may not act for personal gain of wealth or power; never acts from hatred, anger, fear or aggression. Characters with Force skills gain Dark Side points whenever they do wrong, not only when spending Force points."
+   },
+   {
+    "name": "Force skills",
+    "text": "Control, sense and alter are not governed by any attribute. The first skill learned is normally control, then sense, then alter; each takes a week with a master and starts at 1D. A master can only teach what he knows, may have one pupil at a time, and may not teach anyone with Dark Side points or who will not abide by the Jedi Code. Starting templates with Force skills: Alien Student (control, sense, alter), Failed Jedi (control, sense), Minor Jedi (control), Quixotic Jedi (sense — self-taught)."
+   },
+   {
+    "name": "Using powers",
+    "text": "Each power lists a difficulty number per skill required; make a separate roll for each skill, and failing any one means the power fails. Using a Force skill takes one combat round; a multi-skill power can be attempted in one round (with multiple-action penalties) or over several rounds. Using Force skills does not cost Force points."
+   },
+   {
+    "name": "Dark Side modification",
+    "text": "A character with Dark Side points adds 1D to his Force skill codes per Dark Side point — the Dark Side is the easier, more seductive path."
+   },
+   {
+    "name": "Resisting powers",
+    "text": "When a power is used against a character's will, roll the target's perception (or control, if he has it) against the Force skill roll; if perception is greater, the power fails."
+   },
+   {
+    "name": "Keeping a power up",
+    "text": "A player may announce before rolling that he will keep a power continuously operating. It stays up until dropped, or until the character is stunned or wounded or distracted. While a power is up, its skills count as being used for the purposes of multiple-action penalties on all other rolls."
+   },
+   {
+    "name": "Proximity modifiers",
+    "text": "User and target in physical contact: +0; in line of sight but not touching: +2; not in line of sight, 1-100 meters: +5; 101 m-10 km: +7; 11-1000 km: +10; same planet but more than 1000 km: +15; same star system but not the same planet: +20 (farseeing only); not in the same star system: +30 (farseeing only)."
+   },
+   {
+    "name": "Relationship modifiers",
+    "text": "Close relatives (married, siblings, parent and child): +0; close friends: +2; friends: +5; acquaintances: +7; slight acquaintances: +10; met once: +12; never met but know each other by reputation: +15; complete strangers: +20; complete strangers not of the same species: +30."
+   },
+   {
+    "name": "Lightsabers",
+    "text": "Anyone may use a lightsaber (damage 5D, lightsaber skill; strength is never added). A character with control adds his control dice to the damage. A character with sense may parry with sense instead of melee parry (sense is then a reaction skill), may parry blaster bolts by adding his sense roll to the firer's difficulty, and may reflect a missed bolt at another target with a second sense roll against the range difficulty of that blaster."
+   }
+  ],
+  "starship": [
+   {
+    "name": "Ship codes",
+    "text": "Speed (catching or escaping opponents), Maneuverability (evading fire), Hull (resisting damage, like strength), Shields (added to hull when the shield operator succeeds). Each weapon has Fire Control (added to the gunner's roll) and Damage."
+   },
+   {
+    "name": "Sequence",
+    "text": "Piloting segment: everyone declares actions. Speed segment: range changes. First fire segment: gunnery rolls, evasion, shields, damage. Second and subsequent fire segments for additional shots."
+   },
+   {
+    "name": "Range and pursuit",
+    "text": "Ships are at short, medium or long range. If both close, range drops one step; if both run, range opens one step (at long range the fight is over). If one closes and one runs, roll speed dice; the higher roller chooses. A pilot may add a piloting roll to the speed roll (a skill use). A ship doing nothing lets its opponent decide."
+   },
+   {
+    "name": "Gunnery",
+    "text": "Roll gunnery skill plus the weapon's fire control. Difficulty 5 point-blank, 10 short, 15 medium, 20 long, plus the target's evasion. A gunner may fire his weapon more than once, each a separate action."
+   },
+   {
+    "name": "Evasion",
+    "text": "The pilot (or copilot) rolls the ship's maneuverability plus his piloting skill and adds the total to every attacker's difficulty for that fire segment. Piloting is a reaction skill for this purpose; each evasion is a skill use."
+   },
+   {
+    "name": "Shields",
+    "text": "A reaction skill; one roll per attack, decided before the attacker rolls. Difficulty 10 at long range, 15 medium, 20 short. Success adds the ship's shield dice to its hull roll. Multiple skill uses reduce the operator's codes, never the ship's."
+   },
+   {
+    "name": "Damage",
+    "text": "Reduce weapon damage by 1D at medium range and 2D at long. Hull (plus shields) roll greater than damage: lightly damaged — controls ionized (no speed, maneuver, fire, piloting or gunnery rolls next round) or, if shields were used, shields blown (-1D shields until repaired). Damage >= hull, < 2x: heavily damaged — speed, maneuver, fire control and shields -1D. Damage >= 2x: severely damaged — as heavy plus a system knocked out (Starship System Damage Table). Damage >= 3x: destroyed. Heavily damaged again: severely damaged; severely damaged then heavily: dead in space; severely damaged twice: destroyed."
+   },
+   {
+    "name": "Torpedoes and missiles",
+    "text": "Short range only; add the target's speed roll to the fire difficulty; completely dissipated by a successful shield attempt."
+   },
+   {
+    "name": "Multiship combat",
+    "text": "One ship against several: it runs from all or closes with one; resolve each pursuer separately. Several against several: split into dogfights; extra ships may join any dogfight; a ship that destroys its opponent may join another fight at long range next round."
+   },
+   {
+    "name": "Ships and characters",
+    "text": "A ship firing at a character is at short range but difficulty 20; double the ship weapon's damage code against a character. A hand blaster hitting a ship does 1D (repeating blasters 2D) and has no effect if the roll is less than half the hull roll."
+   },
+   {
+    "name": "Astrogation",
+    "text": "Standard duration by route: major trade route 3 days, commonly travelled 7, lightly travelled 14, infrequently travelled 21, last travelled more than 3 years ago 30, never travelled 30+; +1-14 days through a gas cloud or star cluster or asteroid field; multiply by the ship's hyperdrive multiplier. Difficulty 15 (30 without a nav computer); +1 per day saved, -1 per extra day taken; x2 for hasty entry (one round, needs a 15 to enter hyperspace); +5 lightly damaged, +10 heavily damaged; severely damaged ships cannot jump. Trips take at least one day."
+   },
+   {
+    "name": "Astrogation mishaps (2D)",
+    "text": "2-3 hyperdrive cut-out, damage sustained (1 day lost, lightly damaged); 4 radiation fluctuations (lightly damaged, duration changes); 5-6 hyperdrive cut-out, no damage (1 day lost); 7 off course (1 day lost, new trip needed); 8 Mynocks (3D days longer unless removed); 9-10 close call (1 day lost, heavily damaged); 11-12 collision — heavy damage, ship hulled (survival rolls, difficulty 10, to suit up)."
+   },
+   {
+    "name": "Repairs",
+    "text": "Starship repair difficulty 10 light, 20 heavy, 30 severe (+10 without tools and parts). Roll after 15 minutes; failure subtracts the roll from the difficulty; roll again after a day, then after two more days; then only a repair facility can finish the job."
+   }
+  ],
+  "quickRules": [
+   {
+    "title": "Dice and pips",
+    "text": "A die code like 3D+2 means roll three six-sided dice and add 2. Codes go 2D, 2D+1, 2D+2, 3D. Skills start at the code of their attribute.",
+    "book": "core"
+   },
+   {
+    "title": "Skill rolls",
+    "text": "Use a skill if one applies, otherwise the attribute. Roll equal to or higher than the difficulty number to succeed. Opposed rolls: the higher roll wins; ties go to the player character against NPCs.",
+    "book": "core"
+   },
+   {
+    "title": "Difficulty numbers",
+    "text": "Very Easy 5, Easy 10, Moderate 15, Difficult 20, Very Difficult 30.",
+    "book": "core"
+   },
+   {
+    "title": "Multiple actions",
+    "text": "Declare all non-reaction skill uses at the start of the round. Every skill use after the first costs 1D from all codes: two uses -1D, three -2D, four -3D. Reductions apply to every roll in the round.",
+    "book": "core"
+   },
+   {
+    "title": "Reaction skills",
+    "text": "Dodge, brawling parry and melee parry (and piloting for evasion, starship shields) need not be declared and take no time. Each use counts as an extra action, penalizing only rolls made afterwards. Add the reaction roll to the attacker's difficulty.",
+    "book": "core"
+   },
+   {
+    "title": "Preparing",
+    "text": "Spend a full round doing nothing, then use one skill next round at +1D. Lost if you use more than one skill or a reaction skill in either round.",
+    "book": "core"
+   },
+   {
+    "title": "Running",
+    "text": "Walk 5 meters with any turn, no penalty. Run 10 meters with one 90-degree turn: all skill rolls that round at -1D. Crawl 2 meters while prone, also -1D. Modifiers are cumulative.",
+    "book": "core"
+   },
+   {
+    "title": "Combat rounds and segments",
+    "text": "A round is five seconds. Decision, declaration, then action segments: each character performs one declared action (move, or a skill or attribute use) per segment, in the order declared, until all actions are done.",
+    "book": "core"
+   },
+   {
+    "title": "Initiative",
+    "text": "Only matters when actions affect each other: both roll their skill (dexterity when moving); the higher roll acts first and the same roll decides success. Ties favor player characters; PC vs PC re-roll.",
+    "book": "core"
+   },
+   {
+    "title": "Shooting",
+    "text": "Difficulty by range: point-blank (3 m) 5, short 10, medium 15, long 20, plus the target's dodge roll; +5 for cover, +5 for a prone target (not at point-blank). Ranges in meters vary by weapon.",
+    "book": "core"
+   },
+   {
+    "title": "Damage",
+    "text": "Roll the weapon's damage against the target's strength (plus armor). Strength higher: stunned. Damage >= strength: wounded. >= 2x: incapacitated. >= 3x: mortally wounded. The strength roll is never penalized.",
+    "book": "core"
+   },
+   {
+    "title": "Wounds",
+    "text": "Stunned: prone, lose the rest of the round. Wounded: -1D to everything until healed; wounded again becomes incapacitated. Incapacitated: unconscious. Mortally wounded: roll 2D each round; less than the rounds elapsed and the character dies.",
+    "book": "core"
+   },
+   {
+    "title": "Healing",
+    "text": "Medpac (medicine roll 10/15/20) improves wound status one step, once. Bacta tank: 2D hours, days or weeks. Natural: daily strength roll — wounded heals on 12+, worsens on 2-6; incapacitated improves on 14+, dies on 2-8.",
+    "book": "core"
+   },
+   {
+    "title": "Hand-to-hand",
+    "text": "Within two meters. Difficulty set by the weapon plus the defender's parry. Brawling damage is strength; melee weapons add their code to strength. Lightsabers use the lightsaber skill and do 5D plus the user's control dice.",
+    "book": "core"
+   },
+   {
+    "title": "Grenades",
+    "text": "Roll grenade skill against range difficulty; a miss scatters (1D direction, 3D meters). Everyone within 10 m (20 m for a thermal detonator) is attacked by the grenade at 4D against range difficulty plus dodge; damage 5D/4D/3D/2D by distance. Dodging a grenade leaves you prone.",
+    "book": "core"
+   },
+   {
+    "title": "Force points",
+    "text": "Spend one to double all codes for a round (and ignore stuns). Heroic use returns the point at the end of the adventure; heroic at the dramatic moment may earn an extra point; unheroic use loses it; evil use loses it and adds a Dark Side point.",
+    "book": "core"
+   },
+   {
+    "title": "Dark Side",
+    "text": "On gaining a Dark Side point, the GM rolls 1D; less than the character's Dark Side total and the character is lost to the Dark Side. Jedi gain Dark Side points for any wrong act; each Dark Side point adds 1D to Force skills. Five sessions of clear atonement remove one point.",
+    "book": "core"
+   },
+   {
+    "title": "Force powers",
+    "text": "Control, sense and alter are skills with no attribute. Each power lists a difficulty per skill; roll each and fail if any fails. Targets resist with perception or control. Proximity and relationship add to difficulties. A power can be kept up, counting as an ongoing action.",
+    "book": "core"
+   },
+   {
+    "title": "Skill points",
+    "text": "Awarded at the end of an adventure (3-10, up to about 15). One pip costs the number before the D; a full D costs three times it. Attributes never rise. Force skills above the master's level cost double.",
+    "book": "core"
+   },
+   {
+    "title": "Character creation",
+    "text": "Pick a template; attributes are fixed. Spread 7D across skills, at most 2D per skill. One Force point. Starting equipment and credits are on the card. Agree on a connection with at least one other character.",
+    "book": "core"
+   },
+   {
+    "title": "Movement and stance",
+    "text": "Falling prone is free at the end of movement; getting up is an action. Prone targets are +5 to hit except at point-blank. Drawing a weapon, setting stun, or reloading costs 1D but no segment.",
+    "book": "core"
+   },
+   {
+    "title": "Starship combat",
+    "text": "Gunner rolls gunnery plus fire control against range difficulty (5/10/15/20) plus the pilot's evasion (maneuverability plus piloting). Shields: one reaction roll per attack (10 long / 15 medium / 20 short) to add shield dice to hull. Damage -1D at medium, -2D at long range; compare to hull as for characters: light, heavy, severe, destroyed.",
+    "book": "core"
+   },
+   {
+    "title": "Starship pursuit",
+    "text": "Both close: range drops a step. Both run: range opens; at long range the loser escapes. Otherwise roll speed dice (pilot may add piloting); the higher roll chooses.",
+    "book": "core"
+   },
+   {
+    "title": "Astrogation",
+    "text": "Difficulty 15 for a standard-duration jump (30 with no nav computer); +1 per day cut, -1 per day added, x2 for a hasty jump, +5/+10 for light/heavy damage. Failure rolls 2D on the mishap table.",
+    "book": "core"
+   },
+   {
+    "title": "Repairs",
+    "text": "Difficulty 10 light, 20 heavy, 30 severe (+10 without tools). Roll after 15 minutes, then a day, then two days; each failed roll reduces the remaining difficulty by the amount rolled.",
+    "book": "core"
+   }
+  ]
+ }
+}

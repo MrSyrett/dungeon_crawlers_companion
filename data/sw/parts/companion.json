@@ -1,0 +1,2115 @@
+{
+  "skills": [
+    {
+      "name": "Starship Tactics",
+      "attribute": "Knowledge",
+      "description": "A specialized Knowledge skill (formerly listed under Mechanical for Adar Tallon in Tatooine Manhunt). Used in capital ship combat: a Moderate roll to anticipate the enemy gives the commander's ship a free haste action with no penalty; a Difficult roll to deceive the enemy lets the commander redeclare his actions after hearing what his opponent has declared. Both rolls are made at the start of the Declare Actions segment. The captain's starship tactics code is recorded in parentheses after his command skill on the ship template.",
+      "time": "one round (made before declaring actions)",
+      "book": "companion",
+      "page": 45
+    },
+    {
+      "name": "Command",
+      "attribute": "Perception",
+      "description": "Command is the skill used to combine fire. The maximum number of characters who may combine fire equals the command skill of the character coordinating the attack; he may do other things, such as fire or dodge, but these lower his command code by 1D for every action beyond the first. Taking a command action also lets the lead firer be switched. In capital ship combat the commander must allocate 1D of command to each of the pilot, chief gunnery officer and chief shields officer (or that officer suffers -1D), and may spend further command actions to give a subordinate +1 pip, coordinate the guns of one additional ship, or order differing levels of haste to different batteries (-1D each). Command determines declaration order in capital ship combat and may never be reduced below zero.",
+      "time": "one round",
+      "book": "companion",
+      "page": 7
+    },
+    {
+      "name": "Dodge",
+      "attribute": "Dexterity",
+      "description": "A reaction skill with two options. Full dodge, declared in the Declare Actions segment: add the dodge roll to the attacker's difficulty number; the character may only add haste and movement actions (including maneuver or overspeed but not ramming). A speed action is required, but it does not reduce the dodge roll. Combat dodge, declared in the Declare Reaction Skills segment: the defender rolls dodge and then chooses either his dodge roll or the original difficulty as the attacker's difficulty; it lowers the character's other skill codes by 1D. One dodge roll affects all attacks of the appropriate type for the round, but a dodge does not affect a melee attacker. A dodge must be at a haste equal to or greater than the attack being dodged. Dodge is also the operator skill for a character moving on land: roll dodge (plus nothing, since characters have no speed code) against the movement difficulty. Dodge may not be combined.",
+      "time": "one round",
+      "book": "companion",
+      "reaction": true,
+      "page": 14
+    },
+    {
+      "name": "Melee Parry",
+      "attribute": "Dexterity",
+      "description": "A reaction skill against melee attacks, with the same full and combat options as dodge: a full parry (declared with actions) adds the parry roll to the attacker's difficulty and restricts the character to haste and movement; a combat parry (declared in the reaction segment) lets the character substitute his parry roll for the attacker's difficulty at a cost of 1D to other actions. One parry roll covers all melee attacks that round; a character attacked by both blaster and sword must both dodge and parry. A parry must be at a haste equal to or greater than the attack. Reaction skills may not be combined.",
+      "time": "one round",
+      "book": "companion",
+      "reaction": true,
+      "page": 14
+    },
+    {
+      "name": "Brawling Parry",
+      "attribute": "Dexterity",
+      "description": "A reaction skill against brawling attacks, used exactly like melee parry: a full brawling parry adds the roll to the attacker's difficulty (haste and movement only), while a combat brawling parry substitutes the roll for the difficulty at -1D to other actions. An attack and a parry with the same degree of haste are resolved simultaneously. The parry must be at a haste equal to or greater than the attack. Reaction skills may not be combined.",
+      "time": "one round",
+      "book": "companion",
+      "reaction": true,
+      "page": 14
+    },
+    {
+      "name": "Starship Piloting",
+      "attribute": "Mechanical",
+      "description": "Besides moving the ship (roll starship piloting plus the sublight code against the movement difficulty), the pilot uses this skill for evasion, the starship reaction skill. Full evasion (declared with actions) adds the evasion roll to the attacker's difficulty; the pilot may only add haste or movement actions, needs a speed action which does not reduce the evasion, and every gunner aboard adds the evasion roll to his difficulty while other actions aboard are +5 (or the evasion roll, whichever is less) and shielding rolls are -5 (or the evasion roll). Combat evasion works like a combat dodge: the pilot's skill plus maneuver roll may be substituted for the attacker's difficulty and it affects nobody else aboard. Full evasion may have its haste increased in the reaction segment so the pilot can still open or close the range. Starship piloting may not be combined.",
+      "time": "one round",
+      "book": "companion",
+      "reaction": true,
+      "page": 17
+    },
+    {
+      "name": "Starship Shields",
+      "attribute": "Mechanical",
+      "description": "Shielding is a reaction skill, declared during the Declare Combat Reaction Skills segment and rolled in order of haste. The shields roll is added to the attacker's difficulty number; the sum is the shield number. An attacker who rolls above the difficulty but below the shield number hits the ship, but the shield dice are added to the hull dice against damage; at or above the shield number only the hull resists. Shields may be combined only on a ship with more than one shield and an operator for each. In capital ship combat the operator may declare a shutdown of a damaged shield facing (Moderate; -1D for the declaration) or increase power to one facing by burning out another (Difficult; -1D to other shielding rolls); against starfighters the shields roll is die-capped at 5.",
+      "time": "one round",
+      "book": "companion",
+      "reaction": true,
+      "page": 18
+    },
+    {
+      "name": "Swimming",
+      "attribute": "Strength",
+      "description": "Swimming is both a character's speed code and his operator skill in water. Declare up to as many speed actions as the swimming code (pips rounded up) and roll swimming against the movement difficulty (Very Easy in clear, calm water; Easy through a widely spaced reef; Moderate in constricted spaces; Difficult in violently turbulent water). A human moves better on land: each successful swimming action moves him two meters. Failing the roll means he flounders and loses control.",
+      "time": "one round",
+      "book": "companion",
+      "page": 10
+    },
+    {
+      "name": "Technology",
+      "attribute": "Knowledge",
+      "description": "Used to improve equipment. After spending the skill points and credits to raise a piece of equipment's die code, the improving character makes a technology roll: the first pip of improvement on a die code is Very Easy, the second Easy, the third Moderate, the fourth Difficult, the fifth and all subsequent pips Very Difficult. On a failure the skill points are wasted, though the equipment still works as before. Standard NPC specialists have 4D; NPCs with more than 4D technology are rare.",
+      "time": "character scale 1 day per pip; speeder or walker 3 days; starfighter 1 week; capital ship 1 month; Death Star 2 months",
+      "book": "companion",
+      "page": 30
+    }
+  ],
+  "templates": [],
+  "weapons": [
+    {
+      "name": "Hands",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "STR",
+      "range": "Point-blank (less than 3 meters)",
+      "skill": "brawling",
+      "notes": "Revised Melee Weapons chart (replaces the bottom of the core Weapons Chart). Difficulty scale 3-5.",
+      "book": "companion",
+      "page": 78
+    },
+    {
+      "name": "Club",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "STR+1D",
+      "range": "Point-blank",
+      "skill": "melee",
+      "notes": "Difficulty scale 3-5. Damage at point-blank range.",
+      "book": "companion",
+      "page": 78
+    },
+    {
+      "name": "Gaderffii",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "STR+1D",
+      "range": "Point-blank",
+      "skill": "melee",
+      "notes": "Difficulty scale 3-5.",
+      "book": "companion",
+      "page": 78
+    },
+    {
+      "name": "Spear",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "STR+1D+1",
+      "range": "Point-blank",
+      "skill": "melee",
+      "notes": "Difficulty scale 6-10.",
+      "book": "companion",
+      "page": 78
+    },
+    {
+      "name": "Vibroaxe",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "STR+2D",
+      "range": "Point-blank",
+      "skill": "melee",
+      "notes": "Difficulty scale 11-15.",
+      "book": "companion",
+      "page": 78
+    },
+    {
+      "name": "Vibroblade",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "STR+1D+2",
+      "range": "Point-blank",
+      "skill": "melee",
+      "notes": "Difficulty scale 11-15.",
+      "book": "companion",
+      "page": 78
+    },
+    {
+      "name": "Lightsaber",
+      "kind": "Melee",
+      "damage": 15,
+      "damageText": "5D",
+      "range": "Point-blank",
+      "skill": "melee",
+      "notes": "Difficulty scale 16-20. Characters with the Control skill add their skill code to the damage.",
+      "book": "companion",
+      "page": 78
+    },
+    {
+      "name": "Lajik whip",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "STR+1D",
+      "skill": "melee",
+      "notes": "Carried by Major Lariss as a souvenir from a previous campaign (To Free the Forgotten).",
+      "book": "companion",
+      "page": 69
+    },
+    {
+      "name": "Crude vibroaxe (Dedelin's)",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "STR+1D+2",
+      "skill": "melee",
+      "notes": "Homemade weapon carried by Captain Dedelin on Captivity.",
+      "book": "companion",
+      "page": 72
+    },
+    {
+      "name": "Sharbone backrod (short spear)",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "STR+1D+1",
+      "skill": "melee",
+      "notes": "Sharbone backrods ripped from the Rebels' Virujansi costumes act as short spears.",
+      "book": "companion",
+      "page": 72
+    },
+    {
+      "name": "Thrown rocks",
+      "kind": "Thrown",
+      "damage": null,
+      "damageText": "STR (STR-1D at long range)",
+      "range": "Grenade ranges",
+      "skill": "grenade",
+      "notes": "Rolo's Ruffians throw rocks as grenades: STR damage at close and medium range, STR-1D at long range.",
+      "book": "companion",
+      "page": 71
+    },
+    {
+      "name": "Blaster cannon (homemade, speeder scale)",
+      "kind": "Heavy",
+      "damage": 14,
+      "damageText": "4D+2",
+      "skill": "heavy weapons",
+      "notes": "Speeder scale; fire control 1D. Built by Captain Dedelin's exiles from two power generators; use the scale rules against starfighters.",
+      "book": "companion",
+      "page": 75
+    },
+    {
+      "name": "Light speeder-mounted weapon",
+      "kind": "Vehicle",
+      "damage": null,
+      "damageText": "1D-2D+",
+      "range": "50-300/301-500/501-1,000",
+      "skill": "vehicle blasters",
+      "notes": "Additional Weapons Chart range category (e.g. the Storm IV cloud car's 1D+2 double blaster cannon).",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Medium speeder-mounted weapon",
+      "kind": "Vehicle",
+      "damage": null,
+      "damageText": "3D-4D+",
+      "range": "50-300/301-800/801-1,500",
+      "skill": "vehicle blasters",
+      "notes": "Additional Weapons Chart range category.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Heavy speeder-mounted weapon",
+      "kind": "Vehicle",
+      "damage": null,
+      "damageText": "5D+",
+      "range": "50-400/401-900/901-2,000",
+      "skill": "vehicle blasters",
+      "notes": "Additional Weapons Chart range category.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Light artillery",
+      "kind": "Artillery",
+      "damage": null,
+      "damageText": "1D-2D+",
+      "range": "10-500/501-2,000/2,001-10,000",
+      "skill": "heavy weapons",
+      "notes": "Additional Weapons Chart range category.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Medium artillery",
+      "kind": "Artillery",
+      "damage": null,
+      "damageText": "3D-4D+",
+      "range": "20-600/601-3,000/3,001-16,000",
+      "skill": "heavy weapons",
+      "notes": "Additional Weapons Chart range category.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Heavy artillery",
+      "kind": "Artillery",
+      "damage": null,
+      "damageText": "5D+",
+      "range": "50-600/601-5,000/5,001-25,000",
+      "skill": "heavy weapons",
+      "notes": "Additional Weapons Chart range category.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Starfighter blaster",
+      "kind": "Starship",
+      "damage": null,
+      "range": "200-10,000/10,001-20,000/20,001-35,000",
+      "skill": "starship gunnery",
+      "notes": "Additional Weapons Chart range (meters).",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Starfighter missiles",
+      "kind": "Starship",
+      "damage": null,
+      "range": "250-4,000/4,001-17,000/17,001-30,000",
+      "skill": "starship gunnery",
+      "notes": "Additional Weapons Chart range. To-hit difficulty +1D per speed action of the target.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Starfighter laser cannon",
+      "kind": "Starship",
+      "damage": null,
+      "range": "200-5,000/5,001-25,000/25,001-50,000",
+      "skill": "starship gunnery",
+      "notes": "Additional Weapons Chart range.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Starfighter ion cannon",
+      "kind": "Starship",
+      "damage": null,
+      "range": "5-5,000/5,001-15,000/15,001-75,000",
+      "skill": "starship gunnery",
+      "notes": "Additional Weapons Chart range. Ion cannons cause ionization only, rolled against hull with no shield protection.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Proton torpedoes",
+      "kind": "Starship",
+      "damage": null,
+      "range": "500-15,000 (short only)",
+      "skill": "starship gunnery",
+      "notes": "Additional Weapons Chart range. To-hit difficulty +1D per speed action of the target.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Capital ship missiles",
+      "kind": "Capital",
+      "damage": null,
+      "range": "3,000-25,000/25,001-60,500/60,001-125,000",
+      "skill": "starship gunnery",
+      "notes": "Additional Weapons Chart range (meters). Concussion missile tubes take -1D damage when targeted.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Turbolaser",
+      "kind": "Capital",
+      "damage": null,
+      "range": "5,000-30,000/30,001-70,000/70,001-150,000",
+      "skill": "starship gunnery",
+      "notes": "Additional Weapons Chart range.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Capital ship ion cannon",
+      "kind": "Capital",
+      "damage": null,
+      "range": "2,000-20,000/20,001-50,000/50,001-100,000",
+      "skill": "starship gunnery",
+      "notes": "Additional Weapons Chart range.",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Tractor beam",
+      "kind": "Capital",
+      "damage": null,
+      "range": "1,000-10,000/10,001-30,000/30,001-60,000",
+      "skill": "starship gunnery",
+      "notes": "Additional Weapons Chart range. Beam Strength is opposed by the trapped ship's sublight roll (+1D per successful overspeed action).",
+      "book": "companion",
+      "page": 16
+    }
+  ],
+  "gear": [
+    {
+      "name": "Macrobinoculars",
+      "category": "Misc",
+      "description": "Light intensifier viewers with primitive yet rugged image-enhancing chips for magnification, ranging and targeting information. They provide zoom capability for viewing far away images and line-of-sight sensors for determining distance. A Droid may be fitted with them (1D of building dice) only if it already has some form of vision.",
+      "book": "companion",
+      "page": 31
+    },
+    {
+      "name": "Pocket computer (datapad)",
+      "category": "Misc",
+      "description": "An average pocket computer has a keyboard/memory unit, computer probe, and a touch-sensitive screen/scanner that can process only images within a few centimeters of the unit. Computing power and memory store several thousand volumes worth of information, retrieving any existing data in less than a second. Datapads also serve as interfaces for larger computer banks. Only one character can use a datapad at a time (no combined action).",
+      "book": "companion",
+      "page": 31
+    },
+    {
+      "name": "Recording rod",
+      "category": "Misc",
+      "description": "Audio recorders with laminate-cylinder storage, enough for 100 hours of recording.",
+      "stats": "100 hours of recording",
+      "book": "companion",
+      "page": 31
+    },
+    {
+      "name": "Emergency space suit",
+      "category": "Survival",
+      "description": "Not built to stand extensive exposure. Emergency suits begin to leak after 72 hours of use; for game purposes such leaks are treated as a wound to the occupant. After 120 hours emergency suits no longer have significant pressurization effects and the occupant dies.",
+      "stats": "Leaks (wound) after 72 hours; fatal after 120 hours",
+      "book": "companion",
+      "page": 31
+    },
+    {
+      "name": "Utility space suit",
+      "category": "Survival",
+      "description": "Lasts for hundreds of hours of exposure without loss of pressurization or breakdown of radiation protection. Utility suits leak when the occupant is wounded by a sharp melee, projectile, blaster or other attack which can puncture the suit, giving the occupant an additional wound.",
+      "stats": "Hundreds of hours; extra wound when punctured",
+      "book": "companion",
+      "page": 31
+    },
+    {
+      "name": "High quality space suit",
+      "category": "Survival",
+      "description": "Lasts about as long as a utility suit, but can instantly seal far larger ruptures. High quality suits will not leak until the occupant takes a mortal wound.",
+      "stats": "Hundreds of hours; leaks only on a mortal wound",
+      "book": "companion",
+      "page": 31
+    },
+    {
+      "name": "Syntherope",
+      "category": "Tool",
+      "description": "A powerful coil of rope that is highly impervious to damage. It has a standard strength of 3D that holds up through incapacitating damage. Syntherope comes in 15 meter coils and is extremely light, making it easy to carry.",
+      "stats": "Strength 3D; 15 meter coils",
+      "book": "companion",
+      "page": 32
+    },
+    {
+      "name": "Glow rod",
+      "category": "Tool",
+      "description": "A small tube-like item, about the size of a computer screen stylus, that casts an intense and concentrated beam of light in a given direction. Provides limited illumination for about 50 hours before its power cell must be replaced.",
+      "stats": "About 50 hours per power cell",
+      "book": "companion",
+      "page": 32
+    },
+    {
+      "name": "Chronometer",
+      "category": "Misc",
+      "description": "Chronometers come in all sizes, from those small enough to wear on the wrist or install on a starship control panel to large free-standing models used as dwelling decorations. They are usually set for a particular planet, with a dual setting that keeps Galactic Standard time.",
+      "book": "companion",
+      "page": 32
+    },
+    {
+      "name": "Breath mask",
+      "category": "Survival",
+      "description": "In near-vacuum conditions characters can survive for limited amounts of time with breath masks, which provide life-sustaining gases through a cup that fits snugly over the mouth and nose. They offer no protection from the cold and do not allow survival in hard vacuum.",
+      "book": "companion",
+      "page": 32
+    },
+    {
+      "name": "Medpac (revised use)",
+      "category": "Medical",
+      "description": "Medpacs may be used more than once a day. Each medpac used beyond the first has less chance of being effective, due to negative synergy of the drugs and diagnostics programmed on the assumption that only one medpac is used: each medpac beyond the first in a day increases the difficulty number by three. Difficulty scale: wounded 6-10, incapacitated 11-15, mortally wounded 16-20.",
+      "stats": "+3 difficulty per additional medpac per day",
+      "book": "companion",
+      "page": 16
+    },
+    {
+      "name": "Stormtrooper armor sensor/com gear",
+      "category": "Armor",
+      "description": "The sensor/com gear built into every stormtrooper's armor, integrated with their training and eerily well-meshed mindset, lets any group of stormtroopers who can see a target combine fire on it without limit, and instantly shifts lead-firer status to another firing trooper if the designated lead firer is wounded before firing.",
+      "book": "companion",
+      "page": 8
+    },
+    {
+      "name": "Armor improvement",
+      "category": "Armor",
+      "description": "Armor may be improved like other equipment (an attribute-enhancing code: three extra skill points per pip). Every pip of increase in armor decreases the wearer's Dexterity by the same amount unless Dexterity enhancements are bought to offset it (also three extra points per pip, and purchasable only to cancel the armor penalty). Example: improving +1D armor to +1D+2 and erasing the Dexterity penalty costs 16 skill points. Installing a weapon in armor costs 150 credits or nine skill points.",
+      "stats": "Improvement cost (1+3) skill points per pip; -1 pip Dexterity per pip of armor",
+      "book": "companion",
+      "page": 30
+    },
+    {
+      "name": "Droid equipment (building dice)",
+      "category": "Droid",
+      "description": "When building a Droid, equipment costs 1D of building dice per item or tool (+1D per extra function or unusual feature): method of locomotion, electric arc welder, buzz saw, seismic sensors, photoreceptors, tactile surfaces, olfactory sensors, autochef, macrobinoculars (only with existing vision), trash compactor, fire extinguisher, comlink, radar, sonar, barometer, spectrometer, IDS data-connect for standard computer ports, audio membranes, or speakers. Security and war Droids may be equipped with blasters or other weaponry. Each 1D of Droid armor or speed code costs 3D of building dice. New Droid skills cost skill points plus 1,000 credits for chipburns, software and attachments.",
+      "cost": "1D of building dice per item; 1,000 credits per new skill",
+      "book": "companion",
+      "page": 28
+    },
+    {
+      "name": "Capital ship template",
+      "category": "Misc",
+      "description": "Record sheet for capital ship combat: vessel name, ship type, hull code and crew rating; the captain's command (starship tactics), pilot's starship piloting, chief gunnery officer's starship gunnery and chief shield officer's starship shields; weapon banks with damage and fire control pip boxes (black out boxes above the code); damage records for ship damage, shields, sublight, maneuver and command; and a 28-round evasion number / shield number (ionization) record.",
+      "book": "companion",
+      "page": 77
+    }
+  ],
+  "vehicles": [
+    {
+      "name": "Corellian Corvette",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "3D",
+      "maneuverability": "2D",
+      "hull": "4D",
+      "shields": "2D",
+      "weapons": [
+        {
+          "name": "Turbolaser",
+          "count": "6",
+          "fireControl": "2D",
+          "damage": "4D+2"
+        }
+      ],
+      "description": "Also described in the Star Wars Sourcebook (SB 30). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Escort Frigate",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "2D",
+      "maneuverability": "1D",
+      "hull": "4D+2",
+      "shields": "2D",
+      "weapons": [
+        {
+          "name": "Turbolaser",
+          "count": "12",
+          "fireControl": "3D",
+          "damage": "4D"
+        },
+        {
+          "name": "Laser cannon",
+          "count": "12",
+          "fireControl": "2D",
+          "damage": "2D"
+        }
+      ],
+      "description": "Also described in the Star Wars Sourcebook (SB 31). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Mon Cal Cruiser",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x1",
+      "speed": "3D",
+      "maneuverability": "2D",
+      "hull": "6D",
+      "shields": "3D",
+      "weapons": [
+        {
+          "name": "Turbolaser",
+          "count": "48",
+          "fireControl": "2D",
+          "damage": "4D"
+        },
+        {
+          "name": "Ion cannon",
+          "count": "20",
+          "fireControl": "3D",
+          "damage": "3D"
+        },
+        {
+          "name": "Tractor beam",
+          "count": "6",
+          "fireControl": "2D+2",
+          "damage": "4D"
+        }
+      ],
+      "description": "Mon Calamari star cruiser (SB 36). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Container Ship",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x3",
+      "speed": "1D",
+      "maneuverability": "zero",
+      "hull": "2D+2",
+      "shields": "1D",
+      "weapons": [],
+      "description": "Unarmed cargo vessel (SB 45). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Bulk Freighter",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x3",
+      "speed": "1D",
+      "maneuverability": "zero",
+      "hull": "3D",
+      "shields": "1D",
+      "weapons": [],
+      "description": "Unarmed bulk freighter (SB 44). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Luxury Liner",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "3D+1",
+      "maneuverability": "zero",
+      "hull": "4D",
+      "shields": "1D",
+      "weapons": [],
+      "description": "Unarmed passenger liner (SB 47). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Rebel Transport",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "3D",
+      "maneuverability": "1D",
+      "hull": "5D+2",
+      "shields": "2D",
+      "weapons": [],
+      "description": "Unarmed Alliance transport (listed twice in the Companion chart). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Assault Shuttle",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "4D",
+      "maneuverability": "2D",
+      "hull": "3D+2",
+      "shields": "4D+2",
+      "weapons": [
+        {
+          "name": "Laser cannon",
+          "count": "4",
+          "fireControl": "3D",
+          "damage": "2D"
+        },
+        {
+          "name": "Tractor beam",
+          "count": "1",
+          "fireControl": "4D",
+          "damage": "5D+2"
+        }
+      ],
+      "description": "Imperial assault shuttle. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Lancer Frigate",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "2D",
+      "maneuverability": "1D",
+      "hull": "4D",
+      "shields": "2D+2",
+      "weapons": [
+        {
+          "name": "Quad laser cannon",
+          "count": "20",
+          "fireControl": "4D",
+          "damage": "4D"
+        }
+      ],
+      "description": "Anti-starfighter frigate. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Carrack",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x1",
+      "speed": "4D",
+      "maneuverability": "2D",
+      "hull": "5D",
+      "shields": "2D+2",
+      "weapons": [
+        {
+          "name": "Heavy turbolaser",
+          "count": "10",
+          "fireControl": "1D",
+          "damage": "7D"
+        },
+        {
+          "name": "Laser cannon",
+          "count": "20",
+          "fireControl": "3D",
+          "damage": "2D"
+        },
+        {
+          "name": "Tractor beam",
+          "count": "5",
+          "fireControl": "2D",
+          "damage": "4D"
+        }
+      ],
+      "description": "Carrack-class light cruiser. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Star Galleon",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "1D+2",
+      "maneuverability": "1D",
+      "hull": "5D+2",
+      "shields": "2D",
+      "weapons": [
+        {
+          "name": "Turbolaser",
+          "count": "10",
+          "fireControl": "3D",
+          "damage": "4D"
+        },
+        {
+          "name": "Concussion missiles",
+          "count": "10",
+          "fireControl": "5D",
+          "damage": "5D"
+        }
+      ],
+      "description": "Armed Imperial cargo galleon. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Strike Cruiser",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "3D",
+      "maneuverability": "2D",
+      "hull": "6D",
+      "shields": "2D+2",
+      "weapons": [
+        {
+          "name": "Turbolaser",
+          "count": "20",
+          "fireControl": "2D",
+          "damage": "5D"
+        },
+        {
+          "name": "Turbolaser battery",
+          "count": "10",
+          "fireControl": "1D",
+          "damage": "7D"
+        },
+        {
+          "name": "Ion cannon",
+          "count": "10",
+          "fireControl": "4D",
+          "damage": "4D"
+        },
+        {
+          "name": "Tractor beam",
+          "count": "10",
+          "fireControl": "2D",
+          "damage": "4D"
+        }
+      ],
+      "description": "Imperial strike cruiser. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Carrier",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x1",
+      "speed": "2D",
+      "maneuverability": "1D",
+      "hull": "7D+1",
+      "shields": "2D",
+      "weapons": [
+        {
+          "name": "Twin laser cannon",
+          "count": "10",
+          "fireControl": "3D",
+          "damage": "3D"
+        }
+      ],
+      "description": "Starfighter carrier. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Interdictor",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "3D",
+      "maneuverability": "1D",
+      "hull": "5D",
+      "shields": "3D",
+      "weapons": [
+        {
+          "name": "Quad laser cannon",
+          "count": "20",
+          "fireControl": "2D",
+          "damage": "4D"
+        },
+        {
+          "name": "Gravity well projector",
+          "count": "4",
+          "fireControl": "6D",
+          "notes": "Gravity well projectors: no hyperspace escape"
+        }
+      ],
+      "description": "Interdictor cruiser; its gravity wells prevent hyperspace travel nearby. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Dreadnought",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "2D",
+      "maneuverability": "1D",
+      "hull": "5D+2",
+      "shields": "2D+1",
+      "weapons": [
+        {
+          "name": "Laser cannon",
+          "count": "10",
+          "fireControl": "3D",
+          "damage": "2D"
+        },
+        {
+          "name": "Quad laser cannon",
+          "count": "20",
+          "fireControl": "2D",
+          "damage": "4D"
+        },
+        {
+          "name": "Turbolaser battery",
+          "count": "10",
+          "fireControl": "1D",
+          "damage": "7D"
+        }
+      ],
+      "description": "Old Republic era heavy cruiser. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Victory I Star Destroyer",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x1",
+      "speed": "2D",
+      "maneuverability": "1D",
+      "hull": "4D",
+      "shields": "3D+1",
+      "weapons": [
+        {
+          "name": "Quad turbolaser",
+          "count": "10",
+          "fireControl": "4D",
+          "damage": "5D"
+        },
+        {
+          "name": "Double turbolaser",
+          "count": "40",
+          "fireControl": "3D",
+          "damage": "2D+2"
+        },
+        {
+          "name": "Concussion missiles",
+          "count": "80",
+          "fireControl": "2D",
+          "damage": "9D"
+        },
+        {
+          "name": "Tractor beam",
+          "count": "10",
+          "fireControl": "3D",
+          "damage": "6D"
+        }
+      ],
+      "description": "Victory-class Star Destroyer, mark I (SB 32). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Victory II Star Destroyer",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x1",
+      "speed": "3D",
+      "maneuverability": "1D",
+      "hull": "4D+2",
+      "shields": "3D",
+      "weapons": [
+        {
+          "name": "Turbolaser battery",
+          "count": "20",
+          "fireControl": "1D",
+          "damage": "7D"
+        },
+        {
+          "name": "Turbolaser",
+          "count": "20",
+          "fireControl": "2D",
+          "damage": "5D"
+        },
+        {
+          "name": "Ion cannon",
+          "count": "10",
+          "fireControl": "4D",
+          "damage": "4D"
+        },
+        {
+          "name": "Tractor beam",
+          "count": "10",
+          "fireControl": "2D",
+          "damage": "6D"
+        }
+      ],
+      "description": "Victory-class Star Destroyer, mark II (SB 32). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Imperial Star Destroyer I",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "3D",
+      "maneuverability": "1D",
+      "hull": "7D",
+      "shields": "3D",
+      "weapons": [
+        {
+          "name": "Turbolaser battery",
+          "count": "60",
+          "fireControl": "4D",
+          "damage": "5D"
+        },
+        {
+          "name": "Ion cannon",
+          "count": "60",
+          "fireControl": "2D+2",
+          "damage": "3D"
+        },
+        {
+          "name": "Tractor beam",
+          "count": "10",
+          "fireControl": "4D",
+          "damage": "6D"
+        }
+      ],
+      "description": "Imperial-class Star Destroyer, mark I (SB 34). Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Imperial Star Destroyer II",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x1",
+      "speed": "3D",
+      "maneuverability": "1D",
+      "hull": "7D+1",
+      "shields": "2D+2",
+      "weapons": [
+        {
+          "name": "Heavy turbolaser",
+          "count": "50",
+          "fireControl": "0D",
+          "damage": "10D"
+        },
+        {
+          "name": "Heavy turbolaser",
+          "count": "50",
+          "fireControl": "1D",
+          "damage": "7D"
+        },
+        {
+          "name": "Ion cannon",
+          "count": "20",
+          "fireControl": "4D",
+          "damage": "4D"
+        },
+        {
+          "name": "Tractor beam",
+          "count": "10",
+          "fireControl": "4D",
+          "damage": "6D"
+        }
+      ],
+      "description": "Imperial-class Star Destroyer, mark II. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Torpedo Sphere",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x3",
+      "speed": "1D",
+      "maneuverability": "zero",
+      "hull": "9D+2",
+      "shields": "2D",
+      "weapons": [
+        {
+          "name": "Turbolaser battery",
+          "count": "10",
+          "fireControl": "0D",
+          "notes": "Damage: shield (used against planetary shields)"
+        },
+        {
+          "name": "Concussion missiles",
+          "count": "500",
+          "fireControl": "2D",
+          "damage": "9D",
+          "notes": "Planetary shield short range; damage 9D"
+        }
+      ],
+      "description": "Siege platform designed to breach planetary shields. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Super Star Destroyer",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "2D",
+      "maneuverability": "zero",
+      "hull": "10D",
+      "shields": "8D",
+      "weapons": [
+        {
+          "name": "Turbolaser battery",
+          "count": "250",
+          "fireControl": "1D",
+          "damage": "7D"
+        },
+        {
+          "name": "Heavy turbolaser battery",
+          "count": "250",
+          "fireControl": "0D",
+          "damage": "10D"
+        },
+        {
+          "name": "Concussion missiles",
+          "count": "250",
+          "fireControl": "2D",
+          "damage": "9D"
+        },
+        {
+          "name": "Ion cannon",
+          "count": "250",
+          "fireControl": "4D",
+          "damage": "4D"
+        },
+        {
+          "name": "Enhanced tractor beam",
+          "count": "40",
+          "fireControl": "4D",
+          "damage": "9D"
+        }
+      ],
+      "description": "Executor-class Super Star Destroyer. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "Loronar FSCV",
+      "kind": "Capital Ship",
+      "scale": "Capital Ship",
+      "hyperdrive": "x2",
+      "speed": "zero",
+      "maneuverability": "zero",
+      "hull": "8D",
+      "shields": "none",
+      "weapons": [],
+      "description": "Loronar field secured container vessel; no sublight drive, no shields, no weapons. Capital Ship Statistics chart; hull and shield codes work as for starfighters, damage is recorded in pips under the capital ship combat rules.",
+      "book": "companion",
+      "page": 50
+    },
+    {
+      "name": "TIE/rc Starfighter",
+      "kind": "Starfighter",
+      "scale": "Starfighter",
+      "hyperdrive": "zero (none)",
+      "speed": "5D",
+      "atmosphere": "maneuverability reduced to 1D+2 in atmosphere",
+      "maneuverability": "2D+2",
+      "hull": "2D",
+      "shields": "None",
+      "weapons": [
+        {
+          "name": "Laser cannon",
+          "count": "1",
+          "fireControl": "2D",
+          "damage": "2D+2"
+        }
+      ],
+      "description": "TIE reconnaissance fighter flown by the Grehollo station patrols over the exile moon Captivity (To Free the Forgotten). Typical pilots: starship piloting 4D+2, starship gunnery 5D+2; combined fire not possible in the storm.",
+      "book": "companion",
+      "page": 75
+    },
+    {
+      "name": "Y-wing (standard)",
+      "kind": "Starfighter",
+      "scale": "Starfighter",
+      "hull": "2D+2",
+      "shields": "3D+2",
+      "weapons": [],
+      "description": "The core rulebook gave the Y-wing longprobe, a deep reconnaissance version with a sturdier hull and less shielding. The standard Y-wing starfighter (Star Wars Sourcebook) has shields 3D+2 and hull 2D+2; all other statistics are the same as the core Y-wing longprobe.",
+      "book": "companion",
+      "page": 20
+    }
+  ],
+  "characters": [
+    {
+      "name": "R2 Astromech Droid",
+      "group": "Droid",
+      "description": "Sample Droid built with the Companion's Droid creation rules. Height 1 meter, weight 50 kilograms. Speed code 2D.",
+      "attributes": {
+        "Dexterity": 3,
+        "Knowledge": 3,
+        "Mechanical": 3,
+        "Perception": 3,
+        "Strength": 3,
+        "Technical": 6
+      },
+      "skills": [
+        "binary language 3D",
+        "computer programming & repair 7D",
+        "starship repair 7D"
+      ],
+      "equipment": [
+        "Two wheeled legs plus retractable third leg",
+        "Two arms, normally retracted (one heavy grasper, one for fine work)",
+        "One video sensor extendable almost a meter from the body (+1D special feature)",
+        "Small arc welder (starship repair; emergency defense)",
+        "Small buzz saw",
+        "Video screen for data display, with holographic projection (+1D special feature)",
+        "High pitch acoustic signaller (sound coded for Binary)",
+        "One small fire extinguisher"
+      ],
+      "notes": "Speed code 2D; +1D armor (STR 1D +1D armor). The video sensor extension and the holographic option each cost an additional 1D of building dice as special features.",
+      "book": "companion",
+      "page": 29
+    },
+    {
+      "name": "3PO Human-Cyborg Relations Droid",
+      "group": "Droid",
+      "description": "Sample protocol Droid built with the Companion's Droid creation rules. Height 1.7 meters, weight 50 kilograms.",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 3,
+        "Perception": 6,
+        "Strength": 3,
+        "Technical": 3
+      },
+      "skills": [
+        "alien races 4D",
+        "cultures 4D",
+        "languages 10D",
+        "planetary systems 3D"
+      ],
+      "equipment": [
+        "Two legs (a single method of locomotion)",
+        "Two arms (1D each)",
+        "Two video sensors (1D each)",
+        "Broad-band antenna receiver",
+        "Vocabulator speech/sound system capable of an extraordinarily wide range of sounds"
+      ],
+      "notes": "The legs count as a single method of locomotion, while each arm and each video sensor costs 1D of building dice.",
+      "book": "companion",
+      "page": 29
+    },
+    {
+      "name": "Major Lariss",
+      "group": "Imperial",
+      "description": "A career Imperial who specializes in quick military takeovers of native governments. He prides himself on being an expert in the cultures he ruthlessly destroys but has only superficial knowledge of them. Extremely sensitive about his appearance, especially his gargantuan nose (Alliance agents call him 'Major Nose'). Angering him on two points gets the Rebels exiled to Captivity; on all three, executed.",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 5,
+        "Mechanical": 3,
+        "Perception": 10,
+        "Strength": 9,
+        "Technical": 3
+      },
+      "skills": [
+        "blaster 3D",
+        "dodge 3D+1",
+        "melee parry 3D",
+        "melee 3D+1",
+        "alien races 2D+2",
+        "cultures 2D+2",
+        "command 4D+1"
+      ],
+      "equipment": [
+        "Blaster pistol (damage 4D)",
+        "Lajik whip (damage STR+1D), a souvenir from a previous campaign"
+      ],
+      "book": "companion",
+      "page": 69
+    },
+    {
+      "name": "Lt. Wachten",
+      "group": "Imperial",
+      "description": "Major Lariss's 'Wrathor' during the throne room protocol. Large, with a broad face; his voice is loud and harsh.",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Strength": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "dodge 3D",
+        "command 4D"
+      ],
+      "equipment": [
+        "Blaster pistol"
+      ],
+      "notes": "All other attributes and skills 2D.",
+      "book": "companion",
+      "page": 69
+    },
+    {
+      "name": "Lt. Lewis",
+      "group": "Imperial",
+      "description": "Major Lariss's 'Conciliator'. Slight; speaks rapidly and clearly.",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Strength": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "blaster 3D",
+        "dodge 3D",
+        "cultures 3D",
+        "bargain 4D"
+      ],
+      "equipment": [],
+      "notes": "All other attributes and skills 2D.",
+      "book": "companion",
+      "page": 69
+    },
+    {
+      "name": "Imperial Stormtroopers (throne room platoon)",
+      "group": "Imperial",
+      "description": "A platoon seals off the throne room; nine troopers watch the Rajah and his court and combine fire on the first Rebel who tries to escape or pulls a weapon. Use the core stormtrooper statistics; stormtroopers who can see a target may combine fire without limit.",
+      "attributes": {},
+      "skills": [],
+      "equipment": [
+        "Stormtrooper armor with sensor/com gear",
+        "Blaster rifle"
+      ],
+      "book": "companion",
+      "page": 70
+    },
+    {
+      "name": "Rolo's Ruffians",
+      "group": "Civilian",
+      "description": "Andews Rolo's band of exiled cutthroats on Captivity (28 of them). They use rocks as grenades, doing STR damage at close and medium range and STR-1D at long range, and begin their attack at medium range.",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Strength": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "brawling parry 3D",
+        "dodge 3D",
+        "grenade 4D",
+        "melee 3D",
+        "melee parry 3D",
+        "brawling 3D",
+        "climbing/jumping 3D+1"
+      ],
+      "equipment": [
+        "Rocks (thrown as grenades, STR damage)"
+      ],
+      "notes": "All other attributes and skills 2D.",
+      "book": "companion",
+      "page": 71
+    },
+    {
+      "name": "Volq",
+      "group": "Civilian",
+      "description": "Rolo's champion, a slab of a man who looks like a walking chunk of cliff. He fights the Rebels' chosen brawler in a four-meter ring until one is unconscious.",
+      "attributes": {
+        "Dexterity": 9,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 9,
+        "Strength": 12,
+        "Technical": 6
+      },
+      "skills": [
+        "blaster 4D",
+        "brawling parry 4D",
+        "dodge 4D+1",
+        "brawling 5D"
+      ],
+      "equipment": [],
+      "notes": "All other attributes and skills 2D. Volq's skin has been treated to increase his Strength to 4D+2 for damage purposes; the process lowered his sensory awareness - all Perception and Knowledge-based rolls are reduced by one pip.",
+      "book": "companion",
+      "page": 71
+    },
+    {
+      "name": "Captain Dedelin",
+      "group": "Civilian",
+      "description": "Former Imperial Navy captain and hero of the New Order whose outspoken criticism of Imperial policy got him exiled to Captivity, where he leads the surviving political prisoners. Still wears his captain's cap. He believes Rebels who tell him the truth, reasoning a lie would sound more plausible.",
+      "attributes": {
+        "Dexterity": 8,
+        "Knowledge": 9,
+        "Mechanical": 11,
+        "Perception": 10,
+        "Strength": 7,
+        "Technical": 9
+      },
+      "skills": [
+        "blaster 3D+1",
+        "brawling parry 3D+1",
+        "dodge 4D",
+        "heavy weapons 5D",
+        "melee parry 4D",
+        "melee 4D",
+        "planetary systems 5D",
+        "survival 5D",
+        "technology 4D",
+        "astrogation 4D",
+        "starship gunnery 5D",
+        "starship shields 4D",
+        "command 6D",
+        "brawling 4D",
+        "climbing/jumping 4D",
+        "stamina 4D",
+        "starship repair 4D"
+      ],
+      "equipment": [
+        "Crude vibroaxe (damage STR+1D+2)",
+        "Captain's cap"
+      ],
+      "book": "companion",
+      "page": 72
+    },
+    {
+      "name": "Dedelin's Crew",
+      "group": "Civilian",
+      "description": "Exiled senators, sympathizers and loyal crew who follow Captain Dedelin; a dozen accompany him to the ransom exchange.",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Strength": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "brawling parry 3D+2",
+        "dodge 3D",
+        "grenade 4D",
+        "melee 3D",
+        "melee parry 3D",
+        "brawling 4D",
+        "climbing/jumping 3D+1"
+      ],
+      "equipment": [],
+      "notes": "All other attributes and skills 2D.",
+      "book": "companion",
+      "page": 72
+    },
+    {
+      "name": "Old Guards",
+      "group": "Civilian",
+      "description": "A pair of elderly exiles patrolling the electrified wire fence around Dedelin's camp. Rebels arriving without Dedelin must convince them with a con roll: Moderate if telling the truth, Difficult if stretching it, Very Difficult for a complete fabrication.",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Strength": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "melee 2D+2",
+        "brawling 2D+2"
+      ],
+      "equipment": [],
+      "notes": "All other attributes and skills 2D.",
+      "book": "companion",
+      "page": 74
+    },
+    {
+      "name": "TIE Pilots (Grehollo station patrol)",
+      "group": "Imperial",
+      "description": "Pilots of the four TIE/rc fighters that strafe Borolol's Claw. Combined fire is not possible due to the storm.",
+      "attributes": {},
+      "skills": [
+        "starship piloting 4D+2",
+        "starship gunnery 5D+2"
+      ],
+      "equipment": [
+        "TIE/rc starfighter"
+      ],
+      "book": "companion",
+      "page": 75
+    }
+  ],
+  "force": [
+    {
+      "name": "Control Pain",
+      "attribute": "Control",
+      "difficulty": "Very Easy for wounded characters; Easy for incapacitated (but conscious) characters; Difficult for mortally wounded (but conscious) characters. Stun damage: Easy if the character has not fallen unconscious, Moderate if he regained consciousness through a power.",
+      "time": "one round; takes effect the following round",
+      "description": "A wounded character who controls pain can act as if unwounded: starting with the round after his Control roll, his die codes are not reduced by 1D. The wound is not healed, just ignored; a wounded character who controls pain and is wounded again becomes incapacitated. Characters who were stunned and control pain eliminate the effects of the stun entirely. Pain from any other cause can likewise be ignored.",
+      "book": "companion",
+      "page": 57
+    },
+    {
+      "name": "Remain Conscious",
+      "attribute": "Control",
+      "difficulty": "Easy for incapacitated characters; Difficult for mortally wounded ones.",
+      "time": "one round (the round after being incapacitated or mortally wounded)",
+      "description": "On the round after a character is incapacitated or mortally wounded he may use this power to remain conscious; if he fails he falls unconscious as normal. A conscious incapacitated character acts as though wounded for one round and may take any number of actions (reduced by 1D). A mortally wounded character who remains conscious may do nothing but control pain. A character who remains conscious and then controls pain may act freely without lapsing into unconsciousness. A character knocked out by stun damage gets one round of action as if at '1 Stun' (all actions -1D). The power may not be used repeatedly: it grants a single extra round, during which remain conscious cannot be used again; consciousness is kept only by successfully controlling pain as an action.",
+      "book": "companion",
+      "page": 57
+    },
+    {
+      "name": "Hibernation Trance",
+      "attribute": "Control",
+      "difficulty": "Difficult",
+      "time": "one round to enter; lasts as long as the character states",
+      "description": "The character falls into a trance: heartbeat slows to a few beats per minute, breathing drops to a minimum, and he is unconscious. Useful to play dead or when food or air is low. A hibernating character appears dead unless someone makes a point of testing him (a faint mist on a mirror, a very slow heartbeat over a minute with a stethoscope, a flicker on life sensors); a character with Sense can detect his Force and know he is alive. He consumes about one tenth the air of a sleeper, can hibernate a week in a dry atmosphere or a month in a wet one before dying of thirst (indefinitely on an intravenous drip), and three months before starving (a year on a sugar drip). On entering the trance the player states how long he will hibernate or what stimuli will wake him.",
+      "book": "companion",
+      "page": 58
+    },
+    {
+      "name": "Accelerate Healing",
+      "attribute": "Control",
+      "difficulty": "Easy for wounded; Moderate for incapacitated; Difficult for mortally wounded.",
+      "time": "one round; affects the current day's healing",
+      "description": "On success the character may do one of the following: make two natural healing rolls for the current day with +2 to each roll; or use two medpacs and make two rolls for the current day with +2 to each roll, with no difficulty increase for the second medpac (any medpac beyond the second does incur the multiple medpac penalty).",
+      "book": "companion",
+      "page": 58
+    },
+    {
+      "name": "Contort/Escape",
+      "attribute": "Control",
+      "difficulty": "Loose bonds: Very Easy. Hand binders: Easy. Serious restraints: Moderate. Maximum security: Difficult. Houdini: Very Difficult.",
+      "time": "one round",
+      "description": "The character escapes his bonds by contorting in painful and difficult but physically possible ways - for example escaping hand binders by dislocating the thumb and pinky to narrow the hand. This is painful, but a trained Jedi can resist the pain and damage to muscles and ligaments with proper body control.",
+      "book": "companion",
+      "page": 58
+    },
+    {
+      "name": "Detoxify Poison",
+      "attribute": "Control",
+      "difficulty": "Alcohol: Very Easy. Mild poison: Easy. Average poison: Moderate. Virulent poison: Difficult. Neurotoxin: Very Difficult.",
+      "time": "one round",
+      "description": "Allows the character to detoxify poisons or eject them from the body in a much shorter time than would normally be possible. If the character makes his skill roll, he is not affected by the poison.",
+      "book": "companion",
+      "page": 59
+    },
+    {
+      "name": "Control Disease",
+      "attribute": "Control",
+      "difficulty": "Mild infection (cold): Very Easy. High fever (bad flu): Easy. Serious sickness (gangrene): Moderate. Life-threatening disease (tuberculosis): Difficult. Massive long-standing disease (lung cancer): Very Difficult.",
+      "time": "at least half an hour of meditation; serious diseases need repeated attempts over weeks or months",
+      "description": "Allows the character to direct and control the antibodies and healing resources of his own body to throw off an infection or attack the diseased parts of his body. The character must spend at least half an hour meditating, and life-threatening or long-standing diseases may require repeated attempts over weeks or months to cure entirely. On a success he is no longer infectious if he so wills, even if the disease is not completely cured.",
+      "book": "companion",
+      "page": 59
+    },
+    {
+      "name": "Absorb/Dissipate Energy",
+      "attribute": "Control",
+      "difficulty": "Sunburn: Very Easy. Intense sun: Easy. Solar wind: Moderate. Radiation storm: Difficult. Blaster bolt: Moderate, plus the blaster's damage roll.",
+      "time": "one round; may be kept up against continuous radiation",
+      "description": "Absorbs or dissipates energy to which the character is subjected: light and heat, microwave or other electromagnetic radiation, hard radiation (alpha, beta, gamma) and blaster bolts. A successful Control roll means the energy is dissipated and does not injure the character; under continuous radiation he may keep the power up. It works like starship shields, except that if the Control roll exceeds the difficulty no damage at all is taken; once up it affects all attacks in a round, the skill cannot be blown as shields can, and the Control code is unaffected by attacks.",
+      "book": "companion",
+      "page": 59
+    },
+    {
+      "name": "Emptiness",
+      "attribute": "Control",
+      "difficulty": "Moderate to initiate the power; Difficult to break away from the emptiness.",
+      "time": "hours; the player states the intended duration",
+      "description": "New power. The user empties his mind and lets the Force flow through him; he resembles one in deep meditation, is oblivious to his surroundings and may take no action except trying to disengage. He may roll to come out when his allotted time has passed, once each hour beyond it, or when his body takes non-stun damage. He dehydrates and hungers normally; initiates weak in Control have died in emptiness. While empty he is hard to affect with the Force: add his emptiness roll to the Sense difficulty (or the Alter difficulty if no Sense is used) of any power used on him, whether he wishes to resist or not. Afterwards he receives +6 to all Force skill rolls for a period equal to the time spent in emptiness, reduced by one for every Dark Side Point he has. Characters consumed by evil may not go into emptiness.",
+      "book": "companion",
+      "page": 64
+    },
+    {
+      "name": "Force of Will",
+      "attribute": "Control",
+      "difficulty": "Very Easy; the power may be kept up.",
+      "time": "one round; may be kept up",
+      "description": "New power. The character manipulates his Force to protect himself from hostile Force powers, creating a filtering aura as a manifestation of his will; it protects only the user and works like shielding on a starship. The power roll is added to the difficulty of any hostile power used against him; the sum is the protection number. An attack roll below the difficulty has no effect; at or above the protection number it has full effect; between the two the attack hits but force of will protects the target from harm. Each time it protects against a Force attack, lower the force of will code by 1D (this affects nothing else); each 1D is recovered with one day, or one hour in emptiness.",
+      "book": "companion",
+      "page": 65
+    },
+    {
+      "name": "Receptive Telepathy",
+      "attribute": "Sense",
+      "difficulty": "Very Easy if the target is friendly and does not resist, modified by proximity and relationship. If the target resists, make a Perception or Control roll for the target and add the proximity and relationship modifiers.",
+      "time": "one round at a time; may be kept up to keep monitoring",
+      "description": "If the user's roll equals or exceeds the difficulty he can read the target's thoughts and emotions - he hears what the target is thinking but cannot probe deeper. If the roll is at least double the difficulty he can rifle through the target's mind and memories for the information he wants. Each additional person read counts as a power use under the multiple skill rules. Works on creatures as well as sapients; alien emotions may be hard to interpret. It may not be used on Droids.",
+      "book": "companion",
+      "page": 59
+    },
+    {
+      "name": "Magnify Senses",
+      "attribute": "Sense",
+      "difficulty": "Very Easy, modified by proximity.",
+      "time": "one round",
+      "description": "The character can sense something that would be impossible with unaided senses: hear something beyond the range of the human ear, see something that would normally require macrobinoculars, hear a very faint sound.",
+      "book": "companion",
+      "page": 59
+    },
+    {
+      "name": "Life Sense",
+      "attribute": "Sense",
+      "difficulty": "Very Easy, modified by target proximity and relationship. A target with Control may add his Control roll to the difficulty to hide from the senser.",
+      "time": "one round; may be kept up to track a target",
+      "description": "The user senses the presence and identity of the person he searches for, and how badly wounded, diseased or otherwise physically disturbed the target is. Kept up, the power can be used to track a target.",
+      "book": "companion",
+      "page": 59
+    },
+    {
+      "name": "Instinctive Astrogation",
+      "attribute": "Sense",
+      "difficulty": "Moderate",
+      "time": "as the astrogation roll",
+      "description": "Normally astrogating a ship without a nav computer is Very Difficult for a standard duration trip. By using Sense to plot the trip through hyperspace, the character reduces the astrogation difficulty to Very Easy for a standard duration trip.",
+      "book": "companion",
+      "page": 60
+    },
+    {
+      "name": "Postcognition",
+      "attribute": "Sense",
+      "difficulty": "Less than two hours into the past: Easy; two hours to a week: Moderate; a week to two years: Difficult; more than two years: Very Difficult.",
+      "time": "one round; the object must be handled",
+      "description": "New power. Investigates the tenuous imprints of the Force left on objects handled by living beings; the character must handle the object. If the roll is at least three times the difficulty he witnesses the event as if he were there; at least twice, he gains a good sensory impression with the primary sense (usually sight) wavery or obscured; simply greater than the difficulty, all impressions are muzzy - sight blurry, sound muffled, touch dulled, smells and tastes indistinct.",
+      "book": "companion",
+      "page": 65
+    },
+    {
+      "name": "Sense Force",
+      "attribute": "Sense",
+      "difficulty": "Very Easy for an area; Difficult for sensing details or specific objects within the area, modified by proximity.",
+      "time": "one round",
+      "description": "New power. Senses the ambient Force within a place. It cannot detect sentient beings, but many life forms and regions are well intertwined with the Force and can be sensed. It tells the rough magnitude of the Force in an area or object and whether it tends toward the Dark Side or the light.",
+      "book": "companion",
+      "page": 65
+    },
+    {
+      "name": "Shift Sense",
+      "attribute": "Sense",
+      "difficulty": "Moderate; the power may be kept up.",
+      "time": "one round; may be kept up",
+      "description": "New power. The character shifts his senses to detect phenomena of a different type than normal: shifting vision into the infrared or even radio waves, setting the olfactory nerves to detect specific chemical combinations, or improving hearing to frequencies above or below the normal range.",
+      "book": "companion",
+      "page": 65
+    },
+    {
+      "name": "Projective Telepathy",
+      "attribute": "Control & Sense",
+      "difficulty": "Control: Very Easy, modified by proximity; +5 if the user cannot verbalize the thoughts (gagged or wishing to be silent). Sense: Very Easy modified by relationship if the target is friendly and does not resist; otherwise a Perception or Control roll for the target, modified by relationship.",
+      "time": "one round",
+      "description": "The target hears the thoughts and feels the emotions of the user, and knows they are not his own but belong to the user of the power. The power is used to communicate, not to control minds.",
+      "book": "companion",
+      "page": 60
+    },
+    {
+      "name": "Farseeing",
+      "attribute": "Control & Sense",
+      "difficulty": "Control: Very Easy, modified by proximity; +5 to see the past, +10 to see the future. Sense: Very Easy modified by relationship if the target is friendly; otherwise a Perception (or Control) roll for the target, modified by relationship.",
+      "time": "a few minutes of calm; cannot be done in the face of danger",
+      "description": "The user sees in his mind the place or person he wishes to see, as it appears now, with the immediate surroundings - knowing when a friend is in danger or what has happened to his home planet. Accuracy: a roll equal to the difficulty gives 75% of past/present information and 50% of the future; twice the difficulty gives all past/present and 75% of the future; three times gives all. The future is always in motion; the gamemaster reveals selected truths without giving away the whole story and need not force events to match a foretelling.",
+      "book": "companion",
+      "page": 60
+    },
+    {
+      "name": "Telekinesis",
+      "attribute": "Alter",
+      "difficulty": "Very Easy for objects of one kilogram or less; Easy for one to 10 kg; Moderate for 11 to 100 kg; Difficult for 101 kg to one metric ton; +5 for each further factor of 10. Modified by proximity. An unwilling levitated character adds his Perception or Control roll to the difficulty.",
+      "time": "one round; may be kept up to keep moving the object",
+      "description": "Levitates and moves objects with the naked mind; the object moves as the user desires and continues to move while the power is kept up. It can levitate the user or other characters and even serve as a primitive space drive in emergencies. Using levitated objects to injure or attack other characters is possible, but anyone who does so gains a Dark Side Point.",
+      "book": "companion",
+      "page": 61
+    },
+    {
+      "name": "Injure/Kill",
+      "attribute": "Alter",
+      "difficulty": "Make a Perception or Control roll for the target.",
+      "time": "one round; requires touching the target (usually a successful brawling attack the same round)",
+      "description": "Warning: the user immediately gains a Dark Side Point. The attacker must be touching the target, which in combat usually means a successful brawling attack in the same round. If successful, the Alter roll is the damage roll and the target's Perception or Control roll substitutes for the Strength roll; damage is determined normally, except that if the Alter roll is less than the difficulty the target is not affected.",
+      "book": "companion",
+      "page": 61
+    },
+    {
+      "name": "Control Another's Pain",
+      "attribute": "Control & Alter",
+      "difficulty": "Control: Very Easy, modified by target proximity and relationship. Alter: Easy for wounded characters; Moderate for incapacitated; Difficult for mortally wounded.",
+      "time": "one round",
+      "description": "Has the same effect on the target as control pain has on its user: from the next round the target acts as if unwounded, though the wound is only ignored, not healed.",
+      "book": "companion",
+      "page": 61
+    },
+    {
+      "name": "Inflict Pain",
+      "attribute": "Control & Alter",
+      "difficulty": "Control: Very Easy, modified by proximity. Alter: make a Perception or Control roll for the target, modified by proximity.",
+      "time": "one round",
+      "description": "Warning: the user immediately gains a Dark Side Point. The target experiences great agony. Damage is determined as for a stun attack with no separate damage roll: the Alter roll is the damage roll and the Alter difficulty substitutes for the Strength roll. Alter roll at or above the difficulty: 1 stun; at or above twice the difficulty: 2 stun; at or above three times: unconscious.",
+      "book": "companion",
+      "page": 61
+    },
+    {
+      "name": "Return to Consciousness",
+      "attribute": "Control & Alter",
+      "difficulty": "Control: Easy, modified by target proximity. Alter: Easy for incapacitated characters; Difficult for mortally wounded ones.",
+      "time": "one round",
+      "description": "The target becomes conscious again (see remain conscious for what conscious incapacitated and mortally wounded characters can do). A character may use it on himself even while unconscious, but only to revive himself; he cannot revive others while unconscious. If a revived incapacitated or mortally wounded character fails to control pain he lapses into unconsciousness again.",
+      "book": "companion",
+      "page": 61
+    },
+    {
+      "name": "Place in Hibernation Trance",
+      "attribute": "Control & Alter",
+      "difficulty": "Control: Very Easy, modified by the target's relationship. Alter: Very Easy, modified by proximity.",
+      "time": "one round; requires physical contact",
+      "description": "Puts another character into a hibernation trance. The affected character must agree to be shut down - the power cannot be used as an attack to knock others unconscious - and must be in physical contact with the user.",
+      "book": "companion",
+      "page": 62
+    },
+    {
+      "name": "Accelerate Another's Healing",
+      "attribute": "Control & Alter",
+      "difficulty": "Control: Very Easy, modified by relationship. Alter: Very Easy, modified by proximity.",
+      "time": "one round; affects the current day's healing",
+      "description": "Follows the new rules for accelerate healing: the target may make either two natural healing rolls or two medpac rolls a day, in every case receiving +2 to the rolls.",
+      "book": "companion",
+      "page": 62
+    },
+    {
+      "name": "Detoxify Poison in Another",
+      "attribute": "Control & Alter",
+      "difficulty": "Control: Very Easy, modified by relationship. Alter: as detoxify poison (alcohol Very Easy up to neurotoxin Very Difficult), modified by target proximity.",
+      "time": "one round",
+      "description": "Follows the same rules as detoxify poison, but affects a person other than the user.",
+      "book": "companion",
+      "page": 62
+    },
+    {
+      "name": "Control Another's Disease",
+      "attribute": "Control & Alter",
+      "difficulty": "Control: Very Easy, modified by relationship. Alter: as control disease (cold Very Easy up to lung cancer Very Difficult), modified by target proximity.",
+      "time": "at least half an hour of meditation; serious diseases need repeated attempts",
+      "description": "Works the same way as control disease but affects a person other than the user.",
+      "book": "companion",
+      "page": 62
+    },
+    {
+      "name": "Transfer Force",
+      "attribute": "Control & Alter",
+      "difficulty": "Control: Easy, modified by relationship. Alter: Moderate, modified by proximity.",
+      "time": "one round; costs a Force Point (returned, as the use is heroic)",
+      "description": "If both rolls succeed the user must spend a Force Point (regained, as the use is heroic) to transfer a portion of his own life force into the subject. Usually used on mortally wounded subjects to keep them alive: instead of the normal 2D roll each round for a mortally wounded character, the target goes into hibernation and will die only after hours or days - plenty of time to reach a rejuvenation tank.",
+      "book": "companion",
+      "page": 62
+    },
+    {
+      "name": "Affect Mind",
+      "attribute": "Control, Sense & Alter",
+      "difficulty": "Control: Very Easy for perceptions, Easy for memories, Moderate for conclusions, modified by proximity. Sense: a Perception or Control roll for the target, modified by relationship. Alter: Very Easy for slight momentary misperceptions, minor changes to distant memories, or matters the target does not care about; Easy for brief visible phenomena, memories under a year old, or conclusions the target feels some emotion about; Moderate for short hallucinations, memories under a day old, or strict orders about the conclusion; Difficult for slight facial disguises, hallucinations sensed by two senses, or memories under a minute old or extremely important matters; Very Difficult for hallucinations sensed by all senses, major memory changes, or absolutely clear logic.",
+      "time": "one round",
+      "description": "Used to alter a character's perception so he senses an illusion or fails to see what the user hides; to alter his memories permanently; or to alter his conclusions so he decides incorrectly. The user must describe the exact effect before rolling; the Alter difficulty depends on it. Normally one target; more targets require more uses. A target hallucinating a blow would feel it but take no damage. Cannot affect Droids or recording devices.",
+      "book": "companion",
+      "page": 62
+    },
+    {
+      "name": "Telekinetic Kill",
+      "attribute": "Control, Sense & Alter",
+      "difficulty": "Control: Easy, modified by proximity. Sense: Easy, modified by proximity. Alter: a Perception or Control roll for the target (the relationship modifier no longer applies to the Alter difficulty).",
+      "time": "one round",
+      "description": "Warning: the user immediately gains a Dark Side Point. If the Control and Sense rolls succeed, the Alter roll is the damage roll and the target's Perception or Control roll substitutes for the Strength roll; damage is determined normally, except that an Alter roll below the difficulty has no effect. The user injures or kills by telekinesis - stirring the brain, squeezing the heart or collapsing the trachea.",
+      "book": "companion",
+      "page": 63
+    },
+    {
+      "name": "Dim Other's Senses",
+      "attribute": "Sense & Alter",
+      "difficulty": "Sense: Easy, modified by proximity. Alter: a Perception or Control roll for the target.",
+      "time": "one round",
+      "description": "New power. Greatly reduces the Perception of a character. On success reduce the target's Perception, hide/sneak and search skills: Alter roll at or above the difficulty -1D; at or above twice the difficulty -2D; at or above three times -3D.",
+      "book": "companion",
+      "page": 65
+    }
+  ],
+  "tables": {
+    "difficulties": [
+      {
+        "name": "Very Easy",
+        "range": "3-5",
+        "text": "Companion revision: difficulty numbers are now a scale. Very Easy tasks (point-blank range; everyone knows it)."
+      },
+      {
+        "name": "Easy",
+        "range": "6-10",
+        "text": "Companion revision. Easy tasks (short range; common knowledge; medpac on a wounded character)."
+      },
+      {
+        "name": "Moderate",
+        "range": "11-15",
+        "text": "Companion revision. Moderate tasks (medium range; no secret but not widely known; medpac on an incapacitated character)."
+      },
+      {
+        "name": "Difficult",
+        "range": "16-20",
+        "text": "Companion revision. Difficult tasks (long range; specialized knowledge; medpac on a mortally wounded character)."
+      },
+      {
+        "name": "Very Difficult",
+        "range": "21-30",
+        "text": "Companion revision. Very Difficult tasks (expert or truly comprehensive knowledge). Reserve the top of the scale for exceptional circumstances; pick numbers consistently from instance to instance."
+      }
+    ],
+    "ranges": [
+      {
+        "name": "Point-Blank",
+        "modifier": "3-5",
+        "text": "Companion revision: to-hit difficulty is a scale. Anything less than 3 meters away is point-blank for ranged weapons; melee weapons do listed damage at point-blank."
+      },
+      {
+        "name": "Short",
+        "modifier": "6-10",
+        "text": "Companion revision. Grenade scatter at short range: 1D meters."
+      },
+      {
+        "name": "Medium",
+        "modifier": "11-15",
+        "text": "Companion revision. Grenade scatter at medium range: 2D meters."
+      },
+      {
+        "name": "Long",
+        "modifier": "16-20",
+        "text": "Companion revision. Grenade scatter at long range: 3D meters."
+      }
+    ],
+    "damageResults": [
+      {
+        "range": "2xDR < SR",
+        "text": "Companion revision (Damage Summary, Personal Combat): no effect. Escaping unscathed applies to all combat; for stun weapons also no effect."
+      },
+      {
+        "range": "DR < SR",
+        "text": "Stun -1D (all die codes except Strength reduced by 1D for the rest of this round and the next). Stun-set weapons: no effect."
+      },
+      {
+        "range": "DR >= SR",
+        "text": "Wounded. Stun-set weapons: 1 Stun (-1D)."
+      },
+      {
+        "range": "DR >= 2xSR",
+        "text": "Incapacitated. Stun-set weapons: 2 Stun (-2D)."
+      },
+      {
+        "range": "DR >= 3xSR",
+        "text": "Mortally wounded. Stun-set weapons: unconscious."
+      }
+    ],
+    "combatModifiers": [
+      {
+        "name": "Target prone",
+        "text": "Companion revision (Optional Fire Modifiers Chart): +2 to the to-hit difficulty. Rising from prone counts as an action (-1D to other actions); prone characters crawl 2 meters per declared die of speed."
+      },
+      {
+        "name": "Light cover",
+        "text": "+1 to the to-hit difficulty (optional fire modifier)."
+      },
+      {
+        "name": "Medium cover",
+        "text": "+2 to the to-hit difficulty (optional fire modifier)."
+      },
+      {
+        "name": "Heavy cover",
+        "text": "+5 to the to-hit difficulty (optional fire modifier)."
+      },
+      {
+        "name": "Aperture adjacent to firer",
+        "text": "+1 to the to-hit difficulty."
+      },
+      {
+        "name": "Door (otherwise)",
+        "text": "+2 to the to-hit difficulty when firing through a door."
+      },
+      {
+        "name": "Window (otherwise)",
+        "text": "+3 to the to-hit difficulty when firing through a window."
+      },
+      {
+        "name": "Slit (otherwise)",
+        "text": "+4 to the to-hit difficulty when firing through a slit."
+      },
+      {
+        "name": "Target size (personal combat only)",
+        "text": "Less than 1 cm tall +15; 1-10 cm +10; 11-50 cm +5; 51-99 cm +2; 1-3 m no modifier; 3-9 m -3; 10-99 m -5; 100 m or larger -10."
+      },
+      {
+        "name": "Surprise",
+        "text": "Surprise gives a character two free haste actions for the combat round; they do not lower any of his die codes."
+      },
+      {
+        "name": "Setting a blaster on stun",
+        "text": "Counts as an action (-1D to other actions this round). Weapons on stun keep their normal damage code but use the stun column of the Damage Summary."
+      },
+      {
+        "name": "Combined fire",
+        "text": "Lead firer rolls his skill; add one pip for every full die of skill each supporting character has. Command skill sets the maximum number who may combine fire (stormtroopers who can see the target have no limit)."
+      }
+    ],
+    "force": [
+      {
+        "name": "Calling upon the Dark Side",
+        "text": "Companion revision (replaces all core Dark Side rules). Any character may call on the Dark Side when angry, aggressive or desperate: make a Perception or Control roll at difficulty 6, +3 for each further call in the adventure (resets after the adventure); +10 if none of the intended actions would harm a living being. It is a free action resolved before other actions. Success grants one Force Point (which must be spent that round) and one Dark Side Point; failure grants nothing. Characters who refuse to believe in the Force cannot call on it."
+      },
+      {
+        "name": "Dark Side Points",
+        "text": "Whenever a character gains a Dark Side Point the gamemaster rolls one die; if the roll is less than or equal to the character's total Dark Side Points he is consumed by the Dark Side and becomes an NPC. Using the Force (powers or Force Points) immorally, or acting in an evil way even without the Force, earns a Dark Side Point. The gamemaster must warn the player before the action is resolved."
+      },
+      {
+        "name": "Atonement",
+        "text": "During a session in which a character genuinely atones (taking no tainted action) he may remove one Dark Side Point by spending a Force Point that was not gained from the Dark Side; the sacrifice is heroic, so the Force Point returns at the end of the adventure. No more than one Dark Side Point may be removed per adventure."
+      },
+      {
+        "name": "Villains",
+        "text": "An NPC who has turned to the Dark Side is a villain and may gain Force Points only by calling on the Dark Side. If a villain fails a Dark Side check he is briefly free of its thrall and may make a critical choice between good and evil."
+      },
+      {
+        "name": "Training",
+        "text": "Characters whose template has Force skills need a teacher (any Force user with higher Force skill codes) to improve or learn skills; characters without Force skills need a master (all three Force skills at 7D or better). The first skill learned is Control or Sense, the last is Alter. Learning a skill takes ten weeks of intensive training (each skill point spent shortens this by one week, minimum one week) and the new skill begins at 1D. Self-training in skills already acquired, or raising a skill above the teacher's, costs double skill points; a skill still at zero can never be raised without a teacher."
+      },
+      {
+        "name": "Mastering powers",
+        "text": "A character may master three powers per die of a Force skill plus one per pip (the power total). Each 1D learned with traditional training masters three powers: Control - control pain, remain conscious, force of will; Sense - life sense, magnify senses, receptive telepathy; Alter - control another's pain, shift senses, telekinesis. Learning a power from a teacher is free but takes a week; experimenting alone takes a week and one skill point per power. Multi-skill powers count against the power total of every skill used."
+      },
+      {
+        "name": "Using powers not yet mastered",
+        "text": "A power the character has not mastered may still be used, but all difficulty numbers are increased by five (added to the opponent's roll if the difficulty is opposed)."
+      },
+      {
+        "name": "Powers as skills",
+        "text": "Every power is composed of one or more of Control, Sense and Alter; all of a power's skills are rolled at once and this counts as multiple skill use (-1D per skill beyond the first). Some powers kept 'up' cannot be dropped voluntarily and need another roll to deactivate. Force power difficulties now use the new scale: 5 = Very Easy (3-5), 10 = Easy (6-10), 15 = Moderate (11-15), 20 = Difficult (16-20), 30 = Very Difficult (21-30)."
+      },
+      {
+        "name": "Droids and the Force",
+        "text": "Droids may never have Force skills. Droids that believe in the Force may use Force Points; all player character Droids begin with one Force Point."
+      },
+      {
+        "name": "Force-using NPCs",
+        "text": "Force users must be unknown to the Emperor and Vader; those serving the light are of modest power, and Force-using villains are either inconsequential or under the Emperor's control. Beings with any Force ability number perhaps in the hundreds galaxy-wide."
+      }
+    ],
+    "starship": [
+      {
+        "name": "Astrogation correction",
+        "text": "Companion revision: the Astrogation Gazetteer and Chart list times in hours, not days. Difficulty is +1 per hour saved and -1 per extra hour; every hyperspace journey takes at least one hour."
+      },
+      {
+        "name": "Starship combat sequence",
+        "text": "Four segments: 1. Declare actions and full reaction skills (lowest Dexterity first; NPC first on ties). 2. Declare combat reaction skills - combat evasion, shielding - highest Dexterity first; haste for reactions may be increased. 3. Roll actions and reactions in order of haste (non-movement actions, then movement, at each degree of haste). 4. Calculate damage as attacks hit. The same sequence is used for all vehicle combat."
+      },
+      {
+        "name": "Full evasion",
+        "text": "Pilot adds his evasion roll to the attacker's difficulty; may only add haste or movement actions. Requires a speed action which does not reduce the evasion roll (moving adds +1D, cancelled by the multiple action penalty); other movement actions are reduced 1D. Gunners aboard add the evasion roll to their difficulty; any other action aboard is +5 (or the evasion roll, whichever is less); shielding rolls are -5 (or the evasion roll)."
+      },
+      {
+        "name": "Combat evasion",
+        "text": "Works like a combat dodge: the pilot rolls skill plus maneuver and may substitute that roll for the attacker's difficulty number. It has no effect on gunners or other actions aboard."
+      },
+      {
+        "name": "Shielding",
+        "text": "Starship shields is a reaction skill declared in the reaction segment and rolled in order of haste. Shield roll + difficulty = the shield number. An attack roll above the difficulty but below the shield number hits, but shield dice are added to hull dice for damage; at or above the shield number only hull dice resist."
+      },
+      {
+        "name": "Ionization",
+        "text": "A ship without effective shields that is lightly damaged is ionized: all ship codes except hull are -1D for the rest of this round and the next; the ship may still act. Ion cannon hits cause ionization only, rolled against hull with no shield protection (see the Damage Summary)."
+      },
+      {
+        "name": "Damage Summary (Starship Combat)",
+        "text": "2xDR<SR: no effect. DR<SR: lightly damaged (lose shield generator or ionized -1D); ion cannons: lose generator. DR>SR: heavily damaged; ion: -1D ionization. DR>2xSR: severely damaged; ion: -2D ionization. DR>3xSR: destroyed; ion: dead controls (ship does nothing for one round, then is ionized -3D)."
+      },
+      {
+        "name": "Missiles and torpedoes",
+        "text": "The to-hit difficulty is increased by 1D for every speed action the target ship takes; this bonus costs the enemy pilot nothing."
+      },
+      {
+        "name": "Tractor beams",
+        "text": "Tractor beams have a Strength die code. Breaking free is an opposed roll: the trapped ship's sublight code against the beam's Strength, +1D per successful overspeed action. A much larger ship drags the smaller one with it."
+      },
+      {
+        "name": "Scale die caps",
+        "text": "Six scales: character, speeder, walker, starfighter, capital ship, Death Star. Cross-index the scale of the die code rolled with the target's scale on the To Hit, Damage or Maneuver scale chart to find the die cap; any die showing more than the cap is not counted. Damage caps apply to both the damage roll and the resisting Strength/hull roll. To Hit: character vs any 6; speeder vs character 5; walker vs character 4; starfighter vs char/spd/wlk 3/4/5; capital vs char/spd/wlk/star 1/3/4/5; Death Star only vs capital (5) or Death Star (6). Damage: character vs spd/wlk/star 3/2/2, cannot harm capital or Death Star; speeder vs wlk/star/cap 5/5/4; walker or starfighter vs capital 5; capital vs Death Star 1. Maneuver: character or speeder vs starfighter 4, vs capital 5; walker 5/5/6/3/4/6; capital vs starfighter 5; Death Star 3/3/4/1/2/6."
+      },
+      {
+        "name": "Additional weapon ranges (meters)",
+        "text": "Speeder-mounted: light (1-2D+) 50-300/301-500/501-1,000; medium (3D-4D+) 50-300/301-800/801-1,500; heavy (5D+) 50-400/401-900/901-2,000. Artillery: light 10-500/501-2,000/2,001-10,000; medium 20-600/601-3,000/3,001-16,000; heavy 50-600/601-5,000/5,001-25,000. Starfighter: blaster 200-10,000/10,001-20,000/20,001-35,000; missiles 250-4,000/4,001-17,000/17,001-30,000; laser cannon 200-5,000/5,001-25,000/25,001-50,000; ion cannon 5-5,000/5,001-15,000/15,001-75,000; proton torpedoes 500-15,000. Capital: missiles 3,000-25,000/25,001-60,500/60,001-125,000; turbolaser 5,000-30,000/30,001-70,000/70,001-150,000; ion cannon 2,000-20,000/20,001-50,000/50,001-100,000; tractor beam 1,000-10,000/10,001-30,000/30,001-60,000."
+      },
+      {
+        "name": "Capital ship crews",
+        "text": "Crew quality die codes (Imperial / Rebel): Recruit 3D / 2D-3D+2; Average 3D+1-4D / 4D-5D; Veteran 4D+1-5D+2 / 5D+1-6D; Elite 6D-6D+2 / 6D+1-7D; Hand-picked Elite 7D-8D / 7D+1 to PCs. Assume average crews in published adventures."
+      },
+      {
+        "name": "Capital ship combat sequence",
+        "text": "As starship combat with declaration order by command skill (lowest declares actions first, highest declares reactions first) and a fifth segment: hit results recorded on the ship template. Anticipate enemy (Moderate starship tactics) gives a free haste action; deceive enemy (Difficult) lets a commander redeclare after hearing the opponent. Shutting down shields must be declared in segment 1."
+      },
+      {
+        "name": "Guns Modifier Chart",
+        "text": "Instead of rolling each gun, add the to-hit/damage modifier for the number of guns fired to the weapon's fire control, plus the crew die code, to hit; add the same modifier to the weapon damage code (no crew dice). Guns: 1 +0; 2 +2; 3 +1D; 4 +1D+1; 6 +1D+2; 8 +2D; 12 +2D+1; 16 +2D+2; 24 +3D; 32 +3D+1; 48 +3D+2; 60 +4D; 90 +4D+1; 120 +4D+2; 180 +5D; 250 +5D+1. Attacks are grouped by weapon type."
+      },
+      {
+        "name": "Capital ship damage",
+        "text": "Damage is recorded in pips (ionization in whole dice). Each pip on the Ship Damage row reduces all ship operations by one pip; 3 pips = heavily damaged (-1D), 6 pips = severely damaged (-2D), 9 pips = destroyed. Hull rolls are never reduced by damage. Capital Ship Damage Summary (beam and missile / ion): 2xDR<HR no effect; DR<HR 1 shield pip / no effect; DR>=HR 1 pip / 1D; DR>=2xHR 2 pips / 2D, and so on up to DR>=9xHR 9 pips / 9D."
+      },
+      {
+        "name": "Command and coordination",
+        "text": "The commander must always allocate 1D of command to each of the pilot, chief gunnery officer and chief shields officer or that officer is -1D. Remaining command actions may: give a subordinate +1 pip per bonus action; add one more ship's guns to a single attack per coordination action (larger to-hit modifier only, ion and non-ion never combined); or order differing levels of haste to different batteries (-1D per haste order). Command may never be reduced below zero."
+      },
+      {
+        "name": "Advanced shielding",
+        "text": "On a Moderate starship shields roll (declared in segment 1, -1D to the operator) a damaged shield facing may be shut down instead of losing a pip of shield code. A Difficult shields roll doubles one facing's shield code for a round by burning out another facing (-1D to other shielding rolls); not possible with one facing left. Against starfighters the shield operator's roll is die-capped at 5."
+      },
+      {
+        "name": "Advanced targeting",
+        "text": "Hit / damage modifiers: hull 0/0; sublight engines -2D/0; maneuver -3D/+1D*; fire control -4D/+2D*; beam weapons -3D/0; missile tubes -2D/-1D; command -4D/0; vital location -2D/-1D (reduces target hull roll by 1D, cumulative and combinable). *Only if the attack penetrated the shields. Weapon damage pips x guns firing are spread over the targeted weapons: 1 point wounds (-1D fire control), 2 incapacitates, 3 destroys. Each pip of command damage gives opponents a free haste action."
+      },
+      {
+        "name": "Ramming and starfighters vs capital ships",
+        "text": "Ramming: the rammer's piloting roll must beat the defender's evasion; each ship rolls hull +1D per speed action taken that round against the other's hull plus shielding. A swarm of starfighters attacking a capital ship counts as guns on the Guns Modifier Chart; return fire is resolved as counter battery fire with damage points divided among the swarm (1 heavily damaged, 2 severely, 3 destroyed). Remember the scale die caps."
+      },
+      {
+        "name": "Improving ships and equipment",
+        "text": "Equipment die codes are raised with skill points as for skills (a 0D code costs one point per pip); codes that add to a character's own skill or attribute (speed, fire control, maneuver, shielding, armor) cost three more points per pip. Time per pip / credits per skill point by scale: character 1 day/10; speeder 3 days/100; walker 3 days/500; starfighter 1 week/500; capital ship 1 month/1,000,000; Death Star 2 months/1,000,000,000. A technology roll is needed after spending the points: pip 1 Very Easy, 2 Easy, 3 Moderate, 4 Difficult, 5+ Very Difficult. Hyperdrive x4 to x3 costs 5 points, x3 to x2 10, x2 to x1 20, x1 to x1/2 40. A new 1D/1D weapon costs 9 skill points, or buy it and pay installation (150 credits character scale, 1,500 speeder, 6,000 starfighter, 10,000,000 capital). NPC labor doubles credit costs."
+      }
+    ],
+    "quickRules": [
+      {
+        "title": "Dice and pips",
+        "text": "Every die is three pips. When improving a skill or equipment code, pips round up to dice (3D+2 to 4D; 1D+2 plus 2D+1 = 4D). In play, modifiers never round up: a character may roll 4D+6. Adding or subtracting pips always gives pips back (a doubled 5D+2 is 10D+4).",
+        "book": "companion"
+      },
+      {
+        "title": "Difficulty scale",
+        "text": "Difficulty numbers are a scale, not absolutes: Very Easy 3-5, Easy 6-10, Moderate 11-15, Difficult 16-20, Very Difficult 21-30. Combat ranges, knowledge, general knowledge and medpac use have matching scales (medpac: wounded 6-10, incapacitated 11-15, mortally wounded 16-20). Be consistent from instance to instance and keep early adventures in the lower end of each scale.",
+        "book": "companion"
+      },
+      {
+        "title": "Combined actions",
+        "text": "Two or more characters may combine on one task. One is the lead character and rolls his own code; add one pip for every full die of skill, attribute or fire control each supporting character has, and roll once. A combined action counts as one action for everyone involved (reduce codes for multiple actions as usual). Reaction skills, beast riding, repulsorlift operation, starship piloting, single-weapon gunnery, stamina and most Perception skills (except search and con) may not be combined. Exceeding the sensible limit for a task loses the bonus and costs -3 pips per extra character.",
+        "book": "companion"
+      },
+      {
+        "title": "Coordinating and combined fire",
+        "text": "With ample time any number may combine. In combat or under time pressure, the maximum combining on a non-combat skill equals the highest participating skill die code; coordinating the work is itself an action. Command is the skill for combining fire: the maximum firers equals the coordinator's command code (reduced 1D per other action he takes); the coordinator may switch the lead firer. Any stormtroopers who can see a target may combine fire without limit, shifting lead firer automatically if he is wounded.",
+        "book": "companion"
+      },
+      {
+        "title": "Uncertainty dice (optional)",
+        "text": "For non-combat skills where the character cannot be sure of the result, the gamemaster may add two to four uncertainty dice to the player's roll, then rolls the same number himself and subtracts them from the player's total. The gamemaster need not reveal the result; on average the dice cancel, but the player can never be sure.",
+        "book": "companion"
+      },
+      {
+        "title": "Movement actions",
+        "text": "Replaces the core movement and chase rules. Four movement actions: speed, overspeed, maneuver and ramming; each is an action for the multiple action penalty. Declare all movement, including the number of speed actions (up to the base speed code, pips rounded up: Dexterity on land, swimming in water, speed or sublight code for vehicles). Roll the operator skill (dodge on land, swimming in water) plus the vehicle or mount speed code against the movement difficulty; failure means loss of control.",
+        "book": "companion"
+      },
+      {
+        "title": "Movement distances",
+        "text": "Each successful speed action moves: character or creature 10 meters; AT-AT walker 100; repulsorlift vehicle 250; starfighter or capital ship 10,000. Walking (half speed - up to 5 meters, a walker 50, a landspeeder 125, a starfighter 5,000) costs no action. Prone characters crawl 2 meters per die. Operating outside the native medium drops one level (or to 2 meters per action on the character scale). Minimum full move: 1 meter for a character; for a vehicle, the full move of the level below.",
+        "book": "companion"
+      },
+      {
+        "title": "Movement difficulty",
+        "text": "Very Easy: flat artificial ground, calm water, unobstructed terrain, straight flight in space. Easy: natural ground, city repulsorlifting, a busy spaceport. Moderate: broken ground, constricted swimming, maneuvering to avoid fire, a sandstorm. Difficult: a panicked crowd, turbulent water, speeder bike racing through the Endor forest, combat in debris. Very Difficult: a starship breaking apart, a dense asteroid field under fire. Regaining control after a failed roll is +5. Each overspeed action gives one extra speed action's distance that round, reduces all die codes by 1D and adds +3 to the difficulty.",
+        "book": "companion"
+      },
+      {
+        "title": "Maneuver and ramming",
+        "text": "In a chase a maneuver action is an opposed roll of operator skill plus maneuver code (no speed code); the winner reserves speed actions to use after his opponent moves: beat the loser 1, double it 2, triple it 3. If the opponent does not maneuver, success is automatic (as 2x). Ramming (opponents less than a full move apart): opposed operator rolls plus hull or body Strength, using the Damage Scale Chart for scale differences. Beat the loser: +5 to his movement difficulty, failure wounds/heavily damages; 2x: +10, failure incapacitates/severely damages with collision damage for occupants; 3x: loser mortally wounded/destroyed.",
+        "book": "companion"
+      },
+      {
+        "title": "Collision damage",
+        "text": "Replaces the core Falling and Collisions table. Damage dice by speed actions: characters 1D 2D, 2D-3D 3D, 4D-7D 5D, 8D-10D 6D; walkers 1D 6D, 2D 7D, 3D 8D, 4D 9D; speeders 1D 8D, 2D 9D, 3D 10D, 4D 11D, 5D 12D, 6D 14D; starfighters 1D+ 14D. Every three pips a movement roll is missed by is one speed action not taken; the first is where control was lost.",
+        "book": "companion"
+      },
+      {
+        "title": "Combat sequence",
+        "text": "Each round has four segments: 1. Declare actions and full reaction skills, lowest Dexterity first (NPC first on ties). 2. Declare combat reaction skills (combat dodge, parry, evasion, shielding), highest Dexterity first; haste may be increased here but never decreased. 3. Roll actions and reactions in order of haste - non-movement actions first, then movement, at each degree of haste. 4. Calculate damage as hits occur. Haste declared in segment 1 applies to all actions; haste added in segment 2 applies to reactions only. Optionally, a character may degrade the haste of some of his actions to sequence them.",
+        "book": "companion"
+      },
+      {
+        "title": "Reaction skills: full and combat",
+        "text": "A full dodge/parry/evasion (declared in segment 1) adds the reaction roll to the attacker's difficulty; the character may only add haste and movement (not ramming). It requires a speed action that does not reduce the reaction roll. A combat dodge (declared in segment 2) lets the defender substitute his dodge roll for the difficulty and counts as an action (-1D). One reaction roll covers all attacks of that type for the round, but dodge does not affect melee attacks. A reaction must be at a haste equal to or greater than the attack it counters.",
+        "book": "companion"
+      },
+      {
+        "title": "Preparation and stance",
+        "text": "Preparing lets a character raise one skill code by 1D next round; he does nothing else in the preparing round, and only skills that take a round can be prepared. Characters are standing (including crouching or kneeling) or prone; falling prone is free and prone targets are +2 to hit, but rising counts as an action (-1D).",
+        "book": "companion"
+      },
+      {
+        "title": "Stun damage",
+        "text": "Replaces the core stun rules. Setting a blaster on stun is an action. Stun results reduce all die codes except Strength by 1D per stun for the rest of this round and the next, cumulatively. If the stuns taken in one round equal the character's Dexterity dice he is immobile (no Dexterity actions); if total stuns equal his stamina dice he falls unconscious. 2xDR < SR is always no effect (also no ionization or shield loss for starships).",
+        "book": "companion"
+      },
+      {
+        "title": "Damage Summary (personal combat)",
+        "text": "2xDR < SR: no effect. DR < SR: Stun -1D (stun weapon: no effect). DR >= SR: wound (stun weapon: -1D). DR >= 2xSR: incapacitated (stun weapon: -2D). DR >= 3xSR: mortally wounded (stun weapon: unconscious). Grenades scatter 1D meters at short range, 2D at medium, 3D at long. Surprise gives two free haste actions.",
+        "book": "companion"
+      },
+      {
+        "title": "Medpacs",
+        "text": "Medpacs may be used more than once a day, but each medpac beyond the first in a day increases the difficulty by three (base: wounded 6-10, incapacitated 11-15, mortally wounded 16-20).",
+        "book": "companion"
+      },
+      {
+        "title": "Optional fire modifiers",
+        "text": "Target prone +2; light cover +1, medium +2, heavy +5; firing through an aperture adjacent to the firer +1, otherwise door +2, window +3, slit +4. Target size (personal combat): under 1 cm +15, 1-10 cm +10, 11-50 cm +5, 51-99 cm +2, 1-3 m none, 3-9 m -3, 10-99 m -5, 100 m or more -10.",
+        "book": "companion"
+      },
+      {
+        "title": "Melee weapons",
+        "text": "Replaces the bottom of the core Weapons Chart. Damage at point-blank range (difficulty): hands STR (3-5); club STR+1D (3-5); gaderffii STR+1D (3-5); spear STR+1D+1 (6-10); vibroaxe STR+2D (11-15); vibroblade STR+1D+2 (11-15); lightsaber 5D (16-20), and characters with Control add their skill code to lightsaber damage.",
+        "book": "companion"
+      },
+      {
+        "title": "Scale and die caps",
+        "text": "Six scales: character, speeder, walker, starfighter, capital ship, Death Star. When scales differ, find the die cap on the To Hit, Damage or Maneuver scale chart; dice showing more than the cap are not counted. The damage cap applies to both the damage roll and the resisting roll. A character-scale weapon cannot damage a capital ship or the Death Star (cap 2 against starfighters); a starfighter shooting a character has a cap of 3.",
+        "book": "companion"
+      },
+      {
+        "title": "Starship combat revisions",
+        "text": "Astrogation times are hours, not days (minimum one hour). Starship combat uses the four-segment sequence. Full evasion penalizes gunners aboard (add the evasion roll to their difficulty) and other actions (+5); combat evasion substitutes the pilot's roll for the difficulty and affects nobody else. Shielding is a reaction skill: shield roll + difficulty is the shield number; hits below it add shield dice to hull. Missiles and torpedoes are +1D to hit per speed action of the target. Tractor beams have a Strength code opposed by the target's sublight roll.",
+        "book": "companion"
+      },
+      {
+        "title": "Starship damage and ionization",
+        "text": "Lightly damaged with no effective shields = ionized: all codes except hull -1D this round and next. Ion cannons cause only ionization, rolled against hull with no shield protection: DR<SR lose shield generator; DR>SR -1D; DR>2xSR -2D; DR>3xSR dead controls (nothing for one round, then -3D). Standard Y-wing: shields 3D+2, hull 2D+2.",
+        "book": "companion"
+      },
+      {
+        "title": "Capital ship combat",
+        "text": "Declaration order is by command skill; a fifth segment records hits on the ship template. Guns are fired in groups: the Guns Modifier (2 guns +2 ... 12 guns +2D+1 ... 250 guns +5D+1) is added to fire control plus crew code to hit, and to weapon damage. Damage is recorded in pips: 3 pips heavily damaged (-1D), 6 severely (-2D), 9 destroyed; hull rolls never drop. Facing matters only when a shield facing is shut down. The commander must spend 1D of command on each of the pilot, gunnery and shields officers.",
+        "book": "companion"
+      },
+      {
+        "title": "Starship tactics and command",
+        "text": "Starship tactics is a Knowledge skill: Moderate roll to anticipate the enemy (a free haste action), Difficult to deceive the enemy (redeclare after hearing the opponent). Command actions give subordinates +1 pip each, coordinate one extra ship's guns per action, or assign extra haste levels (-1D each). Advanced options: shut down a damaged shield facing (Moderate), double a facing by burning out another (Difficult), and targeted attacks on engines, maneuver, fire control, weapons, command or vital locations.",
+        "book": "companion"
+      },
+      {
+        "title": "Aliens and NPC templates",
+        "text": "When adding 6D to a Sourcebook alien template to make a player character, 1D must go to each of the six attributes. NPC templates total 12D of attributes; player characters total 18D.",
+        "book": "companion"
+      },
+      {
+        "title": "Creating Droids",
+        "text": "All Droid attributes start at 1D. NPC Droids get 35D of building dice, PC Droids 65D. Each 1D of attribute costs 5D; each 1D of speed code or armor costs 3D; each tool or piece of equipment costs 1D (+1D per extra feature); remaining dice go to skills 1 for 1. No Droid skill may exceed 13D and Droids never have Force skills. Droid skills improve with skill points; new skills also cost 1,000 credits.",
+        "book": "companion"
+      },
+      {
+        "title": "Improving equipment",
+        "text": "Equipment die codes are raised with skill points like skills (0D codes cost one point per pip); attribute-enhancing codes (speed, fire control, maneuver, shields, armor) cost three more per pip, and every pip of armor lowers Dexterity by a pip unless offset. Costs by scale (time per pip / credits per skill point): character 1 day/10; speeder 3 days/100; walker 3 days/500; starfighter 1 week/500; capital 1 month/1,000,000. A technology roll follows: pip 1 Very Easy up to pip 5+ Very Difficult; failure wastes the points. Hyperdrive x4>x3 5 points, x3>x2 10, x2>x1 20, x1>x1/2 40.",
+        "book": "companion"
+      },
+      {
+        "title": "Equipment availability",
+        "text": "Availability F requires a fee or permit, normally five percent of the price (one to 15 percent). Availability R is restricted: a license averaging 10 percent (five to 100 percent) with a background check; an NPC specialist finds anything on a Rebel with a Difficult bureaucracy or computer programming roll (Moderate if the Rebel is a little infamous, Easy if as well known as Han Solo).",
+        "book": "companion"
+      },
+      {
+        "title": "The Dark Side",
+        "text": "Replaces the core Dark Side rules. Calling on the Dark Side is a free action: Perception or Control roll at difficulty 6, +3 per further call this adventure, +10 if no intended action harms a living being. Success gives a Force Point (use it this round) and a Dark Side Point. Each Dark Side Point gained: roll 1D; if it is less than or equal to the total, the character is consumed and becomes an NPC. Evil acts, with or without the Force, also earn points. Atone by spending a non-Dark-Side Force Point (returned later) - one point removed per adventure at most.",
+        "book": "companion"
+      },
+      {
+        "title": "Force training",
+        "text": "A teacher (higher Force codes) is needed to improve or learn Force skills if the template started with them; otherwise a master (all three skills at 7D+). Control or Sense first, Alter last; ten weeks per skill, minus one week per skill point spent (minimum one week), starting at 1D. Self-training or exceeding the teacher costs double. Powers are mastered three per die plus one per pip of each skill (three fixed powers per die in traditional training); a week each, free from a teacher or one skill point alone. Unmastered powers may be used at +5 difficulty.",
+        "book": "companion"
+      },
+      {
+        "title": "Force power difficulties",
+        "text": "Force power difficulties now use the difficulty scale: 5 is Very Easy (3-5), 10 Easy (6-10), 15 Moderate (11-15), 20 Difficult (16-20), 30 Very Difficult (21-30), modified by proximity and relationship as in the core rules. All skills in a power are rolled at once as multiple skill use (-1D per extra skill). Inflict pain, injure/kill, telekinetic kill and attacking with telekinesis give a Dark Side Point immediately.",
+        "book": "companion"
+      },
+      {
+        "title": "Space suits and syntherope",
+        "text": "Emergency space suits leak after 72 hours (treat as a wound) and fail after 120 hours; utility suits last hundreds of hours but leak (an extra wound) when the wearer is wounded by a puncturing attack; high-quality suits only leak on a mortal wound. Syntherope has Strength 3D that holds through incapacitating damage, in 15 meter coils. Breath masks allow survival in near-vacuum but not cold or hard vacuum.",
+        "book": "companion"
+      }
+    ]
+  }
+}

@@ -77,6 +77,7 @@ export async function DELETE(_req: NextRequest, ctx: Ctx) {
 //   ACE sheets   { ace_sheet: "<json>" } → top-level `name`
 //   KoB sheets   { kob_sheet: "<json>" } → top-level `name`
 //   Nimble       { nimble_sheet: "<json>" } → top-level `name`
+//   Star Wars    { sw_sheet: "<json>" } → top-level `name`
 //   Prep builders{ sd_session | dcc_session: "<json>" } → top-level `title`
 function extractDocTitle(tool: string, data: object): string | null {
   try {
@@ -101,6 +102,10 @@ function extractDocTitle(tool: string, data: object): string | null {
     }
     if (tool === "nimble-character" && typeof blob.nimble_sheet === "string") {
       const sheet = JSON.parse(blob.nimble_sheet) as { name?: unknown };
+      if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
+    }
+    if (tool === "sw-character" && typeof blob.sw_sheet === "string") {
+      const sheet = JSON.parse(blob.sw_sheet) as { name?: unknown };
       if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
     }
 
@@ -132,7 +137,7 @@ function extractLinkedCampaignId(data: object): string | null {
       return typeof id === "string" && id ? id : null;
     }
     // DCC, ACE and KoB sheets: campaign lives at the top level (campaign.id)
-    for (const key of ["dcc_sheet", "ace_sheet", "kob_sheet", "nimble_sheet"]) {
+    for (const key of ["dcc_sheet", "ace_sheet", "kob_sheet", "nimble_sheet", "sw_sheet"]) {
       if (typeof blob[key] !== "string") continue;
       const sheet = JSON.parse(blob[key] as string) as {
         campaign?: { id?: unknown } | null;

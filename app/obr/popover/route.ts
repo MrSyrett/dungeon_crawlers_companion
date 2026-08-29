@@ -60,6 +60,7 @@ const PAGE = String.raw`<!doctype html>
   .ace { color: #3aa8e0; }
   .kob { color: #a56ee8; }
   .nim { color: #3fb97a; }
+  .sw { color: #f0c020; }
   .group { display: flex; flex-direction: column; gap: 7px; }
   .group + .group { margin-top: 14px; }
   .group-head {
@@ -71,6 +72,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.ace { color: #3aa8e0; }
   .group-head.kob { color: #a56ee8; }
   .group-head.nim { color: #3fb97a; }
+  .group-head.sw { color: #f0c020; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
@@ -253,7 +255,8 @@ const PAGE = String.raw`<!doctype html>
             { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" },
             { key: "ACE", name: "ACE!", cls: "ace" },
             { key: "KOB", name: "Kids on Bikes", cls: "kob" },
-            { key: "NIM", name: "Nimble", cls: "nim" }
+            { key: "NIM", name: "Nimble", cls: "nim" },
+            { key: "SW", name: "Star Wars", cls: "sw" }
           ];
           var seen = {};
           var html = "";

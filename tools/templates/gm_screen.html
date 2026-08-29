@@ -880,15 +880,8 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 .ai-input:focus, .ai-select:focus { border-color: var(--mid); }
 textarea.ai-input { resize: vertical; line-height: 1.4; }
 .ai-select option { background: var(--panel-2); color: var(--white); }
-.ai-cat-filters { display: flex; flex-wrap: wrap; gap: 5px; }
-.ai-chip { border: 1px solid var(--border); background: transparent; color: var(--mid); border-radius: 20px; padding: 3px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; }
-.ai-chip:hover { border-color: var(--gold); color: var(--gold); }
-.ai-chip.on { border-color: var(--gold); background: rgba(200,160,32,0.12); color: var(--gold); }
-.ai-cat-results { display: none; flex-direction: column; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); background: var(--panel-2); }
+.ai-cat-results { display: none; flex-direction: column; max-height: 180px; overflow-y: auto; border: 1px solid var(--border); background: var(--panel-2); }
 .ai-cat-results.open { display: flex; }
-.ai-cat-grp { padding: 5px 9px 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); background: var(--panel); position: sticky; top: 0; }
-.ai-cat-item.custom { color: var(--gold); font-style: italic; }
-.ai-cat-item .ai-cat-meta { font-size: 10px; color: var(--muted); flex-shrink: 0; }
 .ai-cat-item { padding: 6px 9px; cursor: pointer; font-size: 12px; color: var(--light); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; }
 .ai-cat-item:last-child { border-bottom: none; }
 .ai-cat-item:hover { background: var(--panel); color: var(--white); }
@@ -3045,21 +3038,17 @@ GMScenes.renderPins();
           </select>
           <button class="btn small ghost ai-roll-tier" type="button" title="Fill the box from the DCC loot generator">🎲 Roll tier</button>
         </div>
-        <div class="ai-cat-filters"></div>
-        <input type="text" class="ai-input ai-cat-search" placeholder="Search Loot &amp; Gear to add…">
+        <input type="text" class="ai-input ai-cat-search" placeholder="Search the item catalog to add…">
         <div class="ai-cat-results"></div>
         <table class="ai-items"><tbody class="ai-items-body"></tbody></table>
-        <button class="btn small ghost ai-add-row" type="button">+ Add custom item</button>
+        <button class="btn small ghost ai-add-row" type="button">+ Add item</button>
         <div class="ai-row" style="margin-top:8px">
           <select class="ai-select ai-box-mode" title="Who can open this box">
             <option value="copies">Everyone gets a copy</option>
             <option value="named">Only a named player</option>
             <option value="claim">First to claim it</option>
           </select>
-          <select class="ai-select ai-box-to" title="Which player can open it" style="display:none;">
-            <option value="">— choose a player —</option>
-          </select>
-          <button class="btn small ghost ai-party-refresh" type="button" title="Refresh the party list" style="display:none;">↻</button>
+          <input type="text" class="ai-input ai-box-to" placeholder="Player / character name" style="display:none;">
         </div>
         <button class="btn small primary ai-send-box" type="button">Send Loot Box</button>
         <div class="ai-status ai-box-status"></div>
@@ -10590,6 +10579,30 @@ function init_party(root) {
     };
   }
 
+  // Build a Party-tool summary from a Star Wars (WEG D6) sheet. Die codes are
+  // stored as pips on the sheet (3D+2 = 11); render them back as codes here.
+  function swParty(d) {
+    const A = d.attrs || {};
+    const n = v => parseInt(v) || 0;
+    const code = p => { p = n(p); return Math.floor(p / 3) + 'D' + (p % 3 ? '+' + (p % 3) : ''); };
+    const ATTRS = ['Dexterity','Knowledge','Mechanical','Perception','Strength','Technical'];
+    const WOUND = { none:'Unhurt', stunned:'Stunned', wounded:'Wounded', incapacitated:'Incapacitated', mortal:'Mortally Wounded' };
+    return {
+      system: 'SW',
+      name: d.name || 'Unnamed', template: d.template || '', species: d.species || '',
+      attrs: ATTRS.map(id => ({ id, code: code(A[id]) })),
+      skills: (d.skills || []).filter(s => s && s.name).map(s => ({ name: s.name, code: code(s.attr === 'Force' ? s.adds : n(A[s.attr]) + n(s.adds)) })),
+      wound: WOUND[d.wound] || 'Unhurt',
+      forcePoints: n(d.forcePoints), darkSide: n(d.darkSide), skillPoints: n(d.skillPoints),
+      armor: d.armor && d.armor.name ? d.armor.name + (n(d.armor.pips) ? ' (+' + code(d.armor.pips) + ')' : '') : '',
+      weapons: (d.weapons || []).filter(w => w && w.name).map(w => ({ name: w.name, damage: w.damage || '', range: w.range || '' })),
+      powers: (d.force || []).filter(f => f && f.name).map(f => f.name),
+      gear: (d.gear || []).filter(g => g && g.name).map(g => g.name),
+      credits: d.credits || '',
+      ship: d.ship && d.ship.name ? d.ship.name : '',
+    };
+  }
+
   // Build a Party-tool summary from a Nimble sheet (stats, skills, HP/wounds,
   // armor, mana, class features come straight from the saved blob).
   function nimParty(d) {
@@ -10640,6 +10653,7 @@ function init_party(root) {
     const d = raw.sheet && typeof raw.sheet === 'object' ? raw.sheet : raw;
     // ACE! and KoB sheets tag themselves; DCC sheets have a distinct shape
     // (header + combat blocks). Route each to its own summariser, else Shadowdark.
+    if(d && d.system === 'SW') return swParty(d);
     if(d && d.system === 'NIM') return nimParty(d);
     if(d && d.system === 'KOB') return kobParty(d);
     if(d && d.system === 'ACE') return aceParty(d);
@@ -10849,6 +10863,35 @@ function init_party(root) {
     return h;
   }
 
+  function cardHTMLSW(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = [c.species, c.template].filter(Boolean).join(' · ');
+    const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip"' + (c.wound !== 'Unhurt' ? ' style="color:#ff6a6a;"' : '') + '>' + esc(c.wound) + '</span>'
+       + '<span class="pty-chip">FP <b>' + esc(c.forcePoints) + '</b></span>'
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats">' + c.attrs.map(a =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(a.id.slice(0,4).toUpperCase()) + '</div>'
+      + '<div class="pty-stat-mod">' + esc(a.code) + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Force Pts', c.forcePoints) + (c.darkSide ? cell('Dark Side', c.darkSide) : '') + cell('Skill Pts', c.skillPoints) + cell('Armor', c.armor || 'none') + (c.credits ? cell('Credits', c.credits) : '')
+       + '</div></div>';
+    if(c.skills.length) h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + esc(s.code)).join(' · ') + '</div></div>';
+    if(c.weapons.length) h += '<div class="pty-sec"><div class="pty-sec-h">Weapons</div>' + c.weapons.map(w => '<div class="pty-line"><b>' + esc(w.name) + '</b> <span class="dim">' + esc(w.damage) + (w.range ? ' · ' + esc(w.range) : '') + '</span></div>').join('') + '</div>';
+    if(c.powers.length) h += '<div class="pty-sec"><div class="pty-sec-h">Force Powers</div><div class="pty-line dim">' + esc(c.powers.join(', ')) + '</div></div>';
+    if(c.ship) h += '<div class="pty-sec"><div class="pty-sec-h">Ship</div><div class="pty-line">' + esc(c.ship) + '</div></div>';
+    if(c.gear.length) h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
   function cardHTMLNIM(entry) {
     const c = entry.sheet;
     const open = openIds.has(entry.id);
@@ -10910,6 +10953,7 @@ function init_party(root) {
 
   function cardHTML(entry) {
     const c = entry.sheet;
+    if(c.system === 'SW') return cardHTMLSW(entry);
     if(c.system === 'NIM') return cardHTMLNIM(entry);
     if(c.system === 'KOB') return cardHTMLKOB(entry);
     if(c.system === 'ACE') return cardHTMLACE(entry);
@@ -11335,28 +11379,14 @@ function init_ai(root) {
   const boxName   = root.querySelector('.ai-box-name');
   const boxTier   = root.querySelector('.ai-box-tier');
   const rollTier  = root.querySelector('.ai-roll-tier');
-  const catFilters= root.querySelector('.ai-cat-filters');
   const catSearch = root.querySelector('.ai-cat-search');
   const catResults= root.querySelector('.ai-cat-results');
   const itemsBody = root.querySelector('.ai-items-body');
   const addRow    = root.querySelector('.ai-add-row');
   const boxMode   = root.querySelector('.ai-box-mode');
   const boxTo     = root.querySelector('.ai-box-to');
-  const partyRefresh = root.querySelector('.ai-party-refresh');
   const sendBox   = root.querySelector('.ai-send-box');
   const boxStatus = root.querySelector('.ai-box-status');
-
-  // Loot & Gear buckets — mirrors the character sheet's Add-Item picker so the GM
-  // browses the same catalog (DCC_ITEMS) the players do.
-  const CAT_GROUPS = [
-    { key: 'all',        label: 'All',            cats: null },
-    { key: 'consumable', label: 'Consumables',    cats: ['consumable'] },
-    { key: 'weapon',     label: 'Weapons',        cats: ['weapon'] },
-    { key: 'armor',      label: 'Armor',          cats: ['armor'] },
-    { key: 'gear',       label: 'Gear',           cats: ['accessory','mundane','tool','material'] },
-    { key: 'scroll',     label: 'Scrolls & Tomes', cats: ['scroll','tome'] },
-  ];
-  let catFilterKey = 'all';
 
   function addItemRow(name, qty, notes) {
     const tr = document.createElement('tr');
@@ -11423,110 +11453,31 @@ function init_ai(root) {
     setStatus(boxStatus, 'Rolled a ' + key + ' box — tweak it, then send.', 'ok');
   });
 
-  // ── Loot & Gear picker ── browse the DCC_ITEMS catalog by category + search,
-  // click to add a row, or type a name that isn't in the catalog and add it custom.
-  const catGroupOf = cat => { for(let i = 1; i < CAT_GROUPS.length; i++) { if(CAT_GROUPS[i].cats.indexOf(cat) >= 0) return CAT_GROUPS[i]; } return null; };
-  catFilters.innerHTML = CAT_GROUPS.map(g =>
-    '<button type="button" class="ai-chip' + (g.key === catFilterKey ? ' on' : '') + '" data-key="' + g.key + '">' + esc(g.label) + '</button>').join('');
-  catFilters.addEventListener('click', e => {
-    const b = e.target.closest('.ai-chip'); if(!b) return;
-    catFilterKey = b.dataset.key;
-    catFilters.querySelectorAll('.ai-chip').forEach(c => c.classList.toggle('on', c.dataset.key === catFilterKey));
-    renderCat();
-  });
+  // Catalog search — filter DCC_ITEMS by name, click to add a row.
   function renderCat() {
-    // Same catalog the sheet's Add-Item picker uses: the official items plus the
-    // GM's saved homebrew (pulled into __DCC_HB_ITEMS at load).
-    const base = (typeof DCC_ITEMS !== 'undefined') ? DCC_ITEMS : [];
-    const all = base.concat(Array.isArray(window.__DCC_HB_ITEMS) ? window.__DCC_HB_ITEMS : []);
-    const grp = CAT_GROUPS.find(g => g.key === catFilterKey) || CAT_GROUPS[0];
     const q = (catSearch.value || '').trim().toLowerCase();
-    let list = all.filter(it => {
-      if(grp.cats && grp.cats.indexOf(it.category) < 0) return false;
-      if(!q) return true;
-      return (it.name || '').toLowerCase().indexOf(q) >= 0 || (it.effect || '').toLowerCase().indexOf(q) >= 0;
-    });
+    if(!q) { catResults.className = 'ai-cat-results'; catResults.innerHTML = ''; return; }
+    const all = (typeof DCC_ITEMS !== 'undefined') ? DCC_ITEMS : [];
+    const hits = all.filter(it => (it.name || '').toLowerCase().indexOf(q) >= 0).slice(0, 40);
     catResults.className = 'ai-cat-results open';
-    catResults._hits = list;
-    let html = '';
-    // Group the rows under their bucket, in the same order as the chips.
-    CAT_GROUPS.slice(1).forEach(bucket => {
-      const inBucket = list.map((it, i) => ({ it, i })).filter(x => bucket.cats.indexOf(x.it.category) >= 0);
-      if(!inBucket.length) return;
-      html += '<div class="ai-cat-grp">' + esc(bucket.label) + '</div>' + inBucket.slice(0, 60).map(({ it, i }) =>
-        '<div class="ai-cat-item" data-i="' + i + '"><span>' + esc(it.name) + '</span>' +
-        '<span class="ai-cat-meta">' + esc([it.slot, it.tier].filter(Boolean).join(' · ')) + '</span></div>').join('');
-    });
-    if(!html) html = '<div class="ai-cat-empty">No catalog item' + (q ? ' matches “' + esc(q) + '”' : ' here') + '.</div>';
-    // Always let a typed name be added as a custom item.
-    if(q) html += '<div class="ai-cat-item custom" data-custom="1">+ Add “' + esc(catSearch.value.trim()) + '” as a custom item</div>';
-    catResults.innerHTML = html;
+    if(!hits.length) { catResults.innerHTML = '<div class="ai-cat-empty">No items match “' + esc(q) + '”.</div>'; return; }
+    catResults.innerHTML = hits.map((it, i) =>
+      '<div class="ai-cat-item" data-i="' + i + '"><span>' + esc(it.name) + '</span>' +
+      '<span class="ai-cat-tier">' + esc(it.tier || '') + '</span></div>').join('');
+    catResults._hits = hits;
   }
   catSearch.addEventListener('input', renderCat);
-  catSearch.addEventListener('focus', renderCat);
   catResults.addEventListener('click', e => {
-    const el = e.target.closest('.ai-cat-item'); if(!el) return;
-    if(el.dataset.custom) {
-      const nm = catSearch.value.trim(); if(!nm) return;
-      addItemRow(nm, 1, '');
-      setStatus(boxStatus, 'Added “' + nm + '”.', 'ok');
-    } else {
-      const it = (catResults._hits || [])[+el.dataset.i]; if(!it) return;
-      addItemRow(it.name, 1, (it.slot ? it.slot + ' — ' : '') + (it.effect || ''));
-      setStatus(boxStatus, 'Added “' + it.name + '”.', 'ok');
-    }
+    const el = e.target.closest('.ai-cat-item');
+    if(!el || !catResults._hits) return;
+    const it = catResults._hits[+el.dataset.i];
+    if(!it) return;
+    addItemRow(it.name, 1, (it.slot ? it.slot + ' — ' : '') + (it.effect || ''));
     catSearch.value = ''; catResults.className = 'ai-cat-results'; catResults.innerHTML = '';
-  });
-  // Clicking away closes the results list.
-  root.addEventListener('mousedown', e => {
-    if(!e.target.closest('.ai-cat-results') && !e.target.closest('.ai-cat-search') && !e.target.closest('.ai-cat-filters')) {
-      catResults.className = 'ai-cat-results';
-    }
+    setStatus(boxStatus, 'Added “' + it.name + '”.', 'ok');
   });
 
-  // ── Party dropdown ── the "named player" list is the campaign party — the same
-  // linked characters the Party tool shows (GET /api/campaigns/{id}/characters).
-  function partyName(entry) {
-    const d = (entry && entry.sheet && typeof entry.sheet === 'object') ? entry.sheet : entry;
-    if(!d) return '';
-    if(d.header && d.header['f-name']) return String(d.header['f-name']).trim();   // DCC sheet
-    return String(d.name || (entry && entry.name) || '').trim();                    // SD / other
-  }
-  let partyLoaded = false;
-  function fetchParty(force) {
-    const camp = (typeof GMCamp !== 'undefined') ? GMCamp.get() : null;
-    if(!camp || !camp.id) { setParty([], 'Link a campaign to load the party.'); return; }
-    if(partyLoaded && !force) return;
-    fetch('/api/campaigns/' + camp.id + '/characters', { credentials: 'same-origin' })
-      .then(r => r && r.ok ? r.text() : null)
-      .then(text => {
-        if(text == null) { setParty([], 'Could not load the party.'); return; }
-        let data; try { data = JSON.parse(text); } catch(e) { data = null; }
-        const list = Array.isArray(data) ? data : (data && data.characters) || [];
-        const names = list.map(partyName).filter(Boolean)
-          .filter((n, i, a) => a.findIndex(x => x.toLowerCase() === n.toLowerCase()) === i)
-          .sort((a, b) => a.localeCompare(b, 'en'));
-        partyLoaded = true;
-        setParty(names, names.length ? '' : 'No one has linked a character to this campaign yet.');
-      })
-      .catch(() => setParty([], 'Could not load the party.'));
-  }
-  function setParty(names, emptyMsg) {
-    const keep = boxTo.value;
-    boxTo.innerHTML = '<option value="">— choose a player —</option>' +
-      names.map(n => '<option value="' + esc(n).replace(/"/g, '&quot;') + '">' + esc(n) + '</option>').join('') +
-      (names.length ? '' : '<option value="" disabled>' + esc(emptyMsg || 'No players') + '</option>');
-    if(keep && names.some(n => n === keep)) boxTo.value = keep;
-    if(emptyMsg && !names.length) setStatus(boxStatus, emptyMsg, '');
-  }
-  partyRefresh.addEventListener('click', () => { fetchParty(true); });
-
-  function syncMode() {
-    const named = boxMode.value === 'named';
-    boxTo.style.display = named ? '' : 'none';
-    partyRefresh.style.display = named ? '' : 'none';
-    if(named) fetchParty(false);
-  }
+  function syncMode() { boxTo.style.display = (boxMode.value === 'named') ? '' : 'none'; }
   boxMode.addEventListener('change', syncMode);
   syncMode();
 

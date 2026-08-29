@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- BUILD: Star Wars Character Sheet — 2026-08-29 -->
+<script>window.__BUILD__="Star Wars Character Sheet — 2026-08-29";</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Wars Character Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ═══ Star Wars: The Roleplaying Game (WEG 1e + Rules Companion) sheet ═══ Same skeleton as the ACE / KoB / Nimble sheets. */
+:root {
+  --bg:#e9e6dc;--paper:#f8f6ef;--ink:#1a1a1a;--muted:#5d5a50;--rule:#bdb8a8;
+  --sw:#c9a227;--sw-dk:#7a5f0e;--sw-lt:#f6ecc4;--red:#c0392b;--gold:#c8a020;--blue:#2b6cb0;
+  --border:#2a2a2a;--section-hdr:#15161c;--box:#efece2;--input-bg:#fff;--input-border:#888;
+  --log-bg:#111;--log-text:#e8e4dc;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
+.app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;}
+.roll-log{width:280px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--sw);position:sticky;top:0;height:100vh;overflow:hidden;}
+#log-collapse-btn{position:fixed;right:280px;top:50%;transform:translateY(-50%);z-index:201;background:var(--sw);color:white;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
+#log-collapse-btn::after{content:"\25C0";}
+.roll-log.collapsed #log-collapse-btn{right:0;}
+.roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
+.log-header{padding:12px 14px 10px;background:var(--sw);display:flex;justify-content:space-between;align-items:center;}
+.log-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:.12em;color:white;}
+.log-clear{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:2px;}
+.log-entries{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;gap:6px;}
+.log-entry{background:#1e1e1e;border:1px solid #333;border-radius:3px;padding:8px 10px;}
+.log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:2px;}
+.log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--log-text);line-height:1;}
+.log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#777;margin-top:3px;line-height:1.4;word-break:break-word;}
+.log-entry.crit .roll-result{color:#ffd700;}.log-entry.fumble .roll-result{color:#ff4444;}
+.log-entry.crit{border-color:#ffd700;}.log-entry.fumble{border-color:#ff4444;}
+.log-entry.remote{border-left:3px solid #8a7ac8;background:#1c1a24;}
+.log-hint{color:#444;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
+.log-actions{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid #222;}
+.log-action-btn{flex:1;padding:5px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;}
+.log-action-btn.export{background:#1a2a3a;color:#6aabdf;border:1px solid #1a4a8a;}
+.log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
+.log-action-btn.wizard{background:#2a2410;color:#f0c020;border:1px solid #6a5410;}
+.log-action-btn.wizard:hover{background:#6a5410;color:white;}
+.log-action-btn.rules{background:#1e2a1e;color:#b8d8b8;border:1px solid #2f4a2f;}
+.dm-toggle-wrap{display:flex;align-items:center;gap:6px;}
+.dm-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.75);}
+.dm-toggle-btn{width:36px;height:18px;background:#333;border:1px solid #555;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.dm-toggle-btn.on{background:#f0c020;border-color:#c9a227;}
+.dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:white;border-radius:50%;transition:left .2s;}
+.dm-toggle-btn.on::after{left:20px;background:#1a1a1a;}
+.dice-tray{border-top:1px solid #222;padding:10px;display:flex;flex-direction:column;gap:6px;background:#0c0c0c;}
+.tray-row{display:flex;gap:6px;align-items:center;}
+.tray-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;flex-shrink:0;}
+.tray-input,.tray-select{background:#1a1a1a;border:1px solid #333;color:#ddd;font-family:'Share Tech Mono',monospace;font-size:12px;padding:4px 6px;border-radius:3px;outline:none;}
+.tray-input{width:56px;text-align:center;}
+.tray-select{flex:1;}
+.tray-note{font-size:10px;color:#555;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;line-height:1.3;}
+.dice-btns{display:flex;gap:4px;}
+.dice-btn{flex:1;padding:6px 0;background:#1a1a1a;border:1px solid #333;color:#bbb;font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;border-radius:3px;}
+.dice-btn:hover{background:#333;color:#fff;}
+.adv-btns{display:flex;gap:4px;}
+.adv-btn{flex:1;padding:5px;background:#1a1a1a;border:1px solid #333;color:#888;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:3px;letter-spacing:.06em;}
+.adv-btn.on-adv{background:#1e3a1e;color:#6dbf6d;border-color:#2d5a2d;}
+.adv-btn.on-dis{background:#3a1e1e;color:#df6a6a;border-color:#5a2d2d;}
+
+/* SHEET */
+.sheet{background:var(--paper);border:2px solid var(--border);max-width:1040px;margin:0 auto;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+.sheet::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+.sheet>*{position:relative;z-index:1;}
+.section-bar{background:var(--section-hdr);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.18em;text-transform:uppercase;padding:5px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.section-bar.gold{background:var(--sw);}
+.section-bar .sb-note{font-weight:600;font-size:10px;letter-spacing:.08em;text-transform:none;color:rgba(255,255,255,.75);}
+.section-bar .sb-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;cursor:pointer;border-radius:2px;}
+.section-bar .sb-btn:hover{background:rgba(255,255,255,.3);}
+
+/* HEADER */
+.hdr-row{display:flex;border-bottom:2px solid var(--border);background:var(--section-hdr);}
+.hdr-logo{padding:10px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;gap:2px;border-right:2px solid #333;}
+.hdr-logo .sw-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:30px;line-height:1;color:var(--sw);letter-spacing:.04em;}
+.hdr-logo .sw-sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#aaa;}
+.hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);}
+.hdr-field{padding:5px 8px 6px;border-right:1px solid #333;border-bottom:1px solid #333;min-width:0;}
+.hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#d9c26a;margin-bottom:2px;}
+.hdr-field input,.hdr-field select{width:100%;border:none;border-bottom:1px solid #444;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;outline:none;padding:2px 0;}
+.hdr-field select{font-size:14px;cursor:pointer;}
+.hdr-field select option{color:#111;background:#fff;}
+.hdr-field input::placeholder{color:#555;font-weight:500;}
+.hdr-field.lastcol{border-right:none;}
+.hdr-field input.num{text-align:center;font-family:'Share Tech Mono',monospace;}
+
+/* BODY */
+.body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
+.stats-col{width:380px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;}
+.center-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule);}
+.stat-cell{padding:8px 6px;border-right:1px solid var(--rule);text-align:center;}
+.stat-cell:last-child{border-right:none;}
+.stat-cell .sn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.08em;color:var(--ink);cursor:pointer;}
+.stat-cell .sn:hover{color:var(--sw-dk);}
+.stat-cell input{width:54px;height:36px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;text-align:center;color:var(--ink);outline:none;margin:4px 0;}
+.save-toggle{display:flex;justify-content:center;gap:3px;}
+.save-toggle button{width:22px;height:20px;border:1px solid var(--rule);background:transparent;cursor:pointer;font-size:11px;font-weight:900;color:var(--muted);border-radius:2px;line-height:1;}
+.save-toggle button.adv{background:var(--sw);color:#fff;border-color:var(--sw-dk);}
+.save-toggle button.dis{background:var(--red);color:#fff;border-color:#8a1f14;}
+.stat-cell small{display:block;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.skills-table{width:100%;border-collapse:collapse;}
+.skills-table td{padding:2px 6px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:13px;}
+.skills-table td.sk-name{font-weight:700;cursor:pointer;}
+.skills-table td.sk-name:hover{color:var(--sw-dk);}
+.skills-table td.sk-name small{font-weight:600;color:var(--muted);font-size:9px;margin-left:4px;}
+.skills-table input{width:36px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
+.skills-table .sk-total{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;width:34px;text-align:center;color:var(--sw-dk);}
+.pts-note{padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:.04em;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;}
+.pts-note b{color:var(--ink);}.pts-note .bad{color:var(--red);}.pts-note .good{color:var(--sw-dk);}
+
+/* VITALS */
+.vitals{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule);}
+.vital{padding:8px 10px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);}
+.vital:nth-child(2n){border-right:none;}
+.vlbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:4px;}
+.vlbl small{font-weight:600;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:none;text-align:right;}
+.vbig{font-family:'Share Tech Mono',monospace;font-size:26px;font-weight:700;line-height:1.1;color:var(--ink);display:flex;align-items:baseline;gap:4px;}
+.vbig input{width:52px;height:32px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
+.vbig span.sep{color:var(--muted);font-size:16px;}
+.vline{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px;font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);}
+.vline input{width:40px;height:22px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:11px;text-align:center;color:var(--ink);outline:none;}
+.pips{display:flex;gap:3px;margin-top:5px;flex-wrap:wrap;}
+.pip{width:22px;height:22px;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;}
+.pip.wound.on{background:var(--red);color:#fff;}
+.pip.act{border-radius:50%;background:var(--sw);color:#fff;}
+.pip.act.spent{background:transparent;color:var(--muted);}
+.small-btn{background:var(--section-hdr);color:#fff;border:none;border-radius:2px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.small-btn:hover{background:var(--sw);}
+.small-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule);}
+.small-btn.ghost:hover{background:var(--box);}
+.small-btn.gold{background:var(--sw);}
+.ko-banner{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--red);padding:2px 6px;display:inline-block;}
+
+/* CENTER BLOCKS */
+.blk{padding:8px 10px;border-bottom:1px solid var(--rule);}
+.blk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;}
+.fld label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
+.fld input,.fld select,.fld textarea{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
+.fld textarea{font-family:'Barlow',sans-serif;font-weight:400;font-size:12px;line-height:1.45;border:1px solid var(--rule);background:var(--input-bg);padding:6px 8px;resize:vertical;min-height:56px;}
+.hint{font-family:'Barlow',sans-serif;font-size:11px;color:var(--muted);line-height:1.4;margin-top:3px;}
+.hint b{color:var(--ink);}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px;border-bottom:1px solid var(--rule);}
+.tbl td{padding:3px 6px;border-bottom:1px solid var(--rule);vertical-align:middle;}
+.tbl input,.tbl select{width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
+.tbl input:focus{border-bottom-color:var(--sw);}
+.tbl input.num{width:44px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:12px;}
+.tbl .mono{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;}
+.tbl .desc{font-family:'Barlow',sans-serif;font-size:11px;color:var(--muted);line-height:1.35;}
+.row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;}
+.row-x:hover{color:var(--red);}
+.add-row{margin:6px 10px 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.add-row select{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:3px 6px;outline:none;max-width:260px;}
+.feat{padding:5px 10px;border-bottom:1px solid var(--rule);font-size:12px;line-height:1.4;}
+.feat b{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.03em;}
+.feat .lv{display:inline-block;min-width:34px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--sw-dk);}
+.feat.sub b{color:var(--blue);}
+.notes-box{padding:8px 10px;}
+.notes-box textarea{width:100%;min-height:90px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:'Barlow',sans-serif;font-size:13px;line-height:1.5;padding:8px;outline:none;resize:vertical;}
+.sheet-foot{padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+details.feats summary{cursor:pointer;list-style:none;}
+details.feats summary::-webkit-details-marker{display:none;}
+
+/* DARK */
+body.dark{--bg:#111318;--paper:#1e2129;--ink:#e8e4dc;--muted:#a7a9ad;--rule:#3a3e4a;--border:#4a4e5a;--section-hdr:#07080c;--box:#2a2e38;--input-bg:#171a21;--input-border:#4a4e5a;--sw-lt:#3a3010;--sw-dk:#f0c020;--blue:#8ab4f8;}
+body.dark .sheet{border-color:#4a4e5a;}
+body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,body.dark .vline input,body.dark .add-row select{background:var(--input-bg);color:var(--ink);border-color:var(--rule);}
+
+/* Toast + modals */
+#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(10,10,12,0.93);border:2px solid var(--sw);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,0.7);}
+#roll-toast.show{display:block;}
+#roll-toast.crit{border-color:#6dbf6d;}#roll-toast.fumble{border-color:#df6a6a;}
+#roll-toast .t-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8a93;margin-bottom:3px;}
+#roll-toast .t-result{font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:900;color:#f0c020;line-height:1;}
+#roll-toast .t-detail{font-size:11px;color:#a0a0aa;margin-top:3px;}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:16px;}
+.ov.open{display:flex;}
+.modal{background:#1a1e1b;border:2px solid var(--sw);border-radius:6px;max-width:540px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e8e4dc;font-family:'Barlow',sans-serif;}
+.modal.wide{max-width:860px;}
+.modal-hd{background:#0a0c0b;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-hd .ttl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;letter-spacing:.1em;text-transform:uppercase;color:#f0c020;line-height:1;}
+.modal-hd .x{background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;}
+.modal-bd{padding:14px 16px;overflow-y:auto;}
+.modal-ft{padding:10px 16px;border-top:1px solid #333;display:flex;justify-content:space-between;gap:8px;flex-shrink:0;}
+.m-btn{padding:9px 14px;border:none;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:var(--sw);color:#fff;}
+.m-btn:hover{background:#c9a227;}
+.m-btn.ghost{background:#222;color:#bbb;border:1px solid #444;}
+.m-btn.warn{background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;}
+.m-btn:disabled{opacity:.4;cursor:default;}
+.m-hint{font-size:12px;color:#999;margin:0 0 12px;line-height:1.5;}
+.m-input{width:100%;padding:9px 10px;background:#141414;border:1px solid #2a2a2a;border-radius:5px;color:#eee;font-family:Barlow,sans-serif;font-size:13px;outline:none;}
+.m-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#8ad4ff;margin:10px 0 5px;}
+.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#f0c020;margin:12px 0 3px;}
+.rules-list p{font-size:12px;line-height:1.5;color:#ccc;}
+.rules-list table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;}
+.rules-list td,.rules-list th{padding:3px 6px;border-bottom:1px solid #2a2a2a;text-align:left;vertical-align:top;}
+
+.roll-log{transition:width .2s ease;}
+.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
+@media (max-width:900px){.body-row{flex-direction:column;}.stats-col{width:100%;border-right:none;border-bottom:2px solid var(--border);}}
+@media (max-width:768px){
+  .app-wrap{flex-direction:column;align-items:stretch;}
+  .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
+  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--sw);z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
+  .roll-log:not(.collapsed) .log-entries{max-height:calc(100vh - 260px);max-height:calc(100dvh - 260px);}
+  #log-collapse-btn{position:absolute !important;bottom:100% !important;top:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:80px !important;height:28px !important;border-radius:6px 6px 0 0 !important;font-size:11px !important;}
+  #log-collapse-btn::after{content:"\25B2 Log";}
+  .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
+  .hdr-row{flex-direction:column;}
+  .hdr-logo{border-right:none;border-bottom:2px solid #333;}
+  .hdr-fields{grid-template-columns:1fr 1fr;}
+  .hdr-field{grid-column:span 1 !important;}
+  .hdr-field.wide{grid-column:span 2 !important;}
+  .blk-grid,.vitals{grid-template-columns:1fr;}
+  .vital{border-right:none;}
+}
+
+/* SW extras */
+.fp-desc{max-height:2.7em;overflow:hidden;cursor:pointer;position:relative;}
+.fp-desc.open{max-height:none;}
+.stats-grid{grid-template-columns:repeat(3,1fr);}
+.stat-cell input{width:64px;font-size:16px;}
+.stat-cell .sn{font-size:12px;letter-spacing:.06em;}
+.skills-table td.sk-attr{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sw-dk);padding-top:5px;background:var(--box);}
+.skills-table input{width:52px;}
+.wound-track{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;}
+.wound-track button{flex:1;min-width:56px;padding:4px 2px;border:1px solid var(--rule);background:transparent;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px;}
+.wound-track button.on{background:var(--red);color:#fff;border-color:#8a1f14;}
+.wound-track button.on.ok{background:var(--sw);color:#111;border-color:var(--sw-dk);}
+.mod-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.tray-input.code{width:64px;}
+.tpl-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px;}
+.tpl-card{background:#141414;border:1px solid #333;border-radius:4px;padding:8px;cursor:pointer;}
+.tpl-card:hover{border-color:var(--sw);}
+.tpl-card.sel{border-color:var(--sw);background:#2a2410;}
+.tpl-card b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.04em;color:#f0c020;}
+.tpl-card small{display:block;font-family:'Share Tech Mono',monospace;font-size:10px;color:#999;margin-top:3px;line-height:1.5;}
+.alloc{display:grid;grid-template-columns:1fr auto auto auto;gap:4px 8px;align-items:center;font-size:12px;}
+.alloc .a-attr{grid-column:1/-1;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#f0c020;margin-top:8px;border-bottom:1px solid #333;}
+.alloc .a-code{font-family:'Share Tech Mono',monospace;font-size:12px;color:#ddd;min-width:52px;text-align:right;}
+.alloc button{width:24px;height:22px;background:#222;border:1px solid #444;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
+.alloc button:disabled{opacity:.3;cursor:default;}
+</style>
+</head>
+<body>
+<div id="roll-toast"><div class="t-label"></div><div class="t-result"></div><div class="t-detail"></div></div>
+<div class="app-wrap">
+<div class="sheet-wrap">
+<div class="sheet">
+
+  <div class="hdr-row">
+    <div class="hdr-logo"><div class="sw-word">STAR WARS</div><div class="sw-sub">The Roleplaying Game</div></div>
+    <div class="hdr-fields">
+      <div class="hdr-field wide" style="grid-column:span 4;"><label>Character name</label><input type="text" id="f-name" placeholder="Name"></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Template</label><select id="f-template" onchange="onTemplateChange()"><option value="">—</option></select></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Species</label><input type="text" id="f-species" placeholder="Human"></div>
+      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Sex</label><input type="text" id="f-sex"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Age</label><input type="text" id="f-age"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Height</label><input type="text" id="f-height"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Weight</label><input type="text" id="f-weight"></div>
+      <div class="hdr-field lastcol wide" style="grid-column:span 4;"><label>Physical description</label><input type="text" id="f-physical" placeholder="Scars, uniform, the look in your eye"></div>
+    </div>
+  </div>
+
+  <div class="body-row">
+    <div class="stats-col">
+      <div class="section-bar gold"><span>Attributes</span><span class="sb-note">die codes · click a name to roll</span></div>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="pts-note"><span>Skill dice <b id="sk-used">0D</b> / <b>7D</b> <span id="sk-flag"></span></span><span>max +2D per skill at creation</span></div>
+      <table class="skills-table"><tbody id="skills-body"></tbody></table>
+      <div class="add-row"><select id="skill-pick"><option value="">Add a skill…</option></select><button class="small-btn ghost" onclick="addSkillPick()">+ Add</button><button class="small-btn ghost" onclick="addSkillRow({name:'',attr:'Dexterity',adds:0})" title="Blank row for a new skill">+ Custom</button></div>
+
+      <div class="vitals">
+        <div class="vital" style="grid-column:span 2;">
+          <div class="vlbl"><span>Wound status</span><small id="wound-note">unhurt</small></div>
+          <div class="wound-track" id="wound-track"></div>
+          <div class="vline"><button class="small-btn ghost" onclick="takeDamage()">Roll damage vs STR</button> dmg <input type="text" id="dmg-code" class="code" value="4D" style="width:52px;text-align:center;" title="Damage code of the hit"><button class="small-btn ghost" onclick="setWound('none')">Heal</button></div>
+        </div>
+        <div class="vital">
+          <div class="vlbl"><span>Force Points</span><small>spend: double all dice this round</small></div>
+          <div class="vbig"><input type="number" id="f-fp" value="1" min="0" oninput="recalc()"></div>
+          <div class="vline"><button class="small-btn gold" id="fp-btn" onclick="toggleForcePoint()">Use Force Point</button></div>
+        </div>
+        <div class="vital">
+          <div class="vlbl"><span>Dark Side Points</span><small>at 6+ the GM rolls each time you call on the Force</small></div>
+          <div class="vbig"><input type="number" id="f-ds" value="0" min="0" oninput="recalc()"></div>
+          <div class="vline"><button class="small-btn ghost" onclick="callDarkSide()">Call on the Dark Side</button></div>
+        </div>
+        <div class="vital">
+          <div class="vlbl"><span>Skill Points</span><small>unspent · raise a pip: cost = number before the D</small></div>
+          <div class="vbig"><input type="number" id="f-sp" value="0" min="0"></div>
+          <div class="vline">credits <input type="text" id="f-credits" style="width:80px;" placeholder="1,000"></div>
+        </div>
+        <div class="vital">
+          <div class="vlbl"><span>Armor · Move</span><small>armor adds to STR vs damage</small></div>
+          <div class="vbig"><span id="armor-val">—</span><span class="sep">·</span><span id="move-val">10</span><span class="sep">m</span></div>
+          <div class="vline">armor <input type="text" id="f-armor" list="dl-armor" placeholder="none" style="width:110px;text-align:left;" oninput="recalc()"> <input type="text" id="f-armor-pips" class="code" placeholder="+1D" style="width:44px;" oninput="recalc()"> move <input type="number" id="f-move" value="10" oninput="recalc()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="center-col">
+      <div class="section-bar"><span>Weapons</span><span class="sb-note">Attack rolls the skill vs the range difficulty · damage vs the target's Strength</span></div>
+      <table class="tbl">
+        <thead><tr><th style="width:26%;">Weapon</th><th style="width:22%;">Skill</th><th style="width:70px;">Damage</th><th style="width:20%;">Range</th><th>Notes</th><th style="width:110px;"></th></tr></thead>
+        <tbody id="weapons-body"></tbody>
+      </table>
+      <div class="add-row"><button class="small-btn ghost" onclick="addWeaponRow()">+ Weapon</button><select id="weapon-pick" onchange="if(this.value){addWeaponFromData(this.value);this.value='';}"><option value="">Add from the weapon charts…</option></select></div>
+
+      <div class="section-bar"><span>The Force</span><span class="sb-note" id="force-note">Force skills: Control · Sense · Alter — add them in the skill list</span></div>
+      <table class="tbl">
+        <thead><tr><th style="width:28%;">Power</th><th style="width:22%;">Skill(s)</th><th>Difficulty</th><th style="width:110px;"></th></tr></thead>
+        <tbody id="force-body"></tbody>
+      </table>
+      <div class="add-row"><select id="force-pick"><option value="">Add a Force power…</option></select><button class="small-btn ghost" onclick="addForcePick()">+ Add</button></div>
+
+      <div class="section-bar"><span>Equipment</span><span class="sb-note">Everything you own that isn't a weapon</span></div>
+      <table class="tbl">
+        <thead><tr><th style="width:36%;">Item</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
+        <tbody id="gear-body"></tbody>
+      </table>
+      <div class="add-row"><button class="small-btn ghost" onclick="addGearRow()">+ Item</button><select id="gear-pick" onchange="if(this.value){addGearFromData(this.value);this.value='';}"><option value="">Add from the equipment list…</option></select></div>
+
+      <div class="section-bar"><span>Ship / Vehicle</span><span class="sb-note">Space speed · maneuverability · hull · shields</span></div>
+      <div class="blk"><div class="blk-grid">
+        <div class="fld"><label>Name</label><input type="text" id="sh-name" placeholder="The one you owe money on"></div>
+        <div class="fld"><label>Craft</label><input type="text" id="sh-craft" list="dl-ships" placeholder="Stock light freighter" onchange="fillShipFromData()"></div>
+        <div class="fld"><label>Speed · Maneuverability</label><input type="text" id="sh-speed" placeholder="4 · 1D"></div>
+        <div class="fld"><label>Hull · Shields</label><input type="text" id="sh-hull" placeholder="4D · 1D"></div>
+        <div class="fld" style="grid-column:1/-1;"><label>Weapons &amp; notes</label><input type="text" id="sh-weapons" placeholder="2 laser cannons, fire control 2D, damage 4D"></div>
+      </div></div>
+
+      <div class="blk"><div class="blk-grid">
+        <div class="fld" style="grid-column:1/-1;"><label>Background</label><textarea id="f-background"></textarea></div>
+        <div class="fld"><label>Personality</label><textarea id="f-personality"></textarea></div>
+        <div class="fld"><label>Objectives &amp; connection with other characters</label><textarea id="f-connection"></textarea></div>
+        <div class="fld"><label>A quote</label><input type="text" id="f-quote"></div>
+        <div class="fld"><label>Special abilities</label><input type="text" id="f-special" placeholder="Wookiee: berserker rage, climbing…"></div>
+      </div></div>
+
+      <div class="section-bar"><span>Notes</span><span class="sb-note">Contacts, debts, the Empire's opinion of you</span></div>
+      <div class="notes-box"><textarea id="f-notes"></textarea></div>
+    </div>
+  </div>
+  <div class="sheet-foot">
+    <span>Roll the skill (or attribute) and beat the difficulty: Very Easy 3–5 · Easy 6–10 · Moderate 11–15 · Difficult 16–20 · Very Difficult 21–30.</span>
+    <span>Each extra action in a round: −1D to everything. Wounded: −1D. Stunned: −1D this round and next.</span>
+  </div>
+</div>
+</div>
+
+<div class="roll-log">
+  <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-actions">
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign">🔗</button>
+    <button class="log-action-btn wizard" onclick="SWB.launch()" title="Character Builder">✨ Build</button>
+    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">? Rules</button>
+    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">↓</button>
+    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">↑<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
+  </div>
+  <div class="log-entries" id="log-entries"><div class="log-hint">Click an attribute, skill or weapon to roll</div></div>
+  <div class="dice-tray">
+    <div class="tray-row"><span class="tray-label">Difficulty</span><input class="tray-input" id="tray-dc" type="number" min="1" placeholder="—"><select class="tray-select" id="tray-diff" onchange="$('tray-dc').value=this.value;this.value='';"><option value="">pick…</option><option value="4">Very Easy (3–5)</option><option value="8">Easy (6–10)</option><option value="13">Moderate (11–15)</option><option value="18">Difficult (16–20)</option><option value="25">Very Difficult (21–30)</option></select></div>
+    <div class="tray-row mod-row"><span class="tray-label">Actions</span><input class="tray-input" id="tray-actions" type="number" min="1" max="6" value="1" title="Actions this round (−1D per extra)" style="width:44px;" onchange="updateModNote()"><span class="tray-label">Mod</span><input class="tray-input code" id="tray-mod" type="text" placeholder="+1D" title="Extra modifier, a die code like +1D or -2" onchange="updateModNote()"></div>
+    <div class="tray-note" id="mod-note">No modifiers.</div>
+    <div class="dice-btns"><button class="dice-btn" onclick="rollLoose(1)">1D</button><button class="dice-btn" onclick="rollLoose(2)">2D</button><button class="dice-btn" onclick="rollLoose(3)">3D</button><button class="dice-btn" onclick="rollLoose(4)">4D</button><button class="dice-btn" onclick="rollLoose(5)">5D</button><button class="dice-btn" onclick="rollLoose(6)">6D</button></div>
+    <div class="tray-note">Extra actions, wounds and the modifier apply to every roll. A Force Point doubles the dice for one round, then clears.</div>
+  </div>
+</div>
+</div>
+
+<datalist id="dl-armor"></datalist><datalist id="dl-ships"></datalist>
+<div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Star Wars — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
+
+<script>
+// ═══ CORE ═════════════════════════════════════════════════════════════════
+// Die codes live as PIPS everywhere (3D+2 = 11). toCode/fromCode convert.
+const ATTRS = ['Dexterity','Knowledge','Mechanical','Perception','Strength','Technical'];
+const ATTR_HINT = { Dexterity:'blaster · dodge · melee', Knowledge:'alien races · languages · streetwise', Mechanical:'piloting · astrogation · gunnery', Perception:'bargain · con · hide · search', Strength:'brawling · climbing · damage', Technical:'repair · computers · medicine' };
+const FORCE_SKILLS = ['Control','Sense','Alter'];
+const WOUNDS = [['none','Unhurt'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
+const WOUND_PEN = { none:0, stunned:3, wounded:3, incapacitated:0, mortal:0 };
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const $ = id => document.getElementById(id);
+const num = v => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
+const norm = s => String(s || '').replace(/[’‘]/g, "'").trim().toLowerCase();
+const D = {
+  skills:    () => (typeof SW_SKILLS    !== 'undefined' ? SW_SKILLS    : []),
+  templates: () => (typeof SW_TEMPLATES !== 'undefined' ? SW_TEMPLATES : []),
+  weapons:   () => (typeof SW_WEAPONS   !== 'undefined' ? SW_WEAPONS   : []),
+  gear:      () => (typeof SW_GEAR      !== 'undefined' ? SW_GEAR      : []),
+  vehicles:  () => (typeof SW_VEHICLES  !== 'undefined' ? SW_VEHICLES  : []),
+  force:     () => (typeof SW_FORCE     !== 'undefined' ? SW_FORCE     : []),
+  tables:    () => (typeof SW_TABLES    !== 'undefined' ? SW_TABLES    : null),
+};
+let wound = 'none', forcePointArmed = false;
+
+// ═══ DICE CODES ═══════════════════════════════════════════════════════════
+function toCode(pips, signed) {
+  pips = Math.round(num(pips)); const neg = pips < 0; pips = Math.abs(pips);
+  const d = Math.floor(pips / 3), p = pips % 3;
+  let s = d ? d + 'D' + (p ? '+' + p : '') : (p ? '+' + p : '0D');
+  if(neg) s = '-' + s.replace(/^\+/, ''); else if(signed && pips) s = (d ? '+' : '') + s;
+  return s;
+}
+// "3D+2", "3d", "+1D", "-2", "2" (pips), "1D+1" → pips. Returns null if unreadable.
+function fromCode(str) {
+  const s = String(str == null ? '' : str).replace(/\s+/g, '').toUpperCase(); if(!s) return null;
+  const m = /^([+-])?(?:(\d+)D)?(?:\+?(\d+))?$/.exec(s); if(!m || (m[2] === undefined && m[3] === undefined)) return null;
+  const pips = (num(m[2]) * 3) + num(m[3]); return m[1] === '-' ? -pips : pips;
+}
+const codeOrZero = str => fromCode(str) || 0;
+
+// ═══ LOOKUPS ══════════════════════════════════════════════════════════════
+function attr(id) { return codeOrZero($('at-' + id).value); }
+function template() { return D.templates().find(t => t.name === $('f-template').value) || null; }
+function skillRows() { return [...document.querySelectorAll('#skills-body tr[data-skill]')]; }
+function skillPips(name) {
+  const n = norm(name); const tr = skillRows().find(r => norm(r.querySelector('.sk-name-in').value) === n);
+  if(!tr) return null; return rowTotal(tr);
+}
+function rowTotal(tr) { const a = tr.dataset.attr; const adds = codeOrZero(tr.querySelector('.sk-adds').value); return a === 'Force' ? adds : attr(a) + adds; }
+function findWeapon(name) { const n = norm(name); return n ? D.weapons().find(w => norm(w.name) === n) || null : null; }
+function findGear(name, cat) { const n = norm(name); return n ? D.gear().find(g => norm(g.name) === n && (!cat || g.category === cat)) || null : null; }
+function findVehicle(name) { const n = norm(name); return n ? D.vehicles().find(v => norm(v.name) === n) || null : null; }
+
+// ═══ BUILD STATIC UI ══════════════════════════════════════════════════════
+function buildStats() {
+  $('stats-grid').innerHTML = ATTRS.map(a =>
+    `<div class="stat-cell"><div class="sn" onclick="rollAttr('${a}')" title="Roll ${a}">${a.toUpperCase()}</div><input type="text" id="at-${a}" value="2D" oninput="recalc()"><small>${ATTR_HINT[a]}</small></div>`).join('');
+  const tsel = $('f-template'); tsel.innerHTML = '<option value="">—</option>' + D.templates().map(t => '<option value="' + esc(t.name) + '">' + esc(t.name) + '</option>').join('');
+  const groups = {}; D.skills().forEach(s => { (groups[s.attribute] = groups[s.attribute] || []).push(s); });
+  $('skill-pick').innerHTML = '<option value="">Add a skill…</option>' + ATTRS.map(a => '<optgroup label="' + a + '">' + (groups[a] || []).map(s => '<option value="' + esc(s.name) + '">' + esc(s.name) + (s.reaction ? ' (reaction)' : '') + '</option>').join('') + '</optgroup>').join('')
+    + '<optgroup label="The Force">' + FORCE_SKILLS.map(f => '<option value="' + f + '">' + f + '</option>').join('') + '</optgroup>';
+  $('weapon-pick').innerHTML = '<option value="">Add from the weapon charts…</option>' + D.weapons().filter(w => !/^(Starship|Capital|Vehicle|Artillery)$/.test(w.kind)).map(w => '<option value="' + esc(w.name) + '">' + esc(w.name) + ' — ' + esc(w.damageText || toCode(w.damage)) + (w.book === 'companion' ? ' (RC)' : '') + '</option>').join('');
+  $('gear-pick').innerHTML = '<option value="">Add from the equipment list…</option>' + D.gear().map(g => '<option value="' + esc(g.name) + '">' + esc(g.name) + ' (' + esc(g.category) + ')' + '</option>').join('');
+  $('force-pick').innerHTML = '<option value="">Add a Force power…</option>' + D.force().map(f => '<option value="' + esc(f.name) + '">' + esc(f.name) + ' — ' + esc(f.attribute) + '</option>').join('');
+  $('dl-armor').innerHTML = D.gear().filter(g => g.category === 'Armor').map(g => '<option value="' + esc(g.name) + '">').join('');
+  $('dl-ships').innerHTML = D.vehicles().map(v => '<option value="' + esc(v.name) + '">').join('');
+  renderWoundTrack();
+}
+function renderWoundTrack() {
+  $('wound-track').innerHTML = WOUNDS.map(([k, lbl]) => '<button class="' + (wound === k ? 'on' + (k === 'none' ? ' ok' : '') : '') + '" onclick="setWound(\'' + k + '\')">' + lbl + '</button>').join('');
+  const note = { none:'unhurt', incapacitated:'Incapacitated: unconscious 10D minutes; can\'t act', stunned:'−1D this round and next; no Strength penalty', wounded:'−1D to everything; wounded again → incapacitated', mortal:'roll 2D each round: die on a roll under the rounds elapsed' }[wound];
+  $('wound-note').textContent = note;
+}
+function setWound(k) { const prev = wound; wound = k; renderWoundTrack(); updateModNote(); if(k !== prev) addLog('Wound status', WOUNDS.find(w => w[0] === k)[1], k === 'none' ? 'Healed up' : 'Wound modifiers apply to every roll', k === 'none' ? 'normal' : 'fumble'); scheduleAutosave(); }
+
+// ═══ SKILLS ═══════════════════════════════════════════════════════════════
+function addSkillRow(s) {
+  s = s || {}; const body = $('skills-body'); const a = s.attr || 'Dexterity';
+  const tr = document.createElement('tr'); tr.dataset.skill = '1'; tr.dataset.attr = a;
+  tr.innerHTML = '<td class="sk-name"><input type="text" class="sk-name-in" value="' + esc(s.name || '') + '" placeholder="skill" style="width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font:inherit;font-weight:700;color:inherit;outline:none;" oninput="recalc()"></td>'
+    + '<td style="width:26px;"><small class="sk-attr-lbl" style="font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;" title="Click to change the governing attribute" onclick="cycleAttr(this)">' + esc(a === 'Force' ? 'FORCE' : a.slice(0, 4).toUpperCase()) + '</small></td>'
+    + '<td style="width:60px;"><input type="text" class="sk-adds" value="' + esc(s.adds ? toCode(s.adds, true) : '') + '" placeholder="+1D" title="Dice added above the attribute" oninput="recalc()"></td>'
+    + '<td class="sk-total" style="cursor:pointer;" onclick="rollSkillRow(this.parentNode)" title="Roll this skill">0D</td>'
+    + '<td style="width:20px;"><button class="row-x" onclick="this.closest(\'tr\').remove();recalc();scheduleAutosave()">✕</button></td>';
+  tr.querySelector('.sk-name').addEventListener('click', e => { if(e.target.tagName !== 'INPUT') rollSkillRow(tr); });
+  insertSorted(body, tr); recalc(); return tr;
+}
+function insertSorted(body, tr) {
+  const order = [...ATTRS, 'Force']; const rank = r => order.indexOf(r.dataset.attr);
+  const after = [...body.children].find(r => rank(r) > rank(tr)); body.insertBefore(tr, after || null);
+}
+function cycleAttr(el) {
+  const tr = el.closest('tr'); const order = [...ATTRS, 'Force']; const next = order[(order.indexOf(tr.dataset.attr) + 1) % order.length];
+  tr.dataset.attr = next; el.textContent = next === 'Force' ? 'FORCE' : next.slice(0, 4).toUpperCase(); insertSorted($('skills-body'), tr); recalc(); scheduleAutosave();
+}
+function addSkillPick() {
+  const sel = $('skill-pick'); const name = sel.value; if(!name) return; sel.value = '';
+  if(skillPips(name) !== null) { addLog('Skills', '…', name + ' is already on the sheet', 'normal'); return; }
+  const def = D.skills().find(s => s.name === name);
+  addSkillRow({ name, attr: def ? def.attribute : FORCE_SKILLS.includes(name) ? 'Force' : 'Dexterity', adds: FORCE_SKILLS.includes(name) ? 3 : 0 }); scheduleAutosave();
+}
+function recalc() {
+  let used = 0;
+  skillRows().forEach(tr => {
+    const adds = codeOrZero(tr.querySelector('.sk-adds').value); if(tr.dataset.attr !== 'Force') used += Math.max(0, adds); else used += Math.max(0, adds - 3);
+    tr.querySelector('.sk-total').textContent = toCode(rowTotal(tr));
+  });
+  $('sk-used').textContent = toCode(used);
+  $('sk-flag').className = used > 21 ? 'bad' : used === 21 ? 'good' : ''; $('sk-flag').textContent = used > 21 ? '· over' : used === 21 ? '✓' : '';
+  const ap = fromCode($('f-armor-pips').value); const an = $('f-armor').value.trim();
+  $('armor-val').textContent = an ? (ap ? '+' + toCode(ap) : an) : '—';
+  $('move-val').textContent = num($('f-move').value) || 10;
+  const hasForce = skillRows().some(tr => tr.dataset.attr === 'Force');
+  $('force-note').textContent = hasForce ? 'Roll the power\'s skill(s) against its difficulty · each power used is an action' : 'Force skills: Control · Sense · Alter — add them in the skill list';
+  refreshWeaponRows(); updateModNote();
+}
+function onTemplateChange() {
+  const t = template(); if(!t) return;
+  ATTRS.forEach(a => { $('at-' + a).value = toCode(t.attributes[a]); });
+  const m = /Force skills?:\s*([^.]+)/i.exec(t.specialRule || '');
+  if(m) m[1].split(/,|and/).forEach(part => { const mm = /(Control|Sense|Alter)\s*\(?(\d+D(?:\+\d)?)?/i.exec(part); if(mm && skillPips(mm[1]) === null) addSkillRow({ name: mm[1][0].toUpperCase() + mm[1].slice(1).toLowerCase(), attr: 'Force', adds: fromCode(mm[2] || '1D') }); });
+  if(!$('f-species').value) $('f-species').value = speciesFor(t);
+  recalc(); scheduleAutosave();
+}
+function speciesFor(t) { const n = t.name; if(/Wookiee/i.test(n)) return 'Wookiee'; if(/Ewok/i.test(n)) return 'Ewok'; if(/Mon Calamari/i.test(n)) return 'Mon Calamari'; if(/Alien/i.test(n)) return 'Alien'; return 'Human'; }
+
+// ═══ MODIFIERS + ROLLING ══════════════════════════════════════════════════
+function currentMods() {
+  const extra = Math.max(0, (num($('tray-actions').value) || 1) - 1) * 3;
+  const w = WOUND_PEN[wound] || 0; const mod = codeOrZero($('tray-mod').value);
+  return { actions: extra, wound: w, mod, total: -extra - w + mod };
+}
+function updateModNote() {
+  const m = currentMods(); const parts = [];
+  if(m.actions) parts.push('−' + toCode(m.actions) + ' extra actions'); if(m.wound) parts.push('−' + toCode(m.wound) + ' ' + wound); if(m.mod) parts.push(toCode(m.mod, true) + ' modifier'); if(forcePointArmed) parts.push('Force Point: dice doubled');
+  $('mod-note').textContent = parts.length ? parts.join(' · ') : 'No modifiers.';
+  $('fp-btn').textContent = forcePointArmed ? 'Force Point armed ✓' : 'Use Force Point';
+}
+function toggleForcePoint() {
+  if(!forcePointArmed) { if(num($('f-fp').value) <= 0) { addLog('Force Points', '✗', 'No Force Points left', 'fumble'); return; } forcePointArmed = true; addLog('Force Point', '★', 'Next roll is doubled. Force Points spent for a heroic, selfless act come back at the end of the adventure.', 'crit'); }
+  else forcePointArmed = false;
+  updateModNote();
+}
+function rollDice(pips) {
+  pips = Math.max(0, pips); const d = Math.floor(pips / 3), p = pips % 3; const rolls = [];
+  for(let i = 0; i < d; i++) rolls.push(1 + Math.floor(Math.random() * 6));
+  return { rolls, total: rolls.reduce((a, b) => a + b, 0) + p, pips: p };
+}
+// Rolls a code with the tray modifiers; label goes to the log.
+function rollCode(label, basePips, opts) {
+  opts = opts || {}; const m = opts.noMods ? { total: 0, actions: 0, wound: 0, mod: 0 } : currentMods();
+  let pips = basePips + m.total; let fp = false;
+  if(forcePointArmed && !opts.noMods) { pips *= 2; fp = true; forcePointArmed = false; $('f-fp').value = Math.max(0, num($('f-fp').value) - 1); updateModNote(); }
+  if(pips < 3) pips = Math.max(pips, 1);
+  const r = rollDice(pips);
+  const dc = opts.dc !== undefined ? opts.dc : (num($('tray-dc').value) || null);
+  const detail = [toCode(pips) + ': [' + r.rolls.join(' ') + ']' + (r.pips ? ' +' + r.pips : ''), fp ? 'Force Point (doubled)' : '', m.total ? 'mods ' + toCode(m.total, true) : '', dc ? 'vs ' + dc + (r.total >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
+  const type = dc ? (r.total >= dc ? 'crit' : 'fumble') : 'normal';
+  addLog(label, r.total, detail, type); return r.total;
+}
+function rollAttr(a) { rollCode(a, attr(a)); }
+function rollSkillRow(tr) { const name = tr.querySelector('.sk-name-in').value.trim() || 'Skill'; rollCode(name, rowTotal(tr)); }
+function rollLoose(n) { const r = rollDice(n * 3); addLog(n + 'D', r.total, '[' + r.rolls.join(' ') + ']', 'normal'); }
+function takeDamage() {
+  const dmg = fromCode($('dmg-code').value); if(dmg === null) { addLog('Damage', '✗', 'Enter the damage code (e.g. 4D)', 'fumble'); return; }
+  const str = attr('Strength') + (fromCode($('f-armor-pips').value) || 0);
+  const dr = rollDice(dmg), sr = rollDice(str);
+  let result = 'No effect', k = wound;
+  if(dr.total >= sr.total * 3) { result = 'Mortally wounded'; k = 'mortal'; }
+  else if(dr.total >= sr.total * 2) { result = 'Incapacitated'; k = 'incapacitated'; }
+  else if(dr.total >= sr.total) { result = wound === 'wounded' ? 'Wounded again → Incapacitated' : 'Wounded'; k = wound === 'wounded' ? 'incapacitated' : 'wounded'; }
+  else if(dr.total * 2 >= sr.total) { result = 'Stunned'; k = wound === 'none' ? 'stunned' : wound; }
+  addLog('Damage ' + toCode(dmg) + ' vs STR ' + toCode(str), result, 'damage ' + dr.total + ' [' + dr.rolls.join(' ') + '] vs strength ' + sr.total + ' [' + sr.rolls.join(' ') + ']', result === 'No effect' ? 'crit' : 'fumble');
+  const order = ['none','stunned','wounded','incapacitated','mortal']; if(order.indexOf(k) > order.indexOf(wound)) { wound = k; renderWoundTrack(); updateModNote(); scheduleAutosave(); }
+}
+function callDarkSide() {
+  $('f-ds').value = num($('f-ds').value) + 1; $('f-fp').value = num($('f-fp').value) + 1;
+  addLog('Dark Side', '☠', 'You gain a Force Point to spend now and a Dark Side Point. At 6+ the GM rolls 1D each time you call on the Force; a 1 and your character turns to the dark side.', 'fumble'); scheduleAutosave();
+}
+
+// ═══ WEAPONS ══════════════════════════════════════════════════════════════
+function skillOptions(cur) {
+  const names = [...new Set([...D.skills().map(s => s.name), ...skillRows().map(r => r.querySelector('.sk-name-in').value.trim()).filter(Boolean)])].sort();
+  return '<option value="">— attribute —</option>' + names.map(n => '<option value="' + esc(n) + '"' + (norm(n) === norm(cur) ? ' selected' : '') + '>' + esc(n) + '</option>').join('');
+}
+function addWeaponRow(w) {
+  w = w || {}; const tr = document.createElement('tr');
+  tr.innerHTML = '<td><input type="text" class="wp-name" value="' + esc(w.name || '') + '" placeholder="Blaster pistol"></td>'
+    + '<td><select class="wp-skill" style="width:100%;border:none;background:transparent;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:inherit;">' + skillOptions(w.skill || '') + '</select></td>'
+    + '<td><input type="text" class="wp-dmg num" value="' + esc(w.damage || '') + '" placeholder="4D" style="width:60px;"></td>'
+    + '<td><input type="text" class="wp-range" value="' + esc(w.range || '') + '" placeholder="3-10/30/120"></td>'
+    + '<td><input type="text" class="wp-notes" value="' + esc(w.notes || '') + '"></td>'
+    + '<td style="white-space:nowrap;"><button class="small-btn" onclick="rollWeaponAttack(this.closest(\'tr\'))">Attack</button> <button class="small-btn ghost" onclick="rollWeaponDamage(this.closest(\'tr\'))">Dmg</button> <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+  $('weapons-body').appendChild(tr); return tr;
+}
+function refreshWeaponRows() { document.querySelectorAll('#weapons-body .wp-skill').forEach(sel => { const cur = sel.value; sel.innerHTML = skillOptions(cur); }); }
+function addWeaponFromData(name) {
+  const w = findWeapon(name); if(!w) return;
+  const skillName = w.skill ? (D.skills().find(s => norm(s.name) === norm(w.skill)) || {}).name || w.skill : '';
+  addWeaponRow({ name: w.name, skill: skillName, damage: w.damageText || toCode(w.damage), range: w.range || '', notes: w.kind === 'Melee' ? 'melee' : '' }); scheduleAutosave();
+}
+function weaponSkillPips(tr) {
+  const sk = tr.querySelector('.wp-skill').value; if(sk) { const p = skillPips(sk); if(p !== null) return { name: sk, pips: p }; const def = D.skills().find(s => s.name === sk); if(def) return { name: sk, pips: attr(def.attribute) }; }
+  return { name: 'Dexterity', pips: attr('Dexterity') };
+}
+function rollWeaponAttack(tr) { const s = weaponSkillPips(tr); rollCode((tr.querySelector('.wp-name').value || 'Attack') + ' (' + s.name + ')', s.pips); }
+function rollWeaponDamage(tr) {
+  const txt = tr.querySelector('.wp-dmg').value.trim(); let pips = fromCode(txt); let label = tr.querySelector('.wp-name').value || 'Damage';
+  if(pips === null && /str/i.test(txt)) { pips = attr('Strength') + codeOrZero(txt.replace(/str(ength)?/i, '').trim()); label += ' (STR' + toCode(codeOrZero(txt.replace(/str(ength)?/i, '').trim()), true).replace(/^0D$/, '') + ')'; }
+  if(pips === null) { addLog(label, '✗', 'Damage code not readable: ' + txt, 'fumble'); return; }
+  rollCode(label + ' damage', pips, { noMods: true, dc: 0 });
+}
+
+// ═══ FORCE POWERS ═════════════════════════════════════════════════════════
+function addForceRow(f) {
+  f = f || {}; const def = D.force().find(p => norm(p.name) === norm(f.name)) || {};
+  const tr = document.createElement('tr'); tr.dataset.name = f.name || '';
+  const skills = String(f.attribute || def.attribute || '').split(/[,&]| and /).map(s => s.trim()).filter(Boolean);
+  tr.innerHTML = '<td><b style="font-family:\'Barlow Condensed\',sans-serif;">' + esc(f.name) + '</b></td><td class="mono">' + esc(f.attribute || def.attribute || '') + '</td><td class="desc"><div class="fp-desc" title="Click to expand" onclick="this.classList.toggle(\'open\')">' + esc(f.difficulty || def.difficulty || '') + (def.time ? ' · ' + esc(def.time) : '') + '</div></td>'
+    + '<td style="white-space:nowrap;">' + skills.map(s => '<button class="small-btn" onclick="rollForce(\'' + esc(f.name) + '\',\'' + esc(s) + '\')">' + esc(s.slice(0, 3)) + '</button>').join(' ') + ' <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+  $('force-body').appendChild(tr);
+}
+function addForcePick() { const sel = $('force-pick'); const f = D.force().find(p => p.name === sel.value); sel.value = ''; if(!f) return; if([...document.querySelectorAll('#force-body tr')].some(r => r.dataset.name === f.name)) return; addForceRow({ name: f.name, attribute: f.attribute, difficulty: f.difficulty }); scheduleAutosave(); }
+function rollForce(power, skill) { const p = skillPips(skill); if(p === null) { addLog(power, '✗', 'You have no ' + skill + ' skill — add it to the skill list', 'fumble'); return; } rollCode(power + ' (' + skill + ')', p); }
+
+// ═══ GEAR + SHIP ══════════════════════════════════════════════════════════
+function addGearRow(g) {
+  g = g || {}; const tr = document.createElement('tr');
+  tr.innerHTML = '<td><input type="text" class="gr-name" value="' + esc(g.name || '') + '" placeholder="Comlink"></td><td><input type="text" class="gr-note" value="' + esc(g.note || '') + '"></td><td><button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+  $('gear-body').appendChild(tr); return tr;
+}
+function addGearFromData(name) {
+  const g = findGear(name); if(!g) return;
+  if(g.category === 'Armor') { $('f-armor').value = g.name; const m = /(\d+D(?:\+\d)?|\+\d)/.exec(g.stats || ''); $('f-armor-pips').value = m ? m[1] : ''; recalc(); scheduleAutosave(); return; }
+  addGearRow({ name: g.name, note: [g.stats, g.cost ? g.cost + ' cr' : ''].filter(Boolean).join(' · ') }); scheduleAutosave();
+}
+function fillShipFromData() {
+  const v = findVehicle($('sh-craft').value); if(!v) return;
+  $('sh-speed').value = [v.speed, v.maneuverability].filter(Boolean).join(' · '); $('sh-hull').value = [v.hull, v.shields].filter(Boolean).join(' · ');
+  $('sh-weapons').value = (v.weapons || []).map(w => [w.count, w.name, w.fireControl ? 'FC ' + w.fireControl : '', w.damage ? 'dmg ' + w.damage : ''].filter(Boolean).join(' ')).join('; ');
+  if(!$('sh-name').value) $('sh-name').value = v.name; scheduleAutosave();
+}
+
+// ═══ RULES PANEL ══════════════════════════════════════════════════════════
+function openRules() {
+  const T = D.tables(); const body = $('rules-body');
+  if(!T) body.innerHTML = '<p>Rules data not loaded.</p>';
+  else {
+    let h = '<p class="m-hint">Rules Companion revisions are marked RC; the rest is the core rulebook.</p>';
+    const tag = b => b === 'companion' ? ' <span style="color:#f0c020;font-size:10px;">RC</span>' : '';
+    h += '<h4>Difficulty</h4><table>' + (T.difficulties || []).map(d => '<tr><td><b>' + esc(d.name) + '</b></td><td>' + esc(d.range) + '</td></tr>').join('') + '</table>';
+    h += '<h4>Wounds</h4>' + (T.woundLevels || []).map(w => '<p><b>' + esc(w.name) + '.</b> ' + esc(w.text) + '</p>').join('');
+    h += '<h4>Damage</h4><table>' + (T.damageResults || []).map(d => '<tr><td class="mono">' + esc(d.range) + '</td><td>' + esc(d.text) + '</td></tr>').join('') + '</table>';
+    h += '<h4>Quick rules</h4>' + (T.quickRules || []).map(q => '<p><b>' + esc(q.title) + tag(q.book) + '.</b> ' + esc(q.text) + '</p>').join('');
+    body.innerHTML = h;
+  }
+  $('rules-overlay').classList.add('open');
+}
+function closeRules() { $('rules-overlay').classList.remove('open'); }
+
+// ═══ LOG ══════════════════════════════════════════════════════════════════
+var _toastTimer = null;
+function showRollToast(label, result, detail, type) {
+  if(window.innerWidth > 768) return; var log = document.querySelector('.roll-log'); if(!log || !log.classList.contains('collapsed')) return;
+  var t = $('roll-toast'); t.className = 'show' + (type === 'crit' ? ' crit' : type === 'fumble' ? ' fumble' : '');
+  t.querySelector('.t-label').textContent = label; t.querySelector('.t-result').textContent = result; t.querySelector('.t-detail').textContent = detail;
+  if(_toastTimer) clearTimeout(_toastTimer); _toastTimer = setTimeout(function() { t.className = ''; }, 3500);
+}
+function addLog(label, result, detail, type) {
+  type = type || 'normal';
+  const entries = $('log-entries'); const hint = entries.querySelector('.log-hint'); if(hint) hint.remove();
+  const div = document.createElement('div'); div.className = 'log-entry' + (type === 'crit' ? ' crit' : type === 'fumble' ? ' fumble' : '');
+  div.innerHTML = '<div class="roll-label">' + esc(label) + '</div><div class="roll-result">' + esc(result) + '</div><div class="roll-detail">' + esc(detail) + '</div>';
+  if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
+  entries.insertBefore(div, entries.firstChild); while(entries.children.length > 60) entries.removeChild(entries.lastChild); entries.scrollTop = 0;
+  showRollToast(label, result, detail, type);
+}
+function clearLog() { $('log-entries').innerHTML = '<div class="log-hint">Click an attribute, skill or weapon to roll</div>'; }
+function toggleLogCollapse() { document.querySelector('.roll-log').classList.toggle('collapsed'); }
+document.querySelector('.log-header').addEventListener('click', function(e) { if(window.innerWidth <= 768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse(); });
+(function() { if(window.innerWidth <= 768) document.querySelector('.roll-log').classList.add('collapsed'); })();
+function setDarkMode(on) { document.body.classList.toggle('dark', on); $('dm-toggle').classList.toggle('on', on); try { localStorage.setItem('sw_dark', on ? '1' : '0'); } catch(e) {} }
+function toggleDarkMode() { setDarkMode(!document.body.classList.contains('dark')); }
+
+// ═══ SAVE / LOAD ══════════════════════════════════════════════════════════
+function collectSheet() {
+  const v = id => $(id).value; const attrs = {}; ATTRS.forEach(a => attrs[a] = attr(a));
+  return {
+    system:'SW', v:1,
+    name: v('f-name'), template: v('f-template'), species: v('f-species'), player: v('f-player'), sex: v('f-sex'), age: v('f-age'), height: v('f-height'), weight: v('f-weight'), physical: v('f-physical'),
+    attrs,
+    skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attr: tr.dataset.attr, adds: codeOrZero(tr.querySelector('.sk-adds').value) })).filter(s => s.name),
+    wound, forcePoints: num(v('f-fp')), darkSide: num(v('f-ds')), skillPoints: num(v('f-sp')), credits: v('f-credits'),
+    armor: { name: v('f-armor'), pips: fromCode(v('f-armor-pips')) || 0 }, move: num(v('f-move')) || 10,
+    weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, skill: tr.querySelector('.wp-skill').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, notes: tr.querySelector('.wp-notes').value })).filter(w => w.name || w.damage),
+    force: [...document.querySelectorAll('#force-body tr')].map(tr => ({ name: tr.dataset.name })).filter(f => f.name),
+    gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gr-name').value, note: tr.querySelector('.gr-note').value })).filter(g => g.name),
+    ship: { name: v('sh-name'), craft: v('sh-craft'), speed: v('sh-speed'), hull: v('sh-hull'), weapons: v('sh-weapons') },
+    background: v('f-background'), personality: v('f-personality'), connection: v('f-connection'), quote: v('f-quote'), special: v('f-special'), notes: v('f-notes'),
+    campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
+  };
+}
+function applySheet(d) {
+  d = d || {}; const set = (id, val) => { $(id).value = val == null ? '' : val; };
+  set('f-name', d.name); set('f-template', d.template || ''); set('f-species', d.species); set('f-player', d.player); set('f-sex', d.sex); set('f-age', d.age); set('f-height', d.height); set('f-weight', d.weight); set('f-physical', d.physical);
+  ATTRS.forEach(a => set('at-' + a, toCode(d.attrs && d.attrs[a] != null ? d.attrs[a] : 6)));
+  $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
+  wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; forcePointArmed = false; renderWoundTrack();
+  set('f-fp', d.forcePoints ?? 1); set('f-ds', d.darkSide || 0); set('f-sp', d.skillPoints || 0); set('f-credits', d.credits);
+  const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-pips', ar.pips ? toCode(ar.pips, true) : ''); set('f-move', d.move || 10);
+  $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(addWeaponRow);
+  $('force-body').innerHTML = ''; (d.force || []).forEach(addForceRow);
+  $('gear-body').innerHTML = ''; (d.gear || []).forEach(addGearRow);
+  const sh = d.ship || {}; set('sh-name', sh.name); set('sh-craft', sh.craft); set('sh-speed', sh.speed); set('sh-hull', sh.hull); set('sh-weapons', sh.weapons);
+  set('f-background', d.background); set('f-personality', d.personality); set('f-connection', d.connection); set('f-quote', d.quote); set('f-special', d.special); set('f-notes', d.notes);
+  if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
+  recalc();
+}
+function saveSheet(quiet) {
+  const data = collectSheet(); const json = JSON.stringify(data);
+  try { localStorage.setItem('sw_sheet', json); } catch(e) {}
+  if(window.__ddSave) window.__ddSave({ sw_sheet: json });
+  if(!quiet) addLog('Sheet Saved', '✓', data.name || 'Unnamed', 'normal');
+}
+function syncDocTitle() { const name = ($('f-name').value || '').trim(); if(name && window.__ddSaveTitle) window.__ddSaveTitle(name); }
+function exportSheet() {
+  const data = collectSheet(); const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = ((data.name || 'sw-character').replace(/[^a-z0-9]+/gi, '_').toLowerCase() || 'sw-character') + '.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000); addLog('Sheet Exported', '↓', a.download, 'normal');
+}
+function importSheet(input) {
+  const f = input.files && input.files[0]; if(!f) return; const r = new FileReader();
+  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported', '↑', f.name, 'normal'); } catch(e) { addLog('Import failed', '✗', 'Not a valid sheet file', 'fumble'); } };
+  r.readAsText(f); input.value = '';
+}
+function newCharacter() { wound = 'none'; applySheet({}); }
+function autoLoad() {
+  let saved = null;
+  if(window.__ddState !== undefined) saved = window.__ddState['sw_sheet'] || null; else { try { saved = localStorage.getItem('sw_sheet'); } catch(e) {} }
+  if(!saved) { applySheet({}); return; }
+  try { applySheet(JSON.parse(saved)); } catch(e) { applySheet({}); }
+}
+var _pageReady = false; setTimeout(function() { _pageReady = true; }, 2500);
+function autoSaveOnExit() { if(!_pageReady) return; try { saveSheet(true); } catch(e) {} try { syncDocTitle(); } catch(e) {} }
+window.addEventListener('beforeunload', autoSaveOnExit); window.addEventListener('pagehide', autoSaveOnExit);
+document.addEventListener('visibilitychange', function() { if(document.visibilityState === 'hidden') autoSaveOnExit(); });
+document.addEventListener('click', function(e) { const a = e.target.closest && e.target.closest('a[href]'); if(a && !a.target && !a.href.startsWith('javascript:')) autoSaveOnExit(); }, true);
+var _autoSaveTimer = null;
+function scheduleAutosave() { if(!_pageReady) return; if(_autoSaveTimer) clearTimeout(_autoSaveTimer); _autoSaveTimer = setTimeout(function() { try { saveSheet(true); } catch(e) {} }, 1500); }
+document.addEventListener('input', scheduleAutosave);
+document.addEventListener('change', scheduleAutosave);
+$('f-name').addEventListener('change', syncDocTitle);
+try { if(localStorage.getItem('sw_dark') === '1') setDarkMode(true); } catch(e) {}
+</script>
+
+<script>
+// ═══ CAMPAIGN LINK — same contract as the other sheets ════════════════════
+let _campaign = null; const _campaignClientKey = 'ck-' + Math.random().toString(36).slice(2, 12); let _campaignLastId = 0; let _campaignTimer = null;
+function campaignPlayerName() { return $('f-name').value.trim() || 'Player'; }
+function campaignUpdateBtn() { const btn = $('campaign-btn'); if(!btn) return; if(_campaign) { btn.title = 'Campaign: ' + _campaign.name; btn.style.background = '#241f10'; btn.style.color = '#e8c84a'; btn.style.borderColor = '#7a5a00'; } else { btn.title = 'Campaign'; btn.style.background = 'transparent'; btn.style.color = '#888'; btn.style.borderColor = '#333'; } }
+function openCampaign() { $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
+function closeCampaign() { $('campaign-overlay').classList.remove('open'); }
+function campaignRenderModal() {
+  const body = $('campaign-body');
+  if(_campaign) body.innerHTML = '<p class="m-hint">Connected — your rolls are shared with everyone in this campaign.</p><div style="background:#0f0f0f;border:1px solid #7a5a00;border-radius:5px;padding:12px;margin-bottom:12px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;color:#e8c84a;">' + esc(_campaign.name) + '</div><div style="font-size:11px;color:#888;margin-top:4px;">Join code: <b style="color:#eee;font-family:\'Share Tech Mono\',monospace;font-size:15px;letter-spacing:.2em;">' + esc(_campaign.code) + '</b></div></div><button class="m-btn warn" style="width:100%;" onclick="campaignLeave()">Leave Campaign</button>';
+  else body.innerHTML = '<p class="m-hint">Enter a join code from your GM to connect this sheet. Campaigns are created on the Campaigns page.</p><div class="m-lbl">Join a Campaign</div><div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" class="m-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="flex:1;text-transform:uppercase;letter-spacing:.15em;"><button class="m-btn" onclick="campaignJoin()">Join</button></div><div id="campaign-error" style="font-size:12px;color:#df6a6a;margin-top:10px;"></div>';
+}
+function campaignError(msg) { const el = $('campaign-error'); if(el) el.textContent = msg; }
+async function campaignJoin() { const code = ($('campaign-code-input')?.value || '').trim().toUpperCase(); if(!code) { campaignError('Enter a join code.'); return; } try { const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials:'same-origin' }); if(r.status === 404) { campaignError('No campaign found with that code.'); return; } if(!r.ok) throw new Error(r.status); _campaign = await r.json(); campaignConnected(); } catch(e) { campaignError('Could not join — are you signed in to the app?'); } }
+function campaignConnected() { _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign', '🔗', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal'); saveSheet(true); }
+function campaignLeaveSilent() { if(_campaignTimer) { clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
+function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', '🔗', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Hero Builder']);
+function campaignBroadcast(label, result, detail, type) { if(!_campaign || CAMPAIGN_SKIP_LABELS.has(String(label))) return; fetch('/api/campaigns/' + _campaign.id + '/rolls', { method:'POST', credentials:'same-origin', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ clientKey:_campaignClientKey, source: campaignPlayerName(), label:String(label), result:String(result), detail:String(detail || ''), type: type || 'normal' }) }).catch(() => {}); }
+function campaignAddRemote(roll) { const entries = $('log-entries'); if(!entries || roll.type === 'lootclaim' || roll.type === 'lootbox') return; const hint = entries.querySelector('.log-hint'); if(hint) hint.remove(); const div = document.createElement('div'); div.className = 'log-entry remote' + (roll.type === 'crit' ? ' crit' : roll.type === 'fumble' ? ' fumble' : ''); div.innerHTML = '<div class="roll-label">' + esc(roll.source) + ' · ' + esc(roll.label) + '</div><div class="roll-result">' + esc(roll.result) + '</div><div class="roll-detail">' + esc(roll.detail) + '</div>'; entries.insertBefore(div, entries.firstChild); entries.scrollTop = 0; while(entries.children.length > 60) entries.removeChild(entries.lastChild); }
+async function campaignPoll() { if(!_campaign) return; try { const r = await fetch('/api/campaigns/' + _campaign.id + '/rolls' + (_campaignLastId ? '?since=' + _campaignLastId : ''), { credentials:'same-origin' }); if(!r.ok) return; const data = await r.json(); (data.rolls || []).forEach(roll => { if(roll.clientKey !== _campaignClientKey) campaignAddRemote(roll); }); if(data.last) _campaignLastId = data.last; } catch(e) {} }
+function campaignPollDelay() { return document.hidden ? 20000 : 4000; }
+function campaignStartPolling() { if(_campaignTimer) clearInterval(_campaignTimer); campaignPoll(); _campaignTimer = setInterval(campaignPoll, campaignPollDelay()); }
+document.addEventListener('visibilitychange', function() { if(!_campaign || !_campaignTimer) return; clearInterval(_campaignTimer); if(!document.hidden) campaignPoll(); _campaignTimer = setInterval(campaignPoll, campaignPollDelay()); });
+function campaignRestore(saved) { if(saved && saved.id && saved.code) { _campaign = { id: saved.id, code: saved.code, name: saved.name || 'Campaign' }; campaignStartPolling(); } else campaignLeaveSilent(); campaignUpdateBtn(); }
+campaignUpdateBtn();
+</script>
+
+<!-- Star Wars data layer + character builder (generated by scripts/build-sw-data.mjs) -->
+<script src="/tools-data/sw-tables.js"></script>
+<script src="/tools-data/sw-skills.js"></script>
+<script src="/tools-data/sw-templates.js"></script>
+<script src="/tools-data/sw-weapons.js"></script>
+<script src="/tools-data/sw-gear.js"></script>
+<script src="/tools-data/sw-vehicles.js"></script>
+<script src="/tools-data/sw-force.js"></script>
+<script src="/tools-data/sw-sheet-builder.js"></script>
+<script>
+buildStats();
+autoLoad();
+</script>
+</body>
+</html>

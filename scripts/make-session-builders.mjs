@@ -1,4 +1,4 @@
-// Generates the ACE!, Kids on Bikes and Nimble Session Prep Builders from the
+// Generates the ACE!, Kids on Bikes, Nimble and Star Wars Session Prep Builders from the
 // Dungeon Crawler Carl builder, which is system-neutral apart from its theme
 // (palette, "Floor"/"Mob" labels, storage keys). Re-run after changing the DCC
 // builder so the clones pick up fixes:
@@ -32,6 +32,13 @@ const SYSTEMS = [
     accent: "#2f9b63", accentDark: "#1f6f46", red: "#c0392b", redDark: "#8a1f14", highlight: "#f4d84a", boxBg: "#d8efe2",
     chapter: "Level", chapterPh: "Level 3 heroes", session: "Session", mobs: "Monsters/NPCs", mobsHeading: "Monsters &amp; NPCs",
     mob: "Monster", boss: "Legendary", npc: "NPC", typePh: "LVL 2 // MEDIUM // 15 HP // M ARMOR", titlePh: "e.g. Goblins of the Crystal Crag", subtitlePh: "e.g. A Nimble one-shot for level 2 heroes",
+  },
+  {
+    file: "sw_session_prep_builder.html", key: "sw_session", ls: "sw_builder_v1",
+    name: "Star Wars", title: "Session Prep Builder — Star Wars: The Roleplaying Game",
+    accent: "#c9a227", accentDark: "#7a5f0e", red: "#b82018", redDark: "#7a1510", highlight: "#f0c020", boxBg: "#efe6c4",
+    chapter: "Episode", chapterPh: "IV", session: "Session", mobs: "Imperials/NPCs", mobsHeading: "Imperials, Aliens &amp; NPCs",
+    mob: "Trooper", boss: "Villain", npc: "NPC", typePh: "STORMTROOPER // DEX 2D // BLASTER 4D", titlePh: "e.g. Rebel Breakout", subtitlePh: "e.g. A Star Wars adventure for 4–6 Rebels",
   },
 ];
 

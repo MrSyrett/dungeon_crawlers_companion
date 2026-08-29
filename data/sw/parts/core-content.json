@@ -1,0 +1,968 @@
+{
+  "skills": [],
+  "templates": [],
+  "weapons": [
+    {
+      "name": "Hold-out Blaster",
+      "kind": "Blaster",
+      "damage": 10,
+      "damageText": "3D+1",
+      "book": "core",
+      "page": 139,
+      "range": "3-4/5-8/9-12",
+      "skill": "blaster",
+      "notes": "Small, concealable weapon; the blaster of choice for under-cover agents and big-city crooks. Notoriously under-powered and short-ranged, but has saved more than one character in a tight spot (description p.52).",
+      "cost": "300",
+      "availability": "Illegal in many systems."
+    },
+    {
+      "name": "Sporting Blaster",
+      "kind": "Blaster",
+      "damage": 10,
+      "damageText": "3D+1",
+      "book": "core",
+      "page": 139,
+      "range": "3-10/11-30/31-120",
+      "skill": "blaster",
+      "notes": "Thin-barrelled blaster pistol designed for firing ranges and small-game hunting; sometimes used for duelling. An aristocratic weapon; Princess Leia fires one in A New Hope (p.52).",
+      "cost": "300"
+    },
+    {
+      "name": "Blaster Pistol",
+      "kind": "Blaster",
+      "damage": 12,
+      "damageText": "4D",
+      "book": "core",
+      "page": 139,
+      "range": "3-10/11-30/31-120",
+      "skill": "blaster",
+      "notes": "The common weapon of self-defense; innumerable models and makes are available throughout the galaxy. Stormtroopers use a modified military version of the same weapon (p.52). Point-blank range (under 3 m) is difficulty 5; short 10, medium 15, long 20.",
+      "cost": "500",
+      "availability": "Ownership is restricted in many systems."
+    },
+    {
+      "name": "Heavy Blaster Pistol",
+      "kind": "Blaster",
+      "damage": 15,
+      "damageText": "5D",
+      "book": "core",
+      "page": 139,
+      "range": "3-7/8-25/26-50",
+      "skill": "blaster",
+      "notes": "A weapon for close-in fighting; basically a cut-down blaster rifle. Bulkier and heavier than a blaster pistol, its main advantage is the massive damage it can do. Han Solo carries one (p.52).",
+      "cost": "750",
+      "availability": "Illegal in many systems."
+    },
+    {
+      "name": "Hunting Blaster",
+      "kind": "Blaster",
+      "damage": 12,
+      "damageText": "4D",
+      "book": "core",
+      "page": 139,
+      "range": "3-30/31-100/101-300",
+      "skill": "blaster",
+      "notes": "A sportsman's version of the blaster rifle, mainly used in sport shooting and hunting. Common in the Rebel Alliance, which frequently uses whatever weapons are readily at hand (p.52).",
+      "cost": "500"
+    },
+    {
+      "name": "Blaster Rifle",
+      "kind": "Blaster",
+      "damage": 15,
+      "damageText": "5D",
+      "book": "core",
+      "page": 139,
+      "range": "3-30/31-100/101-300",
+      "skill": "blaster",
+      "notes": "A heavier, military blaster rifle. The main stormtrooper weapon; also used by regular Alliance infantry (p.52).",
+      "cost": "1000",
+      "availability": "Only in the least restrictive systems can citizens purchase blaster rifles legally."
+    },
+    {
+      "name": "Blaster Carbine",
+      "kind": "Blaster",
+      "damage": 15,
+      "damageText": "5D",
+      "book": "core",
+      "page": 139,
+      "range": "3-25/26-60/61-250",
+      "skill": "blaster",
+      "notes": "A shorter, slightly less accurate version of the blaster rifle. Issued to walker assault teams; also frequently used by nomads such as the Tatooine sand people. Its smaller size and lower weight make it easier to use from a vehicle or riding beast (p.52).",
+      "cost": "900"
+    },
+    {
+      "name": "Repeating Blaster",
+      "kind": "Blaster",
+      "damage": 18,
+      "damageText": "6D",
+      "book": "core",
+      "page": 139,
+      "range": "3-50/51-120/121-300",
+      "skill": "blaster (heavy weapons when tripod- or vehicle-mounted)",
+      "notes": "A rapid-fire blaster rifle, usually mounted on a tripod. An infantry support weapon; support blasters are frequently mounted on speeder bikes and landspeeders (p.52).",
+      "cost": "2000",
+      "availability": "Military issue only."
+    },
+    {
+      "name": "Medium Repeat Blaster",
+      "kind": "Blaster",
+      "damage": 21,
+      "damageText": "7D",
+      "book": "core",
+      "page": 139,
+      "range": "3-60/61-150/151-400",
+      "skill": "heavy weapons",
+      "notes": "A heavier rapid-fire blaster, usually operated by a team of two. Frequently mounted on landspeeders and defense installations (p.52). When it hits a starship, roll 2D for its damage (p.65).",
+      "cost": "3000",
+      "availability": "Military issue only."
+    },
+    {
+      "name": "Heavy Repeat Blaster",
+      "kind": "Blaster",
+      "damage": 24,
+      "damageText": "8D",
+      "book": "core",
+      "page": 139,
+      "range": "3-75/76-200/201-500",
+      "skill": "heavy weapons",
+      "notes": "A powerful rapid-fire blaster, mainly mounted on vehicles. The Millennium Falcon mounts one especially for use against ground troops (p.52). When it hits a starship, roll 2D for its damage (p.65).",
+      "cost": "5000",
+      "availability": "Military issue only."
+    },
+    {
+      "name": "Stormtrooper Blaster",
+      "kind": "Blaster",
+      "damage": 12,
+      "damageText": "4D",
+      "book": "core",
+      "page": 84,
+      "range": "3-10/11-30/31-120",
+      "skill": "blaster",
+      "notes": "The standard stormtrooper blaster, a modified military version of the blaster pistol, has a damage code of 4D. Blaster rifles (5D) are sometimes used (p.84). Range as blaster pistol."
+    },
+    {
+      "name": "Crossbow",
+      "kind": "Archaic",
+      "damage": 8,
+      "damageText": "2D+2",
+      "book": "core",
+      "page": 139,
+      "range": "3-10/11-30/31-50",
+      "skill": "bows",
+      "notes": "Archaic weapon using stressed string to launch small spears or bolts; used by the Ewoks of Endor and many other primitive species. Must be reloaded each time it is fired; reloading costs 1D from all skill and attribute codes but does not take an action segment (p.52)."
+    },
+    {
+      "name": "Longbow",
+      "kind": "Archaic",
+      "damage": 8,
+      "damageText": "2D+2",
+      "book": "core",
+      "page": 139,
+      "range": "3-10/11-30/31-100",
+      "skill": "bows",
+      "notes": "Archaic weapon using stressed string to launch arrows; used by Ewoks and many primitive species. Must be reloaded each time it is fired; reloading costs 1D from all skill and attribute codes but does not take an action segment (p.52)."
+    },
+    {
+      "name": "Black-Powder Pistol",
+      "kind": "Archaic",
+      "damage": 8,
+      "damageText": "2D+2",
+      "book": "core",
+      "page": 139,
+      "range": "3-4/5-8/9-12",
+      "skill": "archaic guns",
+      "notes": "A primitive slug-throwing hand gun, common among pre-industrial civilizations. Reloading takes a full combat round; at short range firers usually get one shot off, then use the pistol as a club or throw it aside (p.52)."
+    },
+    {
+      "name": "Musket",
+      "kind": "Archaic",
+      "damage": 9,
+      "damageText": "3D",
+      "book": "core",
+      "page": 139,
+      "range": "3-10/11-30/31-100",
+      "skill": "archaic guns",
+      "notes": "A pre-industrial military arm. Reloading is an action, taking an action segment and costing 1D from all skill and attribute codes (p.52)."
+    },
+    {
+      "name": "Rifle",
+      "kind": "Archaic",
+      "damage": 10,
+      "damageText": "3D+1",
+      "book": "core",
+      "page": 139,
+      "range": "3-30/31-100/101-300",
+      "skill": "archaic guns",
+      "notes": "A mass-produced, machined and vastly improved musket; characteristic of newly-industrializing cultures. Reloading costs 1D from all skill and attribute codes but does not take an action segment. Rifles may fire from one to twenty shots before requiring reloading (p.52)."
+    },
+    {
+      "name": "Submachinegun",
+      "kind": "Archaic",
+      "damage": 12,
+      "damageText": "4D",
+      "book": "core",
+      "page": 139,
+      "range": "3-10/11-50/51-100",
+      "skill": "archaic guns",
+      "notes": "A rapid-fire rifle characteristic of neo-atomic civilizations; fires bursts of multiple bullets. Reloading as for rifles. Most fire four to ten bursts before needing to be reloaded (p.52)."
+    },
+    {
+      "name": "Wookiee Bowcaster",
+      "kind": "Archaic",
+      "damage": 12,
+      "damageText": "4D",
+      "book": "core",
+      "page": 139,
+      "range": "3-10/11-30/31-50",
+      "skill": "bowcaster",
+      "notes": "A unique variant of the crossbow used by Wookiees; throws explosive bolts which do considerably more damage than regular crossbows. Clip-loaded, fires up to six shots before it must be reloaded; reloading costs 1D from all die codes but does not take an action segment (p.52)."
+    },
+    {
+      "name": "Grenade",
+      "kind": "Grenade",
+      "damage": 15,
+      "damageText": "5D at point-blank / 4D short / 3D medium / 2D long",
+      "book": "core",
+      "page": 139,
+      "range": "3-7/8-20/21-40 (throw); 3-4/5-6/7-10 (hitting)",
+      "skill": "grenade",
+      "notes": "Expended when thrown. A failed throw means the grenade scatters: roll 1D on the scatter diagram for direction and 3D for meters. Affects everyone within 10 m: roll 4D for the grenade against each character's range-based difficulty (5 point-blank, 10 short, 15 medium, 20 long, plus dodge); damage by range band. Can be thrown at unseen targets. Enclosed area +1D, vacuum -1D, through door/window -1D, slit -2D (pp.49-51).",
+      "cost": "200"
+    },
+    {
+      "name": "Thermal Detonator",
+      "kind": "Grenade",
+      "damage": 30,
+      "damageText": "10D at point-blank / 8D short / 5D medium / 2D long",
+      "book": "core",
+      "page": 139,
+      "range": "3-4/5-7/8-12 (throw); 3-8/9-12/13-20 (hitting)",
+      "skill": "grenade",
+      "notes": "Used exactly like a grenade but affects everyone within 20 m. Roll 4D for the detonator against each character's range-based difficulty; damage by range band (pp.49-51).",
+      "cost": "2000"
+    },
+    {
+      "name": "Detonite",
+      "kind": "Explosive",
+      "damage": 3,
+      "damageText": "1D per cube",
+      "book": "core",
+      "page": 44,
+      "skill": "demolition",
+      "notes": "The standard explosive used in the Empire; comes in cubes about the size of a fist. One cube does 1D worth of damage, using the same rules as for grenades. Requires a detonator triggered by wire, timer or communicator signal; planting a charge takes about a minute (one round at double difficulty). Difficulty by barrier: plywood door 5, hard wooden door 10, bolted steel door 15, blast door 20, hull of the Millennium Falcon 30 (p.44)."
+    },
+    {
+      "name": "Hands (brawling)",
+      "kind": "Melee",
+      "damage": null,
+      "damageText": "str",
+      "skill": "brawling",
+      "notes": "Difficulty to hit: 5. Unarmed attack; roll the attacker's strength code as the damage code. Attacker must be within 2 m. Can be parried by brawling parry or melee parry (p.49).",
+      "book": "core",
+      "page": 139
+    },
+    {
+      "name": "Club",
+      "kind": "Melee",
+      "damage": 3,
+      "damageText": "str+1D",
+      "skill": "melee weapons",
+      "notes": "Difficulty to hit: 5. Any improvised bludgeon, such as a chair or the butt of a blaster rifle. Roll the weapon's damage dice plus the attacker's strength dice (p.49).",
+      "book": "core",
+      "page": 139
+    },
+    {
+      "name": "Gaderffii (Gaffi Stick)",
+      "kind": "Melee",
+      "damage": 3,
+      "damageText": "str+1D",
+      "skill": "melee weapons",
+      "notes": "Difficulty to hit: 5. A curved, double-pointed weapon carried by the Tusken Raiders of Tatooine, but adopted by many Rebels as a useful multi-purpose tool and melee weapon (p.52).",
+      "book": "core",
+      "page": 139
+    },
+    {
+      "name": "Spear",
+      "kind": "Melee",
+      "damage": 4,
+      "damageText": "str+1D+1",
+      "skill": "melee weapons",
+      "notes": "Difficulty to hit: 10. A primitive melee weapon; basically, a pointed stick (p.52).",
+      "book": "core",
+      "page": 139
+    },
+    {
+      "name": "Vibroaxe",
+      "kind": "Melee",
+      "damage": 6,
+      "damageText": "str+2D",
+      "skill": "melee weapons",
+      "notes": "Difficulty to hit: 15. A hand-held cutting weapon; its broad blade can cut through almost any material if enough force is applied. Ultrasonic energy provides cutting power (p.52).",
+      "book": "core",
+      "page": 139,
+      "cost": "500"
+    },
+    {
+      "name": "Vibroblade",
+      "kind": "Melee",
+      "damage": 5,
+      "damageText": "str+1D+2",
+      "skill": "melee weapons",
+      "notes": "Difficulty to hit: 15. A smaller, concealable version of the vibroaxe (p.52).",
+      "book": "core",
+      "page": 139,
+      "cost": "250"
+    },
+    {
+      "name": "Lightsaber",
+      "kind": "Melee",
+      "damage": 15,
+      "damageText": "5D (strength is not added; characters with the control skill add their control skill dice)",
+      "skill": "lightsaber",
+      "notes": "Difficulty to hit: 20. An antiquated Jedi weapon: a metallic cylinder projects a beam of coruscating energy that can cut through any known material. Anyone can use it, but only another lightsaber can parry it; a lightsaber parrying a lesser weapon destroys that weapon if the attack roll beats the weapon's base difficulty but not the parried total, and wounds a brawling attacker likewise. Its beam can severely injure its wielder; intensive training is required for proficiency. Rare and difficult to obtain (pp.49, 52).",
+      "availability": "Rare and difficult to obtain.",
+      "book": "core",
+      "page": 139
+    }
+  ],
+  "gear": [
+    {
+      "name": "Stormtrooper Armor",
+      "category": "Armor",
+      "description": "Standard Imperial stormtrooper armor. The armor code is added to the wearer's strength code for damage purposes only, and subtracted from the wearer's dexterity attribute and all dexterity skill codes for all purposes (a stormtrooper's 2D dexterity and 4D blaster become 1D and 3D). Not listed on the Cost Chart.",
+      "book": "core",
+      "page": 139,
+      "stats": "Armor code 1D (3 pips)"
+    },
+    {
+      "name": "Protective Helmet",
+      "category": "Armor",
+      "description": "Adds +1 to the wearer's strength code for damage purposes only, and subtracts +1 from dexterity and dexterity skill codes.",
+      "book": "core",
+      "page": 139,
+      "cost": "300",
+      "stats": "Armor code +1 (1 pip)"
+    },
+    {
+      "name": "Protective Vest (Flak Vest)",
+      "category": "Armor",
+      "description": "Adds +1 to the wearer's strength code for damage purposes only, and subtracts +1 from dexterity and dexterity skill codes. Listed as 'Flak Vest' on the Cost Chart.",
+      "book": "core",
+      "page": 139,
+      "cost": "300",
+      "stats": "Armor code +1 (1 pip)"
+    },
+    {
+      "name": "Bounty Hunter Armor",
+      "category": "Armor",
+      "description": "Heavy armor of the kind worn by bounty hunters such as Boba Fett. Adds 1D to the wearer's strength code for damage purposes only, and subtracts 1D from dexterity and dexterity skill codes.",
+      "book": "core",
+      "page": 139,
+      "cost": "2500",
+      "stats": "Armor code 1D (3 pips)"
+    },
+    {
+      "name": "Medpac",
+      "category": "Medical",
+      "description": "A package of drugs, syntheflesh, coagulants and computerized diagnostics used for first-aid and emergency field care. Any character with medicine skill may make one skill roll per combat round spent treating an injured character: difficulty 10 for wounded, 15 for incapacitated, 20 for mortally wounded. Success reduces the wound status by one degree; a character can only be treated once per wound, and a wounded character healed by medpac cannot be treated again that day. A medpac is expended when used (p.53).",
+      "book": "core",
+      "page": 53,
+      "cost": "100",
+      "stats": "Difficulty 10/15/20 by wound level; one use"
+    },
+    {
+      "name": "Rejuvenation Tank",
+      "category": "Medical",
+      "description": "Rejuve tanks are filled with bacta, a specially-formulated treatment liquid which promotes rapid healing and acts as a disinfectant. Anyone placed in a tank will be healed: wounded in 2D hours, incapacitated in 2D days, mortally wounded in 2D weeks (p.53, Healing Table p.140).",
+      "book": "core",
+      "page": 53,
+      "stats": "Healing time: wounded 2D hours, incapacitated 2D days, mortally wounded 2D weeks"
+    },
+    {
+      "name": "Comlink",
+      "category": "Communication",
+      "description": "Personal communicator. Headset comlinks (as issued by Rebel agents) let everyone wearing one talk within 10 kilometers on a special frequency.",
+      "book": "core",
+      "page": 141,
+      "cost": "100"
+    },
+    {
+      "name": "Macrobinoculars",
+      "category": "Misc",
+      "description": "Long-range viewing optics; standard personal gear characters may carry through Imperial checkpoints.",
+      "book": "core",
+      "page": 141,
+      "cost": "100"
+    },
+    {
+      "name": "Pocket Computer",
+      "category": "Misc",
+      "description": "A portable computer.",
+      "book": "core",
+      "page": 141,
+      "cost": "100"
+    },
+    {
+      "name": "Rations, 1 week, concentrate",
+      "category": "Survival",
+      "description": "One week of concentrated food rations.",
+      "book": "core",
+      "page": 141,
+      "cost": "200"
+    },
+    {
+      "name": "Portable Fusion Generator",
+      "category": "Tool",
+      "description": "A portable power source.",
+      "book": "core",
+      "page": 141,
+      "cost": "500"
+    },
+    {
+      "name": "Autochef",
+      "category": "Misc",
+      "description": "An automatic cooking unit; programmed to produce simple fare from the limited foodstuffs available aboard small ships (p.55).",
+      "book": "core",
+      "page": 141,
+      "cost": "500"
+    },
+    {
+      "name": "Blaster Ammo Pack",
+      "category": "Misc",
+      "description": "A single blaster pack is good for hundreds of shots. Replacing a pack costs 1D from all die codes for the round but does not take an action segment, like drawing a weapon (p.51).",
+      "book": "core",
+      "page": 51
+    },
+    {
+      "name": "Restraining Bolt",
+      "category": "Droid",
+      "description": "Fitted to a Droid when time does not permit reprogramming. Does not alter the Droid's allegiance, but allows the owner to immobilize or summon the Droid when needed, and can deliver a jolt to make the Droid obey (p.82).",
+      "book": "core",
+      "page": 82
+    },
+    {
+      "name": "R2 Astromech Droid (unit)",
+      "category": "Droid",
+      "description": "Astromech Droid; see the character entry for full game data (skills, equipment).",
+      "book": "core",
+      "page": 141,
+      "cost": "1000"
+    },
+    {
+      "name": "3PO Human-Cyborg Relations Droid (unit)",
+      "category": "Droid",
+      "description": "Protocol Droid; see the character entry for full game data.",
+      "book": "core",
+      "page": 141,
+      "cost": "2000"
+    },
+    {
+      "name": "Glow Rod",
+      "category": "Misc",
+      "description": "A flashlight; each illuminates about 20 meters of tunnel. Standard personal gear (Rebel Breakout, p.101).",
+      "book": "core",
+      "page": 101
+    },
+    {
+      "name": "Rope with Grapple Hook (10 m)",
+      "category": "Tool",
+      "description": "Ten-meter rope with a removable grapple hook at one end; ropes can snap together, and each can support 1,000 kilograms (Rebel Breakout, p.101).",
+      "book": "core",
+      "page": 101
+    },
+    {
+      "name": "Smoke Grenade",
+      "category": "Misc",
+      "description": "Fills 10 meters of tunnel with thick black smoke; nobody can see through it, so increase blaster difficulty numbers by 5 (Rebel Breakout, p.101).",
+      "book": "core",
+      "page": 101
+    },
+    {
+      "name": "Flight Suit",
+      "category": "Misc",
+      "description": "Standard pilot's flight suit; useful as decoys, slings, nets, etc. (Rebel Breakout, p.101).",
+      "book": "core",
+      "page": 101
+    },
+    {
+      "name": "Space Suit",
+      "category": "Survival",
+      "description": "Vacuum suit. When a ship is hulled, each character must make a survival skill roll (difficulty 10) to get into a space suit in time; another character can get an unconscious character into a suit with a survival roll of 15 (p.60).",
+      "book": "core",
+      "page": 60
+    },
+    {
+      "name": "Droid Tool Attachments",
+      "category": "Droid",
+      "description": "Tools a Droid may be equipped with at a cost of 1D from its skill allotment each: blaster pistol (war and security Droids only), electric arc welder, buzz saw, electrobinoculars, autochef, jack hammer, trash compactor, comlink, radar, sonar, radiation sensor, barometer, spectrometer, fire extinguisher (p.84).",
+      "book": "core",
+      "page": 84
+    },
+    {
+      "name": "Passage (starliner ticket)",
+      "category": "Misc",
+      "description": "Typical ticket prices: luxury liner 1000, 'no frills' liner 500, steerage 100, chartered ship 10,000. Multiply by x1 on a heavily-travelled route, x2 common, x3 rarely-travelled, x5 uncommon; 'You want to go where?' routes are chartered ships only (Cost Chart p.141).",
+      "book": "core",
+      "page": 141,
+      "cost": "100-10,000 (see description)"
+    }
+  ],
+  "vehicles": [
+    {
+      "name": "X-Wing Fighter",
+      "kind": "Starfighter",
+      "weapons": [
+        {
+          "name": "Laser Cannons",
+          "count": "Four (fire as one)",
+          "fireControl": "3D",
+          "damage": "6D"
+        },
+        {
+          "name": "Proton Torpedoes",
+          "fireControl": "2D",
+          "damage": "9D"
+        }
+      ],
+      "description": "The Rebel Alliance's main space superiority fighter. Equipped with a hyperdrive but no nav computer; its R2 unit stores pre-calculated coordinates for up to ten hyperdrive routes (p.58).",
+      "book": "core",
+      "page": 55,
+      "scale": "Starship",
+      "crew": "1 (plus R2 unit)",
+      "passengers": "none",
+      "cargo": "110 kilograms",
+      "consumables": "1 week (can be mounted with pods carrying additional consumables for extended missions, at a cost in speed and maneuverability: reduce each by 1D for each additional week of consumables carried)",
+      "hyperdrive": "x1",
+      "nav": "none (hyperdrive backups: none)",
+      "speed": "4D",
+      "maneuverability": "3D",
+      "hull": "4D",
+      "shields": "1D"
+    },
+    {
+      "name": "TIE Fighter",
+      "kind": "Starfighter",
+      "weapons": [
+        {
+          "name": "Laser Cannons",
+          "count": "Two (fire as one)",
+          "fireControl": "2D",
+          "damage": "5D"
+        }
+      ],
+      "description": "This is the TIE/ln model, a modest improvement on the earlier T.I.E., now the mainstay of Imperial starfighter forces. TIEs are not hyperspace capable, and generally operate from bases or Star Destroyers.",
+      "book": "core",
+      "page": 55,
+      "scale": "Starship",
+      "crew": "1",
+      "passengers": "none",
+      "cargo": "110 kilograms",
+      "consumables": "1 day",
+      "hyperdrive": "no hyperdrive carried",
+      "nav": "none (hyperdrive backups: none)",
+      "speed": "5D",
+      "maneuverability": "2D",
+      "hull": "2D",
+      "shields": "none"
+    },
+    {
+      "name": "Millennium Falcon",
+      "kind": "Space Transport",
+      "weapons": [
+        {
+          "name": "Quad Laser Cannons",
+          "count": "Two, each",
+          "fireControl": "3D",
+          "damage": "6D"
+        },
+        {
+          "name": "Concussion Missiles",
+          "fireControl": "3D",
+          "damage": "10D"
+        }
+      ],
+      "description": "The ship of the infamous smuggler Solo, now vigorously sought by both Imperial forces and the nefarious crime boss Jabba the Hutt, to whom the smuggler reputedly owes heavy debts. The Falcon is basically a souped-up stock light freighter. It also mounts a smaller blaster (a heavy repeat blaster for use against ground troops) which is not used in starship combat.",
+      "book": "core",
+      "page": 56,
+      "craft": "Modified stock light freighter",
+      "scale": "Starship",
+      "crew": "2",
+      "passengers": "6",
+      "cargo": "100 metric tons",
+      "consumables": "2 months",
+      "hyperdrive": "x1/2",
+      "nav": "yes (hyperdrive backups: yes)",
+      "speed": "4D",
+      "maneuverability": "1D",
+      "hull": "6D",
+      "shields": "3D"
+    },
+    {
+      "name": "Stock Light Freighter",
+      "kind": "Space Transport",
+      "weapons": [
+        {
+          "name": "Laser Cannon",
+          "count": "One",
+          "fireControl": "2D",
+          "damage": "4D"
+        }
+      ],
+      "description": "One of the most commonly-encountered small trading vessels; frequently seen in the galactic rim, where trade-routes are less intensively developed than in the core, and where small traders can still hope to compete with the giant shipping corporations. Widely available on the open market.",
+      "book": "core",
+      "page": 56,
+      "cost": "100,000 credits (used: 25,000)",
+      "scale": "Starship",
+      "crew": "2",
+      "passengers": "6",
+      "cargo": "100 metric tons",
+      "consumables": "2 months",
+      "hyperdrive": "x2",
+      "nav": "yes (hyperdrive backups: yes)",
+      "speed": "2D",
+      "maneuverability": "zero",
+      "hull": "4D",
+      "shields": "none"
+    },
+    {
+      "name": "Imperial Customs Frigate",
+      "kind": "Capital Ship",
+      "weapons": [
+        {
+          "name": "Laser Cannons",
+          "count": "Four, each",
+          "fireControl": "2D",
+          "damage": "5D"
+        },
+        {
+          "name": "Proton Torpedoes",
+          "fireControl": "2D",
+          "damage": "9D"
+        }
+      ],
+      "description": "As customs-enforcement vessels, these frigates are sufficiently well-armed to overawe most smugglers and pirates, but far too lightly armed to be of much use in regular naval actions. There aren't many merchant ships that outgun or can outrun one.",
+      "book": "core",
+      "page": 57,
+      "scale": "Starship",
+      "crew": "16",
+      "passengers": "room for 6 prisoners in the brig",
+      "cargo": "200 metric tons (for seizure of contraband)",
+      "consumables": "6 months",
+      "hyperdrive": "x1",
+      "nav": "yes (hyperdrive backups: yes)",
+      "speed": "4D",
+      "maneuverability": "1D",
+      "hull": "5D",
+      "shields": "3D"
+    },
+    {
+      "name": "Y-Wing Fighter",
+      "kind": "Starfighter",
+      "weapons": [
+        {
+          "name": "Double Laser Cannon",
+          "count": "One",
+          "fireControl": "2D",
+          "damage": "5D"
+        },
+        {
+          "name": "Double Ion Cannon (pivot mount)",
+          "count": "One",
+          "fireControl": "1D",
+          "damage": "3D"
+        },
+        {
+          "name": "Proton Torpedoes",
+          "fireControl": "2D",
+          "damage": "9D"
+        }
+      ],
+      "description": "The Rebel Alliance's two-man starfighter. Each Y-wing seats two, a pilot and a gunner; the gunner controls a swivel ion cannon mounted on the canopy roof. Each has a Droid socket designed to hold an astromech Droid (Rebel Breakout).",
+      "book": "core",
+      "page": 108,
+      "scale": "Starship",
+      "crew": "2 (plus R2 unit)",
+      "passengers": "none",
+      "cargo": "110 kilograms",
+      "consumables": "1 week",
+      "hyperdrive": "x1",
+      "nav": "none (hyperdrive backups: none)",
+      "speed": "3D+2",
+      "maneuverability": "2D",
+      "hull": "4D+1",
+      "shields": "1D"
+    },
+    {
+      "name": "Landspeeder",
+      "kind": "Speeder",
+      "weapons": [],
+      "description": "Repulsorlift ground vehicle, operated with the repulsorlift craft operation skill. No stat block is printed in the core rulebook (the Star Wars Sourcebook provides speed codes for all vehicles); only the price is given on the Cost Chart. Ground vehicle hull codes are on a different scale from starships; damage: light (repair 10), heavy (speed -1D, repair 20), severe (stops, repair 30), destroyed (p.43).",
+      "book": "core",
+      "page": 141,
+      "cost": "10,000 credits (used: 2,000)",
+      "scale": "Ground vehicle"
+    },
+    {
+      "name": "Speeder Bike",
+      "kind": "Speeder",
+      "weapons": [],
+      "description": "One-man repulsorlift bike, operated with the repulsorlift craft operation skill. Only the price is printed on the Cost Chart; the chase example on p.35 gives speeder bikes a speed code of 2D. Support (repeating) blasters are frequently mounted on speeder bikes (p.52).",
+      "book": "core",
+      "page": 141,
+      "cost": "5,000 credits (used: 1000)",
+      "scale": "Ground vehicle",
+      "speed": "2D (chase example, p.35)"
+    }
+  ],
+  "characters": [
+    {
+      "name": "Standard Stormtrooper",
+      "group": "Imperial",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Strength": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "brawling 3D",
+        "blaster 4D (reduced to 3D by armor)",
+        "brawling parry 4D (reduced to 3D)",
+        "dodge 4D (reduced to 3D)",
+        "all other attributes and skills 2D"
+      ],
+      "equipment": [
+        "Stormtrooper armor (+1D: strength 2D counts as 3D for damage purposes; dexterity 2D and all dexterity skills reduced by 1D)",
+        "Stormtrooper blaster (damage 4D); blaster rifles (5D) are sometimes used"
+      ],
+      "book": "core",
+      "page": 84,
+      "description": "Quick-and-dirty stock character for minor Imperial troopers.",
+      "notes": "Loyalty: completely loyal to the Empire; cannot be bribed, seduced or blackmailed into betraying the Emperor. Can be conned and tricked, but they aren't stupid. Used to responding to orders instantly, so player characters dressed as officers (preferably with matching identification) and good command skills stand an excellent chance of bluffing past them. Not suicidal: they surrender when confronted with overwhelming force. Speech: voices are filtered through helmet speakers; cup your hands over your mouth when speaking as one."
+    },
+    {
+      "name": "Standard Human",
+      "group": "Civilian",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Strength": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "all skills 2D"
+      ],
+      "equipment": [],
+      "book": "core",
+      "page": 85,
+      "description": "Innocent bystanders and the like who have no particular importance to the plot but for whom you need to make skill rolls: assume John or Jane Doe has 2D in all attributes and skills.",
+      "notes": "The average player character attribute is 3D because player characters are heroes."
+    },
+    {
+      "name": "Standard Specialist",
+      "group": "Civilian",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Strength": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "any three skills 4D (the skills of his profession; many specialists have bargain as one of them)"
+      ],
+      "equipment": [],
+      "book": "core",
+      "page": 85,
+      "description": "Professional NPCs the player characters visit to purchase goods or services (repairmen, merchants, etc.). 4D is the skill of the average professional; on sophisticated planets, or for a higher fee, a specialist with a considerably higher skill can be found. Many employ specialty Droids who are even better with specific skills."
+    },
+    {
+      "name": "R2 Astromech Droid",
+      "group": "Droid",
+      "attributes": {
+        "Dexterity": 3,
+        "Knowledge": 3,
+        "Mechanical": 3,
+        "Perception": 3,
+        "Strength": 3,
+        "Technical": 3
+      },
+      "skills": [
+        "computer programming & repair 7D",
+        "starship repair 7D"
+      ],
+      "equipment": [
+        "Three wheeled legs (has problems with stairs)",
+        "Two arms, normally retracted inside body compartments: one heavy grasper, one for fine work",
+        "One video sensor (eye), extendable almost a meter from the main body",
+        "Small electric arc welder (starship repair; can be used in an emergency for defense)",
+        "Small buzz saw (starship repair)",
+        "Video screen for data display; can also project data as a holographic image",
+        "One small fire extinguisher"
+      ],
+      "book": "core",
+      "page": 83,
+      "description": "Height 1 meter (3' 2\"); weight 50 kilograms. All Droid attributes are 1D. Cost 1000 credits (Cost Chart).",
+      "notes": "R2 units are not equipped to communicate in Basic. They communicate with other machines by plugging into standard input-output ports and transmitting data, and have a 'beeps and whistles' language which many other Droids can interpret; with humans they normally display data on their video screens. An R2 can store pre-calculated coordinates for up to ten hyperdrive routes for an X-wing (p.58). Move 5 m per round, 10 m at top speed."
+    },
+    {
+      "name": "3PO Human-Cyborg Relations Droid",
+      "group": "Droid",
+      "attributes": {
+        "Dexterity": 3,
+        "Knowledge": 3,
+        "Mechanical": 3,
+        "Perception": 3,
+        "Strength": 3,
+        "Technical": 3
+      },
+      "skills": [
+        "languages 10D",
+        "cultures 4D"
+      ],
+      "equipment": [
+        "Two legs",
+        "Two arms",
+        "Two video sensors (eyes)",
+        "Speaker capable of providing an extraordinarily wide range of sounds"
+      ],
+      "book": "core",
+      "page": 83,
+      "description": "Height 1.7 meters (5' 6\"); weight 50 kilograms. All Droid attributes are 1D. Cost 2000 credits (Cost Chart).",
+      "notes": "Most Droids are programmed to avoid injuring humans and other sapients and will not do so even when ordered; unless a Droid has dice allocated to combat skills, it may not attempt to injure others. Move 5 m per round, 10 m at top speed."
+    },
+    {
+      "name": "Odeon Farnish, Customs Inspector",
+      "group": "Civilian",
+      "attributes": {},
+      "skills": [
+        "search 5D+1",
+        "bargain 4D",
+        "con 4D",
+        "bureaucracy 6D"
+      ],
+      "equipment": [],
+      "book": "core",
+      "page": 97,
+      "description": "Species: Lexlar, a three-foot-tall hair-covered hominid (looks like 'Cousin It'). Speech: always uses infinitives: 'To present your passport now, hairless one.' Example NPC from the adventure design chapter; only the codes he is expected to use are given.",
+      "notes": "Objective: willing to be bribed by serious smugglers. Wants promotion, so insists on searching everyone's bags and catching minor infractions. Zealous but greedy."
+    },
+    {
+      "name": "Mynock",
+      "group": "Creature",
+      "attributes": {
+        "Strength": 3,
+        "Dexterity": 9
+      },
+      "skills": [
+        "claws: damage 1D",
+        "bite: damage 2D"
+      ],
+      "equipment": [],
+      "book": "core",
+      "page": 102,
+      "description": "Silicon-based parasitic creatures that look like giant manta-rays, with black leathery wings; one of the few creatures that can live in outer space. They attach themselves to exposed power lines and passing starships and chew on the power cables (p.60). Alien knowledge rolls of 10 or better are needed to identify them.",
+      "notes": "Attack difficulty number 5 (hand-to-hand rules). PCs make opposed dexterity rolls against the Mynocks to act before they reach their targets. A Mynock that attaches its suction-cup mouth to a Droid or a blaster quickly drains half its energy; after two more rounds attached both are powerless. Shooting a Mynock attached to a PC or Droid requires 10 or better; misses hit the character under attack."
+    },
+    {
+      "name": "Stormtroopers (Rebel Breakout)",
+      "group": "Adventure",
+      "attributes": {
+        "Dexterity": 6,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Strength": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "brawling 3D",
+        "blaster 4D (reduced to 3D)",
+        "brawling parry 4D (reduced to 3D)",
+        "dodge 4D (reduced to 3D)",
+        "all other attributes and skills 2D"
+      ],
+      "equipment": [
+        "Stormtrooper armor (STR 2D counts as 3D for damage purposes; DEX 2D reduced to 1D)",
+        "Blaster",
+        "Medium repeat blaster emplacement at the mine entrance (damage 7D; difficulty to hit: point blank 5, short 10, medium 15, long 20)"
+      ],
+      "book": "core",
+      "page": 103,
+      "description": "Barezz commands a small stormtrooper squadron: three times as many stormtroopers as there are PCs (18 for six PCs). Tough, aggressive and persistent, not stupid; they know when to retreat and when to push forward.",
+      "notes": "Ordered to capture the PCs if possible for interrogation, but will do whatever is necessary to stop them escaping. If four or more are incapacitated or killed, the rest fall back to regroup."
+    },
+    {
+      "name": "Mar Barezz, ISB Agent",
+      "group": "Adventure",
+      "attributes": {
+        "Dexterity": 12,
+        "Strength": 11,
+        "Knowledge": 6,
+        "Mechanical": 6,
+        "Perception": 6,
+        "Technical": 6
+      },
+      "skills": [
+        "blaster 5D",
+        "brawling 5D+2",
+        "all other attributes 2D"
+      ],
+      "equipment": [
+        "Thermal detonator",
+        "Blaster"
+      ],
+      "book": "core",
+      "page": 106,
+      "description": "A cunning Imperial Security Bureau officer who guessed that the Rebel agent Tiree was recruiting Rebels at Mesa 291 and led a squadron of stormtroopers to the mine to capture them. Holds Imperial warrants charging the PCs with treason and taunts them over the mine's PA system.",
+      "notes": "Stays back out of sight and lets the troopers do the fighting; wants prisoners to interrogate. In Episode Three he jumps out wielding a thermal detonator and throws it at the PCs (difficulty 15 throw)."
+    },
+    {
+      "name": "R2-D0 'Deo'",
+      "group": "Adventure",
+      "attributes": {
+        "Dexterity": 3,
+        "Knowledge": 3,
+        "Mechanical": 3,
+        "Perception": 3,
+        "Strength": 3,
+        "Technical": 3
+      },
+      "skills": [
+        "as R2 astromech Droid: computer programming & repair 7D",
+        "starship repair 7D"
+      ],
+      "equipment": [
+        "Standard R2 astromech equipment",
+        "Infrared receptor",
+        "Built-in sensors"
+      ],
+      "book": "core",
+      "page": 103,
+      "description": "Tiree's trusted astromech Droid, the main NPC of Rebel Breakout. Bright, but stubborn and hard-headed; feels a wide range of emotions and expresses them through beeps, whistles, whines and shrieks. Knows the way to the hidden escape ship (he thinks) and carries the hyperspace jump coordinates to a Rebel base.",
+      "notes": "Will never purposely injure the PCs or endanger himself, though if threatened he may charge into a pack of stormtroopers. Through a computer port he can access the mine's PA system, display a partial map, open closed blast doors, track nearby stormtroopers, jam comlinks, estimate the depth of the main shaft, control the shaft winches and emergency systems. A Mynock attached to him drains half his energy; PCs can recharge him with a live power cable and a moderate Technical roll (15). Only by fitting into a Y-wing's Droid socket can he feed the jump coordinates to the fighters' nav computers."
+    },
+    {
+      "name": "Tiree, Rebel Agent",
+      "group": "Adventure",
+      "attributes": {},
+      "skills": [],
+      "equipment": [
+        "Smouldering flight suit",
+        "Shuttle (wrecked)",
+        "Four hidden Y-wing starfighters"
+      ],
+      "book": "core",
+      "page": 107,
+      "description": "The Rebel agent who told the PCs to meet him at Mesa 291 on Bothan's Planet and promised to fly them to a Rebel base. When the ISB broke his cover he left his astromech Droid and supplies in the mine and drew the Imperials away in his shuttle; two AT-ATs damaged it and he crash-landed in the cavern. Found wounded (grievous injuries) beside a computer port; a moderate medical roll (15) rouses him so he can walk on his own. No attribute or skill codes are printed.",
+      "notes": "After the escape he is placed in a bacta rejuve tank at the secret Rebel base."
+    }
+  ],
+  "force": [],
+  "tables": {}
+}

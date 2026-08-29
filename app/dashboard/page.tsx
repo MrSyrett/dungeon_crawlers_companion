@@ -82,6 +82,17 @@ const NIM_REFERENCE: { href: string; label: string }[] = [
   { href: "/nimble/rules", label: "Rules" },
 ];
 
+// Star Wars (WEG 1e + Rules Companion) reference pages.
+const SW_REFERENCE: { href: string; label: string }[] = [
+  { href: "/sw/templates", label: "Templates" },
+  { href: "/sw/skills", label: "Skills" },
+  { href: "/sw/equipment", label: "Equipment" },
+  { href: "/sw/starships", label: "Starships" },
+  { href: "/sw/characters", label: "Characters" },
+  { href: "/sw/force", label: "The Force" },
+  { href: "/sw/rules", label: "Rules" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
@@ -89,6 +100,7 @@ const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   ACE: ACE_REFERENCE,
   KOB: KOB_REFERENCE,
   NIM: NIM_REFERENCE,
+  SW: SW_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

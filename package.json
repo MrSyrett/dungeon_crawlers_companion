@@ -17,6 +17,7 @@
     "data:ace": "node scripts/build-ace-data.mjs",
     "data:kob": "node scripts/build-kob-data.mjs",
     "data:nimble": "node scripts/build-nimble-data.mjs",
+    "data:sw": "node scripts/build-sw-data.mjs",
     "tools:session-builders": "node scripts/make-session-builders.mjs"
   },
   "engines": {
