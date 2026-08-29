@@ -414,7 +414,8 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 .fl-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:#f0e2b0;margin-top:2px;}
 .fl-desc,.sys-body{font-size:11px;color:#b7a98a;margin-top:2px;line-height:1.4;}
 .fl-items{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
-.fl-item{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:11px;color:#cfc6a8;}
+.fl-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:11px;color:#cfc6a8;}
+.fl-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9a9a78;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
 .fl-item-name{flex:1;min-width:0;}
 .fl-note{color:#8a8570;font-style:italic;}
 .fl-btn{flex:0 0 auto;background:#c8a020;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
@@ -3271,15 +3272,16 @@ function renderFoundLoot(roll){
   const items = Array.isArray(p.items) ? p.items : [];
   const dropId = p.dropId || ('fl-' + (roll.id || Math.random().toString(36).slice(2)));
   const claimed = _flClaimed(dropId), me = campaignPlayerName();
+  const mode = p.mode || 'claim', to = String(p.to || '').trim(), mine = mode !== 'named' || (!!me && to.toLowerCase() === me.toLowerCase());
   const div = document.createElement('div');
-  div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div._flItems = items;
+  div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div.dataset.mode = mode; div._flItems = items;
   const rows = items.map((it, i) => {
     const by = claimed[i];
     const label = _lootEsc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + _lootEsc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + _lootEsc(it.notes) + '</span>' : '');
-    const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + _lootEsc(by)) + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
+    const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + _lootEsc(by)) + '</button>' : !mine ? '<button class="fl-btn" disabled>For ' + _lootEsc(to || 'someone else') + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
     return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
   }).join('');
-  div.innerHTML = '<div class="fl-head">🎁 ' + _lootEsc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + _lootEsc(roll.result) + '</div>' : '') + (p.note ? '<div class="fl-desc">' + _lootEsc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  div.innerHTML = '<div class="fl-head">🎁 ' + _lootEsc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + _lootEsc(roll.result) + '</div>' : '') + (mode === 'named' ? '<div class="fl-for">For: ' + _lootEsc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '') + (p.note ? '<div class="fl-desc">' + _lootEsc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
   return div;
 }
 function _flRenderSystemEntryUnused(roll){
@@ -3290,8 +3292,10 @@ function _flRenderSystemEntryUnused(roll){
 function applyFoundClaim(roll){
   let p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e) { return; }
   if(!p.dropId || p.itemIndex == null) return;
+  if(p.mode === 'copies' || _flDropMode(p.dropId) === 'copies') return;   // everyone gets their own copy — nothing to lock
   _flMarkClaimed(p.dropId, p.itemIndex, p.by || roll.source || 'Someone'); _flRefreshCard(p.dropId);
 }
+function _flDropMode(dropId){ const card = [...document.querySelectorAll('.log-foundloot')].find(c => c.dataset.dropId === dropId); return card ? (card.dataset.mode || 'claim') : 'claim'; }
 function _flRefreshCard(dropId){
   const card = [...document.querySelectorAll('.log-foundloot')].find(c => c.dataset.dropId === dropId); if(!card) return;
   const claimed = _flClaimed(dropId), me = campaignPlayerName();
@@ -3306,7 +3310,7 @@ document.getElementById('log-entries').addEventListener('click', function(e) {
   const it = (card._flItems || [])[idx]; if(!it) return;
   if(lootAddItems([it]) === false) return;
   const me = campaignPlayerName(); _flMarkClaimed(dropId, idx, me); _flRefreshCard(dropId);
-  if(typeof campaignBroadcast === 'function') campaignBroadcast('CLAIMED', it.item || 'Item', JSON.stringify({ dropId, itemIndex: idx, by: me }), 'lootclaim');
+  if(typeof campaignBroadcast === 'function') campaignBroadcast('CLAIMED', it.item || 'Item', JSON.stringify({ dropId, itemIndex: idx, by: me, mode: card.dataset.mode || 'claim' }), 'lootclaim');
   if(typeof scheduleAutosave === "function") scheduleAutosave();
 });
 

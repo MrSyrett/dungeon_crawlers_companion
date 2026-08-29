@@ -1123,7 +1123,8 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .dice-log-entry .fl-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800; color: #f0e2b0; margin-top: 2px; }
 .dice-log-entry .fl-body { font-size: 11px; color: #d8d2c0; margin-top: 3px; line-height: 1.45; }
 .dice-log-entry .fl-items { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
-.dice-log-entry .fl-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; color: #cfc6a8; }
+.dice-log-entry .fl-item { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; font-size: 11px; color: #cfc6a8; }
+.dice-log-entry .fl-for { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; color: #9a9a78; text-transform: uppercase; letter-spacing: .08em; margin-top: 2px; }
 .dice-log-entry .fl-note { color: #8a8570; font-style: italic; }
 .dice-log-entry .fl-by { flex: 0 0 auto; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8a8570; border: 1px solid #4a463a; border-radius: 3px; padding: 2px 6px; }
 .dice-log-entry .fl-by.open { color: #c8a020; border-color: #7a5a00; }
@@ -2634,17 +2635,6 @@ GMScenes.renderPins();
             <div class="ai-cat-results"></div>
             <table class="ai-items"><tbody class="ai-items-body"></tbody></table>
             <button class="btn small ghost ai-add-row" type="button">+ Add custom item</button>
-            <div class="ai-row" style="margin-top:8px">
-              <select class="ai-select ai-box-mode" title="Who can open this box">
-                <option value="copies">Everyone gets a copy</option>
-                <option value="named">Only a named player</option>
-                <option value="claim">First to claim it</option>
-              </select>
-              <select class="ai-select ai-box-to" title="Which player can open it" style="display:none;">
-                <option value="">— choose a player —</option>
-              </select>
-              <button class="btn small ghost ai-party-refresh" type="button" title="Refresh the party list" style="display:none;">↻</button>
-            </div>
             <button class="btn small primary ai-send-box" type="button">Send Loot Box</button>
             <div class="ai-status ai-box-status"></div>
           </div>
@@ -10677,7 +10667,12 @@ function init_dice(root) {
     if(roll && roll.type === 'lootclaim') {
       let pc = {}; try { pc = JSON.parse(roll.detail || '{}'); } catch(e) { pc = {}; }
       const drop = log.find(e => e.payload && (e.payload.dropId === pc.dropId || e.payload.boxId === pc.boxId));
-      if(drop) { drop.claimed = drop.claimed || {}; drop.claimed[pc.itemIndex == null ? 'all' : pc.itemIndex] = pc.by || roll.source || 'Someone'; queueRenderLog(); }
+      if(drop) {
+        const key = pc.itemIndex == null ? 'all' : pc.itemIndex, who = pc.by || roll.source || 'Someone';
+        if(pc.mode === 'copies' || (drop.payload && drop.payload.mode === 'copies')) { drop.taken = drop.taken || {}; const l = drop.taken[key] = drop.taken[key] || []; if(!l.some(n => n.toLowerCase() === who.toLowerCase())) l.push(who); }
+        else { drop.claimed = drop.claimed || {}; drop.claimed[key] = who; }
+        queueRenderLog();
+      }
       return;
     }
     const special = roll.type === 'foundloot' || roll.type === 'lootbox' || roll.type === 'system' || roll.type === 'achievement';
@@ -10789,14 +10784,18 @@ function init_dice(root) {
     const esc = v => String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
     logEl.innerHTML = log.map(e=>{
       if(e.type === 'foundloot' || e.type === 'lootbox') {
-        const p = e.payload || {}, items = Array.isArray(p.items) ? p.items : [], claimed = e.claimed || {};
+        const p = e.payload || {}, items = Array.isArray(p.items) ? p.items : [], claimed = e.claimed || {}, taken = e.taken || {};
+        const mode = p.mode || (e.type === 'lootbox' ? 'copies' : 'claim'), to = String(p.to || '').trim();
+        const forLine = mode === 'named' ? '<div class="fl-for">For: ' + esc(to || '?') + '</div>' : mode === 'copies' ? '<div class="fl-for">A copy for everyone</div>' : '<div class="fl-for">First to claim</div>';
         const rows = items.map((it, i) => {
-          const by = claimed[i] || claimed.all;
-          return '<li class="fl-item"><span>' + esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + '</span>'
-            + '<span class="fl-by' + (by ? '' : ' open') + '">' + (by ? 'Claimed by ' + esc(by) : 'Unclaimed') + '</span></li>';
+          const by = claimed[i] || claimed.all, took = (taken[i] || []).concat(taken.all || []);
+          const chip = mode === 'copies'
+            ? '<span class="fl-by' + (took.length ? '' : ' open') + '">' + (took.length ? 'Taken by ' + esc(took.join(', ')) : 'Not taken yet') + '</span>'
+            : '<span class="fl-by' + (by ? '' : ' open') + '">' + (by ? (e.type === 'lootbox' && mode !== 'claim' ? 'Opened by ' : 'Claimed by ') + esc(by) : 'Unclaimed') + '</span>';
+          return '<li class="fl-item"><span>' + esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + '</span>' + chip + '</li>';
         }).join('');
         return '<div class="dice-log-entry foundloot"><div class="fl-head">🎁 ' + esc(e.source ? e.source + ' · ' : '') + esc(e.label || 'FOUND LOOT') + '</div>'
-          + (e.total ? '<div class="fl-name">' + esc(e.total) + '</div>' : '') + (p.note ? '<div class="fl-body">' + esc(p.note) + '</div>' : '')
+          + (e.total ? '<div class="fl-name">' + esc(e.total) + '</div>' : '') + forLine + (p.note ? '<div class="fl-body">' + esc(p.note) + '</div>' : '')
           + (rows ? '<ul class="fl-items">' + rows + '</ul>' : (e.type === 'lootbox' ? '<div class="fl-body">' + esc(e.detail) + '</div>' : '')) + '</div>';
       }
       if(e.type === 'system' || e.type === 'achievement') {
@@ -11903,6 +11902,55 @@ function wireAiConsole(root) {
     return out;
   }
 
+  // ── Shared "who gets it" control for every loot/gear/treasure builder ──
+  // Three modes: `named` (one player, picked from the campaign roster),
+  // `copies` (every player can take their own copy), `claim` (everyone sees it,
+  // first to claim each item gets it). The roster is fetched once and shared.
+  let _partyNames = null, _partyPending = null;
+  function partyName(entry){ const d=(entry&&entry.sheet&&typeof entry.sheet==='object')?entry.sheet:entry; if(!d)return ''; if(d.header&&d.header['f-name'])return String(d.header['f-name']).trim(); return String(d.name||(entry&&entry.name)||'').trim(); }
+  function loadParty(force){
+    const camp=(typeof GMCamp!=='undefined')?GMCamp.get():null;
+    if(!camp||!camp.id) return Promise.resolve({ names:[], msg:'Link a campaign to load the party.' });
+    if(_partyNames&&!force) return Promise.resolve({ names:_partyNames, msg:'' });
+    if(_partyPending&&!force) return _partyPending;
+    _partyPending = fetch('/api/campaigns/'+camp.id+'/characters',{credentials:'same-origin'})
+      .then(r=>r&&r.ok?r.text():null)
+      .then(text=>{ if(text==null) return { names:[], msg:'Could not load the party.' }; let data;try{data=JSON.parse(text);}catch(e){data=null;}
+        const list=Array.isArray(data)?data:(data&&data.characters)||[];
+        const names=list.map(partyName).filter(Boolean).filter((n,i,a)=>a.findIndex(x=>x.toLowerCase()===n.toLowerCase())===i).sort((a,b)=>a.localeCompare(b,'en'));
+        _partyNames=names; return { names, msg: names.length?'':'No one has linked a character to this campaign yet.' }; })
+      .catch(()=>({ names:[], msg:'Could not load the party.' }))
+      .then(res=>{ _partyPending=null; return res; });
+    return _partyPending;
+  }
+  function wireSendMode(modeSel, toSel, refreshBtn, statusEl){
+    if(!modeSel||!toSel) return { mode:()=>'claim', to:()=>'', reset(){} };
+    function setParty(names, emptyMsg){
+      const keep=toSel.value;
+      toSel.innerHTML='<option value="">— choose a player —</option>'+names.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join('')+(names.length?'':'<option value="" disabled>'+esc(emptyMsg||'No players')+'</option>');
+      if(keep&&names.some(n=>n===keep)) toSel.value=keep;
+      if(emptyMsg&&!names.length) setStatus(statusEl,emptyMsg,'');
+    }
+    const fill=force=>loadParty(force).then(r=>setParty(r.names,r.msg));
+    function sync(){ const named=modeSel.value==='named'; toSel.style.display=named?'':'none'; if(refreshBtn) refreshBtn.style.display=named?'':'none'; if(named) fill(false); }
+    modeSel.addEventListener('change', sync); sync();
+    if(refreshBtn) refreshBtn.addEventListener('click', ()=>fill(true));
+    return { mode:()=>modeSel.value||'claim', to:()=>(modeSel.value==='named'?toSel.value.trim():''), reset(){ if(modeSel.value==='named') toSel.value=''; } };
+  }
+  // Human wording for a send confirmation.
+  const modeWho = (mode,to) => mode==='named'?('for '+to):mode==='claim'?'(first to claim)':'(a copy for everyone)';
+  const MODE_HTML = '<div class="ai-row" style="margin-top:8px">'
+    + '<select class="ai-select ai-send-mode" title="Who gets it"><option value="claim">Everyone — first to claim</option><option value="copies">Everyone gets a copy</option><option value="named">Only a named player</option></select>'
+    + '<select class="ai-select ai-send-to" title="Which player" style="display:none;"><option value="">— choose a player —</option></select>'
+    + '<button class="btn small ghost ai-send-refresh" type="button" title="Refresh the party list" style="display:none;">↻</button></div>';
+  // Drop the shared mode row just above a builder's Send button.
+  function mountSendMode(sendBtn, statusEl){
+    if(!sendBtn) return wireSendMode(null);
+    const wrap=document.createElement('div'); wrap.innerHTML=MODE_HTML; const row=wrap.firstChild;
+    sendBtn.parentNode.insertBefore(row, sendBtn);
+    return wireSendMode(row.querySelector('.ai-send-mode'), row.querySelector('.ai-send-to'), row.querySelector('.ai-send-refresh'), statusEl);
+  }
+
   // ── Generic catalog picker: browse by category chips, search, or add custom ──
   function buildPicker(cfg) {
     let filterKey = 'all';
@@ -12009,8 +12057,8 @@ function wireAiConsole(root) {
   const boxName=root.querySelector('.ai-box-name'), boxTier=root.querySelector('.ai-box-tier'), rollTier=root.querySelector('.ai-roll-tier');
   const enchCat=root.querySelector('.ai-ench-cat'), enchRoll=root.querySelector('.ai-ench-roll');
   const itemsBody=root.querySelector('.ai-items-body'), addRow=root.querySelector('.ai-add-row');
-  const boxMode=root.querySelector('.ai-box-mode'), boxTo=root.querySelector('.ai-box-to'), partyRefresh=root.querySelector('.ai-party-refresh');
   const sendBox=root.querySelector('.ai-send-box'), boxStatus=root.querySelector('.ai-box-status');
+  const boxSend=mountSendMode(sendBox, boxStatus);
   addRow.addEventListener('click', () => makeRow(itemsBody, '', '', ''));
   buildPicker({ filters:root.querySelector('.ai-cat-filters'), search:root.querySelector('.ai-cat-search'), results:root.querySelector('.ai-cat-results'), groups:DCC_GROUPS,
     catalog: () => ((typeof DCC_ITEMS!=='undefined'?DCC_ITEMS:[]).concat(Array.isArray(window.__DCC_HB_ITEMS)?window.__DCC_HB_ITEMS:[])),
@@ -12047,44 +12095,19 @@ function wireAiConsole(root) {
     makeRow(itemsBody, e.name, 1, e.effect, { category: e.category, slot: e.slot });
     setStatus(boxStatus, 'Enchanted a '+e.base+' — edit the name/perks, then send.', 'ok');
   });
-  // Party dropdown — the campaign roster (same source as the Party tool).
-  function partyName(entry){ const d=(entry&&entry.sheet&&typeof entry.sheet==='object')?entry.sheet:entry; if(!d)return ''; if(d.header&&d.header['f-name'])return String(d.header['f-name']).trim(); return String(d.name||(entry&&entry.name)||'').trim(); }
-  let partyLoaded=false;
-  function fetchParty(force){
-    const camp=(typeof GMCamp!=='undefined')?GMCamp.get():null;
-    if(!camp||!camp.id){ setParty([],'Link a campaign to load the party.'); return; }
-    if(partyLoaded&&!force) return;
-    fetch('/api/campaigns/'+camp.id+'/characters',{credentials:'same-origin'})
-      .then(r=>r&&r.ok?r.text():null)
-      .then(text=>{ if(text==null){setParty([],'Could not load the party.');return;} let data;try{data=JSON.parse(text);}catch(e){data=null;}
-        const list=Array.isArray(data)?data:(data&&data.characters)||[];
-        const names=list.map(partyName).filter(Boolean).filter((n,i,a)=>a.findIndex(x=>x.toLowerCase()===n.toLowerCase())===i).sort((a,b)=>a.localeCompare(b,'en'));
-        partyLoaded=true; setParty(names, names.length?'':'No one has linked a character to this campaign yet.'); })
-      .catch(()=>setParty([],'Could not load the party.'));
-  }
-  function setParty(names, emptyMsg){
-    const keep=boxTo.value;
-    boxTo.innerHTML='<option value="">— choose a player —</option>'+names.map(n=>'<option value="'+esc(n).replace(/"/g,'&quot;')+'">'+esc(n)+'</option>').join('')+(names.length?'':'<option value="" disabled>'+esc(emptyMsg||'No players')+'</option>');
-    if(keep&&names.some(n=>n===keep)) boxTo.value=keep;
-    if(emptyMsg&&!names.length) setStatus(boxStatus,emptyMsg,'');
-  }
-  partyRefresh.addEventListener('click', ()=>fetchParty(true));
-  function syncMode(){ const named=boxMode.value==='named'; boxTo.style.display=named?'':'none'; partyRefresh.style.display=named?'':'none'; if(named) fetchParty(false); }
-  boxMode.addEventListener('change', syncMode); syncMode();
   sendBox.addEventListener('click', () => {
     if(!canSend()){ setStatus(boxStatus,'Link a campaign first (top bar) to send loot.','err'); return; }
     const items=readRows(itemsBody).slice(0,12);
     if(!items.length){ setStatus(boxStatus,'Add at least one item to the box.','err'); return; }
-    const mode=boxMode.value, to=(mode==='named')?boxTo.value.trim():'';
+    const mode=boxSend.mode(), to=boxSend.to();
     if(mode==='named'&&!to){ setStatus(boxStatus,'Choose the player who can open it.','err'); return; }
     const name=boxName.value.trim()||'Loot Box';
     const boxId='lb-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
     const detail=JSON.stringify({boxId,mode,to,items});
     if(detail.length>2000){ setStatus(boxStatus,'Too many items — remove a few and resend.','err'); return; }
     GMCamp.send({type:'lootbox',label:'LOOT BOX',result:name,detail});
-    const who=mode==='named'?('for '+to):mode==='claim'?'(first to claim)':'(a copy for everyone)';
-    setStatus(boxStatus,'Sent “'+name+'” '+who+'.','ok');
-    itemsBody.innerHTML=''; boxName.value=''; if(mode==='named') boxTo.value='';
+    setStatus(boxStatus,'Sent “'+name+'” '+modeWho(mode,to)+'.','ok');
+    itemsBody.innerHTML=''; boxName.value=''; boxSend.reset();
   });
   } // end DCC Loot Box builder
 
@@ -12110,6 +12133,7 @@ function wireAiConsole(root) {
   const flBody=root.querySelector('.ai-fl-body'), flAdd=root.querySelector('.ai-fl-add'), flMagic=root.querySelector('.ai-fl-magic');
   const flSend=root.querySelector('.ai-fl-send'), flStatus=root.querySelector('.ai-fl-status');
   const flTier = root.querySelector('.ai-fl-tier');
+  const flSendMode = mountSendMode(flSend, flStatus);
   flAdd.addEventListener('click', ()=>makeRow(flBody,'','',''));
   buildPicker({ filters:root.querySelector('.ai-fl-filters'), search:root.querySelector('.ai-fl-search'), results:root.querySelector('.ai-fl-results'), groups:SD_GROUPS,
     catalog: sdCatalog,
@@ -12155,12 +12179,14 @@ function wireAiConsole(root) {
     const items=readRows(flBody).slice(0,14);
     if(!items.length){ setStatus(flStatus,'Add at least one item to the drop.','err'); return; }
     const name=flName.value.trim();
+    const mode=flSendMode.mode(), to=flSendMode.to();
+    if(mode==='named'&&!to){ setStatus(flStatus,'Choose the player who gets it.','err'); return; }
     const dropId='fl-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-    const detail=JSON.stringify({dropId,items});
+    const detail=JSON.stringify({dropId,mode,to,items});
     if(detail.length>2000){ setStatus(flStatus,'Too many items — remove a few and resend.','err'); return; }
     GMCamp.send({type:'foundloot',label:'TREASURE',result:name||'Treasure',detail});
-    setStatus(flStatus,'Sent '+items.length+' item'+(items.length===1?'':'s')+' for the party to claim.','ok');
-    flBody.innerHTML=''; flName.value='';
+    setStatus(flStatus,'Sent '+items.length+' item'+(items.length===1?'':'s')+' '+modeWho(mode,to)+'.','ok');
+    flBody.innerHTML=''; flName.value=''; flSendMode.reset();
   });
   } // end Treasure builder
 
@@ -12191,6 +12217,7 @@ function wireAiConsole(root) {
     const q = sel => panel.querySelector(sel);
     const trName = q('.xs-tr-name'), trRoll = q('.xs-tr-roll'), trType = q('.xs-tr-type'), trCount = q('.xs-tr-count'), trTier = q('.xs-tr-tier');
     const trBody = q('.xs-tr-body'), trAdd = q('.xs-tr-add'), trSend = q('.xs-tr-send'), trStatus = q('.xs-tr-status'), trCredits = q('.xs-tr-credits');
+    const trSendMode = mountSendMode(trSend, trStatus);
     trAdd.addEventListener('click', () => makeRow(trBody, '', '', ''));
     buildPicker({ filters: q('.xs-tr-filters'), search: q('.xs-tr-search'), results: q('.xs-tr-results'), groups: cfg.groups,
       catalog: () => cfg.list().map(g => ({ name: g.name, category: g.category, slot: '', tier: g.setting && g.setting !== 'core' ? g.setting : '', effect: g.desc })),
@@ -12219,12 +12246,14 @@ function wireAiConsole(root) {
       const items = readRows(trBody).slice(0, 14);
       if(!items.length) { setStatus(trStatus, 'Add at least one item to the drop.', 'err'); return; }
       const name = trName.value.trim();
+      const mode = trSendMode.mode(), to = trSendMode.to();
+      if(mode === 'named' && !to) { setStatus(trStatus, 'Choose the player who gets it.', 'err'); return; }
       const dropId = 'fl-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      const detail = JSON.stringify({ dropId, items, sys: panel.dataset.sys });
+      const detail = JSON.stringify({ dropId, mode, to, items, sys: panel.dataset.sys });
       if(detail.length > 2000) { setStatus(trStatus, 'Too many items — remove a few and resend.', 'err'); return; }
       GMCamp.send({ type: 'foundloot', label: cfg.label, result: name || cfg.label.charAt(0) + cfg.label.slice(1).toLowerCase(), detail });
-      setStatus(trStatus, 'Sent ' + items.length + ' item' + (items.length === 1 ? '' : 's') + ' for the party to claim.', 'ok');
-      trBody.innerHTML = ''; trName.value = '';
+      setStatus(trStatus, 'Sent ' + items.length + ' item' + (items.length === 1 ? '' : 's') + ' ' + modeWho(mode, to) + '.', 'ok');
+      trBody.innerHTML = ''; trName.value = ''; trSendMode.reset();
     });
   });
 
