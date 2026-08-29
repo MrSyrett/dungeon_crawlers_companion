@@ -1,0 +1,2698 @@
+{
+  "skills": [],
+  "templates": [],
+  "weapons": [
+    {
+      "name": "Black-Powder Pistol",
+      "kind": "Slugthrower",
+      "damage": 8,
+      "damageText": "2D+2",
+      "skill": "firearms",
+      "cost": "200",
+      "availability": "2, R — large cities and space ports; restricted (license required)",
+      "notes": "Primitive slugthrower, almost never used by modern armies: ineffective against projectile shielding and even the weakest modern armor, and prone to running out of ammunition at awkward moments. Found on primitive settlement planets and in pre-atomic cultures; Rebels occasionally use them for shock value (extraordinarily loud).",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Musket",
+      "kind": "Slugthrower",
+      "damage": 9,
+      "damageText": "3D",
+      "skill": "firearms",
+      "cost": "250",
+      "availability": "2, R",
+      "notes": "Primitive slugthrower (see Black-Powder Pistol).",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Slugthrower",
+      "kind": "Slugthrower",
+      "damage": 9,
+      "damageText": "3D",
+      "skill": "firearms",
+      "cost": "275",
+      "availability": "2, R",
+      "notes": "Generic projectile weapon; ineffective against modern armor and projectile shielding.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Rifle",
+      "kind": "Slugthrower",
+      "damage": 10,
+      "damageText": "3D+1",
+      "skill": "firearms",
+      "cost": "300",
+      "availability": "2, R",
+      "notes": "Projectile rifle, used on wilderness farms and homesteads to hunt game for food and pelts.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Submachinegun",
+      "kind": "Slugthrower",
+      "damage": 12,
+      "damageText": "4D",
+      "skill": "firearms",
+      "cost": "600",
+      "availability": "2, R",
+      "notes": "Primitive automatic slugthrower.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Hold-out Blaster",
+      "kind": "Blaster",
+      "damage": 10,
+      "damageText": "3D+1",
+      "skill": "blaster",
+      "cost": "300",
+      "availability": "2, R",
+      "notes": "Concealable 'hold-out' pistol. Blasters fire coherent packets of intense light energy; on the highest setting a blaster vaporizes almost any material it hits, and most have an intensity setting from stun to full power.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Sporting Blaster",
+      "kind": "Blaster",
+      "damage": 10,
+      "damageText": "3D+1",
+      "skill": "blaster",
+      "cost": "300",
+      "availability": "2, R",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Blaster Pistol",
+      "kind": "Blaster",
+      "damage": 12,
+      "damageText": "4D",
+      "skill": "blaster",
+      "cost": "500",
+      "availability": "1, R — readily available; restricted",
+      "notes": "The standard weapon of the Imperial military and the civilian community. Top-line makers: Merr-Sonn Munitions, SoroSuub Corporation (both exclusive Imperial suppliers) and BlasTech Industries (sells to anyone). Powered by miniature energy cells (power packs).",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Heavy Blaster Pistol",
+      "kind": "Blaster",
+      "damage": 15,
+      "damageText": "5D",
+      "skill": "blaster",
+      "cost": "750",
+      "availability": "2, X — illegal",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Hunting Blaster",
+      "kind": "Blaster",
+      "damage": 12,
+      "damageText": "4D",
+      "skill": "blaster",
+      "cost": "500",
+      "availability": "2, F — fee or permit required",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Blaster Rifle",
+      "kind": "Blaster",
+      "damage": 15,
+      "damageText": "5D",
+      "skill": "blaster",
+      "cost": "1000",
+      "availability": "2, X — illegal",
+      "notes": "Stormtrooper blaster rifle damage is 5D.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Blaster Carbine",
+      "kind": "Blaster",
+      "damage": 15,
+      "damageText": "5D",
+      "skill": "blaster",
+      "cost": "900",
+      "availability": "1, R",
+      "notes": "Light carbine; can be topped with a vibrobayonet.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Repeating Blaster",
+      "kind": "Blaster",
+      "damage": 18,
+      "damageText": "6D",
+      "skill": "blaster",
+      "cost": "2000",
+      "availability": "2, X — illegal",
+      "notes": "Larger blasters may require a crew and come with their own shield generators and targeting computers; powered by portable generators or energy spectrum converters.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Medium Repeat Blaster",
+      "kind": "Blaster",
+      "damage": 21,
+      "damageText": "7D",
+      "skill": "blaster",
+      "cost": "3000",
+      "availability": "2, X — illegal",
+      "page": 96,
+      "notes": "Listed on the Equipment Cost Chart as \"Medium Repeating Blaster\".",
+      "book": "sourcebook"
+    },
+    {
+      "name": "Heavy Repeat Blaster",
+      "kind": "Blaster",
+      "damage": 24,
+      "damageText": "8D",
+      "skill": "blaster",
+      "cost": "5000",
+      "availability": "2, R",
+      "page": 96,
+      "notes": "Listed on the Equipment Cost Chart as \"Heavy Repeating Blaster\".",
+      "book": "sourcebook"
+    },
+    {
+      "name": "Stun Pistol",
+      "kind": "Blaster",
+      "damage": 9,
+      "damageText": "3D (stun damage only)",
+      "skill": "blaster",
+      "cost": "200",
+      "availability": "1, F — fee or permit required",
+      "notes": "BlasTech's underpowered personal-defense blaster with a single power setting, used to knock an opponent unconscious rather than kill. Quieter than blasters — useful for undercover agents and commandos on stealth missions.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Riot Gun",
+      "kind": "Blaster",
+      "damage": 24,
+      "damageText": "8D (stun damage only)",
+      "skill": "blaster",
+      "cost": "750",
+      "availability": "2, R",
+      "notes": "Large tripod-mounted stun gun with a wide area of effect, used by police and peace-keeping forces for crowd control.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Crossbow",
+      "kind": "Archaic",
+      "damage": 8,
+      "damageText": "2D+2",
+      "skill": "bowcaster / archaic weapons",
+      "cost": "200",
+      "availability": "1, F",
+      "page": 96,
+      "notes": "Listed with the longbow on the Equipment Cost Chart (2D+2, 200 credits, 1, F).",
+      "book": "sourcebook"
+    },
+    {
+      "name": "Longbow",
+      "kind": "Archaic",
+      "damage": 8,
+      "damageText": "2D+2",
+      "skill": "bowcaster / archaic weapons",
+      "cost": "200",
+      "availability": "1, F",
+      "page": 96,
+      "notes": "Listed with the crossbow on the Equipment Cost Chart (2D+2, 200 credits, 1, F).",
+      "book": "sourcebook"
+    },
+    {
+      "name": "Wookiee Bowcaster",
+      "kind": "Archaic",
+      "damage": 12,
+      "damageText": "4D",
+      "skill": "bowcaster",
+      "cost": "900",
+      "availability": "3, R — available only on the planet of origin; restricted",
+      "notes": "Essentially a crossbow that fires explosive 'quarrels' powered by the same source as blasters, so the bolt looks like an elongated blaster bolt. Requires great strength to cock, making it of little use to weaker species.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Club",
+      "kind": "Melee",
+      "damage": 3,
+      "damageText": "Str+1D",
+      "skill": "melee weapons",
+      "cost": "15",
+      "availability": "1",
+      "notes": "Difficulty to hit: 5. Clubs, staves, maces and swords are of little use against high-tech armor and powered weapons; a few skilled martial artists (especially aliens) wield them effectively. Listed on the Equipment Cost Chart as \"Staff or Club\".",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Spear",
+      "kind": "Melee",
+      "damage": 4,
+      "damageText": "Str+1D+1",
+      "skill": "melee weapons",
+      "cost": "60",
+      "availability": "1",
+      "notes": "Difficulty to hit: 10.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Gaderffii (Gaffi Stick)",
+      "kind": "Melee",
+      "damage": 3,
+      "damageText": "Str+1D",
+      "skill": "melee weapons",
+      "cost": "50",
+      "availability": "3 — only on the planet of origin (Tatooine)",
+      "notes": "Difficulty to hit: 5. Double-edged axe of scrap alloys and composites carried by the Tusken Raiders; each is handmade and no two are identical — smooth or jagged blades, pointed tips and hooks. 'Gaffi stick' has become slang for any mean-looking large non-powered weapon.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Knife (with self-sharpening sheath)",
+      "kind": "Melee",
+      "damage": 1,
+      "damageText": "Str+1",
+      "skill": "melee weapons",
+      "cost": "25",
+      "availability": "1",
+      "notes": "Difficulty to hit: 5. Unregulated on most planets and easily concealed; hardened plastic, ceramic and fiber-alloy knives are sharper than metal, never rust, are non-conducting and hard to detect with sensors. Completely silent, but must be used within about a meter; balanced knives can be thrown accurately up to 10 meters.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Hatchet (with self-sharpening sheath)",
+      "kind": "Melee",
+      "damage": 2,
+      "damageText": "Str+2",
+      "skill": "melee weapons",
+      "cost": "35",
+      "availability": "1",
+      "notes": "Difficulty to hit: 10.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Bayonet (with self-sharpening sheath)",
+      "kind": "Melee",
+      "damage": 3,
+      "damageText": "Str+1D",
+      "skill": "melee weapons",
+      "cost": "75",
+      "availability": "2, F",
+      "notes": "Difficulty to hit: 10. Snaps, twists, screws or locks onto a rifle barrel to make a short spear — a last-ditch weapon for troops out of ammunition; ceremonial in most modern armies. Stormtroopers seldom use them because they seldom run out of ammunition or get overrun.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Vibroaxe",
+      "kind": "Melee",
+      "damage": 6,
+      "damageText": "Str+2D",
+      "skill": "melee weapons",
+      "cost": "500",
+      "availability": "2, R",
+      "notes": "Difficulty to hit: 15. Vibro-weapons use an ultrasonic generator in the handle to make thousands of tiny vibrations along the edge every second, cutting most materials with slight pressure; a low audible hum when on.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Vibroblade",
+      "kind": "Melee",
+      "damage": 5,
+      "damageText": "Str+1D+2",
+      "skill": "melee weapons",
+      "cost": "250",
+      "availability": "2, F",
+      "notes": "Difficulty to hit: 15. Has all but replaced the knife in general, industrial and combat use. Vibroblades range from medical scalpels to Craftsbeing's 3-meter industrial 'fastcutter'.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Vibrobayonet",
+      "kind": "Melee",
+      "damage": 5,
+      "damageText": "Str+1D+2",
+      "skill": "melee weapons",
+      "cost": "300",
+      "availability": "2, F",
+      "notes": "Difficulty to hit: 10. The vibroblade variety of bayonet, used regularly by some militias and guards.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Force Pike",
+      "kind": "Melee",
+      "damage": 6,
+      "damageText": "Str+2D",
+      "skill": "melee weapons",
+      "cost": "500",
+      "availability": "2, R",
+      "notes": "Difficulty to hit: 15. A spun-graphite pole topped with an enhanced vibroblade and a power tip that can shock, stun or kill anything it touches; switches select the power setting. Used by ceremonial and shipboard guards where heavier weapons would be undiplomatic or endanger the ship; the Emperor's Red Guards are believed to carry them.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Lightsaber",
+      "kind": "Melee",
+      "damage": 15,
+      "damageText": "5D (strength is not added)",
+      "skill": "lightsaber",
+      "cost": "Not for sale (—)",
+      "availability": "4, X — rare, difficult to find anywhere; illegal",
+      "notes": "Difficulty to hit: 20. The personal weapon of the Jedi Knights: a blade of pure energy that cuts through most materials except another lightsaber blade — but as likely to sever the user as the opponent without years of dedicated practice; only the Jedi, through the Force, truly mastered it, some deflecting blaster bolts or returning them. All components fit into a handle 24-30 cm long: a power cell, one to three multi-faceted jewels that focus the energy (single-jewel sabers have fixed blade length; multi-jewel sabers vary it), a continuous energy lens and a flux aperture in the handguard disk where the beam arcs back. The beam loses power only when cutting, radiates no heat, and runs for years between recharges; no lightsaber can cut another's beam, so contests of blades are strength and skill. Every Jedi built his own (usually a month's work; two days in the Clone Wars) and none was ever known to fail. The construction techniques are lost with the Jedi.",
+      "page": 100,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Light Laser Cannon",
+      "kind": "Heavy",
+      "damage": 12,
+      "damageText": "4D (vehicle damage; see rulebook p.65)",
+      "skill": "starship gunnery / heavy weapons",
+      "cost": "5000",
+      "availability": "2, R",
+      "notes": "Ship-mounted or tripod-mounted ground defense weapon; laser cannons are larger, more powerful versions of the personal blaster ('laser' and 'blaster' are synonymous, 'blaster' implying a smaller weapon). Capable of rapid fire but prone to overheating; usually fire in the visible spectrum so the gunner can see the shots.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Medium Laser Cannon",
+      "kind": "Heavy",
+      "damage": 15,
+      "damageText": "5D (vehicle damage)",
+      "skill": "starship gunnery / heavy weapons",
+      "cost": "7500",
+      "availability": "2, R",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Heavy Laser Cannon",
+      "kind": "Heavy",
+      "damage": 18,
+      "damageText": "6D (vehicle damage)",
+      "skill": "starship gunnery / heavy weapons",
+      "cost": "10000",
+      "availability": "2, R",
+      "notes": "The AT-AT's two chin-mounted heavy laser cannons do 6D combined (fire control 2D).",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Light Ion Cannon",
+      "kind": "Heavy",
+      "damage": 21,
+      "damageText": "7D (vehicle damage; ionization)",
+      "skill": "starship gunnery / heavy weapons",
+      "cost": "14000",
+      "availability": "2, R",
+      "notes": "Ion cannons fire high-energy ionized particles that wreak havoc with a starship's electronics, disabling rather than destroying so it can be captured; no small-arms counterpart because of the energy required. Used mainly by planetary and system defense forces and ground-support fighters such as the B-wing (three medium ion cannons, 4D combined) and Y-wing (two light ion cannons, 4D combined).",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Proton Torpedoes",
+      "kind": "Starship",
+      "damage": 27,
+      "damageText": "9D (vehicle damage)",
+      "skill": "starship gunnery",
+      "cost": "500 per torpedo; launcher system 2000",
+      "availability": "2, R",
+      "notes": "Combination energy/projectile weapon with a proton-scattering warhead, the primary surface-attack weapon of light space forces (Z-95, Y-wing, X-wing, B-wing) and effective against ray-shielded targets; complete particle shielding deflects them. A highly maneuverable fighter is almost impossible to hit, so they are used against large craft and ground installations.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Concussion Missiles",
+      "kind": "Starship",
+      "damage": 24,
+      "damageText": "8D (vehicle damage); 7D on the Z-95, 9D on the TIE bomber and Millennium Falcon, 9D from Victory-class tube launchers",
+      "skill": "starship gunnery",
+      "cost": "750 per missile; launcher system 1500",
+      "availability": "2, R",
+      "notes": "Armor-piercing warhead with a compact energy pack whose concussive blast disrupts delicate instruments and causes shock damage to durable targets. Susceptible to jamming and fast defensive guns.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Grenade",
+      "kind": "Grenade",
+      "damage": 15,
+      "damageText": "5D",
+      "skill": "grenade",
+      "cost": "200",
+      "availability": "1, R",
+      "notes": "A powerful explosive in a lightweight cannister or sphere. Not common in ground combat (blasters have a greater use-factor) but useful in house-to-house fighting. Grenade launcher: 500 credits (2, X).",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Grenade Launcher",
+      "kind": "Heavy",
+      "damage": null,
+      "damageText": "As grenade fired",
+      "skill": "grenade / heavy weapons",
+      "cost": "500",
+      "availability": "2, X — illegal",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Personnel Mine",
+      "kind": "Explosive",
+      "damage": 15,
+      "damageText": "5D",
+      "skill": "demolition",
+      "cost": "500",
+      "availability": "2, X — illegal",
+      "notes": "Mines are used for defensive set-ups; some carry sophisticated sensor attachments, e.g. a mine that only explodes when a certain type of vehicle passes.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Vehicle Mine",
+      "kind": "Explosive",
+      "damage": 24,
+      "damageText": "8D (vehicle damage)",
+      "skill": "demolition",
+      "cost": "750",
+      "availability": "2, X — illegal",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Detonite",
+      "kind": "Explosive",
+      "damage": 3,
+      "damageText": "1D",
+      "skill": "demolition",
+      "cost": "100",
+      "availability": "1, R",
+      "notes": "Detonite, the most common explosive in grenades and detonators, comes in moldable fist-sized cubes. Standard detonator 50 (1, R); timer fuse 50 (1, R); remote fuse 100 (2, R). Listed on the Equipment Cost Chart as \"Explosive Charge (detonite)\".",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Thermal Detonator",
+      "kind": "Grenade",
+      "damage": 30,
+      "damageText": "10D",
+      "skill": "grenade / demolition",
+      "cost": "2000",
+      "availability": "2, X — illegal",
+      "notes": "More powerful explosive used for defensive set-ups and demolition of large buildings or emplacements; TIE bombers drop them free-fall.",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Triple Blasters (Z-95)",
+      "kind": "Starship",
+      "damage": 9,
+      "damageText": "3D combined (two, fire linked)",
+      "skill": "starship gunnery",
+      "notes": "Fire control 1D. Mounted on the Z-95 Headhunter.",
+      "page": 13,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Starfighter Laser Cannon",
+      "kind": "Starship",
+      "damage": null,
+      "damageText": "Varies by mount: 2D+2 (single cannon, TIE/rc, TIE/fc, TIE/gt); 3D (TIE bomber pair, original TIE double laser cannon); 5D (fire-linked pairs on A-wing, Y-wing, TIE/ln); 6D (fire-linked quads on X-wing, TIE interceptor); 7D (B-wing heavy laser cannon); 4D single cannon on stock light freighters and shuttles",
+      "skill": "starship gunnery",
+      "notes": "Fire control 1D-3D depending on the craft. Laser tips deteriorate with each shot; a quad-helix prismatic crystal in each cannon lasts an estimated 45,000 shots (X-wing). Fire-linked cannons roll one attack with combined damage.",
+      "page": 23,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Auto-Blasters (B-wing)",
+      "kind": "Starship",
+      "damage": 9,
+      "damageText": "3D",
+      "skill": "starship gunnery",
+      "notes": "Fire control 2D; two mounted in the nose of the B-wing command pod, fired separately under the pilot's direct control.",
+      "page": 15,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Medium Ion Cannons (B-wing)",
+      "kind": "Starship",
+      "damage": 12,
+      "damageText": "4D combined (three, fire linked)",
+      "skill": "starship gunnery",
+      "notes": "Fire control 4D (includes the B-wing's ranging laser; -2D if it is not operational). Ionization damage disables rather than destroys.",
+      "page": 15,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Quad Laser Cannons (Millennium Falcon)",
+      "kind": "Starship",
+      "damage": 18,
+      "damageText": "6D",
+      "skill": "starship gunnery",
+      "notes": "Fire control 3D; two turrets (dorsal and ventral) firing separately, manually or by remote from the cockpit at reduced accuracy. Upgraded actuators fire higher-energy bursts at the cost of crystal corrosion.",
+      "page": 43,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Light Laser Cannon (Millennium Falcon anti-personnel)",
+      "kind": "Starship",
+      "damage": 3,
+      "damageText": "1D",
+      "skill": "starship gunnery",
+      "notes": "Fire control 4D. Auto-firing blaster cannon (Taim & Bak) that drops from a concealed ventral pod; fires only when the ship is on the ground.",
+      "page": 43,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Twin Laser Cannons (passenger liner)",
+      "kind": "Starship",
+      "damage": 12,
+      "damageText": "4D combined (four, fire linked)",
+      "skill": "starship gunnery",
+      "notes": "Fire control 1D; the Lady of Mindor's laser turrets.",
+      "page": 47,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Double Turbolaser Cannon (Corvette)",
+      "kind": "Capital",
+      "damage": 24,
+      "damageText": "8D",
+      "skill": "starship gunnery",
+      "notes": "Fire control 3D; six on a Corellian Corvette, fired separately. Turbolasers use turbine generators and capacitor banks to build a very powerful pulse, so they fire more slowly than lasers but hit harder; strictly regulated — only the Empire, sector or local governments may mount them.",
+      "page": 30,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Turbolaser Battery",
+      "kind": "Capital",
+      "damage": null,
+      "damageText": "4D (Escort Frigate, fire control 3D; Mon Cal Cruiser, fire control 2D); 5D (Imperial Star Destroyer, fire control 4D; Victory quad batteries, fire control 4D); 2D+2 (Victory double batteries, fire control 3D)",
+      "skill": "starship gunnery",
+      "notes": "On an Imperial Star Destroyer each five-gun battery has three turrets (two double, one single) that can concentrate on one target or engage several. Fired separately.",
+      "page": 34,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Capital Ship Laser Cannons (Escort Frigate)",
+      "kind": "Capital",
+      "damage": 6,
+      "damageText": "2D",
+      "skill": "starship gunnery",
+      "notes": "Fire control 2D; 12 on a Nebulon-B, fired separately, for use against starfighters.",
+      "page": 31,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Ion Cannon Battery",
+      "kind": "Capital",
+      "damage": 9,
+      "damageText": "3D (ionization)",
+      "skill": "starship gunnery",
+      "notes": "Fire control 2D+2 (Imperial Star Destroyer, 60 batteries) or 3D (Mon Cal Cruiser, 20 batteries). Fired separately; disable enemy vessels so they can be captured with minor damage.",
+      "page": 34,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Concussion Missile Tube Launchers (Victory-class)",
+      "kind": "Capital",
+      "damage": 27,
+      "damageText": "9D",
+      "skill": "starship gunnery",
+      "notes": "Fire control 2D; 80 tubes fired separately — the Victory-class Star Destroyer's main ground-attack weapon.",
+      "page": 32,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Tractor Beam Projector",
+      "kind": "Capital",
+      "damage": null,
+      "damageText": "None; target captured if hit",
+      "skill": "starship gunnery",
+      "notes": "Fire control 2D (Escort Frigate, two), 3D (Victory-class, ten), 4D (Imperial Star Destroyer, ten), 2D+2 (Mon Cal Cruiser, six). Military tractors can arrest even an immense vessel; the larger the ship, the stronger the pull (some space tugs are also very powerful). Doctrine uses them to arrest a target's maneuverability so the guns can bear; locking onto fast-moving targets is very difficult, and ships can break free by maneuvering beyond the beam's covering arc.",
+      "page": 31,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Double Laser Cannon (snowspeeder)",
+      "kind": "Vehicle",
+      "damage": 12,
+      "damageText": "4D combined (fire linked)",
+      "skill": "vehicle blasters",
+      "notes": "Fire control 2D. Two forward-pointing heavy laser cannons on the Rebel combat snowspeeder. Repulsorcraft weapon codes are in scale to starfighter codes; damage is doubled against characters.",
+      "page": 60,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Power Harpoon (snowspeeder)",
+      "kind": "Vehicle",
+      "damage": 9,
+      "damageText": "3D, or none if tow cable and fusion disc is used",
+      "skill": "vehicle blasters",
+      "notes": "Fire control 2D. Harpoon cannon with high-tension tow cable and fusion discs, operated by the rear-facing gunner.",
+      "page": 60,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Double Blaster Cannon (cloud car)",
+      "kind": "Vehicle",
+      "damage": 5,
+      "damageText": "1D+2 combined (fire linked)",
+      "skill": "vehicle blasters",
+      "notes": "Fire control 1D. Patrol cloud cars only — a fixed forward-firing cannon on each pod.",
+      "page": 60,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Heavy Blaster Cannon (sail barge)",
+      "kind": "Vehicle",
+      "damage": 9,
+      "damageText": "3D",
+      "skill": "vehicle blasters",
+      "notes": "Fire control 1D; mounted on the Ubrikkian luxury sail barge.",
+      "page": 61,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Speeder Bike Laser Cannon",
+      "kind": "Vehicle",
+      "damage": 9,
+      "damageText": "3D",
+      "skill": "vehicle blasters",
+      "notes": "Fire control 2D. Small laser cannon on the Aratech 74-Z military speeder bike; military bikes are also armored and carry extra power cells or self-charging power.",
+      "page": 63,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Medium Blasters (AT-AT)",
+      "kind": "Vehicle",
+      "damage": 9,
+      "damageText": "3D combined (two, fire linked)",
+      "skill": "vehicle blasters",
+      "notes": "Fire control 2D; one on each side of the AT-AT's head. Walker weapon codes are in scale to repulsorcraft and starfighter codes; damage is doubled against characters.",
+      "page": 68,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Twin Blaster Cannon (AT-ST)",
+      "kind": "Vehicle",
+      "damage": 12,
+      "damageText": "4D",
+      "skill": "vehicle blasters",
+      "notes": "Fire control 1D; swivel-mounted on the AT-ST's chin.",
+      "page": 69,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Twin Light Blaster Cannon (AT-ST)",
+      "kind": "Vehicle",
+      "damage": 6,
+      "damageText": "2D",
+      "skill": "vehicle blasters",
+      "notes": "Fire control 1D; swivel-mounted on the port-side sensor pod.",
+      "page": 69,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Concussion Grenade Launcher (AT-ST)",
+      "kind": "Vehicle",
+      "damage": 9,
+      "damageText": "3D",
+      "skill": "vehicle blasters",
+      "notes": "Fire control 1D; juts from the AT-ST's starboard pod. Snowtrooper concussion grenades do 5D.",
+      "page": 69,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Probe Droid Blaster Cannon",
+      "kind": "Droid",
+      "damage": 14,
+      "damageText": "4D+2",
+      "skill": "blaster",
+      "notes": "Carried by the Arakyd Viper probe Droid (blaster 4D). Most Imperial probots carry at least one blaster cannon; armed commercial probe Droids are illegal.",
+      "page": 55,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Assassin Droid Blaster Cannon",
+      "kind": "Droid",
+      "damage": 18,
+      "damageText": "6D",
+      "skill": "blaster",
+      "notes": "Built into the Eliminator 434 assassin Droid (blaster 5D).",
+      "page": 57,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Assassin Droid Concussion Missile Launcher",
+      "kind": "Droid",
+      "damage": 21,
+      "damageText": "7D",
+      "skill": "blaster / missile weapons",
+      "notes": "Built into the Eliminator 434 assassin Droid.",
+      "page": 57,
+      "book": "sourcebook"
+    }
+  ],
+  "gear": [
+    {
+      "name": "Protective Helmet",
+      "category": "Armor",
+      "description": "Helmets are common, especially among Rebel troops, since fragments from near-miss blaster bolts can be as deadly as the bolt. Armor code +1 to strength for damage purposes; reduces dexterity by the same amount (core rules). Availability 2, F.",
+      "cost": "300",
+      "stats": "Armor code +1 (1 pip)",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Protective Vest (Flak Vest)",
+      "category": "Armor",
+      "description": "Common vest armor; no known armor stops a full-power blaster bolt, but vests protect against fragments and slugthrowers. Availability 2, F. Listed as 'Protective Vest' on the chart.",
+      "cost": "300",
+      "stats": "Armor code +1 (1 pip)",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Stormtrooper Armor",
+      "category": "Armor",
+      "description": "'Stormtrooper Armor / Armored Spacesuit' on the Equipment Cost Chart: the 18-piece white-and-black armored spacesuit lets a stormtrooper operate in almost any environment and gives limited protection from blaster fire (it cannot fully stop a heavy bolt) while making slugs and primitive melee weapons far less effective; also a potent psychological weapon. Helmet has polarized lenses and comlinks; utility belt holds survival gear, rations, batteries and a spare comlink; a black two-piece temperature-control body glove is worn underneath. +1D to strength for damage purposes only; -1D to dexterity and all dexterity skills. Availability 2, X (illegal for civilians).",
+      "cost": "2500",
+      "stats": "Armor code 1D (3 pips)",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Bounty Hunter Armor",
+      "category": "Armor",
+      "description": "Armored suits worn by bounty hunters and pirates for disguise, shock value, to conceal equipment and to defend against the light blasters and slug weapons their quarries carry. Availability 2, R.",
+      "cost": "2500",
+      "stats": "Armor code 1D (3 pips)",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Work Clothes",
+      "category": "Clothing",
+      "description": "Everyday work clothing. Availability 1.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Casual Clothes",
+      "category": "Clothing",
+      "description": "Availability 1.",
+      "cost": "75",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Business Clothes",
+      "category": "Clothing",
+      "description": "Availability 1.",
+      "cost": "75",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Formal Clothes",
+      "category": "Clothing",
+      "description": "Availability 1.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Local Uniform",
+      "category": "Clothing",
+      "description": "A local military, police or service uniform. Availability 1.",
+      "cost": "150",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Flame-Proof Suit",
+      "category": "Clothing",
+      "description": "Protective 'suit' — any garment worn to protect the wearer from an otherwise hostile environment. Availability 2.",
+      "cost": "200",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Exposure Suit (general)",
+      "category": "Survival",
+      "description": "General environmental protection suit. Availability 2.",
+      "cost": "300",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Exposure Suit (arid)",
+      "category": "Survival",
+      "description": "Environmental suit for desert worlds. Availability 2.",
+      "cost": "400",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Thermal Suit (cold weather)",
+      "category": "Survival",
+      "description": "Heat suit for cold planets. Availability 2.",
+      "cost": "400",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Sub-Zero Parka",
+      "category": "Survival",
+      "description": "Availability 2.",
+      "cost": "250",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "High-G Suit",
+      "category": "Clothing",
+      "description": "Worn by many starfighter pilots to protect against the effects of high-acceleration maneuvering. Availability 2.",
+      "cost": "400",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Wet Suit",
+      "category": "Survival",
+      "description": "Availability 2.",
+      "cost": "400",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Air Tanks",
+      "category": "Survival",
+      "description": "Breathing supply for unbreathable atmospheres. Availability 2.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Oxygen Reprocessor (or other vital gas)",
+      "category": "Survival",
+      "description": "Recycles breathing gas. Availability 2.",
+      "cost": "300",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Miniature Life-Support System",
+      "category": "Survival",
+      "description": "Portable life support for unbreathable atmospheres. Availability 2.",
+      "cost": "1000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Space Suit (emergency)",
+      "category": "Survival",
+      "description": "Vacuum suit for emergencies; a space suit is usually reserved for operation in vacuum. Availability 2.",
+      "cost": "1000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Space Suit (utility)",
+      "category": "Survival",
+      "description": "Working vacuum suit. Availability 2.",
+      "cost": "1500",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Space Suit (high quality)",
+      "category": "Survival",
+      "description": "Availability 2.",
+      "cost": "2000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Survival Tent (single-person)",
+      "category": "Survival",
+      "description": "Portable, flame-proof, rip and puncture resistant, lightweight, non-reflecting, insulated, water-proof and air-sealable; hundreds of styles, can be camouflaged for military use. Availability 1.",
+      "cost": "200",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Survival Tent (two-person)",
+      "category": "Survival",
+      "description": "As single-person survival tent. Availability 1.",
+      "cost": "400",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Survival Tent (four-person)",
+      "category": "Survival",
+      "description": "As single-person survival tent. Availability 1.",
+      "cost": "600",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Survival Tent (six-person)",
+      "category": "Survival",
+      "description": "As single-person survival tent. Availability 1.",
+      "cost": "800",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Fusion Power Generator (Light)",
+      "category": "Tool",
+      "description": "Portable fusion generator; powers larger blasters, equipment and camps. Availability 1.",
+      "cost": "500",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Fusion Power Generator (Medium)",
+      "category": "Tool",
+      "description": "Availability 1.",
+      "cost": "750",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Fusion Power Generator (Heavy)",
+      "category": "Tool",
+      "description": "Availability 1.",
+      "cost": "1000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Moisture Vaporator",
+      "category": "Tool",
+      "description": "Extracts water from the air on arid worlds. Availability 1.",
+      "cost": "500",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Shield Generator (Small)",
+      "category": "Tool",
+      "description": "Portable shield generator. Availability 1.",
+      "cost": "500",
+      "stats": "Shield rating 1D",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Shield Generator (Medium)",
+      "category": "Tool",
+      "description": "Availability 1.",
+      "cost": "750",
+      "stats": "Shield rating 2D",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Power Fence (per 50 m)",
+      "category": "Tool",
+      "description": "Energy fencing, priced per 50 meters; requires a power fence generator. Availability 2.",
+      "cost": "100 per 50 m",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Power Fence Generator",
+      "category": "Tool",
+      "description": "Availability 2.",
+      "cost": "750",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Power Scanner",
+      "category": "Tool",
+      "description": "Projects an invisible beam that reflects back to detect surges or leaks in power lines; a microprocessor notes variations. Cannot penetrate shielded circuitry. Availability 1.",
+      "cost": "150",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Hydrospanner",
+      "category": "Tool",
+      "description": "Hydraulically powered wrench for adjusting machinery; manipulates even the toughest bolt. Availability 1.",
+      "cost": "50",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Beam Drill",
+      "category": "Tool",
+      "description": "Cutting/drilling tool using a narrow pulse version of the blaster, capable of penetrating just about any known material. Availability 1.",
+      "cost": "50",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Fusion Cutter",
+      "category": "Tool",
+      "description": "Nuclear-powered cutting and welding tool. Availability 1.",
+      "cost": "75",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Worklight",
+      "category": "Tool",
+      "description": "Availability 1.",
+      "cost": "25",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Plasma Welder",
+      "category": "Tool",
+      "description": "Welds with superheated gas in a magnetic bottle; joins just about any material. Availability 1.",
+      "cost": "50",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Vibropick",
+      "category": "Tool",
+      "description": "Vibro-tool using vibroblade technology for extra digging power. Availability 1.",
+      "cost": "50",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Vibrosaw",
+      "category": "Tool",
+      "description": "Vibro-tool saw. Availability 1.",
+      "cost": "75",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Power Prybar",
+      "category": "Tool",
+      "description": "Hydraulically powered prybar that can move even steel plate. Availability 1.",
+      "cost": "30",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Tool Harness",
+      "category": "Tool",
+      "description": "Availability 1.",
+      "cost": "10",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Computer Tool Kit",
+      "category": "Tool",
+      "description": "Tools for computer repair. Availability 1.",
+      "cost": "200",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Droid Tool Kit",
+      "category": "Tool",
+      "description": "Tools for Droid repair. Availability 1.",
+      "cost": "200",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Vehicle Tool Kit",
+      "category": "Tool",
+      "description": "Tools for vehicle and starship maintenance. Availability 1.",
+      "cost": "200",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Security Systems Tool Kit",
+      "category": "Tool",
+      "description": "Tools for working on (and defeating) security systems. Availability 1, R.",
+      "cost": "200",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Medpac",
+      "category": "Medical",
+      "description": "The standard first aid kit of the civilized galaxy: limited diagnostic computers, drugs, syntheflesh, antiseptics, coagulants and other medicinal items in a compact package — enough to treat most light wounds and help in life-or-death situations until better facilities are reached. Availability 1.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Bacta Tank",
+      "category": "Medical",
+      "description": "The mainstay of modern medicine (also called a rejuve tank). A patient wounded beyond a medpac's capacity is connected to breathing equipment and fully immersed in bacta, a specially-formulated liquid that accelerates the body's natural healing; almost any injury not involving the loss of a limb can be healed, faster than natural healing and without scars. Availability 2.",
+      "cost": "3000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Medicines",
+      "category": "Medical",
+      "description": "Availability 1.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "First-Degree Droid",
+      "category": "Droid",
+      "description": "Droid skilled in the physical, mathematical or medical sciences (e.g. Too-Onebee medical Droids). Availability 2. All Droids have locomotion, sensory reception, logic, manipulation and some form of communication; power cells usually need recharging monthly.",
+      "cost": "5000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Second-Degree Droid",
+      "category": "Droid",
+      "description": "Droid skilled in engineering and technical sciences (e.g. R2 astromech Droids). Availability 2.",
+      "cost": "4000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Third-Degree Droid",
+      "category": "Droid",
+      "description": "Droid skilled in the social sciences and service areas — translation, protocol, spaceport control, teaching, diplomatic assistance (e.g. 3PO protocol Droids). Availability 2.",
+      "cost": "3000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Fourth-Degree Droid",
+      "category": "Droid",
+      "description": "Security and military Droids (probe Droids; assassin Droids are illegal). Availability 2.",
+      "cost": "3000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Fifth-Degree Droid",
+      "category": "Droid",
+      "description": "Menial labor Droids for mining, salvage, transportation and sanitation, where intelligence is not important (e.g. a space barge's laborer Droid). Availability 1.",
+      "cost": "1000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Restraining Bolt",
+      "category": "Droid",
+      "description": "Availability 1.",
+      "cost": "25",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Droid Control Device",
+      "category": "Droid",
+      "description": "Caller used with a restraining bolt. Availability 1.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Droid Repair Services",
+      "category": "Droid",
+      "description": "Availability 1.",
+      "cost": "50-500",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Droid Overhaul Services",
+      "category": "Droid",
+      "description": "Availability 1.",
+      "cost": "50-500",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Droid Memory Wipe Services",
+      "category": "Droid",
+      "description": "Manufacturers recommend periodic memory wipes to prevent personality glitches and devotion quirks in Droids allowed to keep their memories. Availability 1.",
+      "cost": "50-500",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Passage (starliner ticket)",
+      "category": "Misc",
+      "description": "Buying passage: luxury liner 1,000 credits and up; 'no frills' liner 500; steerage 100; chartered ship 10,000 and up. Multiply by route: heavily-travelled x1, common x2, rarely-travelled x3, uncommon x5, 'You want to go where?' x? (chartered ships only). Passengers with shaky credentials pay independents about three times the regular fare. Boarding luxury liners happens only at the home port or scheduled stops.",
+      "cost": "100 (steerage) to 10,000+ (charter), times route multiplier",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Comlink",
+      "category": "Communication",
+      "description": "Standard comlink. Availability 1. Listed as 'Standard Comlink'.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Subspace Radio (small)",
+      "category": "Communication",
+      "description": "Small subspace transmitter. Availability 1.",
+      "cost": "500",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Subspace Radio (large)",
+      "category": "Communication",
+      "description": "Availability 1.",
+      "cost": "1000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Syntherope",
+      "category": "Misc",
+      "description": "Availability 1.",
+      "cost": "2",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Sleeping Bag",
+      "category": "Survival",
+      "description": "Availability 1.",
+      "cost": "15",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Glow Rod",
+      "category": "Misc",
+      "description": "Flashlight. Availability 1.",
+      "cost": "10",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Rations",
+      "category": "Survival",
+      "description": "Availability 1.",
+      "cost": "200",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Ammo Bandolier",
+      "category": "Misc",
+      "description": "Holds ammunition for the weapon carried: energy cells for blasters, explosive bolts for a bowcaster, projectiles for slugthrowers, grenades, etc. Availability 1.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Chronometer",
+      "category": "Misc",
+      "description": "Availability 1.",
+      "cost": "25",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Flares",
+      "category": "Misc",
+      "description": "Availability 1.",
+      "cost": "5",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Macrobinoculars",
+      "category": "Misc",
+      "description": "Microprocessor-controlled magnification sensors giving a stereoscopic view plus range and targeting information. Availability 1.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Pocket Computer",
+      "category": "Misc",
+      "description": "Availability 1.",
+      "cost": "100",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Breath Mask",
+      "category": "Survival",
+      "description": "Availability 1.",
+      "cost": "50",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Recording Rod",
+      "category": "Misc",
+      "description": "Availability 1.",
+      "cost": "30",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Ground Car",
+      "category": "Vehicle",
+      "description": "Primitive-engine ground vehicle; rent 50/day. Availability 1.",
+      "cost": "6000 (used: 1500); rent 50/day",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Landspeeder (purchase/rental)",
+      "category": "Vehicle",
+      "description": "Cost chart row; see the Landspeeder vehicle entry for statistics. Availability 1.",
+      "cost": "10000 (used: 2000); rent 75/day",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Swoop (purchase/rental)",
+      "category": "Vehicle",
+      "description": "Cost chart row; see the Swoop vehicle entry. Availability 2.",
+      "cost": "5000 (used: 1000); rent 30/day",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Speeder Bike (purchase/rental)",
+      "category": "Vehicle",
+      "description": "Cost chart row; see the Speeder Bike vehicle entries. Availability 2.",
+      "cost": "5000 (used: 1000); rent 30/day",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Skyhopper (purchase/rental)",
+      "category": "Vehicle",
+      "description": "Incom T-16 Skyhopper airspeeder; see the Airspeeder vehicle entry. Availability 2.",
+      "cost": "30000 (used: 7000); rent 400/day",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Planetary Shuttle (rental)",
+      "category": "Vehicle",
+      "description": "In-system shuttle hire. Availability 2, F.",
+      "cost": "1000/day",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Hyperdrive Shuttle (rental)",
+      "category": "Vehicle",
+      "description": "Hyperspace-capable shuttle hire. Availability 2, F.",
+      "cost": "1200+/day",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Stock Light Freighter (purchase/rental)",
+      "category": "Vehicle",
+      "description": "Cost chart row; see the Stock Light Freighter vehicle entry. Availability 2, F.",
+      "cost": "100000 (used: 25000); rent 1200+/day",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Hovel",
+      "category": "Housing",
+      "description": "Rental housing; higher-quality quarters cost more, need longer leases and sometimes background checks. Availability 1.",
+      "cost": "50-250/month",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Regular Apartment",
+      "category": "Housing",
+      "description": "Availability 1.",
+      "cost": "250-500/month",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Luxury Apartment",
+      "category": "Housing",
+      "description": "Availability 2, F.",
+      "cost": "500-1400/month",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "House",
+      "category": "Housing",
+      "description": "Buying buildings or land in cities requires permits, fees and a lot of credits; rural areas are cheaper and more lax. Imperial agencies can and do seize property. Availability 1.",
+      "cost": "750-1800+/month; buy 35000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Storage Space",
+      "category": "Housing",
+      "description": "Availability 1.",
+      "cost": "10-100/month",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Established Farm",
+      "category": "Housing",
+      "description": "Purchase only. Availability 1.",
+      "cost": "1000-50000+",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "New Settlement",
+      "category": "Housing",
+      "description": "A few credits can buy title to many acres on a frontier or newly-settled world. Purchase only. Availability 1.",
+      "cost": "50-50000",
+      "page": 96,
+      "book": "sourcebook"
+    },
+    {
+      "name": "Equipment availability codes",
+      "category": "Misc",
+      "description": "Where an item can be acquired: 1 readily available throughout the galaxy; 2 only in large cities and space ports of the Empire and Corporate Sector; 3 specialized, only on the planet of origin; 4 rare, difficult to find anywhere; F fee or permit required; R restricted — needs a local or Imperial license (background checks, high fees); X illegal — severe punishments. Any item may be illegal somewhere (any weapon on pacifist Alderaan). Black market: almost any F, R or X item is available without fee or restriction, but opportunities are rare, may take time or involve danger, goods tend to be inferior, and prices are always at least triple. Listed prices are the manufacturer's suggested price and vary with locale, availability and streetwise, bargain and con skills; theft is a popular alternative.",
+      "page": 96,
+      "book": "sourcebook"
+    }
+  ],
+  "vehicles": [
+    {
+      "name": "Z-95 Headhunter",
+      "kind": "Starfighter",
+      "craft": "Incom/Subpro Z-95 Headhunter Starfighter",
+      "scale": "Starship",
+      "crew": "1; 2 in Z-95XT and some other models",
+      "passengers": "None",
+      "cargo": "85 kilograms",
+      "consumables": "1 day; some models equipped with larger stores (up to 4 weeks for the Z-95ER)",
+      "hyperdrive": "None",
+      "nav": "None (hyperdrive backup: none)",
+      "speed": "3D+2",
+      "maneuverability": "1D",
+      "hull": "4D",
+      "shields": "1D",
+      "weapons": [
+        {
+          "name": "Triple Blasters",
+          "count": "Two (fire linked)",
+          "fireControl": "1D",
+          "damage": "3D",
+          "notes": "Combined damage"
+        },
+        {
+          "name": "Concussion Missiles",
+          "fireControl": "1D",
+          "damage": "7D"
+        }
+      ],
+      "description": "Multi-purpose space fighter, 11.8 meters; many variants (Z-95ER extended range, Z-95ML missile platform, Z-95C4d ground support bomber, Z-95XT twin-seat trainer). A generation out of date and no longer manufactured, but more Headhunters remain in service than any other starfighter — constabularies, customs, planetary defense forces, corporations and pirates. Swing-wing design, sensor jammers, Loan-chat 'slingshot' ejection seat; legendary for holding together despite severe damage. Incom built many of its systems into the T-65 X-wing.",
+      "book": "sourcebook",
+      "page": 13
+    },
+    {
+      "name": "A-Wing Starfighter",
+      "kind": "Starfighter",
+      "craft": "Rebel A-wing Starfighter",
+      "scale": "Starship",
+      "crew": "1 pilot",
+      "passengers": "None",
+      "cargo": "40 kilograms",
+      "consumables": "1 week",
+      "hyperdrive": "x1",
+      "nav": "Limited; two jumps (hyperdrive backup: none)",
+      "speed": "6D",
+      "maneuverability": "4D",
+      "hull": "2D+2",
+      "shields": "1D",
+      "weapons": [
+        {
+          "name": "Laser Cannons",
+          "count": "Two (fire linked)",
+          "fireControl": "3D",
+          "damage": "5D",
+          "notes": "Combined damage. Each cannon can elevate and depress 60 degrees on a hydro-servo bearing, letting the A-wing engage from much wider angles; a few field-modified craft swivel them 360 degrees."
+        }
+      ],
+      "description": "Interceptor and multi-purpose fighter, 9.6 meters, developed secretly by the Alliance. Two massive Novaldex J-77 'Event Horizon' engines and low mass give it the highest sublight speed of any known production starfighter, including the TIE interceptor. Carries a full sensor array and engine-powered jammers that can completely blind a small craft's sensors (fleet-ship arrays are too powerful to jam). Demands more skill than most pilots possess; a primary mission is defending bases and merchant ships against strike craft.",
+      "book": "sourcebook",
+      "page": 14
+    },
+    {
+      "name": "B-Wing Assault Starfighter",
+      "kind": "Starfighter",
+      "craft": "Slayn & Korpil B-wing Assault Starfighter",
+      "scale": "Starship",
+      "crew": "1 pilot",
+      "passengers": "None, though cockpit is large enough to fit a second person in an emergency — greatly reducing combat control",
+      "cargo": "45 kilograms",
+      "consumables": "1 week",
+      "hyperdrive": "x2",
+      "nav": "Limited, two jumps (hyperdrive backup: none)",
+      "speed": "3D",
+      "maneuverability": "1D+1",
+      "hull": "3D",
+      "shields": "2D",
+      "weapons": [
+        {
+          "name": "Medium Ion Cannons",
+          "count": "Three (fire linked)",
+          "fireControl": "4D",
+          "damage": "4D",
+          "notes": "Combined damage"
+        },
+        {
+          "name": "Proton Torpedo Launchers",
+          "count": "Two",
+          "fireControl": "3D",
+          "damage": "9D"
+        },
+        {
+          "name": "Laser Cannon",
+          "count": "One",
+          "fireControl": "1D",
+          "damage": "7D"
+        },
+        {
+          "name": "Auto-Blasters",
+          "count": "Two",
+          "fireControl": "2D",
+          "damage": "3D"
+        }
+      ],
+      "description": "Heavy assault starfighter, 16.9 meters — the most heavily-armed starfighter in the Rebel arsenal. A gyroscopically-stabilized command pod stays fixed while the rest of the fighter spins to evade fire; a ranging laser gives near-perfect targeting but reveals the approach vector. Single Quadex Kyromaster engine; slow but strongly shielded. A mechanic's nightmare, requiring more maintenance per flight hour than any other Rebel craft. Gamemaster notes: the ranging laser is built into the high fire control codes — if it is not operational, reduce fire control by 2D. When the gyro system fails from heavy damage, reduce all fire control codes by 1D and sublight speed by 2D.",
+      "book": "sourcebook",
+      "page": 15
+    },
+    {
+      "name": "Y-Wing Fighter",
+      "kind": "Starfighter",
+      "craft": "Koensayr BTL Y-wing Starfighter",
+      "scale": "Starship",
+      "crew": "1 pilot and 1 astromech Droid in BTL-A4; plus a weapons officer in BTL-S3",
+      "passengers": "None",
+      "cargo": "110 kilograms",
+      "consumables": "1 week",
+      "hyperdrive": "x1",
+      "nav": "None; uses Droid for 10 jumps (hyperdrive backup: none)",
+      "speed": "3D+2",
+      "maneuverability": "2D",
+      "hull": "4D+1",
+      "shields": "1D",
+      "weapons": [
+        {
+          "name": "Laser Cannons",
+          "count": "Two (fire linked)",
+          "fireControl": "2D",
+          "damage": "5D",
+          "notes": "Combined damage. Taim & Bak IX4 cannons in the nose, bore-sighted to the flight path."
+        },
+        {
+          "name": "Proton Torpedo Launchers",
+          "count": "Two",
+          "fireControl": "2D",
+          "damage": "9D",
+          "notes": "Arakyd flex tube launchers fed from a central magazine of eight torpedoes."
+        },
+        {
+          "name": "Light Ion Cannons",
+          "count": "Two (fire linked)",
+          "fireControl": "1D",
+          "damage": "4D",
+          "notes": "Combined damage. Twin-barrelled cannon on a pivot mount behind the cockpit; fixed position in the single-seat BTL-A4, operated by the aft-facing weapons officer in the BTL-S3 (360 degree pivot, 60 degree elevation)."
+        }
+      ],
+      "description": "Attack fighter, 16 meters. Rugged fighter-bomber that bore the brunt of the Alliance's early battles; the Rebellion has lost more Y-wings than any other craft simply because it has flown more of them. Two Koensayr Ion Jet engines with disk vectrals that scatter emissions and serve as steering thrusters; closing the vectrals reverses thrust once, burning them off. Shields can be angled. An R2 unit stores data for 10 jumps; the simpler R4 handles only one. Sensors are often thrown out of alignment by engine vibration. Koensayr ballistic ejection seats (both fire together in the BTL-S3).",
+      "book": "sourcebook",
+      "page": 17
+    },
+    {
+      "name": "X-Wing Fighter",
+      "kind": "Starfighter",
+      "craft": "Incom T-65B X-wing",
+      "scale": "Starship",
+      "crew": "1 pilot plus 1 astromech Droid",
+      "passengers": "None",
+      "cargo": "110 kilograms",
+      "consumables": "1 week's supply; can be extended with power and life support pods, but with a loss of speed and maneuverability",
+      "hyperdrive": "x1",
+      "nav": "None, uses astromech Droid (hyperdrive backup: none)",
+      "speed": "4D",
+      "maneuverability": "3D",
+      "hull": "4D",
+      "shields": "1D",
+      "weapons": [
+        {
+          "name": "Laser Cannons",
+          "count": "Four (fire linked)",
+          "fireControl": "3D",
+          "damage": "6D",
+          "notes": "Combined damage. Taim & Bak KX9 long-barreled cannons, one on each S-foil tip; fire together or in sequence for a near-continuous barrage."
+        },
+        {
+          "name": "Proton Torpedo Launchers",
+          "count": "Two",
+          "fireControl": "2D",
+          "damage": "9D",
+          "notes": "Each launcher draws from a three-torpedo magazine; fire together or separately."
+        }
+      ],
+      "description": "Space superiority starfighter, 12.5 meters — the cutting edge of starfighter performance and only operated by the Rebel Alliance, whose commandos helped the Incom design team defect with the prototypes. Twin-split S-foils deploy in an 'X' for combat; shields can be angled forward or behind; an auxiliary generator keeps life support, shields, weapons or the subspace radio running even with total engine failure. Incom MKI hyperdrive modules but no astrogation computer — an astromech Droid (usually an R2) stores jump data, monitors all systems, reroutes circuitry and makes in-flight repairs, and is ejected automatically with the pilot. Handles much like the T-16 Skyhopper. The T-65C-A2 is the newest model; most Rebels fly the T-65B.",
+      "book": "sourcebook",
+      "page": 18
+    },
+    {
+      "name": "TIE Fighter",
+      "kind": "Starfighter",
+      "craft": "Sienar Fleet Systems TIE/ln",
+      "scale": "Starship",
+      "crew": "1 pilot",
+      "passengers": "None",
+      "cargo": "110 kilograms",
+      "consumables": "2 days",
+      "hyperdrive": "None",
+      "nav": "None (hyperdrive backup: none)",
+      "speed": "5D",
+      "maneuverability": "2D",
+      "hull": "2D",
+      "shields": "None",
+      "weapons": [
+        {
+          "name": "Laser Cannons",
+          "count": "Two (fire linked)",
+          "fireControl": "2D",
+          "damage": "5D",
+          "notes": "Combined damage. Chin-mounted inside the spherical hull; the TIE/ln carries a separate power generator for its lasers, increasing range and lethality."
+        }
+      ],
+      "description": "Space superiority starfighter, 6.3 meters — the standard fleet-based TIE fighter. Twin ion engines accelerate ionized gas to a fraction of lightspeed, giving high thrust with low mass and near-instant turns (but TIEs cannot stop quickly; reverse thrusting can damage the pylons). No hyperdrive, no deflector shields, and no atmospheric converter — the pilot's suit provides life support. Pilots compensate by shooting first, attacking in numbers and accepting losses. Most Star Destroyers carry six squadrons of 12 (flights of four, elements of two). Other models: T.I.E. (original), TIE (first upgrade), TIE/rc recon, TIE/fc fire control, TIE/gt ground attack.",
+      "book": "sourcebook",
+      "page": 25
+    },
+    {
+      "name": "TIE Interceptor",
+      "kind": "Starfighter",
+      "craft": "Sienar Fleet Systems TIE Interceptor",
+      "scale": "Starship",
+      "crew": "1 pilot",
+      "passengers": "None",
+      "cargo": "110 kilograms",
+      "consumables": "2 days",
+      "hyperdrive": "None",
+      "nav": "None (hyperdrive backup: none)",
+      "speed": "5D+2",
+      "maneuverability": "3D+2",
+      "hull": "3D",
+      "shields": "None",
+      "weapons": [
+        {
+          "name": "Laser Cannons",
+          "count": "Four (fire linked)",
+          "fireControl": "3D",
+          "damage": "6D",
+          "notes": "Combined damage. Forward-mounted on the tips of the dagger-shaped solar panels; updated targeting software."
+        }
+      ],
+      "description": "Space superiority starfighter, 9.6 meters — the Empire's newest TIE, developed after Yavin from Darth Vader's 'bent-wing' prototype. Larger twin ion engines and solar panels make it (by Imperial claim) the fastest starfighter in the galaxy, 25 percent faster than an X-wing; a new ion stream projection system with twin-port deflectors allows tighter turns and rolls. Still no hyperdrive or shields. Perhaps a complete squadron is ready to fly.",
+      "book": "sourcebook",
+      "page": 26
+    },
+    {
+      "name": "TIE Bomber",
+      "kind": "Starfighter",
+      "craft": "Sienar Fleet Systems TIE Bomber",
+      "scale": "Starship",
+      "crew": "1 pilot",
+      "passengers": "None",
+      "cargo": "None in flight pod; 15,000 kilograms in bomb bay",
+      "consumables": "2 days",
+      "hyperdrive": "None",
+      "nav": "None (hyperdrive backup: none)",
+      "speed": "3D",
+      "maneuverability": "zero",
+      "hull": "4D+1",
+      "shields": "None",
+      "weapons": [
+        {
+          "name": "Laser Cannons",
+          "count": "Two (fire linked)",
+          "fireControl": "2D",
+          "damage": "3D",
+          "notes": "Combined damage"
+        },
+        {
+          "name": "Concussion Missiles",
+          "fireControl": "3D",
+          "damage": "9D",
+          "notes": "Port pod bomb bays also carry proton bombs, guided missiles, orbital mines and free-falling thermal detonators; ordnance is armed only near the target."
+        }
+      ],
+      "description": "Dedicated light space bomber, 7.8 meters, developed from the TIE/gt. Twin-pod design: the pilot sits in the starboard pod, the port pod holds two bomb bays, a Nordoxicon bomb sight, targeting sensors and beam altimeter. Makes precise 'surgical strikes' against ground and space targets, letting the fleet capture ships and bases intact. One of the first Imperial starfighters with an ejection seat. Bent-wing solar panels power the extra systems. Missiles are susceptible to jamming and fast defensive guns.",
+      "book": "sourcebook",
+      "page": 28
+    },
+    {
+      "name": "TIE Starfighter (original TIE)",
+      "kind": "Starfighter",
+      "craft": "Sienar Fleet Systems TIE",
+      "scale": "Starship",
+      "hyperdrive": "None",
+      "speed": "4D",
+      "maneuverability": "2D",
+      "hull": "2D",
+      "shields": "None",
+      "weapons": [
+        {
+          "name": "Double Laser Cannon",
+          "count": "One",
+          "fireControl": "2D",
+          "damage": "3D"
+        }
+      ],
+      "description": "The first, modestly upgraded fighter manufactured by Sienar Fleet Systems under direct Imperial Navy control (the T.I.E. was the original Republic Sienar Systems starfighter). Early-model TIEs are still operated by a few planetary and local forces, whose pilots are less rigorously trained. Statistics from the Spacecraft Performance Data Chart; no full stat block is printed.",
+      "book": "sourcebook",
+      "page": 23
+    },
+    {
+      "name": "TIE/rc Fighter",
+      "kind": "Starfighter",
+      "craft": "Sienar Fleet Systems TIE/rc",
+      "scale": "Starship",
+      "hyperdrive": "None",
+      "speed": "5D",
+      "maneuverability": "2D+2",
+      "hull": "2D",
+      "shields": "None",
+      "weapons": [
+        {
+          "name": "Laser Cannon",
+          "count": "One",
+          "fireControl": "2D",
+          "damage": "2D+2"
+        }
+      ],
+      "description": "Special reconnaissance fighter with extra-sensitive sensors and long-range communications gear, armed with only one laser cannon. Each Star Destroyer wing always includes one recon squadron. Statistics from the Spacecraft Performance Data Chart.",
+      "book": "sourcebook",
+      "page": 23
+    },
+    {
+      "name": "TIE/fc Starfighter",
+      "kind": "Starfighter",
+      "craft": "Sienar Fleet Systems TIE/fc",
+      "scale": "Starship",
+      "hyperdrive": "None",
+      "speed": "4D",
+      "maneuverability": "3D",
+      "hull": "2D",
+      "shields": "None",
+      "weapons": [
+        {
+          "name": "Laser Cannon",
+          "count": "One",
+          "fireControl": "2D",
+          "damage": "2D+2"
+        }
+      ],
+      "description": "Fire-control fighter: provides accurate fire control and target designation for long-range naval bombardment of ground or space targets, maneuvering near the target and transmitting aiming adjustments to a fleet ship out of counter-fire range. Carries laser target designators and jam-resistant data comlinks. One or two flights in a fighter squadron are TIE/fc, often detached to assist TIE bombers or ground forces. Statistics from the Spacecraft Performance Data Chart.",
+      "book": "sourcebook",
+      "page": 23
+    },
+    {
+      "name": "TIE/gt Starfighter",
+      "kind": "Starfighter",
+      "craft": "Sienar Fleet Systems TIE/gt",
+      "scale": "Starship",
+      "hyperdrive": "None",
+      "speed": "2D",
+      "maneuverability": "1D",
+      "hull": "2D",
+      "shields": "None",
+      "weapons": [
+        {
+          "name": "Laser Cannon",
+          "count": "One",
+          "fireControl": "2D",
+          "damage": "2D+2"
+        },
+        {
+          "name": "Concussion Missiles",
+          "fireControl": "1D",
+          "damage": "8D"
+        }
+      ],
+      "description": "An enlarged hull allows this ground-attack model to carry a wide range of torpedoes and bombs. Found mostly in ground support squadrons; gradually being replaced by the TIE bomber, though many Star Destroyers still carry TIE/gt models. Statistics from the Spacecraft Performance Data Chart.",
+      "book": "sourcebook",
+      "page": 23
+    },
+    {
+      "name": "Standard Interplanetary Shuttle",
+      "kind": "Space Transport",
+      "scale": "Starship",
+      "hyperdrive": "None",
+      "speed": "2D+2",
+      "maneuverability": "zero",
+      "hull": "5D",
+      "shields": "1D",
+      "weapons": [
+        {
+          "name": "Laser Cannon",
+          "count": "One",
+          "fireControl": "2D",
+          "damage": "4D"
+        }
+      ],
+      "description": "Generic in-system shuttle without a hyperdrive. Statistics from the Spacecraft Performance Data Chart (p.23); no full stat block is printed.",
+      "book": "sourcebook",
+      "page": 23
+    },
+    {
+      "name": "Corellian Corvette",
+      "kind": "Capital",
+      "craft": "Corellian Engineering Corporation Corvette",
+      "scale": "Capital ship (no hull or shield ratings — small craft cannot significantly damage it)",
+      "crew": "45-165, depending on function (military configuration about 165; cargo configuration 45-60). Crew skill codes 3D+2 to 8D in astrogation, starship gunnery and starship piloting",
+      "passengers": "Up to 600, depending on function",
+      "cargo": "3,000 metric tons",
+      "consumables": "1 year",
+      "hyperdrive": "x2",
+      "nav": "Yes (hyperdrive backup: no)",
+      "speed": "3D",
+      "maneuverability": "2D",
+      "weapons": [
+        {
+          "name": "Double Turbolaser Cannons",
+          "count": "Six (fire separately)",
+          "fireControl": "3D",
+          "damage": "8D"
+        }
+      ],
+      "description": "Mid-sized, multi-purpose starship, 150 meters. Modular interior reconfigures it as troop carrier, light escort, cargo transport, passenger liner or diplomatic courier; used by the Empire, Rebel blockade runners, pirates and privateers. Design flaw: the dorsal solar collector/stabilizer fin — repeated heavy hits there cause reactor vibration and heat build-up, forcing a shutdown; some are retrofitted with heavier fins, others refocus shields to protect it.",
+      "book": "sourcebook",
+      "page": 30
+    },
+    {
+      "name": "Escort Frigate",
+      "kind": "Capital",
+      "craft": "KDY's Nebulon-B Frigate",
+      "scale": "Capital ship (no hull or shield ratings)",
+      "crew": "920 (78 officers, 842 enlisted); troops: 75",
+      "passengers": "Troops: 75; carries two TIE fighter squadrons (24 starfighters)",
+      "cargo": "6,000 metric tons",
+      "consumables": "2 years",
+      "hyperdrive": "x2",
+      "nav": "Yes (hyperdrive backup: yes)",
+      "speed": "2D",
+      "maneuverability": "1D",
+      "weapons": [
+        {
+          "name": "Turbolaser Batteries",
+          "count": "12 (fire separately)",
+          "fireControl": "3D",
+          "damage": "4D"
+        },
+        {
+          "name": "Laser Cannons",
+          "count": "12 (fire separately)",
+          "fireControl": "2D",
+          "damage": "2D"
+        },
+        {
+          "name": "Tractor Beam Projectors",
+          "count": "Two",
+          "fireControl": "2D",
+          "damage": "None; target captured if hit"
+        }
+      ],
+      "description": "Escort starship, 300 meters — the Kuat Drive Yards Nebulon-B, the standard convoy escort for both the Empire and the Rebellion. Well armed, good shields and tractor beams, very good long-range sensors, and carries two TIE squadrons to handle anything too quick or small for the slow, unwieldy frigate. Several have defected to or been captured by the Rebellion and used to capture whole Imperial convoys.",
+      "book": "sourcebook",
+      "page": 31
+    },
+    {
+      "name": "Victory-class Star Destroyer",
+      "kind": "Capital",
+      "craft": "Rendili StarDrive's Victory I",
+      "scale": "Capital ship (no hull or shield ratings)",
+      "crew": "5,200 (610 officers, 4,590 enlisted); troops: 2,040",
+      "passengers": "Troops: 2,040; carries two TIE fighter squadrons in Imperial service",
+      "cargo": "8,100 metric tons",
+      "consumables": "4 years",
+      "hyperdrive": "x1",
+      "nav": "Yes (hyperdrive backup: yes)",
+      "speed": "2D",
+      "maneuverability": "1D",
+      "weapons": [
+        {
+          "name": "Quad Turbolaser Batteries",
+          "count": "10 (fire separately)",
+          "fireControl": "4D",
+          "damage": "5D"
+        },
+        {
+          "name": "Double Turbolaser Batteries",
+          "count": "40 (fire separately)",
+          "fireControl": "3D",
+          "damage": "2D+2"
+        },
+        {
+          "name": "Concussion Missile Tube Launchers",
+          "count": "80 (fire separately)",
+          "fireControl": "2D",
+          "damage": "9D",
+          "notes": "Main ground-attack weapon"
+        },
+        {
+          "name": "Tractor Beam Projectors",
+          "count": "10 (fire separately)",
+          "fireControl": "3D",
+          "damage": "None; target captured if hit"
+        }
+      ],
+      "description": "Star Destroyer, 900 meters, designed by Walex Blissex and commissioned at the end of the Clone Wars. Now largely replaced by Imperial-class ships and relegated to planetary defense and assault. Can enter the upper atmosphere of planets (newer Star Destroyers cannot). Weak LF9 ion engines make it slow in realspace, but DeLuxFlux hyperdrive motivators give it rapid jumps. Its 10 high-intensity tractor beams compensate for its slow speed.",
+      "book": "sourcebook",
+      "page": 32
+    },
+    {
+      "name": "Imperial Star Destroyer",
+      "kind": "Capital",
+      "craft": "KDY's Imperial I",
+      "scale": "Capital ship (no hull or shield ratings)",
+      "crew": "37,085 (9,235 officers, 27,850 enlisted); troops: 9,700. Crew skill codes up to 8D in astrogation, gunnery and piloting",
+      "passengers": "Troops: 9,700 (a full stormtrooper division with assault craft); 20 AT-AT and 30 AT-ST walkers; 72 TIE starfighters (48 TIE fighters, 12 interceptors, 12 bombers); eight Lambda-class shuttles; 12 landing barges (four AT-ATs or eight AT-STs and 1,000 troops each)",
+      "cargo": "36,000 metric tons",
+      "consumables": "6 years",
+      "hyperdrive": "x2",
+      "nav": "Yes (hyperdrive backup: yes)",
+      "speed": "3D",
+      "maneuverability": "1D",
+      "weapons": [
+        {
+          "name": "Turbolaser Batteries",
+          "count": "60 (fire separately)",
+          "fireControl": "4D",
+          "damage": "5D",
+          "notes": "Mounted in five-gun batteries of three turrets (two double, one single) that can concentrate on one target or engage several"
+        },
+        {
+          "name": "Ion Cannon Batteries",
+          "count": "60 (fire separately)",
+          "fireControl": "2D+2",
+          "damage": "3D"
+        },
+        {
+          "name": "Tractor Beam Projectors",
+          "count": "10 (fire separately)",
+          "fireControl": "4D",
+          "damage": "None; target captured if hit"
+        }
+      ],
+      "description": "Star Destroyer, 1,600 meters — the mainstay of the Imperial fleet, with enough firepower to reduce a civilization to slag or take on an enemy fleet. Proposed by Lira Wessex; each fleet is built around one Imperial-class ship. Serves as weapons platform, space station, repair dock and heavy transport; not designed to enter atmospheres, so it carries landing barges, and many carry pre-fabricated garrison bases (800 troops, 2,200 support personnel, 10 AT-ATs, 10 AT-STs, 40 TIEs). Weakness: few overlapping fields of fire at close range against small, maneuverable ships. Lord Vader's squadron includes the Super-class Executor and the Imperial-class Devastator and Avenger.",
+      "book": "sourcebook",
+      "page": 34
+    },
+    {
+      "name": "Mon Cal Cruiser",
+      "kind": "Capital",
+      "craft": "Mon Calamari MC80",
+      "scale": "Capital ship (no hull or shield ratings)",
+      "crew": "5,402 (668 officers, 4,734 enlisted); troops: 1,200",
+      "passengers": "Troops: 1,200",
+      "cargo": "20,000 metric tons",
+      "consumables": "2 years",
+      "hyperdrive": "x1",
+      "nav": "Yes (hyperdrive backup: yes)",
+      "speed": "3D",
+      "maneuverability": "2D",
+      "weapons": [
+        {
+          "name": "Turbolaser Batteries",
+          "count": "48 (fire separately)",
+          "fireControl": "2D",
+          "damage": "4D"
+        },
+        {
+          "name": "Ion Cannon Batteries",
+          "count": "20 (fire separately)",
+          "fireControl": "3D",
+          "damage": "3D"
+        },
+        {
+          "name": "Tractor Beam Projectors",
+          "count": "Six (fire separately)",
+          "fireControl": "2D+2",
+          "damage": "None; target captured if hit"
+        }
+      ],
+      "description": "Star Cruiser, 1,200 meters. MC80 passenger/exploration vessels converted for war by the Mon Calamari and now serving the Rebellion; each is hand-crafted and no two are alike, which pains non-Calamari mechanics. Almost organic in appearance, covered with pods holding sensors, recessed batteries, shield generators and observation decks; many viewports have been plated over. Triple-redundant shield generators, each weaker than an Imperial unit but re-channelable when one fails — an Imperial Star Destroyer that loses a shield simply loses it.",
+      "book": "sourcebook",
+      "page": 36
+    },
+    {
+      "name": "Space Barge",
+      "kind": "Space Transport",
+      "craft": "Incom X-23 StarWorker",
+      "scale": "Starship",
+      "crew": "2, plus Droid (pilot, co-pilot and fifth-degree laborer Droid; can be operated by one person)",
+      "passengers": "None",
+      "cargo": "2,000 cubic meters with a maximum mass of 5,000 metric tons",
+      "consumables": "1 week",
+      "hyperdrive": "None",
+      "nav": "Yes (hyperdrive backup: no)",
+      "speed": "1D",
+      "maneuverability": "0",
+      "hull": "3D",
+      "shields": "No combat shields (limited shields against collisions and debris)",
+      "weapons": [],
+      "description": "Intra-system space barge, 38 meters — the workhorse of in-system commerce, shuttling cargo between large hyperspace-capable ships, orbiting warehouses and planetary spaceports. Most have both sublight and repulsorlift drives and standardized docking ports and airlocks. Unarmed and slow, so a tempting target for hit-and-run pirates just after it loads.",
+      "book": "sourcebook",
+      "page": 38
+    },
+    {
+      "name": "Stock Light Freighter",
+      "kind": "Space Transport",
+      "craft": "Corellian YT-1300 Transport",
+      "scale": "Starship",
+      "crew": "2",
+      "passengers": "6",
+      "cargo": "100 metric tons",
+      "consumables": "2 months",
+      "hyperdrive": "x2",
+      "nav": "Yes (hyperdrive backup: yes)",
+      "speed": "2D",
+      "maneuverability": "zero",
+      "hull": "4D",
+      "shields": "No combat shields",
+      "weapons": [
+        {
+          "name": "Laser Cannon",
+          "count": "One",
+          "fireControl": "2D",
+          "damage": "4D"
+        }
+      ],
+      "description": "Stock light freighter, 26.7 meters. Corellian-built light freighters, once the backbone of galactic trade, are now most often seen plying the Outer Rim routes that the big bulk freighters and container ships disdain. Built around a command pod or bridge with sleeping/recreation section and storage holds, and almost always at least minimally armed. Owners are fanatically loyal and usually in debt up to their ocular receptors; no two are 'stock' any more. Cost 100,000 credits (used: 25,000) on the Equipment Cost Chart.",
+      "cost": "100,000 (used: 25,000)",
+      "book": "sourcebook",
+      "page": 38
+    },
+    {
+      "name": "Millennium Falcon",
+      "kind": "Space Transport",
+      "craft": "The Millennium Falcon (modified Corellian YT-1300)",
+      "scale": "Starship",
+      "crew": "2 (minimum); one person can operate the ship from the cockpit or forward hold technical station if necessary",
+      "passengers": "6",
+      "cargo": "100 metric tons (plus several sensor-shielded hidden holds)",
+      "consumables": "2 months",
+      "hyperdrive": "x1/2",
+      "nav": "Yes (hyperdrive backup: yes)",
+      "speed": "4D",
+      "maneuverability": "1D",
+      "hull": "6D",
+      "shields": "3D",
+      "weapons": [
+        {
+          "name": "Quad Laser Cannons",
+          "count": "Two (fire separately)",
+          "fireControl": "3D",
+          "damage": "6D",
+          "notes": "Dorsal and ventral turrets; fired manually or remotely from the cockpit at reduced accuracy"
+        },
+        {
+          "name": "Concussion Missile Tubes",
+          "count": "Two (fire linked)",
+          "fireControl": "3D",
+          "damage": "9D",
+          "notes": "Combined damage; mounted between the bow mandibles"
+        },
+        {
+          "name": "Light Laser Cannon",
+          "count": "One",
+          "fireControl": "4D",
+          "damage": "1D",
+          "notes": "Auto-firing anti-personnel blaster cannon that drops from a concealed pod near the cockpit; fires only when the ship is on the ground"
+        }
+      ],
+      "description": "Modified Corellian stock light freighter captained by Han Solo. Looks like a battered tramp freighter but is packed with unlicensed modifications: extensively rebuilt hyperdrive and sublight engines that outrun pickets, customs ships and many starfighters; star-cruiser-grade deflectors 'acquired' from Myomar (only sustainable for limited duration); scavenged duralloy armor; a transponder broadcasting several identity codes; hidden holds; a complete sensor package and a powerful (once self-jamming) sensor jammer. The Hanx-Wargel SuperFlow IV computer holds three bickering Droid brains, and breakdowns are chronic.",
+      "book": "sourcebook",
+      "page": 43
+    },
+    {
+      "name": "Bulk Freighter",
+      "kind": "Space Transport",
+      "craft": "Corellian Action IV Transport",
+      "scale": "Starship (no hull or shield ratings — vast size makes it immune to most small ship fire)",
+      "crew": "8 (crew skill codes 2D to 6D)",
+      "passengers": "None",
+      "cargo": "30,000 cubic meters with a maximum mass of 75,000 metric tons in a variety of partial or fully pressurized and climate-controlled holds",
+      "consumables": "3 months",
+      "hyperdrive": "x3",
+      "nav": "No (hyperdrive backup: no)",
+      "speed": "1D",
+      "maneuverability": "zero",
+      "weapons": [],
+      "description": "Medium bulk freighter, 100 meters. Bulk freighters haul the vast majority of interplanetary cargo — essentially a box with a hyperspace engine, bottom-of-the-line computers, limited sensors and often no nav computer (Port Authority computers sell jump coordinates for major routes). Extremely rugged and reliable; mostly independently or family-owned and mortgaged; often crewed by greenhorns working for room and board. Common conversions: tugs, salvage ships, fleet resuppliers, research vessels.",
+      "book": "sourcebook",
+      "page": 44
+    },
+    {
+      "name": "Container Ship",
+      "kind": "Space Transport",
+      "craft": "Kuat Drive Yards Super Transport XI",
+      "scale": "Starship (no hull or shield ratings)",
+      "crew": "100",
+      "passengers": "None",
+      "cargo": "10 million cubic meters (up to 40,000 standard containers) with a maximum mass of 25 million metric tons in 20 holds, some pressurized and with limited temperature control",
+      "consumables": "500 days",
+      "hyperdrive": "x3",
+      "nav": "Yes (hyperdrive backup: yes)",
+      "speed": "1D",
+      "maneuverability": "zero",
+      "weapons": [],
+      "description": "Large container ship ('super transport'), 840 meters — among the largest commercial vessels in space. Hauls only standard sealed containers (smallest 500 cubic meters / 1,000 metric tons; standard sizes 10x10x10 m = 1,000 cubic meters, 20x10x10 = 2,000, 40x20x10 = 8,000) loaded by built-in tracks and lifters; cannot land on planets. Flagships of the great shipping corporations, often accompanied by guardships; the Imperial Navy uses them to resupply fleets.",
+      "book": "sourcebook",
+      "page": 45
+    },
+    {
+      "name": "Passenger Liner",
+      "kind": "Space Transport",
+      "craft": "Lady of Mindor",
+      "scale": "Starship (no hull or shield ratings)",
+      "crew": "117 (12 officers, 24 crewmen, and 81 stewards)",
+      "passengers": "600 in staterooms",
+      "cargo": "1,000 cubic meters",
+      "consumables": "300 days",
+      "hyperdrive": "x2",
+      "nav": "Yes (hyperdrive backup: yes)",
+      "speed": "3D+1",
+      "maneuverability": "zero",
+      "weapons": [
+        {
+          "name": "Twin Laser Cannons",
+          "count": "Four (fire linked)",
+          "fireControl": "1D",
+          "damage": "4D",
+          "notes": "Combined damage"
+        }
+      ],
+      "description": "Luxury passenger liner, 310 meters. 'Luxury liner' covers non-military starships over 100 meters carrying over 250 passengers; smaller passenger ships (SSPs, under 100 meters and 500 passengers) are registered with a planetary governor. Massive drives, backup systems, powerful shields and several laser turrets. Cost of passage: luxury liner 1,000 credits and up, 'no frills' liner 500, steerage 100, chartered ship 10,000 and up; multiply by x1 heavily-travelled route, x2 common, x3 rarely-travelled, x5 uncommon (chartered ships to unusual destinations: gamemaster's choice). Shaky credentials cost about three times the fare.",
+      "book": "sourcebook",
+      "page": 47
+    },
+    {
+      "name": "Landspeeder",
+      "kind": "Speeder",
+      "craft": "SoroSuub XP-38 Landspeeder Ground Vehicle",
+      "scale": "Repulsorcraft (speed, maneuverability, body strength and weapon codes are in scale to starfighter codes)",
+      "crew": "1",
+      "passengers": "1",
+      "cargo": "10 kilograms",
+      "speed": "2D",
+      "maneuverability": "2D",
+      "hull": "2D (body strength)",
+      "atmosphere": "Flight ceiling 2 meters",
+      "weapons": [],
+      "description": "Light-duty surface transport on repulsorlift (often with turbothrust engines), hovering about a meter above the surface at up to 250 kilometers per hour — the most common personal planetary transport. The XP-38 is the most advanced and hottest-selling model: 320 kph, two-meter ceiling, optional sensor package, and an R2-shaped autopilot that 'gives you the feel of flying a starfighter'. Other popular makes: Bespin Motors Void-Spider TX-3, Ubrikkian 9000 Z001, Mobquet Deluxe. Some police forces and the Rebel Alliance armor-plate landspeeders and add blaster cannons. Cost 10,000 credits (used: 2,000).",
+      "cost": "10,000 (used: 2,000)",
+      "book": "sourcebook",
+      "page": 59
+    },
+    {
+      "name": "Airspeeder",
+      "kind": "Airspeeder",
+      "craft": "Incom's T-47 Airspeeder",
+      "scale": "Repulsorcraft",
+      "crew": "1",
+      "passengers": "1",
+      "cargo": "10 kilograms",
+      "speed": "3D",
+      "maneuverability": "3D",
+      "hull": "2D (body strength)",
+      "atmosphere": "Flight ceiling 250 kilometers",
+      "weapons": [],
+      "description": "Small wedge-shaped repulsorlift vehicle with a ceiling over 250 kilometers and top speed over 900 kilometers per hour. Mechanical control flaps brake and turn without losing speed, making airspeeders nearly impossible to track with flight-predictor sensors. Incom's T-47 and T-16 Skyhopper are the most popular; the T-16 adds ion afterburners (1,200 kph) and many X-wing pilots train in it. Sport and family transport, often hot-rodded; militias and the Rebellion convert them into weapon platforms. The Equipment Cost Chart prices a Skyhopper at 30,000 credits new (7,000 used) or 400/day to rent; the T-47 itself is not priced.",
+      "book": "sourcebook",
+      "page": 60
+    },
+    {
+      "name": "Snowspeeder",
+      "kind": "Airspeeder",
+      "craft": "Rebel Alliance Combat Snowspeeder (converted airspeeder)",
+      "scale": "Repulsorcraft",
+      "crew": "2 (pilot forward, gunner facing rearward)",
+      "passengers": "None",
+      "cargo": "10 kilograms",
+      "speed": "3D+2",
+      "maneuverability": "3D",
+      "hull": "3D (body strength)",
+      "atmosphere": "Flight ceiling 175 kilometers",
+      "weapons": [
+        {
+          "name": "Double Laser Cannon",
+          "count": "One (fire linked)",
+          "fireControl": "2D",
+          "damage": "4D",
+          "notes": "Combined damage; two forward-pointing heavy laser cannons"
+        },
+        {
+          "name": "Power Harpoon",
+          "fireControl": "2D",
+          "damage": "3D or none if tow cable and fusion disc is used",
+          "notes": "Harpoon cannon with high-tension tow cable and fusion discs"
+        }
+      ],
+      "description": "Airspeeder refitted by the Rebellion for military service and hostile environments (nicknamed 'snowspeeder' or 'sandspeeder'): heavy angled armor plating, dust covers, insulation or cooling systems, and a modified Y-wing cockpit pod giving pilots familiar controls. Fast, agile and heavily armed, converted airspeeders are the Rebellion's major ground-support fighting craft.",
+      "book": "sourcebook",
+      "page": 60
+    },
+    {
+      "name": "Cloud Car",
+      "kind": "Airspeeder",
+      "craft": "Bespin Motors Storm IV Twin-Pod Cloud Car",
+      "scale": "Repulsorcraft",
+      "crew": "1",
+      "passengers": "1",
+      "cargo": "10 kilograms",
+      "speed": "3D",
+      "maneuverability": "2D+2",
+      "hull": "1D (body strength)",
+      "atmosphere": "Flight ceiling 250 kilometers",
+      "weapons": [
+        {
+          "name": "Double Blaster Cannon",
+          "count": "One (fire linked)",
+          "fireControl": "1D",
+          "damage": "1D+2",
+          "notes": "Combined damage; patrol craft only — fixed forward-firing cannon on each pod"
+        }
+      ],
+      "description": "Twin-pod atmospheric vehicle with both repulsorlifts and a boom-mounted miniature Quadex Kyromaster ion engine (left exposed for cooling); pilot and passenger ride in separate pods. Cruises at 1,500 kph up to about 250 kilometers. Bespin Motors makes pleasure craft, air taxis and patrol models; used for traffic control, guiding landing craft and spot-checking cargo. Useless in combat — cloud cars fly apart when hit and cannot mount adequate shields, armor or heavy weapons.",
+      "book": "sourcebook",
+      "page": 60
+    },
+    {
+      "name": "Sail Barge",
+      "kind": "Speeder",
+      "craft": "Ubrikkian Luxury Sail Barge",
+      "scale": "Repulsorcraft",
+      "crew": "26",
+      "passengers": "500",
+      "cargo": "2000 metric tons",
+      "speed": "1D",
+      "maneuverability": "0",
+      "hull": "2D (body strength)",
+      "atmosphere": "Flight ceiling 10 meters",
+      "weapons": [
+        {
+          "name": "Heavy Blaster Cannon",
+          "fireControl": "1D",
+          "damage": "3D"
+        }
+      ],
+      "description": "Huge antigravity vessel for crossing large flat surfaces — sand, water and ice seas — at up to 100 kph on repulsorlifts, or 30 kph under its massive sails alone. Usually a luxury touring craft, entertainment venue or vacation complex (Galaxy Tours sells sail barge packages) for the wealthy, planetary royalty and high Imperial officials. Skiffs serve as support and emergency vehicles aboard sail barges.",
+      "book": "sourcebook",
+      "page": 61
+    },
+    {
+      "name": "Skiff",
+      "kind": "Speeder",
+      "craft": "Ubrikkian Bantha II Cargo Skiff",
+      "scale": "Repulsorcraft",
+      "crew": "1",
+      "passengers": "16",
+      "cargo": "120 metric tons",
+      "speed": "1D",
+      "maneuverability": "0",
+      "hull": "1D (body strength)",
+      "atmosphere": "Flight ceiling 50 meters",
+      "weapons": [],
+      "description": "Ten-meter open-topped antigravity utility craft steered from the rear by a tiller with two steering vanes; up to 250 kph and a 50-meter ceiling. Easily operated — even labor Droids can handle one. Used by shipping firms to move cargo between ports and warehouses (two electromagnetic load lifters and a boarding ramp), refitted for up to 16 passengers, or carried as support vehicles on sail barges.",
+      "book": "sourcebook",
+      "page": 62
+    },
+    {
+      "name": "Speeder Bike",
+      "kind": "Speeder",
+      "craft": "Aratech 74-Z Military Speeder Bike",
+      "scale": "Repulsorcraft",
+      "crew": "1",
+      "passengers": "None",
+      "cargo": "3 kilograms (personal gear)",
+      "speed": "4D",
+      "maneuverability": "3D+2",
+      "hull": "2D (body strength)",
+      "atmosphere": "Flight ceiling 25 meters",
+      "weapons": [
+        {
+          "name": "Laser Cannon",
+          "fireControl": "2D",
+          "damage": "3D"
+        }
+      ],
+      "description": "One- or two-man repulsorlift vehicle sacrificing altitude for low-altitude, high-speed maneuverability: rear-mounted engine, front outriggings with four directional vanes, handlebar and pedal controls, saddle with safety harness. Batteries need recharging every 600 kilometers or so; military versions are armored, armed with a small laser cannon and carry self-charging power. The Aratech 74-Z is Imperial military issue, used by garrisons for reconnaissance, courier and patrol work by specially trained scout troopers. Cost 5,000 credits (used: 1,000).",
+      "cost": "5,000 (used: 1,000)",
+      "book": "sourcebook",
+      "page": 63
+    },
+    {
+      "name": "Civilian Speeder Bike (Ikas-Adno Starhawk)",
+      "kind": "Speeder",
+      "craft": "Ikas-Adno Starhawk",
+      "scale": "Repulsorcraft",
+      "crew": "1",
+      "passengers": "1",
+      "cargo": "3 kilograms",
+      "speed": "3D",
+      "maneuverability": "3D",
+      "hull": "1D (body strength)",
+      "atmosphere": "Flight ceiling 10 meters",
+      "weapons": [],
+      "description": "The best-selling civilian speeder bike: sleek, fast, relatively inexpensive and popular with the galaxy's youth. Competitors include Aratech's two-seat Yellow Demon 100 (QuietLift 1400 propulsion) and the Mobquet TrailMaker III (giant TurboToo repulsorlift engine, civilian and military versions). Cost 5,000 credits (used: 1,000).",
+      "cost": "5,000 (used: 1,000)",
+      "book": "sourcebook",
+      "page": 63
+    },
+    {
+      "name": "Swoop",
+      "kind": "Speeder",
+      "craft": "Mobquet Nebulon-Q Swoop Racer",
+      "scale": "Repulsorcraft",
+      "crew": "1",
+      "passengers": "None",
+      "cargo": "2 kilograms",
+      "speed": "5D",
+      "maneuverability": "4D",
+      "hull": "1D (body strength)",
+      "atmosphere": "Flight ceiling 350 kilometers",
+      "weapons": [],
+      "description": "Essentially a high-powered engine with a seat: a repulsorlift unit plus an advanced turbothrust engine reaching 600 kph with a 400-kilometer ceiling. Handlebar accelerators with separate lift, thrust and braking controls; knees tuck into control auxiliaries; riders must be belted on. Faster and more powerful than speeder bikes and much harder to operate — the Imperial Scouts chose speeder bikes instead. Swoop racing in huge domed 'swoop tracks' is a hugely popular, dangerous sport; Outer Rim swoop gangs such as the Nova Demons and Dark Star Hellions use them as raiding craft. Cost 5,000 credits (used: 1,000); 30/day to rent.",
+      "cost": "5,000 (used: 1,000)",
+      "book": "sourcebook",
+      "page": 65
+    },
+    {
+      "name": "AT-AT Walker",
+      "kind": "Walker",
+      "craft": "All Terrain Armored Transport",
+      "scale": "Walker (speed code in scale to creatures; weapon codes in scale to repulsorcraft and starfighters — damage doubled against characters)",
+      "crew": "3 (pilot, gunner, combat coordinator/commander); crew skill codes 4D to 8D in gunnery and piloting",
+      "passengers": "40 (fully-armed stormtroopers)",
+      "cargo": "400 kilograms",
+      "speed": "2D",
+      "hull": "6D (body strength)",
+      "weapons": [
+        {
+          "name": "Heavy Laser Cannon",
+          "count": "Two (fire linked)",
+          "fireControl": "2D",
+          "damage": "6D",
+          "notes": "Combined damage; chin-mounted, forward-firing"
+        },
+        {
+          "name": "Medium Blasters",
+          "count": "Two (fire linked)",
+          "fireControl": "2D",
+          "damage": "3D",
+          "notes": "Combined damage; one on each side of the head"
+        }
+      ],
+      "description": "Over 15 meters tall, four-legged ground-assault vehicle and troop transport assembled at Kuat Drive Yards, designed to inspire fear. The armored head (elevates/depresses 30 degrees, turns 90) holds crew and weapons; the less-armored 'neck/tunnel' is the usual target. Thick armor absorbs heavy blaster fire; climbs sheer slopes up to eight meters; kneels to deploy troops by rear ramp. Deceptively fast strides. Dropped from shuttle barges. Rules: walker speed codes are in scale to creatures' speed codes — when walkers engage repulsorcraft or starfighters in atmosphere, double the flying vehicles' speed codes; walker damage codes are doubled against characters (rulebook p.65).",
+      "book": "sourcebook",
+      "page": 68
+    },
+    {
+      "name": "AT-ST Walker",
+      "kind": "Walker",
+      "craft": "All Terrain Scout Transport",
+      "scale": "Walker (speed code in scale to creatures; weapon damage doubled against characters)",
+      "crew": "2",
+      "passengers": "None",
+      "cargo": "40 kilograms",
+      "speed": "3D",
+      "hull": "3D (body strength)",
+      "weapons": [
+        {
+          "name": "Twin Blaster Cannon",
+          "count": "One",
+          "fireControl": "1D",
+          "damage": "4D",
+          "notes": "Swivel-mounted on the chin"
+        },
+        {
+          "name": "Twin Light Blaster Cannon",
+          "count": "One",
+          "fireControl": "1D",
+          "damage": "2D",
+          "notes": "Swivel-mounted on the port-side sensor pod"
+        },
+        {
+          "name": "Concussion Grenade Launcher",
+          "fireControl": "1D",
+          "damage": "3D",
+          "notes": "Starboard pod"
+        }
+      ],
+      "description": "Two-legged scout walker just over six meters tall, for reconnaissance and front-line support: faster and more maneuverable than the AT-AT but less armed and armored. Escorts stormtroopers, covers AT-AT flanks and mops up infantry attacking from underneath; steel foot claws cut trip wires and troops. Only heavy blaster or laser cannon fire pierces its hide, but balance is a problem — susceptible to trip wires, deadfalls, pits and explosive charges, so infantry now clears traps ahead of scout actions. Dropped from shuttle barges or carried inside AT-ATs.",
+      "book": "sourcebook",
+      "page": 69
+    }
+  ],
+  "characters": [
+    {
+      "name": "R2 Astromech Droid",
+      "group": "Droid",
+      "description": "Model: Industrial Automaton R2 Astromech Droid. Height 1 meter. Second-degree (engineering/technical) Droid; Equipment Cost Chart price for a second-degree Droid is 4,000 credits. Sophisticated computer repair and information retrieval robot specializing in starship maintenance, able to work in vacuum indefinitely. Short, squat and cylindrical, moving on a pair of treaded rollers with a retractable third leg. Plugged into a starfighter's socket it becomes part of the flight computer: an Intellex IV computer performing over 10,000 operations a second monitors all systems, reroutes circuitry, stores navigational charts and evasion maneuvers, and holds up to 10 pre-programmed hyperspace jumps. Many can fly or land the craft if the pilot is disabled.",
+      "attributes": {
+        "Dexterity": 3,
+        "Knowledge": 3,
+        "Mechanical": 3,
+        "Perception": 3,
+        "Strength": 3,
+        "Technical": 3
+      },
+      "skills": [
+        "computer programming & repair 7D",
+        "starship repair 7D"
+      ],
+      "equipment": [
+        "Three wheeled legs (one retractable)",
+        "Two retractable arms; a heavy grasper and one suited for fine work",
+        "Extendable video sensor",
+        "Small electric arc welder",
+        "Small circular saw",
+        "Video display screen",
+        "Holograph projector",
+        "Fire extinguisher"
+      ],
+      "notes": "Standard sensor package: infrared receptors, electro photo receptors, dedicated energy receptors, auditory receivers, heat and motion detectors; some carry life-form sensors that can count and locate life forms in an area. Also carries electro-shock prods, laser cutters, high-powered spotlights and clawed graspers. Astromech sockets include ejectors. The simpler R4 unit can safely hold only a single hyperspace jump. All Droid attributes are 1D unless skills are listed (core rules).",
+      "book": "sourcebook",
+      "page": 50
+    },
+    {
+      "name": "3PO Human-Cyborg Relations Droid",
+      "group": "Droid",
+      "description": "Model: Cybot Galactica 3PO Human-Cyborg Relations Droid. Height 1.7 meters, weight 50 kilograms. Third-degree (social sciences and service) protocol Droid; Equipment Cost Chart price for a third-degree Droid is 3,000 credits. Humanoid, built to blend into human society; expert in etiquette, ceremony and translation for diplomats, traders and heads of state. The SytheTech AA-1 VerboBrain stores the etiquette of millions of species and, with TranLang III modules, accesses up to seven million languages, can analyze new ones, and phrases translations in the proper social context.",
+      "attributes": {
+        "Dexterity": 3,
+        "Knowledge": 3,
+        "Mechanical": 3,
+        "Perception": 3,
+        "Strength": 3,
+        "Technical": 3
+      },
+      "skills": [
+        "languages 10D",
+        "cultures 4D"
+      ],
+      "equipment": [
+        "Vocabulator speech/sound system",
+        "Broad-band antenna receiver",
+        "AA-1 VerboBrain",
+        "TranLang III Communication module (can access up to seven million different languages)"
+      ],
+      "notes": "All protocol Droids have microwave sensors, photoreceptors, olfactory sensors, energy transducers and pelvic servomotors, and need frequent lubrication baths. Creativity dampers restrict lying (but not exaggeration or evasiveness). Personality modules suit the Droid to its work — Imperial interrogation models are harsh, Alderaan models courtly. A protocol Droid allowed to keep its memory for a long time develops a unique personality and either becomes fiercely loyal or goes rogue; manufacturers recommend periodic memory wipes.",
+      "book": "sourcebook",
+      "page": 51
+    },
+    {
+      "name": "Too-Onebee Medical Droid",
+      "group": "Droid",
+      "description": "Model: Geentech Too-Onebee Medical Droid. Height 1.5 meters, weight 75 kilograms. First-degree (medical sciences) surgical Droid; Equipment Cost Chart price for a first-degree Droid is 5,000 credits. One of the older but most successful surgical Droids: simply constructed, but with uncanny perception and decades of refined skill. Many specialize (neurosurgery, optometry) but all share general medical expertise; they can perform cyborg adaptations, replacing limbs as complex as hands. Sought after by military units; many independent Too-Onebees serve voluntarily with the Rebel Alliance.",
+      "attributes": {
+        "Dexterity": 3,
+        "Knowledge": 3,
+        "Mechanical": 3,
+        "Perception": 3,
+        "Strength": 3,
+        "Technical": 3
+      },
+      "skills": [
+        "medicine 9D",
+        "alien races 5D"
+      ],
+      "equipment": [
+        "Medical diagnostic computer",
+        "Analytical computer",
+        "Various surgical attachments"
+      ],
+      "notes": "Medical Droids follow strict codes of conduct requiring them to treat every injury they encounter; surgical Droids may shut down or burn out if unable to help, and many evolve to work without any owner imprint. Often works with bacta-filled rejuve tanks. Other models: the Industrial Automaton Emdee series — MD-0 diagnostic, MD-1 laboratory technician, MD-2 anesthesiology, MD-3 pharmaceutical, MD-4 microsurgery, MD-5 general practitioner ('country doctors' of space, assigned to ships) — and the older Medtech FX series (FX-7 is a surgeon's assistant).",
+      "book": "sourcebook",
+      "page": 53
+    },
+    {
+      "name": "Probe Droid (Arakyd Viper)",
+      "group": "Droid",
+      "description": "Model: Arakyd Viper Probe Droid. Height 1.5 meters. The Empire's most versatile military probot: a fully intelligent probe that follows leads, avoids danger, evaluates information, and protects itself and its data by concealment, fleeing or fighting. Its combat computer's reaction and target selection are very quick and its aim quite accurate. Standard Imperial issue is spherical or curved to deflect sensor sweeps, with treaded rollers or repulsorlifts and many articulated limbs; military probots usually carry at least one blaster cannon and limited shielding. Prohibitively expensive for all but the largest companies and Imperial forces (fourth-degree Droid, 3,000 credits on the Equipment Cost Chart; armed commercial probe Droids are illegal).",
+      "attributes": {
+        "Dexterity": 3,
+        "Knowledge": 3,
+        "Mechanical": 3,
+        "Perception": 3,
+        "Strength": 12,
+        "Technical": 3
+      },
+      "skills": [
+        "blaster 4D",
+        "planetary systems 4D",
+        "search 4D"
+      ],
+      "equipment": [
+        "Blaster Cannon (damage 4D+2)",
+        "Full sensor array: acoustic, electromagnetic, motive, seismic and olfactory sensors; optical cameras, zoom magnifiers, infrared scopes, magnetic imagers, radar, sonar, radiation meters",
+        "Coded transmitter and scramblers"
+      ],
+      "notes": "Power systems run for years without recharging. Launched in pods (disguised as meteorites for military missions) and usually ordered to self-destruct when detected. 'Hunter' probots in hyperspace pods can scan a ship's jump, calculate its route and follow it (up to three jumps). Typical Imperial mission profiles: radar picket around fleets, pursuit after battles, rescue searches for pods and lifeboats, and hunting for Rebel, pirate and smuggler bases — often hundreds at a time.",
+      "book": "sourcebook",
+      "page": 55
+    },
+    {
+      "name": "Assassin Droid (Eliminator 434)",
+      "group": "Droid",
+      "description": "Model: Eliminator 434 (manufacturer unknown). Height 1.8 meters. Intelligent killing machine programmed to hunt specific targets, illegal for decades yet still roaming the galaxy in untold numbers (a few thousand to several million). Experts at stealth with reflexes faster than any human's, they usually get first shot and a kill ratio better than 90 percent. True assassin Droids look like standard Droids, conduct their own investigations and set up fail-safe operations; many carry compact repulsorlifts. Banned by Imperial edict on penalty of death after being used against the Empire itself, though the ISD is believed to use them and police register them as 'tactical situation specialists'.",
+      "attributes": {
+        "Dexterity": 3,
+        "Knowledge": 3,
+        "Mechanical": 3,
+        "Perception": 3,
+        "Strength": 15,
+        "Technical": 3
+      },
+      "skills": [
+        "blaster 5D",
+        "search 5D"
+      ],
+      "equipment": [
+        "Blaster Cannon (damage 6D)",
+        "Concussion Missile Launcher (damage 7D)",
+        "Conflict-avoidance personality programming and body language interpreters (to remain under cover)"
+      ],
+      "notes": "Rogue assassin Droids are the most dangerous: mission persistence erodes other programming, so they hunt secondary targets, reinterpret orders (a few decided to destroy all life), work as freelance bounty hunters, or go berserk. On Caprioril one Droid killed 20,000 swoop-arena spectators to reach Governor Amel Bakli. Pirates and crime lords such as Jabba the Hutt and Ploovo Two-For-One are rumored to employ them.",
+      "book": "sourcebook",
+      "page": 57
+    }
+  ],
+  "force": [],
+  "tables": {
+    "quickRules": [
+      {
+        "title": "Hyperdrives and astrogation",
+        "text": "Hyperspace is coterminous with realspace: every real object casts a 'shadow' there, so careful astrogation is essential and only the desperate jump without up-to-date charts and an astrogation Droid or computer. Starfighter computers or Droids usually hold data for one jump (an R2 unit holds up to 10; an R4 only one); capital ships store coordinates for almost every destination. Over 90 percent of large bodies are uncharted, so even good astrogators can plot a fatal course. Hyperdrive multiplier: x1/2 (Millennium Falcon) to x3 (bulk freighters). TIE fighters carry no hyperdrive at all.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Sublight drives",
+        "text": "The Hoersch-Kessel ion engine, standard across the galaxy, gives thrust from a fusion reaction; steering uses vectrals or lateral thrusters. Its hot, mildly radioactive exhaust is illegal on most inhabited worlds, so ships use repulsorlifts near planets. It needs periodic tuning but rarely breaks down and parts are easy to find. Sublight speed codes run from 1D (barges, bulk freighters) to 6D (A-wing); in atmosphere a starfighter's sublight speed and maneuverability codes correspond directly to repulsorcraft speed and maneuverability codes.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Ship weapons",
+        "text": "'Laser' and 'blaster' are synonymous ('blaster' implies a lighter weapon); laser cannons fire rapidly but overheat. Turbolasers build a charge in capacitors: slower fire, bigger punch, Imperial/government use only. Ion cannons disable electronics so a ship can be captured. Proton torpedoes and concussion missiles are light craft's surface-attack weapons and punch through ray shields, but particle shields stop torpedoes. Tractor beams pin a target so guns can bear; ships can break free by maneuvering out of the beam's arc. 'Fire linked' weapons make one attack with the listed combined damage; 'fire separately' weapons each attack on their own.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Shields",
+        "text": "Two kinds: particle shields stop missiles and debris but must be dropped to fire missiles or launch craft; ray/energy shields stop lasers and beams but not matter, cost lots of power, and are raised only for combat. Non-Imperial ships need a permit for ray shields (fear of piracy usually suffices). Pilots can angle shields forward or aft (X-wing, Y-wing). Mon Cal cruisers have three times as many weaker, re-channelable shield generators; an Imperial Star Destroyer that loses a shield must refocus the rest.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Sensors",
+        "text": "Modes: active (emit pulses; strong at short and medium range but easy to spot) and passive (listen only). Sweeps: scan (everything around the ship), search (a specified target type), focus (one area, at the cost of the rest; wingmen focus on overlapping arcs). Ranges run from a few kilometers to a million. Types: electro photo receptors (short range, most targeting), full-spectrum transceivers (universal but insensitive; most civilian ships have only these), dedicated energy receptors (passive, operator skill matters), crystal gravfield traps (blocked by mass), hyperwave signal interceptors (detect jumps and hyperradio), life form indicators (software). Countermeasures: jamming (blinds everyone and advertises your location), decoys, stealth (shut down engines and active sensors, run silent), and the billion-credit, death-penalty-illegal cloaking device.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Life support",
+        "text": "Every ship provides a breathable atmosphere by chemical or biological converters (TIE fighters have none — the pilot's suit does the work) and usually artificial gravity: repulsor fields give starfighter cockpits constant zero-g regardless of maneuvers, while large ships have gravity generators that can be tuned by compartment. Consumables range from 1 day (Z-95) to 6 years (Star Destroyer). Ithorian herd ships carry whole jungles.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Ejection seats and escape pods",
+        "text": "Imperial directives require an escape system for every passenger; licenses are granted at one-fourth of complement. Small craft use ejection seats: survival in vacuum needs a sealed environmental flight suit and even then only hours (24-hour oxygen, heating; antigrav lowers the seat within 500 km of a ship or surface). Most survivable ejections are in atmosphere. Large ships carry escape pods (one or two on a light freighter, hundreds on a Star Destroyer): limited flight, no repulsorlifts, rockets and parachutes to land, two to three weeks of rations, a distress beacon. 'Life boats' hold 10-50 and some have sublight or even hyperdrives.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Capital ships and big transports",
+        "text": "Capital combat ships and large transports have no hull or shield ratings: small craft simply cannot damage them, and characters who refuse to run, hide or surrender deserve applause followed by a quick death. Crew skill codes: 3D+2 (civilian) to 8D (Imperial Star Destroyers) in astrogation, starship gunnery and piloting for warships; 2D to 6D on transports. Walker and capital ship weapons list a number of batteries that fire separately.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Repulsorcraft versus starfighters and people",
+        "text": "Repulsorcraft speed, maneuverability, body strength and weapon codes are in scale to starfighter codes, so resolve repulsorcraft-versus-starfighter combat exactly like starfighter combat. Against characters, repulsorlift vehicles follow the starfighter rules (rulebook p.65): vehicle weapon damage is doubled against characters, and personal blasters do only 1D against repulsorcraft.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Walkers",
+        "text": "AT-AT and AT-ST speed codes are in scale to creatures' speed codes; when walkers engage repulsorcraft or starfighters in atmosphere, double the flying vehicles' speed codes. Walker weapon codes are in scale to repulsorcraft and starfighter codes, and walker damage codes are doubled when fired at characters. Crew skill codes run 4D to 8D in gunnery and piloting. Only prepared defenses, a direct attack on the gun emplacements, or concentrated fire on the AT-AT's neck have any chance; AT-STs are vulnerable to trip wires, pits and deadfalls.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "B-wing fire control and gyro",
+        "text": "The B-wing's ranging laser is built into its high fire control codes; if the ranging laser is not operational, reduce fire control by 2D. Its gyroscopic stabilization fails under heavy damage: then reduce all fire control codes by 1D and sublight speed by 2D.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Lightsabers",
+        "text": "Damage 5D (strength not added), difficulty 20 to hit; availability 4, X — no price. The blade cuts through most materials but not another lightsaber blade, so blade-to-blade contests are strength and skill; the saber loses power only when cutting and runs for years between charges. Anything less than years of Jedi training risks self-inflicted wounds or failing to stop an opponent's weapon; Jedi mastery came from the Force, letting them sense attacks, let foes draw first, and even deflect blaster bolts. Every Jedi built his own saber (about a month's work; two days for Clone Wars masters) from a power cell, one to three focusing jewels, an energy lens and a flux aperture in a 24-30 cm handle — knowledge now lost with the Jedi.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Droid degrees and programming",
+        "text": "Droids are classed by primary function: first degree (physical, mathematical, medical sciences; 5,000 credits), second (engineering and technical; 4,000), third (social sciences and service — translation, protocol, spaceport control; 3,000), fourth (security and military; 3,000), fifth (menial labor; 1,000). All have locomotion, sensors, logic, manipulation and some communication, and need recharging about monthly. A Droid allowed to keep its memory develops a personality and either becomes devoted or goes rogue; memory wipes (50-500 credits) prevent this. Medical Droids must treat every injury they meet; assassin Droids are illegal on pain of death.",
+        "book": "sourcebook"
+      },
+      {
+        "title": "Buying gear",
+        "text": "Availability codes: 1 everywhere; 2 large cities and spaceports; 3 planet of origin only; 4 rare; F permit; R restricted (license); X illegal. Prices are manufacturer's suggested and vary with locale and the buyer's streetwise, bargain and con skills. The black market supplies almost any F, R or X item without paperwork, but rarely, slowly, dangerously, in inferior quality and at three times the price. Passage costs 100 (steerage) to 1,000+ (luxury liner) or 10,000+ (charter), multiplied x1 to x5 by how rarely the route is travelled.",
+        "book": "sourcebook"
+      }
+    ]
+  }
+}

@@ -262,7 +262,7 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
     <div class="hdr-fields">
       <div class="hdr-field wide" style="grid-column:span 4;"><label>Character name</label><input type="text" id="f-name" placeholder="Name"></div>
       <div class="hdr-field" style="grid-column:span 4;"><label>Template</label><select id="f-template" onchange="onTemplateChange()"><option value="">—</option></select></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Species</label><input type="text" id="f-species" placeholder="Human"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Species</label><input type="text" id="f-species" list="dl-species" placeholder="Human"></div>
       <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Sex</label><input type="text" id="f-sex"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Age</label><input type="text" id="f-age"></div>
@@ -387,7 +387,7 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 </div>
 </div>
 
-<datalist id="dl-armor"></datalist><datalist id="dl-ships"></datalist>
+<datalist id="dl-armor"></datalist><datalist id="dl-ships"></datalist><datalist id="dl-species"></datalist>
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Star Wars — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 
@@ -410,6 +410,7 @@ const D = {
   gear:      () => (typeof SW_GEAR      !== 'undefined' ? SW_GEAR      : []),
   vehicles:  () => (typeof SW_VEHICLES  !== 'undefined' ? SW_VEHICLES  : []),
   force:     () => (typeof SW_FORCE     !== 'undefined' ? SW_FORCE     : []),
+  characters:() => (typeof SW_CHARACTERS !== 'undefined' ? SW_CHARACTERS : []),
   tables:    () => (typeof SW_TABLES    !== 'undefined' ? SW_TABLES    : null),
 };
 let wound = 'none', forcePointArmed = false;
@@ -451,11 +452,12 @@ function buildStats() {
   const groups = {}; D.skills().forEach(s => { (groups[s.attribute] = groups[s.attribute] || []).push(s); });
   $('skill-pick').innerHTML = '<option value="">Add a skill…</option>' + ATTRS.map(a => '<optgroup label="' + a + '">' + (groups[a] || []).map(s => '<option value="' + esc(s.name) + '">' + esc(s.name) + (s.reaction ? ' (reaction)' : '') + '</option>').join('') + '</optgroup>').join('')
     + '<optgroup label="The Force">' + FORCE_SKILLS.map(f => '<option value="' + f + '">' + f + '</option>').join('') + '</optgroup>';
-  $('weapon-pick').innerHTML = '<option value="">Add from the weapon charts…</option>' + D.weapons().filter(w => !/^(Starship|Capital|Vehicle|Artillery)$/.test(w.kind)).map(w => '<option value="' + esc(w.name) + '">' + esc(w.name) + ' — ' + esc(w.damageText || toCode(w.damage)) + (w.book === 'companion' ? ' (RC)' : '') + '</option>').join('');
+  $('weapon-pick').innerHTML = '<option value="">Add from the weapon charts…</option>' + D.weapons().filter(w => !/^(Starship|Capital|Vehicle|Artillery|Droid)$/.test(w.kind)).map(w => '<option value="' + esc(w.name) + '">' + esc(w.name) + ' — ' + esc(w.damageText || toCode(w.damage)) + (w.book === 'companion' ? ' (RC)' : '') + '</option>').join('');
   $('gear-pick').innerHTML = '<option value="">Add from the equipment list…</option>' + D.gear().map(g => '<option value="' + esc(g.name) + '">' + esc(g.name) + ' (' + esc(g.category) + ')' + '</option>').join('');
   $('force-pick').innerHTML = '<option value="">Add a Force power…</option>' + D.force().map(f => '<option value="' + esc(f.name) + '">' + esc(f.name) + ' — ' + esc(f.attribute) + '</option>').join('');
   $('dl-armor').innerHTML = D.gear().filter(g => g.category === 'Armor').map(g => '<option value="' + esc(g.name) + '">').join('');
   $('dl-ships').innerHTML = D.vehicles().map(v => '<option value="' + esc(v.name) + '">').join('');
+  $('dl-species').innerHTML = ['Human', ...D.characters().filter(c => c.group === 'Alien').map(c => c.name)].map(n => '<option value="' + esc(n) + '">').join('');
   renderWoundTrack();
 }
 function renderWoundTrack() {
@@ -633,8 +635,8 @@ function openRules() {
   const T = D.tables(); const body = $('rules-body');
   if(!T) body.innerHTML = '<p>Rules data not loaded.</p>';
   else {
-    let h = '<p class="m-hint">Rules Companion revisions are marked RC; the rest is the core rulebook.</p>';
-    const tag = b => b === 'companion' ? ' <span style="color:#f0c020;font-size:10px;">RC</span>' : '';
+    let h = '<p class="m-hint">Rules Companion revisions are marked RC, Sourcebook entries SB; the rest is the core rulebook.</p>';
+    const tag = b => b === 'companion' ? ' <span style="color:#f0c020;font-size:10px;">RC</span>' : b === 'sourcebook' ? ' <span style="color:#999;font-size:10px;">SB</span>' : '';
     h += '<h4>Difficulty</h4><table>' + (T.difficulties || []).map(d => '<tr><td><b>' + esc(d.name) + '</b></td><td>' + esc(d.range) + '</td></tr>').join('') + '</table>';
     h += '<h4>Wounds</h4>' + (T.woundLevels || []).map(w => '<p><b>' + esc(w.name) + '.</b> ' + esc(w.text) + '</p>').join('');
     h += '<h4>Damage</h4><table>' + (T.damageResults || []).map(d => '<tr><td class="mono">' + esc(d.range) + '</td><td>' + esc(d.text) + '</td></tr>').join('') + '</table>';
@@ -776,6 +778,7 @@ campaignUpdateBtn();
 <script src="/tools-data/sw-gear.js"></script>
 <script src="/tools-data/sw-vehicles.js"></script>
 <script src="/tools-data/sw-force.js"></script>
+<script src="/tools-data/sw-characters.js"></script>
 <script src="/tools-data/sw-sheet-builder.js"></script>
 <script>
 buildStats();

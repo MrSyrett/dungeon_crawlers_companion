@@ -63,7 +63,10 @@ export function code(pips: number | null | undefined): string {
   const d = Math.floor(pips / 3), p = pips % 3;
   return d ? `${d}D${p ? "+" + p : ""}` : p ? `+${p}` : "0D";
 }
-/** Small RC tag for Companion entries. */
-export function BookTag({ book }: { book: "core" | "companion" }) {
-  return book === "companion" ? <span className={`${badge} ml-2 border-[var(--sw)] text-[var(--sw)]`} title="Rules Companion (1989)">RC</span> : null;
+/** Small book tag: RC for Rules Companion entries, SB for Sourcebook ones. */
+export function BookTag({ book }: { book: "core" | "sourcebook" | "companion" }) {
+  if (book === "companion") return <span className={`${badge} ml-2 border-[var(--sw)] text-[var(--sw)]`} title="Rules Companion (1989)">RC</span>;
+  if (book === "sourcebook") return <span className={`${badge} ml-2`} title="The Star Wars Sourcebook (1987)">SB</span>;
+  return null;
 }
+export const BOOK_NAME = { core: "Core rulebook", sourcebook: "Sourcebook", companion: "Rules Companion" } as const;

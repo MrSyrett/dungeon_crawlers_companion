@@ -129,6 +129,126 @@ const SW_TABLES = {
       "book": "core"
     },
     {
+      "title": "Hyperdrives and astrogation",
+      "text": "Hyperspace is coterminous with realspace: every real object casts a 'shadow' there, so careful astrogation is essential and only the desperate jump without up-to-date charts and an astrogation Droid or computer. Starfighter computers or Droids usually hold data for one jump (an R2 unit holds up to 10; an R4 only one); capital ships store coordinates for almost every destination. Over 90 percent of large bodies are uncharted, so even good astrogators can plot a fatal course. Hyperdrive multiplier: x1/2 (Millennium Falcon) to x3 (bulk freighters). TIE fighters carry no hyperdrive at all.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Sublight drives",
+      "text": "The Hoersch-Kessel ion engine, standard across the galaxy, gives thrust from a fusion reaction; steering uses vectrals or lateral thrusters. Its hot, mildly radioactive exhaust is illegal on most inhabited worlds, so ships use repulsorlifts near planets. It needs periodic tuning but rarely breaks down and parts are easy to find. Sublight speed codes run from 1D (barges, bulk freighters) to 6D (A-wing); in atmosphere a starfighter's sublight speed and maneuverability codes correspond directly to repulsorcraft speed and maneuverability codes.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Ship weapons",
+      "text": "'Laser' and 'blaster' are synonymous ('blaster' implies a lighter weapon); laser cannons fire rapidly but overheat. Turbolasers build a charge in capacitors: slower fire, bigger punch, Imperial/government use only. Ion cannons disable electronics so a ship can be captured. Proton torpedoes and concussion missiles are light craft's surface-attack weapons and punch through ray shields, but particle shields stop torpedoes. Tractor beams pin a target so guns can bear; ships can break free by maneuvering out of the beam's arc. 'Fire linked' weapons make one attack with the listed combined damage; 'fire separately' weapons each attack on their own.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Shields",
+      "text": "Two kinds: particle shields stop missiles and debris but must be dropped to fire missiles or launch craft; ray/energy shields stop lasers and beams but not matter, cost lots of power, and are raised only for combat. Non-Imperial ships need a permit for ray shields (fear of piracy usually suffices). Pilots can angle shields forward or aft (X-wing, Y-wing). Mon Cal cruisers have three times as many weaker, re-channelable shield generators; an Imperial Star Destroyer that loses a shield must refocus the rest.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Sensors",
+      "text": "Modes: active (emit pulses; strong at short and medium range but easy to spot) and passive (listen only). Sweeps: scan (everything around the ship), search (a specified target type), focus (one area, at the cost of the rest; wingmen focus on overlapping arcs). Ranges run from a few kilometers to a million. Types: electro photo receptors (short range, most targeting), full-spectrum transceivers (universal but insensitive; most civilian ships have only these), dedicated energy receptors (passive, operator skill matters), crystal gravfield traps (blocked by mass), hyperwave signal interceptors (detect jumps and hyperradio), life form indicators (software). Countermeasures: jamming (blinds everyone and advertises your location), decoys, stealth (shut down engines and active sensors, run silent), and the billion-credit, death-penalty-illegal cloaking device.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Life support",
+      "text": "Every ship provides a breathable atmosphere by chemical or biological converters (TIE fighters have none — the pilot's suit does the work) and usually artificial gravity: repulsor fields give starfighter cockpits constant zero-g regardless of maneuvers, while large ships have gravity generators that can be tuned by compartment. Consumables range from 1 day (Z-95) to 6 years (Star Destroyer). Ithorian herd ships carry whole jungles.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Ejection seats and escape pods",
+      "text": "Imperial directives require an escape system for every passenger; licenses are granted at one-fourth of complement. Small craft use ejection seats: survival in vacuum needs a sealed environmental flight suit and even then only hours (24-hour oxygen, heating; antigrav lowers the seat within 500 km of a ship or surface). Most survivable ejections are in atmosphere. Large ships carry escape pods (one or two on a light freighter, hundreds on a Star Destroyer): limited flight, no repulsorlifts, rockets and parachutes to land, two to three weeks of rations, a distress beacon. 'Life boats' hold 10-50 and some have sublight or even hyperdrives.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Capital ships and big transports",
+      "text": "Capital combat ships and large transports have no hull or shield ratings: small craft simply cannot damage them, and characters who refuse to run, hide or surrender deserve applause followed by a quick death. Crew skill codes: 3D+2 (civilian) to 8D (Imperial Star Destroyers) in astrogation, starship gunnery and piloting for warships; 2D to 6D on transports. Walker and capital ship weapons list a number of batteries that fire separately.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Repulsorcraft versus starfighters and people",
+      "text": "Repulsorcraft speed, maneuverability, body strength and weapon codes are in scale to starfighter codes, so resolve repulsorcraft-versus-starfighter combat exactly like starfighter combat. Against characters, repulsorlift vehicles follow the starfighter rules (rulebook p.65): vehicle weapon damage is doubled against characters, and personal blasters do only 1D against repulsorcraft.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Walkers",
+      "text": "AT-AT and AT-ST speed codes are in scale to creatures' speed codes; when walkers engage repulsorcraft or starfighters in atmosphere, double the flying vehicles' speed codes. Walker weapon codes are in scale to repulsorcraft and starfighter codes, and walker damage codes are doubled when fired at characters. Crew skill codes run 4D to 8D in gunnery and piloting. Only prepared defenses, a direct attack on the gun emplacements, or concentrated fire on the AT-AT's neck have any chance; AT-STs are vulnerable to trip wires, pits and deadfalls.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "B-wing fire control and gyro",
+      "text": "The B-wing's ranging laser is built into its high fire control codes; if the ranging laser is not operational, reduce fire control by 2D. Its gyroscopic stabilization fails under heavy damage: then reduce all fire control codes by 1D and sublight speed by 2D.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Lightsabers",
+      "text": "Damage 5D (strength not added), difficulty 20 to hit; availability 4, X — no price. The blade cuts through most materials but not another lightsaber blade, so blade-to-blade contests are strength and skill; the saber loses power only when cutting and runs for years between charges. Anything less than years of Jedi training risks self-inflicted wounds or failing to stop an opponent's weapon; Jedi mastery came from the Force, letting them sense attacks, let foes draw first, and even deflect blaster bolts. Every Jedi built his own saber (about a month's work; two days for Clone Wars masters) from a power cell, one to three focusing jewels, an energy lens and a flux aperture in a 24-30 cm handle — knowledge now lost with the Jedi.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Droid degrees and programming",
+      "text": "Droids are classed by primary function: first degree (physical, mathematical, medical sciences; 5,000 credits), second (engineering and technical; 4,000), third (social sciences and service — translation, protocol, spaceport control; 3,000), fourth (security and military; 3,000), fifth (menial labor; 1,000). All have locomotion, sensors, logic, manipulation and some communication, and need recharging about monthly. A Droid allowed to keep its memory develops a personality and either becomes devoted or goes rogue; memory wipes (50-500 credits) prevent this. Medical Droids must treat every injury they meet; assassin Droids are illegal on pain of death.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Buying gear",
+      "text": "Availability codes: 1 everywhere; 2 large cities and spaceports; 3 planet of origin only; 4 rare; F permit; R restricted (license); X illegal. Prices are manufacturer's suggested and vary with locale and the buyer's streetwise, bargain and con skills. The black market supplies almost any F, R or X item without paperwork, but rarely, slowly, dangerously, in inferior quality and at three times the price. Passage costs 100 (steerage) to 1,000+ (luxury liner) or 10,000+ (charter), multiplied x1 to x5 by how rarely the route is travelled.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Playing aliens",
+      "text": "Each alien entry gives the attribute codes of an average member of the species. To create a player-character Gamorrean, Ithorian, Jawa, Quarren, Tusken Raider, Sullustan or Twi'lek, add 6D to the given stats; Ewok, Mon Calamari and Wookiee player characters use the templates on core rulebook pp.125, 131 and 137. Aliens have the same six attributes as humans and the same skills.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Average alien attributes (Dex/Kno/Mec/Per/Str/Tec)",
+      "text": "Ewok 2D+2/1D/1D+2/3D/2D/1D+2. Gamorrean 3D/1D/1D/2D/4D/1D. Ithorian 2D/2D+2/1D+1/2D+1/2D/1D+2. Jawa 2D/2D/3D/1D/1D/3D. Mon Calamari 2D/2D/2D+1/1D+1/2D/2D+1. Quarren 2D/1D+2/2D/2D+1/2D+1/1D+2. Sand People 2D+1/2D/1D/2D/3D+2/1D. Sullustan 2D/1D+1/3D/2D/2D/1D+2. Twi'lek 2D/2D/1D+2/3D+1/2D/1D. Wookiee 2D/1D/2D/1D/4D+1/1D+2.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Creatures in the game",
+      "text": "Creatures have Dexterity, Perception and Strength only: no skills and no Knowledge, Mechanical or Technical. A creature may never parry; its Dexterity is used when it attacks (in lieu of brawling) and for jumping, balancing and other physical tricks it could fail. Strength resists damage and is normally the creature's damage code, unless the description gives a higher code for dangerous horns, claws or fangs. Perception is used to notice things (core p.36). Rideable creatures have orneriness codes (core p.35). When a creature is in a chase with a repulsorcraft or starfighter, double the vehicle's speed code or sublight speed.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Mounts and pack animals",
+      "text": "Bantha (Speed 2D, Orneriness 2D): carries 500 kilos, or a drover plus four other characters; controlled by a drover tapping with a stick, or with beast riding; after an hour or more of riding, beast riding rolls (difficulty 5) to avoid nausea from its rocking gait; horns 7D, war-Bantha trample 8D. Dewback (Speed 3D, Orneriness 3D): 200 kilos, or one rider and 100 kilos; faster and more agile than a Bantha and untroubled by heat and sand storms. Tauntaun (Speed 3D, Orneriness 1D): 150 kilos, or one rider and 100 kilos; damage 5D+1; cannot survive the nights of Hoth unprotected.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Space hazards: Mynocks and Space Slugs",
+      "text": "Mynocks (Dex 3D, Per 1D, Str 1D, Speed 2D, up to 1.6 m) attach to starships and dissolve the hull to reproduce; they attack in numbers when cornered and are mainly a nuisance for spacefarers (core p.60). Space Slugs (Dex 2D, Per 1D, Speed 5D for short periods) have Strength of roughly 1D per meter of length (6D for a 6-meter Slug) and instinctively attack anything moving on an asteroid; their teeth (7D for a 6-meter Slug) can rip open a space suit. 900-meter Slugs exist but are very rare: use one sparingly.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Stormtrooper armor variants",
+      "text": "Standard stormtrooper armor: +1D to Strength for damage purposes only; Dexterity and all Dexterity skills reduced by 1D (Dex 2D to 1D, Str 2D to 3D). Snowtrooper (cold assault) armor: the same +1D/-1D, on a trooper with Strength 3D (to 4D) and blaster 5D (to 4D); adds heating units, airtight oversuit and breather hood. Spacetrooper (zero-G) armor: +3D to Strength for damage only, Dexterity -1D; a personal spacecraft with repulsorlift propulsion, magnetic couplers, exoskeleton and built-in launchers, at its best in no-gravity. Scout armor: +2 pips to Strength for damage only and no Dexterity penalty. Weapon damage: blaster pistol 4D, blaster rifle 5D, concussion grenade 5D; spacetrooper gas/stun grenades 5D, mini-proton torpedoes 6D, blaster cannons 6D, laser cutters 3D.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Stormtrooper unit organisation",
+      "text": "Scout troop: 40 scouts on 40 Aratech 74-Z speeder bikes in four squadrons of ten, plus 10 service technicians, one lieutenant and four sergeants; scouts patrol with AT-STs and withdraw from strong resistance, calling in stormtroopers. Each snowtrooper legion has 10 tripod-mounted automatic blaster cannons, each served by three troopers; snowtroopers deploy from kneeling AT-ATs. Spacetrooper platoon: 40 troopers in a heavily armored shuttle with a five-man command crew; the shuttle holds the target with tractor beams or harpoons while the troopers cut in.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Rebel ground facilities",
+      "text": "Supply caches (ingeniously concealed, often booby-trapped to destroy the contents). Surveillance posts: small teams with passive sensors watching Imperial traffic and garrisons. Recon bases: temporary rendezvous and supply points near a mission objective, sometimes fortified with sensors, trenches, pill boxes and mines. Outposts: permanent bases of 50 to 500 personnel with generators, hangars, medical wards, sensors and limited defenses; missions are fighter, strike, recon or composite squadrons, fleet resupply, maintenance or medical. Operational bases house 1,000 to 15,000; ports (starship repair yards) may need upward of 60,000 personnel. One hidden headquarters base and secret colony worlds also exist. Most Rebels know the locations of only one or two bases, and bases are sited far from civilian centers.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Typical Rebel outpost strength (Tierfon)",
+      "text": "The X-wing outpost on Tierfon, dug 250 meters into a cliff: 158 personnel: combat 18 pilots and 54 ground troops (including laser turret crews); command: commander, first officer, 2 senior engineers, intelligence officer, senior navigator, ground troop commander, surgeon, 4 junior officers; support: 8 X-wing ground crew chiefs, 24 ground crew, 18 technicians, 24 general staff. Vehicles (19): 5 airspeeders, 2 landspeeders, 4 speeder bikes, 8 X-wing starfighters, plus hangar space for one shuttle or stock light freighter. As powerful as its X-wings and lasers are, it could not stand against a determined Imperial assault.",
+      "book": "sourcebook"
+    },
+    {
+      "title": "Standard Imperial garrison base",
+      "text": "A pre-fabricated battalion garrison houses 3,000 personnel: 800 stormtroopers, 40 scout troopers, 10 speeder bike technicians, 40 TIE pilots, 60 ground crew, 25 controllers, 25 sensor technicians, 100 gunners/weapons technicians, 50 walker crew, 80 walker technicians, 50 Imperial Intelligence officers, 150 security/detention troops, 200 perimeter support troops, 300 command personnel, 70 trade/diplomatic, 500 support/services, 200 technical, 200 science, 100 medical. Vehicles (260): 40 TIE fighters (usually 30 fighters and 5 bombers, 5 to 15 on constant patrol; launch in 10 minutes, 5 at highest readiness), 10 AT-ATs, 10 AT-STs, 40 speeder bikes, 60 landspeeders, 100 miscellaneous. Defenses: 10-meter high-voltage death fence with force-field gates, observation towers every 100 meters linked by a fortified catwalk, energy mine fields, modified probots and AT-ST patrols, deflector shields against air and space attack, walls up to 10 meters thick, six heavy twin laser turrets and three heavy twin turbolaser turrets, and tractor beams that launch and land TIEs or reel in small craft.",
+      "book": "sourcebook"
+    },
+    {
       "title": "Dice and pips",
       "text": "Every die is three pips. When improving a skill or equipment code, pips round up to dice (3D+2 to 4D; 1D+2 plus 2D+1 = 4D). In play, modifiers never round up: a character may roll 4D+6. Adding or subtracting pips always gives pips back (a doubled 5D+2 is 10D+4).",
       "book": "companion"

@@ -1,18 +1,18 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SW_TABLES } from "@/lib/data/sw-tables";
-import { SwHeader, cardCls, badge } from "@/components/SwRef";
+import { SwHeader, cardCls, BookTag } from "@/components/SwRef";
 
 export const dynamic = "force-dynamic";
 
 function H({ children }: { children: React.ReactNode }) {
   return <h2 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0c020]">{children}</h2>;
 }
-type Row = { name?: string; title?: string; text: string; book?: "core" | "companion" };
+type Row = { name?: string; title?: string; text: string; book?: "core" | "sourcebook" | "companion" };
 function Dl({ rows }: { rows: Row[] }) {
   return (
     <dl className="mt-2 grid gap-x-6 gap-y-2 md:grid-cols-2">
-      {rows.map((r, i) => <div key={(r.name ?? r.title ?? "") + i}><dt className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)]">{r.name ?? r.title}{r.book === "companion" ? <span className={`${badge} ml-2 border-[var(--sw)] text-[var(--sw)]`}>RC</span> : null}</dt><dd className="text-[12px] leading-relaxed text-[var(--muted)]">{r.text}</dd></div>)}
+      {rows.map((r, i) => <div key={(r.name ?? r.title ?? "") + i}><dt className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)]">{r.name ?? r.title}{r.book && r.book !== "core" ? <BookTag book={r.book} /> : null}</dt><dd className="text-[12px] leading-relaxed text-[var(--muted)]">{r.text}</dd></div>)}
     </dl>
   );
 }
@@ -26,11 +26,12 @@ export default async function SwRulesPage() {
   if (!user) redirect("/login");
   const T = SW_TABLES;
   const core = T.quickRules.filter((r) => r.book === "core");
+  const sb = T.quickRules.filter((r) => r.book === "sourcebook");
   const rc = T.quickRules.filter((r) => r.book === "companion");
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <SwHeader title="Rules" subtitle="Core rulebook (1987) with the Rules Companion (1989) revisions" />
-      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Where the Companion replaces a core table, the Companion version is shown and the original is folded underneath. Entries tagged <span className="text-[var(--sw)]">RC</span> come from the Companion.</p>
+      <SwHeader title="Rules" subtitle="Core rulebook & Sourcebook (1987) with the Rules Companion (1989) revisions" />
+      <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Where the Companion replaces a core table, the Companion version is shown and the original is folded underneath. Entries tagged <span className="text-[var(--sw)]">RC</span> come from the Companion, <span className="text-[var(--muted)]">SB</span> from the Sourcebook.</p>
       <section className={`${cardCls} mb-4`}><H>Attributes</H>
         <ul className="mt-2 grid gap-2 md:grid-cols-2">{T.attributes.map((a) => <li key={a.name} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-bold text-[var(--text)]">{a.name}.</span> {a.description}</li>)}</ul>
         <p className="mt-3 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Creating a character.</span> {T.creation.templateNote} Attributes: {T.creation.attributeDice.toLowerCase()}. {T.creation.forcePoints} Force Point to start. {T.creation.skillPointsNote}</p>
@@ -49,6 +50,7 @@ export default async function SwRulesPage() {
         <Dl rows={T.woundLevels} />
       </section>
       <section className={`${cardCls} mb-4`}><H>Playing the game — core rulebook</H><Dl rows={core} /></section>
+      <section className={`${cardCls} mb-4`}><H>Sourcebook — ships, gear & the galaxy</H><Dl rows={sb} /></section>
       <section className={`${cardCls} mb-4`}><H>Rules Companion revisions</H><Dl rows={rc} /></section>
       <section className={`${cardCls} mb-4`}><H>Advancement</H><Dl rows={T.advancement} /></section>
       <section className={`${cardCls} mb-4`}><H>Starships</H><Dl rows={T.starship} /><Sup label="Starship rules" rows={T.superseded.starship} /></section>

@@ -1,5 +1,6 @@
 // Hand-authored types for Star Wars: The Roleplaying Game (West End Games,
-// 1st edition 1987) with the Rules Companion (1989) revisions layered on top.
+// 1st edition 1987), The Star Wars Sourcebook (1987) and the Rules Companion
+// (1989) revisions layered on top.
 //
 // Everything is measured in six-sided dice: a "die code" like 3D+2 is stored
 // as pips (3D+2 = 11 pips; one die = 3 pips) so the sheet can add and round
@@ -8,7 +9,7 @@
 //
 // Canonical data: data/sw/parts/{core,companion}.json → scripts/build-sw-data.mjs.
 
-export type SwBook = "core" | "companion";
+export type SwBook = "core" | "sourcebook" | "companion";
 
 export type SwAttribute = "Dexterity" | "Knowledge" | "Mechanical" | "Perception" | "Strength" | "Technical";
 export const SW_ATTRIBUTES: SwAttribute[] = ["Dexterity", "Knowledge", "Mechanical", "Perception", "Strength", "Technical"];
@@ -127,8 +128,12 @@ export interface SwCharacter {
   /** Imperial, Rebel, Civilian, Alien, Droid, Creature… */
   group: string;
   description?: string;
-  /** Attribute die codes in pips (partial for creatures). */
+  /** Attribute die codes in pips (partial for creatures); for a species this is the typical member. */
   attributes: Partial<Record<SwAttribute, number>>;
+  /** Sourcebook species: allowed range per attribute as printed, e.g. "1D/4D". */
+  attributeRange?: Partial<Record<SwAttribute, string>>;
+  /** Move rate as printed (Sourcebook). */
+  move?: string;
   /** "blaster 4D" style skill lines, as printed. */
   skills: string[];
   equipment: string[];

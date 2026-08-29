@@ -50,9 +50,10 @@ The dashboard, the `/rules` shelf and the tool registry are keyed by
 `SystemKey` in `components/systemStore.ts` (`"SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW"`).
 Kids on Bikes, Kids on Brooms and Kids in Capes share the `KOB` system: one
 sheet with a per-character book switch, one data layer tagged by book. Star Wars
-(`SW`) is the 1987 WEG rulebook with the 1989 Rules Companion layered on as a
-revision: `scripts/build-sw-data.mjs` lets a Companion entry replace a core one
-by name (the original is kept under `superseded`). To add a
+(`SW`) is the 1987 WEG rulebook plus the Sourcebook, with the 1989 Rules
+Companion layered on as a revision: `scripts/build-sw-data.mjs` lets a later
+book's entry replace an earlier one by name (the original is kept under
+`superseded`). To add a
 system: add its key and accent to `SYSTEMS`, register its tools in
 `lib/tools.ts`, and add its reference links to `SYSTEM_REFERENCE` in
 `app/dashboard/page.tsx`. Everything else (rulebook tagging, campaign rosters,

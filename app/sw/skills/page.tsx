@@ -4,7 +4,7 @@ import { SW_SKILLS } from "@/lib/data/sw-skills";
 import { SW_TABLES } from "@/lib/data/sw-tables";
 import { SW_FORCE } from "@/lib/data/sw-force";
 import { SW_ATTRIBUTES } from "@/lib/data/sw-types";
-import { SwHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, one, BookTag, type Query, type RawQuery } from "@/components/SwRef";
+import { SwHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, one, BookTag, BOOK_NAME, type Query, type RawQuery } from "@/components/SwRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/sw/skills";
@@ -41,7 +41,7 @@ export default async function SwSkillsPage({ searchParams }: { searchParams: Pro
               <li key={s.name} className="text-[12px] leading-relaxed text-[var(--muted)]">
                 <div className="flex flex-wrap items-baseline gap-2"><span className="font-bold uppercase tracking-[0.08em] text-[var(--text)]">{s.name}</span>{s.reaction ? <span className={badge}>reaction</span> : null}<BookTag book={s.book} />{s.time ? <span className="text-[10px] uppercase tracking-[0.1em]">{s.time}</span> : null}<span className="text-[10px]">p.{s.page}</span></div>
                 {s.description}
-                {s.superseded ? <details className="mt-1"><summary className="cursor-pointer text-[10px] uppercase tracking-[0.12em] text-[var(--sw)]">Core rulebook version</summary><p className="mt-1">{s.superseded.description}</p></details> : null}
+                {s.superseded ? <details className="mt-1"><summary className="cursor-pointer text-[10px] uppercase tracking-[0.12em] text-[var(--sw)]">{BOOK_NAME[s.superseded.book]} version</summary><p className="mt-1">{s.superseded.description}</p></details> : null}
               </li>
             ))}
           </ul>
@@ -64,7 +64,7 @@ export default async function SwSkillsPage({ searchParams }: { searchParams: Pro
                     <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Difficulty.</span> {p.difficulty}</p>
                     {p.requires?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Requires.</span> {p.requires.join(", ")}</p> : null}
                     <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{p.description}</p>
-                    {p.superseded ? <details className="mt-2"><summary className="cursor-pointer text-[10px] uppercase tracking-[0.12em] text-[var(--sw)]">Core rulebook version (p.{p.superseded.page})</summary><p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Difficulty.</span> {p.superseded.difficulty}</p><p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">{p.superseded.description}</p></details> : null}
+                    {p.superseded ? <details className="mt-2"><summary className="cursor-pointer text-[10px] uppercase tracking-[0.12em] text-[var(--sw)]">{BOOK_NAME[p.superseded.book]} version (p.{p.superseded.page})</summary><p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Difficulty.</span> {p.superseded.difficulty}</p><p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">{p.superseded.description}</p></details> : null}
                   </article>
                 ))}
               </div>

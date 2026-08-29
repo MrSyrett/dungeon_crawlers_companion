@@ -1,16 +1,17 @@
 // Builds the Star Wars (WEG 1e + Rules Companion) data layer from one
 // canonical source, like the ACE / KoB / Nimble builders:
 //
-//   data/sw/parts/{core,core-content,companion}.json
+//   data/sw/parts/{core,core-content,sourcebook-tech,sourcebook-people,companion}.json
 //        │
 //        ├─▶ lib/data/sw-<name>.ts          typed `export const` for Next pages
 //        └─▶ public/tools-data/sw-<name>.js  `const` global for the HTML sheet
 //
-// The Companion is applied as a revision layer: a skill, Force power, item,
-// vehicle or character with the same name as a core entry REPLACES it (the
-// core version is kept under `superseded` so the reference pages can show
-// what changed); table keys the Companion defines replace the core table, and
-// the core table moves to tables.superseded. quickRules are concatenated.
+// Books are layered in order: core → Sourcebook → Companion. A skill, Force
+// power, item, vehicle or character with the same name as an earlier entry
+// REPLACES it (the earlier version is kept under `superseded` so the reference
+// pages can show what changed); table keys the Companion defines replace the
+// core table, and the core table moves to tables.superseded. quickRules are
+// concatenated.
 // After editing anything under data/sw/:  node scripts/build-sw-data.mjs
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
@@ -21,7 +22,8 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PARTS_DIR = join(ROOT, "data", "sw", "parts");
 const TS_DIR = join(ROOT, "lib", "data");
 const JS_DIR = join(ROOT, "public", "tools-data");
-const BOOK_ORDER = ["core", "core-content", "companion"];
+const BOOK_ORDER = ["core", "core-content", "sourcebook-tech", "sourcebook-people", "companion"];
+const BOOK_RANK = { core: 0, sourcebook: 1, companion: 2 };
 const ATTRS = ["Dexterity", "Knowledge", "Mechanical", "Perception", "Strength", "Technical"];
 
 const ENTITIES = [
@@ -57,8 +59,8 @@ for (const key of keys) {
     if (!Array.isArray(rows)) throw new Error(`parts/${key}.json: "${e.key}" must be an array`);
     for (const row of rows) {
       const i = merged[e.key].findIndex((r) => norm(r.name) === norm(row.name));
-      if (i >= 0 && row.book === "companion" && merged[e.key][i].book === "core") {
-        // Companion revision replaces the core entry in place (keeps order).
+      if (i >= 0 && BOOK_RANK[row.book] > BOOK_RANK[merged[e.key][i].book]) {
+        // A later book replaces the earlier entry in place (keeps order).
         merged[e.key][i] = { ...row, superseded: merged[e.key][i] };
         replaced++;
       } else if (i >= 0) {
@@ -92,4 +94,4 @@ const summary = [];
 for (const e of ENTITIES) { emitTs(e.base, e.type, e.constName, "array", merged[e.key]); emitJs(e.base, e.constName, merged[e.key]); summary.push(`${e.constName}=${merged[e.key].length}`); }
 emitTs("sw-tables", "SwTables", "SW_TABLES", "object", tables); emitJs("sw-tables", "SW_TABLES", tables);
 summary.push(`SW_TABLES=obj(quickRules=${tables.quickRules.length}, superseded=${Object.keys(tables.superseded).join("/") || "none"})`);
-console.log(`build-sw-data: merged ${keys.length} part(s), ${replaced} companion revision(s) -> lib/data/ + public/tools-data/\n  ${summary.join(", ")}`);
+console.log(`build-sw-data: merged ${keys.length} part(s), ${replaced} later-book replacement(s) -> lib/data/ + public/tools-data/\n  ${summary.join(", ")}`);
