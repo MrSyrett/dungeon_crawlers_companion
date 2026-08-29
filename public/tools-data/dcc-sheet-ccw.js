@@ -171,6 +171,35 @@
     return DCC_SPELLS.find((s) => s.name.toLowerCase() === t) ||
       DCC_SPELLS.find((s) => s.name.toLowerCase().replace(/[^a-z]/g, "") === t.replace(/[^a-z]/g, "")) || null;
   }
+  // ── Experience skill options ────────────────────────────────────────────────
+  // Some experiences list "flavor" perks that aren't real skills (no rulebook
+  // entry, no mechanics) — those are dropped from the options. Others are an open
+  // pick ("Edged Weapon Skill of Choice"); the player resolves those to a concrete
+  // skill before finishing, so a real skill lands on the sheet.
+  function isChoiceSkill(sk) { return /of\s+(?:your\s+)?choice/i.test(String(sk || "")); }
+  function isOfficialSkill(sk) { return !!(skillByName(sk) || spellByName(sk)); }
+  function validExpSkill(sk) { return isChoiceSkill(sk) || isOfficialSkill(sk); }
+  // The concrete skills an "…of choice" option resolves to.
+  function choicePool(label) {
+    const l = String(label || "").toLowerCase();
+    const SK = (typeof DCC_SKILLS !== "undefined" ? DCC_SKILLS : []);
+    const SP = (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []);
+    const inGroups = (gs) => SK.filter((s) => gs.indexOf(s.group) >= 0).map((s) => s.name).sort();
+    if (/edged/.test(l)) return inGroups(["Edged"]);
+    if (/hand-?to-?hand/.test(l)) return inGroups(["Hand-to-Hand"]);
+    if (/attack\s+spell/.test(l)) return SP.filter((s) => s.type === "attack").map((s) => s.name).sort();
+    if (/utility\s+spell/.test(l)) return SP.filter((s) => s.type === "utility").map((s) => s.name).sort();
+    if (/spell/.test(l)) return SP.map((s) => s.name).sort();
+    if (/weapon\s+skill/.test(l)) return inGroups(["Bashing", "Edged", "Ranged", "Reach"]);
+    return [];
+  }
+  // Resolve a chosen experience option to the concrete skill to add ("" if an
+  // "…of choice" pick hasn't been made yet).
+  function resolveExpPick(slot, sk) {
+    if (!isChoiceSkill(sk)) return sk;
+    return (slot && slot.choices && slot.choices[sk]) || "";
+  }
+
   // A spell as a Skills-list row (spells live on the Skills list). `src` = the
   // rulebook name so the row's (i) info button resolves it, exactly like adding it
   // from "+ Add Skill".
@@ -601,8 +630,9 @@
   // ── step: experiences (Third-Floor+) ────────────────────────────────────────
   function ensureExpSlots() {
     const n = FLOOR_CFG[W.floor].experiences;
-    while (W.experiences.length < n) W.experiences.push({ exp: "", skills: [] });
+    while (W.experiences.length < n) W.experiences.push({ exp: "", skills: [], choices: {} });
     if (W.experiences.length > n) W.experiences.length = n;
+    W.experiences.forEach((s) => { if (!s.choices) s.choices = {}; });   // older saved state
   }
   function renderExperiences() {
     if (typeof DCC_EXPERIENCES === "undefined") return `<h3>Experiences</h3><p class="dccw-warn">The experiences list didn't load. Reopen the sheet from the app so /tools-data/dcc-experiences.js is available.</p>`;
@@ -618,12 +648,30 @@
       const e = avail.find((x) => x.name === slot.exp);
       if (e) {
         if (e.desc) h += `<p class="dccw-sub" style="margin-bottom:6px;">${esc(e.desc)}</p>`;
-        h += `<div>` + e.skills.map((sk) => {
+        // Only offer skills with real mechanics: official skills/spells + open picks.
+        const opts = (e.skills || []).filter(validExpSkill);
+        h += `<div>` + opts.map((sk) => {
           const on = (slot.skills || []).includes(sk);
-          return `<span class="dccw-chip ${on ? "on" : ""}"><span onclick="DCCW.toggleExpSkill(${idx},'${attr(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span><span class="dccw-i" title="Skill info" onclick="event.stopPropagation();DCCW.toggleInfo('${attr(sk)}')">i</span></span>`;
+          const choice = isChoiceSkill(sk);
+          const info = choice ? "" : `<span class="dccw-i" title="Skill info" onclick="event.stopPropagation();DCCW.toggleInfo('${attr(sk)}')">i</span>`;
+          return `<span class="dccw-chip ${on ? "on" : ""}"><span onclick="DCCW.toggleExpSkill(${idx},'${attr(sk)}')">${esc(sk)}${on ? " ✓" : ""}</span>${info}</span>`;
         }).join("") + `</div>`;
-        h += e.skills.filter((sk) => W.info[sk]).map(skillDesc).join("");
+        // For any selected "…of choice" option, make the concrete pick here so it
+        // lands on the sheet as a real skill.
+        opts.filter((sk) => isChoiceSkill(sk) && (slot.skills || []).includes(sk)).forEach((sk) => {
+          const pool = choicePool(sk);
+          const cur = (slot.choices || {})[sk] || "";
+          h += `<div class="dccw-field" style="margin-top:6px;"><label>${esc(sk)}</label>` +
+            `<select onchange="DCCW.setExpChoice(${idx},'${attr(sk)}',this.value)"><option value="">— pick a skill —</option>` +
+            pool.map((p) => `<option value="${attr(p)}" ${cur === p ? "selected" : ""}>${esc(p)}</option>`).join("") +
+            `</select></div>`;
+        });
+        h += opts.filter((sk) => !isChoiceSkill(sk) && W.info[sk]).map(skillDesc).join("");
         if ((slot.skills || []).length !== 2) h += `<p class="dccw-warn">Pick exactly 2 skills.</p>`;
+        else {
+          const unpicked = (slot.skills || []).filter((sk) => isChoiceSkill(sk) && !((slot.choices || {})[sk]));
+          if (unpicked.length) h += `<p class="dccw-warn">Choose a specific skill for: ${unpicked.map(esc).join(", ")}.</p>`;
+        }
       }
       h += `</div>`;
     });
@@ -900,12 +948,23 @@
     const third = isThird();
     const b1 = () => (third ? d(4) : 0);           // +1d4
     const bP = () => (third ? d(4) + d(4) : 0);    // +2d4 to the primary attack
-    const skillRank = {}; // key -> { name, rank, stat, checkType, notes }
+    const skillRank = {}; // key -> { name, rank, stat, checkType, notes, src, isAttack, dice }
+    // Resolve a name to its rulebook entry and stamp the SAME metadata the "+ Add
+    // Skill" picker would (checkType, stat, notes, src, attack flag + base dice), so
+    // however a skill/spell reaches the sheet it behaves identically — spells get
+    // their Hotlist pin, attack skills get an Attacks row, and (i) info resolves.
+    function skillMeta(name) {
+      const sd = skillByName(name);
+      if (sd) return { name: sd.name, stat: sd.stat ? String(sd.stat).toLowerCase() : "", checkType: sd.passive ? "Passive" : "Active", notes: sd.group || "", src: sd.name, isAttack: sd.category === "attack", dice: sd.damage || "" };
+      const sp = spellByName(name);
+      if (sp) return { name: sp.name, stat: String(sp.stat || "int").toLowerCase(), checkType: "Spell", notes: [(sp.mana != null ? sp.mana + " Mana" : ""), sp.type || ""].filter(Boolean).join(" · "), src: sp.name, isAttack: sp.type === "attack", dice: sp.type === "attack" ? spellDice(sp) : "" };
+      return { name: name, stat: "", checkType: "Active", notes: "", src: "", isAttack: false, dice: "" };
+    }
     function addSkill(name, rank, note) {
       const key = String(name).toLowerCase();
       if (!skillRank[key]) {
-        const sd = skillByName(name);
-        skillRank[key] = { name, rank: 0, stat: skillStatLc(name), checkType: sd && sd.passive ? "Passive" : "Active", notes: "" };
+        const m = skillMeta(name);
+        skillRank[key] = { name: m.name, rank: 0, stat: m.stat, checkType: m.checkType, notes: m.notes, src: m.src, isAttack: m.isAttack, dice: m.dice };
       }
       skillRank[key].rank = Math.min(10, skillRank[key].rank + rank);
       if (note && skillRank[key].notes.indexOf(note) === -1) skillRank[key].notes = skillRank[key].notes ? skillRank[key].notes + "; " + note : note;
@@ -916,7 +975,11 @@
     addSkill("Heal", 1, "Spell · heals 2 HB slots, 2 Mana");   // always first, capped at Rank 1
     addSkill(_b.name, baseRank, "Base attack");                 // Unarmed Combat / Slice Attack — just under Heal
     ERAS.forEach((era) => { const c = W.bg[era]; if (!c) return; (c.skills || []).forEach((name) => addSkill(name, ERA_RANK[era] + b1(), eraLabel(era) + " — " + bgDisplayName(era))); });
-    if (third) W.experiences.forEach((slot) => { const p = slot.skills || []; if (p[0]) addSkill(p[0], d(4), "Experience"); if (p[1]) addSkill(p[1], d(2), "Experience"); });
+    if (third) W.experiences.forEach((slot) => {
+      const p = (slot.skills || []).map((sk) => resolveExpPick(slot, sk));   // "…of choice" → the concrete pick
+      if (p[0]) addSkill(p[0], d(4), "Experience");
+      if (p[1]) addSkill(p[1], d(2), "Experience");
+    });
 
     // Race/Class grants (they count from the Third Floor). Named Skills stack into
     // the skill map; named Spells become full spell rows (details + info button);
@@ -932,7 +995,7 @@
       ));
     }
 
-    const skills = Object.values(skillRank).map((s) => ({ name: s.name, rank: String(s.rank), stat: s.stat, checkType: s.checkType, notes: s.notes, checked: false }));
+    const skills = Object.values(skillRank).map((s) => ({ name: s.name, rank: String(s.rank), stat: s.stat, checkType: s.checkType, notes: s.notes, checked: false, src: s.src || "" }));
     grantSpells.forEach((gs) => { const { _spell, ...row } = gs; skills.push(row); });
 
     const atks = [{ name: _b.name, rank: String(baseRank), dice: _b.dice, stat: _b.stat, effects: "" }];
@@ -954,6 +1017,18 @@
       if (gs._spell && gs._spell.type === "attack") {
         atks.push({ name: gs.name + " (Spell)", rank: gs.rank, dice: spellDice(gs._spell), stat: gs.stat, effects: (gs._spell.mana != null ? gs._spell.mana + " Mana" : ""), src: gs.name });
       }
+    });
+    // Every OTHER attack skill/spell on the list (background + experience picks)
+    // also gets an Attacks row — same as adding it from "+ Add Skill" (Core p.176).
+    // Skip any already represented (base attack, chosen specialty, granted spells).
+    const haveAtk = new Set(atks.map((a) => String(a.src || a.name).toLowerCase().replace(/\s*\(spell\)\s*$/, "").trim()));
+    Object.values(skillRank).forEach((s) => {
+      if (!s.isAttack) return;
+      const key = String(s.src || s.name).toLowerCase();
+      if (haveAtk.has(key)) return;
+      haveAtk.add(key);
+      const isSpell = s.checkType === "Spell";
+      atks.push({ name: s.name + (isSpell ? " (Spell)" : ""), rank: String(s.rank), dice: s.dice || "", stat: s.stat, effects: isSpell ? s.notes : "", src: s.src || s.name });
     });
     // Loot: the tiered weapon adds Weapon-Skill ranks to the primary attack.
     if (third && W.loot && atks[1]) {
@@ -1023,7 +1098,7 @@
     if (key === "stats") return statsAssigned();
     if (key === "background") return ERAS.every((e) => W.bg[e] && (W.bg[e].skills || []).length === 2);
     if (key === "combat") return W.combat.type === "weapon" ? !!W.combat.weapon : (finalStats().int >= 4 && !!W.combat.spell);
-    if (key === "experiences") { ensureExpSlots(); return W.experiences.every((s) => s.exp && (s.skills || []).length === 2); }
+    if (key === "experiences") { ensureExpSlots(); return W.experiences.every((s) => s.exp && (s.skills || []).length === 2 && (s.skills || []).every((sk) => !isChoiceSkill(sk) || !!((s.choices || {})[sk]))); }
     if (key === "statpoints") return statPointsSpent() === statBudget();
     if (key === "loot") return !!W.loot;
     return true;
@@ -1158,6 +1233,25 @@
     return data;
   }
 
+  // Auto-equip starting gear that occupies a body slot (Head/Torso/Arms/Hands·
+  // Holding/Legs/Feet) — exactly what happens when such gear is added from the
+  // item picker. Only run on a fresh build, so an upgrade keeps the player's own
+  // equip choices.
+  function autoEquipStartingGear() {
+    if (!window.DCCEquip || typeof DCC_ITEMS === "undefined") return;
+    const isBody = (slot) => { const s = String(slot || "").trim().toLowerCase(); return /^(head|torso|arms|legs|feet)$/.test(s) || /hand|holding/.test(s); };
+    document.querySelectorAll("#inv-body tr").forEach((tr) => {
+      if (tr.dataset.equipped === "1") return;
+      const inp = tr.querySelector('input[type="text"]');
+      const nm = inp ? inp.value.trim().toLowerCase() : "";
+      if (!nm) return;
+      const it = DCC_ITEMS.find((x) => x.name.toLowerCase() === nm);
+      if (!it || !isBody(it.slot)) return;
+      const pin = tr.querySelector(".hot-pin");
+      if (pin && window.DCCEquip.isEquipType && window.DCCEquip.isEquipType(tr)) { try { window.DCCEquip.click(pin); } catch (e) {} }
+    });
+  }
+
   function finish() {
     if (typeof applySheet !== "function" || typeof saveSheet !== "function") {
       alert("Couldn't reach the sheet to apply the character. Try reloading.");
@@ -1166,6 +1260,7 @@
     const nm = (W.existing && W.existing.header && W.existing.header["f-name"]) || "Crawler";
     const upgrade = isUpgrade();
     applySheet(upgrade ? buildUpgradeData() : buildData());
+    if (!upgrade) { try { autoEquipStartingGear(); } catch (e) {} }   // wear body-slot gear on a fresh build
     saveSheet();
     try {
       if (typeof addLog === "function") {
@@ -1231,13 +1326,19 @@
     setPath(p) { W.path = p; W.maxStep = W.step; clampStep(); render(); },
     setFloor(f) { W.floor = f; W.experiences = []; render(); },
     setClass(v) { W.class = v; render(); },
-    setExp(idx, name) { if (W.experiences[idx]) { W.experiences[idx] = { exp: name, skills: [] }; render(); } },
+    setExp(idx, name) { if (W.experiences[idx]) { W.experiences[idx] = { exp: name, skills: [], choices: {} }; render(); } },
     toggleExpSkill(idx, sk) {
       const slot = W.experiences[idx]; if (!slot) return;
-      slot.skills = slot.skills || [];
+      slot.skills = slot.skills || []; slot.choices = slot.choices || {};
       const i = slot.skills.indexOf(sk);
-      if (i >= 0) slot.skills.splice(i, 1);
+      if (i >= 0) { slot.skills.splice(i, 1); if (isChoiceSkill(sk)) delete slot.choices[sk]; }
       else if (slot.skills.length < 2) slot.skills.push(sk);
+      render();
+    },
+    setExpChoice(idx, label, value) {
+      const slot = W.experiences[idx]; if (!slot) return;
+      slot.choices = slot.choices || {};
+      if (value) slot.choices[label] = value; else delete slot.choices[label];
       render();
     },
     pt(k, delta) {
