@@ -3100,7 +3100,14 @@ function lootAddItems(items){
     if(inp[0]) inp[0].value = it.item || '';
     if(inp[1]) inp[1].value = (it.qty!=null ? String(it.qty) : '');
     if(inp[2]) inp[2].value = it.notes || '';
+    // An enchanted loot item carries its category + slot so the row can be equipped
+    // and its bonuses (parsed from the Notes text) applied — just like a catalog item.
+    if(it.cat) tr.dataset.cat = it.cat;
+    if(it.slot) tr.dataset.slot = it.slot;
+    if(it.notes) tr.dataset.effect = it.notes;
   });
+  // Refresh the row radials so equippable loot shows its equip control.
+  try { if(window.DCCHotlist) window.DCCHotlist.refresh(); } catch(e){}
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
 }
 

@@ -53,7 +53,25 @@
     if (cat == null || cat === "") { var it = lookup(rowName(tr)); if (it) { cat = it.category; slot = it.slot || ""; effect = it.effect || ""; } }
     return { cat: cat || "", slot: slot || "", effect: effect || "" };
   }
-  function isEquipType(tr) { var c = rowMeta(tr).cat; return c === "armor" || c === "accessory"; }
+  // Does an effect/name carry a bonus the sheet can actually apply on equip
+  // (Damage Resistance, a Stat bonus, or a named Skill rank)? Mirrors the regexes
+  // in parseBonuses so weapons/mundane items only count as equippable when they'd
+  // do something — an enchanted "+3 STR" baseball bat equips; a plain club doesn't.
+  function hasBonus(effect, name) {
+    var e = norm(effect) + " " + norm(name);
+    if (/\+(\d+)\s*(?:DR\b|Damage Resistance)/i.test(e)) return true;
+    if (/\+(\d+)\s*(strength|intelligence|constitution|dexterity|charisma|str|int|con|dex|cha)\b/i.test(e)) return true;
+    if (/\+(\d+)\s*(?:to\s+)?(?:a\s+)?(?:chosen\s+)?stat\b/i.test(e)) return true;
+    if (/\+(\d+)\s+[A-Za-z][A-Za-z'/\- ]*?\s+skills?\b/i.test(e)) return true;
+    return false;
+  }
+  function isEquipType(tr) {
+    var m = rowMeta(tr);
+    if (m.cat === "armor" || m.cat === "accessory") return true;
+    // Enchanted weapons / mundane items are equippable when they carry a real bonus.
+    if (m.cat === "weapon" || m.cat === "mundane") return hasBonus(m.effect, rowName(tr));
+    return false;
+  }
 
   // ── gear slots ───────────────────────────────────────────────────────────────
   function normSlotLabel(s) {
@@ -226,7 +244,8 @@
     btn.style.visibility = "visible";
     btn.classList.toggle("on", on);
     btn.textContent = on ? "◉" : "○";
-    btn.title = on ? "Unequip" : (rowMeta(tr).cat === "accessory" ? "Equip accessory" : "Equip armor");
+    var c = rowMeta(tr).cat;
+    btn.title = on ? "Unequip" : (c === "accessory" ? "Equip accessory" : (c === "armor" ? "Equip armor" : "Equip"));
   }
   function refreshRow(btn) { var tr = btn && btn.closest ? btn.closest("tr") : null; if (tr) refreshRowEl(tr); }
 

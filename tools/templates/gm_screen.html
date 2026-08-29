@@ -3047,6 +3047,13 @@ GMScenes.renderPins();
           </select>
           <button class="btn small ghost ai-roll-tier" type="button" title="Fill the box from the DCC loot generator">🎲 Roll tier</button>
         </div>
+        <div class="ai-row">
+          <select class="ai-select ai-ench-cat" title="Base item type to enchant">
+            <option value="">Any type</option><option value="weapon">Weapon</option>
+            <option value="armor">Armor</option><option value="accessory">Accessory</option>
+          </select>
+          <button class="btn small ghost ai-ench-roll" type="button" title="Enchant a random base item at the chosen tier — bonuses auto-apply when the player equips it">✨ Enchant an item</button>
+        </div>
         <div class="ai-cat-filters"></div>
         <input type="text" class="ai-input ai-cat-search" placeholder="Search Loot &amp; Gear to add…">
         <div class="ai-cat-results"></div>
@@ -6614,6 +6621,70 @@ function genDccMagicItem(tierKey, forcedType) {
     `<div class="gen-item-desc" style="opacity:.6;text-transform:none;">Tables 38&ndash;42${pageNote} · rename to taste.</div>`
   );
 }
+
+// ── Enchant a base item → a one-off magic item (Message tool loot builder) ──
+// Takes a base (mundane) item from the library and rolls the tier's enchant
+// perks (Tables 39/40/41) as SHEET-PARSEABLE strings ("+3 STR", "+2 Athletics
+// Skill", "+1 DR") so that when a player equips the item its bonuses auto-apply.
+// Returns { base, name, category, slot, tier, perks[], effect } with a fun name.
+const DCC_ENCHANT_EPITHETS = [
+  'of the Great Bambino','of Doom','of the Ancients','of Untold Power','of the Forgotten King',
+  'of the Screaming Void','of Righteous Fury','of the Midnight Sun','of Sudden Violence','of the Dungeon Lord',
+  'of Cosmic Regret','of the Nine Hells','of Legendary Renown','of the Fallen Star','of Whispered Secrets',
+  'of the Blood Moon','of Eternal Vigilance','of the Last Laugh','of Merciless Judgment','of the Iron Will',
+  'of Boundless Greed','of the Shattered Crown','of the Howling Wastes','of the Grinning Skull','of Reckless Abandon',
+  'of the Silent Hunter','of Molten Rage','of the Frozen Depths','of Unspoken Dread','of the Golden Age',
+  'of the Feral Beast','of Divine Spite','of the Wandering Ghost','of Ten Thousand Screams','of Maximum Overdrive',
+  'of the Sponsored Content','of the System’s Favor','of the Content Mob','of the Fifth Floor','of Questionable Taste',
+];
+function dccEnchantMagnitude(tierKey, kind) {   // kind: 'stat' | 'skill'
+  const t = dccLootTier(tierKey);
+  const parsed = dccParseX(t ? t.xValue : '');
+  let v = parsed ? dccRollX(kind === 'skill' ? parsed.skill : parsed.stat) : '';
+  if(!v || v === '+' || /\?/.test(v)) v = '+1';   // Bronze / unparseable → +1
+  return v;
+}
+// One rolled perk as a plain, sheet-parseable string (or descriptive for the
+// non-numeric results the sheet can't auto-apply).
+function dccEnchantPerk(raw, tierKey) {
+  const p = String(raw || '');
+  if(/\bX\b/.test(p) && /skill/i.test(p)) { const sk = dccRandomSkillName(false) || 'Athletics'; return dccEnchantMagnitude(tierKey,'skill') + ' ' + sk + ' Skill'; }
+  if(/\bX\b/.test(p) && /stat/i.test(p))  { return dccEnchantMagnitude(tierKey,'stat') + ' ' + dccRandomStat(); }
+  if(/damage resistance/i.test(p)) { const m = p.match(/(\d+)/); return '+' + (m ? m[1] : '1') + ' DR'; }
+  if(/^a buff/i.test(p)) { const b = dccRandomBuff(); return b ? ('Buff: ' + b.name) : 'a Buff'; }
+  if(/passive skill/i.test(p)) { const sk = dccRandomSkillName(true) || 'a Skill'; return 'Passive ' + sk + ' (Rank = Floor)'; }
+  if(/inherent spell/i.test(p)) { const sp = dccRandomSpell(); return 'Inherent Spell: ' + (sp ? sp.name : 'a Spell'); }
+  if(/resistance to an uncommon/i.test(p)) { return 'Resist ' + dccPick(DCC_DMG_UNCOMMON) + ' damage'; }
+  if(/external buff/i.test(p)) { return Math.random() < 0.5 ? 'Recovery (full Health) 1/Floor' : 'Restore (full Mana) 1/Floor'; }
+  if(/something unique|table 42/i.test(p)) { const u = dccRollRow(dccLootTable('42')); return 'Unique: ' + (u ? u.result : 'GM’s choice'); }
+  return p;
+}
+window.dccEnchantItem = function(tierKey, category) {
+  const CAT_TABLE = { armor: '40', accessory: '41', weapon: '39', mundane: '39' };
+  let cats = category ? [category] : dccPick([['weapon'], ['armor'], ['accessory']]);
+  let pool = dccBasePool(cats);
+  if(!pool.length) pool = dccBasePool(['weapon', 'armor', 'accessory', 'mundane']);
+  const baseItem = pool.length ? dccPick(pool) : null;
+  const base = baseItem ? baseItem.name : 'Trinket';
+  const cat = baseItem ? baseItem.category : 'weapon';
+  const slot = baseItem ? (baseItem.slot || '') : '';
+  const tableNum = CAT_TABLE[cat] || '39';
+  const typeTable = dccLootTable(tableNum);
+  const t = dccLootTier(tierKey);
+  const nRolls = Math.max(1, (t && typeof t.gearRolls === 'number') ? t.gearRolls : 1);
+  const perks = []; const seen = new Set();
+  for(let i = 0; i < nRolls; i++) {
+    const row = typeTable ? dccRollRow(typeTable) : null;
+    let perk = dccEnchantPerk(row ? row.result : '+X Stat', tierKey);
+    let tries = 0;
+    while(seen.has(perk) && tries < 6) { const r2 = typeTable ? dccRollRow(typeTable) : null; perk = dccEnchantPerk(r2 ? r2.result : '+X Stat', tierKey); tries++; }
+    seen.add(perk); perks.push(perk);
+    if(/unique/i.test(perk)) break;
+  }
+  const name = 'Enchanted ' + base + ' ' + dccPick(DCC_ENCHANT_EPITHETS);
+  const effect = tierKey + ' Tier — ' + perks.join(', ');
+  return { base: base, name: name, category: cat, slot: slot, tier: tierKey, perks: perks, effect: effect };
+};
 
 // ── DCC Item generator (random draw from the catalog) ──────────────────────
 function dccItemPool() {
@@ -11421,7 +11492,9 @@ function init_ai(root) {
   }
 
   // ── Shared item-row helpers (both loot builders use the same table shape) ──
-  function makeRow(tbody, name, qty, notes) {
+  // `meta` (optional) carries an enchanted item's category + slot so the player's
+  // sheet can equip it and auto-apply its bonuses; it rides on the row's dataset.
+  function makeRow(tbody, name, qty, notes, meta) {
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td class="ai-it-name"><input type="text" class="ai-input" placeholder="Item"></td>' +
@@ -11430,6 +11503,8 @@ function init_ai(root) {
       '<td class="ai-it-x"><button type="button" class="ai-it-del" title="Remove">✕</button></td>';
     const inp = tr.querySelectorAll('input');
     inp[0].value = name || ''; inp[1].value = (qty == null ? '' : String(qty)); inp[2].value = notes || '';
+    if(meta && meta.category) tr.dataset.cat = meta.category;
+    if(meta && meta.slot) tr.dataset.slot = meta.slot;
     tr.querySelector('.ai-it-del').addEventListener('click', () => tr.remove());
     tbody.appendChild(tr);
     return tr;
@@ -11442,7 +11517,10 @@ function init_ai(root) {
       if(!item) return;
       const qty = (inp[1].value || '').trim();
       const notes = (inp[2].value || '').trim().slice(0, 160);
-      out.push({ item: item.slice(0, 80), qty: qty || 1, notes });
+      const row = { item: item.slice(0, 80), qty: qty || 1, notes };
+      if(tr.dataset.cat) row.cat = tr.dataset.cat;
+      if(tr.dataset.slot) row.slot = tr.dataset.slot;
+      out.push(row);
     });
     return out;
   }
@@ -11535,6 +11613,7 @@ function init_ai(root) {
     { key:'gear',label:'Gear',cats:['accessory','mundane','tool','material'] },{ key:'scroll',label:'Scrolls & Tomes',cats:['scroll','tome'] },
   ];
   const boxName=root.querySelector('.ai-box-name'), boxTier=root.querySelector('.ai-box-tier'), rollTier=root.querySelector('.ai-roll-tier');
+  const enchCat=root.querySelector('.ai-ench-cat'), enchRoll=root.querySelector('.ai-ench-roll');
   const itemsBody=root.querySelector('.ai-items-body'), addRow=root.querySelector('.ai-add-row');
   const boxMode=root.querySelector('.ai-box-mode'), boxTo=root.querySelector('.ai-box-to'), partyRefresh=root.querySelector('.ai-party-refresh');
   const sendBox=root.querySelector('.ai-send-box'), boxStatus=root.querySelector('.ai-box-status');
@@ -11557,6 +11636,14 @@ function init_ai(root) {
     pickN(gear,td.gearRolls||0).forEach(it=>makeRow(itemsBody,it.name,1,(it.slot?it.slot+' — ':'')+(it.effect||'')));
     if(!boxName.value.trim()) boxName.value=key+' Loot Box';
     setStatus(boxStatus,'Rolled a '+key+' box — tweak it, then send.','ok');
+  });
+  // Enchant a base item at the chosen tier and drop it in the box, carrying its
+  // category/slot so it's equippable on the sheet (bonuses auto-apply).
+  if(enchRoll) enchRoll.addEventListener('click', () => {
+    if(typeof window.dccEnchantItem !== 'function'){ setStatus(boxStatus,'Loot tables didn’t load — open from the app.','err'); return; }
+    const e = window.dccEnchantItem(boxTier.value, enchCat && enchCat.value ? enchCat.value : '');
+    makeRow(itemsBody, e.name, 1, e.effect, { category: e.category, slot: e.slot });
+    setStatus(boxStatus, 'Enchanted a '+e.base+' — edit the name/perks, then send.', 'ok');
   });
   // Party dropdown — the campaign roster (same source as the Party tool).
   function partyName(entry){ const d=(entry&&entry.sheet&&typeof entry.sheet==='object')?entry.sheet:entry; if(!d)return ''; if(d.header&&d.header['f-name'])return String(d.header['f-name']).trim(); return String(d.name||(entry&&entry.name)||'').trim(); }
