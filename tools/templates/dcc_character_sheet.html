@@ -1696,11 +1696,14 @@ function collectSheet() {
 
   // Combat
   data.combat = {
-    evadeBuffs: document.getElementById('evade-buffs')?.value || '',
+    // Evade/DR Buffs store the HAND-ENTERED amount only — the always-on skill
+    // contribution (Dodge, weapon-skill upgrades…) is a runtime overlay that's
+    // re-applied on load, so it must never be baked into the save.
+    evadeBuffs: (window.DCCSkillBuff ? DCCSkillBuff.manualValue('evade-buffs') : (document.getElementById('evade-buffs')?.value || '')),
     evadeMove:  document.getElementById('evade-move')?.value || '',
     evadeStep:  document.getElementById('evade-step')?.value || '',
     drArmor:    document.getElementById('dr-armor')?.value || '',
-    drBuffs:    document.getElementById('dr-buffs')?.value || '',
+    drBuffs:    (window.DCCSkillBuff ? DCCSkillBuff.manualValue('dr-buffs') : (document.getElementById('dr-buffs')?.value || '')),
     drAiFavor:  document.getElementById('dr-aifavor')?.value || '',
     drSize:     document.getElementById('dr-size')?.value || '',
     manaCurrentVal: document.getElementById('mana-current')?.value || '',
@@ -1828,6 +1831,9 @@ function applySheet(data) {
   if(data.combat) {
     const c = data.combat;
     const set = (id,v) => { const el=document.getElementById(id); if(el) el.value=v; };
+    // The saved Evade/DR Buffs are hand-entered only; clear any stale skill-overlay
+    // tracking so the post-restore refresh() layers the skill bonus on cleanly.
+    try { if(window.DCCSkillBuff){ DCCSkillBuff.resetTracking('evade-buffs'); DCCSkillBuff.resetTracking('dr-buffs'); } } catch(e){}
     set('evade-buffs', c.evadeBuffs); calcEvadeTotal();
     set('evade-move', c.evadeMove); set('evade-step', c.evadeStep);
     set('dr-armor', c.drArmor); set('dr-buffs', c.drBuffs); calcDR();
@@ -1916,6 +1922,9 @@ function applySheet(data) {
   // Now that both Attacks and Skills are populated, link them so each attack's
   // Rank + Damage reflect its skill/spell (and any Rank 5/10/15 upgrades).
   if(typeof syncLinkedAttacks === 'function') syncLinkedAttacks();
+  // Layer the always-on skill buffs (Dodge etc.) onto Evade/DR now that the skill
+  // rows exist. Idempotent: the saved fields hold only the hand-entered amount.
+  try { if(window.DCCSkillBuff) DCCSkillBuff.refresh(); } catch(e){}
 
   // Inventory
   if(data.inventory) {
@@ -2000,6 +2009,7 @@ function newCharacter() {
   ['evade-buffs','evade-move','evade-step','dr-armor','dr-buffs','dr-aifavor','dr-size','mana-current','debuffs'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = '';
   });
+  try { if(window.DCCSkillBuff){ DCCSkillBuff.resetTracking('evade-buffs'); DCCSkillBuff.resetTracking('dr-buffs'); } } catch(e){}
   calcEvadeTotal(); calcDR();
   try { if (window.DCCDebuffs) window.DCCDebuffs.refresh(); } catch(e) {}
 
@@ -3309,6 +3319,7 @@ autoLoad();
   <script src="/tools-data/dcc-sheet-skills.js"></script>
   <script src="/tools-data/dcc-sheet-hotlist.js"></script>
   <script src="/tools-data/dcc-sheet-equip.js"></script>
+  <script src="/tools-data/dcc-sheet-skillbuff.js"></script>
   <script src="/tools-data/dcc-sheet-loot.js"></script>
   <script src="/tools-data/dcc-sheet-inv-picker.js"></script>
 </body>

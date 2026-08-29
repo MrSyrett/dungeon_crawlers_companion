@@ -1460,7 +1460,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 // filter — both systems' data stays loaded. Persisted per browser.
 // ══════════════════════════════════════════
 (function () {
-  const SD_GENS  = ['adventure','npc','rival','monster','dungeon','encounter','shop','loot'];
+  const SD_GENS  = ['adventure','npc','rival','monster','dungeon','encounter','shop','loot','sdfoundloot'];
   const DCC_GENS = ['dccnpc','dccneighborhood','dccmonster','dccencounter','dccloot','dccitem'];
   function readSys() { try { return localStorage.getItem('gm_system') === 'SD' ? 'SD' : 'DCC'; } catch (e) { return 'DCC'; } }
   let SYS = readSys();
@@ -1994,7 +1994,6 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice">Dice Tray</option>
-        <option value="ai">Message</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-1-toolbar"></div>
     </div>
@@ -2014,7 +2013,6 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice">Dice Tray</option>
-        <option value="ai">Message</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-2-toolbar"></div>
     </div>
@@ -2033,7 +2031,6 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice">Dice Tray</option>
-        <option value="ai">Message</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-3-toolbar"></div>
     </div>
@@ -2053,7 +2050,6 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice" selected>Dice Tray</option>
-        <option value="ai">Message</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-4-toolbar"></div>
     </div>
@@ -2303,6 +2299,7 @@ GMScenes.renderPins();
         <option value="encounter">Encounter</option>
         <option value="shop">Shop/Tavern</option>
         <option value="loot">Treasure</option>
+        <option value="sdfoundloot">Found Loot</option>
         <option value="dccnpc">DCC NPC</option>
         <option value="dccneighborhood">DCC Neighborhood/Quest</option>
         <option value="dccmonster">DCC Monster</option>
@@ -2621,59 +2618,93 @@ GMScenes.renderPins();
         </div>
       </div>
 
-      <!-- DCC LOOT BOX PANEL -->
+      <!-- DCC LOOT BOX PANEL (full builder — compose, roll tier, enchant, send) -->
       <div class="gen-panel" data-panel="dccloot">
-        <div class="gen-controls">
-          <label class="gen-label">Loot Box Tier
-            <select class="gen-select" id="gen-dccloot-tier">
-              <option value="Bronze">Bronze</option>
-              <option value="Silver">Silver</option>
-              <option value="Gold">Gold</option>
-              <option value="Platinum">Platinum</option>
-              <option value="Legendary">Legendary</option>
-              <option value="Celestial">Celestial</option>
-            </select>
-          </label>
-          <label class="gen-label">Boxes
-            <select class="gen-select" id="gen-dccloot-count">
-              <option value="1">1</option><option value="2">2</option>
-              <option value="3">3</option><option value="5">5</option>
-            </select>
-          </label>
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Loot Box</div>
+            <input type="text" class="ai-input ai-box-name" placeholder="Box name (e.g. Gold Loot Box)">
+            <div class="ai-row">
+              <select class="ai-select ai-box-tier">
+                <option value="Bronze">Bronze</option><option value="Silver">Silver</option>
+                <option value="Gold" selected>Gold</option><option value="Platinum">Platinum</option>
+                <option value="Legendary">Legendary</option><option value="Celestial">Celestial</option>
+              </select>
+              <button class="btn small ghost ai-roll-tier" type="button" title="Fill the box from the DCC loot generator — gold, gear, and a couple of enchanted items">🎲 Roll tier</button>
+            </div>
+            <div class="ai-row">
+              <select class="ai-select ai-ench-cat" title="Base item type to enchant">
+                <option value="">Any type</option><option value="weapon">Weapon</option>
+                <option value="armor">Armor</option><option value="accessory">Accessory</option>
+              </select>
+              <button class="btn small ghost ai-ench-roll" type="button" title="Enchant a random base item at the chosen tier — bonuses auto-apply when the player equips it">✨ Enchant an item</button>
+            </div>
+            <div class="ai-cat-filters"></div>
+            <input type="text" class="ai-input ai-cat-search" placeholder="Search Loot &amp; Gear to add…">
+            <div class="ai-cat-results"></div>
+            <table class="ai-items"><tbody class="ai-items-body"></tbody></table>
+            <button class="btn small ghost ai-add-row" type="button">+ Add custom item</button>
+            <div class="ai-row" style="margin-top:8px">
+              <select class="ai-select ai-box-mode" title="Who can open this box">
+                <option value="copies">Everyone gets a copy</option>
+                <option value="named">Only a named player</option>
+                <option value="claim">First to claim it</option>
+              </select>
+              <select class="ai-select ai-box-to" title="Which player can open it" style="display:none;">
+                <option value="">— choose a player —</option>
+              </select>
+              <button class="btn small ghost ai-party-refresh" type="button" title="Refresh the party list" style="display:none;">↻</button>
+            </div>
+            <button class="btn small primary ai-send-box" type="button">Send Loot Box</button>
+            <div class="ai-status ai-box-status"></div>
+          </div>
         </div>
-        <div class="gen-results" id="gen-dccloot-results">
-          <div class="gen-empty">Pick a tier and press Generate &mdash; gold, consumables, and the tier&rsquo;s gear are drawn from the DCC catalog.</div>
+      </div>
+
+      <!-- SD FOUND LOOT PANEL (full builder — visible drop, each item claimed) -->
+      <div class="gen-panel" data-panel="sdfoundloot">
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Found Loot</div>
+            <input type="text" class="ai-input ai-fl-name" placeholder="Where it's found (e.g. Chest by the altar)">
+            <div class="ai-row">
+              <select class="ai-select ai-fl-tier" title="Treasure tier">
+                <option value="1">Tier 1–3</option><option value="4">Tier 4–6</option>
+                <option value="7">Tier 7–9</option><option value="10">Tier 10+</option>
+              </select>
+              <button class="btn small ghost ai-fl-roll" type="button" title="Roll a treasure spread (like the Treasure Generator)">🎲 Roll treasure</button>
+            </div>
+            <div class="ai-cat-filters ai-fl-filters"></div>
+            <input type="text" class="ai-input ai-fl-search" placeholder="Search treasure to add…">
+            <div class="ai-cat-results ai-fl-results"></div>
+            <table class="ai-items"><tbody class="ai-fl-body"></tbody></table>
+            <button class="btn small ghost ai-fl-add" type="button">+ Add custom item</button>
+            <button class="btn small primary ai-fl-send" type="button">Send Found Loot</button>
+            <div class="ai-status ai-fl-status"></div>
+          </div>
         </div>
       </div>
 
       <!-- DCC ITEM PANEL (catalog items + magic properties, Tables 38–42) -->
       <div class="gen-panel" data-panel="dccitem">
         <div class="gen-controls">
-          <label class="gen-label">What
+          <label class="gen-label">Type
             <select class="gen-select" id="gen-dccitem-cat">
-              <optgroup label="Catalog item">
-                <option value="">Any Category</option>
-                <option value="consumable">Consumables</option>
-                <option value="weapon">Weapons</option>
-                <option value="armor">Armor</option>
-                <option value="accessory">Accessories</option>
-                <option value="scroll">Scrolls</option>
-                <option value="tome">Tomes</option>
-                <option value="mundane">Mundane</option>
-                <option value="tool">Tools</option>
-                <option value="material">Materials</option>
-              </optgroup>
-              <optgroup label="Magic property (Tables 38–42)">
-                <option value="magic">Magic: random type</option>
-                <option value="magic:39">Magic: Item / Weapon</option>
-                <option value="magic:40">Magic: Clothing</option>
-                <option value="magic:41">Magic: Accessory</option>
-              </optgroup>
+              <option value="">Any Type</option>
+              <option value="weapon">Weapons</option>
+              <option value="armor">Armor</option>
+              <option value="accessory">Accessories</option>
+              <option value="mundane">Mundane Items</option>
+              <option value="consumable">Consumables</option>
+              <option value="scroll">Scrolls</option>
+              <option value="tome">Tomes</option>
+              <option value="tool">Tools</option>
+              <option value="material">Materials</option>
             </select>
           </label>
           <label class="gen-label">Tier / Rarity
             <select class="gen-select" id="gen-dccitem-tier">
-              <option value="">Any Tier</option>
+              <option value="Mundane">Mundane</option>
               <option value="Bronze">Bronze</option>
               <option value="Silver">Silver</option>
               <option value="Gold">Gold</option>
@@ -2690,7 +2721,7 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-dccitem-results">
-          <div class="gen-empty">Draws a named item from the DCC catalog, or &mdash; pick a &ldquo;Magic property&rdquo; under <b>What</b> &mdash; rolls a random enchanted property (Tables 38&ndash;42) at the chosen rarity.</div>
+          <div class="gen-empty">Draws an item of the chosen type from the full DCC catalog. At <b>Mundane</b> you get the base item; at any higher tier it&rsquo;s enchanted with random perks (like the Loot Box enchanter), ready to send.</div>
         </div>
       </div>
 
@@ -2980,6 +3011,21 @@ GMScenes.renderPins();
       <button class="btn small ghost pty-clear" title="Clear" aria-label="Clear"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.5 2.6h5a1 1 0 0 1 1 1v1.2H8.5V3.6a1 1 0 0 1 1-1Z"/><path d="M4.5 5.8h15v2h-1.2l-.9 12.1a1.6 1.6 0 0 1-1.6 1.5H8.2a1.6 1.6 0 0 1-1.6-1.5L5.7 7.8H4.5Zm4.4 3.6.4 8.6h1.5l-.3-8.6Zm5.7 0-.3 8.6h1.5l.4-8.6Z"/></svg></button>
     </div>
     <div class="pty-body">
+      <!-- Message to the Roll Log (moved here from the old Message tool) -->
+      <div class="ai-section ai-party-msg">
+        <div class="ai-sec-title">Message to the Roll Log</div>
+        <div class="ai-row">
+          <select class="ai-select ai-msg-type">
+            <option value="system">💬 Message</option>
+            <option value="achievement" class="ai-dcc-only">🏆 New Achievement</option>
+          </select>
+          <button class="btn small ghost ai-snark-btn ai-dcc-only" type="button" title="Roll a random snarky line">🎲 Snark</button>
+        </div>
+        <input type="text" class="ai-input ai-msg-title" placeholder="Message header (optional)">
+        <textarea class="ai-input ai-msg-body" rows="3" placeholder="Your message to the players…"></textarea>
+        <button class="btn small primary ai-send-msg" type="button">Send Message</button>
+        <div class="ai-status ai-msg-status"></div>
+      </div>
       <div class="pty-bar">
         <span class="pty-note"></span>
       </div>
@@ -3016,86 +3062,6 @@ GMScenes.renderPins();
   </div>
 </template>
 
-<template id="tpl-ai">
-  <div class="tool-instance ai-tool" data-tool="ai">
-    <div class="ai-scroll">
-      <!-- ── Message (universal) ── -->
-      <div class="ai-section">
-        <div class="ai-sec-title">Message to the Roll Log</div>
-        <div class="ai-row">
-          <select class="ai-select ai-msg-type">
-            <option value="system">💬 Message</option>
-            <option value="achievement" class="ai-dcc-only">🏆 New Achievement</option>
-          </select>
-          <button class="btn small ghost ai-snark-btn ai-dcc-only" type="button" title="Roll a random snarky line">🎲 Snark</button>
-        </div>
-        <input type="text" class="ai-input ai-msg-title" placeholder="Message header (optional)">
-        <textarea class="ai-input ai-msg-body" rows="3" placeholder="Your message to the players…"></textarea>
-        <button class="btn small primary ai-send-msg" type="button">Send Message</button>
-        <div class="ai-status ai-msg-status"></div>
-      </div>
-
-      <!-- ── DCC Loot Box (DCC only) ── -->
-      <div class="ai-section ai-dcc-only">
-        <div class="ai-sec-title">Loot Box</div>
-        <input type="text" class="ai-input ai-box-name" placeholder="Box name (e.g. Gold Loot Box)">
-        <div class="ai-row">
-          <select class="ai-select ai-box-tier">
-            <option value="Bronze">Bronze</option><option value="Silver">Silver</option>
-            <option value="Gold" selected>Gold</option><option value="Platinum">Platinum</option>
-            <option value="Legendary">Legendary</option><option value="Celestial">Celestial</option>
-          </select>
-          <button class="btn small ghost ai-roll-tier" type="button" title="Fill the box from the DCC loot generator">🎲 Roll tier</button>
-        </div>
-        <div class="ai-row">
-          <select class="ai-select ai-ench-cat" title="Base item type to enchant">
-            <option value="">Any type</option><option value="weapon">Weapon</option>
-            <option value="armor">Armor</option><option value="accessory">Accessory</option>
-          </select>
-          <button class="btn small ghost ai-ench-roll" type="button" title="Enchant a random base item at the chosen tier — bonuses auto-apply when the player equips it">✨ Enchant an item</button>
-        </div>
-        <div class="ai-cat-filters"></div>
-        <input type="text" class="ai-input ai-cat-search" placeholder="Search Loot &amp; Gear to add…">
-        <div class="ai-cat-results"></div>
-        <table class="ai-items"><tbody class="ai-items-body"></tbody></table>
-        <button class="btn small ghost ai-add-row" type="button">+ Add custom item</button>
-        <div class="ai-row" style="margin-top:8px">
-          <select class="ai-select ai-box-mode" title="Who can open this box">
-            <option value="copies">Everyone gets a copy</option>
-            <option value="named">Only a named player</option>
-            <option value="claim">First to claim it</option>
-          </select>
-          <select class="ai-select ai-box-to" title="Which player can open it" style="display:none;">
-            <option value="">— choose a player —</option>
-          </select>
-          <button class="btn small ghost ai-party-refresh" type="button" title="Refresh the party list" style="display:none;">↻</button>
-        </div>
-        <button class="btn small primary ai-send-box" type="button">Send Loot Box</button>
-        <div class="ai-status ai-box-status"></div>
-      </div>
-
-      <!-- ── Shadowdark Found Loot (SD only) ── -->
-      <div class="ai-section ai-sd-only">
-        <div class="ai-sec-title">Found Loot</div>
-        <input type="text" class="ai-input ai-fl-name" placeholder="Where it's found (e.g. Chest by the altar)">
-        <div class="ai-row">
-          <select class="ai-select ai-fl-tier" title="Treasure tier">
-            <option value="1">Tier 1–3</option><option value="4">Tier 4–6</option>
-            <option value="7">Tier 7–9</option><option value="10">Tier 10+</option>
-          </select>
-          <button class="btn small ghost ai-fl-roll" type="button" title="Roll a treasure spread (like the Treasure Generator)">🎲 Roll treasure</button>
-        </div>
-        <div class="ai-cat-filters ai-fl-filters"></div>
-        <input type="text" class="ai-input ai-fl-search" placeholder="Search treasure to add…">
-        <div class="ai-cat-results ai-fl-results"></div>
-        <table class="ai-items"><tbody class="ai-fl-body"></tbody></table>
-        <button class="btn small ghost ai-fl-add" type="button">+ Add custom item</button>
-        <button class="btn small primary ai-fl-send" type="button">Send Found Loot</button>
-        <div class="ai-status ai-fl-status"></div>
-      </div>
-    </div>
-  </div>
-</template>
 
 <!-- DCC data layer — bestiary, items, and loot tables for the DCC generators
      and the Trackers monster picker. Generated from data/dcc/*.json. -->
@@ -3137,7 +3103,7 @@ GMScenes.renderPins();
 // This is what makes loaded files / typed content persist.
 // ══════════════════════════════════════════
 
-const TOOL_TYPES = ['adventure', 'maps', 'trackers', 'notes', 'gen', 'party', 'rules', 'ai'];
+const TOOL_TYPES = ['adventure', 'maps', 'trackers', 'notes', 'gen', 'party', 'rules'];
 const instancePool = document.createElement('div');
 instancePool.style.cssText = 'position:fixed; top:0; left:-9999px; width:1px; height:1px; overflow:hidden;';
 document.body.appendChild(instancePool);
@@ -6694,10 +6660,28 @@ function dccItemPool() {
 }
 function genDccItem(cat, tier) {
   if(typeof DCC_ITEMS === 'undefined') return card('<div class="gen-empty">DCC item catalog didn’t load. Open the GM screen from the app.</div>');
-  const pool = dccItemPool().filter(it => (!cat || it.category === cat) && (!tier || it.tier === tier));
-  if(!pool.length) return card('<div class="gen-empty">No catalog item matches those filters.</div>');
+  tier = tier || 'Mundane';
+  // Higher than Mundane → take a base item of this type and enchant it into a
+  // one-off magic item (same engine as the Loot Box enchanter), rather than
+  // pulling a pre-generated tiered item from the database.
+  if(tier !== 'Mundane') {
+    if(typeof window.dccEnchantItem !== 'function') return card('<div class="gen-empty">Enchant tables didn’t load. Open the GM screen from the app.</div>');
+    const ecat = (cat === 'weapon' || cat === 'armor' || cat === 'accessory' || cat === 'mundane') ? cat : '';
+    const e = window.dccEnchantItem(tier, ecat);
+    const tag = [e.category, e.slot, e.tier].filter(Boolean).join(' · ');
+    return card(
+      `<div class="gen-card-header"><span class="gen-card-name">${esc(e.name)}</span><span class="gen-card-tag">${esc(e.tier)}</span></div>` +
+      `<div class="gen-item-desc" style="opacity:.85;text-transform:none;">${esc(tag)}</div>` +
+      `<div class="gen-item-desc">${esc(e.effect)}</div>` +
+      `<div class="gen-item-desc" style="opacity:.55;text-transform:none;">Base: ${esc(e.base)} — rename to taste. Send via a Loot Box to make it equippable on a sheet.</div>`
+    );
+  }
+  // Mundane → draw the base item straight from the full catalog (base library +
+  // any homebrew/untiered items).
+  const pool = dccItemPool().filter(it => (!cat || it.category === cat) && (!it.tier || it.tier === 'Mundane'));
+  if(!pool.length) return card('<div class="gen-empty">No Mundane item matches those filters.</div>');
   const it = pool[Math.floor(Math.random() * pool.length)];
-  const tagBits = [it.category, it.slot, it.tier, (it.source === 'Homebrew' ? 'Homebrew' : '')].filter(Boolean).join(' · ');
+  const tagBits = [it.category, it.slot, it.tier || 'Mundane', (it.source === 'Homebrew' ? 'Homebrew' : (it.theme || ''))].filter(Boolean).join(' · ');
   const price = (typeof it.price === 'number') ? `<span class="gen-card-tag">${it.price.toLocaleString('en')} g</span>` : '';
   const spellLine = dccItemSpellLine(it, it.tier || 'Bronze');
   return card(
@@ -8261,9 +8245,13 @@ window.init_gen = function(root) {
   const rollBtn = root.querySelector('.gen-roll');
   let activeTab = 'adventure';
 
+  // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
+  // so the toolbar "Generate" button is hidden while one of them is active.
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot'];
   function showGenPanel(name) {
     activeTab = name;
     panels.forEach(p => p.classList.toggle('active', p.dataset.panel === activeTab));
+    if(rollBtn) rollBtn.hidden = BUILDER_PANELS.indexOf(activeTab) >= 0;
     // Keep the live select and any toolbar clones in sync
     if(tabSelect) tabSelect.value = activeTab;
     document.querySelectorAll('.gen-tab-select').forEach(s => { s.value = activeTab; });
@@ -8276,6 +8264,8 @@ window.init_gen = function(root) {
   // Honor the SD/DCC toggle: hide the other system's options and, if the default
   // tab ('adventure') belongs to the hidden system, switch to the first visible one.
   if(typeof window.applyGmSystemToGenerators === 'function') window.applyGmSystemToGenerators(root);
+  // Wire the loot-box + found-loot builders now living in this tool's panels.
+  try { if(typeof wireAiConsole === 'function') wireAiConsole(root); } catch(e){}
 
   rollBtn.addEventListener('click', () => {
     if(activeTab==='npc') {
@@ -8466,25 +8456,12 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-loot-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genTreasure(tier,type));
 
-    } else if(activeTab==='dccloot') {
-      const tier=root.querySelector('#gen-dccloot-tier').value;
-      const count=parseInt(root.querySelector('#gen-dccloot-count').value)||1;
-      const res=root.querySelector('#gen-dccloot-results'); res.innerHTML='';
-      for(let i=0;i<count;i++) res.appendChild(genDccLootBox(tier));
-
     } else if(activeTab==='dccitem') {
       const cat=root.querySelector('#gen-dccitem-cat').value;
       const tier=root.querySelector('#gen-dccitem-tier').value;
       const count=parseInt(root.querySelector('#gen-dccitem-count').value)||1;
       const res=root.querySelector('#gen-dccitem-results'); res.innerHTML='';
-      if(cat.indexOf('magic')===0) {
-        // Magic property (Tables 38–42). Magic starts at Silver, so treat Any/Bronze as Silver.
-        const mtype = cat.indexOf(':')>=0 ? cat.split(':')[1] : '';
-        const mtier = (tier && tier!=='Bronze') ? tier : 'Silver';
-        for(let i=0;i<count;i++) res.appendChild(genDccMagicItem(mtier, mtype));
-      } else {
-        for(let i=0;i<count;i++) res.appendChild(genDccItem(cat, tier));
-      }
+      for(let i=0;i<count;i++) res.appendChild(genDccItem(cat, tier));
 
     } else if(activeTab==='dccmonster') {
       const role=root.querySelector('#gen-dccmon-role').value;
@@ -10634,6 +10611,8 @@ function init_party(root) {
   const noteEl    = root.querySelector('.pty-note');
   const listEl    = root.querySelector('.pty-list');
   const emptyEl   = root.querySelector('.pty-empty');
+  // Wire the "Message to the Roll Log" composer now living at the top of this tool.
+  try { if(typeof wireAiConsole === 'function') wireAiConsole(root); } catch(e){}
 
   let chars = [];          // [{id, source, sheet}]
   let lastSync = null;
@@ -11471,14 +11450,15 @@ function init_rules(root) {
 }
 
 // ══════════════════════════════════════════
-// SYSTEM AI CONSOLE  (init_ai)
+// SYSTEM AI CONSOLE  (wireAiConsole) — mounted into the Generator tool (loot box +
+// found loot) and the Party tool (message composer); wired wherever its DOM lives.
 // The GM's broadcast desk: fire an Achievement or free-form System message into
 // the shared Roll Log, or build a Loot Box (catalog pick / DCC-tier roll / by
 // hand) and send it so players can open it and drop the items on their sheet.
 // Loot helpers are replicated locally because dccLootTier/etc. live inside the
 // generators IIFE and aren't reachable here; they read the same DCC_* globals.
 // ══════════════════════════════════════════
-function init_ai(root) {
+function wireAiConsole(root) {
   const esc = t => String(t == null ? '' : t)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const R = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -11574,39 +11554,43 @@ function init_ai(root) {
     }
   });
 
-  // ══ Message composer (universal) ══
+  // ══ Message composer (universal) ══ (wired only where the composer exists)
   const msgType   = root.querySelector('.ai-msg-type');
-  const snarkBtn  = root.querySelector('.ai-snark-btn');
-  const msgTitle  = root.querySelector('.ai-msg-title');
-  const msgBody   = root.querySelector('.ai-msg-body');
-  const sendMsg   = root.querySelector('.ai-send-msg');
-  const msgStatus = root.querySelector('.ai-msg-status');
-  function syncMsgType() {
-    const ach = msgType.value === 'achievement';
-    msgTitle.placeholder = ach ? 'Achievement name (e.g. Bloodbath)' : 'Message header (optional)';
-    msgBody.placeholder  = ach ? 'The System AI’s snarky remark…' : 'Your message to the players…';
-    sendMsg.textContent  = ach ? 'Send Achievement' : 'Send Message';
+  let syncMsgType = function(){};
+  if(msgType) {
+    const snarkBtn  = root.querySelector('.ai-snark-btn');
+    const msgTitle  = root.querySelector('.ai-msg-title');
+    const msgBody   = root.querySelector('.ai-msg-body');
+    const sendMsg   = root.querySelector('.ai-send-msg');
+    const msgStatus = root.querySelector('.ai-msg-status');
+    syncMsgType = function() {
+      const ach = msgType.value === 'achievement';
+      msgTitle.placeholder = ach ? 'Achievement name (e.g. Bloodbath)' : 'Message header (optional)';
+      msgBody.placeholder  = ach ? 'The System AI’s snarky remark…' : 'Your message to the players…';
+      sendMsg.textContent  = ach ? 'Send Achievement' : 'Send Message';
+    };
+    msgType.addEventListener('change', syncMsgType);
+    if(snarkBtn) snarkBtn.addEventListener('click', () => {
+      const pool = (typeof DCC_PREP !== 'undefined' && Array.isArray(DCC_PREP.aiBlurbs)) ? DCC_PREP.aiBlurbs : [];
+      if(!pool.length) { setStatus(msgStatus, 'No snark table loaded.', 'err'); return; }
+      msgBody.value = R(pool); msgBody.focus();
+    });
+    sendMsg.addEventListener('click', () => {
+      if(!canSend()) { setStatus(msgStatus, 'Link a campaign first (top bar) to broadcast.', 'err'); return; }
+      const ach = msgType.value === 'achievement';
+      const title = msgTitle.value.trim(), body = msgBody.value.trim();
+      if(!title && !body) { setStatus(msgStatus, 'Add a header or a message first.', 'err'); return; }
+      const payload = ach
+        ? { type: 'achievement', label: 'NEW ACHIEVEMENT', result: title || 'Achievement', detail: body }
+        : { type: 'system',      label: title || 'MESSAGE',   result: '',                     detail: body };
+      GMCamp.send(payload);
+      setStatus(msgStatus, (ach ? 'Achievement' : 'Message') + ' sent to players.', 'ok');
+      msgTitle.value = ''; msgBody.value = '';
+    });
   }
-  msgType.addEventListener('change', syncMsgType);
-  snarkBtn.addEventListener('click', () => {
-    const pool = (typeof DCC_PREP !== 'undefined' && Array.isArray(DCC_PREP.aiBlurbs)) ? DCC_PREP.aiBlurbs : [];
-    if(!pool.length) { setStatus(msgStatus, 'No snark table loaded.', 'err'); return; }
-    msgBody.value = R(pool); msgBody.focus();
-  });
-  sendMsg.addEventListener('click', () => {
-    if(!canSend()) { setStatus(msgStatus, 'Link a campaign first (top bar) to broadcast.', 'err'); return; }
-    const ach = msgType.value === 'achievement';
-    const title = msgTitle.value.trim(), body = msgBody.value.trim();
-    if(!title && !body) { setStatus(msgStatus, 'Add a header or a message first.', 'err'); return; }
-    const payload = ach
-      ? { type: 'achievement', label: 'NEW ACHIEVEMENT', result: title || 'Achievement', detail: body }
-      : { type: 'system',      label: title || 'MESSAGE',   result: '',                     detail: body };
-    GMCamp.send(payload);
-    setStatus(msgStatus, (ach ? 'Achievement' : 'Message') + ' sent to players.', 'ok');
-    msgTitle.value = ''; msgBody.value = '';
-  });
 
-  // ══ DCC Loot Box ══
+  // ══ DCC Loot Box ══ (wired only where the loot box builder exists)
+  if(root.querySelector('.ai-box-name')) {
   const DCC_GROUPS = [
     { key:'all',label:'All',cats:null },{ key:'consumable',label:'Consumables',cats:['consumable'] },
     { key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },
@@ -11629,11 +11613,19 @@ function init_ai(root) {
     if(!td){ setStatus(boxStatus,'DCC loot data didn’t load — open from the app.','err'); return; }
     itemsBody.innerHTML='';
     const gold=rollGold(td.gold);
-    if(gold) makeRow(itemsBody, gold.toLocaleString('en')+' gold','',key+' loot box');
+    if(gold) makeRow(itemsBody, 'Gold', gold, key+' loot box');   // amount goes in the Qty column
     const consumables=itemsOfTier(td.tier,['consumable','scroll','tome','material','mundane']);
-    const gear=itemsOfTier(td.tier,['weapon','armor','accessory']);
     pickN(consumables,1+(Math.random()<0.5?1:0)).forEach(it=>makeRow(itemsBody,it.name,1,it.effect||''));
-    pickN(gear,td.gearRolls||0).forEach(it=>makeRow(itemsBody,it.name,1,(it.slot?it.slot+' — ':'')+(it.effect||'')));
+    // The tier's gear rolls come in as ENCHANTED one-off items (equippable on the
+    // sheet, bonuses auto-apply), drawn from the base library — so a box always
+    // yields real, usable magic gear instead of plain catalog rows.
+    const nGear=Math.max(1, td.gearRolls||1);
+    if(typeof window.dccEnchantItem==='function'){
+      for(let i=0;i<nGear;i++){ const e=window.dccEnchantItem(key,''); makeRow(itemsBody,e.name,1,e.effect,{category:e.category,slot:e.slot}); }
+    } else {
+      const gear=itemsOfTier(td.tier,['weapon','armor','accessory']);
+      pickN(gear,nGear).forEach(it=>makeRow(itemsBody,it.name,1,(it.slot?it.slot+' — ':'')+(it.effect||'')));
+    }
     if(!boxName.value.trim()) boxName.value=key+' Loot Box';
     setStatus(boxStatus,'Rolled a '+key+' box — tweak it, then send.','ok');
   });
@@ -11684,8 +11676,10 @@ function init_ai(root) {
     setStatus(boxStatus,'Sent “'+name+'” '+who+'.','ok');
     itemsBody.innerHTML=''; boxName.value=''; if(mode==='named') boxTo.value='';
   });
+  } // end DCC Loot Box builder
 
   // ══ Shadowdark Found Loot ══ (visible drop, each item claimed first-come)
+  if(root.querySelector('.ai-fl-name')) {
   const SD_GROUPS = [
     { key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },
     { key:'wand',label:'Wands & Rings',cats:['wand','ring'] },{ key:'cloak',label:'Cloaks & Boots',cats:['cloak','boots'] },
@@ -11727,20 +11721,21 @@ function init_ai(root) {
     setStatus(flStatus,'Sent '+items.length+' item'+(items.length===1?'':'s')+' for the party to claim.','ok');
     flBody.innerHTML=''; flName.value='';
   });
+  } // end SD Found Loot builder
 
   // ── System awareness: show DCC-only vs SD-only pieces per the master toggle ──
   function applySys(){
     const dcc = (typeof window.GM_SYSTEM==='string'?window.GM_SYSTEM:'DCC')!=='SD';
     root.querySelectorAll('.ai-dcc-only').forEach(el=>{ el.hidden=!dcc; });
     root.querySelectorAll('.ai-sd-only').forEach(el=>{ el.hidden=dcc; });
-    if(!dcc && msgType.value==='achievement') msgType.value='system';
+    if(!dcc && msgType && msgType.value==='achievement') msgType.value='system';
     syncMsgType();
   }
   applySys();
   document.addEventListener('gm-system-change', applySys);
 }
 
-window.init_ai = init_ai;
+window.wireAiConsole = wireAiConsole;
 window.init_party = init_party;
 window.init_rules = init_rules;
 </script>
