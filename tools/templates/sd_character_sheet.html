@@ -105,6 +105,21 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
 .log-action-btn.import:hover{background:#5a1a1a;color:white;}
 .log-entries{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column-reverse;gap:5px;justify-content:flex-start;}
+/* Message-console entries broadcast from the GM (system messages + found loot). */
+.log-system{border-left:3px solid #c8a020 !important;background:#241f14 !important;}
+.log-system .sys-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#e0c060;}
+.log-system .sys-body{font-size:11px;color:#d8d2c0;margin-top:3px;line-height:1.45;}
+.log-foundloot{border-left:3px solid #c8a020 !important;background:#221f16 !important;}
+.fl-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#e0c060;}
+.fl-name{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:#f0e2b0;margin-top:2px;}
+.fl-desc{font-size:10px;color:#b7a98a;margin-top:2px;line-height:1.4;}
+.fl-items{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
+.fl-item{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:11px;color:#cfc6a8;}
+.fl-item-name{flex:1;min-width:0;}
+.fl-note{color:#8a8570;font-style:italic;}
+.fl-btn{flex:0 0 auto;background:#c8a020;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.fl-btn:hover:not(:disabled){background:#e0b83a;}
+.fl-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
 .log-entry{background:#1e1e1e;border:1px solid #333;padding:7px 9px;}
 .log-entry .roll-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#777;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Montserrat',monospace;font-size:22px;font-weight:900;color:var(--log-text);line-height:1;}
@@ -5102,21 +5117,125 @@ function campaignBroadcast(label, result, detail, type) {
 }
 
 // Remote entries render directly (never through addLog, so they don't rebroadcast)
+function _flEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _flRead(k){try{return JSON.parse(localStorage.getItem(k)||'{}');}catch(e){return {};}}
+function _flWrite(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function _flClaimed(dropId){const all=_flRead('sd_found_claimed');return all[dropId]||{};}
+function _flMarkClaimed(dropId,idx,by){const all=_flRead('sd_found_claimed');(all[dropId]=all[dropId]||{})[idx]=by;_flWrite('sd_found_claimed',all);}
+
+// Find the first empty gear slot and drop a claimed item into it.
+function sdAddGearItem(name, qty){
+  const names=[...document.querySelectorAll('#gear-list .gear-name')];
+  const empty=names.find(inp=>!inp.value.trim());
+  if(!empty){ if(typeof showRollToast==='function') showRollToast('Gear full','—','Free a gear slot to claim more loot.','normal'); return false; }
+  empty.value=name||'';
+  if(typeof onGearNameInput==='function'){ try{onGearNameInput(empty);}catch(e){} }
+  const row=empty.closest('.gear-slot'); const q=row&&row.querySelector('.gear-qty');
+  if(q && qty!=null && String(qty)!=='' && String(qty)!=='1') q.value=String(qty);
+  try{ empty.dispatchEvent(new Event('input',{bubbles:true})); }catch(e){}
+  if(typeof saveSheet==='function'){ try{saveSheet(false);}catch(e){} }
+  try{ empty.scrollIntoView({block:'nearest'}); }catch(e){}
+  return true;
+}
+
+function renderNormalRemote(roll){
+  const div = document.createElement('div');
+  div.className = 'log-entry remote' + (roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
+  div.innerHTML = '<div class="roll-label"><span style="color:#8a7ac8;">'+_flEsc(roll.source)+'</span> · '+_flEsc(roll.label)+'</div>'
+    + '<div class="roll-result">'+_flEsc(roll.result)+'</div>'
+    + (roll.detail?'<div class="roll-detail">'+_flEsc(roll.detail)+'</div>':'');
+  return div;
+}
+// A free-form GM message (and, as a graceful fallback, a DCC achievement).
+function renderSystemEntry(roll){
+  const div = document.createElement('div');
+  div.className = 'log-entry remote log-system';
+  div.innerHTML = '<div class="sys-head">'+_flEsc(roll.label||'MESSAGE')+'</div>'
+    + (roll.result?'<div class="fl-name">'+_flEsc(roll.result)+'</div>':'')
+    + (roll.detail?'<div class="sys-body">'+_flEsc(roll.detail)+'</div>':'');
+  return div;
+}
+// Found Loot: a visible drop whose items are claimed individually, first-come.
+function renderFoundLoot(roll){
+  let p={}; try{ p=JSON.parse(roll.detail||'{}'); }catch(e){ p={}; }
+  const items = Array.isArray(p.items)?p.items:[];
+  const dropId = p.dropId || ('fl-'+(roll.id||Math.random().toString(36).slice(2)));
+  const claimed = _flClaimed(dropId);
+  const me = campaignPlayerName();
+  const div = document.createElement('div');
+  div.className='log-entry remote log-foundloot';
+  div.dataset.dropId=dropId;
+  div._flItems=items;
+  const rows = items.map((it,i)=>{
+    const by = claimed[i];
+    const label = _flEsc(it.item||'?')
+      + (it.qty!=null && String(it.qty)!=='1' && String(it.qty)!==''?' ×'+_flEsc(it.qty):'')
+      + (it.notes?' <span class="fl-note">'+_flEsc(it.notes)+'</span>':'');
+    const btn = by
+      ? '<button class="fl-btn" disabled>'+(me && by.toLowerCase()===me.toLowerCase()?'Yours ✓':'Claimed by '+_flEsc(by))+'</button>'
+      : '<button class="fl-btn fl-claim" data-idx="'+i+'">Claim</button>';
+    return '<li class="fl-item" data-idx="'+i+'"><span class="fl-item-name">'+label+'</span>'+btn+'</li>';
+  }).join('');
+  div.innerHTML = '<div class="fl-head">🪙 '+_flEsc(roll.label||'FOUND LOOT')+'</div>'
+    + (roll.result?'<div class="fl-name">'+_flEsc(roll.result)+'</div>':'')
+    + (p.note?'<div class="fl-desc">'+_flEsc(p.note)+'</div>':'')
+    + (rows?'<ul class="fl-items">'+rows+'</ul>':'');
+  return div;
+}
+// A claim broadcast (from anyone) locks that one item on every log.
+function applyFoundClaim(roll){
+  let p={}; try{ p=JSON.parse(roll.detail||'{}'); }catch(e){ return; }
+  if(!p.dropId || p.itemIndex==null) return;   // ignore DCC whole-box claims
+  _flMarkClaimed(p.dropId, p.itemIndex, p.by||roll.source||'Someone');
+  _flRefreshCard(p.dropId);
+}
+function _flRefreshCard(dropId){
+  const sel='.log-foundloot[data-drop-id="'+(window.CSS&&CSS.escape?CSS.escape(dropId):dropId)+'"]';
+  const card=document.querySelector(sel);
+  if(!card) return;
+  const claimed=_flClaimed(dropId), me=campaignPlayerName();
+  card.querySelectorAll('.fl-item').forEach(li=>{
+    const i=parseInt(li.dataset.idx,10), by=claimed[i], cur=li.querySelector('.fl-btn');
+    if(by && cur && !cur.disabled){
+      cur.outerHTML='<button class="fl-btn" disabled>'+(me && by.toLowerCase()===me.toLowerCase()?'Yours ✓':'Claimed by '+_flEsc(by))+'</button>';
+    }
+  });
+}
+
+// Remote entries render directly (never through addLog, so they don't rebroadcast)
 function campaignAddRemote(roll) {
   const entries = document.getElementById('log-entries');
   if(!entries) return;
+  if(roll.type==='lootclaim'){ applyFoundClaim(roll); return; }   // updates a card in place
   const hint = entries.querySelector('.log-hint');
   if(hint) hint.remove();
-  const div = document.createElement('div');
-  div.className = 'log-entry remote' + (roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
-  const esc = (s)=>String(s).replace(/</g,'&lt;');
-  div.innerHTML = '<div class="roll-label"><span style="color:#8a7ac8;">'+esc(roll.source)+'</span> · '+esc(roll.label)+'</div>'
-    + '<div class="roll-result">'+esc(roll.result)+'</div>'
-    + (roll.detail?'<div class="roll-detail">'+esc(roll.detail)+'</div>':'');
+  let div;
+  if(roll.type==='foundloot')        div = renderFoundLoot(roll);
+  else if(roll.type==='system' || roll.type==='achievement') div = renderSystemEntry(roll);
+  else                               div = renderNormalRemote(roll);
   entries.insertBefore(div, entries.firstChild);
   entries.scrollTop = 0;
   while(entries.children.length > 60) entries.removeChild(entries.lastChild);
 }
+
+// One delegated handler for per-item Claim on found-loot cards.
+(function(){
+  const entries=document.getElementById('log-entries');
+  if(!entries || entries.dataset.flWired) return;
+  entries.dataset.flWired='1';
+  entries.addEventListener('click',function(e){
+    const btn=e.target.closest('.fl-claim'); if(!btn) return;
+    const card=btn.closest('.log-foundloot'); if(!card) return;
+    const dropId=card.dataset.dropId, idx=parseInt(btn.dataset.idx,10);
+    if(_flClaimed(dropId)[idx]) return;                 // already taken
+    const it=(card._flItems||[])[idx]; if(!it) return;
+    if(sdAddGearItem(it.item, it.qty)===false) return;  // gear full — leave it claimable
+    const me=campaignPlayerName();
+    _flMarkClaimed(dropId, idx, me);
+    _flRefreshCard(dropId);
+    if(typeof campaignBroadcast==='function') campaignBroadcast('CLAIMED', it.item||'Item', JSON.stringify({dropId, itemIndex:idx, by:me}), 'lootclaim');
+  });
+})();
 
 async function campaignPoll() {
   if(!_campaign) return;

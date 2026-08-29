@@ -57,6 +57,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .lb-desc{font-size:11px;color:#b7a98a;margin-top:3px;line-height:1.4;}
 .lb-items{margin:5px 0 0;padding-left:16px;font-size:11px;color:#cfc6a8;}
 .lb-items li{margin:1px 0;}
+.lb-sealed{margin-top:5px;font-size:11px;color:#8a8570;font-style:italic;}
 .lb-note{color:#8a8570;font-style:italic;}
 .lb-actions{margin-top:6px;}
 .lb-btn{background:#c8a020;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
@@ -3145,9 +3146,7 @@ function renderLootBoxEntry(roll){
   div.dataset.boxId = boxId;
   div._lootItems = items;
   div._lootName  = roll.result || 'Loot Box';
-  const itemsHtml = items.map(it =>
-    '<li>'+_lootEsc(it.item||'?')+(it.qty!=null && String(it.qty)!=='1' && String(it.qty)!==''?' ×'+_lootEsc(it.qty):'')
-    + (it.notes?' <span class="lb-note">'+_lootEsc(it.notes)+'</span>':'')+'</li>').join('');
+  const itemsHtml = _lootItemsHtml(items);
   let forLabel='', btn='';
   if(mode==='named'){
     forLabel = to ? '<div class="lb-for">For: '+_lootEsc(to)+'</div>' : '';
@@ -3162,13 +3161,35 @@ function renderLootBoxEntry(roll){
   } else { // copies — everyone opens their own
     btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>';
   }
+  // The contents stay sealed until this player opens (or claims) the box — the
+  // whole point is the surprise. Once opened, _lootReveal() swaps in the list.
+  const contentsHtml = opened
+    ? (itemsHtml ? '<ul class="lb-items">'+itemsHtml+'</ul>' : '')
+    : '<div class="lb-sealed">🔒 Contents hidden until '+(mode==='claim'?'claimed':'opened')+'.</div>';
   div.innerHTML = '<div class="lb-head">🎁 '+_lootEsc(roll.label||'LOOT BOX')+'</div>'
     + (roll.result?'<div class="lb-name">'+_lootEsc(roll.result)+'</div>':'')
     + forLabel
     + (p.note?'<div class="lb-desc">'+_lootEsc(p.note)+'</div>':'')
-    + (itemsHtml?'<ul class="lb-items">'+itemsHtml+'</ul>':'')
+    + contentsHtml
     + '<div class="lb-actions">'+btn+'</div>';
   return div;
+}
+// Shared <li> builder for a loot box's items (used at render and on reveal).
+function _lootItemsHtml(items){
+  return (Array.isArray(items)?items:[]).map(it =>
+    '<li>'+_lootEsc(it.item||'?')+(it.qty!=null && String(it.qty)!=='1' && String(it.qty)!==''?' ×'+_lootEsc(it.qty):'')
+    + (it.notes?' <span class="lb-note">'+_lootEsc(it.notes)+'</span>':'')+'</li>').join('');
+}
+// Reveal a box's contents in-card after it's opened/claimed (replaces the sealed
+// placeholder with the item list so the player sees what they just got).
+function _lootReveal(card){
+  if(!card) return;
+  const sealed = card.querySelector('.lb-sealed');
+  const html = _lootItemsHtml(card._lootItems||[]);
+  if(sealed){
+    if(html){ const ul=document.createElement('ul'); ul.className='lb-items'; ul.innerHTML=html; sealed.replaceWith(ul); }
+    else sealed.remove();
+  }
 }
 // A claim broadcast from another player locks the box on everyone else's log.
 function applyLootClaim(roll){
@@ -3210,11 +3231,13 @@ function campaignAddRemote(roll) {
     if(e.target.closest('.lb-open')){
       lootAddItems(card._lootItems||[]);
       _markOpened(boxId);
+      _lootReveal(card);
       const act = card.querySelector('.lb-actions');
       if(act) act.innerHTML = '<button class="lb-btn" disabled>Opened ✓</button>';
     } else if(e.target.closest('.lb-claim')){
       lootAddItems(card._lootItems||[]);
       _markOpened(boxId); _markClaimed(boxId, campaignPlayerName());
+      _lootReveal(card);
       const act = card.querySelector('.lb-actions');
       if(act) act.innerHTML = '<button class="lb-btn" disabled>You claimed this ✓</button>';
       if(typeof campaignBroadcast==='function') campaignBroadcast('CLAIMED', card._lootName||'Loot Box', JSON.stringify({boxId, by: campaignPlayerName()}), 'lootclaim');

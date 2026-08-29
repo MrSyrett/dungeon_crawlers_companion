@@ -8,9 +8,10 @@ const clip = (v: unknown, max: number, fallback = ""): string =>
   typeof v === "string" ? v.slice(0, max) : fallback;
 
 // Roll types the log understands. Beyond dice results (crit/fumble/normal),
-// the GM's "System AI" console broadcasts achievements, free-form system
-// messages, and loot boxes; a player's sheet broadcasts a loot-box claim back.
-const ROLL_TYPES = ["crit", "fumble", "normal", "achievement", "system", "lootbox", "lootclaim"];
+// the GM's "Message" console broadcasts achievements, free-form system messages,
+// DCC loot boxes, and Shadowdark "found loot" drops; a player's sheet broadcasts
+// a claim back (a whole DCC box, or a single item from a found-loot drop).
+const ROLL_TYPES = ["crit", "fumble", "normal", "achievement", "system", "lootbox", "lootclaim", "foundloot"];
 
 // POST — broadcast a roll to the campaign.
 // Body: { clientKey, source, label, result, detail, type }

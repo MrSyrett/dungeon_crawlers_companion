@@ -861,7 +861,7 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
 }
 .gen-card-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
 
-/* ── System AI console (message composer + loot-box builder) ─────────────── */
+/* ── Message console (message composer + DCC loot box + SD found loot) ────── */
 .ai-tool { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .ai-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 14px 16px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .ai-section { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--gold); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
@@ -896,6 +896,14 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .ai-status { font-size: 11px; min-height: 14px; color: var(--mid); }
 .ai-status.ok { color: var(--green-light); } .ai-status.err { color: var(--red-light); }
 .pane.narrow .ai-scroll { padding: 10px 11px; }
+.ai-cat-filters { display: flex; flex-wrap: wrap; gap: 5px; }
+.ai-chip { border: 1px solid var(--border); background: transparent; color: var(--mid); border-radius: 20px; padding: 3px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; font-family: 'Barlow Condensed', sans-serif; }
+.ai-chip:hover { border-color: var(--gold); color: var(--gold); }
+.ai-chip.on { border-color: var(--gold); background: rgba(200,160,32,0.12); color: var(--gold); }
+.ai-cat-grp { padding: 5px 9px 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); background: var(--panel); position: sticky; top: 0; }
+.ai-cat-item.custom { color: var(--gold); font-style: italic; }
+.ai-cat-item .ai-cat-meta { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+.ai-tool [hidden] { display: none !important; }
 
 /* Stat pairs (AC/HP/MV, STR–CHA) as a responsive grid: six pairs on one line in
    a full-width pane, folding to two or three lines in a quarter-width one, so
@@ -1483,6 +1491,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     document.querySelectorAll('#gm-system-toggle').forEach(s => { s.value = SYS; });
     window.applyGmSystemToGenerators(document);
     if (typeof window.setGmMonsterSource === 'function') window.setGmMonsterSource(SYS === 'SD' ? 'sd' : 'dcc');
+    try { document.dispatchEvent(new CustomEvent('gm-system-change', { detail: SYS })); } catch (e) {}
   };
   function initSys() {
     document.querySelectorAll('#gm-system-toggle').forEach(s => { s.value = SYS; });
@@ -1985,7 +1994,7 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice">Dice Tray</option>
-        <option value="ai">System AI</option>
+        <option value="ai">Message</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-1-toolbar"></div>
     </div>
@@ -2005,7 +2014,7 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice">Dice Tray</option>
-        <option value="ai">System AI</option>
+        <option value="ai">Message</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-2-toolbar"></div>
     </div>
@@ -2024,7 +2033,7 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice">Dice Tray</option>
-        <option value="ai">System AI</option>
+        <option value="ai">Message</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-3-toolbar"></div>
     </div>
@@ -2044,7 +2053,7 @@ GMScenes.renderPins();
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
         <option value="dice" selected>Dice Tray</option>
-        <option value="ai">System AI</option>
+        <option value="ai">Message</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-4-toolbar"></div>
     </div>
@@ -3010,24 +3019,24 @@ GMScenes.renderPins();
 <template id="tpl-ai">
   <div class="tool-instance ai-tool" data-tool="ai">
     <div class="ai-scroll">
-      <!-- ── Message ── -->
+      <!-- ── Message (universal) ── -->
       <div class="ai-section">
         <div class="ai-sec-title">Message to the Roll Log</div>
         <div class="ai-row">
           <select class="ai-select ai-msg-type">
-            <option value="achievement">🏆 New Achievement</option>
-            <option value="system">💬 System Message</option>
+            <option value="system">💬 Message</option>
+            <option value="achievement" class="ai-dcc-only">🏆 New Achievement</option>
           </select>
-          <button class="btn small ghost ai-snark-btn" type="button" title="Roll a random snarky line">🎲 Snark</button>
+          <button class="btn small ghost ai-snark-btn ai-dcc-only" type="button" title="Roll a random snarky line">🎲 Snark</button>
         </div>
-        <input type="text" class="ai-input ai-msg-title" placeholder="Achievement name (e.g. Bloodbath)">
-        <textarea class="ai-input ai-msg-body" rows="3" placeholder="The System AI's snarky remark…"></textarea>
-        <button class="btn small primary ai-send-msg" type="button">Send to Players</button>
+        <input type="text" class="ai-input ai-msg-title" placeholder="Message header (optional)">
+        <textarea class="ai-input ai-msg-body" rows="3" placeholder="Your message to the players…"></textarea>
+        <button class="btn small primary ai-send-msg" type="button">Send Message</button>
         <div class="ai-status ai-msg-status"></div>
       </div>
 
-      <!-- ── Loot Box ── -->
-      <div class="ai-section">
+      <!-- ── DCC Loot Box (DCC only) ── -->
+      <div class="ai-section ai-dcc-only">
         <div class="ai-sec-title">Loot Box</div>
         <input type="text" class="ai-input ai-box-name" placeholder="Box name (e.g. Gold Loot Box)">
         <div class="ai-row">
@@ -3038,20 +3047,40 @@ GMScenes.renderPins();
           </select>
           <button class="btn small ghost ai-roll-tier" type="button" title="Fill the box from the DCC loot generator">🎲 Roll tier</button>
         </div>
-        <input type="text" class="ai-input ai-cat-search" placeholder="Search the item catalog to add…">
+        <div class="ai-cat-filters"></div>
+        <input type="text" class="ai-input ai-cat-search" placeholder="Search Loot &amp; Gear to add…">
         <div class="ai-cat-results"></div>
         <table class="ai-items"><tbody class="ai-items-body"></tbody></table>
-        <button class="btn small ghost ai-add-row" type="button">+ Add item</button>
+        <button class="btn small ghost ai-add-row" type="button">+ Add custom item</button>
         <div class="ai-row" style="margin-top:8px">
           <select class="ai-select ai-box-mode" title="Who can open this box">
             <option value="copies">Everyone gets a copy</option>
             <option value="named">Only a named player</option>
             <option value="claim">First to claim it</option>
           </select>
-          <input type="text" class="ai-input ai-box-to" placeholder="Player / character name" style="display:none;">
+          <select class="ai-select ai-box-to" title="Which player can open it" style="display:none;">
+            <option value="">— choose a player —</option>
+          </select>
+          <button class="btn small ghost ai-party-refresh" type="button" title="Refresh the party list" style="display:none;">↻</button>
         </div>
         <button class="btn small primary ai-send-box" type="button">Send Loot Box</button>
         <div class="ai-status ai-box-status"></div>
+      </div>
+
+      <!-- ── Shadowdark Found Loot (SD only) ── -->
+      <div class="ai-section ai-sd-only">
+        <div class="ai-sec-title">Found Loot</div>
+        <input type="text" class="ai-input ai-fl-name" placeholder="Where it's found (e.g. Chest by the altar)">
+        <div class="ai-row">
+          <button class="btn small ghost ai-fl-roll" type="button" title="Roll a random spread of found loot">🎲 Roll random loot</button>
+        </div>
+        <div class="ai-cat-filters ai-fl-filters"></div>
+        <input type="text" class="ai-input ai-fl-search" placeholder="Search Gear &amp; treasure to add…">
+        <div class="ai-cat-results ai-fl-results"></div>
+        <table class="ai-items"><tbody class="ai-fl-body"></tbody></table>
+        <button class="btn small ghost ai-fl-add" type="button">+ Add custom item</button>
+        <button class="btn small primary ai-fl-send" type="button">Send Found Loot</button>
+        <div class="ai-status ai-fl-status"></div>
       </div>
     </div>
   </div>
@@ -3061,6 +3090,7 @@ GMScenes.renderPins();
      and the Trackers monster picker. Generated from data/dcc/*.json. -->
 <script src="/tools-data/dcc-monsters.js"></script>
 <script src="/tools-data/dcc-items.js"></script>
+<script src="/tools-data/dcc-gear-sd.js"></script>
 <script src="/tools-data/dcc-loot.js"></script>
 <script src="/tools-data/dcc-spells.js"></script>
 <script src="/tools-data/dcc-skills.js"></script>
@@ -11330,65 +11360,15 @@ function init_ai(root) {
   const R = arr => arr[Math.floor(Math.random() * arr.length)];
   const pickN = (arr, n) => { const p = arr.slice(), out = []; while(out.length < n && p.length) out.push(p.splice(Math.floor(Math.random()*p.length),1)[0]); return out; };
   const canSend = () => (typeof GMCamp !== 'undefined' && GMCamp.get());
-
-  // ── Message composer ──
-  const msgType   = root.querySelector('.ai-msg-type');
-  const snarkBtn  = root.querySelector('.ai-snark-btn');
-  const msgTitle  = root.querySelector('.ai-msg-title');
-  const msgBody   = root.querySelector('.ai-msg-body');
-  const sendMsg   = root.querySelector('.ai-send-msg');
-  const msgStatus = root.querySelector('.ai-msg-status');
-
-  function syncMsgType() {
-    const ach = msgType.value === 'achievement';
-    msgTitle.placeholder = ach ? 'Achievement name (e.g. Bloodbath)' : 'Message header (e.g. SYSTEM ALERT)';
-    msgBody.placeholder  = ach ? 'The System AI’s snarky remark…' : 'The System AI’s message…';
-    sendMsg.textContent  = ach ? 'Send Achievement' : 'Send Message';
-  }
-  msgType.addEventListener('change', syncMsgType);
-  syncMsgType();
-
-  snarkBtn.addEventListener('click', () => {
-    const pool = (typeof DCC_PREP !== 'undefined' && Array.isArray(DCC_PREP.aiBlurbs)) ? DCC_PREP.aiBlurbs : [];
-    if(!pool.length) { setStatus(msgStatus, 'No snark table loaded.', 'err'); return; }
-    msgBody.value = R(pool);
-    msgBody.focus();
-  });
-
   function setStatus(el, msg, kind) {
+    if(!el) return;
     el.textContent = msg || '';
-    el.className = 'ai-status' + (msg ? (msg && kind === 'ok' ? ' ok' : kind === 'err' ? ' err' : '') : '');
+    el.className = 'ai-status' + (msg && kind === 'ok' ? ' ok' : msg && kind === 'err' ? ' err' : '');
     if(msg && kind === 'ok') { clearTimeout(el._t); el._t = setTimeout(() => { el.textContent = ''; el.className = 'ai-status'; }, 4000); }
   }
 
-  sendMsg.addEventListener('click', () => {
-    if(!canSend()) { setStatus(msgStatus, 'Link a campaign first (top bar) to broadcast.', 'err'); return; }
-    const ach = msgType.value === 'achievement';
-    const title = msgTitle.value.trim();
-    const body  = msgBody.value.trim();
-    if(!title && !body) { setStatus(msgStatus, 'Add a name or a message first.', 'err'); return; }
-    const payload = ach
-      ? { type: 'achievement', label: 'NEW ACHIEVEMENT', result: title || 'Achievement', detail: body }
-      : { type: 'system',      label: title || 'SYSTEM',   result: '',                     detail: body };
-    GMCamp.send(payload);
-    setStatus(msgStatus, (ach ? 'Achievement' : 'Message') + ' sent to players.', 'ok');
-    msgTitle.value = ''; msgBody.value = '';
-  });
-
-  // ── Loot box ──
-  const boxName   = root.querySelector('.ai-box-name');
-  const boxTier   = root.querySelector('.ai-box-tier');
-  const rollTier  = root.querySelector('.ai-roll-tier');
-  const catSearch = root.querySelector('.ai-cat-search');
-  const catResults= root.querySelector('.ai-cat-results');
-  const itemsBody = root.querySelector('.ai-items-body');
-  const addRow    = root.querySelector('.ai-add-row');
-  const boxMode   = root.querySelector('.ai-box-mode');
-  const boxTo     = root.querySelector('.ai-box-to');
-  const sendBox   = root.querySelector('.ai-send-box');
-  const boxStatus = root.querySelector('.ai-box-status');
-
-  function addItemRow(name, qty, notes) {
+  // ── Shared item-row helpers (both loot builders use the same table shape) ──
+  function makeRow(tbody, name, qty, notes) {
     const tr = document.createElement('tr');
     tr.innerHTML =
       '<td class="ai-it-name"><input type="text" class="ai-input" placeholder="Item"></td>' +
@@ -11398,12 +11378,12 @@ function init_ai(root) {
     const inp = tr.querySelectorAll('input');
     inp[0].value = name || ''; inp[1].value = (qty == null ? '' : String(qty)); inp[2].value = notes || '';
     tr.querySelector('.ai-it-del').addEventListener('click', () => tr.remove());
-    itemsBody.appendChild(tr);
+    tbody.appendChild(tr);
     return tr;
   }
-  function readItems() {
+  function readRows(tbody) {
     const out = [];
-    itemsBody.querySelectorAll('tr').forEach(tr => {
+    tbody.querySelectorAll('tr').forEach(tr => {
       const inp = tr.querySelectorAll('input');
       const item = (inp[0].value || '').trim();
       if(!item) return;
@@ -11414,89 +11394,209 @@ function init_ai(root) {
     return out;
   }
 
-  addRow.addEventListener('click', () => addItemRow('', '', ''));
+  // ── Generic catalog picker: browse by category chips, search, or add custom ──
+  function buildPicker(cfg) {
+    let filterKey = 'all';
+    cfg.filters.innerHTML = cfg.groups.map(g => '<button type="button" class="ai-chip' + (g.key === filterKey ? ' on' : '') + '" data-key="' + g.key + '">' + esc(g.label) + '</button>').join('');
+    cfg.filters.addEventListener('click', e => {
+      const b = e.target.closest('.ai-chip'); if(!b) return;
+      filterKey = b.dataset.key;
+      cfg.filters.querySelectorAll('.ai-chip').forEach(c => c.classList.toggle('on', c.dataset.key === filterKey));
+      render();
+    });
+    function render() {
+      const all = cfg.catalog();
+      const grp = cfg.groups.find(g => g.key === filterKey) || cfg.groups[0];
+      const q = (cfg.search.value || '').trim().toLowerCase();
+      const list = all.filter(it => {
+        if(grp.cats && grp.cats.indexOf(it.category) < 0) return false;
+        if(!q) return true;
+        return (it.name || '').toLowerCase().indexOf(q) >= 0 || (it.effect || '').toLowerCase().indexOf(q) >= 0;
+      });
+      cfg.results.classList.add('open');
+      cfg.results._hits = list;
+      let html = '';
+      cfg.groups.slice(1).forEach(bucket => {
+        const inB = list.map((it, i) => ({ it, i })).filter(x => bucket.cats.indexOf(x.it.category) >= 0);
+        if(!inB.length) return;
+        html += '<div class="ai-cat-grp">' + esc(bucket.label) + '</div>' + inB.slice(0, 60).map(({ it, i }) =>
+          '<div class="ai-cat-item" data-i="' + i + '"><span>' + esc(it.name) + '</span><span class="ai-cat-meta">' + esc([it.slot, it.tier].filter(Boolean).join(' · ')) + '</span></div>').join('');
+      });
+      if(!html) html = '<div class="ai-cat-empty">No catalog item' + (q ? ' matches “' + esc(q) + '”' : ' here') + '.</div>';
+      if(q) html += '<div class="ai-cat-item custom" data-custom="1">+ Add “' + esc(cfg.search.value.trim()) + '” as a custom item</div>';
+      cfg.results.innerHTML = html;
+    }
+    cfg.search.addEventListener('input', render);
+    cfg.search.addEventListener('focus', render);
+    cfg.results.addEventListener('click', e => {
+      const el = e.target.closest('.ai-cat-item'); if(!el) return;
+      if(el.dataset.custom) { const nm = cfg.search.value.trim(); if(!nm) return; cfg.onAdd(nm, ''); }
+      else { const it = (cfg.results._hits || [])[+el.dataset.i]; if(!it) return; cfg.onAdd(it.name, (it.slot ? it.slot + ' — ' : '') + (it.effect || '')); }
+      cfg.search.value = ''; cfg.results.classList.remove('open'); cfg.results.innerHTML = '';
+    });
+    return render;
+  }
+  // Close any open results list on an outside click.
+  root.addEventListener('mousedown', e => {
+    if(!e.target.closest('.ai-cat-results') && !e.target.closest('.ai-input') && !e.target.closest('.ai-cat-filters')) {
+      root.querySelectorAll('.ai-cat-results.open').forEach(r => r.classList.remove('open'));
+    }
+  });
 
-  // Local mirrors of the generator loot helpers (read the same DCC_* globals).
-  function lootTier(t) {
-    if(typeof DCC_LOOT === 'undefined') return null;
-    const tiers = DCC_LOOT.tiers || [];
-    return tiers.find(x => x.tier === t) || tiers[0] || null;
+  // ══ Message composer (universal) ══
+  const msgType   = root.querySelector('.ai-msg-type');
+  const snarkBtn  = root.querySelector('.ai-snark-btn');
+  const msgTitle  = root.querySelector('.ai-msg-title');
+  const msgBody   = root.querySelector('.ai-msg-body');
+  const sendMsg   = root.querySelector('.ai-send-msg');
+  const msgStatus = root.querySelector('.ai-msg-status');
+  function syncMsgType() {
+    const ach = msgType.value === 'achievement';
+    msgTitle.placeholder = ach ? 'Achievement name (e.g. Bloodbath)' : 'Message header (optional)';
+    msgBody.placeholder  = ach ? 'The System AI’s snarky remark…' : 'Your message to the players…';
+    sendMsg.textContent  = ach ? 'Send Achievement' : 'Send Message';
   }
-  function itemsOfTier(t, cats) {
-    if(typeof DCC_ITEMS === 'undefined') return [];
-    return DCC_ITEMS.filter(it => it.tier === t && cats.indexOf(it.category) >= 0);
-  }
-  function rollGold(formula) {
-    const f = String(formula || '');
-    if(/none|nuthin/i.test(f)) return 0;
-    const m = f.match(/(\d+)\s*d\s*(\d+)/i);
-    if(!m) return 0;
-    let total = 0; const num = +m[1], sides = +m[2];
-    for(let i = 0; i < num; i++) total += 1 + Math.floor(Math.random() * sides);
-    const mult = f.match(/[x×]\s*([\d,]+)/i);
-    if(mult) total *= (parseInt(mult[1].replace(/,/g, ''), 10) || 1);
-    return total;
-  }
+  msgType.addEventListener('change', syncMsgType);
+  snarkBtn.addEventListener('click', () => {
+    const pool = (typeof DCC_PREP !== 'undefined' && Array.isArray(DCC_PREP.aiBlurbs)) ? DCC_PREP.aiBlurbs : [];
+    if(!pool.length) { setStatus(msgStatus, 'No snark table loaded.', 'err'); return; }
+    msgBody.value = R(pool); msgBody.focus();
+  });
+  sendMsg.addEventListener('click', () => {
+    if(!canSend()) { setStatus(msgStatus, 'Link a campaign first (top bar) to broadcast.', 'err'); return; }
+    const ach = msgType.value === 'achievement';
+    const title = msgTitle.value.trim(), body = msgBody.value.trim();
+    if(!title && !body) { setStatus(msgStatus, 'Add a header or a message first.', 'err'); return; }
+    const payload = ach
+      ? { type: 'achievement', label: 'NEW ACHIEVEMENT', result: title || 'Achievement', detail: body }
+      : { type: 'system',      label: title || 'MESSAGE',   result: '',                     detail: body };
+    GMCamp.send(payload);
+    setStatus(msgStatus, (ach ? 'Achievement' : 'Message') + ' sent to players.', 'ok');
+    msgTitle.value = ''; msgBody.value = '';
+  });
 
+  // ══ DCC Loot Box ══
+  const DCC_GROUPS = [
+    { key:'all',label:'All',cats:null },{ key:'consumable',label:'Consumables',cats:['consumable'] },
+    { key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },
+    { key:'gear',label:'Gear',cats:['accessory','mundane','tool','material'] },{ key:'scroll',label:'Scrolls & Tomes',cats:['scroll','tome'] },
+  ];
+  const boxName=root.querySelector('.ai-box-name'), boxTier=root.querySelector('.ai-box-tier'), rollTier=root.querySelector('.ai-roll-tier');
+  const itemsBody=root.querySelector('.ai-items-body'), addRow=root.querySelector('.ai-add-row');
+  const boxMode=root.querySelector('.ai-box-mode'), boxTo=root.querySelector('.ai-box-to'), partyRefresh=root.querySelector('.ai-party-refresh');
+  const sendBox=root.querySelector('.ai-send-box'), boxStatus=root.querySelector('.ai-box-status');
+  addRow.addEventListener('click', () => makeRow(itemsBody, '', '', ''));
+  buildPicker({ filters:root.querySelector('.ai-cat-filters'), search:root.querySelector('.ai-cat-search'), results:root.querySelector('.ai-cat-results'), groups:DCC_GROUPS,
+    catalog: () => ((typeof DCC_ITEMS!=='undefined'?DCC_ITEMS:[]).concat(Array.isArray(window.__DCC_HB_ITEMS)?window.__DCC_HB_ITEMS:[])),
+    onAdd: (name, notes) => { makeRow(itemsBody, name, 1, notes); setStatus(boxStatus, 'Added “'+name+'”.', 'ok'); } });
+  function lootTier(t){ if(typeof DCC_LOOT==='undefined')return null; const tiers=DCC_LOOT.tiers||[]; return tiers.find(x=>x.tier===t)||tiers[0]||null; }
+  function itemsOfTier(t,cats){ if(typeof DCC_ITEMS==='undefined')return []; return DCC_ITEMS.filter(it=>it.tier===t&&cats.indexOf(it.category)>=0); }
+  function rollGold(formula){ const f=String(formula||''); if(/none|nuthin/i.test(f))return 0; const m=f.match(/(\d+)\s*d\s*(\d+)/i); if(!m)return 0; let total=0; const num=+m[1],sides=+m[2]; for(let i=0;i<num;i++) total+=1+Math.floor(Math.random()*sides); const mult=f.match(/[x×]\s*([\d,]+)/i); if(mult) total*=(parseInt(mult[1].replace(/,/g,''),10)||1); return total; }
   rollTier.addEventListener('click', () => {
-    const key = boxTier.value;
-    const td = lootTier(key);
-    if(!td) { setStatus(boxStatus, 'DCC loot data didn’t load — open from the app.', 'err'); return; }
-    itemsBody.innerHTML = '';
-    const gold = rollGold(td.gold);
-    if(gold) addItemRow(gold.toLocaleString('en') + ' gold', '', key + ' loot box');
-    const consumables = itemsOfTier(td.tier, ['consumable','scroll','tome','material','mundane']);
-    const gear = itemsOfTier(td.tier, ['weapon','armor','accessory']);
-    pickN(consumables, 1 + (Math.random() < 0.5 ? 1 : 0)).forEach(it => addItemRow(it.name, 1, it.effect || ''));
-    pickN(gear, td.gearRolls || 0).forEach(it => addItemRow(it.name, 1, (it.slot ? it.slot + ' — ' : '') + (it.effect || '')));
-    if(!boxName.value.trim()) boxName.value = key + ' Loot Box';
-    setStatus(boxStatus, 'Rolled a ' + key + ' box — tweak it, then send.', 'ok');
+    const key=boxTier.value, td=lootTier(key);
+    if(!td){ setStatus(boxStatus,'DCC loot data didn’t load — open from the app.','err'); return; }
+    itemsBody.innerHTML='';
+    const gold=rollGold(td.gold);
+    if(gold) makeRow(itemsBody, gold.toLocaleString('en')+' gold','',key+' loot box');
+    const consumables=itemsOfTier(td.tier,['consumable','scroll','tome','material','mundane']);
+    const gear=itemsOfTier(td.tier,['weapon','armor','accessory']);
+    pickN(consumables,1+(Math.random()<0.5?1:0)).forEach(it=>makeRow(itemsBody,it.name,1,it.effect||''));
+    pickN(gear,td.gearRolls||0).forEach(it=>makeRow(itemsBody,it.name,1,(it.slot?it.slot+' — ':'')+(it.effect||'')));
+    if(!boxName.value.trim()) boxName.value=key+' Loot Box';
+    setStatus(boxStatus,'Rolled a '+key+' box — tweak it, then send.','ok');
   });
-
-  // Catalog search — filter DCC_ITEMS by name, click to add a row.
-  function renderCat() {
-    const q = (catSearch.value || '').trim().toLowerCase();
-    if(!q) { catResults.className = 'ai-cat-results'; catResults.innerHTML = ''; return; }
-    const all = (typeof DCC_ITEMS !== 'undefined') ? DCC_ITEMS : [];
-    const hits = all.filter(it => (it.name || '').toLowerCase().indexOf(q) >= 0).slice(0, 40);
-    catResults.className = 'ai-cat-results open';
-    if(!hits.length) { catResults.innerHTML = '<div class="ai-cat-empty">No items match “' + esc(q) + '”.</div>'; return; }
-    catResults.innerHTML = hits.map((it, i) =>
-      '<div class="ai-cat-item" data-i="' + i + '"><span>' + esc(it.name) + '</span>' +
-      '<span class="ai-cat-tier">' + esc(it.tier || '') + '</span></div>').join('');
-    catResults._hits = hits;
+  // Party dropdown — the campaign roster (same source as the Party tool).
+  function partyName(entry){ const d=(entry&&entry.sheet&&typeof entry.sheet==='object')?entry.sheet:entry; if(!d)return ''; if(d.header&&d.header['f-name'])return String(d.header['f-name']).trim(); return String(d.name||(entry&&entry.name)||'').trim(); }
+  let partyLoaded=false;
+  function fetchParty(force){
+    const camp=(typeof GMCamp!=='undefined')?GMCamp.get():null;
+    if(!camp||!camp.id){ setParty([],'Link a campaign to load the party.'); return; }
+    if(partyLoaded&&!force) return;
+    fetch('/api/campaigns/'+camp.id+'/characters',{credentials:'same-origin'})
+      .then(r=>r&&r.ok?r.text():null)
+      .then(text=>{ if(text==null){setParty([],'Could not load the party.');return;} let data;try{data=JSON.parse(text);}catch(e){data=null;}
+        const list=Array.isArray(data)?data:(data&&data.characters)||[];
+        const names=list.map(partyName).filter(Boolean).filter((n,i,a)=>a.findIndex(x=>x.toLowerCase()===n.toLowerCase())===i).sort((a,b)=>a.localeCompare(b,'en'));
+        partyLoaded=true; setParty(names, names.length?'':'No one has linked a character to this campaign yet.'); })
+      .catch(()=>setParty([],'Could not load the party.'));
   }
-  catSearch.addEventListener('input', renderCat);
-  catResults.addEventListener('click', e => {
-    const el = e.target.closest('.ai-cat-item');
-    if(!el || !catResults._hits) return;
-    const it = catResults._hits[+el.dataset.i];
-    if(!it) return;
-    addItemRow(it.name, 1, (it.slot ? it.slot + ' — ' : '') + (it.effect || ''));
-    catSearch.value = ''; catResults.className = 'ai-cat-results'; catResults.innerHTML = '';
-    setStatus(boxStatus, 'Added “' + it.name + '”.', 'ok');
-  });
-
-  function syncMode() { boxTo.style.display = (boxMode.value === 'named') ? '' : 'none'; }
-  boxMode.addEventListener('change', syncMode);
-  syncMode();
-
+  function setParty(names, emptyMsg){
+    const keep=boxTo.value;
+    boxTo.innerHTML='<option value="">— choose a player —</option>'+names.map(n=>'<option value="'+esc(n).replace(/"/g,'&quot;')+'">'+esc(n)+'</option>').join('')+(names.length?'':'<option value="" disabled>'+esc(emptyMsg||'No players')+'</option>');
+    if(keep&&names.some(n=>n===keep)) boxTo.value=keep;
+    if(emptyMsg&&!names.length) setStatus(boxStatus,emptyMsg,'');
+  }
+  partyRefresh.addEventListener('click', ()=>fetchParty(true));
+  function syncMode(){ const named=boxMode.value==='named'; boxTo.style.display=named?'':'none'; partyRefresh.style.display=named?'':'none'; if(named) fetchParty(false); }
+  boxMode.addEventListener('change', syncMode); syncMode();
   sendBox.addEventListener('click', () => {
-    if(!canSend()) { setStatus(boxStatus, 'Link a campaign first (top bar) to send loot.', 'err'); return; }
-    const items = readItems().slice(0, 12);   // keep the JSON detail under the 2000-char cap
-    if(!items.length) { setStatus(boxStatus, 'Add at least one item to the box.', 'err'); return; }
-    const mode = boxMode.value;
-    const to = (mode === 'named') ? boxTo.value.trim() : '';
-    if(mode === 'named' && !to) { setStatus(boxStatus, 'Name the player who can open it.', 'err'); return; }
-    const name = boxName.value.trim() || 'Loot Box';
-    const boxId = 'lb-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    const detail = JSON.stringify({ boxId, mode, to, items });
-    if(detail.length > 2000) { setStatus(boxStatus, 'Too many items — remove a few and resend.', 'err'); return; }
-    GMCamp.send({ type: 'lootbox', label: 'LOOT BOX', result: name, detail });
-    const who = mode === 'named' ? ('for ' + to) : mode === 'claim' ? '(first to claim)' : '(a copy for everyone)';
-    setStatus(boxStatus, 'Sent “' + name + '” ' + who + '.', 'ok');
-    itemsBody.innerHTML = ''; boxName.value = ''; if(mode === 'named') boxTo.value = '';
+    if(!canSend()){ setStatus(boxStatus,'Link a campaign first (top bar) to send loot.','err'); return; }
+    const items=readRows(itemsBody).slice(0,12);
+    if(!items.length){ setStatus(boxStatus,'Add at least one item to the box.','err'); return; }
+    const mode=boxMode.value, to=(mode==='named')?boxTo.value.trim():'';
+    if(mode==='named'&&!to){ setStatus(boxStatus,'Choose the player who can open it.','err'); return; }
+    const name=boxName.value.trim()||'Loot Box';
+    const boxId='lb-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    const detail=JSON.stringify({boxId,mode,to,items});
+    if(detail.length>2000){ setStatus(boxStatus,'Too many items — remove a few and resend.','err'); return; }
+    GMCamp.send({type:'lootbox',label:'LOOT BOX',result:name,detail});
+    const who=mode==='named'?('for '+to):mode==='claim'?'(first to claim)':'(a copy for everyone)';
+    setStatus(boxStatus,'Sent “'+name+'” '+who+'.','ok');
+    itemsBody.innerHTML=''; boxName.value=''; if(mode==='named') boxTo.value='';
   });
+
+  // ══ Shadowdark Found Loot ══ (visible drop, each item claimed first-come)
+  const SD_GROUPS = [
+    { key:'all',label:'All',cats:null },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'weapon',label:'Weapons',cats:['weapon'] },
+    { key:'armor',label:'Armor',cats:['armor'] },{ key:'magic',label:'Magic',cats:['magic'] },{ key:'potion',label:'Potions',cats:['potion'] },
+    { key:'scroll',label:'Scrolls',cats:['scroll'] },{ key:'gem',label:'Gems',cats:['gem'] },
+  ];
+  function sdCatalog(){
+    const out=[];
+    const gear=(typeof DCC_GEAR_SD!=='undefined')?DCC_GEAR_SD:[];
+    gear.forEach(it=>{ const c=it.category; const cat=(c==='weapon')?'weapon':(c==='armor'||c==='shield')?'armor':'gear'; out.push({name:it.name,category:cat,effect:it.effect||'',tier:''}); });
+    if(typeof MAGIC_ITEM_POOLS!=='undefined') Object.keys(MAGIC_ITEM_POOLS).forEach(k=>{ const cat=(k==='Potion')?'potion':(k==='Scroll')?'scroll':'magic'; (MAGIC_ITEM_POOLS[k]||[]).forEach(it=>out.push({name:it.name,category:cat,effect:it.desc||''})); });
+    if(typeof GEMS!=='undefined') GEMS.forEach(g=>out.push({name:g.name,category:'gem',effect:'Value: '+g.value}));
+    return out;
+  }
+  const flName=root.querySelector('.ai-fl-name'), flRoll=root.querySelector('.ai-fl-roll');
+  const flBody=root.querySelector('.ai-fl-body'), flAdd=root.querySelector('.ai-fl-add');
+  const flSend=root.querySelector('.ai-fl-send'), flStatus=root.querySelector('.ai-fl-status');
+  flAdd.addEventListener('click', ()=>makeRow(flBody,'','',''));
+  buildPicker({ filters:root.querySelector('.ai-fl-filters'), search:root.querySelector('.ai-fl-search'), results:root.querySelector('.ai-fl-results'), groups:SD_GROUPS,
+    catalog: sdCatalog, onAdd:(name,notes)=>{ makeRow(flBody,name,1,notes); setStatus(flStatus,'Added “'+name+'”.','ok'); } });
+  flRoll.addEventListener('click', ()=>{
+    const cat=sdCatalog();
+    if(!cat.length){ setStatus(flStatus,'Shadowdark gear/treasure didn’t load — open from the app.','err'); return; }
+    flBody.innerHTML='';
+    let coins=0; for(let i=0;i<3;i++) coins+=1+Math.floor(Math.random()*6); coins*=(5+Math.floor(Math.random()*20));
+    makeRow(flBody, coins+' gp','','coins');
+    pickN(cat, 2+Math.floor(Math.random()*3)).forEach(it=>makeRow(flBody,it.name,1,it.effect||''));
+    setStatus(flStatus,'Rolled a random drop — tweak it, then send.','ok');
+  });
+  flSend.addEventListener('click', ()=>{
+    if(!canSend()){ setStatus(flStatus,'Link a campaign first (top bar) to send loot.','err'); return; }
+    const items=readRows(flBody).slice(0,14);
+    if(!items.length){ setStatus(flStatus,'Add at least one item to the drop.','err'); return; }
+    const name=flName.value.trim();
+    const dropId='fl-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    const detail=JSON.stringify({dropId,items});
+    if(detail.length>2000){ setStatus(flStatus,'Too many items — remove a few and resend.','err'); return; }
+    GMCamp.send({type:'foundloot',label:'FOUND LOOT',result:name||'Found Loot',detail});
+    setStatus(flStatus,'Sent '+items.length+' item'+(items.length===1?'':'s')+' for the party to claim.','ok');
+    flBody.innerHTML=''; flName.value='';
+  });
+
+  // ── System awareness: show DCC-only vs SD-only pieces per the master toggle ──
+  function applySys(){
+    const dcc = (typeof window.GM_SYSTEM==='string'?window.GM_SYSTEM:'DCC')!=='SD';
+    root.querySelectorAll('.ai-dcc-only').forEach(el=>{ el.hidden=!dcc; });
+    root.querySelectorAll('.ai-sd-only').forEach(el=>{ el.hidden=dcc; });
+    if(!dcc && msgType.value==='achievement') msgType.value='system';
+    syncMsgType();
+  }
+  applySys();
+  document.addEventListener('gm-system-change', applySys);
 }
 
 window.init_ai = init_ai;
