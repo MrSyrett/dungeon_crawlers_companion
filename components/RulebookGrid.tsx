@@ -13,7 +13,7 @@ import type { RulebookSystem } from "@/lib/rulebooks";
 export type RulebookListItem = { file: string; title: string; system: RulebookSystem };
 
 /**
- * The /rules book list, filtered by the Shadowdark / Crawler Carl toggle on the
+ * The /rules book list, filtered by the system toggle on the
  * dashboard (shared localStorage store — the toggle itself only lives there).
  * A book tagged BOTH shows on either tab. This only hides cards — access
  * control happened on the server, so `books` already contains only what this
@@ -24,7 +24,8 @@ export default function RulebookGrid({ books }: { books: RulebookListItem[] }) {
   const shown = books.filter((b) => b.system === "BOTH" || b.system === active);
   const hidden = books.length - shown.length;
   const activeName = SYSTEMS.find((s) => s.key === active)?.name ?? active;
-  const otherName = SYSTEMS.find((s) => s.key !== active)?.name ?? "the other system";
+  const others = SYSTEMS.filter((s) => s.key !== active).map((s) => s.name);
+  const otherName = others.length === 1 ? others[0] : "another system's";
 
   return (
     <>
@@ -34,8 +35,8 @@ export default function RulebookGrid({ books }: { books: RulebookListItem[] }) {
             No {activeName} rulebooks
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">
-            None of your rulebooks are tagged for {activeName}. Switch systems on the main page to
-            see the {otherName} shelf.
+            None of your rulebooks are tagged for {activeName}. Switch systems above to see the
+            other shelves.
           </p>
         </div>
       ) : (
@@ -61,7 +62,7 @@ export default function RulebookGrid({ books }: { books: RulebookListItem[] }) {
 
       {hidden > 0 ? (
         <p className="mt-4 text-right text-[11px] text-[var(--muted)]">
-          {hidden} more on the {otherName} shelf
+          {hidden} more on {otherName === "another system's" ? "other shelves" : `the ${otherName} shelf`}
         </p>
       ) : null}
     </>

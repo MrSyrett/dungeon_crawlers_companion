@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { CHARACTER_TOOLS, ownerForToken, tokenFromRequest } from "@/lib/vtt";
+import { CHARACTER_TOOL_IDS, isToolId } from "@/lib/tools";
 
 export const dynamic = "force-dynamic";
 
@@ -30,11 +31,11 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (typeof body.title === "string" && body.title.trim()) {
     update.title = body.title.trim().slice(0, 120);
   }
-  // Keep the indexed campaign link in sync on the VTT save path too (both
-  // sd-character and dcc-character sheets carry one; see /api/documents/[id]).
+  // Keep the indexed campaign link in sync on the VTT save path too (every
+  // character sheet tool carries one; see /api/documents/[id]).
   // Only a still-live campaign id is stored, so a stale link left in the sheet
   // JSON (its campaign was deleted) can't trip the foreign key — it becomes null.
-  if (update.data && (doc.tool === "sd-character" || doc.tool === "dcc-character")) {
+  if (update.data && isToolId(doc.tool) && CHARACTER_TOOL_IDS.includes(doc.tool)) {
     update.linkedCampaignId = await liveCampaignId(extractLinkedCampaignId(update.data));
   }
   if (!Object.keys(update).length) return Response.json({ ok: true });
@@ -64,9 +65,10 @@ function extractLinkedCampaignId(data: object): string | null {
       const id = sheet?._sheet?.campaign?.id;
       return typeof id === "string" && id ? id : null;
     }
-    // DCC sheet: campaign lives at the top level (campaign.id)
-    if (typeof blob.dcc_sheet === "string") {
-      const sheet = JSON.parse(blob.dcc_sheet) as {
+    // DCC and ACE sheets: campaign lives at the top level (campaign.id)
+    for (const key of ["dcc_sheet", "ace_sheet"]) {
+      if (typeof blob[key] !== "string") continue;
+      const sheet = JSON.parse(blob[key] as string) as {
         campaign?: { id?: unknown } | null;
       };
       const id = sheet?.campaign?.id;

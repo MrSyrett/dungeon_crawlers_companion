@@ -2,6 +2,7 @@ import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { prisma } from "@/lib/prisma";
 import { isAdminEmail } from "@/lib/admin";
+import { isSystemKey, type SystemKey } from "@/components/systemStore";
 
 // Rulebooks live OUTSIDE public/ so Next never serves them statically.
 export const RULEBOOK_DIR = path.join(process.cwd(), "protected", "rulebooks");
@@ -9,14 +10,15 @@ export const RULEBOOK_DIR = path.join(process.cwd(), "protected", "rulebooks");
 export type RbUser = { id: string; email: string } | null;
 
 // Which game system's Rulebooks list shows a file. Display-only — it hides
-// books behind the dashboard's Shadowdark/DCC toggle, it never gates access.
-export type RulebookSystem = "SD" | "DCC" | "BOTH";
+// books behind the dashboard's system toggle, it never gates access. "BOTH"
+// is the historical name for "every system" and is kept for stored rows.
+export type RulebookSystem = SystemKey | "BOTH";
 
 export type RulebookInfo = { file: string; system: RulebookSystem };
 
 // Anything unexpected in the DB column degrades to BOTH (never hides a book).
 export function normalizeSystem(value: string | undefined | null): RulebookSystem {
-  return value === "SD" || value === "DCC" ? value : "BOTH";
+  return isSystemKey(value) ? value : "BOTH";
 }
 
 // "shadowdark-core-rules.pdf" -> "Shadowdark Core Rules"

@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
+import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 import { MONSTER_TYPES } from "@/lib/data/monster-types";
 import { TALENT_TARGET_KEYS } from "@/lib/effects";
 import {
@@ -133,7 +134,7 @@ export const userCampaigns = cache(async function userCampaigns(
   // column (kept in sync on every save), so the linked campaign ids are a plain
   // index scan — no full-table JSON scan, no per-sheet parse.
   const linkedRows = await prisma.document.findMany({
-    where: { userId, tool: { in: ["sd-character", "dcc-character"] }, linkedCampaignId: { not: null } },
+    where: { userId, tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: { not: null } },
     select: { linkedCampaignId: true },
     distinct: ["linkedCampaignId"],
   });
@@ -160,10 +161,10 @@ async function participatesInCampaign(userId: string, campaignId: string): Promi
   const owned = await prisma.campaign.count({ where: { id: campaignId, ownerId: userId } });
   if (owned > 0) return true;
 
-  // Indexed membership check: does this user have an sd-character linked to the
+  // Indexed membership check: does this user have a character sheet linked to the
   // campaign? The link is its own column now, so this is a counted index scan.
   const linked = await prisma.document.count({
-    where: { userId, tool: { in: ["sd-character", "dcc-character"] }, linkedCampaignId: campaignId },
+    where: { userId, tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: campaignId },
   });
   return linked > 0;
 }

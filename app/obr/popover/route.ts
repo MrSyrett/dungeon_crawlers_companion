@@ -57,6 +57,7 @@ const PAGE = String.raw`<!doctype html>
   .sheet-meta { display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
   .sd { color: var(--gold); }
   .dcc { color: var(--red); }
+  .ace { color: #3aa8e0; }
   .group { display: flex; flex-direction: column; gap: 7px; }
   .group + .group { margin-top: 14px; }
   .group-head {
@@ -65,6 +66,7 @@ const PAGE = String.raw`<!doctype html>
   }
   .group-head.sd { color: var(--gold); }
   .group-head.dcc { color: var(--red); }
+  .group-head.ace { color: #3aa8e0; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
@@ -244,7 +246,8 @@ const PAGE = String.raw`<!doctype html>
           // read as one undifferentiated list.
           var GROUPS = [
             { key: "SD", name: "Shadowdark", cls: "sd" },
-            { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" }
+            { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" },
+            { key: "ACE", name: "ACE!", cls: "ace" }
           ];
           var seen = {};
           var html = "";

@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { CHARACTER_TOOL_IDS, isToolId } from "@/lib/tools";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -38,13 +39,14 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
   }
 
   // Keep the indexed campaign link in sync with the sheet's own record of it
-  // (SD: data.sd_sheet → _sheet.campaign.id; DCC: data.dcc_sheet → campaign.id).
-  // Both character systems carry this; for anything else it stays null. Writing
+  // (SD: data.sd_sheet → _sheet.campaign.id; DCC: data.dcc_sheet → campaign.id;
+  // ACE: data.ace_sheet → campaign.id). Every character system carries this;
+  // for anything else it stays null. Writing
   // it here means the column tracks every save without the client shim needing to
   // know about it. We only store an id that still points at a live campaign — a
   // sheet can hold a stale link in its JSON (e.g. the campaign was since deleted),
   // and writing that would trip the foreign key, so an orphaned reference is null.
-  if (update.data && (existing.tool === "sd-character" || existing.tool === "dcc-character")) {
+  if (update.data && isToolId(existing.tool) && CHARACTER_TOOL_IDS.includes(existing.tool)) {
     update.linkedCampaignId = await liveCampaignId(extractLinkedCampaignId(update.data));
   }
 
@@ -72,6 +74,7 @@ export async function DELETE(_req: NextRequest, ctx: Ctx) {
 // Pulls a display title out of a saved payload.
 //   SD sheets    { sd_sheet:  "<json>" } → top-level `name`
 //   DCC sheets   { dcc_sheet: "<json>" } → `header['f-name']`
+//   ACE sheets   { ace_sheet: "<json>" } → top-level `name`
 //   Prep builders{ sd_session | dcc_session: "<json>" } → top-level `title`
 function extractDocTitle(tool: string, data: object): string | null {
   try {
@@ -85,6 +88,10 @@ function extractDocTitle(tool: string, data: object): string | null {
       const sheet = JSON.parse(blob.dcc_sheet) as { header?: Record<string, unknown> };
       const name = sheet.header?.["f-name"];
       if (typeof name === "string" && name.trim()) return name.trim();
+    }
+    if (tool === "ace-character" && typeof blob.ace_sheet === "string") {
+      const sheet = JSON.parse(blob.ace_sheet) as { name?: unknown };
+      if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
     }
 
     const sessionKey = tool === "sd-session" ? "sd_session" : tool === "dcc-session" ? "dcc_session" : null;
@@ -113,9 +120,10 @@ function extractLinkedCampaignId(data: object): string | null {
       const id = sheet?._sheet?.campaign?.id;
       return typeof id === "string" && id ? id : null;
     }
-    // DCC sheet: campaign lives at the top level (campaign.id)
-    if (typeof blob.dcc_sheet === "string") {
-      const sheet = JSON.parse(blob.dcc_sheet) as {
+    // DCC and ACE sheets: campaign lives at the top level (campaign.id)
+    for (const key of ["dcc_sheet", "ace_sheet"]) {
+      if (typeof blob[key] !== "string") continue;
+      const sheet = JSON.parse(blob[key] as string) as {
         campaign?: { id?: unknown } | null;
       };
       const id = sheet?.campaign?.id;

@@ -1,15 +1,30 @@
-// Shared client-side store for the selected game system (Shadowdark / DCC).
-// Kept in localStorage and surfaced via useSyncExternalStore so the header
-// toggle and the dashboard tab panels stay in step — including across browser
-// tabs via the storage event. Both SystemToggle and SystemTabs read this one
-// store, so the toggle can live in the header while the panels live below.
+// Shared client-side store for the selected game system (Shadowdark / Dungeon
+// Crawler Carl / ACE!). Kept in localStorage and surfaced via
+// useSyncExternalStore so the header toggle and the dashboard tab panels stay
+// in step — including across browser tabs via the storage event. SystemToggle,
+// SystemTabs and RulebookGrid all read this one store.
+//
+// Adding a system: add its key to SystemKey and a row to SYSTEMS, register its
+// tools in lib/tools.ts, give the dashboard a panel for it, and extend the
+// admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC";
+export type SystemKey = "SD" | "DCC" | "ACE";
 
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
   { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--red)" },
+  { key: "ACE", name: "ACE!", short: "ACE", accent: "var(--ace)" },
 ];
+
+export const DEFAULT_SYSTEM: SystemKey = "SD";
+
+export function isSystemKey(value: unknown): value is SystemKey {
+  return SYSTEMS.some((s) => s.key === value);
+}
+
+export function systemName(key: SystemKey): string {
+  return SYSTEMS.find((s) => s.key === key)?.name ?? key;
+}
 
 const STORAGE_KEY = "dcw_system";
 const listeners = new Set<() => void>();
@@ -25,16 +40,17 @@ export function subscribeSystem(cb: () => void): () => void {
 
 export function getSystemSnapshot(): SystemKey {
   try {
-    return window.localStorage.getItem(STORAGE_KEY) === "DCC" ? "DCC" : "SD";
+    const v = window.localStorage.getItem(STORAGE_KEY);
+    return isSystemKey(v) ? v : DEFAULT_SYSTEM;
   } catch {
-    return "SD"; // private mode / storage disabled
+    return DEFAULT_SYSTEM; // private mode / storage disabled
   }
 }
 
 // The server always renders Shadowdark; the client swaps to the saved choice
 // after hydration.
 export function getSystemServerSnapshot(): SystemKey {
-  return "SD";
+  return DEFAULT_SYSTEM;
 }
 
 export function setSystem(key: SystemKey): void {

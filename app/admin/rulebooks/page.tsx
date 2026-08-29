@@ -7,6 +7,7 @@ import { listRulebookFiles, prettyName, normalizeSystem } from "@/lib/rulebooks"
 import type { RulebookSystem } from "@/lib/rulebooks";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { AdminNav } from "@/components/AdminNav";
+import { SYSTEMS } from "@/components/systemStore";
 import {
   saveRulebookSettings,
   grantRulebookAccess,
@@ -17,9 +18,8 @@ export const dynamic = "force-dynamic";
 
 // Matches the dashboard's system toggle (components/systemStore.ts).
 const SYSTEM_LABEL: Record<RulebookSystem, string> = {
-  SD: "Shadowdark",
-  DCC: "Dungeon Crawler Carl",
-  BOTH: "Both systems",
+  ...(Object.fromEntries(SYSTEMS.map((s) => [s.key, s.name])) as Record<RulebookSystem, string>),
+  BOTH: "All systems",
 };
 
 export default async function AdminRulebooksPage({
@@ -138,9 +138,12 @@ export default async function AdminRulebooksPage({
                       defaultValue={system}
                       className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-2 py-1.5 text-[13px] text-[var(--text)] outline-none focus:border-[var(--gold)]"
                     >
-                      <option value="BOTH">Both systems</option>
-                      <option value="SD">Shadowdark</option>
-                      <option value="DCC">Dungeon Crawler Carl</option>
+                      <option value="BOTH">All systems</option>
+                      {SYSTEMS.map((s) => (
+                        <option key={s.key} value={s.key}>
+                          {s.name}
+                        </option>
+                      ))}
                     </select>
                   </label>
                   <button className="ml-auto shrink-0 rounded border border-[var(--border)] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)]">

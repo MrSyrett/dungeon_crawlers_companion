@@ -10,6 +10,7 @@ import { createDocument, deleteDocument } from "@/app/actions/documents";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import SystemTabs from "@/components/SystemTabs";
 import SystemToggle from "@/components/SystemToggle";
+import { SYSTEMS, type SystemKey } from "@/components/systemStore";
 
 // Toolbar links, in the order they appear beside the system toggle.
 // These work for either ruleset, so they show on both tabs. On the Shadowdark
@@ -49,6 +50,24 @@ const DCC_REFERENCE: { href: string; label: string }[] = [
   { href: "/dcc/bestiary", label: "Bestiary" },
   { href: "/dcc/options", label: "Options" },
 ];
+
+// ACE! reference pages — they read Awfully Cheerful Engine! data and lead the
+// toolbar on the ACE tab only.
+const ACE_REFERENCE: { href: string; label: string }[] = [
+  { href: "/ace/roles", label: "Roles" },
+  { href: "/ace/focuses", label: "Focuses" },
+  { href: "/ace/traits", label: "Traits" },
+  { href: "/ace/gear", label: "Gear" },
+  { href: "/ace/extras", label: "Extras" },
+  { href: "/ace/settings", label: "Settings" },
+];
+
+// Per-system reference links, keyed the same way the toggle is.
+const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
+  SD: SD_REFERENCE,
+  DCC: DCC_REFERENCE,
+  ACE: ACE_REFERENCE,
+};
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {
   return (
@@ -226,21 +245,24 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      {/* One system at a time; Shadowdark by default. */}
+      {/* One system at a time; Shadowdark by default. Each system gets the
+          same two columns (its character sheets and its session-prep docs),
+          filtered by the tool registry's system tag, plus its own reference
+          links ahead of the shared toolbar links. */}
       <SystemTabs
-        /* Shared tools on both tabs; the Shadowdark reference pages lead them
-           on the SD tab and are dropped on the DCC tab. */
         nav={<NavLinks links={SHARED_NAV} />}
-        sdNav={<NavLinks links={SD_REFERENCE} />}
-        dccNav={<NavLinks links={DCC_REFERENCE} />}
-        shadowdark={
-          <>
-            <div className="grid gap-10 md:grid-cols-2">
+        systemNav={Object.fromEntries(
+          SYSTEMS.map((s) => [s.key, <NavLinks key={s.key} links={SYSTEM_REFERENCE[s.key]} />]),
+        )}
+        panels={Object.fromEntries(
+          SYSTEMS.map((s) => [
+            s.key,
+            <div key={s.key} className="grid gap-10 md:grid-cols-2">
               <section>
                 <ColumnHeading>Character Sheets</ColumnHeading>
                 <div className="flex flex-col gap-6">
                   {charSheetIds
-                    .filter((id) => TOOLS[id].system === "SD")
+                    .filter((id) => TOOLS[id].system === s.key)
                     .map((id) => (
                       <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
                     ))}
@@ -251,40 +273,20 @@ export default async function DashboardPage() {
                 <ColumnHeading>Session Prep</ColumnHeading>
                 <div className="flex flex-col gap-6">
                   {sessionPrepIds
-                    .filter((id) => TOOLS[id].system === "SD")
+                    .filter((id) => TOOLS[id].system === s.key)
                     .map((id) => (
                       <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
                     ))}
+                  {sessionPrepIds.every((id) => TOOLS[id].system !== s.key) ? (
+                    <p className="text-sm text-[var(--muted)]">
+                      No session-prep tool for {s.name} yet.
+                    </p>
+                  ) : null}
                 </div>
               </section>
-            </div>
-          </>
-        }
-        dcc={
-          <div className="grid gap-10 md:grid-cols-2">
-            <section>
-              <ColumnHeading>Character Sheets</ColumnHeading>
-              <div className="flex flex-col gap-6">
-                {charSheetIds
-                  .filter((id) => TOOLS[id].system === "DCC")
-                  .map((id) => (
-                    <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
-                  ))}
-              </div>
-            </section>
-
-            <section>
-              <ColumnHeading>Session Prep</ColumnHeading>
-              <div className="flex flex-col gap-6">
-                {sessionPrepIds
-                  .filter((id) => TOOLS[id].system === "DCC")
-                  .map((id) => (
-                    <DocList key={id} id={id} docs={byTool.get(id) ?? []} />
-                  ))}
-              </div>
-            </section>
-          </div>
-        }
+            </div>,
+          ]),
+        )}
       />
     </div>
   );

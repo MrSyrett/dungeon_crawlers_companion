@@ -8,14 +8,15 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character";
 
 export type ToolKind = "character" | "session";
 
 export interface ToolDef {
   id: ToolId;
-  system: "DCC" | "SD";
+  system: SystemKey;
   systemName: string;
   kind: ToolKind;
   label: string;
@@ -60,9 +61,29 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "sd_session_prep_builder.html",
     keys: ["sd_session"],
   },
+  "ace-character": {
+    id: "ace-character",
+    system: "ACE",
+    systemName: "ACE!",
+    kind: "character",
+    label: "Hero ID Card",
+    file: "ace_character_sheet.html",
+    keys: ["ace_sheet"],
+  },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character"];
+
+// Every character-sheet tool id — the set the campaign roster, VTT token access
+// and the documents API treat as "a sheet" (they all carry a campaign link).
+export const CHARACTER_TOOL_IDS: ToolId[] = TOOL_ORDER.filter((id) => TOOLS[id].kind === "character");
+
+// The localStorage/blob key a character tool keeps its sheet JSON under
+// (sd_sheet / dcc_sheet / ace_sheet). Null for non-character tools.
+export function sheetKeyFor(tool: string): string | null {
+  if (!isToolId(tool) || TOOLS[tool].kind !== "character") return null;
+  return TOOLS[tool].keys[0] ?? null;
+}
 
 export function isToolId(value: string): value is ToolId {
   return Object.prototype.hasOwnProperty.call(TOOLS, value);

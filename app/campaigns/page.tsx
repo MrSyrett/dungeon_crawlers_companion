@@ -7,6 +7,7 @@ import { makeCode } from "@/lib/campaign-code";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import CopyCodeButton from "@/components/CopyCodeButton";
 import { deleteCampaign, renameCampaign, setCampaignVttUrl } from "@/app/actions/campaigns";
+import { CHARACTER_TOOL_IDS } from "@/lib/tools";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,17 @@ function readCharMeta(
         level: Number.isNaN(lv) ? null : lv,
       };
     }
+    // ACE! Hero ID Card: no levels — the roster shows "Trait Role" as the class.
+    const ace = blob?.ace_sheet;
+    if (typeof ace === "string") {
+      const s = JSON.parse(ace) as { name?: unknown; trait?: unknown; role?: unknown };
+      const cls = [s.trait, s.role].filter((v) => typeof v === "string" && v.trim()).join(" ");
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: null,
+      };
+    }
   } catch {
     return null;
   }
@@ -133,7 +145,7 @@ export default async function CampaignsPage() {
   const parties = await Promise.all(
     ids.map(async (id) => {
       const docs = await prisma.document.findMany({
-        where: { tool: { in: ["sd-character", "dcc-character"] }, linkedCampaignId: id },
+        where: { tool: { in: CHARACTER_TOOL_IDS }, linkedCampaignId: id },
         select: { id: true, title: true, data: true },
         orderBy: { updatedAt: "desc" },
       });
@@ -158,7 +170,7 @@ export default async function CampaignsPage() {
   const myDocs = await prisma.document.findMany({
     where: {
       userId: user.id,
-      tool: { in: ["sd-character", "dcc-character"] },
+      tool: { in: CHARACTER_TOOL_IDS },
       linkedCampaignId: { not: null },
     },
     select: { id: true, title: true, data: true, linkedCampaignId: true },

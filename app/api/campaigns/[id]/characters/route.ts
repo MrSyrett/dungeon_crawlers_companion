@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPlayUser } from "@/lib/vtt";
+import { CHARACTER_TOOL_IDS, TOOLS, sheetKeyFor } from "@/lib/tools";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -14,8 +15,8 @@ type SheetBlob = {
 
 // GET — every character sheet linked to this campaign.
 // Returns { characters: [{ docId, title, updatedAt, system, sheet }] } for both
-// Shadowdark ("sd-character" → sd_sheet) and Dungeon Crawler Carl
-// ("dcc-character" → dcc_sheet) sheets, so the GM Screen Party tool shows both.
+// every character tool (sd-character → sd_sheet, dcc-character → dcc_sheet,
+// ace-character → ace_sheet), so the GM Screen Party tool shows them all.
 export async function GET(req: NextRequest, ctx: Ctx) {
   // Cookie normally; a VTT token when framed by a tabletop.
   const user = await getPlayUser(req);
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   if (!campaign) return new Response("Not found", { status: 404 });
 
   const memberWhere = {
-    tool: { in: ["sd-character", "dcc-character"] },
+    tool: { in: CHARACTER_TOOL_IDS },
     linkedCampaignId: id,
   };
 
@@ -63,8 +64,8 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   const characters = [];
   for (const doc of docs) {
     const blob = doc.data as Record<string, unknown> | null;
-    const isDcc = doc.tool === "dcc-character";
-    const raw = isDcc ? blob?.dcc_sheet : blob?.sd_sheet;
+    const key = sheetKeyFor(doc.tool);
+    const raw = key ? blob?.[key] : undefined;
     if (typeof raw !== "string") continue;
 
     let sheet: SheetBlob;
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       docId: doc.id,
       title: doc.title,
       updatedAt: doc.updatedAt,
-      system: isDcc ? "DCC" : "SD",
+      system: TOOLS[doc.tool as keyof typeof TOOLS]?.system ?? "SD",
       sheet,
     });
   }

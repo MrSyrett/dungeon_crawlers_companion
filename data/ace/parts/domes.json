@@ -1,0 +1,543 @@
+{
+  "setting": {
+    "key": "domes",
+    "name": "Domes of Thunder",
+    "tagline": "Post-apocalyptic wasteland road trip with cyborgs, mutants and cage fights",
+    "blurb": "Domes of Thunder concentrates on a specific type of postapocalyptic tale, the wasteland road trip. The heroes undertake a dangerous mission across a blasted landscape, confronting challenges and enemies along the way while guarding a precious cargo until they can deliver it to their destination. The Boom happened a few decades ago: bombs fell, plagues ran rampant, civilization collapsed, and the surviving humans now share the world with cyborgs and mutants. You have been forged in the fire of ruin, learning skills and honing instincts that enable you to survive in a lawless land. You are a waste warrior.",
+    "pages": [201, 232],
+    "recommendedRoles": ["Barbarian", "Outlaw", "Bounty Hunter", "Cowboy", "Doctor", "Engineer", "Gambler", "Hermit", "Soldier"],
+    "usesPower": true,
+    "rules": [
+      "Waste-Born: Heroes take either a species or an occupation as a Role. Besides the recommended core Roles, a Hero may be a talking animal (a normal-looking but intelligent animal or a humanoid variation; kangaroos are an excellent choice), or one of the new wasteland Roles: Cyborg, Driver, Entertainer, Gladiator, Mechanic, Mutant, Survivalist, Warrior.",
+      "Rule of Cool: the postapocalyptic world runs on looking awesome; driving leathers with metal bits, spiky raider pads, medieval-knight guardians and old spacesuits all fit.",
+      "Gun Control: guns are hard to maintain and ammunition is scarce, so Heroes and Extras alike are limited to weapons that add 2 damage, with an exception for the occasional sword or chainsaw that does 3. Guns only enter the adventure if the Director places them there.",
+      "Starting gun: the Director may grant a Hero a gun with a few bullets at the start of the adventure; the Hero must spend a Karma point to use a bullet.",
+      "Acquiring a vehicle: Heroes aren't assumed to start an adventure with a vehicle unless they roll the Cost (Style difficulty) listed on the Typical Wasteland Vehicles table. At the start of each Act a Hero must make a Style 15 roll to have enough gas to run their vehicle for the remainder of the Act. Vehicles found or captured during the adventure have enough gas for the rest of the scene, and gasoline may be siphoned from one vehicle into another.",
+      "Vehicle stats: every vehicle has Bash, Steering and Plating. Bash is used by the driver when ramming a vehicle or running over a pedestrian and determines the vehicle's Health. Steering is the bonus die or penalty die applied to Driving rolls. Plating is subtracted from any damage the vehicle takes; if the result is 0 or less the vehicle takes no damage (the hit is only cosmetic).",
+      "Typical Wasteland Vehicles (Cost / Health / Bash / Steering / Plating): Dune Buggy 20/5/3/+1/2; Cycle 25/2/3/+2/2; Sedan 30/15/4/0/3; Truck 35/25/5/0/3; Bus 50/25/6/-2/3; Semi 50/30/6/-2/3 (only -1 Steering without a trailer).",
+      "Targeting passengers: Heroes in vehicles rely on their Driving focus when attacked, but a Hero who is completely covered (in a car, not on a bike) receives the benefit of the vehicle's Plating if hit. An attacker trying to shoot around the plating may suffer a circumstance penalty.",
+      "No Speed stat: catching up to or leaving a vehicle in the dust is a question of maneuverability, so Driving rolls are modified by Steering rather than speed. Assign circumstance penalties for travelling off-road depending on the terrain.",
+      "Driving Duels: whether one vehicle catches another or pulls away is an opposed Moves action. Each participant announces what they are trying to accomplish; the winner gets to do it. A vehicle can always approach or escape a pedestrian without a roll.",
+      "Spectacular Destruction: when a vehicle is reduced to 0 Health it crashes and burns in spectacular, unique fashion; occupants are usually thrown clear or crawl out unless the Director is feeling bloodthirsty.",
+      "Disabling vehicles: describe how you disable a vehicle (puncturing a tire, releasing fuel, pulling battery cables); the Director assigns a Difficulty and Stat, and success disables the vehicle. Disabling doesn't affect the occupants and doesn't necessarily stop the vehicle. A disabled vehicle may be repaired with a Smarts roll, with time and Difficulty set by the Director.",
+      "Dome fighting: fighters battle inside a cage until one submits, is killed, or can no longer engage, with weapons agreed beforehand (the Lectric Buggalu bouts are unarmed). Many cages are electrified: brushing or touching the cage causes 1-4 damage, sometimes changing randomly each round. Pushing an opponent against the cage takes a 2 dice penalty on the Brawn roll; on a success the cage's damage is used instead of the attacker's usual damage.",
+      "Portable miniguns: a Hero can use a minigun (4 damage) if holding it with two hands, but takes a die deduction on any Moves actions while doing so."
+    ]
+  },
+  "roles": [
+    {
+      "name": "Cyborg",
+      "category": "Wasteland",
+      "setting": "domes",
+      "ability": "Part of your body is replaced with machinery, making you a tough opponent. You may spend a Karma point to make a Brawling attack and do double damage.",
+      "page": 206
+    },
+    {
+      "name": "Driver",
+      "category": "Wasteland",
+      "setting": "domes",
+      "ability": "You are a wizard of the road, able to push vehicles long after their expiration date across the Waste. You gain the Driving focus for free, in addition to whatever other Focus you choose for your Moves stat.",
+      "grantsFocus": ["Driving"],
+      "page": 206
+    },
+    {
+      "name": "Entertainer",
+      "category": "Wasteland",
+      "setting": "domes",
+      "ability": "In a world without smartphones, game consoles, and streaming services, entertainment is in short supply. All eyes are on you when you perform, granting the other Heroes a bonus circumstance die on their non-combat actions while you are performing.",
+      "page": 206
+    },
+    {
+      "name": "Gladiator",
+      "category": "Wasteland",
+      "setting": "domes",
+      "ability": "You've toughened yourself up for blood sports. Basically, you're an Ogre. You get an extra +1 to your Brawn Stat, and an extra +2 Health.",
+      "statMods": { "Brawn": 1 },
+      "healthBonus": 2,
+      "page": 206
+    },
+    {
+      "name": "Mechanic",
+      "category": "Wasteland",
+      "setting": "domes",
+      "ability": "You keep the machines running, even when they are falling apart around you. For every Karma point you spend, you can scrounge up enough material to repair 1 point of Health to a vehicle. This takes you a round, but you can spend as much Karma as you like.",
+      "page": 206
+    },
+    {
+      "name": "Mutant",
+      "category": "Wasteland",
+      "setting": "domes",
+      "ability": "The Boom has granted you special abilities. You have a Power stat, although you don't get extra points to distribute.",
+      "power": true,
+      "page": 206
+    },
+    {
+      "name": "Survivalist",
+      "category": "Wasteland",
+      "setting": "domes",
+      "ability": "You know your way through the wastes. You never get lost and you can always secure enough food and adequate shelter for you and your friends.",
+      "page": 206
+    },
+    {
+      "name": "Warrior",
+      "category": "Wasteland",
+      "setting": "domes",
+      "ability": "Anyone that sees you knows that you are a true Wasteland Warrior. You gain the Armor focus for free, in addition to whatever other Focus you choose for your Moves stat.",
+      "grantsFocus": ["Armor"],
+      "page": 206
+    }
+  ],
+  "focuses": [
+    { "name": "Armor", "stat": "Moves", "setting": "domes", "note": "Granted free by the Warrior Role; used by ORCS and Tucker Welch." },
+    { "name": "Leadership", "stat": "Style", "setting": "domes" },
+    { "name": "Stagecraft", "stat": "Style", "setting": "domes" },
+    { "name": "Conjuration", "stat": "Power", "setting": "domes", "note": "Illusions and parlor tricks (Rosie the Riveting)." }
+  ],
+  "traits": [],
+  "gear": [
+    {
+      "name": "Dune Buggy",
+      "setting": "domes",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Vehicle",
+      "description": "Health 5, Bash 3, Steering +1, Plating 2. Or any largely open air vehicle, including sedans with missing roofs or doors.",
+      "page": 209
+    },
+    {
+      "name": "Cycle",
+      "setting": "domes",
+      "tier": "Hard",
+      "tn": 25,
+      "category": "Vehicle",
+      "description": "Health 2, Bash 3, Steering +2, Plating 2. Also works for trikes and ATVs.",
+      "page": 209
+    },
+    {
+      "name": "Sedan",
+      "setting": "domes",
+      "tier": "Herculean",
+      "tn": 30,
+      "category": "Vehicle",
+      "description": "Health 15, Bash 4, Steering 0, Plating 3. Really any car.",
+      "page": 209
+    },
+    {
+      "name": "Truck",
+      "setting": "domes",
+      "tier": "Herculean",
+      "tn": 35,
+      "category": "Vehicle",
+      "description": "Health 25, Bash 5, Steering 0, Plating 3. Also works for vans.",
+      "page": 209
+    },
+    {
+      "name": "Bus",
+      "setting": "domes",
+      "tier": "Impossible",
+      "tn": 50,
+      "category": "Vehicle",
+      "description": "Health 25, Bash 6, Steering -2, Plating 3. Also works for RVs.",
+      "page": 209
+    },
+    {
+      "name": "Semi",
+      "setting": "domes",
+      "tier": "Impossible",
+      "tn": 50,
+      "category": "Vehicle",
+      "description": "Health 30, Bash 6, Steering -2, Plating 3. Without a trailer, the Semi only has -1 Steering.",
+      "page": 209
+    },
+    {
+      "name": "Wasteland Weapon",
+      "setting": "domes",
+      "tier": "Free",
+      "tn": null,
+      "category": "Weapon",
+      "description": "Knives, machetes, batons, clubs, crossbows and similar scrounged weapons. Heroes and Extras alike are limited to weapons that add 2 damage.",
+      "damage": 2,
+      "page": 207
+    },
+    {
+      "name": "Sword or Chainsaw",
+      "setting": "domes",
+      "tier": "Free",
+      "tn": null,
+      "category": "Weapon",
+      "description": "The occasional sword or chainsaw is the exception to the 2-damage limit and does 3 damage.",
+      "damage": 3,
+      "page": 207
+    },
+    {
+      "name": "Gun (Director-granted)",
+      "setting": "domes",
+      "tier": "Free",
+      "tn": null,
+      "category": "Weapon",
+      "description": "Guns only enter the adventure if the Director places them. The Director may grant a Hero a gun with a few bullets to start the adventure; the Hero must spend a Karma point to use a bullet. Pistols and shotguns in this book do 3 damage.",
+      "damage": 3,
+      "page": 207
+    },
+    {
+      "name": "Minigun",
+      "setting": "domes",
+      "tier": "Impossible",
+      "tn": null,
+      "category": "Weapon",
+      "description": "The Saint's movable minigun (4 damage). A Hero can use it if holding it with two hands, but takes a die deduction on any Moves actions. It holds 3 attacks' worth of ammo, or 10 attacks if extra ammunition is grabbed.",
+      "damage": 4,
+      "page": 230
+    }
+  ],
+  "extras": [
+    {
+      "name": "Hercules Ferris",
+      "setting": "domes",
+      "type": "Person",
+      "smarts": 2,
+      "moves": 5,
+      "style": 3,
+      "brawn": 6,
+      "focuses": [
+        { "stat": "Moves", "name": "Dodging" },
+        { "stat": "Brawn", "name": "Brawling" }
+      ],
+      "health": 6,
+      "defence": 21,
+      "attacks": [{ "name": "Unarmed", "dice": 8, "damage": 2 }],
+      "notes": [],
+      "description": "A fighter from Paradise City; overconfident and a bit full of himself.",
+      "page": 218
+    },
+    {
+      "name": "Shelby Hudson",
+      "setting": "domes",
+      "type": "Person",
+      "smarts": 3,
+      "moves": 4,
+      "style": 3,
+      "brawn": 6,
+      "focuses": [{ "stat": "Brawn", "name": "Tough" }],
+      "health": 8,
+      "defence": 12,
+      "attacks": [{ "name": "Unarmed", "dice": 6, "damage": 2 }],
+      "notes": ["Former fighter with a prosthetic leg, now Hercules' manager and trainer; drives an armored school bus with a turret (pump action shotgun, 6 shells)."],
+      "description": "Hercules' manager, bearing the weight of responsibility and regret that she can no longer compete.",
+      "page": 218
+    },
+    {
+      "name": "Tucker Welch",
+      "setting": "domes",
+      "type": "Villain",
+      "smarts": 2,
+      "moves": 2,
+      "style": 4,
+      "brawn": 5,
+      "focuses": [
+        { "stat": "Moves", "name": "Armor" },
+        { "stat": "Brawn", "name": "Brawling" }
+      ],
+      "health": 5,
+      "defence": 12,
+      "attacks": [
+        { "name": "Unarmed", "dice": 7, "damage": 2 }
+      ],
+      "notes": ["A mutant with a non-functional third eye hidden under a spiked leather cap; accompanied by one Mook per Hero.", "Carries a knife (2 damage) once banned from the restie; no knife attack line is printed."],
+      "description": "An obnoxious oaf of a fighter; a bully, but sympathetic.",
+      "page": 218
+    },
+    {
+      "name": "\"Su\" Sussudio",
+      "setting": "domes",
+      "type": "Person",
+      "smarts": 3,
+      "moves": 4,
+      "style": 2,
+      "brawn": 2,
+      "focuses": [
+        { "stat": "Moves", "name": "Stealth" },
+        { "stat": "Style", "name": "Empathy" },
+        { "stat": "Style", "name": "Perception" }
+      ],
+      "health": 2,
+      "defence": 12,
+      "attacks": [{ "name": "Knife", "dice": 2, "damage": 2 }],
+      "notes": ["An elf (spy) for the Saint; use the same stats for Mickey, a young boy who is also an elf."],
+      "description": "Friendly and curious server at Jin's Restie who secretly works for the Saint.",
+      "page": 218
+    },
+    {
+      "name": "Howlers",
+      "setting": "domes",
+      "type": "Mook",
+      "smarts": 2,
+      "moves": 3,
+      "style": 2,
+      "brawn": 2,
+      "focuses": [],
+      "health": 1,
+      "defence": 9,
+      "attacks": [{ "name": "Clawed Hands", "dice": 3, "damage": 1 }],
+      "notes": ["Mutants resembling classic werewolves; not magical, regular weapons work and their bite is not contagious.", "Ride motorcycles, usually doubled up or with sidecars."],
+      "page": 218
+    },
+    {
+      "name": "Alpha",
+      "setting": "domes",
+      "type": "Villain",
+      "smarts": 3,
+      "moves": 3,
+      "style": 2,
+      "brawn": 3,
+      "focuses": [
+        { "stat": "Moves", "name": "Dodging" },
+        { "stat": "Brawn", "name": "Tough" }
+      ],
+      "health": 5,
+      "defence": 15,
+      "attacks": [
+        { "name": "Clawed Hands", "dice": 3, "damage": 1 },
+        { "name": "Machete", "dice": 3, "damage": 2 }
+      ],
+      "notes": ["Leader of the Howlers; calls off the attack if the Howlers lose half their members.", "Drives a pickup truck."],
+      "description": "A large wolf-man with a jagged scar down one side of his face.",
+      "page": 218
+    },
+    {
+      "name": "Rosie",
+      "setting": "domes",
+      "type": "Person",
+      "smarts": 3,
+      "moves": 5,
+      "style": 4,
+      "brawn": 2,
+      "power": 3,
+      "focuses": [
+        { "stat": "Moves", "name": "Acrobatics" },
+        { "stat": "Style", "name": "Stagecraft" },
+        { "stat": "Brawn", "name": "Brawling" },
+        { "stat": "Power", "name": "Conjuration" }
+      ],
+      "health": 4,
+      "defence": 21,
+      "attacks": [{ "name": "Baton", "dice": 4, "damage": 2 }],
+      "notes": ["Master illusionist; her 'magic' is simply illusions and parlor tricks.", "Accomplished thief with a kind heart."],
+      "description": "'Rosie the Riveting', a traveling mutant magician with hare-like features.",
+      "page": 228
+    },
+    {
+      "name": "ORCS",
+      "setting": "domes",
+      "type": "Mook",
+      "smarts": 2,
+      "moves": 3,
+      "style": 2,
+      "brawn": 3,
+      "focuses": [{ "stat": "Moves", "name": "Armor" }],
+      "health": 1,
+      "defence": 15,
+      "attacks": [
+        { "name": "Sword", "dice": 3, "damage": 3 },
+        { "name": "Hand Crossbow", "dice": 3, "damage": 2 },
+        { "name": "Shotgun", "dice": 3, "damage": 3 }
+      ],
+      "notes": ["The Saint's army, derived from mall security; wear leathers with a stylized ORC-on-a-shield badge."],
+      "page": 228
+    },
+    {
+      "name": "Fighters",
+      "setting": "domes",
+      "type": "Person",
+      "smarts": 2,
+      "moves": 3,
+      "style": 2,
+      "brawn": 4,
+      "focuses": [
+        { "stat": "Moves", "name": "Dodging" },
+        { "stat": "Brawn", "name": "Tough" }
+      ],
+      "health": 6,
+      "defence": 15,
+      "attacks": [{ "name": "Unarmed", "dice": 6, "damage": 2 }],
+      "notes": ["Generic community fighters competing in the Lectric Buggalu."],
+      "page": 228
+    },
+    {
+      "name": "The Saint (Nicole Last)",
+      "setting": "domes",
+      "type": "Villain",
+      "smarts": 3,
+      "moves": 4,
+      "style": 5,
+      "brawn": 3,
+      "focuses": [
+        { "stat": "Smarts", "name": "Empathy" },
+        { "stat": "Moves", "name": "Shooting" },
+        { "stat": "Style", "name": "Leadership" }
+      ],
+      "health": 3,
+      "defence": 12,
+      "attacks": [{ "name": "Pistol", "dice": 6, "damage": 3 }],
+      "notes": ["Warlord of the Saint's Compound (the old Odessa Retail Center); commands the ORCS, elf spies, a movable minigun and the Dragon helicopter."],
+      "description": "The Jolly Saint of the Wasteland, Checker of Lists, and General Manager for Life; wears a red cloak with white trim.",
+      "page": 228
+    },
+    {
+      "name": "Mr. Frost",
+      "setting": "domes",
+      "type": "Villain",
+      "smarts": 2,
+      "moves": 4,
+      "style": 2,
+      "brawn": 5,
+      "focuses": [
+        { "stat": "Smarts", "name": "Perception" },
+        { "stat": "Moves", "name": "Dodging" },
+        { "stat": "Brawn", "name": "Intimidating" }
+      ],
+      "health": 5,
+      "defence": 18,
+      "attacks": [
+        { "name": "Unarmed", "dice": 5, "damage": 2 },
+        { "name": "Spiked Baseball Bat", "dice": 5, "damage": 3 }
+      ],
+      "notes": ["The Saint's reigning champion; fears his age is catching up with him."],
+      "description": "A massive shirtless man in a black wool hat, covered in white powder like a snowman.",
+      "page": 228
+    },
+    {
+      "name": "Rudy",
+      "setting": "domes",
+      "type": "Villain",
+      "smarts": 2,
+      "moves": 5,
+      "style": 4,
+      "brawn": 2,
+      "focuses": [
+        { "stat": "Moves", "name": "Acrobatics" },
+        { "stat": "Style", "name": "Public Speaking" }
+      ],
+      "health": 2,
+      "defence": 21,
+      "attacks": [
+        { "name": "Knife", "dice": 2, "damage": 2 },
+        { "name": "Thrown Knife", "dice": 5, "damage": 2 }
+      ],
+      "notes": ["Runs the Workshop and its technicians; embraces the 'mad, giggling henchman' trope."],
+      "description": "The Saint's announcer, in a long brown coat, antler cap and red clown nose.",
+      "page": 228
+    },
+    {
+      "name": "The Dragon",
+      "setting": "domes",
+      "type": "Vehicle",
+      "smarts": null,
+      "moves": null,
+      "style": null,
+      "brawn": 4,
+      "focuses": [],
+      "health": 4,
+      "defence": 15,
+      "attacks": [{ "name": "Flamethrower", "dice": 4, "damage": 4, "note": "bottom-mounted, relatively short-ranged; operated by the co-pilot" }],
+      "notes": [
+        "Bash 4, Steering +1, Plating 3.",
+        "A red helicopter once used to burn fire lines; carries a pilot, a co-pilot and 4-6 passengers.",
+        "If the minigun (4 damage) was not taken or disabled, it is mounted on the left side and manned by a gunner.",
+        "Can be fought by leaping aboard from a vehicle, disabling it from afar, or shooting the pilot through the exposed window."
+      ],
+      "page": 232
+    },
+    {
+      "name": "Dune Buggy",
+      "setting": "domes",
+      "type": "Vehicle",
+      "smarts": null,
+      "moves": null,
+      "style": null,
+      "brawn": 3,
+      "focuses": [],
+      "health": 5,
+      "defence": null,
+      "attacks": [{ "name": "Ram", "dice": null, "damage": 3, "note": "driver uses the vehicle's Bash when ramming or running over pedestrians" }],
+      "notes": ["Bash 3, Steering +1, Plating 2. Cost 20.", "Or any largely open air vehicle, including sedans with missing roofs or doors."],
+      "page": 209
+    },
+    {
+      "name": "Cycle",
+      "setting": "domes",
+      "type": "Vehicle",
+      "smarts": null,
+      "moves": null,
+      "style": null,
+      "brawn": 3,
+      "focuses": [],
+      "health": 2,
+      "defence": null,
+      "attacks": [{ "name": "Ram", "dice": null, "damage": 3, "note": "driver uses the vehicle's Bash when ramming or running over pedestrians" }],
+      "notes": ["Bash 3, Steering +2, Plating 2. Cost 25.", "Also works for trikes and ATVs. Riders are not covered and do not benefit from Plating."],
+      "page": 209
+    },
+    {
+      "name": "Sedan",
+      "setting": "domes",
+      "type": "Vehicle",
+      "smarts": null,
+      "moves": null,
+      "style": null,
+      "brawn": 4,
+      "focuses": [],
+      "health": 15,
+      "defence": null,
+      "attacks": [{ "name": "Ram", "dice": null, "damage": 4, "note": "driver uses the vehicle's Bash when ramming or running over pedestrians" }],
+      "notes": ["Bash 4, Steering 0, Plating 3. Cost 30.", "Really any car."],
+      "page": 209
+    },
+    {
+      "name": "Truck",
+      "setting": "domes",
+      "type": "Vehicle",
+      "smarts": null,
+      "moves": null,
+      "style": null,
+      "brawn": 5,
+      "focuses": [],
+      "health": 25,
+      "defence": null,
+      "attacks": [{ "name": "Ram", "dice": null, "damage": 5, "note": "driver uses the vehicle's Bash when ramming or running over pedestrians" }],
+      "notes": ["Bash 5, Steering 0, Plating 3. Cost 35.", "Also works for vans."],
+      "page": 209
+    },
+    {
+      "name": "Bus",
+      "setting": "domes",
+      "type": "Vehicle",
+      "smarts": null,
+      "moves": null,
+      "style": null,
+      "brawn": 6,
+      "focuses": [],
+      "health": 25,
+      "defence": null,
+      "attacks": [{ "name": "Ram", "dice": null, "damage": 6, "note": "driver uses the vehicle's Bash when ramming or running over pedestrians" }],
+      "notes": ["Bash 6, Steering -2, Plating 3. Cost 50.", "Also works for RVs."],
+      "page": 209
+    },
+    {
+      "name": "Semi",
+      "setting": "domes",
+      "type": "Vehicle",
+      "smarts": null,
+      "moves": null,
+      "style": null,
+      "brawn": 6,
+      "focuses": [],
+      "health": 30,
+      "defence": null,
+      "attacks": [{ "name": "Ram", "dice": null, "damage": 6, "note": "driver uses the vehicle's Bash when ramming or running over pedestrians" }],
+      "notes": ["Bash 6, Steering -2, Plating 3. Cost 50.", "Without a trailer, the Semi only has -1 Steering."],
+      "page": 209
+    }
+  ],
+  "pregens": []
+}

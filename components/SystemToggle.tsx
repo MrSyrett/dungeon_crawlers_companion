@@ -9,7 +9,7 @@ import {
   getSystemServerSnapshot,
 } from "./systemStore";
 
-// The Shadowdark / Crawler Carl switch. Lives in the dashboard header (under the
+// The game-system switch (one tab per entry in SYSTEMS). Lives in the dashboard header (under the
 // Sign-out button) and shares state with SystemTabs, which renders the matching
 // panels below.
 export default function SystemToggle() {

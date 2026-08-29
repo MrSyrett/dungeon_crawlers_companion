@@ -9,6 +9,8 @@
   --text: #ece9e1;
   --gold: #c8a020;
   --red: #b82018;
+  /* ACE! accent — the comic-book sky blue of the omnibus covers. */
+  --ace: #3aa8e0;
 }
 
 @theme inline {
@@ -20,6 +22,7 @@
   --color-text: var(--text);
   --color-gold: var(--gold);
   --color-red: var(--red);
+  --color-ace: var(--ace);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }

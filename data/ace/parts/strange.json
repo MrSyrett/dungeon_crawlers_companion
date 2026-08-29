@@ -1,0 +1,279 @@
+{
+  "setting": {
+    "key": "strange",
+    "name": "Strange Science",
+    "tagline": "80s kids investigating weird science in small-town Wilden Falls",
+    "blurb": "In Strange Science you get to play teenagers attending a school in small-town America in 1984. It's all pretty innocent, until weird things start happening at the local research facility, people go missing, and there's a sudden influx of fitness nuts in the town. That's before we get to the time travel, bodysnatching, and portals to other dimensions. We're talking Weird Science, Real Genius, Back to the Future, Ghostbusters, and just a hint of Stranger Things and Twin Peaks - it's all light, funny, and characters can't die.",
+    "pages": [101, 132],
+    "recommendedRoles": ["Brain", "Cheerleader", "Outsider", "Protector", "Radio Presenter", "Tycoon"],
+    "usesPower": true,
+    "rules": [
+      "The Kids Are Alright: Heroes are meant to be a group of kids (pre-teen like The Goonies, or teenagers like The Breakfast Club), though any regular character is possible - a cool investigating FBI agent or a quirky tree-hugging local. Vampires, wizards, and talking dogs are not recommended.",
+      "Kid Stats: if playing regular, normal kids, drop the number of points spent on Stats to 10 (kids aren't as strong or smart as grown-ups) and increase starting Karma to 8 to give them a bit more of a fighting chance.",
+      "Supernatural Kids: optionally one Hero can be Supernatural. Don't reduce their Stats or raise their Karma; instead put a couple of Stat Points into Power to reflect a psychic ability like Telekinesis, Telepathy, or Pyrokinesis.",
+      "Nobody dies: it can get tense and scary, but characters can't die. Buildings can collapse on them or they can be transformed into giant man-eating zucchinis, and they'll be back to normal next scene, dusting themselves off.",
+      "New Traits: Awkward, Childlike, Dedicated, Eccentric, Rebellious, Sassy, Shy, Sultry - or just make traits up.",
+      "Setting: Wilden Falls, 1984, a Pacific North West town of about eight thousand with a middle school, high school, waterfall, lake, radio tower, power station and the Osterman Labs Research Facility. With a few tweaks you can set the town anywhere (even your own home town) as long as the key locations - the research lab and the lake - are covered.",
+      "Health shakes: anyone (normal) ingesting the Super Energy Fruit Fit Juice Shake is infected with a mild mind-control drug and starts to hear the subliminal messages in the health food radio commercials. The more shake consumed, the stronger the messages, until they are unable to control their actions.",
+      "Pod-people: biological clones grown from an interdimensional plant; they bleed greenish goo, only consume the green juice, are updated and commanded by a subliminal radio signal, and become fertilizer when flooded. They're creepy plants, not actual people, so nobody need feel bad about fighting them.",
+      "Time travel: Dr Dunwood's device sends a Hero's consciousness back in time (maximum range 876,000 hours - exactly 100 years) into the body of a person of that era. Nothing physical or written can be taken back. Players keep exactly the same Stats, Focuses and abilities as their 1980s selves while inhabiting a borrowed body.",
+      "YOU SHALL NOT PASS!: everything after the New Traits list (the town secrets, NPC stats and the adventure) is for the Director only - players should stop reading there."
+    ]
+  },
+  "roles": [
+    {
+      "name": "Brain",
+      "category": "Strange Science",
+      "setting": "strange",
+      "ability": "You're clever and you know stuff. Usually the stuff you know is really nerdy. Sometimes it's actually useful. You can spend a Karma point to ask the Director a single 'yes/no' question which they will answer honestly. The question should be about the game, not the Director's personal life!",
+      "page": 105
+    },
+    {
+      "name": "Cheerleader",
+      "category": "Strange Science",
+      "setting": "strange",
+      "ability": "Everybody loves you (or at least pretends to). Plus you can do acrobatics and stuff. But mainly, you can cheer people on to be their best selves. You are able to grant your Karma points to your friends.",
+      "page": 105
+    },
+    {
+      "name": "Outsider",
+      "category": "Strange Science",
+      "setting": "strange",
+      "ability": "You don't fit in. Always a loner, you have learned to be very observant and you always know when somebody is lying.",
+      "page": 105
+    },
+    {
+      "name": "Protector",
+      "category": "Strange Science",
+      "setting": "strange",
+      "ability": "You're in security. All you care about is helping others. If one of your fellow Heroes takes damage, you can choose to take it for them.",
+      "page": 105
+    },
+    {
+      "name": "Radio Presenter",
+      "category": "Strange Science",
+      "setting": "strange",
+      "ability": "A face made for radio, eh? Your weapon of choice is your voice, and you know how to use it. You can make a Style check vs. Smarts to mesmerize somebody for one minute. If it doesn't work, though, they find you really annoying.",
+      "page": 106
+    },
+    {
+      "name": "Tycoon",
+      "category": "Strange Science",
+      "setting": "strange",
+      "ability": "You're not just a businessperson, you're a successful businessperson! Choose $1,000,000 worth of property and gear and stuff. It's yours. You earned it.",
+      "page": 106
+    }
+  ],
+  "focuses": [],
+  "traits": [
+    { "name": "Awkward", "setting": "strange" },
+    { "name": "Childlike", "setting": "strange" },
+    { "name": "Dedicated", "setting": "strange" },
+    { "name": "Eccentric", "setting": "strange" },
+    { "name": "Rebellious", "setting": "strange" },
+    { "name": "Sassy", "setting": "strange" },
+    { "name": "Shy", "setting": "strange" },
+    { "name": "Sultry", "setting": "strange" }
+  ],
+  "gear": [],
+  "extras": [
+    {
+      "name": "Cherry Kilbourne, DJ",
+      "setting": "strange",
+      "type": "Person",
+      "smarts": 3,
+      "moves": 3,
+      "style": 4,
+      "brawn": 2,
+      "focuses": [
+        { "stat": "Smarts", "name": "Computers" },
+        { "stat": "Moves", "name": "Driving" },
+        { "stat": "Style", "name": "Music" },
+        { "stat": "Brawn", "name": "Climbing" }
+      ],
+      "health": 2,
+      "defence": 9,
+      "attacks": [],
+      "notes": [
+        "Sultry Radio Presenter.",
+        "Using her captivating voice, Cherry can make a Style check vs. Smarts to mesmerize somebody for one minute. If it doesn't work, though, they find her really annoying."
+      ],
+      "description": "KWF Radio's evening DJ, playing late night tunes and bringing all the local news to the town with her dulcet tones.",
+      "page": 109
+    },
+    {
+      "name": "Ian Peterson, Hotel Manager",
+      "setting": "strange",
+      "type": "Person",
+      "smarts": 4,
+      "moves": 3,
+      "style": 3,
+      "brawn": 2,
+      "focuses": [
+        { "stat": "Smarts", "name": "Accounting" },
+        { "stat": "Moves", "name": "Stealth" },
+        { "stat": "Style", "name": "Persuasion" },
+        { "stat": "Brawn", "name": "Intimidating" }
+      ],
+      "health": 2,
+      "defence": 9,
+      "attacks": [],
+      "notes": [
+        "Greedy Tycoon.",
+        "Ian has any property or equipment he needs."
+      ],
+      "description": "Business tycoon and owner of the Lookout Hotel, desperate to take over the Power & Utility company and acquire the land north of the hotel to profit from the planned hydro-electric dam.",
+      "page": 109
+    },
+    {
+      "name": "Amanda Lee, Hotel Security",
+      "setting": "strange",
+      "type": "Person",
+      "smarts": 3,
+      "moves": 4,
+      "style": 2,
+      "brawn": 3,
+      "focuses": [
+        { "stat": "Smarts", "name": "Perception" },
+        { "stat": "Moves", "name": "Shooting" },
+        { "stat": "Style", "name": "Animals" },
+        { "stat": "Brawn", "name": "Brawling" }
+      ],
+      "health": 3,
+      "defence": 12,
+      "attacks": [],
+      "notes": [
+        "Honest Protector.",
+        "If Ian Peterson takes damage, Amanda can choose to take it instead."
+      ],
+      "description": "Security at the Lookout Hotel.",
+      "page": 109
+    },
+    {
+      "name": "Dr Erik Dunwood",
+      "setting": "strange",
+      "type": "Person",
+      "smarts": 5,
+      "moves": 4,
+      "style": 1,
+      "brawn": 2,
+      "focuses": [
+        { "stat": "Smarts", "name": "Physics" },
+        { "stat": "Smarts", "name": "Electronics" },
+        { "stat": "Smarts", "name": "Quantum Theory" },
+        { "stat": "Moves", "name": "Spot Welding" },
+        { "stat": "Style", "name": "Science" },
+        { "stat": "Brawn", "name": "Carrying" }
+      ],
+      "health": 2,
+      "defence": 12,
+      "attacks": [],
+      "notes": [
+        "Eccentric Scientist.",
+        "If a monster has a weakness, Dr Dunwood knows it automatically. It's just a question of physics."
+      ],
+      "description": "Former research director of the Osterman Laboratories. After a falling out with the powers-that-be at the labs he relocated to Cygnet Island in the middle of the lake, building an extensive laboratory in the basement of his house. Distracted, brilliant, and thinks so far outside of the box that it's in another universe.",
+      "page": 112
+    },
+    {
+      "name": "Sheriff Harry Slater",
+      "setting": "strange",
+      "type": "Person",
+      "smarts": 3,
+      "moves": 4,
+      "style": 2,
+      "brawn": 3,
+      "focuses": [
+        { "stat": "Smarts", "name": "Investigation" },
+        { "stat": "Moves", "name": "Driving" },
+        { "stat": "Style", "name": "Persuasion" },
+        { "stat": "Brawn", "name": "Brawling" }
+      ],
+      "health": 3,
+      "defence": 12,
+      "attacks": [],
+      "notes": [
+        "Dedicated Cop."
+      ],
+      "description": "Head of the Wilden Falls Sheriff's Department. His handful of deputies have little to do other than patrol during tourist season; they have two Chevy K5 Blazers and an old Ford Fairmont to drive around.",
+      "page": 113
+    },
+    {
+      "name": "Steve Twentyseven",
+      "setting": "strange",
+      "type": "Alien",
+      "smarts": 3,
+      "moves": 3,
+      "style": 1,
+      "brawn": 2,
+      "focuses": [
+        { "stat": "Smarts", "name": "Occultism" },
+        { "stat": "Moves", "name": "Stealth" },
+        { "stat": "Style", "name": "Disguise" },
+        { "stat": "Brawn", "name": "Tough" }
+      ],
+      "health": 4,
+      "defence": 9,
+      "attacks": [],
+      "notes": [
+        "Childlike Pod-Person.",
+        "Not real - a biological clone created by the pod-person scientists at Osterman Labs. If injured he bleeds like a human, except the blood is a strange, greenish goo.",
+        "Doesn't talk much but gradually becomes more talkative as he learns from those around him. Only consumes the green health shake."
+      ],
+      "description": "The new kid at school. Plaid shirt, brown tie, beige pants, perfect blonde hair, perfect freckles, perfect teeth, and always smiling. Here to learn, observe, and start to infiltrate the town of Wilden Falls.",
+      "page": 115
+    },
+    {
+      "name": "Typical Steve",
+      "setting": "strange",
+      "type": "Mook",
+      "smarts": 3,
+      "moves": 3,
+      "style": 3,
+      "brawn": 3,
+      "focuses": [
+        { "stat": "Smarts", "name": "Occultism" },
+        { "stat": "Moves", "name": "Running" },
+        { "stat": "Style", "name": "Disguise" },
+        { "stat": "Brawn", "name": "Tough" }
+      ],
+      "health": 5,
+      "defence": 9,
+      "attacks": [],
+      "notes": [
+        "Cheerful Cultist Pod-person.",
+        "Pod-people are creepy plants, not actual people - you don't have to feel bad about killing Steve-joggers.",
+        "Commanded by the subliminal signal in the evening radio commercials; when it broadcasts, every Steve leaves home in fitness gear and jogs around searching for threats.",
+        "Any Steves caught in flooding soon lose functionality and become fertilizer to the forest."
+      ],
+      "description": "One of the perfect, identical pod-person clones that have replaced the Osterman Labs scientists. Perfect hair, perfect teeth, the same clothes, jogging first thing every morning. All of them are called Steve - Steve Radioshow, Steve Bakingsoda, Steve Feelgood, Steve Cowbell...",
+      "page": 122
+    },
+    {
+      "name": "Average Possessed Townsperson",
+      "setting": "strange",
+      "type": "Mook",
+      "smarts": 2,
+      "moves": 4,
+      "style": 2,
+      "brawn": 4,
+      "focuses": [
+        { "stat": "Smarts", "name": "Occultism" },
+        { "stat": "Moves", "name": "Riding" },
+        { "stat": "Style", "name": "Ritual Dance" },
+        { "stat": "Brawn", "name": "Brawling" }
+      ],
+      "health": 4,
+      "defence": 12,
+      "attacks": [],
+      "notes": [
+        "Mindless Drone.",
+        "In a trance, under the control of the ringleader Felicity McCallum; will try to protect her while she recites the ritual. Overpowered Heroes are carried to the pit to be hurled in as a sacrifice.",
+        "A flood should wake them from their trance-like state."
+      ],
+      "description": "A townsperson of Wildenville in 1884, wandering aimlessly under the influence of the ancient interdimensional gods and preparing to summon Yogurt-Sothoth.",
+      "page": 130
+    }
+  ],
+  "pregens": []
+}

@@ -2,7 +2,7 @@
 
 A multi-user web wrapper around the [Dungeon Desk](https://github.com/MrSyrett/dungeondesk)
 TTRPG tools (Dungeon Crawler Carl & Shadowdark character sheets and session-prep
-builders). The original tools store everything in the browser's `localStorage`;
+builders), plus an ACE! (Awfully Cheerful Engine) Hero ID Card built for this app. The original tools store everything in the browser's `localStorage`;
 this app hosts them behind accounts and saves each user's data in Postgres.
 
 ## Stack
@@ -38,6 +38,21 @@ registered in `lib/tools.ts`.
 | `dcc-session`   | Dungeon Crawler Carl | `dcw_builder_v5` |
 | `sd-character`  | Shadowdark           | `sd_sheet`       |
 | `sd-session`    | Shadowdark           | `dcw_builder_v5` |
+| `ace-character` | ACE!                 | `ace_sheet`      |
+
+## Game systems
+
+The dashboard, the `/rules` shelf and the tool registry are keyed by
+`SystemKey` in `components/systemStore.ts` (`"SD" | "DCC" | "ACE"`). To add a
+system: add its key and accent to `SYSTEMS`, register its tools in
+`lib/tools.ts`, and add its reference links to `SYSTEM_REFERENCE` in
+`app/dashboard/page.tsx`. Everything else (rulebook tagging, campaign rosters,
+VTT tokens, the documents API) reads those two tables.
+
+Rulebook content lives as curated JSON under `data/<system>/` and is fanned out
+to typed `lib/data/*.ts` (Next pages) and `public/tools-data/*.js` (the HTML
+tools) by `npm run data:dcc` / `npm run data:ace`. The generated files are
+committed; re-run after editing the JSON.
 
 > Note: portrait images are intentionally not persisted (the original tools strip
 > them before saving to avoid storage-quota issues). Same limitation here.

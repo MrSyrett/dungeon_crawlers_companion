@@ -10555,12 +10555,37 @@ function init_party(root) {
     };
   }
 
+  // Build a Party-tool summary from an ACE! Hero ID Card. The card stores raw
+  // Stats/Focuses; Defence and Health are recomputed here the way the card does
+  // (Moves ×3 +6 Dodging, min 8, + gear bonus; Brawn +2 Tough + bonus).
+  function aceParty(d) {
+    const S = d.stats || {}, F = d.focuses || {};
+    const n = v => parseInt(v) || 0;
+    const ids = ['smarts','moves','style','brawn'].concat(d.hasPower ? ['power'] : []);
+    let def = n(S.moves) * 3 + (/^dodg/i.test(F.moves || '') ? 6 : 0);
+    if(def < 8) def = 8;
+    def += n(d.defBonus);
+    const hpMax = Math.max(0, n(S.brawn) + (/^tough/i.test(F.brawn || '') ? 2 : 0) + n(d.hpBonus));
+    const hpCur = (typeof d.hpCur === 'number') ? d.hpCur : hpMax;
+    return {
+      system: 'ACE',
+      name: d.name || 'Unnamed',
+      trait: d.trait || '', role: d.role || '', role2: d.role2 || '', setting: d.setting || '',
+      stats: ids.map(id => ({ id, abbr: id.charAt(0).toUpperCase() + id.slice(1), val: n(S[id]), focus: F[id] || '' })),
+      defence: def, hpCur, hpMax, karma: (typeof d.karma === 'number') ? d.karma : 6,
+      ability: d.ability || '',
+      attacks: (d.attacks || []).filter(a => a && a.name).map(a => ({ name: a.name, kind: a.kind || 'melee', damage: a.damage || '' })),
+      gear: (d.gear || []).filter(g => g && g.name).map(g => g.name),
+    };
+  }
+
   // Sheets come from a few exporters (our sheet, Shadowdarklings). Read defensively.
   function normalize(raw) {
     if(!raw || typeof raw !== 'object') return null;
     const d = raw.sheet && typeof raw.sheet === 'object' ? raw.sheet : raw;
-    // DCC sheets have a distinct shape (header + combat blocks) — route them to
-    // the DCC summariser instead of the Shadowdark path below.
+    // ACE! cards tag themselves; DCC sheets have a distinct shape (header +
+    // combat blocks). Route each to its own summariser, else Shadowdark below.
+    if(d && d.system === 'ACE') return aceParty(d);
     if(d && d.header && d.combat) return dccParty(d);
     if(!d.name && !d.class && !d.stats) return null;
     const st = d.stats || d.rolledStats || {};
@@ -10737,8 +10762,39 @@ function init_party(root) {
     return h;
   }
 
+  function cardHTMLACE(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = [[c.trait, c.role].filter(Boolean).join(' '), c.role2, c.setting ? 'ACE! · ' + c.setting : 'ACE!'].filter(Boolean).join(' · ');
+    const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip">HP <b>' + esc(c.hpCur) + '/' + esc(c.hpMax) + '</b></span>'
+       + '<span class="pty-chip">DEF <b>' + esc(c.defence) + '</b></span>'
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats">' + c.stats.map(s =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.abbr) + '</div>'
+      + '<div class="pty-stat-mod">' + s.val + 'd</div>'
+      + '<div class="pty-stat-val">' + (s.focus ? esc(s.focus) + ' ' + (s.val + 2) + 'd' : '—') + '</div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Karma', c.karma) + cell('Defence', c.defence) + cell('Health', c.hpCur + '/' + c.hpMax)
+       + (c.hpCur <= 0 && c.hpMax > 0 ? '<span class="pty-chip" style="color:#ff6a6a;">Knocked Out</span>' : '')
+       + '</div></div>';
+    if(c.ability) h += '<div class="pty-sec"><div class="pty-sec-h">Role ability</div><div class="pty-line">' + esc(c.ability) + '</div></div>';
+    if(c.attacks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a =>
+        '<div class="pty-line"><b>' + esc(a.name) + '</b> <span class="dim">' + esc(a.kind) + (a.damage ? ' · ' + esc(a.damage) + ' dmg' : '') + '</span></div>').join('') + '</div>';
+    if(c.gear.length) h += '<div class="pty-sec"><div class="pty-sec-h">Gear</div><div class="pty-line dim">' + esc(c.gear.join(', ')) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
   function cardHTML(entry) {
     const c = entry.sheet;
+    if(c.system === 'ACE') return cardHTMLACE(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);
     const open = openIds.has(entry.id);
     const hp = c.hpCur !== '' ? esc(c.hpCur) + '/' + c.hpMax : String(c.hpMax);

@@ -1,0 +1,83 @@
+{
+  "statDescriptions": {
+    "Smarts": "Smarts measures how clever, perceptive, and knowledgeable you are. You might use Smarts to crack a cypher, remember an obscure fact, or spot a trap.",
+    "Moves": "Moves measures how quick, accurate, and agile you are. You would use Moves to win a race, shoot a pistol, ride a horse, or balance on a tightrope.",
+    "Style": "Style measures how cool, stylish and charismatic you are. Style is used to trick a guard, seduce a villain, or sing a song.",
+    "Brawn": "Brawn measures how strong and tough you are. Brawn is used to hit things, lift things, or withstand damage.",
+    "Power": "Some games feature a fifth Stat called Power. This represents magic, psionic power, or similar abilities. It can do anything the other Stats can do, but every time you use it you spend a Karma point. You only get a Power Stat if your Role says you do."
+  },
+  "difficulties": [
+    { "name": "Easy", "tn": null, "examples": "Pick up a book, drive down the street, climb a ladder (no roll needed)" },
+    { "name": "Normal", "tn": 10, "examples": "Climb a rope, build a campfire, parallel parking" },
+    { "name": "Hard", "tn": 20, "examples": "Break down a door, scale a cliff, pick a lock" },
+    { "name": "Herculean", "tn": 30, "examples": "Walk a tightrope, fill out a tax form, jump a car across a canyon" },
+    { "name": "Impossible", "tn": 40, "examples": "Lift a car, derive the Theory of Relativity" }
+  ],
+  "weapons": [
+    { "name": "Bazooka", "damage": 5 },
+    { "name": "Bow", "damage": 2 },
+    { "name": "Club", "damage": 2 },
+    { "name": "Grenade", "damage": 4 },
+    { "name": "Knife", "damage": 2 },
+    { "name": "Machine Gun", "damage": 4 },
+    { "name": "Pistol", "damage": 3 },
+    { "name": "Rifle", "damage": 3 },
+    { "name": "Spear", "damage": 2 },
+    { "name": "Sword", "damage": 3 }
+  ],
+  "unarmedDamage": [
+    { "minBrawn": 1, "maxBrawn": 5, "damage": 1 },
+    { "minBrawn": 6, "maxBrawn": 10, "damage": 2 },
+    { "minBrawn": 11, "maxBrawn": 15, "damage": 3 },
+    { "minBrawn": 16, "maxBrawn": 20, "damage": 4 }
+  ],
+  "purchase": [
+    { "amount": "Up to 10", "tn": null, "examples": "Candy bar, dagger, basic meal" },
+    { "amount": "Up to 1,000", "tn": 10, "examples": "Bicycle, suit of armor, ray gun, healing potion" },
+    { "amount": "Up to 10,000", "tn": 20, "examples": "Cheap car, magic sword" },
+    { "amount": "Up to 100,000", "tn": 30, "examples": "Luxury car, masterpiece art, small ship" },
+    { "amount": "Up to 1,000,000", "tn": 40, "examples": "House, helicopter" }
+  ],
+  "karmaUses": [
+    { "name": "Add an extra die to a dice roll", "text": "For each Karma point you spend, you can add an extra die. You can choose to do this after you fail a roll, and you can add the extra dice one at a time as many times as you need to. If this means you end up doing something palpably impossible, come up with a reason why you were able to do that." },
+    { "name": "Reduce damage from an attack", "text": "You can only do this at the same time as the attack. For each Karma point you spend, the attack's damage is reduced by one point. Describe out loud how the damage was reduced." },
+    { "name": "Negate the Calamity Die", "text": "Of course, Calamity Dice are fun, so we don't encourage this." },
+    { "name": "Instigate a Flashback", "text": "Describe an action you took before the current events which has an effect on the current situation. The action must be one you were capable of using the normal rules (a Flashback to have a car handy still needs a Style roll). You can flash back as far as you like, even to your childhood." }
+  ],
+  "combatCircumstances": [
+    { "name": "Long range", "effect": "Deducts one die from your roll." },
+    { "name": "High ground", "effect": "Adds one die to your roll." },
+    { "name": "Prone opponent", "effect": "Adds one die to your roll if you are making a melee attack against them, but deducts one die if you are making a ranged attack." }
+  ],
+  "creation": {
+    "statPoints": 12,
+    "statMin": 2,
+    "statMax": 5,
+    "startingKarma": 6,
+    "maxKarma": 10,
+    "minDefence": 8,
+    "defenceMultiplier": 3,
+    "dodgingDefenceBonus": 6,
+    "toughHealthBonus": 2
+  },
+  "quickRules": [
+    { "title": "Building a Hero", "text": "Choose a Role, spend 12 points between your four Stats (max 5, min 2 — the checklist on p.8 says 1, but the Stats section on p.14 says no Stat can be less than 2), pick one Focus per Stat, work out Defence and Health, choose a Trait. Health = Brawn (+2 with Tough). Defence = Moves x 3 (+6 with Dodging), minimum 8. Start with 6 Karma." },
+    { "title": "Rolling Dice", "text": "Roll a number of d6 equal to the Stat and add them up. If the task relates to your Focus, roll two extra dice. Sixes explode: roll any six again and add the new number, repeating on further sixes." },
+    { "title": "Target Numbers", "text": "Equal or beat the Target Number to succeed. Normal 10, Hard 20, Herculean 30, Impossible 40. Easy tasks need no roll." },
+    { "title": "Opposed Actions", "text": "When two Heroes or Extras compete, both roll (the Stats need not match, e.g. guard's Smarts vs. Hero's Moves) and the highest wins. On a draw, roll again." },
+    { "title": "Circumstances", "text": "The Director may grant an extra die when circumstances favor you, or deduct a die when they hinder you." },
+    { "title": "The Calamity Die", "text": "One of your dice is the Calamity Die. If you fail and the Calamity Die shows a 1, a Calamity occurs; your so-called friends decide what it is." },
+    { "title": "Attacking", "text": "Melee attacks roll Brawn (add Brawling); ranged attacks roll Moves (add Shooting). Beat the target's Defence (their Moves x 3) to hit." },
+    { "title": "Combat Circumstances", "text": "Long range: -1 die. High ground: +1 die. Prone opponent: +1 die for melee, -1 die for ranged." },
+    { "title": "Damage & Knocked Out", "text": "A hit removes Health equal to the weapon's damage; unarmed damage is 1 per 5 points of Brawn (Focus dice may count). At 0 Health you are Knocked Out; you don't die, and wake up five minutes later with 1 Health." },
+    { "title": "Recovery", "text": "Recover 1 Health per day naturally, or 2 per day under medical care (someone with a Medicine Focus, or a hospital)." },
+    { "title": "Who Goes First", "text": "The combatant with the highest Moves goes first, takes their turn, then chooses who goes next, and so on until everyone has acted. Ties: compare Smarts, then Style, then Brawn." },
+    { "title": "Your Turn", "text": "You can move and take one action. The Director divides the area into zones; moving takes you into an adjacent zone. Anyone in the same zone can fight hand-to-hand; otherwise shoot or throw something." },
+    { "title": "Using Power", "text": "Power can do anything another Stat can do, but every use costs 1 Karma. Power attacks do 1 damage, +1 per extra Karma spent. Healing works the same way: 1 Health per Karma. Protection: use Power instead of Moves to set the Defence of you or an ally." },
+    { "title": "Spending Karma", "text": "Spend Karma to add an extra die (even after failing, one at a time), reduce an attack's damage by 1 per point, negate the Calamity Die, or instigate a Flashback." },
+    { "title": "Regaining Karma", "text": "Whenever you take a significant action that reflects your Trait, the Director may award a Karma point. You cannot go above 10 Karma." },
+    { "title": "Gear & Wealth", "text": "You have whatever your Role suggests. To buy something special, spend a Karma point (even if you fail) and roll Style (plus Wealth Focus) against the item's Target Number: 10 for up to 1,000; 20 up to 10,000; 30 up to 100,000; 40 up to 1,000,000." },
+    { "title": "Advancement", "text": "At the end of each adventure, increase one Stat by one point or learn one new Focus. Health and Defence increase with Brawn and Moves." },
+    { "title": "Roles & Traits", "text": "Your Role gives one special ability. You can combine two Roles (Ninja Turtle, Elf Ranger) but only get one of the abilities; the second is descriptive. No two Heroes in the group can have the same Trait." }
+  ]
+}

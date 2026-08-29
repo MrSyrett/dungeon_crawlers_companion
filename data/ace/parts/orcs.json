@@ -1,0 +1,298 @@
+{
+  "setting": {
+    "key": "orcs",
+    "name": "Orcs & Oubliettes",
+    "tagline": "Dusk Watch constables delving dungeons beneath a city on a spider's web",
+    "blurb": "Welcome to Webworld, a disc-shaped world tethered to the web of the great spider An'Ansee, and to Heq Moreveg, the not-so-shining jewel dangling at the centre of that web. The Heroes are constables of the Dusk Watch, the city's largely derided constabulary, patrolling from Watch Station 12-and-1-Half. Orcs & Oubliettes is designed to be light, fun, and exciting: fist fights, dungeon delving, equipment upgrading, friendly orcs, an interdimensional prison, and a dragon with a temper tantrum.",
+    "pages": [163, 200],
+    "recommendedRoles": [],
+    "usesPower": true,
+    "rules": [
+      "Many Roles from the ACE! core rules work for this adventure; the book adds three new Roles: Watch Captain, Sprite, and Troll.",
+      "Dusk Watch starting kit: as a member of the Watch you have a tabard, a weapon, a leather jerkin, a whistle, a truncheon, and a waterproof poncho.",
+      "Gold is the standard coin on Webworld; gems and precious ore are always given an equivalent gold value. Cost table: up to 10 gold needs no roll; up to 1,000 is Style 10; up to 10,000 is Style 20; up to 100,000 is Style 30; up to 1,000,000 is Style 40.",
+      "A little steampunk-type tech exists alongside magic: flying galleons, magical picture boxes, steam-powered engines of destruction.",
+      "Loot: it is up to the Director whether Heroes keep loot found in dungeons; the thieves' guilds get upset at unsolicited thievery, so it may be prudent to declare it with them.",
+      "Magic items can be found while exploring a dungeon or looting a corpse as well as purchased; each is listed under the difficulty to buy it. Core rules magic items (p. 16-17) also apply.",
+      "Sprite: fly for rounds equal to 3 x Moves, then rest for the same number of rounds (or spend 1 Karma to refresh flying to zero rounds). Brawn can never exceed 2 (unless wearing Bracers of Giant Strength), start with 2 extra Karma, and never take falling damage.",
+      "Troll: gains the Tough Focus for free in addition to the chosen Brawn Focus, and deals 1 extra damage with fists or melee weapons.",
+      "Watch Captain: your badge gets you into everywhere but the thieves' guilds (appointment only); once per scene spend 1 Karma to ask the Director for an important clue (not spent if there are no clues).",
+      "Thieves' guilds may only be raided by prior appointment with at least forty-seven hours and fifty-six minutes notice.",
+      "Three sharp whistle blasts with a pause, repeated, signal a Watch member under attack and in need of assistance.",
+      "Honouring a shrine to An'Ansee grants a Hero 1 temporary Karma until the end of the scene, which can take them above their normal maximum.",
+      "A bargain with a demon can cost a sliver of each Hero's soul: 1 Karma each, with possible story repercussions in future games.",
+      "The Dragonseur, an ancient platinum ranseur forged in the Age of Flame, halves a dragon's Defence against attacks made with it and inflicts double damage (4 instead of 2) on a hit.",
+      "A dragon's sudden reveal calls for a Smarts or Style 20 roll; anyone who fails is paralysed by fear and awe for 1d6 rounds.",
+      "Salvation orcs use the core rules orc stats (ACE! p. 27). A band of twenty noisy orcs imposes -1d6 on stealth attempts; sending them off as a distraction instead grants +1d6 to stealth rolls.",
+      "Redoubtable Guards use the core Soldier or Cop stats (replace the Cop's pistol with a bow); giant spiders, zombies, mooks, and carnivorous plants come from the core bestiary."
+    ]
+  },
+  "roles": [
+    {
+      "name": "Watch Captain",
+      "category": "Orcs & Oubliettes",
+      "setting": "orcs",
+      "ability": "You've worked your way through the ranks and now look after your own merry band of constables and special investigators. Your badge gets you entrance into everywhere but the thieves' guilds—those are by appointment only—plus you can spend a Karma point once per scene to ask the Director for an important clue. Just the one mind. And if there aren't any clues, you don't spend the Karma point.",
+      "page": 169
+    },
+    {
+      "name": "Sprite",
+      "category": "Orcs & Oubliettes",
+      "setting": "orcs",
+      "ability": "Thanks to faerie dust and a set of glimmering wings, you can fly for a number of rounds equal to three times your Moves. After that, you need to rest for the same number of rounds that you spent flying before being able to fly again. Or you can spend 1 Karma to refresh your flying to zero rounds. You can't ever have a Brawn higher than 2 but you do start the game with 2 extra Karma. You also never take falling damage but gently drift to the ground like a feather.",
+      "page": 169
+    },
+    {
+      "name": "Troll",
+      "category": "Orcs & Oubliettes",
+      "setting": "orcs",
+      "ability": "You're massive, strong and generally only attractive to other members of your species. You gain the Tough Focus for free, in addition to whatever other Focus you choose for your Brawn Stat and you deal 1 extra damage with your fists or weapons in melee. You also eat a lot and you're not too fussy about flavour.",
+      "grantsFocus": ["Tough"],
+      "page": 169
+    }
+  ],
+  "focuses": [],
+  "traits": [],
+  "gear": [
+    {
+      "name": "Dusk Watch Kit",
+      "setting": "orcs",
+      "tier": "Free",
+      "tn": null,
+      "category": "Kit",
+      "description": "As a member of the Dusk Watch, you'll have everything that's required to fulfil your role, which includes a tabard, a weapon, a leather jerkin, a whistle, a truncheon, and a waterproof poncho.",
+      "page": 169
+    },
+    {
+      "name": "Dagger",
+      "setting": "orcs",
+      "tier": "Free",
+      "tn": null,
+      "category": "Weapon",
+      "description": "Cost table example: buy a dagger, send a carrier pigeon, or rent a room at an inn for up to 10 gold (no roll needed).",
+      "page": 170
+    },
+    {
+      "name": "Bow",
+      "setting": "orcs",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Weapon",
+      "description": "Cost table example: up to 1,000 gold (Style 10).",
+      "page": 170
+    },
+    {
+      "name": "Chain Mail",
+      "setting": "orcs",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Armor",
+      "description": "Cost table example: up to 1,000 gold (Style 10).",
+      "page": 170
+    },
+    {
+      "name": "Healing Potion",
+      "setting": "orcs",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Consumable",
+      "description": "Cost table example: up to 1,000 gold (Style 10).",
+      "page": 170
+    },
+    {
+      "name": "Small Boat or Horse",
+      "setting": "orcs",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Vehicle",
+      "description": "Cost table example: up to 10,000 gold (Style 20).",
+      "page": 170
+    },
+    {
+      "name": "Magic Sword",
+      "setting": "orcs",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Magic Item",
+      "description": "Cost table example: up to 10,000 gold (Style 20).",
+      "page": 170
+    },
+    {
+      "name": "Griffon or Flying Beast",
+      "setting": "orcs",
+      "tier": "Herculean",
+      "tn": 30,
+      "category": "Vehicle",
+      "description": "Cost table example: buy a griffon or similar flying beast, or purchase a ship, for up to 100,000 gold (Style 30).",
+      "page": 170
+    },
+    {
+      "name": "Ship or Airship",
+      "setting": "orcs",
+      "tier": "Impossible",
+      "tn": 40,
+      "category": "Vehicle",
+      "description": "Cost table example: buy your own ship or airship for up to 1,000,000 gold (Style 40).",
+      "page": 170
+    },
+    {
+      "name": "Climbing Potion",
+      "setting": "orcs",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Magic Item",
+      "description": "Like some sort of spider or creepy possessed person, you can climb as fast as you can walk for one scene.",
+      "page": 170
+    },
+    {
+      "name": "Dark Vision Potion",
+      "setting": "orcs",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Magic Item",
+      "description": "Lets you see in the dark for one scene.",
+      "page": 170
+    },
+    {
+      "name": "Riveted Rod",
+      "setting": "orcs",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Magic Item",
+      "description": "A metal rod that stays in place when a button is pushed, even if it's just hanging in the air all on its lonesome.",
+      "page": 170
+    },
+    {
+      "name": "Snore Powder",
+      "setting": "orcs",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Magic Item",
+      "description": "Fling it in someone's face and watch them fall asleep! Unless they pass a hard Brawn 20 roll that is, which means they'll probably just sneeze instead.",
+      "page": 170
+    },
+    {
+      "name": "Amulet of Fiery Death",
+      "setting": "orcs",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Magic Item",
+      "description": "This amulet has three quick release hoops attached, each of which has a small ruby inset into it. When thrown, each hoop does 2 damage to everyone within 30 feet. So make sure you throw them at least 30 feet away!",
+      "damage": 2,
+      "page": 171
+    },
+    {
+      "name": "Bag of Storing",
+      "setting": "orcs",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Magic Item",
+      "description": "A sack, satchel, rucksack or some type of… bag that can hold an awful lot of stuff inside the pocket dimension that nests within its innocent looking opening. Who knows what might be lurking inside the nooks and crannies of its interdimensional space? (The Director, that's who!)",
+      "page": 171
+    },
+    {
+      "name": "Lidded Eye",
+      "setting": "orcs",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Magic Item",
+      "description": "A lantern with a mechanism that can change it from hooded (30 foot radius of light) to bullseye (5 foot wide 60 foot line of light). Anything invisible that is caught by the lantern's light is now visible.",
+      "page": 171
+    },
+    {
+      "name": "Winged Boots",
+      "setting": "orcs",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Magic Item",
+      "description": "Leather boots with itty bitty wings on each ankle. You can click your heels together and fly for an hour. Once they've been used to fly, they need an hour's rest before they can be used again.",
+      "page": 171
+    },
+    {
+      "name": "Absorbing Gloves",
+      "setting": "orcs",
+      "tier": "Herculean",
+      "tn": 30,
+      "category": "Magic Item",
+      "description": "A pair of black gloves that absorb a Power that specifically targets you (not an area effect). If the gloves absorb a Power, they convert it into 1 Karma and store it. The gloves can hold up to 10 Karma. Power targeting you once the gloves are full has its normal effect. If you have a Power stat, you can use the stored Karma to fuel your Powers.",
+      "page": 171
+    },
+    {
+      "name": "Bracers of Giant Strength",
+      "setting": "orcs",
+      "tier": "Herculean",
+      "tn": 30,
+      "category": "Magic Item",
+      "description": "Putting these on makes you amazingly strong. Multiply your Brawn Stat by 4 for anything related to feats of strength, including unarmed damage, and add your unarmed damage as a bonus to damage when attacking with melee weapons. Don't adjust your Health, this only affects your strength. Sprites can have a Brawn higher than 2 if they have a pair of these.",
+      "page": 171
+    },
+    {
+      "name": "Symbol of Speed",
+      "setting": "orcs",
+      "tier": "Herculean",
+      "tn": 30,
+      "category": "Magic Item",
+      "description": "Shaped like a lightning bolt, this symbol needs to be worn prominently on the centre of your chest. Shout the magic words 'fastest person alive' to activate it: you gain two actions instead of one each turn for the rest of the scene. The symbol needs 24 hours to recharge once used.",
+      "page": 171
+    },
+    {
+      "name": "Lamp of Three Wishes",
+      "setting": "orcs",
+      "tier": "Impossible",
+      "tn": 40,
+      "category": "Magic Item",
+      "description": "Give it a polish, then say hi to the djinni inside and seriously ponder your heart's desires. You can't wish for more wishes. What can you wish for? Director, this one's on you!",
+      "page": 171
+    },
+    {
+      "name": "Vorpal Blade",
+      "setting": "orcs",
+      "tier": "Impossible",
+      "tn": 40,
+      "category": "Magic Item",
+      "description": "A sword that goes snicker-snack! You get 1 extra die when attacking with this weapon and it does +2 damage. If you roll three 6s when you attack then you chop off the creature's head. Unless it has more than one head, there's no coming back from that!",
+      "page": 172
+    },
+    {
+      "name": "Dragonseur",
+      "setting": "orcs",
+      "tier": "Impossible",
+      "tn": null,
+      "category": "Magic Item",
+      "description": "A ranseur seemingly made from platinum and carved with intricate runes, forged during the Age of Flame to combat the dragons. Brought to bear against a dragon, it halves her Defence against attacks made with it and inflicts double damage on a successful attack (4 instead of the normal 2). It also becalms air elementals.",
+      "damage": 4,
+      "page": 191
+    }
+  ],
+  "extras": [
+    {
+      "name": "Guardian Demon",
+      "setting": "orcs",
+      "type": "Demon",
+      "smarts": 5,
+      "moves": 3,
+      "style": 5,
+      "brawn": 8,
+      "power": 5,
+      "focuses": [
+        { "stat": "Style", "name": "Persuasion" },
+        { "stat": "Brawn", "name": "Brawling" },
+        { "stat": "Power", "name": "Fire", "dice": 7 }
+      ],
+      "health": 8,
+      "defence": 9,
+      "attacks": [
+        { "name": "Firebolt", "dice": 7, "damage": 2, "note": "30' range" },
+        { "name": "Fiery Sword", "dice": 10, "damage": 3, "note": "plus a Moves 10 roll to avoid catching fire" }
+      ],
+      "notes": [
+        "Bound to guard the Dragonseur; appears as soon as intruders set foot on its lava-ringed island and blocks the exit with roaring flames (leaping through the flames inflicts 6 damage).",
+        "Prefers conversation to combat: offers the answer to one of the Oubliette's puzzles in exchange for a sliver of each Hero's soul (1 Karma each), then vanishes in a blaze of cinders.",
+        "The dragonseur it guards is an illusion; the real one was stolen by the orcs of Salvation."
+      ],
+      "description": "A creature from the Abyss bound to guard an ancient weapon in the Orphic Oubliette. Bored and hungry, it greets fresh arrivals with 'Ah, how wonderful. Fresh meat for the barbecue'.",
+      "page": 192
+    }
+  ],
+  "pregens": []
+}

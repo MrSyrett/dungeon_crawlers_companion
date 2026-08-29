@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- BUILD: ACE! Hero ID Card — 2026-08-29 -->
+<script>window.__BUILD__="ACE! Hero ID Card — 2026-08-29";</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACE! Hero ID Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ═══ ACE! Hero ID Card ═══
+   Same app-wrap / sheet / roll-log skeleton as the DCC sheet so the injected
+   save shim, the campaign roll log and the mobile layout all behave the same.
+   Palette: the omnibus' comic-book sky blue with the ID card's yellow. */
+:root {
+  --bg:#dfe9f0;--paper:#f7f4ea;--ink:#1a1a1a;--muted:#5a5f66;--rule:#b9b3a4;
+  --ace:#2b93c9;--ace-dk:#1d6f9a;--yellow:#f4d84a;--yellow-dk:#d8b92a;--green:#2f8f4e;--red:#c0251e;
+  --border:#2a2a2a;--section-hdr:#1d1d21;--box:#efe9d6;--input-bg:#fff;--input-border:#888;
+  --log-bg:#111;--log-text:#e8e4dc;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
+.app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;}
+.roll-log{width:270px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--ace);position:sticky;top:0;height:100vh;overflow:hidden;}
+#log-collapse-btn{position:fixed;right:270px;top:50%;transform:translateY(-50%);z-index:201;background:var(--ace);color:white;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
+#log-collapse-btn::after{content:"\25C0";}
+.roll-log.collapsed #log-collapse-btn{right:0;}
+.roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
+.log-header{padding:12px 14px 10px;background:var(--ace);display:flex;justify-content:space-between;align-items:center;}
+.log-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:.12em;color:white;}
+.log-clear{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:2px;}
+.log-clear:hover{background:rgba(255,255,255,.35);}
+.log-entries{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;gap:6px;}
+.log-entry{background:#1e1e1e;border:1px solid #333;border-radius:3px;padding:8px 10px;}
+.log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:2px;}
+.log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--log-text);line-height:1;}
+.log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#777;margin-top:3px;line-height:1.4;word-break:break-word;}
+.log-entry.crit .roll-result{color:#ffd700;}.log-entry.fumble .roll-result{color:#ff4444;}
+.log-entry.crit{border-color:#ffd700;}.log-entry.fumble{border-color:#ff4444;}
+.log-entry.remote{border-left:3px solid #8a7ac8;background:#1c1a24;}
+.log-entry .karma-die-btn{margin-top:6px;background:#2a2410;color:#f4d84a;border:1px solid #7a6a10;border-radius:3px;padding:3px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.log-entry .karma-die-btn:hover{background:#3d3416;}
+.log-entry .karma-die-btn:disabled{opacity:.4;cursor:default;}
+.log-hint{color:#444;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
+.log-actions{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid #222;}
+.log-action-btn{flex:1;padding:5px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;}
+.log-action-btn.export{background:#1a2a3a;color:#6aabdf;border:1px solid #1a4a8a;}
+.log-action-btn.export:hover{background:#1a4a8a;color:white;}
+.log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
+.log-action-btn.import:hover{background:#5a1a1a;color:white;}
+.log-action-btn.wizard{background:#2a2410;color:#f4d84a;border:1px solid #7a6a10;}
+.log-action-btn.wizard:hover{background:#7a6a10;color:white;}
+.log-action-btn.rules{background:#14261a;color:#7fd39a;border:1px solid #1f5a30;}
+.log-action-btn.rules:hover{background:#1f5a30;color:white;}
+.dm-toggle-wrap{display:flex;align-items:center;gap:6px;}
+.dm-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.75);}
+.dm-toggle-btn{width:36px;height:18px;background:#333;border:1px solid #555;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.dm-toggle-btn.on{background:#f4d84a;border-color:#d8b92a;}
+.dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:white;border-radius:50%;transition:left .2s;}
+.dm-toggle-btn.on::after{left:20px;background:#1a1a1a;}
+
+/* DICE TRAY */
+.dice-tray{border-top:1px solid #222;padding:10px;display:flex;flex-direction:column;gap:6px;background:#0c0c0c;}
+.tray-row{display:flex;gap:6px;align-items:center;}
+.tray-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;flex-shrink:0;}
+.tray-select,.tray-input{background:#1a1a1a;border:1px solid #333;color:#ddd;font-family:'Share Tech Mono',monospace;font-size:12px;padding:4px 6px;border-radius:3px;outline:none;}
+.tray-input{width:52px;text-align:center;}
+.tray-select{flex:1;min-width:0;}
+.dice-roll-btn{flex:1;padding:7px;background:var(--ace);border:none;color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .1s;}
+.dice-roll-btn:hover{background:#3aa8e0;}
+.tray-step{width:28px;height:28px;background:#1a1a1a;border:1px solid #333;color:#aaa;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;cursor:pointer;border-radius:3px;}
+.tray-step:hover{background:#333;color:#fff;}
+.tray-note{font-size:10px;color:#555;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;line-height:1.3;}
+
+/* SHEET */
+.sheet{background:var(--paper);border:2px solid var(--border);max-width:960px;margin:0 auto;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+.sheet::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+.sheet>*{position:relative;z-index:1;}
+.section-bar{background:var(--section-hdr);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.18em;text-transform:uppercase;padding:5px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.section-bar.blue{background:var(--ace);}
+.section-bar .sb-note{font-weight:600;font-size:10px;letter-spacing:.08em;text-transform:none;color:rgba(255,255,255,.75);}
+.section-bar .sb-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;cursor:pointer;border-radius:2px;}
+.section-bar .sb-btn:hover{background:rgba(255,255,255,.3);}
+
+/* HEADER — the yellow ID card strip */
+.hdr-row{display:flex;border-bottom:2px solid var(--border);background:var(--yellow);}
+.hdr-logo{background:var(--section-hdr);padding:10px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;gap:2px;}
+.hdr-logo .ace-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:34px;line-height:1;color:var(--yellow);letter-spacing:-.02em;font-style:italic;}
+.hdr-logo .ace-sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#fff;}
+.hdr-logo .ace-card{margin-top:4px;background:var(--yellow);color:#1a1a1a;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:10px;letter-spacing:.14em;padding:2px 7px;border-radius:2px;}
+.hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);border-left:2px solid var(--border);}
+.hdr-field{padding:5px 8px 6px;border-right:1px solid rgba(0,0,0,.18);border-bottom:1px solid rgba(0,0,0,.18);min-width:0;}
+.hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#4a4520;margin-bottom:2px;}
+.hdr-field input,.hdr-field select{width:100%;border:none;border-bottom:1px solid rgba(0,0,0,.35);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#1a1a1a;outline:none;padding:2px 0;}
+.hdr-field select{font-size:14px;cursor:pointer;}
+.hdr-field input::placeholder{color:rgba(0,0,0,.35);font-weight:500;}
+.hdr-field.lastcol{border-right:none;}
+
+/* BODY */
+.body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
+.stats-col{width:420px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;}
+.center-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+/* STATS TABLE */
+.stats-head{display:grid;grid-template-columns:82px 54px 1fr 54px 34px;gap:4px;padding:4px 10px 2px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.stat-row{display:grid;grid-template-columns:82px 54px 1fr 54px 34px;gap:4px;align-items:center;padding:5px 10px;border-bottom:1px solid var(--rule);}
+.stat-row.off{opacity:.45;}
+.stat-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink);cursor:pointer;user-select:none;}
+.stat-name:hover{color:var(--ace-dk);}
+.stat-name small{display:block;font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--muted);}
+.stat-input,.focus-input{height:32px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--ink);outline:none;}
+.stat-input{width:100%;text-align:center;}
+.focus-input{width:100%;font-family:'Barlow Condensed',sans-serif;font-size:14px;padding:0 8px;}
+.focus-dice{height:32px;line-height:30px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;background:var(--box);border:1px solid var(--rule);color:var(--ink);cursor:pointer;}
+.focus-dice:hover{background:var(--section-hdr);color:#fff;}
+.stat-roll{height:32px;background:var(--section-hdr);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
+.stat-roll:hover{background:var(--ace);}
+.power-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.chk{display:flex;align-items:center;gap:6px;cursor:pointer;}
+.chk input{width:16px;height:16px;accent-color:var(--ace);}
+.points-note{padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.04em;color:var(--muted);border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;}
+.points-note b{color:var(--ink);}
+.points-note .bad{color:var(--red);}
+.points-note .good{color:var(--green);}
+
+/* DERIVED */
+.derived{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule);}
+.derived-cell{padding:8px 10px;border-right:1px solid var(--rule);}
+.derived-cell:last-child{border-right:none;}
+.derived-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;}
+.derived-lbl small{font-weight:600;font-size:9px;letter-spacing:.06em;color:var(--muted);text-transform:none;}
+.derived-big{font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;line-height:1.1;color:var(--ink);}
+.derived-formula{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);letter-spacing:.04em;}
+.derived-formula input{width:36px;height:22px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:11px;text-align:center;color:var(--ink);outline:none;}
+.health-pips{display:flex;gap:3px;margin:6px 0 4px;flex-wrap:wrap;}
+.hp-pip{width:26px;height:26px;border:2px solid var(--border);background:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;color:#fff;transition:all .1s;}
+.hp-pip.lost{background:transparent;color:var(--muted);}
+.hp-pip:hover{transform:scale(1.08);}
+.ko-banner{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--red);padding:2px 6px;display:inline-block;}
+.small-btn{background:var(--section-hdr);color:#fff;border:none;border-radius:2px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.small-btn:hover{background:var(--ace);}
+.small-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule);}
+.small-btn.ghost:hover{background:var(--box);}
+
+/* KARMA */
+.karma-wrap{padding:8px 10px;border-bottom:1px solid var(--rule);}
+.karma-pips{display:flex;gap:4px;margin:6px 0;}
+.karma-pip{flex:1;height:22px;border:2px solid var(--yellow-dk);background:var(--yellow);cursor:pointer;border-radius:11px;transition:all .1s;}
+.karma-pip.spent{background:transparent;border-color:var(--rule);}
+.karma-pip:hover{transform:scale(1.06);}
+.karma-actions{display:flex;flex-wrap:wrap;gap:4px;}
+.karma-actions .small-btn{background:#3b3212;color:var(--yellow);}
+.karma-actions .small-btn:hover{background:var(--yellow-dk);color:#1a1a1a;}
+
+/* ROLE / TRAIT */
+.rt-grid{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule);}
+.rt-cell{padding:8px 10px;border-right:1px solid var(--rule);min-width:0;}
+.rt-cell:last-child{border-right:none;}
+.rt-cell textarea{width:100%;min-height:74px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:'Barlow',sans-serif;font-size:12px;line-height:1.45;padding:6px 8px;outline:none;resize:vertical;}
+.rt-hint{font-family:'Barlow',sans-serif;font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4;}
+
+/* ATTACKS */
+.attacks-table{width:100%;border-collapse:collapse;}
+.attacks-table th{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px;border-bottom:1px solid var(--rule);}
+.attacks-table td{padding:3px 6px;border-bottom:1px solid var(--rule);vertical-align:middle;}
+.attacks-table input,.attacks-table select{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
+.attacks-table select{cursor:pointer;font-size:12px;}
+.attacks-table input.num{width:44px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:13px;}
+.atk-dice{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+.row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;}
+.row-x:hover{color:var(--red);}
+.add-row{margin:6px 10px 8px;}
+
+/* GEAR / NOTES */
+.gear-table{width:100%;border-collapse:collapse;}
+.gear-table td{padding:2px 6px;border-bottom:1px solid var(--rule);}
+.gear-table input{width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow',sans-serif;font-size:13px;color:var(--ink);outline:none;padding:4px 0;}
+.gear-table input:focus{border-bottom-color:var(--ace);}
+.notes-box{padding:8px 10px;}
+.notes-box textarea{width:100%;min-height:110px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:'Barlow',sans-serif;font-size:13px;line-height:1.5;padding:8px;outline:none;resize:vertical;}
+.wealth-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 10px;border-top:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:.04em;}
+.wealth-row select{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:3px 6px;outline:none;}
+
+/* FOOTER */
+.sheet-foot{padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+
+/* DARK MODE */
+body.dark{--bg:#15171b;--paper:#232529;--ink:#e8e4dc;--muted:#a7a7ad;--rule:#3a3a42;--border:#4a4a52;--section-hdr:#0a0a0a;--box:#2e2e36;--input-bg:#1c1d22;--input-border:#4a4a52;}
+body.dark .sheet{border-color:#4a4a52;}
+body.dark .hdr-row{background:#b9a22c;}
+body.dark .hdr-field label{color:#2a2610;}
+body.dark .hdr-field input,body.dark .hdr-field select{color:#111;}
+body.dark .hdr-field select option{color:#111;background:#fff;}
+body.dark .stat-input,body.dark .focus-input{background:var(--input-bg);color:var(--ink);border-color:var(--rule);}
+body.dark .hp-pip.lost{color:#666;}
+body.dark .karma-pip.spent{border-color:#4a4a52;}
+
+/* Mobile toast */
+#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(10,10,12,0.93);border:2px solid var(--ace);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,0.7);}
+#roll-toast.show{display:block;animation:_toast-in .18s ease;}
+#roll-toast.crit{border-color:#6dbf6d;}#roll-toast.fumble{border-color:#df6a6a;}
+#roll-toast .t-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a8a93;margin-bottom:3px;}
+#roll-toast .t-result{font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:900;color:#f4d84a;line-height:1;}
+#roll-toast.crit .t-result{color:#6dbf6d;}#roll-toast.fumble .t-result{color:#df6a6a;}
+#roll-toast .t-detail{font-size:11px;color:#a0a0aa;margin-top:3px;}
+@keyframes _toast-in{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+
+/* MODALS (campaign, rules, builder) */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:16px;}
+.ov.open{display:flex;}
+.modal{background:#1a1a1e;border:2px solid var(--ace);border-radius:6px;max-width:520px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e8e4dc;font-family:'Barlow',sans-serif;}
+.modal.wide{max-width:760px;}
+.modal-hd{background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-hd .ttl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);line-height:1;}
+.modal-hd .x{background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;}
+.modal-bd{padding:14px 16px;overflow-y:auto;}
+.modal-ft{padding:10px 16px;border-top:1px solid #333;display:flex;justify-content:space-between;gap:8px;flex-shrink:0;}
+.m-btn{padding:9px 14px;border:none;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:var(--ace);color:#fff;}
+.m-btn:hover{background:#3aa8e0;}
+.m-btn.ghost{background:#222;color:#bbb;border:1px solid #444;}
+.m-btn.ghost:hover{background:#333;color:#fff;}
+.m-btn.warn{background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;}
+.m-btn:disabled{opacity:.4;cursor:default;}
+.m-hint{font-size:12px;color:#999;margin:0 0 12px;line-height:1.5;}
+.m-input{width:100%;padding:9px 10px;background:#141414;border:1px solid #2a2a2a;border-radius:5px;color:#eee;font-family:Barlow,sans-serif;font-size:13px;outline:none;}
+.m-input:focus{border-color:var(--ace);}
+.m-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#6ac8df;margin:10px 0 5px;}
+.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--yellow);margin:12px 0 3px;}
+.rules-list p{font-size:12px;line-height:1.5;color:#ccc;}
+.rules-list table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;}
+.rules-list td,.rules-list th{padding:3px 6px;border-bottom:1px solid #2a2a2a;text-align:left;}
+.rules-list th{color:#888;font-family:'Barlow Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;font-size:10px;}
+
+/* ═══ COLLAPSE + MOBILE ═══ */
+.roll-log{transition:width .2s ease;}
+.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
+@media (max-width:860px){
+  .body-row{flex-direction:column;}
+  .stats-col{width:100%;border-right:none;border-bottom:2px solid var(--border);}
+}
+@media (max-width:768px){
+  .app-wrap{flex-direction:column;align-items:stretch;}
+  .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
+  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--ace);z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
+  .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
+  .roll-log:not(.collapsed) .log-entries{max-height:calc(100vh - 230px);max-height:calc(100dvh - 230px);}
+  #log-collapse-btn{position:absolute !important;bottom:100% !important;top:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:80px !important;height:28px !important;border-radius:6px 6px 0 0 !important;font-size:11px !important;}
+  #log-collapse-btn::after{content:"\25B2 Log";}
+  .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
+  .hdr-row{flex-direction:column;}
+  .hdr-fields{grid-template-columns:1fr 1fr;border-left:none;border-top:2px solid var(--border);}
+  .hdr-field{grid-column:span 1 !important;}
+  .hdr-field.wide{grid-column:span 2 !important;}
+  .stats-head,.stat-row{grid-template-columns:70px 44px 1fr 44px 34px;padding-left:6px;padding-right:6px;}
+  .derived,.rt-grid{grid-template-columns:1fr;}
+  .derived-cell,.rt-cell{border-right:none;border-bottom:1px solid var(--rule);}
+}
+</style>
+</head>
+<body>
+<div id="roll-toast"><div class="t-label"></div><div class="t-result"></div><div class="t-detail"></div></div>
+<div class="app-wrap">
+
+<!-- ═══ SHEET ═══ -->
+<div class="sheet-wrap">
+<div class="sheet">
+
+  <!-- HEADER / ID CARD -->
+  <div class="hdr-row">
+    <div class="hdr-logo">
+      <div class="ace-word">ACE!</div>
+      <div class="ace-sub">Awfully Cheerful Engine</div>
+      <div class="ace-card">ID CARD</div>
+    </div>
+    <div class="hdr-fields">
+      <div class="hdr-field wide" style="grid-column:span 5;"><label>Name</label><input type="text" id="f-name" placeholder="Hero name"></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Trait</label><input type="text" id="f-trait" list="dl-traits" placeholder="Squeamish"></div>
+      <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Role</label><input type="text" id="f-role" list="dl-roles" placeholder="Scientist"></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Second Role <span style="font-weight:600;letter-spacing:0;text-transform:none;">(descriptive only)</span></label><input type="text" id="f-role2" list="dl-roles" placeholder="optional"></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Setting</label><select id="f-setting"><option value="core">Any — core rules</option></select></div>
+      <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
+    </div>
+  </div>
+
+  <div class="body-row">
+    <!-- LEFT: STATS + DERIVED + KARMA -->
+    <div class="stats-col">
+      <div class="section-bar blue"><span>Stats &amp; Focuses</span><span class="sb-note">Roll Stat · +2 dice with Focus</span></div>
+      <div class="points-note"><span>Stat points <b id="pts-used">0</b> / <b id="pts-max">12</b> <span id="pts-flag"></span></span><span>Each Stat 2–5 at creation</span></div>
+      <div class="stats-head"><span>Stat</span><span style="text-align:center;">Dice</span><span>Focus</span><span style="text-align:center;">Dice</span><span></span></div>
+      <div id="stats-list"></div>
+      <div class="power-toggle-row">
+        <label class="chk"><input type="checkbox" id="has-power" onchange="onPowerToggle()"> Power Stat (Wizards, Aliens…)</label>
+        <span id="power-note" style="font-weight:600;text-transform:none;letter-spacing:0;">costs 1 Karma per use</span>
+      </div>
+
+      <div class="derived">
+        <div class="derived-cell">
+          <div class="derived-lbl"><span>Defence</span><small>Moves × 3 · min 8</small></div>
+          <div class="derived-big" id="def-val">8</div>
+          <div class="derived-formula">Dodging +6 · gear <input type="number" id="def-bonus" value="0" oninput="recalc()"> <button class="small-btn ghost" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">Roll it</button></div>
+        </div>
+        <div class="derived-cell">
+          <div class="derived-lbl"><span>Health</span><small>= Brawn · Tough +2</small></div>
+          <div class="derived-big"><span id="hp-cur">2</span><span style="font-size:16px;color:var(--muted);"> / <span id="hp-max">2</span></span></div>
+          <div class="health-pips" id="hp-pips"></div>
+          <div class="derived-formula">bonus <input type="number" id="hp-bonus" value="0" oninput="recalc()">
+            <button class="small-btn ghost" onclick="damage(1)">−1</button>
+            <button class="small-btn ghost" onclick="heal(1)">+1</button>
+            <button class="small-btn ghost" onclick="heal(99)">Full</button>
+            <span id="ko-flag"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="karma-wrap">
+        <div class="derived-lbl"><span>Karma <span id="karma-val" style="font-family:'Share Tech Mono',monospace;font-size:18px;">6</span></span><small>start 6 · max 10 · regain by playing your Trait</small></div>
+        <div class="karma-pips" id="karma-pips"></div>
+        <div class="karma-actions">
+          <button class="small-btn" onclick="karmaSpend('Reduced damage by 1')" title="Reduce an attack's damage by 1 per Karma">Soak 1 dmg</button>
+          <button class="small-btn" onclick="karmaSpend('Negated the Calamity Die')">No Calamity</button>
+          <button class="small-btn" onclick="karmaSpend('Flashback!')">Flashback</button>
+          <button class="small-btn" onclick="karmaGain()" title="The Director awards Karma for playing your Trait">+1 Trait</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: ROLE / TRAIT / ATTACKS / GEAR / NOTES -->
+    <div class="center-col">
+      <div class="section-bar"><span>Role Ability &amp; Trait</span><span class="sb-note">One special ability · one complication</span></div>
+      <div class="rt-grid">
+        <div class="rt-cell">
+          <div class="derived-lbl"><span id="ability-title">Role ability</span><button class="small-btn ghost" onclick="lookupAbility()" title="Fill from the Roles list">Look up</button></div>
+          <textarea id="f-ability" placeholder="What only you can do…" style="margin-top:4px;"></textarea>
+          <div class="rt-hint" id="role-hint"></div>
+        </div>
+        <div class="rt-cell">
+          <div class="derived-lbl"><span>Trait</span><small>invoke it → the Director awards Karma</small></div>
+          <textarea id="f-trait-notes" placeholder="How does your Trait complicate things?" style="margin-top:4px;"></textarea>
+          <div class="rt-hint" id="trait-hint"></div>
+        </div>
+      </div>
+
+      <div class="section-bar"><span>Attacks</span><span class="sb-note">Melee = Brawn (+Brawling) · Ranged = Moves (+Shooting) · vs Defence</span></div>
+      <table class="attacks-table">
+        <thead><tr><th style="width:38%;">Weapon</th><th>Kind</th><th style="width:60px;">Dmg</th><th>Dice</th><th style="width:74px;"></th></tr></thead>
+        <tbody id="attacks-body"></tbody>
+      </table>
+      <div class="add-row"><button class="small-btn ghost" onclick="addAttackRow()">+ Weapon</button> <button class="small-btn ghost" onclick="addAttackRow({name:'Unarmed',kind:'melee',damage:''})">+ Unarmed</button></div>
+
+      <div class="section-bar"><span>Gear</span><span class="sb-note">You have what your Role suggests. Money isn't tracked.</span></div>
+      <table class="gear-table"><tbody id="gear-body"></tbody></table>
+      <div class="add-row"><button class="small-btn ghost" onclick="addGearRow()">+ Item</button></div>
+      <div class="wealth-row">
+        Buy something: roll Style (+Wealth) vs
+        <select id="wealth-tn"><option value="10">10 — up to 1,000</option><option value="20">20 — up to 10,000</option><option value="30">30 — up to 100,000</option><option value="40">40 — up to 1,000,000</option></select>
+        <button class="small-btn" onclick="rollWealth()">Roll (costs 1 Karma)</button>
+      </div>
+
+      <div class="section-bar"><span>Notes &amp; Advancement</span><span class="sb-note">Each adventure: +1 to a Stat or a new Focus</span></div>
+      <div class="notes-box"><textarea id="f-notes" placeholder="Backstory, catchphrases, sworn enemies, the names of your parrot…"></textarea></div>
+    </div>
+  </div>
+
+  <div class="sheet-foot">
+    <span>Roll a number of d6 equal to the Stat (+2 with a Focus). Sixes explode. Beat the Target Number: 10 normal · 20 hard · 30 herculean · 40 impossible.</span>
+    <span>Knocked out at 0 Health — you wake up five minutes later with 1. Nobody dies in ACE!</span>
+  </div>
+</div>
+</div>
+
+<!-- ═══ ROLL LOG ═══ -->
+<div class="roll-log">
+  <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
+  <div class="log-header">
+    <span class="log-title">Roll Log</span>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div>
+      <button class="log-clear" onclick="clearLog()">Clear</button>
+    </div>
+  </div>
+  <div class="log-actions">
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">🔗</button>
+    <button class="log-action-btn wizard" onclick="ACEB.launch()" title="Hero Builder" aria-label="Hero Builder">✨ Build</button>
+    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">? Rules</button>
+    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">↓</button>
+    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">↑<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
+  </div>
+  <div class="log-entries" id="log-entries"><div class="log-hint">Click a Stat or a Focus to roll</div></div>
+
+  <!-- DICE TRAY -->
+  <div class="dice-tray">
+    <div class="tray-row">
+      <span class="tray-label">Target</span>
+      <select class="tray-select" id="tray-tn">
+        <option value="">None / opposed</option>
+        <option value="10">10 — Normal</option>
+        <option value="20">20 — Hard</option>
+        <option value="30">30 — Herculean</option>
+        <option value="40">40 — Impossible</option>
+        <option value="custom">Custom…</option>
+      </select>
+      <input class="tray-input" id="tray-tn-custom" type="number" min="1" placeholder="TN" style="display:none;">
+    </div>
+    <div class="tray-row">
+      <span class="tray-label">Dice</span>
+      <button class="tray-step" onclick="trayStep(-1)">−</button>
+      <input class="tray-input" id="tray-n" type="number" min="1" max="30" value="3">
+      <button class="tray-step" onclick="trayStep(1)">+</button>
+      <span class="tray-label" style="flex:1;text-align:right;">any pool</span>
+    </div>
+    <div class="tray-row">
+      <button class="dice-roll-btn" onclick="rollTray()">🎲 Roll d6 pool</button>
+    </div>
+    <div class="tray-note">One die is the Calamity Die: fail with a 1 on it and something funny happens. After a failure, spend Karma to add dice one at a time.</div>
+  </div>
+</div>
+
+</div><!-- end app-wrap -->
+
+<!-- datalists filled from the data layer -->
+<datalist id="dl-traits"></datalist>
+<datalist id="dl-roles"></datalist>
+<datalist id="dl-focus-smarts"></datalist>
+<datalist id="dl-focus-moves"></datalist>
+<datalist id="dl-focus-style"></datalist>
+<datalist id="dl-focus-brawn"></datalist>
+<datalist id="dl-focus-power"></datalist>
+
+<!-- RULES MODAL -->
+<div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()">
+  <div class="modal wide">
+    <div class="modal-hd"><div class="ttl">ACE! Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div>
+    <div class="modal-bd rules-list" id="rules-body"></div>
+  </div>
+</div>
+
+<!-- CAMPAIGN MODAL -->
+<div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()">
+  <div class="modal">
+    <div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div>
+    <div class="modal-bd" id="campaign-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══ CORE STATE ═══════════════════════════════════════════════════════════
+const STATS = [
+  { id:'smarts', name:'Smarts', hint:'clever · perceptive' },
+  { id:'moves',  name:'Moves',  hint:'quick · accurate' },
+  { id:'style',  name:'Style',  hint:'cool · charming' },
+  { id:'brawn',  name:'Brawn',  hint:'strong · tough' },
+  { id:'power',  name:'Power',  hint:'magic · psionics', optional:true },
+];
+const CREATION = { points:12, min:2, max:5, karma:6, karmaMax:10, minDef:8 };
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const $ = id => document.getElementById(id);
+const num = v => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
+const norm = s => String(s || '').trim().toLowerCase();
+
+let hpCur = null;          // null = full
+let karma = CREATION.karma;
+let _lastRoll = null;      // {total, dice, label, tn, karmaDice}
+
+// Data layer globals (ACE_ROLES etc.) are loaded after this script; the
+// helpers below tolerate their absence so the sheet still works standalone.
+const D = {
+  roles:    () => (typeof ACE_ROLES    !== 'undefined' ? ACE_ROLES    : []),
+  focuses:  () => (typeof ACE_FOCUSES  !== 'undefined' ? ACE_FOCUSES  : []),
+  traits:   () => (typeof ACE_TRAITS   !== 'undefined' ? ACE_TRAITS   : []),
+  gear:     () => (typeof ACE_GEAR     !== 'undefined' ? ACE_GEAR     : []),
+  settings: () => (typeof ACE_SETTINGS !== 'undefined' ? ACE_SETTINGS : []),
+  pregens:  () => (typeof ACE_PREGENS  !== 'undefined' ? ACE_PREGENS  : []),
+  tables:   () => (typeof ACE_TABLES   !== 'undefined' ? ACE_TABLES   : null),
+};
+
+// ═══ STATS ════════════════════════════════════════════════════════════════
+function buildStats() {
+  const list = $('stats-list');
+  list.innerHTML = '';
+  STATS.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'stat-row' + (s.optional ? ' off' : '');
+    row.id = 'row-' + s.id;
+    row.innerHTML =
+      `<div class="stat-name" onclick="rollStat('${s.id}', false)" title="Roll ${s.name}">${s.name}<small>${s.hint}</small></div>` +
+      `<input class="stat-input" id="st-${s.id}" type="number" min="0" max="20" value="${s.optional ? '' : 3}" oninput="recalc()">` +
+      `<input class="focus-input" id="fo-${s.id}" list="dl-focus-${s.id}" placeholder="Focus" oninput="recalc()">` +
+      `<div class="focus-dice" id="fd-${s.id}" onclick="rollStat('${s.id}', true)" title="Roll ${s.name} with Focus">5</div>` +
+      `<button class="stat-roll" onclick="rollStat('${s.id}', false)" title="Roll ${s.name} (no Focus)">🎲</button>`;
+    list.appendChild(row);
+  });
+}
+
+function hasPower() { return $('has-power').checked; }
+function onPowerToggle() {
+  const on = hasPower();
+  $('row-power').classList.toggle('off', !on);
+  if(on && !$('st-power').value) $('st-power').value = 3;
+  if(!on) { $('st-power').value = ''; }
+  recalc();
+}
+function statVal(id) { return Math.max(0, num($('st-' + id).value)); }
+function focusOf(id) { return String($('fo-' + id).value || '').trim(); }
+function statDice(id, withFocus) { return statVal(id) + (withFocus && focusOf(id) ? 2 : 0); }
+
+function recalc() {
+  // dice-with-focus preview + stat point tally
+  let used = 0;
+  STATS.forEach(s => {
+    const on = !s.optional || hasPower();
+    const v = statVal(s.id);
+    if(on && !s.optional) used += v;
+    $('fd-' + s.id).textContent = on ? String(statDice(s.id, true)) : '—';
+    $('fd-' + s.id).title = focusOf(s.id) ? `Roll ${s.name} + ${focusOf(s.id)} (${statDice(s.id, true)} dice)` : `Add a Focus to ${s.name} for +2 dice`;
+  });
+  $('pts-used').textContent = used;
+  $('pts-max').textContent = CREATION.points;
+  const flag = $('pts-flag');
+  flag.className = ''; flag.textContent = '';
+  if(used > CREATION.points) { flag.className = 'bad'; flag.textContent = '· over — advancement?'; }
+  else if(used === CREATION.points) { flag.className = 'good'; flag.textContent = '✓'; }
+
+  // Defence: Moves ×3, +6 with Dodging, min 8, + gear bonus
+  const dodging = /^dodg/i.test(focusOf('moves'));
+  let def = statVal('moves') * 3 + (dodging ? 6 : 0);
+  if(def < CREATION.minDef) def = CREATION.minDef;
+  def += num($('def-bonus').value);
+  $('def-val').textContent = def;
+
+  // Health: Brawn, +2 with Tough, + bonus (Ogre etc.)
+  const tough = /^tough/i.test(focusOf('brawn'));
+  const max = Math.max(0, statVal('brawn') + (tough ? 2 : 0) + num($('hp-bonus').value));
+  if(hpCur === null || hpCur > max) hpCur = max;
+  $('hp-max').textContent = max;
+  $('hp-cur').textContent = hpCur;
+  renderHpPips(max);
+  $('ko-flag').innerHTML = (max > 0 && hpCur <= 0) ? '<span class="ko-banner">Knocked Out — back in 5 min with 1 Health</span>' : '';
+
+  // hints
+  refreshHints();
+  recalcAttacks();
+  renderKarma();
+}
+
+function renderHpPips(max) {
+  const wrap = $('hp-pips');
+  wrap.innerHTML = '';
+  for(let i = 1; i <= max; i++) {
+    const p = document.createElement('div');
+    p.className = 'hp-pip' + (i > hpCur ? ' lost' : '');
+    p.textContent = i;
+    p.title = i > hpCur ? 'Heal to ' + i : 'Take damage down to ' + (i - 1);
+    p.onclick = () => { hpCur = (i > hpCur) ? i : i - 1; recalc(); scheduleAutosave(); };
+    wrap.appendChild(p);
+  }
+}
+function damage(n) {
+  const before = hpCur;
+  hpCur = Math.max(0, hpCur - n);
+  recalc();
+  if(hpCur === 0 && before > 0) addLog('Knocked Out!', '💫', 'Health 0 — out of the action for five minutes, then back with 1 Health', 'fumble');
+  scheduleAutosave();
+}
+function heal(n) {
+  const max = num($('hp-max').textContent);
+  hpCur = Math.min(max, hpCur + n);
+  recalc(); scheduleAutosave();
+}
+
+// ═══ KARMA ════════════════════════════════════════════════════════════════
+function renderKarma() {
+  $('karma-val').textContent = karma;
+  const wrap = $('karma-pips');
+  wrap.innerHTML = '';
+  for(let i = 1; i <= CREATION.karmaMax; i++) {
+    const p = document.createElement('div');
+    p.className = 'karma-pip' + (i > karma ? ' spent' : '');
+    p.title = i > karma ? 'Set Karma to ' + i : 'Spend down to ' + (i - 1);
+    p.onclick = () => { karma = (i > karma) ? i : i - 1; renderKarma(); scheduleAutosave(); };
+    wrap.appendChild(p);
+  }
+}
+function karmaSpend(why, n) {
+  n = n || 1;
+  if(karma < n) { addLog('Karma', '0', 'No Karma left — play your Trait to earn some back!', 'fumble'); return false; }
+  karma -= n;
+  renderKarma();
+  addLog('Karma −' + n, '✦ ' + karma, why || 'Spent', 'normal');
+  scheduleAutosave();
+  return true;
+}
+function karmaGain() {
+  if(karma >= CREATION.karmaMax) { addLog('Karma', '10', 'Already at the maximum — spend some!', 'normal'); return; }
+  karma += 1;
+  renderKarma();
+  addLog('Karma +1', '✦ ' + karma, 'Played your Trait', 'crit');
+  scheduleAutosave();
+}
+
+// ═══ DICE ═════════════════════════════════════════════════════════════════
+function d6() { return Math.floor(Math.random() * 6) + 1; }
+// One exploding d6: keep rolling on a six and sum. Returns {total, faces[]}.
+function explode() {
+  const faces = [];
+  let total = 0, f;
+  do { f = d6(); faces.push(f); total += f; } while(f === 6 && faces.length < 20);
+  return { total, faces };
+}
+function rollPool(n) {
+  n = Math.max(1, num(n));
+  const dice = [];
+  for(let i = 0; i < n; i++) dice.push(explode());
+  return dice;
+}
+function poolTotal(dice) { return dice.reduce((a, d) => a + d.total, 0); }
+function fmtDie(d, calamity) {
+  const s = d.faces.length > 1 ? d.faces.join('→') + '=' + d.total : String(d.total);
+  return calamity ? '[' + s + ']' : s;
+}
+function trayTN() {
+  const sel = $('tray-tn').value;
+  if(sel === 'custom') return num($('tray-tn-custom').value) || null;
+  return sel ? num(sel) : null;
+}
+$('tray-tn').addEventListener('change', function() {
+  $('tray-tn-custom').style.display = this.value === 'custom' ? '' : 'none';
+});
+function trayStep(dir) { const el = $('tray-n'); el.value = Math.max(1, Math.min(30, num(el.value) + dir)); }
+
+// The universal roll: `label` names it, `n` dice, optional target number.
+// Calamity Die = the first die. Fail + Calamity 1 → CALAMITY.
+function doRoll(label, n, opts) {
+  opts = opts || {};
+  const tn = opts.tn !== undefined ? opts.tn : trayTN();
+  const dice = rollPool(n);
+  const total = poolTotal(dice);
+  const cal = dice[0].faces[0] === 1;
+  let type = 'normal', verdict = '';
+  if(tn) {
+    if(total >= tn) { type = 'crit'; verdict = ' ✓ beats ' + tn; }
+    else { verdict = ' ✗ vs ' + tn; if(cal) { type = 'fumble'; verdict += ' — CALAMITY!'; } }
+  } else if(cal) {
+    verdict = ' (Calamity Die shows 1 — if this fails, calamity!)';
+  }
+  const detail = n + 'd6: ' + dice.map((d, i) => fmtDie(d, i === 0)).join(' + ') + (opts.note ? ' · ' + opts.note : '') + verdict;
+  _lastRoll = { label, total, dice, tn, karmaDice: 0 };
+  addLog(label, String(total), detail, type, { karmaBtn: true });
+  return total;
+}
+// Spend a Karma point to add one more exploding die to the last roll.
+function karmaDie(btn) {
+  if(!_lastRoll) return;
+  if(!karmaSpend(null, 1)) return;
+  const d = explode();
+  _lastRoll.total += d.total;
+  _lastRoll.karmaDice += 1;
+  const r = _lastRoll;
+  let type = 'normal', verdict = '';
+  if(r.tn) { if(r.total >= r.tn) { type = 'crit'; verdict = ' ✓ now beats ' + r.tn; } else verdict = ' ✗ still short of ' + r.tn; }
+  addLog(r.label + ' +Karma die', String(r.total), '+' + fmtDie(d, false) + ' (Karma die #' + r.karmaDice + ')' + verdict, type, { karmaBtn: true });
+}
+function rollStat(id, withFocus) {
+  const s = STATS.find(x => x.id === id);
+  if(s.optional && !hasPower()) return;
+  if(id === 'power') { if(!karmaSpend('Used Power', 1)) return; }
+  const n = statDice(id, withFocus);
+  const label = s.name + (withFocus && focusOf(id) ? ' + ' + focusOf(id) : '');
+  doRoll(label, n, { note: withFocus && focusOf(id) ? 'Stat ' + statVal(id) + ' + Focus 2' : 'Stat ' + statVal(id) });
+}
+function rollDefence() {
+  doRoll('Defence (Moves, opposed)', statDice('moves', /^dodg/i.test(focusOf('moves'))), { tn: null, note: 'instead of the flat ' + $('def-val').textContent });
+}
+function rollTray() {
+  doRoll('Dice pool', num($('tray-n').value), {});
+}
+function rollWealth() {
+  const tn = num($('wealth-tn').value);
+  if(!karmaSpend('Tried to buy something (TN ' + tn + ')', 1)) return;
+  const wf = /^wealth/i.test(focusOf('style'));
+  doRoll('Buy: Style' + (wf ? ' + Wealth' : ''), statDice('style', wf), { tn, note: 'Style ' + statVal('style') + (wf ? ' + Focus 2' : '') });
+}
+
+// ═══ ATTACKS ══════════════════════════════════════════════════════════════
+function unarmedDamage() {
+  // 1 point per 5 points of Brawn (or part thereof), Focus dice count if apt.
+  const b = statDice('brawn', /^brawl/i.test(focusOf('brawn')));
+  return Math.max(1, Math.ceil(b / 5));
+}
+function attackDice(kind) {
+  if(kind === 'ranged') return statDice('moves', /^shoot/i.test(focusOf('moves')));
+  if(kind === 'power')  return statDice('power', true);
+  return statDice('brawn', /^brawl/i.test(focusOf('brawn')));
+}
+function addAttackRow(a) {
+  a = a || { name:'', kind:'melee', damage:'' };
+  const tr = document.createElement('tr');
+  tr.innerHTML =
+    `<td><input type="text" class="atk-name" list="dl-weapons" placeholder="Pistol, katana, hook hand…" value="${esc(a.name)}" oninput="onWeaponPick(this)"></td>` +
+    `<td><select class="atk-kind" onchange="recalcAttacks()"><option value="melee"${a.kind==='melee'?' selected':''}>Melee</option><option value="ranged"${a.kind==='ranged'?' selected':''}>Ranged</option><option value="power"${a.kind==='power'?' selected':''}>Power</option></select></td>` +
+    `<td><input type="number" class="num atk-dmg" min="0" placeholder="dmg" value="${esc(a.damage)}"></td>` +
+    `<td class="atk-dice"></td>` +
+    `<td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this)">🎲 Attack</button><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button></td>`;
+  $('attacks-body').appendChild(tr);
+  recalcAttacks();
+}
+function onWeaponPick(input) {
+  // Typing a known weapon name fills in its damage + kind from the gear data.
+  const n = norm(input.value);
+  const g = D.gear().find(x => norm(x.name) === n && x.damage);
+  if(g) {
+    const tr = input.closest('tr');
+    tr.querySelector('.atk-dmg').value = g.damage;
+    const ranged = /pistol|rifle|bow|gun|blaster|blazer|bazooka|grenade|thrower|laser|rocket|crossbow|sling|machine/i.test(g.name + ' ' + (g.description || ''));
+    tr.querySelector('.atk-kind').value = ranged ? 'ranged' : 'melee';
+  }
+  recalcAttacks();
+}
+function recalcAttacks() {
+  document.querySelectorAll('#attacks-body tr').forEach(tr => {
+    const kind = tr.querySelector('.atk-kind').value;
+    const n = attackDice(kind);
+    const dmgEl = tr.querySelector('.atk-dmg');
+    const isUnarmed = /^unarmed|^punch|^fist|^bite|^claw|^kick/i.test(tr.querySelector('.atk-name').value) && !dmgEl.value;
+    tr.querySelector('.atk-dice').textContent = n + 'd6' + (isUnarmed ? ' · ' + unarmedDamage() + ' dmg' : '');
+  });
+}
+function rollAttack(btn) {
+  const tr = btn.closest('tr');
+  const name = tr.querySelector('.atk-name').value || 'Attack';
+  const kind = tr.querySelector('.atk-kind').value;
+  let dmg = num(tr.querySelector('.atk-dmg').value);
+  if(!dmg) dmg = kind === 'power' ? 1 : unarmedDamage();
+  if(kind === 'power' && !karmaSpend('Used Power to attack', 1)) return;
+  const n = attackDice(kind);
+  const statName = kind === 'ranged' ? 'Moves' : kind === 'power' ? 'Power' : 'Brawn';
+  doRoll(name + ' (' + (kind === 'ranged' ? 'ranged' : kind) + ')', n, { note: statName + ' · ' + dmg + ' damage on a hit' });
+}
+
+// ═══ GEAR ═════════════════════════════════════════════════════════════════
+function addGearRow(g) {
+  g = g || { name:'', note:'' };
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td style="width:45%;"><input type="text" class="gear-name" list="dl-gear" placeholder="Item" value="${esc(g.name)}"></td>` +
+                 `<td><input type="text" class="gear-note" placeholder="notes" value="${esc(g.note)}"></td>` +
+                 `<td style="width:24px;"><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button></td>`;
+  $('gear-body').appendChild(tr);
+}
+
+// ═══ HINTS FROM THE DATA LAYER ════════════════════════════════════════════
+function findRole(name) { const n = norm(name); if(!n) return null; return D.roles().find(r => norm(r.name) === n) || null; }
+function findTrait(name) { const n = norm(name); if(!n) return null; return D.traits().find(t => norm(t.name) === n) || null; }
+function refreshHints() {
+  const r = findRole($('f-role').value);
+  $('ability-title').textContent = r ? r.name + ' ability' : 'Role ability';
+  $('role-hint').textContent = r
+    ? (r.category ? r.category + ' · ' : '') + (r.power ? 'Grants a Power Stat. ' : '') + (r.grantsFocus ? 'Free Focus: ' + r.grantsFocus.join(', ') + '. ' : '') + (r.healthBonus ? '+' + r.healthBonus + ' Health. ' : '')
+    : ($('f-role').value ? 'Custom Role — write your own ability.' : '');
+  const t = findTrait($('f-trait').value);
+  $('trait-hint').textContent = t ? (t.description || ('Play up being ' + t.name + ' and the Director may award Karma.')) : '';
+}
+function lookupAbility() {
+  const r = findRole($('f-role').value);
+  if(!r) { addLog('Roles', '?', 'No Role called "' + esc($('f-role').value) + '" in the books — write your own ability!', 'normal'); return; }
+  $('f-ability').value = r.ability;
+  if(r.power) { $('has-power').checked = true; onPowerToggle(); }
+  if(r.healthBonus) $('hp-bonus').value = r.healthBonus;
+  recalc(); scheduleAutosave();
+}
+function fillDatalists() {
+  const fill = (id, names) => { const dl = $(id); if(!dl) return; dl.innerHTML = [...new Set(names)].sort().map(n => '<option value="' + esc(n) + '">').join(''); };
+  fill('dl-traits', D.traits().map(t => t.name));
+  fill('dl-roles', D.roles().map(r => r.name));
+  STATS.forEach(s => fill('dl-focus-' + s.id, D.focuses().filter(f => norm(f.stat) === s.id).map(f => f.name)));
+  let dlw = $('dl-weapons'); if(!dlw) { dlw = document.createElement('datalist'); dlw.id = 'dl-weapons'; document.body.appendChild(dlw); }
+  dlw.innerHTML = [...new Set(D.gear().filter(g => g.damage).map(g => g.name))].sort().map(n => '<option value="' + esc(n) + '">').join('');
+  let dlg = $('dl-gear'); if(!dlg) { dlg = document.createElement('datalist'); dlg.id = 'dl-gear'; document.body.appendChild(dlg); }
+  dlg.innerHTML = [...new Set(D.gear().map(g => g.name))].sort().map(n => '<option value="' + esc(n) + '">').join('');
+  const sel = $('f-setting');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="core">Any — core rules</option>' + D.settings().map(s => '<option value="' + esc(s.key) + '">' + esc(s.name) + '</option>').join('');
+  sel.value = cur || 'core';
+}
+
+// ═══ RULES MODAL ══════════════════════════════════════════════════════════
+function openRules() {
+  const T = D.tables();
+  const body = $('rules-body');
+  if(!T) { body.innerHTML = '<p>Rules data not loaded.</p>'; }
+  else {
+    let h = '';
+    (T.quickRules || []).forEach(q => { h += '<h4>' + esc(q.title) + '</h4><p>' + esc(q.text) + '</p>'; });
+    h += '<h4>Target Numbers</h4><table><tr><th>Difficulty</th><th>TN</th><th>Examples</th></tr>' + (T.difficulties || []).map(d => '<tr><td>' + esc(d.name) + '</td><td>' + (d.tn == null ? '—' : d.tn) + '</td><td>' + esc(d.examples) + '</td></tr>').join('') + '</table>';
+    h += '<h4>Weapons</h4><table><tr><th>Weapon</th><th>Damage</th></tr>' + (T.weapons || []).map(w => '<tr><td>' + esc(w.name) + '</td><td>' + w.damage + '</td></tr>').join('') + '</table>';
+    h += '<h4>Unarmed damage</h4><table><tr><th>Brawn dice</th><th>Damage</th></tr>' + (T.unarmedDamage || []).map(u => '<tr><td>' + u.minBrawn + '–' + u.maxBrawn + '</td><td>' + u.damage + '</td></tr>').join('') + '</table>';
+    h += '<h4>Karma</h4>' + (T.karmaUses || []).map(k => '<p><b>' + esc(k.name) + '.</b> ' + esc(k.text) + '</p>').join('');
+    const st = D.settings().find(s => s.key === $('f-setting').value);
+    if(st) { h += '<h4>' + esc(st.name) + ' — setting rules</h4>' + (st.rules || []).map(r => '<p>▸ ' + esc(r) + '</p>').join(''); }
+    body.innerHTML = h;
+  }
+  $('rules-overlay').classList.add('open');
+}
+function closeRules() { $('rules-overlay').classList.remove('open'); }
+
+// ═══ LOG ══════════════════════════════════════════════════════════════════
+var _toastTimer = null;
+function showRollToast(label, result, detail, type) {
+  if(window.innerWidth > 768) return;
+  var log = document.querySelector('.roll-log');
+  if(!log || !log.classList.contains('collapsed')) return;
+  var t = $('roll-toast'); if(!t) return;
+  t.className = 'show' + (type === 'crit' ? ' crit' : type === 'fumble' ? ' fumble' : '');
+  t.querySelector('.t-label').textContent = label;
+  t.querySelector('.t-result').textContent = result;
+  t.querySelector('.t-detail').textContent = detail;
+  if(_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() { t.className = ''; }, 3500);
+}
+function addLog(label, result, detail, type, opts) {
+  type = type || 'normal'; opts = opts || {};
+  const entries = $('log-entries');
+  const hint = entries.querySelector('.log-hint'); if(hint) hint.remove();
+  // Only the newest roll can take a Karma die — retire older buttons.
+  entries.querySelectorAll('.karma-die-btn').forEach(b => b.remove());
+  const div = document.createElement('div');
+  div.className = 'log-entry' + (type === 'crit' ? ' crit' : type === 'fumble' ? ' fumble' : '');
+  div.innerHTML = '<div class="roll-label">' + esc(label) + '</div><div class="roll-result">' + esc(result) + '</div><div class="roll-detail">' + esc(detail) + '</div>' +
+    (opts.karmaBtn ? '<button class="karma-die-btn" onclick="karmaDie(this)" title="Spend 1 Karma to add another die">✦ +1 Karma die</button>' : '');
+  if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
+  entries.insertBefore(div, entries.firstChild);
+  while(entries.children.length > 60) entries.removeChild(entries.lastChild);
+  entries.scrollTop = 0;
+  showRollToast(label, result, detail, type);
+}
+function clearLog() { $('log-entries').innerHTML = '<div class="log-hint">Click a Stat or a Focus to roll</div>'; }
+function toggleLogCollapse() { document.querySelector('.roll-log').classList.toggle('collapsed'); }
+document.querySelector('.log-header').addEventListener('click', function(e) {
+  if(window.innerWidth <= 768 && !e.target.closest('button,.dm-toggle-btn')) toggleLogCollapse();
+});
+(function() { if(window.innerWidth <= 768) document.querySelector('.roll-log').classList.add('collapsed'); })();
+
+function setDarkMode(on) {
+  document.body.classList.toggle('dark', on);
+  $('dm-toggle').classList.toggle('on', on);
+  try { localStorage.setItem('ace_dark', on ? '1' : '0'); } catch(e) {}
+}
+function toggleDarkMode() { setDarkMode(!document.body.classList.contains('dark')); }
+
+// ═══ SAVE / LOAD ══════════════════════════════════════════════════════════
+function collectSheet() {
+  const stats = {}, focuses = {};
+  STATS.forEach(s => { stats[s.id] = statVal(s.id); focuses[s.id] = focusOf(s.id); });
+  return {
+    system: 'ACE', v: 1,
+    name: $('f-name').value, trait: $('f-trait').value, role: $('f-role').value, role2: $('f-role2').value,
+    player: $('f-player').value, setting: $('f-setting').value,
+    hasPower: hasPower(), stats, focuses,
+    defBonus: num($('def-bonus').value), hpBonus: num($('hp-bonus').value),
+    hpCur, karma,
+    ability: $('f-ability').value, traitNotes: $('f-trait-notes').value, notes: $('f-notes').value,
+    attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, kind: tr.querySelector('.atk-kind').value, damage: tr.querySelector('.atk-dmg').value })),
+    gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gear-name').value, note: tr.querySelector('.gear-note').value })).filter(g => g.name || g.note),
+    campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
+  };
+}
+function applySheet(d) {
+  d = d || {};
+  $('f-name').value = d.name || ''; $('f-trait').value = d.trait || ''; $('f-role').value = d.role || ''; $('f-role2').value = d.role2 || '';
+  $('f-player').value = d.player || ''; $('f-setting').value = d.setting || 'core';
+  if(!$('f-setting').value) $('f-setting').value = 'core';
+  $('has-power').checked = !!d.hasPower;
+  $('row-power').classList.toggle('off', !d.hasPower);
+  STATS.forEach(s => {
+    const v = d.stats ? d.stats[s.id] : undefined;
+    $('st-' + s.id).value = (v === undefined || v === null || (s.optional && !d.hasPower)) ? (s.optional ? '' : 3) : v;
+    $('fo-' + s.id).value = (d.focuses && d.focuses[s.id]) || '';
+  });
+  $('def-bonus').value = d.defBonus || 0; $('hp-bonus').value = d.hpBonus || 0;
+  hpCur = (typeof d.hpCur === 'number') ? d.hpCur : null;
+  karma = (typeof d.karma === 'number') ? d.karma : CREATION.karma;
+  $('f-ability').value = d.ability || ''; $('f-trait-notes').value = d.traitNotes || ''; $('f-notes').value = d.notes || '';
+  $('attacks-body').innerHTML = '';
+  (d.attacks && d.attacks.length ? d.attacks : [{ name:'Unarmed', kind:'melee', damage:'' }]).forEach(a => addAttackRow(a));
+  $('gear-body').innerHTML = '';
+  (d.gear || []).forEach(g => addGearRow(g));
+  if(!(d.gear || []).length) addGearRow();
+  if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
+  recalc();
+}
+function saveSheet(quiet) {
+  const data = collectSheet();
+  const json = JSON.stringify(data);
+  try { localStorage.setItem('ace_sheet', json); } catch(e) {}
+  if(window.__ddSave) window.__ddSave({ ace_sheet: json });
+  if(!quiet) addLog('Sheet Saved', '✓', data.name || 'Unnamed hero', 'normal');
+}
+function syncDocTitle() {
+  const name = ($('f-name').value || '').trim();
+  if(name && window.__ddSaveTitle) window.__ddSaveTitle(name);
+}
+function exportSheet() {
+  const data = collectSheet();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = ((data.name || 'ace-hero').replace(/[^a-z0-9]+/gi, '_').toLowerCase() || 'ace-hero') + '.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  addLog('Sheet Exported', '↓', a.download, 'normal');
+}
+function importSheet(input) {
+  const f = input.files && input.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported', '↑', f.name, 'normal'); } catch(e) { addLog('Import failed', '✗', 'Not a valid sheet file', 'fumble'); } };
+  r.readAsText(f);
+  input.value = '';
+}
+function newCharacter() {
+  hpCur = null; karma = CREATION.karma;
+  applySheet({});
+}
+function autoLoad() {
+  let saved = null;
+  if(window.__ddState !== undefined) saved = window.__ddState['ace_sheet'] || null;
+  else { try { saved = localStorage.getItem('ace_sheet'); } catch(e) {} }
+  if(!saved) { applySheet({}); return; }
+  try { applySheet(JSON.parse(saved)); } catch(e) { applySheet({}); }
+}
+
+// ═══ AUTOSAVE ═════════════════════════════════════════════════════════════
+var _pageReady = false;
+setTimeout(function() { _pageReady = true; }, 2500);
+function autoSaveOnExit() {
+  if(!_pageReady) return;
+  try { saveSheet(true); } catch(e) {}
+  try { syncDocTitle(); } catch(e) {}
+}
+window.addEventListener('beforeunload', autoSaveOnExit);
+window.addEventListener('pagehide', autoSaveOnExit);
+document.addEventListener('visibilitychange', function() { if(document.visibilityState === 'hidden') autoSaveOnExit(); });
+document.addEventListener('click', function(e) {
+  const a = e.target.closest && e.target.closest('a[href]');
+  if(a && !a.target && !a.href.startsWith('javascript:')) autoSaveOnExit();
+}, true);
+var _autoSaveTimer = null;
+function scheduleAutosave() {
+  if(!_pageReady) return;
+  if(_autoSaveTimer) clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(function() { try { saveSheet(true); } catch(e) {} }, 1500);
+}
+document.addEventListener('input', function(e) { if(e.target && (e.target.id === 'f-role' || e.target.id === 'f-trait')) refreshHints(); scheduleAutosave(); });
+document.addEventListener('change', scheduleAutosave);
+$('f-name').addEventListener('change', syncDocTitle);
+$('f-setting').addEventListener('change', function() { if(typeof ACEB !== 'undefined' && ACEB.onSettingChange) ACEB.onSettingChange(); });
+
+// ═══ INIT ═════════════════════════════════════════════════════════════════
+try { if(localStorage.getItem('ace_dark') === '1') setDarkMode(true); } catch(e) {}
+buildStats();
+renderKarma();
+// autoLoad() runs at the end of the campaign block below, once campaignRestore exists.
+</script>
+
+<script>
+// ═══ CAMPAIGN LINK (shared roll log) ════════════════════════════════════════
+// Same /api/campaigns contract as the SD and DCC sheets, so an ACE! hero can
+// sit at the same table (and share one join code) with either.
+let _campaign = null;
+const _campaignClientKey = 'ck-' + Math.random().toString(36).slice(2, 12);
+let _campaignLastId = 0;
+let _campaignTimer = null;
+
+function campaignPlayerName() { return $('f-name').value.trim() || $('f-player').value.trim() || 'Player'; }
+function campaignUpdateBtn() {
+  const btn = $('campaign-btn'); if(!btn) return;
+  if(_campaign) { btn.title = 'Campaign: ' + _campaign.name; btn.style.background = '#241f10'; btn.style.color = '#e8c84a'; btn.style.borderColor = '#7a5a00'; }
+  else { btn.title = 'Campaign'; btn.style.background = 'transparent'; btn.style.color = '#888'; btn.style.borderColor = '#333'; }
+}
+function openCampaign() { $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
+function closeCampaign() { $('campaign-overlay').classList.remove('open'); }
+function campaignRenderModal() {
+  const body = $('campaign-body');
+  if(_campaign) {
+    body.innerHTML = '<p class="m-hint">Connected — your rolls are shared with everyone in this campaign.</p>'
+      + '<div style="background:#0f0f0f;border:1px solid #7a5a00;border-radius:5px;padding:12px;margin-bottom:12px;">'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;color:#e8c84a;">' + esc(_campaign.name) + '</div>'
+      + '<div style="font-size:11px;color:#888;margin-top:4px;">Join code: <b style="color:#eee;font-family:\'Share Tech Mono\',monospace;font-size:15px;letter-spacing:.2em;">' + esc(_campaign.code) + '</b></div></div>'
+      + '<button class="m-btn warn" style="width:100%;" onclick="campaignLeave()">Leave Campaign</button>';
+  } else {
+    body.innerHTML = '<p class="m-hint">Enter a join code from your Director to connect this card. Rolls appear in everyone\'s roll log. Campaigns are created on the Campaigns page.</p>'
+      + '<div class="m-lbl">Join a Campaign</div>'
+      + '<div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" class="m-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="flex:1;text-transform:uppercase;letter-spacing:.15em;"><button class="m-btn" onclick="campaignJoin()">Join</button></div>'
+      + '<div id="campaign-error" style="font-size:12px;color:#df6a6a;margin-top:10px;"></div>';
+  }
+}
+function campaignError(msg) { const el = $('campaign-error'); if(el) el.textContent = msg; }
+async function campaignJoin() {
+  const code = ($('campaign-code-input')?.value || '').trim().toUpperCase();
+  if(!code) { campaignError('Enter a join code.'); return; }
+  try {
+    const r = await fetch('/api/campaigns?code=' + encodeURIComponent(code), { credentials: 'same-origin' });
+    if(r.status === 404) { campaignError('No campaign found with that code.'); return; }
+    if(!r.ok) throw new Error(r.status);
+    _campaign = await r.json();
+    campaignConnected();
+  } catch(e) { campaignError('Could not join — are you signed in to the app?'); }
+}
+function campaignConnected() {
+  _campaignLastId = 0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling();
+  addLog('Campaign', '🔗', 'Connected to "' + _campaign.name + '" (' + _campaign.code + ')', 'normal');
+  saveSheet(true);
+}
+function campaignLeaveSilent() { if(_campaignTimer) { clearInterval(_campaignTimer); _campaignTimer = null; } _campaign = null; _campaignLastId = 0; campaignUpdateBtn(); }
+function campaignLeave() { const name = _campaign ? _campaign.name : ''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign', '🔗', 'Left "' + name + '"', 'normal'); saveSheet(true); }
+const CAMPAIGN_SKIP_LABELS = new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Roles','Hero Builder']);
+function campaignBroadcast(label, result, detail, type) {
+  if(!_campaign) return;
+  if(CAMPAIGN_SKIP_LABELS.has(String(label))) return;
+  fetch('/api/campaigns/' + _campaign.id + '/rolls', {
+    method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ clientKey: _campaignClientKey, source: campaignPlayerName(), label: String(label), result: String(result), detail: String(detail || ''), type: type || 'normal' })
+  }).catch(() => {});
+}
+function campaignAddRemote(roll) {
+  const entries = $('log-entries'); if(!entries) return;
+  if(roll.type === 'lootclaim' || roll.type === 'lootbox') return; // DCC-only broadcasts
+  const hint = entries.querySelector('.log-hint'); if(hint) hint.remove();
+  const div = document.createElement('div');
+  div.className = 'log-entry remote' + (roll.type === 'crit' ? ' crit' : roll.type === 'fumble' ? ' fumble' : '');
+  div.innerHTML = '<div class="roll-label">' + esc(roll.source) + ' · ' + esc(roll.label) + '</div><div class="roll-result">' + esc(roll.result) + '</div><div class="roll-detail">' + esc(roll.detail) + '</div>';
+  entries.insertBefore(div, entries.firstChild);
+  entries.scrollTop = 0;
+  while(entries.children.length > 60) entries.removeChild(entries.lastChild);
+}
+async function campaignPoll() {
+  if(!_campaign) return;
+  try {
+    const url = '/api/campaigns/' + _campaign.id + '/rolls' + (_campaignLastId ? '?since=' + _campaignLastId : '');
+    const r = await fetch(url, { credentials: 'same-origin' });
+    if(!r.ok) return;
+    const data = await r.json();
+    (data.rolls || []).forEach(roll => { if(roll.clientKey !== _campaignClientKey) campaignAddRemote(roll); });
+    if(data.last) _campaignLastId = data.last;
+  } catch(e) {}
+}
+function campaignPollDelay() { return document.hidden ? 20000 : 4000; }
+function campaignStartPolling() { if(_campaignTimer) clearInterval(_campaignTimer); campaignPoll(); _campaignTimer = setInterval(campaignPoll, campaignPollDelay()); }
+document.addEventListener('visibilitychange', function() {
+  if(!_campaign || !_campaignTimer) return;
+  clearInterval(_campaignTimer);
+  if(!document.hidden) campaignPoll();
+  _campaignTimer = setInterval(campaignPoll, campaignPollDelay());
+});
+function campaignRestore(saved) {
+  if(saved && saved.id && saved.code) { _campaign = { id: saved.id, code: saved.code, name: saved.name || 'Campaign' }; campaignStartPolling(); }
+  else campaignLeaveSilent();
+  campaignUpdateBtn();
+}
+campaignUpdateBtn();
+</script>
+
+<!-- ACE! data layer + hero builder (generated by scripts/build-ace-data.mjs) -->
+<script src="/tools-data/ace-tables.js"></script>
+<script src="/tools-data/ace-settings.js"></script>
+<script src="/tools-data/ace-roles.js"></script>
+<script src="/tools-data/ace-focuses.js"></script>
+<script src="/tools-data/ace-traits.js"></script>
+<script src="/tools-data/ace-gear.js"></script>
+<script src="/tools-data/ace-pregens.js"></script>
+<script src="/tools-data/ace-sheet-builder.js"></script>
+<script>
+// Data is on the page now: fill the pickers, then load the saved card.
+fillDatalists();
+autoLoad();
+</script>
+</body>
+</html>

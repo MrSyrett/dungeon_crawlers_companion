@@ -1,0 +1,509 @@
+{
+  "setting": {
+    "key": "bite",
+    "name": "Bite Me!",
+    "tagline": "Teen monster hunters versus the creatures of the night",
+    "blurb": "In a world very similar to ours, sinister creatures actually do lurk in the darkness, and those shows featuring vampire slayers and mystery machines serve as uncanny documentaries. A (mostly) brave few — often teenagers with curiosity and time on their hands, crackpot scholars, or officers of the law — know that monsters are real and have chosen to uncover and oppose them. Their adversaries may be evil incarnate but good always overcomes, with madcap antics and crazy chases along the way. It's comedy horror, not Horror horror.",
+    "pages": [233, 266],
+    "recommendedRoles": ["Cleric", "Druid", "Slayer", "Vampire", "Werewolf"],
+    "usesPower": true,
+    "rules": [
+      "Animals (suggested Role): a faithful talking animal companion. Pick an ability from one of the Talking Animal Roles in the core book; you start with 2 extra Karma and can share your Karma points with your friends.",
+      "Priests (Cleric) and ancient/primal faiths (Druid) genuinely wield Power in the Bite Me! world; a Holy Symbol adds 1d6 to a Cleric's Power roll to affect undead.",
+      "Spooked!: a Hero who fails a Smarts or Style roll against a spooky situation or Extra suffers -1d6 to all rolls until they recover by spending a Karma, succeeding on a Style 20 roll, or receiving healing/encouragement from another Hero. Everyone recovers at the end of the scene. A Spooked! Hero can't get any worse, but rolls (at -1d6) against new sources — success clears the original Spooked! state.",
+      "Ghosts and spirits: when first seen, a ghost Spooks characters unless they succeed on a Smarts or Style roll (TN set by the ghost, typically 10–20). Spirits can't pick things up and are only harmed by holy, magical, or sci-fi ecto-gadgetry damage.",
+      "Vampires are killed by sunlight and vulnerable to Holy Water and Garlic. A Wooden Stake hit that beats a vampire's Defence by 5 or more renders them Prone; a UV Flashlight inflicts 2 damage on sunlight-affected creatures caught in its beam.",
+      "Silver: werewolves, devils and hellhounds take double damage from silver weapons. Silver Ammunition doubles a ranged weapon's damage against silver-vulnerable monsters, but a Calamity means you've run out.",
+      "Fire: mummies take double damage from fire-based weapons. Garlic inflicts 4 damage and Holy Water 5 damage on the supernatural creatures they affect (a vial of Holy Water has three uses).",
+      "Pure Salt: creatures warded by salt (zombies, devils…) must make a Style 30 roll to cross an unbroken line or circle.",
+      "Tarot readings: with a successful Style or Power 20 roll the reader may ask their subject one yes/no question that must be answered truthfully, or ask the Director one (cryptically answered) question about the subject's future. One reading per target per day.",
+      "Regenerating monsters (Wolfman, Adam the flesh golem) recover 1 Health per round, but cannot regenerate once reduced to zero Health.",
+      "Ghost Traps: reward creative trap/ambush plans with 2–3 Karma. A trap takes preparation and a sequence of rolls — set it up (Smarts or Brawn), lure the monster (Style vs its Smarts), position it (Style/Moves vs its Smarts/Moves), then spring it (target rolls Smarts, Moves or Brawn to avoid a condition or damage). Any Calamity on these rolls lets the Director decide what goes wrong.",
+      "Chase scenes run over about five stages, each with a roll (TN 10–30). Success moves both parties on; failure moves the Heroes on but applies the stage's ill effect and the quarry gains a stage of lead. The same Hero can't roll two consecutive stages. A lead of more than two stages means the quarry is lost; three 6s on a stage roll catches it immediately.",
+      "Tone: comedy horror, not Horror horror — set expectations with the group, use graphic violence sparingly and only in an exaggerated manner."
+    ]
+  },
+  "roles": [
+    {
+      "name": "Fortune Teller",
+      "category": "Occupations",
+      "setting": "bite",
+      "ability": "You are a well-intentioned practitioner of the occult (white witch, Wiccan, nose-twitcher…) with a knack for portents of the future. You gain the Power stat but no additional points to add to it. You also gain a bonus 1d6 when using a tarot deck and instinctively know if a spirit conversing via a Ouija board is a harmful one.",
+      "power": true,
+      "page": 239
+    },
+    {
+      "name": "Paranormal Investigator",
+      "category": "Occupations",
+      "setting": "bite",
+      "ability": "Creatures of Darkness are out there, you know it — you just need to find one to prove it, though every investigation so far has proven to be an elaborate hoax. You gain a bonus 1d6 when searching for clues and interacting with any local authorities. You also begin the game with a brightly coloured, mid-sized van called the Mystery Wagon.",
+      "page": 239
+    }
+  ],
+  "focuses": [],
+  "traits": [],
+  "gear": [
+    {
+      "name": "Flashlight",
+      "setting": "bite",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Gadget",
+      "description": "Provides illumination up to 30' away.",
+      "page": 240
+    },
+    {
+      "name": "Garlic",
+      "setting": "bite",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Consumable",
+      "description": "Inflicts 4 damage against certain supernatural creatures such as vampires. Unless the Director says otherwise, this will usually involve infusing water with garlic in a water pistol or some other method. Careful. Carry too much and people will start giving you a wide berth.",
+      "damage": 4,
+      "page": 240
+    },
+    {
+      "name": "Holy Symbol",
+      "setting": "bite",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Gadget",
+      "description": "Adds 1d6 to a Cleric's Power roll to affect undead with their Power. May also ward off other creatures depending on their own beliefs or vulnerabilities.",
+      "page": 240
+    },
+    {
+      "name": "Ouija Board",
+      "setting": "bite",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Gadget",
+      "description": "Allows Heroes to communicate with ghosts and spirits. Kind of like using the keyboard on a mobile phone to contact someone in the afterlife. Users should beware, not every spirit is friendly or truthful.",
+      "page": 240
+    },
+    {
+      "name": "Tarot Deck",
+      "setting": "bite",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Gadget",
+      "description": "Allows a Hero to perform a reading for another character. With a successful Style or Power 20 roll, the Hero may ask the character they are reading one yes or no question about themselves, which must be answered truthfully. Alternatively, the reader may ask the Director one question about the character's future, answered as cryptically as possible. A reading may only be performed on a specific target once per day.",
+      "page": 240
+    },
+    {
+      "name": "Wooden Stakes",
+      "setting": "bite",
+      "tier": "Normal",
+      "tn": 10,
+      "category": "Weapon",
+      "description": "Pointy sticks are sharp. Be careful you might get a splinter. Can be used as a weapon that inflicts 1 damage. A successful attack against a vampire that beats their Defence by 5 or more will render them Prone.",
+      "damage": 1,
+      "page": 240
+    },
+    {
+      "name": "EMF Meter",
+      "setting": "bite",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Gadget",
+      "description": "An electronic device that measures electromagnetic fluctuations, making it easier to detect the presence of spirits. Adds 1d6 to Smarts rolls made to sense the location of nearby spirits.",
+      "page": 240
+    },
+    {
+      "name": "Holy Water",
+      "setting": "bite",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Consumable",
+      "description": "Blessed by a priest or other holy individual, holy water can harm some evil monsters such as demons or vampires. Thrown like a grenade, the vial explodes on impact to inflict 5 damage on any supernatural creature it can affect. A vial contains up to three uses (less if you use it on a particularly big creature).",
+      "damage": 5,
+      "page": 240
+    },
+    {
+      "name": "Pure Salt",
+      "setting": "bite",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Consumable",
+      "description": "Sprinkled in circles or lines, pure salt can ward off certain creatures such as zombies or devils. Creatures warded by salt need to make a Style 30 roll to cross an unbroken line. Sufficient salt for one use. Also handy for fish and chips.",
+      "page": 241
+    },
+    {
+      "name": "Silver Ammunition",
+      "setting": "bite",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Consumable",
+      "description": "Expensive projectiles for a ranged weapon. Doubles the weapon's damage when used against a monster that is vulnerable to silver, such as a werewolf. Roll a Calamity while using the weapon and you've run out of silver ammo… that werewolf has stopped moving, right?",
+      "page": 241
+    },
+    {
+      "name": "UV Flashlight",
+      "setting": "bite",
+      "tier": "Hard",
+      "tn": 20,
+      "category": "Gadget",
+      "description": "Like a regular flashlight but inflicts 2 damage against creatures that are affected by sunlight who are caught in its beam.",
+      "damage": 2,
+      "page": 241
+    },
+    {
+      "name": "Mystery Wagon",
+      "setting": "bite",
+      "tier": "Free",
+      "tn": null,
+      "category": "Vehicle",
+      "description": "A brightly coloured, mid-sized van. Paranormal Investigators begin the game with one.",
+      "page": 239
+    }
+  ],
+  "extras": [
+    {
+      "name": "Crooked Property Developer",
+      "setting": "bite",
+      "type": "Person",
+      "smarts": 4,
+      "moves": 2,
+      "style": 3,
+      "brawn": 2,
+      "focuses": [{ "stat": "Style", "name": "Disguise" }],
+      "health": 2,
+      "defence": 6,
+      "attacks": [{ "name": "Fisticuffs", "dice": 4, "damage": 1 }],
+      "notes": [],
+      "page": 241
+    },
+    {
+      "name": "Cultist",
+      "setting": "bite",
+      "type": "Mook",
+      "smarts": 2,
+      "moves": 2,
+      "style": 1,
+      "brawn": 3,
+      "focuses": [{ "stat": "Smarts", "name": "Occultism" }],
+      "health": 3,
+      "defence": 6,
+      "attacks": [{ "name": "Sacrificial Dagger", "dice": 5, "damage": 2 }],
+      "notes": [],
+      "page": 241
+    },
+    {
+      "name": "Devil",
+      "setting": "bite",
+      "type": "Monster",
+      "smarts": 6,
+      "moves": 4,
+      "style": 6,
+      "brawn": 8,
+      "focuses": [
+        { "stat": "Moves", "name": "Flying" },
+        { "stat": "Brawn", "name": "Brawling" }
+      ],
+      "health": 8,
+      "defence": 12,
+      "attacks": [
+        { "name": "Flaming Trident", "dice": 10, "damage": 3 },
+        { "name": "Fire blast", "dice": 6, "damage": 3, "note": "30' range" }
+      ],
+      "notes": ["Takes double damage from silver weapons.", "Smells of sulphur."],
+      "page": 241
+    },
+    {
+      "name": "Ghost",
+      "setting": "bite",
+      "type": "Ghost",
+      "smarts": 3,
+      "moves": 3,
+      "style": 3,
+      "brawn": null,
+      "focuses": [{ "stat": "Moves", "name": "Flying" }],
+      "health": 3,
+      "defence": 9,
+      "attacks": [{ "name": "Ghostly Chill", "dice": 5, "damage": 2 }],
+      "notes": [
+        "When first seen a Ghost causes characters to be Spooked! unless they succeed on a Smarts 20 or Style 20 roll.",
+        "Spirits can't pick things up and are only harmed by holy, magical, or sci-fi ecto-gadgetry damage."
+      ],
+      "page": 241
+    },
+    {
+      "name": "Mummy",
+      "setting": "bite",
+      "type": "Undead",
+      "smarts": 6,
+      "moves": 2,
+      "style": 4,
+      "brawn": 6,
+      "focuses": [{ "stat": "Brawn", "name": "Brawling" }],
+      "health": 8,
+      "defence": 6,
+      "attacks": [{ "name": "Throttling grasp", "dice": 8, "damage": 3 }],
+      "notes": ["A mummy takes double damage from fire-based weapons."],
+      "page": 241
+    },
+    {
+      "name": "Hex Master",
+      "setting": "bite",
+      "type": "Villain",
+      "smarts": 6,
+      "moves": 3,
+      "style": 5,
+      "brawn": 3,
+      "power": 5,
+      "focuses": [
+        { "stat": "Moves", "name": "Rituals" },
+        { "stat": "Power", "name": "Necromancy" }
+      ],
+      "health": 3,
+      "defence": 9,
+      "attacks": [
+        {
+          "name": "Hex Doll",
+          "dice": 7,
+          "damage": 4,
+          "note": "Target has to be able to see the doll and the Hex Master needs to be able to see the target and have an appropriate doll prepared"
+        }
+      ],
+      "notes": [],
+      "page": 242
+    },
+    {
+      "name": "Pirate Ghost",
+      "setting": "bite",
+      "type": "Ghost",
+      "smarts": 2,
+      "moves": 4,
+      "style": 3,
+      "brawn": null,
+      "focuses": [{ "stat": "Moves", "name": "Climbing" }],
+      "health": 3,
+      "defence": 12,
+      "attacks": [{ "name": "Spectral Cutlass", "dice": 6, "damage": 3 }],
+      "notes": [
+        "When first seen, a ghost causes characters to be Spooked! unless they succeed on a Smarts 10 or Style 10 roll.",
+        "Spirits can't pick things up and are only harmed by holy, magical, or sci-fi ecto-gadgetry damage."
+      ],
+      "page": 242
+    },
+    {
+      "name": "Poltergeist",
+      "setting": "bite",
+      "type": "Ghost",
+      "smarts": 1,
+      "moves": 5,
+      "style": 1,
+      "brawn": null,
+      "power": 5,
+      "focuses": [
+        { "stat": "Moves", "name": "Flying" },
+        { "stat": "Power", "name": "Telekinesis" }
+      ],
+      "health": 3,
+      "defence": 15,
+      "attacks": [{ "name": "Ghostly Fling", "dice": 7, "damage": 2, "note": "to all within 10'" }],
+      "notes": ["Spirits can't pick things up and are only harmed by holy, magical, or sci-fi ecto-gadgetry damage."],
+      "page": 242
+    },
+    {
+      "name": "Wolfman",
+      "setting": "bite",
+      "type": "Monster",
+      "smarts": 3,
+      "moves": 4,
+      "style": 2,
+      "brawn": 6,
+      "focuses": [
+        { "stat": "Smarts", "name": "Tracking" },
+        { "stat": "Brawn", "name": "Brawling" }
+      ],
+      "health": 6,
+      "defence": 12,
+      "attacks": [{ "name": "Claws and bite", "dice": 8, "damage": 2 }],
+      "notes": [
+        "Takes double damage from silver weapons.",
+        "Regenerates 1 Health per round unless at zero Health."
+      ],
+      "page": 242
+    },
+    {
+      "name": "The Park Poltergeist",
+      "setting": "bite",
+      "type": "Villain",
+      "smarts": 3,
+      "moves": 3,
+      "style": 3,
+      "brawn": 2,
+      "focuses": [{ "stat": "Style", "name": "Intimidate" }],
+      "health": 2,
+      "defence": 9,
+      "attacks": [{ "name": "Fling Debris", "dice": 5, "damage": 2, "note": "to all within 10'" }],
+      "notes": [
+        "A fake ghost: a skull-faced apparition glowing green, actually a man in a costume of old Halloween pieces and luminous paint, using radio-controlled rides and spring-loaded debris launchers."
+      ],
+      "description": "A skull-faced spectral apparition glowing green with ghostly energy, issuing a dreadful moaning wail as fairground debris whirls around it.",
+      "page": 249
+    },
+    {
+      "name": "Mr Stephen Scribbens",
+      "setting": "bite",
+      "type": "Person",
+      "smarts": 3,
+      "moves": 2,
+      "style": 2,
+      "brawn": 1,
+      "focuses": [{ "stat": "Smarts", "name": "Accounting" }],
+      "health": 1,
+      "defence": 6,
+      "attacks": [],
+      "notes": [],
+      "description": "Crooked Real Estate Developer. A scrawny middle-aged man with dark, thinning, greasy hair, a pencil moustache, and a sharp hooked nose.",
+      "page": 250
+    },
+    {
+      "name": "Quentin Braddock",
+      "setting": "bite",
+      "type": "Person",
+      "smarts": 2,
+      "moves": 2,
+      "style": 2,
+      "brawn": 2,
+      "focuses": [{ "stat": "Smarts", "name": "Office Work" }],
+      "health": 2,
+      "defence": 6,
+      "attacks": [],
+      "notes": [],
+      "description": "A hassled young secretary and \"junior developer\", hamster-like in both features and demeanour, completely in the dark and out of his depth.",
+      "page": 252
+    },
+    {
+      "name": "Madame Rosmerta",
+      "setting": "bite",
+      "type": "Person",
+      "smarts": 4,
+      "moves": 2,
+      "style": 5,
+      "brawn": 2,
+      "power": 3,
+      "focuses": [
+        { "stat": "Smarts", "name": "Occultism" },
+        { "stat": "Style", "name": "Fortune Telling" },
+        { "stat": "Power", "name": "Fortune Telling and Séance" }
+      ],
+      "health": 2,
+      "defence": 6,
+      "attacks": [],
+      "notes": [
+        "Can perform tarot readings for the Heroes: on a Style 20 roll, a Hero may ask a single yes or no question (answered truthfully, if cryptically)."
+      ],
+      "description": "A tarot reader and fortune teller who runs a small New Age bookshop; dresses for the part in embroidered scarves, a long shawl and lots of costume jewellery.",
+      "page": 253
+    },
+    {
+      "name": "Adam",
+      "setting": "bite",
+      "type": "Monster",
+      "smarts": 1,
+      "moves": 3,
+      "style": 2,
+      "brawn": 5,
+      "focuses": [
+        { "stat": "Moves", "name": "Jumping" },
+        { "stat": "Brawn", "name": "Brawling" },
+        { "stat": "Brawn", "name": "Tough" }
+      ],
+      "health": 7,
+      "defence": 9,
+      "attacks": [{ "name": "Brawling", "dice": 7, "damage": 2 }],
+      "notes": ["Regenerates 1 Health each round. Cannot regenerate once reduced to zero Health."],
+      "description": "A huge flesh golem; a creature built from the parts of other human beings. Not a great conversationalist.",
+      "page": 254
+    },
+    {
+      "name": "Open-Minded Eve",
+      "setting": "bite",
+      "type": "Monster",
+      "smarts": 3,
+      "moves": 4,
+      "style": 3,
+      "brawn": 5,
+      "power": 5,
+      "focuses": [
+        { "stat": "Style", "name": "Hideous Allure" },
+        { "stat": "Power", "name": "Lightning" }
+      ],
+      "health": 5,
+      "defence": 12,
+      "attacks": [
+        { "name": "Brawling", "dice": 5, "damage": 2 },
+        { "name": "Shocking Blast", "dice": 7, "damage": 2, "note": "20ft range" }
+      ],
+      "notes": [],
+      "description": "Adam's shrewd and cunning partner. The top of her skull is missing, leaving her brain on view.",
+      "page": 258
+    },
+    {
+      "name": "Little Minion Monsters",
+      "setting": "bite",
+      "type": "Mook",
+      "smarts": 1,
+      "moves": 3,
+      "style": 1,
+      "brawn": 1,
+      "focuses": [{ "stat": "Brawn", "name": "Brawling" }],
+      "health": 1,
+      "defence": 9,
+      "attacks": [{ "name": "Brawling", "dice": 3, "damage": 1 }],
+      "notes": [],
+      "description": "A family of infant flesh golems.",
+      "page": 258
+    },
+    {
+      "name": "Hell Hound",
+      "setting": "bite",
+      "type": "Monster",
+      "smarts": 2,
+      "moves": 3,
+      "style": 1,
+      "brawn": 5,
+      "focuses": [
+        { "stat": "Moves", "name": "Shooting" },
+        { "stat": "Brawn", "name": "Brawling" }
+      ],
+      "health": 7,
+      "defence": 9,
+      "attacks": [
+        { "name": "Bite", "dice": 7, "damage": 1 },
+        { "name": "Fiery Breath", "dice": 5, "damage": 2, "note": "15' range" }
+      ],
+      "notes": [
+        "Takes double damage from silver weapons.",
+        "Supernatural senses: cannot be avoided by sneaking."
+      ],
+      "page": 263
+    },
+    {
+      "name": "Dark Master",
+      "setting": "bite",
+      "type": "Villain",
+      "smarts": 7,
+      "moves": 7,
+      "style": 6,
+      "brawn": 8,
+      "power": 6,
+      "focuses": [
+        { "stat": "Style", "name": "Seduction" },
+        { "stat": "Brawn", "name": "Brawling" }
+      ],
+      "health": 8,
+      "defence": 21,
+      "attacks": [{ "name": "Bite", "dice": 10, "damage": 2, "note": "Dark Master recovers 1 Health" }],
+      "notes": [
+        "Killed by sunlight, vulnerable to Holy Water and Garlic.",
+        "Can turn into a hellhound or a ghost."
+      ],
+      "description": "That most deadly (and gorgeous) of vampires… a true prince of darkness. When defeated he dissolves into a pile of ash from which a red mist dissipates with a blood-curdling shriek.",
+      "page": 265
+    }
+  ],
+  "pregens": []
+}
