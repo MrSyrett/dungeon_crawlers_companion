@@ -234,6 +234,7 @@ body::before {
 .pane.narrow .npc-mon-attack { font-size: 13px; padding: 6px 11px; min-height: 34px; min-width: 54px; }
 .pane.narrow .npc-seg { min-width: 0; height: 26px; flex: 1 1 0; }
 .pane.narrow .npc-seg-num { font-size: 10px; }
+.npc-ace-pip { flex: 0 0 34px !important; min-width: 34px !important; }
 .pane.narrow .npc-seg-row { gap: 2px; }
 .pane.narrow .npc-hp-input { min-height: 32px; font-size: 14px; }
 .pane.narrow .tracker-name-input, .pane.narrow .npc-name-input { font-size: 14px; }
@@ -4159,15 +4160,19 @@ function init_trackers(root) {
   // (ACE Health, Nimble HP, SW's four wound levels).
   function xsMonsterItem(src, m) {
     const sum = xsMonSummary(src, m);
+    // ACE Health is a row of clickable pips (like the ID card); Star Wars has
+    // no HP at all — combatants use the same wound track as the players.
+    const hpMode = src === 'ace' ? 'ace' : src === 'sw' ? 'sw' : 'standard';
     return {
       id: nextId++, type: 'npc',
       name: m.name || 'Monster',
-      tag: sum.tag || '', hpMode: 'standard',
-      hpCurrent: sum.hp, hpMax: sum.hp,
+      tag: sum.tag || '', hpMode: hpMode,
+      hpCurrent: sum.hp, hpMax: sum.hp, wound: 'none',
       statuses: [], statsOpen: true, traitsOpen: false,
       gmon: { src: src, stats: sum.stats, lines: sum.lines, notes: sum.notes, page: m.page || '' }
     };
   }
+  const SW_WOUNDS = [['none','Unhurt'],['stunned','Stunned'],['wounded','Wounded'],['incapacitated','Incap.'],['mortal','Mortal']];
   function xsMonsterBlockHtml(n) {
     const g = n.gmon; if(!g) return '';
     const chips = (g.stats || []).map(st => st.roll
@@ -4455,6 +4460,8 @@ function init_trackers(root) {
     const modeSelectHtml = (n.mon || n.dmon || n.gmon) ? '' : `<select class="card-select npc-mode-select ${mode==='dcc'?'dcc-active':'std-active'}" title="HP mode">
         <option value="standard" ${mode==='standard'?'selected':''}>SD</option>
         <option value="dcc"      ${mode==='dcc'     ?'selected':''}>DCC</option>
+        <option value="ace"      ${mode==='ace'     ?'selected':''}>ACE</option>
+        <option value="sw"       ${mode==='sw'      ?'selected':''}>SW</option>
       </select>`;
     let hpBlockHtml = '', defeated = false;
 
@@ -4479,6 +4486,42 @@ function init_trackers(root) {
           <input type="text" class="npc-tag-input npc-tag-inline" value="${escAttr(n.tag || '')}" placeholder="Tag (elite, minion, ...)">
         </div>
         <div class="npc-hp-bar-track"><div class="npc-hp-bar-fill" style="width:${pct}%;background:${npcHpColor(pct)};"></div></div>
+      `;
+    } else if(mode === 'ace') {
+      // ACE! Health pips: click a lost pip to heal up to it, a live one to take damage down to it.
+      const max = Math.max(1, parseInt(n.hpMax, 10) || 1);
+      if(typeof n.hpCurrent !== 'number') n.hpCurrent = max;
+      defeated = n.hpCurrent <= 0;
+      let pips = '';
+      for(let i = 1; i <= max; i++) pips += `<button class="npc-seg npc-ace-pip ${i > n.hpCurrent ? 'dead' : ''}" data-pip="${i}" style="--seg-color:#4caf50;" title="${i > n.hpCurrent ? 'Heal to ' + i : 'Damage down to ' + (i - 1)}"><span class="npc-seg-num">${i}</span></button>`;
+      hpBlockHtml = `
+        <div class="npc-seg-setup">
+          <span class="npc-mon-label" style="align-self:center;">Health</span>
+          <input type="number" class="npc-hp-input npc-ace-max" min="1" max="40" value="${max}" title="Max Health">
+          <button class="btn small ghost status-add">+ Status</button>
+        </div>
+        <div class="npc-hp-second">
+          <input type="text" class="npc-tag-input npc-tag-inline" value="${escAttr(n.tag || '')}" placeholder="Tag (mook, villain, ...)">
+        </div>
+        <div class="npc-seg-row">${pips}</div>
+      `;
+    } else if(mode === 'sw') {
+      // Star Wars wound track — same five states as the player sheet.
+      const w = SW_WOUNDS.some(x => x[0] === n.wound) ? n.wound : 'none';
+      n.wound = w;
+      defeated = w === 'incapacitated' || w === 'mortal';
+      const colors = { none: '#4caf50', stunned: '#c8a020', wounded: '#c08020', incapacitated: '#b82018', mortal: '#6a1a12' };
+      const track = SW_WOUNDS.map(([k, lbl]) => `<button class="npc-seg npc-sw-wound ${k === w ? '' : 'dead'}" data-wound="${k}" style="--seg-color:${colors[k]};" title="${lbl}"><span class="npc-seg-num">${lbl}</span></button>`).join('');
+      hpBlockHtml = `
+        <div class="npc-seg-setup">
+          <span class="npc-mon-label" style="align-self:center;">Wounds</span>
+          <span style="font-size:11px;color:var(--muted);align-self:center;">${w === 'none' ? 'unhurt' : w === 'stunned' ? '−1D this round and next' : w === 'wounded' ? '−1D to everything' : w === 'incapacitated' ? 'unconscious' : 'mortally wounded — roll each round'}</span>
+          <button class="btn small ghost status-add">+ Status</button>
+        </div>
+        <div class="npc-hp-second">
+          <input type="text" class="npc-tag-input npc-tag-inline" value="${escAttr(n.tag || '')}" placeholder="Tag (trooper, officer, ...)">
+        </div>
+        <div class="npc-seg-row">${track}</div>
       `;
     } else {
       const segCount = n.segCount || 10;
@@ -4534,6 +4577,17 @@ function init_trackers(root) {
       card.querySelector('.npc-dmg1').addEventListener('click',  () => { n.hpCurrent = Math.max(0, n.hpCurrent - 1); render(); });
       card.querySelector('.npc-heal1').addEventListener('click', () => { n.hpCurrent = Math.min(n.hpMax, n.hpCurrent + 1); render(); });
       card.querySelector('.npc-heal5').addEventListener('click', () => { n.hpCurrent = Math.min(n.hpMax, n.hpCurrent + 5); render(); });
+    } else if(mode === 'ace') {
+      card.querySelectorAll('.npc-ace-pip').forEach(b => b.addEventListener('click', () => {
+        const i = parseInt(b.dataset.pip, 10);
+        n.hpCurrent = i > n.hpCurrent ? i : i - 1;
+        render();
+      }));
+      const mx = card.querySelector('.npc-ace-max');
+      mx.addEventListener('change', () => { n.hpMax = Math.max(1, Math.min(40, parseInt(mx.value, 10) || 1)); n.hpCurrent = Math.min(n.hpCurrent, n.hpMax); render(); });
+      mx.addEventListener('keydown', e => { if(e.key === 'Enter') e.target.blur(); });
+    } else if(mode === 'sw') {
+      card.querySelectorAll('.npc-sw-wound').forEach(b => b.addEventListener('click', () => { n.wound = b.dataset.wound; render(); }));
     } else {
       // Auto-apply: committing either box (blur / Enter / spinner) rebuilds the
       // segments — same behaviour the Apply button had, minus the button.
@@ -7033,8 +7087,7 @@ function xsMonSummary(src, m) {
     (m.skills || []).forEach(sk => { const dm = /(\d+D(?:\+\d)?)/.exec(sk); out.lines.push({ label: 'Skill', text: sk, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
     (m.equipment || []).forEach(e => { const dm = /damage\s*(\d+D(?:\+\d)?)/i.exec(e); out.lines.push({ label: 'Gear', text: e, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
     if(m.description) out.notes.push(m.description); if(m.notes) out.notes.push(m.notes);
-    // No hit points in D6: the four wound levels stand in (4 = unhurt … 0 = mortally wounded).
-    out.hp = 4; out.notes.push('Wound track: 4 unhurt · 3 stunned · 2 wounded · 1 incapacitated · 0 mortally wounded.');
+    out.hp = 0;   // no hit points in D6 — the tracker card carries a wound track instead
   }
   return out;
 }
