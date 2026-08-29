@@ -170,7 +170,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .atk-dice{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
 .row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;}
 .row-x:hover{color:var(--red);}
-.add-row{margin:6px 10px 8px;}
+.add-row{margin:6px 10px 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.add-row select{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:3px 6px;outline:none;max-width:260px;}
+body.dark .add-row select{background:var(--input-bg);color:var(--ink);border-color:var(--rule);}
 
 /* GEAR / NOTES */
 .gear-table{width:100%;border-collapse:collapse;}
@@ -256,8 +258,9 @@ body.dark .karma-pip.spent{border-color:#4a4a52;}
   .derived,.rt-grid{grid-template-columns:1fr;}
   .derived-cell,.rt-cell{border-right:none;border-bottom:1px solid var(--rule);}
 }
-textarea{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
-textarea::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track{background:transparent;}
+textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
+textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scrollbar,.modal-bd::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb,select::-webkit-scrollbar-thumb,.log-entries::-webkit-scrollbar-thumb,.modal-bd::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track,select::-webkit-scrollbar-track{background:transparent;}
+select option{background:var(--input-bg);color:var(--ink);}
 
 /* Found-loot drops broadcast from the GM screen (claim one item each). */
 .log-foundloot{border-left:3px solid #c8a020 !important;background:#221f16 !important;}
@@ -388,8 +391,8 @@ textarea::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb{backgro
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">🔗</button>
-    <button class="log-action-btn wizard" onclick="ACEB.launch()" title="Hero Builder" aria-label="Hero Builder">✨ Build</button>
-    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">? Rules</button>
+    <button class="log-action-btn wizard" onclick="ACEB.launch()" title="Hero Builder" aria-label="Hero Builder">✨</button>
+    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">📖</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">↓</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">↑<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>

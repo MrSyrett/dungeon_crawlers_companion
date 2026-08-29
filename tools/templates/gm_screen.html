@@ -1119,19 +1119,19 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 /* Found-loot / message cards broadcast from the Generators & Party tools. */
 .dice-log-entry.system { border-left: 3px solid #c8a020; background: #241f14; }
 .dice-log-entry.foundloot { border-left: 3px solid #c8a020; background: #221f16; }
-.dice-log-entry .fl-head { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: #e0c060; }
-.dice-log-entry .fl-name { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 800; color: #f0e2b0; margin-top: 2px; }
+.dice-log-entry .fl-head { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: #e0c060; }
+.dice-log-entry .fl-name { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800; color: #f0e2b0; margin-top: 2px; }
 .dice-log-entry .fl-body { font-size: 11px; color: #d8d2c0; margin-top: 3px; line-height: 1.45; }
 .dice-log-entry .fl-items { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
 .dice-log-entry .fl-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; color: #cfc6a8; }
 .dice-log-entry .fl-note { color: #8a8570; font-style: italic; }
-.dice-log-entry .fl-by { flex: 0 0 auto; font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8a8570; border: 1px solid #4a463a; border-radius: 3px; padding: 2px 6px; }
+.dice-log-entry .fl-by { flex: 0 0 auto; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8a8570; border: 1px solid #4a463a; border-radius: 3px; padding: 2px 6px; }
 .dice-log-entry .fl-by.open { color: #c8a020; border-color: #7a5a00; }
-.dice-log-hint { font-family: 'Montserrat', sans-serif; font-size: 10px; color: #666; font-style: italic; padding: 8px 2px; }
-.dice-log-entry { background: #1e1e1e; border: 1px solid #333; padding: 7px 9px; }
-.dice-log-entry .roll-label { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #777; margin-bottom: 2px; }
-.dice-log-entry .roll-result { font-family: 'Montserrat', monospace; font-size: 22px; font-weight: 900; color: #f0f0f0; line-height: 1; }
-.dice-log-entry .roll-detail { font-size: 9px; color: #555; margin-top: 2px; font-family: 'Montserrat', sans-serif; }
+.dice-log-hint { color: #444; font-size: 11px; font-family: 'Barlow Condensed', sans-serif; text-align: center; padding: 20px 10px; letter-spacing: .06em; text-transform: uppercase; }
+.dice-log-entry { background: #1e1e1e; border: 1px solid #333; border-radius: 3px; padding: 8px 10px; }
+.dice-log-entry .roll-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #888; margin-bottom: 2px; }
+.dice-log-entry .roll-result { font-family: 'Share Tech Mono', monospace; font-size: 22px; font-weight: 700; color: #e8e4dc; line-height: 1; }
+.dice-log-entry .roll-detail { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #777; margin-top: 3px; line-height: 1.4; word-break: break-word; }
 .dice-log-entry.crit { border-color: #ffd700; }
 .dice-log-entry.crit .roll-result { color: #ffd700; }
 .dice-log-entry.fumble { border-color: #ff4444; }
@@ -1186,7 +1186,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 #camp-popover .camp-sep { height: 1px; background: var(--border); margin: 8px 0; }
 @media (max-width: 760px) { #camp-popover { top: 54px; left: 12px; right: 12px; width: auto; } }
 .dice-camp-row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
-.dice-log-entry.remote { border-left: 3px solid #8a7ac8; background: #201d2a; }
+.dice-log-entry.remote { border-left: 3px solid #8a7ac8; background: #1c1a24; }
 /* ══ ROUNDED BUTTONS ══════════════════════════════════════════════════════
    Applied last so it wins over the per-button rules above. Deliberately
    shaped controls are left alone: .nts-tab / .nts-tab-add (notes tabs). */
@@ -2333,7 +2333,7 @@ GMScenes.renderPins();
         <option value="dccencounter">DCC Encounter</option>
         <option value="dccloot">DCC Loot Box</option>
         <option value="dccitem">DCC Item</option>
-        <option value="acemonster">ACE! Extra</option>
+        <option value="acemonster">ACE! Monsters</option>
         <option value="acetreasure">ACE! Gear Drop</option>
         <option value="nimmonster">Nimble Monster</option>
         <option value="nimtreasure">Nimble Treasure</option>

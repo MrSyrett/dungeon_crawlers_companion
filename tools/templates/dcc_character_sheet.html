@@ -402,6 +402,11 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
   from { opacity: 0; transform: translateX(-50%) translateY(8px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
+
+/* Quick Rules panel */
+.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#c8a020;margin:12px 0 3px;}
+.rules-list h4:first-child{margin-top:0;}
+.rules-list p{font-family:'Barlow',sans-serif;font-size:12px;line-height:1.5;color:#ccc;}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
@@ -736,6 +741,7 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
     <button id="dccw-launch-btn" class="log-action-btn" onclick="DCCW.launch()" title="Character Wizard" aria-label="Character Wizard" style="border:1px solid #b82018;background:transparent;color:#f0a8a3;font-size:14px;line-height:1;">✨</button>
+    <button class="log-action-btn" onclick="openRules()" style="border:1px solid #2f4a2f;background:#1e2a1e;color:#b8d8b8;" title="Quick rules" aria-label="Quick rules">📖</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">↓</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">↑<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
     <button class="log-action-btn pdf" onclick="exportPDF()" title="Official DCC sheet PDF" aria-label="Export PDF"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M7 3.5h10v4H7z"/><path d="M5 8.5h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2v-3H7v3H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12.6 2.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8 16h8v4.5H8z"/></svg></button>
@@ -2949,6 +2955,29 @@ document.addEventListener('input', scheduleAutosave);
 document.addEventListener('change', scheduleAutosave);
 </script>
 
+<div id="rules-overlay" onclick="if(event.target===this)closeRules()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#1a1a1a;border:2px solid #c8a020;border-radius:6px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;">
+    <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;letter-spacing:.1em;text-transform:uppercase;color:#e0c060;line-height:1;">Quick Rules</div>
+      <button onclick="closeRules()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">&#10005;</button>
+    </div>
+    <div id="rules-body" class="rules-list" style="padding:14px 16px;overflow-y:auto;scrollbar-width:thin;"></div>
+  </div>
+</div>
+<script src="/tools-data/dcc-quick-rules.js"></script>
+<script>
+// ── QUICK RULES (hand-curated in /tools-data/dcc-quick-rules.js) ──
+const _qrEsc = t => String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function openRules() {
+  const body = document.getElementById('rules-body');
+  const rows = (typeof DCC_QUICK_RULES !== 'undefined' && Array.isArray(DCC_QUICK_RULES)) ? DCC_QUICK_RULES : [];
+  body.innerHTML = rows.length
+    ? rows.map(r => '<h4>' + _qrEsc(r.title) + (r.page ? ' <span style="font-weight:400;color:#666;font-size:10px;">p.' + _qrEsc(String(r.page)) + '</span>' : '') + '</h4><p>' + _qrEsc(r.text) + '</p>').join('')
+    : '<p>Rules data not loaded.</p>';
+  document.getElementById('rules-overlay').style.display = 'flex';
+}
+function closeRules() { document.getElementById('rules-overlay').style.display = 'none'; }
+</script>
 <div id="campaign-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#1a1a1a;border:2px solid #8a7ac8;border-radius:6px;max-width:420px;width:100%;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
