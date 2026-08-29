@@ -1116,6 +1116,25 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 .dice-pool-clear { padding: 6px 9px; background: transparent; color: #999; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .dice-pool-clear:hover { color: #df6a6a; border-color: #7a2d2d; }
 .dice-log { flex: 1; overflow-y: auto; padding: 8px 10px; display: flex; flex-direction: column-reverse; justify-content: flex-start; gap: 6px; }
+/* Roll Log tray — the same controls a character sheet keeps under its log:
+   difficulty / bonus / ADV·DIS, one-tap dice, and a formula box. */
+.rl-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+.rl-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #888; flex-shrink: 0; }
+.rl-input { background: #1a1a1a; border: 1px solid #333; color: #ddd; font-family: 'Share Tech Mono', monospace; font-size: 12px; padding: 5px 6px; border-radius: 3px; outline: none; width: 58px; text-align: center; }
+.rl-input.formula { flex: 1; min-width: 90px; text-align: left; }
+.rl-input:focus { border-color: var(--gold); }
+.rl-note { font-size: 10px; color: #555; font-family: 'Barlow Condensed', sans-serif; letter-spacing: .04em; line-height: 1.3; }
+/* Found-loot / message cards broadcast from the Generators & Party tools. */
+.dice-log-entry.system { border-left: 3px solid #c8a020; background: #241f14; }
+.dice-log-entry.foundloot { border-left: 3px solid #c8a020; background: #221f16; }
+.dice-log-entry .fl-head { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: #e0c060; }
+.dice-log-entry .fl-name { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 800; color: #f0e2b0; margin-top: 2px; }
+.dice-log-entry .fl-body { font-size: 11px; color: #d8d2c0; margin-top: 3px; line-height: 1.45; }
+.dice-log-entry .fl-items { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+.dice-log-entry .fl-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; color: #cfc6a8; }
+.dice-log-entry .fl-note { color: #8a8570; font-style: italic; }
+.dice-log-entry .fl-by { flex: 0 0 auto; font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8a8570; border: 1px solid #4a463a; border-radius: 3px; padding: 2px 6px; }
+.dice-log-entry .fl-by.open { color: #c8a020; border-color: #7a5a00; }
 .dice-log-hint { font-family: 'Montserrat', sans-serif; font-size: 10px; color: #666; font-style: italic; padding: 8px 2px; }
 .dice-log-entry { background: #1e1e1e; border: 1px solid #333; padding: 7px 9px; }
 .dice-log-entry .roll-label { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #777; margin-bottom: 2px; }
@@ -1522,7 +1541,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 <script>
 // ══════════════════════════════════════════
 // CAMPAIGN LINK (top bar)
-// The campaign used to live inside the Dice Tray, which meant it vanished
+// The campaign used to live inside the Roll Log (then "Dice Tray"), which meant it vanished
 // whenever that tool wasn't on screen. It now lives here — one connection,
 // owned by the page, that the Dice Tray broadcasts to and the Party tool reads.
 // ══════════════════════════════════════════
@@ -2010,7 +2029,7 @@ GMScenes.renderPins();
         <option value="gen">Generators</option>
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
-        <option value="dice">Dice Tray</option>
+        <option value="dice">Roll Log</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-1-toolbar"></div>
     </div>
@@ -2029,7 +2048,7 @@ GMScenes.renderPins();
         <option value="gen">Generators</option>
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
-        <option value="dice">Dice Tray</option>
+        <option value="dice">Roll Log</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-2-toolbar"></div>
     </div>
@@ -2047,7 +2066,7 @@ GMScenes.renderPins();
         <option value="gen">Generators</option>
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
-        <option value="dice">Dice Tray</option>
+        <option value="dice">Roll Log</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-3-toolbar"></div>
     </div>
@@ -2066,7 +2085,7 @@ GMScenes.renderPins();
         <option value="gen">Generators</option>
         <option value="party">Party</option>
         <option value="rules">Rulebooks</option>
-        <option value="dice" selected>Dice Tray</option>
+        <option value="dice" selected>Roll Log</option>
       </select>
       <div class="pane-toolbar-slot" id="pane-4-toolbar"></div>
     </div>
@@ -10641,10 +10660,10 @@ function init_dice(root) {
   const logEl = root.querySelector('.dice-log');
   const clearBtn = root.querySelector('.dice-clear');
 
-  let pool = {};       // {6: 2, 20: 1}
   let modifier = 0;
+  let dc = null;        // difficulty / target number; a roll against it reads success or failure
   let advMode = 'none'; // none | adv | dis
-  let log = [];         // [{label, detail, total, crit, adv, remote?, source?}]
+  let log = [];         // [{label, detail, total, crit, adv, remote?, source?, type?, payload?}]
 
   // ── Campaign link ──
   // The connection itself lives in GMCamp (top bar). The tray only sends its
@@ -10663,66 +10682,58 @@ function init_dice(root) {
     // The poll re-fetches the campaign's history from id 0 whenever the link
     // (re)activates, so skip any roll already in the log by its server id.
     if(roll && roll.id != null && log.some(e => e.id === roll.id)) return;
+    // A claim locks one item on the drop it belongs to (no entry of its own).
+    if(roll && roll.type === 'lootclaim') {
+      let pc = {}; try { pc = JSON.parse(roll.detail || '{}'); } catch(e) { pc = {}; }
+      const drop = log.find(e => e.payload && (e.payload.dropId === pc.dropId || e.payload.boxId === pc.boxId));
+      if(drop) { drop.claimed = drop.claimed || {}; drop.claimed[pc.itemIndex == null ? 'all' : pc.itemIndex] = pc.by || roll.source || 'Someone'; queueRenderLog(); }
+      return;
+    }
+    const special = roll.type === 'foundloot' || roll.type === 'lootbox' || roll.type === 'system' || roll.type === 'achievement';
+    let payload = null;
+    if(roll.type === 'foundloot' || roll.type === 'lootbox') { try { payload = JSON.parse(roll.detail || '{}'); } catch(e) { payload = {}; } }
     log.unshift({ id: roll ? roll.id : undefined, label: roll.label, detail: roll.detail, total: roll.result,
-                  crit: roll.type === 'normal' ? '' : roll.type, adv: 'none',
+                  crit: (roll.type === 'normal' || special) ? '' : roll.type, adv: 'none',
+                  type: special ? roll.type : '', payload,
                   remote: true, source: roll.source });
     if(log.length > 100) log.length = 100;
     queueRenderLog();
   });
 
-  const DICE = [2, 4, 6, 8, 10, 12, 20, 100];
+  const DICE = [4, 6, 8, 10, 12, 20, 100];
+  const ICO_EYE = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7Zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9Zm0-7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>';
+  const ICO_EYE_OFF = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M3 4.4 4.4 3l16.6 16.6-1.4 1.4-3.2-3.2A11 11 0 0 1 12 19c-5 0-9-4.5-10-7a13.6 13.6 0 0 1 4.3-5L3 4.4Zm5.4 5.4A4.5 4.5 0 0 0 14.2 15.6l-1.5-1.5a2.5 2.5 0 0 1-3.3-3.3L8.4 9.8ZM12 5c5 0 9 4.5 10 7a13.7 13.7 0 0 1-3.4 4.3l-1.5-1.5A11.7 11.7 0 0 0 19.7 12c-1-1.9-4-5-7.7-5-.9 0-1.7.2-2.5.4L8 5.8A9.9 9.9 0 0 1 12 5Z"/></svg>';
 
-  function poolLabel() {
-    const parts = Object.entries(pool).filter(([,n])=>n>0).map(([d,n])=>n+'d'+d);
-    let s = parts.join(' + ');
-    if(modifier) s += (s?' ':'') + (modifier>0?'+':'') + modifier;
-    return s;
-  }
-
+  // Under the log: Difficulty · Bonus · ADV / DIS · hide-from-campaign, then the
+  // one-tap dice row (each rolls one die + bonus, like a character sheet), then a
+  // formula box for anything else ("2d6+3", "4d6", "1d20+5").
   function renderTray() {
-    const label = poolLabel();
-    let h = '<div class="dice-pool-label-row"><span class="dice-pool-label">'+(label||'Tap dice to build a roll')+'</span></div>';
-    h += '<div class="dice-btn-row">';
-    DICE.forEach(d=>{
-      const n = pool[d]||0;
-      h += '<button class="dice-die'+(n?' has':'')+'" data-d="'+d+'">d'+d+(n?'<span class="dice-count">'+n+'</span>':'')+'</button>';
-    });
-    h += '</div>';
-    trayEl.innerHTML = h;
-    trayEl.querySelectorAll('.dice-die').forEach(b=>{
-      b.onclick = ()=>{ const d = parseInt(b.dataset.d); pool[d]=(pool[d]||0)+1; renderTray(); renderPool(); };
-      b.oncontextmenu = (e)=>{ e.preventDefault(); const d = parseInt(b.dataset.d); if(pool[d]) pool[d]--; renderTray(); renderPool(); };
-    });
-  }
-
-  function renderPool() {
-    let h = '<div class="dice-pool-row">';
-    // Order: Hide · Bonus · ADV · DIS · ✕ · Roll  (the campaign link itself is in the top bar)
     const camp = GMCamp.get(), hidden = GMCamp.isHidden();
-    if(camp) h += '<button class="dice-hide-btn'+(hidden?' on':'')+'" title="'+(hidden?'Rolls hidden from campaign — click to share':'Rolls shared with campaign — click to hide')+'">'+(hidden?'<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M4.3 3 3 4.3l2.7 2.7C4 8.3 2.8 10 2.3 11.5a1.2 1.2 0 0 0 0 1c1.4 3.1 5.1 6.3 9.7 6.3 1.7 0 3.3-.4 4.7-1.2L19.7 21 21 19.7Zm5.1 7.4 3.2 3.2a2 2 0 0 1-3.2-3.2Z"/><path d="M12 5.2c-.9 0-1.8.1-2.6.4l2.2 2.2a3.5 3.5 0 0 1 4.4 4.4l2.7 2.7c1.4-1.1 2.5-2.5 3.1-3.9a1.2 1.2 0 0 0 0-1C20.3 8.4 16.6 5.2 12 5.2Z" opacity=".7"/></svg>':'<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M12 5.2c-4.6 0-8.3 3.2-9.7 6.3a1.2 1.2 0 0 0 0 1c1.4 3.1 5.1 6.3 9.7 6.3s8.3-3.2 9.7-6.3a1.2 1.2 0 0 0 0-1C20.3 8.4 16.6 5.2 12 5.2Zm0 3.3a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z"/></svg>')+'</button>';
-    h += '<input type="number" class="dice-mod" value="'+(modifier||'')+'" placeholder="+0" title="Bonus">';
-    h += '<button class="dice-advbtn'+(advMode==='adv'?' on-adv':'')+'" data-m="adv" title="Advantage (d20)">ADV</button>';
-    h += '<button class="dice-advbtn'+(advMode==='dis'?' on-dis':'')+'" data-m="dis" title="Disadvantage (d20)">DIS</button>';
-    h += '<button class="dice-pool-clear" title="Clear pool">✕</button>';
-    h += '<button class="dice-roll-go" title="Roll"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Roll</button>';
-    h += '</div>';
-    poolEl.innerHTML = h;
-    poolEl.querySelector('.dice-mod').onchange = (e)=>{ modifier = parseInt(e.target.value)||0; renderTray(); };
-    poolEl.querySelectorAll('.dice-advbtn').forEach(b=>{
-      b.onclick = ()=>{ advMode = advMode===b.dataset.m ? 'none' : b.dataset.m; renderPool(); };
-    });
-    poolEl.querySelector('.dice-roll-go').onclick = doRoll;
-    poolEl.querySelector('.dice-pool-clear').onclick = ()=>{ pool={}; modifier=0; advMode='none'; renderTray(); renderPool(); };
-    const hideBtn = poolEl.querySelector('.dice-hide-btn');
-    if(hideBtn) hideBtn.onclick = ()=>{ GMCamp.toggleHide(); renderPool(); };
+    let h = '<div class="rl-row">'
+      + '<span class="rl-label">DC</span><input type="number" class="rl-input rl-dc" min="1" placeholder="—" value="' + (dc == null ? '' : dc) + '" title="Difficulty / target number — rolls against it read success or failure">'
+      + '<span class="rl-label">Bonus</span><input type="number" class="rl-input rl-mod" placeholder="+0" value="' + (modifier || '') + '" title="Added to every roll">'
+      + '<button class="dice-advbtn' + (advMode === 'adv' ? ' on-adv' : '') + '" data-m="adv" title="Advantage (d20)">▲ ADV</button>'
+      + '<button class="dice-advbtn' + (advMode === 'dis' ? ' on-dis' : '') + '" data-m="dis" title="Disadvantage (d20)">▼ DIS</button>'
+      + (camp ? '<button class="dice-hide-btn' + (hidden ? ' on' : '') + '" style="margin-left:auto;" title="' + (hidden ? 'Rolls hidden from the campaign — click to share' : 'Rolls shared with the campaign — click to hide') + '">' + (hidden ? ICO_EYE_OFF : ICO_EYE) + '</button>' : '')
+      + '</div>';
+    h += '<div class="dice-btn-row">' + DICE.map(d => '<button class="dice-die" data-d="' + d + '" title="Roll 1d' + d + (modifier ? (modifier > 0 ? '+' : '') + modifier : '') + '">d' + d + '</button>').join('') + '</div>';
+    trayEl.innerHTML = h;
+    trayEl.querySelector('.rl-dc').onchange = e => { const v = parseInt(e.target.value, 10); dc = Number.isFinite(v) && v > 0 ? v : null; };
+    trayEl.querySelector('.rl-mod').onchange = e => { modifier = parseInt(e.target.value, 10) || 0; renderTray(); };
+    trayEl.querySelectorAll('.dice-advbtn').forEach(b => { b.onclick = () => { advMode = advMode === b.dataset.m ? 'none' : b.dataset.m; renderTray(); }; });
+    trayEl.querySelectorAll('.dice-die').forEach(b => { b.onclick = () => { const d = parseInt(b.dataset.d, 10); rollCore([[d, 1]], modifier, advMode, null); }; });
+    const hideBtn = trayEl.querySelector('.dice-hide-btn');
+    if(hideBtn) hideBtn.onclick = () => { GMCamp.toggleHide(); renderTray(); };
   }
-
-  function doRoll() {
-    const dice = Object.entries(pool).filter(([,n])=>n>0).map(([d,n])=>[parseInt(d), n]);
-    if(!dice.length && !modifier) return;
-    rollCore(dice, modifier, advMode, null);
+  function renderPool() {
+    poolEl.innerHTML = '<div class="rl-row" style="margin-bottom:2px;"><input type="text" class="rl-input formula rl-formula" placeholder="2d6+3" title="Any dice formula">'
+      + '<button class="dice-roll-go" style="flex:0 0 auto;" title="Roll the formula">🎲 Roll</button></div>'
+      + '<div class="rl-note">Bonus and DC apply to every roll; ADV/DIS to a single d20.</div>';
+    const inp = poolEl.querySelector('.rl-formula');
+    const go = () => { const { dice, mod } = parseFormula(inp.value); if(!dice.length && !mod) return; rollCore(dice, mod + modifier, advMode, inp.value.trim()); };
+    poolEl.querySelector('.dice-roll-go').onclick = go;
+    inp.addEventListener('keydown', e => { if(e.key === 'Enter') go(); });
   }
-
   // The rolling mechanic itself, so the tray's Roll button and other tools
   // (a monster's attack or ability check) produce identical entries.
   //   dice: [[sides, count], ...]   label: overrides the pool description
@@ -10747,11 +10758,18 @@ function init_dice(root) {
       }
     });
     if(modifier) detailParts.push((modifier>0?'+':'')+modifier);
+    // Against a difficulty the entry reads as a success or failure (a natural
+    // 20 / 1 still wins the colour), exactly as the character sheets do.
+    const nat = crit;
+    if(dc != null) {
+      detailParts.push('vs ' + dc + (total >= dc ? ' — success' : ' — failure'));
+      if(!crit) crit = total >= dc ? 'crit' : 'fumble';
+    }
     const entry = {
-      label: label || poolLabel() || String(modifier),
+      label: label || dice.map(([d, n]) => n + 'd' + d).join(' + ') + (modifier ? (modifier > 0 ? ' +' : ' ') + modifier : ''),
       adv: isSingleD20 ? advMode : 'none',
       detail: detailParts.join(' '),
-      total, crit
+      total, crit, nat
     };
     log.unshift(entry);
     if(log.length > 100) log.length = 100;
@@ -10762,11 +10780,27 @@ function init_dice(root) {
 
   function renderLog() {
     if(!log.length) {
-      logEl.innerHTML = '<div class="dice-log-hint">Tap dice and roll — results appear here</div>';
+      logEl.innerHTML = '<div class="dice-log-hint">Tap a die, roll a formula, or click a stat on a tracker card — results appear here</div>';
       return;
     }
+    const esc = v => String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;');
     logEl.innerHTML = log.map(e=>{
-      const critTag = e.crit==='crit' ? ' ★ NAT 20' : e.crit==='fumble' ? ' ✗ NAT 1' : '';
+      if(e.type === 'foundloot' || e.type === 'lootbox') {
+        const p = e.payload || {}, items = Array.isArray(p.items) ? p.items : [], claimed = e.claimed || {};
+        const rows = items.map((it, i) => {
+          const by = claimed[i] || claimed.all;
+          return '<li class="fl-item"><span>' + esc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + esc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + esc(it.notes) + '</span>' : '') + '</span>'
+            + '<span class="fl-by' + (by ? '' : ' open') + '">' + (by ? 'Claimed by ' + esc(by) : 'Unclaimed') + '</span></li>';
+        }).join('');
+        return '<div class="dice-log-entry foundloot"><div class="fl-head">🎁 ' + esc(e.source ? e.source + ' · ' : '') + esc(e.label || 'FOUND LOOT') + '</div>'
+          + (e.total ? '<div class="fl-name">' + esc(e.total) + '</div>' : '') + (p.note ? '<div class="fl-body">' + esc(p.note) + '</div>' : '')
+          + (rows ? '<ul class="fl-items">' + rows + '</ul>' : (e.type === 'lootbox' ? '<div class="fl-body">' + esc(e.detail) + '</div>' : '')) + '</div>';
+      }
+      if(e.type === 'system' || e.type === 'achievement') {
+        return '<div class="dice-log-entry system"><div class="fl-head">' + esc(e.source ? e.source + ' · ' : '') + esc(e.label || 'MESSAGE') + '</div>'
+          + (e.total ? '<div class="fl-name">' + esc(e.total) + '</div>' : '') + (e.detail ? '<div class="fl-body">' + esc(e.detail) + '</div>' : '') + '</div>';
+      }
+      const critTag = e.nat==='crit' ? ' ★ NAT 20' : e.nat==='fumble' ? ' ✗ NAT 1' : '';
       const advTag = e.adv==='adv' ? ' <span style="color:#6dbf6d;font-size:8px;">▲ADV</span>'
                    : e.adv==='dis' ? ' <span style="color:#df6a6a;font-size:8px;">▼DIS</span>' : '';
       const srcTag = e.remote ? '<span style="color:#8a7ac8;">'+String(e.source||'').replace(/</g,'&lt;')+'</span> · ' : '';
@@ -10857,7 +10891,7 @@ function init_dice(root) {
       label: label || 'Attack',
       adv: hasHit ? mode : 'none',
       detail: detailParts.join('  |  '),
-      total, crit
+      total, crit, nat: crit
     };
     log.unshift(entry);
     if(log.length > 100) log.length = 100;
@@ -11604,7 +11638,7 @@ function init_party(root) {
   async function sync(quiet) {
     const camp = (typeof window.__gmCampaign === 'function') ? window.__gmCampaign() : null;
     if(!camp || !camp.id) {
-      if(!quiet) status('Link a campaign first — Dice Tray → Campaign link.', true);
+      if(!quiet) status('Link a campaign first — Campaign link in the top bar.', true);
       return;
     }
     if(!quiet) status('Syncing "' + camp.name + '"…');
