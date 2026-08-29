@@ -115,6 +115,11 @@
       ".dccs-btn{border:1px solid #2a2a2e;background:#1c1516;color:#f0a8a3;border-radius:6px;padding:0 14px;font-size:12px;font-weight:700;cursor:pointer;}",
       ".dccs-btn:hover{border-color:#b82018;}",
       ".dccs-btn.plain{background:#161618;color:#c9c9cf;}",
+      ".dccs-item.adding{border-color:#b82018;}",
+      ".dccs-addbar{display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid #2a2a2e;}",
+      ".dccs-rename{flex:1;min-width:0;background:#0e0e10;border:1px solid #2a2a2e;border-radius:6px;color:#ece9e1;padding:7px 9px;font-size:13px;font-family:inherit;}",
+      ".dccs-rename:focus{outline:none;border-color:#b82018;}",
+      ".dccs-hint{padding:9px 18px 16px;font-size:11px;color:#8a8a93;text-align:center;}",
       // info panel
       ".dccs-info .ef{color:#e6e3da;font-size:13px;line-height:1.55;margin-top:8px;}",
       ".dccs-info .uprow{margin-top:8px;font-size:12px;color:#c9c9cf;line-height:1.5;}",
@@ -148,6 +153,7 @@
   var query = "";
   var filterKind = "all";   // 'all' | 'utility' | 'attack' | 'spell'
   var expanded = {};        // kind:name -> inline detail open in the picker
+  var adding = null;        // kind:name -> rename/confirm bar open (only one at a time)
   var FILTERS = [
     { key: "all", label: "All" },
     { key: "utility", label: "Utility" },
@@ -164,25 +170,41 @@
     var s = document.getElementById("dccs-search-input");
     if (s) s.focus();
   }
-  function closePicker() { var ov = document.getElementById("dccs-overlay"); if (ov) ov.style.display = "none"; query = ""; expanded = {}; }
+  function closePicker() { var ov = document.getElementById("dccs-overlay"); if (ov) ov.style.display = "none"; query = ""; expanded = {}; adding = null; }
   function itemHtml(e) {
-    var open = !!expanded[ekey(e)];
+    var k = ekey(e);
+    var open = !!expanded[k];
+    var addOpen = adding === k;
     var detail = open
       ? '<div class="detail"><div class="ef">' + esc(e.desc || "No description on file.") + '</div>' + upgradesHtml(e) + '</div>'
       : "";
-    return '<div class="dccs-item' + (open ? " open" : "") + '">' +
+    // Tapping a skill opens a rename bar (pre-filled) so it can be renamed before
+    // it's added — the rulebook original is still remembered as its source.
+    var addBar = addOpen
+      ? '<div class="dccs-addbar">' +
+          '<input class="dccs-rename" type="text" value="' + attr(e.name) + '" data-kind="' + attr(e.kind) + '" data-name="' + attr(e.name) + '" ' +
+          'onkeydown="if(event.key===\'Enter\')DCCSkills.confirmAdd(this)">' +
+          '<button class="dccs-btn" onclick="DCCSkills.confirmAdd(this.previousElementSibling)">Add to sheet</button>' +
+        '</div>'
+      : "";
+    return '<div class="dccs-item' + (open ? " open" : "") + (addOpen ? " adding" : "") + '">' +
       '<div class="row">' +
-        '<div class="body" onclick="DCCSkills.add(\'' + attr(e.name) + '\')" title="Add to your skills">' +
+        '<div class="body" onclick="DCCSkills.pick(\'' + attr(e.kind) + '\',\'' + attr(e.name) + '\')" title="Add to your skills — rename it first if you like">' +
           '<div class="nm">' + esc(e.name) + '</div>' +
           '<div class="mt">' + esc(metaLine(e)) + '</div>' +
         '</div>' +
         '<button class="dccs-i' + (open ? " on" : "") + '" title="' + (open ? "Hide details" : "What does it do?") + '" onclick="DCCSkills.toggle(\'' + attr(e.kind) + '\',\'' + attr(e.name) + '\')">i</button>' +
-      '</div>' + detail +
+      '</div>' + addBar + detail +
     '</div>';
   }
   function renderPicker() {
     var ov = document.getElementById("dccs-overlay");
     if (!ov) return;
+    // Preserve the list's scroll position and whether the search box was focused,
+    // so toggling a skill's info (or opening its rename bar) doesn't jump to top.
+    var prevList = ov.querySelector(".dccs-list");
+    var savedScroll = prevList ? prevList.scrollTop : 0;
+    var searchWasFocused = document.activeElement && document.activeElement.id === "dccs-search-input";
     var q = query.trim().toLowerCase();
     var all = entries().filter(function (e) { return !q || e.name.toLowerCase().indexOf(q) >= 0 || (e.desc && e.desc.toLowerCase().indexOf(q) >= 0) || (e.group && e.group.toLowerCase().indexOf(q) >= 0); });
     var util = all.filter(function (e) { return e.kind === "skill"; });
@@ -205,12 +227,14 @@
         '<div class="dccs-search"><input id="dccs-search-input" type="search" placeholder="Search skills &amp; spells…" value="' + attr(query) + '" oninput="DCCSkills.search(this.value)"></div>' +
         '<div class="dccs-filters">' + chips + '</div>' +
         '<div class="dccs-list">' + rows + '</div>' +
-        '<div class="dccs-foot"><input id="dccs-custom-input" type="text" placeholder="…or type a custom skill name" onkeydown="if(event.key===\'Enter\')DCCSkills.addCustom()">' +
-          '<button class="dccs-btn" onclick="DCCSkills.addCustom()">Add</button>' +
-          '<button class="dccs-btn plain" onclick="DCCSkills.addBlank()">Blank row</button></div>' +
+        '<div class="dccs-hint">Tap a skill to rename &amp; add it · tap the “i” for details</div>' +
       '</div>';
+    var newList = ov.querySelector(".dccs-list");
+    if (newList) newList.scrollTop = savedScroll;
+    // Only pull focus back to search if it was already there — never steal it from
+    // an open rename field.
     var s = document.getElementById("dccs-search-input");
-    if (s) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }
+    if (s && searchWasFocused) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }
   }
 
   // ── info panel (shared by picker and per-row (i) buttons) ───────────────────
@@ -368,17 +392,28 @@
     info: info,
     closeInfo: closeInfo,
     infoRow: infoRow,
-    add: function (name) { var e = lookup(name); addToSheet(e ? e.name : name, e); },
-    addCustom: function () {
-      var inp = document.getElementById("dccs-custom-input");
-      var name = inp ? String(inp.value || "").trim() : "";
-      if (!name) return;
-      var e = lookup(name);
-      addToSheet(e ? e.name : name, e);
-      if (inp) inp.value = "";
-      closePicker();
+    add: function (name) { var e = lookup(name); if (e) addToSheet(e.name, e); },
+    // Tap a skill → open its rename bar (pre-filled). Tapping again closes it.
+    pick: function (kind, name) {
+      var k = kind + ":" + name;
+      adding = (adding === k) ? null : k;
+      renderPicker();
+      if (adding) {
+        var inp = document.querySelector(".dccs-item.adding .dccs-rename");
+        if (inp) { try { inp.focus(); inp.select(); } catch (e) {} inp.scrollIntoView({ block: "nearest" }); }
+      }
     },
-    addBlank: function () { newRow(); closePicker(); },
+    // Add the picked skill/spell under its (possibly renamed) display name; the
+    // rulebook original stays as the row's source so links + info still resolve.
+    confirmAdd: function (inp) {
+      if (!inp) return;
+      var e = lookup(inp.dataset.name);
+      if (!e) return;                                   // official/homebrew only
+      var display = String(inp.value || "").trim() || e.name;
+      addToSheet(display, e);
+      adding = null;
+      renderPicker();
+    },
     // Mirror a Skills-tab spell into the Attacks section (used by the Hotlist pin).
     // Only attack skills/spells get an attack row; no-op for utility/heal or duplicates.
     addAttackForRow: function (tr) {

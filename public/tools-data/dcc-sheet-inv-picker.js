@@ -183,13 +183,27 @@
     fireInput(ins[2]);
     try { tr.scrollIntoView({ block: "nearest" }); } catch (_) {}
   }
+  // Gear that occupies a body slot (Head / Torso / Arms / Hands·Holding / Legs /
+  // Feet) is worn, not pinned — so it auto-equips into the Gear slots on add.
+  function isBodySlot(slot) {
+    var s = String(slot == null ? "" : slot).trim().toLowerCase();
+    if (!s || s === "accessory") return false;
+    return /^(head|torso|arms|legs|feet)$/.test(s) || /hand|holding/.test(s);
+  }
   function addToSheet(it, name) {
     var tr = newInvRow();
     fillRow(tr, name || (it ? it.name : ""), it ? notesOf(it) : "");
     // Stamp category/slot/effect so the row's radial can equip it (works for
     // homebrew armor/accessories too, which a name lookup wouldn't find).
     if (tr && it) { tr.dataset.cat = it.category || ""; if (it.slot) tr.dataset.slot = it.slot; if (it.effect) tr.dataset.effect = it.effect; }
-    try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {}
+    // Auto-equip body-slot gear straight into the Gear slots instead of leaving
+    // it to be pinned to the Hotlist.
+    var equipped = false;
+    if (tr && it && isBodySlot(it.slot) && window.DCCEquip && typeof window.DCCEquip.isEquipType === "function" && window.DCCEquip.isEquipType(tr)) {
+      var pin = tr.querySelector(".hot-pin");
+      if (pin && tr.dataset.equipped !== "1") { try { window.DCCEquip.click(pin); equipped = true; } catch (e) {} }
+    }
+    if (!equipped) { try { if (window.DCCHotlist) window.DCCHotlist.refresh(); } catch (e) {} }
   }
 
   // ── picker ──────────────────────────────────────────────────────────────────
@@ -261,8 +275,7 @@
         '<div class="dcci-filters">' + chips + '</div>' +
         '<div class="dcci-list">' + rows + '</div>' +
         '<div class="dcci-foot"><input id="dcci-custom-input" type="text" placeholder="…or type a custom item name" onkeydown="if(event.key===\'Enter\')DCCItems.addCustom()">' +
-          '<button class="dcci-btn" onclick="DCCItems.addCustom()">Add</button>' +
-          '<button class="dcci-btn plain" onclick="DCCItems.addBlank()">Blank row</button></div>' +
+          '<button class="dcci-btn" onclick="DCCItems.addCustom()">Add</button></div>' +
       '</div>';
     var s = document.getElementById("dcci-search-input");
     if (s) { s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch (e) {} }
