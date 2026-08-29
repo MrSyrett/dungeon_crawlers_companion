@@ -137,6 +137,10 @@
       ".dcci-btn{border:1px solid #2a2a2e;background:#1c1610;color:#e6c15a;border-radius:6px;padding:0 14px;font-size:12px;font-weight:700;cursor:pointer;}",
       ".dcci-btn:hover{border-color:#c8892a;}",
       ".dcci-btn.plain{background:#161618;color:#c9c9cf;}",
+      ".dcci-info-body{padding:14px 18px 18px;}",
+      ".dcci-info-body .mt{color:#8a8a93;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}",
+      ".dcci-info-body .ef{color:#d8d5cc;font-size:13px;line-height:1.55;}",
+      ".dcci-info-body .grp{color:#8a8a93;font-size:12px;line-height:1.5;}",
     ].join("\n");
     document.head.appendChild(st);
   }
@@ -311,9 +315,44 @@
     renderPicker();
   }
 
+  // ── info panel (per-row (i) button on the Inventory table) ──────────────────
+  function info(name) {
+    injectCss();
+    var it = lookup(name);
+    var ov = overlay("dcci-info-overlay");
+    var inner = it
+      ? '<div class="dcci-head"><h3>' + esc(it.name) + '</h3><button class="dcci-x" onclick="DCCItems.closeInfo()" aria-label="Close">✕</button></div>' +
+        '<div class="dcci-info-body"><div class="mt">' + esc(metaLine(it)) + '</div><div class="ef">' + esc(it.effect || "No description on file.") + '</div></div>'
+      : '<div class="dcci-head"><h3>' + esc(name || "Item") + '</h3><button class="dcci-x" onclick="DCCItems.closeInfo()" aria-label="Close">✕</button></div>' +
+        '<div class="dcci-info-body"><div class="grp">No catalog entry matches “' + esc(name || "") + '”. It may be a custom, renamed, or looted item — check its Notes.</div></div>';
+    ov.innerHTML = '<div class="dcci-modal" role="dialog" aria-label="Item info">' + inner + '</div>';
+  }
+  function closeInfo() { var ov = document.getElementById("dcci-info-overlay"); if (ov) ov.style.display = "none"; }
+  function infoRow(btn) {
+    var tr = btn && btn.closest ? btn.closest("tr") : null;
+    if (!tr) return;
+    var texts = tr.querySelectorAll('input[type="text"]');   // [item, qty, notes]
+    var name = texts[0] ? texts[0].value : "";
+    // Try, in order: the raw name, the part before a ":" (spell-bearing items read
+    // "Spell Scroll: Fireball" — the catalog item is "Spell Scroll"), and the name
+    // with a trailing parenthetical removed. First one the catalog knows wins.
+    var cands = [];
+    if (name) cands.push(name);
+    var beforeColon = String(name).split(":")[0].trim();
+    if (beforeColon && cands.indexOf(beforeColon) < 0) cands.push(beforeColon);
+    var stripped = String(name).replace(/\s*\([^)]*\)\s*$/, "").trim();
+    if (stripped && cands.indexOf(stripped) < 0) cands.push(stripped);
+    var hit = null;
+    for (var i = 0; i < cands.length && !hit; i++) { if (lookup(cands[i])) hit = cands[i]; }
+    info(hit || name);
+  }
+
   window.DCCItems = {
     openPicker: openPicker,
     closePicker: closePicker,
+    info: info,
+    closeInfo: closeInfo,
+    infoRow: infoRow,
     search: function (v) { query = v; renderPicker(); },
     filter: function (key) { filterKey = key; renderPicker(); },
     toggle: function (name) { expanded[name] = !expanded[name]; renderPicker(); },

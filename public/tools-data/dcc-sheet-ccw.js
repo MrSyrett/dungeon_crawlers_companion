@@ -257,6 +257,15 @@
     const all = (typeof DCC_SPELLS !== "undefined" ? DCC_SPELLS : []);
     return BASIC_SPELLS.map((n) => all.find((s) => s.name === n)).filter(Boolean);
   }
+  // Attack spells keep their base damage in the description ("Base Damage: 1d2 +
+  // INT Bludgeoning."), not a dedicated field. Pull the dice term so the Attacks
+  // row's Damage column gets filled — the "+ INT" is the stat mod, which the
+  // sheet already adds from the row's stat select.
+  function spellDice(sp) {
+    if (!sp || !sp.desc) return "";
+    const m = String(sp.desc).match(/Base Damage:\s*(\d*d\d+)/i);
+    return m ? m[1] : "";
+  }
   function bgByEra(era) { return (typeof DCC_BACKGROUNDS !== "undefined" ? DCC_BACKGROUNDS : []).filter((b) => b.era === era && (b.kind || "human") === W.kind); }
   // Human vs animal crawlers use different life-stage labels (Core pp.104-107).
   const ERA_LABEL = { human: { Childhood: "Childhood", Adolescence: "Adolescence", Career: "Career", Hobby: "Hobby" }, animal: { Childhood: "Youth", Adolescence: "Training", Career: "Adult", Hobby: "Quirk" } };
@@ -873,7 +882,7 @@
       const sp = basicSpells().find((s) => s.name === W.combat.spell);
       const disp = combatDisplayName() || W.combat.spell;
       const eff = [sp ? sp.mana + " Mana" : "", disp !== W.combat.spell ? W.combat.spell : ""].filter(Boolean).join(" · ");
-      atks.push({ name: disp + " (Spell)", rank: "3", dice: "", stat: (sp ? String(sp.stat).toLowerCase() : "int"), effects: eff });
+      atks.push({ name: disp + " (Spell)", rank: "3", dice: spellDice(sp), stat: (sp ? String(sp.stat).toLowerCase() : "int"), effects: eff });
     }
     return atks;
   }
@@ -937,13 +946,13 @@
     } else if (W.combat.type === "spell" && W.combat.spell) {
       const sp = basicSpells().find((s) => s.name === W.combat.spell), disp = combatDisplayName() || W.combat.spell;
       const st = (sp ? String(sp.stat).toLowerCase() : "int");
-      atks.push({ name: disp + " (Spell)", rank: String(primaryRank), dice: "", stat: st, effects: [sp ? sp.mana + " Mana" : "", disp !== W.combat.spell ? W.combat.spell : ""].filter(Boolean).join(" · "), src: W.combat.spell });
+      atks.push({ name: disp + " (Spell)", rank: String(primaryRank), dice: spellDice(sp), stat: st, effects: [sp ? sp.mana + " Mana" : "", disp !== W.combat.spell ? W.combat.spell : ""].filter(Boolean).join(" · "), src: W.combat.spell });
       skills.push({ name: disp, rank: String(primaryRank), stat: st, checkType: "Spell", notes: [sp ? sp.mana + " Mana" : "", sp && sp.type ? sp.type : ""].filter(Boolean).join(" · "), checked: false, src: W.combat.spell });
     }
     // Attack-type granted spells also get an Attacks row (attack spells live in both).
     grantSpells.forEach((gs) => {
       if (gs._spell && gs._spell.type === "attack") {
-        atks.push({ name: gs.name + " (Spell)", rank: gs.rank, dice: "", stat: gs.stat, effects: (gs._spell.mana != null ? gs._spell.mana + " Mana" : ""), src: gs.name });
+        atks.push({ name: gs.name + " (Spell)", rank: gs.rank, dice: spellDice(gs._spell), stat: gs.stat, effects: (gs._spell.mana != null ? gs._spell.mana + " Mana" : ""), src: gs.name });
       }
     });
     // Loot: the tiered weapon adds Weapon-Skill ranks to the primary attack.

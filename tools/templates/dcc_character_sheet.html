@@ -1012,7 +1012,6 @@ function addAttackRow(tbody) {
       <div class="atk-formula">
         <input type="text" placeholder="Rank" style="width:36px;" oninput="${recalc}">
       </div>
-      <span class="atk-calc" data-atk="hit" title="d20 + Rank + Stat Mod vs the target's Evade">d20+0</span>
     </td>
     <td>
       <div class="atk-formula">
@@ -1023,7 +1022,6 @@ function addAttackRow(tbody) {
       <div class="atk-formula">
         <input type="text" placeholder="Dice" style="width:44px;" oninput="${recalc}">
       </div>
-      <span class="atk-calc" data-atk="dmg" title="Damage dice + Stat Mod">—</span>
     </td>
     <td><input type="text" placeholder="Effects..."></td>
     <td style="text-align:right;white-space:nowrap;"><button class="skill-del-btn" onclick="this.closest('tr').remove()" title="Remove attack" aria-label="Remove attack" style="margin-right:3px;">✕</button><button class="skill-info-btn" onclick="if(window.DCCSkills)DCCSkills.infoRow(this)" title="Look up this attack skill/spell" aria-label="Attack info">i</button><button class="atk-roll-btn" onclick="rollAttack(this)" title="Roll attack" aria-label="Roll attack"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button></td>
@@ -1180,9 +1178,10 @@ function refreshSkillRowRules() {
     const nameInp = texts[0];
     const chk = tr.querySelector('input[type="checkbox"]');
     // Passive skills can't be rolled — hide the roll button when the
-    // Active/Passive field reads "Passive".
+    // Active/Passive field reads "Passive". Use visibility (not display) so the
+    // button's space is preserved and passive rows still line up with active ones.
     const rollBtn = tr.querySelector('.skill-roll-btn');
-    if(rollBtn) rollBtn.style.display = /passive/i.test(texts[2] ? texts[2].value : '') ? 'none' : '';
+    if(rollBtn) rollBtn.style.visibility = /passive/i.test(texts[2] ? texts[2].value : '') ? 'hidden' : '';
     if(!chk) return;
     const fixed = isFixedSkill(nameInp ? nameInp.value : '');
     chk.style.visibility = fixed ? 'hidden' : '';
@@ -1210,7 +1209,7 @@ function addInvRow() {
     <td><input type="text" placeholder="Item name..."></td>
     <td><input type="text" placeholder="Qty" style="text-align:center;"></td>
     <td><input type="text" placeholder="Notes..."></td>
-    <td style="text-align:right;"><button class="inv-del-btn" onclick="this.closest('tr').remove()" title="Remove item" aria-label="Remove item">✕</button></td>
+    <td style="text-align:right;white-space:nowrap;"><button class="skill-info-btn" onclick="if(window.DCCItems)DCCItems.infoRow(this)" title="What does this item do?" aria-label="Item info">i</button><button class="inv-del-btn" onclick="this.closest('tr').remove()" title="Remove item" aria-label="Remove item">✕</button></td>
   `;
   tbody.appendChild(tr);
 }
@@ -1758,9 +1757,14 @@ function applySheet(data) {
       pip.classList.toggle('dimmed', !active);
     });
   }
-  // Shield Spell markers (default off when absent)
+  // Shield Spell markers (default off when absent). Coerce to a real boolean:
+  // when data.hpShields is undefined (new character), `on` would be undefined,
+  // and classList.toggle('on', undefined) ignores the force arg and *flips* the
+  // class — adding 'on' to freshly-built (empty) pips so they look filled while
+  // dataset.active stays 'false'. That desync is what made new shields need
+  // extra clicks before they'd turn off. A boolean force always sets it right.
   document.querySelectorAll('.hp-shield').forEach((s, i) => {
-    const on = data.hpShields && data.hpShields[i] === 'true';
+    const on = !!(data.hpShields && data.hpShields[i] === 'true');
     s.dataset.active = on ? 'true' : 'false';
     s.classList.toggle('on', on);
   });
