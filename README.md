@@ -40,11 +40,13 @@ registered in `lib/tools.ts`.
 | `sd-session`    | Shadowdark           | `dcw_builder_v5` |
 | `ace-character` | ACE!                 | `ace_sheet`      |
 | `kob-character` | Kids on Bikes        | `kob_sheet`      |
+| `nimble-character` | Nimble            | `nimble_sheet`   |
+| `ace-session` / `kob-session` / `nimble-session` | ACE! / Kids on Bikes / Nimble | `ace_session` / `kob_session` / `nimble_session` (generated from the DCC builder by `scripts/make-session-builders.mjs`) |
 
 ## Game systems
 
 The dashboard, the `/rules` shelf and the tool registry are keyed by
-`SystemKey` in `components/systemStore.ts` (`"SD" | "DCC" | "ACE" | "KOB"`).
+`SystemKey` in `components/systemStore.ts` (`"SD" | "DCC" | "ACE" | "KOB" | "NIM"`).
 Kids on Bikes, Kids on Brooms and Kids in Capes share the `KOB` system: one
 sheet with a per-character book switch, one data layer tagged by book. To add a
 system: add its key and accent to `SYSTEMS`, register its tools in
@@ -54,7 +56,7 @@ VTT tokens, the documents API) reads those two tables.
 
 Rulebook content lives as curated JSON under `data/<system>/` and is fanned out
 to typed `lib/data/*.ts` (Next pages) and `public/tools-data/*.js` (the HTML
-tools) by `npm run data:dcc` / `npm run data:ace` / `npm run data:kob`. The generated files are
+tools) by `npm run data:dcc` / `npm run data:ace` / `npm run data:kob` / `npm run data:nimble`. The generated files are
 committed; re-run after editing the JSON.
 
 > Note: portrait images are intentionally not persisted (the original tools strip

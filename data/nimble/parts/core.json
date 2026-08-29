@@ -1,0 +1,2658 @@
+{
+  "skills": [
+    {
+      "name": "Arcana",
+      "stat": "INT",
+      "description": "Your understanding of magical phenomena, spells, and enchantments. With Arcana, you can identify magical effects, decipher arcane symbols, and discern the properties of magical items. It also grants insights into the abilities and weaknesses of magical beings like Aberrations, Elementals, and Oozes."
+    },
+    {
+      "name": "Examination",
+      "stat": "INT",
+      "description": "Your aptitude for thorough analysis and deduction. Use Examination to diagnose injuries, determine causes of death, uncover clues, and unravel the workings of traps or mechanical devices. It also grants insights into the abilities and weaknesses of Constructs."
+    },
+    {
+      "name": "Finesse",
+      "stat": "DEX",
+      "description": "Your ability to use your hands and feet in careful ways. Use Finesse for activities such as picking locks, disarming traps, piloting vehicles, tinkering, card tricks, stealing or planting items, climbing a mossy wall, or any other task that requires precise, careful movement."
+    },
+    {
+      "name": "Influence",
+      "stat": "WIL",
+      "description": "Your persuasiveness, charm, and ability to influence others through charisma or cunning. Use Influence to convince or deceive people, negotiate deals, build trust, win allies to your cause, or put on a captivating performance."
+    },
+    {
+      "name": "Insight",
+      "stat": "WIL",
+      "description": "Your ability to understand people and situations beyond the obvious. Use Insight to sense motives, detect lies, read hidden emotions, make sense of clues, and when faced with uncertainty—you can think ahead or just “get” what is happening. Insight can be used to retroactively change situations (e.g., “Oh no! I forgot to buy rope back in town!” — “Give me an Insight check; maybe your hero would have thought about it.”)."
+    },
+    {
+      "name": "Lore",
+      "stat": "INT",
+      "description": "Your understanding of the history of civilization, kingdoms, and religions. Use Lore to recall historical events and grasp the significance of cultural practices. It extends to knowledge of the abilities and behavior of Celestials, Dragons, Fey, Fiends, Giants, Humanoids, and Undead."
+    },
+    {
+      "name": "Might",
+      "stat": "STR",
+      "description": "Your ability to apply strength effectively. Use Might for lifting heavy objects, breaking through obstacles, climbing, swimming, jumping, or performing feats of strength."
+    },
+    {
+      "name": "Naturecraft",
+      "stat": "WIL",
+      "description": "Your expertise in wilderness survival, navigation, tracking, and the handling of animals. Use Naturecraft to thrive in the wild, identify flora, fauna, and track creatures with precision. It encompasses knowledge of Beasts, Monstrosities, and Plants, providing insights into their behavior, habitats, and characteristics."
+    },
+    {
+      "name": "Perception",
+      "stat": "WIL",
+      "description": "Your overall ability to notice subtle details in your surroundings. Use Perception to spot hidden objects, detect secret passages, sense subtle environmental changes, and sense when you’re being followed or observed. It encompasses your ability to pick up on non-obvious cues, and hidden threats."
+    },
+    {
+      "name": "Stealth",
+      "stat": "DEX",
+      "description": "Your proficiency in staying unseen and moving quietly. Use Stealth to hide, slip past guards, evade detection, and move without drawing attention."
+    }
+  ],
+  "ancestries": [
+    {
+      "name": "Human",
+      "group": "Common",
+      "size": "Medium",
+      "description": "Found in every terrain and environment, their curiosity and ambition drive them to explore every corner of the world, making them a ubiquitous and versatile race.",
+      "traits": [
+        {
+          "name": "Tenacious",
+          "text": "+1 to all skills and Initiative."
+        }
+      ],
+      "page": 23
+    },
+    {
+      "name": "Dwarf",
+      "group": "Common",
+      "size": "Medium",
+      "description": "Dwarf, in the old language, means “stone.” You are resilient, solid, stout. Even when driven to exhaustion, you will not falter. Forgoing speed, you are gifted with physical vitality and a belly that can handle the finest (and worst) consumables this world has to offer.",
+      "traits": [
+        {
+          "name": "Stout",
+          "text": "+2 max Hit Dice, +1 max Wounds, –1 Speed. You know Dwarvish if your INT is not negative."
+        }
+      ],
+      "page": 23
+    },
+    {
+      "name": "Elf",
+      "group": "Common",
+      "size": "Medium",
+      "description": "Elves epitomize swiftness and grace. Their tall, slender forms belie their innate speed, grace, and wit. Formidable in both diplomacy and combat, elves strike swiftly, often preventing the worst by acting first.",
+      "traits": [
+        {
+          "name": "Lithe",
+          "text": "Advantage on Initiative, +1 Speed. You know Elvish if your INT is not negative."
+        }
+      ],
+      "page": 23
+    },
+    {
+      "name": "Halfling",
+      "group": "Common",
+      "size": "Small",
+      "description": "Kind of like a human, but smaller (except for the feet). Where does our luck come from? Well…you know what they say about rabbit feet? Well, we’ve got feet for days compared to them. Imagine the amount of luck you could fit into these bad boys!",
+      "traits": [
+        {
+          "name": "Elusive",
+          "text": "+1 to Stealth. If you fail a save, you can succeed instead, 1/Safe Rest."
+        }
+      ],
+      "page": 23
+    },
+    {
+      "name": "Gnome",
+      "group": "Common",
+      "size": "Small",
+      "description": "Eccentric, curious, and perpetually optimistic, gnomes are cheerful—especially when compared to their typically grumpier and larger kin, the dwarves. Known for their tinkering, spreading cheer, and playful antics, gnomes pursue their passions with a scatterbrained enthusiasm.",
+      "traits": [
+        {
+          "name": "Optimistic",
+          "text": "Allow an ally within Reach 6 to reroll any single die, resets when healed to your max HP. –1 Speed. You know Dwarvish if your INT is not negative (but you call it Gnomish, of course)."
+        }
+      ],
+      "page": 23
+    },
+    {
+      "name": "Bunbun",
+      "group": "Exotic",
+      "size": "Small",
+      "description": "Bunbun are agile and unpredictable, using their powerful legs to leap great distances and catch foes off guard. Facing a Bunbun means contending with an opponent who can strike from unexpected angles and swiftly reposition themselves in the heat of battle.",
+      "traits": [
+        {
+          "name": "Bunny Legs",
+          "text": "Before Interposing or after Defending (after damage), hop up to your Speed in any direction for free, 1/encounter."
+        }
+      ],
+      "page": 24
+    },
+    {
+      "name": "Dragonborn",
+      "group": "Exotic",
+      "size": "Medium",
+      "description": "The soul of a dragon burns within you, the scales of your body are like forged steel. You are a kiln and your heritage the coals that stoke your flames. Call upon your wrath, to speak in the tongue of your ancestors and imbue unbridled fury into your attacks.",
+      "traits": [
+        {
+          "name": "Draconic Heritage",
+          "text": "+1 Armor. When you attack: deal an additional LVL+KEY damage (ignoring armor) divided as you choose among any of your targets; recharges whenever you Safe Rest or gain a Wound. You know Draconic if your INT is not negative."
+        }
+      ],
+      "page": 24
+    },
+    {
+      "name": "Fiendkin",
+      "group": "Exotic",
+      "size": "Medium",
+      "description": "Said to have been born from the union of man and fiend, or from a cursed bloodline, Fiendkin often find themselves outcasts in society. Yet, they embody determination in the face of adversity. Their ancestors didn’t emerge from the depths of the Everflame to succumb to minor setbacks!",
+      "traits": [
+        {
+          "name": "Flameborn",
+          "text": "1 of your neutral saves is advantaged instead. You know Infernal if your INT is not negative."
+        }
+      ],
+      "page": 24
+    },
+    {
+      "name": "Goblin",
+      "group": "Exotic",
+      "size": "Small",
+      "description": "Green, cunning, and perpetually vilified, Goblins thrive on the edge of chaos. For a Goblin, vanishing into the shadows is not just a skill—it’s an identity. After all, what kind of Goblin would you be if you couldn’t slip away unnoticed?",
+      "traits": [
+        {
+          "name": "Skedaddle",
+          "text": "Can move 2 spaces for free after you become the target of an attack or negative effect (after damage, ignoring difficult terrain). You know Goblin if your INT is not negative."
+        }
+      ],
+      "page": 24
+    },
+    {
+      "name": "Kobold",
+      "group": "Exotic",
+      "size": "Small",
+      "description": "Small, often maniacal, and dragon–obsessed. Kobolds thrive in the shadows, finding ingenious ways to survive despite their diminutive size. Underestimated by many, Kobolds prove time and again that even the smallest among us can wield great power.",
+      "traits": [
+        {
+          "name": "Wily",
+          "text": "Force an enemy to reroll a non-critical attack against you, 1/encounter. +3 to Influence friendly characters. Advantage on skill checks related to dragons. You know Draconic if your INT is not negative."
+        }
+      ],
+      "page": 24
+    },
+    {
+      "name": "Orc",
+      "group": "Exotic",
+      "size": "Medium",
+      "description": "Just when you think you’ve bested a mighty Orc, you’ve merely succeeded in rousing their anger. Engaging in combat with an Orc is no endeavor for the weak-willed. While others may cower before death’s approach, Orcs boldly defy its grasp.",
+      "traits": [
+        {
+          "name": "Relentless",
+          "text": "When you would drop to 0 HP, you may set your HP to LVL instead, 1/Safe Rest. +1 Might. You know Goblin if your INT is not negative (but you call it Orcish, of course)."
+        }
+      ],
+      "page": 24
+    },
+    {
+      "name": "Birdfolk",
+      "group": "Exotic",
+      "size": "Small or Medium",
+      "description": "Birdfolk find sanctuary not in stone or chains, but within the boundless expanse of the sky. However, the gift of flight comes at a cost—hollow bones, and commensurate frailty.",
+      "traits": [
+        {
+          "name": "Hollow Bones",
+          "text": "You have a fly Speed as long as you are wearing armor no heavier than Leather. Crits against you are Vicious (the attacker rolls 1 additional die). Forced movement moves you twice as far."
+        }
+      ],
+      "page": 26
+    },
+    {
+      "name": "Celestial",
+      "group": "Exotic",
+      "size": "Medium",
+      "description": "Descendants of divine beings, Celestials carry an aura of nobility and grace. Their innate connection to the higher planes allows them to resist the effects of misfortune, standing strong where others may falter.",
+      "traits": [
+        {
+          "name": "Highborn",
+          "text": "Your disadvantaged save is Neutral instead. You know Celestial if your INT isn’t negative."
+        }
+      ],
+      "page": 26
+    },
+    {
+      "name": "Changeling",
+      "group": "Exotic",
+      "size": "Medium",
+      "description": "Often hunted for their silver blood, Changelings are natural survivors, slipping into new identities with ease. Changelings that shift too often typically aren’t long for the world—they can struggle to remember who they once were, becoming little more than reflections of the faces they wear.",
+      "traits": [
+        {
+          "name": "New Place, New Face",
+          "text": "+2 shifting skill points. You may take on the appearance of any ancestry. When you do, you may place your 2 shifting skill points into any 1 skill. 1/day."
+        }
+      ],
+      "page": 26
+    },
+    {
+      "name": "Crystalborn",
+      "group": "Exotic",
+      "size": "Medium",
+      "description": "Formed from living crystal, the Crystalborn are beings of dazzling beauty and otherworldly toughness. Their translucent bodies refract light and sound, granting them unique abilities in combat.",
+      "traits": [
+        {
+          "name": "Reflective Aura",
+          "text": "When you Defend, gain KEY armor and deal KEY damage back to the attacker. 1/encounter."
+        }
+      ],
+      "page": 26
+    },
+    {
+      "name": "Dryad/Shroomling",
+      "group": "Exotic",
+      "size": "Small or Medium",
+      "description": "Tied to the natural world, Dryads and Shroomlings embody the balance between flora and fauna. Their unique physiology releases toxic spores when harmed, providing a natural defense against those who dare to harm them.",
+      "traits": [
+        {
+          "name": "Danger Pollen/Spores",
+          "text": "Whenever an enemy causes you one or more Wounds, you excrete soporific spores: all adjacent enemies are Dazed. You know Elvish if your INT is not negative."
+        }
+      ],
+      "page": 26
+    },
+    {
+      "name": "Half-Giant",
+      "group": "Exotic",
+      "size": "Large",
+      "description": "Towering beings whose strength is as immovable as the mountains they call home. Their sheer size and resilience make them fearsome opponents, capable of surviving even devastating blows.",
+      "traits": [
+        {
+          "name": "Strength of Stone",
+          "text": "Force an enemy to reroll a crit against you, 1/encounter. +2 Might. You know Dwarvish if your INT is not negative."
+        }
+      ],
+      "page": 26
+    },
+    {
+      "name": "Minotaur/Beastfolk",
+      "group": "Exotic",
+      "size": "Medium",
+      "description": "Minotaur and other Beastfolk embody a primal connection to The Wild, combining strength with natural agility. Their powerful build allows them to move swiftly, whether repositioning to outflank foes or charging in with unstoppable force.",
+      "traits": [
+        {
+          "name": "Charge",
+          "text": "When you move at least 4 spaces, you can push a creature in your path. Medium: 1 space; Small/Tiny: up to 2 spaces. 1/turn."
+        }
+      ],
+      "page": 26
+    },
+    {
+      "name": "Oozeling/Construct",
+      "group": "Exotic",
+      "size": "Small or Medium",
+      "description": "What even is a “PeOpLe” anyway? So what if your heart pumps oil instead of blood, so what if you don’t even have a heart!? If you can squish yourself into a pair of pants, or swing a sword like everyone else, who’s to say you can’t be a pEOpLe, too?!",
+      "traits": [
+        {
+          "name": "Odd Constitution",
+          "text": "Increment your Hit Dice one step (d6 » d8 » d10 » d12 » d20); they always heal you for the maximum amount. Magical healing always heals you for the minimum amount."
+        }
+      ],
+      "page": 26
+    },
+    {
+      "name": "Planarbeing",
+      "group": "Exotic",
+      "size": "Medium",
+      "description": "You are not from this plane of existence—your soul is not as strongly tethered to it as others. But with this vulnerability comes power, the ability to temporarily shift from one plane to another in times of dire need.",
+      "traits": [
+        {
+          "name": "Planeshift",
+          "text": "Whenever you Defend, you can gain 1 Wound to temporarily phase out of the material plane and ignore the damage. –2 max Wounds."
+        }
+      ],
+      "page": 26
+    },
+    {
+      "name": "Ratfolk",
+      "group": "Exotic",
+      "size": "Small",
+      "description": "Ratfolk are survivors, thriving in the shadows of society where others fear to tread. Agile, resourceful, and fiercely loyal to their own, they have a knack for turning scraps into solutions.",
+      "traits": [
+        {
+          "name": "Scurry",
+          "text": "Gain +2 armor if you moved on your last turn."
+        }
+      ],
+      "page": 27
+    },
+    {
+      "name": "Stoatling",
+      "group": "Exotic",
+      "size": "Small",
+      "description": "Stoatlings may be small, but they’re far from weak. With fierce determination and warrior hearts, they can take down foes many times their size. Their agility and tenacity let them exploit larger enemies’ weaknesses, turning their size into a lethal advantage.",
+      "traits": [
+        {
+          "name": "Small But Ferocious",
+          "text": "Whenever you make a single-target attack against a creature larger than you, roll 1 additional d6 for each size category it is larger. They do the same."
+        }
+      ],
+      "page": 27
+    },
+    {
+      "name": "Turtlefolk",
+      "group": "Exotic",
+      "size": "Small or Medium",
+      "description": "Turtlefolk take their time in everything they do; they are patient, sturdy, and slow to anger. They rely on their thick shells for protection, making them difficult to harm, but their cautious movements come at the cost of speed.",
+      "traits": [
+        {
+          "name": "Slow & Steady",
+          "text": "+4 Armor, –2 speed."
+        }
+      ],
+      "page": 27
+    },
+    {
+      "name": "Wyrdling",
+      "group": "Exotic",
+      "size": "Small",
+      "description": "Unpredictable and chaotic, Wyrdlings are the result of magic gone awry. Their bodies pulse with raw arcane energy, and their mere presence often disturbs the balance of magic around them.",
+      "traits": [
+        {
+          "name": "Chaotic Surge",
+          "text": "Whenever you or a willing ally within Reach 6 casts a tiered spell, you may allow them to roll on the Chaos Table. 1/encounter."
+        }
+      ],
+      "page": 27
+    }
+  ],
+  "backgrounds": [
+    {
+      "name": "Back Out of Retirement",
+      "description": "You’ve forgotten more than most adventurers these days know! Talk with your GM, what made you come out of retirement? • Let’s see if I remember how to do this... You may gain 1 Wound to use an ability or cast a spell as if you were 1 level higher. • These old bones. Your age has long since started to show. –1 max Wounds.",
+      "page": 28
+    },
+    {
+      "name": "Devoted Protector",
+      "description": "Choose 1 ally in your party. You can survive +3 max Wounds as long as they are nearby. Whenever they take a Wound, you do too.",
+      "page": 28
+    },
+    {
+      "name": "Academy Dropout",
+      "description": "School just isn’t for everyone! You learn by experience in the real world (or at least that’s what you tell yourself). Learn any 1 Utility Spell.",
+      "page": 28
+    },
+    {
+      "name": "Made a BAD Choice",
+      "description": "Start with 500 or 1000 extra gold, or an uncommon/rare magical item (that your GM allows). Gain an equally powerful curse or enemy who wants it back. If you choose this background, your GM may allow you to choose another.",
+      "page": 28
+    },
+    {
+      "name": "Haunted Past",
+      "description": "You are haunted by voices that occasionally give you cryptic advice. The voices are sometimes VERY helpful. Other times they only want to see you suffer. Advantage against fear.",
+      "page": 28
+    },
+    {
+      "name": "Ear to the Ground",
+      "description": "Advantage on checks to know or obtain gossip for events that will soon happen or have happened less than 1 year ago.",
+      "page": 28
+    },
+    {
+      "name": "What? I’ve Been Around",
+      "description": "1/per location (or at the GM’s discretion). You happen to know JUST the person who has the information you’re looking for, or could get you out of a jam, and… Roll 1d20: 1–5. They want you DEAD. 6–12. You owe them money. 13–19. They can be convinced to help you. 20. They are your biggest fan/are madly in love with you.",
+      "page": 28
+    },
+    {
+      "name": "Acrobat",
+      "description": "Can be thrown by a larger ally, REALLY far. Half damage from falling and forced movement.",
+      "page": 28
+    },
+    {
+      "name": "Wild One",
+      "description": "Whether it is the sticks or flowers in your hair, your smell, or the way you carry yourself, wild creatures are less frightened of you and more willing to aid you. +1 Naturecraft. While Field Resting, roll your Hit Dice with advantage while in the wild.",
+      "page": 28
+    },
+    {
+      "name": "Fey Touched",
+      "description": "You take half damage from all magical effects, double from weapons made of metal (before armor is applied).",
+      "page": 28
+    },
+    {
+      "name": "Survivalist",
+      "description": "You never run out of your own personal rations. Anything can be food if you try hard enough! Advantage against poison saves. +1 max Hit Die.",
+      "page": 28
+    },
+    {
+      "name": "Home at Sea",
+      "description": "Recover twice as many Wounds and HP while resting on a ship or near water. You can fill in for a first mate or captain in a pinch. Advantage on water-related skill checks.",
+      "page": 28
+    },
+    {
+      "name": "At Home Underground",
+      "description": "You can dig twice as fast as others. Safe resting locations underground always count as Lavish lodging for you. You struggle to rest (INT save) while it’s raining. “Water… from the SKY?!”",
+      "page": 28
+    },
+    {
+      "name": "Raised by Goblins",
+      "description": "You speak Goblin natively (much better than one who has learned it later in life). You automatically notice and can avoid crudely-made traps and have advantage to notice and disarm more sophisticated traps. Change It Up! You can choose any other ancestry to be raised by instead, and exchange the known language and get 1 helpful/iconic ability those people would inculcate (e.g., Dwarves know Dwarvish and are very good with smithing or stonecraft).",
+      "page": 28
+    },
+    {
+      "name": "History Buff",
+      "description": "Advantage on all Lore checks related to knowledge about items, facts, or events that happened more than 100 years ago.",
+      "page": 28
+    },
+    {
+      "name": "(Former) Con Artist",
+      "description": "You can forge most documents or mimic voices flawlessly. You have a criminal contact in most major cities. However, your reputation often precedes you—until you prove yourself to be trustworthy.",
+      "page": 29
+    },
+    {
+      "name": "(Secretly) Undead",
+      "description": "Unnatural Resilience: You are immune to disease and do not need to eat, drink, or breathe. Children, animals, and Celestials are uneasy in your presence; many will be horrified to discover your true nature.",
+      "page": 29
+    },
+    {
+      "name": "Taste for the Finer Things",
+      "description": "You always have up-to-date knowledge of the customs and dress of the upper classes and may even know many of their secrets. Advantage on Influence checks with the upper class.",
+      "page": 29
+    },
+    {
+      "name": "Fearless",
+      "description": "You are immune to the Frightened condition. +1 Initiative. –1 Armor.",
+      "page": 29
+    },
+    {
+      "name": "So Dumb I’m Smart Sometimes",
+      "description": "(Req. 0 or negative INT at character creation.) Reroll an INT-related skill check, 1/day. Reroll a failed INT save with advantage, 1/Safe Rest.",
+      "page": 29
+    },
+    {
+      "name": "Wily Underdog",
+      "description": "(Req. 0 or negative STR at character creation.) Reroll a failed STR-related roll (e.g., STR attack, STR save, Might check) and use another stat instead, 1/day.",
+      "page": 29
+    },
+    {
+      "name": "Bumblewise",
+      "description": "(Req. 0 or negative WIL at character creation.) A result of 1 or less on any WIL-related roll counts as a natural 20 (WIL save, Naturecraft, Perception, Influence, or Insight check).",
+      "page": 29
+    },
+    {
+      "name": "Accidental Acrobat",
+      "description": "(Req. 0 or negative DEX at character creation.) Whenever you fail a DEX-related roll (e.g., DEX attack, DEX save, Stealth check, Finesse check), you may roll again. If you still fail, the consequences are BAD.",
+      "page": 29
+    },
+    {
+      "name": "Tradesman/Artisan",
+      "description": "Choose a profession (Baker/Cook, Smith, Stonemason, Weaver, Leatherworker, etc.). Checks you make related to that profession are made with advantage. You also retain special knowledge related to your profession.",
+      "page": 29
+    }
+  ],
+  "motivations": [
+    {
+      "name": "I owe a life debt to someone in my party",
+      "description": "Chat with your party: Who else needs help with their backstory? What did they do to help you?",
+      "page": 31
+    },
+    {
+      "name": "I owe a LOT of money to some very dangerous people",
+      "description": "What did you do with the money? Your GM probably has some GREAT ideas of bad guys you’re in deep with.",
+      "page": 31
+    },
+    {
+      "name": "I need to grow in power to defeat someone who has wronged me",
+      "description": "Do you know who wronged you, or are they unknown? Is it an individual or a larger group? Chat with your GM; they’ll love to help fill in the blanks.",
+      "page": 31
+    },
+    {
+      "name": "I am searching for a way to bring a loved one (or someone I hate) back from the dead",
+      "description": "Who even told you this was possible? What if they don’t remember you?",
+      "page": 31
+    },
+    {
+      "name": "I am trying to get back home",
+      "description": "Where is home for you, do you even remember? What caused you to leave? Chat with your GM; they can give you some options of homelands.",
+      "page": 31
+    },
+    {
+      "name": "I am searching for the one who stole something valuable from me",
+      "description": "Is it an object? A person? A memory? Was it really stolen or did you make a bad bargain?",
+      "page": 31
+    },
+    {
+      "name": "I was polymorphed into another kind of creature by a wizard",
+      "description": "Hah! How would it feel for a cute halfling to become an ugly goblin? What did you do to anger the wizard?",
+      "page": 31
+    },
+    {
+      "name": "Duty calls. I am honor-bound to serve",
+      "description": "Who calls you? Your king? Your family? An ancient alliance or grudge? Talk with your GM and other players for ideas and mutual connections.",
+      "page": 31
+    },
+    {
+      "name": "I was best friends with (and betrayed by) ______",
+      "description": "Do you want to win them back? Get even? Warn others of their backstabbing? Talk with your GM about who this might be.",
+      "page": 31
+    },
+    {
+      "name": "I’m lost",
+      "description": "Physically? Emotionally? Spiritually? Are you in the wrong country or even plane of existence?",
+      "page": 31
+    },
+    {
+      "name": "Wanderlust/Pilgrimage",
+      "description": "What amazing thing do you want to see or experience? Have you spent too much time away from the road? Your GM probably has some fantastic locations in mind for you.",
+      "page": 31
+    },
+    {
+      "name": "My home town is in danger",
+      "description": "Are you looking for a cure? Mercenaries? Personal strength?",
+      "page": 31
+    },
+    {
+      "name": "Curiosity! I want to learn the DEEP secrets",
+      "description": "Which secrets? Magical, lore, politics, what really happened in history?",
+      "page": 31
+    },
+    {
+      "name": "To prove my worth",
+      "description": "You were always underestimated—by your family, your village, your peers, or yourself. What will it take to show them you’re more than they thought? What kind of recognition do you seek?",
+      "page": 31
+    },
+    {
+      "name": "I’m following a prophecy",
+      "description": "A mysterious figure or ancient text foretold that you would play a crucial role in the fate of the world. What do you know of the prophecy? Do you believe it?",
+      "page": 31
+    }
+  ],
+  "items": [
+    {
+      "name": "Adventurer’s Garb",
+      "category": "Cloth",
+      "armor": "2+DEX",
+      "cost": "10 gp",
+      "page": 33
+    },
+    {
+      "name": "Minor Enchantment",
+      "category": "Cloth",
+      "armor": "3+DEX",
+      "cost": "100 gp",
+      "page": 33
+    },
+    {
+      "name": "Major Enchantment",
+      "category": "Cloth",
+      "armor": "4+DEX",
+      "cost": "1,000 gp",
+      "page": 33
+    },
+    {
+      "name": "Epic Enchantment",
+      "category": "Cloth",
+      "armor": "5+DEX",
+      "cost": "10,000 gp",
+      "page": 33
+    },
+    {
+      "name": "Cheap Hides",
+      "category": "Leather",
+      "armor": "3+DEX",
+      "cost": "5 gp",
+      "page": 33
+    },
+    {
+      "name": "Ox Hide",
+      "category": "Leather",
+      "armor": "4+DEX",
+      "cost": "45 gp",
+      "page": 33
+    },
+    {
+      "name": "Hard Leather",
+      "category": "Leather",
+      "armor": "5+DEX",
+      "cost": "300 gp",
+      "page": 33,
+      "properties": "Req. 1 STR"
+    },
+    {
+      "name": "Wyrmhide",
+      "category": "Leather",
+      "armor": "6+DEX",
+      "cost": "2,000 gp",
+      "page": 33,
+      "properties": "Req. 1 STR"
+    },
+    {
+      "name": "Rusty Mail",
+      "category": "Mail",
+      "armor": "6+DEX (max 2)",
+      "cost": "15 gp",
+      "page": 33
+    },
+    {
+      "name": "Chain Shirt",
+      "category": "Mail",
+      "armor": "9+DEX (max 2)",
+      "cost": "60 gp",
+      "page": 33,
+      "properties": "Req. 2 STR"
+    },
+    {
+      "name": "Scale Mail",
+      "category": "Mail",
+      "armor": "12+DEX (max 2)",
+      "cost": "700 gp",
+      "page": 33,
+      "properties": "Req. 3 STR"
+    },
+    {
+      "name": "Dragonscale",
+      "category": "Mail",
+      "armor": "15+DEX (max 2)",
+      "cost": "3,000 gp",
+      "page": 33,
+      "properties": "Req. 4 STR"
+    },
+    {
+      "name": "Rusty Plate",
+      "category": "Plate",
+      "armor": "10",
+      "cost": "25 gp",
+      "page": 33,
+      "properties": "Req. 2 STR"
+    },
+    {
+      "name": "Half Plate",
+      "category": "Plate",
+      "armor": "14",
+      "cost": "200 gp",
+      "page": 33,
+      "properties": "Req. 3 STR"
+    },
+    {
+      "name": "Full Plate",
+      "category": "Plate",
+      "armor": "18",
+      "cost": "2,000 gp",
+      "page": 33,
+      "properties": "Req. 4 STR"
+    },
+    {
+      "name": "Mithril Plate",
+      "category": "Plate",
+      "armor": "22",
+      "cost": "5,000 gp",
+      "page": 33,
+      "properties": "Req. 5 STR"
+    },
+    {
+      "name": "Wooden Buckler",
+      "category": "Shield",
+      "armor": "2",
+      "cost": "5 gp",
+      "page": 33
+    },
+    {
+      "name": "Iron Shield",
+      "category": "Shield",
+      "armor": "4",
+      "cost": "80 gp",
+      "page": 33,
+      "properties": "Req. 2 STR"
+    },
+    {
+      "name": "Tower Shield",
+      "category": "Shield",
+      "armor": "6",
+      "cost": "1,500 gp",
+      "page": 33,
+      "properties": "Req. 3 STR"
+    },
+    {
+      "name": "Dragon Shield",
+      "category": "Shield",
+      "armor": "8",
+      "cost": "9,000 gp",
+      "page": 33,
+      "properties": "Req. 3 STR"
+    },
+    {
+      "name": "Dagger",
+      "category": "Melee Weapon",
+      "damage": "1d4+DEX Piercing",
+      "cost": "3 gp",
+      "page": 35,
+      "properties": "Light, Thrown 4"
+    },
+    {
+      "name": "Sickle",
+      "category": "Melee Weapon",
+      "damage": "1d4+DEX Slashing",
+      "cost": "10 gp",
+      "page": 35,
+      "properties": "Vicious"
+    },
+    {
+      "name": "Club/Mace",
+      "category": "Melee Weapon",
+      "damage": "1d6+STR Bludgeoning",
+      "cost": "2 gp",
+      "page": 35
+    },
+    {
+      "name": "Hand Axe",
+      "category": "Melee Weapon",
+      "damage": "1d6+STR Slashing",
+      "cost": "8 gp",
+      "page": 35,
+      "properties": "Thrown 4"
+    },
+    {
+      "name": "Short Sword",
+      "category": "Melee Weapon",
+      "damage": "1d6+DEX Piercing",
+      "cost": "10 gp",
+      "page": 35,
+      "properties": "Light"
+    },
+    {
+      "name": "Rapier",
+      "category": "Melee Weapon",
+      "damage": "2d4+DEX Piercing",
+      "cost": "60 gp",
+      "page": 35
+    },
+    {
+      "name": "Staff",
+      "category": "Melee Weapon",
+      "damage": "1d8+STR Bludgeoning",
+      "cost": "8 gp",
+      "page": 35,
+      "properties": "2-handed"
+    },
+    {
+      "name": "Longsword",
+      "category": "Melee Weapon",
+      "damage": "1d8+STR Slashing",
+      "cost": "60 gp",
+      "page": 35,
+      "properties": "2-handed (1-handed: Req. 2 STR)"
+    },
+    {
+      "name": "Battleaxe",
+      "category": "Melee Weapon",
+      "damage": "1d10+STR Slashing",
+      "cost": "30 gp",
+      "page": 35,
+      "properties": "2-handed"
+    },
+    {
+      "name": "Pole Hammer",
+      "category": "Melee Weapon",
+      "damage": "1d10+STR Bludgeoning",
+      "cost": "60 gp",
+      "page": 35,
+      "properties": "2-handed, Reach 2"
+    },
+    {
+      "name": "Glaive",
+      "category": "Melee Weapon",
+      "damage": "1d10+STR Slashing",
+      "cost": "60 gp",
+      "page": 35,
+      "properties": "2-handed, Reach 2"
+    },
+    {
+      "name": "Spear",
+      "category": "Melee Weapon",
+      "damage": "1d10+STR Piercing",
+      "cost": "60 gp",
+      "page": 35,
+      "properties": "2-handed, Reach 2"
+    },
+    {
+      "name": "Greatmaul",
+      "category": "Melee Weapon",
+      "damage": "1d12+STR Bludgeoning",
+      "cost": "80 gp",
+      "page": 35,
+      "properties": "2-handed (Req. 2 STR)"
+    },
+    {
+      "name": "Greataxe",
+      "category": "Melee Weapon",
+      "damage": "2d6+STR Slashing",
+      "cost": "100 gp",
+      "page": 35,
+      "properties": "2-handed (Req. 2 STR)"
+    },
+    {
+      "name": "Greatsword",
+      "category": "Melee Weapon",
+      "damage": "3d4+STR Slashing/Piercing",
+      "cost": "120 gp",
+      "page": 35,
+      "properties": "2-handed (Req. 2 STR)"
+    },
+    {
+      "name": "Sling",
+      "category": "Ranged Weapon",
+      "damage": "1d4+DEX Bludgeoning",
+      "cost": "4 gp",
+      "page": 35,
+      "properties": "2-handed, Range 12, Vicious"
+    },
+    {
+      "name": "Javelins",
+      "category": "Ranged Weapon",
+      "damage": "1d6+STR Piercing",
+      "cost": "20 gp",
+      "page": 35,
+      "properties": "Range 8, Stack of 4"
+    },
+    {
+      "name": "Throwing Hammers",
+      "category": "Ranged Weapon",
+      "damage": "1d8+STR Bludgeoning",
+      "cost": "25 gp",
+      "page": 35,
+      "properties": "Range 4, Stack of 3"
+    },
+    {
+      "name": "Shortbow",
+      "category": "Ranged Weapon",
+      "damage": "1d6+DEX Piercing",
+      "cost": "25 gp",
+      "page": 35,
+      "properties": "2-handed, Range 12"
+    },
+    {
+      "name": "Longbow",
+      "category": "Ranged Weapon",
+      "damage": "1d8+DEX Piercing",
+      "cost": "30 gp",
+      "page": 35,
+      "properties": "2-handed, Range 16 (Req. 1 STR)"
+    },
+    {
+      "name": "Crossbow",
+      "category": "Ranged Weapon",
+      "damage": "4d4+DEX Piercing",
+      "cost": "60 gp",
+      "page": 35,
+      "properties": "2-handed, Load: 1 action, Range 8"
+    },
+    {
+      "name": "Handheld Ballista",
+      "category": "Ranged Weapon",
+      "damage": "1d20+DEX Piercing",
+      "cost": "120 gp",
+      "page": 35,
+      "properties": "2-handed, Load: 2 actions, Range 8 (Req. 2 STR)"
+    },
+    {
+      "name": "Unarmed Strike",
+      "category": "Melee Weapon",
+      "damage": "1d4; on hit: 1+STR",
+      "description": "To attack with your bare hands or feet, roll 1d4; on hit: deal 1+STR damage. If completely unarmed, fists/feet can be considered dual wielded.",
+      "page": 34
+    },
+    {
+      "name": "Improvised Weapon",
+      "category": "Melee Weapon",
+      "damage": "1d4+STR or 1d6+STR",
+      "description": "Using an improvised weapon (e.g. a chair, a frying pan, a big rock), default to 1d4+STR or 1d6+STR. Your GM may allow you to use bigger dice or other properties if it makes sense. An improvised weapon may be likely to break if it lands a crit, though!",
+      "page": 34
+    },
+    {
+      "name": "Healing Potion",
+      "category": "Key Equipment",
+      "properties": "(action) Heal 2d4+4 HP.",
+      "cost": "50 gp",
+      "description": "Healing potions are deep, shimmering red elixirs with a refreshing, effervescent taste. Their availability is limited: small towns may have only a few, while cities offer more (but they are not in unlimited supply). Potions require one action to drink or to administer to an adjacent willing creature.",
+      "page": 37
+    },
+    {
+      "name": "Greater Healing Potion",
+      "category": "Key Equipment",
+      "properties": "(action) Heal 3d6+6 HP.",
+      "cost": "150 gp",
+      "description": "Healing potions are deep, shimmering red elixirs with a refreshing, effervescent taste. Their availability is limited: small towns may have only a few, while cities offer more (but they are not in unlimited supply). Potions require one action to drink or to administer to an adjacent willing creature.",
+      "page": 37
+    },
+    {
+      "name": "Supreme Healing Potion",
+      "category": "Key Equipment",
+      "properties": "(action) Heal 4d8+8 HP.",
+      "cost": "450 gp",
+      "description": "Healing potions are deep, shimmering red elixirs with a refreshing, effervescent taste. Their availability is limited: small towns may have only a few, while cities offer more (but they are not in unlimited supply). Potions require one action to drink or to administer to an adjacent willing creature.",
+      "page": 37
+    },
+    {
+      "name": "Torch (stack of 2)",
+      "category": "Key Equipment",
+      "properties": "For when it’s dark. 1 use each.",
+      "cost": "5 sp",
+      "description": "Heroes cannot typically see in the dark. Fighting in the dark imposes the Blinded condition. Heroes can bring a lantern or torch to light their way as long as they have a hand free (or some other way) to hold it. A torch typically lasts for 1 dungeon (or 1 level of a very large one). A lamp with oil can typically last for 1 entire outing, until your next Safe Rest. Torches and lanterns cast light up to 6 spaces away; beyond this is darkness.",
+      "page": 37
+    },
+    {
+      "name": "Lantern & Oil",
+      "category": "Key Equipment",
+      "properties": "Like a torch, but not as cool (refill: 1 gp).",
+      "cost": "10 gp",
+      "description": "Heroes cannot typically see in the dark. Fighting in the dark imposes the Blinded condition. Heroes can bring a lantern or torch to light their way as long as they have a hand free (or some other way) to hold it. A torch typically lasts for 1 dungeon (or 1 level of a very large one). A lamp with oil can typically last for 1 entire outing, until your next Safe Rest. Torches and lanterns cast light up to 6 spaces away; beyond this is darkness.",
+      "page": 37
+    },
+    {
+      "name": "Vial of Pitch",
+      "category": "Adventuring Gear",
+      "properties": "Sticky, and VERY flammable.",
+      "cost": "2 gp",
+      "page": 37
+    },
+    {
+      "name": "Rope (50 ft.)",
+      "category": "Adventuring Gear",
+      "properties": "You always need rope.",
+      "cost": "10 gp",
+      "page": 37
+    },
+    {
+      "name": "Chain (10 ft.)",
+      "category": "Adventuring Gear",
+      "properties": "Like rope, but stronger (and heavy).",
+      "cost": "50 gp",
+      "page": 37
+    },
+    {
+      "name": "Bucket",
+      "category": "Adventuring Gear",
+      "properties": "Also works as a hat in a pinch!",
+      "cost": "1 gp",
+      "page": 37
+    },
+    {
+      "name": "Padlock & Key",
+      "category": "Adventuring Gear",
+      "properties": "Lock it or lose it.",
+      "cost": "3 gp",
+      "page": 37
+    },
+    {
+      "name": "Mirror",
+      "category": "Adventuring Gear",
+      "properties": "For medusas AND spinach teeth.",
+      "cost": "4 gp",
+      "page": 37
+    },
+    {
+      "name": "Telescope",
+      "category": "Adventuring Gear",
+      "properties": "Arrr.",
+      "cost": "10 gp",
+      "page": 37
+    },
+    {
+      "name": "Magnifying Glass",
+      "category": "Adventuring Gear",
+      "properties": "Make the small, big.",
+      "cost": "5 gp",
+      "page": 37
+    },
+    {
+      "name": "Chalk",
+      "category": "Adventuring Gear",
+      "properties": "Not JUST for kids.",
+      "cost": "1 sp",
+      "page": 37
+    },
+    {
+      "name": "Shovel",
+      "category": "Adventuring Gear",
+      "properties": "Sometimes you need a hole dug.",
+      "cost": "3 gp",
+      "page": 37
+    },
+    {
+      "name": "Pulley",
+      "category": "Adventuring Gear",
+      "properties": "Pull down, go up.",
+      "cost": "3 gp",
+      "page": 37
+    },
+    {
+      "name": "Grappling Hook",
+      "category": "Adventuring Gear",
+      "properties": "For climbing or catching BIG fish.",
+      "cost": "4 gp",
+      "page": 37
+    },
+    {
+      "name": "Quiver & Ammo",
+      "category": "Adventuring Gear",
+      "properties": "Don’t leave home without it.",
+      "cost": "10 gp",
+      "page": 37
+    },
+    {
+      "name": "Saw",
+      "category": "Adventuring Gear",
+      "properties": "For cutting lumber.",
+      "cost": "4 gp",
+      "page": 37
+    },
+    {
+      "name": "Soap",
+      "category": "Adventuring Gear",
+      "properties": "Useless.",
+      "cost": "1 sp",
+      "page": 37
+    },
+    {
+      "name": "Strange Plant",
+      "category": "Adventuring Gear",
+      "properties": "Who knows?",
+      "cost": "5 sp",
+      "page": 37
+    },
+    {
+      "name": "Shiny Object",
+      "category": "Adventuring Gear",
+      "properties": "Worthless, but VERY pretty.",
+      "cost": "1 sp",
+      "page": 37
+    },
+    {
+      "name": "Lock Pick",
+      "category": "Adventuring Gear",
+      "properties": "It’s not mine, honest!",
+      "cost": "5 gp",
+      "page": 37
+    },
+    {
+      "name": "Bell",
+      "category": "Adventuring Gear",
+      "properties": "For service.",
+      "cost": "2 gp",
+      "page": 37
+    },
+    {
+      "name": "Dice",
+      "category": "Adventuring Gear",
+      "properties": "LOTS of fun.",
+      "cost": "5 sp",
+      "page": 37
+    },
+    {
+      "name": "Blanket",
+      "category": "Adventuring Gear",
+      "properties": "Warm & fuzzy.",
+      "cost": "1 gp",
+      "page": 37
+    },
+    {
+      "name": "Hunting Trap",
+      "category": "Adventuring Gear",
+      "properties": "Snap snap, don’t lose a finger!",
+      "cost": "10 gp",
+      "page": 37
+    },
+    {
+      "name": "Camping Supplies",
+      "category": "Adventuring Gear",
+      "properties": "Bedroll, rations, simple tent.",
+      "cost": "5 gp",
+      "page": 37
+    },
+    {
+      "name": "Crowbar",
+      "category": "Adventuring Gear",
+      "properties": "It’s LIKE a key.",
+      "cost": "2 gp",
+      "page": 37
+    },
+    {
+      "name": "Pitons",
+      "category": "Adventuring Gear",
+      "properties": "Metal spikes, for sealing doors.",
+      "cost": "5 gp",
+      "page": 37
+    },
+    {
+      "name": "Manacles",
+      "category": "Adventuring Gear",
+      "properties": "For when someone has been bad.",
+      "cost": "3 gp",
+      "page": 37
+    },
+    {
+      "name": "Large Sack",
+      "category": "Adventuring Gear",
+      "properties": "Like a BIG pocket.",
+      "cost": "5 sp",
+      "page": 37
+    },
+    {
+      "name": "Instrument",
+      "category": "Adventuring Gear",
+      "properties": "Drums, Horn, Lyre, Flute, etc.",
+      "cost": "5–50 gp",
+      "page": 37
+    },
+    {
+      "name": "Weapon of Many Hands",
+      "category": "Magic Item",
+      "rarity": "Rarity varies",
+      "cost": "Rarity varies",
+      "description": "While equipped, this weapon grants the wearer additional arms. The wearer can use the extra arms to perform any task their normal hands can do (wield equipment, Grapple enemies, climb, etc.) but does not allow the wearer to perform actions any faster. These extra appendages may be horrifying to people in polite society. A weapon that grants 1 extra hand is likely to be uncommon; 4 extra hands, legendary. Extra Arms?! Yes, you can dual wield 2-handed weapons or wear more than 1 shield, or Grapple 2 different creatures while hitting them both at the same time! Or any number of creative things, provided you have the arms to perform the task.",
+      "page": 39
+    },
+    {
+      "name": "Harbinger & Sovereign, Abyssal’s Claim",
+      "category": "Magic Item",
+      "rarity": "Legendary",
+      "cost": "Legendary",
+      "description": "Legendary Glaives. Set of 2 matching glaives, +4 extra arms while both are equipped.",
+      "page": 39
+    },
+    {
+      "name": "Weapon of Animosity",
+      "category": "Magic Item",
+      "rarity": "Uncommon to Legendary",
+      "cost": "Uncommon to Legendary",
+      "description": "Whenever you attack with this weapon, roll an additional animosity die. The weapon deals that much additional damage to your target on a hit. Whenever this weapon misses, you take that damage instead. A weapon that adds 1d4 is likely to be uncommon; 1d10 or greater, legendary.",
+      "page": 39
+    },
+    {
+      "name": "Weapon of Slaying",
+      "category": "Magic Item",
+      "rarity": "Uncommon to Legendary",
+      "cost": "Uncommon to Legendary",
+      "description": "Whenever you attack with this weapon, it deals an additional die of damage against a particular creature type. Those creatures may try to kill you first. A 1d4 weapon of slaying is likely to be uncommon; +1d10 or more, legendary.",
+      "page": 39
+    },
+    {
+      "name": "Gnatbane Weapon",
+      "category": "Magic Item",
+      "rarity": "Uncommon",
+      "cost": "Uncommon",
+      "description": "Does not miss Small or Tiny creatures (they may hate you for it and attack you first).",
+      "page": 39
+    },
+    {
+      "name": "Weapon of Wounding",
+      "category": "Magic Item",
+      "rarity": "Uncommon",
+      "cost": "Uncommon",
+      "description": "When you land a hit with this weapon, you may suffer 1d6 damage to deal twice that much additional damage to your target.",
+      "page": 40
+    },
+    {
+      "name": "Trinket of Ill Omen",
+      "category": "Magic Item",
+      "rarity": "Rare",
+      "cost": "Rare",
+      "description": "While equipped, you have –1 to saves you roll and +1 to your save DC.",
+      "page": 40
+    },
+    {
+      "name": "Mindlink Daggers",
+      "category": "Magic Item",
+      "rarity": "Rare",
+      "cost": "Rare",
+      "description": "A matched pair of slender, silver daggers with intertwining runes. Enables the sharing of thoughts between any who holds (or is stabbed by) one.",
+      "page": 40
+    },
+    {
+      "name": "Bloodstained Quill",
+      "category": "Magic Item",
+      "rarity": "Uncommon",
+      "cost": "Uncommon",
+      "description": "If you dip this quill into the blood of a dead intelligent creature, the quill animates and writes the last words spoken by that creature.",
+      "page": 40
+    },
+    {
+      "name": "Eyes of the Street",
+      "category": "Magic Item",
+      "rarity": "Uncommon",
+      "cost": "Uncommon",
+      "description": "A pair of goggles covered in muck that you can’t ever clean off completely. While wearing them, you can look at a rat or a pigeon to gain the ability to see and hear through its senses for 10 minutes. Once you use this ability, you must whisper a secret to the goggles before you can use them again. That secret always seems to become a local rumor before too long….",
+      "page": 40
+    },
+    {
+      "name": "Handwraps of Force",
+      "category": "Magic Item",
+      "rarity": "Rare",
+      "cost": "Rare",
+      "description": "While wearing these wraps, whenever you make an unarmed strike, you may push your target up to 2 spaces and yourself the same distance in the opposite direction. You may instead make an attack with no target, striking the air to propel yourself 4 spaces in any direction.",
+      "page": 40
+    },
+    {
+      "name": "Resolute Fangs, Golden Bastion",
+      "category": "Magic Item",
+      "rarity": "Legendary",
+      "cost": "Legendary",
+      "description": "Legendary Shield. +8 Armor. Reaction: When you reduce damage from a melee attack with this shield, it may Grapple the attacker regardless of its size (escape DC 20 STR, max 1 creature). Action: Speak this shield’s command word to make it immovable, fixed in place, until it is spoken again.",
+      "page": 40
+    },
+    {
+      "name": "Key of Doors",
+      "category": "Magic Item",
+      "rarity": "Very Rare",
+      "cost": "Very Rare",
+      "description": "Insert this key into any locked door to open it, not to the room beyond, but to any doorway you’ve previously walked through while holding this item.",
+      "page": 40
+    },
+    {
+      "name": "Grim Coronet",
+      "category": "Magic Item",
+      "rarity": "Rare",
+      "cost": "Rare",
+      "description": "When you would die while wearing this crown, gain 3 actions and take a turn immediately. You die at the end of your turn.",
+      "page": 40
+    },
+    {
+      "name": "Vindication",
+      "category": "Magic Item",
+      "rarity": "Legendary",
+      "cost": "Legendary",
+      "description": "Legendary Weapon of Animosity. A jagged blade marred by scorch marks and dark stains, radiating a bitter, vengeful energy that punishes both wielder and foe alike. +1d12 damage. You take this damage on a miss.",
+      "page": 41
+    },
+    {
+      "name": "Ball of Spiders",
+      "category": "Magic Item",
+      "rarity": "Uncommon",
+      "cost": "Uncommon",
+      "description": "A black, palm-sized ball with faintly writhing patterns etched into its surface. Action: Throw this ball up to 6 spaces. Upon impact, it shatters, releasing a swarm of harmless but horrifyingly realistic spectral spiders that cover a 2x2 area. Creatures in the area must make a WIL save or be Frightened until the end of their next turn. Once used, the ball reforms at the next Safe Rest.",
+      "page": 41
+    },
+    {
+      "name": "Skitter Shoes",
+      "category": "Magic Item",
+      "rarity": "Rare",
+      "cost": "Rare",
+      "description": "While wearing these shoes, you can walk on vertical surfaces or ceilings as if they were flat ground, but only at half your normal Speed. If you end your turn upside down or on a vertical surface, you must make a DC 10 STR save or fall down, landing prone.",
+      "page": 41
+    },
+    {
+      "name": "Button of Protection",
+      "category": "Magic Item",
+      "rarity": "Rare",
+      "cost": "Rare",
+      "description": "A small, unassuming button etched with a faintly glowing sigil. When sewn onto an outfit, as a reaction when you are attacked, you may pull the button off and throw it into the air. The button emits a sudden, dazzling flash of light and a high-pitched whistle. The attacker must make a WIL save or be distracted, causing the attack to miss you. After use, the button becomes inert. It can be sewn back onto a garment during a Safe Rest by an experienced seamstress or tailor with silver thread, which reactivates its power.",
+      "page": 41
+    },
+    {
+      "name": "Spell Scroll (Cantrip)",
+      "category": "Spell Scroll",
+      "cost": "10 gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Spell Scroll (Tier 1 Spell)",
+      "category": "Spell Scroll",
+      "cost": "35 gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Spell Scroll (Tier 2 Spell)",
+      "category": "Spell Scroll",
+      "cost": "100 gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Spell Scroll (Tier 3 Spell)",
+      "category": "Spell Scroll",
+      "cost": "300 gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Spell Scroll (Tier 4 Spell)",
+      "category": "Spell Scroll",
+      "cost": "1,000 gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Spell Scroll (Tier 5 Spell)",
+      "category": "Spell Scroll",
+      "cost": "3,000 gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Spell Scroll (Tier 6 Spell)",
+      "category": "Spell Scroll",
+      "cost": "10,000 gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Spell Scroll (Tier 7 Spell)",
+      "category": "Spell Scroll",
+      "cost": "25,000+ gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Spell Scroll (Tier 8 Spell)",
+      "category": "Spell Scroll",
+      "cost": "75,000+ gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Spell Scroll (Tier 9 Spell)",
+      "category": "Spell Scroll",
+      "cost": "200,000+ gp",
+      "description": "Spell scrolls are single-use inscribed magical spells. Casting a spell with a spell scroll does not cost mana, nor does it require magical ability. Anyone who can read the language the scroll is written in can utilize it. Reading one aloud takes the same number of actions the spell normally takes and consumes the scroll. A character must succeed on a DC 10 Arcana check to cast it successfully if they do not already know a spell from that school; on a failure, it is wasted.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Cantrip)",
+      "category": "Wand",
+      "cost": "50 gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Tier 1 Spell)",
+      "category": "Wand",
+      "cost": "175 gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Tier 2 Spell)",
+      "category": "Wand",
+      "cost": "500 gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Tier 3 Spell)",
+      "category": "Wand",
+      "cost": "1,500 gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Tier 4 Spell)",
+      "category": "Wand",
+      "cost": "5,000 gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Tier 5 Spell)",
+      "category": "Wand",
+      "cost": "15,000 gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Tier 6 Spell)",
+      "category": "Wand",
+      "cost": "50,000 gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Tier 7 Spell)",
+      "category": "Wand",
+      "cost": "125,000+ gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Tier 8 Spell)",
+      "category": "Wand",
+      "cost": "375,000+ gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand (Tier 9 Spell)",
+      "category": "Wand",
+      "cost": "1,000,000+ gp",
+      "description": "Like spell scrolls, wands can be used to cast spells without consuming mana and do not require magical ability. Unlike spell scrolls, wands can be recharged and used again. Characters proficient with wands can use one from any spell school, spending only the normal amount of actions to cast the spell. Characters not proficient with wands must succeed on a DC 10+spell tier Arcana check to successfully cast the spell. Success or failure, the charge is spent.",
+      "page": 42
+    },
+    {
+      "name": "Wand of Firestep",
+      "category": "Wand",
+      "rarity": "Uncommon",
+      "cost": "Uncommon",
+      "properties": "Cantrip (3 charges)",
+      "description": "Recharge: Heat the wand in a blacksmith’s forge until it glows, then quench it in oil.",
+      "page": 43
+    },
+    {
+      "name": "Wand of Dread Visage",
+      "category": "Wand",
+      "rarity": "Uncommon",
+      "cost": "Uncommon",
+      "properties": "Tier 2 (2 charges)",
+      "description": "Recharge: Place the wand in a freshly slain corpse. Leave it until only bones remain.",
+      "page": 43
+    },
+    {
+      "name": "Wand of Fly",
+      "category": "Wand",
+      "rarity": "Uncommon",
+      "cost": "Uncommon",
+      "properties": "Tier 3 (2 charges)",
+      "description": "Recharge: Give it to a wild bird and let it fly freely. Retrieve it wherever the bird drops it.",
+      "page": 43
+    },
+    {
+      "name": "Wand of Glacier Strike",
+      "category": "Wand",
+      "rarity": "Very Rare",
+      "cost": "Very Rare",
+      "properties": "Tier 8 (1 charge)",
+      "description": "Recharge: Leave the wand at the bottom of a lake until it freezes over and thaws naturally.",
+      "page": 43
+    },
+    {
+      "name": "Wand of Ride the Lightning",
+      "category": "Wand",
+      "rarity": "Very Rare",
+      "cost": "Very Rare",
+      "properties": "Tier 6 (2 charges)",
+      "description": "Recharge: Place at the highest point within 1 mile. Retrieve after 3 thunderstorms.",
+      "page": 43
+    },
+    {
+      "name": "Wand of Barrier of Wind",
+      "category": "Wand",
+      "rarity": "Rare",
+      "cost": "Rare",
+      "properties": "Tier 2 (3 charges)",
+      "description": "Recharge: Hang the wand with wind chimes in a breezy area. Let it ring for 3 days.",
+      "page": 43
+    },
+    {
+      "name": "Wand of Sacrifice",
+      "category": "Wand",
+      "rarity": "Very Rare",
+      "cost": "Very Rare",
+      "properties": "Tier 6 (1 charge)",
+      "description": "Recharge: Plant it in a new garden, leave it undisturbed until the flowers bloom.",
+      "page": 43
+    },
+    {
+      "name": "Elderwyrm’s Majesty",
+      "category": "Wand",
+      "rarity": "Legendary",
+      "cost": "Legendary",
+      "properties": "Tier 9 (1 charge)",
+      "description": "This wand can cast Dragonform, turning into the type of dragon that last charged it. Recharge: Give an ancient dragon a gift it truly desires.",
+      "page": 43
+    },
+    {
+      "name": "Heartwood, Splinter of the Tree of Life",
+      "category": "Wand",
+      "rarity": "Legendary",
+      "cost": "Legendary",
+      "properties": "Tier 9 (1 charge)",
+      "description": "Cast Redeem with no required components. Recharge: A sacred hymn must be sung over it ceaselessly for 100 years.",
+      "page": 43
+    }
+  ],
+  "spells": [
+    {
+      "name": "Flame Dart",
+      "school": "Fire",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Range: 8. Damage: 1d10. On crit: Smoldering. High Levels: +5 damage every 5 levels.",
+      "page": 46,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Heart’s Fire",
+      "school": "Fire",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Range: 4. Give an ally within Range an extra action. Spend 1 mana to cast this when it is not your turn. High Levels: +1 Range every 5 levels.",
+      "page": 46,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Ignite",
+      "school": "Fire",
+      "tier": 1,
+      "actions": "2 Actions",
+      "text": "Range: 8. Damage: 4d10 to a Smoldering target, ending the condition on hit. Upcast: +10 damage.",
+      "page": 46,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Enchant Weapon",
+      "school": "Fire",
+      "tier": 2,
+      "actions": "1 Action",
+      "text": "Concentration: Up to 1 minute. A weapon you touch is enchanted with magical flame. It deals +KEY damage and inflicts Smoldering on crit. Upcast: +KEY damage.",
+      "page": 46,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Flame Barrier",
+      "school": "Fire",
+      "tier": 3,
+      "actions": "1 Action",
+      "text": "Reaction: When attacked, Defend for free. Until the start of your next turn, melee attackers against you take KEY damage (ignoring armor) and gain Smoldering. Upcast: +KEY damage. (If you’ve already Defended this round, you can’t use abilities requiring it again, even for free.)",
+      "page": 46,
+      "targeting": "Self"
+    },
+    {
+      "name": "Pyroclasm",
+      "school": "Fire",
+      "tier": 4,
+      "actions": "2 Actions",
+      "text": "Reach: 3. Others within Reach take 2d20+10 damage (ignoring armor) on a failed DEX save. Half damage on save. Smoldering creatures fail. Upcast: +1 Reach, +2 damage.",
+      "page": 46,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Fiery Embrace",
+      "school": "Fire",
+      "tier": 5,
+      "actions": "2 Actions",
+      "text": "Concentration: Up to 1 minute. Reach: 8. While within Reach: 1 ally gains the effects of Enchant Weapon. Enemies gain Smoldering, lose damage resistance, and their damage immunity is reduced to resistance. Upcast: +1 ally.",
+      "page": 46,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Living Inferno",
+      "school": "Fire",
+      "tier": 7,
+      "actions": "3 Actions",
+      "text": "Gain the effects of Flame Barrier until your next turn. At the end of this turn and your next turn, cast Pyroclasm for free. Upcast: Upcast Flame Barrier and Pyroclasm.",
+      "page": 46,
+      "targeting": "Self"
+    },
+    {
+      "name": "Dragonform",
+      "school": "Fire",
+      "tier": 9,
+      "actions": "5 Actions",
+      "text": "Transform into a Huge dragon. Gain 3 actions, a fly speed of 12, LVL Armor, 10×LVL temp HP, and: • Tooth & Claw. Action: (Reach 2) 1d20+LVL damage (ignoring armor). Inflicts Smoldering. • Immolating Breath. 2 Actions: (Reach: Cone 8). DC 20 DEX save, KEY d20 damage, half on save. Smoldering targets fail. You can maintain this form for as long as the temp HP granted by this spell remain (max. 10 minutes). When it ends, you drop to 0 HP.",
+      "page": 46,
+      "targeting": "Self"
+    },
+    {
+      "name": "Ice Lance",
+      "school": "Ice",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Range: 12. Damage: 1d6 cold or piercing damage. On hit: Slowed. High Levels: +3 damage every 5 levels.",
+      "page": 47,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Snowblind",
+      "school": "Ice",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Reach: 1. Damage: 1d6. On hit: Blinded until the end of their next turn. High Levels: +3 damage every 5 levels.",
+      "page": 47,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Frost Shield",
+      "school": "Ice",
+      "tier": 1,
+      "actions": "1 Action",
+      "text": "Reaction: When attacked, Gain 2×KEY temp HP and Defend for free. The ice melts and these temp HP are lost at the start of your next turn. Upcast: +2×KEY temp HP.",
+      "page": 47,
+      "targeting": "Self"
+    },
+    {
+      "name": "Shatter",
+      "school": "Ice",
+      "tier": 2,
+      "actions": "2 Actions",
+      "text": "Range: 12. Damage: 3d6. If any die rolls the max against a Hampered target, this counts as a crit. On crit: +20 damage. Upcast: Increase the result of ANY die by 1. +5 damage on crit.",
+      "page": 47,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Cryosleep",
+      "school": "Ice",
+      "tier": 3,
+      "actions": "2 Actions",
+      "text": "Reach: 12. Creatures in a 2×2 area within Reach are Dazed. On a failed STR save, they fall asleep instead, becoming Incapacitated until their next two turns have passed, until damaged, or until an ally uses an action to wake them. Upcast: +1 area, +1 turn asleep.",
+      "page": 47,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Rimeblades",
+      "school": "Ice",
+      "tier": 4,
+      "actions": "3 Actions",
+      "text": "Concentration: Up to 1 minute. Reach: 12. Conjure razor-sharp icy spikes in 5 contiguous spaces within Reach; this area is difficult terrain. Creatures that enter these spaces (or who are in the area when you conjure them) suffer 2d6 damage for each space they touch. Upcast: +1 space, +1 damage.",
+      "page": 47,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Arctic Blast",
+      "school": "Ice",
+      "tier": 5,
+      "actions": "2 Actions",
+      "text": "Reach: Cone 4. Damage: 4d6+10 damage. This area is difficult terrain until the end of your next turn. Surviving creatures must make a STR save or be frozen in place (Restrained) until the end of their next turn; creatures already Hampered are Incapacitated for 1 turn instead. Upcast: +1 Reach.",
+      "page": 47,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Glacier Strike",
+      "school": "Ice",
+      "tier": 8,
+      "actions": "3 Actions",
+      "text": "Range: 12. Damage: d66 bludgeoning to creatures in a 3×3 area. Creatures adjacent to that area take half as much. The entire area permanently becomes difficult terrain. Upcast: +1 initial area. (D66: Roll 2d6. The leftmost die is the tens place, and the second is the ones, e.g., 4 and 5 deal 45 damage.)",
+      "page": 47,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Arctic Annihilation",
+      "school": "Ice",
+      "tier": 9,
+      "actions": "3 Actions",
+      "text": "Reach: 12. Choose any number of objects or willing creatures within Reach to encase in ice. They are Incapacitated and immune to damage and negative effects until the start of their next turn. All other creatures and objects within Reach take d66 damage. Any surviving creature who took this damage must make a STR save or be Incapacitated for 1 round. Once you cast this spell, you must Safe Rest for 1 week before using it again.",
+      "page": 47,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Zap",
+      "school": "Lightning",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Range: 12. Damage: 2d8. On miss: the lightning fails to find ground, and strikes you instead. High Levels: +6 damage every 5 levels.",
+      "page": 48,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Overload",
+      "school": "Lightning",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Castable only if you are Charged, ending the condition. Reach: 2. Damage: 2d8 to others within Reach. High Levels: +4 damage every 5 levels. (Charged: Whenever you take lightning damage, you are Charged for 1 minute.)",
+      "page": 48,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Arc Lightning",
+      "school": "Lightning",
+      "tier": 1,
+      "actions": "2 Actions",
+      "text": "Range: 12. Damage: 3d8. The bolt also damages the next closest creature to your target. On miss: the lightning fails to find ground and strikes you instead. Upcast: +4 damage. (Next Closest: If you or an ally is the next closest, they are hit! If 2 creatures are equally close, the GM can roll for it or select the one wearing the most metal.)",
+      "page": 48,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Alacrity",
+      "school": "Lightning",
+      "tier": 2,
+      "actions": "1 Action",
+      "text": "Range: 4. Reaction: When attacked. Defend for free. After damage is dealt, you gain the Charged condition then teleport anywhere within Range. Upcast: +4 Range.",
+      "page": 48,
+      "targeting": "Self"
+    },
+    {
+      "name": "Stormlash",
+      "school": "Lightning",
+      "tier": 3,
+      "actions": "2 Actions",
+      "text": "Line: 12. Damage: 3d8+4 (ignoring metal armor). Surviving creatures are Dazed on a failed STR save, or Incapacitated instead for 1 of their turns if they fail by 5 or more. Creatures with a large amount of metal (e.g., armor or a longsword) roll with disadvantage. Upcast: +4 damage.",
+      "page": 48,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Electrickery",
+      "school": "Lightning",
+      "tier": 4,
+      "actions": "3 Actions",
+      "text": "Range: 8. Reaction: When an ally is attacked. Choose another creature within Range to swap places with your ally on a failed WIL save (they become the new target). Costs 1 Action while Charged, ending the condition. Upcast: +2 Range.",
+      "page": 48,
+      "targeting": "2 Targets"
+    },
+    {
+      "name": "Electrocharge",
+      "school": "Lightning",
+      "tier": 5,
+      "actions": "2 Actions",
+      "text": "Concentration: Up to 1 minute. A creature you touch gains the Charged condition, +1 max action, +5 armor, 2x speed, and advantage on DEX saves. Upcast: +4 Range.",
+      "page": 48,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Ride the Lightning",
+      "school": "Lightning",
+      "tier": 6,
+      "actions": "3 Actions",
+      "text": "Teleport up to 12 spaces away to a spot you can see (if a willing creature is there, swap places with them). Adjacent creatures take d88 damage. Surviving creatures must make a STR save or be hurled back 3 spaces, knocked Prone, and deafened for 1 day. Upcast: +1 DC. (D88: Roll 2d8. The leftmost die is the tens place, and the second is the ones, e.g., 4 and 5 deal 45 damage.)",
+      "page": 48,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Seething Storm",
+      "school": "Lightning",
+      "tier": 9,
+      "actions": "3 Actions",
+      "text": "Concentration: Up to 1 minute. Reach: 4. You become a cloud of tempestuous storm. You can fly, move for free 1/round, and attacks against you are made with disadvantage. • At the end of each of your turns, strike up to 4 creatures within Reach with a bolt of lightning for d88 damage (a creature can only be struck 1/round). • +2 Reach and number of bolts each round. Costs 3 actions each round to maintain. Once you cast this spell, you must Safe Rest for 1 week before you can use it again.",
+      "page": 48,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Razor Wind",
+      "school": "Wind",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Range: 12. Damage: 1d4 slashing (Vicious: roll 1 additional die whenever you roll crit damage). Also damages up to 1 adjacent target. High Levels: +2 damage every 5 levels.",
+      "page": 49,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Breath of Life",
+      "school": "Wind",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Range: 6. Restore 1 HP to a Dying creature. High Levels: +2 Range every 5 levels.",
+      "page": 49,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Blustery Gale",
+      "school": "Wind",
+      "tier": 1,
+      "actions": "2 Actions",
+      "text": "Range: 12. Damage: 3d4 bludgeoning, advantage against flying, Small, or Tiny targets. On hit: Move a Med target 2 spaces away; Small/Tiny twice as far; Large half as far (round down). For each die you would roll due to forced movement from this spell, deal +5 damage instead. Upcast: +1 movement.",
+      "page": 49,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Barrier of Wind",
+      "school": "Wind",
+      "tier": 2,
+      "actions": "1 Action",
+      "text": "Reaction: When attacked at Range. Defend for free. Ranged attacks have disadvantage against you this round (including the triggering attack). Upcast: +3 Armor.",
+      "page": 49,
+      "targeting": "Self"
+    },
+    {
+      "name": "Fly",
+      "school": "Wind",
+      "tier": 3,
+      "actions": "1 Action",
+      "text": "Concentration: Up to 10 minutes. Touch a creature, grant a flying speed of 12. Upcast: +1 target.",
+      "page": 49,
+      "targeting": "Single Target+"
+    },
+    {
+      "name": "Eye of the Storm",
+      "school": "Wind",
+      "tier": 4,
+      "actions": "2 Actions",
+      "text": "Reach: 3. Damage: 4d4+10 bludgeoning to enemies within Reach. You may place surviving creatures anywhere within 1 space of the storm’s Reach on a failed STR save. Upcast: +1 Reach.",
+      "page": 49,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Updraft",
+      "school": "Wind",
+      "tier": 5,
+      "actions": "3 Actions",
+      "text": "Reach: 12. Enemies within a 5×5 area must repeat a DEX save until they succeed. For each time they failed they suffer 1d6 falling damage and land prone. Upcast: +2 Range, +1 area.",
+      "page": 49,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Thousand Cuts",
+      "school": "Wind",
+      "tier": 6,
+      "actions": "3 Actions",
+      "text": "Range: 12. Damage: d44 slashing damage (roll with advantage), also damages enemies within Reach 1 of your target. Upcast: +1 Reach. (D44 with advantage: Roll 3d4 and drop the lowest die. The leftmost die is the tens place, and the second is the ones, e.g., 2, 3, and 4 deals 34 damage.)",
+      "page": 49,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Boisterous Winds",
+      "school": "Wind",
+      "tier": 7,
+      "actions": "2 Actions",
+      "text": "Concentration: Up to 1 minute. You and up to 12 allies within Reach 12 gain: Ranged attacks have disadvantage against you, a flying speed of 12, and can move for free 1/round. Upcast: +1 minute or +2 targets.",
+      "page": 49,
+      "targeting": "Multi-target"
+    },
+    {
+      "name": "Vicious Mockery",
+      "school": "Wind",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Songweaver only. Range: 12. Damage: 1d4+INT psychic (ignoring armor). On hit: the target is Taunted during their next turn. High Levels: +2 damage every 5 levels.",
+      "page": 49,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Rebuke",
+      "school": "Radiant",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Reach: 4. Damage: 1d6 (ignoring armor), does not miss. 2× damage against undead or cowardly (those Frightened or behind cover). High Levels: +2 damage every 5 levels.",
+      "page": 50,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "True Strike",
+      "school": "Radiant",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Reach: 2. Give a creature advantage on the next attack they make (until the end of their next turn). High Levels: +1 Reach every 5 levels.",
+      "page": 50,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Heal",
+      "school": "Radiant",
+      "tier": 1,
+      "actions": "1 Action",
+      "text": "Reach: 1. Heal a creature 1d6+KEY HP. Upcast: Choose one: +1 target, +4 Reach, +1d6 healing. If 5+ mana is spent, you may also heal 1 negative condition (e.g., Blind, Poisoned, 1 Wound).",
+      "page": 50,
+      "targeting": "Single Target+"
+    },
+    {
+      "name": "Warding Bond",
+      "school": "Radiant",
+      "tier": 2,
+      "actions": "1 Action",
+      "text": "Designate a willing creature as your ward for 1 minute. They take half damage from all attacks; you are attacked for the other half. Upcast: +1 creature.",
+      "page": 50,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Shield of Justice",
+      "school": "Radiant",
+      "tier": 3,
+      "actions": "1 Action",
+      "text": "Reaction: When attacked, Defend for free and reflect Radiant damage back at the attacker equal to the amount blocked (ignoring armor). Upcast: +5 Armor.",
+      "page": 50,
+      "targeting": "Self"
+    },
+    {
+      "name": "Condemn",
+      "school": "Radiant",
+      "tier": 4,
+      "actions": "2 Actions",
+      "text": "Reach: 4. Damage: 30. Can only target an enemy that crit you or an ally since your last turn. Cannot be reduced by any means. The next attack against that enemy is made with advantage. Upcast: +1 Reach, +1 advantage.",
+      "page": 50,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Vengeance",
+      "school": "Radiant",
+      "tier": 5,
+      "actions": "2 Actions",
+      "text": "Reach: 1. Damage: 1d100, to a creature that attacked a Dying ally or reduced one to 0 HP since your last turn. Upcast: +1 Reach, roll w/ advantage.",
+      "page": 50,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Sacrifice",
+      "school": "Radiant",
+      "tier": 6,
+      "actions": "1 Action",
+      "text": "Reach: 4. Reduce yourself to 0 HP. You cannot have more than 0 HP until you Safe Rest. Heal a number of HP equal to your maximum HP, divided as you choose to any other creatures within Reach. You may revive a creature that has died in the past minute if you give them at least 20 HP (also healing 2 Wounds from them), provided they have not been revived with this spell before. Upcast: +4 Reach.",
+      "page": 50,
+      "targeting": "Special"
+    },
+    {
+      "name": "Redeem",
+      "school": "Radiant",
+      "tier": 9,
+      "actions": "Casting Time: 24 hours",
+      "text": "Casting Time: 24 hours. Requires: A diamond worth at least 10,000 gp, which this spell consumes. Revive any number of deceased creatures you choose—within 1 mile—that have died in the past year, provided they have not died of old age or been revived with this spell before.",
+      "page": 50,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Lifebinding Spirit",
+      "school": "Radiant",
+      "tier": 1,
+      "actions": "1 Action",
+      "text": "Shepherd only. Summon a spirit companion that follows you and is immune to harm. It lasts until you cast this spell again, take a Safe Rest, or it heals a number of times equal to the mana spent summoning it. Action: It attacks or heals a creature within Reach 4. It attacks for 1d6+WIL radiant damage (ignoring armor), or heals for the same amount. Upcast: Increment its die size by 1 (max d12), +1 healing use. Flavor is Free: Your Lifebinding Spirit can take the form of any small friendly animal or similar creature (dog, lamb, rabbit, sparrow, etc.). Outside of Combat: Your companion is a spirit, so it can pass through walls and dangers harmlessly. It can briefly move away from you (but always prefers to be faithfully at your side). It cannot speak.",
+      "page": 50,
+      "targeting": "Summon"
+    },
+    {
+      "name": "Entice",
+      "school": "Necrotic",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Range: 8. Damage: 1d4 (ignoring armor). On hit: target moves 2 spaces closer to you. High Levels: Increment the die size 1 step every 5 levels (d6 » d8 » d10 » d12).",
+      "page": 51,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Withering Touch",
+      "school": "Necrotic",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Reach: 1. Damage: 1d12. On hit: Target is considered undead for 1 round. High Levels: +6 damage every 5 levels.",
+      "page": 51,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Shadow Trap",
+      "school": "Necrotic",
+      "tier": 1,
+      "actions": "2 Actions",
+      "text": "Concentration: Up to 1 minute. The next creature to move adjacent to you suffers 3d12 damage; if Small or Tiny, it is also Restrained by shadowy tendrils for as long as you maintain concentration or until they escape. Upcast: +1 size category, +1d12 damage when they escape.",
+      "page": 51,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Dread Visage",
+      "school": "Necrotic",
+      "tier": 2,
+      "actions": "1 Action",
+      "text": "Reaction: When attacked, Defend for free. Melee attackers are Frightened of you and suffer 1d12 damage if they attack you this round. Costs 2 mana less while dying. Upcast: +2 damage, +2 armor.",
+      "page": 51,
+      "targeting": "Self"
+    },
+    {
+      "name": "Vampiric Greed",
+      "school": "Necrotic",
+      "tier": 3,
+      "actions": "2 Actions",
+      "text": "Gain 1 Wound. 4d12 to all adjacent creatures, and heal HP equal to the damage done. Any surviving creatures make a STR save. Gain 1 additional Wound for each creature that saves. Upcast: +1 DC.",
+      "page": 51,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Greater Shadow",
+      "school": "Necrotic",
+      "tier": 4,
+      "actions": "2 Actions",
+      "text": "Summon a 5d12 Greater Shadow minion (max 1) adjacent to you. When it dies, it explodes into 5 shadow minions (see Summon Shadow). Place them anywhere within 8 spaces. Upcast: +1d12 damage, +1 shadow minion on explosion.",
+      "page": 51,
+      "targeting": "Summon"
+    },
+    {
+      "name": "Gangrenous Burst",
+      "school": "Necrotic",
+      "tier": 5,
+      "actions": "2 Actions",
+      "text": "Reach: Up to 8. Other damaged creatures must make a STR save or take 3d20 damage (ignoring armor), half on save. The save is rolled with disadvantage while Bloodied. Upcast: +10 damage.",
+      "page": 51,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Unspeakable Word",
+      "school": "Necrotic",
+      "tier": 6,
+      "actions": "2 Actions",
+      "text": "Reach: 8. Damage: d66 (with advantage, ignoring armor, does not miss or crit) on a failed INT save. Target rolls with disadvantage if Bloodied or Frightened. On a success, you both take half of this damage instead. Upcast: +1 DC, +10 damage. (D66 with advantage: Roll 3d6 and drop the lowest die. The leftmost die is the tens place, and the second is the ones, e.g., 2, 3, and 4 deals 34 damage.)",
+      "page": 51,
+      "targeting": "Special"
+    },
+    {
+      "name": "Creeping Death",
+      "school": "Necrotic",
+      "tier": 7,
+      "actions": "3 Actions",
+      "text": "Reach: 8. Damage: 4d20. If this kills the creature, it violently erupts and you MUST deal the same amount of damage to another creature within 8 spaces of it that has not yet been damaged by this effect. Repeat until a creature survives this damage or no other creatures are within Reach. Upcast: +1d20 damage.",
+      "page": 51,
+      "targeting": "AoE"
+    },
+    {
+      "name": "Shadow Blast",
+      "school": "Necrotic",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Shadowmancer only. Range: 8. Damage: 1d12+KEY. 1/round. High Levels: +1d12 every 5 levels.",
+      "page": 51,
+      "targeting": "Single Target"
+    },
+    {
+      "name": "Summon Shadow",
+      "school": "Necrotic",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Shadowmancer only. Summon a shadow minion within Reach 1 (you can summon a max of INT or LVL minions this way, whichever is lower). Your shadow minions follow the normal minion rules: they have 1 HP, no damage bonus, and do not crit. They abandon you immediately outside of combat. Action: (1/turn) you may command ALL of your minions to move up to 6 then attack (Reach 1, d12 each). High Levels: +1 Reach every 5 levels.",
+      "page": 51,
+      "targeting": "Summon"
+    },
+    {
+      "name": "Ice Disk",
+      "school": "Ice",
+      "tier": 0,
+      "actions": "Casting Time: 1 min",
+      "text": "Conjure a disk of ice that floats just above the ground and follows you. It can carry up to 250 lbs./115 kg of weight for 1 hour or until you cast this spell again.",
+      "page": 52,
+      "targeting": "Utility",
+      "utility": true
+    },
+    {
+      "name": "Chillcraft",
+      "school": "Ice",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Chill. Harmlessly freeze, thaw, or move a bath-sized amount of water near you. OR: Craft. Conjure a sheet of opaque, mirror-like, or transparent ice the size of a window or small door.",
+      "page": 52,
+      "targeting": "Utility",
+      "utility": true
+    },
+    {
+      "name": "Wintry Scrying",
+      "school": "Ice",
+      "tier": 0,
+      "actions": "Casting Time: 10 min",
+      "text": "Turn a small patch of water into a reflective icy mirror. Looking though it grants you vision of any desired location near this same body of water for 10 minutes.",
+      "page": 52,
+      "targeting": "Utility",
+      "utility": true
+    },
+    {
+      "name": "Firebrand",
+      "school": "Fire",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Touch a surface and secretly mark it with a symbol or brief message. Speaking a chosen command word while nearby reveals it.",
+      "page": 52,
+      "targeting": "Utility",
+      "utility": true
+    },
+    {
+      "name": "Fire Step",
+      "school": "Fire",
+      "tier": 0,
+      "actions": "Casting Time: 1 min",
+      "text": "Teleport to a fire source you can see.",
+      "page": 52,
+      "targeting": "Self",
+      "utility": true
+    },
+    {
+      "name": "Kindle",
+      "school": "Fire",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Conjure a minor visual illusion. OR: Ignite a small, unheld item within Range 6.",
+      "page": 52,
+      "targeting": "Single Target",
+      "utility": true
+    },
+    {
+      "name": "Spark Buddy",
+      "school": "Lightning",
+      "tier": 0,
+      "actions": "Casting Time: 1 min",
+      "text": "Conjure a Tiny (squirrel-sized) electrical helper for up to 1 hour. It can fetch Tiny objects (~1 lb./500 g max), open unlocked doors, illuminate a small area, or deliver a harmless shock. If it takes damage or moves further than 6 spaces away from you, it dissipates into sparks.",
+      "page": 53,
+      "targeting": "Utility",
+      "utility": true
+    },
+    {
+      "name": "Spark Step",
+      "school": "Lightning",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Range: 4. Teleport to a metal object.",
+      "page": 53,
+      "targeting": "Self",
+      "utility": true
+    },
+    {
+      "name": "Tempest’s Command",
+      "school": "Lightning",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Dispel a minor magical effect, or temporarily suppress a stronger one (the more powerful an enchantment, the shorter the duration). OR: Voice of Thunder. Your eyes glow and your voice is amplified to a booming, thunder-like volume for 1 min.",
+      "page": 53,
+      "targeting": "Utility",
+      "utility": true
+    },
+    {
+      "name": "Light",
+      "school": "Radiant",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Cause an item to brightly glow as a torch with radiant light for as long as you hold it.",
+      "page": 53,
+      "targeting": "Single Target",
+      "utility": true
+    },
+    {
+      "name": "Beautify",
+      "school": "Radiant",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Clean stains or repair a small tear/break in a non-magical item, or conjure tiny beautiful things: flowers, butterflies, etc.",
+      "page": 53,
+      "targeting": "Single Target",
+      "utility": true
+    },
+    {
+      "name": "Bond of Peace",
+      "school": "Radiant",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Bond. Telepathically communicate simple thoughts or feelings with a friendly creature you can see. OR: Peace. Imbue your spoken words with calming magic, granting advantage on any check made to soothe anger or fear in creatures who can hear you.",
+      "page": 53,
+      "targeting": "Single Target/Self",
+      "utility": true
+    },
+    {
+      "name": "Wind Whisper",
+      "school": "Wind",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "You whisper a message into the wind and it will be secretly carried to a specified target within 100 miles/160 km.",
+      "page": 53,
+      "targeting": "Single Target",
+      "utility": true
+    },
+    {
+      "name": "Helpful Gust",
+      "school": "Wind",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Reach: 6. Gently move a Tiny unheld item within Reach in any direction. OR: Generate an illusory scent.",
+      "page": 53,
+      "targeting": "Single Target",
+      "utility": true
+    },
+    {
+      "name": "Feather Fall",
+      "school": "Wind",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Reach: 6. Reaction: When a creature falls, cause them to gently float to the ground, unharmed.",
+      "page": 53,
+      "targeting": "Single Target",
+      "utility": true
+    },
+    {
+      "name": "Gravecraft",
+      "school": "Necrotic",
+      "tier": 0,
+      "actions": "1 Action or Casting Time: 1 min",
+      "text": "Gravemark. Action: Soil a surface with blood, filth, or other disgusting things. OR: Gravework. Casting time 1 minute: Shape/move a body-sized plot of earth.",
+      "page": 53,
+      "targeting": "Single Target",
+      "utility": true
+    },
+    {
+      "name": "False Face",
+      "school": "Necrotic",
+      "tier": 0,
+      "actions": "Casting Time: 1 min",
+      "text": "Change your appearance to look like someone else for 10 minutes. Requires a piece of them.",
+      "page": 53,
+      "targeting": "Self",
+      "utility": true
+    },
+    {
+      "name": "Thought Leech",
+      "school": "Necrotic",
+      "tier": 0,
+      "actions": "1 Action",
+      "text": "Reach: 6. Read the surface thoughts of a creature within Reach. Creatures can sense you doing this and may not like it.",
+      "page": 53,
+      "targeting": "Single Target",
+      "utility": true
+    }
+  ],
+  "conditions": [
+    {
+      "name": "Blinded",
+      "text": "Can’t see. Attacks against you have advantage, and your attacks have disadvantage."
+    },
+    {
+      "name": "Bloodied",
+      "text": "At half HP or less."
+    },
+    {
+      "name": "Charmed",
+      "text": "Sees the charmer as an ally. Charmer has advantage on social interactions with you."
+    },
+    {
+      "name": "Dazed",
+      "text": "Heroes: lose 1 action; monsters: can perform one less action on their next turn."
+    },
+    {
+      "name": "Dying",
+      "text": "At 0 HP. Taking damage while dying causes 2 Wounds, a crit causes 3 instead. While Dying, actions are limited to 1, Concentration is broken, and attacking/casting spells causes 1 Wound unless you make a DC 10 STR save."
+    },
+    {
+      "name": "Frightened",
+      "text": "Disadvantage on rolls when source of fear is nearby; speed halved when moving closer to it."
+    },
+    {
+      "name": "Grappled",
+      "text": "Cannot move. Attacks against you have advantage. Forced movement (pushing a grappler away), incapacitation, or spending an action and succeeding on a STR or DEX save can end it."
+    },
+    {
+      "name": "Restrained",
+      "text": "Functions like Grappled (cannot move; attacks against you have advantage), but is caused by objects (e.g., chains, rope, roots) and ignores size restrictions. It can also be ended through any logical means, such as picking a lock or cutting/burning rope."
+    },
+    {
+      "name": "Hampered",
+      "text": "Any creature with their actions or movement reduced (e.g., Dazed, Slowed, Grappled, Restrained, Prone, Difficult Terrain)."
+    },
+    {
+      "name": "Incapacitated",
+      "text": "Can’t do anything. Attacks against you have advantage, and melee attacks that hit, crit. (Paralyzed, Stunned, and Unconscious all mean Incapacitated.)"
+    },
+    {
+      "name": "Invisible",
+      "text": "Cannot be seen. Your attacks have advantage, and attacks against you have disadvantage."
+    },
+    {
+      "name": "Petrified",
+      "text": "Incapacitated. You have all the benefits and drawbacks of being a rock! Immune to most damage except from large explosions, picks, or similar tools."
+    },
+    {
+      "name": "Poisoned",
+      "text": "Disadvantage on rolls."
+    },
+    {
+      "name": "Prone",
+      "text": "Movement costs twice as much, and disadvantage on attacks. Melee attacks against you have advantage; Ranged have disadvantage. Spend 3 spaces of your Speed to stand up."
+    },
+    {
+      "name": "Riding",
+      "text": "You move with the creature you are riding. Any attacks that miss you, strike them."
+    },
+    {
+      "name": "Slowed",
+      "text": "Speed halved during your next turn."
+    },
+    {
+      "name": "Taunted",
+      "text": "Disadvantage on attacks except against the most recent taunter."
+    },
+    {
+      "name": "Wounded",
+      "text": "Has any Wounds (typically 6 Wounds and a hero is dead)."
+    },
+    {
+      "name": "Smoldering",
+      "text": "Minor status. Does nothing on its own, though some fire spells and abilities have additional effects against Smoldering creatures. Ends when combat does."
+    },
+    {
+      "name": "Charged",
+      "text": "Minor status. Whenever you take lightning damage, you are Charged for 1 minute. Does nothing on its own; some lightning spells require or consume it. Ends when combat does."
+    },
+    {
+      "name": "Distracted",
+      "text": "Minor status. A target is distracted if it is adjacent to or Taunted by an ally, or if it cannot see you. Does nothing on its own; some abilities have additional effects against such targets. Ends when combat does."
+    }
+  ],
+  "classes": [],
+  "monsters": [],
+  "families": [],
+  "tables": {
+    "statDescriptions": {
+      "STR": "Strength. Your raw physical power and resilience, endurance, and resistance to harm. Affects STR weapon damage, resistance to Wounds, HP recovery, Concentration, STR saves, carrying capacity, Grappling, and the Might skill.",
+      "DEX": "Dexterity. Your agility, reflexes, and precision with blades or bows. Affects DEX weapon damage, Initiative, DEX saves, Grappling, and can contribute to Armor, as well as the Stealth and Finesse skills.",
+      "INT": "Intelligence. Reflects knowledge and reasoning across fields like the arcane, tactics, or street smarts. Affects languages, spellcasting, use of wands, spell scrolls, INT saves, as well as the Arcana, Examination, and Lore skills.",
+      "WIL": "Will. Your force of personality, courage, and wisdom. Will shapes your interactions with both nature and society. Affects spellcasting and WIL saves, as well as the Insight, Influence, Naturecraft, and Perception skills."
+    },
+    "difficulties": [
+      {
+        "name": "Easy",
+        "dc": "8",
+        "example": "Spotting a large Ogre crouched behind a small bush might be a DC 8 Perception check."
+      },
+      {
+        "name": "Medium",
+        "dc": "12",
+        "example": "A hidden doorway behind a bookcase might be a DC 12 Examination check."
+      },
+      {
+        "name": "Challenging",
+        "dc": "15",
+        "example": "Calming an injured Owlbear stuck in a trap may be a DC 15 Naturecraft check."
+      },
+      {
+        "name": "Very Difficult",
+        "dc": "18",
+        "example": "Intuiting the true intentions of a trained Spy may be a DC 18 Insight check."
+      },
+      {
+        "name": "Extremely Difficult",
+        "dc": "20+",
+        "example": "Disarming an ancient legendary trap may be a DC 20+ Finesse check."
+      }
+    ],
+    "statArrays": [
+      {
+        "name": "Standard",
+        "values": [
+          2,
+          2,
+          0,
+          -1
+        ]
+      },
+      {
+        "name": "Balanced",
+        "values": [
+          2,
+          1,
+          1,
+          0
+        ]
+      },
+      {
+        "name": "Min–Max",
+        "values": [
+          3,
+          1,
+          -1,
+          -1
+        ]
+      }
+    ],
+    "languages": [
+      {
+        "name": "Common",
+        "spokenBy": "Most intelligent creatures."
+      },
+      {
+        "name": "Dwarvish",
+        "spokenBy": "Dwarves, Gnomes, and Giants."
+      },
+      {
+        "name": "Elvish",
+        "spokenBy": "Elves, Fey, and Sylvan."
+      },
+      {
+        "name": "Goblin",
+        "spokenBy": "Goblins and Orcs."
+      },
+      {
+        "name": "Infernal",
+        "spokenBy": "Various Fiends and cultists."
+      },
+      {
+        "name": "Thieves’ Cant",
+        "spokenBy": "Scoundrels and rogues."
+      },
+      {
+        "name": "Celestial",
+        "spokenBy": "Celestials and priests."
+      },
+      {
+        "name": "Draconic",
+        "spokenBy": "Dragons, Dragonborn, and Kobolds."
+      },
+      {
+        "name": "Primordial",
+        "spokenBy": "Elementals and Ancient Beings."
+      },
+      {
+        "name": "Deep Speak",
+        "spokenBy": "Underworld dwellers."
+      }
+    ],
+    "creation": {
+      "skillPointsAtL1": 4,
+      "inventorySlotsBase": 10,
+      "maxWounds": 6,
+      "speed": 6,
+      "actions": 3,
+      "startingGold": 50,
+      "maxStat": 5,
+      "maxSkill": 12
+    },
+    "sizes": [
+      {
+        "name": "Tiny",
+        "text": "Can be carried in a typical pocket (many can comfortably fit in 1 space)."
+      },
+      {
+        "name": "Small",
+        "text": "Can be carried in a backpack (2 can comfortably fit in 1 space)."
+      },
+      {
+        "name": "Medium",
+        "text": "The average human size (1 can comfortably fit in 1 space)."
+      },
+      {
+        "name": "Large",
+        "text": "Roughly the size of a bear (1 can comfortably fit in a 2x2 area)."
+      },
+      {
+        "name": "Huge",
+        "text": "Roughly the size of a small house (1 can comfortably fit in a 3x3 area)."
+      },
+      {
+        "name": "Gargantuan",
+        "text": "Can be as large as a castle keep (1 can fill a 4x4 area or greater)."
+      }
+    ],
+    "weaponProperties": [
+      {
+        "name": "2-handed",
+        "text": "Can be held in a single hand, but must be wielded in 2 hands to attack with it."
+      },
+      {
+        "name": "Load",
+        "text": "Some weapons require extra actions to load before each shot."
+      },
+      {
+        "name": "Reach",
+        "text": "How close an enemy must be to be affected by this attack. If unspecified, Reach 1."
+      },
+      {
+        "name": "Range",
+        "text": "Attacks can be made from afar. If any enemy is adjacent to you, your Ranged attacks are made with disadvantage. Add 1 die of disadvantage to gain +2 Range (max +6)."
+      },
+      {
+        "name": "Thrown",
+        "text": "Treat a melee weapon as if it had Range. Once thrown, you no longer have it!"
+      },
+      {
+        "name": "Vicious",
+        "text": "Roll 1 additional die whenever you roll crit damage. Only the Primary Die (the leftmost one) is used for determining whether an attack crits; every time you roll crit damage, roll the additional Vicious die as well."
+      },
+      {
+        "name": "Light",
+        "text": "Heroes may wield 2 Light weapons at the same time. While dual wielding, you may gain advantage on an attack with those weapons, 1/round. You may dual wield 1-handed weapons without the Light property if your STR is 3 or greater, or 1 weapon without the Light property if your STR is 2. Dual wielding different weapons? Roll dice for both weapons and choose either result instead (the 1/round limit still applies). Attacking with advantage? Add an extra die for one of the weapons."
+      },
+      {
+        "name": "Req. X STR",
+        "text": "Requires the listed STR to use effectively. Heroes can use any equipment they like, but weapons used without proficiency cannot crit, and Defending while wearing armor without proficiency costs 1 additional action."
+      }
+    ],
+    "rests": [
+      {
+        "name": "Catch Breath (Field Rest)",
+        "text": "Requires at least 10 minutes to tend to your injuries. Expend any number of Hit Dice one at a time (roll them and add your STR to each), and regain that many HP. Negative STR? Subtract your STR from each HD you expend."
+      },
+      {
+        "name": "Make Camp (Field Rest)",
+        "text": "If you rest for at least 8 hours with food and sleep, take the maximum value for each Hit Die you expend instead of rolling. Add your STR to each Hit Die as usual."
+      },
+      {
+        "name": "Safe Rest",
+        "text": "Takes place in a safe location designated by your GM, typically lodging at an inn overnight—but could also be at a secret oasis, a well-stocked cabin in the woods, near a sacred shrine, or the like. Camping in the open wilderness or in a dungeon is not sufficient. After a Safe Rest, heroes recover all of their HP, Hit Dice, mana (and other class-specific resources), and heal 1 Wound. For a more realistic convalescence time, 1 week per wound recovered may make more sense."
+      }
+    ],
+    "downtime": [
+      {
+        "name": "Retrain",
+        "text": "Spend time doing activities to retrain any of your chosen abilities, features, or if it makes sense in the story, possibly even your subclass."
+      },
+      {
+        "name": "Gather Information",
+        "text": "Meet NPCs, pick up news, or collect rumors and job leads."
+      },
+      {
+        "name": "Personal Goals",
+        "text": "Pursue goals from your backstory or other smaller quests you’ve chosen."
+      },
+      {
+        "name": "Buy & Sell",
+        "text": "Get new equipment, and sell treasures you’ve collected while out adventuring."
+      },
+      {
+        "name": "Perform",
+        "text": "Play music, tell stories, compete, or perform in public to earn gold or fame."
+      },
+      {
+        "name": "Craft",
+        "text": "Create weapons, armor, or simple items using materials you’ve acquired."
+      },
+      {
+        "name": "Socialize",
+        "text": "Build alliances, make new friends, or make new enemies."
+      },
+      {
+        "name": "Invest",
+        "text": "Use your gold to invest in businesses or trade ventures for future profit."
+      },
+      {
+        "name": "Mentor",
+        "text": "Teach a skill or ability to another character or NPC."
+      },
+      {
+        "name": "Research",
+        "text": "Investigate a mystery, study ancient texts, or uncover hidden knowledge."
+      },
+      {
+        "name": "Serve",
+        "text": "Aid a patron or a deity in exchange for a favor, or perform charity for townsfolk."
+      },
+      {
+        "name": "Build",
+        "text": "Establish a home base, start a business, craft siege weapons, or build anything else you can imagine (GM and setting-permitting, of course)."
+      }
+    ],
+    "lodging": [
+      {
+        "name": "Poor",
+        "cost": "5 sp",
+        "text": "The cheapest rooms at an inn save you money but may lead to complications. Price is per person/day."
+      },
+      {
+        "name": "Comfortable",
+        "cost": "2 gp",
+        "text": "A standard room. Price is per person/day."
+      },
+      {
+        "name": "Lavish",
+        "cost": "10 gp",
+        "text": "A premium room and amenities. Lavish inns allow players to gain one Temporary Boon the following day (see Lodging Boons table on pg. 22 of the GM’s Guide). Price is per person/day."
+      }
+    ],
+    "quickRules": [
+      {
+        "title": "Stats & KEY",
+        "text": "4 stats: STR, DEX, INT, WIL (max typically +5). Each class has 2 Key Stats; “KEY” means use one of them. A stat before a die (e.g., “WIL d8”) means roll that many dice."
+      },
+      {
+        "title": "Skill Checks",
+        "text": "Roll 1d20 + skill (max +12) vs. the DC: Easy 8, Medium 12, Challenging 15, Very Difficult 18, Extremely Difficult 20+. A 1 always fails, a 20 always succeeds."
+      },
+      {
+        "title": "Saves",
+        "text": "Roll 1d20 + the relevant stat. 1 always fails, 20 always saves; you may choose to fail. Each hero has 1 advantaged save (+), 1 disadvantaged save (–), and 2 neutral. The DC for effects a hero causes is 10+KEY."
+      },
+      {
+        "title": "Advantage & Disadvantage",
+        "text": "Roll 1 additional die of the same type and remove the lowest (advantage) or highest (disadvantage). Multiple instances stack; each advantage cancels one disadvantage before you roll. Ties: remove dice left to right."
+      },
+      {
+        "title": "HP, Dying & Wounds",
+        "text": "At 0 HP gain 1 Wound and the Dying condition (1 action only, Concentration broken). Attacking/casting while Dying causes 1 Wound unless you pass a DC 10 STR save; taking damage causes 2 Wounds (3 on a crit). Die at 6 Wounds. Wounds heal 1 per Safe Rest. Temp HP is lost first, doesn’t stack, and expires after a Safe Rest."
+      },
+      {
+        "title": "Hit Dice",
+        "text": "Max Hit Dice = your level (start with 1). Spend them during Field Rests to regain HP (roll + STR; Make Camp = max value). All recovered on a Safe Rest."
+      },
+      {
+        "title": "Actions",
+        "text": "3 actions per turn, all recharge at the end of your turn. Attack, Move (up to Speed 6; Difficult Terrain halves it), Cast Spell (needs a free hand or focus and the ability to speak), Assess (DC 12 skill check to ask a question, create an opening, or anticipate danger). Simple free actions 1/turn."
+      },
+      {
+        "title": "Attacks, Crits & Misses",
+        "text": "Roll the weapon/spell dice; a 1 on the Primary (leftmost) Die misses. Rolling the max on the Primary Die is a crit: roll it again and add, repeating on each max. Crits ignore monster armor. Weapons used without proficiency cannot crit."
+      },
+      {
+        "title": "Rushed Attacks",
+        "text": "Additional attacks on the same turn are rushed: cumulative disadvantage for each attack after the first. For save-based abilities (e.g., Grappling), enemies instead roll with increasing advantage."
+      },
+      {
+        "title": "Reactions",
+        "text": "Cost 1 action, taken off-turn, each no more than 1/round. Defend: reduce one attack’s damage by your Armor. Interpose: swap into the space of a creature within 2 spaces to become the target. Opportunity Attack: melee attack with disadvantage on an adjacent enemy that willingly moves away (heroes only). Help: give an ally advantage on a roll if you explain how (one Help per roll)."
+      },
+      {
+        "title": "Initiative",
+        "text": "Roll 1d20 + Initiative (typically DEX). Single digit: start with 1 action; 2 digits: 2 actions; 20+ (or natural 20): all 3. Heroes go first by default (any order), monsters typically last. Everyone regains all 3 actions at the end of their turn."
+      },
+      {
+        "title": "Mana & Upcasting",
+        "text": "A spell’s mana cost equals its tier; cantrips are free. Upcast by spending extra mana (up to the highest tier you have unlocked) for the listed bonus per additional mana. Multi-target/AoE spells don’t miss or crit; one roll applies to all targets."
+      },
+      {
+        "title": "Concentration",
+        "text": "Only one thing at a time. When crit while concentrating, make a DC 10 STR save or lose it. Automatically broken at 0 HP or when Incapacitated."
+      },
+      {
+        "title": "Cover & Hiding",
+        "text": "Mostly obscured = Cover: attacks against you have disadvantage. Fully obscured = Full Cover: can’t normally be targeted. To hide in combat you need Cover, and an action for a DC 15 Stealth check (automatic with Full Cover). Your first attack while hidden has advantage, then you are revealed."
+      },
+      {
+        "title": "Range & Reach",
+        "text": "Default Reach 1. Ranged attacks have disadvantage if any enemy is adjacent (Reach attacks do not). Take disadvantage 1 to gain +2 Range (max +6)."
+      },
+      {
+        "title": "Grappling",
+        "text": "Need Reach and 1 free arm. Target makes a STR or DEX save (DC 10+STR or DEX): your size or smaller is Grappled; larger, you gain Riding. Ends by forced movement, incapacitation, or an action + successful STR/DEX save."
+      },
+      {
+        "title": "Falling & Forced Movement",
+        "text": "1d6 bludgeoning per space a forced move is shortened by an obstacle (split if it hits another creature). Falling: 1d6 per 10 ft. (2 spaces)."
+      },
+      {
+        "title": "Armor",
+        "text": "Unarmored, Armor = DEX. Armor applies when you Defend. Monsters with Medium Armor take only the dice (ignoring positive modifiers); Heavy Armor halves the dice. Crits and vulnerabilities ignore monster armor."
+      },
+      {
+        "title": "Rests",
+        "text": "Field Rest: Catch Breath (10 min, roll Hit Dice + STR) or Make Camp (8 hrs, max Hit Die value + STR). Safe Rest (inn or other GM-designated safe place): recover all HP, Hit Dice, mana and class resources, and heal 1 Wound."
+      },
+      {
+        "title": "Leveling Up",
+        "text": "Roll your Hit Die with advantage and add it to max HP; max Hit Dice +1; gain 1 skill point (and may move 1 point between skills; max +12); gain class features. Adjust anything affected by stat increases."
+      },
+      {
+        "title": "Character Creation",
+        "text": "Pick a class, ancestry, background (and optionally a motivation). Choose a stat array (Standard +2,+2,+0,–1; Balanced +2,+1,+1,+0; Min–Max +3,+1,–1,–1). Skills start at their stat, plus 4 skill points. Common plus 1 language per point of INT. Start with class/background gear or 50 gp (× level if starting higher). Speed 6, max Wounds 6, Hit Dice = level, Initiative = DEX."
+      },
+      {
+        "title": "Inventory",
+        "text": "10+STR slots. 1 slot: one-handed weapon, shield, worn armor, stack of javelins, 500 gp, or 2 potions. 2 slots: 2-handed weapon, unworn armor, or bulky items. Small related items can share a slot. Ammo need not be tracked."
+      },
+      {
+        "title": "Equipment Swapping",
+        "text": "Sheathe a weapon or shield you are proficient with and equip a different one for free 1/round. Potions take an action to drink or give to an adjacent willing creature."
+      },
+      {
+        "title": "Minions",
+        "text": "Die from any damage, move and attack at the same time, cannot crit, and their attacks can be Defended against as if they were a single attack. Overflow damage may spill to nearby minions at the GM’s discretion."
+      }
+    ]
+  }
+}

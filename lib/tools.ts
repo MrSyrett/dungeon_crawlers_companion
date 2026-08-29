@@ -10,7 +10,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session";
 
 export type ToolKind = "character" | "session";
 
@@ -79,9 +79,47 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "kob_character_sheet.html",
     keys: ["kob_sheet"],
   },
+  "nimble-character": {
+    id: "nimble-character",
+    system: "NIM",
+    systemName: "Nimble",
+    kind: "character",
+    label: "Character Sheet",
+    file: "nimble_character_sheet.html",
+    keys: ["nimble_sheet"],
+  },
+  // The three session-prep builders below are generated from the DCC one by
+  // scripts/make-session-builders.mjs (same tool, re-themed + re-keyed).
+  "ace-session": {
+    id: "ace-session",
+    system: "ACE",
+    systemName: "ACE!",
+    kind: "session",
+    label: "Session Prep",
+    file: "ace_session_prep_builder.html",
+    keys: ["ace_session"],
+  },
+  "kob-session": {
+    id: "kob-session",
+    system: "KOB",
+    systemName: "Kids on Bikes",
+    kind: "session",
+    label: "Session Prep",
+    file: "kob_session_prep_builder.html",
+    keys: ["kob_session"],
+  },
+  "nimble-session": {
+    id: "nimble-session",
+    system: "NIM",
+    systemName: "Nimble",
+    kind: "session",
+    label: "Session Prep",
+    file: "nimble_session_prep_builder.html",
+    keys: ["nimble_session"],
+  },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "kob-character"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

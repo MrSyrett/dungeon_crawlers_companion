@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { CHARACTER_TOOL_IDS, isToolId } from "@/lib/tools";
+import { CHARACTER_TOOL_IDS, TOOLS, isToolId } from "@/lib/tools";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -76,6 +76,7 @@ export async function DELETE(_req: NextRequest, ctx: Ctx) {
 //   DCC sheets   { dcc_sheet: "<json>" } → `header['f-name']`
 //   ACE sheets   { ace_sheet: "<json>" } → top-level `name`
 //   KoB sheets   { kob_sheet: "<json>" } → top-level `name`
+//   Nimble       { nimble_sheet: "<json>" } → top-level `name`
 //   Prep builders{ sd_session | dcc_session: "<json>" } → top-level `title`
 function extractDocTitle(tool: string, data: object): string | null {
   try {
@@ -98,8 +99,13 @@ function extractDocTitle(tool: string, data: object): string | null {
       const sheet = JSON.parse(blob.kob_sheet) as { name?: unknown };
       if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
     }
+    if (tool === "nimble-character" && typeof blob.nimble_sheet === "string") {
+      const sheet = JSON.parse(blob.nimble_sheet) as { name?: unknown };
+      if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
+    }
 
-    const sessionKey = tool === "sd-session" ? "sd_session" : tool === "dcc-session" ? "dcc_session" : null;
+    // Every session-prep tool keeps its blob under its registered key.
+    const sessionKey = isToolId(tool) && TOOLS[tool].kind === "session" ? TOOLS[tool].keys[0] : null;
     if (sessionKey && typeof blob[sessionKey] === "string") {
       const prep = JSON.parse(blob[sessionKey] as string) as { title?: unknown };
       if (typeof prep.title === "string" && prep.title.trim()) return prep.title.trim();
@@ -126,7 +132,7 @@ function extractLinkedCampaignId(data: object): string | null {
       return typeof id === "string" && id ? id : null;
     }
     // DCC, ACE and KoB sheets: campaign lives at the top level (campaign.id)
-    for (const key of ["dcc_sheet", "ace_sheet", "kob_sheet"]) {
+    for (const key of ["dcc_sheet", "ace_sheet", "kob_sheet", "nimble_sheet"]) {
       if (typeof blob[key] !== "string") continue;
       const sheet = JSON.parse(blob[key] as string) as {
         campaign?: { id?: unknown } | null;

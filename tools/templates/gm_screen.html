@@ -10579,6 +10579,27 @@ function init_party(root) {
     };
   }
 
+  // Build a Party-tool summary from a Nimble sheet (stats, skills, HP/wounds,
+  // armor, mana, class features come straight from the saved blob).
+  function nimParty(d) {
+    const S = d.stats || {}, K = d.skillPts || {}, hp = d.hp || {}, hd = d.hitDice || {}, mn = d.mana || {};
+    const n = v => parseInt(v) || 0;
+    const SK = [['Arcana','INT'],['Examination','INT'],['Finesse','DEX'],['Influence','WIL'],['Insight','WIL'],['Lore','INT'],['Might','STR'],['Naturecraft','WIL'],['Perception','WIL'],['Stealth','DEX']];
+    return {
+      system: 'NIM',
+      name: d.name || 'Unnamed', ancestry: d.ancestry || '', cls: d.cls || '', subclass: d.subclass || '', level: n(d.level) || 1, background: d.background || '',
+      stats: ['STR','DEX','INT','WIL'].map(id => ({ id, val: n(S[id]), adv: d.saveAdv === id, dis: d.saveDis === id })),
+      skills: SK.map(([nm, st]) => ({ name: nm, val: n(S[st]) + n(K[nm]) })),
+      hpCur: n(hp.cur), hpMax: n(hp.max), temp: n(hp.temp), wounds: n(d.wounds), woundsMax: n(d.woundsMax) || 6,
+      hdCur: n(hd.cur), hdMax: n(hd.max), manaCur: n(mn.cur), manaMax: n(mn.max),
+      armor: d.armor || '', shield: d.shield || '',
+      attacks: (d.attacks || []).filter(a => a && a.name).map(a => ({ name: a.name, damage: a.damage || '', props: a.props || '' })),
+      spells: (d.spells || []).filter(s => s && s.name).map(s => s.name + (s.tier ? ' (T' + s.tier + ')' : '')),
+      picks: (d.picks || []).map(p => String(p).split('|').pop()),
+      inventory: (d.inventory || []).filter(i => i && i.name).map(i => i.name),
+    };
+  }
+
   // Build a Party-tool summary from a Kids on Bikes / Brooms / Capes sheet.
   function kobParty(d) {
     const S = d.stats || {}, M = d.mods || {};
@@ -10608,6 +10629,7 @@ function init_party(root) {
     const d = raw.sheet && typeof raw.sheet === 'object' ? raw.sheet : raw;
     // ACE! and KoB sheets tag themselves; DCC sheets have a distinct shape
     // (header + combat blocks). Route each to its own summariser, else Shadowdark.
+    if(d && d.system === 'NIM') return nimParty(d);
     if(d && d.system === 'KOB') return kobParty(d);
     if(d && d.system === 'ACE') return aceParty(d);
     if(d && d.header && d.combat) return dccParty(d);
@@ -10816,6 +10838,35 @@ function init_party(root) {
     return h;
   }
 
+  function cardHTMLNIM(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sub = ['LV ' + c.level, [c.ancestry, c.cls].filter(Boolean).join(' '), c.subclass].filter(Boolean).join(' · ');
+    const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip">HP <b>' + esc(c.hpCur) + '/' + esc(c.hpMax) + (c.temp ? '+' + esc(c.temp) : '') + '</b></span>'
+       + (c.wounds ? '<span class="pty-chip" style="color:#ff6a6a;">Wounds <b>' + esc(c.wounds) + '/' + esc(c.woundsMax) + '</b></span>' : '')
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats">' + c.stats.map(s =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + (s.adv ? ' ▲' : s.dis ? ' ▼' : '') + '</div>'
+      + '<div class="pty-stat-mod">' + (s.val >= 0 ? '+' : '') + s.val + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Hit Dice', c.hdCur + '/' + c.hdMax) + (c.manaMax ? cell('Mana', c.manaCur + '/' + c.manaMax) : '') + cell('Armor', [c.armor, c.shield].filter(Boolean).join(' + ') || 'unarmored')
+       + '</div></div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + (s.val >= 0 ? '+' : '') + s.val).join(' · ') + '</div></div>';
+    if(c.attacks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a => '<div class="pty-line"><b>' + esc(a.name) + '</b> <span class="dim">' + esc(a.damage) + (a.props ? ' · ' + esc(a.props) : '') + '</span></div>').join('') + '</div>';
+    if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
+    if(c.picks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.picks.join(', ')) + '</div></div>';
+    if(c.inventory.length) h += '<div class="pty-sec"><div class="pty-sec-h">Inventory</div><div class="pty-line dim">' + esc(c.inventory.join(', ')) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
   function cardHTMLKOB(entry) {
     const c = entry.sheet;
     const open = openIds.has(entry.id);
@@ -10848,6 +10899,7 @@ function init_party(root) {
 
   function cardHTML(entry) {
     const c = entry.sheet;
+    if(c.system === 'NIM') return cardHTMLNIM(entry);
     if(c.system === 'KOB') return cardHTMLKOB(entry);
     if(c.system === 'ACE') return cardHTMLACE(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);

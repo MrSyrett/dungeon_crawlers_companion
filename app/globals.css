@@ -13,6 +13,8 @@
   --ace: #3aa8e0;
   /* Kids on Bikes accent — the books' purple. */
   --kob: #a56ee8;
+  /* Nimble accent — a heroic emerald. */
+  --nimble: #3fb97a;
 }
 
 @theme inline {
@@ -26,6 +28,7 @@
   --color-red: var(--red);
   --color-ace: var(--ace);
   --color-kob: var(--kob);
+  --color-nimble: var(--nimble);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }

@@ -64,7 +64,7 @@ model PasswordResetToken {
 model Document {
   id        String   @id @default(cuid())
   userId    String
-  tool      String // "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "gm-screen"
+  tool      String // "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "gm-screen"
   // For "gm-screen" docs this scopes the saved board to a campaign:
   //   null      → the personal "unlinked" scratch board
   //   <cuid>    → the board for that campaign (per user)
@@ -235,7 +235,7 @@ model Rulebook {
   file      String   @id // filename in protected/rulebooks/
   everyone  Boolean  @default(false)
   // Which game system's Rulebooks list shows this file: "SD" (Shadowdark),
-  // "DCC" (Dungeon Crawler Carl), "ACE" (ACE!), "KOB" (Kids on Bikes), or "BOTH" (every system — the
+  // "DCC" (Dungeon Crawler Carl), "ACE" (ACE!), "KOB" (Kids on Bikes), "NIM" (Nimble), or "BOTH" (every system — the
   // historical name). Display-only — it hides books on the /rules list when
   // another system is toggled; it does NOT gate access
   // (that stays with `everyone` + RulebookAccess). Files with no row are BOTH.

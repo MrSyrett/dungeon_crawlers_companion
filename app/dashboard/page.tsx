@@ -72,12 +72,23 @@ const KOB_REFERENCE: { href: string; label: string }[] = [
   { href: "/kob/rules", label: "Rules" },
 ];
 
+// Nimble reference pages.
+const NIM_REFERENCE: { href: string; label: string }[] = [
+  { href: "/nimble/classes", label: "Classes" },
+  { href: "/nimble/ancestries", label: "Ancestries" },
+  { href: "/nimble/equipment", label: "Equipment" },
+  { href: "/nimble/spells", label: "Spells" },
+  { href: "/nimble/bestiary", label: "Bestiary" },
+  { href: "/nimble/rules", label: "Rules" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
   DCC: DCC_REFERENCE,
   ACE: ACE_REFERENCE,
   KOB: KOB_REFERENCE,
+  NIM: NIM_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

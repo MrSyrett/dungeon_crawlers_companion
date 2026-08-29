@@ -77,6 +77,17 @@ function readCharMeta(
         level: Number.isNaN(lv) ? null : lv,
       };
     }
+    // Nimble: class + level like Shadowdark.
+    const nim = blob?.nimble_sheet;
+    if (typeof nim === "string") {
+      const s = JSON.parse(nim) as { name?: unknown; cls?: unknown; level?: unknown; ancestry?: unknown };
+      const lv = parseInt(String(s.level ?? ""), 10);
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls: [s.ancestry, s.cls].filter((v) => typeof v === "string" && v.trim()).join(" "),
+        level: Number.isNaN(lv) ? null : lv,
+      };
+    }
     // Kids on Bikes: no levels — the roster shows the Trope (and book) as the class.
     const kob = blob?.kob_sheet;
     if (typeof kob === "string") {

@@ -1,0 +1,3610 @@
+{
+  "skills": [],
+  "ancestries": [],
+  "backgrounds": [],
+  "motivations": [],
+  "items": [
+    {
+      "name": "Gem of Escape",
+      "category": "Magic Item",
+      "rarity": "Reward",
+      "description": "These magical gems are always crafted in pairs and can have any number of willing creatures magically bound to it. Crush one (1 Action) in case of emergency to instantly teleport ALL who are bound to it to the location of the other gem. Why This is Great: a party may find the gem on a defeated bad guy — where is the other gem? They might use it to hunt down the rest of the bad guys, or to escape a sticky situation; it's up to the GM whether they escape to safety or \"out of the frying pan and into the fire!\"",
+      "page": 18
+    },
+    {
+      "name": "Glacier in a Bottle",
+      "category": "Magic Item",
+      "rarity": "Reward",
+      "description": "When poured out (1 Action), it creates a solid form of ice, filling any number of unoccupied consecutive spaces up to 6 spaces away and 2 spaces high. The ice lasts for 1 hour before melting. Extreme heat or damage may cause it to fail prematurely. 1/Safe Rest.",
+      "page": 18
+    },
+    {
+      "name": "Phoenix Helm",
+      "category": "Magic Item",
+      "rarity": "Reward",
+      "description": "On Death: You are reborn as a golden fiery phoenix. Enemies within 6 spaces take LVL d10 fire damage on a failed DC 10+KEY DEX save (half on save). Gain the following stats and abilities: gain a fly speed of 10, 10 Armor, and 10×LVL HP; creatures that touch you take LVL fire damage; Fiery Talons — 1 Action, 1d10+LVL damage. After 10 minutes, this form ends, the helm is no more and you return with 0 HP and all but 1 Wound.",
+      "page": 18
+    },
+    {
+      "name": "The Grimoire of Truths",
+      "category": "Magic Item",
+      "rarity": "Story Item",
+      "description": "This sentient magical book possesses an extensive knowledge of the world, past events, people's motivations, and even possible future outcomes. It eagerly converses with its owner, presenting itself as a helpful companion. However, its true goal is to gain their trust, offering just enough useful insight to ultimately lead them into great trouble. \"Ah, another mortal thirsting for knowledge.\" \"Power comes at a cost. But then, so does ignorance.\" \"Would you like the safe, boring route, or the one filled with excitement and potential doom? I know which one I'd pick.\"",
+      "page": 19
+    },
+    {
+      "name": "Hear-ring",
+      "category": "Magic Item",
+      "rarity": "Story Item",
+      "description": "A simple piece of jewelry worn on the ear. While worn, wearers can communicate with one another no matter the distance. Frequently crafted as a pair, sometimes as a larger set. Why this is cool: how many do you let your party find? Who has the other ones (the bad guys perhaps)? Perhaps they are part of a much larger set left by the bad guys so they can listen in on the party's plans!",
+      "page": 19
+    },
+    {
+      "name": "Pocket Cauldron",
+      "category": "Magic Item",
+      "rarity": "Story Item",
+      "description": "While taking a Safe Rest, use this cauldron to brew a single potion of your choice, which must be consumed immediately: Elixir of Futuresight — grants the drinker a brief, cryptic vision of a future event. Elixir of Requiem — allows the drinker to relive a crucial memory from their past. Elixir of Time — once every 100 years, the cauldron can brew a potion that can take the drinker back in time 1 day. Why this is great: it lets the GM reach into the world to move things along or mix things up, can help players develop their backstories, and can even serve as a 'redo' button.",
+      "page": 19
+    },
+    {
+      "name": "Lumina, Living Sunbeam",
+      "category": "Magic Item",
+      "rarity": "Combat Item",
+      "description": "A small, radiant orb of light, about the size of an apple, with a gentle, warm glow that pulses with life and a perpetually cheerful expression. She is a one-time use item that, when activated as an action, will deal LVL d6 radiant damage to all enemies within 6 spaces and heal allies in the area for the same amount. Until then, she hovers around her owner, spreading warmth and light, and offering encouragement. \"I'm here to brighten your journey! And, when the time comes, it's okay… don't be afraid to let me shine.\" —Lumina",
+      "page": 19
+    }
+  ],
+  "spells": [],
+  "conditions": [],
+  "classes": [],
+  "monsters": [
+    {
+      "name": "Kobold Minion",
+      "family": "Kobolds",
+      "level": "1/4",
+      "size": "small",
+      "hp": null,
+      "armor": null,
+      "legendary": false,
+      "minion": true,
+      "abilities": [
+        {
+          "name": "Stab",
+          "text": "1d4 (follows minion rules)."
+        }
+      ],
+      "familyTrait": "Nooooo! When an ally within 2 spaces dies, attack once for free.",
+      "page": 32
+    },
+    {
+      "name": "Kobold",
+      "family": "Kobolds",
+      "level": "1/3",
+      "size": "small",
+      "hp": 12,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Stab",
+          "text": "1d4+2 (or Sling, Range 8)."
+        }
+      ],
+      "familyTrait": "Nooooo! When an ally within 2 spaces dies, attack once for free.",
+      "page": 32
+    },
+    {
+      "name": "Kobold Sneak",
+      "family": "Kobolds",
+      "level": "1/2",
+      "size": "small",
+      "hp": 15,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Revenge!",
+          "text": "When an ally dies, you may move up to 6 spaces before using your Nooooo! ability."
+        },
+        {
+          "name": "Stab",
+          "text": "1d4+2 (or Sling, Range 8)."
+        }
+      ],
+      "familyTrait": "Nooooo! When an ally within 2 spaces dies, attack once for free.",
+      "page": 32
+    },
+    {
+      "name": "Kobold Clanger",
+      "family": "Kobolds",
+      "level": "1",
+      "hp": 16,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "CLANG!",
+          "text": "Allies who hear your clanging, roll 1 additional die whenever they attack."
+        }
+      ],
+      "familyTrait": "Nooooo! When an ally within 2 spaces dies, attack once for free.",
+      "page": 32
+    },
+    {
+      "name": "Kobold Trapper",
+      "family": "Kobolds",
+      "level": "1",
+      "size": "small",
+      "hp": 26,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Throw Scorpion (2×)",
+          "text": "(Range 8) 1d4+2."
+        },
+        {
+          "name": "Trap!",
+          "text": "When an enemy moves adjacent to you or an ally, they trigger one of your traps! (1/encounter each). BEEES! Deal 5d4 damage (doesn't miss). Half as much to ALL adjacent creatures. HIDDEN NET! Restrained (escape DC 10)."
+        }
+      ],
+      "familyTrait": "Nooooo! When an ally within 2 spaces dies, attack once for free.",
+      "page": 32
+    },
+    {
+      "name": "Kobold Denwarden",
+      "family": "Kobolds",
+      "level": "1",
+      "hp": 20,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Hold!",
+          "text": "Adjacent allies gain Medium Armor."
+        },
+        {
+          "name": "Stab (2×)",
+          "text": "1d4+2 (or Sling, Range 8)."
+        }
+      ],
+      "familyTrait": "Nooooo! When an ally within 2 spaces dies, attack once for free.",
+      "page": 32
+    },
+    {
+      "name": "Goblin Minion",
+      "family": "Goblins",
+      "level": "1/4",
+      "size": "small",
+      "hp": null,
+      "armor": null,
+      "legendary": false,
+      "minion": true,
+      "abilities": [
+        {
+          "name": "Stab",
+          "text": "1d6 (follows minion rules)."
+        }
+      ],
+      "familyTrait": "Haha, Missed Me! Whenever an attack misses you, deal 1 psychic damage in return.",
+      "page": 33
+    },
+    {
+      "name": "Goblin",
+      "family": "Goblins",
+      "level": "1/3",
+      "size": "small",
+      "hp": 15,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Stab",
+          "text": "1d6+2 (or Shoot, Range 8)."
+        }
+      ],
+      "familyTrait": "Haha, Missed Me! Whenever an attack misses you, deal 1 psychic damage in return.",
+      "page": 33
+    },
+    {
+      "name": "Bugbear",
+      "family": "Goblins",
+      "level": "2",
+      "hp": 30,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Cleave",
+          "text": "2d6+4. OR:"
+        },
+        {
+          "name": "Javelin",
+          "text": "1d6+2 (Range 8)."
+        }
+      ],
+      "familyTrait": "Haha, Missed Me! Whenever an attack misses you, deal 1 psychic damage in return.",
+      "page": 33
+    },
+    {
+      "name": "Goblin Taskmaster",
+      "family": "Goblins",
+      "level": "2",
+      "size": "small",
+      "hp": 30,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Meat Shield",
+          "text": "Can force other goblins to Interpose for him."
+        },
+        {
+          "name": "Stab",
+          "text": "1d6+2 (or Shoot, Range 8). Then:"
+        },
+        {
+          "name": "Get in here!",
+          "text": "Call a goblin minion to the fight."
+        }
+      ],
+      "familyTrait": "Haha, Missed Me! Whenever an attack misses you, deal 1 psychic damage in return.",
+      "page": 33
+    },
+    {
+      "name": "Goblin Ratrider",
+      "family": "Goblins",
+      "level": "2",
+      "hp": 30,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "CHAAARGE!",
+          "text": "If you move at least 4 spaces in a straight line, attack with advantage once."
+        },
+        {
+          "name": "Bite & Stab (2×)",
+          "text": "1d6+2. On crit: Prone."
+        }
+      ],
+      "familyTrait": "Haha, Missed Me! Whenever an attack misses you, deal 1 psychic damage in return.",
+      "description": "Speed 10.",
+      "page": 33
+    },
+    {
+      "name": "Bandit Minion",
+      "family": "Bandits",
+      "level": "1/4",
+      "hp": null,
+      "armor": null,
+      "legendary": false,
+      "minion": true,
+      "abilities": [
+        {
+          "name": "Stab",
+          "text": "1d8 (follows minion rules)."
+        }
+      ],
+      "familyTrait": "Parry. Treat attacks against you that roll 2 as a miss.",
+      "page": 34
+    },
+    {
+      "name": "Bandit",
+      "family": "Bandits",
+      "level": "1/3",
+      "hp": 12,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Stab",
+          "text": "1d8+1 (or Shoot, Range 8)."
+        }
+      ],
+      "familyTrait": "Parry. Treat attacks against you that roll 2 as a miss.",
+      "page": 34
+    },
+    {
+      "name": "Bandit Bruiser",
+      "family": "Bandits",
+      "level": "2",
+      "hp": 24,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Bash",
+          "text": "2d8+4."
+        }
+      ],
+      "familyTrait": "Parry. Treat attacks against you that roll 2 as a miss.",
+      "page": 34
+    },
+    {
+      "name": "Bandit Captain",
+      "family": "Bandits",
+      "level": "4",
+      "hp": 36,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Slice (3×)",
+          "text": "1d8+1 (or Shoot, Range 8)."
+        }
+      ],
+      "familyTrait": "Parry. Treat attacks against you that roll 2 as a miss.",
+      "page": 34
+    },
+    {
+      "name": "Bandit Hunter",
+      "family": "Bandits",
+      "level": "1",
+      "hp": 22,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Battlebow",
+          "text": "2d8+2 (Range 12)."
+        }
+      ],
+      "familyTrait": "Parry. Treat attacks against you that roll 2 as a miss.",
+      "page": 34
+    },
+    {
+      "name": "Bandit Assassin",
+      "family": "Bandits",
+      "level": "2",
+      "hp": 24,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Sneak",
+          "text": "You are invisible until you attack."
+        },
+        {
+          "name": "Poison Blade (2×)",
+          "text": "1d8+2. On damage: Dazed."
+        }
+      ],
+      "familyTrait": "Parry. Treat attacks against you that roll 2 as a miss.",
+      "page": 34
+    },
+    {
+      "name": "Bandit Mage",
+      "family": "Bandits",
+      "level": "4",
+      "hp": 41,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Spark Step",
+          "text": "When damaged, teleport up to 4 spaces."
+        },
+        {
+          "name": "Arc Lightning",
+          "text": "3d8 (Range 12). Also strikes the next closest creature. On miss: damage self instead."
+        }
+      ],
+      "familyTrait": "Parry. Treat attacks against you that roll 2 as a miss.",
+      "page": 34
+    },
+    {
+      "name": "Snakeman Minion",
+      "family": "Snakemen",
+      "level": "1/4",
+      "hp": null,
+      "armor": null,
+      "legendary": false,
+      "minion": true,
+      "abilities": [
+        {
+          "name": "Strike",
+          "text": "1d6 melee/ranged (follows minion rules)."
+        }
+      ],
+      "familyTrait": "Coiling Strike. On melee crit: Grapple (escape DC 10).",
+      "page": 34
+    },
+    {
+      "name": "Snakeman",
+      "family": "Snakemen",
+      "level": "1",
+      "hp": 26,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Slash",
+          "text": "1d6+6 (or Spit, Range 8)."
+        }
+      ],
+      "familyTrait": "Coiling Strike. On melee crit: Grapple (escape DC 10).",
+      "page": 34
+    },
+    {
+      "name": "Cobra Captain",
+      "family": "Snakemen",
+      "level": "4",
+      "hp": 36,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Slash (2×)",
+          "text": "1d6+6 (or Spit, Range 8)."
+        }
+      ],
+      "familyTrait": "Coiling Strike. On melee crit: Grapple (escape DC 10).",
+      "page": 34
+    },
+    {
+      "name": "Giant Cobra",
+      "family": "Snakemen",
+      "level": "8",
+      "size": "large",
+      "hp": 80,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Crush",
+          "text": "2d6+20. Advantage vs. smaller creatures."
+        }
+      ],
+      "familyTrait": "Coiling Strike. On melee crit: Grapple (escape DC 10).",
+      "page": 34
+    },
+    {
+      "name": "Stirge",
+      "family": "Dungeon Denizens",
+      "level": "1/2",
+      "size": "tiny",
+      "hp": 10,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Latch On",
+          "text": "1d4+2. On hit: Latched On."
+        },
+        {
+          "name": "Latched On",
+          "text": "You move where your target moves until either dies. Your attacks can't miss or be Defended/Interposed against. Attacks that miss you damage your target instead."
+        }
+      ],
+      "familyTrait": "Evasive Flier. Attacks against stirges are made with disadvantage.",
+      "description": "Stirges.",
+      "page": 35
+    },
+    {
+      "name": "Greater Stirge",
+      "family": "Dungeon Denizens",
+      "level": "6",
+      "size": "small",
+      "hp": 60,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Latch On",
+          "text": "1d12+10. On hit: Latched On."
+        },
+        {
+          "name": "Latched On",
+          "text": "You move where your target moves until either dies. Your attacks can't miss or be Defended/Interposed against. Attacks that miss you damage your target instead."
+        }
+      ],
+      "familyTrait": "Evasive Flier. Attacks against stirges are made with disadvantage.",
+      "description": "Stirges.",
+      "page": 35
+    },
+    {
+      "name": "Tiny Mimic",
+      "family": "Dungeon Denizens",
+      "level": "1",
+      "hp": 28,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Pseudopod",
+          "text": "1d4 (escape DC 9) OR:"
+        },
+        {
+          "name": "Bite",
+          "text": "(a Grappled creature) 1d12."
+        },
+        {
+          "name": "Sticky",
+          "text": "Mimic hits also Grapple and can Grapple any number of creatures. When crit: release 1 creature (attacker's choice)."
+        }
+      ],
+      "familyTrait": "Ambusher. Mimics always start first and heroes roll Initiative with disadvantage.",
+      "description": "Mimics. Disguises: Cup, Shoe, Apple, Candlestick, Potion, Pebble.",
+      "page": 35
+    },
+    {
+      "name": "Small Mimic",
+      "family": "Dungeon Denizens",
+      "level": "2",
+      "hp": 41,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Pseudopod",
+          "text": "1d6 (escape DC 11) OR:"
+        },
+        {
+          "name": "Bite",
+          "text": "(a Grappled creature) 1d20."
+        },
+        {
+          "name": "Sticky",
+          "text": "Mimic hits also Grapple and can Grapple any number of creatures. When crit: release 1 creature (attacker's choice)."
+        }
+      ],
+      "familyTrait": "Ambusher. Mimics always start first and heroes roll Initiative with disadvantage.",
+      "description": "Mimics. Disguises: Backpack, Shield/Weapon, Chair, Crate, Tree Stump.",
+      "page": 35
+    },
+    {
+      "name": "Medium Mimic",
+      "family": "Dungeon Denizens",
+      "level": "6",
+      "hp": 79,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Pseudopod",
+          "text": "1d8 (escape DC 13) OR:"
+        },
+        {
+          "name": "Bite",
+          "text": "(a Grappled creature) 2d20."
+        },
+        {
+          "name": "Sticky",
+          "text": "Mimic hits also Grapple and can Grapple any number of creatures. When crit: release 1 creature (attacker's choice)."
+        }
+      ],
+      "familyTrait": "Ambusher. Mimics always start first and heroes roll Initiative with disadvantage.",
+      "description": "Mimics. Disguises: Table, Treasure Chest, Barrel, Bookshelf, Door, Bed.",
+      "page": 35
+    },
+    {
+      "name": "Gray Ooze",
+      "family": "Dungeon Denizens",
+      "level": "1",
+      "hp": 28,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Acidic Touch (2×)",
+          "text": "1d6+2."
+        },
+        {
+          "name": "Digestive Touch",
+          "text": "Contact with an ooze inflicts the Digested condition: they deal an additional 2 damage for each time the target has been Digested this encounter."
+        }
+      ],
+      "familyTrait": "Digestive Touch. Contact with an ooze inflicts the Digested condition: they deal an additional X damage for each time the target has been Digested this encounter (X = the ooze's damage bonus).",
+      "description": "Oozes.",
+      "page": 35
+    },
+    {
+      "name": "Ochre Jelly",
+      "family": "Dungeon Denizens",
+      "level": "4",
+      "size": "large",
+      "hp": 52,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Acidic Touch (2×)",
+          "text": "1d6+3."
+        },
+        {
+          "name": "Digestive Touch",
+          "text": "Contact with an ooze inflicts the Digested condition: they deal an additional 3 damage for each time the target has been Digested this encounter."
+        }
+      ],
+      "familyTrait": "Digestive Touch. Contact with an ooze inflicts the Digested condition: they deal an additional X damage for each time the target has been Digested this encounter (X = the ooze's damage bonus).",
+      "description": "Oozes.",
+      "page": 35
+    },
+    {
+      "name": "Black Pudding",
+      "family": "Dungeon Denizens",
+      "level": "8",
+      "size": "large",
+      "hp": 90,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Acidic Touch (2×)",
+          "text": "(Reach 2) 1d6+5."
+        },
+        {
+          "name": "Digestive Touch",
+          "text": "Contact with an ooze inflicts the Digested condition: they deal an additional 5 damage for each time the target has been Digested this encounter."
+        }
+      ],
+      "familyTrait": "Digestive Touch. Contact with an ooze inflicts the Digested condition: they deal an additional X damage for each time the target has been Digested this encounter (X = the ooze's damage bonus).",
+      "description": "Oozes.",
+      "page": 35
+    },
+    {
+      "name": "Elder Ooze",
+      "family": "Dungeon Denizens",
+      "level": "12",
+      "size": "huge",
+      "hp": 150,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Acidic Touch (3×)",
+          "text": "(Reach 3) 1d6+6."
+        },
+        {
+          "name": "Digestive Touch",
+          "text": "Contact with an ooze inflicts the Digested condition: they deal an additional 6 damage for each time the target has been Digested this encounter."
+        },
+        {
+          "name": "Goopy",
+          "text": "When crit or dealt any slashing damage: summon 6 ooze minions (size: d6); their attacks inflict Digested."
+        }
+      ],
+      "familyTrait": "Digestive Touch. Contact with an ooze inflicts the Digested condition: they deal an additional X damage for each time the target has been Digested this encounter (X = the ooze's damage bonus).",
+      "description": "Oozes.",
+      "page": 35
+    },
+    {
+      "name": "Gnoll",
+      "family": "Hill & Field",
+      "level": "1",
+      "hp": 28,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Ravage (2×)",
+          "text": "1d10. OR:"
+        },
+        {
+          "name": "Shoot",
+          "text": "(Range 12) 1d10."
+        }
+      ],
+      "familyTrait": "Frenzy. Advantage against Bloodied creatures.",
+      "description": "Gnolls.",
+      "page": 36
+    },
+    {
+      "name": "Gnoll Packleader",
+      "family": "Hill & Field",
+      "level": "4",
+      "hp": 39,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Bark Orders",
+          "text": "2 allies can move. Then:"
+        },
+        {
+          "name": "Ravage (3×)",
+          "text": "1d10."
+        }
+      ],
+      "familyTrait": "Frenzy. Advantage against Bloodied creatures.",
+      "description": "Gnolls.",
+      "page": 36
+    },
+    {
+      "name": "Worg",
+      "family": "Hill & Field",
+      "level": "1",
+      "size": "large",
+      "hp": 28,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Savage",
+          "text": "Always crits when attacking a Grappled creature."
+        },
+        {
+          "name": "Rip Apart (2×)",
+          "text": "1d6+2. On hit: Grappled (escape DC 10)."
+        }
+      ],
+      "description": "Speed 10.",
+      "page": 36
+    },
+    {
+      "name": "Hill Giant",
+      "family": "Hill & Field",
+      "level": "12",
+      "size": "huge",
+      "hp": 140,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Brute",
+          "text": "On hit: Knockback Primary Die spaces."
+        },
+        {
+          "name": "Smash (2×)",
+          "text": "(Reach 2) 1d6+15. OR:"
+        },
+        {
+          "name": "Boulder!",
+          "text": "(Range 12) 1d6+20."
+        }
+      ],
+      "description": "Speed 8.",
+      "page": 36
+    },
+    {
+      "name": "Bulette",
+      "family": "Hill & Field",
+      "level": "10",
+      "size": "large",
+      "hp": 74,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Burst Forth!",
+          "text": "Combat with a Bulette starts with the heaviest character making a DC 14 DEX save or they are Grappled (escape DC 14) and take 1d12+20 damage (half on save)."
+        },
+        {
+          "name": "Drag Below",
+          "text": "(A Grappled creature) 2d12 then drag below and burrow away. OR:"
+        },
+        {
+          "name": "Leap & Bite",
+          "text": "(If not grappling) leap 6, and attack for 1d12+20. On hit: Grappled."
+        }
+      ],
+      "description": "Burrow.",
+      "page": 36
+    },
+    {
+      "name": "Troll",
+      "family": "Hill & Field",
+      "level": "10",
+      "size": "large",
+      "hp": 100,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Regenerate",
+          "text": "Does not die at 0 HP. Only fire, radiant, or a crit while at 0 HP can kill it."
+        },
+        {
+          "name": "Claws",
+          "text": "Choose twice: (Reach 2) 1d4+10. On crit: Prone."
+        },
+        {
+          "name": "Bite",
+          "text": "Choose twice: (A Prone creature) 1d4+20."
+        }
+      ],
+      "description": "Speed 8.",
+      "page": 36
+    },
+    {
+      "name": "Blue Drake",
+      "family": "Hill & Field",
+      "level": "2",
+      "hp": 34,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Shocking Bite",
+          "text": "1d12+5 (ignores metal armor)."
+        },
+        {
+          "name": "On Death",
+          "text": "Deal 1d12 damage back (ignores metal armor)."
+        }
+      ],
+      "description": "Fly 12.",
+      "page": 36
+    },
+    {
+      "name": "Griffon",
+      "family": "Hill & Field",
+      "level": "4",
+      "size": "large",
+      "hp": 50,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Talons",
+          "text": "2d6+10, on hit: Grappled (escape DC 14) OR:"
+        },
+        {
+          "name": "Fly & Drop",
+          "text": "(if grappling) Fly upward 12 and release (6d6 fall damage)."
+        }
+      ],
+      "description": "Fly 12.",
+      "page": 36
+    },
+    {
+      "name": "Roc",
+      "family": "Hill & Field",
+      "level": "17",
+      "size": "gargantuan",
+      "hp": 195,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Pluck Up",
+          "text": "(Reach 4, target up to 2 creatures) 3d12+20. On hit: Grappled (escape DC 18). OR:"
+        },
+        {
+          "name": "Crush & Drop",
+          "text": "Fly upward 20 spaces, deal 20 damage to Grappled creatures, then release (10d6 fall damage)."
+        }
+      ],
+      "description": "Fly 20.",
+      "page": 36
+    },
+    {
+      "name": "Skeleton",
+      "family": "Undead",
+      "level": "1/3",
+      "hp": 10,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Grave Arrow",
+          "text": "1d4+3 (Range 8)."
+        }
+      ],
+      "familyTrait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "page": 37
+    },
+    {
+      "name": "Zombie",
+      "family": "Undead",
+      "level": "1/2",
+      "hp": 15,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Crunch",
+          "text": "1d4+4. On damage: Grappled."
+        }
+      ],
+      "familyTrait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "page": 37
+    },
+    {
+      "name": "Ghoul",
+      "family": "Undead",
+      "level": "1",
+      "hp": 20,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Sickening Claw",
+          "text": "1d4+8. On damage: Dazed."
+        }
+      ],
+      "familyTrait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "page": 37
+    },
+    {
+      "name": "Specter",
+      "family": "Undead",
+      "level": "3",
+      "hp": 30,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Deathly Touch",
+          "text": "1d4. On damage: set HP to 0."
+        }
+      ],
+      "familyTrait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "description": "Fly.",
+      "page": 37
+    },
+    {
+      "name": "Ogre Zombie",
+      "family": "Undead",
+      "level": "5",
+      "size": "large",
+      "hp": 46,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Greatclub (2×)",
+          "text": "1d4+8. On crit: Prone."
+        }
+      ],
+      "familyTrait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "page": 37
+    },
+    {
+      "name": "Mummy",
+      "family": "Undead",
+      "level": "6",
+      "hp": 54,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Slam (2×)",
+          "text": "1d4+8. On damage: Dazed."
+        }
+      ],
+      "familyTrait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "page": 37
+    },
+    {
+      "name": "Giant Zombie",
+      "family": "Undead",
+      "level": "8",
+      "size": "huge",
+      "hp": 73,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Decaying Swipe (2×)",
+          "text": "1d4+10. On damage: knockback Primary Die spaces."
+        }
+      ],
+      "familyTrait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "page": 37
+    },
+    {
+      "name": "Wraith",
+      "family": "Undead",
+      "level": "10",
+      "hp": 94,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Soul Rend (2×)",
+          "text": "(Range 8) 1d4+10. On damage: deal 1 Wound."
+        }
+      ],
+      "familyTrait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "description": "Fly.",
+      "page": 37
+    },
+    {
+      "name": "Mummy Lord",
+      "family": "Undead",
+      "level": "21",
+      "hp": 280,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Cursed Gaze",
+          "text": "When crit: DC 20 INT save, or suffer 1 Wound."
+        },
+        {
+          "name": "Scarab Swarm",
+          "text": "Summon 10 scarab minions (d6) within 6 spaces. Then:"
+        },
+        {
+          "name": "Slam (2×)",
+          "text": "1d4+20. On damage: Dazed."
+        }
+      ],
+      "familyTrait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "page": 37
+    },
+    {
+      "name": "Duskprowler",
+      "family": "Forest Denizens",
+      "level": "6",
+      "size": "large",
+      "hp": 70,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Illusory Aura",
+          "text": "Attacks against the Duskprowler have Disadvantage 2. Damage suppresses this effect until the end of the next hero's turn."
+        },
+        {
+          "name": "Ravage (2×)",
+          "text": "2d8+2."
+        }
+      ],
+      "page": 38
+    },
+    {
+      "name": "Basilisk",
+      "family": "Forest Denizens",
+      "level": "7",
+      "hp": 48,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Stone Gaze",
+          "text": "Daze 1 creature within sight, then:"
+        },
+        {
+          "name": "Envenom",
+          "text": "1d8+10, advantage vs Dazed targets."
+        },
+        {
+          "name": "Flesh to Stone",
+          "text": "Creatures Dazed by the Basilisk remain so for 10 minutes. Dazed 3 times = Petrified."
+        }
+      ],
+      "page": 38
+    },
+    {
+      "name": "Druid",
+      "family": "Forest Denizens",
+      "level": "8",
+      "hp": 90,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Beastshift",
+          "text": "+4 speed, gain Medium armor this round. 4d4+10. OR:"
+        },
+        {
+          "name": "Hurricane",
+          "text": "(Reach 3) 4d4+10 to all enemies within reach. On damage: move targets anywhere else in Reach."
+        }
+      ],
+      "page": 38
+    },
+    {
+      "name": "Seedling",
+      "family": "Forest Denizens",
+      "level": "1/2",
+      "size": "small",
+      "hp": 8,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Thorn Seed",
+          "text": "(Range 6) 2d6+2."
+        }
+      ],
+      "familyTrait": "Peeling Bark. Damage degrades Armor 1 step: Heavy » Medium » None.",
+      "description": "Briarbane. Armor H* (Peeling Bark).",
+      "page": 38
+    },
+    {
+      "name": "Acidpod",
+      "family": "Forest Denizens",
+      "level": "1",
+      "size": "small",
+      "hp": 8,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Caustic Eruption",
+          "text": "On death: 4d6 acid damage to ALL adjacent creatures."
+        },
+        {
+          "name": "Grab",
+          "text": "DC 12 DEX save or Grappled."
+        }
+      ],
+      "familyTrait": "Peeling Bark. Damage degrades Armor 1 step: Heavy » Medium » None.",
+      "description": "Briarbane. Armor H* (Peeling Bark).",
+      "page": 38
+    },
+    {
+      "name": "Tangler",
+      "family": "Forest Denizens",
+      "level": "2",
+      "hp": 20,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Tangle (2×)",
+          "text": "(Reach 6) 1d6+2. On hit: Grappled (escape DC 12, or any fire or slashing damage)."
+        }
+      ],
+      "familyTrait": "Peeling Bark. Damage degrades Armor 1 step: Heavy » Medium » None.",
+      "description": "Briarbane. Armor H* (Peeling Bark).",
+      "page": 38
+    },
+    {
+      "name": "Rootbreaker",
+      "family": "Forest Denizens",
+      "level": "5",
+      "size": "large",
+      "hp": 50,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Slam",
+          "text": "3d6+6. On crit: knockback 2."
+        }
+      ],
+      "familyTrait": "Peeling Bark. Damage degrades Armor 1 step: Heavy » Medium » None.",
+      "description": "Briarbane. Armor H* (Peeling Bark).",
+      "page": 38
+    },
+    {
+      "name": "Treant",
+      "family": "Forest Denizens",
+      "level": "14",
+      "size": "huge",
+      "hp": 170,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Enrage",
+          "text": "Attack with advantage when unarmored."
+        },
+        {
+          "name": "Slam",
+          "text": "Choose twice: (Reach 3) 2d6+10. On damage: Prone."
+        },
+        {
+          "name": "Stomp",
+          "text": "Choose twice: (Hampered target) 2d6+20."
+        }
+      ],
+      "familyTrait": "Peeling Bark. Damage degrades Armor 1 step: Heavy » Medium » None.",
+      "description": "Briarbane. Armor H* (Peeling Bark).",
+      "page": 38
+    },
+    {
+      "name": "Cultist",
+      "family": "Cultists/Horrors",
+      "level": "1",
+      "hp": 28,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Oblation of Blood!",
+          "text": "If undamaged, attack self for 2 damage. Adjacent enemies are inflicted with Despair. OR:"
+        },
+        {
+          "name": "Dreadful Blade",
+          "text": "1d6+6. OR:"
+        },
+        {
+          "name": "Blood Boil",
+          "text": "(Range 12, Bloodied creature) 3d6+6."
+        },
+        {
+          "name": "Despair",
+          "text": "Disadvantage on the next attack you make this encounter."
+        }
+      ],
+      "familyTrait": "Fanatical Zeal. While not at max HP, make all rolls with advantage. Your crits also inflict Despair. (Despair: Disadvantage on the next attack you make this encounter.)",
+      "description": "Cultists.",
+      "page": 39
+    },
+    {
+      "name": "Fanatic",
+      "family": "Cultists/Horrors",
+      "level": "3",
+      "hp": 41,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Oblation of Blood!",
+          "text": "If undamaged, attack self for 2 damage. Adjacent enemies are inflicted with Despair. OR:"
+        },
+        {
+          "name": "Whispers of Madness",
+          "text": "Contested STR check or Grappled (reroll to escape, or any radiant damage); if successful, deal 3d6+6 psychic damage (cannot be Defended or Interposed against)."
+        },
+        {
+          "name": "Despair",
+          "text": "Disadvantage on the next attack you make this encounter."
+        }
+      ],
+      "familyTrait": "Fanatical Zeal. While not at max HP, make all rolls with advantage. Your crits also inflict Despair. (Despair: Disadvantage on the next attack you make this encounter.)",
+      "description": "Cultists.",
+      "page": 39
+    },
+    {
+      "name": "Doomsayer",
+      "family": "Cultists/Horrors",
+      "level": "5",
+      "hp": 58,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Feverish Chant",
+          "text": "(Concentration) Reduce all damage done to allies who can hear you to 1. OR:"
+        },
+        {
+          "name": "Ecstatic Ravings",
+          "text": "2d6 psychic damage to all enemies who can hear you."
+        },
+        {
+          "name": "Despair",
+          "text": "Disadvantage on the next attack you make this encounter."
+        }
+      ],
+      "familyTrait": "Fanatical Zeal. While not at max HP, make all rolls with advantage. Your crits also inflict Despair. (Despair: Disadvantage on the next attack you make this encounter.)",
+      "description": "Cultists.",
+      "page": 39
+    },
+    {
+      "name": "Stenchling",
+      "family": "Cultists/Horrors",
+      "level": "1/2",
+      "size": "small",
+      "hp": 18,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Bite",
+          "text": "2d6."
+        },
+        {
+          "name": "Putrid Cloud",
+          "text": "On Death: 2d6 poison damage to enemies within Reach 2."
+        }
+      ],
+      "page": 39
+    },
+    {
+      "name": "Spiny Fiend",
+      "family": "Cultists/Horrors",
+      "level": "4",
+      "hp": 49,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Spines",
+          "text": "Melee attackers take 3 damage."
+        },
+        {
+          "name": "Claws (2×)",
+          "text": "1d6+6. OR:"
+        },
+        {
+          "name": "Shoot Spine",
+          "text": "(Range 12) 1d6+6."
+        }
+      ],
+      "page": 39
+    },
+    {
+      "name": "Glabrezu",
+      "family": "Cultists/Horrors",
+      "level": "14",
+      "size": "large",
+      "hp": 110,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Doomclaw (2×)",
+          "text": "(Reach 2) 3d6+10. On damage: Grappled (escape DC 17). If the same creature is Grappled by both of the glabrezu's claws, it must escape from each of them separately. OR:"
+        },
+        {
+          "name": "Tear Asunder",
+          "text": "(A creature Grappled by both of the glabrezu's claws) 50 unpreventable damage. If the target is at 0 HP: DC 17 STR save or be torn in two, dying instantly."
+        }
+      ],
+      "page": 39
+    },
+    {
+      "name": "Giant Spider",
+      "family": "Underground",
+      "level": "2",
+      "hp": 27,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Shoot Web",
+          "text": "(Range 6) 1d8+2. On hit: Restrained (escape DC 12, or any slashing/fire damage). OR:"
+        },
+        {
+          "name": "Bite",
+          "text": "(Hampered target) 2d8+4, Poisoned (magical healing ends)."
+        }
+      ],
+      "page": 40
+    },
+    {
+      "name": "Ettercap",
+      "family": "Underground",
+      "level": "4",
+      "hp": 49,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Web Garrote",
+          "text": "1d8+2. On hit: Grappled (escape DC 13), Silenced until target escapes."
+        },
+        {
+          "name": "Silenced",
+          "text": "Cannot cast spells or use other abilities that require speaking (e.g. Commander's Orders)."
+        }
+      ],
+      "page": 40
+    },
+    {
+      "name": "Nestweaver",
+      "family": "Underground",
+      "level": "6",
+      "size": "large",
+      "hp": 54,
+      "armor": "M",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Summon",
+          "text": "Summon 2 spider minions (d8). Then choose 1:"
+        },
+        {
+          "name": "Shoot Web",
+          "text": "(Range 6) 1d8+2. On hit: Restrained (escape DC 12, or any slashing/fire damage). OR:"
+        },
+        {
+          "name": "Bite",
+          "text": "(Hampered target) 3d8+6 and Poisoned (magical healing ends)."
+        }
+      ],
+      "page": 40
+    },
+    {
+      "name": "Great Worm",
+      "family": "Underground",
+      "level": "16",
+      "size": "huge",
+      "hp": 140,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Tremor Sight",
+          "text": "Advantage against creatures that moved since the worm's last turn."
+        },
+        {
+          "name": "Crush",
+          "text": "Creatures in a 2×6 area take 50 damage on a failed DC 18 DEX save. (Creatures who fail can spend 1 Action to dive out of the way instead of taking this damage. They move half their speed and land Prone.) OR:"
+        },
+        {
+          "name": "Bite/Swallow",
+          "text": "1d4+40. On crit: Swallowed."
+        },
+        {
+          "name": "Swallowed",
+          "text": "You take 20 damage at the start of your turn. Your attacks cannot miss and ignore armor."
+        }
+      ],
+      "description": "Burrow 8.",
+      "page": 40
+    },
+    {
+      "name": "Cloaker",
+      "family": "Underground",
+      "level": "13",
+      "size": "large",
+      "hp": 110,
+      "armor": null,
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Ambusher",
+          "text": "Cloakers always start first and heroes roll Initiative with disadvantage."
+        },
+        {
+          "name": "Mutual Harm",
+          "text": "You take half damage from attacks while grappling a creature (they take the other half)."
+        },
+        {
+          "name": "Wrap",
+          "text": "2d10+20. On Hit: Grappled (escape DC 16). OR:"
+        },
+        {
+          "name": "Horrifying Wail",
+          "text": "DC 16 WIL save, or creatures within 6 spaces are Frightened and must spend 1 Action moving as far away as possible."
+        }
+      ],
+      "description": "Fly 10.",
+      "page": 40
+    },
+    {
+      "name": "Umber Hulk",
+      "family": "Underground",
+      "level": "10",
+      "size": "large",
+      "hp": 70,
+      "armor": "H",
+      "legendary": false,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Confounding Pheromones",
+          "text": "Enemies make a DC 15 WIL save at the start of their turns or Confused this turn. Gain advantage 1 on the save for each failure this encounter."
+        },
+        {
+          "name": "Mandible & Claws (2×)",
+          "text": "1d10+10 damage."
+        },
+        {
+          "name": "Confused",
+          "text": "The GM spends your next action."
+        }
+      ],
+      "page": 40
+    },
+    {
+      "name": "Pudge the Blunderer",
+      "family": "Legendary",
+      "level": "2",
+      "hp": 75,
+      "armor": "M",
+      "saves": "STR+, INT–",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Move & Smack",
+          "text": "Move 8, attack for 1d8+2. On damage: Prone."
+        },
+        {
+          "name": "Grab & Throw",
+          "text": "1d8+2, on damage: they are thrown at another hero within 6 spaces. Both make a DC 12 DEX save or take 1d8+2 damage and are knocked Prone, half damage on save."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 37 HP, Pudge's damage increases to 1d12+2."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Pudge is dying! 20 more damage and he dies. Until then, Pudge can move 6 spaces, and use Grab & Throw each turn."
+        }
+      ],
+      "description": "Level 2 Solo Dumb Ogre. Example legendary: for a level 2 party he has 75 HP and Medium Armor; his small attack hits for slightly less than suggested and his big attack for slightly more.",
+      "page": 44
+    },
+    {
+      "name": "Kelebek, Entomancer",
+      "family": "Legendary",
+      "level": "3",
+      "hp": 60,
+      "armor": "M",
+      "saves": "INT+, WIL+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Vinelash",
+          "text": "Move 6, then 2d6. On damage: move target to an unoccupied space within 10 spaces."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "When Kelebek is reduced to 30 HP, Poppy always Interposes for him."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "When Poppy dies, the room is filled with noxious gas: all heroes have a maximum of 2 actions each turn."
+        }
+      ],
+      "description": "Level 3 Solo Bug Druid & His Stinky Pet (Kelebek & Poppy, a Legendary Team). After each hero's turn, choose Kelebek OR Poppy to act.",
+      "page": 44
+    },
+    {
+      "name": "Poppy, Giant Stinkbug",
+      "family": "Legendary",
+      "level": "3",
+      "hp": 60,
+      "armor": "H",
+      "saves": "STR+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Stink Cloud",
+          "text": "When damaged, enemies within 2 spaces make a STR save (DC equal to the higher of 10 or the damage done). On a failure, they must spend their next action vomiting, and they cannot take reactions this round."
+        },
+        {
+          "name": "Crushing Mandibles",
+          "text": "Move 6. 4d6 damage, up to 2 adjacent creatures."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "When Kelebek is reduced to 30 HP, Poppy always Interposes for him."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "When Poppy dies, the room is filled with noxious gas: all heroes have a maximum of 2 actions each turn."
+        }
+      ],
+      "description": "Level 3 Solo Bug Druid & His Stinky Pet (Kelebek & Poppy, a Legendary Team). After each hero's turn, choose Kelebek OR Poppy to act.",
+      "page": 44
+    },
+    {
+      "name": "Grimbeak, the Unyielding",
+      "family": "Legendary",
+      "level": "3",
+      "size": "large",
+      "hp": 100,
+      "armor": "M",
+      "saves": "STR+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Brutal",
+          "text": "Treat the highest die rolled as the Primary Die. On crit: knock Prone."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Savage Screech",
+          "text": "(1 use) All enemies within reach 12 suffer 2d6 damage (ignoring armor). DC 11 WIL save or become Frightened for 1 round."
+        },
+        {
+          "name": "Rend & Tear",
+          "text": "Attack for 2d6+10 damage."
+        },
+        {
+          "name": "Beak",
+          "text": "Move 8. Attack for 2d6 damage."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 50 HP, Savage Screech recharges."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Grimbeak is dying! 30 more damage and she dies. Until then, her Attacks use d10s instead of d6s."
+        }
+      ],
+      "description": "Level 3 Solo Large Owlbear.",
+      "page": 45
+    },
+    {
+      "name": "Thorn Quickblade",
+      "family": "Legendary",
+      "level": "4",
+      "hp": 125,
+      "armor": "M",
+      "saves": "DEX+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Strike Back",
+          "text": "When crit, make a Heart Piercer or Stormquill attack in return."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Stormquill (Crossbow)",
+          "text": "Move 4, 4d4+10 damage (Range 8)."
+        },
+        {
+          "name": "Heart Piercer (Rapier)",
+          "text": "Move 8, 2d4+3 damage. On crit: Dazed."
+        },
+        {
+          "name": "BLOODIED: Smoke Bomb",
+          "text": "At 62 HP, Thorn immediately becomes invisible (until the end of his next turn), then moves 8, ignoring opportunity attacks."
+        },
+        {
+          "name": "LAST STAND: Mortal Panic!",
+          "text": "Thorn is dying! 30 more damage and he's dead! Until then he'll Strike Back EVERY time he's hit (1/turn)."
+        }
+      ],
+      "description": "Level 4 Solo Human Criminal.",
+      "page": 46
+    },
+    {
+      "name": "Ravager of the Lowlands",
+      "family": "Legendary",
+      "level": "5",
+      "size": "large",
+      "hp": 130,
+      "armor": "M",
+      "saves": "STR+, DEX+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Feral Instinct",
+          "text": "Whenever Ravager is crit, he can fly 10."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Venomous Stinger",
+          "text": "(1 use) Reach 3, 5d12 damage."
+        },
+        {
+          "name": "Ravage",
+          "text": "Attack for 1d12+20 damage."
+        },
+        {
+          "name": "Claw",
+          "text": "Fly 10, attack for 1d12+6 damage."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 65 HP, his Venomous Stinger recharges."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "The Ravager is dying! 40 more damage and he dies. Until then, the first time each turn he takes damage, he uses Move & Claw."
+        }
+      ],
+      "description": "Level 5 Solo Large Manticore.",
+      "page": 47
+    },
+    {
+      "name": "Queen Aranya, Broodmother",
+      "family": "Legendary",
+      "level": "6",
+      "size": "large",
+      "hp": 160,
+      "armor": "M",
+      "saves": "ALL+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Weave Web",
+          "text": "Creatures she hits are entangled in a sticky web (Dazed)."
+        },
+        {
+          "name": "Flammable Webs",
+          "text": "Fire critical hits suppress the Broodmother's Weave Web for 1 turn."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Impale",
+          "text": "(Reach 2) 2d8+8 damage. Then skitter away up to 8 spaces."
+        },
+        {
+          "name": "Hatch Brood",
+          "text": "Summon spiderling minions (1/hero, size: d8); they act only when commanded."
+        },
+        {
+          "name": "Dinner Time!",
+          "text": "Command all of your spiderling minions to move up to 6 spaces and attack once each."
+        },
+        {
+          "name": "BLOODIED: \"Avenge Your Queen, My Brood!\"",
+          "text": "At 80 HP, summon 3 spiderling minions/hero anywhere within Reach 8."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Aranya is dying! 40 more damage and she dies. Until then, Hatch Brood after each of her turns."
+        }
+      ],
+      "description": "Level 6 Solo Large Matriarch of Spiders.",
+      "page": 48
+    },
+    {
+      "name": "Nalzar, Apex Predator",
+      "family": "Legendary",
+      "level": "6",
+      "size": "large",
+      "hp": 180,
+      "armor": "M",
+      "saves": "STR+, DEX+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Tail Swipe",
+          "text": "When dealt slashing or lightning damage: knock a hero within 3 spaces Prone."
+        },
+        {
+          "name": "Torn Wings",
+          "text": "Each slashing crit reduces the Wing Buffet DC by 1."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Devour",
+          "text": "(Prone creatures only, Reach 2) 4d12+6."
+        },
+        {
+          "name": "Wing Buffet",
+          "text": "Fly 8, then land. Cone 8: 1d12, then DC 14 STR save or also knocked Prone (advantage if behind cover or another hero)."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 90 HP, her Wing Buffet Range and DC increase by 2."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Nalzar is dying! 60 more damage and she dies. Until then, each turn, she moves 6, then uses Devour (ignoring the Prone requirement)."
+        }
+      ],
+      "description": "Level 6 Solo Large Grey Drake.",
+      "page": 49
+    },
+    {
+      "name": "Florindris, Bane of the Forest",
+      "family": "Legendary",
+      "level": "7",
+      "size": "large",
+      "hp": 200,
+      "armor": "M",
+      "saves": "ALL+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Aura of Wind",
+          "text": "Ranged attacks against you have disadvantage. End of turn: push adjacent creatures 2 spaces away."
+        },
+        {
+          "name": "Wither",
+          "text": "Resistant to necrotic damage, but it suppresses Aura of Wind for 1 turn."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Petal Storm",
+          "text": "(1 use) 3d10+10 damage to all enemies within Reach 8, half on a DC 13 DEX save."
+        },
+        {
+          "name": "Rend",
+          "text": "Fly 10 before or after attacking. (Reach 2) 1d10+10 damage to up to 2 targets within reach. On hit: Gain Thornblight. (Thornblight: Suffer 5 damage for each space you are forcibly moved. Magical healing ends this effect.)"
+        },
+        {
+          "name": "Gust",
+          "text": "(Reach 8) Move a target 1d10 spaces."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 100 HP, enemies within Reach 12 gain Thornblight, and Petal Storm recharges."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Florindris is dying! 70 more damage and she dies. Until then, Aura of Wind and Gust move creatures twice as far."
+        }
+      ],
+      "description": "Level 7 Solo Large Floral Dragon.",
+      "page": 50
+    },
+    {
+      "name": "General Flameheart",
+      "family": "Legendary",
+      "level": "8",
+      "size": "huge",
+      "hp": 175,
+      "armor": "H",
+      "saves": "STR+, WIL+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Cinder Armor",
+          "text": "Immune to fire. When damaged, deal 5 fire damage to all adjacent creatures."
+        },
+        {
+          "name": "Extinguish Flame",
+          "text": "Cold or radiant crits extinguish all areas ignited by Molten Fury and suppress Cinder Armor for 1 turn."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Inferno Cleave",
+          "text": "Move 8 then strike a 2×2 square area for 2d10+10 fire damage."
+        },
+        {
+          "name": "Molten Fury",
+          "text": "Lob a molten fireball at the furthest hero not already in the flames, igniting a 2×2 square area. Creatures there take 2d10+10 damage; and another 10 damage at the end of each of their turns if they remain in the area."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 87 HP, on his next turn, he uses Molten Fury a number of times equal to half the number of heroes (rounded up)."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Flameheart is dying! 80 more damage and he dies. Until then, the area of his attacks increase to a 3×3 square."
+        }
+      ],
+      "description": "Level 8 Solo Huge Flame Titan.",
+      "page": 51
+    },
+    {
+      "name": "Vael, Undying Necromancer",
+      "family": "Legendary",
+      "level": "9",
+      "hp": 250,
+      "armor": null,
+      "saves": "INT++, WIL++",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Protect Master!",
+          "text": "Whenever Vael would fail a save or take 20 or more damage, he may sacrifice his Lifebinding Spirit, Bane, instead. He spends his next turn moving up to 6 spaces and summoning Bane."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, Bane attacks for 1d12+6 then Vael chooses one:"
+        },
+        {
+          "name": "DOOM",
+          "text": "(Range 12, undamaged target) DC 14 WIL save or 5d12 damage. Half on save."
+        },
+        {
+          "name": "Veilwalker's Rebuke",
+          "text": "(Range 8) 2d12+6. Double damage against those behind cover. 1/round you may swap places with them."
+        },
+        {
+          "name": "Cruelty's Edge",
+          "text": "1d4+2. On hit: DC 14 WIL save or Dazed and Frightened. Then move 6."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 125 HP, Vael gains the reaction Shield of Cruelty. (1 time use) If Vael would be damaged, instead he may reflect that much radiant damage back at the attacker."
+        },
+        {
+          "name": "LAST STAND: DEATH, AN OLD FRIEND",
+          "text": "Vael is dying! 90 more damage and he dies. Until then, he gains Heavy Armor, the hero that most recently damaged him is reduced to 0 HP, and Bane is sacrificed into a Vengeful Spirit. It deals 1d12+6 necrotic damage to creatures within reach 3 at the end of each of his turns."
+        }
+      ],
+      "description": "Level 9 Solo Luminary of Malice.",
+      "page": 52
+    },
+    {
+      "name": "Titan of the Deep Woods",
+      "family": "Legendary",
+      "level": "10",
+      "size": "gargantuan",
+      "hp": 240,
+      "armor": "H",
+      "saves": "STR+++",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Splintering Legions",
+          "text": "Bludgeoning damage or any crit cause bones to splinter off and animate, forming a d10 minion."
+        },
+        {
+          "name": "Brittle Bones",
+          "text": "Resistant to piercing, vulnerable to bludgeoning."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose 1:"
+        },
+        {
+          "name": "Devastating Strike",
+          "text": "(Reach 4) 1d4+30 damage. On hit: Knockback 6."
+        },
+        {
+          "name": "Crushing Stomp",
+          "text": "Move up to 10 spaces. Deal 1d4+20 damage to up to 2 targets along the path. On hit: Prone."
+        },
+        {
+          "name": "Beckoning Doom",
+          "text": "The 2 furthest heroes make a DC 16 STR save or are moved adjacent to Titan."
+        },
+        {
+          "name": "LAST STAND: Shattered Legion",
+          "text": "At 0 HP Titan collapses into 4 skeleton minions/hero (d10 sized). If any remain, they reassemble into the Titan the next evening."
+        }
+      ],
+      "description": "Level 10 Solo Gargantuan Skeleton.",
+      "page": 53
+    },
+    {
+      "name": "Ul'vek, Psionic Despot",
+      "family": "Legendary",
+      "level": "11",
+      "size": "medium",
+      "hp": 300,
+      "armor": null,
+      "saves": "INT++, WIL++, DEX+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Mind Shield",
+          "text": "Whenever Ul' would fail a save or take more than 30 damage while he has a creature Dominated, he may avoid the attack instead, but all Dominated creatures come to their senses."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Dominate",
+          "text": "(If no creatures are Dominated) Choose half of the heroes to suffer 2d12 psychic damage (ignoring armor). DC 15 WIL save or Dominated as well. (Dominated: Rolls are made with disadvantage while Dominated. Ul' spends your first action on each of your turns, moving, making a weapon attack, or casting a cantrip. Damage ends.)"
+        },
+        {
+          "name": "Consume",
+          "text": "(Dominated creature) Contested DEX or STR check, on success: Grappled and 6d12. Cannot be Defended or Interposed against."
+        },
+        {
+          "name": "Control",
+          "text": "Teleport 8. (Reach 8) DC 15 WIL save, force an enemy to spend one Action to make a weapon attack or cast a cantrip. On save, they attack with disadvantage."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 150 HP gain Illusory Shift. Reaction, when attacked (1 use): Swap places with a Dominated creature, making them the new target of the attack."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Ul' is dying! 110 more damage and he dies. Until then, Dominated no longer ends on taking damage. Every hero makes a WIL save or become Dominated."
+        }
+      ],
+      "description": "Level 11 Solo Medium Brain-Eating Aberration.",
+      "page": 54
+    },
+    {
+      "name": "Dravok, All-Seeing Tyrant",
+      "family": "Legendary",
+      "level": "12",
+      "size": "large",
+      "hp": 325,
+      "armor": null,
+      "saves": "INT++, WIL++",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "My plans, flawless!",
+          "text": "Dravok makes all saves with +1 Advantage, attacks against him have Disadvantage."
+        },
+        {
+          "name": "Weakness",
+          "text": "Taking more than 12 piercing or slashing damage: Dravok's plans are FLAWED! (until the end of the next hero's turn.)"
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, Move 6 and then either use Eye Ray (Range 10, randomly chosen ray then choose target) OR Terrible Maw."
+        },
+        {
+          "name": "Terrible Maw",
+          "text": "Melee attack. 4d4, EVERY die can crit and is Vicious."
+        },
+        {
+          "name": "1. Warping Ray",
+          "text": "3d6. On hit: Dazed, exchange places with target."
+        },
+        {
+          "name": "2. Petrification Ray",
+          "text": "Permanently Dazed. Healing ends. (3 stacks, Petrified)."
+        },
+        {
+          "name": "3. Terror Ray",
+          "text": "5d10 psychic damage & Terrified: You are Frightened, and your screams give allies within 6 disadvantage on rolls. Ends when Dravok's plans are FLAWED."
+        },
+        {
+          "name": "4. Gravitation Ray",
+          "text": "2d6 damage. Push that many spaces. Knocked Prone on 7+."
+        },
+        {
+          "name": "5. Charm Ray",
+          "text": "DC 16 WIL save or you spend 3 Actions attacking with or moving them, 2 actions on save. (Cannot spend resources, they regain spent actions afterward.)"
+        },
+        {
+          "name": "6. Death Ray",
+          "text": "DC 16 STR save or drop to 0 HP. On save, gain 1 Wound. If a Dying creature fails this, they die."
+        },
+        {
+          "name": "BLOODIED: To Dust!",
+          "text": "At 110 HP, use Petrification Ray against every enemy. His save DC increases to 18."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Dravok is dying! 70 more damage and he dies. Until then, each turn he will move or use Warping Ray and then Devastation Beam. 2d12+20 in a 10 space long, 2 space wide line."
+        }
+      ],
+      "description": "Level 12 Solo Large Aberration, all TEETH & EYES.",
+      "page": 55
+    },
+    {
+      "name": "Azriel, Lord of Pain & Flame",
+      "family": "Legendary",
+      "level": "14",
+      "size": "huge",
+      "hp": 320,
+      "armor": "H",
+      "saves": "ALL+",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "PAIN!",
+          "text": "Crits against Azriel are Vicious, he deals damage equal to the crit dice back to the attacker."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose 1:"
+        },
+        {
+          "name": "Crackling Whip",
+          "text": "Move 6. (Reach 6) 3d12 damage. On hit: Grappled and pulled adjacent to Azriel (escape DC 17 STR, DEX, or until he uses the whip again)."
+        },
+        {
+          "name": "Doom Sword",
+          "text": "3d12+10 fire damage to all creatures within Reach 2."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 160 HP, Azriel can use Crackling Whip twice each turn."
+        },
+        {
+          "name": "LAST STAND: YES, MORE PAIN!",
+          "text": "Azriel is dying! 180 more damage and he dies. Until then, EVERY hit against him is a crit."
+        }
+      ],
+      "description": "Level 14 Solo Huge Balor Feeling Hot & Spicy.",
+      "page": 56
+    },
+    {
+      "name": "Gloomwing the Cruel",
+      "family": "Legendary",
+      "level": "15",
+      "size": "huge",
+      "hp": 320,
+      "armor": "H",
+      "saves": "ALL++",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Aura of Rot",
+          "text": "Creatures within 6 spaces take 5 necrotic damage at the end of their turns."
+        },
+        {
+          "name": "Light Sensitivity",
+          "text": "Radiant damage suppresses Aura of Rot until the end of the next hero's turn."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose one:"
+        },
+        {
+          "name": "Rot Breath",
+          "text": "(1 use) Fly 10, then (Cone 8) DC 17 DEX save or 8d10 necrotic, half on save."
+        },
+        {
+          "name": "Bite",
+          "text": "(Reach 2) Move 6, then 3d10. On damage: Cruelty's Gift. (Cruelty's Gift: Healing is halved and Vulnerable to necrotic damage. Healing ends.)"
+        },
+        {
+          "name": "Claws",
+          "text": "(Reach 2) 3d10 slashing +10 necrotic."
+        },
+        {
+          "name": "Tail",
+          "text": "(Reach 4) 1d10, and knocked back that many spaces."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 160 HP Gloomwing's Rot Breath recharges."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Gloomwing is dying! 150 more damage and he dies. Until then, the damage and range of his Aura of Rot is doubled."
+        }
+      ],
+      "description": "Level 15 Solo Huge Rot Dragon.",
+      "page": 57
+    },
+    {
+      "name": "Alaric Draegoth, the Crimson Count",
+      "family": "Legendary",
+      "level": "16",
+      "hp": 320,
+      "armor": null,
+      "saves": "ALL++",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Sanguine Cloak",
+          "text": "(1/turn) Deal 1d10 necrotic damage whenever you are hit, the attack is reduced by this amount."
+        },
+        {
+          "name": "Sunscorn",
+          "text": "Vulnerable to radiant. After taking radiant damage, use Beguile as a Reaction, they roll with disadvantage."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, summon 1 blood bat minion (d10) within 8 spaces, then choose 1:"
+        },
+        {
+          "name": "Ebonfang",
+          "text": "Deal 1d10+15 damage, your target is considered Bloodied for 1 round. Fly 8 before or after attacking."
+        },
+        {
+          "name": "Beguile",
+          "text": "If no creature is Beguiled, Beguile a target on a failed DC 18 WIL save (w/ disadvantage if Bloodied). (Beguiled: Dazed. Cannot Defend or allow anyone to Interpose for you. Damage ends.)"
+        },
+        {
+          "name": "Beckon & Bite",
+          "text": "Move a Beguiled creature adjacent to you and bite them: 2d10+30 damage and 1 Wound."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 160 HP, gain Mistform. Not vulnerable to radiant. Bat Decoy. Whenever Alaric would take damage, instead first swap places with a bat minion, 1/round."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Alaric is dying! 160 more damage and he dies. Until then, his Sanguine Cloak, attacks, and bats roll d20s instead of d10s."
+        }
+      ],
+      "description": "Level 16 Solo Vampire Lord.",
+      "page": 58
+    },
+    {
+      "name": "Caerys, the Hollow Star",
+      "family": "Legendary",
+      "level": "20",
+      "hp": 620,
+      "armor": "H",
+      "saves": "ALL+++",
+      "legendary": true,
+      "minion": false,
+      "abilities": [
+        {
+          "name": "Ravages of Time",
+          "text": "At the beginning of each round, all heroes suffer 1 Wound."
+        },
+        {
+          "name": "Slipstream",
+          "text": "3/encounter when she would suffer any negative effect she can swap places with a creature of her choice making them the target instead. All heroes recover 1 Wound."
+        },
+        {
+          "name": "Actions",
+          "text": "After each hero's turn, choose 1 not yet chosen (reset when all have been chosen):"
+        },
+        {
+          "name": "Wormhole",
+          "text": "Teleport 12. 3d20 to a creature adjacent to where you began or ended."
+        },
+        {
+          "name": "Immensity",
+          "text": "(Reach 12) DC 20 STR save (disadvantage if within Reach 4) or suffer 3d20 damage and Prone. Half on save."
+        },
+        {
+          "name": "Glimpse Your End",
+          "text": "DC 20 WIL save or DOOMED: Concentration ends, the next damage roll against you is maximized."
+        },
+        {
+          "name": "Plasma Storm",
+          "text": "Reach 6, DC 20 DEX save or 2d20 lightning and 2d20 fire damage. Half on save."
+        },
+        {
+          "name": "Singularity",
+          "text": "Reach 2, 5d20 bludgeoning damage."
+        },
+        {
+          "name": "Almighty Push & Pull",
+          "text": "(Range 12) DC 20 STR save or be launched 20 ft. into the air, repeat until the target saves. Fall damage for this attack is 1d20 for every 10 ft. fallen."
+        },
+        {
+          "name": "BLOODIED",
+          "text": "At 310 HP, Gravitational Mastery. Move ALL objects and creatures within 16 spaces anywhere else within the area. Gravitational Lensing. The hero with the most HP is marked by Caerys. She takes half damage from all sources, her mark takes the other half. This lasts until the mark drops to 0 HP."
+        },
+        {
+          "name": "LAST STAND",
+          "text": "Use Gravitational Mastery, then Caerys is dying! 200 more damage and she dies. Until then she chooses twice each turn. If still alive after 1 round: Reset Time: she resets back to full HP."
+        }
+      ],
+      "description": "Level 20 Solo World-Ending Cataclysm. She Who Is Our Desire & End.",
+      "page": 60
+    }
+  ],
+  "families": [
+    {
+      "name": "Kobolds",
+      "blurb": "Small, maniacal dragonlings. Fiercely protective of their own.",
+      "trait": "Nooooo! When an ally within 2 spaces dies, attack once for free.",
+      "sampleEncounters": [
+        "Sample Encounters (per hero). For an easier encounter use the line 1 or 2 levels lower. More challenging, 1 or 2 levels higher.",
+        "Level 1: 3 Kobold Flunkies / 4 Minions",
+        "Level 2: 6 Kobolds* / 4 Sneaks / 1 Clanger + 1 Trapper",
+        "Level 3: 2 Clangers + 1 Trapper / 3 Trappers / 6 Sneaks*",
+        "Level 4: 4 Trappers / 2 Denwardens + 4 Sneaks*",
+        "*Remember! Even very weak monsters can be far more deadly than intended when they outnumber the heroes by more than 4 to 1. Between 1 and 4 monsters for each hero is ideal."
+      ],
+      "loot": "Honey, LOTS of twine, sandwiches (stolen), shiny objects, dragon painting (poorly—yet lovingly—made), rotting meats, a variety of traps (small cages, spikes, snapping).",
+      "page": 32
+    },
+    {
+      "name": "Goblins",
+      "blurb": "Green, cunning, & thriving on the edge of chaos. Will mock you mercilessly if given the chance.",
+      "trait": "Haha, Missed Me! Whenever an attack misses you, deal 1 psychic damage in return.",
+      "sampleEncounters": [
+        "Sample Goblin Encounters (per hero). For an easier encounter, use the line 1 or 2 levels lower. More challenging, 1 or 2 levels higher.",
+        "Level 1: 1 Flunky / 2 Minions",
+        "Level 2: 3 Goblins / 1 Bugbear / 1 Taskmaster / 1 Ratrider",
+        "Level 3: 1 Goblin + 1 Bugbear/Taskmaster/Ratrider",
+        "Level 4: 2 Goblins + 1 Bugbear/Taskmaster/Ratrider",
+        "Level 5: 3 Goblins + 2 Ratrider / 2 Bugbears*",
+        "Level 6: 3 Bugbears, 3 Ratriders, or 9 Goblins*"
+      ],
+      "loot": "Live mouse (a snack for later), moldy bread, smooth stones, sharp sticks, teeth (forcibly removed), arrows (surprisingly well-made), lots of blades (jagged, but effective), dead captive (forgot to feed him), shiny junk (random shiny bits of metal, broken glass, and buttons), slug farm (a jar of slimy, wriggling slugs), \"Potion\" (suspiciously colored liquid in a dirty bottle), unidentifiable jerky. A filthy notebook tracking bizarre trades and bets, boots (too big).",
+      "page": 33
+    },
+    {
+      "name": "Bandits",
+      "blurb": "You've got money, they want money… a perfect match! (hand it over)",
+      "trait": "Parry. Treat attacks against you that roll 2 as a miss.",
+      "loot": "VERY valuable item (stolen; its owner may come looking for it, or reward you for its return), kidnapped person, leather armor, chipped blades, old food, fine art or clothes, wagon load of some commodity (salt, nails, wool, etc.), coded letter from a secretive client.",
+      "page": 34
+    },
+    {
+      "name": "Snakemen",
+      "blurb": "*Aggressive Hissing Noises*",
+      "trait": "Coiling Strike. On melee crit: Grapple (escape DC 10).",
+      "page": 34
+    },
+    {
+      "name": "Dungeon Denizens",
+      "blurb": "For some creatures, YOU are the loot at the end of the dungeon.",
+      "trait": "Stirges — Evasive Flier. Attacks against stirges are made with disadvantage. Latched On. You move where your target moves until either dies. Your attacks can't miss or be Defended/Interposed against. Attacks that miss you damage your target instead. Mimics — Ambusher. Mimics always start first and heroes roll Initiative with disadvantage. Sticky. Mimic hits also Grapple and can Grapple any number of creatures. When crit: release 1 creature (attacker's choice). Oozes — Digestive Touch. Contact with an ooze inflicts the Digested condition: they deal an additional X damage for each time the target has been Digested this encounter (X = the ooze's damage bonus).",
+      "loot": "Tarnished coins (partially dissolved by acid), ancient bones with traces of gnaw marks, indigestible items (bones, gems, magical trinkets), a leather-bound journal (water-damaged pages), lockpicks, a treasure map (only half), boots (suspiciously untouched by corrosion).",
+      "page": 35
+    },
+    {
+      "name": "Hill & Field",
+      "blurb": "Mighty brutes and cunning beasts, always on the lookout for easy prey.",
+      "trait": "Gnolls — Frenzy. Advantage against Bloodied creatures.",
+      "page": 36
+    },
+    {
+      "name": "Undead",
+      "blurb": "Hate the living for not being dead, hate themselves for not being living.",
+      "trait": "Unliving, Undying. The first time this dies, reset to 1 HP instead (excluding minions).",
+      "loot": "Tarnished silver locket containing a faded portrait (who is it?), bone fragments engraved with arcane symbols, a dark gemstone (emits a faint chill), vials of blood (long-dried), a diary written in an ancient hand, a macabre necklace (skeletal finger bones), a broken holy symbol smeared with ash, a signet ring from a lost noble house, moldy grave dirt (whispers when touched), shovel.",
+      "page": 37
+    },
+    {
+      "name": "Forest Denizens",
+      "blurb": "Every shadow hides a predator, every branch and leaf conspires against you, the forest is alive—and you are not welcome.",
+      "trait": "Briarbanes (soulless, thorny plant beings fertilized by blood) — Peeling Bark. Damage degrades Armor 1 step: Heavy » Medium » None.",
+      "loot": "Briarbane Loot: 25 ft. of vines (usable as rope), glowing sap (minor healing properties), moss-covered coins from an ancient era, a brittle leaf with veins that spell out words in Druidic, a pouch of dried herbs, a cluster of rare mushrooms, a handful of acorns (they grow INSTANTLY when placed in water), a small flower that never wilts, flute overgrown with moss, a tattered map to a hidden grove, a dried flower crown.",
+      "page": 38
+    },
+    {
+      "name": "Cultists/Horrors",
+      "blurb": "Driven by twisted beliefs, fanatical cultists perform dark rituals to awaken ancient evils, unleashing horrors that feast on fear and despair.",
+      "trait": "Cultists — Fanatical Zeal. While not at max HP, make all rolls with advantage. Your crits also inflict Despair. (Despair: Disadvantage on the next attack you make this encounter.)",
+      "loot": "Horrible Loot: Bloodstained dagger (engraved with dark symbols), a twisted idol (whispers terrible thoughts), vial of black ichor, a mask (carved, likeness of a fiend), a tattered robe (lined with hidden pockets), a scroll with summoning rituals (half-finished), shackles inscribed with infernal runes, fragment of a fiendish contract, black candles (cannot be extinguished).",
+      "page": 39
+    },
+    {
+      "name": "Underground",
+      "blurb": "Nightmarish denizens of the deep, these monstrous beings lurk in dark tunnels and cavernous depths, ready to ensnare or devour any intruders.",
+      "loot": "Chitinous plating, tunnel map (hastily scrawled), serrated teeth (as much as you can carry), spider silk, venom sac, partially digested meats, gemstones (uncut), pheromone gland, luminescent fungus, molted carapace, rusted tools, ancient coins, echo stones (faintly hum when tapped).",
+      "page": 40
+    },
+    {
+      "name": "Legendary",
+      "blurb": "Solo monsters should almost always be Legendary. Heroes should know when they are fighting a Legendary creature; save these encounters for a particularly meaningful fight — THE SCARY DRAGON, the named boss, or the Big Bad Evil Guy. Legendary monsters act after EACH hero's turn (only after heroes' turns — not commoners, minions or followers). They have interesting mechanics and weaknesses that can be uncovered through research ahead of time or the Assess action. Saves: advantaged (+) or disadvantaged (–) saves, e.g. STR++, WIL– rolls STR saves with advantage 2 and WIL saves with disadvantage. Bloodied: they gain an additional dangerous ability as their HP drops to half. Last Stand: at 0 HP they are dying and gain dangerous new capabilities; they finally die once a small amount of additional damage is done. Legendary Teams: \"Solo\" encounters need not be strictly solo — legendary creatures may have pets, summon minions, or come in groups; have ALL of them attack after each hero, or take turns.",
+      "trait": "Optional Actions. Each legendary monster can also use these default actions instead of its listed attacks (to add drama or tune down a too-hard encounter): Wind Up/Breathe In — regain the use of a single use ability. Terrible Roar/Creepy Monologue/Taunt — creatures who hear this make a WIL save or are Frightened for 1 turn. Toss Around/Telekinetic Shove — STR save or moved, Prone, etc. Size Up/Spot Weakness/Pin Down — DEX save, the next attack you make is with advantage and cannot be Interposed.",
+      "page": 42
+    }
+  ],
+  "tables": {
+    "boons": [
+      {
+        "kind": "Boons (overview)",
+        "name": "Awarding Boons",
+        "text": "Boons can be a great quest reward from a powerful patron (e.g., an elf queen, hearing of a hero's bravery, could bestow them with the Brave or Lionhearted Boon), a temporary buff (e.g., a tonic that gives Epic Speed for 1 hour), or you can allow players to take a Minor/Major Boon instead of a Secondary/Key stat increase. (p.22)"
+      },
+      {
+        "kind": "Minor Boon",
+        "name": "Alert",
+        "text": "+1 to Initiative."
+      },
+      {
+        "kind": "Minor Boon",
+        "name": "Bright",
+        "text": "+1 max mana."
+      },
+      {
+        "kind": "Minor Boon",
+        "name": "Experienced",
+        "text": "+4 HP."
+      },
+      {
+        "kind": "Minor Boon",
+        "name": "Feisty",
+        "text": "+1 max Hit Die."
+      },
+      {
+        "kind": "Minor Boon",
+        "name": "Fiery",
+        "text": "+1 fire damage."
+      },
+      {
+        "kind": "Minor Boon",
+        "name": "Intrepid",
+        "text": "+1 speed."
+      },
+      {
+        "kind": "Minor Boon",
+        "name": "Skilled",
+        "text": "+1 skill point."
+      },
+      {
+        "kind": "Minor Boon",
+        "name": "Simple",
+        "text": "+1 VS Charm effects."
+      },
+      {
+        "kind": "Minor Boon",
+        "name": "Stand Tall",
+        "text": "+Height (slightly)."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Ancestry Trait",
+        "text": "Selecting another Ancestry trait (if it makes sense) can make for a great Major Boon."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Aggressive",
+        "text": "On your first round of combat you can spend 1 Action from your next turn."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Battle Hardened",
+        "text": "+2 Armor."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Brave",
+        "text": "+2 to damage while you have the most enemies adjacent to you."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Expansive Mind",
+        "text": "+4 max mana."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Good Patient",
+        "text": "Whenever you would receive healing, you heal an additional KEY HP."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Hardy",
+        "text": "Whenever you would roll your Hit Dice to increase your max HP, roll with advantage 2 instead."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Honorable Protector",
+        "text": "Gain LVL temp HP whenever you Interpose. Suffer LVL psychic damage whenever an ally within 2 spaces is attacked and you don't Interpose."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Lionhearted",
+        "text": "+2 Armor while you have the most enemies adjacent to you."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Natural Talent",
+        "text": "Learn 1 Cantrip in a school you don't know."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Resolute",
+        "text": "When pushed, you are pushed 1 space less. Whenever you would be knocked Prone, you can instead be moved back 1 space. 1/turn."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Resilient",
+        "text": "If you would take any Wounds, you may become immune to them this turn instead. 1/Safe Rest."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Smart, Not Book Smart",
+        "text": "–KEY max mana. Gain 1d4 mana whenever you roll Initiative; this expires if unused at the end of combat."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Sniper",
+        "text": "Advantage on attacks when no enemy is adjacent to you; disadvantage otherwise."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Stalwart",
+        "text": "+1 max Hit Die, +2 Might."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Tenacious",
+        "text": "+2 max Hit Dice."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Tough",
+        "text": "Whenever you gain temp HP, gain 5 more."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Unflinching",
+        "text": "Your focus is unbroken even in the face of danger. Advantage on Concentration checks."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Unnatural Talent",
+        "text": "Learn any 1 Utility Spell."
+      },
+      {
+        "kind": "Major Boon",
+        "name": "Veteran",
+        "text": "+10 HP."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Agility",
+        "text": "Gain 1 action. 1/encounter."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Criticals",
+        "text": "Whenever you roll for critical hit damage, you may replace one die with a d20."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Defense",
+        "text": "Your shields gain +3 Armor."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Foresight",
+        "text": "Gain +5 to Initiative rolls and advantage on your first attack each encounter."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Knowledge",
+        "text": "1/day, you can call upon a moment of profound insight to gain hidden knowledge about a legendary person or object."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Mana",
+        "text": "Whenever you are healed, you may instead recover 1 mana for every 5 HP you would have been healed."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Mind",
+        "text": "+8 mana."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Stamina",
+        "text": "Rolling 4 or higher on a Hit Die during a Field Rest heals 1 Wound."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Speed",
+        "text": "+4 Speed, +4 Initiative."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Stats",
+        "text": "Increase 3 different stats by 1."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Senses",
+        "text": "Gain Blindsight 6 or Darkvision 16."
+      },
+      {
+        "kind": "EPIC Boon",
+        "name": "Epic Resistance",
+        "text": "1/encounter. Whenever you would suffer damage or fail a save you can choose not to instead."
+      },
+      {
+        "kind": "Lodging Boon",
+        "name": "Lodging Boons",
+        "text": "Spending extra gold on lavish accommodations can provide valuable temporary benefits: quicker recovery, valuable contacts, additional resources, or unique opportunities. The specific benefits depend on the quality of the lodging and the amount spent. Roll 1d8 on the Temporary Boon table, or award a Minor, Major, or even EPIC Boon based on how much the heroes pay and where they rest. These Boons are temporary and last only until the heroes take another Safe Rest. Adjust the cost and impact to suit your campaign and the party's level of wealth. (p.21)"
+      },
+      {
+        "kind": "Lodging Boon",
+        "name": "A Minor Boon",
+        "text": "Typically costs around 10 gp."
+      },
+      {
+        "kind": "Lodging Boon",
+        "name": "A Major Boon",
+        "text": "Typically costs around 100 gp."
+      },
+      {
+        "kind": "Lodging Boon",
+        "name": "An EPIC Boon",
+        "text": "Typically costs around 1,000 gp."
+      },
+      {
+        "kind": "Temporary Boon (1d8)",
+        "name": "1",
+        "text": "Recover 2 additional Wounds"
+      },
+      {
+        "kind": "Temporary Boon (1d8)",
+        "name": "2",
+        "text": "Gain LVL temp HP"
+      },
+      {
+        "kind": "Temporary Boon (1d8)",
+        "name": "3",
+        "text": "Gain KEY temp Hit Dice"
+      },
+      {
+        "kind": "Temporary Boon (1d8)",
+        "name": "4",
+        "text": "+1 Speed"
+      },
+      {
+        "kind": "Temporary Boon (1d8)",
+        "name": "5",
+        "text": "Inspired (reroll any die, once)"
+      },
+      {
+        "kind": "Temporary Boon (1d8)",
+        "name": "6",
+        "text": "Advantage vs. Fear/Charm/Etc."
+      },
+      {
+        "kind": "Temporary Boon (1d8)",
+        "name": "7",
+        "text": "Learn an important rumor"
+      },
+      {
+        "kind": "Temporary Boon (1d8)",
+        "name": "8",
+        "text": "+KEY mana"
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Secret Spells",
+        "text": "These spells are either incredibly powerful and banned from common knowledge, or ancient and simply lost to the ravages of time. They may not be appropriate for heroes to wield freely but can make for excellent quest rewards when found on scrolls, imbued in wands, or taught by a rare NPC. The mere existence of these spells can drive entire storylines and enrich your game world. (p.20)"
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Revive",
+        "text": "(Tier 3 Radiant spell, casting time: 1 hour.) Bring a dead creature back to life, provided they've been dead no more than 10 days and have not been revived by this spell before. Attempting to revive a creature already brought back with this spell risks raising a mindless, zombified husk instead. Why is this secret? Freely returning to life can lower the stakes and sap excitement from near-death encounters. On the flip side, it's a powerful tool to maintain momentum in a campaign struck by bad luck or to create dramatic story moments (such as reviving a villain)."
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Sparkfetch",
+        "text": "(Lightning cantrip) Loudly teleport a tiny, unheld metal item you can see to yourself. Why is this secret? This seemingly harmless cantrip led to a wave of mysterious thefts, as stormy nights became prime time for mischievous first-year students pilfering coins and valuables. Quickly banned, it remains an infamous spell in magical academies."
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Lesser Windform",
+        "text": "(Wind cantrip, Concentration: up to 10 minutes.) You are invisible and blinded for the duration of the spell."
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Greater Windform",
+        "text": "(Tier 5 Wind spell, Concentration: up to 10 minutes.) Gain invisibility, a flying speed, and the ability to slip through any space that wind can pass through."
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Radiant Bond",
+        "text": "(Tier 3 Radiant spell, Concentration: up to 10 minutes.) Telepathically communicate across any distance with a creature that holds a gift you have freely given."
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Speak With Dead",
+        "text": "(Tier 4 Necrotic spell) Temporarily animate a corpse, allowing it to answer up to 3 questions before returning to rest. The corpse must answer, but it isn't required to be truthful if it dislikes the questioner or the questions."
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Hearth & Home",
+        "text": "(Tier 3 Fire spell, casting time 10 minutes.) Conjure a welcoming inn, complete with sturdy wooden tables, plush chairs, and a soft rug underfoot. At its heart burns a cozy fire in a fireplace, filling the space with warmth and light. The inn lasts for 12 hours and vanishes without a trace afterward. Why is this secret? Safe resting anywhere is incredibly powerful. This spell is notoriously tricky to cast manually, so it is most often imbued in wands for wealthy travelers. Allow it cautiously, as it can easily break game balance."
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Teleport",
+        "text": "(Tier 6 Lightning Spell, casting time: 10 minutes.) You and up to 10 willing creatures within 2 spaces are instantly teleported to a place of your choice that you have visited before."
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Cryotomb",
+        "text": "(Tier 8 Ice Spell, 4 Actions.) Range: 12. A target must make a STR save or become incapacitated in an icy tomb and immune to harm. This lasts as long as you remain alive, or until the ice melts or is otherwise destroyed. The creature may repeat the save once every 10 days. Huge or larger creatures have advantage on the save. A Small or Tiny creature, disadvantage. Upcast: +5 spell save DC. Why is this secret? Being able to instantly trap any boss who fails a single roll is incredibly useful. Cryotomb is even more useful as a narrative linchpin though — the king may have a terrifying monster sealed in ice beneath the palace, and the tomb is beginning to crack…"
+      },
+      {
+        "kind": "Secret Spell",
+        "name": "Memory Veil",
+        "text": "(Tier 3 Necrotic spell, Concentration: as long as the caster remains conscious.) Conceal or change all memories of an event for up to 12 creatures within 2 spaces on a failed WIL save for as long as this spell lasts. Why is this secret? This can have profound ethical and narrative implications. Often used by shadowy organizations or rulers to cover up secrets best left buried."
+      },
+      {
+        "kind": "Gold",
+        "name": "How Much Gold?",
+        "text": "Gold is a versatile reward that gives heroes the freedom to choose their own rewards. The table outlines the average amount of gold each hero will typically gain per level. A quest for a noble cause or from a poor villager might pay modestly (one or two levels below average), while one from a wealthy noble with questionable motives may offer a more extravagant reward (one or two levels above average). On Buying Magical Items: most adventurers can save up enough to purchase uncommon or rare magical items, often found in specialty shops in large cities; very rare or legendary items are typically far too expensive to buy and must be earned through adventuring. (p.21)"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 1",
+        "text": "25 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 2",
+        "text": "40 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 3",
+        "text": "80 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 4",
+        "text": "150 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 5",
+        "text": "280 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 6",
+        "text": "450 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 7",
+        "text": "750 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 8",
+        "text": "1,200 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 9",
+        "text": "2,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 10",
+        "text": "3,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 11",
+        "text": "5,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 12",
+        "text": "7,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 13",
+        "text": "10,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 14",
+        "text": "17,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 15",
+        "text": "25,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 16",
+        "text": "40,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 17",
+        "text": "60,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 18",
+        "text": "90,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 19",
+        "text": "130,000 gp"
+      },
+      {
+        "kind": "Gold per Level",
+        "name": "Level 20",
+        "text": "200,000 gp"
+      },
+      {
+        "kind": "Gold",
+        "name": "Too Much Gold?",
+        "text": "An overabundance of gold has its challenges and it may attract unwanted attention: It's Cumbersome (large amounts must be transported via caravan or ship and safely stored). Bandits & Thieves (pickpockets, ambushers, organized crime). Jealousy (rival adventurers, \"old money\" nobles, resentful poor, debt collectors). Corruption (bribes, fake \"opportunities,\" suspicious authorities). Curses (a cache cursed by dark magic, greedy spirits, or treasure guardians). Fame (opportunists, sycophants, bounty hunters, warlords). People In Need (a destitute village, public works, beggars, allies in need). Greedy Monsters (dragons and other powerful beings are drawn to large hoards)."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "Chaos Table",
+        "text": "Unless otherwise noted, ongoing effects last for up to 1 minute or until Chaos is triggered again. Roll 1d20. (p.115)"
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "1. Elemental Eruption",
+        "text": "Creatures within 6 spaces of you must make a DEX save or take INT d10 fire damage on a failure, half on save. You fail the save."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "2. Backfire",
+        "text": "Suffer 1 Wound. The spell you just cast also targets you (or an enemy if it was a beneficial spell)."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "3. Aww, Nuts!",
+        "text": "You polymorph into a cute squirrel until you take damage. Your TOP priority is to find acorns (squirrels can't cast spells)."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "4. Summon Aetherlings",
+        "text": "At the end of each of your turns, summon INT hostile aetherling minions adjacent to you that act immediately after you (size: d6)."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "5. Graviturgical Grace",
+        "text": "A random enemy is pulled adjacent to you at the end of each of your turns."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "6. Liquefy Legs",
+        "text": "You fall Prone, cannot stand, and your speed becomes 0 while out of water."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "7. Elemental Entanglement",
+        "text": "An enemy controls 1 Action for you at the start of each of your turns."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "8. Ethereal Cocoon",
+        "text": "You are enveloped in a magical cocoon until the end of your next turn. You fall Prone, are unable to move or speak, and are immune to damage. You must spend all of your Actions casting cantrips at the nearest creature."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "9. Manastorm",
+        "text": "The last spell you cast is cast again for free, against a random target."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "10. Reality Warp",
+        "text": "Everywhere around you within 6 spaces is difficult terrain."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "11. Displacement",
+        "text": "Teleport. 1d4: 1. The worst place! (GM's choice) 2. UP! 6 spaces (3d6 falling damage) 3. Player's choice, 6 spaces 4. Player's choice, 12 spaces."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "12. Chaos Step",
+        "text": "Swap places with any creature you can see."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "13. Mindfire",
+        "text": "The dumbest enemy within 16 spaces takes INT d6 psychic damage (ignoring armor), and gains the Smoldering condition."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "14. Emerge beautiful",
+        "text": "You sprout butterfly wings from your back; gain a flying speed."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "15. Unbiggen",
+        "text": "Your size is halved. Gain advantage on Stealth checks, and attacks against you are made with disadvantage."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "16. Embiggen",
+        "text": "Your size is doubled. Gain INT d10 Temp HP and advantage on STR saves instead of disadvantage."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "17. Awakening",
+        "text": "A 3rd eye appears on your forehead. Gain advantage on the Assess action and all attacks."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "18. Diamond Skin",
+        "text": "Multiply your Armor by INT; you can Defend for free each round."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "19. Mighty Mana",
+        "text": "Your spells (including the one that triggered this effect) are empowered and are cast as if you spent 2 additional mana on them (ignoring your natural max)."
+      },
+      {
+        "kind": "Chaos Table",
+        "name": "20. Elemental Overload",
+        "text": "Enemies within 12 spaces of you take INT d8 lightning damage. You regain INT mana at the end of your turns (this mana expires at the end of combat if unused)."
+      }
+    ],
+    "encounters": [
+      {
+        "name": "Monster Levels",
+        "text": "Making encounters in Nimble is easy! Simply add up the total levels of the heroes (e.g., 3 level 2 heroes = 6). Monsters with a total level equal to that will be a hard but fair fight; less than that: medium or easy; greater than that: deadly, or very deadly. Example: a griffon is a level 4 monster, so a flock of 6 griffons (24 monster levels) would be a hard encounter for 6 level 4 heroes, 4 level 6 heroes, or 3 level 8 heroes. (p.25)"
+      },
+      {
+        "name": "Monsters per Hero",
+        "text": "Typical encounters should have 1–4 monsters per hero (excluding minions). For an epic fight against a single bad guy, use a legendary monster; for hordes, use minions. If the heroes or monsters greatly outnumber one another the encounter may be easier or harder than anticipated — 1–4 monsters per hero is the sweet spot."
+      },
+      {
+        "name": "Encounters Per Rest",
+        "text": "Typically, a session includes 2–5 combat encounters, but this is flexible. If your players are enjoying the game without combat, don't force it — especially if they've cleverly avoided it or it doesn't fit the story. If the story calls for more than five encounters, go ahead! Avoid encounters that are trivial, frustratingly difficult, or repetitive."
+      },
+      {
+        "name": "Easy (< 50%)",
+        "text": "If the monsters' total levels are less than half of the heroes', this is an easy encounter. Heroes will lose minimal HP and resources — great for testing new abilities, gauging progress, or whittling down resources. They help players feel powerful, especially after leveling up. Use 1–2 easy encounters in a typical session."
+      },
+      {
+        "name": "Medium (~75%)",
+        "text": "When the monsters' levels are around 75% of the heroes', expect some HP loss and moderate resource expenditure. Heroes will get hurt but shouldn't drop to 0 HP. Use 1–2 medium encounters in a typical session."
+      },
+      {
+        "name": "Hard (100%)",
+        "text": "When the monsters' levels equal the heroes', this encounter will be challenging but fair. Heroes must use significant resources; some may drop to 0 HP, but none should die, barring poor tactics or bad luck. Use 1 hard encounter in a typical session."
+      },
+      {
+        "name": "Deadly (100–125%)",
+        "text": "When monster levels are 100–125% of the heroes', this encounter requires strategic thinking and teamwork. Suitable for tough battles, well-equipped parties, or campaign bosses. Use sparingly!"
+      },
+      {
+        "name": "Very Deadly (150%+)",
+        "text": "At 150%+ monster levels, this encounter is extremely dangerous. Unless they are extremely well optimized (or are multiclassing) and play exquisitely, they will almost certainly need to retreat — or die. Use only when the heroes made a bad mistake: you telegraphed danger and they failed to heed."
+      },
+      {
+        "name": "Resting and Recovery",
+        "text": "It's common for heroes to return to a home base or town to rest after each session, but this isn't a rule. If your players are accumulating too many Wounds, consider introducing an opportunity for a Safe Rest, such as a friendly cleric or a hidden oasis. If a Safe Rest isn't an option, you can ease the encounter difficulty to keep the adventure moving."
+      },
+      {
+        "name": "Armor Variety",
+        "text": "Too many armored foes can bog down combat. Use armor to add flavor, not frustration. For a balanced session, aim for roughly: 60% Unarmored, 30% Medium Armor, 10% Heavy Armor."
+      },
+      {
+        "name": "Fine Tuning: Start Easy",
+        "text": "It's better to err on the side of \"too easy\" than \"too hard.\" As a GM, you have many ways to increase difficulty during play, but few ways to lower it without breaking immersion. (p.26)"
+      },
+      {
+        "name": "Balancing With Tactics",
+        "text": "Focus Fire: concentrating attacks on one or two heroes makes encounters feel harder; spreading out damage or sending monsters in waves makes them more manageable. Movement: monsters that move each turn force martial characters to reposition (and open up Opportunity Attacks); reduce monster movement to lower difficulty. Target Squishy Characters: make them use their actions to defend or run away and hide; let the tanks feel good about Defending and Interposing. Adjust Initiative: the sooner the monsters act in the round, the harder the encounter — if the bad guys are in for a trouncing, move some of them up in the initiative order. Relax! Heroes have plenty of tools to handle tough situations. Hero Death Isn't the End: encourage your group to make new characters and dive back in."
+      },
+      {
+        "name": "Balancing with Minions",
+        "text": "Minions excel as battlefield filler, allowing heroes to showcase their strengths. Armored defenders can hold off waves of attacks, while spellcasters can annihilate groups with a single spell. Waves of Minions: start with an easier encounter and introduce minions in waves (emerging from hidden positions or summoned mid-battle). 1 minion/hero: slightly more difficult, but greatly increases tactical options. 2–3 minions/hero: noticeably more difficult. 4 minions/hero: much more challenging."
+      },
+      {
+        "name": "Overkill Damage (Minions)",
+        "text": "While minions lack HP, you can optionally use their die size as a measure of durability. Excess damage from an attack can carry over to other minions in range. For example, a 20 damage attack could take down two d10 minions or five d4 minions."
+      },
+      {
+        "name": "Minion Die Size by Party Level",
+        "text": "Level 1–3: d4. Level 3–5: d6. Level 5–10: d8. Level 10–13: d10. Level 13–17: d12. Level 17–20: d20."
+      },
+      {
+        "name": "Unique Encounters",
+        "text": "Most encounters start with heroes and bad guys aware of each other, within one or two moves apart, and feature 1–4 level-appropriate enemies per hero who fight to the death. Changing it up from time to time can make for a more memorable encounter. Dessert, not main course: use these sparingly — there should still be baseline \"typical\" encounters more frequently. (pp.27–28)"
+      },
+      {
+        "name": "Unique: Ambush (Bad Guys)!",
+        "text": "An easy encounter becomes much more difficult and exciting when the bad guys get the drop on the heroes. Place hidden enemies close to the party, and let them act first (be careful there is a good story reason for the ambush or give them a chance to spot it!)."
+      },
+      {
+        "name": "Unique: Ambush (Heroes)!",
+        "text": "An extremely hard encounter, but the heroes get plenty of time to scout, research weaknesses, set up traps and obstacles, or even choose the battleground (on top of getting a full turn to act before the bad guys can act)."
+      },
+      {
+        "name": "Unique: Backdraft",
+        "text": "Heroes take damage whenever they take a certain action (e.g., cast spells, use weapons, move, or use special abilities)."
+      },
+      {
+        "name": "Unique: Betrayal!",
+        "text": "Have an allied NPC suddenly turn on the heroes mid-fight (temporarily or permanently)."
+      },
+      {
+        "name": "Unique: Can't Reach Me!",
+        "text": "A relatively weak group of bad guys are at an unfairly advantageous height, able to drop heavy things onto the heroes, or out of range of melee attacks and with excellent cover against range."
+      },
+      {
+        "name": "Unique: Capture the Flag",
+        "text": "The heroes must take (and keep) possession of an item that the bad guys desperately want."
+      },
+      {
+        "name": "Unique: Charmed Allies",
+        "text": "Enemies cast powerful charms or illusions on one or more party members, forcing the heroes to fight their own while trying to break the spell."
+      },
+      {
+        "name": "Unique: Defend the Fort",
+        "text": "Heroes must defend a location for a certain number of rounds until reinforcements arrive."
+      },
+      {
+        "name": "Unique: Divided Loyalties",
+        "text": "Two enemy factions are fighting each other when the heroes arrive. The party can sit back and let the factions weaken each other, manipulate the chaos to their advantage, or attack both sides."
+      },
+      {
+        "name": "Unique: Environmental Ally",
+        "text": "Heroes gain an advantage from the environment, a rampaging beast, a structure collapsing, or a natural disaster to help turn the tide. Properly foreshadow what is coming and allow them to set up a cool moment, otherwise they can feel cheated."
+      },
+      {
+        "name": "Unique: Environmental Catastrophe",
+        "text": "The environment itself is the main challenge: rivers of lava, throwable explosive mushrooms, collapsing caves, a sinking ship."
+      },
+      {
+        "name": "Unique: Enraged Baddies",
+        "text": "Each time something happens (a bad guy takes damage, they lose an ally, etc.) their damage increases."
+      },
+      {
+        "name": "Unique: Ethereal Enemies",
+        "text": "The bad guys are ghosts, shadows, or other ethereal beings that phase in and out of the material plane. They're immune to damage during certain phases, forcing the heroes to adapt their timing and tactics."
+      },
+      {
+        "name": "Unique: Grudge Match",
+        "text": "An otherwise easy encounter but all of the bad guys ONLY attack one hero (a bounty, an offended warlord, a curse?). Make sure your players know ahead of time so it doesn't feel unfair; they will have to greatly change up their typical tactics."
+      },
+      {
+        "name": "Unique: Illusory Enemies",
+        "text": "Bad guys that create illusions, making attacks miss more often, or that can redirect attacks against allies. Special care must be taken to see through the illusions and hit the right targets."
+      },
+      {
+        "name": "Unique: Impending Doom",
+        "text": "An encounter that would otherwise be far too difficult, but the heroes get an extra round or two before the enemies can properly engage: enemies with no ranged attacks starting very far away, enemies that need to wake up or \"charge up\" before acting."
+      },
+      {
+        "name": "Unique: Interlopers",
+        "text": "Another faction arrives while the heroes are already engaged in combat. The bad guys ask for assistance — the heroes could fight both sides or convince the newcomers to join their side instead."
+      },
+      {
+        "name": "Unique: Manastorm",
+        "text": "All spells have a reduced mana cost, even as low as 0 mana. Casting spells may damage the caster instead (e.g., 1d6/mana spent)."
+      },
+      {
+        "name": "Unique: Mid-air Combat",
+        "text": "Enemies that fly, heroes that don't is a great classic — particularly when the bad guys can pluck the heroes off the ground, fly high, and let gravity do the rest. Alternatively, give heroes flight and let them strafe and pick off the bad guys."
+      },
+      {
+        "name": "Unique: Mounted Combat",
+        "text": "Heroes fight while mounted on beasts that are running, climbing, flying, or swimming!"
+      },
+      {
+        "name": "Unique: Moving Hazard",
+        "text": "Heroes fight on a collapsing bridge, in a building that is burning down, or on a battlefield under attack by siege weapons. Heroes have to continually move — or die!"
+      },
+      {
+        "name": "Unique: Non-combatants",
+        "text": "Bad guys interspersed with innocent bystanders or other precious resources that must not be harmed."
+      },
+      {
+        "name": "Unique: Oops, All Minions!",
+        "text": "Heroes can face a TREMENDOUS amount of minions. This shines when heroes have access to AoE abilities and rewards players who position themselves strategically."
+      },
+      {
+        "name": "Unique: Pitch Black",
+        "text": "Monsters attack in the dark, heroes can't see, any light sources are magically snuffed out. Cannot Interpose or Defend against unseen attacks."
+      },
+      {
+        "name": "Unique: Poor Tactics (Dumb Enemies)",
+        "text": "A very hard encounter, but the enemies do their best to spread damage out equally across the heroes and otherwise make obvious tactical blunders."
+      },
+      {
+        "name": "Unique: Push 'em Off!",
+        "text": "Battle at very great heights; the most efficient way to win (or lose) is to push others off the edge, or where forced movement is otherwise greatly incentivized."
+      },
+      {
+        "name": "Unique: Puzzle Combat",
+        "text": "A puzzle that must be solved mid-fight: enemies that are invulnerable while standing in a certain place, or until a device is turned off or destroyed, or a ritual is disrupted."
+      },
+      {
+        "name": "Unique: Reinforce!",
+        "text": "Enemies run away for reinforcements when bloodied or half of their numbers are taken down."
+      },
+      {
+        "name": "Unique: Split the Party!",
+        "text": "Physically split the party in an interesting way: melee heroes on one side, ranged heroes on the other; make them fight in ways they normally don't."
+      },
+      {
+        "name": "Unique: Stealthy Take Down",
+        "text": "Loud noises attract more enemies!"
+      },
+      {
+        "name": "Unique: Thorns",
+        "text": "Enemies have very few HP; any overkill damage is dealt back at the heroes."
+      },
+      {
+        "name": "Unique: Tight Quarters",
+        "text": "Unusually small room/platform, or a location crowded with obstacles."
+      },
+      {
+        "name": "Unique: Traps Abound!",
+        "text": "A location filled with traps and environmental hazards that can be used against the heroes or bad guys."
+      },
+      {
+        "name": "Unique: Turncoats",
+        "text": "Bad guys (honestly or dishonestly) negotiate to aid the heroes against a common foe or threat."
+      },
+      {
+        "name": "Unique: Vehicular Combat",
+        "text": "Heroes fight bad guys while piloting a vehicle traveling at speed."
+      },
+      {
+        "name": "Unique: Waves Upon Waves",
+        "text": "Heroes can face FAR more bad guys if they appear over time rather than all at once. Add more enemies each round and watch your heroes rack up the kills! Have a good reason for the baddies to show up over time (summoning portals, spread throughout a hideout, an arena challenge)."
+      },
+      {
+        "name": "Unique: We Give Up!",
+        "text": "Enemies who give up and run away once their numbers are fewer than the heroes (they may or may not return during the next encounter)."
+      },
+      {
+        "name": "Monster Builder",
+        "text": "Use the Monster Builder table for your monster's stats; you can also mix and match stats from different levels. For each special ability added (e.g. the Kobold's \"Noooo!\"), lower the HP or damage 1 step or treat the monster as 1 step stronger. Example: for a glass cannon (mage or assassin), use damage from 1–5 rows higher and HP from an equal number of rows lower — a level 5 mage might have 34 HP and deal 26 damage per round; give it a teleport and it's as strong as a level 6 monster. For a tanky creature, lower the damage and increase the HP/Armor. Columns: HP (No Armor / M Armor / H Armor), Damage per round, Attack sample dice, Save DC, CR equivalent. (p.29)"
+      },
+      {
+        "name": "Monster Level 1/4",
+        "text": "HP 12 (no armor) / 9 (M) / 7 (H). Damage per round 3. Attack sample dice 1d4+1. Save DC 9. CR equiv. 1/8."
+      },
+      {
+        "name": "Monster Level 1/3",
+        "text": "HP 15 (no armor) / 11 (M) / 8 (H). Damage per round 5. Attack sample dice 1d6+2. Save DC 9. CR equiv. 1/4."
+      },
+      {
+        "name": "Monster Level 1/2",
+        "text": "HP 18 (no armor) / 15 (M) / 11 (H). Damage per round 7. Attack sample dice 1d6+3. Save DC 10. CR equiv. 1/4."
+      },
+      {
+        "name": "Monster Level 1",
+        "text": "HP 26 (no armor) / 20 (M) / 16 (H). Damage per round 11. Attack sample dice 2d8+2 or (2×) 1d8+1. Save DC 10. CR equiv. 1/2."
+      },
+      {
+        "name": "Monster Level 2",
+        "text": "HP 34 (no armor) / 27 (M) / 20 (H). Damage per round 13. Attack sample dice 2d8+4 or (2×) 1d8+3. Save DC 11. CR equiv. 1."
+      },
+      {
+        "name": "Monster Level 3",
+        "text": "HP 41 (no armor) / 33 (M) / 25 (H). Damage per round 15. Attack sample dice 2d8+6 or (2×) 1d8+4. Save DC 11. CR equiv. 1."
+      },
+      {
+        "name": "Monster Level 4",
+        "text": "HP 49 (no armor) / 39 (M) / 29 (H). Damage per round 18. Attack sample dice 2d8+9 or (2×) 1d8+5. Save DC 12. CR equiv. 2."
+      },
+      {
+        "name": "Monster Level 5",
+        "text": "HP 58 (no armor) / 46 (M) / 35 (H). Damage per round 19. Attack sample dice 2d8+10 or (2×) 1d8+6. Save DC 12. CR equiv. 2."
+      },
+      {
+        "name": "Monster Level 6",
+        "text": "HP 68 (no armor) / 54 (M) / 41 (H). Damage per round 21. Attack sample dice 2d8+12 or (2×) 1d8+7. Save DC 13. CR equiv. 3."
+      },
+      {
+        "name": "Monster Level 7",
+        "text": "HP 79 (no armor) / 63 (M) / 47 (H). Damage per round 24. Attack sample dice 3d8+10 or (2×) 2d8+4. Save DC 13. CR equiv. 3."
+      },
+      {
+        "name": "Monster Level 8",
+        "text": "HP 91 (no armor) / 73 (M) / 55 (H). Damage per round 26. Attack sample dice 3d8+12 or (2×) 2d8+5. Save DC 14. CR equiv. 4."
+      },
+      {
+        "name": "Monster Level 9",
+        "text": "HP 104 (no armor) / 83 (M) / 62 (H). Damage per round 28. Attack sample dice 4d8+10 or (2×) 2d8+6. Save DC 14. CR equiv. 4."
+      },
+      {
+        "name": "Monster Level 10",
+        "text": "HP 118 (no armor) / 94 (M) / 71 (H). Damage per round 30. Attack sample dice 4d8+12 or (2×) 2d8+7. Save DC 15. CR equiv. 5."
+      },
+      {
+        "name": "Monster Level 11",
+        "text": "HP 133 (no armor) / 106 (M) / 80 (H). Damage per round 33. Attack sample dice 5d8+11 or (2×) 3d8+3. Save DC 15. CR equiv. 6."
+      },
+      {
+        "name": "Monster Level 12",
+        "text": "HP 149 (no armor) / 119 (M) / 89 (H). Damage per round 35. Attack sample dice 5d8+13 or (2×) 3d8+4. Save DC 16. CR equiv. 7."
+      },
+      {
+        "name": "Monster Level 13",
+        "text": "HP 166 (no armor) / 132 (M) / 100 (H). Damage per round 38. Attack sample dice 6d8+11 or (2×) 3d8+6. Save DC 16. CR equiv. 8."
+      },
+      {
+        "name": "Monster Level 14",
+        "text": "HP 184 (no armor) / 147 (M) / 110 (H). Damage per round 40. Attack sample dice 6d8+13 or (2×) 3d8+7. Save DC 17. CR equiv. 9."
+      },
+      {
+        "name": "Monster Level 15",
+        "text": "HP 203 (no armor) / 162 (M) / 122 (H). Damage per round 43. Attack sample dice 7d8+11 or (2×) 3d8+8. Save DC 17. CR equiv. 9."
+      },
+      {
+        "name": "Monster Level 16",
+        "text": "HP 223 (no armor) / 178 (M) / 134 (H). Damage per round 45. Attack sample dice 7d8+13 or (2×) 4d8+5. Save DC 18. CR equiv. 10."
+      },
+      {
+        "name": "Monster Level 17",
+        "text": "HP 244 (no armor) / 195 (M) / 146 (H). Damage per round 48. Attack sample dice 8d8+12 or (2×) 4d8+6. Save DC 18. CR equiv. 11."
+      },
+      {
+        "name": "Monster Level 18",
+        "text": "HP 266 (no armor) / 213 (M) / 160 (H). Damage per round 50. Attack sample dice 8d8+14 or (2×) 4d8+7. Save DC 19. CR equiv. 12."
+      },
+      {
+        "name": "Monster Level 19",
+        "text": "HP 289 (no armor) / 231 (M) / 173 (H). Damage per round 52. Attack sample dice 9d8+12 or (2×) 4d8+8. Save DC 19. CR equiv. 13."
+      },
+      {
+        "name": "Monster Level 20",
+        "text": "HP 313 (no armor) / 250 (M) / 189 (H). Damage per round 54. Attack sample dice 9d8+13 or (2×) 4d8+9. Save DC 20. CR equiv. 14."
+      },
+      {
+        "name": "Monster Die Size",
+        "text": "Default to d8 for custom monsters — it offers a balanced chance of hitting, missing, and critting. Any die size is fine as long as overall damage per round stays consistent. d4: Undead (slow, with BIG bonus damage). d6: Goblins (small, chaotic, likely to miss or crit). d8: Humans (balanced and reliable attackers). d10: Beasts (stronger than humans). d12: Giants (superhumanly strong/accurate). d20: The mightiest creatures (massive damage)."
+      },
+      {
+        "name": "Flavorful Monster Abilities",
+        "text": "Once you have the base stats, you can optionally add a cool flavorful ability to make monsters feel and play differently. Abilities can be passive or trigger \"On Movement,\" \"On Attack,\" \"On Miss,\" \"On Hit,\" \"On Damage,\" \"On Crit,\" \"On Death,\" and more. (p.30)"
+      },
+      {
+        "name": "Ability: Acid Blood",
+        "text": "Melee attackers take half the HP lost in return as acid damage."
+      },
+      {
+        "name": "Ability: Aggressive",
+        "text": "+X speed if moving toward enemies."
+      },
+      {
+        "name": "Ability: Blinding Spit",
+        "text": "Spits a blinding substance at a target within range. The target must make a save or be blinded for 1 round."
+      },
+      {
+        "name": "Ability: Bloodthirsty",
+        "text": "Has advantage on attacks against Bloodied targets."
+      },
+      {
+        "name": "Ability: Brute",
+        "text": "Attacks also knockback a number of spaces equal to the primary die rolled."
+      },
+      {
+        "name": "Ability: Brawler",
+        "text": "Extra damage, can only attack in melee."
+      },
+      {
+        "name": "Ability: Burning Aura",
+        "text": "Creatures that start their turn adjacent to this monster take 1d6 fire damage."
+      },
+      {
+        "name": "Ability: Climbing",
+        "text": "Can traverse walls or ceilings normally."
+      },
+      {
+        "name": "Ability: Controlling",
+        "text": "Creates/immune to difficult terrain."
+      },
+      {
+        "name": "Ability: Disgusting/Venomous/Heavy Blows",
+        "text": "Attacks also Daze the target."
+      },
+      {
+        "name": "Ability: Disintegrating Armor",
+        "text": "Starts with Heavy Armor, on crit degrades to Medium, then to none."
+      },
+      {
+        "name": "Ability: Doom",
+        "text": "Attacks also Wound the target."
+      },
+      {
+        "name": "Ability: Explosive Death",
+        "text": "Explode on death, dealing 2d6 damage to creatures within reach."
+      },
+      {
+        "name": "Ability: FAST",
+        "text": "Reaction: 1/round. Force a reroll with disadvantage on an attack."
+      },
+      {
+        "name": "Ability: Fearsome",
+        "text": "Frighten enemies within Range on a failed WIL save. 1/encounter."
+      },
+      {
+        "name": "Ability: Flying",
+        "text": "Flying speed and immune to Opportunity Attacks. May FALL when crit (1d6 damage/10 ft. fallen, and lands Prone)."
+      },
+      {
+        "name": "Ability: Formation",
+        "text": "Armor increases 1 step for each adjacent ally (None, Med, Heavy)."
+      },
+      {
+        "name": "Ability: Frenzied",
+        "text": "Deals extra damage or has faster speed while damaged."
+      },
+      {
+        "name": "Ability: Grappler",
+        "text": "On hit: Grapples."
+      },
+      {
+        "name": "Ability: Gravity Manipulator",
+        "text": "Can pull or push enemies within reach."
+      },
+      {
+        "name": "Ability: Hates the Light",
+        "text": "Attacks the hero holding light."
+      },
+      {
+        "name": "Ability: Hypnotic Gaze",
+        "text": "Forces enemies to make a WIL save or be confused for 1 round."
+      },
+      {
+        "name": "Ability: Invulnerable",
+        "text": "Immune to damage until crit."
+      },
+      {
+        "name": "Ability: Mounted",
+        "text": "Faster movement and deals extra damage after moving toward an enemy."
+      },
+      {
+        "name": "Ability: Obstinate",
+        "text": "When attacking a target with disadvantage, treat the roll as if it had advantage instead."
+      },
+      {
+        "name": "Ability: Pack Tactics",
+        "text": "Advantage on attacks when an ally is adjacent to the target."
+      },
+      {
+        "name": "Ability: Parry",
+        "text": "Attacks against them miss on a 1 and 2."
+      },
+      {
+        "name": "Ability: Ranged",
+        "text": "Extra damage; can only attack at range."
+      },
+      {
+        "name": "Ability: Retaliate",
+        "text": "Attacks the first creature who attacks them in melee each round."
+      },
+      {
+        "name": "Ability: Savage",
+        "text": "Always crits Grappled creatures."
+      },
+      {
+        "name": "Ability: Shifty",
+        "text": "Can move after being attacked."
+      },
+      {
+        "name": "Ability: Silencer",
+        "text": "Attacks silence enemies (making them unable to cast spells or perform other actions that require the voice)."
+      },
+      {
+        "name": "Ability: Sneak",
+        "text": "Invisible until they attack."
+      },
+      {
+        "name": "Ability: Spiked",
+        "text": "When hit by a melee attack, the attacker takes 1d4 piercing damage in return."
+      },
+      {
+        "name": "Ability: Standard Bearer",
+        "text": "Buffs nearby allies, reducing the damage they take or increasing the damage they do (see Kobold Clanger or Doomsayer Cultist)."
+      },
+      {
+        "name": "Ability: Sturdy/Undying",
+        "text": "The first time the monster would die, they have 1 HP instead."
+      },
+      {
+        "name": "Ability: Summoner",
+        "text": "Calls minions to their aid each round."
+      },
+      {
+        "name": "Ability: Tricky",
+        "text": "Can swap places with allies or enemies."
+      },
+      {
+        "name": "Ability: Vicious",
+        "text": "Crits are Vicious (roll 1 additional die)."
+      },
+      {
+        "name": "Ability: Warping Touch",
+        "text": "On hit: teleport target X spaces."
+      },
+      {
+        "name": "Ability: Webslinger",
+        "text": "Can immobilize a target with webs when hit or crit."
+      },
+      {
+        "name": "Legendary Monster Builder",
+        "text": "Legendary monsters are balanced to last long enough for heroes to each get a chance to do something cool, and short enough to not drag on (roughly 15 hero turns to get to the Last Stand, then 2–4 additional turns). They typically have 2 actions to choose from: one that allows them to move (or has other utility) and deals a small amount of damage, and another that deals big damage if they're already in position. A good legendary monster feels almost puzzle-like, encouraging heroes to think differently, move, and use teamwork. Unlike normal encounters, the numbers are based off the Party Level and stay the same regardless of the number of heroes. For an easier encounter use the stats 1 or 2 levels lower; more challenging, 1 or 2 levels higher. Legendary monsters typically have at least Medium armor; if unarmored make sure they have some other defensive ability. (p.43)"
+      },
+      {
+        "name": "Legendary Party Level 1",
+        "text": "HP 50 (Med Armor) / 35 (Hev Armor). Last Stand 10. Save DC 10. Attack damage small 8 / big 16."
+      },
+      {
+        "name": "Legendary Party Level 2",
+        "text": "HP 75 (Med Armor) / 55 (Hev Armor). Last Stand 20. Save DC 11. Attack damage small 9 / big 18."
+      },
+      {
+        "name": "Legendary Party Level 3",
+        "text": "HP 100 (Med Armor) / 75 (Hev Armor). Last Stand 30. Save DC 11. Attack damage small 10 / big 20."
+      },
+      {
+        "name": "Legendary Party Level 4",
+        "text": "HP 125 (Med Armor) / 95 (Hev Armor). Last Stand 40. Save DC 12. Attack damage small 11 / big 22."
+      },
+      {
+        "name": "Legendary Party Level 5",
+        "text": "HP 150 (Med Armor) / 115 (Hev Armor). Last Stand 50. Save DC 12. Attack damage small 12 / big 24."
+      },
+      {
+        "name": "Legendary Party Level 6",
+        "text": "HP 175 (Med Armor) / 135 (Hev Armor). Last Stand 60. Save DC 13. Attack damage small 13 / big 26."
+      },
+      {
+        "name": "Legendary Party Level 7",
+        "text": "HP 200 (Med Armor) / 155 (Hev Armor). Last Stand 70. Save DC 13. Attack damage small 14 / big 28."
+      },
+      {
+        "name": "Legendary Party Level 8",
+        "text": "HP 225 (Med Armor) / 175 (Hev Armor). Last Stand 80. Save DC 14. Attack damage small 15 / big 30."
+      },
+      {
+        "name": "Legendary Party Level 9",
+        "text": "HP 250 (Med Armor) / 195 (Hev Armor). Last Stand 90. Save DC 14. Attack damage small 16 / big 32."
+      },
+      {
+        "name": "Legendary Party Level 10",
+        "text": "HP 275 (Med Armor) / 215 (Hev Armor). Last Stand 100. Save DC 15. Attack damage small 17 / big 34."
+      },
+      {
+        "name": "Legendary Party Level 11",
+        "text": "HP 300 (Med Armor) / 235 (Hev Armor). Last Stand 110. Save DC 15. Attack damage small 18 / big 36."
+      },
+      {
+        "name": "Legendary Party Level 12",
+        "text": "HP 325 (Med Armor) / 255 (Hev Armor). Last Stand 120. Save DC 16. Attack damage small 19 / big 38."
+      },
+      {
+        "name": "Legendary Party Level 13",
+        "text": "HP 350 (Med Armor) / 275 (Hev Armor). Last Stand 130. Save DC 16. Attack damage small 20 / big 40."
+      },
+      {
+        "name": "Legendary Party Level 14",
+        "text": "HP 375 (Med Armor) / 295 (Hev Armor). Last Stand 140. Save DC 17. Attack damage small 21 / big 42."
+      },
+      {
+        "name": "Legendary Party Level 15",
+        "text": "HP 400 (Med Armor) / 315 (Hev Armor). Last Stand 150. Save DC 17. Attack damage small 22 / big 44."
+      },
+      {
+        "name": "Legendary Party Level 16",
+        "text": "HP 425 (Med Armor) / 335 (Hev Armor). Last Stand 160. Save DC 18. Attack damage small 23 / big 46."
+      },
+      {
+        "name": "Legendary Party Level 17",
+        "text": "HP 450 (Med Armor) / 355 (Hev Armor). Last Stand 170. Save DC 18. Attack damage small 24 / big 48."
+      },
+      {
+        "name": "Legendary Party Level 18",
+        "text": "HP 475 (Med Armor) / 375 (Hev Armor). Last Stand 180. Save DC 19. Attack damage small 25 / big 50."
+      },
+      {
+        "name": "Legendary Party Level 19",
+        "text": "HP 500 (Med Armor) / 395 (Hev Armor). Last Stand 190. Save DC 19. Attack damage small 26 / big 52."
+      },
+      {
+        "name": "Legendary Party Level 20",
+        "text": "HP 525 (Med Armor) / 415 (Hev Armor). Last Stand 200. Save DC 20. Attack damage small 27 / big 54."
+      }
+    ],
+    "quickRules": [
+      {
+        "title": "Running Monsters",
+        "text": "The GM controls the monsters during combat. Monsters do not use Heroic Actions/Reactions. They can move, use the actions listed on their stat block, and their turn ends. Monsters die when they reach 0 HP. (p.24)"
+      },
+      {
+        "title": "Default Monster Stats",
+        "text": "Unless otherwise noted, monsters are medium-sized, unarmored, have speed 6 (can replace an attack to move again, or replace either one of those to retry a save), attacks have Reach 1, and roll 1d20 for all saves (some monsters may have advantaged/disadvantaged saves or checks when appropriate)."
+      },
+      {
+        "title": "Reading a Stat Block",
+        "text": "Name, LVL and size; the number by the name is the creature's Hit Points; M or H is its Armor; a speed note (fly, burrow, etc.) if it differs from the default. E.g. a Goblin (LVL 1/3, 15 HP): if he ever takes a total of 15 or more damage he dies; LVL 1/3 means 3 goblins are about as strong as a level 1 hero."
+      },
+      {
+        "title": "Medium Armor: Just the Dice",
+        "text": "Monsters with Medium Armor (M) ignore all damage modifiers from stats and other effects, taking damage from the sum of the dice only."
+      },
+      {
+        "title": "Heavy Armor: Half the Dice",
+        "text": "Monsters with Heavy Armor (H) ignore damage modifiers and take half the sum of the dice (rounding up)."
+      },
+      {
+        "title": "Dealing With Armor",
+        "text": "Heroes' critical hits, some spells, and damage type vulnerabilities ignore monster armor altogether — certain weapons and spells are better or worse against armored foes. Remind players about the Assess action. Tell your players when a monster has armor — it shouldn't be a secret (that goblin is holding a shield: Medium Armor; a golem made of metal: Heavy Armor)."
+      },
+      {
+        "title": "Monster vs Hero Armor",
+        "text": "Why does it work differently? GMs have enough to juggle without deciding when to Defend against a dozen attacks each round. Heroes have only one character to focus on, so the added tactical depth is an enjoyable detail rather than a burden."
+      },
+      {
+        "title": "Flunkies",
+        "text": "Flunkies are like regular monsters, but with one key difference: they can't crit. Ideal opponents for new or low-level heroes."
+      },
+      {
+        "title": "Minions",
+        "text": "Minions are low-threat monsters that are easy to kill individually but dangerous in numbers. No HP to Track: any damage kills a minion. Easy Attacks: each minion attacks with a single damage die, cannot crit, and misses on a roll of 1. Simplified Defense: when multiple minions attack a single target, their damage is combined and counts as a single attack, so heroes can Defend or Interpose against them all at once."
+      },
+      {
+        "title": "Minions Act Together!",
+        "text": "Rather than moving minions one at a time, all minions attacking a particular hero should move and attack at the same time. E.g. 5 minions move next to Grudge and attack him: roll and add up 5d6 (ignoring any 1s)."
+      },
+      {
+        "title": "Minion Die Size",
+        "text": "Suggested minion die size by party level: 1–3 d4, 3–5 d6, 5–10 d8, 10–13 d10, 13–17 d12, 17–20 d20. Optionally use the die size as durability: excess damage from an attack can carry over to other minions in range."
+      },
+      {
+        "title": "Encounter Difficulty",
+        "text": "Add up the heroes' total levels. Monster levels < 50% of that: Easy. ~75%: Medium. 100%: Hard. 100–125%: Deadly. 150%+: Very Deadly. Use 1–4 monsters per hero (excluding minions); 2–5 encounters per session is typical."
+      },
+      {
+        "title": "Armor Variety",
+        "text": "Aim for roughly 60% unarmored, 30% Medium Armor, 10% Heavy Armor foes in a session — use armor to add flavor, not frustration."
+      },
+      {
+        "title": "Building Monsters",
+        "text": "Use the Monster Builder table; for each special ability added, lower HP or damage 1 step or treat the monster as 1 step stronger. Default to d8 damage dice (d4 undead, d6 goblins, d10 beasts, d12 giants, d20 the mightiest)."
+      },
+      {
+        "title": "Legendary Monsters",
+        "text": "Solo monsters should almost always be Legendary. Legendary monsters act after EACH hero's turn (not after minions, commoners or followers). They have saves like heroes (STR++ = advantage 2, WIL– = disadvantage), gain a Bloodied ability at half HP, and at 0 HP enter their Last Stand — dying, with dangerous new capabilities, until a small amount of additional damage finishes them."
+      },
+      {
+        "title": "Legendary Optional Actions",
+        "text": "Instead of a listed attack a legendary monster may: Wind Up/Breathe In (regain a single-use ability); Terrible Roar/Creepy Monologue/Taunt (WIL save or Frightened for 1 turn); Toss Around/Telekinetic Shove (STR save or moved, Prone, etc.); Size Up/Spot Weakness/Pin Down (DEX save; its next attack has advantage and cannot be Interposed)."
+      },
+      {
+        "title": "Legendary Teams",
+        "text": "\"Solo\" encounters need not be strictly solo: legendary creatures may have pets, summon minions, or come in groups. Have ALL of them attack after each hero, or take turns attacking."
+      },
+      {
+        "title": "Family Traits",
+        "text": "Each bestiary family shares a trait that applies to every member (e.g. Kobolds' Nooooo!, Goblins' Haha, Missed Me!, Bandits' Parry, Undead's Unliving, Undying). Sub-groups (Stirges, Mimics, Oozes, Gnolls, Briarbanes, Cultists) have their own trait."
+      },
+      {
+        "title": "Release Valves",
+        "text": "A TPK is sometimes the right outcome when heroes forge ahead heedless of telegraphed danger. When it's NOT the players' fault (unexpected, unfair, unintended), a TPK should NOT happen — keep a release valve (e.g. a Gem of Escape) so you have leeway in encounter design. (p.18)"
+      },
+      {
+        "title": "Rewards",
+        "text": "The most memorable magical items are a bit strange, have a trade-off, are temporary, require creativity, or create memorable moments — flat stat boosts are quickly forgotten. A simple item with a cool name and description can be just as exciting. Tailor rewards to your table and adjust challenge accordingly."
+      },
+      {
+        "title": "Resting & Healing as Rewards",
+        "text": "When a party rests is up to the GM. One-time healing or directions to a hidden oasis can be great quest rewards. Reward different classes: the Hunter spots rare herbs, the Stormshifter befriends an animal that shares a safe hideaway, the Shepherd or Oathsworn cleanses a holy site."
+      }
+    ]
+  }
+}
