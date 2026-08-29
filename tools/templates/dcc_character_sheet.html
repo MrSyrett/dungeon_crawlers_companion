@@ -407,6 +407,19 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 .rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#c8a020;margin:12px 0 3px;}
 .rules-list h4:first-child{margin-top:0;}
 .rules-list p{font-family:'Barlow',sans-serif;font-size:12px;line-height:1.5;color:#ccc;}
+/* Found-loot drops broadcast from the GM screen (claim one item each). */
+.log-foundloot{border-left:3px solid #c8a020 !important;background:#221f16 !important;}
+.log-system{border-left:3px solid #c8a020 !important;background:#241f14 !important;}
+.fl-head,.sys-head{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#e0c060;}
+.fl-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:#f0e2b0;margin-top:2px;}
+.fl-desc,.sys-body{font-size:11px;color:#b7a98a;margin-top:2px;line-height:1.4;}
+.fl-items{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
+.fl-item{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:11px;color:#cfc6a8;}
+.fl-item-name{flex:1;min-width:0;}
+.fl-note{color:#8a8570;font-style:italic;}
+.fl-btn{flex:0 0 auto;background:#c8a020;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.fl-btn:hover:not(:disabled){background:#e0b83a;}
+.fl-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
@@ -3121,8 +3134,9 @@ const _lootEsc = (s)=>String(s==null?'':s).replace(/</g,'&lt;');
 
 // ── Loot-box state (per browser) — so opened/claimed boxes survive a reload
 // and don't get re-added when the roll history replays. ──
-function _lootRead(key){ try { return JSON.parse(localStorage.getItem(key)||'{}'); } catch(e){ return {}; } }
-function _lootWrite(key,obj){ try { localStorage.setItem(key, JSON.stringify(obj)); } catch(e){} }
+const _lootMem = {};
+function _lootRead(key){ if(!_lootMem[key]) { try { _lootMem[key] = JSON.parse(localStorage.getItem(key)||'{}') || {}; } catch(e){ _lootMem[key] = {}; } } return _lootMem[key]; }
+function _lootWrite(key,obj){ _lootMem[key] = obj; try { localStorage.setItem(key, JSON.stringify(obj)); } catch(e){} }
 function _lootOpened(){ return _lootRead('dcc_loot_opened'); }
 function _lootClaimed(){ return _lootRead('dcc_loot_claimed'); }
 function _markOpened(boxId){ const o=_lootOpened(); o[boxId]=1; _lootWrite('dcc_loot_opened',o); }
@@ -3235,6 +3249,7 @@ function _lootReveal(card){
 // A claim broadcast from another player locks the box on everyone else's log.
 function applyLootClaim(roll){
   let p={}; try { p = JSON.parse(roll.detail||'{}'); } catch(e){ return; }
+  if(p.dropId && p.itemIndex != null) { applyFoundClaim(roll); return; }
   if(!p.boxId) return;
   _markClaimed(p.boxId, p.by || roll.source || 'Someone');
   const card = document.querySelector('.log-lootbox[data-box-id="'+(window.CSS&&CSS.escape?CSS.escape(p.boxId):p.boxId)+'"]');
@@ -3243,6 +3258,57 @@ function applyLootClaim(roll){
     if(act) act.innerHTML = '<button class="lb-btn" disabled>Claimed by '+_lootEsc(p.by||'Someone')+'</button>';
   }
 }
+
+// ═══ FOUND LOOT (drops from the GM screen; claim one item each) ═══════════
+// Claim state lives in memory and mirrors to localStorage when it's available.
+const _flMem = {};
+function _flRead(k){ if(!_flMem[k]) { try { _flMem[k] = JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch(e) { _flMem[k] = {}; } } return _flMem[k]; }
+function _flWrite(k, v){ _flMem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+function _flClaimed(dropId){ const all = _flRead('dcc_found_claimed'); return all[dropId] || {}; }
+function _flMarkClaimed(dropId, idx, by){ const all = _flRead('dcc_found_claimed'); (all[dropId] = all[dropId] || {})[idx] = by; _flWrite('dcc_found_claimed', all); }
+function renderFoundLoot(roll){
+  let p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e) { p = {}; }
+  const items = Array.isArray(p.items) ? p.items : [];
+  const dropId = p.dropId || ('fl-' + (roll.id || Math.random().toString(36).slice(2)));
+  const claimed = _flClaimed(dropId), me = campaignPlayerName();
+  const div = document.createElement('div');
+  div.className = 'log-entry remote log-foundloot'; div.dataset.dropId = dropId; div._flItems = items;
+  const rows = items.map((it, i) => {
+    const by = claimed[i];
+    const label = _lootEsc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + _lootEsc(it.qty) : '') + (it.notes ? ' <span class="fl-note">' + _lootEsc(it.notes) + '</span>' : '');
+    const btn = by ? '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + _lootEsc(by)) + '</button>' : '<button class="fl-btn fl-claim" data-idx="' + i + '">Claim</button>';
+    return '<li class="fl-item" data-idx="' + i + '"><span class="fl-item-name">' + label + '</span>' + btn + '</li>';
+  }).join('');
+  div.innerHTML = '<div class="fl-head">🎁 ' + _lootEsc(roll.label || 'FOUND LOOT') + '</div>' + (roll.result ? '<div class="fl-name">' + _lootEsc(roll.result) + '</div>' : '') + (p.note ? '<div class="fl-desc">' + _lootEsc(p.note) + '</div>' : '') + (rows ? '<ul class="fl-items">' + rows + '</ul>' : '');
+  return div;
+}
+function _flRenderSystemEntryUnused(roll){
+  const div = document.createElement('div'); div.className = 'log-entry remote log-system';
+  div.innerHTML = '<div class="sys-head">' + _lootEsc(roll.label || 'MESSAGE') + '</div>' + (roll.result ? '<div class="fl-name">' + _lootEsc(roll.result) + '</div>' : '') + (roll.detail ? '<div class="sys-body">' + _lootEsc(roll.detail) + '</div>' : '');
+  return div;
+}
+function applyFoundClaim(roll){
+  let p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e) { return; }
+  if(!p.dropId || p.itemIndex == null) return;
+  _flMarkClaimed(p.dropId, p.itemIndex, p.by || roll.source || 'Someone'); _flRefreshCard(p.dropId);
+}
+function _flRefreshCard(dropId){
+  const card = [...document.querySelectorAll('.log-foundloot')].find(c => c.dataset.dropId === dropId); if(!card) return;
+  const claimed = _flClaimed(dropId), me = campaignPlayerName();
+  card.querySelectorAll('.fl-item').forEach(li => { const i = parseInt(li.dataset.idx, 10), by = claimed[i], cur = li.querySelector('.fl-btn');
+    if(by && cur && !cur.disabled) cur.outerHTML = '<button class="fl-btn" disabled>' + (me && by.toLowerCase() === me.toLowerCase() ? 'Yours ✓' : 'Claimed by ' + _lootEsc(by)) + '</button>'; });
+}
+document.getElementById('log-entries').addEventListener('click', function(e) {
+  const btn = e.target.closest('.fl-claim'); if(!btn) return;
+  const card = btn.closest('.log-foundloot'); if(!card) return;
+  const dropId = card.dataset.dropId, idx = parseInt(btn.dataset.idx, 10);
+  if(_flClaimed(dropId)[idx]) return;
+  const it = (card._flItems || [])[idx]; if(!it) return;
+  if(lootAddItems([it]) === false) return;
+  const me = campaignPlayerName(); _flMarkClaimed(dropId, idx, me); _flRefreshCard(dropId);
+  if(typeof campaignBroadcast === 'function') campaignBroadcast('CLAIMED', it.item || 'Item', JSON.stringify({ dropId, itemIndex: idx, by: me }), 'lootclaim');
+  if(typeof scheduleAutosave === "function") scheduleAutosave();
+});
 
 // Remote entries render directly (never through addLog, so they don't rebroadcast)
 function campaignAddRemote(roll) {
@@ -3253,6 +3319,7 @@ function campaignAddRemote(roll) {
   if(hint) hint.remove();
   let div;
   if(roll.type==='lootbox')      div = renderLootBoxEntry(roll);
+  else if(roll.type==='foundloot')   div = renderFoundLoot(roll);
   else if(roll.type==='achievement') div = renderAchievementEntry(roll);
   else if(roll.type==='system')  div = renderSystemEntry(roll);
   else                           div = renderNormalRemote(roll);

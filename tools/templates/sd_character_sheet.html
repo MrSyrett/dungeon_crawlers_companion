@@ -374,6 +374,20 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 .rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#c8a020;margin:12px 0 3px;}
 .rules-list h4:first-child{margin-top:0;}
 .rules-list p{font-family:'Barlow',sans-serif;font-size:12px;line-height:1.5;color:#ccc;}
+/* DCC loot boxes broadcast from the GM screen (sealed until opened / claimed). */
+.log-lootbox{border-left:3px solid #c8a020 !important;background:#20211a !important;}
+.lb-head{font-family:'Barlow Condensed',sans-serif;color:#e0c060;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
+.lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#f0e2b0;margin-top:2px;}
+.lb-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9a9a78;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.lb-desc{font-size:11px;color:#b7a98a;margin-top:3px;line-height:1.4;}
+.lb-items{margin:5px 0 0;padding-left:16px;font-size:11px;color:#cfc6a8;}
+.lb-items li{margin:1px 0;}
+.lb-sealed{margin-top:5px;font-size:11px;color:#8a8570;font-style:italic;}
+.lb-note{color:#8a8570;font-style:italic;}
+.lb-actions{margin-top:6px;}
+.lb-btn{background:#c8a020;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.lb-btn:hover:not(:disabled){background:#e0b83a;}
+.lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
@@ -5144,10 +5158,57 @@ function campaignBroadcast(label, result, detail, type) {
   }).catch(()=>{});
 }
 
+// ═══ DCC LOOT BOXES (sealed boxes from the GM screen; open or claim adds every item) ═══
+function _lbRead(k){ if(!_flMem[k]) { try { _flMem[k] = JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch(e) { _flMem[k] = {}; } } return _flMem[k]; }
+function _lbWrite(k, v){ _flMem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+function _lbOpened(){ return _lbRead('sd_loot_opened'); }
+function _lbClaimed(){ return _lbRead('sd_loot_claimed'); }
+function _lbMarkOpened(id){ const o = _lbOpened(); o[id] = 1; _lbWrite('sd_loot_opened', o); }
+function _lbMarkClaimed(id, by){ const c = _lbClaimed(); c[id] = by; _lbWrite('sd_loot_claimed', c); }
+function _lbItemsHtml(items){ return (Array.isArray(items) ? items : []).map(it => '<li>' + _flEsc(it.item || '?') + (it.qty != null && String(it.qty) !== '1' && String(it.qty) !== '' ? ' ×' + _flEsc(it.qty) : '') + (it.notes ? ' <span class="lb-note">' + _flEsc(it.notes) + '</span>' : '') + '</li>').join(''); }
+function renderLootBoxEntry(roll){
+  let p = {}; try { p = JSON.parse(roll.detail || '{}'); } catch(e) { p = {}; }
+  const items = Array.isArray(p.items) ? p.items : [];
+  const boxId = p.boxId || ('lb-' + (roll.id || Math.random().toString(36).slice(2)));
+  const mode = p.mode || 'copies', to = String(p.to || '').trim(), me = campaignPlayerName();
+  const opened = !!_lbOpened()[boxId], claimedBy = _lbClaimed()[boxId];
+  const div = document.createElement('div'); div.className = 'log-entry remote log-lootbox'; div.dataset.boxId = boxId; div._lootItems = items; div._lootName = roll.result || 'Loot Box';
+  let forLabel = '', btn = '';
+  if(mode === 'named') {
+    forLabel = to ? '<div class="lb-for">For: ' + _flEsc(to) + '</div>' : '';
+    const mine = to && me && to.toLowerCase() === me.toLowerCase();
+    btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : mine ? '<button class="lb-btn lb-open">Open</button>' : '<button class="lb-btn" disabled>' + (to ? 'For ' + _flEsc(to) : 'Not for you') + '</button>';
+  } else if(mode === 'claim') {
+    btn = opened ? '<button class="lb-btn" disabled>You claimed this ✓</button>' : claimedBy ? '<button class="lb-btn" disabled>Claimed by ' + _flEsc(claimedBy) + '</button>' : '<button class="lb-btn lb-claim">Claim</button>';
+  } else { btn = opened ? '<button class="lb-btn" disabled>Opened ✓</button>' : '<button class="lb-btn lb-open">Open</button>'; }
+  const contents = opened ? (items.length ? '<ul class="lb-items">' + _lbItemsHtml(items) + '</ul>' : '') : '<div class="lb-sealed">🔒 Contents hidden until ' + (mode === 'claim' ? 'claimed' : 'opened') + '.</div>';
+  div.innerHTML = '<div class="lb-head">🎁 ' + _flEsc(roll.label || 'LOOT BOX') + '</div>' + (roll.result ? '<div class="lb-name">' + _flEsc(roll.result) + '</div>' : '') + forLabel + (p.note ? '<div class="lb-desc">' + _flEsc(p.note) + '</div>' : '') + contents + '<div class="lb-actions">' + btn + '</div>';
+  return div;
+}
+function _lbReveal(card){ const sealed = card.querySelector('.lb-sealed'); if(!sealed) return; const html = _lbItemsHtml(card._lootItems || []); if(html) { const ul = document.createElement('ul'); ul.className = 'lb-items'; ul.innerHTML = html; sealed.replaceWith(ul); } else sealed.remove(); }
+function applyLootBoxClaim(p, roll){
+  if(!p.boxId) return; _lbMarkClaimed(p.boxId, p.by || roll.source || 'Someone');
+  const card = [...document.querySelectorAll('.log-lootbox')].find(c => c.dataset.boxId === p.boxId);
+  if(card && !_lbOpened()[p.boxId]) { const act = card.querySelector('.lb-actions'); if(act) act.innerHTML = '<button class="lb-btn" disabled>Claimed by ' + _flEsc(p.by || 'Someone') + '</button>'; }
+}
+document.getElementById('log-entries').addEventListener('click', function(e) {
+  const card = e.target.closest('.log-lootbox'); if(!card) return;
+  const boxId = card.dataset.boxId; const isOpen = e.target.closest('.lb-open'), isClaim = e.target.closest('.lb-claim');
+  if(!isOpen && !isClaim) return;
+  (card._lootItems || []).forEach(it => { try { sdClaimItem(it); } catch(err) {} });
+  _lbMarkOpened(boxId); _lbReveal(card);
+  const act = card.querySelector('.lb-actions');
+  if(isClaim) { _lbMarkClaimed(boxId, campaignPlayerName()); if(act) act.innerHTML = '<button class="lb-btn" disabled>You claimed this ✓</button>'; if(typeof campaignBroadcast === 'function') campaignBroadcast('CLAIMED', card._lootName || 'Loot Box', JSON.stringify({ boxId, by: campaignPlayerName() }), 'lootclaim'); }
+  else if(act) act.innerHTML = '<button class="lb-btn" disabled>Opened ✓</button>';
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+});
+
 // Remote entries render directly (never through addLog, so they don't rebroadcast)
 function _flEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function _flRead(k){try{return JSON.parse(localStorage.getItem(k)||'{}');}catch(e){return {};}}
-function _flWrite(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+// Claim state lives in memory and mirrors to localStorage when it's available.
+const _flMem = {};
+function _flRead(k){ if(!_flMem[k]) { try { _flMem[k] = JSON.parse(localStorage.getItem(k) || '{}') || {}; } catch(e) { _flMem[k] = {}; } } return _flMem[k]; }
+function _flWrite(k,v){ _flMem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
 function _flClaimed(dropId){const all=_flRead('sd_found_claimed');return all[dropId]||{};}
 function _flMarkClaimed(dropId,idx,by){const all=_flRead('sd_found_claimed');(all[dropId]=all[dropId]||{})[idx]=by;_flWrite('sd_found_claimed',all);}
 
@@ -5240,7 +5301,8 @@ function renderFoundLoot(roll){
 // A claim broadcast (from anyone) locks that one item on every log.
 function applyFoundClaim(roll){
   let p={}; try{ p=JSON.parse(roll.detail||'{}'); }catch(e){ return; }
-  if(!p.dropId || p.itemIndex==null) return;   // ignore DCC whole-box claims
+  if(p.boxId){ applyLootBoxClaim(p, roll); return; }
+  if(!p.dropId || p.itemIndex==null) return;
   _flMarkClaimed(p.dropId, p.itemIndex, p.by||roll.source||'Someone');
   _flRefreshCard(p.dropId);
 }
@@ -5266,6 +5328,7 @@ function campaignAddRemote(roll) {
   if(hint) hint.remove();
   let div;
   if(roll.type==='foundloot')        div = renderFoundLoot(roll);
+  else if(roll.type==='lootbox')     div = renderLootBoxEntry(roll);
   else if(roll.type==='system' || roll.type==='achievement') div = renderSystemEntry(roll);
   else                               div = renderNormalRemote(roll);
   entries.insertBefore(div, entries.firstChild);
