@@ -307,7 +307,6 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="stats-col">
       <div class="section-bar gold"><span>Attributes</span></div>
       <div class="stats-grid" id="stats-grid"></div>
-      <div class="pts-note"><span>Skill dice <b id="sk-used">0D</b> / <b>7D</b> <span id="sk-flag"></span></span></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
       <div class="add-row"><select id="skill-pick"><option value="">Add a skill…</option></select><button class="small-btn ghost" onclick="addSkillPick()">+ Add</button><button class="small-btn ghost" onclick="addSkillRow({name:'',attr:'Dexterity',adds:0})" title="Blank row for a new skill">+ Custom</button></div>
 
@@ -525,8 +524,6 @@ function recalc() {
     const adds = codeOrZero(tr.querySelector('.sk-adds').value); if(tr.dataset.attr !== 'Force') used += Math.max(0, adds); else used += Math.max(0, adds - 3);
     tr.querySelector('.sk-total').textContent = toCode(rowTotal(tr));
   });
-  $('sk-used').textContent = toCode(used);
-  $('sk-flag').className = used > 21 ? 'bad' : used === 21 ? 'good' : ''; $('sk-flag').textContent = used > 21 ? '· over' : used === 21 ? '✓' : '';
   refreshWeaponRows(); updateModNote();
 }
 function onTemplateChange() {

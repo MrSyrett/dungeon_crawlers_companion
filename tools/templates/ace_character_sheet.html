@@ -320,7 +320,6 @@ select option{background:var(--input-bg);color:var(--ink);}
     <!-- LEFT: STATS + DERIVED + KARMA -->
     <div class="stats-col">
       <div class="section-bar blue"><span>Stats &amp; Focuses</span></div>
-      <div class="points-note"><span>Stat points <b id="pts-used">0</b> / <b id="pts-max">12</b> <span id="pts-flag"></span></span></div>
       <div class="stats-head"><span>Stat</span><span style="text-align:center;">Dice</span><span>Focus</span><span style="text-align:center;">Dice</span></div>
       <div id="stats-list"></div>
       <div class="power-toggle-row">
@@ -538,12 +537,6 @@ function recalc() {
     $('fd-' + s.id).textContent = on ? String(statDice(s.id, true)) : '—';
     $('fd-' + s.id).title = focusOf(s.id) ? `Roll ${s.name} + ${focusOf(s.id)} (${statDice(s.id, true)} dice)` : `Add a Focus to ${s.name} for +2 dice`;
   });
-  $('pts-used').textContent = used;
-  $('pts-max').textContent = CREATION.points;
-  const flag = $('pts-flag');
-  flag.className = ''; flag.textContent = '';
-  if(used > CREATION.points) { flag.className = 'bad'; flag.textContent = '· over — advancement?'; }
-  else if(used === CREATION.points) { flag.className = 'good'; flag.textContent = '✓'; }
 
   // Defence: Moves ×3, +6 with Dodging, min 8, + gear bonus
   const dodging = /^dodg/i.test(focusOf('moves'));

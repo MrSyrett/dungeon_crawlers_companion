@@ -279,7 +279,6 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="stats-col">
       <div class="section-bar green"><span>Stats &amp; Saves</span></div>
       <div class="stats-grid" id="stats-grid"></div>
-      <div class="pts-note"><span>Skill points <b id="sk-used">0</b> / <b id="sk-max">4</b> <span id="sk-flag"></span></span></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
 
       <div class="vitals">
@@ -480,9 +479,6 @@ function recalc() {
   { const has = !!cls(); const bb = $('build-btn'), lb = $('level-btn'); if(bb && lb) { bb.style.display = has ? 'none' : ''; lb.style.display = has ? '' : 'none'; } }
   STATS.forEach(s => { $('adv-' + s).classList.toggle('adv', saveAdv === s); $('dis-' + s).classList.toggle('dis', saveDis === s); });
   let used = 0; SKILLS.forEach(([n, s]) => { used += num($('skp-' + n).value); $('skt-' + n).textContent = (skillTotal(n, s) >= 0 ? '+' : '') + skillTotal(n, s); });
-  const max = 4 + (level() - 1) + (/\+2 shifting skill points/i.test(ancestryText()) ? 2 : 0);
-  $('sk-used').textContent = used; $('sk-max').textContent = max;
-  $('sk-flag').className = used > max ? 'bad' : used === max ? 'good' : ''; $('sk-flag').textContent = used > max ? '· over' : used === max ? '✓' : '';
   $('armor-val').textContent = armorValue(); $('init-val').textContent = (initBonus() >= 0 ? '+' : '') + initBonus(); $('speed-val').textContent = speedValue();
   const c = cls();
   $('hd-lbl').textContent = c ? 'd' + c.hitDie : '';
