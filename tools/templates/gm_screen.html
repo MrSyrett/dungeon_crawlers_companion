@@ -869,6 +869,11 @@ input[type=range].mus-seek, input[type=range].mus-vol { accent-color: var(--gold
   font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
   letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold);
 }
+/* Collapsible sections: the title toggles the body via a caret. */
+.ai-section.ai-collapsible > .ai-sec-title { cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; }
+.ai-section.ai-collapsible > .ai-sec-title::before { content: '\25be'; font-size: 9px; opacity: .8; transition: transform .12s; }
+.ai-section.ai-collapsible.collapsed > .ai-sec-title::before { content: '\25b8'; }
+.ai-section.ai-collapsible.collapsed > *:not(.ai-sec-title) { display: none !important; }
 .ai-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-width: 0; }
 .ai-row > .ai-select, .ai-row > .ai-input { flex: 1; min-width: 0; }
 .ai-input, .ai-select {
@@ -1460,7 +1465,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 // filter — both systems' data stays loaded. Persisted per browser.
 // ══════════════════════════════════════════
 (function () {
-  const SD_GENS  = ['adventure','npc','rival','monster','dungeon','encounter','shop','loot','sdfoundloot'];
+  const SD_GENS  = ['adventure','npc','rival','monster','dungeon','encounter','shop','sdfoundloot'];
   const DCC_GENS = ['dccnpc','dccneighborhood','dccmonster','dccencounter','dccloot','dccitem'];
   function readSys() { try { return localStorage.getItem('gm_system') === 'SD' ? 'SD' : 'DCC'; } catch (e) { return 'DCC'; } }
   let SYS = readSys();
@@ -2298,8 +2303,7 @@ GMScenes.renderPins();
         <option value="dungeon">Dungeon</option>
         <option value="encounter">Encounter</option>
         <option value="shop">Shop/Tavern</option>
-        <option value="loot">Treasure</option>
-        <option value="sdfoundloot">Found Loot</option>
+        <option value="sdfoundloot">Treasure</option>
         <option value="dccnpc">DCC NPC</option>
         <option value="dccneighborhood">DCC Neighborhood/Quest</option>
         <option value="dccmonster">DCC Monster</option>
@@ -2575,49 +2579,6 @@ GMScenes.renderPins();
         </div>
       </div>
 
-      <!-- ENCOUNTER PANEL (merged with Events) -->
-      <div class="gen-panel" data-panel="loot">
-        <div class="gen-controls">
-          <label class="gen-label">Monster HD / Party Level
-            <select class="gen-select" id="gen-treasure-tier">
-              <option value="1">1–3 HD (levels 1–3)</option>
-              <option value="4">4–6 HD (levels 4–6)</option>
-              <option value="7">7–9 HD (levels 7–9)</option>
-              <option value="10">10+ HD (levels 10+)</option>
-            </select>
-          </label>
-          <label class="gen-label">Type
-            <select class="gen-select" id="gen-loot-type">
-              <option value="random_all">Random (All Types)</option>
-              <option value="random">Random Magic Item</option>
-              <option value="Weapon">Weapon</option>
-              <option value="Armor">Armor</option>
-              <option value="Wand">Wand</option>
-              <option value="Ring">Ring</option>
-              <option value="Cloak">Cloak</option>
-              <option value="Boots">Boots</option>
-              <option value="Potion">Potion</option>
-              <option value="Scroll">Scroll</option>
-              <option value="table">Treasure Table Roll</option>
-              <option value="mundane">Mundane / Non-Magical Loot</option>
-              <option value="gem">Gemstone</option>
-              <option value="luxury">Luxury Item</option>
-            </select>
-          </label>
-          <label class="gen-label">Count
-            <select class="gen-select" id="gen-loot-count">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="5">5</option>
-            </select>
-          </label>
-        </div>
-        <div class="gen-results" id="gen-loot-results">
-          <div class="gen-empty">Set options and press <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Generate</div>
-        </div>
-      </div>
-
       <!-- DCC LOOT BOX PANEL (full builder — compose, roll tier, enchant, send) -->
       <div class="gen-panel" data-panel="dccloot">
         <div class="ai-scroll">
@@ -2661,25 +2622,41 @@ GMScenes.renderPins();
         </div>
       </div>
 
-      <!-- SD FOUND LOOT PANEL (full builder — visible drop, each item claimed) -->
+      <!-- TREASURE PANEL (merged: random spread + hand-picked items + magic +X,
+           all from the unified SD gear list; sends a claimable drop to the log) -->
       <div class="gen-panel" data-panel="sdfoundloot">
         <div class="ai-scroll">
           <div class="ai-section">
-            <div class="ai-sec-title">Found Loot</div>
+            <div class="ai-sec-title">Treasure</div>
             <input type="text" class="ai-input ai-fl-name" placeholder="Where it's found (e.g. Chest by the altar)">
             <div class="ai-row">
-              <select class="ai-select ai-fl-tier" title="Treasure tier">
-                <option value="1">Tier 1–3</option><option value="4">Tier 4–6</option>
-                <option value="7">Tier 7–9</option><option value="10">Tier 10+</option>
+              <select class="ai-select ai-fl-tier" title="Party Level / Monster HD — scales gold and magic bonuses">
+                <option value="1">Level 1–3</option><option value="4">Level 4–6</option>
+                <option value="7">Level 7–9</option><option value="10">Level 10+</option>
               </select>
-              <button class="btn small ghost ai-fl-roll" type="button" title="Roll a treasure spread (like the Treasure Generator)">🎲 Roll treasure</button>
+              <select class="ai-select ai-fl-type" title="What to roll">
+                <option value="random_all">Random (all)</option>
+                <option value="magic">Magic item (+X)</option>
+                <option value="weapon">Weapon</option>
+                <option value="armor">Armor</option>
+                <option value="basic">Basic gear</option>
+                <option value="coins">Coins only</option>
+              </select>
+              <select class="ai-select ai-fl-count" title="How many items to roll">
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="5">5</option>
+              </select>
+              <button class="btn small ghost ai-fl-roll" type="button" title="Roll a treasure spread from the gear list at the chosen level">🎲 Roll</button>
             </div>
             <div class="ai-cat-filters ai-fl-filters"></div>
-            <input type="text" class="ai-input ai-fl-search" placeholder="Search treasure to add…">
+            <input type="text" class="ai-input ai-fl-search" placeholder="Search gear to add…">
             <div class="ai-cat-results ai-fl-results"></div>
             <table class="ai-items"><tbody class="ai-fl-body"></tbody></table>
-            <button class="btn small ghost ai-fl-add" type="button">+ Add custom item</button>
-            <button class="btn small primary ai-fl-send" type="button">Send Found Loot</button>
+            <div class="ai-row">
+              <button class="btn small ghost ai-fl-add" type="button">+ Add custom item</button>
+              <button class="btn small ghost ai-fl-magic" type="button" title="Add one random magic weapon/armor with a +X bonus scaled to the party level">✨ Magic item (+X)</button>
+            </div>
+            <button class="btn small primary ai-fl-send" type="button">Send Treasure</button>
             <div class="ai-status ai-fl-status"></div>
           </div>
         </div>
@@ -6648,7 +6625,7 @@ window.dccEnchantItem = function(tierKey, category) {
     if(/unique/i.test(perk)) break;
   }
   const name = 'Enchanted ' + base + ' ' + dccPick(DCC_ENCHANT_EPITHETS);
-  const effect = tierKey + ' Tier — ' + perks.join(', ');
+  const effect = perks.join(', ');   // description = perks only (tier lives on the item's tier field / card tag)
   return { base: base, name: name, category: cat, slot: slot, tier: tierKey, perks: perks, effect: effect };
 };
 
@@ -8448,13 +8425,6 @@ window.init_gen = function(root) {
         wrap.appendChild(grid);
         res.appendChild(wrap);
       }
-
-    } else if(activeTab==='loot') {
-      const tier=root.querySelector('#gen-treasure-tier').value;
-      const type=root.querySelector('#gen-loot-type').value;
-      const count=parseInt(root.querySelector('#gen-loot-count').value)||1;
-      const res=root.querySelector('#gen-loot-results'); res.innerHTML='';
-      for(let i=0;i<count;i++) res.appendChild(genTreasure(tier,type));
 
     } else if(activeTab==='dccitem') {
       const cat=root.querySelector('#gen-dccitem-cat').value;
@@ -10265,6 +10235,10 @@ else syncHomebrewMonsters();
 // synchronously so everything after this point sees it exactly as before.
 </script>
 <script src="/tools-data/sd-monsters.js"></script>
+<!-- Unified Shadowdark gear list (weapons, armor, basic gear, magic items) —
+     the same catalog the SD sheet shop and the Gear page use. Powers the
+     Treasure generator's picker + random rolls. -->
+<script src="/tools-data/sd-gear.js"></script>
 <script>
 
 
@@ -11563,6 +11537,18 @@ function wireAiConsole(root) {
     const msgBody   = root.querySelector('.ai-msg-body');
     const sendMsg   = root.querySelector('.ai-send-msg');
     const msgStatus = root.querySelector('.ai-msg-status');
+    // Make the section collapsible — the title toggles the body.
+    const msgSection = msgType.closest('.ai-section');
+    const msgTitleEl = msgSection && msgSection.querySelector('.ai-sec-title');
+    if(msgSection && msgTitleEl && !msgSection.dataset.collapsibleWired){
+      msgSection.dataset.collapsibleWired = '1';
+      msgSection.classList.add('ai-collapsible');
+      msgTitleEl.setAttribute('role','button');
+      msgTitleEl.setAttribute('tabindex','0');
+      const toggle = () => msgSection.classList.toggle('collapsed');
+      msgTitleEl.addEventListener('click', toggle);
+      msgTitleEl.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
+    }
     syncMsgType = function() {
       const ach = msgType.value === 'achievement';
       msgTitle.placeholder = ach ? 'Achievement name (e.g. Bloodbath)' : 'Message header (optional)';
@@ -11678,36 +11664,64 @@ function wireAiConsole(root) {
   });
   } // end DCC Loot Box builder
 
-  // ══ Shadowdark Found Loot ══ (visible drop, each item claimed first-come)
+  // ══ Treasure ══ (merged random spread + hand-picked items + magic +X, all from
+  // the unified SD gear list; sends a claimable drop to the roll log).
   if(root.querySelector('.ai-fl-name')) {
+  const gearList = () => (typeof SD_GEAR !== 'undefined' && Array.isArray(SD_GEAR)) ? SD_GEAR : [];
+  const gearDesc = g => !g ? '' : (g.category === 'weapon' ? [g.damage, g.range, g.props].filter(Boolean).join(', ') : (g.desc || ''));
   const SD_GROUPS = [
-    { key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },
-    { key:'wand',label:'Wands & Rings',cats:['wand','ring'] },{ key:'cloak',label:'Cloaks & Boots',cats:['cloak','boots'] },
-    { key:'potion',label:'Potions',cats:['potion'] },{ key:'scroll',label:'Scrolls',cats:['scroll'] },
-    { key:'gem',label:'Gems',cats:['gem'] },{ key:'mundane',label:'Mundane',cats:['mundane'] },
+    { key:'all',label:'All',cats:null },
+    { key:'weapon',label:'Weapons',cats:['weapon'] },
+    { key:'armor',label:'Armor',cats:['armor'] },
+    { key:'basic',label:'Basic',cats:['basic','ammo'] },
+    { key:'magic',label:'Magic',cats:['magic'] },
   ];
-  // Shadowdark found-loot catalog = the Treasure Generator's items (magic items,
-  // gems, mundane loot). window.sdTreasureCatalog is published from the generators
-  // IIFE where the pools live, so this is reliable and matches that generator.
-  function sdCatalog(){
-    return (typeof window.sdTreasureCatalog === 'function') ? window.sdTreasureCatalog() : [];
-  }
+  // Picker catalog = the unified gear list (same rows the SD sheet shop + Gear page use).
+  function sdCatalog(){ return gearList().map(g => ({ name:g.name, category:g.category, slot:'', tier:'', effect:gearDesc(g) })); }
   const flName=root.querySelector('.ai-fl-name'), flRoll=root.querySelector('.ai-fl-roll');
-  const flBody=root.querySelector('.ai-fl-body'), flAdd=root.querySelector('.ai-fl-add');
+  const flType=root.querySelector('.ai-fl-type'), flCount=root.querySelector('.ai-fl-count');
+  const flBody=root.querySelector('.ai-fl-body'), flAdd=root.querySelector('.ai-fl-add'), flMagic=root.querySelector('.ai-fl-magic');
   const flSend=root.querySelector('.ai-fl-send'), flStatus=root.querySelector('.ai-fl-status');
+  const flTier = root.querySelector('.ai-fl-tier');
   flAdd.addEventListener('click', ()=>makeRow(flBody,'','',''));
   buildPicker({ filters:root.querySelector('.ai-fl-filters'), search:root.querySelector('.ai-fl-search'), results:root.querySelector('.ai-fl-results'), groups:SD_GROUPS,
-    catalog: sdCatalog, onAdd:(name,notes)=>{ makeRow(flBody,name,1,notes); setStatus(flStatus,'Added “'+name+'”.','ok'); } });
-  const flTier = root.querySelector('.ai-fl-tier');
+    catalog: sdCatalog,
+    onAdd:(name,notes)=>{ const g=gearList().find(x=>x.name===name); makeRow(flBody,name,1,notes, g?{category:g.category}:null); setStatus(flStatus,'Added “'+name+'”.','ok'); } });
+  // +X bonus and gold both scale with party level (Shadowdark power curve).
+  function magicBonus(tier){ const t=String(tier||'1'); if(t==='10') return 3; if(t==='7') return 2+(Math.random()<0.5?1:0); if(t==='4') return 1+(Math.random()<0.5?1:0); return 1; }
+  function rollGold(tier){ let c=0; for(let i=0;i<3;i++) c+=1+Math.floor(Math.random()*6); c*=(5+Math.floor(Math.random()*20)); return c*(({'1':1,'4':3,'7':6,'10':10})[String(tier||'1')]||1); }
+  // One random magic weapon/armor as "+X <base>" — the SD sheet applies the +X to
+  // attack/damage (weapon) or AC (armor) when it's equipped.
+  function makeMagic(tier){
+    const bases=gearList().filter(g=>g.category==='weapon'||g.category==='armor');
+    if(!bases.length) return null;
+    const base=R(bases), x=magicBonus(tier);
+    const notes = base.category==='weapon' ? [base.damage, base.props].filter(Boolean).join(', ') : (base.desc||'');
+    return { name:'+'+x+' '+base.name, notes:notes, cat:base.category };
+  }
   flRoll.addEventListener('click', ()=>{
-    if(typeof window.sdTreasureRoll !== 'function'){ setStatus(flStatus,'Treasure tables didn’t load — open from the app.','err'); return; }
+    if(!gearList().length){ setStatus(flStatus,'Gear list didn’t load — open from the app.','err'); return; }
     flBody.innerHTML='';
-    const tier = flTier ? flTier.value : '1';
-    let coins=0; for(let i=0;i<3;i++) coins+=1+Math.floor(Math.random()*6); coins*=(5+Math.floor(Math.random()*20));
-    makeRow(flBody, coins+' gp','','coins');
-    const n = 2+Math.floor(Math.random()*3);
-    for(let i=0;i<n;i++){ const t=window.sdTreasureRoll(tier); makeRow(flBody, t.item, t.qty||1, t.notes||''); }
+    const tier=flTier?flTier.value:'1', type=flType?flType.value:'random_all', count=Math.max(1,parseInt(flCount&&flCount.value,10)||1);
+    makeRow(flBody, 'Gold', rollGold(tier), 'coins', {category:'gold'});   // gold amount in the Qty column
+    if(type!=='coins'){
+      for(let i=0;i<count;i++){
+        let cat = (type==='random_all') ? R(['weapon','armor','basic','magic']) : type;
+        if(cat==='magic'){ const m=makeMagic(tier); if(m) makeRow(flBody,m.name,1,m.notes,{category:m.cat}); continue; }
+        const pool=gearList().filter(g=>g.category===cat);
+        if(!pool.length) continue;
+        const g=R(pool);
+        makeRow(flBody, g.name, 1, gearDesc(g), {category:g.category});
+      }
+    }
     setStatus(flStatus,'Rolled treasure — tweak it, then send.','ok');
+  });
+  if(flMagic) flMagic.addEventListener('click', ()=>{
+    if(!gearList().length){ setStatus(flStatus,'Gear list didn’t load — open from the app.','err'); return; }
+    const m=makeMagic(flTier?flTier.value:'1');
+    if(!m){ setStatus(flStatus,'No weapons/armor in the gear list.','err'); return; }
+    makeRow(flBody,m.name,1,m.notes,{category:m.cat});
+    setStatus(flStatus,'Added '+m.name+' — edit, then send.','ok');
   });
   flSend.addEventListener('click', ()=>{
     if(!canSend()){ setStatus(flStatus,'Link a campaign first (top bar) to send loot.','err'); return; }
@@ -11717,11 +11731,11 @@ function wireAiConsole(root) {
     const dropId='fl-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
     const detail=JSON.stringify({dropId,items});
     if(detail.length>2000){ setStatus(flStatus,'Too many items — remove a few and resend.','err'); return; }
-    GMCamp.send({type:'foundloot',label:'FOUND LOOT',result:name||'Found Loot',detail});
+    GMCamp.send({type:'foundloot',label:'TREASURE',result:name||'Treasure',detail});
     setStatus(flStatus,'Sent '+items.length+' item'+(items.length===1?'':'s')+' for the party to claim.','ok');
     flBody.innerHTML=''; flName.value='';
   });
-  } // end SD Found Loot builder
+  } // end Treasure builder
 
   // ── System awareness: show DCC-only vs SD-only pieces per the master toggle ──
   function applySys(){

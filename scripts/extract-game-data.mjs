@@ -320,6 +320,19 @@ const gearCount = emit(
   gear,
 );
 
+// Also emit the same flat gear catalog as a plain browser global for the HTML
+// tools (the GM-screen Treasure generator), so the generator, the SD sheet shop,
+// and the Gear page all draw from ONE united list.
+writeFileSync(
+  join(ROOT, "public", "tools-data", "sd-gear.js"),
+  "// GENERATED — do not edit by hand.\n" +
+    "// Source: lib/data/gear.ts (GEAR), itself extracted from the SD sheet SHOP_* tables.\n" +
+    "// Regenerate with: node scripts/extract-game-data.mjs\n" +
+    "// Browser global for the HTML tools (GM screen generators). One united gear list.\n" +
+    "const SD_GEAR = " + JSON.stringify(gear, null, 1) + ";\n",
+  "utf8",
+);
+
 // ── Classes / Ancestries / Backgrounds (Shadowdark character creation) ───────
 // The creation wizard's book data. Classes must be evaluated as one contiguous
 // scope because RC_CLASS_INFO's Ranger features spread SD_REMEDIES/remedyLine,

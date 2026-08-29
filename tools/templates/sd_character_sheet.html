@@ -5138,6 +5138,33 @@ function sdAddGearItem(name, qty){
   return true;
 }
 
+// Gold from a claimed treasure item → the GP coin box, not a gear slot. Detects a
+// gold row by its cat flag ('gold'), a "NNN gp" name, or a plain "Gold" name with
+// the amount in the qty field.
+function sdItemGold(it){
+  if(!it) return null;
+  if(String(it.cat||'').toLowerCase()==='gold') return parseInt(it.qty,10)||0;
+  const m = String(it.item||'').match(/^\s*([\d,]+)\s*gp\b/i);
+  if(m) return parseInt(m[1].replace(/,/g,''),10)||0;
+  if(/^\s*gold\s*$/i.test(String(it.item||''))) return parseInt(it.qty,10)||0;
+  return null;
+}
+function sdAddGold(amt){
+  const el=document.getElementById('coin-gp'); if(!el) return;
+  const cur=parseInt(String(el.value).replace(/[^0-9-]/g,''),10)||0;
+  el.value=String(cur+(parseInt(amt,10)||0));
+  try{ el.dispatchEvent(new Event('input',{bubbles:true})); }catch(e){}
+  if(typeof saveSheet==='function'){ try{saveSheet(false);}catch(e){} }
+}
+// Claim one treasure item like adding it from the item shop: gold → GP total,
+// everything else → a gear slot (weapons/armor there are equippable, and a
+// "+N <base>" magic item applies its bonus to attack/damage or AC when equipped).
+function sdClaimItem(it){
+  const gold = sdItemGold(it);
+  if(gold != null){ sdAddGold(gold); return true; }
+  return sdAddGearItem(it.item, it.qty);
+}
+
 function renderNormalRemote(roll){
   const div = document.createElement('div');
   div.className = 'log-entry remote' + (roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
@@ -5229,7 +5256,7 @@ function campaignAddRemote(roll) {
     const dropId=card.dataset.dropId, idx=parseInt(btn.dataset.idx,10);
     if(_flClaimed(dropId)[idx]) return;                 // already taken
     const it=(card._flItems||[])[idx]; if(!it) return;
-    if(sdAddGearItem(it.item, it.qty)===false) return;  // gear full — leave it claimable
+    if(sdClaimItem(it)===false) return;  // gear full — leave it claimable (gold always succeeds → GP)
     const me=campaignPlayerName();
     _flMarkClaimed(dropId, idx, me);
     _flRefreshCard(dropId);
