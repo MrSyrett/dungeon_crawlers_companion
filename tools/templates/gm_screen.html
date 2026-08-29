@@ -10973,10 +10973,19 @@ function init_dice(root) {
     return out;
   }
 
+  // Entries saved while a drop was still typed 'normal' (older server / older
+  // log) carry the JSON in `detail` — turn them back into loot cards on restore.
+  function upgradeSavedEntry(e) {
+    if(!e || e.type || !e.remote && !e.local) return e;
+    const r = sniffRollType({ type: 'normal', detail: e.detail });
+    if(!r.type || r.type === 'normal' || r.type === 'lootclaim') return e;
+    let payload = {}; try { payload = JSON.parse(e.detail || '{}'); } catch(err) { payload = {}; }
+    return Object.assign({}, e, { type: r.type, payload, crit: '' });
+  }
   root._getState = () => ({ log });
   root._setState = (s) => {
     if(!s) return;
-    if(Array.isArray(s.log)) log = dedupeLog(s.log);
+    if(Array.isArray(s.log)) log = dedupeLog(s.log).map(upgradeSavedEntry);
     // Sessions saved before the link moved to the top bar kept it in here
     if(s.campaign || typeof s.hideRolls === 'boolean') GMCamp.restore(s);
     renderLog();
