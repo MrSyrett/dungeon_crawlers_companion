@@ -10978,14 +10978,33 @@ function init_dice(root) {
   function upgradeSavedEntry(e) {
     if(!e || e.type || !e.remote && !e.local) return e;
     const r = sniffRollType({ type: 'normal', detail: e.detail });
-    if(!r.type || r.type === 'normal' || r.type === 'lootclaim') return e;
+    if(!r.type || r.type === 'normal') return e;
     let payload = {}; try { payload = JSON.parse(e.detail || '{}'); } catch(err) { payload = {}; }
     return Object.assign({}, e, { type: r.type, payload, crit: '' });
+  }
+  // Claims never get an entry of their own: fold any saved raw claim into the
+  // drop it belongs to (the log is newest-first, so walk it oldest-first).
+  function upgradeSavedLog(arr) {
+    const out = [];
+    for(let i = arr.length - 1; i >= 0; i--) {
+      const e = upgradeSavedEntry(arr[i]);
+      if(e && e.type === 'lootclaim') {
+        const pc = e.payload || {}, drop = out.find(x => x.payload && ((pc.dropId && x.payload.dropId === pc.dropId) || (pc.boxId && x.payload.boxId === pc.boxId)));
+        if(drop) {
+          const key = pc.itemIndex == null ? 'all' : pc.itemIndex, who = pc.by || e.source || 'Someone';
+          if(pc.mode === 'copies' || drop.payload.mode === 'copies') { drop.taken = drop.taken || {}; const l = drop.taken[key] = drop.taken[key] || []; if(!l.some(n => n.toLowerCase() === who.toLowerCase())) l.push(who); }
+          else { drop.claimed = drop.claimed || {}; drop.claimed[key] = who; }
+        }
+        continue;
+      }
+      out.push(e);
+    }
+    return out.reverse();
   }
   root._getState = () => ({ log });
   root._setState = (s) => {
     if(!s) return;
-    if(Array.isArray(s.log)) log = dedupeLog(s.log).map(upgradeSavedEntry);
+    if(Array.isArray(s.log)) log = upgradeSavedLog(dedupeLog(s.log));
     // Sessions saved before the link moved to the top bar kept it in here
     if(s.campaign || typeof s.hideRolls === 'boolean') GMCamp.restore(s);
     renderLog();
