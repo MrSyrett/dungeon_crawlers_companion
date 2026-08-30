@@ -127,6 +127,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .vital.vc .vline{justify-content:center;}
 .vital.vc .pips{justify-content:center;}
 .vital.vc.band-top{border-top:2px solid var(--muted);}
+/* Vertical divider between the paired cells (Hit Dice | Actions, Armor | Initiative) */
+.vital.vc.band-mid{border-right:2px solid var(--muted);}
 .vlbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:4px;}
 .vlbl small{font-weight:600;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:none;text-align:right;}
 .vbig{font-family:'Share Tech Mono',monospace;font-size:26px;font-weight:700;line-height:1.1;color:var(--ink);display:flex;align-items:baseline;gap:4px;}
@@ -323,7 +325,7 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="pips" id="wound-pips"></div>
           <div class="vline">max <input type="number" id="wounds-max" value="6" oninput="recalc()"></div>
         </div>
-        <div class="vital vc">
+        <div class="vital vc band-mid">
           <div class="vlbl"><span>Hit Dice</span><small id="hd-lbl"></small></div>
           <div class="vbig"><input type="number" id="hd-cur" value="1" oninput="recalc()"><span class="sep">/</span><input type="number" id="hd-max" value="1" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn" onclick="catchBreath()" title="Spend 1 Hit Die: roll it + STR">Catch Breath</button><button class="small-btn" onclick="makeCamp()" title="Spend 1 Hit Die at max value + STR">Make Camp</button><button class="small-btn green" onclick="safeRest()" title="Recover all HP, Hit Dice, mana; heal 1 Wound">Safe Rest</button></div>
@@ -333,7 +335,7 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="pips" id="action-pips"></div>
           <div class="vline"><button class="small-btn ghost" onclick="resetActions()">New turn</button></div>
         </div>
-        <div class="vital vc band-top">
+        <div class="vital vc band-top band-mid">
           <div class="vlbl"><span>Armor</span></div>
           <div class="vbig"><span id="armor-val">0</span></div>
           <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="Armor" style="width:100px;" oninput="recalc()"><input type="text" id="f-shield" list="dl-shield" placeholder="Shield" style="width:80px;" oninput="recalc()"> +<input type="number" id="armor-bonus" value="0" oninput="recalc()"></div>
