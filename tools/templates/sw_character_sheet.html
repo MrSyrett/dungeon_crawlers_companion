@@ -222,6 +222,27 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   .hdr-field.wide{grid-column:span 2 !important;}
   .blk-grid,.vitals{grid-template-columns:1fr;}
   .vital{border-right:none;}
+  /* Roll targets big enough for a thumb */
+  .stat-cell .sn{display:block;min-height:40px;line-height:40px;font-size:14px !important;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
+  .stat-cell input{height:44px;}
+  .skills-table td{padding:0 4px;}
+  .skills-table td.sk-name{height:44px;padding:0 6px;}
+  .skills-table td.sk-name input,.skills-table td.sk-adds input,.skills-table td input{height:40px;font-size:15px;}
+  .skills-table .sk-total{width:64px;min-width:64px;height:44px;font-size:16px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
+  /* Mobile ergonomics: thumb-sized buttons/selects, readable labels */
+  .small-btn{min-height:36px;padding:6px 12px;font-size:12px;}
+  .row-x{min-width:36px;min-height:36px;font-size:18px;}
+  .add-row select,.hdr-field select,.tbl select,.sheet-wrap select{min-height:40px;font-size:14px;}
+  .add-row select{max-width:100%;flex:1 1 200px;}
+  .hdr-field label,.tbl th,.stats-head span{font-size:10px;}
+  .stat-name small,.stat-cell small,.sk-name small,.skills-table td.sk-name small{font-size:10px;}
+  .sk-attr-lbl{font-size:11px !important;}
+  input[type=checkbox]{width:22px;height:22px;}
+  #wound-track button{min-height:38px;font-size:12px;}
+  /* Weapons: Range + Notes don't fit a phone; the roll buttons wrap under the name */
+  #weapons-tbl th:nth-child(4),#weapons-tbl td:nth-child(4),#weapons-tbl th:nth-child(5),#weapons-tbl td:nth-child(5){display:none;}
+  #weapons-tbl td[style*="nowrap"]{white-space:normal !important;}
+  #weapons-tbl .wp-skill{min-width:90px;}
 }
 
 /* SW extras */
@@ -348,7 +369,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
     <div class="center-col">
       <div class="section-bar"><span>Weapons</span></div>
-      <table class="tbl">
+      <table class="tbl" id="weapons-tbl">
         <thead><tr><th style="width:26%;">Weapon</th><th style="width:22%;">Skill</th><th style="width:70px;">Damage</th><th style="width:20%;">Range</th><th>Notes</th><th style="width:110px;"></th></tr></thead>
         <tbody id="weapons-body"></tbody>
       </table>
@@ -473,7 +494,7 @@ function findVehicle(name) { const n = norm(name); return n ? D.vehicles().find(
 // ═══ BUILD STATIC UI ══════════════════════════════════════════════════════
 function buildStats() {
   $('stats-grid').innerHTML = ATTRS.map(a =>
-    `<div class="stat-cell"><div class="sn" onclick="rollAttr('${a}')" title="Roll ${a}">${a.toUpperCase()}</div><input type="text" id="at-${a}" value="2D" oninput="recalc()"><small>${ATTR_HINT[a]}</small></div>`).join('');
+    `<div class="stat-cell"><div class="sn" onclick="rollAttr('${a}')" title="Roll ${a}">${a.toUpperCase()}</div><input type="text" id="at-${a}" value="2D" oninput="recalc()"></div>`).join('');
   const tsel = $('f-template'); tsel.innerHTML = '<option value="">—</option>' + D.templates().map(t => '<option value="' + esc(t.name) + '">' + esc(t.name) + '</option>').join('');
   const groups = {}; D.skills().forEach(s => { (groups[s.attribute] = groups[s.attribute] || []).push(s); });
   $('skill-pick').innerHTML = '<option value="">Add a skill…</option>' + ATTRS.map(a => '<optgroup label="' + a + '">' + (groups[a] || []).map(s => '<option value="' + esc(s.name) + '">' + esc(s.name) + (s.reaction ? ' (reaction)' : '') + '</option>').join('') + '</optgroup>').join('')

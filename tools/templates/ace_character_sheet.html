@@ -114,6 +114,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .focus-input{width:100%;font-family:'Barlow Condensed',sans-serif;font-size:14px;padding:0 8px;}
 .focus-dice{height:32px;line-height:30px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;background:var(--box);border:1px solid var(--rule);color:var(--ink);cursor:pointer;}
 .focus-dice:hover{background:var(--section-hdr);color:#fff;}
+.focus-cell{grid-column:3 / span 2;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.focus-line{display:grid;grid-template-columns:1fr 54px;gap:4px;align-items:center;}
+.focus-line .focus-input{min-width:0;}
+.focus-add{align-self:flex-start;background:none;border:none;padding:0 2px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;}
+.focus-add:hover{color:var(--ace-dk);}
 .stat-roll{height:32px;background:var(--section-hdr);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
 .stat-roll:hover{background:var(--ace);}
 .power-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
@@ -254,9 +259,32 @@ body.dark .karma-pip.spent{border-color:#4a4a52;}
   .hdr-fields{grid-template-columns:1fr 1fr;border-left:none;border-top:2px solid var(--border);}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
-  .stats-head,.stat-row{grid-template-columns:70px 44px 1fr 44px;padding-left:6px;padding-right:6px;}
-  .derived,.rt-grid{grid-template-columns:1fr;}
-  .derived-cell,.rt-cell{border-right:none;border-bottom:1px solid var(--rule);}
+  .stats-head,.stat-row{grid-template-columns:96px 48px 1fr 56px;padding-left:6px;padding-right:6px;}
+  .focus-line{grid-template-columns:1fr 56px;}
+  .stat-name{min-height:44px;display:flex;flex-direction:column;justify-content:center;padding:2px 6px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
+  .stat-input,.focus-input{height:44px;font-size:16px;}
+  .focus-dice{height:44px;line-height:42px;font-size:16px;border-width:2px;}
+  .rt-grid{grid-template-columns:1fr;}
+  .rt-cell{border-right:none;border-bottom:1px solid var(--rule);}
+  /* Mobile ergonomics: thumb-sized buttons/selects, readable labels */
+  .small-btn{min-height:36px;padding:6px 12px;font-size:12px;}
+  .row-x{min-width:36px;min-height:36px;font-size:18px;}
+  .add-row select,.hdr-field select,.tbl select,.sheet-wrap select{min-height:40px;font-size:14px;}
+  .add-row select{max-width:100%;flex:1 1 200px;}
+  .hdr-field label,.tbl th,.stats-head span{font-size:10px;}
+  .stat-name small,.stat-cell small,.sk-name small,.skills-table td.sk-name small{font-size:10px;}
+  input[type=checkbox]{width:22px;height:22px;}
+  .focus-add{min-height:32px;font-size:12px;padding:0 6px;}
+  .derived-formula input{width:48px;height:32px;font-size:14px;}
+  .attacks-table{table-layout:fixed;}
+  .attacks-table th:first-child{width:30% !important;}
+  .attacks-table th:nth-child(3){width:52px !important;}
+  .attacks-table th:last-child{width:66px !important;}
+  .attacks-table td:last-child{white-space:normal !important;}
+  .attacks-table td:last-child .small-btn{padding:6px 8px;}
+  .attacks-table td:last-child .row-x{min-width:28px;padding:0;}
+  .attacks-table select{min-height:36px;font-size:13px;}
+  .attacks-table input.num{width:100%;}
 }
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scrollbar,.modal-bd::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb,select::-webkit-scrollbar-thumb,.log-entries::-webkit-scrollbar-thumb,.modal-bd::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track,select::-webkit-scrollbar-track{background:transparent;}
@@ -345,12 +373,6 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="karma-wrap">
         <div class="derived-lbl"><span>Karma <span id="karma-val" style="font-family:'Share Tech Mono',monospace;font-size:18px;">6</span></span></div>
         <div class="karma-pips" id="karma-pips"></div>
-        <div class="karma-actions">
-          <button class="small-btn" onclick="karmaSpend('Reduced damage by 1')" title="Reduce an attack's damage by 1 per Karma">Soak 1 dmg</button>
-          <button class="small-btn" onclick="karmaSpend('Negated the Calamity Die')">No Calamity</button>
-          <button class="small-btn" onclick="karmaSpend('Flashback!')">Flashback</button>
-          <button class="small-btn" onclick="karmaGain()" title="The Director awards Karma for playing your Trait">+1 Trait</button>
-        </div>
       </div>
     </div>
 
@@ -507,14 +529,39 @@ function buildStats() {
     row.className = 'stat-row' + (s.optional ? ' off' : '');
     row.id = 'row-' + s.id;
     row.innerHTML =
-      `<div class="stat-name" onclick="rollStat('${s.id}', false)" title="Roll ${s.name}">${s.name}<small>${s.hint}</small></div>` +
+      `<div class="stat-name" onclick="rollStat('${s.id}', false)" title="Roll ${s.name}">${s.name}</div>` +
       `<input class="stat-input" id="st-${s.id}" type="number" min="0" max="20" value="${s.optional ? '' : 3}" oninput="recalc()">` +
-      `<input class="focus-input" id="fo-${s.id}" list="dl-focus-${s.id}" placeholder="Focus" oninput="recalc()">` +
-      `<div class="focus-dice" id="fd-${s.id}" onclick="rollStat('${s.id}', true)" title="Roll ${s.name} with Focus">5</div>` +
-      ``;
+      `<div class="focus-cell" id="fc-${s.id}"></div>`;
     list.appendChild(row);
+    addFocusLine(s.id, '');
   });
 }
+// Each Stat can carry several Focuses (Advancement adds one); every line rolls
+// on its own. The first line keeps the fo-<stat> id for the builder/pregens.
+function focusInputs(id) { return [...$('fc-' + id).querySelectorAll('.focus-input')]; }
+function focusesOf(id) { return focusInputs(id).map(i => i.value.trim()).filter(Boolean); }
+function hasFocus(id, re) { return focusesOf(id).some(f => re.test(f)); }
+function addFocusLine(id, value) {
+  const s = STATS.find(x => x.id === id), cell = $('fc-' + id);
+  const first = !cell.querySelector('.focus-line');
+  const line = document.createElement('div'); line.className = 'focus-line';
+  line.innerHTML = `<input class="focus-input"${first ? ` id="fo-${id}"` : ''} list="dl-focus-${id}" placeholder="${first ? 'Focus' : 'Another Focus'}" oninput="recalc()">` +
+    `<div class="focus-dice" ${first ? `id="fd-${id}" ` : ''}onclick="rollFocusLine('${id}', this)" title="Roll ${s.name} with this Focus">5</div>`;
+  const inp = line.querySelector('.focus-input'); inp.value = value || '';
+  // An emptied extra line goes away when you leave it.
+  if(!first) inp.addEventListener('blur', () => { if(!inp.value.trim()) { line.remove(); recalc(); scheduleAutosave(); } });
+  let add = cell.querySelector('.focus-add');
+  if(!add) { add = document.createElement('button'); add.type = 'button'; add.className = 'focus-add'; add.textContent = '+ Focus'; add.title = 'Add another Focus to ' + s.name + ' (Advancement)'; add.onclick = () => { const l = addFocusLine(id, ''); l.querySelector('.focus-input').focus(); scheduleAutosave(); }; cell.appendChild(add); }
+  cell.insertBefore(line, add);
+  return line;
+}
+function setFocuses(id, list) {
+  const arr = Array.isArray(list) ? list.map(x => String(x || '').trim()).filter(Boolean) : String(list || '').split(/\s*,\s*/).map(x => x.trim()).filter(Boolean);
+  const cell = $('fc-' + id); cell.querySelectorAll('.focus-line').forEach((l, i) => { if(i > 0) l.remove(); });
+  $('fo-' + id).value = arr[0] || '';
+  arr.slice(1).forEach(f => addFocusLine(id, f));
+}
+function rollFocusLine(id, dice) { const f = dice.parentNode.querySelector('.focus-input').value.trim(); rollStat(id, f || false); }
 
 function hasPower() { return $('has-power').checked; }
 function onPowerToggle() {
@@ -526,7 +573,7 @@ function onPowerToggle() {
 }
 function statVal(id) { return Math.max(0, num($('st-' + id).value)); }
 function focusOf(id) { return String($('fo-' + id).value || '').trim(); }
-function statDice(id, withFocus) { return statVal(id) + (withFocus && focusOf(id) ? 2 : 0); }
+function statDice(id, withFocus) { return statVal(id) + ((typeof withFocus === 'string' ? withFocus : (withFocus && focusOf(id))) ? 2 : 0); }
 
 function recalc() {
   // dice-with-focus preview + stat point tally
@@ -535,19 +582,22 @@ function recalc() {
     const on = !s.optional || hasPower();
     const v = statVal(s.id);
     if(on && !s.optional) used += v;
-    $('fd-' + s.id).textContent = on ? String(statDice(s.id, true)) : '—';
-    $('fd-' + s.id).title = focusOf(s.id) ? `Roll ${s.name} + ${focusOf(s.id)} (${statDice(s.id, true)} dice)` : `Add a Focus to ${s.name} for +2 dice`;
+    $('fc-' + s.id).querySelectorAll('.focus-line').forEach(line => {
+      const f = line.querySelector('.focus-input').value.trim(), dice = line.querySelector('.focus-dice');
+      dice.textContent = on ? String(statDice(s.id, f || false) + (f ? 0 : 2)) : '—';
+      dice.title = f ? `Roll ${s.name} + ${f} (${statDice(s.id, f)} dice)` : `Add a Focus to ${s.name} for +2 dice`;
+    });
   });
 
   // Defence: Moves ×3, +6 with Dodging, min 8, + gear bonus
-  const dodging = /^dodg/i.test(focusOf('moves'));
+  const dodging = hasFocus('moves', /^dodg/i);
   let def = statVal('moves') * 3 + (dodging ? 6 : 0);
   if(def < CREATION.minDef) def = CREATION.minDef;
   def += num($('def-bonus').value);
   $('def-val').textContent = def;
 
   // Health: Brawn, +2 with Tough, + bonus (Ogre etc.)
-  const tough = /^tough/i.test(focusOf('brawn'));
+  const tough = hasFocus('brawn', /^tough/i);
   const max = Math.max(0, statVal('brawn') + (tough ? 2 : 0) + num($('hp-bonus').value));
   if(hpCur === null || hpCur > max) hpCur = max;
   $('hp-max').textContent = max;
@@ -682,12 +732,13 @@ function rollStat(id, withFocus) {
   const s = STATS.find(x => x.id === id);
   if(s.optional && !hasPower()) return;
   if(id === 'power') { if(!karmaSpend('Used Power', 1)) return; }
-  const n = statDice(id, withFocus);
-  const label = s.name + (withFocus && focusOf(id) ? ' + ' + focusOf(id) : '');
-  doRoll(label, n, { note: withFocus && focusOf(id) ? 'Stat ' + statVal(id) + ' + Focus 2' : 'Stat ' + statVal(id) });
+  const f = typeof withFocus === 'string' ? withFocus : (withFocus ? focusOf(id) : '');
+  const n = statDice(id, f || false);
+  const label = s.name + (f ? ' + ' + f : '');
+  doRoll(label, n, { note: f ? 'Stat ' + statVal(id) + ' + Focus 2' : 'Stat ' + statVal(id) });
 }
 function rollDefence() {
-  doRoll('Defence (Moves, opposed)', statDice('moves', /^dodg/i.test(focusOf('moves'))), { tn: null, note: 'instead of the flat ' + $('def-val').textContent });
+  doRoll('Defence (Moves, opposed)', statDice('moves', hasFocus('moves', /^dodg/i)), { tn: null, note: 'instead of the flat ' + $('def-val').textContent });
 }
 function rollTray() {
   doRoll('Dice pool', num($('tray-n').value), {});
@@ -695,20 +746,20 @@ function rollTray() {
 function rollWealth() {
   const tn = num($('wealth-tn').value);
   if(!karmaSpend('Tried to buy something (TN ' + tn + ')', 1)) return;
-  const wf = /^wealth/i.test(focusOf('style'));
+  const wf = hasFocus('style', /^wealth/i);
   doRoll('Buy: Style' + (wf ? ' + Wealth' : ''), statDice('style', wf), { tn, note: 'Style ' + statVal('style') + (wf ? ' + Focus 2' : '') });
 }
 
 // ═══ ATTACKS ══════════════════════════════════════════════════════════════
 function unarmedDamage() {
   // 1 point per 5 points of Brawn (or part thereof), Focus dice count if apt.
-  const b = statDice('brawn', /^brawl/i.test(focusOf('brawn')));
+  const b = statDice('brawn', hasFocus('brawn', /^brawl/i));
   return Math.max(1, Math.ceil(b / 5));
 }
 function attackDice(kind) {
-  if(kind === 'ranged') return statDice('moves', /^shoot/i.test(focusOf('moves')));
+  if(kind === 'ranged') return statDice('moves', hasFocus('moves', /^shoot/i));
   if(kind === 'power')  return statDice('power', true);
-  return statDice('brawn', /^brawl/i.test(focusOf('brawn')));
+  return statDice('brawn', hasFocus('brawn', /^brawl/i));
 }
 function addAttackRow(a) {
   a = a || { name:'', kind:'melee', damage:'' };
@@ -880,13 +931,13 @@ function toggleDarkMode() { setDarkMode(!document.body.classList.contains('dark'
 
 // ═══ SAVE / LOAD ══════════════════════════════════════════════════════════
 function collectSheet() {
-  const stats = {}, focuses = {};
-  STATS.forEach(s => { stats[s.id] = statVal(s.id); focuses[s.id] = focusOf(s.id); });
+  const stats = {}, focuses = {}, focusList = {};
+  STATS.forEach(s => { stats[s.id] = statVal(s.id); focuses[s.id] = focusOf(s.id); focusList[s.id] = focusesOf(s.id); });
   return {
     system: 'ACE', v: 1,
     name: $('f-name').value, trait: $('f-trait').value, role: $('f-role').value, role2: $('f-role2').value,
     player: $('f-player').value, setting: $('f-setting').value,
-    hasPower: hasPower(), stats, focuses,
+    hasPower: hasPower(), stats, focuses, focusList,
     defBonus: num($('def-bonus').value), hpBonus: num($('hp-bonus').value),
     hpCur, karma,
     ability: $('f-ability').value, traitNotes: $('f-trait-notes').value, notes: $('f-notes').value,
@@ -905,7 +956,7 @@ function applySheet(d) {
   STATS.forEach(s => {
     const v = d.stats ? d.stats[s.id] : undefined;
     $('st-' + s.id).value = (v === undefined || v === null || (s.optional && !d.hasPower)) ? (s.optional ? '' : 3) : v;
-    $('fo-' + s.id).value = (d.focuses && d.focuses[s.id]) || '';
+    setFocuses(s.id, (d.focusList && Array.isArray(d.focusList[s.id]) && d.focusList[s.id].length) ? d.focusList[s.id] : ((d.focuses && d.focuses[s.id]) || ''));
   });
   $('def-bonus').value = d.defBonus || 0; $('hp-bonus').value = d.hpBonus || 0;
   hpCur = (typeof d.hpCur === 'number') ? d.hpCur : null;

@@ -378,18 +378,19 @@
   }
   function applyPregen() {
     const p = st.pregen;
-    const focuses = {};
-    ["smarts", "moves", "style", "brawn", "power"].forEach((id) => { const k = STAT_NAME[id]; focuses[id] = (p.focuses && p.focuses[k] && p.focuses[k].length) ? p.focuses[k].join(", ") : ""; });
+    const focuses = {}, focusList = {};
+    ["smarts", "moves", "style", "brawn", "power"].forEach((id) => { const k = STAT_NAME[id]; const l = (p.focuses && p.focuses[k] && p.focuses[k].length) ? p.focuses[k].slice() : []; focusList[id] = l; focuses[id] = l[0] || ""; });
+    const has = (id, re) => focusList[id].some((f) => re.test(f));
     const attacks = [{ name: "Unarmed", kind: "melee", damage: "" }].concat(weaponRows(p.gear || []));
     if (p.power) attacks.push({ name: "Power bolt", kind: "power", damage: 1 });
     // Health/Defence are printed on the card; keep them via bonuses so the
     // derived numbers match the book even when they stray from the formula.
-    const baseDef = Math.max(8, p.moves * 3 + (/^dodg/i.test(focuses.moves) ? 6 : 0));
-    const baseHp = p.brawn + (/^tough/i.test(focuses.brawn) ? 2 : 0);
+    const baseDef = Math.max(8, p.moves * 3 + (has("moves", /^dodg/i) ? 6 : 0));
+    const baseHp = p.brawn + (has("brawn", /^tough/i) ? 2 : 0);
     const data = {
       system: "ACE", v: 1,
       name: p.name, trait: p.trait, role: p.role, role2: "", setting: p.setting,
-      hasPower: !!p.power, stats: { smarts: p.smarts, moves: p.moves, style: p.style, brawn: p.brawn, power: p.power || 0 }, focuses,
+      hasPower: !!p.power, stats: { smarts: p.smarts, moves: p.moves, style: p.style, brawn: p.brawn, power: p.power || 0 }, focuses, focusList,
       defBonus: (p.defence || baseDef) - baseDef, hpBonus: (p.health || baseHp) - baseHp, hpCur: null, karma: 6,
       ability: p.ability || "", traitNotes: "", notes: p.bio || "",
       attacks,

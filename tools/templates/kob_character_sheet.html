@@ -238,8 +238,22 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
   .hdr-fields{grid-template-columns:1fr 1fr;border-left:none;border-top:2px solid var(--border);}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
-  .stat-row,.stats-head{grid-template-columns:80px 60px 30px 44px auto;padding-left:6px;padding-right:6px;}
+  .stat-row,.stats-head{grid-template-columns:96px 56px 30px 44px auto;padding-left:6px;padding-right:6px;}
+  /* Roll targets big enough for a thumb */
+  .stat-name{min-height:44px;display:flex;flex-direction:column;justify-content:center;padding:2px 6px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
+  .stat-name small{font-size:9px;}
+  .stat-roll{width:48px;height:44px;font-size:14px;}
+  .stat-row input{height:44px;font-size:16px;}
   .blk-grid{grid-template-columns:1fr;}
+  /* Mobile ergonomics: thumb-sized buttons/selects, readable labels */
+  .small-btn{min-height:36px;padding:6px 12px;font-size:12px;}
+  .row-x{min-width:36px;min-height:36px;font-size:18px;}
+  .add-row select,.hdr-field select,.tbl select,.sheet-wrap select{min-height:40px;font-size:14px;}
+  .add-row select{max-width:100%;flex:1 1 200px;}
+  .hdr-field label,.tbl th,.stats-head span{font-size:10px;}
+  .stat-name small,.stat-cell small,.sk-name small,.skills-table td.sk-name small{font-size:10px;}
+  input[type=checkbox]{width:22px;height:22px;}
+
 }
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scrollbar,.modal-bd::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb,select::-webkit-scrollbar-thumb,.log-entries::-webkit-scrollbar-thumb,.modal-bd::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track,select::-webkit-scrollbar-track{background:transparent;}
@@ -502,7 +516,7 @@ function buildStats() {
     const row = document.createElement('div');
     row.className = 'stat-row';
     row.innerHTML =
-      `<div class="stat-name" onclick="rollStat('${s.id}')" title="Roll ${s.id}">${s.id}<small>${s.hint}</small></div>` +
+      `<div class="stat-name" onclick="rollStat('${s.id}')" title="Roll ${s.id}">${s.id}</div>` +
       `<select class="die-sel" id="die-${s.id}" onchange="recalc()">${DICE.map(d => '<option value="' + d + '"' + (d === 8 ? ' selected' : '') + '>d' + d + '</option>').join('')}</select>` +
       `<div class="stat-bonus" id="ab-${s.id}"></div>` +
       `<input class="stat-mod" id="mod-${s.id}" type="number" value="0" title="Other modifiers" oninput="recalc()">` +

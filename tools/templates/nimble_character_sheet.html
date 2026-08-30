@@ -222,6 +222,27 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   .hdr-field.wide{grid-column:span 2 !important;}
   .blk-grid,.vitals{grid-template-columns:1fr;}
   .vital{border-right:none;}
+  /* Roll targets big enough for a thumb */
+  .stat-cell .sn{display:block;min-height:40px;line-height:40px;font-size:15px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
+  .stat-cell input{height:44px;width:64px;}
+  .skills-table td{padding:0 6px;}
+  .skills-table td.sk-name{min-height:44px;height:44px;font-size:15px;padding:0 8px;background:var(--box);}
+  .skills-table td.sk-name small{font-size:10px;}
+  .skills-table td input{height:36px;font-size:15px;}
+  .skills-table .sk-total{font-size:16px;}
+  /* Mobile ergonomics: thumb-sized buttons/selects, readable labels */
+  .small-btn{min-height:36px;padding:6px 12px;font-size:12px;}
+  .row-x{min-width:36px;min-height:36px;font-size:18px;}
+  .add-row select,.hdr-field select,.tbl select,.sheet-wrap select{min-height:40px;font-size:14px;}
+  .add-row select{max-width:100%;flex:1 1 200px;}
+  .hdr-field label,.tbl th,.stats-head span{font-size:10px;}
+  .stat-name small,.stat-cell small,.sk-name small,.skills-table td.sk-name small{font-size:10px;}
+  input[type=checkbox]{width:22px;height:22px;}
+  .save-toggle button{width:34px;height:30px;font-size:14px;}
+  .pip{width:32px;height:32px;font-size:13px;}
+  .vline input{width:52px;height:34px;font-size:14px;}
+  .vline{font-size:12px;gap:6px;}
+  .vline .small-btn{flex:1 1 auto;white-space:nowrap;}
 }
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scrollbar,.modal-bd::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb,select::-webkit-scrollbar-thumb,.log-entries::-webkit-scrollbar-thumb,.modal-bd::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track,select::-webkit-scrollbar-track{background:transparent;}
@@ -421,7 +442,7 @@ function findItem(name, cats) { const n = norm(name); if(!n) return null; return
 function buildStats() {
   $('stats-grid').innerHTML = STATS.map(s =>
     `<div class="stat-cell"><div class="sn" onclick="rollSave('${s}')" title="Roll a ${s} save">${s}</div><input type="number" id="st-${s}" value="0" min="-5" max="10" oninput="recalc()">` +
-    `<div class="save-toggle"><button id="adv-${s}" onclick="toggleSave('${s}','adv')" title="Advantaged save">▲</button><button id="dis-${s}" onclick="toggleSave('${s}','dis')" title="Disadvantaged save">▼</button></div><small>${STAT_HINT[s]}</small></div>`).join('');
+    `<div class="save-toggle"><button id="adv-${s}" onclick="toggleSave('${s}','adv')" title="Advantaged save">▲</button><button id="dis-${s}" onclick="toggleSave('${s}','dis')" title="Disadvantaged save">▼</button></div></div>`).join('');
   $('skills-body').innerHTML = SKILLS.map(([n, s]) =>
     `<tr><td class="sk-name" onclick="rollSkill('${n}')">${n}<small>${s}</small></td><td style="width:44px;"><input type="number" id="skp-${n}" value="0" min="0" oninput="recalc()" title="Extra skill points"></td><td class="sk-total" id="skt-${n}">+0</td></tr>`).join('');
   const csel = $('f-class'); csel.innerHTML = '<option value="">—</option>' + D.classes().map(c => '<option value="' + esc(c.name) + '">' + esc(c.name) + '</option>').join('');
