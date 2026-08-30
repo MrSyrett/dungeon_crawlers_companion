@@ -397,7 +397,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         <thead><tr><th style="width:38%;">Weapon</th><th>Kind</th><th style="width:60px;">Dmg</th><th>Dice</th><th style="width:74px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
       </table>
-      <div class="add-row"><button class="small-btn ghost" onclick="addAttackRow()">+ Weapon</button> <button class="small-btn ghost" onclick="addAttackRow({name:'Unarmed',kind:'melee',damage:''})">+ Unarmed</button></div>
+      <div class="add-row"><button class="small-btn ghost" onclick="addAttackRow()">+ Attack</button><select id="atk-pick" onchange="if(this.value){addAttackFromData(this.value);this.value='';}"><option value="">Add from the weapon list…</option></select></div>
 
       <div class="section-bar"><span>Gear</span></div>
       <table class="gear-table"><tbody id="gear-body"></tbody></table>
@@ -776,14 +776,41 @@ function addAttackRow(a) {
 function onWeaponPick(input) {
   // Typing a known weapon name fills in its damage + kind from the gear data.
   const n = norm(input.value);
-  const g = D.gear().find(x => norm(x.name) === n && x.damage);
+  const g = D.gear().find(x => norm(x.name) === n && x.damage != null);
   if(g) {
     const tr = input.closest('tr');
     tr.querySelector('.atk-dmg').value = g.damage;
-    const ranged = /pistol|rifle|bow|gun|blaster|blazer|bazooka|grenade|thrower|laser|rocket|crossbow|sling|machine/i.test(g.name + ' ' + (g.description || ''));
-    tr.querySelector('.atk-kind').value = ranged ? 'ranged' : 'melee';
+    tr.querySelector('.atk-kind').value = weaponIsRanged(g) ? 'ranged' : 'melee';
   }
   recalcAttacks();
+}
+function weaponIsRanged(g) { return /pistol|rifle|bow|gun|blaster|blazer|bazooka|grenade|thrower|laser|rocket|crossbow|sling|machine/i.test(g.name + ' ' + (g.description || '')); }
+function attackFromGear(g) { return { name: g.name, kind: weaponIsRanged(g) ? 'ranged' : 'melee', damage: g.damage != null ? String(g.damage) : '' }; }
+// Add an attack, reusing a blank row if there is one; skip if the same weapon is
+// already listed (so adding a weapon to gear won't double it in Attacks).
+function addAttackDeduped(a) {
+  const rows = [...document.querySelectorAll('#attacks-body tr')];
+  if(a.name && rows.some(tr => norm(tr.querySelector('.atk-name').value) === norm(a.name))) return;
+  const blank = rows.find(tr => !tr.querySelector('.atk-name').value && !tr.querySelector('.atk-dmg').value);
+  if(blank) {
+    blank.querySelector('.atk-name').value = a.name;
+    blank.querySelector('.atk-kind').value = a.kind;
+    blank.querySelector('.atk-dmg').value = a.damage;
+    recalcAttacks();
+  } else addAttackRow(a);
+}
+// Add an attack from the weapon list (same "database dropdown" pattern as gear).
+function addAttackFromData(name) {
+  const g = D.gear().find(x => x.name === name && x.damage != null); if(!g) return;
+  addAttackDeduped(attackFromGear(g));
+  scheduleAutosave();
+}
+// The Attacks dropdown = every gear item that deals damage, grouped by category.
+function fillAttackPick() {
+  const sel = $('atk-pick'); if(!sel) return;
+  const weapons = D.gear().filter(g => g.damage != null);
+  const cats = [...new Set(weapons.map(g => g.category))];
+  sel.innerHTML = '<option value="">Add from the weapon list…</option>' + cats.map(c => '<optgroup label="' + esc(c) + '">' + weapons.filter(g => g.category === c).map(g => '<option value="' + esc(g.name) + '">' + esc(g.name) + ' (' + g.damage + ' dmg' + (g.setting && g.setting !== 'core' ? ' · ' + esc(g.setting) : '') + ')</option>').join('') + '</optgroup>').join('');
 }
 function recalcAttacks() {
   document.querySelectorAll('#attacks-body tr').forEach(tr => {
@@ -822,6 +849,8 @@ function addGearFromData(name) {
   const note = [g.description, g.damage ? g.damage + ' damage' : '', g.tier && g.tier !== 'Normal' ? g.tier : ''].filter(Boolean).join(' · ');
   const blank = [...document.querySelectorAll('#gear-body tr')].find(tr => !tr.querySelector('.gear-name').value && !tr.querySelector('.gear-note').value);
   if(blank) { blank.querySelector('.gear-name').value = g.name; blank.querySelector('.gear-note').value = note; } else addGearRow({ name: g.name, note });
+  // A weapon added to gear also shows up as an attack (deduped).
+  if(g.damage != null) addAttackDeduped(attackFromGear(g));
   scheduleAutosave();
 }
 function fillGearPick() {
@@ -852,7 +881,7 @@ function lookupAbility() {
 }
 function fillDatalists() {
   const fill = (id, names) => { const dl = $(id); if(!dl) return; dl.innerHTML = [...new Set(names)].sort().map(n => '<option value="' + esc(n) + '">').join(''); };
-  fill('dl-traits', D.traits().map(t => t.name)); fillGearPick();
+  fill('dl-traits', D.traits().map(t => t.name)); fillGearPick(); fillAttackPick();
   fill('dl-roles', D.roles().map(r => r.name));
   STATS.forEach(s => fill('dl-focus-' + s.id, D.focuses().filter(f => norm(f.stat) === s.id).map(f => f.name)));
   let dlw = $('dl-weapons'); if(!dlw) { dlw = document.createElement('datalist'); dlw.id = 'dl-weapons'; document.body.appendChild(dlw); }
