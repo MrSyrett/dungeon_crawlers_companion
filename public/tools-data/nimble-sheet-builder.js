@@ -22,11 +22,20 @@
   let st = null, step = 0;
 
   function fresh() {
-    return { cls: null, ancestry: null, background: null, motivation: null, array: "Standard", stats: { STR: 0, DEX: 0, INT: 0, WIL: 0 }, assigned: false, skills: {}, gearMode: "class", gearPicks: [], name: "", body: "" };
+    return { cls: null, ancestry: null, background: null, motivation: null, array: "Standard", stats: { STR: null, DEX: null, INT: null, WIL: null }, assigned: false, skills: {}, gearMode: "class", gearPicks: [], name: "", body: "" };
   }
   function arrays() { const T = D.tables(); return (T && T.statArrays) || [{ name: "Standard", values: [2, 2, 0, -1] }, { name: "Balanced", values: [2, 1, 1, 0] }, { name: "Min–Max", values: [3, 1, -1, -1] }]; }
   function arrayValues() { return (arrays().find((a) => a.name === st.array) || arrays()[0]).values.slice(); }
-  function statsOk() { const want = arrayValues().sort((a, b) => a - b).join(","); const have = STATS.map((s) => st.stats[s]).sort((a, b) => a - b).join(","); return want === have; }
+  function statsOk() { if (STATS.some((s) => st.stats[s] == null)) return false; const want = arrayValues().sort((a, b) => a - b).join(","); const have = STATS.map((s) => st.stats[s]).sort((a, b) => a - b).join(","); return want === have; }
+  // The array values a given stat may still take: the pool minus what the OTHER
+  // stats have already used (respecting duplicates), plus this stat's own value.
+  function availableValues(forStat) {
+    const pool = arrayValues();
+    STATS.forEach((other) => { if (other === forStat) return; const v = st.stats[other]; if (v == null) return; const i = pool.indexOf(v); if (i >= 0) pool.splice(i, 1); });
+    const cur = st.stats[forStat]; if (cur != null && !pool.includes(cur)) pool.push(cur);
+    return [...new Set(pool)].sort((a, b) => b - a);
+  }
+  const sgn = (v) => (v >= 0 ? "+" : "") + v;
   function skillPts() { return Object.values(st.skills).reduce((a, b) => a + (b || 0), 0); }
   const maxSkillPts = () => 4 + (st.ancestry && /\+2 shifting skill points/i.test(traitText(st.ancestry)) ? 2 : 0);
   const traitText = (a) => a.traits.map((t) => t.text).join(" ");
@@ -47,6 +56,8 @@
       ".nb-chips{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 10px;}.nb-chip{background:#222;border:1px solid #3a3a40;color:#bbb;border-radius:3px;padding:4px 9px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}.nb-chip.on{background:#1a2a20;border-color:#3fb97a;color:#a8e6c1;}" +
       ".nb-stat{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #2a2e2a;}.nb-stat b{font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.06em;}.nb-stat b small{display:block;font-size:9px;color:#8ad4ff;font-weight:600;letter-spacing:.08em;}" +
       ".nb-stat .opts{display:flex;gap:4px;}.nb-stat .opts span{flex:1;text-align:center;padding:6px 0;background:#1a1a1a;border:1px solid #333;border-radius:3px;font-family:'Share Tech Mono',monospace;font-size:13px;cursor:pointer;color:#bbb;}.nb-stat .opts span.on{background:#1a2a20;border-color:#3fb97a;color:#fff;}.nb-stat .opts span.taken{opacity:.35;}" +
+      ".nb-arow{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:center;padding:6px 0 10px;border-bottom:1px solid #2a2e2a;}.nb-albl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8ad4ff;}" +
+      ".nb-sel{width:100%;padding:9px 10px;background:#141414;border:1px solid #333;border-radius:5px;color:#eee;font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;outline:none;cursor:pointer;}.nb-sel:focus{border-color:#3fb97a;}.nb-statsel{font-size:15px;}" +
       ".nb-skill{display:grid;grid-template-columns:120px 40px 30px 40px 30px 1fr;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid #2a2e2a;font-size:13px;}.nb-skill b{font-family:'Barlow Condensed',sans-serif;font-size:14px;}.nb-skill .stp{width:30px;height:28px;background:#1a1a1a;border:1px solid #333;color:#ddd;font-size:16px;font-weight:900;cursor:pointer;border-radius:3px;}.nb-skill .v{font-family:'Share Tech Mono',monospace;text-align:center;color:#7fd39a;font-size:15px;}" +
       ".nb-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;}.nb-review{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:13px;}.nb-review .k{color:#888;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;}.nb-review .v{color:#f0eee6;}" +
       "@media(max-width:600px){.nb-grid,.nb-review{grid-template-columns:1fr;}.nb-skill{grid-template-columns:100px 34px 26px 34px 26px 1fr;}}";
@@ -84,13 +95,19 @@
       '<div class="m-lbl">Motivation (optional)</div><div class="nb-chips">' + D.motivations().map((m) => '<span class="nb-chip' + (st.motivation === m ? " on" : "") + '" data-motivation="' + esc(m.name) + '" title="' + esc(m.description) + '">' + esc(m.name) + "</span>").join("") + "</div>";
   }
   function rStats() {
-    const vals = arrayValues(); const key = st.cls ? st.cls.keyStats : [];
-    return '<p class="m-hint">Pick a stat array and assign its numbers. Put the highest in your key stats (<b>' + esc(key.join(" & ")) + "</b>). Saves come from your class: " + esc(st.cls.saves.advantaged) + " advantaged, " + esc(st.cls.saves.disadvantaged) + " disadvantaged.</p>" +
-      '<div class="nb-chips">' + arrays().map((a) => '<span class="nb-chip' + (st.array === a.name ? " on" : "") + '" data-array="' + esc(a.name) + '">' + esc(a.name) + ": " + a.values.map((v) => (v >= 0 ? "+" : "") + v).join(", ") + "</span>").join("") + "</div>" +
-      STATS.map((s) => '<div class="nb-stat"><b>' + s + (key.includes(s) ? "<small>KEY</small>" : "<small>&nbsp;</small>") + '</b><div class="opts">' + vals.map((v, i) => '<span class="' + (st.assigned && st.stats[s] === v && countAssigned(v, s) ? "on" : "") + '" data-stat="' + s + "|" + v + '">' + (v >= 0 ? "+" : "") + v + "</span>").join("") + "</div></div>").join("") +
-      '<p class="m-hint" style="margin-top:8px;">' + (statsOk() ? "Every value of the array is used once ✓" : "Assign each value exactly once (values can repeat when the array repeats them).") + '</p><div class="nb-chips"><span class="nb-chip" data-auto="1">Auto-assign (key stats first)</span></div>';
+    const key = st.cls ? st.cls.keyStats : [];
+    const arraySel = '<div class="nb-arow"><span class="nb-albl">Stat array</span><select class="nb-sel" id="nimb-arraysel">' +
+      arrays().map((a) => '<option value="' + esc(a.name) + '"' + (st.array === a.name ? " selected" : "") + ">" + esc(a.name) + ": " + a.values.map(sgn).join(", ") + "</option>").join("") + "</select></div>";
+    const rows = STATS.map((s) => {
+      const cur = st.stats[s];
+      return '<div class="nb-stat"><b>' + s + (key.includes(s) ? "<small>KEY</small>" : "<small>&nbsp;</small>") + "</b>" +
+        '<select class="nb-sel nb-statsel" data-statsel="' + s + '"><option value=""' + (cur == null ? " selected" : "") + ">— choose —</option>" +
+        availableValues(s).map((v) => '<option value="' + v + '"' + (cur === v ? " selected" : "") + ">" + sgn(v) + "</option>").join("") + "</select></div>";
+    }).join("");
+    return '<p class="m-hint">Pick a stat array, then choose each stat\'s value from its dropdown. Put the highest in your key stats (<b>' + esc(key.join(" & ")) + "</b>). Each value is used once — a dropdown only offers values still free. Saves come from your class: " + esc(st.cls.saves.advantaged) + " advantaged, " + esc(st.cls.saves.disadvantaged) + " disadvantaged.</p>" +
+      arraySel + rows +
+      '<p class="m-hint" style="margin-top:8px;">' + (statsOk() ? "Every value of the array is assigned ✓" : "Assign every stat to use up the array.") + '</p><div class="nb-chips"><span class="nb-chip" data-auto="1">Auto-assign (key stats first)</span><span class="nb-chip" data-clear="1">Clear</span></div>';
   }
-  function countAssigned() { return true; }
   function rSkills() {
     const left = maxSkillPts() - skillPts();
     return '<p class="m-hint">Each skill starts at its stat. Spend <b>' + maxSkillPts() + "</b> extra points anywhere (max +12 in a skill). Points left: <b>" + left + "</b></p>" +
@@ -117,8 +134,9 @@
     body.querySelectorAll("[data-ancestry]").forEach((el) => el.addEventListener("click", () => { st.ancestry = D.ancestries().find((a) => a.name === el.dataset.ancestry); render(); }));
     body.querySelectorAll("[data-background]").forEach((el) => el.addEventListener("click", () => { st.background = D.backgrounds().find((b) => b.name === el.dataset.background); render(); }));
     body.querySelectorAll("[data-motivation]").forEach((el) => el.addEventListener("click", () => { const m = D.motivations().find((x) => x.name === el.dataset.motivation); st.motivation = st.motivation === m ? null : m; render(); }));
-    body.querySelectorAll("[data-array]").forEach((el) => el.addEventListener("click", () => { st.array = el.dataset.array; st.assigned = false; STATS.forEach((s) => (st.stats[s] = 0)); render(); }));
-    body.querySelectorAll("[data-stat]").forEach((el) => el.addEventListener("click", () => { const [s, v] = el.dataset.stat.split("|"); st.stats[s] = +v; st.assigned = true; render(); }));
+    const asel = $("nimb-arraysel"); if (asel) asel.addEventListener("change", () => { st.array = asel.value; st.assigned = false; STATS.forEach((s) => (st.stats[s] = null)); render(); });
+    body.querySelectorAll("[data-statsel]").forEach((el) => el.addEventListener("change", () => { const s = el.dataset.statsel; st.stats[s] = el.value === "" ? null : +el.value; st.assigned = true; render(); }));
+    body.querySelectorAll("[data-clear]").forEach((el) => el.addEventListener("click", () => { STATS.forEach((s) => (st.stats[s] = null)); st.assigned = false; render(); }));
     body.querySelectorAll("[data-auto]").forEach((el) => el.addEventListener("click", () => {
       const vals = arrayValues().sort((a, b) => b - a); const order = st.cls.keyStats.concat(STATS.filter((s) => !st.cls.keyStats.includes(s)));
       order.forEach((s, i) => (st.stats[s] = vals[i])); st.assigned = true; render();
