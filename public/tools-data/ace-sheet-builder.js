@@ -25,6 +25,7 @@
   // ── builder state ──
   let st = null;
   let step = 0;
+  let _lastStep = -1;   // re-render on the same step keeps scroll; a step change starts at top
   const STEPS = ["Start", "Role", "Stats", "Focuses", "Trait", "Gear", "Review"];
 
   function fresh() {
@@ -147,9 +148,14 @@
     const nextBtn = $("aceb-next");
     nextBtn.textContent = STEPS[step] === "Review" ? "Build this Hero ✓" : (STEPS[step] === "Start" && st.mode === "pregen") ? "Load this Hero ✓" : "Next →";
     const body = $("aceb-body");
+    const keep = _lastStep === step;
+    const bScroll = keep ? body.scrollTop : 0;
+    const lScroll = keep ? [...body.querySelectorAll(".aceb-list")].map((e) => e.scrollTop) : [];
     const fn = { Start: rStart, Role: rRole, Stats: rStats, Focuses: rFocuses, Trait: rTrait, Gear: rGear, Review: rReview }[STEPS[step]];
     body.innerHTML = fn();
     wire();
+    if (keep) { body.scrollTop = bScroll; body.querySelectorAll(".aceb-list").forEach((e, i) => { if (lScroll[i] != null) e.scrollTop = lScroll[i]; }); }
+    _lastStep = step;
     nextBtn.disabled = !canProceed();
   }
   function refreshNext() { $("aceb-next").disabled = !canProceed(); }
@@ -289,7 +295,7 @@
         st[el.dataset.k] = el.value;
         if (el.dataset.k === "roleName") { st.role = null; body.querySelectorAll(".aceb-card.on[data-role]").forEach((c) => c.classList.remove("on")); }
         if (el.dataset.k === "trait") body.querySelectorAll(".aceb-card.on[data-trait]").forEach((c) => c.classList.remove("on"));
-        if (el.dataset.k === "roleQuery") { render(); const q = body.querySelector('[data-k="roleQuery"]'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } return; }
+        if (el.dataset.k === "roleQuery") { render(); const q = body.querySelector('[data-k="roleQuery"]'); if (q) { q.focus({ preventScroll: true }); q.setSelectionRange(q.value.length, q.value.length); } return; }
         refreshNext();
       });
       if (el.dataset.k === "setting") el.addEventListener("change", () => { st.setting = el.value; st.pregen = null; st.role = null; st.roleFilter = ""; render(); });
@@ -342,7 +348,7 @@
       el.classList.toggle("on", i < 0);
     }));
     const first = body.querySelector('[data-k="name"]');
-    if (first) first.focus();
+    if (first) first.focus({ preventScroll: true });
   }
 
   // ── apply to the sheet ──

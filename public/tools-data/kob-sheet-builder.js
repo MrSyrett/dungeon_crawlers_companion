@@ -22,7 +22,7 @@
   const BOOK_NAMES = { bikes: "Kids on Bikes", brooms: "Kids on Brooms", capes: "Kids in Capes" };
   const STEPS = ["Start", "Trope", "Age", "Strengths", "Extras", "Touches", "Review"];
 
-  let st = null, step = 0;
+  let st = null, step = 0, _lastStep = -1;
   function fresh() {
     return {
       book: ($("f-book") && $("f-book").value) || "bikes",
@@ -94,9 +94,15 @@
     $("kobb-step").textContent = step === 0 ? "" : "Step " + step + " of " + (STEPS.length - 1) + " — " + STEPS[step];
     $("kobb-back").style.visibility = step === 0 ? "hidden" : "visible";
     $("kobb-next").textContent = STEPS[step] === "Review" ? "Build this character ✓" : "Next →";
+    const body = $("kobb-body");
+    const keep = _lastStep === step;
+    const bScroll = keep ? body.scrollTop : 0;
+    const lScroll = keep ? [...body.querySelectorAll(".kb-list")].map((e) => e.scrollTop) : [];
     const fn = { Start: rStart, Trope: rTrope, Age: rAge, Strengths: rStrengths, Extras: rExtras, Touches: rTouches, Review: rReview }[STEPS[step]];
-    $("kobb-body").innerHTML = fn();
+    body.innerHTML = fn();
     wire();
+    if (keep) { body.scrollTop = bScroll; body.querySelectorAll(".kb-list").forEach((e, i) => { if (lScroll[i] != null) e.scrollTop = lScroll[i]; }); }
+    _lastStep = step;
     $("kobb-next").disabled = !canProceed();
   }
   const refreshNext = () => { $("kobb-next").disabled = !canProceed(); };
@@ -204,7 +210,7 @@
     body.querySelectorAll("[data-k]").forEach((el) => {
       el.addEventListener("input", () => {
         if (el.dataset.k === "skillNote") st.strengthNotes.skill = el.value; else st[el.dataset.k] = el.value;
-        if (el.dataset.k === "tropeQuery") { render(); const q = body.querySelector('[data-k="tropeQuery"]'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } return; }
+        if (el.dataset.k === "tropeQuery") { render(); const q = body.querySelector('[data-k="tropeQuery"]'); if (q) { q.focus({ preventScroll: true }); q.setSelectionRange(q.value.length, q.value.length); } return; }
         if (el.dataset.k === "flaw") body.querySelectorAll(".kb-chip.on[data-flaw]").forEach((c) => c.classList.remove("on"));
         if (el.dataset.k === "boost" || el.dataset.k === "reduce") { render(); return; }
         refreshNext();
@@ -231,7 +237,7 @@
     }));
     body.querySelectorAll("[data-flaw]").forEach((el) => el.addEventListener("click", () => { st.flaw = el.dataset.flaw; render(); }));
     body.querySelectorAll("[data-pick]").forEach((el) => el.addEventListener("click", () => { const [k, v] = el.dataset.pick.split("|"); st[k] = st[k] === v ? "" : v; render(); }));
-    const first = body.querySelector('[data-k="name"]'); if (first) first.focus();
+    const first = body.querySelector('[data-k="name"]'); if (first) first.focus({ preventScroll: true });
   }
 
   function apply() {

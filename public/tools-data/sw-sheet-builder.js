@@ -7,7 +7,7 @@
   const STEPS = ['Template', 'Skills', 'Details', 'Gear'];
   const ATTRS = ['Dexterity', 'Knowledge', 'Mechanical', 'Perception', 'Strength', 'Technical'];
   const MAX_TOTAL = 21, MAX_PER = 6; // 7D, 2D per skill
-  let step = 0, tpl = null, alloc = {}, forceAlloc = {}, details = {};
+  let step = 0, tpl = null, alloc = {}, forceAlloc = {}, details = {}, _lastStep = -1;
   let ov = null;
 
   function templates() { return typeof SW_TEMPLATES !== 'undefined' ? SW_TEMPLATES : []; }
@@ -36,6 +36,9 @@
     $('swb-back').style.visibility = step === 0 ? 'hidden' : 'visible';
     $('swb-next').textContent = step === STEPS.length - 1 ? 'Finish ✓' : 'Next →';
     const b = $('swb-body'); const note = $('swb-note');
+    const keep = _lastStep === step;
+    const bScroll = keep ? b.scrollTop : 0;
+    const lScroll = keep ? [...b.querySelectorAll('.tpl-list, .alloc')].map((e) => e.scrollTop) : [];
     if (step === 0) {
       note.textContent = tpl ? tpl.name : 'Pick a template';
       b.innerHTML = '<p class="m-hint">Every character starts from one of the 24 templates. Attributes are fixed by the template; you\'ll spend 7D of skill dice next.</p><div class="tpl-list">'
@@ -73,6 +76,8 @@
         + '<div style="display:flex;flex-direction:column;gap:6px;">' + (tpl.equipment || []).map((e, i) => { const w = matchWeapon(e); return '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:#ddd;"><input type="checkbox" class="swb-eq" data-i="' + i + '" checked style="margin-top:3px;"><span>' + esc(e) + (w ? ' <span style="color:#f0c020;font-size:11px;">→ weapon ' + esc(w.damageText || toCode(w.damage)) + '</span>' : '') + '</span></label>'; }).join('') + '</div>'
         + (tpl.specialRule ? '<div class="m-lbl">Special</div><p style="font-size:12px;color:#ccc;line-height:1.5;">' + esc(tpl.specialRule) + '</p>' : '');
     }
+    if (keep) { b.scrollTop = bScroll; b.querySelectorAll('.tpl-list, .alloc').forEach((e, i) => { if (lScroll[i] != null) e.scrollTop = lScroll[i]; }); }
+    _lastStep = step;
     ov.classList.add('open');
   }
   function speciesFor(t) { const n = t.name; if (/Wookiee/i.test(n)) return 'Wookiee'; if (/Ewok/i.test(n)) return 'Ewok'; if (/Mon Calamari/i.test(n)) return 'Mon Calamari'; if (/Alien/i.test(n)) return 'Alien'; return 'Human'; }

@@ -73,12 +73,17 @@
   }
   function next() { if (!canProceed()) return; if (STEPS[step] === "Name") { apply(); return; } step += 1; render(); }
   function back() { if (step > 0) { step -= 1; render(); } }
-  function render() {
+  function render(keepScroll) {
+    const bodyEl = $("nimb-body");
+    const prevBody = keepScroll ? bodyEl.scrollTop : 0;
+    const prevList = keepScroll ? ((bodyEl.querySelector(".nb-list") || {}).scrollTop || 0) : 0;
     $("nimb-step").textContent = "Step " + (step + 1) + " of " + STEPS.length + " — " + STEPS[step];
     $("nimb-back").style.visibility = step === 0 ? "hidden" : "visible";
     $("nimb-next").textContent = STEPS[step] === "Name" ? "Build this hero ✓" : "Next →";
-    $("nimb-body").innerHTML = ({ Class: rClass, Ancestry: rAncestry, Background: rBackground, Stats: rStats, Skills: rSkills, Gear: rGear, Name: rName })[STEPS[step]]();
-    wire(); $("nimb-next").disabled = !canProceed();
+    bodyEl.innerHTML = ({ Class: rClass, Ancestry: rAncestry, Background: rBackground, Stats: rStats, Skills: rSkills, Gear: rGear, Name: rName })[STEPS[step]]();
+    wire();
+    if (keepScroll) { bodyEl.scrollTop = prevBody; const nl = bodyEl.querySelector(".nb-list"); if (nl) nl.scrollTop = prevList; }
+    $("nimb-next").disabled = !canProceed();
   }
 
   function rClass() {
@@ -130,20 +135,20 @@
   function wire() {
     const body = $("nimb-body");
     body.querySelectorAll("[data-k]").forEach((el) => el.addEventListener("input", () => { st[el.dataset.k] = el.value; }));
-    body.querySelectorAll("[data-class]").forEach((el) => el.addEventListener("click", () => { st.cls = D.classes().find((c) => c.name === el.dataset.class); render(); }));
-    body.querySelectorAll("[data-ancestry]").forEach((el) => el.addEventListener("click", () => { st.ancestry = D.ancestries().find((a) => a.name === el.dataset.ancestry); render(); }));
-    body.querySelectorAll("[data-background]").forEach((el) => el.addEventListener("click", () => { st.background = D.backgrounds().find((b) => b.name === el.dataset.background); render(); }));
-    body.querySelectorAll("[data-motivation]").forEach((el) => el.addEventListener("click", () => { const m = D.motivations().find((x) => x.name === el.dataset.motivation); st.motivation = st.motivation === m ? null : m; render(); }));
-    const asel = $("nimb-arraysel"); if (asel) asel.addEventListener("change", () => { st.array = asel.value; st.assigned = false; STATS.forEach((s) => (st.stats[s] = null)); render(); });
-    body.querySelectorAll("[data-statsel]").forEach((el) => el.addEventListener("change", () => { const s = el.dataset.statsel; st.stats[s] = el.value === "" ? null : +el.value; st.assigned = true; render(); }));
-    body.querySelectorAll("[data-clear]").forEach((el) => el.addEventListener("click", () => { STATS.forEach((s) => (st.stats[s] = null)); st.assigned = false; render(); }));
+    body.querySelectorAll("[data-class]").forEach((el) => el.addEventListener("click", () => { st.cls = D.classes().find((c) => c.name === el.dataset.class); render(true); }));
+    body.querySelectorAll("[data-ancestry]").forEach((el) => el.addEventListener("click", () => { st.ancestry = D.ancestries().find((a) => a.name === el.dataset.ancestry); render(true); }));
+    body.querySelectorAll("[data-background]").forEach((el) => el.addEventListener("click", () => { st.background = D.backgrounds().find((b) => b.name === el.dataset.background); render(true); }));
+    body.querySelectorAll("[data-motivation]").forEach((el) => el.addEventListener("click", () => { const m = D.motivations().find((x) => x.name === el.dataset.motivation); st.motivation = st.motivation === m ? null : m; render(true); }));
+    const asel = $("nimb-arraysel"); if (asel) asel.addEventListener("change", () => { st.array = asel.value; st.assigned = false; STATS.forEach((s) => (st.stats[s] = null)); render(true); });
+    body.querySelectorAll("[data-statsel]").forEach((el) => el.addEventListener("change", () => { const s = el.dataset.statsel; st.stats[s] = el.value === "" ? null : +el.value; st.assigned = true; render(true); }));
+    body.querySelectorAll("[data-clear]").forEach((el) => el.addEventListener("click", () => { STATS.forEach((s) => (st.stats[s] = null)); st.assigned = false; render(true); }));
     body.querySelectorAll("[data-auto]").forEach((el) => el.addEventListener("click", () => {
       const vals = arrayValues().sort((a, b) => b - a); const order = st.cls.keyStats.concat(STATS.filter((s) => !st.cls.keyStats.includes(s)));
-      order.forEach((s, i) => (st.stats[s] = vals[i])); st.assigned = true; render();
+      order.forEach((s, i) => (st.stats[s] = vals[i])); st.assigned = true; render(true);
     }));
-    body.querySelectorAll("[data-skill]").forEach((el) => el.addEventListener("click", () => { const [n, d] = el.dataset.skill.split("|"); const nx = (st.skills[n] || 0) + +d; if (nx < 0) return; if (+d > 0 && skillPts() >= maxSkillPts()) return; st.skills[n] = nx; render(); }));
-    body.querySelectorAll("[data-gear]").forEach((el) => el.addEventListener("click", () => { st.gearMode = el.dataset.gear; render(); }));
-    const first = body.querySelector('[data-k="name"]'); if (first) first.focus();
+    body.querySelectorAll("[data-skill]").forEach((el) => el.addEventListener("click", () => { const [n, d] = el.dataset.skill.split("|"); const nx = (st.skills[n] || 0) + +d; if (nx < 0) return; if (+d > 0 && skillPts() >= maxSkillPts()) return; st.skills[n] = nx; render(true); }));
+    body.querySelectorAll("[data-gear]").forEach((el) => el.addEventListener("click", () => { st.gearMode = el.dataset.gear; render(true); }));
+    const first = body.querySelector('[data-k="name"]'); if (first) first.focus({ preventScroll: true });
   }
   function apply() {
     const c = st.cls;
