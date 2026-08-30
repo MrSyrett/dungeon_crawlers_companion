@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Session Prep Builder — Shadowdark RPG</title>
+<title>Adventure Prep Builder — Shadowdark RPG</title>
 <script src="/dungeon-engine.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&family=MedievalSharp&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
 <!-- html2canvas + jsPDF (~550KB) load on demand in loadExportLibs() when an
@@ -2402,7 +2402,7 @@ function importHTML(input) {
     const html=e.target.result;
     const match=html.match(/data-spb="([^"]+)"/);
     if(!match){
-      alert("This HTML file does not contain Session Prep Builder data.\n\nOnly files exported from this builder can be imported.");
+      alert("This HTML file does not contain Adventure Prep Builder data.\n\nOnly files exported from this builder can be imported.");
       input.value="";
       return;
     }

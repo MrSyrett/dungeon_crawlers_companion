@@ -306,7 +306,7 @@ export default async function DashboardPage() {
               </section>
 
               <section>
-                <ColumnHeading>Session Prep</ColumnHeading>
+                <ColumnHeading>Adventure Prep</ColumnHeading>
                 <div className="flex flex-col gap-6">
                   {sessionPrepIds
                     .filter((id) => TOOLS[id].system === s.key)
@@ -315,7 +315,7 @@ export default async function DashboardPage() {
                     ))}
                   {sessionPrepIds.every((id) => TOOLS[id].system !== s.key) ? (
                     <p className="text-sm text-[var(--muted)]">
-                      No session-prep tool for {s.name} yet.
+                      No adventure-prep tool for {s.name} yet.
                     </p>
                   ) : null}
                 </div>
