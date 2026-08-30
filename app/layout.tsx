@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
+import PullToRefresh from "@/components/PullToRefresh";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -36,7 +37,10 @@ export default function RootLayout({
       lang="en"
       className={`${cinzel.variable} ${barlow.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <PullToRefresh />
+        {children}
+      </body>
     </html>
   );
 }
