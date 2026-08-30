@@ -120,6 +120,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .vitals{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule);}
 .vital{padding:8px 10px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);}
 .vital:nth-child(2n){border-right:none;}
+/* Hit Dice, Actions, Armor, Initiative·Speed → centred content, banded off */
+.vital.vc{display:flex;flex-direction:column;align-items:center;text-align:center;}
+.vital.vc .vlbl{justify-content:center;width:100%;}
+.vital.vc .vbig{justify-content:center;}
+.vital.vc .vline{justify-content:center;}
+.vital.vc .pips{justify-content:center;}
+.vital.vc.band-top{border-top:2px solid var(--rule);}
 .vlbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:4px;}
 .vlbl small{font-weight:600;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:none;text-align:right;}
 .vbig{font-family:'Share Tech Mono',monospace;font-size:26px;font-weight:700;line-height:1.1;color:var(--ink);display:flex;align-items:baseline;gap:4px;}
@@ -220,7 +227,9 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   .hdr-fields{grid-template-columns:1fr 1fr;}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
-  .blk-grid,.vitals{grid-template-columns:1fr;}
+  .blk-grid{grid-template-columns:1fr;}
+  /* Vitals stay two-up on mobile (fills the width; Wounds boxes wrap) */
+  .vitals{grid-template-columns:1fr 1fr;}
   .vital{border-right:none;}
   /* Roll targets big enough for a thumb */
   .stat-cell .sn{display:block;min-height:40px;line-height:40px;font-size:15px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
@@ -304,37 +313,37 @@ select option{background:var(--input-bg);color:var(--ink);}
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
 
       <div class="vitals">
-        <div class="vital">
+        <div class="vital vc">
           <div class="vlbl"><span>Hit Points</span></div>
           <div class="vbig"><input type="number" id="hp-cur" value="10" oninput="recalc()"><span class="sep">/</span><input type="number" id="hp-max" value="10" oninput="recalc()"></div>
           <div class="vline">temp <input type="number" id="hp-temp" value="0" oninput="recalc()"><span id="ko-flag"></span></div>
         </div>
-        <div class="vital">
+        <div class="vital vc">
           <div class="vlbl"><span>Wounds</span></div>
           <div class="pips" id="wound-pips"></div>
           <div class="vline">max <input type="number" id="wounds-max" value="6" oninput="recalc()"></div>
         </div>
-        <div class="vital">
+        <div class="vital vc">
           <div class="vlbl"><span>Hit Dice</span><small id="hd-lbl"></small></div>
           <div class="vbig"><input type="number" id="hd-cur" value="1" oninput="recalc()"><span class="sep">/</span><input type="number" id="hd-max" value="1" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn" onclick="catchBreath()" title="Spend 1 Hit Die: roll it + STR">Catch Breath</button><button class="small-btn" onclick="makeCamp()" title="Spend 1 Hit Die at max value + STR">Make Camp</button><button class="small-btn green" onclick="safeRest()" title="Recover all HP, Hit Dice, mana; heal 1 Wound">Safe Rest</button></div>
         </div>
-        <div class="vital">
+        <div class="vital vc">
           <div class="vlbl"><span>Actions</span></div>
           <div class="pips" id="action-pips"></div>
           <div class="vline"><button class="small-btn ghost" onclick="resetActions()">New turn</button></div>
         </div>
-        <div class="vital">
+        <div class="vital vc band-top">
           <div class="vlbl"><span>Armor</span></div>
           <div class="vbig"><span id="armor-val">0</span></div>
-          <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="Armor" style="width:100px;text-align:left;" oninput="recalc()"><input type="text" id="f-shield" list="dl-shield" placeholder="Shield" style="width:80px;text-align:left;" oninput="recalc()"> +<input type="number" id="armor-bonus" value="0" oninput="recalc()"></div>
+          <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="Armor" style="width:100px;" oninput="recalc()"><input type="text" id="f-shield" list="dl-shield" placeholder="Shield" style="width:80px;" oninput="recalc()"> +<input type="number" id="armor-bonus" value="0" oninput="recalc()"></div>
         </div>
-        <div class="vital">
+        <div class="vital vc band-top">
           <div class="vlbl"><span>Initiative · Speed</span></div>
           <div class="vbig"><span id="init-val">+0</span><span class="sep">·</span><span id="speed-val">6</span><button class="small-btn ghost" style="margin-left:8px;align-self:center;" onclick="rollInitiative()" title="Roll initiative">🎲</button></div>
           <div class="vline">init +<input type="number" id="init-bonus" value="0" oninput="recalc()"> speed +<input type="number" id="speed-bonus" value="0" oninput="recalc()"> size <input type="text" id="f-size" value="Medium" style="width:64px;text-align:left;"></div>
         </div>
-        <div class="vital" style="grid-column:span 2;">
+        <div class="vital vc" style="grid-column:span 2;">
           <div class="vlbl"><span>Mana</span><small id="mana-lbl"></small></div>
           <div class="vbig"><input type="number" id="mana-cur" value="0" oninput="recalc()"><span class="sep">/</span><input type="number" id="mana-max" value="0" oninput="recalc()"></div>
         </div>

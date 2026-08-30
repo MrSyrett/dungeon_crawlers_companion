@@ -238,7 +238,13 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
   .hdr-fields{grid-template-columns:1fr 1fr;border-left:none;border-top:2px solid var(--border);}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
-  .stat-row,.stats-head{grid-template-columns:96px 56px 30px 44px auto;padding-left:6px;padding-right:6px;}
+  /* Spread the 4 stat controls across the full width; the ⚡ Power column
+     (Capes only) collapses to nothing in the default book so there's no dead
+     space on the right. */
+  .stat-row,.stats-head{grid-template-columns:minmax(96px,1.4fr) minmax(70px,1.1fr) 44px minmax(64px,1.1fr) min-content;gap:8px;padding-left:8px;padding-right:8px;}
+  .die-sel{height:44px;font-size:17px;}
+  .stat-mod{height:44px;font-size:15px;}
+  .stat-bonus{height:44px;line-height:44px;font-size:15px;}
   /* Roll targets big enough for a thumb */
   .stat-name{min-height:44px;display:flex;flex-direction:column;justify-content:center;padding:2px 6px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
   .stat-name small{font-size:9px;}
@@ -326,7 +332,6 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="tok-pips" id="at-pips"></div>
           <button class="small-btn ghost" onclick="atChange(-1)">−</button>
           <button class="small-btn ghost" onclick="atChange(1)">+</button>
-          <button class="small-btn purple" onclick="atChange(1,'Failed while acting on Flaw')" title="Failing because you acted on your Flaw earns an extra token">+1 Flaw</button>
         </div>
       </div>
 
