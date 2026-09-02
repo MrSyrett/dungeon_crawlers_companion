@@ -14492,7 +14492,8 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Flight—Rayzers can move through the air as though on the ground and hover in place."
     ],
     "page": 19,
-    "source": "GM Toolkit"
+    "source": "GM Toolkit",
+    "flavor": "The Rayzer is a deceptively cunning ambush predator. Sure, they can fly and shoot magic and even blend in with their surroundings, but that’s not what makes them so successful. Their true power lies in their patience and their intelligence. These crafty little devils have been known to hide in the perfect ambush spot and wait up to sixty hours without moving. Watch your step and your head, because these guys hide above and below before striking at unsuspecting prey. If you have the fortune to see one before it springs its trap, take a good look around, because there’s probably at least two more you don’t see, just waiting for you to lower your guard."
   },
   {
     "name": "Razor Fox",

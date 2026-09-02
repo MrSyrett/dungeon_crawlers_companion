@@ -56,7 +56,8 @@ function matches(m: DccMonster, q: string, roleKey: string, src: string): boolea
     m.role.toLowerCase().includes(q) ||
     m.tags.some((t) => t.toLowerCase().includes(q)) ||
     m.notes.some((n) => n.toLowerCase().includes(q)) ||
-    m.attacks.some((a) => a.name.toLowerCase().includes(q))
+    m.attacks.some((a) => a.name.toLowerCase().includes(q)) ||
+    (m.flavor ? m.flavor.toLowerCase().includes(q) : false)
   );
 }
 
@@ -201,6 +202,10 @@ export default async function DccBestiaryPage({
 
                 {m.tags.length ? (
                   <div className="mt-1 text-[11px] uppercase tracking-[0.1em] text-[var(--muted)]">{m.tags.join(" · ")}</div>
+                ) : null}
+
+                {m.flavor ? (
+                  <p className="mt-2 text-[13px] italic leading-relaxed text-[var(--text)]">{m.flavor}</p>
                 ) : null}
 
                 {/* Derived line: Surprise / Evade / Move / DR */}

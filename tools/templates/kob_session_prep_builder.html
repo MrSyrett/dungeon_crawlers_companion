@@ -138,6 +138,15 @@ document.addEventListener("DOMContentLoaded", function() {
   .page.dark-mode .sb-ability { color: #c8c4bc; }
   .page.dark-mode .sb-warning { background: #1a2a3a; color: #7aaadd; border-color: #1a4a8a; }
   .page.dark-mode .sb-notes { color: #b0aca4; }
+  .rt-table { width: 100%; border-collapse: collapse; font-size: 8.5px; margin-top: 3px; }
+  .rt-table th { background: #7a4db3; color: #fff; text-align: left; padding: 2px 6px; font-family: 'Share Tech Mono', monospace; font-size: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .rt-table td { padding: 2px 6px; border-bottom: 1px solid rgba(0,0,0,0.12); vertical-align: top; color: var(--ink); }
+  .rt-table th.rt-roll-col, .rt-table td.rt-roll-col { width: 40px; white-space: nowrap; text-align: center; font-family: 'Share Tech Mono', monospace; }
+  .rt-table td.rt-roll-col { font-weight: 700; color: #7a4db3; }
+  .page.dark-mode .rt-table th { background: #5a3a86; }
+  .page.dark-mode .rt-table td { color: #d0ccc4; border-bottom-color: #3a3a3e; }
+  .page.dark-mode .rt-table td.rt-roll-col { color: #b58ce0; }
+
   .page.dark-mode .sl { color: #e05040; border-bottom-color: #F7941D; }
   .page.dark-mode .location-block { border-bottom-color: #3a3a3e; }
   .page.dark-mode .p-footer { border-top-color: #F7941D; }
@@ -519,6 +528,10 @@ body.flow-mode .page + .page {
       <div class="field-group">
         <textarea id="f-notes" rows="4" style="width:100%;background:var(--ui-panel);border:1px solid var(--ui-border);border-radius:3px;color:var(--ui-text);font-size:12px;padding:6px 8px;resize:vertical;outline:none;font-family:'Barlow',sans-serif;" placeholder="Session notes, reminders, GM notes..." oninput="autosave()"></textarea>
       </div>
+      <div class="section-divider" style="border-left-color:#7a4db3;">Roll Tables</div>
+      <div id="rolltables-list" class="entity-list"></div>
+      <button class="btn-add" onclick="addRollTable()">+ Add Roll Table</button>
+
 
     </div>
 
@@ -694,7 +707,7 @@ const DEFAULT_STATE = {
   darkMode:false,
   title:'', subtitle:'', floor:'', session:'', players:'', duration:'',
   overview:'', mappath:'', maps:[],
-  clues:[], rewards:[], hooks:[], notes:'', strongopen:[], locations:[], statblocks:[]
+  clues:[], rewards:[], hooks:[], notes:'', strongopen:[], locations:[], statblocks:[], rolltables:[]
 };
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 let saveTimer = null;
@@ -1194,6 +1207,14 @@ function readFields() {
     fullwidth:c.querySelector('.sb-fullwidth')?.checked||false,
     notes:c.querySelector('.sb-notes-input')?.value.trim()||''
   })).filter(s=>s.name);
+  state.rolltables=[...document.querySelectorAll('#rolltables-list .entity-card')].map(c=>({
+    title:c.querySelector('.rt-title-input')?.value.trim()||'',
+    die:c.querySelector('.rt-die-input')?.value.trim()||'',
+    rows:[...c.querySelectorAll('.rt-row')].map(r=>({
+      range:r.querySelector('.rt-range-input')?.value.trim()||'',
+      result:r.querySelector('.rt-result-input')?.value.trim()||''
+    })).filter(r=>r.range||r.result)
+  })).filter(t=>t.title||t.rows.length);
 }
 
 function buildSidebarFromState() {
@@ -1214,6 +1235,39 @@ function buildSidebarFromState() {
   state.locations.forEach(l=>addLocation(l));
   const _el_statblocks_list=document.getElementById('statblocks-list'); if(_el_statblocks_list) _el_statblocks_list.innerHTML='';
   state.statblocks.forEach(s=>addStatBlock(s));
+  const _el_rolltables_list=document.getElementById('rolltables-list'); if(_el_rolltables_list) _el_rolltables_list.innerHTML='';
+  (state.rolltables||[]).forEach(t=>addRollTable(t));
+}
+
+function addRollTable(data={}) {
+  const list=document.getElementById('rolltables-list');
+  const div=document.createElement('div'); div.className='entity-card';
+  div.style.borderLeft='2px solid #7a4db3';
+  div.innerHTML=`
+    <div class="entity-card-header">
+      <input class="entity-name-input rt-title-input" type="text" placeholder="Table name (e.g. Random Rumors)" value="${escA(data.title||'')}" oninput="autosave()">
+      <button class="btn-remove" onclick="this.closest('.entity-card').remove();autosave()">\u2715</button>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Roll / Die label</label>
+      <input type="text" class="rt-die-input" placeholder="e.g. d20, d6, 2d6" value="${escA(data.die||'')}" oninput="autosave()">
+    </div>
+    <div class="rt-rows"></div>
+    <button class="btn-add" style="margin-top:4px;" onclick="addRollTableRow(this.closest('.entity-card').querySelector('.rt-rows'))">+ Add Row</button>`;
+  list.appendChild(div);
+  const rowsWrap=div.querySelector('.rt-rows');
+  const rows=(data.rows&&data.rows.length)?data.rows:[{},{}];
+  rows.forEach(r=>addRollTableRow(rowsWrap,r));
+}
+function addRollTableRow(wrap, data={}) {
+  const row=document.createElement('div');
+  row.className='rt-row';
+  row.style.cssText='display:flex;gap:4px;margin-bottom:4px;align-items:flex-start;';
+  row.innerHTML=`
+    <input type="text" class="rt-range-input" style="flex:0 0 46px;width:46px;min-width:0;" placeholder="1-2" value="${escA(data.range||'')}" oninput="autosave()">
+    <textarea class="rt-result-input" rows="1" style="flex:1;min-width:0;min-height:0;" placeholder="Result..." oninput="autosave()">${escH(data.result||'')}</textarea>
+    <button class="btn-remove" onclick="this.closest('.rt-row').remove();autosave()">\u2715</button>`;
+  wrap.appendChild(row);
 }
 
 function addClue(data={}) {
@@ -1724,6 +1778,15 @@ function renderPreview() {
     if(state.notes && state.notes.trim()){
       sections.push('<div class="p-section"><div class="sl">Notes</div><p class="p-text">'+fmtText(state.notes)+'</p></div>');
     }
+    // Roll Tables
+    (state.rolltables||[]).forEach(t=>{
+      if(!t || (!t.title && !((t.rows||[]).some(r=>r.range||r.result)))) return;
+      let h='<div class="p-section rt-block"><div class="sl" style="color:#7a4db3;border-bottom-color:#7a4db3;">'+(escH(t.title)||'Roll Table')+'</div>';
+      h+='<table class="rt-table"><tr><th class="rt-roll-col">'+(escH(t.die)||'Roll')+'</th><th>Result</th></tr>';
+      (t.rows||[]).forEach(r=>{ if(!r.range&&!r.result) return; h+='<tr><td class="rt-roll-col">'+escH(r.range)+'</td><td>'+fmtText(r.result)+'</td></tr>'; });
+      h+='</table></div>';
+      sections.push(h);
+    });
 
     // Encounters inline on page 1 (spills onto page 2 when they don't fit)
     const _typeC={'combat':'#C0392B','exploration':'#2d6a2d','npc':'#1a4a8a'};
@@ -1880,7 +1943,7 @@ function buildSB(s) {
       ${s.flavor?`<div class="sb-flavor">${fmtText(s.flavor)}</div>`:''}
       ${pips?`<div class="sb-hp-row">${pips}</div>`:``}${tables}
       ${abilities?`<hr class="sb-divider">${abilities}`:''}
-      ${s.isnpc&&s.notes?`<hr class="sb-divider"><div style="font-size:8.5px;color:var(--ink);line-height:1.6">${fmtText(s.notes)}</div>`:''}`;
+      ${s.isnpc&&s.notes?`<hr class="sb-divider"><div class="sb-notes" style="column-count:1;">${fmtText(s.notes)}</div>`:''}`;
   }
   return div;
 }
@@ -1991,6 +2054,7 @@ function importHTML(input) {
       if(!Array.isArray(state.strongopen)) state.strongopen=[];
       if(!Array.isArray(state.locations)) state.locations=[];
       if(!Array.isArray(state.statblocks)) state.statblocks=[];
+      if(!Array.isArray(state.rolltables)) state.rolltables=[];
       try {
         const toSave={...state, mappath:"", maps:[]};
         localStorage.setItem("kob_builder_v1", JSON.stringify(toSave));

@@ -137,7 +137,16 @@
   .page.dark-mode .sb-table td { background: #ffffff; color: #0a0a0a; border-color: rgba(0,0,0,0.1); }
   .page.dark-mode .sb-ability { color: var(--ink); }
   .page.dark-mode .sb-warning { background: #1a2a3a; color: #7aaadd; border-color: #1a4a8a; }
-  .page.dark-mode .sb-notes { color: var(--ink); }
+  .page.dark-mode .sb-notes { color: #b0aca4; }
+  .rt-table { width: 100%; border-collapse: collapse; font-size: 8.5px; margin-top: 3px; }
+  .rt-table th { background: #7a4db3; color: #fff; text-align: left; padding: 2px 6px; font-family: 'Share Tech Mono', monospace; font-size: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .rt-table td { padding: 2px 6px; border-bottom: 1px solid rgba(0,0,0,0.12); vertical-align: top; color: var(--ink); }
+  .rt-table th.rt-roll-col, .rt-table td.rt-roll-col { width: 40px; white-space: nowrap; text-align: center; font-family: 'Share Tech Mono', monospace; }
+  .rt-table td.rt-roll-col { font-weight: 700; color: #7a4db3; }
+  .page.dark-mode .rt-table th { background: #5a3a86; }
+  .page.dark-mode .rt-table td { color: #d0ccc4; border-bottom-color: #3a3a3e; }
+  .page.dark-mode .rt-table td.rt-roll-col { color: #b58ce0; }
+
   .page.dark-mode .adventure-title { color: #ffffff; }
   .page.dark-mode .adventure-subtitle { color: #ffffff; }
   .page.dark-mode .header-meta span { color: #ffffff; }
@@ -513,6 +522,13 @@ body.flow-mode .page + .page {
       </div>
       <div style="display:flex;gap:6px;"><button class="btn-add" style="flex:1" onclick="addReward()">+ Add Reward</button><button class="btn-add" style="flex:1;border-color:#e8c84a;color:#e8c84a;" onclick="randReward()"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random</button></div>
       <div id="rewards-list" class="entity-list" style="margin-top:8px;"></div>
+      <div class="section-divider" style="border-left-color:#555;">Notes</div>
+      <div class="field-group">
+        <textarea id="f-notes" rows="4" style="width:100%;background:var(--ui-panel);border:1px solid var(--ui-border);border-radius:3px;color:var(--ui-text);font-size:12px;padding:6px 8px;resize:vertical;outline:none;font-family:inherit;" placeholder="Session notes, reminders, GM notes..." oninput="autosave()"></textarea>
+      </div>
+      <div class="section-divider" style="border-left-color:#7a4db3;">Roll Tables</div>
+      <div id="rolltables-list" class="entity-list"></div>
+      <button class="btn-add" onclick="addRollTable()">+ Add Roll Table</button>
     </div>
 
     <!-- ENCOUNTERS -->
@@ -720,7 +736,7 @@ const DEFAULT_STATE = {
   darkMode:false,
   title:'', subtitle:'', floor:'', session:'', players:'', duration:'',
   overview:'', mappath:'', maps:[],
-  randenc:[], clues:[], rewards:[], strongopen:[], locations:[], statblocks:[]
+  randenc:[], clues:[], rewards:[], strongopen:[], locations:[], statblocks:[], notes:'', rolltables:[]
 };
 let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
 let saveTimer = null;
@@ -1242,6 +1258,15 @@ function readFields() {
     fullwidth:c.querySelector('.sb-fullwidth')?.checked||false,
     notes:c.querySelector('.sb-notes-input')?.value.trim()||''
   })).filter(s=>s.name);
+  state.notes=document.getElementById('f-notes')?.value||'';
+  state.rolltables=[...document.querySelectorAll('#rolltables-list .entity-card')].map(c=>({
+    title:c.querySelector('.rt-title-input')?.value.trim()||'',
+    die:c.querySelector('.rt-die-input')?.value.trim()||'',
+    rows:[...c.querySelectorAll('.rt-row')].map(r=>({
+      range:r.querySelector('.rt-range-input')?.value.trim()||'',
+      result:r.querySelector('.rt-result-input')?.value.trim()||''
+    })).filter(r=>r.range||r.result)
+  })).filter(t=>t.title||t.rows.length);
 }
 
 function buildSidebarFromState() {
@@ -1263,7 +1288,10 @@ function buildSidebarFromState() {
   const _el_locations_list=document.getElementById('locations-list'); if(_el_locations_list) _el_locations_list.innerHTML='';
   state.locations.forEach(l=>addLocation(l));
   const _el_statblocks_list=document.getElementById('statblocks-list'); if(_el_statblocks_list) _el_statblocks_list.innerHTML='';
+  setVal('f-notes',state.notes||'');
   state.statblocks.forEach(s=>addStatBlock(s));
+  const _el_rolltables_list=document.getElementById('rolltables-list'); if(_el_rolltables_list) _el_rolltables_list.innerHTML='';
+  (state.rolltables||[]).forEach(t=>addRollTable(t));
 }
 
 // ── Random Encounters roll table ──────────────────────────────────────────
@@ -1295,6 +1323,37 @@ function randRandEncBatch() {
     addRandEnc({ header: '', text: e.text });
   }
   autosave();
+}
+
+function addRollTable(data={}) {
+  const list=document.getElementById('rolltables-list');
+  const div=document.createElement('div'); div.className='entity-card';
+  div.style.borderLeft='2px solid #7a4db3';
+  div.innerHTML=`
+    <div class="entity-card-header">
+      <input class="entity-name-input rt-title-input" type="text" placeholder="Table name (e.g. Random Rumors)" value="${escA(data.title||'')}" oninput="autosave()">
+      <button class="btn-remove" onclick="this.closest('.entity-card').remove();autosave()">\u2715</button>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Roll / Die label</label>
+      <input type="text" class="rt-die-input" placeholder="e.g. d20, d6, 2d6" value="${escA(data.die||'')}" oninput="autosave()">
+    </div>
+    <div class="rt-rows"></div>
+    <button class="btn-add" style="margin-top:4px;" onclick="addRollTableRow(this.closest('.entity-card').querySelector('.rt-rows'))">+ Add Row</button>`;
+  list.appendChild(div);
+  const rowsWrap=div.querySelector('.rt-rows');
+  const rows=(data.rows&&data.rows.length)?data.rows:[{},{}];
+  rows.forEach(r=>addRollTableRow(rowsWrap,r));
+}
+function addRollTableRow(wrap, data={}) {
+  const row=document.createElement('div');
+  row.className='rt-row';
+  row.style.cssText='display:flex;gap:4px;margin-bottom:4px;align-items:flex-start;';
+  row.innerHTML=`
+    <input type="text" class="rt-range-input" style="flex:0 0 46px;width:46px;min-width:0;" placeholder="1-2" value="${escA(data.range||'')}" oninput="autosave()">
+    <textarea class="rt-result-input" rows="1" style="flex:1;min-width:0;min-height:0;" placeholder="Result..." oninput="autosave()">${escH(data.result||'')}</textarea>
+    <button class="btn-remove" onclick="this.closest('.rt-row').remove();autosave()">\u2715</button>`;
+  wrap.appendChild(row);
 }
 
 function addClue(data={}) {
@@ -2115,6 +2174,20 @@ function renderPreview() {
       sections.push(h+'</div>');
     }
 
+    // Notes
+    if(state.notes && state.notes.trim()){
+      sections.push('<div class="p-section"><div class="sl" style="color:#f8f8f6;background:#0a0a0a;padding:3px 8px;">Notes</div><p class="p-text">'+fmtText(state.notes)+'</p></div>');
+    }
+    // Roll Tables
+    (state.rolltables||[]).forEach(t=>{
+      if(!t || (!t.title && !((t.rows||[]).some(r=>r.range||r.result)))) return;
+      let h='<div class="p-section rt-block"><div class="sl" style="color:#f8f8f6;background:#0a0a0a;padding:3px 8px;">'+(escH(t.title)||'Roll Table')+'</div>';
+      h+='<table class="rt-table"><tr><th class="rt-roll-col">'+(escH(t.die)||'Roll')+'</th><th>Result</th></tr>';
+      (t.rows||[]).forEach(r=>{ if(!r.range&&!r.result) return; h+='<tr><td class="rt-roll-col">'+escH(r.range)+'</td><td>'+fmtText(r.result)+'</td></tr>'; });
+      h+='</table></div>';
+      sections.push(h);
+    });
+
     // Encounters inline after hooks on page 1 — headed like the other sections,
     // but only once there is something under it.
     const _typeC={'combat':'#cc2222','exploration':'#1a7a1a','npc':'#1a4a8a'};
@@ -2302,7 +2375,7 @@ function buildSB(s) {
     html += '<hr class="sb-divider">';
     html += s.fullwidth
       ? '<div class="sb-notes">' + fmtText(s.notes) + '</div>'
-      : '<div style="font-size:8.5px;color:var(--ink);line-height:1.6;">' + fmtText(s.notes) + '</div>';
+      : '<div class="sb-notes" style="column-count:1;">' + fmtText(s.notes) + '</div>';
   }
 
   div.innerHTML = html;
@@ -2418,6 +2491,7 @@ function importHTML(input) {
       if(!Array.isArray(state.strongopen)) state.strongopen=[];
       if(!Array.isArray(state.locations)) state.locations=[];
       if(!Array.isArray(state.statblocks)) state.statblocks=[];
+      if(!Array.isArray(state.rolltables)) state.rolltables=[];
       try {
         const toSave={...state, mappath:"", maps:[]};
         localStorage.setItem("dcw_builder_v5", JSON.stringify(toSave));

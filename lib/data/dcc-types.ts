@@ -179,6 +179,8 @@ export interface DccMonster {
   stats: Record<DccStat, { score: number; mod: number }>;
   attacks: DccMonsterAttack[];
   notes: string[];        // named passive abilities
+  /** Flavor / lore prose for the creature (from the rulebook write-up). */
+  flavor?: string;
   page: number;
   source: DccSource;
 }
