@@ -17,6 +17,8 @@
   --nimble: #3fb97a;
   /* Star Wars accent — WEG cover yellow. */
   --sw: #f0c020;
+  /* D&D accent — the classic dragon red. */
+  --dnd: #c8102e;
 }
 
 @theme inline {
@@ -32,6 +34,7 @@
   --color-kob: var(--kob);
   --color-nimble: var(--nimble);
   --color-sw: var(--sw);
+  --color-dnd: var(--dnd);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }
@@ -40,19 +43,6 @@ html,
 body {
   background: var(--bg);
   color: var(--text);
-}
-
-/* Suppress the browser's own pull-to-refresh so the app's custom one (a soft
-   router.refresh via components/PullToRefresh) is the only one that fires. */
-html {
-  overscroll-behavior-y: none;
-}
-
-/* Spinner rotation for the pull-to-refresh indicator. */
-@keyframes ptr-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 body {

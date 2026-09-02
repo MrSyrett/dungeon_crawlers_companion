@@ -16,10 +16,16 @@
 //   node scripts/extract-dcc-flavor.mjs --from-text extracted/   # use pre-dumped .txt instead of PDFs
 //   node scripts/extract-dcc-flavor.mjs --overwrite     # replace flavor that's already set
 //
-// Getting text out of the PDFs: this uses `pdfjs-dist` if it's installed
-//   (npm i -D pdfjs-dist). If it isn't, dump the PDFs to text yourself with
-//   poppler's pdftotext (`pdftotext -layout book.pdf book.txt`) into a folder
-//   and pass it with --from-text.
+// Getting text out of the PDFs (recommended: --from-text). The rulebooks are
+// laid out in TWO COLUMNS. Dump them in READING ORDER — poppler's pdftotext with
+// NO -layout flag keeps each column intact:
+//   mkdir extracted
+//   for f in protected/rulebooks/*.pdf; do pdftotext "$f" "extracted/$(basename "$f" .pdf).txt"; done
+//   node scripts/extract-dcc-flavor.mjs --from-text extracted
+// Do NOT use `pdftotext -layout` here: it glues the left and right columns onto
+// the same line, so each creature's flavor gets spliced with its neighbour's.
+// (The built-in pdfjs path below is a fallback and may interleave columns the
+// same way; prefer the pdftotext --from-text route for clean prose.)
 
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname, basename } from "node:path";
@@ -87,29 +93,64 @@ function normalize(raw) {
 
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-// Capture the flavor paragraph after a "<Name>, Level <N>" heading. It ends where
-// the stat block begins — the write-ups follow the prose with the creature's name
-// again and/or the "Level N" stat line and type keywords.
+// Roles used on the stat-block "type line" (e.g. "Mob; Medium (4), Beastly" or
+// "Neighborhood Boss; Large (5), Humanoid"). This line opens every stat block and
+// never occurs in flavor prose, so it is the reliable end-of-flavor boundary.
+const ROLE =
+  "(?:Mob|Elite|Rival(?:\\s+Crawler)?|NPC|(?:Neighborhood|Borough|City|Province|Country|Floor|Quest)\\s+Boss|Boss)";
+const SIZE = "(?:Tiny|Petite|Small|Medium|Large|Huge|Gargantuan|Colossal|Titanic)";
+const ROLE_LINE = new RegExp(`\\b${ROLE}\\s*;\\s*${SIZE}\\b`, "i");
+
+// Strip pdftotext artifacts from a captured paragraph: the rotated "F L O O R n"
+// floor-tab, lone "AI" markers, page numbers on their own, and collapse whitespace.
+function scrub(s) {
+  return s
+    .replace(/\bF\s+L\s+O\s+O\s+R\s+\d+/gi, " ")
+    .replace(/\bHealth\s*Bar\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Capture the flavor paragraph that sits just before a creature's stat block.
+// The write-ups head this paragraph with the creature's name + level, in one of
+// two book styles: "Rayzer, Level 3" (GM Toolkit) or "Babababoon. Level 17."
+// (Core Rulebook). The paragraph ends where the stat block's type line begins.
 function captureFlavor(text, name, level) {
-  const head = new RegExp(esc(name) + "\\s*,?\\s*Level\\s*" + level + "\\b", "i");
-  const m = head.exec(text);
+  // Mob style: "Rayzer, Level 3" / "Babababoon. Level 17." — name, optional comma or
+  // period, then "Level N". Boss style: a "<Name>, <epithet>" title line immediately
+  // above a "Level N <Role>!" header (e.g. "Level 7 Neighborhood Boss!"), with the
+  // flavor beneath. Try the mob heading first, then the boss heading.
+  const mobHead = new RegExp(esc(name) + "\\s*[.,]?\\s*Level\\s*\\.?\\s*" + level + "\\b", "i");
+  const bossHead = new RegExp(
+    esc(name) + "[\\s\\S]{0,80}?Level\\s*\\.?\\s*" + level + "\\s+" + ROLE + "\\b!?",
+    "i",
+  );
+  const m = mobHead.exec(text) || bossHead.exec(text);
   if (!m) return null;
   const start = m.index + m[0].length;
-  const rest = text.slice(start, start + 2000);
-  // Boundary = where the stat block starts. Keyed off stat-block LABELS, never the
-  // creature's name (the flavor prose itself repeats the name, e.g. "The Rayzer is…").
-  // The block opens with the "Surprise … Evade" stat line (or a Health Bar / a
-  // "Level N … Surprise" header), none of which occur together in flavor prose.
-  const boundary =
-    /\bSurprise\b[\s\S]{0,40}\bEvade\b|\bHealth\s*Bar\b|\bLevel\s+\d+\b[\s\S]{0,24}\bSurprise\b/i;
+  const rest = text.slice(start, start + 2500);
+  // Boundary = start of the stat block. Reliable openers: the type line ("Role; Size"),
+  // a monster attack line ("14+F to hit"), or the older Surprise/Evade headers.
+  const boundary = new RegExp(
+    ROLE_LINE.source +
+      "|\\d+\\s*\\+\\s*F\\s+to\\s+hit\\b" +
+      "|\\bSurprise\\b[\\s\\S]{0,40}\\bEvade\\b|\\bLevel\\s+\\d+\\b[\\s\\S]{0,24}\\bSurprise\\b",
+    "i",
+  );
   const b = boundary.exec(rest);
-  let flavor = (b ? rest.slice(0, b.index) : rest).trim();
+  let flavor = scrub(b ? rest.slice(0, b.index) : rest);
+  // Drop leading punctuation (a stray "." left from the heading's own period),
+  // then a stray leading stat-header fragment that bled in from an adjacent block
+  // (e.g. "Flesher. Level 10." ahead of the real prose), then any punctuation again.
+  flavor = flavor.replace(/^[^A-Za-z"“'‘]+/, "");
+  flavor = flavor.replace(/^[A-Za-z'’ ]{0,30}\.\s*Level\s*\.?\s*\d+\.?\s*/i, "");
+  flavor = flavor.replace(/^[^A-Za-z"“'‘]+/, "");
   // Trim to the last complete sentence.
   const lastStop = Math.max(flavor.lastIndexOf(". "), flavor.lastIndexOf(".”"), flavor.lastIndexOf(".\""));
   if (lastStop > 40) flavor = flavor.slice(0, lastStop + 1);
   flavor = flavor.replace(/\s+/g, " ").trim();
   // Sanity: prose-shaped, reasonable length.
-  if (flavor.length < 40 || flavor.length > 1400) return null;
+  if (flavor.length < 40 || flavor.length > 1600) return null;
   if (!/[a-z]/.test(flavor) || !/\s/.test(flavor)) return null;
   return flavor;
 }

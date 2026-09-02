@@ -1,0 +1,53 @@
+{
+  "_note": "Core mechanical reference for the D&D 2024 layer. Skills/conditions carry concise original descriptions of their mechanical effects; tables are game facts. Rules text drawn from the SRD 5.2 is credited in data/dnd/LICENSE.md.",
+  "skills": [
+    { "name": "Athletics", "ability": "STR", "description": "Climbing, jumping, swimming, and feats of raw physical power such as grappling or shoving." },
+    { "name": "Acrobatics", "ability": "DEX", "description": "Keeping your balance and performing agile stunts like tumbles, flips, and staying upright on unstable footing." },
+    { "name": "Sleight of Hand", "ability": "DEX", "description": "Manual trickery: picking pockets, planting an object, or concealing a small item on your person." },
+    { "name": "Stealth", "ability": "DEX", "description": "Moving silently and staying hidden from notice." },
+    { "name": "Arcana", "ability": "INT", "description": "Recalling lore about spells, magic items, planes of existence, and arcane symbols." },
+    { "name": "History", "ability": "INT", "description": "Recalling lore about past events, ancient realms, wars, and lost civilizations." },
+    { "name": "Investigation", "ability": "INT", "description": "Deducing clues, spotting hidden details, and reasoning out how something works." },
+    { "name": "Nature", "ability": "INT", "description": "Recalling lore about terrain, plants, animals, weather, and natural cycles." },
+    { "name": "Religion", "ability": "INT", "description": "Recalling lore about deities, rites, holy symbols, and the practices of the faithful." },
+    { "name": "Animal Handling", "ability": "WIS", "description": "Calming, controlling, or reading the intentions of a beast or mount." },
+    { "name": "Insight", "ability": "WIS", "description": "Reading body language and intent to determine a creature's true feelings or catch a lie." },
+    { "name": "Medicine", "ability": "WIS", "description": "Stabilizing the dying and diagnosing an illness or injury." },
+    { "name": "Perception", "ability": "WIS", "description": "Noticing things around you using sight, hearing, and your other senses." },
+    { "name": "Survival", "ability": "WIS", "description": "Following tracks, foraging, navigating the wilds, and predicting the weather." },
+    { "name": "Deception", "ability": "CHA", "description": "Convincingly hiding the truth through words or actions." },
+    { "name": "Intimidation", "ability": "CHA", "description": "Influencing a creature through overt threats, hostile actions, or menacing presence." },
+    { "name": "Performance", "ability": "CHA", "description": "Delighting an audience with music, dance, acting, storytelling, or other entertainment." },
+    { "name": "Persuasion", "ability": "CHA", "description": "Influencing a creature with tact, social grace, or good nature." }
+  ],
+  "conditions": [
+    { "name": "Blinded", "description": "You can't see and automatically fail any check that requires sight. Attack rolls against you have Advantage, and your attack rolls have Disadvantage." },
+    { "name": "Charmed", "description": "You can't attack the charmer or target it with harmful abilities or magical effects. The charmer has Advantage on ability checks to interact with you socially." },
+    { "name": "Deafened", "description": "You can't hear and automatically fail any check that requires hearing." },
+    { "name": "Exhaustion", "description": "Measured in levels. Each level gives a −2 penalty per level to d20 Tests and reduces your Speed by 5 feet per level. You die at level 6. A Long Rest removes one level." },
+    { "name": "Frightened", "description": "You have Disadvantage on ability checks and attack rolls while the source of your fear is within line of sight, and you can't willingly move closer to it." },
+    { "name": "Grappled", "description": "Your Speed is 0. You have Disadvantage on attack rolls against any target other than the grappler. The condition ends if the grappler is Incapacitated or you're moved away." },
+    { "name": "Incapacitated", "description": "You can't take any action, Bonus Action, or Reaction; you can't concentrate; your Speed is 0; and you can't speak haltingly at best." },
+    { "name": "Invisible", "description": "You can't be seen without the aid of magic or a special sense; you're considered Heavily Obscured. Attack rolls against you have Disadvantage, and your attack rolls have Advantage." },
+    { "name": "Paralyzed", "description": "You're Incapacitated and can't move or speak. You fail STR and DEX saves. Attacks against you have Advantage, and any attack that hits you from within 5 feet is a Critical Hit." },
+    { "name": "Petrified", "description": "You're transformed into a solid substance, Incapacitated, and unaware of your surroundings. Attacks against you have Advantage; you fail STR and DEX saves and have Resistance to all damage and Immunity to poison and disease." },
+    { "name": "Poisoned", "description": "You have Disadvantage on attack rolls and ability checks." },
+    { "name": "Prone", "description": "Your only movement option is to crawl unless you stand up. You have Disadvantage on attack rolls. Attacks against you have Advantage if the attacker is within 5 feet, otherwise Disadvantage." },
+    { "name": "Restrained", "description": "Your Speed is 0. Attacks against you have Advantage, and your attack rolls have Disadvantage. You have Disadvantage on DEX saves." },
+    { "name": "Stunned", "description": "You're Incapacitated, can't move, and can speak only falteringly. You fail STR and DEX saves, and attacks against you have Advantage." },
+    { "name": "Unconscious", "description": "You're Incapacitated, can't move or speak, and are unaware of your surroundings. You drop what you're holding and fall Prone. You fail STR and DEX saves; attacks against you have Advantage and are Critical Hits if the attacker is within 5 feet." }
+  ],
+  "tables": {
+    "standardArray": [15, 14, 13, 12, 10, 8],
+    "pointBuyCosts": { "8": 0, "9": 1, "10": 2, "11": 3, "12": 4, "13": 5, "14": 7, "15": 9 },
+    "pointBuyBudget": 27,
+    "proficiencyByLevel": [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6],
+    "misc": {
+      "xpToLevel": [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000],
+      "carryMultiplier": 15,
+      "encumberedMultiplier": 5,
+      "abilityScoreMin": 3,
+      "abilityScoreMax": 20
+    }
+  }
+}

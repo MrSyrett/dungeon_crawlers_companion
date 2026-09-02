@@ -92,6 +92,19 @@ const SW_REFERENCE: { href: string; label: string }[] = [
   { href: "/sw/rules", label: "Rules" },
 ];
 
+// D&D (2024) reference pages.
+const DND_REFERENCE: { href: string; label: string }[] = [
+  { href: "/dnd/classes", label: "Classes" },
+  { href: "/dnd/species", label: "Species" },
+  { href: "/dnd/backgrounds", label: "Backgrounds" },
+  { href: "/dnd/feats", label: "Feats" },
+  { href: "/dnd/equipment", label: "Equipment" },
+  { href: "/dnd/spells", label: "Spells" },
+  { href: "/dnd/bestiary", label: "Bestiary" },
+  { href: "/dnd/magic-items", label: "Magic Items" },
+  { href: "/dnd/rules", label: "Rules" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
@@ -100,6 +113,7 @@ const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   KOB: KOB_REFERENCE,
   NIM: NIM_REFERENCE,
   SW: SW_REFERENCE,
+  DND: DND_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {
@@ -306,7 +320,7 @@ export default async function DashboardPage() {
               </section>
 
               <section>
-                <ColumnHeading>Adventure Prep</ColumnHeading>
+                <ColumnHeading>Session Prep</ColumnHeading>
                 <div className="flex flex-col gap-6">
                   {sessionPrepIds
                     .filter((id) => TOOLS[id].system === s.key)
@@ -315,7 +329,7 @@ export default async function DashboardPage() {
                     ))}
                   {sessionPrepIds.every((id) => TOOLS[id].system !== s.key) ? (
                     <p className="text-sm text-[var(--muted)]">
-                      No adventure-prep tool for {s.name} yet.
+                      No session-prep tool for {s.name} yet.
                     </p>
                   ) : null}
                 </div>

@@ -10,7 +10,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session";
 
 export type ToolKind = "character" | "session";
 
@@ -39,7 +39,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     system: "DCC",
     systemName: "Dungeon Crawler Carl",
     kind: "session",
-    label: "Adventure Prep",
+    label: "Session Prep",
     file: "dcc_session_prep_builder.html",
     keys: ["dcc_session"],
   },
@@ -57,7 +57,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     system: "SD",
     systemName: "Shadowdark",
     kind: "session",
-    label: "Adventure Prep",
+    label: "Session Prep",
     file: "sd_session_prep_builder.html",
     keys: ["sd_session"],
   },
@@ -97,6 +97,15 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "sw_character_sheet.html",
     keys: ["sw_sheet"],
   },
+  "dnd-character": {
+    id: "dnd-character",
+    system: "DND",
+    systemName: "D&D",
+    kind: "character",
+    label: "Character Sheet",
+    file: "dnd_character_sheet.html",
+    keys: ["dnd_sheet"],
+  },
   // The session-prep builders below are generated from the DCC one by
   // scripts/make-session-builders.mjs (same tool, re-themed + re-keyed).
   "ace-session": {
@@ -104,7 +113,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     system: "ACE",
     systemName: "ACE!",
     kind: "session",
-    label: "Adventure Prep",
+    label: "Session Prep",
     file: "ace_session_prep_builder.html",
     keys: ["ace_session"],
   },
@@ -113,7 +122,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     system: "KOB",
     systemName: "Kids on Bikes",
     kind: "session",
-    label: "Adventure Prep",
+    label: "Session Prep",
     file: "kob_session_prep_builder.html",
     keys: ["kob_session"],
   },
@@ -122,7 +131,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     system: "NIM",
     systemName: "Nimble",
     kind: "session",
-    label: "Adventure Prep",
+    label: "Session Prep",
     file: "nimble_session_prep_builder.html",
     keys: ["nimble_session"],
   },
@@ -131,13 +140,22 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     system: "SW",
     systemName: "Star Wars",
     kind: "session",
-    label: "Adventure Prep",
+    label: "Session Prep",
     file: "sw_session_prep_builder.html",
     keys: ["sw_session"],
   },
+  "dnd-session": {
+    id: "dnd-session",
+    system: "DND",
+    systemName: "D&D",
+    kind: "session",
+    label: "Session Prep",
+    file: "dnd_session_prep_builder.html",
+    keys: ["dnd_session"],
+  },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

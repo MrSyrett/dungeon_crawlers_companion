@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND";
 
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
@@ -20,6 +20,9 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   { key: "NIM", name: "Nimble", short: "Nimble", accent: "var(--nimble)" },
   // Star Wars: The Roleplaying Game (WEG 1e, 1987) with the Rules Companion.
   { key: "SW", name: "Star Wars", short: "SW", accent: "var(--sw)" },
+  // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
+  // plus original concise descriptions for non-SRD options.
+  { key: "DND", name: "D&D", short: "D&D", accent: "var(--dnd)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";
