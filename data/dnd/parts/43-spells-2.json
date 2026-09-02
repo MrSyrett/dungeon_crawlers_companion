@@ -1,0 +1,1078 @@
+{
+  "_note": "2024 PHB spells, level 2. Original paraphrased descriptions; mechanical params accurate.",
+  "spells": [
+    {
+      "name": "Acid Arrow",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "90 feet",
+      "components": "V, S, M (powdered rhubarb leaf and an adder's stomach)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Hurl a streaking arrow of acid at a target and make a ranged spell attack. A hit deals 4d4 acid damage immediately and another 2d4 acid at the end of the target's next turn. Even on a miss, the acid splashes for half the initial damage with no delayed effect.",
+      "higherLevels": "Each slot level above 2nd increases both the initial and the delayed damage by 1d4.",
+      "source": "srd"
+    },
+    {
+      "name": "Aid",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S, M (a strip of white cloth)",
+      "duration": "8 Hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Paladin",
+        "Ranger"
+      ],
+      "description": "Bolster up to three creatures you can see for the duration. Each target's Hit Point maximum and current Hit Points both rise by 5 while the spell lasts.",
+      "higherLevels": "Each slot level above 2nd increases the bonus Hit Points by 5.",
+      "source": "srd"
+    },
+    {
+      "name": "Alter Self",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 Hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Reshape your own body in one of three ways for the duration. You can gain gills and a swim speed, alter your appearance and voice at will, or grow natural weapons that count as magical and deal 1d6 of the chosen type. You may switch between the three options as an action while the spell holds.",
+      "source": "srd"
+    },
+    {
+      "name": "Animal Messenger",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S, M (a morsel of food)",
+      "duration": "24 Hours",
+      "concentration": false,
+      "ritual": true,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Ranger"
+      ],
+      "description": "Direct a Tiny beast you can see to carry a short spoken message to a location you describe. The animal travels toward a recipient you name, delivering up to 25 words when it arrives.",
+      "higherLevels": "Each slot level above 2nd adds 48 hours to the delivery time.",
+      "source": "srd"
+    },
+    {
+      "name": "Arcane Lock",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (gold dust worth 25+ GP, which the spell consumes)",
+      "duration": "Until Dispelled",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "Magically seal a door, chest, or other closure so it counts as locked. You and creatures you designate can open it normally, and you may set a password that bypasses the seal. Breaking it open or picking the lock is much harder, raising the relevant DC by 10.",
+      "source": "srd"
+    },
+    {
+      "name": "Arcane Vigor",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "Bonus Action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Draw on your own vitality to heal yourself. Spend and roll one or two of your unspent Hit Point Dice, regaining Hit Points equal to the total plus your spellcasting ability modifier.",
+      "higherLevels": "Each slot level above 2nd lets you roll one additional Hit Point Die.",
+      "source": "phb"
+    },
+    {
+      "name": "Augury",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "1 Minute",
+      "range": "Self",
+      "components": "V, S, M (specially marked sticks, bones, or cards worth 25+ GP)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": true,
+      "classes": [
+        "Cleric",
+        "Druid",
+        "Wizard"
+      ],
+      "description": "Consult an otherworldly force about a specific course of action you plan to take within the next 30 minutes. You receive one of four omens: weal for good, woe for bad, weal and woe for a mix, or nothing for an outcome that is neutral or beyond the spell's reach. Casting it repeatedly on the same question risks a random, misleading result.",
+      "source": "srd"
+    },
+    {
+      "name": "Barkskin",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Bonus Action",
+      "range": "Touch",
+      "components": "V, S, M (a handful of oak bark)",
+      "duration": "Concentration, up to 1 Hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Ranger"
+      ],
+      "description": "Toughen a willing creature's skin to a bark-like hide. For the duration the target's Armor Class cannot drop below 17, regardless of any armor it wears.",
+      "source": "srd"
+    },
+    {
+      "name": "Blindness/Deafness",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V",
+      "duration": "1 Minute",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Strike a creature with sudden loss of a sense. It must succeed on a Constitution save or become Blinded or Deafened (your choice) for the duration. The target repeats the save at the end of each of its turns, ending the effect on a success.",
+      "higherLevels": "Each slot level above 2nd lets you target one additional creature.",
+      "source": "srd"
+    },
+    {
+      "name": "Blur",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Your outline becomes shifting and indistinct. Attack rolls against you have Disadvantage unless the attacker can perceive you without relying on sight or ignores the effect through some other sense.",
+      "source": "srd"
+    },
+    {
+      "name": "Branding Smite",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Bonus Action",
+      "range": "Self",
+      "components": "V",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Paladin"
+      ],
+      "description": "Cast this after hitting a target with a weapon attack to sear it with radiant light. The strike deals an extra 2d6 radiant damage, and the target sheds dim light in a 5-foot radius and can't turn Invisible until the spell ends.",
+      "higherLevels": "Each slot level above 2nd increases the extra radiant damage by 1d6.",
+      "source": "srd"
+    },
+    {
+      "name": "Calm Emotions",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric"
+      ],
+      "description": "Soothe the feelings of humanoids in a 20-foot-radius sphere. Each affected creature must make a Charisma save; on a failure you may either suppress any Charmed or Frightened condition on it, or make it indifferent toward creatures of your choice that it is hostile to, until the spell ends or it is harmed.",
+      "source": "srd"
+    },
+    {
+      "name": "Cloud of Daggers",
+      "level": 2,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (a sliver of glass)",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Fill a 5-foot cube with whirling spectral blades. A creature takes 4d4 slashing damage when it enters the cube for the first time on a turn or starts its turn there.",
+      "higherLevels": "Each slot level above 2nd increases the damage by 2d4.",
+      "source": "srd"
+    },
+    {
+      "name": "Continual Flame",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (ruby dust worth 50+ GP, which the spell consumes)",
+      "duration": "Until Dispelled",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Wizard"
+      ],
+      "description": "Create a heatless, flickering flame on an object you touch that looks like fire but consumes no fuel and can't be extinguished by wind or water. It sheds bright light in a 20-foot radius and dim light for another 20 feet until dispelled.",
+      "source": "srd"
+    },
+    {
+      "name": "Crown of Madness",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Force a humanoid to make a Wisdom save or fall under a maddening compulsion, a twisted crown of spikes appearing on its head. On each of its turns it must use its action to make a melee attack against a creature you mentally choose, or else waste the action if none is reachable. The target can repeat the save at the end of each of its turns to break free.",
+      "source": "srd"
+    },
+    {
+      "name": "Darkness",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, M (bat fur and a drop of pitch or a lump of coal)",
+      "duration": "Concentration, up to 10 Minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Flood a 15-foot-radius sphere with magical darkness that ordinary light cannot pierce and that even Darkvision cannot see through. You may anchor it to a point in space or to an object you can hold or wear. If it overlaps light from a spell of 2nd level or lower, that light is snuffed out.",
+      "source": "srd"
+    },
+    {
+      "name": "Darkvision",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (dried carrot or an agate)",
+      "duration": "8 Hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Ranger",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Grant a willing creature you touch the ability to see in the dark. For the duration it gains Darkvision out to a range of 150 feet.",
+      "source": "srd"
+    },
+    {
+      "name": "Detect Thoughts",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S, M (a copper coin)",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Sense the surface thoughts of a creature within 30 feet. Each turn you can focus on one target to read what's on its mind, and by pressing deeper you can probe further, forcing a Wisdom save; on a failure you learn its reasoning and emotional state, while a success ends the reading and alerts the creature. You can also sweep the area to detect thinking minds you can't see.",
+      "source": "srd"
+    },
+    {
+      "name": "Enhance Ability",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 Hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Ranger",
+        "Sorcerer"
+      ],
+      "description": "Bless a creature you touch with magical enhancement tied to one ability score. For the duration it gains Advantage on ability checks using that score; some choices add a further benefit, such as temporary Hit Points or negating fall damage.",
+      "higherLevels": "Each slot level above 2nd lets you target one additional creature.",
+      "source": "srd"
+    },
+    {
+      "name": "Enlarge/Reduce",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S, M (a pinch of powdered iron)",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Grow or shrink a creature or object by one size category. Enlarging grants Advantage on Strength checks and saves and adds 1d4 to the target's weapon damage; reducing imposes Disadvantage on those checks and saves and subtracts 1d4 from its weapon damage. An unwilling creature can resist with a Constitution save.",
+      "source": "srd"
+    },
+    {
+      "name": "Enthrall",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "1 Minute",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Warlock"
+      ],
+      "description": "Weave a distracting stream of words that grips the creatures you choose within range. Each must make a Wisdom save or have Disadvantage on Wisdom (Perception) checks made to perceive any creature other than you for the duration.",
+      "source": "srd"
+    },
+    {
+      "name": "Find Steed",
+      "level": 2,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Paladin"
+      ],
+      "description": "Summon a loyal spirit that takes the form of a mount, appearing in an unoccupied space nearby. The steed is a Celestial, Fey, or Fiend and shares a telepathic bond with you, acting as your ally and following your commands. If it drops to 0 Hit Points it vanishes, and you can dismiss and later resummon it.",
+      "source": "srd"
+    },
+    {
+      "name": "Find Traps",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Druid",
+        "Ranger"
+      ],
+      "description": "Sense whether any trap lies within range and line of sight. You learn that a trap is present and its general nature, but not its exact location or how to disarm it.",
+      "source": "srd"
+    },
+    {
+      "name": "Flame Blade",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "Bonus Action",
+      "range": "Self",
+      "components": "V, S, M (a sumac leaf)",
+      "duration": "Concentration, up to 10 Minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Sorcerer"
+      ],
+      "description": "Conjure a blazing scimitar of fire in your hand. You can make melee spell attacks with it for 3d6 fire damage, and it sheds bright light in a 10-foot radius. You may drop and re-form the blade with a Bonus Action on later turns.",
+      "higherLevels": "The damage increases by 1d6 for every two slot levels above 2nd.",
+      "source": "srd"
+    },
+    {
+      "name": "Flaming Sphere",
+      "level": 2,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (a bit of tallow, a pinch of brimstone, and a dusting of powdered iron)",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Create a 5-foot-diameter ball of fire that you can roll up to 30 feet with a Bonus Action each turn. A creature that ends up in the sphere's space or within 5 feet of it must make a Dexterity save, taking 2d6 fire damage on a failure or half as much on a success.",
+      "higherLevels": "Each slot level above 2nd increases the damage by 1d6.",
+      "source": "srd"
+    },
+    {
+      "name": "Gentle Repose",
+      "level": 2,
+      "school": "Necromancy",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (a pinch of salt and a copper coin placed on each of the corpse's eyes)",
+      "duration": "10 Days",
+      "concentration": false,
+      "ritual": true,
+      "classes": [
+        "Cleric",
+        "Wizard"
+      ],
+      "description": "Protect a corpse you touch from decay and from becoming Undead. For the duration the body doesn't rot, and the time it spends under the spell doesn't count against the window in which spells like Raise Dead can restore it to life.",
+      "source": "srd"
+    },
+    {
+      "name": "Gust of Wind",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "Self (60-foot Line)",
+      "components": "V, S, M (a legume seed)",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Ranger",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "A blast of wind roars out in a 60-foot line 10 feet wide. Each creature in the line must make a Strength save or be pushed 15 feet away from you. The gust disperses gas and vapor, snuffs unprotected flames, and you can redirect it each turn with a Bonus Action.",
+      "source": "srd"
+    },
+    {
+      "name": "Heat Metal",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (a piece of iron and a flame)",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Sorcerer"
+      ],
+      "description": "Make a manufactured metal object, such as a weapon or a suit of armor, glow red hot. A creature touching or wearing it takes 2d8 fire damage and, if it's holding the object, must succeed on a Constitution save or drop it. On later turns you can use a Bonus Action to deal the damage again.",
+      "higherLevels": "Each slot level above 2nd increases the damage by 1d8.",
+      "source": "srd"
+    },
+    {
+      "name": "Hold Person",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (a straight piece of iron)",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Attempt to freeze a humanoid in place. The target must succeed on a Wisdom save or be Paralyzed for the duration, repeating the save at the end of each of its turns to end the effect.",
+      "higherLevels": "Each slot level above 2nd lets you target one additional humanoid.",
+      "source": "srd"
+    },
+    {
+      "name": "Invisibility",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (an eyelash in gum arabic)",
+      "duration": "Concentration, up to 1 Hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Turn a creature you touch, along with whatever it's wearing and carrying, Invisible for the duration. The effect ends early if the target makes an attack or casts a spell.",
+      "higherLevels": "Each slot level above 2nd lets you target one additional creature.",
+      "source": "srd"
+    },
+    {
+      "name": "Knock",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Target an object that is locked, stuck, or barred and magically open it with a loud knock audible for 300 feet. A mundane lock unlocks, a stuck door or lid comes free, and an Arcane Lock is suppressed for 10 minutes. Only one bolt or bar is undone per casting.",
+      "source": "srd"
+    },
+    {
+      "name": "Lesser Restoration",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Paladin",
+        "Ranger"
+      ],
+      "description": "Cleanse a creature you touch of one affliction. You end either the Blinded, Deafened, Paralyzed, or Poisoned condition, or one disease affecting it.",
+      "source": "srd"
+    },
+    {
+      "name": "Levitate",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (a small leather loop or a golden wire bent into a cup)",
+      "duration": "Concentration, up to 10 Minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Lift a creature or loose object weighing up to 500 pounds straight into the air. An unwilling target can resist with a Constitution save. You can move a levitating target up or down as much as 20 feet on your turn, and it hangs there until the spell ends, drifting gently to the ground when it does.",
+      "source": "srd"
+    },
+    {
+      "name": "Locate Animals or Plants",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S, M (fur from a bloodhound)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": true,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Ranger"
+      ],
+      "description": "Name a specific kind of beast or plant and instantly learn the location of the nearest one of that type within 5 miles, if any exists that close. You sense its direction and distance from you.",
+      "source": "srd"
+    },
+    {
+      "name": "Locate Object",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S, M (a forked twig)",
+      "duration": "Concentration, up to 10 Minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Paladin",
+        "Ranger",
+        "Wizard"
+      ],
+      "description": "Sense the direction to a specific object you're familiar with, or the nearest object of a general kind, as long as it lies within 1,000 feet. The sense is blocked if at least a thin sheet of lead lies between you and the item.",
+      "source": "srd"
+    },
+    {
+      "name": "Magic Mouth",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S, M (jade dust worth 10+ GP, which the spell consumes)",
+      "duration": "Until Dispelled",
+      "concentration": false,
+      "ritual": true,
+      "classes": [
+        "Bard",
+        "Wizard"
+      ],
+      "description": "Implant a spoken message of up to 25 words into an object, set to play when a trigger you specify occurs within 30 feet. When triggered, a magical mouth forms on the object and recites the message, mimicking your voice.",
+      "source": "srd"
+    },
+    {
+      "name": "Magic Weapon",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Bonus Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 Hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Paladin",
+        "Ranger",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Imbue a nonmagical weapon you touch with magic. For the duration it becomes a magic weapon with a +1 bonus to attack and damage rolls.",
+      "higherLevels": "The bonus rises to +2 when cast with a 4th- or 5th-level slot, and to +3 with a 6th-level slot or higher.",
+      "source": "srd"
+    },
+    {
+      "name": "Mind Spike",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Drive a spike of psychic force into a target's mind. It must make a Wisdom save, taking 3d8 psychic damage on a failure or half as much on a success. On a failed save you also know the creature's location for the duration as long as you both stay on the same plane, and you have Advantage on attack rolls against it.",
+      "higherLevels": "Each slot level above 2nd increases the damage by 1d8.",
+      "source": "phb"
+    },
+    {
+      "name": "Mirror Image",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "1 Minute",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Three illusory duplicates of yourself appear and shift around you. Whenever a creature that can see targets you with an attack, roll to see whether it strikes a duplicate instead, which is then destroyed. Each image has an AC of 10 plus your Dexterity modifier, and any hit that would land on one pops it harmlessly.",
+      "source": "srd"
+    },
+    {
+      "name": "Misty Step",
+      "level": 2,
+      "school": "Conjuration",
+      "castingTime": "Bonus Action",
+      "range": "Self",
+      "components": "V",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Wrapped briefly in silvery mist, you teleport up to 30 feet to an unoccupied space you can see.",
+      "source": "srd"
+    },
+    {
+      "name": "Moonbeam",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "V, S, M (a moonseed leaf and a moonstone)",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid"
+      ],
+      "description": "A shaft of pale light shines down in a 5-foot-radius, 40-foot-high cylinder. A creature that enters the beam or starts its turn there makes a Constitution save, taking 2d10 radiant damage on a failure or half on a success, and shapechangers have Disadvantage on the save. On each of your turns you can shift the beam up to 60 feet with an action.",
+      "higherLevels": "Each slot level above 2nd increases the damage by 1d10.",
+      "source": "srd"
+    },
+    {
+      "name": "Nystul's Magic Aura",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (a small square of silk)",
+      "duration": "24 Hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "Mask the magical nature of a creature or object you touch. You can make it register falsely to divination, hiding or faking its aura and magical properties, or make a creature appear to be a different creature type to spells and effects that detect type. The disguise lasts for the duration.",
+      "source": "srd"
+    },
+    {
+      "name": "Pass without Trace",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S, M (ashes from a burned leaf of mistletoe and a sprig of spruce)",
+      "duration": "Concentration, up to 1 Hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Ranger"
+      ],
+      "description": "A veil of shadow and silence settles over you and your companions. Each creature you choose within 30 feet gains a +10 bonus to Dexterity (Stealth) checks and leaves no tracks or scent that can be followed by nonmagical means, for as long as it remains within 30 feet of you.",
+      "source": "srd"
+    },
+    {
+      "name": "Phantasmal Force",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (a bit of fleece)",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Craft an illusion in the mind of a creature that fails an Intelligence save. The target perceives the phantom as real and rationalizes away any evidence against it. If the illusion is something dangerous, it deals 1d6 psychic damage to the target on each of its turns while the creature believes it can be harmed by it.",
+      "source": "srd"
+    },
+    {
+      "name": "Prayer of Healing",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "10 Minutes",
+      "range": "30 feet",
+      "components": "V",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Paladin"
+      ],
+      "description": "Utter a prolonged healing prayer over as many as five willing creatures within range. Each target regains Hit Points equal to 2d8 plus your spellcasting ability modifier.",
+      "higherLevels": "Each slot level above 2nd increases the healing by 1d8.",
+      "source": "srd"
+    },
+    {
+      "name": "Protection from Poison",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "1 Hour",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Druid",
+        "Paladin",
+        "Ranger"
+      ],
+      "description": "Purge and ward a creature you touch. You neutralize one poison affecting it (your choice if there are several), and for the duration the target has Advantage on saves against being Poisoned and Resistance to poison damage.",
+      "source": "srd"
+    },
+    {
+      "name": "Rope Trick",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (powdered corn and a twisted loop of parchment)",
+      "duration": "1 Hour",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "Touch a length of rope up to 60 feet long and make one end rise into the air, opening an invisible extradimensional space at its top. Up to eight Medium or smaller creatures can climb up and hide inside, pulling the rope after them, and the entrance is invisible from outside. When the spell ends, everything inside spills out.",
+      "source": "srd"
+    },
+    {
+      "name": "Scorching Ray",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Fling three fiery rays at targets within range, dividing them among one or more creatures. Make a separate ranged spell attack for each ray; each hit deals 2d6 fire damage.",
+      "higherLevels": "Each slot level above 2nd creates one additional ray.",
+      "source": "srd"
+    },
+    {
+      "name": "See Invisibility",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S, M (talc and a small amount of silver powder)",
+      "duration": "1 Hour",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "For the duration you can see creatures and objects that are Invisible, and you can perceive into the Ethereal Plane. Such things appear to you as translucent, shimmering shapes.",
+      "source": "srd"
+    },
+    {
+      "name": "Shatter",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (a chip of mica)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "A sudden ringing burst of sound erupts at a point you choose. Each creature in a 10-foot-radius sphere makes a Constitution save, taking 3d8 thunder damage on a failure or half on a success. Creatures made of inorganic material like stone, crystal, or metal have Disadvantage on the save, and nonmagical objects that aren't worn or carried also take damage.",
+      "higherLevels": "Each slot level above 2nd increases the damage by 1d8.",
+      "source": "srd"
+    },
+    {
+      "name": "Silence",
+      "level": 2,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 Minutes",
+      "concentration": true,
+      "ritual": true,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Ranger"
+      ],
+      "description": "Create a 20-foot-radius sphere of magical silence centered on a point you choose. No sound arises within it or crosses its boundary, so creatures inside are Deafened and can't cast spells with verbal components, and thunder damage is prevented in the area.",
+      "source": "srd"
+    },
+    {
+      "name": "Spider Climb",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (a drop of bitumen and a spider)",
+      "duration": "Concentration, up to 1 Hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Give a willing creature you touch the power to walk on walls and ceilings with its hands free. For the duration the target can climb difficult vertical and inverted surfaces and gains a Climb Speed equal to its Speed.",
+      "source": "srd"
+    },
+    {
+      "name": "Spike Growth",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "150 feet",
+      "components": "V, S, M (seven sharp thorns or seven twigs sharpened to points)",
+      "duration": "Concentration, up to 10 Minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Ranger"
+      ],
+      "description": "Twist the ground in a 20-foot radius into a mass of hard spikes and thorns. The area becomes Difficult Terrain, and any creature takes 2d4 piercing damage for every 5 feet it travels through it. The spikes are camouflaged, so a creature that hasn't perceived them needs a Wisdom (Perception) or Survival check to recognize the hazard.",
+      "source": "srd"
+    },
+    {
+      "name": "Spiritual Weapon",
+      "level": 2,
+      "school": "Evocation",
+      "castingTime": "Bonus Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Cleric"
+      ],
+      "description": "Conjure a floating spectral weapon that you can direct against foes. When you cast the spell, and again as a Bonus Action on later turns, you can move it up to 20 feet and make a melee spell attack with it, dealing 1d8 plus your spellcasting ability modifier in force damage on a hit.",
+      "higherLevels": "The damage increases by 1d8 for every two slot levels above 2nd.",
+      "source": "srd"
+    },
+    {
+      "name": "Suggestion",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, M (a drop of honey)",
+      "duration": "Concentration, up to 8 Hours",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Suggest a reasonable course of action, no more than a sentence or two, to a creature that can hear and understand you. It must succeed on a Wisdom save or pursue the suggested activity as best it can. The effect ends when the task is finished, and an obviously harmful or self-destructive suggestion automatically fails.",
+      "source": "srd"
+    },
+    {
+      "name": "Warding Bond",
+      "level": 2,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (a pair of platinum rings worth 50+ GP each, which you and the target must wear)",
+      "duration": "1 Hour",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Paladin"
+      ],
+      "description": "Forge a protective link with a willing creature you touch. For the duration it gains a +1 bonus to AC and saving throws and Resistance to all damage, but whenever it takes damage you take the same amount of force damage. The bond breaks if either of you drops to 0 Hit Points or you move more than 60 feet apart.",
+      "source": "srd"
+    },
+    {
+      "name": "Web",
+      "level": 2,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (a bit of spiderweb)",
+      "duration": "Concentration, up to 1 Hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Fill a 20-foot cube with thick, sticky webbing that turns the area into Difficult Terrain and lightly obscures it. A creature that enters the webs or starts its turn there must make a Dexterity save or be Restrained; a Restrained creature can repeat the save as an action to break free. The webs are flammable and burst into flame if exposed to fire.",
+      "source": "srd"
+    },
+    {
+      "name": "Zone of Truth",
+      "level": 2,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "10 Minutes",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Paladin"
+      ],
+      "description": "Create a 15-foot-radius sphere in which lying is impossible. A creature entering or starting its turn in the area must make a Charisma save; on a failure it can't speak a deliberate falsehood while inside, though it can still evade and choose its words. You know which creatures succeed on their saves.",
+      "source": "srd"
+    },
+    {
+      "name": "Shining Smite",
+      "level": 2,
+      "school": "Transmutation",
+      "castingTime": "Bonus Action",
+      "range": "Self",
+      "components": "V",
+      "duration": "Concentration, up to 1 Minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Paladin"
+      ],
+      "description": "You cast this the instant after hitting a creature with a weapon or Unarmed Strike. The target takes an extra 2d6 Radiant damage and, for the duration, sheds Bright Light in a 5-foot radius, can't benefit from becoming Invisible, and attack rolls against it have Advantage.",
+      "higherLevels": "The extra Radiant damage increases by 1d6 for each spell slot level above 2nd.",
+      "source": "phb"
+    }
+  ]
+}

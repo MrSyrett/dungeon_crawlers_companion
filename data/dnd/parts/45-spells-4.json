@@ -1,0 +1,703 @@
+{
+  "_note": "2024 PHB spells, level 4. Original paraphrased descriptions; mechanical params accurate.",
+  "spells": [
+    {
+      "name": "Arcane Eye",
+      "level": 4,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S, M (a bit of bat fur)",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "You conjure an invisible, floating magical sensor that you can see through. As a Bonus Action you can fly it up to 30 feet in any direction, including through openings as small as 1 inch. The eye has darkvision out to 30 feet and lets you observe as if you were there, but it cannot pass through solid matter.",
+      "source": "srd"
+    },
+    {
+      "name": "Aura of Life",
+      "level": 4,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Self (30-foot Emanation)",
+      "components": "V",
+      "duration": "Concentration, up to 10 minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Paladin"
+      ],
+      "description": "A protective aura radiates from you in a 30-foot Emanation for the duration. You and your allies inside it have Resistance to Necrotic damage, and their Hit Point maximums can't be reduced. A creature in the aura that has 0 Hit Points regains 1 Hit Point at the start of its turn.",
+      "source": "phb"
+    },
+    {
+      "name": "Aura of Purity",
+      "level": 4,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Self (30-foot Emanation)",
+      "components": "V",
+      "duration": "Concentration, up to 10 minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Paladin"
+      ],
+      "description": "A cleansing aura extends from you in a 30-foot Emanation. You and your allies within it have Resistance to Poison damage, can't gain the Poisoned condition, and have Advantage on saving throws to avoid or end the Blinded, Charmed, Deafened, Frightened, Paralyzed, Poisoned, and Stunned conditions.",
+      "source": "phb"
+    },
+    {
+      "name": "Banishment",
+      "level": 4,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (an item distasteful to the target)",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Paladin",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "Choose a creature you can see within range and force a Charisma saving throw. On a failure, it is banished to a harmless demiplane and gains the Incapacitated condition until the spell ends, at which point it returns to the space it left. If the target is native to a different plane of existence and the spell lasts the full minute, the banishment becomes permanent.",
+      "higherLevels": "Target one additional creature for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Blight",
+      "level": 4,
+      "school": "Necromancy",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "You draw the moisture from a creature you can see within range. It makes a Constitution saving throw, taking 8d8 Necrotic damage on a failed save or half as much on a success. A plant creature automatically fails and takes maximum damage, while Undead and Constructs are unaffected. If you instead target a nonmagical plant that isn't a creature, it withers with no save.",
+      "higherLevels": "The damage increases by 1d8 for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Charm Monster",
+      "level": 4,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "1 hour",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "One creature you can see within range must succeed on a Wisdom saving throw or be Charmed by you until the spell ends or until you or your allies harm it. The target has Advantage on the save if you or your companions are currently fighting it. While Charmed, it regards you as a friendly acquaintance, and it knows it was influenced once the effect ends.",
+      "higherLevels": "Target one additional creature for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Compulsion",
+      "level": 4,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard"
+      ],
+      "description": "Each creature of your choice that you can see within range must succeed on a Wisdom saving throw or be affected. On your turn, as a Bonus Action, you can designate a direction, and each affected creature must use its movement to travel that way on its turn, though it can first make saves to avoid obvious hazards. An affected creature that has no movement left is unaffected that turn.",
+      "source": "srd"
+    },
+    {
+      "name": "Confusion",
+      "level": 4,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "90 feet",
+      "components": "V, S, M (three nut shells)",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Each creature in a 10-foot-radius Sphere centered on a point within range must make a Wisdom saving throw or have its mind scrambled. On its turn, an affected creature can't take Reactions and rolls on a randomized table that may leave it unable to act, send it moving in a random direction, or make it attack the nearest creature. At the end of each of its turns, it repeats the save, ending the effect on itself with a success.",
+      "higherLevels": "The Sphere's radius increases by 5 feet for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Conjure Minor Elementals",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "Self (15-foot Emanation)",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Wizard"
+      ],
+      "description": "Elemental spirits swirl in a 15-foot Emanation around you for the duration. The area is Difficult Terrain for your enemies. Whenever the Emanation enters a creature's space and whenever a creature enters it or ends its turn there, your attacks against creatures in the area deal an extra 2d8 damage of a type you chose when casting (Acid, Cold, Fire, or Lightning).",
+      "higherLevels": "The extra damage increases by 1d8 for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Conjure Woodland Beings",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "Self (10-foot Emanation)",
+      "components": "V, S, M (one holly berry)",
+      "duration": "Concentration, up to 10 minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Ranger"
+      ],
+      "description": "Fey spirits gather in a 10-foot Emanation around you for the duration, making the area Difficult Terrain for your enemies. Once on each of your turns when a creature you can see enters the Emanation or ends its turn there, you can force it to make a Wisdom saving throw, dealing 5d8 Force damage on a failure. As a Bonus Action you can teleport up to 30 feet to an unoccupied space you can see.",
+      "higherLevels": "The Force damage increases by 1d8 for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Control Water",
+      "level": 4,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "300 feet",
+      "components": "V, S, M (a mix of water and dust)",
+      "duration": "Concentration, up to 10 minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Druid",
+        "Wizard"
+      ],
+      "description": "You take control of a body of water within range that fits inside a 100-foot cube, choosing one of several effects when you cast and being able to change it on later turns. You can raise a flood, part the water to form a trench, redirect its flow, or churn it into a violent whirlpool that pulls creatures under and damages them.",
+      "source": "srd"
+    },
+    {
+      "name": "Death Ward",
+      "level": 4,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "8 hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Paladin"
+      ],
+      "description": "You touch a creature and ward it against death. The first time the target would drop to 0 Hit Points before the spell ends, it instead drops to 1 Hit Point and the spell ends. If an effect would instead kill the target outright without reducing it to 0, that effect is negated against it and the spell ends.",
+      "source": "srd"
+    },
+    {
+      "name": "Dimension Door",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "500 feet",
+      "components": "V",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "You teleport yourself to any spot within range that you can see, visualize, or describe by direction and distance. You may bring one willing creature within 5 feet of you, which arrives in a space next to your destination. If either of you would materialize in an occupied space, you each take 4d6 Force damage and the teleport fails.",
+      "source": "srd"
+    },
+    {
+      "name": "Divination",
+      "level": 4,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S, M (incense worth 25+ GP, which the spell consumes)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": true,
+      "classes": [
+        "Cleric",
+        "Wizard"
+      ],
+      "description": "Through a ritual contact with a divine or otherworldly power, you receive a truthful reply to one question about a specific goal, event, or activity to occur within the next 7 days. The answer is typically a short phrase, cryptic verse, or omen. If you cast this spell more than once before finishing a Long Rest, each casting past the first carries a growing chance of a random, meaningless reading.",
+      "source": "srd"
+    },
+    {
+      "name": "Dominate Beast",
+      "level": 4,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Ranger",
+        "Sorcerer"
+      ],
+      "description": "You attempt to seize control of a Beast you can see within range, which must succeed on a Wisdom saving throw or be Charmed for the duration. While the target is Charmed, you have a telepathic link with it as long as you share a plane, and you can direct its movement and actions or take control of it entirely using your action. Each time the target takes damage, it repeats the save, ending the effect on a success.",
+      "higherLevels": "The duration becomes Concentration, up to 10 minutes with a level 5 slot, up to 1 hour with a level 6 slot, and up to 8 hours with a level 7+ slot.",
+      "source": "srd"
+    },
+    {
+      "name": "Evard's Black Tentacles",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "90 feet",
+      "components": "V, S, M (a tentacle from a giant octopus or a giant squid)",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "Writhing black tentacles fill a 20-foot square on ground you can see within range, turning it into Difficult Terrain for the duration. Each creature that starts its turn there or enters the area must succeed on a Strength saving throw or take 3d6 Bludgeoning damage and be Restrained. A creature Restrained by the tentacles can use its action to attempt a Strength or Dexterity check to break free.",
+      "source": "srd"
+    },
+    {
+      "name": "Fabricate",
+      "level": 4,
+      "school": "Transmutation",
+      "castingTime": "10 Minutes",
+      "range": "120 feet",
+      "components": "V, S",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "You convert raw materials within range into finished products of the same substance, transforming up to a 10-foot cube of material (or a 5-foot cube of metal, stone, or a similar mineral). The item's shape is determined by you, but crafting anything that requires a high degree of craftsmanship demands proficiency with the relevant tools. You can't create or transmute creatures or magic items with this spell.",
+      "source": "srd"
+    },
+    {
+      "name": "Fire Shield",
+      "level": 4,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "10 minutes",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Flames wreathe your body, shedding Bright Light in a 10-foot radius. Choose a warm shield, which gives you Resistance to Cold damage, or a chill shield, which gives you Resistance to Fire damage. Whenever a creature within 5 feet hits you with a melee attack, the shield erupts and deals 2d8 Fire (warm) or Cold (chill) damage to it.",
+      "source": "srd"
+    },
+    {
+      "name": "Freedom of Movement",
+      "level": 4,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (a leather strap)",
+      "duration": "1 hour",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Ranger"
+      ],
+      "description": "You touch a willing creature, freeing its movement for the duration. Difficult Terrain doesn't slow it, and magic can neither reduce its Speed nor cause it to be Paralyzed or Restrained. It can spend 5 feet of movement to escape nonmagical restraints or a grapple, and it isn't hindered by being underwater, though it still can't move faster than its Speed there.",
+      "source": "srd"
+    },
+    {
+      "name": "Giant Insect",
+      "level": 4,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid"
+      ],
+      "description": "You summon a Large monstrous insect that appears in an unoccupied space you can see within range and uses the Giant Insect stat block. The creature is friendly to you and your allies, and it acts on your turn, obeying your verbal commands (no action required from you); absent commands it defends itself but takes no other action. It vanishes when it drops to 0 Hit Points or when the spell ends.",
+      "source": "srd"
+    },
+    {
+      "name": "Greater Invisibility",
+      "level": 4,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You touch a creature, and it has the Invisible condition until the spell ends. Unlike ordinary invisibility, the effect persists even if the target attacks or casts spells, making it a reliable way to hide an ally in the thick of combat.",
+      "source": "srd"
+    },
+    {
+      "name": "Guardian of Faith",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V",
+      "duration": "8 hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Cleric"
+      ],
+      "description": "A Large spectral guardian appears and hovers in an unoccupied space you can see within range for the duration. It occupies its space and menaces your foes: any creature hostile to you that first enters a space within 10 feet of it or ends its turn there must make a Dexterity saving throw, taking 20 Radiant damage on a failure or half as much on a success. The guardian vanishes once it has dealt a total of 60 damage.",
+      "source": "srd"
+    },
+    {
+      "name": "Hallucinatory Terrain",
+      "level": 4,
+      "school": "Illusion",
+      "castingTime": "10 Minutes",
+      "range": "300 feet",
+      "components": "V, S, M (a mushroom, a twig, and a bit of moss)",
+      "duration": "24 hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "You disguise the natural terrain within a 150-foot cube in range so that it looks, sounds, and smells like a different kind of natural terrain, such as making a swamp appear as grassland. Manufactured structures, equipment, and creatures are not concealed. A creature that uses an action to physically examine the area can attempt an Intelligence (Investigation) check to see through the illusion.",
+      "source": "srd"
+    },
+    {
+      "name": "Ice Storm",
+      "level": 4,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "300 feet",
+      "components": "V, S, M (a pinch of dust and a few drops of water)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Hail hammers down in a 20-foot-radius, 40-foot-high Cylinder centered on a point within range. Each creature in the area makes a Dexterity saving throw, taking 2d8 Bludgeoning damage plus 4d6 Cold damage on a failure, or half as much on a success. The pounding ice turns the ground in the Cylinder into Difficult Terrain until the end of your next turn.",
+      "higherLevels": "The Bludgeoning damage increases by 1d8 for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Leomund's Secret Chest",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (a chest worth 5,000+ GP and a Tiny replica of it)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "You hide an ornate chest and its contents on the Ethereal Plane, leaving you holding a Tiny replica made of the same materials. While you have the replica in hand, you can use an action to recall the chest, which appears in an unoccupied space nearby. After 60 days there is a cumulative chance each day that the spell ends and the chest is lost, and if either the chest or its replica is destroyed, the other and its contents are gone for good.",
+      "source": "srd"
+    },
+    {
+      "name": "Locate Creature",
+      "level": 4,
+      "school": "Divination",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S, M (fur from a bloodhound)",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Cleric",
+        "Druid",
+        "Paladin",
+        "Ranger",
+        "Wizard"
+      ],
+      "description": "You sense the direction to a creature you name or describe, provided it is within 1,000 feet of you. You can seek a specific creature you know or the nearest creature of a particular kind, such as a bear. The spell fails if the target is behind at least 10 feet of running water, is buried under a foot of stone, or is hidden from Divination magic; it also loses the trail if the target changes into an unfamiliar form.",
+      "source": "srd"
+    },
+    {
+      "name": "Mordenkainen's Faithful Hound",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S, M (a silver whistle, a piece of bone, and a thread)",
+      "duration": "8 hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "You conjure an invisible, phantom watchdog in an unoccupied space you can see, where it remains for the duration or until you move more than 30 feet away. It barks loudly if any Small or larger creature comes within 30 feet without a password you set, and it can see Invisible creatures and see into the Ethereal Plane. On your turn, once a hostile creature is within 5 feet of it, the hound bites: that creature makes a Dexterity saving throw, taking 4d8 Piercing damage on a failure.",
+      "source": "srd"
+    },
+    {
+      "name": "Mordenkainen's Private Sanctum",
+      "level": 4,
+      "school": "Abjuration",
+      "castingTime": "10 Minutes",
+      "range": "120 feet",
+      "components": "V, S, M (a thin sheet of lead, a piece of opaque glass, a wad of cotton, and powdered chrysolite)",
+      "duration": "24 hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "You secure an area up to a 100-foot cube against intrusion and spying for the duration, choosing which protections apply when you cast. You can block sound from passing the barrier, prevent sight through it (including with Darkvision), foil divination and scrying sensors, stop teleportation and planar travel in or out, and darken the interior. If you cast the spell in the same place every day for a year, the effect becomes permanent.",
+      "higherLevels": "The size of the cube increases by 100 feet for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Otiluke's Resilient Sphere",
+      "level": 4,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S, M (a glasslike bead)",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "A shimmering sphere of force encloses a creature or object of Large size or smaller within range. An unwilling creature must succeed on a Dexterity saving throw or be trapped inside. Nothing can pass through the barrier in either direction, and it can't be dispelled or targeted by attacks, though a creature inside can push it slowly along the ground using half its Speed.",
+      "source": "srd"
+    },
+    {
+      "name": "Phantasmal Killer",
+      "level": 4,
+      "school": "Illusion",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You conjure an illusory manifestation of a creature's deepest fears, visible only to it. The target makes a Wisdom saving throw; on a failure it takes 4d10 Psychic damage and gains the Frightened condition for the duration. While Frightened this way, it repeats the save at the end of each of its turns, taking another 4d10 Psychic damage on a failure and ending the spell on a success.",
+      "higherLevels": "The damage on each failed save increases by 1d10 for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Polymorph",
+      "level": 4,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S, M (a caterpillar cocoon)",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You transform a creature you can see within range into a Beast whose Challenge Rating is no higher than the target's CR or level. An unwilling target can resist with a Wisdom saving throw. The subject takes on the new form's statistics but keeps its alignment and personality, and it gains a separate pool of Hit Points; when those drop to 0 the form ends and any leftover damage carries over. The effect lasts until the spell ends or the creature is reduced to 0 Hit Points.",
+      "source": "srd"
+    },
+    {
+      "name": "Stone Shape",
+      "level": 4,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (soft clay, which must be worked into the desired shape)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Druid",
+        "Wizard"
+      ],
+      "description": "You touch a stone object or section of stone no larger than a 5-foot cube and reshape it into any form you like. You can craft it into a rough tool, a weapon, or a container, or form simple features such as a door, though intricate mechanical detail beyond a crude latch is beyond the spell's precision.",
+      "source": "srd"
+    },
+    {
+      "name": "Stoneskin",
+      "level": 4,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S, M (diamond dust worth 100+ GP, which the spell consumes)",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Ranger",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You touch a willing creature, turning its flesh as hard as stone for the duration. Until the spell ends, the target has Resistance to Bludgeoning, Piercing, and Slashing damage from nonmagical attacks.",
+      "source": "srd"
+    },
+    {
+      "name": "Summon Aberration",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "90 feet",
+      "components": "V, S, M (a pickled tentacle and an eyeball in a platinum-inlaid vial worth 400+ GP)",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "You call forth an aberrant spirit that appears in an unoccupied space you can see within range, using the Aberrant Spirit stat block and taking a Beholderkin, Slaad, or Star Spawn form of your choice. The creature is an ally to you and your companions, rolls its own Initiative, and acts on its turn. In combat it moves and takes its Reaction on its own, but it takes an action only if you use a Bonus Action to command it (it can always make one melee attack when within 5 feet of an enemy on its turn).",
+      "higherLevels": "Cast with a level 5+ slot to use that level in place of 4 wherever the stat block references the spell's level, improving the spirit's Hit Points, attack bonus, and damage.",
+      "source": "phb"
+    },
+    {
+      "name": "Summon Construct",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "90 feet",
+      "components": "V, S, M (a gilded gear worth 400+ GP)",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "You conjure a construct spirit in an unoccupied space you can see within range, using the Construct Spirit stat block and choosing a Clay, Metal, or Stone form. The construct is friendly to you and your allies, rolls its own Initiative, and acts on its turn. You must spend a Bonus Action to have it take an action other than its innate melee attack, and if you don't command it, it defends itself while otherwise remaining in place.",
+      "higherLevels": "Cast with a level 5+ slot to use that level in place of 4 wherever the stat block references the spell's level, improving the spirit's Hit Points, attack bonus, and damage.",
+      "source": "phb"
+    },
+    {
+      "name": "Summon Elemental",
+      "level": 4,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "90 feet",
+      "components": "V, S, M (air, a pebble, ash, and water inside a gold-inlaid vial worth 400+ GP)",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Ranger",
+        "Wizard"
+      ],
+      "description": "You summon an elemental spirit into an unoccupied space you can see within range, using the Elemental Spirit stat block and choosing an Air, Earth, Fire, or Water form. The spirit is an ally, rolls its own Initiative, and acts on its turn. It attacks and moves on its own but takes other actions only when you spend a Bonus Action to direct it.",
+      "higherLevels": "Cast with a level 5+ slot to use that level in place of 4 wherever the stat block references the spell's level, improving the spirit's Hit Points, attack bonus, and damage.",
+      "source": "phb"
+    },
+    {
+      "name": "Vitriolic Sphere",
+      "level": 4,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "150 feet",
+      "components": "V, S, M (a drop of giant slug bile)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You hurl a glob of acid that bursts in a 20-foot-radius Sphere at a point within range. Each creature in the area makes a Dexterity saving throw. On a failure, a creature takes 10d4 Acid damage and, unless it succeeds on a second Dexterity save at the end of your next turn, takes another 5d4 Acid damage then. On a successful initial save, a creature takes half the initial damage and suffers no lingering acid.",
+      "higherLevels": "The initial damage increases by 2d4 for each spell slot level above 4.",
+      "source": "phb"
+    },
+    {
+      "name": "Wall of Fire",
+      "level": 4,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": "V, S, M (a piece of charcoal)",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "You raise a wall of flame on a solid surface within range, either a straight wall up to 60 feet long, 20 feet high, and 1 foot thick, or a ring up to 20 feet in diameter. You choose one side of the wall to radiate heat; a creature within 10 feet of that side, or one that enters the wall's space or ends its turn there, makes a Dexterity saving throw and takes 5d8 Fire damage on a failure or half as much on a success. The wall sheds Bright Light and blocks line of sight.",
+      "higherLevels": "The damage increases by 1d8 for each spell slot level above 4.",
+      "source": "srd"
+    },
+    {
+      "name": "Fount of Moonlight",
+      "level": 4,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 Minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Druid"
+      ],
+      "description": "You wreathe yourself in moonlight, shedding Bright Light in a 20-foot radius and Dim Light for 20 feet beyond. For the duration you have Resistance to Radiant damage, and each time you hit a creature with a melee attack you add 2d6 Radiant damage to it. When a creature you can see within 50 feet damages you, you can use a Reaction to force it to make a Constitution save; on a failure it is Blinded until the end of your next turn.",
+      "source": "phb"
+    }
+  ]
+}

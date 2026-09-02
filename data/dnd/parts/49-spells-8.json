@@ -1,0 +1,316 @@
+{
+  "_note": "2024 PHB spells, level 8. Original paraphrased descriptions; mechanical params accurate.",
+  "spells": [
+    {
+      "name": "Animal Shapes",
+      "level": 8,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "30 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 24 hours",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid"
+      ],
+      "description": "You transform any number of willing creatures you can see within range into a single Beast form of your choice that is Large or smaller and has a Challenge Rating of 4 or lower. Each affected creature adopts that Beast's statistics, but keeps its own Intelligence, Wisdom, Charisma, alignment, and personality, and gains temporary Hit Points equal to the Beast's Hit Points. A creature reverts when it drops to 0 temporary Hit Points or when you end the spell, and any leftover damage carries over to its true form. While transformed, a creature can't cast spells or speak, though it can still take other actions the form allows.",
+      "source": "srd"
+    },
+    {
+      "name": "Antimagic Field",
+      "level": 8,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Self (10-foot Radius)",
+      "components": "V, S, M (iron filings)",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Wizard"
+      ],
+      "description": "A 10-foot-radius sphere of magical nullification surrounds you and moves with you. Within it, spells can't be cast, magic items function as mundane objects, ongoing spell effects are suppressed, summoned or created magical creatures temporarily wink out of existence, and attempts to cast into or out of the area fail. A spell of higher level than this one is not automatically suppressed, but its area doesn't extend into the field. Areas of other magic that overlap the sphere are held in check while they intersect it.",
+      "source": "srd"
+    },
+    {
+      "name": "Antipathy/Sympathy",
+      "level": 8,
+      "school": "Enchantment",
+      "castingTime": "1 Hour",
+      "range": "60 feet",
+      "components": "V, S, M (a lump of alum soaked in vinegar for the Antipathy effect or a drop of honey for the Sympathy effect)",
+      "duration": "10 days",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Wizard"
+      ],
+      "description": "You enchant a creature or object no larger than a 200-foot cube to strongly repel or attract a specific kind of intelligent creature that you name. With Antipathy, an affected creature that comes within 60 feet or sees the target must succeed on a Wisdom saving throw or become Frightened until it moves beyond 60 feet, and it will try to flee. With Sympathy, such a creature is instead compelled to approach; on a failed save it moves toward the target and is reluctant to leave, repeating the save only after it takes damage, once every 24 hours, or if it moves more than 60 feet away. A creature that succeeds on its save is immune to this casting for 1 minute.",
+      "source": "srd"
+    },
+    {
+      "name": "Clone",
+      "level": 8,
+      "school": "Necromancy",
+      "castingTime": "1 Hour",
+      "range": "Touch",
+      "components": "V, S, M (a diamond worth 1,000+ GP and at least a cubic inch of flesh from the creature being cloned, both of which the spell consumes, plus a sealable vessel worth 2,000+ GP large enough to hold a Medium creature)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "You grow an inert duplicate of a living creature inside the vessel as a safeguard against death. The body matures over 120 days into a physical copy of the creature at the age it was when the spell was cast, or younger if you choose. When the original creature dies afterward, its soul transfers to the clone if that soul is free and willing, and the clone awakens with all of the original's memories, personality, and abilities. The original body, if it still exists, becomes lifeless and can't be restored to life while the clone lives.",
+      "source": "srd"
+    },
+    {
+      "name": "Control Weather",
+      "level": 8,
+      "school": "Transmutation",
+      "castingTime": "10 Minutes",
+      "range": "Self (5-mile Radius)",
+      "components": "V, S, M (burning incense and bits of earth and wood mixed in water)",
+      "duration": "Concentration, up to 8 hours",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Druid",
+        "Wizard"
+      ],
+      "description": "While outdoors, you seize control of the weather within 5 miles of you. You can shift the current conditions of precipitation, temperature, and wind up or down one stage on their respective scales, choosing the new condition from the range available for the season. Each change takes 1d4 by 10 minutes to take full effect, and the weather gradually returns to normal once the spell ends.",
+      "source": "srd"
+    },
+    {
+      "name": "Demiplane",
+      "level": 8,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "S",
+      "duration": "1 hour",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "You conjure a shadowy doorway on a flat surface you can see within range. The door opens into an empty demiplane shaped like a 30-foot cube of wood or stone, and creatures can pass through the doorway in either direction. When the spell ends, the door vanishes, sealing anyone inside within the demiplane. Each time you cast this spell you can create a new demiplane or open a door to one you or another caster made before, letting you use these pocket spaces for storage or as a hidden refuge.",
+      "source": "srd"
+    },
+    {
+      "name": "Dominate Monster",
+      "level": 8,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "You attempt to seize control of one creature you can see within range, which must succeed on a Wisdom saving throw or become Charmed by you for the duration. While the target is Charmed this way, you share a telepathic link with it as long as you're on the same plane, and you can direct its movement and actions with a mental command; without a specific command it simply defends itself. Using your action, you can take full control until the end of your next turn, and each time the target takes damage it can repeat the saving throw to end the effect.",
+      "higherLevels": "When cast using a level 9 spell slot, the duration becomes Concentration, up to 8 hours.",
+      "source": "srd"
+    },
+    {
+      "name": "Earthquake",
+      "level": 8,
+      "school": "Transmutation",
+      "castingTime": "Action",
+      "range": "500 feet",
+      "components": "V, S, M (a fistful of dirt, a piece of rock, and a lump of clay)",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Cleric",
+        "Druid",
+        "Sorcerer"
+      ],
+      "description": "You unleash a violent tremor across a 100-foot-radius circle of ground centered on a point within range. The shaking makes the area Difficult Terrain, and each creature on the ground when you cast the spell and at the start of each of your turns must succeed on a Dexterity saving throw or fall Prone. Structures in the area take 50 bludgeoning damage each round and collapse when reduced to 0 Hit Points, potentially burying those nearby. On your later turns you can open fissures in the ground: a creature standing over a new fissure must save or fall in, and the crevices can swallow creatures whole.",
+      "source": "srd"
+    },
+    {
+      "name": "Glibness",
+      "level": 8,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": "V",
+      "duration": "1 hour",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Warlock"
+      ],
+      "description": "You imbue your words with supernatural persuasiveness for the duration. Whenever you make a Charisma check, you can replace the number you roll on the d20 with a 15, taking whichever result you prefer. In addition, no magic can determine whether you are telling the truth, so lie-detecting effects always register your statements as honest.",
+      "source": "phb"
+    },
+    {
+      "name": "Holy Aura",
+      "level": 8,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Self (30-foot Radius)",
+      "components": "V, S, M (a reliquary worth 1,000+ GP)",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Cleric"
+      ],
+      "description": "Radiant light spreads out to a 30-foot radius from you, and you designate any number of creatures in that area to be protected. Each protected creature sheds dim light out to 5 feet, has Advantage on all saving throws, and imposes Disadvantage on attack rolls made against it. Furthermore, when a Fiend or an Undead hits a protected creature with a melee attack, that attacker must succeed on a Constitution saving throw or be Blinded until the spell ends.",
+      "source": "srd"
+    },
+    {
+      "name": "Incendiary Cloud",
+      "level": 8,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "150 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "A swirling 20-foot-radius sphere of smoke shot through with burning embers appears at a point within range and Heavily Obscures the area. When the cloud appears and whenever a creature enters it or starts its turn there, that creature must make a Dexterity saving throw, taking 10d8 fire damage on a failure or half as much on a success. The cloud drifts 10 feet away from you at the start of each of your turns, and a strong wind can disperse it, ending the spell.",
+      "source": "srd"
+    },
+    {
+      "name": "Maze",
+      "level": 8,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V, S",
+      "duration": "Concentration, up to 10 minutes",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "You banish one creature you can see within range into a labyrinthine demiplane, where it vanishes from your plane for the duration. The trapped creature can use its action to try to escape by making a DC 20 Intelligence check; on a success it finds an exit and reappears in the nearest unoccupied space to where it left. When the spell ends, the target returns to the space it vanished from, or the nearest unoccupied one if that space is filled.",
+      "source": "srd"
+    },
+    {
+      "name": "Mind Blank",
+      "level": 8,
+      "school": "Abjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": "V, S",
+      "duration": "24 hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Wizard"
+      ],
+      "description": "You touch a willing creature and shield its mind against intrusion for the duration. The target gains Immunity to Psychic damage and to any effect that would sense its emotions or read its thoughts, and it can't be Charmed or Frightened. Divination magic can't perceive or locate the creature, and even a Wish spell can't gather information about it or affect it against its will.",
+      "source": "srd"
+    },
+    {
+      "name": "Power Word Stun",
+      "level": 8,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": "V",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Sorcerer",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "You speak a word of power at one creature you can see within range. If the target has 150 Hit Points or fewer, it is Stunned; a target with more than 150 Hit Points is instead unaffected. A Stunned creature repeats a Constitution saving throw at the end of each of its turns, ending the condition on a success.",
+      "source": "srd"
+    },
+    {
+      "name": "Sunburst",
+      "level": 8,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "150 feet",
+      "components": "V, S, M (fire and a piece of sunstone)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Druid",
+        "Sorcerer",
+        "Wizard"
+      ],
+      "description": "Brilliant sunlight erupts in a 60-foot-radius sphere centered on a point you choose within range. Each creature in the area must make a Constitution saving throw, taking 12d6 radiant damage and being Blinded for 1 minute on a failure, or half as much damage and no blindness on a success. A Blinded creature can repeat the save at the end of each of its turns to end the effect. The burst also dispels any Darkness in its area that was created by a spell.",
+      "source": "srd"
+    },
+    {
+      "name": "Telepathy",
+      "level": 8,
+      "school": "Evocation",
+      "castingTime": "Action",
+      "range": "Unlimited",
+      "components": "V, S, M (a pair of linked silver rings)",
+      "duration": "24 hours",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Wizard"
+      ],
+      "description": "You forge a telepathic link with one willing creature you're familiar with, allowing the two of you to exchange words, images, sounds, and other sensory messages regardless of the distance between you, so long as you're both on the same plane of existence. The target doesn't need to share a language with you to understand your transmissions and to send its own. The connection lasts for the duration.",
+      "source": "srd"
+    },
+    {
+      "name": "Tsunami",
+      "level": 8,
+      "school": "Conjuration",
+      "castingTime": "Action",
+      "range": "Sight",
+      "components": "V, S",
+      "duration": "Concentration, up to 6 rounds",
+      "concentration": true,
+      "ritual": false,
+      "classes": [
+        "Druid"
+      ],
+      "description": "You raise a towering wall of water up to 300 feet long, 300 feet high, and 50 feet thick at a point you can see. When the wall appears, each creature in its area must make a Strength saving throw, taking 6d10 bludgeoning damage on a failure or half as much on a success. At the start of each of your later turns, the wall's height drops by 50 feet and it surges 50 feet toward the far edge of its length, dealing 1d10 less damage to creatures caught in it each round. Swimming through the moving wall is difficult, requiring a creature to spend extra movement against the current.",
+      "source": "srd"
+    },
+    {
+      "name": "Befuddlement",
+      "level": 8,
+      "school": "Enchantment",
+      "castingTime": "Action",
+      "range": "150 feet",
+      "components": "V, S, M (a key ring with no keys)",
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": [
+        "Bard",
+        "Druid",
+        "Warlock",
+        "Wizard"
+      ],
+      "description": "You shatter one creature's mind. It makes an Intelligence saving throw, taking 10d12 Psychic damage on a failure or half as much on a success. On a failed save the target also can't cast spells, take the Magic action, or use spellcasting-related features for the next 30 days. The target repeats the save every 30 days, and Greater Restoration, Heal, or Wish can end the effect early.",
+      "source": "phb"
+    }
+  ]
+}
