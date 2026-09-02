@@ -92,18 +92,19 @@ const SW_REFERENCE: { href: string; label: string }[] = [
   { href: "/sw/rules", label: "Rules" },
 ];
 
-// D&D (2024) reference pages.
+// D&D (2024) reference pages. Backgrounds & Feats share a page (they pair up on
+// the 2024 origin), and Magic Items live on the Equipment page.
 const DND_REFERENCE: { href: string; label: string }[] = [
+  { href: "/dnd/bestiary", label: "Bestiary" },
   { href: "/dnd/classes", label: "Classes" },
   { href: "/dnd/species", label: "Species" },
-  { href: "/dnd/backgrounds", label: "Backgrounds" },
-  { href: "/dnd/feats", label: "Feats" },
-  { href: "/dnd/equipment", label: "Equipment" },
+  { href: "/dnd/backgrounds", label: "Backgrounds & Feats" },
   { href: "/dnd/spells", label: "Spells" },
-  { href: "/dnd/bestiary", label: "Bestiary" },
-  { href: "/dnd/magic-items", label: "Magic Items" },
-  { href: "/dnd/rules", label: "Rules" },
+  { href: "/dnd/equipment", label: "Equipment" },
 ];
+
+// D&D has no rulebook PDFs, so its shared toolbar drops the Rulebooks link.
+const SHARED_NAV_DND = SHARED_NAV.filter((l) => l.href !== "/rules");
 
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
@@ -301,6 +302,7 @@ export default async function DashboardPage() {
           links ahead of the shared toolbar links. */}
       <SystemTabs
         nav={<NavLinks links={SHARED_NAV} />}
+        navFor={{ DND: <NavLinks links={SHARED_NAV_DND} /> }}
         systemNav={Object.fromEntries(
           SYSTEMS.map((s) => [s.key, <NavLinks key={s.key} links={SYSTEM_REFERENCE[s.key]} />]),
         )}

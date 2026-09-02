@@ -22,6 +22,7 @@ export default function SystemTabs({
   panels,
   systemNav,
   nav,
+  navFor,
 }: {
   /** One dashboard panel per system key. */
   panels: Partial<Record<SystemKey, ReactNode>>;
@@ -29,18 +30,21 @@ export default function SystemTabs({
   systemNav?: Partial<Record<SystemKey, ReactNode>>;
   /** Links shown on every tab. */
   nav?: ReactNode;
+  /** Per-system override of the shared `nav` (e.g. D&D drops Rulebooks — no PDFs). */
+  navFor?: Partial<Record<SystemKey, ReactNode>>;
 }) {
   const active = useSyncExternalStore(subscribeSystem, getSystemSnapshot, getSystemServerSnapshot);
   const ownNav = systemNav?.[active];
+  const sharedNav = navFor?.[active] ?? nav;
 
   return (
     <>
       {/* The toolbar owns the full width (the toggle lives in the header), so
           the reference links wrap freely instead of running off the edge. */}
-      {nav || ownNav ? (
+      {sharedNav || ownNav ? (
         <nav className="mb-8 flex flex-wrap justify-center gap-2 border-b border-[var(--border)] pb-5">
           {ownNav}
-          {nav}
+          {sharedNav}
         </nav>
       ) : null}
 
