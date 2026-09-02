@@ -142,7 +142,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .dice-pool-display{font-size:9px;color:#666;min-height:14px;margin-bottom:5px;font-family:'Montserrat',sans-serif;}
 .dice-pool-display span{color:#c8a020;}
 .dice-tray-actions{display:flex;gap:3px;}
-.dice-roll-btn{flex:1;padding:5px;background:var(--black);border:none;color:white;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
+.dice-roll-btn{flex:1;padding:5px;background:var(--red);border:none;color:white;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
 .dice-roll-btn:hover{background:var(--red);}
 .dice-clear-btn{padding:5px 8px;background:#1a1a1a;border:1px solid #333;color:#555;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;cursor:pointer;}
 .dice-clear-btn:hover{background:#333;color:#aaa;}
@@ -205,8 +205,8 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:4px;text-align:center;align-self:stretch;}
 .stat-val-row{display:flex;align-items:center;justify-content:center;gap:6px;}
 .stat-val{width:30px;height:26px;border:1px solid var(--rule);background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
-.stat-mod{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900;color:var(--ink);width:44px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--box);border:2px solid var(--border);text-align:center;cursor:pointer;}
-.stat-mod:hover{background:var(--black);color:white;}
+.stat-mod{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900;color:var(--red);width:44px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--box);border:2px solid var(--red);text-align:center;cursor:pointer;}
+.stat-mod:hover{background:var(--red);color:white;}
 
 /* LEFT INFO */
 
@@ -247,8 +247,8 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .attacks-table th{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding:3px 6px;border-bottom:1px solid var(--rule);text-align:left;background:var(--bg);}
 .attacks-table td{border-bottom:1px solid var(--rule);padding:1px 4px;}
 .attacks-table td input{width:100%;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;padding:4px 2px;color:var(--ink);}
-.atk-roll-btn{padding:2px 5px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--muted);}
-.atk-roll-btn:hover{background:var(--black);border-color:var(--black);color:white;}
+.atk-roll-btn{padding:2px 5px;background:transparent;border:1px solid var(--red);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--red);}
+.atk-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
 
 /* RIGHT — talents + spells */
 .right-col{grid-column:3;grid-row:1/3;border-left:2px solid var(--border);}
@@ -291,8 +291,8 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .spell-row[data-src='wand']{border-left:3px solid #2d5a7a;}
 .spell-input{border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:3px 2px;min-width:0;}
 .spell-level{width:100%;border:1px solid var(--rule);background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:1px 0;}
-.spell-cast-btn{padding:1px 3px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--muted);width:100%;}
-.spell-cast-btn:hover{background:var(--black);color:white;}
+.spell-cast-btn{padding:1px 3px;background:transparent;border:1px solid var(--red);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--red);width:100%;}
+.spell-cast-btn:hover{background:var(--red);color:white;}
 .spell-adv-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}
 .spell-adv-btn.on{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
 .spell-lost-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}

@@ -57,8 +57,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tray-select{flex:1;}
 .tray-note{font-size:10px;color:#555;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;line-height:1.3;}
 .dice-btns{display:flex;gap:4px;}
-.dice-btn{flex:1;padding:6px 0;background:#1a1a1a;border:1px solid #333;color:#bbb;font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;border-radius:3px;}
-.dice-btn:hover{background:#333;color:#fff;}
+.dice-btn{flex:1;padding:6px 0;background:var(--nim);border:1px solid var(--nim-dk);color:#fff;font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;border-radius:3px;}
+.dice-btn:hover{background:var(--nim-dk);color:#fff;}
 .adv-btns{display:flex;gap:4px;}
 .adv-btn{flex:1;padding:5px;background:#1a1a1a;border:1px solid #333;color:#888;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:3px;letter-spacing:.06em;}
 .adv-btn.on-adv{background:#1e3a1e;color:#6dbf6d;border-color:#2d5a2d;}
@@ -98,7 +98,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule);}
 .stat-cell{padding:8px 6px;border-right:1px solid var(--rule);text-align:center;}
 .stat-cell:last-child{border-right:none;}
-.stat-cell .sn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.08em;color:var(--ink);cursor:pointer;}
+.stat-cell .sn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.08em;color:var(--nim-dk);cursor:pointer;}
 .stat-cell .sn:hover{color:var(--nim-dk);}
 .stat-cell input{width:54px;height:36px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;text-align:center;color:var(--ink);outline:none;margin:4px 0;}
 .save-toggle{display:flex;justify-content:center;gap:3px;}
@@ -108,7 +108,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stat-cell small{display:block;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
 .skills-table{width:100%;border-collapse:collapse;}
 .skills-table td{padding:2px 6px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:13px;}
-.skills-table td.sk-name{font-weight:700;cursor:pointer;}
+.skills-table td.sk-name{font-weight:700;cursor:pointer;color:var(--nim-dk);}
 .skills-table td.sk-name:hover{color:var(--nim-dk);}
 .skills-table td.sk-name small{font-weight:600;color:var(--muted);font-size:9px;margin-left:4px;}
 .skills-table input{width:36px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
@@ -126,9 +126,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .vital.vc .vbig{justify-content:center;}
 .vital.vc .vline{justify-content:center;}
 .vital.vc .pips{justify-content:center;}
-.vital.vc.band-top{border-top:2px solid var(--muted);}
-/* Vertical divider between the paired cells (Hit Dice | Actions, Armor | Initiative) */
-.vital.vc.band-mid{border-right:2px solid var(--muted);}
+.vital:last-child{border-right:none;}
+/* Bigger Action pips + New turn button */
+#action-pips .pip{width:34px;height:34px;font-size:14px;}
+#new-turn-btn{min-height:34px;padding:6px 14px;font-size:12px;}
+/* Conditions chips */
+.cond-list{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin:5px 0 2px;min-height:20px;}
+.cond-chip{display:inline-flex;align-items:center;gap:4px;background:var(--nim-lt);border:1px solid var(--nim-dk);border-radius:11px;padding:2px 4px 2px 9px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--nim-dk);}
+.cond-x{background:none;border:none;color:var(--nim-dk);cursor:pointer;font-size:12px;line-height:1;padding:0 2px;}
+.cond-x:hover{color:var(--red);}
+.cond-empty{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:.06em;}
 .vlbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:4px;}
 .vlbl small{font-weight:600;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:none;text-align:right;}
 .vbig{font-family:'Share Tech Mono',monospace;font-size:26px;font-weight:700;line-height:1.1;color:var(--ink);display:flex;align-items:baseline;gap:4px;}
@@ -141,8 +148,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .pip.wound.on{background:var(--red);color:#fff;}
 .pip.act{border-radius:50%;background:var(--nim);color:#fff;}
 .pip.act.spent{background:transparent;color:var(--muted);}
-.small-btn{background:var(--section-hdr);color:#fff;border:none;border-radius:2px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
-.small-btn:hover{background:var(--nim);}
+.small-btn{background:var(--nim);color:#fff;border:none;border-radius:2px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.small-btn:hover{background:var(--nim-dk);}
 .small-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule);}
 .small-btn.ghost:hover{background:var(--box);}
 .small-btn.green{background:var(--nim);}
@@ -230,9 +237,9 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
   .blk-grid{grid-template-columns:1fr;}
-  /* Vitals stay two-up on mobile (fills the width; Wounds boxes wrap) */
+  /* Vitals stay two-up on mobile (fills the width; Wounds boxes wrap) — keep the
+     column dividers so each pair reads as two cells */
   .vitals{grid-template-columns:1fr 1fr;}
-  .vital{border-right:none;}
   /* Roll targets big enough for a thumb */
   .stat-cell .sn{display:block;min-height:40px;line-height:40px;font-size:15px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
   .stat-cell input{height:44px;width:64px;}
@@ -325,7 +332,7 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="pips" id="wound-pips"></div>
           <div class="vline">max <input type="number" id="wounds-max" value="6" oninput="recalc()"></div>
         </div>
-        <div class="vital vc band-mid">
+        <div class="vital vc">
           <div class="vlbl"><span>Hit Dice</span><small id="hd-lbl"></small></div>
           <div class="vbig"><input type="number" id="hd-cur" value="1" oninput="recalc()"><span class="sep">/</span><input type="number" id="hd-max" value="1" oninput="recalc()"></div>
           <div class="vline"><button class="small-btn" onclick="catchBreath()" title="Spend 1 Hit Die: roll it + STR">Catch Breath</button><button class="small-btn" onclick="makeCamp()" title="Spend 1 Hit Die at max value + STR">Make Camp</button><button class="small-btn green" onclick="safeRest()" title="Recover all HP, Hit Dice, mana; heal 1 Wound">Safe Rest</button></div>
@@ -333,21 +340,26 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="vital vc">
           <div class="vlbl"><span>Actions</span></div>
           <div class="pips" id="action-pips"></div>
-          <div class="vline"><button class="small-btn ghost" onclick="resetActions()">New turn</button></div>
+          <div class="vline"><button class="small-btn ghost" id="new-turn-btn" onclick="resetActions()">New turn</button></div>
         </div>
-        <div class="vital vc band-top band-mid">
+        <div class="vital vc">
           <div class="vlbl"><span>Armor</span></div>
           <div class="vbig"><span id="armor-val">0</span></div>
           <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="Armor" style="width:100px;" oninput="recalc()"><input type="text" id="f-shield" list="dl-shield" placeholder="Shield" style="width:80px;" oninput="recalc()"> +<input type="number" id="armor-bonus" value="0" oninput="recalc()"></div>
         </div>
         <div class="vital vc band-top">
           <div class="vlbl"><span>Initiative · Speed</span></div>
-          <div class="vbig"><span id="init-val">+0</span><span class="sep">·</span><span id="speed-val">6</span><button class="small-btn ghost" style="margin-left:8px;align-self:center;" onclick="rollInitiative()" title="Roll initiative">🎲</button></div>
+          <div class="vbig"><span id="init-val">+0</span><span class="sep">·</span><span id="speed-val">6</span><button class="small-btn" style="margin-left:8px;align-self:center;" onclick="rollInitiative()" title="Roll initiative">🎲</button></div>
           <div class="vline">init +<input type="number" id="init-bonus" value="0" oninput="recalc()"> speed +<input type="number" id="speed-bonus" value="0" oninput="recalc()"> size <input type="text" id="f-size" value="Medium" style="width:64px;text-align:left;"></div>
         </div>
-        <div class="vital vc" style="grid-column:span 2;">
+        <div class="vital vc">
           <div class="vlbl"><span>Mana</span><small id="mana-lbl"></small></div>
           <div class="vbig"><input type="number" id="mana-cur" value="0" oninput="recalc()"><span class="sep">/</span><input type="number" id="mana-max" value="0" oninput="recalc()"></div>
+        </div>
+        <div class="vital vc">
+          <div class="vlbl"><span>Conditions</span></div>
+          <div class="cond-list" id="cond-list"></div>
+          <div class="vline"><select id="cond-pick" onchange="if(this.value){addCondition(this.value);this.value='';}"><option value="">Add a condition…</option></select></div>
         </div>
       </div>
     </div>
@@ -439,6 +451,7 @@ const D = {
 };
 let saveAdv = '', saveDis = '';
 let wounds = 0, actions = 3, advState = 0;
+let conditions = [];
 
 // ═══ LOOKUPS ══════════════════════════════════════════════════════════════
 function cls() { return D.classes().find(c => c.name === $('f-class').value) || null; }
@@ -536,6 +549,23 @@ function renderWounds() {
 function renderActions() { const wrap = $('action-pips'); wrap.innerHTML = ''; for(let i = 1; i <= 3; i++) { const p = document.createElement('div'); p.className = 'pip act' + (i > actions ? ' spent' : ''); p.textContent = i; p.onclick = () => { actions = i > actions ? i : i - 1; renderActions(); }; wrap.appendChild(p); } }
 function spendAction() { if(actions > 0) { actions -= 1; renderActions(); } }
 function resetActions() { actions = 3; renderActions(); }
+
+// ═══ CONDITIONS ═══ (add from the dropdown; each chip shows its effect on hover)
+function fillCondPick() {
+  const sel = $('cond-pick'); if(!sel) return;
+  sel.innerHTML = '<option value="">Add a condition…</option>' + D.conditions().map(c => '<option value="' + esc(c.name) + '">' + esc(c.name) + '</option>').join('');
+}
+function renderConditions() {
+  const wrap = $('cond-list'); if(!wrap) return;
+  if(!conditions.length) { wrap.innerHTML = '<span class="cond-empty">None</span>'; return; }
+  wrap.innerHTML = conditions.map(name => {
+    const c = D.conditions().find(x => x.name === name);
+    return '<span class="cond-chip" title="' + esc(c ? c.text : '') + '">' + esc(name) + '<button class="cond-x" data-cond="' + esc(name) + '" title="Remove">✕</button></span>';
+  }).join('');
+}
+function addCondition(name) { if(name && !conditions.includes(name)) { conditions.push(name); renderConditions(); scheduleAutosave(); } }
+function removeCondition(name) { conditions = conditions.filter(n => n !== name); renderConditions(); scheduleAutosave(); }
+(function(){ const wrap = $('cond-list'); if(wrap && !wrap.dataset.wired) { wrap.dataset.wired = '1'; wrap.addEventListener('click', e => { const b = e.target.closest('.cond-x'); if(b) removeCondition(b.dataset.cond); }); } })();
 
 // ═══ HP / RESTS ═══════════════════════════════════════════════════════════
 function spendHD(maxed) {
@@ -736,6 +766,7 @@ function fillDatalists() {
   $('item-pick').innerHTML = '<option value="">Add from equipment list…</option>' + cats.map(c => '<optgroup label="' + esc(c) + '">' + D.items().filter(i => i.category === c).map(i => '<option value="' + esc(i.name) + '">' + esc(i.name) + (i.cost ? ' (' + esc(i.cost) + ')' : '') + '</option>').join('') + '</optgroup>').join('');
   const schools = [...new Set(D.spells().map(s => s.school))];
   $('spell-pick').innerHTML = '<option value="">Add a spell…</option>' + schools.map(sc => '<optgroup label="' + esc(sc) + '">' + D.spells().filter(s => s.school === sc).sort((a, b) => a.tier - b.tier).map(s => '<option value="' + esc(s.name) + '">' + esc(s.name) + ' (' + (s.tier ? 'T' + s.tier : 'cantrip') + (s.utility ? ', utility' : '') + ')</option>').join('') + '</optgroup>').join('');
+  fillCondPick();
 }
 
 // ═══ RULES ════════════════════════════════════════════════════════════════
@@ -793,7 +824,7 @@ function collectSheet() {
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value) })).filter(s => s.name),
     inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value })).filter(i => i.name),
-    gold: num(v('f-gold')), traits: v('f-traits'), languages: v('f-languages'), body: v('f-body'), notes: v('f-notes'),
+    gold: num(v('f-gold')), traits: v('f-traits'), languages: v('f-languages'), body: v('f-body'), notes: v('f-notes'), conditions: conditions.slice(),
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
 }
@@ -812,6 +843,7 @@ function applySheet(d) {
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
   set('f-gold', d.gold ?? 50); set('f-traits', d.traits); set('f-languages', d.languages || 'Common'); set('f-body', d.body); set('f-notes', d.notes);
+  conditions = Array.isArray(d.conditions) ? d.conditions.slice() : []; renderConditions();
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
   recalc();
 }
@@ -1021,6 +1053,7 @@ campaignUpdateBtn();
 <script>
 buildStats();
 fillDatalists();
+renderConditions();
 autoLoad();
 </script>
 </body>

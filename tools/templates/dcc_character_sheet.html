@@ -123,14 +123,14 @@ body.dark .hp-shield.on{background:#5bb8ec;border-color:#7fd0ff;}
 .stat-divider{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--rule);padding-bottom:4px;}
 .stat-mod-row{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
 .stat-mod-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
-.stat-mod-val{display:block;width:100%;box-sizing:border-box;height:30px;line-height:28px;font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--ink);background:var(--box);border:1px solid var(--rule);padding:0 4px;min-width:32px;text-align:center;cursor:pointer;transition:background .1s,color .1s,border-color .1s;}
-.stat-mod-val:hover{background:var(--section-hdr);color:#fff;border-color:var(--section-hdr);}
+.stat-mod-val{display:block;width:100%;box-sizing:border-box;height:30px;line-height:28px;font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--red);background:var(--box);border:1px solid var(--red);padding:0 4px;min-width:32px;text-align:center;cursor:pointer;transition:background .1s,color .1s,border-color .1s;}
+.stat-mod-val:hover{background:var(--red);color:#fff;border-color:var(--red);}
 .stat-mod-val:active{background:var(--red);border-color:var(--red);}
 .stat-mod-val:focus-visible{outline:2px solid var(--red);outline-offset:1px;}
 .mod-toggle{font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;padding:2px 5px;border:1px solid var(--rule);background:transparent;cursor:pointer;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
 .mod-toggle.enhanced{background:var(--red);border-color:var(--red);color:white;}
-.roll-btn{width:100%;padding:3px 0;background:var(--section-hdr);color:white;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;transition:background .1s;margin-top:2px;}
-.roll-btn:hover{background:var(--red);}
+.roll-btn{width:100%;padding:3px 0;background:var(--red);color:white;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;transition:background .1s;margin-top:2px;}
+.roll-btn:hover{background:#9e1e18;}
 .btn-die{font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;font-size:1.05em;line-height:1;vertical-align:-1px;}
 .atk-roll-btn,.skill-roll-btn{line-height:1;}
 
@@ -185,7 +185,7 @@ body.dark .hp-shield.on{background:#5bb8ec;border-color:#7fd0ff;}
 body.dark .atk-formula input[readonly]{color:#8fc4ec;}
 .atk-plus{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--muted);}
 .atk-calc{display:block;text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);opacity:.85;margin-top:1px;white-space:nowrap;}
-.atk-roll-btn{height:24px;min-width:34px;padding:0 8px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--muted);transition:all .1s;}
+.atk-roll-btn{height:24px;min-width:34px;padding:0 8px;background:transparent;border:1px solid var(--red);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--red);transition:all .1s;}
 .atk-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
 
 /* HOTLIST inline */
@@ -220,7 +220,7 @@ body.dark .atk-formula input[readonly]{color:#8fc4ec;}
 .skill-stat-sel{border:1px solid var(--rule);background:var(--input-bg);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;outline:none;padding:2px 3px;color:var(--ink);width:52px;}
 .skill-mod-input{width:32px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;text-align:center;padding:2px;}
 .skill-check{width:18px;height:18px;cursor:pointer;accent-color:var(--red);}
-.skill-roll-btn{height:24px;min-width:32px;padding:0 7px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;}
+.skill-roll-btn{height:24px;min-width:32px;padding:0 7px;background:transparent;border:1px solid var(--red);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--red);white-space:nowrap;}
 .skill-roll-btn:hover{background:var(--red);border-color:var(--red);color:white;}
 .hot-pin{background:transparent;border:none;cursor:pointer;font-size:15px;line-height:1;color:var(--muted);padding:0 3px;vertical-align:middle;}
 .hot-pin:hover{color:var(--red);}
@@ -323,8 +323,8 @@ body.dark .sheet{border-color:#4a4a52;}
 body.dark .hdr-logo{background:#0a0a0a;}
 body.dark .hdr-field input{color:var(--ink);border-bottom-color:var(--rule);}
 body.dark .stat-input{background:var(--input-bg);color:var(--ink);border-color:var(--rule);}
-body.dark .stat-mod-val{background:var(--box);color:var(--ink);}
-body.dark .stat-mod-val:hover{background:var(--section-hdr);color:#fff;border-color:var(--section-hdr);}
+body.dark .stat-mod-val{background:var(--box);color:var(--red);}
+body.dark .stat-mod-val:hover{background:var(--red);color:#fff;border-color:var(--red);}
 body.dark .stat-mod-val:active{background:var(--red);color:#fff;border-color:var(--red);}
 body.dark .formula-input{background:var(--input-bg);color:var(--ink);}
 body.dark .formula-input[readonly]{background:var(--box);}
@@ -2887,27 +2887,27 @@ syncLinkedAttacks();
    and dice-pool buttons were transparent / red. All of them now share the
    same black, keeping red as the hover accent. */
 .roll-btn, .evade-roll-btn, .atk-roll-btn, .skill-roll-btn, .dice-roll-btn {
-  background: var(--section-hdr);
-  border: 1px solid var(--section-hdr);
+  background: var(--red);
+  border: 1px solid var(--red);
   color: #fff;
 }
 .roll-btn:hover, .evade-roll-btn:hover, .atk-roll-btn:hover,
 .skill-roll-btn:hover, .dice-roll-btn:hover {
-  background: var(--red);
-  border-color: var(--red);
+  background: #9e1e18;
+  border-color: #9e1e18;
   color: #fff;
 }
-/* Dark mode: the panel is already near-black, so lift the buttons off it */
+/* Dark mode: keep the roll red so every roll control reads the same */
 body.dark .roll-btn, body.dark .evade-roll-btn, body.dark .atk-roll-btn,
 body.dark .skill-roll-btn, body.dark .dice-roll-btn {
-  background: #000;
-  border-color: #3a3a3a;
+  background: var(--red);
+  border-color: var(--red);
 }
 body.dark .roll-btn:hover, body.dark .evade-roll-btn:hover,
 body.dark .atk-roll-btn:hover, body.dark .skill-roll-btn:hover,
 body.dark .dice-roll-btn:hover {
-  background: var(--red);
-  border-color: var(--red);
+  background: #9e1e18;
+  border-color: #9e1e18;
 }
 </style>
 

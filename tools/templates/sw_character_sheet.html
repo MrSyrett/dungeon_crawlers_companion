@@ -57,8 +57,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tray-select{flex:1;}
 .tray-note{font-size:10px;color:#555;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;line-height:1.3;}
 .dice-btns{display:flex;gap:4px;}
-.dice-btn{flex:1;padding:6px 0;background:#1a1a1a;border:1px solid #333;color:#bbb;font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;border-radius:3px;}
-.dice-btn:hover{background:#333;color:#fff;}
+.dice-btn{flex:1;padding:6px 0;background:var(--sw);border:1px solid var(--sw-dk);color:#1a1a1a;font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;border-radius:3px;}
+.dice-btn:hover{background:var(--sw-dk);color:#fff;}
 .adv-btns{display:flex;gap:4px;}
 .adv-btn{flex:1;padding:5px;background:#1a1a1a;border:1px solid #333;color:#888;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:3px;letter-spacing:.06em;}
 .adv-btn.on-adv{background:#1e3a1e;color:#6dbf6d;border-color:#2d5a2d;}
@@ -98,7 +98,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule);}
 .stat-cell{padding:8px 6px;border-right:1px solid var(--rule);text-align:center;}
 .stat-cell:last-child{border-right:none;}
-.stat-cell .sn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.08em;color:var(--ink);cursor:pointer;}
+.stat-cell .sn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.08em;color:var(--sw-dk);cursor:pointer;}
 .stat-cell .sn:hover{color:var(--sw-dk);}
 .stat-cell input{width:54px;height:36px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;text-align:center;color:var(--ink);outline:none;margin:4px 0;}
 .save-toggle{display:flex;justify-content:center;gap:3px;}
@@ -108,7 +108,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stat-cell small{display:block;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
 .skills-table{width:100%;border-collapse:collapse;}
 .skills-table td{padding:2px 6px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:13px;}
-.skills-table td.sk-name{font-weight:700;cursor:pointer;}
+.skills-table td.sk-name{font-weight:700;cursor:pointer;color:var(--sw-dk);}
 .skills-table td.sk-name:hover{color:var(--sw-dk);}
 .skills-table td.sk-name small{font-weight:600;color:var(--muted);font-size:9px;margin-left:4px;}
 .skills-table input{width:36px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
@@ -132,8 +132,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .pip.wound.on{background:var(--red);color:#fff;}
 .pip.act{border-radius:50%;background:var(--sw);color:#fff;}
 .pip.act.spent{background:transparent;color:var(--muted);}
-.small-btn{background:var(--section-hdr);color:#fff;border:none;border-radius:2px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
-.small-btn:hover{background:var(--sw);}
+.small-btn{background:var(--sw);color:#1a1a1a;border:none;border-radius:2px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.small-btn:hover{background:var(--sw-dk);color:#fff;}
 .small-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule);}
 .small-btn.ghost:hover{background:var(--box);}
 .small-btn.gold{background:var(--sw);}
@@ -330,7 +330,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="section-bar gold"><span>Attributes</span></div>
       <div class="stats-grid" id="stats-grid"></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
-      <div class="add-row"><select id="skill-pick"><option value="">Add a skill…</option></select><button class="small-btn ghost" onclick="addSkillPick()">+ Add</button><button class="small-btn ghost" onclick="addSkillRow({name:'',attr:'Dexterity',adds:0})" title="Blank row for a new skill">+ Custom</button></div>
+      <div class="add-row"><select id="skill-pick" onchange="addSkillPick()"><option value="">Add a skill…</option></select><button class="small-btn ghost" onclick="addSkillRow({name:'',attr:'Dexterity',adds:0})" title="Blank row for a new skill">+ Skill</button></div>
 
       <div class="vitals">
         <div class="vital" style="grid-column:span 2;">
@@ -380,7 +380,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         <thead><tr><th style="width:28%;">Power</th><th style="width:22%;">Skill(s)</th><th>Difficulty</th><th style="width:110px;"></th></tr></thead>
         <tbody id="force-body"></tbody>
       </table>
-      <div class="add-row"><select id="force-pick"><option value="">Add a Force power…</option></select><button class="small-btn ghost" onclick="addForcePick()">+ Add</button></div>
+      <div class="add-row"><select id="force-pick" onchange="addForcePick()"><option value="">Add a Force power…</option></select></div>
 
       <div class="section-bar"><span>Equipment</span></div>
       <table class="tbl">

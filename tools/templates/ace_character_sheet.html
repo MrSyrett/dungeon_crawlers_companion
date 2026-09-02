@@ -106,21 +106,21 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stats-head{display:grid;grid-template-columns:82px 54px 1fr 54px;gap:4px;padding:4px 10px 2px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
 .stat-row{display:grid;grid-template-columns:82px 54px 1fr 54px;gap:4px;align-items:start;padding:5px 10px;border-bottom:1px solid var(--rule);}
 .stat-row.off{opacity:.45;}
-.stat-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink);cursor:pointer;user-select:none;}
+.stat-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:var(--ace-dk);cursor:pointer;user-select:none;}
 .stat-name:hover{color:var(--ace-dk);}
 .stat-name small{display:block;font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--muted);}
 .stat-input,.focus-input{height:32px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--ink);outline:none;}
 .stat-input{width:100%;text-align:center;}
 .focus-input{width:100%;font-family:'Barlow Condensed',sans-serif;font-size:14px;padding:0 8px;}
-.focus-dice{height:32px;line-height:30px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;background:var(--box);border:1px solid var(--rule);color:var(--ink);cursor:pointer;}
-.focus-dice:hover{background:var(--section-hdr);color:#fff;}
+.focus-dice{height:32px;line-height:30px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;background:var(--box);border:1px solid var(--ace);color:var(--ace-dk);cursor:pointer;}
+.focus-dice:hover{background:var(--ace);color:#fff;border-color:var(--ace);}
 .focus-cell{grid-column:3 / span 2;display:flex;flex-direction:column;gap:4px;min-width:0;}
 .focus-line{display:grid;grid-template-columns:1fr 54px;gap:4px;align-items:center;}
 .focus-line .focus-input{min-width:0;}
 .focus-add{align-self:flex-start;background:none;border:none;padding:0 2px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;}
 .focus-add:hover{color:var(--ace-dk);}
-.stat-roll{height:32px;background:var(--section-hdr);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
-.stat-roll:hover{background:var(--ace);}
+.stat-roll{height:32px;background:var(--ace);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
+.stat-roll:hover{background:var(--ace-dk);}
 .power-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
 .chk{display:flex;align-items:center;gap:6px;cursor:pointer;}
 .chk input{width:16px;height:16px;accent-color:var(--ace);}
@@ -143,8 +143,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hp-pip.lost{background:transparent;color:var(--muted);}
 .hp-pip:hover{transform:scale(1.08);}
 .ko-banner{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--red);padding:2px 6px;display:inline-block;}
-.small-btn{background:var(--section-hdr);color:#fff;border:none;border-radius:2px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
-.small-btn:hover{background:var(--ace);}
+.small-btn{background:var(--ace);color:#fff;border:none;border-radius:2px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.small-btn:hover{background:var(--ace-dk);}
 .small-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule);}
 .small-btn.ghost:hover{background:var(--box);}
 
@@ -360,7 +360,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="derived-cell">
           <div class="derived-lbl"><span>Defence</span></div>
           <div class="derived-big" id="def-val">8</div>
-          <div class="derived-formula">gear <input type="number" id="def-bonus" value="0" oninput="recalc()"> <button class="small-btn ghost" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">🎲</button></div>
+          <div class="derived-formula">gear <input type="number" id="def-bonus" value="0" oninput="recalc()"> <button class="small-btn" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">🎲</button></div>
         </div>
         <div class="derived-cell">
           <div class="derived-lbl"><span>Health</span></div>
@@ -765,7 +765,7 @@ function addAttackRow(a) {
   a = a || { name:'', kind:'melee', damage:'' };
   const tr = document.createElement('tr');
   tr.innerHTML =
-    `<td><input type="text" class="atk-name" list="dl-weapons" placeholder="Pistol, katana, hook hand…" value="${esc(a.name)}" oninput="onWeaponPick(this)"></td>` +
+    `<td><input type="text" class="atk-name" placeholder="Pistol, katana, hook hand…" value="${esc(a.name)}" oninput="onWeaponPick(this)"></td>` +
     `<td><select class="atk-kind" onchange="recalcAttacks()"><option value="melee"${a.kind==='melee'?' selected':''}>Melee</option><option value="ranged"${a.kind==='ranged'?' selected':''}>Ranged</option><option value="power"${a.kind==='power'?' selected':''}>Power</option></select></td>` +
     `<td><input type="number" class="num atk-dmg" min="0" placeholder="dmg" value="${esc(a.damage)}"></td>` +
     `<td class="atk-dice"></td>` +
