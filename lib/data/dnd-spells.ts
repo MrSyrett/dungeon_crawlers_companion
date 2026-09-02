@@ -2838,6 +2838,23 @@ export const DND_SPELLS: DndSpell[] = [
     "source": "phb"
   },
   {
+    "name": "Beast Sense",
+    "level": 2,
+    "school": "Divination",
+    "castingTime": "Action or Ritual",
+    "range": "Touch",
+    "components": "S",
+    "duration": "Concentration, up to 1 Hour",
+    "concentration": true,
+    "ritual": true,
+    "classes": [
+      "Druid",
+      "Ranger"
+    ],
+    "description": "You touch a willing Beast and, for the duration, you can perceive through its senses as well as your own, gaining the benefit of any special senses it has. While using the creature's senses, you are Blinded and Deafened to your own surroundings.",
+    "source": "srd"
+  },
+  {
     "name": "Animate Dead",
     "level": 3,
     "school": "Necromancy",
@@ -3765,6 +3782,23 @@ export const DND_SPELLS: DndSpell[] = [
     "source": "srd"
   },
   {
+    "name": "Lightning Arrow",
+    "level": 3,
+    "school": "Transmutation",
+    "castingTime": "Bonus Action, taken immediately after you hit or miss a target with a ranged weapon attack",
+    "range": "Self",
+    "components": "V, S",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Ranger"
+    ],
+    "description": "The attack's ammunition or thrown weapon becomes a bolt of lightning. The target takes 4d8 Lightning damage on a hit, or half as much on a miss. Each other creature within 10 feet of it makes a Dexterity saving throw, taking 2d8 Lightning damage on a failure or half as much on a success.",
+    "higherLevels": "Both damage rolls increase by 1d8 for each spell slot level above 3rd.",
+    "source": "srd"
+  },
+  {
     "name": "Arcane Eye",
     "level": 4,
     "school": "Divination",
@@ -4461,6 +4495,41 @@ export const DND_SPELLS: DndSpell[] = [
     ],
     "description": "You wreathe yourself in moonlight, shedding Bright Light in a 20-foot radius and Dim Light for 20 feet beyond. For the duration you have Resistance to Radiant damage, and each time you hit a creature with a melee attack you add 2d6 Radiant damage to it. When a creature you can see within 50 feet damages you, you can use a Reaction to force it to make a Constitution save; on a failure it is Blinded until the end of your next turn.",
     "source": "phb"
+  },
+  {
+    "name": "Grasping Vine",
+    "level": 4,
+    "school": "Conjuration",
+    "castingTime": "Bonus Action",
+    "range": "60 feet",
+    "components": "V, S",
+    "duration": "Concentration, up to 1 Minute",
+    "concentration": true,
+    "ritual": false,
+    "classes": [
+      "Druid",
+      "Ranger"
+    ],
+    "description": "You conjure a vine that sprouts from a surface. As a Bonus Action you can make a melee spell attack against a creature within 30 feet of the vine; on a hit the target takes 4d8 Bludgeoning damage, is pulled up to 30 feet toward the vine, and — if Huge or smaller — has the Grappled condition (escape DC equals your spell save DC). The vine can grapple only one creature at a time.",
+    "higherLevels": "The number of creatures the vine can grapple at once increases by one for each spell slot level above 4th.",
+    "source": "srd"
+  },
+  {
+    "name": "Staggering Smite",
+    "level": 4,
+    "school": "Enchantment",
+    "castingTime": "Bonus Action, taken immediately after hitting a creature with a melee weapon or Unarmed Strike",
+    "range": "Self",
+    "components": "V",
+    "duration": "Instantaneous",
+    "concentration": false,
+    "ritual": false,
+    "classes": [
+      "Paladin"
+    ],
+    "description": "The target takes an extra 4d6 Psychic damage and must succeed on a Wisdom saving throw or have the Stunned condition until the end of your next turn.",
+    "higherLevels": "The extra Psychic damage increases by 1d6 for each spell slot level above 4th.",
+    "source": "srd"
   },
   {
     "name": "Animate Objects",

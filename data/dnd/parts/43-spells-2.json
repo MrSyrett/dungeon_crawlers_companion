@@ -1073,6 +1073,23 @@
       "description": "You cast this the instant after hitting a creature with a weapon or Unarmed Strike. The target takes an extra 2d6 Radiant damage and, for the duration, sheds Bright Light in a 5-foot radius, can't benefit from becoming Invisible, and attack rolls against it have Advantage.",
       "higherLevels": "The extra Radiant damage increases by 1d6 for each spell slot level above 2nd.",
       "source": "phb"
+    },
+    {
+      "name": "Beast Sense",
+      "level": 2,
+      "school": "Divination",
+      "castingTime": "Action or Ritual",
+      "range": "Touch",
+      "components": "S",
+      "duration": "Concentration, up to 1 Hour",
+      "concentration": true,
+      "ritual": true,
+      "classes": [
+        "Druid",
+        "Ranger"
+      ],
+      "description": "You touch a willing Beast and, for the duration, you can perceive through its senses as well as your own, gaining the benefit of any special senses it has. While using the creature's senses, you are Blinded and Deafened to your own surroundings.",
+      "source": "srd"
     }
   ]
 }
