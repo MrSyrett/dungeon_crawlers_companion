@@ -171,16 +171,35 @@ const raw = FROM_TEXT ? loadTextDir(FROM_TEXT) : await loadPdfText(PDF_DIR);
 const text = normalize(raw);
 
 const monsters = JSON.parse(readFileSync(MONSTERS, "utf8"));
-let matched = 0, skipped = 0;
+let skipped = 0;
 const unmatched = [];
+
+// First pass: capture a candidate flavor for every monster that needs one.
+const candidates = new Map(); // monster -> flavor
 for (const m of monsters) {
   if (m.flavor && !OVERWRITE) { skipped++; continue; }
   const flavor = captureFlavor(text, m.name, m.level);
-  if (flavor) { if (WRITE) m.flavor = flavor; matched++; }
-  else unmatched.push(`${m.name} (L${m.level}, ${m.source} p.${m.page})`);
+  if (flavor) candidates.set(m, flavor);
+}
+
+// Two-column pages sometimes splice two neighbouring creatures' write-ups into one
+// blob that both of them then match identically. A flavor claimed by more than one
+// creature can't be trusted for either, so drop every copy of a duplicated capture.
+const freq = new Map();
+for (const f of candidates.values()) freq.set(f, (freq.get(f) || 0) + 1);
+const dropped = [];
+for (const [m, f] of candidates) {
+  if (freq.get(f) > 1) { candidates.delete(m); dropped.push(m.name); }
+}
+
+let matched = 0;
+for (const m of monsters) {
+  if (candidates.has(m)) { if (WRITE) m.flavor = candidates.get(m); matched++; }
+  else if (!(m.flavor && !OVERWRITE)) unmatched.push(`${m.name} (L${m.level}, ${m.source} p.${m.page})`);
 }
 
 console.log(`\nMatched flavor for ${matched} / ${monsters.length} monsters` + (skipped ? ` (${skipped} already had flavor, kept)` : "") + ".");
+if (dropped.length) console.log(`Dropped ${dropped.length} ambiguous (two-column) captures shared by neighbours: ${dropped.join(", ")}.`);
 if (unmatched.length) {
   console.log(`\nNo confident match for ${unmatched.length} — fill these by hand if needed:`);
   unmatched.slice(0, 60).forEach((n) => console.log("  · " + n));
