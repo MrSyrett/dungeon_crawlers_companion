@@ -115,25 +115,38 @@ function scrub(s) {
 // The write-ups head this paragraph with the creature's name + level, in one of
 // two book styles: "Rayzer, Level 3" (GM Toolkit) or "Babababoon. Level 17."
 // (Core Rulebook). The paragraph ends where the stat block's type line begins.
+// Return the LAST match of a global regex in text, or null.
+function lastMatch(re, text) {
+  let m, last = null;
+  while ((m = re.exec(text)) !== null) { last = m; if (m.index === re.lastIndex) re.lastIndex++; }
+  return last;
+}
+
 function captureFlavor(text, name, level) {
   // Mob style: "Rayzer, Level 3" / "Babababoon. Level 17." — name, optional comma or
   // period, then "Level N". Boss style: a "<Name>, <epithet>" title line immediately
   // above a "Level N <Role>!" header (e.g. "Level 7 Neighborhood Boss!"), with the
   // flavor beneath. Try the mob heading first, then the boss heading.
-  const mobHead = new RegExp(esc(name) + "\\s*[.,]?\\s*Level\\s*\\.?\\s*" + level + "\\b", "i");
+  //
+  // Some creatures are written up TWICE — once in a neighborhood/adventure section and
+  // again in the bestiary appendix, each with its own "Name, Level N" flavor box. The
+  // appendix box (the canonical green box) is the LATER one, so take the last match.
+  const mobHead = new RegExp(esc(name) + "\\s*[.,]?\\s*Level\\s*\\.?\\s*" + level + "\\b", "ig");
   const bossHead = new RegExp(
     esc(name) + "[\\s\\S]{0,80}?Level\\s*\\.?\\s*" + level + "\\s+" + ROLE + "\\b!?",
-    "i",
+    "ig",
   );
-  const m = mobHead.exec(text) || bossHead.exec(text);
+  const m = lastMatch(mobHead, text) || lastMatch(bossHead, text);
   if (!m) return null;
   const start = m.index + m[0].length;
   const rest = text.slice(start, start + 2500);
-  // Boundary = start of the stat block. Reliable openers: the type line ("Role; Size"),
-  // a monster attack line ("14+F to hit"), or the older Surprise/Evade headers.
+  // Boundary = start of the stat block or end of the flavor box. Reliable openers: the
+  // type line ("Role; Size"), a monster attack line ("14+F to hit"), the per-page
+  // "Copyright Renegade Game Studios" footer, or the older Surprise/Evade headers.
   const boundary = new RegExp(
     ROLE_LINE.source +
       "|\\d+\\s*\\+\\s*F\\s+to\\s+hit\\b" +
+      "|Copyright\\s+Renegade\\s+Game\\s+Studios" +
       "|\\bSurprise\\b[\\s\\S]{0,40}\\bEvade\\b|\\bLevel\\s+\\d+\\b[\\s\\S]{0,24}\\bSurprise\\b",
     "i",
   );
@@ -144,6 +157,15 @@ function captureFlavor(text, name, level) {
   // (e.g. "Flesher. Level 10." ahead of the real prose), then any punctuation again.
   flavor = flavor.replace(/^[^A-Za-z"“'‘]+/, "");
   flavor = flavor.replace(/^[A-Za-z'’ ]{0,30}\.\s*Level\s*\.?\s*\d+\.?\s*/i, "");
+  // A boss heading "…Level N <Role>!" can leave its trailing "<Role>" in front of the
+  // prose (e.g. "Neighborhood Boss! Do you feel…" or "Neighborhood Boss Audiences…").
+  // Drop a leading "<Role>!" for any role, or a bare multi-word boss role (which never
+  // opens real prose).
+  flavor = flavor.replace(new RegExp("^(?:" + ROLE + ")\\s*!\\s*", "i"), "");
+  flavor = flavor.replace(
+    /^(?:Neighborhood|Borough|City|Province|Country|Floor|Quest)\s+Boss\s+/i,
+    "",
+  );
   flavor = flavor.replace(/^[^A-Za-z"“'‘]+/, "");
   // Trim to the last complete sentence.
   const lastStop = Math.max(flavor.lastIndexOf(". "), flavor.lastIndexOf(".”"), flavor.lastIndexOf(".\""));
@@ -152,6 +174,9 @@ function captureFlavor(text, name, level) {
   // Sanity: prose-shaped, reasonable length.
   if (flavor.length < 40 || flavor.length > 1600) return null;
   if (!/[a-z]/.test(flavor) || !/\s/.test(flavor)) return null;
+  // A real flavor box opens a sentence — a capital letter or an opening quote. A
+  // lowercase (or mid-word) start means the capture began inside another block; drop it.
+  if (!/^["“'‘A-Z0-9]/.test(flavor)) return null;
   return flavor;
 }
 

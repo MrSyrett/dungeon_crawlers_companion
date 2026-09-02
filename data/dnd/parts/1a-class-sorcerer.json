@@ -1,0 +1,108 @@
+{
+  "_note": "Sorcerer (2024), full caster (tables.fullCasterSlots). Base class + Draconic Sorcery are SRD 5.2 (CC-BY); Aberrant / Clockwork / Wild Magic are mechanics + original descriptions.",
+  "classes": [
+    {
+      "name": "Sorcerer",
+      "primaryAbility": ["CHA"],
+      "hitDie": 6,
+      "savingThrows": ["CON", "CHA"],
+      "proficiencies": {
+        "armor": [],
+        "weapons": ["Simple weapons"],
+        "tools": [],
+        "skillsChoose": 2,
+        "skillsFrom": ["Arcana", "Deception", "Insight", "Intimidation", "Persuasion", "Religion"]
+      },
+      "startingEquipment": ["Spear, 2 Daggers, Arcane Focus (Crystal), Dungeoneer's Pack, 28 GP", "or 50 GP"],
+      "spellcasting": "full",
+      "spellcastingAbility": "CHA",
+      "subclassLevel": 3,
+      "subclassLabel": "Sorcerer Subclass",
+      "flavor": "A caster whose magic wells up from within, reshaped on the fly by Metamagic and Sorcery Points — flexible, explosive, and unmistakably innate.",
+      "source": "srd",
+      "table": [
+        { "level": 1,  "profBonus": 2, "features": ["Spellcasting", "Innate Sorcery"], "cantripsKnown": 4, "columns": { "Sorcery Points": "—", "Cantrips": "4", "Prepared Spells": "2" } },
+        { "level": 2,  "profBonus": 2, "features": ["Font of Magic", "Metamagic"], "cantripsKnown": 4, "columns": { "Sorcery Points": "2", "Cantrips": "4", "Prepared Spells": "4" } },
+        { "level": 3,  "profBonus": 2, "features": ["Sorcerer Subclass"], "cantripsKnown": 4, "columns": { "Sorcery Points": "3", "Cantrips": "4", "Prepared Spells": "6" } },
+        { "level": 4,  "profBonus": 2, "features": ["Ability Score Improvement"], "cantripsKnown": 5, "columns": { "Sorcery Points": "4", "Cantrips": "5", "Prepared Spells": "7" } },
+        { "level": 5,  "profBonus": 3, "features": ["Sorcerous Restoration"], "cantripsKnown": 5, "columns": { "Sorcery Points": "5", "Cantrips": "5", "Prepared Spells": "9" } },
+        { "level": 6,  "profBonus": 3, "features": ["Subclass Feature"], "cantripsKnown": 5, "columns": { "Sorcery Points": "6", "Cantrips": "5", "Prepared Spells": "10" } },
+        { "level": 7,  "profBonus": 3, "features": ["Sorcery Incarnate"], "cantripsKnown": 5, "columns": { "Sorcery Points": "7", "Cantrips": "5", "Prepared Spells": "11" } },
+        { "level": 8,  "profBonus": 3, "features": ["Ability Score Improvement"], "cantripsKnown": 5, "columns": { "Sorcery Points": "8", "Cantrips": "5", "Prepared Spells": "12" } },
+        { "level": 9,  "profBonus": 4, "features": [], "cantripsKnown": 5, "columns": { "Sorcery Points": "9", "Cantrips": "5", "Prepared Spells": "14" } },
+        { "level": 10, "profBonus": 4, "features": ["Metamagic"], "cantripsKnown": 6, "columns": { "Sorcery Points": "10", "Cantrips": "6", "Prepared Spells": "15" } },
+        { "level": 11, "profBonus": 4, "features": [], "cantripsKnown": 6, "columns": { "Sorcery Points": "11", "Cantrips": "6", "Prepared Spells": "16" } },
+        { "level": 12, "profBonus": 4, "features": ["Ability Score Improvement"], "cantripsKnown": 6, "columns": { "Sorcery Points": "12", "Cantrips": "6", "Prepared Spells": "16" } },
+        { "level": 13, "profBonus": 5, "features": [], "cantripsKnown": 6, "columns": { "Sorcery Points": "13", "Cantrips": "6", "Prepared Spells": "17" } },
+        { "level": 14, "profBonus": 5, "features": ["Subclass Feature"], "cantripsKnown": 6, "columns": { "Sorcery Points": "14", "Cantrips": "6", "Prepared Spells": "17" } },
+        { "level": 15, "profBonus": 5, "features": [], "cantripsKnown": 6, "columns": { "Sorcery Points": "15", "Cantrips": "6", "Prepared Spells": "18" } },
+        { "level": 16, "profBonus": 5, "features": ["Ability Score Improvement"], "cantripsKnown": 6, "columns": { "Sorcery Points": "16", "Cantrips": "6", "Prepared Spells": "18" } },
+        { "level": 17, "profBonus": 6, "features": ["Metamagic"], "cantripsKnown": 6, "columns": { "Sorcery Points": "17", "Cantrips": "6", "Prepared Spells": "19" } },
+        { "level": 18, "profBonus": 6, "features": ["Subclass Feature"], "cantripsKnown": 6, "columns": { "Sorcery Points": "18", "Cantrips": "6", "Prepared Spells": "20" } },
+        { "level": 19, "profBonus": 6, "features": ["Epic Boon"], "cantripsKnown": 6, "columns": { "Sorcery Points": "19", "Cantrips": "6", "Prepared Spells": "21" } },
+        { "level": 20, "profBonus": 6, "features": ["Arcane Apotheosis"], "cantripsKnown": 6, "columns": { "Sorcery Points": "20", "Cantrips": "6", "Prepared Spells": "22" } }
+      ],
+      "features": [
+        { "name": "Spellcasting", "level": 1, "source": "srd", "description": "You cast Sorcerer spells using Charisma, preparing a growing list (shown on the table) plus cantrips from the full Sorcerer list. Save DC is 8 + Charisma modifier + proficiency bonus. You can use an Arcane Focus." },
+        { "name": "Innate Sorcery", "level": 1, "source": "srd", "description": "As a Bonus Action you unleash your innate magic for 1 minute: your Sorcerer spell save DC increases by 1 and you have Advantage on Sorcerer spell attack rolls. Twice per Long Rest." },
+        { "name": "Font of Magic", "level": 2, "source": "srd", "description": "You gain Sorcery Points (shown on the table). As a Bonus Action you can convert Sorcery Points into spell slots, or expend spell slots to gain Sorcery Points." },
+        { "name": "Metamagic", "level": 2, "source": "srd", "description": "You learn two Metamagic options (such as Careful, Distant, Empowered, Extended, Quickened, Subtle, or Twinned Spell) that reshape your spells for a cost in Sorcery Points. You learn two more at levels 10 and 17, and can swap options when you level up." },
+        { "name": "Sorcerous Restoration", "level": 5, "source": "srd", "description": "When you finish a Short Rest, you can regain expended Sorcery Points (up to half your Sorcerer level). Once per Long Rest." },
+        { "name": "Sorcery Incarnate", "level": 7, "source": "srd", "description": "If you have no uses of Innate Sorcery left, you can activate it by spending 2 Sorcery Points, and while it's active you can apply up to two Metamagic options to a single spell." },
+        { "name": "Ability Score Improvement", "level": 4, "source": "srd", "description": "Increase one ability score by 2, or two by 1 (max 20), or take a feat. Repeats at 8th, 12th, and 16th level." },
+        { "name": "Epic Boon", "level": 19, "source": "srd", "description": "You gain an Epic Boon feat or another feat you qualify for. Boon of Spell Recall is a fitting choice." },
+        { "name": "Arcane Apotheosis", "level": 20, "source": "srd", "description": "While your Innate Sorcery is active, you can use one Metamagic option on each of your turns without spending Sorcery Points." }
+      ],
+      "subclasses": [
+        {
+          "name": "Draconic Sorcery",
+          "className": "Sorcerer",
+          "flavor": "A sorcerer with dragon blood, warded by scaled resilience and commanding an elemental heritage — eventually sprouting wings.",
+          "source": "srd",
+          "features": [
+            { "name": "Draconic Resilience", "level": 3, "subclass": "Draconic Sorcery", "source": "srd", "description": "Your HP maximum increases by 1 per Sorcerer level, and while you wear no armor your AC equals 10 + Dexterity modifier + Charisma modifier. You also gain Draconic Spells always prepared and choose a draconic damage type." },
+            { "name": "Elemental Affinity", "level": 6, "subclass": "Draconic Sorcery", "source": "srd", "description": "When you cast a spell that deals your draconic damage type, you add your Charisma modifier to one damage roll, and you can spend a Sorcery Point to gain Resistance to that damage type for an hour." },
+            { "name": "Dragon Wings", "level": 14, "subclass": "Draconic Sorcery", "source": "srd", "description": "As a Bonus Action you can sprout dragon wings and gain a Fly Speed equal to your Speed for as long as you like (while not wearing armor that doesn't accommodate them)." },
+            { "name": "Dragon Companion", "level": 18, "subclass": "Draconic Sorcery", "source": "srd", "description": "You can cast Summon Dragon (always prepared) once without a spell slot per Long Rest, and while concentrating on it you gain a Frightful Presence you can unleash." }
+          ]
+        },
+        {
+          "name": "Aberrant Sorcery",
+          "className": "Sorcerer",
+          "flavor": "A sorcerer whose power seeps from the Far Realm — psionic whispers, telepathy, and flesh that warps to alien will.",
+          "source": "phb",
+          "features": [
+            { "name": "Psionic Sorcery", "level": 3, "subclass": "Aberrant Sorcery", "source": "phb", "description": "You gain Psionic Spells and Telepathic Speech (a Bonus Action to form a telepathic link with a creature you can see). You can cast your psionic spells by spending Sorcery Points instead of slots and can cast them without Verbal or Somatic components." },
+            { "name": "Psychic Defenses", "level": 6, "subclass": "Aberrant Sorcery", "source": "phb", "description": "You have Resistance to Psychic damage and Advantage on saves against being Charmed or Frightened, and when a creature deals Psychic damage to you or tries to read your mind, you can lash back with Psychic damage." },
+            { "name": "Revelation in Flesh", "level": 14, "subclass": "Aberrant Sorcery", "source": "phb", "description": "As a Bonus Action you can spend Sorcery Points to physically transform for 10 minutes, gaining benefits such as a Fly or Swim Speed, Darkvision and See Invisibility, or a squeezing, boneless body." },
+            { "name": "Warping Implosion", "level": 18, "subclass": "Aberrant Sorcery", "source": "phb", "description": "As a Magic action you can teleport up to 120 feet and unleash a burst of Force damage on creatures near the space you left, pulling them toward it. Once per Long Rest, or by spending Sorcery Points." }
+          ]
+        },
+        {
+          "name": "Clockwork Sorcery",
+          "className": "Sorcerer",
+          "flavor": "A sorcerer aligned with the cosmic force of Order, smoothing away chaos and cloaking allies in inevitable law.",
+          "source": "phb",
+          "features": [
+            { "name": "Restore Balance", "level": 3, "subclass": "Clockwork Sorcery", "source": "phb", "description": "You gain Clockwork Spells. As a Reaction when a creature you can see is about to roll with Advantage or Disadvantage, you can cancel it, forcing a straight roll. Uses equal to your proficiency bonus per Long Rest." },
+            { "name": "Bastion of Law", "level": 6, "subclass": "Clockwork Sorcery", "source": "phb", "description": "As a Magic action you can spend 1-5 Sorcery Points to shield a creature with a ward of dice; the creature can expend those dice to reduce damage it takes." },
+            { "name": "Trance of Order", "level": 14, "subclass": "Clockwork Sorcery", "source": "phb", "description": "As a Bonus Action you enter perfect focus for 1 minute: attack rolls against you can't benefit from Advantage, and once each turn you can treat a d20 roll of 9 or lower as a 10. Once per Long Rest, or by spending Sorcery Points." },
+            { "name": "Clockwork Cavalcade", "level": 18, "subclass": "Clockwork Sorcery", "source": "phb", "description": "As a Magic action you summon spirits of order in a 30-foot Cube that heal creatures, repair objects, and end one spell of level 6 or lower on each creature. Once per Long Rest, or by spending Sorcery Points." }
+          ]
+        },
+        {
+          "name": "Wild Magic Sorcery",
+          "className": "Sorcerer",
+          "flavor": "A sorcerer riddled with raw chaos, whose spells sometimes spark unpredictable surges — and who can bend that luck at will.",
+          "source": "phb",
+          "features": [
+            { "name": "Wild Magic Surge", "level": 3, "subclass": "Wild Magic Sorcery", "source": "phb", "description": "Your spellcasting can trigger a random magical Surge (roll on the Wild Magic table). You also gain Tides of Chaos: give yourself Advantage on one d20 roll; using it may trigger a Surge, and a Surge refreshes it." },
+            { "name": "Bend Luck", "level": 6, "subclass": "Wild Magic Sorcery", "source": "phb", "description": "As a Reaction when a creature you can see makes a d20 roll, you can spend 1 Sorcery Point to add or subtract 1d4 from it." },
+            { "name": "Controlled Chaos", "level": 14, "subclass": "Wild Magic Sorcery", "source": "phb", "description": "Whenever you roll on the Wild Magic table, you roll twice and choose which result to use." },
+            { "name": "Spell Bombardment", "level": 18, "subclass": "Wild Magic Sorcery", "source": "phb", "description": "Once per turn, when you roll damage for a spell and a die shows its highest value, you can roll it again and add it to the damage." }
+          ]
+        }
+      ]
+    }
+  ]
+}

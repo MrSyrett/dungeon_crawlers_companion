@@ -1,0 +1,112 @@
+{
+  "_note": "Artificer (2025, Eberron: Forge of the Artificer). NON-SRD: all descriptions are original paraphrase of the mechanics, source 'eberron'. Half caster with the artificer quirk (spell slots at level 1) — uses tables.artificerSlots, spellcasting type 'artificer'. Base subclass at level 3 with features at 3/5/9/15.",
+  "classes": [
+    {
+      "name": "Artificer",
+      "primaryAbility": ["INT"],
+      "hitDie": 8,
+      "savingThrows": ["CON", "INT"],
+      "proficiencies": {
+        "armor": ["Light armor", "Medium armor", "Shields"],
+        "weapons": ["Simple weapons"],
+        "tools": ["Thieves' Tools", "Tinker's Tools", "one other Artisan's Tools of your choice"],
+        "skillsChoose": 2,
+        "skillsFrom": ["Arcana", "History", "Investigation", "Medicine", "Nature", "Perception", "Sleight of Hand"]
+      },
+      "startingEquipment": ["Studded Leather Armor, Dagger, Thieves' Tools, Tinker's Tools, two Simple weapons, a Spellcasting Focus (any Artisan's Tools you're proficient with), Dungeoneer's Pack, 12 GP", "or 150 GP"],
+      "spellcasting": "artificer",
+      "spellcastingAbility": "INT",
+      "subclassLevel": 3,
+      "subclassLabel": "Artificer Specialist",
+      "flavor": "An inventor who channels magic through tools and tinkered devices — infusing ordinary gear with power, replicating wondrous items, and improvising a fix for any problem.",
+      "source": "eberron",
+      "table": [
+        { "level": 1,  "profBonus": 2, "features": ["Magical Tinkering", "Spellcasting"], "columns": { "Cantrips": "2", "Prepared Spells": "2" }, "cantripsKnown": 2 },
+        { "level": 2,  "profBonus": 2, "features": ["Replicate Magic Item"], "columns": { "Cantrips": "2", "Prepared Spells": "3" }, "cantripsKnown": 2 },
+        { "level": 3,  "profBonus": 2, "features": ["Artificer Subclass", "Right Tool for the Job"], "columns": { "Cantrips": "2", "Prepared Spells": "4" }, "cantripsKnown": 2 },
+        { "level": 4,  "profBonus": 2, "features": ["Ability Score Improvement"], "columns": { "Cantrips": "2", "Prepared Spells": "5" }, "cantripsKnown": 2 },
+        { "level": 5,  "profBonus": 3, "features": ["Subclass Feature"], "columns": { "Cantrips": "2", "Prepared Spells": "6" }, "cantripsKnown": 2 },
+        { "level": 6,  "profBonus": 3, "features": ["Magic Item Tinker"], "columns": { "Cantrips": "2", "Prepared Spells": "6" }, "cantripsKnown": 2 },
+        { "level": 7,  "profBonus": 3, "features": ["Flash of Genius"], "columns": { "Cantrips": "2", "Prepared Spells": "7" }, "cantripsKnown": 2 },
+        { "level": 8,  "profBonus": 3, "features": ["Ability Score Improvement"], "columns": { "Cantrips": "2", "Prepared Spells": "7" }, "cantripsKnown": 2 },
+        { "level": 9,  "profBonus": 4, "features": ["Subclass Feature"], "columns": { "Cantrips": "2", "Prepared Spells": "9" }, "cantripsKnown": 2 },
+        { "level": 10, "profBonus": 4, "features": ["Magic Item Adept"], "columns": { "Cantrips": "3", "Prepared Spells": "9" }, "cantripsKnown": 3 },
+        { "level": 11, "profBonus": 4, "features": ["Spell-Storing Item"], "columns": { "Cantrips": "3", "Prepared Spells": "10" }, "cantripsKnown": 3 },
+        { "level": 12, "profBonus": 4, "features": ["Ability Score Improvement"], "columns": { "Cantrips": "3", "Prepared Spells": "10" }, "cantripsKnown": 3 },
+        { "level": 13, "profBonus": 5, "features": [], "columns": { "Cantrips": "3", "Prepared Spells": "11" }, "cantripsKnown": 3 },
+        { "level": 14, "profBonus": 5, "features": ["Advanced Artifice"], "columns": { "Cantrips": "4", "Prepared Spells": "11" }, "cantripsKnown": 4 },
+        { "level": 15, "profBonus": 5, "features": ["Subclass Feature"], "columns": { "Cantrips": "4", "Prepared Spells": "12" }, "cantripsKnown": 4 },
+        { "level": 16, "profBonus": 5, "features": ["Ability Score Improvement"], "columns": { "Cantrips": "4", "Prepared Spells": "12" }, "cantripsKnown": 4 },
+        { "level": 17, "profBonus": 6, "features": [], "columns": { "Cantrips": "4", "Prepared Spells": "14" }, "cantripsKnown": 4 },
+        { "level": 18, "profBonus": 6, "features": ["Magic Item Master"], "columns": { "Cantrips": "4", "Prepared Spells": "14" }, "cantripsKnown": 4 },
+        { "level": 19, "profBonus": 6, "features": ["Epic Boon"], "columns": { "Cantrips": "4", "Prepared Spells": "15" }, "cantripsKnown": 4 },
+        { "level": 20, "profBonus": 6, "features": ["Soul of Artifice"], "columns": { "Cantrips": "4", "Prepared Spells": "15" }, "cantripsKnown": 4 }
+      ],
+      "features": [
+        { "name": "Magical Tinkering", "level": 1, "source": "eberron", "description": "Using your tools, you can touch a tiny nonmagical object and give it one minor magical property: it can emit light, a recorded message (up to 6 words), a smell, or a static visual effect. You can affect a number of objects equal to your Intelligence modifier, and can end an effect as an action." },
+        { "name": "Spellcasting", "level": 1, "source": "eberron", "description": "You cast Artificer spells using Intelligence and a set of Artisan's Tools (or Thieves' Tools) as your Spellcasting Focus. You know two cantrips and prepare a number of leveled spells shown on the table, drawn from the Artificer list; unusually, you gain spell slots at 1st level. Save DC is 8 + Intelligence modifier + proficiency bonus. To cast a spell you must have a spellcasting focus in hand." },
+        { "name": "Replicate Magic Item", "level": 2, "source": "eberron", "description": "You learn to reproduce specific magic items with your tools. Choose items from the Replicable Items lists (the number you can have replicated grows as you level); creating one takes time during a rest and it functions as the normal magic item while it exists. You can change your choices when you finish a Long Rest." },
+        { "name": "Right Tool for the Job", "level": 3, "source": "eberron", "description": "Over a Short or Long Rest you can magically fabricate one set of Artisan's Tools of your choice in an unoccupied space near you, saving you from ever being caught without the right tools." },
+        { "name": "Ability Score Improvement", "level": 4, "source": "eberron", "description": "Increase one ability score by 2, or two by 1 (max 20), or take a feat. Repeats at 8th, 12th, and 16th level." },
+        { "name": "Magic Item Tinker", "level": 6, "source": "eberron", "description": "As a Magic action you can manipulate the magic of an item you're holding: Charge (restore an expended charge — limited uses per day), Drain (destroy a nonpermanent item to regain a spell slot), or Transmute (change the item into a different one you could replicate)." },
+        { "name": "Flash of Genius", "level": 7, "source": "eberron", "description": "When you or a creature you can see within 30 feet makes an ability check or saving throw, you can use a Reaction to add your Intelligence modifier to the roll. You can do this a number of times equal to your Intelligence modifier per Long Rest." },
+        { "name": "Magic Item Adept", "level": 10, "source": "eberron", "description": "You can attune to up to four magic items at once, and you can replicate magic items faster and more cheaply than normal." },
+        { "name": "Spell-Storing Item", "level": 11, "source": "eberron", "description": "When you finish a Long Rest you can store one Artificer spell of level 1 or 2 (that has a casting time of an action) into an item you hold. A creature holding the item can cast that spell from it, a total number of times equal to twice your Intelligence modifier before it's used up." },
+        { "name": "Advanced Artifice", "level": 14, "source": "eberron", "description": "You can attune to one additional magic item (five total), and when you roll Initiative with no uses of Flash of Genius left, you regain one use." },
+        { "name": "Magic Item Master", "level": 18, "source": "eberron", "description": "You can attune to up to six magic items at once." },
+        { "name": "Epic Boon", "level": 19, "source": "eberron", "description": "You gain an Epic Boon feat or another feat you qualify for. Boon of Skill or Boon of Spell Recall are fitting choices." },
+        { "name": "Soul of Artifice", "level": 20, "source": "eberron", "description": "You gain a +1 bonus to all saving throws for each magic item you're attuned to. In addition, when you're reduced to 0 Hit Points but not killed outright, you can use a Reaction to end one of your attunements and drop to 1 Hit Point instead." }
+      ],
+      "subclasses": [
+        {
+          "name": "Alchemist",
+          "className": "Artificer",
+          "flavor": "A master of potions and reagents who brews restorative and destructive concoctions on the fly.",
+          "source": "eberron",
+          "features": [
+            { "name": "Experimental Elixir", "level": 3, "subclass": "Alchemist", "source": "eberron", "description": "You gain Alchemist spells (always prepared) and proficiency with Alchemist's Supplies. After a Long Rest you can magically produce Experimental Elixirs (their effect rolled randomly or chosen at higher levels) — a Healing, Swiftness, Resilience, Boldness, Flight, or Transformation elixir a creature can drink as a Bonus Action. You make more elixirs as you gain levels." },
+            { "name": "Alchemical Savant", "level": 5, "subclass": "Alchemist", "source": "eberron", "description": "When you cast a spell using Alchemist's Supplies as your focus, you add your Intelligence modifier to one roll of the spell that restores Hit Points or deals Acid, Fire, Necrotic, or Poison damage." },
+            { "name": "Restorative Reagents", "level": 9, "subclass": "Alchemist", "source": "eberron", "description": "Whenever a creature drinks one of your Experimental Elixirs it also gains Temporary Hit Points, and you can cast Lesser Restoration without expending a spell slot a limited number of times per Long Rest using your supplies." },
+            { "name": "Chemical Mastery", "level": 15, "subclass": "Alchemist", "source": "eberron", "description": "You gain Resistance to Acid and Poison damage and immunity to the Poisoned condition, and you can cast Greater Restoration and Heal without expending spell slots (once each per Long Rest) using your Alchemist's Supplies." }
+          ]
+        },
+        {
+          "name": "Armorer",
+          "className": "Artificer",
+          "flavor": "An artificer who lives inside a suit of arcane power armor, reshaping it for defense or infiltration.",
+          "source": "eberron",
+          "features": [
+            { "name": "Arcane Armor", "level": 3, "subclass": "Armorer", "source": "eberron", "description": "You gain Armorer spells and turn a suit of armor into Arcane Armor you can don or doff quickly; it needs no Strength requirement, incorporates your tools, and can't be removed against your will. You choose an Armor Model — Guardian (a thundering gauntlet melee weapon plus a taunt) or Infiltrator (a ranged Lightning Launcher and stealth boosts) — and can reconfigure it on a rest." },
+            { "name": "Extra Attack", "level": 5, "subclass": "Armorer", "source": "eberron", "description": "You can attack twice whenever you take the Attack action on your turn." },
+            { "name": "Armor Modifications", "level": 9, "subclass": "Armorer", "source": "eberron", "description": "You can attune to and infuse the pieces of your Arcane Armor (armor, weapon, boots, helmet) as separate items, letting you carry more magical enhancements at once, and you can replicate more items." },
+            { "name": "Perfected Armor", "level": 15, "subclass": "Armorer", "source": "eberron", "description": "Your Armor Model gains a potent upgrade: Guardian can pull a distant creature toward you when its melee weapon hits, and Infiltrator's ranged weapon can force a save that reduces speed and imposes a penalty on its next attack." }
+          ]
+        },
+        {
+          "name": "Artillerist",
+          "className": "Artificer",
+          "flavor": "A battlefield engineer who conjures an Eldritch Cannon to blast, protect, and control the field.",
+          "source": "eberron",
+          "features": [
+            { "name": "Eldritch Cannon", "level": 3, "subclass": "Artillerist", "source": "eberron", "description": "You gain Artillerist spells and can magically create an Eldritch Cannon (Flamethrower, Force Ballista, or Protector) using your tools. It's a Small or Tiny object you can command as a Bonus Action to attack or produce its effect, and you can dismiss and rebuild it. You also gain the Arcane Firearm option to boost your spells." },
+            { "name": "Arcane Firearm", "level": 5, "subclass": "Artillerist", "source": "eberron", "description": "You can turn a Wand, Staff, or Rod into an Arcane Firearm spellcasting focus; when you cast an Artificer spell through it, you add an extra 1d8 to one of the spell's damage rolls." },
+            { "name": "Explosive Cannon", "level": 9, "subclass": "Artillerist", "source": "eberron", "description": "Your Eldritch Cannon deals extra damage, and as an action you can command it to detonate, destroying it in a burst of force damage that all nearby creatures must save against." },
+            { "name": "Fortified Position", "level": 15, "subclass": "Artillerist", "source": "eberron", "description": "You and your allies have Half Cover while within 10 feet of your cannon, and you can have two Eldritch Cannons active at once, commanding both with a single Bonus Action." }
+          ]
+        },
+        {
+          "name": "Battle Smith",
+          "className": "Artificer",
+          "flavor": "A protector-artificer who fights beside a loyal mechanical Steel Defender and wields arcane weapons with Intelligence.",
+          "source": "eberron",
+          "features": [
+            { "name": "Battle Ready", "level": 3, "subclass": "Battle Smith", "source": "eberron", "description": "You gain Battle Smith spells and proficiency with Martial weapons; you can use Intelligence instead of Strength or Dexterity for the attack and damage rolls of magic weapons and weapons you're wielding. You also build a Steel Defender — a construct ally that obeys you, shares your proficiency bonus, and acts on your turn (defending allies and making a Force-Empowered Rend attack)." },
+            { "name": "Extra Attack", "level": 5, "subclass": "Battle Smith", "source": "eberron", "description": "You can attack twice whenever you take the Attack action on your turn." },
+            { "name": "Arcane Jolt", "level": 9, "subclass": "Battle Smith", "source": "eberron", "description": "When you or your Steel Defender hits with a weapon or the Defender's attack, you can either deal extra Force damage or heal a nearby creature. You can do this a number of times per Long Rest equal to your Intelligence modifier." },
+            { "name": "Improved Defender", "level": 15, "subclass": "Battle Smith", "source": "eberron", "description": "Your Arcane Jolt damage and healing increase, and your Steel Defender gains a bonus to its AC, adds your Arcane Jolt effect to its Rend, and gains a Reaction to impose Disadvantage on an attack against a creature it protects." }
+          ]
+        }
+      ]
+    }
+  ]
+}

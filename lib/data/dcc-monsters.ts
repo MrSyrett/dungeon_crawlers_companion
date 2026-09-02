@@ -287,7 +287,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "notes": [],
     "page": 595,
-    "flavor": "These Arachnids are Human from the waist up, and spider from—oh, fuck it. They’re goddamn spidertaurs. It’s an easy descriptive shortcut, but way overused: “-taur” is to monsters as “-gate” is to scandals and “-punk” is to science fiction subgenres. It’s so fashionably overused that it’s completely lost its original meaning. It means “bull” in ancient Greek. What does “bull” have to do with a half-baked half-Human, half-spider monster concept? Goddamn nothing. That’s what! Anyway, rant over. Arachnid Grapplers do what spiders do best: they immobilize prey. They make sticky webs and bear-hug you with their bulging Human arms. Hairy arms like your father’s, and most of the damage you take is knowing you’ll never be as manly as he was."
+    "flavor": "He’s remarkably friendly for a spider-person, unless you’re something he wants to eat. You’re about the right size and shape of his usual prey, so… hope you make friends easily or fight giant half-spider people with ease. • Standard Success: The creature shakes off the depression enough to act normally this round. • Near Miss: −1 to all rolls this round. • Standard Fail: All rolls are made with Disadvantage this round. • Major Fail or worse: Gains the Resigned to Die Debuff: Takes 1 HB slot of damage at the end of each round until they roll a Standard Success or better."
   },
   {
     "name": "Aranaea Magnus",
@@ -1018,7 +1018,8 @@ export const DCC_MONSTERS: DccMonster[] = [
       }
     ],
     "notes": [],
-    "page": 571
+    "page": 571,
+    "flavor": "The good ol’ Big Boy Blue is the largest of the jellyfish one might find floating around. They’re a little like that guy you used to know in high school who was always wearing either overalls or a jersey of some sort. The dude was like six-foot-five and pushing 300 pounds when he was a freshman. He always had a crewcut. Dad’s a trucker. Never talks. Never does his homework. He’s just always, you know, kinda there. He doesn’t mean any harm. But he’s so goddamned dumb, he does harm if you get in his way. Plus, he always has a super-hot girlfriend for some reason, but that has nothing to do with the jellyfish. Anyway, you get the point. Harmless as long as you don’t touch them. Also known as the “Death’s Welcoming Committee” Shark, the Concierge Shark is one of the fastest and most voracious of the ocean’s predators. They’ll eat anything. Anything. Even those circus peanut candy things. It’s really kind of gross. They’re attracted to the scent of blood, making them the most common death dealers of any water-themed dungeon. “Statistically speaking, the sharks can’t eat all of us.” Crawler #1,197,506, Chrissie W."
   },
   {
     "name": "Big Daddy Nick",
@@ -1101,7 +1102,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 366,
     "source": "Core",
-    "flavor": "Neighborhood Boss! Do you feel the holiday joy in your bones? How about in your internal organs? Here at Big Daddy Nick’s cabin, every day is worth celebrating, but whenever he gets to protect his little slice of heaven from alien invaders, it’s just as good as Christmas morning! He’s been telling people for years that an invasion’s coming, and now that he’s finally found a group that will listen to him, he’s trained them to protect themselves and their home ever since. It might be nice if that all happened before the invasion, but honestly, I can’t tell if anything’s really changed for him."
+    "flavor": "Do you feel the holiday joy in your bones? How about in your internal organs? Here at Big Daddy Nick’s cabin, every day is worth celebrating, but whenever he gets to protect his little slice of heaven from alien invaders, it’s just as good as Christmas morning! He’s been telling people for years that an invasion’s coming, and now that he’s finally found a group that will listen to him, he’s trained them to protect themselves and their home ever since. It might be nice if that all happened before the invasion, but honestly, I can’t tell if anything’s really changed for him."
   },
   {
     "name": "Blaster Master",
@@ -1352,7 +1353,8 @@ export const DCC_MONSTERS: DccMonster[] = [
     "notes": [
       "Flight—Can move through air as if on the ground."
     ],
-    "page": 623
+    "page": 623,
+    "flavor": "It’s a bird! It’s a plane! Nope, it really is a bird—a big damn bird with razor-sharp talons, a bad attitude, and the tendency to spontaneously erupt into a bolt of lightning whenever the fancy strikes them. Don’t piss these guys off, or you’re likely to end up flash-fried, which I suppose isn’t any worse than the other ways you’re likely to die. Notes: Flight—Can move through air as if on the ground. BUNE LIEUTENANT These small lizard-folk bear the semblance of a humanoid dragon from Earth’s mythology. They’re incredibly agile and have an innate understanding of magic that makes them versatile magic-casters. These Bunes in particular are reminiscent of the Syndicate Race that was once featured in a previous season of Dungeon Crawler World, but they have no direct ties to those of their Race outside the dungeon… or do they? Wherever a large group of Rainbow Sprites can be found, one of these lieutenants is sure to be nearby, though they tend to let the little creatures run wild unless they’re threatened or given some other reason to respond directly. Bune Lieutenant. Level 35. Bunes are a slight dragon-like people that are naturally peaceful, unless pressed into service by an overly colorful warlord disguising herself as a bright rainbow of light here to make everyone’s lives better. They now wear garishly colorful robes and serve as Rainbow Sprite-herders while attempting to enforce the new, dizzyingly colorful agenda of their leader with as much force as necessary. On second thought, go for it."
   },
   {
     "source": "Core",
@@ -1489,8 +1491,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Oozy—A Bone Collector can squeeze through size Small (2) and larger openings."
     ],
     "page": 480,
-    "source": "Core",
-    "flavor": "Like a cross between a black lab and an abattoir, Bone Collectors are the perfect answer to the question “what do we do after the five-second rule?” You’ll notice they’re not called Squashers or Jelly-Blobs. They jiggle like jam and love a good compressive asphyxia, but these horror shows only pin you down so they can start sucking out your bones through every available orifice."
+    "source": "Core"
   },
   {
     "name": "Brain Boiler",
@@ -1685,8 +1686,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Overcrowding—Up to 5 Brindle Grubs can share a space. Entities can attempt to move through a space containing Brindle Grubs but must make a roll Dex Stat Check with a Difficulty of 4 x the number of Brindle Grubs in the space. On Fail, the entity steps on and kills one of the Brindle Grubs, triggering the System AI to spawn more Brindle Grubs to eat the corpse."
     ],
     "page": 139,
-    "source": "GM Toolkit",
-    "flavor": "Here on the Second Floor, Rats are yesterday’s news. Brindle Grubs are now all the rage, and janitor duty falls to them. The more monsters you kill in an area, the more the grubs eat. The more the grubs eat, the bigger they get. Once you start finding them in the pupa stage, you’d best move on. Grubs are easy to kill. Their older siblings are not."
+    "source": "GM Toolkit"
   },
   {
     "name": "Brindled Vespa",
@@ -2091,8 +2091,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Cautious—They travel in pairs and will not move to engage crawlers. If Surprised in combat or when one of their numbers have been killed, they retreat until they can find reinforcements."
     ],
     "page": 128,
-    "source": "GM Toolkit",
-    "flavor": "padded jars meant to keep their specimens intact. They are rarely encountered alone, preferring to work behind a screen of their Bugaboo Goblin-Napper brethren."
+    "source": "GM Toolkit"
   },
   {
     "name": "Bugaboo Socket-Picker",
@@ -2217,7 +2216,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Rainbow Magic—Bune Lieutenants can cast the following Spells at Rank 10, each of which has rainbow-like visual effects: Dirt Clod, Heal Critter, Hole, Magic Missile, and Shield."
     ],
     "page": 624,
-    "flavor": "Bunes are a slight dragon-like people that are naturally peaceful, unless pressed into service by an overly colorful warlord disguising herself as a bright rainbow of light here to make everyone’s lives better. They now wear garishly colorful robes and serve as Rainbow Sprite-herders while attempting to enforce the new, dizzyingly colorful agenda of their leader with as much force as necessary. On second thought, go for it. Try not to have too much fun! 623 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026. 9 Bune Lieutenant Bune Light Guard."
+    "flavor": "Bunes are a slight dragon-like people that are naturally peaceful, unless pressed into service by an overly colorful warlord disguising herself as a bright rainbow of light here to make everyone’s lives better. They now wear garishly colorful robes and serve as Rainbow Sprite-herders while attempting to enforce the new, dizzyingly colorful agenda of their leader with as much force as necessary. On second thought, go for it."
   },
   {
     "source": "Core",
@@ -2866,7 +2865,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 491,
     "source": "Core",
-    "flavor": "Cave Mudge culture involves elaborate drawnout contests to determine things like what job a Mudge should have, which Mudges should get married, and which Mudges are simply exiled from the caves. The Judges decide the winners of these contests, and the losers get insults that would make Gordon Ramsey jealous. 491 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026. 8 DRAKE BITCH Drakes are reptilian ducks the size of small ponies but shaped like waterfowl, including bills and webbed feet. Spines run down their back, and their eyes are those of serpents. Majestic dragon wings take the place of bird wings, and sharp teeth line their duck-billed mouths. Drake Bitches are covered in drab gray-green scales. Ovulated Debuff You’ve got a Drake egg inside of you! You might be able to get it out, but that won’t be pleasant. At least there’s nothing nearby that might make this condition worse… DRAKE STUD Drake Bitch. Level 22. Drakes are the bungled creations of the Tiamat, Mother of Monsters. She’s known for creating all sorts of fearsome mythic monstrosities with poisonous blood. She hopes everyone forgets that she made these. Because Drake Bitches and Drake Studs do not inhabit the same caves and rarely interact with each other, they must get creative with their mating. Drake Bitches spray clouds of tiny eggs as they go about their business, and after they move on, Drake Studs come by spraying streams of tiny sperm. If you get sprayed with both, you’re fucked."
+    "flavor": "Cave Mudge culture involves elaborate drawnout contests to determine things like what job a Mudge should have, which Mudges should get married, and which Mudges are simply exiled from the caves. The Judges decide the winners of these contests, and the losers get insults that would make Gordon Ramsey jealous."
   },
   {
     "name": "Centurion Skyfowl",
@@ -2949,7 +2948,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 342,
     "source": "Core",
-    "flavor": "Neighborhood Boss! A former centurion brawler and metalhead, he’s killed in ways that language hasn’t even invented words for yet. This one bird army—make that air force—wears no uniform, colors, or crest. His only allegiance now is to wreaking havoc on the crawlers that dare invade his lair."
+    "flavor": "A former centurion brawler and metalhead, he’s killed in ways that language hasn’t even invented words for yet. This one bird army—make that air force—wears no uniform, colors, or crest. His only allegiance now is to wreaking havoc on the crawlers that dare invade his lair."
   },
   {
     "name": "Charmed Drek",
@@ -3017,8 +3016,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Warped by Magic—During a gender reveal, Charmed Dreks can be mutated into a humanoid hybrid on the Conga Line. When this happens, they go berserk, attacking the nearest target without distinguishing friend from foe. They also grow to Medium size unless otherwise specified and gain 4 HB slots, a +1 bonus to hit, one additional damage die, and traits determined by Race."
     ],
     "page": 458,
-    "source": "Core",
-    "flavor": "Someone call the exorcist! Oh, wait—these demon babies already ate him. Maybe you’re wondering what’s the big deal? They’re only two feet tall and Level 6. Basically harmless on their own. Just like piranhas, or Literal Fire Ants, or Black Friday shoppers. Luckily for you, Drek aboard the Conga Line are part of the show, so if the party goes well—when has this Crawl ever gone off the rails?—your only concern should be whether or not they’re potty trained."
+    "source": "Core"
   },
   {
     "name": "Chef BoyardOoze",
@@ -3714,7 +3712,8 @@ export const DCC_MONSTERS: DccMonster[] = [
     "notes": [
       "Feeding Frenzy—If a shark-foe drops to 50% HB or less or gains the Blood Trail Debuff, Concierge Sharks may use their Move Action to attack."
     ],
-    "page": 572
+    "page": 572,
+    "flavor": "These psychos are of the bite-first, ask-questions-later school of underwater diplomacy. Big Boy Blue. Level 40. The good ol’ Big Boy Blue is the largest of the jellyfish one might find floating around. They’re a little like that guy you used to know in high school who was always wearing either overalls or a jersey of some sort. The dude was like six-foot-five and pushing 300 pounds when he was a freshman. He always had a crewcut. Dad’s a trucker. Never talks. Never does his homework. He’s just always, you know, kinda there. He doesn’t mean any harm. But he’s so goddamned dumb, he does harm if you get in his way. Plus, he always has a super-hot girlfriend for some reason, but that has nothing to do with the jellyfish. Anyway, you get the point. Harmless as long as you don’t touch them. Also known as the “Death’s Welcoming Committee” Shark, the Concierge Shark is one of the fastest and most voracious of the ocean’s predators. They’ll eat anything. Anything. Even those circus peanut candy things. It’s really kind of gross. They’re attracted to the scent of blood, making them the most common death dealers of any water-themed dungeon. “Statistically speaking, the sharks can’t eat all of us.” Crawler #1,197,506, Chrissie W."
   },
   {
     "name": "Concierge Wereshark",
@@ -4075,7 +4074,8 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Power Boost—Critical Consensus is a Shambling Berserker and as such is more powerful in the dark—its Stat Mod to damage is quadrupled."
     ],
     "page": 69,
-    "source": "GM Toolkit"
+    "source": "GM Toolkit",
+    "flavor": "Crawlers, congratulations. You took a heartfelt about love, food, and forced eugenics… and somehow made it worse. Meet the Critical Consensus! It’s a Shambling Berserker stitched together from the remains of twenty-six failed food influencers. Now in zombie form, they’re still doing what they did in life: chasing free meals and filming their own faces while they chew. Be warned: Like any social media presence, their public image isn’t who they are when no one’s looking. They’re slow and clumsy under bright light but four times more dangerous in darkness. So, give us your best duck face! Whether you emerge winner, winner, or chicken dinner, this battle will be immortalized in a blog post."
   },
   {
     "source": "Core",
@@ -4501,7 +4501,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 141,
     "source": "GM Toolkit",
-    "flavor": "These aren’t the cute, cuddly, baby-eating puppies from the land down under. No, mate. The Danger Dingo features a stronger body, sharper teeth, and a penchant for black metal bands such as Dimmyu Borgir and Satyricon. Where there are Dingoes, their Kobold Riders and slave masters usually aren’t far behind. 96 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "These aren’t the cute, cuddly, baby-eating puppies from the land down under. No, mate. The Danger Dingo features a stronger body, sharper teeth, and a penchant for black metal bands such as Dimmyu Borgir and Satyricon. Where there are Dingoes, their Kobold Riders and slave masters usually aren’t far behind."
   },
   {
     "name": "Demon",
@@ -5188,8 +5188,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Wall Walker—Dreks can move along vertical surfaces and upside down on ceilings as though on the ground."
     ],
     "page": 432,
-    "source": "Core",
-    "flavor": "Think of these baby-looking demon creatures a little like piranhas—if piranhas had claws and legs and could move faster than a gazelle. And just like gazelles, these things only move in herds. The more, the better! They’re weak on their own, and they know it. Thus, they make sure they’re never on their own."
+    "source": "Core"
   },
   {
     "name": "Dwarf Employee",
@@ -6048,8 +6047,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "War Mage—If a Symbiote is Re-Sleeved at least a dozen time, it becomes sapient and fuses into a single powerful being known as a War Mage."
     ],
     "page": 434,
-    "source": "Core",
-    "flavor": "No, your eyes aren’t deceiving you. That is, in fact, the bloody skin of another creature flying through the air. If it’s not coming for you, you should say a prayer for its intended target. It won’t help, but it’ll make you feel better. If it’s coming straight for you, though, you should run—if you value your own skin, that is."
+    "source": "Core"
   },
   {
     "name": "Former Circus Lemur",
@@ -6422,7 +6420,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 22,
     "source": "Par",
-    "flavor": "“He’s big, he’s mean, he’s dressed like a walking midlife crisis, and he runs the worst country club in the universe. And folks, let me tell you… the reviews are terrible. “Once upon a time, he was just another angry primate with a plumbing problem. But after one broken toilet, two unreliable plumbers, and a fourhour wait window that they never showed up for… something inside him snapped. “He enlisted, he trained, he rose through the ranks, and now he commands an army of golf-obsessed baboons. Welcome, crawlers… to the Kong Country Club Invitational. Par:1981. Course hazards include: explosive barrels and violent primates. “Play it where it lies.” 21 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026. Examples of Rosie’s Messages As the party nears the Boss fight, Rosie remembers her piece of advice, granting Advantage on the first Look for Clues check made by the crawlers."
+    "flavor": "“He’s big, he’s mean, he’s dressed like a walking midlife crisis, and he runs the worst country club in the universe. And folks, let me tell you… the reviews are terrible. “Once upon a time, he was just another angry primate with a plumbing problem. But after one broken toilet, two unreliable plumbers, and a fourhour wait window that they never showed up for… something inside him snapped. “He enlisted, he trained, he rose through the ranks, and now he commands an army of golf-obsessed baboons. Welcome, crawlers… to the Kong Country Club Invitational. Par:1981. Course hazards include: explosive barrels and violent primates. “Play it where it lies."
   },
   {
     "source": "Core",
@@ -6940,7 +6938,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Professional Courtesy—Crawlers holding a legal text in one hand roll Evade Checks with Advantage."
     ],
     "page": 548,
-    "flavor": "In the language of ancient Babylon, “girtablullu” literally means “scorpion-man.” That Tiamat couldn’t think of a better name for one of her eleven great poison-blooded monstrosities really says something about her. The lameness of that moniker is right up there with half the characters from Masters of the Universe. Dressed in a designer suit that costs more than you’ll ever make in your life, Girtablullu’s glasses make him almost seem Human if you ignore the whole giant scorpion part. From the venom dripping from his stinger, he’s probably going to make you wish your blood couldn’t feel pain. But those aren’t even the worst things about Girtablullu… He’s also Tiamat’s corporate lawyer. 547 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "In the language of ancient Babylon, “girtablullu” literally means “scorpion-man.” That Tiamat couldn’t think of a better name for one of her eleven great poison-blooded monstrosities really says something about her. The lameness of that moniker is right up there with half the characters from Masters of the Universe. Dressed in a designer suit that costs more than you’ll ever make in your life, Girtablullu’s glasses make him almost seem Human if you ignore the whole giant scorpion part. From the venom dripping from his stinger, he’s probably going to make you wish your blood couldn’t feel pain. But those aren’t even the worst things about Girtablullu… He’s also Tiamat’s corporate lawyer."
   },
   {
     "source": "Core",
@@ -8536,7 +8534,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 421,
     "source": "Core",
-    "flavor": "Neighborhood Boss Audiences came from far and wide to see one of Grimaldi’s Traveling Circus’s main attractions— Heather the Roller-Skating Bear. After a long successful career, Heather was weeks from retirement when the great cataclysm hit, ending her dreams of salmon and honey. Warped by Scolopendra’s spores, Heather is now a monstrous mockery of her old self— but if you look real close, you might see a glimpse of the real Heather and feel her shame and sorrow."
+    "flavor": "Audiences came from far and wide to see one of Grimaldi’s Traveling Circus’s main attractions— Heather the Roller-Skating Bear. After a long successful career, Heather was weeks from retirement when the great cataclysm hit, ending her dreams of salmon and honey. Warped by Scolopendra’s spores, Heather is now a monstrous mockery of her old self— but if you look real close, you might see a glimpse of the real Heather and feel her shame and sorrow."
   },
   {
     "name": "Hector",
@@ -8597,7 +8595,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     "notes": [],
     "page": 453,
     "source": "Core",
-    "flavor": "This overgrown lunch-bucket of a Dwarf looks like he just stuck a fork in an electric socket. His black hair frizzes out every which way, and smoke drifts from a dark cigar stuffed between his lips. Have you ever seen a half-roasted marshmallow? The top is kinda charred, like it was just on fire, the rest is brown, and the whole thing smells like burnt sugar? Yeah, that’s Hector. 452 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "This overgrown lunch-bucket of a Dwarf looks like he just stuck a fork in an electric socket. His black hair frizzes out every which way, and smoke drifts from a dark cigar stuffed between his lips. Have you ever seen a half-roasted marshmallow? The top is kinda charred, like it was just on fire, the rest is brown, and the whole thing smells like burnt sugar? Yeah, that’s Hector."
   },
   {
     "name": "Hide-Hitter Crib Daddy",
@@ -8680,7 +8678,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 27,
     "source": "GM Toolkit",
-    "flavor": "Neighborhood Boss! Surrounded by his troop of Scat Thugs, the HideHitter Crib Daddy knows how to keep things chill. A good rhythm section lays down any tune, and with the Hide-Hitter Crib Daddy leading the battle on the drums, you’re in for a screaming, steaming good time. Crib Daddies are masters of improvisation, unexpected timing, and ferocious violence. Their large claws are excellent for beating drums and cracking skulls. Their battle music inspires their Trash Princess fangirls to ignore their wounds and keep fighting. Attacking the Hide-Hitter Crib Daddy sends his troops into a frenzy, often leading to unexpected side effects."
+    "flavor": "Surrounded by his troop of Scat Thugs, the HideHitter Crib Daddy knows how to keep things chill. A good rhythm section lays down any tune, and with the Hide-Hitter Crib Daddy leading the battle on the drums, you’re in for a screaming, steaming good time. Crib Daddies are masters of improvisation, unexpected timing, and ferocious violence. Their large claws are excellent for beating drums and cracking skulls. Their battle music inspires their Trash Princess fangirls to ignore their wounds and keep fighting. Attacking the Hide-Hitter Crib Daddy sends his troops into a frenzy, often leading to unexpected side effects."
   },
   {
     "name": "Hissing Scatterer",
@@ -9530,7 +9528,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 503,
     "source": "Core",
-    "flavor": "Just because you put a ghoul in a polo doesn’t mean he’s any less repulsive or single-minded. Actually, given that the polo is the most single-minded article of clothing Humans ever made, I think this might be a match made in corporate hell. To be frank, I’m surprised they haven’t taken the polos off yet—it’s literally the only thing distinguishing them from normal janitors on this floor. Anyway, stay clear when they clean up messes or when they take their supplements, and you should be alright. 502 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "Just because you put a ghoul in a polo doesn’t mean he’s any less repulsive or single-minded. Actually, given that the polo is the most single-minded article of clothing Humans ever made, I think this might be a match made in corporate hell. To be frank, I’m surprised they haven’t taken the polos off yet—it’s literally the only thing distinguishing them from normal janitors on this floor. Anyway, stay clear when they clean up messes or when they take their supplements, and you should be alright."
   },
   {
     "source": "Core",
@@ -10280,7 +10278,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 108,
     "source": "GM Toolkit",
-    "flavor": "The second tier of the Rev-Up empire, these Laminak consultants don’t need to speak to a manager. They are the managers. They run their business with brutal efficiency. 107 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026. Laminak Rev-Up Consultant Manager Flight—Laminaks are fairies with wings."
+    "flavor": "The second tier of the Rev-Up empire, these Laminak consultants don’t need to speak to a manager. They are the managers. They run their business with brutal efficiency."
   },
   {
     "name": "Literal Murder Hornets",
@@ -10696,7 +10694,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Spell Bound—Lutin Priests know the following Spells at Rank 10: Heal Others, Holy Aura, Smite, Shield, and Turn Undead."
     ],
     "page": 614,
-    "flavor": "This is a Lutin of the cloth. You may notice that the cloth is very red, that’s because of the massive amount of heathen blood they’re walking through most days. These guys tend to talk more than they hit, but they can throw some serious magic around. Word of Advice: If they start making sense, run. They’re adept at enchantment magic. Almost as adept as they are at enhancing their own bodies. Ever gotten your ass beat by a priest half your size? If you don’t wanna find out, maybe try praying on your knees. It won’t stop them, but at least you can look the little guys in the eye when they blow up your head. 614 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "This is a Lutin of the cloth. You may notice that the cloth is very red, that’s because of the massive amount of heathen blood they’re walking through most days. These guys tend to talk more than they hit, but they can throw some serious magic around. Word of Advice: If they start making sense, run. They’re adept at enchantment magic. Almost as adept as they are at enhancing their own bodies. Ever gotten your ass beat by a priest half your size? If you don’t wanna find out, maybe try praying on your knees. It won’t stop them, but at least you can look the little guys in the eye when they blow up your head."
   },
   {
     "source": "Core",
@@ -11758,7 +11756,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 520,
     "source": "Core",
-    "flavor": "Borough Boss! Standing thirty feet tall with thick armored limbs and a giant shield and sword, More Dread looks like a mecha knight by way of certain Japanese model kits, but on steroids. His chrome body reflects the madness around him, and he grins with teeth made from subway cars. A hideous sight, this Voltron-gone-bad is the Boss of the bello below, the master of disaster, the warrior of the wastelands."
+    "flavor": "Standing thirty feet tall with thick armored limbs and a giant shield and sword, More Dread looks like a mecha knight by way of certain Japanese model kits, but on steroids. His chrome body reflects the madness around him, and he grins with teeth made from subway cars. A hideous sight, this Voltron-gone-bad is the Boss of the bello below, the master of disaster, the warrior of the wastelands."
   },
   {
     "name": "Neo-Maxie-Zoom-Dweebie",
@@ -11904,7 +11902,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "notes": [],
     "page": 527,
-    "flavor": "There’s something to be said for a simple design. Doesn’t get a lot simpler than a couple of big fangs, a jaw that unhinges, and a big tube of death slithering toward you like… well, like a hungry snake. And sure, most snakes are harmless. You know they’re far more scared of you than you are of them? Keep that in mind when taking your one-way trip through their digestive tract. 527 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "There’s something to be said for a simple design. Doesn’t get a lot simpler than a couple of big fangs, a jaw that unhinges, and a big tube of death slithering toward you like… well, like a hungry snake. And sure, most snakes are harmless. You know they’re far more scared of you than you are of them? Keep that in mind when taking your one-way trip through their digestive tract."
   },
   {
     "source": "Core",
@@ -12335,7 +12333,8 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Riled Up—During the first round of combat, Over City Skyfowl add their Stat Mod to damage a second time."
     ],
     "page": 336,
-    "source": "Core"
+    "source": "Core",
+    "flavor": "You know that one woman who will absolutely call the HOA on you for leaving your trash cans out fifteen minutes past pickup, then parks her SUV across two spots in the visitor section because “she needs the extra room?” Or maybe that guy who lectures a teenage cashier about the store’s non-existent pricematch guarantee while his unleashed dog pisses on the endcap display? If you do, then you know all you need to know about the Over City Skyfowl! Heavensworth is a small village in the Over City, composed mostly of two-story buildings with upper-level perches to accommodate a Skyfowl population that prefers to fly from building to building. As such, several buildings have unoccupied first floors, with business being conducted only above the ground level. For flightless creatures, rope ladders and crude elevators are available. Similar to other Skyfowl settlements in the Over City, both the construction and the administration of Heavensworth indicate a severe bias toward Skyfowl with the city magistrate, Alecturis, barely bothering with the flightless in his city. Nearly half the village was destroyed in Scolopendra’s nine-tier attack on the Over City, including the village’s temple district and constabulary buildings. The denizens of the village rarely venture out into the ruins, especially at night, due to the dangerous Mobs that roam throughout. The Village Guards routinely patrol during the day to keep the peace and prevent Mobs from the ruins from encroaching, but they retire in the evenings, leaving the streets chaotic and dangerous at night."
   },
   {
     "name": "Pack Rat",
@@ -13034,7 +13033,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     "notes": [],
     "page": 109,
     "source": "GM Toolkit",
-    "flavor": "Fueled by their abject jealousy of the Krakaren and their not-so-subtle pursuit of Rev-Up glory, these creatures despise the Empire even while wanting to join it. With fewer tentacles than the Krakaren or her clones, Pickmees are believed to be significantly safer to tangle with. 108 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "Fueled by their abject jealousy of the Krakaren and their not-so-subtle pursuit of Rev-Up glory, these creatures despise the Empire even while wanting to join it. With fewer tentacles than the Krakaren or her clones, Pickmees are believed to be significantly safer to tangle with."
   },
   {
     "source": "Core",
@@ -13270,7 +13269,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 442,
     "source": "Core",
-    "flavor": "Neighborhood Boss! Don’t let its cute, fuzzy face fool you. This adorable thing is only the public face of a much little goblin-thing moree insidious enemy. The moment you’re alone with it or the second you don’t give it what it wants, that’s when you’ll find out what it really is."
+    "flavor": "Don’t let its cute, fuzzy face fool you. This adorable thing is only the public face of a much little goblin-thing moree insidious enemy. The moment you’re alone with it or the second you don’t give it what it wants, that’s when you’ll find out what it really is."
   },
   {
     "name": "Pooka Goal Digger",
@@ -13435,7 +13434,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 503,
     "source": "Core",
-    "flavor": "I hope you’re not afraid of needles, because these jumped-up little goat goblins are definitely gonna stab you, and they don’t practice clean needle hygiene. Pooka Harmacists are what happens when you give a burgeoning serial killer a chemistry set instead of court-mandated therapy. They love devising all sorts of bizarre concoctions to inject into their victims’ bloodstreams “just to see what happens.” Haddley Luanne Montgomery. Clurichaun Aspirant Super Star. Level 55. Haddley Luanne Montgomery never found a competition she couldn’t win or a cousin she couldn’t kiss. She’s the most dangerous Clurichaun this side of the Iron Tangle, and if you get in the way of her efforts to manifest her future, she’ll stomp you into the dirt and cuss you out for not being a girl’s girl. 503 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "I hope you’re not afraid of needles, because these jumped-up little goat goblins are definitely gonna stab you, and they don’t practice clean needle hygiene. Pooka Harmacists are what happens when you give a burgeoning serial killer a chemistry set instead of court-mandated therapy. They love devising all sorts of bizarre concoctions to inject into their victims’ bloodstreams “just to see what happens.” Haddley Luanne Montgomery. Clurichaun Aspirant Super Star. Level 55. Haddley Luanne Montgomery never found a competition she couldn’t win or a cousin she couldn’t kiss. She’s the most dangerous Clurichaun this side of the Iron Tangle, and if you get in the way of her efforts to manifest her future, she’ll stomp you into the dirt and cuss you out for not being a girl’s girl."
   },
   {
     "source": "Core",
@@ -14404,7 +14403,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 41,
     "source": "GM Toolkit",
-    "flavor": "Are you afraid of rats? How about rats tall enough to look you in the eye and strong enough to break you in half? The Rat Brute is a force of raw physical power and sheer ferocity. The muscles in their jaws alone can shear through steel. These guys are deranged, too. They carry mattocks just because they like the feeling of steel slamming into flesh. On the plus side, you can always tell when they’re happy because of their bulging eyes. Just don’t ask what they’re thinking about."
+    "flavor": "Most Rat-kin are twitchy flea-bitten little cowards who would sooner shank you in the kidney than look you in the eye. Then there’s these guys. Rat Brutes are what happens when Rat-kin decide they’re tired of being pushed around. They pump themselves full of magical growth hormones and take any excuse to show off their bulging biceps. Warning: Do not try to reason with Rat Brutes. Their brains shrank to the size of a dried raisin to make room for more jaw muscles."
   },
   {
     "name": "Rat Hooligan",
@@ -14542,7 +14541,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     "notes": [],
     "page": 42,
     "source": "GM Toolkit",
-    "flavor": "Rats typically have a healthy fear of fire, just like almost everything else. Rat Shamans have a decidedly unhealthy obsession with it. As part of their training, the up-and-coming Rat Shaman must light a fire and dance through it until they have utterly lost their fear of the flame. Rats who do this and manage to avoid catching fire are clubbed to death by their classmates, as it is believed they have been rejected by the fire. Unfortunately, this means many Shamans are scarred both inside and out. You can usually hear one of these pyromaniacs coming by the heavy hacking sound of their coughs."
+    "flavor": "While the Brutes were getting jacked, the Shamans were getting weird. They spent their youth huffing toxic sewer fumes and “communing” with the Great Vermin in the Sky. But don’t let their coughing fits fool you; they somehow got real magical powers from that nonsense. They mainly launch fireballs but can also transmit plagues. Not the bubonic type—you think they bothered learning Earth history? They prefer watching reality television, so if anything, you’ll be dodging STDs."
   },
   {
     "name": "Rayzer",
@@ -15929,7 +15928,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     "notes": [],
     "page": 86,
     "source": "GM Toolkit",
-    "flavor": "If these things are around, don’t wear your Sunday best, you hear me? These nasty amalgamations love to spit acid darts with the precision of a freaking marksman. It’s their destructive capabilities that make most crawlers say “nope” and head the other direction, but if you have to fight them, take them out quickly and without mercy, or else you’re gonna go into your next area wearing nothing but your boxers. 85 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "If these things are around, don’t wear your Sunday best, you hear me? These nasty amalgamations love to spit acid darts with the precision of a freaking marksman. It’s their destructive capabilities that make most crawlers say “nope” and head the other direction, but if you have to fight them, take them out quickly and without mercy, or else you’re gonna go into your next area wearing nothing but your boxers."
   },
   {
     "name": "Shambling Berserker",
@@ -16826,8 +16825,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Silver Weakness—Silver weapons do x2 damage to Sporto Teen Wolves, bypass DR, and apply The Taint Debuff."
     ],
     "page": 383,
-    "source": "Core",
-    "flavor": "ewolves of Dungeons! Wa-hooo! Werewolves The Sporto Teen Wolves are the defending state champions in multiple team sports, and they’re here to ruff you up. These seven-foot-tall werewolves wear ter jackets that jingle like the holidays from letter all the medals they’ve won, so you’ll hear them coming, but don’t let their lack of subtlety fool you; under their coats they’ve donned game day jerseys and pads (but no pants). They’re raking the ground with their claws, waiting for that starting whistle. Hope you know how to block, nerd."
+    "source": "Core"
   },
   {
     "name": "Sprites",
@@ -16998,7 +16996,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 438,
     "source": "Core",
-    "flavor": "City Boss! These mammoth monsters have quite a lot in common with their smaller, younger cousins. However, by the time they’ve reached this Level, they’re roughly the size of a city block, with a mouth as large as the average train, and teeth bigger than the average person. While they’re essentially shapeless blobs in their normal form, they prefer to take the form of a common train station structure to lure victims in—although occasionally, if hungry enough, some of them have been known to take the form of a train to more actively hunt their victims. There are six of these creatures scattered through the Iron Tangle. These are not simply mindless beasts. They don’t speak in a way most people can hear them, but they find plenty of other ways to voice their displeasure. They’re also smart enough not to attack the first moment a crawler steps inside their mouths. Many times, they’ll wait until a crawler or a group of crawlers ventures so far into their mouths that they have no hope of leaving once again. At this size, they form up to eight prehensile tongues at once. Using them as weapons, manipulators, and, of course, tongues. Some say these mimics represent an ancient enemy of the Syndicate, but they’re clearly reading too many (entirely accurate) conspiracy theories. 437 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "These mammoth monsters have quite a lot in common with their smaller, younger cousins. However, by the time they’ve reached this Level, they’re roughly the size of a city block, with a mouth as large as the average train, and teeth bigger than the average person. While they’re essentially shapeless blobs in their normal form, they prefer to take the form of a common train station structure to lure victims in—although occasionally, if hungry enough, some of them have been known to take the form of a train to more actively hunt their victims. There are six of these creatures scattered through the Iron Tangle. These are not simply mindless beasts. They don’t speak in a way most people can hear them, but they find plenty of other ways to voice their displeasure. They’re also smart enough not to attack the first moment a crawler steps inside their mouths. Many times, they’ll wait until a crawler or a group of crawlers ventures so far into their mouths that they have no hope of leaving once again. At this size, they form up to eight prehensile tongues at once. Using them as weapons, manipulators, and, of course, tongues. Some say these mimics represent an ancient enemy of the Syndicate, but they’re clearly reading too many (entirely accurate) conspiracy theories."
   },
   {
     "name": "Stiggy, Dungeon Surveillance Architect",
@@ -17825,7 +17823,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 378,
     "source": "Core",
-    "flavor": "I’m not sure if this thing is worse than the stingray that killed Steve Irwin, but it’s pretty damn close. The Dispenser is part manta ray, part blender, and part fog machine. It’s not the only Boss in the dungeon with a splash zone, but this one comes with a mosh pit of pissed-off body parts that put Juggalos to shame. Try not to die; we would definitely mist you! 377 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "I’m not sure if this thing is worse than the stingray that killed Steve Irwin, but it’s pretty damn close. The Dispenser is part manta ray, part blender, and part fog machine. It’s not the only Boss in the dungeon with a splash zone, but this one comes with a mosh pit of pissed-off body parts that put Juggalos to shame."
   },
   {
     "name": "The Divider",
@@ -18484,7 +18482,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 512,
     "source": "Core",
-    "flavor": "You know how corporations and municipalities hire the lowest bidder to get the job done? And how sometimes that results in crappy workmanship and subpar results? Somewhere along the line, that happened, and now we’ve got the Trash Knights. These hodgepodge husks have pledged fealty to the one and true lord of the underway, More Dread. They fight without honor, though it’s arguable there’s no such thing in the aftermath of nuclear war. But they do adhere to a code—just not one that any sane creature can make out. Upon their mighty flying ostriches they ride into battle, ready to… Joust. 512 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026. 18 CHAPTER 8: THE IRON TANGLE F L O O R Trash Knight Gelatinous Boob."
+    "flavor": "You know how corporations and municipalities hire the lowest bidder to get the job done? And how sometimes that results in crappy workmanship and subpar results? Somewhere along the line, that happened, and now we’ve got the Trash Knights. These hodgepodge husks have pledged fealty to the one and true lord of the underway, More Dread. They fight without honor, though it’s arguable there’s no such thing in the aftermath of nuclear war. But they do adhere to a code—just not one that any sane creature can make out. Upon their mighty flying ostriches they ride into battle, ready to… Joust."
   },
   {
     "name": "Trash Princess",
@@ -19252,7 +19250,7 @@ export const DCC_MONSTERS: DccMonster[] = [
     ],
     "page": 335,
     "source": "Core",
-    "flavor": "Everyone likes the strong, silent type. To find out what’s underneath that helmet, you’ll have to first kill the guard. Go ahead and give it a try. I double-dog dare you. They’re tasked with protecting the village from the creatures that roam the Over City Ruins. They’re only on duty when the sun is up, so don’t go whining to them for help when it’s dark. services to the highest bidder, which is how they ended up in the World Dungeon. Grulke are ruthlessly hunted by tunnel trolls, who like to capture and lick them. Not because they impart any sort of hallucinogenic effect. It’s just that tunnel trolls are weird-ass fuckers. Grulke. Level 16. Grulke are what happens when evolution decides amphibians need opposable thumbs and an attitude problem. Don’t ever call a Grulke a frog—they’ll take it personally, and they’re mean bastards. They’re toads, and they know how to fight. Get on their bad side at your own peril, and watch out for their lashing tongues."
+    "flavor": "Everyone likes the strong, silent type. To find out what’s underneath that helmet, you first must kill the guard. Go ahead and give it a try. I double-dog dare you. They’re tasked with protecting the village from the creatures that roam the Over City Ruins. They’re only on duty when the sun is up, so don’t go whining to them for help when it’s dark."
   },
   {
     "name": "Vine Creeper",
@@ -19813,7 +19811,8 @@ export const DCC_MONSTERS: DccMonster[] = [
       }
     ],
     "notes": [],
-    "page": 527
+    "page": 527,
+    "flavor": "You know what I like about Beetles? Work ethic. They really get down to business. You crawlers are all alike: Ooooh, nooo, I’m too scared to fight. I don’t want to die. I miss my cat. Constantly procrastinating, not getting the job done. You don’t get that garbage from a Beetle. Big dumb armored tanks with legs. Get on top of one, and you can crash it into things all day long and not wear it out. I’ve even heard if you make friends with one and say its name three times, it might show up when you need it. Or was that something else? YARD MANTIS Yard Mantises lurk where the Grass Jungle is thickest, moving in silent packs and striking without warning. These perfect predators hide among tall grass stems, their green-and-brown bodies blending easily with the foliage. They use the whole environment to their advantage, ambushing from above and below. Once they identify a meal, their raptorial forelegs snap out with blinding speed and enough power to crush bones, dragging the unfortunate victim toward mandibles capable of dismembering even the toughest of prey. Yard Mantis. Level 45. I had thousands of bugs to choose from when I built this Neighborhood. Tens of thousands. And I absolutely filled the yard with Mantises. I just like the juxtaposition, you know? They’re so still and patient. All calm and polite, hands folded like they’re praying and waiting for church to start. Then BAM! They grab some little old lady from a pew across the way, and before you know it, they’re munching on her head while her body’s cooling next to a spilled plate of those little wafers."
   },
   {
     "source": "Core",
@@ -19883,7 +19882,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       "Sudden Burst—Any Mantis that is not surprised can travel twice its Move in the first round of combat."
     ],
     "page": 528,
-    "flavor": "I had thousands of bugs to choose from when I built this Neighborhood. Tens of thousands. And I absolutely filled the yard with Mantises. I just like the juxtaposition, you know? They’re so still and patient. All calm and polite, hands folded like they’re praying and waiting for church to start. Then BAM! They grab some little old lady from a pew across the way, and before you know it, they’re munching on her head while her body’s cooling next to a spilled plate of those little wafers. Maybe now you wanna start praying, too, eh? 528 Copyright Renegade Game Studios. Unauthorized distribution prohibited. 08/25/2026."
+    "flavor": "I had thousands of bugs to choose from when I built this Neighborhood. Tens of thousands. And I absolutely filled the yard with Mantises. I just like the juxtaposition, you know? They’re so still and patient. All calm and polite, hands folded like they’re praying and waiting for church to start. Then BAM! They grab some little old lady from a pew across the way, and before you know it, they’re munching on her head while her body’s cooling next to a spilled plate of those little wafers."
   },
   {
     "source": "Core",
@@ -19951,6 +19950,7 @@ export const DCC_MONSTERS: DccMonster[] = [
       }
     ],
     "notes": [],
-    "page": 528
+    "page": 528,
+    "flavor": "I can’t understand why Humans don’t like these things. What’s not to like? They’re quick and efficient. They come up with so many approaches to finding dinner, it’s wild. Sure, they can’t agree on webs, hidey holes, or just striking out like an eight-legged serial killer, but at thee end of the day, they all make it work. And did you know their legs use hydraulics? They’re like tiny little murder machines! No rolled-up newspaper is gonna save you this time, bucko."
   }
 ];

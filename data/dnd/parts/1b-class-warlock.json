@@ -1,0 +1,107 @@
+{
+  "_note": "Warlock (2024), Pact Magic caster (tables.pactMagic). Base class + Fiend Patron are SRD 5.2 (CC-BY); Archfey / Celestial / Great Old One are mechanics + original descriptions.",
+  "classes": [
+    {
+      "name": "Warlock",
+      "primaryAbility": ["CHA"],
+      "hitDie": 8,
+      "savingThrows": ["WIS", "CHA"],
+      "proficiencies": {
+        "armor": ["Light armor"],
+        "weapons": ["Simple weapons"],
+        "tools": [],
+        "skillsChoose": 2,
+        "skillsFrom": ["Arcana", "Deception", "History", "Intimidation", "Investigation", "Nature", "Religion"]
+      },
+      "startingEquipment": ["Leather Armor, Sickle, 2 Daggers, Arcane Focus (Orb), Book (Occult Lore), Scholar's Pack, 15 GP", "or 100 GP"],
+      "spellcasting": "pact",
+      "spellcastingAbility": "CHA",
+      "subclassLevel": 3,
+      "subclassLabel": "Warlock Subclass",
+      "flavor": "A caster bound to an otherworldly patron, wielding a small set of hard-hitting slots that recharge on a Short Rest, endlessly customized by Eldritch Invocations.",
+      "source": "srd",
+      "table": [
+        { "level": 1,  "profBonus": 2, "features": ["Pact Magic", "Eldritch Invocations"], "cantripsKnown": 2, "columns": { "Cantrips": "2", "Prepared Spells": "2", "Invocations": "1" } },
+        { "level": 2,  "profBonus": 2, "features": ["Magical Cunning"], "cantripsKnown": 2, "columns": { "Cantrips": "2", "Prepared Spells": "3", "Invocations": "3" } },
+        { "level": 3,  "profBonus": 2, "features": ["Warlock Subclass"], "cantripsKnown": 2, "columns": { "Cantrips": "2", "Prepared Spells": "4", "Invocations": "3" } },
+        { "level": 4,  "profBonus": 2, "features": ["Ability Score Improvement"], "cantripsKnown": 3, "columns": { "Cantrips": "3", "Prepared Spells": "5", "Invocations": "3" } },
+        { "level": 5,  "profBonus": 3, "features": [], "cantripsKnown": 3, "columns": { "Cantrips": "3", "Prepared Spells": "6", "Invocations": "5" } },
+        { "level": 6,  "profBonus": 3, "features": ["Subclass Feature"], "cantripsKnown": 3, "columns": { "Cantrips": "3", "Prepared Spells": "7", "Invocations": "5" } },
+        { "level": 7,  "profBonus": 3, "features": [], "cantripsKnown": 3, "columns": { "Cantrips": "3", "Prepared Spells": "8", "Invocations": "6" } },
+        { "level": 8,  "profBonus": 3, "features": ["Ability Score Improvement"], "cantripsKnown": 3, "columns": { "Cantrips": "3", "Prepared Spells": "9", "Invocations": "6" } },
+        { "level": 9,  "profBonus": 4, "features": ["Contact Patron"], "cantripsKnown": 3, "columns": { "Cantrips": "3", "Prepared Spells": "10", "Invocations": "7" } },
+        { "level": 10, "profBonus": 4, "features": ["Subclass Feature"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "10", "Invocations": "7" } },
+        { "level": 11, "profBonus": 4, "features": ["Mystic Arcanum (Level 6 Spell)"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "11", "Invocations": "7" } },
+        { "level": 12, "profBonus": 4, "features": ["Ability Score Improvement"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "11", "Invocations": "8" } },
+        { "level": 13, "profBonus": 5, "features": ["Mystic Arcanum (Level 7 Spell)"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "12", "Invocations": "8" } },
+        { "level": 14, "profBonus": 5, "features": ["Subclass Feature"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "12", "Invocations": "8" } },
+        { "level": 15, "profBonus": 5, "features": ["Mystic Arcanum (Level 8 Spell)"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "13", "Invocations": "9" } },
+        { "level": 16, "profBonus": 5, "features": ["Ability Score Improvement"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "13", "Invocations": "9" } },
+        { "level": 17, "profBonus": 6, "features": ["Mystic Arcanum (Level 9 Spell)"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "14", "Invocations": "9" } },
+        { "level": 18, "profBonus": 6, "features": [], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "14", "Invocations": "10" } },
+        { "level": 19, "profBonus": 6, "features": ["Epic Boon"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "15", "Invocations": "10" } },
+        { "level": 20, "profBonus": 6, "features": ["Eldritch Master"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "15", "Invocations": "10" } }
+      ],
+      "features": [
+        { "name": "Pact Magic", "level": 1, "source": "srd", "description": "You cast Warlock spells using Charisma. Your spell slots are all the same level (rising to level 5) and few in number, and you regain them on a Short or Long Rest. You prepare a small list (shown on the table) plus cantrips. Save DC is 8 + Charisma modifier + proficiency bonus. You can use an Arcane Focus." },
+        { "name": "Eldritch Invocations", "level": 1, "source": "srd", "description": "You learn Eldritch Invocations — magical customizations that grant new abilities, alter your Eldritch Blast, or forge a pact with a weapon (Pact of the Blade), tome (Pact of the Tome), or familiar (Pact of the Chain). You learn more as you level (shown on the table) and can swap them when you level up." },
+        { "name": "Magical Cunning", "level": 2, "source": "srd", "description": "Once per Long Rest you can perform a 1-minute ritual to regain expended Pact Magic spell slots (up to half your maximum, rounded up)." },
+        { "name": "Contact Patron", "level": 9, "source": "srd", "description": "You always have the Contact Other Plane spell prepared, and you can cast it to contact your patron without risk of harm, once per Long Rest without a slot." },
+        { "name": "Mystic Arcanum", "level": 11, "source": "srd", "description": "You gain a level 6 spell of your choice from the Warlock list as an Arcanum; you can cast it once per Long Rest without a spell slot. You gain a level 7 Arcanum at 13th, level 8 at 15th, and level 9 at 17th level." },
+        { "name": "Ability Score Improvement", "level": 4, "source": "srd", "description": "Increase one ability score by 2, or two by 1 (max 20), or take a feat. Repeats at 8th, 12th, and 16th level." },
+        { "name": "Epic Boon", "level": 19, "source": "srd", "description": "You gain an Epic Boon feat or another feat you qualify for. Boon of Fate is a fitting choice." },
+        { "name": "Eldritch Master", "level": 20, "source": "srd", "description": "You can take a Magic action to regain all your expended Pact Magic spell slots. Once per Long Rest." }
+      ],
+      "subclasses": [
+        {
+          "name": "Fiend Patron",
+          "className": "Warlock",
+          "flavor": "A pact with a devil or demon of the Lower Planes, rewarding slaughter with vitality and infernal luck.",
+          "source": "srd",
+          "features": [
+            { "name": "Dark One's Blessing", "level": 3, "subclass": "Fiend Patron", "source": "srd", "description": "You gain Fiend spells always prepared (Burning Hands, Command, and more). When you reduce a creature to 0 HP, or one dies near you, you gain Temporary HP equal to your Charisma modifier + Warlock level." },
+            { "name": "Dark One's Own Luck", "level": 6, "subclass": "Fiend Patron", "source": "srd", "description": "When you make an ability check or saving throw, you can add 1d10 to it after seeing the roll. Uses equal to your Charisma modifier per Long Rest." },
+            { "name": "Fiendish Resilience", "level": 10, "subclass": "Fiend Patron", "source": "srd", "description": "After a Short or Long Rest, choose a damage type; you have Resistance to it until you choose a different one (except damage from Silvered or Magical weapons)." },
+            { "name": "Hurl Through Hell", "level": 14, "subclass": "Fiend Patron", "source": "srd", "description": "Once per turn when you hit a creature with an attack, you can banish it on a hellish journey; at the start of your next turn it returns and takes heavy Psychic damage. Uses equal to your proficiency bonus per Long Rest." }
+          ]
+        },
+        {
+          "name": "Archfey Patron",
+          "className": "Warlock",
+          "flavor": "A bargain with a lord or lady of the Feywild — misty steps, beguiling wards, and fey-touched trickery.",
+          "source": "phb",
+          "features": [
+            { "name": "Steps of the Fey", "level": 3, "subclass": "Archfey Patron", "source": "phb", "description": "You gain Archfey spells and can cast Misty Step without a slot a number of times per Long Rest; each casting also grants a Refreshing Step (Temporary HP) or Taunting Step (nearby enemies have Disadvantage attacking others)." },
+            { "name": "Misty Escape", "level": 6, "subclass": "Archfey Patron", "source": "phb", "description": "When you take damage, you can use a Reaction to turn Invisible and teleport up to 60 feet (part of your Steps of the Fey), gaining Advantage on your next attack." },
+            { "name": "Beguiling Defenses", "level": 10, "subclass": "Archfey Patron", "source": "phb", "description": "You're immune to the Charmed condition, and when a creature tries to Charm you, you can use a Reaction to turn the effect back on it (a Wisdom save or be Charmed and take Psychic damage each turn)." },
+            { "name": "Bewitching Magic", "level": 14, "subclass": "Archfey Patron", "source": "phb", "description": "When you cast an Enchantment or Illusion spell of level 1+ using a spell slot, you can immediately cast Misty Step as part of the same action, without expending a use." }
+          ]
+        },
+        {
+          "name": "Celestial Patron",
+          "className": "Warlock",
+          "flavor": "A pact with a being of the Upper Planes, channeling radiant power to heal allies and scour the wicked.",
+          "source": "phb",
+          "features": [
+            { "name": "Healing Light", "level": 3, "subclass": "Celestial Patron", "source": "phb", "description": "You gain Celestial spells and the Light and Sacred Flame cantrips. You have a pool of d6 healing dice (equal to 1 + your Warlock level) that you can spend as a Bonus Action to restore a creature's HP; the pool refreshes on a Long Rest." },
+            { "name": "Radiant Soul", "level": 6, "subclass": "Celestial Patron", "source": "phb", "description": "You have Resistance to Radiant damage, and once per turn you add your Charisma modifier to one Radiant or Fire damage roll of a spell you cast." },
+            { "name": "Celestial Resilience", "level": 10, "subclass": "Celestial Patron", "source": "phb", "description": "You gain Temporary HP when you finish a Short or Long Rest, and can share Temporary HP with allies." },
+            { "name": "Searing Vengeance", "level": 14, "subclass": "Celestial Patron", "source": "phb", "description": "When you would make a Death Saving Throw, you can instead spring back up with HP and radiant power, dealing Radiant damage to and Blinding nearby enemies. Once per Long Rest." }
+          ]
+        },
+        {
+          "name": "Great Old One Patron",
+          "className": "Warlock",
+          "flavor": "A pact with an incomprehensible entity of the Far Realm — telepathy, mind-rending magic, and psychic dominion.",
+          "source": "phb",
+          "features": [
+            { "name": "Awakened Mind", "level": 3, "subclass": "Great Old One Patron", "source": "phb", "description": "You gain Psychic spells and can telepathically speak with any creature you can see within 30 feet. You also gain Whispers of the Grave (cast Detect Thoughts a number of times per Long Rest) and Tongue of the Void." },
+            { "name": "Psychic Spells", "level": 6, "subclass": "Great Old One Patron", "source": "phb", "description": "When you cast a Warlock spell that deals damage, you can change its damage type to Psychic, and Enchantment/Illusion spells can be cast without Verbal or Somatic components." },
+            { "name": "Clairvoyant Combatant", "level": 10, "subclass": "Great Old One Patron", "source": "phb", "description": "When you telepathically speak to a creature, you can force a Wisdom save; on a failure it has Disadvantage on attacks against you and you have Advantage against it for 1 minute. Once per Short or Long Rest." },
+            { "name": "Create Thrall", "level": 14, "subclass": "Great Old One Patron", "source": "phb", "description": "You can cast Summon Aberration without a slot once per Long Rest, and you can Charm an Incapacitated creature you touch, making it your psychically bound thrall." }
+          ]
+        }
+      ]
+    }
+  ]
+}

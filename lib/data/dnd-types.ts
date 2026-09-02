@@ -98,7 +98,7 @@ export interface DndClass {
   source: DndSource;
 }
 
-export type DndCasterType = "full" | "half" | "third" | "pact" | "none";
+export type DndCasterType = "full" | "half" | "third" | "pact" | "artificer" | "none";
 
 // ── Species (races) & backgrounds ─────────────────────────────────────────
 export interface DndSpeciesTrait {
