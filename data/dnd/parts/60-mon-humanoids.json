@@ -1,0 +1,984 @@
+{
+  "_note": "D&D bestiary — Humanoids. Mechanical stats accurate; trait narration original.",
+  "monsters": [
+    {
+      "name": "Goblin",
+      "size": "Small",
+      "type": "Humanoid (Goblinoid)",
+      "alignment": "Neutral Evil",
+      "ac": 15,
+      "acNote": "(leather armor, shield)",
+      "hp": 7,
+      "hpFormula": "7 (2d6)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 8, "DEX": 14, "CON": 10, "INT": 10, "WIS": 8, "CHA": 8 },
+      "skills": "Stealth +6",
+      "senses": "Darkvision 60 ft., Passive Perception 9",
+      "languages": "Common, Goblin",
+      "cr": "1/4",
+      "xp": 50,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Nimble Escape", "description": "As a bonus action on each of its turns, the goblin can slip away by taking the Disengage or Hide action." }
+      ],
+      "actions": [
+        { "name": "Scimitar", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage." },
+        { "name": "Shortbow", "description": "Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6 + 2) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Goblin Boss",
+      "size": "Small",
+      "type": "Humanoid (Goblinoid)",
+      "alignment": "Neutral Evil",
+      "ac": 17,
+      "acNote": "(chain shirt, shield)",
+      "hp": 21,
+      "hpFormula": "21 (6d6)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 10, "DEX": 14, "CON": 10, "INT": 10, "WIS": 8, "CHA": 10 },
+      "skills": "Stealth +6",
+      "senses": "Darkvision 60 ft., Passive Perception 9",
+      "languages": "Common, Goblin",
+      "cr": "1",
+      "xp": 200,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Nimble Escape", "description": "As a bonus action on each of its turns, the boss can take the Disengage or Hide action." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The goblin makes two attacks with its scimitar. The second attack is made with disadvantage." },
+        { "name": "Scimitar", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) slashing damage." },
+        { "name": "Javelin", "description": "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing damage." }
+      ],
+      "reactions": [
+        { "name": "Redirect Attack", "description": "When a creature the boss can see targets it with an attack, the boss picks a goblin within 5 feet; the two swap places and that goblin becomes the target instead." }
+      ],
+      "group": "Humanoids",
+      "source": "mm"
+    },
+    {
+      "name": "Hobgoblin",
+      "size": "Medium",
+      "type": "Humanoid (Goblinoid)",
+      "alignment": "Lawful Evil",
+      "ac": 18,
+      "acNote": "(chain mail, shield)",
+      "hp": 11,
+      "hpFormula": "11 (2d8 + 2)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 13, "DEX": 12, "CON": 12, "INT": 10, "WIS": 10, "CHA": 9 },
+      "senses": "Darkvision 60 ft., Passive Perception 10",
+      "languages": "Common, Goblin",
+      "cr": "1/2",
+      "xp": 100,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Martial Advantage", "description": "Once per turn, the hobgoblin deals an extra 7 (2d6) damage to a target it hits with a weapon attack if an ally of the hobgoblin is within 5 feet of that target and isn't incapacitated." }
+      ],
+      "actions": [
+        { "name": "Longsword", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 5 (1d8 + 1) slashing damage, or 6 (1d10 + 1) slashing damage if used with two hands." },
+        { "name": "Longbow", "description": "Ranged Weapon Attack: +3 to hit, range 150/600 ft., one target. Hit: 5 (1d8 + 1) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Bugbear",
+      "size": "Medium",
+      "type": "Humanoid (Goblinoid)",
+      "alignment": "Chaotic Evil",
+      "ac": 16,
+      "acNote": "(hide armor, shield)",
+      "hp": 27,
+      "hpFormula": "27 (5d8 + 5)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 15, "DEX": 14, "CON": 13, "INT": 8, "WIS": 11, "CHA": 9 },
+      "skills": "Stealth +6, Survival +2",
+      "senses": "Darkvision 60 ft., Passive Perception 10",
+      "languages": "Common, Goblin",
+      "cr": "1",
+      "xp": 200,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Brute", "description": "The bugbear rolls one extra die of damage whenever it hits with a melee weapon (already included below)." },
+        { "name": "Surprise Attack", "description": "If the bugbear catches a creature off guard in the first round of combat, that target takes an extra 7 (2d6) damage from any attack the bugbear lands against it." }
+      ],
+      "actions": [
+        { "name": "Morningstar", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 11 (2d8 + 2) piercing damage." },
+        { "name": "Javelin", "description": "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 9 (2d6 + 2) piercing damage in melee or 5 (1d6 + 2) piercing damage at range." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Kobold",
+      "size": "Small",
+      "type": "Humanoid (Kobold)",
+      "alignment": "Lawful Evil",
+      "ac": 12,
+      "hp": 5,
+      "hpFormula": "5 (2d6 - 2)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 7, "DEX": 15, "CON": 9, "INT": 8, "WIS": 7, "CHA": 8 },
+      "senses": "Darkvision 60 ft., Passive Perception 8",
+      "languages": "Common, Draconic",
+      "cr": "1/8",
+      "xp": 25,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Sunlight Sensitivity", "description": "In direct sunlight the kobold has disadvantage on attack rolls and on Wisdom (Perception) checks that rely on sight." },
+        { "name": "Pack Tactics", "description": "The kobold attacks with advantage against any creature that has at least one of the kobold's allies within 5 feet of it and not incapacitated." }
+      ],
+      "actions": [
+        { "name": "Dagger", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 4 (1d4 + 2) piercing damage." },
+        { "name": "Sling", "description": "Ranged Weapon Attack: +4 to hit, range 30/120 ft., one target. Hit: 4 (1d4 + 2) bludgeoning damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Orc",
+      "size": "Medium",
+      "type": "Humanoid (Orc)",
+      "alignment": "Chaotic Evil",
+      "ac": 13,
+      "acNote": "(hide armor)",
+      "hp": 15,
+      "hpFormula": "15 (2d8 + 6)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 16, "DEX": 12, "CON": 16, "INT": 7, "WIS": 11, "CHA": 10 },
+      "skills": "Intimidation +2",
+      "senses": "Darkvision 60 ft., Passive Perception 10",
+      "languages": "Common, Orc",
+      "cr": "1/2",
+      "xp": 100,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Aggressive", "description": "As a bonus action, the orc can dash straight toward an enemy it can see, moving up to its speed." }
+      ],
+      "actions": [
+        { "name": "Greataxe", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 9 (1d12 + 3) slashing damage." },
+        { "name": "Javelin", "description": "Melee or Ranged Weapon Attack: +5 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 6 (1d6 + 3) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Orc War Chief",
+      "size": "Medium",
+      "type": "Humanoid (Orc)",
+      "alignment": "Chaotic Evil",
+      "ac": 16,
+      "acNote": "(chain mail)",
+      "hp": 93,
+      "hpFormula": "93 (11d8 + 44)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 18, "DEX": 12, "CON": 18, "INT": 11, "WIS": 11, "CHA": 16 },
+      "savingThrows": "Str +6, Con +6, Wis +2",
+      "senses": "Darkvision 60 ft., Passive Perception 10",
+      "languages": "Common, Orc",
+      "cr": "4",
+      "xp": 1100,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Aggressive", "description": "As a bonus action, the war chief can rush up to its speed straight toward an enemy it can see." },
+        { "name": "Gruumsh's Fury", "description": "The war chief's weapon attacks deal an extra 4 (1d8) damage, granted by its god of war (included below)." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The war chief makes two greataxe attacks, or two spear attacks." },
+        { "name": "Greataxe", "description": "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 10 (1d12 + 4) slashing damage plus 4 (1d8) slashing damage." },
+        { "name": "Spear", "description": "Melee or Ranged Weapon Attack: +6 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 7 (1d6 + 4) piercing damage plus 4 (1d8) piercing damage, or 8 (1d8 + 4) piercing damage plus 4 (1d8) piercing damage if used with two hands to make a melee attack." }
+      ],
+      "group": "Humanoids",
+      "source": "mm"
+    },
+    {
+      "name": "Gnoll",
+      "size": "Medium",
+      "type": "Humanoid (Gnoll)",
+      "alignment": "Chaotic Evil",
+      "ac": 15,
+      "acNote": "(hide armor, shield)",
+      "hp": 22,
+      "hpFormula": "22 (5d8)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 14, "DEX": 12, "CON": 11, "INT": 6, "WIS": 10, "CHA": 7 },
+      "senses": "Darkvision 60 ft., Passive Perception 10",
+      "languages": "Gnoll",
+      "cr": "1/2",
+      "xp": 100,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Rampage", "description": "When it drops a creature to 0 hit points with a melee attack, the gnoll can use a bonus action to move up to half its speed and make a bite attack." }
+      ],
+      "actions": [
+        { "name": "Bite", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one creature. Hit: 4 (1d4 + 2) piercing damage." },
+        { "name": "Spear", "description": "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 5 (1d6 + 2) piercing damage, or 6 (1d8 + 2) piercing damage if used with two hands to make a melee attack." },
+        { "name": "Longbow", "description": "Ranged Weapon Attack: +3 to hit, range 150/600 ft., one target. Hit: 5 (1d8 + 1) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Bandit",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Non-Lawful",
+      "ac": 12,
+      "acNote": "(leather armor)",
+      "hp": 11,
+      "hpFormula": "11 (2d8 + 2)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 11, "DEX": 12, "CON": 12, "INT": 10, "WIS": 10, "CHA": 10 },
+      "senses": "Passive Perception 10",
+      "languages": "Any one language (usually Common)",
+      "cr": "1/8",
+      "xp": 25,
+      "proficiencyBonus": 2,
+      "traits": [],
+      "actions": [
+        { "name": "Scimitar", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 4 (1d6 + 1) slashing damage." },
+        { "name": "Light Crossbow", "description": "Ranged Weapon Attack: +3 to hit, range 80/320 ft., one target. Hit: 5 (1d8 + 1) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Bandit Captain",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Non-Lawful",
+      "ac": 15,
+      "acNote": "(studded leather)",
+      "hp": 65,
+      "hpFormula": "65 (10d8 + 20)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 15, "DEX": 16, "CON": 14, "INT": 14, "WIS": 11, "CHA": 14 },
+      "savingThrows": "Str +4, Dex +5, Wis +2",
+      "skills": "Athletics +4, Deception +4",
+      "senses": "Passive Perception 10",
+      "languages": "Any two languages",
+      "cr": "2",
+      "xp": 450,
+      "proficiencyBonus": 2,
+      "traits": [],
+      "actions": [
+        { "name": "Multiattack", "description": "The captain makes three melee attacks: two with its scimitar and one with its dagger. Or it makes two ranged attacks with its daggers." },
+        { "name": "Scimitar", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 6 (1d6 + 3) slashing damage." },
+        { "name": "Dagger", "description": "Melee or Ranged Weapon Attack: +5 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 5 (1d4 + 3) piercing damage." }
+      ],
+      "reactions": [
+        { "name": "Parry", "description": "The captain adds 2 to its AC against one melee attack that would hit it, provided it can see the attacker and is wielding a melee weapon." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Guard",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 16,
+      "acNote": "(chain shirt, shield)",
+      "hp": 11,
+      "hpFormula": "11 (2d8 + 2)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 13, "DEX": 12, "CON": 12, "INT": 10, "WIS": 11, "CHA": 10 },
+      "skills": "Perception +2",
+      "senses": "Passive Perception 12",
+      "languages": "Any one language (usually Common)",
+      "cr": "1/8",
+      "xp": 25,
+      "proficiencyBonus": 2,
+      "traits": [],
+      "actions": [
+        { "name": "Spear", "description": "Melee or Ranged Weapon Attack: +3 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 + 1) piercing damage, or 5 (1d8 + 1) piercing damage if used with two hands to make a melee attack." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Knight",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 18,
+      "acNote": "(plate armor)",
+      "hp": 52,
+      "hpFormula": "52 (8d8 + 16)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 16, "DEX": 11, "CON": 14, "INT": 11, "WIS": 11, "CHA": 15 },
+      "savingThrows": "Con +4, Wis +2",
+      "senses": "Passive Perception 10",
+      "languages": "Any one language (usually Common)",
+      "cr": "3",
+      "xp": 700,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Brave", "description": "The knight has advantage on saving throws against being frightened." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The knight makes two melee attacks." },
+        { "name": "Greatsword", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 10 (2d6 + 3) slashing damage." },
+        { "name": "Heavy Crossbow", "description": "Ranged Weapon Attack: +2 to hit, range 100/400 ft., one target. Hit: 5 (1d10) piercing damage." },
+        { "name": "Leadership (Recharges after a Short or Long Rest)", "description": "For 1 minute, the knight can utter a special command or warning whenever a nonhostile creature it can see within 30 feet makes an attack roll or saving throw; that creature adds a d4 to the roll, provided it can hear and understand the knight. The knight can use this only while not incapacitated, and a creature can benefit from just one Leadership die at a time." }
+      ],
+      "reactions": [
+        { "name": "Parry", "description": "The knight adds 2 to its AC against one melee attack that would hit it, provided it can see the attacker and is wielding a melee weapon." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Cultist",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Non-Good",
+      "ac": 12,
+      "acNote": "(leather armor)",
+      "hp": 9,
+      "hpFormula": "9 (2d8)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 11, "DEX": 12, "CON": 10, "INT": 10, "WIS": 11, "CHA": 10 },
+      "skills": "Deception +2, Religion +2",
+      "senses": "Passive Perception 10",
+      "languages": "Any one language (usually Common)",
+      "cr": "1/8",
+      "xp": 25,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Dark Devotion", "description": "The cultist's fanaticism grants it advantage on saving throws against being charmed or frightened." }
+      ],
+      "actions": [
+        { "name": "Scimitar", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 4 (1d6 + 1) slashing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Cult Fanatic",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Non-Good",
+      "ac": 13,
+      "acNote": "(leather armor)",
+      "hp": 33,
+      "hpFormula": "33 (6d8 + 6)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 11, "DEX": 14, "CON": 12, "INT": 10, "WIS": 13, "CHA": 14 },
+      "skills": "Deception +4, Persuasion +4, Religion +2",
+      "senses": "Passive Perception 11",
+      "languages": "Any one language (usually Common)",
+      "cr": "2",
+      "xp": 450,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Dark Devotion", "description": "The fanatic's zeal gives it advantage on saving throws against being charmed or frightened." },
+        { "name": "Spellcasting", "description": "The fanatic is a 4th-level spellcaster using Wisdom (spell save DC 11, +3 to hit with spell attacks). It knows the following cleric spells: Cantrips — light, mage hand, thaumaturgy; 1st level (4 slots) — command, inflict wounds, shield of faith; 2nd level (3 slots) — hold person, spiritual weapon." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The fanatic makes two melee attacks." },
+        { "name": "Dagger", "description": "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 20/60 ft., one creature. Hit: 4 (1d4 + 2) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Acolyte",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 10,
+      "hp": 9,
+      "hpFormula": "9 (2d8)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 10, "DEX": 10, "CON": 10, "INT": 10, "WIS": 14, "CHA": 11 },
+      "skills": "Medicine +4, Religion +2",
+      "senses": "Passive Perception 12",
+      "languages": "Any one language (usually Common)",
+      "cr": "1/4",
+      "xp": 50,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Spellcasting", "description": "The acolyte is a 1st-level spellcaster using Wisdom (spell save DC 12, +4 to hit with spell attacks). It has access to the following cleric spells: Cantrips — light, sacred flame, thaumaturgy; 1st level (3 slots) — bless, cure wounds, sanctuary." }
+      ],
+      "actions": [
+        { "name": "Club", "description": "Melee Weapon Attack: +2 to hit, reach 5 ft., one target. Hit: 2 (1d4) bludgeoning damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Priest",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 13,
+      "acNote": "(chain shirt)",
+      "hp": 27,
+      "hpFormula": "27 (5d8 + 5)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 10, "DEX": 10, "CON": 12, "INT": 13, "WIS": 16, "CHA": 13 },
+      "skills": "Medicine +7, Persuasion +3, Religion +4",
+      "senses": "Passive Perception 13",
+      "languages": "Any two languages",
+      "cr": "2",
+      "xp": 450,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Divine Eminence", "description": "As a bonus action, the priest can expend a spell slot to make its melee weapon strike sear with holy power, dealing an extra 10 (3d6) radiant damage on a hit. A slot of 2nd level or higher adds 1d6 for each level above 1st, up to 5d6." },
+        { "name": "Spellcasting", "description": "The priest is a 5th-level spellcaster using Wisdom (spell save DC 13, +5 to hit with spell attacks). It has the following cleric spells prepared: Cantrips — light, sacred flame, thaumaturgy; 1st level (4 slots) — cure wounds, guiding bolt, sanctuary; 2nd level (3 slots) — lesser restoration, spiritual weapon; 3rd level (2 slots) — dispel magic, spirit guardians." }
+      ],
+      "actions": [
+        { "name": "Mace", "description": "Melee Weapon Attack: +2 to hit, reach 5 ft., one target. Hit: 3 (1d6) bludgeoning damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Mage",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 12,
+      "acNote": "(15 with mage armor)",
+      "hp": 40,
+      "hpFormula": "40 (9d8)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 9, "DEX": 14, "CON": 11, "INT": 17, "WIS": 12, "CHA": 11 },
+      "savingThrows": "Int +6, Wis +4",
+      "skills": "Arcana +6, History +6",
+      "senses": "Passive Perception 11",
+      "languages": "Any four languages",
+      "cr": "6",
+      "xp": 2300,
+      "proficiencyBonus": 3,
+      "traits": [
+        { "name": "Spellcasting", "description": "The mage is a 9th-level spellcaster using Intelligence (spell save DC 14, +6 to hit with spell attacks). It has the following wizard spells prepared: Cantrips — fire bolt, light, mage hand, prestidigitation; 1st level (4 slots) — detect magic, mage armor, magic missile, shield; 2nd level (3 slots) — misty step, suggestion; 3rd level (3 slots) — counterspell, fireball, fly; 4th level (3 slots) — greater invisibility, ice storm; 5th level (1 slot) — cone of cold." }
+      ],
+      "actions": [
+        { "name": "Dagger", "description": "Melee or Ranged Weapon Attack: +5 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d4 + 2) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Archmage",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 12,
+      "acNote": "(15 with mage armor)",
+      "hp": 99,
+      "hpFormula": "99 (18d8 + 18)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 10, "DEX": 14, "CON": 12, "INT": 20, "WIS": 15, "CHA": 16 },
+      "savingThrows": "Int +9, Wis +6",
+      "skills": "Arcana +13, History +13",
+      "damageResistances": "damage from spells; nonmagical bludgeoning, piercing, and slashing (from stoneskin)",
+      "senses": "Passive Perception 12",
+      "languages": "Any six languages",
+      "cr": "12",
+      "xp": 8400,
+      "proficiencyBonus": 4,
+      "traits": [
+        { "name": "Magic Resistance", "description": "The archmage rolls with advantage on saving throws against spells and other magical effects." },
+        { "name": "Spellcasting", "description": "The archmage is an 18th-level spellcaster using Intelligence (spell save DC 17, +9 to hit with spell attacks). It can cast disguise self and invisibility at will and has the following wizard spells prepared: Cantrips — fire bolt, light, mage hand, prestidigitation, shocking grasp; 1st level (4 slots) — detect magic, identify, mage armor, magic missile; 2nd level (3 slots) — detect thoughts, mirror image, misty step; 3rd level (3 slots) — counterspell, fly, lightning bolt; 4th level (3 slots) — banishment, fire shield, stoneskin; 5th level (3 slots) — cone of cold, scrying, wall of force; 6th level (1 slot) — globe of invulnerability; 7th level (1 slot) — teleport; 8th level (1 slot) — mind blank; 9th level (1 slot) — time stop." }
+      ],
+      "actions": [
+        { "name": "Dagger", "description": "Melee or Ranged Weapon Attack: +6 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d4 + 2) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Assassin",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Non-Good",
+      "ac": 15,
+      "acNote": "(studded leather)",
+      "hp": 78,
+      "hpFormula": "78 (12d8 + 24)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 11, "DEX": 16, "CON": 14, "INT": 13, "WIS": 11, "CHA": 10 },
+      "savingThrows": "Dex +6, Int +4",
+      "skills": "Acrobatics +6, Deception +3, Perception +3, Stealth +9",
+      "damageResistances": "poison",
+      "senses": "Passive Perception 13",
+      "languages": "Thieves' cant plus any two languages",
+      "cr": "8",
+      "xp": 3900,
+      "proficiencyBonus": 3,
+      "traits": [
+        { "name": "Assassinate", "description": "During its first turn, the assassin has advantage on attack rolls against any creature that hasn't yet taken a turn. Any hit it scores against a surprised creature is a critical hit." },
+        { "name": "Evasion", "description": "When subjected to an effect allowing a Dexterity save for half damage, the assassin takes no damage on a success and only half on a failure." },
+        { "name": "Sneak Attack", "description": "Once per turn, the assassin deals an extra 14 (4d6) damage when it hits with a weapon attack while it has advantage, or when the target has an ally of the assassin within 5 feet and the assassin isn't at disadvantage." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The assassin makes two shortsword attacks." },
+        { "name": "Shortsword", "description": "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 6 (1d6 + 3) piercing damage, and the target must succeed on a DC 15 Constitution saving throw or take 24 (7d6) poison damage, taking half as much on a success." },
+        { "name": "Light Crossbow", "description": "Ranged Weapon Attack: +6 to hit, range 80/320 ft., one target. Hit: 7 (1d8 + 3) piercing damage, and the target must succeed on a DC 15 Constitution saving throw or take 24 (7d6) poison damage, taking half as much on a success." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Berserker",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Chaotic",
+      "ac": 13,
+      "acNote": "(hide armor)",
+      "hp": 67,
+      "hpFormula": "67 (9d8 + 27)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 16, "DEX": 12, "CON": 17, "INT": 9, "WIS": 11, "CHA": 9 },
+      "senses": "Passive Perception 10",
+      "languages": "Any one language (usually Common)",
+      "cr": "2",
+      "xp": 450,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Reckless", "description": "At the start of its turn, the berserker can throw caution aside to gain advantage on melee weapon attack rolls for the turn, but attack rolls against it also have advantage until its next turn." }
+      ],
+      "actions": [
+        { "name": "Greataxe", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 9 (1d12 + 3) slashing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Scout",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 13,
+      "acNote": "(leather armor)",
+      "hp": 16,
+      "hpFormula": "16 (3d8 + 3)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 11, "DEX": 14, "CON": 12, "INT": 11, "WIS": 13, "CHA": 11 },
+      "skills": "Nature +4, Perception +5, Stealth +6, Survival +5",
+      "senses": "Passive Perception 15",
+      "languages": "Any one language (usually Common)",
+      "cr": "1/2",
+      "xp": 100,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Keen Hearing and Sight", "description": "The scout has advantage on Wisdom (Perception) checks that rely on hearing or sight." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The scout makes two melee attacks or two ranged attacks." },
+        { "name": "Shortsword", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage." },
+        { "name": "Longbow", "description": "Ranged Weapon Attack: +4 to hit, range 150/600 ft., one target. Hit: 6 (1d8 + 2) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Spy",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 12,
+      "hp": 27,
+      "hpFormula": "27 (6d8)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 10, "DEX": 15, "CON": 10, "INT": 12, "WIS": 14, "CHA": 16 },
+      "skills": "Deception +5, Insight +4, Investigation +5, Perception +6, Persuasion +5, Sleight of Hand +4, Stealth +4",
+      "senses": "Passive Perception 16",
+      "languages": "Any two languages",
+      "cr": "1",
+      "xp": 200,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Cunning Action", "description": "On each of its turns, the spy can use a bonus action to take the Dash, Disengage, or Hide action." },
+        { "name": "Sneak Attack", "description": "Once per turn, the spy deals an extra 7 (2d6) damage when it hits with a weapon attack while it has advantage, or when an ally is within 5 feet of the target and the spy isn't at disadvantage." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The spy makes two melee attacks." },
+        { "name": "Shortsword", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage." },
+        { "name": "Hand Crossbow", "description": "Ranged Weapon Attack: +4 to hit, range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Thug",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Non-Good",
+      "ac": 11,
+      "acNote": "(leather armor)",
+      "hp": 32,
+      "hpFormula": "32 (5d8 + 10)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 15, "DEX": 11, "CON": 14, "INT": 10, "WIS": 10, "CHA": 11 },
+      "skills": "Intimidation +2",
+      "senses": "Passive Perception 10",
+      "languages": "Any one language (usually Common)",
+      "cr": "1/2",
+      "xp": 100,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Pack Tactics", "description": "The thug attacks with advantage against a creature that has at least one of the thug's allies within 5 feet of it and not incapacitated." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The thug makes two melee attacks." },
+        { "name": "Mace", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) bludgeoning damage." },
+        { "name": "Heavy Crossbow", "description": "Ranged Weapon Attack: +2 to hit, range 100/400 ft., one target. Hit: 5 (1d10) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Tribal Warrior",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 12,
+      "acNote": "(hide armor)",
+      "hp": 11,
+      "hpFormula": "11 (2d8 + 2)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 13, "DEX": 11, "CON": 12, "INT": 8, "WIS": 11, "CHA": 8 },
+      "senses": "Passive Perception 10",
+      "languages": "Any one language",
+      "cr": "1/8",
+      "xp": 25,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Pack Tactics", "description": "The warrior attacks with advantage against a creature that has at least one of its allies within 5 feet of it and not incapacitated." }
+      ],
+      "actions": [
+        { "name": "Spear", "description": "Melee or Ranged Weapon Attack: +3 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 + 1) piercing damage, or 5 (1d8 + 1) piercing damage if used with two hands to make a melee attack." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Veteran",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 17,
+      "acNote": "(splint armor)",
+      "hp": 58,
+      "hpFormula": "58 (9d8 + 18)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 16, "DEX": 13, "CON": 14, "INT": 10, "WIS": 11, "CHA": 10 },
+      "skills": "Athletics +5, Perception +2",
+      "senses": "Passive Perception 12",
+      "languages": "Any one language (usually Common)",
+      "cr": "3",
+      "xp": 700,
+      "proficiencyBonus": 2,
+      "traits": [],
+      "actions": [
+        { "name": "Multiattack", "description": "The veteran makes two longsword attacks. If it has drawn its shortsword, it can also make one shortsword attack." },
+        { "name": "Longsword", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 7 (1d8 + 3) slashing damage, or 8 (1d10 + 3) slashing damage if used with two hands." },
+        { "name": "Shortsword", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 6 (1d6 + 3) piercing damage." },
+        { "name": "Heavy Crossbow", "description": "Ranged Weapon Attack: +3 to hit, range 100/400 ft., one target. Hit: 6 (1d10 + 1) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Commoner",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 10,
+      "hp": 4,
+      "hpFormula": "4 (1d8)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 10, "DEX": 10, "CON": 10, "INT": 10, "WIS": 10, "CHA": 10 },
+      "senses": "Passive Perception 10",
+      "languages": "Any one language (usually Common)",
+      "cr": "0",
+      "xp": 10,
+      "proficiencyBonus": 2,
+      "traits": [],
+      "actions": [
+        { "name": "Club", "description": "Melee Weapon Attack: +2 to hit, reach 5 ft., one target. Hit: 2 (1d4) bludgeoning damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Noble",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 15,
+      "acNote": "(breastplate)",
+      "hp": 9,
+      "hpFormula": "9 (2d8)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 11, "DEX": 12, "CON": 11, "INT": 12, "WIS": 14, "CHA": 16 },
+      "skills": "Deception +5, Insight +4, Persuasion +5",
+      "senses": "Passive Perception 12",
+      "languages": "Any two languages",
+      "cr": "1/8",
+      "xp": 25,
+      "proficiencyBonus": 2,
+      "traits": [],
+      "actions": [
+        { "name": "Rapier", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 5 (1d8 + 1) piercing damage." }
+      ],
+      "reactions": [
+        { "name": "Parry", "description": "The noble adds 2 to its AC against one melee attack that would hit it, provided it can see the attacker and is wielding a melee weapon." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Druid",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 11,
+      "acNote": "(16 with barkskin)",
+      "hp": 27,
+      "hpFormula": "27 (5d8 + 5)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 10, "DEX": 12, "CON": 13, "INT": 12, "WIS": 15, "CHA": 11 },
+      "skills": "Medicine +4, Nature +3, Perception +4",
+      "senses": "Passive Perception 14",
+      "languages": "Druidic plus any two languages",
+      "cr": "2",
+      "xp": 450,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Spellcasting", "description": "The druid is a 4th-level spellcaster using Wisdom (spell save DC 12, +4 to hit with spell attacks). It has the following druid spells prepared: Cantrips — druidcraft, produce flame, shillelagh; 1st level (4 slots) — entangle, longstrider, speak with animals, thunderwave; 2nd level (3 slots) — animal messenger, barkskin." }
+      ],
+      "actions": [
+        { "name": "Quarterstaff", "description": "Melee Weapon Attack: +2 to hit, reach 5 ft., one target. Hit: 3 (1d6) bludgeoning damage, or 4 (1d8) bludgeoning damage if used with two hands, or 6 (1d8 + 2) if wielded with shillelagh." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Gladiator",
+      "size": "Medium",
+      "type": "Humanoid (any race)",
+      "alignment": "Any Alignment",
+      "ac": 16,
+      "acNote": "(studded leather, shield)",
+      "hp": 112,
+      "hpFormula": "112 (15d8 + 45)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 18, "DEX": 15, "CON": 16, "INT": 10, "WIS": 12, "CHA": 15 },
+      "savingThrows": "Str +7, Dex +5, Con +6",
+      "skills": "Athletics +10, Intimidation +5",
+      "senses": "Passive Perception 11",
+      "languages": "Any one language (usually Common)",
+      "cr": "5",
+      "xp": 1800,
+      "proficiencyBonus": 3,
+      "traits": [
+        { "name": "Brave", "description": "The gladiator has advantage on saving throws against being frightened." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The gladiator makes three melee attacks or two ranged attacks." },
+        { "name": "Spear", "description": "Melee or Ranged Weapon Attack: +7 to hit, reach 5 ft. and range 20/60 ft., one target. Hit: 11 (2d6 + 4) piercing damage, or 13 (2d8 + 4) piercing damage if used with two hands to make a melee attack." },
+        { "name": "Shield Bash", "description": "Melee Weapon Attack: +7 to hit, reach 5 ft., one creature. Hit: 9 (2d4 + 4) bludgeoning damage. If the target is Medium or smaller, it must succeed on a DC 15 Strength saving throw or be knocked prone." }
+      ],
+      "reactions": [
+        { "name": "Parry", "description": "The gladiator adds 3 to its AC against one melee attack that would hit it, provided it can see the attacker and is wielding a melee weapon." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Lizardfolk",
+      "size": "Medium",
+      "type": "Humanoid (Lizardfolk)",
+      "alignment": "Neutral",
+      "ac": 15,
+      "acNote": "(natural armor, shield)",
+      "hp": 22,
+      "hpFormula": "22 (4d8 + 4)",
+      "speed": "30 ft., swim 30 ft.",
+      "abilities": { "STR": 15, "DEX": 10, "CON": 13, "INT": 7, "WIS": 12, "CHA": 7 },
+      "skills": "Perception +3, Stealth +4, Survival +5",
+      "senses": "Passive Perception 13",
+      "languages": "Draconic",
+      "cr": "1/2",
+      "xp": 100,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Hold Breath", "description": "The lizardfolk can hold its breath for up to 15 minutes." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The lizardfolk makes two melee attacks, each with a different weapon." },
+        { "name": "Bite", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage." },
+        { "name": "Heavy Club", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) bludgeoning damage." },
+        { "name": "Javelin", "description": "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing damage." },
+        { "name": "Spiked Shield", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Sahuagin",
+      "size": "Medium",
+      "type": "Humanoid (Sahuagin)",
+      "alignment": "Lawful Evil",
+      "ac": 12,
+      "acNote": "(natural armor)",
+      "hp": 22,
+      "hpFormula": "22 (4d8 + 4)",
+      "speed": "30 ft., swim 40 ft.",
+      "abilities": { "STR": 13, "DEX": 11, "CON": 12, "INT": 12, "WIS": 13, "CHA": 9 },
+      "skills": "Perception +5",
+      "senses": "Darkvision 120 ft., Passive Perception 15",
+      "languages": "Sahuagin",
+      "cr": "1/2",
+      "xp": 100,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Blood Frenzy", "description": "The sahuagin has advantage on melee attack rolls against any creature that doesn't have all its hit points." },
+        { "name": "Limited Amphibiousness", "description": "The sahuagin can breathe both air and water, but it must submerge in water at least once every 4 hours to avoid suffocating." },
+        { "name": "Shark Telepathy", "description": "The sahuagin can telepathically command any shark within 120 feet, using a limited range of instinctive commands." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The sahuagin makes two melee attacks: one with its bite and one with its claws or spear." },
+        { "name": "Bite", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 3 (1d4 + 1) piercing damage." },
+        { "name": "Claws", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 3 (1d4 + 1) slashing damage." },
+        { "name": "Spear", "description": "Melee or Ranged Weapon Attack: +3 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 + 1) piercing damage, or 5 (1d8 + 1) piercing damage if used with two hands to make a melee attack." }
+      ],
+      "group": "Humanoids",
+      "source": "srd"
+    },
+    {
+      "name": "Bullywug",
+      "size": "Medium",
+      "type": "Humanoid (Bullywug)",
+      "alignment": "Neutral Evil",
+      "ac": 15,
+      "acNote": "(hide armor, shield)",
+      "hp": 11,
+      "hpFormula": "11 (2d8 + 2)",
+      "speed": "20 ft., swim 40 ft.",
+      "abilities": { "STR": 12, "DEX": 12, "CON": 13, "INT": 7, "WIS": 10, "CHA": 7 },
+      "skills": "Stealth +3",
+      "senses": "Passive Perception 10",
+      "languages": "Bullywug",
+      "cr": "1/4",
+      "xp": 50,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Amphibious", "description": "The bullywug can breathe air and water alike." },
+        { "name": "Speak with Frogs and Toads", "description": "The bullywug can communicate simple ideas to frogs and toads through sounds and gestures." },
+        { "name": "Swamp Camouflage", "description": "The bullywug has advantage on Dexterity (Stealth) checks made to hide in swampy terrain." },
+        { "name": "Standing Leap", "description": "The bullywug's long jump is up to 20 feet and its high jump up to 10 feet, with or without a running start." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The bullywug makes two attacks: one with its bite and one with its spear." },
+        { "name": "Bite", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 3 (1d4 + 1) piercing damage." },
+        { "name": "Spear", "description": "Melee or Ranged Weapon Attack: +3 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 + 1) piercing damage, or 5 (1d8 + 1) piercing damage if used with two hands to make a melee attack." }
+      ],
+      "group": "Humanoids",
+      "source": "mm"
+    },
+    {
+      "name": "Kuo-toa",
+      "size": "Medium",
+      "type": "Humanoid (Kuo-toa)",
+      "alignment": "Neutral Evil",
+      "ac": 13,
+      "acNote": "(natural armor, shield)",
+      "hp": 18,
+      "hpFormula": "18 (4d8)",
+      "speed": "30 ft., swim 30 ft.",
+      "abilities": { "STR": 13, "DEX": 10, "CON": 11, "INT": 11, "WIS": 10, "CHA": 8 },
+      "skills": "Perception +4",
+      "senses": "Darkvision 120 ft., Passive Perception 14",
+      "languages": "Undercommon",
+      "cr": "1/4",
+      "xp": 50,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Amphibious", "description": "The kuo-toa can breathe both air and water." },
+        { "name": "Otherworldly Perception", "description": "The kuo-toa can sense the presence of any creature within 30 feet that is invisible or on the Ethereal Plane. It can pinpoint such a creature that is moving." },
+        { "name": "Slippery", "description": "The kuo-toa has advantage on ability checks and saving throws made to escape a grapple." },
+        { "name": "Sunlight Sensitivity", "description": "In direct sunlight the kuo-toa has disadvantage on attack rolls and on Wisdom (Perception) checks that rely on sight." }
+      ],
+      "actions": [
+        { "name": "Multiattack", "description": "The kuo-toa makes two melee attacks: one with its bite and one with its spear or unarmed strike." },
+        { "name": "Bite", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 2 (1d4) piercing damage." },
+        { "name": "Spear", "description": "Melee or Ranged Weapon Attack: +3 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 4 (1d6 + 1) piercing damage, or 5 (1d8 + 1) piercing damage if used with two hands to make a melee attack." },
+        { "name": "Net", "description": "Ranged Weapon Attack: +2 to hit, range 5/15 ft., one Large or smaller creature. Hit: The target is restrained. A creature can free itself or another creature within reach with an action and a DC 10 Strength check, or by dealing 5 slashing damage to the net (AC 10)." }
+      ],
+      "reactions": [
+        { "name": "Sticky Shield", "description": "When a creature misses the kuo-toa with a melee attack, the kuo-toa uses its shield's adhesive coating to try to catch the weapon. The attacker must succeed on a DC 11 Strength saving throw or the weapon sticks to the shield. If the weapon's wielder can't or won't let go, it is grappled while the weapon is stuck." }
+      ],
+      "group": "Humanoids",
+      "source": "mm"
+    },
+    {
+      "name": "Drow",
+      "size": "Medium",
+      "type": "Humanoid (Elf)",
+      "alignment": "Neutral Evil",
+      "ac": 15,
+      "acNote": "(chain shirt)",
+      "hp": 13,
+      "hpFormula": "13 (3d8)",
+      "speed": "30 ft.",
+      "abilities": { "STR": 10, "DEX": 14, "CON": 10, "INT": 11, "WIS": 11, "CHA": 12 },
+      "skills": "Perception +2, Stealth +4",
+      "senses": "Darkvision 120 ft., Passive Perception 12",
+      "languages": "Elvish, Undercommon",
+      "cr": "1/4",
+      "xp": 50,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Fey Ancestry", "description": "The drow has advantage on saving throws against being charmed, and magic can't put it to sleep." },
+        { "name": "Innate Spellcasting", "description": "The drow's innate spellcasting ability is Charisma (spell save DC 11). It can innately cast the following spells, requiring no material components: at will — dancing lights; 1/day each — darkness, faerie fire." },
+        { "name": "Sunlight Sensitivity", "description": "In direct sunlight the drow has disadvantage on attack rolls and on Wisdom (Perception) checks that rely on sight." }
+      ],
+      "actions": [
+        { "name": "Shortsword", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage." },
+        { "name": "Hand Crossbow", "description": "Ranged Weapon Attack: +4 to hit, range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing damage, and the target must succeed on a DC 13 Constitution saving throw or be poisoned for 1 hour. If the save fails by 5 or more, the target also falls unconscious while poisoned this way, waking if it takes damage or another creature uses an action to shake it awake." }
+      ],
+      "group": "Humanoids",
+      "source": "mm"
+    },
+    {
+      "name": "Duergar",
+      "size": "Medium",
+      "type": "Humanoid (Dwarf)",
+      "alignment": "Lawful Evil",
+      "ac": 16,
+      "acNote": "(scale mail, shield)",
+      "hp": 26,
+      "hpFormula": "26 (4d8 + 8)",
+      "speed": "25 ft.",
+      "abilities": { "STR": 14, "DEX": 11, "CON": 14, "INT": 11, "WIS": 10, "CHA": 9 },
+      "damageResistances": "poison",
+      "senses": "Darkvision 120 ft., Passive Perception 10",
+      "languages": "Dwarvish, Undercommon",
+      "cr": "1",
+      "xp": 200,
+      "proficiencyBonus": 2,
+      "traits": [
+        { "name": "Duergar Resilience", "description": "The duergar has advantage on saving throws against poison, spells, and illusions, as well as against being charmed or paralyzed." },
+        { "name": "Sunlight Sensitivity", "description": "In direct sunlight the duergar has disadvantage on attack rolls and on Wisdom (Perception) checks that rely on sight." }
+      ],
+      "actions": [
+        { "name": "Enlarge (Recharges after a Short or Long Rest)", "description": "For 1 minute, the duergar magically grows to Large along with anything it is wearing or carrying. While enlarged it has advantage on Strength checks and saves, and its weapon attacks deal an extra die of damage (included below)." },
+        { "name": "War Pick", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8 + 2) piercing damage, or 11 (2d8 + 2) piercing damage while enlarged." },
+        { "name": "Javelin", "description": "Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 5 (1d6 + 2) piercing damage, or 9 (2d6 + 2) piercing damage while enlarged." },
+        { "name": "Invisibility (Recharges after a Short or Long Rest)", "description": "The duergar magically turns invisible until it attacks, casts a spell, or uses its Enlarge, or until its concentration ends (as if concentrating on a spell). Any equipment it wears or carries is invisible with it." }
+      ],
+      "group": "Humanoids",
+      "source": "mm"
+    }
+  ]
+}
