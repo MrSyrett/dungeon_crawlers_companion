@@ -1,0 +1,117 @@
+{
+  "_note": "Fighter (2024). Base class + Champion are SRD 5.2 (CC-BY); Battle Master / Eldritch Knight / Psi Warrior are mechanics + original descriptions.",
+  "classes": [
+    {
+      "name": "Fighter",
+      "primaryAbility": ["STR", "DEX"],
+      "hitDie": 10,
+      "savingThrows": ["STR", "CON"],
+      "proficiencies": {
+        "armor": ["Light armor", "Medium armor", "Heavy armor", "Shields"],
+        "weapons": ["Simple weapons", "Martial weapons"],
+        "tools": [],
+        "skillsChoose": 2,
+        "skillsFrom": ["Acrobatics", "Animal Handling", "Athletics", "History", "Insight", "Intimidation", "Persuasion", "Perception", "Survival"]
+      },
+      "startingEquipment": ["Chain Mail, Greatsword, Flail, 8 Javelins, Dungeoneer's Pack, 4 GP", "or Studded Leather, Scimitar, Shortsword, Longbow, 20 Arrows, Quiver, Dungeoneer's Pack, 11 GP", "or 155 GP"],
+      "spellcasting": "none",
+      "subclassLevel": 3,
+      "subclassLabel": "Fighter Subclass",
+      "flavor": "A master of weapons and armor whose training turns any fight to advantage — striking more often than anyone, surging into extra action, and shrugging off what should have stopped them.",
+      "source": "srd",
+      "table": [
+        { "level": 1,  "profBonus": 2, "features": ["Fighting Style", "Second Wind", "Weapon Mastery"], "columns": { "Second Wind": "2", "Weapon Mastery": "3" } },
+        { "level": 2,  "profBonus": 2, "features": ["Action Surge", "Tactical Mind"], "columns": { "Second Wind": "2", "Weapon Mastery": "3" } },
+        { "level": 3,  "profBonus": 2, "features": ["Fighter Subclass"], "columns": { "Second Wind": "2", "Weapon Mastery": "3" } },
+        { "level": 4,  "profBonus": 2, "features": ["Ability Score Improvement"], "columns": { "Second Wind": "3", "Weapon Mastery": "4" } },
+        { "level": 5,  "profBonus": 3, "features": ["Extra Attack", "Tactical Shift"], "columns": { "Second Wind": "3", "Weapon Mastery": "4" } },
+        { "level": 6,  "profBonus": 3, "features": ["Ability Score Improvement"], "columns": { "Second Wind": "3", "Weapon Mastery": "4" } },
+        { "level": 7,  "profBonus": 3, "features": ["Subclass Feature"], "columns": { "Second Wind": "3", "Weapon Mastery": "4" } },
+        { "level": 8,  "profBonus": 3, "features": ["Ability Score Improvement"], "columns": { "Second Wind": "3", "Weapon Mastery": "4" } },
+        { "level": 9,  "profBonus": 4, "features": ["Indomitable", "Tactical Master"], "columns": { "Second Wind": "3", "Weapon Mastery": "4" } },
+        { "level": 10, "profBonus": 4, "features": ["Subclass Feature"], "columns": { "Second Wind": "4", "Weapon Mastery": "5" } },
+        { "level": 11, "profBonus": 4, "features": ["Two Extra Attacks"], "columns": { "Second Wind": "4", "Weapon Mastery": "5" } },
+        { "level": 12, "profBonus": 4, "features": ["Ability Score Improvement"], "columns": { "Second Wind": "4", "Weapon Mastery": "5" } },
+        { "level": 13, "profBonus": 5, "features": ["Indomitable (two uses)", "Studied Attacks"], "columns": { "Second Wind": "4", "Weapon Mastery": "5" } },
+        { "level": 14, "profBonus": 5, "features": ["Ability Score Improvement"], "columns": { "Second Wind": "4", "Weapon Mastery": "5" } },
+        { "level": 15, "profBonus": 5, "features": ["Subclass Feature"], "columns": { "Second Wind": "4", "Weapon Mastery": "5" } },
+        { "level": 16, "profBonus": 5, "features": ["Ability Score Improvement"], "columns": { "Second Wind": "4", "Weapon Mastery": "6" } },
+        { "level": 17, "profBonus": 6, "features": ["Action Surge (two uses)", "Indomitable (three uses)"], "columns": { "Second Wind": "4", "Weapon Mastery": "6" } },
+        { "level": 18, "profBonus": 6, "features": ["Subclass Feature"], "columns": { "Second Wind": "4", "Weapon Mastery": "6" } },
+        { "level": 19, "profBonus": 6, "features": ["Epic Boon"], "columns": { "Second Wind": "4", "Weapon Mastery": "6" } },
+        { "level": 20, "profBonus": 6, "features": ["Three Extra Attacks"], "columns": { "Second Wind": "4", "Weapon Mastery": "6" } }
+      ],
+      "features": [
+        { "name": "Fighting Style", "level": 1, "source": "srd", "description": "You gain a Fighting Style feat of your choice (such as Archery, Defense, Great Weapon Fighting, or Two-Weapon Fighting)." },
+        { "name": "Second Wind", "level": 1, "source": "srd", "description": "As a Bonus Action you regain 1d10 + your Fighter level HP. You have a number of uses shown on the table and regain one on a Short Rest and all on a Long Rest." },
+        { "name": "Weapon Mastery", "level": 1, "source": "srd", "description": "You can use the Mastery property of a number of weapon kinds shown on the table (3 at level 1), provided you're proficient. You can change your choices after a Long Rest." },
+        { "name": "Action Surge", "level": 2, "source": "srd", "description": "On your turn you can take one additional action (any except casting a spell). Once per Short or Long Rest (twice at level 17)." },
+        { "name": "Tactical Mind", "level": 2, "source": "srd", "description": "When you fail an ability check, you can spend a use of Second Wind (without regaining HP) to add 1d10 to the check, potentially turning the failure into a success." },
+        { "name": "Ability Score Improvement", "level": 4, "source": "srd", "description": "Increase one ability score by 2, or two by 1 (max 20), or take a feat. Repeats at 6th, 8th, 12th, 14th, and 16th level." },
+        { "name": "Extra Attack", "level": 5, "source": "srd", "description": "You can attack twice whenever you take the Attack action (three times at level 11, four times at level 20)." },
+        { "name": "Tactical Shift", "level": 5, "source": "srd", "description": "When you activate Second Wind you can move up to half your Speed without provoking Opportunity Attacks." },
+        { "name": "Indomitable", "level": 9, "source": "srd", "description": "You can reroll a saving throw you fail and must use the new roll. You gain a use back on a Long Rest (two uses at 13th, three at 17th level)." },
+        { "name": "Tactical Master", "level": 9, "source": "srd", "description": "When you attack with a weapon whose Mastery you can use, you can replace that property with the Push, Sap, or Slow mastery for that attack." },
+        { "name": "Studied Attacks", "level": 13, "source": "srd", "description": "If you miss a creature with an attack, you have Advantage on your next attack roll against it before the end of your next turn." },
+        { "name": "Epic Boon", "level": 19, "source": "srd", "description": "You gain an Epic Boon feat or another feat you qualify for. Boon of Combat Prowess is a fitting choice." }
+      ],
+      "subclasses": [
+        {
+          "name": "Champion",
+          "className": "Fighter",
+          "flavor": "A paragon of physical excellence who lands more critical hits, excels at athletic feats, and refuses to fall.",
+          "source": "srd",
+          "features": [
+            { "name": "Improved Critical", "level": 3, "subclass": "Champion", "source": "srd", "description": "Your weapon attacks score a Critical Hit on a roll of 19 or 20." },
+            { "name": "Remarkable Athlete", "level": 3, "subclass": "Champion", "source": "srd", "description": "You have Advantage on Initiative and on Strength (Athletics) checks. Once per turn, immediately after a Critical Hit, you can move up to half your Speed without provoking Opportunity Attacks." },
+            { "name": "Additional Fighting Style", "level": 7, "subclass": "Champion", "source": "srd", "description": "You gain a second Fighting Style feat of your choice." },
+            { "name": "Heroic Warrior", "level": 10, "subclass": "Champion", "source": "srd", "description": "During combat you can give yourself Heroic Advantage — Advantage on one attack roll, ability check, or saving throw — at the start of each of your turns if you have none already." },
+            { "name": "Superior Critical", "level": 15, "subclass": "Champion", "source": "srd", "description": "Your weapon attacks now score a Critical Hit on a roll of 18–20." },
+            { "name": "Survivor", "level": 18, "subclass": "Champion", "source": "srd", "description": "You have Advantage on Death Saving Throws, and at the start of each of your turns in combat you regain HP (5 + your Constitution modifier) if you're below half your HP maximum and have at least 1 HP." }
+          ]
+        },
+        {
+          "name": "Battle Master",
+          "className": "Fighter",
+          "flavor": "A student of martial technique who spends Superiority Dice on precise maneuvers — disarming, goading, and outmaneuvering foes.",
+          "source": "phb",
+          "features": [
+            { "name": "Combat Superiority", "level": 3, "subclass": "Battle Master", "source": "phb", "description": "You learn maneuvers fueled by Superiority Dice (four d8s, regained on a Short or Long Rest). Maneuvers such as Trip Attack, Disarming Attack, Riposte, and Precision Attack let you add a die to a roll and create an effect. The save DC is 8 + your proficiency bonus + your Strength or Dexterity modifier. You learn more maneuvers and gain more dice as you level." },
+            { "name": "Student of War", "level": 3, "subclass": "Battle Master", "source": "phb", "description": "You gain proficiency with one type of Artisan's Tools and in one skill from the Fighter list." },
+            { "name": "Know Your Enemy", "level": 7, "subclass": "Battle Master", "source": "phb", "description": "As a Bonus Action you can spend one Superiority Die to study a creature you can see and learn whether it has more or fewer HP than you, plus one other characteristic of your choice." },
+            { "name": "Improved Combat Superiority", "level": 10, "subclass": "Battle Master", "source": "phb", "description": "Your Superiority Dice become d10s." },
+            { "name": "Relentless", "level": 15, "subclass": "Battle Master", "source": "phb", "description": "When you roll Initiative and have no Superiority Dice, you regain one." },
+            { "name": "Ultimate Combat Superiority", "level": 18, "subclass": "Battle Master", "source": "phb", "description": "Your Superiority Dice become d12s." }
+          ]
+        },
+        {
+          "name": "Eldritch Knight",
+          "className": "Fighter",
+          "flavor": "A warrior who weaves Wizard magic into swordplay — warding themselves, binding a weapon, and striking with spell and steel at once.",
+          "source": "phb",
+          "features": [
+            { "name": "Spellcasting", "level": 3, "subclass": "Eldritch Knight", "source": "phb", "description": "You learn cantrips and a small number of spells from the Wizard list (mostly Abjuration and Evocation), casting with Intelligence. You prepare a growing list and cast using your Fighter level as a one-third caster." },
+            { "name": "War Bond", "level": 3, "subclass": "Eldritch Knight", "source": "phb", "description": "You can bond with weapons: bonded weapons can't be disarmed while conscious, and you can summon one you can see to your hand as a Bonus Action." },
+            { "name": "War Magic", "level": 7, "subclass": "Eldritch Knight", "source": "phb", "description": "When you take the Attack action you can replace one attack with casting a cantrip." },
+            { "name": "Eldritch Strike", "level": 10, "subclass": "Eldritch Knight", "source": "phb", "description": "When you hit a creature with a weapon, it has Disadvantage on the next saving throw against a spell you cast before the end of your next turn." },
+            { "name": "Arcane Charge", "level": 15, "subclass": "Eldritch Knight", "source": "phb", "description": "When you use Action Surge you can teleport up to 30 feet to an unoccupied space you can see, before or after the extra action." },
+            { "name": "Improved War Magic", "level": 18, "subclass": "Eldritch Knight", "source": "phb", "description": "When you take the Attack action you can replace one attack with casting a level 1 or 2 spell." }
+          ]
+        },
+        {
+          "name": "Psi Warrior",
+          "className": "Fighter",
+          "flavor": "A soldier awakened to psionic power, wielding telekinetic force to shield allies, hurl enemies, and strike from afar.",
+          "source": "phb",
+          "features": [
+            { "name": "Psionic Power", "level": 3, "subclass": "Psi Warrior", "source": "phb", "description": "You have a pool of Psionic Energy Dice (starting as d6s) that fuel: Protective Field (Reaction to reduce damage to a nearby creature), Psionic Strike (once per turn add Force damage to a hit), and Telekinetic Movement (move an object or creature with your mind). You regain a die on a Short Rest and all on a Long Rest; the dice grow larger as you level." },
+            { "name": "Telekinetic Adept", "level": 7, "subclass": "Psi Warrior", "source": "phb", "description": "You gain Psi-Powered Leap (a Bonus Action Fly Speed for one move) and Telekinetic Thrust (Psionic Strike can knock the target Prone or push it 10 feet)." },
+            { "name": "Guarded Mind", "level": 10, "subclass": "Psi Warrior", "source": "phb", "description": "You have Resistance to Psychic damage, and you can spend a Psionic Energy Die to end the Charmed or Frightened condition on yourself." },
+            { "name": "Bulwark of Force", "level": 15, "subclass": "Psi Warrior", "source": "phb", "description": "As a Bonus Action you can grant yourself and nearby allies Half Cover for 1 minute via telekinetic shields. Once per Long Rest, or by spending a Psionic Energy Die." },
+            { "name": "Telekinetic Master", "level": 18, "subclass": "Psi Warrior", "source": "phb", "description": "You can cast Telekinesis without a spell slot (Intelligence is your spellcasting ability), and while concentrating on it you can still make one weapon attack as a Bonus Action." }
+          ]
+        }
+      ]
+    }
+  ]
+}

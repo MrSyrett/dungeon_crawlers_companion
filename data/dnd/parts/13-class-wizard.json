@@ -1,0 +1,109 @@
+{
+  "_note": "Wizard (2024), a full caster (slots from tables.fullCasterSlots). Base class + Evoker are SRD 5.2 (CC-BY); Abjurer / Diviner / Illusionist are mechanics + original descriptions.",
+  "classes": [
+    {
+      "name": "Wizard",
+      "primaryAbility": ["INT"],
+      "hitDie": 6,
+      "savingThrows": ["INT", "WIS"],
+      "proficiencies": {
+        "armor": [],
+        "weapons": ["Simple weapons"],
+        "tools": [],
+        "skillsChoose": 2,
+        "skillsFrom": ["Arcana", "History", "Insight", "Investigation", "Medicine", "Nature", "Religion"]
+      },
+      "startingEquipment": ["2 Daggers, Arcane Focus (Quarterstaff), Robe, Spellbook, Scholar's Pack, 5 GP", "or 55 GP"],
+      "spellcasting": "full",
+      "spellcastingAbility": "INT",
+      "subclassLevel": 3,
+      "subclassLabel": "Wizard Subclass",
+      "flavor": "A scholar of the arcane whose spellbook is an arsenal — preparing exactly the right spells for the day and bending raw magic to precise, devastating effect.",
+      "source": "srd",
+      "table": [
+        { "level": 1,  "profBonus": 2, "features": ["Spellcasting", "Ritual Adept", "Arcane Recovery"], "cantripsKnown": 3, "columns": { "Cantrips": "3", "Prepared Spells": "4" } },
+        { "level": 2,  "profBonus": 2, "features": ["Scholar"], "cantripsKnown": 3, "columns": { "Cantrips": "3", "Prepared Spells": "5" } },
+        { "level": 3,  "profBonus": 2, "features": ["Wizard Subclass"], "cantripsKnown": 3, "columns": { "Cantrips": "3", "Prepared Spells": "6" } },
+        { "level": 4,  "profBonus": 2, "features": ["Ability Score Improvement"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "7" } },
+        { "level": 5,  "profBonus": 3, "features": ["Memorize Spell"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "9" } },
+        { "level": 6,  "profBonus": 3, "features": ["Subclass Feature"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "10" } },
+        { "level": 7,  "profBonus": 3, "features": [], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "11" } },
+        { "level": 8,  "profBonus": 3, "features": ["Ability Score Improvement"], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "12" } },
+        { "level": 9,  "profBonus": 4, "features": [], "cantripsKnown": 4, "columns": { "Cantrips": "4", "Prepared Spells": "14" } },
+        { "level": 10, "profBonus": 4, "features": ["Subclass Feature"], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "15" } },
+        { "level": 11, "profBonus": 4, "features": [], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "16" } },
+        { "level": 12, "profBonus": 4, "features": ["Ability Score Improvement"], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "16" } },
+        { "level": 13, "profBonus": 5, "features": [], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "17" } },
+        { "level": 14, "profBonus": 5, "features": ["Subclass Feature"], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "18" } },
+        { "level": 15, "profBonus": 5, "features": [], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "19" } },
+        { "level": 16, "profBonus": 5, "features": ["Ability Score Improvement"], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "21" } },
+        { "level": 17, "profBonus": 6, "features": [], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "22" } },
+        { "level": 18, "profBonus": 6, "features": ["Spell Mastery"], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "23" } },
+        { "level": 19, "profBonus": 6, "features": ["Epic Boon"], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "24" } },
+        { "level": 20, "profBonus": 6, "features": ["Signature Spells"], "cantripsKnown": 5, "columns": { "Cantrips": "5", "Prepared Spells": "26" } }
+      ],
+      "features": [
+        { "name": "Spellcasting", "level": 1, "source": "srd", "description": "You cast Wizard spells using Intelligence, drawing them from a Spellbook. Each day after a Long Rest you prepare a number of spells from the book (shown on the table) plus cantrips. Your spell save DC is 8 + Intelligence modifier + proficiency bonus, and your attack bonus is Intelligence modifier + proficiency bonus. You can copy new spells you find into your book for a cost of time and gold." },
+        { "name": "Ritual Adept", "level": 1, "source": "srd", "description": "You can cast any spell in your Spellbook that has the Ritual tag as a Ritual, even if it isn't prepared." },
+        { "name": "Arcane Recovery", "level": 1, "source": "srd", "description": "Once per day on a Short Rest, you can recover expended spell slots with a combined level up to half your Wizard level (rounded up), none of them level 6 or higher." },
+        { "name": "Scholar", "level": 2, "source": "srd", "description": "You gain Expertise (double proficiency) in one skill of your choice from Arcana, History, Investigation, Medicine, Nature, or Religion (you must already be proficient)." },
+        { "name": "Ability Score Improvement", "level": 4, "source": "srd", "description": "Increase one ability score by 2, or two by 1 (max 20), or take a feat. Repeats at 8th, 12th, and 16th level." },
+        { "name": "Memorize Spell", "level": 5, "source": "srd", "description": "Whenever you finish a Short Rest, you can swap one prepared spell for another from your Spellbook." },
+        { "name": "Spell Mastery", "level": 18, "source": "srd", "description": "Choose one level 1 and one level 2 spell in your Spellbook; you can cast them at their lowest level without expending a spell slot. You can swap the choices after a Long Rest." },
+        { "name": "Epic Boon", "level": 19, "source": "srd", "description": "You gain an Epic Boon feat or another feat you qualify for. Boon of Spell Recall is a fitting choice." },
+        { "name": "Signature Spells", "level": 20, "source": "srd", "description": "Choose two level 3 spells in your Spellbook as Signature Spells; they're always prepared and you can cast each once at level 3 without a slot, regaining the ability on a Short or Long Rest." }
+      ],
+      "subclasses": [
+        {
+          "name": "Evoker",
+          "className": "Wizard",
+          "flavor": "A master of raw elemental force who shapes blasts around allies and squeezes every point of damage from a spell.",
+          "source": "srd",
+          "features": [
+            { "name": "Evocation Savant", "level": 3, "subclass": "Evoker", "source": "srd", "description": "Evocation spells cost less time and gold to copy into your book, and you always have two Evocation spells prepared without counting against your prepared limit." },
+            { "name": "Potent Cantrip", "level": 3, "subclass": "Evoker", "source": "srd", "description": "When a creature succeeds on a save against your cantrip, it still takes half the cantrip's damage (and suffers no other effect)." },
+            { "name": "Sculpt Spells", "level": 6, "subclass": "Evoker", "source": "srd", "description": "When you cast an Evocation spell that affects other creatures you can see, you can protect a number of them (1 + the spell's level): they automatically succeed on their save and take no damage from the spell." },
+            { "name": "Empowered Evocation", "level": 10, "subclass": "Evoker", "source": "srd", "description": "You add your Intelligence modifier to one damage roll of any Wizard Evocation spell you cast." },
+            { "name": "Overchannel", "level": 14, "subclass": "Evoker", "source": "srd", "description": "When you cast a Wizard spell of level 1–5 that deals damage, you can deal maximum damage with it. The first use each Long Rest is free; each further use before a Long Rest deals escalating Necrotic damage to you." }
+          ]
+        },
+        {
+          "name": "Abjurer",
+          "className": "Wizard",
+          "flavor": "A warding specialist who wraps themselves in a self-renewing shield of magic and unravels hostile spells.",
+          "source": "phb",
+          "features": [
+            { "name": "Abjuration Savant", "level": 3, "subclass": "Abjurer", "source": "phb", "description": "Abjuration spells cost less to copy into your book, and you gain an Arcane Ward: when you cast an Abjuration spell, a pool of Temporary-HP-like ward force absorbs damage to you (its size scales with the spell level and your Wizard level, recharging as you cast more abjurations)." },
+            { "name": "Projected Ward", "level": 6, "subclass": "Abjurer", "source": "phb", "description": "When a creature you can see within 30 feet takes damage, you can use your Reaction to have your Arcane Ward absorb that damage instead." },
+            { "name": "Spell Breaker", "level": 10, "subclass": "Abjurer", "source": "phb", "description": "You always have Counterspell and Dispel Magic prepared, and when you cast either using a higher-level slot its effectiveness improves." },
+            { "name": "Spell Resistance", "level": 14, "subclass": "Abjurer", "source": "phb", "description": "You have Advantage on saving throws against spells, and Resistance to the damage of spells." }
+          ]
+        },
+        {
+          "name": "Diviner",
+          "className": "Wizard",
+          "flavor": "A seer who glimpses the strands of fate and rewrites a roll of the dice before it lands.",
+          "source": "phb",
+          "features": [
+            { "name": "Divination Savant", "level": 3, "subclass": "Diviner", "source": "phb", "description": "Divination spells cost less to copy, and you gain Portent: after a Long Rest, roll two d20s and record them. You can replace any attack roll, saving throw, or ability check (yours or a creature's you can see) with one of these foretold rolls." },
+            { "name": "Expert Divination", "level": 6, "subclass": "Diviner", "source": "phb", "description": "When you cast a Divination spell of level 2 or higher, you regain an expended spell slot of a lower level." },
+            { "name": "The Third Eye", "level": 10, "subclass": "Diviner", "source": "phb", "description": "As a Bonus Action you gain one benefit until your next rest: Darkvision, an increased understanding of a language, See Invisibility, or greater awareness of your surroundings." },
+            { "name": "Greater Portent", "level": 14, "subclass": "Diviner", "source": "phb", "description": "You roll three d20s for your Portent feature instead of two." }
+          ]
+        },
+        {
+          "name": "Illusionist",
+          "className": "Wizard",
+          "flavor": "A weaver of deception whose illusions grow so convincing they gain a sliver of reality.",
+          "source": "phb",
+          "features": [
+            { "name": "Illusion Savant", "level": 3, "subclass": "Illusionist", "source": "phb", "description": "Illusion spells cost less to copy, and your Minor Illusion improves: you can create both a sound and an image at once, and shape the illusion as a Bonus Action." },
+            { "name": "Phantasmal Creatures", "level": 6, "subclass": "Illusionist", "source": "phb", "description": "You always have Summon Beast and Summon Fey prepared, and can cast either once without a slot per Long Rest, conjuring an illusory creature." },
+            { "name": "Illusory Self", "level": 10, "subclass": "Illusionist", "source": "phb", "description": "When a creature hits you with an attack, you can use a Reaction to interpose an illusory duplicate, causing the attack to miss. Recharge on a rest, or by expending a spell slot." },
+            { "name": "Illusory Reality", "level": 14, "subclass": "Illusionist", "source": "phb", "description": "When you cast an Illusion spell of level 1+, you can make one inanimate, nonmagical part of the illusion real for 1 minute — a bridge you can cross, a wall that blocks, and so on." }
+          ]
+        }
+      ]
+    }
+  ]
+}
