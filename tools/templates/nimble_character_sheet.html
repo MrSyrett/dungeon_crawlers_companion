@@ -136,6 +136,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .cond-x{background:none;border:none;color:var(--nim-dk);cursor:pointer;font-size:12px;line-height:1;padding:0 2px;}
 .cond-x:hover{color:var(--red);}
 .cond-empty{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);letter-spacing:.06em;}
+/* Themed "Add a condition" picker — an accent-outlined pill with a custom chevron */
+#cond-pick{appearance:none;-webkit-appearance:none;width:100%;max-width:210px;border:1px solid var(--nim-dk);border-radius:6px;background-color:var(--nim-lt);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%231f6f46' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 9px center;background-size:11px;color:var(--nim-dk);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:6px 26px 6px 12px;cursor:pointer;outline:none;transition:background-color .1s,border-color .1s;}
+#cond-pick:hover{background-color:#c6e7d4;}
+#cond-pick:focus{border-color:var(--nim);}
+#cond-pick option{color:var(--ink);background:var(--input-bg);font-weight:600;letter-spacing:0;text-transform:none;}
+body.dark #cond-pick{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%237fd39a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");}
+body.dark #cond-pick:hover{background-color:#274a38;}
 .vlbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:4px;}
 .vlbl small{font-weight:600;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:none;text-align:right;}
 .vbig{font-family:'Share Tech Mono',monospace;font-size:26px;font-weight:700;line-height:1.1;color:var(--ink);display:flex;align-items:baseline;gap:4px;}
