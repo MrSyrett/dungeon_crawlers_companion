@@ -73,6 +73,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.kob { color: #a56ee8; }
   .group-head.nim { color: #3fb97a; }
   .group-head.sw { color: #f0c020; }
+  .group-head.dnd { color: #e0554e; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
@@ -256,7 +257,8 @@ const PAGE = String.raw`<!doctype html>
             { key: "ACE", name: "ACE!", cls: "ace" },
             { key: "KOB", name: "Kids on Bikes", cls: "kob" },
             { key: "NIM", name: "Nimble", cls: "nim" },
-            { key: "SW", name: "Star Wars", cls: "sw" }
+            { key: "SW", name: "Star Wars", cls: "sw" },
+            { key: "DND", name: "D&D", cls: "dnd" }
           ];
           var seen = {};
           var html = "";

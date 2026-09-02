@@ -1451,6 +1451,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
       <option value="KOB">Kids on Bikes</option>
       <option value="NIM">Nimble</option>
       <option value="SW">Star Wars</option>
+      <option value="DND">D&amp;D</option>
     </select>
     <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
     <a class="btn small ghost vtt-launch" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg> VTT</a>
@@ -1490,6 +1491,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     KOB: [],
     NIM: ['nimmonster','nimtreasure'],
     SW:  ['swmonster','swtreasure'],
+    DND: ['dndmonster','dndtreasure'],
   };
   const SYS_KEYS = Object.keys(SYS_GENS);
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
@@ -2348,6 +2350,8 @@ GMScenes.renderPins();
         <option value="nimtreasure">Nimble Treasure</option>
         <option value="swmonster">Star Wars NPC</option>
         <option value="swtreasure">Star Wars Gear Drop</option>
+        <option value="dndmonster">D&amp;D Monster</option>
+        <option value="dndtreasure">D&amp;D Treasure</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -2745,6 +2749,22 @@ GMScenes.renderPins();
         <div class="gen-results" id="gen-swmon-group-results"></div>
       </div>
 
+      <!-- D&D MONSTER PANEL (pick from the bestiary by creature type) -->
+      <div class="gen-panel" data-panel="dndmonster">
+        <div class="gen-controls">
+          <label class="gen-label">Type
+            <select class="gen-select" id="gen-dndmon-group"><option value="">Any Type</option></select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-dndmon-group-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dndmon-group-results"></div>
+      </div>
+
       <!-- ACE! TREASURE PANEL (random spread + hand-picked items from the gear list; sends a claimable drop) -->
       <div class="gen-panel xs-treasure" data-panel="acetreasure" data-sys="ace">
         <div class="ai-scroll">
@@ -2825,6 +2845,35 @@ GMScenes.renderPins();
             <div class="ai-row">
               <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
               <button class="btn small ghost xs-tr-credits" type="button" title="Add a credit stash">💰 Credits</button>
+            </div>
+            <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
+            <div class="ai-status xs-tr-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- D&D TREASURE PANEL (random spread + hand-picked items from weapons/armor/gear/magic; sends a claimable drop) -->
+      <div class="gen-panel xs-treasure" data-panel="dndtreasure" data-sys="dnd">
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Treasure</div>
+            <input type="text" class="ai-input xs-tr-name" placeholder="Where it's found (e.g. Chest behind the altar)">
+            <div class="ai-row">
+              <select class="ai-select xs-tr-tier" title="Party level — scales gold"><option value="1">Level 1–4</option><option value="5">Level 5–10</option><option value="11">Level 11–16</option><option value="17">Level 17+</option></select>
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="gear">Gear</option><option value="magic">Magic item</option><option value="coins">Coins only</option></select>
+              <select class="ai-select xs-tr-count" title="How many items to roll">
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="5">5</option>
+              </select>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a spread from the item lists">🎲 Roll</button>
+            </div>
+            <div class="ai-cat-filters xs-tr-filters"></div>
+            <input type="text" class="ai-input xs-tr-search" placeholder="Search items to add…">
+            <div class="ai-cat-results xs-tr-results"></div>
+            <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
+            <div class="ai-row">
+              <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
+              <button class="btn small ghost xs-tr-credits" type="button" title="Add a coin stash">💰 Coins</button>
             </div>
             <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
             <div class="ai-status xs-tr-status"></div>
@@ -4665,7 +4714,7 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob'];
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd'];
   function sysToSource(sys) { sys = String(sys || 'DCC').toLowerCase(); return sys === 'sd' ? 'sd' : XS_SOURCES.indexOf(sys) >= 0 ? sys : 'dcc'; }
   let pickerSource = (window.GM_SYSTEM === 'SD') ? 'sd' : XS_SOURCES.indexOf(String(window.GM_SYSTEM || '').toLowerCase()) >= 0 ? String(window.GM_SYSTEM).toLowerCase() : (dccBestiary().length ? 'dcc' : 'sd');
 
@@ -7064,9 +7113,10 @@ function xsBestiary(src) {
   if(src === 'ace') return ok(typeof ACE_EXTRAS !== 'undefined' ? ACE_EXTRAS : undefined);
   if(src === 'nim') return ok(typeof NIMBLE_MONSTERS !== 'undefined' ? NIMBLE_MONSTERS : undefined);
   if(src === 'sw')  return ok(typeof SW_CHARACTERS !== 'undefined' ? SW_CHARACTERS : undefined);
+  if(src === 'dnd') return ok(typeof DND_MONSTERS !== 'undefined' ? DND_MONSTERS : undefined);
   return [];
 }
-// The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW group).
+// The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D group).
 function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : (m.group || ''); }
 function xsMonTypes(src) { return [...new Set(xsBestiary(src).map(m => xsMonType(src, m)).filter(Boolean))]; }
 // Star Wars die codes are stored as pips (3D+2 = 11).
@@ -7097,6 +7147,21 @@ function xsMonSummary(src, m) {
     (m.equipment || []).forEach(e => { const dm = /damage\s*(\d+D(?:\+\d)?)/i.exec(e); out.lines.push({ label: 'Gear', text: e, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
     if(m.description) out.notes.push(m.description); if(m.notes) out.notes.push(m.notes);
     out.hp = 0;   // no hit points in D6 — the tracker card carries a wound track instead
+  } else if(src === 'dnd') {
+    const A = m.abilities || {}; const amod = s => Math.floor(((+s || 10) - 10) / 2);
+    out.stats.push({ label: 'AC', val: String(m.ac ?? '') }, { label: 'HP', val: m.hp != null ? String(m.hp) : '' }, { label: 'CR', val: String(m.cr ?? '') }, { label: 'Speed', val: (m.speed || '').replace(/ ?ft\./g, '') });
+    ['STR','DEX','CON','INT','WIS','CHA'].forEach(k => { if(A[k] != null) { const md = amod(A[k]); out.stats.push({ label: k, val: String(A[k]), roll: '1d20' + (md >= 0 ? '+' : '') + md }); } });
+    if(m.savingThrows) out.lines.push({ label: 'Saves', text: m.savingThrows });
+    if(m.skills) out.lines.push({ label: 'Skills', text: m.skills });
+    ['damageResistances','damageImmunities','damageVulnerabilities','conditionImmunities'].forEach(k => { if(m[k]) out.lines.push({ label: k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).replace('Damage ', '').replace('Condition ', 'Cond. '), text: m[k] }); });
+    const dmg = t => { const dm = /(\d+d\d+(?:\s*\+\s*\d+)?)/.exec(t || ''); return dm ? dm[1].replace(/\s+/g, '') : ''; };
+    (m.traits || []).forEach(t => out.lines.push({ label: t.name || 'Trait', text: t.description || '' }));
+    (m.actions || []).forEach(a => out.lines.push({ label: a.name || 'Action', text: a.description || '', roll: dmg(a.description) }));
+    (m.bonusActions || []).forEach(a => out.lines.push({ label: 'Bonus — ' + (a.name || ''), text: a.description || '', roll: dmg(a.description) }));
+    (m.reactions || []).forEach(a => out.lines.push({ label: 'Reaction — ' + (a.name || ''), text: a.description || '' }));
+    (m.legendaryActions || []).forEach(a => out.lines.push({ label: 'Legendary — ' + (a.name || ''), text: a.description || '', roll: dmg(a.description) }));
+    out.notes.push([m.size, m.type, m.alignment].filter(Boolean).join(' · ') + (m.senses ? ' · ' + m.senses : ''));
+    out.hp = m.hp != null ? (parseInt(m.hp, 10) || 1) : 10;
   }
   return out;
 }
@@ -8561,7 +8626,7 @@ window.init_gen = function(root) {
   // pool when the button is tagged data-src="dcc", else the SD bestiary.
   function resolveGenMon(name, src) {
     if(src === 'dcc') return dccGenBestiary().find(x => x.name === name) || null;
-    if(src === 'ace' || src === 'nim' || src === 'sw') return xsBestiary(src).find(x => x.name === name) || null;
+    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd') return xsBestiary(src).find(x => x.name === name) || null;
     return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
   }
   root.addEventListener('click', (e) => {
@@ -8598,9 +8663,9 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure'];
-  // Type facets for the ACE / Nimble / SW monster generators come from the data.
-  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group']].forEach(([src, id]) => {
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure'];
+  // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
+  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
     sel.innerHTML = sel.options[0].outerHTML + xsMonTypes(src).map(t => '<option value="' + dccSendAttr(t) + '">' + esc(t) + '</option>').join('');
   });
@@ -8819,9 +8884,9 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccmon-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccMonster(role, band));
 
-    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster') {
+    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster') {
       const src = activeTab.slice(0, activeTab.indexOf('monster'));
-      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : '#gen-swmon-group';
+      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : '#gen-dndmon-group';
       const type=root.querySelector(idBase).value;
       const band= src === 'nim' ? root.querySelector('#gen-nimmon-level').value : '';
       const count=parseInt(root.querySelector(idBase+'-count').value)||1;
@@ -10635,6 +10700,11 @@ else syncHomebrewMonsters();
 <script src="/tools-data/sw-characters.js"></script>
 <script src="/tools-data/sw-gear.js"></script>
 <script src="/tools-data/sw-weapons.js"></script>
+<script src="/tools-data/dnd-monsters.js"></script>
+<script src="/tools-data/dnd-weapons.js"></script>
+<script src="/tools-data/dnd-armor.js"></script>
+<script src="/tools-data/dnd-gear.js"></script>
+<script src="/tools-data/dnd-magic-items.js"></script>
 <script>
 
 
@@ -12264,6 +12334,15 @@ function wireAiConsole(root) {
         .concat(((typeof SW_GEAR !== 'undefined' && Array.isArray(SW_GEAR)) ? SW_GEAR : []).filter(g => !/^(Vehicle|Housing)$/.test(g.category)).map(g => ({ name: g.name, category: g.category === 'Armor' ? 'Armor' : g.category === 'Droid' ? 'Droid' : 'gear', desc: [g.stats, g.cost && g.cost + ' cr', g.description].filter(Boolean).join(' · ').slice(0, 160) }))),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'Armor',label:'Armor',cats:['Armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'Droid',label:'Droids',cats:['Droid'] }],
       randomCats: ['weapon','Armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (1 + Math.floor(Math.random() * 6)) * 100 + (Math.random() < 0.3 ? 500 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'GEAR DROP', empty: 'Star Wars gear list',
+    },
+    dnd: {
+      list: () => []
+        .concat(((typeof DND_WEAPONS !== 'undefined' && Array.isArray(DND_WEAPONS)) ? DND_WEAPONS : []).map(w => ({ name: w.name, category: 'weapon', desc: [w.damage + ' ' + w.damageType, (w.properties || []).join(', '), w.mastery && 'Mastery: ' + w.mastery, w.cost].filter(Boolean).join(' · ') })))
+        .concat(((typeof DND_ARMOR !== 'undefined' && Array.isArray(DND_ARMOR)) ? DND_ARMOR : []).map(a => ({ name: a.name, category: 'armor', desc: ['AC ' + a.baseAC, a.category, a.cost].filter(Boolean).join(' · ') })))
+        .concat(((typeof DND_GEAR !== 'undefined' && Array.isArray(DND_GEAR)) ? DND_GEAR : []).map(g => ({ name: g.name, category: 'gear', desc: [g.cost, g.description].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(((typeof DND_MAGIC_ITEMS !== 'undefined' && Array.isArray(DND_MAGIC_ITEMS)) ? DND_MAGIC_ITEMS : []).map(m => ({ name: m.name, category: 'magic', desc: [m.rarity, m.type, m.attunement ? 'attunement' : '', m.description].filter(Boolean).join(' · ').slice(0, 160) }))),
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'magic',label:'Magic',cats:['magic'] }],
+      randomCats: ['weapon','armor','gear','magic'], money: { name: 'Gold', unit: 'gp', cat: 'gold', roll: tier => { let c = 0; for(let i = 0; i < 2; i++) c += 1 + Math.floor(Math.random() * 6); c *= (10 + Math.floor(Math.random() * 40)); return c * (({ '1': 1, '5': 4, '11': 12, '17': 30 })[String(tier || '1')] || 1); } }, label: 'TREASURE', empty: 'D&D item lists',
     },
   };
   root.querySelectorAll('.xs-treasure').forEach(panel => {
