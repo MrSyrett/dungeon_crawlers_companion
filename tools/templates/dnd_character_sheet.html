@@ -102,9 +102,38 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 
 /* BODY */
 .body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
-.ability-col{width:150px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;}
-.center-col{flex:1;display:flex;flex-direction:column;min-width:0;border-right:2px solid var(--border);}
-.right-col{width:290px;flex-shrink:0;display:flex;flex-direction:column;}
+.left-region{width:452px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;}
+.left-top{display:flex;align-items:stretch;border-bottom:1px solid var(--rule);}
+.ability-col{width:158px;flex-shrink:0;border-right:1px solid var(--rule);display:flex;flex-direction:column;}
+.skills-col{flex:1;min-width:0;display:flex;flex-direction:column;}
+.main-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+/* TABS */
+.tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-bottom:2px solid var(--border);flex-wrap:wrap;}
+.tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.6);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.tab-btn:hover{color:#fff;}
+.tab-btn.on{color:#fff;border-bottom-color:var(--dnd);background:rgba(155,27,34,.25);}
+.tab-panel{display:none;}
+.tab-panel.on{display:block;}
+
+/* CONDITIONS */
+.cond-wrap{padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;}
+.cond-chip{border:1px solid var(--rule);border-radius:14px;background:var(--box);padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);cursor:pointer;user-select:none;}
+.cond-chip:hover{border-color:var(--dnd);}
+.cond-chip.on{background:var(--dnd);color:#fff;border-color:var(--dnd-dk);}
+.cond-chip .ci{opacity:.6;margin-left:4px;font-size:9px;}
+.exh-box{display:flex;align-items:center;gap:6px;padding:6px 10px;border-top:1px solid var(--rule);}
+.exh-box .eb-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.exh-pip{width:16px;height:16px;border:2px solid var(--muted);border-radius:3px;cursor:pointer;background:transparent;font-family:'Share Tech Mono',monospace;font-size:9px;line-height:12px;text-align:center;color:var(--muted);}
+.exh-pip.on{background:var(--red);border-color:var(--red);color:#fff;}
+
+/* REST BUTTONS */
+.rest-btns{display:flex;gap:6px;}
+.rest-btn{background:var(--box);color:var(--ink);border:1px solid rgba(255,255,255,.4);border-radius:4px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.rest-btn:hover{background:var(--dnd);color:#fff;border-color:var(--dnd);}
+.death-strip{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid var(--rule);background:var(--box);}
+.death-strip .d-lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.death-strip .death-pip{width:16px;height:16px;}
 
 /* ABILITIES */
 .abil-box{margin:8px;border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:6px 4px 5px;text-align:center;position:relative;}
@@ -154,7 +183,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hp-sub input{width:40px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
 .death-row{display:flex;align-items:center;gap:4px;justify-content:center;flex-wrap:wrap;}
 .death-row .d-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
-.death-pip{width:13px;height:13px;border:2px solid var(--muted);border-radius:50%;cursor:pointer;background:transparent;}
+.death-pip{display:inline-block;width:14px;height:14px;border:2px solid var(--muted);border-radius:50%;cursor:pointer;background:transparent;vertical-align:middle;margin:0 2px;box-sizing:border-box;}
+#death-succ,#death-fail{display:inline-flex;gap:3px;align-items:center;}
 .death-pip.succ.on{background:var(--green);border-color:var(--green);}
 .death-pip.fail.on{background:var(--red);border-color:var(--red);}
 
@@ -261,9 +291,8 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
 .roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
 @media (max-width:1040px){
   .body-row{flex-wrap:wrap;}
-  .ability-col{width:130px;}
-  .right-col{width:100%;border-top:2px solid var(--border);}
-  .center-col{border-right:none;}
+  .left-region{width:100%;border-right:none;border-bottom:2px solid var(--border);}
+  .main-col{width:100%;}
 }
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}
@@ -278,10 +307,11 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
   .hdr-fields{grid-template-columns:1fr 1fr;border-left:none;border-top:2px solid var(--border);}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
-  .ability-col{width:100%;border-right:none;border-bottom:2px solid var(--border);}
+  .left-top{flex-direction:column;}
+  .ability-col{width:100%;border-right:none;border-bottom:1px solid var(--rule);}
   .ability-col .abil-list{display:grid;grid-template-columns:repeat(3,1fr);}
-  .center-col{min-width:0;}
   .combat-strip{grid-template-columns:1fr 1fr;}
+  .tab-btn{flex:1 1 40%;}
   .small-btn{min-height:36px;padding:7px 12px;font-size:12px;}
   .row-x{min-width:36px;min-height:36px;font-size:18px;}
   .pick-sel,.add-row select{min-height:40px;font-size:14px;}
@@ -346,29 +376,42 @@ select option{background:var(--input-bg);color:var(--ink);}
 
   <div class="body-row">
 
-    <!-- LEFT: ABILITIES -->
-    <div class="ability-col">
-      <div class="section-bar red"><span>Abilities</span></div>
-      <div class="abil-list" id="abil-list"></div>
-      <div class="insp-box">
-        <span class="ib-lbl">Heroic Inspiration</span>
-        <input type="checkbox" id="f-inspiration" class="chk-lg" onchange="scheduleAutosave()">
-      </div>
-      <div class="mini-grid">
-        <div class="mini"><div class="m-lbl2">Prof. Bonus</div><div class="m-val" id="d-prof">+2</div></div>
-        <div class="mini click" onclick="rollInitiative()" title="Roll Initiative"><div class="m-lbl2">Initiative</div><div class="m-val" id="d-init">+0</div></div>
-        <div class="mini"><div class="m-lbl2">Pass. Perception</div><div class="m-val" id="d-pp">10</div></div>
-        <div class="mini"><div class="m-lbl2">Walk Speed</div><div class="m-val"><input id="f-speed" value="30" style="width:100%;border:none;background:transparent;font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;text-align:center;color:var(--dnd-dk);outline:none;" oninput="scheduleAutosave()"></div></div>
+    <!-- LEFT REGION: abilities + skills, then proficiencies + conditions -->
+    <div class="left-region">
+      <div class="left-top">
+        <div class="ability-col">
+          <div class="section-bar red"><span>Abilities</span></div>
+          <div class="abil-list" id="abil-list"></div>
+          <div class="insp-box">
+            <span class="ib-lbl">Inspiration</span>
+            <input type="checkbox" id="f-inspiration" class="chk-lg" onchange="scheduleAutosave()">
+          </div>
+        </div>
+        <div class="skills-col">
+          <div class="section-bar red"><span>Skills</span><span class="sb-note">Passive Perception <b id="d-pp">10</b></span></div>
+          <div class="skills-wrap" id="skills-list"></div>
+
+          <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
+          <div class="blk"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
+
+          <div class="section-bar red"><span>Conditions</span><span class="sb-note">tap to toggle</span></div>
+          <div class="cond-wrap" id="conditions-list"></div>
+          <div class="exh-box">
+            <span class="eb-lbl">Exhaustion</span>
+            <span id="exh-pips"></span>
+            <span class="sb-note" style="color:var(--muted);">−<span id="exh-val">0</span> to d20 tests</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- CENTER: COMBAT / ATTACKS / FEATURES / SPELLS -->
-    <div class="center-col">
-      <div class="section-bar"><span>Combat</span><span class="sb-note" id="cbt-note"></span></div>
+    <!-- MAIN: COMBAT / ATTACKS / TABS -->
+    <div class="main-col">
+      <div class="section-bar"><span>Combat <span class="sb-note" id="cbt-note"></span></span><span class="rest-btns"><button class="rest-btn" onclick="shortRest()" title="Short Rest — regain Pact slots">Short Rest</button><button class="rest-btn" onclick="longRest()" title="Long Rest — full HP, all slots, clear death saves">Long Rest</button></span></div>
       <div class="combat-strip">
         <div class="cbt"><div class="c-lbl">Armor Class</div><input id="f-ac" value="10" oninput="scheduleAutosave()"></div>
         <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
-        <div class="cbt"><div class="c-lbl">Speed</div><div class="c-val" id="c-speed">30</div></div>
+        <div class="cbt"><div class="c-lbl">Speed</div><input id="f-speed" value="30" oninput="scheduleAutosave()"></div>
         <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof">+2</div></div>
         <div class="cbt hp-box">
           <div class="c-lbl">Hit Points</div>
@@ -378,70 +421,84 @@ select option{background:var(--input-bg);color:var(--ink);}
             <label>Hit Dice <input id="f-hitdice" placeholder="1d10" style="width:52px;" oninput="scheduleAutosave()"> <button class="mini-roll" onclick="rollHitDie()" title="Roll a Hit Die">🎲</button></label>
           </div>
         </div>
-        <div class="cbt" style="grid-column:span 2;">
-          <div class="death-row">
-            <span class="d-lbl">Death Saves</span>
-            <span class="d-lbl" style="margin-left:4px;">Succ</span><span id="death-succ"></span>
-            <span class="d-lbl" style="margin-left:4px;">Fail</span><span id="death-fail"></span>
-            <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save">🎲</button>
-          </div>
+        <div class="cbt hp-box">
+          <div class="c-lbl">Spell Save DC / Attack</div>
+          <div class="hp-row" style="gap:10px;"><span id="cbt-dc" class="c-val" style="cursor:default;">—</span><span id="cbt-satk" class="c-val click" onclick="rollSpellAttack()" title="Roll a spell attack" style="cursor:pointer;">—</span></div>
+          <div class="hp-sub"><label style="cursor:default;">DC</label><label style="cursor:default;">Spell Atk</label></div>
         </div>
+      </div>
+      <div class="death-strip">
+        <span class="d-lbl">Death Saves</span>
+        <span class="d-lbl">Successes</span><span id="death-succ"></span>
+        <span class="d-lbl" style="margin-left:8px;">Failures</span><span id="death-fail"></span>
+        <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save" style="margin-left:8px;">🎲 Roll</button>
       </div>
 
       <div class="section-bar"><span>Attacks &amp; Spellcasting Actions</span></div>
-      <table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th><th></th></tr></thead><tbody id="attacks-body"></tbody></table>
+      <table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table>
       <div class="add-row">
         <button class="small-btn ghost" onclick="addAttackRow()">+ Attack</button>
         <select class="pick-sel" id="atk-pick" onchange="if(this.value){addAttackFromWeapon(this.value);this.value='';}"><option value="">Add from the weapon list…</option></select>
       </div>
 
-      <div class="section-bar red"><span>Features &amp; Traits</span><span class="sb-note" id="feat-note"></span></div>
-      <div id="features-list" style="padding:4px 10px 8px;"></div>
-      <div class="add-row">
-        <input type="text" id="feat-name" class="pick-sel" placeholder="Custom feature name" style="flex:1 1 130px;">
-        <button class="small-btn ghost" onclick="addCustomFeature()">+ Feature</button>
-        <select class="pick-sel" id="feat-pick" onchange="if(this.value){addFeatByName(this.value);this.value='';}"><option value="">Add a Feat…</option></select>
+      <!-- TABS -->
+      <div class="tabs-bar">
+        <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
+        <button class="tab-btn" data-tab="features" onclick="setTab('features')">Features &amp; Traits</button>
+        <button class="tab-btn" data-tab="equipment" onclick="setTab('equipment')">Equipment</button>
+        <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes &amp; Backstory</button>
       </div>
 
-      <div class="section-bar"><span>Spellcasting</span><span class="sb-note" id="spell-note">No spellcasting</span></div>
-      <div id="spell-block" style="display:none;">
-        <div class="spell-head">
-          <div class="sh-box"><div class="sh-lbl">Spell Ability</div><div class="sh-val" id="sp-ability">—</div></div>
-          <div class="sh-box click" onclick="rollSpellAttack()" title="Roll a spell attack"><div class="sh-lbl">Spell Attack</div><div class="sh-val click" id="sp-atk">+0</div></div>
-          <div class="sh-box"><div class="sh-lbl">Save DC</div><div class="sh-val" id="sp-dc">8</div></div>
+      <!-- SPELLS TAB -->
+      <div class="tab-panel" id="tab-spells">
+        <div class="section-bar"><span>Spellcasting</span><span class="sb-note" id="spell-note">No spellcasting</span></div>
+        <div id="spell-block" style="display:none;">
+          <div class="spell-head">
+            <div class="sh-box"><div class="sh-lbl">Spell Ability</div><div class="sh-val" id="sp-ability">—</div></div>
+            <div class="sh-box click" onclick="rollSpellAttack()" title="Roll a spell attack"><div class="sh-lbl">Spell Attack</div><div class="sh-val click" id="sp-atk">+0</div></div>
+            <div class="sh-box"><div class="sh-lbl">Save DC</div><div class="sh-val" id="sp-dc">8</div></div>
+          </div>
+          <div id="spell-slots"></div>
+          <div id="spells-by-level"></div>
+          <div class="add-row">
+            <select class="pick-sel" id="spell-pick" onchange="if(this.value){addSpellByName(this.value);this.value='';}"><option value="">Add a spell…</option></select>
+          </div>
         </div>
-        <div id="spell-slots"></div>
-        <div id="spells-by-level"></div>
+        <div id="spell-empty" style="padding:8px 10px;font-family:'Barlow',sans-serif;font-size:12px;color:var(--muted);line-height:1.5;">This class has no spellcasting. You can <a href="#" onclick="forceSpellcasting();return false;" style="color:var(--dnd);">enable spellcasting manually</a> (for a subclass caster, multiclass, or an item).</div>
+      </div>
+
+      <!-- FEATURES TAB -->
+      <div class="tab-panel" id="tab-features">
+        <div class="section-bar red"><span>Features &amp; Traits</span><span class="sb-note" id="feat-note"></span></div>
+        <div id="features-list" style="padding:4px 10px 8px;"></div>
         <div class="add-row">
-          <select class="pick-sel" id="spell-pick" onchange="if(this.value){addSpellByName(this.value);this.value='';}"><option value="">Add a spell…</option></select>
+          <input type="text" id="feat-name" class="pick-sel" placeholder="Custom feature name" style="flex:1 1 130px;">
+          <button class="small-btn ghost" onclick="addCustomFeature()">+ Feature</button>
+          <select class="pick-sel" id="feat-pick" onchange="if(this.value){addFeatByName(this.value);this.value='';}"><option value="">Add a Feat…</option></select>
         </div>
       </div>
-      <div id="spell-empty" style="padding:8px 10px;font-family:'Barlow',sans-serif;font-size:12px;color:var(--muted);line-height:1.5;">This class has no spellcasting — or set a class above and the spell section appears. You can also <a href="#" onclick="forceSpellcasting();return false;" style="color:var(--dnd);">enable spellcasting manually</a>.</div>
-    </div>
 
-    <!-- RIGHT: SKILLS / INVENTORY / FEATS / NOTES -->
-    <div class="right-col">
-      <div class="section-bar red"><span>Skills</span><span class="sb-note">● prof · ◆ expertise</span></div>
-      <div class="skills-wrap" id="skills-list"></div>
-
-      <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
-      <div class="blk"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
-
-      <div class="section-bar"><span>Equipment</span><span class="sb-note"><span id="inv-coins"></span></span></div>
-      <table class="tbl"><thead><tr><th>Item</th><th>Qty</th><th></th></tr></thead><tbody id="inv-body"></tbody></table>
-      <div class="add-row">
-        <button class="small-btn ghost" onclick="addInvRow()">+ Item</button>
-        <select class="pick-sel" id="inv-pick" onchange="if(this.value){addInvFromData(this.value);this.value='';}"><option value="">Add gear / armor…</option></select>
-      </div>
-      <div class="blk" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Coins</span>
-        <label style="font-size:11px;color:var(--muted);">GP <input id="f-gp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
-        <label style="font-size:11px;color:var(--muted);">SP <input id="f-sp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
-        <label style="font-size:11px;color:var(--muted);">CP <input id="f-cp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
+      <!-- EQUIPMENT TAB -->
+      <div class="tab-panel" id="tab-equipment">
+        <div class="section-bar"><span>Equipment</span></div>
+        <table class="tbl"><thead><tr><th>Item</th><th>Qty</th><th></th></tr></thead><tbody id="inv-body"></tbody></table>
+        <div class="add-row">
+          <button class="small-btn ghost" onclick="addInvRow()">+ Item</button>
+          <select class="pick-sel" id="inv-pick" onchange="if(this.value){addInvFromData(this.value);this.value='';}"><option value="">Add gear / armor…</option></select>
+        </div>
+        <div class="blk" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Coins</span>
+          <label style="font-size:11px;color:var(--muted);">GP <input id="f-gp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
+          <label style="font-size:11px;color:var(--muted);">SP <input id="f-sp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
+          <label style="font-size:11px;color:var(--muted);">CP <input id="f-cp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
+        </div>
       </div>
 
-      <div class="section-bar"><span>Notes &amp; Backstory</span></div>
-      <div class="notes-box"><textarea id="f-notes" placeholder="Personality, ideals, bonds, flaws, allies, backstory…"></textarea></div>
+      <!-- NOTES TAB -->
+      <div class="tab-panel" id="tab-notes">
+        <div class="section-bar"><span>Notes &amp; Backstory</span></div>
+        <div class="notes-box"><textarea id="f-notes" placeholder="Personality, ideals, bonds, flaws, allies, backstory…"></textarea></div>
+      </div>
     </div>
   </div>
 
@@ -464,11 +521,11 @@ select option{background:var(--input-bg);color:var(--ink);}
     </div>
   </div>
   <div class="log-actions">
+    <button class="log-action-btn campaign" id="campaign-btn" onclick="openCampaign()" title="Campaign" aria-label="Campaign">🔗</button>
     <button class="log-action-btn wizard" onclick="DNDB&&DNDB.launch()" title="Character Builder">✨ Build</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Rules Glossary">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <button class="log-action-btn import" onclick="document.getElementById('import-file').click()" title="Import JSON">Import</button>
-    <button class="log-action-btn campaign" id="campaign-btn" onclick="openCampaign()" title="Campaign" aria-label="Campaign">🔗</button>
     <input type="file" id="import-file" accept="application/json" style="display:none;" onchange="importSheet(this)">
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click an ability, save, skill, or attack to roll</div></div>
@@ -567,6 +624,9 @@ let saveProf = {};                 // { STR:true, ... }
 let skillProf = {};                // { Athletics:1 } (0 none, 1 prof, 2 expertise)
 let slotUsed = {};                 // { 1:2, 2:0, pact:1 }
 let deathSucc = 0, deathFail = 0;
+let activeConditions = [];
+let exhaustion = 0;
+let _tab = 'features';
 let _lineage = '';
 let _adv = 'norm';
 let _forceSpells = false;
@@ -640,10 +700,9 @@ function recalc(){
     if(nm === 'Perception') perceptionVal = v;
   });
   // derived
-  $('d-prof').textContent = sgn(PB); $('c-prof').textContent = sgn(PB);
-  const init = modOf('DEX'); $('d-init').textContent = sgn(init); $('c-init').textContent = sgn(init);
-  $('d-pp').textContent = 10 + perceptionVal;
-  const spd = $('f-speed').value || '30'; $('c-speed').textContent = spd;
+  $('c-prof').textContent = sgn(PB);
+  const init = modOf('DEX'); $('c-init').textContent = sgn(init);
+  const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
   // combat note
   const c = classData();
   $('cbt-note').innerHTML = c ? '<b>' + esc(c.name) + '</b> ' + levelNow() + (subclassData() ? ' · ' + esc(subclassData().name) : '') : '';
@@ -726,8 +785,7 @@ function addAttackRow(a){
       '<input type="checkbox" class="atk-prof" ' + (a.prof?'checked':'') + ' title="Proficient" onchange="scheduleAutosave()" style="accent-color:var(--dnd);">' +
       '<input type="number" class="atk-bonus num mono" value="' + num(a.bonus) + '" title="Extra to-hit" style="width:40px;" oninput="scheduleAutosave()"></div></td>' +
     '<td><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" style="width:70px;" oninput="scheduleAutosave()"><input type="text" class="atk-dtype" value="' + esc(a.type) + '" placeholder="slashing" class="mono" style="width:64px;font-size:10px;" oninput="scheduleAutosave()"></td>' +
-    '<td class="roll-cell"><button class="mini-roll" onclick="rollAttack(this)" title="Roll to hit">Hit</button></td>' +
-    '<td class="roll-cell"><button class="mini-roll" onclick="rollDamage(this)" title="Roll damage" style="background:var(--gold);">Dmg</button><button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+    '<td class="roll-cell" style="white-space:nowrap;"><button class="mini-roll" onclick="rollAttackFull(this)" title="Roll to hit and damage together">Attack</button> <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
   $('attacks-body').appendChild(tr);
 }
 function addAttackFromWeapon(name){
@@ -756,6 +814,31 @@ function rollDamage(btn){
   const faces = []; let sum = 0; for(let i=0;i<nDice;i++){ const f = dN(sides); faces.push(f); sum += f; }
   const total = sum + flat;
   addLog(name + ' — damage', String(total), nDice + 'd' + sides + ': ' + faces.join('+') + ' ' + sgn(flat) + (dtype ? ' ' + dtype : ''), 'normal');
+}
+// One button: roll to-hit (adv/dis) and damage together. Crit (nat 20) doubles the damage dice.
+function rollAttackFull(btn){
+  const tr = _atkRow(btn);
+  const abil = tr.querySelector('.atk-abil').value, prof = tr.querySelector('.atk-prof').checked;
+  const extra = num(tr.querySelector('.atk-bonus').value), name = tr.querySelector('.atk-name').value || 'Attack';
+  const dtype = tr.querySelector('.atk-dtype').value, dmg = tr.querySelector('.atk-dmg').value.trim();
+  // to-hit
+  const r = rawD20(); const hitMod = modOf(abil) + (prof ? profBonus() : 0) + extra;
+  const hitTotal = r.nat + hitMod;
+  const crit = r.nat === 20, fumble = r.nat === 1;
+  // damage
+  const m = dmg.match(/(\d*)d(\d+)\s*([+-]\s*\d+)?/i);
+  let dmgLine = '', dmgTotal = null;
+  if(m){
+    let nDice = num(m[1]) || 1; const sides = num(m[2]);
+    const flat = m[3] ? num(m[3].replace(/\s+/g,'')) : modOf(abil);
+    if(crit) nDice *= 2;
+    const faces = []; let sum = 0; for(let i=0;i<nDice;i++){ const f = dN(sides); faces.push(f); sum += f; }
+    dmgTotal = sum + flat;
+    dmgLine = nDice + 'd' + sides + '(' + faces.join('+') + ') ' + sgn(flat) + (dtype ? ' ' + dtype : '') + (crit ? ' — CRIT!' : '');
+  }
+  const result = 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
+  const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '');
+  addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
 }
 
 // ═══ INVENTORY ════════════════════════════════════════════════════════════
@@ -822,12 +905,14 @@ function renderSpellHeader(){
   const on = isCaster();
   $('spell-block').style.display = on ? '' : 'none';
   $('spell-empty').style.display = on ? 'none' : '';
+  const dc = $('cbt-dc'), sa = $('cbt-satk');
   if(on){
     $('sp-ability').textContent = spellAbilityId();
     $('sp-dc').textContent = spellDC();
     $('sp-atk').textContent = sgn(spellAtkBonus());
     $('spell-note').textContent = casterType().charAt(0).toUpperCase() + casterType().slice(1) + ' caster';
-  } else $('spell-note').textContent = 'No spellcasting';
+    if(dc) dc.textContent = spellDC(); if(sa) sa.textContent = sgn(spellAtkBonus());
+  } else { $('spell-note').textContent = 'No spellcasting'; if(dc) dc.textContent = '—'; if(sa) sa.textContent = '—'; }
 }
 function slotArray(){
   const t = D.tables(); const L = levelNow(); if(!t) return null;
@@ -952,6 +1037,57 @@ function openRules(){
 }
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
 
+// ═══ TABS ═════════════════════════════════════════════════════════════════
+function setTab(name){
+  _tab = name;
+  ['spells','features','equipment','notes'].forEach(t => {
+    const panel = $('tab-' + t); if(panel) panel.classList.toggle('on', t === name);
+    const btn = document.querySelector('.tab-btn[data-tab="' + t + '"]'); if(btn) btn.classList.toggle('on', t === name);
+  });
+}
+function setDefaultTab(){ setTab(_tab || (isCaster() ? 'spells' : 'features')); }
+
+// ═══ CONDITIONS & EXHAUSTION ══════════════════════════════════════════════
+function renderConditions(){
+  const box = $('conditions-list'); if(!box) return;
+  const conds = D.conditions();
+  box.innerHTML = conds.map(c => {
+    const on = activeConditions.some(x => norm(x) === norm(c.name));
+    return '<span class="cond-chip' + (on ? ' on' : '') + '" title="' + esc(c.description) + '" onclick="toggleCondition(\'' + esc(c.name).replace(/'/g,"\\'") + '\')" oncontextmenu="condInfo(\'' + esc(c.name).replace(/'/g,"\\'") + '\');return false;">' + esc(c.name) + '</span>';
+  }).join('');
+  renderExhaustion();
+}
+function toggleCondition(name){
+  const i = activeConditions.findIndex(x => norm(x) === norm(name));
+  if(i >= 0){ activeConditions.splice(i,1); addLog('Condition removed', '—', name, 'normal'); }
+  else { activeConditions.push(name); addLog('Condition', '⚠', name + ' applied', 'fumble'); }
+  renderConditions(); scheduleAutosave();
+}
+function condInfo(name){ const c = D.conditions().find(x => norm(x.name) === norm(name)); if(c){ $('desc-title').textContent = c.name; $('desc-body').innerHTML = '<p>' + esc(c.description) + '</p>'; $('desc-overlay').classList.add('open'); } }
+function renderExhaustion(){
+  const box = $('exh-pips'); if(!box) return;
+  let h = ''; for(let i=1;i<=6;i++) h += '<span class="exh-pip' + (i<=exhaustion?' on':'') + '" onclick="setExhaustion(' + i + ')" title="Exhaustion level ' + i + '">' + i + '</span>';
+  box.innerHTML = h;
+  const ev = $('exh-val'); if(ev) ev.textContent = exhaustion * 2;
+}
+function setExhaustion(n){ exhaustion = (exhaustion === n ? n-1 : n); renderExhaustion(); scheduleAutosave(); }
+
+// ═══ RESTS ════════════════════════════════════════════════════════════════
+function shortRest(){
+  // Warlocks regain Pact Magic slots on a Short Rest.
+  if(casterType() === 'pact' && slotUsed['pact']){ slotUsed['pact'] = 0; renderSlots(); }
+  addLog('Short Rest', '☾', 'Pact slots restored; spend Hit Dice to heal.', 'normal');
+  scheduleAutosave();
+}
+function longRest(){
+  $('f-hp-cur').value = $('f-hp-max').value; $('f-hp-temp').value = 0;
+  slotUsed = {}; deathSucc = 0; deathFail = 0;
+  if(exhaustion > 0) exhaustion -= 1;   // 2024: a Long Rest removes one Exhaustion level
+  renderDeath(); renderSlots(); renderExhaustion();
+  addLog('Long Rest', '☀', 'Full HP, all spell slots, death saves cleared' + (exhaustion >= 0 ? ', −1 Exhaustion' : ''), 'crit');
+  scheduleAutosave();
+}
+
 // ═══ LOG ══════════════════════════════════════════════════════════════════
 var _toastTimer = null;
 function showRollToast(label, result, detail, type){
@@ -998,7 +1134,7 @@ function collectSheet(){
     species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'), player: v('f-player'),
     scores, saveProf, skillProf,
     speed: v('f-speed'), ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'),
-    inspiration: $('f-inspiration').checked, deathSucc, deathFail,
+    inspiration: $('f-inspiration').checked, deathSucc, deathFail, activeConditions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
     customFeatures, addedFeats, spellsKnown, slotUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
@@ -1016,6 +1152,7 @@ function applySheet(d){
   set('f-hp-cur', d.hpCur != null ? d.hpCur : 10); set('f-hp-max', d.hpMax != null ? d.hpMax : 10); set('f-hp-temp', d.hpTemp || 0); set('f-hitdice', d.hitdice || '');
   $('f-inspiration').checked = !!d.inspiration;
   deathSucc = d.deathSucc || 0; deathFail = d.deathFail || 0;
+  activeConditions = d.activeConditions || []; exhaustion = d.exhaustion || 0; _tab = d.tab || _tab;
   set('f-proficiencies', d.proficiencies); set('f-notes', d.notes);
   set('f-gp', d.gp || 0); set('f-sp', d.sp || 0); set('f-cp', d.cp || 0);
   customFeatures = d.customFeatures || []; addedFeats = d.addedFeats || [];
@@ -1023,7 +1160,7 @@ function applySheet(d){
   $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow);
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
   refreshSubclassList(); refreshSpellPicker();
-  renderDeath(); renderFeatures(); recalc();
+  renderDeath(); renderFeatures(); renderConditions(); recalc(); setDefaultTab();
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
 }
 function saveSheet(quiet){
