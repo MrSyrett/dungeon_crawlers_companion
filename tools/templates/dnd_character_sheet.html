@@ -124,6 +124,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.6);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
 .tab-btn:hover{color:#fff;}
 .tab-btn.on{color:#fff;border-bottom-color:var(--dnd);background:rgba(155,27,34,.25);}
+.tab-btn.no-cast{opacity:.38;}
 .tab-panel{display:none;}
 .tab-panel.on{display:block;height:480px;overflow-y:auto;overflow-x:hidden;}
 .tab-panel.on .section-bar{position:sticky;top:0;z-index:2;}
@@ -604,17 +605,9 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="tab-panel" id="tab-features">
         <div class="section-bar red"><span>Class Resources</span><span class="sb-note">per-day trackers</span></div>
         <div id="resources-list" class="res-wrap"></div>
-        <div class="add-row">
-          <input type="text" id="res-name" class="pick-sel" placeholder="Tracker name" style="flex:1 1 90px;">
-          <input type="number" id="res-max" min="1" placeholder="Max" class="pick-sel" style="width:56px;flex:0 0 auto;">
-          <select id="res-reset" class="pick-sel" style="width:auto;flex:0 0 auto;"><option value="short">Short rest</option><option value="long">Long rest</option></select>
-          <button class="small-btn ghost" onclick="addCustomResource()">+ Tracker</button>
-        </div>
         <div class="section-bar red"><span>Features &amp; Traits</span><span class="sb-note" id="feat-note"></span></div>
         <div id="features-list" style="padding:4px 10px 8px;"></div>
         <div class="add-row">
-          <input type="text" id="feat-name" class="pick-sel" placeholder="Custom feature name" style="flex:1 1 130px;">
-          <button class="small-btn ghost" onclick="addCustomFeature()">+ Feature</button>
           <select class="pick-sel" id="feat-pick" onchange="if(this.value){addFeatByName(this.value);this.value='';}"><option value="">Add a Feat…</option></select>
         </div>
       </div>
@@ -1020,6 +1013,7 @@ function addAttackRow(a){
   const tr = document.createElement('tr');
   if(a.spell) tr.dataset.spell = a.spell;
   if(a.weapon) tr.dataset.weapon = a.weapon;
+  if(a.unarmed) tr.dataset.unarmed = '1';
   const abilOpts = ABILITIES.map(x => '<option value="' + x.id + '"' + (a.abil===x.id?' selected':'') + '>' + x.id + '</option>').join('');
   tr.innerHTML =
     '<td><input type="text" class="atk-name" value="' + esc(a.name) + '" placeholder="Longsword" oninput="scheduleAutosave()"></td>' +
@@ -1029,6 +1023,14 @@ function addAttackRow(a){
     '<td><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" style="width:70px;" oninput="scheduleAutosave()"><input type="text" class="atk-dtype" value="' + esc(a.type) + '" placeholder="slashing" class="mono" style="width:64px;font-size:10px;" oninput="scheduleAutosave()"></td>' +
     '<td class="roll-cell" style="white-space:nowrap;"><button class="mini-roll" onclick="rollAttackFull(this)" title="Roll to hit and damage together">Attack</button></td>';
   $('attacks-body').appendChild(tr);
+  return tr;
+}
+// Unarmed Strike is always available — keep exactly one row, at the top.
+function ensureUnarmed(){
+  const body = $('attacks-body'); if(!body) return;
+  if([...body.querySelectorAll('tr')].some(tr => tr.dataset.unarmed === '1')) return;
+  const tr = addAttackRow({ name:'Unarmed Strike', abil:'STR', prof:true, bonus:0, damage:'1', type:'bludgeoning', unarmed:true });
+  body.insertBefore(tr, body.firstChild);
 }
 function addAttackFromWeapon(name){
   const w = D.weapons().find(x => x.name === name); if(!w) return;
@@ -1077,6 +1079,10 @@ function rollAttackFull(btn){
     const faces = []; let sum = 0; for(let i=0;i<nDice;i++){ const f = dN(sides); faces.push(f); sum += f; }
     dmgTotal = sum + flat;
     dmgLine = nDice + 'd' + sides + '(' + faces.join('+') + ') ' + sgn(flat) + (dtype ? ' ' + dtype : '') + (crit ? ' — CRIT!' : '');
+  } else if(/^\d+$/.test(dmg)){
+    // flat damage (e.g. Unarmed Strike = 1 + ability modifier)
+    dmgTotal = num(dmg) + modOf(abil);
+    dmgLine = num(dmg) + ' ' + sgn(modOf(abil)) + (dtype ? ' ' + dtype : '');
   }
   const result = 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
   const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '');
@@ -1330,7 +1336,7 @@ function renderFeatures(){
   const auto = autoFeatures();
   const featObjs = addedFeats.map(n => { const f = D.feats().find(x => norm(x.name) === norm(n)); return f ? { name: f.name, meta: f.category + ' feat', desc: (f.benefits||[]).join(' ') } : { name: n, meta: 'Feat', desc: '' }; });
   const all = auto.concat(featObjs).concat(customFeatures.map(cf => ({ name: cf.name, meta: cf.meta || 'Custom', desc: cf.desc || '', custom: true })));
-  if(!all.length){ box.innerHTML = '<div style="font-family:Barlow,sans-serif;font-size:12px;color:var(--muted);padding:6px 4px;">Set a class, species, and background above — features fill in automatically. Add feats or custom features below.</div>'; $('feat-note').textContent=''; return; }
+  if(!all.length){ box.innerHTML = '<div style="font-family:Barlow,sans-serif;font-size:12px;color:var(--muted);padding:6px 4px;">Set a class, species, and background above — features fill in automatically. Add feats below.</div>'; $('feat-note').textContent=''; return; }
   $('feat-note').innerHTML = '<b>' + all.length + '</b> features';
   all.forEach((f, i) => {
     const d = document.createElement('div'); d.className = 'feat-item';
@@ -1375,7 +1381,7 @@ function allResources(){ return autoResources().concat(customResources.map(r => 
 function renderResources(){
   const box = $('resources-list'); if(!box) return;
   const list = allResources();
-  if(!list.length){ box.innerHTML = '<div class="res-empty">No per-day resources at this level — set a class above, or add your own tracker below.</div>'; return; }
+  if(!list.length){ box.innerHTML = '<div class="res-empty">No per-day resources at this level.</div>'; return; }
   box.innerHTML = list.map(r => {
     const used = Math.min(resourceUsed[r.key] || 0, r.max);
     let pips = ''; for(let i=1;i<=r.max;i++) pips += '<span class="res-pip' + (i<=used?' used':'') + '" onclick="toggleResource(\'' + esc(r.key).replace(/'/g,"\\'") + '\',' + i + ',' + r.max + ')"></span>';
@@ -1412,6 +1418,8 @@ function renderSpellHeader(){
   const on = isCaster();
   $('spell-block').style.display = on ? '' : 'none';
   $('spell-empty').style.display = on ? 'none' : '';
+  const stb = document.querySelector('.tab-btn[data-tab="spells"]');
+  if(stb){ stb.classList.toggle('no-cast', !on); stb.title = on ? '' : 'This class has no spellcasting'; }
   if(on){
     $('sp-ability').textContent = spellAbilityId();
     $('sp-dc').textContent = spellDC();
@@ -1605,7 +1613,7 @@ function setDefaultTab(){ setTab(_tab || (isCaster() ? 'spells' : 'features')); 
 // ═══ CONDITIONS & EXHAUSTION ══════════════════════════════════════════════
 function renderConditions(){
   const box = $('conditions-list'); if(!box) return;
-  const conds = D.conditions();
+  const conds = D.conditions().filter(c => norm(c.name) !== 'exhaustion');   // exhaustion has its own 6-level pip tracker
   box.innerHTML = conds.map(c => {
     const on = activeConditions.some(x => norm(x) === norm(c.name));
     return '<span class="cond-chip' + (on ? ' on' : '') + '" title="' + esc(c.description) + '" onclick="toggleCondition(\'' + esc(c.name).replace(/'/g,"\\'") + '\')" oncontextmenu="condInfo(\'' + esc(c.name).replace(/'/g,"\\'") + '\');return false;">' + esc(c.name) + '</span>';
@@ -1685,7 +1693,7 @@ function collectSheet(){
     name: tr.querySelector('.atk-name').value, abil: tr.querySelector('.atk-abil').value,
     prof: tr.querySelector('.atk-prof').checked, bonus: num(tr.querySelector('.atk-bonus').value),
     damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value,
-    spell: tr.dataset.spell || ''
+    spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1'
   })).filter(a => a.name || a.damage);
   const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1' })).filter(i => i.name);
   return {
@@ -1725,6 +1733,7 @@ function applySheet(d){
   resourceUsed = d.resourceUsed || {}; customResources = d.customResources || [];
   spellsKnown = d.spellsKnown || []; slotUsed = d.slotUsed || {}; _forceSpells = !!d.forceSpells; _spellAbility = d.spellAbility || ''; _lineage = d.lineage || '';
   $('attacks-body').innerHTML = ''; (d.attacks || []).filter(a => !a.spell).forEach(addAttackRow);   // spells now live only in the Spells tab
+  ensureUnarmed();
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
   refreshSubclassList(); refreshSpellPicker();
   renderDeath(); renderFeatures(); renderResources(); renderConditions(); recalc(); setDefaultTab();
@@ -1950,6 +1959,7 @@ fillDatalists();
 updateDicePoolDisplay();
 renderResources();
 autoLoad();
+ensureUnarmed();
 </script>
 </body>
 </html>
