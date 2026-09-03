@@ -215,8 +215,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .death-pip{display:inline-block;width:14px;height:14px;border:2px solid var(--muted);border-radius:50%;cursor:pointer;background:transparent;vertical-align:middle;margin:0 2px;box-sizing:border-box;}
 #death-succ,#death-fail{display:inline-flex;gap:5px;align-items:center;}
 .death-box{grid-column:span 2;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;}
+.death-body{display:flex;align-items:center;justify-content:center;gap:14px;}
 .death-stack{display:flex;flex-direction:column;gap:6px;align-items:center;}
-.death-box .mini-roll{margin-top:1px;}
 .death-pip.succ.on{background:var(--green);border-color:var(--green);}
 .death-pip.fail.on{background:var(--red);border-color:var(--red);}
 
@@ -286,15 +286,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .res-pip.used{background:var(--dnd);}
 .res-reset-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;cursor:pointer;}
 .res-reset-btn:hover{background:var(--dnd-lt);color:var(--dnd-dk);}
-.spell-row{display:grid;grid-template-columns:16px 1fr auto;gap:6px;align-items:center;padding:3px 10px;border-bottom:1px solid var(--rule);}
+.spell-row{display:flex;gap:8px;align-items:center;padding:4px 10px;border-bottom:1px solid var(--rule);}
 .spell-row:hover{background:var(--box);}
 .sp-prep{width:14px;height:14px;border:2px solid var(--dnd-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;}
 .sp-prep.on{background:var(--dnd);}
-.sp-cell{display:flex;flex-direction:column;min-width:0;cursor:pointer;}
 .sp-prep-gap{width:14px;flex-shrink:0;}
-.sp-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.01em;}
-.sp-cell:hover .sp-name{color:var(--dnd);}
-.sp-info{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;margin-top:1px;}
+.sp-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.01em;cursor:pointer;flex-shrink:0;}
+.sp-name:hover{color:var(--dnd);}
+.sp-info{flex:1;text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .sp-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:12px;}
 .sp-x:hover{color:var(--red);}
 .cast-btn{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
@@ -516,7 +515,6 @@ select option{background:var(--input-bg);color:var(--ink);}
             <div class="exh-box">
               <span class="eb-lbl">Exhaustion</span>
               <span id="exh-pips"></span>
-              <span class="sb-note" style="color:var(--muted);">−<span id="exh-val">0</span> to d20 tests</span>
             </div>
             <div class="cond-wrap" id="conditions-list"></div>
           </div>
@@ -540,11 +538,13 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof">+2</div></div>
           <div class="cbt death-box">
             <div class="c-lbl">Death Saves</div>
-            <div class="death-stack">
-              <span id="death-succ" title="Successes"></span>
-              <span id="death-fail" title="Failures"></span>
+            <div class="death-body">
+              <div class="death-stack">
+                <span id="death-succ" title="Successes"></span>
+                <span id="death-fail" title="Failures"></span>
+              </div>
+              <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save">🎲 Roll</button>
             </div>
-            <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save">🎲 Roll</button>
           </div>
         </div>
         <div class="cbt hp-box">
@@ -1464,11 +1464,9 @@ function renderSpells(){
       const q = esc(sk.name).replace(/'/g,"\\'");
       row.innerHTML =
         (lvl > 0 ? '<span class="sp-prep' + (sk.prepared?' on':'') + '" onclick="togglePrep(\'' + q + '\')" title="Prepared"></span>' : '<span class="sp-prep-gap"></span>') +
-        '<span class="sp-cell" onclick="openSpell(\'' + q + '\')" title="Read">' +
-          '<span class="sp-name">' + esc(sk.name) + '</span>' +
-          '<span class="sp-info">' + esc(spellInfoLine(sp)) + '</span>' +
-        '</span>' +
-        '<button class="cast-btn" onclick="event.stopPropagation();castSpellFull(\'' + q + '\')" title="Cast this spell">Cast</button>';
+        '<span class="sp-name" onclick="openSpell(\'' + q + '\')" title="Read">' + esc(sk.name) + '</span>' +
+        '<span class="sp-info" onclick="openSpell(\'' + q + '\')" title="Read">' + esc(spellInfoLine(sp)) + '</span>' +
+        '<button class="cast-btn" onclick="castSpellFull(\'' + q + '\')" title="Cast this spell">Cast</button>';
       box.appendChild(row);
     });
   });

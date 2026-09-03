@@ -17,8 +17,19 @@
     classes: () => window.DND_CLASSES || [], species: () => window.DND_SPECIES || [],
     backgrounds: () => window.DND_BACKGROUNDS || [], skills: () => window.DND_SKILLS || [],
     feats: () => window.DND_FEATS || [], spells: () => window.DND_SPELLS || [],
+    weapons: () => window.DND_WEAPONS || [], armor: () => window.DND_ARMOR || [],
+    gear: () => window.DND_GEAR || [], magicItems: () => window.DND_MAGIC_ITEMS || [],
     tables: () => window.DND_TABLES || null,
   };
+  // Map a starting-equipment token to the catalog's canonical name so it's equippable.
+  function canonItemName(name){
+    const names = [].concat(D.weapons(), D.armor(), D.gear(), D.magicItems()).map((x) => x.name);
+    const n = String(name).trim().toLowerCase();
+    let hit = names.find((x) => x.toLowerCase() === n)
+      || names.find((x) => x.toLowerCase() === n.replace(/s$/, ""));
+    if(!hit){ const s = n.replace(/\s+armor$/, ""); if(s !== n) hit = names.find((x) => x.toLowerCase() === s); }
+    return hit || String(name).trim();
+  }
   const STEPS = ["Class","Subclass","Species","Background","Abilities","Skills","Choices","Spells","Equipment","Review"];
   // Level-1 (and level-gated) class decisions the builder can offer from data.
   const CLASS_CHOICES = {
@@ -294,13 +305,21 @@
     }
     return h;
   }
+  function shortCT(ct){ ct = String(ct || ""); if(/bonus/i.test(ct)) return "Bonus"; if(/reaction/i.test(ct)) return "Reaction"; if(/^\s*action\s*$/i.test(ct)) return "Action"; return ct; }
+  function spellDmg(s){ const m = String(s.description || "").match(/(\d+d\d+)\s+([A-Za-z]+)\s+damage/i); return m ? (m[1] + " " + m[2].toLowerCase()) : ""; }
   function spellCard(s, kind, max) {
     const arr = kind === "cantrip" ? st.pickedCantrips : st.pickedSpells;
     const on = arr.includes(s.name);
-    const tags = [s.level === 0 ? "Cantrip" : "Lvl " + s.level, s.school];
+    const tags = [s.level === 0 ? "Cantrip" : "Lvl " + s.level, s.school, shortCT(s.castingTime), s.range];
+    if (s.duration && !/instant/i.test(s.duration)) tags.push(s.duration);
+    const dmg = spellDmg(s); if (dmg) tags.push(dmg);
     if (s.concentration) tags.push("Conc.");
     if (s.ritual) tags.push("Ritual");
-    return '<div class="dndb-card small' + (on ? " on" : "") + '" data-spell="' + esc(s.name) + '" data-kind="' + kind + '" data-max="' + max + '" title="' + esc(s.description || "") + '"><div class="dc-title">' + esc(s.name) + '</div><div class="dc-sub">' + esc(tags.join(" · ")) + '</div></div>';
+    return '<div class="dndb-card small spellpick' + (on ? " on" : "") + '" data-spell="' + esc(s.name) + '" data-kind="' + kind + '" data-max="' + max + '">' +
+      '<div class="sp-pick-hd"><span class="dc-title">' + esc(s.name) + '</span><button class="sp-pick-i" data-info="' + esc(s.name) + '" title="Show details">&#9432;</button></div>' +
+      '<div class="dc-sub">' + esc(tags.join(" · ")) + '</div>' +
+      '<div class="sp-pick-desc" hidden>' + esc(s.description || "") + (s.higherLevels ? '<br><b>At Higher Levels.</b> ' + esc(s.higherLevels) : "") + '</div>' +
+    '</div>';
   }
   function rEquipment() {
     const c = clsData();
@@ -373,7 +392,8 @@
       render();
     }));
     body.querySelectorAll("[data-order]").forEach((el) => el.addEventListener("click", () => { st.orders = st.orders || {}; st.orders[el.dataset.order] = el.dataset.opt; render(); }));
-    // spells
+    // spells: ⓘ toggles the inline description without selecting the card
+    body.querySelectorAll("[data-info]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); const c = el.closest("[data-spell]"); const d = c && c.querySelector(".sp-pick-desc"); if(d) d.hidden = !d.hidden; }));
     body.querySelectorAll("[data-spell]").forEach((el) => el.addEventListener("click", () => {
       const n = el.dataset.spell, kind = el.dataset.kind, max = parseInt(el.dataset.max,10);
       const arr = kind === "cantrip" ? st.pickedCantrips : st.pickedSpells;
@@ -462,7 +482,12 @@
       const g = (String(c.startingEquipment[1] || "").match(/(\d+)\s*GP/i) || [])[1];
       gp = g ? parseInt(g, 10) : 0;
     } else if (c && c.startingEquipment && c.startingEquipment[0]) {
-      c.startingEquipment[0].split(/,\s*/).forEach((x) => { const m = x.trim().match(/^(\d+)\s+(.*)/); inv.push(m ? { name:m[2], qty:parseInt(m[1],10) } : { name:x.trim(), qty:1 }); });
+      c.startingEquipment[0].split(/,\s*/).forEach((x) => {
+        const t = x.trim();
+        const gold = t.match(/^(\d+)\s*GP$/i); if(gold){ gp += parseInt(gold[1], 10); return; }   // gold → coins, not an item
+        const m = t.match(/^(\d+)\s+(.*)/);
+        inv.push(m ? { name: canonItemName(m[2]), qty: parseInt(m[1], 10) } : { name: canonItemName(t), qty: 1 });
+      });
     }
     // spells
     const spellsKnown = st.pickedCantrips.map((n) => ({ name:n, prepared:true }))
@@ -524,6 +549,10 @@
     ".drs-a{display:block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;color:#a99e90;letter-spacing:.06em;}" +
     ".drs-v{display:block;font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:#f0e0d6;}" +
     ".drs-m{display:block;font-family:'Share Tech Mono',monospace;font-size:11px;color:#e08a70;}" +
-    ".dndb-review .dr-line{font-size:13px;color:#cdc3b6;line-height:1.6;margin-top:6px;}.dndb-review b{color:#f0e0d6;}";
+    ".dndb-review .dr-line{font-size:13px;color:#cdc3b6;line-height:1.6;margin-top:6px;}.dndb-review b{color:#f0e0d6;}" +
+    ".dndb-card.spellpick .sp-pick-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}" +
+    ".sp-pick-i{background:transparent;border:none;color:#8ad4ff;font-size:14px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;}" +
+    ".sp-pick-i:hover{color:#c8e8ff;}" +
+    ".sp-pick-desc{font-size:11px;color:#cdc3b6;line-height:1.45;margin-top:5px;border-top:1px solid #3a2f2a;padding-top:5px;}";
   document.head.appendChild(css);
 })();

@@ -192,7 +192,20 @@
     }
     return h;
   }
-  function spellCard(s, kind, max){ const arr = kind==="cantrip"?lu.pickedCantrips:lu.pickedSpells; const on = arr.includes(s.name); return '<div class="dndb-card small' + (on?" on":"") + '" data-spell="' + esc(s.name) + '" data-kind="' + kind + '" data-max="' + max + '"><div class="dc-title">' + esc(s.name) + '</div><div class="dc-sub">' + (s.level===0?"Cantrip":"Lvl "+s.level) + ' · ' + esc(s.school) + '</div></div>'; }
+  function shortCT(ct){ ct = String(ct || ""); if(/bonus/i.test(ct)) return "Bonus"; if(/reaction/i.test(ct)) return "Reaction"; if(/^\s*action\s*$/i.test(ct)) return "Action"; return ct; }
+  function spellDmg(s){ const m = String(s.description || "").match(/(\d+d\d+)\s+([A-Za-z]+)\s+damage/i); return m ? (m[1] + " " + m[2].toLowerCase()) : ""; }
+  function spellCard(s, kind, max){
+    const arr = kind==="cantrip"?lu.pickedCantrips:lu.pickedSpells; const on = arr.includes(s.name);
+    const tags = [s.level===0?"Cantrip":"Lvl "+s.level, s.school, shortCT(s.castingTime), s.range];
+    if(s.duration && !/instant/i.test(s.duration)) tags.push(s.duration);
+    const dmg = spellDmg(s); if(dmg) tags.push(dmg);
+    if(s.concentration) tags.push("Conc."); if(s.ritual) tags.push("Ritual");
+    return '<div class="dndb-card small spellpick' + (on?" on":"") + '" data-spell="' + esc(s.name) + '" data-kind="' + kind + '" data-max="' + max + '">' +
+      '<div class="sp-pick-hd"><span class="dc-title">' + esc(s.name) + '</span><button class="sp-pick-i" data-info="' + esc(s.name) + '" title="Show details">&#9432;</button></div>' +
+      '<div class="dc-sub">' + esc(tags.join(" · ")) + '</div>' +
+      '<div class="sp-pick-desc" hidden>' + esc(s.description || "") + (s.higherLevels ? '<br><b>At Higher Levels.</b> ' + esc(s.higherLevels) : "") + '</div>' +
+    '</div>';
+  }
   function rReview(){
     const cur = curClasses();
     let h = '<p class="m-hint">Confirm your new level.</p><div class="dndb-review">';
@@ -229,6 +242,7 @@
       lu.asi[a] = nv; if(!nv) delete lu.asi[a]; render();
     }));
     const fs = $("dndlu-feat"); if(fs) fs.addEventListener("change", () => { lu.feat = fs.value; render(); });
+    body.querySelectorAll("[data-info]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); const c = el.closest("[data-spell]"); const d = c && c.querySelector(".sp-pick-desc"); if(d) d.hidden = !d.hidden; }));
     body.querySelectorAll("[data-spell]").forEach((el) => el.addEventListener("click", () => {
       const n = el.dataset.spell, kind = el.dataset.kind, max = num(el.dataset.max), arr = kind==="cantrip"?lu.pickedCantrips:lu.pickedSpells;
       const i = arr.indexOf(n); if(i>=0) arr.splice(i,1); else { if(arr.length>=max) arr.shift(); arr.push(n); }
