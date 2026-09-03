@@ -71,6 +71,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .adv-seg button.on{background:var(--dnd);color:#fff;}
 .adv-seg button.adv.on{background:#2f8f4e;}
 .adv-seg button.dis.on{background:#b03030;}
+.dice-pool-display{font-family:'Share Tech Mono',monospace;font-size:12px;color:#c8a020;min-height:18px;word-break:break-word;line-height:1.4;}
+.dice-pool-display span{color:#e8c84a;}
+.dice-pool-display .empty{color:#5a5050;}
+.dice-clear-btn{flex:0 0 auto;padding:7px 12px;background:transparent;border:1px solid #3a3030;color:#9a8f8f;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.dice-clear-btn:hover{background:#241c1c;color:#fff;}
 .dice-btns{display:flex;gap:4px;}
 .dice-btn{flex:1;padding:6px 0;background:var(--dnd);border:1px solid var(--dnd-dk);color:#fff;font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;border-radius:3px;}
 .dice-btn:hover{background:var(--dnd-dk);}
@@ -566,23 +571,21 @@ select option{background:var(--input-bg);color:var(--ink);}
         <button class="adv" data-mode="adv" onclick="setAdv('adv')" title="Advantage">Adv</button>
       </div>
     </div>
-    <div class="tray-row">
-      <span class="tray-label">Mod</span>
-      <input class="tray-input" id="tray-mod" type="number" value="0" title="Flat modifier added to the die">
-      <span class="tray-label">×</span>
-      <input class="tray-input" id="tray-n" type="number" min="1" max="40" value="1" title="How many dice">
-    </div>
+    <div class="dice-pool-display" id="dice-pool-display"><span>Empty</span></div>
     <div class="dice-btns">
-      <button class="dice-btn" onclick="rollDie(4)">d4</button>
-      <button class="dice-btn" onclick="rollDie(6)">d6</button>
-      <button class="dice-btn" onclick="rollDie(8)">d8</button>
-      <button class="dice-btn" onclick="rollDie(10)">d10</button>
-      <button class="dice-btn" onclick="rollDie(12)">d12</button>
-      <button class="dice-btn" onclick="rollDie(20)">d20</button>
-      <button class="dice-btn" onclick="rollDie(100)">d%</button>
+      <button class="dice-btn" onclick="addDie(4)">d4</button>
+      <button class="dice-btn" onclick="addDie(6)">d6</button>
+      <button class="dice-btn" onclick="addDie(8)">d8</button>
+      <button class="dice-btn" onclick="addDie(10)">d10</button>
+      <button class="dice-btn" onclick="addDie(12)">d12</button>
+      <button class="dice-btn" onclick="addDie(20)">d20</button>
+      <button class="dice-btn" onclick="addDie(100)">d%</button>
     </div>
-    <button class="dice-roll-btn" onclick="rollDie(20)">Roll d20</button>
-    <div class="tray-note">The Adv/Normal/Dis switch also applies to every d20 check, save, and attack you click on the sheet.</div>
+    <div style="display:flex;gap:6px;">
+      <button class="dice-clear-btn" onclick="clearDicePool()">Clear</button>
+      <button class="dice-roll-btn" onclick="rollDicePool()" title="Roll the dice pool">🎲 Roll Pool</button>
+    </div>
+    <div class="tray-note">Tap dice to build a pool, then Roll. The Adv/Normal/Dis switch applies to any d20 in the pool and to every check, save, and attack you click on the sheet.</div>
   </div>
 </div>
 </div><!-- app-wrap -->
@@ -784,13 +787,27 @@ function rollHitDie(){
   const roll = dN(sides), con = modOf('CON'), total = Math.max(1, roll + con);
   addLog('Hit Die', '+' + total, 'd' + sides + ': ' + roll + ' ' + sgn(con) + ' CON', 'normal');
 }
-function rollDie(sides){
-  const n = Math.max(1, Math.min(40, num($('tray-n').value) || 1)), mod = num($('tray-mod').value);
-  if(sides === 20 && n === 1){ d20Check('d20', mod); return; }
-  const faces = []; let sum = 0; for(let i=0;i<n;i++){ const f = dN(sides); faces.push(f); sum += f; }
-  const total = sum + mod;
-  let type = 'normal'; if(sides === 20 && n === 1){ if(faces[0]===20) type='crit'; else if(faces[0]===1) type='fumble'; }
-  addLog(n + 'd' + sides + (mod ? ' ' + sgn(mod) : ''), String(total), faces.join(' + ') + (mod ? ' ' + sgn(mod) : ''), type);
+// ── Dice-pool tray: tap dice to build a pool, then roll the whole pool ──
+let dicePool = [];
+function dieLabel(sides){ return sides === 100 ? 'd%' : 'd' + sides; }
+function addDie(sides){ dicePool.push(sides); updateDicePoolDisplay(); }
+function updateDicePoolDisplay(){
+  const el = $('dice-pool-display'); if(!el) return;
+  if(!dicePool.length){ el.innerHTML = '<span class="empty">Empty — tap dice to add</span>'; return; }
+  const c = {}; dicePool.forEach(s => c[s] = (c[s] || 0) + 1);
+  el.innerHTML = Object.keys(c).map(Number).sort((a,b) => a - b).map(s => '<span>' + c[s] + dieLabel(s) + '</span>').join(' + ');
+}
+function clearDicePool(){ dicePool = []; updateDicePoolDisplay(); }
+function rollDicePool(){
+  if(!dicePool.length){ addLog('Dice Pool', '—', 'No dice in the pool — tap dice to add', 'normal'); return; }
+  const parts = []; let total = 0;
+  dicePool.forEach(sides => {
+    if(sides === 20 && _adv !== 'norm'){ const r = rawD20(); total += r.nat; parts.push('d20[' + r.faces.join(',') + '→' + r.nat + (r.mode === 'adv' ? ' adv' : ' dis') + ']'); }
+    else { const f = dN(sides); total += f; parts.push(dieLabel(sides) + '(' + f + ')'); }
+  });
+  const c = {}; dicePool.forEach(s => c[s] = (c[s] || 0) + 1);
+  const label = Object.keys(c).map(Number).sort((a,b) => a - b).map(s => c[s] + dieLabel(s)).join(' + ');
+  addLog('Dice Pool: ' + label, String(total), parts.join(' + ') + ' = ' + total, 'normal');
 }
 
 // ═══ DEATH SAVES ══════════════════════════════════════════════════════════
@@ -1406,6 +1423,7 @@ campaignUpdateBtn();
 // Data is on the page now: build skills, pickers, then load the saved sheet.
 buildSkills();
 fillDatalists();
+updateDicePoolDisplay();
 autoLoad();
 </script>
 </body>
