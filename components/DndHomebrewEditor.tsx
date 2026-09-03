@@ -64,6 +64,14 @@ const SIZES = ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"] as cons
 const FEAT_CATEGORIES = ["Origin", "General", "Fighting Style", "Epic Boon"] as const;
 const CASTER_TYPES = ["none", "full", "half", "third", "pact", "artificer"] as const;
 const MONSTER_GROUPS = ["Humanoids", "Beasts", "Monstrosities", "Undead", "Fiends", "Celestials", "Fey", "Dragons", "Giants", "Elementals", "Constructs", "Aberrations", "Oozes", "Plants"] as const;
+// Mechanical bonuses a magic item can grant (each maps to a real sheet effect).
+const ITEM_BONUS_OPTS: readonly Opt[] = [
+  ["ac", "Armor Class"], ["save", "Saving Throws (all)"], ["hp", "Hit Point Max"],
+  ["speed", "Walking Speed (ft.)"], ["init", "Initiative"],
+  ["spellAtk", "Spell Attack"], ["spellDC", "Spell Save DC"], ["atk", "Weapon Attack & Damage"],
+  ["str", "Strength"], ["dex", "Dexterity"], ["con", "Constitution"],
+  ["int", "Intelligence"], ["wis", "Wisdom"], ["cha", "Charisma"],
+];
 
 const optsOf = (list: readonly string[]): readonly Opt[] => list.map((x) => [x, x] as Opt);
 const s = (d: Data, k: string): string => { const v = d[k]; return typeof v === "string" ? v : v == null ? "" : String(v); };
@@ -81,11 +89,11 @@ const SCHEMAS: Record<string, Schema> = {
       const k = s(d, "hbKind");
       if (k === "weapon") return `Weapon · ${s(d, "damage")} ${s(d, "damageType")}`;
       if (k === "armor") return `Armor · ${s(d, "category")}`;
-      if (k === "magic") return `Magic · ${s(d, "rarity")}`;
+      if (k === "magic") { const n = Array.isArray(d.bonuses) ? d.bonuses.length : 0; return `Magic · ${s(d, "rarity")}${n ? ` · ${n} bonus${n === 1 ? "" : "es"}` : ""}`; }
       return `Gear · ${s(d, "category")}`;
     },
-    blank: () => ({ name: "", hbKind: "weapon", category: "Simple", kind: "Melee", cost: "", damage: "1d4", damageType: "bludgeoning", weight: "", properties: [], mastery: "" }),
-    toForm: (d) => ({ ...d, properties: arr(d, "properties") }),
+    blank: () => ({ name: "", hbKind: "weapon", category: "Simple", kind: "Melee", cost: "", damage: "1d4", damageType: "bludgeoning", weight: "", properties: [], mastery: "", bonuses: [] }),
+    toForm: (d) => ({ ...d, properties: arr(d, "properties"), bonuses: Array.isArray(d.bonuses) ? (d.bonuses as Data[]) : [] }),
   },
   "dnd-feat": {
     kind: "dnd-feat",
@@ -124,7 +132,7 @@ const SCHEMAS: Record<string, Schema> = {
     kind: "dnd-spell",
     title: "My Homebrew Spells",
     noun: "Spell",
-    summary: (d) => `${s(d, "level") === "0" ? "Cantrip" : "Level " + s(d, "level")} · ${s(d, "school")}`,
+    summary: (d) => [`${s(d, "level") === "0" ? "Cantrip" : "Level " + s(d, "level")} · ${s(d, "school")}`, s(d, "damage") && `${s(d, "damage")} ${s(d, "damageType")}`.trim(), s(d, "heal") && `heal ${s(d, "heal")}`].filter(Boolean).join(" · "),
     fields: [
       { key: "name", label: "Name", type: "text", full: true, placeholder: "e.g. Ember Lash" },
       { key: "level", label: "Level (0 = cantrip)", type: "number", placeholder: "0–9" },
@@ -137,9 +145,15 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "ritual", label: "Ritual", type: "checkbox" },
       { key: "classes", label: "Class Lists", type: "chips", options: [...SPELL_CLASSES], full: true },
       { key: "description", label: "Description", type: "textarea", full: true, placeholder: "What the spell does…" },
-      { key: "higherLevels", label: "At Higher Levels (optional)", type: "textarea", full: true, placeholder: "Upcast / cantrip scaling text…" },
+      { key: "roll", label: "Rolls as (on the sheet)", type: "select", options: [["attack", "Spell Attack Roll"], ["save", "Saving Throw"]], empty: "— none / auto —", help: "How casting resolves on the character sheet." },
+      { key: "saveAbility", label: "Save Ability (if a save)", type: "select", options: optsOf([...ABILITIES]), empty: "—" },
+      { key: "damage", label: "Damage dice", type: "text", placeholder: "e.g. 3d6" },
+      { key: "damageType", label: "Damage Type", type: "select", options: optsOf([...DAMAGE_TYPES]), empty: "— none —" },
+      { key: "heal", label: "Healing dice", type: "text", placeholder: "e.g. 2d8 (+ your spell mod)" },
+      { key: "upcast", label: "Upcast: extra dice / slot level", type: "text", placeholder: "e.g. 1d6", help: "Added per slot level above the spell's level (or per cantrip tier)." },
+      { key: "higherLevels", label: "At Higher Levels (text, optional)", type: "textarea", full: true, placeholder: "Upcast / cantrip scaling text…" },
     ],
-    blank: () => ({ name: "", level: "1", school: "Evocation", castingTime: "Action", range: "60 feet", components: "V, S", duration: "Instantaneous", concentration: false, ritual: false, classes: [], description: "", higherLevels: "" }),
+    blank: () => ({ name: "", level: "1", school: "Evocation", castingTime: "Action", range: "60 feet", components: "V, S", duration: "Instantaneous", concentration: false, ritual: false, classes: [], description: "", roll: "", saveAbility: "DEX", damage: "", damageType: "", heal: "", upcast: "", higherLevels: "" }),
     toForm: (d) => ({ ...d, level: s(d, "level"), classes: arr(d, "classes") }),
   },
   "dnd-species": {
@@ -558,6 +572,12 @@ function EquipmentBody({ form, setForm }: BodyProps) {
           {f({ key: "attunement", label: "Requires Attunement", type: "checkbox" })}
           {f({ key: "attunementNote", label: "Attunement Note", type: "text", placeholder: "e.g. by a spellcaster" })}
           {f({ key: "description", label: "Description", type: "textarea", full: true, placeholder: "What the item does…" })}
+          {f({ key: "bonuses", label: "Mechanical bonuses", type: "objectList", full: true, addLabel: "+ Bonus",
+            help: "Applied to the character sheet while the item is equipped (and attuned, if it requires attunement). Ability-score and HP bonuses adjust those values directly; the rest fold into the derived totals.",
+            fields: [
+              { key: "target", label: "Applies to", type: "select", options: ITEM_BONUS_OPTS },
+              { key: "amount", label: "Amount (+/-)", type: "number", placeholder: "1" },
+            ] })}
         </> : null}
       </div>
     </div>

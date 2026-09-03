@@ -12,6 +12,17 @@ const CLASSES = ["Bard", "Cleric", "Druid", "Paladin", "Ranger", "Sorcerer", "Wa
 const SCHOOLS = ["Abjuration", "Conjuration", "Divination", "Enchantment", "Evocation", "Illusion", "Necromancy", "Transmutation"];
 const lvlLabel = (n: number) => (n === 0 ? "Cantrip" : `Level ${n}`);
 const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#f0a37f]";
+// Structured combat fields carried by homebrew spells (see lib/homebrew normalizeDndSpell).
+type HbCombat = { roll?: string; saveAbility?: string; damage?: string; damageType?: string; heal?: string; upcast?: string };
+function combatBits(s: unknown): string[] {
+  const c = s as HbCombat;
+  return [
+    c.damage ? `${c.damage}${c.damageType ? " " + c.damageType : ""} damage` : "",
+    c.heal ? `${c.heal} healing` : "",
+    c.roll === "attack" ? "spell attack roll" : c.roll === "save" ? `${c.saveAbility || ""} saving throw` : "",
+    c.upcast ? `+${c.upcast} per slot level` : "",
+  ].filter(Boolean);
+}
 
 export default async function DndSpellsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -69,6 +80,7 @@ export default async function DndSpellsPage({ searchParams }: { searchParams: Pr
                 {s.concentration ? <span className="text-[#e8c84a]">Concentration</span> : null}
                 {s.ritual ? <span className="text-[#8ad4ff]">Ritual</span> : null}
               </p>
+              {combatBits(s).length ? <p className="mt-1 text-[11px] font-semibold text-[#f0a37f]">{combatBits(s).join(" · ")}</p> : null}
               <p className="mt-2 text-[12.5px] leading-relaxed text-[var(--text)]">{s.description}</p>
               {s.higherLevels ? <p className="mt-1.5 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[#f0a37f]">At Higher Levels.</span> {s.higherLevels}</p> : null}
               {s.classes.length ? <p className="mt-1.5 text-[11px] text-[var(--muted)]">{s.classes.join(" · ")}</p> : null}

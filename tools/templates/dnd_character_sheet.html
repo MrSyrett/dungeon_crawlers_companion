@@ -158,6 +158,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 
 /* ABILITIES */
 .abil-box{margin:8px;border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:6px 4px 5px;text-align:center;position:relative;}
+.abil-boost{position:absolute;top:-6px;right:-4px;background:var(--dnd);color:#fff;font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;line-height:1;padding:2px 4px;border-radius:6px;box-shadow:0 1px 2px rgba(0,0,0,.25);}
+.hp-boost{font-family:'Share Tech Mono',monospace;font-size:9.5px;font-weight:700;color:#fff;background:var(--dnd);border-radius:5px;padding:1px 5px;vertical-align:middle;}
 .abil-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dnd-dk);}
 .abil-mod{font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;line-height:1;color:var(--ink);cursor:pointer;user-select:none;padding:2px 0;}
 .abil-mod:hover{color:var(--dnd);}
@@ -596,7 +598,7 @@ select option{background:var(--input-bg);color:var(--ink);}
           </div>
         </div>
         <div class="cbt hp-box">
-          <div class="c-lbl">Hit Points</div>
+          <div class="c-lbl">Hit Points <span class="hp-boost" id="hp-boost" title="Bonus to your HP maximum from an equipped magic item (included above)" style="display:none;"></span></div>
           <div class="hp-row"><input id="f-hp-cur" type="number" value="10" oninput="scheduleAutosave()"><span class="slash">/</span><input id="f-hp-max" type="number" value="10" oninput="scheduleAutosave()"></div>
           <div class="hp-adjust">
             <button class="hp-adj-btn heal" onclick="adjustHP(1)" title="Heal by the amount entered">Heal</button>
@@ -891,6 +893,7 @@ function buildAbilities(){
     const box = document.createElement('div');
     box.className = 'abil-box';
     box.innerHTML =
+      '<span class="abil-boost" id="ab-boost-' + a.id + '" title="Bonus from an equipped magic item (included in the score)" style="display:none;"></span>' +
       '<div class="abil-name">' + a.name + '</div>' +
       '<div class="abil-mod" id="mod-' + a.id + '" onclick="rollAbility(\'' + a.id + '\')" title="Roll a ' + a.name + ' check">+0</div>' +
       '<input class="abil-score" id="sc-' + a.id + '" type="number" value="10" oninput="recalc();scheduleAutosave()">' +
@@ -923,6 +926,7 @@ function cycleSkill(name){ skillProf[name] = ((skillProf[name] || 0) + 1) % 3; r
 
 // ═══ RECALC ═══════════════════════════════════════════════════════════════
 function recalc(){
+  applyMagicInputBonuses();   // fold equipped-item ability/HP bonuses into their inputs first
   const PB = profBonus();
   ABILITIES.forEach(a => {
     const m = modOf(a.id);
@@ -945,7 +949,8 @@ function recalc(){
   });
   // derived
   $('c-prof').textContent = sgn(PB);
-  const init = modOf('DEX'); $('c-init').textContent = sgn(init);
+  const init = modOf('DEX') + magicSum('init'); $('c-init').textContent = sgn(init);
+  renderMagicBadges();
   const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
   const pinv = $('d-pinv'); if(pinv) pinv.textContent = 10 + investigationVal;
   const pins = $('d-pins'); if(pins) pins.textContent = 10 + insightVal;
@@ -1500,8 +1505,10 @@ function reconcileAC(){
 }
 // ── Magic items: parse worn bonuses, apply to AC / saves / attacks ────────
 function magicData(ref){ const n = norm(ref); return D.magicItems().find(x => norm(x.name) === n) || null; }
+// Targets a homebrew magic item can boost, each with a real sheet consumer.
+const MAGIC_BONUS_KEYS = ['ac','save','hp','speed','init','spellAtk','spellDC','atk','str','dex','con','int','wis','cha'];
 function magicBonuses(m){
-  const b = { ac:0, save:0, atk:0, dmg:0, baseWeapon:null };
+  const b = { ac:0, save:0, atk:0, dmg:0, hp:0, speed:0, init:0, spellAtk:0, spellDC:0, str:0, dex:0, con:0, int:0, wis:0, cha:0, baseWeapon:null };
   if(!m) return b;
   const d = (m.description || '') + ' ' + m.name;
   let mm = d.match(/\+(\d)\s+bonus to (?:the wearer's |your )?Armor Class/i); if(mm) b.ac = +mm[1];
@@ -1513,6 +1520,8 @@ function magicBonuses(m){
   if(mm){ b.atk = +mm[1]; b.dmg = +mm[1]; }
   const wt = (m.type || '').match(/^Weapon \(([a-z ]+)\)/i);
   if(wt){ const base = D.weapons().find(w => norm(w.name) === norm(wt[1].trim())); if(base) b.baseWeapon = base; }
+  // Structured homebrew bonuses ({target, amount}) stack on top of any parsed text.
+  if(Array.isArray(m.bonuses)) m.bonuses.forEach(x => { const t = x && x.target, amt = num(x && x.amount); if(t && amt && MAGIC_BONUS_KEYS.indexOf(t) >= 0) b[t] = (b[t] || 0) + amt; });
   return b;
 }
 // ── Attunement (A3): a magic item's bonuses count only while equipped AND
@@ -1536,8 +1545,41 @@ function magicActive(tr){
   return magicNeedsAttune(invRowRef(tr)) ? isAttuned(invRowRef(tr)) : true;
 }
 function equippedMagic(){ return invRows().filter(magicActive).map(r => magicBonuses(magicData(invRowRef(r)))); }
-function magicACBonus(){ return equippedMagic().reduce((s, b) => s + (b.ac || 0), 0); }
-function magicSaveBonus(){ return equippedMagic().reduce((s, b) => s + (b.save || 0), 0); }
+// Total of one bonus key across every equipped-and-active magic item.
+function magicSum(key){ return equippedMagic().reduce((s, b) => s + (b[key] || 0), 0); }
+function magicACBonus(){ return magicSum('ac'); }
+function magicSaveBonus(){ return magicSum('save'); }
+// Ability-score + HP-max bonuses live in editable inputs, so they're applied as
+// a reversible delta (like the Shadowdark sheet): we track how much we've baked
+// in and only ever move the input by the change, so the player's base value is
+// preserved and save/load can't double-count (collectSheet stores base = shown −
+// applied; applySheet resets the tracker so the next recalc re-adds the delta).
+let _magicApplied = { str:0, dex:0, con:0, int:0, wis:0, cha:0, hp:0 };
+let _applyingMagicInputs = false;
+function applyMagicInputBonuses(){
+  if(_applyingMagicInputs) return; _applyingMagicInputs = true;
+  ABILITIES.forEach(a => {
+    const key = a.id.toLowerCase();
+    const desired = magicSum(key);
+    const delta = desired - (_magicApplied[key] || 0);
+    if(delta){ const el = $('sc-' + a.id); if(el) el.value = String((num(el.value) || 0) + delta); }
+    _magicApplied[key] = desired;
+  });
+  const hpDesired = magicSum('hp'), hpDelta = hpDesired - (_magicApplied.hp || 0);
+  if(hpDelta){ const mx = $('f-hp-max'); if(mx){ const newMax = (num(mx.value) || 0) + hpDelta; mx.value = String(newMax); const cu = $('f-hp-cur'); if(cu && num(cu.value) > newMax) cu.value = String(newMax); } }  // adjust max only; clamp current down if it now exceeds
+  _magicApplied.hp = hpDesired;
+  _applyingMagicInputs = false;
+}
+// Show a small "✦ +N" tag on any ability box / the HP field a magic item is boosting.
+function renderMagicBadges(){
+  ABILITIES.forEach(a => {
+    const el = $('ab-boost-' + a.id); if(!el) return;
+    const n = magicSum(a.id.toLowerCase());
+    el.textContent = n ? (n > 0 ? '+' + n : String(n)) : '';
+    el.style.display = n ? '' : 'none';
+  });
+  const hpEl = $('hp-boost'); if(hpEl){ const n = magicSum('hp'); hpEl.textContent = n ? '✦ ' + (n > 0 ? '+' + n : n) : ''; hpEl.style.display = n ? '' : 'none'; }
+}
 
 // ═══ SPELLBOOK (browse & add spells) ══════════════════════════════════════
 let _bookInit = false;
@@ -1843,6 +1885,7 @@ function autoSpeed(){
     const ml = num(monk.level);
     sp += ml >= 18 ? 30 : ml >= 14 ? 25 : ml >= 10 ? 20 : ml >= 6 ? 15 : 10;
   }
+  sp += magicSum('speed');                 // homebrew magic-item Speed bonus
   return sp;
 }
 function onSpeedInput(){ _speedManual = true; scheduleAutosave(); }
@@ -2008,8 +2051,8 @@ function multiCasterLevel(){ let lvl = 0; nonPactCasters().forEach(({cl,c}) => {
 function casterType(){ const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); return cs.length ? cs[0].c.spellcasting : (_forceSpells ? 'third' : 'none'); }
 function spellAbilityId(){ if(_spellAbility) return _spellAbility; const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); if(cs.length && cs[0].c.spellcastingAbility) return cs[0].c.spellcastingAbility; const c = classData(); return (c && c.spellcastingAbility) ? c.spellcastingAbility : 'INT'; }
 function abilityForSpell(sp){ if(_spellAbility) return _spellAbility; const owner = spellcastingClasses().find(x => (sp.classes||[]).some(n => norm(n)===norm(x.c.name))); return (owner && owner.c.spellcastingAbility) ? owner.c.spellcastingAbility : spellAbilityId(); }
-function spellDC(ab){ return 8 + profBonus() + modOf(ab || spellAbilityId()); }
-function spellAtkBonus(ab){ return profBonus() + modOf(ab || spellAbilityId()); }
+function spellDC(ab){ return 8 + profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellDC'); }
+function spellAtkBonus(ab){ return profBonus() + modOf(ab || spellAbilityId()) + magicSum('spellAtk'); }
 // A racial/feature-granted spell (e.g. High Elf's cantrip on a Fighter) also opens the Spells tab.
 function isCaster(){ return _forceSpells || spellcastingClasses().length > 0 || spellsKnown.some(s => s.granted); }
 // Prepared-spell budget (A5): sum each non-pact caster class's Prepared Spells (or Spells Known) at its level.
@@ -2094,7 +2137,7 @@ function renderSpells(){
         (sk.granted ? '<span class="sp-granted" title="Granted by a feature or trait — always prepared">granted</span>' : '') +
         '<span class="sp-info">' + esc(spellInfoLine(sp)) + '</span>' +
         '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
-        ((sp && sp.higherLevels && lvl > 0) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
+        ((sp && (sp.higherLevels || sp.upcast) && lvl > 0) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
         '<button class="cast-btn" onclick="castSpellFull(\'' + q + '\')" title="Cast this spell">Cast</button>';
       box.appendChild(row);
     });
@@ -2109,6 +2152,7 @@ function spellInfoLine(sp){
   if(sp.range) parts.push(sp.range);
   if(sp.duration) parts.push(sp.duration);
   const dmg = spellDamage(sp); if(dmg.dice) parts.push(dmg.dice + (dmg.type ? ' ' + dmg.type : ''));
+  const heal = spellHealing(sp); if(heal) parts.push(heal + ' heal');
   if(sp.concentration) parts.push('Conc');
   if(sp.ritual) parts.push('Ritual');
   return parts.join(' · ');
@@ -2120,13 +2164,22 @@ function removeSpell(n){ spellsKnown = spellsKnown.filter(s => s.name !== n); [.
 // Damage is parsed from the description; the row's ability = the spell ability, so its
 // to-hit equals the spell attack bonus.
 const DMG_TYPES = ['acid','bludgeoning','cold','fire','force','lightning','necrotic','piercing','poison','psychic','radiant','slashing','thunder'];
-function spellIsAttack(sp){ return !!(sp && /spell attack/i.test(sp.description || '')); }
+// Homebrew spells can carry structured combat fields (roll/damage/damageType/
+// heal/upcast/saveAbility); when present they win over parsing the description.
+function spellIsAttack(sp){ if(sp && sp.roll) return sp.roll === 'attack'; return !!(sp && /spell attack/i.test(sp.description || '')); }
 function spellDamage(sp){
+  if(sp && sp.damage) return { dice: String(sp.damage), type: (sp.damageType || '') };
   const desc = (sp && sp.description) || '';
   let m = desc.match(/(\d+d\d+(?:\s*\+\s*\d+)?)\s+([A-Za-z]+)\s+damage/i);
   if(m){ const t = m[2].toLowerCase(); return { dice: m[1].replace(/\s+/g,''), type: DMG_TYPES.includes(t) ? t : '' }; }
   m = desc.match(/(\d+d\d+)\s+damage/i);
   return m ? { dice: m[1], type: '' } : { dice: '', type: '' };
+}
+// Healing dice a spell restores (structured field, else parsed from "regains XdY hit points").
+function spellHealing(sp){
+  if(sp && sp.heal) return String(sp.heal);
+  const m = ((sp && sp.description) || '').match(/regains?[^.]*?(\d+d\d+(?:\s*\+\s*\d+)?)\s+hit points/i);
+  return m ? m[1].replace(/\s+/g,'') : '';
 }
 function addSpellAttackRow(n){
   const sp = spellByName(n); if(!spellIsAttack(sp)) return;
@@ -2147,7 +2200,7 @@ function spendSpellSlot(lvl, name){
   if(!arr && !pm) return true;   // no slot tracking → allow
   addLog('Cast ' + name, '✗', 'No slots of level ' + lvl + '+ left', 'fumble'); return false;
 }
-function spellSaveAbility(sp){ const m = ((sp && sp.description) || '').match(/\b(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\s+saving throw/i); return m ? m[1].slice(0,3).toUpperCase() : ''; }
+function spellSaveAbility(sp){ if(sp && sp.roll) return sp.roll === 'save' ? (sp.saveAbility || '') : ''; const m = ((sp && sp.description) || '').match(/\b(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\s+saving throw/i); return m ? m[1].slice(0,3).toUpperCase() : ''; }
 // Cantrip damage scales with character level (×1 / ×2 / ×3 / ×4 at 1 / 5 / 11 / 17).
 function scaleCantrip(expr, charLevel){ const mult = charLevel >= 17 ? 4 : charLevel >= 11 ? 3 : charLevel >= 5 ? 2 : 1; const m = expr.match(/^(\d+)d(\d+)(.*)$/i); return m ? (num(m[1]) * mult) + 'd' + m[2] + (m[3] || '') : expr; }
 function rollDiceExpr(expr, crit){ const m = expr.match(/(\d+)d(\d+)\s*([+-]\s*\d+)?/i); if(!m) return { total:0, detail:expr }; let n = num(m[1]) || 1; const sides = num(m[2]); const flat = m[3] ? num(m[3].replace(/\s+/g,'')) : 0; if(crit) n *= 2; const faces = []; let sum = 0; for(let i=0;i<n;i++){ const f = dN(sides); faces.push(f); sum += f; } return { total: sum + flat, detail: n + 'd' + sides + '(' + faces.join('+') + ')' + (flat ? ' ' + sgn(flat) : '') }; }
@@ -2180,7 +2233,8 @@ function combineDice(a, b){
 // Extra damage dice for casting `castLevel` above the spell's base level, read from higherLevels.
 function upcastBonusDice(sp, castLevel){
   if(!sp || castLevel <= sp.level) return '';
-  const m = (sp.higherLevels || '').match(/(\d*)d(\d+)/i);
+  const src = sp.upcast ? String(sp.upcast) : (sp.higherLevels || '');   // structured upcast wins over text
+  const m = src.match(/(\d*)d(\d+)/i);
   if(!m) return '';
   return ((num(m[1]) || 1) * (castLevel - sp.level)) + 'd' + m[2];
 }
@@ -2216,10 +2270,16 @@ function castSpellFull(name, castLevel){
   let diceExpr = dmgInfo.dice;
   if(lvl === 0 && diceExpr) diceExpr = scaleCantrip(diceExpr, levelNow());
   else if(diceExpr && useLevel > lvl) diceExpr = combineDice(diceExpr, upcastBonusDice(sp, useLevel));
+  let healExpr = spellHealing(sp);
+  if(healExpr){ if(lvl === 0) healExpr = scaleCantrip(healExpr, levelNow()); else if(useLevel > lvl) healExpr = combineDice(healExpr, upcastBonusDice(sp, useLevel)); }
   const upLabel = (useLevel > lvl) ? ' (Lvl ' + useLevel + ')' : '';
   const dtype = dmgInfo.type ? ' ' + dmgInfo.type : '';
   const save = spellSaveAbility(sp);
   const ab = abilityForSpell(sp), dc = spellDC(ab);
+  // Healing = dice + your spellcasting modifier, rolled once if the spell heals.
+  let healTotal = 0, healDetail = '';
+  if(healExpr){ const hd = rollDiceExpr(healExpr, false), hm = modOf(ab); healTotal = hd.total + hm; healDetail = 'heal ' + hd.detail + (hm ? ' ' + sgn(hm) + ' ' + ab : ''); }
+  const healRes = healExpr ? ' · +' + healTotal + ' HP' : '', healDet = healExpr ? ' · ' + healDetail : '';
   // Magic Missile: three darts at level 1, +1 per slot level above, each 1d4+1 force.
   if(/^magic missile$/i.test(sp.name)){
     const darts = 3 + Math.max(0, useLevel - 1); let total = 0; const parts = [];
@@ -2231,13 +2291,15 @@ function castSpellFull(name, castLevel){
     const ctx = rollCtx('attack');
     const r = rawD20(ctx.mode), atkMod = spellAtkBonus(ab) + ctx.pen, hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
     const dd = rollDiceExpr(diceExpr, crit);
-    addLog(label + upLabel, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : '') + (ctx.note ? ' · ' + ctx.note : ''), crit ? 'crit' : fumble ? 'fumble' : 'normal');
+    addLog(label + upLabel, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype + healRes, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : '') + (ctx.note ? ' · ' + ctx.note : '') + healDet, crit ? 'crit' : fumble ? 'fumble' : 'normal');
   } else if(diceExpr && save){
     const dd = rollDiceExpr(diceExpr, false);
-    addLog(label + upLabel, dd.total + dtype, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail, 'normal');
+    addLog(label + upLabel, dd.total + dtype + healRes, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail + healDet, 'normal');
   } else if(diceExpr){
     const dd = rollDiceExpr(diceExpr, false);
-    addLog(label + upLabel, dd.total + dtype, 'damage ' + dd.detail, 'normal');
+    addLog(label + upLabel, dd.total + dtype + healRes, 'damage ' + dd.detail + healDet, 'normal');
+  } else if(healExpr){
+    addLog(label + upLabel, '+' + healTotal + ' HP', healDetail + (save ? ' · DC ' + dc + ' ' + save + ' save' : ''), 'normal');
   } else {
     addLog(label + upLabel, save ? ('DC ' + dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
   }
@@ -2375,7 +2437,8 @@ function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')
 // ═══ SAVE / LOAD ══════════════════════════════════════════════════════════
 function collectSheet(){
   const v = id => { const el = $(id); return el ? el.value : ''; };
-  const scores = {}; ABILITIES.forEach(a => scores[a.id] = num($('sc-' + a.id).value));
+  // Store BASE scores/HP (shown − magic-item delta) so a reload can't double-count.
+  const scores = {}; ABILITIES.forEach(a => scores[a.id] = num($('sc-' + a.id).value) - (_magicApplied[a.id.toLowerCase()] || 0));
   const attacks = [...document.querySelectorAll('#attacks-body tr')].map(tr => ({
     name: tr.querySelector('.atk-name').value, abil: tr.querySelector('.atk-abil').value,
     prof: tr.dataset.prof !== '0', bonus: num(tr.querySelector('.atk-bonus').value),
@@ -2392,7 +2455,7 @@ function collectSheet(){
     classLevels: classLevels,
     species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'),
     scores, saveProf, skillProf,
-    speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
+    speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
     inspiration: $('f-inspiration').checked, deathSucc, deathFail, activeConditions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
@@ -2403,6 +2466,7 @@ function collectSheet(){
 }
 function applySheet(d){
   d = d || {};
+  _magicApplied = { str:0, dex:0, con:0, int:0, wis:0, cha:0, hp:0 };   // stored scores/HP are base; recalc re-adds the magic delta
   const set = (id, val) => { const el = $(id); if(el) el.value = (val == null ? '' : val); };
   set('f-name', d.name); set('f-class', d.cls); set('f-level', d.level || 1); set('f-subclass', d.subclass);
   classLevels = Array.isArray(d.classLevels) ? d.classLevels.slice() : []; syncClassFields();

@@ -811,7 +811,29 @@ export const DND_MONSTER_GROUPS = [
   "Humanoids", "Beasts", "Monstrosities", "Undead", "Fiends", "Celestials", "Fey",
   "Dragons", "Giants", "Elementals", "Constructs", "Aberrations", "Oozes", "Plants",
 ] as const;
+// Mechanical bonuses a homebrew magic item can grant, each mapped to a real
+// character-sheet effect (see magicBonuses/magicSum in dnd_character_sheet.html).
+export const DND_ITEM_BONUS_TARGETS = [
+  "ac", "save", "hp", "speed", "init", "spellAtk", "spellDC", "atk",
+  "str", "dex", "con", "int", "wis", "cha",
+] as const;
 
+// A validated list of {target, amount} bonus rows for a homebrew magic item.
+function dndBonusList(v: unknown): { target: string; amount: number }[] {
+  const targets = DND_ITEM_BONUS_TARGETS as readonly string[];
+  return Array.isArray(v)
+    ? (v as unknown[])
+        .map((b) => { const o = (b ?? {}) as Record<string, unknown>; return { target: str(o.target), amount: num(o.amount) }; })
+        .filter((b): b is { target: string; amount: number } => b.amount != null && b.amount !== 0 && targets.includes(b.target))
+        .slice(0, 14)
+    : [];
+}
+
+// A dice expression like "3d6" or "2d8+1", whitespace-stripped, else "".
+function cleanDice(v: unknown): string {
+  const s = str(v).replace(/\s+/g, "");
+  return /^\d{1,3}d\d{1,3}([+-]\d{1,3})?$/i.test(s) ? s : "";
+}
 // One in a fixed vocabulary, else the given default.
 function oneOf<T extends string>(v: unknown, list: readonly T[], dflt: T): T {
   const s = str(v);
@@ -870,14 +892,17 @@ function normalizeDndEquipment(input: unknown): { name: string; data: Record<str
     } };
   }
   if (hbKind === "magic") {
-    return { name, data: {
+    const magic: Record<string, unknown> = {
       ...base,
       type: str(o.type).slice(0, 80) || "Wondrous Item",
       rarity: oneOf(o.rarity, DND_RARITIES, "Uncommon"),
       attunement: !!o.attunement,
       attunementNote: str(o.attunementNote).slice(0, 200),
       description: str(o.description).slice(0, 6000),
-    } };
+    };
+    const bonuses = dndBonusList(o.bonuses);
+    if (bonuses.length) magic.bonuses = bonuses;   // mechanical effects the sheet applies while equipped
+    return { name, data: magic };
   }
   return { name, data: {
     ...base,
@@ -942,6 +967,15 @@ function normalizeDndSpell(input: unknown): { name: string; data: Record<string,
     source: "Homebrew",
   };
   if (str(o.higherLevels)) data.higherLevels = str(o.higherLevels).slice(0, 2000);
+  // Structured combat fields so the sheet can roll the spell when cast. Stored
+  // only when present, so a book-shaped spell (damage in its text) is unchanged.
+  const roll = oneOf(o.roll, ["attack", "save"] as const, "" as "attack" | "save" | "");
+  if (roll) data.roll = roll;
+  if (roll === "save") data.saveAbility = oneOf(o.saveAbility, DND_ABILITIES, "DEX");
+  const dmg = cleanDice(o.damage);
+  if (dmg) { data.damage = dmg; const dt = oneOf(o.damageType, ["", ...DND_DAMAGE_TYPES] as const, ""); if (dt) data.damageType = dt; }
+  const heal = cleanDice(o.heal); if (heal) data.heal = heal;
+  const up = cleanDice(o.upcast); if (up) data.upcast = up;
   return { name, data };
 }
 
