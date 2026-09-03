@@ -297,6 +297,26 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
 .m-input{width:100%;padding:9px 10px;background:#141010;border:1px solid #2a2422;border-radius:5px;color:#eee;font-family:Barlow,sans-serif;font-size:13px;outline:none;}
 .m-input:focus{border-color:var(--dnd);}
 .m-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#f0a37f;margin:10px 0 5px;}
+/* Spellbook / Item Store browse modals */
+.brow-coins{font-family:'Share Tech Mono',monospace;font-size:11px;color:#c8a020;margin-left:auto;margin-right:10px;white-space:nowrap;}
+.brow-controls{padding:10px 16px 6px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;border-bottom:1px solid #332c2c;}
+.brow-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.brow-sel{flex:1;min-width:120px;cursor:pointer;}
+.brow-tabs{display:flex;flex-shrink:0;border-bottom:1px solid #332c2c;}
+.brow-tab{flex:1;padding:9px 4px;background:#141010;color:#9a8f8f;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+.brow-tab.on{background:var(--dnd);color:#fff;}
+.brow-list{padding:6px 12px;}
+.brow-item{display:flex;align-items:flex-start;gap:10px;padding:8px 2px;border-bottom:1px solid #2a2422;}
+.brow-main{flex:1;min-width:0;}
+.brow-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#f0e0d6;letter-spacing:.01em;}
+.brow-cost{font-family:'Share Tech Mono',monospace;font-size:11px;color:#c8a020;margin-left:8px;font-weight:400;}
+.brow-meta{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#a99e90;letter-spacing:.03em;text-transform:uppercase;margin-top:1px;}
+.brow-desc{font-size:11.5px;color:#bdb3a6;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.brow-btns{display:flex;gap:4px;flex-shrink:0;}
+.brow-add{flex-shrink:0;background:var(--dnd);color:#fff;border:none;border-radius:4px;padding:6px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.brow-add:hover{background:#b93b3b;}
+.brow-add.alt{background:var(--gold);}
+.brow-add.have{background:transparent;color:#6a8a5a;border:1px solid #3a4a30;cursor:default;}
 .rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#f0a37f;margin:12px 0 3px;}
 .rules-list p{font-size:12px;line-height:1.5;color:#cdc3b6;}
 .rules-cat{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#8ad4ff;margin:14px 0 4px;border-bottom:1px solid #332c2c;padding-bottom:3px;}
@@ -530,6 +550,7 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div id="spell-slots"></div>
           <div id="spells-by-level"></div>
           <div class="add-row">
+            <button class="small-btn ghost" onclick="openBook()">📖 Spellbook</button>
             <select class="pick-sel" id="spell-pick" onchange="if(this.value){addSpellByName(this.value);this.value='';}"><option value="">Add a spell…</option></select>
           </div>
         </div>
@@ -553,6 +574,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Item</th><th>Qty</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
         <div class="add-row">
           <button class="small-btn ghost" onclick="addInvRow()">+ Item</button>
+          <button class="small-btn ghost" onclick="openStore()">🛒 Item Store</button>
           <select class="pick-sel" id="inv-pick" onchange="if(this.value){addInvFromData(this.value);this.value='';}"><option value="">Add gear / armor…</option></select>
         </div>
         <div class="blk" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -640,6 +662,31 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="modal wide">
     <div class="modal-hd"><div class="ttl" id="rules-title">Rules Glossary</div><button class="x" onclick="closeRules()">&#10005;</button></div>
     <div class="modal-bd rules-list" id="rules-body"></div>
+  </div>
+</div>
+
+<!-- SPELLBOOK MODAL -->
+<div id="book-overlay" class="ov" onclick="if(event.target===this)closeBook()">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-hd"><div class="ttl">📖 Spellbook</div><button class="x" onclick="closeBook()">&#10005;</button></div>
+    <div class="brow-controls">
+      <input id="book-search" class="m-input" placeholder="Search spells…" oninput="renderBook()">
+      <div class="brow-filters">
+        <select id="book-class" class="m-input brow-sel" onchange="renderBook()"></select>
+        <select id="book-level" class="m-input brow-sel" onchange="renderBook()"></select>
+      </div>
+    </div>
+    <div class="modal-bd brow-list" id="book-body"></div>
+  </div>
+</div>
+
+<!-- ITEM STORE MODAL -->
+<div id="store-overlay" class="ov" onclick="if(event.target===this)closeStore()">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-hd"><div class="ttl">🛒 Item Store</div><span class="brow-coins" id="store-coins"></span><button class="x" onclick="closeStore()">&#10005;</button></div>
+    <div class="brow-tabs" id="store-tabs"></div>
+    <div class="brow-controls"><input id="store-search" class="m-input" placeholder="Search items…" oninput="renderStore()"></div>
+    <div class="modal-bd brow-list" id="store-body"></div>
   </div>
 </div>
 
@@ -947,6 +994,93 @@ function addInvRow(it){
   $('inv-body').appendChild(tr);
 }
 function addInvFromData(name){ addInvRow({ name, qty:1 }); scheduleAutosave(); }
+
+// ═══ SPELLBOOK (browse & add spells) ══════════════════════════════════════
+let _bookInit = false;
+function openBook(){
+  const cls = $('book-class');
+  if(!_bookInit){
+    const classes = [...new Set(D.spells().flatMap(s => s.classes || []))].sort();
+    cls.innerHTML = '<option value="">All classes</option>' + classes.map(c => '<option>' + esc(c) + '</option>').join('');
+    $('book-level').innerHTML = '<option value="">All levels</option>' + [0,1,2,3,4,5,6,7,8,9].map(l => '<option value="' + l + '">' + (l===0?'Cantrips':'Level ' + l) + '</option>').join('');
+    $('book-body').addEventListener('click', (e) => {
+      const add = e.target.closest('[data-add-spell]'); if(add){ addSpellByName(add.dataset.addSpell); renderBook(); return; }
+      const read = e.target.closest('[data-read-spell]'); if(read){ openSpell(read.dataset.readSpell); }
+    });
+    _bookInit = true;
+  }
+  const myClass = (classData() || {}).name;
+  if(myClass && [...cls.options].some(o => o.value === myClass)) cls.value = myClass;
+  $('book-overlay').classList.add('open');
+  renderBook();
+}
+function closeBook(){ $('book-overlay').classList.remove('open'); }
+function renderBook(){
+  const q = norm($('book-search').value), fc = $('book-class').value, fl = $('book-level').value;
+  const list = D.spells().filter(s => {
+    if(fc && !(s.classes || []).includes(fc)) return false;
+    if(fl !== '' && String(s.level) !== String(fl)) return false;
+    if(q && !(norm(s.name).includes(q) || norm(s.school).includes(q))) return false;
+    return true;
+  }).sort((a,b) => (a.level - b.level) || a.name.localeCompare(b.name));
+  const known = new Set(spellsKnown.map(s => norm(s.name)));
+  const box = $('book-body');
+  if(!list.length){ box.innerHTML = '<p class="m-hint" style="padding:10px 4px;">No spells match.</p>'; return; }
+  box.innerHTML = list.map(s => {
+    const have = known.has(norm(s.name));
+    const meta = (s.level===0?'Cantrip':'Lvl ' + s.level) + ' · ' + esc(s.school) + ' · ' + esc(s.castingTime) + ' · ' + esc(s.range) + (s.concentration?' · Conc':'') + (s.ritual?' · Ritual':'');
+    return '<div class="brow-item">' +
+      '<div class="brow-main"><div class="brow-name" data-read-spell="' + esc(s.name) + '" style="cursor:pointer;">' + esc(s.name) + '</div>' +
+        '<div class="brow-meta">' + meta + '</div><div class="brow-desc">' + esc(s.description || '') + '</div></div>' +
+      '<button class="brow-add' + (have?' have':'') + '"' + (have?' disabled':' data-add-spell="' + esc(s.name) + '"') + '>' + (have?'✓ Known':'+ Add') + '</button>' +
+    '</div>';
+  }).join('');
+}
+
+// ═══ ITEM STORE (browse & add gear/weapons/armor/magic) ═══════════════════
+const STORE_TABS = [ {id:'gear',label:'Gear'}, {id:'weapons',label:'Weapons'}, {id:'armor',label:'Armor'}, {id:'magic',label:'Magic Items'} ];
+let _storeTab = 'gear', _storeInit = false;
+function openStore(){
+  _storeTab = 'gear';
+  if(!_storeInit){
+    $('store-body').addEventListener('click', (e) => {
+      const add = e.target.closest('[data-add-item]'); if(add){ addInvRow({ name:add.dataset.addItem, qty:1 }); scheduleAutosave(); flashBtn(add, '✓ Added'); return; }
+      const atk = e.target.closest('[data-add-atk]'); if(atk){ addAttackFromWeapon(atk.dataset.addAtk); flashBtn(atk, '✓'); }
+    });
+    _storeInit = true;
+  }
+  $('store-overlay').classList.add('open');
+  renderStore();
+}
+function closeStore(){ $('store-overlay').classList.remove('open'); }
+function storeSetTab(t){ _storeTab = t; $('store-search').value = ''; renderStore(); }
+function flashBtn(btn, txt){ const o = btn.textContent; btn.textContent = txt; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = false; }, 700); }
+function storeItems(){
+  switch(_storeTab){
+    case 'weapons': return D.weapons().map(w => ({ name:w.name, cost:w.cost, meta:(w.category + ' ' + w.kind + ' · ' + w.damage + ' ' + w.damageType + (w.mastery?' · ' + w.mastery:'')), desc:(w.properties || []).join(', '), kind:'weapon' }));
+    case 'armor':   return D.armor().map(a => ({ name:a.name, cost:a.cost, meta:(a.category + ' Armor · AC ' + a.baseAC + (a.stealthDisadvantage?' · Stealth Dis':'')), desc:'', kind:'armor' }));
+    case 'magic':   return D.magicItems().map(m => ({ name:m.name, cost:'', meta:(m.type + ' · ' + m.rarity + (m.attunement?' · Attunement':'')), desc:m.description, kind:'magic' }));
+    default:        return D.gear().map(g => ({ name:g.name, cost:g.cost, meta:(g.category + (g.weight?' · ' + g.weight:'')), desc:g.description, kind:'gear' }));
+  }
+}
+function renderStore(){
+  $('store-tabs').innerHTML = STORE_TABS.map(t => '<button class="brow-tab' + (_storeTab===t.id?' on':'') + '" onclick="storeSetTab(\'' + t.id + '\')">' + t.label + '</button>').join('');
+  const gp = $('f-gp').value || 0, sp = $('f-sp').value || 0, cp = $('f-cp').value || 0;
+  $('store-coins').textContent = gp + ' gp · ' + sp + ' sp · ' + cp + ' cp';
+  const q = norm($('store-search').value);
+  const list = storeItems().filter(it => !q || norm(it.name).includes(q) || norm(it.meta).includes(q));
+  const box = $('store-body');
+  if(!list.length){ box.innerHTML = '<p class="m-hint" style="padding:10px 4px;">Nothing matches.</p>'; return; }
+  box.innerHTML = list.map(it => {
+    const cost = it.cost ? '<span class="brow-cost">' + esc(it.cost) + '</span>' : '';
+    const wpn = it.kind==='weapon' ? '<button class="brow-add alt" data-add-atk="' + esc(it.name) + '" title="Add as an attack row">⚔</button>' : '';
+    return '<div class="brow-item">' +
+      '<div class="brow-main"><div class="brow-name">' + esc(it.name) + cost + '</div><div class="brow-meta">' + esc(it.meta) + '</div>' +
+        (it.desc ? '<div class="brow-desc">' + esc(it.desc) + '</div>' : '') + '</div>' +
+      '<div class="brow-btns">' + wpn + '<button class="brow-add" data-add-item="' + esc(it.name) + '">+ Add</button></div>' +
+    '</div>';
+  }).join('');
+}
 
 // ═══ FEATURES & TRAITS ════════════════════════════════════════════════════
 let customFeatures = [];   // [{name, desc, meta}]
