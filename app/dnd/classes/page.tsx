@@ -1,26 +1,38 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DND_CLASSES } from "@/lib/data/dnd-classes";
+import type { DndClass } from "@/lib/data/dnd-types";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import DndHomebrewEditor from "@/components/DndHomebrewEditor";
 import { DndHeader, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/classes";
-const sourceLabel: Record<string, string> = { srd: "SRD", phb: "PHB", eberron: "Eberron", dmg: "DMG", mm: "MM", "forgotten-realms": "FR" };
+const sourceLabel: Record<string, string> = { srd: "SRD", phb: "PHB", eberron: "Eberron", dmg: "DMG", mm: "MM", "forgotten-realms": "FR", Homebrew: "Homebrew" };
 
 export default async function DndClassesPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const raw = await searchParams;
   const pick = one(raw.cls);
-  const selected = DND_CLASSES.find((c) => c.name === pick) ?? null;
+
+  const [hbVisible, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "dnd-class" }),
+    ownHomebrew(user.id, "dnd-class"),
+    userCampaigns(user.id),
+  ]);
+  const hbClasses = hbVisible.map((h) => h.data as unknown as DndClass);
+  const allClasses = [...hbClasses, ...DND_CLASSES];
+  const selected = allClasses.find((c) => c.name === pick) ?? null;
 
   if (!selected) {
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
-        <DndHeader title="Classes" subtitle={`${DND_CLASSES.length} classes · levels 1–20`} />
+        <DndHeader title="Classes" subtitle={`${DND_CLASSES.length} classes${hbClasses.length ? ` + ${hbClasses.length} homebrew` : ""} · levels 1–20`} />
+        <DndHomebrewEditor kind="dnd-class" campaigns={campaigns} initial={hbOwn} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {DND_CLASSES.map((c) => (
-            <li key={c.name} className={cardCls}>
+          {allClasses.map((c, i) => (
+            <li key={`${c.name}-${i}`} className={cardCls}>
               <div className="flex items-start justify-between gap-2">
                 <a href={`${BASE}?cls=${encodeURIComponent(c.name)}`} className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f] hover:underline">{c.name}</a>
                 <span className={badge}>{sourceLabel[c.source] ?? c.source}</span>

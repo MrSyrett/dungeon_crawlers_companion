@@ -2,11 +2,15 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DND_BACKGROUNDS } from "@/lib/data/dnd-backgrounds";
 import { DND_FEATS } from "@/lib/data/dnd-feats";
+import type { DndFeat, DndBackground } from "@/lib/data/dnd-types";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import DndHomebrewEditor from "@/components/DndHomebrewEditor";
 import { DndHeader, ModeRow, ChipRow, SearchForm, CountLine, EmptyState, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/backgrounds";
 const CATS = ["Origin", "General", "Fighting Style", "Epic Boon"];
+const hbBadge = "rounded border border-[var(--dnd)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#f0a37f]";
 
 export default async function DndBackgroundsFeatsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -16,23 +20,35 @@ export default async function DndBackgroundsFeatsPage({ searchParams }: { search
   const q = one(raw.q).trim().toLowerCase();
   const cat = one(raw.cat);
 
-  const modeOpts = [{ key: "backgrounds", label: `Backgrounds (${DND_BACKGROUNDS.length})` }, { key: "feats", label: `Feats (${DND_FEATS.length})` }];
+  const [hbFeatV, hbFeatOwn, hbBgV, hbBgOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "dnd-feat" }),
+    ownHomebrew(user.id, "dnd-feat"),
+    visibleHomebrew(user.id, { type: "dnd-background" }),
+    ownHomebrew(user.id, "dnd-background"),
+    userCampaigns(user.id),
+  ]);
+  const hbFeats = hbFeatV.map((h) => h.data as unknown as DndFeat);
+  const hbBgs = hbBgV.map((h) => h.data as unknown as DndBackground);
+  const isHb = (x: { source?: string }) => x.source === "Homebrew";
+
+  const modeOpts = [{ key: "backgrounds", label: `Backgrounds (${DND_BACKGROUNDS.length + hbBgs.length})` }, { key: "feats", label: `Feats (${DND_FEATS.length + hbFeats.length})` }];
 
   if (mode === "backgrounds") {
-    let list = DND_BACKGROUNDS.slice();
+    let list = [...hbBgs, ...DND_BACKGROUNDS];
     if (q) list = list.filter((b) => b.name.toLowerCase().includes(q) || b.feat.toLowerCase().includes(q));
     list.sort((a, b) => a.name.localeCompare(b.name));
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
         <DndHeader title="Backgrounds & Feats" subtitle="2024 origins" />
         <ModeRow base={BASE} current={{ q: "", cat: "" }} param="mode" options={modeOpts} active={mode} />
+        <DndHomebrewEditor kind="dnd-background" campaigns={campaigns} initial={hbBgOwn} />
         <SearchForm base={BASE} q={one(raw.q)} placeholder="Search backgrounds…" hidden={{ mode }} />
         <CountLine count={list.length} noun="background" base={`${BASE}?mode=backgrounds`} filtered={!!q} />
         {list.length === 0 ? <EmptyState noun="background" base={`${BASE}?mode=backgrounds`} /> : (
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-            {list.map((b) => (
-              <li key={b.name} className={cardCls}>
-                <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">{b.name}</h3>
+            {list.map((b, i) => (
+              <li key={`${b.name}-${i}`} className={cardCls}>
+                <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">{b.name} {isHb(b) ? <span className={hbBadge}>HB</span> : null}</h3>
                 <p className="mt-1 text-[12px] leading-relaxed text-[var(--muted)]">{b.description}</p>
                 <dl className="mt-2 grid gap-y-0.5 text-[12px] text-[var(--muted)]">
                   <div><dt className="inline font-semibold text-[var(--text)]">Ability Scores:</dt> <dd className="inline">{b.abilityScores.join(", ")}</dd></div>
@@ -50,24 +66,25 @@ export default async function DndBackgroundsFeatsPage({ searchParams }: { search
   }
 
   // Feats
-  let list = DND_FEATS.slice();
+  let list = [...hbFeats, ...DND_FEATS];
   if (cat) list = list.filter((f) => f.category === cat);
   if (q) list = list.filter((f) => f.name.toLowerCase().includes(q) || f.benefits.some((x) => x.toLowerCase().includes(q)));
   list.sort((a, b) => a.name.localeCompare(b.name));
-  const cats = CATS.filter((c) => DND_FEATS.some((f) => f.category === c));
+  const cats = CATS.filter((c) => [...hbFeats, ...DND_FEATS].some((f) => f.category === c));
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DndHeader title="Backgrounds & Feats" subtitle="2024 origins" />
       <ModeRow base={BASE} current={{ q: "", cat: "" }} param="mode" options={modeOpts} active={mode} />
+      <DndHomebrewEditor kind="dnd-feat" campaigns={campaigns} initial={hbFeatOwn} />
       <SearchForm base={BASE} q={one(raw.q)} placeholder="Search feats…" hidden={{ mode, cat }} />
       <ChipRow label="Category" base={BASE} current={{ mode, q: one(raw.q), cat }} param="cat" options={cats.map((c) => ({ key: c, label: c }))} active={cat} />
       <CountLine count={list.length} noun="feat" base={`${BASE}?mode=feats`} filtered={!!(q || cat)} />
       {list.length === 0 ? <EmptyState noun="feat" base={`${BASE}?mode=feats`} /> : (
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {list.map((f) => (
-            <li key={f.name} className={cardCls}>
+          {list.map((f, i) => (
+            <li key={`${f.name}-${i}`} className={cardCls}>
               <div className="flex items-start justify-between gap-2">
-                <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">{f.name}{f.repeatable ? <span className="ml-1 text-[10px] text-[var(--muted)]">(repeatable)</span> : null}</h3>
+                <h3 className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f]">{f.name}{f.repeatable ? <span className="ml-1 text-[10px] text-[var(--muted)]">(repeatable)</span> : null} {isHb(f) ? <span className={hbBadge}>HB</span> : null}</h3>
                 <span className={badge}>{f.category}</span>
               </div>
               {f.prerequisite ? <p className="mt-0.5 text-[11px] italic text-[var(--muted)]">Prerequisite: {f.prerequisite}</p> : null}

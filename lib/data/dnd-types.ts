@@ -19,8 +19,9 @@ export const DND_ABILITY_NAMES: Record<DndAbility, string> = {
   INT: "Intelligence", WIS: "Wisdom", CHA: "Charisma",
 };
 
-/** Source book an entry comes from; "srd" marks CC-BY licensed text. */
-export type DndSource = "phb" | "dmg" | "mm" | "srd" | "eberron" | "forgotten-realms";
+/** Source book an entry comes from; "srd" marks CC-BY licensed text.
+ *  "Homebrew" marks a user-created entry (lib/homebrew.ts) merged into a pool. */
+export type DndSource = "phb" | "dmg" | "mm" | "srd" | "eberron" | "forgotten-realms" | "Homebrew";
 
 export type DndDamageType =
   | "acid" | "bludgeoning" | "cold" | "fire" | "force" | "lightning"

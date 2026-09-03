@@ -1,11 +1,14 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DND_SPECIES } from "@/lib/data/dnd-species";
+import type { DndSpecies } from "@/lib/data/dnd-types";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import DndHomebrewEditor from "@/components/DndHomebrewEditor";
 import { DndHeader, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/species";
-const sourceLabel: Record<string, string> = { srd: "SRD", phb: "PHB" };
+const sourceLabel: Record<string, string> = { srd: "SRD", phb: "PHB", Homebrew: "Homebrew" };
 const sizeText = (s: string | string[]) => Array.isArray(s) ? s.join(" or ") : s;
 
 export default async function DndSpeciesPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
@@ -13,15 +16,24 @@ export default async function DndSpeciesPage({ searchParams }: { searchParams: P
   if (!user) redirect("/login");
   const raw = await searchParams;
   const pick = one(raw.sp);
-  const selected = DND_SPECIES.find((s) => s.name === pick) ?? null;
+
+  const [hbVisible, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "dnd-species" }),
+    ownHomebrew(user.id, "dnd-species"),
+    userCampaigns(user.id),
+  ]);
+  const hbSpecies = hbVisible.map((h) => h.data as unknown as DndSpecies);
+  const allSpecies = [...hbSpecies, ...DND_SPECIES];
+  const selected = allSpecies.find((s) => s.name === pick) ?? null;
 
   if (!selected) {
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
-        <DndHeader title="Species" subtitle={`${DND_SPECIES.length} species`} />
+        <DndHeader title="Species" subtitle={`${DND_SPECIES.length} species${hbSpecies.length ? ` + ${hbSpecies.length} homebrew` : ""}`} />
+        <DndHomebrewEditor kind="dnd-species" campaigns={campaigns} initial={hbOwn} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {DND_SPECIES.map((s) => (
-            <li key={s.name} className={cardCls}>
+          {allSpecies.map((s, i) => (
+            <li key={`${s.name}-${i}`} className={cardCls}>
               <div className="flex items-start justify-between gap-2">
                 <a href={`${BASE}?sp=${encodeURIComponent(s.name)}`} className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f] hover:underline">{s.name}</a>
                 <span className={badge}>{sourceLabel[s.source] ?? s.source}</span>

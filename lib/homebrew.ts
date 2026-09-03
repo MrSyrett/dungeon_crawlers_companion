@@ -16,11 +16,13 @@ import {
 //     GM screen can drop it straight into the bestiary pool
 export type HbType =
   | "spell" | "gear" | "monster" | "class" | "ancestry" | "background"
-  | "dcc-item" | "dcc-monster" | "dcc-skill" | "dcc-spell" | "dcc-class" | "dcc-race";
+  | "dcc-item" | "dcc-monster" | "dcc-skill" | "dcc-spell" | "dcc-class" | "dcc-race"
+  | "dnd-equipment" | "dnd-feat" | "dnd-background" | "dnd-spell" | "dnd-species" | "dnd-monster" | "dnd-class";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
   "dcc-item", "dcc-monster", "dcc-skill", "dcc-spell", "dcc-class", "dcc-race",
+  "dnd-equipment", "dnd-feat", "dnd-background", "dnd-spell", "dnd-species", "dnd-monster", "dnd-class",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -781,6 +783,302 @@ function normalizeDccClass(input: unknown): { name: string; data: Record<string,
   return { name, data };
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// D&D 2024 homebrew — each normaliser produces the exact lib/data/dnd-types
+// shape its reference page + tools consume, with `source: "Homebrew"` forced so
+// pages/tools merge it straight into their DND_* pools with no translation.
+// ─────────────────────────────────────────────────────────────────────────────
+export const DND_ABILITIES = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
+export const DND_DAMAGE_TYPES = [
+  "acid", "bludgeoning", "cold", "fire", "force", "lightning",
+  "necrotic", "piercing", "poison", "psychic", "radiant", "slashing", "thunder",
+] as const;
+export const DND_WEAPON_CATEGORIES = ["Simple", "Martial"] as const;
+export const DND_WEAPON_KINDS = ["Melee", "Ranged"] as const;
+export const DND_MASTERIES = ["Cleave", "Graze", "Nick", "Push", "Sap", "Slow", "Topple", "Vex"] as const;
+export const DND_ARMOR_CATEGORIES = ["Light", "Medium", "Heavy", "Shield"] as const;
+export const DND_RARITIES = ["Common", "Uncommon", "Rare", "Very Rare", "Legendary", "Artifact", "Varies"] as const;
+export const DND_SCHOOLS = [
+  "Abjuration", "Conjuration", "Divination", "Enchantment",
+  "Evocation", "Illusion", "Necromancy", "Transmutation",
+] as const;
+export const DND_SPELL_CLASSES = ["Bard", "Cleric", "Druid", "Paladin", "Ranger", "Sorcerer", "Warlock", "Wizard"] as const;
+export const DND_SIZES = ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"] as const;
+export const DND_FEAT_CATEGORIES = ["Origin", "General", "Fighting Style", "Epic Boon"] as const;
+export const DND_CASTER_TYPES = ["none", "full", "half", "third", "pact", "artificer"] as const;
+export const DND_HIT_DICE = [6, 8, 10, 12] as const;
+export const DND_MONSTER_GROUPS = [
+  "Humanoids", "Beasts", "Monstrosities", "Undead", "Fiends", "Celestials", "Fey",
+  "Dragons", "Giants", "Elementals", "Constructs", "Aberrations", "Oozes", "Plants",
+] as const;
+
+// One in a fixed vocabulary, else the given default.
+function oneOf<T extends string>(v: unknown, list: readonly T[], dflt: T): T {
+  const s = str(v);
+  return (list as readonly string[]).includes(s) ? (s as T) : dflt;
+}
+// Free list of names validated against a vocabulary (drops anything unknown).
+function pickList<T extends string>(v: unknown, list: readonly T[]): T[] {
+  const arr = Array.isArray(v) ? (v as unknown[]).map(str) : [];
+  return arr.filter((x): x is T => (list as readonly string[]).includes(x));
+}
+// {name, description} rows for traits / monster actions.
+function nameDescList(v: unknown, maxItems: number): { name: string; description: string }[] {
+  return Array.isArray(v)
+    ? (v as unknown[])
+        .map((o) => {
+          const r = (o ?? {}) as Record<string, unknown>;
+          return { name: str(r.name).slice(0, 120), description: str(r.description).slice(0, 4000) };
+        })
+        .filter((r) => r.name || r.description)
+        .slice(0, maxItems)
+    : [];
+}
+
+// ── Equipment (weapon | armor | gear | magic item) ───────────────────────────
+// One editor, four target shapes. `hbKind` tells the reference page which
+// Equipment mode to slot the entry into.
+function normalizeDndEquipment(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew equipment entry needs a name.");
+  const hbKind = oneOf(o.hbKind, ["weapon", "armor", "gear", "magic"] as const, "gear");
+  const base: Record<string, unknown> = { name, hbKind, source: "Homebrew" };
+
+  if (hbKind === "weapon") {
+    return { name, data: {
+      ...base,
+      category: oneOf(o.category, DND_WEAPON_CATEGORIES, "Simple"),
+      kind: oneOf(o.kind, DND_WEAPON_KINDS, "Melee"),
+      cost: str(o.cost).slice(0, 40) || "—",
+      damage: str(o.damage).slice(0, 40) || "1d4",
+      damageType: oneOf(o.damageType, DND_DAMAGE_TYPES, "bludgeoning"),
+      weight: str(o.weight).slice(0, 40) || "—",
+      properties: strList(o.properties, 12, 60),
+      mastery: oneOf(o.mastery, ["", ...DND_MASTERIES] as const, ""),
+    } };
+  }
+  if (hbKind === "armor") {
+    return { name, data: {
+      ...base,
+      category: oneOf(o.category, DND_ARMOR_CATEGORIES, "Light"),
+      cost: str(o.cost).slice(0, 40) || "—",
+      baseAC: str(o.baseAC).slice(0, 60) || "11 + Dex modifier",
+      strength: str(o.strength).slice(0, 40),
+      stealthDisadvantage: !!o.stealthDisadvantage,
+      weight: str(o.weight).slice(0, 40) || "—",
+    } };
+  }
+  if (hbKind === "magic") {
+    return { name, data: {
+      ...base,
+      type: str(o.type).slice(0, 80) || "Wondrous Item",
+      rarity: oneOf(o.rarity, DND_RARITIES, "Uncommon"),
+      attunement: !!o.attunement,
+      attunementNote: str(o.attunementNote).slice(0, 200),
+      description: str(o.description).slice(0, 6000),
+    } };
+  }
+  return { name, data: {
+    ...base,
+    category: str(o.category).slice(0, 60) || "Adventuring Gear",
+    cost: str(o.cost).slice(0, 40) || "—",
+    weight: str(o.weight).slice(0, 40) || "—",
+    description: str(o.description).slice(0, 4000),
+  } };
+}
+
+// ── Feat (DndFeat) ───────────────────────────────────────────────────────────
+function normalizeDndFeat(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew feat needs a name.");
+  return { name, data: {
+    name,
+    category: oneOf(o.category, DND_FEAT_CATEGORIES, "General"),
+    prerequisite: str(o.prerequisite).slice(0, 200),
+    abilityScores: pickList(o.abilityScores, DND_ABILITIES),
+    benefits: strList(o.benefits, 20, 2000),
+    repeatable: !!o.repeatable,
+    source: "Homebrew",
+  } };
+}
+
+// ── Background (DndBackground) ───────────────────────────────────────────────
+function normalizeDndBackground(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew background needs a name.");
+  return { name, data: {
+    name,
+    abilityScores: pickList(o.abilityScores, DND_ABILITIES).slice(0, 3),
+    feat: str(o.feat).slice(0, 120),
+    skillProficiencies: strList(o.skillProficiencies, 8, 60),
+    toolProficiencies: strList(o.toolProficiencies, 8, 60),
+    equipment: strList(o.equipment, 8, 300),
+    description: str(o.description).slice(0, 4000),
+    source: "Homebrew",
+  } };
+}
+
+// ── Spell (DndSpell) ─────────────────────────────────────────────────────────
+function normalizeDndSpell(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew spell needs a name.");
+  const level = num(o.level);
+  const data: Record<string, unknown> = {
+    name,
+    level: level != null && level >= 0 && level <= 9 ? level : 0,
+    school: oneOf(o.school, DND_SCHOOLS, "Evocation"),
+    castingTime: str(o.castingTime).slice(0, 80) || "Action",
+    range: str(o.range).slice(0, 80) || "Self",
+    components: str(o.components).slice(0, 200) || "V, S",
+    duration: str(o.duration).slice(0, 80) || "Instantaneous",
+    concentration: !!o.concentration,
+    ritual: !!o.ritual,
+    classes: pickList(o.classes, DND_SPELL_CLASSES),
+    description: str(o.description).slice(0, 6000),
+    source: "Homebrew",
+  };
+  if (str(o.higherLevels)) data.higherLevels = str(o.higherLevels).slice(0, 2000);
+  return { name, data };
+}
+
+// ── Species (DndSpecies) ─────────────────────────────────────────────────────
+function normalizeDndSpecies(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew species needs a name.");
+  const speed = num(o.speed);
+  const dv = num(o.darkvision);
+  return { name, data: {
+    name,
+    size: oneOf(o.size, DND_SIZES, "Medium"),
+    speed: speed != null && speed >= 0 ? speed : 30,
+    darkvision: dv != null && dv >= 0 ? dv : 0,
+    creatureType: str(o.creatureType).slice(0, 60) || "Humanoid",
+    traits: nameDescList(o.traits, 24),
+    flavor: str(o.flavor).slice(0, 2000),
+    source: "Homebrew",
+  } };
+}
+
+// ── Monster / creature (DndMonster) ──────────────────────────────────────────
+function normalizeDndMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew creature needs a name.");
+  const ab = (o.abilities ?? {}) as Record<string, unknown>;
+  const abilities: Record<string, number> = {};
+  for (const k of DND_ABILITIES) { const n = num(ab[k]); abilities[k] = n != null && n >= 1 ? n : 10; }
+  const hp = num(o.hp);
+  const ac = num(o.ac);
+  const xp = num(o.xp);
+  const pb = num(o.proficiencyBonus);
+  const data: Record<string, unknown> = {
+    name,
+    size: oneOf(o.size, DND_SIZES, "Medium"),
+    type: str(o.type).slice(0, 80) || "Humanoid",
+    alignment: str(o.alignment).slice(0, 60) || "Unaligned",
+    ac: ac != null && ac >= 0 ? ac : 10,
+    hp: hp != null && hp >= 1 ? hp : 1,
+    hpFormula: str(o.hpFormula).slice(0, 60) || String(hp != null && hp >= 1 ? hp : 1),
+    speed: str(o.speed).slice(0, 120) || "30 ft.",
+    abilities,
+    senses: str(o.senses).slice(0, 200) || "Passive Perception 10",
+    languages: str(o.languages).slice(0, 200),
+    cr: str(o.cr).slice(0, 12) || "0",
+    xp: xp != null && xp >= 0 ? xp : 0,
+    proficiencyBonus: pb != null && pb >= 2 ? pb : 2,
+    traits: nameDescList(o.traits, 20),
+    actions: nameDescList(o.actions, 20),
+    group: oneOf(o.group, DND_MONSTER_GROUPS, "Humanoids"),
+    source: "Homebrew",
+  };
+  if (str(o.acNote)) data.acNote = str(o.acNote).slice(0, 80);
+  if (str(o.savingThrows)) data.savingThrows = str(o.savingThrows).slice(0, 200);
+  if (str(o.skills)) data.skills = str(o.skills).slice(0, 200);
+  if (str(o.damageResistances)) data.damageResistances = str(o.damageResistances).slice(0, 200);
+  if (str(o.damageImmunities)) data.damageImmunities = str(o.damageImmunities).slice(0, 200);
+  if (str(o.damageVulnerabilities)) data.damageVulnerabilities = str(o.damageVulnerabilities).slice(0, 200);
+  if (str(o.conditionImmunities)) data.conditionImmunities = str(o.conditionImmunities).slice(0, 200);
+  const bonus = nameDescList(o.bonusActions, 20); if (bonus.length) data.bonusActions = bonus;
+  const reac = nameDescList(o.reactions, 20); if (reac.length) data.reactions = reac;
+  const leg = nameDescList(o.legendaryActions, 20); if (leg.length) data.legendaryActions = leg;
+  return { name, data };
+}
+
+// ── Class (DndClass) ─────────────────────────────────────────────────────────
+// A homebrew class captures the essentials the reference page + creation wizard
+// read. A full 1–20 table is generated here (Proficiency Bonus by level, key
+// features placed at their level) so the page renders like a book class.
+function normalizeDndClass(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 120);
+  if (!name) throw new Error("A homebrew class needs a name.");
+  const hitDie = oneOf(String(num(o.hitDie) ?? 8), ["6", "8", "10", "12"] as const, "8");
+  const spellcasting = oneOf(o.spellcasting, DND_CASTER_TYPES, "none");
+
+  // Key features [{name, level, description}] → DndClassFeature[] + table rows.
+  const rawFeatures = Array.isArray(o.features) ? (o.features as unknown[]) : [];
+  const features = rawFeatures
+    .map((f) => {
+      const r = (f ?? {}) as Record<string, unknown>;
+      const lvl = num(r.level);
+      return {
+        name: str(r.name).slice(0, 120),
+        level: lvl != null && lvl >= 1 && lvl <= 20 ? lvl : 1,
+        description: str(r.description).slice(0, 4000),
+        source: "Homebrew" as const,
+      };
+    })
+    .filter((f) => f.name)
+    .slice(0, 60);
+
+  const pbFor = (lvl: number) => 2 + Math.floor((lvl - 1) / 4);
+  const table = Array.from({ length: 20 }, (_, i) => {
+    const level = i + 1;
+    return {
+      level,
+      profBonus: pbFor(level),
+      features: features.filter((f) => f.level === level).map((f) => f.name),
+    };
+  });
+
+  const subclasses = (Array.isArray(o.subclasses) ? (o.subclasses as unknown[]) : [])
+    .map((s) => {
+      const r = (s ?? {}) as Record<string, unknown>;
+      return { name: str(r.name).slice(0, 120), className: name, flavor: str(r.flavor).slice(0, 2000), features: [], source: "Homebrew" as const };
+    })
+    .filter((s) => s.name)
+    .slice(0, 12);
+
+  return { name, data: {
+    name,
+    primaryAbility: pickList(o.primaryAbility, DND_ABILITIES),
+    hitDie: parseInt(hitDie, 10),
+    savingThrows: pickList(o.savingThrows, DND_ABILITIES),
+    proficiencies: {
+      armor: strList((o.proficiencies as Record<string, unknown> | undefined)?.armor ?? o.armor, 8, 60),
+      weapons: strList((o.proficiencies as Record<string, unknown> | undefined)?.weapons ?? o.weapons, 12, 60),
+      tools: strList((o.proficiencies as Record<string, unknown> | undefined)?.tools ?? o.tools, 12, 60),
+      skillsChoose: num(o.skillsChoose) ?? 2,
+      skillsFrom: strList(o.skillsFrom, 20, 40),
+    },
+    startingEquipment: strList(o.startingEquipment, 12, 300),
+    spellcasting,
+    spellcastingAbility: oneOf(o.spellcastingAbility, ["", ...DND_ABILITIES] as const, "") || undefined,
+    table,
+    features,
+    subclasses,
+    subclassLevel: num(o.subclassLevel) ?? 3,
+    subclassLabel: str(o.subclassLabel).slice(0, 60) || "Subclass",
+    flavor: str(o.flavor).slice(0, 2000),
+    source: "Homebrew",
+  } };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -795,6 +1093,13 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "dcc-spell": return normalizeDccSpell(data);
     case "dcc-class": return normalizeDccClass(data);
     case "dcc-race": return normalizeDccRace(data);
+    case "dnd-equipment": return normalizeDndEquipment(data);
+    case "dnd-feat": return normalizeDndFeat(data);
+    case "dnd-background": return normalizeDndBackground(data);
+    case "dnd-spell": return normalizeDndSpell(data);
+    case "dnd-species": return normalizeDndSpecies(data);
+    case "dnd-monster": return normalizeDndMonster(data);
+    case "dnd-class": return normalizeDndClass(data);
   }
 }
 
