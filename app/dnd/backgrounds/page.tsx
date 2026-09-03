@@ -19,6 +19,8 @@ export default async function DndBackgroundsFeatsPage({ searchParams }: { search
   const mode = one(raw.mode) === "feats" ? "feats" : "backgrounds";
   const q = one(raw.q).trim().toLowerCase();
   const cat = one(raw.cat);
+  const src = ["book", "hb"].includes(one(raw.src)) ? one(raw.src) : "";
+  const srcOk = (x: { source?: string }) => (src === "hb" ? x.source === "Homebrew" : src === "book" ? x.source !== "Homebrew" : true);
 
   const [hbFeatV, hbFeatOwn, hbBgV, hbBgOwn, campaigns] = await Promise.all([
     visibleHomebrew(user.id, { type: "dnd-feat" }),
@@ -34,16 +36,17 @@ export default async function DndBackgroundsFeatsPage({ searchParams }: { search
   const modeOpts = [{ key: "backgrounds", label: `Backgrounds (${DND_BACKGROUNDS.length + hbBgs.length})` }, { key: "feats", label: `Feats (${DND_FEATS.length + hbFeats.length})` }];
 
   if (mode === "backgrounds") {
-    let list = [...hbBgs, ...DND_BACKGROUNDS];
+    let list = [...hbBgs, ...DND_BACKGROUNDS].filter(srcOk);
     if (q) list = list.filter((b) => b.name.toLowerCase().includes(q) || b.feat.toLowerCase().includes(q));
     list.sort((a, b) => a.name.localeCompare(b.name));
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
         <DndHeader title="Backgrounds & Feats" subtitle="2024 origins" />
-        <ModeRow base={BASE} current={{ q: "", cat: "" }} param="mode" options={modeOpts} active={mode} />
+        <ModeRow base={BASE} current={{ q: "", cat: "", src }} param="mode" options={modeOpts} active={mode} />
         <DndHomebrewEditor kind="dnd-background" campaigns={campaigns} initial={hbBgOwn} />
-        <SearchForm base={BASE} q={one(raw.q)} placeholder="Search backgrounds…" hidden={{ mode }} />
-        <CountLine count={list.length} noun="background" base={`${BASE}?mode=backgrounds`} filtered={!!q} />
+        <SearchForm base={BASE} q={one(raw.q)} placeholder="Search backgrounds…" hidden={{ mode, src }} />
+        {hbBgs.length ? <ChipRow label="Source" base={BASE} current={{ mode, q: one(raw.q), src }} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} /> : null}
+        <CountLine count={list.length} noun="background" base={`${BASE}?mode=backgrounds`} filtered={!!q || !!src} />
         {list.length === 0 ? <EmptyState noun="background" base={`${BASE}?mode=backgrounds`} /> : (
           <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
             {list.map((b, i) => (
@@ -66,7 +69,7 @@ export default async function DndBackgroundsFeatsPage({ searchParams }: { search
   }
 
   // Feats
-  let list = [...hbFeats, ...DND_FEATS];
+  let list = [...hbFeats, ...DND_FEATS].filter(srcOk);
   if (cat) list = list.filter((f) => f.category === cat);
   if (q) list = list.filter((f) => f.name.toLowerCase().includes(q) || f.benefits.some((x) => x.toLowerCase().includes(q)));
   list.sort((a, b) => a.name.localeCompare(b.name));
@@ -74,11 +77,12 @@ export default async function DndBackgroundsFeatsPage({ searchParams }: { search
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
       <DndHeader title="Backgrounds & Feats" subtitle="2024 origins" />
-      <ModeRow base={BASE} current={{ q: "", cat: "" }} param="mode" options={modeOpts} active={mode} />
+      <ModeRow base={BASE} current={{ q: "", cat: "", src }} param="mode" options={modeOpts} active={mode} />
       <DndHomebrewEditor kind="dnd-feat" campaigns={campaigns} initial={hbFeatOwn} />
-      <SearchForm base={BASE} q={one(raw.q)} placeholder="Search feats…" hidden={{ mode, cat }} />
-      <ChipRow label="Category" base={BASE} current={{ mode, q: one(raw.q), cat }} param="cat" options={cats.map((c) => ({ key: c, label: c }))} active={cat} />
-      <CountLine count={list.length} noun="feat" base={`${BASE}?mode=feats`} filtered={!!(q || cat)} />
+      <SearchForm base={BASE} q={one(raw.q)} placeholder="Search feats…" hidden={{ mode, cat, src }} />
+      <ChipRow label="Category" base={BASE} current={{ mode, q: one(raw.q), cat, src }} param="cat" options={cats.map((c) => ({ key: c, label: c }))} active={cat} />
+      {hbFeats.length ? <ChipRow label="Source" base={BASE} current={{ mode, q: one(raw.q), cat, src }} param="src" options={[{ key: "book", label: "Official" }, { key: "hb", label: "Homebrew" }]} active={src} /> : null}
+      <CountLine count={list.length} noun="feat" base={`${BASE}?mode=feats`} filtered={!!(q || cat || src)} />
       {list.length === 0 ? <EmptyState noun="feat" base={`${BASE}?mode=feats`} /> : (
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
           {list.map((f, i) => (

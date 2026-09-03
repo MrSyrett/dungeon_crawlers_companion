@@ -42,13 +42,15 @@
     } catch (e) { return Promise.resolve([]); }
   }
 
-  var _busy = false;
+  var _busy = false, _pending = null;
 
   // Fetch every homebrew type whose target pool exists on this page, inject it,
   // then fire onChange so the tool can refresh anything already on screen. Safe
   // to call again later (e.g. after saving new homebrew) — it replaces, not adds.
+  // A call made while one is in flight is queued and runs once the first finishes,
+  // so a save during the initial load isn't lost.
   function load(onChange) {
-    if (_busy) return;
+    if (_busy) { _pending = onChange || _pending || function () {}; return; }
     var jobs = [];
 
     Object.keys(TARGETS).forEach(function (type) {
@@ -80,7 +82,7 @@
           if (!sc || !sc.name || !sc.className) return;
           var base = null;
           for (var j = 0; j < classPool.length; j++) { if (String(classPool[j].name).toLowerCase() === String(sc.className).toLowerCase()) { base = classPool[j]; break; } }
-          if (!base) return;
+          if (!base) { try { console.warn('[homebrew] subclass "' + sc.name + '" references unknown base class "' + sc.className + '" — not shown'); } catch (e) {} return; }
           if (!Array.isArray(base.subclasses)) base.subclasses = [];
           base.subclasses.push(sc);
         });
@@ -92,7 +94,8 @@
     Promise.all(jobs).then(function () {
       _busy = false;
       try { if (typeof onChange === "function") onChange(); } catch (e) {}
-    }, function () { _busy = false; });
+      if (_pending) { var next = _pending; _pending = null; load(next); }   // run a call that arrived mid-flight
+    }, function () { _busy = false; if (_pending) { var n = _pending; _pending = null; load(n); } });
   }
 
   window.DNDHB = { load: load };

@@ -323,6 +323,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .fi-track .fi-track-lbl b{color:var(--ink);font-family:'Share Tech Mono',monospace;}
 .fi-track .res-pip{width:16px;height:16px;border-width:2px;border-radius:3px;}
 .fi-track .res-reset-btn{padding:1px 6px;font-size:8.5px;}
+.fi-roll{margin-top:5px;display:inline-flex;align-items:center;gap:4px;border:1px dashed var(--dnd);color:var(--dnd);background:transparent;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;cursor:pointer;}
+.fi-roll:hover{background:var(--dnd-lt);color:var(--dnd-dk);}
 .res-reset-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;cursor:pointer;}
 .res-reset-btn:hover{background:var(--dnd-lt);color:var(--dnd-dk);}
 .sp-granted{font-family:'Barlow Condensed',sans-serif;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;background:var(--dnd);border-radius:3px;padding:1px 5px;white-space:nowrap;}
@@ -1483,10 +1485,23 @@ function equippedArmorInfo(){
     return { armor:a, plus: (attunedOk ? (magicBonuses(magicData(ref)).ac || 0) : 0) + num(mr.dataset.plus || 0) }; }
   return { armor:null, plus:0 };
 }
+// Unarmored AC when no armor is worn: the best of plain 10+DEX and any class
+// feature that sets an unarmored formula (2024). Shield is added by computeAC,
+// but Monk's Unarmored Defense doesn't work with a shield, so it drops out then.
+function hasUnarmoredDefense(){ return hasFeature('Unarmored Defense') || hasFeature('Draconic Resilience'); }
+function unarmoredACBase(dex){
+  const hasShield = !!equippedItemName('shield');
+  const cl = classList(), has = c => cl.some(x => norm(x.cls) === c);
+  let best = 10 + dex;
+  if(has('barbarian') && hasFeature('Unarmored Defense')) best = Math.max(best, 10 + dex + modOf('CON'));   // shield allowed
+  if(has('monk') && hasFeature('Unarmored Defense') && !hasShield) best = Math.max(best, 10 + dex + modOf('WIS'));
+  if(hasFeature('Draconic Resilience')) best = Math.max(best, 13 + dex);                                    // shield allowed
+  return best;
+}
 function computeAC(){
   const dex = modOf('DEX');
   const { armor, plus } = equippedArmorInfo();
-  let ac = armor ? armorACValue(armor, dex) + plus : 10 + dex;
+  let ac = armor ? armorACValue(armor, dex) + plus : unarmoredACBase(dex);
   if(equippedItemName('shield')) ac += 2 + equippedRowPlus('shield');
   ac += magicACBonus();
   return ac;
@@ -1495,8 +1510,8 @@ function computeAC(){
 let _acWasAuto = false;
 function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
-  const auto = !!(equippedItemName('armor') || equippedItemName('shield') || equippedMagicArmorRow() || magicACBonus() > 0);
-  if(auto){ acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto'); acEl.title = 'Auto-calculated from equipped armor / shield / magic items'; }
+  const auto = !!(equippedItemName('armor') || equippedItemName('shield') || equippedMagicArmorRow() || magicACBonus() > 0 || hasUnarmoredDefense());
+  if(auto){ acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto'); acEl.title = 'Auto-calculated from equipped armor / shield / class features / magic items'; }
   else {
     if(_acWasAuto) acEl.value = computeAC();   // just unequipped the last source → unarmored value
     acEl.readOnly = false; acEl.classList.remove('auto'); acEl.title = '';
@@ -1770,9 +1785,9 @@ function autoFeatures(){
   const out = [];
   classList().forEach(cl => {
     const c = classDataByName(cl.cls); if(!c) return;
-    (c.features || []).filter(f => !f.subclass && f.level <= cl.level).forEach(f => out.push({ name: f.name, meta: c.name + ' ' + f.level, desc: f.description }));
+    (c.features || []).filter(f => !f.subclass && f.level <= cl.level).forEach(f => out.push({ name: f.name, meta: c.name + ' ' + f.level, desc: f.description, damage: f.damage, damageType: f.damageType, heal: f.heal }));
     const sub = (c.subclasses || []).find(s => norm(s.name) === norm(cl.subclass));
-    if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => out.push({ name: f.name, meta: sub.name + ' ' + f.level, desc: f.description }));
+    if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => out.push({ name: f.name, meta: sub.name + ' ' + f.level, desc: f.description, damage: f.damage, damageType: f.damageType, heal: f.heal }));
   });
   const sp = speciesData();
   if(sp){ (sp.traits || []).forEach(t => out.push({ name: t.name, meta: sp.name, desc: t.description }));
@@ -1796,13 +1811,26 @@ function renderFeatures(){
     const d = document.createElement('div'); d.className = 'feat-item';
     const long = (f.desc || '').length > 150;
     const trackers = resourcesForFeature(f.name).map(resourcePipsHTML).join('');
+    const rollLabel = [f.damage ? esc(f.damage) + (f.damageType ? ' ' + esc(f.damageType) : '') : '', f.heal ? 'heal ' + esc(f.heal) : ''].filter(Boolean).join(' · ');
+    const rollBtn = rollLabel ? '<button class="fi-roll" onclick="rollFeatureEffect(\'' + esc(f.name).replace(/'/g,"\\'") + '\')" title="Roll this feature\'s effect">🎲 ' + rollLabel + '</button>' : '';
     d.innerHTML = '<div class="fi-name">' + esc(f.name) + (f.custom ? ' <button class="row-x" onclick="removeCustomFeature(\'' + esc(f.name).replace(/'/g,"\\'") + '\')" style="float:right;">✕</button>' : (featObjs.indexOf(f) >= 0 ? ' <button class="row-x" onclick="removeFeat(\'' + esc(f.name).replace(/'/g,"\\'") + '\')" style="float:right;">✕</button>' : '')) + '</div>' +
       '<div class="fi-meta">' + esc(f.meta || '') + '</div>' +
+      rollBtn +
       (f.desc ? '<div class="fi-desc' + (long ? ' collapsed' : '') + '" onclick="this.classList.toggle(\'collapsed\')">' + esc(f.desc) + '</div>' + (long ? '<span class="tap-more" onclick="openDesc(\'' + esc(f.name).replace(/'/g,"\\'") + '\',\'' + esc(f.meta||'').replace(/'/g,"\\'") + '\',this)">Read full</span>' : '') : '') +
       trackers;
     if(long){ const more = d.querySelector('.tap-more'); if(more) more._desc = f.desc; }
     box.appendChild(d);
   });
+}
+// Roll a homebrew feature's damage and/or healing (flat dice — no ability mod;
+// bake a bonus into the dice like "2d6+3" if you want one).
+function featureByName(n){ return autoFeatures().find(f => norm(f.name) === norm(n)) || null; }
+function rollFeatureEffect(name){
+  const f = featureByName(name); if(!f) return;
+  const parts = [], detail = [];
+  if(f.damage){ const dd = rollDiceExpr(String(f.damage), false); parts.push(dd.total + (f.damageType ? ' ' + f.damageType : '')); detail.push('damage ' + dd.detail); }
+  if(f.heal){ const hd = rollDiceExpr(String(f.heal), false); parts.push('+' + hd.total + ' HP'); detail.push('heal ' + hd.detail); }
+  if(parts.length) addLog(f.name, parts.join(' · '), detail.join(' · '), 'normal');
 }
 function addCustomFeature(){ const n = ($('feat-name').value || '').trim(); if(!n) return; customFeatures.push({ name:n, desc:'', meta:'Custom' }); $('feat-name').value=''; renderFeatures(); scheduleAutosave(); }
 function removeCustomFeature(n){ customFeatures = customFeatures.filter(f => f.name !== n); renderFeatures(); scheduleAutosave(); }

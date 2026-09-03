@@ -63,6 +63,7 @@ const SPELL_CLASSES = ["Bard", "Cleric", "Druid", "Paladin", "Ranger", "Sorcerer
 const SIZES = ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"] as const;
 const FEAT_CATEGORIES = ["Origin", "General", "Fighting Style", "Epic Boon"] as const;
 const BASE_CLASSES = ["Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Warlock", "Wizard"] as const;
+const WEAPON_NAMES = ["Club", "Dagger", "Greatclub", "Handaxe", "Javelin", "Light Hammer", "Mace", "Quarterstaff", "Sickle", "Spear", "Dart", "Light Crossbow", "Shortbow", "Sling", "Battleaxe", "Flail", "Glaive", "Greataxe", "Greatsword", "Halberd", "Lance", "Longsword", "Maul", "Morningstar", "Pike", "Rapier", "Scimitar", "Shortsword", "Trident", "Warhammer", "War Pick", "Whip", "Blowgun", "Hand Crossbow", "Heavy Crossbow", "Longbow", "Musket", "Pistol"] as const;
 const MONSTER_GROUPS = ["Humanoids", "Beasts", "Monstrosities", "Undead", "Fiends", "Celestials", "Fey", "Dragons", "Giants", "Elementals", "Constructs", "Aberrations", "Oozes", "Plants"] as const;
 // Mechanical bonuses a magic item can grant (each maps to a real sheet effect).
 const ITEM_BONUS_OPTS: readonly Opt[] = [
@@ -79,7 +80,7 @@ const optsOf = (list: readonly string[]): readonly Opt[] => list.map((x) => [x, 
 function equipDefaults(kind: string): Data {
   if (kind === "weapon") return { hbKind: "weapon", category: "Simple", kind: "Melee", cost: "", damage: "1d4", damageType: "bludgeoning", weight: "", properties: [], mastery: "" };
   if (kind === "armor") return { hbKind: "armor", category: "Light", baseAC: "", strength: "", cost: "", weight: "", stealthDisadvantage: false };
-  if (kind === "magic") return { hbKind: "magic", type: "", rarity: "Uncommon", attunement: false, attunementNote: "", description: "", bonuses: [] };
+  if (kind === "magic") return { hbKind: "magic", baseWeapon: "", type: "", rarity: "Uncommon", attunement: false, attunementNote: "", description: "", bonuses: [] };
   return { hbKind: "gear", category: "", cost: "", weight: "", description: "" };
 }
 const s = (d: Data, k: string): string => { const v = d[k]; return typeof v === "string" ? v : v == null ? "" : String(v); };
@@ -180,9 +181,16 @@ const SCHEMAS: Record<string, Schema> = {
         { key: "name", label: "Trait name", type: "text", full: true, placeholder: "e.g. Cinder Step" },
         { key: "description", label: "Description", type: "textarea", full: true, placeholder: "What the trait does…" },
       ] },
+      { key: "lineages", label: "Lineages (optional)", type: "objectList", full: true, addLabel: "+ Lineage",
+        help: "Sub-options like High Elf / Wood Elf. Enter each lineage's traits one per line as “Name — description”.",
+        fields: [
+          { key: "name", label: "Lineage name", type: "text", full: true, placeholder: "e.g. Emberborn" },
+          { key: "traits", label: "Traits (one per line: Name — description)", type: "textarea", full: true, placeholder: "Cinderstep — Your Speed increases by 5 ft.\nEmber Sight — You know the Ember Bolt cantrip." },
+        ] },
     ],
-    blank: () => ({ name: "", size: "Medium", speed: "30", darkvision: "0", creatureType: "Humanoid", flavor: "", traits: [{ name: "", description: "" }] }),
-    toForm: (d) => ({ ...d, speed: s(d, "speed"), darkvision: s(d, "darkvision"), traits: Array.isArray(d.traits) ? (d.traits as Data[]) : [] }),
+    blank: () => ({ name: "", size: "Medium", speed: "30", darkvision: "0", creatureType: "Humanoid", flavor: "", traits: [{ name: "", description: "" }], lineages: [] }),
+    toForm: (d) => ({ ...d, speed: s(d, "speed"), darkvision: s(d, "darkvision"), traits: Array.isArray(d.traits) ? (d.traits as Data[]) : [],
+      lineages: Array.isArray(d.lineages) ? (d.lineages as Data[]).map((l) => ({ name: (l as Record<string, unknown>).name ?? "", traits: Array.isArray((l as Record<string, unknown>).traits) ? ((l as Record<string, unknown>).traits as { name?: string; description?: string }[]).map((t) => `${t.name ?? ""}${t.description ? " — " + t.description : ""}`).join("\n") : "" })) : [] }),
   },
   "dnd-monster": {
     kind: "dnd-monster",
@@ -196,7 +204,7 @@ const SCHEMAS: Record<string, Schema> = {
       ac: "12", acNote: "", hp: "10", hpFormula: "", speed: "30 ft.",
       abilities: Object.fromEntries(ABILITIES.map((a) => [a, "10"])),
       savingThrows: "", skills: "", damageResistances: "", damageImmunities: "", damageVulnerabilities: "", conditionImmunities: "",
-      senses: "Passive Perception 10", languages: "", cr: "1", xp: "200", proficiencyBonus: "2",
+      senses: "Passive Perception 10", languages: "", cr: "1", xp: "", proficiencyBonus: "",
       traits: [], actions: [{ name: "", description: "" }], bonusActions: [], reactions: [], legendaryActions: [],
     }),
     toForm: (d) => {
@@ -221,11 +229,14 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "className", label: "Base Class", type: "select", options: optsOf([...BASE_CLASSES]), empty: "— choose a class —" },
       { key: "flavor", label: "Flavor", type: "textarea", full: true, placeholder: "A sentence or two on the subclass…" },
       { key: "features", label: "Features (by level)", type: "objectList", full: true, addLabel: "+ Feature",
-        help: "The perks this subclass grants. Each applies automatically at its level on the character sheet — including per-rest trackers and any spells the text grants.",
+        help: "The perks this subclass grants. Each applies automatically at its level on the character sheet — including per-rest trackers and any spells the text grants. Add damage or healing dice to get a Roll button beside the feature.",
         fields: [
           { key: "name", label: "Feature name", type: "text", placeholder: "e.g. Cinder Strike" },
           { key: "level", label: "Level", type: "number", placeholder: "3" },
           { key: "description", label: "Description", type: "textarea", full: true, placeholder: "What the feature does…" },
+          { key: "damage", label: "Damage dice (optional)", type: "text", placeholder: "e.g. 2d6" },
+          { key: "damageType", label: "Damage Type", type: "select", options: optsOf([...DAMAGE_TYPES]), empty: "— none —" },
+          { key: "heal", label: "Healing dice (optional)", type: "text", placeholder: "e.g. 1d8+3" },
         ] },
     ],
     blank: () => ({ name: "", className: "", flavor: "", features: [{ name: "", level: "3", description: "" }] }),
@@ -568,7 +579,8 @@ function EquipmentBody({ form, setForm }: BodyProps) {
         </> : null}
 
         {kind === "magic" ? <>
-          {f({ key: "type", label: "Type", type: "text", placeholder: "Wondrous Item / Weapon (any)…" })}
+          {f({ key: "baseWeapon", label: "Base weapon (makes this a magic weapon)", type: "text", full: true, datalist: WEAPON_NAMES, placeholder: "e.g. Longsword — leave blank for a non-weapon item", help: "Fill this in and the item equips as an attack on the sheet; a Weapon Attack & Damage bonus below then applies to it." })}
+          {form.baseWeapon ? null : f({ key: "type", label: "Type", type: "text", placeholder: "Wondrous Item / Ring / Rod…" })}
           {f({ key: "rarity", label: "Rarity", type: "select", options: optsOf([...RARITIES]) })}
           {f({ key: "attunement", label: "Requires Attunement", type: "checkbox" })}
           {f({ key: "attunementNote", label: "Attunement Note", type: "text", placeholder: "e.g. by a spellcaster" })}
@@ -607,8 +619,8 @@ function MonsterBody({ form, setForm }: BodyProps) {
         {f({ key: "hpFormula", label: "HP Formula", type: "text", placeholder: "22 (4d8 + 4)" })}
         {f({ key: "speed", label: "Speed", type: "text", placeholder: "30 ft., Fly 60 ft." })}
         {f({ key: "cr", label: "Challenge Rating", type: "text", placeholder: "1/2, 1, 5…" })}
-        {f({ key: "xp", label: "XP", type: "number", placeholder: "200" })}
-        {f({ key: "proficiencyBonus", label: "Proficiency Bonus", type: "number", placeholder: "2" })}
+        {f({ key: "xp", label: "XP", type: "number", placeholder: "auto from CR" })}
+        {f({ key: "proficiencyBonus", label: "Proficiency Bonus", type: "number", placeholder: "auto from CR" })}
       </div>
       {f({ key: "abilities", label: "Ability Scores", type: "abilities" })}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

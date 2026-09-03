@@ -827,6 +827,25 @@ function dndBonusList(v: unknown): { target: string; amount: number }[] {
     : [];
 }
 
+// Challenge Rating → XP and Proficiency Bonus (2024 tables), for auto-deriving a
+// homebrew creature's XP/PB from its CR when they're left blank.
+const CR_XP: Record<string, number> = {
+  "0": 10, "1/8": 25, "1/4": 50, "1/2": 100, "1": 200, "2": 450, "3": 700, "4": 1100,
+  "5": 1800, "6": 2300, "7": 2900, "8": 3900, "9": 5000, "10": 5900, "11": 7200, "12": 8400,
+  "13": 10000, "14": 11500, "15": 13000, "16": 15000, "17": 18000, "18": 20000, "19": 22000,
+  "20": 25000, "21": 33000, "22": 41000, "23": 50000, "24": 62000, "25": 75000, "26": 90000,
+  "27": 105000, "28": 120000, "29": 135000, "30": 155000,
+};
+function crToNum(cr: string): number {
+  const s = str(cr);
+  if (s.includes("/")) { const [a, b] = s.split("/").map(Number); return b ? a / b : 0; }
+  return parseFloat(s) || 0;
+}
+function crToPB(cr: string): number {
+  const n = crToNum(cr);
+  return n >= 29 ? 9 : n >= 25 ? 8 : n >= 21 ? 7 : n >= 17 ? 6 : n >= 13 ? 5 : n >= 9 ? 4 : n >= 5 ? 3 : 2;
+}
+
 // The leading dice expression ("3d6", "2d8+1") from an input, ignoring any
 // trailing text ("2d8 + your mod", "1d6 per level" → "2d8", "1d6"), else "".
 function cleanDice(v: unknown): string {
@@ -891,16 +910,20 @@ function normalizeDndEquipment(input: unknown): { name: string; data: Record<str
     } };
   }
   if (hbKind === "magic") {
+    // A base weapon makes this a magic weapon: the type becomes "Weapon (base)",
+    // which the sheet reads to build the attack row and fold in the atk bonus.
+    const baseWeapon = str(o.baseWeapon).slice(0, 60);
     const magic: Record<string, unknown> = {
       ...base,
-      type: str(o.type).slice(0, 80) || "Wondrous Item",
+      type: baseWeapon ? `Weapon (${baseWeapon})` : (str(o.type).slice(0, 80) || "Wondrous Item"),
       rarity: oneOf(o.rarity, DND_RARITIES, "Uncommon"),
       attunement: !!o.attunement,
       attunementNote: str(o.attunementNote).slice(0, 200),
       description: str(o.description).slice(0, 6000),
     };
+    if (baseWeapon) magic.baseWeapon = baseWeapon;   // remembered so the editor can re-populate it
     const bonuses = dndBonusList(o.bonuses);
-    if (bonuses.length) magic.bonuses = bonuses;   // mechanical effects the sheet applies while equipped
+    if (bonuses.length) magic.bonuses = bonuses;     // mechanical effects the sheet applies while equipped
     return { name, data: magic };
   }
   return { name, data: {
@@ -979,13 +1002,22 @@ function normalizeDndSpell(input: unknown): { name: string; data: Record<string,
 }
 
 // ── Species (DndSpecies) ─────────────────────────────────────────────────────
+// One "Trait Name — description" (or "Name: description") per line → {name, description}.
+function parseTraitLines(v: unknown, maxItems: number): { name: string; description: string }[] {
+  return str(v).split("\n").map((line) => {
+    const m = line.match(/^\s*(.+?)\s*(?:[—:–-]\s*|\s{2,})(.+)$/);
+    if (m) return { name: m[1].slice(0, 120), description: m[2].slice(0, 2000) };
+    const t = line.trim();
+    return t ? { name: t.slice(0, 120), description: "" } : { name: "", description: "" };
+  }).filter((t) => t.name).slice(0, maxItems);
+}
 function normalizeDndSpecies(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 120);
   if (!name) throw new Error("A homebrew species needs a name.");
   const speed = num(o.speed);
   const dv = num(o.darkvision);
-  return { name, data: {
+  const data: Record<string, unknown> = {
     name,
     size: oneOf(o.size, DND_SIZES, "Medium"),
     speed: speed != null && speed >= 0 ? speed : 30,
@@ -994,7 +1026,15 @@ function normalizeDndSpecies(input: unknown): { name: string; data: Record<strin
     traits: nameDescList(o.traits, 24),
     flavor: str(o.flavor).slice(0, 2000),
     source: "Homebrew",
-  } };
+  };
+  // Optional lineages (High-Elf / Wood-Elf style sub-options): each has a name and
+  // its own traits, entered one "Name — description" per line.
+  const lineages = (Array.isArray(o.lineages) ? (o.lineages as unknown[]) : [])
+    .map((l) => { const r = (l ?? {}) as Record<string, unknown>; return { name: str(r.name).slice(0, 120), traits: parseTraitLines(r.traits, 12) }; })
+    .filter((l) => l.name)
+    .slice(0, 8);
+  if (lineages.length) data.lineages = lineages;
+  return { name, data };
 }
 
 // ── Monster / creature (DndMonster) ──────────────────────────────────────────
@@ -1009,6 +1049,7 @@ function normalizeDndMonster(input: unknown): { name: string; data: Record<strin
   const ac = num(o.ac);
   const xp = num(o.xp);
   const pb = num(o.proficiencyBonus);
+  const cr = str(o.cr).slice(0, 12) || "0";
   const data: Record<string, unknown> = {
     name,
     size: oneOf(o.size, DND_SIZES, "Medium"),
@@ -1021,9 +1062,10 @@ function normalizeDndMonster(input: unknown): { name: string; data: Record<strin
     abilities,
     senses: str(o.senses).slice(0, 200) || "Passive Perception 10",
     languages: str(o.languages).slice(0, 200),
-    cr: str(o.cr).slice(0, 12) || "0",
-    xp: xp != null && xp >= 0 ? xp : 0,
-    proficiencyBonus: pb != null && pb >= 2 ? pb : 2,
+    cr,
+    // XP and Proficiency Bonus default from the CR table (2024) when left blank.
+    xp: xp != null && xp > 0 ? xp : (CR_XP[cr] ?? 0),
+    proficiencyBonus: pb != null && pb >= 2 ? pb : crToPB(cr),
     traits: nameDescList(o.traits, 20),
     actions: nameDescList(o.actions, 20),
     group: oneOf(o.group, DND_MONSTER_GROUPS, "Humanoids"),
@@ -1059,16 +1101,21 @@ function normalizeDndSubclass(input: unknown): { name: string; data: Record<stri
     .map((f) => {
       const r = (f ?? {}) as Record<string, unknown>;
       const lvl = num(r.level);
-      return {
+      const feat: Record<string, unknown> = {
         name: str(r.name).slice(0, 120),
         level: lvl != null && lvl >= 1 && lvl <= 20 ? lvl : 3,
         subclass: name,
         description: str(r.description).slice(0, 4000),
         source: "Homebrew" as const,
       };
+      // Optional rollable effect — the sheet shows a Roll button inline with it.
+      const dmg = cleanDice(r.damage);
+      if (dmg) { feat.damage = dmg; const dt = oneOf(r.damageType, ["", ...DND_DAMAGE_TYPES] as const, ""); if (dt) feat.damageType = dt; }
+      const heal = cleanDice(r.heal); if (heal) feat.heal = heal;
+      return feat;
     })
     .filter((f) => f.name)
-    .sort((a, b) => a.level - b.level)
+    .sort((a, b) => (a.level as number) - (b.level as number))
     .slice(0, 40);
 
   return { name, data: {

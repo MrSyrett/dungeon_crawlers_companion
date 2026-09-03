@@ -59,6 +59,10 @@ export interface DndClassFeature {
   subclass?: string;
   description: string;
   source: DndSource;
+  /** Homebrew: optional rollable effect surfaced as a button on the sheet. */
+  damage?: string;      // dice, e.g. "2d6"
+  damageType?: string;  // e.g. "fire"
+  heal?: string;        // dice, e.g. "1d8+3"
 }
 
 export interface DndSubclass {
@@ -167,6 +171,13 @@ export interface DndSpell {
   /** "At Higher Levels" / cantrip-scaling text. */
   higherLevels?: string;
   source: DndSource;
+  /** Homebrew: structured combat fields the sheet rolls on cast. */
+  roll?: "attack" | "save";
+  saveAbility?: DndAbility;
+  damage?: string;      // dice, e.g. "3d6"
+  damageType?: string;  // e.g. "fire"
+  heal?: string;        // dice, e.g. "2d8"
+  upcast?: string;      // extra dice per slot level above base, e.g. "1d6"
 }
 
 // ── Equipment ─────────────────────────────────────────────────────────────
@@ -212,6 +223,10 @@ export interface DndMagicItem {
   attunementNote?: string;
   description: string;
   source: DndSource;
+  /** Homebrew: mechanical bonuses the sheet applies while equipped, and the base
+   *  weapon that makes a "Weapon (X)" item equippable as an attack. */
+  bonuses?: { target: string; amount: number }[];
+  baseWeapon?: string;
 }
 
 // ── Monsters ──────────────────────────────────────────────────────────────

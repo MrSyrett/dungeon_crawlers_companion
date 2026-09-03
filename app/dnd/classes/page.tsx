@@ -4,7 +4,7 @@ import { DND_CLASSES } from "@/lib/data/dnd-classes";
 import type { DndClass, DndSubclass } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
-import { DndHeader, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
+import { DndHeader, ChipRow, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/dnd/classes";
@@ -31,14 +31,18 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
   };
   const classes = DND_CLASSES.map(withSubs);
   const selected = classes.find((c) => c.name === pick) ?? null;
+  const src = one(raw.src) === "hb" ? "hb" : "";
 
   if (!selected) {
+    // "Homebrew" narrows the list to classes that have at least one homebrew subclass.
+    const list = src === "hb" ? classes.filter((c) => (subsByClass.get(c.name.toLowerCase()) ?? []).length) : classes;
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
         <DndHeader title="Classes" subtitle={`${DND_CLASSES.length} classes${hbSubs.length ? ` · +${hbSubs.length} homebrew subclass${hbSubs.length === 1 ? "" : "es"}` : ""} · levels 1–20`} />
         <DndHomebrewEditor kind="dnd-subclass" campaigns={campaigns} initial={hbOwn} />
+        {hbSubs.length ? <ChipRow label="Source" base={BASE} current={{ src }} param="src" options={[{ key: "hb", label: "Has homebrew subclasses" }]} active={src} /> : null}
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {classes.map((c) => {
+          {list.map((c) => {
             const hb = subsByClass.get(c.name.toLowerCase()) ?? [];
             return (
             <li key={c.name} className={cardCls}>
