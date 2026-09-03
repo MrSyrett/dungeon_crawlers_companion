@@ -488,6 +488,7 @@
     if (document.getElementById("f-lineage")) document.getElementById("f-lineage").value = st.lineage || "";
     if (typeof window.renderFeatures === "function") window.renderFeatures();
     if (typeof window.renderSpells === "function") window.renderSpells();
+    if (typeof window.syncSpellAttacks === "function") window.syncSpellAttacks();
     if (typeof window.saveSheet === "function") window.saveSheet(true);
     if (typeof window.addLog === "function") window.addLog("Character Built", "✨", (st.name || st.cls || "Character") + " — " + (st.cls || "") + " " + st.level, "normal");
     close();

@@ -200,7 +200,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .death-row{display:flex;align-items:center;gap:4px;justify-content:center;flex-wrap:wrap;}
 .death-row .d-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
 .death-pip{display:inline-block;width:14px;height:14px;border:2px solid var(--muted);border-radius:50%;cursor:pointer;background:transparent;vertical-align:middle;margin:0 2px;box-sizing:border-box;}
-#death-succ,#death-fail{display:inline-flex;gap:3px;align-items:center;}
+#death-succ,#death-fail{display:inline-flex;gap:5px;align-items:center;}
+.death-box{grid-column:span 2;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;}
+.death-stack{display:flex;flex-direction:column;gap:6px;align-items:center;}
+.death-box .mini-roll{margin-top:1px;}
 .death-pip.succ.on{background:var(--green);border-color:var(--green);}
 .death-pip.fail.on{background:var(--red);border-color:var(--red);}
 
@@ -497,8 +500,8 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="c-lbl">Hit Points</div>
           <div class="hp-row"><input id="f-hp-cur" type="number" value="10" oninput="scheduleAutosave()"><span class="slash">/</span><input id="f-hp-max" type="number" value="10" oninput="scheduleAutosave()"></div>
           <div class="hp-adjust">
-            <input id="f-hp-adjust" type="number" min="0" placeholder="0" title="Amount to heal or take as damage" onkeydown="if(event.key==='Enter')adjustHP(-1)">
             <button class="hp-adj-btn heal" onclick="adjustHP(1)" title="Heal by the amount entered">Heal</button>
+            <input id="f-hp-adjust" type="number" min="0" placeholder="0" title="Amount to heal or take as damage" onkeydown="if(event.key==='Enter')adjustHP(-1)">
             <button class="hp-adj-btn dmg" onclick="adjustHP(-1)" title="Take damage by the amount entered (temp HP absorbs first)">Damage</button>
           </div>
           <div class="hp-sub">
@@ -506,22 +509,19 @@ select option{background:var(--input-bg);color:var(--ink);}
             <label>Hit Dice <input id="f-hitdice" placeholder="1d10" style="width:52px;" oninput="scheduleAutosave()"> <button class="mini-roll" onclick="rollHitDie()" title="Roll a Hit Die">🎲</button></label>
           </div>
         </div>
-        <div class="cbt hp-box">
-          <div class="c-lbl">Spell Save DC / Attack</div>
-          <div class="hp-row" style="gap:10px;"><span id="cbt-dc" class="c-val" style="cursor:default;">—</span><span id="cbt-satk" class="c-val click" onclick="rollSpellAttack()" title="Roll a spell attack" style="cursor:pointer;">—</span></div>
-          <div class="hp-sub"><label style="cursor:default;">DC</label><label style="cursor:default;">Spell Atk</label></div>
+        <div class="cbt death-box">
+          <div class="c-lbl">Death Saves</div>
+          <div class="death-stack">
+            <span id="death-succ" title="Successes"></span>
+            <span id="death-fail" title="Failures"></span>
+          </div>
+          <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save">🎲 Roll</button>
         </div>
-      </div>
-      <div class="death-strip">
-        <span class="d-lbl">Death Saves</span>
-        <span id="death-succ" title="Successes"></span>
-        <span id="death-fail" title="Failures" style="margin-left:8px;"></span>
-        <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save" style="margin-left:8px;">🎲 Roll</button>
       </div>
       </div><!-- mc-combat -->
 
       <div class="mc-attacks">
-      <div class="section-bar"><span>Attacks &amp; Spellcasting Actions</span></div>
+      <div class="section-bar"><span>Attacks &amp; Spellcasting Actions</span><span class="sb-note" id="atk-spell-note"></span></div>
       <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div>
       <div class="add-row">
         <button class="small-btn ghost" onclick="addAttackRow()">+ Attack</button>
@@ -920,6 +920,7 @@ function toggleDeath(kind, i){ if(kind === 'succ') deathSucc = (deathSucc === i 
 function addAttackRow(a){
   a = a || { name:'', abil:'STR', prof:true, bonus:0, damage:'', type:'' };
   const tr = document.createElement('tr');
+  if(a.spell) tr.dataset.spell = a.spell;
   const abilOpts = ABILITIES.map(x => '<option value="' + x.id + '"' + (a.abil===x.id?' selected':'') + '>' + x.id + '</option>').join('');
   tr.innerHTML =
     '<td><input type="text" class="atk-name" value="' + esc(a.name) + '" placeholder="Longsword" oninput="scheduleAutosave()"></td>' +
@@ -1134,14 +1135,14 @@ function renderSpellHeader(){
   const on = isCaster();
   $('spell-block').style.display = on ? '' : 'none';
   $('spell-empty').style.display = on ? 'none' : '';
-  const dc = $('cbt-dc'), sa = $('cbt-satk');
+  const note = $('atk-spell-note');
   if(on){
     $('sp-ability').textContent = spellAbilityId();
     $('sp-dc').textContent = spellDC();
     $('sp-atk').textContent = sgn(spellAtkBonus());
     $('spell-note').textContent = casterType().charAt(0).toUpperCase() + casterType().slice(1) + ' caster';
-    if(dc) dc.textContent = spellDC(); if(sa) sa.textContent = sgn(spellAtkBonus());
-  } else { $('spell-note').textContent = 'No spellcasting'; if(dc) dc.textContent = '—'; if(sa) sa.textContent = '—'; }
+    if(note) note.innerHTML = 'Spell Atk <b onclick="rollSpellAttack()" style="cursor:pointer;color:var(--dnd-dk);" title="Roll a spell attack">' + sgn(spellAtkBonus()) + '</b> · Save DC <b>' + spellDC() + '</b>';
+  } else { $('spell-note').textContent = 'No spellcasting'; if(note) note.textContent = ''; }
 }
 function slotArray(){
   const t = D.tables(); const L = levelNow(); if(!t) return null;
@@ -1200,9 +1201,31 @@ function renderSpells(){
     });
   });
 }
-function addSpellByName(n){ if(!spellsKnown.some(s => norm(s.name) === norm(n))) spellsKnown.push({ name:n, prepared:true }); renderSpells(); scheduleAutosave(); }
+function addSpellByName(n){ if(!spellsKnown.some(s => norm(s.name) === norm(n))) spellsKnown.push({ name:n, prepared:true }); addSpellAttackRow(n); renderSpells(); scheduleAutosave(); }
 function togglePrep(n){ const s = spellsKnown.find(x => x.name === n); if(s) s.prepared = !s.prepared; renderSpells(); scheduleAutosave(); }
-function removeSpell(n){ spellsKnown = spellsKnown.filter(s => s.name !== n); renderSpells(); scheduleAutosave(); }
+function removeSpell(n){ spellsKnown = spellsKnown.filter(s => s.name !== n); [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.spell || '') === norm(n)) tr.remove(); }); renderSpells(); scheduleAutosave(); }
+// Attack spells (those calling for a spell attack roll) get an Attacks/Spellcasting row.
+// Damage is parsed from the description; the row's ability = the spell ability, so its
+// to-hit equals the spell attack bonus.
+const DMG_TYPES = ['acid','bludgeoning','cold','fire','force','lightning','necrotic','piercing','poison','psychic','radiant','slashing','thunder'];
+function spellIsAttack(sp){ return !!(sp && /spell attack/i.test(sp.description || '')); }
+function spellDamage(sp){
+  const desc = (sp && sp.description) || '';
+  let m = desc.match(/(\d+d\d+(?:\s*\+\s*\d+)?)\s+([A-Za-z]+)\s+damage/i);
+  if(m){ const t = m[2].toLowerCase(); return { dice: m[1].replace(/\s+/g,''), type: DMG_TYPES.includes(t) ? t : '' }; }
+  m = desc.match(/(\d+d\d+)\s+damage/i);
+  return m ? { dice: m[1], type: '' } : { dice: '', type: '' };
+}
+function addSpellAttackRow(n){
+  const sp = spellByName(n); if(!spellIsAttack(sp)) return;
+  const exists = [...document.querySelectorAll('#attacks-body tr')].some(tr => norm(tr.dataset.spell || tr.querySelector('.atk-name').value) === norm(n));
+  if(exists) return;
+  const dmg = spellDamage(sp);
+  addAttackRow({ name: sp.name, abil: spellAbilityId(), prof: true, bonus: 0, damage: dmg.dice, type: dmg.type, spell: sp.name });
+}
+// Add rows for every known attack spell that hasn't got one (used after the builder applies a caster).
+function syncSpellAttacks(){ spellsKnown.forEach(sk => addSpellAttackRow(sk.name)); }
+window.syncSpellAttacks = syncSpellAttacks;
 function castSpell(n, lvl){
   // spend the lowest available slot of at least this level (pact spends pact slot)
   const t = D.tables(), L = levelNow();
@@ -1354,7 +1377,8 @@ function collectSheet(){
   const attacks = [...document.querySelectorAll('#attacks-body tr')].map(tr => ({
     name: tr.querySelector('.atk-name').value, abil: tr.querySelector('.atk-abil').value,
     prof: tr.querySelector('.atk-prof').checked, bonus: num(tr.querySelector('.atk-bonus').value),
-    damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value
+    damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value,
+    spell: tr.dataset.spell || ''
   })).filter(a => a.name || a.damage);
   const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value) })).filter(i => i.name);
   return {
