@@ -19,7 +19,7 @@ export default function SystemToggle() {
     <div
       role="tablist"
       aria-label="Game system"
-      className="flex flex-nowrap justify-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1 sm:flex-wrap sm:gap-2 sm:p-1.5"
+      className="flex w-full flex-nowrap justify-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-1 sm:w-auto sm:flex-wrap sm:gap-2 sm:p-1.5"
     >
       {SYSTEMS.map((s) => {
         const on = active === s.key;
@@ -29,7 +29,7 @@ export default function SystemToggle() {
             role="tab"
             aria-selected={on}
             onClick={() => setSystem(s.key)}
-            className={`rounded px-1.5 py-2 text-[10px] tracking-[0.04em] sm:px-4 sm:text-[11px] sm:tracking-[0.15em] font-bold uppercase transition-colors ${
+            className={`flex-1 rounded px-0.5 py-2 text-[11px] tracking-[0.03em] sm:flex-initial sm:px-4 sm:text-[11px] sm:tracking-[0.15em] font-bold uppercase transition-colors ${
               on ? "bg-[var(--panel-2)]" : "text-[var(--muted)] hover:text-[var(--text)]"
             }`}
             style={on ? { color: s.accent, boxShadow: `inset 0 0 0 1px ${s.accent}` } : undefined}

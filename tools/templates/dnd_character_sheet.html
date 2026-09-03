@@ -124,12 +124,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tab-panel.on .section-bar{position:sticky;top:0;z-index:2;}
 
 /* CONDITIONS */
-.cond-wrap{padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;}
+.cond-wrap{padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--rule);}
 .cond-chip{border:1px solid var(--rule);border-radius:14px;background:var(--box);padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.03em;color:var(--muted);cursor:pointer;user-select:none;}
 .cond-chip:hover{border-color:var(--dnd);}
 .cond-chip.on{background:var(--dnd);color:#fff;border-color:var(--dnd-dk);}
 .cond-chip .ci{opacity:.6;margin-left:4px;font-size:9px;}
-.exh-box{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding:6px 10px;border-top:1px solid var(--rule);}
+.exh-box{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding:8px 10px;}
 .exh-box .eb-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
 .exh-box #exh-pips{display:inline-flex;gap:5px;}
 .exh-pip{display:inline-block;width:26px;height:26px;border:2px solid var(--muted);border-radius:5px;cursor:pointer;background:transparent;font-family:'Share Tech Mono',monospace;font-size:13px;line-height:22px;text-align:center;color:var(--muted);vertical-align:middle;}
@@ -184,10 +184,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .cbt .c-val{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--dnd-dk);line-height:1.1;}
 .cbt input{width:100%;border:none;background:transparent;font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;text-align:center;color:var(--dnd-dk);outline:none;}
 .cbt.click{cursor:pointer;}.cbt.click:hover{background:var(--dnd-lt);}
-.hp-box{grid-column:span 2;display:flex;flex-direction:column;gap:3px;}
-.hp-row{display:flex;align-items:center;justify-content:center;gap:4px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
-.hp-row input{width:46px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;}
-.hp-row .slash{color:var(--muted);font-size:16px;}
+.hp-box{grid-column:span 2;display:flex;flex-direction:column;gap:5px;}
+.hp-row{display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
+.hp-row input{width:66px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
+.hp-row .slash{color:var(--muted);font-size:24px;}
+.hp-adjust{display:flex;align-items:center;justify-content:center;gap:5px;}
+.hp-adjust input{width:52px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:15px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:4px 0;}
+.hp-adj-btn{border:none;border-radius:4px;padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:#fff;}
+.hp-adj-btn.heal{background:var(--green);}
+.hp-adj-btn.dmg{background:var(--red);}
+.hp-adj-btn:hover{filter:brightness(1.12);}
 .hp-sub{display:flex;gap:6px;justify-content:center;font-size:9px;}
 .hp-sub label{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:3px;}
 .hp-sub input{width:40px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
@@ -323,15 +329,29 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
   .hdr-fields{grid-template-columns:1fr 1fr;border-left:none;border-top:2px solid var(--border);}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
+  /* One column, reordered for a phone: Combat, Abilities, Skills, Attacks,
+     Conditions, Proficiencies, Tabs. The region/column wrappers are flattened
+     with display:contents so their inner sections become siblings that order
+     freely. */
   .body-row{flex-direction:column;flex-wrap:nowrap;}
-  .left-region,.main-col{width:100%;border-right:none;}
-  .left-top{flex-direction:column;}
-  .ability-col{width:100%;border-right:none;border-bottom:1px solid var(--rule);}
+  .left-region,.left-top,.skills-col,.main-col{display:contents;}
+  .mc-combat{order:1;}
+  .ability-col{order:2;width:100%;border-right:none;border-bottom:1px solid var(--rule);}
+  .sc-skills{order:3;border-bottom:1px solid var(--rule);}
+  .mc-attacks{order:4;border-bottom:1px solid var(--rule);padding-bottom:4px;}
+  .sc-conditions{order:5;border-bottom:1px solid var(--rule);}
+  .sc-prof{order:6;border-bottom:1px solid var(--rule);}
+  .mc-tabs{order:7;}
   .ability-col .abil-list{display:grid;grid-template-columns:repeat(3,1fr);}
   .abil-box{margin:6px 4px;}
   .combat-strip{grid-template-columns:1fr 1fr;}
   .cbt.hp-box{grid-column:span 2;}
+  .hp-row input{width:80px;font-size:34px;}
+  .hp-adj-btn{min-height:38px;flex:1;}
+  .hp-adjust input{min-height:38px;}
   .death-strip{gap:6px;}
+  .cond-chip{padding:7px 13px;font-size:13px;}
+  .exh-pip{width:30px;height:30px;line-height:26px;font-size:14px;}
   /* Tabs: sit under the content, wrap to two rows, and each window is a
      capped, scrollable pane so nothing runs off the page. */
   .tabs-bar{position:sticky;top:0;z-index:3;}
@@ -422,18 +442,24 @@ select option{background:var(--input-bg);color:var(--ink);}
           </div>
         </div>
         <div class="skills-col">
-          <div class="section-bar red"><span>Skills</span><span class="sb-note">Passive Perception <b id="d-pp">10</b></span></div>
-          <div class="skills-wrap" id="skills-list"></div>
+          <div class="sc-skills">
+            <div class="section-bar red"><span>Skills</span><span class="sb-note">Passive Perception <b id="d-pp">10</b></span></div>
+            <div class="skills-wrap" id="skills-list"></div>
+          </div>
 
-          <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
-          <div class="blk"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
+          <div class="sc-conditions">
+            <div class="section-bar red"><span>Conditions</span><span class="sb-note">tap to toggle</span></div>
+            <div class="exh-box">
+              <span class="eb-lbl">Exhaustion</span>
+              <span id="exh-pips"></span>
+              <span class="sb-note" style="color:var(--muted);">−<span id="exh-val">0</span> to d20 tests</span>
+            </div>
+            <div class="cond-wrap" id="conditions-list"></div>
+          </div>
 
-          <div class="section-bar red"><span>Conditions</span><span class="sb-note">tap to toggle</span></div>
-          <div class="cond-wrap" id="conditions-list"></div>
-          <div class="exh-box">
-            <span class="eb-lbl">Exhaustion</span>
-            <span id="exh-pips"></span>
-            <span class="sb-note" style="color:var(--muted);">−<span id="exh-val">0</span> to d20 tests</span>
+          <div class="sc-prof">
+            <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
+            <div class="blk"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
           </div>
         </div>
       </div>
@@ -441,6 +467,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
     <!-- MAIN: COMBAT / ATTACKS / TABS -->
     <div class="main-col">
+      <div class="mc-combat">
       <div class="combat-strip">
         <div class="cbt"><div class="c-lbl">Armor Class</div><input id="f-ac" value="10" oninput="scheduleAutosave()"></div>
         <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
@@ -449,6 +476,11 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="cbt hp-box">
           <div class="c-lbl">Hit Points</div>
           <div class="hp-row"><input id="f-hp-cur" type="number" value="10" oninput="scheduleAutosave()"><span class="slash">/</span><input id="f-hp-max" type="number" value="10" oninput="scheduleAutosave()"></div>
+          <div class="hp-adjust">
+            <input id="f-hp-adjust" type="number" min="0" placeholder="0" title="Amount to heal or take as damage" onkeydown="if(event.key==='Enter')adjustHP(-1)">
+            <button class="hp-adj-btn heal" onclick="adjustHP(1)" title="Heal by the amount entered">Heal</button>
+            <button class="hp-adj-btn dmg" onclick="adjustHP(-1)" title="Take damage by the amount entered (temp HP absorbs first)">Damage</button>
+          </div>
           <div class="hp-sub">
             <label>Temp <input id="f-hp-temp" type="number" value="0" oninput="scheduleAutosave()"></label>
             <label>Hit Dice <input id="f-hitdice" placeholder="1d10" style="width:52px;" oninput="scheduleAutosave()"> <button class="mini-roll" onclick="rollHitDie()" title="Roll a Hit Die">🎲</button></label>
@@ -466,15 +498,19 @@ select option{background:var(--input-bg);color:var(--ink);}
         <span id="death-fail" title="Failures" style="margin-left:8px;"></span>
         <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save" style="margin-left:8px;">🎲 Roll</button>
       </div>
+      </div><!-- mc-combat -->
 
+      <div class="mc-attacks">
       <div class="section-bar"><span>Attacks &amp; Spellcasting Actions</span></div>
       <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div>
       <div class="add-row">
         <button class="small-btn ghost" onclick="addAttackRow()">+ Attack</button>
         <select class="pick-sel" id="atk-pick" onchange="if(this.value){addAttackFromWeapon(this.value);this.value='';}"><option value="">Add from the weapon list…</option></select>
       </div>
+      </div><!-- mc-attacks -->
 
       <!-- TABS -->
+      <div class="mc-tabs">
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="features" onclick="setTab('features')">Features &amp; Traits</button>
@@ -532,6 +568,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="section-bar"><span>Notes &amp; Backstory</span></div>
         <div class="notes-box"><textarea id="f-notes" placeholder="Personality, ideals, bonds, flaws, allies, backstory…"></textarea></div>
       </div>
+      </div><!-- mc-tabs -->
     </div>
   </div>
 
@@ -784,6 +821,22 @@ function rollHitDie(){
   const hd = ($('f-hitdice').value || '').match(/d(\d+)/i); const sides = hd ? num(hd[1]) : 8;
   const roll = dN(sides), con = modOf('CON'), total = Math.max(1, roll + con);
   addLog('Hit Die', '+' + total, 'd' + sides + ': ' + roll + ' ' + sgn(con) + ' CON', 'normal');
+}
+// Heal (sign +1) or Damage (sign -1) current HP by the amount in the adjust field.
+function adjustHP(sign){
+  const amtEl = $('f-hp-adjust'); const amt = Math.abs(num(amtEl.value)); if(!amt){ amtEl.focus(); return; }
+  const curEl = $('f-hp-cur'), maxEl = $('f-hp-max'), tempEl = $('f-hp-temp');
+  const max = num(maxEl.value); let cur = num(curEl.value), temp = num(tempEl.value);
+  if(sign > 0){
+    cur = Math.min(max || cur + amt, cur + amt); curEl.value = cur;
+    addLog('Heal', '+' + amt, 'HP ' + cur + (max ? '/' + max : ''), 'normal');
+  } else {
+    let dmg = amt, soaked = 0;
+    if(temp > 0){ soaked = Math.min(temp, dmg); temp -= soaked; dmg -= soaked; tempEl.value = temp; }
+    cur = Math.max(0, cur - dmg); curEl.value = cur;
+    addLog('Damage', '-' + amt, (soaked ? soaked + ' soaked by temp · ' : '') + 'HP ' + cur + (max ? '/' + max : '') + (cur === 0 ? ' — down!' : ''), cur === 0 ? 'fumble' : 'normal');
+  }
+  amtEl.value = ''; scheduleAutosave();
 }
 // ── Dice-pool tray: tap dice to build a pool, then roll the whole pool ──
 let dicePool = [];
