@@ -2606,9 +2606,11 @@ function rollSpell(btn) {
     row.classList.add('lost');
   }
 
-  // Roll damage if spell succeeded and damage field has a dice string
+  // Always roll damage when there's a dice string — even on a miss. A failed
+  // spellcasting check can still be turned into a success by spending Luck, so
+  // the damage/heal dice are worth rolling (and showing) every time.
   let dmgTotal = null, dmgBreakdown = '';
-  if(success && dmgStr) {
+  if(dmgStr) {
     const dm = dmgStr.match(/^(\d*)d(\d+)([+-]\d+)?$/i);
     if(dm) {
       const num = parseInt(dm[1]||'1'), sides = parseInt(dm[2]), mod = parseInt(dm[3]||'0');
@@ -2620,7 +2622,7 @@ function rollSpell(btn) {
 
   const dmgLabel = healing ? 'Heal' : 'Dmg';
   const resultStr = dmgTotal !== null
-    ? `${total} — ${verdict}  |  ${dmgLabel}: ${dmgTotal}`
+    ? `${total} — ${verdict}  |  ${dmgLabel}${success ? '' : ' if Luck saves'}: ${dmgTotal}`
     : `${total} — ${verdict}`;
   const detailStr = `${base}${bonusPart} vs DC ${dc} (10+${spellLevel})`
     + (dmgBreakdown ? `  |  ${dmgBreakdown}` : '');
@@ -6188,28 +6190,32 @@ function campaignRestore(saved) {
     s+=numSVG(val, n[0], n[1], fs)+'</svg>';
     return s; }
   var clear2dTimer=null;
+  var WAVE_GAP=430; // ms between an exploding die and the next
   function play2D(dice, crit){ ensureOverlay(); layer2d.innerHTML=''; if(clear2dTimer) clearTimeout(clear2dTimer);
     var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var maxWave=0; dice.forEach(function(r){ if((r.wave||0)>maxWave)maxWave=r.wave||0; });
+    var holdStart=640+maxWave*WAVE_GAP+(S.linger||1000);
     dice.forEach(function(r,i){ var die=document.createElement('div'); die.className='da-die'+(crit==='crit'?' crit':crit==='fumble'?' fumble':'');
       die.innerHTML=dieSVG(r.sides,r.display,r.color); layer2d.appendChild(die);
-      var spin=(Math.random()>.5?1:-1)*(500+Math.random()*360), dx=(Math.random()*2-1)*44;
-      if(reduce){ die.animate([{opacity:0},{opacity:1}],{duration:120,fill:'forwards'}); }
+      var wd=(r.wave||0)*WAVE_GAP, spin=(Math.random()>.5?1:-1)*(500+Math.random()*360), dx=(Math.random()*2-1)*44;
+      if(reduce){ die.animate([{opacity:0},{opacity:1}],{duration:120,delay:wd,fill:'both'}); }
       else { die.animate([
         {transform:'translate('+dx+'px,-150px) rotate('+(-spin)+'deg) scale(.35)',opacity:0,offset:0},
+        {opacity:0,offset:0.001},
         {opacity:1,offset:.18},
         {transform:'translate(0,10px) rotate(8deg) scale(1.06)',offset:.72},
         {transform:'translate(0,0) rotate(0) scale(1)',opacity:1,offset:1}
-      ],{duration:640,delay:i*70,easing:'cubic-bezier(.2,.8,.25,1)',fill:'both'}); }
-      die.animate([{opacity:1},{opacity:1},{opacity:0,transform:'scale(.82) translateY(-8px)'}],{duration:650,delay:(640+(S.linger||1000))+i*70,easing:'ease-in',fill:'forwards'});
+      ],{duration:640,delay:wd+i*55,easing:'cubic-bezier(.2,.8,.25,1)',fill:'both'}); }
+      die.animate([{opacity:1},{opacity:1},{opacity:0,transform:'scale(.82) translateY(-8px)'}],{duration:650,delay:holdStart+i*55,easing:'ease-in',fill:'forwards'});
     });
-    clear2dTimer=setTimeout(function(){ if(layer2d) layer2d.innerHTML=''; }, (640+(S.linger||1000)+800)+dice.length*70);
+    clear2dTimer=setTimeout(function(){ if(layer2d) layer2d.innerHTML=''; }, (holdStart+800)+dice.length*55);
   }
 
   // ═══════════ 3D physics dice (three.js, lazy-loaded) ═══════════
   var THREE_URL='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
   var threeState=0; // 0 none, 1 loading, 2 ready, 3 failed
   var renderer,scene,camera,rafId,world3d=null,lastT=0;
-  var FLOORY=-1.9,WALLX=3.3,WALLZ=1.5,GRAV=-38,REST=0.36,FRIC=0.7,FDT=1/60,MAXSTEPS=420,HOLD=850,FADE=440;
+  var FLOORY=-1.9,WALLX=3.3,WALLZ=1.5,GRAV=-38,REST=0.36,FRIC=0.7,FDT=1/60,MAXSTEPS=420,HOLD=850,FADE=440,WAVE_STEPS=28;
   var DOWN,_n,_axis,_dq,_corr;
   var HAS_WEBGL=(function(){ try{ var c=document.createElement('canvas'); return !!(window.WebGLRenderingContext&&(c.getContext('webgl')||c.getContext('experimental-webgl'))); }catch(e){ return false; } })();
   function loadThree(cb){ if(threeState===2){cb(true);return;} if(threeState===3){cb(false);return;}
@@ -6275,7 +6281,16 @@ function campaignRestore(saved) {
                  {n:new THREE.Vector3(0,-1,0), c:new THREE.Vector3(0,-th/2,0), labelPos:new THREE.Vector3(0,-th/2,0)} ];
     return {geo:geo, groups:groups};
   }
-  function getGeoGroups(sides){ if(sides===2) return coinGeoGroups(); if(sides===10) return d10GeoGroups(); var geo=makeGeo(sides); return {geo:geo, groups:faceGroups(geo)}; }
+  // A real d4 reads at the VERTEX pointing up: each corner carries a number, the
+  // same number sits at that corner on all faces meeting it. Pull the 4 unique
+  // vertices + each face's 3 corner indices out of the tetrahedron geometry.
+  function tetraData(geo){ var p=geo.attributes.position.array, verts=[], key={};
+    function add(x,y,z){ var k=x.toFixed(3)+','+y.toFixed(3)+','+z.toFixed(3); if(key[k]===undefined){ key[k]=verts.length; verts.push(new THREE.Vector3(x,y,z)); } return key[k]; }
+    var faces=[]; for(var i=0;i<p.length;i+=9){ var a=add(p[i],p[i+1],p[i+2]),b=add(p[i+3],p[i+4],p[i+5]),c=add(p[i+6],p[i+7],p[i+8]);
+      var C=new THREE.Vector3().add(verts[a]).add(verts[b]).add(verts[c]).multiplyScalar(1/3);
+      var n=new THREE.Vector3().subVectors(verts[b],verts[a]).cross(new THREE.Vector3().subVectors(verts[c],verts[a])).normalize(); if(n.dot(C)<0) n.negate();
+      faces.push({corners:[a,b,c], c:C, n:n}); } return {verts:verts, faces:faces}; }
+  function getGeoGroups(sides){ if(sides===2) return coinGeoGroups(); if(sides===10) return d10GeoGroups(); var geo=makeGeo(sides); var r={geo:geo, groups:faceGroups(geo)}; if(sides===4) r.tetra=tetraData(geo); return r; }
   // Face labels for a die: 1..N normally, 0-9 for a d10, 00-90 for a percentile die.
   function labelSet(faceSet,N){ var a=[],i;
     if(faceSet==='units'){ for(i=0;i<N;i++)a.push(String(i%10)); return a; }
@@ -6285,11 +6300,21 @@ function campaignRestore(saved) {
     g.fillStyle=S.num; g.font='bold '+(text.length>1?64:82)+'px Montserrat,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(text,s/2,s/2+4);
     if(text==='6'||text==='9'){ g.fillRect(s/2-21, s/2+37, 42, 8); }
     var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
-  function buildDie(geo,groups,labels,sides,resultStr,color){
+  function buildDie(geo,groups,labels,sides,resultStr,color,d4){
     var matte=(S.finish==='matte');
     var mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:matte?0.0:0.35, roughness:matte?0.95:0.3, flatShading:true, transparent:true, opacity:1,
       emissive:0x000000, emissiveIntensity:0 });
     var group=new THREE.Group(); group.add(new THREE.Mesh(geo,mat));
+    if(d4){ // vertex-numbered d4: 3 corner numbers per face, each oriented toward its vertex
+      var vsize=0.92;
+      d4.faces.forEach(function(f){ f.corners.forEach(function(vi){ var V=d4.verts[vi], C=f.c, N=f.n;
+        var pos=new THREE.Vector3().lerpVectors(C, V, 0.46).addScaledVector(N, 0.02);
+        var up=new THREE.Vector3().subVectors(V, C); up.addScaledVector(N, -up.dot(N)); up.normalize();      // toward the vertex, in the face plane
+        var xa=new THREE.Vector3().crossVectors(up, N).normalize();                                          // right = up × normal
+        var m4=new THREE.Matrix4().makeBasis(xa, up, N);
+        var pl=new THREE.Mesh(new THREE.PlaneGeometry(vsize,vsize), new THREE.MeshBasicMaterial({map:faceTex(d4.vlabels[vi]),transparent:true,depthWrite:false}));
+        pl.position.copy(pos); pl.quaternion.setFromRotationMatrix(m4); group.add(pl); }); });
+      return group; }
     var size=sides===2?1.15:sides===6?0.95:sides===4?0.8:sides===10?0.5:0.62;
     groups.forEach(function(g,idx){ var isR=labels[idx]===resultStr;
       var pl=new THREE.Mesh(new THREE.PlaneGeometry(size,size), new THREE.MeshBasicMaterial({map:faceTex(labels[idx]),transparent:true,depthWrite:false}));
@@ -6303,7 +6328,7 @@ function campaignRestore(saved) {
   function makeShadow(){ var m=new THREE.Mesh(new THREE.PlaneGeometry(2.2,2.2), new THREE.MeshBasicMaterial({map:shTex(),transparent:true,depthWrite:false})); m.rotation.x=-Math.PI/2; m.position.y=FLOORY+0.012; return m; }
   var _glowTex=null;
   function glowTex(){ if(_glowTex)return _glowTex; var s=128,c=document.createElement('canvas'); c.width=c.height=s; var g=c.getContext('2d'),gr=g.createRadialGradient(s/2,s/2,4,s/2,s/2,s/2); gr.addColorStop(0,'rgba(255,255,255,0.95)'); gr.addColorStop(0.45,'rgba(255,255,255,0.35)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gr; g.fillRect(0,0,s,s); _glowTex=new THREE.CanvasTexture(c); return _glowTex; }
-  function stepState(s,dt){ s.v.y+=GRAV*dt; s.p.x+=s.v.x*dt; s.p.y+=s.v.y*dt; s.p.z+=s.v.z*dt; var grounded=s.p.y<=s.restY+0.004;
+  function stepState(s,dt,step){ if(s.spawnStep && (step||0)<s.spawnStep) return; s.spawned=true; s.v.y+=GRAV*dt; s.p.x+=s.v.x*dt; s.p.y+=s.v.y*dt; s.p.z+=s.v.z*dt; var grounded=s.p.y<=s.restY+0.004;
     if(s.p.y<s.restY){ s.p.y=s.restY; if(s.v.y<0){ s.v.y=-s.v.y*REST; s.v.x*=FRIC; s.v.z*=FRIC; s.av.multiplyScalar(0.55); if(Math.abs(s.v.y)<1.3)s.v.y=0; } }
     if(s.p.x>WALLX){s.p.x=WALLX;s.v.x=-Math.abs(s.v.x)*REST;s.av.multiplyScalar(0.8);} if(s.p.x<-WALLX){s.p.x=-WALLX;s.v.x=Math.abs(s.v.x)*REST;s.av.multiplyScalar(0.8);}
     if(s.p.z>WALLZ){s.p.z=WALLZ;s.v.z=-Math.abs(s.v.z)*REST;} if(s.p.z<-WALLZ){s.p.z=-WALLZ;s.v.z=Math.abs(s.v.z)*REST;}
@@ -6313,29 +6338,36 @@ function campaignRestore(saved) {
         _n.copy(s.groups[di].n).applyQuaternion(s.q).normalize(); s.flat=-_n.y; _corr.setFromUnitVectors(_n,DOWN);
         var slowEase=Math.min(1,(3.2-sp)/3.2); var k=Math.min(0.2,5*dt)*(0.55+0.45*slowEase); _dq.identity().slerp(_corr,k); s.q.premultiply(_dq).normalize(); s.av.multiplyScalar(Math.pow(0.05,dt)); } }
     else { s.flat=0; s.av.multiplyScalar(1-0.5*dt); } }
-  function atRest(s){ return s.p.y<=s.restY+0.02 && s.v.length()<0.55 && s.av.length()<0.8 && s.flat>0.995; }
-  function cloneState(s){ return {p:s.p.clone(),v:s.v.clone(),av:s.av.clone(),q:s.q.clone(),restY:s.restY,radius:s.radius,groups:s.groups,flat:s.flat||0}; }
+  function atRest(s){ return s.spawned && s.p.y<=s.restY+0.02 && s.v.length()<0.55 && s.av.length()<0.8 && s.flat>0.995; }
+  function cloneState(s){ return {p:s.p.clone(),v:s.v.clone(),av:s.av.clone(),q:s.q.clone(),restY:s.restY,radius:s.radius,groups:s.groups,flat:s.flat||0,spawnStep:s.spawnStep||0,spawned:!(s.spawnStep>0)}; }
   function makeInit(sides,i){ var fl=(i%2===0); return { p:new THREE.Vector3((fl?-1:1)*(2.4+Math.random()*0.7),2.1+Math.random()*0.9,(Math.random()-0.5)*1.4),
     v:new THREE.Vector3((fl?1:-1)*(3.4+Math.random()*1.8),0.3+Math.random()*0.7,(Math.random()-0.5)*2.4),
     av:new THREE.Vector3((Math.random()-0.5)*22,(Math.random()-0.5)*22,(Math.random()-0.5)*22),
     q:new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.random()*6,Math.random()*6,Math.random()*6)),
     restY:FLOORY+dieRest(sides), radius:dieRadius(sides), groups:null, flat:0 }; }
-  function stepWorld(states,dt){ for(var i=0;i<states.length;i++) stepState(states[i],dt);
-    for(var i2=0;i2<states.length;i2++){ for(var j=i2+1;j<states.length;j++){ var a=states[i2],b=states[j]; var dx=b.p.x-a.p.x,dy=b.p.y-a.p.y,dz=b.p.z-a.p.z; var dist=Math.sqrt(dx*dx+dy*dy+dz*dz)||0.0001,mn=a.radius+b.radius;
+  function stepWorld(states,dt,step){ for(var i=0;i<states.length;i++) stepState(states[i],dt,step);
+    for(var i2=0;i2<states.length;i2++){ for(var j=i2+1;j<states.length;j++){ var a=states[i2],b=states[j]; if(!a.spawned||!b.spawned) continue; var dx=b.p.x-a.p.x,dy=b.p.y-a.p.y,dz=b.p.z-a.p.z; var dist=Math.sqrt(dx*dx+dy*dy+dz*dz)||0.0001,mn=a.radius+b.radius;
       if(dist<mn){ var nx=dx/dist,ny=dy/dist,nz=dz/dist,push=(mn-dist)*0.5; a.p.x-=nx*push;a.p.y-=ny*push;a.p.z-=nz*push; b.p.x+=nx*push;b.p.y+=ny*push;b.p.z+=nz*push;
         var rel=(b.v.x-a.v.x)*nx+(b.v.y-a.v.y)*ny+(b.v.z-a.v.z)*nz; if(rel<0){ var im=-1.15*rel*0.5; a.v.x-=nx*im;a.v.y-=ny*im;a.v.z-=nz*im; b.v.x+=nx*im;b.v.y+=ny*im;b.v.z+=nz*im; a.av.x+=nz*im;a.av.z-=nx*im; b.av.x-=nz*im;b.av.z+=nx*im; }
         if(a.p.y<a.restY)a.p.y=a.restY; if(b.p.y<b.restY)b.p.y=b.restY; } } } }
   function allRest(st){ for(var i=0;i<st.length;i++){ if(!atRest(st[i]))return false; } return true; }
   function upFace(groups,q){ var best=-1,bY=-2; for(var i=0;i<groups.length;i++){ var wy=_n.copy(groups[i].n).applyQuaternion(q).y; if(wy>bY){bY=wy;best=i;} } return best; }
+  function upVertex(verts,q){ var best=0,bY=-9; for(var i=0;i<verts.length;i++){ var wy=_n.copy(verts[i]).applyQuaternion(q).y; if(wy>bY){bY=wy;best=i;} } return best; }
   function clearWorld(){ if(!world3d)return; world3d.meshes.forEach(function(g){scene.remove(g);}); world3d.shadows.forEach(function(s){scene.remove(s);}); if(world3d.glows)world3d.glows.forEach(function(s){scene.remove(s);}); world3d=null; }
   function play3D(dice,crit){ if(!renderer && !initGL()){ play2D(dice,crit); return; } clearWorld();
-    var metas=[],inits=[]; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i); s.groups=gg.groups; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color}); });
-    var probe=inits.map(cloneState),steps=0; while(steps<MAXSTEPS){ stepWorld(probe,FDT); steps++; if(allRest(probe))break; }
+    var metas=[],inits=[],maxSpawn=0; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,wave:r.wave||0,tetra:gg.tetra}); });
+    var probe=inits.map(cloneState),steps=0; while(steps<MAXSTEPS+maxSpawn){ stepWorld(probe,FDT,steps); steps++; if(allRest(probe))break; }
     var live=inits.map(cloneState),meshes=[],shadows=[];
-    metas.forEach(function(m,i){ var up=upFace(m.groups,probe[i].q); var labels=labelSet(m.faceSet,m.groups.length);
-      var rs=m.display,had=labels.indexOf(rs),prev=labels[up]; labels[up]=rs; if(had>=0&&had!==up)labels[had]=prev;
-      var g=buildDie(m.geo,m.groups,labels,m.sides,rs,m.color); g.position.copy(live[i].p); g.quaternion.copy(live[i].q);
-      var sh=makeShadow(); scene.add(sh); scene.add(g); meshes.push(g); shadows.push(sh); });
+    metas.forEach(function(m,i){ var rs=m.display, d4=null;
+      if(m.tetra){ // d4: put the result on the up-pointing vertex, fill the rest 1-4
+        var uv=upVertex(m.tetra.verts, probe[i].q), res=parseInt(rs,10)||1, vlabels=new Array(m.tetra.verts.length);
+        vlabels[uv]=String(res); var pool=[1,2,3,4].filter(function(x){return x!==res;}), pi=0;
+        for(var vv=0;vv<vlabels.length;vv++){ if(vv!==uv) vlabels[vv]=String(pool[pi++]); }
+        d4={verts:m.tetra.verts, faces:m.tetra.faces, vlabels:vlabels}; }
+      var up=upFace(m.groups,probe[i].q), labels=labelSet(m.faceSet,m.groups.length);
+      var had=labels.indexOf(rs),prev=labels[up]; labels[up]=rs; if(had>=0&&had!==up)labels[had]=prev;
+      var g=buildDie(m.geo,m.groups,labels,m.sides,rs,m.color,d4); g.position.copy(live[i].p); g.quaternion.copy(live[i].q);
+      var sh=makeShadow(); if(inits[i].spawnStep>0){ g.visible=false; sh.visible=false; } scene.add(sh); scene.add(g); meshes.push(g); shadows.push(sh); });
     world3d={ live:live, meshes:meshes, shadows:shadows, crit:(crit||'normal'), emph:false, acc:0, rested:false, stepCount:0, maxSteps:steps, phase:'roll', tStart:performance.now() };
     lastT=performance.now(); startLoop(); }
   function applyCrit(W){ if(W.crit!=='crit'&&W.crit!=='fumble')return; var em=W.crit==='crit'?0x7a5c00:0x4a0300, gc=W.crit==='crit'?0xffd24a:0xff2e2e; W.glows=[];
@@ -6343,8 +6375,8 @@ function campaignRestore(saved) {
       var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex(),color:gc,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));
       sp.scale.set(3.4,3.4,1); sp.position.copy(g.position); scene.add(sp); W.glows.push(sp); }); }
   function frame(){ var now=performance.now(); var real=Math.min((now-lastT)/1000,0.05); lastT=now; var W=world3d;
-    if(W){ if(W.phase==='roll'){ W.acc+=real; var guard=0; while(W.acc>=FDT && !W.rested && guard<6){ stepWorld(W.live,FDT); W.stepCount++; W.acc-=FDT; guard++; if(allRest(W.live)||W.stepCount>=W.maxSteps){W.rested=true;W.restAt=now;} }
-        for(var i=0;i<W.live.length;i++){ W.meshes[i].position.copy(W.live[i].p); W.meshes[i].quaternion.copy(W.live[i].q); } if(W.rested){ W.phase='hold'; if(!W.emph){ W.emph=true; applyCrit(W); } } }
+    if(W){ if(W.phase==='roll'){ W.acc+=real; var guard=0; while(W.acc>=FDT && !W.rested && guard<6){ stepWorld(W.live,FDT,W.stepCount); W.stepCount++; W.acc-=FDT; guard++; if(allRest(W.live)||W.stepCount>=W.maxSteps){W.rested=true;W.restAt=now;} }
+        for(var i=0;i<W.live.length;i++){ W.meshes[i].position.copy(W.live[i].p); W.meshes[i].quaternion.copy(W.live[i].q); if(W.live[i].spawned){ W.meshes[i].visible=true; W.shadows[i].visible=true; } } if(W.rested){ W.phase='hold'; if(!W.emph){ W.emph=true; applyCrit(W); } } }
       else if(W.phase==='hold'){ if(now-W.restAt>(S.linger||1000)){ W.phase='fade'; W.fadeAt=now; } }
       else { var ft=(now-W.fadeAt)/FADE; if(ft>=1){ clearWorld(); } else { for(var i2=0;i2<W.meshes.length;i2++){ var g=W.meshes[i2]; g.children.forEach(function(ch){ if(ch.material)ch.material.opacity=1-ft; }); g.scale.setScalar(1-ft*0.2); W.shadows[i2].material.opacity=(1-ft)*0.9; } } }
       if(world3d){ for(var i3=0;i3<W.live.length;i3++){ var gg=W.meshes[i3],ss=W.shadows[i3]; var h=Math.max(0,gg.position.y-W.live[i3].restY); ss.position.x=gg.position.x; ss.position.z=gg.position.z; ss.scale.setScalar(1+h*0.32); if(W.phase==='roll')ss.material.opacity=Math.max(0.12,0.85-h*0.14);
@@ -6357,7 +6389,7 @@ function campaignRestore(saved) {
   var RANDOM_POOL=['#d8b24a','#c0251e','#3b7dd8','#3fa45b','#8a6fd6'];
   function resolveColor(){ return S.dice==='random' ? RANDOM_POOL[Math.floor(Math.random()*RANDOM_POOL.length)] : (S.dice||'#d8b24a'); }
   function play(dice, crit){ if(!S.on || !dice || !dice.length) return; ensureOverlay();
-    var rd=dice.map(function(d){ return { sides:d.sides, display:d.display, faceSet:d.faceSet||null, color:resolveColor() }; });
+    var rd=dice.map(function(d){ return { sides:d.sides, display:d.display, faceSet:d.faceSet||null, wave:d.wave||0, color:resolveColor() }; });
     playAudio(rd.length);
     if(S.mode==='3d' && HAS_WEBGL){ if(threeState===2){ play3D(rd,crit); } else { play2D(rd,crit); if(threeState!==3) loadThree(function(ok){}); } }
     else { play2D(rd,crit); } }
@@ -6376,22 +6408,31 @@ function campaignRestore(saved) {
   // order, blanking what they consume so later passes don't double-count.
   function parseDice(detail){ detail=String(detail==null?'':detail); if(/[<>{]/.test(detail)) return [];
     var out=[], s=detail;
-    function push(sides,v){ out=out.concat(mapDie(sides,v)); }
+    // wave = which "throw" a die belongs to: 0 = the initial dice, 1+ = exploding
+    // follow-ups (→ chains and ⚡ crits) that appear one after another.
+    function push(sides,v,wave){ var ds=mapDie(sides,v); for(var i=0;i<ds.length;i++){ ds[i].wave=wave||0; } out=out.concat(ds); }
+    // faces of one die group: split on → / ⚡ so the first is wave 0 and each
+    // explosion is the next wave (strip =totals and brackets first).
+    function pushChain(sides,part){ part=part.replace(/=\s*\d+/g,' ').replace(/[\[\]]/g,' ');
+      var toks=part.split(/→|->|⚡/), w=0;
+      toks.forEach(function(t){ var m=t.match(/\d+/); if(m){ push(sides,+m[0],w); w++; } }); }
     // 1) Advantage/disadvantage d20 — ALWAYS show both dice (adv[a,b]→k / d20[a,b→k adv] / d20(a,b ▲ k))
-    s=s.replace(/(?:adv|dis)\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*(?:→|->)\s*\d+/gi,function(_,a,b){push(20,+a);push(20,+b);return ' ';});
-    s=s.replace(/d20\s*\[\s*(\d+)\s*,\s*(\d+)\s*(?:→|->)\s*\d+\s*(?:adv|dis)\s*\]/gi,function(_,a,b){push(20,+a);push(20,+b);return ' ';});
-    s=s.replace(/d20\s*\(\s*(\d+)\s*,\s*(\d+)\s*[▲▼]\s*\d+\s*\)/gi,function(_,a,b){push(20,+a);push(20,+b);return ' ';});
-    // 2) Star Wars pip dice — "3D+2: [3 5 2]" → that many d6
-    s=s.replace(/\dD[+\d]*\s*:\s*\[\s*([\d\s]+?)\s*\]/g,function(_,g){(g.match(/\d+/g)||[]).forEach(function(x){push(6,+x);});return ' ';});
-    // 3) Parenthesised dice — NdX(v) / NdX(v+v) / NdX(v,v)  (trays, damage/heal, GM)
-    s=s.replace(/(\d*)d(\d+)\s*\(\s*([0-9+,\s]*?)\s*\)/gi,function(_,n,sides,inner){(inner.match(/\d+/g)||[]).forEach(function(x){push(+sides,+x);});return ' ';});
-    // 4) Colon dice WITH a count — ace "3d6: 4 + 5 + 3", nimble "2d6: 4+5 ⚡6" (drop trailing +bonus and =totals)
-    s=s.replace(/(\d+)d(\d+)\s*:\s*([0-9→+,=⚡\s]+)/gi,function(_,n,sides,run){
-      run=run.replace(/\s[+-]\d+\s*$/,' ').replace(/=\s*\d+/g,' ');
-      (run.match(/\d+/g)||[]).forEach(function(x){push(+sides,+x);});return ' ';});
-    // 5) Colon dice WITHOUT a count — KoB "d8: 8→3", dnd "d20:14" (→-joined faces only)
+    s=s.replace(/(?:adv|dis)\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*(?:→|->)\s*\d+/gi,function(_,a,b){push(20,+a,0);push(20,+b,0);return ' ';});
+    s=s.replace(/d20\s*\[\s*(\d+)\s*,\s*(\d+)\s*(?:→|->)\s*\d+\s*(?:adv|dis)\s*\]/gi,function(_,a,b){push(20,+a,0);push(20,+b,0);return ' ';});
+    s=s.replace(/d20\s*\(\s*(\d+)\s*,\s*(\d+)\s*[▲▼]\s*\d+\s*\)/gi,function(_,a,b){push(20,+a,0);push(20,+b,0);return ' ';});
+    // 2) Star Wars pip dice — "3D+2: [3 5 2]" → that many d6 (all thrown together)
+    s=s.replace(/\dD[+\d]*\s*:\s*\[\s*([\d\s]+?)\s*\]/g,function(_,g){(g.match(/\d+/g)||[]).forEach(function(x){push(6,+x,0);});return ' ';});
+    // 3) Parenthesised dice — NdX(v) / NdX(v+v) / NdX(v,v)  (trays, damage/heal, GM); all wave 0
+    s=s.replace(/(\d*)d(\d+)\s*\(\s*([0-9+,\s]*?)\s*\)/gi,function(_,n,sides,inner){(inner.match(/\d+/g)||[]).forEach(function(x){push(+sides,+x,0);});return ' ';});
+    // 4) Colon dice WITH a count — ace "3d6: [6→2] + 4 + 5", nimble "2d6: 4+5 ⚡6"
+    //    Split the pool on '+' into base dice; within each, → / ⚡ are explosion waves.
+    s=s.replace(/(\d+)d(\d+)\s*:\s*([0-9→+,=⚡\s\[\]]+)/gi,function(_,n,sides,run){
+      run=run.replace(/\s[+-]\d+\s*$/,' ');                 // drop a trailing +bonus
+      run.split('+').forEach(function(part){ pushChain(+sides,part); });
+      return ' ';});
+    // 5) Colon dice WITHOUT a count — KoB "d8: 8→3", dnd "d20:14" (→ / ⚡ are explosion waves)
     s=s.replace(/(^|[^0-9a-z])d(\d+)\s*:\s*(\d+(?:\s*[→,⚡]\s*\d+)*)/gi,function(_,pre,sides,run){
-      (run.match(/\d+/g)||[]).forEach(function(x){push(+sides,+x);});return ' ';});
+      pushChain(+sides, run.replace(/,/g,'→')); return ' ';});
     return out; }
   function parseGM(detail){ return parseDice(detail); }
 
