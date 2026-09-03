@@ -10705,6 +10705,8 @@ else syncHomebrewMonsters();
 <script src="/tools-data/dnd-armor.js"></script>
 <script src="/tools-data/dnd-gear.js"></script>
 <script src="/tools-data/dnd-magic-items.js"></script>
+<script src="/tools-data/dnd-spells.js"></script>
+<script src="/tools-data/dnd-conditions.js"></script>
 <script>
 
 
@@ -11646,6 +11648,29 @@ function init_party(root) {
     return h;
   }
 
+  // Look up a DND spell's compact details for a party-card info popover.
+  function dndSpellDetail(name) {
+    const list = (typeof DND_SPELLS !== 'undefined') ? DND_SPELLS : [];
+    const nm = String(name || '').toLowerCase().trim();
+    const sp = list.find(s => s.name.toLowerCase() === nm)
+            || list.find(s => nm.indexOf(s.name.toLowerCase()) === 0);
+    if(!sp) return '';
+    const head = [(sp.level === 0 ? 'Cantrip' : 'Level ' + sp.level), sp.school,
+      sp.castingTime, sp.range, sp.duration, sp.concentration ? 'Concentration' : '', sp.ritual ? 'Ritual' : '']
+      .filter(Boolean).join(' · ');
+    return '<b>' + esc(head) + '</b><br>' + esc(sp.description || '')
+      + (sp.higherLevels ? '<br><i>At Higher Levels:</i> ' + esc(sp.higherLevels) : '');
+  }
+  // Look up a DND condition's rules text.
+  function dndConditionDetail(name) {
+    const list = (typeof DND_CONDITIONS !== 'undefined') ? DND_CONDITIONS : [];
+    const nm = String(name || '').toLowerCase().trim();
+    const co = list.find(x => x.name.toLowerCase() === nm)
+            || list.find(x => nm.indexOf(x.name.toLowerCase()) === 0);
+    return co ? esc(co.description || '') : '';
+  }
+  const BOOK_ICO = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg>';
+
   function cardHTMLDND(entry) {
     const c = entry.sheet;
     const open = openIds.has(entry.id);
@@ -11671,10 +11696,24 @@ function init_party(root) {
        + (c.exhaustion ? '<span class="pty-chip" style="color:#ff6a6a;">Exhaustion <b>' + esc(c.exhaustion) + '</b></span>' : '')
        + '</div></div>';
     h += '<div class="pty-sec"><div class="pty-sec-h">Saves</div><div class="pty-line dim">' + c.saves.map(s => esc(s.id) + ' ' + sgn(s.val) + (s.prof ? '•' : '')).join(' · ') + '</div></div>';
-    if(c.conditions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff8a6a;">' + esc(c.conditions.join(', ')) + '</div></div>';
+    if(c.conditions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div>'
+      + c.conditions.map((cond, i) => {
+          const det = dndConditionDetail(cond);
+          const key = entry.id + '-cond-' + i;
+          const info = det ? '<button class="pty-spell-info" data-spell="' + key + '" title="Show condition rules" aria-label="Show condition rules">' + BOOK_ICO + '</button>' : '';
+          return '<div class="pty-line" style="color:#ff8a6a;">' + esc(cond) + info
+            + (det ? '<div class="pty-spell-desc" data-desc="' + key + '" style="display:none;">' + det + '</div>' : '') + '</div>';
+        }).join('') + '</div>';
     if(c.skills.length) h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + sgn(s.val)).join(' · ') + '</div></div>';
     if(c.attacks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a => '<div class="pty-line"><b>' + esc(a.name) + '</b>' + (a.damage ? ' <span class="dim">' + esc(a.damage) + '</span>' : '') + '</div>').join('') + '</div>';
-    if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
+    if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div>'
+      + c.spells.map((spName, i) => {
+          const det = dndSpellDetail(spName);
+          const key = entry.id + '-sp-' + i;
+          const info = det ? '<button class="pty-spell-info" data-spell="' + key + '" title="Show spell details" aria-label="Show spell details">' + BOOK_ICO + '</button>' : '';
+          return '<div class="pty-line dim">' + esc(spName) + info
+            + (det ? '<div class="pty-spell-desc" data-desc="' + key + '" style="display:none;">' + det + '</div>' : '') + '</div>';
+        }).join('') + '</div>';
     if(c.inventory.length) h += '<div class="pty-sec"><div class="pty-sec-h">Inventory</div><div class="pty-line dim">' + esc(c.inventory.join(', ')) + '</div></div>';
     h += '</div></div>';
     return h;

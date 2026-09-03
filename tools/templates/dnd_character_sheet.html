@@ -316,8 +316,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .res-pips{display:flex;gap:5px;flex-wrap:wrap;}
 .res-pip{width:20px;height:20px;border:2px solid var(--dnd-dk);border-radius:4px;background:transparent;cursor:pointer;}
 .res-pip.used{background:var(--dnd);}
+.fi-track{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:5px;}
+.fi-track .fi-track-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+.fi-track .fi-track-lbl b{color:var(--ink);font-family:'Share Tech Mono',monospace;}
+.fi-track .res-pip{width:16px;height:16px;border-width:2px;border-radius:3px;}
+.fi-track .res-reset-btn{padding:1px 6px;font-size:8.5px;}
 .res-reset-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;cursor:pointer;}
 .res-reset-btn:hover{background:var(--dnd-lt);color:var(--dnd-dk);}
+.sp-granted{font-family:'Barlow Condensed',sans-serif;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;background:var(--dnd);border-radius:3px;padding:1px 5px;white-space:nowrap;}
 .spell-row{display:flex;gap:8px;align-items:center;padding:4px 10px;border-bottom:1px solid var(--rule);}
 .spell-row:hover{background:var(--box);}
 .sp-prep{width:14px;height:14px;border:2px solid var(--dnd-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;}
@@ -333,6 +339,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .atk-grp{display:flex;gap:5px;align-items:flex-end;}
 .atk-field{display:flex;flex-direction:column;gap:1px;}
 .atk-sub{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1;}
+.atk-mastery{background:transparent;border:1px dashed var(--rule);border-radius:3px;color:var(--dnd);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:2px 6px;letter-spacing:.02em;}
+.atk-mastery:hover{background:var(--box);border-style:solid;}
 .sneak-btn{background:transparent;border:1px solid #8a5cc0;color:#8a5cc0;border-radius:3px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;margin-right:4px;}
 .sneak-btn:hover{background:#8a5cc0;color:#fff;}
 .upcast-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd);border-radius:3px;padding:3px 6px;font-size:11px;line-height:1;cursor:pointer;margin-right:3px;}
@@ -524,7 +532,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="hdr-field wide" style="grid-column:span 4;"><label>Character Name</label><input type="text" id="f-name" placeholder="Aelric Thornwood"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Class</label><input type="text" id="f-class" list="dl-classes" placeholder="Fighter" oninput="onClassChange()"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Level</label><input type="number" id="f-level" min="1" max="20" value="1" oninput="onLevelChange()"></div>
-      <div class="hdr-field lastcol" style="grid-column:span 3;"><label>Subclass</label><input type="text" id="f-subclass" list="dl-subclasses" placeholder="—"></div>
+      <div class="hdr-field lastcol" style="grid-column:span 3;"><label>Subclass</label><input type="text" id="f-subclass" list="dl-subclasses" placeholder="—" oninput="onSubclassChange()"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Species</label><input type="text" id="f-species" list="dl-species" placeholder="Human" oninput="onSpeciesChange()"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Background</label><input type="text" id="f-background" list="dl-backgrounds" placeholder="Soldier"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Alignment</label><input type="text" id="f-alignment" list="dl-align" placeholder="Neutral Good"></div>
@@ -573,7 +581,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="combat-strip">
         <div class="cbt-left">
           <div class="cbt"><div class="c-lbl">Armor Class</div><input id="f-ac" value="10" oninput="scheduleAutosave()"></div>
-          <div class="cbt"><div class="c-lbl">Speed</div><input id="f-speed" value="30" oninput="scheduleAutosave()"></div>
+          <div class="cbt"><div class="c-lbl">Speed</div><input id="f-speed" value="30" oninput="onSpeedInput()"></div>
           <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
           <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof">+2</div></div>
           <div class="cbt death-box">
@@ -942,11 +950,14 @@ function recalc(){
   const pinv = $('d-pinv'); if(pinv) pinv.textContent = 10 + investigationVal;
   const pins = $('d-pins'); if(pins) pins.textContent = 10 + insightVal;
   reconcileAC();
+  reconcileSpeed();
+  applyGrantedSpells();
+  applyMartialArts();
   updateHitDiceUI();
   refreshWizardButtons();
   refreshAtkActions();
   renderSpellHeader();
-  renderSlots();
+  renderSlots();   // ends with renderSpells(), reflecting any newly-granted spells
 }
 
 // ═══ ROLL ENGINE ══════════════════════════════════════════════════════════
@@ -1146,6 +1157,7 @@ function addAttackRow(a){
   if(a.spell) tr.dataset.spell = a.spell;
   if(a.weapon) tr.dataset.weapon = a.weapon;
   if(a.unarmed) tr.dataset.unarmed = '1';
+  if(a.mastery) tr.dataset.mastery = a.mastery;
   tr.dataset.prof = (a.prof === false ? '0' : '1');       // proficiency is auto-set on equip (no checkbox)
   const bonus = num(a.bonus) + num(a.magic || 0);         // magic +N folds into the visible Bonus (applies to hit + damage)
   const abilOpts = ABILITIES.map(x => '<option value="' + x.id + '"' + (a.abil===x.id?' selected':'') + '>' + x.id + '</option>').join('');
@@ -1158,6 +1170,7 @@ function addAttackRow(a){
     '<td><div class="atk-grp">' +
       '<div class="atk-field"><span class="atk-sub">Damage</span><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" style="width:66px;" oninput="scheduleAutosave()"></div>' +
       '<div class="atk-field"><span class="atk-sub">Type</span><input type="text" class="atk-dtype mono" value="' + esc(a.type) + '" placeholder="slashing" style="width:62px;font-size:10px;" oninput="scheduleAutosave()"></div>' +
+      (a.mastery ? '<div class="atk-field"><span class="atk-sub">Mastery</span><button class="atk-mastery" onclick="openMastery(\'' + esc(a.mastery).replace(/\x27/g,"\\\x27") + '\')" title="What this weapon mastery does">' + esc(a.mastery) + '</button></div>' : '') +
     '</div></td>' +
     '<td class="roll-cell atk-actions" style="white-space:nowrap;text-align:right;"></td>';
   $('attacks-body').appendChild(tr);
@@ -1174,9 +1187,24 @@ function renderAtkActions(tr){
   cell.innerHTML = sneak + '<button class="mini-roll" onclick="rollAttackFull(this)" title="Roll to hit and damage together">Attack</button>';
 }
 function refreshAtkActions(){ [...document.querySelectorAll('#attacks-body tr')].forEach(renderAtkActions); }
-function rollSneak(btn){
-  const n = sneakDice(), faces = []; let sum = 0; for(let i=0;i<n;i++){ const f = dN(6); faces.push(f); sum += f; }
-  addLog('Sneak Attack', String(sum), n + 'd6: ' + faces.join('+') + (rogueLevel() ? ' · Rogue ' + rogueLevel() : ''), 'normal');
+// Sneak Attack: a full attack (to-hit + weapon damage) with an extra sneakDice()d6.
+function rollSneak(btn){ doAttack(_atkRow(btn), sneakDice()); }
+// ── Weapon Mastery (2024) — the eight mastery properties and what they do ──
+const MASTERIES = {
+  'Cleave': 'On a hit against a creature, you can make a single melee attack with the same weapon against a second creature within 5 feet of the first and within your reach. That second attack adds no ability modifier to its damage unless the modifier is negative. Usable once per turn.',
+  'Graze': 'If your attack roll misses, the target still takes damage equal to the ability modifier you use for the attack (of the weapon\'s damage type). This has no effect on a miss caused by other means.',
+  'Nick': 'When you make the extra attack granted by the Light property, you can make it as part of the Attack action instead of using a Bonus Action. You can make this extra attack only once per turn.',
+  'Push': 'On a hit, if the target is Large or smaller you can push it up to 10 feet straight away from you.',
+  'Sap': 'On a hit, the target has Disadvantage on its next attack roll before the start of your next turn.',
+  'Slow': 'On a hit that deals damage, you reduce the target\'s Speed by 10 feet until the start of your next turn. The reduction doesn\'t stack with itself.',
+  'Topple': 'On a hit, you force the target to make a Constitution saving throw (DC 8 + your ability modifier for the attack + your Proficiency Bonus). On a failure it has the Prone condition.',
+  'Vex': 'On a hit that deals damage, you have Advantage on your next attack roll against that same target before the end of your next turn.',
+};
+function openMastery(name){
+  const desc = MASTERIES[name] || 'A weapon mastery property.';
+  $('desc-title').textContent = name + ' (Weapon Mastery)';
+  $('desc-body').innerHTML = '<p>' + esc(desc) + '</p>';
+  $('desc-overlay').classList.add('open');
 }
 // Proficiency with a weapon from the character's class weapon proficiencies.
 function isProficientWithWeapon(w){
@@ -1223,10 +1251,12 @@ function rollDamage(btn){
   addLog(name + ' — damage', String(total), nDice + 'd' + sides + ': ' + faces.join('+') + ' ' + sgn(flat) + (dtype ? ' ' + dtype : ''), 'normal');
 }
 // One button: roll to-hit (adv/dis) and damage together. Crit (nat 20) doubles the damage dice.
-function rollAttackFull(btn){
-  const tr = _atkRow(btn);
+function rollAttackFull(btn){ doAttack(_atkRow(btn), 0); }
+// Core attack roll. sneakD6 > 0 adds that many d6 of Sneak Attack damage (doubled on a crit).
+function doAttack(tr, sneakD6){
+  sneakD6 = sneakD6 || 0;
   const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
-  const bonus = num(tr.querySelector('.atk-bonus').value), name = tr.querySelector('.atk-name').value || 'Attack';
+  const bonus = num(tr.querySelector('.atk-bonus').value), name = (tr.querySelector('.atk-name').value || 'Attack') + (sneakD6 ? ' + Sneak Attack' : '');
   const dtype = tr.querySelector('.atk-dtype').value, dmg = tr.querySelector('.atk-dmg').value.trim();
   // to-hit (Bonus adds to hit)
   const ctx = rollCtx('attack');
@@ -1248,6 +1278,13 @@ function rollAttackFull(btn){
     dmgTotal = num(dmg) + modOf(abil) + bonus;
     dmgLine = num(dmg) + ' ' + sgn(modOf(abil) + bonus) + (dtype ? ' ' + dtype : '');
   }
+  // Sneak Attack dice
+  if(sneakD6 > 0){
+    let sn = sneakD6; if(crit) sn *= 2;
+    const sf = []; let ss = 0; for(let i=0;i<sn;i++){ const f = dN(6); sf.push(f); ss += f; }
+    dmgTotal = (dmgTotal || 0) + ss;
+    dmgLine += (dmgLine ? ' + ' : '') + 'sneak ' + sn + 'd6(' + sf.join('+') + ')';
+  }
   const result = 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
   const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (ctx.note ? ' · ' + ctx.note : '');
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
@@ -1265,6 +1302,7 @@ function addInvRow(it){
   const ref = it.ref || resolveItemRef(it.name);
   if(ref) tr.dataset.ref = ref;
   if(num(it.plus)) tr.dataset.plus = num(it.plus);   // a +N base weapon/armor (magic enhancement)
+  if(it.scroll) tr.dataset.scroll = it.scroll;       // the spell a Spell Scroll contains
   tr.innerHTML =
     '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></td>' +
     '<td class="inv-qty-cell"><input type="number" class="inv-qty mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" oninput="scheduleAutosave()"></td>' +
@@ -1278,6 +1316,8 @@ function addInvRow(it){
 // A compact read-out for the Details column: gold value + weapon damage/props,
 // armor AC, or magic rarity/attunement — pulled from the resolved catalog item.
 function invDetailHTML(tr){
+  // A Spell Scroll shows the contained spell's info instead of the generic scroll blurb.
+  if(tr.dataset.scroll){ const sp = spellByName(tr.dataset.scroll); if(sp) return '<span class="inv-notes">' + esc((sp.level === 0 ? 'Cantrip' : 'Lvl ' + sp.level) + ' · ' + sp.school + ' · ' + shortCastTime(sp.castingTime) + ' · ' + sp.range) + '</span>'; }
   const it = itemData(invRowRef(tr));
   if(!it) return '';
   const notes = [];
@@ -1352,6 +1392,7 @@ function invRowRef(tr){ return tr.dataset.ref || tr.querySelector('.inv-name').v
 function invRowKind(tr){ return itemKind(invRowRef(tr)); }
 function equippedItemName(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && invRowKind(r) === kind); return tr ? invRowRef(tr) : null; }
 function openItemInfo(tr){
+  if(tr.dataset.scroll){ openSpell(tr.dataset.scroll); return; }   // Spell Scroll → show the contained spell
   const it = itemData(invRowRef(tr)), display = tr.querySelector('.inv-name').value;
   let meta = 'Custom item', body = '';
   if(it){
@@ -1369,6 +1410,10 @@ function toggleEquip(btn){
     // one body armor / one shield at a time
     if(kind === 'armor' || kind === 'shield'){
       invRows().forEach(r => { if(r !== tr && r.dataset.equipped === '1' && invRowKind(r) === kind){ r.dataset.equipped = ''; renderInvActions(r); } });
+    }
+    // equipping any armor (real or named magic) unequips other worn armor
+    if(kind === 'armor' || magicArmorBase(ref)){
+      invRows().forEach(r => { if(r !== tr && r.dataset.equipped === '1' && (invRowKind(r) === 'armor' || magicArmorBase(invRowRef(r)))){ r.dataset.equipped = ''; renderInvActions(r); } });
     }
     tr.dataset.equipped = '1';
     if(kind === 'weapon') equipWeaponRow(tr);
@@ -1388,7 +1433,7 @@ function equipMagicRow(tr){
   const w = mb.baseWeapon, finesse = (w.properties || []).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
   // The +N folds into the Bonus (applies to hit + damage); proficiency is auto-set.
-  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: 0, magic: mb.atk || 0, damage: w.damage, type: w.damageType, weapon: ref });
+  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: 0, magic: mb.atk || 0, damage: w.damage, type: w.damageType, mastery: w.mastery || '', weapon: ref });
 }
 function equipWeaponRow(tr){
   const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
@@ -1396,7 +1441,7 @@ function equipWeaponRow(tr){
   if(invAttackHasWeapon(ref)) return;
   const finesse = (w.properties || []).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
-  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: num(tr.dataset.plus || 0), damage: w.damage, type: w.damageType, weapon: ref });
+  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: num(tr.dataset.plus || 0), damage: w.damage, type: w.damageType, mastery: w.mastery || '', weapon: ref });
 }
 // The +N on an equipped base weapon/armor row (from a "+1 Weapon" / "+2 Armor" purchase).
 function equippedRowPlus(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && invRowKind(r) === kind); return tr ? num(tr.dataset.plus || 0) : 0; }
@@ -1416,12 +1461,27 @@ function armorACValue(a, dex){
   if(m){ const cap = /max\s*(\d+)/i.exec(base); return +m[1] + (cap ? Math.min(dex, +cap[1]) : dex); }
   return 10 + dex;
 }
+// A named magic armor's base armor from its type, e.g. "Armor (scale mail)" → Scale Mail (#7).
+function magicArmorBase(ref){
+  const m = magicData(ref); if(!m) return null;
+  const mt = String(m.type || '').match(/^Armor \(([^)]+)\)/i); if(!mt) return null;
+  return D.armor().find(x => norm(x.name) === norm(mt[1].trim())) || null;   // only a specific base counts
+}
+function equippedMagicArmorRow(){ return invRows().find(r => r.dataset.equipped === '1' && itemKind(invRowRef(r)) === 'magic' && magicArmorBase(invRowRef(r))); }
+// The armor the character is actually wearing (real base armor, or a named magic armor), with its AC bonus.
+function equippedArmorInfo(){
+  const dex = modOf('DEX');
+  const realName = equippedItemName('armor');
+  if(realName){ const a = D.armor().find(x => norm(x.name) === norm(realName)); return { armor:a, plus: equippedRowPlus('armor') }; }
+  const mr = equippedMagicArmorRow();
+  if(mr){ const ref = invRowRef(mr), a = magicArmorBase(ref); const attunedOk = !magicNeedsAttune(ref) || isAttuned(ref);
+    return { armor:a, plus: (attunedOk ? (magicBonuses(magicData(ref)).ac || 0) : 0) + num(mr.dataset.plus || 0) }; }
+  return { armor:null, plus:0 };
+}
 function computeAC(){
   const dex = modOf('DEX');
-  const armorName = equippedItemName('armor');
-  const armor = armorName ? D.armor().find(x => norm(x.name) === norm(armorName)) : null;
-  let ac = armor ? armorACValue(armor, dex) : 10 + dex;
-  if(armor) ac += equippedRowPlus('armor');                 // +N magic armor
+  const { armor, plus } = equippedArmorInfo();
+  let ac = armor ? armorACValue(armor, dex) + plus : 10 + dex;
   if(equippedItemName('shield')) ac += 2 + equippedRowPlus('shield');
   ac += magicACBonus();
   return ac;
@@ -1430,7 +1490,7 @@ function computeAC(){
 let _acWasAuto = false;
 function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
-  const auto = !!(equippedItemName('armor') || equippedItemName('shield') || magicACBonus() > 0);
+  const auto = !!(equippedItemName('armor') || equippedItemName('shield') || equippedMagicArmorRow() || magicACBonus() > 0);
   if(auto){ acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto'); acEl.title = 'Auto-calculated from equipped armor / shield / magic items'; }
   else {
     if(_acWasAuto) acEl.value = computeAC();   // just unequipped the last source → unarmored value
@@ -1472,6 +1532,7 @@ function toggleAttune(btn){
 }
 function magicActive(tr){
   if(tr.dataset.equipped !== '1' || itemKind(invRowRef(tr)) !== 'magic') return false;
+  if(magicArmorBase(invRowRef(tr))) return false;   // worn as armor (AC handled in computeAC), not a flat bonus
   return magicNeedsAttune(invRowRef(tr)) ? isAttuned(invRowRef(tr)) : true;
 }
 function equippedMagic(){ return invRows().filter(magicActive).map(r => magicBonuses(magicData(invRowRef(r)))); }
@@ -1541,7 +1602,10 @@ function openStore(){
   if(!_storeInit){
     $('store-body').addEventListener('click', (e) => {
       const add = e.target.closest('[data-add-item]');
-      if(add){ const g = genericPlusItem(add.dataset.addItem); if(g){ openBasePicker(g.kind, g.plus); } else { addInvRow({ name:add.dataset.addItem, qty:1 }); scheduleAutosave(); flashBtn(add, '✓ Added'); } return; }
+      if(add){ const nm = add.dataset.addItem;
+        if(/^spell scroll$/i.test(nm)){ openScrollPicker(); return; }
+        const g = genericPlusItem(nm); if(g){ openBasePicker(g.kind, g.plus); return; }
+        addInvRow({ name:nm, qty:1 }); scheduleAutosave(); flashBtn(add, '✓ Added'); return; }
       const buy = e.target.closest('[data-buy-item]'); if(buy){ if(storeBuy(buy.dataset.buyItem, buy.dataset.buyCost)) flashBtn(buy, '✓ Bought'); else flashBtn(buy, 'Need ' + esc(buy.dataset.buyCost)); }
     });
     _storeInit = true;
@@ -1576,6 +1640,28 @@ function pickBase(kind, plus, base){
   const eq = tr.querySelector('.equip-btn'); if(eq) toggleEquip(eq);   // add + equip with its bonuses
   scheduleAutosave();
   addLog('Item', '+', base + ' +' + plus + ' added & equipped', 'normal');
+}
+// Choose the spell contained in a Spell Scroll; its info then shows in the row's details.
+function openScrollPicker(){
+  let ov = $('scroll-overlay');
+  if(!ov){
+    ov = document.createElement('div'); ov.id = 'scroll-overlay'; ov.className = 'ov';
+    ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('open'); });
+    document.body.appendChild(ov);
+    ov.innerHTML = '<div class="modal" style="max-width:440px;max-height:82vh;display:flex;flex-direction:column;"><div class="modal-hd"><div class="ttl">Choose the spell on this Spell Scroll</div><button class="x" onclick="document.getElementById(\'scroll-overlay\').classList.remove(\'open\')">✕</button></div><div class="modal-bd" style="display:flex;flex-direction:column;overflow:hidden;"><input id="scroll-search" class="m-input" placeholder="Search spells…" oninput="renderScrollList()" style="margin-bottom:8px;flex:0 0 auto;"><div id="scroll-list" style="overflow:auto;"></div></div></div>';
+  }
+  $('scroll-search').value = ''; renderScrollList(); ov.classList.add('open'); $('scroll-search').focus();
+}
+function renderScrollList(){
+  const q = norm($('scroll-search').value);
+  const list = D.spells().filter(s => !q || norm(s.name).includes(q)).sort((a,b)=>(a.level-b.level)||a.name.localeCompare(b.name)).slice(0, 100);
+  $('scroll-list').innerHTML = list.map(s => '<button class="m-btn ghost base-pick-btn" onclick="pickScroll(\'' + esc(s.name).replace(/\x27/g,"\\\x27") + '\')"><b>' + esc(s.name) + '</b> <span class="base-pick-meta">' + (s.level === 0 ? 'Cantrip' : 'Lvl ' + s.level) + ' · ' + esc(s.school) + '</span></button>').join('') || '<p class="m-hint">No spells match.</p>';
+}
+function pickScroll(spell){
+  const ov = $('scroll-overlay'); if(ov) ov.classList.remove('open');
+  addInvRow({ name: 'Spell Scroll (' + spell + ')', ref: 'Spell Scroll', scroll: spell, qty:1 });
+  scheduleAutosave();
+  addLog('Item', '+', 'Spell Scroll (' + spell + ') added', 'normal');
 }
 function storeSetTab(t){ _storeTab = t; $('store-search').value = ''; renderStore(); }
 function flashBtn(btn, txt){ const o = btn.textContent; btn.textContent = txt; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = false; }, 700); }
@@ -1667,9 +1753,11 @@ function renderFeatures(){
   all.forEach((f, i) => {
     const d = document.createElement('div'); d.className = 'feat-item';
     const long = (f.desc || '').length > 150;
+    const trackers = resourcesForFeature(f.name).map(resourcePipsHTML).join('');
     d.innerHTML = '<div class="fi-name">' + esc(f.name) + (f.custom ? ' <button class="row-x" onclick="removeCustomFeature(\'' + esc(f.name).replace(/'/g,"\\'") + '\')" style="float:right;">✕</button>' : (featObjs.indexOf(f) >= 0 ? ' <button class="row-x" onclick="removeFeat(\'' + esc(f.name).replace(/'/g,"\\'") + '\')" style="float:right;">✕</button>' : '')) + '</div>' +
       '<div class="fi-meta">' + esc(f.meta || '') + '</div>' +
-      (f.desc ? '<div class="fi-desc' + (long ? ' collapsed' : '') + '" onclick="this.classList.toggle(\'collapsed\')">' + esc(f.desc) + '</div>' + (long ? '<span class="tap-more" onclick="openDesc(\'' + esc(f.name).replace(/'/g,"\\'") + '\',\'' + esc(f.meta||'').replace(/'/g,"\\'") + '\',this)">Read full</span>' : '') : '');
+      (f.desc ? '<div class="fi-desc' + (long ? ' collapsed' : '') + '" onclick="this.classList.toggle(\'collapsed\')">' + esc(f.desc) + '</div>' + (long ? '<span class="tap-more" onclick="openDesc(\'' + esc(f.name).replace(/'/g,"\\'") + '\',\'' + esc(f.meta||'').replace(/'/g,"\\'") + '\',this)">Read full</span>' : '') : '') +
+      trackers;
     if(long){ const more = d.querySelector('.tap-more'); if(more) more._desc = f.desc; }
     box.appendChild(d);
   });
@@ -1679,15 +1767,131 @@ function removeCustomFeature(n){ customFeatures = customFeatures.filter(f => f.n
 function addFeatByName(n){ if(addedFeats.indexOf(n) < 0) addedFeats.push(n); renderFeatures(); scheduleAutosave(); }
 function removeFeat(n){ addedFeats = addedFeats.filter(f => f !== n); renderFeatures(); scheduleAutosave(); }
 
+// ═══ AUTO-APPLIED FEATURE / TRAIT BONUSES (#5) ════════════════════════════
+// Every class + subclass feature and species trait active at the current level,
+// with its description — the basis for auto-granted spells, speed, and monk dice.
+function activeFeatureList(){
+  const out = [];
+  classList().forEach(cl => {
+    const c = classDataByName(cl.cls); if(!c) return;
+    (c.features || []).filter(f => !f.subclass && f.level <= cl.level).forEach(f => out.push({ name:f.name, desc:f.description }));
+    const sub = (c.subclasses || []).find(s => norm(s.name) === norm(cl.subclass));
+    if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => out.push({ name:f.name, desc:f.description }));
+  });
+  const sp = speciesData();
+  if(sp){ (sp.traits || []).forEach(t => out.push({ name:t.name, desc:t.description }));
+    const ln = norm(_lineage);
+    (sp.lineages || []).filter(l => !ln || norm(l.name) === ln).forEach(l => (l.traits||[]).forEach(t => out.push({ name:t.name, desc:t.description }))); }
+  return out;
+}
+function hasFeature(name){ return activeFeatureList().some(f => norm(f.name) === norm(name)); }
+
+// ── Spells granted by a feature/trait, validated against the real spell list ──
+// Reads "You know the X cantrip", "you always have X [and Y] prepared", "at
+// level N you gain X" (gated on total level), and parenthetical domain lists.
+// Only names that resolve to an actual spell are kept, so stray capitalised
+// phrases (Long Rest, Bonus Action…) are discarded.
+function grantsFromText(desc){
+  if(!desc) return [];
+  const lvl = totalLevel();
+  const found = {};
+  const add = nm => { const sp = spellByName(nm); if(sp) found[norm(sp.name)] = sp.name; };
+  const t = String(desc); let m;
+  const reCant = /know the ([A-Za-z' ]+?)(?: and ([A-Za-z' ]+?))? cantrips?/gi;
+  while((m = reCant.exec(t))){ add(m[1].trim()); if(m[2]) add(m[2].trim()); }
+  const rePrep = /always (?:have|has) (?:the )?([A-Za-z' ]+?)(?: and ([A-Za-z' ]+?))?(?:\s+spells?)? prepared/gi;
+  while((m = rePrep.exec(t))){ add(m[1].trim()); if(m[2]) add(m[2].trim()); }
+  const reLvl = /at level (\d+)[,:]?\s*(?:you gain )?([A-Za-z' ]+?)(?=[;.,]|$| at level)/gi;
+  while((m = reLvl.exec(t))){ if(lvl >= +m[1]) add(m[2].trim()); }
+  // Domain/expanded spell lists are written "(Spell, Spell, and more)"; the
+  // "and more" tail is required so descriptive parentheticals aren't misread.
+  const rePar = /\(([A-Za-z',\s]+?),?\s*and more[A-Za-z\s]*\)/gi;
+  while((m = rePar.exec(t))){ m[1].split(/,\s*(?:and\s+)?/).forEach(x => add(x.trim())); }
+  return Object.values(found);
+}
+function computeGrantedSpells(){
+  const names = {};
+  activeFeatureList().forEach(f => grantsFromText(f.desc).forEach(nm => names[norm(nm)] = nm));
+  return Object.values(names);
+}
+// Add spells granted by current features/traits; drop previously-granted ones
+// that are no longer granted (species swapped, level dropped). Returns whether
+// spellsKnown changed.
+function applyGrantedSpells(){
+  const want = computeGrantedSpells();
+  const wantSet = {}; want.forEach(nm => wantSet[norm(nm)] = 1);
+  let changed = false;
+  const before = spellsKnown.length;
+  spellsKnown = spellsKnown.filter(sk => !(sk.granted && !wantSet[norm(sk.name)]));
+  if(spellsKnown.length !== before) changed = true;
+  want.forEach(nm => { if(!spellsKnown.some(sk => norm(sk.name) === norm(nm))){ spellsKnown.push({ name:nm, prepared:true, granted:true }); changed = true; }
+    else { const sk = spellsKnown.find(s => norm(s.name) === norm(nm)); if(sk && !sk.granted){ sk.granted = true; changed = true; } } });
+  return changed;
+}
+
+// ── Walking speed: species base + trait/feature bonuses (#5) ───────────────
+let _speedManual = false;
+function speciesBaseSpeed(){ const sp = speciesData(); return sp ? (num(sp.speed) || 30) : 30; }
+function autoSpeed(){
+  let sp = speciesBaseSpeed();
+  if(hasFeature('Fleet of Foot')) sp = Math.max(sp, 35);          // Wood Elf: Speed 30 → 35
+  const worn = equippedArmorInfo().armor;
+  const heavy = worn && /heavy/i.test(worn.category || '');
+  if(hasFeature('Fast Movement') && !heavy) sp += 10;              // Barbarian (L5+), not in Heavy armor
+  const monk = classList().find(c => norm(c.cls) === 'monk');
+  if(monk && hasFeature('Unarmored Movement') && !worn && !equippedItemName('shield')){
+    const ml = num(monk.level);
+    sp += ml >= 18 ? 30 : ml >= 14 ? 25 : ml >= 10 ? 20 : ml >= 6 ? 15 : 10;
+  }
+  return sp;
+}
+function onSpeedInput(){ _speedManual = true; scheduleAutosave(); }
+function reconcileSpeed(){
+  const el = $('f-speed'); if(!el) return;
+  if(!speciesData() && !classList().length) return;              // nothing to base it on yet
+  if(_speedManual){ el.classList.remove('auto'); el.title = ''; return; }
+  el.value = autoSpeed(); el.classList.add('auto'); el.title = 'Auto-calculated from species + features (edit to override)';
+}
+
+// ── Monk Martial Arts die on Unarmed + Monk weapons (#5) ───────────────────
+function monkLevel(){ const c = classList().find(x => norm(x.cls) === 'monk'); return c ? num(c.level) : 0; }
+function martialArtsDie(){ const ml = monkLevel(); if(!ml || !hasFeature('Martial Arts')) return ''; return '1d' + (ml >= 17 ? 12 : ml >= 11 ? 10 : ml >= 5 ? 8 : 6); }
+// A weapon qualifies for Martial Arts: a Simple melee weapon without Heavy/Two-Handed.
+function isMonkWeapon(w){
+  if(!w || w.kind === 'Ranged') return false;
+  const props = (w.properties || []).map(p => norm(p));
+  if(props.some(p => /heavy|two-?handed/.test(p))) return false;
+  return /simple/i.test(w.category || '');
+}
+function weaponDieSides(dmg){ const m = String(dmg || '').match(/(\d*)d(\d+)/i); return m ? +m[2] : 0; }
+// Bump Unarmed + Monk-weapon rows to the martial arts die (only upward, so a
+// bigger custom value is never shrunk), and let them use DEX when it's better.
+function applyMartialArts(){
+  const die = martialArtsDie(); if(!die) return;
+  const maSides = +die.slice(die.indexOf('d') + 1);
+  const useDex = modOf('DEX') > modOf('STR');
+  [...document.querySelectorAll('#attacks-body tr')].forEach(tr => {
+    const isUn = tr.dataset.unarmed === '1';
+    let monkWeap = false;
+    if(tr.dataset.weapon){ const w = D.weapons().find(x => norm(x.name) === norm(tr.dataset.weapon)); monkWeap = isMonkWeapon(w); }
+    if(!isUn && !monkWeap) return;
+    const dmgEl = tr.querySelector('.atk-dmg'); if(!dmgEl) return;
+    const cur = dmgEl.value.trim(), curSides = weaponDieSides(cur);
+    if(isUn){ if(curSides < maSides) dmgEl.value = die; }
+    else if(curSides && curSides < maSides){ dmgEl.value = cur.replace(/(\d*)d(\d+)/i, '1d' + maSides); }
+    const ab = tr.querySelector('.atk-abil'); if(ab && useDex) ab.value = 'DEX';
+  });
+}
+
 // ═══ CLASS RESOURCES (per-day / feature trackers) ═════════════════════════
 // Auto-detected from the class table's per-day columns; users can add their own.
 const RESOURCE_DEFS = {
-  'Rages':            { label:'Rages',            reset:'long' },
-  'Second Wind':      { label:'Second Wind',      reset:'short' },
-  'Channel Divinity': { label:'Channel Divinity', reset:'short' },
-  'Wild Shape':       { label:'Wild Shape',       reset:'short' },
-  'Focus':            { label:'Focus Points',     reset:'short' },
-  'Sorcery Points':   { label:'Sorcery Points',   reset:'long' },
+  'Rages':            { label:'Rages',            reset:'long',  feature:'Rage' },
+  'Second Wind':      { label:'Second Wind',      reset:'short', feature:'Second Wind' },
+  'Channel Divinity': { label:'Channel Divinity', reset:'short', feature:'Channel Divinity' },
+  'Wild Shape':       { label:'Wild Shape',       reset:'short', feature:'Wild Shape' },
+  'Focus':            { label:'Focus Points',     reset:'short', feature:"Monk's Focus" },
+  'Sorcery Points':   { label:'Sorcery Points',   reset:'long',  feature:'Font of Magic' },
 };
 let resourceUsed = {};       // { key: usedCount }
 let customResources = [];    // [{name, max, reset}]
@@ -1698,7 +1902,7 @@ function autoResources(){
     const row = c.table.find(r => Number(r.level) === Number(cl.level)); if(!row || !row.columns) return;
     Object.keys(RESOURCE_DEFS).forEach(col => {
       const raw = String(row.columns[col] == null ? '' : row.columns[col]).trim();
-      if(/^\d+$/.test(raw) && +raw > 0){ const d = RESOURCE_DEFS[col]; out.push({ name:d.label, key:d.label, max:+raw, reset:d.reset }); }
+      if(/^\d+$/.test(raw) && +raw > 0){ const d = RESOURCE_DEFS[col]; out.push({ name:d.label, key:d.label, max:+raw, reset:d.reset, feature:d.feature || d.label }); }
     });
   });
   return out;
@@ -1727,7 +1931,7 @@ function featureResources(){
   const add = (name, desc) => {
     const u = parseFeatureUses(desc); if(!u) return;
     if(seen[norm(name)]) return; seen[norm(name)] = 1;
-    out.push({ name, key: name, max: u.max, reset: u.reset, feature: true });
+    out.push({ name, key: name, max: u.max, reset: u.reset, feature: name });
   };
   classList().forEach(cl => {
     const c = classDataByName(cl.cls); if(!c) return;
@@ -1747,10 +1951,34 @@ function allResources(){
   const feats = featureResources().filter(r => !autoNames[norm(r.name)]);
   return auto.concat(feats).concat(customResources.map(r => ({ name:r.name, key:r.name, max:r.max, reset:r.reset || 'long', custom:true })));
 }
+// Resources tied to a given feature/trait name (for inline tracker pips).
+function resourcesForFeature(featName){
+  const k = norm(featName);
+  return allResources().filter(r => r.feature && norm(r.feature) === k);
+}
+// The names of features/traits currently shown in the Features list — used so
+// the standalone Resources section only lists trackers NOT shown inline.
+function shownFeatureNames(){
+  const set = {};
+  autoFeatures().forEach(f => set[norm(f.name)] = 1);
+  addedFeats.forEach(n => set[norm(n)] = 1);
+  customFeatures.forEach(f => set[norm(f.name)] = 1);
+  return set;
+}
+// Render the pip row + label + reset for one resource, for inline use.
+function resourcePipsHTML(r){
+  const used = Math.min(resourceUsed[r.key] || 0, r.max);
+  let pips = ''; for(let i=1;i<=r.max;i++) pips += '<span class="res-pip' + (i<=used?' used':'') + '" onclick="toggleResource(\'' + esc(r.key).replace(/'/g,"\\'") + '\',' + i + ',' + r.max + ')"></span>';
+  return '<div class="fi-track"><span class="fi-track-lbl"><b>' + (r.max - used) + '</b>/' + r.max + ' · ' + r.reset + ' rest</span>' + pips +
+    '<button class="res-reset-btn" onclick="resetResource(\'' + esc(r.key).replace(/'/g,"\\'") + '\')">Reset</button></div>';
+}
 function renderResources(){
   const box = $('resources-list'); if(!box) return;
-  const list = allResources();
-  if(!list.length){ box.innerHTML = '<div class="res-empty">No per-day resources at this level.</div>'; return; }
+  // Trackers shown inline with their feature are omitted here to avoid a
+  // duplicate; only custom trackers and any orphaned ones remain.
+  const shown = shownFeatureNames();
+  const list = allResources().filter(r => r.custom || !(r.feature && shown[norm(r.feature)]));
+  if(!list.length){ box.innerHTML = '<div class="res-empty">Trackers now live with their feature above. Add a custom tracker below.</div>'; return; }
   box.innerHTML = list.map(r => {
     const used = Math.min(resourceUsed[r.key] || 0, r.max);
     let pips = ''; for(let i=1;i<=r.max;i++) pips += '<span class="res-pip' + (i<=used?' used':'') + '" onclick="toggleResource(\'' + esc(r.key).replace(/'/g,"\\'") + '\',' + i + ',' + r.max + ')"></span>';
@@ -1761,11 +1989,11 @@ function renderResources(){
       '</span></div><div class="res-pips">' + pips + '</div></div>';
   }).join('');
 }
-function toggleResource(key, i, max){ const u = resourceUsed[key] || 0; resourceUsed[key] = (i <= u ? i-1 : i); renderResources(); scheduleAutosave(); }
-function resetResource(key){ resourceUsed[key] = 0; renderResources(); scheduleAutosave(); }
+function toggleResource(key, i, max){ const u = resourceUsed[key] || 0; resourceUsed[key] = (i <= u ? i-1 : i); renderResources(); renderFeatures(); scheduleAutosave(); }
+function resetResource(key){ resourceUsed[key] = 0; renderResources(); renderFeatures(); scheduleAutosave(); }
 function addCustomResource(){ const n = ($('res-name').value || '').trim(), m = num($('res-max').value); if(!n || m < 1) return; customResources.push({ name:n, max:m, reset:$('res-reset').value || 'long' }); $('res-name').value=''; $('res-max').value=''; renderResources(); scheduleAutosave(); }
 function removeCustomResource(n){ customResources = customResources.filter(r => r.name !== n); delete resourceUsed[n]; renderResources(); scheduleAutosave(); }
-function resetResources(kind){ allResources().forEach(r => { if(kind === 'long' || r.reset === 'short') resourceUsed[r.key] = 0; }); renderResources(); }
+function resetResources(kind){ allResources().forEach(r => { if(kind === 'long' || r.reset === 'short') resourceUsed[r.key] = 0; }); renderResources(); renderFeatures(); }
 
 // ═══ SPELLCASTING ═════════════════════════════════════════════════════════
 let spellsKnown = [];   // [{name, prepared}]
@@ -1782,7 +2010,8 @@ function spellAbilityId(){ if(_spellAbility) return _spellAbility; const cs = sp
 function abilityForSpell(sp){ if(_spellAbility) return _spellAbility; const owner = spellcastingClasses().find(x => (sp.classes||[]).some(n => norm(n)===norm(x.c.name))); return (owner && owner.c.spellcastingAbility) ? owner.c.spellcastingAbility : spellAbilityId(); }
 function spellDC(ab){ return 8 + profBonus() + modOf(ab || spellAbilityId()); }
 function spellAtkBonus(ab){ return profBonus() + modOf(ab || spellAbilityId()); }
-function isCaster(){ return _forceSpells || spellcastingClasses().length > 0; }
+// A racial/feature-granted spell (e.g. High Elf's cantrip on a Fighter) also opens the Spells tab.
+function isCaster(){ return _forceSpells || spellcastingClasses().length > 0 || spellsKnown.some(s => s.granted); }
 // Prepared-spell budget (A5): sum each non-pact caster class's Prepared Spells (or Spells Known) at its level.
 function preparedMax(){
   let total = 0;
@@ -1793,7 +2022,8 @@ function preparedMax(){
   });
   return total;
 }
-function preparedNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level > 0 && sk.prepared; }).length; }
+// Granted always-prepared spells don't count against the prepared limit.
+function preparedNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level > 0 && sk.prepared && !sk.granted; }).length; }
 function renderSpellHeader(){
   const on = isCaster();
   $('spell-block').style.display = on ? '' : 'none';
@@ -1861,6 +2091,7 @@ function renderSpells(){
       row.innerHTML =
         (lvl > 0 ? '<span class="sp-prep' + (sk.prepared?' on':'') + '" onclick="togglePrep(\'' + q + '\')" title="Prepared"></span>' : '<span class="sp-prep-gap"></span>') +
         '<input class="sp-name-input" value="' + esc(sk.display || sk.name) + '" oninput="onSpellRename(\'' + q + '\',this.value)" title="Rename (keeps its spell mechanics)">' +
+        (sk.granted ? '<span class="sp-granted" title="Granted by a feature or trait — always prepared">granted</span>' : '') +
         '<span class="sp-info">' + esc(spellInfoLine(sp)) + '</span>' +
         '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
         ((sp && sp.higherLevels && lvl > 0) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
@@ -2039,9 +2270,10 @@ function fillDatalists(){
 }
 function refreshSubclassList(){ const c = classData(); $('dl-subclasses').innerHTML = c ? (c.subclasses||[]).map(s => '<option value="' + esc(s.name) + '">').join('') : ''; }
 function refreshSpellPicker(){ /* spell picker replaced by the Spellbook modal */ }
-function onClassChange(){ refreshSubclassList(); refreshSpellPicker(); renderFeatures(); renderResources(); recalc(); scheduleAutosave(); syncDocTitle(); }
-function onLevelChange(){ renderFeatures(); renderResources(); recalc(); scheduleAutosave(); }
-function onSpeciesChange(){ renderFeatures(); recalc(); scheduleAutosave(); }
+function onClassChange(){ _speedManual = false; refreshSubclassList(); refreshSpellPicker(); renderFeatures(); renderResources(); recalc(); scheduleAutosave(); syncDocTitle(); }
+function onLevelChange(){ _speedManual = false; renderFeatures(); renderResources(); recalc(); scheduleAutosave(); }
+function onSpeciesChange(){ _speedManual = false; renderFeatures(); recalc(); scheduleAutosave(); }
+function onSubclassChange(){ renderFeatures(); renderResources(); recalc(); scheduleAutosave(); }
 
 // ═══ RULES MODAL ══════════════════════════════════════════════════════════
 function openRules(){
@@ -2148,9 +2380,9 @@ function collectSheet(){
     name: tr.querySelector('.atk-name').value, abil: tr.querySelector('.atk-abil').value,
     prof: tr.dataset.prof !== '0', bonus: num(tr.querySelector('.atk-bonus').value),
     damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value,
-    spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1'
+    spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1', mastery: tr.dataset.mastery || ''
   })).filter(a => a.name || a.damage);
-  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '', plus: num(tr.dataset.plus || 0) })).filter(i => i.name);
+  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '', plus: num(tr.dataset.plus || 0), scroll: tr.dataset.scroll || '' })).filter(i => i.name);
   return {
     system:'DND', v:1,
     name: v('f-name'),
@@ -2160,7 +2392,7 @@ function collectSheet(){
     classLevels: classLevels,
     species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'),
     scores, saveProf, skillProf,
-    speed: v('f-speed'), ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
+    speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
     inspiration: $('f-inspiration').checked, deathSucc, deathFail, activeConditions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
@@ -2177,7 +2409,7 @@ function applySheet(d){
   set('f-species', d.species); set('f-background', d.background); set('f-alignment', d.alignment);
   ABILITIES.forEach(a => { const el = $('sc-' + a.id); if(el) el.value = (d.scores && d.scores[a.id]) || 10; });
   saveProf = d.saveProf || {}; skillProf = d.skillProf || {};
-  set('f-speed', d.speed || '30'); set('f-ac', d.ac || '10');
+  set('f-speed', d.speed || '30'); _speedManual = !!d.speedManual; set('f-ac', d.ac || '10');
   set('f-hp-cur', d.hpCur != null ? d.hpCur : 10); set('f-hp-max', d.hpMax != null ? d.hpMax : 10); set('f-hp-temp', d.hpTemp || 0); set('f-hitdice', d.hitdice || '');
   set('f-hd-left', d.hdLeft != null ? d.hdLeft : hitDiceTotal());
   $('f-inspiration').checked = !!d.inspiration;
