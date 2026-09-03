@@ -1314,10 +1314,13 @@ function removeInvRow(btn){
   tr.remove(); reconcileAC(); recalc(); scheduleAutosave();
 }
 // Equip toggle + info (ⓘ) + remove. Equip only if the item resolves to a weapon/armor/shield.
+// Consumable magic items (potions, scrolls) aren't equippable.
+function magicEquippable(ref){ const m = magicData(ref); return !!(m && !/^(Potion|Scroll)$/i.test(m.type || '')); }
 function renderInvActions(tr){
   const kind = invRowKind(tr), ref = invRowRef(tr);
   const eq = tr.dataset.equipped === '1';
-  const equipBtn = (kind === 'weapon' || kind === 'armor' || kind === 'shield' || kind === 'magic')
+  const canEquip = (kind === 'weapon' || kind === 'armor' || kind === 'shield' || (kind === 'magic' && magicEquippable(ref)));
+  const equipBtn = canEquip
     ? '<button class="equip-btn' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="Equip / Unequip">' + (eq?'Equipped':'Equip') + '</button>' : '';
   const attuneBtn = (kind === 'magic' && magicNeedsAttune(ref))
     ? '<button class="attune-btn' + (isAttuned(ref)?' on':'') + '" onclick="toggleAttune(this)" title="Attunement — bonuses apply only while attuned (max 3)">' + (isAttuned(ref)?'Attuned':'Attune') + '</button>' : '';

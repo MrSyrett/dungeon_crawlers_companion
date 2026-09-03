@@ -206,7 +206,7 @@ export interface DndGear {
 export interface DndMagicItem {
   name: string;
   type: string; // "Wondrous Item", "Weapon (any)", …
-  rarity: "Common" | "Uncommon" | "Rare" | "Very Rare" | "Legendary" | "Artifact";
+  rarity: "Common" | "Uncommon" | "Rare" | "Very Rare" | "Legendary" | "Artifact" | "Varies";
   attunement: boolean;
   attunementNote?: string;
   description: string;
