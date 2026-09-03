@@ -1105,6 +1105,8 @@ autoLoad();
 /* settings gear + popover */
 .da-gear{width:26px;height:22px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid #3a3a3a;border-radius:5px;color:#aaa;cursor:pointer;font-size:13px;line-height:1;padding:0;}
 .da-gear:hover{color:#e8c84a;border-color:#e8c84a;}
+.da-gear-gm{position:absolute;top:6px;right:8px;z-index:6;width:28px;height:24px;display:flex;align-items:center;justify-content:center;background:rgba(20,22,28,.88);border:1px solid #3a3a3a;border-radius:5px;color:#c9a94a;cursor:pointer;font-size:14px;line-height:1;padding:0;}
+.da-gear-gm:hover{color:#e8c84a;border-color:#e8c84a;}
 .da-pop{position:fixed;z-index:100000;background:#17181d;border:1px solid #3a3d47;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.6);padding:14px;width:250px;font-family:system-ui,sans-serif;color:#e8e6df;}
 .da-pop h4{margin:0 0 10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a8f98;font-weight:700;}
 .da-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:9px 0;}
@@ -1126,7 +1128,7 @@ autoLoad();
 (function(){
   'use strict';
   var LS='dcw_diceanim';  // shared across all sheets
-  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000 };
+  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, finish:'shiny' };
   var S=Object.assign({},DEF);
   try{ var raw=localStorage.getItem(LS); if(raw) Object.assign(S, JSON.parse(raw)||{}); }catch(e){}
   function persistLocal(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
@@ -1289,7 +1291,8 @@ autoLoad();
     if(text==='6'||text==='9'){ g.fillRect(s/2-21, s/2+37, 42, 8); }
     var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t; }
   function buildDie(geo,groups,labels,sides,resultStr,color){
-    var mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:0.3, roughness:0.34, flatShading:true, transparent:true, opacity:1,
+    var matte=(S.finish==='matte');
+    var mat=new THREE.MeshStandardMaterial({ color:threeColor(color), metalness:matte?0.0:0.35, roughness:matte?0.95:0.3, flatShading:true, transparent:true, opacity:1,
       emissive:0x000000, emissiveIntensity:0 });
     var group=new THREE.Group(); group.add(new THREE.Mesh(geo,mat));
     var size=sides===2?1.15:sides===6?0.95:sides===4?0.8:sides===10?0.5:0.62;
@@ -1368,19 +1371,41 @@ autoLoad();
 
   // ─── parse a roll's detail string into dice ───
   function pad2(v){ v=''+v; return v.length<2?('0'+v):v; }
+  // sides+value → dice objects (d100 → tens+units, d10 → 0-9, else the value)
+  function mapDie(sides,n){ if(sides===100){ if(n<1||n>100)return []; var u=n%10,t=n-u; if(t===100)t=0; return [{sides:10,display:pad2(t),faceSet:'tens'},{sides:10,display:String(u),faceSet:'units'}]; }
+    if(sides===10){ if(n<1||n>10)return []; return [{sides:10,display:(n===10?'0':String(n)),faceSet:'units'}]; }
+    if(sides<2||n<1||n>sides) return []; return [{sides:sides,display:String(n),faceSet:null}]; }
+  // Character sheets: detail like "d20(14) + Mod(3)" / "adv[a,b]→k"
   function parseDice(detail){ detail=String(detail==null?'':detail); if(/[<>]/.test(detail)) return [];
     var out=[], m, re=/d(\d+)\s*\(\s*(\d+)\s*\)/gi;
-    while((m=re.exec(detail))){ var sides=+m[1], n=+m[2];
-      if(sides===100){ if(n<1||n>100) continue; var u=n%10, t=n-u; if(t===100)t=0; out.push({sides:10,display:pad2(t),faceSet:'tens'}); out.push({sides:10,display:String(u),faceSet:'units'}); }
-      else if(sides===10){ if(n<1||n>10) continue; out.push({sides:10,display:(n===10?'0':String(n)),faceSet:'units'}); }
-      else { if(sides<2||n<1||n>sides) continue; out.push({sides:sides,display:String(n),faceSet:null}); } }
-    if(!out.length){ var a=/(?:adv|dis)\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*(?:→|->)\s*(\d+)/i.exec(detail); if(a){ var v=+a[3]; if(v>=1&&v<=20) out.push({sides:20,display:String(v),faceSet:null}); } }
+    while((m=re.exec(detail))){ out=out.concat(mapDie(+m[1],+m[2])); }
+    if(!out.length){ var a=/(?:adv|dis)\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*(?:→|->)\s*(\d+)/i.exec(detail); if(a) out=out.concat(mapDie(20,+a[3])); }
+    return out; }
+  // GM screen: detail like "2d6(3,5)" / "d20(14,8 ▲ 14)"
+  function parseGM(detail){ detail=String(detail==null?'':detail); if(/[<>{]/.test(detail)) return [];
+    var out=[], m, re=/(\d*)d(\d+)\(([^)]*)\)/gi;
+    while((m=re.exec(detail))){ var sides=+m[2], inner=m[3];
+      if(/[\u25B2\u25BC]/.test(inner)){ var mm=inner.match(/(\d+)\s*$/); if(mm) out=out.concat(mapDie(sides,+mm[1])); }
+      else { var nums=inner.match(/\d+/g)||[]; nums.forEach(function(x){ out=out.concat(mapDie(sides,+x)); }); } }
     return out; }
 
   // ─── hook addLog ───
   var _add = window.addLog;
   window.addLog = function(label,result,detail,type){ var r = _add ? _add.apply(this, arguments) : undefined;
     try{ if(S.on){ var dice=parseDice(detail); if(dice.length) play(dice, type||'normal'); } }catch(e){} return r; };
+
+  // GM screen: the GM's own rolls run through GMCamp.broadcast (no addLog there)
+  if(window.GMCamp && typeof window.GMCamp.broadcast==='function'){
+    var _bc=window.GMCamp.broadcast;
+    window.GMCamp.broadcast=function(entry){ try{ if(S.on && entry && entry.detail){ var dice=parseGM(entry.detail); if(dice.length) play(dice, entry.crit||'normal'); } }catch(e){} return _bc.apply(this,arguments); };
+  }
+  // delegated open for a gear placed in markup (e.g. the GM dice tool toolbar)
+  document.addEventListener('click', function(e){ var t=e.target; var g=t&&t.closest?t.closest('[data-da-gear]'):null; if(g){ e.preventDefault(); togglePop(g); } });
+  // GM screen: the dice tool is created on demand — drop a settings gear into it
+  function mountGmGear(root){ if(!root || !root.querySelector || root.querySelector('.da-gear-gm')) return;
+    try{ if(getComputedStyle(root).position==='static') root.style.position='relative'; }catch(e){}
+    var g=document.createElement('button'); g.className='da-gear-gm'; g.type='button'; g.setAttribute('data-da-gear',''); g.title='Dice animation settings'; g.setAttribute('aria-label','Dice animation settings'); g.textContent='🎲'; root.appendChild(g); }
+  if(typeof window.init_dice==='function'){ var _idf=window.init_dice; window.init_dice=function(root){ var res=_idf.apply(this,arguments); try{ mountGmGear(root); }catch(e){} return res; }; }
 
   // ─── settings UI ───
   var PRESETS_DICE=['#d8b24a','#c0251e','#3b7dd8','#3fa45b','#8a6fd6','#e8e2d0','#20232b'];
@@ -1391,6 +1416,7 @@ autoLoad();
       +'<h4>Dice Animation</h4>'
       +'<div class="da-row"><span class="k">Show dice</span><div class="da-sw" data-k="on"></div></div>'
       +'<div class="da-row"><span class="k">Style</span><div class="da-seg" data-k="mode"><button data-v="2d">2D</button><button data-v="3d">3D</button></div></div>'
+      +'<div class="da-row"><span class="k">Finish</span><div class="da-seg" data-k="finish"><button data-v="shiny">Shiny</button><button data-v="matte">Matte</button></div></div>'
       +'<div class="da-row"><span class="k">Linger</span><div class="da-seg" data-k="linger"><button data-v="1000">1s</button><button data-v="2000">2s</button><button data-v="4000">4s</button><button data-v="8000">8s</button></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Dice colour</span><div class="da-swatches" data-k="dice"></div></div>'
       +'<div class="da-row" style="align-items:flex-start"><span class="k" style="padding-top:3px">Number colour</span><div class="da-swatches" data-k="num"></div></div>'
@@ -1405,11 +1431,13 @@ autoLoad();
     pop.querySelector('[data-k="on"]').onclick=function(){ setS('on', !S.on); };
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.onclick=function(){ setS('mode', b.dataset.v); if(b.dataset.v==='3d'&&HAS_WEBGL) loadThree(function(){}); }; });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.onclick=function(){ setS('linger', +b.dataset.v); }; });
+    pop.querySelectorAll('[data-k="finish"] button').forEach(function(b){ b.onclick=function(){ setS('finish', b.dataset.v); }; });
     syncPop();
   }
   function syncPop(){ if(!pop)return; pop.querySelector('[data-k="on"]').classList.toggle('on', !!S.on);
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===S.mode); });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.classList.toggle('on', +b.dataset.v===(S.linger||1000)); });
+    pop.querySelectorAll('[data-k="finish"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.finish||'shiny')); });
     var dc=pop.querySelector('[data-k="dice"] .da-custom'); if(dc && S.dice&&String(S.dice)[0]==='#')dc.value=S.dice; var nc=pop.querySelector('[data-k="num"] .da-custom'); if(nc)nc.value=S.num;
     var rb=pop.querySelector('.da-rand'); if(rb) rb.classList.toggle('sel', S.dice==='random'); }
   function setS(k,v){ S[k]=v; persist(); syncPop(); }
@@ -1427,8 +1455,8 @@ autoLoad();
     var dm=host.querySelector('.dm-toggle-wrap'); if(dm && dm.parentNode){ dm.parentNode.insertBefore(g, dm); } else host.appendChild(g); }
 
   // ─── expose for sheet persistence ───
-  window.DiceAnim={ get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger}; },
-    restore:function(o){ if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
+  window.DiceAnim={ get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish}; },
+    restore:function(o){ if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish)S.finish=o.finish; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
     play:function(dice,crit){ play(dice,crit); } };
 
   // Persist settings in the saved sheet too (survives the VTT webview where
