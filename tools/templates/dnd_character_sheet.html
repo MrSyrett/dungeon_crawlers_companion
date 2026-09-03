@@ -267,6 +267,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .conc-bar .conc-x:hover{color:var(--red);}
 .cast-lvls{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
 .cast-lvl-btn{flex:1 1 30%;}
+.base-pick-btn{display:block;width:100%;text-align:left;margin-bottom:4px;}
+.base-pick-meta{color:var(--muted);font-size:11px;font-weight:600;margin-left:6px;}
 .inv-actions{white-space:nowrap;text-align:right;width:1%;}
 .inv-qty-cell{width:44px;}
 .tbl .inv-qty{width:36px;text-align:center;}
@@ -328,7 +330,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .sp-x:hover{color:var(--red);}
 .cast-btn{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
 .cast-btn:hover{background:var(--dnd-dk);}
-.upcast-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd);border-radius:3px;padding:3px 6px;font-size:11px;line-height:1;cursor:pointer;margin-left:3px;}
+.atk-grp{display:flex;gap:5px;align-items:flex-end;}
+.atk-field{display:flex;flex-direction:column;gap:1px;}
+.atk-sub{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1;}
+.sneak-btn{background:transparent;border:1px solid #8a5cc0;color:#8a5cc0;border-radius:3px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;margin-right:4px;}
+.sneak-btn:hover{background:#8a5cc0;color:#fff;}
+.upcast-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd);border-radius:3px;padding:3px 6px;font-size:11px;line-height:1;cursor:pointer;margin-right:3px;}
 .upcast-btn:hover{background:var(--dnd);color:#fff;}
 
 /* DARK */
@@ -937,6 +944,7 @@ function recalc(){
   reconcileAC();
   updateHitDiceUI();
   refreshWizardButtons();
+  refreshAtkActions();
   renderSpellHeader();
   renderSlots();
 }
@@ -1138,17 +1146,46 @@ function addAttackRow(a){
   if(a.spell) tr.dataset.spell = a.spell;
   if(a.weapon) tr.dataset.weapon = a.weapon;
   if(a.unarmed) tr.dataset.unarmed = '1';
-  if(a.magic) tr.dataset.magic = num(a.magic);   // magic +N applied to hit AND damage
+  tr.dataset.prof = (a.prof === false ? '0' : '1');       // proficiency is auto-set on equip (no checkbox)
+  const bonus = num(a.bonus) + num(a.magic || 0);         // magic +N folds into the visible Bonus (applies to hit + damage)
   const abilOpts = ABILITIES.map(x => '<option value="' + x.id + '"' + (a.abil===x.id?' selected':'') + '>' + x.id + '</option>').join('');
   tr.innerHTML =
     '<td><input type="text" class="atk-name" value="' + esc(a.name) + '" placeholder="Longsword" oninput="scheduleAutosave()"></td>' +
-    '<td><div style="display:flex;gap:2px;align-items:center;"><select class="atk-abil" onchange="scheduleAutosave()" style="width:46px;">' + abilOpts + '</select>' +
-      '<input type="checkbox" class="atk-prof" ' + (a.prof?'checked':'') + ' title="Proficient" onchange="scheduleAutosave()" style="accent-color:var(--dnd);">' +
-      '<input type="number" class="atk-bonus num mono" value="' + num(a.bonus) + '" title="Extra to-hit" style="width:40px;" oninput="scheduleAutosave()"></div></td>' +
-    '<td><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" style="width:70px;" oninput="scheduleAutosave()"><input type="text" class="atk-dtype" value="' + esc(a.type) + '" placeholder="slashing" class="mono" style="width:64px;font-size:10px;" oninput="scheduleAutosave()"></td>' +
-    '<td class="roll-cell" style="white-space:nowrap;"><button class="mini-roll" onclick="rollAttackFull(this)" title="Roll to hit and damage together">Attack</button></td>';
+    '<td><div class="atk-grp">' +
+      '<div class="atk-field"><span class="atk-sub">Ability</span><select class="atk-abil" onchange="scheduleAutosave()" style="width:46px;">' + abilOpts + '</select></div>' +
+      '<div class="atk-field"><span class="atk-sub">Bonus</span><input type="number" class="atk-bonus mono" value="' + bonus + '" title="To-hit and damage bonus (magic weapons fill this automatically)" style="width:40px;" oninput="scheduleAutosave()"></div>' +
+    '</div></td>' +
+    '<td><div class="atk-grp">' +
+      '<div class="atk-field"><span class="atk-sub">Damage</span><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" style="width:66px;" oninput="scheduleAutosave()"></div>' +
+      '<div class="atk-field"><span class="atk-sub">Type</span><input type="text" class="atk-dtype mono" value="' + esc(a.type) + '" placeholder="slashing" style="width:62px;font-size:10px;" oninput="scheduleAutosave()"></div>' +
+    '</div></td>' +
+    '<td class="roll-cell atk-actions" style="white-space:nowrap;text-align:right;"></td>';
   $('attacks-body').appendChild(tr);
+  renderAtkActions(tr);
   return tr;
+}
+// Rogues get a Sneak Attack button to the left of Attack; refreshed when class/level changes.
+function isRogue(){ return classList().some(cl => norm(cl.cls) === 'rogue'); }
+function rogueLevel(){ const cl = classList().find(c => norm(c.cls) === 'rogue'); return cl ? num(cl.level) : 0; }
+function sneakDice(){ return Math.max(1, Math.ceil(rogueLevel() / 2)); }
+function renderAtkActions(tr){
+  const cell = tr.querySelector('.atk-actions'); if(!cell) return;
+  const sneak = isRogue() ? '<button class="sneak-btn" onclick="rollSneak(this)" title="Roll Sneak Attack damage (' + sneakDice() + 'd6, once per turn)">Sneak</button>' : '';
+  cell.innerHTML = sneak + '<button class="mini-roll" onclick="rollAttackFull(this)" title="Roll to hit and damage together">Attack</button>';
+}
+function refreshAtkActions(){ [...document.querySelectorAll('#attacks-body tr')].forEach(renderAtkActions); }
+function rollSneak(btn){
+  const n = sneakDice(), faces = []; let sum = 0; for(let i=0;i<n;i++){ const f = dN(6); faces.push(f); sum += f; }
+  addLog('Sneak Attack', String(sum), n + 'd6: ' + faces.join('+') + (rogueLevel() ? ' · Rogue ' + rogueLevel() : ''), 'normal');
+}
+// Proficiency with a weapon from the character's class weapon proficiencies.
+function isProficientWithWeapon(w){
+  if(!w) return true;
+  const profs = [];
+  classList().forEach(cl => { const c = classDataByName(cl.cls); if(c && c.proficiencies && c.proficiencies.weapons) c.proficiencies.weapons.forEach(x => profs.push(norm(x))); });
+  if(profs.includes('martial weapons')) return true;
+  if(profs.includes('simple weapons') && /simple/i.test(w.category || '')) return true;
+  return profs.some(p => p === norm(w.name));
 }
 // Unarmed Strike is always available — keep exactly one row, at the top.
 function ensureUnarmed(){
@@ -1167,19 +1204,20 @@ function addAttackFromWeapon(name){
 function _atkRow(btn){ return btn.closest('tr'); }
 function rollAttack(btn){
   const tr = _atkRow(btn);
-  const abil = tr.querySelector('.atk-abil').value, prof = tr.querySelector('.atk-prof').checked;
-  const extra = num(tr.querySelector('.atk-bonus').value), magic = num(tr.dataset.magic || 0), name = tr.querySelector('.atk-name').value || 'Attack';
-  const mod = modOf(abil) + (prof ? profBonus() : 0) + extra + magic;
-  d20Check(name + ' — to hit', mod, { kind:'attack', note: magic ? ('+' + magic + ' magic') : '' });
+  const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
+  const bonus = num(tr.querySelector('.atk-bonus').value), name = tr.querySelector('.atk-name').value || 'Attack';
+  const mod = modOf(abil) + (prof ? profBonus() : 0) + bonus;
+  d20Check(name + ' — to hit', mod, { kind:'attack', note: bonus ? (sgn(bonus) + ' bonus') : '' });
 }
 function rollDamage(btn){
   const tr = _atkRow(btn);
   const dmg = tr.querySelector('.atk-dmg').value.trim(), abil = tr.querySelector('.atk-abil').value;
   const name = tr.querySelector('.atk-name').value || 'Attack', dtype = tr.querySelector('.atk-dtype').value;
+  const bonus = num(tr.querySelector('.atk-bonus').value);
   const m = dmg.match(/(\d*)d(\d+)\s*([+-]\s*\d+)?/i);
   if(!m){ addLog(name + ' — damage', dmg || '?', 'No dice expression', 'normal'); return; }
   const nDice = num(m[1]) || 1, sides = num(m[2]);
-  let flat = m[3] ? num(m[3].replace(/\s+/g,'')) : modOf(abil);
+  let flat = (m[3] ? num(m[3].replace(/\s+/g,'')) : modOf(abil)) + bonus;
   const faces = []; let sum = 0; for(let i=0;i<nDice;i++){ const f = dN(sides); faces.push(f); sum += f; }
   const total = sum + flat;
   addLog(name + ' — damage', String(total), nDice + 'd' + sides + ': ' + faces.join('+') + ' ' + sgn(flat) + (dtype ? ' ' + dtype : ''), 'normal');
@@ -1187,31 +1225,31 @@ function rollDamage(btn){
 // One button: roll to-hit (adv/dis) and damage together. Crit (nat 20) doubles the damage dice.
 function rollAttackFull(btn){
   const tr = _atkRow(btn);
-  const abil = tr.querySelector('.atk-abil').value, prof = tr.querySelector('.atk-prof').checked;
-  const extra = num(tr.querySelector('.atk-bonus').value), magic = num(tr.dataset.magic || 0), name = tr.querySelector('.atk-name').value || 'Attack';
+  const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
+  const bonus = num(tr.querySelector('.atk-bonus').value), name = tr.querySelector('.atk-name').value || 'Attack';
   const dtype = tr.querySelector('.atk-dtype').value, dmg = tr.querySelector('.atk-dmg').value.trim();
-  // to-hit (magic +N adds to hit)
+  // to-hit (Bonus adds to hit)
   const ctx = rollCtx('attack');
-  const r = rawD20(ctx.mode); const hitMod = modOf(abil) + (prof ? profBonus() : 0) + extra + magic + ctx.pen;
+  const r = rawD20(ctx.mode); const hitMod = modOf(abil) + (prof ? profBonus() : 0) + bonus + ctx.pen;
   const hitTotal = r.nat + hitMod;
   const crit = r.nat === 20, fumble = r.nat === 1;
-  // damage (dice + ability mod + magic +N)
+  // damage (dice + ability mod + Bonus)
   const m = dmg.match(/(\d*)d(\d+)\s*([+-]\s*\d+)?/i);
   let dmgLine = '', dmgTotal = null;
   if(m){
     let nDice = num(m[1]) || 1; const sides = num(m[2]);
-    const flat = (m[3] ? num(m[3].replace(/\s+/g,'')) : modOf(abil)) + magic;
+    const flat = (m[3] ? num(m[3].replace(/\s+/g,'')) : modOf(abil)) + bonus;
     if(crit) nDice *= 2;
     const faces = []; let sum = 0; for(let i=0;i<nDice;i++){ const f = dN(sides); faces.push(f); sum += f; }
     dmgTotal = sum + flat;
     dmgLine = nDice + 'd' + sides + '(' + faces.join('+') + ') ' + sgn(flat) + (dtype ? ' ' + dtype : '') + (crit ? ' — CRIT!' : '');
   } else if(/^\d+$/.test(dmg)){
     // flat damage (e.g. Unarmed Strike = 1 + ability modifier)
-    dmgTotal = num(dmg) + modOf(abil) + magic;
-    dmgLine = num(dmg) + ' ' + sgn(modOf(abil) + magic) + (dtype ? ' ' + dtype : '');
+    dmgTotal = num(dmg) + modOf(abil) + bonus;
+    dmgLine = num(dmg) + ' ' + sgn(modOf(abil) + bonus) + (dtype ? ' ' + dtype : '');
   }
   const result = 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
-  const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '') + (magic ? ' · +' + magic + ' magic' : '') + (ctx.note ? ' · ' + ctx.note : '');
+  const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '') + (bonus ? ' · ' + sgn(bonus) + ' bonus' : '') + (ctx.note ? ' · ' + ctx.note : '');
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
 }
 
@@ -1226,6 +1264,7 @@ function addInvRow(it){
   if(it.equipped) tr.dataset.equipped = '1';
   const ref = it.ref || resolveItemRef(it.name);
   if(ref) tr.dataset.ref = ref;
+  if(num(it.plus)) tr.dataset.plus = num(it.plus);   // a +N base weapon/armor (magic enhancement)
   tr.innerHTML =
     '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></td>' +
     '<td class="inv-qty-cell"><input type="number" class="inv-qty mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" oninput="scheduleAutosave()"></td>' +
@@ -1242,6 +1281,7 @@ function invDetailHTML(tr){
   const it = itemData(invRowRef(tr));
   if(!it) return '';
   const notes = [];
+  const plus = num(tr.dataset.plus || 0); if(plus) notes.push('+' + plus + ' magic');
   if(it.damage){                                   // weapon
     notes.push(it.damage + (it.damageType ? ' ' + it.damageType : ''));
     if(it.properties && it.properties.length) notes.push(it.properties.join(', '));
@@ -1282,7 +1322,8 @@ function renderInvActions(tr){
   const attuneBtn = (kind === 'magic' && magicNeedsAttune(ref))
     ? '<button class="attune-btn' + (isAttuned(ref)?' on':'') + '" onclick="toggleAttune(this)" title="Attunement — bonuses apply only while attuned (max 3)">' + (isAttuned(ref)?'Attuned':'Attune') + '</button>' : '';
   const infoBtn = itemData(ref) ? '<button class="row-i" onclick="openItemInfo(this.closest(\'tr\'))" title="Item details">&#9432;</button>' : '';
-  tr.querySelector('.inv-actions').innerHTML = equipBtn + attuneBtn + infoBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
+  // Order: Info · Attune · Equip · Remove
+  tr.querySelector('.inv-actions').innerHTML = infoBtn + attuneBtn + equipBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
 }
 
 // ── EQUIPMENT: item kinds, equip toggles, AC, weapon attack rows ──────────
@@ -1343,8 +1384,8 @@ function equipMagicRow(tr){
   if(invAttackHasWeapon(ref)) return;
   const w = mb.baseWeapon, finesse = (w.properties || []).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
-  // The +N applies to BOTH to-hit and damage (A4); stored as a magic bonus, not the manual to-hit field.
-  addAttackRow({ name: display, abil, prof: true, bonus: 0, magic: mb.atk || 0, damage: w.damage, type: w.damageType, weapon: ref });
+  // The +N folds into the Bonus (applies to hit + damage); proficiency is auto-set.
+  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: 0, magic: mb.atk || 0, damage: w.damage, type: w.damageType, weapon: ref });
 }
 function equipWeaponRow(tr){
   const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
@@ -1352,8 +1393,10 @@ function equipWeaponRow(tr){
   if(invAttackHasWeapon(ref)) return;
   const finesse = (w.properties || []).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
-  addAttackRow({ name: display, abil, prof: true, bonus: 0, damage: w.damage, type: w.damageType, weapon: ref });
+  addAttackRow({ name: display, abil, prof: isProficientWithWeapon(w), bonus: num(tr.dataset.plus || 0), damage: w.damage, type: w.damageType, weapon: ref });
 }
+// The +N on an equipped base weapon/armor row (from a "+1 Weapon" / "+2 Armor" purchase).
+function equippedRowPlus(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && invRowKind(r) === kind); return tr ? num(tr.dataset.plus || 0) : 0; }
 function unequipWeaponRow(ref){ [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.weapon || '') === norm(ref)) tr.remove(); }); }
 // Keep an equipped weapon's attack-row name in sync when its inventory item is renamed.
 function syncEquippedWeaponName(tr){
@@ -1375,7 +1418,8 @@ function computeAC(){
   const armorName = equippedItemName('armor');
   const armor = armorName ? D.armor().find(x => norm(x.name) === norm(armorName)) : null;
   let ac = armor ? armorACValue(armor, dex) : 10 + dex;
-  if(equippedItemName('shield')) ac += 2;
+  if(armor) ac += equippedRowPlus('armor');                 // +N magic armor
+  if(equippedItemName('shield')) ac += 2 + equippedRowPlus('shield');
   ac += magicACBonus();
   return ac;
 }
@@ -1493,7 +1537,8 @@ function openStore(){
   _storeTab = 'gear';
   if(!_storeInit){
     $('store-body').addEventListener('click', (e) => {
-      const add = e.target.closest('[data-add-item]'); if(add){ addInvRow({ name:add.dataset.addItem, qty:1 }); scheduleAutosave(); flashBtn(add, '✓ Added'); return; }
+      const add = e.target.closest('[data-add-item]');
+      if(add){ const g = genericPlusItem(add.dataset.addItem); if(g){ openBasePicker(g.kind, g.plus); } else { addInvRow({ name:add.dataset.addItem, qty:1 }); scheduleAutosave(); flashBtn(add, '✓ Added'); } return; }
       const buy = e.target.closest('[data-buy-item]'); if(buy){ if(storeBuy(buy.dataset.buyItem, buy.dataset.buyCost)) flashBtn(buy, '✓ Bought'); else flashBtn(buy, 'Need ' + esc(buy.dataset.buyCost)); }
     });
     _storeInit = true;
@@ -1502,6 +1547,33 @@ function openStore(){
   renderStore();
 }
 function closeStore(){ $('store-overlay').classList.remove('open'); }
+// A generic enhancement item ("Weapon, +1" / "Armor, +2") that needs a base chosen.
+function genericPlusItem(name){
+  const m = magicData(name); if(!m) return null;
+  const pm = String(m.name).match(/\+(\d)/); const plus = pm ? +pm[1] : 0; if(!plus) return null;
+  if(/^Weapon \(any\)/i.test(m.type || '') || /^Weapon,\s*\+\d/i.test(m.name)) return { kind:'weapon', plus };
+  if(/^Armor \(any\)/i.test(m.type || '') || /^Armor,\s*\+\d/i.test(m.name)) return { kind:'armor', plus };
+  return null;
+}
+// Pick the base weapon/armor a "+N" enhancement applies to, then add + equip it.
+function openBasePicker(kind, plus){
+  let ov = $('base-overlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'base-overlay'; ov.className = 'ov'; ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('open'); }); document.body.appendChild(ov); }
+  const items = kind === 'weapon' ? D.weapons() : D.armor().filter(a => !/shield/i.test(a.category || ''));
+  const rows = items.map(x => {
+    const meta = kind === 'weapon' ? (x.category + ' · ' + x.damage + ' ' + x.damageType) : (x.category + ' · AC ' + x.baseAC);
+    return '<button class="m-btn ghost base-pick-btn" onclick="pickBase(\'' + kind + '\',' + plus + ',\'' + esc(x.name).replace(/'/g,"\\'") + '\')"><b>' + esc(x.name) + '</b> <span class="base-pick-meta">' + esc(meta) + '</span></button>';
+  }).join('');
+  ov.innerHTML = '<div class="modal" style="max-width:440px;max-height:82vh;display:flex;flex-direction:column;"><div class="modal-hd"><div class="ttl">Choose a base ' + kind + ' for your +' + plus + ' ' + (kind === 'weapon' ? 'Weapon' : 'Armor') + '</div><button class="x" onclick="document.getElementById(\'base-overlay\').classList.remove(\'open\')">✕</button></div><div class="modal-bd" style="overflow:auto;">' + rows + '</div></div>';
+  ov.classList.add('open');
+}
+function pickBase(kind, plus, base){
+  const ov = $('base-overlay'); if(ov) ov.classList.remove('open');
+  const tr = addInvRow({ name: base + ' +' + plus, ref: base, plus: plus, qty:1 });
+  const eq = tr.querySelector('.equip-btn'); if(eq) toggleEquip(eq);   // add + equip with its bonuses
+  scheduleAutosave();
+  addLog('Item', '+', base + ' +' + plus + ' added & equipped', 'normal');
+}
 function storeSetTab(t){ _storeTab = t; $('store-search').value = ''; renderStore(); }
 function flashBtn(btn, txt){ const o = btn.textContent; btn.textContent = txt; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = false; }, 700); }
 // Proficiency helpers (used by the store's "proficient only" filter).
@@ -1628,7 +1700,50 @@ function autoResources(){
   });
   return out;
 }
-function allResources(){ return autoResources().concat(customResources.map(r => ({ name:r.name, key:r.name, max:r.max, reset:r.reset || 'long', custom:true }))); }
+// A limited-use count parsed from a feature/trait description, or null if it
+// doesn't state a simple per-rest count (pool/table features return null).
+function parseFeatureUses(text){
+  if(!text) return null;
+  const t = String(text); let max = null; let m;
+  if(/\bonce per day\b/i.test(t)) max = 1;
+  else if(/once per (?:short|long) rest/i.test(t)) max = 1;
+  else if(/\bonce\b[^.]*?(?:can't|cannot|until you finish)[^.]*?(?:short|long) rest/i.test(t) || /(?:can't|cannot) (?:use|do so)[^.]*?again until you finish a (?:short|long) rest/i.test(t)) max = 1;
+  else if((m = t.match(/number of (?:uses|times)[^.]*?equal to your (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma) modifier/i))) max = Math.max(1, modOf(m[1].slice(0,3).toUpperCase()));
+  else if(/number of times[^.]*?equal to your Proficiency Bonus/i.test(t) || /equal to your Proficiency Bonus[^.]*?(?:times|per (?:short|long) rest)/i.test(t)) max = profBonus();
+  else if(/\btwice\b[^.]*?(?:short|long) rest|two times[^.]*?(?:short|long) rest/i.test(t)) max = 2;
+  else if(/\bthree times\b[^.]*?(?:short|long) rest/i.test(t)) max = 3;
+  else if((m = t.match(/\b(\d+)\s+times[^.]*?(?:short|long) rest/i))) max = +m[1];
+  if(max == null || max < 1 || max > 30) return null;
+  const reset = /\bonce per day\b/i.test(t) ? 'long' : (/short rest/i.test(t) ? 'short' : 'long');
+  return { max, reset };
+}
+// Trackers for class/subclass/species features that state a limited per-rest use
+// but aren't already a per-day table column (Arcane Recovery, Bardic Inspiration…).
+function featureResources(){
+  const out = [], seen = {};
+  const add = (name, desc) => {
+    const u = parseFeatureUses(desc); if(!u) return;
+    if(seen[norm(name)]) return; seen[norm(name)] = 1;
+    out.push({ name, key: name, max: u.max, reset: u.reset, feature: true });
+  };
+  classList().forEach(cl => {
+    const c = classDataByName(cl.cls); if(!c) return;
+    (c.features || []).filter(f => !f.subclass && f.level <= cl.level).forEach(f => add(f.name, f.description));
+    const sub = (c.subclasses || []).find(s => norm(s.name) === norm(cl.subclass));
+    if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => add(f.name, f.description));
+  });
+  const sp = speciesData();
+  if(sp){ (sp.traits || []).forEach(t => add(t.name, t.description));
+    const ln = norm(_lineage);
+    (sp.lineages || []).filter(l => !ln || norm(l.name) === ln).forEach(l => (l.traits || []).forEach(t => add(t.name, t.description))); }
+  return out;
+}
+function allResources(){
+  const auto = autoResources();
+  const autoNames = {}; auto.forEach(r => autoNames[norm(r.name)] = 1);
+  const feats = featureResources().filter(r => !autoNames[norm(r.name)]);
+  return auto.concat(feats).concat(customResources.map(r => ({ name:r.name, key:r.name, max:r.max, reset:r.reset || 'long', custom:true })));
+}
 function renderResources(){
   const box = $('resources-list'); if(!box) return;
   const list = allResources();
@@ -1745,8 +1860,8 @@ function renderSpells(){
         '<input class="sp-name-input" value="' + esc(sk.display || sk.name) + '" oninput="onSpellRename(\'' + q + '\',this.value)" title="Rename (keeps its spell mechanics)">' +
         '<span class="sp-info">' + esc(spellInfoLine(sp)) + '</span>' +
         '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
-        '<button class="cast-btn" onclick="castSpellFull(\'' + q + '\')" title="Cast this spell">Cast</button>' +
-        ((sp && sp.higherLevels && lvl > 0) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '');
+        ((sp && sp.higherLevels && lvl > 0) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '') +
+        '<button class="cast-btn" onclick="castSpellFull(\'' + q + '\')" title="Cast this spell">Cast</button>';
       box.appendChild(row);
     });
   });
@@ -1871,6 +1986,13 @@ function castSpellFull(name, castLevel){
   const dtype = dmgInfo.type ? ' ' + dmgInfo.type : '';
   const save = spellSaveAbility(sp);
   const ab = abilityForSpell(sp), dc = spellDC(ab);
+  // Magic Missile: three darts at level 1, +1 per slot level above, each 1d4+1 force.
+  if(/^magic missile$/i.test(sp.name)){
+    const darts = 3 + Math.max(0, useLevel - 1); let total = 0; const parts = [];
+    for(let i=0;i<darts;i++){ const f = dN(4) + 1; total += f; parts.push(String(f)); }
+    addLog(label + upLabel, total + ' force', darts + ' darts · 1d4+1 each: ' + parts.join(' + '), 'normal');
+    return;
+  }
   if(diceExpr && spellIsAttack(sp)){
     const ctx = rollCtx('attack');
     const r = rawD20(ctx.mode), atkMod = spellAtkBonus(ab) + ctx.pen, hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
@@ -2021,11 +2143,11 @@ function collectSheet(){
   const scores = {}; ABILITIES.forEach(a => scores[a.id] = num($('sc-' + a.id).value));
   const attacks = [...document.querySelectorAll('#attacks-body tr')].map(tr => ({
     name: tr.querySelector('.atk-name').value, abil: tr.querySelector('.atk-abil').value,
-    prof: tr.querySelector('.atk-prof').checked, bonus: num(tr.querySelector('.atk-bonus').value),
+    prof: tr.dataset.prof !== '0', bonus: num(tr.querySelector('.atk-bonus').value),
     damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value,
-    spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1', magic: num(tr.dataset.magic || 0)
+    spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1'
   })).filter(a => a.name || a.damage);
-  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '' })).filter(i => i.name);
+  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '', plus: num(tr.dataset.plus || 0) })).filter(i => i.name);
   return {
     system:'DND', v:1,
     name: v('f-name'),

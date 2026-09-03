@@ -109,7 +109,12 @@
     $("dndlu-back").style.visibility = step === 0 ? "hidden" : "visible";
     $("dndlu-next").textContent = STEPS[step] === "Review" ? "Apply level ✓" : "Next →";
     const fn = { Class:rClass, Subclass:rSubclass, HP:rHP, ASI:rASI, Spells:rSpells, Review:rReview }[STEPS[step]];
-    $("dndlu-body").innerHTML = fn(); $("dndlu-body").scrollTop = 0; wire();
+    const body = $("dndlu-body");
+    // Keep scroll on in-step re-renders (picking a spell/ASI); reset only on step change.
+    const sameStep = render._step === step, prevScroll = body.scrollTop;
+    body.innerHTML = fn();
+    body.scrollTop = sameStep ? prevScroll : 0;
+    render._step = step; wire();
   }
   const card = (attr, on, title, sub) => '<div class="dndb-card' + (on?" on":"") + '" ' + attr + '><div class="dc-title">' + esc(title) + '</div>' + (sub?'<div class="dc-sub">' + esc(sub) + '</div>':"") + '</div>';
 

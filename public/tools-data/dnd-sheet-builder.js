@@ -152,8 +152,12 @@
     $("dndb-back").style.visibility = step === 0 ? "hidden" : "visible";
     $("dndb-next").textContent = STEPS[step] === "Review" ? "Build character ✓" : "Next →";
     const fn = { Class:rClass, Subclass:rSubclass, Species:rSpecies, Background:rBackground, Abilities:rAbilities, Skills:rSkills, Choices:rChoices, Advancement:rAdvancement, Spells:rSpells, Equipment:rEquipment, Review:rReview }[STEPS[step]];
-    $("dndb-body").innerHTML = fn();
-    $("dndb-body").scrollTop = 0;
+    const body = $("dndb-body");
+    // Keep the scroll position on in-step re-renders (e.g. picking a spell); reset only on a step change.
+    const sameStep = render._step === step, prevScroll = body.scrollTop;
+    body.innerHTML = fn();
+    body.scrollTop = sameStep ? prevScroll : 0;
+    render._step = step;
     wire();
   }
 
