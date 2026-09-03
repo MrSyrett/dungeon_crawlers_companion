@@ -44,6 +44,7 @@ const SYSTEMS = [
     file: "dnd_session_prep_builder.html", key: "dnd_session", ls: "dnd_builder_v1", cfg: "dnd", random: "Random Monster",
     name: "D&D", title: "Session Prep Builder — D&D 2024",
     accent: "#c8102e", accentDark: "#8a0f1e", red: "#9b1b22", redDark: "#6f1119", highlight: "#f0c020", boxBg: "#f0d9d0",
+    paper: "#f3e7cf", previewBg: "#000000",
     chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Monsters/NPCs", mobsHeading: "Monsters &amp; NPCs",
     mob: "Monster", boss: "Boss", npc: "NPC", typePh: "GOBLIN // CR 1/4 // AC 15 // 7 HP", titlePh: "e.g. The Sunless Citadel", subtitlePh: "e.g. A D&D adventure for level 1–3",
   },
@@ -152,6 +153,9 @@ for (const S of SYSTEMS) {
   s = rep(s, "--highlight: #FFE600;", `--highlight: ${S.highlight};`);
   s = rep(s, "--ui-accent: #F7941D; --ui-highlight: #FFE600;", `--ui-accent: ${S.accent}; --ui-highlight: ${S.highlight};`);
   s = rep(s, "--section-hdr: #C0392B;", `--section-hdr: ${S.red};`);
+  // page paper + preview-area background (per system; defaults match the DCC base)
+  s = rep(s, "--paper: #ffffff;", `--paper: ${S.paper || "#ffffff"};`);
+  s = rep(s, "--preview-bg: #6b5030;", `--preview-bg: ${S.previewBg || "#6b5030"};`);
   // storage keys (server blob key + standalone localStorage key)
   s = rep(s, "'dcc_session'", `'${S.key}'`);
   s = rep(s, "'dcw_builder_v5'", `'${S.ls}'`);

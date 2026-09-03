@@ -255,7 +255,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .row-i{background:transparent;border:none;color:#5a9bd4;cursor:pointer;font-size:14px;padding:0 4px;line-height:1;}
 .row-i:hover{color:var(--dnd);}
 .cbt input.auto{color:var(--dnd-dk);}
-.inv-actions{white-space:nowrap;}
+.inv-actions{white-space:nowrap;text-align:right;width:1%;}
+.inv-qty-cell{width:44px;}
+.tbl .inv-qty{width:36px;text-align:center;}
+.inv-detail{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);line-height:1.3;letter-spacing:.01em;white-space:normal;}
+.inv-detail .inv-cost{font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;color:var(--ink);white-space:nowrap;}
+.inv-detail .inv-cost + .inv-notes{margin-left:2px;}
 .pick-sel{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:5px 6px;border-radius:3px;outline:none;flex:1 1 160px;min-width:0;}
 .notes-box{padding:8px 10px;}
 .notes-box textarea{width:100%;min-height:80px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:'Barlow',sans-serif;font-size:13px;line-height:1.5;padding:8px;outline:none;resize:vertical;}
@@ -634,7 +639,7 @@ select option{background:var(--input-bg);color:var(--ink);}
           <label style="font-size:11px;color:var(--muted);">SP <input id="f-sp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
           <label style="font-size:11px;color:var(--muted);">CP <input id="f-cp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
         </div>
-        <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Item</th><th>Qty</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
+        <div class="tbl-scroll"><table class="tbl inv-tbl"><thead><tr><th>Item</th><th>Qty</th><th>Details</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
       </div>
 
       <!-- NOTES TAB -->
@@ -1145,17 +1150,44 @@ function addInvRow(it){
   if(ref) tr.dataset.ref = ref;
   tr.innerHTML =
     '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></td>' +
-    '<td><input type="number" class="inv-qty num mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" style="width:46px;" oninput="scheduleAutosave()"></td>' +
-    '<td class="roll-cell inv-actions"></td>';
+    '<td class="inv-qty-cell"><input type="number" class="inv-qty mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" oninput="scheduleAutosave()"></td>' +
+    '<td class="inv-detail"></td>' +
+    '<td class="inv-actions"></td>';
   $('inv-body').appendChild(tr);
   renderInvActions(tr);
+  renderInvDetail(tr);
   return tr;
 }
+// A compact read-out for the Details column: gold value + weapon damage/props,
+// armor AC, or magic rarity/attunement — pulled from the resolved catalog item.
+function invDetailHTML(tr){
+  const it = itemData(invRowRef(tr));
+  if(!it) return '';
+  const notes = [];
+  if(it.damage){                                   // weapon
+    notes.push(it.damage + (it.damageType ? ' ' + it.damageType : ''));
+    if(it.properties && it.properties.length) notes.push(it.properties.join(', '));
+    if(it.mastery) notes.push('Mastery: ' + it.mastery);
+  } else if(it.baseAC){                             // armor / shield
+    notes.push('AC ' + String(it.baseAC).replace(/\s*modifier/i, ''));
+    if(it.category && !/shield/i.test(it.category)) notes.push(it.category);
+    if(it.stealthDisadvantage) notes.push('Stealth Disadv.');
+  } else if(it.rarity){                             // magic item
+    if(it.type) notes.push(it.type);
+    notes.push(it.rarity + (it.attunement ? ' · Attunement' : ''));
+  } else if(it.category){                           // gear
+    notes.push(it.category);
+  }
+  const cost = it.cost ? '<span class="inv-cost">' + esc(it.cost) + '</span>' : '';
+  const note = notes.length ? '<span class="inv-notes">' + esc(notes.join(' · ')) + '</span>' : '';
+  return [cost, note].filter(Boolean).join(' ');
+}
+function renderInvDetail(tr){ const cell = tr.querySelector('.inv-detail'); if(cell) cell.innerHTML = invDetailHTML(tr); }
 function addInvFromData(name){ addInvRow({ name, qty:1 }); scheduleAutosave(); }
 function onInvNameChange(input){
   const tr = input.closest('tr');
   if(!tr.dataset.ref){ const ref = resolveItemRef(input.value); if(ref) tr.dataset.ref = ref; }
-  renderInvActions(tr); syncEquippedWeaponName(tr); scheduleAutosave();
+  renderInvActions(tr); renderInvDetail(tr); syncEquippedWeaponName(tr); scheduleAutosave();
 }
 function removeInvRow(btn){
   const tr = btn.closest('tr');
