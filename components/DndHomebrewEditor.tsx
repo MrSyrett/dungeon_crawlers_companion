@@ -62,7 +62,7 @@ const SCHOOLS = ["Abjuration", "Conjuration", "Divination", "Enchantment", "Evoc
 const SPELL_CLASSES = ["Bard", "Cleric", "Druid", "Paladin", "Ranger", "Sorcerer", "Warlock", "Wizard"] as const;
 const SIZES = ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"] as const;
 const FEAT_CATEGORIES = ["Origin", "General", "Fighting Style", "Epic Boon"] as const;
-const CASTER_TYPES = ["none", "full", "half", "third", "pact", "artificer"] as const;
+const BASE_CLASSES = ["Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Warlock", "Wizard"] as const;
 const MONSTER_GROUPS = ["Humanoids", "Beasts", "Monstrosities", "Undead", "Fiends", "Celestials", "Fey", "Dragons", "Giants", "Elementals", "Constructs", "Aberrations", "Oozes", "Plants"] as const;
 // Mechanical bonuses a magic item can grant (each maps to a real sheet effect).
 const ITEM_BONUS_OPTS: readonly Opt[] = [
@@ -203,35 +203,25 @@ const SCHEMAS: Record<string, Schema> = {
       };
     },
   },
-  "dnd-class": {
-    kind: "dnd-class",
-    title: "My Homebrew Classes",
-    noun: "Class",
-    fields: [],
-    Body: ClassBody,
-    summary: (d) => `d${s(d, "hitDie")} · ${arr(d, "primaryAbility").join("/") || "—"}${s(d, "spellcasting") !== "none" ? " · " + s(d, "spellcasting") : ""}`,
-    blank: () => ({
-      name: "", hitDie: "8", primaryAbility: [], savingThrows: [],
-      armor: [], weapons: [], tools: [], skillsChoose: "2", skillsFrom: [""],
-      startingEquipment: [""], spellcasting: "none", spellcastingAbility: "",
-      subclassLabel: "Subclass", subclassLevel: "3", flavor: "",
-      features: [{ name: "", level: "1", description: "" }], subclasses: [{ name: "", flavor: "" }],
-    }),
-    toForm: (d) => {
-      const p = (d.proficiencies ?? {}) as Record<string, unknown>;
-      const list = (v: unknown) => (Array.isArray(v) ? (v as string[]) : []);
-      return {
-        ...d,
-        hitDie: s(d, "hitDie") || "8",
-        primaryAbility: arr(d, "primaryAbility"), savingThrows: arr(d, "savingThrows"),
-        armor: list(p.armor), weapons: list(p.weapons), tools: list(p.tools),
-        skillsChoose: String((p.skillsChoose ?? d.skillsChoose ?? "2")), skillsFrom: list(p.skillsFrom ?? d.skillsFrom),
-        startingEquipment: arr(d, "startingEquipment"),
-        subclassLevel: s(d, "subclassLevel") || "3",
-        features: Array.isArray(d.features) ? (d.features as Data[]).map((f) => ({ ...f, level: String(f.level ?? "1") })) : [],
-        subclasses: Array.isArray(d.subclasses) ? (d.subclasses as Data[]) : [],
-      };
-    },
+  "dnd-subclass": {
+    kind: "dnd-subclass",
+    title: "My Homebrew Subclasses",
+    noun: "Subclass",
+    summary: (d) => { const n = Array.isArray(d.features) ? d.features.length : 0; return `${s(d, "className") || "—"} · ${n} feature${n === 1 ? "" : "s"}`; },
+    fields: [
+      { key: "name", label: "Subclass Name", type: "text", full: true, placeholder: "e.g. Path of Embers" },
+      { key: "className", label: "Base Class", type: "select", options: optsOf([...BASE_CLASSES]), empty: "— choose a class —" },
+      { key: "flavor", label: "Flavor", type: "textarea", full: true, placeholder: "A sentence or two on the subclass…" },
+      { key: "features", label: "Features (by level)", type: "objectList", full: true, addLabel: "+ Feature",
+        help: "The perks this subclass grants. Each applies automatically at its level on the character sheet — including per-rest trackers and any spells the text grants.",
+        fields: [
+          { key: "name", label: "Feature name", type: "text", placeholder: "e.g. Cinder Strike" },
+          { key: "level", label: "Level", type: "number", placeholder: "3" },
+          { key: "description", label: "Description", type: "textarea", full: true, placeholder: "What the feature does…" },
+        ] },
+    ],
+    blank: () => ({ name: "", className: "", flavor: "", features: [{ name: "", level: "3", description: "" }] }),
+    toForm: (d) => ({ ...d, features: Array.isArray(d.features) ? (d.features as Data[]).map((f) => ({ ...f, level: String(f.level ?? "3") })) : [] }),
   },
 };
 
@@ -629,40 +619,3 @@ function MonsterBody({ form, setForm }: BodyProps) {
   );
 }
 
-// ── Class: identity + proficiencies + key features + subclasses ──────────────
-function ClassBody({ form, setForm }: BodyProps) {
-  const set = (k: string, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
-  const f = (field: Field) => <FieldView key={field.key} field={field} value={form[field.key]} onChange={(v) => set(field.key, v)} />;
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {f({ key: "name", label: "Name", type: "text", full: true, placeholder: "Class name…" })}
-        {f({ key: "hitDie", label: "Hit Die", type: "select", options: optsOf(["6", "8", "10", "12"]) })}
-        {f({ key: "spellcasting", label: "Spellcasting", type: "select", options: optsOf([...CASTER_TYPES]) })}
-        {f({ key: "primaryAbility", label: "Primary Ability", type: "chips", options: [...ABILITIES], full: true })}
-        {f({ key: "savingThrows", label: "Saving Throw Proficiencies", type: "chips", options: [...ABILITIES], full: true })}
-        {f({ key: "spellcastingAbility", label: "Spellcasting Ability", type: "select", options: optsOf(["", ...ABILITIES]), empty: "— none —" })}
-        {f({ key: "subclassLabel", label: "Subclass Label", type: "text", placeholder: "e.g. Sacred Oath" })}
-        {f({ key: "subclassLevel", label: "Subclass Level", type: "number", placeholder: "3" })}
-      </div>
-      {f({ key: "flavor", label: "Flavor", type: "textarea", full: true, placeholder: "A sentence or two on the class…" })}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {f({ key: "armor", label: "Armor Proficiencies", type: "stringList", placeholder: "e.g. Light armor", addLabel: "+ Armor" })}
-        {f({ key: "weapons", label: "Weapon Proficiencies", type: "stringList", placeholder: "e.g. Simple weapons", addLabel: "+ Weapon" })}
-        {f({ key: "tools", label: "Tool Proficiencies", type: "stringList", placeholder: "e.g. Thieves' Tools", addLabel: "+ Tool" })}
-        {f({ key: "skillsFrom", label: "Skill Choices", type: "stringList", placeholder: "e.g. Athletics", addLabel: "+ Skill" })}
-        {f({ key: "skillsChoose", label: "Number of Skills", type: "number", placeholder: "2" })}
-        {f({ key: "startingEquipment", label: "Starting Equipment (options)", type: "stringList", full: true, placeholder: "An equipment package…", addLabel: "+ Option" })}
-      </div>
-      {f({ key: "features", label: "Key Features", type: "objectList", full: true, addLabel: "+ Feature", fields: [
-        { key: "name", label: "Feature name", type: "text", placeholder: "e.g. Second Wind" },
-        { key: "level", label: "Level", type: "number", placeholder: "1" },
-        { key: "description", label: "Description", type: "textarea", full: true, placeholder: "What the feature does…" },
-      ] })}
-      {f({ key: "subclasses", label: "Subclasses", type: "objectList", full: true, addLabel: "+ Subclass", fields: [
-        { key: "name", label: "Subclass name", type: "text", full: true, placeholder: "e.g. Path of Embers" },
-        { key: "flavor", label: "Flavor", type: "textarea", full: true, placeholder: "A sentence on the subclass…" },
-      ] })}
-    </div>
-  );
-}

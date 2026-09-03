@@ -17,7 +17,6 @@
   // Homebrew type → the window global its entries live in. Equipment is one
   // type whose rows carry an hbKind discriminator and fan out to four pools.
   var TARGETS = {
-    "dnd-class": "DND_CLASSES",
     "dnd-species": "DND_SPECIES",
     "dnd-background": "DND_BACKGROUNDS",
     "dnd-feat": "DND_FEATS",
@@ -65,6 +64,25 @@
           if (!pool) return;
           stripHb(pool);
           inject(pool, rows.filter(function (d) { return d && d.hbKind === kind; }));
+        });
+      }));
+    }
+
+    // dnd-subclass → nested into the matching base class's subclasses[] (by className).
+    var classPool = poolFor("DND_CLASSES");
+    if (classPool) {
+      jobs.push(pull("dnd-subclass").then(function (rows) {
+        classPool.forEach(function (c) {
+          if (!Array.isArray(c.subclasses)) return;
+          for (var i = c.subclasses.length - 1; i >= 0; i--) { if (c.subclasses[i] && c.subclasses[i].source === "Homebrew") c.subclasses.splice(i, 1); }
+        });
+        rows.forEach(function (sc) {
+          if (!sc || !sc.name || !sc.className) return;
+          var base = null;
+          for (var j = 0; j < classPool.length; j++) { if (String(classPool[j].name).toLowerCase() === String(sc.className).toLowerCase()) { base = classPool[j]; break; } }
+          if (!base) return;
+          if (!Array.isArray(base.subclasses)) base.subclasses = [];
+          base.subclasses.push(sc);
         });
       }));
     }

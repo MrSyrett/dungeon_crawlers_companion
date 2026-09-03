@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DND_CLASSES } from "@/lib/data/dnd-classes";
-import type { DndClass } from "@/lib/data/dnd-types";
+import type { DndClass, DndSubclass } from "@/lib/data/dnd-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DndHomebrewEditor from "@/components/DndHomebrewEditor";
 import { DndHeader, cardCls, badge, one, type RawQuery } from "@/components/DndRef";
@@ -16,23 +16,32 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
   const raw = await searchParams;
   const pick = one(raw.cls);
 
+  // Homebrew subclasses attach to an official base class by `className`.
   const [hbVisible, hbOwn, campaigns] = await Promise.all([
-    visibleHomebrew(user.id, { type: "dnd-class" }),
-    ownHomebrew(user.id, "dnd-class"),
+    visibleHomebrew(user.id, { type: "dnd-subclass" }),
+    ownHomebrew(user.id, "dnd-subclass"),
     userCampaigns(user.id),
   ]);
-  const hbClasses = hbVisible.map((h) => h.data as unknown as DndClass);
-  const allClasses = [...hbClasses, ...DND_CLASSES];
-  const selected = allClasses.find((c) => c.name === pick) ?? null;
+  const hbSubs = hbVisible.map((h) => h.data as unknown as DndSubclass & { className: string });
+  const subsByClass = new Map<string, DndSubclass[]>();
+  for (const sc of hbSubs) { const k = (sc.className || "").toLowerCase(); subsByClass.set(k, [...(subsByClass.get(k) ?? []), sc]); }
+  const withSubs = (c: DndClass): DndClass => {
+    const hb = subsByClass.get(c.name.toLowerCase());
+    return hb && hb.length ? { ...c, subclasses: [...hb, ...c.subclasses] } : c;
+  };
+  const classes = DND_CLASSES.map(withSubs);
+  const selected = classes.find((c) => c.name === pick) ?? null;
 
   if (!selected) {
     return (
       <div className="mx-auto w-full max-w-5xl px-5 py-10">
-        <DndHeader title="Classes" subtitle={`${DND_CLASSES.length} classes${hbClasses.length ? ` + ${hbClasses.length} homebrew` : ""} · levels 1–20`} />
-        <DndHomebrewEditor kind="dnd-class" campaigns={campaigns} initial={hbOwn} />
+        <DndHeader title="Classes" subtitle={`${DND_CLASSES.length} classes${hbSubs.length ? ` · +${hbSubs.length} homebrew subclass${hbSubs.length === 1 ? "" : "es"}` : ""} · levels 1–20`} />
+        <DndHomebrewEditor kind="dnd-subclass" campaigns={campaigns} initial={hbOwn} />
         <ul className="grid grid-cols-1 items-start gap-3 md:grid-cols-2">
-          {allClasses.map((c, i) => (
-            <li key={`${c.name}-${i}`} className={cardCls}>
+          {classes.map((c) => {
+            const hb = subsByClass.get(c.name.toLowerCase()) ?? [];
+            return (
+            <li key={c.name} className={cardCls}>
               <div className="flex items-start justify-between gap-2">
                 <a href={`${BASE}?cls=${encodeURIComponent(c.name)}`} className="text-base font-bold uppercase tracking-[0.12em] text-[#f0a37f] hover:underline">{c.name}</a>
                 <span className={badge}>{sourceLabel[c.source] ?? c.source}</span>
@@ -42,9 +51,9 @@ export default async function DndClassesPage({ searchParams }: { searchParams: P
                 <span className="font-semibold text-[var(--text)]">Hit Die:</span> d{c.hitDie} · <span className="font-semibold text-[var(--text)]">Primary:</span> {c.primaryAbility.join("/")} · <span className="font-semibold text-[var(--text)]">Saves:</span> {c.savingThrows.join(", ")}
                 {c.spellcasting !== "none" ? <> · <span className="font-semibold text-[var(--text)]">Caster:</span> {c.spellcasting}</> : null}
               </p>
-              <p className="mt-1 text-[11px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{c.subclassLabel}:</span> {c.subclasses.map((s) => s.name).join(", ")}</p>
+              <p className="mt-1 text-[11px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{c.subclassLabel}:</span> {c.subclasses.map((s) => s.name).join(", ")}{hb.length ? <span className="text-[#f0a37f]"> · +{hb.length} homebrew</span> : null}</p>
             </li>
-          ))}
+          );})}
         </ul>
       </div>
     );

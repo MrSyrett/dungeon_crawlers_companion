@@ -17,12 +17,12 @@ import {
 export type HbType =
   | "spell" | "gear" | "monster" | "class" | "ancestry" | "background"
   | "dcc-item" | "dcc-monster" | "dcc-skill" | "dcc-spell" | "dcc-class" | "dcc-race"
-  | "dnd-equipment" | "dnd-feat" | "dnd-background" | "dnd-spell" | "dnd-species" | "dnd-monster" | "dnd-class";
+  | "dnd-equipment" | "dnd-feat" | "dnd-background" | "dnd-spell" | "dnd-species" | "dnd-monster" | "dnd-subclass";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
   "dcc-item", "dcc-monster", "dcc-skill", "dcc-spell", "dcc-class", "dcc-race",
-  "dnd-equipment", "dnd-feat", "dnd-background", "dnd-spell", "dnd-species", "dnd-monster", "dnd-class",
+  "dnd-equipment", "dnd-feat", "dnd-background", "dnd-spell", "dnd-species", "dnd-monster", "dnd-subclass",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -805,8 +805,6 @@ export const DND_SCHOOLS = [
 export const DND_SPELL_CLASSES = ["Bard", "Cleric", "Druid", "Paladin", "Ranger", "Sorcerer", "Warlock", "Wizard"] as const;
 export const DND_SIZES = ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"] as const;
 export const DND_FEAT_CATEGORIES = ["Origin", "General", "Fighting Style", "Epic Boon"] as const;
-export const DND_CASTER_TYPES = ["none", "full", "half", "third", "pact", "artificer"] as const;
-export const DND_HIT_DICE = [6, 8, 10, 12] as const;
 export const DND_MONSTER_GROUPS = [
   "Humanoids", "Beasts", "Monstrosities", "Undead", "Fiends", "Celestials", "Fey",
   "Dragons", "Giants", "Elementals", "Constructs", "Aberrations", "Oozes", "Plants",
@@ -1043,72 +1041,40 @@ function normalizeDndMonster(input: unknown): { name: string; data: Record<strin
   return { name, data };
 }
 
-// ── Class (DndClass) ─────────────────────────────────────────────────────────
-// A homebrew class captures the essentials the reference page + creation wizard
-// read. A full 1–20 table is generated here (Proficiency Bonus by level, key
-// features placed at their level) so the page renders like a book class.
-function normalizeDndClass(input: unknown): { name: string; data: Record<string, unknown> } {
+// ── Subclass (DndSubclass) ───────────────────────────────────────────────────
+// A homebrew subclass attaches to an official base class and carries its perks
+// as per-level features. On the sheet these merge into the base class's
+// subclasses[] and auto-apply at their level like any book subclass feature
+// (feature list, per-rest trackers, granted spells). The `subclass` field on
+// each feature marks it as a subclass feature (base features use !subclass).
+function normalizeDndSubclass(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 120);
-  if (!name) throw new Error("A homebrew class needs a name.");
-  const hitDie = oneOf(String(num(o.hitDie) ?? 8), ["6", "8", "10", "12"] as const, "8");
-  const spellcasting = oneOf(o.spellcasting, DND_CASTER_TYPES, "none");
+  if (!name) throw new Error("A homebrew subclass needs a name.");
+  const className = str(o.className).slice(0, 120);
+  if (!className) throw new Error("Choose the base class this subclass belongs to.");
 
-  // Key features [{name, level, description}] → DndClassFeature[] + table rows.
-  const rawFeatures = Array.isArray(o.features) ? (o.features as unknown[]) : [];
-  const features = rawFeatures
+  const features = (Array.isArray(o.features) ? (o.features as unknown[]) : [])
     .map((f) => {
       const r = (f ?? {}) as Record<string, unknown>;
       const lvl = num(r.level);
       return {
         name: str(r.name).slice(0, 120),
-        level: lvl != null && lvl >= 1 && lvl <= 20 ? lvl : 1,
+        level: lvl != null && lvl >= 1 && lvl <= 20 ? lvl : 3,
+        subclass: name,
         description: str(r.description).slice(0, 4000),
         source: "Homebrew" as const,
       };
     })
     .filter((f) => f.name)
-    .slice(0, 60);
-
-  const pbFor = (lvl: number) => 2 + Math.floor((lvl - 1) / 4);
-  const table = Array.from({ length: 20 }, (_, i) => {
-    const level = i + 1;
-    return {
-      level,
-      profBonus: pbFor(level),
-      features: features.filter((f) => f.level === level).map((f) => f.name),
-    };
-  });
-
-  const subclasses = (Array.isArray(o.subclasses) ? (o.subclasses as unknown[]) : [])
-    .map((s) => {
-      const r = (s ?? {}) as Record<string, unknown>;
-      return { name: str(r.name).slice(0, 120), className: name, flavor: str(r.flavor).slice(0, 2000), features: [], source: "Homebrew" as const };
-    })
-    .filter((s) => s.name)
-    .slice(0, 12);
+    .sort((a, b) => a.level - b.level)
+    .slice(0, 40);
 
   return { name, data: {
     name,
-    primaryAbility: pickList(o.primaryAbility, DND_ABILITIES),
-    hitDie: parseInt(hitDie, 10),
-    savingThrows: pickList(o.savingThrows, DND_ABILITIES),
-    proficiencies: {
-      armor: strList((o.proficiencies as Record<string, unknown> | undefined)?.armor ?? o.armor, 8, 60),
-      weapons: strList((o.proficiencies as Record<string, unknown> | undefined)?.weapons ?? o.weapons, 12, 60),
-      tools: strList((o.proficiencies as Record<string, unknown> | undefined)?.tools ?? o.tools, 12, 60),
-      skillsChoose: num(o.skillsChoose) ?? 2,
-      skillsFrom: strList(o.skillsFrom, 20, 40),
-    },
-    startingEquipment: strList(o.startingEquipment, 12, 300),
-    spellcasting,
-    spellcastingAbility: oneOf(o.spellcastingAbility, ["", ...DND_ABILITIES] as const, "") || undefined,
-    table,
-    features,
-    subclasses,
-    subclassLevel: num(o.subclassLevel) ?? 3,
-    subclassLabel: str(o.subclassLabel).slice(0, 60) || "Subclass",
+    className,
     flavor: str(o.flavor).slice(0, 2000),
+    features,
     source: "Homebrew",
   } };
 }
@@ -1133,7 +1099,7 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "dnd-spell": return normalizeDndSpell(data);
     case "dnd-species": return normalizeDndSpecies(data);
     case "dnd-monster": return normalizeDndMonster(data);
-    case "dnd-class": return normalizeDndClass(data);
+    case "dnd-subclass": return normalizeDndSubclass(data);
   }
 }
 

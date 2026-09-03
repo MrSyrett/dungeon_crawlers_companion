@@ -21,7 +21,7 @@ const EFFECT_SPELLS = Array.from(new Set(SPELLS.map((s) => s.name))).sort((a, b)
 type HbType =
   | "spell" | "gear" | "monster" | "class" | "ancestry" | "background"
   | "dcc-item" | "dcc-monster" | "dcc-skill" | "dcc-spell" | "dcc-class" | "dcc-race"
-  | "dnd-equipment" | "dnd-feat" | "dnd-background" | "dnd-spell" | "dnd-species" | "dnd-monster" | "dnd-class";
+  | "dnd-equipment" | "dnd-feat" | "dnd-background" | "dnd-spell" | "dnd-species" | "dnd-monster" | "dnd-subclass";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {
   id: string;
