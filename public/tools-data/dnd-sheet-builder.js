@@ -39,7 +39,7 @@
     const ref = canonRef(t);
     return ref ? { name: ref, ref } : { name: t, ref: "" };
   }
-  const STEPS = ["Class","Subclass","Species","Background","Abilities","Skills","Choices","Spells","Equipment","Review"];
+  const STEPS = ["Class","Subclass","Species","Background","Abilities","Skills","Choices","Advancement","Spells","Equipment","Review"];
   // Level-1 (and level-gated) class decisions the builder can offer from data.
   const CLASS_CHOICES = {
     Fighter: [{ kind:"style", level:1 }],
@@ -61,7 +61,7 @@
              method:"array", base:{ STR:8,DEX:8,CON:8,INT:8,WIS:8,CHA:8 }, arrayPick:{},
              bg2:"", bg1:"", classSkills:[], multiclass:[],
              name:"", alignment:"",
-             fightingStyle:"", expertise:[], orders:{},
+             fightingStyle:"", expertise:[], orders:{}, advances:[],
              pickedCantrips:[], pickedSpells:[], equipChoice:"gear" };
   }
   function clsData() { return D.classes().find((c) => c.name === st.cls) || null; }
@@ -72,6 +72,14 @@
   function primaryLevel() { return Math.max(1, (num(st.level) || 1) - secondaryTotal()); }
   function classBreakdown() { return [{ cls: st.cls, subclass: st.subclass, level: primaryLevel() }].concat((st.multiclass || []).map((m) => ({ cls: m.cls, subclass: "", level: num(m.level) }))); }
   function num(v) { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; }
+  // Hit-dice pool string from the class breakdown, e.g. Fighter3/Wizard2 → "3d10 + 2d6".
+  function hitDiceString() {
+    const byDie = {};
+    classBreakdown().forEach((cl) => { const cc = D.classes().find((x) => x.name === cl.cls); const hd = cc ? cc.hitDie : 8; byDie[hd] = (byDie[hd] || 0) + num(cl.level); });
+    return Object.keys(byDie).map(Number).sort((a,b) => b-a).map((d) => byDie[d] + "d" + d).join(" + ");
+  }
+  // Number of ASI/feat choices earned by this build's levels (B1), summed per class.
+  function asiSlots() { let n = 0; classBreakdown().forEach((cl) => { n += window.DNDCALC.asiLevelsUpTo(cl.cls, cl.level).length; }); return n; }
 
   // ── casting helpers ────────────────────────────────────────────────────
   function isCaster() { const c = clsData(); return !!(c && c.spellcasting && c.spellcasting !== "none"); }
@@ -120,6 +128,7 @@
   function stepSkipped(name) {
     if (name === "Subclass") return !hasSubclass();
     if (name === "Choices") return classChoices().length === 0;
+    if (name === "Advancement") return asiSlots() === 0;
     if (name === "Spells") return !isCaster();
     return false;
   }
@@ -142,7 +151,7 @@
     $("dndb-step").textContent = stepLabel();
     $("dndb-back").style.visibility = step === 0 ? "hidden" : "visible";
     $("dndb-next").textContent = STEPS[step] === "Review" ? "Build character ✓" : "Next →";
-    const fn = { Class:rClass, Subclass:rSubclass, Species:rSpecies, Background:rBackground, Abilities:rAbilities, Skills:rSkills, Choices:rChoices, Spells:rSpells, Equipment:rEquipment, Review:rReview }[STEPS[step]];
+    const fn = { Class:rClass, Subclass:rSubclass, Species:rSpecies, Background:rBackground, Abilities:rAbilities, Skills:rSkills, Choices:rChoices, Advancement:rAdvancement, Spells:rSpells, Equipment:rEquipment, Review:rReview }[STEPS[step]];
     $("dndb-body").innerHTML = fn();
     $("dndb-body").scrollTop = 0;
     wire();
@@ -320,6 +329,32 @@
     });
     return h;
   }
+  // B1: characters built above level 1 allocate the ASIs / feats their levels earned.
+  function rAdvancement() {
+    const n = asiSlots();
+    while (st.advances.length < n) st.advances.push({ mode:"asi", asi:{}, feat:"" });
+    st.advances.length = n;
+    const base = finalScores();
+    let h = '<p class="m-hint">Your levels grant <b>' + n + '</b> Ability Score Improvement' + (n>1?"s":"") + ' (each can be a feat instead). Allocate them below.</p>';
+    st.advances.forEach((av, i) => {
+      h += '<div style="border:1px solid #443c38;border-radius:6px;padding:8px 10px;margin-bottom:8px;">';
+      h += '<span class="m-lbl">Improvement ' + (i+1) + '</span>';
+      h += '<div class="dndb-seg" style="margin:4px 0 8px;"><button class="dndb-seg-btn' + (av.mode!=="feat"?" on":"") + '" data-advmode="asi" data-i="' + i + '">Ability Scores</button><button class="dndb-seg-btn' + (av.mode==="feat"?" on":"") + '" data-advmode="feat" data-i="' + i + '">Feat</button></div>';
+      if (av.mode === "feat") {
+        h += '<select class="m-input dndb-adv-feat" data-i="' + i + '"><option value="">Select a feat…</option>' +
+          D.feats().filter((f) => (f.category||"") !== "Fighting Style").slice().sort((a,b)=>a.name.localeCompare(b.name)).map((f) => '<option value="' + esc(f.name) + '"' + (av.feat===f.name?" selected":"") + '>' + esc(f.name) + " — " + esc(f.category) + '</option>').join("") + '</select>';
+        const f = D.feats().find((x) => x.name === av.feat);
+        if (f) h += '<div class="dndb-note">' + esc((f.benefits||[]).join(" ") || "") + '</div>';
+      } else {
+        const total = ABIL.reduce((s,a) => s + (av.asi[a]||0), 0);
+        h += '<p class="m-hint" style="margin:0 0 6px;">+2 to one score, or +1 to two (max 20). <b style="color:#8ad4ff;">' + total + '/2</b></p><div class="dndb-abil-rows">';
+        ABIL.forEach((a) => { const add = av.asi[a]||0; h += '<div class="dndb-abil-row"><span class="dar-name">' + ABIL_NAME[a] + ' <small style="color:#a99e90;">' + base[a] + (add?" +"+add:"") + '</small></span><button class="dndb-pm" data-advasi="' + a + '" data-i="' + i + '" data-d="-1">−</button><span class="dar-val">' + add + '</span><button class="dndb-pm" data-advasi="' + a + '" data-i="' + i + '" data-d="1">+</button></div>'; });
+        h += "</div>";
+      }
+      h += "</div>";
+    });
+    return h;
+  }
   function rSpells() {
     if (!isCaster()) return '<p class="m-hint">This class doesn\'t cast spells at this level.</p>';
     const cCount = cantripCount(), sCount = preparedCount(), maxL = maxSpellLevel();
@@ -338,21 +373,10 @@
     }
     return h;
   }
-  function shortCT(ct){ ct = String(ct || ""); if(/bonus/i.test(ct)) return "Bonus"; if(/reaction/i.test(ct)) return "Reaction"; if(/^\s*action\s*$/i.test(ct)) return "Action"; return ct; }
-  function spellDmg(s){ const m = String(s.description || "").match(/(\d+d\d+)\s+([A-Za-z]+)\s+damage/i); return m ? (m[1] + " " + m[2].toLowerCase()) : ""; }
+  // Card markup is shared with the level-up wizard (window.DNDCALC).
   function spellCard(s, kind, max) {
     const arr = kind === "cantrip" ? st.pickedCantrips : st.pickedSpells;
-    const on = arr.includes(s.name);
-    const tags = [s.level === 0 ? "Cantrip" : "Lvl " + s.level, s.school, shortCT(s.castingTime), s.range];
-    if (s.duration && !/instant/i.test(s.duration)) tags.push(s.duration);
-    const dmg = spellDmg(s); if (dmg) tags.push(dmg);
-    if (s.concentration) tags.push("Conc.");
-    if (s.ritual) tags.push("Ritual");
-    return '<div class="dndb-card small spellpick' + (on ? " on" : "") + '" data-spell="' + esc(s.name) + '" data-kind="' + kind + '" data-max="' + max + '">' +
-      '<div class="sp-pick-hd"><span class="dc-title">' + esc(s.name) + '</span><button class="sp-pick-i" data-info="' + esc(s.name) + '" title="Show details">&#9432;</button></div>' +
-      '<div class="dc-sub">' + esc(tags.join(" · ")) + '</div>' +
-      '<div class="sp-pick-desc" hidden>' + esc(s.description || "") + (s.higherLevels ? '<br><b>At Higher Levels.</b> ' + esc(s.higherLevels) : "") + '</div>' +
-    '</div>';
+    return window.DNDCALC.spellCard(s, kind, max, arr.includes(s.name));
   }
   function rEquipment() {
     const c = clsData();
@@ -383,6 +407,10 @@
     if (st.fightingStyle) h += '<div class="dr-line">Fighting Style: <b>' + esc(st.fightingStyle) + '</b></div>';
     Object.keys(st.orders || {}).forEach((k) => { if (st.orders[k]) h += '<div class="dr-line">' + esc(k) + ': <b>' + esc(st.orders[k]) + '</b></div>'; });
     if (b) h += '<div class="dr-line">Origin feat: <b>' + esc(b.feat) + '</b></div>';
+    if (st.advances && st.advances.length) {
+      const advTxt = st.advances.map((av) => av.mode === "feat" ? (av.feat || "—") : ("ASI " + ABIL.filter((a)=>av.asi[a]).map((a)=>a+" +"+av.asi[a]).join(" ")) ).filter(Boolean).join(" · ");
+      if (advTxt) h += '<div class="dr-line">Advancement: <b>' + esc(advTxt) + '</b></div>';
+    }
     if (isCaster()) {
       const spells = st.pickedCantrips.concat(st.pickedSpells);
       h += '<div class="dr-line">Spells: <b>' + esc(spells.join(", ") || "none chosen") + '</b></div>';
@@ -429,6 +457,17 @@
       render();
     }));
     body.querySelectorAll("[data-order]").forEach((el) => el.addEventListener("click", () => { st.orders = st.orders || {}; st.orders[el.dataset.order] = el.dataset.opt; render(); }));
+    // Advancement (B1): ASI/feat mode toggle, ASI +/- (2-pt budget, cap 20), feat pick
+    body.querySelectorAll("[data-advmode]").forEach((el) => el.addEventListener("click", () => { const i = num(el.dataset.i); st.advances[i].mode = el.dataset.advmode; if (el.dataset.advmode === "asi") st.advances[i].feat = ""; else st.advances[i].asi = {}; render(); }));
+    body.querySelectorAll("[data-advasi]").forEach((el) => el.addEventListener("click", () => {
+      const i = num(el.dataset.i), a = el.dataset.advasi, d = num(el.dataset.d), av = st.advances[i];
+      const cur = av.asi[a]||0, total = ABIL.reduce((s,x)=>s+(av.asi[x]||0),0), base = finalScores()[a], nv = cur + d;
+      if (nv < 0 || nv > 2) return;
+      if (d > 0 && total >= 2) return;
+      if (d > 0 && base + nv > 20) return;
+      av.asi[a] = nv; if (!nv) delete av.asi[a]; render();
+    }));
+    body.querySelectorAll(".dndb-adv-feat").forEach((el) => el.addEventListener("change", () => { st.advances[num(el.dataset.i)].feat = el.value; render(); }));
     // spells: ⓘ toggles the inline description without selecting the card
     body.querySelectorAll("[data-info]").forEach((el) => el.addEventListener("click", (e) => { e.stopPropagation(); const c = el.closest("[data-spell]"); const d = c && c.querySelector(".sp-pick-desc"); if(d) d.hidden = !d.hidden; }));
     body.querySelectorAll("[data-spell]").forEach((el) => el.addEventListener("click", () => {
@@ -478,6 +517,11 @@
         }
         return true;
       }
+      case "Advancement": {
+        const n = asiSlots();
+        for (let i = 0; i < n; i++) { const av = st.advances[i] || {}; if (av.mode === "feat") { if (!av.feat) return false; } else { if (ABIL.reduce((s,a)=>s+((av.asi||{})[a]||0),0) !== 2) return false; } }
+        return true;
+      }
       case "Spells": {
         if (!isCaster()) return true;
         if (st.pickedCantrips.length < cantripCount()) return false;
@@ -496,18 +540,32 @@
     if (b) (b.skillProficiencies || []).forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 1; });
     st.classSkills.forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 1; });
     st.expertise.forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 2; });
-    // HP: very first level = max die; every level after = its own class's average.
+    // ── feats: background origin feat + fighting style + advancement (B1) ──
+    const addedFeats = [];
+    if (b && b.feat) addedFeats.push(b.feat);
+    if (st.fightingStyle) addedFeats.push(st.fightingStyle);
+    (st.advances || []).forEach((av) => { if (av.mode === "feat" && av.feat) addedFeats.push(av.feat); });
+    // Advancement ASIs (B1) then feat ability increases (B4) — applied to scores
+    // BEFORE HP/AC so their Con/Dex changes count.
+    (st.advances || []).forEach((av) => { if (av.mode !== "feat" && av.asi) ABIL.forEach((a) => { if (av.asi[a]) sc[a] = Math.min(20, (sc[a] || 10) + av.asi[a]); }); });
+    let featHP = 0;
+    addedFeats.forEach((fn) => { const fe = window.DNDCALC.featEffects(fn, num(st.level)); featHP += fe.hpBonus; ABIL.forEach((a) => { if (fe.abil[a]) sc[a] = Math.min(20, (sc[a] || 10) + fe.abil[a]); }); });
+    // HP: very first level = max die; every level after = its own class's average. (+ feat HP, e.g. Tough)
     let hp = 0; const conMod = mod(sc.CON); let firstLvl = true;
     classBreakdown().forEach((cl) => { const cc = D.classes().find((x) => x.name === cl.cls); const hd = cc ? cc.hitDie : 8; for (let L=1; L<=cl.level; L++){ hp += (firstLvl ? hd : Math.floor(hd/2)+1) + conMod; firstLvl = false; } });
-    hp = Math.max(1, hp);
+    hp = Math.max(1, hp + featHP);
     const speed = sp ? sp.speed : 30;
     const ac = 10 + mod(sc.DEX);
     // proficiency text
     const profBits = [];
     if (c && c.proficiencies) { ["armor","weapons","tools"].forEach((k) => { if (c.proficiencies[k] && c.proficiencies[k].length) profBits.push(c.proficiencies[k].join(", ")); }); }
     if (b && b.toolProficiencies && b.toolProficiencies.length) profBits.push(b.toolProficiencies.join(", "));
-    // order grants (extra weapon/armor training)
+    // B3: multiclass secondary classes contribute their armor/weapon proficiencies.
+    (st.multiclass || []).forEach((m) => { const mc = D.classes().find((x) => x.name === m.cls); if (mc && mc.proficiencies) ["armor","weapons"].forEach((k) => { if (mc.proficiencies[k] && mc.proficiencies[k].length) profBits.push(m.cls + ": " + mc.proficiencies[k].join(", ")); }); });
+    // Species + lineage traits (B2) are populated by the sheet's autoFeatures()
+    // from the saved species/lineage, so the builder doesn't duplicate them here.
     const customFeatures = [];
+    // order grants (extra weapon/armor training)
     classChoices().forEach((ch) => {
       if (ch.kind === "pick") {
         const opt = (ch.options || []).find((o) => o.name === (st.orders || {})[ch.name]);
@@ -531,10 +589,6 @@
     // spells
     const spellsKnown = st.pickedCantrips.map((n) => ({ name:n, prepared:true }))
       .concat(st.pickedSpells.map((n) => ({ name:n, prepared:true })));
-    // feats
-    const addedFeats = [];
-    if (b && b.feat) addedFeats.push(b.feat);
-    if (st.fightingStyle) addedFeats.push(st.fightingStyle);
     const spellcasts = isCaster();
     const data = {
       system:"DND", v:1, name: st.name, cls: st.cls, level: st.level, subclass: st.subclass,
@@ -542,7 +596,7 @@
       species: st.species, background: st.background, alignment: st.alignment,
       scores: sc, saveProf, skillProf,
       speed: String(speed), ac: String(ac), hpCur: hp, hpMax: hp, hpTemp:0,
-      hitdice: st.level + "d" + (c ? c.hitDie : 8),
+      hitdice: hitDiceString(),
       attacks: [], inventory: inv, gp: gp, sp:0, cp:0,
       proficiencies: profBits.join(" · "), notes:"",
       customFeatures, addedFeats, spellsKnown, slotUsed:{},

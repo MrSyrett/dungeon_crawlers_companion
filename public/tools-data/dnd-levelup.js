@@ -12,9 +12,8 @@
   const norm = (s) => String(s == null ? "" : s).trim().toLowerCase();
   const ABIL = ["STR","DEX","CON","INT","WIS","CHA"];
   const ABIL_NAME = { STR:"Strength", DEX:"Dexterity", CON:"Constitution", INT:"Intelligence", WIS:"Wisdom", CHA:"Charisma" };
-  // ASI/feat is granted at these class levels (2024).
-  const ASI_LEVELS = { Fighter:[4,6,8,12,14,16,19], Rogue:[4,8,10,12,16,19] };
-  const ASI_DEFAULT = [4,8,12,16,19];
+  // Shared caster/spell/ASI math (window.DNDCALC, loaded before this script).
+  const RULES = () => window.DNDCALC || {};
 
   const D = {
     classes: () => window.DND_CLASSES || [], feats: () => window.DND_FEATS || [],
@@ -31,21 +30,18 @@
   }
   const totalOf = (arr) => arr.reduce((s,c) => s + num(c.level), 0);
   const summaryOf = (arr) => arr.map((c) => c.cls + " " + c.level).join(" / ");
-
-  // ── class-table helpers ────────────────────────────────────────────────
-  function colAt(c, level, col){ const row = (c.table||[]).find((r) => Number(r.level) === Number(level)); if(!row || !row.columns) return 0; const n = parseInt(row.columns[col],10); return isNaN(n) ? 0 : n; }
-  function cantripsAt(c, level){ if(level < 1) return 0; const row = (c.table||[]).find((r) => Number(r.level) === Number(level)); return Math.max(colAt(c,level,"Cantrips"), row && row.cantripsKnown != null ? Number(row.cantripsKnown) : 0); }
-  function preparedAt(c, level){ if(level < 1) return 0; return colAt(c,level,"Prepared Spells") || colAt(c,level,"Spells Known"); }
-  function grantsASI(cls, newLevel){ return (ASI_LEVELS[cls] || ASI_DEFAULT).includes(newLevel); }
-  function maxSpellLvl(c, level){
-    const T = D.tables(), sc = c.spellcasting;
-    if(sc === "pact"){ const r = (T.pactMagic||[])[level-1]; return r ? r.level : 1; }
-    const map = { full:"fullCasterSlots", half:"halfCasterSlots", third:"thirdCasterSlots", artificer:"artificerSlots" };
-    const arr = (T[map[sc]]||[])[level-1] || []; let m = 0; arr.forEach((n,i) => { if(n > 0) m = i+1; });
-    if(m < 1 && preparedAt(c, level) > 0) m = 1;
-    return m;
+  // Hit-dice pool string from a class breakdown, grouped by die size (C1).
+  function hitDiceStr(classLevels){
+    const byDie = {};
+    (classLevels||[]).forEach((cl) => { const c = classByName(cl.cls); const die = c ? c.hitDie : 8; byDie[die] = (byDie[die]||0) + num(cl.level); });
+    return Object.keys(byDie).map(Number).sort((a,b)=>b-a).map((d)=>byDie[d]+"d"+d).join(" + ");
   }
-  function isCasterClass(c){ return !!(c && c.spellcasting && c.spellcasting !== "none"); }
+
+  // ── class-table helpers (delegated to the shared module) ────────────────
+  const cantripsAt = (c, level) => RULES().cantripsAt(c, level);
+  const preparedAt = (c, level) => RULES().preparedAt(c, level);
+  const grantsASI = (cls, newLevel) => RULES().grantsASI(cls, newLevel);
+  const isCasterClass = (c) => RULES().isCasterClass(c);
   function knownSpellSet(){ try { return new Set((window.getSpellsKnown ? window.getSpellsKnown() : []).map((s) => norm(s.name))); } catch(e){ return new Set(); } }
 
   // Build the context for the chosen class: what this level grants.
@@ -60,7 +56,12 @@
     const needSub = !!(c && !sub && newLevel >= (c.subclassLevel || 3) && (c.subclasses||[]).length);
     const newCantrips = isCasterClass(c) ? Math.max(0, cantripsAt(c,newLevel) - cantripsAt(c,newLevel-1)) : 0;
     const newSpells = isCasterClass(c) ? Math.max(0, preparedAt(c,newLevel) - preparedAt(c,newLevel-1)) : 0;
-    const maxSL = isCasterClass(c) ? maxSpellLvl(c,newLevel) : 0;
+    // Max spell level uses the COMBINED multiclass caster level after this level (C2),
+    // so a multiclass caster is offered spells up to the level their slots allow.
+    const projected = cur.map((x) => ({ cls:x.cls, level:x.level }));
+    const pe = projected.find((x) => norm(x.cls) === norm(lu.targetCls));
+    if(pe) pe.level += 1; else projected.push({ cls: lu.targetCls, level: 1 });
+    const maxSL = isCasterClass(c) ? RULES().maxSpellLevelMulti(projected) : 0;
     return { c, isNew, newLevel, hitDie, needSub, asi: grantsASI(lu.targetCls, newLevel), newCantrips, newSpells, maxSL };
   }
   function computeSteps(){
@@ -192,19 +193,10 @@
     }
     return h;
   }
-  function shortCT(ct){ ct = String(ct || ""); if(/bonus/i.test(ct)) return "Bonus"; if(/reaction/i.test(ct)) return "Reaction"; if(/^\s*action\s*$/i.test(ct)) return "Action"; return ct; }
-  function spellDmg(s){ const m = String(s.description || "").match(/(\d+d\d+)\s+([A-Za-z]+)\s+damage/i); return m ? (m[1] + " " + m[2].toLowerCase()) : ""; }
+  // Card markup is shared with the builder (DNDCALC); `on` = already picked here.
   function spellCard(s, kind, max){
-    const arr = kind==="cantrip"?lu.pickedCantrips:lu.pickedSpells; const on = arr.includes(s.name);
-    const tags = [s.level===0?"Cantrip":"Lvl "+s.level, s.school, shortCT(s.castingTime), s.range];
-    if(s.duration && !/instant/i.test(s.duration)) tags.push(s.duration);
-    const dmg = spellDmg(s); if(dmg) tags.push(dmg);
-    if(s.concentration) tags.push("Conc."); if(s.ritual) tags.push("Ritual");
-    return '<div class="dndb-card small spellpick' + (on?" on":"") + '" data-spell="' + esc(s.name) + '" data-kind="' + kind + '" data-max="' + max + '">' +
-      '<div class="sp-pick-hd"><span class="dc-title">' + esc(s.name) + '</span><button class="sp-pick-i" data-info="' + esc(s.name) + '" title="Show details">&#9432;</button></div>' +
-      '<div class="dc-sub">' + esc(tags.join(" · ")) + '</div>' +
-      '<div class="sp-pick-desc" hidden>' + esc(s.description || "") + (s.higherLevels ? '<br><b>At Higher Levels.</b> ' + esc(s.higherLevels) : "") + '</div>' +
-    '</div>';
+    const arr = kind === "cantrip" ? lu.pickedCantrips : lu.pickedSpells;
+    return RULES().spellCard(s, kind, max, arr.includes(s.name));
   }
   function rReview(){
     const cur = curClasses();
@@ -270,10 +262,18 @@
     const hpMax = $("f-hp-max"), hpCur = $("f-hp-cur");
     hpMax.value = num(hpMax.value) + gain; hpCur.value = num(hpCur.value) + gain;
     const hd = $("f-hd-left"); if(hd) hd.value = num(hd.value) + 1;
+    // C1: rebuild the hit-dice pool string from the class breakdown (e.g. 3d10 + 2d6).
+    const hdField = $("f-hitdice"); if(hdField) hdField.value = hitDiceStr(cur);
     // ASI / feat
     if(ctx.asi){
       if(lu.asiMode === "asi"){ ABIL.forEach((a) => { if(lu.asi[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + lu.asi[a]); } }); }
-      else if(lu.feat && window.addFeatByName){ window.addFeatByName(lu.feat); }
+      else if(lu.feat && window.addFeatByName){
+        window.addFeatByName(lu.feat);
+        // C4: apply the feat's structured effects (Tough HP, a single named +1) to the live sheet.
+        const fe = RULES().featEffects(lu.feat, totalOf(cur));
+        if(fe.hpBonus){ hpMax.value = num(hpMax.value) + fe.hpBonus; hpCur.value = num(hpCur.value) + fe.hpBonus; }
+        ABIL.forEach((a) => { if(fe.abil[a]){ const el = $("sc-" + a); if(el) el.value = Math.min(20, (num(el.value)||10) + fe.abil[a]); } });
+      }
     }
     // spells
     lu.pickedCantrips.concat(lu.pickedSpells).forEach((n) => { if(window.addSpellByName) window.addSpellByName(n); });

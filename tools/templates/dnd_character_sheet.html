@@ -252,9 +252,21 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .equip-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;margin-right:5px;}
 .equip-btn:hover{border-color:var(--green);color:var(--ink);}
 .equip-btn.on{background:var(--green);color:#fff;border-color:var(--green);}
+.attune-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;margin-right:5px;}
+.attune-btn:hover{border-color:#5a9bd4;color:var(--ink);}
+.attune-btn.on{background:#5a9bd4;color:#fff;border-color:#5a9bd4;}
+.attune-count-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:8px;}
+.attune-count-lbl b{color:var(--ink);}
 .row-i{background:transparent;border:none;color:#5a9bd4;cursor:pointer;font-size:14px;padding:0 4px;line-height:1;}
 .row-i:hover{color:var(--dnd);}
 .cbt input.auto{color:var(--dnd-dk);}
+.conc-bar{display:flex;align-items:center;gap:8px;margin:0 0 6px;padding:4px 10px;background:rgba(90,155,212,.12);border:1px solid #5a9bd4;border-radius:4px;}
+.conc-bar .conc-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#5a9bd4;}
+.conc-bar .conc-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--ink);}
+.conc-bar .conc-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;}
+.conc-bar .conc-x:hover{color:var(--red);}
+.cast-lvls{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.cast-lvl-btn{flex:1 1 30%;}
 .inv-actions{white-space:nowrap;text-align:right;width:1%;}
 .inv-qty-cell{width:44px;}
 .tbl .inv-qty{width:36px;text-align:center;}
@@ -316,6 +328,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .sp-x:hover{color:var(--red);}
 .cast-btn{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
 .cast-btn:hover{background:var(--dnd-dk);}
+.upcast-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd);border-radius:3px;padding:3px 6px;font-size:11px;line-height:1;cursor:pointer;margin-left:3px;}
+.upcast-btn:hover{background:var(--dnd);color:#fff;}
 
 /* DARK */
 body.dark{--bg:#141417;--paper:#1e1e22;--ink:#e9e7e3;--muted:#9b988f;--rule:#3a3a41;--border:#44444d;--section-hdr:#0d0d10;--box:#28282e;--input-bg:#171719;--input-border:#44444d;--dnd-lt:#352a2d;--dnd-dk:#ea8f7d;}
@@ -526,7 +540,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
         <div class="skills-col">
           <div class="sc-skills">
-            <div class="section-bar red"><span>Skills</span><span class="sb-note">Passive Perception <b id="d-pp">10</b></span></div>
+            <div class="section-bar red"><span>Skills</span><span class="sb-note">Passive · Perc <b id="d-pp">10</b> · Invest <b id="d-pinv">10</b> · Insight <b id="d-pins">10</b></span></div>
             <div class="skills-wrap" id="skills-list"></div>
           </div>
 
@@ -591,6 +605,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <div class="mc-attacks">
       <div class="section-bar"><span>Attacks</span></div>
+      <div id="conc-bar" class="conc-bar" style="display:none;"></div>
       <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div>
       <div class="add-hint">Equip a weapon in the Equipment tab to fill this list. Cast spells from the Spells tab.</div>
       </div><!-- mc-attacks -->
@@ -612,6 +627,7 @@ select option{background:var(--input-bg);color:var(--ink);}
             <div class="sh-box"><div class="sh-lbl">Spell Ability</div><div class="sh-val" id="sp-ability">—</div></div>
             <div class="sh-box click" onclick="rollSpellAttack()" title="Roll a spell attack"><div class="sh-lbl">Spell Attack</div><div class="sh-val click" id="sp-atk">+0</div></div>
             <div class="sh-box"><div class="sh-lbl">Save DC</div><div class="sh-val" id="sp-dc">8</div></div>
+            <div class="sh-box" id="sp-prep-box" style="display:none;" title="Spells prepared vs your maximum (spellcasting-class Prepared Spells)"><div class="sh-lbl">Prepared</div><div class="sh-val" id="sp-prep-val">0/0</div></div>
           </div>
           <div id="spell-slots"></div>
           <div id="spells-by-level"></div>
@@ -632,7 +648,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <!-- EQUIPMENT TAB -->
       <div class="tab-panel" id="tab-equipment">
-        <div class="section-bar"><span>Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openStore()">🛒 Item Store</button></span></div>
+        <div class="section-bar"><span>Equipment</span><span class="hdr-right"><span class="attune-count-lbl" title="Magic items you're attuned to (max 3)">Attuned <b id="attune-count">0/3</b></span><button class="hdr-btn" onclick="openStore()">🛒 Item Store</button></span></div>
         <div class="blk" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Coins</span>
           <label style="font-size:11px;color:var(--muted);">GP <input id="f-gp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
@@ -805,6 +821,8 @@ let _lineage = '';
 let _adv = 'norm';
 let _forceSpells = false;
 let _spellAbility = '';            // manual override
+let _concentration = null;         // name of the spell currently concentrated on
+let attunedRefs = [];              // catalog refs of attuned magic items (max 3)
 let _lastRoll = null;
 
 function levelNow(){ return totalLevel(); }
@@ -899,7 +917,7 @@ function recalc(){
     const dot = $('svp-' + a.id); if(dot) dot.classList.toggle('on', !!saveProf[a.id]);
   });
   // skills
-  let perceptionVal = 0;
+  let perceptionVal = 0, investigationVal = 0, insightVal = 0;
   document.querySelectorAll('.skill-row').forEach(row => {
     const nm = row.dataset.skill, ab = row.dataset.abil, lvl = skillProf[nm] || 0;
     const v = modOf(ab) + lvl * PB;
@@ -907,11 +925,15 @@ function recalc(){
     const dot = $('skp-' + cssId(nm)); dot.className = 'prof-dot' + (lvl === 1 ? ' on' : lvl === 2 ? ' exp' : '');
     dot.title = lvl === 0 ? 'Not proficient' : lvl === 1 ? 'Proficient' : 'Expertise';
     if(nm === 'Perception') perceptionVal = v;
+    else if(nm === 'Investigation') investigationVal = v;
+    else if(nm === 'Insight') insightVal = v;
   });
   // derived
   $('c-prof').textContent = sgn(PB);
   const init = modOf('DEX'); $('c-init').textContent = sgn(init);
   const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
+  const pinv = $('d-pinv'); if(pinv) pinv.textContent = 10 + investigationVal;
+  const pins = $('d-pins'); if(pins) pins.textContent = 10 + insightVal;
   reconcileAC();
   updateHitDiceUI();
   refreshWizardButtons();
@@ -981,11 +1003,11 @@ function rollDeathSave(){
   const r = rawD20(ctx.mode);
   const eff = r.nat + ctx.pen;   // exhaustion lowers the effective result
   let type = 'normal', msg = (ctx.note ? '(' + ctx.note + ') ' : '');
-  if(r.nat === 20){ type = 'crit'; msg += 'Nat 20 — regain 1 HP and get up!'; }
+  if(r.nat === 20){ type = 'crit'; deathSucc = 0; deathFail = 0; $('f-hp-cur').value = 1; setUnconscious(false); msg += 'Nat 20 — regain 1 HP and get up!'; }
   else if(r.nat === 1){ type = 'fumble'; deathFail = Math.min(3, deathFail + 2); msg += 'Nat 1 — two failures!'; }
   else if(eff >= 10){ type = 'crit'; deathSucc = Math.min(3, deathSucc + 1); msg += 'Success (' + deathSucc + '/3)'; }
   else { type = 'fumble'; deathFail = Math.min(3, deathFail + 1); msg += 'Failure (' + deathFail + '/3)'; }
-  if(deathSucc >= 3) msg += ' — stable!';
+  if(deathSucc >= 3){ msg += ' — stable!'; setUnconscious(true); }   // stable but still unconscious
   if(deathFail >= 3) msg += ' — the character dies.';
   renderDeath();
   addLog('Death Save', String(r.nat), msg, type); scheduleAutosave();
@@ -1008,20 +1030,75 @@ function rollHitDie(){
   scheduleAutosave();
 }
 // Heal (sign +1) or Damage (sign -1) current HP by the amount in the adjust field.
+// Automates the downed state: dropping to 0 HP → Unconscious + fresh death saves;
+// taking damage at 0 → a death-save failure (instant death on massive damage);
+// healing above 0 → clears both. Damage also triggers a concentration check.
 function adjustHP(sign){
   const amtEl = $('f-hp-adjust'); const amt = Math.abs(num(amtEl.value)); if(!amt){ amtEl.focus(); return; }
   const curEl = $('f-hp-cur'), maxEl = $('f-hp-max'), tempEl = $('f-hp-temp');
   const max = num(maxEl.value); let cur = num(curEl.value), temp = num(tempEl.value);
   if(sign > 0){
+    const wasDown = cur === 0;
     cur = Math.min(max || cur + amt, cur + amt); curEl.value = cur;
     addLog('Heal', '+' + amt, 'HP ' + cur + (max ? '/' + max : ''), 'normal');
+    if(wasDown && cur > 0) reviveFromDown();
   } else {
+    const before = cur;
     let dmg = amt, soaked = 0;
     if(temp > 0){ soaked = Math.min(temp, dmg); temp -= soaked; dmg -= soaked; tempEl.value = temp; }
-    cur = Math.max(0, cur - dmg); curEl.value = cur;
+    cur = Math.max(0, before - dmg); curEl.value = cur;
     addLog('Damage', '-' + amt, (soaked ? soaked + ' soaked by temp · ' : '') + 'HP ' + cur + (max ? '/' + max : '') + (cur === 0 ? ' — down!' : ''), cur === 0 ? 'fumble' : 'normal');
+    if(_concentration && dmg > 0) concentrationCheck(dmg);
+    if(before > 0 && cur === 0){                 // just dropped to 0
+      const overkill = dmg - before;             // damage beyond what brought you to 0
+      setUnconscious(true); deathSucc = 0; deathFail = 0;
+      if(max > 0 && overkill >= max){ deathFail = 3; renderDeath(); addLog('Massive Damage', '☠', 'Overflow ' + overkill + ' ≥ max HP — instant death', 'fumble'); }
+      else { renderDeath(); addLog('Downed', '☠', 'At 0 HP — Unconscious, roll Death Saves', 'fumble'); }
+    } else if(before === 0 && dmg > 0){           // taking damage while already down
+      tickDeathDamage(dmg, max);
+    }
   }
   amtEl.value = ''; scheduleAutosave();
+}
+// Taking damage at 0 HP costs a death-save failure (three = dead; massive damage = instant death).
+function tickDeathDamage(dmg, max){
+  const inc = (max > 0 && dmg >= max) ? 3 : 1;
+  deathFail = Math.min(3, deathFail + inc); renderDeath();
+  addLog('Death Save', '☠', 'Damage at 0 HP — ' + (inc >= 2 ? 'instant death' : 'a failure') + ' (' + deathFail + '/3)' + (deathFail >= 3 ? ' — the character dies.' : ''), 'fumble');
+}
+function setUnconscious(on){
+  const has = activeCond('Unconscious');
+  if(on && !has){ activeConditions.push('Unconscious'); renderConditions(); }
+  else if(!on && has){ activeConditions = activeConditions.filter(c => norm(c) !== norm('Unconscious')); renderConditions(); }
+}
+// Back above 0 HP: clear death saves and the Unconscious condition.
+function reviveFromDown(){
+  deathSucc = 0; deathFail = 0; renderDeath(); setUnconscious(false);
+  addLog('Revived', '✚', 'Above 0 HP — death saves cleared', 'normal');
+}
+// ── Concentration (A2) ────────────────────────────────────────────────────
+function startConcentration(name){
+  if(_concentration && norm(_concentration) !== norm(name)) addLog('Concentration', '…', 'Dropped ' + _concentration + ' for ' + name, 'normal');
+  _concentration = name; renderConcentration(); scheduleAutosave();
+}
+function dropConcentration(silent){
+  if(!_concentration) return;
+  if(!silent) addLog('Concentration', '—', 'Stopped concentrating on ' + _concentration, 'normal');
+  _concentration = null; renderConcentration(); scheduleAutosave();
+}
+// On taking damage: CON save DC = max(10, ⌊damage/2⌋) or concentration breaks.
+function concentrationCheck(dmg){
+  const dc = Math.max(10, Math.floor(dmg / 2));
+  const ctx = rollCtx('save'); const r = rawD20(ctx.mode);
+  const mod = modOf('CON') + (saveProf['CON'] ? profBonus() : 0) + magicSaveBonus() + ctx.pen;
+  const total = r.nat + mod, ok = r.nat !== 1 && total >= dc;
+  addLog('Concentration', (ok ? 'Held ' : 'Broken ') + sgn(total), 'DC ' + dc + ' CON save · ' + d20Detail(r) + ' ' + sgn(mod) + (ctx.note ? ' · ' + ctx.note : ''), ok ? 'normal' : 'fumble');
+  if(!ok) dropConcentration(true);
+}
+function renderConcentration(){
+  const bar = $('conc-bar'); if(!bar) return;
+  if(_concentration){ bar.style.display = ''; bar.innerHTML = '<span class="conc-lbl">Concentrating</span><span class="conc-name">' + esc(_concentration) + '</span><button class="conc-x" onclick="dropConcentration()" title="Stop concentrating">✕</button>'; }
+  else { bar.style.display = 'none'; bar.innerHTML = ''; }
 }
 // ── Dice-pool tray: tap dice to build a pool, then roll the whole pool ──
 let dicePool = [];
@@ -1061,6 +1138,7 @@ function addAttackRow(a){
   if(a.spell) tr.dataset.spell = a.spell;
   if(a.weapon) tr.dataset.weapon = a.weapon;
   if(a.unarmed) tr.dataset.unarmed = '1';
+  if(a.magic) tr.dataset.magic = num(a.magic);   // magic +N applied to hit AND damage
   const abilOpts = ABILITIES.map(x => '<option value="' + x.id + '"' + (a.abil===x.id?' selected':'') + '>' + x.id + '</option>').join('');
   tr.innerHTML =
     '<td><input type="text" class="atk-name" value="' + esc(a.name) + '" placeholder="Longsword" oninput="scheduleAutosave()"></td>' +
@@ -1090,9 +1168,9 @@ function _atkRow(btn){ return btn.closest('tr'); }
 function rollAttack(btn){
   const tr = _atkRow(btn);
   const abil = tr.querySelector('.atk-abil').value, prof = tr.querySelector('.atk-prof').checked;
-  const extra = num(tr.querySelector('.atk-bonus').value), name = tr.querySelector('.atk-name').value || 'Attack';
-  const mod = modOf(abil) + (prof ? profBonus() : 0) + extra;
-  d20Check(name + ' — to hit', mod, { kind:'attack' });
+  const extra = num(tr.querySelector('.atk-bonus').value), magic = num(tr.dataset.magic || 0), name = tr.querySelector('.atk-name').value || 'Attack';
+  const mod = modOf(abil) + (prof ? profBonus() : 0) + extra + magic;
+  d20Check(name + ' — to hit', mod, { kind:'attack', note: magic ? ('+' + magic + ' magic') : '' });
 }
 function rollDamage(btn){
   const tr = _atkRow(btn);
@@ -1110,30 +1188,30 @@ function rollDamage(btn){
 function rollAttackFull(btn){
   const tr = _atkRow(btn);
   const abil = tr.querySelector('.atk-abil').value, prof = tr.querySelector('.atk-prof').checked;
-  const extra = num(tr.querySelector('.atk-bonus').value), name = tr.querySelector('.atk-name').value || 'Attack';
+  const extra = num(tr.querySelector('.atk-bonus').value), magic = num(tr.dataset.magic || 0), name = tr.querySelector('.atk-name').value || 'Attack';
   const dtype = tr.querySelector('.atk-dtype').value, dmg = tr.querySelector('.atk-dmg').value.trim();
-  // to-hit
+  // to-hit (magic +N adds to hit)
   const ctx = rollCtx('attack');
-  const r = rawD20(ctx.mode); const hitMod = modOf(abil) + (prof ? profBonus() : 0) + extra + ctx.pen;
+  const r = rawD20(ctx.mode); const hitMod = modOf(abil) + (prof ? profBonus() : 0) + extra + magic + ctx.pen;
   const hitTotal = r.nat + hitMod;
   const crit = r.nat === 20, fumble = r.nat === 1;
-  // damage
+  // damage (dice + ability mod + magic +N)
   const m = dmg.match(/(\d*)d(\d+)\s*([+-]\s*\d+)?/i);
   let dmgLine = '', dmgTotal = null;
   if(m){
     let nDice = num(m[1]) || 1; const sides = num(m[2]);
-    const flat = m[3] ? num(m[3].replace(/\s+/g,'')) : modOf(abil);
+    const flat = (m[3] ? num(m[3].replace(/\s+/g,'')) : modOf(abil)) + magic;
     if(crit) nDice *= 2;
     const faces = []; let sum = 0; for(let i=0;i<nDice;i++){ const f = dN(sides); faces.push(f); sum += f; }
     dmgTotal = sum + flat;
     dmgLine = nDice + 'd' + sides + '(' + faces.join('+') + ') ' + sgn(flat) + (dtype ? ' ' + dtype : '') + (crit ? ' — CRIT!' : '');
   } else if(/^\d+$/.test(dmg)){
     // flat damage (e.g. Unarmed Strike = 1 + ability modifier)
-    dmgTotal = num(dmg) + modOf(abil);
-    dmgLine = num(dmg) + ' ' + sgn(modOf(abil)) + (dtype ? ' ' + dtype : '');
+    dmgTotal = num(dmg) + modOf(abil) + magic;
+    dmgLine = num(dmg) + ' ' + sgn(modOf(abil) + magic) + (dtype ? ' ' + dtype : '');
   }
   const result = 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
-  const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '') + (ctx.note ? ' · ' + ctx.note : '');
+  const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '') + (magic ? ' · +' + magic + ' magic' : '') + (ctx.note ? ' · ' + ctx.note : '');
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
 }
 
@@ -1190,18 +1268,21 @@ function onInvNameChange(input){
   renderInvActions(tr); renderInvDetail(tr); syncEquippedWeaponName(tr); scheduleAutosave();
 }
 function removeInvRow(btn){
-  const tr = btn.closest('tr');
-  if(tr.dataset.equipped === '1' && invRowKind(tr) === 'weapon') unequipWeaponRow(invRowRef(tr));
-  tr.remove(); reconcileAC(); scheduleAutosave();
+  const tr = btn.closest('tr'); const ref = invRowRef(tr);
+  if(tr.dataset.equipped === '1' && (invRowKind(tr) === 'weapon' || invRowKind(tr) === 'magic')) unequipWeaponRow(ref);
+  if(isAttuned(ref)){ attunedRefs = attunedRefs.filter(r => norm(r) !== norm(ref)); renderAttuneCount(); }
+  tr.remove(); reconcileAC(); recalc(); scheduleAutosave();
 }
 // Equip toggle + info (ⓘ) + remove. Equip only if the item resolves to a weapon/armor/shield.
 function renderInvActions(tr){
-  const kind = invRowKind(tr);
+  const kind = invRowKind(tr), ref = invRowRef(tr);
   const eq = tr.dataset.equipped === '1';
   const equipBtn = (kind === 'weapon' || kind === 'armor' || kind === 'shield' || kind === 'magic')
     ? '<button class="equip-btn' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="Equip / Unequip">' + (eq?'Equipped':'Equip') + '</button>' : '';
-  const infoBtn = itemData(invRowRef(tr)) ? '<button class="row-i" onclick="openItemInfo(this.closest(\'tr\'))" title="Item details">&#9432;</button>' : '';
-  tr.querySelector('.inv-actions').innerHTML = equipBtn + infoBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
+  const attuneBtn = (kind === 'magic' && magicNeedsAttune(ref))
+    ? '<button class="attune-btn' + (isAttuned(ref)?' on':'') + '" onclick="toggleAttune(this)" title="Attunement — bonuses apply only while attuned (max 3)">' + (isAttuned(ref)?'Attuned':'Attune') + '</button>' : '';
+  const infoBtn = itemData(ref) ? '<button class="row-i" onclick="openItemInfo(this.closest(\'tr\'))" title="Item details">&#9432;</button>' : '';
+  tr.querySelector('.inv-actions').innerHTML = equipBtn + attuneBtn + infoBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
 }
 
 // ── EQUIPMENT: item kinds, equip toggles, AC, weapon attack rows ──────────
@@ -1262,7 +1343,8 @@ function equipMagicRow(tr){
   if(invAttackHasWeapon(ref)) return;
   const w = mb.baseWeapon, finesse = (w.properties || []).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
-  addAttackRow({ name: display, abil, prof: true, bonus: mb.atk || 0, damage: w.damage, type: w.damageType, weapon: ref });
+  // The +N applies to BOTH to-hit and damage (A4); stored as a magic bonus, not the manual to-hit field.
+  addAttackRow({ name: display, abil, prof: true, bonus: 0, magic: mb.atk || 0, damage: w.damage, type: w.damageType, weapon: ref });
 }
 function equipWeaponRow(tr){
   const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
@@ -1326,7 +1408,26 @@ function magicBonuses(m){
   if(wt){ const base = D.weapons().find(w => norm(w.name) === norm(wt[1].trim())); if(base) b.baseWeapon = base; }
   return b;
 }
-function equippedMagic(){ return invRows().filter(r => r.dataset.equipped === '1' && itemKind(invRowRef(r)) === 'magic').map(r => magicBonuses(magicData(invRowRef(r)))); }
+// ── Attunement (A3): a magic item's bonuses count only while equipped AND
+// (it doesn't require attunement, or it's one of your ≤3 attuned items). ──────
+function magicNeedsAttune(ref){ const m = magicData(ref); return !!(m && m.attunement); }
+function isAttuned(ref){ return attunedRefs.some(r => norm(r) === norm(ref)); }
+function attunedCount(){ return attunedRefs.length; }
+function renderAttuneCount(){ const el = $('attune-count'); if(el) el.textContent = attunedCount() + '/3'; }
+function toggleAttune(btn){
+  const tr = btn.closest('tr'), ref = invRowRef(tr), nm = tr.querySelector('.inv-name').value || ref;
+  if(isAttuned(ref)){ attunedRefs = attunedRefs.filter(r => norm(r) !== norm(ref)); addLog('Attunement', '—', 'Unattuned ' + nm, 'normal'); }
+  else {
+    if(attunedCount() >= 3){ addLog('Attunement', '✗', 'Already attuned to 3 items', 'fumble'); return; }
+    attunedRefs.push(ref); addLog('Attunement', '✦', 'Attuned to ' + nm, 'normal');
+  }
+  renderInvActions(tr); renderAttuneCount(); recalc(); scheduleAutosave();
+}
+function magicActive(tr){
+  if(tr.dataset.equipped !== '1' || itemKind(invRowRef(tr)) !== 'magic') return false;
+  return magicNeedsAttune(invRowRef(tr)) ? isAttuned(invRowRef(tr)) : true;
+}
+function equippedMagic(){ return invRows().filter(magicActive).map(r => magicBonuses(magicData(invRowRef(r)))); }
 function magicACBonus(){ return equippedMagic().reduce((s, b) => s + (b.ac || 0), 0); }
 function magicSaveBonus(){ return equippedMagic().reduce((s, b) => s + (b.save || 0), 0); }
 
@@ -1482,7 +1583,10 @@ function renderFeatures(){
   const box = $('features-list'); box.innerHTML = '';
   const auto = autoFeatures();
   const featObjs = addedFeats.map(n => { const f = D.feats().find(x => norm(x.name) === norm(n)); return f ? { name: f.name, meta: f.category + ' feat', desc: (f.benefits||[]).join(' ') } : { name: n, meta: 'Feat', desc: '' }; });
-  const all = auto.concat(featObjs).concat(customFeatures.map(cf => ({ name: cf.name, meta: cf.meta || 'Custom', desc: cf.desc || '', custom: true })));
+  const allRaw = auto.concat(featObjs).concat(customFeatures.map(cf => ({ name: cf.name, meta: cf.meta || 'Custom', desc: cf.desc || '', custom: true })));
+  // Dedupe by name so a feature granted two ways (e.g. a background feat that is
+  // both auto-listed and in addedFeats) shows once — the first (auto) entry wins.
+  const seen = {}, all = allRaw.filter(f => { const k = norm(f.name); if(seen[k]) return false; seen[k] = 1; return true; });
   if(!all.length){ box.innerHTML = '<div style="font-family:Barlow,sans-serif;font-size:12px;color:var(--muted);padding:6px 4px;">Set a class, species, and background above — features fill in automatically. Add feats below.</div>'; $('feat-note').textContent=''; return; }
   $('feat-note').innerHTML = '<b>' + all.length + '</b> features';
   all.forEach((f, i) => {
@@ -1561,6 +1665,17 @@ function abilityForSpell(sp){ if(_spellAbility) return _spellAbility; const owne
 function spellDC(ab){ return 8 + profBonus() + modOf(ab || spellAbilityId()); }
 function spellAtkBonus(ab){ return profBonus() + modOf(ab || spellAbilityId()); }
 function isCaster(){ return _forceSpells || spellcastingClasses().length > 0; }
+// Prepared-spell budget (A5): sum each non-pact caster class's Prepared Spells (or Spells Known) at its level.
+function preparedMax(){
+  let total = 0;
+  spellcastingClasses().forEach(({cl,c}) => {
+    if(c.spellcasting === 'pact') return;
+    const row = (c.table||[]).find(r => Number(r.level) === num(cl.level));
+    if(row && row.columns){ const n = parseInt(row.columns['Prepared Spells'] != null ? row.columns['Prepared Spells'] : row.columns['Spells Known'], 10); if(!isNaN(n)) total += n; }
+  });
+  return total;
+}
+function preparedNow(){ return spellsKnown.filter(sk => { const sp = spellByName(sk.name); return sp && sp.level > 0 && sk.prepared; }).length; }
 function renderSpellHeader(){
   const on = isCaster();
   $('spell-block').style.display = on ? '' : 'none';
@@ -1572,6 +1687,11 @@ function renderSpellHeader(){
     $('sp-dc').textContent = spellDC();
     $('sp-atk').textContent = sgn(spellAtkBonus());
     $('spell-note').textContent = casterType().charAt(0).toUpperCase() + casterType().slice(1) + ' caster';
+    const pmax = preparedMax(), pbox = $('sp-prep-box');
+    if(pbox){
+      if(pmax > 0){ pbox.style.display = ''; const now = preparedNow(), el = $('sp-prep-val'); el.textContent = now + '/' + pmax; el.style.color = now > pmax ? 'var(--red)' : ''; }
+      else pbox.style.display = 'none';
+    }
   } else { $('spell-note').textContent = 'No spellcasting'; }
 }
 // Regular (Vancian) slots: a single caster uses its own table; multiple casters use
@@ -1625,12 +1745,13 @@ function renderSpells(){
         '<input class="sp-name-input" value="' + esc(sk.display || sk.name) + '" oninput="onSpellRename(\'' + q + '\',this.value)" title="Rename (keeps its spell mechanics)">' +
         '<span class="sp-info">' + esc(spellInfoLine(sp)) + '</span>' +
         '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
-        '<button class="cast-btn" onclick="castSpellFull(\'' + q + '\')" title="Cast this spell">Cast</button>';
+        '<button class="cast-btn" onclick="castSpellFull(\'' + q + '\')" title="Cast this spell">Cast</button>' +
+        ((sp && sp.higherLevels && lvl > 0) ? '<button class="upcast-btn" onclick="upcastSpell(\'' + q + '\')" title="Cast at a higher level (upcast)">⇧</button>' : '');
       box.appendChild(row);
     });
   });
 }
-function addSpellByName(n){ if(!spellsKnown.some(s => norm(s.name) === norm(n))) spellsKnown.push({ name:n, prepared:true }); renderSpells(); scheduleAutosave(); }
+function addSpellByName(n){ if(!spellsKnown.some(s => norm(s.name) === norm(n))) spellsKnown.push({ name:n, prepared:true }); renderSpells(); renderSpellHeader(); scheduleAutosave(); }
 // Compact info line for a spell row: casting time · range · duration · damage.
 function shortCastTime(ct){ ct = String(ct || ''); if(/bonus/i.test(ct)) return 'Bonus'; if(/reaction/i.test(ct)) return 'Reaction'; if(/^\s*action\s*$/i.test(ct)) return 'Action'; return ct; }
 function spellInfoLine(sp){
@@ -1643,9 +1764,9 @@ function spellInfoLine(sp){
   if(sp.ritual) parts.push('Ritual');
   return parts.join(' · ');
 }
-function togglePrep(n){ const s = spellsKnown.find(x => x.name === n); if(s) s.prepared = !s.prepared; renderSpells(); scheduleAutosave(); }
+function togglePrep(n){ const s = spellsKnown.find(x => x.name === n); if(s) s.prepared = !s.prepared; renderSpells(); renderSpellHeader(); scheduleAutosave(); }
 function onSpellRename(n, val){ const s = spellsKnown.find(x => norm(x.name) === norm(n)); if(s) s.display = val; scheduleAutosave(); }
-function removeSpell(n){ spellsKnown = spellsKnown.filter(s => s.name !== n); [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.spell || '') === norm(n)) tr.remove(); }); renderSpells(); scheduleAutosave(); }
+function removeSpell(n){ spellsKnown = spellsKnown.filter(s => s.name !== n); [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.spell || '') === norm(n)) tr.remove(); }); renderSpells(); renderSpellHeader(); scheduleAutosave(); }
 // Attack spells (those calling for a spell attack roll) get an Attacks/Spellcasting row.
 // Damage is parsed from the description; the row's ability = the spell ability, so its
 // to-hit equals the spell attack bonus.
@@ -1683,17 +1804,70 @@ function scaleCantrip(expr, charLevel){ const mult = charLevel >= 17 ? 4 : charL
 function rollDiceExpr(expr, crit){ const m = expr.match(/(\d+)d(\d+)\s*([+-]\s*\d+)?/i); if(!m) return { total:0, detail:expr }; let n = num(m[1]) || 1; const sides = num(m[2]); const flat = m[3] ? num(m[3].replace(/\s+/g,'')) : 0; if(crit) n *= 2; const faces = []; let sum = 0; for(let i=0;i<n;i++){ const f = dN(sides); faces.push(f); sum += f; } return { total: sum + flat, detail: n + 'd' + sides + '(' + faces.join('+') + ')' + (flat ? ' ' + sgn(flat) : '') }; }
 function d20Detail(r){ return r.mode !== 'norm' ? 'd20[' + r.faces.join(',') + '→' + r.nat + (r.mode === 'adv' ? ' adv' : ' dis') + ']' : 'd20:' + r.nat; }
 function spellEffectSummary(sp){ const d = (sp && sp.description) || ''; const first = d.split(/(?<=[.!?])\s/)[0] || d; return first.length > 170 ? first.slice(0,167) + '…' : first; }
-// Cast a spell: spend a slot (leveled), then roll/report by type — attack roll, saving throw, plain damage, or effect text.
-function castSpellFull(name){
+// Slot levels (≥ minLevel) that currently have a free slot — the upcast options.
+function availableCastLevels(minLevel){
+  const set = [];
+  const arr = slotArray();
+  if(arr){ for(let i = minLevel; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(max > 0 && used < max) set.push(i); } }
+  const pm = pactInfo();
+  if(pm && pm.level >= minLevel && (slotUsed['pact'] || 0) < pm.slots && set.indexOf(pm.level) < 0) set.push(pm.level);
+  return set.sort((a,b) => a-b);
+}
+// Spend a slot of exactly `level` (a regular slot, else a Pact slot of that level).
+function spendSlotAt(level, name){
+  const arr = slotArray();
+  if(arr){ const max = arr[level-1] || 0, used = slotUsed[String(level)] || 0; if(max > 0 && used < max){ slotUsed[String(level)] = used + 1; renderSlots(); scheduleAutosave(); return true; } }
+  const pm = pactInfo();
+  if(pm && pm.level === level && (slotUsed['pact'] || 0) < pm.slots){ slotUsed['pact'] = (slotUsed['pact'] || 0) + 1; renderSlots(); scheduleAutosave(); return true; }
+  return spendSpellSlot(level, name);   // fall back to lowest available ≥ level
+}
+// Combine two dice expressions of the same die size (e.g. 8d6 + 1d6 → 9d6).
+function combineDice(a, b){
+  if(!b) return a; if(!a) return b;
+  const ma = a.match(/^(\d+)d(\d+)$/i), mb = b.match(/^(\d+)d(\d+)$/i);
+  if(ma && mb && ma[2] === mb[2]) return (num(ma[1]) + num(mb[1])) + 'd' + ma[2];
+  return a + ' + ' + b;
+}
+// Extra damage dice for casting `castLevel` above the spell's base level, read from higherLevels.
+function upcastBonusDice(sp, castLevel){
+  if(!sp || castLevel <= sp.level) return '';
+  const m = (sp.higherLevels || '').match(/(\d*)d(\d+)/i);
+  if(!m) return '';
+  return ((num(m[1]) || 1) * (castLevel - sp.level)) + 'd' + m[2];
+}
+function openCastPicker(name, label, levels){
+  let ov = $('cast-overlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'cast-overlay'; ov.className = 'ov'; ov.addEventListener('click', e => { if(e.target === ov) ov.classList.remove('open'); }); document.body.appendChild(ov); }
+  const q = esc(name).replace(/'/g,"\\'");
+  ov.innerHTML = '<div class="modal" style="max-width:340px;"><div class="modal-hd"><div class="ttl">Cast ' + esc(label) + '</div><button class="x" onclick="document.getElementById(\'cast-overlay\').classList.remove(\'open\')">✕</button></div><div class="modal-bd"><p class="m-hint">Choose a spell-slot level (casting higher upcasts the spell).</p><div class="cast-lvls">' +
+    levels.map(l => '<button class="m-btn cast-lvl-btn" onclick="pickCastLevel(\'' + q + '\',' + l + ')">Level ' + l + (l > 0 ? '' : '') + '</button>').join('') +
+    '</div></div></div>';
+  ov.classList.add('open');
+}
+function pickCastLevel(name, level){ const ov = $('cast-overlay'); if(ov) ov.classList.remove('open'); castSpellFull(name, level); }
+// Explicit upcast: open the slot-level picker (falls back to a normal cast if nothing higher is free).
+function upcastSpell(name){
+  const sp = spellByName(name); if(!sp || sp.level === 0) return castSpellFull(name);
+  const opts = availableCastLevels(sp.level);
+  if(opts.length <= 1) return castSpellFull(name);
+  const sk = spellsKnown.find(s => norm(s.name) === norm(name));
+  openCastPicker(name, (sk && sk.display) || name, opts);
+}
+// Cast a spell: pick/spend a slot (with upcasting), then roll/report by type — attack roll, saving throw, plain damage, or effect text.
+function castSpellFull(name, castLevel){
   const sk = spellsKnown.find(s => norm(s.name) === norm(name));
   const label = (sk && sk.display) || name;
   const sp = spellByName(name);
   if(!sp){ addLog('Cast ' + label, '✦', 'Cast', 'normal'); return; }
   const lvl = sp.level;
-  if(lvl > 0 && !spendSpellSlot(lvl, label)) return;   // out of slots → aborted (logged)
+  // Default Cast is one click at base level; the ⇧ button (upcastSpell) opens the picker.
+  const useLevel = Math.max(lvl, castLevel || lvl);
+  if(lvl > 0){ if(castLevel != null){ if(!spendSlotAt(useLevel, label)) return; } else if(!spendSpellSlot(lvl, label)) return; }
   const dmgInfo = spellDamage(sp);
   let diceExpr = dmgInfo.dice;
   if(lvl === 0 && diceExpr) diceExpr = scaleCantrip(diceExpr, levelNow());
+  else if(diceExpr && useLevel > lvl) diceExpr = combineDice(diceExpr, upcastBonusDice(sp, useLevel));
+  const upLabel = (useLevel > lvl) ? ' (Lvl ' + useLevel + ')' : '';
   const dtype = dmgInfo.type ? ' ' + dmgInfo.type : '';
   const save = spellSaveAbility(sp);
   const ab = abilityForSpell(sp), dc = spellDC(ab);
@@ -1701,16 +1875,17 @@ function castSpellFull(name){
     const ctx = rollCtx('attack');
     const r = rawD20(ctx.mode), atkMod = spellAtkBonus(ab) + ctx.pen, hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
     const dd = rollDiceExpr(diceExpr, crit);
-    addLog(label, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : '') + (ctx.note ? ' · ' + ctx.note : ''), crit ? 'crit' : fumble ? 'fumble' : 'normal');
+    addLog(label + upLabel, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : '') + (ctx.note ? ' · ' + ctx.note : ''), crit ? 'crit' : fumble ? 'fumble' : 'normal');
   } else if(diceExpr && save){
     const dd = rollDiceExpr(diceExpr, false);
-    addLog(label, dd.total + dtype, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail, 'normal');
+    addLog(label + upLabel, dd.total + dtype, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail, 'normal');
   } else if(diceExpr){
     const dd = rollDiceExpr(diceExpr, false);
-    addLog(label, dd.total + dtype, 'damage ' + dd.detail, 'normal');
+    addLog(label + upLabel, dd.total + dtype, 'damage ' + dd.detail, 'normal');
   } else {
-    addLog(label, save ? ('DC ' + dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
+    addLog(label + upLabel, save ? ('DC ' + dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
   }
+  if(sp.concentration) startConcentration(label);
 }
 function openSpell(n){
   const sp = spellByName(n); if(!sp){ openDesc(n, '', { _desc:'' }); return; }
@@ -1800,7 +1975,7 @@ function shortRest(){
 }
 function longRest(){
   $('f-hp-cur').value = $('f-hp-max').value; $('f-hp-temp').value = 0;
-  slotUsed = {}; deathSucc = 0; deathFail = 0;
+  slotUsed = {}; deathSucc = 0; deathFail = 0; dropConcentration(true); setUnconscious(false);
   if(exhaustion > 0) exhaustion -= 1;   // 2024: a Long Rest removes one Exhaustion level
   // Regain half your Hit Dice (rounded down, minimum 1).
   const t = hitDiceTotal(); const le = $('f-hd-left'); const regained = Math.min(t - num(le.value), Math.max(1, Math.floor(t/2))); le.value = Math.min(t, num(le.value) + regained);
@@ -1848,7 +2023,7 @@ function collectSheet(){
     name: tr.querySelector('.atk-name').value, abil: tr.querySelector('.atk-abil').value,
     prof: tr.querySelector('.atk-prof').checked, bonus: num(tr.querySelector('.atk-bonus').value),
     damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value,
-    spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1'
+    spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1', magic: num(tr.dataset.magic || 0)
   })).filter(a => a.name || a.damage);
   const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '' })).filter(i => i.name);
   return {
@@ -1865,6 +2040,7 @@ function collectSheet(){
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
     customFeatures, addedFeats, resourceUsed, customResources, spellsKnown, slotUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
+    concentration: _concentration, attunedRefs,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id:_campaign.id, code:_campaign.code, name:_campaign.name } : null,
   };
 }
@@ -1887,11 +2063,12 @@ function applySheet(d){
   customFeatures = d.customFeatures || []; addedFeats = d.addedFeats || [];
   resourceUsed = d.resourceUsed || {}; customResources = d.customResources || [];
   spellsKnown = d.spellsKnown || []; slotUsed = d.slotUsed || {}; _forceSpells = !!d.forceSpells; _spellAbility = d.spellAbility || ''; _lineage = d.lineage || '';
+  _concentration = d.concentration || null; attunedRefs = Array.isArray(d.attunedRefs) ? d.attunedRefs.slice() : [];
   $('attacks-body').innerHTML = ''; (d.attacks || []).filter(a => !a.spell).forEach(addAttackRow);   // spells now live only in the Spells tab
   ensureUnarmed();
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
   refreshSubclassList(); refreshSpellPicker();
-  renderDeath(); renderFeatures(); renderResources(); renderConditions(); recalc(); setDefaultTab();
+  renderDeath(); renderFeatures(); renderResources(); renderConditions(); renderConcentration(); renderAttuneCount(); recalc(); setDefaultTab();
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
 }
 function saveSheet(quiet){
@@ -2105,6 +2282,7 @@ campaignUpdateBtn();
 <script src="/tools-data/dnd-rules.js"></script>
 <script src="/tools-data/dnd-conditions.js"></script>
 <script src="/tools-data/dnd-tables.js"></script>
+<script src="/tools-data/dnd-caster-rules.js"></script>
 <script src="/tools-data/dnd-sheet-builder.js"></script>
 <script src="/tools-data/dnd-levelup.js"></script>
 <script>
