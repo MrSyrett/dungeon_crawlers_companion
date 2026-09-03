@@ -1217,7 +1217,7 @@ autoLoad();
   // ═══════════ 3D physics dice (three.js, lazy-loaded) ═══════════
   var THREE_URL='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
   var threeState=0; // 0 none, 1 loading, 2 ready, 3 failed
-  var renderer,scene,camera,rafId,world3d=null,lastT=0;
+  var renderer,scene,camera,rafId,world3d=null,lastT=0,_camTilt=false;
   var FLOORY=-1.9,WALLX=3.3,WALLZ=1.5,GRAV=-38,REST=0.36,FRIC=0.7,FDT=1/60,MAXSTEPS=420,HOLD=850,FADE=440,WAVE_STEPS=28;
   var DOWN,_n,_axis,_dq,_corr;
   var HAS_WEBGL=(function(){ try{ var c=document.createElement('canvas'); return !!(window.WebGLRenderingContext&&(c.getContext('webgl')||c.getContext('experimental-webgl'))); }catch(e){ return false; } })();
@@ -1235,8 +1235,14 @@ autoLoad();
     var key=new THREE.DirectionalLight(0xffffff,1.0); key.position.set(2,8,4); scene.add(key);
     var rim=new THREE.DirectionalLight(0x99bbff,0.35); rim.position.set(-4,2,-3); scene.add(rim);
     sizeGL(); window.addEventListener('resize', sizeGL); return true; }
+  // Camera is straight-down by default; a d4 in the pool tilts it ~34° so the
+  // tetrahedron's near-vertical faces (and their numbers) turn toward the viewer.
+  function applyCam(){ if(!camera) return;
+    if(_camTilt){ camera.position.set(0,15,11.5); camera.up.set(0,1,0); }
+    else { camera.position.set(0,20,0.0001); camera.up.set(0,0,-1); }
+    camera.lookAt(0,FLOORY,0); camera.updateProjectionMatrix(); }
   function sizeGL(){ if(!renderer) return; var w=overlay.clientWidth||window.innerWidth, h=overlay.clientHeight||window.innerHeight;
-    renderer.setSize(w,h,false); if(camera){ camera.aspect=w/h; camera.position.set(0,20,0.0001); camera.up.set(0,0,-1); camera.lookAt(0,FLOORY,0); camera.updateProjectionMatrix(); } }
+    renderer.setSize(w,h,false); if(camera){ camera.aspect=w/h; applyCam(); } }
   function makeGeo(s){ if(s===4)return new THREE.TetrahedronGeometry(1.15).toNonIndexed(); if(s===6)return new THREE.BoxGeometry(1.5,1.5,1.5).toNonIndexed();
     if(s===8)return new THREE.OctahedronGeometry(1.25).toNonIndexed(); if(s===12)return new THREE.DodecahedronGeometry(1.15).toNonIndexed();
     if(s===20)return new THREE.IcosahedronGeometry(1.2).toNonIndexed(); var g=new THREE.OctahedronGeometry(1.25).toNonIndexed(); g.scale(1,1.35,1); return g; }
@@ -1311,11 +1317,11 @@ autoLoad();
     if(d4){ // vertex-numbered d4: 3 corner numbers per face, each oriented toward its vertex
       var vsize=0.92;
       d4.faces.forEach(function(f){ f.corners.forEach(function(vi){ var V=d4.verts[vi], C=f.c, N=f.n;
-        var pos=new THREE.Vector3().lerpVectors(C, V, 0.46).addScaledVector(N, 0.02);
+        var pos=new THREE.Vector3().lerpVectors(C, V, 0.46).addScaledVector(N, 0.06);
         var up=new THREE.Vector3().subVectors(V, C); up.addScaledVector(N, -up.dot(N)); up.normalize();      // toward the vertex, in the face plane
         var xa=new THREE.Vector3().crossVectors(up, N).normalize();                                          // right = up × normal
         var m4=new THREE.Matrix4().makeBasis(xa, up, N);
-        var pl=new THREE.Mesh(new THREE.PlaneGeometry(vsize,vsize), new THREE.MeshBasicMaterial({map:faceTex(d4.vlabels[vi]),transparent:true,depthWrite:false}));
+        var pl=new THREE.Mesh(new THREE.PlaneGeometry(vsize,vsize), new THREE.MeshBasicMaterial({map:faceTex(d4.vlabels[vi]),transparent:true,depthWrite:false,side:THREE.DoubleSide}));
         pl.position.copy(pos); pl.quaternion.setFromRotationMatrix(m4); group.add(pl); }); });
       return group; }
     var size=sides===2?1.15:sides===6?0.95:sides===4?0.8:sides===10?0.5:0.62;
@@ -1358,6 +1364,7 @@ autoLoad();
   function upVertex(verts,q){ var best=0,bY=-9; for(var i=0;i<verts.length;i++){ var wy=_n.copy(verts[i]).applyQuaternion(q).y; if(wy>bY){bY=wy;best=i;} } return best; }
   function clearWorld(){ if(!world3d)return; world3d.meshes.forEach(function(g){scene.remove(g);}); world3d.shadows.forEach(function(s){scene.remove(s);}); if(world3d.glows)world3d.glows.forEach(function(s){scene.remove(s);}); world3d=null; }
   function play3D(dice,crit){ if(!renderer && !initGL()){ play2D(dice,crit); return; } clearWorld();
+    _camTilt = dice.some(function(d){ return d.sides===4; }); applyCam();
     var metas=[],inits=[],maxSpawn=0; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,wave:r.wave||0,tetra:gg.tetra}); });
     var probe=inits.map(cloneState),steps=0; while(steps<MAXSTEPS+maxSpawn){ stepWorld(probe,FDT,steps); steps++; if(allRest(probe))break; }
     var live=inits.map(cloneState),meshes=[],shadows=[];
