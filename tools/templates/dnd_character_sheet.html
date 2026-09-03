@@ -69,6 +69,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .adv-seg{display:flex;gap:0;border:1px solid #332c2c;border-radius:4px;overflow:hidden;flex:1;}
 .adv-seg button{flex:1;padding:5px 4px;background:#1a1414;color:#9a8f8f;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
 .adv-seg button.on{background:var(--dnd);color:#fff;}
+.adv-seg button.norm.on{background:#3a3a41;color:#fff;}
 .adv-seg button.adv.on{background:#2f8f4e;}
 .adv-seg button.dis.on{background:#b03030;}
 .dice-pool-display{font-family:'Share Tech Mono',monospace;font-size:12px;color:#c8a020;min-height:18px;word-break:break-word;line-height:1.4;}
@@ -91,6 +92,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .section-bar.red{background:var(--dnd);}
 .section-bar .sb-note{font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:none;color:rgba(255,255,255,.8);}
 .section-bar .sb-note b{color:#fff;}
+.hdr-btn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.38);color:#fff;border-radius:3px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.hdr-btn:hover{background:rgba(255,255,255,.28);}
+.hdr-right{display:flex;align-items:center;gap:8px;}
 
 /* HEADER */
 .hdr-row{display:flex;border-bottom:2px solid var(--border);background:var(--dnd);}
@@ -229,6 +233,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .small-btn:hover{background:var(--dnd-dk);}
 .small-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule);}
 .small-btn.ghost:hover{background:var(--box);}
+.add-hint{margin:6px 10px 8px;font-family:'Barlow',sans-serif;font-size:11px;color:var(--muted);line-height:1.4;font-style:italic;}
+.equip-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;margin-right:5px;}
+.equip-btn:hover{border-color:var(--green);color:var(--ink);}
+.equip-btn.on{background:var(--green);color:#fff;border-color:var(--green);}
+.cbt input.auto{color:var(--dnd-dk);}
+.inv-actions{white-space:nowrap;}
 .pick-sel{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:5px 6px;border-radius:3px;outline:none;flex:1 1 160px;min-width:0;}
 .notes-box{padding:8px 10px;}
 .notes-box textarea{width:100%;min-height:80px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:'Barlow',sans-serif;font-size:13px;line-height:1.5;padding:8px;outline:none;resize:vertical;}
@@ -305,6 +315,12 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
 .brow-controls{padding:10px 16px 6px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;border-bottom:1px solid #332c2c;}
 .brow-filters{display:flex;gap:6px;flex-wrap:wrap;}
 .brow-sel{flex:1;min-width:120px;cursor:pointer;}
+.brow-check{display:flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;color:#cdc3b6;cursor:pointer;text-transform:uppercase;}
+.brow-check input{width:16px;height:16px;accent-color:var(--dnd);cursor:pointer;}
+.brow-add.remove{background:transparent;color:#c98a8a;border:1px solid #6a3535;}
+.brow-add.remove:hover{background:#3a1e1e;color:#fff;}
+.brow-add.buy{background:var(--gold);color:#1a1408;}
+.brow-add.buy:hover{filter:brightness(1.1);}
 .brow-tabs{display:flex;flex-shrink:0;border-bottom:1px solid #332c2c;}
 .brow-tab{flex:1;padding:9px 4px;background:#141010;color:#9a8f8f;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
 .brow-tab.on{background:var(--dnd);color:#fff;}
@@ -523,10 +539,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="mc-attacks">
       <div class="section-bar"><span>Attacks &amp; Spellcasting Actions</span><span class="sb-note" id="atk-spell-note"></span></div>
       <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div>
-      <div class="add-row">
-        <button class="small-btn ghost" onclick="addAttackRow()">+ Attack</button>
-        <select class="pick-sel" id="atk-pick" onchange="if(this.value){addAttackFromWeapon(this.value);this.value='';}"><option value="">Add from the weapon list…</option></select>
-      </div>
+      <div class="add-hint">Equip a weapon in the Equipment tab or add an attack spell to fill this list.</div>
       </div><!-- mc-attacks -->
 
       <!-- TABS -->
@@ -540,7 +553,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <!-- SPELLS TAB -->
       <div class="tab-panel" id="tab-spells">
-        <div class="section-bar"><span>Spellcasting</span><span class="sb-note" id="spell-note">No spellcasting</span></div>
+        <div class="section-bar"><span>Spellcasting</span><span class="hdr-right"><span class="sb-note" id="spell-note">No spellcasting</span><button class="hdr-btn" onclick="openBook()">📖 Spellbook</button></span></div>
         <div id="spell-block" style="display:none;">
           <div class="spell-head">
             <div class="sh-box"><div class="sh-lbl">Spell Ability</div><div class="sh-val" id="sp-ability">—</div></div>
@@ -549,10 +562,6 @@ select option{background:var(--input-bg);color:var(--ink);}
           </div>
           <div id="spell-slots"></div>
           <div id="spells-by-level"></div>
-          <div class="add-row">
-            <button class="small-btn ghost" onclick="openBook()">📖 Spellbook</button>
-            <select class="pick-sel" id="spell-pick" onchange="if(this.value){addSpellByName(this.value);this.value='';}"><option value="">Add a spell…</option></select>
-          </div>
         </div>
         <div id="spell-empty" style="padding:8px 10px;font-family:'Barlow',sans-serif;font-size:12px;color:var(--muted);line-height:1.5;">This class has no spellcasting. You can <a href="#" onclick="forceSpellcasting();return false;" style="color:var(--dnd);">enable spellcasting manually</a> (for a subclass caster, multiclass, or an item).</div>
       </div>
@@ -570,19 +579,14 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <!-- EQUIPMENT TAB -->
       <div class="tab-panel" id="tab-equipment">
-        <div class="section-bar"><span>Equipment</span></div>
-        <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Item</th><th>Qty</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
-        <div class="add-row">
-          <button class="small-btn ghost" onclick="addInvRow()">+ Item</button>
-          <button class="small-btn ghost" onclick="openStore()">🛒 Item Store</button>
-          <select class="pick-sel" id="inv-pick" onchange="if(this.value){addInvFromData(this.value);this.value='';}"><option value="">Add gear / armor…</option></select>
-        </div>
+        <div class="section-bar"><span>Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openStore()">🛒 Item Store</button></span></div>
         <div class="blk" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);">Coins</span>
           <label style="font-size:11px;color:var(--muted);">GP <input id="f-gp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
           <label style="font-size:11px;color:var(--muted);">SP <input id="f-sp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
           <label style="font-size:11px;color:var(--muted);">CP <input id="f-cp" type="number" value="0" style="width:56px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);" oninput="scheduleAutosave()"></label>
         </div>
+        <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Item</th><th>Qty</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
       </div>
 
       <!-- NOTES TAB -->
@@ -624,6 +628,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
   <!-- DICE TRAY -->
   <div class="dice-tray">
+    <div class="dice-pool-display" id="dice-pool-display"><span>Empty</span></div>
     <div class="tray-row">
       <div class="adv-seg" id="adv-seg">
         <button class="adv dis" data-mode="dis" onclick="setAdv('dis')" title="Disadvantage">Dis</button>
@@ -631,7 +636,6 @@ select option{background:var(--input-bg);color:var(--ink);}
         <button class="adv" data-mode="adv" onclick="setAdv('adv')" title="Advantage">Adv</button>
       </div>
     </div>
-    <div class="dice-pool-display" id="dice-pool-display"><span>Empty</span></div>
     <div class="dice-btns">
       <button class="dice-btn" onclick="addDie(4)">d4</button>
       <button class="dice-btn" onclick="addDie(6)">d6</button>
@@ -675,6 +679,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         <select id="book-class" class="m-input brow-sel" onchange="renderBook()"></select>
         <select id="book-level" class="m-input brow-sel" onchange="renderBook()"></select>
       </div>
+      <label class="brow-check"><input type="checkbox" id="book-mine" onchange="renderBook()"> Only spells available to me</label>
     </div>
     <div class="modal-bd brow-list" id="book-body"></div>
   </div>
@@ -685,7 +690,7 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="modal" style="max-width:640px;">
     <div class="modal-hd"><div class="ttl">🛒 Item Store</div><span class="brow-coins" id="store-coins"></span><button class="x" onclick="closeStore()">&#10005;</button></div>
     <div class="brow-tabs" id="store-tabs"></div>
-    <div class="brow-controls"><input id="store-search" class="m-input" placeholder="Search items…" oninput="renderStore()"></div>
+    <div class="brow-controls"><input id="store-search" class="m-input" placeholder="Search items…" oninput="renderStore()"><label class="brow-check" id="store-prof-wrap"><input type="checkbox" id="store-prof" onchange="renderStore()"> Only gear I'm proficient with</label></div>
     <div class="modal-bd brow-list" id="store-body"></div>
   </div>
 </div>
@@ -818,6 +823,7 @@ function recalc(){
   $('c-prof').textContent = sgn(PB);
   const init = modOf('DEX'); $('c-init').textContent = sgn(init);
   const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
+  reconcileAC();
   renderSpellHeader();
   renderSlots();
 }
@@ -921,6 +927,7 @@ function addAttackRow(a){
   a = a || { name:'', abil:'STR', prof:true, bonus:0, damage:'', type:'' };
   const tr = document.createElement('tr');
   if(a.spell) tr.dataset.spell = a.spell;
+  if(a.weapon) tr.dataset.weapon = a.weapon;
   const abilOpts = ABILITIES.map(x => '<option value="' + x.id + '"' + (a.abil===x.id?' selected':'') + '>' + x.id + '</option>').join('');
   tr.innerHTML =
     '<td><input type="text" class="atk-name" value="' + esc(a.name) + '" placeholder="Longsword" oninput="scheduleAutosave()"></td>' +
@@ -928,7 +935,7 @@ function addAttackRow(a){
       '<input type="checkbox" class="atk-prof" ' + (a.prof?'checked':'') + ' title="Proficient" onchange="scheduleAutosave()" style="accent-color:var(--dnd);">' +
       '<input type="number" class="atk-bonus num mono" value="' + num(a.bonus) + '" title="Extra to-hit" style="width:40px;" oninput="scheduleAutosave()"></div></td>' +
     '<td><input type="text" class="atk-dmg" value="' + esc(a.damage) + '" placeholder="1d8" style="width:70px;" oninput="scheduleAutosave()"><input type="text" class="atk-dtype" value="' + esc(a.type) + '" placeholder="slashing" class="mono" style="width:64px;font-size:10px;" oninput="scheduleAutosave()"></td>' +
-    '<td class="roll-cell" style="white-space:nowrap;"><button class="mini-roll" onclick="rollAttackFull(this)" title="Roll to hit and damage together">Attack</button> <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+    '<td class="roll-cell" style="white-space:nowrap;"><button class="mini-roll" onclick="rollAttackFull(this)" title="Roll to hit and damage together">Attack</button></td>';
   $('attacks-body').appendChild(tr);
 }
 function addAttackFromWeapon(name){
@@ -986,15 +993,91 @@ function rollAttackFull(btn){
 
 // ═══ INVENTORY ════════════════════════════════════════════════════════════
 function addInvRow(it){
-  it = it || { name:'', qty:1 };
+  it = it || { name:'', qty:1, equipped:false };
   const tr = document.createElement('tr');
+  if(it.equipped) tr.dataset.equipped = '1';
   tr.innerHTML =
-    '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="scheduleAutosave()"></td>' +
+    '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></td>' +
     '<td><input type="number" class="inv-qty num mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" style="width:46px;" oninput="scheduleAutosave()"></td>' +
-    '<td class="roll-cell"><button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+    '<td class="roll-cell inv-actions"></td>';
   $('inv-body').appendChild(tr);
+  renderInvActions(tr);
+  return tr;
 }
 function addInvFromData(name){ addInvRow({ name, qty:1 }); scheduleAutosave(); }
+function onInvNameChange(input){ renderInvActions(input.closest('tr')); scheduleAutosave(); }
+function removeInvRow(btn){
+  const tr = btn.closest('tr'); const name = tr.querySelector('.inv-name').value;
+  if(tr.dataset.equipped === '1' && itemKind(name) === 'weapon') unequipWeaponRow(name);
+  tr.remove(); reconcileAC(); scheduleAutosave();
+}
+// A row gets an Equip toggle only if the item is a known weapon, armor, or shield.
+function renderInvActions(tr){
+  const kind = itemKind(tr.querySelector('.inv-name').value);
+  const eq = tr.dataset.equipped === '1';
+  const equipBtn = (kind === 'weapon' || kind === 'armor' || kind === 'shield')
+    ? '<button class="equip-btn' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="Equip / Unequip">' + (eq?'Equipped':'Equip') + '</button>' : '';
+  tr.querySelector('.inv-actions').innerHTML = equipBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
+}
+
+// ── EQUIPMENT: item kinds, equip toggles, AC, weapon attack rows ──────────
+function itemKind(name){
+  const n = norm(name); if(!n) return 'gear';
+  if(D.weapons().some(w => norm(w.name) === n)) return 'weapon';
+  const a = D.armor().find(x => norm(x.name) === n);
+  if(a) return /shield/i.test(a.category) ? 'shield' : 'armor';
+  return 'gear';
+}
+function invRows(){ return [...document.querySelectorAll('#inv-body tr')]; }
+function equippedItemName(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && itemKind(r.querySelector('.inv-name').value) === kind); return tr ? tr.querySelector('.inv-name').value : null; }
+function toggleEquip(btn){
+  const tr = btn.closest('tr'); const name = tr.querySelector('.inv-name').value; const kind = itemKind(name);
+  const turningOn = tr.dataset.equipped !== '1';
+  if(turningOn){
+    // one body armor / one shield at a time
+    if(kind === 'armor' || kind === 'shield'){
+      invRows().forEach(r => { if(r !== tr && r.dataset.equipped === '1' && itemKind(r.querySelector('.inv-name').value) === kind){ r.dataset.equipped = ''; renderInvActions(r); } });
+    }
+    tr.dataset.equipped = '1';
+    if(kind === 'weapon') equipWeaponRow(name);
+  } else {
+    tr.dataset.equipped = '';
+    if(kind === 'weapon') unequipWeaponRow(name);
+  }
+  renderInvActions(tr); reconcileAC(); scheduleAutosave();
+}
+function equipWeaponRow(name){
+  const w = D.weapons().find(x => norm(x.name) === norm(name)); if(!w) return;
+  if(invAttackHasWeapon(name)) return;
+  const finesse = (w.properties || []).some(p => /finesse/i.test(p));
+  const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
+  addAttackRow({ name: w.name, abil, prof: true, bonus: 0, damage: w.damage, type: w.damageType, weapon: w.name });
+}
+function unequipWeaponRow(name){ [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.weapon || '') === norm(name)) tr.remove(); }); }
+function invAttackHasWeapon(name){ return [...document.querySelectorAll('#attacks-body tr')].some(tr => norm(tr.dataset.weapon || '') === norm(name)); }
+// Armor Class from equipped armor + shield (Light = full Dex, Medium = +Dex max 2, Heavy = flat).
+function armorACValue(a, dex){
+  const base = String(a.baseAC || '');
+  const flat = base.match(/^\s*(\d+)\s*$/); if(flat) return +flat[1];
+  const m = base.match(/^\s*(\d+)\s*\+\s*Dex/i);
+  if(m){ const cap = /max\s*(\d+)/i.exec(base); return +m[1] + (cap ? Math.min(dex, +cap[1]) : dex); }
+  return 10 + dex;
+}
+function computeAC(){
+  const dex = modOf('DEX');
+  const armorName = equippedItemName('armor');
+  const armor = armorName ? D.armor().find(x => norm(x.name) === norm(armorName)) : null;
+  let ac = armor ? armorACValue(armor, dex) : 10 + dex;
+  if(equippedItemName('shield')) ac += 2;
+  return ac;
+}
+// When armor or a shield is equipped, AC is auto-calculated and locked; otherwise it stays editable.
+function reconcileAC(){
+  const acEl = $('f-ac'); if(!acEl) return;
+  const auto = !!(equippedItemName('armor') || equippedItemName('shield'));
+  if(auto){ acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto'); acEl.title = 'Auto-calculated from equipped armor/shield'; }
+  else { acEl.readOnly = false; acEl.classList.remove('auto'); acEl.title = ''; }
+}
 
 // ═══ SPELLBOOK (browse & add spells) ══════════════════════════════════════
 let _bookInit = false;
@@ -1006,6 +1089,7 @@ function openBook(){
     $('book-level').innerHTML = '<option value="">All levels</option>' + [0,1,2,3,4,5,6,7,8,9].map(l => '<option value="' + l + '">' + (l===0?'Cantrips':'Level ' + l) + '</option>').join('');
     $('book-body').addEventListener('click', (e) => {
       const add = e.target.closest('[data-add-spell]'); if(add){ addSpellByName(add.dataset.addSpell); renderBook(); return; }
+      const rem = e.target.closest('[data-remove-spell]'); if(rem){ removeSpell(rem.dataset.removeSpell); renderBook(); return; }
       const read = e.target.closest('[data-read-spell]'); if(read){ openSpell(read.dataset.readSpell); }
     });
     _bookInit = true;
@@ -1016,10 +1100,20 @@ function openBook(){
   renderBook();
 }
 function closeBook(){ $('book-overlay').classList.remove('open'); }
+// Highest spell level this character can currently cast (0 = cantrips only / none).
+function sheetMaxSpellLevel(){
+  const t = D.tables(), L = levelNow();
+  if(casterType() === 'pact'){ const pm = t && t.pactMagic ? t.pactMagic[L-1] : null; return pm ? pm.level : (isCaster()?1:0); }
+  const arr = slotArray(); let m = 0; if(arr) arr.forEach((n,i) => { if(n > 0) m = i + 1; });
+  if(isCaster() && m < 1) m = 1;
+  return m;
+}
 function renderBook(){
   const q = norm($('book-search').value), fc = $('book-class').value, fl = $('book-level').value;
+  const mine = $('book-mine').checked, myClass = (classData() || {}).name, maxL = sheetMaxSpellLevel();
   const list = D.spells().filter(s => {
-    if(fc && !(s.classes || []).includes(fc)) return false;
+    if(mine){ if(!myClass || !(s.classes || []).includes(myClass)) return false; if(s.level > maxL) return false; }
+    else if(fc && !(s.classes || []).includes(fc)) return false;
     if(fl !== '' && String(s.level) !== String(fl)) return false;
     if(q && !(norm(s.name).includes(q) || norm(s.school).includes(q))) return false;
     return true;
@@ -1030,10 +1124,12 @@ function renderBook(){
   box.innerHTML = list.map(s => {
     const have = known.has(norm(s.name));
     const meta = (s.level===0?'Cantrip':'Lvl ' + s.level) + ' · ' + esc(s.school) + ' · ' + esc(s.castingTime) + ' · ' + esc(s.range) + (s.concentration?' · Conc':'') + (s.ritual?' · Ritual':'');
+    const btn = have
+      ? '<button class="brow-add remove" data-remove-spell="' + esc(s.name) + '">− Remove</button>'
+      : '<button class="brow-add" data-add-spell="' + esc(s.name) + '">+ Add</button>';
     return '<div class="brow-item">' +
       '<div class="brow-main"><div class="brow-name" data-read-spell="' + esc(s.name) + '" style="cursor:pointer;">' + esc(s.name) + '</div>' +
-        '<div class="brow-meta">' + meta + '</div><div class="brow-desc">' + esc(s.description || '') + '</div></div>' +
-      '<button class="brow-add' + (have?' have':'') + '"' + (have?' disabled':' data-add-spell="' + esc(s.name) + '"') + '>' + (have?'✓ Known':'+ Add') + '</button>' +
+        '<div class="brow-meta">' + meta + '</div><div class="brow-desc">' + esc(s.description || '') + '</div></div>' + btn +
     '</div>';
   }).join('');
 }
@@ -1046,7 +1142,7 @@ function openStore(){
   if(!_storeInit){
     $('store-body').addEventListener('click', (e) => {
       const add = e.target.closest('[data-add-item]'); if(add){ addInvRow({ name:add.dataset.addItem, qty:1 }); scheduleAutosave(); flashBtn(add, '✓ Added'); return; }
-      const atk = e.target.closest('[data-add-atk]'); if(atk){ addAttackFromWeapon(atk.dataset.addAtk); flashBtn(atk, '✓'); }
+      const buy = e.target.closest('[data-buy-item]'); if(buy){ if(storeBuy(buy.dataset.buyItem, buy.dataset.buyCost)) flashBtn(buy, '✓ Bought'); else flashBtn(buy, 'Need ' + esc(buy.dataset.buyCost)); }
     });
     _storeInit = true;
   }
@@ -1056,29 +1152,58 @@ function openStore(){
 function closeStore(){ $('store-overlay').classList.remove('open'); }
 function storeSetTab(t){ _storeTab = t; $('store-search').value = ''; renderStore(); }
 function flashBtn(btn, txt){ const o = btn.textContent; btn.textContent = txt; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = false; }, 700); }
+// Proficiency helpers (used by the store's "proficient only" filter).
+function classProf(kind){ const c = classData(); return (c && c.proficiencies && c.proficiencies[kind]) ? c.proficiencies[kind].map(x => String(x).toLowerCase()) : []; }
+function weaponProficient(w){
+  const p = classProf('weapons'); if(!p.length) return false;
+  if(p.some(x => x.includes('martial'))) return true;                 // martial covers simple + martial
+  if(p.some(x => x.includes('simple'))) return /simple/i.test(w.category);
+  return p.some(x => x === String(w.name).toLowerCase());             // named weapon proficiencies
+}
+function armorProficient(a){
+  const p = classProf('armor'); if(!p.length) return false;
+  const cat = String(a.category || '').toLowerCase();
+  if(/shield/.test(cat)) return p.some(x => x.includes('shield'));
+  if(p.some(x => x.includes('heavy'))) return cat==='heavy' || cat==='medium' || cat==='light';
+  if(p.some(x => x.includes('medium'))) return cat==='medium' || cat==='light';
+  if(p.some(x => x.includes('light'))) return cat==='light';
+  return false;
+}
 function storeItems(){
   switch(_storeTab){
-    case 'weapons': return D.weapons().map(w => ({ name:w.name, cost:w.cost, meta:(w.category + ' ' + w.kind + ' · ' + w.damage + ' ' + w.damageType + (w.mastery?' · ' + w.mastery:'')), desc:(w.properties || []).join(', '), kind:'weapon' }));
-    case 'armor':   return D.armor().map(a => ({ name:a.name, cost:a.cost, meta:(a.category + ' Armor · AC ' + a.baseAC + (a.stealthDisadvantage?' · Stealth Dis':'')), desc:'', kind:'armor' }));
-    case 'magic':   return D.magicItems().map(m => ({ name:m.name, cost:'', meta:(m.type + ' · ' + m.rarity + (m.attunement?' · Attunement':'')), desc:m.description, kind:'magic' }));
-    default:        return D.gear().map(g => ({ name:g.name, cost:g.cost, meta:(g.category + (g.weight?' · ' + g.weight:'')), desc:g.description, kind:'gear' }));
+    case 'weapons': return D.weapons().map(w => ({ name:w.name, cost:w.cost, meta:(w.category + ' ' + w.kind + ' · ' + w.damage + ' ' + w.damageType + (w.mastery?' · ' + w.mastery:'')), desc:(w.properties || []).join(', '), prof:weaponProficient(w) }));
+    case 'armor':   return D.armor().map(a => ({ name:a.name, cost:a.cost, meta:(a.category + ' Armor · AC ' + a.baseAC + (a.stealthDisadvantage?' · Stealth Dis':'')), desc:'', prof:armorProficient(a) }));
+    case 'magic':   return D.magicItems().map(m => ({ name:m.name, cost:'', meta:(m.type + ' · ' + m.rarity + (m.attunement?' · Attunement':'')), desc:m.description, prof:true }));
+    default:        return D.gear().map(g => ({ name:g.name, cost:g.cost, meta:(g.category + (g.weight?' · ' + g.weight:'')), desc:g.description, prof:true }));
   }
+}
+function costToCp(cost){ const m = String(cost || '').match(/(\d+)\s*(GP|SP|CP)/i); if(!m) return 0; const n = +m[1], u = m[2].toUpperCase(); return u==='GP'?n*100:u==='SP'?n*10:n; }
+function coinsCp(){ return (num($('f-gp').value))*100 + (num($('f-sp').value))*10 + num($('f-cp').value); }
+function setCoinsCp(total){ total = Math.max(0, total); $('f-gp').value = Math.floor(total/100); $('f-sp').value = Math.floor((total%100)/10); $('f-cp').value = total%10; }
+function storeBuy(name, cost){
+  const price = costToCp(cost); if(price <= 0) return false;
+  if(price > coinsCp()) return false;
+  setCoinsCp(coinsCp() - price);
+  addInvRow({ name, qty:1 }); scheduleAutosave(); renderStore();
+  return true;
 }
 function renderStore(){
   $('store-tabs').innerHTML = STORE_TABS.map(t => '<button class="brow-tab' + (_storeTab===t.id?' on':'') + '" onclick="storeSetTab(\'' + t.id + '\')">' + t.label + '</button>').join('');
-  const gp = $('f-gp').value || 0, sp = $('f-sp').value || 0, cp = $('f-cp').value || 0;
+  // "proficient" filter only applies to weapons/armor
+  $('store-prof-wrap').style.display = (_storeTab==='weapons' || _storeTab==='armor') ? '' : 'none';
+  const gp = num($('f-gp').value), sp = num($('f-sp').value), cp = num($('f-cp').value);
   $('store-coins').textContent = gp + ' gp · ' + sp + ' sp · ' + cp + ' cp';
-  const q = norm($('store-search').value);
-  const list = storeItems().filter(it => !q || norm(it.name).includes(q) || norm(it.meta).includes(q));
+  const q = norm($('store-search').value), profOnly = $('store-prof').checked && (_storeTab==='weapons' || _storeTab==='armor');
+  const list = storeItems().filter(it => (!q || norm(it.name).includes(q) || norm(it.meta).includes(q)) && (!profOnly || it.prof));
   const box = $('store-body');
   if(!list.length){ box.innerHTML = '<p class="m-hint" style="padding:10px 4px;">Nothing matches.</p>'; return; }
   box.innerHTML = list.map(it => {
     const cost = it.cost ? '<span class="brow-cost">' + esc(it.cost) + '</span>' : '';
-    const wpn = it.kind==='weapon' ? '<button class="brow-add alt" data-add-atk="' + esc(it.name) + '" title="Add as an attack row">⚔</button>' : '';
+    const buy = costToCp(it.cost) > 0 ? '<button class="brow-add buy" data-buy-item="' + esc(it.name) + '" data-buy-cost="' + esc(it.cost) + '" title="Buy — deducts from your coins">Buy</button>' : '';
     return '<div class="brow-item">' +
       '<div class="brow-main"><div class="brow-name">' + esc(it.name) + cost + '</div><div class="brow-meta">' + esc(it.meta) + '</div>' +
         (it.desc ? '<div class="brow-desc">' + esc(it.desc) + '</div>' : '') + '</div>' +
-      '<div class="brow-btns">' + wpn + '<button class="brow-add" data-add-item="' + esc(it.name) + '">+ Add</button></div>' +
+      '<div class="brow-btns">' + buy + '<button class="brow-add" data-add-item="' + esc(it.name) + '">+ Add</button></div>' +
     '</div>';
   }).join('');
 }
@@ -1195,7 +1320,6 @@ function renderSpells(){
         '<span style="display:flex;gap:4px;align-items:center;">' +
           (lvl > 0 ? '<button class="cast-btn" onclick="castSpell(\'' + esc(sk.name).replace(/'/g,"\\'") + '\',' + lvl + ')" title="Spend a slot">Cast</button>' : '') +
           (atkRoll ? '<button class="cast-btn" style="background:var(--gold);" onclick="rollSpellAttack()" title="Spell attack">Atk</button>' : '') +
-          '<button class="sp-x" onclick="removeSpell(\'' + esc(sk.name).replace(/'/g,"\\'") + '\')">✕</button>' +
         '</span>';
       box.appendChild(row);
     });
@@ -1256,23 +1380,11 @@ function fillDatalists(){
   refreshSubclassList();
   // pickers
   const opt = (v, label) => '<option value="' + esc(v) + '">' + esc(label || v) + '</option>';
-  $('atk-pick').innerHTML = '<option value="">Add from the weapon list…</option>' + D.weapons().map(w => opt(w.name, w.name + ' (' + w.damage + ' ' + w.damageType + ')')).join('');
   $('feat-pick').innerHTML = '<option value="">Add a Feat…</option>' + D.feats().slice().sort((a,b)=>a.name.localeCompare(b.name)).map(f => opt(f.name, f.name + ' — ' + f.category)).join('');
-  $('inv-pick').innerHTML = '<option value="">Add gear / armor…</option>' +
-    '<optgroup label="Armor">' + D.armor().map(a => opt(a.name)).join('') + '</optgroup>' +
-    '<optgroup label="Weapons">' + D.weapons().map(w => opt(w.name)).join('') + '</optgroup>' +
-    '<optgroup label="Gear">' + D.gear().map(g => opt(g.name)).join('') + '</optgroup>' +
-    '<optgroup label="Magic Items">' + D.magicItems().map(m => opt(m.name)).join('') + '</optgroup>';
   refreshSpellPicker();
 }
 function refreshSubclassList(){ const c = classData(); $('dl-subclasses').innerHTML = c ? (c.subclasses||[]).map(s => '<option value="' + esc(s.name) + '">').join('') : ''; }
-function refreshSpellPicker(){
-  const cls = classData(); const clsName = cls ? cls.name : null;
-  let list = D.spells();
-  const forClass = clsName ? list.filter(s => (s.classes||[]).some(c => norm(c) === norm(clsName))) : list;
-  const use = (clsName && forClass.length) ? forClass : list;
-  $('spell-pick').innerHTML = '<option value="">Add a spell…</option>' + use.slice().sort((a,b)=>(a.level-b.level)||a.name.localeCompare(b.name)).map(s => '<option value="' + esc(s.name) + '">' + (s.level===0?'C':s.level) + ' · ' + esc(s.name) + '</option>').join('');
-}
+function refreshSpellPicker(){ /* spell picker replaced by the Spellbook modal */ }
 function onClassChange(){ refreshSubclassList(); refreshSpellPicker(); renderFeatures(); recalc(); scheduleAutosave(); syncDocTitle(); }
 function onLevelChange(){ renderFeatures(); recalc(); scheduleAutosave(); }
 function onSpeciesChange(){ renderFeatures(); recalc(); scheduleAutosave(); }
@@ -1380,7 +1492,7 @@ function collectSheet(){
     damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value,
     spell: tr.dataset.spell || ''
   })).filter(a => a.name || a.damage);
-  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value) })).filter(i => i.name);
+  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1' })).filter(i => i.name);
   return {
     system:'DND', v:1,
     name: v('f-name'), cls: v('f-class'), level: num(v('f-level')), subclass: v('f-subclass'),
