@@ -182,13 +182,21 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .sk-val{font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:var(--dnd-dk);min-width:26px;text-align:right;cursor:pointer;}
 
 /* COMBAT strip */
-.combat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;}
+.combat-strip{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;align-items:stretch;}
+.cbt-left{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-content:start;}
+.cbt-left .death-box{grid-column:1 / -1;}
 .cbt{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:6px 4px;text-align:center;}
 .cbt .c-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);line-height:1.1;}
 .cbt .c-val{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--dnd-dk);line-height:1.1;}
 .cbt input{width:100%;border:none;background:transparent;font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;text-align:center;color:var(--dnd-dk);outline:none;}
 .cbt.click{cursor:pointer;}.cbt.click:hover{background:var(--dnd-lt);}
-.hp-box{grid-column:span 2;display:flex;flex-direction:column;gap:5px;}
+.hp-box{display:flex;flex-direction:column;justify-content:center;gap:8px;}
+.hp-hd{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif;}
+.hp-hd .hd-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.hp-hd input{width:38px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;color:var(--ink);outline:none;padding:2px 0;}
+.hp-hd .hd-slash{color:var(--muted);}
+.hp-hd #hd-total{font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:var(--ink);}
+.hp-hd .hd-die{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--dnd-dk);font-weight:700;}
 .hp-row{display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Share Tech Mono',monospace;font-weight:700;color:var(--ink);}
 .hp-row input{width:66px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
 .hp-row .slash{color:var(--muted);font-size:24px;}
@@ -262,6 +270,21 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .slot-pip{width:15px;height:15px;border:2px solid var(--dnd-dk);border-radius:3px;background:transparent;cursor:pointer;}
 .slot-pip.used{background:var(--dnd);}
 .slot-reset{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;font-size:9px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;cursor:pointer;}
+/* Class resource / per-day trackers */
+.res-wrap{padding:4px 10px 6px;display:flex;flex-direction:column;gap:8px;}
+.res-empty{font-family:'Barlow',sans-serif;font-size:12px;color:var(--muted);line-height:1.4;padding:4px 0;font-style:italic;}
+.res-row{border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:6px 9px;}
+.res-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;}
+.res-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--dnd-dk);}
+.res-meta{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.res-meta b{color:var(--ink);font-family:'Share Tech Mono',monospace;}
+.res-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0 2px;}
+.res-x:hover{color:var(--dnd);}
+.res-pips{display:flex;gap:5px;flex-wrap:wrap;}
+.res-pip{width:20px;height:20px;border:2px solid var(--dnd-dk);border-radius:4px;background:transparent;cursor:pointer;}
+.res-pip.used{background:var(--dnd);}
+.res-reset-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;cursor:pointer;}
+.res-reset-btn:hover{background:var(--dnd-lt);color:var(--dnd-dk);}
 .spell-row{display:grid;grid-template-columns:16px 1fr auto;gap:6px;align-items:center;padding:3px 10px;border-bottom:1px solid var(--rule);}
 .spell-row:hover{background:var(--box);}
 .sp-prep{width:14px;height:14px;border:2px solid var(--dnd-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;}
@@ -383,8 +406,7 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
   .mc-tabs{order:7;}
   .ability-col .abil-list{display:grid;grid-template-columns:repeat(3,1fr);}
   .abil-box{margin:6px 4px;}
-  .combat-strip{grid-template-columns:1fr 1fr;}
-  .cbt.hp-box{grid-column:span 2;}
+  .combat-strip{grid-template-columns:1fr;}
   .hp-row input{width:80px;font-size:34px;}
   .hp-adj-btn{min-height:38px;flex:1;}
   .hp-adjust input{min-height:38px;}
@@ -508,10 +530,20 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="main-col">
       <div class="mc-combat">
       <div class="combat-strip">
-        <div class="cbt"><div class="c-lbl">Armor Class</div><input id="f-ac" value="10" oninput="scheduleAutosave()"></div>
-        <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
-        <div class="cbt"><div class="c-lbl">Speed</div><input id="f-speed" value="30" oninput="scheduleAutosave()"></div>
-        <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof">+2</div></div>
+        <div class="cbt-left">
+          <div class="cbt"><div class="c-lbl">Armor Class</div><input id="f-ac" value="10" oninput="scheduleAutosave()"></div>
+          <div class="cbt"><div class="c-lbl">Speed</div><input id="f-speed" value="30" oninput="scheduleAutosave()"></div>
+          <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
+          <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof">+2</div></div>
+          <div class="cbt death-box">
+            <div class="c-lbl">Death Saves</div>
+            <div class="death-stack">
+              <span id="death-succ" title="Successes"></span>
+              <span id="death-fail" title="Failures"></span>
+            </div>
+            <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save">🎲 Roll</button>
+          </div>
+        </div>
         <div class="cbt hp-box">
           <div class="c-lbl">Hit Points</div>
           <div class="hp-row"><input id="f-hp-cur" type="number" value="10" oninput="scheduleAutosave()"><span class="slash">/</span><input id="f-hp-max" type="number" value="10" oninput="scheduleAutosave()"></div>
@@ -522,16 +554,15 @@ select option{background:var(--input-bg);color:var(--ink);}
           </div>
           <div class="hp-sub">
             <label>Temp <input id="f-hp-temp" type="number" value="0" oninput="scheduleAutosave()"></label>
-            <label>Hit Dice <input id="f-hitdice" placeholder="1d10" style="width:52px;" oninput="scheduleAutosave()"> <button class="mini-roll" onclick="rollHitDie()" title="Roll a Hit Die">🎲</button></label>
           </div>
-        </div>
-        <div class="cbt death-box">
-          <div class="c-lbl">Death Saves</div>
-          <div class="death-stack">
-            <span id="death-succ" title="Successes"></span>
-            <span id="death-fail" title="Failures"></span>
+          <div class="hp-hd">
+            <span class="hd-lbl">Hit Dice</span>
+            <input id="f-hd-left" type="number" min="0" value="1" title="Hit Dice remaining" oninput="scheduleAutosave()">
+            <span class="hd-slash">/</span><span id="hd-total">1</span>
+            <span class="hd-die" id="hd-die">d8</span>
+            <button class="mini-roll" onclick="rollHitDie()" title="Spend a Hit Die to heal">🎲</button>
+            <input id="f-hitdice" type="hidden">
           </div>
-          <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save">🎲 Roll</button>
         </div>
       </div>
       </div><!-- mc-combat -->
@@ -568,6 +599,14 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <!-- FEATURES TAB -->
       <div class="tab-panel" id="tab-features">
+        <div class="section-bar red"><span>Class Resources</span><span class="sb-note">per-day trackers</span></div>
+        <div id="resources-list" class="res-wrap"></div>
+        <div class="add-row">
+          <input type="text" id="res-name" class="pick-sel" placeholder="Tracker name" style="flex:1 1 90px;">
+          <input type="number" id="res-max" min="1" placeholder="Max" class="pick-sel" style="width:56px;flex:0 0 auto;">
+          <select id="res-reset" class="pick-sel" style="width:auto;flex:0 0 auto;"><option value="short">Short rest</option><option value="long">Long rest</option></select>
+          <button class="small-btn ghost" onclick="addCustomResource()">+ Tracker</button>
+        </div>
         <div class="section-bar red"><span>Features &amp; Traits</span><span class="sb-note" id="feat-note"></span></div>
         <div id="features-list" style="padding:4px 10px 8px;"></div>
         <div class="add-row">
@@ -824,6 +863,7 @@ function recalc(){
   const init = modOf('DEX'); $('c-init').textContent = sgn(init);
   const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
   reconcileAC();
+  updateHitDiceUI();
   renderSpellHeader();
   renderSlots();
 }
@@ -870,10 +910,22 @@ function rollDeathSave(){
   renderDeath();
   addLog('Death Save', String(r.nat), msg, type); scheduleAutosave();
 }
+function hitDieSides(){ const m = ($('f-hitdice').value || '').match(/d(\d+)/i); if(m) return num(m[1]); const c = classData(); return (c && c.hitDie) ? c.hitDie : 8; }
+function hitDiceTotal(){ return Math.max(1, num($('f-level').value) || 1); }
+function updateHitDiceUI(){
+  const t = hitDiceTotal(); $('hd-total').textContent = t; $('hd-die').textContent = 'd' + hitDieSides();
+  const le = $('f-hd-left'); if(le){ le.max = t; if(le.value === '' ) le.value = t; else if(num(le.value) > t) le.value = t; }
+}
+// Spend one Hit Die: roll it + CON and heal that much (up to max HP), decrementing the pool.
 function rollHitDie(){
-  const hd = ($('f-hitdice').value || '').match(/d(\d+)/i); const sides = hd ? num(hd[1]) : 8;
-  const roll = dN(sides), con = modOf('CON'), total = Math.max(1, roll + con);
-  addLog('Hit Die', '+' + total, 'd' + sides + ': ' + roll + ' ' + sgn(con) + ' CON', 'normal');
+  const sides = hitDieSides(), le = $('f-hd-left'); let left = num(le.value);
+  if(left <= 0){ addLog('Hit Die', '✗', 'No Hit Dice remaining — take a Long Rest', 'fumble'); return; }
+  le.value = left - 1;
+  const roll = dN(sides), con = modOf('CON'), heal = Math.max(1, roll + con);
+  const cur = $('f-hp-cur'), max = num($('f-hp-max').value);
+  cur.value = max ? Math.min(max, num(cur.value) + heal) : num(cur.value) + heal;
+  addLog('Hit Die', '+' + heal + ' HP', 'd' + sides + ': ' + roll + ' ' + sgn(con) + ' CON · ' + (left-1) + ' HD left', 'normal');
+  scheduleAutosave();
 }
 // Heal (sign +1) or Damage (sign -1) current HP by the amount in the adjust field.
 function adjustHP(sign){
@@ -1249,6 +1301,49 @@ function removeCustomFeature(n){ customFeatures = customFeatures.filter(f => f.n
 function addFeatByName(n){ if(addedFeats.indexOf(n) < 0) addedFeats.push(n); renderFeatures(); scheduleAutosave(); }
 function removeFeat(n){ addedFeats = addedFeats.filter(f => f !== n); renderFeatures(); scheduleAutosave(); }
 
+// ═══ CLASS RESOURCES (per-day / feature trackers) ═════════════════════════
+// Auto-detected from the class table's per-day columns; users can add their own.
+const RESOURCE_DEFS = {
+  'Rages':            { label:'Rages',            reset:'long' },
+  'Second Wind':      { label:'Second Wind',      reset:'short' },
+  'Channel Divinity': { label:'Channel Divinity', reset:'short' },
+  'Wild Shape':       { label:'Wild Shape',       reset:'short' },
+  'Focus':            { label:'Focus Points',     reset:'short' },
+  'Sorcery Points':   { label:'Sorcery Points',   reset:'long' },
+};
+let resourceUsed = {};       // { key: usedCount }
+let customResources = [];    // [{name, max, reset}]
+function autoResources(){
+  const c = classData(); if(!c || !c.table) return [];
+  const row = c.table.find(r => Number(r.level) === levelNow()); if(!row || !row.columns) return [];
+  const out = [];
+  Object.keys(RESOURCE_DEFS).forEach(col => {
+    const raw = String(row.columns[col] == null ? '' : row.columns[col]).trim();
+    if(/^\d+$/.test(raw) && +raw > 0){ const d = RESOURCE_DEFS[col]; out.push({ name:d.label, key:d.label, max:+raw, reset:d.reset }); }
+  });
+  return out;
+}
+function allResources(){ return autoResources().concat(customResources.map(r => ({ name:r.name, key:r.name, max:r.max, reset:r.reset || 'long', custom:true }))); }
+function renderResources(){
+  const box = $('resources-list'); if(!box) return;
+  const list = allResources();
+  if(!list.length){ box.innerHTML = '<div class="res-empty">No per-day resources at this level — set a class above, or add your own tracker below.</div>'; return; }
+  box.innerHTML = list.map(r => {
+    const used = Math.min(resourceUsed[r.key] || 0, r.max);
+    let pips = ''; for(let i=1;i<=r.max;i++) pips += '<span class="res-pip' + (i<=used?' used':'') + '" onclick="toggleResource(\'' + esc(r.key).replace(/'/g,"\\'") + '\',' + i + ',' + r.max + ')"></span>';
+    return '<div class="res-row"><div class="res-head"><span class="res-name">' + esc(r.name) + '</span>' +
+      '<span class="res-meta"><b>' + (r.max - used) + '</b>/' + r.max + ' · ' + r.reset + ' rest' +
+      ' <button class="res-reset-btn" onclick="resetResource(\'' + esc(r.key).replace(/'/g,"\\'") + '\')">Reset</button>' +
+      (r.custom ? '<button class="res-x" onclick="removeCustomResource(\'' + esc(r.name).replace(/'/g,"\\'") + '\')" title="Remove tracker">✕</button>' : '') +
+      '</span></div><div class="res-pips">' + pips + '</div></div>';
+  }).join('');
+}
+function toggleResource(key, i, max){ const u = resourceUsed[key] || 0; resourceUsed[key] = (i <= u ? i-1 : i); renderResources(); scheduleAutosave(); }
+function resetResource(key){ resourceUsed[key] = 0; renderResources(); scheduleAutosave(); }
+function addCustomResource(){ const n = ($('res-name').value || '').trim(), m = num($('res-max').value); if(!n || m < 1) return; customResources.push({ name:n, max:m, reset:$('res-reset').value || 'long' }); $('res-name').value=''; $('res-max').value=''; renderResources(); scheduleAutosave(); }
+function removeCustomResource(n){ customResources = customResources.filter(r => r.name !== n); delete resourceUsed[n]; renderResources(); scheduleAutosave(); }
+function resetResources(kind){ allResources().forEach(r => { if(kind === 'long' || r.reset === 'short') resourceUsed[r.key] = 0; }); renderResources(); }
+
 // ═══ SPELLCASTING ═════════════════════════════════════════════════════════
 let spellsKnown = [];   // [{name, prepared}]
 function casterType(){ const c = classData(); if(c && c.spellcasting && c.spellcasting !== 'none') return c.spellcasting; return _forceSpells ? 'third' : 'none'; }
@@ -1385,8 +1480,8 @@ function fillDatalists(){
 }
 function refreshSubclassList(){ const c = classData(); $('dl-subclasses').innerHTML = c ? (c.subclasses||[]).map(s => '<option value="' + esc(s.name) + '">').join('') : ''; }
 function refreshSpellPicker(){ /* spell picker replaced by the Spellbook modal */ }
-function onClassChange(){ refreshSubclassList(); refreshSpellPicker(); renderFeatures(); recalc(); scheduleAutosave(); syncDocTitle(); }
-function onLevelChange(){ renderFeatures(); recalc(); scheduleAutosave(); }
+function onClassChange(){ refreshSubclassList(); refreshSpellPicker(); renderFeatures(); renderResources(); recalc(); scheduleAutosave(); syncDocTitle(); }
+function onLevelChange(){ renderFeatures(); renderResources(); recalc(); scheduleAutosave(); }
 function onSpeciesChange(){ renderFeatures(); recalc(); scheduleAutosave(); }
 
 // ═══ RULES MODAL ══════════════════════════════════════════════════════════
@@ -1440,15 +1535,19 @@ function setExhaustion(n){ exhaustion = (exhaustion === n ? n-1 : n); renderExha
 function shortRest(){
   // Warlocks regain Pact Magic slots on a Short Rest.
   if(casterType() === 'pact' && slotUsed['pact']){ slotUsed['pact'] = 0; renderSlots(); }
-  addLog('Short Rest', '☾', 'Pact slots restored; spend Hit Dice to heal.', 'normal');
+  resetResources('short');
+  addLog('Short Rest', '☾', 'Pact slots + short-rest resources restored; spend Hit Dice to heal.', 'normal');
   scheduleAutosave();
 }
 function longRest(){
   $('f-hp-cur').value = $('f-hp-max').value; $('f-hp-temp').value = 0;
   slotUsed = {}; deathSucc = 0; deathFail = 0;
   if(exhaustion > 0) exhaustion -= 1;   // 2024: a Long Rest removes one Exhaustion level
+  // Regain half your Hit Dice (rounded down, minimum 1).
+  const t = hitDiceTotal(); const le = $('f-hd-left'); const regained = Math.min(t - num(le.value), Math.max(1, Math.floor(t/2))); le.value = Math.min(t, num(le.value) + regained);
+  resetResources('long');
   renderDeath(); renderSlots(); renderExhaustion();
-  addLog('Long Rest', '☀', 'Full HP, all spell slots, death saves cleared' + (exhaustion >= 0 ? ', −1 Exhaustion' : ''), 'crit');
+  addLog('Long Rest', '☀', 'Full HP, all spell slots, death saves cleared' + (exhaustion >= 0 ? ', −1 Exhaustion' : '') + ', +' + Math.max(0,regained) + ' Hit Dice', 'crit');
   scheduleAutosave();
 }
 
@@ -1498,11 +1597,11 @@ function collectSheet(){
     name: v('f-name'), cls: v('f-class'), level: num(v('f-level')), subclass: v('f-subclass'),
     species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'),
     scores, saveProf, skillProf,
-    speed: v('f-speed'), ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'),
+    speed: v('f-speed'), ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
     inspiration: $('f-inspiration').checked, deathSucc, deathFail, activeConditions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),
     proficiencies: v('f-proficiencies'), notes: v('f-notes'),
-    customFeatures, addedFeats, spellsKnown, slotUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
+    customFeatures, addedFeats, resourceUsed, customResources, spellsKnown, slotUsed, forceSpells: _forceSpells, spellAbility: _spellAbility, lineage: _lineage,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id:_campaign.id, code:_campaign.code, name:_campaign.name } : null,
   };
 }
@@ -1515,17 +1614,19 @@ function applySheet(d){
   saveProf = d.saveProf || {}; skillProf = d.skillProf || {};
   set('f-speed', d.speed || '30'); set('f-ac', d.ac || '10');
   set('f-hp-cur', d.hpCur != null ? d.hpCur : 10); set('f-hp-max', d.hpMax != null ? d.hpMax : 10); set('f-hp-temp', d.hpTemp || 0); set('f-hitdice', d.hitdice || '');
+  set('f-hd-left', d.hdLeft != null ? d.hdLeft : hitDiceTotal());
   $('f-inspiration').checked = !!d.inspiration;
   deathSucc = d.deathSucc || 0; deathFail = d.deathFail || 0;
   activeConditions = d.activeConditions || []; exhaustion = d.exhaustion || 0; _tab = d.tab || _tab;
   set('f-proficiencies', d.proficiencies); set('f-notes', d.notes);
   set('f-gp', d.gp || 0); set('f-sp', d.sp || 0); set('f-cp', d.cp || 0);
   customFeatures = d.customFeatures || []; addedFeats = d.addedFeats || [];
+  resourceUsed = d.resourceUsed || {}; customResources = d.customResources || [];
   spellsKnown = d.spellsKnown || []; slotUsed = d.slotUsed || {}; _forceSpells = !!d.forceSpells; _spellAbility = d.spellAbility || ''; _lineage = d.lineage || '';
   $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow);
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
   refreshSubclassList(); refreshSpellPicker();
-  renderDeath(); renderFeatures(); renderConditions(); recalc(); setDefaultTab();
+  renderDeath(); renderFeatures(); renderResources(); renderConditions(); recalc(); setDefaultTab();
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
 }
 function saveSheet(quiet){
@@ -1745,6 +1846,7 @@ campaignUpdateBtn();
 buildSkills();
 fillDatalists();
 updateDicePoolDisplay();
+renderResources();
 autoLoad();
 </script>
 </body>
