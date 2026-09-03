@@ -474,6 +474,7 @@
     const spellcasts = isCaster();
     const data = {
       system:"DND", v:1, name: st.name, cls: st.cls, level: st.level, subclass: st.subclass,
+      classLevels: [{ cls: st.cls, subclass: st.subclass, level: st.level }],
       species: st.species, background: st.background, alignment: st.alignment,
       scores: sc, saveProf, skillProf,
       speed: String(speed), ac: String(ac), hpCur: hp, hpMax: hp, hpTemp:0,

@@ -109,6 +109,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hdr-field select option{color:#111;background:#fff;}
 .hdr-field input::placeholder{color:rgba(255,255,255,.45);font-weight:500;}
 .hdr-field.lastcol{border-right:none;}
+.hdr-field input.managed{opacity:.92;cursor:default;}
 
 /* BODY */
 .body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
@@ -659,7 +660,8 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
   <div class="log-actions">
     <button class="log-action-btn campaign" id="campaign-btn" onclick="openCampaign()" title="Campaign" aria-label="Campaign">🔗</button>
-    <button class="log-action-btn wizard" onclick="DNDB&&DNDB.launch()" title="Character Builder">✨ Build</button>
+    <button class="log-action-btn wizard" id="build-btn" onclick="DNDB&&DNDB.launch()" title="Character Builder">✨ Build</button>
+    <button class="log-action-btn wizard" id="levelup-btn" onclick="DNDLU&&DNDLU.launch()" title="Level Up" style="display:none;">⬆ Level Up</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Rules Glossary">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <button class="log-action-btn import" onclick="document.getElementById('import-file').click()" title="Import JSON">Import</button>
@@ -794,12 +796,47 @@ let _forceSpells = false;
 let _spellAbility = '';            // manual override
 let _lastRoll = null;
 
-function levelNow(){ return Math.max(1, Math.min(20, num($('f-level').value) || 1)); }
+function levelNow(){ return totalLevel(); }
 function profBonus(){ const t = D.tables(); const L = levelNow(); if(t && t.proficiencyByLevel && t.proficiencyByLevel[L-1]) return t.proficiencyByLevel[L-1]; return 2 + Math.floor((L-1)/4); }
 function score(id){ return num($('sc-' + id) ? $('sc-' + id).value : 10); }
 function modOf(id){ return abilMod(score(id)); }
-function classData(){ const n = norm($('f-class').value); return D.classes().find(c => norm(c.name) === n) || null; }
-function subclassData(){ const c = classData(); if(!c) return null; const n = norm($('f-subclass').value); return (c.subclasses||[]).find(s => norm(s.name) === n) || null; }
+// ── Multiclass model ──────────────────────────────────────────────────────
+// classLevels is the authoritative breakdown: [{cls, subclass, level}]. When it's
+// empty the sheet is in single-class "hand entry" mode and reads the header fields.
+let classLevels = [];
+function classList(){
+  if(classLevels.length) return classLevels;
+  const n = ($('f-class').value || '').trim();
+  return n ? [{ cls:n, subclass:($('f-subclass').value || '').trim(), level: Math.max(1, num($('f-level').value) || 1) }] : [];
+}
+function classDataByName(n){ return D.classes().find(c => norm(c.name) === norm(n)) || null; }
+function primaryClassEntry(){ return classList()[0] || null; }
+function totalLevel(){
+  if(classLevels.length){ const l = classLevels.reduce((s,c) => s + (num(c.level) || 0), 0); return Math.max(1, Math.min(20, l || 1)); }
+  return Math.max(1, Math.min(20, num($('f-level').value) || 1));
+}
+function classData(){ const p = primaryClassEntry(); return p ? classDataByName(p.cls) : null; }
+function subclassData(){ const p = primaryClassEntry(); if(!p) return null; const c = classDataByName(p.cls); if(!c) return null; return (c.subclasses||[]).find(s => norm(s.name) === norm(p.subclass)) || null; }
+// Managed mode locks the header Class/Level/Subclass fields (the Level-Up wizard drives them).
+function classManaged(){ return classLevels.length > 0; }
+function classSummary(){ return classList().map(c => c.cls + ' ' + c.level).join(' / '); }
+function syncClassFields(){
+  const managed = classManaged();
+  const cf = $('f-class'), lf = $('f-level'), sf = $('f-subclass');
+  if(managed){
+    cf.value = classLevels.length > 1 ? classSummary() : classLevels[0].cls;
+    lf.value = totalLevel();
+    sf.value = classLevels.map(c => c.subclass).filter(Boolean).join(' / ');
+    [cf,lf,sf].forEach(el => { el.readOnly = true; el.classList.add('managed'); el.title = 'Managed by the Level-Up wizard'; });
+  } else {
+    [cf,lf,sf].forEach(el => { el.readOnly = false; el.classList.remove('managed'); el.title = ''; });
+  }
+}
+window.getClassLevels = () => classLevels;
+window.setClassLevels = (arr) => { classLevels = Array.isArray(arr) ? arr.slice() : []; syncClassFields(); };
+// Once a character exists (a class is set), the Build button becomes Level Up.
+function refreshWizardButtons(){ const built = classList().length > 0; const bb = $('build-btn'), lb = $('levelup-btn'); if(bb) bb.style.display = built ? 'none' : ''; if(lb) lb.style.display = built ? '' : 'none'; }
+window.refreshWizardButtons = refreshWizardButtons;
 function speciesData(){ const n = norm($('f-species').value); return D.species().find(s => norm(s.name) === n) || null; }
 function backgroundData(){ const n = norm($('f-background').value); return D.backgrounds().find(b => norm(b.name) === n) || null; }
 
@@ -866,6 +903,7 @@ function recalc(){
   const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
   reconcileAC();
   updateHitDiceUI();
+  refreshWizardButtons();
   renderSpellHeader();
   renderSlots();
 }
@@ -1272,13 +1310,13 @@ function renderStore(){
 let customFeatures = [];   // [{name, desc, meta}]
 let addedFeats = [];       // [feat name]
 function autoFeatures(){
-  const out = []; const L = levelNow();
-  const c = classData();
-  if(c){
-    (c.features || []).filter(f => !f.subclass && f.level <= L).forEach(f => out.push({ name: f.name, meta: c.name + ' ' + f.level, desc: f.description }));
-    const sub = subclassData();
-    if(sub) (sub.features || []).filter(f => f.level <= L).forEach(f => out.push({ name: f.name, meta: sub.name + ' ' + f.level, desc: f.description }));
-  }
+  const out = [];
+  classList().forEach(cl => {
+    const c = classDataByName(cl.cls); if(!c) return;
+    (c.features || []).filter(f => !f.subclass && f.level <= cl.level).forEach(f => out.push({ name: f.name, meta: c.name + ' ' + f.level, desc: f.description }));
+    const sub = (c.subclasses || []).find(s => norm(s.name) === norm(cl.subclass));
+    if(sub) (sub.features || []).filter(f => f.level <= cl.level).forEach(f => out.push({ name: f.name, meta: sub.name + ' ' + f.level, desc: f.description }));
+  });
   const sp = speciesData();
   if(sp){ (sp.traits || []).forEach(t => out.push({ name: t.name, meta: sp.name, desc: t.description }));
     const ln = norm(_lineage);
@@ -1322,12 +1360,14 @@ const RESOURCE_DEFS = {
 let resourceUsed = {};       // { key: usedCount }
 let customResources = [];    // [{name, max, reset}]
 function autoResources(){
-  const c = classData(); if(!c || !c.table) return [];
-  const row = c.table.find(r => Number(r.level) === levelNow()); if(!row || !row.columns) return [];
   const out = [];
-  Object.keys(RESOURCE_DEFS).forEach(col => {
-    const raw = String(row.columns[col] == null ? '' : row.columns[col]).trim();
-    if(/^\d+$/.test(raw) && +raw > 0){ const d = RESOURCE_DEFS[col]; out.push({ name:d.label, key:d.label, max:+raw, reset:d.reset }); }
+  classList().forEach(cl => {
+    const c = classDataByName(cl.cls); if(!c || !c.table) return;
+    const row = c.table.find(r => Number(r.level) === Number(cl.level)); if(!row || !row.columns) return;
+    Object.keys(RESOURCE_DEFS).forEach(col => {
+      const raw = String(row.columns[col] == null ? '' : row.columns[col]).trim();
+      if(/^\d+$/.test(raw) && +raw > 0){ const d = RESOURCE_DEFS[col]; out.push({ name:d.label, key:d.label, max:+raw, reset:d.reset }); }
+    });
   });
   return out;
 }
@@ -1354,11 +1394,20 @@ function resetResources(kind){ allResources().forEach(r => { if(kind === 'long' 
 
 // ═══ SPELLCASTING ═════════════════════════════════════════════════════════
 let spellsKnown = [];   // [{name, prepared}]
-function casterType(){ const c = classData(); if(c && c.spellcasting && c.spellcasting !== 'none') return c.spellcasting; return _forceSpells ? 'third' : 'none'; }
-function spellAbilityId(){ if(_spellAbility) return _spellAbility; const c = classData(); if(c && c.spellcastingAbility) return c.spellcastingAbility; return 'INT'; }
-function spellDC(){ return 8 + profBonus() + modOf(spellAbilityId()); }
-function spellAtkBonus(){ return profBonus() + modOf(spellAbilityId()); }
-function isCaster(){ return casterType() !== 'none'; }
+window.getSpellsKnown = () => spellsKnown;
+// Spellcasting is multiclass-aware: each caster class contributes to a combined
+// caster level (full=level, half=⌊/2⌋, artificer=⌈/2⌉, third=⌊/3⌋); Warlock's Pact
+// Magic is tracked separately.
+function spellcastingClasses(){ return classList().map(cl => ({ cl, c: classDataByName(cl.cls) })).filter(x => x.c && x.c.spellcasting && x.c.spellcasting !== 'none'); }
+function warlockEntry(){ return spellcastingClasses().find(x => x.c.spellcasting === 'pact') || null; }
+function nonPactCasters(){ return spellcastingClasses().filter(x => x.c.spellcasting !== 'pact'); }
+function multiCasterLevel(){ let lvl = 0; nonPactCasters().forEach(({cl,c}) => { if(c.spellcasting==='full') lvl+=num(cl.level); else if(c.spellcasting==='artificer') lvl+=Math.ceil(num(cl.level)/2); else if(c.spellcasting==='half') lvl+=Math.floor(num(cl.level)/2); else if(c.spellcasting==='third') lvl+=Math.floor(num(cl.level)/3); }); return lvl; }
+function casterType(){ const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); return cs.length ? cs[0].c.spellcasting : (_forceSpells ? 'third' : 'none'); }
+function spellAbilityId(){ if(_spellAbility) return _spellAbility; const cs = spellcastingClasses().slice().sort((a,b)=>num(b.cl.level)-num(a.cl.level)); if(cs.length && cs[0].c.spellcastingAbility) return cs[0].c.spellcastingAbility; const c = classData(); return (c && c.spellcastingAbility) ? c.spellcastingAbility : 'INT'; }
+function abilityForSpell(sp){ if(_spellAbility) return _spellAbility; const owner = spellcastingClasses().find(x => (sp.classes||[]).some(n => norm(n)===norm(x.c.name))); return (owner && owner.c.spellcastingAbility) ? owner.c.spellcastingAbility : spellAbilityId(); }
+function spellDC(ab){ return 8 + profBonus() + modOf(ab || spellAbilityId()); }
+function spellAtkBonus(ab){ return profBonus() + modOf(ab || spellAbilityId()); }
+function isCaster(){ return _forceSpells || spellcastingClasses().length > 0; }
 function renderSpellHeader(){
   const on = isCaster();
   $('spell-block').style.display = on ? '' : 'none';
@@ -1370,27 +1419,26 @@ function renderSpellHeader(){
     $('spell-note').textContent = casterType().charAt(0).toUpperCase() + casterType().slice(1) + ' caster';
   } else { $('spell-note').textContent = 'No spellcasting'; }
 }
+// Regular (Vancian) slots: a single caster uses its own table; multiple casters use
+// the full-caster table at the combined caster level (RAW multiclass rule).
 function slotArray(){
-  const t = D.tables(); const L = levelNow(); if(!t) return null;
-  switch(casterType()){
-    case 'full': return t.fullCasterSlots ? t.fullCasterSlots[L-1] : null;
-    case 'half': return t.halfCasterSlots ? t.halfCasterSlots[L-1] : null;
-    case 'third': return t.thirdCasterSlots ? t.thirdCasterSlots[L-1] : null;
-    case 'artificer': return t.artificerSlots ? t.artificerSlots[L-1] : null;
-    default: return null;
+  const t = D.tables(); if(!t) return null;
+  const casters = nonPactCasters();
+  if(!casters.length) return _forceSpells && t.thirdCasterSlots ? t.thirdCasterSlots[levelNow()-1] : null;
+  if(casters.length === 1){
+    const { cl, c } = casters[0]; const map = { full:'fullCasterSlots', half:'halfCasterSlots', third:'thirdCasterSlots', artificer:'artificerSlots' };
+    const arr = t[map[c.spellcasting]]; return arr ? arr[num(cl.level)-1] : null;
   }
+  const mcl = multiCasterLevel(); return (mcl >= 1 && t.fullCasterSlots) ? t.fullCasterSlots[mcl-1] : null;
 }
+function pactInfo(){ const w = warlockEntry(), t = D.tables(); if(!w || !t || !t.pactMagic) return null; return t.pactMagic[num(w.cl.level)-1] || null; }
 function renderSlots(){
   if(!isCaster()){ $('spell-slots').innerHTML=''; renderSpells(); return; }
   const box = $('spell-slots'); box.innerHTML = '';
-  const t = D.tables(), L = levelNow();
-  if(casterType() === 'pact'){
-    const pm = t && t.pactMagic ? t.pactMagic[L-1] : null;
-    if(pm && pm.slots > 0) box.appendChild(slotRow('pact', 'Pact Slots (level ' + pm.level + ')', pm.slots));
-  } else {
-    const arr = slotArray();
-    if(arr) arr.forEach((max, i) => { if(max > 0) box.appendChild(slotRow(String(i+1), 'Level ' + (i+1), max)); });
-  }
+  const arr = slotArray();
+  if(arr) arr.forEach((max, i) => { if(max > 0) box.appendChild(slotRow(String(i+1), 'Level ' + (i+1), max)); });
+  const pm = pactInfo();
+  if(pm && pm.slots > 0) box.appendChild(slotRow('pact', 'Pact Slots (level ' + pm.level + ')', pm.slots));
   renderSpells();
 }
 function slotRow(key, label, max){
@@ -1462,12 +1510,13 @@ function addSpellAttackRow(n){
 // Add rows for every known attack spell that hasn't got one (used after the builder applies a caster).
 function syncSpellAttacks(){ spellsKnown.forEach(sk => addSpellAttackRow(sk.name)); }
 window.syncSpellAttacks = syncSpellAttacks;
-// Spend the lowest slot of at least `lvl` (pact spends a pact slot). Returns true if a slot was spent.
+// Spend the lowest available slot of at least `lvl` — regular slots first, then a Pact slot.
 function spendSpellSlot(lvl, name){
-  const t = D.tables(), L = levelNow();
-  if(casterType() === 'pact'){ const pm = t && t.pactMagic ? t.pactMagic[L-1] : null; if(pm){ const used = slotUsed['pact'] || 0; if(used < pm.slots){ slotUsed['pact'] = used + 1; renderSlots(); scheduleAutosave(); return true; } } addLog('Cast ' + name, '✗', 'No pact slots left', 'fumble'); return false; }
-  const arr = slotArray(); if(!arr) return true;   // no slot tracking (manual caster) → allow
-  for(let i = lvl; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(used < max){ slotUsed[String(i)] = used + 1; renderSlots(); scheduleAutosave(); return true; } }
+  const arr = slotArray();
+  if(arr){ for(let i = lvl; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(used < max){ slotUsed[String(i)] = used + 1; renderSlots(); scheduleAutosave(); return true; } } }
+  const pm = pactInfo();
+  if(pm && pm.level >= lvl){ const used = slotUsed['pact'] || 0; if(used < pm.slots){ slotUsed['pact'] = used + 1; renderSlots(); scheduleAutosave(); return true; } }
+  if(!arr && !pm) return true;   // no slot tracking → allow
   addLog('Cast ' + name, '✗', 'No slots of level ' + lvl + '+ left', 'fumble'); return false;
 }
 function spellSaveAbility(sp){ const m = ((sp && sp.description) || '').match(/\b(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\s+saving throw/i); return m ? m[1].slice(0,3).toUpperCase() : ''; }
@@ -1487,18 +1536,19 @@ function castSpellFull(name){
   if(lvl === 0 && diceExpr) diceExpr = scaleCantrip(diceExpr, levelNow());
   const dtype = dmgInfo.type ? ' ' + dmgInfo.type : '';
   const save = spellSaveAbility(sp);
+  const ab = abilityForSpell(sp), dc = spellDC(ab);
   if(diceExpr && spellIsAttack(sp)){
-    const r = rawD20(), atkMod = spellAtkBonus(), hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
+    const r = rawD20(), atkMod = spellAtkBonus(ab), hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
     const dd = rollDiceExpr(diceExpr, crit);
     addLog(sp.name, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : ''), crit ? 'crit' : fumble ? 'fumble' : 'normal');
   } else if(diceExpr && save){
     const dd = rollDiceExpr(diceExpr, false);
-    addLog(sp.name, dd.total + dtype, 'DC ' + spellDC() + ' ' + save + ' save · dmg ' + dd.detail, 'normal');
+    addLog(sp.name, dd.total + dtype, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail, 'normal');
   } else if(diceExpr){
     const dd = rollDiceExpr(diceExpr, false);
     addLog(sp.name, dd.total + dtype, 'damage ' + dd.detail, 'normal');
   } else {
-    addLog(sp.name, save ? ('DC ' + spellDC() + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
+    addLog(sp.name, save ? ('DC ' + dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
   }
 }
 function openSpell(n){
@@ -1642,7 +1692,11 @@ function collectSheet(){
   const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1' })).filter(i => i.name);
   return {
     system:'DND', v:1,
-    name: v('f-name'), cls: v('f-class'), level: num(v('f-level')), subclass: v('f-subclass'),
+    name: v('f-name'),
+    cls: classManaged() ? classLevels[0].cls : v('f-class'),
+    level: classManaged() ? totalLevel() : num(v('f-level')),
+    subclass: classManaged() ? (classLevels[0].subclass || '') : v('f-subclass'),
+    classLevels: classLevels,
     species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'),
     scores, saveProf, skillProf,
     speed: v('f-speed'), ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
@@ -1657,6 +1711,7 @@ function applySheet(d){
   d = d || {};
   const set = (id, val) => { const el = $(id); if(el) el.value = (val == null ? '' : val); };
   set('f-name', d.name); set('f-class', d.cls); set('f-level', d.level || 1); set('f-subclass', d.subclass);
+  classLevels = Array.isArray(d.classLevels) ? d.classLevels.slice() : []; syncClassFields();
   set('f-species', d.species); set('f-background', d.background); set('f-alignment', d.alignment);
   ABILITIES.forEach(a => { const el = $('sc-' + a.id); if(el) el.value = (d.scores && d.scores[a.id]) || 10; });
   saveProf = d.saveProf || {}; skillProf = d.skillProf || {};
@@ -1889,6 +1944,7 @@ campaignUpdateBtn();
 <script src="/tools-data/dnd-conditions.js"></script>
 <script src="/tools-data/dnd-tables.js"></script>
 <script src="/tools-data/dnd-sheet-builder.js"></script>
+<script src="/tools-data/dnd-levelup.js"></script>
 <script>
 // Data is on the page now: build skills, pickers, then load the saved sheet.
 buildSkills();
