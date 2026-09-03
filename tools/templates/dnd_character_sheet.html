@@ -2640,6 +2640,7 @@ campaignUpdateBtn();
 <script src="/tools-data/dnd-conditions.js"></script>
 <script src="/tools-data/dnd-tables.js"></script>
 <script src="/tools-data/dnd-caster-rules.js"></script>
+<script src="/tools-data/dnd-homebrew.js"></script>
 <script src="/tools-data/dnd-sheet-builder.js"></script>
 <script src="/tools-data/dnd-levelup.js"></script>
 <script>
@@ -2650,6 +2651,19 @@ updateDicePoolDisplay();
 renderResources();
 autoLoad();
 ensureUnarmed();
+// Pull the user's saved homebrew into the DND_* pools, then refresh anything
+// already rendered (datalists, store, spells, features, derived stats). No-op
+// when opened standalone (no /api).
+if(window.DNDHB) DNDHB.load(function(){
+  try {
+    fillDatalists();
+    if($('store-overlay') && $('store-overlay').classList.contains('open')) renderStore();
+    if($('scroll-overlay') && $('scroll-overlay').classList.contains('open')) renderScrollList();
+    renderFeatures(); renderSpells(); renderSpellHeader(); recalc();
+    // The creation + level-up wizards read the DND_* pools live on each launch,
+    // so they pick up homebrew automatically the next time they're opened.
+  } catch(e){}
+});
 </script>
 </body>
 </html>

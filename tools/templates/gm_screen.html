@@ -4788,6 +4788,9 @@ function init_trackers(root) {
     listEl.innerHTML = pickerRowsHtml();
     wirePickerRows();
   }
+  // Let the homebrew loader repaint the bestiary picker if it's open when the
+  // user's saved homebrew arrives (it reads the DND_* pools live).
+  window.__gmRefreshPicker = () => { if(pickerEl) refreshPickerRows(); };
 
   function openPicker() {
     if(pickerEl) return;
@@ -10707,6 +10710,7 @@ else syncHomebrewMonsters();
 <script src="/tools-data/dnd-magic-items.js"></script>
 <script src="/tools-data/dnd-spells.js"></script>
 <script src="/tools-data/dnd-conditions.js"></script>
+<script src="/tools-data/dnd-homebrew.js"></script>
 <script>
 
 
@@ -12569,6 +12573,21 @@ window.init_rules = init_rules;
       setTimeout(function(){ try { input.focus(); } catch(e){} }, 30);
     });
   };
+})();
+</script>
+
+<script>
+// Load the user's saved D&D 2024 homebrew into the DND_* pools so the bestiary
+// picker, the tracker cards, the monster generator and the equipment reference
+// all draw it. Re-run when the campaign link changes so campaign-shared homebrew
+// appears/disappears with it. No-op standalone (no /api).
+(function(){
+  function go(){
+    if(!window.DNDHB) return;
+    DNDHB.load(function(){ try { if(typeof window.__gmRefreshPicker === 'function') window.__gmRefreshPicker(); } catch(e){} });
+  }
+  try { if(typeof GMCamp !== 'undefined' && GMCamp.onChange) GMCamp.onChange(go); } catch(e){}
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
 })();
 </script>
 
