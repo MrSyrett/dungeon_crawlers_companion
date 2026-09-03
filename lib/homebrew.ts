@@ -827,10 +827,11 @@ function dndBonusList(v: unknown): { target: string; amount: number }[] {
     : [];
 }
 
-// A dice expression like "3d6" or "2d8+1", whitespace-stripped, else "".
+// The leading dice expression ("3d6", "2d8+1") from an input, ignoring any
+// trailing text ("2d8 + your mod", "1d6 per level" → "2d8", "1d6"), else "".
 function cleanDice(v: unknown): string {
-  const s = str(v).replace(/\s+/g, "");
-  return /^\d{1,3}d\d{1,3}([+-]\d{1,3})?$/i.test(s) ? s : "";
+  const m = str(v).replace(/\s+/g, "").match(/^\d{1,3}d\d{1,3}([+-]\d{1,3})?/i);
+  return m ? m[0] : "";
 }
 // One in a fixed vocabulary, else the given default.
 function oneOf<T extends string>(v: unknown, list: readonly T[], dflt: T): T {

@@ -38,7 +38,7 @@ type Field =
   | ScalarField
   | (BaseField & { type: "stringList"; placeholder?: string; addLabel?: string })
   | (BaseField & { type: "objectList"; addLabel?: string; fields: readonly ScalarField[] })
-  | (BaseField & { type: "chips"; options: readonly string[] })
+  | (BaseField & { type: "chips"; options: readonly string[]; max?: number })
   | (BaseField & { type: "abilities" });
 
 type BodyProps = { form: Data; setForm: (u: Data | ((f: Data) => Data)) => void };
@@ -74,6 +74,14 @@ const ITEM_BONUS_OPTS: readonly Opt[] = [
 ];
 
 const optsOf = (list: readonly string[]): readonly Opt[] => list.map((x) => [x, x] as Opt);
+// Per-kind default fields for a homebrew equipment entry — used by blank() and by
+// the Kind switch in EquipmentBody so a weapon's fields never leak into gear, etc.
+function equipDefaults(kind: string): Data {
+  if (kind === "weapon") return { hbKind: "weapon", category: "Simple", kind: "Melee", cost: "", damage: "1d4", damageType: "bludgeoning", weight: "", properties: [], mastery: "" };
+  if (kind === "armor") return { hbKind: "armor", category: "Light", baseAC: "", strength: "", cost: "", weight: "", stealthDisadvantage: false };
+  if (kind === "magic") return { hbKind: "magic", type: "", rarity: "Uncommon", attunement: false, attunementNote: "", description: "", bonuses: [] };
+  return { hbKind: "gear", category: "", cost: "", weight: "", description: "" };
+}
 const s = (d: Data, k: string): string => { const v = d[k]; return typeof v === "string" ? v : v == null ? "" : String(v); };
 const arr = (d: Data, k: string): string[] => (Array.isArray(d[k]) ? (d[k] as string[]) : []);
 
@@ -92,7 +100,7 @@ const SCHEMAS: Record<string, Schema> = {
       if (k === "magic") { const n = Array.isArray(d.bonuses) ? d.bonuses.length : 0; return `Magic · ${s(d, "rarity")}${n ? ` · ${n} bonus${n === 1 ? "" : "es"}` : ""}`; }
       return `Gear · ${s(d, "category")}`;
     },
-    blank: () => ({ name: "", hbKind: "weapon", category: "Simple", kind: "Melee", cost: "", damage: "1d4", damageType: "bludgeoning", weight: "", properties: [], mastery: "", bonuses: [] }),
+    blank: () => ({ name: "", ...equipDefaults("weapon") }),
     toForm: (d) => ({ ...d, properties: arr(d, "properties"), bonuses: Array.isArray(d.bonuses) ? (d.bonuses as Data[]) : [] }),
   },
   "dnd-feat": {
@@ -118,7 +126,7 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => (arr(d, "abilityScores").join("/") || "Background"),
     fields: [
       { key: "name", label: "Name", type: "text", full: true, placeholder: "e.g. Guild Cartographer" },
-      { key: "abilityScores", label: "Ability Scores (choose 3)", type: "chips", options: [...ABILITIES], full: true },
+      { key: "abilityScores", label: "Ability Scores (choose 3)", type: "chips", options: [...ABILITIES], max: 3, full: true },
       { key: "feat", label: "Origin Feat", type: "text", placeholder: "e.g. Tough" },
       { key: "skillProficiencies", label: "Skill Proficiencies", type: "stringList", placeholder: "e.g. Perception", addLabel: "+ Skill" },
       { key: "toolProficiencies", label: "Tool Proficiencies", type: "stringList", placeholder: "e.g. Cartographer's Tools", addLabel: "+ Tool" },
@@ -149,7 +157,7 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "saveAbility", label: "Save Ability (if a save)", type: "select", options: optsOf([...ABILITIES]), empty: "—" },
       { key: "damage", label: "Damage dice", type: "text", placeholder: "e.g. 3d6" },
       { key: "damageType", label: "Damage Type", type: "select", options: optsOf([...DAMAGE_TYPES]), empty: "— none —" },
-      { key: "heal", label: "Healing dice", type: "text", placeholder: "e.g. 2d8 (+ your spell mod)" },
+      { key: "heal", label: "Healing dice", type: "text", placeholder: "e.g. 2d8", help: "Your spellcasting modifier is added automatically when cast." },
       { key: "upcast", label: "Upcast: extra dice / slot level", type: "text", placeholder: "e.g. 1d6", help: "Added per slot level above the spell's level (or per cantrip tier)." },
       { key: "higherLevels", label: "At Higher Levels (text, optional)", type: "textarea", full: true, placeholder: "Upcast / cantrip scaling text…" },
     ],
@@ -386,15 +394,17 @@ function FieldView({ field, value, onChange }: { field: Field; value: unknown; o
 
   if (field.type === "chips") {
     const sel = Array.isArray(value) ? (value as string[]) : [];
-    const toggle = (o: string) => onChange(sel.includes(o) ? sel.filter((x) => x !== o) : [...sel, o]);
+    const atMax = field.max != null && sel.length >= field.max;
+    const toggle = (o: string) => { if (sel.includes(o)) onChange(sel.filter((x) => x !== o)); else if (!atMax) onChange([...sel, o]); };
     return (
       <div className={cls}>
-        <label className={labelCls}>{field.label}</label>
+        <label className={labelCls}>{field.label}{field.max != null ? <span className="ml-1 normal-case tracking-normal text-[var(--muted)]">({sel.length}/{field.max})</span> : null}</label>
         {field.help ? <p className="mb-1 text-[11px] text-[var(--muted)]">{field.help}</p> : null}
         <div className="flex flex-wrap gap-1.5">
-          {field.options.map((o) => (
-            <button key={o} type="button" className={chip(sel.includes(o))} onClick={() => toggle(o)}>{o}</button>
-          ))}
+          {field.options.map((o) => {
+            const on = sel.includes(o);
+            return <button key={o} type="button" disabled={!on && atMax} className={`${chip(on)}${!on && atMax ? " opacity-40" : ""}`} onClick={() => toggle(o)}>{o}</button>;
+          })}
         </div>
       </div>
     );
@@ -519,7 +529,8 @@ function EquipmentBody({ form, setForm }: BodyProps) {
         <FieldView field={{ key: "name", label: "Name", type: "text", full: true, placeholder: "Item name…" }} value={form.name} onChange={(v) => set("name", v)} />
         <div>
           <label className={labelCls}>Kind</label>
-          <select className={`${fieldBase} w-full`} value={kind} onChange={(e) => set("hbKind", e.target.value)}>
+          {/* Switching kind resets kind-specific fields (keeping the name) so a weapon's values never leak into gear/armor/magic. */}
+          <select className={`${fieldBase} w-full`} value={kind} onChange={(e) => { const k = e.target.value; setForm((f) => ({ ...equipDefaults(k), name: f.name })); }}>
             <option value="weapon">Weapon</option>
             <option value="armor">Armor / Shield</option>
             <option value="gear">Adventuring Gear</option>
