@@ -1229,18 +1229,29 @@ autoLoad();
     if(sides===10){ if(n<1||n>10)return []; return [{sides:10,display:(n===10?'0':String(n)),faceSet:'units'}]; }
     if(sides<2||n<1||n>sides) return []; return [{sides:sides,display:String(n),faceSet:null}]; }
   // Character sheets: detail like "d20(14) + Mod(3)" / "adv[a,b]→k"
-  function parseDice(detail){ detail=String(detail==null?'':detail); if(/[<>]/.test(detail)) return [];
-    var out=[], m, re=/d(\d+)\s*\(\s*(\d+)\s*\)/gi;
-    while((m=re.exec(detail))){ out=out.concat(mapDie(+m[1],+m[2])); }
-    if(!out.length){ var a=/(?:adv|dis)\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*(?:→|->)\s*(\d+)/i.exec(detail); if(a) out=out.concat(mapDie(20,+a[3])); }
+  // Unified roll parser — reads the log detail string (the source of truth) and
+  // emits the exact dice pool for EVERY sheet + the GM screen. Passes run in
+  // order, blanking what they consume so later passes don't double-count.
+  function parseDice(detail){ detail=String(detail==null?'':detail); if(/[<>{]/.test(detail)) return [];
+    var out=[], s=detail;
+    function push(sides,v){ out=out.concat(mapDie(sides,v)); }
+    // 1) Advantage/disadvantage d20 — ALWAYS show both dice (adv[a,b]→k / d20[a,b→k adv] / d20(a,b ▲ k))
+    s=s.replace(/(?:adv|dis)\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*(?:→|->)\s*\d+/gi,function(_,a,b){push(20,+a);push(20,+b);return ' ';});
+    s=s.replace(/d20\s*\[\s*(\d+)\s*,\s*(\d+)\s*(?:→|->)\s*\d+\s*(?:adv|dis)\s*\]/gi,function(_,a,b){push(20,+a);push(20,+b);return ' ';});
+    s=s.replace(/d20\s*\(\s*(\d+)\s*,\s*(\d+)\s*[▲▼]\s*\d+\s*\)/gi,function(_,a,b){push(20,+a);push(20,+b);return ' ';});
+    // 2) Star Wars pip dice — "3D+2: [3 5 2]" → that many d6
+    s=s.replace(/\dD[+\d]*\s*:\s*\[\s*([\d\s]+?)\s*\]/g,function(_,g){(g.match(/\d+/g)||[]).forEach(function(x){push(6,+x);});return ' ';});
+    // 3) Parenthesised dice — NdX(v) / NdX(v+v) / NdX(v,v)  (trays, damage/heal, GM)
+    s=s.replace(/(\d*)d(\d+)\s*\(\s*([0-9+,\s]*?)\s*\)/gi,function(_,n,sides,inner){(inner.match(/\d+/g)||[]).forEach(function(x){push(+sides,+x);});return ' ';});
+    // 4) Colon dice WITH a count — ace "3d6: 4 + 5 + 3", nimble "2d6: 4+5 ⚡6" (drop trailing +bonus and =totals)
+    s=s.replace(/(\d+)d(\d+)\s*:\s*([0-9→+,=⚡\s]+)/gi,function(_,n,sides,run){
+      run=run.replace(/\s[+-]\d+\s*$/,' ').replace(/=\s*\d+/g,' ');
+      (run.match(/\d+/g)||[]).forEach(function(x){push(+sides,+x);});return ' ';});
+    // 5) Colon dice WITHOUT a count — KoB "d8: 8→3", dnd "d20:14" (→-joined faces only)
+    s=s.replace(/(^|[^0-9a-z])d(\d+)\s*:\s*(\d+(?:\s*[→,⚡]\s*\d+)*)/gi,function(_,pre,sides,run){
+      (run.match(/\d+/g)||[]).forEach(function(x){push(+sides,+x);});return ' ';});
     return out; }
-  // GM screen: detail like "2d6(3,5)" / "d20(14,8 ▲ 14)"
-  function parseGM(detail){ detail=String(detail==null?'':detail); if(/[<>{]/.test(detail)) return [];
-    var out=[], m, re=/(\d*)d(\d+)\(([^)]*)\)/gi;
-    while((m=re.exec(detail))){ var sides=+m[2], inner=m[3];
-      if(/[\u25B2\u25BC]/.test(inner)){ var mm=inner.match(/(\d+)\s*$/); if(mm) out=out.concat(mapDie(sides,+mm[1])); }
-      else { var nums=inner.match(/\d+/g)||[]; nums.forEach(function(x){ out=out.concat(mapDie(sides,+x)); }); } }
-    return out; }
+  function parseGM(detail){ return parseDice(detail); }
 
   // ─── hook addLog ───
   var _add = window.addLog;
