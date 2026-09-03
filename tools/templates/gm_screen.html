@@ -1491,7 +1491,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     KOB: [],
     NIM: ['nimmonster','nimtreasure'],
     SW:  ['swmonster','swtreasure'],
-    DND: ['dndmonster','dndtreasure'],
+    DND: ['adventure','npc','dungeon','encounter','shop','dndmonster','dndtreasure'],
   };
   const SYS_KEYS = Object.keys(SYS_GENS);
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
@@ -11301,6 +11301,46 @@ function init_party(root) {
     };
   }
 
+  // Build a Party-tool summary from a D&D 2024 sheet. Ability mods, proficiency
+  // bonus, saves, proficient skills and passive Perception are derived here from
+  // the raw scores + proficiency maps so the GM sees the same numbers the player
+  // does, without depending on the sheet's own script being loaded.
+  function dndParty(d) {
+    const n = v => parseInt(v) || 0;
+    const S = d.scores || {};
+    const mod = k => Math.floor((n(S[k]) - 10) / 2);
+    const cl = Array.isArray(d.classLevels) ? d.classLevels.filter(e => e && e.cls) : [];
+    const totalLvl = cl.length ? cl.reduce((s, e) => s + (n(e.level) || 0), 0) : (n(d.level) || 1);
+    const pb = 2 + Math.floor((Math.max(1, totalLvl) - 1) / 4);
+    const classLine = cl.length
+      ? cl.map(e => [e.cls, e.subclass].filter(Boolean).join(' ') + (e.level ? ' ' + e.level : '')).join(' / ')
+      : [d.cls, d.subclass].filter(Boolean).join(' ');
+    const ABBR = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+    const sp = d.saveProf || {};
+    const saves = ABBR.map(k => ({ id: k, val: mod(k) + (sp[k] ? pb : 0), prof: !!sp[k] }));
+    const SKILLS = [['Acrobatics', 'DEX'], ['Animal Handling', 'WIS'], ['Arcana', 'INT'], ['Athletics', 'STR'], ['Deception', 'CHA'], ['History', 'INT'], ['Insight', 'WIS'], ['Intimidation', 'CHA'], ['Investigation', 'INT'], ['Medicine', 'WIS'], ['Nature', 'INT'], ['Perception', 'WIS'], ['Performance', 'CHA'], ['Persuasion', 'CHA'], ['Religion', 'INT'], ['Sleight of Hand', 'DEX'], ['Stealth', 'DEX'], ['Survival', 'WIS']];
+    const skp = d.skillProf || {};
+    const skills = SKILLS.filter(([nm]) => skp[nm]).map(([nm, ab]) => ({ name: nm, val: mod(ab) + pb * (n(skp[nm]) || 1) }));
+    const passivePerc = 10 + mod('WIS') + (skp['Perception'] ? pb * (n(skp['Perception']) || 1) : 0);
+    return {
+      system: 'DND',
+      name: d.name || 'Unnamed',
+      cls: classLine, level: totalLvl,
+      species: d.species || '', background: d.background || '', alignment: d.alignment || '',
+      ac: d.ac || '', speed: d.speed || '',
+      hpCur: (d.hpCur === '' || d.hpCur == null) ? '' : n(d.hpCur), hpMax: n(d.hpMax), hpTemp: n(d.hpTemp),
+      hitdice: d.hitdice || '', hdLeft: (d.hdLeft == null ? '' : n(d.hdLeft)),
+      pb, passivePerc, inspiration: !!d.inspiration, exhaustion: n(d.exhaustion),
+      conditions: Array.isArray(d.activeConditions) ? d.activeConditions.filter(Boolean) : [],
+      stats: ABBR.map(k => ({ id: k, mod: mod(k), score: n(S[k]) })),
+      saves, skills,
+      attacks: (d.attacks || []).filter(a => a && (a.name || a.damage)).map(a => ({ name: a.name || '', damage: [a.damage, a.type].filter(Boolean).join(' ') })),
+      spells: (d.spellsKnown || []).filter(s => s && (s.display || s.name)).map(s => s.display || s.name),
+      inventory: (d.inventory || []).filter(i => i && i.name).map(i => i.name + (n(i.qty) > 1 ? ' ×' + n(i.qty) : '')),
+      coins: { gp: n(d.gp), sp: n(d.sp), cp: n(d.cp) },
+    };
+  }
+
   // Sheets come from a few exporters (our sheet, Shadowdarklings). Read defensively.
   function normalize(raw) {
     if(!raw || typeof raw !== 'object') return null;
@@ -11311,6 +11351,7 @@ function init_party(root) {
     if(d && d.system === 'NIM') return nimParty(d);
     if(d && d.system === 'KOB') return kobParty(d);
     if(d && d.system === 'ACE') return aceParty(d);
+    if(d && d.system === 'DND') return dndParty(d);
     if(d && d.header && d.combat) return dccParty(d);
     if(!d.name && !d.class && !d.stats) return null;
     const st = d.stats || d.rolledStats || {};
@@ -11605,12 +11646,47 @@ function init_party(root) {
     return h;
   }
 
+  function cardHTMLDND(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const sgn = v => (v >= 0 ? '+' : '') + v;
+    const sub = ['LV ' + c.level, [c.species, c.cls].filter(Boolean).join(' '), c.alignment].filter(Boolean).join(' · ');
+    const cell = (lbl, val) => '<span class="pty-chip">' + lbl + ' <b>' + esc(val === '' || val == null ? '—' : val) + '</b></span>';
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip">AC <b>' + esc(c.ac || '—') + '</b></span>'
+       + '<span class="pty-chip">HP <b>' + (c.hpCur !== '' ? esc(c.hpCur) + '/' : '') + esc(c.hpMax) + (c.hpTemp ? '+' + esc(c.hpTemp) : '') + '</b></span>'
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats">' + c.stats.map(s =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
+      + '<div class="pty-stat-mod">' + sgn(s.mod) + '</div><div class="pty-stat-val">' + esc(s.score) + '</div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Speed', c.speed || '—') + cell('Prof', sgn(c.pb)) + cell('Pass. Perc', c.passivePerc)
+       + (c.hitdice ? cell('Hit Dice', (c.hdLeft !== '' ? c.hdLeft + ' × ' : '') + c.hitdice) : '')
+       + (c.inspiration ? cell('Inspiration', '●') : '')
+       + (c.exhaustion ? '<span class="pty-chip" style="color:#ff6a6a;">Exhaustion <b>' + esc(c.exhaustion) + '</b></span>' : '')
+       + '</div></div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Saves</div><div class="pty-line dim">' + c.saves.map(s => esc(s.id) + ' ' + sgn(s.val) + (s.prof ? '•' : '')).join(' · ') + '</div></div>';
+    if(c.conditions.length) h += '<div class="pty-sec"><div class="pty-sec-h">Conditions</div><div class="pty-line" style="color:#ff8a6a;">' + esc(c.conditions.join(', ')) + '</div></div>';
+    if(c.skills.length) h += '<div class="pty-sec"><div class="pty-sec-h">Skills</div><div class="pty-line dim">' + c.skills.map(s => esc(s.name) + ' ' + sgn(s.val)).join(' · ') + '</div></div>';
+    if(c.attacks.length) h += '<div class="pty-sec"><div class="pty-sec-h">Attacks</div>' + c.attacks.map(a => '<div class="pty-line"><b>' + esc(a.name) + '</b>' + (a.damage ? ' <span class="dim">' + esc(a.damage) + '</span>' : '') + '</div>').join('') + '</div>';
+    if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
+    if(c.inventory.length) h += '<div class="pty-sec"><div class="pty-sec-h">Inventory</div><div class="pty-line dim">' + esc(c.inventory.join(', ')) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
   function cardHTML(entry) {
     const c = entry.sheet;
     if(c.system === 'SW') return cardHTMLSW(entry);
     if(c.system === 'NIM') return cardHTMLNIM(entry);
     if(c.system === 'KOB') return cardHTMLKOB(entry);
     if(c.system === 'ACE') return cardHTMLACE(entry);
+    if(c.system === 'DND') return cardHTMLDND(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);
     const open = openIds.has(entry.id);
     const hp = c.hpCur !== '' ? esc(c.hpCur) + '/' + c.hpMax : String(c.hpMax);

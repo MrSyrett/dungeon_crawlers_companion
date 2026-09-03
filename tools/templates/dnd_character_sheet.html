@@ -889,7 +889,7 @@ function recalc(){
   ABILITIES.forEach(a => {
     const m = modOf(a.id);
     $('mod-' + a.id).textContent = sgn(m);
-    const sv = m + (saveProf[a.id] ? PB : 0);
+    const sv = m + (saveProf[a.id] ? PB : 0) + magicSaveBonus();
     $('sv-' + a.id).textContent = sgn(sv);
     const dot = $('svp-' + a.id); if(dot) dot.classList.toggle('on', !!saveProf[a.id]);
   });
@@ -917,40 +917,69 @@ function recalc(){
 // ═══ ROLL ENGINE ══════════════════════════════════════════════════════════
 function dN(n){ return Math.floor(Math.random() * n) + 1; }
 function setAdv(mode){ _adv = mode; document.querySelectorAll('#adv-seg button').forEach(b => b.classList.toggle('on', b.dataset.mode === mode)); }
-function rawD20(){
-  if(_adv === 'adv'){ const a = dN(20), b = dN(20); return { nat: Math.max(a,b), faces:[a,b], mode:'adv' }; }
-  if(_adv === 'dis'){ const a = dN(20), b = dN(20); return { nat: Math.min(a,b), faces:[a,b], mode:'dis' }; }
+function rawD20(mode){
+  mode = mode || _adv;
+  if(mode === 'adv'){ const a = dN(20), b = dN(20); return { nat: Math.max(a,b), faces:[a,b], mode:'adv' }; }
+  if(mode === 'dis'){ const a = dN(20), b = dN(20); return { nat: Math.min(a,b), faces:[a,b], mode:'dis' }; }
   const a = dN(20); return { nat: a, faces:[a], mode:'norm' };
 }
-// A d20 test: 1d20 (adv/dis) + mod. type crit on nat20, fumble on nat1.
+// ── Automatic roll modifiers from exhaustion + active conditions ──────────
+function activeCond(name){ return activeConditions.some(c => norm(c) === norm(name)); }
+function exhPenalty(){ return -2 * (exhaustion || 0); }   // 2024: −2 × level to every d20 test
+// Conditions that give the character adv/dis on its own rolls, by roll kind.
+function condMode(kind){
+  let dis = '', adv = '';
+  const anyDis = (names) => names.find(activeCond);
+  if(kind === 'attack'){ dis = anyDis(['Blinded','Frightened','Poisoned','Prone','Restrained']) || ''; if(activeCond('Invisible')) adv = 'Invisible'; }
+  else if(kind === 'check'){ dis = anyDis(['Frightened','Poisoned']) || ''; }
+  else if(kind === 'saveDex'){ dis = anyDis(['Restrained']) || ''; }
+  return { adv, dis };
+}
+// Combine manual Adv/Dis with condition effects (adv + dis cancel to normal) and exhaustion.
+function rollCtx(kind){
+  const cm = condMode(kind);
+  const advOn = _adv === 'adv' || !!cm.adv, disOn = _adv === 'dis' || !!cm.dis;
+  const mode = (advOn && disOn) ? 'norm' : advOn ? 'adv' : disOn ? 'dis' : 'norm';
+  const pen = exhPenalty(), why = [];
+  if(mode === 'adv' && cm.adv) why.push('adv from ' + cm.adv);
+  if(mode === 'dis' && cm.dis) why.push('dis from ' + cm.dis);
+  if(pen) why.push(Math.abs(pen) + ' exhaustion');
+  return { mode, pen, note: why.join(' · ') };
+}
+// A d20 test: 1d20 (adv/dis) + mod. opts.kind = 'check' | 'save' | 'saveDex' | 'attack'.
 function d20Check(label, mod, opts){
   opts = opts || {};
-  const r = rawD20();
-  const total = r.nat + mod;
-  let detail = 'd20' + (r.mode !== 'norm' ? ' [' + r.faces.join(',') + '→' + r.nat + (r.mode === 'adv' ? ' adv' : ' dis') + ']' : ': ' + r.nat) + (mod ? ' ' + sgn(mod) : '');
-  if(opts.note) detail += ' · ' + opts.note;
+  const ctx = rollCtx(opts.kind || 'check');
+  const r = rawD20(ctx.mode);
+  const totalMod = mod + ctx.pen;
+  const total = r.nat + totalMod;
+  let detail = 'd20' + (r.mode !== 'norm' ? ' [' + r.faces.join(',') + '→' + r.nat + (r.mode === 'adv' ? ' adv' : ' dis') + ']' : ': ' + r.nat) + (totalMod ? ' ' + sgn(totalMod) : '');
+  const notes = [opts.note, ctx.note].filter(Boolean).join(' · ');
+  if(notes) detail += ' · ' + notes;
   let type = 'normal';
   if(r.nat === 20) type = 'crit'; else if(r.nat === 1) type = 'fumble';
   _lastRoll = { label, total };
   addLog(label, sgn(total), detail, type);
   return { total, nat: r.nat, type };
 }
-function rollAbility(id){ d20Check(id + ' check', modOf(id)); }
-function rollSave(id){ const PB = profBonus(); d20Check(id + ' save', modOf(id) + (saveProf[id] ? PB : 0)); }
+function rollAbility(id){ d20Check(id + ' check', modOf(id), { kind:'check' }); }
+function rollSave(id){ const PB = profBonus(), ms = magicSaveBonus(); d20Check(id + ' save', modOf(id) + (saveProf[id] ? PB : 0) + ms, { kind: id === 'DEX' ? 'saveDex' : 'save', note: ms ? ('+' + ms + ' magic') : '' }); }
 function rollSkill(name){
   const row = [...document.querySelectorAll('.skill-row')].find(r => r.dataset.skill === name); if(!row) return;
   const ab = row.dataset.abil, PB = profBonus(), lvl = skillProf[name] || 0;
-  d20Check(name + ' (' + ab + ')', modOf(ab) + lvl * PB);
+  d20Check(name + ' (' + ab + ')', modOf(ab) + lvl * PB, { kind:'check' });
 }
-function rollInitiative(){ d20Check('Initiative', modOf('DEX')); }
-function rollSpellAttack(){ d20Check('Spell Attack', spellAtkBonus()); }
+function rollInitiative(){ d20Check('Initiative', modOf('DEX'), { kind:'check' }); }
+function rollSpellAttack(){ d20Check('Spell Attack', spellAtkBonus(), { kind:'attack' }); }
 function rollDeathSave(){
-  const r = rawD20();
-  let type = 'normal', msg = '';
-  if(r.nat === 20){ type = 'crit'; msg = 'Nat 20 — regain 1 HP and get up!'; }
-  else if(r.nat === 1){ type = 'fumble'; deathFail = Math.min(3, deathFail + 2); msg = 'Nat 1 — two failures!'; }
-  else if(r.nat >= 10){ type = 'crit'; deathSucc = Math.min(3, deathSucc + 1); msg = 'Success (' + deathSucc + '/3)'; }
-  else { type = 'fumble'; deathFail = Math.min(3, deathFail + 1); msg = 'Failure (' + deathFail + '/3)'; }
+  const ctx = rollCtx('save');
+  const r = rawD20(ctx.mode);
+  const eff = r.nat + ctx.pen;   // exhaustion lowers the effective result
+  let type = 'normal', msg = (ctx.note ? '(' + ctx.note + ') ' : '');
+  if(r.nat === 20){ type = 'crit'; msg += 'Nat 20 — regain 1 HP and get up!'; }
+  else if(r.nat === 1){ type = 'fumble'; deathFail = Math.min(3, deathFail + 2); msg += 'Nat 1 — two failures!'; }
+  else if(eff >= 10){ type = 'crit'; deathSucc = Math.min(3, deathSucc + 1); msg += 'Success (' + deathSucc + '/3)'; }
+  else { type = 'fumble'; deathFail = Math.min(3, deathFail + 1); msg += 'Failure (' + deathFail + '/3)'; }
   if(deathSucc >= 3) msg += ' — stable!';
   if(deathFail >= 3) msg += ' — the character dies.';
   renderDeath();
@@ -1058,7 +1087,7 @@ function rollAttack(btn){
   const abil = tr.querySelector('.atk-abil').value, prof = tr.querySelector('.atk-prof').checked;
   const extra = num(tr.querySelector('.atk-bonus').value), name = tr.querySelector('.atk-name').value || 'Attack';
   const mod = modOf(abil) + (prof ? profBonus() : 0) + extra;
-  d20Check(name + ' — to hit', mod);
+  d20Check(name + ' — to hit', mod, { kind:'attack' });
 }
 function rollDamage(btn){
   const tr = _atkRow(btn);
@@ -1079,7 +1108,8 @@ function rollAttackFull(btn){
   const extra = num(tr.querySelector('.atk-bonus').value), name = tr.querySelector('.atk-name').value || 'Attack';
   const dtype = tr.querySelector('.atk-dtype').value, dmg = tr.querySelector('.atk-dmg').value.trim();
   // to-hit
-  const r = rawD20(); const hitMod = modOf(abil) + (prof ? profBonus() : 0) + extra;
+  const ctx = rollCtx('attack');
+  const r = rawD20(ctx.mode); const hitMod = modOf(abil) + (prof ? profBonus() : 0) + extra + ctx.pen;
   const hitTotal = r.nat + hitMod;
   const crit = r.nat === 20, fumble = r.nat === 1;
   // damage
@@ -1098,7 +1128,7 @@ function rollAttackFull(btn){
     dmgLine = num(dmg) + ' ' + sgn(modOf(abil)) + (dtype ? ' ' + dtype : '');
   }
   const result = 'Hit ' + sgn(hitTotal) + (dmgTotal != null ? ' · ' + dmgTotal + ' dmg' : '');
-  const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '');
+  const detail = 'to hit d20' + (r.mode !== 'norm' ? '[' + r.faces.join(',') + '→' + r.nat + (r.mode==='adv'?' adv':' dis') + ']' : ':' + r.nat) + ' ' + sgn(hitMod) + (dmgLine ? ' · damage ' + dmgLine : '') + (ctx.note ? ' · ' + ctx.note : '');
   addLog(name, result, detail, crit ? 'crit' : fumble ? 'fumble' : 'normal');
 }
 
@@ -1136,7 +1166,7 @@ function removeInvRow(btn){
 function renderInvActions(tr){
   const kind = invRowKind(tr);
   const eq = tr.dataset.equipped === '1';
-  const equipBtn = (kind === 'weapon' || kind === 'armor' || kind === 'shield')
+  const equipBtn = (kind === 'weapon' || kind === 'armor' || kind === 'shield' || kind === 'magic')
     ? '<button class="equip-btn' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="Equip / Unequip">' + (eq?'Equipped':'Equip') + '</button>' : '';
   const infoBtn = itemData(invRowRef(tr)) ? '<button class="row-i" onclick="openItemInfo(this.closest(\'tr\'))" title="Item details">&#9432;</button>' : '';
   tr.querySelector('.inv-actions').innerHTML = equipBtn + infoBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
@@ -1148,6 +1178,7 @@ function itemKind(name){
   if(D.weapons().some(w => norm(w.name) === n)) return 'weapon';
   const a = D.armor().find(x => norm(x.name) === n);
   if(a) return /shield/i.test(a.category) ? 'shield' : 'armor';
+  if(D.magicItems().some(x => norm(x.name) === n)) return 'magic';
   return 'gear';
 }
 function itemData(ref){ const n = norm(ref); if(!n) return null; return D.weapons().find(x => norm(x.name) === n) || D.armor().find(x => norm(x.name) === n) || D.gear().find(x => norm(x.name) === n) || D.magicItems().find(x => norm(x.name) === n) || null; }
@@ -1184,11 +1215,22 @@ function toggleEquip(btn){
     }
     tr.dataset.equipped = '1';
     if(kind === 'weapon') equipWeaponRow(tr);
+    if(kind === 'magic') equipMagicRow(tr);
   } else {
     tr.dataset.equipped = '';
     if(kind === 'weapon') unequipWeaponRow(ref);
+    if(kind === 'magic') unequipWeaponRow(ref);
   }
-  renderInvActions(tr); reconcileAC(); scheduleAutosave();
+  renderInvActions(tr); reconcileAC(); if(kind === 'magic') recalc(); scheduleAutosave();
+}
+// A magic weapon (its type names a base weapon) equips as an attack row with its +N to hit.
+function equipMagicRow(tr){
+  const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
+  const mb = magicBonuses(magicData(ref)); if(!mb.baseWeapon) return;
+  if(invAttackHasWeapon(ref)) return;
+  const w = mb.baseWeapon, finesse = (w.properties || []).some(p => /finesse/i.test(p));
+  const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
+  addAttackRow({ name: display, abil, prof: true, bonus: mb.atk || 0, damage: w.damage, type: w.damageType, weapon: ref });
 }
 function equipWeaponRow(tr){
   const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
@@ -1220,21 +1262,41 @@ function computeAC(){
   const armor = armorName ? D.armor().find(x => norm(x.name) === norm(armorName)) : null;
   let ac = armor ? armorACValue(armor, dex) : 10 + dex;
   if(equippedItemName('shield')) ac += 2;
+  ac += magicACBonus();
   return ac;
 }
-// When armor or a shield is equipped, AC is auto-calculated and locked; otherwise it stays editable.
+// When armor/shield or an AC-granting magic item is equipped, AC is auto-calculated.
 let _acWasAuto = false;
 function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
-  const auto = !!(equippedItemName('armor') || equippedItemName('shield'));
-  if(auto){ acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto'); acEl.title = 'Auto-calculated from equipped armor/shield'; }
+  const auto = !!(equippedItemName('armor') || equippedItemName('shield') || magicACBonus() > 0);
+  if(auto){ acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto'); acEl.title = 'Auto-calculated from equipped armor / shield / magic items'; }
   else {
-    // Just unequipped the last armor/shield → drop back to the unarmored value (10 + Dex).
-    if(_acWasAuto) acEl.value = computeAC();
+    if(_acWasAuto) acEl.value = computeAC();   // just unequipped the last source → unarmored value
     acEl.readOnly = false; acEl.classList.remove('auto'); acEl.title = '';
   }
   _acWasAuto = auto;
 }
+// ── Magic items: parse worn bonuses, apply to AC / saves / attacks ────────
+function magicData(ref){ const n = norm(ref); return D.magicItems().find(x => norm(x.name) === n) || null; }
+function magicBonuses(m){
+  const b = { ac:0, save:0, atk:0, dmg:0, baseWeapon:null };
+  if(!m) return b;
+  const d = (m.description || '') + ' ' + m.name;
+  let mm = d.match(/\+(\d)\s+bonus to (?:the wearer's |your )?Armor Class/i); if(mm) b.ac = +mm[1];
+  if(/Bracers of Defense/i.test(m.name)) b.ac = Math.max(b.ac, 2);
+  mm = m.name.match(/(?:Shield|Armor),?\s*\+(\d)/i); if(mm) b.ac = Math.max(b.ac, +mm[1]);
+  if(/^Shield$/i.test(m.type)) b.ac += 2;                                   // a magic shield still gives the base +2
+  if(/saving throws/i.test(d) && b.ac) b.save = b.ac;                       // Ring/Cloak of Protection: same +N to saves
+  mm = d.match(/\+(\d)\s+bonus to (?:attack and damage|attack rolls? and damage)/i) || m.name.match(/^Weapon,?\s*\+(\d)/i);
+  if(mm){ b.atk = +mm[1]; b.dmg = +mm[1]; }
+  const wt = (m.type || '').match(/^Weapon \(([a-z ]+)\)/i);
+  if(wt){ const base = D.weapons().find(w => norm(w.name) === norm(wt[1].trim())); if(base) b.baseWeapon = base; }
+  return b;
+}
+function equippedMagic(){ return invRows().filter(r => r.dataset.equipped === '1' && itemKind(invRowRef(r)) === 'magic').map(r => magicBonuses(magicData(invRowRef(r)))); }
+function magicACBonus(){ return equippedMagic().reduce((s, b) => s + (b.ac || 0), 0); }
+function magicSaveBonus(){ return equippedMagic().reduce((s, b) => s + (b.save || 0), 0); }
 
 // ═══ SPELLBOOK (browse & add spells) ══════════════════════════════════════
 let _bookInit = false;
@@ -1604,9 +1666,10 @@ function castSpellFull(name){
   const save = spellSaveAbility(sp);
   const ab = abilityForSpell(sp), dc = spellDC(ab);
   if(diceExpr && spellIsAttack(sp)){
-    const r = rawD20(), atkMod = spellAtkBonus(ab), hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
+    const ctx = rollCtx('attack');
+    const r = rawD20(ctx.mode), atkMod = spellAtkBonus(ab) + ctx.pen, hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
     const dd = rollDiceExpr(diceExpr, crit);
-    addLog(label, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : ''), crit ? 'crit' : fumble ? 'fumble' : 'normal');
+    addLog(label, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : '') + (ctx.note ? ' · ' + ctx.note : ''), crit ? 'crit' : fumble ? 'fumble' : 'normal');
   } else if(diceExpr && save){
     const dd = rollDiceExpr(diceExpr, false);
     addLog(label, dd.total + dtype, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail, 'normal');

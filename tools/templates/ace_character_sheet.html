@@ -43,7 +43,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-entry .karma-die-btn:hover{background:#3d3416;}
 .log-entry .karma-die-btn:disabled{opacity:.4;cursor:default;}
 .log-hint{color:#444;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
-.log-actions{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid #222;}
+.log-actions{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid #222;}
 .log-action-btn{flex:1;padding:5px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;}
 .log-action-btn.export{background:#1a2a3a;color:#6aabdf;border:1px solid #1a4a8a;}
 .log-action-btn.export:hover{background:#1a4a8a;color:white;}
@@ -427,10 +427,10 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">🔗</button>
-    <button class="log-action-btn wizard" onclick="ACEB.launch()" title="Hero Builder" aria-label="Hero Builder">✨</button>
-    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">📖</button>
-    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">↓</button>
-    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">↑<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
+    <button class="log-action-btn wizard" onclick="ACEB.launch()" title="Hero Builder" aria-label="Hero Builder">✨ Build</button>
+    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">Rules</button>
+    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">Export</button>
+    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click a Stat or a Focus to roll</div></div>
 

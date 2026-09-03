@@ -36,7 +36,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-entry.crit{border-color:#ffd700;}.log-entry.fumble{border-color:#ff4444;}
 .log-entry.remote{border-left:3px solid #8a7ac8;background:#1c1a24;}
 .log-hint{color:#444;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
-.log-actions{display:flex;gap:4px;padding:8px 10px;border-bottom:1px solid #222;}
+.log-actions{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid #222;}
 .log-action-btn{flex:1;padding:5px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;}
 .log-action-btn.export{background:#1a2a3a;color:#6aabdf;border:1px solid #1a4a8a;}
 .log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
@@ -417,11 +417,11 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign">🔗</button>
-    <button id="build-btn" class="log-action-btn wizard" onclick="NIMB.launch()" title="Hero Builder" aria-label="Hero Builder">✨</button>
-    <button id="level-btn" class="log-action-btn wizard" onclick="levelUp()" title="Level up" aria-label="Level up" style="display:none;">⬆</button>
-    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">📖</button>
-    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">↓</button>
-    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">↑<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
+    <button id="build-btn" class="log-action-btn wizard" onclick="NIMB.launch()" title="Hero Builder" aria-label="Hero Builder">✨ Build</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="levelUp()" title="Level up" aria-label="Level up" style="display:none;">⬆ Level Up</button>
+    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">Rules</button>
+    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
+    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click a stat, skill or attack to roll</div></div>
   <div class="dice-tray">
