@@ -289,9 +289,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .spell-row:hover{background:var(--box);}
 .sp-prep{width:14px;height:14px;border:2px solid var(--dnd-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;}
 .sp-prep.on{background:var(--dnd);}
-.sp-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;}
-.sp-name:hover{color:var(--dnd);}
-.sp-name small{color:var(--muted);font-size:10px;font-weight:600;}
+.sp-cell{display:flex;flex-direction:column;min-width:0;cursor:pointer;}
+.sp-prep-gap{width:14px;flex-shrink:0;}
+.sp-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.01em;}
+.sp-cell:hover .sp-name{color:var(--dnd);}
+.sp-info{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;margin-top:1px;}
 .sp-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:12px;}
 .sp-x:hover{color:var(--red);}
 .cast-btn{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
@@ -568,9 +570,9 @@ select option{background:var(--input-bg);color:var(--ink);}
       </div><!-- mc-combat -->
 
       <div class="mc-attacks">
-      <div class="section-bar"><span>Attacks &amp; Spellcasting Actions</span><span class="sb-note" id="atk-spell-note"></span></div>
+      <div class="section-bar"><span>Attacks</span></div>
       <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div>
-      <div class="add-hint">Equip a weapon in the Equipment tab or add an attack spell to fill this list.</div>
+      <div class="add-hint">Equip a weapon in the Equipment tab to fill this list. Cast spells from the Spells tab.</div>
       </div><!-- mc-attacks -->
 
       <!-- TABS -->
@@ -1124,11 +1126,17 @@ function computeAC(){
   return ac;
 }
 // When armor or a shield is equipped, AC is auto-calculated and locked; otherwise it stays editable.
+let _acWasAuto = false;
 function reconcileAC(){
   const acEl = $('f-ac'); if(!acEl) return;
   const auto = !!(equippedItemName('armor') || equippedItemName('shield'));
   if(auto){ acEl.value = computeAC(); acEl.readOnly = true; acEl.classList.add('auto'); acEl.title = 'Auto-calculated from equipped armor/shield'; }
-  else { acEl.readOnly = false; acEl.classList.remove('auto'); acEl.title = ''; }
+  else {
+    // Just unequipped the last armor/shield → drop back to the unarmored value (10 + Dex).
+    if(_acWasAuto) acEl.value = computeAC();
+    acEl.readOnly = false; acEl.classList.remove('auto'); acEl.title = '';
+  }
+  _acWasAuto = auto;
 }
 
 // ═══ SPELLBOOK (browse & add spells) ══════════════════════════════════════
@@ -1355,14 +1363,12 @@ function renderSpellHeader(){
   const on = isCaster();
   $('spell-block').style.display = on ? '' : 'none';
   $('spell-empty').style.display = on ? 'none' : '';
-  const note = $('atk-spell-note');
   if(on){
     $('sp-ability').textContent = spellAbilityId();
     $('sp-dc').textContent = spellDC();
     $('sp-atk').textContent = sgn(spellAtkBonus());
     $('spell-note').textContent = casterType().charAt(0).toUpperCase() + casterType().slice(1) + ' caster';
-    if(note) note.innerHTML = 'Spell Atk <b onclick="rollSpellAttack()" style="cursor:pointer;color:var(--dnd-dk);" title="Roll a spell attack">' + sgn(spellAtkBonus()) + '</b> · Save DC <b>' + spellDC() + '</b>';
-  } else { $('spell-note').textContent = 'No spellcasting'; if(note) note.textContent = ''; }
+  } else { $('spell-note').textContent = 'No spellcasting'; }
 }
 function slotArray(){
   const t = D.tables(); const L = levelNow(); if(!t) return null;
@@ -1407,20 +1413,31 @@ function renderSpells(){
     box.appendChild(hd);
     byLvl[lvl].sort((a,b)=>a.sk.name.localeCompare(b.sk.name)).forEach(({ sk, sp }) => {
       const row = document.createElement('div'); row.className = 'spell-row';
-      const meta = sp ? (sp.school + (sp.concentration ? ' · Conc' : '') + (sp.ritual ? ' · Ritual' : '')) : 'unknown';
-      const atkRoll = sp && /attack roll|spell attack|make a (ranged|melee)/i.test(sp.description || '');
+      const q = esc(sk.name).replace(/'/g,"\\'");
       row.innerHTML =
-        (lvl > 0 ? '<span class="sp-prep' + (sk.prepared?' on':'') + '" onclick="togglePrep(\'' + esc(sk.name).replace(/'/g,"\\'") + '\')" title="Prepared"></span>' : '<span></span>') +
-        '<span class="sp-name" onclick="openSpell(\'' + esc(sk.name).replace(/'/g,"\\'") + '\')" title="Read">' + esc(sk.name) + ' <small>' + esc(meta) + '</small></span>' +
-        '<span style="display:flex;gap:4px;align-items:center;">' +
-          (lvl > 0 ? '<button class="cast-btn" onclick="castSpell(\'' + esc(sk.name).replace(/'/g,"\\'") + '\',' + lvl + ')" title="Spend a slot">Cast</button>' : '') +
-          (atkRoll ? '<button class="cast-btn" style="background:var(--gold);" onclick="rollSpellAttack()" title="Spell attack">Atk</button>' : '') +
-        '</span>';
+        (lvl > 0 ? '<span class="sp-prep' + (sk.prepared?' on':'') + '" onclick="togglePrep(\'' + q + '\')" title="Prepared"></span>' : '<span class="sp-prep-gap"></span>') +
+        '<span class="sp-cell" onclick="openSpell(\'' + q + '\')" title="Read">' +
+          '<span class="sp-name">' + esc(sk.name) + '</span>' +
+          '<span class="sp-info">' + esc(spellInfoLine(sp)) + '</span>' +
+        '</span>' +
+        '<button class="cast-btn" onclick="event.stopPropagation();castSpellFull(\'' + q + '\')" title="Cast this spell">Cast</button>';
       box.appendChild(row);
     });
   });
 }
-function addSpellByName(n){ if(!spellsKnown.some(s => norm(s.name) === norm(n))) spellsKnown.push({ name:n, prepared:true }); addSpellAttackRow(n); renderSpells(); scheduleAutosave(); }
+function addSpellByName(n){ if(!spellsKnown.some(s => norm(s.name) === norm(n))) spellsKnown.push({ name:n, prepared:true }); renderSpells(); scheduleAutosave(); }
+// Compact info line for a spell row: casting time · range · duration · damage.
+function shortCastTime(ct){ ct = String(ct || ''); if(/bonus/i.test(ct)) return 'Bonus'; if(/reaction/i.test(ct)) return 'Reaction'; if(/^\s*action\s*$/i.test(ct)) return 'Action'; return ct; }
+function spellInfoLine(sp){
+  if(!sp) return 'unknown spell';
+  const parts = [shortCastTime(sp.castingTime)];
+  if(sp.range) parts.push(sp.range);
+  if(sp.duration) parts.push(sp.duration);
+  const dmg = spellDamage(sp); if(dmg.dice) parts.push(dmg.dice + (dmg.type ? ' ' + dmg.type : ''));
+  if(sp.concentration) parts.push('Conc');
+  if(sp.ritual) parts.push('Ritual');
+  return parts.join(' · ');
+}
 function togglePrep(n){ const s = spellsKnown.find(x => x.name === n); if(s) s.prepared = !s.prepared; renderSpells(); scheduleAutosave(); }
 function removeSpell(n){ spellsKnown = spellsKnown.filter(s => s.name !== n); [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.spell || '') === norm(n)) tr.remove(); }); renderSpells(); scheduleAutosave(); }
 // Attack spells (those calling for a spell attack roll) get an Attacks/Spellcasting row.
@@ -1445,13 +1462,44 @@ function addSpellAttackRow(n){
 // Add rows for every known attack spell that hasn't got one (used after the builder applies a caster).
 function syncSpellAttacks(){ spellsKnown.forEach(sk => addSpellAttackRow(sk.name)); }
 window.syncSpellAttacks = syncSpellAttacks;
-function castSpell(n, lvl){
-  // spend the lowest available slot of at least this level (pact spends pact slot)
+// Spend the lowest slot of at least `lvl` (pact spends a pact slot). Returns true if a slot was spent.
+function spendSpellSlot(lvl, name){
   const t = D.tables(), L = levelNow();
-  if(casterType() === 'pact'){ const pm = t && t.pactMagic ? t.pactMagic[L-1] : null; if(pm){ const used = slotUsed['pact'] || 0; if(used < pm.slots){ slotUsed['pact'] = used + 1; addLog('Cast ' + n, '✦', 'Spent a pact slot (' + (used+1) + '/' + pm.slots + ')', 'normal'); renderSlots(); scheduleAutosave(); return; } } addLog('Cast ' + n, '✗', 'No pact slots left', 'fumble'); return; }
-  const arr = slotArray(); if(!arr){ addLog('Cast ' + n, '✦', 'Cast (no slot tracking)', 'normal'); return; }
-  for(let i = lvl; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(used < max){ slotUsed[String(i)] = used + 1; addLog('Cast ' + n, '✦', 'Spent a level ' + i + ' slot (' + (used+1) + '/' + max + ')', 'normal'); renderSlots(); scheduleAutosave(); return; } }
-  addLog('Cast ' + n, '✗', 'No slots of level ' + lvl + '+ left', 'fumble');
+  if(casterType() === 'pact'){ const pm = t && t.pactMagic ? t.pactMagic[L-1] : null; if(pm){ const used = slotUsed['pact'] || 0; if(used < pm.slots){ slotUsed['pact'] = used + 1; renderSlots(); scheduleAutosave(); return true; } } addLog('Cast ' + name, '✗', 'No pact slots left', 'fumble'); return false; }
+  const arr = slotArray(); if(!arr) return true;   // no slot tracking (manual caster) → allow
+  for(let i = lvl; i <= 9; i++){ const max = arr[i-1] || 0, used = slotUsed[String(i)] || 0; if(used < max){ slotUsed[String(i)] = used + 1; renderSlots(); scheduleAutosave(); return true; } }
+  addLog('Cast ' + name, '✗', 'No slots of level ' + lvl + '+ left', 'fumble'); return false;
+}
+function spellSaveAbility(sp){ const m = ((sp && sp.description) || '').match(/\b(Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)\s+saving throw/i); return m ? m[1].slice(0,3).toUpperCase() : ''; }
+// Cantrip damage scales with character level (×1 / ×2 / ×3 / ×4 at 1 / 5 / 11 / 17).
+function scaleCantrip(expr, charLevel){ const mult = charLevel >= 17 ? 4 : charLevel >= 11 ? 3 : charLevel >= 5 ? 2 : 1; const m = expr.match(/^(\d+)d(\d+)(.*)$/i); return m ? (num(m[1]) * mult) + 'd' + m[2] + (m[3] || '') : expr; }
+function rollDiceExpr(expr, crit){ const m = expr.match(/(\d+)d(\d+)\s*([+-]\s*\d+)?/i); if(!m) return { total:0, detail:expr }; let n = num(m[1]) || 1; const sides = num(m[2]); const flat = m[3] ? num(m[3].replace(/\s+/g,'')) : 0; if(crit) n *= 2; const faces = []; let sum = 0; for(let i=0;i<n;i++){ const f = dN(sides); faces.push(f); sum += f; } return { total: sum + flat, detail: n + 'd' + sides + '(' + faces.join('+') + ')' + (flat ? ' ' + sgn(flat) : '') }; }
+function d20Detail(r){ return r.mode !== 'norm' ? 'd20[' + r.faces.join(',') + '→' + r.nat + (r.mode === 'adv' ? ' adv' : ' dis') + ']' : 'd20:' + r.nat; }
+function spellEffectSummary(sp){ const d = (sp && sp.description) || ''; const first = d.split(/(?<=[.!?])\s/)[0] || d; return first.length > 170 ? first.slice(0,167) + '…' : first; }
+// Cast a spell: spend a slot (leveled), then roll/report by type — attack roll, saving throw, plain damage, or effect text.
+function castSpellFull(name){
+  const sp = spellByName(name);
+  if(!sp){ addLog('Cast ' + name, '✦', 'Cast', 'normal'); return; }
+  const lvl = sp.level;
+  if(lvl > 0 && !spendSpellSlot(lvl, name)) return;   // out of slots → aborted (logged)
+  const dmgInfo = spellDamage(sp);
+  let diceExpr = dmgInfo.dice;
+  if(lvl === 0 && diceExpr) diceExpr = scaleCantrip(diceExpr, levelNow());
+  const dtype = dmgInfo.type ? ' ' + dmgInfo.type : '';
+  const save = spellSaveAbility(sp);
+  if(diceExpr && spellIsAttack(sp)){
+    const r = rawD20(), atkMod = spellAtkBonus(), hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
+    const dd = rollDiceExpr(diceExpr, crit);
+    addLog(sp.name, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : ''), crit ? 'crit' : fumble ? 'fumble' : 'normal');
+  } else if(diceExpr && save){
+    const dd = rollDiceExpr(diceExpr, false);
+    addLog(sp.name, dd.total + dtype, 'DC ' + spellDC() + ' ' + save + ' save · dmg ' + dd.detail, 'normal');
+  } else if(diceExpr){
+    const dd = rollDiceExpr(diceExpr, false);
+    addLog(sp.name, dd.total + dtype, 'damage ' + dd.detail, 'normal');
+  } else {
+    addLog(sp.name, save ? ('DC ' + spellDC() + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
+  }
 }
 function openSpell(n){
   const sp = spellByName(n); if(!sp){ openDesc(n, '', { _desc:'' }); return; }
@@ -1623,7 +1671,7 @@ function applySheet(d){
   customFeatures = d.customFeatures || []; addedFeats = d.addedFeats || [];
   resourceUsed = d.resourceUsed || {}; customResources = d.customResources || [];
   spellsKnown = d.spellsKnown || []; slotUsed = d.slotUsed || {}; _forceSpells = !!d.forceSpells; _spellAbility = d.spellAbility || ''; _lineage = d.lineage || '';
-  $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow);
+  $('attacks-body').innerHTML = ''; (d.attacks || []).filter(a => !a.spell).forEach(addAttackRow);   // spells now live only in the Spells tab
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
   refreshSubclassList(); refreshSpellPicker();
   renderDeath(); renderFeatures(); renderResources(); renderConditions(); recalc(); setDefaultTab();
