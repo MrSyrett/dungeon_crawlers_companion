@@ -56,7 +56,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .dm-toggle-btn.on{background:#e0a37f;border-color:#c47a52;}
 .dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:white;border-radius:50%;transition:left .2s;}
 .dm-toggle-btn.on::after{left:20px;background:#1a1a1a;}
-.log-action-btn.campaign{flex:0 0 auto;padding:5px 9px;}
+.log-action-btn.campaign{flex:0 0 auto;padding:5px 9px;background:transparent;color:#9a8f8f;border:1px solid #3a3030;}
+.log-action-btn.campaign:hover{background:#241c1c;color:#fff;}
 
 /* DICE TRAY */
 .dice-tray{border-top:1px solid #241c1c;padding:10px;display:flex;flex-direction:column;gap:6px;background:#0e0a0a;}
@@ -114,7 +115,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tab-btn:hover{color:#fff;}
 .tab-btn.on{color:#fff;border-bottom-color:var(--dnd);background:rgba(155,27,34,.25);}
 .tab-panel{display:none;}
-.tab-panel.on{display:block;}
+.tab-panel.on{display:block;height:480px;overflow-y:auto;overflow-x:hidden;}
+.tab-panel.on .section-bar{position:sticky;top:0;z-index:2;}
 
 /* CONDITIONS */
 .cond-wrap{padding:8px 10px;display:flex;flex-wrap:wrap;gap:6px;}
@@ -122,9 +124,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .cond-chip:hover{border-color:var(--dnd);}
 .cond-chip.on{background:var(--dnd);color:#fff;border-color:var(--dnd-dk);}
 .cond-chip .ci{opacity:.6;margin-left:4px;font-size:9px;}
-.exh-box{display:flex;align-items:center;gap:6px;padding:6px 10px;border-top:1px solid var(--rule);}
+.exh-box{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding:6px 10px;border-top:1px solid var(--rule);}
 .exh-box .eb-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
-.exh-pip{width:16px;height:16px;border:2px solid var(--muted);border-radius:3px;cursor:pointer;background:transparent;font-family:'Share Tech Mono',monospace;font-size:9px;line-height:12px;text-align:center;color:var(--muted);}
+.exh-box #exh-pips{display:inline-flex;gap:5px;}
+.exh-pip{display:inline-block;width:26px;height:26px;border:2px solid var(--muted);border-radius:5px;cursor:pointer;background:transparent;font-family:'Share Tech Mono',monospace;font-size:13px;line-height:22px;text-align:center;color:var(--muted);vertical-align:middle;}
 .exh-pip.on{background:var(--red);border-color:var(--red);color:#fff;}
 
 /* REST BUTTONS */
@@ -193,6 +196,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .fld label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
 .fld input,.fld select,.fld textarea{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
 .fld textarea{font-family:'Barlow',sans-serif;font-weight:400;font-size:12px;line-height:1.45;border:1px solid var(--rule);background:var(--input-bg);padding:6px 8px;resize:vertical;min-height:46px;}
+.tbl-scroll{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .tbl{width:100%;border-collapse:collapse;}
 .tbl th{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px;border-bottom:1px solid var(--rule);}
 .tbl td{padding:3px 6px;border-bottom:1px solid var(--rule);vertical-align:middle;}
@@ -245,8 +249,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .cast-btn:hover{background:var(--dnd-dk);}
 
 /* DARK */
-body.dark{--bg:#16110f;--paper:#231b17;--ink:#ece3d6;--muted:#a99e90;--rule:#413428;--border:#4a3a2c;--section-hdr:#0c0908;--box:#2c221b;--input-bg:#1c1512;--input-border:#4a3a2c;--dnd-lt:#3a2018;--dnd-dk:#e08a70;}
-body.dark .sheet{border-color:#4a3a2c;}
+body.dark{--bg:#141417;--paper:#1e1e22;--ink:#e9e7e3;--muted:#9b988f;--rule:#3a3a41;--border:#44444d;--section-hdr:#0d0d10;--box:#28282e;--input-bg:#171719;--input-border:#44444d;--dnd-lt:#352a2d;--dnd-dk:#ea8f7d;}
+body.dark .sheet{border-color:#44444d;}
+body.dark .cbt input,body.dark .abil-mod,body.dark .c-val,body.dark .sk-val{color:var(--dnd-dk);}
 body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark .cbt input,body.dark .pick-sel{background:var(--input-bg);color:var(--ink);border-color:var(--rule);}
 
 /* Mobile toast */
@@ -303,20 +308,42 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
   #log-collapse-btn{position:absolute !important;bottom:100% !important;top:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:80px !important;height:28px !important;border-radius:6px 6px 0 0 !important;font-size:11px !important;}
   #log-collapse-btn::after{content:"\25B2 Log";}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
+  /* Everything stacks in one column, full width, no horizontal overflow. */
+  .sheet{max-width:100%;box-shadow:none;}
+  .sheet-wrap{padding-left:6px;padding-right:6px;}
   .hdr-row{flex-direction:column;}
+  .hdr-logo{flex-direction:row;gap:8px;padding:8px 12px;}
   .hdr-fields{grid-template-columns:1fr 1fr;border-left:none;border-top:2px solid var(--border);}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
+  .body-row{flex-direction:column;flex-wrap:nowrap;}
+  .left-region,.main-col{width:100%;border-right:none;}
   .left-top{flex-direction:column;}
   .ability-col{width:100%;border-right:none;border-bottom:1px solid var(--rule);}
   .ability-col .abil-list{display:grid;grid-template-columns:repeat(3,1fr);}
+  .abil-box{margin:6px 4px;}
   .combat-strip{grid-template-columns:1fr 1fr;}
-  .tab-btn{flex:1 1 40%;}
+  .cbt.hp-box{grid-column:span 2;}
+  .death-strip{gap:6px;}
+  /* Tabs: sit under the content, wrap to two rows, and each window is a
+     capped, scrollable pane so nothing runs off the page. */
+  .tabs-bar{position:sticky;top:0;z-index:3;}
+  .tab-btn{flex:1 1 45%;font-size:11px;padding:8px 4px;}
+  .tab-panel.on{height:auto;max-height:70vh;}
+  .tbl input,.tbl select{font-size:13px;}
   .small-btn{min-height:36px;padding:7px 12px;font-size:12px;}
-  .row-x{min-width:36px;min-height:36px;font-size:18px;}
-  .pick-sel,.add-row select{min-height:40px;font-size:14px;}
-  input[type=checkbox]{width:22px;height:22px;}
+  .row-x{min-width:32px;min-height:32px;font-size:18px;}
+  .pick-sel,.add-row select{min-height:40px;font-size:14px;flex:1 1 100%;}
+  .add-row{flex-direction:column;align-items:stretch;}
+  input[type=checkbox]{width:20px;height:20px;}
   .abil-mod{font-size:34px;}
+  .skill-row{padding:5px 4px;}
+  .sk-name{font-size:14px;}.sk-val{font-size:14px;}
+}
+@media (max-width:400px){
+  .ability-col .abil-list{grid-template-columns:repeat(2,1fr);}
+  .hdr-fields{grid-template-columns:1fr;}
+  .hdr-field.wide{grid-column:span 1 !important;}
 }
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scrollbar,.modal-bd::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb,select::-webkit-scrollbar-thumb,.log-entries::-webkit-scrollbar-thumb,.modal-bd::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}
@@ -429,13 +456,13 @@ select option{background:var(--input-bg);color:var(--ink);}
       </div>
       <div class="death-strip">
         <span class="d-lbl">Death Saves</span>
-        <span class="d-lbl">Successes</span><span id="death-succ"></span>
-        <span class="d-lbl" style="margin-left:8px;">Failures</span><span id="death-fail"></span>
+        <span id="death-succ" title="Successes"></span>
+        <span id="death-fail" title="Failures" style="margin-left:8px;"></span>
         <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save" style="margin-left:8px;">🎲 Roll</button>
       </div>
 
       <div class="section-bar"><span>Attacks &amp; Spellcasting Actions</span></div>
-      <table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table>
+      <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div>
       <div class="add-row">
         <button class="small-btn ghost" onclick="addAttackRow()">+ Attack</button>
         <select class="pick-sel" id="atk-pick" onchange="if(this.value){addAttackFromWeapon(this.value);this.value='';}"><option value="">Add from the weapon list…</option></select>
@@ -481,7 +508,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <!-- EQUIPMENT TAB -->
       <div class="tab-panel" id="tab-equipment">
         <div class="section-bar"><span>Equipment</span></div>
-        <table class="tbl"><thead><tr><th>Item</th><th>Qty</th><th></th></tr></thead><tbody id="inv-body"></tbody></table>
+        <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Item</th><th>Qty</th><th></th></tr></thead><tbody id="inv-body"></tbody></table></div>
         <div class="add-row">
           <button class="small-btn ghost" onclick="addInvRow()">+ Item</button>
           <select class="pick-sel" id="inv-pick" onchange="if(this.value){addInvFromData(this.value);this.value='';}"><option value="">Add gear / armor…</option></select>
@@ -1212,7 +1239,7 @@ let _campaign = null;
 const _campaignClientKey = 'ck-' + Math.random().toString(36).slice(2, 12);
 let _campaignLastId = 0; let _campaignTimer = null;
 function campaignPlayerName(){ return $('f-name').value.trim() || $('f-player').value.trim() || 'Player'; }
-function campaignUpdateBtn(){ const btn = $('campaign-btn'); if(!btn) return; if(_campaign){ btn.title = 'Campaign: ' + _campaign.name; btn.style.background = '#241f10'; btn.style.color = '#e8c84a'; btn.style.borderColor = '#7a5a00'; } else { btn.title = 'Campaign'; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = ''; } }
+function campaignUpdateBtn(){ const btn = $('campaign-btn'); if(!btn) return; if(_campaign){ btn.title = 'Campaign: ' + _campaign.name; btn.style.background = '#241f10'; btn.style.color = '#e8c84a'; btn.style.borderColor = '#7a5a00'; } else { btn.title = 'Campaign'; btn.style.background = 'transparent'; btn.style.color = '#9a8f8f'; btn.style.borderColor = '#3a3030'; } }
 function openCampaign(){ $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
 function closeCampaign(){ $('campaign-overlay').classList.remove('open'); }
 function campaignRenderModal(){
