@@ -137,6 +137,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 
 /* REST BUTTONS */
 .rest-btns{display:flex;gap:6px;}
+.hdr-rest{margin-top:3px;}
+.hdr-rest .rest-btn{flex:1;padding:4px 4px;}
 .rest-btn{background:var(--box);color:var(--ink);border:1px solid rgba(255,255,255,.4);border-radius:4px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
 .rest-btn:hover{background:var(--dnd);color:#fff;border-color:var(--dnd);}
 .death-strip{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;padding:8px 10px;border-bottom:1px solid var(--rule);background:var(--box);}
@@ -402,7 +404,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="hdr-field" style="grid-column:span 3;"><label>Species</label><input type="text" id="f-species" list="dl-species" placeholder="Human" oninput="onSpeciesChange()"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Background</label><input type="text" id="f-background" list="dl-backgrounds" placeholder="Soldier"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Alignment</label><input type="text" id="f-alignment" list="dl-align" placeholder="Neutral Good"></div>
-      <div class="hdr-field lastcol" style="grid-column:span 3;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
+      <div class="hdr-field lastcol" style="grid-column:span 3;"><label>Rest</label><span class="rest-btns hdr-rest"><button class="rest-btn" onclick="shortRest()" title="Short Rest — regain Pact slots">Short Rest</button><button class="rest-btn" onclick="longRest()" title="Long Rest — full HP, all slots, clear death saves">Long Rest</button></span></div>
     </div>
   </div>
 
@@ -439,7 +441,6 @@ select option{background:var(--input-bg);color:var(--ink);}
 
     <!-- MAIN: COMBAT / ATTACKS / TABS -->
     <div class="main-col">
-      <div class="section-bar"><span>Combat <span class="sb-note" id="cbt-note"></span></span><span class="rest-btns"><button class="rest-btn" onclick="shortRest()" title="Short Rest — regain Pact slots">Short Rest</button><button class="rest-btn" onclick="longRest()" title="Long Rest — full HP, all slots, clear death saves">Long Rest</button></span></div>
       <div class="combat-strip">
         <div class="cbt"><div class="c-lbl">Armor Class</div><input id="f-ac" value="10" oninput="scheduleAutosave()"></div>
         <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
@@ -733,9 +734,6 @@ function recalc(){
   $('c-prof').textContent = sgn(PB);
   const init = modOf('DEX'); $('c-init').textContent = sgn(init);
   const pp = $('d-pp'); if(pp) pp.textContent = 10 + perceptionVal;
-  // combat note
-  const c = classData();
-  $('cbt-note').innerHTML = c ? '<b>' + esc(c.name) + '</b> ' + levelNow() + (subclassData() ? ' · ' + esc(subclassData().name) : '') : '';
   renderSpellHeader();
   renderSlots();
 }
@@ -1175,7 +1173,7 @@ function collectSheet(){
   return {
     system:'DND', v:1,
     name: v('f-name'), cls: v('f-class'), level: num(v('f-level')), subclass: v('f-subclass'),
-    species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'), player: v('f-player'),
+    species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'),
     scores, saveProf, skillProf,
     speed: v('f-speed'), ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'),
     inspiration: $('f-inspiration').checked, deathSucc, deathFail, activeConditions, exhaustion, tab: _tab,
@@ -1189,7 +1187,7 @@ function applySheet(d){
   d = d || {};
   const set = (id, val) => { const el = $(id); if(el) el.value = (val == null ? '' : val); };
   set('f-name', d.name); set('f-class', d.cls); set('f-level', d.level || 1); set('f-subclass', d.subclass);
-  set('f-species', d.species); set('f-background', d.background); set('f-alignment', d.alignment); set('f-player', d.player);
+  set('f-species', d.species); set('f-background', d.background); set('f-alignment', d.alignment);
   ABILITIES.forEach(a => { const el = $('sc-' + a.id); if(el) el.value = (d.scores && d.scores[a.id]) || 10; });
   saveProf = d.saveProf || {}; skillProf = d.skillProf || {};
   set('f-speed', d.speed || '30'); set('f-ac', d.ac || '10');
@@ -1255,7 +1253,7 @@ buildAbilities();
 let _campaign = null;
 const _campaignClientKey = 'ck-' + Math.random().toString(36).slice(2, 12);
 let _campaignLastId = 0; let _campaignTimer = null;
-function campaignPlayerName(){ return $('f-name').value.trim() || $('f-player').value.trim() || 'Player'; }
+function campaignPlayerName(){ return $('f-name').value.trim() || 'Player'; }
 function campaignUpdateBtn(){ const btn = $('campaign-btn'); if(!btn) return; if(_campaign){ btn.title = 'Campaign: ' + _campaign.name; btn.style.background = '#241f10'; btn.style.color = '#e8c84a'; btn.style.borderColor = '#7a5a00'; } else { btn.title = 'Campaign'; btn.style.background = 'transparent'; btn.style.color = '#9a8f8f'; btn.style.borderColor = '#3a3030'; } }
 function openCampaign(){ $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
 function closeCampaign(){ $('campaign-overlay').classList.remove('open'); }
