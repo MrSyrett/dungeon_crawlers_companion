@@ -117,6 +117,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .left-top{display:flex;align-items:stretch;border-bottom:1px solid var(--rule);}
 .ability-col{width:158px;flex-shrink:0;border-right:1px solid var(--rule);display:flex;flex-direction:column;}
 .skills-col{flex:1;min-width:0;display:flex;flex-direction:column;}
+/* Skills grows to fill so the bottom of Conditions lines up with the bottom of Abilities. */
+.sc-skills{display:flex;flex-direction:column;flex:1;min-height:0;}
+.sc-skills .skills-wrap{flex:1;display:flex;flex-direction:column;}
+.sc-skills .skill-row{flex:1 1 auto;}
+.sc-prof .blk{border-bottom:none;}
 .main-col{flex:1;display:flex;flex-direction:column;min-width:0;}
 
 /* TABS */
@@ -247,6 +252,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .equip-btn{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;padding:3px 9px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;margin-right:5px;}
 .equip-btn:hover{border-color:var(--green);color:var(--ink);}
 .equip-btn.on{background:var(--green);color:#fff;border-color:var(--green);}
+.row-i{background:transparent;border:none;color:#5a9bd4;cursor:pointer;font-size:14px;padding:0 4px;line-height:1;}
+.row-i:hover{color:var(--dnd);}
 .cbt input.auto{color:var(--dnd-dk);}
 .inv-actions{white-space:nowrap;}
 .pick-sel{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:5px 6px;border-radius:3px;outline:none;flex:1 1 160px;min-width:0;}
@@ -271,6 +278,11 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .slot-pips{display:flex;gap:4px;flex-wrap:wrap;flex:1;}
 .slot-pip{width:15px;height:15px;border:2px solid var(--dnd-dk);border-radius:3px;background:transparent;cursor:pointer;}
 .slot-pip.used{background:var(--dnd);}
+.slot-cols{display:flex;flex-wrap:wrap;gap:10px 14px;padding:9px 10px;}
+.slot-col{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.slot-col-pips{display:flex;gap:4px;justify-content:center;min-height:15px;}
+.slot-col-lbl{background:var(--dnd-lt);border:none;color:var(--dnd-dk);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:10px;letter-spacing:.06em;text-transform:uppercase;border-radius:3px;padding:2px 8px;cursor:pointer;}
+.slot-col-lbl:hover{background:var(--dnd);color:#fff;}
 .slot-reset{background:transparent;border:1px solid var(--rule);color:var(--muted);border-radius:3px;font-size:9px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;cursor:pointer;}
 /* Class resource / per-day trackers */
 .res-wrap{padding:4px 10px 6px;display:flex;flex-direction:column;gap:8px;}
@@ -292,9 +304,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .sp-prep{width:14px;height:14px;border:2px solid var(--dnd-dk);border-radius:3px;background:transparent;cursor:pointer;flex-shrink:0;}
 .sp-prep.on{background:var(--dnd);}
 .sp-prep-gap{width:14px;flex-shrink:0;}
-.sp-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.01em;cursor:pointer;flex-shrink:0;}
-.sp-name:hover{color:var(--dnd);}
-.sp-info{flex:1;text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;cursor:pointer;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sp-name-input{flex:1 1 90px;min-width:60px;background:transparent;border:none;border-bottom:1px dashed transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.01em;outline:none;padding:1px 0;}
+.sp-name-input:hover,.sp-name-input:focus{border-bottom-color:var(--rule);}
+.sp-info{flex:1 1 auto;text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .sp-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:12px;}
 .sp-x:hover{color:var(--red);}
 .cast-btn{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
@@ -402,7 +414,9 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
   .left-region,.left-top,.skills-col,.main-col{display:contents;}
   .mc-combat{order:1;}
   .ability-col{order:2;width:100%;border-right:none;border-bottom:1px solid var(--rule);}
-  .sc-skills{order:3;border-bottom:1px solid var(--rule);}
+  .sc-skills{order:3;border-bottom:1px solid var(--rule);display:block;flex:0 1 auto;}
+  .sc-skills .skills-wrap{display:block;}
+  .sc-skills .skill-row{flex:none;}
   .mc-attacks{order:4;border-bottom:1px solid var(--rule);padding-bottom:4px;}
   .sc-conditions{order:5;border-bottom:1px solid var(--rule);}
   .sc-prof{order:6;border-bottom:1px solid var(--rule);}
@@ -519,12 +533,11 @@ select option{background:var(--input-bg);color:var(--ink);}
             </div>
             <div class="cond-wrap" id="conditions-list"></div>
           </div>
-
-          <div class="sc-prof">
-            <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
-            <div class="blk"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
-          </div>
         </div>
+      </div>
+      <div class="sc-prof">
+        <div class="section-bar"><span>Proficiencies &amp; Languages</span></div>
+        <div class="blk"><div class="fld"><label>Armor · Weapons · Tools · Languages</label><textarea id="f-proficiencies" placeholder="Light armor, Simple weapons, Thieves' Tools, Common, Elvish…"></textarea></div></div>
       </div>
     </div>
 
@@ -1090,10 +1103,16 @@ function rollAttackFull(btn){
 }
 
 // ═══ INVENTORY ════════════════════════════════════════════════════════════
+// Each row carries a canonical `data-ref` (the catalog name behind it). The
+// visible name can be renamed freely; mechanics (equip, stats, info) resolve
+// through the ref, so a renamed item still works. The ref auto-links the first
+// time a typed name matches the catalog (DCC-style).
 function addInvRow(it){
   it = it || { name:'', qty:1, equipped:false };
   const tr = document.createElement('tr');
   if(it.equipped) tr.dataset.equipped = '1';
+  const ref = it.ref || resolveItemRef(it.name);
+  if(ref) tr.dataset.ref = ref;
   tr.innerHTML =
     '<td><input type="text" class="inv-name" value="' + esc(it.name) + '" placeholder="Item" oninput="onInvNameChange(this)"></td>' +
     '<td><input type="number" class="inv-qty num mono" value="' + (it.qty != null ? num(it.qty) : 1) + '" style="width:46px;" oninput="scheduleAutosave()"></td>' +
@@ -1103,19 +1122,24 @@ function addInvRow(it){
   return tr;
 }
 function addInvFromData(name){ addInvRow({ name, qty:1 }); scheduleAutosave(); }
-function onInvNameChange(input){ renderInvActions(input.closest('tr')); scheduleAutosave(); }
+function onInvNameChange(input){
+  const tr = input.closest('tr');
+  if(!tr.dataset.ref){ const ref = resolveItemRef(input.value); if(ref) tr.dataset.ref = ref; }
+  renderInvActions(tr); syncEquippedWeaponName(tr); scheduleAutosave();
+}
 function removeInvRow(btn){
-  const tr = btn.closest('tr'); const name = tr.querySelector('.inv-name').value;
-  if(tr.dataset.equipped === '1' && itemKind(name) === 'weapon') unequipWeaponRow(name);
+  const tr = btn.closest('tr');
+  if(tr.dataset.equipped === '1' && invRowKind(tr) === 'weapon') unequipWeaponRow(invRowRef(tr));
   tr.remove(); reconcileAC(); scheduleAutosave();
 }
-// A row gets an Equip toggle only if the item is a known weapon, armor, or shield.
+// Equip toggle + info (ⓘ) + remove. Equip only if the item resolves to a weapon/armor/shield.
 function renderInvActions(tr){
-  const kind = itemKind(tr.querySelector('.inv-name').value);
+  const kind = invRowKind(tr);
   const eq = tr.dataset.equipped === '1';
   const equipBtn = (kind === 'weapon' || kind === 'armor' || kind === 'shield')
     ? '<button class="equip-btn' + (eq?' on':'') + '" onclick="toggleEquip(this)" title="Equip / Unequip">' + (eq?'Equipped':'Equip') + '</button>' : '';
-  tr.querySelector('.inv-actions').innerHTML = equipBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
+  const infoBtn = itemData(invRowRef(tr)) ? '<button class="row-i" onclick="openItemInfo(this.closest(\'tr\'))" title="Item details">&#9432;</button>' : '';
+  tr.querySelector('.inv-actions').innerHTML = equipBtn + infoBtn + '<button class="row-x" onclick="removeInvRow(this)">✕</button>';
 }
 
 // ── EQUIPMENT: item kinds, equip toggles, AC, weapon attack rows ──────────
@@ -1126,32 +1150,61 @@ function itemKind(name){
   if(a) return /shield/i.test(a.category) ? 'shield' : 'armor';
   return 'gear';
 }
+function itemData(ref){ const n = norm(ref); if(!n) return null; return D.weapons().find(x => norm(x.name) === n) || D.armor().find(x => norm(x.name) === n) || D.gear().find(x => norm(x.name) === n) || D.magicItems().find(x => norm(x.name) === n) || null; }
+function resolveItemRef(name){
+  const n = norm(name); if(!n) return '';
+  const all = [].concat(D.weapons(), D.armor(), D.gear(), D.magicItems());
+  let hit = all.find(x => norm(x.name) === n) || all.find(x => norm(x.name) === n.replace(/s$/, ''));
+  if(!hit){ const s = n.replace(/\s+armor$/, ''); if(s !== n) hit = all.find(x => norm(x.name) === s); }
+  if(!hit){ const s = n.replace(/\s*\([^)]*\)\s*$/, '').trim(); if(s && s !== n) hit = all.find(x => norm(x.name) === s); }   // strip a trailing "(note)"
+  return hit ? hit.name : '';
+}
 function invRows(){ return [...document.querySelectorAll('#inv-body tr')]; }
-function equippedItemName(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && itemKind(r.querySelector('.inv-name').value) === kind); return tr ? tr.querySelector('.inv-name').value : null; }
+function invRowRef(tr){ return tr.dataset.ref || tr.querySelector('.inv-name').value; }
+function invRowKind(tr){ return itemKind(invRowRef(tr)); }
+function equippedItemName(kind){ const tr = invRows().find(r => r.dataset.equipped === '1' && invRowKind(r) === kind); return tr ? invRowRef(tr) : null; }
+function openItemInfo(tr){
+  const it = itemData(invRowRef(tr)), display = tr.querySelector('.inv-name').value;
+  let meta = 'Custom item', body = '';
+  if(it){
+    if(it.damage){ meta = it.category + ' ' + it.kind + ' · ' + it.damage + ' ' + it.damageType + (it.mastery ? ' · Mastery: ' + it.mastery : ''); body = (it.properties || []).join(', ') + (it.weight ? (((it.properties||[]).length?' · ':'') + it.weight) : ''); }
+    else if(it.baseAC){ meta = it.category + ' Armor · AC ' + it.baseAC + (it.stealthDisadvantage ? ' · Stealth Disadvantage' : ''); body = it.weight || ''; }
+    else if(it.rarity){ meta = it.type + ' · ' + it.rarity + (it.attunement ? ' · Requires Attunement' : ''); body = it.description || ''; }
+    else { meta = (it.category || 'Gear') + (it.weight ? ' · ' + it.weight : ''); body = it.description || ''; }
+  }
+  openDesc(display, meta, { _desc: body });
+}
 function toggleEquip(btn){
-  const tr = btn.closest('tr'); const name = tr.querySelector('.inv-name').value; const kind = itemKind(name);
+  const tr = btn.closest('tr'); const ref = invRowRef(tr); const kind = itemKind(ref);
   const turningOn = tr.dataset.equipped !== '1';
   if(turningOn){
     // one body armor / one shield at a time
     if(kind === 'armor' || kind === 'shield'){
-      invRows().forEach(r => { if(r !== tr && r.dataset.equipped === '1' && itemKind(r.querySelector('.inv-name').value) === kind){ r.dataset.equipped = ''; renderInvActions(r); } });
+      invRows().forEach(r => { if(r !== tr && r.dataset.equipped === '1' && invRowKind(r) === kind){ r.dataset.equipped = ''; renderInvActions(r); } });
     }
     tr.dataset.equipped = '1';
-    if(kind === 'weapon') equipWeaponRow(name);
+    if(kind === 'weapon') equipWeaponRow(tr);
   } else {
     tr.dataset.equipped = '';
-    if(kind === 'weapon') unequipWeaponRow(name);
+    if(kind === 'weapon') unequipWeaponRow(ref);
   }
   renderInvActions(tr); reconcileAC(); scheduleAutosave();
 }
-function equipWeaponRow(name){
-  const w = D.weapons().find(x => norm(x.name) === norm(name)); if(!w) return;
-  if(invAttackHasWeapon(name)) return;
+function equipWeaponRow(tr){
+  const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
+  const w = D.weapons().find(x => norm(x.name) === norm(ref)); if(!w) return;
+  if(invAttackHasWeapon(ref)) return;
   const finesse = (w.properties || []).some(p => /finesse/i.test(p));
   const abil = w.kind === 'Ranged' ? 'DEX' : (finesse ? (modOf('DEX') > modOf('STR') ? 'DEX' : 'STR') : 'STR');
-  addAttackRow({ name: w.name, abil, prof: true, bonus: 0, damage: w.damage, type: w.damageType, weapon: w.name });
+  addAttackRow({ name: display, abil, prof: true, bonus: 0, damage: w.damage, type: w.damageType, weapon: ref });
 }
-function unequipWeaponRow(name){ [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.weapon || '') === norm(name)) tr.remove(); }); }
+function unequipWeaponRow(ref){ [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.weapon || '') === norm(ref)) tr.remove(); }); }
+// Keep an equipped weapon's attack-row name in sync when its inventory item is renamed.
+function syncEquippedWeaponName(tr){
+  if(tr.dataset.equipped !== '1' || invRowKind(tr) !== 'weapon') return;
+  const ref = invRowRef(tr), display = tr.querySelector('.inv-name').value;
+  [...document.querySelectorAll('#attacks-body tr')].forEach(row => { if(norm(row.dataset.weapon || '') === norm(ref)){ const nm = row.querySelector('.atk-name'); if(nm) nm.value = display; } });
+}
 function invAttackHasWeapon(name){ return [...document.querySelectorAll('#attacks-body tr')].some(tr => norm(tr.dataset.weapon || '') === norm(name)); }
 // Armor Class from equipped armor + shield (Light = full Dex, Medium = +Dex max 2, Heavy = flat).
 function armorACValue(a, dex){
@@ -1443,17 +1496,20 @@ function pactInfo(){ const w = warlockEntry(), t = D.tables(); if(!w || !t || !t
 function renderSlots(){
   if(!isCaster()){ $('spell-slots').innerHTML=''; renderSpells(); return; }
   const box = $('spell-slots'); box.innerHTML = '';
+  const cols = document.createElement('div'); cols.className = 'slot-cols';
   const arr = slotArray();
-  if(arr) arr.forEach((max, i) => { if(max > 0) box.appendChild(slotRow(String(i+1), 'Level ' + (i+1), max)); });
+  if(arr) arr.forEach((max, i) => { if(max > 0) cols.appendChild(slotCol(String(i+1), 'Lvl ' + (i+1), max)); });
   const pm = pactInfo();
-  if(pm && pm.slots > 0) box.appendChild(slotRow('pact', 'Pact Slots (level ' + pm.level + ')', pm.slots));
+  if(pm && pm.slots > 0) cols.appendChild(slotCol('pact', 'Pact ' + pm.level, pm.slots));
+  if(cols.children.length) box.appendChild(cols);
   renderSpells();
 }
-function slotRow(key, label, max){
-  const wrap = document.createElement('div'); wrap.className = 'slot-level';
+// One column per spell level: pips on top, the "Lvl N" label below (click to reset).
+function slotCol(key, label, max){
+  const wrap = document.createElement('div'); wrap.className = 'slot-col';
   const used = slotUsed[key] || 0;
   let pips = ''; for(let i=1;i<=max;i++) pips += '<span class="slot-pip' + (i<=used?' used':'') + '" onclick="toggleSlot(\'' + key + '\',' + i + ',' + max + ')"></span>';
-  wrap.innerHTML = '<div class="slot-hd"><span class="sl-name">' + esc(label) + '</span><div class="slot-pips">' + pips + '</div><button class="slot-reset" onclick="resetSlot(\'' + key + '\')">Reset</button></div>';
+  wrap.innerHTML = '<div class="slot-col-pips">' + pips + '</div><button class="slot-col-lbl" onclick="resetSlot(\'' + key + '\')" title="Reset ' + esc(label) + ' slots">' + esc(label) + '</button>';
   return wrap;
 }
 function toggleSlot(key, i, max){ const used = slotUsed[key] || 0; slotUsed[key] = (i <= used ? i-1 : i); renderSlots(); scheduleAutosave(); }
@@ -1472,8 +1528,9 @@ function renderSpells(){
       const q = esc(sk.name).replace(/'/g,"\\'");
       row.innerHTML =
         (lvl > 0 ? '<span class="sp-prep' + (sk.prepared?' on':'') + '" onclick="togglePrep(\'' + q + '\')" title="Prepared"></span>' : '<span class="sp-prep-gap"></span>') +
-        '<span class="sp-name" onclick="openSpell(\'' + q + '\')" title="Read">' + esc(sk.name) + '</span>' +
-        '<span class="sp-info" onclick="openSpell(\'' + q + '\')" title="Read">' + esc(spellInfoLine(sp)) + '</span>' +
+        '<input class="sp-name-input" value="' + esc(sk.display || sk.name) + '" oninput="onSpellRename(\'' + q + '\',this.value)" title="Rename (keeps its spell mechanics)">' +
+        '<span class="sp-info">' + esc(spellInfoLine(sp)) + '</span>' +
+        '<button class="row-i" onclick="openSpell(\'' + q + '\')" title="Spell details">&#9432;</button>' +
         '<button class="cast-btn" onclick="castSpellFull(\'' + q + '\')" title="Cast this spell">Cast</button>';
       box.appendChild(row);
     });
@@ -1493,6 +1550,7 @@ function spellInfoLine(sp){
   return parts.join(' · ');
 }
 function togglePrep(n){ const s = spellsKnown.find(x => x.name === n); if(s) s.prepared = !s.prepared; renderSpells(); scheduleAutosave(); }
+function onSpellRename(n, val){ const s = spellsKnown.find(x => norm(x.name) === norm(n)); if(s) s.display = val; scheduleAutosave(); }
 function removeSpell(n){ spellsKnown = spellsKnown.filter(s => s.name !== n); [...document.querySelectorAll('#attacks-body tr')].forEach(tr => { if(norm(tr.dataset.spell || '') === norm(n)) tr.remove(); }); renderSpells(); scheduleAutosave(); }
 // Attack spells (those calling for a spell attack roll) get an Attacks/Spellcasting row.
 // Damage is parsed from the description; the row's ability = the spell ability, so its
@@ -1533,10 +1591,12 @@ function d20Detail(r){ return r.mode !== 'norm' ? 'd20[' + r.faces.join(',') + '
 function spellEffectSummary(sp){ const d = (sp && sp.description) || ''; const first = d.split(/(?<=[.!?])\s/)[0] || d; return first.length > 170 ? first.slice(0,167) + '…' : first; }
 // Cast a spell: spend a slot (leveled), then roll/report by type — attack roll, saving throw, plain damage, or effect text.
 function castSpellFull(name){
+  const sk = spellsKnown.find(s => norm(s.name) === norm(name));
+  const label = (sk && sk.display) || name;
   const sp = spellByName(name);
-  if(!sp){ addLog('Cast ' + name, '✦', 'Cast', 'normal'); return; }
+  if(!sp){ addLog('Cast ' + label, '✦', 'Cast', 'normal'); return; }
   const lvl = sp.level;
-  if(lvl > 0 && !spendSpellSlot(lvl, name)) return;   // out of slots → aborted (logged)
+  if(lvl > 0 && !spendSpellSlot(lvl, label)) return;   // out of slots → aborted (logged)
   const dmgInfo = spellDamage(sp);
   let diceExpr = dmgInfo.dice;
   if(lvl === 0 && diceExpr) diceExpr = scaleCantrip(diceExpr, levelNow());
@@ -1546,15 +1606,15 @@ function castSpellFull(name){
   if(diceExpr && spellIsAttack(sp)){
     const r = rawD20(), atkMod = spellAtkBonus(ab), hit = r.nat + atkMod, crit = r.nat === 20, fumble = r.nat === 1;
     const dd = rollDiceExpr(diceExpr, crit);
-    addLog(sp.name, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : ''), crit ? 'crit' : fumble ? 'fumble' : 'normal');
+    addLog(label, 'Hit ' + sgn(hit) + ' · ' + dd.total + dtype, 'attack ' + d20Detail(r) + ' ' + sgn(atkMod) + ' · dmg ' + dd.detail + (crit ? ' — CRIT!' : ''), crit ? 'crit' : fumble ? 'fumble' : 'normal');
   } else if(diceExpr && save){
     const dd = rollDiceExpr(diceExpr, false);
-    addLog(sp.name, dd.total + dtype, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail, 'normal');
+    addLog(label, dd.total + dtype, 'DC ' + dc + ' ' + save + ' save · dmg ' + dd.detail, 'normal');
   } else if(diceExpr){
     const dd = rollDiceExpr(diceExpr, false);
-    addLog(sp.name, dd.total + dtype, 'damage ' + dd.detail, 'normal');
+    addLog(label, dd.total + dtype, 'damage ' + dd.detail, 'normal');
   } else {
-    addLog(sp.name, save ? ('DC ' + dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
+    addLog(label, save ? ('DC ' + dc + ' ' + save + ' save') : '✦ Cast', spellEffectSummary(sp), 'normal');
   }
 }
 function openSpell(n){
@@ -1695,7 +1755,7 @@ function collectSheet(){
     damage: tr.querySelector('.atk-dmg').value, type: tr.querySelector('.atk-dtype').value,
     spell: tr.dataset.spell || '', unarmed: tr.dataset.unarmed === '1'
   })).filter(a => a.name || a.damage);
-  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1' })).filter(i => i.name);
+  const inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, qty: num(tr.querySelector('.inv-qty').value), equipped: tr.dataset.equipped === '1', ref: tr.dataset.ref || '' })).filter(i => i.name);
   return {
     system:'DND', v:1,
     name: v('f-name'),

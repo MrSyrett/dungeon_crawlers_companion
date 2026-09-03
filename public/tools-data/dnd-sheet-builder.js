@@ -21,14 +21,23 @@
     gear: () => window.DND_GEAR || [], magicItems: () => window.DND_MAGIC_ITEMS || [],
     tables: () => window.DND_TABLES || null,
   };
-  // Map a starting-equipment token to the catalog's canonical name so it's equippable.
-  function canonItemName(name){
+  // The catalog name a token resolves to (canonical), or "" if it isn't in the catalog.
+  function canonRef(name){
     const names = [].concat(D.weapons(), D.armor(), D.gear(), D.magicItems()).map((x) => x.name);
     const n = String(name).trim().toLowerCase();
-    let hit = names.find((x) => x.toLowerCase() === n)
-      || names.find((x) => x.toLowerCase() === n.replace(/s$/, ""));
+    let hit = names.find((x) => x.toLowerCase() === n) || names.find((x) => x.toLowerCase() === n.replace(/s$/, ""));
     if(!hit){ const s = n.replace(/\s+armor$/, ""); if(s !== n) hit = names.find((x) => x.toLowerCase() === s); }
-    return hit || String(name).trim();
+    return hit || "";
+  }
+  // Turn a starting-equipment token into an inventory item {name, ref}. A ref keeps
+  // it equippable even when renamed. "Arcane Focus (Quarterstaff)" → the item is a
+  // Quarterstaff, shown as "Quarterstaff (Arcane Focus)".
+  function resolveItem(raw){
+    const t = String(raw).trim();
+    const paren = t.match(/^(.+?)\s*\((.+)\)$/);
+    if(paren){ const ref = canonRef(paren[2]); if(ref) return { name: ref + " (" + paren[1].trim() + ")", ref }; }
+    const ref = canonRef(t);
+    return ref ? { name: ref, ref } : { name: t, ref: "" };
   }
   const STEPS = ["Class","Subclass","Species","Background","Abilities","Skills","Choices","Spells","Equipment","Review"];
   // Level-1 (and level-gated) class decisions the builder can offer from data.
@@ -50,7 +59,7 @@
   function fresh() {
     return { cls:"", level:1, subclass:"", species:"", lineage:"", background:"",
              method:"array", base:{ STR:8,DEX:8,CON:8,INT:8,WIS:8,CHA:8 }, arrayPick:{},
-             bg2:"", bg1:"", classSkills:[],
+             bg2:"", bg1:"", classSkills:[], multiclass:[],
              name:"", alignment:"",
              fightingStyle:"", expertise:[], orders:{},
              pickedCantrips:[], pickedSpells:[], equipChoice:"gear" };
@@ -58,17 +67,22 @@
   function clsData() { return D.classes().find((c) => c.name === st.cls) || null; }
   function spData() { return D.species().find((s) => s.name === st.species) || null; }
   function bgData() { return D.backgrounds().find((b) => b.name === st.background) || null; }
+  // Multiclass: secondary classes take some of the total level; the primary keeps the rest.
+  function secondaryTotal() { return (st.multiclass || []).reduce((s, m) => s + (num(m.level) || 0), 0); }
+  function primaryLevel() { return Math.max(1, (num(st.level) || 1) - secondaryTotal()); }
+  function classBreakdown() { return [{ cls: st.cls, subclass: st.subclass, level: primaryLevel() }].concat((st.multiclass || []).map((m) => ({ cls: m.cls, subclass: "", level: num(m.level) }))); }
+  function num(v) { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; }
 
   // ── casting helpers ────────────────────────────────────────────────────
   function isCaster() { const c = clsData(); return !!(c && c.spellcasting && c.spellcasting !== "none"); }
   function tableRow(L) { const c = clsData(); if (!c || !c.table) return null; return c.table.find((r) => Number(r.level) === Number(L)) || null; }
-  function colNum(name) { const r = tableRow(st.level); if (!r || !r.columns) return 0; const n = parseInt(r.columns[name], 10); return isNaN(n) ? 0 : n; }
+  function colNum(name) { const r = tableRow(primaryLevel()); if (!r || !r.columns) return 0; const n = parseInt(r.columns[name], 10); return isNaN(n) ? 0 : n; }
   function orderCantripBonus() { let b = 0; classChoices().forEach((ch) => { if (ch.kind === "pick") { const opt = (ch.options || []).find((o) => o.name === (st.orders || {})[ch.name]); if (opt && opt.extraCantrip) b++; } }); return b; }
-  function cantripCount() { const r = tableRow(st.level); const base = Math.max(colNum("Cantrips"), r && r.cantripsKnown != null ? Number(r.cantripsKnown) : 0); return base + orderCantripBonus(); }
+  function cantripCount() { const r = tableRow(primaryLevel()); const base = Math.max(colNum("Cantrips"), r && r.cantripsKnown != null ? Number(r.cantripsKnown) : 0); return base + orderCantripBonus(); }
   function preparedCount() { return colNum("Prepared Spells") || colNum("Spells Known"); }
   function maxSpellLevel() {
     const c = clsData(); if (!c) return 0; const T = D.tables(); if (!T) return 1;
-    const L = st.level, ct = c.spellcasting;
+    const L = primaryLevel(), ct = c.spellcasting;
     if (ct === "pact") { const row = (T.pactMagic || [])[L-1]; return row ? row.level : 1; }
     const map = { full:"fullCasterSlots", half:"halfCasterSlots", third:"thirdCasterSlots", artificer:"artificerSlots" };
     const arr = (T[map[ct]] || [])[L-1] || [];
@@ -82,7 +96,7 @@
       .sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name));
   }
   function fightingStyles() { return D.feats().filter((f) => (f.category || "") === "Fighting Style"); }
-  function classChoices() { return (CLASS_CHOICES[st.cls] || []).filter((ch) => st.level >= (ch.level || 1)); }
+  function classChoices() { return (CLASS_CHOICES[st.cls] || []).filter((ch) => primaryLevel() >= (ch.level || 1)); }
   function proficientSkills() { const b = bgData(); const bg = b ? (b.skillProficiencies || []) : []; const out = []; bg.concat(st.classSkills).forEach((s) => { const r = matchSkill(s); if (r && out.indexOf(r) < 0) out.push(r); }); return out; }
 
   // ── modal shell ────────────────────────────────────────────────────────
@@ -113,7 +127,7 @@
   function prevEnabled(from) { let s = from; while (s > 0) { s--; if (!stepSkipped(STEPS[s])) return s; } return 0; }
   function next() { if (!canProceed()) return; if (STEPS[step] === "Review") { apply(); return; } step = nextEnabled(step); render(); }
   function back() { if (step === 0) return; step = prevEnabled(step); render(); }
-  function hasSubclass() { const c = clsData(); return !!(c && st.level >= (c.subclassLevel || 3)); }
+  function hasSubclass() { const c = clsData(); return !!(c && primaryLevel() >= (c.subclassLevel || 3)); }
 
   // How many real (non-skipped) steps precede Review, for the "Step X of Y" label.
   function stepLabel() {
@@ -153,6 +167,25 @@
     h += "</div>";
     const c = clsData();
     if (c) h += '<div class="dndb-note">' + esc(c.flavor || "") + '</div>';
+    // Multiclass allocator (only meaningful above level 1)
+    if (st.cls && num(st.level) > 1) h += rMulticlass();
+    return h;
+  }
+  function rMulticlass(){
+    let h = '<span class="m-lbl">Multiclass (optional)</span><p class="m-hint" style="margin:2px 0 6px;">Give some of your levels to other classes. Your primary <b>' + esc(st.cls) + '</b> keeps the remaining <b style="color:#8ad4ff;">' + primaryLevel() + '</b>.</p>';
+    h += '<div class="dndb-mc-rows">';
+    (st.multiclass || []).forEach((m, i) => {
+      h += '<div class="dndb-mc-row"><span class="dndb-mc-name">' + esc(m.cls) + '</span>' +
+        '<button class="dndb-pm" data-mc="' + i + '" data-d="-1">−</button><span class="dar-val" style="min-width:22px;">' + num(m.level) + '</span><button class="dndb-pm" data-mc="' + i + '" data-d="1">+</button>' +
+        '<button class="dndb-mc-x" data-mcx="' + i + '" title="Remove">✕</button></div>';
+    });
+    h += '</div>';
+    const taken = new Set([norm(st.cls)].concat((st.multiclass || []).map((m) => norm(m.cls))));
+    const others = D.classes().filter((c) => !taken.has(norm(c.name)));
+    if (others.length && secondaryTotal() < num(st.level) - 1){
+      h += '<select id="dndb-mc-add" class="m-input" style="margin-top:6px;"><option value="">+ Add a class…</option>' +
+        others.map((c) => '<option value="' + esc(c.name) + '">' + esc(c.name) + '</option>').join("") + '</select>';
+    }
     return h;
   }
   function rSubclass() {
@@ -342,7 +375,8 @@
            '<option value="">—</option>' + ALIGNMENTS.map((a) => '<option value="' + a + '"' + (st.alignment === a ? " selected" : "") + '>' + a + '</option>').join("") + '</select></label>' +
          '</div>';
     h += '<div class="dndb-review">';
-    h += '<div class="dr-line"><b>' + esc(st.name || "Unnamed") + '</b> — ' + esc(st.species || "—") + (st.lineage ? " (" + esc(st.lineage) + ")" : "") + ' ' + esc(st.cls || "—") + ' ' + st.level + (st.subclass ? " · " + esc(st.subclass) : "") + ' · ' + esc(st.background || "—") + (st.alignment ? " · " + esc(st.alignment) : "") + '</div>';
+    const clsLabel = (st.multiclass && st.multiclass.length) ? classBreakdown().map((cl) => cl.cls + " " + cl.level).join(" / ") : (esc(st.cls || "—") + " " + st.level + (st.subclass ? " · " + esc(st.subclass) : ""));
+    h += '<div class="dr-line"><b>' + esc(st.name || "Unnamed") + '</b> — ' + esc(st.species || "—") + (st.lineage ? " (" + esc(st.lineage) + ")" : "") + ' ' + clsLabel + ' · ' + esc(st.background || "—") + (st.alignment ? " · " + esc(st.alignment) : "") + '</div>';
     h += '<div class="dr-scores">' + ABIL.map((a) => '<div class="drs"><span class="drs-a">' + a + '</span><span class="drs-v">' + sc[a] + '</span><span class="drs-m">' + sgn(mod(sc[a])) + '</span></div>').join("") + '</div>';
     if (c) h += '<div class="dr-line">Saves: <b>' + esc((c.savingThrows||[]).join(", ")) + '</b> · Hit Die d' + c.hitDie + '</div>';
     h += '<div class="dr-line">Skills: <b>' + esc(bgSkills.concat(st.classSkills).join(", ") || "—") + '</b>' + (st.expertise.length ? ' · Expertise: <b>' + esc(st.expertise.join(", ")) + '</b>' : "") + '</div>';
@@ -362,10 +396,13 @@
   // ── wiring ─────────────────────────────────────────────────────────────
   function wire() {
     const body = $("dndb-body");
-    const lvl = $("dndb-level"); if (lvl) lvl.addEventListener("input", () => { st.level = Math.max(1, Math.min(20, parseInt(lvl.value,10) || 1)); });
+    const lvl = $("dndb-level"); if (lvl) lvl.addEventListener("input", () => { st.level = Math.max(1, Math.min(20, parseInt(lvl.value,10) || 1)); while (secondaryTotal() > st.level - 1 && st.multiclass.length) st.multiclass.pop(); render(); });
     const nm = $("dndb-name"); if (nm) nm.addEventListener("input", () => { st.name = nm.value; });
     const al = $("dndb-align"); if (al) al.addEventListener("change", () => { st.alignment = al.value; });
-    body.querySelectorAll("[data-cls]").forEach((el) => el.addEventListener("click", () => { st.cls = el.dataset.cls; st.subclass = ""; st.fightingStyle = ""; st.expertise = []; st.orders = {}; st.pickedCantrips = []; st.pickedSpells = []; render(); }));
+    body.querySelectorAll("[data-cls]").forEach((el) => el.addEventListener("click", () => { st.cls = el.dataset.cls; st.subclass = ""; st.multiclass = []; st.fightingStyle = ""; st.expertise = []; st.orders = {}; st.pickedCantrips = []; st.pickedSpells = []; render(); }));
+    body.querySelectorAll("[data-mc]").forEach((el) => el.addEventListener("click", () => { const i = num(el.dataset.mc), d = num(el.dataset.d); const m = st.multiclass[i]; if(!m) return; const nv = num(m.level) + d; if(nv < 1){ st.multiclass.splice(i,1); } else if(secondaryTotal() - num(m.level) + nv <= num(st.level) - 1){ m.level = nv; } render(); }));
+    body.querySelectorAll("[data-mcx]").forEach((el) => el.addEventListener("click", () => { st.multiclass.splice(num(el.dataset.mcx),1); render(); }));
+    const mca = $("dndb-mc-add"); if (mca) mca.addEventListener("change", () => { if(mca.value){ st.multiclass.push({ cls: mca.value, level: 1 }); render(); } });
     body.querySelectorAll("[data-sub]").forEach((el) => el.addEventListener("click", () => { st.subclass = el.dataset.sub; render(); }));
     body.querySelectorAll("[data-sp]").forEach((el) => el.addEventListener("click", () => { st.species = el.dataset.sp; st.lineage = ""; render(); }));
     body.querySelectorAll("[data-lin]").forEach((el) => el.addEventListener("click", () => { st.lineage = el.dataset.lin; render(); }));
@@ -459,8 +496,9 @@
     if (b) (b.skillProficiencies || []).forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 1; });
     st.classSkills.forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 1; });
     st.expertise.forEach((s) => { const real = matchSkill(s); if (real) skillProf[real] = 2; });
-    // HP: max hit die at 1, average after
-    let hp = 0; if (c) { const hd = c.hitDie; hp = hd + mod(sc.CON); for (let L=2; L<=st.level; L++) hp += Math.floor(hd/2)+1 + mod(sc.CON); }
+    // HP: very first level = max die; every level after = its own class's average.
+    let hp = 0; const conMod = mod(sc.CON); let firstLvl = true;
+    classBreakdown().forEach((cl) => { const cc = D.classes().find((x) => x.name === cl.cls); const hd = cc ? cc.hitDie : 8; for (let L=1; L<=cl.level; L++){ hp += (firstLvl ? hd : Math.floor(hd/2)+1) + conMod; firstLvl = false; } });
     hp = Math.max(1, hp);
     const speed = sp ? sp.speed : 30;
     const ac = 10 + mod(sc.DEX);
@@ -486,7 +524,8 @@
         const t = x.trim();
         const gold = t.match(/^(\d+)\s*GP$/i); if(gold){ gp += parseInt(gold[1], 10); return; }   // gold → coins, not an item
         const m = t.match(/^(\d+)\s+(.*)/);
-        inv.push(m ? { name: canonItemName(m[2]), qty: parseInt(m[1], 10) } : { name: canonItemName(t), qty: 1 });
+        const item = resolveItem(m ? m[2] : t);
+        inv.push({ name: item.name, ref: item.ref, qty: m ? parseInt(m[1], 10) : 1 });
       });
     }
     // spells
@@ -499,7 +538,7 @@
     const spellcasts = isCaster();
     const data = {
       system:"DND", v:1, name: st.name, cls: st.cls, level: st.level, subclass: st.subclass,
-      classLevels: [{ cls: st.cls, subclass: st.subclass, level: st.level }],
+      classLevels: classBreakdown(),
       species: st.species, background: st.background, alignment: st.alignment,
       scores: sc, saveProf, skillProf,
       speed: String(speed), ac: String(ac), hpCur: hp, hpMax: hp, hpTemp:0,
@@ -553,6 +592,10 @@
     ".dndb-card.spellpick .sp-pick-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}" +
     ".sp-pick-i{background:transparent;border:none;color:#8ad4ff;font-size:14px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0;}" +
     ".sp-pick-i:hover{color:#c8e8ff;}" +
-    ".sp-pick-desc{font-size:11px;color:#cdc3b6;line-height:1.45;margin-top:5px;border-top:1px solid #3a2f2a;padding-top:5px;}";
+    ".sp-pick-desc{font-size:11px;color:#cdc3b6;line-height:1.45;margin-top:5px;border-top:1px solid #3a2f2a;padding-top:5px;}" +
+    ".dndb-mc-rows{display:flex;flex-direction:column;gap:6px;margin:6px 0;}" +
+    ".dndb-mc-row{display:flex;align-items:center;gap:8px;}" +
+    ".dndb-mc-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:#ece3d6;}" +
+    ".dndb-mc-x{background:transparent;border:none;color:#a99e90;cursor:pointer;font-size:13px;}.dndb-mc-x:hover{color:#e08a70;}";
   document.head.appendChild(css);
 })();
