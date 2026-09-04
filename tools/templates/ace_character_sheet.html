@@ -1528,11 +1528,14 @@ autoLoad();
     if(d4){ // vertex-numbered d4: 3 corner numbers per face, each oriented toward its vertex
       var vsize=0.92;
       d4.faces.forEach(function(f){ f.corners.forEach(function(vi){ var V=d4.verts[vi], C=f.c, N=f.n;
-        var pos=new THREE.Vector3().lerpVectors(C, V, 0.46).addScaledVector(N, 0.06);
+        var pos=new THREE.Vector3().lerpVectors(C, V, 0.46).addScaledVector(N, 0.03);
         var up=new THREE.Vector3().subVectors(V, C); up.addScaledVector(N, -up.dot(N)); up.normalize();      // toward the vertex, in the face plane
         var xa=new THREE.Vector3().crossVectors(up, N).normalize();                                          // right = up × normal
         var m4=new THREE.Matrix4().makeBasis(xa, up, N);
-        var pl=new THREE.Mesh(new THREE.PlaneGeometry(vsize,vsize), new THREE.MeshBasicMaterial({map:faceTex(d4.vlabels[vi]),transparent:true,depthWrite:false,side:THREE.DoubleSide}));
+        // Opaque alpha-tested decal (writes depth, front-side only, depth-biased toward
+        // the camera) so the 3 co-located copies of each vertex number don't z-fight /
+        // flicker and the back-face copies are culled instead of bleeding through.
+        var pl=new THREE.Mesh(new THREE.PlaneGeometry(vsize,vsize), new THREE.MeshBasicMaterial({map:faceTex(d4.vlabels[vi]),alphaTest:0.5,depthWrite:true,side:THREE.FrontSide,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4}));
         pl.position.copy(pos); pl.quaternion.setFromRotationMatrix(m4); group.add(pl); }); });
       return group; }
     var size=sides===2?1.15:sides===6?0.95:sides===4?0.8:sides===10?0.5:0.62;
