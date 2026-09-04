@@ -2909,5 +2909,2570 @@ export const DCC_SKILLS: DccSkill[] = [
     ],
     "page": 201,
     "source": "Core"
+  },
+  {
+    "name": "Shortsword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed shortsword wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Scimitar",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed scimitar wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Mace",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed mace wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Hand Axe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed hand axe wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Sickle",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed sickle wielded in melee. Base Damage is 1d4 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Cutlass",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed cutlass wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "War Pick",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed war pick wielded in melee. Base Damage is 1d6 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Flail",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed flail wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Combat Knife",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed combat knife wielded in melee. Base Damage is 1d4 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Machete",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed machete wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Baseball Bat",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed baseball bat wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Crowbar",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed crowbar wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Brass Knuckles",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Hand-to-Hand",
+    "damage": "1d4",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Cannot choose a Damage Effect.",
+    "desc": "A one-handed brass knuckles wielded in melee. Base Damage is 1d4 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+2d4 base damage"
+      }
+    ],
+    "page": 179,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Frying Pan",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed frying pan wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Tire Iron",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed tire iron wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Nightstick",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed nightstick wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Katana",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed katana wielded in melee. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Cattle Prod",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Lightning",
+    "range": "Melee",
+    "desc": "A one-handed cattle prod wielded in melee. Base Damage is 1d6 + STR Lightning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Shocked Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Fire Poker",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed fire poker wielded in melee. Base Damage is 1d6 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Broken Bottle",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed broken bottle wielded in melee. Base Damage is 1d4 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Vibroblade",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed vibroblade wielded in melee. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Energy Sword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "Melee",
+    "desc": "A one-handed energy sword wielded in melee. Base Damage is 1d8 + STR Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Rubber Chicken",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Hand-to-Hand",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed rubber chicken wielded in melee. Base Damage is 1d2 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+2d2 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and you may make an extra free Attack with Disadvantage."
+      }
+    ],
+    "page": 179,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Foam Sword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Hand-to-Hand",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed foam sword wielded in melee. Base Damage is 1d2 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+2d2 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and you may make an extra free Attack with Disadvantage."
+      }
+    ],
+    "page": 179,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Falchion",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed falchion wielded in melee. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Kukri",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed kukri wielded in melee. Base Damage is 1d4 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Morningstar",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed morningstar wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Cudgel",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed cudgel wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Whip",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d4",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "desc": "A two-handed whip with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d4 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and you may slide the target 5 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and on a Success or better you may disarm the target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and the target gains the Take Down Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Estoc",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed estoc wielded in melee. Base Damage is 1d6 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Hatchet",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed hatchet wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Switchblade",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed switchblade wielded in melee. Base Damage is 1d4 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Meat Cleaver",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed meat cleaver wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Golf Club",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed golf club wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Hockey Stick",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed hockey stick wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Lead Pipe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed lead pipe wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Lightsaber",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "Melee",
+    "desc": "A one-handed lightsaber wielded in melee. Base Damage is 1d8 + STR Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Greatsword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed greatsword wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Battleaxe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed battleaxe wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Greataxe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed greataxe wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Halberd",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed halberd with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Spear",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed spear with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pike",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d12",
+    "damageType": "Piercing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed pike with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d12 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d12 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d12 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d12 base damage, and deal double damage to a target that Moved toward you this turn."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Maul",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed maul wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Sledgehammer",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed sledgehammer wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Fire Axe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed fire axe wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Chainsaw",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed chainsaw wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pool Cue",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed pool cue with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pipe Wrench",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed pipe wrench wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Shovel",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed shovel wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Buster Sword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed buster sword wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Giant Foam Finger",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed giant foam finger with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pool Noodle",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed pool noodle with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Zweihander",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed zweihander wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Glaive",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed glaive with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "War Scythe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed war scythe with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Bo Staff",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed bo staff with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Trident",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed trident with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Lucerne Hammer",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed lucerne hammer with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Weed Whacker",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed weed whacker with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Jackhammer",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed jackhammer wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Push Broom",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed push broom with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Metal Pipe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed metal pipe wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Power Loader",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed power loader wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Shortbow",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "60 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition.",
+    "desc": "A ranged shortbow. Range 60 ft. Each Attack requires proper ammunition. Base Damage is 1d6 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and the target gains the Blood Trail Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Longbow",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition.",
+    "desc": "A ranged longbow. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d6 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and the target gains the Blood Trail Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Sling",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "30 ft",
+    "desc": "A ranged sling. Range 30 ft. Base Damage is 1d2 + DEX Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d2 base damage, and its range increases by your Strength score in feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Throwing Knives",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d4",
+    "damageType": "Piercing",
+    "range": "30 ft",
+    "desc": "A thrown throwing knives. Range 30 ft. Base Damage is 1d4 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and the range is 40 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Blowgun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d4",
+    "damageType": "Piercing",
+    "range": "30 ft",
+    "desc": "A ranged blowgun. Range 30 ft. Base Damage is 1d4 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and the range is 40 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pistol",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged pistol. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Revolver",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged revolver. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Hunting Rifle",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d10",
+    "damageType": "Piercing",
+    "range": "200 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged hunting rifle. Range 200 ft. Each Attack requires proper ammunition. Base Damage is 1d10 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target gains the Blood Trail Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Submachine Gun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged submachine gun. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Nail Gun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "30 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged nail gun. Range 30 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Taser",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d4",
+    "damageType": "Lightning",
+    "range": "15 ft",
+    "desc": "A ranged taser. Range 15 ft. Base Damage is 1d4 + DEX Lightning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and the target gains the Shocked Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and the target gains the Shocked Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Flare Gun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "100 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged flare gun. Range 100 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Burned Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Blaster",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged blaster. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Burned Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Ray Gun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged ray gun. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Burned Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Nerf Blaster",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "30 ft",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A ranged nerf blaster. Range 30 ft. Base Damage is 1d2 + DEX Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d2 base damage, and its range increases by your Strength score in feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Boomerang",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d4",
+    "damageType": "Bludgeoning",
+    "range": "40 ft",
+    "desc": "A thrown boomerang. Range 40 ft. Base Damage is 1d4 + DEX Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and the range is 40 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Heavy Crossbow",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d10",
+    "damageType": "Piercing",
+    "range": "60 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged heavy crossbow. Range 60 ft. Each Attack requires proper ammunition. Base Damage is 1d10 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage, and the target gains the Blood Trail Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the range is doubled."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Recurve Bow",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "100 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition.",
+    "desc": "A ranged recurve bow. Range 100 ft. Each Attack requires proper ammunition. Base Damage is 1d6 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and the target gains the Blood Trail Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Bolas",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "30 ft",
+    "desc": "A thrown bolas. Range 30 ft. Base Damage is 1d2 + DEX Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d2 base damage, and its range increases by your Strength score in feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and the target gains the Take Down Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Throwing Hammer",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Bludgeoning",
+    "range": "40 ft",
+    "desc": "A thrown throwing hammer. Range 40 ft. Base Damage is 1d8 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and this attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and its range increases by your Strength score in feet."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Sniper Rifle",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d10",
+    "damageType": "Piercing",
+    "range": "300 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged sniper rifle. Range 300 ft. Each Attack requires proper ammunition. Base Damage is 1d10 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Machine Pistol",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged machine pistol. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Molotov Cocktail",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "30 ft",
+    "desc": "A thrown molotov cocktail. Range 30 ft. Base Damage is 1d8 + STR Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and the target gains the Burned Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and its range increases by your Strength score in feet."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pepper Spray",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d2",
+    "damageType": "Poison",
+    "range": "15 ft",
+    "desc": "A ranged pepper spray. Range 15 ft. Base Damage is 1d2 + DEX Poison.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d2 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage, and the target gains the Blinded Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and the target gains the Blinded Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Plasma Rifle",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d10",
+    "damageType": "Fire",
+    "range": "150 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged plasma rifle. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d10 + DEX Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, +5ft Splash"
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Freeze Ray",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Cold",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged freeze ray. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Cold.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Stiff Legs Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
   }
 ];

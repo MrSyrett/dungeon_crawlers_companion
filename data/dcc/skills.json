@@ -11,9 +11,18 @@
     "range": "Melee",
     "desc": "A basic claw slash. This weapon grants AI Favor 1 if used for a majority of attacks in a combat lasting at least three rounds. Base Damage is 1d4 + STR Slashing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 base damage" },
-      { "rank": 10, "text": "+1d4 base damage" },
-      { "rank": 15, "text": "+2d4 base damage" }
+      {
+        "rank": 5,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+2d4 base damage"
+      }
     ],
     "page": 177,
     "source": "Core"
@@ -30,9 +39,18 @@
     "range": "Melee",
     "desc": "A raking claw attack. Base Damage is 1d6 + STR Slashing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d6 base damage" },
-      { "rank": 10, "text": "+1d6 base damage" },
-      { "rank": 15, "text": "+1d6 base damage, and the target gains the Blood Trail Debuff." }
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and the target gains the Blood Trail Debuff."
+      }
     ],
     "page": 177,
     "source": "Core"
@@ -50,9 +68,18 @@
     "limitations": "The target must have an appendage you can clamp down onto.",
     "desc": "You clamp down on your victim and taste their blood. The target must have an appendage you can clamp down onto. Base Damage is 1d8 + STR Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d8 base damage" },
-      { "rank": 10, "text": "+1d8 base damage, and you may latch on to move when the foe moves during their next Action (then you let go)." },
-      { "rank": 15, "text": "+1d8 base damage, and the target gains the Woozy Debuff." }
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and you may latch on to move when the foe moves during their next Action (then you let go)."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Woozy Debuff."
+      }
     ],
     "page": 177,
     "source": "Core"
@@ -69,9 +96,18 @@
     "range": "Melee",
     "desc": "A simple bludgeon. Base Damage is 1d6 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "+1d6 base damage" },
-      { "rank": 10, "text": "+1d6 base damage, and the target gains the Woozy Debuff." },
-      { "rank": 15, "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff." }
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
     ],
     "page": 178,
     "source": "Core"
@@ -88,9 +124,18 @@
     "range": "Melee",
     "desc": "Pick up something and smack someone else with it. That object must weigh at least one pound and can't weigh more than your STR in pounds. This weapon grants AI Favor 1 if used for a majority of attacks in a combat lasting at least three rounds. Base Damage is 1d4 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 base damage, and you can throw the item (using this Skill) up to a range of Rank x5 feet." },
-      { "rank": 10, "text": "+1d4 base damage, and you roll your first Attack each combat with Advantage due to the unexpected nature of your Attacks." },
-      { "rank": 15, "text": "+1d4 base damage" }
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and you can throw the item (using this Skill) up to a range of Rank x5 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you roll your first Attack each combat with Advantage due to the unexpected nature of your Attacks."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage"
+      }
     ],
     "page": 178,
     "source": "Core"
@@ -108,9 +153,18 @@
     "limitations": "Requires two hands to wield.",
     "desc": "A heavy two-handed hammer. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "+1d10 base damage" },
-      { "rank": 10, "text": "+1d10 base damage" },
-      { "rank": 15, "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet." }
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
     ],
     "page": 178,
     "source": "Core"
@@ -127,9 +181,18 @@
     "range": "Melee",
     "desc": "A chopping edged weapon. Base Damage is 1d6 + STR Slashing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d6 base damage" },
-      { "rank": 10, "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target." },
-      { "rank": 15, "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)." }
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
     ],
     "page": 178,
     "source": "Core"
@@ -146,9 +209,18 @@
     "range": "Melee",
     "desc": "A quick light blade. This weapon grants AI Favor 1 if used for a majority of attacks in a combat lasting at least three rounds. Base Damage is 1d4 + STR Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)." },
-      { "rank": 10, "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet." },
-      { "rank": 15, "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage." }
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
     ],
     "page": 178,
     "source": "Core"
@@ -165,9 +237,18 @@
     "range": "Melee",
     "desc": "A versatile bladed weapon. Base Damage is 1d8 + STR Slashing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d8 base damage" },
-      { "rank": 10, "text": "+1d8 base damage" },
-      { "rank": 15, "text": "+1d8 base damage, and you gain a +1 Evade Buff." }
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
     ],
     "page": 178,
     "source": "Core"
@@ -184,9 +265,18 @@
     "range": "Melee",
     "desc": "A nimble thrusting blade. Base Damage is 1d6 + DEX Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d6 base damage" },
-      { "rank": 10, "text": "+1d6 base damage, and you gain a +1 Evade Buff." },
-      { "rank": 15, "text": "+1d6 base damage, and you gain a +1 Evade Buff." }
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
     ],
     "page": 178,
     "source": "Core"
@@ -203,9 +293,18 @@
     "range": "Melee",
     "desc": "Kicking-based hand-to-hand combat. Choose the Powerful Strike or Smush Damage Effect (if you wish) before rolling to hit. Grants AI Favor 1 if no Damage Effect is used for a majority of your hand-to-hand attacks in a combat lasting at least three rounds. Base Damage is 1d4 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 base damage" },
-      { "rank": 10, "text": "+1d4 base damage" },
-      { "rank": 15, "text": "+1d4 base damage, and the target gains the Sore as Shit Debuff." }
+      {
+        "rank": 5,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and the target gains the Sore as Shit Debuff."
+      }
     ],
     "page": 179,
     "source": "Core"
@@ -223,9 +322,18 @@
     "limitations": "On Success, you lose 1 Health Bar slot.",
     "desc": "It's like a headbutt, only cooler. On Success, you lose 1 Health Bar slot. Choose the Skullcracker or Powerful Strike Damage Effect (if you wish) before rolling to hit. Grants AI Favor 1 if no Damage Effect is used for a majority of your hand-to-hand attacks in a combat lasting at least three rounds. Base Damage is 1d4 + CON Bludgeoning (rolled to hit with STR).",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 base damage, and you don't take any damage from your own Attack." },
-      { "rank": 10, "text": "+1d4 base damage, and add 1 Rank damage die." },
-      { "rank": 15, "text": "+1d4 base damage, and the target gains the Woozy Debuff." }
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and you don't take any damage from your own Attack."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and the target gains the Woozy Debuff."
+      }
     ],
     "page": 179,
     "source": "Core"
@@ -242,9 +350,18 @@
     "range": "Melee",
     "desc": "Philistines call it punching. Choose the Dirty Fighting, Iron Punch, or Powerful Strike Damage Effect (if you wish) before rolling to hit. Grants AI Favor 2 if no Damage Effect is used for a majority of your hand-to-hand attacks in a combat lasting at least three rounds. Base Damage is 1d2 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "+2d2 base damage" },
-      { "rank": 10, "text": "+1d2 base damage" },
-      { "rank": 15, "text": "+1d2 base damage, and you may make an extra free Attack with Disadvantage." }
+      {
+        "rank": 5,
+        "text": "+2d2 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and you may make an extra free Attack with Disadvantage."
+      }
     ],
     "page": 179,
     "source": "Core"
@@ -262,9 +379,18 @@
     "limitations": "Cannot choose a Damage Effect.",
     "desc": "Every crawler starts out with this Skill. This is a mixture of all strikes, so call it what you will when you Attack. Grants AI Favor 1. Cannot choose a Damage Effect. Base Damage is 1d4 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 base damage" },
-      { "rank": 10, "text": "+1d4 base damage" },
-      { "rank": 15, "text": "+2d4 base damage" }
+      {
+        "rank": 5,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+2d4 base damage"
+      }
     ],
     "page": 179,
     "source": "Core"
@@ -282,9 +408,18 @@
     "limitations": "Requires two hands to wield.",
     "desc": "Requires two hands to wield. Choose the Choke Out, Dirty Fighting, or Toss Damage Effect (if you wish) before rolling to hit. Grants AI Favor 1 if no Damage Effect is used for a majority of your hand-to-hand attacks in a combat lasting at least three rounds. On Success, the target gains the Held Debuff. Held foes continue to be Held until they spend an Action to attempt escape (Mobs may use their Move Action). To prevent such an escape, you must use an Action as an Interrupt and succeed in a Wrasslin' STR-Opposed Skill Check. Base Damage is 1d4 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "You may maintain the Held Debuff at no Action cost if you wish, but your Skill Check to prevent escape is made with Disadvantage." },
-      { "rank": 10, "text": "+1d4 base damage" },
-      { "rank": 15, "text": "+1d4 base damage" }
+      {
+        "rank": 5,
+        "text": "You may maintain the Held Debuff at no Action cost if you wish, but your Skill Check to prevent escape is made with Disadvantage."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage"
+      }
     ],
     "page": 179,
     "source": "Core"
@@ -298,9 +433,18 @@
     "group": "Damage Effect",
     "desc": "A Wrasslin' Damage Effect (Passive). If the target is at 10% Health Bar or less, you deal x2 the total damage.",
     "upgrades": [
-      { "rank": 5, "text": "Choke Out activates at 20% Health Bar or less." },
-      { "rank": 10, "text": "Choke Out activates at 40% Health Bar or less, and deals x4 the total damage." },
-      { "rank": 15, "text": "Choke Out activates at 80% Health Bar or less, and deals x8 the total damage." }
+      {
+        "rank": 5,
+        "text": "Choke Out activates at 20% Health Bar or less."
+      },
+      {
+        "rank": 10,
+        "text": "Choke Out activates at 40% Health Bar or less, and deals x4 the total damage."
+      },
+      {
+        "rank": 15,
+        "text": "Choke Out activates at 80% Health Bar or less, and deals x8 the total damage."
+      }
     ],
     "page": 180,
     "source": "Core"
@@ -314,9 +458,18 @@
     "group": "Damage Effect",
     "desc": "A Pugilism or Wrasslin' Damage Effect (Passive). You use underhanded tactics to win fights and cause a different kind of harm to your opponents. If the Attack Skill Check is a Critical Fail, lose 1 Popularity. Apply the Woozy Debuff to the target.",
     "upgrades": [
-      { "rank": 5, "text": "Also apply The Taint Debuff to the target." },
-      { "rank": 10, "text": "Also apply the Blinded Debuff to the target. You no longer lose Popularity on Critical Fails." },
-      { "rank": 15, "text": "Also apply an immediate Minor Injury Debuff to the target." }
+      {
+        "rank": 5,
+        "text": "Also apply The Taint Debuff to the target."
+      },
+      {
+        "rank": 10,
+        "text": "Also apply the Blinded Debuff to the target. You no longer lose Popularity on Critical Fails."
+      },
+      {
+        "rank": 15,
+        "text": "Also apply an immediate Minor Injury Debuff to the target."
+      }
     ],
     "page": 180,
     "source": "Core"
@@ -330,9 +483,18 @@
     "group": "Damage Effect",
     "desc": "A Pugilism Damage Effect (Passive). You deal +1d2 base damage.",
     "upgrades": [
-      { "rank": 5, "text": "Add 1 Rank damage die." },
-      { "rank": 10, "text": "You may choose to have the target gain the Stunned Debuff instead of rolling damage." },
-      { "rank": 15, "text": "Add 1 Rank damage die, and the target gains the Stunned Debuff." }
+      {
+        "rank": 5,
+        "text": "Add 1 Rank damage die."
+      },
+      {
+        "rank": 10,
+        "text": "You may choose to have the target gain the Stunned Debuff instead of rolling damage."
+      },
+      {
+        "rank": 15,
+        "text": "Add 1 Rank damage die, and the target gains the Stunned Debuff."
+      }
     ],
     "page": 180,
     "source": "Core"
@@ -347,9 +509,18 @@
     "cooldown": "30 hours",
     "desc": "A Foot Soldier, Noggin Nocker, or Pugilism Damage Effect (Passive). Multiply your base damage dice result by your Rank in this Skill, then add your modifiers and buffs.",
     "upgrades": [
-      { "rank": 5, "text": "The cooldown is 10 hours." },
-      { "rank": 10, "text": "The cooldown is 5 hours." },
-      { "rank": 15, "text": "The cooldown is 2 hours." }
+      {
+        "rank": 5,
+        "text": "The cooldown is 10 hours."
+      },
+      {
+        "rank": 10,
+        "text": "The cooldown is 5 hours."
+      },
+      {
+        "rank": 15,
+        "text": "The cooldown is 2 hours."
+      }
     ],
     "page": 180,
     "source": "Core"
@@ -363,9 +534,18 @@
     "group": "Damage Effect",
     "desc": "A Noggin Nocker Damage Effect (Passive). If the target is the same size as you, gain +1d4 base damage.",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 base damage if target is the same size as you." },
-      { "rank": 10, "text": "If the target is the same size as you, add 1 Rank damage die, and the target gains the Stunned Debuff." },
-      { "rank": 15, "text": "If the target is the same size as you, add 1 Rank damage die, and the target gains the Blood Trail Debuff." }
+      {
+        "rank": 5,
+        "text": "+1d4 base damage if target is the same size as you."
+      },
+      {
+        "rank": 10,
+        "text": "If the target is the same size as you, add 1 Rank damage die, and the target gains the Stunned Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "If the target is the same size as you, add 1 Rank damage die, and the target gains the Blood Trail Debuff."
+      }
     ],
     "page": 180,
     "source": "Core"
@@ -381,9 +561,18 @@
     "limitations": "You can only apply this Damage Effect to targets with 20% Health Bar or less.",
     "desc": "A Foot Soldier Damage Effect (Passive). You can only apply this Damage Effect to targets with 20% Health Bar or less. You deal x2 the total damage.",
     "upgrades": [
-      { "rank": 5, "text": "Smush activates at 30% Health Bar or less and deals x3 the total damage." },
-      { "rank": 10, "text": "This skill has no cooldown." },
-      { "rank": 15, "text": "Smush activates at 40% Health Bar or less and deals x4 the total damage." }
+      {
+        "rank": 5,
+        "text": "Smush activates at 30% Health Bar or less and deals x3 the total damage."
+      },
+      {
+        "rank": 10,
+        "text": "This skill has no cooldown."
+      },
+      {
+        "rank": 15,
+        "text": "Smush activates at 40% Health Bar or less and deals x4 the total damage."
+      }
     ],
     "page": 181,
     "source": "Core"
@@ -399,9 +588,18 @@
     "damageType": "Bludgeoning",
     "desc": "A Wrasslin' Damage Effect (Passive). You deal +1d8 base damage + STR Bludgeoning, end the Held Debuff, and throw the target 5 feet for every five Ranks (minimum 5 feet) you have in this Skill. You can only Toss foes of a smaller size than you.",
     "upgrades": [
-      { "rank": 5, "text": "You can Toss foes up to your own size or smaller." },
-      { "rank": 10, "text": "You can Toss foes one size larger than you or smaller." },
-      { "rank": 15, "text": "+1d8 base damage, and you can throw foes two sizes larger than you or smaller." }
+      {
+        "rank": 5,
+        "text": "You can Toss foes up to your own size or smaller."
+      },
+      {
+        "rank": 10,
+        "text": "You can Toss foes one size larger than you or smaller."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you can throw foes two sizes larger than you or smaller."
+      }
     ],
     "page": 181,
     "source": "Core"
@@ -420,9 +618,18 @@
     "limitations": "Requires two hands to wield. Each Attack requires proper ammunition.",
     "desc": "A ranged crossbow. Requires two hands to wield and proper ammunition. Range 50 feet. Base Damage is 1d8 Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d8 base damage" },
-      { "rank": 10, "text": "+1d8 base damage, and the target gains the Blood Trail Debuff." },
-      { "rank": 15, "text": "+1d8 base damage, and the range is 100 feet." }
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and the target gains the Blood Trail Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the range is 100 feet."
+      }
     ],
     "page": 181,
     "source": "Core"
@@ -440,9 +647,18 @@
     "limitations": "Requires two hands to wield. Each Attack requires proper ammunition.",
     "desc": "A ranged bow. Requires two hands to wield and proper ammunition. Range 100 feet. Base Damage is 1d6 + STR Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d6 base damage" },
-      { "rank": 10, "text": "+1d6 base damage, and add 1 Rank damage die." },
-      { "rank": 15, "text": "+1d6 base damage, and the target gains the Blood Trail Debuff." }
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and the target gains the Blood Trail Debuff."
+      }
     ],
     "page": 181,
     "source": "Core"
@@ -460,9 +676,18 @@
     "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
     "desc": "A ranged handgun. Each Attack requires proper ammunition; spend one Action to reload after a Major Fail or worse. Range 150 feet. Base Damage is 1d8 Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d8 base damage" },
-      { "rank": 10, "text": "+1d8 base damage" },
-      { "rank": 15, "text": "+1d8 base damage, and the target gains the Staggered Debuff." }
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
     ],
     "page": 181,
     "source": "Core"
@@ -479,9 +704,18 @@
     "range": "40 ft",
     "desc": "A thrown javelin. Range 40 feet. Base Damage is 1d8 + STR Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d8 base damage" },
-      { "rank": 10, "text": "+1d8 base damage, and this attack deals Armor-Piercing damage (ignores DR)." },
-      { "rank": 15, "text": "+1d8 base damage, and its range increases by your Strength score in feet." }
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and this attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and its range increases by your Strength score in feet."
+      }
     ],
     "page": 182,
     "source": "Core"
@@ -499,9 +733,18 @@
     "limitations": "Requires two hands to wield. Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
     "desc": "A ranged shotgun. Requires two hands to wield and proper ammunition; spend one Action to reload after a Major Fail or worse. Range 30 feet. Base Damage is 1d10 Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d10 base damage" },
-      { "rank": 10, "text": "+1d10 base damage" },
-      { "rank": 15, "text": "+1d10 base damage, +5ft Splash" }
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, +5ft Splash"
+      }
     ],
     "page": 182,
     "source": "Core"
@@ -518,9 +761,18 @@
     "range": "30 ft",
     "desc": "Thrown throwing stars. This weapon grants AI Favor 1 if used for a majority of attacks in a combat lasting at least three rounds. Range 30 feet. Base Damage is 1d4 + STR Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 base damage, and the range is 40 feet." },
-      { "rank": 10, "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage." },
-      { "rank": 15, "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage." }
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and the range is 40 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      }
     ],
     "page": 182,
     "source": "Core"
@@ -538,9 +790,18 @@
     "limitations": "Requires two hands to wield.",
     "desc": "A ranged slingshot. Requires two hands to wield. This weapon grants AI Favor 2 if used for a majority of attacks in a combat lasting at least three rounds. Range 30 feet. Base Damage is 1d2 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "+1d2 base damage, and its range increases by your Strength score in feet." },
-      { "rank": 10, "text": "+1d2 base damage, and add 1 Rank damage die." },
-      { "rank": 15, "text": "+1d2 base damage, and add 1 Rank damage die." }
+      {
+        "rank": 5,
+        "text": "+1d2 base damage, and its range increases by your Strength score in feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      }
     ],
     "page": 182,
     "source": "Core"
@@ -558,9 +819,18 @@
     "limitations": "Requires two hands to wield.",
     "desc": "You start with a shepherd's crook but soon have more tricks up your dirty sleeves. Requires two hands to wield. This weapon grants AI Favor 1 if used for a majority of attacks in a combat lasting at least three rounds. Range 10 feet. Base Damage is 1d4 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 base damage and you may slide the target 5 feet." },
-      { "rank": 10, "text": "+1d4 base damage, and you may use this skill to make a Sling attack with a range of 50 feet, but using DEX to hit." },
-      { "rank": 15, "text": "+1d4 base damage, and the target gains the Take Down Debuff." }
+      {
+        "rank": 5,
+        "text": "+1d4 base damage and you may slide the target 5 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you may use this skill to make a Sling attack with a range of 50 feet, but using DEX to hit."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and the target gains the Take Down Debuff."
+      }
     ],
     "page": 182,
     "source": "Core"
@@ -578,9 +848,18 @@
     "limitations": "Must be mounted to use. Cannot be used in conjunction with Attack of Opportunity or Zone of Control Skills.",
     "desc": "A mounted reach weapon. Must be mounted to use. Cannot be used in conjunction with Attack of Opportunity or Zone of Control Skills. Range 10 feet. Base Damage is 1d12 + STR Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d12 base damage" },
-      { "rank": 10, "text": "+1d12 base damage, and +1 damage for every 10 feet your mount Moved this turn." },
-      { "rank": 15, "text": "+1d12 base damage, and +X damage, where X is the size of your mount." }
+      {
+        "rank": 5,
+        "text": "+1d12 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d12 base damage, and +1 damage for every 10 feet your mount Moved this turn."
+      },
+      {
+        "rank": 15,
+        "text": "+1d12 base damage, and +X damage, where X is the size of your mount."
+      }
     ],
     "page": 182,
     "source": "Core"
@@ -598,9 +877,18 @@
     "limitations": "Requires two hands to wield.",
     "desc": "A two-handed reach weapon. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Piercing.",
     "upgrades": [
-      { "rank": 5, "text": "+1d8 base damage" },
-      { "rank": 10, "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill." },
-      { "rank": 15, "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill." }
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
     ],
     "page": 183,
     "source": "Core"
@@ -618,9 +906,18 @@
     "limitations": "Requires two hands to wield.",
     "desc": "A two-handed reach staff. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
     "upgrades": [
-      { "rank": 5, "text": "+1d6 base damage" },
-      { "rank": 10, "text": "+1d6 base damage, and you gain a +1 Evade Buff." },
-      { "rank": 15, "text": "+1d6 base damage, and you gain a +1 Evade Buff." }
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
     ],
     "page": 183,
     "source": "Core"
@@ -633,9 +930,18 @@
     "interrupt": false,
     "desc": "Improves a crawler's hearing and allows the crawler to see more Mobs on the minimap in their HUD. The information is somewhat reliable.",
     "upgrades": [
-      { "rank": 5, "text": "Information on the Mob's size and whether you have encountered them before are added to the red dot indicator." },
-      { "rank": 10, "text": "Mobs of a lower level than you cannot Ambush your party." },
-      { "rank": 15, "text": "Mobs cannot Ambush your party." }
+      {
+        "rank": 5,
+        "text": "Information on the Mob's size and whether you have encountered them before are added to the red dot indicator."
+      },
+      {
+        "rank": 10,
+        "text": "Mobs of a lower level than you cannot Ambush your party."
+      },
+      {
+        "rank": 15,
+        "text": "Mobs cannot Ambush your party."
+      }
     ],
     "page": 184,
     "source": "Core"
@@ -649,9 +955,18 @@
     "limitations": "Used only in conjunction with Ranged Attacks. Mark this Skill for Advancement only when applying its Ranks to such an Attack.",
     "desc": "You are skilled at targeting vital body parts to deal additional damage. When making a Ranged Attack, you can add your Ranks in this Skill to your Attack Skill Check if you choose to make the Check with Disadvantage. On Success, add 1d4 to the damage.",
     "upgrades": [
-      { "rank": 5, "text": "+1d4 damage" },
-      { "rank": 10, "text": "+1d4 base damage" },
-      { "rank": 15, "text": "+1d4 base damage" }
+      {
+        "rank": 5,
+        "text": "+1d4 damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage"
+      }
     ],
     "page": 184,
     "source": "Core"
@@ -664,9 +979,18 @@
     "interrupt": false,
     "desc": "Used for crafting potions and poisons (see Crafting, p. 221). You may craft potions up to a +5 bonus level.",
     "upgrades": [
-      { "rank": 5, "text": "You may craft potions up to a +10 bonus level." },
-      { "rank": 10, "text": "You may create additional potions of the same kind without spending extra time." },
-      { "rank": 15, "text": "You can write the recipe for any potion you find." }
+      {
+        "rank": 5,
+        "text": "You may craft potions up to a +10 bonus level."
+      },
+      {
+        "rank": 10,
+        "text": "You may create additional potions of the same kind without spending extra time."
+      },
+      {
+        "rank": 15,
+        "text": "You can write the recipe for any potion you find."
+      }
     ],
     "page": 184,
     "source": "Core"
@@ -679,9 +1003,18 @@
     "interrupt": false,
     "desc": "You are skilled at popping up out of nowhere. When a Mob is moving toward you, even if they are aware of your general presence, make an INT-Opposed Skill Check. On Success, you gain a surprise Action against the Mob before combat starts. As an unseen attacker, you Attack with Advantage.",
     "upgrades": [
-      { "rank": 5, "text": "If you Attack with your Surprise Action, add an Ambush Rank damage die to your Surprise Attack damage." },
-      { "rank": 10, "text": "When other crawlers in your party roll this skill untrained, they roll as normal (not with Disadvantage)." },
-      { "rank": 15, "text": "You gain a second bonus Action as a surprise Action. This bonus Action can't be an Attack." }
+      {
+        "rank": 5,
+        "text": "If you Attack with your Surprise Action, add an Ambush Rank damage die to your Surprise Attack damage."
+      },
+      {
+        "rank": 10,
+        "text": "When other crawlers in your party roll this skill untrained, they roll as normal (not with Disadvantage)."
+      },
+      {
+        "rank": 15,
+        "text": "You gain a second bonus Action as a surprise Action. This bonus Action can't be an Attack."
+      }
     ],
     "page": 184,
     "source": "Core"
@@ -694,9 +1027,18 @@
     "interrupt": false,
     "desc": "You are skilled in calming, befriending, and guiding animals. Make an INT-Opposed Skill Check. On Success, the animal is friendly enough to avoid attacking you.",
     "upgrades": [
-      { "rank": 5, "text": "Choose an animal type to specialize in. You have Advantage on your Animal Handling Skill Checks against that animal type." },
-      { "rank": 10, "text": "Forming each level of bonding with a potential pet takes half the normal time." },
-      { "rank": 15, "text": "You can have up to two pets." }
+      {
+        "rank": 5,
+        "text": "Choose an animal type to specialize in. You have Advantage on your Animal Handling Skill Checks against that animal type."
+      },
+      {
+        "rank": 10,
+        "text": "Forming each level of bonding with a potential pet takes half the normal time."
+      },
+      {
+        "rank": 15,
+        "text": "You can have up to two pets."
+      }
     ],
     "page": 185,
     "source": "Core"
@@ -709,9 +1051,18 @@
     "interrupt": false,
     "desc": "You have general knowledge of magic and can determine whether items are magical or not. Make an Unopposed Skill Check. On Success, you can identify the item as magical or not.",
     "upgrades": [
-      { "rank": 5, "text": "You are able to determine details such as the specific Rank and bonus levels of magical items." },
-      { "rank": 10, "text": "You can imbue items with inherent spells using an Arcanist Table. See Crafting on p. 221." },
-      { "rank": 15, "text": "The default cooldown of your imbued spells is 3 hours." }
+      {
+        "rank": 5,
+        "text": "You are able to determine details such as the specific Rank and bonus levels of magical items."
+      },
+      {
+        "rank": 10,
+        "text": "You can imbue items with inherent spells using an Arcanist Table. See Crafting on p. 221."
+      },
+      {
+        "rank": 15,
+        "text": "The default cooldown of your imbued spells is 3 hours."
+      }
     ],
     "page": 185,
     "source": "Core"
@@ -725,9 +1076,18 @@
     "limitations": "Requires a single-handed melee weapon with a range no greater than 5 feet.",
     "desc": "When a foe moves out of a space adjacent to you (except via a Step), you may spend an Action to make an Attack Action as an Interrupt against that foe. On Success, roll damage and apply any other effects from the Attack.",
     "upgrades": [
-      { "rank": 5, "text": "If the foe moves into another space adjacent to you, they must stop." },
-      { "rank": 10, "text": "A foe using their Step no longer prevents this ability." },
-      { "rank": 15, "text": "Roll the Attack Skill Check with Advantage." }
+      {
+        "rank": 5,
+        "text": "If the foe moves into another space adjacent to you, they must stop."
+      },
+      {
+        "rank": 10,
+        "text": "A foe using their Step no longer prevents this ability."
+      },
+      {
+        "rank": 15,
+        "text": "Roll the Attack Skill Check with Advantage."
+      }
     ],
     "page": 185,
     "source": "Core"
@@ -741,9 +1101,18 @@
     "limitations": "Compensated Anarchist Class Only.",
     "desc": "You are skilled at neutralizing and deconstructing traps without the use of a Sapper's Table. Triggering mechanisms are quite valuable. Time required to neutralize a trap is 10 minutes; time required to deconstruct it is 1 hour. Make an Unopposed Skill Check. On Success, you successfully take apart the trap and can repurpose it.",
     "upgrades": [
-      { "rank": 5, "text": "You can identify when the trap was placed. Time required to neutralize a trap is 5 minutes." },
-      { "rank": 10, "text": "You can identify when the trap was created. Time required to deconstruct a trap is 30 minutes." },
-      { "rank": 15, "text": "You can identify the designer of the trap. Time required to deconstruct a trap is 15 minutes." }
+      {
+        "rank": 5,
+        "text": "You can identify when the trap was placed. Time required to neutralize a trap is 5 minutes."
+      },
+      {
+        "rank": 10,
+        "text": "You can identify when the trap was created. Time required to deconstruct a trap is 30 minutes."
+      },
+      {
+        "rank": 15,
+        "text": "You can identify the designer of the trap. Time required to deconstruct a trap is 15 minutes."
+      }
     ],
     "page": 185,
     "source": "Core"
@@ -756,9 +1125,18 @@
     "interrupt": false,
     "desc": "You can traverse tricky surfaces with general ease. Make an Unopposed Skill Check. The GM may add Difficulty for especially crazy surfaces. On Success, you keep your balance on tricky or shifting surfaces.",
     "upgrades": [
-      { "rank": 5, "text": "You may perform Move Actions in difficult terrain without penalty." },
-      { "rank": 10, "text": "When subject to a Take Down or involuntary Move effect, you may use this skill as a free Interrupt Action to avoid the effect." },
-      { "rank": 15, "text": "You may perform your Step on vertical surfaces (yes, like in The Matrix), but must end it on a flat(ish) surface." }
+      {
+        "rank": 5,
+        "text": "You may perform Move Actions in difficult terrain without penalty."
+      },
+      {
+        "rank": 10,
+        "text": "When subject to a Take Down or involuntary Move effect, you may use this skill as a free Interrupt Action to avoid the effect."
+      },
+      {
+        "rank": 15,
+        "text": "You may perform your Step on vertical surfaces (yes, like in The Matrix), but must end it on a flat(ish) surface."
+      }
     ],
     "page": 186,
     "source": "Core"
@@ -771,9 +1149,18 @@
     "interrupt": false,
     "desc": "You understand basic scientific principles and natural laws, which you hope are still in effect in the dungeon. Experiments take 2 hours to perform. Make an Unopposed Skill Check. On Success, you learn or confirm something.",
     "upgrades": [
-      { "rank": 5, "text": "Experiments take 1 hour to perform." },
-      { "rank": 10, "text": "Choose a specialty (physics, biology, chemistry, Earth science, etc.), and roll with Advantage when dealing with that." },
-      { "rank": 15, "text": "Experiments take 30 minutes to perform." }
+      {
+        "rank": 5,
+        "text": "Experiments take 1 hour to perform."
+      },
+      {
+        "rank": 10,
+        "text": "Choose a specialty (physics, biology, chemistry, Earth science, etc.), and roll with Advantage when dealing with that."
+      },
+      {
+        "rank": 15,
+        "text": "Experiments take 30 minutes to perform."
+      }
     ],
     "page": 186,
     "source": "Core"
@@ -786,9 +1173,18 @@
     "interrupt": false,
     "desc": "Use this Skill to deconstruct explosive bombs and smoke bombs. You can then use the half-sized bomb, or use the component parts to craft new bombs using other Skills. If you are using a Sapper's Table, you do not have to make an Unopposed Explosives Handling Skill Check to avoid a mishap. Time required is 1 hour. Make an Unopposed Skill Check. On Success, you have deconstructed it.",
     "upgrades": [
-      { "rank": 5, "text": "Time required is 30 minutes." },
-      { "rank": 10, "text": "You never have to make an Explosives Handling Skill Check when using this skill." },
-      { "rank": 15, "text": "When cutting dynamite in half to make smaller bombs, round dice up. Time required is 15 minutes." }
+      {
+        "rank": 5,
+        "text": "Time required is 30 minutes."
+      },
+      {
+        "rank": 10,
+        "text": "You never have to make an Explosives Handling Skill Check when using this skill."
+      },
+      {
+        "rank": 15,
+        "text": "When cutting dynamite in half to make smaller bombs, round dice up. Time required is 15 minutes."
+      }
     ],
     "page": 186,
     "source": "Core"
@@ -801,9 +1197,18 @@
     "interrupt": false,
     "desc": "Used for making documents look super elegant. Make an Unopposed Skill Check. On Success, what you have written is a joy to read and feels important, even if it's bad news.",
     "upgrades": [
-      { "rank": 5, "text": "Roll with Advantage on your next Charisma Skill Check vs. the recipient of your beautiful paper." },
-      { "rank": 10, "text": "You are able to craft scrolls as if this were a crafting skill. See Crafting, p. 221." },
-      { "rank": 15, "text": "Once per floor, you may craft a scroll for a spell you have only seen cast within the last 2 hours." }
+      {
+        "rank": 5,
+        "text": "Roll with Advantage on your next Charisma Skill Check vs. the recipient of your beautiful paper."
+      },
+      {
+        "rank": 10,
+        "text": "You are able to craft scrolls as if this were a crafting skill. See Crafting, p. 221."
+      },
+      {
+        "rank": 15,
+        "text": "Once per floor, you may craft a scroll for a spell you have only seen cast within the last 2 hours."
+      }
     ],
     "page": 186,
     "source": "Core"
@@ -816,9 +1221,18 @@
     "interrupt": false,
     "desc": "Mapping the dungeon will help you in many ways. Make an Unopposed Skill Check. On Success, you figure out where you are in relation to other things.",
     "upgrades": [
-      { "rank": 5, "text": "You can always return from whence you came quickly, assuming the dungeon walls haven't shifted in the meantime." },
-      { "rank": 10, "text": "You provide an Advantage die to crawlers in your party (could be you) who are making Tracking Skill Checks or Checks that rely on spatial relations." },
-      { "rank": 15, "text": "Even with merely a finger point or a 'thataway,' you can get from point A to point B via the most direct path." }
+      {
+        "rank": 5,
+        "text": "You can always return from whence you came quickly, assuming the dungeon walls haven't shifted in the meantime."
+      },
+      {
+        "rank": 10,
+        "text": "You provide an Advantage die to crawlers in your party (could be you) who are making Tracking Skill Checks or Checks that rely on spatial relations."
+      },
+      {
+        "rank": 15,
+        "text": "Even with merely a finger point or a 'thataway,' you can get from point A to point B via the most direct path."
+      }
     ],
     "page": 186,
     "source": "Core"
@@ -832,9 +1246,18 @@
     "limitations": "This limited Skill is only available to cat-based Races, such as Cat, Cat Girl/Cat Boy, and Tigran.",
     "desc": "You gain a +10ft Move. Use this Skill Check when you would make a Dexterity Stat Check (vs. the typically lesser Stat Check Difficulty).",
     "upgrades": [
-      { "rank": 5, "text": "Reduce the damage you take from foes' Surprise Attacks against you by your Rank in this skill." },
-      { "rank": 10, "text": "Reduce all Area damage you take by 50% (rounded down)." },
-      { "rank": 15, "text": "+10ft Move. You gain a +1 Evade Buff. Roll with Advantage to Evade Attacks and effects that would apply the Held Debuff (or similar) to you." }
+      {
+        "rank": 5,
+        "text": "Reduce the damage you take from foes' Surprise Attacks against you by your Rank in this skill."
+      },
+      {
+        "rank": 10,
+        "text": "Reduce all Area damage you take by 50% (rounded down)."
+      },
+      {
+        "rank": 15,
+        "text": "+10ft Move. You gain a +1 Evade Buff. Roll with Advantage to Evade Attacks and effects that would apply the Held Debuff (or similar) to you."
+      }
     ],
     "page": 186,
     "source": "Core"
@@ -847,9 +1270,18 @@
     "interrupt": true,
     "desc": "When a Successful direct (non-Area) Attack is about to damage an ally, you leap in and take the damage instead. You must be adjacent to that ally but can take a 10ft Step before using this Skill to get into position. You take the damage. You can't use Evade, Shield Block, and other Skills or Spells to negate damage dealt to you this way.",
     "upgrades": [
-      { "rank": 5, "text": "You've learned how to take hits. You gain +5 DR when using this Skill." },
-      { "rank": 10, "text": "You gain +5 DR when using this Skill." },
-      { "rank": 15, "text": "You gain +5 DR when using this Skill and ignore any Debuffs attached to this damage." }
+      {
+        "rank": 5,
+        "text": "You've learned how to take hits. You gain +5 DR when using this Skill."
+      },
+      {
+        "rank": 10,
+        "text": "You gain +5 DR when using this Skill."
+      },
+      {
+        "rank": 15,
+        "text": "You gain +5 DR when using this Skill and ignore any Debuffs attached to this damage."
+      }
     ],
     "page": 187,
     "source": "Core"
@@ -863,9 +1295,18 @@
     "limitations": "Only acquired via an Earth Hobby Potion.",
     "desc": "Use this Skill Check when playing jai alai or when throwing things that fit in the xistera. See Throwing (p. 200) for rules on throwing things, but use the ranges below. Roll with Disadvantage at ranges over 500 feet.",
     "upgrades": [
-      { "rank": 5, "text": "Throw range Strength x20 feet." },
-      { "rank": 10, "text": "Add 1 Cesta Punta Rank damage die to thrown damaging Attacks." },
-      { "rank": 15, "text": "Throw range Strength x30 feet, and roll with Disadvantage at ranges over 2,000 feet." }
+      {
+        "rank": 5,
+        "text": "Throw range Strength x20 feet."
+      },
+      {
+        "rank": 10,
+        "text": "Add 1 Cesta Punta Rank damage die to thrown damaging Attacks."
+      },
+      {
+        "rank": 15,
+        "text": "Throw range Strength x30 feet, and roll with Disadvantage at ranges over 2,000 feet."
+      }
     ],
     "page": 187,
     "source": "Core"
@@ -879,9 +1320,18 @@
     "limitations": "Former Child Actor Class Only. Rank increases by 1 when descending to a new floor only.",
     "desc": "At the start of each floor, choose a new Class from a random list of three provided by the GM. You gain a random assortment of the new Class's abilities for the remainder of the current floor, while keeping your current ones. For each bullet point line item in the new Class description, roll 1d2. On a 2, you gain the listed abilities.",
     "upgrades": [
-      { "rank": 5, "text": "The random Classes increase in rarity and power based on the crawler's Stats and Level." },
-      { "rank": 10, "text": "Skill Ranks gained in any newly-granted Skills persist from floor to floor, but the starting Ranks of those Skills are lost." },
-      { "rank": 15, "text": "You choose the Class from any available." }
+      {
+        "rank": 5,
+        "text": "The random Classes increase in rarity and power based on the crawler's Stats and Level."
+      },
+      {
+        "rank": 10,
+        "text": "Skill Ranks gained in any newly-granted Skills persist from floor to floor, but the starting Ranks of those Skills are lost."
+      },
+      {
+        "rank": 15,
+        "text": "You choose the Class from any available."
+      }
     ],
     "page": 187,
     "source": "Core"
@@ -895,9 +1345,18 @@
     "limitations": "You suffer Disadvantage on Attack Skill Checks made while Piloting and cannot Attack with a weapon that requires two hands.",
     "desc": "Known as a motorcycle in most parts of the world. If you're racing, chasing, showing off, or trying to pop a wheelie, this is the Skill you want. Make an Unopposed Skill Check; depending on how extreme the circumstances are, the GM may apply Advantage or Disadvantage. On Success, you stay upright while performing your crazy maneuvers.",
     "upgrades": [
-      { "rank": 5, "text": "Your chopper has +5ft Move." },
-      { "rank": 10, "text": "Attacking while piloting no longer suffers Disadvantage." },
-      { "rank": 15, "text": "Your chopper has +5ft Move. When performing crazy stunts (like riding up a canyon wall), roll with Advantage." }
+      {
+        "rank": 5,
+        "text": "Your chopper has +5ft Move."
+      },
+      {
+        "rank": 10,
+        "text": "Attacking while piloting no longer suffers Disadvantage."
+      },
+      {
+        "rank": 15,
+        "text": "Your chopper has +5ft Move. When performing crazy stunts (like riding up a canyon wall), roll with Advantage."
+      }
     ],
     "page": 187,
     "source": "Core"
@@ -911,9 +1370,18 @@
     "limitations": "If you Attack while Climbing, you suffer Disadvantage on those Checks.",
     "desc": "If you're racing, chasing, rappelling from a burning building, or doing something dangerous while climbing, this is the Skill you want. Make an Unopposed Skill Check every minute (not round); the GM may apply Advantage or Disadvantage. On Success, you are safe in your climb and make progress.",
     "upgrades": [
-      { "rank": 5, "text": "Make a Check every 5 minutes." },
-      { "rank": 10, "text": "Make a Check every 10 minutes. You no longer Attack with Disadvantage while climbing." },
-      { "rank": 15, "text": "Make a Check every 15 minutes. When other crawlers in your party roll this skill untrained, they roll as normal (not with Disadvantage)." }
+      {
+        "rank": 5,
+        "text": "Make a Check every 5 minutes."
+      },
+      {
+        "rank": 10,
+        "text": "Make a Check every 10 minutes. You no longer Attack with Disadvantage while climbing."
+      },
+      {
+        "rank": 15,
+        "text": "Make a Check every 15 minutes. When other crawlers in your party roll this skill untrained, they roll as normal (not with Disadvantage)."
+      }
     ],
     "page": 188,
     "source": "Core"
@@ -928,9 +1396,18 @@
     "limitations": "This Limited Skill can only be learned via a Race, Class, or item. Ranks only increase by magical means and training after Rank 5.",
     "desc": "When an Attack would drop you to 0% Health Bar, roll an Unopposed Skill Check. On Success, drop to 10% instead.",
     "upgrades": [
-      { "rank": 5, "text": "No Skill Check required anymore." },
-      { "rank": 10, "text": "The crawler's Health Bar is unaffected by damage that would drop them to 0%." },
-      { "rank": 15, "text": "Cooldown is twice per scene. When it triggers, the crawler heals to 100% and has +Rank DR until the end of the next round of combat." }
+      {
+        "rank": 5,
+        "text": "No Skill Check required anymore."
+      },
+      {
+        "rank": 10,
+        "text": "The crawler's Health Bar is unaffected by damage that would drop them to 0%."
+      },
+      {
+        "rank": 15,
+        "text": "Cooldown is twice per scene. When it triggers, the crawler heals to 100% and has +Rank DR until the end of the next round of combat."
+      }
     ],
     "page": 188,
     "source": "Core"
@@ -943,9 +1420,18 @@
     "interrupt": false,
     "desc": "You are skilled in the culinary arts. Once you have your ingredients and 1 hour to prepare it, make an Unopposed Skill Check. On Success, you make edible food for you and your party.",
     "upgrades": [
-      { "rank": 5, "text": "It takes you 30 minutes to prepare a meal with makeshift ingredients." },
-      { "rank": 10, "text": "The diners gain the day-long 'You are full!' Buff: Heal 2 Health Bar slots per hour when not resting." },
-      { "rank": 15, "text": "The 'You are full!' Buff also causes Debuffs to end if you drop to 10% Health Bar." }
+      {
+        "rank": 5,
+        "text": "It takes you 30 minutes to prepare a meal with makeshift ingredients."
+      },
+      {
+        "rank": 10,
+        "text": "The diners gain the day-long 'You are full!' Buff: Heal 2 Health Bar slots per hour when not resting."
+      },
+      {
+        "rank": 15,
+        "text": "The 'You are full!' Buff also causes Debuffs to end if you drop to 10% Health Bar."
+      }
     ],
     "page": 188,
     "source": "Core"
@@ -958,9 +1444,18 @@
     "interrupt": false,
     "desc": "If you know the truth but want to obscure it, this is the Skill for you. When you lie and try to get away with it, make an INT-Opposed Skill Check. If the creature you're lying to has the Detect Lies Skill, you make this Check with Disadvantage. On Success, they believe you.",
     "upgrades": [
-      { "rank": 5, "text": "You can use this Skill while gambling." },
-      { "rank": 10, "text": "You can use this Skill to forge documents." },
-      { "rank": 15, "text": "You're good enough to know when you've been caught. If you fail this Check, you may perform one Action before your foes can react." }
+      {
+        "rank": 5,
+        "text": "You can use this Skill while gambling."
+      },
+      {
+        "rank": 10,
+        "text": "You can use this Skill to forge documents."
+      },
+      {
+        "rank": 15,
+        "text": "You're good enough to know when you've been caught. If you fail this Check, you may perform one Action before your foes can react."
+      }
     ],
     "page": 189,
     "source": "Core"
@@ -973,9 +1468,18 @@
     "interrupt": false,
     "desc": "You have an incredible bullshit detector. If you believe someone is trying to lie to you, make a CHA-Opposed Skill Check. If they possess the Deception Skill, you make this Check with Disadvantage. On Success, you sense if they're lying, but if they believe they're telling the truth, you sense they're telling the truth.",
     "upgrades": [
-      { "rank": 5, "text": "When you Fail, you still can't detect the lie, but you can ignore the additional effects of a Major Fail or worse." },
-      { "rank": 10, "text": "When you Fail, you can't detect the lie, but you can ignore the effects of a Critical Fail." },
-      { "rank": 15, "text": "You do not need to see the speaker, which allows you to detect lies in text and audio form." }
+      {
+        "rank": 5,
+        "text": "When you Fail, you still can't detect the lie, but you can ignore the additional effects of a Major Fail or worse."
+      },
+      {
+        "rank": 10,
+        "text": "When you Fail, you can't detect the lie, but you can ignore the effects of a Critical Fail."
+      },
+      {
+        "rank": 15,
+        "text": "You do not need to see the speaker, which allows you to detect lies in text and audio form."
+      }
     ],
     "page": 189,
     "source": "Core"
@@ -988,9 +1492,18 @@
     "interrupt": false,
     "desc": "When you suspect a room, door, chest, or other object has an active trap, this is the Skill you want. Make an Unopposed Skill Check. Roll with Disadvantage when using this Skill to scan an entire room or while moving. On Success, you are alerted to the presence of a non-magic trap, which typically allows you to avoid triggering it. On Fail, you sense nothing, and a trap may or may not be present.",
     "upgrades": [
-      { "rank": 5, "text": "You can detect magical traps." },
-      { "rank": 10, "text": "You no longer roll with Disadvantage when searching a broad area or while moving." },
-      { "rank": 15, "text": "When you are aware of nearby traps, your party has Advantage on their first Check to avoid or escape the effects." }
+      {
+        "rank": 5,
+        "text": "You can detect magical traps."
+      },
+      {
+        "rank": 10,
+        "text": "You no longer roll with Disadvantage when searching a broad area or while moving."
+      },
+      {
+        "rank": 15,
+        "text": "When you are aware of nearby traps, your party has Advantage on their first Check to avoid or escape the effects."
+      }
     ],
     "page": 189,
     "source": "Core"
@@ -1004,9 +1517,18 @@
     "limitations": "Ranks in this Skill only increase by magical means.",
     "desc": "You can sort your HUD's Inventory by item value. The actual gold value is not displayed.",
     "upgrades": [
-      { "rank": 5, "text": "Your Inventory is tabbed to sort your items by type, and it includes a history tab that tracks your item usage and any former owners of an item." },
-      { "rank": 10, "text": "You can determine what type of loot box the item would have come from." },
-      { "rank": 15, "text": "Whenever you add a new item to your Inventory, the gold value of that item is displayed." }
+      {
+        "rank": 5,
+        "text": "Your Inventory is tabbed to sort your items by type, and it includes a history tab that tracks your item usage and any former owners of an item."
+      },
+      {
+        "rank": 10,
+        "text": "You can determine what type of loot box the item would have come from."
+      },
+      {
+        "rank": 15,
+        "text": "Whenever you add a new item to your Inventory, the gold value of that item is displayed."
+      }
     ],
     "page": 189,
     "source": "Core"
@@ -1019,9 +1541,18 @@
     "interrupt": false,
     "desc": "Used in mediation between opposing organizations and parties. Make an INT-Opposed Skill Check of the side with the higher INT Mod. On Success, the two parties are willing to discuss options.",
     "upgrades": [
-      { "rank": 5, "text": "Roll with Advantage if you are not a member of either party." },
-      { "rank": 10, "text": "Each side accepts consequences if they break the deal." },
-      { "rank": 15, "text": "Hostilities cease at least for the remainder of the day." }
+      {
+        "rank": 5,
+        "text": "Roll with Advantage if you are not a member of either party."
+      },
+      {
+        "rank": 10,
+        "text": "Each side accepts consequences if they break the deal."
+      },
+      {
+        "rank": 15,
+        "text": "Hostilities cease at least for the remainder of the day."
+      }
     ],
     "page": 189,
     "source": "Core"
@@ -1035,9 +1566,18 @@
     "limitations": "Mark the Skill for Advancement when Evading until you reach Rank 5. After that, Ranks only increase by magical means and training.",
     "desc": "You gain a +1 Evade Buff.",
     "upgrades": [
-      { "rank": 5, "text": "Gain a +1 Evade Buff, and you may Step an additional 5 feet when you perform the Evade Action." },
-      { "rank": 10, "text": "Gain a +2 Evade Buff, and roll Evade with Advantage vs. Spells and Ranged Attacks." },
-      { "rank": 15, "text": "Gain a +2 Evade Buff, and you may perform the Evade Action without spending an Action in combat." }
+      {
+        "rank": 5,
+        "text": "Gain a +1 Evade Buff, and you may Step an additional 5 feet when you perform the Evade Action."
+      },
+      {
+        "rank": 10,
+        "text": "Gain a +2 Evade Buff, and roll Evade with Advantage vs. Spells and Ranged Attacks."
+      },
+      {
+        "rank": 15,
+        "text": "Gain a +2 Evade Buff, and you may perform the Evade Action without spending an Action in combat."
+      }
     ],
     "page": 190,
     "source": "Core"
@@ -1051,9 +1591,18 @@
     "limitations": "To engage this Skill, you must declare a Double Tap at the start of the combat round, before Mob Actions have been determined. You must then use all of your Actions this round to Attack a single target with the same weapon or Spell.",
     "desc": "Mark this Skill for advancement anytime you roll an Amazing Success or better while using it. If your first Attack is an Amazing Success or better, your second Attack (if it hits) is upgraded to a Critical Hit.",
     "upgrades": [
-      { "rank": 5, "text": "Roll your first Attack with Advantage." },
-      { "rank": 10, "text": "If your first Attack is a Standard Success or better, the second Attack (if it hits) is upgraded to a Critical Hit." },
-      { "rank": 15, "text": "Roll your second Attack with Advantage. If your second Attack is a Critical Hit or upgraded to one, deal x3 damage (instead of x2)." }
+      {
+        "rank": 5,
+        "text": "Roll your first Attack with Advantage."
+      },
+      {
+        "rank": 10,
+        "text": "If your first Attack is a Standard Success or better, the second Attack (if it hits) is upgraded to a Critical Hit."
+      },
+      {
+        "rank": 15,
+        "text": "Roll your second Attack with Advantage. If your second Attack is a Critical Hit or upgraded to one, deal x3 damage (instead of x2)."
+      }
     ],
     "page": 190,
     "source": "Core"
@@ -1067,9 +1616,18 @@
     "limitations": "If you Attack while Driving, you suffer Disadvantage on those Checks.",
     "desc": "If you're racing, chasing, showing off, or doing something dangerous in a vehicle, this is the Skill you want. Make an Unopposed Skill Check; depending on how extreme the circumstances are, the GM may apply Advantage or Disadvantage. On Success, you achieve your daredevil maneuver or avoid wrecking your vehicle.",
     "upgrades": [
-      { "rank": 5, "text": "You no longer suffer Disadvantage when attacking while Driving." },
-      { "rank": 10, "text": "Your vehicle has +5ft Move. Roll with Advantage to Evade Attacks against your vehicle." },
-      { "rank": 15, "text": "Your vehicle has +5ft Move. When performing crazy stunts (like driving on only your left-side wheels), roll with Advantage." }
+      {
+        "rank": 5,
+        "text": "You no longer suffer Disadvantage when attacking while Driving."
+      },
+      {
+        "rank": 10,
+        "text": "Your vehicle has +5ft Move. Roll with Advantage to Evade Attacks against your vehicle."
+      },
+      {
+        "rank": 15,
+        "text": "Your vehicle has +5ft Move. When performing crazy stunts (like driving on only your left-side wheels), roll with Advantage."
+      }
     ],
     "page": 190,
     "source": "Core"
@@ -1082,9 +1640,18 @@
     "interrupt": false,
     "desc": "Known as 'scrounging' in some parts of the world. This Skill bolsters your ability to search the clutter within the dungeon to find interesting bits of rubbish and maybe something useful. Using this Skill takes 1 hour and can only be performed once per 50-foot-square area. Make an Unopposed Skill Check. On Success, you find what you were looking for or another interesting item, determined by the GM.",
     "upgrades": [
-      { "rank": 5, "text": "You also find 1 Rank damage die's-worth of Misc. Junk." },
-      { "rank": 10, "text": "A Dumpster Dive takes 30 minutes. On a Critical Hit, you gain an additional interesting item." },
-      { "rank": 15, "text": "A Dumpster Dive takes 10 minutes. On an Amazing Success, you gain an interesting item." }
+      {
+        "rank": 5,
+        "text": "You also find 1 Rank damage die's-worth of Misc. Junk."
+      },
+      {
+        "rank": 10,
+        "text": "A Dumpster Dive takes 30 minutes. On a Critical Hit, you gain an additional interesting item."
+      },
+      {
+        "rank": 15,
+        "text": "A Dumpster Dive takes 10 minutes. On an Amazing Success, you gain an interesting item."
+      }
     ],
     "page": 190,
     "source": "Core"
@@ -1097,9 +1664,18 @@
     "interrupt": false,
     "desc": "Use this Skill to prevent fatigue while grinding, walking long distances (measured in miles), or other extended strenuous activities. Make an Unopposed Skill Check. On Success, you may continue the activity and do not gain the Fatigued Debuff.",
     "upgrades": [
-      { "rank": 5, "text": "You can ignore the effects of a Major Fail when making these Checks." },
-      { "rank": 10, "text": "If you are not Fatigued or in extreme conditions, you make this Check with Advantage." },
-      { "rank": 15, "text": "If your Check is a Critical Fail, you can take the effects of a Standard Fail." }
+      {
+        "rank": 5,
+        "text": "You can ignore the effects of a Major Fail when making these Checks."
+      },
+      {
+        "rank": 10,
+        "text": "If you are not Fatigued or in extreme conditions, you make this Check with Advantage."
+      },
+      {
+        "rank": 15,
+        "text": "If your Check is a Critical Fail, you can take the effects of a Standard Fail."
+      }
     ],
     "page": 190,
     "source": "Core"
@@ -1113,9 +1689,18 @@
     "limitations": "Cannot create vehicles or high-powered engines (see Gear Head, p. 192).",
     "desc": "This Skill is used to design and build things with moving parts, fluids, or chemicals wholly out of Misc. Junk with no inherent bonuses, though they may have situational bonuses. Examples include a watch, a water pump, or bullets (see Crafting, p. 221). Starting on the Fourth Floor, you may make use of an Engineering Table to make your mundane items easier to craft. Make an Unopposed Skill Check. On Success, you create the item.",
     "upgrades": [
-      { "rank": 5, "text": "Choose a mundane item type to specialize in. You have Advantage when creating an item of that type." },
-      { "rank": 10, "text": "You may craft your specialty item with a +1 bonus level enchantment." },
-      { "rank": 15, "text": "You may craft your specialty item with up to +2 bonus level enchantment, and it takes half the time." }
+      {
+        "rank": 5,
+        "text": "Choose a mundane item type to specialize in. You have Advantage when creating an item of that type."
+      },
+      {
+        "rank": 10,
+        "text": "You may craft your specialty item with a +1 bonus level enchantment."
+      },
+      {
+        "rank": 15,
+        "text": "You may craft your specialty item with up to +2 bonus level enchantment, and it takes half the time."
+      }
     ],
     "page": 191,
     "source": "Core"
@@ -1128,9 +1713,18 @@
     "interrupt": false,
     "desc": "You're especially skilled at the art of escape. When trying to escape bonds, make an Unopposed Skill Check. To escape being Held, make a STR-Opposed Skill Check. Based on the complexity or simplicity of what binds you, the GM may have you make the Check with Advantage or Disadvantage. On Success, you escape your bonds or the creature holding you.",
     "upgrades": [
-      { "rank": 5, "text": "You can escape your bonds, and no one sees you do it. If you escape being Held, you can then take a Step (also unseen)." },
-      { "rank": 10, "text": "When other crawlers in your party roll this skill untrained, they roll as normal (not with Disadvantage)." },
-      { "rank": 15, "text": "When you slip out, you may immediately take an Action with Advantage." }
+      {
+        "rank": 5,
+        "text": "You can escape your bonds, and no one sees you do it. If you escape being Held, you can then take a Step (also unseen)."
+      },
+      {
+        "rank": 10,
+        "text": "When other crawlers in your party roll this skill untrained, they roll as normal (not with Disadvantage)."
+      },
+      {
+        "rank": 15,
+        "text": "When you slip out, you may immediately take an Action with Advantage."
+      }
     ],
     "page": 191,
     "source": "Core"
@@ -1144,9 +1738,18 @@
     "limitations": "Ranks in this Skill only advance by magical means.",
     "desc": "Your HUD reveals hidden doors and passages, unless those passages were crafted by someone with more Ranks in Fabricate or Engineering than you have in this Skill or the passage is entirely natural.",
     "upgrades": [
-      { "rank": 5, "text": "You have access to system-concealed displays and the Dungeon Locator. Holographic signs pop up in your HUD, displaying insider information like signs at a zoo, including arrows toward City and stronger Bosses." },
-      { "rank": 10, "text": "You are able to read hidden sigils (glowing blue circles) used by the showrunners to direct the movement of Mobs." },
-      { "rank": 15, "text": "You are able to read hidden messages and redactions in dungeon documents." }
+      {
+        "rank": 5,
+        "text": "You have access to system-concealed displays and the Dungeon Locator. Holographic signs pop up in your HUD, displaying insider information like signs at a zoo, including arrows toward City and stronger Bosses."
+      },
+      {
+        "rank": 10,
+        "text": "You are able to read hidden sigils (glowing blue circles) used by the showrunners to direct the movement of Mobs."
+      },
+      {
+        "rank": 15,
+        "text": "You are able to read hidden messages and redactions in dungeon documents."
+      }
     ],
     "page": 191,
     "source": "Core"
@@ -1159,9 +1762,18 @@
     "interrupt": false,
     "desc": "For making Attack Skill Checks with explosives (see Throwing, p. 200). Make an Unopposed Skill Check. On Success, you safely handle standard explosive devices. On Fail, the GM will think of something.",
     "upgrades": [
-      { "rank": 5, "text": "You are able to determine the type, status, and raw materials of explosives you handle." },
-      { "rank": 10, "text": "You are able to craft explosives such as dynamite as if this were a crafting Skill, though you must have explosive raw materials and a Sapper's Table (see Crafting, p. 221)." },
-      { "rank": 15, "text": "You may create explosive raw materials out of non-volatile materials. Your crafting takes half the time." }
+      {
+        "rank": 5,
+        "text": "You are able to determine the type, status, and raw materials of explosives you handle."
+      },
+      {
+        "rank": 10,
+        "text": "You are able to craft explosives such as dynamite as if this were a crafting Skill, though you must have explosive raw materials and a Sapper's Table (see Crafting, p. 221)."
+      },
+      {
+        "rank": 15,
+        "text": "You may create explosive raw materials out of non-volatile materials. Your crafting takes half the time."
+      }
     ],
     "page": 191,
     "source": "Core"
@@ -1175,9 +1787,18 @@
     "limitations": "Cannot create things with moving parts, fluids, or chemicals.",
     "desc": "Use this Skill to make generic, mundane items with no inherent bonuses wholly out of Misc. Junk, but your GM can give them situational bonuses. Examples include a ladder, a 50ft rope, or a ceramic pot. For items with moving parts, see Engineering (see Crafting, p. 221). Make an Unopposed Skill Check. On Success, you create the item.",
     "upgrades": [
-      { "rank": 5, "text": "Choose a mundane item to specialize in. You have Advantage when creating that item." },
-      { "rank": 10, "text": "You may craft your specialty item with a +1 bonus level enchantment." },
-      { "rank": 15, "text": "You may craft your specialty item with up to +2 bonus level enchantment, and it takes half the time." }
+      {
+        "rank": 5,
+        "text": "Choose a mundane item to specialize in. You have Advantage when creating that item."
+      },
+      {
+        "rank": 10,
+        "text": "You may craft your specialty item with a +1 bonus level enchantment."
+      },
+      {
+        "rank": 15,
+        "text": "You may craft your specialty item with up to +2 bonus level enchantment, and it takes half the time."
+      }
     ],
     "page": 191,
     "source": "Core"
@@ -1191,9 +1812,18 @@
     "limitations": "Ranks in this Skill only increase by magical means.",
     "desc": "Your HUD displays other crawlers within 1,000 feet of you. They are designated with a blue dot.",
     "upgrades": [
-      { "rank": 5, "text": "The area in which you can detect other crawlers increases to 5 miles." },
-      { "rank": 10, "text": "The area in which you can detect other crawlers increases to 10 miles." },
-      { "rank": 15, "text": "You can input a specific crawler's name and learn their exact location anywhere in the dungeon." }
+      {
+        "rank": 5,
+        "text": "The area in which you can detect other crawlers increases to 5 miles."
+      },
+      {
+        "rank": 10,
+        "text": "The area in which you can detect other crawlers increases to 10 miles."
+      },
+      {
+        "rank": 15,
+        "text": "You can input a specific crawler's name and learn their exact location anywhere in the dungeon."
+      }
     ],
     "page": 192,
     "source": "Core"
@@ -1207,9 +1837,18 @@
     "limitations": "Ranks in this Skill only increase by magical means and training.",
     "desc": "Traps within 5 feet of you appear on your HUD one second prior to triggering the trap, which is often too late to react.",
     "upgrades": [
-      { "rank": 5, "text": "Traps appear on your HUD up to 5 seconds before they are triggered." },
-      { "rank": 10, "text": "Traps within 10 feet of you appear on your HUD as you approach them." },
-      { "rank": 15, "text": "Traps within 15 feet of you appear on your HUD as you approach them." }
+      {
+        "rank": 5,
+        "text": "Traps appear on your HUD up to 5 seconds before they are triggered."
+      },
+      {
+        "rank": 10,
+        "text": "Traps within 10 feet of you appear on your HUD as you approach them."
+      },
+      {
+        "rank": 15,
+        "text": "Traps within 15 feet of you appear on your HUD as you approach them."
+      }
     ],
     "page": 192,
     "source": "Core"
@@ -1223,9 +1862,18 @@
     "limitations": "After you treat someone, you can't treat them again until they complete a Short or Long Rest.",
     "desc": "Give minor medical aid to yourself or someone else. Make an Unopposed Skill Check. On Success, the patient regains 1 Health Bar slot. Each higher degree of Success heals 1 additional slot.",
     "upgrades": [
-      { "rank": 5, "text": "If you spend 5 minutes, the patient also heals a Minor Injury Debuff." },
-      { "rank": 10, "text": "If you spend 10 minutes, the patient also heals a Long-Term Minor Injury Debuff." },
-      { "rank": 15, "text": "The patient regains 1 additional Health Bar slot. If you spend 15 minutes, the patient also heals a Major Injury Debuff." }
+      {
+        "rank": 5,
+        "text": "If you spend 5 minutes, the patient also heals a Minor Injury Debuff."
+      },
+      {
+        "rank": 10,
+        "text": "If you spend 10 minutes, the patient also heals a Long-Term Minor Injury Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "The patient regains 1 additional Health Bar slot. If you spend 15 minutes, the patient also heals a Major Injury Debuff."
+      }
     ],
     "page": 192,
     "source": "Core"
@@ -1239,9 +1887,18 @@
     "limitations": "This Limited Skill can only be learned via a Race, Class, or item. Requires an Engine Stand attachment to an Engineering Table (2,000 gold).",
     "desc": "You are proficient at building high-performance engines, using the rules of Crafting (see p. 221). Each +5ft Move is a +1 Bonus Level at the default '10 + Bonus Level x4' Difficulty. The time it takes and Misc. Junk required uses the rules of crafting mundane items. On Success, you have successfully built a custom engine.",
     "upgrades": [
-      { "rank": 5, "text": "You are able to add accessories to vehicles or even build your own custom vehicles. Use the rules of Engineering, but use this Skill and there are no bonus level limits to your custom-crafted items." },
-      { "rank": 10, "text": "Each +10ft Move is a +1 Bonus Level. You may use this Skill as a Repair Skill (see p. 197) when fixing engines." },
-      { "rank": 15, "text": "Cut the time required to craft engines and vehicles you build around your engines in half." }
+      {
+        "rank": 5,
+        "text": "You are able to add accessories to vehicles or even build your own custom vehicles. Use the rules of Engineering, but use this Skill and there are no bonus level limits to your custom-crafted items."
+      },
+      {
+        "rank": 10,
+        "text": "Each +10ft Move is a +1 Bonus Level. You may use this Skill as a Repair Skill (see p. 197) when fixing engines."
+      },
+      {
+        "rank": 15,
+        "text": "Cut the time required to craft engines and vehicles you build around your engines in half."
+      }
     ],
     "page": 192,
     "source": "Core"
@@ -1254,9 +1911,18 @@
     "interrupt": false,
     "desc": "For making Attack Skill Checks with explosives (see Throwing, p. 200). Make an Unopposed Skill Check. Goblin Explosives are so unstable that Critical Fails occur on a Natural 1-4. On Success, you safely use Goblin Explosive devices.",
     "upgrades": [
-      { "rank": 5, "text": "Critical Fail occurs on a Natural 3 or less. You are able to determine the type, status, and raw materials of Goblin Explosives you handle." },
-      { "rank": 10, "text": "Critical Fail occurs on a Natural 2 or less. You are able to craft explosives such as dynamite as if this were a crafting Skill, though you must have explosive raw materials and a Sapper's Table (see Crafting, p. 221)." },
-      { "rank": 15, "text": "Critical Fail occurs on a Natural 1 as usual. You may create explosive raw materials out of non-volatile materials with the use of a Sapper's Table. Your crafting takes half the time." }
+      {
+        "rank": 5,
+        "text": "Critical Fail occurs on a Natural 3 or less. You are able to determine the type, status, and raw materials of Goblin Explosives you handle."
+      },
+      {
+        "rank": 10,
+        "text": "Critical Fail occurs on a Natural 2 or less. You are able to craft explosives such as dynamite as if this were a crafting Skill, though you must have explosive raw materials and a Sapper's Table (see Crafting, p. 221)."
+      },
+      {
+        "rank": 15,
+        "text": "Critical Fail occurs on a Natural 1 as usual. You may create explosive raw materials out of non-volatile materials with the use of a Sapper's Table. Your crafting takes half the time."
+      }
     ],
     "page": 192,
     "source": "Core"
@@ -1270,9 +1936,18 @@
     "limitations": "Doesn't work on crawlers, Bosses, or Elites. You can only make a Skill Check against individuals, not groups.",
     "desc": "When you encounter an NPC or Mob that is not immediately hostile or attacking, make an INT-Opposed Skill Check. On Success, the Mob approaches with wary curiosity.",
     "upgrades": [
-      { "rank": 5, "text": "A Mob that is lower level than you won't attack your party unless they are attacked by a member of your party." },
-      { "rank": 10, "text": "A Mob that is up to double your level won't attack your party unless they are attacked by you or an ally or your party is preventing them from completing their objective." },
-      { "rank": 15, "text": "A group of Mobs of the same type up to double your level won't attack your party unless they are attacked by a member of your party, or your party is preventing them from completing their objective." }
+      {
+        "rank": 5,
+        "text": "A Mob that is lower level than you won't attack your party unless they are attacked by a member of your party."
+      },
+      {
+        "rank": 10,
+        "text": "A Mob that is up to double your level won't attack your party unless they are attacked by you or an ally or your party is preventing them from completing their objective."
+      },
+      {
+        "rank": 15,
+        "text": "A group of Mobs of the same type up to double your level won't attack your party unless they are attacked by a member of your party, or your party is preventing them from completing their objective."
+      }
     ],
     "page": 193,
     "source": "Core"
@@ -1286,9 +1961,18 @@
     "limitations": "To move while avoiding detection, see Stealth (p. 199).",
     "desc": "While in a heavily shadowed area or out of sight, you can stay still and attempt to foil foes' chances to spot you. Make an INT-Opposed Skill Check. If you're hiding behind an object that is larger than you, roll with Advantage. On Success, you become invisible to Mobs and the HUDs of other crawlers but can still be affected by environmental and Area Attacks. You become visible if you take an Action that affects another creature or if you're no longer behind cover.",
     "upgrades": [
-      { "rank": 5, "text": "You can use this Skill in a dim light without having an object to hide behind." },
-      { "rank": 10, "text": "When other crawlers in your party roll this Skill untrained, they roll as normal (not with Disadvantage)." },
-      { "rank": 15, "text": "You can use this Skill in a lightly shaded area and may make a Step without giving away your position." }
+      {
+        "rank": 5,
+        "text": "You can use this Skill in a dim light without having an object to hide behind."
+      },
+      {
+        "rank": 10,
+        "text": "When other crawlers in your party roll this Skill untrained, they roll as normal (not with Disadvantage)."
+      },
+      {
+        "rank": 15,
+        "text": "You can use this Skill in a lightly shaded area and may make a Step without giving away your position."
+      }
     ],
     "page": 193,
     "source": "Core"
@@ -1301,9 +1985,18 @@
     "interrupt": false,
     "desc": "Use this Skill to manipulate explosive material into bombs and traps without a Sapper's Table. You'll have to make an Explosives Handling Skill Check to avoid issues when crafting your device (use the rules of Crafting, p. 221). On Success, you create the device. Bombs and traps can have timers and triggering devices more sophisticated than a burning fuse.",
     "upgrades": [
-      { "rank": 5, "text": "Your crafting takes half the time." },
-      { "rank": 10, "text": "Your devices deal d10s of damage instead of d6s (the default)." },
-      { "rank": 15, "text": "Your devices can be set to trigger only against a specific Mob, Boss, NPC, or crawler." }
+      {
+        "rank": 5,
+        "text": "Your crafting takes half the time."
+      },
+      {
+        "rank": 10,
+        "text": "Your devices deal d10s of damage instead of d6s (the default)."
+      },
+      {
+        "rank": 15,
+        "text": "Your devices can be set to trigger only against a specific Mob, Boss, NPC, or crawler."
+      }
     ],
     "page": 193,
     "source": "Core"
@@ -1316,9 +2009,18 @@
     "interrupt": false,
     "desc": "For making Attack Skill Checks with incendiary devices (see Throwing, p. 200). Make an Unopposed Skill Check. On Success, you are able to safely handle incendiary devices.",
     "upgrades": [
-      { "rank": 5, "text": "You are able to determine the type, status, and raw materials of incendiary devices you handle." },
-      { "rank": 10, "text": "You are able to craft incendiary devices as if this were a crafting Skill, though you must have incendiary raw materials and a Sapper's Table (see Crafting, p. 221)." },
-      { "rank": 15, "text": "Add a +5 Splash to your crafted device at no additional Difficulty, and your crafting takes half the time." }
+      {
+        "rank": 5,
+        "text": "You are able to determine the type, status, and raw materials of incendiary devices you handle."
+      },
+      {
+        "rank": 10,
+        "text": "You are able to craft incendiary devices as if this were a crafting Skill, though you must have incendiary raw materials and a Sapper's Table (see Crafting, p. 221)."
+      },
+      {
+        "rank": 15,
+        "text": "Add a +5 Splash to your crafted device at no additional Difficulty, and your crafting takes half the time."
+      }
     ],
     "page": 193,
     "source": "Core"
@@ -1332,9 +2034,18 @@
     "limitations": "Requires an Infusion Station attachment on an Alchemy Table or Tier 3 Sapper's Table.",
     "desc": "Use this Skill to infuse potion bonuses onto consumable items. One potion can infuse one item. You'll either need to learn Alchemy to craft your own potions, or find potions to transfer to consumables. Example: Infuse a Hobgoblin Smoke Curtain with an Invisibility potion to create a Hobgoblin Disco Ball (see Crafting, p. 221). On Success, your consumable item now does more.",
     "upgrades": [
-      { "rank": 5, "text": "One potion can infuse 2 items at once." },
-      { "rank": 10, "text": "One potion can infuse 5 items at once." },
-      { "rank": 15, "text": "One potion can infuse 10 items at once." }
+      {
+        "rank": 5,
+        "text": "One potion can infuse 2 items at once."
+      },
+      {
+        "rank": 10,
+        "text": "One potion can infuse 5 items at once."
+      },
+      {
+        "rank": 15,
+        "text": "One potion can infuse 10 items at once."
+      }
     ],
     "page": 194,
     "source": "Core"
@@ -1347,9 +2058,18 @@
     "interrupt": false,
     "desc": "You can use this Skill to scare the wits out of a foe. Make a CHA-Opposed Skill Check. If either side has attacked or taken a hostile stance in this encounter, roll with Disadvantage. On Success, the target gains the Staggered Debuff (p. 97).",
     "upgrades": [
-      { "rank": 5, "text": "On Success or greater, until the end of the next round, the target can only use its remaining Actions to move away from you (though it does not need to use its Step when doing so)." },
-      { "rank": 10, "text": "The target also gains the Woozy Debuff." },
-      { "rank": 15, "text": "The target drops everything they were holding and also gains the Paralyzed Debuff." }
+      {
+        "rank": 5,
+        "text": "On Success or greater, until the end of the next round, the target can only use its remaining Actions to move away from you (though it does not need to use its Step when doing so)."
+      },
+      {
+        "rank": 10,
+        "text": "The target also gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "The target drops everything they were holding and also gains the Paralyzed Debuff."
+      }
     ],
     "page": 194,
     "source": "Core"
@@ -1362,9 +2082,18 @@
     "interrupt": false,
     "desc": "You spend 10 minutes looking at an area or puzzle in front of you and might make heads or tails of it. Make an Unopposed Skill Check. When you take the Look for Clues Action (p. 85), spend only one Action to use this Skill. On Success, you learn something useful.",
     "upgrades": [
-      { "rank": 5, "text": "If you're familiar with the area you are investigating, you can make the Skill Check with Advantage." },
-      { "rank": 10, "text": "Each attempt takes 5 minutes." },
-      { "rank": 15, "text": "Roll with Advantage if you know the parties involved. Example: You know the puzzle's maker, or you know the murder victim and the main suspect." }
+      {
+        "rank": 5,
+        "text": "If you're familiar with the area you are investigating, you can make the Skill Check with Advantage."
+      },
+      {
+        "rank": 10,
+        "text": "Each attempt takes 5 minutes."
+      },
+      {
+        "rank": 15,
+        "text": "Roll with Advantage if you know the parties involved. Example: You know the puzzle's maker, or you know the murder victim and the main suspect."
+      }
     ],
     "page": 194,
     "source": "Core"
@@ -1377,9 +2106,18 @@
     "interrupt": false,
     "desc": "Eat magic items for fun and profit! But beware of cursed items, as they could have negative effects. Make an Unopposed Skill Check. On Success, you eat the item and it is destroyed. On an Amazing Success or better, gain 1 permanent Intelligence.",
     "upgrades": [
-      { "rank": 5, "text": "On a Critical Hit, gain 1 additional permanent Intelligence." },
-      { "rank": 10, "text": "On a Standard Success or better, gain 1 permanent Intelligence. You may eat cursed items with no ill effects." },
-      { "rank": 15, "text": "You choose which Stat is permanently increased." }
+      {
+        "rank": 5,
+        "text": "On a Critical Hit, gain 1 additional permanent Intelligence."
+      },
+      {
+        "rank": 10,
+        "text": "On a Standard Success or better, gain 1 permanent Intelligence. You may eat cursed items with no ill effects."
+      },
+      {
+        "rank": 15,
+        "text": "You choose which Stat is permanently increased."
+      }
     ],
     "page": 194,
     "source": "Core"
@@ -1392,9 +2130,18 @@
     "interrupt": false,
     "desc": "With a running start of at least 10 feet (made as a 10-foot Step with this Action), you leap through the air in an arcing trajectory. Make an Unopposed Skill Check. On Success, you leap a distance in feet up to your Rank + STR with a height of 1ft.",
     "upgrades": [
-      { "rank": 5, "text": "Add your DEX to the height of your Jump." },
-      { "rank": 10, "text": "You gain a +1 Evade Buff." },
-      { "rank": 15, "text": "Your leap distance in feet is Rank + [STR x2]." }
+      {
+        "rank": 5,
+        "text": "Add your DEX to the height of your Jump."
+      },
+      {
+        "rank": 10,
+        "text": "You gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "Your leap distance in feet is Rank + [STR x2]."
+      }
     ],
     "page": 194,
     "source": "Core"
@@ -1407,9 +2154,18 @@
     "interrupt": false,
     "desc": "You are skilled at coordinating two or more separate parties during fights against Bosses. Make an INT-Opposed Skill Check. On Success, the parties have Advantage on their first Attack against the Boss.",
     "upgrades": [
-      { "rank": 5, "text": "You may instead use this Skill during Skill challenges while on a group Quest. Perform a free Call a Play Action, and it extends to each member of the parties during their next non-combat Skill Check." },
-      { "rank": 10, "text": "Instead of Advantage, anyone in the parties may perform a free Move Action." },
-      { "rank": 15, "text": "Instead of Advantage, anyone in the parties may perform a free Evade Action." }
+      {
+        "rank": 5,
+        "text": "You may instead use this Skill during Skill challenges while on a group Quest. Perform a free Call a Play Action, and it extends to each member of the parties during their next non-combat Skill Check."
+      },
+      {
+        "rank": 10,
+        "text": "Instead of Advantage, anyone in the parties may perform a free Move Action."
+      },
+      {
+        "rank": 15,
+        "text": "Instead of Advantage, anyone in the parties may perform a free Evade Action."
+      }
     ],
     "page": 194,
     "source": "Core"
@@ -1423,9 +2179,18 @@
     "limitations": "Usable only by animals.",
     "desc": "With a running start of at least 10 feet (made as a 10ft Step with this Skill), you leap through the air in an arcing trajectory. Make an Unopposed Skill Check. On Success, you leap a distance in feet up to your Rank x2 with a height equal to your DEX x2 in feet.",
     "upgrades": [
-      { "rank": 5, "text": "Your distance is Rank x3 and your height is DEX x3." },
-      { "rank": 10, "text": "You may leap without an arcing trajectory, which allows for 'straight up.'" },
-      { "rank": 15, "text": "Your leap may last up to your Rank in seconds, which resembles gliding." }
+      {
+        "rank": 5,
+        "text": "Your distance is Rank x3 and your height is DEX x3."
+      },
+      {
+        "rank": 10,
+        "text": "You may leap without an arcing trajectory, which allows for 'straight up.'"
+      },
+      {
+        "rank": 15,
+        "text": "Your leap may last up to your Rank in seconds, which resembles gliding."
+      }
     ],
     "page": 195,
     "source": "Core"
@@ -1439,9 +2204,18 @@
     "limitations": "Roll with Disadvantage if you do not have the proper tools, unless it's a crude lock.",
     "desc": "You spend the Floor number in minutes trying to pick the lock. Make an Unopposed Skill Check (more complex locks may have a higher Difficulty, as determined by the GM). If the lock was created by a named antagonist, this could be an INT-Opposed Skill Check instead. On Success, you pick the lock.",
     "upgrades": [
-      { "rank": 5, "text": "You make no noise and leave no trace." },
-      { "rank": 10, "text": "Each attempt takes half the time. You may alter the lock so that the key no longer works." },
-      { "rank": 15, "text": "You don't roll with Disadvantage if you lack the proper tools." }
+      {
+        "rank": 5,
+        "text": "You make no noise and leave no trace."
+      },
+      {
+        "rank": 10,
+        "text": "Each attempt takes half the time. You may alter the lock so that the key no longer works."
+      },
+      {
+        "rank": 15,
+        "text": "You don't roll with Disadvantage if you lack the proper tools."
+      }
     ],
     "page": 195,
     "source": "Core"
@@ -1454,9 +2228,18 @@
     "interrupt": false,
     "desc": "You have studied the goings-on in the Dungeon and have figured out a thing or two. Make an Unopposed Skill Check. On Success, you know a little something about a neighborhood, some of the Mobs, or how to avoid pissing off the locals.",
     "upgrades": [
-      { "rank": 5, "text": "You can identify the major factions in the area." },
-      { "rank": 10, "text": "You are aware of the important local NPCs." },
-      { "rank": 15, "text": "You roll with Advantage on your first Charisma-based Skill Check when encountering an organized group in a neighborhood." }
+      {
+        "rank": 5,
+        "text": "You can identify the major factions in the area."
+      },
+      {
+        "rank": 10,
+        "text": "You are aware of the important local NPCs."
+      },
+      {
+        "rank": 15,
+        "text": "You roll with Advantage on your first Charisma-based Skill Check when encountering an organized group in a neighborhood."
+      }
     ],
     "page": 195,
     "source": "Core"
@@ -1470,9 +2253,18 @@
     "limitations": "Does not work on members of your own party. Some items have a minimum price.",
     "desc": "You spend 5 minutes haggling over the price of items or negotiating to get what you want through compromise. Typically, haggling is done with an NPC merchant; if you haggle with other entities, you do so with Disadvantage. Make an INT-Opposed Skill Check. On Success, you increase or decrease the price 10% in your favor. If you're not haggling, the opponent tentatively agrees to your terms.",
     "upgrades": [
-      { "rank": 5, "text": "Your party members can also buy or sell at your newly-negotiated price." },
-      { "rank": 10, "text": "Increase or decrease the price by an additional 10% in your favor." },
-      { "rank": 15, "text": "Increase or decrease the price by an additional 15% in your favor." }
+      {
+        "rank": 5,
+        "text": "Your party members can also buy or sell at your newly-negotiated price."
+      },
+      {
+        "rank": 10,
+        "text": "Increase or decrease the price by an additional 10% in your favor."
+      },
+      {
+        "rank": 15,
+        "text": "Increase or decrease the price by an additional 15% in your favor."
+      }
     ],
     "page": 195,
     "source": "Core"
@@ -1486,9 +2278,18 @@
     "limitations": "Ranks in this Skill only increase by magical means and training.",
     "desc": "Your HUD map zooms out with a thought, the breadth of which is determined by a multiplier equal to your Rank. Example: Rank 4 means your map covers x4 the standard area (1/4 of a square mile), which makes it extend to 1 mile around you.",
     "upgrades": [
-      { "rank": 5, "text": "You are notified when you are near a saferoom or stairwell." },
-      { "rank": 10, "text": "You can see through your map while it is open in your HUD." },
-      { "rank": 15, "text": "Mobs appear as red dots on your HUD map." }
+      {
+        "rank": 5,
+        "text": "You are notified when you are near a saferoom or stairwell."
+      },
+      {
+        "rank": 10,
+        "text": "You can see through your map while it is open in your HUD."
+      },
+      {
+        "rank": 15,
+        "text": "Mobs appear as red dots on your HUD map."
+      }
     ],
     "page": 195,
     "source": "Core"
@@ -1501,9 +2302,18 @@
     "interrupt": false,
     "desc": "You concentrate your senses to pick out details about your environment that others might miss. Make an Unopposed Skill Check, though the GM will likely adjust the Difficulty based on the lighting, how cluttered the area is, how quickly an event occurs, and other such circumstances. Also use Perception when you take a Look for Clues Action (p. 85). On Success, you notice something. It could be important; it might not be.",
     "upgrades": [
-      { "rank": 5, "text": "Halve the penalty for cluttered areas." },
-      { "rank": 10, "text": "Halve the penalty for how short of a window you have to notice the thing." },
-      { "rank": 15, "text": "Halve the penalty for the range to the thing." }
+      {
+        "rank": 5,
+        "text": "Halve the penalty for cluttered areas."
+      },
+      {
+        "rank": 10,
+        "text": "Halve the penalty for how short of a window you have to notice the thing."
+      },
+      {
+        "rank": 15,
+        "text": "Halve the penalty for the range to the thing."
+      }
     ],
     "page": 196,
     "source": "Core"
@@ -1516,9 +2326,18 @@
     "interrupt": false,
     "desc": "Whether you're acting, dancing, playing an instrument, singing, or delivering slam poetry, use this Skill when you want to electrify an audience. Choose a type of performance to specialize in as your starting type. Make an Unopposed Skill Check to determine the audience reaction. If you are competing against other performers, add the top rival's CHA to the Difficulty. On Success, you command the stage. The audience is entertained.",
     "upgrades": [
-      { "rank": 5, "text": "Choose an additional type of performance to specialize in." },
-      { "rank": 10, "text": "Choose an additional type of performance. You can coach and coordinate others in one of your specialties; after coaching them for at least 1 hour in one of your specialties, they can attempt an unskilled Performance Skill Check without Disadvantage." },
-      { "rank": 15, "text": "Choose an additional type of performance. You can mimic someone else's performance after experiencing it once." }
+      {
+        "rank": 5,
+        "text": "Choose an additional type of performance to specialize in."
+      },
+      {
+        "rank": 10,
+        "text": "Choose an additional type of performance. You can coach and coordinate others in one of your specialties; after coaching them for at least 1 hour in one of your specialties, they can attempt an unskilled Performance Skill Check without Disadvantage."
+      },
+      {
+        "rank": 15,
+        "text": "Choose an additional type of performance. You can mimic someone else's performance after experiencing it once."
+      }
     ],
     "page": 196,
     "source": "Core"
@@ -1531,9 +2350,18 @@
     "interrupt": false,
     "desc": "You have a knack for getting others to see things your way. You typically need about 10 minutes of schmoozing in a safe environment to make a Check with this Skill, and you may suffer Disadvantage if the request is risky, inconvenient, or untoward. Make an INT-Opposed Skill Check. On Success, you convince the target to follow your suggestion if it isn't too costly for them, too dangerous, or against their nature.",
     "upgrades": [
-      { "rank": 5, "text": "They'll follow your suggestion even if it is costly for them." },
-      { "rank": 10, "text": "They'll follow your suggestion even if it is dangerous." },
-      { "rank": 15, "text": "They'll follow your suggestion even if it's against their nature." }
+      {
+        "rank": 5,
+        "text": "They'll follow your suggestion even if it is costly for them."
+      },
+      {
+        "rank": 10,
+        "text": "They'll follow your suggestion even if it is dangerous."
+      },
+      {
+        "rank": 15,
+        "text": "They'll follow your suggestion even if it's against their nature."
+      }
     ],
     "page": 196,
     "source": "Core"
@@ -1546,9 +2374,18 @@
     "interrupt": false,
     "desc": "If your Rank in this Skill is equal to or greater than your CON, you heal 1 Health Bar slot at the start of each round (or every 10 seconds outside of combat). If not, you heal 1 Health Bar slot every other round (or every 20 seconds outside of combat).",
     "upgrades": [
-      { "rank": 5, "text": "After 5 minutes, any Minor Injury Debuff you suffer from ends. After 10 minutes, any Major Injury Debuff you suffer from ends." },
-      { "rank": 10, "text": "After 20 minutes, any Long-Term Minor Injury Debuff you suffer from ends. After 1 hour, any Long-Term Major Injury Debuff you suffer from ends." },
-      { "rank": 15, "text": "The time required to end injury Debuffs is halved." }
+      {
+        "rank": 5,
+        "text": "After 5 minutes, any Minor Injury Debuff you suffer from ends. After 10 minutes, any Major Injury Debuff you suffer from ends."
+      },
+      {
+        "rank": 10,
+        "text": "After 20 minutes, any Long-Term Minor Injury Debuff you suffer from ends. After 1 hour, any Long-Term Major Injury Debuff you suffer from ends."
+      },
+      {
+        "rank": 15,
+        "text": "The time required to end injury Debuffs is halved."
+      }
     ],
     "page": 196,
     "source": "Core"
@@ -1561,9 +2398,18 @@
     "interrupt": false,
     "desc": "You have a knack for understanding gods, their followers, and what makes them tick. Make an Unopposed Skill Check. On Success, you know the basic information about a god and the practices of their followers.",
     "upgrades": [
-      { "rank": 5, "text": "You can identify the followers on sight, even if they're trying to hide their affiliation." },
-      { "rank": 10, "text": "You know how to sow discord among the followers of that religion." },
-      { "rank": 15, "text": "You know strengths and weakness of the gods." }
+      {
+        "rank": 5,
+        "text": "You can identify the followers on sight, even if they're trying to hide their affiliation."
+      },
+      {
+        "rank": 10,
+        "text": "You know how to sow discord among the followers of that religion."
+      },
+      {
+        "rank": 15,
+        "text": "You know strengths and weakness of the gods."
+      }
     ],
     "page": 197,
     "source": "Core"
@@ -1577,9 +2423,18 @@
     "limitations": "For basic repairs to items with no moving parts, magical or not.",
     "desc": "After spending 2 hours, you can repair most simple items that are broken or damaged but not destroyed. Make an Unopposed Skill Check. On Success, you repair the item.",
     "upgrades": [
-      { "rank": 5, "text": "You can make repairs to things with moving parts." },
-      { "rank": 10, "text": "You can make repairs in 1 hour." },
-      { "rank": 15, "text": "You can rebuild a destroyed item." }
+      {
+        "rank": 5,
+        "text": "You can make repairs to things with moving parts."
+      },
+      {
+        "rank": 10,
+        "text": "You can make repairs in 1 hour."
+      },
+      {
+        "rank": 15,
+        "text": "You can rebuild a destroyed item."
+      }
     ],
     "page": 197,
     "source": "Core"
@@ -1593,9 +2448,18 @@
     "limitations": "The rider in control of the mount rolls Attack Skill Checks with Disadvantage.",
     "desc": "While mounted on a living beast, you can ride to the local watering hole without needing to make a Check. But during an action scene, your mount might panic, and you might get tossed for 1d6 bludgeoning for every 10ft Move your mount has, plus its size value. Make an Unopposed Skill Check. On Success, your mount doesn't stumble, and you stay upright.",
     "upgrades": [
-      { "rank": 5, "text": "Your mount has +5ft Move. You no longer suffer Disadvantage when attacking while Riding." },
-      { "rank": 10, "text": "Your mount has an additional +10ft Move. When other crawlers in your party roll this Skill untrained, they roll as normal (not with Disadvantage)." },
-      { "rank": 15, "text": "Your mount has an additional +15ft Move. When performing crazy stunts (like jumping through flames), roll with Advantage." }
+      {
+        "rank": 5,
+        "text": "Your mount has +5ft Move. You no longer suffer Disadvantage when attacking while Riding."
+      },
+      {
+        "rank": 10,
+        "text": "Your mount has an additional +10ft Move. When other crawlers in your party roll this Skill untrained, they roll as normal (not with Disadvantage)."
+      },
+      {
+        "rank": 15,
+        "text": "Your mount has an additional +15ft Move. When performing crazy stunts (like jumping through flames), roll with Advantage."
+      }
     ],
     "page": 197,
     "source": "Core"
@@ -1608,9 +2472,18 @@
     "interrupt": false,
     "desc": "You know a half hitch from a clove hitch, and the qualities of hemp vs. nylon. This knowledge is used to tie people up, climb, and cattle-rustle. Make an Unopposed Skill Check. On Success, you rope the thing with a good knot.",
     "upgrades": [
-      { "rank": 5, "text": "You can now use this Skill as an Attack, at a Range of 10ft vs. the target's Evade. On Success, the target gains the Held Debuff." },
-      { "rank": 10, "text": "You can whip your line in that special way to untie a knot you made and recover your rope." },
-      { "rank": 15, "text": "Your Attack now has a Range of your Strength (min 15). Just make sure your rope is long enough." }
+      {
+        "rank": 5,
+        "text": "You can now use this Skill as an Attack, at a Range of 10ft vs. the target's Evade. On Success, the target gains the Held Debuff."
+      },
+      {
+        "rank": 10,
+        "text": "You can whip your line in that special way to untie a knot you made and recover your rope."
+      },
+      {
+        "rank": 15,
+        "text": "Your Attack now has a Range of your Strength (min 15). Just make sure your rope is long enough."
+      }
     ],
     "page": 197,
     "source": "Core"
@@ -1624,9 +2497,18 @@
     "limitations": "For short bursts of running. For extended runs, use Endurance instead (p. 190).",
     "desc": "If you're racing, chasing, or need to get away from a ticking time bomb, this is the Skill you want (see Racing & Chasing, p. 73). Make an Unopposed Skill Check every minute, not every round. Add 1 to your result for every 10ft of Move you have. On Success, you succeed in the run.",
     "upgrades": [
-      { "rank": 5, "text": "You have a permanent +5ft Move Buff. Make a Check every 2 minutes." },
-      { "rank": 10, "text": "You have an additional permanent +10ft Move Buff. Make a Check every 4 minutes." },
-      { "rank": 15, "text": "You have an additional permanent +15ft Move Buff. Make a Check every 6 minutes." }
+      {
+        "rank": 5,
+        "text": "You have a permanent +5ft Move Buff. Make a Check every 2 minutes."
+      },
+      {
+        "rank": 10,
+        "text": "You have an additional permanent +10ft Move Buff. Make a Check every 4 minutes."
+      },
+      {
+        "rank": 15,
+        "text": "You have an additional permanent +15ft Move Buff. Make a Check every 6 minutes."
+      }
     ],
     "page": 197,
     "source": "Core"
@@ -1640,9 +2522,18 @@
     "limitations": "Salvage cannot be used with explosive devices.",
     "desc": "Salvage is the art of collecting useful items from things you have deconstructed or failed to properly craft (see Crafting, p. 221). Salvaging usually takes 1 hour to accomplish. At the end of that time, make an Unopposed Skill Check. On Success, you recover half of the important raw materials.",
     "upgrades": [
-      { "rank": 5, "text": "Your Salvage Checks take 30 minutes." },
-      { "rank": 10, "text": "On Success, you recover all of the important raw materials." },
-      { "rank": 15, "text": "On a crafting Standard Fail or Near Miss, roll your crafting Check again with Advantage, with an additional 15-minute time expenditure." }
+      {
+        "rank": 5,
+        "text": "Your Salvage Checks take 30 minutes."
+      },
+      {
+        "rank": 10,
+        "text": "On Success, you recover all of the important raw materials."
+      },
+      {
+        "rank": 15,
+        "text": "On a crafting Standard Fail or Near Miss, roll your crafting Check again with Advantage, with an additional 15-minute time expenditure."
+      }
     ],
     "page": 198,
     "source": "Core"
@@ -1656,9 +2547,18 @@
     "limitations": "This Limited Skill can only be learned via a Race, Class, or item.",
     "desc": "You know your way around patches and love collecting them. Make an Unopposed Skill Check. On Success, you are able to identify a patch and its bonus level, if any.",
     "upgrades": [
-      { "rank": 5, "text": "You can sew and iron patches onto clothing using this Skill." },
-      { "rank": 10, "text": "You may use this as a crafting Skill, but crafting tables provide no bonuses. Enchanted patches are limited to one per Gear slot and do not take up Accessory slots (see Crafting, p. 221)." },
-      { "rank": 15, "text": "Your crafting Checks take half the time. Increase the bonus value of your enchantments with this Skill by 1, at no additional Difficulty or time to craft. Example: If you craft a +2 Strength patch, it becomes a +3 Strength patch." }
+      {
+        "rank": 5,
+        "text": "You can sew and iron patches onto clothing using this Skill."
+      },
+      {
+        "rank": 10,
+        "text": "You may use this as a crafting Skill, but crafting tables provide no bonuses. Enchanted patches are limited to one per Gear slot and do not take up Accessory slots (see Crafting, p. 221)."
+      },
+      {
+        "rank": 15,
+        "text": "Your crafting Checks take half the time. Increase the bonus value of your enchantments with this Skill by 1, at no additional Difficulty or time to craft. Example: If you craft a +2 Strength patch, it becomes a +3 Strength patch."
+      }
     ],
     "page": 198,
     "source": "Core"
@@ -1672,9 +2572,18 @@
     "limitations": "Requires you to be wielding a shield. Cannot be used against Area of Effect damage. A successful Shield Block still counts as 'a hit crawler' or 'a crawler who failed to Evade.'",
     "desc": "When you are attacked by a physical Attack, spend one Action to make a separate Shield Block Skill Check vs. the Mob's 'to hit' for each of the Attacks targeting you. If 3 physical Attacks are directed at you, roll this Skill Check 3 times. On Success, take half the damage before applying your DR. Your Shield takes a -1 DR penalty on a Major Fail; -2 on a Critical Fail. It breaks at 0 DR, but a broken shield and lost DR can be Repaired.",
     "upgrades": [
-      { "rank": 5, "text": "You may also use this Skill against Spells and magical damage." },
-      { "rank": 10, "text": "On a Critical Hit, you may make a Shield Bash Attack as a free melee-range Interrupt Attack (instead of Advantage on your next Attack) if you wish, dealing 3d6 base damage + STR Bludgeoning." },
-      { "rank": 15, "text": "+1d6 Shield Bash damage. Further reduce the damage you would take by your STR Mod. Example: After halving 30 damage down to 15, your STR Mod of 5 reduces it to 10 damage." }
+      {
+        "rank": 5,
+        "text": "You may also use this Skill against Spells and magical damage."
+      },
+      {
+        "rank": 10,
+        "text": "On a Critical Hit, you may make a Shield Bash Attack as a free melee-range Interrupt Attack (instead of Advantage on your next Attack) if you wish, dealing 3d6 base damage + STR Bludgeoning."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 Shield Bash damage. Further reduce the damage you would take by your STR Mod. Example: After halving 30 damage down to 15, your STR Mod of 5 reduces it to 10 damage."
+      }
     ],
     "page": 198,
     "source": "Core"
@@ -1688,9 +2597,18 @@
     "limitations": "Items you manipulate must be smaller than the size of your hand. You cannot access others' Inventories or Hotlists.",
     "desc": "You've learned to manipulate small objects without being spotted. Great for shoplifting. Make an INT-Opposed Skill Check. If someone's Perception is a higher Rank than your Sleight of Hand, you have Disadvantage. On Success, you maneuver the item without being noticed.",
     "upgrades": [
-      { "rank": 5, "text": "You may attempt to pick the pockets of NPCs and Mobs." },
-      { "rank": 10, "text": "You may attempt to plant items on someone with pockets or the equivalent." },
-      { "rank": 15, "text": "You may manipulate items up to half your own size (rounded down)." }
+      {
+        "rank": 5,
+        "text": "You may attempt to pick the pockets of NPCs and Mobs."
+      },
+      {
+        "rank": 10,
+        "text": "You may attempt to plant items on someone with pockets or the equivalent."
+      },
+      {
+        "rank": 15,
+        "text": "You may manipulate items up to half your own size (rounded down)."
+      }
     ],
     "page": 198,
     "source": "Core"
@@ -1703,9 +2621,18 @@
     "interrupt": false,
     "desc": "You may craft mundane items such as horseshoes, railroad spikes, nails, or the fun stuff: armor and weapons, but without DR or any bonuses (see Crafting, p. 221).",
     "upgrades": [
-      { "rank": 5, "text": "You may craft items up to a +5 bonus." },
-      { "rank": 10, "text": "You may craft items up to a +10 bonus." },
-      { "rank": 15, "text": "Your crafting with this Skill takes half the time." }
+      {
+        "rank": 5,
+        "text": "You may craft items up to a +5 bonus."
+      },
+      {
+        "rank": 10,
+        "text": "You may craft items up to a +10 bonus."
+      },
+      {
+        "rank": 15,
+        "text": "Your crafting with this Skill takes half the time."
+      }
     ],
     "page": 199,
     "source": "Core"
@@ -1719,9 +2646,18 @@
     "limitations": "You must be out of sight of all foes to begin this Check.",
     "desc": "Use this Skill if you want to move undetected or surprise a Mob. Make an INT-Opposed Skill Check. On Success before combat starts, you are unnoticed and gain 1 non-Attack Action (don't forget to take your 10ft Step). On Success in a non-combat situation, you remain unnoticed and can perform a Move Action with a 10ft Step as part of this Check.",
     "upgrades": [
-      { "rank": 5, "text": "Your surprise Action can be an Attack with Advantage." },
-      { "rank": 10, "text": "When other crawlers in your party roll this Skill untrained, they roll as normal (not with Disadvantage)." },
-      { "rank": 15, "text": "On a successful Surprise Check, you may also take a full Move and Step. If you Attack with your Surprise Action, deal x2 the base damage dice." }
+      {
+        "rank": 5,
+        "text": "Your surprise Action can be an Attack with Advantage."
+      },
+      {
+        "rank": 10,
+        "text": "When other crawlers in your party roll this Skill untrained, they roll as normal (not with Disadvantage)."
+      },
+      {
+        "rank": 15,
+        "text": "On a successful Surprise Check, you may also take a full Move and Step. If you Attack with your Surprise Action, deal x2 the base damage dice."
+      }
     ],
     "page": 199,
     "source": "Core"
@@ -1734,9 +2670,18 @@
     "interrupt": false,
     "desc": "Use this Skill in populated areas to learn or spread rumors, avoid attracting too much attention, gain access to less-than-legal items, and the like. Make an Unopposed Skill Check. On Success, you navigate a town without attracting attention, deal with a criminal network, identify an informal power structure, or gain the information you're seeking.",
     "upgrades": [
-      { "rank": 5, "text": "You also hear an additional rumor, as determined by the GM. Or spread one!" },
-      { "rank": 10, "text": "You also quickly find a hiding place determined by the GM." },
-      { "rank": 15, "text": "You also uncover information that might give you some leverage on an important person in town determined by the GM." }
+      {
+        "rank": 5,
+        "text": "You also hear an additional rumor, as determined by the GM. Or spread one!"
+      },
+      {
+        "rank": 10,
+        "text": "You also quickly find a hiding place determined by the GM."
+      },
+      {
+        "rank": 15,
+        "text": "You also uncover information that might give you some leverage on an important person in town determined by the GM."
+      }
     ],
     "page": 199,
     "source": "Core"
@@ -1749,9 +2694,18 @@
     "interrupt": false,
     "desc": "You know how to survive in dangerous, often remote places for long periods of time with only the meager food and water you can rustle up. When traveling through such areas, make an Unopposed Skill Check. On Success, you survive the perils of the conditions unscathed. On a standard Fail, you suffer the effects of hunger and/or thirst (see p. 76).",
     "upgrades": [
-      { "rank": 5, "text": "You do not suffer additional damage from a Critical Fail." },
-      { "rank": 10, "text": "When other crawlers in your party roll this Skill untrained, they roll as normal (not with Disadvantage)." },
-      { "rank": 15, "text": "You do not suffer additional damage from a Major Fail." }
+      {
+        "rank": 5,
+        "text": "You do not suffer additional damage from a Critical Fail."
+      },
+      {
+        "rank": 10,
+        "text": "When other crawlers in your party roll this Skill untrained, they roll as normal (not with Disadvantage)."
+      },
+      {
+        "rank": 15,
+        "text": "You do not suffer additional damage from a Major Fail."
+      }
     ],
     "page": 199,
     "source": "Core"
@@ -1765,9 +2719,18 @@
     "limitations": "After 1 minute of Swimming (Success or Fail) or immediately on a Major Fail or worse, gain the Fatigued Debuff.",
     "desc": "Use this Skill when there are consequences for not swimming strongly or well rather than when you're taking a casual swim, such as racing for your life or swimming against a strong current. Make an Unopposed Skill Check every 30 seconds. On Success, you swim well despite the danger. For swimming during combat, see Special Forms of Movement, p. 70.",
     "upgrades": [
-      { "rank": 5, "text": "After 2 minutes of Swimming (Success or Fail), gain the Fatigued Debuff." },
-      { "rank": 10, "text": "You can swim at your full Move rate as an Action, but you still can't take a 10ft Step." },
-      { "rank": 15, "text": "Make this Check every 5 minutes, and only gain the Fatigue Debuff on a Critical Fail." }
+      {
+        "rank": 5,
+        "text": "After 2 minutes of Swimming (Success or Fail), gain the Fatigued Debuff."
+      },
+      {
+        "rank": 10,
+        "text": "You can swim at your full Move rate as an Action, but you still can't take a 10ft Step."
+      },
+      {
+        "rank": 15,
+        "text": "Make this Check every 5 minutes, and only gain the Fatigue Debuff on a Critical Fail."
+      }
     ],
     "page": 199,
     "source": "Core"
@@ -1781,9 +2744,18 @@
     "limitations": "A crawler may attempt this Skill Check only once per combat.",
     "desc": "Your tactical mind and directions can spur your allies to victory. Choose one of the following combat disciplines: Attack, Damage, or Evade, and then make an Unopposed Skill Check. On Success, you and each member of your party gain a +1 bonus to Checks for the chosen discipline. Increase the bonus by +1 for each higher degree of Success.",
     "upgrades": [
-      { "rank": 5, "text": "If you observe the foes and battlefield for at least 5 minutes prior to combat, roll this Skill Check with Advantage." },
-      { "rank": 10, "text": "After using this Skill during a combat, you roll 2d10 when you Call a Play (still choose one die)." },
-      { "rank": 15, "text": "The bonus applies to all three combat disciplines instead of just one." }
+      {
+        "rank": 5,
+        "text": "If you observe the foes and battlefield for at least 5 minutes prior to combat, roll this Skill Check with Advantage."
+      },
+      {
+        "rank": 10,
+        "text": "After using this Skill during a combat, you roll 2d10 when you Call a Play (still choose one die)."
+      },
+      {
+        "rank": 15,
+        "text": "The bonus applies to all three combat disciplines instead of just one."
+      }
     ],
     "page": 200,
     "source": "Core"
@@ -1796,9 +2768,18 @@
     "interrupt": false,
     "desc": "Used to stick and poke ink under someone's skin to create a mundane tattoo. See Crafting, p. 221 for magical tattoos.",
     "upgrades": [
-      { "rank": 5, "text": "You may craft tattoos with up to a +5 bonus." },
-      { "rank": 10, "text": "You may craft tattoos with up to a +10 bonus." },
-      { "rank": 15, "text": "Your crafting with this Skill takes half the time." }
+      {
+        "rank": 5,
+        "text": "You may craft tattoos with up to a +5 bonus."
+      },
+      {
+        "rank": 10,
+        "text": "You may craft tattoos with up to a +10 bonus."
+      },
+      {
+        "rank": 15,
+        "text": "Your crafting with this Skill takes half the time."
+      }
     ],
     "page": 200,
     "source": "Core"
@@ -1811,9 +2792,18 @@
     "interrupt": true,
     "desc": "With a shout, some choice words, and maybe an obscene hand gesture, you attempt to draw the ire of enemies within 30 feet of you. After seeing where the Mob Attacks are headed, make an INT-Opposed Skill Check. On Success, Taunt one Attack of your choosing away from any target of your choosing and onto you. Higher degrees of Success allow you to Taunt additional Attacks onto you.",
     "upgrades": [
-      { "rank": 5, "text": "You may make a free Evade Check against each Taunted Attack (roll separately vs. each Attack as usual). Then you may still spend an Action to Evade other Attacks and reroll any Fails from your free Evades." },
-      { "rank": 10, "text": "You can affect Mobs within 60 feet." },
-      { "rank": 15, "text": "Your free Evade Checks against Taunted Attacks are made with Advantage." }
+      {
+        "rank": 5,
+        "text": "You may make a free Evade Check against each Taunted Attack (roll separately vs. each Attack as usual). Then you may still spend an Action to Evade other Attacks and reroll any Fails from your free Evades."
+      },
+      {
+        "rank": 10,
+        "text": "You can affect Mobs within 60 feet."
+      },
+      {
+        "rank": 15,
+        "text": "Your free Evade Checks against Taunted Attacks are made with Advantage."
+      }
     ],
     "page": 200,
     "source": "Core"
@@ -1826,9 +2816,18 @@
     "interrupt": false,
     "desc": "This Skill is used for passing the pigskin or throwing dynamite. You can Throw an object that weighs up to your STR in pounds at a distance of up to your STR x10 feet. To Throw a heavier or bulkier item (up to the GM's discretion), you do so with Disadvantage. To hit a target area, make an Unopposed Skill Check. To hit a foe with an object, make an Attack Skill Check vs. the target's Evade. On Success, you hit the target. On Fail, roll 1d8 for direction (see Figure 3); the amount the Skill Check missed by is the distance away in feet it lands.",
     "upgrades": [
-      { "rank": 5, "text": "You have Advantage when Throwing to a target who wants to catch what you are selling." },
-      { "rank": 10, "text": "Choose the direction on a miss, rather than roll." },
-      { "rank": 15, "text": "Your Throw range is your STR x20 feet." }
+      {
+        "rank": 5,
+        "text": "You have Advantage when Throwing to a target who wants to catch what you are selling."
+      },
+      {
+        "rank": 10,
+        "text": "Choose the direction on a miss, rather than roll."
+      },
+      {
+        "rank": 15,
+        "text": "Your Throw range is your STR x20 feet."
+      }
     ],
     "page": 200,
     "source": "Core"
@@ -1841,9 +2840,18 @@
     "interrupt": false,
     "desc": "Use this Skill to find and follow tracks. When searching for or attempting to follow tracks, make an Unopposed Skill Check. Factors such as how long ago the tracks were made, the ground conditions, and whether other tracks or marks obscure them may influence the Difficulty. Once you find tracks, you must make another Tracking Check every 15 minutes to continue following them. On Success, you either find the tracks or continue following them.",
     "upgrades": [
-      { "rank": 5, "text": "You can follow found tracks for 30 minutes before making a new Check, and gain 1 piece of information about the target(s)." },
-      { "rank": 10, "text": "You can follow found tracks for 1 hour before making a new Check, and gain 2 pieces of information about the target(s)." },
-      { "rank": 15, "text": "You can follow found tracks for 2 hours before making a new Check, and gain 4 pieces of information about the target(s)." }
+      {
+        "rank": 5,
+        "text": "You can follow found tracks for 30 minutes before making a new Check, and gain 1 piece of information about the target(s)."
+      },
+      {
+        "rank": 10,
+        "text": "You can follow found tracks for 1 hour before making a new Check, and gain 2 pieces of information about the target(s)."
+      },
+      {
+        "rank": 15,
+        "text": "You can follow found tracks for 2 hours before making a new Check, and gain 4 pieces of information about the target(s)."
+      }
     ],
     "page": 201,
     "source": "Core"
@@ -1856,9 +2864,18 @@
     "interrupt": false,
     "desc": "Used to craft traps via a Sapper's Table with a Trap Module (3,000 gold). See Crafting, p. 221.",
     "upgrades": [
-      { "rank": 5, "text": "Roll with Advantage when making non-explosive traps." },
-      { "rank": 10, "text": "Your traps can be set to trigger only against a specific Mob, Boss, NPC, or crawler." },
-      { "rank": 15, "text": "Add a +5 Splash to your trap at no additional Difficulty, and your crafting takes half the time." }
+      {
+        "rank": 5,
+        "text": "Roll with Advantage when making non-explosive traps."
+      },
+      {
+        "rank": 10,
+        "text": "Your traps can be set to trigger only against a specific Mob, Boss, NPC, or crawler."
+      },
+      {
+        "rank": 15,
+        "text": "Add a +5 Splash to your trap at no additional Difficulty, and your crafting takes half the time."
+      }
     ],
     "page": 201,
     "source": "Core"
@@ -1872,11 +2889,2585 @@
     "limitations": "You must be wielding a Reach weapon.",
     "desc": "Once per round, when an enemy enters a space adjacent to you for the first time, you may perform an Interrupt Attack against them at a cost of one Action. Make the Attack with Disadvantage.",
     "upgrades": [
-      { "rank": 5, "text": "Your Attack is no longer made with Disadvantage." },
-      { "rank": 10, "text": "The target is pushed 5 feet." },
-      { "rank": 15, "text": "Make your Attack Skill Check with Advantage." }
+      {
+        "rank": 5,
+        "text": "Your Attack is no longer made with Disadvantage."
+      },
+      {
+        "rank": 10,
+        "text": "The target is pushed 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "Make your Attack Skill Check with Advantage."
+      }
     ],
     "page": 201,
     "source": "Core"
+  },
+  {
+    "name": "Shortsword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed shortsword wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Scimitar",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed scimitar wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Mace",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed mace wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Hand Axe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed hand axe wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Sickle",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed sickle wielded in melee. Base Damage is 1d4 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Cutlass",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed cutlass wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "War Pick",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed war pick wielded in melee. Base Damage is 1d6 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Flail",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed flail wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Combat Knife",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed combat knife wielded in melee. Base Damage is 1d4 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Machete",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed machete wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Baseball Bat",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed baseball bat wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Crowbar",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed crowbar wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Brass Knuckles",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Hand-to-Hand",
+    "damage": "1d4",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Cannot choose a Damage Effect.",
+    "desc": "A one-handed brass knuckles wielded in melee. Base Damage is 1d4 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+2d4 base damage"
+      }
+    ],
+    "page": 179,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Frying Pan",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed frying pan wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Tire Iron",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed tire iron wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Nightstick",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed nightstick wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Katana",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed katana wielded in melee. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Cattle Prod",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Lightning",
+    "range": "Melee",
+    "desc": "A one-handed cattle prod wielded in melee. Base Damage is 1d6 + STR Lightning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Shocked Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Fire Poker",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed fire poker wielded in melee. Base Damage is 1d6 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Broken Bottle",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed broken bottle wielded in melee. Base Damage is 1d4 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Vibroblade",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed vibroblade wielded in melee. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Energy Sword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "Melee",
+    "desc": "A one-handed energy sword wielded in melee. Base Damage is 1d8 + STR Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Rubber Chicken",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Hand-to-Hand",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed rubber chicken wielded in melee. Base Damage is 1d2 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+2d2 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and you may make an extra free Attack with Disadvantage."
+      }
+    ],
+    "page": 179,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Foam Sword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Hand-to-Hand",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed foam sword wielded in melee. Base Damage is 1d2 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+2d2 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and you may make an extra free Attack with Disadvantage."
+      }
+    ],
+    "page": 179,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Falchion",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed falchion wielded in melee. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Kukri",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed kukri wielded in melee. Base Damage is 1d4 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Morningstar",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed morningstar wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Cudgel",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed cudgel wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Whip",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d4",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "desc": "A two-handed whip with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d4 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and you may slide the target 5 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and on a Success or better you may disarm the target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and the target gains the Take Down Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Estoc",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed estoc wielded in melee. Base Damage is 1d6 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Hatchet",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed hatchet wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Switchblade",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d4",
+    "damageType": "Piercing",
+    "range": "Melee",
+    "desc": "A one-handed switchblade wielded in melee. Base Damage is 1d4 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you can throw this weapon (using this Skill) up to a range of Rank x 5 feet."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and Attacks targeting the back of a foe deal x2 damage."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Meat Cleaver",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "desc": "A one-handed meat cleaver wielded in melee. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you may make an extra free Attack with Disadvantage against another foe adjacent to both you and the original target."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and on an Amazing Success or better, sever an arm (or similar) of your foe (which disarms anyone with a two-handed weapon)."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Golf Club",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed golf club wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Hockey Stick",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed hockey stick wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Lead Pipe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "desc": "A one-handed lead pipe wielded in melee. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and the target gains the Woozy Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and if the target loses at least 3 Health Bar slots, they gain the Take Down Debuff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Lightsaber",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Edged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "Melee",
+    "desc": "A one-handed lightsaber wielded in melee. Base Damage is 1d8 + STR Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Greatsword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed greatsword wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Battleaxe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed battleaxe wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Greataxe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed greataxe wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Halberd",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed halberd with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Spear",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed spear with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pike",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d12",
+    "damageType": "Piercing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed pike with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d12 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d12 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d12 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d12 base damage, and deal double damage to a target that Moved toward you this turn."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Maul",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed maul wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Sledgehammer",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed sledgehammer wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Fire Axe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed fire axe wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Chainsaw",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed chainsaw wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pool Cue",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed pool cue with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pipe Wrench",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed pipe wrench wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Shovel",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed shovel wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Buster Sword",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed buster sword wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Giant Foam Finger",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed giant foam finger with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pool Noodle",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed pool noodle with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Zweihander",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Slashing",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed zweihander wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Glaive",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed glaive with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "War Scythe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Slashing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed war scythe with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Bo Staff",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed bo staff with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Trident",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed trident with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Lucerne Hammer",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d8",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed lucerne hammer with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d8 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and +1 Rank in the Zone of Control Skill."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Weed Whacker",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Slashing",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed weed whacker with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Slashing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Jackhammer",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed jackhammer wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Push Broom",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Reach",
+    "damage": "1d6",
+    "damageType": "Bludgeoning",
+    "range": "Reach (10 ft)",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A two-handed push broom with reach. Requires two hands to wield. Range 10 feet. Base Damage is 1d6 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and you gain a +1 Evade Buff."
+      }
+    ],
+    "page": 183,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Metal Pipe",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed metal pipe wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Power Loader",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Bashing",
+    "damage": "1d10",
+    "damageType": "Bludgeoning",
+    "range": "Melee",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A heavy two-handed power loader wielded in melee. Requires two hands to wield. Base Damage is 1d10 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target (of your size or smaller) is pushed 15 feet."
+      }
+    ],
+    "page": 178,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Shortbow",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "60 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition.",
+    "desc": "A ranged shortbow. Range 60 ft. Each Attack requires proper ammunition. Base Damage is 1d6 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and the target gains the Blood Trail Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Longbow",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition.",
+    "desc": "A ranged longbow. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d6 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and the target gains the Blood Trail Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Sling",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "30 ft",
+    "desc": "A ranged sling. Range 30 ft. Base Damage is 1d2 + DEX Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d2 base damage, and its range increases by your Strength score in feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Throwing Knives",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d4",
+    "damageType": "Piercing",
+    "range": "30 ft",
+    "desc": "A thrown throwing knives. Range 30 ft. Base Damage is 1d4 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and the range is 40 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Blowgun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d4",
+    "damageType": "Piercing",
+    "range": "30 ft",
+    "desc": "A ranged blowgun. Range 30 ft. Base Damage is 1d4 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and the range is 40 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pistol",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged pistol. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Revolver",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged revolver. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Hunting Rifle",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d10",
+    "damageType": "Piercing",
+    "range": "200 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged hunting rifle. Range 200 ft. Each Attack requires proper ammunition. Base Damage is 1d10 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the target gains the Blood Trail Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Submachine Gun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged submachine gun. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Nail Gun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "30 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged nail gun. Range 30 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Taser",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d4",
+    "damageType": "Lightning",
+    "range": "15 ft",
+    "desc": "A ranged taser. Range 15 ft. Base Damage is 1d4 + DEX Lightning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and the target gains the Shocked Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and the target gains the Shocked Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Flare Gun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "100 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged flare gun. Range 100 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Burned Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Blaster",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged blaster. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Burned Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Ray Gun",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged ray gun. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Burned Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Nerf Blaster",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "30 ft",
+    "limitations": "Requires two hands to wield.",
+    "desc": "A ranged nerf blaster. Range 30 ft. Base Damage is 1d2 + DEX Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d2 base damage, and its range increases by your Strength score in feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Boomerang",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d4",
+    "damageType": "Bludgeoning",
+    "range": "40 ft",
+    "desc": "A thrown boomerang. Range 40 ft. Base Damage is 1d4 + DEX Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d4 base damage, and the range is 40 feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      },
+      {
+        "rank": 15,
+        "text": "+1d4 base damage, and you may make an extra free attack with Disadvantage."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Heavy Crossbow",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d10",
+    "damageType": "Piercing",
+    "range": "60 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged heavy crossbow. Range 60 ft. Each Attack requires proper ammunition. Base Damage is 1d10 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage, and the target gains the Blood Trail Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and the range is doubled."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Recurve Bow",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d6",
+    "damageType": "Piercing",
+    "range": "100 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition.",
+    "desc": "A ranged recurve bow. Range 100 ft. Each Attack requires proper ammunition. Base Damage is 1d6 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d6 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d6 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d6 base damage, and the target gains the Blood Trail Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Bolas",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d2",
+    "damageType": "Bludgeoning",
+    "range": "30 ft",
+    "desc": "A thrown bolas. Range 30 ft. Base Damage is 1d2 + DEX Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d2 base damage, and its range increases by your Strength score in feet."
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage, and add 1 Rank damage die."
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and the target gains the Take Down Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Throwing Hammer",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Bludgeoning",
+    "range": "40 ft",
+    "desc": "A thrown throwing hammer. Range 40 ft. Base Damage is 1d8 + STR Bludgeoning.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and this attack deals Armor-Piercing damage (ignores DR)."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and its range increases by your Strength score in feet."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Sniper Rifle",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d10",
+    "damageType": "Piercing",
+    "range": "300 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged sniper rifle. Range 300 ft. Each Attack requires proper ammunition. Base Damage is 1d10 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, and this Attack deals Armor-Piercing damage (ignores DR)."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Machine Pistol",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Piercing",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged machine pistol. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Piercing.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Staggered Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Molotov Cocktail",
+    "category": "attack",
+    "stat": "STR",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Fire",
+    "range": "30 ft",
+    "desc": "A thrown molotov cocktail. Range 30 ft. Base Damage is 1d8 + STR Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage, and the target gains the Burned Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and its range increases by your Strength score in feet."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Pepper Spray",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d2",
+    "damageType": "Poison",
+    "range": "15 ft",
+    "desc": "A ranged pepper spray. Range 15 ft. Base Damage is 1d2 + DEX Poison.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d2 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d2 base damage, and the target gains the Blinded Debuff."
+      },
+      {
+        "rank": 15,
+        "text": "+1d2 base damage, and the target gains the Blinded Debuff."
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Plasma Rifle",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d10",
+    "damageType": "Fire",
+    "range": "150 ft",
+    "limitations": "Requires two hands to wield. Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged plasma rifle. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d10 + DEX Fire.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d10 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d10 base damage, +5ft Splash"
+      }
+    ],
+    "page": 182,
+    "source": "Homebrew"
+  },
+  {
+    "name": "Freeze Ray",
+    "category": "attack",
+    "stat": "DEX",
+    "passive": false,
+    "interrupt": false,
+    "group": "Ranged",
+    "damage": "1d8",
+    "damageType": "Cold",
+    "range": "150 ft",
+    "limitations": "Each Attack requires proper ammunition. Spend one Action to reload after a Major Fail or worse.",
+    "desc": "A ranged freeze ray. Range 150 ft. Each Attack requires proper ammunition. Base Damage is 1d8 + DEX Cold.",
+    "upgrades": [
+      {
+        "rank": 5,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 10,
+        "text": "+1d8 base damage"
+      },
+      {
+        "rank": 15,
+        "text": "+1d8 base damage, and the target gains the Stiff Legs Debuff."
+      }
+    ],
+    "page": 181,
+    "source": "Homebrew"
   }
 ]

@@ -1,0 +1,122 @@
+<title>Weapon Skill Mapping</title>
+<style>
+:root{--bg:#faf8f3;--panel:#fff;--border:#d8d2c4;--text:#1c1a15;--muted:#6b6656;--gold:#9a7b12;--accent:#7a4a1a}
+:root:not([data-theme="light"]){ @media (prefers-color-scheme: dark){ :root{} } }
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0f0f10;--panel:#161618;--border:#2b2b30;--text:#ece9e1;--muted:#9a958a;--gold:#d8b23a;--accent:#e0a060}}
+:root[data-theme="dark"]{--bg:#0f0f10;--panel:#161618;--border:#2b2b30;--text:#ece9e1;--muted:#9a958a;--gold:#d8b23a;--accent:#e0a060}
+body{background:var(--bg);color:var(--text);font:14px/1.5 ui-sans-serif,system-ui,sans-serif;margin:0;padding:24px;max-width:900px}
+h1{font-size:22px;margin:0 0 4px} .sub{color:var(--muted);margin:0 0 20px}
+h2{font-size:16px;margin:26px 0 8px;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:4px}
+h2 .n{color:var(--muted);font-weight:400;font-size:13px}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;font-size:13px}
+th{text-align:left;padding:7px 10px;background:color-mix(in srgb,var(--panel) 80%,var(--border));color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+td{padding:6px 10px;border-top:1px solid var(--border)}
+.w{font-weight:600} .c{color:var(--accent)}
+.dt{font-weight:600}
+.dt-Slashing{color:#c0632a}.dt-Piercing{color:#3a8ac0}.dt-Bludgeoning{color:#8a7a3a}
+.dt-Fire{color:#d0402a}.dt-Cold{color:#3ab0c8}.dt-Lightning{color:#b060d0}.dt-Poison{color:#4aa838}
+.tot{color:var(--muted);font-size:13px;margin-top:20px}
+</style>
+<h1>Weapon → Skill Mapping <span style="color:var(--muted);font-weight:400;font-size:15px">(90 weapons)</span></h1>
+<p class="sub">Each weapon gets a new attack skill cloned from the "Clones" archetype, reskinned to the name, damage type, and die below. Review and tell me any rows to change — then I'll generate the skills (source: Homebrew).</p>
+<h2>One-handed melee <span class="n">37</span></h2>
+<table><thead><tr><th>Weapon</th><th>Clones</th><th>Stat</th><th>Group</th><th>Damage</th><th>Type</th><th>Range</th></tr></thead><tbody>
+<tr><td class="w">Shortsword</td><td class="c">Axe</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Scimitar</td><td class="c">Axe</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Mace</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Hand Axe</td><td class="c">Axe</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Sickle</td><td class="c">Dagger</td><td>STR</td><td>Edged</td><td>1d4+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Cutlass</td><td class="c">Axe</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">War Pick</td><td class="c">Rapier</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Piercing">Piercing</td><td>Melee</td></tr>
+<tr><td class="w">Flail</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Combat Knife</td><td class="c">Dagger</td><td>STR</td><td>Edged</td><td>1d4+STR</td><td class="dt dt-Piercing">Piercing</td><td>Melee</td></tr>
+<tr><td class="w">Machete</td><td class="c">Axe</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Baseball Bat</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Crowbar</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Brass Knuckles</td><td class="c">Unarmed Combat</td><td>STR</td><td>Hand-to-Hand</td><td>1d4+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Frying Pan</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Tire Iron</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Nightstick</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Katana</td><td class="c">Longsword</td><td>STR</td><td>Edged</td><td>1d8+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Cattle Prod</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Lightning">Lightning</td><td>Melee</td></tr>
+<tr><td class="w">Fire Poker</td><td class="c">Rapier</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Piercing">Piercing</td><td>Melee</td></tr>
+<tr><td class="w">Broken Bottle</td><td class="c">Dagger</td><td>STR</td><td>Edged</td><td>1d4+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Vibroblade</td><td class="c">Longsword</td><td>STR</td><td>Edged</td><td>1d8+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Energy Sword</td><td class="c">Longsword</td><td>STR</td><td>Edged</td><td>1d8+STR</td><td class="dt dt-Fire">Fire</td><td>Melee</td></tr>
+<tr><td class="w">Rubber Chicken</td><td class="c">Pugilism</td><td>STR</td><td>Hand-to-Hand</td><td>1d2+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Foam Sword</td><td class="c">Pugilism</td><td>STR</td><td>Hand-to-Hand</td><td>1d2+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Falchion</td><td class="c">Longsword</td><td>STR</td><td>Edged</td><td>1d8+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Kukri</td><td class="c">Dagger</td><td>STR</td><td>Edged</td><td>1d4+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Morningstar</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Cudgel</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Whip</td><td class="c">Herding Weapons</td><td>STR</td><td>Reach</td><td>1d4+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Estoc</td><td class="c">Rapier</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Piercing">Piercing</td><td>Melee</td></tr>
+<tr><td class="w">Hatchet</td><td class="c">Axe</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Switchblade</td><td class="c">Dagger</td><td>STR</td><td>Edged</td><td>1d4+STR</td><td class="dt dt-Piercing">Piercing</td><td>Melee</td></tr>
+<tr><td class="w">Meat Cleaver</td><td class="c">Axe</td><td>STR</td><td>Edged</td><td>1d6+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Golf Club</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Hockey Stick</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Lead Pipe</td><td class="c">Club</td><td>STR</td><td>Bashing</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Lightsaber</td><td class="c">Longsword</td><td>STR</td><td>Edged</td><td>1d8+STR</td><td class="dt dt-Fire">Fire</td><td>Melee</td></tr>
+</tbody></table>
+<h2>Two-handed melee <span class="n">27</span></h2>
+<table><thead><tr><th>Weapon</th><th>Clones</th><th>Stat</th><th>Group</th><th>Damage</th><th>Type</th><th>Range</th></tr></thead><tbody>
+<tr><td class="w">Greatsword</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Battleaxe</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Greataxe</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Halberd</td><td class="c">Polearm</td><td>STR</td><td>Reach</td><td>1d8+STR</td><td class="dt dt-Slashing">Slashing</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Spear</td><td class="c">Polearm</td><td>STR</td><td>Reach</td><td>1d8+STR</td><td class="dt dt-Piercing">Piercing</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Pike</td><td class="c">Lance</td><td>STR</td><td>Reach</td><td>1d12+STR</td><td class="dt dt-Piercing">Piercing</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Maul</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Sledgehammer</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Fire Axe</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Chainsaw</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Pool Cue</td><td class="c">Quarterstaff</td><td>STR</td><td>Reach</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Pipe Wrench</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Shovel</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Buster Sword</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Giant Foam Finger</td><td class="c">Quarterstaff</td><td>STR</td><td>Reach</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Pool Noodle</td><td class="c">Quarterstaff</td><td>STR</td><td>Reach</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Zweihander</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Slashing">Slashing</td><td>Melee</td></tr>
+<tr><td class="w">Glaive</td><td class="c">Polearm</td><td>STR</td><td>Reach</td><td>1d8+STR</td><td class="dt dt-Slashing">Slashing</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">War Scythe</td><td class="c">Polearm</td><td>STR</td><td>Reach</td><td>1d8+STR</td><td class="dt dt-Slashing">Slashing</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Bo Staff</td><td class="c">Quarterstaff</td><td>STR</td><td>Reach</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Trident</td><td class="c">Polearm</td><td>STR</td><td>Reach</td><td>1d8+STR</td><td class="dt dt-Piercing">Piercing</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Lucerne Hammer</td><td class="c">Polearm</td><td>STR</td><td>Reach</td><td>1d8+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Weed Whacker</td><td class="c">Quarterstaff</td><td>STR</td><td>Reach</td><td>1d6+STR</td><td class="dt dt-Slashing">Slashing</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Jackhammer</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Push Broom</td><td class="c">Quarterstaff</td><td>STR</td><td>Reach</td><td>1d6+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Reach (10 ft)</td></tr>
+<tr><td class="w">Metal Pipe</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+<tr><td class="w">Power Loader</td><td class="c">Warhammer</td><td>STR</td><td>Bashing</td><td>1d10+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>Melee</td></tr>
+</tbody></table>
+<h2>Ranged <span class="n">26</span></h2>
+<table><thead><tr><th>Weapon</th><th>Clones</th><th>Stat</th><th>Group</th><th>Damage</th><th>Type</th><th>Range</th></tr></thead><tbody>
+<tr><td class="w">Shortbow</td><td class="c">Bow</td><td>DEX</td><td>Ranged</td><td>1d6+DEX</td><td class="dt dt-Piercing">Piercing</td><td>60 ft</td></tr>
+<tr><td class="w">Longbow</td><td class="c">Bow</td><td>DEX</td><td>Ranged</td><td>1d6+DEX</td><td class="dt dt-Piercing">Piercing</td><td>150 ft</td></tr>
+<tr><td class="w">Sling</td><td class="c">Slingshot</td><td>DEX</td><td>Ranged</td><td>1d2+DEX</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>30 ft</td></tr>
+<tr><td class="w">Throwing Knives</td><td class="c">Shuriken</td><td>DEX</td><td>Ranged</td><td>1d4+DEX</td><td class="dt dt-Piercing">Piercing</td><td>30 ft</td></tr>
+<tr><td class="w">Blowgun</td><td class="c">Shuriken</td><td>DEX</td><td>Ranged</td><td>1d4+DEX</td><td class="dt dt-Piercing">Piercing</td><td>30 ft</td></tr>
+<tr><td class="w">Pistol</td><td class="c">Handgun</td><td>DEX</td><td>Ranged</td><td>1d8+DEX</td><td class="dt dt-Piercing">Piercing</td><td>150 ft</td></tr>
+<tr><td class="w">Revolver</td><td class="c">Handgun</td><td>DEX</td><td>Ranged</td><td>1d8+DEX</td><td class="dt dt-Piercing">Piercing</td><td>150 ft</td></tr>
+<tr><td class="w">Hunting Rifle</td><td class="c">Shotgun</td><td>DEX</td><td>Ranged</td><td>1d10+DEX</td><td class="dt dt-Piercing">Piercing</td><td>200 ft</td></tr>
+<tr><td class="w">Submachine Gun</td><td class="c">Handgun</td><td>DEX</td><td>Ranged</td><td>1d8+DEX</td><td class="dt dt-Piercing">Piercing</td><td>150 ft</td></tr>
+<tr><td class="w">Nail Gun</td><td class="c">Handgun</td><td>DEX</td><td>Ranged</td><td>1d8+DEX</td><td class="dt dt-Piercing">Piercing</td><td>30 ft</td></tr>
+<tr><td class="w">Taser</td><td class="c">Shuriken</td><td>DEX</td><td>Ranged</td><td>1d4+DEX</td><td class="dt dt-Lightning">Lightning</td><td>15 ft</td></tr>
+<tr><td class="w">Flare Gun</td><td class="c">Handgun</td><td>DEX</td><td>Ranged</td><td>1d8+DEX</td><td class="dt dt-Fire">Fire</td><td>100 ft</td></tr>
+<tr><td class="w">Blaster</td><td class="c">Handgun</td><td>DEX</td><td>Ranged</td><td>1d8+DEX</td><td class="dt dt-Fire">Fire</td><td>150 ft</td></tr>
+<tr><td class="w">Ray Gun</td><td class="c">Handgun</td><td>DEX</td><td>Ranged</td><td>1d8+DEX</td><td class="dt dt-Fire">Fire</td><td>150 ft</td></tr>
+<tr><td class="w">Nerf Blaster</td><td class="c">Slingshot</td><td>DEX</td><td>Ranged</td><td>1d2+DEX</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>30 ft</td></tr>
+<tr><td class="w">Boomerang</td><td class="c">Shuriken</td><td>DEX</td><td>Ranged</td><td>1d4+DEX</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>40 ft</td></tr>
+<tr><td class="w">Heavy Crossbow</td><td class="c">Shotgun</td><td>DEX</td><td>Ranged</td><td>1d10+DEX</td><td class="dt dt-Piercing">Piercing</td><td>60 ft</td></tr>
+<tr><td class="w">Recurve Bow</td><td class="c">Bow</td><td>DEX</td><td>Ranged</td><td>1d6+DEX</td><td class="dt dt-Piercing">Piercing</td><td>100 ft</td></tr>
+<tr><td class="w">Bolas</td><td class="c">Slingshot</td><td>DEX</td><td>Ranged</td><td>1d2+DEX</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>30 ft</td></tr>
+<tr><td class="w">Throwing Hammer</td><td class="c">Javelin</td><td>STR</td><td>Ranged</td><td>1d8+STR</td><td class="dt dt-Bludgeoning">Bludgeoning</td><td>40 ft</td></tr>
+<tr><td class="w">Sniper Rifle</td><td class="c">Shotgun</td><td>DEX</td><td>Ranged</td><td>1d10+DEX</td><td class="dt dt-Piercing">Piercing</td><td>300 ft</td></tr>
+<tr><td class="w">Machine Pistol</td><td class="c">Handgun</td><td>DEX</td><td>Ranged</td><td>1d8+DEX</td><td class="dt dt-Piercing">Piercing</td><td>150 ft</td></tr>
+<tr><td class="w">Molotov Cocktail</td><td class="c">Javelin</td><td>STR</td><td>Ranged</td><td>1d8+STR</td><td class="dt dt-Fire">Fire</td><td>30 ft</td></tr>
+<tr><td class="w">Pepper Spray</td><td class="c">Slingshot</td><td>DEX</td><td>Ranged</td><td>1d2+DEX</td><td class="dt dt-Poison">Poison</td><td>15 ft</td></tr>
+<tr><td class="w">Plasma Rifle</td><td class="c">Shotgun</td><td>DEX</td><td>Ranged</td><td>1d10+DEX</td><td class="dt dt-Fire">Fire</td><td>150 ft</td></tr>
+<tr><td class="w">Freeze Ray</td><td class="c">Handgun</td><td>DEX</td><td>Ranged</td><td>1d8+DEX</td><td class="dt dt-Cold">Cold</td><td>150 ft</td></tr>
+</tbody></table>
+
+<p class="tot">Damage die comes from the cloned archetype (so upgrade text like "+1d10 base damage" stays correct). Uncommon types — Fire, Cold, Lightning, Poison — are used for sci-fi / joke weapons; say the word if you'd rather those be plain physical types.</p>
