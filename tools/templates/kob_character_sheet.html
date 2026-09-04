@@ -176,6 +176,30 @@ body[data-book="brooms"] .brooms-only,body[data-book="capes"] .capes-only,body[d
 body[data-book="brooms"] tr.brooms-only,body[data-book="capes"] tr.capes-only{display:table-row;}
 .sheet-foot{padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 
+/* TABS — the right-hand sections (Strengths / Skills / Motivations / Backpack / Relationships / Notes) */
+.tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-bottom:2px solid var(--border);flex-wrap:wrap;}
+.tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.6);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.tab-btn:hover{color:#fff;}
+.tab-btn.on{color:#fff;border-bottom-color:var(--kob);background:rgba(124,77,189,.28);}
+.tab-panel{display:none;}
+.tab-panel.on{display:block;}
+/* Section-bar right-side controls + buttons (open the pickers) */
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.hdr-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:3px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.hdr-btn:hover{background:rgba(255,255,255,.3);}
+/* Browse / picker modal list (Strengths) */
+.brow-controls{padding:10px 16px 8px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;border-bottom:1px solid #2e2a34;}
+.brow-list{padding:4px 12px;overflow-y:auto;}
+.brow-item{display:flex;align-items:flex-start;gap:10px;padding:8px 2px;border-bottom:1px solid #29252f;}
+.brow-main{flex:1;min-width:0;}
+.brow-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#efe9f6;letter-spacing:.01em;}
+.brow-cost{font-family:'Share Tech Mono',monospace;font-size:11px;color:#c8a020;margin-left:8px;font-weight:400;}
+.brow-desc{font-size:11.5px;color:#bcb2c6;line-height:1.4;margin-top:3px;}
+.brow-add{flex-shrink:0;background:var(--kob);color:#fff;border:none;border-radius:4px;padding:6px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.brow-add:hover{background:#9b6ad6;}
+.brow-add.have{background:transparent;color:#8a7fa0;border:1px solid #4a4458;cursor:default;}
+.brow-empty{padding:14px 4px;font-size:12px;color:#999;}
+
 /* DARK */
 body.dark{--bg:#15141a;--paper:#232128;--ink:#e8e4dc;--muted:#a7a7ad;--rule:#3a3842;--border:#4a4852;--section-hdr:#0a0a0a;--box:#2e2b38;--input-bg:#1c1a22;--input-border:#4a4852;--kob-lt:#3b2e55;--kob-dk:#c9aaff;}
 body.dark .sheet{border-color:#4a4852;}
@@ -368,23 +392,34 @@ select option{background:var(--input-bg);color:var(--ink);}
 
     <!-- CENTER -->
     <div class="center-col">
-      <div class="section-bar"><span>Strengths &amp; Flaw</span></div>
-      <table class="tbl">
-        <thead><tr><th style="width:34%;">Strength</th><th style="width:70px;">Cost</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
-        <tbody id="strengths-body"></tbody>
-      </table>
-      <div class="add-row"><button class="small-btn ghost" onclick="addStrengthRow()">+ Strength</button></div>
-      <div class="blk">
-        <div class="blk-grid">
-          <div class="fld"><label>Flaw</label><input type="text" id="f-flaw" list="dl-flaws" placeholder="Clumsy"></div>
-          <div class="fld bikes-only book-only"><label>Knack</label><input type="text" id="f-knack" placeholder="Take a 10 instead of rolling when it applies"></div>
-          <div class="fld capes-only book-only"><label>Cape (team role)</label><input type="text" id="f-cape" list="dl-capes" placeholder="Brawler" oninput="recalc()"><div class="hint" id="cape-hint"></div></div>
-          <div class="fld capes-only book-only"><label>Power</label><input type="text" id="f-power-cat" list="dl-power-cat" placeholder="Energy Control — describe it"></div>
+      <div class="tabs-bar">
+        <button class="tab-btn" data-tab="strengths" onclick="setTab('strengths')">Strengths</button>
+        <button class="tab-btn capes-only book-only" id="tabbtn-skills" data-tab="skills" onclick="setTab('skills')">Skills</button>
+        <button class="tab-btn" data-tab="bonds" onclick="setTab('bonds')">Motivations</button>
+        <button class="tab-btn" data-tab="backpack" onclick="setTab('backpack')">Backpack</button>
+        <button class="tab-btn" data-tab="relationships" onclick="setTab('relationships')">Relationships</button>
+        <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
+      </div>
+
+      <div class="tab-panel" id="tab-strengths">
+        <div class="section-bar"><span>Strengths &amp; Flaw</span><span class="hdr-right"><button class="hdr-btn" onclick="openStrengthPicker()">✦ Strengths</button></span></div>
+        <table class="tbl">
+          <thead><tr><th style="width:34%;">Strength</th><th style="width:70px;">Cost</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
+          <tbody id="strengths-body"></tbody>
+        </table>
+        <div class="add-row"><button class="small-btn ghost" onclick="addStrengthRow()">+ Blank strength</button></div>
+        <div class="blk">
+          <div class="blk-grid">
+            <div class="fld"><label>Flaw</label><input type="text" id="f-flaw" list="dl-flaws" placeholder="Clumsy"></div>
+            <div class="fld bikes-only book-only"><label>Knack</label><input type="text" id="f-knack" placeholder="Take a 10 instead of rolling when it applies"></div>
+            <div class="fld capes-only book-only"><label>Cape (team role)</label><input type="text" id="f-cape" list="dl-capes" placeholder="Brawler" oninput="recalc()"><div class="hint" id="cape-hint"></div></div>
+            <div class="fld capes-only book-only"><label>Power</label><input type="text" id="f-power-cat" list="dl-power-cat" placeholder="Energy Control — describe it"></div>
+          </div>
         </div>
       </div>
 
       <!-- CAPES: skills -->
-      <div class="book-only capes-only">
+      <div class="tab-panel" id="tab-skills">
         <div class="section-bar teal"><span>Cape &amp; Power Skills</span></div>
         <table class="tbl">
           <thead><tr><th style="width:34%;">Skill</th><th style="width:110px;">Tier</th><th>Effect</th><th style="width:26px;"></th></tr></thead>
@@ -393,42 +428,50 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="add-row"><button class="small-btn ghost" onclick="addSkillRow()">+ Skill</button></div>
       </div>
 
-      <div class="section-bar"><span>Motivations, Fear &amp; Obligations</span></div>
-      <div class="blk">
-        <div class="blk-grid">
-          <div class="fld"><label>Motivations</label><textarea id="f-motivations" placeholder="What does your character want?"></textarea></div>
-          <div class="fld"><label>Fear</label><input type="text" id="f-fear" placeholder="The dark, the mines, being alone…"><label style="margin-top:6px;">Obligations</label><textarea id="f-obligations" placeholder="School, work, family, the team…" style="min-height:34px;"></textarea></div>
-        </div>
-      </div>
-
-      <div class="section-bar"><span id="bag-title">Backpack</span></div>
-      <div class="blk">
-        <div class="blk-grid">
-          <div class="fld"><label id="bag-label">Backpack</label><textarea id="f-bag" placeholder="One item per line" style="min-height:70px;"></textarea></div>
-          <div>
-            <div class="fld book-only bikes-only"><label>Bike colour</label><input type="text" id="f-bike-color" list="dl-bike-color" placeholder="Purple" oninput="recalc()"><div class="hint" id="bike-color-hint"></div></div>
-            <div class="fld book-only bikes-only" style="margin-top:6px;"><label>Bike accessory</label><input type="text" id="f-bike-acc" list="dl-bike-acc" placeholder="Basket" oninput="recalc()"><div class="hint" id="bike-acc-hint"></div></div>
-            <div class="fld book-only brooms-only"><label>Where your broom / wand came from</label><textarea id="f-ride-story" placeholder="Every caster's broom is special to them…" style="min-height:70px;"></textarea></div>
-            <div class="fld book-only capes-only"><label>Secret identity &amp; costume</label><textarea id="f-identity" placeholder="Who knows? What do you wear?" style="min-height:70px;"></textarea></div>
+      <div class="tab-panel" id="tab-bonds">
+        <div class="section-bar"><span>Motivations, Fear &amp; Obligations</span></div>
+        <div class="blk">
+          <div class="blk-grid">
+            <div class="fld"><label>Motivations</label><textarea id="f-motivations" placeholder="What does your character want?"></textarea></div>
+            <div class="fld"><label>Fear</label><input type="text" id="f-fear" placeholder="The dark, the mines, being alone…"><label style="margin-top:6px;">Obligations</label><textarea id="f-obligations" placeholder="School, work, family, the team…" style="min-height:34px;"></textarea></div>
           </div>
         </div>
       </div>
 
-      <div class="section-bar"><span>Relationships</span></div>
-      <table class="tbl">
-        <thead><tr><th style="width:24%;">Character</th><th style="width:20%;">Relationship</th><th>Question &amp; answer</th><th style="width:26px;"></th></tr></thead>
-        <tbody id="rel-body"></tbody>
-      </table>
-      <div class="add-row">
-        <button class="small-btn ghost" onclick="addRelRow()">+ Character</button>
-        <button class="small-btn ghost" onclick="drawQuestion('positive')">Draw positive question</button>
-        <button class="small-btn ghost" onclick="drawQuestion('negative')">Draw negative</button>
-        <button class="small-btn ghost" onclick="drawQuestion('unknown')">Draw “don't know”</button>
+      <div class="tab-panel" id="tab-backpack">
+        <div class="section-bar"><span id="bag-title">Backpack</span></div>
+        <div class="blk">
+          <div class="blk-grid">
+            <div class="fld"><label id="bag-label">Backpack</label><textarea id="f-bag" placeholder="One item per line" style="min-height:70px;"></textarea></div>
+            <div>
+              <div class="fld book-only bikes-only"><label>Bike colour</label><input type="text" id="f-bike-color" list="dl-bike-color" placeholder="Purple" oninput="recalc()"><div class="hint" id="bike-color-hint"></div></div>
+              <div class="fld book-only bikes-only" style="margin-top:6px;"><label>Bike accessory</label><input type="text" id="f-bike-acc" list="dl-bike-acc" placeholder="Basket" oninput="recalc()"><div class="hint" id="bike-acc-hint"></div></div>
+              <div class="fld book-only brooms-only"><label>Where your broom / wand came from</label><textarea id="f-ride-story" placeholder="Every caster's broom is special to them…" style="min-height:70px;"></textarea></div>
+              <div class="fld book-only capes-only"><label>Secret identity &amp; costume</label><textarea id="f-identity" placeholder="Who knows? What do you wear?" style="min-height:70px;"></textarea></div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="section-bar"><span>Notes</span></div>
-      <div class="hint" id="trope-q-note" style="padding:6px 10px 0;margin:0;"></div>
-      <div class="notes-box"><textarea id="f-notes" placeholder="Trope questions, injuries, secrets, what happened last session…"></textarea></div>
+      <div class="tab-panel" id="tab-relationships">
+        <div class="section-bar"><span>Relationships</span></div>
+        <table class="tbl">
+          <thead><tr><th style="width:24%;">Character</th><th style="width:20%;">Relationship</th><th>Question &amp; answer</th><th style="width:26px;"></th></tr></thead>
+          <tbody id="rel-body"></tbody>
+        </table>
+        <div class="add-row">
+          <button class="small-btn ghost" onclick="addRelRow()">+ Character</button>
+          <button class="small-btn ghost" onclick="drawQuestion('positive')">Draw positive question</button>
+          <button class="small-btn ghost" onclick="drawQuestion('negative')">Draw negative</button>
+          <button class="small-btn ghost" onclick="drawQuestion('unknown')">Draw “don't know”</button>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-notes">
+        <div class="section-bar"><span>Notes</span></div>
+        <div class="hint" id="trope-q-note" style="padding:6px 10px 0;margin:0;"></div>
+        <div class="notes-box"><textarea id="f-notes" placeholder="Trope questions, injuries, secrets, what happened last session…"></textarea></div>
+      </div>
     </div>
   </div>
 
@@ -476,6 +519,15 @@ select option{background:var(--input-bg);color:var(--ink);}
 </div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()">
   <div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div>
+</div>
+
+<!-- STRENGTH PICKER -->
+<div id="strength-overlay" class="ov" onclick="if(event.target===this)closeStrengthPicker()">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-hd"><div class="ttl">✦ Strengths</div><button class="x" onclick="closeStrengthPicker()">&#10005;</button></div>
+    <div class="brow-controls"><input id="strength-search" class="m-input" placeholder="Search strengths…" oninput="renderStrengthPicker()"></div>
+    <div class="modal-bd brow-list" id="strength-body"></div>
+  </div>
 </div>
 
 <script>
@@ -582,6 +634,7 @@ function onBookChange() {
   fillAgeOptions();
   fillDatalists();
   recalc();
+  setTab(_tab);   // re-evaluate: the Skills tab exists only for Capes
   scheduleAutosave();
 }
 function fillAgeOptions() {
@@ -710,6 +763,48 @@ function refreshStrengthRows() {
     tr.querySelector('.desc').textContent = s ? s.description : '';
   });
 }
+
+// ═══ TABS ═════════════════════════════════════════════════════════════════
+var _tab = 'strengths';
+const TABS = ['strengths','skills','bonds','backpack','relationships','notes'];
+function setTab(name) {
+  if(!TABS.includes(name)) name = 'strengths';
+  if(name === 'skills' && book() !== 'capes') name = 'strengths';   // Skills tab is Capes-only
+  _tab = name;
+  TABS.forEach(t => {
+    const panel = $('tab-' + t); if(panel) panel.classList.toggle('on', t === name);
+    const btn = document.querySelector('.tab-btn[data-tab="' + t + '"]'); if(btn) btn.classList.toggle('on', t === name);
+  });
+}
+function setDefaultTab() { setTab(_tab || 'strengths'); }
+
+// ═══ STRENGTH PICKER ══════════════════════════════════════════════════════
+function openStrengthPicker() { $('strength-search').value = ''; $('strength-overlay').classList.add('open'); renderStrengthPicker(); $('strength-search').focus(); }
+function closeStrengthPicker() { $('strength-overlay').classList.remove('open'); }
+function strengthsTaken() { return new Set([...document.querySelectorAll('#strengths-body .st-name')].map(el => norm(el.value))); }
+function renderStrengthPicker() {
+  const q = norm($('strength-search').value), b = book();
+  // Current book's strengths first, then any others, deduped by name.
+  const seen = new Set(); const list = [];
+  D.strengths().filter(s => s.book === b).concat(D.strengths().filter(s => s.book !== b)).forEach(s => {
+    const k = norm(s.name); if(seen.has(k)) return; seen.add(k);
+    if(q && !(norm(s.name).includes(q) || norm(s.description || '').includes(q))) return;
+    list.push(s);
+  });
+  const taken = strengthsTaken();
+  const box = $('strength-body');
+  if(!list.length) { box.innerHTML = '<p class="brow-empty">No strengths match.</p>'; return; }
+  box.innerHTML = list.map(s => {
+    const have = taken.has(norm(s.name));
+    const btn = have ? '<button class="brow-add have">Added ✓</button>' : '<button class="brow-add" data-add-strength="' + esc(s.name) + '">+ Add</button>';
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(s.name) + (s.cost != null && s.cost !== '' ? '<span class="brow-cost">cost ' + esc(s.cost) + '</span>' : '') + '</div>' +
+      (s.description ? '<div class="brow-desc">' + esc(s.description) + '</div>' : '') + '</div>' + btn + '</div>';
+  }).join('');
+}
+(function wireStrengthPicker() {
+  const sb = $('strength-body');
+  if(sb) sb.addEventListener('click', e => { const b = e.target.closest('[data-add-strength]'); if(b) { addStrengthRow({ name: b.dataset.addStrength, note: '' }); scheduleAutosave(); renderStrengthPicker(); } });
+})();
 function addSkillRow(s) {
   s = s || { name:'', tier:'starting' };
   const tr = document.createElement('tr');
@@ -847,7 +942,7 @@ function collectSheet() {
     capes: { cape: v('f-cape'), power: v('f-power-cat'), powerDie: num(v('f-power-die')), powerBonus: num(v('f-power-bonus')), gp: num(v('f-gp')), stressBoost: v('f-stress-boost'), stressReduce: v('f-stress-reduce'), identity: v('f-identity'),
              skills: [...document.querySelectorAll('#skills-body tr')].map(tr => ({ name: tr.querySelector('.sk-name').value, tier: tr.querySelector('.sk-tier').value })).filter(s => s.name) },
     relationships: [...document.querySelectorAll('#rel-body tr')].map(tr => ({ who: tr.querySelector('.rel-who').value, rel: tr.querySelector('.rel-rel').value, text: tr.querySelector('.rel-text').value })).filter(r => r.who || r.text),
-    notes: v('f-notes'),
+    notes: v('f-notes'), tab: _tab,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
 }
@@ -867,8 +962,10 @@ function applySheet(d) {
   $('skills-body').innerHTML = ''; (c.skills || []).forEach(addSkillRow);
   $('rel-body').innerHTML = ''; (d.relationships || []).forEach(addRelRow);
   set('f-notes', d.notes);
+  _tab = TABS.includes(d.tab) ? d.tab : _tab;
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
   recalc();
+  setDefaultTab();
 }
 function saveSheet(quiet) {
   const data = collectSheet(); const json = JSON.stringify(data);

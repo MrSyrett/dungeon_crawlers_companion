@@ -192,6 +192,33 @@ body.dark .add-row select{background:var(--input-bg);color:var(--ink);border-col
 /* FOOTER */
 .sheet-foot{padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 
+/* TABS — main column: Role / Gear / Notes */
+.tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-bottom:2px solid var(--border);flex-wrap:wrap;}
+.tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.6);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.tab-btn:hover{color:#fff;}
+.tab-btn.on{color:#fff;border-bottom-color:var(--ace);background:rgba(43,147,201,.28);}
+.tab-panel{display:none;}
+.tab-panel.on{display:block;}
+/* Section-bar right-side controls + buttons (open the pickers/shops) */
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.hdr-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:3px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.hdr-btn:hover{background:rgba(255,255,255,.3);}
+/* Browse / shop modal lists (Weapons, Gear Store, Focus picker) */
+.brow-controls{padding:10px 16px 8px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;border-bottom:1px solid #2a2c31;}
+.brow-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.brow-sel{flex:1;min-width:120px;cursor:pointer;}
+.brow-list{padding:4px 12px;overflow-y:auto;}
+.brow-item{display:flex;align-items:flex-start;gap:10px;padding:8px 2px;border-bottom:1px solid #26282d;}
+.brow-main{flex:1;min-width:0;}
+.brow-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#eaeef3;letter-spacing:.01em;}
+.brow-cost{font-family:'Share Tech Mono',monospace;font-size:11px;color:#7fc4ec;margin-left:8px;font-weight:400;}
+.brow-meta{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9fb0bd;letter-spacing:.03em;text-transform:uppercase;margin-top:1px;}
+.brow-desc{font-size:11.5px;color:#b7c2cc;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.brow-add{flex-shrink:0;background:var(--ace);color:#fff;border:none;border-radius:4px;padding:6px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.brow-add:hover{background:#3aa8e0;}
+.brow-add.have{background:transparent;color:#6f93a6;border:1px solid #3a4650;cursor:default;}
+.brow-empty{padding:14px 4px;font-size:12px;color:#999;}
+
 /* DARK MODE */
 body.dark{--bg:#15171b;--paper:#232529;--ink:#e8e4dc;--muted:#a7a7ad;--rule:#3a3a42;--border:#4a4a52;--section-hdr:#0a0a0a;--box:#2e2e36;--input-bg:#1c1d22;--input-border:#4a4a52;}
 body.dark .sheet{border-color:#4a4a52;}
@@ -346,16 +373,25 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
 
   <div class="body-row">
-    <!-- LEFT: STATS + DERIVED + KARMA -->
+    <!-- LEFT: STATS + KARMA -->
     <div class="stats-col">
       <div class="section-bar blue"><span>Stats &amp; Focuses</span></div>
       <div class="stats-head"><span>Stat</span><span style="text-align:center;">Dice</span><span>Focus</span><span style="text-align:center;">Dice</span></div>
       <div id="stats-list"></div>
       <div class="power-toggle-row">
         <label class="chk"><input type="checkbox" id="has-power" onchange="onPowerToggle()"> Power Stat (Wizards, Aliens…)</label>
-        
+
       </div>
 
+      <div class="karma-wrap">
+        <div class="derived-lbl"><span>Karma <span id="karma-val" style="font-family:'Share Tech Mono',monospace;font-size:18px;">6</span></span></div>
+        <div class="karma-pips" id="karma-pips"></div>
+      </div>
+    </div>
+
+    <!-- CENTER: HEALTH/DEFENCE · ATTACKS · TABS -->
+    <div class="center-col">
+      <div class="section-bar blue"><span>Health &amp; Defence</span></div>
       <div class="derived">
         <div class="derived-cell">
           <div class="derived-lbl"><span>Defence</span></div>
@@ -370,45 +406,49 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
       </div>
 
-      <div class="karma-wrap">
-        <div class="derived-lbl"><span>Karma <span id="karma-val" style="font-family:'Share Tech Mono',monospace;font-size:18px;">6</span></span></div>
-        <div class="karma-pips" id="karma-pips"></div>
-      </div>
-    </div>
-
-    <!-- CENTER: ROLE / TRAIT / ATTACKS / GEAR / NOTES -->
-    <div class="center-col">
-      <div class="section-bar"><span>Role Ability &amp; Trait</span></div>
-      <div class="rt-grid">
-        <div class="rt-cell">
-          <div class="derived-lbl"><span id="ability-title">Role ability</span><button class="small-btn ghost" onclick="lookupAbility()" title="Fill from the Roles list">Look up</button></div>
-          <textarea id="f-ability" placeholder="What only you can do…" style="margin-top:4px;"></textarea>
-          <div class="rt-hint" id="role-hint"></div>
-        </div>
-        <div class="rt-cell">
-          <div class="derived-lbl"><span>Trait</span></div>
-          <textarea id="f-trait-notes" placeholder="How does your Trait complicate things?" style="margin-top:4px;"></textarea>
-          <div class="rt-hint" id="trait-hint"></div>
-        </div>
-      </div>
-
-      <div class="section-bar"><span>Attacks</span></div>
+      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><button class="hdr-btn" onclick="openWeaponPicker()">⚔ Weapons</button></span></div>
       <table class="attacks-table">
         <thead><tr><th style="width:38%;">Weapon</th><th>Kind</th><th style="width:60px;">Dmg</th><th>Dice</th><th style="width:74px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
       </table>
-      <div class="add-row"><button class="small-btn ghost" onclick="addAttackRow()">+ Attack</button><select id="atk-pick" onchange="if(this.value){addAttackFromData(this.value);this.value='';}"><option value="">Add from the weapon list…</option></select></div>
+      <div class="add-row"><button class="small-btn ghost" onclick="addAttackRow()">+ Blank attack</button></div>
 
-      <div class="section-bar"><span>Gear</span></div>
-      <table class="gear-table"><tbody id="gear-body"></tbody></table>
-      <div class="add-row"><button class="small-btn ghost" onclick="addGearRow()">+ Item</button><select id="gear-pick" onchange="if(this.value){addGearFromData(this.value);this.value='';}"><option value="">Add from the gear list…</option></select></div>
-      <div class="wealth-row">
-        Buy <select id="wealth-tn"><option value="10">10 — up to 1,000</option><option value="20">20 — up to 10,000</option><option value="30">30 — up to 100,000</option><option value="40">40 — up to 1,000,000</option></select>
-        <button class="small-btn" onclick="rollWealth()" title="Roll Style (+Wealth) — costs 1 Karma">🎲</button>
+      <div class="tabs-bar">
+        <button class="tab-btn" data-tab="role" onclick="setTab('role')">Role</button>
+        <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
+        <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
       </div>
 
-      <div class="section-bar"><span>Notes &amp; Advancement</span></div>
-      <div class="notes-box"><textarea id="f-notes" placeholder="Backstory, catchphrases, sworn enemies, the names of your parrot…"></textarea></div>
+      <div class="tab-panel" id="tab-role">
+        <div class="section-bar"><span>Role Ability &amp; Trait</span></div>
+        <div class="rt-grid">
+          <div class="rt-cell">
+            <div class="derived-lbl"><span id="ability-title">Role ability</span><button class="small-btn ghost" onclick="lookupAbility()" title="Fill from the Roles list">Look up</button></div>
+            <textarea id="f-ability" placeholder="What only you can do…" style="margin-top:4px;"></textarea>
+            <div class="rt-hint" id="role-hint"></div>
+          </div>
+          <div class="rt-cell">
+            <div class="derived-lbl"><span>Trait</span></div>
+            <textarea id="f-trait-notes" placeholder="How does your Trait complicate things?" style="margin-top:4px;"></textarea>
+            <div class="rt-hint" id="trait-hint"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-gear">
+        <div class="section-bar"><span>Gear</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">🛒 Gear Store</button></span></div>
+        <table class="gear-table"><tbody id="gear-body"></tbody></table>
+        <div class="add-row"><button class="small-btn ghost" onclick="addGearRow()">+ Blank item</button></div>
+        <div class="wealth-row">
+          Buy <select id="wealth-tn"><option value="10">10 — up to 1,000</option><option value="20">20 — up to 10,000</option><option value="30">30 — up to 100,000</option><option value="40">40 — up to 1,000,000</option></select>
+          <button class="small-btn" onclick="rollWealth()" title="Roll Style (+Wealth) — costs 1 Karma">🎲</button>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-notes">
+        <div class="section-bar"><span>Notes &amp; Advancement</span></div>
+        <div class="notes-box"><textarea id="f-notes" placeholder="Backstory, catchphrases, sworn enemies, the names of your parrot…"></textarea></div>
+      </div>
     </div>
   </div>
 
@@ -489,6 +529,33 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
 </div>
 
+<!-- WEAPON PICKER (Attacks) -->
+<div id="weapon-overlay" class="ov" onclick="if(event.target===this)closeWeaponPicker()">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-hd"><div class="ttl">⚔ Weapons</div><button class="x" onclick="closeWeaponPicker()">&#10005;</button></div>
+    <div class="brow-controls"><input id="weapon-search" class="m-input" placeholder="Search weapons…" oninput="renderWeaponPicker()"></div>
+    <div class="modal-bd brow-list" id="weapon-body"></div>
+  </div>
+</div>
+
+<!-- GEAR STORE (Gear) -->
+<div id="gearstore-overlay" class="ov" onclick="if(event.target===this)closeGearPicker()">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-hd"><div class="ttl">🛒 Gear Store</div><button class="x" onclick="closeGearPicker()">&#10005;</button></div>
+    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search gear…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select></div></div>
+    <div class="modal-bd brow-list" id="gearstore-body"></div>
+  </div>
+</div>
+
+<!-- FOCUS PICKER -->
+<div id="focus-overlay" class="ov" onclick="if(event.target===this)closeFocusPicker()">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-hd"><div class="ttl" id="focus-title">Focuses</div><button class="x" onclick="closeFocusPicker()">&#10005;</button></div>
+    <div class="brow-controls"><input id="focus-search" class="m-input" placeholder="Search focuses…" oninput="renderFocusPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addBlankFocusLine()">＋ Type my own</button></div>
+    <div class="modal-bd brow-list" id="focus-body"></div>
+  </div>
+</div>
+
 <script>
 // ═══ CORE STATE ═══════════════════════════════════════════════════════════
 const STATS = [
@@ -551,7 +618,7 @@ function addFocusLine(id, value) {
   // An emptied extra line goes away when you leave it.
   if(!first) inp.addEventListener('blur', () => { if(!inp.value.trim()) { line.remove(); recalc(); scheduleAutosave(); } });
   let add = cell.querySelector('.focus-add');
-  if(!add) { add = document.createElement('button'); add.type = 'button'; add.className = 'focus-add'; add.textContent = '+ Focus'; add.title = 'Add another Focus to ' + s.name + ' (Advancement)'; add.onclick = () => { const l = addFocusLine(id, ''); l.querySelector('.focus-input').focus(); scheduleAutosave(); }; cell.appendChild(add); }
+  if(!add) { add = document.createElement('button'); add.type = 'button'; add.className = 'focus-add'; add.textContent = '+ Focus'; add.title = 'Add a Focus to ' + s.name + ' (Advancement)'; add.onclick = () => openFocusPicker(id); cell.appendChild(add); }
   cell.insertBefore(line, add);
   return line;
 }
@@ -859,6 +926,96 @@ function fillGearPick() {
   sel.innerHTML = '<option value="">Add from the gear list…</option>' + cats.map(c => '<optgroup label="' + esc(c) + '">' + D.gear().filter(g => g.category === c).map(g => '<option value="' + esc(g.name) + '">' + esc(g.name) + (g.setting && g.setting !== 'core' ? ' (' + esc(g.setting) + ')' : '') + '</option>').join('') + '</optgroup>').join('');
 }
 
+// ═══ TABS ═════════════════════════════════════════════════════════════════
+var _tab = 'role';
+const TABS = ['role','gear','notes'];
+function setTab(name) {
+  if(!TABS.includes(name)) name = 'role';
+  _tab = name;
+  TABS.forEach(t => {
+    const panel = $('tab-' + t); if(panel) panel.classList.toggle('on', t === name);
+    const btn = document.querySelector('.tab-btn[data-tab="' + t + '"]'); if(btn) btn.classList.toggle('on', t === name);
+  });
+}
+function setDefaultTab() { setTab(_tab || 'role'); }
+
+// ═══ PICKERS / SHOPS ══════════════════════════════════════════════════════
+// — Weapon picker (Attacks): every gear item that deals damage ——————————————
+function openWeaponPicker() { $('weapon-search').value = ''; $('weapon-overlay').classList.add('open'); renderWeaponPicker(); $('weapon-search').focus(); }
+function closeWeaponPicker() { $('weapon-overlay').classList.remove('open'); }
+function renderWeaponPicker() {
+  const q = norm($('weapon-search').value);
+  const list = D.gear().filter(g => g.damage != null && (!q || norm(g.name).includes(q) || norm(g.category || '').includes(q)))
+    .sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
+  const box = $('weapon-body');
+  if(!list.length) { box.innerHTML = '<p class="brow-empty">No weapons match.</p>'; return; }
+  box.innerHTML = list.map(g =>
+    '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + '<span class="brow-cost">' + esc(g.damage) + ' dmg</span></div>' +
+    '<div class="brow-meta">' + esc(g.category || 'Weapon') + (g.setting && g.setting !== 'core' ? ' · ' + esc(g.setting) : '') + '</div>' +
+    (g.description ? '<div class="brow-desc">' + esc(g.description) + '</div>' : '') + '</div>' +
+    '<button class="brow-add" data-add-weapon="' + esc(g.name) + '">+ Add</button></div>').join('');
+}
+// — Gear store (Gear) ——————————————————————————————————————————————————————
+function openGearPicker() { $('gearstore-search').value = ''; $('gearstore-overlay').classList.add('open'); renderGearPicker(); $('gearstore-search').focus(); }
+function closeGearPicker() { $('gearstore-overlay').classList.remove('open'); }
+function renderGearPicker() {
+  const q = norm($('gearstore-search').value), fc = $('gearstore-cat').value;
+  const list = D.gear().filter(g => {
+    if(fc && g.category !== fc) return false;
+    if(q && !(norm(g.name).includes(q) || norm(g.category || '').includes(q) || norm(g.description || '').includes(q))) return false;
+    return true;
+  }).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
+  const box = $('gearstore-body');
+  if(!list.length) { box.innerHTML = '<p class="brow-empty">No gear matches.</p>'; return; }
+  box.innerHTML = list.map(g => {
+    const meta = [g.category, g.tier && g.tier !== 'Normal' ? g.tier : '', g.damage != null ? g.damage + ' dmg' : '', g.setting && g.setting !== 'core' ? g.setting : ''].filter(Boolean).map(esc).join(' · ');
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + (g.tn ? '<span class="brow-cost">TN ' + esc(g.tn) + '</span>' : '') + '</div>' +
+      (meta ? '<div class="brow-meta">' + meta + '</div>' : '') + (g.description ? '<div class="brow-desc">' + esc(g.description) + '</div>' : '') + '</div>' +
+      '<button class="brow-add" data-add-gear="' + esc(g.name) + '">+ Add</button></div>';
+  }).join('');
+}
+// — Focus picker (per Stat) ————————————————————————————————————————————————
+var _focusStat = null;
+function openFocusPicker(id) {
+  _focusStat = id; const s = STATS.find(x => x.id === id);
+  $('focus-title').textContent = (s ? s.name : '') + ' Focuses';
+  $('focus-search').value = ''; $('focus-overlay').classList.add('open'); renderFocusPicker(); $('focus-search').focus();
+}
+function closeFocusPicker() { $('focus-overlay').classList.remove('open'); }
+function pickFocusValue(name) {
+  if(!_focusStat) return;
+  const inputs = focusInputs(_focusStat);
+  const empty = inputs.find(i => !i.value.trim());
+  if(empty) empty.value = name; else addFocusLine(_focusStat, name);
+  recalc(); scheduleAutosave(); renderFocusPicker();
+}
+function addBlankFocusLine() {
+  if(!_focusStat) return;
+  const l = addFocusLine(_focusStat, ''); closeFocusPicker(); l.querySelector('.focus-input').focus(); scheduleAutosave();
+}
+function renderFocusPicker() {
+  if(!_focusStat) return;
+  const q = norm($('focus-search').value);
+  const taken = new Set(focusesOf(_focusStat).map(norm));
+  const list = D.focuses().filter(f => norm(f.stat) === _focusStat && (!q || norm(f.name).includes(q)))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const box = $('focus-body');
+  if(!list.length) { box.innerHTML = '<p class="brow-empty">No focuses match — use “Type my own”.</p>'; return; }
+  box.innerHTML = list.map(f => {
+    const have = taken.has(norm(f.name));
+    const btn = have ? '<button class="brow-add have">Added ✓</button>' : '<button class="brow-add" data-add-focus="' + esc(f.name) + '">+ Add</button>';
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(f.name) + '</div>' +
+      (f.setting && f.setting !== 'core' ? '<div class="brow-meta">' + esc(f.setting) + '</div>' : '') + '</div>' + btn + '</div>';
+  }).join('');
+}
+// Wire the browse lists once (event delegation).
+(function wireAcePickers() {
+  const wb = $('weapon-body'); if(wb) wb.addEventListener('click', e => { const b = e.target.closest('[data-add-weapon]'); if(b) { addAttackFromData(b.dataset.addWeapon); _flashBrow(b); } });
+  const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => { const b = e.target.closest('[data-add-gear]'); if(b) { addGearFromData(b.dataset.addGear); _flashBrow(b); } });
+  const fb = $('focus-body'); if(fb) fb.addEventListener('click', e => { const b = e.target.closest('[data-add-focus]'); if(b) pickFocusValue(b.dataset.addFocus); });
+})();
+function _flashBrow(btn) { const o = btn.textContent, d = btn.disabled; btn.textContent = '✓ Added'; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = d; }, 600); }
+
 // ═══ HINTS FROM THE DATA LAYER ════════════════════════════════════════════
 function findRole(name) { const n = norm(name); if(!n) return null; return D.roles().find(r => norm(r.name) === n) || null; }
 function findTrait(name) { const n = norm(name); if(!n) return null; return D.traits().find(t => norm(t.name) === n) || null; }
@@ -883,6 +1040,8 @@ function fillDatalists() {
   const fill = (id, names) => { const dl = $(id); if(!dl) return; dl.innerHTML = [...new Set(names)].sort().map(n => '<option value="' + esc(n) + '">').join(''); };
   fill('dl-traits', D.traits().map(t => t.name)); fillGearPick(); fillAttackPick();
   fill('dl-roles', D.roles().map(r => r.name));
+  const gsCat = $('gearstore-cat');
+  if(gsCat) { const cats = [...new Set(D.gear().map(g => g.category))].filter(Boolean).sort(); gsCat.innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join(''); }
   STATS.forEach(s => fill('dl-focus-' + s.id, D.focuses().filter(f => norm(f.stat) === s.id).map(f => f.name)));
   let dlw = $('dl-weapons'); if(!dlw) { dlw = document.createElement('datalist'); dlw.id = 'dl-weapons'; document.body.appendChild(dlw); }
   dlw.innerHTML = [...new Set(D.gear().filter(g => g.damage).map(g => g.name))].sort().map(n => '<option value="' + esc(n) + '">').join('');
@@ -974,6 +1133,7 @@ function collectSheet() {
     ability: $('f-ability').value, traitNotes: $('f-trait-notes').value, notes: $('f-notes').value,
     attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, kind: tr.querySelector('.atk-kind').value, damage: tr.querySelector('.atk-dmg').value })),
     gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gear-name').value, note: tr.querySelector('.gear-note').value })).filter(g => g.name || g.note),
+    tab: _tab,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
 }
@@ -998,8 +1158,10 @@ function applySheet(d) {
   $('gear-body').innerHTML = '';
   (d.gear || []).forEach(g => addGearRow(g));
   if(!(d.gear || []).length) addGearRow();
+  _tab = TABS.includes(d.tab) ? d.tab : _tab;
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
   recalc();
+  setDefaultTab();
 }
 function saveSheet(quiet) {
   const data = collectSheet();

@@ -248,6 +248,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hp-adj-btn.heal{background:var(--green);}
 .hp-adj-btn.dmg{background:var(--red);}
 .hp-adj-btn:hover{filter:brightness(1.12);}
+.hp-dtype{display:flex;justify-content:center;}
+.dtype-sel{appearance:none;-webkit-appearance:none;max-width:190px;border:1px solid var(--input-border);border-radius:6px;background-color:var(--input-bg);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%239b1b22' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 8px center;background-size:10px;color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 24px 4px 10px;cursor:pointer;outline:none;transition:border-color .1s;}
+.dtype-sel:hover{border-color:var(--dnd);}
+.dtype-sel:focus{border-color:var(--dnd);}
+.dtype-sel option{color:var(--ink);background:var(--input-bg);font-weight:600;letter-spacing:0;text-transform:none;}
+body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%23e07a5f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");}
 .hp-sub{display:flex;gap:6px;justify-content:center;font-size:9px;}
 .hp-sub label{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:3px;}
 .hp-sub input{width:40px;border:1px solid var(--input-border);border-radius:3px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
@@ -650,7 +656,7 @@ select option{background:var(--input-bg);color:var(--ink);}
             <button class="hp-adj-btn dmg" onclick="adjustHP(-1)" title="Take damage by the amount entered (resistances applied, then temp HP absorbs)">Damage</button>
           </div>
           <div class="hp-dtype">
-            <label>Damage type <select id="f-dmg-type" title="Damage type — applies your defenses below (resistance halves, immunity negates, vulnerability doubles)"></select></label>
+            <select id="f-dmg-type" class="dtype-sel" title="Damage type — applies your defenses below (resistance halves, immunity negates, vulnerability doubles)"></select>
           </div>
           <div class="hp-sub">
             <label>Temp <input id="f-hp-temp" type="number" value="0" oninput="scheduleAutosave()"></label>
@@ -2361,7 +2367,15 @@ function castSpellFull(name, castLevel){
   const lvl = sp.level;
   // Default Cast is one click at base level; the ⇧ button (upcastSpell) opens the picker.
   const useLevel = Math.max(lvl, castLevel || lvl);
-  if(lvl > 0){ if(castLevel != null){ if(!spendSlotAt(useLevel, label)) return; } else if(!spendSpellSlot(lvl, label)) return; }
+  // Spells granted by a feature/trait are always-prepared and cast without a spell
+  // slot (they're free, or gated by their own tracker). Only a deliberate upcast to
+  // a higher level spends a real slot to boost them.
+  const isGranted = !!(sk && sk.granted);
+  if(lvl > 0){
+    if(isGranted){ if(useLevel > lvl){ if(!spendSlotAt(useLevel, label)) return; } }
+    else if(castLevel != null){ if(!spendSlotAt(useLevel, label)) return; }
+    else { if(!spendSpellSlot(lvl, label)) return; }
+  }
   const dmgInfo = spellDamage(sp);
   let diceExpr = dmgInfo.dice;
   if(lvl === 0 && diceExpr) diceExpr = scaleCantrip(diceExpr, levelNow());
@@ -2531,7 +2545,7 @@ let defenses = {};   // { <type>: 'resist' | 'immune' | 'vuln' }
 const DEF_MARK = { resist: '½', immune: '0', vuln: '×2' };
 const DEF_NEXT = { '': 'resist', resist: 'immune', immune: 'vuln', vuln: '' };
 function fillDamageTypes(){ const sel = $('f-dmg-type'); if(!sel || sel.options.length) return;
-  sel.insertAdjacentHTML('beforeend', '<option value="">— untyped —</option>' + DAMAGE_TYPES.map(t => '<option value="' + t + '">' + t.charAt(0).toUpperCase() + t.slice(1) + '</option>').join('')); }
+  sel.insertAdjacentHTML('beforeend', '<option value="">Damage type…</option>' + DAMAGE_TYPES.map(t => '<option value="' + t + '">' + t.charAt(0).toUpperCase() + t.slice(1) + '</option>').join('')); }
 function renderDefenses(){ const box = $('defenses-list'); if(!box) return;
   box.innerHTML = DAMAGE_TYPES.map(t => { const st = defenses[t] || ''; const mk = st ? '<span class="dm">' + DEF_MARK[st] + '</span>' : '';
     return '<span class="def-chip' + (st ? ' ' + st : '') + '" title="' + t + ' — tap to cycle resistance › immunity › vulnerability" onclick="cycleDefense(\'' + t + '\')">' + t + mk + '</span>'; }).join(''); }
