@@ -13,6 +13,13 @@
   function templates() { return typeof SW_TEMPLATES !== 'undefined' ? SW_TEMPLATES : []; }
   function skills() { return typeof SW_SKILLS !== 'undefined' ? SW_SKILLS : []; }
   function weapons() { return typeof SW_WEAPONS !== 'undefined' ? SW_WEAPONS : []; }
+  // Species options for the picker: Human + playable Aliens + Sourcebook Droids.
+  function speciesList() {
+    const chars = (typeof SW_CHARACTERS !== 'undefined' ? SW_CHARACTERS : []);
+    const aliens = chars.filter(c => c.group === 'Alien').map(c => c.name).sort();
+    const droids = chars.filter(c => c.group === 'Droid').map(c => c.name).sort();
+    const seen = {}; return ['Human'].concat(aliens, droids).filter(n => n && !seen[n] && (seen[n] = 1));
+  }
   function forceSkills(t) {
     const out = {}; const m = /Force skills?:\s*([^.]+)/i.exec((t && t.specialRule) || '');
     if (m) m[1].split(/,|\band\b/).forEach(part => { const mm = /(Control|Sense|Alter)\s*\(?(\d+D(?:\+\d)?)?/i.exec(part); if (mm) out[mm[1][0].toUpperCase() + mm[1].slice(1).toLowerCase()] = fromCode(mm[2] || '1D'); });
@@ -62,8 +69,9 @@
       note.textContent = 'Who are you?';
       const f = (id, lbl, val, ph) => '<div class="m-lbl">' + lbl + '</div><input class="m-input" id="swb-' + id + '" value="' + esc(val == null ? '' : val) + '" placeholder="' + esc(ph || '') + '">';
       const ta = (id, lbl, val) => '<div class="m-lbl">' + lbl + '</div><textarea class="m-input" id="swb-' + id + '" rows="3">' + esc(val == null ? '' : val) + '</textarea>';
-      b.innerHTML = '<p class="m-hint">Name your character and tweak the template\'s background and personality — they are yours now.</p>'
-        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px;">' + f('name', 'Name', details.name, 'Character name') + f('species', 'Species', details.species != null ? details.species : speciesFor(tpl), 'Human')
+      const fSpecies = (val) => '<div class="m-lbl">Species</div><input class="m-input" id="swb-species" list="swb-species-list" value="' + esc(val == null ? '' : val) + '" placeholder="Pick or type a species…"><datalist id="swb-species-list">' + speciesList().map(n => '<option value="' + esc(n) + '"></option>').join('') + '</datalist>';
+      b.innerHTML = '<p class="m-hint">Name your character and tweak the template\'s background and personality — they are yours now. Pick your <b>species</b> — Human, a playable alien, or a droid.</p>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px;">' + f('name', 'Name', details.name, 'Character name') + fSpecies(details.species != null ? details.species : speciesFor(tpl))
         + f('sex', 'Sex', details.sex) + f('age', 'Age', details.age) + f('height', 'Height', details.height) + f('weight', 'Weight', details.weight) + '</div>'
         + f('physical', 'Physical description', details.physical, 'What people notice first')
         + ta('background', 'Background', details.background != null ? details.background : tpl.background)

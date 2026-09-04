@@ -330,13 +330,14 @@
 
   // ─── public play ───
   var RANDOM_POOL=['#d8b24a','#c0251e','#3b7dd8','#3fa45b','#8a6fd6'];
+  var WILD_COLOR='#d13a2e';   // Star Wars Wild Die — always a distinct red, whatever the sheet's die colour
   function resolveColor(){ return S.dice==='random' ? RANDOM_POOL[Math.floor(Math.random()*RANDOM_POOL.length)] : (S.dice||'#d8b24a'); }
   // Empty every inline mount (e.g. the roll-toast .t-dice). Called on every roll so a
   // 2D roll left in the card doesn't linger after switching to 3D (play2Dinline refills
   // it right after when this roll IS inline).
   function clearInline(){ try{ var els=document.querySelectorAll('[data-da-inline]'); for(var i=0;i<els.length;i++) els[i].innerHTML=''; }catch(e){} }
   function play(dice, crit){ if(!S.on || !dice || !dice.length) return; ensureOverlay();
-    var rd=dice.map(function(d){ return { sides:d.sides, display:(d.display!=null?d.display:d.val), faceSet:d.faceSet||null, wave:d.wave||0, color:resolveColor() }; });
+    var rd=dice.map(function(d){ return { sides:d.sides, display:(d.display!=null?d.display:d.val), faceSet:d.faceSet||null, wave:d.wave||0, color:(d.color!=null?d.color:resolveColor()) }; });
     if(S.sound!==false) playAudio(rd.length);
     clearInline();
     if(S.mode==='3d' && HAS_WEBGL){ if(threeState===2){ play3D(rd,crit); } else { play2D(rd,crit); if(threeState!==3) loadThree(function(ok){}); } }
@@ -358,18 +359,21 @@
     var out=[], s=detail;
     // wave = which "throw" a die belongs to: 0 = the initial dice, 1+ = exploding
     // follow-ups (→ chains and ⚡ crits) that appear one after another.
-    function push(sides,v,wave){ var ds=mapDie(sides,v); for(var i=0;i<ds.length;i++){ ds[i].wave=wave||0; } out=out.concat(ds); }
+    function push(sides,v,wave,color){ var ds=mapDie(sides,v); for(var i=0;i<ds.length;i++){ ds[i].wave=wave||0; if(color) ds[i].color=color; } out=out.concat(ds); }
     // faces of one die group: split on → / ⚡ so the first is wave 0 and each
     // explosion is the next wave (strip =totals and brackets first).
-    function pushChain(sides,part){ part=part.replace(/=\s*\d+/g,' ').replace(/[\[\]]/g,' ');
+    function pushChain(sides,part,color){ part=part.replace(/=\s*\d+/g,' ').replace(/[\[\]]/g,' ');
       var toks=part.split(/→|->|⚡/), w=0;
-      toks.forEach(function(t){ var m=t.match(/\d+/); if(m){ push(sides,+m[0],w); w++; } }); }
+      toks.forEach(function(t){ var m=t.match(/\d+/); if(m){ push(sides,+m[0],w,color); w++; } }); }
     // 1) Advantage/disadvantage d20 — ALWAYS show both dice (adv[a,b]→k / d20[a,b→k adv] / d20(a,b ▲ k))
     s=s.replace(/(?:adv|dis)\[\s*(\d+)\s*,\s*(\d+)\s*\]\s*(?:→|->)\s*\d+/gi,function(_,a,b){push(20,+a,0);push(20,+b,0);return ' ';});
     s=s.replace(/d20\s*\[\s*(\d+)\s*,\s*(\d+)\s*(?:→|->)\s*\d+\s*(?:adv|dis)\s*\]/gi,function(_,a,b){push(20,+a,0);push(20,+b,0);return ' ';});
     s=s.replace(/d20\s*\(\s*(\d+)\s*,\s*(\d+)\s*[▲▼]\s*\d+\s*\)/gi,function(_,a,b){push(20,+a,0);push(20,+b,0);return ' ';});
     // 2) Star Wars pip dice — "3D+2: [3 5 2]" → that many d6 (all thrown together)
     s=s.replace(/\dD[+\d]*\s*:\s*\[\s*([\d\s]+?)\s*\]/g,function(_,g){(g.match(/\d+/g)||[]).forEach(function(x){push(6,+x,0);});return ' ';});
+    // 2w) Star Wars Wild Die — "✦[6→4]" → the pool's last die, coloured distinctly,
+    //     with → marking each explosion as the next wave.
+    s=s.replace(/✦\s*\[\s*([0-9→>\- ]+?)\s*\]/g,function(_,g){ pushChain(6,g,WILD_COLOR); return ' '; });
     // 3) Parenthesised dice — NdX(v) / NdX(v+v) / NdX(v,v)  (trays, damage/heal, GM); all wave 0
     s=s.replace(/(\d*)d(\d+)\s*\(\s*([0-9+,\s]*?)\s*\)/gi,function(_,n,sides,inner){(inner.match(/\d+/g)||[]).forEach(function(x){push(+sides,+x,0);});return ' ';});
     // 4) Colon dice WITH a count — ace "3d6: [6→2] + 4 + 5", nimble "2d6: 4+5 ⚡6"
