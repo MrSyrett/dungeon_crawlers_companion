@@ -2470,6 +2470,9 @@ function collectSheet(){
   const v = id => { const el = $(id); return el ? el.value : ''; };
   // Store BASE scores/HP (shown − magic-item delta) so a reload can't double-count.
   const scores = {}; ABILITIES.forEach(a => scores[a.id] = num($('sc-' + a.id).value) - (_magicApplied[a.id.toLowerCase()] || 0));
+  // Effective (as-displayed) values for read-only consumers like the GM Party tool,
+  // which can't re-derive magic-item bonuses. `scores`/`hpMax` remain BASE.
+  const shownScores = {}; ABILITIES.forEach(a => shownScores[a.id] = num($('sc-' + a.id).value));
   const attacks = [...document.querySelectorAll('#attacks-body tr')].map(tr => ({
     name: tr.querySelector('.atk-name').value, abil: tr.querySelector('.atk-abil').value,
     prof: tr.dataset.prof !== '0', bonus: num(tr.querySelector('.atk-bonus').value),
@@ -2486,6 +2489,7 @@ function collectSheet(){
     classLevels: classLevels,
     species: v('f-species'), background: v('f-background'), alignment: v('f-alignment'),
     scores, saveProf, skillProf,
+    shown: { scores: shownScores, hpMax: num(v('f-hp-max')), saveBonus: magicSaveBonus() },
     speed: v('f-speed'), speedManual: _speedManual, ac: v('f-ac'), hpCur: num(v('f-hp-cur')), hpMax: num(v('f-hp-max')) - (_magicApplied.hp || 0), hpTemp: num(v('f-hp-temp')), hitdice: v('f-hitdice'), hdLeft: num(v('f-hd-left')),
     inspiration: $('f-inspiration').checked, deathSucc, deathFail, activeConditions, exhaustion, tab: _tab,
     attacks, inventory, gp: num(v('f-gp')), sp: num(v('f-sp')), cp: num(v('f-cp')),

@@ -829,13 +829,16 @@ function toggleDarkMode() { setDarkMode(!document.body.classList.contains('dark'
 
 // ═══ SAVE / LOAD ══════════════════════════════════════════════════════════
 function collectSheet() {
-  const stats = {}, mods = {};
-  STATS.forEach(s => { stats[s.id] = dieOf(s.id); mods[s.id] = num($('mod-' + s.id).value); });
+  const stats = {}, mods = {}, bonuses = {};
+  // `mods` is the raw "Other modifiers" field; `bonuses` is the effective per-stat
+  // check bonus the player actually rolls with (age + ride/broom benefit + Capes
+  // stress + the manual mod) — what the GM Party tool should display.
+  STATS.forEach(s => { stats[s.id] = dieOf(s.id); mods[s.id] = num($('mod-' + s.id).value); bonuses[s.id] = bonusOf(s.id); });
   const v = id => $(id).value;
   return {
     system:'KOB', v:1, book: book(),
     name: v('f-name'), lastName: v('f-last'), pronouns: v('f-pronouns'), player: v('f-player'), trope: v('f-trope'), age: v('f-age'),
-    stats, mods, at, stress,
+    stats, mods, bonuses, at, stress,
     strengths: [...document.querySelectorAll('#strengths-body tr')].map(tr => ({ name: tr.querySelector('.st-name').value, note: tr.querySelector('.st-note').value })).filter(s => s.name || s.note),
     flaw: v('f-flaw'), knack: v('f-knack'),
     motivations: v('f-motivations'), fear: v('f-fear'), obligations: v('f-obligations'), bag: v('f-bag'),

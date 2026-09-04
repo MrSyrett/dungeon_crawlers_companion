@@ -822,12 +822,14 @@ function toggleDarkMode() { setDarkMode(!document.body.classList.contains('dark'
 
 // ═══ SAVE / LOAD ══════════════════════════════════════════════════════════
 function collectSheet() {
-  const v = id => $(id).value; const stats = {}, skillPts = {};
-  STATS.forEach(s => stats[s] = stat(s)); SKILLS.forEach(([n]) => skillPts[n] = num($('skp-' + n).value));
+  const v = id => $(id).value; const stats = {}, skillPts = {}, skillTotals = {};
+  // skillTotals = the effective per-skill value the player sees (stat + points +
+  // ancestry/background bonuses, capped at 12) — what the GM Party tool should show.
+  STATS.forEach(s => stats[s] = stat(s)); SKILLS.forEach(([n, st]) => { skillPts[n] = num($('skp-' + n).value); skillTotals[n] = skillTotal(n, st); });
   return {
     system:'NIM', v:1,
     name: v('f-name'), ancestry: v('f-ancestry'), cls: v('f-class'), subclass: v('f-subclass'), level: level(), background: v('f-background'), motivation: v('f-motivation'),
-    stats, saveAdv, saveDis, skillPts,
+    stats, saveAdv, saveDis, skillPts, skillTotals,
     hp: { cur: num(v('hp-cur')), max: num(v('hp-max')), temp: num(v('hp-temp')) }, wounds, woundsMax: num(v('wounds-max')),
     hitDice: { cur: num(v('hd-cur')), max: num(v('hd-max')) }, mana: { cur: num(v('mana-cur')), max: num(v('mana-max')) },
     armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions,
