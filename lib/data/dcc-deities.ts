@@ -51,7 +51,7 @@ export const DCC_DEITIES: DccDeity[] = [
     "sponsor": "Huanxin Jinx",
     "signatureSkills": [
       "Wisp Armor Spell",
-      "Heal Other Spell"
+      "Heal Others Spell"
     ],
     "signatureStat": "CON",
     "symbol": "A blooming flower",
@@ -73,7 +73,7 @@ export const DCC_DEITIES: DccDeity[] = [
       {
         "tier": "Zealot",
         "benefits": [
-          "Rank 10 Heal Other Spell. If already at Rank 10 or higher, +2 Heal Other Spell",
+          "Rank 10 Heal Others Spell. If already at Rank 10 or higher, +2 Heal Others Spell",
           "Double CON Mod to Health Bars for a 4-hour period, once per day",
           "Gain Rank 20 Wisp Armor Spell once per day"
         ]

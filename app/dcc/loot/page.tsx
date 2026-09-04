@@ -8,7 +8,7 @@ import DccHomebrew from "@/components/DccHomebrew";
 
 export const dynamic = "force-dynamic";
 
-type Query = { q?: string; cat?: string; tier?: string; src?: string };
+type Query = { q?: string; cat?: string; tier?: string; src?: string; sort?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -29,6 +29,14 @@ const CATEGORIES: { key: DccItem["category"]; label: string }[] = [
 const CAT_KEYS = CATEGORIES.map((c) => c.key) as string[];
 // Tier order, rarest last; only those that appear on items are shown as chips.
 const TIER_ORDER = ["Mundane", "Bronze", "Silver", "Gold", "Platinum", "Legendary", "Celestial"];
+
+const SORTS: { key: string; label: string; cmp: (a: Row, b: Row) => number }[] = [
+  { key: "", label: "Name", cmp: (a, b) => a.name.localeCompare(b.name, "en") },
+  { key: "tier", label: "Tier", cmp: (a, b) =>
+      (TIER_ORDER.indexOf(a.tier ?? "") + 1 || 99) - (TIER_ORDER.indexOf(b.tier ?? "") + 1 || 99) || a.name.localeCompare(b.name, "en") },
+  { key: "price", label: "Price", cmp: (a, b) =>
+      (b.price ?? -1) - (a.price ?? -1) || a.name.localeCompare(b.name, "en") },
+];
 
 const TIER_COLOR: Record<string, string> = {
   Bronze: "#c88a5a", Silver: "#c7ccd1", Gold: "#e6c15a", Platinum: "#9fd6e6",
@@ -61,6 +69,7 @@ function withParams(current: Query, patch: Query): string {
   if (next.cat) sp.set("cat", next.cat);
   if (next.tier) sp.set("tier", next.tier);
   if (next.src) sp.set("src", next.src);
+  if (next.sort) sp.set("sort", next.sort);
   const s = sp.toString();
   return s ? `/dcc/loot?${s}` : "/dcc/loot";
 }
@@ -105,10 +114,13 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
   const activeCat = CATEGORIES.some((c) => c.key === cat) ? cat : "";
   const activeTier = TIERS.includes(tier) ? tier : "";
   const activeSrc = src === "hb" || src === "book" ? src : "";
+  const sort = one(raw.sort);
+  const activeSort = SORTS.some((s) => s.key === sort && s.key) ? sort : "";
+  const cmp = (SORTS.find((s) => s.key === activeSort) ?? SORTS[0]).cmp;
 
-  const results = ALL_ROWS.filter((it) => matches(it, needle, activeCat, activeTier, activeSrc));
+  const results = ALL_ROWS.filter((it) => matches(it, needle, activeCat, activeTier, activeSrc)).sort(cmp);
   const filtered = Boolean(needle || activeCat || activeTier || activeSrc);
-  const current: Query = { q: q.trim(), cat: activeCat, tier: activeTier, src: activeSrc };
+  const current: Query = { q: q.trim(), cat: activeCat, tier: activeTier, src: activeSrc, sort: activeSort };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -134,12 +146,14 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
           type="search"
           name="q"
           defaultValue={q}
+          aria-label="Search items"
           placeholder="Search name, effect, or slot…"
           className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--red)]"
         />
         {activeCat ? <input type="hidden" name="cat" value={activeCat} /> : null}
         {activeTier ? <input type="hidden" name="tier" value={activeTier} /> : null}
         {activeSrc ? <input type="hidden" name="src" value={activeSrc} /> : null}
+        {activeSort ? <input type="hidden" name="sort" value={activeSort} /> : null}
         <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]">
           Search
         </button>
@@ -172,6 +186,13 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
         <Link href={withParams(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
       </div>
 
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Sort</span>
+        {SORTS.map((s) => (
+          <Link key={s.key || "name"} href={withParams(current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
+        ))}
+      </div>
+
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
         <span>{results.length} {results.length === 1 ? "item" : "items"}</span>
         {filtered ? <Link href="/dcc/loot" className="text-[var(--red)] hover:underline">Clear filters</Link> : null}
@@ -199,7 +220,7 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
                   </span>
                 </div>
                 <div className="mt-1 flex flex-wrap gap-1.5">
-                  {it.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
+                  {it.homebrew ? <span className={hbBadge}>Homebrew</span> : (it.source ? <span className={badge}>{it.source}{it.page ? ` · p.${it.page}` : ""}</span> : null)}
                   {it.tier ? (
                     <span className="rounded border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]" style={{ borderColor: TIER_COLOR[it.tier] ?? "var(--border)", color: TIER_COLOR[it.tier] ?? "var(--muted)" }}>
                       {it.tier}

@@ -8,7 +8,7 @@ import DccHomebrewEditor from "@/components/DccHomebrewEditor";
 
 export const dynamic = "force-dynamic";
 
-type Query = { q?: string; role?: string; src?: string };
+type Query = { q?: string; role?: string; src?: string; sort?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -20,10 +20,28 @@ const SIZE_NAMES: Record<number, string> = {
 // Bosses first (they anchor an encounter), then mobs; by level within a role.
 const ROLE_RANK: Record<string, number> = {
   "Floor Boss": 0, "Country Boss": 1, "Province Boss": 2, "City Boss": 3,
-  "Borough Boss": 4, "Neighborhood Boss": 5, "Rival Crawler": 6, "Mob": 7, "NPC": 8,
+  "Borough Boss": 4, "Neighborhood Boss": 5, "Quest Boss": 5.5, "Rival Crawler": 6,
+  "Elite": 6.5, "Mob": 7, "NPC": 8,
 };
-const byMonster = (a: DccMonster, b: DccMonster) =>
+const byRole = (a: DccMonster, b: DccMonster) =>
   (ROLE_RANK[a.role] ?? 9) - (ROLE_RANK[b.role] ?? 9) || a.level - b.level || a.name.localeCompare(b.name, "en");
+const byLevel = (a: DccMonster, b: DccMonster) =>
+  a.level - b.level || a.name.localeCompare(b.name, "en");
+const byName = (a: DccMonster, b: DccMonster) => a.name.localeCompare(b.name, "en");
+const SORTS: { key: string; label: string; cmp: (a: DccMonster, b: DccMonster) => number }[] = [
+  { key: "", label: "Role", cmp: byRole },
+  { key: "level", label: "Level", cmp: byLevel },
+  { key: "name", label: "Name", cmp: byName },
+];
+
+// Homebrew records are unvalidated JSON; keep only those with the shape the card
+// dereferences so one malformed entry can't crash the whole list.
+function validMonster(m: unknown): m is DccMonster {
+  const x = m as Record<string, unknown>;
+  return !!x && typeof x.name === "string" && Array.isArray(x.tags) && Array.isArray(x.attacks)
+    && Array.isArray(x.notes) && Array.isArray(x.hbSlots) && !!x.stats
+    && STAT_ORDER.every((s) => !!(x.stats as Record<string, { score?: unknown }>)[s]);
+}
 
 // Group the many boss tiers into one "Boss" filter plus Mob / Rival Crawler.
 const ROLE_FILTERS: { key: string; label: string; test: (r: DccMonster["role"]) => boolean }[] = [
@@ -39,6 +57,7 @@ function withParams(current: Query, patch: Query): string {
   if (next.q) sp.set("q", next.q);
   if (next.role) sp.set("role", next.role);
   if (next.src) sp.set("src", next.src);
+  if (next.sort) sp.set("sort", next.sort);
   const s = sp.toString();
   return s ? `/dcc/bestiary?${s}` : "/dcc/bestiary";
 }
@@ -68,6 +87,8 @@ const chipOff =
 const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
 const hbBadge =
   "rounded border border-[var(--red)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#f0a8a3]";
+const srcBadge =
+  "rounded border border-[var(--border)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]";
 
 // Health-bar segment colour, red→orange→yellow→green across the bar — mirrors the
 // GM screen tracker's dccSegColor so a creature reads the same in both places.
@@ -89,21 +110,24 @@ export default async function DccBestiaryPage({
     ownHomebrew(user.id, "dcc-monster"),
     userCampaigns(user.id),
   ]);
-  const hbRows = hbVisible.map((h) => h.data as unknown as DccMonster);
-  const ALL_MONSTERS = [...hbRows, ...DCC_MONSTERS].sort(byMonster);
+  const hbRows = hbVisible.map((h) => h.data as unknown as DccMonster).filter(validMonster);
   const homebrewCount = hbRows.length;
 
   const raw = await searchParams;
   const q = one(raw.q);
   const role = one(raw.role);
   const src = one(raw.src);
+  const sort = one(raw.sort);
   const needle = q.trim().toLowerCase();
   const activeRole = ROLE_FILTERS.some((r) => r.key === role) ? role : "";
   const activeSrc = src === "hb" || src === "book" ? src : "";
+  const activeSort = SORTS.some((s) => s.key === sort && s.key) ? sort : "";
+  const cmp = (SORTS.find((s) => s.key === activeSort) ?? SORTS[0]).cmp;
 
+  const ALL_MONSTERS = [...hbRows, ...DCC_MONSTERS].sort(cmp);
   const results = ALL_MONSTERS.filter((m) => matches(m, needle, activeRole, activeSrc));
   const filtered = Boolean(needle || activeRole || activeSrc);
-  const current: Query = { q: q.trim(), role: activeRole, src: activeSrc };
+  const current: Query = { q: q.trim(), role: activeRole, src: activeSrc, sort: activeSort };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -132,11 +156,13 @@ export default async function DccBestiaryPage({
           type="search"
           name="q"
           defaultValue={q}
+          aria-label="Search creatures"
           placeholder="Search name, tag, attack, or ability…"
           className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--red)]"
         />
         {activeRole ? <input type="hidden" name="role" value={activeRole} /> : null}
         {activeSrc ? <input type="hidden" name="src" value={activeSrc} /> : null}
+        {activeSort ? <input type="hidden" name="sort" value={activeSort} /> : null}
         <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]">
           Search
         </button>
@@ -165,6 +191,13 @@ export default async function DccBestiaryPage({
         <Link href={withParams(current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
         <Link href={withParams(current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
         <Link href={withParams(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Sort</span>
+        {SORTS.map((s) => (
+          <Link key={s.key || "role"} href={withParams(current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
+        ))}
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
@@ -200,7 +233,7 @@ export default async function DccBestiaryPage({
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
                     {m.role} · {SIZE_NAMES[m.size] ?? `Size ${m.size}`} · Level {m.level}
                   </span>
-                  {hb ? <span className={hbBadge}>Homebrew</span> : null}
+                  {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{m.source}{m.page ? ` · p.${m.page}` : ""}</span>}
                 </div>
 
                 {m.tags.length ? (

@@ -8,7 +8,7 @@ import DccHomebrewEditor from "@/components/DccHomebrewEditor";
 
 export const dynamic = "force-dynamic";
 
-type Query = { q?: string; group?: string; src?: string };
+type Query = { q?: string; group?: string; src?: string; sort?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -20,6 +20,11 @@ const SIZE_NAMES: Record<number, string> = {
 const GROUP_RANK: Record<DccRace["group"], number> = { Earth: 0, Alien: 1 };
 const byRace = (a: DccRace, b: DccRace) =>
   GROUP_RANK[a.group] - GROUP_RANK[b.group] || a.name.localeCompare(b.name, "en");
+const SORTS: { key: string; label: string; cmp: (a: DccRace, b: DccRace) => number }[] = [
+  { key: "", label: "Origin", cmp: byRace },
+  { key: "name", label: "Name", cmp: (a, b) => a.name.localeCompare(b.name, "en") },
+  { key: "size", label: "Size", cmp: (a, b) => a.size - b.size || a.name.localeCompare(b.name, "en") },
+];
 
 const GROUPS: { key: DccRace["group"]; label: string }[] = [
   { key: "Earth", label: "Earth" },
@@ -32,6 +37,7 @@ function withParams(current: Query, patch: Query): string {
   if (next.q) sp.set("q", next.q);
   if (next.group) sp.set("group", next.group);
   if (next.src) sp.set("src", next.src);
+  if (next.sort) sp.set("sort", next.sort);
   const s = sp.toString();
   return s ? `/dcc/races?${s}` : "/dcc/races";
 }
@@ -51,6 +57,14 @@ const chipOff =
 const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
 const hbBadge =
   "rounded border border-[var(--red)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#f0a8a3]";
+const srcBadge =
+  "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
+
+// Homebrew is unvalidated JSON — keep only records with the shape the card reads.
+function validRace(r: unknown): r is DccRace {
+  const x = r as Record<string, unknown>;
+  return !!x && typeof x.name === "string" && Array.isArray(x.grants);
+}
 
 export default async function DccRacesPage({
   searchParams,
@@ -65,8 +79,8 @@ export default async function DccRacesPage({
     ownHomebrew(user.id, "dcc-race"),
     userCampaigns(user.id),
   ]);
-  const hbRows = hbVisible.map((h) => h.data as unknown as DccRace);
-  const ALL_RACES = [...hbRows, ...DCC_RACES].sort(byRace);
+  const hbRows = hbVisible.map((h) => h.data as unknown as DccRace).filter(validRace);
+  const ALL_RACES = [...hbRows, ...DCC_RACES];
   const homebrewCount = hbRows.length;
 
   const raw = await searchParams;
@@ -76,10 +90,13 @@ export default async function DccRacesPage({
   const needle = q.trim().toLowerCase();
   const activeGroup = GROUPS.some((g) => g.key === group) ? group : "";
   const activeSrc = src === "hb" || src === "book" ? src : "";
+  const sort = one(raw.sort);
+  const activeSort = SORTS.some((s) => s.key === sort && s.key) ? sort : "";
+  const cmp = (SORTS.find((s) => s.key === activeSort) ?? SORTS[0]).cmp;
 
-  const results = ALL_RACES.filter((r) => matches(r, needle, activeGroup, activeSrc));
+  const results = ALL_RACES.filter((r) => matches(r, needle, activeGroup, activeSrc)).sort(cmp);
   const filtered = Boolean(needle || activeGroup || activeSrc);
-  const current: Query = { q: q.trim(), group: activeGroup, src: activeSrc };
+  const current: Query = { q: q.trim(), group: activeGroup, src: activeSrc, sort: activeSort };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -108,11 +125,13 @@ export default async function DccRacesPage({
           type="search"
           name="q"
           defaultValue={q}
+          aria-label="Search races"
           placeholder="Search name or trait…"
           className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--red)]"
         />
         {activeGroup ? <input type="hidden" name="group" value={activeGroup} /> : null}
         {activeSrc ? <input type="hidden" name="src" value={activeSrc} /> : null}
+        {activeSort ? <input type="hidden" name="sort" value={activeSort} /> : null}
         <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]">
           Search
         </button>
@@ -141,6 +160,13 @@ export default async function DccRacesPage({
         <Link href={withParams(current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
         <Link href={withParams(current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
         <Link href={withParams(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Sort</span>
+        {SORTS.map((s) => (
+          <Link key={s.key || "origin"} href={withParams(current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
+        ))}
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
@@ -176,7 +202,7 @@ export default async function DccRacesPage({
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
                     {r.group} · {SIZE_NAMES[r.size] ?? `Size ${r.size}`}
                   </span>
-                  {hb ? <span className={hbBadge}>Homebrew</span> : null}
+                  {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{r.source}{r.page ? ` · p.${r.page}` : ""}</span>}
                 </div>
 
                 {r.prerequisites ? (

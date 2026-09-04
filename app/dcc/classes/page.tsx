@@ -8,7 +8,7 @@ import DccHomebrewEditor from "@/components/DccHomebrewEditor";
 
 export const dynamic = "force-dynamic";
 
-type Query = { q?: string; cat?: string; src?: string };
+type Query = { q?: string; cat?: string; src?: string; sort?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -23,9 +23,15 @@ function withParams(current: Query, patch: Query): string {
   if (next.q) sp.set("q", next.q);
   if (next.cat) sp.set("cat", next.cat);
   if (next.src) sp.set("src", next.src);
+  if (next.sort) sp.set("sort", next.sort);
   const s = sp.toString();
   return s ? `/dcc/classes?${s}` : "/dcc/classes";
 }
+
+const SORTS: { key: string; label: string; cmp: (a: DccClass, b: DccClass) => number }[] = [
+  { key: "", label: "Name", cmp: (a, b) => a.name.localeCompare(b.name, "en") },
+  { key: "type", label: "Type", cmp: (a, b) => (a.categories[0] ?? "").localeCompare(b.categories[0] ?? "", "en") || a.name.localeCompare(b.name, "en") },
+];
 
 function matches(c: DccClass, q: string, cat: string, src: string): boolean {
   if (cat && !c.categories.includes(cat)) return false;
@@ -46,6 +52,14 @@ const chipOff =
 const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
 const hbBadge =
   "rounded border border-[var(--red)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#f0a8a3]";
+const srcBadge =
+  "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
+
+// Homebrew is unvalidated JSON — keep only records with the shape the card reads.
+function validClass(c: unknown): c is DccClass {
+  const x = c as Record<string, unknown>;
+  return !!x && typeof x.name === "string" && Array.isArray(x.categories) && Array.isArray(x.grants);
+}
 
 export default async function DccClassesPage({
   searchParams,
@@ -60,8 +74,8 @@ export default async function DccClassesPage({
     ownHomebrew(user.id, "dcc-class"),
     userCampaigns(user.id),
   ]);
-  const hbRows = hbVisible.map((h) => h.data as unknown as DccClass);
-  const ALL_CLASSES = [...hbRows, ...DCC_CLASSES].sort((a, b) => a.name.localeCompare(b.name, "en"));
+  const hbRows = hbVisible.map((h) => h.data as unknown as DccClass).filter(validClass);
+  const ALL_CLASSES = [...hbRows, ...DCC_CLASSES];
   const homebrewCount = hbRows.length;
 
   const CATEGORIES = [...new Set(ALL_CLASSES.flatMap((c) => c.categories))].sort((a, b) => {
@@ -77,10 +91,13 @@ export default async function DccClassesPage({
   const needle = q.trim().toLowerCase();
   const activeCat = CATEGORIES.includes(cat) ? cat : "";
   const activeSrc = src === "hb" || src === "book" ? src : "";
+  const sort = one(raw.sort);
+  const activeSort = SORTS.some((s) => s.key === sort && s.key) ? sort : "";
+  const cmp = (SORTS.find((s) => s.key === activeSort) ?? SORTS[0]).cmp;
 
-  const results = ALL_CLASSES.filter((c) => matches(c, needle, activeCat, activeSrc));
+  const results = ALL_CLASSES.filter((c) => matches(c, needle, activeCat, activeSrc)).sort(cmp);
   const filtered = Boolean(needle || activeCat || activeSrc);
-  const current: Query = { q: q.trim(), cat: activeCat, src: activeSrc };
+  const current: Query = { q: q.trim(), cat: activeCat, src: activeSrc, sort: activeSort };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
@@ -109,11 +126,13 @@ export default async function DccClassesPage({
           type="search"
           name="q"
           defaultValue={q}
+          aria-label="Search classes"
           placeholder="Search name, type, or benefit…"
           className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--red)]"
         />
         {activeCat ? <input type="hidden" name="cat" value={activeCat} /> : null}
         {activeSrc ? <input type="hidden" name="src" value={activeSrc} /> : null}
+        {activeSort ? <input type="hidden" name="sort" value={activeSort} /> : null}
         <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]">
           Search
         </button>
@@ -142,6 +161,13 @@ export default async function DccClassesPage({
         <Link href={withParams(current, { src: "" })} className={`${chipBase} ${activeSrc ? chipOff : chipOn}`}>All</Link>
         <Link href={withParams(current, { src: "book" })} className={`${chipBase} ${activeSrc === "book" ? chipOn : chipOff}`}>Official</Link>
         <Link href={withParams(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Sort</span>
+        {SORTS.map((s) => (
+          <Link key={s.key || "name"} href={withParams(current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
+        ))}
       </div>
 
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
@@ -177,7 +203,7 @@ export default async function DccClassesPage({
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
                     {c.categories.join(" / ")}
                   </span>
-                  {hb ? <span className={hbBadge}>Homebrew</span> : null}
+                  {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{c.source}{c.page ? ` · p.${c.page}` : ""}</span>}
                   {c.earthClass ? (
                     <span className="rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
                       Earth Class

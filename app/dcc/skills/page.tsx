@@ -8,7 +8,7 @@ import DccHomebrewEditor from "@/components/DccHomebrewEditor";
 
 export const dynamic = "force-dynamic";
 
-type Query = { q?: string; cat?: string; group?: string; src?: string };
+type Query = { q?: string; cat?: string; group?: string; src?: string; sort?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -16,6 +16,18 @@ const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v
 const CAT_RANK: Record<DccSkill["category"], number> = { attack: 0, utility: 1 };
 const bySkill = (a: DccSkill, b: DccSkill) =>
   CAT_RANK[a.category] - CAT_RANK[b.category] || a.name.localeCompare(b.name, "en");
+// Sort by biggest damage die (then die count), non-damage skills last.
+const dieVal = (d?: string) => {
+  const m = String(d ?? "").match(/(\d*)d(\d+)/i);
+  return m ? parseInt(m[2], 10) * 100 + (parseInt(m[1] || "1", 10)) : -1;
+};
+const bySkillName = (a: DccSkill, b: DccSkill) => a.name.localeCompare(b.name, "en");
+const bySkillDamage = (a: DccSkill, b: DccSkill) => dieVal(b.damage) - dieVal(a.damage) || a.name.localeCompare(b.name, "en");
+const SORTS: { key: string; label: string; cmp: (a: DccSkill, b: DccSkill) => number }[] = [
+  { key: "", label: "Category", cmp: bySkill },
+  { key: "name", label: "Name", cmp: bySkillName },
+  { key: "damage", label: "Damage", cmp: bySkillDamage },
+];
 
 const CATEGORIES: { key: DccSkill["category"]; label: string; noun: string; plural: string }[] = [
   { key: "attack", label: "Attack", noun: "attack skill", plural: "attack skills" },
@@ -41,6 +53,7 @@ function withParams(current: Query, patch: Query): string {
   if (next.cat) sp.set("cat", next.cat);
   if (next.group) sp.set("group", next.group);
   if (next.src) sp.set("src", next.src);
+  if (next.sort) sp.set("sort", next.sort);
   const s = sp.toString();
   return s ? `/dcc/skills?${s}` : "/dcc/skills";
 }
@@ -67,6 +80,14 @@ const badge =
   "rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold tracking-[0.08em] text-[var(--muted)]";
 const hbBadge =
   "rounded border border-[var(--red)] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#f0a8a3]";
+const srcBadge =
+  "rounded border border-[var(--border)] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]";
+
+// Homebrew is unvalidated JSON — keep only records with the shape the card reads.
+function validSkill(s: unknown): s is DccSkill {
+  const x = s as Record<string, unknown>;
+  return !!x && typeof x.name === "string" && Array.isArray(x.upgrades);
+}
 
 function Badge({ label, value }: { label: string; value: string }) {
   return (
@@ -89,8 +110,8 @@ export default async function DccSkillsPage({
     ownHomebrew(user.id, "dcc-skill"),
     userCampaigns(user.id),
   ]);
-  const hbRows = hbVisible.map((h) => h.data as unknown as DccSkill);
-  const ALL_SKILLS = [...hbRows, ...DCC_SKILLS].sort(bySkill);
+  const hbRows = hbVisible.map((h) => h.data as unknown as DccSkill).filter(validSkill);
+  const ALL_SKILLS = [...hbRows, ...DCC_SKILLS];
   const homebrewCount = hbRows.length;
 
   // Groups from both book and homebrew skills, ordered by the book's grouping.
@@ -110,10 +131,13 @@ export default async function DccSkillsPage({
   // The group filter only makes sense alongside attack skills; ignore it otherwise.
   const activeGroup = GROUPS.includes(group) && activeCat !== "utility" ? group : "";
   const activeSrc = src === "hb" || src === "book" ? src : "";
+  const sort = one(raw.sort);
+  const activeSort = SORTS.some((s) => s.key === sort && s.key) ? sort : "";
+  const cmp = (SORTS.find((s) => s.key === activeSort) ?? SORTS[0]).cmp;
 
-  const results = ALL_SKILLS.filter((s) => matches(s, needle, activeCat, activeGroup, activeSrc));
+  const results = ALL_SKILLS.filter((s) => matches(s, needle, activeCat, activeGroup, activeSrc)).sort(cmp);
   const filtered = Boolean(needle || activeCat || activeGroup || activeSrc);
-  const current: Query = { q: q.trim(), cat: activeCat, group: activeGroup, src: activeSrc };
+  const current: Query = { q: q.trim(), cat: activeCat, group: activeGroup, src: activeSrc, sort: activeSort };
   const activeMeta = CATEGORIES.find((c) => c.key === activeCat);
   const noun = activeMeta?.noun ?? "skill";
   const plural = activeMeta?.plural ?? "skills";
@@ -145,12 +169,14 @@ export default async function DccSkillsPage({
           type="search"
           name="q"
           defaultValue={q}
+          aria-label="Search skills"
           placeholder="Search name or effect…"
           className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--red)]"
         />
         {activeCat ? <input type="hidden" name="cat" value={activeCat} /> : null}
         {activeGroup ? <input type="hidden" name="group" value={activeGroup} /> : null}
         {activeSrc ? <input type="hidden" name="src" value={activeSrc} /> : null}
+        {activeSort ? <input type="hidden" name="sort" value={activeSort} /> : null}
         <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)]">
           Search
         </button>
@@ -207,6 +233,13 @@ export default async function DccSkillsPage({
         <Link href={withParams(current, { src: "hb" })} className={`${chipBase} ${activeSrc === "hb" ? chipOn : chipOff}`}>Homebrew</Link>
       </div>
 
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">Sort</span>
+        {SORTS.map((s) => (
+          <Link key={s.key || "cat"} href={withParams(current, { sort: s.key })} className={`${chipBase} ${activeSort === s.key ? chipOn : chipOff}`}>{s.label}</Link>
+        ))}
+      </div>
+
       <div className="mb-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
         <span>
           {results.length} {results.length === 1 ? noun : plural}
@@ -243,7 +276,7 @@ export default async function DccSkillsPage({
                 </div>
 
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {hb ? <span className={hbBadge}>Homebrew</span> : null}
+                  {hb ? <span className={hbBadge}>Homebrew</span> : <span className={srcBadge}>{s.source}{s.page ? ` · p.${s.page}` : ""}</span>}
                   {s.passive ? <span className={badge}><span className="text-[var(--text)]">Passive</span></span> : null}
                   {s.interrupt ? <span className={badge}><span className="text-[var(--text)]">Interrupt</span></span> : null}
                   {s.damage ? <Badge label="Damage" value={s.damage + (s.damageType ? ` ${s.damageType}` : "")} /> : null}

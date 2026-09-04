@@ -5,7 +5,10 @@
     "offering": "A single tear shed in sadness",
     "rival": "Nekhebit",
     "sponsor": "The Dream",
-    "signatureSkills": ["Catcher", "Shield Spell"],
+    "signatureSkills": [
+      "Catcher",
+      "Shield Spell"
+    ],
     "signatureStat": "INT",
     "symbol": "Wooden face of a beautiful woman, with green hair shaped like leaves and tree branches cascading down her neck",
     "tiers": [
@@ -41,7 +44,10 @@
     "offering": "A petal from a blooming flower",
     "rival": "Grull",
     "sponsor": "Huanxin Jinx",
-    "signatureSkills": ["Wisp Armor Spell", "Heal Other Spell"],
+    "signatureSkills": [
+      "Wisp Armor Spell",
+      "Heal Others Spell"
+    ],
     "signatureStat": "CON",
     "symbol": "A blooming flower",
     "tiers": [
@@ -62,7 +68,7 @@
       {
         "tier": "Zealot",
         "benefits": [
-          "Rank 10 Heal Other Spell. If already at Rank 10 or higher, +2 Heal Other Spell",
+          "Rank 10 Heal Others Spell. If already at Rank 10 or higher, +2 Heal Others Spell",
           "Double CON Mod to Health Bars for a 4-hour period, once per day",
           "Gain Rank 20 Wisp Armor Spell once per day"
         ]
@@ -77,7 +83,10 @@
     "offering": "A single drop of blood",
     "rival": "Hellik",
     "sponsor": "Lemig Sortion",
-    "signatureSkills": ["Morning Star (Club) Skill", "Fire Fingers Spell"],
+    "signatureSkills": [
+      "Morning Star (Club) Skill",
+      "Fire Fingers Spell"
+    ],
     "signatureStat": "CON",
     "symbol": "A circular sun disk with triangular rays",
     "tiers": [
@@ -113,7 +122,10 @@
     "offering": "A secret never previously shared with anyone else",
     "rival": "Oshun",
     "sponsor": "Helene Jbarska",
-    "signatureSkills": ["Deception Skill", "Grand Illusion Spell"],
+    "signatureSkills": [
+      "Deception Skill",
+      "Grand Illusion Spell"
+    ],
     "signatureStat": "CHA",
     "symbol": "A spinning five-sided coin",
     "tiers": [
@@ -149,7 +161,10 @@
     "offering": "A drop of blood (or blood equivalent) from a slain enemy",
     "rival": "Eileithyia",
     "sponsor": "Skull Empire (in general) or Prince Maestro (specifically)",
-    "signatureSkills": ["Iron Punch Skill", "Pugilism Skill"],
+    "signatureSkills": [
+      "Iron Punch Skill",
+      "Pugilism Skill"
+    ],
     "signatureStat": "STR",
     "symbol": "A double-headed axe with an oak tree for a handle",
     "tiers": [
@@ -185,7 +200,10 @@
     "offering": "None required",
     "rival": "Emberus",
     "sponsor": "Viceroys (The Madness) or Ripper Wonton",
-    "signatureSkills": ["Taunt Skill", "Second Chance Spell"],
+    "signatureSkills": [
+      "Taunt Skill",
+      "Second Chance Spell"
+    ],
     "signatureStat": "CHA",
     "symbol": "A sun shining on a field of crops",
     "tiers": [
@@ -221,7 +239,10 @@
     "offering": "A cup of cold water",
     "rival": "Apito",
     "sponsor": "Odette",
-    "signatureSkills": ["First Aid Skill", "Salvage Skill"],
+    "signatureSkills": [
+      "First Aid Skill",
+      "Salvage Skill"
+    ],
     "signatureStat": "INT",
     "symbol": "The bare head of a large vulture",
     "tiers": [
@@ -257,7 +278,10 @@
     "offering": "A piece of steel",
     "rival": "Legba",
     "sponsor": "The Dreadnoughts",
-    "signatureSkills": ["Warhammer Skill", "Smithing Skill"],
+    "signatureSkills": [
+      "Warhammer Skill",
+      "Smithing Skill"
+    ],
     "signatureStat": "STR",
     "symbol": "A large blacksmith's hammer",
     "tiers": [
@@ -293,7 +317,10 @@
     "offering": "A jolt of electricity",
     "rival": "Emberus",
     "sponsor": "Monty Winter Jr",
-    "signatureSkills": ["Dodge Skill", "Lightning Bolt Spell"],
+    "signatureSkills": [
+      "Dodge Skill",
+      "Lightning Bolt Spell"
+    ],
     "signatureStat": "DEX",
     "symbol": "A jagged, silver lightning bolt",
     "tiers": [

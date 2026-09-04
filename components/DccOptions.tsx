@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 import { DCC_DEITIES } from "@/lib/data/dcc-deities";
 import { DCC_DEBUFFS } from "@/lib/data/dcc-debuffs";
 import { DCC_BUFFS } from "@/lib/data/dcc-buffs";
 import { DCC_EXPERIENCES } from "@/lib/data/dcc-experiences";
 import { DCC_BACKGROUNDS } from "@/lib/data/dcc-backgrounds";
+import { DCC_SKILLS } from "@/lib/data/dcc-skills";
+import { DCC_SPELLS } from "@/lib/data/dcc-spells";
 import type {
   DccDeity,
   DccDebuff,
@@ -103,6 +106,41 @@ function splitName(full: string): { name: string; epithet: string } {
   return i === -1 ? { name: full, epithet: "" } : { name: full.slice(0, i), epithet: full.slice(i + 1).trim() };
 }
 
+// ── Cross-linking: a listed skill/spell name → its reference page (D1). We match
+// on a normalized key (drop parentheticals, a trailing "Skill"/"Spell", punctuation)
+// so "Warhammer Skill" and "Heal Others Spell" resolve to the real entries.
+const linkNorm = (s: string): string =>
+  s.toLowerCase().replace(/\s*\(.*?\)\s*/g, " ").replace(/\s+(skill|spell)s?$/i, "").replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+const REF_LOOKUP = new Map<string, { page: "skills" | "spells"; name: string }>();
+for (const s of DCC_SPELLS) REF_LOOKUP.set(linkNorm(s.name), { page: "spells", name: s.name });
+for (const s of DCC_SKILLS) REF_LOOKUP.set(linkNorm(s.name), { page: "skills", name: s.name }); // skills win on a name clash
+
+// Render a comma list of skill/spell names, linking the ones that resolve to a
+// reference-page entry and leaving freeform "…of choice" perks as plain text.
+function SkillLinks({ names }: { names: string[] }): ReactNode {
+  return (
+    <>
+      {names.map((raw, i) => {
+        const hit = REF_LOOKUP.get(linkNorm(raw));
+        const tail = i < names.length - 1 ? ", " : "";
+        return hit ? (
+          <span key={i}>
+            <Link
+              href={`/dcc/${hit.page}?q=${encodeURIComponent(hit.name)}`}
+              className="text-[#f0a8a3] underline decoration-dotted underline-offset-2 hover:text-[var(--text)]"
+            >
+              {raw}
+            </Link>
+            {tail}
+          </span>
+        ) : (
+          <span key={i}>{raw}{tail}</span>
+        );
+      })}
+    </>
+  );
+}
+
 // ── per-tab renderers ───────────────────────────────────────────────────────
 function DeitiesSection({ q }: { q: string }): ReactNode {
   const [stat, setStat] = useState("");
@@ -143,7 +181,7 @@ function DeitiesSection({ q }: { q: string }): ReactNode {
               {d.signatureSkills.length ? (
                 <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">
                   <span className="font-semibold uppercase tracking-[0.08em] text-[var(--text)]">Signature skills:</span>{" "}
-                  {d.signatureSkills.join(", ")}
+                  <SkillLinks names={d.signatureSkills} />
                 </p>
               ) : null}
               {d.symbol ? (
@@ -237,7 +275,7 @@ function ExperiencesSection({ q }: { q: string }): ReactNode {
             <p className="mt-0.5 text-[12px] italic text-[var(--muted)]">{e.table}</p>
             {e.desc ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{e.desc}</p> : null}
             <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">
-              <span className="font-semibold uppercase tracking-[0.08em] text-[var(--text)]">Skills (pick 2):</span> {e.skills.join(", ")}
+              <span className="font-semibold uppercase tracking-[0.08em] text-[var(--text)]">Skills (pick 2):</span> <SkillLinks names={e.skills} />
             </p>
           </Card>
         ))}
@@ -274,7 +312,7 @@ function BackgroundsSection({ q }: { q: string }): ReactNode {
               }
             />
             <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">
-              <span className="font-semibold uppercase tracking-[0.08em] text-[var(--text)]">Skills (pick 2):</span> {b.skills.join(", ")}
+              <span className="font-semibold uppercase tracking-[0.08em] text-[var(--text)]">Skills (pick 2):</span> <SkillLinks names={b.skills} />
             </p>
           </Card>
         ))}
@@ -322,6 +360,7 @@ export default function DccOptions(): ReactNode {
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
+          aria-label="Search options"
           placeholder="Search this section…"
           className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--red)]"
         />
