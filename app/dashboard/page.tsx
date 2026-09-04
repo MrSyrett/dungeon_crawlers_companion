@@ -46,10 +46,10 @@ const DCC_REFERENCE: { href: string; label: string }[] = [
   { href: "/dcc/races", label: "Races" },
   { href: "/dcc/skills", label: "Skills" },
   { href: "/dcc/spells", label: "Spells" },
-  { href: "/dcc/loot", label: "Loot & Gear" },
+  { href: "/dcc/loot", label: "Loot" },
   { href: "/dcc/bestiary", label: "Bestiary" },
   { href: "/dcc/options", label: "Options" },
-  { href: "/dcc/reference", label: "Reference" },
+  { href: "/dcc/reference", label: "Rules" },
 ];
 
 // ACE! reference pages — they read Awfully Cheerful Engine! data and lead the

@@ -2,14 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DCC_ITEMS } from "@/lib/data/dcc-items";
-import { DCC_LOOT } from "@/lib/data/dcc-loot";
 import type { DccItem } from "@/lib/data/dcc-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import DccHomebrew from "@/components/DccHomebrew";
 
 export const dynamic = "force-dynamic";
 
-type Query = { q?: string; cat?: string; tier?: string; src?: string; sort?: string; theme?: string; view?: string };
+type Query = { q?: string; cat?: string; tier?: string; src?: string; sort?: string; theme?: string };
 type RawQuery = { [K in keyof Query]?: string | string[] };
 const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -74,7 +73,6 @@ function withParams(current: Query, patch: Query): string {
   if (next.src) sp.set("src", next.src);
   if (next.sort) sp.set("sort", next.sort);
   if (next.theme) sp.set("theme", next.theme);
-  if (next.view) sp.set("view", next.view);
   const s = sp.toString();
   return s ? `/dcc/loot?${s}` : "/dcc/loot";
 }
@@ -94,90 +92,6 @@ const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--
 const chipOn = "border-[var(--red)] bg-[var(--panel-2)] text-[#f0a8a3]";
 const badge = "rounded border border-[var(--border)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--muted)]";
 const hbBadge = "rounded border border-[var(--red)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#f0a8a3]";
-
-// Treasure-table reference (C2): renders the authored DCC_LOOT dataset — loot tiers,
-// gold-by-floor, and the drop tables (Tables 38–42) — none of which the item browser shows.
-function TreasureTables() {
-  const cellHead = "px-2.5 py-1.5 text-left text-[10px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]";
-  const cell = "px-2.5 py-1.5 align-top text-[13px] text-[var(--text)]";
-  const wrap = "overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--panel)]";
-  return (
-    <div className="flex flex-col gap-8">
-      <section>
-        <h2 className="mb-2 text-base font-bold uppercase tracking-[0.15em] text-[#f0a8a3]">Loot Tiers</h2>
-        <div className={wrap}>
-          <table className="w-full border-collapse">
-            <thead><tr className="border-b border-[var(--border)]">
-              <th className={cellHead}>Tier</th><th className={cellHead}>Gear Rolls</th><th className={cellHead}>Gold</th><th className={cellHead}>Enchant X-Value</th><th className={cellHead}>Sample Contents</th>
-            </tr></thead>
-            <tbody>
-              {DCC_LOOT.tiers.map((t) => (
-                <tr key={t.tier} className="border-b border-[var(--border)] last:border-0">
-                  <td className={`${cell} whitespace-nowrap font-semibold`} style={{ color: TIER_COLOR[t.tier] ?? "var(--text)" }}>{t.tier}</td>
-                  <td className={`${cell} tabular-nums`}>{t.gearRolls}</td>
-                  <td className={`${cell} whitespace-nowrap`}>{t.gold}</td>
-                  <td className={cell}>{t.xValue}</td>
-                  <td className={`${cell} text-[var(--muted)]`}>{t.contents.join(", ")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-base font-bold uppercase tracking-[0.15em] text-[#f0a8a3]">Gold by Floor</h2>
-        <div className={wrap}>
-          <table className="w-full border-collapse">
-            <thead><tr className="border-b border-[var(--border)]"><th className={cellHead}>Floor</th><th className={cellHead}>Gold</th></tr></thead>
-            <tbody>
-              {DCC_LOOT.goldByFloor.map((g) => (
-                <tr key={g.floor} className="border-b border-[var(--border)] last:border-0">
-                  <td className={`${cell} whitespace-nowrap font-semibold`}>{g.floor}</td>
-                  <td className={cell}>{g.gold}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-base font-bold uppercase tracking-[0.15em] text-[#f0a8a3]">Drop Tables</h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {DCC_LOOT.tables.map((tbl) => (
-            <div key={tbl.name} className={wrap}>
-              <div className="border-b border-[var(--border)] px-2.5 py-2 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--text)]">
-                {tbl.name} <span className="text-[var(--muted)]">({tbl.die})</span>
-              </div>
-              <table className="w-full border-collapse">
-                <tbody>
-                  {tbl.rows.map((r, i) => (
-                    <tr key={i} className="border-b border-[var(--border)] last:border-0">
-                      <td className={`${cell} w-14 whitespace-nowrap font-semibold tabular-nums text-[var(--muted)]`}>{r.roll}</td>
-                      <td className={cell}>{r.result}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {DCC_LOOT.notes.length ? (
-        <section>
-          <h2 className="mb-2 text-base font-bold uppercase tracking-[0.15em] text-[#f0a8a3]">Notes</h2>
-          <ul className="flex flex-col gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4">
-            {DCC_LOOT.notes.map((n, i) => (
-              <li key={i} className="text-[13px] leading-relaxed text-[var(--muted)]">• {n}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-    </div>
-  );
-}
 
 export default async function DccLootPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -210,17 +124,16 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
   const cmp = (SORTS.find((s) => s.key === activeSort) ?? SORTS[0]).cmp;
   const theme = one(raw.theme);
   const activeTheme = THEMES.includes(theme) ? theme : "";
-  const activeView = one(raw.view) === "tables" ? "tables" : "items";
 
   const results = ALL_ROWS.filter((it) => matches(it, needle, activeCat, activeTier, activeSrc, activeTheme)).sort(cmp);
   const filtered = Boolean(needle || activeCat || activeTier || activeSrc || activeTheme);
-  const current: Query = { q: q.trim(), cat: activeCat, tier: activeTier, src: activeSrc, sort: activeSort, theme: activeTheme, view: activeView === "tables" ? "tables" : "" };
+  const current: Query = { q: q.trim(), cat: activeCat, tier: activeTier, src: activeSrc, sort: activeSort, theme: activeTheme };
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
       <header className="mb-8 flex items-end justify-between gap-4 border-b border-[var(--border)] pb-6">
         <div>
-          <h1 className="font-display text-3xl font-black tracking-wide">Loot &amp; Gear</h1>
+          <h1 className="font-display text-3xl font-black tracking-wide">Loot</h1>
           <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--red)] sm:text-[11px] sm:tracking-[0.35em]">
             {DCC_ITEMS.length} items{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}
           </p>
@@ -233,16 +146,6 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
         </div>
       </header>
 
-      <div className="mb-6 flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">View</span>
-        <Link href={withParams(current, { view: "" })} className={`${chipBase} ${activeView === "items" ? chipOn : chipOff}`}>Items</Link>
-        <Link href={withParams(current, { view: "tables" })} className={`${chipBase} ${activeView === "tables" ? chipOn : chipOff}`}>Treasure Tables</Link>
-      </div>
-
-      {activeView === "tables" ? (
-        <TreasureTables />
-      ) : (
-      <>
       <DccHomebrew campaigns={campaigns} initial={hbOwn} />
 
       <form method="get" action="/dcc/loot" className="mb-4 flex gap-2">
@@ -349,8 +252,6 @@ export default async function DccLootPage({ searchParams }: { searchParams: Prom
             );
           })}
         </ul>
-      )}
-      </>
       )}
     </div>
   );
