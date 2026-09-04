@@ -49,6 +49,7 @@ const DCC_REFERENCE: { href: string; label: string }[] = [
   { href: "/dcc/loot", label: "Loot & Gear" },
   { href: "/dcc/bestiary", label: "Bestiary" },
   { href: "/dcc/options", label: "Options" },
+  { href: "/dcc/reference", label: "Reference" },
 ];
 
 // ACE! reference pages — they read Awfully Cheerful Engine! data and lead the
