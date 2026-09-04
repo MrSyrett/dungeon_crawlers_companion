@@ -11185,7 +11185,11 @@ function init_party(root) {
   // enhanced INT). The DCC sheet stores raw fields only, so no sheet change needed.
   function dccParty(d) {
     const src = d.globalModSource === 'unenhanced' ? 'unenh' : 'enh';
-    const toMod = v => Math.floor(((parseInt(v) || 10) - 10) / 2);
+    // DCC uses its OWN score→modifier table (not D&D's (score-10)/2), and mods are
+    // always positive. This must match the character sheet's statToMod exactly, or the
+    // Party card shows wrong (negative) mods.
+    const toMod = v => { const n = parseInt(v); if(isNaN(n) || n < 1) return null;
+      return n<=2?1 : n<=5?2 : n<=9?3 : n<=19?4 : n<=49?5 : n<=99?6 : n<=149?7 : n<=199?8 : n<=299?9 : 10; };
     const S = d.stats || {}, H = d.header || {}, C = d.combat || {};
     const statMod = id => toMod((S[id] || {})[src]);
     const num = v => parseInt(v) || 0;
@@ -11201,7 +11205,7 @@ function init_party(root) {
       hpPips:  Array.isArray(d.hpPips) ? d.hpPips : [],
       stats:   [['STR','str'],['INT','int'],['CON','con'],['DEX','dex'],['CHA','cha']].map(([abbr,id]) =>
                  ({ abbr, mod: statMod(id), enh:(S[id]||{}).enh || '', unenh:(S[id]||{}).unenh || '' })),
-      evade:   { total: statMod('dex') + num(C.evadeBuffs), move: C.evadeMove || '', step: C.evadeStep || '' },
+      evade:   { total: (statMod('dex') || 0) + num(C.evadeBuffs), move: C.evadeMove || '', step: C.evadeStep || '' },
       dr:      { total: num(C.drArmor) + num(C.drBuffs), aiFavor: C.drAiFavor || '', size: C.drSize || '' },
       mana:    { current: C.manaCurrentVal || '', max: (S.int || {}).enh || '' },
       buffs:   Array.isArray(d.extBuffs) ? d.extBuffs.filter(b => b && String(b).trim()) : [],
@@ -11473,7 +11477,7 @@ function init_party(root) {
        + '<span class="pty-stat-lbl">' + hpPct + '%</span></div>';
     h += '<div class="pty-stats">' + c.stats.map(s =>
         '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.abbr) + '</div>'
-      + '<div class="pty-stat-mod">' + (s.mod>=0?'+':'') + s.mod + '</div>'
+      + '<div class="pty-stat-mod">' + (s.mod==null ? '—' : (s.mod>=0?'+':'')+s.mod) + '</div>'
       + '<div class="pty-stat-val">' + esc(s.enh||'—') + '/' + esc(s.unenh||'—') + '</div></div>').join('') + '</div>';
     h += '<div class="pty-line dim" style="margin:-4px 0 8px;font-size:9px;">Mods from ' + esc(c.modSource) + ' scores · Enh/Unenh shown</div>';
 
