@@ -90,12 +90,15 @@ export default async function DccRacesPage({
             {DCC_RACES.length} races{homebrewCount ? ` + ${homebrewCount} homebrew` : ""}
           </p>
         </div>
-        <Link
+        <div className="flex shrink-0 gap-2">
+          <Link href="/dcc/homebrew" className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--red)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]">My Homebrew</Link>
+          <Link
           href="/dashboard"
           className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
         >
           ← Home
         </Link>
+        </div>
       </header>
 
       <DccHomebrewEditor kind="dcc-race" campaigns={campaigns} initial={hbOwn} />

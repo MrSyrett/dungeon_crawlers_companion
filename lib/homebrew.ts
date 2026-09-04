@@ -17,12 +17,20 @@ import {
 export type HbType =
   | "spell" | "gear" | "monster" | "class" | "ancestry" | "background"
   | "dcc-item" | "dcc-monster" | "dcc-skill" | "dcc-spell" | "dcc-class" | "dcc-race"
-  | "dnd-equipment" | "dnd-feat" | "dnd-background" | "dnd-spell" | "dnd-species" | "dnd-monster" | "dnd-subclass";
+  | "dnd-equipment" | "dnd-feat" | "dnd-background" | "dnd-spell" | "dnd-species" | "dnd-monster" | "dnd-subclass"
+  | "nimble-item" | "nimble-spell" | "nimble-monster" | "nimble-ancestry"
+  | "sw-weapon" | "sw-gear" | "sw-force" | "sw-character"
+  | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
+  | "kob-trope" | "kob-strength" | "kob-flaw";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
   "dcc-item", "dcc-monster", "dcc-skill", "dcc-spell", "dcc-class", "dcc-race",
   "dnd-equipment", "dnd-feat", "dnd-background", "dnd-spell", "dnd-species", "dnd-monster", "dnd-subclass",
+  "nimble-item", "nimble-spell", "nimble-monster", "nimble-ancestry",
+  "sw-weapon", "sw-gear", "sw-force", "sw-character",
+  "ace-role", "ace-gear", "ace-extra", "ace-focus", "ace-trait",
+  "kob-trope", "kob-strength", "kob-flaw",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1127,6 +1135,289 @@ function normalizeDndSubclass(input: unknown): { name: string; data: Record<stri
   } };
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Nimble / SW / ACE / KOB homebrew — each normaliser emits the exact
+// public/tools-data/{sys}-*.js book shape (see lib/data/{sys}-types.ts), forces
+// source:"Homebrew" so the runtime loaders can strip/re-inject idempotently, and
+// clamps every field. page is 0 (consumers guard `page ? …`). components/
+// HomebrewEditor is the UI; these functions are the validators.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// An array of small string-keyed objects (abilities, traits, notes-with-fields).
+function objList(v: unknown, fields: readonly string[], maxItems: number, maxLen: number): Record<string, string>[] {
+  if (!Array.isArray(v)) return [];
+  const out: Record<string, string>[] = [];
+  for (const raw of v) {
+    if (!raw || typeof raw !== "object") continue;
+    const o = raw as Record<string, unknown>;
+    const row: Record<string, string> = {}; let any = false;
+    for (const f of fields) { const s = str(o[f]).slice(0, maxLen); if (s) any = true; row[f] = s; }
+    if (any) { out.push(row); if (out.length >= maxItems) break; }
+  }
+  return out;
+}
+const truthy = (v: unknown): boolean => v === true || str(v) === "true";
+
+// ── Nimble ──────────────────────────────────────────────────────────────────
+const NIMBLE_ITEM_CATEGORIES = ["Cloth", "Leather", "Mail", "Plate", "Shield", "Melee Weapon", "Ranged Weapon", "Key Equipment", "Adventuring Gear", "Magic Item", "Spell Scroll", "Wand"] as const;
+const NIMBLE_SCHOOLS = ["Fire", "Ice", "Lightning", "Wind", "Radiant", "Necrotic", "Utility"] as const;
+const NIMBLE_TARGETING = ["Single Target", "AoE", "Self", "Utility"] as const;
+const NIMBLE_ANCESTRY_GROUPS = ["Common", "Exotic"] as const;
+const NIMBLE_ARMOR = ["M", "H"] as const;
+
+function normalizeNimbleItem(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew item needs a name.");
+  const data: Record<string, unknown> = { name, category: oneOf(o.category, NIMBLE_ITEM_CATEGORIES, "Adventuring Gear"), page: 0, source: "Homebrew" };
+  if (str(o.armor)) data.armor = str(o.armor).slice(0, 40);
+  if (str(o.damage)) data.damage = str(o.damage).slice(0, 60);
+  if (str(o.properties)) data.properties = str(o.properties).slice(0, 200);
+  if (str(o.cost)) data.cost = str(o.cost).slice(0, 40);
+  if (str(o.rarity)) data.rarity = str(o.rarity).slice(0, 60);
+  if (str(o.description)) data.description = str(o.description).slice(0, 2000);
+  return { name, data };
+}
+function normalizeNimbleSpell(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew spell needs a name.");
+  const tier = num(o.tier);
+  const data: Record<string, unknown> = {
+    name, school: oneOf(o.school, NIMBLE_SCHOOLS, "Utility"),
+    tier: tier != null && tier >= 0 ? Math.min(9, Math.floor(tier)) : 0,
+    actions: str(o.actions).slice(0, 40) || "1 Action",
+    text: str(o.text).slice(0, 3000), page: 0, source: "Homebrew",
+  };
+  if (str(o.targeting)) data.targeting = oneOf(o.targeting, NIMBLE_TARGETING, "Single Target");
+  if (truthy(o.utility)) data.utility = true;
+  return { name, data };
+}
+function normalizeNimbleMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew monster needs a name.");
+  const data: Record<string, unknown> = {
+    name, family: str(o.family).slice(0, 60) || "Homebrew",
+    level: str(o.level).slice(0, 20) || "1", hp: num(o.hp),
+    armor: (NIMBLE_ARMOR as readonly string[]).includes(str(o.armor)) ? str(o.armor) : null,
+    legendary: truthy(o.legendary), minion: truthy(o.minion),
+    abilities: objList(o.abilities, ["name", "text"], 30, 1000),
+    page: 0, source: "Homebrew",
+  };
+  if (str(o.size)) data.size = str(o.size).slice(0, 20);
+  if (str(o.saves)) data.saves = str(o.saves).slice(0, 80);
+  if (str(o.familyTrait)) data.familyTrait = str(o.familyTrait).slice(0, 1000);
+  if (str(o.description)) data.description = str(o.description).slice(0, 2000);
+  return { name, data };
+}
+function normalizeNimbleAncestry(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew ancestry needs a name.");
+  const data: Record<string, unknown> = {
+    name, group: oneOf(o.group, NIMBLE_ANCESTRY_GROUPS, "Common"),
+    size: str(o.size).slice(0, 40) || "Medium",
+    description: str(o.description).slice(0, 2000),
+    traits: objList(o.traits, ["name", "text"], 20, 1000),
+    page: 0, source: "Homebrew",
+  };
+  return { name, data };
+}
+
+// ── SW ────────────────────────────────────────────────────────────────────
+const SW_WEAPON_KINDS = ["Blaster", "Melee", "Grenade", "Heavy", "Vehicle", "Starship", "Capital", "Artillery", "Droid"] as const;
+const SW_GEAR_CATEGORIES = ["Armor", "Medical", "Tool", "Communication", "Survival", "Droid", "Misc"] as const;
+const SW_BOOKS = ["core", "sourcebook", "companion"] as const;
+const SW_ATTRIBUTES = ["Dexterity", "Knowledge", "Mechanical", "Perception", "Strength", "Technical"] as const;
+const SW_CHAR_GROUPS = ["Imperial", "Rebel", "Civilian", "Alien", "Droid", "Creature"] as const;
+
+// A die code "3D+2" / "4D" / "5D-1" → pips (1D = 3). null if blank/unparseable.
+function swPips(v: unknown): number | null {
+  const m = /^\s*(\d+)\s*D\s*([+-]\s*\d+)?\s*$/i.exec(str(v));
+  if (!m) return null;
+  return parseInt(m[1], 10) * 3 + (m[2] ? parseInt(m[2].replace(/\s+/g, ""), 10) : 0);
+}
+function normalizeSwWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew weapon needs a name.");
+  const damageText = str(o.damageText || o.damage).slice(0, 20);
+  const data: Record<string, unknown> = {
+    name, kind: oneOf(o.kind, SW_WEAPON_KINDS, "Blaster"),
+    damage: swPips(damageText), book: oneOf(o.book, SW_BOOKS, "companion"),
+    page: 0, source: "Homebrew",
+  };
+  if (damageText) data.damageText = damageText;
+  if (str(o.range)) data.range = str(o.range).slice(0, 60);
+  if (str(o.skill)) data.skill = str(o.skill).slice(0, 40);
+  if (str(o.notes)) data.notes = str(o.notes).slice(0, 400);
+  if (str(o.cost)) data.cost = str(o.cost).slice(0, 40);
+  if (str(o.availability)) data.availability = str(o.availability).slice(0, 40);
+  return { name, data };
+}
+function normalizeSwGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const data: Record<string, unknown> = {
+    name, category: oneOf(o.category, SW_GEAR_CATEGORIES, "Misc"),
+    description: str(o.description).slice(0, 2000), book: oneOf(o.book, SW_BOOKS, "companion"),
+    page: 0, source: "Homebrew",
+  };
+  if (str(o.cost)) data.cost = str(o.cost).slice(0, 40);
+  if (str(o.stats)) data.stats = str(o.stats).slice(0, 200);
+  return { name, data };
+}
+function normalizeSwForce(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew Force power needs a name.");
+  const data: Record<string, unknown> = {
+    name, attribute: str(o.attribute).slice(0, 60) || "Control",
+    difficulty: str(o.difficulty).slice(0, 200), description: str(o.description).slice(0, 3000),
+    book: oneOf(o.book, SW_BOOKS, "companion"), page: 0, source: "Homebrew",
+  };
+  if (str(o.time)) data.time = str(o.time).slice(0, 120);
+  const req = strList(o.requires, 20, 80); if (req.length) data.requires = req;
+  return { name, data };
+}
+function normalizeSwCharacter(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew character needs a name.");
+  const attributes: Record<string, number> = {};
+  for (const a of SW_ATTRIBUTES) { const p = swPips(o[a]); if (p != null) attributes[a] = p; }
+  const data: Record<string, unknown> = {
+    name, group: oneOf(o.group, SW_CHAR_GROUPS, "Alien"), attributes,
+    skills: strList(o.skills, 40, 200), equipment: strList(o.equipment, 40, 200),
+    book: oneOf(o.book, SW_BOOKS, "companion"), page: 0, source: "Homebrew",
+  };
+  if (str(o.description)) data.description = str(o.description).slice(0, 2000);
+  if (str(o.move)) data.move = str(o.move).slice(0, 40);
+  if (str(o.notes)) data.notes = str(o.notes).slice(0, 400);
+  return { name, data };
+}
+
+// ── ACE ─────────────────────────────────────────────────────────────────────
+const ACE_STATS = ["Smarts", "Moves", "Style", "Brawn", "Power"] as const;
+const ACE_GEAR_TIERS = ["Free", "Normal", "Hard", "Herculean", "Impossible"] as const;
+
+function normalizeAceRole(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew role needs a name.");
+  const statMods: Record<string, number> = {};
+  for (const st of ACE_STATS) { const n = num(o["mod" + st]); if (n != null && n !== 0) statMods[st] = n; }
+  const data: Record<string, unknown> = {
+    name, category: str(o.category).slice(0, 60) || "Species",
+    setting: str(o.setting).slice(0, 40) || "core",
+    ability: str(o.ability).slice(0, 4000), page: 0, source: "Homebrew",
+  };
+  if (truthy(o.power)) data.power = true;
+  const gf = strList(o.grantsFocus, 20, 60); if (gf.length) data.grantsFocus = gf;
+  if (Object.keys(statMods).length) data.statMods = statMods;
+  const hb = num(o.healthBonus); if (hb != null && hb !== 0) data.healthBonus = hb;
+  return { name, data };
+}
+function normalizeAceGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const data: Record<string, unknown> = {
+    name, setting: str(o.setting).slice(0, 40) || "core",
+    tier: oneOf(o.tier, ACE_GEAR_TIERS, "Normal"), tn: num(o.tn),
+    category: str(o.category).slice(0, 40) || "Gadget",
+    description: str(o.description).slice(0, 2000), page: 0, source: "Homebrew",
+  };
+  const dmg = num(o.damage); if (dmg != null) data.damage = dmg;
+  const def = num(o.defence); if (def != null) data.defence = def;
+  return { name, data };
+}
+function normalizeAceExtra(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew extra needs a name.");
+  const focuses = (Array.isArray(o.focuses) ? o.focuses : []).map((r) => {
+    const f = (r ?? {}) as Record<string, unknown>;
+    const row: Record<string, unknown> = { stat: oneOf(f.stat, ACE_STATS, "Brawn"), name: str(f.name).slice(0, 60) };
+    const d = num(f.dice); if (d != null) row.dice = d;
+    return row;
+  }).filter((r) => r.name).slice(0, 20);
+  const attacks = (Array.isArray(o.attacks) ? o.attacks : []).map((r) => {
+    const a = (r ?? {}) as Record<string, unknown>;
+    const row: Record<string, unknown> = { name: str(a.name).slice(0, 60), dice: num(a.dice), damage: num(a.damage) };
+    if (str(a.note)) row.note = str(a.note).slice(0, 200);
+    return row;
+  }).filter((r) => r.name).slice(0, 20);
+  const data: Record<string, unknown> = {
+    name, setting: str(o.setting).slice(0, 40) || "core", type: str(o.type).slice(0, 40) || "Monster",
+    smarts: num(o.smarts), moves: num(o.moves), style: num(o.style), brawn: num(o.brawn),
+    health: num(o.health), defence: num(o.defence), focuses, attacks,
+    notes: strList(o.notes, 20, 200), page: 0, source: "Homebrew",
+  };
+  const p = num(o.power); if (p != null) data.power = p;
+  if (str(o.description)) data.description = str(o.description).slice(0, 2000);
+  return { name, data };
+}
+function normalizeAceFocus(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew focus needs a name.");
+  const data: Record<string, unknown> = { name, stat: oneOf(o.stat, ACE_STATS, "Smarts"), setting: str(o.setting).slice(0, 40) || "core", source: "Homebrew" };
+  if (str(o.note)) data.note = str(o.note).slice(0, 200);
+  return { name, data };
+}
+function normalizeAceTrait(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew trait needs a name.");
+  const data: Record<string, unknown> = { name, setting: str(o.setting).slice(0, 40) || "core", source: "Homebrew" };
+  if (str(o.description)) data.description = str(o.description).slice(0, 500);
+  return { name, data };
+}
+
+// ── KOB ─────────────────────────────────────────────────────────────────────
+const KOB_BOOKS = ["bikes", "brooms", "capes"] as const;
+const KOB_STATS = ["Brains", "Brawn", "Fight", "Flight", "Charm", "Grit"] as const;
+const KOB_DICE = ["4", "6", "8", "10", "12", "20"] as const;
+
+function normalizeKobTrope(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew trope needs a name.");
+  const dice: Record<string, number> = {};
+  for (const st of KOB_STATS) { const d = str(o["dice" + st]); if ((KOB_DICE as readonly string[]).includes(d)) dice[st] = parseInt(d, 10); }
+  const data: Record<string, unknown> = {
+    name, book: oneOf(o.book, KOB_BOOKS, "bikes"), dice,
+    ages: strList(o.ages, 6, 20),
+    suggestedStrengths: strList(o.suggestedStrengths, 20, 60),
+    suggestedFlaws: strList(o.suggestedFlaws, 20, 60),
+    questions: strList(o.questions, 6, 300), page: 0, source: "Homebrew",
+  };
+  if (str(o.suggestedRide)) data.suggestedRide = str(o.suggestedRide).slice(0, 200);
+  return { name, data };
+}
+function normalizeKobStrength(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew strength needs a name.");
+  const data: Record<string, unknown> = {
+    name, book: oneOf(o.book, KOB_BOOKS, "bikes"),
+    cost: str(o.cost).slice(0, 60), description: str(o.description).slice(0, 1000),
+    page: 0, source: "Homebrew",
+  };
+  return { name, data };
+}
+function normalizeKobFlaw(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew flaw needs a name.");
+  const data: Record<string, unknown> = { name, book: oneOf(o.book, KOB_BOOKS, "bikes"), page: 0, source: "Homebrew" };
+  if (str(o.description)) data.description = str(o.description).slice(0, 500);
+  return { name, data };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -1148,6 +1439,22 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "dnd-species": return normalizeDndSpecies(data);
     case "dnd-monster": return normalizeDndMonster(data);
     case "dnd-subclass": return normalizeDndSubclass(data);
+    case "nimble-item": return normalizeNimbleItem(data);
+    case "nimble-spell": return normalizeNimbleSpell(data);
+    case "nimble-monster": return normalizeNimbleMonster(data);
+    case "nimble-ancestry": return normalizeNimbleAncestry(data);
+    case "sw-weapon": return normalizeSwWeapon(data);
+    case "sw-gear": return normalizeSwGear(data);
+    case "sw-force": return normalizeSwForce(data);
+    case "sw-character": return normalizeSwCharacter(data);
+    case "ace-role": return normalizeAceRole(data);
+    case "ace-gear": return normalizeAceGear(data);
+    case "ace-extra": return normalizeAceExtra(data);
+    case "ace-focus": return normalizeAceFocus(data);
+    case "ace-trait": return normalizeAceTrait(data);
+    case "kob-trope": return normalizeKobTrope(data);
+    case "kob-strength": return normalizeKobStrength(data);
+    case "kob-flaw": return normalizeKobFlaw(data);
   }
 }
 
