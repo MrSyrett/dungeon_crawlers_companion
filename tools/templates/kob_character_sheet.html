@@ -295,7 +295,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 </style>
 </head>
 <body data-book="bikes">
-<div id="roll-toast"><div class="t-label"></div><div class="t-result"></div><div class="t-detail"></div></div>
+<div id="roll-toast"><div class="t-label"></div><div class="t-dice" data-da-inline></div><div class="t-result"></div><div class="t-detail"></div></div>
 <div class="app-wrap">
 
 <div class="sheet-wrap">
@@ -794,8 +794,11 @@ function closeRules() { $('rules-overlay').classList.remove('open'); }
 // ═══ LOG ══════════════════════════════════════════════════════════════════
 var _toastTimer = null;
 function showRollToast(label, result, detail, type) {
-  if(window.innerWidth > 768) return;
-  var log = document.querySelector('.roll-log'); if(!log || !log.classList.contains('collapsed')) return;
+  var _da = window.DiceAnim && window.DiceAnim.get ? window.DiceAnim.get() : null;
+  var _twoD = !!(_da && _da.on && _da.mode === '2d');
+  // 2D dice: show the roll card everywhere (mobile + desktop). Otherwise (3D, or
+  // dice off) keep it mobile-only and only when the log is collapsed.
+  if(!_twoD){ if(window.innerWidth > 768) return; var log = document.querySelector('.roll-log'); if(!log || !log.classList.contains('collapsed')) return; }
   var t = $('roll-toast'); if(!t) return;
   t.className = 'show' + (type === 'crit' ? ' crit' : type === 'fumble' ? ' fumble' : '');
   t.querySelector('.t-label').textContent = label; t.querySelector('.t-result').textContent = result; t.querySelector('.t-detail').textContent = detail;
@@ -1102,6 +1105,13 @@ autoLoad();
 .da-die.crit svg{filter:drop-shadow(0 0 11px rgba(255,210,74,.9)) drop-shadow(0 6px 6px rgba(0,0,0,.45));}
 .da-die.fumble svg{filter:drop-shadow(0 0 10px rgba(227,90,79,.75)) drop-shadow(0 6px 6px rgba(0,0,0,.45));}
 .da-canvas{position:absolute;inset:0;width:100%!important;height:100%!important;}
+/* Inline 2D mount (e.g. the character sheets' collapsed-log roll toast): the dice
+   render compact, in-flow, inside a host that carries [data-da-inline]. */
+[data-da-inline]{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+[data-da-inline]:not(:empty){margin:5px 0;}
+[data-da-inline] .da-die{width:42px;height:42px;}
+/* The roll toast becomes the semi-transparent card that hosts the 2D roll. */
+#roll-toast{background:rgba(14,12,16,.8)!important;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
 /* settings gear + popover */
 .da-gear{width:26px;height:22px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid #3a3a3a;border-radius:5px;color:#aaa;cursor:pointer;font-size:13px;line-height:1;padding:0;}
 .da-gear:hover{color:#e8c84a;border-color:#e8c84a;}
@@ -1128,7 +1138,7 @@ autoLoad();
 (function(){
   'use strict';
   var LS='dcw_diceanim';  // shared across all sheets
-  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, finish:'shiny' };
+  var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, finish:'shiny', sound:true };
   var S=Object.assign({},DEF);
   try{ var raw=localStorage.getItem(LS); if(raw) Object.assign(S, JSON.parse(raw)||{}); }catch(e){}
   function persistLocal(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
@@ -1194,7 +1204,19 @@ autoLoad();
     return s; }
   var clear2dTimer=null;
   var WAVE_GAP=430; // ms between an exploding die and the next
-  function play2D(dice, crit){ ensureOverlay(); layer2d.innerHTML=''; if(clear2dTimer) clearTimeout(clear2dTimer);
+  // A currently-visible [data-da-inline] host (e.g. the collapsed-log roll toast)
+  // means "render the 2D dice compactly in here instead of the full-screen overlay".
+  function inlineMount(){ if(S.mode!=='2d') return null; try{ var el=document.querySelector('[data-da-inline]'); return (el && el.getClientRects().length>0) ? el : null; }catch(e){ return null; } }
+  function play2Dinline(mount, dice, crit){ mount.innerHTML='';
+    var maxWave=0; dice.forEach(function(r){ if((r.wave||0)>maxWave)maxWave=r.wave||0; });
+    dice.forEach(function(r,i){ var die=document.createElement('div'); die.className='da-die'+(crit==='crit'?' crit':crit==='fumble'?' fumble':'');
+      die.innerHTML=dieSVG(r.sides,r.display,r.color); mount.appendChild(die);
+      var wd=(r.wave||0)*WAVE_GAP;
+      die.animate([{transform:'scale(.3) translateY(-16px)',opacity:0,offset:0},{opacity:0,offset:0.001},{transform:'scale(1.12)',opacity:1,offset:.62},{transform:'scale(1)',opacity:1,offset:1}],
+        {duration:360,delay:wd+i*60,easing:'cubic-bezier(.2,.8,.25,1)',fill:'both'}); });
+  }
+  function play2D(dice, crit){ var mount=inlineMount(); if(mount){ play2Dinline(mount, dice, crit); return; }
+    ensureOverlay(); layer2d.innerHTML=''; if(clear2dTimer) clearTimeout(clear2dTimer);
     var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
     var maxWave=0; dice.forEach(function(r){ if((r.wave||0)>maxWave)maxWave=r.wave||0; });
     var holdStart=640+maxWave*WAVE_GAP+(S.linger||1000);
@@ -1367,7 +1389,6 @@ autoLoad();
   function upVertex(verts,q){ var best=0,bY=-9; for(var i=0;i<verts.length;i++){ var wy=_n.copy(verts[i]).applyQuaternion(q).y; if(wy>bY){bY=wy;best=i;} } return best; }
   function clearWorld(){ if(!world3d)return; world3d.meshes.forEach(function(g){scene.remove(g);}); world3d.shadows.forEach(function(s){scene.remove(s);}); if(world3d.glows)world3d.glows.forEach(function(s){scene.remove(s);}); world3d=null; }
   function play3D(dice,crit){ if(!renderer && !initGL()){ play2D(dice,crit); return; } clearWorld();
-    _camTilt = dice.some(function(d){ return d.sides===4; }); applyCam();
     var metas=[],inits=[],maxSpawn=0; dice.forEach(function(r,i){ var gg=getGeoGroups(r.sides); var s=makeInit(r.sides,i); s.groups=gg.groups; s.spawnStep=(r.wave||0)*WAVE_STEPS; if(s.spawnStep>maxSpawn)maxSpawn=s.spawnStep; inits.push(s); metas.push({geo:gg.geo,groups:gg.groups,sides:r.sides,display:r.display,faceSet:r.faceSet,color:r.color,wave:r.wave||0,tetra:gg.tetra}); });
     var probe=inits.map(cloneState),steps=0; while(steps<MAXSTEPS+maxSpawn){ stepWorld(probe,FDT,steps); steps++; if(allRest(probe))break; }
     var live=inits.map(cloneState),meshes=[],shadows=[];
@@ -1401,9 +1422,14 @@ autoLoad();
   // ─── public play ───
   var RANDOM_POOL=['#d8b24a','#c0251e','#3b7dd8','#3fa45b','#8a6fd6'];
   function resolveColor(){ return S.dice==='random' ? RANDOM_POOL[Math.floor(Math.random()*RANDOM_POOL.length)] : (S.dice||'#d8b24a'); }
+  // Empty every inline mount (e.g. the roll-toast .t-dice). Called on every roll so a
+  // 2D roll left in the card doesn't linger after switching to 3D (play2Dinline refills
+  // it right after when this roll IS inline).
+  function clearInline(){ try{ var els=document.querySelectorAll('[data-da-inline]'); for(var i=0;i<els.length;i++) els[i].innerHTML=''; }catch(e){} }
   function play(dice, crit){ if(!S.on || !dice || !dice.length) return; ensureOverlay();
     var rd=dice.map(function(d){ return { sides:d.sides, display:d.display, faceSet:d.faceSet||null, wave:d.wave||0, color:resolveColor() }; });
-    playAudio(rd.length);
+    if(S.sound!==false) playAudio(rd.length);
+    clearInline();
     if(S.mode==='3d' && HAS_WEBGL){ if(threeState===2){ play3D(rd,crit); } else { play2D(rd,crit); if(threeState!==3) loadThree(function(ok){}); } }
     else { play2D(rd,crit); } }
   // warm up three.js if 3D is the active mode
@@ -1475,6 +1501,7 @@ autoLoad();
     pop.innerHTML=''
       +'<h4>Dice Animation</h4>'
       +'<div class="da-row"><span class="k">Show dice</span><div class="da-sw" data-k="on"></div></div>'
+      +'<div class="da-row"><span class="k">Sound</span><div class="da-sw" data-k="sound"></div></div>'
       +'<div class="da-row"><span class="k">Style</span><div class="da-seg" data-k="mode"><button data-v="2d">2D</button><button data-v="3d">3D</button></div></div>'
       +'<div class="da-row"><span class="k">Finish</span><div class="da-seg" data-k="finish"><button data-v="shiny">Shiny</button><button data-v="matte">Matte</button></div></div>'
       +'<div class="da-row"><span class="k">Linger</span><div class="da-seg" data-k="linger"><button data-v="1000">1s</button><button data-v="2000">2s</button><button data-v="4000">4s</button><button data-v="8000">8s</button></div></div>'
@@ -1489,12 +1516,14 @@ autoLoad();
     swatches(pop.querySelector('[data-k="dice"]'), PRESETS_DICE, 'dice');
     swatches(pop.querySelector('[data-k="num"]'), PRESETS_NUM, 'num');
     pop.querySelector('[data-k="on"]').onclick=function(){ setS('on', !S.on); };
+    pop.querySelector('[data-k="sound"]').onclick=function(){ setS('sound', S.sound===false); };
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.onclick=function(){ setS('mode', b.dataset.v); if(b.dataset.v==='3d'&&HAS_WEBGL) loadThree(function(){}); }; });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.onclick=function(){ setS('linger', +b.dataset.v); }; });
     pop.querySelectorAll('[data-k="finish"] button').forEach(function(b){ b.onclick=function(){ setS('finish', b.dataset.v); }; });
     syncPop();
   }
   function syncPop(){ if(!pop)return; pop.querySelector('[data-k="on"]').classList.toggle('on', !!S.on);
+    pop.querySelector('[data-k="sound"]').classList.toggle('on', S.sound!==false);
     pop.querySelectorAll('[data-k="mode"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===S.mode); });
     pop.querySelectorAll('[data-k="linger"] button').forEach(function(b){ b.classList.toggle('on', +b.dataset.v===(S.linger||1000)); });
     pop.querySelectorAll('[data-k="finish"] button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===(S.finish||'shiny')); });
@@ -1515,8 +1544,8 @@ autoLoad();
     var dm=host.querySelector('.dm-toggle-wrap'); if(dm && dm.parentNode){ dm.parentNode.insertBefore(g, dm); } else host.appendChild(g); }
 
   // ─── expose for sheet persistence ───
-  window.DiceAnim={ get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish}; },
-    restore:function(o){ if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish)S.finish=o.finish; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
+  window.DiceAnim={ get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish,sound:S.sound}; },
+    restore:function(o){ if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish)S.finish=o.finish; if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
     play:function(dice,crit){ play(dice,crit); } };
 
   // Persist settings in the saved sheet too (survives the VTT webview where
