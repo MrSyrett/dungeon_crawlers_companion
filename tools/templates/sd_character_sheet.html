@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shadowdark Character Sheet</title>
-<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=UnifrakturMaguntia&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
 <style>
 /* JSL Blackletter — Shadowdark title face, embedded below as a woff2 base64 data: URI (self-contained, no network fetch).
    (c) 1997-2000 Jeffrey S. Lee; freely distributable & edit-embeddable per its license. */
@@ -91,11 +91,11 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
 
 .log-header{padding:10px 12px;background:var(--black);display:flex;justify-content:space-between;align-items:center;gap:6px;}
-.log-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:white;}
+.log-title{font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:white;white-space:nowrap;}
 .log-clear{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;cursor:pointer;}
 .log-clear:hover{background:var(--red);}
 .log-actions{display:flex;flex-wrap:wrap;gap:3px;padding:6px 8px;border-bottom:1px solid #222;}
-.log-action-btn{flex:1 1 0;min-width:0;padding:6px 3px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;line-height:1.1;letter-spacing:0;white-space:nowrap;overflow:hidden;text-align:center;}
+.log-action-btn{flex:1 1 0;min-width:0;padding:6px 3px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;line-height:1.1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
 .log-action-btn.save{background:#1e3a1e;color:#6dbf6d;border:1px solid #2d5a2d;}
 .log-action-btn.save:hover{background:#2d5a2d;color:white;}
 .log-action-btn.export{background:#1a2a3a;color:#6aabdf;border:1px solid #1a4a8a;}
@@ -2635,7 +2635,7 @@ function rollSpell(btn) {
 
   const dmgLabel = healing ? 'Heal' : 'Dmg';
   const resultStr = dmgTotal !== null
-    ? `${total} — ${verdict}  |  ${dmgLabel}${success ? '' : ' if Luck saves'}: ${dmgTotal}`
+    ? `${total} — ${verdict}  |  ${dmgLabel}: ${dmgTotal}`
     : `${total} — ${verdict}`;
   const detailStr = `${base}${bonusPart} vs DC ${dc} (10+${spellLevel})`
     + (dmgBreakdown ? `  |  ${dmgBreakdown}` : '');

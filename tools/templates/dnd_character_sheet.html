@@ -1036,7 +1036,8 @@ function rollDeathSave(){
   if(deathSucc >= 3){ msg += ' — stable!'; setUnconscious(true); }   // stable but still unconscious
   if(deathFail >= 3) msg += ' — the character dies.';
   renderDeath();
-  addLog('Death Save', String(r.nat), msg, type); scheduleAutosave();
+  // Prefix a parseable d20 detail so the dice-animation module rolls the die too.
+  addLog('Death Save', String(r.nat), d20Detail(r) + (msg ? ' · ' + msg : ''), type); scheduleAutosave();
 }
 function hitDieSides(){ const m = ($('f-hitdice').value || '').match(/d(\d+)/i); if(m) return num(m[1]); const c = classData(); return (c && c.hitDie) ? c.hitDie : 8; }
 function hitDiceTotal(){ return Math.max(1, num($('f-level').value) || 1); }
