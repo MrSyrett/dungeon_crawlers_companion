@@ -179,11 +179,24 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .hdr-field input{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:var(--ink);outline:none;padding:1px 0;}
 .hdr-fields-2{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid var(--border);}
 
-/* MAIN BODY */
-.main-body{display:grid;grid-template-columns:220px 1fr 230px;grid-template-rows:auto auto;border-bottom:2px solid var(--border);}
+/* MAIN BODY — unified two-column layout (left region + main column) */
+.main-body{display:grid;grid-template-columns:210px 1fr;border-bottom:2px solid var(--border);align-items:stretch;}
 
-/* LEFT — stats + info */
-.left-col{grid-column:1;grid-row:1;border-right:2px solid var(--border);}
+/* LEFT — stats + trackers */
+.left-col{grid-column:1;grid-row:1;border-right:2px solid var(--border);display:flex;flex-direction:column;}
+/* MAIN — combat tiles, attacks, tabs */
+.main-col{grid-column:2;grid-row:1;display:flex;flex-direction:column;min-width:0;}
+
+/* COMBAT TILES (HP / AC / XP / Luck) — rounded 'bubble' cards above Attacks */
+.sd-vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;border-bottom:1px solid var(--rule);align-items:stretch;}
+.sd-vital{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:7px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;}
+.sd-vital .sv-lbl{font-family:'Montserrat',sans-serif;font-weight:800;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.sd-vital .sv-row{display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;}
+.sd-vital input{border:1px solid var(--input-border,var(--rule));border-radius:5px;background:var(--input-bg);font-family:'Montserrat',sans-serif;font-weight:900;text-align:center;color:var(--ink);outline:none;}
+.sd-vital .sv-big{width:44px;height:34px;font-size:17px;}
+.sd-vital .sv-sm{width:34px;height:26px;font-size:12px;font-weight:700;background:var(--box);}
+.sd-vital .sv-slash{font-size:13px;color:var(--muted);}
+.sd-vital .lk-btn{border-radius:5px;}
 
 /* STATS BLOCK */
 /* TRACKERS (left column) — active status chips */
@@ -198,14 +211,14 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .trk-del:hover{background:#7a2d2d;border-color:#df6a6a;color:#ffdede;}
 .trk-add{margin-left:auto;padding:3px 9px;font-size:11px;background:transparent;border:1px solid var(--rule);border-radius:3px;cursor:pointer;color:var(--muted);}
 .trk-add:hover{border-color:var(--ink);color:var(--ink);}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule);}
-.stat-cell{padding:8px 10px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);display:flex;flex-direction:column;align-items:stretch;}
-.stat-cell:nth-child(2n){border-right:none;}
-.stat-cell:nth-last-child(-n+2){border-bottom:none;}
-.stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:4px;text-align:center;align-self:stretch;}
-.stat-val-row{display:flex;align-items:center;justify-content:center;gap:6px;}
-.stat-val{width:30px;height:26px;border:1px solid var(--rule);background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
-.stat-mod{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900;color:var(--red);width:44px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--box);border:2px solid var(--red);text-align:center;cursor:pointer;}
+/* Ability scores — single column, one row each (label · score · mod) */
+.stats-grid{display:flex;flex-direction:column;border-bottom:1px solid var(--rule);}
+.stat-cell{padding:6px 10px;border-bottom:1px solid var(--rule);display:flex;flex-direction:row;align-items:center;gap:8px;}
+.stat-cell:last-child{border-bottom:none;}
+.stat-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin-bottom:0;text-align:left;flex:1;min-width:0;}
+.stat-val-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-shrink:0;}
+.stat-val{width:34px;height:30px;border:1px solid var(--rule);border-radius:5px;background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
+.stat-mod{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900;color:var(--red);width:44px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--box);border:2px solid var(--red);border-radius:8px;text-align:center;cursor:pointer;}
 .stat-mod:hover{background:var(--red);color:white;}
 
 /* LEFT INFO */
@@ -325,12 +338,27 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .sw-knob{position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#ddd;transition:left .12s;}
 .sw-toggle.on .sw-knob{left:13px;background:#f0d070;}
 .ammo-toggle-lbl{display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);user-select:none;}
+/* Auto toggle lives in the black title bar now — lighten it and bump the type */
+.title-auto{color:rgba(255,255,255,.72);font-size:10px;align-self:center;}
+.title-auto:hover{color:#fff;}
 .gear-disable-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;}
 .gear-disable-btn.on{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
 /* FREE TO CARRY */
-.free-carry{border-top:2px solid var(--border);}
+.free-carry{border-top:1px solid var(--rule);}
 .free-carry-inner{padding:6px 10px;}
 .free-carry-inner textarea{width:100%;min-height:60px;border:none;background:transparent;resize:none;font-family:'Montserrat',sans-serif;font-size:11px;outline:none;color:var(--ink);}
+
+/* TABS — main column: Spells / Talents / Gear */
+.tabs-bar{display:flex;gap:0;background:var(--section-bar);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
+.tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.55);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;}
+.tab-btn:hover{color:#fff;}
+.tab-btn.on{color:#fff;border-bottom-color:var(--red);background:rgba(192,37,30,.28);}
+.tab-panel{display:none;}
+.tab-panel.on{display:block;}
+/* Softer 'bubble' feel: round the sheet shell and the coin row cells */
+.sheet{border-radius:10px;overflow:hidden;}
+.coin-row{gap:6px;padding:8px;border-bottom:1px solid var(--rule);}
+.coin-cell{border-right:none;border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:6px;}
 
 /* ROLL BTN */
 
@@ -404,6 +432,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   <div class="sheet-title">
     <div class="sheet-title-text">Shadowdark</div>
     <div class="sheet-title-actions">
+      <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and auto-consumes ammo (bows spend an arrow, crossbows a bolt), uses up a scroll on casting, and marks a wand spent on a failed check (broken on a natural 1). Also locks the Talents box (the wizards write it). Turn off to handle AC, talents and these items by hand."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
       <button onclick="takeRest()" style="padding:6px 14px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;align-self:center;" onmouseover="this.style.background='#1a5a7a';this.style.color='white'" onmouseout="this.style.background='#1a2e3a';this.style.color='#6ac8df'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg> Rest</button>
     </div>
   </div>
@@ -427,54 +456,42 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   <!-- MAIN BODY -->
   <div class="main-body">
 
-    <!-- LEFT COL: Stats + HP/AC + XP + Coins + SPELLS -->
+    <!-- LEFT COL: Ability Scores (single column) + Trackers -->
     <div class="left-col">
       <div class="sl">Ability Scores</div>
       <div class="stats-grid" id="stats-grid"></div>
 
-      <!-- HP / AC -->
-      <div class="hp-ac-row">
-        <div class="hp-box">
-          <span class="hpac-label">HP</span>
-          <div class="hpac-inputs">
-            <input type="text" class="hpac-input" id="hp-current" placeholder="0">
-            <span class="hpac-slash">/</span>
-            <input type="text" class="hpac-max" id="hp-max" placeholder="0">
-          </div>
-        </div>
-        <div class="ac-box">
-          <span class="hpac-label">AC</span>
-          <input type="text" class="hpac-input" id="ac-val" placeholder="0" title="Armor Class — from your equipped armor and shield (turn off Auto to edit by hand)">
-        </div>
-      </div>
-
-      <!-- XP -->
-      <div class="xp-row">
-        <div class="xp-half">
-          <span class="xp-label">XP</span>
-          <input type="text" class="xp-input" id="xp-current" placeholder="0">
-          <span class="xp-slash">/</span>
-          <input type="text" class="xp-input" id="xp-next" placeholder="0" readonly title="Auto: 10 × current level">
-        </div>
-        <div class="xp-half">
-          <span class="xp-label">Lk</span>
-          <button class="lk-btn" onclick="adjustLuck(-1)">−</button>
-          <input type="text" class="lk-input" id="lk-val" placeholder="0">
-          <button class="lk-btn" onclick="adjustLuck(1)">+</button>
-        </div>
-      </div>
-
-      <!-- TRACKERS -->
       <div class="sl">
         <span>Trackers</span>
         <button class="trk-add" onclick="openTrackerPicker()" title="Add a tracker">+</button>
       </div>
       <div class="trk-box" id="trk-list"></div>
-
     </div><!-- end left-col -->
 
-    <!-- CENTER: Attacks + Talents below -->
-    <div class="center-col">
+    <!-- MAIN COL: combat tiles → attacks → tabs -->
+    <div class="main-col">
+
+      <!-- COMBAT TILES: HP / AC / XP / Luck -->
+      <div class="sd-vitals">
+        <div class="sd-vital">
+          <span class="sv-lbl">HP</span>
+          <div class="sv-row"><input type="text" class="sv-big" id="hp-current" placeholder="0"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="hp-max" placeholder="0"></div>
+        </div>
+        <div class="sd-vital">
+          <span class="sv-lbl">AC</span>
+          <div class="sv-row"><input type="text" class="sv-big" id="ac-val" placeholder="0" title="Armor Class — from your equipped armor and shield (turn off Auto to edit by hand)"></div>
+        </div>
+        <div class="sd-vital">
+          <span class="sv-lbl">XP</span>
+          <div class="sv-row"><input type="text" class="sv-sm" id="xp-current" placeholder="0"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="xp-next" placeholder="0" readonly title="Auto: 10 × current level"></div>
+        </div>
+        <div class="sd-vital">
+          <span class="sv-lbl">Luck</span>
+          <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-sm" id="lk-val" placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
+        </div>
+      </div>
+
+      <!-- ATTACKS -->
       <div class="attacks-section-wrap">
         <div class="sl">Attacks</div>
         <table class="attacks-table">
@@ -491,54 +508,60 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           </thead>
           <tbody id="attacks-body"></tbody>
         </table>
-
       </div>
 
-      <!-- TALENTS below attacks -->
-      <div class="talents-section-wrap">
+      <!-- TABS: Spells / Talents / Gear -->
+      <div class="tabs-bar">
+        <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
+        <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
+        <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
+      </div>
+
+      <!-- SPELLS TAB -->
+      <div class="tab-panel" id="tab-spells">
+        <div class="sl"><span>Spells</span><label style="display:flex;align-items:center;gap:4px;text-transform:uppercase;color:#aaa;margin-left:auto;">Cast Mod
+          <select id="spell-stat" onchange="saveSheet(false)" style="background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:2px;color:#f8f8f6;padding:1px 4px;outline:none;">
+            <option value="">—</option>
+            <option value="int">INT</option>
+            <option value="wis">WIS</option>
+            <option value="cha">CHA</option>
+          </select>
+          <input type="text" id="spell-gbonus" placeholder="+0" title="Global bonus to all casting checks" style="width:26px;background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:2px;color:#f8f8f6;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;padding:1px 2px;outline:none;text-align:center;" onchange="saveSheet(false)">
+        </label><button onclick="_spellShopMode=null;openSpellShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg> Spellbook</button></div>
+        <div id="spells-list"></div>
+      </div>
+
+      <!-- TALENTS TAB -->
+      <div class="tab-panel" id="tab-talents">
         <div class="sl">Talents</div>
         <div class="talents-area" id="talents-area">
           <div id="talents-view" class="talents-view" onclick="talentsEdit()" title="Click to edit"></div>
-          <textarea id="talents-text" placeholder="List talents, features, and special abilities here..." onblur="talentsDone()" style="width:100%;flex:1;min-height:260px;border:none;background:transparent;resize:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:6px 10px;box-sizing:border-box;"></textarea>
+          <textarea id="talents-text" placeholder="List talents, features, and special abilities here..." onblur="talentsDone()" style="width:100%;flex:1;min-height:220px;border:none;background:transparent;resize:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:6px 10px;box-sizing:border-box;"></textarea>
         </div>
       </div>
-    </div><!-- end center-col -->
 
-    <!-- SPELLS: spans left+center -->
-    <div class="spells-bottom">
-      <div class="sl"><span>Spells</span><label style="display:flex;align-items:center;gap:4px;text-transform:uppercase;color:#aaa;margin-left:auto;">Cast Mod
-        <select id="spell-stat" onchange="saveSheet(false)" style="background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:2px;color:#f8f8f6;padding:1px 4px;outline:none;">
-          <option value="">—</option>
-          <option value="int">INT</option>
-          <option value="wis">WIS</option>
-          <option value="cha">CHA</option>
-        </select>
-        <input type="text" id="spell-gbonus" placeholder="+0" title="Global bonus to all casting checks" style="width:26px;background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:2px;color:#f8f8f6;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;padding:1px 2px;outline:none;text-align:center;" onchange="saveSheet(false)">
-      </label><button onclick="_spellShopMode=null;openSpellShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg> Spellbook</button></div>
-      <div id="spells-list"></div>
-    </div>
+      <!-- GEAR TAB (coins + gear + free to carry) -->
+      <div class="tab-panel" id="tab-gear">
+        <div class="coin-row">
+          <div class="coin-cell"><span class="coin-label">GP</span><input type="text" class="coin-input" id="coin-gp" placeholder="0"></div>
+          <div class="coin-cell"><span class="coin-label">SP</span><input type="text" class="coin-input" id="coin-sp" placeholder="0"></div>
+          <div class="coin-cell"><span class="coin-label">CP</span><input type="text" class="coin-input" id="coin-cp" placeholder="0"></div>
+        </div>
+        <div class="sl"><span>Gear</span>
+          <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
+            <button onclick="openShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">+ Item</button>
+          </div></div>
+        <div id="gear-list"></div>
 
-    <!-- RIGHT: Gear + Free to Carry -->
-    <div class="right-col">
-      <div class="coin-row">
-        <div class="coin-cell"><span class="coin-label">GP</span><input type="text" class="coin-input" id="coin-gp" placeholder="0"></div>
-        <div class="coin-cell"><span class="coin-label">SP</span><input type="text" class="coin-input" id="coin-sp" placeholder="0"></div>
-        <div class="coin-cell"><span class="coin-label">CP</span><input type="text" class="coin-input" id="coin-cp" placeholder="0"></div>
-      </div>
-      <div class="sl"><span>Gear</span>
-        <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
-          <span class="ammo-toggle-lbl" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and auto-consumes ammo (bows spend an arrow, crossbows a bolt), uses up a scroll on casting, and marks a wand spent on a failed check (broken on a natural 1). Also locks the Talents box (the wizards write it). Turn off to handle AC, talents and these items by hand."><span style="text-align:right;">Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
-          <button onclick="openShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">+ Item</button>
-        </div></div>
-      <div id="gear-list"></div>
-
-      <div class="free-carry">
-        <div class="sl">Free to Carry</div>
-        <div class="free-carry-inner">
-          <textarea id="free-carry" placeholder="Torch, Rations, Rope..." rows="4"></textarea>
+        <div class="free-carry">
+          <div class="sl">Free to Carry</div>
+          <div class="free-carry-inner">
+            <textarea id="free-carry" placeholder="Torch, Rations, Rope..." rows="4"></textarea>
+          </div>
         </div>
       </div>
-    </div>
+
+    </div><!-- end main-col -->
 
   </div><!-- end main-body -->
 
@@ -1115,6 +1138,19 @@ function onStatChange(id) {
   const m = statToMod(val);
   document.getElementById(id+'-mod').textContent = fmtMod(m);
 }
+
+// ═══ TABS (Spells / Talents / Gear) ═════════════════════════════════════════
+var _tab = 'gear';
+const TABS = ['spells','talents','gear'];
+function setTab(name){
+  if(TABS.indexOf(name) < 0) name = 'gear';
+  _tab = name;
+  TABS.forEach(function(t){
+    var panel = document.getElementById('tab-'+t); if(panel) panel.classList.toggle('on', t===name);
+    var btn = document.querySelector('.tab-btn[data-tab="'+t+'"]'); if(btn) btn.classList.toggle('on', t===name);
+  });
+}
+function setDefaultTab(){ setTab(_tab || 'gear'); }
 
 // Weapon types the character has mastered (Fighter class feature + any talent
 // grants). Bonus per the rules = +1 atk/dmg, plus half your level (round down).
@@ -2959,6 +2995,7 @@ function collectSheet(){
       gearEquipped: [...document.querySelectorAll('#gear-list .gear-slot')].map(row => !!row.querySelector('.gear-equip')?.checked),
       spellStat: document.getElementById('spell-stat')?.value || '',
       spellGBonus: document.getElementById('spell-gbonus')?.value || '',
+      tab: _tab,
       campaign: _campaign ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
       mastery: Array.isArray(_charMastery) ? _charMastery : [],
       trusty: _charTrusty || null,
@@ -3076,6 +3113,7 @@ function _applySDData(d){
     if(spellStatEl) spellStatEl.value = d._sheet?.spellStat || '';
     const spellGBEl = document.getElementById('spell-gbonus');
     if(spellGBEl) spellGBEl.value = d._sheet?.spellGBonus || '';
+    _tab = (TABS.indexOf(d._sheet?.tab) >= 0) ? d._sheet.tab : _tab;
     _charMastery = Array.isArray(d._sheet?.mastery) ? d._sheet.mastery.slice() : [];
     _charTrusty = (d._sheet && d._sheet.trusty && d._sheet.trusty.value) ? d._sheet.trusty : null;
     _charExtraWeapons = Array.isArray(d._sheet?.extraWeapons) ? d._sheet.extraWeapons.slice() : [];
@@ -3846,6 +3884,7 @@ buildAttacks();
 buildSpells();
 buildGear();
 autoLoad();
+setDefaultTab();   // activate the saved (or default) main-column tab
 ensureStrikesAttack();   // blank sheets get the baseline unarmed attack too
 ensurePseudopodAttack(); // Wyrdling natural attack (no-op for other classes)
 if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock derived fields per Auto
@@ -3886,38 +3925,23 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   .log-header{cursor:pointer;}
   body{padding-bottom:48px;}
 
-  /* Collapse grid to single column, use order to sequence sections */
+  /* Flow both columns' children into one stacked list so we can reorder them */
   .main-body{
     display:flex;
     flex-direction:column;
   }
-  .left-col{
-    width:100%;border-right:none;border-bottom:2px solid var(--border);
-    order:1; /* Ability Scores */
-  }
-  .attacks-section-wrap{
-    order:2; /* Attacks */
-    border-bottom:1px solid var(--rule);
-  }
-  .spells-bottom{
-    order:3; /* Spells */
-    border-top:none;border-bottom:2px solid var(--border);
-  }
-  .talents-section-wrap{
-    order:4; /* Talents */
-    border-bottom:2px solid var(--border);
-  }
-  .right-col{
-    width:100%;border-left:none;border-top:none;
-    order:5; /* Gold + Gear + Free to Carry */
-  }
-  /* center-col becomes a flex column so order works on its children */
-  .center-col{
-    display:contents; /* lets attacks-section-wrap and talents-section-wrap participate in main-body flex order */
-    border-right:none;
-  }
-
-  .stats-grid{grid-template-columns:repeat(3,1fr);}
+  .left-col,.main-col{display:contents;}
+  /* Mobile order: Vitals → Ability Scores → Attacks → Trackers → tabs */
+  .sd-vitals{order:1;grid-template-columns:1fr 1fr;}   /* HP/AC on top, XP/Luck below */
+  .main-body > .left-col > .sl:nth-child(1){order:2;}  /* Ability Scores label */
+  #stats-grid{order:2;}
+  .attacks-section-wrap{order:3;border-top:2px solid var(--border);}
+  .main-body > .left-col > .sl:nth-child(3){order:4;}  /* Trackers label */
+  #trk-list{order:4;}
+  .tabs-bar{order:5;}
+  #tab-spells,#tab-talents,#tab-gear{order:6;}
+  /* Ability scores stay stacked (single column) on phones */
+  .stats-grid{display:flex;flex-direction:column;}
   .hdr-fields,.hdr-fields-2{grid-template-columns:1fr 1fr;}
   .hdr-field:nth-child(2n){border-right:none;}
   .hdr-field:nth-child(3){border-right:1px solid var(--rule);}
