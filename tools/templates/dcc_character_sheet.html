@@ -159,7 +159,9 @@ body.dark .hp-shield.on{background:#5bb8ec;border-color:#7fd0ff;}
 .mana-row{display:flex;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid var(--rule);}
 .mana-group{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 /* Buffs / Debuffs condition rows: label · ＋ · chips (chips grow to the right, wrap below) */
-.cond-row{display:flex;flex-direction:column;gap:5px;padding:6px 10px;border-bottom:1px solid var(--rule);}
+.cond-row{display:flex;flex-direction:row;align-items:stretch;gap:8px;padding:6px 10px;border-bottom:1px solid var(--rule);}
+.cond-stack{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+.cond-roll{flex:0 0 auto;align-self:stretch;padding:0 14px;}
 .cond-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .cond-label{width:52px;flex:0 0 auto;}
 .debuff-group{display:flex;align-items:center;gap:8px;flex:1;min-width:0;margin-left:10px;}
@@ -242,14 +244,11 @@ body.dark .atk-formula input[readonly]{color:#8fc4ec;}
 .gear-acc-row input{flex:1;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow',sans-serif;font-size:11px;outline:none;}
 
 /* INVENTORY */
-.inv-pinned{display:flex;gap:6px;margin-bottom:7px;}
-.inv-pin{display:flex;align-items:center;gap:7px;background:var(--box);border:1px solid var(--rule);border-radius:4px;padding:5px 9px;}
-.inv-pin.gold{flex:0 0 auto;}
-.inv-pin.junk{flex:1;min-width:0;}
+.inv-pinned{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.inv-pin-group{margin-left:auto;display:flex;gap:6px;}
+.inv-pin{display:flex;align-items:center;gap:7px;background:var(--box);border:1px solid var(--rule);border-radius:4px;padding:5px 9px;flex:0 0 auto;}
 .inv-pin-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);white-space:nowrap;}
-.inv-pin-in{border:none;background:transparent;font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:var(--ink);outline:none;min-width:0;}
-.inv-pin.gold .inv-pin-in{width:64px;text-align:center;color:var(--red);}
-.inv-pin.junk .inv-pin-in{width:100%;font-family:'Barlow',sans-serif;}
+.inv-pin-in{border:none;background:transparent;font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:var(--red);outline:none;width:64px;text-align:center;}
 .inv-table{width:100%;border-collapse:collapse;}
 .inv-table th{background:var(--section-hdr);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:5px 6px;text-align:left;}
 .inv-table td{border-bottom:1px solid var(--rule);padding:1px 4px;}
@@ -298,6 +297,8 @@ body.dark .comp-stats input,body.dark .comp-row input,body.dark .comp-acc textar
 .add-btn:hover{background:var(--red);}
 /* + Add Skill on the left, Advancement pinned right (under the action column) */
 .skill-actions-row{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.skill-topbar{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.skill-topbar-actions{margin-left:auto;display:flex;gap:6px;}
 .sort-sel{border:1px solid var(--rule);background:var(--input-bg);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;border-radius:3px;cursor:pointer;outline:none;}
 .sort-sel:hover{border-color:var(--red);color:var(--red);}
 .adv-run-btn{background:#2f7d3f;color:#fff;}
@@ -454,7 +455,6 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
         <div style="display:flex;gap:4px;">
           <button type="button" class="rest-btn" onclick="rest('short')" title="Short Rest (2 hrs): heal 5 Health Bar slots and regain half your Mana.">Short Rest</button>
           <button type="button" class="rest-btn" onclick="rest('long')" title="Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.">Long Rest</button>
-          <button type="button" class="rest-btn" onclick="rollDoT()" title="Roll end-of-round damage for every active damage-over-time debuff (Blood Trail, Burned, Poisoned, Drowning, Sepsis).">Roll DoT</button>
         </div>
       </div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Class</label><input type="text" id="f-class"></div>
@@ -580,14 +580,17 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 
           <!-- BUFFS / DEBUFFS (＋ buttons and chips injected by dcc-sheet-buffs.js / dcc-sheet-debuffs.js) -->
           <div class="cond-row">
-            <div class="buffs-field cond-line">
-              <span class="mana-label cond-label">Buffs</span>
-              <input type="text" class="ext-buff-input" id="buffs" placeholder="add or type…">
+            <div class="cond-stack">
+              <div class="buffs-field cond-line">
+                <span class="mana-label cond-label">Buffs</span>
+                <input type="text" class="ext-buff-input" id="buffs" placeholder="add or type…">
+              </div>
+              <div class="cond-line">
+                <span class="mana-label cond-label">Debuffs</span>
+                <input type="text" class="debuff-input" id="debuffs" placeholder="">
+              </div>
             </div>
-            <div class="cond-line">
-              <span class="mana-label cond-label">Debuffs</span>
-              <input type="text" class="debuff-input" id="debuffs" placeholder="">
-            </div>
+            <button type="button" class="rest-btn cond-roll" onclick="rollDoT()" title="Roll end-of-round damage for every active damage-over-time debuff (Blood Trail, Burned, Poisoned, Drowning, Sepsis).">Roll</button>
           </div>
 
           <!-- ATTACKS -->
@@ -633,6 +636,19 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 
   <!-- TAB: SKILLS -->
   <div class="tab-panel active" id="tab-skills">
+    <div class="skill-topbar">
+      <select class="sort-sel" onchange="sortSkills(this.value);this.selectedIndex=0;" title="Sort skills">
+        <option value="">Sort ▾</option>
+        <option value="name">Name</option>
+        <option value="rank">Rank</option>
+        <option value="stat">Stat</option>
+        <option value="check">Check Type</option>
+      </select>
+      <div class="skill-topbar-actions">
+        <button class="add-btn" onclick="if(window.DCCSkills){DCCSkills.openPicker()}else{addSkillRow()}">+ Add Skill</button>
+        <button class="add-btn adv-run-btn" onclick="runAdvancement()" title="Roll a Skill Advancement Check (1d20 ≥ Rank → +1, cap 15) for every checked skill, then clear the marks">⬆ Advancement</button>
+      </div>
+    </div>
     <table class="skills-table">
       <thead>
         <tr>
@@ -647,17 +663,6 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
       </thead>
       <tbody id="skills-body"></tbody>
     </table>
-    <div class="skill-actions-row">
-      <button class="add-btn" onclick="if(window.DCCSkills){DCCSkills.openPicker()}else{addSkillRow()}">+ Add Skill</button>
-      <button class="add-btn adv-run-btn" onclick="runAdvancement()" title="Roll a Skill Advancement Check (1d20 ≥ Rank → +1, cap 15) for every checked skill, then clear the marks">⬆ Advancement</button>
-      <select class="sort-sel" onchange="sortSkills(this.value);this.selectedIndex=0;" title="Sort skills">
-        <option value="">Sort ▾</option>
-        <option value="name">Name</option>
-        <option value="rank">Rank</option>
-        <option value="stat">Stat</option>
-        <option value="check">Check Type</option>
-      </select>
-    </div>
   </div>
 
   <!-- TAB: GEAR -->
@@ -679,8 +684,15 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
   <!-- TAB: INVENTORY -->
   <div class="tab-panel" id="tab-inventory">
     <div class="inv-pinned">
-      <div class="inv-pin gold"><span class="inv-pin-lbl">Gold</span><input type="text" inputmode="numeric" id="f-gold" class="inv-pin-in" placeholder="0" oninput="scheduleAutosave()"></div>
-      <div class="inv-pin junk"><span class="inv-pin-lbl">Misc. Junk</span><input type="text" id="f-junk" class="inv-pin-in" placeholder="odds &amp; ends, trophies, trash…" oninput="scheduleAutosave()"></div>
+      <select class="sort-sel" onchange="sortInventory(this.value);this.selectedIndex=0;" title="Sort inventory">
+        <option value="">Sort ▾</option>
+        <option value="item">Item Name</option>
+        <option value="qty">Quantity</option>
+      </select>
+      <div class="inv-pin-group">
+        <div class="inv-pin gold"><span class="inv-pin-lbl">Gold</span><input type="text" inputmode="numeric" id="f-gold" class="inv-pin-in" placeholder="0" oninput="scheduleAutosave()"></div>
+        <div class="inv-pin junk"><span class="inv-pin-lbl">Misc. Junk</span><input type="text" inputmode="numeric" id="f-junk" class="inv-pin-in" placeholder="0" title="Amount of Misc. Junk (a crafting currency)" oninput="scheduleAutosave()"></div>
+      </div>
     </div>
     <table class="inv-table">
       <thead>
@@ -690,11 +702,6 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
     </table>
     <div class="skill-actions-row">
       <button class="add-btn" onclick="if(window.DCCItems){DCCItems.openPicker()}else{addInvRow()}">+ Add Item</button>
-      <select class="sort-sel" onchange="sortInventory(this.value);this.selectedIndex=0;" title="Sort inventory">
-        <option value="">Sort ▾</option>
-        <option value="item">Item Name</option>
-        <option value="qty">Quantity</option>
-      </select>
     </div>
   </div>
 
