@@ -1554,7 +1554,7 @@ const GMCamp = (function() {
 
   const btn = () => document.getElementById('camp-btn');
   const pop = () => document.getElementById('camp-popover');
-  const esc = t => String(t == null ? '' : t).replace(/</g, '&lt;');
+  const esc = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   // ── Roll traffic ──
   function broadcast(entry) {
@@ -9847,7 +9847,7 @@ function init_notes(root) {
       else text += n.textContent;
     });
 
-    const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     // Only replace if something actually changes
     const rendered = esc(text)
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -10032,7 +10032,7 @@ function init_notes(root) {
 
   // ── Import: Markdown → DOM ──
   function mdToDom(md) {
-    const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     const inline = s => esc(s)
       .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
       .replace(/\*(.+?)\*/g,'<em>$1</em>')

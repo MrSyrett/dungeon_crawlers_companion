@@ -1365,6 +1365,12 @@ function showRollToast(label, result, detail, type) {
   _toastTimer = setTimeout(function() { t.className = ''; }, 3500);
 }
 
+// Escape user-supplied roll text before it hits innerHTML — weapon/spell/character
+// names can contain < > & " and are also broadcast to other players. Code-generated
+// icons pass through _logIcon (kept only when the whole value is one <svg> element,
+// which user text never is); the ADV/DIS badge is added separately as trusted markup.
+function _logEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _logIcon(s){ s=String(s==null?'':s); return /^\s*<svg[\s\S]*<\/svg>\s*$/.test(s) ? s : _logEsc(s); }
 function addLog(label, result, detail, type='normal') {
   const entries = document.getElementById('log-entries');
   const hint = entries.querySelector('.log-hint');
@@ -1373,7 +1379,7 @@ function addLog(label, result, detail, type='normal') {
   div.className = 'log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
   const advLabel = advState === 'advantage' ? ' <span style="color:#6dbf6d;font-size:9px;">▲ADV</span>'
                  : advState === 'disadvantage' ? ' <span style="color:#df6a6a;font-size:9px;">▼DIS</span>' : '';
-  div.innerHTML = `<div class="roll-label">${label}${advLabel}</div><div class="roll-result">${result}</div><div class="roll-detail">${detail}</div>`;
+  div.innerHTML = `<div class="roll-label">${_logEsc(label)}${advLabel}</div><div class="roll-result">${_logIcon(result)}</div><div class="roll-detail">${_logEsc(detail)}</div>`;
   if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
   entries.insertBefore(div, entries.firstChild);
   // Same cap the remote-roll path uses — without it a long session accumulates

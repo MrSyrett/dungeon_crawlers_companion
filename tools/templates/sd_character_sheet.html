@@ -2286,6 +2286,12 @@ function showRollToast(label, result, detail, type) {
   _toastTimer = setTimeout(function() { t.className = ''; }, 3500);
 }
 
+// Escape user-supplied roll text before it hits innerHTML — weapon/spell/character
+// names can contain < > & " and are also broadcast to other players. Code-generated
+// icons pass through _logIcon (kept only when the whole value is one <svg> element,
+// which user text never is); the ADV/DIS badge is added separately as trusted markup.
+function _logEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _logIcon(s){ s=String(s==null?'':s); return /^\s*<svg[\s\S]*<\/svg>\s*$/.test(s) ? s : _logEsc(s); }
 function addLog(label, result, detail, type='normal') {
   const entries = document.getElementById('log-entries');
   const hint = entries.querySelector('.log-hint');
@@ -2294,7 +2300,7 @@ function addLog(label, result, detail, type='normal') {
   div.className = 'log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
   const advLabel = advState==='advantage'?' <span style="color:#6dbf6d;font-size:8px;">▲ADV</span>'
                  : advState==='disadvantage'?' <span style="color:#df6a6a;font-size:8px;">▼DIS</span>':'';
-  div.innerHTML = `<div class="roll-label">${label}${advLabel}</div><div class="roll-result">${result}</div><div class="roll-detail">${detail}</div>`;
+  div.innerHTML = `<div class="roll-label">${_logEsc(label)}${advLabel}</div><div class="roll-result">${_logIcon(result)}</div><div class="roll-detail">${_logEsc(detail)}</div>`;
   if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
   entries.insertBefore(div, entries.firstChild);
   // Same cap the remote-roll path uses — without it a long session accumulates
@@ -2512,7 +2518,8 @@ function rollAttack(btn) {
   const atkAdvBtn = btn.closest('tr').querySelector('.atk-adv-btn');
   const hasAtkAdv = atkAdvBtn?.classList.contains('on');
   const prevAdv = advState;
-  if(hasAtkAdv && !advState) advState = 'advantage';
+  // Per-row advantage: grants advantage, but cancels a global disadvantage to a normal roll.
+  if(hasAtkAdv) advState = (advState === 'disadvantage') ? null : 'advantage';
   const {result:hitRoll, detail:advDetail} = rollWithAdv(20);
   advState = prevAdv;
   const hitTotal = hitRoll + bonus + statMod;
@@ -2523,10 +2530,13 @@ function rollAttack(btn) {
   let dmgTotal = null, dmgBreakdown = '';
   const dm = diceStr.match(/^(\d*)d(\d+)([+-]\d+)?$/i);
   if(dm) {
-    const num=parseInt(dm[1]||'1'), sides=parseInt(dm[2]), bonus2=parseInt(dm[3]||'0');
+    const baseNum=parseInt(dm[1]||'1'), sides=parseInt(dm[2]), bonus2=parseInt(dm[3]||'0');
+    // Shadowdark: a critical hit (natural 20) rolls DOUBLE the damage dice (not the modifier).
+    const num = type==='crit' ? baseNum*2 : baseNum;
     const rolls=Array.from({length:num},()=>d(sides));
     dmgTotal = rolls.reduce((a,b)=>a+b,0)+bonus2;
-    dmgBreakdown = `${diceStr}(${rolls.join('+')})${bonus2?((bonus2>0?'+':'')+bonus2):''}=${dmgTotal}`;
+    dmgBreakdown = `${num}d${sides}(${rolls.join('+')})${bonus2?((bonus2>0?'+':'')+bonus2):''}=${dmgTotal}`
+      + (type==='crit' ? ' ✷ crit — double dice' : '');
   }
 
   // Bold result: clean totals only
@@ -2542,7 +2552,7 @@ function rollAttack(btn) {
       const res = consumeAmmo(at);
       ammoNote = res.ok
         ? `  |  −1 ${res.item} (${res.left} left)`
-        : `  |  <svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.3 3.8a1.5 1.5 0 0 0-2.6 0L2.5 18.4A1.5 1.5 0 0 0 3.8 20.6h16.4a1.5 1.5 0 0 0 1.3-2.2ZM12 8.4a1 1 0 0 1 1 1v4a1 1 0 0 1-2 0v-4a1 1 0 0 1 1-1Zm0 8.8a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4Z"/></svg> Out of ${ammoLabel(at)}`;
+        : `  |  ⚠ Out of ${ammoLabel(at)}`;
     }
   }
 
@@ -2586,7 +2596,8 @@ function rollSpell(btn) {
 
   // Spell advantage stacks with global adv state
   const prevAdv = advState;
-  if(isAdvSpell && !advState) advState = 'advantage';
+  // Per-spell advantage: grants advantage, but cancels a global disadvantage to normal.
+  if(isAdvSpell) advState = (advState === 'disadvantage') ? null : 'advantage';
   const {result:roll, detail:advDetail} = rollWithAdv(20);
   advState = prevAdv;
 
@@ -2725,11 +2736,12 @@ function rollDicePool(){
 function clearDicePool(){dicePool=[];updateDicePoolDisplay();}
 
 // ── DARK MODE ──
-function toggleDarkMode(){
-  const on=document.body.classList.toggle('dark');
-  document.getElementById('dm-toggle').classList.toggle('on',on);
+function setDarkMode(on){
+  document.body.classList.toggle('dark', on);
+  document.getElementById('dm-toggle')?.classList.toggle('on', on);
   try{ localStorage.setItem('sd_dark', on?'1':'0'); }catch(e){}
 }
+function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')); }
 
 // ── SAVE / EXPORT / IMPORT ──
 function collectSheet(){
@@ -3404,11 +3416,21 @@ function _saveSheetNow(manual=false){
 // + PATCH per click/keystroke. A manual save (the Save button) still runs
 // immediately and logs its confirmation.
 var _saveSheetTimer = null;
-function saveSheet(manual=false){
-  if(manual){ _saveSheetNow(true); return; }
+function saveSheet(quiet){
+  // Aligned with the other sheets: a truthy `quiet` (incl. the shared dice module's
+  // saveSheet(true)) saves silently and immediately. SD's own interactive call sites
+  // pass no arg / false and debounce to a silent autosave — SD has no loud manual save,
+  // so nothing here toasts and a dice-setting change no longer pops "Saved".
+  if(quiet){ if(_saveSheetTimer){ clearTimeout(_saveSheetTimer); _saveSheetTimer = null; } try { _saveSheetNow(); } catch(e) {} return; }
   if(_saveSheetTimer) clearTimeout(_saveSheetTimer);
   _saveSheetTimer = setTimeout(function(){ _saveSheetTimer = null; try { _saveSheetNow(); } catch(e) {} }, 400);
 }
+// Standard debounced-silent autosave entry point the other sheets expose (and that
+// shared/future code can rely on). SD's own inputs already autosave via the global
+// input/change listener below; this just makes the contract uniform.
+function scheduleAutosave(){ if(!_pageReady) return; saveSheet(); }
+// Push the character name up to the campaign/party title, like the other sheets.
+function syncDocTitle(){ try { const n = (document.getElementById('f-name')?.value || '').trim(); if(n && window.__ddSaveTitle) window.__ddSaveTitle(n); } catch(e){} }
 
 // ═══ PRINTER-FRIENDLY PDF EXPORT ══════════════════════════════════════════
 // Rather than screenshotting the dark UI, this rebuilds the sheet as a clean
@@ -4094,11 +4116,17 @@ function autoSaveOnExit() {
   if(!_pageReady) return;
   // Immediate — a debounced save would be cancelled by the page going away.
   try { _saveSheetNow(); } catch(e) {}
+  try { syncDocTitle(); } catch(e) {}
 }
 window.addEventListener('beforeunload', autoSaveOnExit);
+window.addEventListener('pagehide', autoSaveOnExit);   // the reliable mobile-backgrounding save
 document.addEventListener('visibilitychange', function() {
   if(document.visibilityState === 'hidden') autoSaveOnExit();
 });
+// Save before following an outbound link (the party page, an export, etc.).
+document.addEventListener('click', function(e){ const a = e.target.closest && e.target.closest('a[href]'); if(a && !a.target && !a.href.startsWith('javascript:') && !a.getAttribute('onclick')) autoSaveOnExit(); }, true);
+// Keep the party/campaign title in sync when the name changes.
+document.getElementById('f-name')?.addEventListener('change', syncDocTitle);
 
 // Auto-save 1.5s after any input — primary save strategy on mobile
 (function() {
@@ -4114,6 +4142,16 @@ document.addEventListener('visibilitychange', function() {
 </script>
 
 <script src="/tools-data/sd-sheet-rc-data.js"></script>
+<script>
+/* Fallback shims — if a /tools-data file fails to load (misdeploy/offline), keep these
+   globals defined as empty containers so handlers degrade gracefully instead of throwing
+   a hard ReferenceError. (SD_WEAPONS/SD_SPELLS are inline; SD_QUICK_RULES is guarded at use.) */
+window.RC_ANCESTRY    = (typeof RC_ANCESTRY    !== 'undefined') ? RC_ANCESTRY    : {};
+window.RC_CLASSES     = (typeof RC_CLASSES     !== 'undefined') ? RC_CLASSES     : [];
+window.RC_BACKGROUNDS = (typeof RC_BACKGROUNDS !== 'undefined') ? RC_BACKGROUNDS : [];
+window.RC_NAMES       = (typeof RC_NAMES       !== 'undefined') ? RC_NAMES       : {};
+window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL  : {};
+</script>
 
 
 
