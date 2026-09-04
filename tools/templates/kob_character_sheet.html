@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- BUILD: Kids on Bikes Character Sheet — 2026-08-29 -->
-<script>window.__BUILD__="Kids on Bikes Character Sheet — 2026-08-29";</script>
+<!-- BUILD: Kids on Bikes Character Sheet — 2026-09-04 -->
+<script>window.__BUILD__="Kids on Bikes Character Sheet — 2026-09-04";</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kids on Bikes Character Sheet</title>
@@ -1143,7 +1143,8 @@ autoLoad();
   var LS='dcw_diceanim';  // shared across all sheets
   var DEF={ on:true, mode:'3d', dice:'#d8b24a', num:'#2a2007', linger:1000, finish:'shiny', sound:true };
   var S=Object.assign({},DEF);
-  try{ var raw=localStorage.getItem(LS); if(raw) Object.assign(S, JSON.parse(raw)||{}); }catch(e){}
+  var hadLS=false;  // did localStorage hold a real saved preference? (false in webviews where LS is unreliable)
+  try{ var raw=localStorage.getItem(LS); if(raw){ Object.assign(S, JSON.parse(raw)||{}); hadLS=true; } }catch(e){}
   function persistLocal(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
   function persist(){ persistLocal(); if(typeof window.saveSheet==='function'){ try{ window.saveSheet(true); }catch(e){} } }
 
@@ -1548,11 +1549,14 @@ autoLoad();
 
   // ─── expose for sheet persistence ───
   window.DiceAnim={ get:function(){ return {on:S.on,mode:S.mode,dice:S.dice,num:S.num,linger:S.linger,finish:S.finish,sound:S.sound}; },
-    restore:function(o){ if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish)S.finish=o.finish; if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
+    restore:function(o,force){ if(hadLS&&force!==true) return; if(o&&typeof o==='object'){ if(typeof o.on==='boolean')S.on=o.on; if(o.mode)S.mode=o.mode; if(o.dice)S.dice=o.dice; if(o.num)S.num=o.num; if(typeof o.linger==='number')S.linger=o.linger; if(o.finish)S.finish=o.finish; if(typeof o.sound==='boolean')S.sound=o.sound; persistLocal(); syncPop(); if(S.on&&S.mode==='3d'&&HAS_WEBGL) loadThree(function(){}); } },
     play:function(dice,crit){ play(dice,crit); } };
 
-  // Persist settings in the saved sheet too (survives the VTT webview where
-  // localStorage is unreliable). Wrapping means no per-sheet edits are needed.
+  // Persist settings into the saved sheet too, as a fallback for VTT webviews
+  // where localStorage is unreliable. On load a REAL localStorage preference
+  // wins (it is the live, cross-sheet setting) — restore() no-ops when hadLS is
+  // true, so a stale sheet copy can't clobber a newer global choice; the blob
+  // copy is used only when localStorage held nothing. Wrapping = no per-sheet edits.
   if(typeof window.collectSheet==='function'){ var _cs=window.collectSheet; window.collectSheet=function(){ var d=_cs.apply(this,arguments); try{ if(d&&typeof d==='object') d.diceAnim=window.DiceAnim.get(); }catch(e){} return d; }; }
   if(typeof window.applySheet==='function'){ var _as=window.applySheet; window.applySheet=function(data){ var r=_as.apply(this,arguments); try{ if(data&&data.diceAnim) window.DiceAnim.restore(data.diceAnim); }catch(e){} return r; }; }
 
