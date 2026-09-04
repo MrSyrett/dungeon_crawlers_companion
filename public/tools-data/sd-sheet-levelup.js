@@ -696,10 +696,10 @@ function updateHeaderButton() {
   if(!btn) return;
   const hasChar = (document.getElementById('f-name')?.value.trim()) && (document.getElementById('f-class')?.value.trim());
   if(hasChar) {
-    btn.textContent = '⬆ Level Up'; btn.title = 'Level up'; btn.setAttribute('aria-label', 'Level up');
+    btn.textContent = 'Level'; btn.title = 'Level up'; btn.setAttribute('aria-label', 'Level up');
     btn.onclick = startLevelUp;
   } else {
-    btn.textContent = '✨ Build'; btn.title = 'Create character'; btn.setAttribute('aria-label', 'Create character');
+    btn.textContent = 'Create'; btn.title = 'Create character'; btn.setAttribute('aria-label', 'Create character');
     btn.onclick = startCharWizard;
   }
 }

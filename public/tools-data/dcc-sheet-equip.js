@@ -68,8 +68,10 @@
   function isEquipType(tr) {
     var m = rowMeta(tr);
     if (m.cat === "armor" || m.cat === "accessory") return true;
-    // Enchanted weapons / mundane items are equippable when they carry a real bonus.
-    if (m.cat === "weapon" || m.cat === "mundane") return hasBonus(m.effect, rowName(tr));
+    // Weapons equip into the Hands / Holding slot (any bonus in the effect still applies).
+    if (m.cat === "weapon") return true;
+    // Other mundane items are equippable only when they carry a real bonus.
+    if (m.cat === "mundane") return hasBonus(m.effect, rowName(tr));
     return false;
   }
 
@@ -207,8 +209,9 @@
       var slot = accInputs().find(function (i) { return !norm(i.value); });
       if (!slot) { try { alert("All 10 Accessory slots are full. Clear one first."); } catch (e) {} return; }
       slot.value = name; fire(slot); placed = "acc";
-    } else { // armor
+    } else { // armor or weapon
       var label = normSlotLabel(meta.slot);
+      if (!label && meta.cat === "weapon") label = "Hands / Holding"; // weapons default to the Hands slot
       if (label) { addName(gearInput(label), name); placed = label; }
     }
     var bonus = parseBonuses(meta.effect, name);

@@ -147,8 +147,8 @@ body.dark .hp-shield.on{background:#5bb8ec;border-color:#7fd0ff;}
 .formula-eq{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--muted);}
 .formula-total{width:50px;height:28px;border:2px solid var(--border);background:var(--box);font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;text-align:center;outline:none;color:var(--ink);}
 /* Evade Total doubles as its own roll control (ID beats the .formula-total rules in both themes). */
-#evade-total{cursor:pointer;transition:background .1s,color .1s,border-color .1s;}
-#evade-total:hover{background:var(--section-hdr);color:#fff;border-color:var(--section-hdr);}
+#evade-total{cursor:pointer;color:var(--red);background:var(--box);border-color:var(--red);transition:background .1s,color .1s,border-color .1s;}
+#evade-total:hover{background:var(--red);color:#fff;border-color:var(--red);}
 #evade-total:active{background:var(--red);color:#fff;border-color:var(--red);}
 #evade-total:focus-visible{outline:2px solid var(--red);outline-offset:1px;}
 .formula-sublabel{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;margin-top:1px;}
@@ -242,6 +242,14 @@ body.dark .atk-formula input[readonly]{color:#8fc4ec;}
 .gear-acc-row input{flex:1;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow',sans-serif;font-size:11px;outline:none;}
 
 /* INVENTORY */
+.inv-pinned{display:flex;gap:6px;margin-bottom:7px;}
+.inv-pin{display:flex;align-items:center;gap:7px;background:var(--box);border:1px solid var(--rule);border-radius:4px;padding:5px 9px;}
+.inv-pin.gold{flex:0 0 auto;}
+.inv-pin.junk{flex:1;min-width:0;}
+.inv-pin-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);white-space:nowrap;}
+.inv-pin-in{border:none;background:transparent;font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;color:var(--ink);outline:none;min-width:0;}
+.inv-pin.gold .inv-pin-in{width:64px;text-align:center;color:var(--red);}
+.inv-pin.junk .inv-pin-in{width:100%;font-family:'Barlow',sans-serif;}
 .inv-table{width:100%;border-collapse:collapse;}
 .inv-table th{background:var(--section-hdr);color:white;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:5px 6px;text-align:left;}
 .inv-table td{border-bottom:1px solid var(--rule);padding:1px 4px;}
@@ -289,7 +297,9 @@ body.dark .comp-stats input,body.dark .comp-row input,body.dark .comp-acc textar
 .add-btn{margin-top:6px;padding:4px 12px;background:var(--section-hdr);color:white;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;}
 .add-btn:hover{background:var(--red);}
 /* + Add Skill on the left, Advancement pinned right (under the action column) */
-.skill-actions-row{display:flex;align-items:center;justify-content:space-between;}
+.skill-actions-row{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.sort-sel{border:1px solid var(--rule);background:var(--input-bg);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;border-radius:3px;cursor:pointer;outline:none;}
+.sort-sel:hover{border-color:var(--red);color:var(--red);}
 .adv-run-btn{background:#2f7d3f;color:#fff;}
 .adv-run-btn:hover{background:#3a9a4e;}
 
@@ -444,7 +454,6 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
         <div style="display:flex;gap:4px;">
           <button type="button" class="rest-btn" onclick="rest('short')" title="Short Rest (2 hrs): heal 5 Health Bar slots and regain half your Mana.">Short Rest</button>
           <button type="button" class="rest-btn" onclick="rest('long')" title="Long Rest (8 hrs): full Health Bar, full Mana, and clears all Fatigued.">Long Rest</button>
-          <button type="button" class="rest-btn" onclick="rollDoT()" title="Roll end-of-round damage for every active damage-over-time debuff (Blood Trail, Burned, Poisoned, Drowning, Sepsis).">Roll DoT</button>
         </div>
       </div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Class</label><input type="text" id="f-class"></div>
@@ -552,7 +561,7 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
                   <span class="formula-sublabel" style="font-size:6.5px;">AI Favor</span>
                 </div>
                 <div class="formula-extra-item" style="flex:1;">
-                  <select class="formula-total" id="dr-size" title="Creature Size (DCC size ladder)" style="width:100%;height:20px;font-size:10px;padding:0 1px;"><option value="">—</option><option value="Tiny">1 · Tiny</option><option value="Small">2 · Small</option><option value="Petite">3 · Petite</option><option value="Medium">4 · Medium</option><option value="Large">5 · Large</option><option value="Huge">6 · Huge</option><option value="Colossal">7 · Colossal</option><option value="Gargantuan">8 · Gargantuan</option></select>
+                  <input type="text" class="formula-total" id="dr-size" placeholder="—" style="width:100%;height:20px;font-size:10px;padding:0 2px;" oninput="dccSizeCoerce(this)" title="Size (number only)">
                   <span class="formula-sublabel" style="font-size:6.5px;">Size</span>
                 </div>
               </div>
@@ -640,6 +649,13 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
     <div class="skill-actions-row">
       <button class="add-btn" onclick="if(window.DCCSkills){DCCSkills.openPicker()}else{addSkillRow()}">+ Add Skill</button>
       <button class="add-btn adv-run-btn" onclick="runAdvancement()" title="Roll a Skill Advancement Check (1d20 ≥ Rank → +1, cap 15) for every checked skill, then clear the marks">⬆ Advancement</button>
+      <select class="sort-sel" onchange="sortSkills(this.value);this.selectedIndex=0;" title="Sort skills">
+        <option value="">Sort ▾</option>
+        <option value="name">Name</option>
+        <option value="rank">Rank</option>
+        <option value="stat">Stat</option>
+        <option value="check">Check Type</option>
+      </select>
     </div>
   </div>
 
@@ -661,6 +677,10 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
 
   <!-- TAB: INVENTORY -->
   <div class="tab-panel" id="tab-inventory">
+    <div class="inv-pinned">
+      <div class="inv-pin gold"><span class="inv-pin-lbl">Gold</span><input type="text" inputmode="numeric" id="f-gold" class="inv-pin-in" placeholder="0" oninput="scheduleAutosave()"></div>
+      <div class="inv-pin junk"><span class="inv-pin-lbl">Misc. Junk</span><input type="text" id="f-junk" class="inv-pin-in" placeholder="odds &amp; ends, trophies, trash…" oninput="scheduleAutosave()"></div>
+    </div>
     <table class="inv-table">
       <thead>
         <tr><th style="width:22px"></th><th style="width:38%">Item</th><th style="width:12%;text-align:center;">Qty</th><th>Notes</th><th style="width:28px"></th></tr>
@@ -669,6 +689,11 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
     </table>
     <div class="skill-actions-row">
       <button class="add-btn" onclick="if(window.DCCItems){DCCItems.openPicker()}else{addInvRow()}">+ Add Item</button>
+      <select class="sort-sel" onchange="sortInventory(this.value);this.selectedIndex=0;" title="Sort inventory">
+        <option value="">Sort ▾</option>
+        <option value="item">Item Name</option>
+        <option value="qty">Quantity</option>
+      </select>
     </div>
   </div>
 
@@ -755,7 +780,7 @@ body.dark select.skill-stat-sel{background:var(--input-bg);}
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
-    <button id="dccw-launch-btn" class="log-action-btn" onclick="DCCW.launch()" title="Character Wizard" aria-label="Character Wizard" style="border:1px solid #b82018;background:transparent;color:#f0a8a3;line-height:1;">✨ Build</button>
+    <button id="dccw-launch-btn" class="log-action-btn" onclick="DCCW.launch()" title="Character Wizard" aria-label="Character Wizard" style="border:1px solid #b82018;background:transparent;color:#f0a8a3;line-height:1;">Create</button>
     <button class="log-action-btn" onclick="openRules()" style="border:1px solid #2f4a2f;background:#1e2a1e;color:#b8d8b8;" title="Quick rules" aria-label="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -879,22 +904,15 @@ function onStatChange(id) {
   if(typeof recalcAllAttacks === 'function') recalcAllAttacks();
 }
 
-// The stat SCORE actually in play: the entered Enh/Unenh value, plus the Good Sleep
-// buff's "+Floor Number to all Stats" when that buff is active. Blank stays blank.
-function effStatScore(id) {
-  const raw = document.getElementById(id+'-'+(globalModSource==='enhanced'?'enh':'unenh'))?.value;
-  if (raw == null || String(raw).trim() === '') return null;
-  const n = parseInt(raw, 10);
-  if (isNaN(n)) return null;
-  return hasBuff('Good Sleep') ? n + getFloor() : n;
-}
-
 function updateMod(id) {
-  document.getElementById(id+'-mod').textContent = fmtMod(statToMod(effStatScore(id)));
+  const val = document.getElementById(id+'-'+(globalModSource==='enhanced'?'enh':'unenh'))?.value;
+  const m = statToMod(val);
+  document.getElementById(id+'-mod').textContent = fmtMod(m);
 }
 
 function getStatMod(id) {
-  return statToMod(effStatScore(id)) ?? 0;
+  const val = document.getElementById(id+'-'+(globalModSource==='enhanced'?'enh':'unenh'))?.value;
+  return statToMod(val) ?? 0;
 }
 
 // Current dungeon floor (F). Many rulebook values read as "X + F" (Evade, natural
@@ -905,46 +923,6 @@ function getFloor() {
   return (isNaN(v) || v < 1) ? 1 : v;
 }
 
-// ── ACTIVE CONDITIONS: read the Buffs / Debuffs fields and turn them into live
-// mechanical effects (data-driven from DCC_BUFFS / DCC_DEBUFFS, so they can't
-// drift from the rulebook). Both fields are comma lists, e.g. "Fatigued ×2, Minor Injury".
-
-// Set of active buff names (lower-cased) from the #buffs field.
-function activeBuffSet() {
-  const raw = document.getElementById('buffs')?.value || '';
-  return new Set(raw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean));
-}
-function hasBuff(name) { return activeBuffSet().has(String(name).toLowerCase()); }
-
-// Roll-affecting debuffs: flat penalty to all Checks, blanket Disadvantage, and the
-// Woozy "no DEX on Attack/Evade" rule — all parsed from each debuff's effect text.
-function activeDebuffMods() {
-  const out = { penalty: 0, dis: false, noDex: false, parts: [] };
-  const raw = document.getElementById('debuffs')?.value || '';
-  if (!raw.trim() || typeof DCC_DEBUFFS === 'undefined') return out;
-  raw.split(',').forEach(tok => {
-    const t = tok.trim(); if (!t) return;
-    const m = t.match(/^(.*?)(?:\s*[x×]\s*(\d+))?$/i);
-    const nm = (m ? m[1] : t).trim();
-    const cnt = Math.max(1, parseInt((m && m[2]) || '1', 10) || 1);
-    const d = DCC_DEBUFFS.find(x => x.name.toLowerCase() === nm.toLowerCase());
-    if (!d) return;
-    const eff = d.effect || '';
-    let touched = false;
-    const pm = eff.match(/[-−]\s*(\d+)\s*to all\s*(?:checks|rolls)/i);
-    if (pm) { out.penalty -= (parseInt(pm[1], 10) || 0) * cnt; touched = true; }
-    if (/all checks at disadvantage|disadvantage on next check|next rolled action at disadvantage/i.test(eff)) { out.dis = true; touched = true; }
-    if (/cannot add your dex/i.test(eff)) { out.noDex = true; touched = true; }
-    if (touched) out.parts.push(d.name + (cnt > 1 ? '×' + cnt : ''));
-  });
-  return out;
-}
-// Merge two forced adv/dis states into the single `extra` rollWithAdv accepts
-// (same direction keeps it; opposite cancels to normal — mirrors rollWithAdv).
-function mergeExtra(a, b) { if (a && b) return a === b ? a : null; return a || b || null; }
-// A "+Debuffs(−N)" fragment for a roll's detail string, or ''.
-function debuffTag(mods) { return mods.penalty ? ` + Debuffs(${mods.penalty})` : ''; }
-
 // Sync DEX Mod → Evade DEX field and recalc total
 function syncEvadeDex() {
   const m = getStatMod('dex');
@@ -952,6 +930,9 @@ function syncEvadeDex() {
   calcEvadeTotal();
 }
 
+// The Size box holds just the size number (1–8); strip any "— Name" suffix that
+// an older save or a manual entry may carry so the narrow box isn't clipped.
+function dccSizeCoerce(el) { if (!el) return; const m = String(el.value == null ? '' : el.value).match(/\d+/); if (m && el.value !== m[0]) el.value = m[0]; }
 function calcEvadeTotal() {
   const dex = parseMod(document.getElementById('evade-dex')?.value);
   const buffs = parseMod(document.getElementById('evade-buffs')?.value);
@@ -968,11 +949,7 @@ function syncMana() {
 function calcDR() {
   const armor = parseInt(document.getElementById('dr-armor')?.value)||0;
   const buffs = parseInt(document.getElementById('dr-buffs')?.value)||0;
-  let total = armor + buffs;
-  if(hasBuff('Iron Skin')) total *= 2;   // Iron Skin buff doubles DR (Core p.96)
-  const el = document.getElementById('dr-total');
-  el.value = total;
-  el.title = hasBuff('Iron Skin') ? `Iron Skin: (${armor} + ${buffs}) ×2` : '';
+  document.getElementById('dr-total').value = armor + buffs;
 }
 document.getElementById('dr-armor').addEventListener('input', calcDR);
 document.getElementById('dr-buffs').addEventListener('input', calcDR);
@@ -1008,7 +985,6 @@ function buildHpBar() {
     div.addEventListener('click', () => {
       div.dataset.active = div.dataset.active==='true'?'false':'true';
       div.classList.toggle('dimmed', div.dataset.active==='false');
-      checkDying();   // 0% Health Bar → Dying debuff; healed above 0% → clear it
       // A pip is a div, so its click fires no input/change — save explicitly or
       // the GM Screen's Party healthbar goes stale until the sheet closes.
       if(typeof scheduleAutosave === 'function') scheduleAutosave();
@@ -1061,7 +1037,6 @@ function rest(kind) {
       }
     }
   }
-  checkDying();   // a rest heals the Health Bar → clear Dying if now above 0%
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
   if(typeof addLog === 'function') {
     if(long) addLog('Long Rest', 'Full HP & Mana', 'Full Health Bar, full Mana' + (clearedFat ? ', Fatigued cleared' : ''), 'normal');
@@ -1069,70 +1044,13 @@ function rest(kind) {
   }
 }
 
-// ── DYING (Core p.75) ──
-// At 0% Health Bar (every pip crossed off) the crawler is Dying: auto-add the Dying
-// debuff and log the CON-Mod round countdown. Healing above 0% clears it.
-function checkDying() {
-  const pips = [...document.querySelectorAll('.hp-pip')];
-  if(!pips.length) return;
-  const df = document.getElementById('debuffs');
-  if(!df) return;
-  const alive = pips.some(p => p.dataset.active === 'true');
-  const parts = df.value.split(',').map(s => s.trim()).filter(Boolean);
-  const hasDying = parts.some(t => /^dying$/i.test(t));
-  if(!alive && !hasDying) {
-    parts.push('Dying');
-    df.value = parts.join(', ');
-    try { df.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
-    try { if(window.DCCDebuffs) window.DCCDebuffs.refresh(); } catch(e) {}
-    const cm = getStatMod('con');
-    if(typeof addLog === 'function') addLog('Dying', '0% Health Bar',
-      `You have ${cm} round${cm===1?'':'s'} (CON Mod) before death. Cannot act, move, speak, or use the HUD.`, 'fumble');
-  } else if(alive && hasDying) {
-    df.value = parts.filter(t => !/^dying$/i.test(t)).join(', ');
-    try { df.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {}
-    try { if(window.DCCDebuffs) window.DCCDebuffs.refresh(); } catch(e) {}
-  }
-}
-
-// ── DAMAGE OVER TIME ──
-// Rolls the end-of-round damage of every active DoT debuff (Blood Trail, Burned,
-// Poisoned, Drowning, Sepsis…), data-driven from each debuff's effect text. Stackable
-// debuffs (e.g. Blood Trail ×2) roll once per stack. Floor Number is added where the
-// effect says "+F".
-function rollDoT() {
-  const raw = document.getElementById('debuffs')?.value || '';
-  const F = getFloor();
-  let any = false, grand = 0; const summary = [];
-  if(raw.trim() && typeof DCC_DEBUFFS !== 'undefined') {
-    raw.split(',').forEach(tok => {
-      const t = tok.trim(); if(!t) return;
-      const mm = t.match(/^(.*?)(?:\s*[x×]\s*(\d+))?$/i);
-      const nm = (mm ? mm[1] : t).trim();
-      const cnt = Math.max(1, parseInt((mm && mm[2]) || '1', 10) || 1);
-      const deb = DCC_DEBUFFS.find(x => x.name.toLowerCase() === nm.toLowerCase());
-      if(!deb) return;
-      const dm = (deb.effect || '').match(/(\d*)d(\d+)\s*(\+\s*F)?[^.]*end of each round/i);
-      if(!dm) return;
-      any = true;
-      const num = parseInt(dm[1] || '1', 10), sides = parseInt(dm[2], 10), plusF = !!dm[3];
-      const dieStr = (dm[1] || '') + 'd' + dm[2];
-      let sub = 0; const detail = [];
-      for(let k=0;k<cnt;k++) {
-        const rolls = Array.from({length:num}, () => d(sides));
-        const r = rolls.reduce((a,b)=>a+b,0) + (plusF ? F : 0);
-        sub += r;
-        detail.push(`${dieStr}(${rolls.join('+')})${plusF?`+F(${F})`:''}`);
-      }
-      grand += sub;
-      summary.push(deb.name + (cnt>1?'×'+cnt:'') + ': ' + sub);
-      if(typeof addLog === 'function') addLog(deb.name + ' — DoT', sub, detail.join(' ; '), 'fumble');
-    });
-  }
-  if(typeof addLog === 'function') {
-    if(!any) addLog('Damage Over Time', '—', 'No active damage-over-time debuffs', 'normal');
-    else addLog('DoT — total this round', grand, summary.join('  |  '), 'fumble');
-  }
+// The Skills-row radial: for an ATTACK skill it toggles that skill's Attacks row
+// (equip-style ◉/○); for everything else it pins to the Hotlist as before.
+function dccSkillRadial(btn) {
+  const tr = btn && btn.closest ? btn.closest('tr') : null;
+  if(!tr) return;
+  if(window.DCCSkills && DCCSkills.isAttackSkillRow && DCCSkills.isAttackSkillRow(tr)) { DCCSkills.toggleAttack(tr); return; }
+  if(window.DCCHotlist) DCCHotlist.toggleRow(btn);
 }
 
 // ── ATTACKS ──
@@ -1152,7 +1070,6 @@ function addAttackRow(tbody) {
       <div class="atk-formula">
         <input type="text" placeholder="Rank" style="width:36px;" oninput="${recalc}">
       </div>
-      <span class="atk-calc" data-atk="hit" title="To Hit = d20 + Rank + Stat Mod">—</span>
     </td>
     <td>
       <div class="atk-formula">
@@ -1163,10 +1080,9 @@ function addAttackRow(tbody) {
       <div class="atk-formula">
         <input type="text" placeholder="Dice" style="width:44px;" oninput="${recalc}">
       </div>
-      <span class="atk-calc" data-atk="dmg" title="Damage = dice + Stat Mod">—</span>
     </td>
     <td><input type="text" placeholder="Effects..."></td>
-    <td style="text-align:right;white-space:nowrap;"><button class="skill-del-btn" onclick="this.closest('tr').remove()" title="Remove attack" aria-label="Remove attack" style="margin-right:3px;">✕</button><button class="skill-info-btn" onclick="if(window.DCCSkills)DCCSkills.infoRow(this)" title="Look up this attack skill/spell" aria-label="Attack info">i</button><button class="atk-roll-btn" onclick="rollAttack(this)" title="Roll attack" aria-label="Roll attack"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button></td>
+    <td style="text-align:right;white-space:nowrap;"><button class="skill-info-btn" onclick="if(window.DCCSkills)DCCSkills.infoRow(this)" title="Look up this attack skill/spell" aria-label="Attack info">i</button><button class="atk-roll-btn" onclick="rollAttack(this)" title="Roll attack" aria-label="Roll attack"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg></button></td>
   `;
   tbody.appendChild(tr);
   recalcAttackRow(tr);
@@ -1370,7 +1286,7 @@ function addSkillRow() {
   const tbody = document.getElementById('skills-body');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td style="text-align:center;"><button class="hot-pin" onclick="if(window.DCCHotlist)DCCHotlist.toggleRow(this)" title="Add spell to Hotlist" aria-label="Toggle Hotlist">○</button></td>
+    <td style="text-align:center;"><button class="hot-pin" onclick="dccSkillRadial(this)" title="Hotlist / attack toggle" aria-label="Hotlist or attack toggle">○</button></td>
     <td><input type="text" placeholder="Skill name..."></td>
     <td><input type="text" placeholder="Rank" style="text-align:center;width:100%;"></td>
     <td>
@@ -1427,6 +1343,43 @@ function floatHealToTop() {
   });
   if(healRow && tbody.firstElementChild !== healRow) tbody.insertBefore(healRow, tbody.firstElementChild);
   refreshSkillRowRules();
+}
+
+// ── Sort helpers: reorder rows in place, keeping blank rows at the bottom ──────
+function sortSkills(key) {
+  if(!key) return;
+  const tbody = document.getElementById('skills-body'); if(!tbody) return;
+  const info = (tr) => {
+    const t = tr.querySelectorAll('input[type="text"]');   // [name, rank, checkType, notes]
+    const name = (t[0] ? t[0].value : '').trim();
+    return { tr, blank: !name, name: name.toLowerCase(),
+      rank: parseInt(t[1] ? t[1].value : '0', 10) || 0,
+      stat: (tr.querySelector('select') ? tr.querySelector('select').value : '').toLowerCase(),
+      check: (t[2] ? t[2].value : '').toLowerCase() };
+  };
+  [...tbody.querySelectorAll('tr')].map(info).sort((a, b) => {
+    if(a.blank !== b.blank) return a.blank ? 1 : -1;
+    if(key === 'rank') return b.rank - a.rank;                 // highest Rank first
+    const va = a[key] || '', vb = b[key] || '';
+    return va < vb ? -1 : va > vb ? 1 : 0;
+  }).forEach(x => tbody.appendChild(x.tr));
+  if(typeof floatHealToTop === 'function') floatHealToTop();
+  scheduleAutosave();
+}
+function sortInventory(key) {
+  if(!key) return;
+  const tbody = document.getElementById('inv-body'); if(!tbody) return;
+  const info = (tr) => {
+    const t = tr.querySelectorAll('input[type="text"]');   // [item, qty, notes]
+    const item = (t[0] ? t[0].value : '').trim();
+    return { tr, blank: !item, item: item.toLowerCase(), qty: parseInt(t[1] ? t[1].value : '0', 10) || 0 };
+  };
+  [...tbody.querySelectorAll('tr')].map(info).sort((a, b) => {
+    if(a.blank !== b.blank) return a.blank ? 1 : -1;
+    if(key === 'qty') return b.qty - a.qty;                    // most first
+    return a.item < b.item ? -1 : a.item > b.item ? 1 : 0;
+  }).forEach(x => tbody.appendChild(x.tr));
+  scheduleAutosave();
 }
 
 // ── INVENTORY ──
@@ -1527,13 +1480,12 @@ function rollStatKey(e, id, name) {
 
 function rollStat(id, name) {
   const mod = getStatMod(id);
-  const dm = activeDebuffMods();
-  const {result: roll, detail: advDetail} = rollWithAdv(20, dm.dis ? 'disadvantage' : null);
-  const total = roll + mod + dm.penalty;
+  const {result: roll, detail: advDetail} = rollWithAdv(20);
+  const total = roll + mod;
   let type = roll===20?'crit':roll===1?'fumble':'normal';
   let label = name+' Check'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':'');
-  const base = advDetail ? advDetail : `d20(${roll})`;
-  addLog(label, total, `${base} + Mod(${mod})${debuffTag(dm)} = ${total}`, type);
+  const detailStr = advDetail ? `${advDetail} + Mod(${mod}) = ${total}` : `d20(${roll}) + Mod(${mod}) = ${total}`;
+  addLog(label, total, detailStr, type);
 }
 
 // The Evade Total box doubles as the roll control, so support keyboard
@@ -1546,16 +1498,14 @@ function rollEvadeKey(e) {
 }
 
 function rollEvade() {
-  const dm = activeDebuffMods();
-  const dexRaw = parseMod(document.getElementById('evade-dex')?.value);
-  const dex = dm.noDex ? 0 : dexRaw;                 // Woozy: no DEX Mod on Evade
+  const dex = parseMod(document.getElementById('evade-dex')?.value);
   const buffs = parseMod(document.getElementById('evade-buffs')?.value);
-  const {result: roll, detail: advDetail} = rollWithAdv(20, dm.dis ? 'disadvantage' : null);
-  const total = roll + dex + buffs + dm.penalty;
+  const {result: roll, detail: advDetail} = rollWithAdv(20);
+  const total = roll + dex + buffs;
   let type = roll===20?'crit':roll===1?'fumble':'normal';
   const base = advDetail ? advDetail : `d20(${roll})`;
   addLog('Evade Roll'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
-    `${base} + DEX(${dex}${dm.noDex?' — Woozy':''}) + Buffs(${buffs})${debuffTag(dm)} = ${total}`, type);
+    `${base} + DEX(${dex}) + Buffs(${buffs}) = ${total}`, type);
 }
 
 // Resolve a saved attack's stat, tolerating older saves that stored separate
@@ -1606,15 +1556,13 @@ function rollAttack(btn) {
   const sels = row.querySelectorAll('select');
   const name = inputs[0].value || 'Attack';
   const rank = parseMod(inputs[1].value);
-  const dm = activeDebuffMods();
   const statId = sels[0]?.value || '';                 // one stat feeds both
-  const wooz = dm.noDex && statId === 'dex';           // Woozy: no DEX Mod on Attack
-  const statMod = statId && !wooz ? getStatMod(statId) : 0;
-  const statLabel = statId ? `+${statId.toUpperCase()}(${statMod}${wooz?' — Woozy':''})` : '';
+  const statMod = statId ? getStatMod(statId) : 0;
+  const statLabel = statId ? `+${statId.toUpperCase()}(${statMod})` : '';
   const diceStr = inputs[2].value || 'd6';
 
-  const {result: hitRoll, detail: advDetail} = rollWithAdv(20, mergeExtra(untrainedDis(inputs[1]), dm.dis ? 'disadvantage' : null));
-  const hitTotal = hitRoll + rank + statMod + dm.penalty;
+  const {result: hitRoll, detail: advDetail} = rollWithAdv(20, untrainedDis(inputs[1]));
+  const hitTotal = hitRoll + rank + statMod;
   const hitStatLabel = statLabel;
   let type = hitRoll===20?'crit':hitRoll===1?'fumble':'normal';
 
@@ -1633,7 +1581,7 @@ function rollAttack(btn) {
     : `Hit: ${hitTotal}`;
 
   const hitBase = advDetail ? advDetail : `d20(${hitRoll})`;
-  const detailStr = `${hitBase}+Rank(${rank})${hitStatLabel}${debuffTag(dm)}=${hitTotal}`
+  const detailStr = `${hitBase}+Rank(${rank})${hitStatLabel}=${hitTotal}`
     + (dmgDetail ? `  |  ${dmgDetail}` : '');
 
   addLog(`${name}` + (hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''), resultStr, detailStr, type);
@@ -1672,15 +1620,14 @@ function rollSkill(btn) {
   const rank = parseMod(inputs[1].value);
   const statId = sel?.value||'';
   const statMod = statId ? getStatMod(statId) : 0;
-  const dm = activeDebuffMods();
-  const totalMod = rank + statMod + dm.penalty;
-  const {result: roll, detail: advDetail} = rollWithAdv(20, mergeExtra(untrainedDis(inputs[1]), dm.dis ? 'disadvantage' : null));
+  const totalMod = rank + statMod;
+  const {result: roll, detail: advDetail} = rollWithAdv(20, untrainedDis(inputs[1]));
   const total = roll + totalMod;
   let type = roll===20?'crit':roll===1?'fumble':'normal';
   const statLabel = statId ? ` + ${statId.toUpperCase()}(${statMod})` : '';
   const base = advDetail ? advDetail : `d20(${roll})`;
   addLog(`${name}`+(roll===20?' ★':roll===1?' ✗':''), total,
-    `${base}+Rank(${rank})${statLabel}${debuffTag(dm)}=${total}`, type);
+    `${base}+Rank(${rank})${statLabel}=${total}`, type);
   // Using a skill marks it for advancement (Core p.169).
   const chk = row.querySelector('input[type="checkbox"]');
   if(chk && !chk.checked) { chk.checked = true; try { chk.dispatchEvent(new Event('input', { bubbles: true })); } catch(e) {} }
@@ -1914,6 +1861,10 @@ function collectSheet() {
     };
   });
 
+  // Pinned inventory sections (always at the top of the tab)
+  data.gold = document.getElementById('f-gold')?.value || '';
+  data.junk = document.getElementById('f-junk')?.value || '';
+
   // Inventory (+ equip state: what's worn, where, and the bonus deltas it applied)
   data.inventory = [...document.querySelectorAll('#inv-body tr')].map(tr => {
     const inputs = tr.querySelectorAll('input[type="text"]');
@@ -1996,7 +1947,7 @@ function applySheet(data) {
     set('evade-buffs', c.evadeBuffs); calcEvadeTotal();
     set('evade-move', c.evadeMove); set('evade-step', c.evadeStep);
     set('dr-armor', c.drArmor); set('dr-buffs', c.drBuffs); calcDR();
-    set('dr-aifavor', c.drAiFavor); set('dr-size', c.drSize);
+    set('dr-aifavor', c.drAiFavor); set('dr-size', c.drSize); dccSizeCoerce(document.getElementById('dr-size'));
     set('mana-current', c.manaCurrentVal);
     set('debuffs', c.debuffs);
     try { if (window.DCCDebuffs) window.DCCDebuffs.refresh(); } catch(e) {}
@@ -2084,6 +2035,10 @@ function applySheet(data) {
   // Layer the always-on skill buffs (Dodge etc.) onto Evade/DR now that the skill
   // rows exist. Idempotent: the saved fields hold only the hand-entered amount.
   try { if(window.DCCSkillBuff) DCCSkillBuff.refresh(); } catch(e){}
+
+  // Pinned inventory sections
+  { const g = document.getElementById('f-gold'); if(g) g.value = data.gold || ''; }
+  { const j = document.getElementById('f-junk'); if(j) j.value = data.junk || ''; }
 
   // Inventory
   if(data.inventory) {
@@ -2737,22 +2692,6 @@ document.getElementById('attacks-body').addEventListener('input', e => {
 });
 refreshSkillRowRules();
 syncLinkedAttacks();
-
-// ── Size picklist, Move/Step defaults, live buff recalc ──
-(function initDerived(){
-  // Default Move / Step (Core: 20 ft Move, 10 ft Step) on a fresh sheet.
-  const mv = document.getElementById('evade-move'); if(mv && !String(mv.value).trim()) mv.value = '20';
-  const st = document.getElementById('evade-step'); if(st && !String(st.value).trim()) st.value = '10';
-  // Internal buffs (Good Sleep → +F stats, Iron Skin → ×2 DR) change derived values,
-  // so recompute mods / evade / HP / DR / attacks whenever the Buffs field changes.
-  const bf = document.getElementById('buffs');
-  if(bf) bf.addEventListener('input', () => {
-    STATS.forEach(s => updateMod(s.id));
-    syncEvadeDex(); updateHpPips(); calcDR();
-    if(typeof recalcAllAttacks === 'function') recalcAllAttacks();
-  });
-})();
-
 // autoLoad() is deferred to the end of the campaign <script> block below, so
 // campaignRestore() is defined by the time applySheet() calls it. Running it
 // here (before that block parses) silently skipped campaign restore.
@@ -3585,6 +3524,7 @@ autoLoad();
   <script src="/tools-data/dcc-sheet-hotlist.js"></script>
   <script src="/tools-data/dcc-sheet-equip.js"></script>
   <script src="/tools-data/dcc-sheet-skillbuff.js"></script>
+  <script src="/tools-data/dcc-sheet-loot.js"></script>
   <script src="/tools-data/dcc-sheet-inv-picker.js"></script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>

@@ -81,8 +81,10 @@
     // Armor/Accessory inventory rows use the radial to EQUIP, not to pin — hand
     // their radial's state to the equip module and leave it alone here.
     if (inInv && window.DCCEquip && window.DCCEquip.isEquipType(tr)) { window.DCCEquip.refreshRow(btn); return; }
+    // Attack SKILL rows use the radial to add/remove their Attacks row (not the Hotlist).
+    if (!inInv && window.DCCSkills && window.DCCSkills.isAttackSkillRow && window.DCCSkills.isAttackSkillRow(tr)) { btn.style.visibility = "visible"; window.DCCSkills.refreshSkillRadial(tr); return; }
     var name = norm(rowNameOf(btn));
-    // Hide the pin on blank rows, and on non-spell skill rows.
+    // Hide the pin on blank rows, and on non-spell / non-attack skill rows.
     if (!name || (!inInv && !skillRowIsSpell(tr))) { btn.style.visibility = "hidden"; btn.classList.remove("on"); return; }
     btn.style.visibility = "visible";
     var on = isPinned(name);

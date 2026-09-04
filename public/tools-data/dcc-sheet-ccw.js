@@ -474,7 +474,7 @@
     const btn = document.getElementById("dccw-launch-btn");
     if (!btn) return;
     const up = crawlerExists();
-    btn.textContent = up ? "⬆ Upgrade" : "✨ Build";
+    btn.textContent = up ? "Level" : "Create";
     btn.title = up ? "Upgrade this crawler to the Third Floor" : "Create a character with the wizard";
     btn.setAttribute("aria-label", btn.title);
   }

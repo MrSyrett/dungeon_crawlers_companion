@@ -383,7 +383,51 @@
     return [src, name].filter(Boolean);
   }
 
+  // ── attack-skill radial (○/◉ on the Skills row toggles its Attacks row) ──────
+  // An attack SKILL's radial equips/unequips its attack row instead of pinning to
+  // the Hotlist; the ◉ state mirrors whether that attack row currently exists.
+  function isAttackSkillRow(tr) {
+    if (!tr) return false;
+    var texts = tr.querySelectorAll('input[type="text"]');
+    var name = texts[0] ? String(texts[0].value).trim() : "";
+    var src = tr.dataset && tr.dataset.src ? tr.dataset.src : "";
+    var e = lookup(src) || lookup(name);
+    return !!e && e.kind === "attack";
+  }
+  function hasAttackRow(tr) { return findAttackRows(rowKeys(tr)).length > 0; }
+  function skillRadialEl(tr) { return tr ? tr.querySelector(".hot-pin") : null; }
+  function refreshSkillRadial(tr) {
+    var btn = skillRadialEl(tr); if (!btn || !isAttackSkillRow(tr)) return;
+    var on = hasAttackRow(tr);
+    btn.classList.toggle("on", on);
+    btn.textContent = on ? "◉" : "○";
+    btn.title = on ? "Remove this attack from the Attacks list" : "Add this attack to the Attacks list";
+    btn.setAttribute("aria-label", btn.title);
+  }
+  function refreshAllSkillRadials() {
+    [].slice.call(document.querySelectorAll("#skills-body tr")).forEach(function (tr) { if (isAttackSkillRow(tr)) refreshSkillRadial(tr); });
+  }
+  function toggleAttack(tr) {
+    if (!tr) return;
+    var rows = findAttackRows(rowKeys(tr));
+    if (rows.length) { rows.forEach(function (r) { r.remove(); }); }
+    else {
+      var texts = tr.querySelectorAll('input[type="text"]');
+      var name = texts[0] ? String(texts[0].value).trim() : "";
+      var src = tr.dataset && tr.dataset.src ? tr.dataset.src : "";
+      var e = lookup(src) || lookup(name);
+      if (isAttackEntry(e)) fillAttackRow(newAttackRow(), name || e.name, e);
+    }
+    refreshSkillRadial(tr);
+    if (typeof window.syncLinkedAttacks === "function") { try { window.syncLinkedAttacks(); } catch (_) {} }
+  }
+
   window.DCCSkills = {
+    isAttackSkillRow: isAttackSkillRow,
+    hasAttackRow: hasAttackRow,
+    toggleAttack: toggleAttack,
+    refreshSkillRadial: refreshSkillRadial,
+    refreshAllSkillRadials: refreshAllSkillRadials,
     openPicker: openPicker,
     closePicker: closePicker,
     search: function (v) { query = v; renderPicker(); },
