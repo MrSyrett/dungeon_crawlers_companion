@@ -336,7 +336,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="hdr-field" style="grid-column:span 3;"><label>Last name</label><input type="text" id="f-last" placeholder="(after introductions)"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Book</label><select id="f-book" onchange="onBookChange()"><option value="bikes">Kids on Bikes</option><option value="brooms">Kids on Brooms</option><option value="capes">Kids in Capes</option></select></div>
       <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
-      <div class="hdr-field" style="grid-column:span 5;"><label>Trope</label><input type="text" id="f-trope" list="dl-tropes" placeholder="Brilliant Mathlete"></div>
+      <div class="hdr-field" style="grid-column:span 5;"><label>Trope</label><input type="text" id="f-trope" placeholder="Brilliant Mathlete"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label id="age-label">Age</label><select id="f-age" onchange="recalc()"></select></div>
       <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
     </div>
@@ -431,25 +431,24 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="tab-panel" id="tab-bonds">
         <div class="section-bar"><span>Motivations, Fear &amp; Obligations</span></div>
         <div class="blk">
-          <div class="blk-grid">
-            <div class="fld"><label>Motivations</label><textarea id="f-motivations" placeholder="What does your character want?"></textarea></div>
-            <div class="fld"><label>Fear</label><input type="text" id="f-fear" placeholder="The dark, the mines, being alone…"><label style="margin-top:6px;">Obligations</label><textarea id="f-obligations" placeholder="School, work, family, the team…" style="min-height:34px;"></textarea></div>
-          </div>
+          <div class="fld"><label>Fear</label><input type="text" id="f-fear" placeholder="The dark, the mines, being alone…"></div>
+          <div class="fld" style="margin-top:8px;"><label>Motivations</label><textarea id="f-motivations" placeholder="What does your character want?"></textarea></div>
+          <div class="fld" style="margin-top:8px;"><label>Obligations</label><textarea id="f-obligations" placeholder="School, work, family, the team…"></textarea></div>
         </div>
       </div>
 
       <div class="tab-panel" id="tab-backpack">
         <div class="section-bar"><span id="bag-title">Backpack</span></div>
         <div class="blk">
-          <div class="blk-grid">
-            <div class="fld"><label id="bag-label">Backpack</label><textarea id="f-bag" placeholder="One item per line" style="min-height:70px;"></textarea></div>
-            <div>
-              <div class="fld book-only bikes-only"><label>Bike colour</label><input type="text" id="f-bike-color" list="dl-bike-color" placeholder="Purple" oninput="recalc()"><div class="hint" id="bike-color-hint"></div></div>
-              <div class="fld book-only bikes-only" style="margin-top:6px;"><label>Bike accessory</label><input type="text" id="f-bike-acc" list="dl-bike-acc" placeholder="Basket" oninput="recalc()"><div class="hint" id="bike-acc-hint"></div></div>
-              <div class="fld book-only brooms-only"><label>Where your broom / wand came from</label><textarea id="f-ride-story" placeholder="Every caster's broom is special to them…" style="min-height:70px;"></textarea></div>
-              <div class="fld book-only capes-only"><label>Secret identity &amp; costume</label><textarea id="f-identity" placeholder="Who knows? What do you wear?" style="min-height:70px;"></textarea></div>
+          <div class="book-only bikes-only" style="margin-bottom:8px;">
+            <div class="blk-grid">
+              <div class="fld"><label>Bike colour</label><input type="text" id="f-bike-color" list="dl-bike-color" placeholder="Purple" oninput="recalc()"><div class="hint" id="bike-color-hint"></div></div>
+              <div class="fld"><label>Bike accessory</label><input type="text" id="f-bike-acc" list="dl-bike-acc" placeholder="Basket" oninput="recalc()"><div class="hint" id="bike-acc-hint"></div></div>
             </div>
           </div>
+          <div class="fld book-only brooms-only" style="margin-bottom:8px;"><label>Where your broom / wand came from</label><textarea id="f-ride-story" placeholder="Every caster's broom is special to them…" style="min-height:60px;"></textarea></div>
+          <div class="fld book-only capes-only" style="margin-bottom:8px;"><label>Secret identity &amp; costume</label><textarea id="f-identity" placeholder="Who knows? What do you wear?" style="min-height:60px;"></textarea></div>
+          <div class="fld"><label id="bag-label">Backpack</label><textarea id="f-bag" placeholder="One item per line" style="min-height:120px;"></textarea></div>
         </div>
       </div>
 
@@ -497,11 +496,6 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click a stat to roll</div></div>
   <div class="dice-tray">
-    <div class="tray-row">
-      <span class="tray-label">Difficulty</span>
-      <input class="tray-input" id="tray-tn" type="number" min="1" placeholder="—">
-      <span class="tray-note" style="flex:1;">Set by the GM; leave blank for tiered/opposed checks.</span>
-    </div>
     <div class="dice-btns">
       <button class="dice-btn" onclick="rollLoose(4)">d4</button><button class="dice-btn" onclick="rollLoose(6)">d6</button><button class="dice-btn" onclick="rollLoose(8)">d8</button><button class="dice-btn" onclick="rollLoose(10)">d10</button><button class="dice-btn" onclick="rollLoose(12)">d12</button><button class="dice-btn" onclick="rollLoose(20)">d20</button>
     </div>
@@ -704,7 +698,7 @@ function judge(total, tn) {
 // A stat check: die (+ optional extra die) + bonus vs the tray difficulty.
 function doCheck(label, sides, bonus, opts) {
   opts = opts || {};
-  const tn = opts.tn !== undefined ? opts.tn : (num($('tray-tn').value) || null);
+  const tn = opts.tn !== undefined ? opts.tn : (num(($('tray-tn')||{}).value) || null);
   const r = explode(sides);
   let total = r.total + bonus;
   let detail = 'd' + sides + ': ' + r.faces.join('→') + (r.lucky ? ' LUCKY BREAK×' + r.lucky : '');
@@ -712,9 +706,13 @@ function doCheck(label, sides, bonus, opts) {
   if(bonus) detail += ' ' + (bonus > 0 ? '+' : '') + bonus;
   if(opts.note) detail += ' · ' + opts.note;
   const j = judge(total, tn);
-  if(j.type === 'fumble' && opts.earnAT !== false) { at += 1; renderAT(); scheduleAutosave(); }
+  // With no target number set (checks are GM-narrated), a lucky break still
+  // shines and nothing auto-fails; AT is earned via the tokens buttons.
+  let type = j.type;
+  if(r.lucky && type !== 'crit') type = 'crit';
+  if(tn && j.type === 'fumble' && opts.earnAT !== false) { at += 1; renderAT(); scheduleAutosave(); }
   _lastRoll = { label, total, tn, spent:0 };
-  addLog(label, String(total), detail + j.verdict, j.type, { atBtn: true });
+  addLog(label, String(total), detail + j.verdict, type, { atBtn: true });
   return total;
 }
 function spendATOnRoll() {
@@ -735,7 +733,7 @@ function rollStat(id) {
 function fearNote() { const f = $('f-fear').value.trim(); return f ? 'fear: ' + f + '? −1 to −3' : ''; }
 function planStat(id) {
   const half = dieOf(id) / 2 + bonusOf(id);
-  const tn = num($('tray-tn').value) || null;
+  const tn = num(($('tray-tn')||{}).value) || null;
   const j = judge(half, tn);
   _lastRoll = { label: id + ' (planned)', total: half, tn, spent:0 };
   addLog(id + ' (Planned Action)', String(half), 'half of d' + dieOf(id) + (bonusOf(id) ? (bonusOf(id) > 0 ? ' +' : ' ') + bonusOf(id) : '') + j.verdict.replace(' → +1 AT', ''), j.type === 'fumble' ? 'normal' : j.type, { atBtn: true });

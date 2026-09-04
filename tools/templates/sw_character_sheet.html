@@ -208,6 +208,9 @@ details.feats summary::-webkit-details-marker{display:none;}
 .brow-add{flex-shrink:0;background:var(--sw);color:#1a1a1a;border:none;border-radius:4px;padding:6px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
 .brow-add:hover{background:#e0c040;}
 .brow-add.have{background:transparent;color:#9a8f6a;border:1px solid #4a4636;cursor:default;}
+.brow-btns{display:flex;gap:4px;flex-shrink:0;align-items:flex-start;}
+.brow-add.buy{background:#3a7a3a;color:#fff;}
+.brow-add.buy:hover{background:#4a9a4a;}
 .brow-empty{padding:14px 4px;font-size:12px;color:#999;}
 
 /* DARK */
@@ -306,11 +309,19 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 .tpl-card.sel{border-color:var(--sw);background:#2a2410;}
 .tpl-card b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.04em;color:#f0c020;}
 .tpl-card small{display:block;font-family:'Share Tech Mono',monospace;font-size:10px;color:#999;margin-top:3px;line-height:1.5;}
-.alloc{display:grid;grid-template-columns:1fr auto auto auto;gap:4px 8px;align-items:center;font-size:12px;}
-.alloc .a-attr{grid-column:1/-1;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#f0c020;margin-top:8px;border-bottom:1px solid #333;}
-.alloc .a-code{font-family:'Share Tech Mono',monospace;font-size:12px;color:#ddd;min-width:52px;text-align:right;}
-.alloc button{width:24px;height:22px;background:#222;border:1px solid #444;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
-.alloc button:disabled{opacity:.3;cursor:default;}
+.alloc{font-size:12px;}
+.alloc .a-attr{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#f0c020;margin-top:8px;border-bottom:1px solid #333;padding-bottom:2px;}
+.a-skills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px;margin-top:4px;}
+.a-row{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;align-items:center;padding:1px 0;}
+.a-row .a-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.a-row .a-code{font-family:'Share Tech Mono',monospace;font-size:12px;color:#ddd;text-align:right;white-space:nowrap;}
+.a-row button{width:24px;height:22px;background:#222;border:1px solid #444;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
+.a-row button:disabled{opacity:.3;cursor:default;}
+/* Builder species picker chips */
+.swb-sp-pick{max-height:150px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:5px;padding:6px;border:1px solid #2a2a2a;border-radius:5px;background:#141414;}
+.swb-sp-chip{background:#1c1c1c;border:1px solid #3a3a3a;color:#ddd;border-radius:12px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
+.swb-sp-chip:hover{border-color:var(--sw);}
+.swb-sp-chip.sel{background:#2a2410;border-color:var(--sw);color:#f0c020;}
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scrollbar,.modal-bd::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb,select::-webkit-scrollbar-thumb,.log-entries::-webkit-scrollbar-thumb,.modal-bd::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track,select::-webkit-scrollbar-track{background:transparent;}
 select option{background:var(--input-bg);color:var(--ink);}
@@ -355,8 +366,8 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="hdr-logo"><div class="sw-word">STAR WARS</div><div class="sw-sub">The Roleplaying Game</div></div>
     <div class="hdr-fields">
       <div class="hdr-field wide" style="grid-column:span 4;"><label>Character name</label><input type="text" id="f-name" placeholder="Name"></div>
-      <div class="hdr-field" style="grid-column:span 4;"><label>Template</label><select id="f-template" onchange="onTemplateChange()"><option value="">—</option></select></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Species</label><input type="text" id="f-species" list="dl-species" placeholder="Human"></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Template</label><input type="text" id="f-template" placeholder="Set by the builder"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Species</label><input type="text" id="f-species" placeholder="Human"></div>
       <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Sex</label><input type="text" id="f-sex"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Age</label><input type="text" id="f-age"></div>
@@ -371,7 +382,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="section-bar gold"><span>Attributes</span></div>
       <div class="stats-grid" id="stats-grid"></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
-      <div class="add-row"><button class="small-btn ghost" onclick="openSkillPicker()">＋ Skills</button><button class="small-btn ghost" onclick="addSkillRow({name:'',attr:'Dexterity',adds:0})" title="Blank row for a new skill">+ Blank</button><span class="sp-hdr">Skill Points <input type="number" id="f-sp" value="0" min="0"></span></div>
+      <div class="add-row"><button class="small-btn ghost" onclick="openSkillPicker()">＋ Skills</button><span class="sp-hdr">Skill Points <input type="number" id="f-sp" value="0" min="0"></span></div>
     </div>
 
     <div class="center-col">
@@ -407,7 +418,6 @@ select option{background:var(--input-bg);color:var(--ink);}
         <thead><tr><th style="width:26%;">Weapon</th><th style="width:22%;">Skill</th><th style="width:70px;">Damage</th><th style="width:20%;">Range</th><th>Notes</th><th style="width:110px;"></th></tr></thead>
         <tbody id="weapons-body"></tbody>
       </table>
-      <div class="add-row"><button class="small-btn ghost" onclick="addWeaponRow()">+ Blank weapon</button></div>
 
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="force" onclick="setTab('force')">The Force</button>
@@ -427,12 +437,11 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <div class="tab-panel" id="tab-equipment">
         <div class="section-bar"><span>Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">🛒 Equipment</button></span></div>
-        <div class="credits-row">Credits <input type="text" id="f-credits" placeholder="1,000"></div>
+        <div class="credits-row">Credits <input type="number" id="f-credits" min="0" placeholder="1000"></div>
         <table class="tbl">
           <thead><tr><th style="width:36%;">Item</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="gear-body"></tbody>
         </table>
-        <div class="add-row"><button class="small-btn ghost" onclick="addGearRow()">+ Blank item</button></div>
       </div>
 
       <div class="tab-panel" id="tab-ship">
@@ -500,7 +509,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="skill-overlay" class="ov" onclick="if(event.target===this)closeSkillPicker()">
   <div class="modal" style="max-width:560px;">
     <div class="modal-hd"><div class="ttl">＋ Skills</div><button class="x" onclick="closeSkillPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="skill-search" class="m-input" placeholder="Search skills…" oninput="renderSkillPicker()"><div class="brow-filters"><select id="skill-attr" class="m-input brow-sel" onchange="renderSkillPicker()"></select></div></div>
+    <div class="brow-controls"><input id="skill-search" class="m-input" placeholder="Search skills…" oninput="renderSkillPicker()"><div class="brow-filters"><select id="skill-attr" class="m-input brow-sel" onchange="renderSkillPicker()"></select><button class="m-btn ghost" onclick="addCustomSkill()">＋ Add custom</button></div></div>
     <div class="modal-bd brow-list" id="skill-body"></div>
   </div>
 </div>
@@ -509,7 +518,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="weapon-overlay" class="ov" onclick="if(event.target===this)closeWeaponPicker()">
   <div class="modal" style="max-width:600px;">
     <div class="modal-hd"><div class="ttl">⚔ Weapons</div><button class="x" onclick="closeWeaponPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="weapon-search" class="m-input" placeholder="Search weapons…" oninput="renderWeaponPicker()"></div>
+    <div class="brow-controls"><input id="weapon-search" class="m-input" placeholder="Search weapons…" oninput="renderWeaponPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addCustomWeapon()">＋ Add custom</button></div>
     <div class="modal-bd brow-list" id="weapon-body"></div>
   </div>
 </div>
@@ -527,7 +536,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="gearstore-overlay" class="ov" onclick="if(event.target===this)closeGearPicker()">
   <div class="modal" style="max-width:600px;">
     <div class="modal-hd"><div class="ttl">🛒 Equipment</div><button class="x" onclick="closeGearPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search equipment…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select></div></div>
+    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search equipment…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><button class="m-btn ghost" onclick="addCustomGear()">＋ Add custom</button></div></div>
     <div class="modal-bd brow-list" id="gearstore-body"></div>
   </div>
 </div>
@@ -604,7 +613,7 @@ function buildStats() {
 // Just the option lists / datalists — safe to re-run (e.g. after homebrew loads)
 // without touching the stat grid or any entered values.
 function fillPickers() {
-  const tsel = $('f-template'); if(tsel) tsel.innerHTML = '<option value="">—</option>' + D.templates().map(t => '<option value="' + esc(t.name) + '">' + esc(t.name) + '</option>').join('');
+  // Template and Species are plain text fields set by the builder now.
   // Picker/shop filter dropdowns (the browse modals build their lists live).
   const skAttr = $('skill-attr'); if(skAttr) skAttr.innerHTML = '<option value="">All attributes</option>' + ATTRS.map(a => '<option value="' + a + '">' + a + '</option>').join('') + '<option value="Force">The Force</option>';
   const fAttr = $('force-attr'); if(fAttr) { const fa = [...new Set(D.force().map(f => String(f.attribute || '').split(/[,&]| and /)[0].trim()).filter(Boolean))].sort(); fAttr.innerHTML = '<option value="">All</option>' + fa.map(a => '<option value="' + esc(a) + '">' + esc(a) + '</option>').join(''); }
@@ -798,7 +807,7 @@ function addForcePowerByName(name) {
 }
 
 // ═══ TABS ═════════════════════════════════════════════════════════════════
-var _tab = 'force';
+var _tab = 'equipment';
 const TABS = ['force','equipment','ship','background','notes'];
 function setTab(name) {
   if(!TABS.includes(name)) name = 'force';
@@ -808,7 +817,7 @@ function setTab(name) {
     const btn = document.querySelector('.tab-btn[data-tab="' + t + '"]'); if(btn) btn.classList.toggle('on', t === name);
   });
 }
-function setDefaultTab() { setTab(_tab || 'force'); }
+function setDefaultTab() { setTab(_tab || 'equipment'); }
 
 // ═══ PICKERS / SHOPS ══════════════════════════════════════════════════════
 function _flashBrow(btn) { const o = btn.textContent, d = btn.disabled; btn.textContent = '✓ Added'; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = d; }, 600); }
@@ -875,10 +884,25 @@ function renderGearPicker() {
   if(!list.length) { box.innerHTML = '<p class="brow-empty">No equipment matches.</p>'; return; }
   box.innerHTML = list.map(g => {
     const meta = [g.category, g.stats].filter(Boolean).map(esc).join(' · ');
+    const price = creditCost(g.cost);
+    const buy = price != null ? '<button class="brow-add buy" data-buy-gear="' + esc(g.name) + '">Buy</button>' : '';
     return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + (g.cost ? '<span class="brow-cost">' + esc(g.cost) + ' cr</span>' : '') + '</div>' +
       (meta ? '<div class="brow-meta">' + meta + '</div>' : '') + '</div>' +
-      '<button class="brow-add" data-add-gear="' + esc(g.name) + '">+ Add</button></div>';
+      '<div class="brow-btns">' + buy + '<button class="brow-add" data-add-gear="' + esc(g.name) + '">+ Add</button></div></div>';
   }).join('');
+}
+// Credits (buying deducts from the Credits field).
+function creditCost(c) { const m = /[\d,]+/.exec(String(c == null ? '' : c)); if(!m) return null; const n = parseInt(m[0].replace(/,/g, ''), 10); return isNaN(n) ? null : n; }
+function creditsNum() { return parseInt(String($('f-credits').value).replace(/[^0-9]/g, ''), 10) || 0; }
+function buyGear(name) {
+  const g = findGear(name); if(!g) return false;
+  const price = creditCost(g.cost);
+  if(price == null) { addGearFromData(name); return true; }
+  if(creditsNum() < price) return false;
+  $('f-credits').value = creditsNum() - price;
+  addGearFromData(name);
+  addLog('Bought', '💰', g.name + ' — ' + price + ' cr · ' + creditsNum() + ' cr left', 'normal');
+  scheduleAutosave(); return true;
 }
 // — Armor picker (Armor tile) ——————————————————————————————————————————————
 function openArmorPicker() { $('armor-search').value = ''; $('armor-overlay').classList.add('open'); renderArmorPicker(); $('armor-search').focus(); }
@@ -900,9 +924,16 @@ function renderArmorPicker() {
   const sb = $('skill-body'); if(sb) sb.addEventListener('click', e => { const b = e.target.closest('[data-add-skill]'); if(b) { if(addSkillByName(b.dataset.addSkill)) _flashBrow(b); renderSkillPicker(); } });
   const wb = $('weapon-body'); if(wb) wb.addEventListener('click', e => { const b = e.target.closest('[data-add-weapon]'); if(b) { addWeaponFromData(b.dataset.addWeapon); _flashBrow(b); } });
   const fb = $('force-pbody'); if(fb) fb.addEventListener('click', e => { const b = e.target.closest('[data-add-force]'); if(b) { if(addForcePowerByName(b.dataset.addForce)) _flashBrow(b); renderForcePicker(); } });
-  const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => { const b = e.target.closest('[data-add-gear]'); if(b) { addGearFromData(b.dataset.addGear); _flashBrow(b); } });
+  const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => {
+    const buy = e.target.closest('[data-buy-gear]'); if(buy) { if(buyGear(buy.dataset.buyGear)) _flashBrow(buy); else { const o = buy.textContent; buy.textContent = 'Need cr'; setTimeout(() => buy.textContent = o, 700); } return; }
+    const b = e.target.closest('[data-add-gear]'); if(b) { addGearFromData(b.dataset.addGear); _flashBrow(b); }
+  });
   const ab = $('armor-body'); if(ab) ab.addEventListener('click', e => { const b = e.target.closest('[data-add-armor]'); if(b) { addGearFromData(b.dataset.addArmor); renderArmorPicker(); } });
 })();
+// "Add custom" from a picker: a blank row to fill by hand.
+function addCustomSkill() { addSkillRow({ name:'', attr:'Dexterity', adds:0 }); closeSkillPicker(); scheduleAutosave(); }
+function addCustomWeapon() { addWeaponRow(); closeWeaponPicker(); scheduleAutosave(); }
+function addCustomGear() { addGearRow(); closeGearPicker(); scheduleAutosave(); }
 function rollForce(power, skill) { const p = skillPips(skill); if(p === null) { addLog(power, '✗', 'You have no ' + skill + ' skill — add it to the skill list', 'fumble'); return; } rollCode(power + ' (' + skill + ')', p); }
 
 // ═══ GEAR + SHIP ══════════════════════════════════════════════════════════

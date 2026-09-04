@@ -138,6 +138,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .derived-big{font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;line-height:1.1;color:var(--ink);}
 .derived-formula{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);letter-spacing:.04em;}
 .derived-formula input{width:36px;height:22px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:11px;text-align:center;color:var(--ink);outline:none;}
+.def-row{display:flex;align-items:center;gap:8px;}
 .health-pips{display:flex;gap:3px;margin:6px 0 4px;flex-wrap:wrap;}
 .hp-pip{width:26px;height:26px;border:2px solid var(--border);background:var(--green);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;color:#fff;transition:all .1s;}
 .hp-pip.lost{background:transparent;color:var(--muted);}
@@ -364,9 +365,9 @@ select option{background:var(--input-bg);color:var(--ink);}
     </div>
     <div class="hdr-fields">
       <div class="hdr-field wide" style="grid-column:span 5;"><label>Name</label><input type="text" id="f-name" placeholder="Hero name"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Trait</label><input type="text" id="f-trait" list="dl-traits" placeholder="Squeamish"></div>
-      <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Role</label><input type="text" id="f-role" list="dl-roles" placeholder="Scientist"></div>
-      <div class="hdr-field" style="grid-column:span 4;"><label>Second Role <span style="font-weight:600;letter-spacing:0;text-transform:none;">(descriptive only)</span></label><input type="text" id="f-role2" list="dl-roles" placeholder="optional"></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Trait</label><input type="text" id="f-trait" placeholder="Squeamish"></div>
+      <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Role</label><input type="text" id="f-role" placeholder="Scientist"></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Second Role <span style="font-weight:600;letter-spacing:0;text-transform:none;">(descriptive only)</span></label><input type="text" id="f-role2" placeholder="optional"></div>
       <div class="hdr-field" style="grid-column:span 4;"><label>Setting</label><select id="f-setting"><option value="core">Any — core rules</option></select></div>
       <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
     </div>
@@ -395,14 +396,16 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="derived">
         <div class="derived-cell">
           <div class="derived-lbl"><span>Defence</span></div>
-          <div class="derived-big" id="def-val">8</div>
-          <div class="derived-formula">gear <input type="number" id="def-bonus" value="0" oninput="recalc()"> <button class="small-btn" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">🎲</button></div>
+          <div class="def-row">
+            <div class="derived-big" id="def-val">8</div>
+            <div class="derived-formula" style="margin-left:auto;">gear <input type="number" id="def-bonus" value="0" oninput="recalc()"> <button class="small-btn" onclick="rollDefence()" title="Roll Moves as a full opposed roll instead of using Defence">🎲</button></div>
+          </div>
         </div>
         <div class="derived-cell">
           <div class="derived-lbl"><span>Health</span></div>
-          <div class="derived-big"><span id="hp-cur">2</span><span style="font-size:16px;color:var(--muted);"> / <span id="hp-max">2</span></span></div>
           <div class="health-pips" id="hp-pips"></div>
           <div class="derived-formula">bonus <input type="number" id="hp-bonus" value="0" oninput="recalc()"> <span id="ko-flag"></span></div>
+          <span id="hp-cur" hidden></span><span id="hp-max" hidden></span>
         </div>
       </div>
 
@@ -411,7 +414,6 @@ select option{background:var(--input-bg);color:var(--ink);}
         <thead><tr><th style="width:38%;">Weapon</th><th>Kind</th><th style="width:60px;">Dmg</th><th>Dice</th><th style="width:74px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
       </table>
-      <div class="add-row"><button class="small-btn ghost" onclick="addAttackRow()">+ Blank attack</button></div>
 
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="role" onclick="setTab('role')">Role</button>
@@ -438,7 +440,6 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="tab-panel" id="tab-gear">
         <div class="section-bar"><span>Gear</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">🛒 Gear Store</button></span></div>
         <table class="gear-table"><tbody id="gear-body"></tbody></table>
-        <div class="add-row"><button class="small-btn ghost" onclick="addGearRow()">+ Blank item</button></div>
         <div class="wealth-row">
           Buy <select id="wealth-tn"><option value="10">10 — up to 1,000</option><option value="20">20 — up to 10,000</option><option value="30">30 — up to 100,000</option><option value="40">40 — up to 1,000,000</option></select>
           <button class="small-btn" onclick="rollWealth()" title="Roll Style (+Wealth) — costs 1 Karma">🎲</button>
@@ -533,7 +534,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="weapon-overlay" class="ov" onclick="if(event.target===this)closeWeaponPicker()">
   <div class="modal" style="max-width:560px;">
     <div class="modal-hd"><div class="ttl">⚔ Weapons</div><button class="x" onclick="closeWeaponPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="weapon-search" class="m-input" placeholder="Search weapons…" oninput="renderWeaponPicker()"></div>
+    <div class="brow-controls"><input id="weapon-search" class="m-input" placeholder="Search weapons…" oninput="renderWeaponPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addCustomAttack()">＋ Add custom</button></div>
     <div class="modal-bd brow-list" id="weapon-body"></div>
   </div>
 </div>
@@ -542,7 +543,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="gearstore-overlay" class="ov" onclick="if(event.target===this)closeGearPicker()">
   <div class="modal" style="max-width:600px;">
     <div class="modal-hd"><div class="ttl">🛒 Gear Store</div><button class="x" onclick="closeGearPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search gear…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select></div></div>
+    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search gear…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><button class="m-btn ghost" onclick="addCustomGear()">＋ Add custom</button></div></div>
     <div class="modal-bd brow-list" id="gearstore-body"></div>
   </div>
 </div>
@@ -551,7 +552,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="focus-overlay" class="ov" onclick="if(event.target===this)closeFocusPicker()">
   <div class="modal" style="max-width:520px;">
     <div class="modal-hd"><div class="ttl" id="focus-title">Focuses</div><button class="x" onclick="closeFocusPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="focus-search" class="m-input" placeholder="Search focuses…" oninput="renderFocusPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addBlankFocusLine()">＋ Type my own</button></div>
+    <div class="brow-controls"><input id="focus-search" class="m-input" placeholder="Search focuses…" oninput="renderFocusPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addBlankFocusLine()">＋ Add custom</button></div>
     <div class="modal-bd brow-list" id="focus-body"></div>
   </div>
 </div>
@@ -839,6 +840,7 @@ function addAttackRow(a) {
     `<td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this)" title="Roll the attack">🎲</button><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button></td>`;
   $('attacks-body').appendChild(tr);
   recalcAttacks();
+  return tr;
 }
 function onWeaponPick(input) {
   // Typing a known weapon name fills in its damage + kind from the gear data.
@@ -908,6 +910,7 @@ function addGearRow(g) {
                  `<td><input type="text" class="gear-note" placeholder="notes" value="${esc(g.note)}"></td>` +
                  `<td style="width:24px;"><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button></td>`;
   $('gear-body').appendChild(tr);
+  return tr;
 }
 // Adds a gear-list item with its description (and damage) as the note; an
 // empty first row is reused so the sheet doesn't start with a blank line.
@@ -1015,6 +1018,9 @@ function renderFocusPicker() {
   const fb = $('focus-body'); if(fb) fb.addEventListener('click', e => { const b = e.target.closest('[data-add-focus]'); if(b) pickFocusValue(b.dataset.addFocus); });
 })();
 function _flashBrow(btn) { const o = btn.textContent, d = btn.disabled; btn.textContent = '✓ Added'; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = d; }, 600); }
+// "Add custom" from a picker: drop in a blank row to fill by hand.
+function addCustomAttack() { const tr = addAttackRow(); closeWeaponPicker(); const inp = tr && tr.querySelector('.atk-name'); if(inp) inp.focus(); scheduleAutosave(); }
+function addCustomGear() { const tr = addGearRow(); closeGearPicker(); const inp = tr && tr.querySelector('.gear-name'); if(inp) inp.focus(); scheduleAutosave(); }
 
 // ═══ HINTS FROM THE DATA LAYER ════════════════════════════════════════════
 function findRole(name) { const n = norm(name); if(!n) return null; return D.roles().find(r => norm(r.name) === n) || null; }

@@ -57,11 +57,12 @@
       const left = MAX_TOTAL - spent(); note.textContent = 'Skill dice left: ' + toCode(Math.max(0, left));
       let h = '<p class="m-hint">Spend 7D among skills, no more than 2D on any one skill (pips are fine: 1D+2 is five pips). A skill starts at its attribute\'s code; the dice you add go on top. Force skills printed on the template already have 1D.</p><div class="alloc">';
       ATTRS.forEach(a => {
-        h += '<div class="a-attr">' + a + ' ' + toCode(tpl.attributes[a]) + '</div>';
-        (groups[a] || []).forEach(s => { const v = alloc[s.name] || 0; h += '<span>' + esc(s.name) + (s.reaction ? ' <span style="color:#777;">(reaction)</span>' : '') + '</span><span class="a-code">' + toCode(tpl.attributes[a] + v) + (v ? ' <span style="color:#f0c020;">' + toCode(v, true) + '</span>' : '') + '</span><button data-s="' + esc(s.name) + '" data-d="-1"' + (v ? '' : ' disabled') + '>−</button><button data-s="' + esc(s.name) + '" data-d="1"' + (v >= MAX_PER || left <= 0 ? ' disabled' : '') + '>+</button>'; });
+        h += '<div class="a-attr">' + a + ' ' + toCode(tpl.attributes[a]) + '</div><div class="a-skills">';
+        (groups[a] || []).forEach(s => { const v = alloc[s.name] || 0; h += '<div class="a-row"><span class="a-name">' + esc(s.name) + (s.reaction ? ' <span style="color:#777;">(r)</span>' : '') + '</span><span class="a-code">' + toCode(tpl.attributes[a] + v) + (v ? ' <span style="color:#f0c020;">' + toCode(v, true) + '</span>' : '') + '</span><button data-s="' + esc(s.name) + '" data-d="-1"' + (v ? '' : ' disabled') + '>−</button><button data-s="' + esc(s.name) + '" data-d="1"' + (v >= MAX_PER || left <= 0 ? ' disabled' : '') + '>+</button></div>'; });
+        h += '</div>';
       });
       const fk = Object.keys(forceAlloc);
-      if (fk.length) { h += '<div class="a-attr">The Force</div>'; fk.forEach(f => { const base = forceSkills(tpl)[f], v = forceAlloc[f] - base; h += '<span>' + f + '</span><span class="a-code">' + toCode(forceAlloc[f]) + (v ? ' <span style="color:#f0c020;">' + toCode(v, true) + '</span>' : '') + '</span><button data-f="' + f + '" data-d="-1"' + (v ? '' : ' disabled') + '>−</button><button data-f="' + f + '" data-d="1"' + (v >= MAX_PER || left <= 0 ? ' disabled' : '') + '>+</button>'; }); }
+      if (fk.length) { h += '<div class="a-attr">The Force</div><div class="a-skills">'; fk.forEach(f => { const base = forceSkills(tpl)[f], v = forceAlloc[f] - base; h += '<div class="a-row"><span class="a-name">' + f + '</span><span class="a-code">' + toCode(forceAlloc[f]) + (v ? ' <span style="color:#f0c020;">' + toCode(v, true) + '</span>' : '') + '</span><button data-f="' + f + '" data-d="-1"' + (v ? '' : ' disabled') + '>−</button><button data-f="' + f + '" data-d="1"' + (v >= MAX_PER || left <= 0 ? ' disabled' : '') + '>+</button></div>'; }); h += '</div>'; }
       b.innerHTML = h + '</div>';
       b.querySelectorAll('button[data-s]').forEach(btn => btn.addEventListener('click', () => { const k = btn.dataset.s; alloc[k] = Math.max(0, (alloc[k] || 0) + Number(btn.dataset.d)); if (!alloc[k]) delete alloc[k]; render(); }));
       b.querySelectorAll('button[data-f]').forEach(btn => btn.addEventListener('click', () => { forceAlloc[btn.dataset.f] += Number(btn.dataset.d); render(); }));
@@ -69,15 +70,19 @@
       note.textContent = 'Who are you?';
       const f = (id, lbl, val, ph) => '<div class="m-lbl">' + lbl + '</div><input class="m-input" id="swb-' + id + '" value="' + esc(val == null ? '' : val) + '" placeholder="' + esc(ph || '') + '">';
       const ta = (id, lbl, val) => '<div class="m-lbl">' + lbl + '</div><textarea class="m-input" id="swb-' + id + '" rows="3">' + esc(val == null ? '' : val) + '</textarea>';
-      const fSpecies = (val) => '<div class="m-lbl">Species</div><input class="m-input" id="swb-species" list="swb-species-list" value="' + esc(val == null ? '' : val) + '" placeholder="Pick or type a species…"><datalist id="swb-species-list">' + speciesList().map(n => '<option value="' + esc(n) + '"></option>').join('') + '</datalist>';
+      const curSpecies = details.species != null ? details.species : speciesFor(tpl);
+      const speciesPick = '<div class="m-lbl">Species</div><div class="swb-sp-pick" id="swb-species-pick">'
+        + speciesList().map(n => '<button type="button" class="swb-sp-chip' + (norm(n) === norm(curSpecies) ? ' sel' : '') + '" data-sp="' + esc(n) + '">' + esc(n) + '</button>').join('') + '</div>';
       b.innerHTML = '<p class="m-hint">Name your character and tweak the template\'s background and personality — they are yours now. Pick your <b>species</b> — Human, a playable alien, or a droid.</p>'
-        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px;">' + f('name', 'Name', details.name, 'Character name') + fSpecies(details.species != null ? details.species : speciesFor(tpl))
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px;">' + f('name', 'Name', details.name, 'Character name')
         + f('sex', 'Sex', details.sex) + f('age', 'Age', details.age) + f('height', 'Height', details.height) + f('weight', 'Weight', details.weight) + '</div>'
+        + speciesPick
         + f('physical', 'Physical description', details.physical, 'What people notice first')
         + ta('background', 'Background', details.background != null ? details.background : tpl.background)
         + ta('personality', 'Personality', details.personality != null ? details.personality : tpl.personality)
         + ta('connection', 'Objectives & connection with other characters', details.connection != null ? details.connection : (tpl.connection || ''))
         + f('quote', 'A quote', details.quote != null ? details.quote : (tpl.quote || ''));
+      b.querySelectorAll('.swb-sp-chip').forEach(c => c.addEventListener('click', () => { readDetails(); details.species = c.dataset.sp; render(); }));
     } else {
       note.textContent = 'Starting equipment';
       b.innerHTML = '<p class="m-hint">Your template starts with this gear' + (tpl.credits ? ' and <b style="color:#f0c020;">' + esc(tpl.credits) + '</b>' : '') + '. Items that match the weapon charts become weapon rows; everything else goes in Equipment. Untick anything you\'d rather not carry.</p>'
@@ -107,10 +112,15 @@
     keep.forEach(e => { if (/credit/i.test(e) && !/blaster|weapon/i.test(e)) { if (/debt|owe/i.test(e)) extraNotes.push(e); return; } });
     keep.forEach(e => { const w = matchWeapon(e); if (w) wp.push({ name: w.name, skill: (skills().find(s => norm(s.name) === norm(w.skill || '')) || {}).name || '', damage: w.damageText || toCode(w.damage), range: w.range || '', notes: e.toLowerCase() !== w.name.toLowerCase() ? e : '' }); else if (/credit/i.test(e)) return; else if (!ship.craft && /freighter|starfighter|fighter|speeder|skiff|shuttle|starship|swoop/i.test(e)) { const v = (typeof SW_VEHICLES !== 'undefined' ? SW_VEHICLES : []).find(x => new RegExp(x.name.replace(/[^a-z0-9 ]/gi, '').split(' ').slice(0, 2).join('.*'), 'i').test(e)); ship = { name: '', craft: v ? v.name : e, speed: v ? [v.speed, v.maneuverability].filter(Boolean).join(' · ') : '', hull: v ? [v.hull, v.shields].filter(Boolean).join(' · ') : '', weapons: v ? (v.weapons || []).map(w => [w.count, w.name, w.fireControl ? 'FC ' + w.fireControl : '', w.damage ? 'dmg ' + w.damage : ''].filter(Boolean).join(' ')).join('; ') : '' }; } else gear.push({ name: e, note: '' }); });
     let armor = { name: '', pips: 0 }; const ai = gear.findIndex(g => /armor|armour|flak vest|protective vest/i.test(g.name)); if (ai >= 0) { const g = gear.splice(ai, 1)[0]; const m = /(\d+D(?:\+\d)?|\+\d)/.exec(g.name); armor = { name: g.name, pips: m ? fromCode(m[1]) || 0 : 3 }; }
+    // Credits is a number field now: take the starting amount and keep any
+    // descriptive text (e.g. a debt to a crime boss) as a note.
+    const creditsText = String(tpl.credits || '');
+    const cm = /[\d,]+/.exec(creditsText); const creditsNum = cm ? parseInt(cm[0].replace(/,/g, ''), 10) : 0;
+    if (creditsText && /[a-z(]/i.test(creditsText.replace(/^[\s\d,]*credits?/i, ''))) extraNotes.unshift(creditsText);
     const prev = collectSheet();
     applySheet({
       name: details.name || '', template: tpl.name, species: details.species || speciesFor(tpl), sex: details.sex, age: details.age, height: details.height, weight: details.weight, physical: details.physical,
-      attrs, skills: sk, wound: 'none', forcePoints: 1, darkSide: 0, skillPoints: 0, credits: tpl.credits || '', armor, move: 10,
+      attrs, skills: sk, wound: 'none', forcePoints: 1, darkSide: 0, skillPoints: 0, credits: creditsNum, armor, move: 10,
       weapons: wp, force: [], gear, ship, background: details.background, personality: details.personality, connection: details.connection, quote: details.quote, special: tpl.specialRule || '', notes: extraNotes.join('\n'),
       campaign: prev.campaign,
     });

@@ -330,7 +330,7 @@
 
   // ─── public play ───
   var RANDOM_POOL=['#d8b24a','#c0251e','#3b7dd8','#3fa45b','#8a6fd6'];
-  var WILD_COLOR='#d13a2e';   // Star Wars Wild Die — always a distinct red, whatever the sheet's die colour
+  var WILD_COLOR='#c9a227';   // Star Wars Wild Die — the sheet's golden yellow, whatever the sheet's die colour
   function resolveColor(){ return S.dice==='random' ? RANDOM_POOL[Math.floor(Math.random()*RANDOM_POOL.length)] : (S.dice||'#d8b24a'); }
   // Empty every inline mount (e.g. the roll-toast .t-dice). Called on every roll so a
   // 2D roll left in the card doesn't linger after switching to 3D (play2Dinline refills

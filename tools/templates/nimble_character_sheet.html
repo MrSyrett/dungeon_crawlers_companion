@@ -218,6 +218,9 @@ details.feats summary::-webkit-details-marker{display:none;}
 .brow-add.remove{background:transparent;color:#c98a8a;border:1px solid #6a3535;}
 .brow-add.remove:hover{background:#3a1e1e;color:#fff;}
 .brow-add.have{background:transparent;color:#6a8a5a;border:1px solid #3a4a30;cursor:default;}
+.brow-btns{display:flex;gap:4px;flex-shrink:0;align-items:flex-start;}
+.brow-add.buy{background:var(--gold);color:#1a1408;}
+.brow-add.buy:hover{filter:brightness(1.1);background:var(--gold);}
 .brow-empty{padding:14px 4px;font-size:12px;color:#999;}
 
 /* DARK */
@@ -399,7 +402,6 @@ select option{background:var(--input-bg);color:var(--ink);}
         <thead><tr><th style="width:32%;">Weapon / spell</th><th style="width:26%;">Damage</th><th>Properties</th><th style="width:96px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
       </table>
-      <div class="add-row"><button class="small-btn ghost" onclick="addAttackRow()">+ Blank attack</button></div>
 
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
@@ -431,7 +433,7 @@ select option{background:var(--input-bg);color:var(--ink);}
           <thead><tr><th>Item</th><th style="width:54px;">Slots</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="inv-body"></tbody>
         </table>
-        <div class="add-row"><button class="small-btn ghost" onclick="addInvRow()">+ Blank item</button><span class="hint" style="margin:0 0 0 auto;">gold <input type="number" id="f-gold" value="50" style="width:70px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> gp</span></div>
+        <div class="add-row"><span class="hint" style="margin:0 0 0 auto;">Coins <input type="number" id="f-gold" value="50" style="width:64px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> gp <input type="number" id="f-silver" value="0" style="width:54px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;text-align:center;color:var(--ink);"> sp</span></div>
       </div>
 
       <div class="tab-panel" id="tab-notes">
@@ -476,7 +478,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="weapon-overlay" class="ov" onclick="if(event.target===this)closeWeaponPicker()">
   <div class="modal" style="max-width:560px;">
     <div class="modal-hd"><div class="ttl">⚔ Weapons</div><button class="x" onclick="closeWeaponPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="weapon-search" class="m-input" placeholder="Search weapons…" oninput="renderWeaponPicker()"></div>
+    <div class="brow-controls"><input id="weapon-search" class="m-input" placeholder="Search weapons…" oninput="renderWeaponPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addCustomAttack()">＋ Add custom</button></div>
     <div class="modal-bd brow-list" id="weapon-body"></div>
   </div>
 </div>
@@ -487,7 +489,7 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="modal-hd"><div class="ttl">📖 Spellbook</div><button class="x" onclick="closeSpellbook()">&#10005;</button></div>
     <div class="brow-controls">
       <input id="spellbook-search" class="m-input" placeholder="Search spells…" oninput="renderSpellbook()">
-      <div class="brow-filters"><select id="spellbook-school" class="m-input brow-sel" onchange="renderSpellbook()"></select><select id="spellbook-tier" class="m-input brow-sel" onchange="renderSpellbook()"></select></div>
+      <div class="brow-filters"><select id="spellbook-school" class="m-input brow-sel" onchange="renderSpellbook()"></select><select id="spellbook-tier" class="m-input brow-sel" onchange="renderSpellbook()"></select><button class="m-btn ghost" onclick="addCustomSpell()">＋ Add custom</button></div>
     </div>
     <div class="modal-bd brow-list" id="spellbook-body"></div>
   </div>
@@ -497,7 +499,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="store-overlay" class="ov" onclick="if(event.target===this)closeStore()">
   <div class="modal" style="max-width:600px;">
     <div class="modal-hd"><div class="ttl">🛒 Item Store</div><span class="brow-coins" id="store-coins"></span><button class="x" onclick="closeStore()">&#10005;</button></div>
-    <div class="brow-controls"><input id="store-search" class="m-input" placeholder="Search items…" oninput="renderStore()"><div class="brow-filters"><select id="store-cat" class="m-input brow-sel" onchange="renderStore()"></select></div></div>
+    <div class="brow-controls"><input id="store-search" class="m-input" placeholder="Search items…" oninput="renderStore()"><div class="brow-filters"><select id="store-cat" class="m-input brow-sel" onchange="renderStore()"></select><button class="m-btn ghost" onclick="addCustomItem()">＋ Add custom</button></div></div>
     <div class="modal-bd brow-list" id="store-body"></div>
   </div>
 </div>
@@ -922,9 +924,24 @@ function removeSpellByName(name) { document.querySelectorAll('#spells-body tr').
 // — Item Store (Inventory tab) —————————————————————————————————————————————
 function openStore() { $('store-overlay').classList.add('open'); renderStore(); $('store-search').focus(); }
 function closeStore() { $('store-overlay').classList.remove('open'); }
+// Coins: gp + sp, tracked in sp internally (1 gp = 10 sp).
+function parseCoin(str) { const m = /([\d,]+)\s*(gp|sp)/i.exec(String(str || '')); if(!m) return null; const n = parseInt(m[1].replace(/,/g, ''), 10); if(isNaN(n)) return null; return m[2].toLowerCase() === 'sp' ? n : n * 10; }
+function coinsSp() { return num($('f-gold').value) * 10 + num($('f-silver').value); }
+function setCoinsSp(sp) { sp = Math.max(0, Math.round(sp)); $('f-gold').value = Math.floor(sp / 10); $('f-silver').value = sp % 10; }
+function coinsLabel() { return num($('f-gold').value) + ' gp ' + num($('f-silver').value) + ' sp'; }
+function buyItem(name) {
+  const it = findItem(name); if(!it) return false;
+  const cost = parseCoin(it.cost);
+  if(cost == null) { addInvFromItem(name); return true; }   // no numeric price → just add
+  if(coinsSp() < cost) return false;
+  setCoinsSp(coinsSp() - cost);
+  addInvFromItem(name);
+  addLog('Bought', '🪙', it.name + ' — ' + it.cost + ' · ' + coinsLabel() + ' left', 'normal');
+  recalc(); scheduleAutosave(); return true;
+}
 function renderStore() {
   const q = norm($('store-search').value), fc = $('store-cat').value;
-  $('store-coins').textContent = num($('f-gold').value) + ' gp';
+  $('store-coins').textContent = coinsLabel();
   const list = D.items().filter(i => {
     if(fc && i.category !== fc) return false;
     if(q && !(norm(i.name).includes(q) || norm(i.category || '').includes(q))) return false;
@@ -934,9 +951,11 @@ function renderStore() {
   if(!list.length) { box.innerHTML = '<p class="brow-empty">No items match.</p>'; return; }
   box.innerHTML = list.map(i => {
     const meta = [i.category, i.armor && 'Armor ' + i.armor, i.damage, i.properties].filter(Boolean).map(esc).join(' · ');
+    const canBuy = parseCoin(i.cost) != null;
+    const buy = canBuy ? '<button class="brow-add buy" data-buy-item="' + esc(i.name) + '">Buy</button>' : '';
     return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(i.name) + (i.cost ? '<span class="brow-cost">' + esc(i.cost) + '</span>' : '') + '</div>' +
       (meta ? '<div class="brow-meta">' + meta + '</div>' : '') + '</div>' +
-      '<button class="brow-add" data-add-item="' + esc(i.name) + '">+ Add</button></div>';
+      '<div class="brow-btns">' + buy + '<button class="brow-add" data-add-item="' + esc(i.name) + '">+ Add</button></div></div>';
   }).join('');
 }
 // — Ability picker (Class Features tab) ————————————————————————————————————
@@ -970,9 +989,16 @@ function _flashBrowBtn(btn, txt) { const o = btn.textContent, d = btn.disabled; 
     const add = e.target.closest('[data-add-spell]'); if(add) { addSpellRow({ name: add.dataset.addSpell, tier: 0 }); scheduleAutosave(); renderSpellbook(); return; }
     const rem = e.target.closest('[data-remove-spell]'); if(rem) { removeSpellByName(rem.dataset.removeSpell); renderSpellbook(); }
   });
-  const stb = $('store-body'); if(stb) stb.addEventListener('click', e => { const b = e.target.closest('[data-add-item]'); if(b) { addInvFromItem(b.dataset.addItem); _flashBrowBtn(b, '✓ Added'); renderStore(); } });
+  const stb = $('store-body'); if(stb) stb.addEventListener('click', e => {
+    const buy = e.target.closest('[data-buy-item]'); if(buy) { if(buyItem(buy.dataset.buyItem)) _flashBrowBtn(buy, '✓ Bought'); else _flashBrowBtn(buy, 'Need coin'); renderStore(); return; }
+    const b = e.target.closest('[data-add-item]'); if(b) { addInvFromItem(b.dataset.addItem); _flashBrowBtn(b, '✓ Added'); renderStore(); }
+  });
   const ab = $('ability-body'); if(ab) ab.addEventListener('click', e => { const b = e.target.closest('[data-add-ability]'); if(b) { addPick(b.dataset.addAbility); renderAbilityPicker(); } });
 })();
+// "Add custom" from a picker: drop in a blank row to fill by hand.
+function addCustomAttack() { addAttackRow(); closeWeaponPicker(); scheduleAutosave(); }
+function addCustomSpell() { addSpellRow(); closeSpellbook(); scheduleAutosave(); }
+function addCustomItem() { addInvRow(); closeStore(); scheduleAutosave(); }
 
 // ═══ RULES ════════════════════════════════════════════════════════════════
 function openRules() {
@@ -1035,7 +1061,7 @@ function collectSheet() {
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value) })).filter(s => s.name),
     inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value })).filter(i => i.name),
-    gold: num(v('f-gold')), traits: v('f-traits'), languages: v('f-languages'), body: v('f-body'), notes: v('f-notes'), conditions: conditions.slice(), tab: _tab,
+    gold: num(v('f-gold')), silver: num(v('f-silver')), traits: v('f-traits'), languages: v('f-languages'), body: v('f-body'), notes: v('f-notes'), conditions: conditions.slice(), tab: _tab,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
 }
@@ -1053,7 +1079,7 @@ function applySheet(d) {
   fillPoolPick(); $('picks-body').innerHTML = ''; (d.picks || []).forEach(p => addPick(p));
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
-  set('f-gold', d.gold ?? 50); set('f-traits', d.traits); set('f-languages', d.languages || 'Common'); set('f-body', d.body); set('f-notes', d.notes);
+  set('f-gold', d.gold ?? 50); set('f-silver', d.silver || 0); set('f-traits', d.traits); set('f-languages', d.languages || 'Common'); set('f-body', d.body); set('f-notes', d.notes);
   conditions = Array.isArray(d.conditions) ? d.conditions.slice() : []; renderConditions();
   _tab = TABS.includes(d.tab) ? d.tab : _tab;
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
