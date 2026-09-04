@@ -1237,26 +1237,9 @@ function addAttackFromWeapon(name){
   scheduleAutosave();
 }
 function _atkRow(btn){ return btn.closest('tr'); }
-function rollAttack(btn){
-  const tr = _atkRow(btn);
-  const abil = tr.querySelector('.atk-abil').value, prof = tr.dataset.prof !== '0';
-  const bonus = num(tr.querySelector('.atk-bonus').value), name = tr.querySelector('.atk-name').value || 'Attack';
-  const mod = modOf(abil) + (prof ? profBonus() : 0) + bonus;
-  d20Check(name + ' — to hit', mod, { kind:'attack', note: bonus ? (sgn(bonus) + ' bonus') : '' });
-}
-function rollDamage(btn){
-  const tr = _atkRow(btn);
-  const dmg = tr.querySelector('.atk-dmg').value.trim(), abil = tr.querySelector('.atk-abil').value;
-  const name = tr.querySelector('.atk-name').value || 'Attack', dtype = tr.querySelector('.atk-dtype').value;
-  const bonus = num(tr.querySelector('.atk-bonus').value);
-  const m = dmg.match(/(\d*)d(\d+)\s*([+-]\s*\d+)?/i);
-  if(!m){ addLog(name + ' — damage', dmg || '?', 'No dice expression', 'normal'); return; }
-  const nDice = num(m[1]) || 1, sides = num(m[2]);
-  let flat = (m[3] ? num(m[3].replace(/\s+/g,'')) : modOf(abil)) + bonus;
-  const faces = []; let sum = 0; for(let i=0;i<nDice;i++){ const f = dN(sides); faces.push(f); sum += f; }
-  const total = sum + flat;
-  addLog(name + ' — damage', String(total), nDice + 'd' + sides + ': ' + faces.join('+') + ' ' + sgn(flat) + (dtype ? ' ' + dtype : ''), 'normal');
-}
+// (Legacy rollAttack/rollDamage removed 2026-09-04 — unwired dead code; rollDamage had no
+//  crit-doubling path, so re-wiring it would have silently produced wrong crit damage.
+//  The live path is rollAttackFull → doAttack, which handles adv/dis and crit doubling.)
 // One button: roll to-hit (adv/dis) and damage together. Crit (nat 20) doubles the damage dice.
 function rollAttackFull(btn){ doAttack(_atkRow(btn), 0); }
 // Core attack roll. sneakD6 > 0 adds that many d6 of Sneak Attack damage (doubled on a crit).
