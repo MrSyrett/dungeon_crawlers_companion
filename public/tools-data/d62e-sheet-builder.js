@@ -10,8 +10,10 @@
   const SKILL_TOTAL = 21, SKILL_PER = 6;                 // 7D of adds, max +2D per skill
   let step = 0, mode = null, tpl = null, genre = 'core';
   let attrAlloc = { Agility: 3, Brawn: 3, Knowledge: 3, Perception: 3 };
-  let skillAlloc = {}, details = {}, gearPicks = {}, _lastStep = -1;
+  let skillAlloc = {}, details = {}, gearPicks = {}, traitPicks = {}, _lastStep = -1;
+  let bopts = {}, bgearCat = '', bgearQ = '';
   let ov = null;
+  function freshOpts() { return (typeof defaultOptions === 'function') ? defaultOptions() : { noDodge:false, wildDie:'core', heroModel:'heroic', advancement:'none', magicPoints:false, specialization:false, attrBudget:false, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
 
   const templates = () => (typeof D62E_TEMPLATES !== 'undefined' ? D62E_TEMPLATES : []);
   const skillsData = () => (typeof D62E_SKILLS !== 'undefined' ? D62E_SKILLS : []);
@@ -19,7 +21,7 @@
   const powersData = () => (typeof D62E_POWERS !== 'undefined' ? D62E_POWERS : []);
   const genreOk = item => { const g = item && item.genre; return !g || g === 'core' || g === genre; };
 
-  function steps() { return mode === 'alacarte' ? ['Path', 'Attributes', 'Skills', 'Details', 'Gear'] : ['Path', 'Skills', 'Details', 'Gear']; }
+  function steps() { const s = ['Options', 'Path']; if (mode === 'alacarte') s.push('Attributes'); s.push('Skills', 'Traits', 'Details', 'Gear'); return s; }
   function charAttrs() {
     if (mode === 'alacarte') return Object.assign({}, attrAlloc);
     return tpl ? Object.assign({}, tpl.attributes) : { Agility: 9, Brawn: 9, Knowledge: 9, Perception: 9 };
@@ -28,7 +30,7 @@
   function skillSpent() { return Object.values(skillAlloc).reduce((a, b) => a + Math.max(0, b), 0); }
   // Additional Attribute Budgets option (read from the sheet's live options): +3D (9 pips)
   // of attribute budget for each attribute the character has beyond the four core.
-  const attrBudgetOn = () => (typeof options !== 'undefined' && options && !!options.attrBudget);
+  const attrBudgetOn = () => !!(bopts && bopts.attrBudget);
   function optionalCount() { return Object.keys(attrAlloc).filter(a => CORE_ATTRS.indexOf(a) < 0).length; }
   function attrTotal() { return ATTR_TOTAL + (attrBudgetOn() ? 9 * optionalCount() : 0); }
   // Recommended skills for a template: structured skills + text in the description / talents field.
@@ -68,13 +70,36 @@
     const b = $('d62eb-body'), note = $('d62eb-note');
     const keep = _lastStep === step; const bScroll = keep ? b.scrollTop : 0;
     const name = STEPS[step];
-    if (name === 'Path') renderPath(b, note);
+    if (name === 'Options') renderOptionsStep(b, note);
+    else if (name === 'Path') renderPath(b, note);
     else if (name === 'Attributes') renderAttributes(b, note);
     else if (name === 'Skills') renderSkills(b, note);
+    else if (name === 'Traits') renderTraits(b, note);
     else if (name === 'Details') renderDetails(b, note);
     else renderGear(b, note);
     if (keep) b.scrollTop = bScroll;
     _lastStep = step; ov.classList.add('open');
+  }
+
+  // ── Step: Options (table rules — reuses the sheet's options model) ──────────
+  function optRow(name, note2, control) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #2a221c;"><div style="flex:1;min-width:0;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:14px;color:#f0e2d6;letter-spacing:.02em;">' + esc(name) + '</div><div style="font-size:11px;color:#a89888;line-height:1.35;margin-top:2px;">' + note2 + '</div></div>' + control + '</div>';
+  }
+  function bchk(key) { return '<button type="button" class="opt-check' + (bopts[key] ? ' on' : '') + '" data-optk="' + key + '" aria-label="toggle"></button>'; }
+  function bsel(key, opts) { return '<select class="m-input" data-opts="' + key + '" style="width:auto;min-width:120px;flex:0 0 auto;">' + opts.map(o => '<option value="' + o[0] + '"' + (bopts[key] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select>'; }
+  function renderOptionsStep(b, note) {
+    note.textContent = 'Table rules';
+    let h = '<p class="m-hint">Set the optional rules your table uses. These configure the finished sheet and the rest of this builder (attribute budgets, specializations, and so on).</p>';
+    h += optRow('No Dodge Defense', 'Ranged attacks use fixed difficulties instead of a Dodge score.', bchk('noDodge'));
+    h += optRow('Alt Wild Die', 'Core / Basic / Classic / Simple behaviour on a natural 1.', bsel('wildDie', [['core','Core'],['basic','Basic'],['classic','Classic'],['simple','Simple']]));
+    h += optRow('Hero Point Model', 'Heroic / Basic / Classic / Superheroic spend effect.', bsel('heroModel', [['heroic','Heroic'],['basic','Basic'],['classic','Classic'],['superheroic','Superheroic']]));
+    h += optRow('Advancement', 'Growth tracker shown on the sheet.', bsel('advancement', [['none','None'],['xp','XP'],['milestone','Milestone'],['narrative','Narrative']]));
+    h += optRow('Magic Points Casting', 'Cast from a points pool instead of straight rolls.', bchk('magicPoints'));
+    h += optRow('Skill Specializations & Advanced Skills', 'Adds Adv / Spec controls to each skill on the sheet.', bchk('specialization'));
+    h += optRow('Additional Attribute Budgets', 'Scales the a-la-carte attribute budget +3D per attribute beyond the core four.', bchk('attrBudget'));
+    b.innerHTML = h;
+    b.querySelectorAll('[data-optk]').forEach(el => el.addEventListener('click', () => { bopts[el.dataset.optk] = !bopts[el.dataset.optk]; render(); }));
+    b.querySelectorAll('[data-opts]').forEach(el => el.addEventListener('change', () => { bopts[el.dataset.opts] = el.value; render(); }));
   }
 
   // ── Step: Path ────────────────────────────────────────────────────────────
@@ -99,7 +124,7 @@
   // ── Step: Attributes (a la carte) ───────────────────────────────────────────
   function renderAttributes(b, note) {
     const budget = attrBudgetOn(); const total = attrTotal(); const left = total - attrSpent();
-    note.textContent = 'Attribute dice left: ' + code(Math.max(0, left));
+    note.textContent = left < 0 ? 'Over budget by ' + code(-left) + ' — lower an attribute' : 'Attribute dice left: ' + code(left);
     let h = '<p class="m-hint">Assign <b>' + code(total) + '</b> across your attributes — each between <b>1D and 5D</b>.'
       + (budget ? ' Each optional attribute beyond the core four adds <b>+3D</b> to the budget.' : '') + ' Dice are whole here (fine-tune with pips on the sheet later).</p><div class="alloc">';
     const keys = CORE_ATTRS.concat(Object.keys(attrAlloc).filter(a => CORE_ATTRS.indexOf(a) < 0));
@@ -111,10 +136,8 @@
         + (optional ? ' <button data-rm="' + a + '" title="Remove attribute (refunds its dice)">✕</button>' : '') + '</span></div>';
     });
     h += '</div>';
-    if (budget) {
-      const avail = OPTIONAL_ATTRS.filter(a => attrAlloc[a] == null);
-      if (avail.length) h += '<div class="m-lbl">Add optional attribute (+3D budget each)</div><div style="display:flex;flex-wrap:wrap;gap:5px;">' + avail.map(a => '<button type="button" class="builder-chip" data-add="' + a + '">＋ ' + a + '</button>').join('') + '</div>';
-    }
+    const avail = OPTIONAL_ATTRS.filter(a => attrAlloc[a] == null);
+    if (avail.length) h += '<div class="m-lbl">Add optional attribute' + (budget ? ' (+3D budget each)' : ' (draws from the 12D budget)') + '</div><div style="display:flex;flex-wrap:wrap;gap:5px;">' + avail.map(a => '<button type="button" class="builder-chip" data-add="' + a + '">＋ ' + a + '</button>').join('') + '</div>';
     b.innerHTML = h;
     b.querySelectorAll('button[data-a]').forEach(btn => btn.addEventListener('click', () => {
       const a = btn.dataset.a, d = Number(btn.dataset.d);
@@ -163,36 +186,69 @@
     const f = (id, lbl, val, ph) => '<div class="m-lbl">' + lbl + '</div><input class="m-input" id="d62eb-' + id + '" value="' + esc(val == null ? '' : val) + '" placeholder="' + esc(ph || '') + '">';
     const ta = (id, lbl, val) => '<div class="m-lbl">' + lbl + '</div><textarea class="m-input" id="d62eb-' + id + '" rows="3">' + esc(val == null ? '' : val) + '</textarea>';
     b.innerHTML = '<p class="m-hint">Name your character. Genre is set from your starting point but you can change it.</p>'
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px;">' + f('name', 'Name', details.name, 'Character name') + f('player', 'Player', details.player, 'optional') + '</div>'
+      + f('name', 'Name', details.name, 'Character name')
       + '<div class="m-lbl">Genre</div><select class="m-input" id="d62eb-genre2" style="max-width:200px;">' + ['core', 'fantasy', 'scifi', 'superhero'].map(g => '<option value="' + g + '"' + (genre === g ? ' selected' : '') + '>' + (g === 'scifi' ? 'Sci-Fi' : g[0].toUpperCase() + g.slice(1)) + '</option>').join('') + '</select>'
       + ta('background', 'Background', details.background != null ? details.background : (tpl ? tpl.description : ''))
       + ta('personality', 'Personality', details.personality);
     b.querySelector('#d62eb-genre2').addEventListener('change', e => { genre = e.target.value; });
   }
-  function readDetails() { ['name', 'player', 'background', 'personality'].forEach(k => { const el = $('d62eb-' + k); if (el) details[k] = el.value; }); const g = $('d62eb-genre2'); if (g) genre = g.value; }
+  function readDetails() { ['name', 'background', 'personality'].forEach(k => { const el = $('d62eb-' + k); if (el) details[k] = el.value; }); const g = $('d62eb-genre2'); if (g) genre = g.value; }
 
-  // ── Step: Gear ──────────────────────────────────────────────────────────────
-  function matchEquip(text) {
-    const t = String(text).toLowerCase().replace(/\(.*?\)/g, '');
-    let best = null; equipData().forEach(g => { const n = g.name.toLowerCase(); if (n.length > 3 && t.includes(n) && (!best || n.length > best.name.length)) best = g; });
-    return best;
+  // ── Step: Traits (perks / flaws / talents from D62E_PERKS) ──────────────────
+  function perksData() { return (typeof D !== 'undefined' && D.perks) ? D.perks() : (typeof D62E_PERKS !== 'undefined' ? D62E_PERKS : []); }
+  function renderTraits(b, note) {
+    note.textContent = 'Perks · Flaws · Talents';
+    let h = '<p class="m-hint">Pick any perks, flaws, and talents — they land on the sheet where you can edit them. Perks/assets, flaws/troubles, and talents are sorted automatically.</p>';
+    h += '<input class="m-input" id="d62eb-trait-search" placeholder="Search…" style="margin-bottom:8px;">';
+    h += '<div class="brow-list" id="d62eb-trait-list" style="max-height:46vh;overflow:auto;padding:0;">' + traitListHtml('') + '</div>';
+    b.innerHTML = h;
+    const s = $('d62eb-trait-search');
+    s.addEventListener('input', () => { $('d62eb-trait-list').innerHTML = traitListHtml(norm(s.value)); wireTraits(); });
+    wireTraits();
+    function wireTraits() { $('d62eb-trait-list').querySelectorAll('[data-trait]').forEach(btn => btn.addEventListener('click', () => { const n = btn.dataset.trait; traitPicks[n] = !traitPicks[n]; $('d62eb-trait-list').innerHTML = traitListHtml(norm(s.value)); wireTraits(); })); }
+  }
+  function traitListHtml(q) {
+    const list = perksData().filter(t => genreOk(t) && (!q || norm(t.name).includes(q) || norm(t.kind || '').includes(q))).sort((a, c) => (a.kind || '').localeCompare(c.kind || '') || a.name.localeCompare(c.name));
+    if (!list.length) return '<p class="brow-empty">No entries match.</p>';
+    return list.map(t => {
+      const on = !!traitPicks[t.name];
+      const btn = '<button class="brow-add" data-trait="' + esc(t.name) + '"' + (on ? ' style="background:#5a3a1a;color:#f0c9a0;"' : '') + '>' + (on ? 'Added ✓' : '+ Add') + '</button>';
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(t.name) + (t.cost ? '<span class="brow-cost">' + esc(t.cost) + '</span>' : '') + '</div><div class="brow-meta">' + esc(t.kind || '') + '</div>' + (t.description ? '<div class="brow-desc">' + esc(t.description) + '</div>' : '') + '</div>' + btn + '</div>';
+    }).join('');
+  }
+
+  // ── Step: Gear (same picker as the sheet's Equipment browser) ───────────────
+  function toggleGear(name) {
+    const g = equipData().find(x => x.name === name); if (!g) return;
+    if (g.category === 'armor') { const was = !!gearPicks[name]; equipData().forEach(x => { if (x.category === 'armor') delete gearPicks[x.name]; }); if (!was) gearPicks[name] = true; }
+    else gearPicks[name] = !gearPicks[name];
   }
   function renderGear(b, note) {
     note.textContent = 'Starting equipment';
-    const list = equipData().filter(g => genreOk(g)).sort((a, c) => (a.category || '').localeCompare(c.category || '') || a.name.localeCompare(c.name));
-    let h = '<p class="m-hint">Tick any starting equipment. Weapons become attack rows; armor fills the Armor box; everything else goes to Gear. You can add more on the sheet at any time.</p>';
-    h += '<input class="m-input" id="d62eb-gear-search" placeholder="Filter equipment…" style="margin-bottom:8px;">';
-    h += '<div id="d62eb-gear-list" style="display:flex;flex-direction:column;gap:4px;max-height:44vh;overflow:auto;">' + gearListHtml('') + '</div>';
+    let h = '<p class="m-hint">Add starting equipment — the same picker as the sheet. Weapons become attack rows, armor fills the Armor box, everything else goes to Gear. You can add more on the sheet anytime.</p>';
+    h += '<div style="display:flex;gap:6px;margin-bottom:8px;"><input class="m-input" id="d62eb-gear-search" placeholder="Search equipment…" style="flex:1;"><select class="m-input" id="d62eb-gear-cat" style="width:auto;min-width:130px;flex:0 0 auto;"></select></div>';
+    h += '<div class="brow-list" id="d62eb-gear-list" style="max-height:46vh;overflow:auto;padding:0;">' + gearListHtml() + '</div>';
     b.innerHTML = h;
-    const search = $('d62eb-gear-search');
-    search.addEventListener('input', () => { $('d62eb-gear-list').innerHTML = gearListHtml(norm(search.value)); wireGear(); });
+    const cats = [...new Set(equipData().map(g => g.category))].filter(Boolean).sort();
+    $('d62eb-gear-cat').innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '"' + (bgearCat === c ? ' selected' : '') + '>' + esc(c[0].toUpperCase() + c.slice(1)) + '</option>').join('');
+    const s = $('d62eb-gear-search'), cat = $('d62eb-gear-cat');
+    s.addEventListener('input', () => { bgearQ = norm(s.value); $('d62eb-gear-list').innerHTML = gearListHtml(); wireGear(); });
+    cat.addEventListener('change', () => { bgearCat = cat.value; $('d62eb-gear-list').innerHTML = gearListHtml(); wireGear(); });
     wireGear();
-    function wireGear() { $('d62eb-gear-list').querySelectorAll('input[type=checkbox]').forEach(c => c.addEventListener('change', () => { gearPicks[c.dataset.name] = c.checked; })); }
+    function wireGear() { $('d62eb-gear-list').querySelectorAll('[data-gname]').forEach(btn => btn.addEventListener('click', () => { toggleGear(btn.dataset.gname); $('d62eb-gear-list').innerHTML = gearListHtml(); wireGear(); })); }
   }
-  function gearListHtml(q) {
-    const list = equipData().filter(g => genreOk(g) && (!q || norm(g.name).includes(q) || norm(g.category || '').includes(q))).sort((a, c) => (a.category || '').localeCompare(c.category || '') || a.name.localeCompare(c.name));
+  function gearListHtml() {
+    const list = equipData().filter(g => genreOk(g) && (!bgearCat || g.category === bgearCat) && (!bgearQ || norm(g.name).includes(bgearQ) || norm(g.category || '').includes(bgearQ))).sort((a, c) => (a.category || '').localeCompare(c.category || '') || a.name.localeCompare(c.name));
     if (!list.length) return '<p class="brow-empty">No equipment matches.</p>';
-    return list.map(g => '<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:#ddd;"><input type="checkbox" data-name="' + esc(g.name) + '"' + (gearPicks[g.name] ? ' checked' : '') + ' style="margin-top:3px;"><span><b style="font-family:\'Barlow Condensed\',sans-serif;">' + esc(g.name) + '</b> <span style="color:#9a8a6a;font-size:11px;">' + esc([g.category, g.damage, g.protection].filter(Boolean).join(' · ')) + '</span></span></label>').join('');
+    return list.map(g => {
+      const on = !!gearPicks[g.name];
+      let cost = '', label = on ? 'Added ✓' : '+ Add';
+      if (g.category === 'weapon') { cost = g.damage || ''; label = on ? 'On attacks ✓' : '+ Attack'; }
+      else if (g.category === 'armor') { cost = g.protection || ''; label = on ? 'Worn ✓' : 'Wear'; }
+      const meta = [g.category, g.era, g.range].filter(Boolean).map(esc).join(' · ');
+      const btn = '<button class="brow-add" data-gname="' + esc(g.name) + '"' + (on ? ' style="background:#5a3a1a;color:#f0c9a0;"' : '') + '>' + label + '</button>';
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + (cost ? '<span class="brow-cost">' + esc(cost) + '</span>' : '') + '</div><div class="brow-meta">' + meta + '</div>' + (g.description ? '<div class="brow-desc">' + esc(g.description) + '</div>' : '') + '</div>' + btn + '</div>';
+    }).join('');
   }
 
   // ── Finish ──────────────────────────────────────────────────────────────────
@@ -217,16 +273,25 @@
       const def = powersData().find(x => norm(x.name) === norm(String(pName).replace(/\(.*?\)/g, '').trim())) || {};
       powers.push({ name: pName, kind: def.kind || 'superpower', note: [def.difficulty ? 'Diff ' + def.difficulty : '', def.skill || ''].filter(Boolean).join(' · ') });
     });
+    // Perks / Flaws / Talents picked in the Traits step, routed to buckets by kind.
+    const perks = [], flaws = [], talents = [];
+    Object.keys(traitPicks).forEach(n => {
+      if (!traitPicks[n]) return; const t = perksData().find(x => x.name === n); if (!t) return;
+      const bucket = (typeof traitBucketOf === 'function') ? traitBucketOf(t.kind) : 'perks';
+      const obj = { name: t.name, note: [t.cost ? 'Cost ' + t.cost : '', t.description || ''].filter(Boolean).join(' · ') };
+      if (bucket === 'flaws') flaws.push(obj); else if (bucket === 'talents') talents.push(obj); else perks.push(obj);
+    });
     const prev = (typeof collectSheet === 'function') ? collectSheet() : {};
     applySheet({
-      system: 'D62E', name: details.name || '', player: details.player || '', genre: genre,
+      system: 'D62E', name: details.name || '', genre: genre,
       template: mode === 'template' ? tpl.name : '', archetype: mode === 'template' ? (tpl.archetype || '') : '',
       attrs: attrs, skills: skills,
       heroPoints: mode === 'template' ? (tpl.heroPoints || 1) : 1, characterPoints: 0,
       dodgeOverride: null, parryOverride: null, move: '10', wound: 'none',
       weapons: weapons, armor: armor, powers: powers,
-      perks: [], flaws: [], talents: [], gear: gear,
+      perks: perks, flaws: flaws, talents: talents, gear: gear,
       wealth: '', background: details.background || (mode === 'template' ? tpl.description : '') || '', personality: details.personality || '', notes: '',
+      options: Object.assign(freshOpts(), bopts),
       campaign: prev.campaign || null,
     });
     if (typeof saveSheet === 'function') saveSheet(true);
@@ -235,7 +300,12 @@
   }
 
   window.D62EB = {
-    launch() { step = 0; mode = null; tpl = null; genre = ((typeof currentGenre === 'function') ? currentGenre() : 'core') || 'core'; attrAlloc = { Agility: 3, Brawn: 3, Knowledge: 3, Perception: 3 }; skillAlloc = {}; details = {}; gearPicks = {}; _lastStep = -1; render(); },
+    launch() {
+      step = 0; mode = null; tpl = null; genre = ((typeof currentGenre === 'function') ? currentGenre() : 'core') || 'core';
+      attrAlloc = { Agility: 3, Brawn: 3, Knowledge: 3, Perception: 3 }; skillAlloc = {}; details = {}; gearPicks = {}; traitPicks = {}; bgearCat = ''; bgearQ = '';
+      bopts = Object.assign(freshOpts(), (typeof options !== 'undefined' && options) ? JSON.parse(JSON.stringify(options)) : {});
+      _lastStep = -1; render();
+    },
     close() { if (ov) ov.classList.remove('open'); },
     next() {
       const STEPS = steps();
