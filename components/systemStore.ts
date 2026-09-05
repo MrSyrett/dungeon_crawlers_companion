@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E";
 
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
@@ -23,6 +23,9 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
   // plus original concise descriptions for non-SRD options.
   { key: "DND", name: "D&D", short: "D&D", accent: "var(--dnd)" },
+  // D6 System: Second Edition (Gallant Knight Games, 2024) — a genre-agnostic
+  // evolution of the West End Games D6 System.
+  { key: "D62E", name: "D6 System 2e", short: "D62e", accent: "var(--d62e)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";

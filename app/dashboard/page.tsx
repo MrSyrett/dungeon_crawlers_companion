@@ -106,6 +106,19 @@ const DND_REFERENCE: { href: string; label: string }[] = [
 // D&D has no rulebook PDFs, so its shared toolbar drops the Rulebooks link.
 const SHARED_NAV_DND = SHARED_NAV.filter((l) => l.href !== "/rules");
 
+// D6 System: Second Edition (D62e) reference pages. Genre-agnostic: skills,
+// templates, equipment, powers (magic/psionics/superpowers), perks/flaws/talents,
+// bestiary, and the rules modules + tables.
+const D62E_REFERENCE: { href: string; label: string }[] = [
+  { href: "/d62e/skills", label: "Skills" },
+  { href: "/d62e/templates", label: "Templates" },
+  { href: "/d62e/equipment", label: "Equipment" },
+  { href: "/d62e/powers", label: "Powers" },
+  { href: "/d62e/perks", label: "Perks" },
+  { href: "/d62e/bestiary", label: "Bestiary" },
+  { href: "/d62e/rules", label: "Rules" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
@@ -115,6 +128,7 @@ const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   NIM: NIM_REFERENCE,
   SW: SW_REFERENCE,
   DND: DND_REFERENCE,
+  D62E: D62E_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

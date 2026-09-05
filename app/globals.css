@@ -19,6 +19,8 @@
   --sw: #f0c020;
   /* D&D accent — the classic dragon red. */
   --dnd: #c8102e;
+  /* D62e (D6 System 2e) accent — a genre-agnostic burnt orange. */
+  --d62e: #e07b39;
 }
 
 @theme inline {

@@ -21,7 +21,8 @@ export type HbType =
   | "nimble-item" | "nimble-spell" | "nimble-monster" | "nimble-ancestry"
   | "sw-weapon" | "sw-gear" | "sw-force" | "sw-character"
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
-  | "kob-trope" | "kob-strength" | "kob-flaw";
+  | "kob-trope" | "kob-strength" | "kob-flaw"
+  | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -31,6 +32,7 @@ const HB_TYPES = [
   "sw-weapon", "sw-gear", "sw-force", "sw-character",
   "ace-role", "ace-gear", "ace-extra", "ace-focus", "ace-trait",
   "kob-trope", "kob-strength", "kob-flaw",
+  "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1418,6 +1420,104 @@ function normalizeKobFlaw(input: unknown): { name: string; data: Record<string, 
   return { name, data };
 }
 
+// ── D62e (D6 System: Second Edition) ─────────────────────────────────────────
+// Each normaliser emits the exact lib/data/d62e-types shape its reference page
+// consumes, forces source:"Homebrew", and clamps every field. Die codes on a
+// creature's attributes are stored as pips (1D = 3), matching the book data.
+const D62E_GENRES = ["core", "fantasy", "scifi", "superhero"] as const;
+const D62E_GEAR_CATEGORIES = ["weapon", "armor", "gear"] as const;
+const D62E_POWER_KINDS = ["magic", "psionic", "superpower"] as const;
+const D62E_CORE_ATTRS = ["Agility", "Brawn", "Knowledge", "Perception"] as const;
+
+// A die code "3D+2" / "4D" / "+2" → pips (1D = 3). null if blank/unparseable.
+function d62ePips(v: unknown): number | null {
+  const s = str(v).toUpperCase().replace(/\s+/g, "");
+  if (!s) return null;
+  const m = /^(\d+)D(?:\+(\d+))?$/.exec(s);
+  if (m) return parseInt(m[1], 10) * 3 + (m[2] ? parseInt(m[2], 10) : 0);
+  const p = /^\+(\d+)$/.exec(s);
+  if (p) return parseInt(p[1], 10);
+  const n = /^(\d+)$/.exec(s);
+  if (n) return parseInt(n[1], 10) * 3;
+  return null;
+}
+
+function normalizeD62eSkill(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew skill needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    attribute: str(o.attribute).slice(0, 60) || "Agility",
+    genre: oneOf(o.genre, D62E_GENRES, "core"),
+    description: str(o.description).slice(0, 3000),
+    page: 0, source: "Homebrew",
+  };
+  const specs = strList(o.specializations, 20, 60); if (specs.length) data.specializations = specs;
+  if (str(o.time)) data.time = str(o.time).slice(0, 120);
+  return { name, data };
+}
+
+function normalizeD62eGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    category: oneOf(o.category, D62E_GEAR_CATEGORIES, "gear"),
+    genre: oneOf(o.genre, D62E_GENRES, "core"),
+    description: str(o.description).slice(0, 3000),
+    page: 0, source: "Homebrew",
+  };
+  if (str(o.era)) data.era = str(o.era).slice(0, 60);
+  if (str(o.damage)) data.damage = str(o.damage).slice(0, 60);
+  if (str(o.protection)) data.protection = str(o.protection).slice(0, 120);
+  if (str(o.range)) data.range = str(o.range).slice(0, 80);
+  if (str(o.skill)) data.skill = str(o.skill).slice(0, 60);
+  if (str(o.cost)) data.cost = str(o.cost).slice(0, 40);
+  return { name, data };
+}
+
+function normalizeD62ePower(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew power needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    kind: oneOf(o.kind, D62E_POWER_KINDS, "magic"),
+    genre: oneOf(o.genre, D62E_GENRES, "fantasy"),
+    description: str(o.description).slice(0, 3000),
+    page: 0, source: "Homebrew",
+  };
+  if (str(o.skill)) data.skill = str(o.skill).slice(0, 120);
+  if (str(o.difficulty)) data.difficulty = str(o.difficulty).slice(0, 60);
+  if (str(o.cost)) data.cost = str(o.cost).slice(0, 60);
+  const opts = strList(o.options, 20, 120); if (opts.length) data.options = opts;
+  return { name, data };
+}
+
+function normalizeD62eCreature(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew creature needs a name.");
+  const attributes: Record<string, number> = {};
+  for (const a of D62E_CORE_ATTRS) { const p = d62ePips(o[a]); if (p != null) attributes[a] = p; }
+  const data: Record<string, unknown> = {
+    name,
+    genre: oneOf(o.genre, D62E_GENRES, "core"),
+    attributes,
+    skills: strList(o.skills, 40, 120),
+    page: 0, source: "Homebrew",
+  };
+  if (str(o.kind)) data.kind = str(o.kind).slice(0, 60);
+  const talents = strList(o.talents, 40, 120); if (talents.length) data.talents = talents;
+  const powers = strList(o.powers, 40, 120); if (powers.length) data.powers = powers;
+  const special = strList(o.special, 40, 120); if (special.length) data.special = special;
+  if (str(o.move)) data.move = str(o.move).slice(0, 60);
+  if (str(o.description)) data.description = str(o.description).slice(0, 3000);
+  return { name, data };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -1455,6 +1555,10 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "kob-trope": return normalizeKobTrope(data);
     case "kob-strength": return normalizeKobStrength(data);
     case "kob-flaw": return normalizeKobFlaw(data);
+    case "d62e-skill": return normalizeD62eSkill(data);
+    case "d62e-gear": return normalizeD62eGear(data);
+    case "d62e-power": return normalizeD62ePower(data);
+    case "d62e-creature": return normalizeD62eCreature(data);
   }
 }
 

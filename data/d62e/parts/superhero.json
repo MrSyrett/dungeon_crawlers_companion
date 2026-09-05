@@ -1,0 +1,454 @@
+{
+  "skills": [
+    {
+      "name": "Flying",
+      "attribute": "Agility",
+      "genre": "superhero",
+      "description": "Maneuvering under one's own power (wings) or in zero-gravity. Fly meters equal to the Flying die code per round, hover rounds equal to the code without a test, and may replace Agility when calculating Dodge (excluding the Agility code).",
+      "time": "one action",
+      "page": 206
+    },
+    {
+      "name": "Gambling",
+      "attribute": "Perception",
+      "genre": "superhero",
+      "description": "Playing, teaching, understanding, and cheating at games of strategy and luck, and assessing risk and reward where loss is significant. Successes increase winnings, failures decrease them.",
+      "time": "one action",
+      "page": 206
+    },
+    {
+      "name": "Streetwise",
+      "attribute": "Perception",
+      "genre": "superhero",
+      "description": "Finding information, goods, and contacts in large population centers and urban areas — thieves' guilds, crime cartels, black markets, and contacts. Useful for determining criminal motives and methods.",
+      "time": "one action",
+      "page": 206
+    }
+  ],
+  "powers": [
+    {
+      "name": "Accelerated Healing",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "4",
+      "description": "When treated with Medicine the die code gains +3D (the bonus applies even without the skill). At the end of a turn while incapacitated or wounded, a Brawn roll vs Difficulty 20 (with the +3D) downgrades the condition one step. Also ignores penalty results of '1' when healing naturally.",
+      "page": 214
+    },
+    {
+      "name": "Animal Control",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3 per rank",
+      "description": "Control one particular species of animal, bird, or insect. Gain +3D to Survival when handling that species; must win a Survival roll vs the animal's Knowledge. On a high success the animal follows reasonable orders for minutes equal to Survival die code x10 and serves faithfully. One extra species per rank.",
+      "options": ["Range: sight or voice"],
+      "page": 214
+    },
+    {
+      "name": "Armor Piercing Attack",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "2 per rank",
+      "description": "When attacking with natural weapons (fists, claws, teeth), negates the target armor's bonus to resist damage, up to +1D per rank. The character must specify how the attack negates armor and define at least one armor type unaffected. Optionally combined with natural ranged weapons.",
+      "page": 214
+    },
+    {
+      "name": "Atmospheric Tolerance",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "2",
+      "description": "The character can breathe one form of atmosphere (gas or liquid) lethal to most others. Only one rank, but different versions may exist for different atmospheres.",
+      "page": 215
+    },
+    {
+      "name": "Attack Resistance",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "2",
+      "description": "Highly resistant to one type of attack, gaining +1D per rank (a general bonus, not a die code) to resist damage from it. Physical attacks are covered by armor, not this talent.",
+      "options": ["Energy Attacks", "Mystical Attack", "Mental Attacks"],
+      "page": 215
+    },
+    {
+      "name": "Blur",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3",
+      "description": "Appear indistinct to the naked eye or most technological aids; usually only spotted from the corner of the eye. May become blurry at will (no action). While blurred: -1D to social die codes, +1 to Dodge and Parry totals, and imposes -1D on Perception die codes made against the character.",
+      "page": 215
+    },
+    {
+      "name": "Confusion",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "4 per rank",
+      "description": "Hamper the thoughts of those the character touches. Grants the confuse skill at +1D per rank (a Perception skill). As a multi-action with an unarmed/natural weapon attack, opposed by the target's Knowledge (or Willpower); if higher (not equal), the target is confused — suffers -1D on all die codes, cannot use reroll abilities, and cannot spend hero points for rounds equal to twice the rank (or until wounded/incapacitated).",
+      "page": 215
+    },
+    {
+      "name": "Darkness",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3 per rank",
+      "description": "As an action, project a field of darkness adding -1D penalty per rank to ranged attacks or sight-based Perception skills. Fills a room or a half-sphere of one meter radius per rank, maintainable up to one minute per rank. Remains stationary even if the character moves.",
+      "page": 216
+    },
+    {
+      "name": "Elasticity",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "1 per rank",
+      "description": "Stretch, elongate, and compress the body to expand height or squeeze through openings. Shifting form takes an action; slipping through small openings takes a round or more. Gains +1 per rank to Dodge, +1D to disguise die codes, and can add +1 to the reach of a melee weapon up to a value equal to ranks.",
+      "page": 216
+    },
+    {
+      "name": "Energy Ranged Weapon",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3",
+      "description": "Some sort of channeled-energy ranged weapon. Long range equals 20 times the number of ranks x the character's Brawn, lift, or firearms in meters. Damage is 3D plus 1D per rank; must have a visible effect and defined energy type, and may do no mental damage.",
+      "page": 216
+    },
+    {
+      "name": "Extra Body Part",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "0",
+      "description": "An extra limb or organ — external (arms, legs, tail, fins, tentacles, antennae) or internal (eyes, hearts, glands). Unless specified by a Flaw/Limitation or used by another Talent, the part is nonfunctional and provides no benefit. Only one rank, though multiple versions may represent multiple organs; a foundation for building other tweaks.",
+      "page": 216
+    },
+    {
+      "name": "Extra Sense",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "1 per rank",
+      "description": "Detect something a normal human cannot — pressure changes, seismic activity, radiation fluctuations, etc. Gains +1D to search rolls to detect the change and +1D to investigation rolls to find its source, plus possible +1 skill bonuses to related activities. All modifiers per rank.",
+      "page": 217
+    },
+    {
+      "name": "Fear",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "2 per rank",
+      "description": "Provoke fear in those who see or hear the character. As an action, channel fear into all within meters equal to rank x10. Affected targets make a Knowledge Test (Difficulty 15) or suffer -1 per rank (cumulative) to all results for rounds equal to the ranks.",
+      "page": 217
+    },
+    {
+      "name": "Flight",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "6 per rank",
+      "description": "Fly by nature, mutation, technology, or wings. Flying rate equals base Move x2 x number of ranks. Grants 1D in the Agility: Flying skill, advanceable as normal.",
+      "page": 217
+    },
+    {
+      "name": "Glider Wings",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3",
+      "description": "Fly by drifting with air currents given sufficient wind (GM decides speed and wind). Grants 1D in the Agility: Flying skill, advanceable as normal. May not be taken more than once.",
+      "page": 217
+    },
+    {
+      "name": "Immortality",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "7",
+      "description": "The character is immortal, aging at a decreased pace. If mortally wounded they do not die, go unconscious, or bleed out, but will not heal without mystical, medical, technological, or Accelerated Healing aid. When mortally wounded only minimal actions are possible and no Agility rolls (except initiative). One rare set of circumstances (beheading, a particular element, etc.) can kill them forever. May not be taken more than once.",
+      "page": 217
+    },
+    {
+      "name": "Infravision/Ultravision",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "1 per rank",
+      "description": "See in the dark using infravision (sees heat changes) or ultravision (makes the most of available light). Each provides +2 per rank to sight-based Perception rolls in dim/dark conditions. Extreme heat or bright light (including daylight) prevents it from working.",
+      "options": ["Infravision", "Ultravision"],
+      "page": 218
+    },
+    {
+      "name": "Intangibility",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "5 per rank",
+      "description": "Reduce physical density to near zero for one minute per rank; damage resistance vs physical and energy attacks is +3D per rank, but movement is halved. Can pass through solid objects (not super-science protections, energy, or electrified barriers). Cannot carry objects (including clothing) or make physical attacks; becoming intangible/solid takes a full round, and one minute solid is required before trying again.",
+      "page": 218
+    },
+    {
+      "name": "Invisibility",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3 per rank",
+      "description": "Become transparent, adding +1 per rank to dodge, sneak, and hide totals and +1 per rank to default search, investigation, and attack difficulties against the character (while not actively engaging). No one may 'spot' them without sufficient provocation. Covers only basic clothes — not gear carried or items picked up; the character can't hide things behind their back.",
+      "page": 218
+    },
+    {
+      "name": "Life Drain",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "5",
+      "description": "Drain attribute dice — either physical (Agility, Brawn) or mental (Knowledge, Perception). Attack with the relevant skill; for every four points over the target's defense, drain one pip per rank off each relevant attribute. If an attribute reaches zero the target goes into a coma. Every three attribute pips drained grants +1D to an attribute in the chosen category; drained attributes recover 1D per three hours. No ranks, but may have multiple versions.",
+      "options": ["Physical (Agility, Brawn)", "Mental (Knowledge, Perception)"],
+      "page": 219
+    },
+    {
+      "name": "Mental Defense",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3 per rank",
+      "description": "Mental wards or indomitable will adding +1D per rank to die codes to resist mental manipulation, possession, mind control, and similar. Does not apply to social situations or standard interactions.",
+      "page": 220
+    },
+    {
+      "name": "Mental Suggestion",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3 per rank",
+      "description": "Suggest or influence others, gaining +3D to die codes when attempting social manipulation (deception, persuasion, intimidation, etc.).",
+      "page": 220
+    },
+    {
+      "name": "Multiple Abilities",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "1 per rank",
+      "description": "Multiple minor abilities improving a few different tasks. Bonuses add to the skill or attribute total when rolled (not to the die code), and should be fairly limited to specific uses (like specializations). Max total bonus per rank is +4.",
+      "page": 220
+    },
+    {
+      "name": "Natural Armor",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3 per rank",
+      "description": "Plates, toughened skin, scales, or similar adding +1D per rank to damage resistance rolls vs physical (not mental) attacks, contact poisons, corrosives, and similar.",
+      "page": 220
+    },
+    {
+      "name": "Natural Hand-to-Hand Weapon",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "2",
+      "description": "A natural melee weapon — claws, pincers, bone spikes, stinger — adding +1D per rank to Brawn Damage when used. Uses melee to attack unless the weapon can be detached (or exists separately as a super-scientific weapon).",
+      "page": 220
+    },
+    {
+      "name": "Natural Ranged Weapon",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3",
+      "description": "A natural ranged weapon built into the character (quills, spines, acid spray, fire breath). Long range equals 20 times ranks x Brawn, lift, or firearms in meters. Damage for physically enhanced projections is Brawn Damage plus 1D per rank; must have a visible effect and may do no mental damage.",
+      "page": 221
+    },
+    {
+      "name": "Omnivorous",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "2",
+      "description": "Gain nourishment from any organic substance (though not immune to poisons) and chew through nearly any organic substance with teeth or jaws. May not be taken more than once.",
+      "page": 221
+    },
+    {
+      "name": "Paralyzing Touch",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "4",
+      "description": "Freeze a target with a touch. On a brawling attack, instead of damage, paralyze the victim until they make a successful Knowledge or willpower roll vs the brawling total (once per round). Paralyzed targets may only take mental actions or Talents not requiring movement. Heavily armored/covered targets are harder to hit. May not be taken more than once.",
+      "page": 221
+    },
+    {
+      "name": "Super-speed",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "1 per rank",
+      "description": "Extremely fast, adding +2 meters per round per rank to base Move rate (affecting all movement). Adds +1 to Dodge and Parry defenses per 3 ranks (rounded down).",
+      "page": 221
+    },
+    {
+      "name": "Teleportation",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "3 per rank",
+      "description": "Move instantly to another visible place up to 10 meters per rank away. In combat this takes an entire round. May carry along whatever they can hold.",
+      "page": 222
+    },
+    {
+      "name": "Transmutation",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "5 per rank",
+      "description": "Alter one's substance to one specific substance (specified at purchase) while keeping form. The form grants up to 4 points (not ranks) in related Talents per rank (Natural Armor, Hardiness, Environmental Resistance common). Shifting takes an action; the form lasts rounds equal to ranks. May be taken multiple times for different forms.",
+      "page": 222
+    },
+    {
+      "name": "Water Breathing",
+      "kind": "superpower",
+      "genre": "superhero",
+      "cost": "2 per rank",
+      "description": "Breathe water and never drown underwater, gaining +1D per rank to all swim rolls (no need to worry about drowning).",
+      "page": 222
+    }
+  ],
+  "equipment": [
+    {
+      "name": "Utility Belt",
+      "category": "gear",
+      "genre": "superhero",
+      "era": "Modern",
+      "description": "Example super-science gear built with the Multiple Abilities superpower plus the Super-science enhancement. A sample 6D build (with Restricted 1) grants +1 to Athletics (grapple gun), Investigation (forensic kit), Stealth (smoke bombs), Perception (binoculars), and Rank 1 Natural Ranged Weapons (throwing stars). Can be loaned or grabbed away (-1D to use by another).",
+      "page": 228
+    }
+  ],
+  "templates": [
+    {
+      "name": "Blaster",
+      "genre": "superhero",
+      "archetype": "Ranged Striker",
+      "attributes": { "Agility": 15, "Brawn": 6, "Charm": 9, "Knowledge": 6, "Perception": 9 },
+      "skills": [
+        { "name": "Acrobatics" },
+        { "name": "Flying" },
+        { "name": "Persuasion" },
+        { "name": "Shooting" }
+      ],
+      "powers": ["Energy Ranged Weapon (3)", "Infravision (1 rank)", "Teleportation (2 ranks)"],
+      "heroPoints": 3,
+      "description": "An agile ranged combatant who blasts foes with energy and blinks about the battlefield. Dodge 15, Parry 25. Skills listed are recommended.",
+      "page": 238
+    },
+    {
+      "name": "Bruiser",
+      "genre": "superhero",
+      "archetype": "Durable Melee Fighter",
+      "attributes": { "Agility": 12, "Brawn": 12, "Charm": 6, "Knowledge": 6, "Perception": 9 },
+      "skills": [
+        { "name": "Medicine" },
+        { "name": "Melee" },
+        { "name": "Stamina" },
+        { "name": "Stealth" }
+      ],
+      "powers": ["Accelerated Healing (4)", "Armor Piercing Attack (1 rank)", "Attack Resistance - Energy Attacks (1)", "Extra Sense - Undersea Sonar (2 ranks)"],
+      "heroPoints": 3,
+      "description": "A tough, self-healing brawler resistant to energy attacks and sensitive to undersea sonar. Dodge 15, Parry 20. Skills listed are recommended.",
+      "page": 238
+    },
+    {
+      "name": "Paragon",
+      "genre": "superhero",
+      "archetype": "All-Rounder",
+      "attributes": { "Agility": 12, "Brawn": 12, "Charm": 9, "Knowledge": 6, "Perception": 6 },
+      "skills": [
+        { "name": "Acrobatics" },
+        { "name": "Flying" },
+        { "name": "Melee" },
+        { "name": "Persuasion" }
+      ],
+      "powers": ["Flight (1 rank)", "Natural Armor (2 ranks)", "Natural Hand-to-Hand Weapon (2)", "Super-Speed (1 rank)"],
+      "heroPoints": 3,
+      "description": "A classic flying paragon with armored skin, natural weapons, and enhanced speed. Dodge 10, Parry 20. Skills listed are recommended.",
+      "page": 239
+    },
+    {
+      "name": "Tank",
+      "genre": "superhero",
+      "archetype": "Bruiser Powerhouse",
+      "attributes": { "Agility": 9, "Brawn": 15, "Charm": 6, "Knowledge": 6, "Perception": 9 },
+      "skills": [
+        { "name": "Melee" },
+        { "name": "Intimidation" },
+        { "name": "Stamina" },
+        { "name": "Willpower" }
+      ],
+      "powers": ["Attack Resistance - Energy Attacks (2)", "Extra Body Part - Trunk (0)", "Natural Armor (3 ranks)", "Natural Hand-to-Hand Weapon - Tusks (2)"],
+      "heroPoints": 3,
+      "description": "A massive, armored powerhouse with a prehensile trunk and goring tusks, resistant to energy attacks. Dodge 15, Parry 15. Skills listed are recommended.",
+      "page": 239
+    }
+  ],
+  "perks": [
+    {
+      "name": "Fast",
+      "kind": "talent",
+      "genre": "core",
+      "description": "This character ignores the first multi-action die penalty they suffer.",
+      "page": 252
+    },
+    {
+      "name": "Stubborn",
+      "kind": "talent",
+      "genre": "core",
+      "description": "This character ignores die penalties from being Staggered. Additionally, it must be staggered a number of times equal to its Brawn die code before it is stunned.",
+      "page": 252
+    },
+    {
+      "name": "Sturdy",
+      "kind": "talent",
+      "genre": "core",
+      "description": "This character cannot be knocked prone.",
+      "page": 252
+    },
+    {
+      "name": "Indomitable",
+      "kind": "talent",
+      "genre": "core",
+      "description": "This character ignores die penalties from being Staggered and cannot be stunned.",
+      "page": 252
+    },
+    {
+      "name": "Weak",
+      "kind": "talent",
+      "genre": "core",
+      "description": "This character is defeated when stunned or staggered.",
+      "page": 252
+    }
+  ],
+  "modules": [
+    {
+      "name": "\"Superheroic\" Hero Points",
+      "category": "Superhero Module",
+      "genre": "superhero",
+      "summary": "Superheroes begin with 3 hero points. Spending one lets a character take an extra action with no multi-action penalty, count a used Talent or Superpower Talent one Rank higher, give a hero point to an ally with fewer than three, or ignore a capped die code. Works with any Wild Die variant and with Troubles and Assets (including secret identities), and can trigger 'kicker' effects on superpowers.",
+      "page": 207
+    },
+    {
+      "name": "Capping Die Codes",
+      "category": "Superhero Module",
+      "genre": "superhero",
+      "summary": "An optional Total Die Code Cap limits the maximum dice a player can roll on a single die code, regardless of the bonus source. Suggested caps: Young Heroes 10D, Street Level 12D, Standard Hero 15D, National Heroic Team 18D, Worldwide Heroic Team 24D, Galactic & Cosmic Heroes 30D. Caps do not apply to enemies, monsters, or GM-created villains.",
+      "page": 208
+    },
+    {
+      "name": "Secret Identities",
+      "category": "Superhero Module",
+      "genre": "superhero",
+      "summary": "A secret identity begins with 1 Hero Point (bankable up to 3) spendable on anything justified by that identity, restored by Reinforcing the identity through roleplay. Heroic-but-revealing actions raise Suspicion; each gain triggers a d6 roll — rolling at or under current Suspicion Exposes the character. An Exposed hero can Go Public (losing secret-identity benefits, raising Reputation) or Clear Their Name (an adventure resetting Suspicion to 0). Suspicion can also be lowered by Allaying it (Wild Die rolls of 6) after clean adventures.",
+      "page": 208
+    },
+    {
+      "name": "Superpowers",
+      "category": "Superhero Module",
+      "genre": "superhero",
+      "summary": "Superpowers are talents with more extreme application, purchased with dice set aside at creation (Young Heroes 8D up to Galactic & Cosmic Heroes 24D). Each has a base point cost; ranks add more. Enhancements customize a power (Additional Effect, Bestow, Extended Range, Multiple Targets, Side Effect on limitation side, Singularity, Super-science) and their cost is paid at each rank. Limitations reduce total cost (never below 1): Ability Loss, Allergy, Burnout, Debt, Flaw, Minor Stigma, Others Only, Price, Restricted, Side Effect, Singularity. Powers can be reskinned narratively.",
+      "page": 212
+    },
+    {
+      "name": "Gadgets & Gear",
+      "category": "Superhero Module",
+      "genre": "superhero",
+      "summary": "Two equipment types: gadgets (small items granting a tactical option or a single +1D to a use case of a skill) and gear (items that emulate superpower-level effects). Gear is most commonly built with the Super-science enhancement (2), which contains a Talent in a device; multiple superpowers can be combined into one piece by summing costs. Items can be lent or grabbed (-1D to use by another) and malfunction on a complication.",
+      "page": 227
+    },
+    {
+      "name": "Hidden Bases & Hideouts",
+      "category": "Superhero Module",
+      "genre": "superhero",
+      "summary": "Hideouts are purchased like a Talent or granted by the GM and have three elements: Location (Urban, Country, or Wild — narrative only), Description (narrative only), and Features (the mechanical benefits). Players pick four features from a list including Armory, Attendant, Cells, Dock, False Front, Garage, Gymnasium, Infirmary, Entourage, Laboratory, Hospital, Library, Sanctuary, Safehouse, Stable, Transportation Network, Vault, Wardrobe, and Workshop. Groups can pool for larger hideouts; hideouts can be relocated (about a month per feature).",
+      "page": 229
+    },
+    {
+      "name": "Nemesis, Companions, & Sidekicks",
+      "category": "Superhero Module",
+      "genre": "superhero",
+      "summary": "A Nemesis is a unique recurring Rank 3 foe built with normal creation rules plus bonus dice, gaining 1d6+3 Nemesis Points per encounter and matching the hero's experience; if 'killed' with points left it escapes, and defeating it earns the hero a hero point. Companions (Contacts/Patrons and emotional touchstones) can restore a hero point through grounding scenes. Sidekicks are new characters with halved starting dice, the Age flaw, and require the owner to take Debt or Hindrance.",
+      "page": 235
+    }
+  ]
+}

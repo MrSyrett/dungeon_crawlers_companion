@@ -1,0 +1,231 @@
+{
+  "creatures": [
+    {
+      "name": "Bear, Black",
+      "genre": "core",
+      "kind": "Animal",
+      "attributes": { "Agility": 6, "Brawn": 12, "Knowledge": 6, "Perception": 3 },
+      "skills": ["Athletics: +1D"],
+      "special": ["Dodge 10", "Parry 10", "Damage: Talons (Brawn+2D)"],
+      "description": "A black bear is more likely to run from people or animals who invade their space, but they will protect their young. They are excellent climbers and can also run extremely fast.",
+      "page": 132
+    },
+    {
+      "name": "Bear, Brown",
+      "genre": "core",
+      "kind": "Animal",
+      "attributes": { "Agility": 6, "Brawn": 15, "Knowledge": 3, "Perception": 3 },
+      "special": ["Dodge 10", "Parry 10", "Damage: Talons (Brawn+3D)"],
+      "description": "Grizzlies are more aggressive than their black bear cousins, but only when threatened. They are quite fast but are not accomplished climbers, and have little fear of humans, often roaming into towns.",
+      "page": 133
+    },
+    {
+      "name": "Bird of Prey",
+      "genre": "core",
+      "kind": "Animal",
+      "attributes": { "Agility": 18, "Brawn": 6, "Knowledge": 3, "Perception": 15 },
+      "special": ["Dodge 25", "Parry 30", "Damage: Talons (Brawn+1D)", "Special: Naturally birds can fly! Wings allow the bird to fly or glide for several hundred miles or as long as there are thermals to keep them aloft."],
+      "description": "Representing hawks, falcons, and eagles, a bird of prey is a powerful companion for those who can tame it and a relentless, harrying foe for those who disturb it.",
+      "page": 133
+    },
+    {
+      "name": "Mountain Lion",
+      "genre": "core",
+      "kind": "Animal",
+      "attributes": { "Agility": 12, "Brawn": 12, "Knowledge": 6, "Perception": 9 },
+      "special": ["Dodge 15", "Parry 15", "Damage: Claws or Bite (Brawn+1D)"],
+      "description": "Solitary by nature, mountain lions avoid humans under most circumstances but can be tempted by loose livestock or pets. These powerful apex predators are extremely dangerous when cornered or protecting their young.",
+      "page": 134
+    },
+    {
+      "name": "Shark",
+      "genre": "core",
+      "kind": "Animal",
+      "attributes": { "Agility": 9, "Brawn": 15, "Knowledge": 3, "Perception": 6 },
+      "special": ["Dodge 10", "Parry 15", "Damage: Bite (Brawn+3D)", "Special: Swimming! Any movement this creature does is at a swim speed, rather than walking (treat its movement rate as 0 on land)."],
+      "description": "Popular culture has these beasts as terrifying sea predators and well... they are.",
+      "page": 134
+    },
+    {
+      "name": "Snake, Constrictor",
+      "genre": "core",
+      "kind": "Animal",
+      "attributes": { "Agility": 9, "Brawn": 12, "Knowledge": 3, "Perception": 3 },
+      "special": ["Dodge 5", "Parry 15", "Damage: Constrict (Brawn+1D)"],
+      "description": "Growing quite large, a constrictor snake can grapple and drown, crush, or suffocate a foe it can get its coils around.",
+      "page": 135
+    },
+    {
+      "name": "Snake, Venomous",
+      "genre": "core",
+      "kind": "Animal",
+      "attributes": { "Agility": 9, "Brawn": 3, "Knowledge": 3, "Perception": 3 },
+      "special": ["Dodge 5", "Parry 15", "Damage: Bite (Brawn+1D). If the target of a bite from a venomous snake takes damage from the attack (stunned, wounded, or incapacitated), they suffer a 6D damage roll at the start of their next round."],
+      "description": "Widespread throughout the world, venomous snakes have the potential to be deadly to even a large person (non-venomous snakes either flee or are constrictors).",
+      "page": 135
+    },
+    {
+      "name": "Wolf",
+      "genre": "core",
+      "kind": "Animal",
+      "attributes": { "Agility": 6, "Brawn": 9, "Knowledge": 6, "Perception": 9 },
+      "special": ["Dodge 10", "Parry 10", "Damage: Bite (Brawn+1D)", "Special: Wolves are rarely alone. If you can see one there's usually a half-dozen more nearby."],
+      "description": "The ultimate pack hunter, wolves are smart, and during lean times, very dangerous in packs.",
+      "page": 135
+    },
+    {
+      "name": "Assassin",
+      "genre": "core",
+      "kind": "NPC",
+      "attributes": { "Agility": 12, "Brawn": 9, "Knowledge": 3, "Perception": 9 },
+      "skills": ["Shooting 2D", "Melee 1D", "Throwing 1D", "Stealth 2D", "Survival 1D"],
+      "special": ["Dodge 15", "Parry 20"],
+      "description": "A generic character; assign weapons and equipment based on the setting.",
+      "page": 136
+    },
+    {
+      "name": "Corrupt Politician",
+      "genre": "core",
+      "kind": "NPC",
+      "attributes": { "Agility": 3, "Brawn": 3, "Knowledge": 12, "Perception": 12 },
+      "skills": ["Sleight of Hand 1D", "Intimidation 1D", "Languages 1D", "Medicine 1D", "Scholar 2D", "Investigation 1D", "Stealth 1D", "Survival 1D"],
+      "special": ["Dodge 10", "Parry 10"],
+      "description": "A generic character; assign weapons and equipment based on the setting.",
+      "page": 136
+    },
+    {
+      "name": "Detective",
+      "genre": "core",
+      "kind": "NPC",
+      "attributes": { "Agility": 9, "Brawn": 12, "Knowledge": 6, "Perception": 6 },
+      "skills": ["Acrobatics 1D", "Shooting 1D", "Athletics 1D", "Stamina 1D", "Sciences 1D", "Investigation 2D"],
+      "special": ["Dodge 10", "Parry 15"],
+      "description": "A generic character; assign weapons and equipment based on the setting.",
+      "page": 136
+    },
+    {
+      "name": "Medic",
+      "genre": "core",
+      "kind": "NPC",
+      "attributes": { "Agility": 6, "Brawn": 6, "Knowledge": 12, "Perception": 6 },
+      "skills": ["Intimidation 1D", "Medicine 3D", "Survival 1D"],
+      "special": ["Dodge 10", "Parry 10"],
+      "description": "A generic character; assign weapons and equipment based on the setting.",
+      "page": 136
+    },
+    {
+      "name": "Pickpocket",
+      "genre": "core",
+      "kind": "NPC",
+      "attributes": { "Agility": 15, "Brawn": 6, "Knowledge": 3, "Perception": 9 },
+      "skills": ["Acrobatics 1D", "Shooting", "Melee 1D", "Sleight of Hand 2D", "Stealth 2D", "Survival"],
+      "special": ["Dodge 15", "Parry 25"],
+      "description": "A generic character; assign weapons and equipment based on the setting.",
+      "page": 137
+    },
+    {
+      "name": "Soldier",
+      "genre": "core",
+      "kind": "NPC",
+      "attributes": { "Agility": 9, "Brawn": 12, "Knowledge": 3, "Perception": 6 },
+      "skills": ["Melee 1D", "Athletics 2D", "Intimidation 2D", "Survival 1D"],
+      "special": ["Dodge 10", "Parry 15"],
+      "description": "A generic character; assign weapons and equipment based on the setting.",
+      "page": 137
+    },
+    {
+      "name": "Street Soldier",
+      "genre": "core",
+      "kind": "NPC",
+      "attributes": { "Agility": 12, "Brawn": 3, "Knowledge": 6, "Perception": 6 },
+      "skills": ["Shooting 1D", "Melee 2D", "Intimidation 1D", "Stamina 1D", "Languages 1D", "Driving (or Riding/Piloting) 1D", "Survival 1D"],
+      "special": ["Dodge 10", "Parry 20"],
+      "description": "A generic character; assign weapons and equipment based on the setting.",
+      "page": 137
+    },
+    {
+      "name": "Street Thug",
+      "genre": "core",
+      "kind": "NPC",
+      "attributes": { "Agility": 9, "Brawn": 12, "Knowledge": 3, "Perception": 9 },
+      "skills": ["Acrobatics 1D", "Sleight of Hand 1D", "Athletics 1D", "Intimidation 2D", "Survival 1D"],
+      "special": ["Dodge 15", "Parry 15"],
+      "description": "A generic character; assign weapons and equipment based on the setting.",
+      "page": 137
+    }
+  ],
+  "templates": [
+    {
+      "name": "Athlete",
+      "genre": "core",
+      "attributes": { "Agility": 15, "Brawn": 12, "Knowledge": 3, "Perception": 6 },
+      "heroPoints": 1,
+      "description": "Defenses: Dodge 10, Parry 25. Recommended skills: Acrobatics, Athletics, Stamina. Add 7D of skills to complete the character.",
+      "page": 138
+    },
+    {
+      "name": "Brawler",
+      "genre": "core",
+      "attributes": { "Agility": 9, "Brawn": 15, "Knowledge": 3, "Perception": 9 },
+      "heroPoints": 1,
+      "description": "Defenses: Dodge 15, Parry 15. Recommended skills: Athletics, Melee, Stamina. Add 7D of skills to complete the character.",
+      "page": 138
+    },
+    {
+      "name": "Doctor",
+      "genre": "core",
+      "attributes": { "Agility": 9, "Brawn": 9, "Knowledge": 12, "Perception": 6 },
+      "heroPoints": 1,
+      "description": "Defenses: Dodge 10, Parry 15. Recommended skills: Medicine, Sciences, Scholar. Add 7D of skills to complete the character.",
+      "page": 138
+    },
+    {
+      "name": "Driver",
+      "genre": "core",
+      "attributes": { "Agility": 9, "Brawn": 6, "Knowledge": 9, "Perception": 12 },
+      "heroPoints": 1,
+      "description": "Defenses: Dodge 20, Parry 15. Recommended skills: Driving, Sciences, Stamina. Add 7D of skills to complete the character.",
+      "page": 139
+    },
+    {
+      "name": "Investigator",
+      "genre": "core",
+      "attributes": { "Agility": 6, "Brawn": 6, "Knowledge": 9, "Perception": 15 },
+      "heroPoints": 1,
+      "description": "Defenses: Dodge 25, Parry 10. Recommended skills: Investigation, Languages, Stealth. Add 7D of skills to complete the character.",
+      "page": 139
+    },
+    {
+      "name": "Jack of all Trades",
+      "genre": "core",
+      "attributes": { "Agility": 9, "Brawn": 9, "Knowledge": 9, "Perception": 9 },
+      "heroPoints": 1,
+      "description": "Defenses: Dodge 15, Parry 15. Recommended skills: Any and all. Add 7D of skills to complete the character.",
+      "page": 139
+    },
+    {
+      "name": "Scholar",
+      "genre": "core",
+      "attributes": { "Agility": 9, "Brawn": 6, "Knowledge": 15, "Perception": 6 },
+      "heroPoints": 1,
+      "description": "Defenses: Dodge 20, Parry 15. Recommended skills: Languages, Scholar, Sciences. Add 7D of skills to complete the character.",
+      "page": 139
+    },
+    {
+      "name": "Thief",
+      "genre": "core",
+      "attributes": { "Agility": 12, "Brawn": 6, "Knowledge": 6, "Perception": 12 },
+      "heroPoints": 1,
+      "description": "Defenses: Dodge 20, Parry 20. Recommended skills: Acrobatics, Sleight of Hand, Stealth. Add 7D of skills to complete the character.",
+      "page": 139
+    },
+    {
+      "name": "Veteran",
+      "genre": "core",
+      "attributes": { "Agility": 12, "Brawn": 12, "Knowledge": 6, "Perception": 6 },
+      "heroPoints": 1,
+      "description": "Defenses: Dodge 20, Parry 10. Recommended skills: Athletics, Melee, Shooting. Add 7D of skills to complete the character.",
+      "page": 139
+    }
+  ]
+}

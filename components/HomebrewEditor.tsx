@@ -67,6 +67,8 @@ const ACE_STAT_OPTS: readonly Opt[] = [["Smarts", "Smarts"], ["Moves", "Moves"],
 const NIM_SCHOOL_OPTS: readonly Opt[] = [["Fire", "Fire"], ["Ice", "Ice"], ["Lightning", "Lightning"], ["Wind", "Wind"], ["Radiant", "Radiant"], ["Necrotic", "Necrotic"], ["Utility", "Utility"]];
 const SW_ATTRS = ["Dexterity", "Knowledge", "Mechanical", "Perception", "Strength", "Technical"] as const;
 const KOB_STAT_KEYS = ["Brains", "Brawn", "Fight", "Flight", "Charm", "Grit"] as const;
+const D62E_GENRE_OPTS: readonly Opt[] = [["core", "Core"], ["fantasy", "Fantasy"], ["scifi", "Sci-Fi"], ["superhero", "Superhero"]];
+const D62E_ATTRS = ["Agility", "Brawn", "Knowledge", "Perception"] as const;
 
 const sv = (d: Data, k: string): string => { const v = d[k]; return typeof v === "string" ? v : v == null ? "" : String(v); };
 // pips → die code: 10 → "3D+1", 12 → "4D", 0/blank → "".
@@ -303,6 +305,69 @@ const SCHEMAS: Record<string, Schema> = {
     ],
     blank: () => ({ book: "bikes" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "book"),
   },
+  "d62e-skill": {
+    title: "My Homebrew Skills", noun: "Skill",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "attribute", label: "Attribute", type: "text", placeholder: "Agility, Brawn, Knowledge, Perception, Charm…" },
+      { key: "genre", label: "Genre", type: "select", options: D62E_GENRE_OPTS },
+      { key: "time", label: "Time to use", type: "text", placeholder: "an action, one round…" },
+      { key: "description", label: "Description", type: "textarea", full: true },
+      { key: "specializations", label: "Sample specializations", type: "stringList", full: true, addLabel: "+ Specialization" },
+    ],
+    blank: () => ({ attribute: "Agility", genre: "core", specializations: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "attribute")}${sv(d, "genre") ? " · " + sv(d, "genre") : ""}`,
+  },
+  "d62e-gear": {
+    title: "My Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: [["weapon", "Weapon"], ["armor", "Armor"], ["gear", "Gear"]] },
+      { key: "genre", label: "Genre", type: "select", options: D62E_GENRE_OPTS },
+      { key: "era", label: "Era", type: "text", placeholder: "Medieval, Modern, Futuristic…" },
+      { key: "damage", label: "Damage (weapons)", type: "text", placeholder: "Brawn+2D, 5D" },
+      { key: "protection", label: "Protection (armor)", type: "text", placeholder: "+2D physical / +1D energy" },
+      { key: "range", label: "Range", type: "text", placeholder: "melee (reach 1), 3-10/30/120" },
+      { key: "skill", label: "Skill", type: "text", placeholder: "Melee, Shooting…" },
+      { key: "cost", label: "Cost", type: "text" },
+      { key: "description", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ category: "gear", genre: "core" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "category")} · ${sv(d, "genre")}`,
+  },
+  "d62e-power": {
+    title: "My Homebrew Powers", noun: "Power",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "kind", label: "Kind", type: "select", options: [["magic", "Magic"], ["psionic", "Psionic"], ["superpower", "Superpower"]] },
+      { key: "genre", label: "Genre", type: "select", options: D62E_GENRE_OPTS },
+      { key: "skill", label: "Skill", type: "text", placeholder: "Spell School: Creation, Telepathy…" },
+      { key: "difficulty", label: "Difficulty", type: "text", placeholder: "5, 10, Opposed…" },
+      { key: "cost", label: "Cost / Power", type: "text", placeholder: "Power 2" },
+      { key: "description", label: "Description", type: "textarea", full: true },
+      { key: "options", label: "Options / parameters", type: "stringList", full: true, addLabel: "+ Option", placeholder: "Duration: Ten minutes" },
+    ],
+    blank: () => ({ kind: "magic", genre: "fantasy", options: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "kind")} · ${sv(d, "genre")}`,
+  },
+  "d62e-creature": {
+    title: "My Homebrew Creatures", noun: "Creature",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "genre", label: "Genre", type: "select", options: D62E_GENRE_OPTS },
+      { key: "kind", label: "Kind", type: "text", placeholder: "Animal, NPC, Monster…" },
+      ...D62E_ATTRS.map((a) => ({ key: a, label: a, type: "text" as const, placeholder: "3D+2" })),
+      { key: "move", label: "Move", type: "text", placeholder: "10, Flight…" },
+      { key: "skills", label: "Skills", type: "stringList", full: true, addLabel: "+ Skill", placeholder: "Brawling 4D" },
+      { key: "special", label: "Special", type: "stringList", full: true, addLabel: "+ Special", placeholder: "Dodge 15, Parry 20" },
+      { key: "talents", label: "Talents", type: "stringList", full: true, addLabel: "+ Talent" },
+      { key: "powers", label: "Powers", type: "stringList", full: true, addLabel: "+ Power" },
+      { key: "description", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ genre: "core", kind: "Monster", skills: [], special: [], talents: [], powers: [] }),
+    toForm: (d) => { const a = (d.attributes ?? {}) as Record<string, unknown>; const out: Data = { ...d }; for (const k of D62E_ATTRS) out[k] = codeFromPips(a[k]); return out; },
+    summary: (d) => `${sv(d, "kind") || "Creature"} · ${sv(d, "genre")}`,
+  },
 };
 
 // Accent CSS var by system prefix (globals.css: --nimble/--sw/--ace/--kob).
@@ -311,6 +376,7 @@ function accentFor(kind: string): string {
   if (kind.startsWith("sw-")) return "--sw";
   if (kind.startsWith("ace-")) return "--ace";
   if (kind.startsWith("kob-")) return "--kob";
+  if (kind.startsWith("d62e-")) return "--d62e";
   return "--dnd";
 }
 

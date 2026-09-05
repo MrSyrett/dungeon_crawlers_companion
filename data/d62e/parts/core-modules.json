@@ -1,0 +1,252 @@
+{
+  "modules": [
+    {
+      "name": "Additional Attributes",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Adds optional extra attributes that can be slotted into any game, each bringing its own skill list. Charm governs social interactions and suits any game; Mechanical and Technical are rooted in the science fiction genre, while Mysticism and Magic are rooted in fantasy, though any can be added however you like. Adding an attribute broadens what characters can do and grants +3D of attribute dice at creation.",
+      "page": 62
+    },
+    {
+      "name": "Alternate Initiative",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Replaces standard initiative with one of three optional systems chosen as the campaign default (use only one). Simple Initiative lets whichever group takes the first significant action go first, and groups keep that order until the scene ends. Basic Initiative has everyone roll Perception, declaring actions lowest-to-highest and resolving highest-to-lowest, with penalties for extra action segments. Narrative Initiative has the highest Perception roller declare and then choose who acts next, resolving segments last-to-first.",
+      "page": 69
+    },
+    {
+      "name": "Alternate Wild Die",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Offers three additional Wild Die variants (Basic, Classic, Simple) beyond the core rule; only use one. In each, one rolled die is the wild die: rolling a 6 explodes it (add the result and reroll), while a 1 triggers a mishap. In Basic and Classic a 1 removes the wild die and the single highest other die from the total, whereas Simple only explodes on 6 with no penalty for a 1. They trade rules complexity for swingier results.",
+      "page": 71
+    },
+    {
+      "name": "Chases",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Light, freeform pursuit rules built around a Distance number that normally starts at 4. Each participant (a group elects one roller) makes opposed rolls; the winner shifts Distance by 1, or by 2 on an Exceptional Success. If Distance reaches 0 the pursuer has caught the quarry; if it reaches 8 the fleeing party has evaded and vanishes. The skills rolled vary by how each side approaches the chase (Acrobatics across rooftops, Stamina in a running footrace).",
+      "page": 73
+    },
+    {
+      "name": "Hero Points",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Adds a Hero Point economy; use only one Hero Point module. 'Heroic' starts each hero with 1 point per session, gained from Complications, Troubles, and Assets, spent to double a die code, reroll a failed roll, or avoid being Stunned. 'Basic' starts heroes with 3-5 points that each add a single non-wild die to a roll on a 1-for-1 basis. 'Classic' treats Hero Points as experience points that carry between sessions and add wild dice up to the baseline attribute die used for the roll.",
+      "page": 75
+    },
+    {
+      "name": "Environments",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Rules for dangerous environments: Cold, Heat, Drowning, and Gas/Poisonous Air. Every four hours in a hazardous environment (or each round while drowning) a character makes a Stamina test against the threat's difficulty, typically 15/20/30 for moderate/severe/deadly, with failure inflicting penalties, incapacitation, or mortal wounds. Appropriate gear (weather wear, gas mask, enviro-suit) negates the tests, and about a day in a safe environment removes accrued penalties.",
+      "page": 77
+    },
+    {
+      "name": "Equipment by Genre/Era",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Provides the game's equipment tables across the Medieval, Magical, Modern, and Science Fiction eras, covering gear, weapons, and armor. No costs are listed, since campaigns vary; an optional Professional Skill sidebar handles acquiring items instead. The most common benefit of gear is a die-code bonus (usually +1D or +2D) to a relevant skill, while armor adds a bonus to the Brawn roll made to resist damage.",
+      "page": 79
+    },
+    {
+      "name": "Experience Points",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Adds experience points as a benchmark for advancement, granted either as flat session rewards (Slow 2-3, Moderate 4-6, Fast 7-10 per session) or via ad hoc per-obstacle guidelines. Improving a skill costs XP equal to its current number (minimum 1), while improving an attribute costs ten times its current number. With the Pips module, points are spent to buy +1 and +2 pips before moving on to the next full die.",
+      "page": 86
+    },
+    {
+      "name": "Hyper-lethal Combat",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Options to dial combat lethality up or down, combinable as desired. You can remove the Stunned and/or Wounded damage levels to make hits deadlier, add Killing Blows (a target dies immediately if its resist roll totals less than half the damage), and apply a Maximum Armor Rule capping Brawn+Armor resist rolls at 6D. The book recommends pairing this with a Hero Point module so characters retain some survivability.",
+      "page": 89
+    },
+    {
+      "name": "Milestone Character Advancement",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Advancement by reaching milestones, set either by sessions played (every 2-4) or by campaign events (every 3 or so). Every milestone grants +1 attribute die and +3 skill dice to spend, or +9 pips instead of skill dice when using the Pips module. Alternatively a player may forgo the attribute and skill dice to gain a new Perk (at Rank 1) or to raise an existing Perk by one rank.",
+      "page": 90
+    },
+    {
+      "name": "Narrative Advancement",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Characters advance by completing arcs, personal story goals tied to a specific skill (or attribute) being improved. An arc must have one more step than the skill's current rating, and completing every step raises that skill by one die. Arcs are crafted with the gamemaster's approval and woven into the ongoing campaign, and are recommended for skills rather than attributes, flaws, or talents.",
+      "page": 92
+    },
+    {
+      "name": "No Dodge Defense",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Replaces the character-specific Dodge defense with standardized difficulties for ranged attacks; characters keep their Parry defense. Firing a ranged weapon is Difficulty 5 at point blank, 10 short, 15 medium, and 20 at long range, rising to 30 against a target dodging at long range. This mirrors the fixed ranged difficulties used by previous D6 games.",
+      "page": 94
+    },
+    {
+      "name": "Pips",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Adds classic dice modifiers called 'pips', a +1 or +2 bonus to a roll's total (this core book presents no negative pips). Pips are always locked at +1 or +2; anything that would reach +3 becomes +1D added to the die code instead. During character creation only 2D may be split into pips, and a die must be split within its own pool (attribute pips from attribute dice, skill pips from skill dice). Pips also interact with advancement, letting players buy +1 and +2 before adding a new die.",
+      "page": 94
+    },
+    {
+      "name": "Skill Specialization & Advanced Skills",
+      "category": "Core Module",
+      "genre": "core",
+      "summary": "Adds more granular skills through two related rules. Advanced Skills are locked, prerequisite-gated fields of expertise (such as Surgery under Medicine and Sciences) that cannot be attempted untrained, roll only their own dice rather than attribute+skill, and cost twice as much to acquire or advance. Specializations are narrow focuses of a normal skill that add +1D when relevant, are capped at +1D, and can never outnumber the skill's rating. The gamemaster defines which advanced skills and specializations exist.",
+      "page": 96
+    }
+  ],
+  "attributes": [
+    {
+      "name": "Charm",
+      "core": false,
+      "genre": "core",
+      "description": "Optional attribute governing social interactions; a combination of personality, appearance, self-esteem, and mastery of niceties, used to convince others and to resist intimidation or seduction. Suitable for any game. Skills: Command, Deceive, Persuasion, Willpower.",
+      "page": 62
+    },
+    {
+      "name": "Mechanical",
+      "core": false,
+      "genre": "core",
+      "description": "Optional attribute (rooted in the science fiction genre) covering the operation of non-digital, mechanical equipment, from vehicles and starships to radios and navsat gear. Skills: Communications, Navigation, Piloting, Use/Repair Mechanical.",
+      "page": 64
+    },
+    {
+      "name": "Technical",
+      "core": false,
+      "genre": "core",
+      "description": "Optional attribute (rooted in the science fiction genre) covering the manipulation, repair, modification, hacking, or destruction of equipment and gear, specifically digital gear. Skills: Computers, Demolition, Use/Repair Technical, Upgrade.",
+      "page": 65
+    },
+    {
+      "name": "Mysticism",
+      "core": false,
+      "genre": "core",
+      "description": "Optional fantasy attribute covering religious abilities, prayers, faith, cults, miracles, and divine beings; more nebulous and faith-based than arcane magic. It has only three skills: Esoterica, Ritual, Prayer.",
+      "page": 66
+    },
+    {
+      "name": "Magic",
+      "core": false,
+      "genre": "core",
+      "description": "Optional fantasy attribute governing skills related to understanding magic, crafting magic items, and identifying and casting arcane spells; explicitly tied to the Freeform Skill-Based Magic module and requiring the Skill Specialization & Advanced Skills module. Skills: Arcane World, Craft Magic Item, Identify Magic, Spell School.",
+      "page": 68
+    }
+  ],
+  "skills": [
+    { "name": "Command", "attribute": "Charm", "genre": "core", "description": "The ability to lead, to have your instructions followed and actions emulated; based on force of personality, experience, and charisma. Can rally fleeing allies and help troops stand their ground.", "time": "an action", "page": 63 },
+    { "name": "Deceive", "attribute": "Charm", "genre": "core", "description": "Helps you mislead, misdirect, and disguise yourself; used when subterfuge is the order of the day and the truth must be hidden.", "time": "an action", "page": 63 },
+    { "name": "Persuasion", "attribute": "Charm", "genre": "core", "description": "The ability to use soft social power to convince others through rhetoric, diplomacy, flattery, and empathy; used in courts, haggling, and debates.", "time": "an action", "page": 63 },
+    { "name": "Willpower", "attribute": "Charm", "genre": "core", "description": "The ability to resist and withstand social attacks (Command, Deceive, Persuasion), temptation, torture, and seduction; a defense for your esteem, thoughts, and emotions, also often used to resist magic and psionics.", "time": "reaction", "page": 63 },
+    { "name": "Communications", "attribute": "Mechanical", "genre": "core", "description": "Use of communication devices, codes, and call signs, as well as boosting signals, overcoming jamming, and using tools like radar or sensory arrays.", "time": "an action", "page": 64 },
+    { "name": "Navigation", "attribute": "Mechanical", "genre": "core", "description": "Plotting courses for starships, sailboats, or land caravans using maps, landmarks, and other tools to move through terrain.", "time": "an action", "page": 64 },
+    { "name": "Piloting", "attribute": "Mechanical", "genre": "core", "description": "Flying airplanes, spaceships, hovercraft, or any aerial conveyance (interstellar and atmospheric). Using this module changes the core Driving skill to cover ground/terrestrial transport only.", "time": "an action", "page": 64 },
+    { "name": "Use/Repair Mechanical", "attribute": "Mechanical", "genre": "core", "description": "A catch-all for using and repairing other mechanical equipment not covered by the specific Mechanical skills, such as industrial equipment and heavy machinery.", "time": "an action", "page": 65 },
+    { "name": "Computers", "attribute": "Technical", "genre": "core", "description": "Programming, hacking, disrupting, and undermining technological threats, and repairing computers.", "time": "an action", "page": 65 },
+    { "name": "Demolition", "attribute": "Technical", "genre": "core", "description": "Setting explosives or destroying items and gear; can pinpoint weak points, find access, and know how to build or set a bomb for maximum effect.", "time": "an action", "page": 65 },
+    { "name": "Use/Repair Technical", "attribute": "Technical", "genre": "core", "description": "A catch-all for using and repairing technical equipment not covered by the specific Technical skills, such as power armor, specific firearms, or drones.", "time": "an action", "page": 66 },
+    { "name": "Upgrade", "attribute": "Technical", "genre": "core", "description": "Improving technical (and often mechanical) gear so it provides a greater benefit, whether a narrative gain or a limited +1D-or-more bonus the next time the equipment is used.", "time": "an action", "page": 66 },
+    { "name": "Esoterica", "attribute": "Mysticism", "genre": "core", "description": "Scholarly knowledge of gods, their faiths and cults, and divine beings like angels and demons, as well as the practices and rituals of various faiths.", "time": "an action", "page": 67 },
+    { "name": "Ritual", "attribute": "Mysticism", "genre": "core", "description": "Leading a religious group through rite, sermon, baptism, or ordination; may cover secret words, rituals, rites, and lore that grant access to a faith's inner sanctums. Practiced by those who lead in a faith, whereas Esoterica is what anyone can learn about it.", "time": "an action", "page": 67 },
+    { "name": "Prayer", "attribute": "Mysticism", "genre": "core", "description": "Attempting to commune with divine beings, usually to seek intervention or aid from a deity; a catastrophically bad roll can remove the divinity's favor. May be allowed to emulate a spell at increased difficulty and Hero Point cost.", "time": "an action", "page": 67 },
+    { "name": "Arcane World", "attribute": "Magic", "genre": "core", "description": "Knowing, understanding, and identifying magical creatures, planes, locations, items, and lore; if the being, location, item, or lore is part of the world, this skill tells you whether you know it.", "time": "an action", "page": 68 },
+    { "name": "Craft Magic Item", "attribute": "Magic", "genre": "core", "description": "Creating magic items like potions, weapons, armors, and wands; the difficulty and effects are set by the gamemaster and can take days or weeks rather than actions.", "time": "days or weeks", "page": 68 },
+    { "name": "Identify Magic", "attribute": "Magic", "genre": "core", "description": "Understanding magic and its effects, analyzing and assessing spells as they are cast, and the knowledge needed to negate or overcome magical effects and spells.", "time": "an action", "page": 68 },
+    { "name": "Spell School", "attribute": "Magic", "genre": "core", "description": "A specialization skill; each spell school (change/alteration, movement/apportation, creation/conjuration, and knowledge/divination) is its own specialization used to cast magic under the Freeform Skill-Based Magic rules.", "specializations": ["Change (Alteration)", "Movement (Apportation)", "Creation (Conjuration)", "Knowledge (Divination)"], "time": "one or more actions", "page": 68 },
+    { "name": "Interstellar Navigation", "attribute": "Mechanical", "genre": "core", "description": "Example advanced skill of the Mechanical Skill module, suitable for the science fiction module; a locked, prerequisite-gated area of expertise.", "page": 98 },
+    { "name": "Nuclear Engineering", "attribute": "Knowledge", "genre": "core", "description": "Example advanced skill built on Knowledge in the core rules (or Technical with the Technical Skill module); a locked field requiring specific training and education.", "page": 98 },
+    { "name": "Necromancy", "attribute": "Magic", "genre": "core", "description": "Example advanced skill (or school of magic) under the Magic skill module, as well as Freeform Magic in the Fantasy genre.", "page": 98 }
+  ],
+  "equipment": [
+    { "name": "Candle or Lamp", "category": "gear", "genre": "core", "era": "Medieval", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "Reduces the difficulty of tests in the dark (by -5 or -10). If used as a weapon, deals 1D per round after the first when held against a flammable surface for more than one round.", "page": 80 },
+    { "name": "Climbing Kit", "category": "gear", "genre": "core", "era": "Medieval", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "Spikes, climbing gloves, pitons and more; grants +2D to attempts to climb difficult terrain or obstacles.", "page": 80 },
+    { "name": "Grappling Hook", "category": "gear", "genre": "core", "era": "Medieval", "damage": "Brawn+1", "protection": null, "range": null, "skill": null, "cost": null, "description": "Grants +1D to climbing attempts when attached to a rope. If used as a weapon, inflicts Brawn+1 damage.", "page": 80 },
+    { "name": "Healer's Pack", "category": "gear", "genre": "core", "era": "Medieval", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "A small kit of soothing herbs and clean cloth strips; adds +1D to medicine die codes. Can only be used six times.", "page": 80 },
+    { "name": "Lockpicking Tools", "category": "gear", "genre": "core", "era": "Medieval", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "Grants a +1D bonus to lockpicking attempts; generally lockpicking cannot be attempted without them.", "page": 80 },
+    { "name": "Rope", "category": "gear", "genre": "core", "era": "Medieval", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "A useful tool for tying enemies or prisoners, climbing walls (paired with a grappling hook), and numerous other applications.", "page": 80 },
+    { "name": "Torch", "category": "gear", "genre": "core", "era": "Medieval", "damage": "3D", "protection": null, "range": null, "skill": null, "cost": null, "description": "Reduces the difficulty of tests in the dark (by -5 or -10). If used as a weapon, deals 3D per round after the first when held against a flammable surface for more than one round.", "page": 80 },
+    { "name": "Healing Potion", "category": "gear", "genre": "core", "era": "Magical", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "The character who drinks this potion removes the Wounded or Incapacitated condition from themselves.", "page": 82 },
+    { "name": "Gem of Trueseeing", "category": "gear", "genre": "core", "era": "Magical", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "While tightly clutching this gem, the character gains the infravision talent.", "page": 82 },
+    { "name": "Blessed Water", "category": "gear", "genre": "core", "era": "Magical", "damage": "5D", "protection": null, "range": "thrown", "skill": "Throwing", "cost": null, "description": "When splashed or thrown on undead or demonic foes, the blessed water does 5D damage.", "page": 82 },
+    { "name": "Hide/Fur", "category": "armor", "genre": "core", "era": "Medieval", "damage": null, "protection": "+1", "range": null, "skill": null, "cost": null, "description": "Basic hide or fur armor; adds its bonus to the Brawn roll to resist damage.", "page": 81 },
+    { "name": "Light Leather", "category": "armor", "genre": "core", "era": "Medieval", "damage": null, "protection": "+2", "range": null, "skill": null, "cost": null, "description": "Light leather armor; adds its bonus to the Brawn roll to resist damage.", "page": 81 },
+    { "name": "Hardened Leather", "category": "armor", "genre": "core", "era": "Medieval", "damage": null, "protection": "+1D", "range": null, "skill": null, "cost": null, "description": "Hardened leather armor; adds its bonus to the Brawn roll to resist damage.", "page": 81 },
+    { "name": "Mail", "category": "armor", "genre": "core", "era": "Medieval", "damage": null, "protection": "+2D", "range": null, "skill": null, "cost": null, "description": "Chain mail; adds its bonus to the Brawn roll to resist damage.", "page": 81 },
+    { "name": "Plate", "category": "armor", "genre": "core", "era": "Medieval", "damage": null, "protection": "+3D", "range": null, "skill": null, "cost": null, "description": "Plate armor; adds its bonus to the Brawn roll to resist damage.", "page": 81 },
+    { "name": "Shield", "category": "armor", "genre": "core", "era": "Medieval", "damage": null, "protection": "+1", "range": null, "skill": null, "cost": null, "description": "A shield; may stack its bonus on top of your normal armor bonus.", "page": 81 },
+    { "name": "Heavy Shield", "category": "armor", "genre": "core", "era": "Medieval", "damage": null, "protection": "+2", "range": null, "skill": null, "cost": null, "description": "A heavy shield; may stack its bonus on top of your normal armor bonus.", "page": 81 },
+    { "name": "Blowgun", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "1D", "protection": null, "range": "S10/M40/L80 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Short 10m, medium 40m, long 80m.", "page": 81 },
+    { "name": "Crossbow, Light", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "4D", "protection": null, "range": "S10/M80/L140 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Short 10m, medium 80m, long 140m.", "page": 81 },
+    { "name": "Crossbow, Heavy", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "5D", "protection": null, "range": "S10/M80/L140 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Short 10m, medium 80m, long 140m.", "page": 81 },
+    { "name": "Longbow", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "4D", "protection": null, "range": "S10/M100/L200 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Short 10m, medium 100m, long 200m.", "page": 81 },
+    { "name": "Shortbow", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "3D", "protection": null, "range": "S10/M100/L200 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Short 10m, medium 100m, long 200m.", "page": 81 },
+    { "name": "Slingshot/Sling", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+1D", "protection": null, "range": null, "skill": "Shooting", "cost": null, "description": "Missile weapon; damage is Brawn+1D.", "page": 81 },
+    { "name": "Rocks", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn", "protection": null, "range": "S Brawn / M Brawn+2 / L Brawn+4", "skill": "Throwing", "cost": null, "description": "Thrown weapon; thrown ranges scale with the Brawn value.", "page": 81 },
+    { "name": "Darts", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+1D", "protection": null, "range": "S Brawn x2 / M Brawn x3 / L Brawn x4", "skill": "Throwing", "cost": null, "description": "Thrown weapon; thrown ranges scale with the Brawn value.", "page": 81 },
+    { "name": "Javelin", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+2D", "protection": null, "range": "S Brawn x2 / M Brawn x3 / L Brawn x4", "skill": "Throwing", "cost": null, "description": "Thrown weapon; thrown ranges scale with the Brawn value.", "page": 81 },
+    { "name": "Handaxe (Thrown)", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+3D", "protection": null, "range": "S Brawn / M Brawn+1 / L Brawn+2", "skill": "Throwing", "cost": null, "description": "Thrown weapon; thrown ranges scale with the Brawn value.", "page": 81 },
+    { "name": "Throwing Dagger", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+2D", "protection": null, "range": "S Brawn+2 / M Brawn+3 / L Brawn+5", "skill": "Throwing", "cost": null, "description": "Thrown weapon; thrown ranges scale with the Brawn value.", "page": 81 },
+    { "name": "Axe", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+3D", "protection": null, "range": "melee (reach 1)", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 82 },
+    { "name": "Bullwhip", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+2D", "protection": null, "range": "melee (reach 2)", "skill": "Melee", "cost": null, "description": "Melee weapon with extended reach.", "page": 82 },
+    { "name": "Club", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+1D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 82 },
+    { "name": "Club, Spiked", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+2D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 82 },
+    { "name": "Greatsword", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+4D", "protection": null, "range": "melee (reach 2), two-handed", "skill": "Melee", "cost": null, "description": "Two-handed melee weapon with extended reach.", "page": 82 },
+    { "name": "Handaxe", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+2D", "protection": null, "range": "melee (can be thrown)", "skill": "Melee", "cost": null, "description": "Melee weapon that can also be thrown.", "page": 82 },
+    { "name": "Halberd/Spear", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+2D", "protection": null, "range": "melee (reach 2)", "skill": "Melee", "cost": null, "description": "Melee weapon with extended reach.", "page": 82 },
+    { "name": "Knife", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+1D", "protection": null, "range": "melee (can be thrown)", "skill": "Melee", "cost": null, "description": "Melee weapon that can also be thrown.", "page": 82 },
+    { "name": "Longsword", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+3D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon; the default stand-in for arming swords, katanas, and rapiers.", "page": 82 },
+    { "name": "Quarterstaff", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+2D", "protection": null, "range": "melee (reach 2), two-handed", "skill": "Melee", "cost": null, "description": "Two-handed melee weapon with extended reach.", "page": 82 },
+    { "name": "Shortsword", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+2D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 82 },
+    { "name": "Warhammer", "category": "weapon", "genre": "core", "era": "Medieval", "damage": "Brawn+2D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 82 },
+    { "name": "Binoculars", "category": "gear", "genre": "core", "era": "Modern", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "Give a +1D bonus to sight-based rolls for viewing objects 3 or more meters away; without modification the bonus only applies in daylight.", "page": 82 },
+    { "name": "Cold Weather Gear", "category": "gear", "genre": "core", "era": "Modern", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "Boots, gloves, hat, facemask, and heavy jacket; grants +1D to Stamina die codes to avoid harm or negative effects from cold weather.", "page": 82 },
+    { "name": "Crowbar", "category": "gear", "genre": "core", "era": "Modern", "damage": "Brawn+1D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Grants +1D to prying attempts to open jammed or sealed doors; in combat, treat it as a club.", "page": 82 },
+    { "name": "Flashlight", "category": "gear", "genre": "core", "era": "Modern", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "Reduces the difficulty of tests made in the dark (by -5 or -10).", "page": 82 },
+    { "name": "Gas Mask", "category": "gear", "genre": "core", "era": "Modern", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "When worn appropriately, provides a +2D bonus to Stamina rolls against gas attacks or negates up to 1D in relevant modifiers.", "page": 83 },
+    { "name": "Shovel", "category": "gear", "genre": "core", "era": "Modern", "damage": "Brawn+1D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Adds +1D to digging attempts; in combat you can treat it like a club.", "page": 83 },
+    { "name": "Telescope", "category": "gear", "genre": "core", "era": "Modern", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "Adds +2D to sight-based rolls for viewing objects 3 or more meters away; takes two rounds to set up and focus.", "page": 83 },
+    { "name": "Tool Kits", "category": "gear", "genre": "core", "era": "Modern", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "A catch-all item that adds +1D to relevant modifications, upgrades, repairs, or construction attempts, but only if the user has the appropriate skill.", "page": 83 },
+    { "name": "Walk-talkie/Radio/Headset", "category": "gear", "genre": "core", "era": "Modern", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "A catch-all communication device; generally operates easily at 10 kilometers and lets someone keep their hands free while talking.", "page": 83 },
+    { "name": "Bulletproof Vest", "category": "armor", "genre": "core", "era": "Modern", "damage": null, "protection": "+3D", "range": null, "skill": null, "cost": null, "description": "Modern body armor; adds its bonus to the Brawn roll to resist damage.", "page": 83 },
+    { "name": "Flak Jacket", "category": "armor", "genre": "core", "era": "Modern", "damage": null, "protection": "+3D+1", "range": null, "skill": null, "cost": null, "description": "Modern body armor; adds its bonus to the Brawn roll to resist damage.", "page": 83 },
+    { "name": "Light Ballistic Armor", "category": "armor", "genre": "core", "era": "Modern", "damage": null, "protection": "+2D+1", "range": null, "skill": null, "cost": null, "description": "Modern body armor; adds its bonus to the Brawn roll to resist damage.", "page": 83 },
+    { "name": "Heavy Ballistic Armor", "category": "armor", "genre": "core", "era": "Modern", "damage": null, "protection": "+3D", "range": null, "skill": null, "cost": null, "description": "Modern body armor; adds its bonus to the Brawn roll to resist damage.", "page": 83 },
+    { "name": "Ceramic Armor", "category": "armor", "genre": "core", "era": "Modern", "damage": null, "protection": "+3D+1", "range": null, "skill": null, "cost": null, "description": "Modern body armor; adds its bonus to the Brawn roll to resist damage.", "page": 83 },
+    { "name": "Riot Shield", "category": "armor", "genre": "core", "era": "Modern", "damage": null, "protection": "+2", "range": null, "skill": null, "cost": null, "description": "A shield; may stack its bonus on top of your normal armor bonus.", "page": 83 },
+    { "name": "Revolver", "category": "weapon", "genre": "core", "era": "Modern", "damage": "5D", "protection": null, "range": "S5/M15/L40 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 6. Short 5m, medium 15m, long 40m.", "page": 83 },
+    { "name": "Semi-automatic", "category": "weapon", "genre": "core", "era": "Modern", "damage": "4D", "protection": null, "range": "S10/M25/L40 m", "skill": "Shooting", "cost": null, "description": "Semi-automatic pistol. Ammo 8. Short 10m, medium 25m, long 40m.", "page": 83 },
+    { "name": "Shotgun (12 gauge)", "category": "weapon", "genre": "core", "era": "Modern", "damage": "5D+1", "protection": null, "range": "S5/M20/L40 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 2. Short 5m, medium 20m, long 40m.", "page": 83 },
+    { "name": "Shotgun (20 gauge)", "category": "weapon", "genre": "core", "era": "Modern", "damage": "5D", "protection": null, "range": "S5/M30/L60 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 4. Short 5m, medium 30m, long 60m.", "page": 83 },
+    { "name": "Submachine Gun", "category": "weapon", "genre": "core", "era": "Modern", "damage": "4D", "protection": null, "range": "S10/M40/L80 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 8. Short 10m, medium 40m, long 80m.", "page": 83 },
+    { "name": "Machine Gun", "category": "weapon", "genre": "core", "era": "Modern", "damage": "7D", "protection": null, "range": "S100/M250/L500 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 12. Short 100m, medium 250m, long 500m.", "page": 83 },
+    { "name": "Rifle", "category": "weapon", "genre": "core", "era": "Modern", "damage": "5D", "protection": null, "range": "S25/M50/L200 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 10. Short 25m, medium 50m, long 200m.", "page": 83 },
+    { "name": "Grenade", "category": "weapon", "genre": "core", "era": "Modern", "damage": "5D", "protection": null, "range": "S Brawn+2 / M Brawn+4 / L Brawn+6", "skill": "Throwing", "cost": null, "description": "Explosive; throw range uses the Brawn value. Anyone or anything within 3 meters also suffers the damage.", "page": 84 },
+    { "name": "Dynamite", "category": "weapon", "genre": "core", "era": "Modern", "damage": "6D", "protection": null, "range": "S Brawn+1 / M Brawn+2 / L Brawn+6", "skill": "Throwing", "cost": null, "description": "Explosive; throw range uses the Brawn value. Anyone or anything within 3 meters also suffers the damage.", "page": 84 },
+    { "name": "Anti-tank Mine", "category": "weapon", "genre": "core", "era": "Modern", "damage": "10D", "protection": null, "range": "Stationary", "skill": null, "cost": null, "description": "Explosive; must be set before use (an action) and is stationary. Armor may not be used on Brawn rolls to resist its damage. Anyone within 3 meters also suffers the damage.", "page": 84 },
+    { "name": "Brass Knuckles", "category": "weapon", "genre": "core", "era": "Modern", "damage": "Brawn+1D+1", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 84 },
+    { "name": "Chainsaw", "category": "weapon", "genre": "core", "era": "Modern", "damage": "Brawn+4D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 84 },
+    { "name": "Icepick", "category": "weapon", "genre": "core", "era": "Modern", "damage": "Brawn+2", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 84 },
+    { "name": "Garden Shears", "category": "weapon", "genre": "core", "era": "Modern", "damage": "Brawn+1D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 84 },
+    { "name": "Machete", "category": "weapon", "genre": "core", "era": "Modern", "damage": "Brawn+1D+2", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Melee weapon.", "page": 84 },
+    { "name": "Enviro-suit", "category": "gear", "genre": "core", "era": "Science Fiction", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "The basic survival suit of the space explorer; a sealed bodysuit and helmet that provides clean air. Counts as a gas mask while worn and grants +2D to Stamina tests to avoid environmental conditions.", "page": 85 },
+    { "name": "Handcomp", "category": "gear", "genre": "core", "era": "Science Fiction", "damage": null, "protection": null, "range": null, "skill": null, "cost": null, "description": "A small, portable computer that interfaces with starships, AI networks, or neural ports. Functionally a tool kit (+1D bonus), but its bonus can apply to any Knowledge skill die codes (and Technical or Mechanical as the gamemaster sees fit).", "page": 85 },
+    { "name": "Nanoleather", "category": "armor", "genre": "core", "era": "Science Fiction", "damage": null, "protection": "+1D", "range": null, "skill": null, "cost": null, "description": "Science fiction armor; adds its bonus to the Brawn roll to resist damage.", "page": 85 },
+    { "name": "Nanomesh", "category": "armor", "genre": "core", "era": "Science Fiction", "damage": null, "protection": "+1D+2", "range": null, "skill": null, "cost": null, "description": "Science fiction armor; adds its bonus to the Brawn roll to resist damage.", "page": 85 },
+    { "name": "EDA (Energy Dissipation Armor)", "category": "armor", "genre": "core", "era": "Science Fiction", "damage": null, "protection": "+2D", "range": null, "skill": null, "cost": null, "description": "Science fiction armor; adds its bonus to the Brawn roll to resist damage.", "page": 85 },
+    { "name": "Synthweave Plasarmor", "category": "armor", "genre": "core", "era": "Science Fiction", "damage": null, "protection": "+3D", "range": null, "skill": null, "cost": null, "description": "Science fiction armor; adds its bonus to the Brawn roll to resist damage.", "page": 85 },
+    { "name": "Heavy Synthweave", "category": "armor", "genre": "core", "era": "Science Fiction", "damage": null, "protection": "+4D", "range": null, "skill": null, "cost": null, "description": "Science fiction armor; adds its bonus to the Brawn roll to resist damage.", "page": 85 },
+    { "name": "Blaster Pocketgun", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "3D", "protection": null, "range": "S4/M8/L12 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 6. Short 4m, medium 8m, long 12m.", "page": 85 },
+    { "name": "Blaster Pistol", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "5D", "protection": null, "range": "S50/M50/L150 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 12. Short 50m, medium 50m, long 150m.", "page": 85 },
+    { "name": "Blaster Rifle", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "7D", "protection": null, "range": "S150/M150/L300 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 30. Short 150m, medium 150m, long 300m.", "page": 85 },
+    { "name": "Energy Pistol", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "5D", "protection": null, "range": "S25/M25/L40 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 20. Short 25m, medium 25m, long 40m.", "page": 85 },
+    { "name": "Energy Rifle", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "5D", "protection": null, "range": "S150/M150/L300 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 50. Short 150m, medium 150m, long 300m.", "page": 85 },
+    { "name": "Laser Pistol", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "4D", "protection": null, "range": "S90/M90/L180 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 15. Short 90m, medium 90m, long 180m.", "page": 85 },
+    { "name": "Laser Rifle", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "5D", "protection": null, "range": "S125/M125/L250 m", "skill": "Shooting", "cost": null, "description": "Missile weapon. Ammo 20. Short 125m, medium 125m, long 250m.", "page": 85 },
+    { "name": "Energized Longblade", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "Brawn+4D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Science fiction melee weapon.", "page": 86 },
+    { "name": "Nanoknife", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "Brawn+2D", "protection": null, "range": "melee (can be thrown)", "skill": "Melee", "cost": null, "description": "Science fiction melee weapon that can also be thrown like a knife.", "page": 86 },
+    { "name": "Shockbaton", "category": "weapon", "genre": "core", "era": "Science Fiction", "damage": "Brawn+2D", "protection": null, "range": "melee", "skill": "Melee", "cost": null, "description": "Science fiction melee weapon with the Stun property; if the target would be staggered they are stunned instead, and it can never inflict a damage level greater than incapacitated.", "page": 86 }
+  ]
+}

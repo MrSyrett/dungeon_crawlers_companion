@@ -1,0 +1,333 @@
+{
+  "skills": [
+    {
+      "name": "Riding",
+      "attribute": "Agility",
+      "genre": "fantasy",
+      "description": "Using other creatures as mounts — horses, camels, dragons, or other esoteric beasts. When mounted, the Riding die code replaces Agility for calculating Dodge defense (no double-dipping).",
+      "time": "one action",
+      "page": 142
+    },
+    {
+      "name": "Lockpicking",
+      "attribute": "Agility",
+      "genre": "fantasy",
+      "description": "The dexterity and agility to precisely open a mechanical lock without the key or combination. Usually needs tools; without them raise the Difficulty by +5 or +10 based on the lock's complexity and quality.",
+      "time": "one action",
+      "page": 142
+    },
+    {
+      "name": "Swimming",
+      "attribute": "Brawn",
+      "genre": "fantasy",
+      "description": "Physical movement through water. Swim a number of meters equal to the Swimming die code in a round, tread water for rounds equal to the die code (no test), and in combat it can replace Agility for Dodge (no double-dipping).",
+      "time": "one action",
+      "page": 142
+    },
+    {
+      "name": "Barter",
+      "attribute": "Knowledge",
+      "genre": "fantasy",
+      "description": "Trade, business, exchanges, and local financial customs — exchange rates, monetary values, and how economies work. The Scholar skill of making and spending money and conducting business. Does not cover religious financial customs (Mysticism/Esoterica or Scholar).",
+      "time": "one action",
+      "page": 143
+    },
+    {
+      "name": "Languages",
+      "attribute": "Knowledge",
+      "genre": "fantasy",
+      "description": "Knowing, speaking, understanding, interpreting and expressing knowledge about languages, living and dead — fluency beyond the common trade tongue. Usually takes no action unless researching or deciphering an obscure or lost language.",
+      "specializations": ["Specific languages", "Dead or esoteric languages (as Advanced Skills)"],
+      "page": 143
+    },
+    {
+      "name": "Navigation",
+      "attribute": "Knowledge",
+      "genre": "fantasy",
+      "description": "Guiding a vessel or group on an accurate course using external reference points (stars, maps, landmarks); also covers cartography. Concerns long journeys, large groups or vessels, and broad regional travel (Survival covers short-distance local wayfinding).",
+      "time": "one action",
+      "page": 144
+    },
+    {
+      "name": "Traps",
+      "attribute": "Knowledge",
+      "genre": "fantasy",
+      "description": "Noticing, installing, altering, and disabling traps, alarms, and warning devices, and identifying trap types (gas, pit, wire-triggered). Failure can trigger a trap on the user depending on the scope of the failure.",
+      "time": "one action",
+      "page": 144
+    },
+    {
+      "name": "Gambling",
+      "attribute": "Perception",
+      "genre": "fantasy",
+      "description": "Playing, teaching, learning, understanding, and cheating at games of strategy and luck, and assessing risk and reward in dangerous situations. Successes increase winnings, failures decrease them.",
+      "time": "one action",
+      "page": 144
+    },
+    {
+      "name": "Streetwise",
+      "attribute": "Perception",
+      "genre": "fantasy",
+      "description": "Finding information, goods, and contacts in large population centers and urban areas — thieves' guilds, crime cartels, black markets, and illicit operations. Useful for investigators determining criminal motives and methods.",
+      "time": "one action",
+      "page": 145
+    }
+  ],
+  "powers": [
+    {
+      "name": "Arcane World",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Arcane World",
+      "description": "Magic skill governing knowing, understanding, and identifying magical creatures, planes, locations, items, and lore. If the being, location, item, or lore is part of the world, this skill tells you what you know about it. Takes an action to use.",
+      "page": 145
+    },
+    {
+      "name": "Craft Magic Item",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Craft Magic Item",
+      "description": "Magic skill used to create magic items — potions, weapons, armors, wands, and more. Crafting difficulty and how effects are handled is set by the gamemaster (inspired by the Crafting Spells guidelines). Takes days or weeks rather than actions.",
+      "page": 145
+    },
+    {
+      "name": "Identify Magic",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Identify Magic",
+      "description": "Magic skill governing understanding magic and its effects, analyzing and assessing spells as they're cast, and the knowledge needed to negate or overcome magical effects and spells. Takes an action to use.",
+      "page": 147
+    },
+    {
+      "name": "Spell School",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School",
+      "difficulty": "Varies (base 5, modified by effect/power/resist/duration/range/targets)",
+      "description": "The core casting skill; each spell school is its own specialization. To cast, generate a Magic skill total (Spell School + specialization) and beat the spell's Difficulty. Four specializations: Change (Alteration), Movement (Apportation), Creation (Conjuration), Knowledge (Divination). Always takes one or more actions.",
+      "options": ["Change (Alteration)", "Movement (Apportation)", "Creation (Conjuration)", "Knowledge (Divination)"],
+      "page": 147
+    },
+    {
+      "name": "Change (Alteration)",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Change (Alteration)",
+      "description": "Spell specialization governing change — taking something that exists and modifying or mutating it into something else. Can enhance, reduce, or restrict existing characteristics or skills (e.g. raising Brawn, turning a flame into a fireball, changing a person into a bat). Can only modify things already present.",
+      "page": 147
+    },
+    {
+      "name": "Movement (Apportation)",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Movement (Apportation)",
+      "description": "Spell specialization governing movement — telekinesis, calling objects, teleporting the caster, or moving a person/creature by compulsion, the spell's power, or teleportation. The object or creature already exists; the spell simply 'calls' or relocates it. Spells that restrict movement are also apportation.",
+      "page": 147
+    },
+    {
+      "name": "Creation (Conjuration)",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Creation (Conjuration)",
+      "description": "Spell specialization governing creation — producing something from nothing (e.g. gold from thin air) or imbuing an inanimate object with animate features and attributes. Conjured items and characteristics remain for the spell's duration. Used only to create something out of nothing, not to move things.",
+      "page": 148
+    },
+    {
+      "name": "Knowledge (Divination)",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Knowledge (Divination)",
+      "description": "Spell specialization governing obtaining knowledge — scrying, far-sight, and speak-with-the-dead effects. Spells that block the obtaining of Intellect/knowledge are also divination spells.",
+      "page": 148
+    },
+    {
+      "name": "Arcane Armor",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Creation (Conjuration)",
+      "difficulty": "5",
+      "description": "Summons mystical armor that protects and girds the caster. They gain +2D to Brawn to resist damage. Casting Time 1 action; Power 2; Resist Yes (Complete Nullification, Willpower); Duration Ten minutes; Range Self; Target Self.",
+      "options": ["Casting Time: 1 action", "Power: 2", "Resist: Yes (Complete Nullification, Willpower)", "Duration: Ten minutes", "Range: Self", "Target: Self"],
+      "page": 151
+    },
+    {
+      "name": "Fireball",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Change (Alteration)",
+      "difficulty": "10",
+      "description": "Turns an existing flame (candle or larger) into a large fireball that harms the nearest four targets adjacent to or within reach of it, with damage code 4D. Can only alter an existing flame, not create fire from nothing. Casting Time Two turns; Power 4; Resist Yes (Complete Nullification, Acrobatics); Duration Instant; Range Senses; Target One (the flame).",
+      "options": ["Casting Time: Two turns", "Power: 4", "Resist: Yes (Complete Nullification, Acrobatics)", "Duration: Instant", "Range: Senses", "Target: One target (the flame)"],
+      "page": 151
+    },
+    {
+      "name": "Enhance Attribute",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Change (Alteration)",
+      "difficulty": "15",
+      "description": "Grants +2D to a single attribute of the caster's choice (chosen when cast). Casting Time 1 action; Power 2; Resist No; Duration Ten minutes; Range Melee; Target One.",
+      "options": ["Casting Time: 1 action", "Power: 2", "Resist: No", "Duration: Ten minutes", "Range: Melee", "Target: One"],
+      "page": 151
+    },
+    {
+      "name": "Oracular Sight",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Knowledge (Divination)",
+      "difficulty": "10",
+      "description": "The caster asks one question of a situation via a proxy in the narrative (an artifact, an awoken corpse, etc.). The question is answered truthfully and honestly, though answers may be esoteric or require research. Casting Time One action; Power 1; Resist No; Duration Instant; Range Melee; Target Self.",
+      "options": ["Casting Time: One action", "Power: 1", "Resist: No", "Duration: Instant", "Range: Melee", "Target: Self"],
+      "page": 152
+    },
+    {
+      "name": "Raise Zombie",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Change (Alteration)",
+      "difficulty": "15",
+      "description": "Raises one corpse as a zombie (see Bestiary). The caster may issue it one simple command, which the zombie will do its best to obey. Casting Time one action; Power 1; Resist No; Duration Instant; Range Melee; Target One target (a corpse).",
+      "options": ["Casting Time: one action", "Power: 1", "Resist: No", "Duration: Instant", "Range: Melee", "Target: One target (a corpse)"],
+      "page": 152
+    },
+    {
+      "name": "Snowfall Step",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Movement (Apportation)",
+      "difficulty": "10",
+      "description": "Instantly teleports the caster to a location they can see, leaving behind a coldsnap of bitter frost and blinding whirling snow that imposes a -1D penalty on attempts to locate the caster's new location during the next turn. Casting Time one action; Power 1; Resist No; Duration Instant; Range Senses (Sight); Target Self.",
+      "options": ["Casting Time: one action", "Power: 1", "Resist: No", "Duration: Instant", "Range: Senses (Sight)", "Target: Self"],
+      "page": 152
+    },
+    {
+      "name": "Healing Touch",
+      "kind": "magic",
+      "genre": "fantasy",
+      "skill": "Spell School: Change (Alteration)",
+      "difficulty": "15",
+      "description": "The target immediately makes a Medicine roll to heal damage they've suffered, with a +2D bonus. This medicine roll does not count as an action. Casting Time one action; Power 2; Resist No; Duration Instant; Range Melee; Target One.",
+      "options": ["Casting Time: one action", "Power: 2", "Resist: No", "Duration: Instant", "Range: Melee", "Target: One"],
+      "page": 153
+    }
+  ],
+  "creatures": [
+    {
+      "name": "Dragon",
+      "genre": "fantasy",
+      "kind": "Monster",
+      "attributes": { "Agility": 12, "Brawn": 18, "Knowledge": 6, "Perception": 12 },
+      "skills": ["Agility Skills 4D", "Brawn Skills 6D"],
+      "special": [
+        "Armored Scales: +3D to resist damage applied against them, magical or otherwise.",
+        "Breath Weapon: a Perception-based attack dealing 6D damage as a stream or line, hitting any foes in a roughly 30' line before it dissipates.",
+        "Flight: wings allow flight, gliding, and soaring under their own power (count Dodge as +5)."
+      ],
+      "move": "Flight",
+      "description": "A mighty winged reptile. Dodge 20 (25 while flying), Parry 20. Damage: Claws (Brawn+1D), Tail (Brawn, Range 3), or Bite (Agility+2D).",
+      "page": 165
+    },
+    {
+      "name": "Giant",
+      "genre": "fantasy",
+      "kind": "Humanoid",
+      "attributes": { "Agility": 6, "Brawn": 27, "Knowledge": 6, "Perception": 9 },
+      "skills": ["Agility Skills 2D", "Brawn Skills 9D"],
+      "special": ["Large Size: giants are huge, so their melee attacks have Range 3."],
+      "description": "A huge humanoid. Dodge 10 (15 while flying), Parry 10. Damage: Treetrunk Club (Brawn+3D) or Unarmed (Brawn).",
+      "page": 166
+    },
+    {
+      "name": "Fairy Nuisance",
+      "genre": "fantasy",
+      "kind": "Fae",
+      "attributes": { "Agility": 12, "Brawn": 3, "Knowledge": 6, "Perception": 12 },
+      "skills": ["Agility Skills 4D", "Brawn Skills 1D"],
+      "special": [
+        "Fairy flight: wings allow flight, gliding, and flitting in forested areas; outside forests they must walk (which they hate).",
+        "Fairy magick: some are spellcasters using the Magic Points module with 10 magic points recovered as normal."
+      ],
+      "powers": ["Magic Points casting (10 magic points, when a spellcaster)"],
+      "description": "Flitting, dark, deadly bloodthirsty faefolk who steal children, attack travelers, and infest forests. Dodge 20, Parry 10. Damage: Knife (Brawn+1D).",
+      "page": 167
+    },
+    {
+      "name": "Zombie",
+      "genre": "fantasy",
+      "kind": "Undead",
+      "attributes": { "Agility": 6, "Brawn": 12, "Knowledge": 3, "Perception": 3 },
+      "skills": ["Agility Skills 2D", "Brawn Skills 4D"],
+      "special": ["Bite may sometimes infect and create new zombies (not always the case)."],
+      "description": "Shambling undead with no intelligence, often created by Necromancers. Dodge 10, Parry 10. Damage: Bite, Claw, or Grab (Brawn+1D).",
+      "page": 167
+    }
+  ],
+  "templates": [
+    {
+      "name": "Occultist",
+      "genre": "fantasy",
+      "archetype": "Scholar of Magic",
+      "attributes": { "Agility": 6, "Brawn": 6, "Charm": 12, "Knowledge": 15, "Magic": 3, "Mysticism": 12, "Perception": 9 },
+      "talents": ["Recommended Skills: Arcane World, Esoterica, Identify Magic, Scholar"],
+      "description": "One who studies magic in the world around them (much like a theoretical scientist), rather than one who puts it to use as a tool. Defenses: Dodge 15, Parry 10.",
+      "page": 168
+    },
+    {
+      "name": "Priest",
+      "genre": "fantasy",
+      "archetype": "Divine Caster",
+      "attributes": { "Agility": 6, "Brawn": 6, "Charm": 9, "Knowledge": 12, "Magic": 3, "Mysticism": 12, "Perception": 6 },
+      "talents": ["Recommended Skills: Esoterica, Prayer, Scholar, Ritual"],
+      "description": "A servant of the divine, channeling faith and ritual. Defenses: Dodge 10, Parry 10.",
+      "page": 169
+    },
+    {
+      "name": "Warrior",
+      "genre": "fantasy",
+      "archetype": "Warrior",
+      "attributes": { "Agility": 12, "Brawn": 15, "Charm": 9, "Knowledge": 9, "Magic": 3, "Mysticism": 3, "Perception": 12 },
+      "talents": ["Recommended Skills: Athletics, Melee, Shooting, Stamina, Throwing"],
+      "description": "A martial powerhouse focused on physical combat and endurance. Defenses: Dodge 20, Parry 20.",
+      "page": 170
+    },
+    {
+      "name": "Wizard",
+      "genre": "fantasy",
+      "archetype": "Arcane Caster",
+      "attributes": { "Agility": 3, "Brawn": 6, "Charm": 9, "Knowledge": 15, "Magic": 15, "Mysticism": 6, "Perception": 9 },
+      "talents": ["Recommended Skills: Arcane World, Identify Magic, Spell School (must spend 1D from assigned skill dice and select at least one specialization for Spell School)"],
+      "description": "One who puts magic to use as a tool (much like an engineer uses science). Defenses: Dodge 15, Parry 5.",
+      "page": 171
+    }
+  ],
+  "modules": [
+    {
+      "name": "Fantasy Skills",
+      "category": "Fantasy Module",
+      "genre": "fantasy",
+      "summary": "Adds new skills suited to the fantasy genre across the four core attributes (Riding, Lockpicking, Swimming, Barter, Languages, Navigation, Traps, Gambling, Streetwise). Gamemasters select a subset per attribute rather than adopting all, and may create limited-focus skills by carving a narrow skill out of a broader one.",
+      "page": 141
+    },
+    {
+      "name": "Freeform Skill-Based Magic",
+      "category": "Fantasy Module",
+      "genre": "fantasy",
+      "summary": "A freeform magic system (requires the Magic attribute). Casters roll a Magic skill total (Spell School + one of four specializations: Change/Alteration, Movement/Apportation, Creation/Conjuration, Knowledge/Divination) against a spell's Difficulty. Spells are built from base Difficulty 5 modified by effect, Spell Power (die code of effect), resistance, duration, range, and number of targets. Includes Arcane World, Craft Magic Item, and Identify Magic skills, untrained-magic penalties (+5 partial / +10 none), and an optional Strain rule.",
+      "page": 145
+    },
+    {
+      "name": "Magic Points Casting",
+      "category": "Fantasy Module",
+      "genre": "fantasy",
+      "summary": "An alternative to rolling to cast: spells built with the Freeform rules are paid for with magic points instead of a roll. Spell School is replaced by a 'Mystical Alignment' skill (not rolled). Magic points = Magic attribute + (Mystical Alignment x3). A spell costs its casting Difficulty divided by ten (rounded up) in points. Points recover equal to the Magic attribute at the start of every hour. Magic points never fail — they just work.",
+      "page": 160
+    },
+    {
+      "name": "Active & Responsive Combat",
+      "category": "Fantasy Module",
+      "genre": "fantasy",
+      "summary": "Optional melee/combat reactions. Riposte: when an enemy rolls a 1 on the Wild Die (or with Melee 4+, when any attack misses), spend a Hero Point to make an immediate Melee attack. Feint: on a 6 on the Wild Die (or with Melee 4+), lower an opponent's Dodge or Parry by your Melee for the next attack. Autofire: unload extra rounds, lowering attack to raise damage by twice that amount. Full Defense: forgo other actions to add Melee to Parry and Acrobatics to Dodge. Each reaction counts as a skill use for the round.",
+      "page": 162
+    }
+  ]
+}

@@ -108,6 +108,10 @@ function extractDocTitle(tool: string, data: object): string | null {
       const sheet = JSON.parse(blob.sw_sheet) as { name?: unknown };
       if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
     }
+    if (tool === "d62e-character" && typeof blob.d62e_sheet === "string") {
+      const sheet = JSON.parse(blob.d62e_sheet) as { name?: unknown };
+      if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
+    }
 
     // Every session-prep tool keeps its blob under its registered key.
     const sessionKey = isToolId(tool) && TOOLS[tool].kind === "session" ? TOOLS[tool].keys[0] : null;
@@ -136,8 +140,8 @@ function extractLinkedCampaignId(data: object): string | null {
       const id = sheet?._sheet?.campaign?.id;
       return typeof id === "string" && id ? id : null;
     }
-    // DCC, ACE, KoB, Nimble, SW and D&D sheets: campaign lives at the top level (campaign.id)
-    for (const key of ["dcc_sheet", "ace_sheet", "kob_sheet", "nimble_sheet", "sw_sheet", "dnd_sheet"]) {
+    // DCC, ACE, KoB, Nimble, SW, D&D and D62e sheets: campaign lives at the top level (campaign.id)
+    for (const key of ["dcc_sheet", "ace_sheet", "kob_sheet", "nimble_sheet", "sw_sheet", "dnd_sheet", "d62e_sheet"]) {
       if (typeof blob[key] !== "string") continue;
       const sheet = JSON.parse(blob[key] as string) as {
         campaign?: { id?: unknown } | null;

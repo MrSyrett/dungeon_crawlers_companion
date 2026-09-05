@@ -10,7 +10,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session";
 
 export type ToolKind = "character" | "session";
 
@@ -153,9 +153,27 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "dnd_session_prep_builder.html",
     keys: ["dnd_session"],
   },
+  "d62e-character": {
+    id: "d62e-character",
+    system: "D62E",
+    systemName: "D6 System 2e",
+    kind: "character",
+    label: "Character Sheet",
+    file: "d62e_character_sheet.html",
+    keys: ["d62e_sheet"],
+  },
+  "d62e-session": {
+    id: "d62e-session",
+    system: "D62E",
+    systemName: "D6 System 2e",
+    kind: "session",
+    label: "Session Prep",
+    file: "d62e_session_prep_builder.html",
+    keys: ["d62e_session"],
+  },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

@@ -48,6 +48,13 @@ const SYSTEMS = [
     chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Monsters/NPCs", mobsHeading: "Monsters &amp; NPCs",
     mob: "Monster", boss: "Boss", npc: "NPC", typePh: "GOBLIN // CR 1/4 // AC 15 // 7 HP", titlePh: "e.g. The Sunless Citadel", subtitlePh: "e.g. A D&D adventure for level 1–3",
   },
+  {
+    file: "d62e_session_prep_builder.html", key: "d62e_session", ls: "d62e_builder_v1", cfg: "d62e", random: "Random Foe",
+    name: "D6 System 2e", title: "Session Prep Builder — D6 System: Second Edition",
+    accent: "#e07b39", accentDark: "#a8551f", red: "#c0392b", redDark: "#7a1510", highlight: "#f0c020", boxBg: "#f3ddc9",
+    chapter: "Scene", chapterPh: "Scene 1", session: "Session", mobs: "Foes/NPCs", mobsHeading: "Foes &amp; NPCs",
+    mob: "Foe", boss: "Villain", npc: "NPC", typePh: "THUG // AGILITY 2D // BRAWLING 3D", titlePh: "e.g. The Heist Goes Sideways", subtitlePh: "e.g. A D62e one-shot for 4 heroes",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -127,6 +134,23 @@ const SB_CONFIG = {
     abilities: [...(m.traits||[]).map(t => t.name + ': ' + t.description), ...(m.actions||[]).map(a => a.name + ': ' + a.description), ...(m.bonusActions||[]).map(a => 'Bonus — ' + a.name + ': ' + a.description), ...(m.reactions||[]).map(a => 'Reaction — ' + a.name + ': ' + a.description), ...(m.legendaryActions||[]).map(a => 'Legendary — ' + a.name + ': ' + a.description)].join('\\n'),
   }; }, sub: m => String(m.type||'') + ' · CR ' + m.cr + (m.legendaryActions && m.legendaryActions.length ? ' · legendary' : '') },
 };`,
+  d62e: `const _d6Code = p => { p = Math.round(Number(p)||0); const d = Math.floor(p/3), r = p%3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); };
+const SB_CONFIG = {
+  typePlaceholder: 'FOE // HUMANOID',
+  hp: null,
+  rows: [
+    [{ key:'agi', label:'AGI', th:'Agility', ph:'2D' }, { key:'bra', label:'BRAWN', th:'Brawn', ph:'2D' }, { key:'kno', label:'KNOW', th:'Knowledge', ph:'2D' }, { key:'per', label:'PERC', th:'Perception', ph:'2D' }],
+    [{ key:'dodge', label:'DODGE' }, { key:'parry', label:'PARRY' }, { key:'move', label:'MOVE' }],
+  ],
+  abilitiesLabel: 'Skills, Powers & Notes', abilitiesPlaceholder: 'One per line — brawling 4D · Special: night vision',
+  mobs: { placeholder: 'Search the D62e Bestiary…', pool: () => (typeof D62E_CREATURES !== 'undefined' && Array.isArray(D62E_CREATURES)) ? D62E_CREATURES : [], toCard: m => { const A = m.attributes || {}; const c = k => A[k] == null ? '' : _d6Code(A[k]); return {
+    sbtype: /villain|boss|dragon|giant|robot/i.test(String(m.kind||'') + ' ' + String(m.name||'')) ? 'boss' : /npc|ally|civilian|detective|medic/i.test(String(m.kind||'') + ' ' + String(m.name||'')) ? 'npc' : 'mob', name: m.name || '',
+    type: [String(m.kind||'Foe').toUpperCase(), m.genre && m.genre !== 'core' ? String(m.genre).toUpperCase() : ''].filter(Boolean).join(' // '), flavor: m.description || '',
+    agi: c('Agility'), bra: c('Brawn'), kno: c('Knowledge'), per: c('Perception'),
+    dodge: '', parry: '', move: m.move || '',
+    abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.special||[]).map(x => 'Special: ' + x), ...(m.talents||[]).map(x => 'Talent: ' + x), ...(m.powers||[]).map(x => 'Power: ' + x)].filter(Boolean).join('\\n'),
+  }; }, sub: m => String(m.kind||'') + (m.genre && m.genre !== 'core' ? ' · ' + m.genre : '') },
+};`,
 };
 const MOB_DATA = {
   ace: '<script src="/tools-data/ace-extras.js"></script>',
@@ -134,6 +158,7 @@ const MOB_DATA = {
   nimble: '<script src="/tools-data/nimble-monsters.js"></script>',
   sw: '<script src="/tools-data/sw-characters.js"></script>',
   dnd: '<script src="/tools-data/dnd-monsters.js"></script>',
+  d62e: '<script src="/tools-data/d62e-creatures.js"></script>',
 };
 
 function rep(s, a, b, all = true) {
