@@ -966,16 +966,15 @@
       // map cached before whatever happened in between. Nothing renders on arming
       // itself, so a null cache makes the first ghost frame fall back to a full
       // render — which refills it.
-      // Always cache the freshly-composited map (the expensive part — a lit textured
-      // frame is tens of ms) so camera moves and armed ghosts can blit it (~1 ms)
-      // instead of re-lighting. It's a single full-canvas drawImage, negligible next
-      // to the render it just finished. snapCam records the camera it was taken at, so
-      // a later pan/zoom blit can transform it into place (see blitSnap).
-      snapMap();
+      // Cache the composited map while placing an object or room, so the ghost preview
+      // is a ~1 ms blit each mousemove instead of a full re-render. The camera is static
+      // while placing, so the cached frame lines up exactly. Dropped when nothing is
+      // being placed, so an ordinary render never pays for the copy.
+      if(armedObj || armedRoom) snapMap(); else mapSnap=null;
       drawPreview(); drawLightMarkers(); drawSelection();
     }
   }
-  let mapSnap=null, snapCam=null;
+  let mapSnap=null;
   function snapMap(){
     if(!mapSnap) mapSnap=document.createElement("canvas");
     if(mapSnap.width!==cv.width || mapSnap.height!==cv.height){
@@ -984,55 +983,26 @@
     g.setTransform(1,0,0,1,0,0);
     g.clearRect(0,0,mapSnap.width,mapSnap.height);
     g.drawImage(cv,0,0);
-    snapCam={x:cam.x, y:cam.y, scale:cam.scale};
   }
   // Repaint the overlays over the cached map. Anything that actually changes the
   // map goes through render(), which refreshes the cache, so this can never show
   // a stale map — it just can't be used before the first armed render.
-  // Blit the cached map (taken at snapCam) into the CURRENT camera. For a pure pan
-  // the transform is an exact translation, so the result is pixel-identical to a real
-  // render; for a zoom it's a scaled bitmap (a touch soft) that a settle-render then
-  // sharpens. Device-pixel maths: a world point maps the same way under both cameras,
-  // so the snap→now mapping is the affine (k = scale ratio) below.
-  function blitSnap(){
-    const sc=snapCam||{x:cam.x,y:cam.y,scale:cam.scale};
-    const k=cam.scale/sc.scale, A=CELL*sc.scale;
-    const tx=DPR*( W/2*(1-k) + k*A*(sc.x-cam.x) );
-    const ty=DPR*( H/2*(1-k) + k*A*(sc.y-cam.y) );
-    ctx.setTransform(1,0,0,1,0,0);
-    ctx.clearRect(0,0,cv.width,cv.height);
-    ctx.setTransform(k,0,0,k,tx,ty);
-    ctx.drawImage(mapSnap,0,0);
-  }
-  // Repaint the overlays over the cached map. Anything that actually changes the
-  // map goes through render(), which refreshes the cache, so this can never show
-  // a stale map — it just can't be used before the first render has filled it.
+  // Repaint the overlays over the cached map. Used only while placing an object or room,
+  // when the camera is static so the cache lines up exactly. Anything that changes the
+  // map goes through render(), which refreshes the cache, so this can't show a stale map.
   function renderGhostOnly(){
     if(!mapSnap || mapSnap.width!==cv.width || mapSnap.height!==cv.height){ render(); return; }
-    blitSnap();
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.drawImage(mapSnap,0,0);
     ctx.setTransform(DPR,0,0,DPR,0,0);
     drawPreview(); drawLightMarkers(); drawSelection();
   }
-  // ── Camera-move performance ───────────────────────────────────────
-  // Lights & Shadows recompute from scratch every render (ray-marched visibility
-  // polygons + full-canvas blur passes) — tens of ms a frame. Panning/zooming used
-  // to fire that on every pointer event, which is why the map crawled with lights on.
-  // Now a camera move blits the cached map (~1 ms) each frame and does ONE real render
-  // when the gesture settles, so lights can stay on while you navigate.
-  function litExpensive(){ return !!(map && (map.lit || map.shadowsOn)); }
+  // Camera moves (pan/zoom/pinch) do a FULL render so the whole map is always drawn —
+  // no blank space when you pan into new area. Coalesced to one render per animation
+  // frame so a burst of pointer events can't stack synchronous renders behind each other.
   let camRaf=0;
-  function renderCamOnly(){ camRaf=0;
-    if(!mapSnap || mapSnap.width!==cv.width || mapSnap.height!==cv.height){ render(); return; }
-    renderGhostOnly();
-  }
-  function scheduleCam(){ if(!camRaf) camRaf=requestAnimationFrame(renderCamOnly); }
-  let fullRaf=0;
-  function scheduleFull(){ if(!fullRaf) fullRaf=requestAnimationFrame(()=>{ fullRaf=0; render(); }); }
-  let camSettle=0;
-  function scheduleSettle(){ clearTimeout(camSettle); camSettle=setTimeout(()=>{ camSettle=0; render(); }, 130); }
-  // A camera change: cheap blit + settle when lighting is on (expensive); a coalesced
-  // full render otherwise (cheap, and stays crisp at every step).
-  function onCamMove(){ if(litExpensive()){ scheduleCam(); scheduleSettle(); } else scheduleFull(); }
+  function scheduleRender(){ if(!camRaf) camRaf=requestAnimationFrame(()=>{ camRaf=0; render(); }); }
   function renderLocalMap(){
     // Work in CSS-pixel logical space; scale once for crisp HiDPI output.
     ctx.setTransform(DPR,0,0,DPR,0,0);
@@ -2833,7 +2803,7 @@
     cam.scale=Math.max(0.15,Math.min(6, gesture.scale0*(d/gesture.d0)));
     const wp=wpx();                                    // pin the start world-midpoint under the moving finger-midpoint
     cam.x=gesture.worldMid[0]-(mid[0]-W/2)/wp; cam.y=gesture.worldMid[1]-(mid[1]-H/2)/wp;
-    onCamMove(); updateZoom(); }
+    scheduleRender(); updateZoom(); }
 
   cv.addEventListener("pointerdown", e=>{
     cv.setPointerCapture(e.pointerId);
@@ -2902,7 +2872,7 @@
     if(pointers.has(e.pointerId)) pointers.set(e.pointerId, rel(e));
     if(gesture){ if(pointers.size>=2) updatePinch(); return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
-    if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); onCamMove(); return; }
+    if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); scheduleRender(); return; }
     if(handle){
       const o=handle.o;
       if(handle.mode==="rotate"){
@@ -2959,10 +2929,10 @@
 
   cv.addEventListener("pointerup", e=>{
     pointers.delete(e.pointerId);
-    if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; render(); } return; }
+    if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
     if(stroke){ finishStroke(); return; }
     if(handle){ if(moved){ pushHistory(handle.snap); commit(); } handle=null; return; }
-    if(panning){ panning=null; render(); return; }   // one sharp render to resync the map cache to the new camera
+    if(panning){ panning=null; render(); return; }
     if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
     if(!dragStart){ return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
@@ -2986,7 +2956,7 @@
   cv.addEventListener("wheel", e=>{ e.preventDefault();
     const [sx,sy]=rel(e); const [bwx,bwy]=toWorld(sx,sy);
     const f=e.deltaY<0?1.12:1/1.12; cam.scale=Math.max(0.15,Math.min(6,cam.scale*f));
-    const [awx,awy]=toWorld(sx,sy); cam.x+=bwx-awx; cam.y+=bwy-awy; onCamMove(); updateZoom();
+    const [awx,awy]=toWorld(sx,sy); cam.x+=bwx-awx; cam.y+=bwy-awy; scheduleRender(); updateZoom();
   },{passive:false});
 
   function rel(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
