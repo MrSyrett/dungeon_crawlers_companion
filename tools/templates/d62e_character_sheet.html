@@ -235,6 +235,32 @@ body.dark{--bg:#121013;--paper:#211c22;--ink:#eae2e6;--muted:#aca6a0;--rule:#463
 body.dark .sheet{border-color:#544a50;}
 body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,body.dark .vline input{background:var(--input-bg);color:var(--ink);border-color:var(--rule);}
 
+/* Optional Rules */
+.vbig .calc.ref{font-size:11px;font-weight:800;letter-spacing:.01em;line-height:1.35;}
+.opt-cog{background:#1c1512;border:1px solid #3a2c22;color:#f0a860;border-radius:4px;width:30px;height:26px;cursor:pointer;font-size:14px;line-height:1;flex:0 0 auto;}
+.opt-cog:hover{background:#3a2410;}
+.opt-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #2a221c;}
+.opt-row .opt-main{flex:1;min-width:0;}
+.opt-row .opt-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#f0e2d6;letter-spacing:.02em;}
+.opt-row .opt-note2{font-size:11px;color:#a89888;line-height:1.35;margin-top:2px;}
+.opt-row select.m-input{width:auto;min-width:120px;padding:6px 8px;flex:0 0 auto;}
+.opt-sub{background:#141010;border:1px solid #3a2c22;border-radius:6px;padding:10px 12px;margin:8px 0 4px;}
+.opt-sub .m-lbl{margin-top:0;}
+.opt-ref{font-size:11px;color:#a89888;line-height:1.4;margin-top:6px;font-style:italic;}
+.opt-check{width:40px;height:22px;background:#333;border:1px solid #555;border-radius:11px;cursor:pointer;position:relative;flex:0 0 auto;transition:background .2s;}
+.opt-check.on{background:var(--d62e);border-color:var(--d62e-dk);}
+.opt-check::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .2s;}
+.opt-check.on::after{left:20px;background:#1a1a1a;}
+.sk-spec-cell{display:none;white-space:nowrap;}
+body.spec-on .sk-spec-cell{display:table-cell;}
+.sk-spec-cell label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;color:var(--muted);letter-spacing:.03em;cursor:pointer;margin-right:4px;}
+.sk-spec-cell input[type=checkbox]{vertical-align:middle;margin:0 1px;}
+.sk-spec-cell input.sk-specname{width:52px;height:20px;font-size:11px;font-family:'Barlow Condensed',sans-serif;border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);}
+.arc-row{display:grid;grid-template-columns:1fr 52px 52px 24px;gap:5px;align-items:center;margin-bottom:5px;}
+.arc-row input{padding:5px 6px;background:#141010;border:1px solid #2a221c;border-radius:4px;color:#eee;font-size:12px;outline:none;}
+.mp-btns{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;}
+.mp-pool{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:#f0a860;}
+
 .roll-log{transition:width .2s ease;}
 .roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
 @media (max-width:900px){.body-row{flex-direction:column;}.stats-col{width:100%;border-right:none;border-bottom:2px solid var(--border);}}
@@ -304,6 +330,7 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="vlbl"><span>Hero Points</span></div>
           <div class="vbig"><input type="number" id="f-hero" value="1" min="0" oninput="scheduleAutosave()"></div>
           <div class="vline"><button class="small-btn" id="hero-btn" onclick="toggleHeroPoint()">Spend: double</button></div>
+          <div class="vline" id="hero-hint" style="font-size:9px;line-height:1.3;"></div>
         </div>
         <div class="vital">
           <div class="vlbl"><span>Char. Points</span><small>XP</small></div>
@@ -404,13 +431,17 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click an attribute, skill or weapon to roll</div></div>
   <div class="dice-tray">
-    <div class="dice-pool-display" id="pool-display">Empty — tap 1D / 2D / 3D to build a pool</div>
+    <div class="tray-row" style="justify-content:space-between;">
+      <div class="dice-pool-display" id="pool-display" style="flex:1;">Empty — tap 1D / 2D / 3D to build a pool</div>
+      <button class="opt-cog" id="opt-cog" onclick="openOptions()" title="Optional Rules" aria-label="Optional Rules">⚙</button>
+    </div>
     <div class="tray-row">
       <span class="tray-label">DC</span><input type="text" id="tray-dc" class="tray-input" placeholder="—" title="Optional target number">
       <span class="tray-label">Extra acts</span><input type="number" id="mod-actions" class="tray-input" value="0" min="0" oninput="updateModNote()" title="−1D per extra action this round">
       <button class="tray-toggle" id="mod-prep" onclick="togglePrep()" title="+1D next roll">Preparing</button>
     </div>
     <div class="tray-note" id="mod-note">No modifiers.</div>
+    <div class="tray-note" id="opt-note"></div>
     <div class="dice-btns">
       <button class="dice-btn" onclick="addPoolDice(1)">+1D</button>
       <button class="dice-btn" onclick="addPoolDice(2)">+2D</button>
@@ -487,6 +518,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">D6 System 2e — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
+<div id="options-overlay" class="ov" onclick="if(event.target===this)closeOptions()"><div class="modal"><div class="modal-hd"><div class="ttl">⚙ Optional Rules</div><button class="x" onclick="closeOptions()">&#10005;</button></div><div class="modal-bd" id="options-body"></div></div></div>
 
 <script>
 // ═══ CORE ═════════════════════════════════════════════════════════════════
@@ -511,6 +543,8 @@ const D = {
   tables:    () => (typeof D62E_TABLES          !== 'undefined' ? D62E_TABLES          : null),
 };
 let wound = 'none', heroArmed = false, prepArmed = false;
+function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'heroic', advancement:'none', magicPoints:false, specialization:false, attrBudget:false, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
+let options = defaultOptions();
 
 // ═══ DICE CODES ═══════════════════════════════════════════════════════════
 function code(pips, signed) {
@@ -537,7 +571,12 @@ function genreOk(item) { const g = item && item.genre; return !g || g === 'core'
 function activeAttrs() { return [...document.querySelectorAll('#stats-grid .stat-cell[data-attr]')].map(c => c.dataset.attr); }
 function attr(name) { const el = $('at-' + name); return el ? codeOrZero(el.value) : 0; }
 function skillRows() { return [...document.querySelectorAll('#skills-body tr[data-skill]')]; }
-function rowTotal(tr) { return attr(tr.dataset.attr) + codeOrZero(tr.querySelector('.sk-adds').value); }
+function rowTotal(tr) {
+  const adds = codeOrZero(tr.querySelector('.sk-adds').value);
+  // Advanced Skill (specialization option ON + Adv checked): rolls only its own dice.
+  if(typeof options !== 'undefined' && options && options.specialization && tr.dataset.adv === '1') return adds;
+  return attr(tr.dataset.attr) + adds;
+}
 function skillPips(name) {
   const n = norm(name); const tr = skillRows().find(r => norm(r.querySelector('.sk-name-in').value) === n);
   return tr ? rowTotal(tr) : null;
@@ -589,10 +628,13 @@ function renderAttrPicker() {
 function skillAttrLabel(a) { return esc(a.slice(0, 4).toUpperCase()); }
 function addSkillRow(s) {
   s = s || {}; const body = $('skills-body'); let a = s.attribute || 'Agility';
-  const tr = document.createElement('tr'); tr.dataset.skill = '1'; tr.dataset.attr = a;
+  const tr = document.createElement('tr'); tr.dataset.skill = '1'; tr.dataset.attr = a; tr.dataset.adv = s.adv ? '1' : '0';
   tr.innerHTML = '<td class="sk-name"><input type="text" class="sk-name-in" value="' + esc(s.name || '') + '" placeholder="skill" style="width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font:inherit;font-weight:700;color:inherit;outline:none;" oninput="scheduleAutosave()"></td>'
     + '<td class="sk-attr" style="width:26px;" title="Click to change the governing attribute" onclick="cycleAttr(this)">' + skillAttrLabel(a) + '</td>'
     + '<td style="width:60px;"><input type="text" class="sk-adds" value="' + esc(s.pips ? code(s.pips, true) : '') + '" placeholder="+1D" title="Dice added above the attribute" oninput="recalc();scheduleAutosave()"></td>'
+    + '<td class="sk-spec-cell"><label title="Advanced Skill: rolls only its own dice"><input type="checkbox" class="sk-adv"' + (s.adv ? ' checked' : '') + ' onchange="onSkillAdvChange(this)">Adv</label>'
+      + '<label title="Specialization applies: +1D to this roll"><input type="checkbox" class="sk-spec"' + (s.spec ? ' checked' : '') + ' onchange="scheduleAutosave()">Spec</label>'
+      + '<input type="text" class="sk-specname" value="' + esc(s.specName || '') + '" placeholder="spec" title="Specialization name" oninput="scheduleAutosave()"></td>'
     + '<td class="sk-total" onclick="rollSkillRow(this.parentNode)" title="Roll this skill">0D</td>'
     + '<td style="width:20px;"><button class="row-x" onclick="this.closest(\'tr\').remove();recalc();scheduleAutosave()">✕</button></td>';
   body.appendChild(tr); recalc(); return tr;
@@ -610,10 +652,16 @@ function addSkillByName(name) {
 }
 function recalc() {
   skillRows().forEach(tr => { tr.querySelector('.sk-total').textContent = code(rowTotal(tr)); });
-  const dodge = 5 * diceOf(attr('Perception')), parry = 5 * diceOf(attr('Agility'));
-  const dOvr = $('f-dodge-ovr').value.trim(), pOvr = $('f-parry-ovr').value.trim();
-  $('dodge-val').textContent = dOvr !== '' ? dOvr : dodge;
-  $('parry-val').textContent = pOvr !== '' ? pOvr : parry;
+  const dv = $('dodge-val'), pv = $('parry-val');
+  const pOvr = $('f-parry-ovr').value.trim();
+  pv.textContent = pOvr !== '' ? pOvr : 5 * diceOf(attr('Agility'));
+  if(typeof options !== 'undefined' && options && options.noDodge) {
+    // No Dodge Defense: fixed ranged-attack difficulties instead of a computed number.
+    dv.textContent = 'PB5 · S10 · M15 · L20 · Dodge@L30'; dv.classList.add('ref');
+  } else {
+    const dOvr = $('f-dodge-ovr').value.trim();
+    dv.textContent = dOvr !== '' ? dOvr : 5 * diceOf(attr('Perception')); dv.classList.remove('ref');
+  }
   refreshWeaponRows(); updateModNote();
 }
 
@@ -629,38 +677,56 @@ function updateModNote() {
   if(m.wound) parts.push('−' + code(m.wound) + ' ' + wound);
   if(m.actions) parts.push(m.actions + ' extra action' + (m.actions > 1 ? 's' : '') + ' −' + code(m.actions * 3));
   if(m.prep) parts.push('Preparing +1D');
-  if(heroArmed) parts.push('Hero Point: code doubled');
+  if(heroArmed) parts.push('Hero Point: ' + heroArmDesc());
   const note = $('mod-note'); if(note) note.textContent = parts.length ? parts.join(' · ') : 'No modifiers.';
-  const hb = $('hero-btn'); if(hb) hb.textContent = heroArmed ? 'Hero Point armed ✓' : 'Spend: double';
+  const hb = $('hero-btn'); if(hb) hb.textContent = heroArmed ? 'Hero armed ✓' : heroArmLabel();
   const pb = $('mod-prep'); if(pb) pb.classList.toggle('on', prepArmed);
 }
+function heroModel() { return (typeof options !== 'undefined' && options && options.heroModel) || 'heroic'; }
+function heroArmLabel() { return { heroic:'Spend: double', basic:'Spend: +1 die', classic:'Spend: +wild', superheroic:'Spend: boost' }[heroModel()]; }
+function heroArmDesc() { return { heroic:'code doubled', basic:'+1 extra die', classic:'+1D wild', superheroic:'code doubled (boost)' }[heroModel()]; }
 function togglePrep() { prepArmed = !prepArmed; updateModNote(); }
 function toggleHeroPoint() {
-  if(!heroArmed) { if(num($('f-hero').value) <= 0) { addLog('Hero Points', '✗', 'No Hero Points left', 'fumble'); return; } heroArmed = true; addLog('Hero Point', '★', 'Next roll doubles its die code. A Hero Point can also reroll a failed roll or avoid being stunned.', 'crit'); }
+  if(!heroArmed) {
+    if(num($('f-hero').value) <= 0) { addLog('Hero Points', '✗', 'No Hero Points left', 'fumble'); return; }
+    heroArmed = true;
+    const eff = { heroic:'Next roll doubles its die code.', basic:'Next roll adds one extra normal d6.', classic:'Next roll adds +1D wild (up to your attribute die).', superheroic:'Next roll is boosted — doubling its die code (or spend for another use).' }[heroModel()];
+    addLog('Hero Point', '★', eff + ' A Hero Point can also reroll a failed roll or avoid being Stunned.', 'crit');
+  }
   else heroArmed = false;
   updateModNote();
 }
-// WEG-style pips. When `wild` is set, the LAST die is the Wild Die: it explodes on
-// a 6 (reroll and add, repeat) and a natural 1 is a Complication (GM's call — the
-// total is kept). `rolls` includes every face rolled so the dice animation matches.
-function rollDice(p, wild) {
-  p = Math.max(0, num(p)); const d = Math.floor(p / 3), pipsRem = p % 3; const rolls = [];
-  let wildFaces = null, complication = false;
+// WEG-style pips. When `wild` is set, the LAST die is the Wild Die. The Alt Wild Die
+// option (options.wildDie) picks the behaviour on a natural 1:
+//   core   — 1 is a Complication (flag only, no subtraction); 6 explodes.
+//   basic/ — 1 is a Mishap: remove the Wild Die AND the single highest other die; 6 explodes.
+//   classic
+//   simple — 1 does nothing special; 6 explodes.
+// `extraPlain` adds N ordinary (non-wild, non-exploding) d6 to the roll — used by the
+// Basic Hero Point model. `rolls` includes every face rolled so the animation matches.
+function rollDice(p, wild, extraPlain) {
+  p = Math.max(0, num(p)); const d = Math.floor(p / 3), pipsRem = p % 3; const rolls = []; const regular = [];
+  const variant = (typeof options !== 'undefined' && options && options.wildDie) ? options.wildDie : 'core';
+  for(let i = 0; i < (extraPlain || 0); i++) { const f = 1 + Math.floor(Math.random() * 6); rolls.push(f); regular.push(f); }
+  let wildFaces = null, complication = false, mishap = false;
   for(let i = 0; i < d; i++) {
     let f = 1 + Math.floor(Math.random() * 6);
     if(wild && i === d - 1) {
       wildFaces = [f];
-      if(f === 1) complication = true;
+      if(f === 1) { if(variant === 'core') complication = true; else if(variant === 'basic' || variant === 'classic') mishap = true; }
       let guard = 0;
       while(f === 6 && guard++ < 20) { f = 1 + Math.floor(Math.random() * 6); wildFaces.push(f); }
       rolls.push.apply(rolls, wildFaces);
-    } else { rolls.push(f); }
+    } else { rolls.push(f); regular.push(f); }
   }
-  return { rolls, total: rolls.reduce((a, b) => a + b, 0) + pipsRem, pips: pipsRem, wildFaces: wildFaces, complication: complication };
+  let total = rolls.reduce((a, b) => a + b, 0) + pipsRem;
+  if(mishap && wildFaces) { total -= wildFaces.reduce((a, b) => a + b, 0); if(regular.length) total -= Math.max.apply(null, regular); if(total < 0) total = 0; }
+  return { rolls, total: total, pips: pipsRem, wildFaces: wildFaces, complication: complication, mishap: mishap, variant: variant };
 }
 function wildStyle(r) {
   if(r.wildFaces && r.wildFaces[0] === 6) return { type: 'crit', mark: ' ✦', note: '✦ Advantage — the Wild Die exploded!' };
   if(r.complication) return { type: 'fumble', mark: ' ⚠', note: '⚠ Complication — the Wild Die rolled a 1 (GM\'s call)' };
+  if(r.mishap) return { type: 'fumble', mark: ' ⚠', note: '⚠ Mishap — Wild Die 1: removed the Wild Die and your highest other die' };
   return { type: '', mark: '', note: '' };
 }
 function diceStr(p, r) {
@@ -670,20 +736,34 @@ function diceStr(p, r) {
 }
 function rollCode(label, basePips, opts) {
   opts = opts || {}; const m = opts.noMods ? { total: 0 } : currentMods();
-  let p = basePips + (m.total || 0); let hero = false;
-  if(heroArmed && !opts.noMods) { p *= 2; hero = true; heroArmed = false; $('f-hero').value = Math.max(0, num($('f-hero').value) - 1); }
+  let p = basePips + (m.total || 0); let heroInfo = ''; let extraPlain = 0;
+  if(heroArmed && !opts.noMods) {
+    const model = heroModel();
+    if(model === 'heroic' || model === 'superheroic') { p *= 2; heroInfo = 'Hero Point (code doubled)'; }
+    else if(model === 'classic') { p += 3; heroInfo = 'Hero Point (+1D wild)'; }
+    else { extraPlain = 1; heroInfo = 'Hero Point (+1 die)'; }  // basic
+    heroArmed = false; $('f-hero').value = Math.max(0, num($('f-hero').value) - 1);
+  }
   if(!opts.noMods && prepArmed) { prepArmed = false; }
   if(p < 1) p = 1;
-  const r = rollDice(p, !opts.noWild);
+  const r = rollDice(p, !opts.noWild, extraPlain);
   const dcEl = $('tray-dc'); const dc = opts.dc !== undefined ? opts.dc : (dcEl ? (num(dcEl.value) || null) : null);
   const ws = wildStyle(r);
-  const detail = [diceStr(p, r), hero ? 'Hero Point (doubled)' : '', m.total ? 'mods ' + code(m.total, true) : '', ws.note, dc ? 'vs ' + dc + (r.total >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
+  const detail = [diceStr(p, r), heroInfo, m.total ? 'mods ' + code(m.total, true) : '', ws.note, dc ? 'vs ' + dc + (r.total >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
   const type = ws.type || (dc ? (r.total >= dc ? 'crit' : 'fumble') : 'normal');
   updateModNote();
   addLog(label, r.total + ws.mark, detail, type); return r.total;
 }
 function rollAttr(a) { rollCode(a, attr(a)); }
-function rollSkillRow(tr) { const name = tr.querySelector('.sk-name-in').value.trim() || 'Skill'; rollCode(name, rowTotal(tr)); }
+function onSkillAdvChange(cb) { const tr = cb.closest('tr'); tr.dataset.adv = cb.checked ? '1' : '0'; recalc(); scheduleAutosave(); }
+function rollSkillRow(tr) {
+  let base = rowTotal(tr); let name = tr.querySelector('.sk-name-in').value.trim() || 'Skill';
+  if(typeof options !== 'undefined' && options && options.specialization) {
+    const spec = tr.querySelector('.sk-spec');
+    if(spec && spec.checked) { base += 3; const sn = (tr.querySelector('.sk-specname').value || '').trim(); name += ' (spec' + (sn ? ' ' + sn : '') + ' +1D)'; }
+  }
+  rollCode(name, base);
+}
 // ── Dice pool tray ──────────────────────────────────────────────────────────
 var d62ePool = 0;
 function renderPool() { const el = $('pool-display'); if(el) el.textContent = d62ePool > 0 ? (d62ePool + 'D  ·  last die is Wild') : 'Empty — tap 1D / 2D / 3D to build a pool'; }
@@ -706,6 +786,93 @@ function setWound(k) {
   const prev = wound; wound = k; renderWoundTrack(); updateModNote();
   if(k !== prev) addLog('Wound status', WOUNDS.find(w => w[0] === k)[1], k === 'none' ? 'Back to full health' : 'Wound modifiers apply to rolls', k === 'none' ? 'normal' : 'fumble');
   scheduleAutosave();
+}
+
+// ═══ OPTIONAL RULES ═══════════════════════════════════════════════════════
+function magicMax() { return diceOf(attr('Magic')) + num(options.magicAlignment) * 3; }
+function heroHint() {
+  const base = { heroic:'Spend 1 to double a roll\'s die code.', basic:'Spend 1 to add one extra normal d6.', classic:'Spend 1 to add +1D wild (up to your attribute die). Bankable between sessions.', superheroic:'Spend 1 to boost: double a code, take an extra action w/o the multi-action penalty, raise a Talent/Power one rank, gift a point, or ignore a die cap.' }[heroModel()];
+  return base + ' A Hero Point can also avoid being Stunned.';
+}
+function setHeroUI() {
+  const hb = $('hero-btn'); if(hb && !heroArmed) hb.textContent = heroArmLabel();
+  const hint = $('hero-hint'); if(hint) hint.textContent = heroHint();
+}
+function refreshOptNote() {
+  const el = $('opt-note'); if(!el) return;
+  const wd = { core:'Core Wild Die', basic:'Basic Wild Die (1 = mishap)', classic:'Classic Wild Die (1 = mishap)', simple:'Simple Wild Die (1 = nothing)' }[options.wildDie || 'core'];
+  const hm = { heroic:'Heroic', basic:'Basic', classic:'Classic', superheroic:'Superheroic' }[heroModel()];
+  const extras = [];
+  if(options.noDodge) extras.push('No-Dodge defenses');
+  if(options.specialization) extras.push('Specializations');
+  if(options.magicPoints) extras.push('Magic Points');
+  if(options.advancement && options.advancement !== 'none') extras.push('Adv: ' + options.advancement);
+  el.textContent = wd + ' · Hero: ' + hm + (extras.length ? ' · ' + extras.join(' · ') : '');
+}
+function applyOptions() {
+  document.body.classList.toggle('spec-on', !!options.specialization);
+  setHeroUI(); refreshOptNote(); recalc();
+}
+function optToggle(key) { options[key] = !options[key]; afterOptChange(); }
+function optSet(key, val) { options[key] = val; afterOptChange(); }
+function afterOptChange() { applyOptions(); scheduleAutosave(); renderOptions(); }
+function optField(key, val) { options[key] = val; refreshOptNote(); scheduleAutosave(); }
+function addArc() { options.arcs = options.arcs || []; options.arcs.push({ skill: '', stepsDone: 0, stepsNeeded: 1 }); renderOptions(); scheduleAutosave(); }
+function removeArc(i) { options.arcs.splice(i, 1); renderOptions(); scheduleAutosave(); }
+function setArc(i, field, val) { const a = options.arcs[i]; if(!a) return; a[field] = field === 'skill' ? val : num(val); scheduleAutosave(); }
+function magicSpend(delta) { const mx = magicMax(); options.magicCurrent = Math.max(0, Math.min(mx, num(options.magicCurrent) + delta)); renderOptions(); scheduleAutosave(); }
+function magicRefill() { options.magicCurrent = magicMax(); renderOptions(); scheduleAutosave(); }
+function openOptions() { $('options-overlay').classList.add('open'); renderOptions(); }
+function closeOptions() { $('options-overlay').classList.remove('open'); }
+function _optRow(name, note, control) {
+  return '<div class="opt-row"><div class="opt-main"><div class="opt-name">' + esc(name) + '</div><div class="opt-note2">' + note + '</div></div>' + control + '</div>';
+}
+function _check(key) { return '<div class="opt-check' + (options[key] ? ' on' : '') + '" onclick="optToggle(\'' + key + '\')" role="switch" aria-checked="' + (!!options[key]) + '"></div>'; }
+function _sel(key, opts) { return '<select class="m-input" onchange="optSet(\'' + key + '\', this.value)">' + opts.map(o => '<option value="' + o[0] + '"' + (options[key] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select>'; }
+function renderOptions() {
+  const b = $('options-body'); if(!b) return;
+  let h = '<p class="m-hint">Turn on the optional rules your table uses. Each change applies immediately and is saved with the character.</p>';
+  h += _optRow('No Dodge Defense', 'Ranged attacks use fixed difficulties (PB 5 / short 10 / medium 15 / long 20; dodging at long 30) instead of a Dodge score. Parry is unchanged.', _check('noDodge'));
+  h += _optRow('Alt Wild Die', 'Core: 6 explodes, 1 is a Complication. Basic/Classic: 1 removes the Wild Die + your highest other die. Simple: 1 does nothing.', _sel('wildDie', [['core','Core'],['basic','Basic'],['classic','Classic'],['simple','Simple']]));
+  h += _optRow('Hero Point Model', 'Heroic: double a code. Basic: +1 normal die (start 3–5). Classic: +1D wild, bankable. Superheroic: boost, start 3.', _sel('heroModel', [['heroic','Heroic'],['basic','Basic'],['classic','Classic'],['superheroic','Superheroic']]));
+  h += _optRow('Advancement', 'Track character growth. XP, Milestone, or Narrative arcs — a tracker + reference, not an auto-spend engine.', _sel('advancement', [['none','None'],['xp','XP'],['milestone','Milestone'],['narrative','Narrative']]));
+  if(options.advancement && options.advancement !== 'none') h += renderAdvancement();
+  h += _optRow('Magic Points Casting', 'Cast from a points pool (Magic dice + Mystical Alignment × 3) instead of straight rolls.', _check('magicPoints'));
+  if(options.magicPoints) h += renderMagic();
+  h += _optRow('Skill Specializations & Advanced Skills', 'Each skill row gains an Adv toggle (rolls only its own dice) and a Spec toggle (+1D when the specialization applies).', _check('specialization'));
+  h += _optRow('Additional Attribute Budgets', 'Builder only: a-la-carte attribute budget scales +3D for each attribute beyond the four core ones.', _check('attrBudget'));
+  b.innerHTML = h;
+}
+function renderAdvancement() {
+  const mode = options.advancement;
+  let h = '<div class="opt-sub">';
+  if(mode === 'xp') {
+    h += '<div class="m-lbl">Experience Points</div><input class="m-input" type="number" min="0" value="' + esc(options.xp) + '" oninput="optField(\'xp\', num(this.value))" style="max-width:140px;">'
+      + '<div class="opt-ref">Raise a skill = its current rating in XP (min 1); raise an attribute = 10× its current rating. With pips, buy +1/+2 before the next die.</div>';
+  } else if(mode === 'milestone') {
+    h += '<div class="m-lbl">Milestones reached</div><input class="m-input" type="number" min="0" value="' + esc(options.milestones) + '" oninput="optField(\'milestones\', num(this.value))" style="max-width:140px;">'
+      + '<div class="opt-ref">Each milestone = +1 attribute die and +3 skill dice (or +9 pips), or a new/raised Perk instead.</div>';
+  } else {
+    h += '<div class="m-lbl">Narrative arcs</div>';
+    h += (options.arcs || []).map((a, i) =>
+      '<div class="arc-row"><input type="text" value="' + esc(a.skill) + '" placeholder="skill" oninput="setArc(' + i + ',\'skill\',this.value)">'
+      + '<input type="number" min="0" value="' + esc(a.stepsDone) + '" title="steps done" oninput="setArc(' + i + ',\'stepsDone\',this.value)">'
+      + '<input type="number" min="0" value="' + esc(a.stepsNeeded) + '" title="steps needed" oninput="setArc(' + i + ',\'stepsNeeded\',this.value)">'
+      + '<button class="row-x" onclick="removeArc(' + i + ')">✕</button></div>').join('');
+    h += '<button class="small-btn ghost" onclick="addArc()" style="margin-top:4px;">＋ Add arc</button>';
+    h += '<div class="opt-ref">An arc needs one more step than the skill\'s current rating; complete all steps to raise the skill +1D.</div>';
+  }
+  return h + '</div>';
+}
+function renderMagic() {
+  const mx = magicMax(); const hasMagic = !!$('at-Magic');
+  let h = '<div class="opt-sub"><div class="m-lbl">Mystical Alignment</div>'
+    + '<input class="m-input" type="number" min="0" value="' + esc(options.magicAlignment) + '" onchange="optField(\'magicAlignment\', num(this.value)); renderOptions();" style="max-width:120px;">'
+    + '<div class="mp-btns"><span class="tray-label" style="color:var(--muted);">Pool</span> <span class="mp-pool">' + num(options.magicCurrent) + ' / ' + mx + '</span>'
+    + '<button class="small-btn ghost" onclick="magicSpend(-1)">− Spend</button><button class="small-btn ghost" onclick="magicSpend(1)">＋ Recover</button><button class="small-btn" onclick="magicRefill()">Full</button></div>'
+    + (hasMagic ? '' : '<div class="opt-ref" style="color:#df8a8a;">No Magic attribute on the sheet — the Magic-dice term counts as 0. Add the Magic attribute for a full pool.</div>')
+    + '<div class="opt-ref">Max pool = Magic attribute dice + (Mystical Alignment × 3). A spell costs ⌈Difficulty ÷ 10⌉ points; recover the Magic attribute in points each hour.</div>';
+  return h + '</div>';
 }
 
 // ═══ WEAPONS ══════════════════════════════════════════════════════════════
@@ -986,7 +1153,7 @@ function collectSheet() {
   return {
     system: 'D62E', name: v('f-name'), player: v('f-player'), genre: v('f-genre'), template: v('f-template'), archetype: v('f-archetype'),
     attrs: attrs,
-    skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attribute: tr.dataset.attr, pips: codeOrZero(tr.querySelector('.sk-adds').value) })).filter(s => s.name),
+    skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attribute: tr.dataset.attr, pips: codeOrZero(tr.querySelector('.sk-adds').value), adv: tr.dataset.adv === '1', spec: !!(tr.querySelector('.sk-spec') && tr.querySelector('.sk-spec').checked), specName: (tr.querySelector('.sk-specname') && tr.querySelector('.sk-specname').value.trim()) || '' })).filter(s => s.name),
     heroPoints: num(v('f-hero')), characterPoints: num(v('f-cp')),
     dodgeOverride: dOvr === '' ? null : dOvr, parryOverride: pOvr === '' ? null : pOvr, move: v('f-move'),
     wound: wound,
@@ -996,11 +1163,23 @@ function collectSheet() {
     perks: traits('perks'), flaws: traits('flaws'), talents: traits('talents'),
     gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gr-name').value.trim(), note: tr.querySelector('.gr-note').value.trim() })).filter(g => g.name),
     wealth: v('f-wealth'), background: v('f-background'), personality: v('f-personality'), notes: v('f-notes'),
+    options: {
+      noDodge: !!options.noDodge, wildDie: options.wildDie || 'core', heroModel: options.heroModel || 'heroic',
+      advancement: options.advancement || 'none', magicPoints: !!options.magicPoints,
+      specialization: !!options.specialization, attrBudget: !!options.attrBudget,
+      xp: num(options.xp), milestones: num(options.milestones),
+      arcs: (options.arcs || []).map(a => ({ skill: a.skill || '', stepsDone: num(a.stepsDone), stepsNeeded: num(a.stepsNeeded) })),
+      magicAlignment: num(options.magicAlignment), magicCurrent: num(options.magicCurrent),
+    },
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
 }
 function applySheet(d) {
   d = d || {}; const set = (id, val) => { const el = $(id); if(el) el.value = val == null ? '' : val; };
+  // Options first: skill rows read options.specialization when computing totals.
+  options = Object.assign(defaultOptions(), (d.options && typeof d.options === 'object') ? d.options : {});
+  options.arcs = Array.isArray(options.arcs) ? options.arcs.map(a => ({ skill: (a && a.skill) || '', stepsDone: num(a && a.stepsDone), stepsNeeded: num(a && a.stepsNeeded) })) : [];
+  document.body.classList.toggle('spec-on', !!options.specialization);
   set('f-name', d.name); set('f-player', d.player); set('f-genre', d.genre || 'core'); set('f-template', d.template || ''); set('f-archetype', d.archetype || '');
   buildStats(d.attrs && typeof d.attrs === 'object' ? d.attrs : { Agility:9, Brawn:9, Knowledge:9, Perception:9 });
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
@@ -1017,7 +1196,7 @@ function applySheet(d) {
   $('gear-body').innerHTML = ''; (d.gear || []).forEach(g => addGearRow(typeof g === 'string' ? { name: g } : g));
   set('f-wealth', d.wealth); set('f-background', d.background); set('f-personality', d.personality); set('f-notes', d.notes);
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
-  recalc(); setDefaultTab();
+  recalc(); setDefaultTab(); applyOptions();
 }
 function saveSheet(quiet) {
   const data = collectSheet(); const json = JSON.stringify(data);

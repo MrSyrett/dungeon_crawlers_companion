@@ -26,6 +26,11 @@
   }
   function attrSpent() { return Object.values(attrAlloc).reduce((a, b) => a + b, 0); }
   function skillSpent() { return Object.values(skillAlloc).reduce((a, b) => a + Math.max(0, b), 0); }
+  // Additional Attribute Budgets option (read from the sheet's live options): +3D (9 pips)
+  // of attribute budget for each attribute the character has beyond the four core.
+  const attrBudgetOn = () => (typeof options !== 'undefined' && options && !!options.attrBudget);
+  function optionalCount() { return Object.keys(attrAlloc).filter(a => CORE_ATTRS.indexOf(a) < 0).length; }
+  function attrTotal() { return ATTR_TOTAL + (attrBudgetOn() ? 9 * optionalCount() : 0); }
   // Recommended skills for a template: structured skills + text in the description / talents field.
   function recSkills(t) {
     const out = new Set();
@@ -93,23 +98,33 @@
 
   // ── Step: Attributes (a la carte) ───────────────────────────────────────────
   function renderAttributes(b, note) {
-    const left = ATTR_TOTAL - attrSpent();
+    const budget = attrBudgetOn(); const total = attrTotal(); const left = total - attrSpent();
     note.textContent = 'Attribute dice left: ' + code(Math.max(0, left));
-    let h = '<p class="m-hint">Assign <b>12D</b> across the four attributes — each between <b>1D and 5D</b>. Dice are whole here (fine-tune with +1/+2 pips on the sheet later).</p><div class="alloc">';
-    CORE_ATTRS.forEach(a => {
-      const v = attrAlloc[a] || 0;
+    let h = '<p class="m-hint">Assign <b>' + code(total) + '</b> across your attributes — each between <b>1D and 5D</b>.'
+      + (budget ? ' Each optional attribute beyond the core four adds <b>+3D</b> to the budget.' : '') + ' Dice are whole here (fine-tune with pips on the sheet later).</p><div class="alloc">';
+    const keys = CORE_ATTRS.concat(Object.keys(attrAlloc).filter(a => CORE_ATTRS.indexOf(a) < 0));
+    keys.forEach(a => {
+      const v = attrAlloc[a] || 0; const optional = CORE_ATTRS.indexOf(a) < 0;
       h += '<div class="a-attr"><span>' + a + ' <span style="color:#f0a860;">' + code(v) + '</span></span><span>'
         + '<button data-a="' + a + '" data-d="-3"' + (v <= ATTR_MIN ? ' disabled' : '') + '>−</button> '
-        + '<button data-a="' + a + '" data-d="3"' + (v >= ATTR_MAX || left < 3 ? ' disabled' : '') + '>+</button></span></div>';
+        + '<button data-a="' + a + '" data-d="3"' + (v >= ATTR_MAX || left < 3 ? ' disabled' : '') + '>+</button>'
+        + (optional ? ' <button data-rm="' + a + '" title="Remove attribute (refunds its dice)">✕</button>' : '') + '</span></div>';
     });
-    b.innerHTML = h + '</div>';
+    h += '</div>';
+    if (budget) {
+      const avail = OPTIONAL_ATTRS.filter(a => attrAlloc[a] == null);
+      if (avail.length) h += '<div class="m-lbl">Add optional attribute (+3D budget each)</div><div style="display:flex;flex-wrap:wrap;gap:5px;">' + avail.map(a => '<button type="button" class="builder-chip" data-add="' + a + '">＋ ' + a + '</button>').join('') + '</div>';
+    }
+    b.innerHTML = h;
     b.querySelectorAll('button[data-a]').forEach(btn => btn.addEventListener('click', () => {
       const a = btn.dataset.a, d = Number(btn.dataset.d);
       const nv = (attrAlloc[a] || 0) + d;
       if (nv < ATTR_MIN || nv > ATTR_MAX) return;
-      if (d > 0 && ATTR_TOTAL - attrSpent() < d) return;
+      if (d > 0 && attrTotal() - attrSpent() < d) return;
       attrAlloc[a] = nv; render();
     }));
+    b.querySelectorAll('button[data-rm]').forEach(btn => btn.addEventListener('click', () => { delete attrAlloc[btn.dataset.rm]; render(); }));
+    b.querySelectorAll('button[data-add]').forEach(btn => btn.addEventListener('click', () => { attrAlloc[btn.dataset.add] = ATTR_MIN; render(); }));
   }
 
   // ── Step: Skills ────────────────────────────────────────────────────────────
@@ -226,7 +241,7 @@
       const STEPS = steps();
       const name = STEPS[step];
       if (name === 'Path' && !mode) { $('d62eb-note').textContent = 'Pick a template or "A la carte"'; return; }
-      if (name === 'Attributes' && attrSpent() !== ATTR_TOTAL) { $('d62eb-note').textContent = 'Assign all 12D — ' + code(ATTR_TOTAL - attrSpent(), true) + ' remaining'; return; }
+      if (name === 'Attributes' && attrSpent() !== attrTotal()) { $('d62eb-note').textContent = 'Assign all ' + code(attrTotal()) + ' — ' + code(attrTotal() - attrSpent(), true) + ' remaining'; return; }
       if (name === 'Skills' && skillSpent() < SKILL_TOTAL) { $('d62eb-note').textContent = 'Spend all 7D — ' + code(SKILL_TOTAL - skillSpent()) + ' left'; return; }
       if (name === 'Details') readDetails();
       if (step === STEPS.length - 1) { finish(); D62EB.close(); return; }
