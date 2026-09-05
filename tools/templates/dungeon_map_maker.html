@@ -304,7 +304,29 @@
       <div id="roomBody">
         <div class="asset-count" style="margin-bottom:6px;line-height:1.35" title="Drop a ready-furnished room onto the map, then keep editing it — every piece of furniture stays individually selectable and movable.">Click a room, then click the map to drop it. The furniture stays movable — nudge, rotate or delete any piece after.</div>
         <button class="btn" id="savePrefab" style="width:100%;margin-bottom:8px" title="Select a room or prefab on the map (click it), then save it here as a reusable prefab. Saving with an existing name updates it.">+ Save selection as prefab</button>
+        <div style="display:flex;gap:5px;margin-bottom:7px">
+          <select class="sel" id="roomCat" style="flex:1;min-width:0" title="Filter by room function"><option value="">All functions</option></select>
+          <select class="sel" id="roomTheme" style="flex:1;min-width:0" title="Filter by setting / theme"><option value="">All settings</option></select>
+        </div>
         <div id="roomGrid" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+
+    <div id="prefabSaveModal" style="display:none;position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);align-items:center;justify-content:center">
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;width:300px;max-width:90vw;box-shadow:0 10px 40px rgba(0,0,0,.5)">
+        <p style="margin:0 0 10px;font-weight:600;font-size:14px" id="pfSaveTitle">Save as prefab</p>
+        <label class="fld">Name</label>
+        <input type="text" id="pfNameIn" autocomplete="off" placeholder="e.g. Throne Room">
+        <label class="fld" style="margin-top:8px">Function (category)</label>
+        <input type="text" id="pfCatIn" list="pfCatList" autocomplete="off" placeholder="e.g. Bedroom, Social, Storage">
+        <datalist id="pfCatList"></datalist>
+        <label class="fld" style="margin-top:8px">Setting (theme)</label>
+        <input type="text" id="pfThemeIn" list="pfThemeList" autocomplete="off" placeholder="e.g. Dungeon, Tavern, Castle">
+        <datalist id="pfThemeList"></datalist>
+        <div class="row" style="margin-top:14px">
+          <button class="btn" id="pfSaveCancel">Cancel</button>
+          <button class="btn" id="pfSaveOk" style="background:var(--gold);color:#1b1b1f;border-color:var(--gold);font-weight:600">Save</button>
+        </div>
       </div>
     </div>
 
@@ -316,12 +338,14 @@
       </div>
       <div id="lightBody" style="display:none">
         <label class="fld">Scene lighting</label>
-        <div id="scenePresets" class="seg" style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px" title="One-click darkness for the whole scene — like Czepeku Architect. Lights you've placed carve pools of light out of it.">
-          <button type="button" data-dark="0">Bright</button>
-          <button type="button" data-dark="0.30">Dim</button>
-          <button type="button" data-dark="0.52">Dusk</button>
-          <button type="button" data-dark="0.72">Night</button>
-          <button type="button" data-dark="0.90">Dark</button>
+        <div id="scenePresets" class="seg" style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px" title="One-click mood for the whole scene — like Czepeku Architect. Sets a darkness level AND a colour grade; your placed lights carve pools of light out of it.">
+          <button type="button" data-dark="0"    data-tint=""        data-a="0">None</button>
+          <button type="button" data-dark="0.18" data-tint="#ffb060" data-a="0.16">Cozy</button>
+          <button type="button" data-dark="0.48" data-tint="#ff8f4d" data-a="0.20">Dusk</button>
+          <button type="button" data-dark="0.72" data-tint="#4560c8" data-a="0.30">Night</button>
+          <button type="button" data-dark="0.58" data-tint="#48dd82" data-a="0.26">Eerie</button>
+          <button type="button" data-dark="0.55" data-tint="#8b44e6" data-a="0.32">Mystic</button>
+          <button type="button" data-dark="0.90" data-tint="#26324f" data-a="0.32">Dark</button>
         </div>
         <label class="fld">Darkness <b id="darkV">55%</b></label>
         <input type="range" id="darkness" min="0" max="100" value="55">
@@ -962,6 +986,15 @@
       const oopt={cam,W,H,DPR,theme, tex, overlayOnly:true, noClear:true, transparent:noRock};
       if(useEngine) window.DungeonEngine.renderTo(ctx, osub, oopt);
       else drawLocal(osub, {overlayOnly:true, transparent:noRock});
+    }
+    // Scene colour tint (Architect-style scene lighting) — a global colour grade over the
+    // finished map. `multiply` keeps it readable and shifts everything toward the tint.
+    // Applied BEFORE the UI overlays and INSIDE the export path, so it bakes into PNG/VTT.
+    if(map.sceneTint && map.sceneTintA>0){
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.globalAlpha=Math.max(0,Math.min(1,map.sceneTintA));
+      ctx.fillStyle=map.sceneTint; ctx.fillRect(0,0,W,H); ctx.restore();
+      ctx.globalAlpha=1; ctx.globalCompositeOperation="source-over";
     }
     // One global lights/shadows overlay over the finished stack, occluded by the
     // union of every visible layer's walls/shapes.
@@ -5329,14 +5362,14 @@
   // WITHOUT baking a per-shape style, so the room adopts the map's current floor/walls.
   // Overlapping a stamped room onto existing rooms merges walls via the existing path.
   const ROOM_TEMPLATES=[
-    { name:"Bedroom", w:6, h:5,
+    { name:"Bedroom", cat:"Bedroom", theme:"Residence", w:6, h:5,
       objs:[["bundled:2mtf-obj-bed-pattern-1-b",1.5,1.4,1.73,2.07],
             ["bundled:2mtf-obj-table-end-1-dark",2.7,0.9,0.75,0.56],
             ["bundled:2mtf-obj-storage-bookshelf-1-a-dark",4.6,0.4,1.08,0.54],
             ["bundled:2mtf-obj-rug-animal-skin",3.6,3.4,2.02,1.28],
             ["bundled:2mtf-obj-chair-armchair-1-a",4.9,3.6,1.06,1.36]],
       doors:[[3,5,0,1]] },
-    { name:"Tavern / Common Room", w:9, h:7,
+    { name:"Tavern / Common Room", cat:"Social", theme:"Tavern", w:9, h:7,
       objs:[["bundled:2mtw-obj-table-round-2-dark",2.6,2.4,1.08,1.12],
             ["bundled:2mtw-obj-chair-simple-3-dark",2.6,1.5,0.55,0.48],
             ["bundled:2mtw-obj-chair-simple-3-dark",2.6,3.3,0.55,0.48,180],
@@ -5354,7 +5387,7 @@
             ["bundled:2mtf-obj-storage-barrel-1-dark",8.1,1.2,0.47,0.45],
             ["bundled:2mtf-obj-cooking-oven-fireplace-3",0.7,3.4,0.89,1.28]],
       doors:[[4.5,7,0,2]] },
-    { name:"Storage Room", w:6, h:5,
+    { name:"Storage Room", cat:"Storage", theme:"Dungeon", w:6, h:5,
       objs:[["bundled:2mtw-obj-storage-crates-1-dark",1.0,1.0,0.93,0.9],
             ["bundled:2mtw-obj-storage-crates-1-dark",1.95,1.0,0.93,0.9],
             ["bundled:2mtw-obj-storage-crates-1-dark",1.0,1.95,0.93,0.9],
@@ -5366,7 +5399,7 @@
             ["bundled:2mtf-obj-storage-shelf-1-dark",5.55,3.0,1.08,0.49,90],
             ["bundled:2mtr-obj-chest-1x1-1",0.7,4.3,1.0,1.0]],
       doors:[[3,5,0,1]] },
-    { name:"Study / Library", w:6, h:5,
+    { name:"Study / Library", cat:"Study", theme:"Residence", w:6, h:5,
       objs:[["bundled:2mtf-obj-table-writing-desk-dark",3.0,1.15,1.03,0.57],
             ["bundled:2mtf-obj-chair-armchair-1-b",3.0,2.2,1.03,1.12,180],
             ["bundled:2mtf-obj-storage-bookshelf-2-dark",1.0,0.35,1.06,0.47],
@@ -5376,7 +5409,7 @@
             ["bundled:2mtf-obj-storage-bookshelf-2-dark",5.62,3.7,1.06,0.47,90],
             ["bundled:2mtr-obj-carpet-2x2",2.6,3.4,2.0,2.0]],
       doors:[[3,5,0,1]] },
-    { name:"Dining Hall", w:9, h:5,
+    { name:"Dining Hall", cat:"Dining", theme:"Castle", w:9, h:5,
       objs:[["bundled:2mtw-obj-table-rectangle-1-dark",3.55,2.5,1.93,0.9],
             ["bundled:2mtw-obj-table-rectangle-1-dark",5.5,2.5,1.93,0.9],
             ["bundled:2mtf-obj-chair-bench-1-dark",4.55,1.7,1.6,0.33],
@@ -5388,7 +5421,7 @@
             ["bundled:2mtw-obj-light-brazier-2-a",0.7,4.3,0.68,0.71],
             ["bundled:2mtw-obj-light-brazier-2-a",8.3,4.3,0.68,0.71]],
       doors:[[4.5,5,0,2]] },
-    { name:"Cottage (2 rooms)", w:8, h:6,
+    { name:"Cottage (2 rooms)", cat:"Dwelling", theme:"Village", w:8, h:6,
       walls:[[4,0,4,6]],
       objs:[["bundled:2mtw-obj-bed-pattern-7-g",1.3,1.4,1.26,1.91],
             ["bundled:2mtf-obj-table-end-2-dark",2.7,1.0,0.9,0.55],
@@ -5472,7 +5505,7 @@
   function prefabEntry(pf){ return (map.prefabs||[]).find(p=>p.id===pf) || null; }
   function prefabLocked(pf){ const e=prefabEntry(pf); return e ? e.locked!==false : false; }
   function prefabChildren(pf){   // {kind,idx,obj} across the active layer
-    const out=[]; const arrs=[["shape",map.shapes],["wall",map.walls],["door",map.doors],["stair",map.stairs],["object",map.objects]];
+    const out=[]; const arrs=[["shape",map.shapes],["wall",map.walls],["door",map.doors],["stair",map.stairs],["object",map.objects],["light",map.lights],["shadow",map.shadows]];
     for(const [kind,arr] of arrs){ (arr||[]).forEach((o,i)=>{ if(o&&o.pf===pf) out.push({kind,idx:i,obj:o}); }); }
     return out;
   }
@@ -5529,7 +5562,7 @@
   function loadCustomPrefabs(){ try{ const a=JSON.parse(localStorage.getItem(CPF_KEY)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
   function saveCustomPrefabs(list){ try{ localStorage.setItem(CPF_KEY, JSON.stringify(list)); return true; }catch(e){ toast("Couldn't save — browser storage may be full."); return false; } }
   function stripElemMeta(o){ delete o.id; delete o.pf; delete o.locked; delete o._adj; return o; }
-  function serializeGroupToTemplate(gsel, name){
+  function serializeGroupToTemplate(gsel, name, cat, theme){
     const kids=groupMembers(gsel); if(!kids.length) return null;
     const roomShape=groupRoomShape(kids);
     const rb = roomShape ? bounds(roomShape,"shape") : elemsBBox(kids); if(!rb) return null;
@@ -5539,21 +5572,42 @@
     for(const it of kids){ if(it.obj===roomShape) continue;
       const o=stripElemMeta(JSON.parse(JSON.stringify(it.obj))); shiftElem(o, it.kind, -rx, -ry);
       els.push({kind:it.kind, obj:o}); }
-    return { id:"cpf-"+Date.now().toString(36)+"-"+Math.floor(Math.random()*1e4), name, w:Math.round(rb.w), h:Math.round(rb.h), els, custom:true };
+    return { id:"cpf-"+Date.now().toString(36)+"-"+Math.floor(Math.random()*1e4), name,
+      cat:(cat||"").trim(), theme:(theme||"").trim(), w:Math.round(rb.w), h:Math.round(rb.h), els, custom:true };
   }
+  // Distinct category / theme values across stock + custom prefabs, for datalists & filters.
+  function prefabCats(){ const s=new Set(); ROOM_TEMPLATES.concat(loadCustomPrefabs()).forEach(t=>{ if(t.cat) s.add(t.cat); }); return [...s].sort((a,b)=>a.localeCompare(b)); }
+  function prefabThemes(){ const s=new Set(); ROOM_TEMPLATES.concat(loadCustomPrefabs()).forEach(t=>{ if(t.theme) s.add(t.theme); }); return [...s].sort((a,b)=>a.localeCompare(b)); }
+  let _pfSaveGsel=null;
+  function closePrefabSaveModal(){ const m=$("prefabSaveModal"); if(m) m.style.display="none"; _pfSaveGsel=null; }
   function saveSelectionAsPrefab(){
     let gsel=sel;
     if(gsel && gsel.kind==="shape" && isRoomShape((map.shapes||[])[gsel.idx])) gsel={kind:"prefab", roomIdx:gsel.idx};
     if(!gsel || gsel.kind!=="prefab"){ toast("Select a room or prefab first (click it), then Save as prefab."); return; }
-    const def = groupName(gsel)==="Room" ? "My Room" : groupName(gsel);
-    const name=(window.prompt("Save this room as a reusable prefab.\nName:", def)||"").trim();
-    if(!name) return;
-    const rec=serializeGroupToTemplate(gsel, name); if(!rec){ toast("Nothing to save."); return; }
+    _pfSaveGsel=gsel;
+    // Prefill: if the selection is an existing custom prefab (armed or same name), reuse its cat/theme.
+    const gname=groupName(gsel);
+    const def = gname==="Room" ? "My Room" : gname;
+    const existing=loadCustomPrefabs().find(p=>p.name.toLowerCase()===def.toLowerCase());
+    const dl=(id,vals)=>{ const d=$(id); if(d) d.innerHTML=vals.map(v=>'<option value="'+esc(v)+'">').join(""); };
+    dl("pfCatList", prefabCats()); dl("pfThemeList", prefabThemes());
+    if($("pfNameIn")) $("pfNameIn").value=def;
+    if($("pfCatIn")) $("pfCatIn").value=existing?(existing.cat||""):"";
+    if($("pfThemeIn")) $("pfThemeIn").value=existing?(existing.theme||""):"";
+    if($("pfSaveTitle")) $("pfSaveTitle").textContent = existing? 'Update prefab' : 'Save as prefab';
+    const m=$("prefabSaveModal"); if(m) m.style.display="flex";
+    setTimeout(()=>{ const n=$("pfNameIn"); if(n){ n.focus(); n.select(); } }, 30);
+  }
+  function commitPrefabSave(){
+    const gsel=_pfSaveGsel; if(!gsel){ closePrefabSaveModal(); return; }
+    const name=(($("pfNameIn")||{}).value||"").trim();
+    if(!name){ toast("Give the prefab a name."); const n=$("pfNameIn"); if(n) n.focus(); return; }
+    const cat=(($("pfCatIn")||{}).value||"").trim(), theme=(($("pfThemeIn")||{}).value||"").trim();
+    const rec=serializeGroupToTemplate(gsel, name, cat, theme); if(!rec){ toast("Nothing to save."); closePrefabSaveModal(); return; }
     const list=loadCustomPrefabs();
     const i=list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
-    if(i>=0){ if(!window.confirm('A prefab named "'+name+'" already exists. Update it?')) return; rec.id=list[i].id; list[i]=rec; }
-    else list.push(rec);
-    if(saveCustomPrefabs(list)){ buildRoomGrid(); toast('Saved prefab "'+name+'"'+(i>=0?" (updated)":"")+" — it's in the palette below."); }
+    if(i>=0){ rec.id=list[i].id; list[i]=rec; } else list.push(rec);
+    if(saveCustomPrefabs(list)){ closePrefabSaveModal(); buildRoomGrid(); toast('Saved prefab "'+name+'"'+(i>=0?" (updated)":"")+" — it's in the palette below."); }
   }
   function deleteCustomPrefab(id, nm){
     if(!window.confirm('Delete your prefab "'+nm+'"? This can\'t be undone.')) return;
@@ -5601,8 +5655,11 @@
       thumb.style.cssText="flex:0 0 auto;width:48px;height:40px;border-radius:4px;background:#efe9dd";
       _roomThumbs.push([thumb,tpl]);
       const txt=document.createElement("span"); txt.style.cssText="flex:1;min-width:0";
+      const meta=[tpl.w+'×'+tpl.h+' cells', pieces+' pieces'];
+      if(tpl.theme) meta.push(esc(tpl.theme));
+      if(isCustom) meta.push('yours');
       txt.innerHTML='<b style="font-size:13px">'+esc(tpl.name)+'</b><span style="display:block;font-size:11px;color:var(--muted)">'
-        +tpl.w+'×'+tpl.h+' cells · '+pieces+' pieces'+(isCustom?' · yours':'')+'</span>';
+        +meta.join(' · ')+'</span>';
       b.appendChild(thumb); b.appendChild(txt);
       b.onclick=()=>{ if(armed) disarmRoom(true); else armRoom(tpl); };
       row.appendChild(b);
@@ -5612,13 +5669,42 @@
         row.appendChild(del); }
       return row;
     };
-    ROOM_TEMPLATES.forEach(tpl=> g.appendChild(mkRow(tpl,false)));
+    // Merge stock + custom into one taggable list.
     const custom=loadCustomPrefabs();
-    if(custom.length){
-      const hd=document.createElement("div"); hd.textContent="My Prefabs";
-      hd.style.cssText="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:9px 0 1px";
-      g.appendChild(hd);
-      custom.forEach(rec=> g.appendChild(mkRow(rec,true)));
+    const all = ROOM_TEMPLATES.map(t=>({tpl:t,isCustom:false})).concat(custom.map(t=>({tpl:t,isCustom:true})));
+
+    // Populate the two filter <select>s (preserve the current selection where still valid).
+    const catSel=$("roomCat"), themeSel=$("roomTheme");
+    const fillSel=(selEl, vals, allLabel)=>{ if(!selEl) return; const cur=selEl.value;
+      selEl.innerHTML='<option value="">'+allLabel+'</option>'+vals.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join("");
+      selEl.value = vals.includes(cur)? cur : ""; };
+    fillSel(catSel, prefabCats(), "All functions");
+    fillSel(themeSel, prefabThemes(), "All settings");
+    const fCat=catSel?catSel.value:"", fTheme=themeSel?themeSel.value:"";
+
+    // Filter by the active dropdowns.
+    let list=all.filter(e=> (!fCat || e.tpl.cat===fCat) && (!fTheme || e.tpl.theme===fTheme));
+
+    if(!list.length){
+      const empty=document.createElement("div");
+      empty.style.cssText="font-size:12px;color:var(--muted);padding:6px 2px";
+      empty.textContent="No prefabs match these filters.";
+      g.appendChild(empty); return;
+    }
+
+    // Group rows under category headers (alphabetical; blank category → "Uncategorized", shown last).
+    const groups=new Map();
+    for(const e of list){ const k=e.tpl.cat||"￿Uncategorized"; if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(e); }
+    const keys=[...groups.keys()].sort((a,b)=>a.localeCompare(b));
+    const single = keys.length<=1;   // one category → skip the header, it's just noise
+    for(const k of keys){
+      if(!single){
+        const hd=document.createElement("div");
+        hd.textContent = k==="￿Uncategorized" ? "Uncategorized" : k;
+        hd.style.cssText="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:9px 0 1px";
+        g.appendChild(hd);
+      }
+      for(const e of groups.get(k)) g.appendChild(mkRow(e.tpl, e.isCustom));
     }
     redrawRoomThumbs();
   }
@@ -5659,7 +5745,7 @@
       if(it.kind==="shape") map.shapes.push(e);
       else if(it.kind==="wall") map.walls.push(e);
       else if(it.kind==="door"){ e._adj=true; map.doors.push(e); }
-      else if(it.kind==="object"){ const t=texReg.get(e.tex); if(t){ e.w=t.w; e.h=t.h; } map.objects.push(e); }
+      else if(it.kind==="object"){ if(!(e.w>0)||!(e.h>0)){ const t=texReg.get(e.tex); if(t){ e.w=t.w; e.h=t.h; } } map.objects.push(e); }
       else if(it.kind==="light") map.lights.push(e);
       else if(it.kind==="shadow") map.shadows.push(e);
       else if(it.kind==="stair") map.stairs.push(e);
@@ -5682,7 +5768,7 @@
     ctx.globalAlpha=0.16; ctx.fillStyle=C.sel; ctx.fillRect(a[0],a[1], b[0]-a[0], b[1]-a[1]); ctx.globalAlpha=1;
     for(const it of inst.els){
       if(it.kind==="object"){ const o=it.obj; const t=texGet(o.tex); if(!t||!t.img||!t.img.complete||!t.img.naturalWidth) continue;
-        const w=((t.w||o.w)||1)*wpx(), h=((t.h||o.h)||1)*wpx(); const p=toScreen(o.x+ox, o.y+oy);
+        const w=((o.w||t.w)||1)*wpx(), h=((o.h||t.h)||1)*wpx(); const p=toScreen(o.x+ox, o.y+oy);
         ctx.save(); ctx.translate(p[0],p[1]); if(o.rot) ctx.rotate(o.rot);
         ctx.globalAlpha=0.55; const at=t.atlas;
         if(at) ctx.drawImage(t.img, at.x,at.y,at.w,at.h, -w/2,-h/2, w,h); else ctx.drawImage(t.img, -w/2,-h/2, w,h);
@@ -5742,7 +5828,7 @@
   function deleteGroup(sel){
     pushHistory();
     if(sel.pf!=null){
-      for(const arr of [map.shapes,map.walls,map.doors,map.stairs,map.objects]){ if(!arr) continue; for(let i=arr.length-1;i>=0;i--){ if(arr[i]&&arr[i].pf===sel.pf) arr.splice(i,1); } }
+      for(const arr of [map.shapes,map.walls,map.doors,map.stairs,map.objects,map.lights,map.shadows]){ if(!arr) continue; for(let i=arr.length-1;i>=0;i--){ if(arr[i]&&arr[i].pf===sel.pf) arr.splice(i,1); } }
       map.prefabs=(map.prefabs||[]).filter(p=>p.id!==sel.pf);
     } else if(sel.roomIdx!=null){
       const rm=new Set(groupMembers(sel).map(k=>k.obj));
@@ -5921,8 +6007,11 @@
       $("darkness").onchange=endLightEdit;
     }
     if($("scenePresets")){ $("scenePresets").querySelectorAll("button").forEach(bt=>{
-      bt.onclick=()=>{ pushHistory(); map.darkness=parseFloat(bt.dataset.dark)||0; if(!map.lit) map.lit=true;
-        syncLightUI(); commit(); toast("Scene: "+bt.textContent+" ("+Math.round(map.darkness*100)+"% dark)"); }; }); }
+      bt.onclick=()=>{ pushHistory();
+        map.darkness=parseFloat(bt.dataset.dark)||0;
+        map.sceneTint=bt.dataset.tint||null; map.sceneTintA=parseFloat(bt.dataset.a)||0;
+        if(map.darkness>0 && !map.lit) map.lit=true;          // the darkness wash needs Lights on
+        syncLightUI(); commit(); toast("Scene: "+bt.textContent); }; }); }
     if($("lightColor")){ $("lightColor").oninput=e=>liveLight({color:e.target.value});
                          $("lightColor").onchange=endLightEdit; }
     if($("lightRadius")){ $("lightRadius").oninput=e=>liveLight({r:(+e.target.value)/2});
@@ -6086,6 +6175,13 @@
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
     if($("imgAdd"))   $("imgAdd").onclick   =()=>$("imgFile").click();
     if($("savePrefab")) $("savePrefab").onclick =saveSelectionAsPrefab;
+    if($("roomCat")) $("roomCat").onchange = buildRoomGrid;
+    if($("roomTheme")) $("roomTheme").onchange = buildRoomGrid;
+    if($("pfSaveOk")) $("pfSaveOk").onclick = commitPrefabSave;
+    if($("pfSaveCancel")) $("pfSaveCancel").onclick = closePrefabSaveModal;
+    if($("prefabSaveModal")) $("prefabSaveModal").addEventListener("mousedown", e=>{ if(e.target===$("prefabSaveModal")) closePrefabSaveModal(); });
+    ["pfNameIn","pfCatIn","pfThemeIn"].forEach(id=>{ const el=$(id); if(el) el.addEventListener("keydown", e=>{
+      if(e.key==="Enter"){ e.preventDefault(); commitPrefabSave(); } else if(e.key==="Escape"){ e.preventDefault(); closePrefabSaveModal(); } }); });
     if($("imgFile"))  $("imgFile").onchange =e=>{ const fs=[...e.target.files];   // copy BEFORE clearing (FileList is live)
       e.target.value=""; if(fs.length) importImageFiles(fs).catch(err=>toast(err.message||"Import failed.")); };
     syncAdvancedUI(); syncStyleScope(); initLights(); initShadows();
