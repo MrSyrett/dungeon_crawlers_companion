@@ -10,19 +10,20 @@
 
 export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E";
 
+// Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
-  { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--red)" },
-  { key: "ACE", name: "ACE!", short: "ACE", accent: "var(--ace)" },
-  // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
-  // same system (one sheet, one shelf, one tab).
-  { key: "KOB", name: "Kids on Bikes", short: "KoB", accent: "var(--kob)" },
   { key: "NIM", name: "Nimble", short: "NIM", accent: "var(--nimble)" },
-  // Star Wars: The Roleplaying Game (WEG 1e, 1987) with the Rules Companion.
-  { key: "SW", name: "Star Wars", short: "SW", accent: "var(--sw)" },
   // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
   // plus original concise descriptions for non-SRD options.
   { key: "DND", name: "D&D", short: "D&D", accent: "var(--dnd)" },
+  { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--red)" },
+  // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
+  // same system (one sheet, one shelf, one tab).
+  { key: "KOB", name: "Kids on Bikes", short: "KoB", accent: "var(--kob)" },
+  { key: "ACE", name: "ACE!", short: "ACE", accent: "var(--ace)" },
+  // Star Wars: The Roleplaying Game (WEG 1e, 1987) with the Rules Companion.
+  { key: "SW", name: "Star Wars", short: "SW", accent: "var(--sw)" },
   // D6 System: Second Edition (Gallant Knight Games, 2024) — a genre-agnostic
   // evolution of the West End Games D6 System.
   { key: "D62E", name: "D6 System 2e", short: "D62e", accent: "var(--d62e)" },
