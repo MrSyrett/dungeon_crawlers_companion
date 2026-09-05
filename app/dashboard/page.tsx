@@ -44,8 +44,7 @@ const SD_REFERENCE: { href: string; label: string }[] = [
 const DCC_REFERENCE: { href: string; label: string }[] = [
   { href: "/dcc/classes", label: "Classes" },
   { href: "/dcc/races", label: "Races" },
-  { href: "/dcc/skills", label: "Skills" },
-  { href: "/dcc/spells", label: "Spells" },
+  { href: "/dcc/skills-and-spells", label: "Skills & Spells" },
   { href: "/dcc/loot", label: "Loot" },
   { href: "/dcc/bestiary", label: "Bestiary" },
   { href: "/dcc/options", label: "Options" },

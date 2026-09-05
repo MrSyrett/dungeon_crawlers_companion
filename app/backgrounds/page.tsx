@@ -65,12 +65,20 @@ export default async function BackgroundsPage({
             {SD_BACKGROUNDS.length} Shadowdark backgrounds{hbRows.length ? ` + ${hbRows.length} homebrew` : ""}
           </p>
         </div>
-        <Link
-          href="/dashboard"
-          className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
-        >
-          &larr; Home
-        </Link>
+        <div className="flex shrink-0 gap-2">
+          <Link
+            href="/homebrew"
+            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--gold)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+          >
+            My Homebrew
+          </Link>
+          <Link
+            href="/dashboard"
+            className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]"
+          >
+            &larr; Home
+          </Link>
+        </div>
       </header>
 
       <HomebrewManager type="background" campaigns={campaigns} initial={hbOwn} />

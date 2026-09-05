@@ -3,31 +3,63 @@ import { getCurrentUser } from "@/lib/auth";
 import { SW_SKILLS } from "@/lib/data/sw-skills";
 import { SW_TABLES } from "@/lib/data/sw-tables";
 import { SW_FORCE } from "@/lib/data/sw-force";
-import { SW_ATTRIBUTES } from "@/lib/data/sw-types";
-import { SwHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, one, BookTag, BOOK_NAME, type Query, type RawQuery } from "@/components/SwRef";
+import { SW_ATTRIBUTES, type SwForcePower, type SwBook } from "@/lib/data/sw-types";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import HomebrewEditor from "@/components/HomebrewEditor";
+import { SwHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, BookTag, BOOK_NAME, type Query, type RawQuery } from "@/components/SwRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/sw/skills";
 const ATTRS = [...SW_ATTRIBUTES.map((a) => ({ key: a, label: a })), { key: "Force", label: "The Force" }];
 const FORCE_ORDER = ["Control", "Sense", "Alter", "Control & Sense", "Control & Alter", "Sense & Alter", "Control, Sense & Alter"];
+const SW_BOOKS: SwBook[] = ["core", "sourcebook", "companion"];
+
+type ForceRow = SwForcePower & { homebrew?: boolean };
+
+// A homebrew record's data blob → a SwForcePower-shaped display row.
+function hbToForce(data: Record<string, unknown>, name: string): ForceRow {
+  const s = (k: string) => (typeof data[k] === "string" ? (data[k] as string) : "");
+  const requires = (Array.isArray(data.requires) ? data.requires : []).filter((x): x is string => typeof x === "string");
+  return {
+    name,
+    attribute: s("attribute") || "Control",
+    difficulty: s("difficulty"),
+    time: s("time") || undefined,
+    requires: requires.length ? requires : undefined,
+    description: s("description"),
+    book: (SW_BOOKS.includes(s("book") as SwBook) ? s("book") : "companion") as SwBook,
+    page: 0,
+    homebrew: true,
+  };
+}
 
 export default async function SwSkillsPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  const [hbVisible, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "sw-force" }),
+    ownHomebrew(user.id, "sw-force"),
+    userCampaigns(user.id),
+  ]);
+  const hbPowers: ForceRow[] = hbVisible.map((h) => hbToForce(h.data as Record<string, unknown>, h.name));
+  const ALL_FORCE: ForceRow[] = [...hbPowers, ...SW_FORCE.map((p) => ({ ...p }))];
+
   const raw = await searchParams;
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
   const attr = ATTRS.some((a) => a.key === one(raw.attr)) ? one(raw.attr) : "";
   const current: Query = { q, attr };
   const results = SW_SKILLS.filter((s) => attr !== "Force" && (!attr || s.attribute === attr) && (!needle || [s.name, s.description, s.time ?? ""].join(" ").toLowerCase().includes(needle)));
-  const powers = SW_FORCE.filter((p) => (!attr || attr === "Force") && (!needle || [p.name, p.attribute, p.difficulty, p.description].join(" ").toLowerCase().includes(needle)));
+  const powers = ALL_FORCE.filter((p) => (!attr || attr === "Force") && (!needle || [p.name, p.attribute, p.difficulty, p.description].join(" ").toLowerCase().includes(needle)));
   const powerGroups = [...new Set(powers.map((p) => p.attribute))].sort((a, b) => FORCE_ORDER.indexOf(a) - FORCE_ORDER.indexOf(b));
   const groups = SW_ATTRIBUTES.filter((a) => results.some((s) => s.attribute === a));
   const count = results.length + powers.length;
   const info = (a: string) => SW_TABLES.attributes.find((x) => x.name === a)?.description ?? "";
   return (
     <div className="mx-auto w-full max-w-5xl px-5 py-10">
-      <SwHeader title="Skills & The Force" subtitle={`${SW_SKILLS.length} skills under six attributes · ${SW_FORCE.length} Force powers`} />
+      <SwHeader title="Skills & The Force" subtitle={`${SW_SKILLS.length} skills under six attributes · ${SW_FORCE.length} Force powers${hbPowers.length ? ` + ${hbPowers.length} homebrew` : ""}`} />
       <p className="mb-4 text-sm leading-relaxed text-[var(--muted)]">Every skill starts at the code of the attribute it sits under; the dice you add go on top. Roll the skill against a difficulty number — or the attribute itself when no skill applies. Reaction skills (dodge, the parries, evasion, shields) can be used out of turn against an attack. Force skills — Control, Sense and Alter — belong to no attribute; the powers they unlock are listed at the bottom. <span className="text-[var(--sw)]">RC</span> marks Rules Companion revisions, with the core version folded underneath.</p>
+      <div className="mb-6"><HomebrewEditor kind="sw-force" campaigns={campaigns} initial={hbOwn} /></div>
       <SearchForm base={BASE} q={q} placeholder="Search skills…" hidden={{ attr }} />
       <ChipRow label="Attribute" base={BASE} current={current} param="attr" options={ATTRS} active={attr} />
       <CountLine count={count} noun="entry" base={BASE} filtered={Boolean(needle || attr)} />
@@ -59,8 +91,8 @@ export default async function SwSkillsPage({ searchParams }: { searchParams: Pro
               <h3 className="mb-2 text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--muted)]">{g}</h3>
               <div className="grid gap-3 md:grid-cols-2">
                 {powers.filter((p) => p.attribute === g).map((p) => (
-                  <article key={p.name} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
-                    <div className="flex flex-wrap items-baseline justify-between gap-2"><h4 className={nameCls}>{p.name}<BookTag book={p.book} /></h4><span className={badge}>{p.time ?? ""}{p.time ? " · " : ""}p.{p.page}</span></div>
+                  <article key={`${p.homebrew ? "hb" : "bk"}-${p.name}`} className="rounded border border-[var(--border)] bg-[var(--panel-2)] p-3">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2"><h4 className={nameCls}>{p.name}{p.homebrew ? null : <BookTag book={p.book} />}</h4>{p.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>{p.time ?? ""}{p.time ? " · " : ""}p.{p.page}</span>}</div>
                     <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Difficulty.</span> {p.difficulty}</p>
                     {p.requires?.length ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Requires.</span> {p.requires.join(", ")}</p> : null}
                     <p className="mt-2 text-[12px] leading-relaxed text-[var(--muted)]">{p.description}</p>

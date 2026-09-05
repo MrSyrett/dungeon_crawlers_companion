@@ -11,6 +11,7 @@ export const chipOn = "border-[var(--nimble)] bg-[var(--panel-2)] text-[#9fe3bd]
 export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#9fe3bd]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
+export const hbBadge = "rounded border border-[var(--nimble)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#9fe3bd]";
 
 export function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch }; const sp = new URLSearchParams();

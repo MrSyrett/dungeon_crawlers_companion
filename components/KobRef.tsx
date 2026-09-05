@@ -16,6 +16,7 @@ export const chipOn = "border-[var(--kob)] bg-[var(--panel-2)] text-[#d9c2ff]";
 export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#d9c2ff]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const bookBadge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
+export const hbBadge = "rounded border border-[var(--kob)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#d9c2ff]";
 
 const BOOK_NAME: Record<string, string> = Object.fromEntries(KOB_BOOKS.map((b) => [b.key, b.name]));
 export function bookName(key: KobBook | string): string {
