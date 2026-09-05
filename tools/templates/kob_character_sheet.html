@@ -84,10 +84,9 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 
 /* HEADER */
 .hdr-row{display:flex;border-bottom:2px solid var(--border);background:var(--kob);}
-.hdr-logo{background:var(--section-hdr);padding:10px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:130px;gap:2px;}
-.hdr-logo .kob-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;line-height:1;color:#fff;letter-spacing:.02em;text-align:center;}
-.hdr-logo .kob-word span{display:block;font-size:12px;color:#c9aaff;letter-spacing:.2em;}
-.hdr-logo .kob-book{margin-top:5px;background:#c9aaff;color:#1a1a1a;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:10px;letter-spacing:.14em;padding:2px 7px;border-radius:2px;text-transform:uppercase;}
+.hdr-logo{background:var(--section-hdr);padding:6px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:120px;gap:1px;}
+.hdr-logo .kob-word{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;line-height:1;color:#fff;letter-spacing:.02em;text-align:center;}
+.hdr-logo .kob-word span{display:block;font-size:10px;color:#c9aaff;letter-spacing:.2em;}
 .hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);border-left:2px solid var(--border);}
 .hdr-field{padding:5px 8px 6px;border-right:1px solid rgba(255,255,255,.25);border-bottom:1px solid rgba(255,255,255,.25);min-width:0;}
 .hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.75);margin-bottom:2px;}
@@ -329,16 +328,13 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="hdr-row">
     <div class="hdr-logo">
       <div class="kob-word">KIDS ON<span>BIKES</span></div>
-      <div class="kob-book" id="book-badge">Kids on Bikes</div>
     </div>
     <div class="hdr-fields">
-      <div class="hdr-field wide" style="grid-column:span 4;"><label>First name / nickname</label><input type="text" id="f-name" placeholder="Billy"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Last name</label><input type="text" id="f-last" placeholder="(after introductions)"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Book</label><select id="f-book" onchange="onBookChange()"><option value="bikes">Kids on Bikes</option><option value="brooms">Kids on Brooms</option><option value="capes">Kids in Capes</option></select></div>
+      <div class="hdr-field wide" style="grid-column:span 3;"><label>First name / nickname</label><input type="text" id="f-name" placeholder="Billy"></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Trope</label><input type="text" id="f-trope" placeholder="Brilliant Mathlete"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label id="age-label">Age</label><input type="text" id="f-age" placeholder="Age group" oninput="recalc()"></div>
+      <div class="hdr-field" style="grid-column:span 2;"><label>Book</label><select id="f-book" onchange="onBookChange()"><option value="bikes">Kids on Bikes</option><option value="brooms">Kids on Brooms</option><option value="capes">Kids in Capes</option></select></div>
       <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
-      <div class="hdr-field" style="grid-column:span 5;"><label>Trope</label><input type="text" id="f-trope" placeholder="Brilliant Mathlete"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label id="age-label">Age</label><input type="text" id="f-age" placeholder="Age group" oninput="recalc()"></div>
-      <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
     </div>
   </div>
 
@@ -608,7 +604,6 @@ function recalc() {
   STATS.forEach(s => { const b = bonusOf(s.id); $('ab-' + s.id).textContent = b ? (b > 0 ? '+' + b : String(b)) : ''; $('ab-' + s.id).title = 'Total bonus on ' + s.id + ' checks'; });
   // book chrome
   const info = bookInfo();
-  $('book-badge').textContent = BOOK_NAMES[book()];
   document.querySelector('.kob-word').innerHTML = 'KIDS ' + (book() === 'capes' ? 'IN' : 'ON') + '<span>' + (book() === 'brooms' ? 'BROOMS' : book() === 'capes' ? 'CAPES' : 'BIKES') + '</span>';
   $('age-label').textContent = book() === 'brooms' ? 'Grade' : 'Age';
   $('bag-title').textContent = info ? info.bagLabel : 'Backpack';
@@ -921,7 +916,7 @@ function collectSheet() {
   const v = id => $(id).value;
   return {
     system:'KOB', v:1, book: book(),
-    name: v('f-name'), lastName: v('f-last'), pronouns: v('f-pronouns'), player: v('f-player'), trope: v('f-trope'), age: v('f-age'),
+    name: v('f-name'), pronouns: v('f-pronouns'), trope: v('f-trope'), age: v('f-age'),
     stats, mods, bonuses, at, stress,
     strengths: [...document.querySelectorAll('#strengths-body tr')].map(tr => ({ name: tr.querySelector('.st-name').value, note: tr.querySelector('.st-note').value })).filter(s => s.name || s.note),
     flaw: v('f-flaw'), knack: v('f-knack'),
@@ -940,7 +935,7 @@ function applySheet(d) {
   const set = (id, val) => { $(id).value = val == null ? '' : val; };
   set('f-book', d.book || 'bikes'); document.body.dataset.book = book();
   fillAgeOptions(); fillDatalists();
-  set('f-name', d.name); set('f-last', d.lastName); set('f-pronouns', d.pronouns); set('f-player', d.player); set('f-trope', d.trope); set('f-age', d.age);
+  set('f-name', [d.name, d.lastName].filter(Boolean).join(' ')); set('f-pronouns', d.pronouns); set('f-trope', d.trope); set('f-age', d.age);
   STATS.forEach(s => { set('die-' + s.id, (d.stats && d.stats[s.id]) || 8); set('mod-' + s.id, (d.mods && d.mods[s.id]) || 0); });
   at = typeof d.at === 'number' ? d.at : 3; stress = typeof d.stress === 'number' ? d.stress : 0;
   $('strengths-body').innerHTML = ''; (d.strengths && d.strengths.length ? d.strengths : [{ name:'', note:'' }, { name:'', note:'' }, { name:'', note:'' }]).forEach(addStrengthRow);
@@ -1008,7 +1003,7 @@ buildStats();
 let _campaign = null;
 const _campaignClientKey = 'ck-' + Math.random().toString(36).slice(2, 12);
 let _campaignLastId = 0; let _campaignTimer = null;
-function campaignPlayerName() { return $('f-name').value.trim() || $('f-player').value.trim() || 'Player'; }
+function campaignPlayerName() { return $('f-name').value.trim() || 'Player'; }
 function campaignUpdateBtn() { const btn = $('campaign-btn'); if(!btn) return; if(_campaign) { btn.title = 'Campaign: ' + _campaign.name; btn.style.background = '#241f10'; btn.style.color = '#e8c84a'; btn.style.borderColor = '#7a5a00'; } else { btn.title = 'Campaign'; btn.style.background = 'transparent'; btn.style.color = '#888'; btn.style.borderColor = '#333'; } }
 function openCampaign() { $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
 function closeCampaign() { $('campaign-overlay').classList.remove('open'); }

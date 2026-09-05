@@ -367,8 +367,7 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="hdr-fields">
       <div class="hdr-field wide" style="grid-column:span 4;"><label>Character name</label><input type="text" id="f-name" placeholder="Name"></div>
       <div class="hdr-field" style="grid-column:span 4;"><label>Template</label><input type="text" id="f-template" placeholder="Set by the builder"></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Species</label><input type="text" id="f-species" placeholder="Human"></div>
-      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
+      <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Species</label><input type="text" id="f-species" placeholder="Human"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Sex</label><input type="text" id="f-sex"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Age</label><input type="text" id="f-age"></div>
       <div class="hdr-field" style="grid-column:span 2;"><label>Height</label><input type="text" id="f-height"></div>
@@ -403,9 +402,9 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="vline"><button class="small-btn ghost" onclick="callDarkSide()">Call on the Dark Side</button></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Armor</span><button class="tile-pick" onclick="openArmorPicker()">pick</button></div>
+          <div class="vlbl"><span>Armor</span></div>
           <div class="vbig"><input type="text" id="f-armor-pips" class="code" placeholder="+1D" style="width:64px;" oninput="recalc()"></div>
-          <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="none" style="width:100%;text-align:left;" oninput="recalc()"></div>
+          <div class="vline"><input type="text" id="f-armor" list="dl-armor" placeholder="none (set from Equipment)" style="width:100%;text-align:left;" oninput="recalc()"></div>
         </div>
         <div class="vital">
           <div class="vlbl"><span>Move</span></div>
@@ -413,7 +412,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span>Weapons</span></div>
+      <div class="section-bar"><span>Weapons</span><span class="hdr-right"><button class="hdr-btn" onclick="openWeaponPicker()">⚔ Weapons</button></span></div>
       <table class="tbl" id="weapons-tbl">
         <thead><tr><th style="width:26%;">Weapon</th><th style="width:22%;">Skill</th><th style="width:70px;">Damage</th><th style="width:20%;">Range</th><th>Notes</th><th style="width:110px;"></th></tr></thead>
         <tbody id="weapons-body"></tbody>
@@ -541,15 +540,6 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
 </div>
 
-<!-- ARMOR PICKER -->
-<div id="armor-overlay" class="ov" onclick="if(event.target===this)closeArmorPicker()">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-hd"><div class="ttl">🛡 Armor</div><button class="x" onclick="closeArmorPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="armor-search" class="m-input" placeholder="Search armor…" oninput="renderArmorPicker()"></div>
-    <div class="modal-bd brow-list" id="armor-body"></div>
-  </div>
-</div>
-
 <script>
 // ═══ CORE ═════════════════════════════════════════════════════════════════
 // Die codes live as PIPS everywhere (3D+2 = 11). toCode/fromCode convert.
@@ -617,7 +607,7 @@ function fillPickers() {
   // Picker/shop filter dropdowns (the browse modals build their lists live).
   const skAttr = $('skill-attr'); if(skAttr) skAttr.innerHTML = '<option value="">All attributes</option>' + ATTRS.map(a => '<option value="' + a + '">' + a + '</option>').join('') + '<option value="Force">The Force</option>';
   const fAttr = $('force-attr'); if(fAttr) { const fa = [...new Set(D.force().map(f => String(f.attribute || '').split(/[,&]| and /)[0].trim()).filter(Boolean))].sort(); fAttr.innerHTML = '<option value="">All</option>' + fa.map(a => '<option value="' + esc(a) + '">' + esc(a) + '</option>').join(''); }
-  const gsCat = $('gearstore-cat'); if(gsCat) { const cats = [...new Set(D.gear().filter(g => g.category !== 'Armor').map(g => g.category))].filter(Boolean); cats.push('Weapon'); cats.sort(); gsCat.innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join(''); }
+  const gsCat = $('gearstore-cat'); if(gsCat) { const cats = [...new Set(D.gear().map(g => g.category))].filter(Boolean); cats.push('Weapon'); cats.sort(); gsCat.innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join(''); }
   $('dl-armor').innerHTML = D.gear().filter(g => g.category === 'Armor').map(g => '<option value="' + esc(g.name) + '">').join('');
   $('dl-ships').innerHTML = D.vehicles().map(v => '<option value="' + esc(v.name) + '">').join('');
   $('dl-species').innerHTML = ['Human', ...D.characters().filter(c => c.group === 'Alien').map(c => c.name).sort(), ...D.characters().filter(c => c.group === 'Droid').map(c => c.name).sort()].map(n => '<option value="' + esc(n) + '">').join('');
@@ -886,7 +876,6 @@ function closeGearPicker() { $('gearstore-overlay').classList.remove('open'); }
 function renderGearPicker() {
   const q = norm($('gearstore-search').value), fc = $('gearstore-cat').value;
   const gearList = (fc === 'Weapon' ? [] : D.gear().filter(g => {
-    if(g.category === 'Armor') return false;   // armor has its own picker on the Armor tile
     if(fc && g.category !== fc) return false;
     if(q && !(norm(g.name).includes(q) || norm(g.category || '').includes(q))) return false;
     return true;
@@ -909,6 +898,13 @@ function renderGearPicker() {
         (meta ? '<div class="brow-meta">' + meta + '</div>' : '') + '</div>' + btn + '</div>';
     }
     const g = e._g;
+    if(g.category === 'Armor') {
+      const worn = norm($('f-armor').value) === norm(g.name);
+      const btn = worn ? '<button class="brow-add have">Worn ✓</button>' : '<button class="brow-add" data-add-armor="' + esc(g.name) + '">Wear</button>';
+      const ameta = [g.category, g.stats].filter(Boolean).map(esc).join(' · ');
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + (g.cost ? '<span class="brow-cost">' + esc(g.cost) + ' cr</span>' : '') + '</div>' +
+        (ameta ? '<div class="brow-meta">' + ameta + '</div>' : '') + '</div>' + btn + '</div>';
+    }
     const meta = [g.category, g.stats].filter(Boolean).map(esc).join(' · ');
     const price = creditCost(g.cost);
     const buy = price != null ? '<button class="brow-add buy" data-buy-gear="' + esc(g.name) + '">Buy</button>' : '';
@@ -930,21 +926,6 @@ function buyGear(name) {
   addLog('Bought', '💰', g.name + ' — ' + price + ' cr · ' + creditsNum() + ' cr left', 'normal');
   scheduleAutosave(); return true;
 }
-// — Armor picker (Armor tile) ——————————————————————————————————————————————
-function openArmorPicker() { $('armor-search').value = ''; $('armor-overlay').classList.add('open'); renderArmorPicker(); $('armor-search').focus(); }
-function closeArmorPicker() { $('armor-overlay').classList.remove('open'); }
-function renderArmorPicker() {
-  const q = norm($('armor-search').value);
-  const list = D.gear().filter(g => g.category === 'Armor' && (!q || norm(g.name).includes(q))).sort((a, b) => a.name.localeCompare(b.name));
-  const box = $('armor-body');
-  if(!list.length) { box.innerHTML = '<p class="brow-empty">No armor matches.</p>'; return; }
-  box.innerHTML = list.map(g => {
-    const cur = norm($('f-armor').value) === norm(g.name);
-    const btn = cur ? '<button class="brow-add have">Worn ✓</button>' : '<button class="brow-add" data-add-armor="' + esc(g.name) + '">Wear</button>';
-    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + (g.stats ? '<span class="brow-cost">' + esc(g.stats) + '</span>' : '') + '</div>' +
-      (g.cost ? '<div class="brow-meta">' + esc(g.cost) + ' cr</div>' : '') + '</div>' + btn + '</div>';
-  }).join('');
-}
 // Wire all browse lists once (event delegation).
 (function wireSwPickers() {
   const sb = $('skill-body'); if(sb) sb.addEventListener('click', e => { const b = e.target.closest('[data-add-skill]'); if(b) { if(addSkillByName(b.dataset.addSkill)) _flashBrow(b); renderSkillPicker(); } });
@@ -952,10 +933,10 @@ function renderArmorPicker() {
   const fb = $('force-pbody'); if(fb) fb.addEventListener('click', e => { const b = e.target.closest('[data-add-force]'); if(b) { if(addForcePowerByName(b.dataset.addForce)) _flashBrow(b); renderForcePicker(); } });
   const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => {
     const wpn = e.target.closest('[data-add-weapon]'); if(wpn) { addWeaponFromEquip(wpn.dataset.addWeapon); renderGearPicker(); return; }
+    const arm = e.target.closest('[data-add-armor]'); if(arm) { addGearFromData(arm.dataset.addArmor); _flashBrow(arm); renderGearPicker(); return; }
     const buy = e.target.closest('[data-buy-gear]'); if(buy) { if(buyGear(buy.dataset.buyGear)) _flashBrow(buy); else { const o = buy.textContent; buy.textContent = 'Need cr'; setTimeout(() => buy.textContent = o, 700); } return; }
     const b = e.target.closest('[data-add-gear]'); if(b) { addGearFromData(b.dataset.addGear); _flashBrow(b); }
   });
-  const ab = $('armor-body'); if(ab) ab.addEventListener('click', e => { const b = e.target.closest('[data-add-armor]'); if(b) { addGearFromData(b.dataset.addArmor); renderArmorPicker(); } });
 })();
 // "Add custom" from a picker: a blank row to fill by hand.
 function addCustomSkill() { addSkillRow({ name:'', attr:'Dexterity', adds:0 }); closeSkillPicker(); scheduleAutosave(); }
@@ -1031,7 +1012,7 @@ function collectSheet() {
   const v = id => $(id).value; const attrs = {}; ATTRS.forEach(a => attrs[a] = attr(a));
   return {
     system:'SW', v:1,
-    name: v('f-name'), template: v('f-template'), species: v('f-species'), player: v('f-player'), sex: v('f-sex'), age: v('f-age'), height: v('f-height'), weight: v('f-weight'), physical: v('f-physical'),
+    name: v('f-name'), template: v('f-template'), species: v('f-species'), sex: v('f-sex'), age: v('f-age'), height: v('f-height'), weight: v('f-weight'), physical: v('f-physical'),
     attrs,
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attr: tr.dataset.attr, adds: codeOrZero(tr.querySelector('.sk-adds').value) })).filter(s => s.name),
     wound, forcePoints: num(v('f-fp')), darkSide: num(v('f-ds')), skillPoints: num(v('f-sp')), credits: v('f-credits'),
@@ -1046,7 +1027,7 @@ function collectSheet() {
 }
 function applySheet(d) {
   d = d || {}; const set = (id, val) => { $(id).value = val == null ? '' : val; };
-  set('f-name', d.name); set('f-template', d.template || ''); set('f-species', d.species); set('f-player', d.player); set('f-sex', d.sex); set('f-age', d.age); set('f-height', d.height); set('f-weight', d.weight); set('f-physical', d.physical);
+  set('f-name', d.name); set('f-template', d.template || ''); set('f-species', d.species); set('f-sex', d.sex); set('f-age', d.age); set('f-height', d.height); set('f-weight', d.weight); set('f-physical', d.physical);
   ATTRS.forEach(a => set('at-' + a, toCode(d.attrs && d.attrs[a] != null ? d.attrs[a] : 6)));
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
   wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; forcePointArmed = false; renderWoundTrack();
