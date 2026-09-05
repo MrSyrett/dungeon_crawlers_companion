@@ -297,6 +297,16 @@
       </div>
     </div>
 
+    <div class="grp" id="roomGroup">
+      <div class="grp-head sec" data-sec="room" role="button" tabindex="0" aria-expanded="true">
+        <p class="grp-title">Prefab Rooms</p><span class="caret">&#9662;</span>
+      </div>
+      <div id="roomBody">
+        <div class="asset-count" style="margin-bottom:6px;line-height:1.35" title="Drop a ready-furnished room onto the map, then keep editing it — every piece of furniture stays individually selectable and movable.">Click a room, then click the map to drop it. The furniture stays movable — nudge, rotate or delete any piece after.</div>
+        <div id="roomGrid" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+
     <div class="grp" id="lightsGrp">
       <div class="grp-head">
         <p class="grp-title">Lights</p>
@@ -956,11 +966,16 @@
       // map cached before whatever happened in between. Nothing renders on arming
       // itself, so a null cache makes the first ghost frame fall back to a full
       // render — which refills it.
-      if(armedObj) snapMap(); else mapSnap=null;
+      // Always cache the freshly-composited map (the expensive part — a lit textured
+      // frame is tens of ms) so camera moves and armed ghosts can blit it (~1 ms)
+      // instead of re-lighting. It's a single full-canvas drawImage, negligible next
+      // to the render it just finished. snapCam records the camera it was taken at, so
+      // a later pan/zoom blit can transform it into place (see blitSnap).
+      snapMap();
       drawPreview(); drawLightMarkers(); drawSelection();
     }
   }
-  let mapSnap=null;
+  let mapSnap=null, snapCam=null;
   function snapMap(){
     if(!mapSnap) mapSnap=document.createElement("canvas");
     if(mapSnap.width!==cv.width || mapSnap.height!==cv.height){
@@ -969,18 +984,55 @@
     g.setTransform(1,0,0,1,0,0);
     g.clearRect(0,0,mapSnap.width,mapSnap.height);
     g.drawImage(cv,0,0);
+    snapCam={x:cam.x, y:cam.y, scale:cam.scale};
   }
   // Repaint the overlays over the cached map. Anything that actually changes the
   // map goes through render(), which refreshes the cache, so this can never show
   // a stale map — it just can't be used before the first armed render.
-  function renderGhostOnly(){
-    if(!mapSnap || mapSnap.width!==cv.width || mapSnap.height!==cv.height){ render(); return; }
+  // Blit the cached map (taken at snapCam) into the CURRENT camera. For a pure pan
+  // the transform is an exact translation, so the result is pixel-identical to a real
+  // render; for a zoom it's a scaled bitmap (a touch soft) that a settle-render then
+  // sharpens. Device-pixel maths: a world point maps the same way under both cameras,
+  // so the snap→now mapping is the affine (k = scale ratio) below.
+  function blitSnap(){
+    const sc=snapCam||{x:cam.x,y:cam.y,scale:cam.scale};
+    const k=cam.scale/sc.scale, A=CELL*sc.scale;
+    const tx=DPR*( W/2*(1-k) + k*A*(sc.x-cam.x) );
+    const ty=DPR*( H/2*(1-k) + k*A*(sc.y-cam.y) );
     ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.setTransform(k,0,0,k,tx,ty);
     ctx.drawImage(mapSnap,0,0);
+  }
+  // Repaint the overlays over the cached map. Anything that actually changes the
+  // map goes through render(), which refreshes the cache, so this can never show
+  // a stale map — it just can't be used before the first render has filled it.
+  function renderGhostOnly(){
+    if(!mapSnap || mapSnap.width!==cv.width || mapSnap.height!==cv.height){ render(); return; }
+    blitSnap();
     ctx.setTransform(DPR,0,0,DPR,0,0);
     drawPreview(); drawLightMarkers(); drawSelection();
   }
+  // ── Camera-move performance ───────────────────────────────────────
+  // Lights & Shadows recompute from scratch every render (ray-marched visibility
+  // polygons + full-canvas blur passes) — tens of ms a frame. Panning/zooming used
+  // to fire that on every pointer event, which is why the map crawled with lights on.
+  // Now a camera move blits the cached map (~1 ms) each frame and does ONE real render
+  // when the gesture settles, so lights can stay on while you navigate.
+  function litExpensive(){ return !!(map && (map.lit || map.shadowsOn)); }
+  let camRaf=0;
+  function renderCamOnly(){ camRaf=0;
+    if(!mapSnap || mapSnap.width!==cv.width || mapSnap.height!==cv.height){ render(); return; }
+    renderGhostOnly();
+  }
+  function scheduleCam(){ if(!camRaf) camRaf=requestAnimationFrame(renderCamOnly); }
+  let fullRaf=0;
+  function scheduleFull(){ if(!fullRaf) fullRaf=requestAnimationFrame(()=>{ fullRaf=0; render(); }); }
+  let camSettle=0;
+  function scheduleSettle(){ clearTimeout(camSettle); camSettle=setTimeout(()=>{ camSettle=0; render(); }, 130); }
+  // A camera change: cheap blit + settle when lighting is on (expensive); a coalesced
+  // full render otherwise (cheap, and stays crisp at every step).
+  function onCamMove(){ if(litExpensive()){ scheduleCam(); scheduleSettle(); } else scheduleFull(); }
   function renderLocalMap(){
     // Work in CSS-pixel logical space; scale once for crisp HiDPI output.
     ctx.setTransform(DPR,0,0,DPR,0,0);
@@ -2565,6 +2617,7 @@
         ctx.restore();
       }
     }
+    if(armedRoom && roomGhostPt) drawRoomGhost();
     if(stroke && stroke.length>1){
       const S=stroke.map(p=>toScreen(p[0],p[1]));
       const last=stroke[stroke.length-1];
@@ -2780,7 +2833,7 @@
     cam.scale=Math.max(0.15,Math.min(6, gesture.scale0*(d/gesture.d0)));
     const wp=wpx();                                    // pin the start world-midpoint under the moving finger-midpoint
     cam.x=gesture.worldMid[0]-(mid[0]-W/2)/wp; cam.y=gesture.worldMid[1]-(mid[1]-H/2)/wp;
-    render(); updateZoom(); }
+    onCamMove(); updateZoom(); }
 
   cv.addEventListener("pointerdown", e=>{
     cv.setPointerCapture(e.pointerId);
@@ -2794,6 +2847,7 @@
     // middle mouse or space = pan; also pan in embed mode
     if(e.button===1 || e.button===2 || spaceDown || embed){ panning={sx,sy,cx:cam.x,cy:cam.y}; return; }
     if(embed) return;
+    if(armedRoom){ stampRoom(wx,wy); return; }
 
     if(tool==="select"){
       // A selected object's handles take priority over anything under them.
@@ -2848,7 +2902,7 @@
     if(pointers.has(e.pointerId)) pointers.set(e.pointerId, rel(e));
     if(gesture){ if(pointers.size>=2) updatePinch(); return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
-    if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); render(); return; }
+    if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); onCamMove(); return; }
     if(handle){
       const o=handle.o;
       if(handle.mode==="rotate"){
@@ -2860,6 +2914,13 @@
         o.w=Math.max(0.1, handle.w0*f); o.h=Math.max(0.1, handle.h0*f);
       }
       moved=true; render(); return;
+    }
+    if(armedRoom){
+      // Track the drop origin (top-left cell) so the ghost sits on whole cells; only
+      // re-render when it actually moves to a new cell.
+      const ox=Math.round(wx-armedRoom.w/2), oy=Math.round(wy-armedRoom.h/2);
+      if(!roomGhostPt || roomGhostPt[0]!==ox || roomGhostPt[1]!==oy){ roomGhostPt=[ox,oy]; ghostRender(); }
+      return;
     }
     if(tool==="object" && armedObj){
       // A full render per mousemove is far too much on a lit textured map, where
@@ -2898,10 +2959,10 @@
 
   cv.addEventListener("pointerup", e=>{
     pointers.delete(e.pointerId);
-    if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
+    if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; render(); } return; }
     if(stroke){ finishStroke(); return; }
     if(handle){ if(moved){ pushHistory(handle.snap); commit(); } handle=null; return; }
-    if(panning){ panning=null; return; }
+    if(panning){ panning=null; render(); return; }   // one sharp render to resync the map cache to the new camera
     if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
     if(!dragStart){ return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
@@ -2915,7 +2976,8 @@
   });
 
   // Leaving the canvas drops the ghost, so it doesn't sit frozen at the edge.
-  cv.addEventListener("pointerleave", ()=>{ if(ghostPt){ ghostPt=null; render(); } });
+  cv.addEventListener("pointerleave", ()=>{ if(ghostPt){ ghostPt=null; render(); }
+    if(roomGhostPt){ roomGhostPt=null; render(); } });
   cv.addEventListener("pointercancel", e=>{ pointers.delete(e.pointerId);
     if(pointers.size<2) gesture=null;
     if(pointers.size===0){ panning=null; draft=null; dragStart=null; stroke=null; render(); } });
@@ -2924,7 +2986,7 @@
   cv.addEventListener("wheel", e=>{ e.preventDefault();
     const [sx,sy]=rel(e); const [bwx,bwy]=toWorld(sx,sy);
     const f=e.deltaY<0?1.12:1/1.12; cam.scale=Math.max(0.15,Math.min(6,cam.scale*f));
-    const [awx,awy]=toWorld(sx,sy); cam.x+=bwx-awx; cam.y+=bwy-awy; render(); updateZoom();
+    const [awx,awy]=toWorld(sx,sy); cam.x+=bwx-awx; cam.y+=bwy-awy; onCamMove(); updateZoom();
   },{passive:false});
 
   function rel(e){ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; }
@@ -5243,6 +5305,171 @@
     commit();
   }
 
+  // ── PREFAB ROOMS ("Architect-style" quick furnished rooms) ─────────
+  // Drop a ready-furnished room onto the map, then keep editing it with the normal
+  // tools. The key difference from Czepeku's Architect: our furniture is REAL objects
+  // (individual sprites), so every piece stays selectable/movable after the drop —
+  // Architect bakes furniture into the room image, so you can't move it.
+  //
+  // A template is a fragment in cells, origin (0,0) at the room's top-left corner:
+  //   { name, w, h,
+  //     objs:  [[texId, cx, cy, w, h, rotDeg?], …]   // cx,cy = object CENTRE
+  //     walls: [[x1,y1,x2,y2], …]                     // interior walls (rooms auto-wall)
+  //     doors: [[x,y,aDeg(0=horizontal wall|90=vertical), len], …] }
+  // Stamping just clones these into the active layer at the drop cell with fresh ids,
+  // WITHOUT baking a per-shape style, so the room adopts the map's current floor/walls.
+  // Overlapping a stamped room onto existing rooms merges walls via the existing path.
+  const ROOM_TEMPLATES=[
+    { name:"Bedroom", w:6, h:5,
+      objs:[["bundled:2mtf-obj-bed-pattern-1-b",1.5,1.4,1.73,2.07],
+            ["bundled:2mtf-obj-table-end-1-dark",2.7,0.9,0.75,0.56],
+            ["bundled:2mtf-obj-storage-bookshelf-1-a-dark",4.6,0.4,1.08,0.54],
+            ["bundled:2mtf-obj-rug-animal-skin",3.6,3.4,2.02,1.28],
+            ["bundled:2mtf-obj-chair-armchair-1-a",4.9,3.6,1.06,1.36]],
+      doors:[[3,5,0,1]] },
+    { name:"Tavern / Common Room", w:9, h:7,
+      objs:[["bundled:2mtw-obj-table-round-2-dark",2.6,2.4,1.08,1.12],
+            ["bundled:2mtw-obj-chair-simple-3-dark",2.6,1.5,0.55,0.48],
+            ["bundled:2mtw-obj-chair-simple-3-dark",2.6,3.3,0.55,0.48,180],
+            ["bundled:2mtw-obj-chair-simple-3-dark",1.7,2.4,0.55,0.48,270],
+            ["bundled:2mtw-obj-chair-simple-3-dark",3.5,2.4,0.55,0.48,90],
+            ["bundled:2mtw-obj-table-round-2-dark",6.4,2.4,1.08,1.12],
+            ["bundled:2mtw-obj-chair-simple-3-dark",6.4,1.5,0.55,0.48],
+            ["bundled:2mtw-obj-chair-simple-3-dark",6.4,3.3,0.55,0.48,180],
+            ["bundled:2mtw-obj-chair-simple-3-dark",5.5,2.4,0.55,0.48,270],
+            ["bundled:2mtw-obj-chair-simple-3-dark",7.3,2.4,0.55,0.48,90],
+            ["bundled:2mtw-obj-table-round-2-dark",4.5,5.0,1.08,1.12],
+            ["bundled:2mtw-obj-chair-simple-3-dark",4.5,4.1,0.55,0.48],
+            ["bundled:2mtw-obj-chair-simple-3-dark",4.5,5.9,0.55,0.48,180],
+            ["bundled:2mtf-obj-storage-barrel-1-dark",8.4,0.6,0.47,0.45],
+            ["bundled:2mtf-obj-storage-barrel-1-dark",8.1,1.2,0.47,0.45],
+            ["bundled:2mtf-obj-cooking-oven-fireplace-3",0.7,3.4,0.89,1.28]],
+      doors:[[4.5,7,0,2]] },
+    { name:"Storage Room", w:6, h:5,
+      objs:[["bundled:2mtw-obj-storage-crates-1-dark",1.0,1.0,0.93,0.9],
+            ["bundled:2mtw-obj-storage-crates-1-dark",1.95,1.0,0.93,0.9],
+            ["bundled:2mtw-obj-storage-crates-1-dark",1.0,1.95,0.93,0.9],
+            ["bundled:2mtf-obj-storage-barrel-1-dark",4.6,0.7,0.47,0.45],
+            ["bundled:2mtf-obj-storage-barrel-1-dark",5.2,0.7,0.47,0.45],
+            ["bundled:2mtf-obj-storage-barrel-1-dark",4.9,1.25,0.47,0.45],
+            ["bundled:2mtf-obj-clutter-sacks-2",2.6,4.2,0.88,0.49],
+            ["bundled:2mtf-obj-clutter-sacks-2",3.6,4.2,0.88,0.49],
+            ["bundled:2mtf-obj-storage-shelf-1-dark",5.55,3.0,1.08,0.49,90],
+            ["bundled:2mtr-obj-chest-1x1-1",0.7,4.3,1.0,1.0]],
+      doors:[[3,5,0,1]] },
+    { name:"Study / Library", w:6, h:5,
+      objs:[["bundled:2mtf-obj-table-writing-desk-dark",3.0,1.15,1.03,0.57],
+            ["bundled:2mtf-obj-chair-armchair-1-b",3.0,2.2,1.03,1.12,180],
+            ["bundled:2mtf-obj-storage-bookshelf-2-dark",1.0,0.35,1.06,0.47],
+            ["bundled:2mtf-obj-storage-bookshelf-2-dark",2.1,0.35,1.06,0.47],
+            ["bundled:2mtf-obj-storage-bookshelf-2-dark",4.9,0.35,1.06,0.47],
+            ["bundled:2mtf-obj-storage-bookshelf-2-dark",5.62,2.6,1.06,0.47,90],
+            ["bundled:2mtf-obj-storage-bookshelf-2-dark",5.62,3.7,1.06,0.47,90],
+            ["bundled:2mtr-obj-carpet-2x2",2.6,3.4,2.0,2.0]],
+      doors:[[3,5,0,1]] },
+    { name:"Dining Hall", w:9, h:5,
+      objs:[["bundled:2mtw-obj-table-rectangle-1-dark",3.55,2.5,1.93,0.9],
+            ["bundled:2mtw-obj-table-rectangle-1-dark",5.5,2.5,1.93,0.9],
+            ["bundled:2mtf-obj-chair-bench-1-dark",4.55,1.7,1.6,0.33],
+            ["bundled:2mtf-obj-chair-bench-1-dark",4.55,3.3,1.6,0.33,180],
+            ["bundled:2mtf-obj-chair-armchair-1-d",2.4,2.5,0.84,0.74,90],
+            ["bundled:2mtf-obj-chair-armchair-1-d",6.7,2.5,0.84,0.74,270],
+            ["bundled:2mtw-obj-light-brazier-2-a",0.7,0.7,0.68,0.71],
+            ["bundled:2mtw-obj-light-brazier-2-a",8.3,0.7,0.68,0.71],
+            ["bundled:2mtw-obj-light-brazier-2-a",0.7,4.3,0.68,0.71],
+            ["bundled:2mtw-obj-light-brazier-2-a",8.3,4.3,0.68,0.71]],
+      doors:[[4.5,5,0,2]] },
+    { name:"Cottage (2 rooms)", w:8, h:6,
+      walls:[[4,0,4,6]],
+      objs:[["bundled:2mtw-obj-bed-pattern-7-g",1.3,1.4,1.26,1.91],
+            ["bundled:2mtf-obj-table-end-2-dark",2.7,1.0,0.9,0.55],
+            ["bundled:2mtr-obj-chest-1x1-2",1.0,4.6,1.0,1.0],
+            ["bundled:2mtw-obj-table-round-2-dark",6.0,2.4,1.08,1.12],
+            ["bundled:2mtw-obj-chair-simple-3-dark",6.0,1.5,0.55,0.48],
+            ["bundled:2mtw-obj-chair-simple-3-dark",6.0,3.3,0.55,0.48,180],
+            ["bundled:2mtf-obj-cooking-oven-fireplace-3",7.35,4.9,0.89,1.28],
+            ["bundled:2mtf-obj-storage-barrel-2-dark",4.6,5.4,0.53,0.54]],
+      doors:[[4,3.5,90,1],[2,6,0,1]] },
+  ];
+  let armedRoom=null, roomGhostPt=null;
+  const D2R=Math.PI/180;
+
+  function buildRoomGrid(){
+    const g=$("roomGrid"); if(!g) return; g.innerHTML="";
+    ROOM_TEMPLATES.forEach(tpl=>{
+      const b=document.createElement("button"); b.type="button";
+      b.style.cssText="display:flex;align-items:center;gap:8px;width:100%;padding:7px 9px;background:var(--panel2);"
+        +"border:1px solid "+(armedRoom===tpl?"var(--gold)":"var(--line)")+";border-radius:7px;"
+        +"color:"+(armedRoom===tpl?"var(--gold)":"var(--ink)")+";cursor:pointer;text-align:left";
+      b.innerHTML='<span style="flex:1;min-width:0"><b style="font-size:13px">'+tpl.name
+        +'</b><span style="display:block;font-size:11px;color:var(--muted)">'+tpl.w+'×'+tpl.h+' cells · '
+        +(tpl.objs?tpl.objs.length:0)+' pieces</span></span>';
+      b.onclick=()=>{ if(armedRoom===tpl) disarmRoom(true); else armRoom(tpl); };
+      g.appendChild(b);
+    });
+  }
+  function armRoom(tpl){
+    if(armedObj){ armedObj=null; ghostPt=null; resetArm(); buildObjGrid(); }
+    setTool("select");                 // a stamp is intercepted before the select logic
+    armedRoom=tpl; roomGhostPt=null;
+    cv.style.cursor="copy";
+    buildRoomGrid();
+    toast('Click the map to drop "'+tpl.name+'". Furniture stays movable. Esc to cancel.');
+    render();
+  }
+  function disarmRoom(rebuild){
+    if(!armedRoom) return;
+    armedRoom=null; roomGhostPt=null;
+    cv.style.cursor = tool==="select"?"default":"crosshair";
+    if(rebuild) buildRoomGrid();
+    render();
+  }
+  function stampRoom(cx,cy){
+    const tpl=armedRoom; if(!tpl) return;
+    const ox=Math.round(cx-tpl.w/2), oy=Math.round(cy-tpl.h/2);
+    pushHistory();
+    if(!map.shapes) map.shapes=[]; if(!map.walls) map.walls=[];
+    if(!map.doors) map.doors=[]; if(!map.objects) map.objects=[];
+    // The room itself — a plain rect room (not deco, no baked style) so it occludes,
+    // merges walls with neighbours and takes the current floor/wall look.
+    map.shapes.push({id:uid(), type:"rect", x:ox, y:oy, w:tpl.w, h:tpl.h});
+    (tpl.walls||[]).forEach(w=> map.walls.push({id:uid(), x1:w[0]+ox, y1:w[1]+oy, x2:w[2]+ox, y2:w[3]+oy}));
+    (tpl.doors||[]).forEach(d=> map.doors.push({id:uid(), x:d[0]+ox, y:d[1]+oy, a:(d[2]||0)*D2R, len:d[3]||1, _adj:true}));
+    (tpl.objs||[]).forEach(o=>{ const t=texReg.get(o[0]);
+      map.objects.push({id:uid(), tex:o[0], x:o[1]+ox, y:o[2]+oy,
+        w:(t&&t.w)||o[3]||1, h:(t&&t.h)||o[4]||1, rot:(o[5]||0)*D2R}); });
+    commit();     // markGeom + render + save + undo
+    toast('Placed "'+tpl.name+'". Pick Select (V) to nudge any piece — the furniture is movable.');
+  }
+  // Ghost preview of the armed room under the cursor: translucent footprint, each
+  // object drawn faintly at its real size, and any interior walls dashed.
+  function drawRoomGhost(){
+    const tpl=armedRoom, g=roomGhostPt; if(!tpl||!g) return;
+    const ox=g[0], oy=g[1];
+    const a=toScreen(ox,oy), b=toScreen(ox+tpl.w, oy+tpl.h);
+    ctx.save();
+    ctx.globalAlpha=0.16; ctx.fillStyle=C.sel; ctx.fillRect(a[0],a[1], b[0]-a[0], b[1]-a[1]); ctx.globalAlpha=1;
+    for(const e of (tpl.objs||[])){
+      const t=texGet(e[0]); if(!t||!t.img||!t.img.complete||!t.img.naturalWidth) continue;
+      const w=((t.w||e[3])||1)*wpx(), h=((t.h||e[4])||1)*wpx();
+      const p=toScreen(e[1]+ox, e[2]+oy);
+      ctx.save(); ctx.translate(p[0],p[1]); if(e[5]) ctx.rotate(e[5]*D2R);
+      ctx.globalAlpha=0.55; const at=t.atlas;
+      if(at) ctx.drawImage(t.img, at.x,at.y,at.w,at.h, -w/2,-h/2, w,h);
+      else   ctx.drawImage(t.img, -w/2,-h/2, w,h);
+      ctx.globalAlpha=1; ctx.restore();
+    }
+    if(tpl.walls && tpl.walls.length){
+      ctx.strokeStyle=C.ink; ctx.setLineDash([5,4]); ctx.lineWidth=1.6;
+      for(const w of tpl.walls){ const p=toScreen(w[0]+ox,w[1]+oy), q=toScreen(w[2]+ox,w[3]+oy);
+        ctx.beginPath(); ctx.moveTo(p[0],p[1]); ctx.lineTo(q[0],q[1]); ctx.stroke(); }
+      ctx.setLineDash([]);
+    }
+    ctx.strokeStyle=C.sel; ctx.setLineDash([6,4]); ctx.lineWidth=1.8;
+    ctx.strokeRect(a[0],a[1], b[0]-a[0], b[1]-a[1]); ctx.setLineDash([]);
+    ctx.restore();
+  }
+
   // ── LIGHTS (Advanced Mode) ────────────────────────────────────────
   // Rendering lives in the engine (and its inlined twin); this is just the
   // controls. Scope mirrors the Floor/Walls pickers: with a light SELECTED the
@@ -5969,6 +6196,7 @@
     if(placing){ placing=null; render(); }
     if(t!=="object" && armedObj){ armedObj=null; resetArm(); buildObjGrid(); }
     if(t!=="object" && ghostPt){ ghostPt=null; render(); }
+    if(armedRoom) disarmRoom(true);   // choosing any tool stops room stamping
     syncStyleScope();          // picker scope follows the active tool
     cv.style.cursor = t==="select"?"default":(t==="erase"?"cell":"crosshair");
     const tips={rect:"Drag to draw a rectangular room.",circle:"Drag out a circular room.",
@@ -6039,7 +6267,7 @@
   // ── collapsible sidebar sections ──────────────────────────────────
   // A UI preference, not map data: its own localStorage key, so it survives Clear
   // and never rides along in an exported .json.
-  const SECTIONS={ obj:"objBody", gen:"genBody" };
+  const SECTIONS={ obj:"objBody", room:"roomBody", gen:"genBody" };
   let secShut={};
   try{ secShut=JSON.parse(localStorage.getItem("dcc_sections")||"{}")||{}; }catch(e){ secShut={}; }
   function syncSections(){
@@ -6145,6 +6373,7 @@
     if(e.key==="\\"){ fitView(); return; }                        // \ = Fit view
     if(e.key==="Enter"&&polyPts){ finishPolygon(false); return; }
     if(e.key==="Escape"){ if(pickOpen){ closePicker(); return; }
+      if(armedRoom){ disarmRoom(true); return; }
       polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; stroke=null; render(); return; }
     if((e.key==="Delete"||e.key==="Backspace")&&sel){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
     if(tool==="object" && armedObj){
@@ -6235,7 +6464,7 @@
     initAdvanced();
     syncGridOp(); syncZUI();
     if($("gridOp")) $("gridOp").oninput=e=>{ map.gridOpacity=(+e.target.value)/100; syncGridOp(); commit(); };
-    syncUndo(); syncLayersUI();
+    syncUndo(); syncLayersUI(); buildRoomGrid();
     if(mapHasContent()) fitView(); else render();
     if(!embed && !mapHasContent()) toast("Pick a tool, or roll a random dungeon →");
   }
