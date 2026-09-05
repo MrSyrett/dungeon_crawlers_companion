@@ -303,6 +303,7 @@
       </div>
       <div id="roomBody">
         <div class="asset-count" style="margin-bottom:6px;line-height:1.35" title="Drop a ready-furnished room onto the map, then keep editing it — every piece of furniture stays individually selectable and movable.">Click a room, then click the map to drop it. The furniture stays movable — nudge, rotate or delete any piece after.</div>
+        <button class="btn" id="savePrefab" style="width:100%;margin-bottom:8px" title="Select a room or prefab on the map (click it), then save it here as a reusable prefab. Saving with an existing name updates it.">+ Save selection as prefab</button>
         <div id="roomGrid" style="display:flex;flex-direction:column;gap:6px"></div>
       </div>
     </div>
@@ -314,6 +315,14 @@
           <input type="checkbox" id="lightToggle"><span class="slider"></span></label>
       </div>
       <div id="lightBody" style="display:none">
+        <label class="fld">Scene lighting</label>
+        <div id="scenePresets" class="seg" style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px" title="One-click darkness for the whole scene — like Czepeku Architect. Lights you've placed carve pools of light out of it.">
+          <button type="button" data-dark="0">Bright</button>
+          <button type="button" data-dark="0.30">Dim</button>
+          <button type="button" data-dark="0.52">Dusk</button>
+          <button type="button" data-dark="0.72">Night</button>
+          <button type="button" data-dark="0.90">Dark</button>
+        </div>
         <label class="fld">Darkness <b id="darkV">55%</b></label>
         <input type="range" id="darkness" min="0" max="100" value="55">
         <label class="fld">Pattern</label>
@@ -2671,7 +2680,7 @@
   }
   function drawSelection(){
     if(sel==null) return;
-    if(sel.kind==="prefab"){ drawPrefabSelection(sel.pf); return; }
+    if(sel.kind==="prefab"){ drawGroupSelection(sel); return; }
     const o=objAt(sel);
     if(!o) return;
     if(o.kind==="light" || o.kind==="shadow"){
@@ -2696,12 +2705,13 @@
       ctx.fillStyle=C.sel;
       ctx.beginPath(); ctx.arc(H.rotate[0],H.rotate[1],5.5,0,7); ctx.fill();      // rotate
       ctx.fillRect(H.scale[0]-5,H.scale[1]-5,10,10);                              // scale
-      ctx.restore(); return;
+      ctx.restore(); drawIndivLockHandle(sel); return;
     }
     ctx.save(); ctx.strokeStyle=C.sel; ctx.lineWidth=2; ctx.setLineDash([6,4]);
     const b=bounds(o.obj,o.kind);
     if(b){ const [x,y]=toScreen(b.x,b.y); ctx.strokeRect(x-4,y-4,b.w*wpx()+8,b.h*wpx()+8); }
     ctx.restore();
+    drawIndivLockHandle(sel);
   }
 
   // ════════════════════════════════════════════════════════════════
@@ -2821,12 +2831,21 @@
     if(armedRoom){ stampRoom(wx,wy); return; }
 
     if(tool==="select"){
-      // A selected prefab's rotate / lock handles take priority over anything under them.
+      // A selected group's rotate / lock handles take priority over anything under them.
       if(sel && sel.kind==="prefab"){
-        const ph=prefabHandles(sel.pf);
+        const ph=groupHandles(sel);
         if(ph){
-          if(Math.hypot(sx-ph.rotate[0], sy-ph.rotate[1])<14){ rotatePrefab(sel.pf, +1); return; }
-          if(Math.hypot(sx-ph.lock[0],   sy-ph.lock[1])<14){ togglePrefabLock(sel.pf, false); return; }
+          if(Math.hypot(sx-ph.rotate[0], sy-ph.rotate[1])<14){ rotateGroup(sel, +1); return; }
+          if(Math.hypot(sx-ph.lock[0],   sy-ph.lock[1])<14){ groupLock(sel, false); return; }
+        }
+      }
+      // An individual room or prefab-piece shows a small "lock this" handle → click to group.
+      if(sel && (sel.kind==="shape"||sel.kind==="object"||sel.kind==="wall"||sel.kind==="door")){
+        const lp=indivLockPos(sel);
+        if(lp && Math.hypot(sx-lp[0], sy-lp[1])<14){
+          if(sel.kind==="shape") lockRoomShape(sel.idx);
+          else { const o=objAt(sel); if(o&&o.obj&&o.obj.pf!=null) groupLock({kind:"prefab",pf:o.obj.pf}, true); }
+          return;
         }
       }
       // A selected object's handles take priority over anything under them.
@@ -2847,11 +2866,12 @@
                     rot0:o.rot||0, w0:o.w||1, h0:o.h||1, snap:objSnapshot({obj:o})};
             return; } } }
       const h=hitTest(wx,wy);
-      if(h && h.obj && h.obj.pf!=null && prefabLocked(h.obj.pf)){
-        // Clicking any part of a LOCKED prefab selects the whole unit and drags it together.
-        setSel({kind:"prefab", pf:h.obj.pf});
+      const g=groupLockedAt(wx,wy,h);
+      if(g){
+        // Clicking any part of a LOCKED prefab or room selects the whole unit and drags it.
+        setSel(g);
         pushHistory();                                   // one undo step for the whole-unit move
-        dragPrefab=beginPrefabDrag(h.obj.pf, wx, wy); moved=false;
+        dragPrefab=beginGroupDrag(g, wx, wy); moved=false;
       }
       else if(h){ setSel({kind:h.kind,idx:h.idx});
         dragObj={h, ox:wx, oy:wy, snap:objSnapshot(h)}; }
@@ -2908,7 +2928,7 @@
       if(!roomGhostPt || roomGhostPt[0]!==ox || roomGhostPt[1]!==oy){ roomGhostPt=[ox,oy]; ghostRender(); }
       return;
     }
-    if(dragPrefab){ moved=true; movePrefab(dragPrefab, wx-dragPrefab.ox, wy-dragPrefab.oy); render(); return; }
+    if(dragPrefab){ moved=true; moveGroup(dragPrefab, wx-dragPrefab.ox, wy-dragPrefab.oy); render(); return; }
     if(tool==="object" && armedObj){
       // A full render per mousemove is far too much on a lit textured map, where
       // one frame is tens of milliseconds. Two guards: the ghost sits on the
@@ -4203,6 +4223,7 @@
                         atlas:t.atlas||null, thumbRect:t.thumb||null,
                         url:"/packs/bundled/"+(t.atlas ? t.atlas.sheet : t.file)+assetV, img:null});
     buildTexSelects(); buildObjGrid();
+    if(typeof redrawRoomThumbs==="function") redrawRoomThumbs();   // prefab thumbnails now have sprites
     render();
   }
 
@@ -5421,13 +5442,21 @@
       x0=Math.min(x0,b.x); y0=Math.min(y0,b.y); x1=Math.max(x1,b.x+b.w); y1=Math.max(y1,b.y+b.h); }
     return (x1<x0)?null:{x:x0,y:y0,w:x1-x0,h:y1-y0};
   }
-  // Build a template's elements (room rect + walls + doors + objects) at `rotSteps`×90°,
-  // normalized so the footprint's top-left is (0,0). Returns {w,h,els:[{kind,obj}]}.
-  function instantiateTemplate(tpl, rotSteps){
+  // A template's element list ({kind,obj}[], els[0] = the room shape). Two shapes of
+  // template: a STOCK one uses the compact {w,h,objs,walls,doors} form; a CUSTOM (saved)
+  // one already carries a full `els` array (so it can hold circles, lights, shadows, etc.).
+  function templateEls(tpl){
+    if(tpl.els) return tpl.els.map(it=>({kind:it.kind, obj:JSON.parse(JSON.stringify(it.obj))}));
     const els=[{kind:"shape", obj:{type:"rect",x:0,y:0,w:tpl.w,h:tpl.h}}];
     (tpl.walls||[]).forEach(w=> els.push({kind:"wall", obj:{x1:w[0],y1:w[1],x2:w[2],y2:w[3]}}));
     (tpl.doors||[]).forEach(d=> els.push({kind:"door", obj:{x:d[0],y:d[1],a:(d[2]||0)*D2R,len:d[3]||1}}));
     (tpl.objs||[]).forEach(o=> els.push({kind:"object", obj:{tex:o[0],x:o[1],y:o[2],w:o[3]||1,h:o[4]||1,rot:(o[5]||0)*D2R}}));
+    return els;
+  }
+  // Build a template's elements at `rotSteps`×90°, normalized so the room's top-left is
+  // (0,0). Returns {w,h,els:[{kind,obj}]}.
+  function instantiateTemplate(tpl, rotSteps){
+    const els=templateEls(tpl);
     const steps=((rotSteps%4)+4)%4;
     for(let s=0;s<steps;s++){ const bb=elemsBBox(els); const px=bb.x+bb.w/2, py=bb.y+bb.h/2;
       for(const it of els) rotElem(it.obj, it.kind, px, py); }
@@ -5449,19 +5478,149 @@
   }
   function prefabBounds(pf){ return elemsBBox(prefabChildren(pf)); }
 
+  // ── generic "locked group": a PREFAB (pf tag) OR any ROOM shape whose `locked`
+  // flag is set (its members are whatever sits spatially inside it). A group `sel`
+  // carries either {pf} or {roomIdx}. ──
+  function wallMidpoint(w){ const s=wallPts(w); if(!s||!s.length) return null; return s[Math.floor(s.length/2)]; }
+  function isRoomShape(sh){ return sh && !sh.deco && (sh.type==="rect"||sh.type==="circle"||sh.type==="polygon"); }
+  function groupMembers(sel){
+    if(!sel) return [];
+    if(sel.pf!=null) return prefabChildren(sel.pf);
+    if(sel.roomIdx!=null){
+      const sh=(map.shapes||[])[sel.roomIdx]; if(!sh) return [];
+      const inside=(x,y)=>pointInShape(x,y,sh);
+      const out=[{kind:"shape", idx:sel.roomIdx, obj:sh}];
+      (map.objects||[]).forEach((o,i)=>{ if(inside(o.x,o.y)) out.push({kind:"object",idx:i,obj:o}); });
+      (map.lights||[]).forEach((o,i)=>{ if(inside(o.x,o.y)) out.push({kind:"light",idx:i,obj:o}); });
+      (map.shadows||[]).forEach((o,i)=>{ if(inside(o.x,o.y)) out.push({kind:"shadow",idx:i,obj:o}); });
+      (map.doors||[]).forEach((o,i)=>{ if(inside(o.x,o.y)) out.push({kind:"door",idx:i,obj:o}); });
+      (map.walls||[]).forEach((o,i)=>{ const p=wallMidpoint(o); if(p&&inside(p[0],p[1])) out.push({kind:"wall",idx:i,obj:o}); });
+      (map.stairs||[]).forEach((o,i)=>{ const b=bounds(o,"stair"); if(b&&inside(b.x+b.w/2,b.y+b.h/2)) out.push({kind:"stair",idx:i,obj:o}); });
+      return out;
+    }
+    return [];
+  }
+  function groupBounds(sel){ return elemsBBox(groupMembers(sel)); }
+  function groupName(sel){ if(sel && sel.pf!=null){ const e=prefabEntry(sel.pf); return e?e.name:"Prefab"; } return "Room"; }
+  function groupLockedAt(wx,wy,h){
+    // Returns a group `sel` if the click lands on a LOCKED prefab or a LOCKED room, else null.
+    if(h && h.obj && h.obj.pf!=null && prefabLocked(h.obj.pf)) return {kind:"prefab", pf:h.obj.pf};
+    // topmost locked room shape containing the point
+    for(let i=(map.shapes||[]).length-1;i>=0;i--){ const sh=map.shapes[i];
+      if(sh && sh.locked && isRoomShape(sh) && pointInShape(wx,wy,sh)) return {kind:"prefab", roomIdx:i}; }
+    return null;
+  }
+  function smallestRoomAt(wx,wy){   // for "U on a piece locks the room around it"
+    let best=null, bestA=1e18;
+    for(let i=0;i<(map.shapes||[]).length;i++){ const sh=map.shapes[i];
+      if(!isRoomShape(sh) || !pointInShape(wx,wy,sh)) continue;
+      const b=bounds(sh,"shape"); const a=b?b.w*b.h:1e18; if(a<bestA){ bestA=a; best=i; } }
+    return best;
+  }
+
+  // ── CUSTOM PREFABS (save your own; stored per-browser in localStorage) ──
+  // A saved prefab is {id, name, w, h, els:[{kind,obj}], custom:true}, els[0] = the room
+  // shape, coords relative to the room's top-left — the same shape instantiateTemplate
+  // consumes, so a custom prefab arms/stamps/rotates exactly like a stock one. Object
+  // sprites are kept by texture id: bundled ids resolve everywhere (self-contained);
+  // imported / "My Images" ids resolve wherever that pack is present (as maps do today).
+  const CPF_KEY="dcc_prefabs";
+  function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+  function loadCustomPrefabs(){ try{ const a=JSON.parse(localStorage.getItem(CPF_KEY)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function saveCustomPrefabs(list){ try{ localStorage.setItem(CPF_KEY, JSON.stringify(list)); return true; }catch(e){ toast("Couldn't save — browser storage may be full."); return false; } }
+  function stripElemMeta(o){ delete o.id; delete o.pf; delete o.locked; delete o._adj; return o; }
+  function serializeGroupToTemplate(gsel, name){
+    const kids=groupMembers(gsel); if(!kids.length) return null;
+    const roomShape=groupRoomShape(kids);
+    const rb = roomShape ? bounds(roomShape,"shape") : elemsBBox(kids); if(!rb) return null;
+    const rx=rb.x, ry=rb.y, els=[];
+    if(roomShape){ const o=stripElemMeta(JSON.parse(JSON.stringify(roomShape))); shiftElem(o,"shape",-rx,-ry); els.push({kind:"shape",obj:o}); }
+    else els.push({kind:"shape", obj:{type:"rect",x:0,y:0,w:Math.round(rb.w),h:Math.round(rb.h)}});
+    for(const it of kids){ if(it.obj===roomShape) continue;
+      const o=stripElemMeta(JSON.parse(JSON.stringify(it.obj))); shiftElem(o, it.kind, -rx, -ry);
+      els.push({kind:it.kind, obj:o}); }
+    return { id:"cpf-"+Date.now().toString(36)+"-"+Math.floor(Math.random()*1e4), name, w:Math.round(rb.w), h:Math.round(rb.h), els, custom:true };
+  }
+  function saveSelectionAsPrefab(){
+    let gsel=sel;
+    if(gsel && gsel.kind==="shape" && isRoomShape((map.shapes||[])[gsel.idx])) gsel={kind:"prefab", roomIdx:gsel.idx};
+    if(!gsel || gsel.kind!=="prefab"){ toast("Select a room or prefab first (click it), then Save as prefab."); return; }
+    const def = groupName(gsel)==="Room" ? "My Room" : groupName(gsel);
+    const name=(window.prompt("Save this room as a reusable prefab.\nName:", def)||"").trim();
+    if(!name) return;
+    const rec=serializeGroupToTemplate(gsel, name); if(!rec){ toast("Nothing to save."); return; }
+    const list=loadCustomPrefabs();
+    const i=list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
+    if(i>=0){ if(!window.confirm('A prefab named "'+name+'" already exists. Update it?')) return; rec.id=list[i].id; list[i]=rec; }
+    else list.push(rec);
+    if(saveCustomPrefabs(list)){ buildRoomGrid(); toast('Saved prefab "'+name+'"'+(i>=0?" (updated)":"")+" — it's in the palette below."); }
+  }
+  function deleteCustomPrefab(id, nm){
+    if(!window.confirm('Delete your prefab "'+nm+'"? This can\'t be undone.')) return;
+    saveCustomPrefabs(loadCustomPrefabs().filter(p=>p.id!==id));
+    if(armedRoom && armedRoom.id===id) disarmRoom(false);
+    buildRoomGrid(); toast('Deleted prefab "'+nm+'"');
+  }
+
+  // A small schematic thumbnail of a template: room outline + furniture (sprites once
+  // loaded, small boxes before) + interior walls. Redrawn after the sprite packs load.
+  function drawTemplateThumb(cnv, tpl){
+    const W=cnv.width, H=cnv.height, g=cnv.getContext("2d"); g.clearRect(0,0,W,H);
+    let inst; try{ inst=instantiateTemplate(tpl,0); }catch(e){ return; }
+    const pad=3, sc=Math.min((W-2*pad)/Math.max(1,inst.w), (H-2*pad)/Math.max(1,inst.h));
+    const ox=(W-inst.w*sc)/2, oy=(H-inst.h*sc)/2;
+    g.fillStyle="#efe9dd"; g.fillRect(ox,oy,inst.w*sc,inst.h*sc);
+    for(const it of inst.els){ if(it.kind!=="object") continue; const o=it.obj;
+      const w=Math.max(2,(o.w||1)*sc), h=Math.max(2,(o.h||1)*sc), cx=ox+o.x*sc, cy=oy+o.y*sc;
+      const t=texGet(o.tex);
+      if(t&&t.img&&t.img.complete&&t.img.naturalWidth){ g.save(); g.translate(cx,cy); if(o.rot) g.rotate(o.rot);
+        const a=t.atlas; if(a) g.drawImage(t.img,a.x,a.y,a.w,a.h,-w/2,-h/2,w,h); else g.drawImage(t.img,-w/2,-h/2,w,h); g.restore(); }
+      else { g.fillStyle="rgba(96,72,44,.7)"; g.fillRect(cx-w/2,cy-h/2,w,h); } }
+    g.strokeStyle="#26262b"; g.lineWidth=1.5;
+    for(const it of inst.els){ if(it.kind!=="wall") continue; const o=it.obj;
+      g.beginPath(); g.moveTo(ox+o.x1*sc,oy+o.y1*sc); g.lineTo(ox+o.x2*sc,oy+o.y2*sc); g.stroke(); }
+    g.strokeRect(ox+0.75,oy+0.75,inst.w*sc-1.5,inst.h*sc-1.5);
+  }
+  let _roomThumbs=[], _thumbT1=0, _thumbT2=0;
+  function redrawRoomThumbs(){ for(const [cnv,tpl] of _roomThumbs) drawTemplateThumb(cnv,tpl);
+    // sprite sheets load lazily on first texGet, so redraw once they've had time to arrive
+    clearTimeout(_thumbT1); clearTimeout(_thumbT2);
+    _thumbT1=setTimeout(()=>{ for(const [c,t] of _roomThumbs) drawTemplateThumb(c,t); }, 700);
+    _thumbT2=setTimeout(()=>{ for(const [c,t] of _roomThumbs) drawTemplateThumb(c,t); }, 2200); }
   function buildRoomGrid(){
-    const g=$("roomGrid"); if(!g) return; g.innerHTML="";
-    ROOM_TEMPLATES.forEach(tpl=>{
+    const g=$("roomGrid"); if(!g) return; g.innerHTML=""; _roomThumbs=[];
+    const mkRow=(tpl,isCustom)=>{
+      const armed = armedRoom && (armedRoom===tpl || (tpl.id && armedRoom.id===tpl.id));
+      const row=document.createElement("div"); row.style.cssText="display:flex;gap:5px;align-items:stretch";
       const b=document.createElement("button"); b.type="button";
-      b.style.cssText="display:flex;align-items:center;gap:8px;width:100%;padding:7px 9px;background:var(--panel2);"
-        +"border:1px solid "+(armedRoom===tpl?"var(--gold)":"var(--line)")+";border-radius:7px;"
-        +"color:"+(armedRoom===tpl?"var(--gold)":"var(--ink)")+";cursor:pointer;text-align:left";
-      b.innerHTML='<span style="flex:1;min-width:0"><b style="font-size:13px">'+tpl.name
-        +'</b><span style="display:block;font-size:11px;color:var(--muted)">'+tpl.w+'×'+tpl.h+' cells · '
-        +(tpl.objs?tpl.objs.length:0)+' pieces</span></span>';
-      b.onclick=()=>{ if(armedRoom===tpl) disarmRoom(true); else armRoom(tpl); };
-      g.appendChild(b);
-    });
+      b.style.cssText="flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--panel2);"
+        +"border:1px solid "+(armed?"var(--gold)":"var(--line)")+";border-radius:7px;"
+        +"color:"+(armed?"var(--gold)":"var(--ink)")+";cursor:pointer;text-align:left";
+      const pieces = tpl.els ? tpl.els.filter(e=>e.kind==="object").length : (tpl.objs?tpl.objs.length:0);
+      const thumb=document.createElement("canvas"); thumb.width=48; thumb.height=40;
+      thumb.style.cssText="flex:0 0 auto;width:48px;height:40px;border-radius:4px;background:#efe9dd";
+      _roomThumbs.push([thumb,tpl]);
+      const txt=document.createElement("span"); txt.style.cssText="flex:1;min-width:0";
+      txt.innerHTML='<b style="font-size:13px">'+esc(tpl.name)+'</b><span style="display:block;font-size:11px;color:var(--muted)">'
+        +tpl.w+'×'+tpl.h+' cells · '+pieces+' pieces'+(isCustom?' · yours':'')+'</span>';
+      b.appendChild(thumb); b.appendChild(txt);
+      b.onclick=()=>{ if(armed) disarmRoom(true); else armRoom(tpl); };
+      row.appendChild(b);
+      if(isCustom){ const del=document.createElement("button"); del.type="button"; del.title="Delete this prefab"; del.textContent="×";
+        del.style.cssText="flex:0 0 auto;width:26px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--muted);cursor:pointer;font-size:16px;line-height:1";
+        del.onclick=(ev)=>{ ev.stopPropagation(); deleteCustomPrefab(tpl.id, tpl.name); };
+        row.appendChild(del); }
+      return row;
+    };
+    ROOM_TEMPLATES.forEach(tpl=> g.appendChild(mkRow(tpl,false)));
+    const custom=loadCustomPrefabs();
+    if(custom.length){
+      const hd=document.createElement("div"); hd.textContent="My Prefabs";
+      hd.style.cssText="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:9px 0 1px";
+      g.appendChild(hd);
+      custom.forEach(rec=> g.appendChild(mkRow(rec,true)));
+    }
+    redrawRoomThumbs();
   }
   function armRoom(tpl){
     if(armedObj){ armedObj=null; ghostPt=null; resetArm(); buildObjGrid(); }
@@ -5493,6 +5652,7 @@
     pushHistory();
     if(!map.shapes) map.shapes=[]; if(!map.walls) map.walls=[];
     if(!map.doors) map.doors=[]; if(!map.objects) map.objects=[];
+    if(!map.stairs) map.stairs=[]; if(!map.lights) map.lights=[]; if(!map.shadows) map.shadows=[];
     const pf=uid();
     for(const it of inst.els){
       const e=JSON.parse(JSON.stringify(it.obj)); shiftElem(e, it.kind, ox, oy); e.id=uid(); e.pf=pf;
@@ -5500,6 +5660,9 @@
       else if(it.kind==="wall") map.walls.push(e);
       else if(it.kind==="door"){ e._adj=true; map.doors.push(e); }
       else if(it.kind==="object"){ const t=texReg.get(e.tex); if(t){ e.w=t.w; e.h=t.h; } map.objects.push(e); }
+      else if(it.kind==="light") map.lights.push(e);
+      else if(it.kind==="shadow") map.shadows.push(e);
+      else if(it.kind==="stair") map.stairs.push(e);
     }
     map.prefabs=map.prefabs||[]; map.prefabs.push({id:pf, name:tpl.name, locked:true});
     // Disarm after a drop and select the new prefab, so it can be moved/rotated/unlocked
@@ -5533,72 +5696,100 @@
 
   // ── placed-prefab group: move / rotate / lock, and its on-canvas handles ──
   let dragPrefab=null;
-  function beginPrefabDrag(pf, wx, wy){
-    const kids=prefabChildren(pf);
-    return { pf, ox:wx, oy:wy, snaps:kids.map(k=>({obj:k.obj, kind:k.kind, snap:JSON.parse(JSON.stringify(k.obj))})) };
+  function groupRoomShape(kids){ for(const it of kids) if(it.kind==="shape" && isRoomShape(it.obj)) return it.obj; return null; }
+  function groupPivot(kids){ const rs=groupRoomShape(kids); const b=rs?bounds(rs,"shape"):elemsBBox(kids); return b?[b.x+b.w/2, b.y+b.h/2]:[0,0]; }
+  function beginGroupDrag(sel, wx, wy){
+    const kids=groupMembers(sel);
+    return { sel, ox:wx, oy:wy, snaps:kids.map(k=>({obj:k.obj, kind:k.kind, snap:JSON.parse(JSON.stringify(k.obj))})) };
   }
-  function movePrefab(dp, dx, dy){
+  function moveGroup(dp, dx, dy){
     const gdx=snapOn?Math.round(dx):dx, gdy=snapOn?Math.round(dy):dy;   // whole-cell moves keep grid alignment
     for(const s of dp.snaps) translFromSnap(s.obj, s.kind, s.snap, gdx, gdy);
     markGeom();
   }
-  function rotatePrefab(pf, dir){
-    const kids=prefabChildren(pf); if(!kids.length) return;
+  function rotateGroup(sel, dir){
+    const kids=groupMembers(sel); if(!kids.length) return;
     pushHistory();
     const steps = dir>0?1:3;
-    for(let s=0;s<steps;s++){ const bb=elemsBBox(kids); const px=bb.x+bb.w/2, py=bb.y+bb.h/2;
-      for(const it of kids) rotElem(it.obj, it.kind, px, py); }
-    // tidy float drift: rooms/walls back onto the grid, objects/doors onto the half-grid
+    // Pivot on the ROOM's centre (NOT the group bbox, which is inflated by furniture/
+    // doors overhanging the walls). Rotating everything rigidly about the room centre
+    // keeps each piece exactly where it belongs relative to the room — no drift.
+    for(let s=0;s<steps;s++){ const c=groupPivot(kids); for(const it of kids) rotElem(it.obj, it.kind, c[0], c[1]); }
+    // float cleanup only — grid-aligned inputs stay grid-aligned, so this shouldn't move
+    // anything visibly. Deliberately NOT snapping doors/objects (that was the shift bug).
     for(const it of kids){ const o=it.obj;
       if(it.kind==="shape" && o.type==="rect"){ o.x=Math.round(o.x); o.y=Math.round(o.y); o.w=Math.round(o.w); o.h=Math.round(o.h); }
-      else if(it.kind==="wall"){ const r=v=>Math.round(v*2)/2; o.x1=r(o.x1);o.y1=r(o.y1);o.x2=r(o.x2);o.y2=r(o.y2); if(o.cx!=null){o.cx=r(o.cx);o.cy=r(o.cy);} }
-      else if(it.kind==="door"){ const r=v=>Math.round(v*2)/2; o.x=r(o.x); o.y=r(o.y); } }
+      else if(it.kind==="wall"){ const r=v=>Math.round(v*2)/2; o.x1=r(o.x1);o.y1=r(o.y1);o.x2=r(o.x2);o.y2=r(o.y2); if(o.cx!=null){o.cx=r(o.cx);o.cy=r(o.cy);} } }
     markGeom(); render(); scheduleSave(); syncUndo();
   }
-  function togglePrefabLock(pf, wantLocked){
-    const e=prefabEntry(pf); if(!e) return;
-    e.locked = (wantLocked==null) ? !(e.locked!==false) : !!wantLocked;
-    if(e.locked){ setSel({kind:"prefab", pf}); toast('"'+e.name+'" locked — moves & rotates as one unit.'); }
-    else { setSel(null); toast('"'+e.name+'" unlocked — pieces are individually movable. Press U on a piece to re-lock.'); }
+  function groupLock(sel, wantLocked){   // lock/unlock the group referenced by sel
+    if(sel.pf!=null){ const e=prefabEntry(sel.pf); if(!e) return;
+      e.locked=(wantLocked==null)?!(e.locked!==false):!!wantLocked;
+      if(e.locked){ setSel({kind:"prefab", pf:sel.pf}); toast('"'+e.name+'" locked — moves & rotates as one unit.'); }
+      else { setSel(null); toast('"'+e.name+'" unlocked — pieces move individually. U on a piece re-locks.'); }
+    } else if(sel.roomIdx!=null){ const sh=(map.shapes||[])[sel.roomIdx]; if(!sh) return;
+      sh.locked=(wantLocked==null)?!sh.locked:!!wantLocked;
+      if(sh.locked){ setSel({kind:"prefab", roomIdx:sel.roomIdx}); toast('Room locked — drag/rotate moves everything inside it.'); }
+      else { setSel({kind:"shape", idx:sel.roomIdx}); toast('Room unlocked — its contents move individually.'); }
+    }
     render(); scheduleSave();
   }
-  function deletePrefab(pf){
+  function lockRoomShape(idx){   // turn a plain room shape into a locked group
+    const sh=(map.shapes||[])[idx]; if(!isRoomShape(sh)) return;
+    sh.locked=true; setSel({kind:"prefab", roomIdx:idx});
+    toast('Room locked — drag to move everything inside · [ ] rotate · U unlock.'); render(); scheduleSave();
+  }
+  function deleteGroup(sel){
     pushHistory();
-    for(const arr of [map.shapes,map.walls,map.doors,map.stairs,map.objects]){
-      if(!arr) continue; for(let i=arr.length-1;i>=0;i--){ if(arr[i] && arr[i].pf===pf) arr.splice(i,1); } }
-    map.prefabs=(map.prefabs||[]).filter(p=>p.id!==pf);
+    if(sel.pf!=null){
+      for(const arr of [map.shapes,map.walls,map.doors,map.stairs,map.objects]){ if(!arr) continue; for(let i=arr.length-1;i>=0;i--){ if(arr[i]&&arr[i].pf===sel.pf) arr.splice(i,1); } }
+      map.prefabs=(map.prefabs||[]).filter(p=>p.id!==sel.pf);
+    } else if(sel.roomIdx!=null){
+      const rm=new Set(groupMembers(sel).map(k=>k.obj));
+      for(const arr of [map.shapes,map.walls,map.doors,map.stairs,map.objects,map.lights,map.shadows]){ if(!arr) continue; for(let i=arr.length-1;i>=0;i--){ if(rm.has(arr[i])) arr.splice(i,1); } }
+    }
     setSel(null); commit();
   }
-  function prefabHandles(pf){
-    const bb=prefabBounds(pf); if(!bb) return null;
+  function groupHandles(sel){
+    const bb=groupBounds(sel); if(!bb) return null;
     const tl=toScreen(bb.x,bb.y), br=toScreen(bb.x+bb.w,bb.y+bb.h);
     const cx=(tl[0]+br[0])/2, top=Math.min(tl[1],br[1]), right=Math.max(tl[0],br[0]);
     return { bb, tl, br, rotate:[cx, top-24], lock:[right+16, top-16] };
   }
-  function drawPrefabSelection(pf){
-    const H=prefabHandles(pf); if(!H) return; const e=prefabEntry(pf);
+  function drawLockGlyph(lx,ly,open){ ctx.save(); ctx.strokeStyle="#1b1b1f"; ctx.fillStyle="#1b1b1f"; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(lx+(open?1.6:0), ly-1.2, 2.6, Math.PI, open?1.75*Math.PI:2*Math.PI); ctx.stroke();   // shackle (ajar if open)
+    ctx.beginPath(); ctx.rect(lx-3.4, ly-1.2, 6.8, 5.4); ctx.fill(); ctx.restore(); }                             // body
+  function drawGroupSelection(sel){
+    const H=groupHandles(sel); if(!H) return;
     ctx.save();
     const x=Math.min(H.tl[0],H.br[0]), y=Math.min(H.tl[1],H.br[1]), w=Math.abs(H.br[0]-H.tl[0]), h=Math.abs(H.br[1]-H.tl[1]);
     ctx.strokeStyle=C.sel; ctx.lineWidth=2; ctx.setLineDash([7,4]); ctx.strokeRect(x-2,y-2,w+4,h+4); ctx.setLineDash([]);
-    // name label
     ctx.font="12px system-ui,sans-serif"; ctx.textBaseline="bottom";
-    const label=(e?e.name:"Prefab"); const tw=ctx.measureText(label).width;
+    const label=groupName(sel); const tw=ctx.measureText(label).width;
     ctx.fillStyle="rgba(0,0,0,.55)"; ctx.fillRect(x-2, y-22, tw+12, 18);
     ctx.fillStyle=C.sel; ctx.fillText(label, x+4, y-6);
-    // rotate handle (line + disc + ⟳)
     ctx.strokeStyle=C.sel; ctx.lineWidth=1.6; ctx.beginPath(); ctx.moveTo((x+x+w)/2, y-2); ctx.lineTo(H.rotate[0],H.rotate[1]); ctx.stroke();
     ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(H.rotate[0],H.rotate[1],9,0,7); ctx.fill();
     ctx.fillStyle="#1b1b1f"; ctx.font="13px system-ui,sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText("⟳", H.rotate[0], H.rotate[1]+0.5);
-    // lock handle (disc + a DRAWN padlock — canvas emoji is unreliable across platforms)
     ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(H.lock[0],H.lock[1],9,0,7); ctx.fill();
-    (function(lx,ly){ ctx.save(); ctx.strokeStyle="#1b1b1f"; ctx.fillStyle="#1b1b1f"; ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.arc(lx, ly-1.2, 2.6, Math.PI, 2*Math.PI); ctx.stroke();     // shackle
-      ctx.beginPath(); ctx.rect(lx-3.4, ly-1.2, 6.8, 5.4); ctx.fill();                  // body
-      ctx.restore(); })(H.lock[0], H.lock[1]);
+    drawLockGlyph(H.lock[0], H.lock[1], false);      // locked padlock
     ctx.textAlign="left"; ctx.textBaseline="alphabetic";
     ctx.restore();
   }
+  // A small "lock this" handle shown on an individual selection that CAN be grouped —
+  // a room shape, or a piece belonging to a prefab. Returns its screen pos, or null.
+  function indivLockPos(sel){
+    if(!sel) return null; let bb=null;
+    if(sel.kind==="shape"){ const sh=(map.shapes||[])[sel.idx]; if(isRoomShape(sh)) bb=bounds(sh,"shape"); }
+    else { const o=objAt(sel); if(o && o.obj && o.obj.pf!=null) bb=bounds(o.obj,o.kind); }
+    if(!bb) return null;
+    const tl=toScreen(bb.x,bb.y), br=toScreen(bb.x+bb.w,bb.y+bb.h);
+    return [Math.max(tl[0],br[0])+15, Math.min(tl[1],br[1])-15];
+  }
+  function drawIndivLockHandle(sel){ const lp=indivLockPos(sel); if(!lp) return;
+    ctx.save(); ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(lp[0],lp[1],8,0,7); ctx.fill();
+    drawLockGlyph(lp[0], lp[1], true); ctx.restore(); }
 
   // ── LIGHTS (Advanced Mode) ────────────────────────────────────────
   // Rendering lives in the engine (and its inlined twin); this is just the
@@ -5729,6 +5920,9 @@
       };
       $("darkness").onchange=endLightEdit;
     }
+    if($("scenePresets")){ $("scenePresets").querySelectorAll("button").forEach(bt=>{
+      bt.onclick=()=>{ pushHistory(); map.darkness=parseFloat(bt.dataset.dark)||0; if(!map.lit) map.lit=true;
+        syncLightUI(); commit(); toast("Scene: "+bt.textContent+" ("+Math.round(map.darkness*100)+"% dark)"); }; }); }
     if($("lightColor")){ $("lightColor").oninput=e=>liveLight({color:e.target.value});
                          $("lightColor").onchange=endLightEdit; }
     if($("lightRadius")){ $("lightRadius").oninput=e=>liveLight({r:(+e.target.value)/2});
@@ -5861,6 +6055,9 @@
     if($("shadowsGrp")) $("shadowsGrp").style.display = on ? "" : "none";
     if($("lightTool"))  $("lightTool").style.display  = on ? "" : "none";
     if($("shadowTool")) $("shadowTool").style.display = on ? "" : "none";
+    // Prefab Rooms are an Advanced-Mode feature too (their furniture is Advanced art).
+    if($("roomGroup")) $("roomGroup").style.display = on ? "" : "none";
+    if(!on){ if(armedRoom) disarmRoom(true); if(sel && sel.kind==="prefab") setSel(null); }
     if(!on && (tool==="light"||tool==="shadow")) setTool("select");
     buildTexSelects(); buildObjGrid();
   }
@@ -5888,6 +6085,7 @@
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
     if($("imgAdd"))   $("imgAdd").onclick   =()=>$("imgFile").click();
+    if($("savePrefab")) $("savePrefab").onclick =saveSelectionAsPrefab;
     if($("imgFile"))  $("imgFile").onchange =e=>{ const fs=[...e.target.files];   // copy BEFORE clearing (FileList is live)
       e.target.value=""; if(fs.length) importImageFiles(fs).catch(err=>toast(err.message||"Import failed.")); };
     syncAdvancedUI(); syncStyleScope(); initLights(); initShadows();
@@ -6509,14 +6707,18 @@
     if(armedRoom && (e.key==="["||e.key==="{")){ rotateArm(-1); return; }
     if(armedRoom && (e.key==="]"||e.key==="}")){ rotateArm(+1); return; }
     if(sel && sel.kind==="prefab"){
-      if(e.key==="["||e.key==="{"){ rotatePrefab(sel.pf,-1); return; }
-      if(e.key==="]"||e.key==="}"){ rotatePrefab(sel.pf,+1); return; }
-      if(e.key==="u"||e.key==="U"){ togglePrefabLock(sel.pf,false); return; }
-      if(e.key==="Delete"||e.key==="Backspace"){ deletePrefab(sel.pf); return; }
+      if(e.key==="["||e.key==="{"){ rotateGroup(sel,-1); return; }
+      if(e.key==="]"||e.key==="}"){ rotateGroup(sel,+1); return; }
+      if(e.key==="u"||e.key==="U"){ groupLock(sel,false); return; }
+      if(e.key==="Delete"||e.key==="Backspace"){ deleteGroup(sel); return; }
     }
-    // U on a piece that belongs to a prefab re-locks that prefab (groups it again).
+    // U on a room shape locks it into a group; on a prefab piece it re-locks the prefab;
+    // on a loose piece it locks the smallest room around it.
     if(sel && sel.kind!=="prefab" && (e.key==="u"||e.key==="U")){
-      const o=objAt(sel); if(o && o.obj && o.obj.pf!=null){ togglePrefabLock(o.obj.pf,true); return; } }
+      if(sel.kind==="shape" && isRoomShape((map.shapes||[])[sel.idx])){ lockRoomShape(sel.idx); return; }
+      const o=objAt(sel);
+      if(o && o.obj && o.obj.pf!=null){ groupLock({kind:"prefab",pf:o.obj.pf},true); return; }
+      if(o && o.obj && o.obj.x!=null){ const ri=smallestRoomAt(o.obj.x,o.obj.y); if(ri!=null){ lockRoomShape(ri); return; } } }
     if((e.key==="Delete"||e.key==="Backspace")&&sel&&sel.kind!=="prefab"){ pushHistory(); removeHit({kind:sel.kind,idx:sel.idx,obj:objAt(sel).obj}); commit(); return; }
     if(tool==="object" && armedObj){
       const base=texReg.get(armedObj);
