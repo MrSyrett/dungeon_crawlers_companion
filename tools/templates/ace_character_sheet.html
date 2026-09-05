@@ -168,6 +168,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .attacks-table{width:100%;border-collapse:collapse;}
 .attacks-table th{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px;border-bottom:1px solid var(--rule);}
 .attacks-table td{padding:3px 6px;border-bottom:1px solid var(--rule);vertical-align:middle;}
+.attacks-table th:last-child,.attacks-table td:last-child{text-align:right;white-space:nowrap;}
 .attacks-table input,.attacks-table select{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
 .attacks-table select{cursor:pointer;font-size:12px;}
 .attacks-table input.num{width:44px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:13px;}
@@ -404,9 +405,9 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><button class="hdr-btn" onclick="addCustomAttack()" title="Add a blank attack row">＋ Add Attack</button></span></div>
+      <div class="section-bar"><span>Attacks</span></div>
       <table class="attacks-table">
-        <thead><tr><th style="width:38%;">Weapon</th><th>Kind</th><th style="width:60px;">Dmg</th><th>Dice</th><th style="width:74px;"></th></tr></thead>
+        <thead><tr><th style="width:32%;">Weapon</th><th>Kind</th><th style="width:56px;">Dmg</th><th>Dice</th><th style="width:64px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
       </table>
 
