@@ -224,6 +224,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .a-row .a-code{font-family:'Share Tech Mono',monospace;font-size:12px;color:#ddd;text-align:right;white-space:nowrap;}
 .a-row button{width:24px;height:22px;background:#2a221c;border:1px solid #4a4030;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
 .a-row button:disabled{opacity:.3;cursor:default;}
+.a-rk{width:22px;height:20px;background:#2a221c;border:1px solid #4a4030;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;line-height:1;}
+.a-rk:disabled{opacity:.3;cursor:default;}
 .a-attr button{width:24px;height:22px;background:#2a221c;border:1px solid #4a4030;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
 .a-attr button:disabled{opacity:.3;cursor:default;}
 .builder-chip{background:#1c1512;border:1px solid #3a2c22;color:#ddd;border-radius:12px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
@@ -244,8 +246,16 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 .combat-grid .vbig input#f-armor-prot{width:80px;}
 .combat-grid .vline{margin-top:auto;}
 .combat-grid .vline input.txt{font-size:12px;}
-.hdr-cog{width:26px;height:22px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.45);border-radius:5px;color:#fff;cursor:pointer;font-size:13px;line-height:1;padding:0;}
-.hdr-cog:hover{background:rgba(255,255,255,.32);}
+/* On-sheet play-time trackers (Magic Points / Advancement) */
+#advancement-panel .trk-body,#magic-panel .trk-body{padding:8px 10px;border-bottom:1px solid var(--rule);}
+.trk-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.trk-row label{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:120px;}
+#advancement-panel input,#magic-panel input{border:1px solid var(--input-border);background:var(--input-bg);color:var(--ink);font-family:'Share Tech Mono',monospace;font-size:13px;padding:4px 6px;outline:none;border-radius:2px;}
+#advancement-panel .trk-num,#magic-panel .trk-num{width:90px;}
+#advancement-panel .arc-row{display:grid;grid-template-columns:1fr 60px 60px 28px;gap:6px;align-items:center;margin-bottom:5px;}
+#advancement-panel .arc-row input{width:100%;}
+.trk-pool{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--d62e-dk);}
+.trk-ref{font-size:11px;color:var(--muted);line-height:1.4;margin-top:4px;font-style:italic;}
 
 /* Optional Rules */
 .vbig .calc.ref{font-size:11px;font-weight:800;letter-spacing:.01em;line-height:1.35;}
@@ -329,6 +339,8 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="stats-grid" id="stats-grid"></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
       <div class="add-row"><button class="small-btn ghost" onclick="openSkillPicker()">＋ Skills</button><span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);letter-spacing:.04em;">Adds are dice above the attribute</span></div>
+      <div id="magic-panel" hidden></div>
+      <div id="advancement-panel" hidden></div>
     </div>
 
     <div class="center-col">
@@ -432,7 +444,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
 <div class="roll-log">
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
-  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><button class="hdr-cog" id="opt-cog" onclick="openOptions()" title="Optional Rules" aria-label="Optional Rules">⚙</button><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #3a2c22;background:transparent;color:#9a8676;" title="Campaign">🔗</button>
     <button class="log-action-btn wizard" onclick="D62EB.launch()" title="Character Builder">Create</button>
@@ -496,14 +508,13 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="gearstore-overlay" class="ov" onclick="if(event.target===this)closeGearPicker()">
   <div class="modal" style="max-width:600px;">
     <div class="modal-hd"><div class="ttl">🛒 Equipment</div><button class="x" onclick="closeGearPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search equipment…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><button class="m-btn ghost" onclick="addCustomGear()">＋ Add custom</button></div></div>
+    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search equipment…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><select id="gearstore-genre" class="m-input brow-sel" onchange="renderGearPicker()"><option value="">All genres</option><option value="core">Core</option><option value="fantasy">Fantasy</option><option value="scifi">Sci-Fi</option><option value="superhero">Superhero</option></select><button class="m-btn ghost" onclick="addCustomGear()">＋ Add custom</button></div></div>
     <div class="modal-bd brow-list" id="gearstore-body"></div>
   </div>
 </div>
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">D6 System 2e — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
-<div id="options-overlay" class="ov" onclick="if(event.target===this)closeOptions()"><div class="modal"><div class="modal-hd"><div class="ttl">⚙ Optional Rules</div><button class="x" onclick="closeOptions()">&#10005;</button></div><div class="modal-bd" id="options-body"></div></div></div>
 
 <script>
 // ═══ CORE ═════════════════════════════════════════════════════════════════
@@ -528,7 +539,7 @@ const D = {
   tables:    () => (typeof D62E_TABLES          !== 'undefined' ? D62E_TABLES          : null),
 };
 let wound = 'none', heroArmed = false;
-function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'heroic', advancement:'none', magicPoints:false, specialization:false, attrBudget:false, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
+function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
 let options = defaultOptions();
 
 // ═══ DICE CODES ═══════════════════════════════════════════════════════════
@@ -789,68 +800,53 @@ function refreshOptNote() {
 }
 function applyOptions() {
   document.body.classList.toggle('spec-on', !!options.specialization);
-  setHeroUI(); refreshOptNote(); recalc();
+  setHeroUI(); refreshOptNote(); renderMagicPanel(); renderAdvancementPanel(); recalc();
 }
-function optToggle(key) { options[key] = !options[key]; afterOptChange(); }
-function optSet(key, val) { options[key] = val; afterOptChange(); }
-function afterOptChange() { applyOptions(); scheduleAutosave(); renderOptions(); }
+// Rule TOGGLES are set only in the builder's Options step. The sheet reads them and,
+// for the play-time rules, renders live trackers on the sheet body (not a modal).
 function optField(key, val) { options[key] = val; refreshOptNote(); scheduleAutosave(); }
-function addArc() { options.arcs = options.arcs || []; options.arcs.push({ skill: '', stepsDone: 0, stepsNeeded: 1 }); renderOptions(); scheduleAutosave(); }
-function removeArc(i) { options.arcs.splice(i, 1); renderOptions(); scheduleAutosave(); }
+function addArc() { options.arcs = options.arcs || []; options.arcs.push({ skill: '', stepsDone: 0, stepsNeeded: 1 }); renderAdvancementPanel(); scheduleAutosave(); }
+function removeArc(i) { options.arcs.splice(i, 1); renderAdvancementPanel(); scheduleAutosave(); }
 function setArc(i, field, val) { const a = options.arcs[i]; if(!a) return; a[field] = field === 'skill' ? val : num(val); scheduleAutosave(); }
-function magicSpend(delta) { const mx = magicMax(); options.magicCurrent = Math.max(0, Math.min(mx, num(options.magicCurrent) + delta)); renderOptions(); scheduleAutosave(); }
-function magicRefill() { options.magicCurrent = magicMax(); renderOptions(); scheduleAutosave(); }
-function openOptions() { $('options-overlay').classList.add('open'); renderOptions(); }
-function closeOptions() { $('options-overlay').classList.remove('open'); }
-function _optRow(name, note, control) {
-  return '<div class="opt-row"><div class="opt-main"><div class="opt-name">' + esc(name) + '</div><div class="opt-note2">' + note + '</div></div>' + control + '</div>';
-}
-function _check(key) { return '<div class="opt-check' + (options[key] ? ' on' : '') + '" onclick="optToggle(\'' + key + '\')" role="switch" aria-checked="' + (!!options[key]) + '"></div>'; }
-function _sel(key, opts) { return '<select class="m-input" onchange="optSet(\'' + key + '\', this.value)">' + opts.map(o => '<option value="' + o[0] + '"' + (options[key] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select>'; }
-function renderOptions() {
-  const b = $('options-body'); if(!b) return;
-  let h = '<p class="m-hint">Turn on the optional rules your table uses. Each change applies immediately and is saved with the character.</p>';
-  h += _optRow('No Dodge Defense', 'Ranged attacks use fixed difficulties (PB 5 / short 10 / medium 15 / long 20; dodging at long 30) instead of a Dodge score. Parry is unchanged.', _check('noDodge'));
-  h += _optRow('Alt Wild Die', 'Core: 6 explodes, 1 is a Complication. Basic/Classic: 1 removes the Wild Die + your highest other die. Simple: 1 does nothing.', _sel('wildDie', [['core','Core'],['basic','Basic'],['classic','Classic'],['simple','Simple']]));
-  h += _optRow('Hero Point Model', 'Heroic: double a code. Basic: +1 normal die (start 3–5). Classic: +1D wild, bankable. Superheroic: boost, start 3.', _sel('heroModel', [['heroic','Heroic'],['basic','Basic'],['classic','Classic'],['superheroic','Superheroic']]));
-  h += _optRow('Advancement', 'Track character growth. XP, Milestone, or Narrative arcs — a tracker + reference, not an auto-spend engine.', _sel('advancement', [['none','None'],['xp','XP'],['milestone','Milestone'],['narrative','Narrative']]));
-  if(options.advancement && options.advancement !== 'none') h += renderAdvancement();
-  h += _optRow('Magic Points Casting', 'Cast from a points pool (Magic dice + Mystical Alignment × 3) instead of straight rolls.', _check('magicPoints'));
-  if(options.magicPoints) h += renderMagic();
-  h += _optRow('Skill Specializations & Advanced Skills', 'Each skill row gains an Adv toggle (rolls only its own dice) and a Spec toggle (+1D when the specialization applies).', _check('specialization'));
-  h += _optRow('Additional Attribute Budgets', 'Builder only: a-la-carte attribute budget scales +3D for each attribute beyond the four core ones.', _check('attrBudget'));
-  b.innerHTML = h;
-}
-function renderAdvancement() {
+function magicSpend(delta) { const mx = magicMax(); options.magicCurrent = Math.max(0, Math.min(mx, num(options.magicCurrent) + delta)); renderMagicPanel(); scheduleAutosave(); }
+function magicRefill() { options.magicCurrent = magicMax(); renderMagicPanel(); scheduleAutosave(); }
+// Play-time Advancement tracker (XP / Milestone / Narrative arcs) — shown only when on.
+function renderAdvancementPanel() {
+  const el = $('advancement-panel'); if(!el) return;
   const mode = options.advancement;
-  let h = '<div class="opt-sub">';
+  if(!mode || mode === 'none') { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  const title = { xp:'Advancement — XP', milestone:'Advancement — Milestones', narrative:'Advancement — Narrative' }[mode] || 'Advancement';
+  let body = '';
   if(mode === 'xp') {
-    h += '<div class="m-lbl">Experience Points</div><input class="m-input" type="number" min="0" value="' + esc(options.xp) + '" oninput="optField(\'xp\', num(this.value))" style="max-width:140px;">'
-      + '<div class="opt-ref">Raise a skill = its current rating in XP (min 1); raise an attribute = 10× its current rating. With pips, buy +1/+2 before the next die.</div>';
+    body = '<div class="trk-row"><label>Experience Points</label><input type="number" min="0" class="trk-num" value="' + esc(options.xp) + '" oninput="optField(\'xp\', num(this.value))"></div>'
+      + '<div class="trk-ref">Raise a skill = its current rating in XP (min 1); raise an attribute = 10× its rating. With pips, buy +1/+2 before the next die.</div>';
   } else if(mode === 'milestone') {
-    h += '<div class="m-lbl">Milestones reached</div><input class="m-input" type="number" min="0" value="' + esc(options.milestones) + '" oninput="optField(\'milestones\', num(this.value))" style="max-width:140px;">'
-      + '<div class="opt-ref">Each milestone = +1 attribute die and +3 skill dice (or +9 pips), or a new/raised Perk instead.</div>';
+    body = '<div class="trk-row"><label>Milestones reached</label><input type="number" min="0" class="trk-num" value="' + esc(options.milestones) + '" oninput="optField(\'milestones\', num(this.value))"></div>'
+      + '<div class="trk-ref">Each milestone = +1 attribute die and +3 skill dice (or +9 pips), or a new/raised Perk instead.</div>';
   } else {
-    h += '<div class="m-lbl">Narrative arcs</div>';
-    h += (options.arcs || []).map((a, i) =>
+    body = (options.arcs || []).map((a, i) =>
       '<div class="arc-row"><input type="text" value="' + esc(a.skill) + '" placeholder="skill" oninput="setArc(' + i + ',\'skill\',this.value)">'
       + '<input type="number" min="0" value="' + esc(a.stepsDone) + '" title="steps done" oninput="setArc(' + i + ',\'stepsDone\',this.value)">'
       + '<input type="number" min="0" value="' + esc(a.stepsNeeded) + '" title="steps needed" oninput="setArc(' + i + ',\'stepsNeeded\',this.value)">'
-      + '<button class="row-x" onclick="removeArc(' + i + ')">✕</button></div>').join('');
-    h += '<button class="small-btn ghost" onclick="addArc()" style="margin-top:4px;">＋ Add arc</button>';
-    h += '<div class="opt-ref">An arc needs one more step than the skill\'s current rating; complete all steps to raise the skill +1D.</div>';
+      + '<button class="row-x" onclick="removeArc(' + i + ')">✕</button></div>').join('')
+      + '<button class="small-btn ghost" onclick="addArc()" style="margin-top:6px;">＋ Add arc</button>'
+      + '<div class="trk-ref">An arc needs one more step than the skill\'s current rating; complete all steps to raise the skill +1D.</div>';
   }
-  return h + '</div>';
+  el.innerHTML = '<div class="section-bar"><span>' + esc(title) + '</span></div><div class="trk-body">' + body + '</div>';
 }
-function renderMagic() {
+// Play-time Magic Points pool — shown only when Magic Points Casting is on.
+function renderMagicPanel() {
+  const el = $('magic-panel'); if(!el) return;
+  if(!options.magicPoints) { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
   const mx = magicMax(); const hasMagic = !!$('at-Magic');
-  let h = '<div class="opt-sub"><div class="m-lbl">Mystical Alignment</div>'
-    + '<input class="m-input" type="number" min="0" value="' + esc(options.magicAlignment) + '" onchange="optField(\'magicAlignment\', num(this.value)); renderOptions();" style="max-width:120px;">'
-    + '<div class="mp-btns"><span class="tray-label" style="color:var(--muted);">Pool</span> <span class="mp-pool">' + num(options.magicCurrent) + ' / ' + mx + '</span>'
-    + '<button class="small-btn ghost" onclick="magicSpend(-1)">− Spend</button><button class="small-btn ghost" onclick="magicSpend(1)">＋ Recover</button><button class="small-btn" onclick="magicRefill()">Full</button></div>'
-    + (hasMagic ? '' : '<div class="opt-ref" style="color:#df8a8a;">No Magic attribute on the sheet — the Magic-dice term counts as 0. Add the Magic attribute for a full pool.</div>')
-    + '<div class="opt-ref">Max pool = Magic attribute dice + (Mystical Alignment × 3). A spell costs ⌈Difficulty ÷ 10⌉ points; recover the Magic attribute in points each hour.</div>';
-  return h + '</div>';
+  el.innerHTML = '<div class="section-bar"><span>Magic Points</span></div><div class="trk-body">'
+    + '<div class="trk-row"><label>Mystical Alignment</label><input type="number" min="0" class="trk-num" value="' + esc(options.magicAlignment) + '" onchange="optField(\'magicAlignment\', num(this.value)); renderMagicPanel();"></div>'
+    + '<div class="trk-row"><label>Pool</label><span class="trk-pool">' + num(options.magicCurrent) + ' / ' + mx + '</span> <button class="small-btn ghost" onclick="magicSpend(-1)">− Spend</button><button class="small-btn ghost" onclick="magicSpend(1)">＋ Recover</button><button class="small-btn" onclick="magicRefill()">Full</button></div>'
+    + (hasMagic ? '' : '<div class="trk-ref" style="color:var(--red);">No Magic attribute on the sheet — the Magic-dice term counts as 0. Add the Magic attribute for a full pool.</div>')
+    + '<div class="trk-ref">Max pool = Magic attribute dice + (Mystical Alignment × 3). A spell costs ⌈Difficulty ÷ 10⌉ points; recover the Magic attribute in points each hour.</div>'
+    + '</div>';
 }
 
 // ═══ WEAPONS ══════════════════════════════════════════════════════════════
@@ -1020,8 +1016,8 @@ function renderTraitPicker() {
 function openGearPicker() { $('gearstore-search').value = ''; $('gearstore-overlay').classList.add('open'); renderGearPicker(); $('gearstore-search').focus(); }
 function closeGearPicker() { $('gearstore-overlay').classList.remove('open'); }
 function renderGearPicker() {
-  const q = norm($('gearstore-search').value), fc = $('gearstore-cat').value;
-  const list = D.equipment().filter(g => genreOk(g) && (!fc || g.category === fc) && (!q || norm(g.name).includes(q) || norm(g.category || '').includes(q))).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
+  const q = norm($('gearstore-search').value), fc = $('gearstore-cat').value, fg = ($('gearstore-genre') ? $('gearstore-genre').value : '');
+  const list = D.equipment().filter(g => (!fg || g.genre === fg) && (!fc || g.category === fc) && (!q || norm(g.name).includes(q) || norm(g.category || '').includes(q))).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
   const box = $('gearstore-body');
   if(!list.length) { box.innerHTML = '<p class="brow-empty">No equipment matches.</p>'; return; }
   box.innerHTML = list.map(g => {
@@ -1119,7 +1115,7 @@ function collectSheet() {
     options: {
       noDodge: !!options.noDodge, wildDie: options.wildDie || 'core', heroModel: options.heroModel || 'heroic',
       advancement: options.advancement || 'none', magicPoints: !!options.magicPoints,
-      specialization: !!options.specialization, attrBudget: !!options.attrBudget,
+      specialization: !!options.specialization, attrBudget: !!options.attrBudget, powerLevel: options.powerLevel || 'none',
       xp: num(options.xp), milestones: num(options.milestones),
       arcs: (options.arcs || []).map(a => ({ skill: a.skill || '', stepsDone: num(a.stepsDone), stepsNeeded: num(a.stepsNeeded) })),
       magicAlignment: num(options.magicAlignment), magicCurrent: num(options.magicCurrent),

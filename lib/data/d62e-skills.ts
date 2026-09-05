@@ -325,6 +325,13 @@ export const D62E_SKILLS = [
     "page": 63
   },
   {
+    "name": "Arcane World",
+    "attribute": "Magic",
+    "genre": "fantasy",
+    "description": "Magic skill governing knowing, understanding, and identifying magical creatures, planes, locations, items, and lore. If the being, location, item, or lore is part of the world, this skill tells you what you know about it. Takes an action to use.",
+    "page": 145
+  },
+  {
     "name": "Barter",
     "attribute": "Knowledge",
     "genre": "fantasy",
@@ -333,12 +340,47 @@ export const D62E_SKILLS = [
     "page": 143
   },
   {
+    "name": "Change (Alteration)",
+    "attribute": "Magic",
+    "genre": "fantasy",
+    "description": "Spell specialization governing change — taking something that exists and modifying or mutating it into something else. Can enhance, reduce, or restrict existing characteristics or skills (e.g. raising Brawn, turning a flame into a fireball, changing a person into a bat). Can only modify things already present.",
+    "page": 147
+  },
+  {
+    "name": "Craft Magic Item",
+    "attribute": "Magic",
+    "genre": "fantasy",
+    "description": "Magic skill used to create magic items — potions, weapons, armors, wands, and more. Crafting difficulty and how effects are handled is set by the gamemaster (inspired by the Crafting Spells guidelines). Takes days or weeks rather than actions.",
+    "page": 145
+  },
+  {
+    "name": "Creation (Conjuration)",
+    "attribute": "Magic",
+    "genre": "fantasy",
+    "description": "Spell specialization governing creation — producing something from nothing (e.g. gold from thin air) or imbuing an inanimate object with animate features and attributes. Conjured items and characteristics remain for the spell's duration. Used only to create something out of nothing, not to move things.",
+    "page": 148
+  },
+  {
     "name": "Gambling",
     "attribute": "Perception",
     "genre": "fantasy",
     "description": "Playing, teaching, learning, understanding, and cheating at games of strategy and luck, and assessing risk and reward in dangerous situations. Successes increase winnings, failures decrease them.",
     "time": "one action",
     "page": 144
+  },
+  {
+    "name": "Identify Magic",
+    "attribute": "Magic",
+    "genre": "fantasy",
+    "description": "Magic skill governing understanding magic and its effects, analyzing and assessing spells as they're cast, and the knowledge needed to negate or overcome magical effects and spells. Takes an action to use.",
+    "page": 147
+  },
+  {
+    "name": "Knowledge (Divination)",
+    "attribute": "Magic",
+    "genre": "fantasy",
+    "description": "Spell specialization governing obtaining knowledge — scrying, far-sight, and speak-with-the-dead effects. Spells that block the obtaining of Intellect/knowledge are also divination spells.",
+    "page": 148
   },
   {
     "name": "Languages",
@@ -360,6 +402,13 @@ export const D62E_SKILLS = [
     "page": 142
   },
   {
+    "name": "Movement (Apportation)",
+    "attribute": "Magic",
+    "genre": "fantasy",
+    "description": "Spell specialization governing movement — telekinesis, calling objects, teleporting the caster, or moving a person/creature by compulsion, the spell's power, or teleportation. The object or creature already exists; the spell simply 'calls' or relocates it. Spells that restrict movement are also apportation.",
+    "page": 147
+  },
+  {
     "name": "Navigation",
     "attribute": "Knowledge",
     "genre": "fantasy",
@@ -374,6 +423,13 @@ export const D62E_SKILLS = [
     "description": "Using other creatures as mounts — horses, camels, dragons, or other esoteric beasts. When mounted, the Riding die code replaces Agility for calculating Dodge defense (no double-dipping).",
     "time": "one action",
     "page": 142
+  },
+  {
+    "name": "Spell School",
+    "attribute": "Magic",
+    "genre": "fantasy",
+    "description": "The core casting skill; each spell school is its own specialization. To cast, generate a Magic skill total (Spell School + specialization) and beat the spell's Difficulty. Four specializations: Change (Alteration), Movement (Apportation), Creation (Conjuration), Knowledge (Divination). Always takes one or more actions.",
+    "page": 147
   },
   {
     "name": "Streetwise",
