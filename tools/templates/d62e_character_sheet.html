@@ -238,13 +238,13 @@ body.dark .sheet{border-color:#544a50;}
 body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,body.dark .vline input{background:var(--input-bg);color:var(--ink);border-color:var(--rule);}
 
 /* Combat/status tiles — even 3×2 grid, sized up */
-.combat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:8px;border-bottom:1px solid var(--rule);}
-.combat-grid .vital{display:flex;flex-direction:column;min-height:96px;}
-.combat-grid .vbig{font-size:32px;margin-top:2px;}
-.combat-grid .vbig .calc{font-size:32px;}
-.combat-grid .vbig input{width:74px;height:44px;font-size:26px;}
-.combat-grid .vbig input#f-armor-prot{width:80px;}
-.combat-grid .vline{margin-top:auto;}
+.combat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:6px 8px;border-bottom:1px solid var(--rule);}
+.combat-grid .vital{display:flex;flex-direction:column;min-height:0;padding:6px 8px;gap:1px;}
+.combat-grid .vbig{font-size:28px;line-height:1;margin-top:1px;}
+.combat-grid .vbig .calc{font-size:28px;}
+.combat-grid .vbig input{width:70px;height:36px;font-size:22px;}
+.combat-grid .vbig input#f-armor-prot{width:76px;}
+.combat-grid .vline{margin-top:4px;}
 .combat-grid .vline input.txt{font-size:12px;}
 /* On-sheet play-time trackers (Magic Points / Advancement) */
 #advancement-panel .trk-body,#magic-panel .trk-body{padding:8px 10px;border-bottom:1px solid var(--rule);}
@@ -846,7 +846,7 @@ function addWeaponRow(w) {
     + '<td><input type="text" class="wp-dmg num" value="' + esc(w.damage || '') + '" placeholder="Brawn+2D" oninput="scheduleAutosave()"></td>'
     + '<td><input type="text" class="wp-range" value="' + esc(w.range || '') + '" placeholder="melee" oninput="scheduleAutosave()"></td>'
     + '<td><input type="text" class="wp-notes" value="' + esc(w.notes || '') + '" oninput="scheduleAutosave()"></td>'
-    + '<td style="white-space:nowrap;"><button class="small-btn" onclick="rollWeaponAttack(this.closest(\'tr\'))">Atk</button> <button class="small-btn ghost" onclick="rollWeaponDamage(this.closest(\'tr\'))">Dmg</button> <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+    + '<td style="white-space:nowrap;"><button class="small-btn" onclick="rollWeaponAttack(this.closest(\'tr\'))" title="Roll attack and damage">Attack</button> <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
   $('weapons-body').appendChild(tr); return tr;
 }
 function refreshWeaponRows() { document.querySelectorAll('#weapons-body .wp-skill').forEach(sel => { const cur = sel.value; sel.innerHTML = skillOptions(cur); }); }
@@ -863,7 +863,6 @@ function weaponSkillPips(tr) {
   if(sk) { const p = skillPips(sk); if(p !== null) return { name: sk, pips: p }; const def = D.skills().find(s => norm(s.name) === norm(sk)); if(def) return { name: sk, pips: attr(def.attribute) }; }
   return { name: 'Agility', pips: attr('Agility') };
 }
-function rollWeaponAttack(tr) { const s = weaponSkillPips(tr); rollCode((tr.querySelector('.wp-name').value || 'Attack') + ' (' + s.name + ')', s.pips); }
 // Damage like "Brawn+2D" or "5D". Attribute-prefixed codes add the attribute dice.
 function weaponDamagePips(txt) {
   txt = String(txt || '').trim(); if(!txt) return { pips: null };
@@ -871,10 +870,15 @@ function weaponDamagePips(txt) {
   if(m) { const a = ALL_ATTRS.find(x => x.toLowerCase() === m[1].toLowerCase()); if(a) { const add = m[2] ? (pipsFrom(m[2]) || 0) : 0; return { pips: attr(a) + add, label: a + (add ? code(add, true) : '') }; } }
   const p = pipsFrom(txt); return { pips: p, label: txt };
 }
-function rollWeaponDamage(tr) {
-  const txt = tr.querySelector('.wp-dmg').value.trim(); const name = tr.querySelector('.wp-name').value || 'Damage';
+// One click rolls the attack (skill code + Wild Die + mods) AND the damage (no mods),
+// logging both. A row with no damage value just rolls the attack.
+function rollWeaponAttack(tr) {
+  const s = weaponSkillPips(tr); const name = tr.querySelector('.wp-name').value || 'Attack';
+  rollCode(name + ' (' + s.name + ')', s.pips);
+  const txt = tr.querySelector('.wp-dmg').value.trim();
+  if(!txt) return;
   const dmg = weaponDamagePips(txt);
-  if(dmg.pips === null) { addLog(name, '✗', 'Damage code not readable: ' + txt, 'fumble'); return; }
+  if(dmg.pips === null) { addLog(name + ' damage', '✗', 'Damage code not readable: ' + txt, 'fumble'); return; }
   rollCode(name + ' damage', dmg.pips, { noMods: true, dc: 0 });
 }
 
