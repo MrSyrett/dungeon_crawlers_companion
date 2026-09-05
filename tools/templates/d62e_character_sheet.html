@@ -338,7 +338,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="section-bar accent"><span>Attributes</span></div>
       <div class="stats-grid" id="stats-grid"></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
-      <div class="add-row"><button class="small-btn ghost" onclick="openSkillPicker()">＋ Skills</button><span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);letter-spacing:.04em;">Adds are dice above the attribute</span></div>
+      <div class="add-row"><button class="small-btn ghost" onclick="openSkillPicker()">＋ Skills</button></div>
       <div id="magic-panel" hidden></div>
       <div id="advancement-panel" hidden></div>
     </div>
@@ -356,20 +356,17 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="vlbl"><span>Hero Points</span></div>
           <div class="vbig"><input type="number" id="f-hero" value="1" min="0" oninput="scheduleAutosave()"></div>
           <div class="vline"><button class="small-btn" id="hero-btn" onclick="toggleHeroPoint()">Spend: double</button></div>
-          <div class="vline" id="hero-hint" style="font-size:9px;line-height:1.3;"></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Dodge</span><small>5 × Perc. dice</small></div>
+          <div class="vlbl"><span>Dodge</span></div>
           <div class="vbig"><span class="calc" id="dodge-val">10</span></div>
-          <div class="vline">override <input type="text" id="f-dodge-ovr" placeholder="auto" oninput="recalc();scheduleAutosave()"></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Parry</span><small>5 × Agi. dice</small></div>
+          <div class="vlbl"><span>Parry</span></div>
           <div class="vbig"><span class="calc" id="parry-val">15</span></div>
-          <div class="vline">override <input type="text" id="f-parry-ovr" placeholder="auto" oninput="recalc();scheduleAutosave()"></div>
         </div>
         <div class="vital">
-          <div class="vlbl"><span>Char. Points</span><small>XP</small></div>
+          <div class="vlbl"><span>Char. Points</span></div>
           <div class="vbig"><input type="number" id="f-cp" value="0" min="0" oninput="scheduleAutosave()"></div>
         </div>
         <div class="vital">
@@ -383,7 +380,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span>Weapons &amp; Attacks</span><span class="hdr-right" style="font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:none;color:rgba(255,255,255,.7);">Add a weapon from the Gear tab's Equipment picker</span></div>
+      <div class="section-bar"><span>Weapons &amp; Attacks</span></div>
       <table class="tbl" id="weapons-tbl">
         <thead><tr><th style="width:24%;">Weapon</th><th style="width:22%;">Skill</th><th style="width:90px;">Damage</th><th style="width:18%;">Range</th><th>Notes</th><th style="width:120px;"></th></tr></thead>
         <tbody id="weapons-body"></tbody>
@@ -438,7 +435,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       </div>
     </div>
   </div>
-  <div class="sheet-foot"><span>D6 System: Second Edition — genre-agnostic. Die codes are stored as pips (1D = 3 pips, +1 = 1 pip).</span><span id="foot-build"></span></div>
+  <div class="sheet-foot"><span></span><span id="foot-build"></span></div>
 </div>
 </div>
 
@@ -643,14 +640,13 @@ function addSkillByName(name) {
 function recalc() {
   skillRows().forEach(tr => { tr.querySelector('.sk-total').textContent = code(rowTotal(tr)); });
   const dv = $('dodge-val'), pv = $('parry-val');
-  const pOvr = $('f-parry-ovr').value.trim();
-  pv.textContent = pOvr !== '' ? pOvr : 5 * diceOf(attr('Agility'));
+  // Parry and Dodge are always computed (5 × attribute dice).
+  pv.textContent = 5 * diceOf(attr('Agility'));
   if(typeof options !== 'undefined' && options && options.noDodge) {
     // No Dodge Defense: fixed ranged-attack difficulties instead of a computed number.
     dv.textContent = 'PB5 · S10 · M15 · L20 · Dodge@L30'; dv.classList.add('ref');
   } else {
-    const dOvr = $('f-dodge-ovr').value.trim();
-    dv.textContent = dOvr !== '' ? dOvr : 5 * diceOf(attr('Perception')); dv.classList.remove('ref');
+    dv.textContent = 5 * diceOf(attr('Perception')); dv.classList.remove('ref');
   }
   refreshWeaponRows(); updateModNote();
 }
@@ -773,13 +769,8 @@ function setWound(k) {
 
 // ═══ OPTIONAL RULES ═══════════════════════════════════════════════════════
 function magicMax() { return diceOf(attr('Magic')) + num(options.magicAlignment) * 3; }
-function heroHint() {
-  const base = { heroic:'Spend 1 to double a roll\'s die code.', basic:'Spend 1 to add one extra normal d6.', classic:'Spend 1 to add +1D wild (up to your attribute die). Bankable between sessions.', superheroic:'Spend 1 to boost: double a code, take an extra action w/o the multi-action penalty, raise a Talent/Power one rank, gift a point, or ignore a die cap.' }[heroModel()];
-  return base + ' A Hero Point can also avoid being Stunned.';
-}
 function setHeroUI() {
   const hb = $('hero-btn'); if(hb && !heroArmed) hb.textContent = heroArmLabel();
-  const hint = $('hero-hint'); if(hint) hint.textContent = heroHint();
 }
 function refreshOptNote() {
   const el = $('opt-note'); if(!el) return;
@@ -1091,13 +1082,12 @@ function collectSheet() {
   const v = id => $(id).value;
   const attrs = {}; activeAttrs().forEach(a => attrs[a] = attr(a));
   const traits = bucket => [...document.querySelectorAll('#' + bucket + '-body tr')].map(tr => ({ name: tr.querySelector('.tr-name').value.trim(), note: tr.querySelector('.tr-note').value.trim() })).filter(t => t.name);
-  const dOvr = v('f-dodge-ovr').trim(), pOvr = v('f-parry-ovr').trim();
   return {
     system: 'D62E', name: v('f-name'), genre: v('f-genre'), template: v('f-template'), archetype: v('f-archetype'),
     attrs: attrs,
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attribute: tr.dataset.attr, pips: codeOrZero(tr.querySelector('.sk-adds').value), adv: tr.dataset.adv === '1', spec: !!(tr.querySelector('.sk-spec') && tr.querySelector('.sk-spec').checked), specName: (tr.querySelector('.sk-specname') && tr.querySelector('.sk-specname').value.trim()) || '' })).filter(s => s.name),
     heroPoints: num(v('f-hero')), characterPoints: num(v('f-cp')),
-    dodgeOverride: dOvr === '' ? null : dOvr, parryOverride: pOvr === '' ? null : pOvr, move: v('f-move'),
+    move: v('f-move'),
     wound: wound,
     weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, skill: tr.querySelector('.wp-skill').value, notes: tr.querySelector('.wp-notes').value })).filter(w => w.name || w.damage),
     armor: { name: v('f-armor'), protection: v('f-armor-prot') },
@@ -1127,7 +1117,6 @@ function applySheet(d) {
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
   wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; heroArmed = false; renderWoundTrack();
   set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0);
-  set('f-dodge-ovr', d.dodgeOverride == null ? '' : d.dodgeOverride); set('f-parry-ovr', d.parryOverride == null ? '' : d.parryOverride);
   set('f-move', d.move != null ? d.move : '10');
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-prot', ar.protection);
   $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(addWeaponRow);
