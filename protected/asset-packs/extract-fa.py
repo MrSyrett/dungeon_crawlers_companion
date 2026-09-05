@@ -146,22 +146,47 @@ for pth in paths:
 if not allobjs:
     raise SystemExit('no objects found')
 
-# One id can appear across batches; keep the first (stable ids for saved maps).
-uniq = {}
+# INCREMENTAL & ADDITIVE. Each pack is atlased into its OWN sheets, prefixed by pack
+# id, and MERGED into any existing fa-bundle.json — so you can bake pack-by-pack and
+# just commit the new sheets + the updated manifest, without re-baking or disturbing
+# packs already deployed. Texture ids are name-slug-stable, so saved maps keep resolving.
+from collections import defaultdict
+by_pid = defaultdict(dict)
 for o in allobjs:
-    uniq.setdefault(o['id'], o)
-allobjs = sorted(uniq.values(), key=lambda o: o['id'])
-print(f'atlasing {len(allobjs)} objects…')
-full  = write_atlas(allobjs, 'fa-objects', 'img', ATLAS, 86)
-thumb = write_atlas(allobjs, 'fa-objthumbs', 'th', 1024, 82)
-by_pack = {}
-for o, f, t in zip(allobjs, full, thumb):
-    e = {'id': o['id'], 'name': o['name'], 'kind': 'object', 'w': o['w'], 'h': o['h'],
-         'atlas': f, 'thumb': t}
-    if o.get('colorable'): e['colorable'] = True
-    by_pack.setdefault(o['_pid'], []).append(e)
+    by_pid[o['_pid']].setdefault(o['id'], o)     # dedupe by id within a pack
+
+new_recs = {}
 for p in packs:
-    p['textures'] = sorted(by_pack.get(p['id'], []), key=lambda e: e['name'])
+    objs = sorted(by_pid[p['id']].values(), key=lambda o: o['id'])
+    if not objs:
+        continue
+    pre = p['id']                                # e.g. fa-fa-objects-a-v3-51-07
+    # clear this pack's old sheets so a re-bake never leaves orphans
+    for _f in os.listdir(OUT):
+        if _f.startswith(pre + '-obj-') or _f.startswith(pre + '-th-'):
+            os.remove(os.path.join(OUT, _f))
+    full  = write_atlas(objs, pre + '-obj', 'img', ATLAS, 86)
+    thumb = write_atlas(objs, pre + '-th', 'th', 1024, 82)
+    texs = []
+    for o, f, t in zip(objs, full, thumb):
+        e = {'id': o['id'], 'name': o['name'], 'kind': 'object', 'w': o['w'], 'h': o['h'],
+             'atlas': f, 'thumb': t}
+        if o.get('colorable'): e['colorable'] = True
+        texs.append(e)
+    p['textures'] = sorted(texs, key=lambda e: e['name'])
+    new_recs[p['id']] = p
+    print(f'  atlased {p["name"]}: {len(objs)} objects, {len(set(f["sheet"] for f in full))} sheets')
+
+# Merge with packs from earlier runs (keep theirs, replace/add ours).
+merged = {}
+existing = os.path.join(OUT, 'fa-bundle.json')
+if os.path.exists(existing):
+    try:
+        for p in json.load(open(existing)).get('packs', []):
+            merged[p['id']] = p
+    except Exception:
+        pass
+merged.update(new_recs)
 
 _h = hashlib.sha1()
 for _f in sorted(os.listdir(OUT)):
@@ -169,8 +194,8 @@ for _f in sorted(os.listdir(OUT)):
         _h.update(_f.encode()); _h.update(str(os.path.getsize(f'{OUT}/{_f}')).encode())
 manifest = {'version': _h.hexdigest()[:10],
             'note': 'Forgotten Adventures — personal-use, admin-gated. Not for public serving.',
-            'packs': packs}
-json.dump(manifest, open(f'{OUT}/fa-bundle.json', 'w'))
+            'packs': sorted(merged.values(), key=lambda p: p['name'])}
+json.dump(manifest, open(existing, 'w'))
 tot = sum(os.path.getsize(os.path.join(OUT, f)) for f in os.listdir(OUT))
-sheets = len(set(f['sheet'] for f in full))
-print(f'-> {OUT}  ({len(os.listdir(OUT))} files, {tot/1024/1024:.2f} MB, {sheets} object sheets)')
+print(f'-> {OUT}  ({len(os.listdir(OUT))} files, {tot/1024/1024:.2f} MB, '
+      f'{len(manifest["packs"])} packs total)')

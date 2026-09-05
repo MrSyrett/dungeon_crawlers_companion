@@ -140,6 +140,14 @@
   .objgrid .sw i.on{box-shadow:inset 0 0 0 2px var(--gold)}
   .objgrid .cnt{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.62);color:#fff;
     font-size:9px;line-height:1;padding:2px 3px;border-radius:4px;pointer-events:none}
+  /* recolour chip on a "Colorable" object cell — a native colour input styled as a
+     small swatch; its value doubles as the current-tint indicator */
+  .objgrid input.tint{position:absolute;top:2px;left:2px;width:16px;height:16px;padding:0;margin:0;
+    border:1px solid rgba(255,255,255,.55);border-radius:3px;cursor:pointer;background:none;
+    -webkit-appearance:none;appearance:none;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+  .objgrid input.tint::-webkit-color-swatch-wrapper{padding:0}
+  .objgrid input.tint::-webkit-color-swatch{border:none;border-radius:2px}
+  .objgrid input.tint::-moz-color-swatch{border:none;border-radius:2px}
   .packs{margin-top:8px;display:flex;flex-direction:column;gap:4px}
   .packs .pk{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);
     background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 7px}
@@ -2329,6 +2337,56 @@
   // Drawn last, on top of floors, walls, doors and stairs — a prop sits on the
   // map. Resolved through tex.byId like every other texture, so objects appear
   // only in Advanced Mode and classic output stays pure ink by construction.
+  // ── colourable objects: runtime tint ─────────────────────────────────────
+  // FA "Colorable" props (flagged `colorable` in the gated bundle) are neutral
+  // bases meant to be recoloured — the same objects you'd tint in Dungeondraft.
+  // A placed object carries `o.tint` (hex); we multiply the sprite by it while
+  // keeping its shading and alpha. Results are cached per (texture, tint) as a
+  // small canvas so the per-frame cost is one drawImage, not a recolour.
+  const texTint = new Map();     // session: texture id → last-picked tint (for arming)
+  const tintCache = new Map();   // "id|hex" → tinted canvas (or null = not ready yet)
+  const COLORABLE_DEFAULT = "#b48a5a";   // the colour a colourable prop gets until you pick one
+  function hexRGB(hex){ const n=parseInt(String(hex).slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+  // Forgotten Adventures draws the RECOLOURABLE region of a "Colorable" prop in flat
+  // saturated red (R high, G/B ~0); the red intensity carries the shading, and every
+  // non-red pixel (wood frame, shadow, metal) is left as-is. So recolouring = map the
+  // red-masked pixels to the chosen hue, scaled by the red channel so shading survives.
+  // This matches how the same object recolours in Dungeondraft.
+  function recolorRedMask(g, w, h, tint){
+    const [tr,tg,tb]=hexRGB(tint);
+    const im=g.getImageData(0,0,w,h), d=im.data;
+    for(let i=0;i<d.length;i+=4){
+      const r=d[i], gg=d[i+1], b=d[i+2];
+      if(d[i+3]>0 && r>45 && gg < r*0.5 && b < r*0.5){   // flat-red recolour mask
+        const l=r/255;                                    // red intensity = shading
+        d[i]=Math.round(tr*l); d[i+1]=Math.round(tg*l); d[i+2]=Math.round(tb*l);
+      }
+    }
+    g.putImageData(im,0,0);
+  }
+  function tintedSprite(t, tint){
+    const key=t.id+"|"+tint;
+    if(tintCache.has(key)) return tintCache.get(key);
+    const src=texGet(t.id);
+    if(!src || !src.img || !src.img.complete || !src.img.naturalWidth) return null; // retry next frame
+    const a=t.atlas, sw=a?a.w:src.img.naturalWidth, sh=a?a.h:src.img.naturalHeight;
+    const cv=document.createElement("canvas"); cv.width=Math.max(1,sw); cv.height=Math.max(1,sh);
+    const g=cv.getContext("2d");
+    if(a) g.drawImage(src.img, a.x,a.y,a.w,a.h, 0,0, sw,sh); else g.drawImage(src.img, 0,0);
+    recolorRedMask(g, cv.width, cv.height, tint);
+    tintCache.set(key, cv);
+    return cv;
+  }
+  // Draw one object sprite at (-w/2,-h/2,w,h) in the current transform, tinted if
+  // it's a colourable object with a tint. Shared by the map render and the ghost.
+  function blitObj(t, tint, w, h){
+    // A colourable prop is drawn in flat red, so it must ALWAYS be recoloured —
+    // fall back to the default tint when the object carries none.
+    if(t.colorable){ const tc=tintedSprite(t, tint||COLORABLE_DEFAULT); if(tc){ ctx.drawImage(tc, -w/2,-h/2, w,h); return; } }
+    const a=t.atlas;
+    if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);
+    else  ctx.drawImage(t.img, -w/2, -h/2, w, h);
+  }
   function drawObjects(){
     if(!tex || !map.objects || !map.objects.length) return;
     for(const o of map.objects){
@@ -2339,9 +2397,7 @@
       ctx.translate(p[0],p[1]);
       if(o.rot) ctx.rotate(o.rot);
       if(o.flip) ctx.scale(-1,1);
-      const a=t.atlas;
-      if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);  // bundled: atlas sub-rect
-      else  ctx.drawImage(t.img, -w/2, -h/2, w, h);                      // imported: whole file
+      blitObj(t, o.tint, w, h);
       ctx.restore();
     }
   }
@@ -2648,9 +2704,7 @@
         if(t && t.img && t.img.complete && t.img.naturalWidth){
           ctx.globalAlpha=0.62;
           ctx.save(); if(armFlip) ctx.scale(-1,1);
-          const a=t.atlas;
-          if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);
-          else  ctx.drawImage(t.img, -w/2, -h/2, w, h);
+          blitObj(t, texTint.get(armedObj), w, h);
           ctx.restore();
           ctx.globalAlpha=1;
         }
@@ -5261,9 +5315,35 @@
     const key=(n.slice(0,m.index)+" "+n.slice(m.index+m[0].length)).replace(/\s+/g," ").trim().toLowerCase();
     return {key, color};
   }
+  // Colourable thumbnails are drawn in flat red, so they must be recoloured before
+  // display. We paint the thumb-atlas crop onto a canvas, recolour it, and swap the
+  // result into an <img>. Dedicated cached images (one per sheet) so we own onload.
+  let _colorThumbs=[];
+  const _colorSheets=new Map();
+  function _colorSheet(url){
+    let im=_colorSheets.get(url);
+    if(!im){ im=new Image(); _colorSheets.set(url,im); im.onload=paintColorThumbs; im.onerror=()=>{}; im.src=url; }
+    return im;
+  }
+  function paintColorThumbs(){
+    for(const {img,t} of _colorThumbs){
+      const r=t.thumbRect; if(!r) continue;
+      const url=(t.thumbBase||"/packs/bundled/")+r.sheet+(t.ver!=null?t.ver:assetV);
+      const sh=_colorSheet(url); if(!sh.complete || !sh.naturalWidth) continue;
+      const c=document.createElement("canvas"); c.width=r.w; c.height=r.h; const g=c.getContext("2d");
+      g.drawImage(sh, r.x,r.y,r.w,r.h, 0,0, r.w,r.h);
+      recolorRedMask(g, r.w, r.h, texTint.get(t.id)||COLORABLE_DEFAULT);
+      try{ const u=c.toDataURL(); if(img.src!==u) img.src=u; }catch(e){}
+    }
+  }
   // Add the cell's visuals (atlas crop or lazy <img>) — shared by single + grouped.
   function fillObjThumb(b, t){
     const r=t.thumbRect;
+    if(r && t.colorable){
+      const im=document.createElement("img"); im.alt=""; b.appendChild(im);
+      _colorThumbs.push({img:im, t}); paintColorThumbs();
+      return;
+    }
     if(r){
       const d=document.createElement("span"); d.className="th";
       const base=t.thumbBase||"/packs/bundled/", ver=(t.ver!=null?t.ver:assetV);
@@ -5286,7 +5366,7 @@
       if(!ok){ armedObj=null; ghostPt=null; resetArm(); if(tool==="object") setTool("select"); } }
     if(thumbObs){ thumbObs.disconnect(); thumbObs=null; }
     const q=(($("objFilter")||{}).value||"").trim().toLowerCase();
-    g.innerHTML="";
+    g.innerHTML=""; _colorThumbs=[];
     let n=0;
     // Two DISJOINT sets. Normal mode offers the `basic` bundled art only;
     // Advanced Mode offers everything else — the CC BY-NC packs and anything the
@@ -5310,6 +5390,9 @@
     // is the representative cell; its `pending` colour defaults to that sprite.
     const groups=new Map(); const order=[]; const single=[];
     for(const t of all){
+      // Colourable props aren't colour-variant SETS — they're one base you recolour
+      // with the tint chip, so they always stand alone.
+      if(t.colorable){ single.push(t); order.push({t}); continue; }
       const cv=colorVariant(t.name);
       if(cv){ const gk=t.pack+"|"+cv.key;
         let grp=groups.get(gk);
@@ -5353,6 +5436,14 @@
           del.title="Remove this image from My Images";
           del.onclick=ev=>{ ev.stopPropagation(); removeCustomImage(t.id); };
           b.appendChild(del);
+        }
+        if(t.colorable){   // recolour chip — native colour input, doubles as the tint indicator
+          const inp=document.createElement("input"); inp.type="color"; inp.className="tint";
+          inp.value=texTint.get(t.id)||"#b48a5a"; inp.title="Recolour this object, then click to place";
+          inp.onclick=ev=>ev.stopPropagation();
+          inp.oninput=()=>{ texTint.set(t.id, inp.value); paintColorThumbs(); };   // live preview on the cell
+          inp.onchange=()=>{ texTint.set(t.id, inp.value); armObjId(t.id); };
+          b.appendChild(inp);
         }
       }
       g.appendChild(b); n++;
@@ -5503,6 +5594,7 @@
     const o={id:uid(), tex:t.id, x:snapHalf(wx), y:snapHalf(wy),
              w:(t.w||1)*armScale, h:(t.h||1)*armScale, rot:armRot};
     if(armFlip) o.flip=true;
+    if(t.colorable) o.tint = texTint.get(t.id) || COLORABLE_DEFAULT;   // colourable props are always recoloured (never raw red)
     map.objects.push(o);
     const idx=map.objects.length-1;
     // Stay on the Object tool after placing (every tool stays selected until you
