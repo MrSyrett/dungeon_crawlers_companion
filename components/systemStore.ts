@@ -16,7 +16,7 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   { key: "NIM", name: "Nimble", short: "NIM", accent: "var(--nimble)" },
   // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
   // plus original concise descriptions for non-SRD options.
-  { key: "DND", name: "D&D", short: "D&D", accent: "var(--dnd)" },
+  { key: "DND", name: "Dungeons & Dragons", short: "D&D", accent: "var(--dnd)" },
   { key: "DCC", name: "Dungeon Crawler Carl", short: "DCC", accent: "var(--red)" },
   // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
   // same system (one sheet, one shelf, one tab).

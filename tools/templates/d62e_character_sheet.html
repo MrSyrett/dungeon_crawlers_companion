@@ -327,7 +327,7 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="hdr-fields">
       <div class="hdr-field wide" style="grid-column:span 3;"><label>Character name</label><input type="text" id="f-name" placeholder="Name"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Genre</label>
-        <select id="f-genre" onchange="onGenreChange()"><option value="core">Core</option><option value="fantasy">Fantasy</option><option value="scifi">Sci-Fi</option><option value="superhero">Superhero</option></select></div>
+        <select id="f-genre" onchange="onGenreChange()"><option value="all">All Genres</option><option value="core">Core</option><option value="fantasy">Fantasy</option><option value="scifi">Sci-Fi</option><option value="superhero">Superhero</option></select></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Template</label><input type="text" id="f-template" placeholder="Set by the builder"></div>
       <div class="hdr-field lastcol" style="grid-column:span 3;"><label>Archetype</label><input type="text" id="f-archetype" placeholder="optional"></div>
     </div>
@@ -335,7 +335,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="section-bar accent"><span>Attributes</span><span class="hdr-right"><button class="hdr-btn" onclick="openAttrPicker()">＋ Attribute</button></span></div>
+      <div class="section-bar accent"><span>Attributes</span></div>
       <div class="stats-grid" id="stats-grid"></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
       <div class="add-row"><button class="small-btn ghost" onclick="openSkillPicker()">＋ Skills</button><span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);letter-spacing:.04em;">Adds are dice above the attribute</span></div>
@@ -398,7 +398,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       </div>
 
       <div class="tab-panel" id="tab-powers">
-        <div class="section-bar"><span>Powers &amp; Abilities</span><span class="hdr-right"><button class="hdr-btn" onclick="openPowerPicker()">✦ Powers</button><button class="hdr-btn" onclick="addCustomPower()">＋ Custom</button></span></div>
+        <div class="section-bar"><span>Powers &amp; Abilities</span><span class="hdr-right"><button class="hdr-btn" onclick="openPowerPicker()">✦ Powers</button></span></div>
         <table class="tbl" id="powers-tbl">
           <thead><tr><th style="width:28%;">Power</th><th style="width:16%;">Kind</th><th>Note</th><th style="width:96px;"></th></tr></thead>
           <tbody id="powers-body"></tbody>
@@ -416,7 +416,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       </div>
 
       <div class="tab-panel" id="tab-gear">
-        <div class="section-bar"><span>Gear &amp; Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">＋ Add</button><button class="hdr-btn" onclick="addCustomGear()">＋ Custom</button></span></div>
+        <div class="section-bar"><span>Gear &amp; Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">＋ Add</button></span></div>
         <div class="blk" style="border-bottom:none;padding-bottom:2px;"><div class="fld"><label>Wealth / Funds</label><input type="text" id="f-wealth" placeholder="coins, credits, resources…"></div></div>
         <table class="tbl">
           <thead><tr><th style="width:38%;">Item</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
@@ -508,7 +508,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="gearstore-overlay" class="ov" onclick="if(event.target===this)closeGearPicker()">
   <div class="modal" style="max-width:600px;">
     <div class="modal-hd"><div class="ttl">🛒 Equipment</div><button class="x" onclick="closeGearPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search equipment…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><select id="gearstore-genre" class="m-input brow-sel" onchange="renderGearPicker()"><option value="">All genres</option><option value="core">Core</option><option value="fantasy">Fantasy</option><option value="scifi">Sci-Fi</option><option value="superhero">Superhero</option></select><button class="m-btn ghost" onclick="addCustomGear()">＋ Add custom</button></div></div>
+    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search equipment…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><select id="gearstore-era" class="m-input brow-sel" onchange="renderGearPicker()"><option value="">All eras</option></select></div></div>
     <div class="modal-bd brow-list" id="gearstore-body"></div>
   </div>
 </div>
@@ -561,7 +561,7 @@ const toCode = code, fromCode = pipsFrom, pips = pipsFrom;
 const codeOrZero = str => pipsFrom(str) || 0;
 const diceOf = p => Math.floor(Math.max(0, num(p)) / 3);
 const currentGenre = () => ($('f-genre') && $('f-genre').value) || 'core';
-function genreOk(item) { const g = item && item.genre; return !g || g === 'core' || g === currentGenre(); }
+function genreOk(item) { const g = item && item.genre; const cur = currentGenre(); if(cur === 'all') return true; return !g || g === 'core' || g === cur; }
 
 // ═══ LOOKUPS ══════════════════════════════════════════════════════════════
 function activeAttrs() { return [...document.querySelectorAll('#stats-grid .stat-cell[data-attr]')].map(c => c.dataset.attr); }
@@ -966,6 +966,7 @@ function setDefaultTab() { setTab(_tab || 'powers'); }
 function fillPickers() {
   const skAttr = $('skill-attr'); if(skAttr) { const cur = skAttr.value; skAttr.innerHTML = '<option value="">All attributes</option>' + ALL_ATTRS.map(a => '<option value="' + a + '">' + a + '</option>').join(''); skAttr.value = cur; }
   const gsCat = $('gearstore-cat'); if(gsCat) { const cur = gsCat.value; const cats = [...new Set(D.equipment().map(g => g.category))].filter(Boolean).sort(); gsCat.innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '">' + esc(c[0].toUpperCase() + c.slice(1)) + '</option>').join(''); gsCat.value = cur; }
+  const gsEra = $('gearstore-era'); if(gsEra) { const cur = gsEra.value; const eras = [...new Set(D.equipment().map(g => g.era))].filter(Boolean).sort(); gsEra.innerHTML = '<option value="">All eras</option>' + eras.map(e => '<option value="' + esc(e) + '">' + esc(e) + '</option>').join(''); gsEra.value = cur; }
 }
 function _flashBrow(btn) { const o = btn.textContent, d = btn.disabled; btn.textContent = '✓ Added'; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = d; }, 600); }
 // — Skill picker —
@@ -997,7 +998,6 @@ function renderPowerPicker() {
     return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(p.name) + (p.difficulty ? '<span class="brow-cost">Diff ' + esc(p.difficulty) + '</span>' : '') + '</div><div class="brow-meta">' + [p.kind, p.skill].filter(Boolean).map(esc).join(' · ') + '</div>' + (p.description ? '<div class="brow-desc">' + esc(p.description) + '</div>' : '') + '</div>' + btn + '</div>';
   }).join('');
 }
-function addCustomPower() { setTab('powers'); addPowerRow({}); closePowerPicker(); scheduleAutosave(); }
 // — Trait picker —
 function openTraitPicker() { $('trait-search').value = ''; $('trait-overlay').classList.add('open'); renderTraitPicker(); $('trait-search').focus(); }
 function closeTraitPicker() { $('trait-overlay').classList.remove('open'); }
@@ -1016,8 +1016,8 @@ function renderTraitPicker() {
 function openGearPicker() { $('gearstore-search').value = ''; $('gearstore-overlay').classList.add('open'); renderGearPicker(); $('gearstore-search').focus(); }
 function closeGearPicker() { $('gearstore-overlay').classList.remove('open'); }
 function renderGearPicker() {
-  const q = norm($('gearstore-search').value), fc = $('gearstore-cat').value, fg = ($('gearstore-genre') ? $('gearstore-genre').value : '');
-  const list = D.equipment().filter(g => (!fg || g.genre === fg) && (!fc || g.category === fc) && (!q || norm(g.name).includes(q) || norm(g.category || '').includes(q))).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
+  const q = norm($('gearstore-search').value), fc = $('gearstore-cat').value, fe = ($('gearstore-era') ? $('gearstore-era').value : '');
+  const list = D.equipment().filter(g => (!fe || g.era === fe) && (!fc || g.category === fc) && (!q || norm(g.name).includes(q) || norm(g.category || '').includes(q))).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
   const box = $('gearstore-body');
   if(!list.length) { box.innerHTML = '<p class="brow-empty">No equipment matches.</p>'; return; }
   box.innerHTML = list.map(g => {
@@ -1034,7 +1034,6 @@ function renderGearPicker() {
     return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + '</div><div class="brow-meta">' + [g.category, g.era].filter(Boolean).map(esc).join(' · ') + '</div>' + (g.description ? '<div class="brow-desc">' + esc(g.description) + '</div>' : '') + '</div><button class="brow-add" data-add-gear="' + esc(g.name) + '">+ Add</button></div>';
   }).join('');
 }
-function addCustomGear() { setTab('gear'); addGearRow(); closeGearPicker(); scheduleAutosave(); }
 // Wire all pick lists once (event delegation).
 (function wirePickers() {
   const ab = $('attr-body'); if(ab) ab.addEventListener('click', e => { const b = e.target.closest('[data-add-attr]'); if(b) { addAttr(b.dataset.addAttr); closeAttrPicker(); } });

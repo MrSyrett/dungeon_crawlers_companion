@@ -8,14 +8,17 @@
 (function () {
   const ATTR_MIN = 3, ATTR_MAX = 15, ATTR_TOTAL = 36;   // 1D-5D each, 12D total
   const SKILL_TOTAL = 21, SKILL_PER = 6;                 // 7D of adds, max +2D per skill
-  let step = 0, mode = null, tpl = null, genre = 'core';
+  let step = 0, mode = null, tpl = null, genre = 'all', maxStep = 0;
   let attrAlloc = { Agility: 3, Brawn: 3, Knowledge: 3, Perception: 3 };
   let skillAlloc = {}, details = {}, gearPicks = {}, _lastStep = -1;
   // traitPicks / powerPicks map name -> chosen rank (number, >=1). Absent = not picked.
   let traitPicks = {}, traitKind = '', traitQ = '';
-  let powerPicks = {}, powerLevel = 'none', powerKind = '', powerGenre = '', powerQ = '';
-  let bopts = {}, bgearCat = '', bgearQ = '', bgearGenre = '';
+  let powerPicks = {}, powerLevel = 'none', powerKind = '', powerQ = '';
+  let bopts = {}, bgearCat = '', bgearQ = '', bgearEra = '';
   let ov = null;
+  const STEP_LABELS = { Extras: 'Troubles & Assets' };
+  // Replace a scrollable list's contents in place, preserving its scroll position + focus.
+  function relist(id, html, wire) { const el = $(id); if (!el) { if (wire) wire(); return; } const sp = el.scrollTop; el.innerHTML = html; el.scrollTop = sp; if (wire) wire(); }
   function freshOpts() { return (typeof defaultOptions === 'function') ? defaultOptions() : { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
   // ── Power Levels (pg 212): key, label, superpower-dice pool ──
   const POWER_LEVELS = [['none','None',0],['young','Young Heroes',8],['street','Street Level',10],['standard','Standard Hero',12],['national','National Heroic Team',16],['worldwide','Worldwide Heroic Team',20],['galactic','Galactic & Cosmic Heroes',24]];
@@ -25,9 +28,9 @@
   const skillsData = () => (typeof D62E_SKILLS !== 'undefined' ? D62E_SKILLS : []);
   const equipData = () => (typeof D62E_EQUIPMENT !== 'undefined' ? D62E_EQUIPMENT : []);
   const powersData = () => (typeof D62E_POWERS !== 'undefined' ? D62E_POWERS : []);
-  const genreOk = item => { const g = item && item.genre; return !g || g === 'core' || g === genre; };
+  const genreOk = item => { const g = item && item.genre; if (genre === 'all') return true; return !g || g === 'core' || g === genre; };
 
-  function steps() { const s = ['Options', 'Path']; if (mode === 'alacarte') s.push('Attributes'); s.push('Traits', 'Powers', 'Skills', 'Details', 'Gear'); return s; }
+  function steps() { const s = ['Options', 'Path']; if (mode === 'alacarte') s.push('Attributes'); s.push('Traits', 'Powers', 'Skills', 'Extras', 'Details', 'Gear'); return s; }
   function perksData() { return (typeof D !== 'undefined' && D.perks) ? D.perks() : (typeof D62E_PERKS !== 'undefined' ? D62E_PERKS : []); }
   // ── Perk/flaw/talent cost parsing (pg 102) ──
   function parseRankRange(costStr) {
@@ -98,11 +101,23 @@
   function render() {
     ensure();
     const STEPS = steps();
-    $('d62eb-steps').innerHTML = STEPS.map((s, i) => '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;border:1px solid ' + (i === step ? '#e07b39' : '#3a2c22') + ';color:' + (i === step ? '#f0a860' : i < step ? '#ccc' : '#666') + ';">' + (i + 1) + '. ' + s + '</span>').join('');
+    if (maxStep > STEPS.length - 1) maxStep = STEPS.length - 1;
+    // Step breadcrumb — click any reached step to jump straight to it (data kept).
+    $('d62eb-steps').innerHTML = STEPS.map((s, i) => {
+      const label = STEP_LABELS[s] || s; const reachable = i <= maxStep;
+      return '<span data-stepidx="' + i + '" style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;cursor:' + (reachable ? 'pointer' : 'default') + ';border:1px solid ' + (i === step ? '#e07b39' : '#3a2c22') + ';color:' + (i === step ? '#f0a860' : reachable ? '#ccc' : '#666') + ';">' + (i + 1) + '. ' + esc(label) + '</span>';
+    }).join('');
+    $('d62eb-steps').querySelectorAll('[data-stepidx]').forEach(el => el.addEventListener('click', () => {
+      const i = +el.dataset.stepidx; if (i > maxStep || i === step) return;
+      if (STEPS[step] === 'Details') readDetails();
+      step = i; render();
+    }));
     $('d62eb-back').style.visibility = step === 0 ? 'hidden' : 'visible';
     $('d62eb-next').textContent = step === STEPS.length - 1 ? 'Finish ✓' : 'Next →';
     const b = $('d62eb-body'), note = $('d62eb-note');
-    const keep = _lastStep === step; const bScroll = keep ? b.scrollTop : 0;
+    const keep = _lastStep === step;
+    const bScroll = keep ? b.scrollTop : 0;
+    const innerScroll = keep ? [...b.querySelectorAll('.brow-list,.alloc,.tpl-list')].map(e => e.scrollTop) : [];
     const name = STEPS[step];
     if (name === 'Options') renderOptionsStep(b, note);
     else if (name === 'Path') renderPath(b, note);
@@ -110,9 +125,10 @@
     else if (name === 'Traits') renderTraits(b, note);
     else if (name === 'Powers') renderPowers(b, note);
     else if (name === 'Skills') renderSkills(b, note);
+    else if (name === 'Extras') renderExtras(b, note);
     else if (name === 'Details') renderDetails(b, note);
     else renderGear(b, note);
-    if (keep) b.scrollTop = bScroll;
+    if (keep) { b.scrollTop = bScroll; [...b.querySelectorAll('.brow-list,.alloc,.tpl-list')].forEach((e, i) => { if (innerScroll[i] != null) e.scrollTop = innerScroll[i]; }); }
     _lastStep = step; ov.classList.add('open');
   }
 
@@ -123,8 +139,10 @@
   function bchk(key) { return '<button type="button" class="opt-check' + (bopts[key] ? ' on' : '') + '" data-optk="' + key + '" aria-label="toggle"></button>'; }
   function bsel(key, opts) { return '<select class="m-input" data-opts="' + key + '" style="width:auto;min-width:120px;flex:0 0 auto;">' + opts.map(o => '<option value="' + o[0] + '"' + (bopts[key] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select>'; }
   function renderOptionsStep(b, note) {
-    note.textContent = 'Table rules';
-    let h = '<p class="m-hint">Set the optional rules your table uses. These configure the finished sheet and the rest of this builder (attribute budgets, specializations, and so on).</p>';
+    note.textContent = 'Genre & table rules';
+    let h = '<p class="m-hint">Pick a <b>genre</b> to focus the builder, then set the optional rules your table uses. Genre filters the skills, templates, perks/flaws/talents and powers you\'ll see (Core content always shows; <b>All</b> shows everything).</p>';
+    h += '<div class="m-lbl">Genre</div><select class="m-input" id="d62eb-bgenre" style="max-width:220px;margin-bottom:12px;">'
+      + [['all','All'],['core','Core'],['fantasy','Fantasy'],['scifi','Sci-Fi'],['superhero','Superhero']].map(o => '<option value="' + o[0] + '"' + (genre === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>';
     h += optRow('No Dodge Defense', 'Ranged attacks use fixed difficulties instead of a Dodge score.', bchk('noDodge'));
     h += optRow('Alt Wild Die', 'Core / Basic / Classic / Simple behaviour on a natural 1.', bsel('wildDie', [['core','Core'],['basic','Basic'],['classic','Classic'],['simple','Simple']]));
     h += optRow('Hero Point Model', 'Heroic / Basic / Classic / Superheroic spend effect.', bsel('heroModel', [['heroic','Heroic'],['basic','Basic'],['classic','Classic'],['superheroic','Superheroic']]));
@@ -133,6 +151,7 @@
     h += optRow('Skill Specializations & Advanced Skills', 'Adds Adv / Spec controls to each skill on the sheet.', bchk('specialization'));
     h += optRow('Additional Attribute Budgets', 'Scales the a-la-carte attribute budget +3D per attribute beyond the core four.', bchk('attrBudget'));
     b.innerHTML = h;
+    $('d62eb-bgenre').addEventListener('change', e => { genre = e.target.value; if (mode === 'template' && tpl && !genreOk(tpl)) { tpl = null; mode = null; } render(); });
     b.querySelectorAll('[data-optk]').forEach(el => el.addEventListener('click', () => { bopts[el.dataset.optk] = !bopts[el.dataset.optk]; render(); }));
     b.querySelectorAll('[data-opts]').forEach(el => el.addEventListener('change', () => { bopts[el.dataset.opts] = el.value; render(); }));
   }
@@ -140,20 +159,17 @@
   // ── Step: Path ────────────────────────────────────────────────────────────
   function renderPath(b, note) {
     note.textContent = mode === 'alacarte' ? 'A la carte' : tpl ? tpl.name : 'Pick a starting point';
-    const tlist = templates();
-    let h = '<p class="m-hint">Start from a <b>template</b> (fixed attributes, recommended skills) and add 7D of skills — or build <b>a la carte</b>, assigning 12D of attributes yourself. Pick a genre to filter what\'s available.</p>';
-    h += '<div class="m-lbl">Genre</div><select id="d62eb-genre" class="m-input" style="max-width:200px;">'
-      + ['core', 'fantasy', 'scifi', 'superhero'].map(g => '<option value="' + g + '"' + (genre === g ? ' selected' : '') + '>' + (g === 'scifi' ? 'Sci-Fi' : g[0].toUpperCase() + g.slice(1)) + '</option>').join('') + '</select>';
-    h += '<div class="tpl-list" style="margin-top:12px;">'
+    const tlist = templates().filter(t => genreOk(t));
+    let h = '<p class="m-hint">Start from a <b>template</b> (fixed attributes, recommended skills) and add 7D of skills — or build <b>a la carte</b>, assigning 12D of attributes yourself. Change the genre back on the Options step.</p>';
+    h += '<div class="tpl-list">'
       + '<div class="tpl-card' + (mode === 'alacarte' ? ' sel' : '') + '" data-alacarte="1"><b>⚙ A la carte</b><small>Assign 12D of attributes yourself, then 7D of skills.</small></div>'
-      + tlist.filter(t => t.genre === genre || (genre === 'core' && t.genre === 'core')).map(t =>
-        '<div class="tpl-card' + (mode === 'template' && tpl && tpl.name === t.name ? ' sel' : '') + '" data-t="' + esc(t.name) + '"><b>' + esc(t.name) + '</b><small>' + Object.keys(t.attributes).map(a => a.slice(0, 3).toUpperCase() + ' ' + code(t.attributes[a])).join(' · ') + (t.archetype ? '<br>' + esc(t.archetype) : '') + '</small></div>').join('')
+      + tlist.map(t =>
+        '<div class="tpl-card' + (mode === 'template' && tpl && tpl.name === t.name ? ' sel' : '') + '" data-t="' + esc(t.name) + '"><b>' + esc(t.name) + '</b><small>' + Object.keys(t.attributes).map(a => a.slice(0, 3).toUpperCase() + ' ' + code(t.attributes[a])).join(' · ') + (t.archetype ? '<br>' + esc(t.archetype) : '') + ' · ' + esc(t.genre || 'core') + '</small></div>').join('')
       + '</div>';
     if (mode === 'template' && tpl) h += '<div style="margin-top:12px;font-size:12px;line-height:1.5;color:#ccc;"><b style="color:#f0a860;">' + esc(tpl.name) + '</b> — ' + esc(String(tpl.description || '').slice(0, 460)) + '</div>';
     b.innerHTML = h;
-    $('d62eb-genre').addEventListener('change', e => { genre = e.target.value; if (mode === 'template' && tpl && tpl.genre !== genre) { tpl = null; mode = null; } skillAlloc = {}; render(); });
     b.querySelector('[data-alacarte]').addEventListener('click', () => { mode = 'alacarte'; tpl = null; attrAlloc = { Agility: 3, Brawn: 3, Knowledge: 3, Perception: 3 }; skillAlloc = {}; render(); });
-    b.querySelectorAll('[data-t]').forEach(c => c.addEventListener('click', () => { tpl = templates().find(t => t.name === c.dataset.t); mode = 'template'; genre = tpl.genre || genre; skillAlloc = {}; render(); }));
+    b.querySelectorAll('[data-t]').forEach(c => c.addEventListener('click', () => { tpl = templates().find(t => t.name === c.dataset.t); mode = 'template'; skillAlloc = {}; render(); }));
   }
 
   // ── Step: Attributes (a la carte) ───────────────────────────────────────────
@@ -224,14 +240,12 @@
     note.textContent = 'Who are you?';
     const f = (id, lbl, val, ph) => '<div class="m-lbl">' + lbl + '</div><input class="m-input" id="d62eb-' + id + '" value="' + esc(val == null ? '' : val) + '" placeholder="' + esc(ph || '') + '">';
     const ta = (id, lbl, val) => '<div class="m-lbl">' + lbl + '</div><textarea class="m-input" id="d62eb-' + id + '" rows="3">' + esc(val == null ? '' : val) + '</textarea>';
-    b.innerHTML = '<p class="m-hint">Name your character. Genre is set from your starting point but you can change it.</p>'
+    b.innerHTML = '<p class="m-hint">Name your character. The genre was set on the Options step.</p>'
       + f('name', 'Name', details.name, 'Character name')
-      + '<div class="m-lbl">Genre</div><select class="m-input" id="d62eb-genre2" style="max-width:200px;">' + ['core', 'fantasy', 'scifi', 'superhero'].map(g => '<option value="' + g + '"' + (genre === g ? ' selected' : '') + '>' + (g === 'scifi' ? 'Sci-Fi' : g[0].toUpperCase() + g.slice(1)) + '</option>').join('') + '</select>'
       + ta('background', 'Background', details.background != null ? details.background : (tpl ? tpl.description : ''))
       + ta('personality', 'Personality', details.personality);
-    b.querySelector('#d62eb-genre2').addEventListener('change', e => { genre = e.target.value; });
   }
-  function readDetails() { ['name', 'background', 'personality'].forEach(k => { const el = $('d62eb-' + k); if (el) details[k] = el.value; }); const g = $('d62eb-genre2'); if (g) genre = g.value; }
+  function readDetails() { ['name', 'background', 'personality'].forEach(k => { const el = $('d62eb-' + k); if (el) details[k] = el.value; }); }
 
   // ── Step: Traits (perks / flaws / talents) — adjust the skill-dice pool ──────
   function traitEffectLabel(t, r) {
@@ -240,36 +254,36 @@
     if (t.kind === 'talent') { const c = talentCostFor(t, r); return c ? '<span style="color:#df8a8a;">−' + c + 'D skill</span>' : '<span style="color:#999;">no skill cost</span>'; }
     return '<span style="color:#c8a24a;">' + (t.kind === 'asset' ? 'asset (no skill cost)' : 'grants Hero Points (no skill cost)') + '</span>';
   }
+  const TRAIT_KINDS = ['perk', 'flaw', 'talent'];
   function renderTraits(b, note) {
     const budget = skillBudgetPips();
     note.textContent = 'Skill dice for later: ' + code(budget) + (perkPoints() > 5 || flawPoints() > 5 ? '  ⚠ soft cap 5/5' : '');
-    let h = '<p class="m-hint">Pick perks, flaws, and talents (pg 102). <b>Perks cost 1 skill die per rank</b>, <b>flaws grant 1 back per rank</b>, <b>talents cost a fixed number</b>. Troubles &amp; assets are optional and don\'t touch the pool. Recommended soft cap: 5 points of perks / 5 of flaws.</p>';
-    h += '<div style="display:flex;gap:6px;margin-bottom:8px;"><input class="m-input" id="d62eb-trait-search" placeholder="Search…" style="flex:1;"><select class="m-input" id="d62eb-trait-kind" style="width:auto;min-width:120px;flex:0 0 auto;">'
-      + [['','All kinds'],['perk','Perks'],['asset','Assets'],['flaw','Flaws'],['trouble','Troubles'],['talent','Talents']].map(o => '<option value="' + o[0] + '"' + (traitKind === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>';
+    let h = '<p class="m-hint">Pick perks, flaws, and talents (pg 102). <b>Perks cost 1 skill die per rank</b>, <b>flaws grant 1 back per rank</b>, <b>talents cost a fixed number</b>. Recommended soft cap: 5 points of perks / 5 of flaws. (Troubles &amp; assets come after Skills.)</p>';
+    h += '<div style="display:flex;gap:6px;margin-bottom:8px;"><input class="m-input" id="d62eb-trait-search" placeholder="Search…" value="' + esc(traitQ) + '" style="flex:1;"><select class="m-input" id="d62eb-trait-kind" style="width:auto;min-width:120px;flex:0 0 auto;">'
+      + [['','All kinds'],['perk','Perks'],['flaw','Flaws'],['talent','Talents']].map(o => '<option value="' + o[0] + '"' + (traitKind === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>';
     h += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;color:#f0a860;margin-bottom:6px;">Skill dice available: <b>' + code(budget) + '</b> · perks ' + perkPoints() + 'pt · flaws ' + flawPoints() + 'pt</div>';
     h += '<div class="brow-list" id="d62eb-trait-list" style="max-height:42vh;overflow:auto;padding:0;">' + traitListHtml() + '</div>';
     b.innerHTML = h;
     const s = $('d62eb-trait-search'), k = $('d62eb-trait-kind');
-    s.addEventListener('input', () => { traitQ = norm(s.value); refresh(); });
-    k.addEventListener('change', () => { traitKind = k.value; refresh(); });
+    s.addEventListener('input', () => { traitQ = norm(s.value); relist('d62eb-trait-list', traitListHtml(), wire); });
+    k.addEventListener('change', () => { traitKind = k.value; relist('d62eb-trait-list', traitListHtml(), wire); });
     wire();
-    function refresh() { $('d62eb-trait-list').innerHTML = traitListHtml(); wire(); render(); }
     function wire() {
       const box = $('d62eb-trait-list');
       box.querySelectorAll('[data-trait]').forEach(btn => btn.addEventListener('click', () => {
         const t = perksData().find(x => x.name === btn.dataset.trait); if (!t) return;
         if (traitPicks[t.name] != null) delete traitPicks[t.name]; else traitPicks[t.name] = traitRankBounds(t).min;
-        refresh();
+        render();
       }));
       box.querySelectorAll('[data-trrank]').forEach(btn => btn.addEventListener('click', () => {
         const t = perksData().find(x => x.name === btn.dataset.trrank); if (!t || traitPicks[t.name] == null) return;
         const bnd = traitRankBounds(t); const nv = (traitPicks[t.name] || bnd.min) + Number(btn.dataset.d);
-        traitPicks[t.name] = Math.max(bnd.min, Math.min(bnd.max, nv)); refresh();
+        traitPicks[t.name] = Math.max(bnd.min, Math.min(bnd.max, nv)); render();
       }));
     }
   }
   function traitListHtml() {
-    const list = perksData().filter(t => genreOk(t) && (!traitKind || t.kind === traitKind) && (!traitQ || norm(t.name).includes(traitQ) || norm(t.kind || '').includes(traitQ))).sort((a, c) => (a.kind || '').localeCompare(c.kind || '') || a.name.localeCompare(c.name));
+    const list = perksData().filter(t => TRAIT_KINDS.indexOf(t.kind) >= 0 && genreOk(t) && (!traitKind || t.kind === traitKind) && (!traitQ || norm(t.name).includes(traitQ) || norm(t.kind || '').includes(traitQ))).sort((a, c) => (a.kind || '').localeCompare(c.kind || '') || a.name.localeCompare(c.name));
     if (!list.length) return '<p class="brow-empty">No entries match.</p>';
     return list.map(t => {
       const on = traitPicks[t.name] != null; const r = traitPicks[t.name] || traitRankBounds(t).min; const bnd = traitRankBounds(t);
@@ -277,6 +291,35 @@
       const btn = '<button class="brow-add" data-trait="' + esc(t.name) + '"' + (on ? ' style="background:#5a3a1a;color:#f0c9a0;"' : '') + '>' + (on ? 'Added ✓' : '+ Add') + '</button>';
       const eff = on ? ' · ' + traitEffectLabel(t, r) : '';
       return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(t.name) + (t.cost ? '<span class="brow-cost">' + esc(t.cost) + '</span>' : '') + '</div><div class="brow-meta">' + esc(t.kind || '') + eff + '</div>' + (t.description ? '<div class="brow-desc">' + esc(t.description) + '</div>' : '') + '</div><span style="display:flex;align-items:center;">' + stepper + btn + '</span></div>';
+    }).join('');
+  }
+
+  // ── Step: Troubles & Assets (no skill-pool effect; grant Hero Points / an asset) ──
+  const EXTRA_KINDS = ['trouble', 'asset'];
+  function renderExtras(b, note) {
+    note.textContent = 'Troubles & Assets (optional)';
+    let h = '<p class="m-hint">Troubles &amp; assets don\'t spend skill dice — troubles grant extra Hero Points (a complication the GM can invoke), assets give a special benefit or resource. Pick any that fit your character.</p>';
+    h += '<input class="m-input" id="d62eb-extra-search" placeholder="Search…" value="' + esc(traitQ) + '" style="margin-bottom:8px;">';
+    h += '<div class="brow-list" id="d62eb-extra-list" style="max-height:48vh;overflow:auto;padding:0;">' + extraListHtml() + '</div>';
+    b.innerHTML = h;
+    const s = $('d62eb-extra-search');
+    s.addEventListener('input', () => { traitQ = norm(s.value); relist('d62eb-extra-list', extraListHtml(), wire); });
+    wire();
+    function wire() {
+      $('d62eb-extra-list').querySelectorAll('[data-extra]').forEach(btn => btn.addEventListener('click', () => {
+        const t = perksData().find(x => x.name === btn.dataset.extra); if (!t) return;
+        if (traitPicks[t.name] != null) delete traitPicks[t.name]; else traitPicks[t.name] = 1;
+        relist('d62eb-extra-list', extraListHtml(), wire);
+      }));
+    }
+  }
+  function extraListHtml() {
+    const list = perksData().filter(t => EXTRA_KINDS.indexOf(t.kind) >= 0 && genreOk(t) && (!traitQ || norm(t.name).includes(traitQ) || norm(t.kind || '').includes(traitQ))).sort((a, c) => (a.kind || '').localeCompare(c.kind || '') || a.name.localeCompare(c.name));
+    if (!list.length) return '<p class="brow-empty">No entries match.</p>';
+    return list.map(t => {
+      const on = traitPicks[t.name] != null;
+      const btn = '<button class="brow-add" data-extra="' + esc(t.name) + '"' + (on ? ' style="background:#5a3a1a;color:#f0c9a0;"' : '') + '>' + (on ? 'Added ✓' : '+ Add') + '</button>';
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(t.name) + (t.cost ? '<span class="brow-cost">' + esc(t.cost) + '</span>' : '') + '</div><div class="brow-meta">' + esc(t.kind || '') + ' · <span style="color:#c8a24a;">' + (t.kind === 'asset' ? 'asset' : 'grants Hero Points') + '</span></div>' + (t.description ? '<div class="brow-desc">' + esc(t.description) + '</div>' : '') + '</div>' + btn + '</div>';
     }).join('');
   }
 
@@ -288,33 +331,30 @@
     h += '<div class="m-lbl">Power Level</div><select class="m-input" id="d62eb-plevel" style="max-width:280px;">'
       + POWER_LEVELS.map(l => '<option value="' + l[0] + '"' + (powerLevel === l[0] ? ' selected' : '') + '>' + esc(l[1]) + (l[2] ? ' (' + l[2] + ')' : '') + '</option>').join('') + '</select>';
     if (powerLevel !== 'none') h += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:#f0a860;margin:8px 0 4px;">Superpower dice: <b>' + spent + ' / ' + total + '</b>' + (spent > total ? ' <span style="color:#df8a8a;">— over pool</span>' : '') + '</div>';
-    h += '<div style="display:flex;gap:6px;margin:8px 0;"><input class="m-input" id="d62eb-power-search" placeholder="Search powers…" style="flex:1;"><select class="m-input" id="d62eb-power-kind" style="width:auto;min-width:120px;flex:0 0 auto;">'
-      + [['','All kinds'],['superpower','Superpower'],['magic','Magic'],['psionic','Psionic']].map(o => '<option value="' + o[0] + '"' + (powerKind === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>'
-      + '<select class="m-input" id="d62eb-power-genre" style="width:auto;min-width:110px;flex:0 0 auto;">' + [['','All genres'],['fantasy','Fantasy'],['scifi','Sci-Fi'],['superhero','Superhero']].map(o => '<option value="' + o[0] + '"' + (powerGenre === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>';
+    h += '<div style="display:flex;gap:6px;margin:8px 0;"><input class="m-input" id="d62eb-power-search" placeholder="Search powers…" value="' + esc(powerQ) + '" style="flex:1;"><select class="m-input" id="d62eb-power-kind" style="width:auto;min-width:120px;flex:0 0 auto;">'
+      + [['','All kinds'],['superpower','Superpower'],['magic','Magic'],['psionic','Psionic']].map(o => '<option value="' + o[0] + '"' + (powerKind === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>';
     h += '<div class="brow-list" id="d62eb-power-list" style="max-height:40vh;overflow:auto;padding:0;">' + powerListHtml() + '</div>';
     b.innerHTML = h;
     $('d62eb-plevel').addEventListener('change', e => { powerLevel = e.target.value; render(); });
-    const s = $('d62eb-power-search'), k = $('d62eb-power-kind'), gsel = $('d62eb-power-genre');
-    s.addEventListener('input', () => { powerQ = norm(s.value); refresh(); });
-    k.addEventListener('change', () => { powerKind = k.value; refresh(); });
-    gsel.addEventListener('change', () => { powerGenre = gsel.value; refresh(); });
+    const s = $('d62eb-power-search'), k = $('d62eb-power-kind');
+    s.addEventListener('input', () => { powerQ = norm(s.value); relist('d62eb-power-list', powerListHtml(), wire); });
+    k.addEventListener('change', () => { powerKind = k.value; relist('d62eb-power-list', powerListHtml(), wire); });
     wire();
-    function refresh() { $('d62eb-power-list').innerHTML = powerListHtml(); wire(); render(); }
     function wire() {
       const box = $('d62eb-power-list');
       box.querySelectorAll('[data-power]').forEach(btn => btn.addEventListener('click', () => {
         const p = powersData().find(x => x.name === btn.dataset.power); if (!p) return;
         if (powerPicks[p.name] != null) delete powerPicks[p.name]; else powerPicks[p.name] = 1;
-        refresh();
+        render();
       }));
       box.querySelectorAll('[data-prank]').forEach(btn => btn.addEventListener('click', () => {
         const p = powersData().find(x => x.name === btn.dataset.prank); if (!p || powerPicks[p.name] == null) return;
-        const nv = (powerPicks[p.name] || 1) + Number(btn.dataset.d); powerPicks[p.name] = Math.max(1, Math.min(5, nv)); refresh();
+        const nv = (powerPicks[p.name] || 1) + Number(btn.dataset.d); powerPicks[p.name] = Math.max(1, Math.min(5, nv)); render();
       }));
     }
   }
   function powerListHtml() {
-    const list = powersData().filter(p => (!powerKind || p.kind === powerKind) && (!powerGenre || p.genre === powerGenre) && (!powerQ || norm(p.name).includes(powerQ) || norm(p.skill || '').includes(powerQ))).sort((a, c) => (a.kind || '').localeCompare(c.kind || '') || a.name.localeCompare(c.name));
+    const list = powersData().filter(p => genreOk(p) && (!powerKind || p.kind === powerKind) && (!powerQ || norm(p.name).includes(powerQ) || norm(p.skill || '').includes(powerQ))).sort((a, c) => (a.kind || '').localeCompare(c.kind || '') || a.name.localeCompare(c.name));
     if (!list.length) return '<p class="brow-empty">No powers match.</p>';
     return list.map(p => {
       const on = powerPicks[p.name] != null; const r = powerPicks[p.name] || 1;
@@ -332,24 +372,26 @@
     if (g.category === 'armor') { const was = !!gearPicks[name]; equipData().forEach(x => { if (x.category === 'armor') delete gearPicks[x.name]; }); if (!was) gearPicks[name] = true; }
     else gearPicks[name] = !gearPicks[name];
   }
+  function gearEras() { return [...new Set(equipData().map(g => g.era))].filter(Boolean).sort(); }
   function renderGear(b, note) {
     note.textContent = 'Starting equipment';
     let h = '<p class="m-hint">Add starting equipment — the same picker as the sheet. Weapons become attack rows, armor fills the Armor box, everything else goes to Gear. You can add more on the sheet anytime.</p>';
-    h += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;"><input class="m-input" id="d62eb-gear-search" placeholder="Search equipment…" style="flex:1;min-width:140px;"><select class="m-input" id="d62eb-gear-cat" style="width:auto;min-width:130px;flex:0 0 auto;"></select>'
-      + '<select class="m-input" id="d62eb-gear-genre" style="width:auto;min-width:110px;flex:0 0 auto;">' + [['','All genres'],['core','Core'],['fantasy','Fantasy'],['scifi','Sci-Fi'],['superhero','Superhero']].map(o => '<option value="' + o[0] + '"' + (bgearGenre === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></div>';
+    h += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;"><input class="m-input" id="d62eb-gear-search" placeholder="Search equipment…" value="' + esc(bgearQ) + '" style="flex:1;min-width:140px;"><select class="m-input" id="d62eb-gear-cat" style="width:auto;min-width:130px;flex:0 0 auto;"></select>'
+      + '<select class="m-input" id="d62eb-gear-era" style="width:auto;min-width:120px;flex:0 0 auto;"></select></div>';
     h += '<div class="brow-list" id="d62eb-gear-list" style="max-height:46vh;overflow:auto;padding:0;">' + gearListHtml() + '</div>';
     b.innerHTML = h;
     const cats = [...new Set(equipData().map(g => g.category))].filter(Boolean).sort();
     $('d62eb-gear-cat').innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '"' + (bgearCat === c ? ' selected' : '') + '>' + esc(c[0].toUpperCase() + c.slice(1)) + '</option>').join('');
-    const s = $('d62eb-gear-search'), cat = $('d62eb-gear-cat'), gsel = $('d62eb-gear-genre');
-    s.addEventListener('input', () => { bgearQ = norm(s.value); $('d62eb-gear-list').innerHTML = gearListHtml(); wireGear(); });
-    cat.addEventListener('change', () => { bgearCat = cat.value; $('d62eb-gear-list').innerHTML = gearListHtml(); wireGear(); });
-    gsel.addEventListener('change', () => { bgearGenre = gsel.value; $('d62eb-gear-list').innerHTML = gearListHtml(); wireGear(); });
+    $('d62eb-gear-era').innerHTML = '<option value="">All eras</option>' + gearEras().map(e => '<option value="' + esc(e) + '"' + (bgearEra === e ? ' selected' : '') + '>' + esc(e) + '</option>').join('');
+    const s = $('d62eb-gear-search'), cat = $('d62eb-gear-cat'), era = $('d62eb-gear-era');
+    s.addEventListener('input', () => { bgearQ = norm(s.value); relist('d62eb-gear-list', gearListHtml(), wireGear); });
+    cat.addEventListener('change', () => { bgearCat = cat.value; relist('d62eb-gear-list', gearListHtml(), wireGear); });
+    era.addEventListener('change', () => { bgearEra = era.value; relist('d62eb-gear-list', gearListHtml(), wireGear); });
     wireGear();
-    function wireGear() { $('d62eb-gear-list').querySelectorAll('[data-gname]').forEach(btn => btn.addEventListener('click', () => { toggleGear(btn.dataset.gname); $('d62eb-gear-list').innerHTML = gearListHtml(); wireGear(); })); }
+    function wireGear() { $('d62eb-gear-list').querySelectorAll('[data-gname]').forEach(btn => btn.addEventListener('click', () => { toggleGear(btn.dataset.gname); relist('d62eb-gear-list', gearListHtml(), wireGear); })); }
   }
   function gearListHtml() {
-    const list = equipData().filter(g => (!bgearGenre || g.genre === bgearGenre) && (!bgearCat || g.category === bgearCat) && (!bgearQ || norm(g.name).includes(bgearQ) || norm(g.category || '').includes(bgearQ))).sort((a, c) => (a.category || '').localeCompare(c.category || '') || a.name.localeCompare(c.name));
+    const list = equipData().filter(g => (!bgearEra || g.era === bgearEra) && (!bgearCat || g.category === bgearCat) && (!bgearQ || norm(g.name).includes(bgearQ) || norm(g.category || '').includes(bgearQ))).sort((a, c) => (a.category || '').localeCompare(c.category || '') || a.name.localeCompare(c.name));
     if (!list.length) return '<p class="brow-empty">No equipment matches.</p>';
     return list.map(g => {
       const on = !!gearPicks[g.name];
@@ -421,10 +463,10 @@
 
   window.D62EB = {
     launch() {
-      step = 0; mode = null; tpl = null; genre = ((typeof currentGenre === 'function') ? currentGenre() : 'core') || 'core';
+      step = 0; maxStep = 0; mode = null; tpl = null; genre = 'all';
       attrAlloc = { Agility: 3, Brawn: 3, Knowledge: 3, Perception: 3 }; skillAlloc = {}; details = {}; gearPicks = {};
-      traitPicks = {}; traitKind = ''; traitQ = ''; powerPicks = {}; powerLevel = 'none'; powerKind = ''; powerGenre = ''; powerQ = '';
-      bgearCat = ''; bgearQ = ''; bgearGenre = '';
+      traitPicks = {}; traitKind = ''; traitQ = ''; powerPicks = {}; powerLevel = 'none'; powerKind = ''; powerQ = '';
+      bgearCat = ''; bgearQ = ''; bgearEra = '';
       bopts = Object.assign(freshOpts(), (typeof options !== 'undefined' && options) ? JSON.parse(JSON.stringify(options)) : {});
       powerLevel = bopts.powerLevel || 'none';
       _lastStep = -1; render();
@@ -438,7 +480,7 @@
       if (name === 'Skills' && skillSpent() < skillBudgetPips()) { $('d62eb-note').textContent = 'Spend all ' + code(skillBudgetPips()) + ' — ' + code(skillBudgetPips() - skillSpent()) + ' left'; return; }
       if (name === 'Details') readDetails();
       if (step === STEPS.length - 1) { finish(); D62EB.close(); return; }
-      step++; render();
+      step++; maxStep = Math.max(maxStep, step); render();
     },
     back() { const STEPS = steps(); if (STEPS[step] === 'Details') readDetails(); if (step > 0) { step--; render(); } },
   };
