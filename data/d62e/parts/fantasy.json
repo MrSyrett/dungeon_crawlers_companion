@@ -25,55 +25,12 @@
    "page": 142
   },
   {
-   "name": "Barter",
-   "attribute": "Knowledge",
-   "genre": "fantasy",
-   "description": "Trade, business, exchanges, and local financial customs — exchange rates, monetary values, and how economies work. The Scholar skill of making and spending money and conducting business. Does not cover religious financial customs (Mysticism/Esoterica or Scholar).",
-   "time": "one action",
-   "page": 143
-  },
-  {
-   "name": "Languages",
-   "attribute": "Knowledge",
-   "genre": "fantasy",
-   "description": "Knowing, speaking, understanding, interpreting and expressing knowledge about languages, living and dead — fluency beyond the common trade tongue. Usually takes no action unless researching or deciphering an obscure or lost language.",
-   "specializations": [
-    "Specific languages",
-    "Dead or esoteric languages (as Advanced Skills)"
-   ],
-   "page": 143
-  },
-  {
-   "name": "Navigation",
-   "attribute": "Knowledge",
-   "genre": "fantasy",
-   "description": "Guiding a vessel or group on an accurate course using external reference points (stars, maps, landmarks); also covers cartography. Concerns long journeys, large groups or vessels, and broad regional travel (Survival covers short-distance local wayfinding).",
-   "time": "one action",
-   "page": 144
-  },
-  {
    "name": "Traps",
    "attribute": "Knowledge",
    "genre": "fantasy",
    "description": "Noticing, installing, altering, and disabling traps, alarms, and warning devices, and identifying trap types (gas, pit, wire-triggered). Failure can trigger a trap on the user depending on the scope of the failure.",
    "time": "one action",
    "page": 144
-  },
-  {
-   "name": "Gambling",
-   "attribute": "Perception",
-   "genre": "fantasy",
-   "description": "Playing, teaching, learning, understanding, and cheating at games of strategy and luck, and assessing risk and reward in dangerous situations. Successes increase winnings, failures decrease them.",
-   "time": "one action",
-   "page": 144
-  },
-  {
-   "name": "Streetwise",
-   "attribute": "Perception",
-   "genre": "fantasy",
-   "description": "Finding information, goods, and contacts in large population centers and urban areas — thieves' guilds, crime cartels, black markets, and illicit operations. Useful for investigators determining criminal motives and methods.",
-   "time": "one action",
-   "page": 145
   },
   {
    "name": "Change (Alteration)",

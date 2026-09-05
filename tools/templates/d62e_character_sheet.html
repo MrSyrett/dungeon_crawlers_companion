@@ -417,7 +417,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <div class="tab-panel" id="tab-gear">
         <div class="section-bar"><span>Gear &amp; Equipment</span><span class="hdr-right"><button class="hdr-btn" onclick="openGearPicker()">＋ Add</button></span></div>
-        <div class="blk" style="border-bottom:none;padding-bottom:2px;"><div class="fld"><label>Wealth / Funds</label><input type="text" id="f-wealth" placeholder="coins, credits, resources…"></div></div>
+        <div class="blk" style="border-bottom:none;padding-bottom:2px;"><div class="fld" style="max-width:180px;"><label>Funds</label><input type="number" id="f-wealth" placeholder="0" class="num" style="font-family:'Share Tech Mono',monospace;"></div></div>
         <table class="tbl">
           <thead><tr><th style="width:38%;">Item</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="gear-body"></tbody>
@@ -582,9 +582,8 @@ function findWeapon(name) { return findEquip(name, 'weapon'); }
 
 // ═══ ATTRIBUTES ═══════════════════════════════════════════════════════════
 function attrCellHtml(name, pipVal) {
-  const optional = OPTIONAL_ATTRS.includes(name);
+  // Attributes are set at character creation; no on-sheet delete (core and optional match).
   return '<div class="stat-cell" data-attr="' + esc(name) + '">' +
-    (optional ? '<button class="attr-x" title="Remove attribute" onclick="removeAttr(\'' + esc(name) + '\')">✕</button>' : '') +
     '<div class="sn" onclick="rollAttr(\'' + esc(name) + '\')" title="Roll ' + esc(name) + '">' + esc(name.toUpperCase()) + '</div>' +
     '<input type="text" id="at-' + esc(name) + '" value="' + esc(code(pipVal)) + '" oninput="recalc();scheduleAutosave()">' +
     '</div>';
@@ -594,11 +593,6 @@ function buildStats(attrsObj) {
   const names = ALL_ATTRS.filter(a => CORE_ATTRS.includes(a) || attrsObj[a] != null);
   $('stats-grid').innerHTML = names.map(a => attrCellHtml(a, attrsObj[a] != null ? attrsObj[a] : 9)).join('');
   fillPickers(); renderWoundTrack();
-}
-function removeAttr(name) {
-  if(CORE_ATTRS.includes(name)) return;
-  const cell = document.querySelector('#stats-grid .stat-cell[data-attr="' + name + '"]'); if(cell) cell.remove();
-  recalc(); scheduleAutosave();
 }
 function addAttr(name) {
   if($('at-' + name)) return;
@@ -1142,7 +1136,9 @@ function applySheet(d) {
   $('flaws-body').innerHTML = ''; (d.flaws || []).forEach(t => addTraitRow('flaws', typeof t === 'string' ? { name: t } : t));
   $('talents-body').innerHTML = ''; (d.talents || []).forEach(t => addTraitRow('talents', typeof t === 'string' ? { name: t } : t));
   $('gear-body').innerHTML = ''; (d.gear || []).forEach(g => addGearRow(typeof g === 'string' ? { name: g } : g));
-  set('f-wealth', d.wealth); set('f-background', d.background); set('f-personality', d.personality); set('f-notes', d.notes);
+  // Funds is a number box now; coerce old free-text wealth values to their numeric part.
+  set('f-wealth', d.wealth == null || d.wealth === '' ? '' : ((String(d.wealth).match(/-?\d+(\.\d+)?/) || [''])[0]));
+  set('f-background', d.background); set('f-personality', d.personality); set('f-notes', d.notes);
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
   recalc(); setDefaultTab(); applyOptions();
 }

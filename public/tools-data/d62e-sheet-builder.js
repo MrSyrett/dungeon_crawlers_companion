@@ -29,6 +29,8 @@
   const equipData = () => (typeof D62E_EQUIPMENT !== 'undefined' ? D62E_EQUIPMENT : []);
   const powersData = () => (typeof D62E_POWERS !== 'undefined' ? D62E_POWERS : []);
   const genreOk = item => { const g = item && item.genre; if (genre === 'all') return true; return !g || g === 'core' || g === genre; };
+  // Templates only: All shows everything, Core shows only core, a specific genre shows only that genre (no core).
+  const templateGenreOk = t => { const g = t && t.genre; if (genre === 'all') return true; if (genre === 'core') return g === 'core'; return g === genre; };
 
   function steps() { const s = ['Options', 'Path']; if (mode === 'alacarte') s.push('Attributes'); s.push('Traits', 'Powers', 'Skills', 'Extras', 'Details', 'Gear'); return s; }
   function perksData() { return (typeof D !== 'undefined' && D.perks) ? D.perks() : (typeof D62E_PERKS !== 'undefined' ? D62E_PERKS : []); }
@@ -151,7 +153,7 @@
     h += optRow('Skill Specializations & Advanced Skills', 'Adds Adv / Spec controls to each skill on the sheet.', bchk('specialization'));
     h += optRow('Additional Attribute Budgets', 'Scales the a-la-carte attribute budget +3D per attribute beyond the core four.', bchk('attrBudget'));
     b.innerHTML = h;
-    $('d62eb-bgenre').addEventListener('change', e => { genre = e.target.value; if (mode === 'template' && tpl && !genreOk(tpl)) { tpl = null; mode = null; } render(); });
+    $('d62eb-bgenre').addEventListener('change', e => { genre = e.target.value; if (mode === 'template' && tpl && !templateGenreOk(tpl)) { tpl = null; mode = null; } render(); });
     b.querySelectorAll('[data-optk]').forEach(el => el.addEventListener('click', () => { bopts[el.dataset.optk] = !bopts[el.dataset.optk]; render(); }));
     b.querySelectorAll('[data-opts]').forEach(el => el.addEventListener('change', () => { bopts[el.dataset.opts] = el.value; render(); }));
   }
@@ -159,7 +161,8 @@
   // ── Step: Path ────────────────────────────────────────────────────────────
   function renderPath(b, note) {
     note.textContent = mode === 'alacarte' ? 'A la carte' : tpl ? tpl.name : 'Pick a starting point';
-    const tlist = templates().filter(t => genreOk(t));
+    // Templates filter differently: a specific non-core genre HIDES core templates.
+    const tlist = templates().filter(templateGenreOk);
     let h = '<p class="m-hint">Start from a <b>template</b> (fixed attributes, recommended skills) and add 7D of skills — or build <b>a la carte</b>, assigning 12D of attributes yourself. Change the genre back on the Options step.</p>';
     h += '<div class="tpl-list">'
       + '<div class="tpl-card' + (mode === 'alacarte' ? ' sel' : '') + '" data-alacarte="1"><b>⚙ A la carte</b><small>Assign 12D of attributes yourself, then 7D of skills.</small></div>'

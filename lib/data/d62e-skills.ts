@@ -13,20 +13,20 @@ export const D62E_SKILLS = [
     "page": 38
   },
   {
-    "name": "Arcane World",
-    "attribute": "Magic",
-    "genre": "core",
-    "description": "Knowing, understanding, and identifying magical creatures, planes, locations, items, and lore; if the being, location, item, or lore is part of the world, this skill tells you whether you know it.",
-    "time": "an action",
-    "page": 68
-  },
-  {
     "name": "Athletics",
     "attribute": "Brawn",
     "genre": "core",
     "description": "Raw physical strength, endurance, and stamina: lifting, pushing, restraining, or strength-based activities such as swimming. A character can generally lift 100 lbs. per die code with a successful Difficulty 10 roll.",
     "time": "one round (some tasks take a few more)",
     "page": 39
+  },
+  {
+    "name": "Barter",
+    "attribute": "Knowledge",
+    "genre": "core",
+    "description": "Trade, business, exchanges, and local financial customs — exchange rates, monetary values, and how economies work. The Scholar skill of making and spending money and conducting business. Does not cover religious financial customs (Mysticism/Esoterica or Scholar).",
+    "time": "one action",
+    "page": 143
   },
   {
     "name": "Command",
@@ -51,14 +51,6 @@ export const D62E_SKILLS = [
     "description": "Programming, hacking, disrupting, and undermining technological threats, and repairing computers.",
     "time": "an action",
     "page": 65
-  },
-  {
-    "name": "Craft Magic Item",
-    "attribute": "Magic",
-    "genre": "core",
-    "description": "Creating magic items like potions, weapons, armors, and wands; the difficulty and effects are set by the gamemaster and can take days or weeks rather than actions.",
-    "time": "days or weeks",
-    "page": 68
   },
   {
     "name": "Deceive",
@@ -93,12 +85,20 @@ export const D62E_SKILLS = [
     "page": 67
   },
   {
-    "name": "Identify Magic",
-    "attribute": "Magic",
+    "name": "Flying",
+    "attribute": "Agility",
     "genre": "core",
-    "description": "Understanding magic and its effects, analyzing and assessing spells as they are cast, and the knowledge needed to negate or overcome magical effects and spells.",
-    "time": "an action",
-    "page": 68
+    "description": "Maneuvering under one's own power (wings) or in zero-gravity. Fly meters equal to the Flying die code per round, hover rounds equal to the code without a test, and may replace Agility when calculating Dodge (excluding the Agility code).",
+    "time": "one action",
+    "page": 206
+  },
+  {
+    "name": "Gambling",
+    "attribute": "Perception",
+    "genre": "core",
+    "description": "Playing, teaching, learning, understanding, and cheating at games of strategy and luck, and assessing risk and reward in dangerous situations. Successes increase winnings, failures decrease them.",
+    "time": "one action",
+    "page": 144
   },
   {
     "name": "Interstellar Navigation",
@@ -247,20 +247,6 @@ export const D62E_SKILLS = [
     "page": 39
   },
   {
-    "name": "Spell School",
-    "attribute": "Magic",
-    "genre": "core",
-    "description": "A specialization skill; each spell school (change/alteration, movement/apportation, creation/conjuration, and knowledge/divination) is its own specialization used to cast magic under the Freeform Skill-Based Magic rules.",
-    "specializations": [
-      "Change (Alteration)",
-      "Movement (Apportation)",
-      "Creation (Conjuration)",
-      "Knowledge (Divination)"
-    ],
-    "time": "one or more actions",
-    "page": 68
-  },
-  {
     "name": "Stamina",
     "attribute": "Brawn",
     "genre": "core",
@@ -275,6 +261,14 @@ export const D62E_SKILLS = [
     "description": "Remaining unnoticed: knowing where to step, reading the patterns of guards, and finding good hiding spaces. Opposed by Investigation.",
     "time": "an action",
     "page": 42
+  },
+  {
+    "name": "Streetwise",
+    "attribute": "Perception",
+    "genre": "core",
+    "description": "Finding information, goods, and contacts in large population centers and urban areas — thieves' guilds, crime cartels, black markets, and illicit operations. Useful for investigators determining criminal motives and methods.",
+    "time": "one action",
+    "page": 145
   },
   {
     "name": "Survival",
@@ -332,14 +326,6 @@ export const D62E_SKILLS = [
     "page": 145
   },
   {
-    "name": "Barter",
-    "attribute": "Knowledge",
-    "genre": "fantasy",
-    "description": "Trade, business, exchanges, and local financial customs — exchange rates, monetary values, and how economies work. The Scholar skill of making and spending money and conducting business. Does not cover religious financial customs (Mysticism/Esoterica or Scholar).",
-    "time": "one action",
-    "page": 143
-  },
-  {
     "name": "Change (Alteration)",
     "attribute": "Magic",
     "genre": "fantasy",
@@ -361,14 +347,6 @@ export const D62E_SKILLS = [
     "page": 148
   },
   {
-    "name": "Gambling",
-    "attribute": "Perception",
-    "genre": "fantasy",
-    "description": "Playing, teaching, learning, understanding, and cheating at games of strategy and luck, and assessing risk and reward in dangerous situations. Successes increase winnings, failures decrease them.",
-    "time": "one action",
-    "page": 144
-  },
-  {
     "name": "Identify Magic",
     "attribute": "Magic",
     "genre": "fantasy",
@@ -381,17 +359,6 @@ export const D62E_SKILLS = [
     "genre": "fantasy",
     "description": "Spell specialization governing obtaining knowledge — scrying, far-sight, and speak-with-the-dead effects. Spells that block the obtaining of Intellect/knowledge are also divination spells.",
     "page": 148
-  },
-  {
-    "name": "Languages",
-    "attribute": "Knowledge",
-    "genre": "fantasy",
-    "description": "Knowing, speaking, understanding, interpreting and expressing knowledge about languages, living and dead — fluency beyond the common trade tongue. Usually takes no action unless researching or deciphering an obscure or lost language.",
-    "specializations": [
-      "Specific languages",
-      "Dead or esoteric languages (as Advanced Skills)"
-    ],
-    "page": 143
   },
   {
     "name": "Lockpicking",
@@ -409,14 +376,6 @@ export const D62E_SKILLS = [
     "page": 147
   },
   {
-    "name": "Navigation",
-    "attribute": "Knowledge",
-    "genre": "fantasy",
-    "description": "Guiding a vessel or group on an accurate course using external reference points (stars, maps, landmarks); also covers cartography. Concerns long journeys, large groups or vessels, and broad regional travel (Survival covers short-distance local wayfinding).",
-    "time": "one action",
-    "page": 144
-  },
-  {
     "name": "Riding",
     "attribute": "Agility",
     "genre": "fantasy",
@@ -430,14 +389,6 @@ export const D62E_SKILLS = [
     "genre": "fantasy",
     "description": "The core casting skill; each spell school is its own specialization. To cast, generate a Magic skill total (Spell School + specialization) and beat the spell's Difficulty. Four specializations: Change (Alteration), Movement (Apportation), Creation (Conjuration), Knowledge (Divination). Always takes one or more actions.",
     "page": 147
-  },
-  {
-    "name": "Streetwise",
-    "attribute": "Perception",
-    "genre": "fantasy",
-    "description": "Finding information, goods, and contacts in large population centers and urban areas — thieves' guilds, crime cartels, black markets, and illicit operations. Useful for investigators determining criminal motives and methods.",
-    "time": "one action",
-    "page": 145
   },
   {
     "name": "Swimming",
@@ -456,79 +407,11 @@ export const D62E_SKILLS = [
     "page": 144
   },
   {
-    "name": "Barter",
-    "attribute": "Knowledge",
-    "genre": "scifi",
-    "description": "A broad skill for trade, business, exchanges, exchange rates, the monetary value of goods, and local financial customs and economics; the Scholar skill of making, spending, and understanding money.",
-    "time": "an action",
-    "page": 175
-  },
-  {
-    "name": "Flying",
-    "attribute": "Agility",
-    "genre": "scifi",
-    "description": "Maneuvering under one's own power (wings) or in zero-gravity; fly meters equal to the Flying die code per round, hover for that many rounds, and in combat Flying can replace Agility when calculating Dodge (excluding the Agility die).",
-    "time": "an action",
-    "page": 174
-  },
-  {
-    "name": "Gambling",
-    "attribute": "Perception",
-    "genre": "scifi",
-    "description": "Playing, teaching, learning, understanding, and cheating at games of strategy and luck, and assessing risk and reward where loss can be significant.",
-    "time": "an action",
-    "page": 176
-  },
-  {
     "name": "Gunnery",
     "attribute": "Perception",
     "genre": "scifi",
     "description": "Attacking with onboard starship weapons; damage is the weapon's die code, and weapon attack bonuses add to the Gunnery roll.",
     "time": "an action",
     "page": 176
-  },
-  {
-    "name": "Languages",
-    "attribute": "Knowledge",
-    "genre": "scifi",
-    "description": "Knowing, speaking, understanding, interpreting, and expressing languages both living and dead, representing fluency beyond common speech.",
-    "specializations": [
-      "Specific living language",
-      "Dead or esoteric language (Advanced Skill)"
-    ],
-    "time": "usually none (an action when researching or deciphering a lost language)",
-    "page": 175
-  },
-  {
-    "name": "Streetwise",
-    "attribute": "Perception",
-    "genre": "scifi",
-    "description": "Finding information, goods, and contacts in large population centers; covers thieves' guilds, crime cartels, black markets, and illicit operations, and helps investigators deduce criminal motives and methods.",
-    "time": "an action",
-    "page": 176
-  },
-  {
-    "name": "Flying",
-    "attribute": "Agility",
-    "genre": "superhero",
-    "description": "Maneuvering under one's own power (wings) or in zero-gravity. Fly meters equal to the Flying die code per round, hover rounds equal to the code without a test, and may replace Agility when calculating Dodge (excluding the Agility code).",
-    "time": "one action",
-    "page": 206
-  },
-  {
-    "name": "Gambling",
-    "attribute": "Perception",
-    "genre": "superhero",
-    "description": "Playing, teaching, understanding, and cheating at games of strategy and luck, and assessing risk and reward where loss is significant. Successes increase winnings, failures decrease them.",
-    "time": "one action",
-    "page": 206
-  },
-  {
-    "name": "Streetwise",
-    "attribute": "Perception",
-    "genre": "superhero",
-    "description": "Finding information, goods, and contacts in large population centers and urban areas — thieves' guilds, crime cartels, black markets, and contacts. Useful for determining criminal motives and methods.",
-    "time": "one action",
-    "page": 206
   }
 ] as unknown as D62eSkill[];

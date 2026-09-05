@@ -1,413 +1,457 @@
 {
-  "skills": [
+ "skills": [
+  {
+   "name": "Gunnery",
+   "attribute": "Perception",
+   "genre": "scifi",
+   "description": "Attacking with onboard starship weapons; damage is the weapon's die code, and weapon attack bonuses add to the Gunnery roll.",
+   "time": "an action",
+   "page": 176
+  }
+ ],
+ "vehicles": [
+  {
+   "name": "Fighter",
+   "kind": "Starship",
+   "genre": "scifi",
+   "scale": "2",
+   "crew": "1",
+   "speed": "5D",
+   "maneuver": "5D",
+   "body": "2D",
+   "shields": "Light Shields 2D",
+   "weapons": [
     {
-      "name": "Flying",
-      "attribute": "Agility",
-      "genre": "scifi",
-      "description": "Maneuvering under one's own power (wings) or in zero-gravity; fly meters equal to the Flying die code per round, hover for that many rounds, and in combat Flying can replace Agility when calculating Dodge (excluding the Agility die).",
-      "time": "an action",
-      "page": 174
-    },
-    {
-      "name": "Barter",
-      "attribute": "Knowledge",
-      "genre": "scifi",
-      "description": "A broad skill for trade, business, exchanges, exchange rates, the monetary value of goods, and local financial customs and economics; the Scholar skill of making, spending, and understanding money.",
-      "time": "an action",
-      "page": 175
-    },
-    {
-      "name": "Languages",
-      "attribute": "Knowledge",
-      "genre": "scifi",
-      "description": "Knowing, speaking, understanding, interpreting, and expressing languages both living and dead, representing fluency beyond common speech.",
-      "specializations": ["Specific living language", "Dead or esoteric language (Advanced Skill)"],
-      "time": "usually none (an action when researching or deciphering a lost language)",
-      "page": 175
-    },
-    {
-      "name": "Gambling",
-      "attribute": "Perception",
-      "genre": "scifi",
-      "description": "Playing, teaching, learning, understanding, and cheating at games of strategy and luck, and assessing risk and reward where loss can be significant.",
-      "time": "an action",
-      "page": 176
-    },
-    {
-      "name": "Gunnery",
-      "attribute": "Perception",
-      "genre": "scifi",
-      "description": "Attacking with onboard starship weapons; damage is the weapon's die code, and weapon attack bonuses add to the Gunnery roll.",
-      "time": "an action",
-      "page": 176
-    },
-    {
-      "name": "Streetwise",
-      "attribute": "Perception",
-      "genre": "scifi",
-      "description": "Finding information, goods, and contacts in large population centers; covers thieves' guilds, crime cartels, black markets, and illicit operations, and helps investigators deduce criminal motives and methods.",
-      "time": "an action",
-      "page": 176
+     "name": "Laser Cannons",
+     "damage": "3D"
     }
-  ],
-  "vehicles": [
+   ],
+   "description": "A nimble single-seat combat starship (Defense 10, Hull x5).",
+   "page": 203
+  },
+  {
+   "name": "Cargo Transport",
+   "kind": "Starship",
+   "genre": "scifi",
+   "scale": "3",
+   "crew": "2",
+   "speed": "3D",
+   "maneuver": "3D",
+   "body": "6D",
+   "shields": "Heavy Shields 4D",
+   "weapons": [
     {
-      "name": "Fighter",
-      "kind": "Starship",
-      "genre": "scifi",
-      "scale": "2",
-      "crew": "1",
-      "speed": "5D",
-      "maneuver": "5D",
-      "body": "2D",
-      "shields": "Light Shields 2D",
-      "weapons": [{ "name": "Laser Cannons", "damage": "3D" }],
-      "description": "A nimble single-seat combat starship (Defense 10, Hull x5).",
-      "page": 203
-    },
-    {
-      "name": "Cargo Transport",
-      "kind": "Starship",
-      "genre": "scifi",
-      "scale": "3",
-      "crew": "2",
-      "speed": "3D",
-      "maneuver": "3D",
-      "body": "6D",
-      "shields": "Heavy Shields 4D",
-      "weapons": [{ "name": "Light Laser Cannons", "damage": "2D" }],
-      "description": "A sturdy hauler built to move goods (Defense 30, Hull x5).",
-      "page": 203
-    },
-    {
-      "name": "Smuggler Transport",
-      "kind": "Starship",
-      "genre": "scifi",
-      "scale": "4",
-      "crew": "4",
-      "speed": "4D",
-      "maneuver": "4D",
-      "body": "4D",
-      "shields": "Heavy Shields 4D",
-      "weapons": [{ "name": "Light Laser Cannons", "damage": "2D" }],
-      "description": "A well-rounded transport favored by smugglers (Defense 20).",
-      "page": 203
-    },
-    {
-      "name": "Capital Ship",
-      "kind": "Starship",
-      "genre": "scifi",
-      "scale": "5",
-      "crew": "25",
-      "speed": "4D",
-      "maneuver": "1D",
-      "body": "7D",
-      "shields": "Heavy Shields 4D",
-      "weapons": [{ "name": "Heavy Laser Cannons", "damage": "4D" }],
-      "description": "A massive, heavily armed warship (Defense 35, Hull x5).",
-      "page": 203
+     "name": "Light Laser Cannons",
+     "damage": "2D"
     }
-  ],
-  "powers": [
+   ],
+   "description": "A sturdy hauler built to move goods (Defense 30, Hull x5).",
+   "page": 203
+  },
+  {
+   "name": "Smuggler Transport",
+   "kind": "Starship",
+   "genre": "scifi",
+   "scale": "4",
+   "crew": "4",
+   "speed": "4D",
+   "maneuver": "4D",
+   "body": "4D",
+   "shields": "Heavy Shields 4D",
+   "weapons": [
     {
-      "name": "Energy Defenses",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis",
-      "difficulty": "Variable (5-20 by energy source; weapon Damage +10 if applied to a weapon)",
-      "description": "Negate the impact of energy on oneself to ignore harm; exceeding the Difficulty by 5 or more can also turn off or extinguish the energy source. Can be maintained against continuous energy with continual tests.",
-      "page": 186
-    },
-    {
-      "name": "Harm",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis",
-      "difficulty": "5 (+5 per use in the last 24 hours, cumulative; plus range penalties)",
-      "description": "Immediately make a Damage roll against a target using the character's Kinesis die code.",
-      "page": 186
-    },
-    {
-      "name": "Physical Enhancement",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis",
-      "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
-      "description": "Gain the Kinesis die code as a bonus on the character's next Agility or Brawn die code.",
-      "page": 186
-    },
-    {
-      "name": "Telekinesis",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis",
-      "difficulty": "5 for a small handheld object under 1 lb; +5 at 10 lbs, +5 at 100 lbs, +5 at 1000 lbs, +5 per 1000 lbs over (cumulative)",
-      "description": "Lift, move, levitate, or throw an object with the mind. A thrown object's Damage roll equals the activation Difficulty. The object can be maintained without further rolls until the character takes a die-code action, which ends the power.",
-      "page": 186
-    },
-    {
-      "name": "Trance",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis",
-      "difficulty": "20",
-      "description": "Fall into a deathlike trance (Difficulty 25 to tell if alive), consuming little energy or food and adding the Perceive die code to rolls resisting environmental effects; on life support the character could live indefinitely. A wake trigger is set on activation, and being Wounded automatically wakes the character.",
-      "page": 186
-    },
-    {
-      "name": "Enhance Perception",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Perceive",
-      "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
-      "description": "Add the Perceive die code to all perception die codes for 10 minutes.",
-      "page": 187
-    },
-    {
-      "name": "Telepathy",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Perceive",
-      "difficulty": "5 (+10 if the target is unfriendly, hostile, or resistant)",
-      "description": "Read the surface thoughts of a visible living target and understand what it is sensing; exceeding the Difficulty by 10 probes deeper into subconscious or repressed thoughts.",
-      "page": 187
-    },
-    {
-      "name": "Sense Living Form",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Perceive",
-      "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
-      "description": "Sense the presence, rough location (within ~5 yards), emotional state, health, and basic identity of living beings within 100 yards; beings with a higher Perceive die code get an opposed roll to avoid detection. Can be kept on with a Difficulty 5 action each round.",
-      "page": 187
-    },
-    {
-      "name": "Withstand Harm",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Perceive",
-      "difficulty": "5 (+5 if wounded, +5 if incapacitated, +5 if mortally wounded; cumulative to 20)",
-      "description": "Act as if not incapacitated, wounded, or mortally wounded. Using this power imposes no multi-action penalty, though the character still suffers die penalties for being harmed.",
-      "page": 187
-    },
-    {
-      "name": "Enhance Other",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Reform",
-      "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
-      "description": "The target gains the psionic character's Reform die code as a bonus to their next die code rolled. May not be used on oneself.",
-      "page": 187
-    },
-    {
-      "name": "Healing",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Reform",
-      "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
-      "description": "Immediately make a Medicine roll applied to oneself, adding the Reform die code as a bonus to the Medicine die code to remove harm.",
-      "page": 188
-    },
-    {
-      "name": "Purge Poison",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Reform",
-      "difficulty": "5 (gamemaster may add difficulty based on the strength of the poison)",
-      "description": "Immediately remove and purge all poisons and toxins from one's own system.",
-      "page": 188
-    },
-    {
-      "name": "Suggestion",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Reform",
-      "difficulty": "Opposed by the target's Willpower (or Knowledge if the Charm module is not used)",
-      "description": "Impart a brief, easy-to-understand suggestion (a glance, a distraction). The target will not risk itself, and an implausible suggestion is quickly recognized as false.",
-      "page": 188
-    },
-    {
-      "name": "Heal Other",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis + Perceive",
-      "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
-      "description": "Make a Medicine roll applied to a target, adding the Reform die code as a bonus to the Medicine die code to remove harm. May not be used on oneself.",
-      "page": 188
-    },
-    {
-      "name": "Purge Poison Other",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis + Perceive",
-      "difficulty": "5 (gamemaster may add difficulty based on the strength of the poison)",
-      "description": "Immediately remove and purge all poisons and toxins from a target's system. May not be used on oneself.",
-      "page": 188
-    },
-    {
-      "name": "Place Other in Trance",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis + Perceive",
-      "difficulty": "20",
-      "description": "Force a target into a Trance (as the Trance power, with all its rules). The awakening trigger is chosen by the target, not the caster, so an enemy cannot be trapped with no way to wake.",
-      "page": 188
-    },
-    {
-      "name": "Cryokinesis",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis + Reform",
-      "difficulty": "15",
-      "description": "Deal a Damage roll equal to the Kinesis+Reform die code to a visible target as a frozen burst of cold; cold defenses and special abilities apply. Can be used to break items or equipment instead of dealing damage.",
-      "page": 189
-    },
-    {
-      "name": "Electrokinesis",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis + Reform",
-      "difficulty": "15",
-      "description": "Deal a Damage roll equal to the Kinesis+Reform die code to a visible target as a supercharged burst of electricity; electrical defenses apply. Can be used to break items or equipment instead.",
-      "page": 189
-    },
-    {
-      "name": "Pyrokinesis",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Kinesis + Reform",
-      "difficulty": "15",
-      "description": "Deal a Damage roll equal to the Kinesis+Reform die code to a visible target as a super-heated burst of fire; heat defenses apply. Can be used to break items or equipment instead.",
-      "page": 189
-    },
-    {
-      "name": "Precognition",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Perceive + Reform",
-      "difficulty": "15 (increased by distance to the location and distance in the timeline)",
-      "description": "View and sense a chosen locale as though present at some future point. The future is not locked, so events almost certainly will not unfold exactly as seen, but the insight can help build a plan. Can be maintained without rolling while taking no other actions.",
-      "page": 189
-    },
-    {
-      "name": "Postcognition",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Perceive + Reform",
-      "difficulty": "15 (increased by distance to the location and distance in the timeline)",
-      "description": "View and sense a chosen locale as though present at some past point. Can be maintained without rolling while taking no other actions or suffering damage.",
-      "page": 189
-    },
-    {
-      "name": "Projected Self",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Perceive + Reform",
-      "difficulty": "5 (+5 if the character is not within sight of the target, +5 if unable to communicate, +5 if the target is unwilling or resistant; cumulative)",
-      "description": "Reach out and appear as a wavering ghostly figure near a target to communicate with it; normal communication hurdles (language, etc.) still apply. The projecting character receives no sensory input beyond what is needed to communicate.",
-      "page": 190
-    },
-    {
-      "name": "Farsight",
-      "kind": "psionic",
-      "genre": "scifi",
-      "skill": "Perceive + Reform",
-      "difficulty": "5 (increased by distance)",
-      "description": "View and sense a chosen locale as though present there. Can be maintained without rolling while taking no other actions or suffering damage.",
-      "page": 190
+     "name": "Light Laser Cannons",
+     "damage": "2D"
     }
-  ],
-  "creatures": [
+   ],
+   "description": "A well-rounded transport favored by smugglers (Defense 20).",
+   "page": 203
+  },
+  {
+   "name": "Capital Ship",
+   "kind": "Starship",
+   "genre": "scifi",
+   "scale": "5",
+   "crew": "25",
+   "speed": "4D",
+   "maneuver": "1D",
+   "body": "7D",
+   "shields": "Heavy Shields 4D",
+   "weapons": [
     {
-      "name": "Hacker",
-      "genre": "scifi",
-      "kind": "Humanoid",
-      "attributes": { "Agility": 6, "Brawn": 6, "Knowledge": 12, "Perception": 12, "Technical": 12 },
-      "skills": ["Agility skills 2D", "Brawn skills 2D", "Computers 3D"],
-      "special": ["Dodge 20", "Parry 10", "Represents a computer technician rather than a combat hacker; the gamemaster may add a weapon or cyberware, which this profile does not include."],
-      "description": "A skilled computer technician who breaks into networks and systems.",
-      "page": 199
-    },
-    {
-      "name": "Killer Robot",
-      "genre": "scifi",
-      "kind": "Robot",
-      "attributes": { "Agility": 12, "Brawn": 9, "Knowledge": 6, "Perception": 9 },
-      "skills": ["Shooting 2D", "Melee 2D", "Intimidation 3D", "Stamina 3D", "Languages 1D", "Driving (or Piloting) 1D", "Survival 1D"],
-      "special": ["Dodge 15", "Parry 20", "Damage: choose one sci-fi melee weapon and one sci-fi ranged weapon", "Robot: a digital and mechanical marvel, not a living being; does not heal normally and must be repaired (Use/Repair Technical due to complexity)", "Firewall 10"],
-      "description": "A lethal autonomous combat machine.",
-      "page": 199
+     "name": "Heavy Laser Cannons",
+     "damage": "4D"
     }
-  ],
-  "templates": [
-    {
-      "name": "Engineer",
-      "genre": "scifi",
-      "archetype": "Technician",
-      "attributes": { "Agility": 9, "Brawn": 6, "Charm": 6, "Knowledge": 12, "Mechanical": 15, "Perception": 9, "Technical": 6 },
-      "description": "A starship and systems specialist who keeps everything running. Dodge 15, Parry 15. Recommended skills: Communications, Navigation, Piloting, Use/Repair Mechanical.",
-      "page": 200
-    },
-    {
-      "name": "Gunslinger",
-      "genre": "scifi",
-      "archetype": "Fighter",
-      "attributes": { "Agility": 15, "Brawn": 12, "Charm": 9, "Knowledge": 6, "Mechanical": 6, "Perception": 9, "Technical": 6 },
-      "description": "A quick-drawing frontier shooter. Dodge 15, Parry 25. Recommended skills: Intimidation, Shooting, Sleight of Hand, Stealth.",
-      "page": 201
-    },
-    {
-      "name": "Hacker",
-      "genre": "scifi",
-      "archetype": "Technician",
-      "attributes": { "Agility": 9, "Brawn": 6, "Charm": 6, "Knowledge": 15, "Mechanical": 3, "Perception": 9, "Technical": 15 },
-      "description": "A cybernetic infiltrator who breaks into systems. Dodge 15, Parry 15. Recommended skills: Computers, Sciences, Use/Repair Technical, Upgrade.",
-      "page": 201
-    },
-    {
-      "name": "Medic",
-      "genre": "scifi",
-      "archetype": "Support",
-      "attributes": { "Agility": 6, "Brawn": 6, "Charm": 12, "Knowledge": 15, "Mechanical": 9, "Perception": 6, "Technical": 9 },
-      "description": "A field healer and doctor. Dodge 10, Parry 10. Recommended skills: Medicine, Sciences, Use/Repair Mechanical, Use/Repair Technical.",
-      "page": 202
-    }
-  ],
-  "modules": [
-    {
-      "name": "Starships & Starship Combat",
-      "category": "Science Fiction Module",
-      "genre": "scifi",
-      "summary": "Starships have four die-code attributes (Navicomp, Maneuverability, Engines, Hull) plus a minimum Crew, weapons, and shields. Interstellar travel needs a Difficulty 15 Navigation roll then a Difficulty 15 Computers roll (rushable to 25), with mishaps on a Wild Die 1. Combat uses normal rules: Gunnery to attack, Hull x5 for Defense, opposed Engines rolls for range, Piloting+Maneuverability to evade, and Hull+Shields to resist damage; ships must be repaired rather than healing.",
-      "page": 176
-    },
-    {
-      "name": "Driving & Vehicles",
-      "category": "Science Fiction Module",
-      "genre": "scifi",
-      "summary": "Ground and air vehicles use two die-code attributes (Maneuverability and Hull) plus a Passenger capacity, weapons, and armor. The Driving skill handles movement and Repair Mechanical maintains them. Combat mirrors starship combat: Gunnery to attack, Hull x5 for Defense, Driving+Maneuverability to evade, and Hull+Armor to resist damage.",
-      "page": 181
-    },
-    {
-      "name": "Psionics",
-      "category": "Science Fiction Module",
-      "genre": "scifi",
-      "summary": "Three stand-alone psionic skills with no governing attribute (Kinesis, Perceive, Reform) must each be trained separately, gaining only the first die through study. Powers are grouped by skill or combined-skill die code; using a power is an action against a Difficulty, and a character knows every power for the skills they possess.",
-      "page": 184
-    },
-    {
-      "name": "Cyberpunk",
-      "category": "Science Fiction Module",
-      "genre": "scifi",
-      "summary": "A cinematic hacking system where the Computers skill is rolled against a target's Firewall (a Difficulty, or Technical x5 for characters); failing by 5+ can draw consequences from an enemy hacker. Cyberware is built on the Perks, Flaws, and Talents module: a Talent declared cybernetic, limited to a number equal to Knowledge, installed via a Medicine roll (Difficulty 10, +5 per existing implant), and hackable at Rank x5 Firewall.",
-      "page": 191
-    },
-    {
-      "name": "Scale",
-      "category": "Science Fiction Module",
-      "genre": "scifi",
-      "summary": "Size differences are ranked 0-6 (Human to super space station). A larger participant adds its Scale bonus (e.g. +1D to +6D) to damage and to Brawn rolls resisting damage; a smaller participant adds its Scale bonus to Dodge defense and to attack die codes against a larger target. Scale rank is a communication tool with no inherent rules effect on its own.",
-      "page": 196
-    }
-  ]
+   ],
+   "description": "A massive, heavily armed warship (Defense 35, Hull x5).",
+   "page": 203
+  }
+ ],
+ "powers": [
+  {
+   "name": "Energy Defenses",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis",
+   "difficulty": "Variable (5-20 by energy source; weapon Damage +10 if applied to a weapon)",
+   "description": "Negate the impact of energy on oneself to ignore harm; exceeding the Difficulty by 5 or more can also turn off or extinguish the energy source. Can be maintained against continuous energy with continual tests.",
+   "page": 186
+  },
+  {
+   "name": "Harm",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis",
+   "difficulty": "5 (+5 per use in the last 24 hours, cumulative; plus range penalties)",
+   "description": "Immediately make a Damage roll against a target using the character's Kinesis die code.",
+   "page": 186
+  },
+  {
+   "name": "Physical Enhancement",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis",
+   "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
+   "description": "Gain the Kinesis die code as a bonus on the character's next Agility or Brawn die code.",
+   "page": 186
+  },
+  {
+   "name": "Telekinesis",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis",
+   "difficulty": "5 for a small handheld object under 1 lb; +5 at 10 lbs, +5 at 100 lbs, +5 at 1000 lbs, +5 per 1000 lbs over (cumulative)",
+   "description": "Lift, move, levitate, or throw an object with the mind. A thrown object's Damage roll equals the activation Difficulty. The object can be maintained without further rolls until the character takes a die-code action, which ends the power.",
+   "page": 186
+  },
+  {
+   "name": "Trance",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis",
+   "difficulty": "20",
+   "description": "Fall into a deathlike trance (Difficulty 25 to tell if alive), consuming little energy or food and adding the Perceive die code to rolls resisting environmental effects; on life support the character could live indefinitely. A wake trigger is set on activation, and being Wounded automatically wakes the character.",
+   "page": 186
+  },
+  {
+   "name": "Enhance Perception",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Perceive",
+   "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
+   "description": "Add the Perceive die code to all perception die codes for 10 minutes.",
+   "page": 187
+  },
+  {
+   "name": "Telepathy",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Perceive",
+   "difficulty": "5 (+10 if the target is unfriendly, hostile, or resistant)",
+   "description": "Read the surface thoughts of a visible living target and understand what it is sensing; exceeding the Difficulty by 10 probes deeper into subconscious or repressed thoughts.",
+   "page": 187
+  },
+  {
+   "name": "Sense Living Form",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Perceive",
+   "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
+   "description": "Sense the presence, rough location (within ~5 yards), emotional state, health, and basic identity of living beings within 100 yards; beings with a higher Perceive die code get an opposed roll to avoid detection. Can be kept on with a Difficulty 5 action each round.",
+   "page": 187
+  },
+  {
+   "name": "Withstand Harm",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Perceive",
+   "difficulty": "5 (+5 if wounded, +5 if incapacitated, +5 if mortally wounded; cumulative to 20)",
+   "description": "Act as if not incapacitated, wounded, or mortally wounded. Using this power imposes no multi-action penalty, though the character still suffers die penalties for being harmed.",
+   "page": 187
+  },
+  {
+   "name": "Enhance Other",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Reform",
+   "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
+   "description": "The target gains the psionic character's Reform die code as a bonus to their next die code rolled. May not be used on oneself.",
+   "page": 187
+  },
+  {
+   "name": "Healing",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Reform",
+   "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
+   "description": "Immediately make a Medicine roll applied to oneself, adding the Reform die code as a bonus to the Medicine die code to remove harm.",
+   "page": 188
+  },
+  {
+   "name": "Purge Poison",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Reform",
+   "difficulty": "5 (gamemaster may add difficulty based on the strength of the poison)",
+   "description": "Immediately remove and purge all poisons and toxins from one's own system.",
+   "page": 188
+  },
+  {
+   "name": "Suggestion",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Reform",
+   "difficulty": "Opposed by the target's Willpower (or Knowledge if the Charm module is not used)",
+   "description": "Impart a brief, easy-to-understand suggestion (a glance, a distraction). The target will not risk itself, and an implausible suggestion is quickly recognized as false.",
+   "page": 188
+  },
+  {
+   "name": "Heal Other",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis + Perceive",
+   "difficulty": "5 (+5 per use in the last 24 hours, cumulative)",
+   "description": "Make a Medicine roll applied to a target, adding the Reform die code as a bonus to the Medicine die code to remove harm. May not be used on oneself.",
+   "page": 188
+  },
+  {
+   "name": "Purge Poison Other",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis + Perceive",
+   "difficulty": "5 (gamemaster may add difficulty based on the strength of the poison)",
+   "description": "Immediately remove and purge all poisons and toxins from a target's system. May not be used on oneself.",
+   "page": 188
+  },
+  {
+   "name": "Place Other in Trance",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis + Perceive",
+   "difficulty": "20",
+   "description": "Force a target into a Trance (as the Trance power, with all its rules). The awakening trigger is chosen by the target, not the caster, so an enemy cannot be trapped with no way to wake.",
+   "page": 188
+  },
+  {
+   "name": "Cryokinesis",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis + Reform",
+   "difficulty": "15",
+   "description": "Deal a Damage roll equal to the Kinesis+Reform die code to a visible target as a frozen burst of cold; cold defenses and special abilities apply. Can be used to break items or equipment instead of dealing damage.",
+   "page": 189
+  },
+  {
+   "name": "Electrokinesis",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis + Reform",
+   "difficulty": "15",
+   "description": "Deal a Damage roll equal to the Kinesis+Reform die code to a visible target as a supercharged burst of electricity; electrical defenses apply. Can be used to break items or equipment instead.",
+   "page": 189
+  },
+  {
+   "name": "Pyrokinesis",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Kinesis + Reform",
+   "difficulty": "15",
+   "description": "Deal a Damage roll equal to the Kinesis+Reform die code to a visible target as a super-heated burst of fire; heat defenses apply. Can be used to break items or equipment instead.",
+   "page": 189
+  },
+  {
+   "name": "Precognition",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Perceive + Reform",
+   "difficulty": "15 (increased by distance to the location and distance in the timeline)",
+   "description": "View and sense a chosen locale as though present at some future point. The future is not locked, so events almost certainly will not unfold exactly as seen, but the insight can help build a plan. Can be maintained without rolling while taking no other actions.",
+   "page": 189
+  },
+  {
+   "name": "Postcognition",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Perceive + Reform",
+   "difficulty": "15 (increased by distance to the location and distance in the timeline)",
+   "description": "View and sense a chosen locale as though present at some past point. Can be maintained without rolling while taking no other actions or suffering damage.",
+   "page": 189
+  },
+  {
+   "name": "Projected Self",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Perceive + Reform",
+   "difficulty": "5 (+5 if the character is not within sight of the target, +5 if unable to communicate, +5 if the target is unwilling or resistant; cumulative)",
+   "description": "Reach out and appear as a wavering ghostly figure near a target to communicate with it; normal communication hurdles (language, etc.) still apply. The projecting character receives no sensory input beyond what is needed to communicate.",
+   "page": 190
+  },
+  {
+   "name": "Farsight",
+   "kind": "psionic",
+   "genre": "scifi",
+   "skill": "Perceive + Reform",
+   "difficulty": "5 (increased by distance)",
+   "description": "View and sense a chosen locale as though present there. Can be maintained without rolling while taking no other actions or suffering damage.",
+   "page": 190
+  }
+ ],
+ "creatures": [
+  {
+   "name": "Hacker",
+   "genre": "scifi",
+   "kind": "Humanoid",
+   "attributes": {
+    "Agility": 6,
+    "Brawn": 6,
+    "Knowledge": 12,
+    "Perception": 12,
+    "Technical": 12
+   },
+   "skills": [
+    "Agility skills 2D",
+    "Brawn skills 2D",
+    "Computers 3D"
+   ],
+   "special": [
+    "Dodge 20",
+    "Parry 10",
+    "Represents a computer technician rather than a combat hacker; the gamemaster may add a weapon or cyberware, which this profile does not include."
+   ],
+   "description": "A skilled computer technician who breaks into networks and systems.",
+   "page": 199
+  },
+  {
+   "name": "Killer Robot",
+   "genre": "scifi",
+   "kind": "Robot",
+   "attributes": {
+    "Agility": 12,
+    "Brawn": 9,
+    "Knowledge": 6,
+    "Perception": 9
+   },
+   "skills": [
+    "Shooting 2D",
+    "Melee 2D",
+    "Intimidation 3D",
+    "Stamina 3D",
+    "Languages 1D",
+    "Driving (or Piloting) 1D",
+    "Survival 1D"
+   ],
+   "special": [
+    "Dodge 15",
+    "Parry 20",
+    "Damage: choose one sci-fi melee weapon and one sci-fi ranged weapon",
+    "Robot: a digital and mechanical marvel, not a living being; does not heal normally and must be repaired (Use/Repair Technical due to complexity)",
+    "Firewall 10"
+   ],
+   "description": "A lethal autonomous combat machine.",
+   "page": 199
+  }
+ ],
+ "templates": [
+  {
+   "name": "Engineer",
+   "genre": "scifi",
+   "archetype": "Technician",
+   "attributes": {
+    "Agility": 9,
+    "Brawn": 6,
+    "Charm": 6,
+    "Knowledge": 12,
+    "Mechanical": 15,
+    "Perception": 9,
+    "Technical": 6
+   },
+   "description": "A starship and systems specialist who keeps everything running. Dodge 15, Parry 15. Recommended skills: Communications, Navigation, Piloting, Use/Repair Mechanical.",
+   "page": 200
+  },
+  {
+   "name": "Gunslinger",
+   "genre": "scifi",
+   "archetype": "Fighter",
+   "attributes": {
+    "Agility": 15,
+    "Brawn": 12,
+    "Charm": 9,
+    "Knowledge": 6,
+    "Mechanical": 6,
+    "Perception": 9,
+    "Technical": 6
+   },
+   "description": "A quick-drawing frontier shooter. Dodge 15, Parry 25. Recommended skills: Intimidation, Shooting, Sleight of Hand, Stealth.",
+   "page": 201
+  },
+  {
+   "name": "Hacker",
+   "genre": "scifi",
+   "archetype": "Technician",
+   "attributes": {
+    "Agility": 9,
+    "Brawn": 6,
+    "Charm": 6,
+    "Knowledge": 15,
+    "Mechanical": 3,
+    "Perception": 9,
+    "Technical": 15
+   },
+   "description": "A cybernetic infiltrator who breaks into systems. Dodge 15, Parry 15. Recommended skills: Computers, Sciences, Use/Repair Technical, Upgrade.",
+   "page": 201
+  },
+  {
+   "name": "Medic",
+   "genre": "scifi",
+   "archetype": "Support",
+   "attributes": {
+    "Agility": 6,
+    "Brawn": 6,
+    "Charm": 12,
+    "Knowledge": 15,
+    "Mechanical": 9,
+    "Perception": 6,
+    "Technical": 9
+   },
+   "description": "A field healer and doctor. Dodge 10, Parry 10. Recommended skills: Medicine, Sciences, Use/Repair Mechanical, Use/Repair Technical.",
+   "page": 202
+  }
+ ],
+ "modules": [
+  {
+   "name": "Starships & Starship Combat",
+   "category": "Science Fiction Module",
+   "genre": "scifi",
+   "summary": "Starships have four die-code attributes (Navicomp, Maneuverability, Engines, Hull) plus a minimum Crew, weapons, and shields. Interstellar travel needs a Difficulty 15 Navigation roll then a Difficulty 15 Computers roll (rushable to 25), with mishaps on a Wild Die 1. Combat uses normal rules: Gunnery to attack, Hull x5 for Defense, opposed Engines rolls for range, Piloting+Maneuverability to evade, and Hull+Shields to resist damage; ships must be repaired rather than healing.",
+   "page": 176
+  },
+  {
+   "name": "Driving & Vehicles",
+   "category": "Science Fiction Module",
+   "genre": "scifi",
+   "summary": "Ground and air vehicles use two die-code attributes (Maneuverability and Hull) plus a Passenger capacity, weapons, and armor. The Driving skill handles movement and Repair Mechanical maintains them. Combat mirrors starship combat: Gunnery to attack, Hull x5 for Defense, Driving+Maneuverability to evade, and Hull+Armor to resist damage.",
+   "page": 181
+  },
+  {
+   "name": "Psionics",
+   "category": "Science Fiction Module",
+   "genre": "scifi",
+   "summary": "Three stand-alone psionic skills with no governing attribute (Kinesis, Perceive, Reform) must each be trained separately, gaining only the first die through study. Powers are grouped by skill or combined-skill die code; using a power is an action against a Difficulty, and a character knows every power for the skills they possess.",
+   "page": 184
+  },
+  {
+   "name": "Cyberpunk",
+   "category": "Science Fiction Module",
+   "genre": "scifi",
+   "summary": "A cinematic hacking system where the Computers skill is rolled against a target's Firewall (a Difficulty, or Technical x5 for characters); failing by 5+ can draw consequences from an enemy hacker. Cyberware is built on the Perks, Flaws, and Talents module: a Talent declared cybernetic, limited to a number equal to Knowledge, installed via a Medicine roll (Difficulty 10, +5 per existing implant), and hackable at Rank x5 Firewall.",
+   "page": 191
+  },
+  {
+   "name": "Scale",
+   "category": "Science Fiction Module",
+   "genre": "scifi",
+   "summary": "Size differences are ranked 0-6 (Human to super space station). A larger participant adds its Scale bonus (e.g. +1D to +6D) to damage and to Brawn rolls resisting damage; a smaller participant adds its Scale bonus to Dodge defense and to attack die codes against a larger target. Scale rank is a communication tool with no inherent rules effect on its own.",
+   "page": 196
+  }
+ ]
 }
