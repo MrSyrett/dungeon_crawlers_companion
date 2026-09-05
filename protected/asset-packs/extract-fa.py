@@ -32,8 +32,10 @@ GLOBS   = sys.argv[3:] or ['*.dungeondraft_pack']
 PX_PER_CELL = 256          # FA v3 draws every object at 256 px per grid cell (verified)
 OBJ_PER_CELL = 96          # …downsampled to match the bundled 2MT objects
 MAX_DIM     = 2048
-THUMB       = 96
-ATLAS       = 2048
+# Big atlases keep the FILE COUNT low so the bundle is a handful of sheets to commit
+# (a whole pack is ~5–10 sheets, not ~70). Thumbnails reuse the object sheet — the
+# 96 px sprites are already palette-sized — so there are no separate thumb files.
+ATLAS       = 4096
 
 # Marketing renders / previews FA sometimes ships in the objects folder.
 SKIP_OBJ = re.compile(r'(_preview|_demo|/preview|/demo)\b', re.I)
@@ -133,10 +135,9 @@ for pth in paths:
         if wc < 0.15 or hc < 0.15: continue
         sc = min(1.0, OBJ_PER_CELL*wc/im.width, MAX_DIM/im.width, MAX_DIM/im.height)
         full = im.resize((max(1, round(im.width*sc)), max(1, round(im.height*sc))), Image.LANCZOS)
-        th = im.copy(); th.thumbnail((THUMB, THUMB), Image.LANCZOS)
         rec = {'id': f'fa:{pid}-obj-{slug(nice_name(fn))}', 'name': nice_name(fn),
                'kind': 'object', 'w': round(wc, 3), 'h': round(hc, 3),
-               'img': full, 'th': th, '_pid': pid}
+               'img': full, '_pid': pid}
         if is_colorable(path): rec['colorable'] = True
         allobjs.append(rec); count += 1
     packs.append({'id': pid, 'name': meta['name'], 'credit': 'Forgotten Adventures',
@@ -165,12 +166,13 @@ for p in packs:
     for _f in os.listdir(OUT):
         if _f.startswith(pre + '-obj-') or _f.startswith(pre + '-th-'):
             os.remove(os.path.join(OUT, _f))
-    full  = write_atlas(objs, pre + '-obj', 'img', ATLAS, 86)
-    thumb = write_atlas(objs, pre + '-th', 'th', 1024, 82)
+    full = write_atlas(objs, pre + '-obj', 'img', ATLAS, 86)
     texs = []
-    for o, f, t in zip(objs, full, thumb):
+    for o, f in zip(objs, full):
+        # thumb reuses the object atlas rect — the sprites are already 96px, so no
+        # separate thumb sheets (halves the file count, same sheet the render uses).
         e = {'id': o['id'], 'name': o['name'], 'kind': 'object', 'w': o['w'], 'h': o['h'],
-             'atlas': f, 'thumb': t}
+             'atlas': f, 'thumb': f}
         if o.get('colorable'): e['colorable'] = True
         texs.append(e)
     p['textures'] = sorted(texs, key=lambda e: e['name'])
