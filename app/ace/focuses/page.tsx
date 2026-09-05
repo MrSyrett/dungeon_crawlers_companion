@@ -1,14 +1,18 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { ACE_FOCUSES } from "@/lib/data/ace-focuses";
-import type { AceFocus, AceStat } from "@/lib/data/ace-types";
+import type { AceFocus, AceStat, AceSettingKey } from "@/lib/data/ace-types";
+import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import HomebrewEditor from "@/components/HomebrewEditor";
 import {
   AceHeader, SearchForm, ChipRow, CountLine, EmptyState, BOOKS, settingName, one,
-  cardCls, bookBadge, type Query, type RawQuery,
+  cardCls, bookBadge, hbBadge, type Query, type RawQuery,
 } from "@/components/AceRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/ace/focuses";
+
+type Row = AceFocus & { homebrew?: boolean };
 
 const STATS: { key: AceStat; label: string; blurb: string }[] = [
   { key: "Smarts", label: "Smarts", blurb: "Clever, perceptive, knowledgeable — crack a cypher, remember a fact, spot a trap." },
@@ -17,8 +21,15 @@ const STATS: { key: AceStat; label: string; blurb: string }[] = [
   { key: "Brawn", label: "Brawn", blurb: "Strong and tough — hit things, lift things, take a punch. Brawn is your Health." },
   { key: "Power", label: "Power", blurb: "Magic, psionics, the Force — only if your Role says so. Every use costs a Karma point." },
 ];
+const STAT_KEYS = STATS.map((s) => s.key) as string[];
 
-function matches(f: AceFocus, q: string, book: string, stat: string): boolean {
+function hbToFocus(data: Record<string, unknown>, name: string): Row {
+  const s = (k: string) => (typeof data[k] === "string" ? (data[k] as string) : "");
+  const stat = (STAT_KEYS.includes(s("stat")) ? s("stat") : "Smarts") as AceStat;
+  return { name, stat, setting: (s("setting") || "core") as AceSettingKey, note: s("note") || undefined, homebrew: true };
+}
+
+function matches(f: Row, q: string, book: string, stat: string): boolean {
   if (book && f.setting !== book) return false;
   if (stat && f.stat !== stat) return false;
   if (!q) return true;
@@ -29,24 +40,37 @@ export default async function AceFocusesPage({ searchParams }: { searchParams: P
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
+  const [hbVisible, hbOwn, campaigns] = await Promise.all([
+    visibleHomebrew(user.id, { type: "ace-focus" }),
+    ownHomebrew(user.id, "ace-focus"),
+    userCampaigns(user.id),
+  ]);
+  const hbRows: Row[] = hbVisible.map((h) => hbToFocus(h.data as Record<string, unknown>, h.name));
+  const ALL: Row[] = [...hbRows, ...ACE_FOCUSES.map((f) => ({ ...f }))];
+
   const raw = await searchParams;
   const q = one(raw.q).trim();
   const book = BOOKS.some((b) => b.key === one(raw.book)) ? one(raw.book) : "";
   const stat = STATS.some((s) => s.key === one(raw.stat)) ? one(raw.stat) : "";
   const needle = q.toLowerCase();
   const current: Query = { q, book, stat };
-  const results = ACE_FOCUSES.filter((f) => matches(f, needle, book, stat));
+  const results = ALL.filter((f) => matches(f, needle, book, stat));
   const filtered = Boolean(needle || book || stat);
   const groups = STATS.filter((s) => results.some((f) => f.stat === s.key));
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <AceHeader title="Stats & Focuses" subtitle={`${ACE_FOCUSES.length} focuses across five stats`} />
+      <AceHeader title="Stats & Focuses" subtitle={`${ACE_FOCUSES.length} focuses${hbRows.length ? ` + ${hbRows.length} homebrew` : ""} across five stats`} />
       <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">
         Roll a number of six-sided dice equal to your Stat. For each Stat you have one Focus — an area of
         expertise — and when it applies you roll <strong className="text-[var(--text)]">two extra dice</strong>.
-        Sixes explode. Want a Focus that isn&rsquo;t listed? Ask the Director; they might say yes.
+        Sixes explode. Want a Focus that isn&rsquo;t listed? Make it below.
       </p>
+
+      <div className="mb-6">
+        <HomebrewEditor kind="ace-focus" campaigns={campaigns} initial={hbOwn} />
+      </div>
+
       <SearchForm base={BASE} q={q} placeholder="Search focuses…" hidden={{ book, stat }} />
       <ChipRow label="Stat" base={BASE} current={current} param="stat" options={STATS.map((s) => ({ key: s.key, label: s.label }))} active={stat} />
       <ChipRow label="Book" base={BASE} current={current} param="book" options={BOOKS} active={book} />
@@ -63,13 +87,13 @@ export default async function AceFocusesPage({ searchParams }: { searchParams: P
               <ul className="mt-3 flex flex-wrap gap-2">
                 {results.filter((f) => f.stat === s.key).map((f) => (
                   <li
-                    key={`${f.setting}-${f.name}`}
+                    key={`${f.homebrew ? "hb" : "bk"}-${f.setting}-${f.name}`}
                     className="rounded border border-[var(--border)] bg-[var(--panel-2)] px-3 py-1.5 text-[13px] text-[var(--text)]"
                     title={f.note ?? ""}
                   >
                     {f.name}
                     {f.note ? <span className="ml-2 text-[11px] text-[var(--muted)]">{f.note}</span> : null}
-                    {f.setting !== "core" ? <span className={`ml-2 ${bookBadge}`}>{settingName(f.setting)}</span> : null}
+                    {f.homebrew ? <span className={`ml-2 ${hbBadge}`}>HB</span> : f.setting !== "core" ? <span className={`ml-2 ${bookBadge}`}>{settingName(f.setting)}</span> : null}
                   </li>
                 ))}
               </ul>

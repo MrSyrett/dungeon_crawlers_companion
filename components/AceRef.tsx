@@ -5,7 +5,8 @@ import type { AceSettingKey } from "@/lib/data/ace-types";
 // Shared bits for the ACE! reference pages (app/ace/*). Same shell as the DCC
 // pages — header, search form, filter chips, count line, empty state — with
 // the ACE! blue accent, and a "Book" chip row that filters by which omnibus
-// setting a row comes from. No homebrew yet (that's a later phase).
+// setting a row comes from. Homebrew rows merge into each list with the
+// hbBadge; the on-page HomebrewEditor lives on each reference page.
 
 export type Query = Record<string, string | undefined>;
 export type RawQuery = Record<string, string | string[] | undefined>;
@@ -21,6 +22,8 @@ export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#8
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const bookBadge =
   "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
+export const hbBadge =
+  "rounded border border-[var(--ace)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#8ad4ff]";
 
 const SETTING_NAME: Record<string, string> = Object.fromEntries(ACE_SETTINGS.map((s) => [s.key, s.name]));
 SETTING_NAME.core = "Core rules";
