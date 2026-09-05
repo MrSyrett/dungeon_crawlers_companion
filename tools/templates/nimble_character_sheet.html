@@ -201,7 +201,7 @@ details.feats summary::-webkit-details-marker{display:none;}
 .mana-hdr input{width:42px;height:22px;border:1px solid rgba(255,255,255,.3);border-radius:3px;background:rgba(255,255,255,.12);font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;text-align:center;color:#fff;outline:none;}
 .mana-hdr .msep{color:rgba(255,255,255,.55);}
 .mana-hdr small{font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.02em;text-transform:none;}
-/* Browse / shop modal lists (Spellbook, Item Store, Weapon & Ability pickers) */
+/* Browse / shop modal lists (Spellbook, Item Store & Ability pickers) */
 .brow-controls{padding:10px 16px 8px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;border-bottom:1px solid #2a2f2b;}
 .brow-filters{display:flex;gap:6px;flex-wrap:wrap;}
 .brow-sel{flex:1;min-width:120px;cursor:pointer;}
@@ -345,9 +345,9 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="hdr-fields">
       <div class="hdr-field wide" style="grid-column:span 4;"><label>Name</label><input type="text" id="f-name" placeholder="Hero name"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Ancestry</label><input type="text" id="f-ancestry" list="dl-ancestries" placeholder="Human" oninput="recalc()"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Class</label><select id="f-class" onchange="onClassChange()"><option value="">—</option></select></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Class</label><input type="text" id="f-class" placeholder="Class" onchange="onClassChange()"></div>
       <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Level</label><input type="number" class="num" id="f-level" min="1" max="20" value="1" oninput="recalc()"></div>
-      <div class="hdr-field" style="grid-column:span 4;"><label>Subclass</label><select id="f-subclass" onchange="recalc()"><option value="">—</option></select></div>
+      <div class="hdr-field" style="grid-column:span 4;"><label>Subclass</label><input type="text" id="f-subclass" placeholder="Subclass" onchange="recalc()"></div>
       <div class="hdr-field" style="grid-column:span 4;"><label>Background</label><input type="text" id="f-background" list="dl-backgrounds" placeholder="Wild One" oninput="recalc()"></div>
       <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Motivation</label><input type="text" id="f-motivation" list="dl-motivations" placeholder="optional"></div>
     </div>
@@ -397,7 +397,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><button class="hdr-btn" onclick="openWeaponPicker()">⚔ Weapons</button></span></div>
+      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><button class="hdr-btn" onclick="addCustomAttack()">＋ Add attack</button></span></div>
       <table class="tbl">
         <thead><tr><th style="width:32%;">Weapon / spell</th><th style="width:26%;">Damage</th><th>Properties</th><th style="width:96px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
@@ -474,15 +474,6 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Nimble — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 
-<!-- WEAPON PICKER (Attacks) -->
-<div id="weapon-overlay" class="ov" onclick="if(event.target===this)closeWeaponPicker()">
-  <div class="modal" style="max-width:560px;">
-    <div class="modal-hd"><div class="ttl">⚔ Weapons</div><button class="x" onclick="closeWeaponPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="weapon-search" class="m-input" placeholder="Search weapons…" oninput="renderWeaponPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addCustomAttack()">＋ Add custom</button></div>
-    <div class="modal-bd brow-list" id="weapon-body"></div>
-  </div>
-</div>
-
 <!-- SPELLBOOK -->
 <div id="spellbook-overlay" class="ov" onclick="if(event.target===this)closeSpellbook()">
   <div class="modal" style="max-width:600px;">
@@ -552,7 +543,6 @@ function buildStats() {
     `<div class="save-toggle"><button id="adv-${s}" onclick="toggleSave('${s}','adv')" title="Advantaged save">▲</button><button id="dis-${s}" onclick="toggleSave('${s}','dis')" title="Disadvantaged save">▼</button></div></div>`).join('');
   $('skills-body').innerHTML = SKILLS.map(([n, s]) =>
     `<tr><td class="sk-name" onclick="rollSkill('${n}')">${n}<small>${s}</small></td><td style="width:44px;"><input type="number" id="skp-${n}" value="0" min="0" oninput="recalc()" title="Extra skill points"></td><td class="sk-total" id="skt-${n}">+0</td></tr>`).join('');
-  const csel = $('f-class'); csel.innerHTML = '<option value="">—</option>' + D.classes().map(c => '<option value="' + esc(c.name) + '">' + esc(c.name) + '</option>').join('');
 }
 function toggleSave(s, kind) {
   if(kind === 'adv') { saveAdv = saveAdv === s ? '' : s; if(saveDis === s) saveDis = ''; }
@@ -560,9 +550,11 @@ function toggleSave(s, kind) {
   recalc(); scheduleAutosave();
 }
 function fillSubclasses() {
-  const c = cls(); const sel = $('f-subclass'); const cur = sel.value;
-  sel.innerHTML = '<option value="">—</option>' + (c ? c.subclasses.map(s => '<option value="' + esc(s.name) + '">' + esc(s.name) + '</option>').join('') : '');
-  if([...sel.options].some(o => o.value === cur)) sel.value = cur;
+  // Subclass is a free-text field. If the class is a known one whose subclass
+  // list doesn't include the current value, clear it (switching class drops an
+  // incompatible subclass); a custom/unknown class leaves any typed value alone.
+  const c = cls(); const inp = $('f-subclass');
+  if(c && inp.value && !c.subclasses.some(s => s.name === inp.value)) inp.value = '';
 }
 function onClassChange() {
   const c = cls();
@@ -775,7 +767,6 @@ function addAttackRow(a) {
   $('attacks-body').appendChild(tr); refreshAttackRows();
 }
 function refreshAttackRows() {}
-function addAttackFromItem(name) { const it = findItem(name); if(it) addAttackRow({ name: it.name, damage: it.damage || '', props: it.properties || '' }); scheduleAutosave(); }
 function addSpellRow(s) {
   s = s || { name:'', tier:0 };
   const sp = D.spells().find(x => norm(x.name) === norm(s.name));
@@ -882,20 +873,6 @@ function setTab(name) {
 function setDefaultTab() { setTab(_tab || (cls() && cls().spellcasting ? 'spells' : 'features')); }
 
 // ═══ PICKERS / SHOPS (modal browse lists replacing the old add-dropdowns) ══
-// — Weapon picker (Attacks) ————————————————————————————————————————————————
-function openWeaponPicker() { $('weapon-search').value = ''; $('weapon-overlay').classList.add('open'); renderWeaponPicker(); $('weapon-search').focus(); }
-function closeWeaponPicker() { $('weapon-overlay').classList.remove('open'); }
-function renderWeaponPicker() {
-  const q = norm($('weapon-search').value);
-  const list = D.items().filter(i => i.damage && (!q || norm(i.name).includes(q) || norm(i.category || '').includes(q) || norm(i.properties || '').includes(q)))
-    .sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
-  const box = $('weapon-body');
-  if(!list.length) { box.innerHTML = '<p class="brow-empty">No weapons match.</p>'; return; }
-  box.innerHTML = list.map(i =>
-    '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(i.name) + '<span class="brow-cost">' + esc(i.damage) + '</span></div>' +
-    '<div class="brow-meta">' + esc(i.category || 'Weapon') + (i.properties ? ' · ' + esc(i.properties) : '') + (i.cost ? ' · ' + esc(i.cost) : '') + '</div></div>' +
-    '<button class="brow-add" data-add-weapon="' + esc(i.name) + '">+ Add</button></div>').join('');
-}
 // — Spellbook (Spells tab) —————————————————————————————————————————————————
 function openSpellbook() { $('spellbook-overlay').classList.add('open'); renderSpellbook(); $('spellbook-search').focus(); }
 function closeSpellbook() { $('spellbook-overlay').classList.remove('open'); }
@@ -982,9 +959,8 @@ function renderAbilityPicker() {
   box.innerHTML = html || '<p class="brow-empty">No abilities match.</p>';
 }
 function _flashBrowBtn(btn, txt) { const o = btn.textContent, d = btn.disabled; btn.textContent = txt; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = d; }, 650); }
-// Wire the four browse lists once (event delegation).
+// Wire the browse lists once (event delegation).
 (function wirePickers() {
-  const wb = $('weapon-body'); if(wb) wb.addEventListener('click', e => { const b = e.target.closest('[data-add-weapon]'); if(b) { addAttackFromItem(b.dataset.addWeapon); _flashBrowBtn(b, '✓ Added'); } });
   const sb = $('spellbook-body'); if(sb) sb.addEventListener('click', e => {
     const add = e.target.closest('[data-add-spell]'); if(add) { addSpellRow({ name: add.dataset.addSpell, tier: 0 }); scheduleAutosave(); renderSpellbook(); return; }
     const rem = e.target.closest('[data-remove-spell]'); if(rem) { removeSpellByName(rem.dataset.removeSpell); renderSpellbook(); }
@@ -996,7 +972,7 @@ function _flashBrowBtn(btn, txt) { const o = btn.textContent, d = btn.disabled; 
   const ab = $('ability-body'); if(ab) ab.addEventListener('click', e => { const b = e.target.closest('[data-add-ability]'); if(b) { addPick(b.dataset.addAbility); renderAbilityPicker(); } });
 })();
 // "Add custom" from a picker: drop in a blank row to fill by hand.
-function addCustomAttack() { addAttackRow(); closeWeaponPicker(); scheduleAutosave(); }
+function addCustomAttack() { addAttackRow(); scheduleAutosave(); }
 function addCustomSpell() { addSpellRow(); closeSpellbook(); scheduleAutosave(); }
 function addCustomItem() { addInvRow(); closeStore(); scheduleAutosave(); }
 

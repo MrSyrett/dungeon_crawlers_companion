@@ -337,7 +337,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="hdr-field" style="grid-column:span 3;"><label>Book</label><select id="f-book" onchange="onBookChange()"><option value="bikes">Kids on Bikes</option><option value="brooms">Kids on Brooms</option><option value="capes">Kids in Capes</option></select></div>
       <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
       <div class="hdr-field" style="grid-column:span 5;"><label>Trope</label><input type="text" id="f-trope" placeholder="Brilliant Mathlete"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label id="age-label">Age</label><select id="f-age" onchange="recalc()"></select></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label id="age-label">Age</label><input type="text" id="f-age" placeholder="Age group" oninput="recalc()"></div>
       <div class="hdr-field lastcol" style="grid-column:span 4;"><label>Player</label><input type="text" id="f-player" placeholder="optional"></div>
     </div>
   </div>
@@ -407,10 +407,9 @@ select option{background:var(--input-bg);color:var(--ink);}
           <thead><tr><th style="width:34%;">Strength</th><th style="width:70px;">Cost</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="strengths-body"></tbody>
         </table>
-        <div class="add-row"><button class="small-btn ghost" onclick="addStrengthRow()">+ Blank strength</button></div>
         <div class="blk">
           <div class="blk-grid">
-            <div class="fld"><label>Flaw</label><input type="text" id="f-flaw" list="dl-flaws" placeholder="Clumsy"></div>
+            <div class="fld"><label>Flaw</label><input type="text" id="f-flaw" placeholder="Clumsy"></div>
             <div class="fld bikes-only book-only"><label>Knack</label><input type="text" id="f-knack" placeholder="Take a 10 instead of rolling when it applies"></div>
             <div class="fld capes-only book-only"><label>Cape (team role)</label><input type="text" id="f-cape" list="dl-capes" placeholder="Brawler" oninput="recalc()"><div class="hint" id="cape-hint"></div></div>
             <div class="fld capes-only book-only"><label>Power</label><input type="text" id="f-power-cat" list="dl-power-cat" placeholder="Energy Control — describe it"></div>
@@ -442,8 +441,8 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="blk">
           <div class="book-only bikes-only" style="margin-bottom:8px;">
             <div class="blk-grid">
-              <div class="fld"><label>Bike colour</label><input type="text" id="f-bike-color" list="dl-bike-color" placeholder="Purple" oninput="recalc()"><div class="hint" id="bike-color-hint"></div></div>
-              <div class="fld"><label>Bike accessory</label><input type="text" id="f-bike-acc" list="dl-bike-acc" placeholder="Basket" oninput="recalc()"><div class="hint" id="bike-acc-hint"></div></div>
+              <div class="fld"><label>Bike colour</label><input type="text" id="f-bike-color" placeholder="Purple" oninput="recalc()"><div class="hint" id="bike-color-hint"></div></div>
+              <div class="fld"><label>Bike accessory</label><input type="text" id="f-bike-acc" placeholder="Basket" oninput="recalc()"><div class="hint" id="bike-acc-hint"></div></div>
             </div>
           </div>
           <div class="fld book-only brooms-only" style="margin-bottom:8px;"><label>Where your broom / wand came from</label><textarea id="f-ride-story" placeholder="Every caster's broom is special to them…" style="min-height:60px;"></textarea></div>
@@ -504,9 +503,9 @@ select option{background:var(--input-bg);color:var(--ink);}
 </div>
 </div>
 
-<datalist id="dl-tropes"></datalist><datalist id="dl-strengths"></datalist><datalist id="dl-flaws"></datalist>
+<datalist id="dl-tropes"></datalist>
 <datalist id="dl-wand-wood"></datalist><datalist id="dl-wand-core"></datalist><datalist id="dl-broom"></datalist><datalist id="dl-class"></datalist>
-<datalist id="dl-capes"></datalist><datalist id="dl-power-cat"></datalist><datalist id="dl-bike-color"></datalist><datalist id="dl-bike-acc"></datalist><datalist id="dl-skills"></datalist>
+<datalist id="dl-capes"></datalist><datalist id="dl-power-cat"></datalist><datalist id="dl-skills"></datalist>
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()">
   <div class="modal wide"><div class="modal-hd"><div class="ttl" id="rules-title">Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div>
@@ -631,12 +630,7 @@ function onBookChange() {
   setTab(_tab);   // re-evaluate: the Skills tab exists only for Capes
   scheduleAutosave();
 }
-function fillAgeOptions() {
-  const sel = $('f-age'); const cur = sel.value;
-  const info = bookInfo();
-  sel.innerHTML = '<option value="">—</option>' + (info ? info.ageGroups.map(a => '<option value="' + esc(a.name) + '">' + esc(a.name) + (a.range ? ' (' + esc(a.range) + ')' : '') + '</option>').join('') : '');
-  if([...sel.options].some(o => o.value === cur)) sel.value = cur;
-}
+function fillAgeOptions() { /* Age is a free-text field now — nothing to populate. Kept as a no-op so existing call sites (recalc/loadSheet/init) stay valid. */ }
 
 // ═══ ADVERSITY TOKENS / STRESS ════════════════════════════════════════════
 function renderAT() {
@@ -749,7 +743,7 @@ function rollPower(id) {
 function addStrengthRow(s) {
   s = s || { name:'', note:'' };
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input type="text" class="st-name" list="dl-strengths" placeholder="Strength" value="${esc(s.name)}" oninput="refreshStrengthRows()"></td><td class="cost"></td><td><input type="text" class="st-note" placeholder="Skilled at… / notes" value="${esc(s.note)}"><div class="desc"></div></td><td><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button></td>`;
+  tr.innerHTML = `<td><input type="text" class="st-name" placeholder="Strength" value="${esc(s.name)}" oninput="refreshStrengthRows()"></td><td class="cost"></td><td><input type="text" class="st-note" placeholder="Skilled at… / notes" value="${esc(s.note)}"><div class="desc"></div></td><td><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button></td>`;
   $('strengths-body').appendChild(tr);
   refreshStrengthRows();
 }
@@ -845,11 +839,8 @@ function fillDatalists() {
   const fill = (id, names) => { $(id).innerHTML = [...new Set(names.filter(Boolean))].sort().map(n => '<option value="' + esc(n) + '">').join(''); };
   const b = book();
   fill('dl-tropes', D.tropes().filter(t => t.book === b).map(t => t.name));
-  fill('dl-strengths', D.strengths().filter(s => s.book === b).map(s => s.name));
-  fill('dl-flaws', D.flaws().filter(f => f.book === b).map(f => f.name));
   fill('dl-wand-wood', itemsOf('wand-wood').map(i => i.name)); fill('dl-wand-core', itemsOf('wand-core').map(i => i.name)); fill('dl-broom', itemsOf('broom').map(i => i.name)); fill('dl-class', itemsOf('class').map(i => i.name));
   fill('dl-capes', D.capes().map(c => c.name)); fill('dl-power-cat', itemsOf('power-category').map(i => i.name));
-  fill('dl-bike-color', itemsOf('bike-color').map(i => i.name)); fill('dl-bike-acc', itemsOf('bike-accessory').map(i => i.name));
   fill('dl-skills', D.capes().flatMap(c => c.skills.map(s => s.name)));
 }
 

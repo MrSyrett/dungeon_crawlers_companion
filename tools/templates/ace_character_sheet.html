@@ -135,6 +135,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .derived-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;}
 .derived-lbl small{font-weight:600;font-size:9px;letter-spacing:.06em;color:var(--muted);text-transform:none;}
 .derived-big{font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;line-height:1.1;color:var(--ink);}
+#def-val{font-size:48px;line-height:1;font-weight:700;}
 .derived-formula{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--muted);letter-spacing:.04em;}
 .derived-formula input{width:36px;height:22px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:11px;text-align:center;color:var(--ink);outline:none;}
 .def-row{display:flex;align-items:center;gap:8px;}
@@ -408,7 +409,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><button class="hdr-btn" onclick="openWeaponPicker()">⚔ Weapons</button></span></div>
+      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><button class="hdr-btn" onclick="addCustomAttack()" title="Add a blank attack row">＋ Add Attack</button></span></div>
       <table class="attacks-table">
         <thead><tr><th style="width:38%;">Weapon</th><th>Kind</th><th style="width:60px;">Dmg</th><th>Dice</th><th style="width:74px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
@@ -507,11 +508,6 @@ select option{background:var(--input-bg);color:var(--ink);}
 <!-- datalists filled from the data layer -->
 <datalist id="dl-traits"></datalist>
 <datalist id="dl-roles"></datalist>
-<datalist id="dl-focus-smarts"></datalist>
-<datalist id="dl-focus-moves"></datalist>
-<datalist id="dl-focus-style"></datalist>
-<datalist id="dl-focus-brawn"></datalist>
-<datalist id="dl-focus-power"></datalist>
 
 <!-- RULES MODAL -->
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()">
@@ -526,15 +522,6 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="modal">
     <div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div>
     <div class="modal-bd" id="campaign-body"></div>
-  </div>
-</div>
-
-<!-- WEAPON PICKER (Attacks) -->
-<div id="weapon-overlay" class="ov" onclick="if(event.target===this)closeWeaponPicker()">
-  <div class="modal" style="max-width:560px;">
-    <div class="modal-hd"><div class="ttl">⚔ Weapons</div><button class="x" onclick="closeWeaponPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="weapon-search" class="m-input" placeholder="Search weapons…" oninput="renderWeaponPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addCustomAttack()">＋ Add custom</button></div>
-    <div class="modal-bd brow-list" id="weapon-body"></div>
   </div>
 </div>
 
@@ -612,7 +599,7 @@ function addFocusLine(id, value) {
   const s = STATS.find(x => x.id === id), cell = $('fc-' + id);
   const first = !cell.querySelector('.focus-line');
   const line = document.createElement('div'); line.className = 'focus-line';
-  line.innerHTML = `<input class="focus-input"${first ? ` id="fo-${id}"` : ''} list="dl-focus-${id}" placeholder="${first ? 'Focus' : 'Another Focus'}" oninput="recalc()">` +
+  line.innerHTML = `<input type="text" class="focus-input"${first ? ` id="fo-${id}"` : ''} placeholder="${first ? 'Focus' : 'Another Focus'}" oninput="recalc()">` +
     `<div class="focus-dice" ${first ? `id="fd-${id}" ` : ''}onclick="rollFocusLine('${id}', this)" title="Roll ${s.name} with this Focus">5</div>`;
   const inp = line.querySelector('.focus-input'); inp.value = value || '';
   // An emptied extra line goes away when you leave it.
@@ -867,19 +854,6 @@ function addAttackDeduped(a) {
     recalcAttacks();
   } else addAttackRow(a);
 }
-// Add an attack from the weapon list (same "database dropdown" pattern as gear).
-function addAttackFromData(name) {
-  const g = D.gear().find(x => x.name === name && x.damage != null); if(!g) return;
-  addAttackDeduped(attackFromGear(g));
-  scheduleAutosave();
-}
-// The Attacks dropdown = every gear item that deals damage, grouped by category.
-function fillAttackPick() {
-  const sel = $('atk-pick'); if(!sel) return;
-  const weapons = D.gear().filter(g => g.damage != null);
-  const cats = [...new Set(weapons.map(g => g.category))];
-  sel.innerHTML = '<option value="">Add from the weapon list…</option>' + cats.map(c => '<optgroup label="' + esc(c) + '">' + weapons.filter(g => g.category === c).map(g => '<option value="' + esc(g.name) + '">' + esc(g.name) + ' (' + g.damage + ' dmg' + (g.setting && g.setting !== 'core' ? ' · ' + esc(g.setting) : '') + ')</option>').join('') + '</optgroup>').join('');
-}
 function recalcAttacks() {
   document.querySelectorAll('#attacks-body tr').forEach(tr => {
     const kind = tr.querySelector('.atk-kind').value;
@@ -905,7 +879,7 @@ function rollAttack(btn) {
 function addGearRow(g) {
   g = g || { name:'', note:'' };
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td style="width:45%;"><input type="text" class="gear-name" list="dl-gear" placeholder="Item" value="${esc(g.name)}"></td>` +
+  tr.innerHTML = `<td style="width:45%;"><input type="text" class="gear-name" placeholder="Item" value="${esc(g.name)}"></td>` +
                  `<td><input type="text" class="gear-note" placeholder="notes" value="${esc(g.note)}"></td>` +
                  `<td style="width:24px;"><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button></td>`;
   $('gear-body').appendChild(tr);
@@ -942,22 +916,7 @@ function setTab(name) {
 function setDefaultTab() { setTab(_tab || 'role'); }
 
 // ═══ PICKERS / SHOPS ══════════════════════════════════════════════════════
-// — Weapon picker (Attacks): every gear item that deals damage ——————————————
-function openWeaponPicker() { $('weapon-search').value = ''; $('weapon-overlay').classList.add('open'); renderWeaponPicker(); $('weapon-search').focus(); }
-function closeWeaponPicker() { $('weapon-overlay').classList.remove('open'); }
-function renderWeaponPicker() {
-  const q = norm($('weapon-search').value);
-  const list = D.gear().filter(g => g.damage != null && (!q || norm(g.name).includes(q) || norm(g.category || '').includes(q)))
-    .sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
-  const box = $('weapon-body');
-  if(!list.length) { box.innerHTML = '<p class="brow-empty">No weapons match.</p>'; return; }
-  box.innerHTML = list.map(g =>
-    '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(g.name) + '<span class="brow-cost">' + esc(g.damage) + ' dmg</span></div>' +
-    '<div class="brow-meta">' + esc(g.category || 'Weapon') + (g.setting && g.setting !== 'core' ? ' · ' + esc(g.setting) : '') + '</div>' +
-    (g.description ? '<div class="brow-desc">' + esc(g.description) + '</div>' : '') + '</div>' +
-    '<button class="brow-add" data-add-weapon="' + esc(g.name) + '">+ Add</button></div>').join('');
-}
-// — Gear store (Gear) ——————————————————————————————————————————————————————
+// — Gear store (Gear): includes weapons; adding a weapon also adds an attack —
 function openGearPicker() { $('gearstore-search').value = ''; $('gearstore-overlay').classList.add('open'); renderGearPicker(); $('gearstore-search').focus(); }
 function closeGearPicker() { $('gearstore-overlay').classList.remove('open'); }
 function renderGearPicker() {
@@ -1012,13 +971,12 @@ function renderFocusPicker() {
 }
 // Wire the browse lists once (event delegation).
 (function wireAcePickers() {
-  const wb = $('weapon-body'); if(wb) wb.addEventListener('click', e => { const b = e.target.closest('[data-add-weapon]'); if(b) { addAttackFromData(b.dataset.addWeapon); _flashBrow(b); } });
   const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => { const b = e.target.closest('[data-add-gear]'); if(b) { addGearFromData(b.dataset.addGear); _flashBrow(b); } });
   const fb = $('focus-body'); if(fb) fb.addEventListener('click', e => { const b = e.target.closest('[data-add-focus]'); if(b) pickFocusValue(b.dataset.addFocus); });
 })();
 function _flashBrow(btn) { const o = btn.textContent, d = btn.disabled; btn.textContent = '✓ Added'; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = d; }, 600); }
 // "Add custom" from a picker: drop in a blank row to fill by hand.
-function addCustomAttack() { const tr = addAttackRow(); closeWeaponPicker(); const inp = tr && tr.querySelector('.atk-name'); if(inp) inp.focus(); scheduleAutosave(); }
+function addCustomAttack() { const tr = addAttackRow(); const inp = tr && tr.querySelector('.atk-name'); if(inp) inp.focus(); scheduleAutosave(); }
 function addCustomGear() { const tr = addGearRow(); closeGearPicker(); const inp = tr && tr.querySelector('.gear-name'); if(inp) inp.focus(); scheduleAutosave(); }
 
 // ═══ HINTS FROM THE DATA LAYER ════════════════════════════════════════════
@@ -1043,15 +1001,10 @@ function lookupAbility() {
 }
 function fillDatalists() {
   const fill = (id, names) => { const dl = $(id); if(!dl) return; dl.innerHTML = [...new Set(names)].sort().map(n => '<option value="' + esc(n) + '">').join(''); };
-  fill('dl-traits', D.traits().map(t => t.name)); fillGearPick(); fillAttackPick();
+  fill('dl-traits', D.traits().map(t => t.name)); fillGearPick();
   fill('dl-roles', D.roles().map(r => r.name));
   const gsCat = $('gearstore-cat');
   if(gsCat) { const cats = [...new Set(D.gear().map(g => g.category))].filter(Boolean).sort(); gsCat.innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join(''); }
-  STATS.forEach(s => fill('dl-focus-' + s.id, D.focuses().filter(f => norm(f.stat) === s.id).map(f => f.name)));
-  let dlw = $('dl-weapons'); if(!dlw) { dlw = document.createElement('datalist'); dlw.id = 'dl-weapons'; document.body.appendChild(dlw); }
-  dlw.innerHTML = [...new Set(D.gear().filter(g => g.damage).map(g => g.name))].sort().map(n => '<option value="' + esc(n) + '">').join('');
-  let dlg = $('dl-gear'); if(!dlg) { dlg = document.createElement('datalist'); dlg.id = 'dl-gear'; document.body.appendChild(dlg); }
-  dlg.innerHTML = [...new Set(D.gear().map(g => g.name))].sort().map(n => '<option value="' + esc(n) + '">').join('');
   const sel = $('f-setting');
   const cur = sel.value;
   sel.innerHTML = '<option value="core">Any — core rules</option>' + D.settings().map(s => '<option value="' + esc(s.key) + '">' + esc(s.name) + '</option>').join('');

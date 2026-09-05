@@ -180,7 +180,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .hdr-fields-2{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid var(--border);}
 
 /* MAIN BODY — unified two-column layout (left region + main column) */
-.main-body{display:grid;grid-template-columns:260px 1fr;border-bottom:2px solid var(--border);align-items:stretch;}
+.main-body{display:grid;grid-template-columns:300px 1fr;border-bottom:2px solid var(--border);align-items:stretch;}
 
 /* LEFT — stats + trackers */
 .left-col{grid-column:1;grid-row:1;border-right:2px solid var(--border);display:flex;flex-direction:column;}
@@ -213,12 +213,12 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .trk-add:hover{border-color:var(--ink);color:var(--ink);}
 /* Ability scores — single column, one row each (label · score · mod) */
 .stats-grid{display:flex;flex-direction:column;border-bottom:1px solid var(--rule);}
-.stat-cell{padding:6px 10px;border-bottom:1px solid var(--rule);display:flex;flex-direction:row;align-items:center;gap:8px;}
+.stat-cell{padding:7px 12px;border-bottom:1px solid var(--rule);display:flex;flex-direction:row;align-items:center;gap:10px;}
 .stat-cell:last-child{border-bottom:none;}
-.stat-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin-bottom:0;text-align:left;flex:1;min-width:0;}
-.stat-val-row{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-shrink:0;}
-.stat-val{width:34px;height:30px;border:1px solid var(--rule);border-radius:5px;background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
-.stat-mod{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:900;color:var(--red);width:44px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--box);border:2px solid var(--red);border-radius:8px;text-align:center;cursor:pointer;}
+.stat-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin-bottom:0;text-align:left;flex:1;min-width:0;}
+.stat-val-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;}
+.stat-val{width:48px;height:40px;border:1px solid var(--rule);border-radius:6px;background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:19px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
+.stat-mod{font-family:'Montserrat',sans-serif;font-size:22px;font-weight:900;color:var(--red);width:56px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--box);border:2px solid var(--red);border-radius:8px;text-align:center;cursor:pointer;}
 .stat-mod:hover{background:var(--red);color:white;}
 
 /* LEFT INFO */
@@ -286,7 +286,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .talents-area textarea{width:100%;flex:1;min-height:260px;border:none;background:transparent;resize:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:6px 10px;box-sizing:border-box;}
 .spells-list{padding:0;}
 /* Spell rows use grid for perfect column alignment */
-.spell-row{display:grid;grid-template-columns:16px 1fr 26px 30px 48px 60px 60px 20px 20px 24px;align-items:center;gap:2px;padding:1px 6px;border-bottom:1px solid var(--rule);}
+.spell-row{display:grid;grid-template-columns:16px 1fr 32px 40px 62px 74px 76px 22px 22px 28px;align-items:center;gap:2px;padding:1px 6px;border-bottom:1px solid var(--rule);}
 /* Wrapper for level/bonus/range/duration/damage. On desktop it dissolves so the
    fields sit directly in the row grid; on mobile it becomes a second line. */
 .spell-meta{display:contents;}
@@ -483,11 +483,11 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         </div>
         <div class="sd-vital">
           <span class="sv-lbl">XP</span>
-          <div class="sv-row"><input type="text" class="sv-sm" id="xp-current" placeholder="0"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="xp-next" placeholder="0" readonly title="Auto: 10 × current level"></div>
+          <div class="sv-row"><input type="text" class="sv-big" id="xp-current" placeholder="0"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="xp-next" placeholder="0" readonly title="Auto: 10 × current level"></div>
         </div>
         <div class="sd-vital">
           <span class="sv-lbl">Luck</span>
-          <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-sm" id="lk-val" placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
+          <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-big" id="lk-val" placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
         </div>
       </div>
 
@@ -497,11 +497,11 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         <table class="attacks-table">
           <thead>
             <tr>
-              <th>Weapon / Attack</th>
-              <th style="width:50px">Bonus</th>
-              <th style="width:40px">Stat</th>
-              <th style="width:54px">Range</th>
-              <th style="width:116px">Damage</th>
+              <th style="width:34%">Weapon / Attack</th>
+              <th style="width:64px">Bonus</th>
+              <th style="width:52px">Stat</th>
+              <th style="width:70px">Range</th>
+              <th style="width:132px">Damage</th>
               <th style="width:24px;text-align:center;" title="Always Advantage">▲</th>
               <th style="width:32px"></th>
             </tr>
@@ -2188,7 +2188,7 @@ function buildSpells() {
   const list = document.getElementById('spells-list');
   const hdr = document.createElement('div');
   hdr.className = 'spell-header';
-  hdr.style.cssText = 'display:grid;grid-template-columns:16px 1fr 26px 30px 48px 60px 60px 20px 20px 24px;align-items:center;gap:2px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
+  hdr.style.cssText = 'display:grid;grid-template-columns:16px 1fr 32px 40px 62px 74px 76px 22px 22px 28px;align-items:center;gap:2px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
   hdr.innerHTML =
     '<span class="sh-num" style="font-size:8px;font-weight:700;color:var(--muted);">#</span>' +
     '<span class="sh-name" style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Spell</span>' +

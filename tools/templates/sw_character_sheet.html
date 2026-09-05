@@ -617,7 +617,7 @@ function fillPickers() {
   // Picker/shop filter dropdowns (the browse modals build their lists live).
   const skAttr = $('skill-attr'); if(skAttr) skAttr.innerHTML = '<option value="">All attributes</option>' + ATTRS.map(a => '<option value="' + a + '">' + a + '</option>').join('') + '<option value="Force">The Force</option>';
   const fAttr = $('force-attr'); if(fAttr) { const fa = [...new Set(D.force().map(f => String(f.attribute || '').split(/[,&]| and /)[0].trim()).filter(Boolean))].sort(); fAttr.innerHTML = '<option value="">All</option>' + fa.map(a => '<option value="' + esc(a) + '">' + esc(a) + '</option>').join(''); }
-  const gsCat = $('gearstore-cat'); if(gsCat) { const cats = [...new Set(D.gear().filter(g => g.category !== 'Armor').map(g => g.category))].filter(Boolean).sort(); gsCat.innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join(''); }
+  const gsCat = $('gearstore-cat'); if(gsCat) { const cats = [...new Set(D.gear().filter(g => g.category !== 'Armor').map(g => g.category))].filter(Boolean); cats.push('Weapon'); cats.sort(); gsCat.innerHTML = '<option value="">All categories</option>' + cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join(''); }
   $('dl-armor').innerHTML = D.gear().filter(g => g.category === 'Armor').map(g => '<option value="' + esc(g.name) + '">').join('');
   $('dl-ships').innerHTML = D.vehicles().map(v => '<option value="' + esc(v.name) + '">').join('');
   $('dl-species').innerHTML = ['Human', ...D.characters().filter(c => c.group === 'Alien').map(c => c.name).sort(), ...D.characters().filter(c => c.group === 'Droid').map(c => c.name).sort()].map(n => '<option value="' + esc(n) + '">').join('');
@@ -779,6 +779,17 @@ function addWeaponFromData(name) {
   const skillName = w.skill ? (D.skills().find(s => norm(s.name) === norm(w.skill)) || {}).name || w.skill : '';
   addWeaponRow({ name: w.name, skill: skillName, damage: w.damageText || toCode(w.damage), range: w.range || '', notes: w.kind === 'Melee' ? 'melee' : '' }); scheduleAutosave();
 }
+// True when an Attack (weapon) row with this name already exists.
+function weaponRowExists(name) {
+  const n = norm(name);
+  return [...document.querySelectorAll('#weapons-body .wp-name')].some(inp => norm(inp.value) === n);
+}
+// Adding a weapon from the Equipment picker creates its Attack row (skill,
+// damage, range, notes filled from the weapon data) — but never a duplicate row.
+function addWeaponFromEquip(name) {
+  const w = findWeapon(name); if(!w || weaponRowExists(w.name)) return;
+  addWeaponFromData(name);
+}
 function weaponSkillPips(tr) {
   const sk = tr.querySelector('.wp-skill').value; if(sk) { const p = skillPips(sk); if(p !== null) return { name: sk, pips: p }; const def = D.skills().find(s => s.name === sk); if(def) return { name: sk, pips: attr(def.attribute) }; }
   return { name: 'Dexterity', pips: attr('Dexterity') };
@@ -874,15 +885,30 @@ function openGearPicker() { $('gearstore-search').value = ''; $('gearstore-overl
 function closeGearPicker() { $('gearstore-overlay').classList.remove('open'); }
 function renderGearPicker() {
   const q = norm($('gearstore-search').value), fc = $('gearstore-cat').value;
-  const list = D.gear().filter(g => {
+  const gearList = (fc === 'Weapon' ? [] : D.gear().filter(g => {
     if(g.category === 'Armor') return false;   // armor has its own picker on the Armor tile
     if(fc && g.category !== fc) return false;
     if(q && !(norm(g.name).includes(q) || norm(g.category || '').includes(q))) return false;
     return true;
-  }).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
+  })).map(g => ({ type: 'gear', name: g.name, category: g.category, _g: g }));
+  // Personal-scale weapons surface here too (vehicle/artillery scale excluded).
+  // Adding one creates a matching Attack row rather than a plain gear line.
+  const weaponList = ((fc && fc !== 'Weapon') ? [] : D.weapons().filter(w =>
+      !/^(Starship|Capital|Vehicle|Artillery|Droid)$/.test(w.kind) &&
+      (!q || norm(w.name).includes(q) || norm(w.kind || '').includes(q))))
+    .map(w => ({ type: 'weapon', name: w.name, category: 'Weapon', _w: w }));
+  const list = gearList.concat(weaponList).sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
   const box = $('gearstore-body');
   if(!list.length) { box.innerHTML = '<p class="brow-empty">No equipment matches.</p>'; return; }
-  box.innerHTML = list.map(g => {
+  box.innerHTML = list.map(e => {
+    if(e.type === 'weapon') {
+      const w = e._w, dmg = w.damageText || toCode(w.damage), have = weaponRowExists(w.name);
+      const meta = [w.kind || 'Weapon', w.range].filter(Boolean).map(esc).join(' · ');
+      const btn = have ? '<button class="brow-add have">On attacks ✓</button>' : '<button class="brow-add" data-add-weapon="' + esc(w.name) + '">+ Attack</button>';
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(w.name) + (dmg ? '<span class="brow-cost">' + esc(dmg) + '</span>' : '') + '</div>' +
+        (meta ? '<div class="brow-meta">' + meta + '</div>' : '') + '</div>' + btn + '</div>';
+    }
+    const g = e._g;
     const meta = [g.category, g.stats].filter(Boolean).map(esc).join(' · ');
     const price = creditCost(g.cost);
     const buy = price != null ? '<button class="brow-add buy" data-buy-gear="' + esc(g.name) + '">Buy</button>' : '';
@@ -925,6 +951,7 @@ function renderArmorPicker() {
   const wb = $('weapon-body'); if(wb) wb.addEventListener('click', e => { const b = e.target.closest('[data-add-weapon]'); if(b) { addWeaponFromData(b.dataset.addWeapon); _flashBrow(b); } });
   const fb = $('force-pbody'); if(fb) fb.addEventListener('click', e => { const b = e.target.closest('[data-add-force]'); if(b) { if(addForcePowerByName(b.dataset.addForce)) _flashBrow(b); renderForcePicker(); } });
   const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => {
+    const wpn = e.target.closest('[data-add-weapon]'); if(wpn) { addWeaponFromEquip(wpn.dataset.addWeapon); renderGearPicker(); return; }
     const buy = e.target.closest('[data-buy-gear]'); if(buy) { if(buyGear(buy.dataset.buyGear)) _flashBrow(buy); else { const o = buy.textContent; buy.textContent = 'Need cr'; setTimeout(() => buy.textContent = o, 700); } return; }
     const b = e.target.closest('[data-add-gear]'); if(b) { addGearFromData(b.dataset.addGear); _flashBrow(b); }
   });
@@ -1241,6 +1268,17 @@ campaignUpdateBtn();
 <script src="/tools-data/sw-sheet-builder.js"></script>
 <script src="/tools-data/sw-homebrew.js"></script>
 <script>
+// C-3PO and R2-D2 are named characters, not species — drop them from the
+// species options everywhere they surface (the sheet's Species datalist and the
+// creation wizard's chips, both of which read the live SW_CHARACTERS array).
+// Their droid TYPES (Protocol Droid, R2 Astromech Droid, …) stay as species.
+(function dropNamedDroids() {
+  if(typeof SW_CHARACTERS === 'undefined' || !Array.isArray(SW_CHARACTERS)) return;
+  const drop = new Set(['c-3po', 'r2-d2']);
+  for(let i = SW_CHARACTERS.length - 1; i >= 0; i--) {
+    if(drop.has(norm(SW_CHARACTERS[i] && SW_CHARACTERS[i].name))) SW_CHARACTERS.splice(i, 1);
+  }
+})();
 buildStats();
 autoLoad();
 if (window.SWHB) SWHB.load(function () { try { fillPickers(); } catch (e) {} });
