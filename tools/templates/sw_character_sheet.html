@@ -715,8 +715,10 @@ function swDiceStr(pips, r) {
   const reg = r.rolls.slice(0, r.rolls.length - wildN);
   return toCode(pips) + ': [' + reg.join(' ') + ']' + (r.wildFaces ? ' ✦[' + r.wildFaces.join('→') + ']' : '') + (r.pips ? ' +' + r.pips : '');
 }
-// Rolls a code with the current modifiers (wounds + Force Point); label goes to the log.
-function rollCode(label, basePips, opts) {
+// Rolls a code with the current modifiers (wounds + Force Point) and RETURNS the
+// result WITHOUT logging, so callers can combine several rolls into one log entry
+// (e.g. an attack + its damage). Consumes an armed Force Point unless noMods.
+function computeRoll(basePips, opts) {
   opts = opts || {}; const m = opts.noMods ? { total: 0, actions: 0, wound: 0, mod: 0 } : currentMods();
   let pips = basePips + m.total; let fp = false;
   if(forcePointArmed && !opts.noMods) { pips *= 2; fp = true; forcePointArmed = false; $('f-fp').value = Math.max(0, num($('f-fp').value) - 1); updateModNote(); }
@@ -726,7 +728,12 @@ function rollCode(label, basePips, opts) {
   const ws = wildStyle(r);
   const detail = [swDiceStr(pips, r), fp ? 'Force Point (doubled)' : '', m.total ? 'mods ' + toCode(m.total, true) : '', ws.note, dc ? 'vs ' + dc + (r.total >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
   const type = ws.type || (dc ? (r.total >= dc ? 'crit' : 'fumble') : 'normal');
-  addLog(label, r.total + ws.mark, detail, type); return r.total;
+  return { total: r.total, mark: ws.mark, detail: detail, type: type };
+}
+// Rolls a code with the current modifiers and logs it; label goes to the log.
+function rollCode(label, basePips, opts) {
+  const c = computeRoll(basePips, opts);
+  addLog(label, c.total + c.mark, c.detail, c.type); return c.total;
 }
 function rollAttr(a) { rollCode(a, attr(a)); }
 function rollSkillRow(tr) { const name = tr.querySelector('.sk-name-in').value.trim() || 'Skill'; rollCode(name, rowTotal(tr)); }
@@ -760,7 +767,7 @@ function addWeaponRow(w) {
     + '<td><input type="text" class="wp-dmg num" value="' + esc(w.damage || '') + '" placeholder="4D" style="width:60px;"></td>'
     + '<td><input type="text" class="wp-range" value="' + esc(w.range || '') + '" placeholder="3-10/30/120"></td>'
     + '<td><input type="text" class="wp-notes" value="' + esc(w.notes || '') + '"></td>'
-    + '<td style="white-space:nowrap;"><button class="small-btn" onclick="rollWeaponAttack(this.closest(\'tr\'))">Attack</button> <button class="small-btn ghost" onclick="rollWeaponDamage(this.closest(\'tr\'))">Dmg</button> <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+    + '<td style="white-space:nowrap;"><button class="small-btn" onclick="rollWeaponAttack(this.closest(\'tr\'))" title="Roll to-hit and damage">Attack</button> <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
   $('weapons-body').appendChild(tr); return tr;
 }
 function refreshWeaponRows() { document.querySelectorAll('#weapons-body .wp-skill').forEach(sel => { const cur = sel.value; sel.innerHTML = skillOptions(cur); }); }
@@ -784,12 +791,24 @@ function weaponSkillPips(tr) {
   const sk = tr.querySelector('.wp-skill').value; if(sk) { const p = skillPips(sk); if(p !== null) return { name: sk, pips: p }; const def = D.skills().find(s => s.name === sk); if(def) return { name: sk, pips: attr(def.attribute) }; }
   return { name: 'Dexterity', pips: attr('Dexterity') };
 }
-function rollWeaponAttack(tr) { const s = weaponSkillPips(tr); rollCode((tr.querySelector('.wp-name').value || 'Attack') + ' (' + s.name + ')', s.pips); }
-function rollWeaponDamage(tr) {
-  const txt = tr.querySelector('.wp-dmg').value.trim(); let pips = fromCode(txt); let label = tr.querySelector('.wp-name').value || 'Damage';
-  if(pips === null && /str/i.test(txt)) { pips = attr('Strength') + codeOrZero(txt.replace(/str(ength)?/i, '').trim()); label += ' (STR' + toCode(codeOrZero(txt.replace(/str(ength)?/i, '').trim()), true).replace(/^0D$/, '') + ')'; }
-  if(pips === null) { addLog(label, '✗', 'Damage code not readable: ' + txt, 'fumble'); return; }
-  rollCode(label + ' damage', pips, { noMods: true, dc: 0, noWild: true });
+// One click rolls the to-hit (skill code + Wild Die + mods, consuming a Force
+// Point if armed) AND the damage (no mods, no Wild Die), logging BOTH as one
+// combined entry. A row with no damage value just rolls the to-hit.
+function rollWeaponAttack(tr) {
+  const s = weaponSkillPips(tr); const name = tr.querySelector('.wp-name').value || 'Attack';
+  const atk = computeRoll(s.pips, {});   // to-hit: skill code + Wild Die + wound/Force Point mods
+  const label = name + ' (' + s.name + ')';
+  const txt = tr.querySelector('.wp-dmg').value.trim();
+  let dmgTotal = null, dmgDetail = '';
+  if(txt) {
+    let pips = fromCode(txt), strNote = '';
+    if(pips === null && /str/i.test(txt)) { const adds = codeOrZero(txt.replace(/str(ength)?/i, '').trim()); pips = attr('Strength') + adds; strNote = ' (STR' + toCode(adds, true).replace(/^0D$/, '') + ')'; }
+    if(pips === null) { dmgDetail = 'Damage code not readable: ' + txt; }
+    else { const d = computeRoll(pips, { noMods: true, dc: 0, noWild: true }); dmgTotal = d.total; dmgDetail = 'Damage' + strNote + ' ' + d.detail + ' · vs target Strength/armor'; }
+  }
+  const result = 'Hit ' + atk.total + atk.mark + (dmgTotal !== null ? ' · Dmg ' + dmgTotal : '');
+  const detail = ['Attack ' + atk.detail, dmgDetail].filter(Boolean).join('  ·  ');
+  addLog(label, result, detail, atk.type);
 }
 
 // ═══ FORCE POWERS ═════════════════════════════════════════════════════════

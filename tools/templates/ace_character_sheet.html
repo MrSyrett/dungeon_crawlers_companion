@@ -761,8 +761,8 @@ function doRoll(label, n, opts) {
     verdict = ' (Calamity Die shows 1 — if this fails, calamity!)';
   }
   const detail = n + 'd6: ' + dice.map((d, i) => fmtDie(d, i === 0)).join(' + ') + (opts.note ? ' · ' + opts.note : '') + verdict;
-  _lastRoll = { label, total, dice, tn, karmaDice: 0 };
-  addLog(label, String(total), detail, type, { karmaBtn: true });
+  _lastRoll = { label, total, dice, tn, karmaDice: 0, resultSuffix: opts.resultSuffix || '' };
+  addLog(label, String(total) + (opts.resultSuffix ? ' · ' + opts.resultSuffix : ''), detail, type, { karmaBtn: true });
   return total;
 }
 // Spend a Karma point to add one more exploding die to the last roll.
@@ -775,7 +775,7 @@ function karmaDie(btn) {
   const r = _lastRoll;
   let type = 'normal', verdict = '';
   if(r.tn) { if(r.total >= r.tn) { type = 'crit'; verdict = ' ✓ now beats ' + r.tn; } else verdict = ' ✗ still short of ' + r.tn; }
-  addLog(r.label + ' +Karma die', String(r.total), '+' + fmtDie(d, false) + ' (Karma die #' + r.karmaDice + ')' + verdict, type, { karmaBtn: true });
+  addLog(r.label + ' +Karma die', String(r.total) + (r.resultSuffix ? ' · ' + r.resultSuffix : ''), '+' + fmtDie(d, false) + ' (Karma die #' + r.karmaDice + ')' + verdict, type, { karmaBtn: true });
 }
 function rollStat(id, withFocus) {
   const s = STATS.find(x => x.id === id);
@@ -867,7 +867,7 @@ function rollAttack(btn) {
   if(kind === 'power' && !karmaSpend('Used Power to attack', 1)) return;
   const n = attackDice(kind);
   const statName = kind === 'ranged' ? 'Moves' : kind === 'power' ? 'Power' : 'Brawn';
-  doRoll(name + ' (' + (kind === 'ranged' ? 'ranged' : kind) + ')', n, { note: statName + ' · ' + dmg + ' damage on a hit' });
+  doRoll(name + ' (' + (kind === 'ranged' ? 'ranged' : kind) + ')', n, { note: statName + ' · ' + dmg + ' damage on a hit', resultSuffix: dmg ? 'Dmg ' + dmg : '' });
 }
 
 // ═══ GEAR ═════════════════════════════════════════════════════════════════

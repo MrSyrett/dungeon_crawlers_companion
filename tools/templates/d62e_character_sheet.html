@@ -714,7 +714,9 @@ function diceStr(p, r) {
   const reg = r.rolls.slice(0, r.rolls.length - wildN);
   return code(p) + ': [' + reg.join(' ') + ']' + (r.wildFaces ? ' ✦[' + r.wildFaces.join('→') + ']' : '') + (r.pips ? ' +' + r.pips : '');
 }
-function rollCode(label, basePips, opts) {
+// Rolls a die code and returns the result WITHOUT logging (so callers can
+// combine several rolls into one log entry, e.g. an attack + its damage).
+function computeRoll(basePips, opts) {
   opts = opts || {}; const m = opts.noMods ? { total: 0 } : currentMods();
   let p = basePips + (m.total || 0); let heroInfo = ''; let extraPlain = 0;
   if(heroArmed && !opts.noMods) {
@@ -730,8 +732,12 @@ function rollCode(label, basePips, opts) {
   const ws = wildStyle(r);
   const detail = [diceStr(p, r), heroInfo, m.total ? 'mods ' + code(m.total, true) : '', ws.note, dc ? 'vs ' + dc + (r.total >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
   const type = ws.type || (dc ? (r.total >= dc ? 'crit' : 'fumble') : 'normal');
+  return { total: r.total, mark: ws.mark, detail: detail, type: type };
+}
+function rollCode(label, basePips, opts) {
+  const c = computeRoll(basePips, opts);
   updateModNote();
-  addLog(label, r.total + ws.mark, detail, type); return r.total;
+  addLog(label, c.total + c.mark, c.detail, c.type); return c.total;
 }
 function rollAttr(a) { rollCode(a, attr(a)); }
 function onSkillAdvChange(cb) { const tr = cb.closest('tr'); tr.dataset.adv = cb.checked ? '1' : '0'; recalc(); scheduleAutosave(); }
@@ -874,12 +880,19 @@ function weaponDamagePips(txt) {
 // logging both. A row with no damage value just rolls the attack.
 function rollWeaponAttack(tr) {
   const s = weaponSkillPips(tr); const name = tr.querySelector('.wp-name').value || 'Attack';
-  rollCode(name + ' (' + s.name + ')', s.pips);
+  const atk = computeRoll(s.pips, {});   // to-hit: skill code + Wild Die + mods (consumes a Hero Point if armed)
+  updateModNote();
+  const label = s.name ? name + ' (' + s.name + ')' : name;
   const txt = tr.querySelector('.wp-dmg').value.trim();
-  if(!txt) return;
-  const dmg = weaponDamagePips(txt);
-  if(dmg.pips === null) { addLog(name + ' damage', '✗', 'Damage code not readable: ' + txt, 'fumble'); return; }
-  rollCode(name + ' damage', dmg.pips, { noMods: true, dc: 0 });
+  let dmgTotal = null, dmgDetail = '';
+  if(txt) {
+    const dmg = weaponDamagePips(txt);
+    if(dmg.pips === null) { dmgDetail = 'Damage code not readable: ' + txt; }
+    else { const d = computeRoll(dmg.pips, { noMods: true, dc: 0 }); dmgTotal = d.total; dmgDetail = 'Damage ' + d.detail; }
+  }
+  const result = 'Hit ' + atk.total + atk.mark + (dmgTotal !== null ? ' · Dmg ' + dmgTotal : '');
+  const detail = ['Attack ' + atk.detail, dmgDetail].filter(Boolean).join('  ·  ');
+  addLog(label, result, detail, atk.type);
 }
 
 // ═══ POWERS ═══════════════════════════════════════════════════════════════

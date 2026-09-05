@@ -114,6 +114,32 @@
   .sel{width:100%;padding:7px 8px;background:var(--panel2);border:1px solid var(--line);
     border-radius:7px;color:var(--ink);font:inherit;font-size:11.5px;cursor:pointer}
   .sel:focus{outline:none;border-color:var(--gold-dim)}
+  /* Multi-pack filter: a native <details> so there's no popover positioning to
+     get wrong. Summary reads like a .sel; the open panel is a scrollable checklist
+     grouped by asset family (2MT, Forgotten Adventures, …). */
+  .packfilter{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;overflow:hidden}
+  .packfilter>summary{list-style:none;padding:7px 8px;font-size:11.5px;color:var(--ink);cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .packfilter>summary::-webkit-details-marker{display:none}
+  .packfilter>summary::after{content:"\25be";color:var(--muted);font-size:10px}
+  .packfilter[open]>summary::after{content:"\25b4"}
+  .packfilter[open]>summary{border-bottom:1px solid var(--line)}
+  #packChecks{max-height:210px;overflow:auto;padding:4px 2px 6px}
+  #packChecks .pf-fam{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
+    display:flex;align-items:center;gap:6px;padding:7px 8px 2px}
+  #packChecks label{display:flex;align-items:center;gap:7px;padding:3px 8px 3px 20px;font-size:11.5px;
+    color:var(--ink);cursor:pointer;border-radius:5px}
+  #packChecks label:hover{background:var(--panel)}
+  #packChecks input[type=checkbox]{accent-color:var(--gold);cursor:pointer;margin:0}
+  #packChecks .pf-fam label{padding:0;font-size:10px;color:var(--muted)}
+  #packChecks .pf-count{color:var(--muted);font-size:10px;margin-left:auto}
+  /* colour-variant swatch strip on a grouped object cell */
+  .objgrid .sw{position:absolute;left:0;right:0;bottom:0;display:flex;gap:0;height:9px;
+    border-bottom-left-radius:6px;border-bottom-right-radius:6px;overflow:hidden}
+  .objgrid .sw i{flex:1 1 auto;min-width:0;cursor:pointer;display:block}
+  .objgrid .sw i.on{box-shadow:inset 0 0 0 2px var(--gold)}
+  .objgrid .cnt{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.62);color:#fff;
+    font-size:9px;line-height:1;padding:2px 3px;border-radius:4px;pointer-events:none}
   .packs{margin-top:8px;display:flex;flex-direction:column;gap:4px}
   .packs .pk{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);
     background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 7px}
@@ -291,7 +317,10 @@
         <input type="file" id="packFile" accept=".dungeondraft_pack" style="display:none">
         <input type="file" id="imgFile" accept="image/png,image/jpeg,image/webp,image/gif,.png,.jpg,.jpeg,.webp,.gif" multiple style="display:none">
         <div id="packList" class="packs" style="margin-bottom:10px"></div>
-        <select class="sel" id="objPack" style="margin-bottom:6px"></select>
+        <details id="packDetails" class="packfilter" style="margin-bottom:6px">
+          <summary id="packSummary" title="Show assets from any combination of packs. Tick a family heading to toggle all its packs at once.">Packs: All</summary>
+          <div id="packChecks"></div>
+        </details>
         <input class="sel" id="objFilter" type="text" placeholder="Search" autocomplete="off">
         <div id="objGrid" class="objgrid"></div>
       </div>
@@ -4260,6 +4289,39 @@
     render();
   }
 
+  // ── gated Forgotten Adventures bundle ────────────────────────────────────
+  // Refined FA atlases served admin-gated from /api/asset-packs (they live in
+  // protected/asset-packs/fa, never under public/, because FA art is personal-use
+  // only). Same manifest shape as bundled.json; the only differences are that the
+  // sheet URLs point at the gated route and each texture may carry `colorable`.
+  // A logged-out or non-admin viewer just gets 401 here and keeps importing packs
+  // by hand — so this is purely additive.
+  let faV="";
+  async function loadGatedFA(manifestUrl="/api/asset-packs", fileBase="/api/asset-packs/"){
+    let m;
+    try{
+      const r = await fetch(manifestUrl, {cache:"no-cache", credentials:"include"});
+      if(!r.ok) return;                       // 401 (not admin) / 404 (not deployed) → skip silently
+      m = await r.json();
+    }catch(e){ return; }
+    faV = m.version ? ("?v="+m.version) : "";
+    let added=0;
+    for(const p of (m.packs||[])) for(const t of (p.textures||[])){
+      if(!t.atlas) continue;                  // FA bundle is objects-only for now
+      texReg.set(t.id, {id:t.id, name:t.name, kind:t.kind||"object", pack:p.id, packName:p.name,
+                        basic:false, w:t.w, h:t.h, colorable:!!t.colorable,
+                        atlas:t.atlas, thumbRect:t.thumb||null,
+                        thumbBase:fileBase, ver:faV,
+                        url:fileBase+t.atlas.sheet+faV, img:null});
+      added++;
+    }
+    if(added){ buildTexSelects(); buildObjGrid();
+      if(typeof redrawRoomThumbs==="function") redrawRoomThumbs(); render(); }
+  }
+  // Test hook only: lets an automated test point the loader at a local bundle.
+  // Inert in normal use (activates solely with the ?fadev= query flag).
+  try{ if(/[?&]fadev=/.test(location.search)) window.__loadFAtest=loadGatedFA; }catch(e){}
+
   // Kick off a load the first time a texture is asked for; re-render when it
   // arrives. Returns the entry only once it's actually drawable.
   // Many object entries point at the SAME atlas sheet, so images are cached by
@@ -5175,6 +5237,45 @@
     el.dataset.tid=id;
     thumbObs.observe(el);
   }
+  // ── colour-variant grouping ──────────────────────────────────────────────
+  // Forgotten Adventures (and others) ship "the same prop in five colours" as five
+  // separate sprites: Corner_Metal_Black_A1, Corner_Metal_Bronze_A1, … Rather than
+  // flood the palette with duplicates, collapse a colour-variant set into ONE cell
+  // with a little swatch strip — Michael picks the colour, and the sculpt variants
+  // (A1…A13) stay as their own cells because they're genuinely different shapes.
+  const COLOR_WORDS=["black","white","grey","gray","brown","red","orange","yellow","green",
+    "blue","teal","cyan","purple","violet","pink","gold","silver","bronze","copper","crimson",
+    "azure","ivory","tan","dark","light","ashen","rusty","rust"];
+  const COLOR_HEX={black:"#222",white:"#f4f0e6",grey:"#8a8a8a",gray:"#8a8a8a",brown:"#7a4b23",
+    red:"#b3352c",orange:"#c9772b",yellow:"#d8b13a",green:"#4c7a3a",blue:"#3a5fb0",teal:"#2e7d78",
+    cyan:"#3aa8b0",purple:"#7a44a6",violet:"#8b57c4",pink:"#c96f9a",gold:"#c9a13b",silver:"#c4c7cc",
+    bronze:"#9c6b39",copper:"#a5622f",crimson:"#8e2233",azure:"#4a86c4",ivory:"#efe7cf",tan:"#c7a878",
+    dark:"#4a4038",light:"#d8cdbb",ashen:"#b8b2a6",rusty:"#8a4a28",rust:"#8a4a28"};
+  const COLOR_RE=new RegExp("(?:^|[ _-])("+COLOR_WORDS.join("|")+")(?=$|[ _-])","i");
+  // {key, color} for a colour-variant sprite, or null. `key` is the name with the
+  // colour token removed, so every colour of one prop maps to the same key.
+  function colorVariant(name){
+    let n=String(name||"").replace(/[ _-]?\d+x\d+\s*$/i,"");   // drop trailing grid size
+    const m=n.match(COLOR_RE); if(!m) return null;
+    const color=m[1].toLowerCase();
+    const key=(n.slice(0,m.index)+" "+n.slice(m.index+m[0].length)).replace(/\s+/g," ").trim().toLowerCase();
+    return {key, color};
+  }
+  // Add the cell's visuals (atlas crop or lazy <img>) — shared by single + grouped.
+  function fillObjThumb(b, t){
+    const r=t.thumbRect;
+    if(r){
+      const d=document.createElement("span"); d.className="th";
+      const base=t.thumbBase||"/packs/bundled/", ver=(t.ver!=null?t.ver:assetV);
+      d.style.backgroundImage='url("'+base+r.sheet+ver+'")';
+      d.dataset.r=[r.x,r.y,r.w,r.h,r.sw,r.sh].join(",");
+      b.appendChild(d);
+    } else {
+      const im=document.createElement("img"); im.loading="lazy"; im.alt="";
+      if(t.thumb) im.src=t.thumb; else observeThumb(im, t.id);
+      b.appendChild(im);
+    }
+  }
   function buildObjGrid(){
     const g=$("objGrid"); if(!g) return;
     // Switching mode can hide whatever was armed — disarm it rather than leave a
@@ -5195,54 +5296,68 @@
     const isImported=t=>String(t.id).indexOf("pack:")===0;
     const inMode=t=> adv ? (isImported(t) || !t.basic) : (!isImported(t) && !!t.basic);
     let all=[...texReg.values()].filter(t=>t.kind==="object" && inMode(t));
-    // Pack filter: "all", "default" (everything that ships with the tool, i.e.
-    // not imported) or one pack id. Rebuilt from THIS list, so the options only
-    // ever offer packs that are actually available in the current mode.
-    buildPackFilter(all, isImported);
-    if(objPack==="default")   all=all.filter(t=>!isImported(t));
-    else if(objPack!=="all")  all=all.filter(t=>t.pack===objPack);
+    // Multi-pack filter: refresh the checklist from what's actually available in
+    // this mode, then keep only ticked packs (empty selection = show everything).
+    buildPackMenu(all);
+    if(packSel.size) all=all.filter(t=>packSel.has(t.pack));
     // Imported packs come FIRST. They're registered after the bundled set, so in
     // plain insertion order a freshly imported pack lands ~215 cells down and
     // reads as "nothing happened".
-    for(const t of all.filter(isImported).concat(all.filter(t=>!isImported(t)))){
-      if(q && (t.name+" "+(t.packName||"")).toLowerCase().indexOf(q)<0) continue;
-      const b=document.createElement("button");
-      // No group headings in the grid, so the tooltip is the only place the pack
-      // name can appear — unlike the pickers, which head each group with it.
-      b.title=(t.packName ? t.packName+" · " : "")+t.name+"  ("+(t.w||1)+"×"+(t.h||1)+" cells)";
-      if(t.id===armedObj) b.className="on";
-      const r=t.thumbRect;
-      if(r){
-        // Crop the sprite out of the shared thumb atlas with background-position —
-        // one image request for the whole palette. The actual pixel size is applied
-        // in sizeObjThumbs() once the grid has been laid out and a cell has a width.
-        const d=document.createElement("span"); d.className="th";
-        d.style.backgroundImage='url("/packs/bundled/'+r.sheet+assetV+'")';
-        d.dataset.r=[r.x,r.y,r.w,r.h,r.sw,r.sh].join(",");
-        b.appendChild(d);
-      } else {
-        const im=document.createElement("img");
-        im.loading="lazy"; im.alt="";
-        if(t.thumb) im.src=t.thumb;
-        else observeThumb(im, t.id);       // imported: decoded on first scroll into view
-        b.appendChild(im);
-      }
-      b.onclick=()=>{ const was=armedObj;
-        armedObj = (armedObj===t.id) ? null : t.id;
-        if(armedObj!==was) resetArm();
-        ghostPt=null;
-        setTool(armedObj ? "object" : "select"); buildObjGrid(); };
-      // Per-image delete for user-imported images ("My Images"). A <span>, not a
-      // nested <button> (which is invalid inside the cell button).
-      if(t.pack===CUSTOM_PACK){
-        const del=document.createElement("span"); del.className="del"; del.textContent="×";
-        del.title="Remove this image from My Images";
-        del.onclick=ev=>{ ev.stopPropagation(); removeCustomImage(t.id); };
-        b.appendChild(del);
-      }
-      g.appendChild(b);
-      if(++n>=MAX_GRID_CELLS) break;
+    all = all.filter(isImported).concat(all.filter(t=>!isImported(t)));
+    if(q) all=all.filter(t=>(t.name+" "+(t.packName||"")).toLowerCase().indexOf(q)>=0);
+    // Collapse colour-variant sets into groups (only when 2+ colours are present).
+    // Keyed by pack+key so two packs' "barrel" sets never merge. First sprite seen
+    // is the representative cell; its `pending` colour defaults to that sprite.
+    const groups=new Map(); const order=[]; const single=[];
+    for(const t of all){
+      const cv=colorVariant(t.name);
+      if(cv){ const gk=t.pack+"|"+cv.key;
+        let grp=groups.get(gk);
+        if(!grp){ grp={rep:t, colors:[], byColor:new Map()}; groups.set(gk,grp); order.push({grp}); }
+        if(!grp.byColor.has(cv.color)){ grp.byColor.set(cv.color,t.id); grp.colors.push({color:cv.color, id:t.id, t}); }
+      } else { single.push(t); order.push({t}); }
     }
+    const render=(item)=>{
+      if(n>=MAX_GRID_CELLS) return;
+      // A "group" that turned out to hold one colour renders as an ordinary cell.
+      if(item.grp && item.grp.colors.length<2){ item={t:item.grp.rep}; }
+      const grp=item.grp, t=item.t || grp.rep;
+      const b=document.createElement("button");
+      const armedInGroup = grp && grp.colors.some(c=>c.id===armedObj);
+      b.title=(t.packName ? t.packName+" · " : "")+t.name+"  ("+(t.w||1)+"×"+(t.h||1)+" cells)"
+        + (grp ? "  — "+grp.colors.length+" colours" : "");
+      if((t.id===armedObj) || armedInGroup) b.className="on";
+      // The representative thumb shows the armed colour if one of the group is armed,
+      // else the first colour.
+      const repTex = grp ? (grp.colors.find(c=>c.id===armedObj)?.t || grp.rep) : t;
+      fillObjThumb(b, repTex);
+      if(grp){
+        const cnt=document.createElement("span"); cnt.className="cnt"; cnt.textContent=grp.colors.length; b.appendChild(cnt);
+        const sw=document.createElement("span"); sw.className="sw";
+        for(const c of grp.colors){
+          const i=document.createElement("i");
+          i.style.background=COLOR_HEX[c.color]||"#888";
+          i.title=c.color.charAt(0).toUpperCase()+c.color.slice(1);
+          if(c.id===armedObj) i.className="on";
+          i.onclick=ev=>{ ev.stopPropagation(); armObjId(c.id); };
+          sw.appendChild(i);
+        }
+        b.appendChild(sw);
+        b.onclick=()=>{ // clicking the cell arms the currently-shown colour (or toggles off)
+          const cur=grp.colors.find(c=>c.id===armedObj);
+          armObjId(cur?null:(repTex.id)); };
+      } else {
+        b.onclick=()=>armObjId(t.id===armedObj?null:t.id);
+        if(t.pack===CUSTOM_PACK){
+          const del=document.createElement("span"); del.className="del"; del.textContent="×";
+          del.title="Remove this image from My Images";
+          del.onclick=ev=>{ ev.stopPropagation(); removeCustomImage(t.id); };
+          b.appendChild(del);
+        }
+      }
+      g.appendChild(b); n++;
+    };
+    for(const item of order){ render(item); if(n>=MAX_GRID_CELLS) break; }
     if(n>=MAX_GRID_CELLS){
       const more=document.createElement("div"); more.className="none";
       more.textContent="Showing the first "+MAX_GRID_CELLS+" — type in the filter to narrow it down.";
@@ -5250,7 +5365,7 @@
     }
     sizeObjThumbs(); syncObjScope();
     if(!n){ const d=document.createElement("div"); d.className="none";
-      if(q || objPack!=="all") d.textContent="No objects match that.";
+      if(q || packSel.size) d.textContent="No objects match that.";
       else if(bundledError) d.textContent="Couldn't load /packs/bundled/bundled.json ("+bundledError+") — is the pack folder uploaded?";
       else if(!bundledPacks.length) d.textContent="Loading asset packs…";
       else if(!advOn()) d.textContent="No basic objects loaded — re-upload public/packs/bundled/.";
@@ -5261,26 +5376,76 @@
       }
       g.appendChild(d); }
   }
-  // Session-only, like `pending`: which pack the palette is narrowed to.
-  let objPack="all";
-  function buildPackFilter(list, isImported){
-    const sel=$("objPack"); if(!sel) return;
-    const seen=new Map();
-    for(const t of list) if(!seen.has(t.pack)) seen.set(t.pack, t.packName||t.pack);
-    const opts=[["all","All"],["default","Default"]];
-    for(const [id,name] of seen) opts.push([id,name]);
-    // Rebuild only when the option set actually changed, or every palette
-    // rebuild would blow away the user's open dropdown and their selection.
-    const sig=opts.map(o=>o[0]).join("|");
-    if(sel.dataset.sig!==sig){
-      sel.dataset.sig=sig;
-      sel.innerHTML="";
-      for(const [id,name] of opts){
-        const o=document.createElement("option"); o.value=id; o.textContent=name; sel.appendChild(o); }
+  function armObjId(id){
+    const was=armedObj; armedObj=id;
+    if(armedObj!==was) resetArm();
+    ghostPt=null;
+    setTool(armedObj ? "object" : "select"); buildObjGrid();
+  }
+  // ── multi-pack filter (checkbox list grouped by asset family) ─────────────
+  // packSel is the set of TICKED pack ids; empty means "all". Session-only.
+  const packSel=new Set();
+  // Which family a pack belongs to, for the grouped checklist + family toggles.
+  function packFamily(id, name){
+    const s=String(id||"");
+    if(s==="stock") return "Stock";
+    if(s==="axb") return "Axebane";
+    if(/^2mt/.test(s)) return "2-Minute Tabletop";
+    if(s===CUSTOM_PACK) return "My Images";
+    if(/FA[_-]|forgotten/i.test(s) || /forgotten adventures/i.test(name||"")) return "Forgotten Adventures";
+    return "Imported";
+  }
+  const FAM_ORDER=["2-Minute Tabletop","Forgotten Adventures","Axebane","Stock","Imported","My Images"];
+  function buildPackMenu(list){
+    const wrap=$("packChecks"); if(!wrap) return;
+    // distinct packs present in this mode, with a count
+    const packs=new Map();
+    for(const t of list){ const p=packs.get(t.pack)||{id:t.pack, name:t.packName||t.pack, count:0}; p.count++; packs.set(t.pack,p); }
+    // drop any ticked pack that has gone out of scope (mode switch / removed)
+    for(const id of [...packSel]) if(!packs.has(id)) packSel.delete(id);
+    // group by family
+    const byFam=new Map();
+    for(const p of packs.values()){ const f=packFamily(p.id,p.name); if(!byFam.has(f)) byFam.set(f,[]); byFam.get(f).push(p); }
+    const fams=[...byFam.keys()].sort((a,b)=>{ const ia=FAM_ORDER.indexOf(a), ib=FAM_ORDER.indexOf(b);
+      return (ia<0?99:ia)-(ib<0?99:ib) || a.localeCompare(b); });
+    // rebuild only when the pack set changes, so an open menu isn't wiped mid-tick
+    const sig=fams.map(f=>f+":"+byFam.get(f).map(p=>p.id).sort().join(",")).join("|");
+    if(wrap.dataset.sig!==sig){
+      wrap.dataset.sig=sig; wrap.innerHTML="";
+      for(const f of fams){
+        const members=byFam.get(f).sort((a,b)=>a.name.localeCompare(b.name));
+        const head=document.createElement("div"); head.className="pf-fam";
+        const flab=document.createElement("label");
+        const fchk=document.createElement("input"); fchk.type="checkbox"; fchk.dataset.fam=f;
+        flab.appendChild(fchk); flab.appendChild(document.createTextNode(" "+f));
+        head.appendChild(flab);
+        const fc=document.createElement("span"); fc.className="pf-count";
+        fc.textContent=members.reduce((s,p)=>s+p.count,0); head.appendChild(fc);
+        fchk.onchange=()=>{ const on=fchk.checked;
+          for(const p of members){ if(on) packSel.add(p.id); else packSel.delete(p.id); }
+          buildObjGrid(); };
+        wrap.appendChild(head);
+        for(const p of members){
+          const lab=document.createElement("label");
+          const c=document.createElement("input"); c.type="checkbox"; c.value=p.id;
+          c.onchange=()=>{ if(c.checked) packSel.add(p.id); else packSel.delete(p.id); buildObjGrid(); };
+          lab.appendChild(c); lab.appendChild(document.createTextNode(" "+p.name));
+          const cc=document.createElement("span"); cc.className="pf-count"; cc.textContent=p.count; lab.appendChild(cc);
+          wrap.appendChild(lab);
+        }
+      }
     }
-    // A pack that just went out of scope (mode switch, pack removed) falls back.
-    if(objPack!=="all" && objPack!=="default" && !seen.has(objPack)) objPack="all";
-    sel.value=objPack;
+    // reflect current selection into the checkboxes + family tri-state + summary
+    wrap.querySelectorAll('input[value]').forEach(c=>{ c.checked=packSel.has(c.value); });
+    wrap.querySelectorAll('input[data-fam]').forEach(fc=>{
+      const members=byFam.get(fc.dataset.fam)||[];
+      const on=members.filter(p=>packSel.has(p.id)).length;
+      fc.checked = on>0 && on===members.length;
+      fc.indeterminate = on>0 && on<members.length;
+    });
+    const sum=$("packSummary");
+    if(sum) sum.firstChild ? (sum.childNodes[0].nodeValue = packSel.size? ("Packs: "+packSel.size+" selected") : "Packs: All")
+                           : (sum.textContent = packSel.size? ("Packs: "+packSel.size+" selected") : "Packs: All");
   }
   function syncObjScope(){
     const el=$("objGroup"); if(!el) return;
@@ -6169,7 +6334,6 @@
     if(sb) sb.addEventListener("scroll", ()=>{
       if(pickOpen && Math.abs(sb.scrollTop - pickScrollTop) > 2) closePicker(); });
     if($("objFilter")) $("objFilter").oninput=()=>buildObjGrid();
-    if($("objPack"))   $("objPack").onchange=e=>{ objPack=e.target.value; buildObjGrid(); };
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
@@ -6186,6 +6350,7 @@
       e.target.value=""; if(fs.length) importImageFiles(fs).catch(err=>toast(err.message||"Import failed.")); };
     syncAdvancedUI(); syncStyleScope(); initLights(); initShadows();
     loadBundled().catch(()=>{});
+    loadGatedFA().catch(()=>{});          // admin-gated FA bundle; no-ops for everyone else
     loadPacks().catch(()=>{});
   }
 
