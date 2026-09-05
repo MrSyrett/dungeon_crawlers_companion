@@ -263,20 +263,58 @@ window.DungeonEngine = (function(){
     // insets away from the shared edge). This is correct everywhere EXCEPT it also
     // leaves a phantom band in the SEAM where two rooms genuinely OVERLAP — the
     // shared wall there is erased, so its band is cleaned up in the second pass.
-    c.globalCompositeOperation="destination-out";
-    c.filter="blur("+(px*0.38).toFixed(2)+"px)";
-    c.fillStyle="#fff";
-    for(const sh of map.shapes){ if(!banded(sh)) continue;
-      fillInsetShape(c, sh, halfCellsFor(shapeWallTex(sh)) + WALL_SHADOW_CELLS); }
+    // ⚡ Localize each blurred inset carve to the shape's own box. With c.filter="blur"
+    // active, every fillInsetShape on the full-canvas `c` is a whole-canvas blur convolution
+    // — 24 of them were the single biggest cost in a lit frame. Instead blur each inset in a
+    // small box-sized scratch, then destination-out it into `c` (a localized composite).
+    // Same result: the union of feathered inset carves. (fillInsetShape uses the context's
+    // transform + fillStyle + filter, so a translated small canvas renders it in place.)
+    { const im=oc(); const imc=im.getContext("2d");
+      const grow=(cv,w,h)=>{ if(cv.width<w||cv.height<h){ cv.width=Math.max(cv.width,w,1); cv.height=Math.max(cv.height,h,1); } };
+      const blurPx=px*0.38, bpad=blurPx*3+3;
+      c.globalCompositeOperation="destination-out"; c.filter="none";
+      for(const sh of map.shapes){ if(!banded(sh)) continue;
+        const bd=bounds(sh,"shape"), sA=toScreen(bd.x,bd.y), sB=toScreen(bd.x+bd.w,bd.y+bd.h);
+        const bx=Math.max(0,Math.floor(Math.min(sA[0],sB[0])-bpad)), by=Math.max(0,Math.floor(Math.min(sA[1],sB[1])-bpad));
+        const bxe=Math.min(W,Math.ceil(Math.max(sA[0],sB[0])+bpad)), bye=Math.min(H,Math.ceil(Math.max(sA[1],sB[1])+bpad));
+        const bw=bxe-bx, bh=bye-by; if(bw<=0||bh<=0) continue;
+        grow(im,bw,bh);
+        imc.setTransform(1,0,0,1,0,0); imc.globalCompositeOperation="source-over"; imc.filter="none"; imc.clearRect(0,0,bw,bh);
+        imc.setTransform(1,0,0,1,-bx,-by); imc.filter="blur("+blurPx.toFixed(2)+"px)"; imc.fillStyle="#fff";
+        fillInsetShape(imc, sh, halfCellsFor(shapeWallTex(sh)) + WALL_SHADOW_CELLS);
+        imc.setTransform(1,0,0,1,0,0); imc.filter="none";
+        c.drawImage(im, 0,0,bw,bh, bx,by,bw,bh);
+      }
+    }
     c.filter="none";
     // Second pass — drop the phantom seam band ONLY in the deep interior of a real
     // overlap: (rooms overlapping, i.e. inside 2+) ∩ (union interior, eroded off
     // the outer wall by the band depth). Intersecting with the eroded union is what
     // spares a real wall that merely crosses an overlap — a T-top, an L elbow — and
     // abutting rooms never enter this pass at all (their interiors don't intersect).
-    { const ov=oc(), run=oc(), tmp=oc(), er=oc();
-      ov.width=run.width=tmp.width=er.width=W; ov.height=run.height=tmp.height=er.height=H;
-      const ovc=ov.getContext("2d"), rc=run.getContext("2d"), tc=tmp.getContext("2d"), erc=er.getContext("2d");
+    //
+    // ⚡ Pass 2 is ~full-canvas and dominates a lit frame, but it only CHANGES anything
+    // when banded rooms genuinely OVERLAP (crossing) or NEST. Detect those cheaply first
+    // (bbox + shapeContains, no canvas work) and skip the whole block otherwise — the
+    // common separate-rooms map renders byte-identically without it (there is no seam to
+    // clean and nothing nested to rebuild). The inner erosion is further gated on a real
+    // crossing so a nested-only map doesn't pay for it either.
+    let __needSeam=false, __hasNested=false;
+    { const _b=[], _bb=[];
+      for(const sh of map.shapes){ if(banded(sh)){ _b.push(sh); _bb.push(bounds(sh,"shape")); } }
+      for(let i=0;i<_b.length && !__needSeam;i++) for(let j=i+1;j<_b.length;j++){
+        const bi=_bb[i], bj=_bb[j];
+        const ox=Math.min(bi.x+bi.w,bj.x+bj.w)-Math.max(bi.x,bj.x);
+        const oy=Math.min(bi.y+bi.h,bj.y+bj.h)-Math.max(bi.y,bj.y);
+        if(ox<=1e-6 || oy<=1e-6) continue;                                    // separate / merely abutting
+        if(shapeContains(_b[i],_b[j])||shapeContains(_b[j],_b[i])) continue;  // nested -> handled below, not a seam
+        __needSeam=true; break; }
+      for(let i=0;i<_b.length && !__hasNested;i++){ if(_b[i].corridor) continue;
+        for(let j=0;j<_b.length;j++){ if(j!==i && shapeContains(_b[j],_b[i])){ __hasNested=true; break; } } }
+    }
+    if(__needSeam || __hasNested){ const ov=oc();
+      ov.width=W; ov.height=H;
+      const ovc=ov.getContext("2d");
       // Overlap = union of (i ∩ j) only over pairs that CROSS (partial overlap,
       // neither contains the other). A NESTED room (fully inside another) is NOT a
       // merge seam, so its band is spared — the nested room keeps its wall shadow.
@@ -284,30 +322,61 @@ window.DungeonEngine = (function(){
       const bb=bnd.map(s=>bounds(s,"shape"));
       const contains=shapeContains;
       ovc.setTransform(1,0,0,1,0,0); ovc.globalCompositeOperation="source-over"; ovc.clearRect(0,0,W,H);
+      // ⚡ The intersection and erosion are done in SMALL scratch canvases sized to each
+      // overlap box, not on full-canvas buffers. `destination-in` is a whole-canvas
+      // composite (it must clear everything outside the drawn shape), so on a full-canvas
+      // buffer it costs the WHOLE canvas even for a one-cell seam — 41 corridor/room seams
+      // did that ~60× a frame, which was the single slowest thing in the renderer. On a
+      // box-sized canvas it costs only the box. Output is identical (i∩j ⊆ bbox(i)∩bbox(j),
+      // and the seam only lives inside the overlap boxes).
+      const pm=oc(), em=oc(); const pmc=pm.getContext("2d"), emc=em.getContext("2d");
+      const grow=(cv,w,h)=>{ if(cv.width<w||cv.height<h){ cv.width=Math.max(cv.width,w,1); cv.height=Math.max(cv.height,h,1); } };
+      let uxmin=1e9,uymin=1e9,uxmax=-1e9,uymax=-1e9;
       for(let i2=0;i2<bnd.length;i2++) for(let j2=i2+1;j2<bnd.length;j2++){
         const bi=bb[i2], bj=bb[j2];
-        if(bi.x>bj.x+bj.w||bj.x>bi.x+bi.w||bi.y>bj.y+bj.h||bj.y>bi.y+bi.h) continue;    // no overlap
+        if(bi.x>bj.x+bj.w||bj.x>bi.x+bi.w||bi.y>bj.y+bj.h||bj.y>bi.y+bi.h) continue;    // no bbox overlap
         if(contains(bnd[i2],bnd[j2])||contains(bnd[j2],bnd[i2])) continue;              // nested -> keep both bands
-        tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
-        tc.fillStyle="#fff"; tc.beginPath(); shapePath(tc,bnd[i2]); tc.fill("nonzero");
-        rc.setTransform(1,0,0,1,0,0); rc.filter="none"; rc.globalCompositeOperation="source-over"; rc.clearRect(0,0,W,H);
-        rc.fillStyle="#fff"; rc.beginPath(); shapePath(rc,bnd[j2]); rc.fill("nonzero");
-        tc.globalCompositeOperation="destination-in"; tc.drawImage(run,0,0);            // i ∩ j
-        ovc.globalCompositeOperation="source-over"; ovc.drawImage(tmp,0,0);
+        const wx0=Math.max(bi.x,bj.x), wy0=Math.max(bi.y,bj.y),
+              wx1=Math.min(bi.x+bi.w,bj.x+bj.w), wy1=Math.min(bi.y+bi.h,bj.y+bj.h);
+        const sA=toScreen(wx0,wy0), sB=toScreen(wx1,wy1);
+        const bx=Math.max(0,Math.floor(Math.min(sA[0],sB[0])-1)), by=Math.max(0,Math.floor(Math.min(sA[1],sB[1])-1));
+        const bxe=Math.min(W,Math.ceil(Math.max(sA[0],sB[0])+1)), bye=Math.min(H,Math.ceil(Math.max(sA[1],sB[1])+1));
+        const bw=bxe-bx, bh=bye-by; if(bw<=0||bh<=0) continue;
+        grow(pm,bw,bh);
+        pmc.setTransform(1,0,0,1,0,0); pmc.filter="none"; pmc.globalCompositeOperation="source-over"; pmc.clearRect(0,0,bw,bh);
+        pmc.setTransform(1,0,0,1,-bx,-by); pmc.fillStyle="#fff";
+        pmc.beginPath(); shapePath(pmc,bnd[i2]); pmc.fill("nonzero");
+        pmc.globalCompositeOperation="destination-in"; pmc.beginPath(); shapePath(pmc,bnd[j2]); pmc.fill("nonzero");  // i ∩ j
+        pmc.setTransform(1,0,0,1,0,0);
+        ovc.globalCompositeOperation="source-over"; ovc.drawImage(pm, 0,0,bw,bh, bx,by,bw,bh);
+        if(bx<uxmin)uxmin=bx; if(by<uymin)uymin=by; if(bxe>uxmax)uxmax=bxe; if(bye>uymax)uymax=bye;
       }
-      // eroded union: intersect the union with copies of itself shifted around a
-      // ring of radius (thickest wall half + band), so what's left is the interior
-      // more than the band-depth inside the union everywhere (off every outer wall).
-      let repHalf=0; for(const sh of map.shapes){ if(banded(sh)) repHalf=Math.max(repHalf, halfCellsFor(shapeWallTex(sh))); }
-      const dPx=(repHalf + WALL_SHADOW_CELLS)*wpx();
-      erc.setTransform(1,0,0,1,0,0); erc.filter="none"; erc.globalCompositeOperation="source-over"; erc.clearRect(0,0,W,H);
-      erc.drawImage(buf.erode,0,0);
-      erc.globalCompositeOperation="destination-in";
-      const RN=20; for(let i=0;i<RN;i++){ const a=(i/RN)*Math.PI*2; erc.drawImage(buf.erode, Math.cos(a)*dPx, Math.sin(a)*dPx); }
-      erc.drawImage(ov,0,0);                              // seam = overlap ∩ eroded-union interior
-      c.globalCompositeOperation="destination-out";
-      c.filter="blur("+(px*0.30).toFixed(2)+"px)";
-      c.drawImage(er,0,0);
+      // eroded union: intersect the union with copies of itself shifted around a ring of
+      // radius (thickest wall half + band) — the interior more than the band-depth inside
+      // the union (off every outer wall). Only needed for a real crossing seam, and done in
+      // a small canvas covering the union of overlap boxes (padded for the ring + the blur).
+      if(__needSeam && uxmax>uxmin){
+        let repHalf=0; for(const sh of map.shapes){ if(banded(sh)) repHalf=Math.max(repHalf, halfCellsFor(shapeWallTex(sh))); }
+        const dPx=(repHalf + WALL_SHADOW_CELLS)*wpx();
+        const pad=dPx + px*2 + 4;
+        const bx=Math.max(0,Math.floor(uxmin-pad)), by=Math.max(0,Math.floor(uymin-pad));
+        const bxe=Math.min(W,Math.ceil(uxmax+pad)), bye=Math.min(H,Math.ceil(uymax+pad));
+        const bw=bxe-bx, bh=bye-by;
+        if(bw>0 && bh>0){
+          grow(em,bw,bh);
+          emc.setTransform(1,0,0,1,0,0); emc.filter="none";
+          emc.globalCompositeOperation="source-over"; emc.clearRect(0,0,bw,bh);
+          emc.drawImage(buf.erode, bx,by,bw,bh, 0,0,bw,bh);
+          emc.globalCompositeOperation="destination-in";
+          const RN=20; for(let i=0;i<RN;i++){ const a=(i/RN)*Math.PI*2, ex=Math.cos(a)*dPx, ey=Math.sin(a)*dPx;
+            emc.drawImage(buf.erode, bx-ex,by-ey,bw,bh, 0,0,bw,bh); }
+          emc.drawImage(ov, bx,by,bw,bh, 0,0,bw,bh);          // seam = overlap ∩ eroded-union interior
+          c.globalCompositeOperation="destination-out";
+          c.filter="blur("+(px*0.30).toFixed(2)+"px)";
+          c.drawImage(em, 0,0,bw,bh, bx,by,bw,bh);
+          c.filter="none";
+        }
+      }
       // ── NESTED ROOMS: rebuild their bands correctly ───────────────────
       // A room fully inside another was carved twice by the passes above: the
       // container's interior inset erased the nested room's INNER band, and the
@@ -322,6 +391,8 @@ window.DungeonEngine = (function(){
         if(bnd[i2].corridor) continue;   // corridors merge into rooms — never nested
         for(let j2=0;j2<bnd.length;j2++){ if(j2!==i2 && contains(bnd[j2],bnd[i2])){ nested.push(bnd[i2]); break; } } }
       if(nested.length){
+        const run=oc(), tmp=oc(); run.width=tmp.width=W; run.height=tmp.height=H;
+        const rc=run.getContext("2d"), tc=tmp.getContext("2d");
         const nb=oc(); nb.width=W; nb.height=H; const nbc=nb.getContext("2d");
         nbc.setTransform(1,0,0,1,0,0); nbc.globalCompositeOperation="source-over"; nbc.clearRect(0,0,W,H);
         for(const S of nested){
