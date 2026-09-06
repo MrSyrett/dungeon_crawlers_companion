@@ -1434,6 +1434,36 @@ window.DungeonEngine = (function(){
   // Drawn last, on top of floors, walls, doors and stairs — a prop sits on the
   // map. Resolved through tex.byId like every other texture, so objects appear
   // only in Advanced Mode and classic output stays pure ink by construction.
+  // Object tint (mirrors the Map Maker template's blitObj/tintedSprite). FA
+  // "Colorable" props are drawn in flat red (redmask) and ALWAYS recolour; auto-
+  // collapsed neutral bases (multiply) recolour only when a colour is chosen.
+  // Cached per (texture, tint) so it's one drawImage per frame; non-tintable
+  // objects fall through to the raw atlas draw exactly as before.
+  const _OBJ_COLORABLE_DEFAULT="#b48a5a";
+  const _objTintCache=new Map();
+  function _hexRGB(hex){ const n=parseInt(String(hex).slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+  function _recolorRedMask(g,w,h,tint){
+    const c=_hexRGB(tint), tr=c[0],tg=c[1],tb=c[2];
+    const im=g.getImageData(0,0,w,h), d=im.data;
+    for(let i=0;i<d.length;i+=4){ const r=d[i], gg=d[i+1], b=d[i+2];
+      if(d[i+3]>0 && r>45 && gg<r*0.5 && b<r*0.5){ const l=r/255;
+        d[i]=Math.round(tr*l); d[i+1]=Math.round(tg*l); d[i+2]=Math.round(tb*l); } }
+    g.putImageData(im,0,0);
+  }
+  function _tintedObjSprite(t,tint,mode){
+    const key=t.id+"|"+mode+"|"+tint;
+    if(_objTintCache.has(key)) return _objTintCache.get(key);
+    const img=t.img; if(!img || !img.complete || !img.naturalWidth) return null;
+    const a=t.atlas, sw=a?a.w:img.naturalWidth, sh=a?a.h:img.naturalHeight;
+    const cv=oc(); cv.width=Math.max(1,sw); cv.height=Math.max(1,sh);
+    const g=cv.getContext("2d");
+    const draw=()=>{ if(a) g.drawImage(img, a.x,a.y,a.w,a.h, 0,0, sw,sh); else g.drawImage(img,0,0); };
+    draw();
+    if(mode==="redmask"){ _recolorRedMask(g,cv.width,cv.height,tint); }
+    else { g.globalCompositeOperation="multiply"; g.fillStyle=tint; g.fillRect(0,0,cv.width,cv.height);
+           g.globalCompositeOperation="destination-in"; draw(); g.globalCompositeOperation="source-over"; }
+    _objTintCache.set(key,cv); return cv;
+  }
   function drawObjects(){
     if(!tex || !map.objects || !map.objects.length) return;
     for(const o of map.objects){
@@ -1444,9 +1474,13 @@ window.DungeonEngine = (function(){
       ctx.translate(p[0],p[1]);
       if(o.rot) ctx.rotate(o.rot);
       if(o.flip) ctx.scale(-1,1);
-      const a=t.atlas;
-      if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);  // bundled: atlas sub-rect
-      else  ctx.drawImage(t.img, -w/2, -h/2, w, h);                      // imported: whole file
+      const tm=t.tintMode; let tc=null;
+      if(tm==="redmask") tc=_tintedObjSprite(t, o.tint||_OBJ_COLORABLE_DEFAULT, "redmask");
+      else if(tm==="multiply" && o.tint) tc=_tintedObjSprite(t, o.tint, "multiply");
+      if(tc){ ctx.drawImage(tc, -w/2,-h/2, w,h); }              // tinted (FA colorable / neutral base)
+      else { const a=t.atlas;
+        if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);  // bundled: atlas sub-rect
+        else  ctx.drawImage(t.img, -w/2, -h/2, w, h); }                    // imported: whole file
       ctx.restore();
     }
   }

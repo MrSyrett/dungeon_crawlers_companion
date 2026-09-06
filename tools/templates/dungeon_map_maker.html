@@ -375,15 +375,16 @@
       </div>
       <div id="lightBody" style="display:none">
         <label class="fld">Scene lighting</label>
-        <div id="scenePresets" class="seg" style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px" title="One-click mood for the whole scene — like Czepeku Architect. Sets a darkness level AND a colour grade; your placed lights carve pools of light out of it.">
-          <button type="button" data-dark="0"    data-tint=""        data-a="0">None</button>
-          <button type="button" data-dark="0.18" data-tint="#ffb060" data-a="0.16">Cozy</button>
-          <button type="button" data-dark="0.48" data-tint="#ff8f4d" data-a="0.20">Dusk</button>
-          <button type="button" data-dark="0.72" data-tint="#4560c8" data-a="0.30">Night</button>
-          <button type="button" data-dark="0.58" data-tint="#48dd82" data-a="0.26">Eerie</button>
-          <button type="button" data-dark="0.55" data-tint="#8b44e6" data-a="0.32">Mystic</button>
-          <button type="button" data-dark="0.90" data-tint="#26324f" data-a="0.32">Dark</button>
-        </div>
+        <select id="scenePresets" class="sel" style="margin-bottom:8px" title="One-click mood for the whole scene — like Czepeku Architect. Sets a darkness level AND a colour grade; your placed lights carve pools of light out of it.">
+          <option value="custom" hidden>Custom…</option>
+          <option value="none"   data-dark="0"    data-tint=""        data-a="0">None</option>
+          <option value="cozy"   data-dark="0.18" data-tint="#ffb060" data-a="0.16">Cozy</option>
+          <option value="dusk"   data-dark="0.48" data-tint="#ff8f4d" data-a="0.20">Dusk</option>
+          <option value="night"  data-dark="0.72" data-tint="#4560c8" data-a="0.30">Night</option>
+          <option value="eerie"  data-dark="0.58" data-tint="#48dd82" data-a="0.26">Eerie</option>
+          <option value="mystic" data-dark="0.55" data-tint="#8b44e6" data-a="0.32">Mystic</option>
+          <option value="dark"   data-dark="0.90" data-tint="#26324f" data-a="0.32">Dark</option>
+        </select>
         <label class="fld">Darkness <b id="darkV">55%</b></label>
         <input type="range" id="darkness" min="0" max="100" value="55">
         <label class="fld">Pattern</label>
@@ -6212,6 +6213,16 @@
     const d=Math.round((map.darkness==null?0:map.darkness)*100);
     if($("darkness")) $("darkness").value=d;
     if($("darkV"))    $("darkV").textContent=d+"%";
+    // Reflect the active scene mood in the dropdown — or "Custom…" when the
+    // darkness/tint don't match a preset (e.g. after nudging the slider).
+    const scenePre=$("scenePresets");
+    if(scenePre){ const dk=(map.darkness==null?0:map.darkness), tn=(map.sceneTint||"").toLowerCase(), aa=(map.sceneTintA||0);
+      let match="custom";
+      for(const o of scenePre.options){ if(o.value==="custom") continue;
+        if(Math.abs((parseFloat(o.dataset.dark)||0)-dk)<0.005
+           && (o.dataset.tint||"").toLowerCase()===tn
+           && Math.abs((parseFloat(o.dataset.a)||0)-aa)<0.005){ match=o.value; break; } }
+      scenePre.value=match; }
     const t=lightTarget();
     const col = t ? (t.color||newLight.col) : newLight.col;
     let pat = (t ? (t.pattern||"soft") : newLight.pattern) || "soft";
@@ -6311,12 +6322,13 @@
       };
       $("darkness").onchange=endLightEdit;
     }
-    if($("scenePresets")){ $("scenePresets").querySelectorAll("button").forEach(bt=>{
-      bt.onclick=()=>{ pushHistory();
-        map.darkness=parseFloat(bt.dataset.dark)||0;
-        map.sceneTint=bt.dataset.tint||null; map.sceneTintA=parseFloat(bt.dataset.a)||0;
+    if($("scenePresets")){ $("scenePresets").onchange=e=>{ const o=e.target.selectedOptions[0];
+        if(!o || o.value==="custom") return;
+        pushHistory();
+        map.darkness=parseFloat(o.dataset.dark)||0;
+        map.sceneTint=o.dataset.tint||null; map.sceneTintA=parseFloat(o.dataset.a)||0;
         if(map.darkness>0 && !map.lit) map.lit=true;          // the darkness wash needs Lights on
-        syncLightUI(); commit(); toast("Scene: "+bt.textContent); }; }); }
+        syncLightUI(); commit(); toast("Scene: "+o.textContent); }; }
     if($("lightColor")){ $("lightColor").oninput=e=>liveLight({color:e.target.value});
                          $("lightColor").onchange=endLightEdit; }
     if($("lightRadius")){ $("lightRadius").oninput=e=>liveLight({r:(+e.target.value)/2});
