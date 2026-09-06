@@ -38,6 +38,10 @@ for p in idx.get('packs', []):
     total += len(texs)
     print(f'  {p["name"]}: {len(texs)} thumbs')
 DATA = json.dumps({'packs': packs}, separators=(',', ':'))
+# PREKEEP=<keep-list.json>: ids in it start KEPT (green); everything else starts TOSSED
+# (red) so a recovery pass only needs the additions ticked. Absent → everything starts kept.
+_PRE = os.environ.get('PREKEEP')
+PREKEEP = json.dumps(sorted(set(json.load(open(_PRE)).get('keep', []))) if _PRE else [], separators=(',', ':'))
 
 HTML = r'''<!doctype html><html><head><meta charset="utf-8"><title>FA Curation</title>
 <style>
@@ -89,6 +93,7 @@ input[type=search]{background:#14151a;border:1px solid #3a3e4c;color:#e8e6df;bor
   <h1>FA Curation</h1>
   <span class="count"><span id="kn">0</span> / <span id="tn">0</span> kept</span>
   <input type="search" id="q" placeholder="Filter by name...">
+  <button class="mini" id="onlyNew" style="display:none">Show only additions</button>
   <button class="mini" id="allOn">Keep all</button>
   <button class="mini" id="allOff">Toss all</button>
   <span class="legend"><span><b class="red">FA</b>FA colorable</span><span><b class="mul">TINT</b>auto tint-base</span>
@@ -99,6 +104,10 @@ input[type=search]{background:#14151a;border:1px solid #3a3e4c;color:#e8e6df;bor
 <div id="peek"><img><div class="pn"></div><span class="pb"></span></div>
 <script>
 const DATA = /*__DATA__*/;
+const PREKEEP = /*__PREKEEP__*/;
+const PRE = new Set(PREKEEP);
+const HAS_PRE = PREKEEP.length>0;
+let onlyAdds = false;   // "show only additions" (candidates not already kept)
 const peek=document.getElementById("peek"), peekImg=peek.querySelector("img"), peekNm=peek.querySelector(".pn"), peekB=peek.querySelector(".pb");
 function showPeek(it){ peekImg.src=it.img; peekNm.textContent=it.name;
   const m=tint[it.id]; peekB.className="pb "+(m==="redmask"?"red":m==="multiply"?"mul":""); peekB.textContent=m==="redmask"?"FA colorable":m==="multiply"?"auto tint-base":"plain"; peekB.style.display="inline-block";
@@ -113,8 +122,10 @@ const tint = {};   // id -> 'multiply' | 'redmask' | '' (curator's final choice)
 const items = [];
 for(const p of DATA.packs) for(const t of p.textures){
   const cat = t.name.split(" ").slice(0,2).join(" ") || "Other";
-  items.push({id:t.id, name:t.name, img:t.img, tm:t.tm||"", pack:p.name, cat});
-  kept.add(t.id); tint[t.id]=t.tm||"";
+  items.push({id:t.id, name:t.name, img:t.img, tm:t.tm||"", pack:p.name, cat, isNew: HAS_PRE && !PRE.has(t.id)});
+  // With a prekeep list, only its ids start kept (others tossed → tick to add). Without, all kept.
+  if(!HAS_PRE || PRE.has(t.id)) kept.add(t.id);
+  tint[t.id]=t.tm||"";
 }
 document.getElementById("tn").textContent = items.length;
 function updCount(){ document.getElementById("kn").textContent = kept.size; }
@@ -126,6 +137,7 @@ function render(filter){
   const byPack=new Map();
   for(const it of items){
     if(f && it.name.toLowerCase().indexOf(f)<0) continue;
+    if(onlyAdds && !it.isNew) continue;
     if(!byPack.has(it.pack)) byPack.set(it.pack,new Map());
     const cats=byPack.get(it.pack);
     if(!cats.has(it.cat)) cats.set(it.cat,[]);
@@ -170,6 +182,9 @@ function render(filter){
   }
   updCount();
 }
+if(HAS_PRE){ const nAdd=items.filter(it=>it.isNew).length;
+  const ob=document.getElementById("onlyNew"); ob.style.display=""; ob.textContent="Show only additions ("+nAdd+")";
+  ob.onclick=()=>{ onlyAdds=!onlyAdds; ob.classList.toggle("gold", onlyAdds); render(document.getElementById("q").value); }; }
 document.getElementById("allOn").onclick=()=>{ for(const it of items) kept.add(it.id); render(document.getElementById("q").value); };
 document.getElementById("allOff").onclick=()=>{ kept.clear(); render(document.getElementById("q").value); };
 let qt; document.getElementById("q").oninput=(e)=>{ clearTimeout(qt); qt=setTimeout(()=>render(e.target.value),200); };
@@ -182,6 +197,6 @@ document.getElementById("exp").onclick=()=>{
 render("");
 </script></body></html>'''
 
-open(OUT, 'w').write(HTML.replace('/*__DATA__*/', DATA))
+open(OUT, 'w').write(HTML.replace('/*__DATA__*/', DATA).replace('/*__PREKEEP__*/', PREKEEP))
 mb = os.path.getsize(OUT) / 1024 / 1024
 print(f'wrote {OUT}  ({mb:.1f} MB, {total} assets across {len(packs)} packs)')

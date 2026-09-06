@@ -194,7 +194,10 @@ def detect_finishes(objs, seed):
             for w in lasts: cnt[w] += 1
     fin = set(seed)
     for w, c in cnt.items():
-        if c >= 2: fin.add(w)
+        # Only learn real finish WORDS. Short letter-codes (a, b, ab, ac, a1…) are sculpt
+        # VARIANT markers, not finishes — learning them collapsed every variant into one
+        # base (beds → "Double Bed", stoves → 2). Skip anything ≤2 letters (+opt digits).
+        if c >= 2 and not re.fullmatch(r'[a-z]{1,2}\d*', w): fin.add(w)
     return fin
 
 # Materials that are FINISHES (a recolourable surface), NOT sculpt identity. These are
@@ -205,6 +208,14 @@ MATERIAL_WORDS = ("earthy earthen slate sandstone volcanic redrock marble granit
 _STRIP = ('colorable', 'f')     # FA markers removed for grouping ('F' precedes 'Runner')
 
 def reduce_objects(objs):
+    # Michael's rule: NEVER remove anything colorable. FA colorable (redmask) sprites
+    # bypass finish-collapse AND the sculpt-cap entirely — every distinct colorable file is
+    # kept, so all pattern/blanket/base-colour variants (Double Bed A, A_AB, A_AC, B, …)
+    # survive for curation. Only NON-colorable objects go through the reducer below.
+    colorable = [o for o in objs if o.get('colorable')]
+    for o in colorable:
+        o['tintable'] = True; o['tintMode'] = 'redmask'
+    objs = [o for o in objs if not o.get('colorable')]
     finishes = detect_finishes(objs, [w.lower() for w in COLOR_WORDS]) | set(MATERIAL_WORDS)
     def _tint_score(o):
         lg = min(1.0, o.get('lum', 0) / 150.0)
@@ -243,7 +254,11 @@ def reduce_objects(objs):
         best['name'] = g['key']
         best['id']   = f"fa:{best['_pid']}-obj-{slug(g['key'])}"
         kept.append(best)
-    # 2) sculpt cap (lowest variant indices first)
+    # 2) sculpt cap (lowest variant indices first). NEVER cap COLORABLE items — Michael's
+    #    rule: don't remove anything colorable. FA colorable (redmask) bases always survive;
+    #    only the non-colorable sculpt variants are capped at SCULPT_CAP.
+    def _is_colorable(o):
+        return o.get('tintMode') == 'redmask' or o.get('colorable')
     sgroups = {}
     for o in kept:
         sgroups.setdefault((o['_pid'], _strip_variant(o['name']).lower()), []).append(o)
@@ -253,7 +268,7 @@ def reduce_objects(objs):
     for members in sgroups.values():
         members.sort(key=_vnum)
         final.extend(members[:SCULPT_CAP])
-    return final
+    return colorable + final                  # colorable (all, uncapped) + reduced non-colorable
 
 _before = len(allobjs)
 allobjs = reduce_objects(allobjs)
