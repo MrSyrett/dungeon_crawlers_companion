@@ -314,6 +314,13 @@
         <button class="pick" id="floorSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <label class="fld">Walls</label>
         <button class="pick" id="wallSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
+        <label class="fld" title="Draw doors with a Forgotten Adventures door sprite instead of the plain drawn leaf. Applies to the selected door, or — with nothing selected — to the next door you place. The door still exports as a door in a UniversalVTT.">Door style</label>
+        <select class="sel" id="doorStyleSel" title="The drawn default, or a Forgotten Adventures door sprite. FA doors need the FA pack loaded (admin).">
+          <option value="">Default (drawn)</option>
+        </select>
+        <label class="row" id="doorFlipRow" style="display:none;align-items:center;gap:6px;margin-top:6px" title="Mirror the door sprite across the wall — flips which way an asymmetric leaf faces.">
+          <input type="checkbox" id="doorFlip"><span class="fld" style="margin:0">Flip door sprite</span>
+        </label>
       </div>
     </div>
 
@@ -395,6 +402,8 @@
           <option value="mystic" data-dark="0.55" data-tint="#8b44e6" data-a="0.32">Mystic</option>
           <option value="dark"   data-dark="0.90" data-tint="#26324f" data-a="0.32">Dark</option>
         </select>
+        <label class="fld" id="tintStrLbl" style="display:none" title="How strongly the scene colour grade tints the whole map. Slide to 0 to keep the darkness but drop the colour cast.">Tint strength <b id="tintStrV">32%</b></label>
+        <input type="range" id="tintStrength" min="0" max="80" value="32" style="display:none">
         <label class="fld">Darkness <b id="darkV">55%</b></label>
         <input type="range" id="darkness" min="0" max="100" value="55">
         <label class="fld">Pattern</label>
@@ -2575,6 +2584,21 @@
   // side reaching to the tips (which are the placement start/end points).
   function drawDoor(d){
     const g=doorGeom(d), halfW=Math.max(1.1,1.5*cam.scale);
+    // FA door sprite: an object sprite locked to the opening — spans `len` along the
+    // wall, proportional depth, rotated to the door's angle. The wall gap is still
+    // punched (punchDoorQuad), so the sprite sits in a real opening and reads as a
+    // door on a UVTT export. Falls back to the drawn leaf until the atlas loads.
+    if(d.style){ const dt=texOf(d.style,null);
+      if(dt && dt.img && dt.img.complete && dt.img.naturalWidth){
+        const a=dt.atlas, asp=(a? a.w/a.h : dt.img.naturalWidth/dt.img.naturalHeight)||1;
+        const wl=(d.len||1)*(d.styleScale||1), hl=wl/asp;
+        const p=toScreen(g.cx,g.cy), pw=wl*wpx(), ph=hl*wpx();
+        ctx.save(); ctx.translate(p[0],p[1]); ctx.rotate(d.a||0); if(d.flip) ctx.scale(1,-1);
+        if(a) ctx.drawImage(dt.img, a.x,a.y,a.w,a.h, -pw/2,-ph/2, pw,ph);
+        else  ctx.drawImage(dt.img, -pw/2,-ph/2, pw,ph);
+        ctx.restore(); return;
+      }
+    }
     const w=(sl,st)=>[g.cx+g.alx*sl+g.acx*st, g.cy+g.aly*sl+g.acy*st];
     const s=(sl,st)=>toScreen(g.cx+g.alx*sl+g.acx*st, g.cy+g.aly*sl+g.acy*st);
     ctx.save();
@@ -3167,7 +3191,9 @@
   }
   function commitPlacing(){
     if(placing.tool==="door"){ const g=doorFromPts(placing.pts[0], placing.pts[1]);
-      pushHistory(); g.id=uid(); map.doors.push(g); commit(); }
+      pushHistory(); g.id=uid();
+      if(activeDoorStyle){ g.style=activeDoorStyle; if(activeDoorFlip) g.flip=true; }
+      map.doors.push(g); commit(); }
     else if(placing.tool==="wall"){
       const wl=wallFromPts(placing.pts[0], placing.pts[1], placing.pts[2], drawMode==="shapes");
       if(wl){ pushHistory(); wl.id=uid(); map.walls.push(stampStyle(wl,"wall")); commit(); } }
@@ -4363,7 +4389,7 @@
                         // because they're used as repeating patterns.
                         atlas:t.atlas||null, thumbRect:t.thumb||null,
                         url:"/packs/bundled/"+(t.atlas ? t.atlas.sheet : t.file)+assetV, img:null});
-    buildTexSelects(); buildObjGrid();
+    buildTexSelects(); buildObjGrid(); buildDoorStyles();
     if(typeof redrawRoomThumbs==="function") redrawRoomThumbs();   // prefab thumbnails now have sprites
     render();
   }
@@ -4424,12 +4450,15 @@
       // paint progressively so a big library fills in as each pack lands
       buildObjGrid();
     }
-    if(added){ buildTexSelects(); buildObjGrid();
+    if(added){ buildTexSelects(); buildObjGrid(); buildDoorStyles();
       if(typeof redrawRoomThumbs==="function") redrawRoomThumbs(); render(); }
   }
   // Test hook only: lets an automated test point the loader at a local bundle.
   // Inert in normal use (activates solely with the ?fadev= query flag).
-  try{ if(/[?&]fadev=/.test(location.search)) window.__loadFAtest=loadGatedFA; }catch(e){}
+  try{ if(/[?&]fadev=/.test(location.search)){ window.__loadFAtest=loadGatedFA;
+    window.__dcc={ getMap:()=>map, texReg, buildDoorStyles, applyStyle, render,
+      getTex:()=>tex, getSel:()=>sel, setSel:setSel,
+      setDoorStyle:v=>{ activeDoorStyle=v; }, getActiveDoorStyle:()=>activeDoorStyle }; } }catch(e){}
 
   // Kick off a load the first time a texture is asked for; re-render when it
   // arrives. Returns the entry only once it's actually drawable.
@@ -4468,7 +4497,8 @@
       // here. Hand the engine a tex carrying ONLY byId, so every surface stays
       // classic ink. `null` when the map has no objects at all, which keeps the
       // classic render byte-identical by construction.
-      for(const L of (map.layers||[map])) for(const o of (L.objects||[])) want(o.tex);
+      for(const L of (map.layers||[map])){ for(const o of (L.objects||[])) want(o.tex);
+        for(const d of (L.doors||[])) want(d.style); }         // FA door sprites work in classic mode too
       tex = Object.keys(byId).length
         ? {objectsOnly:true, floor:null, bg:null, wall:null, bgColor:null, byId} : null;
       return;
@@ -4482,6 +4512,7 @@
       for(const sh of (L.shapes||[])){ want(sh.floor); want(sh.wall); }
       for(const wl of (L.walls||[])) want(wl.wall);
       for(const o of (L.objects||[])) want(o.tex);
+      for(const d of (L.doors||[])) want(d.style);            // FA door sprites
     }
     tex = { floor: texGet(st.floor), bg: texGet(st.bg), wall: texGet(st.wall), byId,
             bgColor: Object.prototype.hasOwnProperty.call(BG_SOLID, st.bg) ? BG_SOLID[st.bg] : null };
@@ -5111,7 +5142,52 @@
     if(o.kind==="wall") return {kind:"wall", obj:o.obj};
     return null;
   }
-  function setSel(v){ sel=v; syncStyleScope(); syncZUI(); syncLightUI(); syncShadowUI(); syncObjTint(); }
+  function setSel(v){ sel=v; syncStyleScope(); syncZUI(); syncLightUI(); syncShadowUI(); syncObjTint(); syncDoorUI(); }
+
+  // ── DOOR STYLE (Advanced) — draw a door with an FA door sprite ────────
+  // `activeDoorStyle`/`activeDoorFlip` are the settings a NEWLY placed door is born
+  // with; a SELECTED door edits its own d.style/d.flip. FA door objects already live
+  // in texReg (kind "object", from the gated bundle) — no extra bake. We list the
+  // ones that read as wall doors and skip furniture doors (wardrobe/cupboard/…).
+  let activeDoorStyle="", activeDoorFlip=false;
+  const DOOR_INC=/(^|[^a-z])doors?([^a-z]|$)|portcullis/i;
+  const DOOR_EXC=/cupboard|dresser|wardrobe|armoire|safe|cage|cellar|trap\s?door|hatch|drawer|chest|cabinet|locker/i;
+  function doorSelTarget(){ if(sel && sel.kind==="door"){ const o=objAt(sel); return o?o.obj:null; } return null; }
+  function buildDoorStyles(){
+    const s=$("doorStyleSel"); if(!s) return;
+    const cur=s.value;
+    const byPack=new Map(), order=[];
+    for(const t of texReg.values()){
+      if(t.kind!=="object") continue; const n=t.name||"";
+      if(!DOOR_INC.test(n) || DOOR_EXC.test(n)) continue;
+      const k=t.packName||t.pack||"FA doors";
+      if(!byPack.has(k)){ byPack.set(k, []); order.push(k); }
+      byPack.get(k).push(t);
+    }
+    let html='<option value="">Default (drawn)</option>';
+    for(const k of order){
+      const list=byPack.get(k).sort((a,b)=>a.name.localeCompare(b.name));
+      html+='<optgroup label="'+esc(k)+'">';
+      for(const t of list) html+='<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>';
+      html+='</optgroup>';
+    }
+    s.innerHTML=html;
+    // keep the current selection if it still exists
+    if(cur && s.querySelector('option[value="'+cssEsc(cur)+'"]')) s.value=cur;
+    syncDoorUI();
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+  function cssEsc(s){ return String(s).replace(/["\\]/g, "\\$&"); }
+  function syncDoorUI(){
+    const s=$("doorStyleSel"); if(!s) return;
+    const t=doorSelTarget();
+    const style = t ? (t.style||"") : activeDoorStyle;
+    const flip  = t ? !!t.flip     : activeDoorFlip;
+    // if the selected door's style isn't in the list (pack not loaded), fall back to Default label
+    if(s.querySelector('option[value="'+cssEsc(style)+'"]')) s.value=style; else s.value="";
+    if($("doorFlipRow")) $("doorFlipRow").style.display = style ? "" : "none";
+    if($("doorFlip")) $("doorFlip").checked = flip;
+  }
 
   // Style scope, in priority order:
   //   • a DRAWING tool is active  -> the pickers set `pending`, the style that new
@@ -6293,6 +6369,12 @@
            && (o.dataset.tint||"").toLowerCase()===tn
            && Math.abs((parseFloat(o.dataset.a)||0)-aa)<0.005){ match=o.value; break; } }
       scenePre.value=match; }
+    // Tint-strength slider: shown only when the scene carries a colour grade; drives
+    // map.sceneTintA on top of whatever preset (or Custom) is active.
+    { const hasTint=!!(map.sceneTint), a=Math.round((map.sceneTintA||0)*100);
+      if($("tintStrLbl")) $("tintStrLbl").style.display = hasTint ? "" : "none";
+      if($("tintStrength")){ $("tintStrength").style.display = hasTint ? "" : "none"; $("tintStrength").value=a; }
+      if($("tintStrV")) $("tintStrV").textContent=a+"%"; }
     const t=lightTarget();
     const col = t ? (t.color||newLight.col) : newLight.col;
     let pat = (t ? (t.pattern||"soft") : newLight.pattern) || "soft";
@@ -6399,6 +6481,21 @@
         map.sceneTint=o.dataset.tint||null; map.sceneTintA=parseFloat(o.dataset.a)||0;
         if(map.darkness>0 && !map.lit) map.lit=true;          // the darkness wash needs Lights on
         syncLightUI(); commit(); toast("Scene: "+o.textContent); }; }
+    if($("tintStrength")){
+      $("tintStrength").oninput=e=>{
+        if(!lightGesture){ pushHistory(); lightGesture=true; }
+        map.sceneTintA=(+e.target.value)/100;
+        if($("tintStrV")) $("tintStrV").textContent=(+e.target.value)+"%";
+        // reflect Custom when the alpha no longer matches the chosen preset
+        const sp=$("scenePresets"); if(sp){ const dk=map.darkness||0, tn=(map.sceneTint||"").toLowerCase(); let m="custom";
+          for(const o of sp.options){ if(o.value==="custom") continue;
+            if(Math.abs((parseFloat(o.dataset.dark)||0)-dk)<0.005 && (o.dataset.tint||"").toLowerCase()===tn
+               && Math.abs((parseFloat(o.dataset.a)||0)-map.sceneTintA)<0.005){ m=o.value; break; } }
+          sp.value=m; }
+        commit();
+      };
+      $("tintStrength").onchange=endLightEdit;
+    }
     if($("lightColor")){ $("lightColor").oninput=e=>liveLight({color:e.target.value});
                          $("lightColor").onchange=endLightEdit; }
     if($("lightRadius")){ $("lightRadius").oninput=e=>liveLight({r:(+e.target.value)/2});
@@ -6535,7 +6632,7 @@
     if($("roomGroup")) $("roomGroup").style.display = on ? "" : "none";
     if(!on){ if(armedRoom) disarmRoom(true); if(sel && sel.kind==="prefab") setSel(null); }
     if(!on && (tool==="light"||tool==="shadow")) setTool("select");
-    buildTexSelects(); buildObjGrid();
+    buildTexSelects(); buildObjGrid(); buildDoorStyles();
   }
   function initAdvanced(){
     const st=map.style||(map.style=DEFAULT_STYLE());
@@ -6563,6 +6660,16 @@
       $("objTintHex").onchange=e=>{ let v=e.target.value.trim(); if(v && v[0]!=="#") v="#"+v;
         if(_validHex(v)) applyObjTint(v,true); else syncObjTint(); };   // revert display on a bad code
     }
+    if($("doorStyleSel")) $("doorStyleSel").onchange=e=>{
+      const v=e.target.value, t=doorSelTarget();
+      if(t){ pushHistory(); if(v) t.style=v; else { delete t.style; delete t.flip; } commit(); syncDoorUI(); }
+      else { activeDoorStyle=v; if(!v) activeDoorFlip=false; syncDoorUI(); }
+    };
+    if($("doorFlip")) $("doorFlip").onchange=e=>{
+      const f=!!e.target.checked, t=doorSelTarget();
+      if(t){ pushHistory(); if(f) t.flip=true; else delete t.flip; commit(); }
+      else activeDoorFlip=f;
+    };
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };

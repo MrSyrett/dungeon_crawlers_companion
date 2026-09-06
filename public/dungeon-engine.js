@@ -1634,6 +1634,22 @@ window.DungeonEngine = (function(){
   }
   function drawDoor(d){
     const g=doorGeom(d), halfW=Math.max(1.1,1.5*cam.scale);
+    // FA door sprite (d.style = an object texture id, resolved through tex.byId like
+    // any sprite). It spans `len` along the wall with proportional depth, rotated to
+    // the door angle; the wall gap is still punched (punchDoorQuad) so it sits in a
+    // real opening and stays a door on a UVTT export. Falls back to the drawn leaf
+    // until the atlas sheet loads (or the pack isn't present).
+    if(d.style){ const dt=texOf(d.style,null);
+      if(dt && dt.img && dt.img.complete && dt.img.naturalWidth){
+        const a=dt.atlas, asp=(a? a.w/a.h : dt.img.naturalWidth/dt.img.naturalHeight)||1;
+        const wl=(d.len||1)*(d.styleScale||1), hl=wl/asp;
+        const p=toScreen(g.cx,g.cy), pw=wl*wpx(), ph=hl*wpx();
+        ctx.save(); ctx.translate(p[0],p[1]); ctx.rotate(d.a||0); if(d.flip) ctx.scale(1,-1);
+        if(a) ctx.drawImage(dt.img, a.x,a.y,a.w,a.h, -pw/2,-ph/2, pw,ph);
+        else  ctx.drawImage(dt.img, -pw/2,-ph/2, pw,ph);
+        ctx.restore(); return;
+      }
+    }
     const w=(sl,st)=>[g.cx+g.alx*sl+g.acx*st, g.cy+g.aly*sl+g.acy*st];
     const s=(sl,st)=>toScreen(g.cx+g.alx*sl+g.acx*st, g.cy+g.aly*sl+g.acy*st);
     ctx.save();
