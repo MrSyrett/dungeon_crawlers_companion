@@ -170,7 +170,7 @@
     border:1px solid rgba(255,255,255,.28);display:none;cursor:pointer;z-index:2;padding:0}
   .objgrid button:hover .del,.objgrid .del:hover{display:block}
   .objgrid .del:hover{background:#a3322b;border-color:#c9564d}
-  .objgrid img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+  .objgrid img,.objgrid canvas.thc{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
   .objgrid .th{display:block;background-repeat:no-repeat;pointer-events:none}
   .objgrid .none{grid-column:1/-1;font-size:10.5px;color:var(--muted);text-align:center;padding:16px 4px}
   /* swatch pickers */
@@ -5352,26 +5352,41 @@
   const _colorSheets=new Map();
   function _colorSheet(url){
     let im=_colorSheets.get(url);
-    if(!im){ im=new Image(); _colorSheets.set(url,im); im.onload=paintColorThumbs; im.onerror=()=>{}; im.src=url; }
+    if(!im){ im=new Image(); _colorSheets.set(url,im); im.onload=scheduleColorPaint; im.onerror=()=>{}; im.src=url; }
     return im;
   }
+  // Draw ONE red-mask thumb straight onto its own <canvas> — no toDataURL encode.
+  function _drawColorThumb(ent){
+    const t=ent.t, r=t.thumbRect; if(!r) return false;
+    const url=(t.thumbBase||"/packs/bundled/")+r.sheet+(t.ver!=null?t.ver:assetV);
+    const sh=_colorSheet(url); if(!sh.complete || !sh.naturalWidth) return false;
+    const cv=ent.cv; if(cv.width!==r.w) cv.width=r.w; if(cv.height!==r.h) cv.height=r.h;
+    const g=cv.getContext("2d", {willReadFrequently:true}); g.clearRect(0,0,r.w,r.h);
+    g.drawImage(sh, r.x,r.y,r.w,r.h, 0,0, r.w,r.h);
+    recolorRedMask(g, r.w, r.h, texTint.get(t.id)||COLORABLE_DEFAULT);
+    return true;
+  }
+  // Paint only thumbs not yet painted whose sheet is now ready — O(thumbs) total,
+  // coalesced to ONE pass per animation frame no matter how many sheets land. (The
+  // old code re-encoded every red-mask thumb on every sheet load via toDataURL,
+  // which froze the tab once a pack had hundreds of colourables across many sheets.)
+  let _colorPaintRaf=0;
+  function scheduleColorPaint(){ if(_colorPaintRaf) return;
+    _colorPaintRaf=requestAnimationFrame(()=>{ _colorPaintRaf=0; paintColorThumbs(); }); }
   function paintColorThumbs(){
-    for(const {img,t} of _colorThumbs){
-      const r=t.thumbRect; if(!r) continue;
-      const url=(t.thumbBase||"/packs/bundled/")+r.sheet+(t.ver!=null?t.ver:assetV);
-      const sh=_colorSheet(url); if(!sh.complete || !sh.naturalWidth) continue;
-      const c=document.createElement("canvas"); c.width=r.w; c.height=r.h; const g=c.getContext("2d");
-      g.drawImage(sh, r.x,r.y,r.w,r.h, 0,0, r.w,r.h);
-      recolorRedMask(g, r.w, r.h, texTint.get(t.id)||COLORABLE_DEFAULT);
-      try{ const u=c.toDataURL(); if(img.src!==u) img.src=u; }catch(e){}
-    }
+    for(const ent of _colorThumbs){ if(ent.done) continue; if(_drawColorThumb(ent)) ent.done=true; }
+  }
+  // Repaint a SINGLE thumb (e.g. when its tint colour changes) — never the whole set.
+  function repaintColorThumb(id){
+    for(const ent of _colorThumbs){ if(ent.t.id===id){ _drawColorThumb(ent); return; } }
   }
   // Add the cell's visuals (atlas crop or lazy <img>) — shared by single + grouped.
   function fillObjThumb(b, t){
     const r=t.thumbRect;
     if(r && t.tintMode==="redmask"){   // FA red-mask thumbs must be recoloured; multiply bases show their neutral art as-is
-      const im=document.createElement("img"); im.alt=""; b.appendChild(im);
-      _colorThumbs.push({img:im, t}); paintColorThumbs();
+      const cv=document.createElement("canvas"); cv.className="thc"; cv.width=r.w; cv.height=r.h; b.appendChild(cv);
+      const ent={cv, t, done:false}; _colorThumbs.push(ent);
+      if(_drawColorThumb(ent)) ent.done=true; else scheduleColorPaint();
       return;
     }
     if(r){
@@ -5471,7 +5486,7 @@
           const inp=document.createElement("input"); inp.type="color"; inp.className="tint";
           inp.value=texTint.get(t.id)||"#b48a5a"; inp.title="Recolour this object, then click to place";
           inp.onclick=ev=>ev.stopPropagation();
-          inp.oninput=()=>{ texTint.set(t.id, inp.value); if(t.tintMode==="redmask") paintColorThumbs(); };
+          inp.oninput=()=>{ texTint.set(t.id, inp.value); if(t.tintMode==="redmask") repaintColorThumb(t.id); };
           inp.onchange=()=>{ texTint.set(t.id, inp.value); armObjId(t.id); };
           b.appendChild(inp);
         }
