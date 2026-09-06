@@ -4332,6 +4332,8 @@
   const CUSTOM_PACK = "pack:custom-images";       // synthetic pack that holds user-imported image objects ("My Images")
   let customSeq = 0;                              // disambiguates ids minted in the same millisecond
   let bundledPacks = [];                          // [{id,name,textures:[…]}] once the manifest lands
+  let gatedTexPacks = [];                         // admin-gated FA floor/wall packs (separate list so
+                                                  // loadBundled's reassignment of bundledPacks can't wipe it)
   let bundledError = null;                        // surfaced in the palette so a bad deploy is obvious
   let bundledCounts = null;                       // what the manifest actually contained
   let assetV = "";                                // ?v=<content hash> appended to every asset URL
@@ -4406,6 +4408,18 @@
       let man;
       try{ const r=await fetch(fileBase+p.manifest+faV, {cache:"no-cache", credentials:"include"});
            if(!r.ok) continue; man=await r.json(); }catch(e){ continue; }
+      if(p.tex){                                   // FA floor/wall textures → the floor/wall pickers
+        if(!gatedTexPacks.some(gp=>gp.id===p.id)) gatedTexPacks.push({id:p.id, name:p.name});
+        for(const t of (man.textures||[])){
+          texReg.set(t.id, {id:t.id, name:t.name, kind:t.kind, pack:p.id, packName:p.name, basic:false,
+                            cells:t.cells, thick:t.thick, tile:t.tile,
+                            thumb: t.thumb || null,   // embedded data: URL from the baker
+                            url: fileBase+t.file+faV, img:null});
+          added++;
+        }
+        buildTexSelects();
+        continue;
+      }
       for(const t of (man.textures||[])) regTex(p, t);
       // paint progressively so a big library fills in as each pack lands
       buildObjGrid();
@@ -5188,6 +5202,11 @@
     }
     const want = kind==="bg" ? "floor" : kind;
     for(const p of bundledPacks){
+      const list=[...texReg.values()].filter(t=>t.kind===want && t.pack===p.id)
+                                     .map(t=>({id:t.id, name:t.name}));
+      if(list.length) out.push({label:p.name, list});
+    }
+    for(const p of gatedTexPacks){                 // admin-gated FA floor/wall textures
       const list=[...texReg.values()].filter(t=>t.kind===want && t.pack===p.id)
                                      .map(t=>({id:t.id, name:t.name}));
       if(list.length) out.push({label:p.name, list});
