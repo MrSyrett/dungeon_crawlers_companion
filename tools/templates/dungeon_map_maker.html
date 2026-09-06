@@ -285,6 +285,14 @@
         <label class="switch" title="Textured floors, walls and background instead of the classic ink-on-parchment look">
           <input type="checkbox" id="advToggle"><span class="slider"></span></label>
       </div>
+      <div id="libRow" style="display:none;margin-bottom:12px">
+        <label class="fld" style="margin-top:0" title="Turn a whole art library on or off everywhere — floors, walls, objects and prefabs. Your own imported art is always available.">Libraries</label>
+        <div class="seg" id="libSeg" style="display:flex;width:100%">
+          <button type="button" data-lib="stock" style="flex:1" title="The app's built-in Stock art + Axebane">Stock</button>
+          <button type="button" data-lib="2mt" style="flex:1" title="2-Minute Tabletop">2MT</button>
+          <button type="button" data-lib="fa" style="flex:1" title="Forgotten Adventures">FA</button>
+        </div>
+      </div>
       <div class="grp-head">
         <p class="grp-title">Layers</p>
         <button class="btn" id="layerAdd" title="Add a new layer on top" style="padding:2px 9px;font-size:12px">+ Add</button>
@@ -363,6 +371,7 @@
           <select class="sel" id="roomTheme" style="flex:1;min-width:0" title="Filter by setting / theme"><option value="">All settings</option></select>
         </div>
         <div id="roomGrid" style="display:flex;flex-direction:column;gap:6px"></div>
+        <button type="button" id="restoreBuiltins" title="Undo your edits to the built-in prefabs and un-hide any you removed. Prefabs you saved yourself are kept." style="margin-top:8px;background:none;border:0;color:var(--muted);font-size:11px;cursor:pointer;text-decoration:underline;padding:2px 0">↺ Restore built-in prefabs</button>
       </div>
     </div>
 
@@ -4368,6 +4377,44 @@
   const BG_SOLID = { "bg:theme":null, "bg:black":"#08080a", "bg:slate":"#171a21", "bg:parch":"#efe8d7" };
   const texReg = new Map();                       // id -> {id,name,kind,url,cells|thick|tile,img}
   const CUSTOM_PACK = "pack:custom-images";       // synthetic pack that holds user-imported image objects ("My Images")
+
+  // ── Library Picker: a GLOBAL on/off per art library, hiding a whole library from
+  // every palette at once (backgrounds/floors/walls, objects, prefabs). Three toggles —
+  // Stock (the app's built-in art + Axebane), 2MT (2-Minute Tabletop), FA (Forgotten
+  // Adventures). Your own imports ("pack:…" / My Images) are NEVER hidden. Toggles only
+  // filter the PALETTES — placed art on the map is untouched. Default: all on.
+  const LIB_KEY="dcc_libs";
+  function loadActiveLibs(){ try{ const a=JSON.parse(localStorage.getItem(LIB_KEY)); if(Array.isArray(a)) return new Set(a); }catch(e){} return new Set(["stock","2mt","fa"]); }
+  let activeLibs=loadActiveLibs();
+  function saveActiveLibs(){ try{ localStorage.setItem(LIB_KEY, JSON.stringify([...activeLibs])); }catch(e){} }
+  function libActive(lib){ return lib==="imported" || activeLibs.has(lib); }
+  // Which library a pack id belongs to.
+  function libForPack(pid){ pid=String(pid||""); if(pid==="stock"||pid==="axb") return "stock";
+    if(/^2mt/.test(pid)) return "2mt"; if(pid.indexOf("pack:")===0) return "imported"; return "fa"; }
+  // Which library a texture id string belongs to (used for prefab sprites, which store ids).
+  function libOfId(id){ const s=String(id||"");
+    if(s.indexOf("pack:")===0) return "imported";
+    if(s.indexOf("fa:")===0) return "fa";
+    if(s.indexOf("bundled:stock-")===0 || s.indexOf("bundled:axb-")===0) return "stock";
+    if(s.indexOf("bundled:")===0) return "2mt";
+    return ""; }
+  // Which library a texReg entry belongs to (id prefix first, pack as tiebreak for bundled).
+  function texLib(t){ const id=String(t&&t.id||"");
+    if(id.indexOf("pack:")===0) return "imported";
+    if(id.indexOf("fa:")===0) return "fa";
+    if(id.indexOf("bundled:")===0){ const pk=t.pack||""; return (pk==="stock"||pk==="axb") ? "stock" : "2mt"; }
+    return libForPack(t&&t.pack); }
+  function texLibActive(t){ return libActive(texLib(t)); }
+  function syncLibUI(){ const seg=$("libSeg"); if(!seg) return;
+    seg.querySelectorAll("button[data-lib]").forEach(b=>b.classList.toggle("on", activeLibs.has(b.dataset.lib))); }
+  function toggleLib(lib){
+    if(activeLibs.has(lib)) activeLibs.delete(lib); else activeLibs.add(lib);
+    saveActiveLibs(); syncLibUI();
+    // refresh every palette the toggle affects (placed art on the map is untouched)
+    if(typeof buildTexSelects==="function") buildTexSelects();
+    if(typeof buildObjGrid==="function") buildObjGrid();
+    if(typeof buildRoomGrid==="function") buildRoomGrid();
+  }
   let customSeq = 0;                              // disambiguates ids minted in the same millisecond
   let bundledPacks = [];                          // [{id,name,textures:[…]}] once the manifest lands
   let gatedTexPacks = [];                         // admin-gated FA floor/wall packs (separate list so
@@ -4470,7 +4517,11 @@
   try{ if(/[?&]fadev=/.test(location.search)){ window.__loadFAtest=loadGatedFA;
     window.__dcc={ getMap:()=>map, texReg, buildDoorStyles, applyStyle, render,
       getTex:()=>tex, getSel:()=>sel, setSel:setSel,
-      setDoorStyle:v=>{ activeDoorStyle=v; }, getActiveDoorStyle:()=>activeDoorStyle }; } }catch(e){}
+      setDoorStyle:v=>{ activeDoorStyle=v; }, getActiveDoorStyle:()=>activeDoorStyle,
+      // library picker + prefab model (tests)
+      getActiveLibs:()=>[...activeLibs], toggleLib, prefabStyleOf, libForPack, texLib,
+      allPrefabs, buildRoomGrid, buildObjGrid, pickList,
+      loadCustomPrefabs, saveCustomPrefabs, loadHiddenDefaults, getDefaults:()=>ROOM_TEMPLATES }; } }catch(e){}
 
   // Kick off a load the first time a texture is asked for; re-render when it
   // arrives. Returns the entry only once it's actually drawable.
@@ -5290,11 +5341,12 @@
     }
     const want = kind==="bg" ? "floor" : kind;
     for(const p of bundledPacks){
+      if(!libActive(libForPack(p.id))) continue;   // hidden by the Library Picker
       const list=[...texReg.values()].filter(t=>t.kind===want && t.pack===p.id)
                                      .map(t=>({id:t.id, name:t.name}));
       if(list.length) out.push({label:p.name, list});
     }
-    for(const p of gatedTexPacks){                 // admin-gated FA floor/wall textures
+    if(libActive("fa")) for(const p of gatedTexPacks){   // admin-gated FA floor/wall textures
       const list=[...texReg.values()].filter(t=>t.kind===want && t.pack===p.id)
                                      .map(t=>({id:t.id, name:t.name}));
       if(list.length) out.push({label:p.name, list});
@@ -5538,7 +5590,7 @@
     const adv=advOn();
     const isImported=t=>String(t.id).indexOf("pack:")===0;
     const inMode=t=> adv ? (isImported(t) || !t.basic) : (!isImported(t) && !!t.basic);
-    let all=[...texReg.values()].filter(t=>t.kind==="object" && inMode(t));
+    let all=[...texReg.values()].filter(t=>t.kind==="object" && inMode(t) && texLibActive(t));
     // Multi-pack filter: refresh the checklist from what's actually available in
     // this mode, then keep only ticked packs (empty selection = show everything).
     buildPackMenu(all);
@@ -5826,14 +5878,14 @@
   // WITHOUT baking a per-shape style, so the room adopts the map's current floor/walls.
   // Overlapping a stamped room onto existing rooms merges walls via the existing path.
   const ROOM_TEMPLATES=[
-    { name:"Bedroom", cat:"Bedroom", theme:"Residence", w:6, h:5,
+    { id:"def:bedroom-2mt", style:"2mt", name:"Bedroom", cat:"Bedroom", theme:"Residence", w:6, h:5,
       objs:[["bundled:2mtf-obj-bed-pattern-1-b",1.5,1.4,1.73,2.07],
             ["bundled:2mtf-obj-table-end-1-dark",2.7,0.9,0.75,0.56],
             ["bundled:2mtf-obj-storage-bookshelf-1-a-dark",4.6,0.4,1.08,0.54],
             ["bundled:2mtf-obj-rug-animal-skin",3.6,3.4,2.02,1.28],
             ["bundled:2mtf-obj-chair-armchair-1-a",4.9,3.6,1.06,1.36]],
       doors:[[3,5,0,1]] },
-    { name:"Tavern / Common Room", cat:"Social", theme:"Tavern", w:9, h:7,
+    { id:"def:tavern-2mt", style:"2mt", name:"Tavern / Common Room", cat:"Social", theme:"Tavern", w:9, h:7,
       objs:[["bundled:2mtw-obj-table-round-2-dark",2.6,2.4,1.08,1.12],
             ["bundled:2mtw-obj-chair-simple-3-dark",2.6,1.5,0.55,0.48],
             ["bundled:2mtw-obj-chair-simple-3-dark",2.6,3.3,0.55,0.48,180],
@@ -5851,7 +5903,7 @@
             ["bundled:2mtf-obj-storage-barrel-1-dark",8.1,1.2,0.47,0.45],
             ["bundled:2mtf-obj-cooking-oven-fireplace-3",0.7,3.4,0.89,1.28]],
       doors:[[4.5,7,0,2]] },
-    { name:"Storage Room", cat:"Storage", theme:"Dungeon", w:6, h:5,
+    { id:"def:storage-2mt", style:"2mt", name:"Storage Room", cat:"Storage", theme:"Dungeon", w:6, h:5,
       objs:[["bundled:2mtw-obj-storage-crates-1-dark",1.0,1.0,0.93,0.9],
             ["bundled:2mtw-obj-storage-crates-1-dark",1.95,1.0,0.93,0.9],
             ["bundled:2mtw-obj-storage-crates-1-dark",1.0,1.95,0.93,0.9],
@@ -5863,7 +5915,7 @@
             ["bundled:2mtf-obj-storage-shelf-1-dark",5.55,3.0,1.08,0.49,90],
             ["bundled:2mtr-obj-chest-1x1-1",0.7,4.3,1.0,1.0]],
       doors:[[3,5,0,1]] },
-    { name:"Study / Library", cat:"Study", theme:"Residence", w:6, h:5,
+    { id:"def:study-2mt", style:"2mt", name:"Study / Library", cat:"Study", theme:"Residence", w:6, h:5,
       objs:[["bundled:2mtf-obj-table-writing-desk-dark",3.0,1.15,1.03,0.57],
             ["bundled:2mtf-obj-chair-armchair-1-b",3.0,2.2,1.03,1.12,180],
             ["bundled:2mtf-obj-storage-bookshelf-2-dark",1.0,0.35,1.06,0.47],
@@ -5873,7 +5925,7 @@
             ["bundled:2mtf-obj-storage-bookshelf-2-dark",5.62,3.7,1.06,0.47,90],
             ["bundled:2mtr-obj-carpet-2x2",2.6,3.4,2.0,2.0]],
       doors:[[3,5,0,1]] },
-    { name:"Dining Hall", cat:"Dining", theme:"Castle", w:9, h:5,
+    { id:"def:dining-2mt", style:"2mt", name:"Dining Hall", cat:"Dining", theme:"Castle", w:9, h:5,
       objs:[["bundled:2mtw-obj-table-rectangle-1-dark",3.55,2.5,1.93,0.9],
             ["bundled:2mtw-obj-table-rectangle-1-dark",5.5,2.5,1.93,0.9],
             ["bundled:2mtf-obj-chair-bench-1-dark",4.55,1.7,1.6,0.33],
@@ -5885,7 +5937,7 @@
             ["bundled:2mtw-obj-light-brazier-2-a",0.7,4.3,0.68,0.71],
             ["bundled:2mtw-obj-light-brazier-2-a",8.3,4.3,0.68,0.71]],
       doors:[[4.5,5,0,2]] },
-    { name:"Cottage (2 rooms)", cat:"Dwelling", theme:"Village", w:8, h:6,
+    { id:"def:cottage-2mt", style:"2mt", name:"Cottage (2 rooms)", cat:"Dwelling", theme:"Village", w:8, h:6,
       walls:[[4,0,4,6]],
       objs:[["bundled:2mtw-obj-bed-pattern-7-g",1.3,1.4,1.26,1.91],
             ["bundled:2mtf-obj-table-end-2-dark",2.7,1.0,0.9,0.55],
@@ -6037,11 +6089,61 @@
       const o=stripElemMeta(JSON.parse(JSON.stringify(it.obj))); shiftElem(o, it.kind, -rx, -ry);
       els.push({kind:it.kind, obj:o}); }
     return { id:"cpf-"+Date.now().toString(36)+"-"+Math.floor(Math.random()*1e4), name,
-      cat:(cat||"").trim(), theme:(theme||"").trim(), w:Math.round(rb.w), h:Math.round(rb.h), els, custom:true };
+      cat:(cat||"").trim(), theme:(theme||"").trim(), style:prefabStyleOf({els}),
+      w:Math.round(rb.w), h:Math.round(rb.h), els, custom:true };
   }
-  // Distinct category / theme values across stock + custom prefabs, for datalists & filters.
-  function prefabCats(){ const s=new Set(); ROOM_TEMPLATES.concat(loadCustomPrefabs()).forEach(t=>{ if(t.cat) s.add(t.cat); }); return [...s].sort((a,b)=>a.localeCompare(b)); }
-  function prefabThemes(){ const s=new Set(); ROOM_TEMPLATES.concat(loadCustomPrefabs()).forEach(t=>{ if(t.theme) s.add(t.theme); }); return [...s].sort((a,b)=>a.localeCompare(b)); }
+
+  // ── Prefab model: built-in DEFAULTS (ROOM_TEMPLATES, in code) + a user layer in
+  // localStorage. The user layer is `dcc_prefabs` (customs you save AND overrides of a
+  // default — an override is stored with the SAME id, "def:…"), plus a hidden-defaults
+  // set (`dcc_prefabs_hidden`) for built-ins you've removed. So EVERY prefab is editable:
+  // edit a default → stored as an override; new built-ins I ship still appear; delete a
+  // default → hidden (restorable); delete an override → reverts to the built-in.
+  const HIDE_KEY="dcc_prefabs_hidden";
+  function loadHiddenDefaults(){ try{ const a=JSON.parse(localStorage.getItem(HIDE_KEY)||"[]"); return new Set(Array.isArray(a)?a:[]); }catch(e){ return new Set(); } }
+  function saveHiddenDefaults(set){ try{ localStorage.setItem(HIDE_KEY, JSON.stringify([...set])); return true; }catch(e){ return false; } }
+  const isDefId=id=>typeof id==="string" && id.indexOf("def:")===0;
+  // Art style of a prefab: explicit `style`, else inferred from its sprite ids
+  // (fa:… → Forgotten Adventures, bundled:… → 2-Minute Tabletop).
+  function prefabStyleOf(tpl){
+    if(tpl && tpl.style) return tpl.style;
+    const ids=[];
+    if(tpl && tpl.els){ for(const e of tpl.els){ if(e.kind==="object" && e.obj && e.obj.tex) ids.push(e.obj.tex); } }
+    else if(tpl && tpl.objs){ for(const o of tpl.objs) ids.push(o[0]); }
+    let fa=false, mt=false, st=false;
+    for(const id of ids){ const l=libOfId(id); if(l==="fa") fa=true; else if(l==="2mt") mt=true; else if(l==="stock") st=true; }
+    return fa ? "fa" : (mt ? "2mt" : (st ? "stock" : ""));   // dominant library
+  }
+  const STYLE_LABEL={ "stock":"Stock", "2mt":"2-Minute Tabletop", "fa":"Forgotten Adventures" };
+  function styleLabel(st){ return STYLE_LABEL[st] || ""; }
+  // The merged, display-ready prefab list: defaults (overrides applied, hidden dropped)
+  // then pure customs. Each entry: {tpl, isDefault, isOverride, isCustom}.
+  function allPrefabs(){
+    const customs=loadCustomPrefabs();
+    const ovr=new Map(); const extra=[];
+    for(const c of customs){ if(isDefId(c.id)) ovr.set(c.id, c); else extra.push(c); }
+    const hidden=loadHiddenDefaults();
+    const out=[];
+    for(const d of ROOM_TEMPLATES){ if(hidden.has(d.id)) continue;
+      if(ovr.has(d.id)) out.push({tpl:ovr.get(d.id), isDefault:true, isOverride:true, isCustom:false});
+      else out.push({tpl:d, isDefault:true, isOverride:false, isCustom:false}); }
+    for(const e of extra) out.push({tpl:e, isDefault:false, isOverride:false, isCustom:true});
+    return out;
+  }
+  function restoreBuiltinPrefabs(){
+    const hadHidden=loadHiddenDefaults().size>0;
+    const customs=loadCustomPrefabs();
+    const hadOverride=customs.some(c=>isDefId(c.id));
+    if(!hadHidden && !hadOverride){ toast("Built-in prefabs are already at their defaults."); return; }
+    if(!window.confirm("Restore all built-in prefabs to their shipped versions?\n\nThis undoes your edits to the built-ins and un-hides any you removed. Prefabs you saved yourself are kept.")) return;
+    saveCustomPrefabs(customs.filter(c=>!isDefId(c.id)));   // drop overrides, keep pure customs
+    saveHiddenDefaults(new Set());
+    buildRoomGrid(); toast("Built-in prefabs restored.");
+  }
+  // Distinct category / theme / style values across all visible prefabs, for datalists & filters.
+  function prefabCats(){ const s=new Set(); allPrefabs().forEach(e=>{ if(e.tpl.cat) s.add(e.tpl.cat); }); return [...s].sort((a,b)=>a.localeCompare(b)); }
+  function prefabThemes(){ const s=new Set(); allPrefabs().forEach(e=>{ if(e.tpl.theme) s.add(e.tpl.theme); }); return [...s].sort((a,b)=>a.localeCompare(b)); }
+  function prefabStyles(){ const s=new Set(); allPrefabs().forEach(e=>{ const st=prefabStyleOf(e.tpl); if(st) s.add(st); }); return [...s].sort((a,b)=>a.localeCompare(b)); }
   let _pfSaveGsel=null;
   function closePrefabSaveModal(){ const m=$("prefabSaveModal"); if(m) m.style.display="none"; _pfSaveGsel=null; }
   function saveSelectionAsPrefab(){
@@ -6049,10 +6151,11 @@
     if(gsel && gsel.kind==="shape" && isRoomShape((map.shapes||[])[gsel.idx])) gsel={kind:"prefab", roomIdx:gsel.idx};
     if(!gsel || gsel.kind!=="prefab"){ toast("Select a room or prefab first (click it), then Save as prefab."); return; }
     _pfSaveGsel=gsel;
-    // Prefill: if the selection is an existing custom prefab (armed or same name), reuse its cat/theme.
+    // Prefill: if this matches an existing prefab by name (built-in OR custom), reuse its
+    // cat/theme and title it "Update prefab".
     const gname=groupName(gsel);
     const def = gname==="Room" ? "My Room" : gname;
-    const existing=loadCustomPrefabs().find(p=>p.name.toLowerCase()===def.toLowerCase());
+    const existing=(allPrefabs().find(e=>e.tpl.name.toLowerCase()===def.toLowerCase())||{}).tpl;
     const dl=(id,vals)=>{ const d=$(id); if(d) d.innerHTML=vals.map(v=>'<option value="'+esc(v)+'">').join(""); };
     dl("pfCatList", prefabCats()); dl("pfThemeList", prefabThemes());
     if($("pfNameIn")) $("pfNameIn").value=def;
@@ -6068,23 +6171,48 @@
     if(!name){ toast("Give the prefab a name."); const n=$("pfNameIn"); if(n) n.focus(); return; }
     const cat=(($("pfCatIn")||{}).value||"").trim(), theme=(($("pfThemeIn")||{}).value||"").trim();
     const rec=serializeGroupToTemplate(gsel, name, cat, theme); if(!rec){ toast("Nothing to save."); closePrefabSaveModal(); return; }
+    // Match by name across BOTH built-ins and customs. Overwriting a built-in stores an
+    // OVERRIDE (same "def:…" id) so the shipped version is layered over, not duplicated.
+    const match=allPrefabs().find(e=>e.tpl.name.toLowerCase()===name.toLowerCase());
     const list=loadCustomPrefabs();
-    const i=list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
-    if(i>=0){
-      // Overwriting an existing prefab is destructive (the old one is replaced) — confirm
-      // first. Cancel keeps the modal open so the name can be changed instead.
-      if(!window.confirm('A prefab named "'+list[i].name+'" already exists.\n\nOverwrite it with this selection?')){
-        const n=$("pfNameIn"); if(n){ n.focus(); n.select(); } return;
-      }
-      rec.id=list[i].id; list[i]=rec;
-    } else list.push(rec);
-    if(saveCustomPrefabs(list)){ closePrefabSaveModal(); buildRoomGrid(); toast('Saved prefab "'+name+'"'+(i>=0?" (updated)":"")+" — it's in the palette below."); }
+    if(match){
+      const isBuiltin=match.isDefault && !match.isOverride;
+      const msg = isBuiltin
+        ? 'This will overwrite the built-in prefab "'+match.tpl.name+'" with your version.\n\n(You can undo it later with "Restore built-ins".) Continue?'
+        : 'A prefab named "'+match.tpl.name+'" already exists.\n\nOverwrite it with this selection?';
+      if(!window.confirm(msg)){ const n=$("pfNameIn"); if(n){ n.focus(); n.select(); } return; }
+      rec.id=match.tpl.id;                         // reuse the id → update custom, or override built-in
+      const i=list.findIndex(p=>p.id===rec.id);
+      if(i>=0) list[i]=rec; else list.push(rec);
+      // un-hide the built-in if it had been hidden
+      const h=loadHiddenDefaults(); if(h.has(rec.id)){ h.delete(rec.id); saveHiddenDefaults(h); }
+    } else {
+      list.push(rec);
+    }
+    if(saveCustomPrefabs(list)){ closePrefabSaveModal(); buildRoomGrid(); toast('Saved prefab "'+name+'"'+(match?" (updated)":"")+" — it's in the palette below."); }
   }
-  function deleteCustomPrefab(id, nm){
-    if(!window.confirm('Delete your prefab "'+nm+'"? This can\'t be undone.')) return;
-    saveCustomPrefabs(loadCustomPrefabs().filter(p=>p.id!==id));
+  // Remove a prefab row. Behaviour depends on what it is:
+  //  • a prefab you saved   → deleted (gone).
+  //  • an EDITED built-in   → the override is removed, reverting to the shipped version.
+  //  • a pristine built-in  → hidden (recoverable via "Restore built-ins").
+  function removePrefabEntry(entry){
+    const tpl=entry.tpl, id=tpl.id, nm=tpl.name;
+    if(entry.isCustom){
+      if(!window.confirm('Delete your prefab "'+nm+'"? This can\'t be undone.')) return;
+      saveCustomPrefabs(loadCustomPrefabs().filter(p=>p.id!==id));
+      if(armedRoom && armedRoom.id===id) disarmRoom(false);
+      buildRoomGrid(); toast('Deleted prefab "'+nm+'"'); return;
+    }
+    if(entry.isOverride){
+      if(!window.confirm('Revert "'+nm+'" to the built-in version?\n\nYour edits to this prefab will be discarded.')) return;
+      saveCustomPrefabs(loadCustomPrefabs().filter(p=>p.id!==id));
+      buildRoomGrid(); toast('Reverted "'+nm+'" to the built-in.'); return;
+    }
+    // pristine built-in → hide
+    if(!window.confirm('Hide the built-in prefab "'+nm+'"?\n\nYou can bring it back with "Restore built-ins".')) return;
+    const h=loadHiddenDefaults(); h.add(id); saveHiddenDefaults(h);
     if(armedRoom && armedRoom.id===id) disarmRoom(false);
-    buildRoomGrid(); toast('Deleted prefab "'+nm+'"');
+    buildRoomGrid(); toast('Hid "'+nm+'". Restore built-ins to bring it back.');
   }
 
   // A small schematic thumbnail of a template: room outline + furniture (sprites once
@@ -6114,7 +6242,8 @@
     _thumbT2=setTimeout(()=>{ for(const [c,t] of _roomThumbs) drawTemplateThumb(c,t); }, 2200); }
   function buildRoomGrid(){
     const g=$("roomGrid"); if(!g) return; g.innerHTML=""; _roomThumbs=[];
-    const mkRow=(tpl,isCustom)=>{
+    const mkRow=(entry)=>{
+      const tpl=entry.tpl;
       const armed = armedRoom && (armedRoom===tpl || (tpl.id && armedRoom.id===tpl.id));
       const row=document.createElement("div"); row.style.cssText="display:flex;gap:5px;align-items:stretch";
       const b=document.createElement("button"); b.type="button";
@@ -6127,22 +6256,24 @@
       _roomThumbs.push([thumb,tpl]);
       const txt=document.createElement("span"); txt.style.cssText="flex:1;min-width:0";
       const meta=[tpl.w+'×'+tpl.h+' cells', pieces+' pieces'];
-      if(tpl.theme) meta.push(esc(tpl.theme));
-      if(isCustom) meta.push('yours');
+      const st=styleLabel(prefabStyleOf(tpl)); if(st) meta.push(st);
+      if(entry.isCustom) meta.push('yours'); else if(entry.isOverride) meta.push('edited');
       txt.innerHTML='<b style="font-size:13px">'+esc(tpl.name)+'</b><span style="display:block;font-size:11px;color:var(--muted)">'
         +meta.join(' · ')+'</span>';
       b.appendChild(thumb); b.appendChild(txt);
       b.onclick=()=>{ if(armed) disarmRoom(true); else armRoom(tpl); };
       row.appendChild(b);
-      if(isCustom){ const del=document.createElement("button"); del.type="button"; del.title="Delete this prefab"; del.textContent="×";
-        del.style.cssText="flex:0 0 auto;width:26px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--muted);cursor:pointer;font-size:16px;line-height:1";
-        del.onclick=(ev)=>{ ev.stopPropagation(); deleteCustomPrefab(tpl.id, tpl.name); };
-        row.appendChild(del); }
+      // Every prefab is editable/removable now. × means: delete (yours) / revert (edited
+      // built-in) / hide (built-in) — removePrefabEntry decides from the entry kind.
+      const del=document.createElement("button"); del.type="button";
+      del.title = entry.isCustom ? "Delete this prefab" : (entry.isOverride ? "Revert to the built-in version" : "Hide this built-in prefab");
+      del.textContent = entry.isCustom ? "×" : (entry.isOverride ? "↺" : "×");
+      del.style.cssText="flex:0 0 auto;width:26px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--muted);cursor:pointer;font-size:15px;line-height:1";
+      del.onclick=(ev)=>{ ev.stopPropagation(); removePrefabEntry(entry); };
+      row.appendChild(del);
       return row;
     };
-    // Merge stock + custom into one taggable list.
-    const custom=loadCustomPrefabs();
-    const all = ROOM_TEMPLATES.map(t=>({tpl:t,isCustom:false})).concat(custom.map(t=>({tpl:t,isCustom:true})));
+    const all = allPrefabs();
 
     // Populate the two filter <select>s (preserve the current selection where still valid).
     const catSel=$("roomCat"), themeSel=$("roomTheme");
@@ -6153,8 +6284,10 @@
     fillSel(themeSel, prefabThemes(), "All settings");
     const fCat=catSel?catSel.value:"", fTheme=themeSel?themeSel.value:"";
 
-    // Filter by the active dropdowns.
-    let list=all.filter(e=> (!fCat || e.tpl.cat===fCat) && (!fTheme || e.tpl.theme===fTheme));
+    // Filter by the dropdowns AND the global Library Picker (a prefab whose art library
+    // is switched off is hidden here too).
+    let list=all.filter(e=> (!fCat || e.tpl.cat===fCat) && (!fTheme || e.tpl.theme===fTheme)
+                            && (function(){ const s=prefabStyleOf(e.tpl); return !s || libActive(s); })());
 
     if(!list.length){
       const empty=document.createElement("div");
@@ -6175,7 +6308,7 @@
         hd.style.cssText="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:9px 0 1px";
         g.appendChild(hd);
       }
-      for(const e of groups.get(k)) g.appendChild(mkRow(e.tpl, e.isCustom));
+      for(const e of groups.get(k)) g.appendChild(mkRow(e));
     }
     redrawRoomThumbs();
   }
@@ -6649,6 +6782,9 @@
     if($("shadowTool")) $("shadowTool").style.display = on ? "" : "none";
     // Prefab Rooms are an Advanced-Mode feature too (their furniture is Advanced art).
     if($("roomGroup")) $("roomGroup").style.display = on ? "" : "none";
+    // The Library Picker governs Advanced art, so it lives with Advanced mode.
+    if($("libRow")) $("libRow").style.display = on ? "" : "none";
+    syncLibUI();
     if(!on){ if(armedRoom) disarmRoom(true); if(sel && sel.kind==="prefab") setSel(null); }
     if(!on && (tool==="light"||tool==="shadow")) setTool("select");
     buildTexSelects(); buildObjGrid(); buildDoorStyles();
@@ -6694,6 +6830,8 @@
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
     if($("imgAdd"))   $("imgAdd").onclick   =()=>$("imgFile").click();
     if($("savePrefab")) $("savePrefab").onclick =saveSelectionAsPrefab;
+    if($("restoreBuiltins")) $("restoreBuiltins").onclick = restoreBuiltinPrefabs;
+    if($("libSeg")) $("libSeg").querySelectorAll("button[data-lib]").forEach(b=>b.onclick=()=>toggleLib(b.dataset.lib));
     if($("roomCat")) $("roomCat").onchange = buildRoomGrid;
     if($("roomTheme")) $("roomTheme").onchange = buildRoomGrid;
     if($("pfSaveOk")) $("pfSaveOk").onclick = commitPrefabSave;
