@@ -1,14 +1,15 @@
 # ============================================================================
 #  Forgotten Adventures pack splitter (PowerShell -- no install needed).
 #
-#  Chops every .dungeondraft_pack over 380 MB into raw byte chunks
+#  Chops every matching .dungeondraft_pack over 380 MB into raw byte chunks
 #  (<name>.part001, .part002, ...) inside an "_split" subfolder. The chunks
 #  are NOT usable on their own -- Claude glues them back into the exact
-#  original file in the cloud and bakes it. Nothing here parses the pack, so
-#  there's nothing to break.
+#  original file in the cloud and bakes it.
 #
-#  Launched by split-fa.bat (double-click that). To run directly:
-#    powershell -NoProfile -ExecutionPolicy Bypass -File split-fa.ps1
+#  >>> This copy targets the TEXTURE packs (Interiors-Stone, Dirt/Sand/Rock).
+#      Change the -like filter below if you need a different set. <<<
+#
+#  Launched by split-fa.bat (double-click that).
 # ============================================================================
 
 # --- EDIT THIS if your Forgotten Adventures folder is somewhere else ---
@@ -29,25 +30,23 @@ if (!(Test-Path -LiteralPath $SplitDir)) {
     New-Item -ItemType Directory -Path $SplitDir | Out-Null
 }
 
-# Objects first: only split the "Walls and Objects" packs. (Texture packs
-# come later -- change or remove the -like clause to include them.)
+# Only the TEXTURE packs this time (the big ones are Interiors-Stone + Dirt/Sand/Rock).
 $packs = Get-ChildItem -LiteralPath $FA -Filter *.dungeondraft_pack -File |
-         Where-Object { $_.Length -gt ($ThreshMB * 1MB) -and $_.Name -like "*Walls and Objects*" }
+         Where-Object { $_.Length -gt ($ThreshMB * 1MB) -and $_.Name -like "*Textures*" }
 
 if ($packs.Count -eq 0) {
-    Write-Host "No packs over $ThreshMB MB -- nothing to split." -ForegroundColor Green
+    Write-Host "No texture packs over $ThreshMB MB -- nothing to split." -ForegroundColor Green
     Write-Host "Claude can pull the rest directly. You're done."
     exit 0
 }
 
-Write-Host "Splitting $($packs.Count) oversized pack(s) into:"
+Write-Host "Splitting $($packs.Count) oversized texture pack(s) into:"
 Write-Host "  $SplitDir`n"
 
 foreach ($p in $packs) {
     $mb = [math]::Round($p.Length / 1MB)
     Write-Host "$($p.Name)  ($mb MB)"
 
-    # remove any stale parts for this pack
     Get-ChildItem -LiteralPath $SplitDir -Filter ($p.Name + ".part*") -File -ErrorAction SilentlyContinue |
         Remove-Item -Force -ErrorAction SilentlyContinue
 
@@ -77,6 +76,6 @@ foreach ($p in $packs) {
 }
 
 Write-Host "`n============================================================================"
-Write-Host " Done. Tell Claude: `"the _split folder is ready`" and it will pull + bake"
-Write-Host " the oversized packs. You can delete the _split folder afterwards."
+Write-Host " Done. Tell Claude: `"the texture _split folder is ready`" and it will pull +"
+Write-Host " bake them. You can delete the _split folder afterwards."
 Write-Host "============================================================================"
