@@ -23,7 +23,7 @@ Usage: python3 extract-fa.py <in_dir_of_.dungeondraft_pack> <out_dir> [pack_glob
        e.g. python3 extract-fa.py "S:/TTRPGS/.../Forgotten Adventures" ./fa "*Furniture*" "*Decor*"
 """
 import struct, io, json, os, re, sys, glob, hashlib
-from PIL import Image
+from PIL import Image, ImageStat
 
 IN_DIR  = sys.argv[1] if len(sys.argv) > 1 else '.'
 OUT     = sys.argv[2] if len(sys.argv) > 2 else './fa-bundle'
@@ -39,6 +39,10 @@ ATLAS       = 4096
 
 # Marketing renders / previews FA sometimes ships in the objects folder.
 SKIP_OBJ = re.compile(r'(_preview|_demo|/preview|/demo)\b', re.I)
+# Colour tokens (same set the Map Maker uses) — a colour-variant set collapses to one.
+COLOR_WORDS = ("black white grey gray brown red orange yellow green blue teal cyan purple "
+               "violet pink gold silver bronze copper crimson azure ivory tan dark light "
+               "ashen rusty rust").split()
 
 os.makedirs(OUT, exist_ok=True)
 
@@ -135,9 +139,16 @@ for pth in paths:
         if wc < 0.15 or hc < 0.15: continue
         sc = min(1.0, OBJ_PER_CELL*wc/im.width, MAX_DIM/im.width, MAX_DIM/im.height)
         full = im.resize((max(1, round(im.width*sc)), max(1, round(im.height*sc))), Image.LANCZOS)
+        try:
+            _m = ImageStat.Stat(full.convert('RGB'), mask=full.getchannel('A')).mean
+            lum = 0.299*_m[0] + 0.587*_m[1] + 0.114*_m[2]
+            _mx, _mn = max(_m), min(_m)
+            sat = (_mx - _mn) / _mx if _mx > 0 else 0        # 0 = neutral grey
+        except Exception:
+            lum, sat = 0, 0
         rec = {'id': f'fa:{pid}-obj-{slug(nice_name(fn))}', 'name': nice_name(fn),
                'kind': 'object', 'w': round(wc, 3), 'h': round(hc, 3),
-               'img': full, '_pid': pid}
+               'img': full, '_pid': pid, 'lum': lum, 'sat': sat}
         if is_colorable(path): rec['colorable'] = True
         allobjs.append(rec); count += 1
     packs.append({'id': pid, 'name': meta['name'], 'credit': 'Forgotten Adventures',
@@ -146,6 +157,127 @@ for pth in paths:
 
 if not allobjs:
     raise SystemExit('no objects found')
+
+# ── AUTO-REDUCTION ──────────────────────────────────────────────────────────
+# The packs carry far more than anyone uses (the same prop in 6 finishes, the same
+# thing sculpted 35 times). Two automatic cuts get each pack toward ~10-20%, and a
+# curation page does the final hand-trim:
+#   1. FINISH COLLAPSE — a set of finish variants (colour OR material: Black/Bronze,
+#      Slate/Sandstone/Volcanic, …) becomes ONE tintable base — the most NEUTRAL one,
+#      which multiply-tints cleanly to any colour in the Map Maker.
+#   2. SCULPT CAP — keep at most SCULPT_CAP of any "same thing, many variations" set.
+# FA's own "Colorable" props are already single tintable bases (red-mask), kept as-is.
+SCULPT_CAP = int(os.environ.get('FA_SCULPT_CAP', '8'))
+_VAR_RE = re.compile(r' ([A-Za-z]?\d+)$')      # trailing variant token, e.g. " A10"
+
+def _strip_variant(name):
+    return _VAR_RE.sub('', name).strip()
+
+def _split_head_idx(name):
+    m = _VAR_RE.search(name)
+    return (name[:m.start()], name[m.start():]) if m else (name, '')
+
+# Data-driven FINISH detection: seed with the known colour words, then learn any token
+# that appears as the varying last-word across 2+ different "sculpt families". Colours
+# and materials (slate, sandstone, volcanic, oak, brass, …) recur that way; genuine
+# shape words (tall, wide) usually don't, so they're left alone.
+def detect_finishes(objs, seed):
+    from collections import defaultdict
+    lastby = defaultdict(set)
+    for o in objs:
+        toks = _strip_variant(o['name']).split()
+        if len(toks) < 2: continue
+        lastby[' '.join(toks[:-1]).lower()].add(toks[-1].lower())
+    cnt = defaultdict(int)
+    for lasts in lastby.values():
+        if len(lasts) >= 2:
+            for w in lasts: cnt[w] += 1
+    fin = set(seed)
+    for w, c in cnt.items():
+        if c >= 2: fin.add(w)
+    return fin
+
+# Materials that are FINISHES (a recolourable surface), NOT sculpt identity. These are
+# removed wherever they appear so e.g. "Basin Stone Slate" and "Basin Stone Sandstone"
+# collapse to one "Basin Stone". "Stone"/"Wood" themselves are categories — NOT removed.
+MATERIAL_WORDS = ("earthy earthen slate sandstone volcanic redrock marble granite "
+                  "oak pine birch walnut mahogany ebony ashen brass iron steel").split()
+_STRIP = ('colorable', 'f')     # FA markers removed for grouping ('F' precedes 'Runner')
+
+def reduce_objects(objs):
+    finishes = detect_finishes(objs, [w.lower() for w in COLOR_WORDS]) | set(MATERIAL_WORDS)
+    def _tint_score(o):
+        lg = min(1.0, o.get('lum', 0) / 150.0)
+        return (1.0 - o.get('sat', 0)) * (0.4 + 0.6 * lg)     # neutral (low-sat) & light enough
+    # 1) FINISH COLLAPSE. Key = name with every finish token removed (anywhere in the
+    #    name), plus FA markers, keeping the variant index. Every colour/material variant
+    #    of one sculpt+variant lands in the same group; a group of 2+ collapses to ONE
+    #    tintable base. Pick order: FA colorable > Slate (Michael's stone rule) > most
+    #    neutral. Names ending up finish-free read generically ("Basin Stone A1 Full").
+    def _key(name):
+        head, idx = _split_head_idx(name)
+        kt = [t for t in head.split() if t.lower() not in finishes and t.lower() not in _STRIP]
+        return (' '.join(kt) + idx).strip()
+    groups = {}
+    for o in objs:
+        k = _key(o['name'])
+        gk = (o['_pid'], k.lower())
+        if gk not in groups: groups[gk] = {'key': k, 'm': []}
+        groups[gk]['m'].append(o)
+    kept = []
+    for g in groups.values():
+        members = g['m']
+        if len(members) == 1:
+            o = members[0]
+            if o.get('colorable'): o['tintable'] = True; o['tintMode'] = 'redmask'
+            kept.append(o); continue
+        reds   = [o for o in members if o.get('colorable')]
+        slates = [o for o in members if ' slate' in (' ' + o['name'].lower())]
+        if reds:
+            best, mode = reds[0], 'redmask'
+        elif slates:
+            best, mode = max(slates, key=_tint_score), 'multiply'
+        else:
+            best, mode = max(members, key=_tint_score), 'multiply'
+        best['tintable'] = True; best['tintMode'] = mode
+        best['name'] = g['key']
+        best['id']   = f"fa:{best['_pid']}-obj-{slug(g['key'])}"
+        kept.append(best)
+    # 2) sculpt cap (lowest variant indices first)
+    sgroups = {}
+    for o in kept:
+        sgroups.setdefault((o['_pid'], _strip_variant(o['name']).lower()), []).append(o)
+    def _vnum(o):
+        m = re.search(r'(\d+)$', o['name']); return int(m.group(1)) if m else 0
+    final = []
+    for members in sgroups.values():
+        members.sort(key=_vnum)
+        final.extend(members[:SCULPT_CAP])
+    return final
+
+_before = len(allobjs)
+allobjs = reduce_objects(allobjs)
+print(f'auto-reduced {_before} -> {len(allobjs)} objects '
+      f'({100*len(allobjs)/_before:.0f}%; finish-collapse + sculpt-cap {SCULPT_CAP})')
+
+# ── CURATION KEEP-LIST ──────────────────────────────────────────────────────
+# FA_KEEP=<keep-list.json> (exported by the curation page) bakes ONLY the assets
+# you kept, and applies your per-asset tint choices: an id in `tint` gets that mode
+# (multiply / redmask); a kept id NOT in `tint` had its tint toggled off → plain.
+KEEP = os.environ.get('FA_KEEP')
+if KEEP:
+    kl = json.load(open(KEEP))
+    keepset = set(kl.get('keep', []))
+    tintmap = kl.get('tint', {})
+    allobjs = [o for o in allobjs if o['id'] in keepset]
+    for o in allobjs:
+        mode = tintmap.get(o['id'])
+        if mode:
+            o['tintable'] = True; o['tintMode'] = mode
+        else:
+            o.pop('tintable', None); o.pop('tintMode', None)
+    print(f'keep-list applied: {len(allobjs)} kept (of {len(keepset)} requested), '
+          f'{sum(1 for o in allobjs if o.get("tintable"))} tintable')
 
 # INCREMENTAL & ADDITIVE. Each pack is atlased into its OWN sheets, prefixed by pack
 # id, and MERGED into any existing fa-bundle.json — so you can bake pack-by-pack and
@@ -167,25 +299,33 @@ for p in packs:
         if _f.startswith(pre + '-obj-') or _f.startswith(pre + '-th-'):
             os.remove(os.path.join(OUT, _f))
     full = write_atlas(objs, pre + '-obj', 'img', ATLAS, 86)
+    # SLIM per-texture entries (drop constant kind/sw/sh; thumb reuses the atlas rect
+    # client-side) — the manifest would otherwise blow past the 20 MB commit limit.
     texs = []
     for o, f in zip(objs, full):
-        # thumb reuses the object atlas rect — the sprites are already 96px, so no
-        # separate thumb sheets (halves the file count, same sheet the render uses).
-        e = {'id': o['id'], 'name': o['name'], 'kind': 'object', 'w': o['w'], 'h': o['h'],
-             'atlas': f, 'thumb': f}
-        if o.get('colorable'): e['colorable'] = True
+        e = {'id': o['id'], 'name': o['name'], 'w': o['w'], 'h': o['h'],
+             'atlas': {'s': f['sheet'], 'x': f['x'], 'y': f['y'], 'w': f['w'], 'h': f['h']}}
+        if o.get('tintable'):
+            e['tintable'] = True
+            e['tm'] = o.get('tintMode', 'multiply')     # 'multiply' (lightest base) | 'redmask' (FA Colorable)
         texs.append(e)
-    p['textures'] = sorted(texs, key=lambda e: e['name'])
-    new_recs[p['id']] = p
+    texs.sort(key=lambda e: e['name'])
+    # each pack's textures live in their OWN file — keeps every file small + scalable
+    manfile = pre + '.json'
+    json.dump({'textures': texs}, open(os.path.join(OUT, manfile), 'w'))
+    new_recs[p['id']] = {'id': p['id'], 'name': p['name'], 'manifest': manfile,
+                         'count': len(texs),
+                         'colorable': sum(1 for e in texs if e.get('colorable'))}
     print(f'  atlased {p["name"]}: {len(objs)} objects, {len(set(f["sheet"] for f in full))} sheets')
 
-# Merge with packs from earlier runs (keep theirs, replace/add ours).
+# The INDEX (fa-bundle.json) just lists packs + their per-pack manifest files. Merge
+# with packs from earlier runs (keep theirs, replace/add ours).
 merged = {}
 existing = os.path.join(OUT, 'fa-bundle.json')
 if os.path.exists(existing):
     try:
         for p in json.load(open(existing)).get('packs', []):
-            merged[p['id']] = p
+            if 'manifest' in p: merged[p['id']] = p   # ignore any legacy embedded packs
     except Exception:
         pass
 merged.update(new_recs)
@@ -194,10 +334,10 @@ _h = hashlib.sha1()
 for _f in sorted(os.listdir(OUT)):
     if _f.endswith('.webp'):
         _h.update(_f.encode()); _h.update(str(os.path.getsize(f'{OUT}/{_f}')).encode())
-manifest = {'version': _h.hexdigest()[:10],
-            'note': 'Forgotten Adventures — personal-use, admin-gated. Not for public serving.',
-            'packs': sorted(merged.values(), key=lambda p: p['name'])}
-json.dump(manifest, open(existing, 'w'))
+index = {'version': _h.hexdigest()[:10],
+         'note': 'Forgotten Adventures — personal-use, admin-gated. Not for public serving.',
+         'packs': sorted(merged.values(), key=lambda p: p['name'])}
+json.dump(index, open(existing, 'w'))
 tot = sum(os.path.getsize(os.path.join(OUT, f)) for f in os.listdir(OUT))
 print(f'-> {OUT}  ({len(os.listdir(OUT))} files, {tot/1024/1024:.2f} MB, '
-      f'{len(manifest["packs"])} packs total)')
+      f'{len(index["packs"])} packs total)')

@@ -1134,11 +1134,604 @@ const D62E_EQUIPMENT = [
     "page": 82
   },
   {
+    "name": "Alchemist's Kit",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": "Knowledge",
+    "cost": null,
+    "page": 0,
+    "description": "Vials, reagents and a portable burner; grants +1D to rolls to identify substances or mix simple compounds (acid, smoke, fire-flasks)."
+  },
+  {
+    "name": "Antitoxin Vial",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A single dose of remedy; drunk in time, it grants +2D to resist one poison for the rest of the scene."
+  },
+  {
+    "name": "Arcane Focus",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Magical",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A crystal, wand or rune-etched rod attuned to one spell specialization (Change, Movement, Creation or Knowledge); grants +1D to casting rolls of that specialization."
+  },
+  {
+    "name": "Bag of Holding",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Magical",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "An enchanted sack whose interior is far larger than its opening; it holds a wagon's worth of goods yet weighs only a few pounds."
+  },
+  {
+    "name": "Buckler",
+    "category": "armor",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "protection": "+1D",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A small strapped shield; adds its bonus to the Brawn roll to resist damage and is light enough to wield alongside a one-handed weapon."
+  },
+  {
+    "name": "Caltrops",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A bag of spiked jacks scattered across the ground. A creature moving through the area at speed must make an Agility roll or take 2D damage and be slowed."
+  },
+  {
+    "name": "Cloak of Elvenkind",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Magical",
+    "skill": "Sneak",
+    "cost": null,
+    "page": 0,
+    "description": "A shifting grey-green cloak; while worn with the hood up, it grants +1D to Sneak and hiding rolls."
+  },
+  {
+    "name": "Disguise Kit",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": "Deceive",
+    "cost": null,
+    "page": 0,
+    "description": "Wigs, cosmetics and costume pieces; grants +1D to rolls to alter one's appearance and pass as someone else."
+  },
+  {
+    "name": "Everburning Torch",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Magical",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A torch wreathed in cold, magical flame that never consumes and cannot be doused by wind or water; reduces dark Difficulty by -5 or -10."
+  },
+  {
+    "name": "Forgery Kit",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": "Deceive",
+    "cost": null,
+    "page": 0,
+    "description": "Inks, seals, blank parchment and fine pens; grants +1D to create or to spot forged documents and seals."
+  },
+  {
+    "name": "Grimoire",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A caster's book of recorded spells and notes. A wizard separated from it prepares or researches spells at +5 to +10 Difficulty."
+  },
+  {
+    "name": "Herbalism Kit",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": "Medicine",
+    "cost": null,
+    "page": 0,
+    "description": "Pouches of dried herbs, a mortar and clean cloth; adds +1D to Medicine die codes and lets a character brew simple remedies or antitoxins."
+  },
+  {
+    "name": "Holy Symbol",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": "Prayer",
+    "cost": null,
+    "page": 0,
+    "description": "A consecrated icon of a faith; a divine caster uses it as a focus and gains +1D to rolls to ward or turn undead and unholy foes."
+  },
+  {
+    "name": "Hooded Lantern",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "An oil lantern with an adjustable shutter; reduces the Difficulty of tests in the dark (by -5 or -10) and can be dimmed to a sliver of light."
+  },
+  {
+    "name": "Manacles",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "Iron restraints for wrists or ankles. A bound captive escapes only with a hard Agility or Brawn roll (GM sets the Difficulty)."
+  },
+  {
+    "name": "Oilskin Cloak",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A waxed traveler's cloak; grants +1D to Stamina rolls against cold and wet, and keeps carried gear dry."
+  },
+  {
+    "name": "Potion of Climbing",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Magical",
+    "skill": "Climbing",
+    "cost": null,
+    "page": 0,
+    "description": "A single-use draught; for one scene the drinker gains +2D to Climbing and can scale sheer surfaces."
+  },
+  {
+    "name": "Potion of Invisibility",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Magical",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A single-use draught; the drinker turns invisible for one scene or until they attack, granting a large bonus to hide and to surprise foes."
+  },
+  {
+    "name": "Ring of Warmth",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Magical",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A plain band that radiates gentle heat; grants +2D to Stamina rolls against cold and lets the wearer ignore harsh but non-lethal chill."
+  },
+  {
+    "name": "Signal Whistle",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A shrill whistle heard clearly across a battlefield or through a dungeon; useful for signaling allies at a distance."
+  },
+  {
+    "name": "Spell Component Pouch",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A belt pouch of reagents and foci. Many spells require it; without one, casting those spells is at +5 to +10 Difficulty."
+  },
+  {
+    "name": "Ten-foot Pole",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A humble but beloved probe; grants +1D to rolls to detect floor traps, pressure plates or unstable ground ahead of you."
+  },
+  {
+    "name": "Thieves' Tools",
+    "category": "gear",
+    "genre": "fantasy",
+    "era": "Medieval",
+    "skill": "Lockpicking",
+    "cost": null,
+    "page": 0,
+    "description": "Picks, tension wrenches and a small pry bar; grants +1D to lockpicking and to disarming mechanical traps. Locks and traps generally can't be attempted without them."
+  },
+  {
+    "name": "Comlink",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A short-range personal communicator; keeps a team in contact across a city or a ship's decks, longer with a relay."
+  },
+  {
+    "name": "Datapad",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Computers",
+    "cost": null,
+    "page": 0,
+    "description": "A slate computer with network access; grants +1D to Computers and research rolls and stores vast reference data."
+  },
+  {
+    "name": "Engineering Toolkit",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Use-Repair Mechanical",
+    "cost": null,
+    "page": 0,
+    "description": "A full case of powered tools and diagnostics; grants +2D to Use-Repair and Upgrade rolls but is bulky and slow to deploy."
+  },
+  {
+    "name": "Environmental Analyzer",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Survival",
+    "cost": null,
+    "page": 0,
+    "description": "A pocket sensor reading atmosphere, radiation and biology; grants +1D to Survival and Knowledge rolls about local hazards on a strange world."
+  },
+  {
+    "name": "Grav Boots",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "Magnetic-grav soled boots; let the wearer walk hull-plating and bulkheads and grant +1D to maneuver in zero gravity."
+  },
+  {
+    "name": "Hacking Rig",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Computers",
+    "cost": null,
+    "page": 0,
+    "description": "A concealed deck of intrusion software and spike hardware; grants +2D to Computers rolls to breach systems and defeat electronic security."
+  },
+  {
+    "name": "Holo-Projector",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Deceive",
+    "cost": null,
+    "page": 0,
+    "description": "A palm emitter that casts convincing three-dimensional images or a decoy of the user; grants +1D to Deceive rolls that rely on a visual ruse."
+  },
+  {
+    "name": "Jetpack",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A short-burn thruster pack; grants brief personal flight (a few rounds per charge) for crossing gaps or gaining height."
+  },
+  {
+    "name": "Medical Scanner",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Medicine",
+    "cost": null,
+    "page": 0,
+    "description": "A handheld diagnostic sensor; grants +1D to Medicine rolls to diagnose injuries, toxins and diseases, and reveals a patient's condition at a glance."
+  },
+  {
+    "name": "Medkit",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Medicine",
+    "cost": null,
+    "page": 0,
+    "description": "A field medical kit of sealant, stims and diagnostic strips; adds +1D to Medicine die codes."
+  },
+  {
+    "name": "Multitool",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Use-Repair Mechanical",
+    "cost": null,
+    "page": 0,
+    "description": "A compact powered tool with interchangeable heads; adds +1D to Use-Repair rolls to fix or jury-rig machinery."
+  },
+  {
+    "name": "Nano-Bandage",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A patch seeded with medical nanites; applied to a wound it grants +1D to natural healing and stops bleeding."
+  },
+  {
+    "name": "Personal Cloaking Field",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Sneak",
+    "cost": null,
+    "page": 0,
+    "description": "A light-bending emitter worn on the belt; while active (a limited duration) it grants +2D to Sneak and hiding rolls, but flickers if the wearer moves fast."
+  },
+  {
+    "name": "Personal Energy Shield",
+    "category": "armor",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "protection": "+2D energy / +1D physical",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A belt-worn deflector field; adds its bonus to Brawn rolls to resist damage (stronger against energy) while its cell holds a charge."
+  },
+  {
+    "name": "Power Cell",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A rechargeable high-density battery; powers or reloads energy weapons and devices. A spare cell is a common lifesaver."
+  },
+  {
+    "name": "Rebreather",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A compact air recycler; grants +2D to Stamina rolls against airless, smoke-filled or toxic atmospheres for its charge duration."
+  },
+  {
+    "name": "Security Spike",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A single-use bypass chip; grants +1D to defeat one electronic lock or panel, then burns out."
+  },
+  {
+    "name": "Sensor Visor",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Search",
+    "cost": null,
+    "page": 0,
+    "description": "A visor overlaying thermal and motion data; grants +1D to search and Perception rolls to spot hidden objects, lifeforms or heat signatures."
+  },
+  {
+    "name": "Stimpack",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "An auto-injector of combat drugs; used as an action it removes the Stunned or Wounded condition once. Repeated use in a scene risks a Stamina penalty."
+  },
+  {
+    "name": "Universal Translator",
+    "category": "gear",
+    "genre": "scifi",
+    "era": "Science Fiction",
+    "skill": "Languages",
+    "cost": null,
+    "page": 0,
+    "description": "A worn earpiece that parses spoken language; grants +1D to Languages rolls to understand and be understood by an unknown tongue."
+  },
+  {
+    "name": "Comms Earpiece",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A concealed team radio; keeps a hero and their allies coordinated across a city block or a whole operation with a relay."
+  },
+  {
+    "name": "Electronic Lockpick",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A powered decryption pick; grants +1D to bypass mechanical and electronic locks and alarm panels."
+  },
+  {
+    "name": "EMP Grenade",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Science Fiction",
+    "skill": "Throwing",
+    "cost": null,
+    "page": 0,
+    "description": "A thrown pulse charge; disables unshielded electronics, drones and powered devices within a few meters for the scene. Harmless to living targets."
+  },
+  {
+    "name": "Exo-Gauntlets",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "Servo-assisted gloves; grant +2D to Brawn rolls to lift, bend or break, and let the wearer punch through light barriers."
+  },
+  {
+    "name": "First-Aid Spray",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A medical aerosol; used as an action it removes the Stunned condition or downgrades a Wounded result once per scene."
+  },
+  {
+    "name": "Forensics Kit",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "Lifts prints, samples and trace evidence; grants +1D to investigation and search rolls when working a scene."
+  },
+  {
+    "name": "Grapple Launcher",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": "Climbing",
+    "cost": null,
+    "page": 0,
+    "description": "A compressed-air line launcher; grants +1D to Climbing and lets the user ascend or swing across a gap as a single action."
+  },
+  {
+    "name": "Hacking Gauntlet",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Science Fiction",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A wrist deck for on-the-fly intrusion; grants +2D to rolls to breach cameras, doors and networks in the field."
+  },
+  {
+    "name": "Holo-Disguise Projector",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Science Fiction",
+    "skill": "Deceive",
+    "cost": null,
+    "page": 0,
+    "description": "A belt unit that overlays a false appearance; grants +2D to disguise and to pass as someone else, but a solid touch or a scanner can reveal the ruse."
+  },
+  {
+    "name": "Micro-Camera",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A button-sized camera or listening bug; plant it to surveil a room and stream to a receiver. Easily missed by the unwary."
+  },
+  {
+    "name": "Night-Vision Goggles",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "Light-amplifying optics; negate darkness penalties and grant +1D to Perception rolls to see in low light."
+  },
+  {
+    "name": "Rebreather Mask",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A slim filter mask; grants +2D to Stamina rolls against gas, smoke and brief underwater work."
+  },
+  {
+    "name": "Reinforced Costume",
+    "category": "armor",
+    "genre": "superhero",
+    "era": "Modern",
+    "protection": "+1D",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A woven protective bodysuit under the colors; adds its bonus to the Brawn roll to resist damage without hampering movement."
+  },
+  {
+    "name": "Smoke Pellets",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "Palmed capsules that burst into concealing smoke; grant +2D to escape or hide for a round and impose penalties on attacks through the cloud."
+  },
+  {
+    "name": "Tracer Beacon",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "A tiny adhesive transmitter; tag a target or vehicle and follow its signal across the city on a paired receiver."
+  },
+  {
     "name": "Utility Belt",
     "category": "gear",
     "genre": "superhero",
     "era": "Modern",
     "description": "Example super-science gear built with the Multiple Abilities superpower plus the Super-science enhancement. A sample 6D build (with Restricted 1) grants +1 to Athletics (grapple gun), Investigation (forensic kit), Stealth (smoke bombs), Perception (binoculars), and Rank 1 Natural Ranged Weapons (throwing stars). Can be loaned or grabbed away (-1D to use by another).",
     "page": 228
+  },
+  {
+    "name": "Zip-Line Gun",
+    "category": "gear",
+    "genre": "superhero",
+    "era": "Modern",
+    "skill": null,
+    "cost": null,
+    "page": 0,
+    "description": "Fires an anchored line for rapid traversal; grants +1D to rolls to cross rooftops or descend quickly and safely."
   }
 ];

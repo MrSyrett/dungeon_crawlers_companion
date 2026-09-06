@@ -7,7 +7,7 @@ import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import {
   D62eHeader, SearchForm, ChipRow, CountLine, EmptyState, SectionH, cardCls, hbBadge,
-  genreBadge, genreName, one, GENRES, matchesGenre, type Query, type RawQuery,
+  genreBadge, genreName, one, type Query, type RawQuery,
 } from "@/components/D62eRef";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +18,15 @@ const CATS = [
   { key: "armor", label: "Armor" },
   { key: "gear", label: "Gear" },
   { key: "vehicle", label: "Vehicles" },
+];
+// Equipment is organized by era (matching the item labels and the sheet's
+// picker); a game's genre draws from the relevant eras — Fantasy from Medieval
+// & Magical, Sci-Fi from Science Fiction, Modern/Superhero from Modern.
+const ERAS = [
+  { key: "Medieval", label: "Medieval" },
+  { key: "Modern", label: "Modern" },
+  { key: "Science Fiction", label: "Science Fiction" },
+  { key: "Magical", label: "Magical" },
 ];
 const CAT_HEADING: Record<string, string> = { weapon: "Weapons", armor: "Armor", gear: "Gear" };
 
@@ -55,18 +64,20 @@ export default async function D62eEquipmentPage({ searchParams }: { searchParams
 
   const raw = await searchParams;
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
-  const genre = GENRES.some((g) => g.key === one(raw.genre)) ? one(raw.genre) : "";
+  const era = ERAS.some((e) => e.key === one(raw.era)) ? one(raw.era) : "";
   const cat = CATS.some((c) => c.key === one(raw.cat)) ? one(raw.cat) : "";
-  const current: Query = { q, genre, cat };
+  const current: Query = { q, era, cat };
 
   const gear = ALL.filter((e) =>
     (cat === "" || cat === e.category) && cat !== "vehicle" &&
-    matchesGenre(e.genre, genre) &&
+    (era === "" || e.era === era) &&
     (!needle || [e.name, e.category, e.era ?? "", e.damage ?? "", e.protection ?? "", e.skill ?? "", e.description ?? ""].join(" ").toLowerCase().includes(needle)),
   );
+  // Vehicles carry no era; treat starships as Science Fiction so they appear in
+  // the unfiltered and Sci-Fi views.
   const vehicles = D62E_VEHICLES.filter((v) =>
     (cat === "" || cat === "vehicle") &&
-    matchesGenre(v.genre, genre) &&
+    (era === "" || era === "Science Fiction") &&
     (!needle || [v.name, v.kind, v.description ?? ""].join(" ").toLowerCase().includes(needle)),
   );
   const count = gear.length + vehicles.length;
@@ -79,10 +90,10 @@ export default async function D62eEquipmentPage({ searchParams }: { searchParams
 
       <div className="mb-6"><HomebrewEditor kind="d62e-gear" campaigns={campaigns} initial={hbOwn} /></div>
 
-      <SearchForm base={BASE} q={q} placeholder="Search gear & vehicles…" hidden={{ genre, cat }} />
-      <ChipRow label="Genre" base={BASE} current={current} param="genre" options={GENRES} active={genre} />
+      <SearchForm base={BASE} q={q} placeholder="Search gear & vehicles…" hidden={{ era, cat }} />
+      <ChipRow label="Era" base={BASE} current={current} param="era" options={ERAS} active={era} />
       <ChipRow label="Type" base={BASE} current={current} param="cat" options={CATS} active={cat} />
-      <CountLine count={count} noun="item" base={BASE} filtered={Boolean(needle || genre || cat)} />
+      <CountLine count={count} noun="item" base={BASE} filtered={Boolean(needle || era || cat)} />
 
       {count === 0 ? <EmptyState noun="item" base={BASE} /> : null}
 

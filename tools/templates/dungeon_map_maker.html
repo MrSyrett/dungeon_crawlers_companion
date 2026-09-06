@@ -2364,25 +2364,37 @@
     }
     g.putImageData(im,0,0);
   }
-  function tintedSprite(t, tint){
-    const key=t.id+"|"+tint;
+  // Multiply the whole sprite by the tint (preserving shading + alpha) — the recolour
+  // for a LIGHT/neutral base (our auto-collapsed "tint bases"), where a pale image ×
+  // colour reads as that colour. FA's own "Colorable" reds use recolorRedMask instead.
+  function multiplyTint(g, w, h, tint){
+    g.globalCompositeOperation="multiply"; g.fillStyle=tint; g.fillRect(0,0,w,h);
+    g.globalCompositeOperation="destination-in";           // restore the sprite's alpha mask
+    // caller re-draws the sprite for the mask; done in tintedSprite
+  }
+  function tintedSprite(t, tint, mode){
+    const key=t.id+"|"+mode+"|"+tint;
     if(tintCache.has(key)) return tintCache.get(key);
     const src=texGet(t.id);
     if(!src || !src.img || !src.img.complete || !src.img.naturalWidth) return null; // retry next frame
     const a=t.atlas, sw=a?a.w:src.img.naturalWidth, sh=a?a.h:src.img.naturalHeight;
     const cv=document.createElement("canvas"); cv.width=Math.max(1,sw); cv.height=Math.max(1,sh);
     const g=cv.getContext("2d");
-    if(a) g.drawImage(src.img, a.x,a.y,a.w,a.h, 0,0, sw,sh); else g.drawImage(src.img, 0,0);
-    recolorRedMask(g, cv.width, cv.height, tint);
+    const draw=()=>{ if(a) g.drawImage(src.img, a.x,a.y,a.w,a.h, 0,0, sw,sh); else g.drawImage(src.img, 0,0); };
+    draw();
+    if(mode==="redmask"){ recolorRedMask(g, cv.width, cv.height, tint); }
+    else { multiplyTint(g, cv.width, cv.height, tint); draw(); g.globalCompositeOperation="source-over"; }
     tintCache.set(key, cv);
     return cv;
   }
-  // Draw one object sprite at (-w/2,-h/2,w,h) in the current transform, tinted if
-  // it's a colourable object with a tint. Shared by the map render and the ghost.
+  // Draw one object sprite at (-w/2,-h/2,w,h), tinted per its tint mode. Shared by the
+  // map render + the ghost. redmask (FA colorable) is drawn in flat red so it ALWAYS
+  // recolours (default tint if none); multiply (auto tint-base) shows its neutral base
+  // untinted until a colour is chosen.
   function blitObj(t, tint, w, h){
-    // A colourable prop is drawn in flat red, so it must ALWAYS be recoloured —
-    // fall back to the default tint when the object carries none.
-    if(t.colorable){ const tc=tintedSprite(t, tint||COLORABLE_DEFAULT); if(tc){ ctx.drawImage(tc, -w/2,-h/2, w,h); return; } }
+    const tm=t.tintMode;
+    if(tm==="redmask"){ const tc=tintedSprite(t, tint||COLORABLE_DEFAULT, "redmask"); if(tc){ ctx.drawImage(tc, -w/2,-h/2, w,h); return; } }
+    else if(tm==="multiply" && tint){ const tc=tintedSprite(t, tint, "multiply"); if(tc){ ctx.drawImage(tc, -w/2,-h/2, w,h); return; } }
     const a=t.atlas;
     if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);
     else  ctx.drawImage(t.img, -w/2, -h/2, w, h);
@@ -4346,28 +4358,46 @@
   // ── gated Forgotten Adventures bundle ────────────────────────────────────
   // Refined FA atlases served admin-gated from /api/asset-packs (they live in
   // protected/asset-packs/fa, never under public/, because FA art is personal-use
-  // only). Same manifest shape as bundled.json; the only differences are that the
-  // sheet URLs point at the gated route and each texture may carry `colorable`.
-  // A logged-out or non-admin viewer just gets 401 here and keeps importing packs
-  // by hand — so this is purely additive.
+  // only). The bundle grew past a single manifest, so it's now a small INDEX
+  // (`fa-bundle.json` = {version, packs:[{id,name,manifest,count}]}) plus one slim
+  // per-pack file each (`{textures:[{id,name,w,h,atlas:{s,x,y,w,h},colorable?}]}`);
+  // this keeps every file small and scales to the whole library. `thumb` is the
+  // object atlas rect (sprites are already palette-sized) and `sw/sh` default 4096.
+  // A logged-out / non-admin viewer just gets 401 and keeps importing by hand.
   let faV="";
-  async function loadGatedFA(manifestUrl="/api/asset-packs", fileBase="/api/asset-packs/"){
-    let m;
+  async function loadGatedFA(indexUrl="/api/asset-packs", fileBase="/api/asset-packs/"){
+    let idx;
     try{
-      const r = await fetch(manifestUrl, {cache:"no-cache", credentials:"include"});
+      const r = await fetch(indexUrl, {cache:"no-cache", credentials:"include"});
       if(!r.ok) return;                       // 401 (not admin) / 404 (not deployed) → skip silently
-      m = await r.json();
+      idx = await r.json();
     }catch(e){ return; }
-    faV = m.version ? ("?v="+m.version) : "";
+    faV = idx.version ? ("?v="+idx.version) : "";
+    // Back-compat: an old-style single manifest embeds textures directly in packs.
+    const packs = idx.packs || [];
     let added=0;
-    for(const p of (m.packs||[])) for(const t of (p.textures||[])){
-      if(!t.atlas) continue;                  // FA bundle is objects-only for now
-      texReg.set(t.id, {id:t.id, name:t.name, kind:t.kind||"object", pack:p.id, packName:p.name,
-                        basic:false, w:t.w, h:t.h, colorable:!!t.colorable,
-                        atlas:t.atlas, thumbRect:t.thumb||null,
-                        thumbBase:fileBase, ver:faV,
-                        url:fileBase+t.atlas.sheet+faV, img:null});
+    const regTex=(p, t)=>{
+      const a=t.atlas; if(!a) return;
+      const rect={sheet:a.sheet||a.s, x:a.x, y:a.y, w:a.w, h:a.h, sw:a.sw||4096, sh:a.sh||4096};
+      // '' plain | 'multiply' (light base) | 'redmask' (FA colorable). Back-compat: an
+      // older manifest only had `colorable` (which was always red-mask).
+      const tm = t.tm || (t.colorable ? "redmask" : (t.tintable ? "multiply" : ""));
+      texReg.set(t.id, {id:t.id, name:t.name, kind:"object", pack:p.id, packName:p.name,
+                        basic:false, w:t.w, h:t.h,
+                        tintable:!!(t.tintable||t.colorable), tintMode:tm, colorable:tm==="redmask",
+                        atlas:rect, thumbRect:rect, thumbBase:fileBase, ver:faV,
+                        url:fileBase+rect.sheet+faV, img:null});
       added++;
+    };
+    for(const p of packs){
+      if(p.textures){ for(const t of p.textures) regTex(p,t); continue; }   // old embedded form
+      if(!p.manifest) continue;
+      let man;
+      try{ const r=await fetch(fileBase+p.manifest+faV, {cache:"no-cache", credentials:"include"});
+           if(!r.ok) continue; man=await r.json(); }catch(e){ continue; }
+      for(const t of (man.textures||[])) regTex(p, t);
+      // paint progressively so a big library fills in as each pack lands
+      buildObjGrid();
     }
     if(added){ buildTexSelects(); buildObjGrid();
       if(typeof redrawRoomThumbs==="function") redrawRoomThumbs(); render(); }
@@ -5339,7 +5369,7 @@
   // Add the cell's visuals (atlas crop or lazy <img>) — shared by single + grouped.
   function fillObjThumb(b, t){
     const r=t.thumbRect;
-    if(r && t.colorable){
+    if(r && t.tintMode==="redmask"){   // FA red-mask thumbs must be recoloured; multiply bases show their neutral art as-is
       const im=document.createElement("img"); im.alt=""; b.appendChild(im);
       _colorThumbs.push({img:im, t}); paintColorThumbs();
       return;
@@ -5390,9 +5420,9 @@
     // is the representative cell; its `pending` colour defaults to that sprite.
     const groups=new Map(); const order=[]; const single=[];
     for(const t of all){
-      // Colourable props aren't colour-variant SETS — they're one base you recolour
-      // with the tint chip, so they always stand alone.
-      if(t.colorable){ single.push(t); order.push({t}); continue; }
+      // Tintable props (FA colorable or auto tint-base) aren't colour-variant SETS —
+      // they're one base you recolour with the tint chip, so they always stand alone.
+      if(t.tintable){ single.push(t); order.push({t}); continue; }
       const cv=colorVariant(t.name);
       if(cv){ const gk=t.pack+"|"+cv.key;
         let grp=groups.get(gk);
@@ -5437,11 +5467,11 @@
           del.onclick=ev=>{ ev.stopPropagation(); removeCustomImage(t.id); };
           b.appendChild(del);
         }
-        if(t.colorable){   // recolour chip — native colour input, doubles as the tint indicator
+        if(t.tintable){   // recolour chip — native colour input, doubles as the tint indicator
           const inp=document.createElement("input"); inp.type="color"; inp.className="tint";
           inp.value=texTint.get(t.id)||"#b48a5a"; inp.title="Recolour this object, then click to place";
           inp.onclick=ev=>ev.stopPropagation();
-          inp.oninput=()=>{ texTint.set(t.id, inp.value); paintColorThumbs(); };   // live preview on the cell
+          inp.oninput=()=>{ texTint.set(t.id, inp.value); if(t.tintMode==="redmask") paintColorThumbs(); };
           inp.onchange=()=>{ texTint.set(t.id, inp.value); armObjId(t.id); };
           b.appendChild(inp);
         }
@@ -5594,7 +5624,10 @@
     const o={id:uid(), tex:t.id, x:snapHalf(wx), y:snapHalf(wy),
              w:(t.w||1)*armScale, h:(t.h||1)*armScale, rot:armRot};
     if(armFlip) o.flip=true;
-    if(t.colorable) o.tint = texTint.get(t.id) || COLORABLE_DEFAULT;   // colourable props are always recoloured (never raw red)
+    // redmask (FA colorable) is drawn in flat red so it ALWAYS carries a tint (default
+    // if none chosen); multiply bases only carry a tint if you actually picked a colour.
+    if(t.tintMode==="redmask") o.tint = texTint.get(t.id) || COLORABLE_DEFAULT;
+    else if(t.tintMode==="multiply" && texTint.has(t.id)) o.tint = texTint.get(t.id);
     map.objects.push(o);
     const idx=map.objects.length-1;
     // Stay on the Object tool after placing (every tool stays selected until you
