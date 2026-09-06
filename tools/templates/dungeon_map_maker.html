@@ -6058,7 +6058,14 @@
     const rec=serializeGroupToTemplate(gsel, name, cat, theme); if(!rec){ toast("Nothing to save."); closePrefabSaveModal(); return; }
     const list=loadCustomPrefabs();
     const i=list.findIndex(p=>p.name.toLowerCase()===name.toLowerCase());
-    if(i>=0){ rec.id=list[i].id; list[i]=rec; } else list.push(rec);
+    if(i>=0){
+      // Overwriting an existing prefab is destructive (the old one is replaced) — confirm
+      // first. Cancel keeps the modal open so the name can be changed instead.
+      if(!window.confirm('A prefab named "'+list[i].name+'" already exists.\n\nOverwrite it with this selection?')){
+        const n=$("pfNameIn"); if(n){ n.focus(); n.select(); } return;
+      }
+      rec.id=list[i].id; list[i]=rec;
+    } else list.push(rec);
     if(saveCustomPrefabs(list)){ closePrefabSaveModal(); buildRoomGrid(); toast('Saved prefab "'+name+'"'+(i>=0?" (updated)":"")+" — it's in the palette below."); }
   }
   function deleteCustomPrefab(id, nm){
