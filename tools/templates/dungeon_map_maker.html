@@ -171,6 +171,11 @@
   .objgrid button:hover .del,.objgrid .del:hover{display:block}
   .objgrid .del:hover{background:#a3322b;border-color:#c9564d}
   .objgrid img,.objgrid canvas.thc{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+  .objgrid .tbadge{position:absolute;bottom:2px;right:2px;height:13px;min-width:13px;padding:0 3px;
+     border-radius:7px;font-size:8.5px;line-height:13px;font-weight:700;text-align:center;
+     pointer-events:none;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+  .objgrid .tbadge.fa{background:#6ea8ff;color:#08122b}   /* FA colourable (red-mask) */
+  .objgrid .tbadge.tn{background:var(--gold);color:#1a1508} /* tint-base (multiply) */
   .objgrid .th{display:block;background-repeat:no-repeat;pointer-events:none}
   .objgrid .none{grid-column:1/-1;font-size:10.5px;color:var(--muted);text-align:center;padding:16px 4px}
   /* swatch pickers */
@@ -330,6 +335,11 @@
           <div id="packChecks"></div>
         </details>
         <input class="sel" id="objFilter" type="text" placeholder="Search" autocomplete="off">
+        <div id="objTintRow" class="row" style="display:none;align-items:center;gap:6px;margin:8px 0 2px">
+          <span class="fld" style="margin:0">Tint</span>
+          <input type="color" id="objTintColor" class="lcol" title="Colour for the armed / selected object">
+          <input type="text" id="objTintHex" class="sel" style="flex:0 0 96px;width:96px;padding:5px 7px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace" maxlength="7" spellcheck="false" placeholder="#ffffff" title="Copy or paste a hex code to match another object's colour">
+        </div>
         <div id="objGrid" class="objgrid"></div>
       </div>
     </div>
@@ -5087,7 +5097,7 @@
     if(o.kind==="wall") return {kind:"wall", obj:o.obj};
     return null;
   }
-  function setSel(v){ sel=v; syncStyleScope(); syncZUI(); syncLightUI(); syncShadowUI(); }
+  function setSel(v){ sel=v; syncStyleScope(); syncZUI(); syncLightUI(); syncShadowUI(); syncObjTint(); }
 
   // Style scope, in priority order:
   //   • a DRAWING tool is active  -> the pickers set `pending`, the style that new
@@ -5485,11 +5495,18 @@
         }
         if(t.tintable){   // recolour chip — native colour input, doubles as the tint indicator
           const inp=document.createElement("input"); inp.type="color"; inp.className="tint";
-          inp.value=texTint.get(t.id)||"#b48a5a"; inp.title="Recolour this object, then click to place";
+          inp.value=texTint.get(t.id) || (t.tintMode==="redmask"?"#b48a5a":"#ffffff"); inp.title="Recolour this object, then click to place";
           inp.onclick=ev=>ev.stopPropagation();
           inp.oninput=()=>{ texTint.set(t.id, inp.value); if(t.tintMode==="redmask") repaintColorThumb(t.id); };
           inp.onchange=()=>{ texTint.set(t.id, inp.value); armObjId(t.id); };
           b.appendChild(inp);
+          const badge=document.createElement("span");
+          badge.className="tbadge "+(t.tintMode==="redmask"?"fa":"tn");
+          badge.textContent=(t.tintMode==="redmask"?"FA":"T");
+          badge.title=(t.tintMode==="redmask")
+            ? "Forgotten Adventures colourable — recolours the red-masked part"
+            : "Tintable — multiply-tints the whole object";
+          b.appendChild(badge);
         }
       }
       g.appendChild(b); n++;
@@ -5500,7 +5517,7 @@
       more.textContent="Showing the first "+MAX_GRID_CELLS+" — type in the filter to narrow it down.";
       g.appendChild(more);
     }
-    sizeObjThumbs(); syncObjScope();
+    sizeObjThumbs(); syncObjScope(); syncObjTint();
     if(!n){ const d=document.createElement("div"); d.className="none";
       if(q || packSel.size) d.textContent="No objects match that.";
       else if(bundledError) d.textContent="Couldn't load /packs/bundled/bundled.json ("+bundledError+") — is the pack folder uploaded?";
@@ -5518,6 +5535,40 @@
     if(armedObj!==was) resetArm();
     ghostPt=null;
     setTool(armedObj ? "object" : "select"); buildObjGrid();
+  }
+
+  // ── Object tint row (colour swatch + hex field) ───────────────────────────
+  // A shared control that edits the tint of a SELECTED placed object (recolour it
+  // in place), or otherwise the ARMED palette object (the colour it will place
+  // with). The hex field lets you copy a colour off one object and paste it onto
+  // another to match them. Only shown for tintable objects.
+  function _objTintDefault(mode){ return mode==="redmask" ? "#b48a5a" : "#ffffff"; }
+  function _validHex(v){ return /^#[0-9a-fA-F]{6}$/.test(v); }
+  function objTintTarget(){
+    if(sel && sel.kind==="object"){ const o=(map.objects||[])[sel.idx];
+      if(o){ const t=texReg.get(o.tex); if(t && t.tintable) return {t, o}; } }
+    if(armedObj){ const t=texReg.get(armedObj); if(t && t.tintable) return {t, o:null}; }
+    return null;
+  }
+  function syncObjTint(){
+    const row=$("objTintRow"); if(!row) return;
+    const tgt=objTintTarget();
+    if(!tgt){ row.style.display="none"; return; }
+    row.style.display="flex";
+    const hex=((tgt.o ? tgt.o.tint : texTint.get(tgt.t.id)) || _objTintDefault(tgt.t.tintMode)).toLowerCase();
+    if($("objTintColor")) $("objTintColor").value=hex;
+    if($("objTintHex"))   $("objTintHex").value=hex;
+  }
+  function applyObjTint(hex, isCommit){
+    if(!_validHex(hex)) return;
+    hex=hex.toLowerCase();
+    const tgt=objTintTarget(); if(!tgt) return;
+    texTint.set(tgt.t.id, hex);                     // remembered for future placements of this type
+    if(tgt.o){ if(isCommit) pushHistory(); tgt.o.tint=hex; isCommit ? commit() : render(); }
+    else render();                                  // armed: refresh the ghost
+    if(tgt.t.tintMode==="redmask") repaintColorThumb(tgt.t.id);
+    if($("objTintColor")) $("objTintColor").value=hex;
+    if($("objTintHex"))   $("objTintHex").value=hex;
   }
   // ── multi-pack filter (checkbox list grouped by asset family) ─────────────
   // packSel is the set of TICKED pack ids; empty means "all". Session-only.
@@ -6486,6 +6537,13 @@
     if(sb) sb.addEventListener("scroll", ()=>{
       if(pickOpen && Math.abs(sb.scrollTop - pickScrollTop) > 2) closePicker(); });
     if($("objFilter")) $("objFilter").oninput=()=>buildObjGrid();
+    if($("objTintColor")){ $("objTintColor").oninput=e=>applyObjTint(e.target.value,false);
+                           $("objTintColor").onchange=e=>applyObjTint(e.target.value,true); }
+    if($("objTintHex")){
+      $("objTintHex").oninput=e=>{ const v=e.target.value.trim(); if(_validHex(v)) applyObjTint(v,false); };
+      $("objTintHex").onchange=e=>{ let v=e.target.value.trim(); if(v && v[0]!=="#") v="#"+v;
+        if(_validHex(v)) applyObjTint(v,true); else syncObjTint(); };   // revert display on a bad code
+    }
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
