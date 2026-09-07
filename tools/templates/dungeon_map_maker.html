@@ -4581,6 +4581,7 @@
       getActiveLibs:()=>[...activeLibs], toggleLib, prefabStyleOf, libForPack, texLib,
       allPrefabs, buildRoomGrid, buildObjGrid, pickList,
       loadCustomPrefabs, saveCustomPrefabs, loadHiddenDefaults, getDefaults:()=>ROOM_TEMPLATES,
+      groupMembers, groupLockedAt, serializeGroupToTemplate,
       fitView, commit, getCam:()=>cam }; } }catch(e){}
 
   // Kick off a load the first time a texture is asked for; re-render when it
@@ -6138,31 +6139,53 @@
   // carries either {pf} or {roomIdx}. ──
   function wallMidpoint(w){ const s=wallPts(w); if(!s||!s.length) return null; return s[Math.floor(s.length/2)]; }
   function isRoomShape(sh){ return sh && !sh.deco && (sh.type==="rect"||sh.type==="circle"||sh.type==="polygon"); }
+  // Is `o` (at world x,y) claimed by a DIFFERENT locked group than the one we're building?
+  // A piece is claimed elsewhere if it carries a different locked prefab's tag, or sits
+  // inside a different locked room that's no bigger than ours. This stops one locked group,
+  // when it overlaps another, from dragging the other's contents along.
+  function ownedByOtherLocked(o,x,y,selfPf,selfRoomIdx,myArea){
+    if(o.pf!=null && o.pf!==selfPf && prefabLocked(o.pf)) return true;
+    for(let i=0;i<(map.shapes||[]).length;i++){ if(i===selfRoomIdx) continue;
+      const o2=map.shapes[i]; if(!(o2 && o2.locked && isRoomShape(o2))) continue;
+      if(pointInShape(x,y,o2)){ const b=bounds(o2,"shape"); const a=b?b.w*b.h:1e18; if(a<=myArea) return true; } }
+    return false;
+  }
+  // Everything that sits spatially inside `roomShape` — objects, lights, shadows, doors,
+  // walls, stairs AND deco shapes — so a locked room behaves as one rigid unit. (Other
+  // ROOM shapes are their own groups, so only DECO shapes get absorbed here.) Pieces
+  // claimed by a different locked group are left out.
+  function insideMembers(roomShape, selfPf, selfRoomIdx){
+    const out=[];
+    const mb=bounds(roomShape,"shape"); const myArea=mb?mb.w*mb.h:1e18;
+    const inside=(x,y)=>pointInShape(x,y,roomShape);
+    const owned=(o,x,y)=>ownedByOtherLocked(o,x,y,selfPf,selfRoomIdx,myArea);
+    (map.shapes||[]).forEach((o,i)=>{ if(o===roomShape||!o||!o.deco) return;
+      const b=bounds(o,"shape"); if(!b) return; const cx=b.x+b.w/2, cy=b.y+b.h/2;
+      if(inside(cx,cy)&&!owned(o,cx,cy)) out.push({kind:"shape",idx:i,obj:o}); });
+    (map.objects||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!owned(o,o.x,o.y)) out.push({kind:"object",idx:i,obj:o}); });
+    (map.lights||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!owned(o,o.x,o.y)) out.push({kind:"light",idx:i,obj:o}); });
+    (map.shadows||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!owned(o,o.x,o.y)) out.push({kind:"shadow",idx:i,obj:o}); });
+    (map.doors||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!owned(o,o.x,o.y)) out.push({kind:"door",idx:i,obj:o}); });
+    (map.walls||[]).forEach((o,i)=>{ const p=wallMidpoint(o); if(p&&inside(p[0],p[1])&&!owned(o,p[0],p[1])) out.push({kind:"wall",idx:i,obj:o}); });
+    (map.stairs||[]).forEach((o,i)=>{ const b=bounds(o,"stair"); if(b&&inside(b.x+b.w/2,b.y+b.h/2)&&!owned(o,b.x+b.w/2,b.y+b.h/2)) out.push({kind:"stair",idx:i,obj:o}); });
+    return out;
+  }
   function groupMembers(sel){
     if(!sel) return [];
-    if(sel.pf!=null) return prefabChildren(sel.pf);
+    if(sel.pf!=null){
+      // Prefab's own tagged pieces, PLUS any loose piece/deco-shape the user later drew
+      // inside the prefab's room — so anything inside a locked prefab locks with it too.
+      const kids=prefabChildren(sel.pf);
+      const rs=kids.find(k=>k.kind==="shape"&&isRoomShape(k.obj));
+      if(!rs) return kids;
+      const have=new Set(kids.map(k=>k.obj));
+      for(const it of insideMembers(rs.obj, sel.pf, null)){ if(!have.has(it.obj)) kids.push(it); }
+      return kids;
+    }
     if(sel.roomIdx!=null){
       const sh=(map.shapes||[])[sel.roomIdx]; if(!sh) return [];
-      const inside=(x,y)=>pointInShape(x,y,sh);
-      const mb=bounds(sh,"shape"); const myArea=mb?mb.w*mb.h:1e18;
-      // A locked room grabs whatever sits inside it — but NOT pieces that belong to a
-      // DIFFERENT locked group. Otherwise, when one locked group overlaps another, rotating
-      // it drags the other's objects/doors along. A piece is "owned elsewhere" if it carries
-      // a locked prefab's tag, or if it also sits inside a smaller/other locked room.
-      const ownedElsewhere=(o,x,y)=>{
-        if(o.pf!=null && prefabLocked(o.pf)) return true;                   // belongs to a locked prefab
-        for(let i=0;i<(map.shapes||[]).length;i++){ if(i===sel.roomIdx) continue;
-          const o2=map.shapes[i]; if(!(o2 && o2.locked && isRoomShape(o2))) continue;
-          if(pointInShape(x,y,o2)){ const b=bounds(o2,"shape"); const a=b?b.w*b.h:1e18; if(a<=myArea) return true; } }
-        return false;
-      };
       const out=[{kind:"shape", idx:sel.roomIdx, obj:sh}];
-      (map.objects||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!ownedElsewhere(o,o.x,o.y)) out.push({kind:"object",idx:i,obj:o}); });
-      (map.lights||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!ownedElsewhere(o,o.x,o.y)) out.push({kind:"light",idx:i,obj:o}); });
-      (map.shadows||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!ownedElsewhere(o,o.x,o.y)) out.push({kind:"shadow",idx:i,obj:o}); });
-      (map.doors||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!ownedElsewhere(o,o.x,o.y)) out.push({kind:"door",idx:i,obj:o}); });
-      (map.walls||[]).forEach((o,i)=>{ const p=wallMidpoint(o); if(p&&inside(p[0],p[1])&&!ownedElsewhere(o,p[0],p[1])) out.push({kind:"wall",idx:i,obj:o}); });
-      (map.stairs||[]).forEach((o,i)=>{ const b=bounds(o,"stair"); if(b&&inside(b.x+b.w/2,b.y+b.h/2)&&!ownedElsewhere(o,b.x+b.w/2,b.y+b.h/2)) out.push({kind:"stair",idx:i,obj:o}); });
+      for(const it of insideMembers(sh, null, sel.roomIdx)) out.push(it);
       return out;
     }
     return [];
@@ -6172,6 +6195,14 @@
   function groupLockedAt(wx,wy,h){
     // Returns a group `sel` if the click lands on a LOCKED prefab or a LOCKED room, else null.
     if(h && h.obj && h.obj.pf!=null && prefabLocked(h.obj.pf)) return {kind:"prefab", pf:h.obj.pf};
+    // Inside a LOCKED prefab's room footprint — even when the hit is a loose piece/shape the
+    // user drew on top of it (which carries no pf tag). Smallest matching prefab wins.
+    { let best=null, bestA=1e18;
+      for(const e of (map.prefabs||[])){ if(e.locked===false) continue;
+        const rs=(map.shapes||[]).find(s=>s&&s.pf===e.id&&isRoomShape(s)); if(!rs) continue;
+        if(!pointInShape(wx,wy,rs)) continue;
+        const b=bounds(rs,"shape"); const a=b?b.w*b.h:1e18; if(a<bestA){ bestA=a; best=e.id; } }
+      if(best!=null) return {kind:"prefab", pf:best}; }
     // topmost locked room shape containing the point
     for(let i=(map.shapes||[]).length-1;i>=0;i--){ const sh=map.shapes[i];
       if(sh && sh.locked && isRoomShape(sh) && pointInShape(wx,wy,sh)) return {kind:"prefab", roomIdx:i}; }
@@ -6649,7 +6680,8 @@
   function deleteGroup(sel){
     pushHistory();
     if(sel.pf!=null){
-      for(const arr of [map.shapes,map.walls,map.doors,map.stairs,map.objects,map.lights,map.shadows]){ if(!arr) continue; for(let i=arr.length-1;i>=0;i--){ if(arr[i]&&arr[i].pf===sel.pf) arr.splice(i,1); } }
+      const rm=new Set(groupMembers(sel).map(k=>k.obj));
+      for(const arr of [map.shapes,map.walls,map.doors,map.stairs,map.objects,map.lights,map.shadows]){ if(!arr) continue; for(let i=arr.length-1;i>=0;i--){ if(arr[i]&&(rm.has(arr[i])||arr[i].pf===sel.pf)) arr.splice(i,1); } }
       map.prefabs=(map.prefabs||[]).filter(p=>p.id!==sel.pf);
     } else if(sel.roomIdx!=null){
       const rm=new Set(groupMembers(sel).map(k=>k.obj));
