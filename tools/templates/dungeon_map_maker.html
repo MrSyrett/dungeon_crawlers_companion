@@ -276,7 +276,19 @@
   <aside class="sidebar">
     <div class="hdr">
       <h1>⚔ Map Maker</h1>
-      <label class="switch" title="Dark mode — darkens the background only"><input type="checkbox" id="darkToggle"><span class="slider"></span></label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button type="button" id="shortcutsBtn" title="Keyboard shortcuts (?)" style="border:1px solid var(--line,#3a3a44);background:none;color:inherit;border-radius:6px;width:26px;height:24px;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center">⌨</button>
+        <label class="switch" title="Dark mode — darkens the background only"><input type="checkbox" id="darkToggle"><span class="slider"></span></label>
+      </div>
+    </div>
+    <div id="shortcutsModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5)">
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:560px;width:calc(100% - 40px);max-height:82vh;overflow:auto;background:var(--panel,#222228);color:var(--fg,#e8e8ec);border:1px solid var(--line,#3a3a44);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line,#3a3a44)">
+          <strong style="font-size:15px">⌨ Keyboard &amp; mouse shortcuts</strong>
+          <button type="button" id="shortcutsClose" style="border:none;background:none;color:inherit;font-size:20px;cursor:pointer;line-height:1">×</button>
+        </div>
+        <div id="shortcutsBody" style="padding:14px 18px;font-size:13px;line-height:1.5"></div>
+      </div>
     </div>
 
     <div class="grp">
@@ -2914,8 +2926,12 @@
     }
   }
   function drawSelection(){
+    if(marquee){ const a=toScreen(marquee.x0,marquee.y0), b=toScreen(marquee.x1,marquee.y1);
+      const x=Math.min(a[0],b[0]), y=Math.min(a[1],b[1]), w=Math.abs(b[0]-a[0]), h=Math.abs(b[1]-a[1]);
+      ctx.save(); ctx.fillStyle="rgba(90,150,255,.12)"; ctx.strokeStyle=C.sel; ctx.lineWidth=1; ctx.setLineDash([4,3]);
+      ctx.fillRect(x,y,w,h); ctx.strokeRect(x,y,w,h); ctx.restore(); }
     if(sel==null) return;
-    if(sel.kind==="prefab"){ drawGroupSelection(sel); return; }
+    if(sel.kind==="prefab" || sel.kind==="multi"){ drawGroupSelection(sel); return; }
     const o=objAt(sel);
     if(!o) return;
     if(o.kind==="light" || o.kind==="shadow"){
@@ -3030,13 +3046,86 @@
   }
   let sel=null;                    // {kind,idx}
   let handle=null;                 // object scale/rotate handle drag
-  function objAt(s){ const arr=({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects,light:map.lights,shadow:map.shadows})[s.kind];
+  function arrOfKind(k){ return ({shape:map.shapes,wall:map.walls,door:map.doors,stair:map.stairs,object:map.objects,light:map.lights,shadow:map.shadows})[k]; }
+  function objAt(s){ const arr=arrOfKind(s.kind);
     return arr&&arr[s.idx]?{kind:s.kind,obj:arr[s.idx]}:null; }
+
+  // ── MULTI-SELECTION: sel = {kind:"multi", items:[{kind,obj}]} (identity-based, so it
+  // survives array re-indexing). Reuses the rigid-group machinery (groupMembers →
+  // beginGroupDrag / rotateGroup / groupHandles) for move & rotate. ──
+  function idxOfObj(kind,obj){ const arr=arrOfKind(kind); return arr?arr.indexOf(obj):-1; }
+  function selItems(){   // current selection as a flat [{kind,obj}] (single, multi, or group)
+    if(!sel) return [];
+    if(sel.kind==="multi") return sel.items.slice();
+    if(sel.kind==="prefab") return groupMembers(sel);
+    const o=objAt(sel); return o?[{kind:o.kind,obj:o.obj}]:[];
+  }
+  function setMulti(items){
+    items=(items||[]).filter(it=>it&&it.obj);
+    // de-dup by object identity, keep order
+    const seen=new Set(), uniq=[];
+    for(const it of items){ if(seen.has(it.obj)) continue; seen.add(it.obj); uniq.push({kind:it.kind,obj:it.obj}); }
+    if(uniq.length===0){ setSel(null); return; }
+    if(uniq.length===1){ const it=uniq[0], i=idxOfObj(it.kind,it.obj); if(i>=0){ setSel({kind:it.kind,idx:i}); return; } }
+    setSel({kind:"multi", items:uniq});
+  }
+  function selHasObj(obj){
+    if(sel && sel.kind==="multi") return sel.items.some(it=>it.obj===obj);
+    if(sel && sel.kind!=="prefab" && sel.kind!=="multi"){ const o=objAt(sel); return !!(o&&o.obj===obj); }
+    return false;
+  }
+  function toggleInSel(h){   // Shift+click: add/remove one hit piece
+    const cur=[];
+    if(sel && sel.kind==="multi") cur.push(...sel.items);
+    else if(sel && sel.kind!=="prefab"){ const o=objAt(sel); if(o) cur.push({kind:o.kind,obj:o.obj}); }
+    const at=cur.findIndex(it=>it.obj===h.obj);
+    if(at>=0) cur.splice(at,1); else cur.push({kind:h.kind,obj:h.obj});
+    setMulti(cur);
+  }
+  // MIRROR the current selection about its own centre (single flips in place; a group /
+  // multi mirrors its whole arrangement). X or M.
+  function mirrorSel(){
+    const mem=selItems(); if(!mem.length) return;
+    pushHistory();
+    const bb=elemsBBox(mem); const cx=bb?bb.x+bb.w/2:0;
+    for(const it of mem) mirrorElem(it.obj, it.kind, cx);
+    commit();
+  }
+  // DUPLICATE the current selection, offset a little, and select the copies. A prefab
+  // copy gets its own new pf id + entry (stays a locked unit); loose copies come back as
+  // a multi-selection. Ctrl/Cmd+D.
+  function duplicateSel(){
+    const mem=selItems(); if(!mem.length) return;
+    pushHistory();
+    const off = snapOn?1:0.5;
+    let newPf=null;
+    if(sel && sel.kind==="prefab" && sel.pf!=null){
+      newPf=uid(); const e=prefabEntry(sel.pf);
+      map.prefabs=map.prefabs||[]; map.prefabs.push({id:newPf, name:(e?e.name:"Prefab"), locked:(e?e.locked!==false:true)});
+    }
+    const clones=[];
+    for(const it of mem){ const arr=arrOfKind(it.kind); if(!arr) continue;
+      const c=JSON.parse(JSON.stringify(it.obj)); c.id=uid(); shiftElem(c, it.kind, off, off);
+      if(newPf!=null) c.pf=newPf; else { delete c.pf; delete c.locked; }
+      arr.push(c); clones.push({kind:it.kind,obj:c}); }
+    if(newPf!=null) setSel({kind:"prefab", pf:newPf});
+    else setMulti(clones);
+    commit();
+    toast(clones.length>1 ? clones.length+" copies — drag to place." : "Copied — drag to place.");
+  }
+  function deleteSelItems(){   // delete every piece in a multi-selection
+    if(!(sel && sel.kind==="multi")) return;
+    pushHistory();
+    const rm=new Set(sel.items.map(it=>it.obj));
+    for(const arr of [map.shapes,map.walls,map.doors,map.stairs,map.objects,map.lights,map.shadows]){
+      if(!arr) continue; for(let i=arr.length-1;i>=0;i--){ if(rm.has(arr[i])) arr.splice(i,1); } }
+    setSel(null); commit();
+  }
 
   // ════════════════════════════════════════════════════════════════
   // POINTER INTERACTION
   // ════════════════════════════════════════════════════════════════
-  let dragStart=null, dragObj=null, panning=null, hoverPt=null, moved=false;
+  let dragStart=null, dragObj=null, panning=null, hoverPt=null, moved=false, marquee=null;
   let liveDrag=false;   // true while actively dragging an object/prefab/handle — skips the costly lit pass
   // Touch: track active pointers so TWO fingers = pinch-zoom + two-finger pan.
   const pointers=new Map();        // pointerId → [screenX, screenY]
@@ -3067,12 +3156,12 @@
     if(armedRoom){ stampRoom(wx,wy); return; }
 
     if(tool==="select"){
-      // A selected group's rotate / lock handles take priority over anything under them.
-      if(sel && sel.kind==="prefab"){
+      // A selected group / multi's rotate (and, for a group, lock) handle takes priority.
+      if(sel && (sel.kind==="prefab" || sel.kind==="multi")){
         const ph=groupHandles(sel);
         if(ph){
           if(Math.hypot(sx-ph.rotate[0], sy-ph.rotate[1])<14){ rotateGroup(sel, +1); return; }
-          if(Math.hypot(sx-ph.lock[0],   sy-ph.lock[1])<14){ groupLock(sel, false); return; }
+          if(sel.kind!=="multi" && Math.hypot(sx-ph.lock[0], sy-ph.lock[1])<14){ groupLock(sel, false); return; }
         }
       }
       // An individual room or prefab-piece shows a small "lock this" handle → click to group.
@@ -3102,6 +3191,13 @@
                     rot0:o.rot||0, w0:o.w||1, h0:o.h||1, snap:objSnapshot({obj:o})};
             return; } } }
       const h=hitTest(wx,wy);
+      // Shift+click toggles a piece in/out of a multi-selection (ignores group locking —
+      // it picks the individual piece under the cursor).
+      if(e.shiftKey && h){ toggleInSel(h); render(); return; }
+      // Click inside an existing multi-selection → drag the whole set as one.
+      if(sel && sel.kind==="multi" && h && selHasObj(h.obj)){
+        pushHistory(); dragPrefab=beginGroupDrag(sel, wx, wy); moved=false; render(); return;
+      }
       const g=groupLockedAt(wx,wy,h);
       if(g){
         // Clicking any part of a LOCKED prefab or room selects the whole unit and drags it.
@@ -3111,7 +3207,8 @@
       }
       else if(h){ setSel({kind:h.kind,idx:h.idx});
         dragObj={h, ox:wx, oy:wy, snap:objSnapshot(h)}; }
-      else { setSel(null); panning={sx,sy,cx:cam.x,cy:cam.y}; }   // drag empty space to pan (one-finger on touch)
+      else if(e.pointerType==="touch"){ setSel(null); panning={sx,sy,cx:cam.x,cy:cam.y}; }   // one-finger drag pans on touch
+      else { marquee={sx,sy,x0:wx,y0:wy,x1:wx,y1:wy,add:e.shiftKey}; }   // mouse: rubber-band select (Space/​middle-drag still pans)
       render(); return;
     }
     if(tool==="object"){ if(armedObj) placeObject(wx,wy,e.shiftKey); return; }
@@ -3144,6 +3241,7 @@
     if(gesture){ if(pointers.size>=2) updatePinch(); return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
     if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); scheduleRender(); return; }
+    if(marquee){ marquee.x1=wx; marquee.y1=wy; moved=true; render(); return; }
     if(handle){
       const o=handle.o;
       if(handle.mode==="rotate"){
@@ -3212,6 +3310,24 @@
     if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
     if(stroke){ finishStroke(); return; }
     if(handle){ if(moved){ pushHistory(handle.snap); commit(); } handle=null; return; }
+    if(marquee){
+      const rx0=Math.min(marquee.x0,marquee.x1), rx1=Math.max(marquee.x0,marquee.x1);
+      const ry0=Math.min(marquee.y0,marquee.y1), ry1=Math.max(marquee.y0,marquee.y1);
+      const dragged = moved && (rx1-rx0>0.15 || ry1-ry0>0.15);
+      const add=marquee.add; marquee=null;
+      if(!dragged){ if(!add) setSel(null); render(); return; }   // a click (not a drag) clears
+      const inR=(p)=>p && p[0]>=rx0 && p[0]<=rx1 && p[1]>=ry0 && p[1]<=ry1;
+      const hits=[];
+      const scan=(arr,kind,ref)=>{ (arr||[]).forEach(o=>{ if(inR(ref(o))) hits.push({kind,obj:o}); }); };
+      scan(map.objects,"object", o=>[o.x,o.y]);
+      scan(map.doors,"door",   o=>[o.x,o.y]);
+      scan(map.stairs,"stair", o=>{ const b=bounds(o,"stair"); return b?[b.x+b.w/2,b.y+b.h/2]:null; });
+      if(advOn()){ scan(map.lights,"light", o=>[o.x,o.y]); scan(map.shadows,"shadow", o=>[o.x,o.y]); }
+      scan(map.shapes,"shape", o=>{ if(!o.deco) return null; const b=bounds(o,"shape"); return b?[b.x+b.w/2,b.y+b.h/2]:null; });
+      const base = add ? selItems() : [];
+      setMulti(base.concat(hits));
+      render(); return;
+    }
     if(panning){ panning=null; render(); return; }
     if(dragPrefab){ if(moved){ commit(); } else { if(history.length) history.pop(); syncUndo(); } dragPrefab=null; return; }
     if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
@@ -3231,7 +3347,7 @@
     if(roomGhostPt){ roomGhostPt=null; render(); } });
   cv.addEventListener("pointercancel", e=>{ pointers.delete(e.pointerId);
     if(pointers.size<2) gesture=null;
-    if(pointers.size===0){ panning=null; draft=null; dragStart=null; stroke=null; liveDrag=false; dragBlit=null; render(); } });
+    if(pointers.size===0){ panning=null; draft=null; dragStart=null; stroke=null; marquee=null; liveDrag=false; dragBlit=null; render(); } });
   cv.addEventListener("dblclick", ()=>{ if(polyPts&&polyPts.length>1) finishPolygon(false); });
   cv.addEventListener("contextmenu", e=>e.preventDefault());
   cv.addEventListener("wheel", e=>{ e.preventDefault();
@@ -4582,6 +4698,7 @@
       allPrefabs, buildRoomGrid, buildObjGrid, pickList,
       loadCustomPrefabs, saveCustomPrefabs, loadHiddenDefaults, getDefaults:()=>ROOM_TEMPLATES,
       groupMembers, groupLockedAt, serializeGroupToTemplate,
+      setMulti, selItems, mirrorSel, duplicateSel,
       fitView, commit, getCam:()=>cam }; } }catch(e){}
 
   // Kick off a load the first time a texture is asked for; re-render when it
@@ -6092,6 +6209,24 @@
     else if(kind==="shape"){ if(o.type==="rect"){o.x=s.x+dx;o.y=s.y+dy;} else if(o.type==="circle"){o.cx=s.cx+dx;o.cy=s.cy+dy;} else if(o.type==="polygon"){o.pts=s.pts.map(q=>[q[0]+dx,q[1]+dy]);} }
     else if(kind==="stair"){ if(s.ax!=null){o.ax=s.ax+dx;o.ay=s.ay+dy;o.bx=s.bx+dx;o.by=s.by+dy;o.tx=s.tx+dx;o.ty=s.ty+dy;} else if(s.x1!=null){o.x1=s.x1+dx;o.y1=s.y1+dy;o.x2=s.x2+dx;o.y2=s.y2+dy;} else {o.x=s.x+dx;o.y=s.y+dy;} }
   }
+  // Mirror an element left↔right across the vertical world line X = cx. Objects/doors
+  // toggle their flip flag and negate rotation so the sprite reads as a true reflection;
+  // shapes/walls/stairs reflect their geometry. (cx = own centre ⇒ flip in place.)
+  function mirrorElem(o, kind, cx){
+    const rx=x=>2*cx-x;
+    if(kind==="object"){ o.x=rx(o.x); o.rot=-(o.rot||0); o.flip=!o.flip; }
+    else if(kind==="door"){ o.x=rx(o.x); o.a=-(o.a||0); o.flip=!o.flip; }
+    else if(kind==="light"||kind==="shadow"){ o.x=rx(o.x); if(o.rot!=null) o.rot=Math.PI-(o.rot||0); }
+    else if(kind==="wall"){ o.x1=rx(o.x1); o.x2=rx(o.x2); if(o.cx!=null)o.cx=rx(o.cx); if(o.pts)o.pts=o.pts.map(q=>[rx(q[0]),q[1]]); }
+    else if(kind==="shape"){
+      if(o.type==="rect"){ o.x=rx(o.x+o.w); }              // left edge becomes the mirror of the right
+      else if(o.type==="circle"){ o.cx=rx(o.cx); }
+      else if(o.type==="polygon"){ o.pts=o.pts.map(q=>[rx(q[0]),q[1]]); } }
+    else if(kind==="stair"){
+      if(o.ax!=null){ o.ax=rx(o.ax); o.bx=rx(o.bx); o.tx=rx(o.tx); }
+      else if(o.x1!=null){ o.x1=rx(o.x1); o.x2=rx(o.x2); }
+      else { o.x=rx(o.x); if(o.rot!=null) o.rot=-(o.rot||0); } }
+  }
   function elemsBBox(list){   // list of {kind,obj}
     let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
     for(const it of list){ const b=bounds(it.obj, it.kind); if(!b) continue;
@@ -6172,6 +6307,7 @@
   }
   function groupMembers(sel){
     if(!sel) return [];
+    if(sel.kind==="multi") return sel.items.map(it=>({kind:it.kind, obj:it.obj}));
     if(sel.pf!=null){
       // Prefab's own tagged pieces, PLUS any loose piece/deco-shape the user later drew
       // inside the prefab's room — so anything inside a locked prefab locks with it too.
@@ -6191,7 +6327,7 @@
     return [];
   }
   function groupBounds(sel){ return elemsBBox(groupMembers(sel)); }
-  function groupName(sel){ if(sel && sel.pf!=null){ const e=prefabEntry(sel.pf); return e?e.name:"Prefab"; } return "Room"; }
+  function groupName(sel){ if(sel && sel.kind==="multi") return sel.items.length+" selected"; if(sel && sel.pf!=null){ const e=prefabEntry(sel.pf); return e?e.name:"Prefab"; } return "Room"; }
   function groupLockedAt(wx,wy,h){
     // Returns a group `sel` if the click lands on a LOCKED prefab or a LOCKED room, else null.
     if(h && h.obj && h.obj.pf!=null && prefabLocked(h.obj.pf)) return {kind:"prefab", pf:h.obj.pf};
@@ -6700,7 +6836,13 @@
     ctx.beginPath(); ctx.rect(lx-3.4, ly-1.2, 6.8, 5.4); ctx.fill(); ctx.restore(); }                             // body
   function drawGroupSelection(sel){
     const H=groupHandles(sel); if(!H) return;
+    const isMulti = sel.kind==="multi";
     ctx.save();
+    // For a multi-selection, outline each member so it's clear what's picked.
+    if(isMulti){ ctx.strokeStyle=C.sel; ctx.lineWidth=1.4; ctx.setLineDash([3,3]);
+      for(const it of sel.items){ const b=bounds(it.obj,it.kind); if(!b) continue;
+        const p=toScreen(b.x,b.y); ctx.strokeRect(p[0]-1.5,p[1]-1.5,b.w*wpx()+3,b.h*wpx()+3); }
+      ctx.setLineDash([]); }
     const x=Math.min(H.tl[0],H.br[0]), y=Math.min(H.tl[1],H.br[1]), w=Math.abs(H.br[0]-H.tl[0]), h=Math.abs(H.br[1]-H.tl[1]);
     ctx.strokeStyle=C.sel; ctx.lineWidth=2; ctx.setLineDash([7,4]); ctx.strokeRect(x-2,y-2,w+4,h+4); ctx.setLineDash([]);
     ctx.font="12px system-ui,sans-serif"; ctx.textBaseline="bottom";
@@ -6711,8 +6853,9 @@
     ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(H.rotate[0],H.rotate[1],9,0,7); ctx.fill();
     ctx.fillStyle="#1b1b1f"; ctx.font="13px system-ui,sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
     ctx.fillText("⟳", H.rotate[0], H.rotate[1]+0.5);
-    ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(H.lock[0],H.lock[1],9,0,7); ctx.fill();
-    drawLockGlyph(H.lock[0], H.lock[1], false);      // locked padlock
+    if(!isMulti){                                     // groups show a lock handle; a multi-pick doesn't
+      ctx.fillStyle=C.sel; ctx.beginPath(); ctx.arc(H.lock[0],H.lock[1],9,0,7); ctx.fill();
+      drawLockGlyph(H.lock[0], H.lock[1], false); }   // locked padlock
     ctx.textAlign="left"; ctx.textBaseline="alphabetic";
     ctx.restore();
   }
@@ -7657,6 +7800,48 @@
     if($("snapToggle")) $("snapToggle").checked=snapOn;
     scheduleSave(); toast("Snap to grid "+(snapOn?"on":"off")); }
   $("darkToggle").onchange=e=>setTheme(e.target.checked ? "dark" : "light");
+  // ── Keyboard-shortcuts popup ──
+  const SHORTCUTS=[
+    ["Tools", [
+      ["V","Select / move tool"],["R","Rectangle room/shape"],["C","Circle"],["P","Polygon (click points; close on start point)"],
+      ["N","Freehand draw"],["D","Door"],["S","Stairs"],["E","Erase"],["L","Light (Advanced)"],["H","Shadow (Advanced)"],
+      ["G / Tab","Toggle Rooms ⟷ Shapes"],
+    ]],
+    ["Select & edit", [
+      ["Click","Select a piece · click a locked room/prefab picks the whole unit"],
+      ["Shift+Click","Add / remove a piece from a multi-selection"],
+      ["Drag empty space","Rubber-band marquee select (mouse)"],
+      ["Ctrl / Cmd + D","Duplicate the selection"],
+      ["M  or  X","Mirror the selection (single flips in place; a group mirrors together)"],
+      ["[  /  ]","Rotate 90° (piece, group, or multi) · Shift = 5° nudge"],
+      ["+  /  −","Resize a selected object (or a light/shadow radius)"],
+      ["F  /  B","Bring to front / send to back"],
+      ["U","Lock a room/piece into a movable group · U again unlocks"],
+      ["Delete / Backspace","Delete the selection"],
+      ["Esc","Deselect / cancel"],
+    ]],
+    ["Placing an object", [
+      ["[  /  ]","Turn the ghost before you drop it"],["+  /  −","Size it"],["X","Flip it"],
+    ]],
+    ["View & history", [
+      ["Space + drag","Pan · middle-mouse also pans"],["Scroll","Zoom"],["\\","Fit view to content"],
+      ["Ctrl/Cmd+Z","Undo"],["Ctrl/Cmd+Shift+Z  /  Ctrl+Y","Redo"],["1–9","Switch layer"],["Shift+S","Toggle snap-to-grid"],
+    ]],
+  ];
+  function buildShortcuts(){
+    const body=$("shortcutsBody"); if(!body) return;
+    body.innerHTML = SHORTCUTS.map(([grp,rows])=>
+      '<div style="margin:0 0 6px"><div style="font-weight:600;opacity:.75;text-transform:uppercase;font-size:11px;letter-spacing:.04em;margin:12px 0 6px">'+esc(grp)+'</div>'+
+      '<table style="width:100%;border-collapse:collapse">'+rows.map(([k,d])=>
+        '<tr><td style="white-space:nowrap;padding:3px 12px 3px 0;vertical-align:top"><kbd style="background:var(--chip,#33333c);border:1px solid var(--line,#4a4a55);border-radius:5px;padding:1px 7px;font:600 12px ui-monospace,monospace">'+esc(k)+'</kbd></td>'+
+        '<td style="padding:3px 0;opacity:.9">'+esc(d)+'</td></tr>').join('')+'</table></div>'
+    ).join('');
+  }
+  function openShortcuts(){ buildShortcuts(); const m=$("shortcutsModal"); if(m) m.style.display="block"; }
+  function closeShortcuts(){ const m=$("shortcutsModal"); if(m) m.style.display="none"; }
+  if($("shortcutsBtn")) $("shortcutsBtn").onclick=openShortcuts;
+  if($("shortcutsClose")) $("shortcutsClose").onclick=closeShortcuts;
+  if($("shortcutsModal")) $("shortcutsModal").onclick=e=>{ if(e.target===$("shortcutsModal")) closeShortcuts(); };
   $("clear").onclick=()=>{ if(!mapHasContent()){return;}
     // Clear wipes CONTENT, not your working setup: keep the map's style (textured mode +
     // floor/wall palette) and lighting prefs. Otherwise blankMap() drops back to normal
@@ -7720,9 +7905,16 @@
     if(e.code==="Space"){ spaceDown=true; cv.style.cursor="grab"; }
     if((e.ctrlKey||e.metaKey)&&e.key==="z"){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
     if((e.ctrlKey||e.metaKey)&&e.key==="y"){ e.preventDefault(); redo(); return; }
+    // Ctrl/Cmd+D duplicates the selection (object, group, or multi).
+    if((e.ctrlKey||e.metaKey)&&(e.key==="d"||e.key==="D")){ e.preventDefault(); if(sel) duplicateSel(); return; }
+    // M or X mirrors the selection (single flips in place; a group/multi mirrors together).
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==="m"||e.key==="M")&&sel){ mirrorSel(); return; }
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==="x"||e.key==="X")&&sel&&(sel.kind==="prefab"||sel.kind==="multi")){ mirrorSel(); return; }
     if(e.key==="\\"){ fitView(); return; }                        // \ = Fit view
     if(e.key==="Enter"&&polyPts){ finishPolygon(false); return; }
-    if(e.key==="Escape"){ if(pickOpen){ closePicker(); return; }
+    if(e.key==="?"){ openShortcuts(); return; }
+    if(e.key==="Escape"){ const sm=$("shortcutsModal"); if(sm && sm.style.display!=="none"){ closeShortcuts(); return; }
+      if(pickOpen){ closePicker(); return; }
       if(armedRoom){ disarmRoom(true); return; }
       polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; stroke=null; render(); return; }
     // Prefab: rotate the armed (unplaced) room, or the selected placed group, in 90° steps.
@@ -7733,6 +7925,11 @@
       if(e.key==="]"||e.key==="}"){ rotateGroup(sel,+1); return; }
       if(e.key==="u"||e.key==="U"){ groupLock(sel,false); return; }
       if(e.key==="Delete"||e.key==="Backspace"){ deleteGroup(sel); return; }
+    }
+    if(sel && sel.kind==="multi"){
+      if(e.key==="["||e.key==="{"){ rotateGroup(sel,-1); return; }
+      if(e.key==="]"||e.key==="}"){ rotateGroup(sel,+1); return; }
+      if(e.key==="Delete"||e.key==="Backspace"){ deleteSelItems(); return; }
     }
     // U on a room shape locks it into a group; on a prefab piece it re-locks the prefab;
     // on a loose piece it locks the smallest room around it.
@@ -7783,7 +7980,7 @@
         // so matching only "]" would make the fine nudge silently do nothing.
         if(e.key==="["||e.key==="{"){ pushHistory(); o.obj.rot=spin(-1); commit(); return; }
         if(e.key==="]"||e.key==="}"){ pushHistory(); o.obj.rot=spin(+1); commit(); return; }
-        if(e.key==="x"||e.key==="X"){ pushHistory(); o.obj.flip=!o.obj.flip; commit(); return; }
+        if(e.key==="x"||e.key==="X"){ mirrorSel(); return; }   // mirror this piece (flip in place)
       }
     }
     if(e.key==="g"||e.key==="G"){ setMode(drawMode==="rooms"?"shapes":"rooms"); return; }  // toggle Rooms/Shapes
