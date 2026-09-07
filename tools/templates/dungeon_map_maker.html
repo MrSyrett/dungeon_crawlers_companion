@@ -366,6 +366,11 @@
       <div id="roomBody">
         <div class="asset-count" style="margin-bottom:6px;line-height:1.35" title="Drop a ready-furnished room onto the map, then keep editing it — every piece of furniture stays individually selectable and movable.">Click a room, then click the map to drop it. The furniture stays movable — nudge, rotate or delete any piece after.</div>
         <button class="btn" id="savePrefab" style="width:100%;margin-bottom:8px" title="Select a room or prefab on the map (click it), then save it here as a reusable prefab. Saving with an existing name updates it.">+ Save selection as prefab</button>
+        <div style="display:flex;gap:5px;margin-bottom:8px">
+          <button class="btn" id="prefabImport" style="flex:1;min-width:0" title="Import a prefab file (.json) into your palette. Prefabs with a name you already have are updated.">⭳ Import prefabs…</button>
+          <button class="btn" id="prefabExport" style="flex:1;min-width:0" title="Export your saved prefabs (and your edits to built-ins) to a .json file — to back up or to share.">⭱ Export prefabs</button>
+        </div>
+        <input type="file" id="prefabImportFile" accept=".json,application/json" style="display:none">
         <div style="display:flex;gap:5px;margin-bottom:7px">
           <select class="sel" id="roomCat" style="flex:1;min-width:0" title="Filter by room function"><option value="">All functions</option></select>
           <select class="sel" id="roomTheme" style="flex:1;min-width:0" title="Filter by setting / theme"><option value="">All settings</option></select>
@@ -6304,6 +6309,43 @@
     }
     if(saveCustomPrefabs(list)){ closePrefabSaveModal(); buildRoomGrid(); toast('Saved prefab "'+name+'"'+(match?" (updated)":"")+" — it's in the palette below."); }
   }
+  // ── Prefab file import / export ───────────────────────────────────────────
+  // Prefabs travel as a JSON ARRAY of {name, cat, theme, style, w, h, els[]} — the same
+  // shape stored in dcc_prefabs (els[0] = the room shape, coords relative to its top-left).
+  // Import merges into your palette (matching NAME updates in place, so re-importing an
+  // updated file refreshes it); export writes out your saved prefabs + your edits to
+  // built-ins, so you can back them up or hand them back for review.
+  function exportPrefabs(){
+    const list=loadCustomPrefabs();
+    if(!list.length){ toast("No saved prefabs to export yet — save or import some first."); return; }
+    saveFile(new Blob([JSON.stringify(list,null,0)],{type:"application/json"}), "dcc-prefabs.json", "Exported "+list.length+" prefab"+(list.length>1?"s":""));
+  }
+  function importPrefabsFile(file){
+    const rd=new FileReader();
+    rd.onload=()=>{
+      let data=null; try{ data=JSON.parse(rd.result); }catch(e){}
+      if(Array.isArray(data)===false && data && Array.isArray(data.prefabs)) data=data.prefabs;   // tolerate {prefabs:[…]}
+      if(!Array.isArray(data)){ toast("That file isn’t a prefab export (expected a JSON list of prefabs)."); return; }
+      const list=loadCustomPrefabs();
+      let added=0, updated=0, skipped=0;
+      for(const e of data){
+        if(!e || !Array.isArray(e.els) || !e.els.length || !(e.w>0) || !(e.h>0) || !e.name){ skipped++; continue; }
+        const rec={ name:String(e.name).slice(0,80), cat:(e.cat||"").toString().trim(),
+          theme:(e.theme||"").toString().trim(), style:e.style||prefabStyleOf(e),
+          w:Math.round(e.w), h:Math.round(e.h), els:e.els, custom:true };
+        // Match an existing CUSTOM by name → update in place; else add with a fresh id.
+        const i=list.findIndex(p=>p && !isDefId(p.id) && String(p.name).toLowerCase()===rec.name.toLowerCase());
+        if(i>=0){ rec.id=list[i].id; list[i]=rec; updated++; }
+        else { rec.id="cpf-"+Date.now().toString(36)+"-"+Math.floor(Math.random()*1e4); list.push(rec); added++; }
+      }
+      if(added||updated){ if(saveCustomPrefabs(list)) buildRoomGrid(); }
+      toast("Imported "+ (added+updated) +" prefab"+((added+updated)===1?"":"s")+
+            (added?(" ("+added+" new"+(updated?", "+updated+" updated":"")+")"):(updated?(" ("+updated+" updated)"):""))+
+            (skipped?" · "+skipped+" skipped":""));
+    };
+    rd.onerror=()=>toast("Couldn’t read that file.");
+    rd.readAsText(file);
+  }
   // Remove a prefab row. Behaviour depends on what it is:
   //  • a prefab you saved   → deleted (gone).
   //  • an EDITED built-in   → the override is removed, reverting to the shipped version.
@@ -7009,6 +7051,9 @@
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
     if($("imgAdd"))   $("imgAdd").onclick   =()=>$("imgFile").click();
     if($("savePrefab")) $("savePrefab").onclick =saveSelectionAsPrefab;
+    if($("prefabExport")) $("prefabExport").onclick = exportPrefabs;
+    if($("prefabImport")) $("prefabImport").onclick = ()=>$("prefabImportFile").click();
+    if($("prefabImportFile")) $("prefabImportFile").onchange = e=>{ const f=e.target.files&&e.target.files[0]; e.target.value=""; if(f) importPrefabsFile(f); };
     if($("restoreBuiltins")) $("restoreBuiltins").onclick = restoreBuiltinPrefabs;
     if($("libSeg")) $("libSeg").querySelectorAll("button[data-lib]").forEach(b=>b.onclick=()=>toggleLib(b.dataset.lib));
     if($("roomCat")) $("roomCat").onchange = buildRoomGrid;
