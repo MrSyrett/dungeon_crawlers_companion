@@ -1110,6 +1110,45 @@
     ctx.setTransform(DPR,0,0,DPR,0,0);
     drawPreview(); drawLightMarkers(); drawSelection();
   }
+  // ── Object drag blit ──────────────────────────────────────────────────────
+  // Dragging one object used to re-composite the WHOLE map every frame (textured
+  // floors, walls, hatching, every other sprite, then lights) — tens of ms even
+  // with lighting off. But none of that changes while a single object moves. So the
+  // first time an object actually moves we render the map ONCE with that object
+  // hidden and cache the bitmap; every later frame is just a blit of that cache plus
+  // the one sprite (+ its selection box) drawn on top — a ~1–2 ms frame regardless of
+  // map size. Dropped on pointerup, when a normal render restores the real thing.
+  let dragBlit=null, dragMapC=null;
+  function startDragBlit(d){
+    const obj=d.h.obj, arr=map.objects, idx=arr?arr.indexOf(obj):-1;
+    if(idx<0){ dragBlit=null; return false; }
+    const s=sel; sel=null;                 // don't bake a stale selection box into the backdrop
+    arr.splice(idx,1);
+    render();                              // backdrop: the map exactly as it is, minus this object
+    arr.splice(idx,0,obj); sel=s;
+    if(!dragMapC) dragMapC=document.createElement("canvas");
+    if(dragMapC.width!==cv.width||dragMapC.height!==cv.height){ dragMapC.width=cv.width; dragMapC.height=cv.height; }
+    const g=dragMapC.getContext("2d"); g.setTransform(1,0,0,1,0,0);
+    g.clearRect(0,0,cv.width,cv.height); g.drawImage(cv,0,0);
+    dragBlit={obj}; return true;
+  }
+  function drawDragBlit(){
+    if(!dragMapC || dragMapC.width!==cv.width || dragMapC.height!==cv.height){ render(); return; }
+    ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height); ctx.drawImage(dragMapC,0,0);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    const o=dragBlit.obj, t=texGet(o.tex);
+    if(t && t.img && t.img.complete && t.img.naturalWidth){
+      const w=(o.w||1)*wpx(), h=(o.h||1)*wpx(), g=toScreen(o.x,o.y);
+      ctx.save(); ctx.translate(g[0],g[1]); if(o.rot) ctx.rotate(o.rot);
+      if(o.flip) ctx.scale(-1,1);
+      blitObj(t, o.tint, w, h);
+      ctx.restore();
+    }
+    drawSelection();
+  }
+  let dragBlitRaf=0;
+  function scheduleDragBlit(){ if(!dragBlitRaf) dragBlitRaf=requestAnimationFrame(()=>{ dragBlitRaf=0; drawDragBlit(); }); }
+
   // Camera moves (pan/zoom/pinch) do a FULL render so the whole map is always drawn —
   // no blank space when you pan into new area. Coalesced to one render per animation
   // frame so a burst of pointer events can't stack synchronous renders behind each other.
@@ -3135,7 +3174,13 @@
       return; }
     if(placing){ placing.hover = (placing.tool==="wall") ? snapPt(wx,wy) : [snapHalf(wx),snapHalf(wy)]; render(); return; }
     if(polyPts){ hoverPt=snapPt(wx,wy); render(); }
-    if(dragObj){ moved=true; liveDrag=true; moveObj(dragObj, wx-dragObj.ox, wy-dragObj.oy); scheduleRender(); return; }
+    if(dragObj){ moved=true; moveObj(dragObj, wx-dragObj.ox, wy-dragObj.oy);
+      // A plain object is drag-blitted (cache map-minus-object, stamp the sprite each
+      // frame). Shapes/walls change floor geometry and doors need wall context, so
+      // those keep the coalesced full render with the lit pass skipped.
+      if(dragObj.h.kind==="object" && (dragBlit || startDragBlit(dragObj))) scheduleDragBlit();
+      else { liveDrag=true; scheduleRender(); }
+      return; }
     if(!dragStart) return;
     moved=true;
     const [gx,gy]=snapPt(wx,wy);
@@ -3155,7 +3200,7 @@
 
   cv.addEventListener("pointerup", e=>{
     pointers.delete(e.pointerId);
-    liveDrag=false;   // relight on the drop frame
+    liveDrag=false; dragBlit=null;   // relight / rebuild the full map on the drop frame
     if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
     if(stroke){ finishStroke(); return; }
     if(handle){ if(moved){ pushHistory(handle.snap); commit(); } handle=null; return; }
@@ -3178,7 +3223,7 @@
     if(roomGhostPt){ roomGhostPt=null; render(); } });
   cv.addEventListener("pointercancel", e=>{ pointers.delete(e.pointerId);
     if(pointers.size<2) gesture=null;
-    if(pointers.size===0){ panning=null; draft=null; dragStart=null; stroke=null; liveDrag=false; render(); } });
+    if(pointers.size===0){ panning=null; draft=null; dragStart=null; stroke=null; liveDrag=false; dragBlit=null; render(); } });
   cv.addEventListener("dblclick", ()=>{ if(polyPts&&polyPts.length>1) finishPolygon(false); });
   cv.addEventListener("contextmenu", e=>e.preventDefault());
   cv.addEventListener("wheel", e=>{ e.preventDefault();
