@@ -2468,10 +2468,22 @@
   // map render + the ghost. redmask (FA colorable) is drawn in flat red so it ALWAYS
   // recolours (default tint if none); multiply (auto tint-base) shows its neutral base
   // untinted until a colour is chosen.
+  // Untinted atlas crop baked into a tiny cached canvas, so drawing never re-touches the
+  // 4096² atlas sheet (same fix as the engine's _plainSprite — avoids re-decode stalls).
+  const _plainSpriteCache=new Map();
+  function _plainSprite(t){
+    let cv=_plainSpriteCache.get(t.id); if(cv) return cv;
+    const a=t.atlas, src=texGet(t.id);
+    if(!a || !src || !src.img || !src.img.complete || !src.img.naturalWidth) return null;
+    cv=document.createElement("canvas"); cv.width=Math.max(1,a.w); cv.height=Math.max(1,a.h);
+    cv.getContext("2d").drawImage(src.img, a.x,a.y,a.w,a.h, 0,0, a.w,a.h);
+    _plainSpriteCache.set(t.id, cv); return cv;
+  }
   function blitObj(t, tint, w, h){
     const tm=t.tintMode;
     if(tm==="redmask"){ const tc=tintedSprite(t, tint||COLORABLE_DEFAULT, "redmask"); if(tc){ ctx.drawImage(tc, -w/2,-h/2, w,h); return; } }
     else if(tm==="multiply" && tint){ const tc=tintedSprite(t, tint, "multiply"); if(tc){ ctx.drawImage(tc, -w/2,-h/2, w,h); return; } }
+    const sc=_plainSprite(t); if(sc){ ctx.drawImage(sc, -w/2,-h/2, w,h); return; }
     const a=t.atlas;
     if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);
     else  ctx.drawImage(t.img, -w/2, -h/2, w, h);

@@ -187,20 +187,15 @@ window.DungeonEngine = (function(){
         // source is cleared), so it costs a full-canvas pass per run even when
         // the fill is tiny — ~180 ms on an 18-room, four-style map. Clipping
         // costs only the run's own box.
-        // Opaque backdrop under the FA patterns: imported floor tiles (e.g. Forgotten
-        // Adventures) carry an alpha channel, so their transparent regions would let the
-        // rock background show through. Paint it ONCE over the whole floor footprint —
-        // NOT under every run — so an upper run composites over the LOWER run beneath it:
-        // a translucent FA floor (water, mud) then layers over the floor under it instead
-        // of onto black. Opaque tiles (2MT, bundled) cover it — no visible change.
-        { let anyImg=false; for(const r of runs){ if(r.t && r.t.img){ anyImg=true; break; } }
-          if(anyImg){ tc.save(); tc.beginPath();
-            for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue; shapePath(tc, sh); }
-            tc.clip("nonzero"); tc.fillStyle="#000"; tc.fillRect(0,0,W,H); tc.restore(); } }
         for(const r of runs){
           const bb=runBox(r.list); if(!bb) continue;
           tc.save();
           tc.beginPath(); for(const sh of r.list) shapePath(tc, sh); tc.clip("nonzero");
+          // Opaque backdrop under the pattern: imported floor tiles (e.g. Forgotten
+          // Adventures) carry an alpha channel, so their black regions are transparent
+          // and would let the rock background show through. Painting black first keeps
+          // those regions black. Opaque tiles (2MT, bundled) cover it — no visible change.
+          if(r.t && r.t.img){ tc.fillStyle="#000"; tc.fillRect(bb.x,bb.y,bb.w,bb.h); }
           tc.fillStyle = patFor(tc, r.t) || C.floor;
           tc.fillRect(bb.x,bb.y,bb.w,bb.h);
           tc.restore();
@@ -1469,6 +1464,21 @@ window.DungeonEngine = (function(){
            g.globalCompositeOperation="destination-in"; draw(); g.globalCompositeOperation="source-over"; }
     _objTintCache.set(key,cv); return cv;
   }
+  // Untinted FA sprites live inside 4096×4096 atlas sheets (~64 MB decoded each). Drawing
+  // straight from that atlas keeps the whole sheet "hot" every frame, and the browser
+  // re-decodes it whenever it evicts the bitmap (e.g. the tab going to the background) —
+  // which is the multi-second "catch up" after dropping a prefab (a prefab pulls in
+  // several sheets at once). Bake each USED sprite into its own tiny canvas ONCE; every
+  // later draw is from that small canvas, so the giant atlas is never touched again and
+  // can be evicted freely with no re-decode. (Tinted sprites already bake via _tintedObjSprite.)
+  const _spriteCache=new Map();   // texId → small canvas (untinted atlas crop)
+  function _plainSprite(t){
+    let cv=_spriteCache.get(t.id); if(cv) return cv;
+    const a=t.atlas, img=t.img; if(!a || !img || !img.complete || !img.naturalWidth) return null;
+    cv=oc(); cv.width=Math.max(1,a.w); cv.height=Math.max(1,a.h);
+    cv.getContext("2d").drawImage(img, a.x,a.y,a.w,a.h, 0,0, a.w,a.h);
+    _spriteCache.set(t.id, cv); return cv;
+  }
   function drawObjects(){
     if(!tex || !map.objects || !map.objects.length) return;
     for(const o of map.objects){
@@ -1482,9 +1492,10 @@ window.DungeonEngine = (function(){
       const tm=t.tintMode; let tc=null;
       if(tm==="redmask") tc=_tintedObjSprite(t, o.tint||_OBJ_COLORABLE_DEFAULT, "redmask");
       else if(tm==="multiply" && o.tint) tc=_tintedObjSprite(t, o.tint, "multiply");
-      if(tc){ ctx.drawImage(tc, -w/2,-h/2, w,h); }              // tinted (FA colorable / neutral base)
+      if(!tc && t.atlas) tc=_plainSprite(t);                    // untinted FA/bundled sprite → tiny cached canvas
+      if(tc){ ctx.drawImage(tc, -w/2,-h/2, w,h); }
       else { const a=t.atlas;
-        if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);  // bundled: atlas sub-rect
+        if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);  // fallback: atlas sub-rect
         else  ctx.drawImage(t.img, -w/2, -h/2, w, h); }                    // imported: whole file
       ctx.restore();
     }
@@ -1558,18 +1569,11 @@ window.DungeonEngine = (function(){
     // (the black bleeding at each shape's clip edge) tracing every shape's outline
     // where two overlapped — a hairline the wall used to hide, now exposed once the
     // shapes merge.
-    { let anyTex=false;
-      const db=oc(); db.width=W; db.height=H; const dbc=db.getContext("2d");
-      dbc.setTransform(1,0,0,1,0,0); dbc.clearRect(0,0,W,H); dbc.fillStyle="#fff"; dbc.beginPath();
+    { let anyTex=false; ctx.save(); ctx.beginPath();
       for(const sh of map.shapes){ if(!sh.deco || !shHasFloor(sh)) continue;
-        const ft=shapeFloorTex(sh); if(ft && ft.img && patFor(ctx,ft)){ shapePath(dbc, sh); anyTex=true; } }
-      if(anyTex){ dbc.fill("nonzero");
-        // Keep the opaque base ONLY where NO room floor lies beneath (over bare rock),
-        // so a translucent deco floor (water, mud) laid over a room floor shows the room
-        // floor through it — while a deco floor over rock still gets a base (no rock-through).
-        dbc.globalCompositeOperation="destination-out"; dbc.drawImage(buf.mask,0,0);
-        dbc.globalCompositeOperation="source-in"; dbc.fillStyle="#000"; dbc.fillRect(0,0,W,H);
-        ctx.drawImage(db,0,0); } }
+        const ft=shapeFloorTex(sh); if(ft && ft.img && patFor(ctx,ft)){ shapePath(ctx, sh); anyTex=true; } }
+      if(anyTex){ ctx.clip("nonzero"); ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }
+      ctx.restore(); }
     for(const sh of map.shapes){
       if(!sh.deco || !shHasFloor(sh)) continue;
       const ft=shapeFloorTex(sh), pat=patFor(ctx, ft);
@@ -1646,22 +1650,6 @@ window.DungeonEngine = (function(){
   }
   function drawDoor(d){
     const g=doorGeom(d), halfW=Math.max(1.1,1.5*cam.scale);
-    // FA door sprite (d.style = an object texture id, resolved through tex.byId like
-    // any sprite). It spans `len` along the wall with proportional depth, rotated to
-    // the door angle; the wall gap is still punched (punchDoorQuad) so it sits in a
-    // real opening and stays a door on a UVTT export. Falls back to the drawn leaf
-    // until the atlas sheet loads (or the pack isn't present).
-    if(d.style){ const dt=texOf(d.style,null);
-      if(dt && dt.img && dt.img.complete && dt.img.naturalWidth){
-        const a=dt.atlas, asp=(a? a.w/a.h : dt.img.naturalWidth/dt.img.naturalHeight)||1;
-        const wl=(d.len||1)*(d.styleScale||1), hl=wl/asp;
-        const p=toScreen(g.cx,g.cy), pw=wl*wpx(), ph=hl*wpx();
-        ctx.save(); ctx.translate(p[0],p[1]); ctx.rotate(d.a||0); if(d.flip) ctx.scale(1,-1);
-        if(a) ctx.drawImage(dt.img, a.x,a.y,a.w,a.h, -pw/2,-ph/2, pw,ph);
-        else  ctx.drawImage(dt.img, -pw/2,-ph/2, pw,ph);
-        ctx.restore(); return;
-      }
-    }
     const w=(sl,st)=>[g.cx+g.alx*sl+g.acx*st, g.cy+g.aly*sl+g.acy*st];
     const s=(sl,st)=>toScreen(g.cx+g.alx*sl+g.acx*st, g.cy+g.aly*sl+g.acy*st);
     ctx.save();
