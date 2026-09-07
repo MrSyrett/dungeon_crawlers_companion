@@ -6150,13 +6150,25 @@
     if(sel.roomIdx!=null){
       const sh=(map.shapes||[])[sel.roomIdx]; if(!sh) return [];
       const inside=(x,y)=>pointInShape(x,y,sh);
+      const mb=bounds(sh,"shape"); const myArea=mb?mb.w*mb.h:1e18;
+      // A locked room grabs whatever sits inside it — but NOT pieces that belong to a
+      // DIFFERENT locked group. Otherwise, when one locked group overlaps another, rotating
+      // it drags the other's objects/doors along. A piece is "owned elsewhere" if it carries
+      // a locked prefab's tag, or if it also sits inside a smaller/other locked room.
+      const ownedElsewhere=(o,x,y)=>{
+        if(o.pf!=null && prefabLocked(o.pf)) return true;                   // belongs to a locked prefab
+        for(let i=0;i<(map.shapes||[]).length;i++){ if(i===sel.roomIdx) continue;
+          const o2=map.shapes[i]; if(!(o2 && o2.locked && isRoomShape(o2))) continue;
+          if(pointInShape(x,y,o2)){ const b=bounds(o2,"shape"); const a=b?b.w*b.h:1e18; if(a<=myArea) return true; } }
+        return false;
+      };
       const out=[{kind:"shape", idx:sel.roomIdx, obj:sh}];
-      (map.objects||[]).forEach((o,i)=>{ if(inside(o.x,o.y)) out.push({kind:"object",idx:i,obj:o}); });
-      (map.lights||[]).forEach((o,i)=>{ if(inside(o.x,o.y)) out.push({kind:"light",idx:i,obj:o}); });
-      (map.shadows||[]).forEach((o,i)=>{ if(inside(o.x,o.y)) out.push({kind:"shadow",idx:i,obj:o}); });
-      (map.doors||[]).forEach((o,i)=>{ if(inside(o.x,o.y)) out.push({kind:"door",idx:i,obj:o}); });
-      (map.walls||[]).forEach((o,i)=>{ const p=wallMidpoint(o); if(p&&inside(p[0],p[1])) out.push({kind:"wall",idx:i,obj:o}); });
-      (map.stairs||[]).forEach((o,i)=>{ const b=bounds(o,"stair"); if(b&&inside(b.x+b.w/2,b.y+b.h/2)) out.push({kind:"stair",idx:i,obj:o}); });
+      (map.objects||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!ownedElsewhere(o,o.x,o.y)) out.push({kind:"object",idx:i,obj:o}); });
+      (map.lights||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!ownedElsewhere(o,o.x,o.y)) out.push({kind:"light",idx:i,obj:o}); });
+      (map.shadows||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!ownedElsewhere(o,o.x,o.y)) out.push({kind:"shadow",idx:i,obj:o}); });
+      (map.doors||[]).forEach((o,i)=>{ if(inside(o.x,o.y)&&!ownedElsewhere(o,o.x,o.y)) out.push({kind:"door",idx:i,obj:o}); });
+      (map.walls||[]).forEach((o,i)=>{ const p=wallMidpoint(o); if(p&&inside(p[0],p[1])&&!ownedElsewhere(o,p[0],p[1])) out.push({kind:"wall",idx:i,obj:o}); });
+      (map.stairs||[]).forEach((o,i)=>{ const b=bounds(o,"stair"); if(b&&inside(b.x+b.w/2,b.y+b.h/2)&&!ownedElsewhere(o,b.x+b.w/2,b.y+b.h/2)) out.push({kind:"stair",idx:i,obj:o}); });
       return out;
     }
     return [];
