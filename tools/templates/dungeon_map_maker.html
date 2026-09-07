@@ -6569,11 +6569,22 @@
     // doors overhanging the walls). Rotating everything rigidly about the room centre
     // keeps each piece exactly where it belongs relative to the room — no drift.
     for(let s=0;s<steps;s++){ const c=groupPivot(kids); for(const it of kids) rotElem(it.obj, it.kind, c[0], c[1]); }
-    // float cleanup only — grid-aligned inputs stay grid-aligned, so this shouldn't move
-    // anything visibly. Deliberately NOT snapping doors/objects (that was the shift bug).
-    for(const it of kids){ const o=it.obj;
-      if(it.kind==="shape" && o.type==="rect"){ o.x=Math.round(o.x); o.y=Math.round(o.y); o.w=Math.round(o.w); o.h=Math.round(o.h); }
-      else if(it.kind==="wall"){ const r=v=>Math.round(v*2)/2; o.x1=r(o.x1);o.y1=r(o.y1);o.x2=r(o.x2);o.y2=r(o.y2); if(o.cx!=null){o.cx=r(o.cx);o.cy=r(o.cy);} } }
+    // Grid-align the ROOM shape, then translate the WHOLE group by the same delta so
+    // nothing drifts off it. When the room's width and height have different parity
+    // (e.g. 7×6), rotating about its centre lands the origin on a half-cell; rounding
+    // ONLY the shape (as before) shifted the room ~0.5 while its objects stayed put, so
+    // each rotation "rolled" the contents off the room. Moving the whole group together
+    // keeps everything registered and still snaps the room to the grid.
+    const rs=groupRoomShape(kids);
+    if(rs && rs.type==="rect"){
+      const nx=Math.round(rs.x), ny=Math.round(rs.y), dx=nx-rs.x, dy=ny-rs.y;
+      rs.x=nx; rs.y=ny; rs.w=Math.round(rs.w); rs.h=Math.round(rs.h);
+      if(dx||dy) for(const it of kids){ if(it.obj===rs) continue; shiftElem(it.obj, it.kind, dx, dy); }
+    } else {
+      // No room shape to key off — keep the old light cleanup (rare; e.g. a shapeless group).
+      for(const it of kids){ const o=it.obj;
+        if(it.kind==="shape" && o.type==="rect"){ o.x=Math.round(o.x); o.y=Math.round(o.y); o.w=Math.round(o.w); o.h=Math.round(o.h); } }
+    }
     markGeom(); render(); scheduleSave(); syncUndo();
   }
   function groupLock(sel, wantLocked){   // lock/unlock the group referenced by sel
