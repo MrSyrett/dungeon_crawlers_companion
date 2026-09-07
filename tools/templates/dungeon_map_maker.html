@@ -1044,7 +1044,7 @@
     // lights/tint of the layers beneath it (a lower torch can't light an upper
     // building), so per-layer isolation holds while a single darkness wash covers the
     // whole scene — walls on every layer, and objects out past an exterior wall.
-    if(map.lit){
+    if(map.lit && !liveDrag){
       const groups=(vis.length?vis:[]).map(L=>({lights:L.lights||[], shapes:L.shapes||[], walls:L.walls||[]}));
       const ushapes=[], uwalls=[];
       for(const L of vis){ for(const s of (L.shapes||[])) ushapes.push(s); for(const w of (L.walls||[])) uwalls.push(w); }
@@ -1053,6 +1053,10 @@
       if(useEngine) window.DungeonEngine.renderTo(ctx, osub, oopt);
       else drawLocal(osub, {overlayOnly:true, transparent:noRock});
     }
+    // ↑ The lit overlay is ~75% of a frame's cost, but nothing moving on the canvas
+    // changes it: objects don't occlude light (only walls/shapes do). So while an
+    // object or prefab is being dragged, skip the lit pass and keep dragging at ~9 ms
+    // a frame instead of ~35 ms; pointerup drops `liveDrag` and the next render relights.
     // Scene colour tint (Architect-style scene lighting) — a global colour grade over the
     // finished map. `multiply` keeps it readable and shifts everything toward the tint.
     // Applied BEFORE the UI overlays and INSIDE the export path, so it bakes into PNG/VTT.
@@ -2986,6 +2990,7 @@
   // POINTER INTERACTION
   // ════════════════════════════════════════════════════════════════
   let dragStart=null, dragObj=null, panning=null, hoverPt=null, moved=false;
+  let liveDrag=false;   // true while actively dragging an object/prefab/handle — skips the costly lit pass
   // Touch: track active pointers so TWO fingers = pinch-zoom + two-finger pan.
   const pointers=new Map();        // pointerId → [screenX, screenY]
   let gesture=null;                // { d0, scale0, worldMid }
@@ -3102,7 +3107,7 @@
         const f=Math.max(0.1, Math.hypot(wx-o.x, wy-o.y)/handle.d0);
         o.w=Math.max(0.1, handle.w0*f); o.h=Math.max(0.1, handle.h0*f);
       }
-      moved=true; render(); return;
+      moved=true; liveDrag=true; scheduleRender(); return;
     }
     if(armedRoom){
       // Track the drop origin (top-left cell) of the ROTATED footprint; only re-render
@@ -3112,7 +3117,7 @@
       if(!roomGhostPt || roomGhostPt[0]!==ox || roomGhostPt[1]!==oy){ roomGhostPt=[ox,oy]; ghostRender(); }
       return;
     }
-    if(dragPrefab){ moved=true; moveGroup(dragPrefab, wx-dragPrefab.ox, wy-dragPrefab.oy); render(); return; }
+    if(dragPrefab){ moved=true; liveDrag=true; moveGroup(dragPrefab, wx-dragPrefab.ox, wy-dragPrefab.oy); scheduleRender(); return; }
     if(tool==="object" && armedObj){
       // A full render per mousemove is far too much on a lit textured map, where
       // one frame is tens of milliseconds. Two guards: the ghost sits on the
@@ -3130,7 +3135,7 @@
       return; }
     if(placing){ placing.hover = (placing.tool==="wall") ? snapPt(wx,wy) : [snapHalf(wx),snapHalf(wy)]; render(); return; }
     if(polyPts){ hoverPt=snapPt(wx,wy); render(); }
-    if(dragObj){ moved=true; moveObj(dragObj, wx-dragObj.ox, wy-dragObj.oy); render(); return; }
+    if(dragObj){ moved=true; liveDrag=true; moveObj(dragObj, wx-dragObj.ox, wy-dragObj.oy); scheduleRender(); return; }
     if(!dragStart) return;
     moved=true;
     const [gx,gy]=snapPt(wx,wy);
@@ -3150,6 +3155,7 @@
 
   cv.addEventListener("pointerup", e=>{
     pointers.delete(e.pointerId);
+    liveDrag=false;   // relight on the drop frame
     if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
     if(stroke){ finishStroke(); return; }
     if(handle){ if(moved){ pushHistory(handle.snap); commit(); } handle=null; return; }
@@ -3172,7 +3178,7 @@
     if(roomGhostPt){ roomGhostPt=null; render(); } });
   cv.addEventListener("pointercancel", e=>{ pointers.delete(e.pointerId);
     if(pointers.size<2) gesture=null;
-    if(pointers.size===0){ panning=null; draft=null; dragStart=null; stroke=null; render(); } });
+    if(pointers.size===0){ panning=null; draft=null; dragStart=null; stroke=null; liveDrag=false; render(); } });
   cv.addEventListener("dblclick", ()=>{ if(polyPts&&polyPts.length>1) finishPolygon(false); });
   cv.addEventListener("contextmenu", e=>e.preventDefault());
   cv.addEventListener("wheel", e=>{ e.preventDefault();
@@ -5482,6 +5488,7 @@
   function ghostRender(){ if(ghostRaf) return;
     ghostRaf=requestAnimationFrame(()=>{ ghostRaf=0; renderGhostOnly(); }); }
   let thumbObs=null;
+  let objCells=[];   // [{el, ids:[texId…], grp}] — lets armObjId flip highlight without a full rebuild
   function observeThumb(el, id){
     if(!("IntersectionObserver" in window)){ const t=texReg.get(id); if(t) ensureThumb(t, el); return; }
     if(!thumbObs) thumbObs=new IntersectionObserver(es=>{
@@ -5582,7 +5589,7 @@
       if(!ok){ armedObj=null; ghostPt=null; resetArm(); if(tool==="object") setTool("select"); } }
     if(thumbObs){ thumbObs.disconnect(); thumbObs=null; }
     const q=(($("objFilter")||{}).value||"").trim().toLowerCase();
-    g.innerHTML=""; _colorThumbs=[];
+    g.innerHTML=""; _colorThumbs=[]; objCells=[];
     let n=0;
     // Two DISJOINT sets. Normal mode offers the `basic` bundled art only;
     // Advanced Mode offers everything else — the CC BY-NC packs and anything the
@@ -5669,6 +5676,9 @@
           b.appendChild(badge);
         }
       }
+      // Record the cell so arming/disarming can flip just the highlight instead of
+      // rebuilding the whole grid (see armObjId → updateArmedCells).
+      objCells.push({el:b, ids: grp ? grp.colors.map(c=>c.id) : [t.id], grp:!!grp});
       g.appendChild(b); n++;
     };
     for(const item of order){ render(item); if(n>=MAX_GRID_CELLS) break; }
@@ -5694,7 +5704,24 @@
     const was=armedObj; armedObj=id;
     if(armedObj!==was) resetArm();
     ghostPt=null;
-    setTool(armedObj ? "object" : "select"); buildObjGrid();
+    setTool(armedObj ? "object" : "select");
+    updateArmedCells(was, id);
+  }
+  // Flip the palette highlight when the armed object changes WITHOUT rebuilding the
+  // grid — arming used to re-create up to 1400 cells, which is what made selecting an
+  // object feel laggy. Single cells just toggle their `.on` class; a colour-group cell
+  // whose armed colour changed needs its rep thumb + swatch redrawn, so those still
+  // fall back to a full rebuild (far rarer than a plain pick).
+  function updateArmedCells(oldId, newId){
+    if(!objCells.length){ buildObjGrid(); return; }
+    for(const c of objCells){
+      if(c.grp){ if(c.ids.indexOf(oldId)>=0 || c.ids.indexOf(newId)>=0){ buildObjGrid(); return; } }
+    }
+    for(const c of objCells){
+      const isOn=c.ids.indexOf(newId)>=0;
+      if(c.el.classList.contains("on")!==isOn) c.el.classList.toggle("on", isOn);
+    }
+    if(typeof syncObjTint==="function") syncObjTint();
   }
 
   // ── Object tint row (colour swatch + hex field) ───────────────────────────
@@ -6838,7 +6865,11 @@
     const sb=document.querySelector(".sidebar");
     if(sb) sb.addEventListener("scroll", ()=>{
       if(pickOpen && Math.abs(sb.scrollTop - pickScrollTop) > 2) closePicker(); });
-    if($("objFilter")) $("objFilter").oninput=()=>buildObjGrid();
+    // Debounce the palette filter: rebuilding the whole object grid on every keystroke
+    // makes typing feel laggy. Coalesce rapid keystrokes into one rebuild once typing
+    // pauses (~130 ms), so the grid catches up smoothly without a rebuild per character.
+    if($("objFilter")){ let _filtT=0;
+      $("objFilter").oninput=()=>{ clearTimeout(_filtT); _filtT=setTimeout(buildObjGrid,130); }; }
     if($("objTintColor")){ $("objTintColor").oninput=e=>applyObjTint(e.target.value,false);
                            $("objTintColor").onchange=e=>applyObjTint(e.target.value,true); }
     if($("objTintHex")){
