@@ -1462,6 +1462,7 @@ window.DungeonEngine = (function(){
     if(mode==="redmask"){ _recolorRedMask(g,cv.width,cv.height,tint); }
     else { g.globalCompositeOperation="multiply"; g.fillStyle=tint; g.fillRect(0,0,cv.width,cv.height);
            g.globalCompositeOperation="destination-in"; draw(); g.globalCompositeOperation="source-over"; }
+    img._dc=true;                        // atlas decoded — shared flag the template's ghost gate reads
     _objTintCache.set(key,cv); return cv;
   }
   // Untinted FA sprites live inside 4096×4096 atlas sheets (~64 MB decoded each). Drawing
@@ -1477,6 +1478,7 @@ window.DungeonEngine = (function(){
     const a=t.atlas, img=t.img; if(!a || !img || !img.complete || !img.naturalWidth) return null;
     cv=oc(); cv.width=Math.max(1,a.w); cv.height=Math.max(1,a.h);
     cv.getContext("2d").drawImage(img, a.x,a.y,a.w,a.h, 0,0, a.w,a.h);
+    img._dc=true;                        // atlas decoded — shared flag the template's ghost gate reads
     _spriteCache.set(t.id, cv); return cv;
   }
   function drawObjects(){

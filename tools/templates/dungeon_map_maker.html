@@ -2461,6 +2461,7 @@
     draw();
     if(mode==="redmask"){ recolorRedMask(g, cv.width, cv.height, tint); }
     else { multiplyTint(g, cv.width, cv.height, tint); draw(); g.globalCompositeOperation="source-over"; }
+    src.img._dc=true;                    // atlas decoded — mark it for the ghost gate
     tintCache.set(key, cv);
     return cv;
   }
@@ -2477,6 +2478,7 @@
     if(!a || !src || !src.img || !src.img.complete || !src.img.naturalWidth) return null;
     cv=document.createElement("canvas"); cv.width=Math.max(1,a.w); cv.height=Math.max(1,a.h);
     cv.getContext("2d").drawImage(src.img, a.x,a.y,a.w,a.h, 0,0, a.w,a.h);
+    src.img._dc=true;                    // the atlas is decoded by now — mark it for the ghost gate
     _plainSpriteCache.set(t.id, cv); return cv;
   }
   function blitObj(t, tint, w, h){
@@ -6427,10 +6429,32 @@
     }
     redrawRoomThumbs();
   }
+  // A prefab pulls in several 4096² atlas sheets. Decoding them synchronously on the
+  // first draw (the ghost, then placement) is what makes selecting/placing a prefab
+  // hitch. img.decode() runs OFF the main thread, so kicking it off the moment the
+  // prefab is armed keeps the UI responsive and gets the sheets ready before the click.
+  function _decodeTex(t){
+    const img=t && t.img; if(!img || img._dc || img._dcing) return;
+    img._dcing=true;
+    const go=()=>{ (img.decode ? img.decode() : Promise.resolve())
+      .then(()=>{ img._dc=true; img._dcing=false; if(armedRoom) ghostRender(); scheduleRender(); })
+      .catch(()=>{ img._dcing=false; }); };
+    if(img.complete && img.naturalWidth) go();
+    else img.addEventListener("load", go, {once:true});
+  }
+  function warmPrefabTextures(inst){
+    if(!inst) return; const seen=new Set();
+    const add=id=>{ if(!id) return; const t=texGet(id); if(t && t.img && !seen.has(t.img)){ seen.add(t.img); _decodeTex(t); } };
+    for(const it of inst.els){
+      if(it.kind==="object") add(it.obj.tex);
+      else if(it.kind==="shape"){ add(it.obj.floor); add(it.obj.wall); }
+    }
+  }
   function armRoom(tpl){
     if(armedObj){ armedObj=null; ghostPt=null; resetArm(); buildObjGrid(); }
     setTool("select");                 // a stamp is intercepted before the select logic
     armedRoom=tpl; roomGhostPt=null; armRoomRot=0; armRoomInst=instantiateTemplate(tpl,0);
+    warmPrefabTextures(armRoomInst);   // start decoding its sheets off the main thread NOW
     cv.style.cursor="copy";
     buildRoomGrid();
     toast('Click to drop "'+tpl.name+'". [ ] rotate before placing · Esc to cancel.');
@@ -6487,10 +6511,15 @@
     ctx.globalAlpha=0.16; ctx.fillStyle=C.sel; ctx.fillRect(a[0],a[1], b[0]-a[0], b[1]-a[1]); ctx.globalAlpha=1;
     for(const it of inst.els){
       if(it.kind==="object"){ const o=it.obj; const t=texGet(o.tex); if(!t||!t.img||!t.img.complete||!t.img.naturalWidth) continue;
+        // Don't sync-decode a 4096² sheet in the ghost frame — skip until it's decoded
+        // (kick that off), so moving the cursor stays smooth; the sprite pops in when ready.
+        if(!t.img._dc){ _decodeTex(t); continue; }
         const w=((o.w||t.w)||1)*wpx(), h=((o.h||t.h)||1)*wpx(); const p=toScreen(o.x+ox, o.y+oy);
         ctx.save(); ctx.translate(p[0],p[1]); if(o.rot) ctx.rotate(o.rot);
-        ctx.globalAlpha=0.55; const at=t.atlas;
-        if(at) ctx.drawImage(t.img, at.x,at.y,at.w,at.h, -w/2,-h/2, w,h); else ctx.drawImage(t.img, -w/2,-h/2, w,h);
+        ctx.globalAlpha=0.55;
+        const sc=_plainSprite(t);
+        if(sc) ctx.drawImage(sc, -w/2,-h/2, w,h);
+        else { const at=t.atlas; if(at) ctx.drawImage(t.img, at.x,at.y,at.w,at.h, -w/2,-h/2, w,h); else ctx.drawImage(t.img, -w/2,-h/2, w,h); }
         ctx.globalAlpha=1; ctx.restore();
       } else if(it.kind==="wall"){ const o=it.obj; ctx.strokeStyle=C.ink; ctx.setLineDash([5,4]); ctx.lineWidth=1.6;
         const p=toScreen(o.x1+ox,o.y1+oy), q=toScreen(o.x2+ox,o.y2+oy); ctx.beginPath(); ctx.moveTo(p[0],p[1]); ctx.lineTo(q[0],q[1]); ctx.stroke(); ctx.setLineDash([]); }
