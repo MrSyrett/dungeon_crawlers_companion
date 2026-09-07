@@ -6350,15 +6350,33 @@
     for(const it of inst.els){ if(it.kind!=="object") continue; const o=it.obj;
       const w=Math.max(2,(o.w||1)*sc), h=Math.max(2,(o.h||1)*sc), cx=ox+o.x*sc, cy=oy+o.y*sc;
       const t=texGet(o.tex);
-      if(t&&t.img&&t.img.complete&&t.img.naturalWidth){ g.save(); g.translate(cx,cy); if(o.rot) g.rotate(o.rot);
-        const a=t.atlas; if(a) g.drawImage(t.img,a.x,a.y,a.w,a.h,-w/2,-h/2,w,h); else g.drawImage(t.img,-w/2,-h/2,w,h); g.restore(); }
-      else { g.fillStyle="rgba(96,72,44,.7)"; g.fillRect(cx-w/2,cy-h/2,w,h); } }
+      // Draw the thumbnail from the small BAKED sprite (never the 4096² atlas), and only
+      // once the sheet is decoded — otherwise kick off an off-thread decode and show a
+      // placeholder for now; the thumbnail fills in when the sheet is ready (see
+      // _decodeTex → scheduleThumbRedraw). Keeps a big saved-prefab library from hitching
+      // the palette or holding every atlas hot in memory.
+      let baked=null;
+      if(t && t.img && t.img.complete && t.img.naturalWidth){
+        if(t.img._dc){ const tm=t.tintMode;
+          if(tm==="redmask") baked=tintedSprite(t, o.tint||COLORABLE_DEFAULT, "redmask");
+          else if(tm==="multiply" && o.tint) baked=tintedSprite(t, o.tint, "multiply");
+          if(!baked && t.atlas) baked=_plainSprite(t); }
+        else _decodeTex(t); }
+      g.save(); g.translate(cx,cy); if(o.rot) g.rotate(o.rot);
+      if(baked) g.drawImage(baked, -w/2,-h/2, w,h);
+      else if(t && t.img && t.img.complete && t.img.naturalWidth && !t.atlas) g.drawImage(t.img, -w/2,-h/2, w,h);  // imported whole-file (small)
+      else { g.fillStyle="rgba(96,72,44,.7)"; g.fillRect(-w/2,-h/2,w,h); }
+      g.restore(); }
     g.strokeStyle="#26262b"; g.lineWidth=1.5;
     for(const it of inst.els){ if(it.kind!=="wall") continue; const o=it.obj;
       g.beginPath(); g.moveTo(ox+o.x1*sc,oy+o.y1*sc); g.lineTo(ox+o.x2*sc,oy+o.y2*sc); g.stroke(); }
     g.strokeRect(ox+0.75,oy+0.75,inst.w*sc-1.5,inst.h*sc-1.5);
   }
-  let _roomThumbs=[], _thumbT1=0, _thumbT2=0;
+  let _roomThumbs=[], _thumbT1=0, _thumbT2=0, _thumbRaf=0;
+  // Coalesced thumbnail repaint — called when a sheet finishes decoding off-thread, so
+  // many sheets landing at once collapse into one repaint instead of one per sheet.
+  function scheduleThumbRedraw(){ if(_thumbRaf || !_roomThumbs.length) return;
+    _thumbRaf=requestAnimationFrame(()=>{ _thumbRaf=0; for(const [c,t] of _roomThumbs) drawTemplateThumb(c,t); }); }
   function redrawRoomThumbs(){ for(const [cnv,tpl] of _roomThumbs) drawTemplateThumb(cnv,tpl);
     // sprite sheets load lazily on first texGet, so redraw once they've had time to arrive
     clearTimeout(_thumbT1); clearTimeout(_thumbT2);
@@ -6449,7 +6467,8 @@
     const img=t && t.img; if(!img || img._dc || img._dcing) return;
     img._dcing=true;
     const go=()=>{ (img.decode ? img.decode() : Promise.resolve())
-      .then(()=>{ img._dc=true; img._dcing=false; if(armedRoom) ghostRender(); scheduleRender(); })
+      .then(()=>{ img._dc=true; img._dcing=false; if(armedRoom) ghostRender(); scheduleRender();
+        if(typeof scheduleThumbRedraw==="function") scheduleThumbRedraw(); })
       .catch(()=>{ img._dcing=false; }); };
     if(img.complete && img.naturalWidth) go();
     else img.addEventListener("load", go, {once:true});
@@ -7562,7 +7581,19 @@
     scheduleSave(); toast("Snap to grid "+(snapOn?"on":"off")); }
   $("darkToggle").onchange=e=>setTheme(e.target.checked ? "dark" : "light");
   $("clear").onclick=()=>{ if(!mapHasContent()){return;}
-    if(confirm("Clear the whole map?")){ pushHistory(); const n=map.name; map=blankMap(); map.name=n; map.theme=theme; afterLoad(); commit(); } };
+    // Clear wipes CONTENT, not your working setup: keep the map's style (textured mode +
+    // floor/wall palette) and lighting prefs. Otherwise blankMap() drops back to normal
+    // mode, which flips Advanced Mode off (advOn = style.mode==="textured") and hides the
+    // whole advanced panel — including the prefab palette, so all prefabs appear to vanish.
+    if(confirm("Clear the whole map?")){ pushHistory();
+      const n=map.name, st=map.style, lit=map.lit, dark=map.darkness, wsh=map.wallShadow,
+            shON=map.shadowsOn, sTint=map.sceneTint, sTintA=map.sceneTintA, gop=map.gridOpacity;
+      map=blankMap(); map.name=n; map.theme=theme;
+      if(st) map.style=st;
+      if(lit!=null) map.lit=lit; if(dark!=null) map.darkness=dark; if(wsh!=null) map.wallShadow=wsh;
+      if(shON!=null) map.shadowsOn=shON; if(sTint!=null) map.sceneTint=sTint; if(sTintA!=null) map.sceneTintA=sTintA;
+      if(gop!=null) map.gridOpacity=gop;
+      afterLoad(); commit(); } };
   $("fit").onclick=fitView;
   if($("layerAdd")) $("layerAdd").onclick=addLayer;
   $("undo").onclick=undo; $("redo").onclick=redo;
