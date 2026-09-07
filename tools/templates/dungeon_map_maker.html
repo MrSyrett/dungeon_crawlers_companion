@@ -2564,21 +2564,10 @@
     // walls: each shape's FLOOR first, then its non-occluding wall ring, in z-order
     // — so a Shape lies on top of a room's floor while the room's (and interior)
     // walls draw over it. (Called after floors + inner shadow, before drawWalls.)
-    // Black under alpha (FA) floor textures — filled once over the UNION of textured
-    // deco floors, so overlapping shapes don't leave a hairline seam where their
-    // per-shape floor clips meet. (Mirror of the engine.)
-    { let anyTex=false;
-      const db=oc(); db.width=W; db.height=H; const dbc=db.getContext("2d");
-      dbc.setTransform(1,0,0,1,0,0); dbc.clearRect(0,0,W,H); dbc.fillStyle="#fff"; dbc.beginPath();
-      for(const sh of map.shapes){ if(!sh.deco || !shHasFloor(sh)) continue;
-        const ft=shapeFloorTex(sh); if(ft && ft.img && patFor(ctx,ft)){ shapePath(dbc, sh); anyTex=true; } }
-      if(anyTex){ dbc.fill("nonzero");
-        // Keep the opaque base ONLY where NO room floor lies beneath (over bare rock),
-        // so a translucent deco floor (water, mud) laid over a room floor shows the room
-        // floor through it — while a deco floor over rock still gets a base (no rock-through).
-        dbc.globalCompositeOperation="destination-out"; dbc.drawImage(buf.mask,0,0);
-        dbc.globalCompositeOperation="source-in"; dbc.fillStyle="#000"; dbc.fillRect(0,0,W,H);
-        ctx.drawImage(db,0,0); } }
+    // Deco (Shapes) floors keep their texture's ALPHA — no opaque backdrop — so a Shape
+    // layers over whatever is beneath it (a room floor, or the bare exterior). Rooms stay
+    // opaque (base painted in the room-floor pass). For an opaque Shape, stack an opaque
+    // room/black shape of the same size underneath. (Mirror of the engine.)
     for(const sh of map.shapes){
       if(!sh.deco || !shHasFloor(sh)) continue;
       const ft=shapeFloorTex(sh), pat=patFor(ctx, ft);
