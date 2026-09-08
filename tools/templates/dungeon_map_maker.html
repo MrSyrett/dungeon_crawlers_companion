@@ -1979,6 +1979,75 @@
     setSel(null); commit();
   }
 
+  // ── RE-ROLL sprites (variety without rebuilding) ─────────────────────────
+  // Swap every object in the selection for a CLOSEST-TIER sibling — the same
+  // object in a different colour/letter variant (chair-wood-a1 → chair-wood-b,
+  // a "-dark" sprite → its "-light" twin). Position, rotation, footprint and
+  // tint are all left exactly as placed; only the texture id changes. So a
+  // room's hand-tuned layout stays put and only its "skin" varies — enough to
+  // make every bedroom in an inn look a little different without rebuilding it.
+  const _RR_COLORWORD=/^(dark|light|red|blue|green|grey|gray|brown|black|white|gold|silver|ashen|walnut|oak|iron|bronze|copper|rusty|mossy|bloody)$/;
+  function _rrBaseName(tex){ const s=String(tex||""); const i=s.lastIndexOf("-obj-"); return i>=0 ? s.slice(i+5) : ""; }
+  // Closest-tier stem: the name minus its LAST variant token (a trailing colour
+  // word, or a short enumerator like a / b / a1 / b2 / 1 / 2). Two sprites are
+  // closest-tier siblings when their stems match — so we vary one axis only
+  // (colour, or A1↔B1), never jump to a different member of the family.
+  function _rrStem(name){
+    if(!name) return "";
+    const parts=name.split("-");
+    if(parts.length>1){
+      const last=parts[parts.length-1];
+      if(_RR_COLORWORD.test(last)) return parts.slice(0,-1).join("-");
+      if(/^[a-z]?\d+$/.test(last) || /^[a-z]$/.test(last)) return parts.slice(0,-1).join("-");
+    }
+    return name;   // no variant token → only an identically-named sprite is a sibling (usually none → left as-is)
+  }
+  // Index every LOADED object sprite (honouring the Library Picker) by stem.
+  function _rrSiblingIndex(){
+    const byStem=new Map();
+    for(const t of texReg.values()){
+      if(!t || t.kind!=="object") continue;
+      const lib=texLib(t); if(lib && !libActive(lib)) continue;      // don't swap into a switched-off library
+      const nm=_rrBaseName(t.id); if(!nm) continue;
+      const stem=_rrStem(nm);
+      let a=byStem.get(stem); if(!a){ a=[]; byStem.set(stem,a); } a.push(t);
+    }
+    return byStem;
+  }
+  // Choose a sibling for `tex`: prefer the nearest native aspect ratio (keeps
+  // proportions sensible in the kept footprint), then pick at random among the
+  // closest few so repeated re-rolls actually wander.
+  function _rrPick(tex, byStem){
+    const nm=_rrBaseName(tex); if(!nm) return null;
+    const pool=byStem.get(_rrStem(nm)); if(!pool || pool.length<2) return null;
+    const cands=pool.filter(t=>t.id!==tex); if(!cands.length) return null;
+    const cur=texReg.get(tex); const curAsp=(cur&&cur.w&&cur.h)?cur.w/cur.h:1;
+    cands.sort((a,b)=>{ const aa=(a.w&&a.h)?a.w/a.h:1, bb=(b.w&&b.h)?b.w/b.h:1;
+      return Math.abs(aa-curAsp)-Math.abs(bb-curAsp); });
+    const top=cands.slice(0, Math.min(4, cands.length));
+    return top[Math.floor(Math.random()*top.length)].id;
+  }
+  // Objects to act on: a locked prefab, a selected room shape (resolved to its
+  // group, like Save-as-prefab does), a multi-selection, or a single object.
+  function _rrGroupObjects(){
+    let g=sel;
+    if(g && g.kind==="shape" && isRoomShape((map.shapes||[])[g.idx])) g={kind:"prefab", roomIdx:g.idx};
+    const mem = (g && (g.kind==="prefab" || g.roomIdx!=null || g.kind==="multi")) ? groupMembers(g) : selItems();
+    return mem.filter(it=>it && it.kind==="object" && it.obj && it.obj.tex);
+  }
+  function rerollSel(){
+    const objs=_rrGroupObjects();
+    if(!objs.length){ toast("Select a room or prefab to re-roll its sprites."); return; }
+    const byStem=_rrSiblingIndex();
+    const changes=[];
+    for(const it of objs){ const nid=_rrPick(it.obj.tex, byStem); if(nid && nid!==it.obj.tex) changes.push([it.obj, nid]); }
+    if(!changes.length){ toast("No alternate sprites available for this room's objects."); return; }
+    pushHistory();
+    for(const c of changes){ c[0].tex=c[1]; }
+    commit();
+    toast("Re-rolled "+changes.length+" sprite"+(changes.length===1?"":"s")+".");
+  }
+
   // ════════════════════════════════════════════════════════════════
   // POINTER INTERACTION
   // ════════════════════════════════════════════════════════════════
@@ -3073,7 +3142,7 @@
       allPrefabs, buildRoomGrid, buildObjGrid, pickList,
       loadCustomPrefabs, saveCustomPrefabs, loadHiddenDefaults, getDefaults:()=>ROOM_TEMPLATES,
       groupMembers, groupLockedAt, serializeGroupToTemplate,
-      setMulti, selItems, mirrorSel, duplicateSel,
+      setMulti, selItems, mirrorSel, duplicateSel, rerollSel,
       fitView, commit, getCam:()=>cam }; } }catch(e){}
 
   // Kick off a load the first time a texture is asked for; re-render when it
@@ -6245,6 +6314,7 @@
       ["Drag empty space","Rubber-band marquee select (mouse)"],
       ["Ctrl / Cmd + D","Duplicate the selection"],
       ["M  or  X","Mirror the selection (single flips in place; a group mirrors together)"],
+      ["Shift + R","Re-roll sprites — keeps the layout, swaps each object for a colour/variant sibling (varies duplicate rooms)"],
       ["[  /  ]","Rotate 90° (piece, group, or multi) · Shift = 5° nudge"],
       ["+  /  −","Resize a selected object (or a light/shadow radius)"],
       ["F  /  B","Bring to front / send to back"],
@@ -6281,7 +6351,7 @@
   if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.08e";
+  const BUILD="2026.09.08f";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
@@ -6367,6 +6437,8 @@
     // M or X mirrors the selection (single flips in place; a group/multi mirrors together).
     if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==="m"||e.key==="M")&&sel){ mirrorSel(); return; }
     if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&(e.key==="x"||e.key==="X")&&sel&&(sel.kind==="prefab"||sel.kind==="multi")){ mirrorSel(); return; }
+    // Shift+R re-rolls the selection's sprites (same layout, swap each for a variant sibling).
+    if(!e.ctrlKey&&!e.metaKey&&!e.altKey&&e.key==="R"&&sel){ rerollSel(); return; }
     if(e.key==="\\"){ fitView(); return; }                        // \ = Fit view
     if(e.key==="Enter"&&polyPts){ finishPolygon(false); return; }
     if(e.key==="?"){ openShortcuts(); return; }
