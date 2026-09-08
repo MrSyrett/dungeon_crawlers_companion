@@ -220,8 +220,9 @@
   /* Floating tool dock along the bottom of the canvas — icons only, names on hover. */
   .tooldock{left:50%;transform:translateX(-50%);bottom:14px;display:flex;align-items:center;
     gap:6px;padding:5px 7px;max-width:calc(100% - 120px);flex-wrap:wrap;justify-content:center}
-  .tooldock .tools{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+  .tooldock .tools{display:flex;gap:4px;flex-wrap:nowrap;justify-content:center}
   .tooldock .tool{padding:7px;gap:0;font-size:0;border-radius:6px}
+  .tool:focus-visible,#snapTool:focus-visible,#opaqueTool:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   .tooldock .tool svg{width:21px;height:21px}
   .tooldock .seg{font-size:11px}
   .dock-div{align-self:stretch;width:1px;background:var(--line);margin:2px}
@@ -572,7 +573,8 @@
       <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a>
         (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a>)<br>
         and <a href="https://axebane.com/" target="_blank" rel="noopener noreferrer">Axebane Games</a>
-        (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>)</p>
+        (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>)
+        <br><span id="buildStamp" style="opacity:.65;font-family:ui-monospace,Menlo,monospace"></span></p>
     </div>
 
     <div class="spacer"></div>
@@ -583,6 +585,8 @@
   <div class="preview-area">
     <canvas id="map"></canvas>
     <div class="float tip" id="tip"></div>
+    <div id="saveWarn" role="alert" hidden style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:8;background:#7a2e1e;color:#ffe;border:1px solid #a5442e;border-radius:8px;padding:8px 14px;font-size:12.5px;box-shadow:0 4px 16px rgba(0,0,0,.4);max-width:min(92%,460px);text-align:center">
+      ⚠ Couldn't autosave — browser storage is full. <b>Export your map</b> to avoid losing work.</div>
     <div class="float tooldock" id="toolDock">
       <div class="tools" id="toolbar">
         <div class="tool active" data-tool="select" title="Select / move (V)">
@@ -4411,7 +4415,8 @@
   // it — nothing is saved to the site. Sharing / keeping a map is via Export.
   let saveTimer=null;
   function scheduleSave(){ if(embed) return; clearTimeout(saveTimer); saveTimer=setTimeout(doSave,700); }
-  function doSave(){ try{ localStorage.setItem("dcc_map", snapshot()); }catch(e){} }
+  function doSave(){ try{ localStorage.setItem("dcc_map", snapshot()); if($("saveWarn")) $("saveWarn").hidden=true; }
+    catch(e){ if($("saveWarn")) $("saveWarn").hidden=false; } }   // surface a full-storage failure instead of losing work silently
 
   function load(){
     let data=null;
@@ -5400,7 +5405,7 @@
     const cb=$("floorOpaque"), row=$("floorAlphaRow");
     if(cb) cb.checked=on;
     if(row) row.style.display = advOn() ? "flex" : "none";
-    const tb=$("opaqueTool"); if(tb){ tb.classList.toggle("opaqueon", on); tb.style.display = advOn() ? "" : "none"; }
+    const tb=$("opaqueTool"); if(tb){ tb.classList.toggle("opaqueon", on); tb.setAttribute("aria-pressed", on?"true":"false"); tb.style.display = advOn() ? "" : "none"; }
   }
   // Toggle the OPAQUE floor state — the selected room/shape's own floor, or (nothing
   // selected) the default for the next shape drawn. Shared by the sidebar checkbox and
@@ -7846,7 +7851,7 @@
 
   $("gridInteriorToggle").onchange=e=>{ map.gridInterior=e.target.checked; render(); scheduleSave(); };
   function syncSnapUI(){ if($("snapToggle")) $("snapToggle").checked=snapOn;
-    if($("snapTool")) $("snapTool").classList.toggle("snapon", snapOn); }
+    const tb=$("snapTool"); if(tb){ tb.classList.toggle("snapon", snapOn); tb.setAttribute("aria-pressed", snapOn?"true":"false"); } }
   $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; syncSnapUI(); scheduleSave(); };
   // Shift+S rather than plain S, which is already the Stairs tool.
   function toggleSnap(){ snapOn=!snapOn; map.snap=snapOn;
@@ -7896,6 +7901,26 @@
   if($("shortcutsBtn")) $("shortcutsBtn").onclick=openShortcuts;
   if($("shortcutsClose")) $("shortcutsClose").onclick=closeShortcuts;
   if($("shortcutsModal")) $("shortcutsModal").onclick=e=>{ if(e.target===$("shortcutsModal")) closeShortcuts(); };
+
+  // ── Build stamp (so a stale cache is diagnosable at a glance) ──
+  const BUILD="2026.09.08";
+  if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
+  if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
+
+  // ── Accessibility: name the icon tools, make them keyboard-operable, label the toolbar ──
+  (function(){
+    const tb=document.getElementById("toolbar");
+    if(tb){ tb.setAttribute("role","toolbar"); tb.setAttribute("aria-label","Map tools"); }
+    document.querySelectorAll("#toolbar .tool").forEach(el=>{
+      el.setAttribute("role","button");
+      if(el.tabIndex<0) el.tabIndex=0;
+      const t=(el.getAttribute("title")||el.textContent||"").trim();
+      if(t && !el.getAttribute("aria-label")) el.setAttribute("aria-label", t);
+      if(el.id==="snapTool"||el.id==="opaqueTool") el.setAttribute("aria-pressed","false");
+      el.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); el.click(); } });
+    });
+  })();
+  syncSnapUI(); syncFloorAlphaUI();   // stamp the initial aria-pressed values
   $("clear").onclick=()=>{ if(!mapHasContent()){return;}
     // Clear wipes CONTENT, not your working setup: keep the map's style (textured mode +
     // floor/wall palette) and lighting prefs. Otherwise blankMap() drops back to normal
