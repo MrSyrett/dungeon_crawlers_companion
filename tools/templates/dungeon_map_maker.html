@@ -2935,6 +2935,9 @@
                         atlas:t.atlas||null, thumbRect:t.thumb||null,
                         url:"/packs/bundled/"+(t.atlas ? t.atlas.sheet : t.file)+assetV, img:null});
     buildTexSelects(); buildObjGrid(); buildDoorStyles();
+    // Refilter the prefab palette: rooms whose style library was empty at init (art loads
+    // async, after the first buildRoomGrid) are hidden until their library's objects land.
+    if(typeof buildRoomGrid==="function") buildRoomGrid();
     if(typeof redrawRoomThumbs==="function") redrawRoomThumbs();   // prefab thumbnails now have sprites
     render();
   }
@@ -2996,6 +2999,9 @@
       buildObjGrid();
     }
     if(added){ buildTexSelects(); buildObjGrid(); buildDoorStyles();
+      // Refilter prefabs now that FA objects are loaded — otherwise FA-styled rooms saved
+      // in the palette stay hidden after a refresh (buildRoomGrid ran before FA arrived).
+      if(typeof buildRoomGrid==="function") buildRoomGrid();
       if(typeof redrawRoomThumbs==="function") redrawRoomThumbs(); render(); }
   }
   // Test hook only: lets an automated test point the loader at a local bundle.
@@ -6217,7 +6223,7 @@
   if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.08c";
+  const BUILD="2026.09.08d";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
