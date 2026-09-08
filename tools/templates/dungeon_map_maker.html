@@ -827,16 +827,6 @@
   // origin the square grid uses, so texture and grid never drift apart.
   // `tex` is set by applyStyle(); null ⇒ classic flat-colour render.
   let tex = null;
-  function patFor(c, t){
-    if(t && t.solid) return t.solid;   // a solid-colour "texture" (Slate/Black floor) fills flat
-    if(!t || !t.img) return null;
-    const img=t.img; if(!img.complete || !img.naturalWidth) return null;
-    let p; try { p=c.createPattern(img, "repeat"); } catch(e){ return null; }
-    if(!p || !p.setTransform || typeof DOMMatrix==="undefined") return null;
-    const s=(wpx()*(t.cells||4))/img.naturalWidth, o=toScreen(0,0);
-    try { p.setTransform(new DOMMatrix([s,0,0,s,o[0],o[1]])); } catch(e){ return null; }
-    return p;
-  }
   function toScreen(wx, wy){ return [ (wx - cam.x)*wpx() + W/2, (wy - cam.y)*wpx() + H/2 ]; }
   function toWorld(sx, sy){ return [ (sx - W/2)/wpx() + cam.x, (sy - H/2)/wpx() + cam.y ]; }
   function snap(v){ return snapOn? Math.round(v): v; }
@@ -845,11 +835,10 @@
   // ════════════════════════════════════════════════════════════════
   // RENDER
   // ════════════════════════════════════════════════════════════════
-  // offscreen scratch buffers (CSS-px sized) for the floor fill & grid clip
   function oc(){ return document.createElement("canvas"); }
+  // offscreen scratch buffers (CSS-px sized) for the floor fill & grid clip
   const buf = { mask:oc(), tint:oc(), grid:oc(), wall:oc(), erode:oc(), deco:oc(), decoClip:oc(),
                  light:oc(), ltint:oc(), wsh:oc() };
-  function sizeBufs(){ for(const k in buf){ if(buf[k].width!==W||buf[k].height!==H){ buf[k].width=W; buf[k].height=H; } } }
 
   // draw a single floor shape's path into a 2d context (screen space)
   function shapePath(c, sh){
@@ -880,150 +869,19 @@
   function hash2(x,y){ const h=Math.sin(x*127.1 + y*311.7)*43758.5453; return h-Math.floor(h); }
   function seeded(x,y){ let s=(Math.floor(x*8191)^Math.floor(y*131071))>>>0; s=(s^0x9e3779b9)>>>0;
     return function(){ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
-  function pointInAny(wx,wy){ const S=map.shapes; for(let i=0;i<S.length;i++) if(pointInShape(wx,wy,S[i])) return true; return false; }
 
   // ── Union boundary as VECTOR contours (marching squares over a world grid).
   // Camera-independent, so it is cached and only rebuilt when geometry changes.
   let contours=[], hatchStrokes=[], geomDirty=true;
   function markGeom(){ geomDirty=true; }
-  function ensureGeom(){ if(geomDirty){ geomDirty=false; buildGeometry(); } }
 
-  function buildGeometry(){
-    // Crosshatching was removed per request, and walls now render per-shape
-    // (drawWalls) rather than from a union contour — so no geometry to build.
-    contours=[]; hatchStrokes=[];
-    return;
-    /* eslint-disable no-unreachable */
-    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9; const S=map.shapes;
-    for(const s of S){ const b=bounds(s,"shape"); if(b){ x0=Math.min(x0,b.x); y0=Math.min(y0,b.y); x1=Math.max(x1,b.x+b.w); y1=Math.max(y1,b.y+b.h); } }
-    const res=0.5;                                          // trace on the half-cell grid
-    x0=Math.floor(x0/res)*res - res; y0=Math.floor(y0/res)*res - res;
-    x1=Math.ceil(x1/res)*res + res;  y1=Math.ceil(y1/res)*res + res;
-    const gw=Math.round((x1-x0)/res), gh=Math.round((y1-y0)/res);
-    // Cell occupancy by centre test. Rooms are grid-aligned, so their edges fall
-    // exactly on grid lines ⇒ the traced walls stay ON the grid and never drift.
-    const occ=new Uint8Array(gw*gh);
-    for(let j=0;j<gh;j++){ const cy=y0+(j+0.5)*res; for(let i=0;i<gw;i++){ occ[j*gw+i]=pointInAny(x0+(i+0.5)*res, cy)?1:0; } }
-    const O=(i,j)=> (i<0||j<0||i>=gw||j>=gh)?0:occ[j*gw+i];
-    const P=(i,j)=>[x0+i*res, y0+j*res];
-    // Boundary = the cell edges that sit between an occupied and an empty cell —
-    // axis-aligned unit segments on grid lines.
-    const segs=[];
-    for(let j=0;j<gh;j++) for(let i=0;i<gw;i++){ if(!O(i,j)) continue;
-      if(!O(i,j-1)) segs.push([P(i,j),   P(i+1,j)]);        // top
-      if(!O(i,j+1)) segs.push([P(i,j+1), P(i+1,j+1)]);      // bottom
-      if(!O(i-1,j)) segs.push([P(i,j),   P(i,j+1)]);        // left
-      if(!O(i+1,j)) segs.push([P(i+1,j), P(i+1,j+1)]);      // right
-    }
-    const loops=stitch(segs);
-    // Merge collinear runs (drop mid-edge points, keep corners exactly on-grid;
-    // also smooths circle/polygon stairsteps into chords).
-    for(let lp of loops){ lp=rdp(lp, res*0.9); if(lp.length>=4) contours.push(lp); }
-    hatchStrokes=buildHatchStrokes(contours);
-  }
 
-  function stitch(segs){
-    const key=p=>Math.round(p[0]*1000)+"|"+Math.round(p[1]*1000);
-    const adj=new Map(), pos=new Map();
-    for(const [a,b] of segs){ const ka=key(a),kb=key(b); if(ka===kb) continue;
-      pos.set(ka,a); pos.set(kb,b);
-      (adj.get(ka)||adj.set(ka,[]).get(ka)).push(kb);
-      (adj.get(kb)||adj.set(kb,[]).get(kb)).push(ka); }
-    const usedEdge=new Set(), loops=[];
-    const eid=(a,b)=> a<b? a+">"+b : b+">"+a;
-    for(const start of adj.keys()){
-      let has=false; for(const n of adj.get(start)) if(!usedEdge.has(eid(start,n))){ has=true; break; }
-      if(!has) continue;
-      let cur=start, prev=null; const loop=[]; let guard=0;
-      while(cur && guard++<200000){
-        loop.push(pos.get(cur));
-        const nbrs=adj.get(cur)||[]; let nxt=null;
-        for(const n of nbrs){ if(!usedEdge.has(eid(cur,n)) && n!==prev){ nxt=n; break; } }
-        if(!nxt){ for(const n of nbrs){ if(!usedEdge.has(eid(cur,n))){ nxt=n; break; } } }
-        if(!nxt) break;
-        usedEdge.add(eid(cur,nxt)); prev=cur; cur=nxt;
-        if(cur===start) break;
-      }
-      if(loop.length>=3) loops.push(loop);
-    }
-    return loops;
-  }
 
-  function perpDist(p,a,b){ const dx=b[0]-a[0],dy=b[1]-a[1]; const l=Math.hypot(dx,dy)||1;
-    return Math.abs((p[0]-a[0])*dy-(p[1]-a[1])*dx)/l; }
-  function rdp(pts,eps){
-    if(pts.length<4) return pts;
-    const keep=new Array(pts.length).fill(false); keep[0]=keep[pts.length-1]=true;
-    const stack=[[0,pts.length-1]];
-    while(stack.length){ const [s,e]=stack.pop(); let dmax=0,idx=-1;
-      for(let i=s+1;i<e;i++){ const d=perpDist(pts[i],pts[s],pts[e]); if(d>dmax){ dmax=d; idx=i; } }
-      if(dmax>eps && idx>0){ keep[idx]=true; stack.push([s,idx],[idx,e]); } }
-    const out=[]; for(let i=0;i<pts.length;i++) if(keep[i]) out.push(pts[i]);
-    const f=out[0], l=out[out.length-1];
-    if(f && (f[0]!==l[0]||f[1]!==l[1])) out.push([f[0],f[1]]);
-    return out;
-  }
 
   // True crosshatching. A dense base layer of bundles roots on the wall and
   // leans outward. Each later generation spawns from points ALONG existing lines
   // (not their tips) and runs PERPENDICULAR to that line — so successive families
   // cross at right angles, weaving a proper crosshatch. Everything stays exterior.
-  function buildHatchStrokes(loops){
-    const out=[];        // [x1,y1,x2,y2]
-    const strokes=[];    // {a:[x,y], b:[x,y]}
-    const skew=0.5;      // outward lean of the base combs (radians off the normal)
-    const ca=Math.cos(skew), sa=Math.sin(skew);
-    const bundleGap=0.6, lineGap=0.14;
-    // base layer — rooted on the wall
-    for(const loop of loops){
-      let carry=0.25;
-      for(let i=0;i<loop.length-1;i++){
-        const a=loop[i], b=loop[i+1];
-        const dx=b[0]-a[0], dy=b[1]-a[1]; const segLen=Math.hypot(dx,dy); if(segLen<1e-4) continue;
-        const tx=dx/segLen, ty=dy/segLen; let nx=-ty, ny=tx;
-        const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2;
-        if(pointInAny(mx+nx*0.15, my+ny*0.15)){ nx=-nx; ny=-ny; }   // outward
-        const hx=nx*ca - ny*sa, hy=nx*sa + ny*ca;
-        let d=carry;
-        while(d<segLen){
-          const bx=a[0]+tx*d, by=a[1]+ty*d;
-          const r=seeded(bx*7.0, by*7.0);
-          const N=3+Math.floor(r()*3);            // 3..5 lines per bundle
-          const L=0.55 + r()*0.25;
-          for(let k=0;k<N;k++){
-            const o=(k-(N-1)/2)*lineGap;
-            const sx=bx + tx*o, sy=by + ty*o;      // root ON the wall
-            const ex=sx + hx*L, ey=sy + hy*L;
-            if(pointInAny(ex,ey)) continue;
-            const st={a:[sx,sy], b:[ex,ey]}; strokes.push(st); out.push([sx,sy,ex,ey]);
-          }
-          d += bundleGap;
-        }
-        carry = d - segLen;
-      }
-    }
-    // crossing generations — spawn along each line, perpendicular to it
-    let front=strokes, depth=0; const maxDepth=2;
-    while(depth<maxDepth && front.length){
-      const next=[];
-      for(const s of front){
-        const dx=s.b[0]-s.a[0], dy=s.b[1]-s.a[1]; const len=Math.hypot(dx,dy)||1;
-        const px=-dy/len, py=dx/len;               // perpendicular to this line
-        for(const f of [0.32, 0.6, 0.84]){          // points ALONG the line (not the tips)
-          const cx=s.a[0]+dx*f, cy=s.a[1]+dy*f;
-          const r=seeded(cx*17.0 + depth*2.3, cy*17.0);
-          if(r()<0.4) continue;
-          const dir = r()<0.5 ? 1 : -1;
-          const L=0.34 + r()*0.26;
-          const ex=cx + px*dir*L, ey=cy + py*dir*L;
-          if(pointInAny(ex,ey) || pointInAny((cx+ex)/2,(cy+ey)/2)) continue;   // exterior only
-          const st={a:[cx,cy], b:[ex,ey]}; next.push(st); out.push([cx,cy,ex,ey]);
-        }
-      }
-      front=next; depth++;
-    }
-    return out;
-  }
 
   // Render entry point. The MAP itself (floors/walls/doors/stairs/grid/dots) is
   // drawn by the shared DungeonEngine when it's loaded (single source of truth,
@@ -1061,15 +919,21 @@
     return { shapes, walls };
   }
   // Fallback path (no engine): render a sub-map by briefly repointing module state.
-  function drawLocal(sub, opt){
-    const sm=map, sr=noRock, sc=renderNoClear, so=renderOverlay;
-    map=sub; noRock=!!opt.transparent; renderNoClear=!!opt.noClear; renderOverlay=!!opt.overlayOnly;
-    renderLocalMap();
-    map=sm; noRock=sr; renderNoClear=sc; renderOverlay=so;
+  // The shared engine (dungeon-engine.js) draws the map. If it didn't load, say so
+  // clearly instead of failing silently — there is no inline fallback any more.
+  let _engErrShown=false;
+  function showEngineError(){
+    try{ ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,cv.width,cv.height);
+      ctx.fillStyle="#1a1712"; ctx.fillRect(0,0,cv.width,cv.height);
+      ctx.fillStyle="#e9c46a"; ctx.textAlign="center"; ctx.font="15px system-ui,sans-serif";
+      ctx.fillText("Map renderer didn't load — check your connection and reload.", cv.width/2, cv.height/2);
+      ctx.textAlign="left"; }catch(e){}
+    if(!_engErrShown){ _engErrShown=true; try{ toast("Renderer (dungeon-engine.js) didn't load — reload the page."); }catch(e){} }
   }
   function render(){
     applyStyle();
     const useEngine = window.DungeonEngine && window.DungeonEngine.renderTo;
+    if(!useEngine){ showEngineError(); return; }
     const vis = soloLayer ? (map.layers||[]).filter(L=>L.id===soloLayer)
                           : (map.layers||[]).filter(L=>L.visible!==false);
     // Composite visible layers bottom→top: the first clears + draws rock, the rest
@@ -1081,7 +945,6 @@
       const ltex=layerTex(L);                     // this layer's own floor/wall default
       const opt={cam,W,H,DPR,theme, transparent:(i>0)||noRock, noClear:(i>0), tex:ltex};
       if(useEngine) window.DungeonEngine.renderTo(ctx, sub, opt);
-      else { const st0=tex; tex=ltex; drawLocal(sub, opt); tex=st0; }   // local path reads the module `tex`
     });
     // ONE global lights + darkness overlay over the finished stack. Each visible layer
     // is a light group occluded by its OWN walls; an upper layer's floor hides the
@@ -1095,7 +958,6 @@
       const osub=Object.assign({}, map, {lightLayers:groups, lit:true, darkness:map.darkness, shapes:ushapes, walls:uwalls});
       const oopt={cam,W,H,DPR,theme, tex, overlayOnly:true, noClear:true, transparent:noRock};
       if(useEngine) window.DungeonEngine.renderTo(ctx, osub, oopt);
-      else drawLocal(osub, {overlayOnly:true, transparent:noRock});
     }
     // ↑ The lit overlay is ~75% of a frame's cost, but nothing moving on the canvas
     // changes it: objects don't occlude light (only walls/shapes do). So while an
@@ -1198,107 +1060,6 @@
   // frame so a burst of pointer events can't stack synchronous renders behind each other.
   let camRaf=0;
   function scheduleRender(){ if(!camRaf) camRaf=requestAnimationFrame(()=>{ camRaf=0; render(); }); }
-  function renderLocalMap(){
-    // Work in CSS-pixel logical space; scale once for crisp HiDPI output.
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-    doorHalf=null;                      // per-door wall thickness, recomputed per frame
-    lightSegs=null;                     // light occluders, likewise
-    if(renderOverlay){ drawLights(); return; }   // global lights pass (shadows draw per-layer)
-    if(!renderNoClear) ctx.clearRect(0,0,W,H);
-    if(!noRock){
-      const bgPat = patFor(ctx, tex && tex.bg), bgCol = tex && tex.bgColor;
-      if(bgPat){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }   // opaque base under an imported (FA) bg texture's alpha
-      ctx.fillStyle = bgPat || bgCol || C.rockHi; ctx.fillRect(0,0,W,H);
-      drawFullGrid();   // square grid across the WHOLE canvas — background AND interiors
-      drawExteriorHatch();   // hand-drawn rock hatching around walls (classic + Interior-Only)
-    }
-
-    const shapes = map.shapes;
-    if(shapes.length){
-      ensureGeom();
-      sizeBufs();
-      // floor mask (white union)
-      const m=buf.mask.getContext("2d"); m.setTransform(1,0,0,1,0,0);
-      m.clearRect(0,0,W,H); m.fillStyle="#fff"; m.beginPath();
-      for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue; shapePath(m, sh); } m.fill("nonzero");
-      // Floors are PER-SHAPE. Walk the shapes in z-order and batch CONSECUTIVE
-      // runs that share a fill: the common single-floor map still costs one pass
-      // (and renders byte-identically to before), while a mixed map stays correct
-      // — a later shape paints over an earlier one exactly as it was drawn. Deco
-      // (Shapes) floors are NOT here — they draw as a unit in drawDecoShapes, on
-      // top of the room floors but below the walls, so a Shape sits on the floor.
-      const runs=[];
-      for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue;
-        const ft=shapeFloorTex(sh), last=runs[runs.length-1];
-        if(last && last.t===ft) last.list.push(sh); else runs.push({t:ft, list:[sh]});
-      }
-      const tc=buf.tint.getContext("2d"); tc.setTransform(1,0,0,1,0,0);
-      tc.clearRect(0,0,W,H); tc.globalCompositeOperation="source-over";
-      // Untextured floors keep the original mask + `source-in` path so the classic
-      // render stays byte-identical. Anything with a texture — one run or twenty —
-      // goes through the clipped-fill path below, which is both faster and the
-      // only way mixed floors can be composited cheaply.
-      if(runs.length<=1 && !(runs.length && runs[0].t)){
-        tc.drawImage(buf.mask,0,0);
-        tc.globalCompositeOperation="source-in";
-        tc.fillStyle = patFor(tc, runs.length?runs[0].t:null) || C.floor; tc.fillRect(0,0,W,H);
-        tc.globalCompositeOperation="source-over";
-      } else {
-        // One CLIPPED pattern fill per run — no composite modes, no scratch
-        // buffers. The obvious mask + `source-in` approach is a trap here:
-        // source-in is defined over the WHOLE canvas (everything outside the
-        // source is cleared), so it costs a full-canvas pass per run even when
-        // the fill is tiny — ~180 ms on an 18-room, four-style map. Clipping
-        // costs only the run's own box.
-        // Opaque backdrop under FA patterns: imported floor tiles carry an alpha channel,
-        // so their transparent regions would let whatever is beneath (the rock background
-        // OR a lower floor) show through. Paint a black base directly under EACH run's
-        // OPAQUE shapes, right before that run's floor — so an opaque floor covers anything
-        // beneath it even where it crosses a lower room. A TRANSPARENT shape (sh.alpha) gets
-        // no base, so a translucent floor (water, mud) still layers over what's under it.
-        for(const r of runs){
-          const bb=runBox(r.list); if(!bb) continue;
-          if(r.t && r.t.img){
-            tc.save(); tc.beginPath(); let anyOpaque=false;
-            for(const sh of r.list){ if(shFloorOpaque(sh)){ shapePath(tc, sh); anyOpaque=true; } }
-            if(anyOpaque){ tc.clip("nonzero"); tc.fillStyle="#000"; tc.fillRect(bb.x,bb.y,bb.w,bb.h); }
-            tc.restore();
-          }
-          tc.save();
-          tc.beginPath(); for(const sh of r.list) shapePath(tc, sh); tc.clip("nonzero");
-          tc.fillStyle = patFor(tc, r.t) || C.floor;
-          tc.fillRect(bb.x,bb.y,bb.w,bb.h);
-          tc.restore();
-        }
-      }
-      ctx.drawImage(buf.tint,0,0);
-      // grid inside floor
-      if(map.grid && gridOp()>0 && wpx()>7){
-        const gc=buf.grid.getContext("2d"); gc.setTransform(1,0,0,1,0,0);
-        gc.clearRect(0,0,W,H); gc.globalCompositeOperation="source-over";
-        // Width scales with zoom so it's a constant fraction of a cell: 3px at
-        // export scale (res=2, the look Michael liked) and correspondingly thinner
-        // in the live preview instead of a fixed 3px that looks heavy there.
-        gc.strokeStyle=C.grid; gc.lineWidth=Math.max(1,1.5*cam.scale); gc.globalAlpha=.85*gridOp();
-        const p=wpx(); const [ox,oy]=toScreen(0,0); gc.beginPath();
-        for(let x=ox%p;x<=W;x+=p){ gc.moveTo(x+.5,0); gc.lineTo(x+.5,H); }
-        for(let y=oy%p;y<=H;y+=p){ gc.moveTo(0,y+.5); gc.lineTo(W,y+.5); }
-        gc.stroke(); gc.globalAlpha=1;
-        gc.globalCompositeOperation="destination-in"; gc.drawImage(buf.mask,0,0);
-        ctx.drawImage(buf.grid,0,0);
-      }
-      drawWallInnerShadow();             // soft band inside every wall (Shadows switch)
-      drawDecoShapes();                  // Shapes sit ON room floors but UNDER the walls (above floors, below walls)
-      drawWalls();                       // rough-edged room walls (round circles), drop shadow
-    }
-
-    drawInteriorWalls();
-    for(const d of map.doors) drawDoor(d);
-    for(const s of map.stairs) drawStair(s);
-    drawShadows();
-    drawObjects();
-    drawLights();
-  }
 
   // ── WALL SHADOW ────────────────────────────────────────────────────
   // A soft dark band hugging the INSIDE of every room wall — the trick that
@@ -1306,120 +1067,6 @@
   // Shadows switch; `map.wallShadow` (0..1) is its strength, 0 turns it off.
   // Drawn under the wall art so the band tucks beneath the stonework.
   const WALL_SHADOW_CELLS = 0.35;                 // band depth, between a quarter and a half square
-  function drawWallInnerShadow(){
-    if(!map || !map.shadowsOn) return;
-    const amt = map.wallShadow==null ? 0.55 : Math.max(0, Math.min(1, map.wallShadow));
-    if(amt<=0) return;
-    const px = WALL_SHADOW_CELLS*wpx();
-    if(px < 1.5) return;                          // too zoomed out to read as anything
-    // Only ROOM shapes that have BOTH a wall and a floor get an inner band — a
-    // floor-only shape has no wall to cast it, a wall-only shape no floor to cast it
-    // onto, and deco shapes draw their own floor on top later (which would bury it).
-    const banded=sh=>!sh.deco&&shHasWall(sh)&&shHasFloor(sh);
-    let any=false;
-    for(const sh of map.shapes) if(banded(sh)){ any=true; break; }
-    if(!any) return;
-    sizeBufs();
-    // Its own floor mask (the render mask now includes wall-less floors), built into
-    // buf.erode (free until drawWalls runs after this).
-    const fm=buf.erode.getContext("2d"); fm.setTransform(1,0,0,1,0,0); fm.globalAlpha=1; fm.filter="none";
-    fm.globalCompositeOperation="source-over"; fm.clearRect(0,0,W,H);
-    fm.fillStyle="#fff"; fm.beginPath();
-    for(const sh of map.shapes){ if(banded(sh)) shapePath(fm, sh); } fm.fill("nonzero");
-    const c=buf.wsh.getContext("2d");
-    c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none";
-    c.globalCompositeOperation="source-over"; c.clearRect(0,0,W,H);
-    c.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; c.fillRect(0,0,W,H);
-    c.globalCompositeOperation="destination-in"; c.drawImage(buf.erode,0,0);   // walled floors only
-    // …then carve the middle of the room back out with a blurred inset fill,
-    // which leaves exactly the feathered band along the boundary. Per-shape, so a
-    // wall SHARED by two merely-abutting rooms keeps its band on both sides (each
-    // insets away from the shared edge). Correct everywhere EXCEPT it also leaves a
-    // phantom band in the SEAM where two rooms genuinely OVERLAP — cleaned up next.
-    c.globalCompositeOperation="destination-out";
-    c.filter="blur("+(px*0.38).toFixed(2)+"px)";
-    c.fillStyle="#fff";
-    for(const sh of map.shapes){ if(!banded(sh)) continue;
-      fillInsetShape(c, sh, halfCellsFor(shapeWallTex(sh)) + WALL_SHADOW_CELLS); }
-    c.filter="none";
-    // Second pass — drop the phantom seam band ONLY in the deep interior of a real
-    // overlap: (inside 2+ rooms) ∩ (union interior, eroded off the outer wall by
-    // the band depth). The intersection spares a real wall crossing an overlap (a
-    // T-top, an L elbow); abutting rooms never enter it (interiors don't intersect).
-    // (Mirror of the engine; keep in sync.)
-    { const ov=oc(), run=oc(), tmp=oc(), er=oc();
-      ov.width=run.width=tmp.width=er.width=W; ov.height=run.height=tmp.height=er.height=H;
-      const ovc=ov.getContext("2d"), rc=run.getContext("2d"), tc=tmp.getContext("2d"), erc=er.getContext("2d");
-      // Overlap only over pairs that CROSS (not nested), so a nested room keeps its
-      // wall-shadow band. (Mirror of the engine.)
-      const bnd=[]; for(const sh of map.shapes){ if(banded(sh)) bnd.push(sh); }
-      const bb=bnd.map(s=>bounds(s,"shape"));
-      const contains=shapeContains;
-      ovc.setTransform(1,0,0,1,0,0); ovc.globalCompositeOperation="source-over"; ovc.clearRect(0,0,W,H);
-      for(let i2=0;i2<bnd.length;i2++) for(let j2=i2+1;j2<bnd.length;j2++){
-        const bi=bb[i2], bj=bb[j2];
-        if(bi.x>bj.x+bj.w||bj.x>bi.x+bi.w||bi.y>bj.y+bj.h||bj.y>bi.y+bi.h) continue;
-        if(contains(bnd[i2],bnd[j2])||contains(bnd[j2],bnd[i2])) continue;
-        tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
-        tc.fillStyle="#fff"; tc.beginPath(); shapePath(tc,bnd[i2]); tc.fill("nonzero");
-        rc.setTransform(1,0,0,1,0,0); rc.filter="none"; rc.globalCompositeOperation="source-over"; rc.clearRect(0,0,W,H);
-        rc.fillStyle="#fff"; rc.beginPath(); shapePath(rc,bnd[j2]); rc.fill("nonzero");
-        tc.globalCompositeOperation="destination-in"; tc.drawImage(run,0,0);
-        ovc.globalCompositeOperation="source-over"; ovc.drawImage(tmp,0,0);
-      }
-      let repHalf=0; for(const sh of map.shapes){ if(banded(sh)) repHalf=Math.max(repHalf, halfCellsFor(shapeWallTex(sh))); }
-      const dPx=(repHalf + WALL_SHADOW_CELLS)*wpx();
-      erc.setTransform(1,0,0,1,0,0); erc.filter="none"; erc.globalCompositeOperation="source-over"; erc.clearRect(0,0,W,H);
-      erc.drawImage(buf.erode,0,0);
-      erc.globalCompositeOperation="destination-in";
-      const RN=20; for(let i=0;i<RN;i++){ const a=(i/RN)*Math.PI*2; erc.drawImage(buf.erode, Math.cos(a)*dPx, Math.sin(a)*dPx); }
-      erc.drawImage(ov,0,0);                              // seam = overlap ∩ eroded-union interior
-      c.globalCompositeOperation="destination-out";
-      c.filter="blur("+(px*0.30).toFixed(2)+"px)";
-      c.drawImage(er,0,0);
-      // ── NESTED ROOMS: rebuild their bands correctly ───────────────────
-      // A room fully inside another was carved twice by the passes above: the
-      // container's interior inset erased the nested room's INNER band, and the
-      // nested room also has an EXTERIOR that sits on the container's floor — its
-      // wall should throw a shadow OUTWARD too, like any structure standing in a
-      // room. Build both rings for every nested room into one feathered mask,
-      // unioned with "lighten" so overlaps never double, clip it to the floor,
-      // then ERASE that footprint out of `c` before stamping it once — so a nested
-      // room sharing a wall with its container reads single-strength, not doubled.
-      // (Mirror of the engine; keep in sync.)
-      const nested=[];
-      for(let i2=0;i2<bnd.length;i2++){
-        if(bnd[i2].corridor) continue;   // corridors merge into rooms — never nested
-        for(let j2=0;j2<bnd.length;j2++){ if(j2!==i2 && contains(bnd[j2],bnd[i2])){ nested.push(bnd[i2]); break; } } }
-      if(nested.length){
-        const nb=oc(); nb.width=W; nb.height=H; const nbc=nb.getContext("2d");
-        nbc.setTransform(1,0,0,1,0,0); nbc.globalCompositeOperation="source-over"; nbc.clearRect(0,0,W,H);
-        for(const S of nested){
-          const hpPx=halfPxFor(shapeWallTex(S)), reach=hpPx + px;
-          rc.setTransform(1,0,0,1,0,0); rc.filter="none"; rc.globalCompositeOperation="source-over"; rc.clearRect(0,0,W,H);
-          rc.fillStyle="#fff"; rc.beginPath(); shapePath(rc,S); rc.fill("nonzero");
-          // INNER ring: S minus its inset, feathered inward.
-          tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
-          tc.drawImage(run,0,0);
-          tc.globalCompositeOperation="destination-out"; tc.filter="blur("+(px*0.38).toFixed(2)+"px)";
-          tc.fillStyle="#fff"; fillInsetShape(tc, S, halfCellsFor(shapeWallTex(S)) + WALL_SHADOW_CELLS);
-          tc.filter="none";
-          nbc.globalCompositeOperation="lighten"; nbc.filter="none"; nbc.drawImage(tmp,0,0);
-          // EXTERIOR ring: a thick stroke straddling the outline, minus S, so only
-          // the outward half survives — the shadow cast onto the container floor.
-          tc.setTransform(1,0,0,1,0,0); tc.filter="none"; tc.globalCompositeOperation="source-over"; tc.clearRect(0,0,W,H);
-          tc.strokeStyle="#fff"; tc.lineJoin="round"; tc.lineWidth=2*reach; tc.beginPath(); shapePath(tc,S); tc.stroke();
-          tc.globalCompositeOperation="destination-out"; tc.drawImage(run,0,0);
-          nbc.globalCompositeOperation="lighten"; nbc.filter="blur("+(px*0.30).toFixed(2)+"px)"; nbc.drawImage(tmp,0,0); nbc.filter="none";
-        }
-        nbc.globalCompositeOperation="destination-in"; nbc.drawImage(buf.erode,0,0);          // keep only what lands on floor
-        c.globalCompositeOperation="destination-out"; c.filter="none"; c.drawImage(nb,0,0);   // clear the footprint (kills doubling)
-        nbc.globalCompositeOperation="source-in"; nbc.fillStyle="rgba(8,10,16,"+(0.78*amt).toFixed(3)+")"; nbc.fillRect(0,0,W,H);
-        c.globalCompositeOperation="source-over"; c.drawImage(nb,0,0);
-      } }
-    c.filter="none"; c.globalCompositeOperation="source-over";
-    ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
-  }
 
   // ══════════════════════ SHADOWS (Advanced Mode) ══════════════════════
   // Hand-placed shadows are DARK LIGHTS — the exact same machinery as a light, just
@@ -1436,60 +1083,6 @@
   // Legacy ellipse shadows (w/h/soft, no r) still load: r = max(w,h)/2.
   // Drawn per layer, inside the layer's own pass, so a lower layer's shadow never
   // lands on the layers above it (the upper layer's opaque floor paints over it).
-  function drawShadows(){
-    // v41: master switch, mirroring map.lit. Only an explicit false hides them, so
-    // a caller that never sets the flag (or a map saved before v41) still draws.
-    if(!map || map.shadowsOn===false) return;       // works in classic mode too (v39)
-    const list=map.shadows||[]; if(!list.length) return;
-    sizeBufs();
-    const sc=buf.wsh.getContext("2d");
-    sc.setTransform(1,0,0,1,0,0); sc.globalAlpha=1; sc.filter="none"; sc.globalCompositeOperation="source-over";
-    sc.clearRect(0,0,W,H);
-    const mc=lmaskCv.getContext("2d");
-    const blur=Math.max(2.5, Math.min(22, 0.18*wpx()));
-    let any=false;
-    for(let si=0;si<list.length;si++){
-      const S=list[si];
-      if(S.on===false) continue;
-      const a=Math.max(0, Math.min(1, S.strength==null ? 0.6 : S.strength));
-      if(a<=0) continue;
-      const R=Math.max(0.4, S.r!=null ? S.r : Math.max((S.w||1.6),(S.h||1.1))/2);
-      const cs=toScreen(S.x,S.y), cx=cs[0], cy=cs[1], rpx=R*wpx();
-      const pad=blur*2+6;
-      const bx=Math.max(0,Math.floor(cx-rpx-pad)), by=Math.max(0,Math.floor(cy-rpx-pad));
-      const bw=Math.min(W,Math.ceil(cx+rpx+pad))-bx, bh=Math.min(H,Math.ceil(cy+rpx+pad))-by;
-      if(bw<=0 || bh<=0) continue;                    // entirely off-screen
-      const k=Math.min(1, LMASK_MAX/Math.max(bw,bh));
-      const mw=Math.max(1,Math.round(bw*k)), mh=Math.max(1,Math.round(bh*k));
-      if(lmaskCv.width!==mw || lmaskCv.height!==mh){ lmaskCv.width=mw; lmaskCv.height=mh; }
-      else mc.clearRect(0,0,mw,mh);
-      mc.setTransform(1,0,0,1,0,0); mc.globalAlpha=1; mc.globalCompositeOperation="source-over";
-      // 1 — visibility polygon (occluded by this layer's walls), feathered
-      const poly=visPoly({x:S.x, y:S.y, r:R});
-      mc.save(); mc.filter="blur("+(blur*k).toFixed(2)+"px)"; mc.fillStyle="#fff"; mc.beginPath();
-      for(let i=0;i<poly.length;i++){ const p=toScreen(poly[i][0],poly[i][1]);
-        const mx=(p[0]-bx)*k, my=(p[1]-by)*k;
-        if(i===0) mc.moveTo(mx,my); else mc.lineTo(mx,my); }
-      mc.closePath(); mc.fill(); mc.restore();
-      // 2 — multiply in the radial falloff (or a painted / beam pattern)
-      mc.globalCompositeOperation="destination-in";
-      const pat=patOf(S);
-      if(PAINTED[pat]){
-        lightProfile(mw, mh, (cx-bx)*k, (cy-by)*k, rpx*k, a, pat, (S.id||si)+1, S.rot||0, S.spread);
-        mc.filter="blur("+(PROFILE_BLUR[pat]||1).toFixed(2)+"px)"; mc.drawImage(lprofCv,0,0); mc.filter="none";
-      } else {
-        mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a,pat); mc.fillRect(0,0,mw,mh);
-      }
-      // 3 — recolour to the shadow's own dark tone and accumulate
-      mc.globalCompositeOperation="source-in";
-      mc.fillStyle=S.color||"#05070d"; mc.fillRect(0,0,mw,mh);
-      mc.globalCompositeOperation="source-over";
-      sc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
-      any=true;
-    }
-    if(!any) return;
-    ctx.save(); ctx.globalCompositeOperation="multiply"; ctx.drawImage(buf.wsh,0,0); ctx.restore();
-  }
 
   // ══════════════════════ LIGHTS (Advanced Mode) ══════════════════════
   // A darkness wash laid over the finished map that every light carves a pool
@@ -1513,114 +1106,17 @@
   // is therefore walked in short steps and only the runs that stay OUTSIDE every
   // other room survive, so a half-buried edge still occludes along the half you
   // can see. Interior walls (map.walls) always draw on top, so they are kept whole.
-  function lightOccluders(){
-    if(lightSegs) return lightSegs;
-    lightSegs=[];
-    const rooms=[], rb=[];
-    for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue; rooms.push(sh); rb.push(bounds(sh,"shape")); }
-    const hits=(bx0,by0,bx1,by1,i)=>{ const b=rb[i];
-      return !!b && bx0<=b.x+b.w && bx1>=b.x && by0<=b.y+b.h && by1>=b.y; };
-    // A room fully INSIDE another still occludes light (nested wall, not buried).
-    // (Mirror of the engine.)
-    const rContains=shapeContains;
-    const containers=rooms.map(()=>null);
-    for(let a=0;a<rooms.length;a++){ const ba=rb[a];
-      for(let b2=0;b2<rooms.length;b2++){ if(a===b2) continue; const bb2=rb[b2];
-        if(ba.x>=bb2.x && ba.y>=bb2.y && ba.x+ba.w<=bb2.x+bb2.w && ba.y+ba.h<=bb2.y+bb2.h && rContains(rooms[b2],rooms[a])){
-          (containers[a]||(containers[a]=[])).push(b2); } } }
-    for(let si=0; si<rooms.length; si++){
-      const sh=rooms[si], o=shapeOutline(sh);
-      for(let i=0;i<o.length;i++){
-        const a=o[i], b=o[(i+1)%o.length];
-        const dx=b[0]-a[0], dy=b[1]-a[1], len=Math.hypot(dx,dy);
-        if(len<1e-6) continue;
-        // Only edges overlapping another room's box can be buried — skip the walk
-        // entirely otherwise, which is the common case.
-        const ex0=Math.min(a[0],b[0]), ex1=Math.max(a[0],b[0]);
-        const ey0=Math.min(a[1],b[1]), ey1=Math.max(a[1],b[1]);
-        const cand=[]; const cont=containers[si];
-        for(let j=0;j<rooms.length;j++) if(j!==si && hits(ex0,ey0,ex1,ey1,j) && !(cont && cont.indexOf(j)>=0)) cand.push(rooms[j]);
-        if(!cand.length){ lightSegs.push([a[0],a[1],b[0],b[1]]); continue; }
-        const n=Math.max(1, Math.min(64, Math.ceil(len/0.35)));
-        let s0=null;
-        const at=t=>[a[0]+dx*t, a[1]+dy*t];
-        const bc=rb[si], ccx=bc.x+bc.w/2, ccy=bc.y+bc.h/2;
-        for(let k=0;k<n;k++){
-          const tm=(k+0.5)/n, m=at(tm);
-          // Nudge the test point a hair INTO this room's interior: a wall SHARED with
-          // an adjoining room sits exactly on the neighbour's boundary and must still
-          // occlude. Only a wall STRICTLY inside another room (overlap) is buried.
-          let vx=ccx-m[0], vy=ccy-m[1]; const vl=Math.hypot(vx,vy)||1; const px=m[0]+vx/vl*0.06, py=m[1]+vy/vl*0.06;
-          let vis=true;
-          for(let j=0;j<cand.length;j++) if(pointInShape(px,py,cand[j])){ vis=false; break; }
-          if(vis && s0===null) s0=k/n;
-          else if(!vis && s0!==null){ const p=at(s0), q=at(k/n);
-            lightSegs.push([p[0],p[1],q[0],q[1]]); s0=null; }
-        }
-        if(s0!==null){ const p=at(s0); lightSegs.push([p[0],p[1],b[0],b[1]]); }
-      }
-    }
-    for(const w of map.walls){ const s=wallPts(w);
-      for(let i=0;i<s.length-1;i++) lightSegs.push([s[i][0],s[i][1],s[i+1][0],s[i+1][1]]); }
-    return lightSegs;
-  }
   // Distance from the ray origin to a segment, or -1. Parametric solve; `u` is
   // the position ALONG the segment so it must stay inside [0,1].
-  function rayHitT(px,py,dx,dy,s){
-    const ax=s[0], ay=s[1], bx=s[2]-s[0], by=s[3]-s[1];
-    const den=dx*by - dy*bx; if(den>-1e-12 && den<1e-12) return -1;
-    const t=((ax-px)*by - (ay-py)*bx)/den; if(t<=1e-9) return -1;
-    const u=((ax-px)*dy - (ay-py)*dx)/den;
-    return (u>=0 && u<=1) ? t : -1;
-  }
-  function segNear(s,px,py,r){
-    const dx=s[2]-s[0], dy=s[3]-s[1], l2=dx*dx+dy*dy;
-    let t=l2 ? ((px-s[0])*dx+(py-s[1])*dy)/l2 : 0; t=t<0?0:(t>1?1:t);
-    const qx=px-(s[0]+t*dx), qy=py-(s[1]+t*dy);
-    return qx*qx+qy*qy <= r*r;
-  }
   // A uniform angular sweep (degrades gracefully, never misses a caster) PLUS
   // three rays at every occluder endpoint (so the shadow boundary lands exactly
   // on the corner that cast it instead of being rounded off by the sweep).
-  function visPoly(L){
-    const R=Math.max(0.4, L.r||6), near=lightOccluders().filter(s=>segNear(s,L.x,L.y,R));
-    const N=Math.max(64, Math.min(288, Math.round(R*22)));
-    const angs=new Array(N);
-    for(let i=0;i<N;i++) angs[i]=i/N*Math.PI*2 - Math.PI;
-    for(const s of near){
-      for(let k=0;k<4;k+=2){
-        const dx=s[k]-L.x, dy=s[k+1]-L.y;
-        if(dx*dx+dy*dy > R*R) continue;
-        const a=Math.atan2(dy,dx);
-        angs.push(a-2e-4, a, a+2e-4);
-      }
-    }
-    angs.sort(function(a,b){ return a-b; });
-    const pts=[];
-    for(let i=0;i<angs.length;i++){
-      const a=angs[i], dx=Math.cos(a), dy=Math.sin(a);
-      let t=R;
-      for(let j=0;j<near.length;j++){ const h=rayHitT(L.x,L.y,dx,dy,near[j]); if(h>0 && h<t) t=h; }
-      pts.push([L.x+dx*t, L.y+dy*t]);
-    }
-    return pts;
-  }
   // Three falloff PROFILES (L.pattern), modelled on Dungeondraft's:
   //   soft      — smooth even wash, the original
   //   hard      — a small intense core, a sharp shoulder, then a long steady
   //                plateau; reads as a focused lamp rather than a glow
   //   textured  — the soft curve with concentric rings over it, like light
   //                through ribbed glass; broken up further by lightMottle()
-  function lightFalloff(c, cx, cy, rpx, a, pat){
-    const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
-    const S=(t,v)=>g.addColorStop(t, "rgba(255,255,255,"+Math.max(0,Math.min(1,v)).toFixed(4)+")");
-    if(pat==="hard"){
-      S(0,a); S(0.15,a); S(0.23,a*0.40); S(0.55,a*0.29); S(0.86,a*0.14); S(1,0);
-    } else {
-      S(0,a); S(0.42,a*0.78); S(0.72,a*0.36); S(1,0);
-    }
-    return g;
-  }
   // ── PATTERNED LIGHT PROFILES ───────────────────────────────────────
   // `textured` and `energy` can't be expressed as a radial gradient — they need
   // ANGULAR structure — so they are painted into a scratch canvas and applied to
@@ -1628,374 +1124,15 @@
   const lprofCv = oc();
   // A closed circle whose radius wanders with angle: three harmonics, so the edge
   // reads as flame licks rather than a wavy ellipse. Seeded per light per ring.
-  function wobblyCircle(c, cx, cy, R, seed, amp){
-    // High harmonics carry the "fire" — with only 3/7/13 the edge undulates like
-    // a wobbly balloon. 5/11/19/31 with weight kept on the fast terms gives the
-    // licked, spiky boundary. N must out-resolve the fastest term or it aliases.
-    const N=192;
-    c.beginPath();
-    for(let i=0;i<=N;i++){
-      const t=i/N*Math.PI*2;
-      const w = 1 + amp*(0.40*Math.sin(5*t+seed)
-                       + 0.26*Math.sin(11*t+seed*1.7)
-                       + 0.20*Math.sin(19*t+seed*2.3)
-                       + 0.14*Math.sin(31*t+seed*3.1));
-      const r=R*w, x=cx+Math.cos(t)*r, y=cy+Math.sin(t)*r;
-      if(i===0) c.moveTo(x,y); else c.lineTo(x,y);
-    }
-    c.closePath();
-  }
   // Patterns that are PAINTED rather than expressed as a gradient. Anything with
   // angular structure has to live here — a radial gradient has no way to say it.
   const PAINTED = { fire:1, swirl:1, caustic:1, spotted:1, energy:1, beam:1 };
   // `textured` was renamed to `fire` in v46; old maps still carry the old value.
-  function patOf(L){ const p=(L && L.pattern) || "soft"; return p==="textured" ? "fire" : p; }
-  function lightProfile(mw, mh, cx, cy, rpx, a, pat, seed, rot, spread){
-    if(lprofCv.width!==mw || lprofCv.height!==mh){ lprofCv.width=mw; lprofCv.height=mh; }
-    const c=lprofCv.getContext("2d");
-    c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none";
-    c.globalCompositeOperation="source-over"; c.clearRect(0,0,mw,mh);
-    c.fillStyle="#fff";
-    const rnd=seeded(seed*13.7+1, seed*7.3+1);
-    rot=rot||0;
-    // Stamped patterns rotate by spinning the canvas about the light. The
-    // per-pixel ones (caustic, beam) can't — they rotate their own coordinates.
-    const spin = rot && pat!=="caustic" && pat!=="beam";
-    if(spin){ c.save(); c.translate(cx,cy); c.rotate(rot); c.translate(-cx,-cy); }
-    const softGrad=(mul)=>{
-      const g=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx));
-      g.addColorStop(0,    "rgba(255,255,255,"+(a*mul).toFixed(4)+")");
-      g.addColorStop(0.42, "rgba(255,255,255,"+(a*mul*0.78).toFixed(4)+")");
-      g.addColorStop(0.72, "rgba(255,255,255,"+(a*mul*0.36).toFixed(4)+")");
-      g.addColorStop(1,    "rgba(255,255,255,0)");
-      return g;
-    };
-    if(pat==="fire"){
-      // Three TERRACES, each strictly dimmer going out — never brighter again.
-      // (The first attempt modulated the falloff with a cosine, which alternated
-      // light and dark and read as a bullseye. Steps only ever step down.)
-      const R=[1.0, 0.62, 0.33], L=[0.26, 0.60, 1.0], AMP=[0.135, 0.125, 0.115];
-      // Painted as overlapping DISCS from the outside in, with each alpha solved
-      // so the composite lands exactly on the target level. Annuli would leave
-      // anti-aliased seams at every shared boundary.
-      let acc=0;
-      for(let i=0;i<3;i++){
-        const target=a*L[i];
-        const alpha = acc>=1 ? 0 : (target-acc)/(1-acc);
-        if(alpha>0.001){
-          c.globalAlpha=Math.min(1,alpha);
-          wobblyCircle(c, cx, cy, rpx*R[i], seed*1.3 + i*2.1, AMP[i]);
-          c.fill();
-        }
-        acc=target;
-      }
-      c.globalAlpha=1;
-    } else if(pat==="swirl"){
-      // A Starry Night STAR. The first version drew long log-spiral arms and read
-      // as a pinwheel; what the painting actually shows is a hot core wrapped in
-      // concentric HALOES built from short tangential brush dabs. So: bands of
-      // little arcs circling the centre, each jittered in radius, length, width
-      // and brightness, drifting slightly in or out so the ring never closes into
-      // a clean circle.
-      c.fillStyle=softGrad(0.30); c.fillRect(0,0,mw,mh);
-      c.globalCompositeOperation="lighter";
-      c.lineCap="round"; c.lineJoin="round";
-      const BANDS=6;
-      const ox=cx+(rnd()-0.5)*rpx*0.10, oy=cy+(rnd()-0.5)*rpx*0.10;
-      for(let bd=0; bd<BANDS; bd++){
-        const t=(bd+0.5)/BANDS * (0.86+rnd()*0.28);    // 0..1 outward, unevenly spaced
-        const rr=rpx*t;
-        const level=a*(0.30*Math.pow(1-t,0.9)+0.05);   // dabs fade outward
-        const dabs=Math.max(9, Math.round(12+t*34));
-        const wid=Math.max(1, rpx*0.15*(1-0.40*t));
-        for(let d=0; d<dabs; d++){
-          const th0=(d/dabs)*Math.PI*2 + rnd()*0.6 + bd*0.8;
-          const span=0.17+rnd()*0.30;                  // radians of arc per dab
-          const rj=rr*(1+(rnd()-0.5)*0.30);
-          const drift=(rnd()-0.5)*0.13*rpx;            // in/out lean = the swirl
-          c.strokeStyle="rgba(255,255,255,"+(level*(0.55+rnd()*0.85)).toFixed(4)+")";
-          c.lineWidth=wid*(0.55+rnd()*0.8);
-          c.beginPath();
-          const N=8;
-          for(let i=0;i<=N;i++){
-            const u=i/N, th=th0+span*u, r=rj+drift*u;
-            const x=ox+Math.cos(th)*r, y=oy+Math.sin(th)*r;
-            if(i===0) c.moveTo(x,y); else c.lineTo(x,y);
-          }
-          c.stroke();
-        }
-      }
-      const sg=c.createRadialGradient(ox,oy,0,ox,oy,Math.max(1,rpx*0.28));
-      sg.addColorStop(0,   "rgba(255,255,255,"+a.toFixed(4)+")");
-      sg.addColorStop(0.5, "rgba(255,255,255,"+(a*0.72).toFixed(4)+")");
-      sg.addColorStop(1,   "rgba(255,255,255,0)");
-      c.fillStyle=sg; c.fillRect(0,0,mw,mh);
-      c.globalCompositeOperation="source-over";
-    } else if(pat==="caustic"){
-      // The rippling net of light on a pool floor. Unlike every other pattern this
-      // one is PER-PIXEL — a caustic web is an interference field, not something
-      // you can stroke or stamp. It is only affordable because the profile is
-      // built at the reduced mask resolution (<=192px, ~37k pixels).
-      //
-      // Three plane waves at different angles are summed; the bright filaments are
-      // where that sum crosses ZERO, so `1-|s|` gives ridges and cubing thins them
-      // into the characteristic thin, wandering lines with dark cells between.
-      const img=c.createImageData(mw,mh), d=img.data;
-      const f=7.0/Math.max(4,rpx);                    // wave scale, in radii
-      const p1=rnd()*6.283, p2=rnd()*6.283, p3=rnd()*6.283;
-      const inv=1/Math.max(1,rpx), r2px=rpx*rpx;
-      const rc=Math.cos(-rot), rs=Math.sin(-rot);
-      // Radial falloff via a 65-entry LUT rather than a pow() per pixel.
-      const FALL=new Float32Array(65);
-      for(let i=0;i<65;i++) FALL[i]=Math.pow(1-i/64, 0.85);
-      for(let y=0;y<mh;y++){
-        const dy=y-cy, hh=r2px-dy*dy;
-        if(hh<=0) continue;                           // whole row outside the disc
-        const half=Math.sqrt(hh);
-        const xa=Math.max(0, Math.ceil(cx-half)), xb=Math.min(mw-1, Math.floor(cx+half));
-        const vy=dy*f;
-        // w1's inner sin depends only on y — hoist it out of the x loop.
-        const k1=Math.sin(vy*1.30 + p1)*1.70 + p2, k2=vy*0.92 + p1;
-        const dy2=dy*dy;
-        for(let x=xa;x<=xb;x++){
-          const dx=x-cx;
-          const rr=Math.sqrt(dx*dx+dy2)*inv;
-          if(rr>=1) continue;
-          // rotate into the field's frame (k1/k2 were hoisted for rot=0 rows,
-          // so with a rotation we pay the full two-axis transform per pixel)
-          const fx=rot ? (dx*rc - dy*rs) : dx, fy=rot ? (dx*rs + dy*rc) : dy;
-          const u=fx*f;
-          const s = rot
-            ? Math.sin(u + Math.sin(fy*f*1.30 + p1)*1.70 + p2)
-              + Math.sin(fy*f*0.92 + p1 + Math.sin(u*1.15 + p3)*1.50)
-            : Math.sin(u + k1) + Math.sin(k2 + Math.sin(u*1.15 + p3)*1.50);
-          const a1=Math.abs(Math.sin(s*2.15)), a2=Math.abs(Math.sin(s*4.6 + 1.3));
-          const q1=a1*a1, q2=a2*a2;                   // pow() by multiplication
-          const t=0.76*(q1*q1*a1) + 0.24*(q2*q2*q2*q2);
-          const al=a*(0.28 + 0.72*t)*FALL[(rr*64)|0];
-          const o=((y*mw+x)<<2);
-          d[o]=255; d[o+1]=255; d[o+2]=255;
-          d[o+3]=al<=0 ? 0 : (al>=1 ? 255 : (al*255)|0);
-        }
-      }
-      c.putImageData(img,0,0);                        // ignores composite ops — fine, it is first
-    } else if(pat==="beam"){
-      // A directional cone. Per-pixel like the caustic, but the only trig in the
-      // loop is a divide: cos(angle from the axis) is just the dot product of the
-      // pixel direction with the beam axis, so there is no atan2 anywhere.
-      const img=c.createImageData(mw,mh), d=img.data;
-      const half=Math.max(0.05, Math.min(Math.PI, (spread==null?1.05:spread)/2));
-      const ux=Math.cos(rot), uy=Math.sin(rot);
-      const cosIn=Math.cos(Math.max(0.02, half*0.72)), cosOut=Math.cos(half);
-      const span=Math.max(1e-4, cosIn-cosOut);
-      const inv=1/Math.max(1,rpx), r2px=rpx*rpx;
-      const FALL=new Float32Array(65);
-      for(let i=0;i<65;i++){ const t=i/64; FALL[i]=(1-t)*(0.35+0.65*(1-t)); }
-      for(let y=0;y<mh;y++){
-        const dy=y-cy, hh=r2px-dy*dy;
-        if(hh<=0) continue;
-        const w=Math.sqrt(hh);
-        const xa=Math.max(0,Math.ceil(cx-w)), xb=Math.min(mw-1,Math.floor(cx+w));
-        for(let x=xa;x<=xb;x++){
-          const dx=x-cx, rl=Math.sqrt(dx*dx+dy*dy);
-          const rr=rl*inv; if(rr>=1) continue;
-          let ang;
-          if(rl<1e-3) ang=1;
-          else {
-            const cs=(dx*ux+dy*uy)/rl;
-            ang = cs>=cosIn ? 1 : (cs<=cosOut ? 0 : (cs-cosOut)/span);
-            ang = ang*ang*(3-2*ang);                  // smoothstep the cone edge
-          }
-          // a little bulb glow at the source, so the emitter itself reads as lit
-          const bulb=rr<0.16 ? (1-rr/0.16)*0.55 : 0;
-          const al=a*FALL[(rr*64)|0]*Math.min(1, ang+bulb);
-          const o=((y*mw+x)<<2);
-          d[o]=255; d[o+1]=255; d[o+2]=255;
-          d[o+3]=al<=0 ? 0 : (al>=1 ? 255 : (al*255)|0);
-        }
-      }
-      c.putImageData(img,0,0);
-    } else if(pat==="spotted"){
-      // Dappled light — sun through a canopy. A soft pool with irregular GAPS
-      // punched out of it, not bright blobs added on: the gaps are what make it
-      // read as leaf shadow rather than confetti.
-      c.fillStyle=softGrad(1); c.fillRect(0,0,mw,mh);
-      c.globalCompositeOperation="destination-out";
-      const N=170;
-      for(let i=0;i<N;i++){
-        // rejection-free polar placement, sqrt for even area density
-        const th=rnd()*Math.PI*2, rr=Math.sqrt(rnd())*rpx*1.02;
-        const bx=cx+Math.cos(th)*rr, by=cy+Math.sin(th)*rr;
-        const br=rpx*(0.035+rnd()*0.105);
-        const g=c.createRadialGradient(bx,by,0,bx,by,Math.max(1,br));
-        const st=(0.25+rnd()*0.45).toFixed(3);
-        g.addColorStop(0,   "rgba(0,0,0,"+st+")");
-        g.addColorStop(0.6, "rgba(0,0,0,"+(st*0.7).toFixed(3)+")");
-        g.addColorStop(1,   "rgba(0,0,0,0)");
-        c.fillStyle=g;
-        // squash each blob a little so they aren't all perfect circles
-        c.save(); c.translate(bx,by); c.rotate(rnd()*Math.PI);
-        c.scale(1, 0.6+rnd()*0.7); c.translate(-bx,-by);
-        c.fillRect(bx-br*2, by-br*2, br*4, br*4);
-        c.restore();
-      }
-      c.globalCompositeOperation="source-over";
-    } else if(pat==="energy"){
-      // A dim halo, jagged filaments crackling out of the middle, and a hot core.
-      c.fillStyle=softGrad(0.44); c.fillRect(0,0,mw,mh);
-      c.globalCompositeOperation="lighter";
-      c.lineCap="round"; c.lineJoin="round";
-      const N=9;
-      for(let k=0;k<N;k++){
-        let ang=(k/N)*Math.PI*2 + rnd()*0.6;
-        const len=rpx*(0.5+rnd()*0.5), steps=5;
-        let px=cx, py=cy;
-        for(let s=1;s<=steps;s++){
-          ang += (rnd()-0.5)*0.6;
-          const r=len*s/steps, x=cx+Math.cos(ang)*r, y=cy+Math.sin(ang)*r;
-          const f=1-(s-1)/steps;                       // taper outward
-          c.strokeStyle="rgba(255,255,255,"+(a*0.45*f).toFixed(4)+")";
-          c.lineWidth=Math.max(0.8, rpx*0.055*f);
-          c.beginPath(); c.moveTo(px,py); c.lineTo(x,y); c.stroke();
-          px=x; py=y;
-        }
-      }
-      const cg=c.createRadialGradient(cx,cy,0,cx,cy,Math.max(1,rpx*0.2));
-      cg.addColorStop(0,"rgba(255,255,255,"+a.toFixed(4)+")");
-      cg.addColorStop(1,"rgba(255,255,255,0)");
-      c.fillStyle=cg; c.fillRect(0,0,mw,mh);
-      c.globalCompositeOperation="source-over";
-    }
-    if(spin) c.restore();
-    return lprofCv;
-  }
   // How hard to feather each painted profile: enough that the edges aren't
   // vector-cut, little enough that the structure survives.
   const PROFILE_BLUR = { fire:0.9, swirl:1.4, caustic:0.7, spotted:1.5, energy:1.0, beam:1.1 };
   const LMASK_MAX = 192;        // per-light mask resolution cap (see drawLights)
   const lmaskCv = oc();
-  function drawLights(){
-    if(!map || !map.lit) return;          // works in classic mode too (v39)
-    // Per-layer light groups (mirror of dungeon-engine.js): each group's lights are
-    // occluded by that group's OWN shapes/walls, so a light in a building isn't
-    // buried under the island room below it. Flat callers get one group.
-    const groups = Array.isArray(map.lightLayers) ? map.lightLayers
-                 : [{lights:map.lights||[], shapes:map.shapes, walls:map.walls}];
-    const dark=Math.max(0, Math.min(1, map.darkness==null ? 0 : map.darkness));
-    const totalLights = groups.reduce((n,g)=>n+((g.lights&&g.lights.length)||0),0);
-    if(!totalLights && dark<=0) return;
-    sizeBufs();
-    const lc=buf.light.getContext("2d"), gc=buf.ltint.getContext("2d"), mc=lmaskCv.getContext("2d");
-    for(let i=0;i<2;i++){ const c=[lc,gc][i];
-      c.setTransform(1,0,0,1,0,0); c.globalAlpha=1; c.filter="none"; c.globalCompositeOperation="source-over"; }
-    lc.clearRect(0,0,W,H); gc.clearRect(0,0,W,H);
-    if(dark>0){ lc.fillStyle="rgba(5,7,13,"+dark+")"; lc.fillRect(0,0,W,H); }
-    // Feather scales with zoom so shadows stay equally soft at any scale.
-    const blur=Math.max(2.5, Math.min(22, 0.18*wpx()));
-    let ux0=Infinity, uy0=Infinity, ux1=-Infinity, uy1=-Infinity;   // union of lit boxes
-    const _svS=map.shapes, _svW=map.walls;
-    for(let gi=0; gi<groups.length; gi++){
-      const _g=groups[gi];
-      map.shapes=_g.shapes||[]; map.walls=_g.walls||[]; lightSegs=null;   // occluders for THIS group only
-      if(gi>0){
-        // ONE global darkness wash covers the whole scene, but an upper layer's floor
-        // must HIDE the lights + tint of the layers beneath it (a lower torch can't
-        // light an upper building). Re-darken the veil and clear the tint wherever this
-        // layer's floor covers them, then this group's own lights punch through.
-        const fmc=buf.mask.getContext("2d"); fmc.setTransform(1,0,0,1,0,0); fmc.globalAlpha=1; fmc.filter="none";
-        fmc.globalCompositeOperation="source-over"; fmc.clearRect(0,0,W,H);
-        fmc.fillStyle="#fff"; fmc.beginPath();
-        for(const sh of (_g.shapes||[])){ if(!shHasFloor(sh)) continue; shapePath(fmc, sh); } fmc.fill("nonzero");
-        if(dark>0){
-          const sb=buf.wsh.getContext("2d"); sb.setTransform(1,0,0,1,0,0); sb.globalAlpha=1; sb.filter="none";
-          sb.globalCompositeOperation="source-over"; sb.clearRect(0,0,W,H);
-          sb.fillStyle="rgba(5,7,13,"+dark+")"; sb.fillRect(0,0,W,H);
-          sb.globalCompositeOperation="destination-in"; sb.drawImage(buf.mask,0,0); sb.globalCompositeOperation="source-over";
-          // RESET the veil under this floor to a UNIFORM `dark`: clear it first (removes
-          // the lower light's hole entirely), then refill. Source-over alone would stack
-          // on the veil still present outside the hole, leaving the punched pool
-          // comparatively bright — a dim ghost ring of the lower light on this floor.
-          lc.globalCompositeOperation="destination-out"; lc.drawImage(buf.mask,0,0);
-          lc.globalCompositeOperation="source-over"; lc.drawImage(buf.wsh,0,0);
-        }
-        gc.globalCompositeOperation="destination-out"; gc.drawImage(buf.mask,0,0); gc.globalCompositeOperation="source-over";
-      }
-      const lights=_g.lights||[];
-      for(let li=0; li<lights.length; li++){
-      const L=lights[li]; if(L.on===false) continue;
-      const R=Math.max(0.4, L.r||6);
-      const a=Math.max(0, Math.min(1, L.bright==null ? 0.85 : L.bright));
-      if(a<=0) continue;
-      const cs=toScreen(L.x,L.y), cx=cs[0], cy=cs[1], rpx=R*wpx();
-      // Everything stays inside the light's own box — a full-canvas pass per
-      // light is the same trap that made the mixed-floor composite slow.
-      const pad=blur*2+6;
-      const bx=Math.max(0,Math.floor(cx-rpx-pad)), by=Math.max(0,Math.floor(cy-rpx-pad));
-      const bw=Math.min(W,Math.ceil(cx+rpx+pad))-bx, bh=Math.min(H,Math.ceil(cy+rpx+pad))-by;
-      if(bw<=0 || bh<=0) continue;                       // entirely off-screen
-      // ⚠ PERF: the mask is a soft blob, so it is built at REDUCED resolution and
-      // scaled back up. Canvas blur costs per pixel — a 540 px light box blurred
-      // at full size was ~36 ms EACH (5 lights = 200 ms/frame); capped at 192 px
-      // it is a few. Upscaling a blurred mask is visually free.
-      const k=Math.min(1, LMASK_MAX/Math.max(bw,bh));
-      const mw=Math.max(1,Math.round(bw*k)), mh=Math.max(1,Math.round(bh*k));
-      if(lmaskCv.width!==mw || lmaskCv.height!==mh){ lmaskCv.width=mw; lmaskCv.height=mh; }
-      else mc.clearRect(0,0,mw,mh);
-      mc.setTransform(1,0,0,1,0,0); mc.globalAlpha=1; mc.globalCompositeOperation="source-over";
-      // 1 — the visibility polygon, feathered into soft shadow edges
-      const poly=visPoly(L);
-      mc.save(); mc.filter="blur("+(blur*k).toFixed(2)+"px)"; mc.fillStyle="#fff"; mc.beginPath();
-      for(let i=0;i<poly.length;i++){ const p=toScreen(poly[i][0],poly[i][1]);
-        const mx=(p[0]-bx)*k, my=(p[1]-by)*k;
-        if(i===0) mc.moveTo(mx,my); else mc.lineTo(mx,my); }
-      mc.closePath(); mc.fill(); mc.restore();
-      // 2 — multiply in the radial falloff
-      mc.globalCompositeOperation="destination-in";
-      const pat=patOf(L);
-      if(PAINTED[pat]){
-        // Painted profile — it carries angular structure a gradient cannot.
-        lightProfile(mw, mh, (cx-bx)*k, (cy-by)*k, rpx*k, a, pat, (L.id||li)+1, L.rot||0, L.spread);
-        mc.filter="blur("+(PROFILE_BLUR[pat]||1).toFixed(2)+"px)";
-        mc.drawImage(lprofCv,0,0);
-        mc.filter="none";
-      } else {
-        mc.fillStyle=lightFalloff(mc,(cx-bx)*k,(cy-by)*k,rpx*k,a,pat); mc.fillRect(0,0,mw,mh);
-      }
-      // 3 — punch the lit pool out of the darkness
-      lc.globalCompositeOperation="destination-out";
-      lc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
-      lc.globalCompositeOperation="source-over";
-      // 4 — recolour the same mask and accumulate it as additive tint
-      mc.globalCompositeOperation="source-in";
-      mc.fillStyle=L.color||"#ffb457"; mc.fillRect(0,0,mw,mh);
-      mc.globalCompositeOperation="source-over";
-      gc.globalCompositeOperation="lighter"; gc.globalAlpha=0.5;
-      gc.drawImage(lmaskCv, 0,0,mw,mh, bx,by,bw,bh);
-      gc.globalAlpha=1; gc.globalCompositeOperation="source-over";
-      if(bx<ux0)ux0=bx; if(by<uy0)uy0=by;
-      if(bx+bw>ux1)ux1=bx+bw; if(by+bh>uy1)uy1=by+bh;
-      }
-    }
-    map.shapes=_svS; map.walls=_svW; lightSegs=null;
-    if(dark>0){
-      // A transparent PNG should not come back as a sheet of dark grey — keep the
-      // wash inside the floors (the union of the visible layers, since the group loop
-      // left buf.mask holding only the top group's floor).
-      if(noRock && map.shapes && map.shapes.length){
-        const um=buf.mask.getContext("2d"); um.setTransform(1,0,0,1,0,0); um.globalAlpha=1; um.filter="none";
-        um.globalCompositeOperation="source-over"; um.clearRect(0,0,W,H);
-        um.fillStyle="#fff"; um.beginPath();
-        for(const sh of map.shapes){ if(!shHasFloor(sh)) continue; shapePath(um, sh); } um.fill("nonzero");
-        lc.globalCompositeOperation="destination-in"; lc.drawImage(buf.mask,0,0);
-        lc.globalCompositeOperation="source-over";
-      }
-      ctx.drawImage(buf.light,0,0);
-    }
-    // The tint only exists inside the lit boxes; compositing the rest is waste.
-    if(ux1>ux0){ ctx.save(); ctx.globalCompositeOperation="lighter";
-      ctx.drawImage(buf.ltint, ux0,uy0,ux1-ux0,uy1-uy0, ux0,uy0,ux1-ux0,uy1-uy0);
-      ctx.restore(); }
-  }
   function drawDotGrid(){ const p=wpx(); if(p<13) return; const go=gridOp(); if(go<=0) return;
     ctx.save(); ctx.fillStyle=C.dot; ctx.globalAlpha=.8*go;
     const [ox,oy]=toScreen(0,0); const r=Math.max(0.6,0.85*Math.min(2,cam.scale));
@@ -2007,15 +1144,6 @@
   // design interior AND exterior maps). Same lines/colour/opacity/gating as the
   // in-floor grid; room and deco floors repaint their own grid on top afterwards,
   // so the result reads as one unbroken grid running under the walls.
-  function drawFullGrid(){
-    if(map.grid===false || gridOp()<=0 || wpx()<=7 || map.gridInterior) return;   // gridInterior ⇒ grid on floors only
-    ctx.save();
-    ctx.strokeStyle=C.grid; ctx.lineWidth=Math.max(1,1.5*cam.scale); ctx.globalAlpha=.85*gridOp();
-    const p=wpx(); const [ox,oy]=toScreen(0,0); ctx.beginPath();
-    for(let x=ox%p;x<=W;x+=p){ ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,H); }
-    for(let y=oy%p;y<=H;y+=p){ ctx.moveTo(0,y+.5); ctx.lineTo(W,y+.5); }
-    ctx.stroke();
-    ctx.restore(); }
 
   // ── hand-drawn exterior stipple (classic maps, Interior-Only) ────────
   // v5: the exterior rock marking around ROOM walls is the same dotted stipple
@@ -2025,17 +1153,6 @@
   // interiors are cleared afterwards, so interior walls between rooms stay
   // clean and strays never land on a neighbouring floor. Gated to classic mode
   // + the Interior-Only grid toggle; skipped when zoomed too far out to read.
-  function drawExteriorHatch(){
-    if(!map || textured() || !map.gridInterior || noRock || renderOverlay) return;
-    const shapes=map.shapes||[]; if(!shapes.length) return;
-    const px=wpx(); if(px < 12) return;
-    const hb=oc(); hb.width=W; hb.height=H; const hc=hb.getContext("2d");
-    hc.setTransform(1,0,0,1,0,0); hc.clearRect(0,0,W,H);
-    for(const S of shapes){ if(S.deco || !shHasWall(S)) continue; stippleRing(hc, S); }
-    hc.globalCompositeOperation="destination-out"; hc.fillStyle="#000"; hc.beginPath();
-    for(const S of shapes){ if(S.deco || !shHasFloor(S)) continue; shapePath(hc,S); } hc.fill("nonzero");
-    ctx.drawImage(hb,0,0);
-  }
 
   function drawHatch(){ if(!hatchStrokes.length) return; ctx.save();
     ctx.strokeStyle=C.hatch; ctx.lineCap="round"; ctx.lineWidth=Math.max(0.8,1.05*cam.scale); ctx.globalAlpha=.5;
@@ -2083,27 +1200,6 @@
   // A rough-edged ring around a closed world polyline. Densifies each edge, so
   // circles (sampled as real arcs) come out ROUND while rects stay crisp; both
   // get the wandering rough edge. Filled as an annulus (evenodd).
-  function roughRing(c, pts, halfW){
-    const dp=[]; const n=pts.length;
-    for(let i=0;i<n;i++){ const a=pts[i], b=pts[(i+1)%n];
-      const dx=b[0]-a[0], dy=b[1]-a[1]; const len=Math.hypot(dx,dy); if(len<1e-6) continue;
-      const steps=Math.max(1, Math.round(len/0.16));
-      for(let k=0;k<steps;k++){ const f=k/steps; dp.push([a[0]+dx*f, a[1]+dy*f]); } }
-    const m=dp.length; if(m<3) return;
-    const outer=[], inner=[];
-    for(let i=0;i<m;i++){
-      const p=dp[i], pa=dp[(i-1+m)%m], pb=dp[(i+1)%m];
-      const ex=pb[0]-pa[0], ey=pb[1]-pa[1]; const l=Math.hypot(ex,ey)||1; const nx=-ey/l, ny=ex/l;
-      const ao=halfW*(0.72 + seeded(p[0]*29, p[1]*29)()*0.66);
-      const ai=halfW*(0.72 + seeded(p[0]*29+11, p[1]*29+5)()*0.66);
-      const [sx,sy]=toScreen(p[0],p[1]);
-      outer.push([sx+nx*ao, sy+ny*ao]); inner.push([sx-nx*ai, sy-ny*ai]);
-    }
-    c.beginPath();
-    c.moveTo(outer[0][0],outer[0][1]); for(let i=1;i<m;i++) c.lineTo(outer[i][0],outer[i][1]); c.closePath();
-    c.moveTo(inner[0][0],inner[0][1]); for(let i=1;i<m;i++) c.lineTo(inner[i][0],inner[i][1]); c.closePath();
-    c.fill("evenodd");
-  }
   // closed world outline for a shape (circle sampled as a true arc → round)
   function shapeOutline(sh){
     if(sh.type==="rect") return [[sh.x,sh.y],[sh.x+sh.w,sh.y],[sh.x+sh.w,sh.y+sh.h],[sh.x,sh.y+sh.h]];
@@ -2146,17 +1242,6 @@
     return out;
   }
   // fill a shape's interior INSET inward by `e` (world units) onto ctx `c`
-  function fillInsetShape(c, sh, e){
-    if(sh.type==="rect"){ if(sh.w>2*e && sh.h>2*e){ const [x,y]=toScreen(sh.x+e, sh.y+e);
-      c.fillRect(x, y, (sh.w-2*e)*wpx(), (sh.h-2*e)*wpx()); } }
-    else if(sh.type==="circle"){ const rr=sh.r-e; if(rr>0){ const [x,y]=toScreen(sh.cx,sh.cy);
-      c.beginPath(); c.arc(x,y, rr*wpx(), 0, 6.2832); c.fill(); } }
-    else if(sh.type==="polygon"){ const q=insetPolyPts(sh.pts, e); if(!q) return;
-      c.beginPath();
-      for(let i=0;i<q.length;i++){ const [sx,sy]=toScreen(q[i][0], q[i][1]);
-        if(i===0)c.moveTo(sx,sy); else c.lineTo(sx,sy); }
-      c.closePath(); c.fill("nonzero"); }
-  }
 
   // Walls = each room's true outline (round circles!) rendered rough, then the
   // union interior (eroded) is punched out so overlaps merge and corridor mouths
@@ -2178,7 +1263,6 @@
   // Do NOT infer it from tex.floor/tex.wall being set: per-shape styling leaves
   // both empty on a fully textured map, and doors lose their wood leaf.
   function textured(){ return !!(tex && !tex.objectsOnly); }
-  function shapeFloorTex(sh){ return tex ? texOf(sh.floor, tex.floor) : null; }
   function shapeWallTex(sh){  return tex ? texOf(sh.wall,  tex.wall)  : null; }
 
   // Wall half-thickness for a given wall texture, in SCREEN px. With no texture
@@ -2188,16 +1272,6 @@
   // the classic render untouched.
   function gridOp(){ const v = map && map.gridOpacity; return (v==null) ? 1 : Math.max(0, Math.min(1, v)); }
   // Screen-space bounding box of a group of shapes, clamped to the canvas.
-  function runBox(list){
-    let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
-    for(const sh of list){ const b=bounds(sh,"shape"); if(!b) continue;
-      const p=toScreen(b.x,b.y), q=toScreen(b.x+b.w,b.y+b.h);
-      if(p[0]<x0)x0=p[0]; if(p[1]<y0)y0=p[1]; if(q[0]>x1)x1=q[0]; if(q[1]>y1)y1=q[1]; }
-    if(!isFinite(x0)) return null;
-    x0=Math.max(0,Math.floor(x0-6)); y0=Math.max(0,Math.floor(y0-6));
-    x1=Math.min(W,Math.ceil(x1+6));  y1=Math.min(H,Math.ceil(y1+6));
-    return (x1<=x0||y1<=y0) ? null : {x:x0,y:y0,w:x1-x0,h:y1-y0};
-  }
   function halfPxFor(t){ return t ? Math.max(1, 0.5*(t.thick||0.4)*wpx()) : Math.max(1.3,1.7*cam.scale); }
   // …and in world cells, or 0 for classic ink (also used as a "textured?" test).
   function halfCellsFor(t){ return t ? 0.5*(t.thick||0.4) : 0; }
@@ -2236,17 +1310,6 @@
   // Insert points so no gap along a screen-space polyline exceeds `maxPx`. Used
   // to smooth curved interior walls for the strip renderer WITHOUT touching
   // wallSamples(), whose sampling the ink renderer's roughness is seeded from.
-  function densify(pts, maxPx){
-    const out=[]; const px=wpx();
-    for(let i=0;i<pts.length-1;i++){
-      const a=pts[i], b=pts[i+1];
-      const d=Math.hypot(b[0]-a[0], b[1]-a[1])*px;
-      const n=Math.max(1, Math.min(64, Math.ceil(d/maxPx)));
-      for(let k=0;k<n;k++) out.push([a[0]+(b[0]-a[0])*k/n, a[1]+(b[1]-a[1])*k/n]);
-    }
-    out.push(pts[pts.length-1]);
-    return out;
-  }
   // A shape outline sampled by SCREEN arc length — a vertex roughly every 5 px —
   // so a round room's textured wall stays smooth at any zoom. The ink renderer
   // keeps shapeOutline()'s fixed sampling, so classic output is unchanged.
@@ -2269,76 +1332,6 @@
     return true;
   }
 
-  function stripPath(c, pts, closed, t, halfPx){
-    if(!t || !t.img || !t.img.complete || !t.img.naturalWidth) return false;
-    const P=pts.map(p=>toScreen(p[0],p[1]));
-    let n=P.length;
-    if(closed && n>1 && P[0][0]===P[n-1][0] && P[0][1]===P[n-1][1]){ P.pop(); n--; }
-    if(n<2) return false;
-    const segN = closed ? n : n-1;
-    const dir=[], len=[];
-    for(let i=0;i<segN;i++){
-      const a=P[i], b=P[(i+1)%n];
-      const dx=b[0]-a[0], dy=b[1]-a[1], L=Math.hypot(dx,dy);
-      dir.push(L>1e-6 ? [dx/L,dy/L] : null); len.push(L);
-    }
-    // MITRE JOINS. Each segment is clipped by the angle bisector at both ends, so
-    // neighbouring quads tile the ribbon exactly — no notch on the outside of a
-    // turn and no double-drawn overlap on the inside (the old code extended every
-    // quad by the half-width and let them overlap, which left a visible mismatch
-    // where the two rotations met). `k` is the cut line's slope in the segment's
-    // own frame: local x = k*y, so the cut corners sit at (∓k·h, ∓h).
-    const ML=4;                                     // miter limit, in half-widths
-    // The mitre line through a vertex is the bisector of (−incoming) and
-    // (outgoing) — one line, shared by both segments that meet there. `frame` is
-    // the segment we're expressing it FOR, and it must be that segment's own
-    // direction: a segment's END cut measured in the NEXT segment's frame comes
-    // out sign-flipped (the frames differ by the turn angle), which cuts every
-    // corner backwards — outer edge pulling back, inner edge overhanging.
-    const cutK=(prev,next,frame)=>{
-      if(!prev || !next) return 0;                  // open end ⇒ square cap
-      let wx=next[0]-prev[0], wy=next[1]-prev[1];
-      const wl=Math.hypot(wx,wy); if(wl<1e-6) return 0;
-      wx/=wl; wy/=wl;
-      const nx=-frame[1], ny=frame[0];
-      const ly=wx*nx+wy*ny; if(Math.abs(ly)<1e-6) return 0;
-      const k=(wx*frame[0]+wy*frame[1])/ly;
-      return Math.max(-ML, Math.min(ML, k));
-    };
-    const tileW=Math.max(8,(t.tile||6)*wpx()), per=2*tileW;
-    let s=0;
-    for(let i=0;i<segN;i++){
-      const u=dir[i], L=len[i];
-      if(!u || L<0.01) continue;
-      const prev = closed ? dir[(i-1+segN)%segN] : (i>0 ? dir[i-1] : null);
-      const next = closed ? dir[(i+1)%segN]      : (i<segN-1 ? dir[i+1] : null);
-      let kS=cutK(prev,u,u), kE=cutK(u,next,u);   // both in THIS segment's frame
-      // Guard against a bow-tie when the segment is short relative to its cuts.
-      const spread=Math.abs(kS-kE)*halfPx;
-      if(spread > L*0.95 && spread>0){ const f=(L*0.95)/spread; kS*=f; kE*=f; }
-      // Extend each segment's clip a hair past the mitre line at both ends (`ov`)
-      // so neighbouring quads OVERLAP by ~1px instead of merely abutting. Two
-      // abutting anti-aliased clip edges each cover <100% at the join, leaving a
-      // 1px gap that shows the floor through — a bright vertical line at every
-      // chain vertex (worst on Draw/Polygon walls, which have many joints). The
-      // texture runs continuously (`s`), so the tiny overlap is invisible.
-      const h=halfPx, ov=1.2, ext=(Math.abs(kS)+Math.abs(kE))*h+2+ov;
-      c.save();
-      c.translate(P[i][0],P[i][1]); c.rotate(Math.atan2(u[1],u[0]));
-      c.beginPath();
-      c.moveTo(-kS*h-ov,-h); c.lineTo(L-kE*h+ov,-h); c.lineTo(L+kE*h+ov,h); c.lineTo(kS*h-ov,h);
-      c.closePath(); c.clip();
-      let x=-(s%per); while(x>-ext) x-=per;
-      for(; x<L+ext; x+=per){
-        c.drawImage(t.img, x, -h, tileW, 2*h);
-        c.save(); c.translate(x+per,0); c.scale(-1,1);
-        c.drawImage(t.img, 0, -h, tileW, 2*h); c.restore();
-      }
-      c.restore();
-      s+=L;
-    }
-    return true;
-  }
 
   // Fill / stroke of a shape, independent of the Rooms/Shapes (deco) axis:
   //   sh.fill = "both" (floor+wall) | "wall" (stroke only) | "floor" (fill only)
@@ -2349,45 +1342,6 @@
   // Opaque floor? Explicit per-shape `sh.alpha` (true = keep alpha / transparent) overrides
   // the kind default (rooms opaque, deco Shapes transparent).
   function shFloorOpaque(sh){ return sh.alpha!=null ? !sh.alpha : !sh.deco; }
-  function drawWalls(){
-    if(!map.shapes.length) return;
-    const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
-    wc.globalCompositeOperation="source-over"; wc.fillStyle=C.ink;
-    // Per-shape outlines (exact circles) stroked with THAT shape's wall texture,
-    // then the inset-union erase below drops wall that lies inside another room —
-    // same merge rule as the ink renderer. Occluding (Room) walls only; deco shape
-    // walls draw in drawDecoShapes, and a floor-only shape has no wall at all.
-    for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue;
-      const wt=shapeWallTex(sh), hp=halfPxFor(wt);
-      if(wt && stripPath(wc, outlineDense(sh), true, wt, hp)) continue;
-      roughRing(wc, shapeOutline(sh), hp); }
-    // Erase mask = union of each shape's fill INSET individually (not the eroded
-    // union). A wall is removed only where it lies inside *another* shape's
-    // interior (a real overlap). Two shapes that merely share an edge each inset
-    // away from that edge, leaving a gap there, so the shared wall survives.
-    const ec=buf.erode.getContext("2d"); ec.setTransform(1,0,0,1,0,0); ec.clearRect(0,0,W,H);
-    ec.globalCompositeOperation="source-over"; ec.fillStyle="#fff";
-    for(const sh of map.shapes){ if(sh.deco || !shHasWall(sh)) continue;   // inset > that shape's own wall half-width
-      fillInsetShape(ec, sh, (halfPxFor(shapeWallTex(sh))+1.4)/wpx()); }
-    wc.globalCompositeOperation="destination-out"; wc.drawImage(buf.erode,0,0);
-    // A room fully INSIDE another was erased by the union too — re-add its wall so a
-    // nested room keeps its wall, like Shapes. (No-op on normal maps. Mirror of the engine.)
-    wc.globalCompositeOperation="source-over";
-    { const contains=shapeContains;
-      const rmz=[]; for(const sh of map.shapes){ if(!sh.deco && shHasWall(sh)) rmz.push(sh); }
-      for(const S of rmz){ let nested=false;
-        if(S.corridor) continue;   // a corridor swallowed by a room is a MERGE, not a nested room
-        for(const T of rmz){ if(T!==S && contains(T,S)){ nested=true; break; } }
-        if(!nested) continue;
-        const wt=shapeWallTex(S), hp=halfPxFor(wt);
-        if(!(wt && stripPath(wc, outlineDense(S), true, wt, hp))) roughRing(wc, shapeOutline(S), hp); } }
-    wc.globalCompositeOperation="destination-out";
-    for(const d of map.doors) punchDoorQuad(wc, d);   // opening cuts the full wall depth
-    // soft drop shadow taken from the real wall shape (round under circles)
-    if(!noRock){ const o=Math.min(2,cam.scale); ctx.save(); ctx.globalAlpha=.16;
-      ctx.drawImage(buf.wall, 2.3*o, 2.9*o); ctx.restore(); }
-    ctx.drawImage(buf.wall,0,0);
-  }
 
   // Sample a curved wall into world points as a HALF-ELLIPSE: the chord is the full
   // major axis and the clicked apex sets the minor axis. `cx,cy` is stored
@@ -2443,16 +1397,6 @@
     if(wl.pts && wl.pts.length>1) return wl.pts;
     return (wl.cx===undefined || wl.cy===undefined) ? [[wl.x1,wl.y1],[wl.x2,wl.y2]] : wallSamples(wl);
   }
-  function drawInteriorWalls(){ if(!map.walls.length) return; ctx.save(); ctx.fillStyle=C.ink;
-    const normal=Math.max(1.3,1.7*cam.scale), thin=Math.max(0.6,0.85*cam.scale);
-    for(const wl of map.walls){
-      const wt = tex ? texOf(wl.wall, tex.wall) : null;
-      const pts = wallPts(wl);
-      if(wt && stripPath(ctx, densify(pts,5), false, wt, halfPxFor(wt)*(wl.thin?0.5:1))) continue;
-      const hw = wl.thin ? thin : normal;
-      if(pts.length===2) roughSeg(ctx, pts[0], pts[1], hw);
-      else roughCurve(ctx, pts, hw); }
-    ctx.restore(); }
 
   // Interior "shapes" (deco: pillars, dais, tables, pits) — thin rough OUTLINES
   // on top of the floor. They add no floor, no rock wall, no interior punch; a
@@ -2539,20 +1483,6 @@
     if(a) ctx.drawImage(t.img, a.x, a.y, a.w, a.h, -w/2, -h/2, w, h);
     else  ctx.drawImage(t.img, -w/2, -h/2, w, h);
   }
-  function drawObjects(){
-    if(!tex || !map.objects || !map.objects.length) return;
-    for(const o of map.objects){
-      const t=texOf(o.tex, null);
-      if(!t || !t.img || !t.img.complete || !t.img.naturalWidth) continue;
-      const p=toScreen(o.x,o.y), w=(o.w||1)*wpx(), h=(o.h||1)*wpx();
-      ctx.save();
-      ctx.translate(p[0],p[1]);
-      if(o.rot) ctx.rotate(o.rot);
-      if(o.flip) ctx.scale(-1,1);
-      blitObj(t, o.tint, w, h);
-      ctx.restore();
-    }
-  }
   // World-space AABB of a (possibly rotated) object.
   function objBox(o){
     const hw=(o.w||1)/2, hh=(o.h||1)/2, r=o.rot||0, c=Math.cos(r), s=Math.sin(r);
@@ -2567,105 +1497,9 @@
   // the same treatment the thin Wall tool gets, so a pillar or dais reads as a
   // thin course of the same masonry rather than an ink line on a textured map.
   // Falls back to the rough ink ring when there's no texture.
-  function drawDecoRing(c, sh){
-    const wt=shapeWallTex(sh);
-    if(wt && stripPath(c, outlineDense(sh), true, wt, halfPxFor(wt))) return;
-    roughRing(c, shapeOutline(sh), halfPxFor(wt));   // wt null ⇒ room-wall ink thickness
-  }
   // Classic-mode stipple around a Shape's exterior wall — the dotted "debris"
   // band from the reference .ai. (Mirror of the engine; keep in sync.)
-  function stippleRing(c, sh){
-    const px=wpx();
-    const o=outlineDense(sh); const n=o.length; if(n<2) return;
-    c.save(); c.fillStyle=C.ink; c.beginPath();
-    const EPS=0.05, step=0.09;
-    for(let i=0;i<n;i++){
-      const a=o[i], b=o[(i+1)%n];
-      const ex=b[0]-a[0], ey=b[1]-a[1]; const L=Math.hypot(ex,ey); if(L<1e-6) continue;
-      const tx=ex/L, ty=ey/L; let nx=-ty, ny=tx;
-      if(pointInShape(a[0]+ex*0.5+nx*EPS, a[1]+ey*0.5+ny*EPS, sh)){ nx=-nx; ny=-ny; }
-      const roots=Math.max(1, Math.round(L/step));
-      for(let k=0;k<roots;k++){
-        const f=(k+0.5)/roots;
-        const wx=a[0]+ex*f, wy=a[1]+ey*f;
-        const rnd=seeded(wx*71.3, wy*71.3);
-        const [sx,sy]=toScreen(wx,wy);
-        // Strong density gradient (mirror of the engine): packed at the wall,
-        // thinner mid band, occasional strays.
-        const dot=(dist)=>{ const along=(rnd()-0.5)*0.14*px;
-          const dx=sx+nx*dist*px+tx*along, dy=sy+ny*dist*px+ty*along;
-          const r=Math.max(0.55, (0.018+rnd()*0.02)*px);
-          c.moveTo(dx+r,dy); c.arc(dx,dy,r,0,6.2832); };
-        dot(0.06+rnd()*0.12);
-        dot(0.07+rnd()*0.13);
-        if(rnd()<0.60) dot(0.19+rnd()*0.15);
-        if(rnd()<0.22) dot(0.32+rnd()*0.22);
-      }
-    }
-    c.fill(); c.restore();
-  }
 
-  function drawDecoShapes(){
-    let any=false;
-    for(const s of map.shapes){ if(s.deco){ any=true; break; } }
-    if(!any) return;
-    // Deco (Shapes) shapes render as a UNIT sitting ON room floors but UNDER the
-    // walls: each shape's FLOOR first, then its non-occluding wall ring, in z-order
-    // — so a Shape lies on top of a room's floor while the room's (and interior)
-    // walls draw over it. (Called after floors + inner shadow, before drawWalls.)
-    // Deco (Shapes) floors keep their texture's ALPHA — no opaque backdrop — so a Shape
-    // layers over whatever is beneath it (a room floor, or the bare exterior). Rooms stay
-    // opaque (base painted in the room-floor pass). For an opaque Shape, stack an opaque
-    // room/black shape of the same size underneath. (Mirror of the engine.)
-    for(const sh of map.shapes){
-      if(!sh.deco || !shHasFloor(sh)) continue;
-      const ft=shapeFloorTex(sh), pat=patFor(ctx, ft);
-      ctx.save(); ctx.beginPath(); shapePath(ctx, sh); ctx.clip("nonzero");
-      if(shFloorOpaque(sh)){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }   // deco shape forced opaque
-      ctx.fillStyle = pat || C.floor; ctx.fillRect(0,0,W,H);
-      ctx.restore();
-    }
-    // Grid over the deco floors — same lines as the room grid, clipped to the deco
-    // floor union (buf.decoClip) so a Shape's floor reads on the grid like a room.
-    if(map.grid && gridOp()>0 && wpx()>7){
-      const dc=buf.decoClip.getContext("2d"); dc.setTransform(1,0,0,1,0,0); dc.clearRect(0,0,W,H);
-      dc.globalCompositeOperation="source-over"; dc.fillStyle="#fff"; dc.beginPath();
-      for(const sh of map.shapes){ if(sh.deco && shHasFloor(sh)) shapePath(dc, sh); } dc.fill("nonzero");
-      const gc=buf.grid.getContext("2d"); gc.setTransform(1,0,0,1,0,0); gc.clearRect(0,0,W,H);
-      gc.globalCompositeOperation="source-over"; gc.strokeStyle=C.grid; gc.lineWidth=Math.max(1,1.5*cam.scale); gc.globalAlpha=.85*gridOp();
-      const p=wpx(); const [ox,oy]=toScreen(0,0); gc.beginPath();
-      for(let x=ox%p;x<=W;x+=p){ gc.moveTo(x+.5,0); gc.lineTo(x+.5,H); }
-      for(let y=oy%p;y<=H;y+=p){ gc.moveTo(0,y+.5); gc.lineTo(W,y+.5); }
-      gc.stroke(); gc.globalAlpha=1;
-      gc.globalCompositeOperation="destination-in"; gc.drawImage(buf.decoClip,0,0);
-      ctx.drawImage(buf.grid,0,0);
-    }
-    // Deco (Shapes) walls interact like room walls: shapes that PARTIALLY overlap
-    // (outlines cross) erase the wall inside each other and merge into one outline;
-    // a shape fully INSIDE another (outlines never cross) keeps its whole wall.
-    // (Mirror of the engine; keep in sync.)
-    const dW = map.shapes.filter(s=>s.deco && shHasWall(s));
-    if(dW.length){
-      const containsFully=shapeContains;
-      const bxs=dW.map(s=>bounds(s,"shape"));
-      const dcx=buf.deco.getContext("2d"), mcx=buf.decoClip.getContext("2d");
-      for(let i=0;i<dW.length;i++){
-        const S=dW[i], bS=bxs[i];
-        dcx.setTransform(1,0,0,1,0,0); dcx.globalCompositeOperation="source-over"; dcx.globalAlpha=1; dcx.filter="none"; dcx.clearRect(0,0,W,H);
-        dcx.save(); dcx.fillStyle=C.ink; drawDecoRing(dcx, S); dcx.restore();
-        if(!textured() && wpx()>=12) stippleRing(dcx, S);   // classic: dotted band outside the wall
-        let hasMask=false;
-        mcx.setTransform(1,0,0,1,0,0); mcx.globalCompositeOperation="source-over"; mcx.globalAlpha=1; mcx.filter="none"; mcx.clearRect(0,0,W,H); mcx.fillStyle="#fff";
-        for(let j=0;j<dW.length;j++){ if(j===i) continue;
-          const T=dW[j], bT=bxs[j];
-          if(bS.x>bT.x+bT.w||bT.x>bS.x+bS.w||bS.y>bT.y+bT.h||bT.y>bS.y+bS.h) continue;
-          if(containsFully(T,S)||containsFully(S,T)) continue;
-          fillInsetShape(mcx, T, (halfPxFor(shapeWallTex(T))+1.4)/wpx()); hasMask=true;
-        }
-        if(hasMask){ dcx.globalCompositeOperation="destination-out"; dcx.drawImage(buf.decoClip,0,0); }
-        ctx.drawImage(buf.deco,0,0);
-      }
-    } }
 
   // Doors: {x,y,a,len} — a is the wall direction; a thin leaf sits in the opening.
   // world-space frame for a door. `len` is the FULL span between the two
@@ -2686,16 +1520,6 @@
   }
   // Clear the wall ONLY under the rectangle + the thin stub lines — everything
   // else in the door's footprint stays transparent so the walls aren't cut off.
-  function punchDoorQuad(wc, d){
-    const g=doorGeom(d);
-    const rect=(sl0,sl1,st)=>{ const c=(sl,s)=>toScreen(g.cx+g.alx*sl+g.acx*s, g.cy+g.aly*sl+g.acy*s);
-      const p1=c(sl0,-st),p2=c(sl1,-st),p3=c(sl1,st),p4=c(sl0,st);
-      wc.beginPath(); wc.moveTo(p1[0],p1[1]); wc.lineTo(p2[0],p2[1]); wc.lineTo(p3[0],p3[1]); wc.lineTo(p4[0],p4[1]); wc.closePath(); wc.fill(); };
-    rect(-g.rhl, g.rhl, g.wt*1.1);                       // the rectangle opening (cut through the FULL wall)
-    const sh=Math.max(0.05, wallHalfCellsAt(d) || (1.7*cam.scale)/wpx());      // stub strip ≈ the stub line's width
-    rect(-g.hl, -g.rhl, sh);                              // left stub
-    rect( g.rhl, g.hl, sh);                               // right stub
-  }
   // Door = a filled leaf RECTANGLE (rough outline, all four sides), inset from the
   // stub tips, with a short wall-connector stub out of the CENTRE of each short
   // side reaching to the tips (which are the placement start/end points).
@@ -3627,9 +2451,8 @@
     const AL0 = activeLayer();
     const keepFloor = (AL0 && AL0.floor!=null) ? AL0.floor : (keepStyle && keepStyle.floor);
     const keepWall  = (AL0 && AL0.wall !=null) ? AL0.wall  : (keepStyle && keepStyle.wall);
-    map = (window.DungeonEngine && window.DungeonEngine.generate)
-      ? window.DungeonEngine.generate(opts)
-      : generateLocal(opts);
+    if(!(window.DungeonEngine && window.DungeonEngine.generate)){ showEngineError(); return; }
+    map = window.DungeonEngine.generate(opts);
     map.name = keepName; map.grid = true; map.gridInterior = $("gridInteriorToggle").checked; map.theme = theme;
     if(keepStyle) map.style = keepStyle;
     // Bake the effective floor/wall into the seed so the new Base layer inherits
@@ -3666,379 +2489,15 @@
   // edge in its traversal direction, so winding sets which way an asymmetric
   // cliff/ledge strip faces — clockwise (shoelace>0) inward, ccw outward.
   // Mirror of the engine's orientPolygons; keep the two in sync.
-  function orientPolygons(shapes, cw){
-    for(const sh of shapes){
-      if(sh.type!=="polygon" || !sh.pts || sh.pts.length<3) continue;
-      let a2=0; const p=sh.pts, n=p.length;
-      for(let i=0;i<n;i++){ const q=p[(i+1)%n]; a2 += p[i][0]*q[1] - q[0]*p[i][1]; }
-      if((a2>0) !== !!cw) sh.pts.reverse();
-    }
-  }
   // Inlined fallback generator (used only when DungeonEngine isn't loaded, e.g.
   // the tool opened standalone). Builds into the module `map` and returns it.
-  function generateLocal(opts){
-    const nRooms=Math.max(2, Math.min(40, Math.round((opts.rooms||8)*(opts.roomsScale||1))));
-    const sizeIdx=Math.max(1, Math.min(5, (+opts.size||3)+(opts.sizeAdj||0)));
-    const [smin,smax]=SIZE_MAP[sizeIdx];
-    const spread=Math.max(1, Math.min(5, (+opts.layout||3)+(opts.layoutAdj||0)));
-    const doCorr=opts.corridors;
-    // Structure (butt/merge) decoupled from Corridors (passages); legacy callers
-    // fall back to the old coupling. Mirror of the engine — keep in sync.
-    const structure = (opts.structure !== undefined) ? !!opts.structure : !doCorr;
-    const roundOk=opts.roundRooms;
-    const organic=!!opts.organic;
-    const building=!!opts.building;               // one large shell, rooms nested inside
-    const wantDoors=opts.doors!==false;
-    const nEntrances=opts.entrances;
-    rngState=(Date.now()^(Math.floor(Math.random()*1e9)))>>>0;
-    map=blankMap(); map.theme=opts.theme;
-
-    // Field size derives from a target packing density (rooms fill ~this
-    // fraction of the bounding area). Tighter layouts pack denser.
-    const avg=(smin+smax)/2;
-    const density=[0.5,0.4,0.32,0.25,0.18][spread-1];
-    const field=Math.max(avg, Math.round(avg*Math.sqrt(nRooms/density)/2));
-    const rooms=[];
-    if(organic){
-      // Cave chambers: irregular blobs. Structure ON ⇒ merged overlapping cavern;
-      // OFF ⇒ scattered islands (Corridors then joins them with winding tunnels).
-      placeBlobs(rooms, nRooms, smin, smax, field, structure);
-    } else if(building){
-      // BUILDING: one large, roughly square shell with (nearly) all the areas
-      // as interior rooms nested inside it. (Mirror of the engine.)
-      const side=Math.max(smax+4, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*1.05));
-      const w0=side+ri(-2,2), h0=side+ri(-2,2);
-      rooms.push({x:0,y:0,w:w0,h:h0,round:false,cx:w0/2,cy:h0/2});
-      var nestedKids = collectBuildingRooms(rooms[0], nRooms, smin, smax);
-    } else if(opts.keep){
-      // KEEP: curtain wall + round corner towers + courtyard buildings. (Mirror of the engine.)
-      const side=Math.max(smax+6, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*1.15));
-      const w0=side+ri(-2,2), h0=side+ri(-2,2);
-      const shell={x:0,y:0,w:w0,h:h0,round:false,cx:w0/2,cy:h0/2};
-      rooms.push(shell);
-      const rt=Math.max(2, Math.round(smin*0.6));
-      for(const t of [[0,0],[w0,0],[0,h0],[w0,h0]])
-        rooms.push({x:t[0]-rt,y:t[1]-rt,w:2*rt,h:2*rt,round:true,cx:t[0],cy:t[1]});
-      var nestedKids = collectBuildingRooms(shell, nRooms, smin, smax, true);   // dwelling-dense interior
-    } else if(opts.village){
-      // VILLAGE: detached multi-room houses. (Mirror of the engine.)
-      let tries=0, guard=nRooms*300, house=0;
-      var nestedKids=[];
-      while(house<nRooms && tries++<guard){
-        // A MIX: about half the houses are little DWELLINGS (one footprint with
-        // interior rooms nested inside), the rest shared-wall room clusters.
-        const dwelling=rng()<0.5;
-        const w=dwelling ? ri(Math.max(7,smin+2), smax+4) : ri(smin,smax);
-        const h=dwelling ? ri(Math.max(7,smin+2), smax+4) : ri(smin,smax);
-        const x=ri(-field,field), y=ri(-field,field);
-        const nb={x:x-2,y:y-2,w:w+4,h:h+4};
-        if(rooms.some(r=>rectsOverlap(nb,{x:r.x,y:r.y,w:r.w,h:r.h}))) continue;
-        const first={x,y,w,h,round:false,cx:x+w/2,cy:y+h/2,house};
-        const mine=[first];
-        if(dwelling){
-          for(const K of collectBuildingRooms(first, ri(2,4), Math.max(3,smin-2), Math.min(smax, Math.min(w,h)-3)))
-            nestedKids.push(K);
-        } else {
-        const extra=ri(1,4);                        // 2–5 rooms per house
-        for(let e=0;e<extra;e++){
-          for(let t2=0;t2<20;t2++){
-            const base=mine[ri(0,mine.length-1)];
-            const w2=ri(Math.max(3,smin-1),smax), h2=ri(Math.max(3,smin-1),smax);
-            let nx,ny;
-            switch(ri(0,3)){
-              case 0: nx=base.x+base.w;  ny=base.y+ri(-(h2-2), base.h-2); break;
-              case 1: nx=base.x-w2;      ny=base.y+ri(-(h2-2), base.h-2); break;
-              case 2: ny=base.y+base.h;  nx=base.x+ri(-(w2-2), base.w-2); break;
-              default:ny=base.y-h2;      nx=base.x+ri(-(w2-2), base.w-2); break;
-            }
-            const cand={x:nx,y:ny,w:w2,h:h2,round:false,cx:nx+w2/2,cy:ny+h2/2,house};
-            if(rooms.some(r=>rectsOverlap(cand,r)) || mine.some(r=>rectsOverlap(cand,r))) continue;
-            const nb2={x:nx-2,y:ny-2,w:w2+4,h:h2+4};
-            if(rooms.some(r=>rectsOverlap(nb2,{x:r.x,y:r.y,w:r.w,h:r.h}))) continue;
-            mine.push(cand); break;
-          }
-        }
-        }
-        for(const r of mine) rooms.push(r);
-        house++;
-      }
-    } else if(opts.sewers){
-      // SEWERS: round cisterns on a loose ring. (Mirror of the engine.)
-      const k=Math.max(3,nRooms);
-      const Rx=Math.max(8, Math.round(avg*Math.sqrt(k)*0.8)), Ry=Math.max(6, Math.round(Rx*0.72));
-      let i2=0, tries=0;
-      while(i2<k && tries++<k*40){
-        const ang=(i2/k)*6.283 + (rng()-0.5)*3.0/k;
-        const jr=0.8+rng()*0.4;
-        const cx=Math.round(Math.cos(ang)*Rx*jr), cy=Math.round(Math.sin(ang)*Ry*jr);
-        const r=ri(2,3);
-        if(rooms.some(o=>Math.hypot(o.cx-cx,o.cy-cy) < (Math.max(o.w,o.h)/2 + r + 2))) continue;
-        rooms.push({x:cx-r,y:cy-r,w:2*r,h:2*r,round:true,cx,cy});
-        i2++;
-      }
-    } else if(opts.crypt){
-      // CRYPT: symmetric nave + mirrored cell pairs + apse. (Mirror of the engine.)
-      const naveW = sizeIdx>=4 ? 6 : 4;
-      const pairs = Math.max(1, Math.floor((nRooms-1)/2));
-      let yc=1;
-      const cells=[];
-      for(let p2=0;p2<pairs;p2++){
-        if(rng()<0.35){
-          // ROUND pair: mirrored rotundas. They overlap the nave wall by 0.6
-          // cells so the wall-merge opens them as archways — a merely TANGENT
-          // circle shares no wall segment and would be sealed off.
-          const r=ri(2, Math.max(2, Math.min(3, Math.floor(smax/2))));
-          const off=naveW/2 + r - 0.6;
-          cells.push({x:-off-r, y:yc, w:2*r, h:2*r, round:true, cx:-off, cy:yc+r});
-          cells.push({x: off-r, y:yc, w:2*r, h:2*r, round:true, cx: off, cy:yc+r});
-          yc += 2*r + 1;
-        } else {
-          const cw=ri(3, smax), ch=ri(3, Math.min(5,smax));
-          cells.push({x:-naveW/2-cw, y:yc, w:cw, h:ch, round:false, cx:-naveW/2-cw/2, cy:yc+ch/2});
-          cells.push({x: naveW/2,    y:yc, w:cw, h:ch, round:false, cx: naveW/2+cw/2, cy:yc+ch/2});
-          yc += ch + 1;
-        }
-      }
-      const naveH = yc + 2;
-      rooms.push({x:-naveW/2, y:0, w:naveW, h:naveH, round:false, cx:0, cy:naveH/2});
-      for(const c2 of cells) rooms.push(c2);
-      if(rng()<0.5){
-        // ROUND apse — a rotunda at the head of the nave, overlapped for the arch
-        const r=ri(2, Math.min(4, Math.max(2, Math.floor((naveW+4)/2))));
-        rooms.push({x:-r, y:0.6-2*r, w:2*r, h:2*r, round:true, cx:0, cy:0.6-r});
-      } else {
-        const aw=naveW+2*ri(1,2), ah=ri(3, Math.min(6,smax+1));
-        rooms.push({x:-aw/2, y:-ah, w:aw, h:ah, round:false, cx:0, cy:-ah/2});
-      }
-    } else if(opts.tower){
-      // TOWER (v3, modelled on the user's example): ONE round shell PARTITIONED
-      // by interior WALLS that run shell-to-shell — a horizontal chord plus a
-      // vertical wall above and below it — cutting the floor into pie sections,
-      // each with a door punched in its wall. Optionally one rect room, and a
-      // stair by the top wall. No nested boxes floating in the middle.
-      const R=Math.max(5, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*0.55));
-      rooms.push({x:-R,y:-R,w:2*R,h:2*R,round:true,cx:0,cy:0});
-      const r2=v=>Math.round(v*100)/100, s2=v=>Math.round(v*2)/2;
-      // horizontal chord wall
-      const ry=ri(-Math.round(R*0.3), Math.round(R*0.3));
-      const hx=r2(Math.sqrt(R*R-ry*ry)*0.99);
-      map.walls.push({id:uid(), x1:-hx, y1:ry, x2:hx, y2:ry});
-      map.doors.push({id:uid(), x:s2(ri(-Math.round(hx-2), Math.round(hx-3))+0.5), y:ry, a:0, len:2, _adj:true});
-      // vertical wall from the top shell down to the chord
-      const vx=ri(-Math.round(R*0.35), Math.round(R*0.35));
-      const ty=r2(-Math.sqrt(R*R-vx*vx)*0.99);
-      map.walls.push({id:uid(), x1:vx, y1:ty, x2:vx, y2:ry});
-      map.doors.push({id:uid(), x:vx, y:s2((ty+ry)/2), a:Math.PI/2, len:1, _adj:true});
-      // vertical wall from the chord down to the bottom shell
-      const vx2=ri(-Math.round(R*0.35), Math.round(R*0.35));
-      const by=r2(Math.sqrt(R*R-vx2*vx2)*0.99);
-      map.walls.push({id:uid(), x1:vx2, y1:ry, x2:vx2, y2:by});
-      map.doors.push({id:uid(), x:vx2, y:s2((ry+by)/2), a:Math.PI/2, len:(rng()<0.5?1:2), _adj:true});
-      // one rect room straddling the partitions (60%), doors on two walls
-      if(rng()<0.6){
-        const kw=ri(4, Math.max(4,Math.min(6,R-1))), kh=ri(3, Math.max(3,Math.min(5,R-1)));
-        const kx=ri(-Math.round(kw*0.7), 0), ky=ri(-Math.round(kh*0.7), 0);
-        const m2=R-1.2;
-        if(Math.hypot(kx,ky)<=m2 && Math.hypot(kx+kw,ky)<=m2 && Math.hypot(kx,ky+kh)<=m2 && Math.hypot(kx+kw,ky+kh)<=m2){
-          const K={x:kx,y:ky,w:kw,h:kh,round:false,cx:kx+kw/2,cy:ky+kh/2};
-          rooms.push(K);
-          const bb={x:-R,y:-R,w:2*R,h:2*R};
-          addNestedDoor(K, bb); addNestedDoor(K, bb);
-        }
-      }
-      // stair by the top wall (like the example), skipped if a room covers it
-      { const sy=r2(-R+1);
-        const hit=rooms.some(k=>!k.round && 1>=k.x-0.5 && -1<=k.x+(k.w||0)+0.5 && sy+2>=k.y-0.5 && sy<=k.y+(k.h||0)+0.5);
-        if(!hit) map.stairs.push({id:uid(), ax:1, ay:sy, bx:1, by:r2(sy+2), tx:-1, ty:r2(sy+1)}); }
-    } else if(opts.ship){
-      // SHIP (v3, modelled on the user's example): a RECT midsection with a
-      // 45°-CHAMFERED stern and bow butted onto its ends (three rooms whose
-      // shared seams merge into one hull), cabins subdividing the midsection
-      // dwelling-style, a door on each seam, and a stair on the top deck.
-      const B=Math.max(6, Math.round(Math.sqrt(Math.max(2,nRooms))*avg*0.55));
-      const midW=Math.round(B*2.1);
-      const c2=Math.max(1, Math.round(B*0.25));
-      const sternL=Math.max(3, Math.round(B*0.75));
-      const bowC=Math.max(2, Math.round(B*0.375)), bowL=Math.max(bowC+2, B-1);
-      const shoulder=Math.max(1, bowL-bowC-1);
-      const s2=v=>Math.round(v*2)/2;
-      const mid={x:0, y:0, w:midW, h:B, round:false, cx:midW/2, cy:B/2};
-      rooms.push(mid);
-      rooms.push({pts:[[0,0],[0,B],[-(sternL-2),B],[-sternL,B-c2],[-sternL,c2],[-(sternL-2),0]],
-                  x:-sternL, y:0, w:sternL, h:B, cx:-sternL/2, cy:B/2});
-      rooms.push({pts:[[midW,0],[midW+shoulder,0],[midW+bowL,bowC],[midW+bowL,B-bowC],[midW+shoulder,B],[midW,B]],
-                  x:midW, y:0, w:bowL, h:B, cx:midW+bowL/2, cy:B/2});
-      // seam doors: mid↔stern and mid↔bow, like the example
-      map.doors.push({id:uid(), x:0,    y:s2(B/2), a:Math.PI/2, len:2, _adj:true});
-      map.doors.push({id:uid(), x:midW, y:s2(B/2), a:Math.PI/2, len:2, _adj:true});
-      // cabins fill the midsection, anchored to its walls
-      var nestedKids = collectBuildingRooms(mid, Math.max(2,nRooms-1), Math.max(2,smin-2), Math.min(smax, Math.max(4,B-2)));
-      // stair on the top deck near the middle, skipped if a cabin covers it
-      { const sx=s2(Math.round(midW*0.45))+0.5;
-        const hit=nestedKids.some(k=> sx+1.5>=k.x-0.5 && sx-0.5<=k.x+k.w+0.5 && 2>=k.y-0.5 && 0<=k.y+k.h+0.5);
-        if(!hit) map.stairs.push({id:uid(), ax:sx, ay:0, bx:sx, by:2, tx:sx+1.5, ty:1}); }
-    } else if(structure){
-      // Adjacency mode: every room butts flush against another, sharing a wall,
-      // so no room floats alone. Rectangular only — a round room can only ever
-      // touch a straight wall at a single point, never share a segment.
-      placeAdjacentRooms(rooms, nRooms, smin, smax);
-      var nestedKids = collectNestedRooms(rooms, smin, smax);   // rooms-within-rooms (mirror of engine)
-    } else {
-      let tries=0, guard=nRooms*220;
-      while(rooms.length<nRooms && tries++<guard){
-        const round = roundOk && rng()<0.28;
-        const w=ri(smin,smax), h=round?w:ri(smin,smax);
-        const x=ri(-field, field), y=ri(-field, field);
-        const gap=1;
-        const nb={x:x-gap,y:y-gap,w:w+gap*2,h:h+gap*2};
-        if(rooms.some(r=>rectsOverlap(nb,{x:r.x,y:r.y,w:r.w,h:r.h}))) continue;
-        if(opts.mineTunnels && rng()<0.5){
-          // MINE: about half the chambers are organic blobs — hewn caverns
-          // between the squared-off worked rooms.
-          const rx=w/2*(0.85+rng()*0.4), ry=h/2*(0.85+rng()*0.4);
-          const cx0=x+w/2, cy0=y+h/2;
-          rooms.push({cx:cx0,cy:cy0,rx,ry,w:rx*2,h:ry*2,x:cx0-rx,y:cy0-ry,round:false,pts:blobPts(cx0,cy0,rx,ry,1.1)});
-        } else rooms.push({x,y,w,h,round,cx:x+w/2,cy:y+h/2});
-      }
-    }
-    // add rooms as shapes
-    for(const r of rooms){
-      if(r.pts) map.shapes.push({id:uid(),type:"polygon",pts:r.pts});
-      else if(r.round){ const rad=Math.max(r.w,r.h)/2; map.shapes.push({id:uid(),type:"circle",cx:r.cx,cy:r.cy,r:Math.round(rad)}); }
-      else map.shapes.push({id:uid(),type:"rect",x:r.x,y:r.y,w:r.w,h:r.h});
-    }
-    // connect via nearest-neighbour spanning tree (winding tunnels for caves,
-    // rect corridors otherwise). Skip when it's already one merged organic cavern.
-    const connect = (organic || opts.mineTunnels) ? carveTunnel : carveCorridor;   // Mine: rect chambers + winding tunnels
-    if(doCorr && rooms.length>1 && !(organic && structure)){
-      // Mirror of the engine (keep in sync): track carved centrelines so extra
-      // loops that would run ALONGSIDE an existing tunnel (the cave-middle rubble
-      // tangle) are skipped — only the spanning tree and shortcuts on their own
-      // route survive. Overlap is ignored near a link's own rooms (branching OK).
-      const carved=[];
-      const overlapFrac=(A,B)=>{ const D=2.6, branchR=3.5, N=16; let close=0, counted=0;
-        for(let k=0;k<=N;k++){ const t=k/N, px=A.cx+(B.cx-A.cx)*t, py=A.cy+(B.cy-A.cy)*t;
-          if(Math.hypot(px-A.cx,py-A.cy)<branchR || Math.hypot(px-B.cx,py-B.cy)<branchR) continue;
-          counted++;
-          for(const e of carved){ if(distToSeg(px,py,e.x1,e.y1,e.x2,e.y2)<D){ close++; break; } } }
-        return counted ? close/counted : 0; };
-      const linked=(a,b)=>carved.some(e=>(e.a===a&&e.b===b)||(e.a===b&&e.b===a));
-      const doConnect=(ci,pj)=>{ connect(rooms[ci], rooms[pj]);
-        carved.push({a:ci,b:pj,x1:rooms[ci].cx,y1:rooms[ci].cy,x2:rooms[pj].cx,y2:rooms[pj].cy}); };
-      const connected=[0], pending=rooms.map((_,i)=>i).slice(1);
-      while(pending.length){
-        let bi=-1,bj=-1,bd=1e9;
-        for(const ci of connected) for(const pj of pending){
-          const d=Math.hypot(rooms[ci].cx-rooms[pj].cx, rooms[ci].cy-rooms[pj].cy);
-          if(d<bd){ bd=d; bi=ci; bj=pj; } }
-        doConnect(bi,bj);
-        connected.push(bj); pending.splice(pending.indexOf(bj),1);
-      }
-      // a few extra loops for interesting layouts (guarded against overlap)
-      const extra=Math.floor(rooms.length*(organic?0.12:0.15));
-      let added=0;
-      for(let k=0; k<extra*5 && added<extra; k++){ const a=ri(0,rooms.length-1), b=ri(0,rooms.length-1);
-        if(a===b || linked(a,b)) continue;
-        if(Math.hypot(rooms[a].cx-rooms[b].cx,rooms[a].cy-rooms[b].cy)>=avg*5) continue;
-        if(organic && overlapFrac(rooms[a],rooms[b])>0.22) continue;
-        doConnect(a,b); added++;
-      }
-    }
-    // Nested sub-rooms join AFTER the corridor pass (mirror of the engine).
-    if(typeof nestedKids!=="undefined" && nestedKids){
-      for(const K of nestedKids){ rooms.push(K);
-        map.shapes.push({id:uid(),type:"rect",x:K.x,y:K.y,w:K.w,h:K.h});
-        addNestedDoor(K, K.nestedIn); }
-    }
-    // SEWERS: looping network (ring + chords). (Mirror of the engine.)
-    if(opts.sewers && rooms.length>2){
-      const k=rooms.length;
-      for(let i2=0;i2<k;i2++) carveCorridor(rooms[i2], rooms[(i2+1)%k]);
-      const chords=Math.max(1, Math.round(k/4));
-      for(let c2=0;c2<chords;c2++){ const a2=ri(0,k-1), b2=(a2+2+ri(0,Math.max(0,k-4)))%k;
-        if(a2!==b2) carveCorridor(rooms[a2], rooms[b2]); }
-    }
-    if(!organic && (structure||building||opts.adjDoors) && rooms.length>1){ addAdjacencyDoors(rooms); }
-    // Snap each generated door to the grid, fit it to the real wall opening it
-    // sits in, and drop any that don't span a visible, corridor-width wall.
-    // Doors OFF ⇒ no interior doors AND no entrance doors.
-    map.doors = wantDoors ? finalizeDoors() : [];
-    // Entrances are doors on EXTERIOR walls leading out of the whole dungeon;
-    // the Doors toggle governs them too.
-    if(wantDoors){
-      if(opts.village){
-        const groupOf={};
-        for(let i2=0;i2<rooms.length && i2<map.shapes.length;i2++)
-          if(rooms[i2].house!=null) groupOf[map.shapes[i2].id]=rooms[i2].house;
-        placeEntrancesPerGroup(nEntrances, groupOf);
-      }
-      else if(opts.perRoomEntrances) placeEntrancesPerRoom(nEntrances);
-      else placeEntrances(nEntrances);
-    }
-    // Smooth organic outlines so cave transitions aren't torn by spikes (mirror
-    // of the engine; keep in sync). Before winding is normalised.
-    if(organic || opts.mineTunnels) smoothOrganicShapes(map.shapes);
-    // Exterior toggle: normalise polygon winding so generated cave walls all face
-    // one way. Off (default) ⇒ clockwise/inward; on ⇒ counter-clockwise/outward.
-    orientPolygons(map.shapes, !opts.exterior);
-    // Stairs are NOT auto-placed — drop them by hand with the Stairs tool.
-    return map;
-  }
   // Final pass over every generated door: measure the actual opening in the wall
   // it sits in, snap it onto the grid, size it to span that opening, and reject
   // anything that isn't a real, visible, corridor-width doorway. This is what
   // guarantees doors are (a) on the grid, (b) on a visible wall, and (c) fully
   // spanning 1- and 2-cell corridors — regardless of how they were first placed.
-  function finalizeDoors(){
-    const s2=v=>Math.round(v*2)/2;
-    // both sides across the wall are floor ⇒ an open passage at this point
-    const cross=(x,y,vx,vy)=> pointInAny(x+vx*0.5,y+vy*0.5) && pointInAny(x-vx*0.5,y-vy*0.5);
-    const fitted=[];
-    for(const d of map.doors){
-      const a=d.a||0, ux=Math.cos(a),uy=Math.sin(a), vx=-Math.sin(a),vy=Math.cos(a);
-      // Adjacency doors sit on a known-good shared wall where BOTH sides are floor
-      // for the whole segment, so the opening-measure below can't judge them —
-      // pass them through (already grid-snapped when placed).
-      if(d._adj){ fitted.push({id:d.id, x:d.x, y:d.y, a, len:d.len||1}); continue; }
-      // Nudge the centre onto the passage if it isn't quite there.
-      let cx=d.x, cy=d.y;
-      if(!cross(cx,cy,vx,vy)){
-        let found=false;
-        for(let t=0.25;t<=1.5 && !found;t+=0.25){
-          if(cross(cx+ux*t,cy+uy*t,vx,vy)){ cx+=ux*t; cy+=uy*t; found=true; }
-          else if(cross(cx-ux*t,cy-uy*t,vx,vy)){ cx-=ux*t; cy-=uy*t; found=true; }
-        }
-        if(!found) continue;                                   // no passage anywhere near → drop
-      }
-      // Walk along the wall to find the contiguous open run (the doorway gap).
-      let lo=0; for(let t=-0.15;t>=-2.4;t-=0.15){ if(cross(cx+ux*t,cy+uy*t,vx,vy)) lo=t; else break; }
-      let hi=0; for(let t=0.15;t<=2.4;t+=0.15){ if(cross(cx+ux*t,cy+uy*t,vx,vy)) hi=t; else break; }
-      const width=hi-lo, mid=(lo+hi)/2;
-      if(width<0.6 || width>2.4) continue;                     // no opening, or wider than a 2-cell corridor (hidden/merged wall)
-      // Recentre on the opening; snap the ALONG coordinate to the grid (the
-      // ACROSS coordinate already sits on the wall — a straight edge or the circle).
-      let mx=cx+ux*mid, my=cy+uy*mid;
-      if(Math.abs(ux)>=Math.abs(uy)) mx=s2(mx); else my=s2(my);
-      const len=Math.min(2,Math.max(1,Math.round(width))), hl=len/2;
-      // Both ends must butt into wall (passage CLOSED just past each end); if the
-      // floor keeps going, the door is floating in open space, not in a wall.
-      if(cross(mx+ux*(hl+0.35),my+uy*(hl+0.35),vx,vy)) continue;
-      if(cross(mx-ux*(hl+0.35),my-uy*(hl+0.35),vx,vy)) continue;
-      fitted.push({id:d.id, x:mx, y:my, a, len});
-    }
-    return dedupeDoors(fitted);
-  }
   // Drop overlapping doors: parallel doors whose footprints overlap along the
   // wall, or any two doors sitting almost on the same spot.
-  function dedupeDoors(arr){
-    const out=[];
-    for(const d of arr){ const dl=(d.len||1)/2;
-      const dup=out.some(o=>{ const dist=Math.hypot(o.x-d.x,o.y-d.y), ol=(o.len||1)/2;
-        const parallel=Math.abs(Math.sin((o.a||0)-(d.a||0)))<0.4;
-        return dist < (parallel ? Math.max(0.6,(dl+ol)*0.85) : 0.4); });
-      if(!dup) out.push(d); }
-    return out;
-  }
   // Add up to `n` ENTRANCE doors — doors on exterior walls (floor inside, empty
   // outside) that lead in/out of the whole dungeon. Runs AFTER finalizeDoors
   // because an entrance is a one-sided opening, not a two-sided passage, so it
@@ -4048,351 +2507,28 @@
   // once a room gets an entrance, the rest of its candidates are dropped.
   // All viable exterior-door spots, tagged with the room they open into.
   // (Mirror of the engine; keep in sync.)
-  function entranceCands(){
-    const floor=(x,y)=>pointInAny(x,y), empty=(x,y)=>!pointInAny(x,y);
-    const cand=[];
-    for(const sh of map.shapes){
-      if(sh.corridor) continue;                                   // never on a corridor stub
-      const room=sh.id;                                           // which room this candidate belongs to
-      if(sh.type==="rect"){
-        for(let x=sh.x+0.5; x<=sh.x+sh.w-0.5; x+=1){
-          if(floor(x,sh.y+0.5)      && empty(x-0.5,sh.y-0.5)      && empty(x+0.5,sh.y-0.5))
-            cand.push({x, y:sh.y, a:0, room});                    // top edge (outside = up)
-          if(floor(x,sh.y+sh.h-0.5) && empty(x-0.5,sh.y+sh.h+0.5) && empty(x+0.5,sh.y+sh.h+0.5))
-            cand.push({x, y:sh.y+sh.h, a:0, room});               // bottom edge
-        }
-        for(let y=sh.y+0.5; y<=sh.y+sh.h-0.5; y+=1){
-          if(floor(sh.x+0.5,y)      && empty(sh.x-0.5,y-0.5)      && empty(sh.x-0.5,y+0.5))
-            cand.push({x:sh.x, y, a:Math.PI/2, room});            // left edge (outside = left)
-          if(floor(sh.x+sh.w-0.5,y) && empty(sh.x+sh.w+0.5,y-0.5) && empty(sh.x+sh.w+0.5,y+0.5))
-            cand.push({x:sh.x+sh.w, y, a:Math.PI/2, room});       // right edge
-        }
-      } else if(sh.type==="circle"){
-        const r=sh.r, s2=v=>Math.round(v*2)/2;
-        const ext=[[sh.cx+r,sh.cy,Math.PI/2,1,0],[sh.cx-r,sh.cy,Math.PI/2,-1,0],
-                   [sh.cx,sh.cy+r,0,0,1],[sh.cx,sh.cy-r,0,0,-1]];
-        for(const [px,py,a,ox,oy] of ext){
-          if(empty(px+ox*0.6,py+oy*0.6) && floor(px-ox*0.5,py-oy*0.5))
-            cand.push(a===0 ? {x:s2(px), y:py, a, room} : {x:px, y:s2(py), a, room});
-        }
-      } else if(sh.type==="polygon" && sh.pts && sh.pts.length>2){
-        // Cave chamber: an edge midpoint that opens to empty air outside and
-        // floor just inside is an entrance spot; leaf runs along the edge.
-        const pts=sh.pts, m=pts.length;
-        let gx=0,gy=0; for(const p of pts){ gx+=p[0]; gy+=p[1]; } gx/=m; gy/=m;
-        for(let i=0;i<m;i++){
-          const p=pts[i], q=pts[(i+1)%m];
-          const mx=(p[0]+q[0])/2, my=(p[1]+q[1])/2;
-          let ex=q[0]-p[0], ey=q[1]-p[1]; const el=Math.hypot(ex,ey)||1; ex/=el; ey/=el;
-          let ox=ey, oy=-ex;
-          if((mx-gx)*ox+(my-gy)*oy < 0){ ox=-ox; oy=-oy; }
-          if(empty(mx+ox*0.8,my+oy*0.8) && floor(mx-ox*0.4,my-oy*0.4))
-            cand.push({x:mx, y:my, a:Math.atan2(ey,ex), room});
-        }
-      }
-    }
-    return cand;
-  }
-  function placeEntrances(n){
-    if(n<=0) return;
-    let pool=entranceCands().filter(c=> !map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2));
-    let placed=0;
-    while(placed<n && pool.length){
-      const c=pool.splice(Math.floor(rng()*pool.length),1)[0];
-      map.doors.push({id:uid(), x:c.x, y:c.y, a:c.a, len:1});
-      pool=pool.filter(o=> o.room!==c.room && Math.hypot(o.x-c.x,o.y-c.y)>3);  // one per room, and spread apart
-      placed++;
-    }
-  }
   // Neighborhood: `n` is entrances PER building. (Mirror of the engine.)
-  function placeEntrancesPerRoom(n){
-    if(n<=0) return;
-    const byRoom=new Map();
-    for(const c of entranceCands()){
-      if(!byRoom.has(c.room)) byRoom.set(c.room, []);
-      byRoom.get(c.room).push(c);
-    }
-    for(const list of byRoom.values()){
-      const placed=[]; let guard=n*40;
-      while(placed.length<n && guard-->0 && list.length){
-        const c=list.splice(Math.floor(rng()*list.length),1)[0];
-        if(placed.some(p=>Math.hypot(p.x-c.x,p.y-c.y)<2)) continue;
-        if(map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2)) continue;
-        map.doors.push({id:uid(), x:c.x, y:c.y, a:c.a, len:1});
-        placed.push(c);
-      }
-    }
-  }
-  function rectsOverlap(a,b){ return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y; }
   // Structure: rooms-within-rooms (house/mansion interiors). Mirror of the
   // engine's collectNestedRooms/addNestedDoor; keep in sync.
-  function collectNestedRooms(rooms, smin, smax){
-    const kids=[];
-    for(const P of rooms){
-      if(P.round || P.pts || P.w<7 || P.h<7) continue;
-      if(rng()<0.25) continue;
-      const mine=[];
-      const nWant=ri(1, Math.max(1, Math.min(4, Math.floor(P.w*P.h/55))));
-      let tries=0;
-      while(mine.length<nWant && tries++<30){
-        const cw=ri(3, Math.min(smax, P.w-3));
-        const ch=ri(3, Math.min(smax, P.h-3));
-        const m=ri(0,8); let x,y;                     // 0–3 corner · 4–7 edge · 8 floating
-        if(m===0){ x=P.x; y=P.y; }
-        else if(m===1){ x=P.x+P.w-cw; y=P.y; }
-        else if(m===2){ x=P.x; y=P.y+P.h-ch; }
-        else if(m===3){ x=P.x+P.w-cw; y=P.y+P.h-ch; }
-        else if(m===4){ x=P.x; y=P.y+ri(1,P.h-ch-1); }
-        else if(m===5){ x=P.x+P.w-cw; y=P.y+ri(1,P.h-ch-1); }
-        else if(m===6){ x=P.x+ri(1,P.w-cw-1); y=P.y; }
-        else if(m===7){ x=P.x+ri(1,P.w-cw-1); y=P.y+P.h-ch; }
-        else { x=P.x+ri(1,P.w-cw-1); y=P.y+ri(1,P.h-ch-1); }
-        const cand={x,y,w:cw,h:ch,round:false,cx:x+cw/2,cy:y+ch/2,nestedIn:P,nested:true};
-        if(mine.some(k=>rectsOverlap(cand,k))) continue;
-        mine.push(cand);
-      }
-      for(const K of mine) kids.push(K);
-    }
-    return kids;
-  }
   // Village: n entrances per GROUP (house). (Mirror of the engine.)
-  function placeEntrancesPerGroup(n, groupOf){
-    if(n<=0) return;
-    const byGroup=new Map();
-    for(const c of entranceCands()){
-      const g=groupOf[c.room]; if(g==null) continue;
-      if(!byGroup.has(g)) byGroup.set(g, []);
-      byGroup.get(g).push(c);
-    }
-    for(const list of byGroup.values()){
-      const placed=[]; let guard=n*40;
-      while(placed.length<n && guard-->0 && list.length){
-        const c=list.splice(Math.floor(rng()*list.length),1)[0];
-        if(placed.some(p=>Math.hypot(p.x-c.x,p.y-c.y)<2)) continue;
-        if(map.doors.some(d=>Math.hypot(d.x-c.x,d.y-c.y)<1.2)) continue;
-        map.doors.push({id:uid(), x:c.x, y:c.y, a:c.a, len:1});
-        placed.push(c);
-      }
-    }
-  }
-  function collectBuildingRooms(P, n, smin, smax, noCorners){
-    const kids=[]; let tries=0, guard=Math.max(40, n*80);
-    while(kids.length<n && tries++<guard){
-      const cw=ri(smin, Math.max(smin, Math.min(smax, P.w-3)));
-      const ch=ri(smin, Math.max(smin, Math.min(smax, P.h-3)));
-      const m=noCorners ? ri(4,8) : ri(0,8); let x,y;   // 0–3 corner · 4–7 edge · 8 floating
-      if(m===0){ x=P.x; y=P.y; }
-      else if(m===1){ x=P.x+P.w-cw; y=P.y; }
-      else if(m===2){ x=P.x; y=P.y+P.h-ch; }
-      else if(m===3){ x=P.x+P.w-cw; y=P.y+P.h-ch; }
-      else if(m===4){ x=P.x; y=P.y+ri(1,P.h-ch-1); }
-      else if(m===5){ x=P.x+P.w-cw; y=P.y+ri(1,P.h-ch-1); }
-      else if(m===6){ x=P.x+ri(1,P.w-cw-1); y=P.y; }
-      else if(m===7){ x=P.x+ri(1,P.w-cw-1); y=P.y+P.h-ch; }
-      else { x=P.x+ri(1,P.w-cw-1); y=P.y+ri(1,P.h-ch-1); }
-      const cand={x,y,w:cw,h:ch,round:false,cx:x+cw/2,cy:y+ch/2,nestedIn:P,nested:true};
-      if(kids.some(k=>rectsOverlap(cand,k))) continue;
-      kids.push(cand);
-    }
-    return kids;
-  }
-  function addNestedDoor(K, P){
-    const s2=v=>Math.round(v*2)/2;
-    const edges=[];
-    if(K.x     > P.x    ) edges.push({v:1, x:K.x,     y0:K.y, y1:K.y+K.h});
-    if(K.x+K.w < P.x+P.w) edges.push({v:1, x:K.x+K.w, y0:K.y, y1:K.y+K.h});
-    if(K.y     > P.y    ) edges.push({v:0, y:K.y,     x0:K.x, x1:K.x+K.w});
-    if(K.y+K.h < P.y+P.h) edges.push({v:0, y:K.y+K.h, x0:K.x, x1:K.x+K.w});
-    if(!edges.length) return;
-    for(let t=0;t<8;t++){
-      const e=edges[ri(0,edges.length-1)];
-      const len=(rng()<0.5?1:2);
-      if(e.v){ const lo=e.y0+0.5+len/2, hi=e.y1-0.5-len/2; if(hi<lo) continue;
-        map.doors.push({id:uid(), x:e.x, y:s2(lo+rng()*(hi-lo)), a:Math.PI/2, len, _adj:true}); return; }
-      else   { const lo=e.x0+0.5+len/2, hi=e.x1-0.5-len/2; if(hi<lo) continue;
-        map.doors.push({id:uid(), x:s2(lo+rng()*(hi-lo)), y:e.y, a:0, len, _adj:true}); return; }
-    }
-  }
   // Accretion placement: seed one room, then grow each new room flush against a
   // random side of an already-placed room so it SHARES that wall (overlap ≥2 so a
   // door fits). Edge-butting isn't an interior overlap, so rectsOverlap stays
   // false against the anchor; we reject only rooms whose interior crosses another.
-  function placeAdjacentRooms(rooms, nRooms, smin, smax){
-    const w0=ri(smin,smax), h0=ri(smin,smax);
-    rooms.push({x:0,y:0,w:w0,h:h0,round:false,cx:w0/2,cy:h0/2});
-    let tries=0, guard=nRooms*500;
-    while(rooms.length<nRooms && tries++<guard){
-      const base=rooms[ri(0,rooms.length-1)];
-      const w=ri(smin,smax), h=ri(smin,smax);
-      let nx,ny;
-      switch(ri(0,3)){
-        case 0: nx=base.x+base.w;  ny=base.y+ri(-(h-2), base.h-2); break;   // right of base
-        case 1: nx=base.x-w;       ny=base.y+ri(-(h-2), base.h-2); break;   // left of base
-        case 2: ny=base.y+base.h;  nx=base.x+ri(-(w-2), base.w-2); break;   // below base
-        default:ny=base.y-h;       nx=base.x+ri(-(w-2), base.w-2); break;   // above base
-      }
-      const cand={x:nx,y:ny,w,h,round:false,cx:nx+w/2,cy:ny+h/2};
-      if(rooms.some(r=>rectsOverlap(cand,r))) continue;                     // interior collision
-      rooms.push(cand);
-    }
-  }
   // Put one door on every shared wall segment (≥2 cells long) between two rooms.
   // The accretion tree guarantees each room shares a wall with the map, so this
   // connects everything without corridors.
-  function addAdjacencyDoors(rooms){
-    const s2=v=>Math.round(v*2)/2, EPS=1e-6;
-    for(let i=0;i<rooms.length;i++) for(let j=i+1;j<rooms.length;j++){
-      const a=rooms[i], b=rooms[j]; let door=null;
-      if(Math.abs((a.x+a.w)-b.x)<EPS || Math.abs((b.x+b.w)-a.x)<EPS){        // vertical shared wall
-        const y0=Math.max(a.y,b.y), y1=Math.min(a.y+a.h,b.y+b.h);
-        if(y1-y0>=2){ const x=Math.abs((a.x+a.w)-b.x)<EPS ? a.x+a.w : a.x;
-          door={x, y:s2((y0+y1)/2), a:Math.PI/2}; }
-      } else if(Math.abs((a.y+a.h)-b.y)<EPS || Math.abs((b.y+b.h)-a.y)<EPS){ // horizontal shared wall
-        const x0=Math.max(a.x,b.x), x1=Math.min(a.x+a.w,b.x+b.w);
-        if(x1-x0>=2){ const y=Math.abs((a.y+a.h)-b.y)<EPS ? a.y+a.h : a.y;
-          door={x:s2((x0+x1)/2), y, a:0}; }
-      }
-      if(door){ door.id=uid(); door.len=(rng()<0.5?1:2); door._adj=true; map.doors.push(door); }
-    }
-  }
-  function carveCorridor(A,B){
-    // L-shaped corridor (random elbow order). Door goes on the wall each leg
-    // actually passes through, so doors land at real thresholds.
-    const ax=Math.round(A.cx),ay=Math.round(A.cy),bx=Math.round(B.cx),by=Math.round(B.cy);
-    const horizFirst=rng()<0.5;
-    const cw=rng()<0.5?1:2;                          // corridor width: 1 or 2 cells
-    // Opening centre = leg start + cw/2, so the door lands on the wall line
-    // centred in the gap; door length is sized to the corridor width.
-    if(horizFirst){
-      map.shapes.push(hall(Math.min(ax,bx),ay,Math.abs(bx-ax)+cw,cw));
-      map.shapes.push(hall(bx,Math.min(ay,by),cw,Math.abs(by-ay)+cw));
-      addDoor(A,"h",ay+cw/2,Math.sign(bx-ax)||1, bx,ay, cw);       // A exits left/right (elbow = bx,ay)
-      addDoor(B,"v",bx+cw/2,Math.sign(ay-by)||1, bx,ay, cw);       // B entered top/bottom
-    } else {
-      map.shapes.push(hall(ax,Math.min(ay,by),cw,Math.abs(by-ay)+cw));
-      map.shapes.push(hall(Math.min(ax,bx),by,Math.abs(bx-ax)+cw,cw));
-      addDoor(A,"v",ax+cw/2,Math.sign(by-ay)||1, ax,by, cw);       // A exits top/bottom (elbow = ax,by)
-      addDoor(B,"h",by+cw/2,Math.sign(ax-bx)||1, ax,by, cw);       // B entered left/right
-    }
-  }
   function hall(x,y,w,h){ return {id:uid(),type:"rect",x,y,w:Math.max(1,w),h:Math.max(1,h),corridor:true}; }
   // ─── Organic / cave generation (mirrors dungeon-engine.js) ───────────────
-  function blobPts(cx,cy,rx,ry,wob){
-    wob = wob==null ? 1 : wob;
-    const n=14+ri(0,8);
-    const p1=rng()*6.283,p2=rng()*6.283,p3=rng()*6.283,p4=rng()*6.283;
-    const a1=(0.10+rng()*0.13)*wob, a2=(0.06+rng()*0.11)*wob,
-          a3=(0.04+rng()*0.08)*wob, a4=(0.02+rng()*0.05)*wob;
-    const pts=[];
-    for(let i=0;i<n;i++){
-      const t=i/n*6.283;
-      let rr=1+a1*Math.sin(t+p1)+a2*Math.sin(2*t+p2)+a3*Math.sin(3*t+p3)+a4*Math.sin(5*t+p4);
-      if(rr<0.45) rr=0.45;
-      pts.push([ Math.round((cx+Math.cos(t)*rx*rr)*4)/4, Math.round((cy+Math.sin(t)*ry*rr)*4)/4 ]);
-    }
-    return pts;
-  }
-  function placeBlobs(rooms, nRooms, smin, smax, field, merge){
-    let tries=0, guard=nRooms*300;
-    while(rooms.length<nRooms && tries++<guard){
-      const R=ri(smin,smax)/2*(0.9+rng()*0.35);
-      const rx=R*(0.8+rng()*0.5), ry=R*(0.8+rng()*0.5);
-      let x,y;
-      if(merge && rooms.length){
-        const base=rooms[ri(0,rooms.length-1)];
-        const ang=rng()*6.283, dist=(Math.max(base.rx,base.ry)+Math.max(rx,ry))*(0.5+rng()*0.4);
-        x=Math.round(base.cx+Math.cos(ang)*dist); y=Math.round(base.cy+Math.sin(ang)*dist);
-      } else { x=ri(-field,field); y=ri(-field,field); }
-      const bb={x:x-rx,y:y-ry,w:rx*2,h:ry*2};
-      const overlaps=rooms.some(r=>rectsOverlap(bb,{x:r.cx-r.rx,y:r.cy-r.ry,w:r.rx*2,h:r.ry*2}));
-      if(!merge && overlaps) continue;
-      const wob=0.9+rng()*1.3;
-      rooms.push({cx:x,cy:y,rx,ry,w:rx*2,h:ry*2,round:false,pts:blobPts(x,y,rx,ry,wob)});
-    }
-  }
-  function carveTunnel(A,B){
-    const ax=A.cx,ay=A.cy,bx=B.cx,by=B.cy;
-    const dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy)||1;
-    const ux=dx/L,uy=dy/L,nx=-uy,ny=ux;
-    const hw=0.95+rng()*0.3;                  // full 1.9–2.5 cells ⇒ ≥1 passable
-    const amp=Math.min(L*0.16,2.4)*(rng()<0.5?1:-1);
-    const waves=1+Math.floor(rng()*2);
-    const ph=rng()*6.283;
-    const M=Math.max(8,Math.round(L*1.2));
-    const C=[];
-    for(let i=0;i<=M;i++){
-      const t=i/M, wig=amp*Math.sin(t*waves*Math.PI*2+ph)*Math.sin(Math.PI*t);
-      C.push([ax+ux*(t*L)+nx*wig, ay+uy*(t*L)+ny*wig]);
-    }
-    const left=[],right=[];
-    // Balloon the ends so a tunnel opens into a room as a smooth trumpet, not a
-    // narrow slot (mirror of the engine; keep in sync).
-    const FLARE=0.85, FL=2.6;
-    for(let i=0;i<=M;i++){
-      const p=C[Math.max(0,i-1)], q=C[Math.min(M,i+1)];
-      let tx=q[0]-p[0], ty=q[1]-p[1]; const tl=Math.hypot(tx,ty)||1; tx/=tl; ty/=tl;
-      const lnx=-ty, lny=tx;                  // local normal — no pinch on bends
-      const along=(i/M)*L, flare=1+FLARE*(Math.exp(-along/FL)+Math.exp(-(L-along)/FL));
-      let w2=hw*(0.92+0.1*Math.sin(i/M*5+ph))*flare; if(w2<0.9) w2=0.9;
-      left.push([C[i][0]+lnx*w2, C[i][1]+lny*w2]); right.push([C[i][0]-lnx*w2, C[i][1]-lny*w2]);
-    }
-    map.shapes.push({id:uid(),type:"polygon",pts:left.concat(right.reverse()),corridor:true});
-    const mid=C[Math.round(M/2)];
-    map.doors.push({id:uid(), x:mid[0], y:mid[1], a:Math.atan2(-ux,uy), len:2});
-  }
   // Mirror of the engine's smoothing (keep the two in sync): soften the jagged
   // self-notches an organic tunnel/chamber outline leaves at bends and junctions,
   // so cave transitions are smooth in the render AND the VTT wall export. De-spike
   // (drop sharp, short-edged folds) then Taubin-smooth (shrink+inflate, no net
   // size change so tunnels keep reaching into their chambers).
-  function smoothClosedPoly(pts){
-    const ang=(p,q,r)=>{ const ax=p[0]-q[0],ay=p[1]-q[1],bx=r[0]-q[0],by=r[1]-q[1];
-      const la=Math.hypot(ax,ay),lb=Math.hypot(bx,by); if(la<1e-6||lb<1e-6) return Math.PI;
-      let c=(ax*bx+ay*by)/(la*lb); c=Math.max(-1,Math.min(1,c)); return Math.acos(c); };
-    let p=pts.map(q=>[q[0],q[1]]);
-    for(let guard=0; guard<40 && p.length>6; guard++){ let hit=-1;
-      for(let i=0;i<p.length;i++){ const n=p.length, a=p[(i-1+n)%n], b=p[i], c=p[(i+1)%n];
-        const e1=Math.hypot(b[0]-a[0],b[1]-a[1]), e2=Math.hypot(c[0]-b[0],c[1]-b[1]);
-        if(ang(a,b,c)<0.7 && Math.min(e1,e2)<0.5){ hit=i; break; } }
-      if(hit<0) break; p.splice(hit,1); }
-    const n=p.length; if(n<4) return p;
-    const relax=f=>{ const out=new Array(n); for(let i=0;i<n;i++){ const a=p[(i-1+n)%n], b=p[i], c=p[(i+1)%n];
-        out[i]=[ b[0]+f*(0.5*(a[0]+c[0])-b[0]), b[1]+f*(0.5*(a[1]+c[1])-b[1]) ]; } for(let i=0;i<n;i++) p[i]=out[i]; };
-    for(let it=0; it<3; it++){ relax(0.5); relax(-0.52); }
-    return p.map(q=>[Math.round(q[0]*100)/100, Math.round(q[1]*100)/100]);
-  }
-  function smoothOrganicShapes(shapes){
-    for(const sh of shapes){ if(sh.type==="polygon" && sh.pts && sh.pts.length>=6) sh.pts=smoothClosedPoly(sh.pts); }
-  }
   // Place a door on `room` where a corridor leg crosses its wall. axis "h" ⇒
   // left/right wall (leaf vertical, a=π/2); "v" ⇒ top/bottom wall (leaf a=0).
   // `line` is the crossing coordinate; `side` picks which wall. Round rooms get
   // a radial door toward (tcx,tcy).
-  function addDoor(room, axis, line, side, tcx, tcy, len){
-    len = len || 1; const m=len/2;
-    if(room.round){
-      // Seat the door at the corridor mouth. The corridor centreline (`line`) is
-      // grid-aligned, so the door's ALONG coordinate is on the grid; the ACROSS
-      // coordinate is put exactly on the circle boundary, so the door meets the
-      // visible curved wall instead of floating off it. finalizeDoors then fits
-      // its length to the real opening and validates it like any other door.
-      const cx=room.cx, cy=room.cy, r=Math.max(room.w,room.h)/2;
-      if(axis==="h"){                                  // horizontal corridor → door on E/W arc (a=π/2, along=y)
-        const y=Math.max(cy-r+0.4, Math.min(cy+r-0.4, line));
-        const off=Math.sqrt(Math.max(0.04, r*r-(y-cy)*(y-cy)));
-        map.doors.push({id:uid(), x:cx+(side>0?off:-off), y, a:Math.PI/2, len});
-      } else {                                         // vertical corridor → door on N/S arc (a=0, along=x)
-        const x=Math.max(cx-r+0.4, Math.min(cx+r-0.4, line));
-        const off=Math.sqrt(Math.max(0.04, r*r-(x-cx)*(x-cx)));
-        map.doors.push({id:uid(), x, y:cy+(side>0?off:-off), a:0, len});
-      }
-      return;
-    }
-    if(axis==="h"){ const x=side>0?room.x+room.w:room.x, y=Math.min(room.y+room.h-m,Math.max(room.y+m,line));
-      map.doors.push({id:uid(), x, y, a:Math.PI/2, len}); }
-    else { const y=side>0?room.y+room.h:room.y, x=Math.min(room.x+room.w-m,Math.max(room.x+m,line));
-      map.doors.push({id:uid(), x, y, a:0, len}); }
-  }
 
   // ════════════════════════════════════════════════════════════════
   // HISTORY / PERSISTENCE
@@ -8061,7 +6197,7 @@
   if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.08";
+  const BUILD="2026.09.08b";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
