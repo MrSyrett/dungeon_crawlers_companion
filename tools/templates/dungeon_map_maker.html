@@ -269,8 +269,8 @@
   .lcol{width:46px;height:26px;padding:0;border:1px solid var(--line);border-radius:6px;
         background:none;cursor:pointer;flex:0 0 auto}
   .tool.off{opacity:.4}
-  .tool.snapon{background:var(--active);border-color:var(--gold);color:var(--gold)}
-  #snapTool:not(.snapon){opacity:.5}
+  .tool.snapon,.tool.opaqueon{background:var(--active);border-color:var(--gold);color:var(--gold)}
+  #snapTool:not(.snapon),#opaqueTool:not(.opaqueon){opacity:.5}
   .tsep{flex:0 0 auto;width:1px;align-self:stretch;margin:6px 3px;background:var(--gold-dim);opacity:.5}
 </style>
 </head>
@@ -608,6 +608,8 @@
         <div class="tsep" aria-hidden="true"></div>
         <div class="tool" id="snapTool" title="Snap to grid — highlighted when on (Shift+S)">
           <svg viewBox="0 0 24 24"><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>Snap</div>
+        <div class="tool" id="opaqueTool" title="Opaque floor — highlighted when the selected room/shape (or the next one you draw) has an opaque floor; off = transparent, layers over what's beneath">
+          <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="M4 6.5h7.5v11H4z" fill="currentColor" stroke="none"/></svg>Opaque</div>
       </div>
       <!-- Compact tool picker shown instead of the icon grid on small screens (see CSS). -->
       <select class="tool-select" id="toolSelect" aria-label="Tool"></select>
@@ -1230,18 +1232,20 @@
         // source is cleared), so it costs a full-canvas pass per run even when
         // the fill is tiny — ~180 ms on an 18-room, four-style map. Clipping
         // costs only the run's own box.
-        // Opaque backdrop under the FA patterns: imported floor tiles (e.g. Forgotten
-        // Adventures) carry an alpha channel, so their transparent regions would let the
-        // rock background show through. Paint it ONCE over the whole floor footprint —
-        // NOT under every run — so an upper run composites over the LOWER run beneath it:
-        // a translucent FA floor (water, mud) then layers over the floor under it instead
-        // of onto black. Opaque tiles (2MT, bundled) cover it — no visible change.
-        { let anyImg=false; for(const r of runs){ if(r.t && r.t.img){ anyImg=true; break; } }
-          if(anyImg){ tc.save(); tc.beginPath();
-            for(const sh of shapes){ if(sh.deco || !shHasFloor(sh) || !shFloorOpaque(sh)) continue; shapePath(tc, sh); }
-            tc.clip("nonzero"); tc.fillStyle="#000"; tc.fillRect(0,0,W,H); tc.restore(); } }
+        // Opaque backdrop under FA patterns: imported floor tiles carry an alpha channel,
+        // so their transparent regions would let whatever is beneath (the rock background
+        // OR a lower floor) show through. Paint a black base directly under EACH run's
+        // OPAQUE shapes, right before that run's floor — so an opaque floor covers anything
+        // beneath it even where it crosses a lower room. A TRANSPARENT shape (sh.alpha) gets
+        // no base, so a translucent floor (water, mud) still layers over what's under it.
         for(const r of runs){
           const bb=runBox(r.list); if(!bb) continue;
+          if(r.t && r.t.img){
+            tc.save(); tc.beginPath(); let anyOpaque=false;
+            for(const sh of r.list){ if(shFloorOpaque(sh)){ shapePath(tc, sh); anyOpaque=true; } }
+            if(anyOpaque){ tc.clip("nonzero"); tc.fillStyle="#000"; tc.fillRect(bb.x,bb.y,bb.w,bb.h); }
+            tc.restore();
+          }
           tc.save();
           tc.beginPath(); for(const sh of r.list) shapePath(tc, sh); tc.clip("nonzero");
           tc.fillStyle = patFor(tc, r.t) || C.floor;
@@ -5389,11 +5393,24 @@
   // true = transparent (keep alpha), false = opaque. Set by the "Opaque floor" checkbox.
   let newShapeAlpha=null;
   function alphaTarget(){ const t=styleTarget(); return (t && t.kind==="shape") ? t.obj : null; }
+  function floorOpaqueState(){ const t=alphaTarget();
+    return t ? shFloorOpaque(t) : ((newShapeAlpha==null) ? (drawMode!=="shapes") : !newShapeAlpha); }
   function syncFloorAlphaUI(){
-    const cb=$("floorOpaque"), row=$("floorAlphaRow"); if(!cb) return;
+    const on=floorOpaqueState();
+    const cb=$("floorOpaque"), row=$("floorAlphaRow");
+    if(cb) cb.checked=on;
     if(row) row.style.display = advOn() ? "flex" : "none";
-    const t=alphaTarget();
-    cb.checked = t ? shFloorOpaque(t) : ((newShapeAlpha==null) ? (drawMode!=="shapes") : !newShapeAlpha);
+    const tb=$("opaqueTool"); if(tb){ tb.classList.toggle("opaqueon", on); tb.style.display = advOn() ? "" : "none"; }
+  }
+  // Toggle the OPAQUE floor state — the selected room/shape's own floor, or (nothing
+  // selected) the default for the next shape drawn. Shared by the sidebar checkbox and
+  // the toolbar button.
+  function toggleFloorOpaque(){
+    const opaque = !floorOpaqueState(), t=alphaTarget();
+    if(t){ pushHistory(); t.alpha = !opaque; commit(); }
+    else newShapeAlpha = !opaque;
+    syncFloorAlphaUI();
+    toast("Floor " + (opaque?"opaque":"transparent") + (t?"":" — for the next shape"));
   }
   // The Floor / Walls pickers edit the SELECTED room (or interior wall) when
   // there is one, and the map-wide default otherwise.
@@ -7249,11 +7266,7 @@
       if(t){ pushHistory(); if(v) t.style=v; else { delete t.style; delete t.flip; } commit(); syncDoorUI(); }
       else { activeDoorStyle=v; syncDoorUI(); }
     };
-    if($("floorOpaque")) $("floorOpaque").onchange=e=>{
-      const opaque=!!e.target.checked, t=alphaTarget();
-      if(t){ pushHistory(); t.alpha = !opaque; commit(); syncFloorAlphaUI(); }   // edit the selected room/shape
-      else { newShapeAlpha = !opaque; }                                          // set the default for new shapes
-    };
+    if($("floorOpaque")) $("floorOpaque").onchange=()=>toggleFloorOpaque();
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
@@ -7727,7 +7740,8 @@
   }
   document.getElementById("toolbar").addEventListener("click", e=>{
     const t=e.target.closest(".tool"); if(!t) return;
-    if(t.id==="snapTool"){ toggleSnap(); return; }   // snap toggle isn't a tool
+    if(t.id==="snapTool"){ toggleSnap(); return; }        // snap toggle isn't a tool
+    if(t.id==="opaqueTool"){ toggleFloorOpaque(); return; }   // opaque-floor toggle isn't a tool
     if(t.dataset.tool) setTool(t.dataset.tool); });
   // Build the compact tool dropdown (shown instead of the icon grid on small screens)
   // from the same .tool buttons, so its labels and order always match. On change →

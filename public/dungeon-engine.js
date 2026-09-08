@@ -187,19 +187,20 @@ window.DungeonEngine = (function(){
         // source is cleared), so it costs a full-canvas pass per run even when
         // the fill is tiny — ~180 ms on an 18-room, four-style map. Clipping
         // costs only the run's own box.
-        // Opaque backdrop under the FA patterns: imported floor tiles (e.g. Forgotten
-        // Adventures) carry an alpha channel, so their transparent regions would let the
-        // rock background show through. Paint it ONCE over the whole floor footprint —
-        // NOT under every run — so an upper run composites over the LOWER run beneath it:
-        // a translucent FA floor (water, mud) then layers over the floor under it instead
-        // of onto black. Opaque tiles (2MT, bundled) cover it — no visible change.
-        { let anyImg=false; for(const r of runs){ if(r.t && r.t.img){ anyImg=true; break; } }
-          if(anyImg){ tc.save(); tc.beginPath();
-            // base only under OPAQUE floors — a shape set transparent (sh.alpha) keeps its alpha
-            for(const sh of shapes){ if(sh.deco || !shHasFloor(sh) || !shFloorOpaque(sh)) continue; shapePath(tc, sh); }
-            tc.clip("nonzero"); tc.fillStyle="#000"; tc.fillRect(0,0,W,H); tc.restore(); } }
+        // Opaque backdrop under FA patterns: imported floor tiles carry an alpha channel,
+        // so their transparent regions would let whatever is beneath (the rock background
+        // OR a lower floor) show through. Paint a black base directly under EACH run's
+        // OPAQUE shapes, right before that run's floor — so an opaque floor covers anything
+        // beneath it even where it crosses a lower room. A TRANSPARENT shape (sh.alpha) gets
+        // no base, so a translucent floor (water, mud) still layers over what's under it.
         for(const r of runs){
           const bb=runBox(r.list); if(!bb) continue;
+          if(r.t && r.t.img){
+            tc.save(); tc.beginPath(); let anyOpaque=false;
+            for(const sh of r.list){ if(shFloorOpaque(sh)){ shapePath(tc, sh); anyOpaque=true; } }
+            if(anyOpaque){ tc.clip("nonzero"); tc.fillStyle="#000"; tc.fillRect(bb.x,bb.y,bb.w,bb.h); }
+            tc.restore();
+          }
           tc.save();
           tc.beginPath(); for(const sh of r.list) shapePath(tc, sh); tc.clip("nonzero");
           tc.fillStyle = patFor(tc, r.t) || C.floor;
