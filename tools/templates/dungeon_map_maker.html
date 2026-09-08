@@ -2002,9 +2002,13 @@
     }
     return name;   // no variant token → only an identically-named sprite is a sibling (usually none → left as-is)
   }
-  // FIXTURES & OPENINGS stay consistent across a building, so re-roll never
-  // touches them — lights (lamp/lantern/candle/…), fireplaces, and doors/windows.
-  const _RR_LOCK=["door","window","lamp","lantern","candle","candelabra","chandelier","brazier","sconce","torch","campfire","fireplace","hearth","chimney"];
+  // Never re-rolled — things that must stay put or that only read right as a
+  // set. Fixtures/openings (consistent across a building): lights, fireplaces,
+  // doors/windows. Multi-tile structures (swapping one tile breaks the whole):
+  // stairs + railings, and "arrangement"/"fancy-desk" pieces that abut into a
+  // bar counter or shelf run.
+  const _RR_LOCK=["door","window","lamp","lantern","candle","candelabra","chandelier","brazier","sconce","torch","campfire","fireplace","hearth","chimney",
+                  "stairs","railing","arrangement","fancy-desk"];
   function _rrExcluded(name){ const s=String(name||"").toLowerCase(); return _RR_LOCK.some(k=>s.indexOf(k)>=0); }
   // STYLE-SWAP categories — soft furnishings where different STYLES of the same
   // size are interchangeable (a fur rug ↔ a patterned rug, one bed ↔ another).
@@ -2038,12 +2042,15 @@
   // square table land in a 2×1 slot and render squished. Same native size ⇒ same
   // aspect ⇒ no distortion.
   function _rrNear(a,b){ if(!a||!b) return false; return Math.min(a,b)/Math.max(a,b) >= 0.8; }   // within ~20%
-  function _rrPickSwap(tex, byKey){
+  // needColorable: only offer sprites that can take a tint, so a coloured item
+  // never swaps onto a plain sprite that would render with an odd tint.
+  function _rrPickSwap(tex, byKey, needColorable){
     const nm=_rrBaseName(tex); if(!nm) return null;
     const pool=byKey.get(_rrKey(nm)); if(!pool || pool.length<2) return null;
     const cur=texReg.get(tex); const cw=cur&&cur.w, ch=cur&&cur.h;
     let cands=pool.filter(t=>t.id!==tex);
     if(cw&&ch) cands=cands.filter(t=> _rrNear(t.w,cw) && _rrNear(t.h,ch));
+    if(needColorable) cands=cands.filter(t=> t.tintable || t.colorable);
     if(!cands.length) return null;
     return cands[Math.floor(Math.random()*cands.length)];
   }
@@ -2083,32 +2090,35 @@
   //   • a light fixture, fireplace, or door/window → LEFT ALONE (stays
   //     consistent across a building).
   //   • a bed/rug (style-swap category) → SWAP to another style of the same
-  //     size; if it's tinted, half the time recolour instead, so repeated
-  //     re-rolls vary both style and colour.
+  //     size; if it's tinted, half the time recolour instead. A tinted item
+  //     only swaps onto ANOTHER COLOURABLE sprite (keeping the tint), so it
+  //     never lands on a plain sprite that would look oddly coloured.
   //   • otherwise tinted (something the user deliberately coloured) → RECOLOUR
   //     (new hue, same sprite + size) — safe variety, no squish.
   //   • otherwise → SWAP to a same-family, same-size sibling.
   // Every swap re-derives w/h from the new sprite's native size × the object's
   // current scale, so proportions are always correct. Position, rotation, flip
-  // (and the tint, on a style-swap) are preserved.
+  // (and a valid tint) are preserved.
   function rerollSel(){
     const objs=_rrGroupObjects();
     if(!objs.length){ toast("Select a room or prefab to re-roll its sprites."); return; }
     const byKey=_rrSiblingIndex();
-    const swapAct=(o)=>{ const sib=_rrPickSwap(o.tex, byKey); if(!sib) return null;
+    const swapAct=(o, needColorable)=>{ const sib=_rrPickSwap(o.tex, byKey, needColorable); if(!sib) return null;
       const cur=texReg.get(o.tex); let nw=o.w, nh=o.h;
       if(cur && cur.w && cur.h){ nw=+(sib.w*(o.w/cur.w)).toFixed(4); nh=+(sib.h*(o.h/cur.h)).toFixed(4); }
-      return {o, tex:sib.id, w:nw, h:nh}; };
+      const act={o, tex:sib.id, w:nw, h:nh};
+      if(o.tint && !(sib.tintable || sib.colorable)) act.clearTint=true;   // don't leave colour on a plain sprite
+      return act; };
     const recolorAct=(o)=>{ const nt=_rrRecolor(o.tint);
       return (nt && nt.toLowerCase()!==String(o.tint).toLowerCase()) ? {o, tint:nt} : null; };
     const acts=[];
     for(const it of objs){ const o=it.obj;
       const nm=_rrBaseName(o.tex);
-      if(_rrExcluded(nm)) continue;                              // fixtures / doors / windows — untouched
+      if(_rrExcluded(nm)) continue;                              // fixtures / openings / multi-tile structures — untouched
       const styleCat=!!_rrCategory(nm);
       let a=null;
       if(styleCat){                                             // bed/rug: restyle, or recolour a tinted one half the time
-        a = (o.tint && Math.random()<0.5) ? recolorAct(o) : (swapAct(o) || (o.tint ? recolorAct(o) : null));
+        a = (o.tint && Math.random()<0.5) ? recolorAct(o) : (swapAct(o, !!o.tint) || (o.tint ? recolorAct(o) : null));
       } else if(o.tint){
         a = recolorAct(o);
       } else {
@@ -2118,7 +2128,7 @@
     }
     if(!acts.length){ toast("No alternate sprites or colours available for this selection."); return; }
     pushHistory();
-    for(const a of acts){ if(a.tex!=null) a.o.tex=a.tex; if(a.w!=null) a.o.w=a.w; if(a.h!=null) a.o.h=a.h; if(a.tint!=null) a.o.tint=a.tint; }
+    for(const a of acts){ if(a.tex!=null) a.o.tex=a.tex; if(a.w!=null) a.o.w=a.w; if(a.h!=null) a.o.h=a.h; if(a.tint!=null) a.o.tint=a.tint; if(a.clearTint) delete a.o.tint; }
     commit();
     const rc=acts.filter(a=>a.tint!=null).length, sw=acts.length-rc;
     toast("Re-rolled — "+[rc?rc+" recoloured":"", sw?sw+" swapped":""].filter(Boolean).join(", ")+".");
@@ -6427,7 +6437,7 @@
   if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.08h";
+  const BUILD="2026.09.08i";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
