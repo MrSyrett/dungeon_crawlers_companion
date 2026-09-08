@@ -2427,6 +2427,46 @@
     tower:        {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false, tower:true, adjDoors:true},
     ship:         {corridors:false, structure:false, organic:false, roundRooms:false, exterior:false, doors:true,  building:false, perRoomEntrances:false, ship:true, adjDoors:true},
   };
+  // ── Map generation runs in a Web Worker ─────────────────────────────────
+  // A big roll can churn for a moment; doing it on the main thread froze the
+  // UI. The worker imports the SAME engine (so results are byte-identical to
+  // the inline path) and calls DungeonEngine.generate; the map comes back as
+  // plain data via structured clone. The engine touches `document`/`window`
+  // only to allocate scratch canvases at load, so the worker shims both — a
+  // real OffscreenCanvas where available, an inert stub otherwise (generate()
+  // never draws). ANY worker failure — unsupported, CSP-blocked, importScripts
+  // error, timeout, or a generate that throws — falls back to generating on
+  // the main thread, so correctness never depends on the worker existing.
+  let _genWorker, _genTried=false, _genBroken=false, _genSeq=0;
+  function _engineUrl(){
+    try{ const s=[...document.scripts].find(x=>/dungeon-engine\.js/.test(x.src||""));
+         return new URL(s?s.src:"/dungeon-engine.js", location.href).href; }
+    catch(e){ return "/dungeon-engine.js"; }
+  }
+  function _genWorkerGet(){
+    if(_genTried) return _genWorker;
+    _genTried=true;
+    try{
+      if(typeof Worker==="undefined" || typeof Blob==="undefined") throw 0;
+      const boot =
+        "self.window=self;"+
+        "self.document={createElement:function(t){return (t==='canvas'&&typeof OffscreenCanvas!=='undefined')"+
+          "?new OffscreenCanvas(1,1):{style:{},width:0,height:0,getContext:function(){return null;}};}};"+
+        "importScripts("+JSON.stringify(_engineUrl())+");"+
+        "self.onmessage=function(e){var d=e.data||{};"+
+          "try{var m=(self.DungeonEngine||self.window.DungeonEngine).generate(d.opts);"+
+              "self.postMessage({id:d.id,ok:true,map:m});}"+
+          "catch(err){self.postMessage({id:d.id,ok:false,error:String(err&&err.message||err)});}};";
+      const url=URL.createObjectURL(new Blob([boot],{type:"text/javascript"}));
+      _genWorker=new Worker(url);
+      _genWorker.onerror=function(){ _genBroken=true; };   // load/importScripts failure
+    }catch(e){ _genWorker=null; }
+    return _genWorker;
+  }
+  function _setGenBusy(on){ const b=$("generate"); if(!b) return;
+    if(on){ if(b._genLabel==null) b._genLabel=b.textContent; b.disabled=true; b.style.opacity=".7"; b.textContent="🎲 Generating…"; }
+    else { b.disabled=false; b.style.opacity=""; if(b._genLabel!=null){ b.textContent=b._genLabel; b._genLabel=null; } } }
+
   function generate(){
     const TYPES = (window.DungeonEngine && window.DungeonEngine.MAP_TYPES) || MAP_TYPES;
     const preset = TYPES[($("mapType")&&$("mapType").value)||"dungeon"] || TYPES.dungeon;
@@ -2437,6 +2477,7 @@
       entrances: +$("entrances").value,
       theme: theme
     }, preset);
+    if(!(window.DungeonEngine && window.DungeonEngine.generate)){ showEngineError(); return; }
     pushHistory();
     // The engine returns a brand-new map object, so carry the user's settings
     // across — otherwise rolling a dungeon silently resets Advanced Mode, the
@@ -2451,38 +2492,55 @@
     const AL0 = activeLayer();
     const keepFloor = (AL0 && AL0.floor!=null) ? AL0.floor : (keepStyle && keepStyle.floor);
     const keepWall  = (AL0 && AL0.wall !=null) ? AL0.wall  : (keepStyle && keepStyle.wall);
-    if(!(window.DungeonEngine && window.DungeonEngine.generate)){ showEngineError(); return; }
-    map = window.DungeonEngine.generate(opts);
-    map.name = keepName; map.grid = true; map.gridInterior = $("gridInteriorToggle").checked; map.theme = theme;
-    if(keepStyle) map.style = keepStyle;
-    // Bake the effective floor/wall into the seed so the new Base layer inherits
-    // exactly what was on screen before the roll.
-    if(map.style){ if(keepFloor!=null) map.style.floor = keepFloor; if(keepWall!=null) map.style.wall = keepWall; }
-    if(keepGridOp!=null) map.gridOpacity = keepGridOp;
-    if(keepSnap!=null) map.snap = keepSnap;
-    map.lit = !!keepLit; map.darkness = (keepDark==null) ? 0.55 : keepDark;
-    map.shadowsOn = !!keepShadowsOn;                       // the entities belong to the old map
-    map.lights = []; map.shadows = [];
-    installLayers(map);                 // a fresh roll replaces the whole map with one Base layer
-    // Option B — rolling the map in Shapes mode brings the whole layer in as
-    // non-occluding shapes (deco): floor + visible outline still render, but no
-    // walls export to VTTs and nothing blocks light. Perfect for islands, water
-    // and open terrain. Doors and interior walls need real room walls, so they
-    // are dropped. (Rooms mode is unchanged.)
-    if(drawMode==="shapes"){
-      let hadDoors=false;
-      for(const L of map.layers){
-        for(const sh of L.shapes){ sh.deco=true; if(!sh.fill) sh.fill="both"; }
-        if(L.doors.length) hadDoors=true;
-        L.walls.length=0; L.doors.length=0;
+    // Everything after the engine hands back a fresh map — identical whether it
+    // came from the worker or the inline fallback.
+    const applyGen = (genMap)=>{
+      map = genMap;
+      map.name = keepName; map.grid = true; map.gridInterior = $("gridInteriorToggle").checked; map.theme = theme;
+      if(keepStyle) map.style = keepStyle;
+      // Bake the effective floor/wall into the seed so the new Base layer inherits
+      // exactly what was on screen before the roll.
+      if(map.style){ if(keepFloor!=null) map.style.floor = keepFloor; if(keepWall!=null) map.style.wall = keepWall; }
+      if(keepGridOp!=null) map.gridOpacity = keepGridOp;
+      if(keepSnap!=null) map.snap = keepSnap;
+      map.lit = !!keepLit; map.darkness = (keepDark==null) ? 0.55 : keepDark;
+      map.shadowsOn = !!keepShadowsOn;                       // the entities belong to the old map
+      map.lights = []; map.shadows = [];
+      installLayers(map);                 // a fresh roll replaces the whole map with one Base layer
+      // Option B — rolling the map in Shapes mode brings the whole layer in as
+      // non-occluding shapes (deco): floor + visible outline still render, but no
+      // walls export to VTTs and nothing blocks light. Perfect for islands, water
+      // and open terrain. Doors and interior walls need real room walls, so they
+      // are dropped. (Rooms mode is unchanged.)
+      if(drawMode==="shapes"){
+        let hadDoors=false;
+        for(const L of map.layers){
+          for(const sh of L.shapes){ sh.deco=true; if(!sh.fill) sh.fill="both"; }
+          if(L.doors.length) hadDoors=true;
+          L.walls.length=0; L.doors.length=0;
+        }
+        // Silently eating the Doors checkbox reads as a bug — say why they vanished.
+        if(hadDoors)
+          toast("Shapes mode: doors dropped — Shapes have no real walls. Roll in Rooms mode to keep doors.");
       }
-      // Silently eating the Doors checkbox reads as a bug — say why they vanished.
-      if(hadDoors)
-        toast("Shapes mode: doors dropped — Shapes have no real walls. Roll in Rooms mode to keep doors.");
-    }
-    // Generated doors inherit the chosen Door style, just like manually-placed ones.
-    if(activeDoorStyle){ for(const L of map.layers) for(const d of (L.doors||[])) if(!d.style) d.style=activeDoorStyle; }
-    commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); syncLayersUI(); fitView();
+      // Generated doors inherit the chosen Door style, just like manually-placed ones.
+      if(activeDoorStyle){ for(const L of map.layers) for(const d of (L.doors||[])) if(!d.style) d.style=activeDoorStyle; }
+      commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); syncLayersUI(); fitView();
+    };
+    const runSync = ()=>{ try{ applyGen(window.DungeonEngine.generate(opts)); } finally { _setGenBusy(false); } };
+    const w = _genBroken ? null : _genWorkerGet();
+    if(!w || _genBroken){ runSync(); return; }
+    // Dispatch to the worker; a timeout or error message drops to the inline path.
+    const id=++_genSeq; let done=false;
+    _setGenBusy(true);
+    const cleanup=()=>{ clearTimeout(to); w.removeEventListener("message", onMsg); };
+    const to=setTimeout(()=>{ if(done) return; done=true; cleanup(); _genBroken=true; runSync(); }, 8000);
+    const onMsg=(e)=>{ const d=e.data||{}; if(d.id!==id || done) return; done=true; cleanup();
+      if(d.ok && d.map){ applyGen(d.map); _setGenBusy(false); }
+      else { runSync(); } };            // worker generate threw → regenerate inline
+    w.addEventListener("message", onMsg);
+    try{ w.postMessage({id, opts}); }
+    catch(e){ done=true; cleanup(); runSync(); }   // opts not cloneable (shouldn't happen)
   }
   // Force every generated polygon (cave chambers + tunnels) to one winding so
   // their textured walls all face the same way. The wall strip flows along each
@@ -6223,7 +6281,7 @@
   if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.08d";
+  const BUILD="2026.09.08e";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
