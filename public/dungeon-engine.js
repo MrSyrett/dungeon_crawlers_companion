@@ -195,7 +195,8 @@ window.DungeonEngine = (function(){
         // of onto black. Opaque tiles (2MT, bundled) cover it — no visible change.
         { let anyImg=false; for(const r of runs){ if(r.t && r.t.img){ anyImg=true; break; } }
           if(anyImg){ tc.save(); tc.beginPath();
-            for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue; shapePath(tc, sh); }
+            // base only under OPAQUE floors — a shape set transparent (sh.alpha) keeps its alpha
+            for(const sh of shapes){ if(sh.deco || !shHasFloor(sh) || !shFloorOpaque(sh)) continue; shapePath(tc, sh); }
             tc.clip("nonzero"); tc.fillStyle="#000"; tc.fillRect(0,0,W,H); tc.restore(); } }
         for(const r of runs){
           const bb=runBox(r.list); if(!bb) continue;
@@ -1329,6 +1330,11 @@ window.DungeonEngine = (function(){
   // wall-only — so the defaults reproduce the old behaviour exactly.
   function shHasFloor(sh){ return sh.fill ? sh.fill!=="wall"  : !sh.deco; }
   function shHasWall(sh){  return sh.fill ? sh.fill!=="floor" : true; }
+  // Should this shape's floor be OPAQUE (an opaque backdrop painted under it so an FA
+  // tile's transparent regions don't show through)? Explicit per-shape override via
+  // `sh.alpha` (true = keep the alpha channel / transparent); with no override the
+  // default follows the kind — rooms opaque, deco Shapes transparent.
+  function shFloorOpaque(sh){ return sh.alpha!=null ? !sh.alpha : !sh.deco; }
   function drawWalls(){
     if(!map.shapes.length) return;
     const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
@@ -1578,6 +1584,7 @@ window.DungeonEngine = (function(){
       if(!sh.deco || !shHasFloor(sh)) continue;
       const ft=shapeFloorTex(sh), pat=patFor(ctx, ft);
       ctx.save(); ctx.beginPath(); shapePath(ctx, sh); ctx.clip("nonzero");
+      if(shFloorOpaque(sh)){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }   // deco shape forced opaque
       ctx.fillStyle = pat || C.floor; ctx.fillRect(0,0,W,H);
       ctx.restore();
     }

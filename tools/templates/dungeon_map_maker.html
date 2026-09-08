@@ -269,6 +269,9 @@
   .lcol{width:46px;height:26px;padding:0;border:1px solid var(--line);border-radius:6px;
         background:none;cursor:pointer;flex:0 0 auto}
   .tool.off{opacity:.4}
+  .tool.snapon{background:var(--active);border-color:var(--gold);color:var(--gold)}
+  #snapTool:not(.snapon){opacity:.5}
+  .tsep{flex:0 0 auto;width:1px;align-self:stretch;margin:6px 3px;background:var(--gold-dim);opacity:.5}
 </style>
 </head>
 <body>
@@ -332,15 +335,16 @@
         <button class="pick" id="bgSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <label class="fld">Floor</label>
         <button class="pick" id="floorSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
+        <label class="chk" id="floorAlphaRow" style="margin:4px 0 2px;display:flex;align-items:center;gap:6px" title="Opaque floors cover whatever is beneath them (rooms). Transparent keeps the floor image's alpha channel so it layers over an exterior (shapes). Applies to the selected room/shape, or — with nothing selected — the next one you draw.">
+          <input type="checkbox" id="floorOpaque" checked> Opaque floor
+        </label>
         <label class="fld">Walls</label>
         <button class="pick" id="wallSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <label class="fld" title="Draw doors with a Forgotten Adventures door sprite instead of the plain drawn leaf. Applies to the selected door, or — with nothing selected — to the next door you place. The door still exports as a door in a UniversalVTT.">Door style</label>
         <select class="sel" id="doorStyleSel" title="The drawn default, or a Forgotten Adventures door sprite. FA doors need the FA pack loaded (admin).">
           <option value="">Default (drawn)</option>
         </select>
-        <label class="row" id="doorFlipRow" style="display:none;align-items:center;gap:6px;margin-top:6px" title="Mirror the door sprite across the wall — flips which way an asymmetric leaf faces.">
-          <input type="checkbox" id="doorFlip"><span class="fld" style="margin:0">Flip door sprite</span>
-        </label>
+        <span class="fld" style="margin:4px 0 0;opacity:.6;font-size:11px">Tip: draw a door in the opposite direction to flip which way it faces.</span>
       </div>
     </div>
 
@@ -601,6 +605,9 @@
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>Light</div>
         <div class="tool" id="shadowTool" data-tool="shadow" title="Shadow (H) — a dark light: a pool of shade cast from a point, occluded by walls just like a light">
           <svg viewBox="0 0 24 24"><ellipse cx="12" cy="15" rx="8" ry="4.2"/><path d="M8 15a4 2.2 0 0 0 8 0" opacity=".55"/></svg>Shadow</div>
+        <div class="tsep" aria-hidden="true"></div>
+        <div class="tool" id="snapTool" title="Snap to grid — highlighted when on (Shift+S)">
+          <svg viewBox="0 0 24 24"><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>Snap</div>
       </div>
       <!-- Compact tool picker shown instead of the icon grid on small screens (see CSS). -->
       <select class="tool-select" id="toolSelect" aria-label="Tool"></select>
@@ -1231,7 +1238,7 @@
         // of onto black. Opaque tiles (2MT, bundled) cover it — no visible change.
         { let anyImg=false; for(const r of runs){ if(r.t && r.t.img){ anyImg=true; break; } }
           if(anyImg){ tc.save(); tc.beginPath();
-            for(const sh of shapes){ if(sh.deco || !shHasFloor(sh)) continue; shapePath(tc, sh); }
+            for(const sh of shapes){ if(sh.deco || !shHasFloor(sh) || !shFloorOpaque(sh)) continue; shapePath(tc, sh); }
             tc.clip("nonzero"); tc.fillStyle="#000"; tc.fillRect(0,0,W,H); tc.restore(); } }
         for(const r of runs){
           const bb=runBox(r.list); if(!bb) continue;
@@ -2317,6 +2324,9 @@
   // wall-only — so the defaults reproduce the old behaviour exactly.
   function shHasFloor(sh){ return sh.fill ? sh.fill!=="wall"  : !sh.deco; }
   function shHasWall(sh){  return sh.fill ? sh.fill!=="floor" : true; }
+  // Opaque floor? Explicit per-shape `sh.alpha` (true = keep alpha / transparent) overrides
+  // the kind default (rooms opaque, deco Shapes transparent).
+  function shFloorOpaque(sh){ return sh.alpha!=null ? !sh.alpha : !sh.deco; }
   function drawWalls(){
     if(!map.shapes.length) return;
     const wc=buf.wall.getContext("2d"); wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,W,H);
@@ -2589,6 +2599,7 @@
       if(!sh.deco || !shHasFloor(sh)) continue;
       const ft=shapeFloorTex(sh), pat=patFor(ctx, ft);
       ctx.save(); ctx.beginPath(); shapePath(ctx, sh); ctx.clip("nonzero");
+      if(shFloorOpaque(sh)){ ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H); }   // deco shape forced opaque
       ctx.fillStyle = pat || C.floor; ctx.fillRect(0,0,W,H);
       ctx.restore();
     }
@@ -3388,7 +3399,7 @@
   function commitPlacing(){
     if(placing.tool==="door"){ const g=doorFromPts(placing.pts[0], placing.pts[1]);
       pushHistory(); g.id=uid();
-      if(activeDoorStyle){ g.style=activeDoorStyle; if(activeDoorFlip) g.flip=true; }
+      if(activeDoorStyle){ g.style=activeDoorStyle; }
       map.doors.push(g); commit(); }
     else if(placing.tool==="wall"){
       const wl=wallFromPts(placing.pts[0], placing.pts[1], placing.pts[2], drawMode==="shapes");
@@ -3624,6 +3635,8 @@
       if(hadDoors)
         toast("Shapes mode: doors dropped — Shapes have no real walls. Roll in Rooms mode to keep doors.");
     }
+    // Generated doors inherit the chosen Door style, just like manually-placed ones.
+    if(activeDoorStyle){ for(const L of map.layers) for(const d of (L.doors||[])) if(!d.style) d.style=activeDoorStyle; }
     commit(); syncAdvancedUI(); syncStyleScope(); syncLightUI(); syncLayersUI(); fitView();
   }
   // Force every generated polygon (cave chambers + tunnels) to one winding so
@@ -4384,7 +4397,7 @@
     if(map.darkness==null) map.darkness=0.55;
     syncGridOp(); syncZUI(); syncLightUI(); syncShadowUI(); syncLayersUI();
     $("gridInteriorToggle").checked=!!map.gridInterior;
-    snapOn=map.snap!==false; if($("snapToggle")) $("snapToggle").checked=snapOn;
+    snapOn=map.snap!==false; if(typeof syncSnapUI==="function") syncSnapUI();
     if($("darkToggle")) $("darkToggle").checked = map.theme==="dark";
     setThemeColors(map.theme==="dark" ? "dark" : "light");
     syncAdvancedUI();
@@ -5367,9 +5380,20 @@
     const p=pendingStyle();
     // A shape takes the wall texture only if it HAS a wall, and the floor texture
     // only if it HAS a floor — set by the Both/Walls/Floors selector via `o.fill`.
-    if(kind==="shape"){ if(shHasWall(o)) o.wall=p.wall||""; if(shHasFloor(o)) o.floor=p.floor||""; }
+    if(kind==="shape"){ if(shHasWall(o)) o.wall=p.wall||""; if(shHasFloor(o)) o.floor=p.floor||"";
+      if(newShapeAlpha!=null) o.alpha=newShapeAlpha; }   // explicit opaque/transparent override
     else o.wall=p.wall||"";
     return o;
+  }
+  // Default floor-alpha for newly drawn shapes: null = auto (rooms opaque, Shapes transparent),
+  // true = transparent (keep alpha), false = opaque. Set by the "Opaque floor" checkbox.
+  let newShapeAlpha=null;
+  function alphaTarget(){ const t=styleTarget(); return (t && t.kind==="shape") ? t.obj : null; }
+  function syncFloorAlphaUI(){
+    const cb=$("floorOpaque"), row=$("floorAlphaRow"); if(!cb) return;
+    if(row) row.style.display = advOn() ? "flex" : "none";
+    const t=alphaTarget();
+    cb.checked = t ? shFloorOpaque(t) : ((newShapeAlpha==null) ? (drawMode!=="shapes") : !newShapeAlpha);
   }
   // The Floor / Walls pickers edit the SELECTED room (or interior wall) when
   // there is one, and the map-wide default otherwise.
@@ -5386,11 +5410,12 @@
   function setSel(v){ sel=v; syncStyleScope(); syncZUI(); syncLightUI(); syncShadowUI(); syncObjTint(); syncDoorUI(); }
 
   // ── DOOR STYLE (Advanced) — draw a door with an FA door sprite ────────
-  // `activeDoorStyle`/`activeDoorFlip` are the settings a NEWLY placed door is born
-  // with; a SELECTED door edits its own d.style/d.flip. FA door objects already live
+  // `activeDoorStyle` is the style a NEWLY placed door is born with; a SELECTED door
+  // edits its own d.style. (Flip which way a door faces by drawing it in reverse.) FA
+  // door objects already live
   // in texReg (kind "object", from the gated bundle) — no extra bake. We list the
   // ones that read as wall doors and skip furniture doors (wardrobe/cupboard/…).
-  let activeDoorStyle="", activeDoorFlip=false;
+  let activeDoorStyle="";
   const DOOR_INC=/(^|[^a-z])doors?([^a-z]|$)|portcullis/i;
   const DOOR_EXC=/cupboard|dresser|wardrobe|armoire|safe|cage|cellar|trap\s?door|hatch|drawer|chest|cabinet|locker/i;
   function doorSelTarget(){ if(sel && sel.kind==="door"){ const o=objAt(sel); return o?o.obj:null; } return null; }
@@ -5423,11 +5448,8 @@
     const s=$("doorStyleSel"); if(!s) return;
     const t=doorSelTarget();
     const style = t ? (t.style||"") : activeDoorStyle;
-    const flip  = t ? !!t.flip     : activeDoorFlip;
     // if the selected door's style isn't in the list (pack not loaded), fall back to Default label
     if(s.querySelector('option[value="'+cssEsc(style)+'"]')) s.value=style; else s.value="";
-    if($("doorFlipRow")) $("doorFlipRow").style.display = style ? "" : "none";
-    if($("doorFlip")) $("doorFlip").checked = flip;
   }
 
   // Style scope, in priority order:
@@ -5642,6 +5664,10 @@
     :                    "Editing this layer's default — its unstyled/generated rooms; other layers are untouched";
     const fs=$("floorSel");
     if(fs) fs.disabled = !!(sc.kind==="sel" && sc.target.kind==="wall");
+    // The Opaque-floor checkbox has no meaning for a wall-only shape (no floor).
+    const alphaRow=$("floorAlphaRow");
+    if(alphaRow) alphaRow.style.display = (advOn() && !(sc.kind==="sel" && sc.target.kind==="wall")) ? "flex" : "none";
+    syncFloorAlphaUI();
     buildTexSelects();
   }
 
@@ -6595,7 +6621,9 @@
       thumb.style.cssText="flex:0 0 auto;width:48px;height:40px;border-radius:4px;background:#efe9dd";
       _roomThumbs.push([thumb,tpl]);
       const txt=document.createElement("span"); txt.style.cssText="flex:1;min-width:0";
-      const meta=[tpl.w+'×'+tpl.h+' cells', pieces+' pieces'];
+      const meta=[];
+      if(tpl.cat) meta.push(tpl.cat);                 // function (was the header; now a per-row tag)
+      meta.push(tpl.w+'×'+tpl.h+' cells', pieces+' pieces');
       const st=styleLabel(prefabStyleOf(tpl)); if(st) meta.push(st);
       if(entry.isCustom) meta.push('yours'); else if(entry.isOverride) meta.push('edited');
       txt.innerHTML='<b style="font-size:13px">'+esc(tpl.name)+'</b><span style="display:block;font-size:11px;color:var(--muted)">'
@@ -6641,15 +6669,19 @@
       g.appendChild(empty); return;
     }
 
-    // Group rows under category headers (alphabetical; blank category → "Uncategorized", shown last).
+    // Group rows under SETTING (theme) headers — the tavern/dungeon/temple etc. a room
+    // belongs to — alphabetical; blank setting → "Other", shown last. Within a setting the
+    // rows sort by function (cat) then name, so a building's rooms sit together.
     const groups=new Map();
-    for(const e of list){ const k=e.tpl.cat||"￿Uncategorized"; if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(e); }
+    for(const e of list){ const k=e.tpl.theme||"￿Other"; if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(e); }
+    for(const arr of groups.values())
+      arr.sort((a,b)=> (a.tpl.cat||"").localeCompare(b.tpl.cat||"") || (a.tpl.name||"").localeCompare(b.tpl.name||""));
     const keys=[...groups.keys()].sort((a,b)=>a.localeCompare(b));
-    const single = keys.length<=1;   // one category → skip the header, it's just noise
+    const single = keys.length<=1;   // one setting → skip the header, it's just noise
     for(const k of keys){
       if(!single){
         const hd=document.createElement("div");
-        hd.textContent = k==="￿Uncategorized" ? "Uncategorized" : k;
+        hd.textContent = k==="￿Other" ? "Other" : k;
         hd.style.cssText="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:9px 0 1px";
         g.appendChild(hd);
       }
@@ -7180,6 +7212,7 @@
     if(!on){ if(armedRoom) disarmRoom(true); if(sel && sel.kind==="prefab") setSel(null); }
     if(!on && (tool==="light"||tool==="shadow")) setTool("select");
     buildTexSelects(); buildObjGrid(); buildDoorStyles();
+    if(typeof syncFloorAlphaUI==="function") syncFloorAlphaUI();
   }
   function initAdvanced(){
     const st=map.style||(map.style=DEFAULT_STYLE());
@@ -7214,12 +7247,12 @@
     if($("doorStyleSel")) $("doorStyleSel").onchange=e=>{
       const v=e.target.value, t=doorSelTarget();
       if(t){ pushHistory(); if(v) t.style=v; else { delete t.style; delete t.flip; } commit(); syncDoorUI(); }
-      else { activeDoorStyle=v; if(!v) activeDoorFlip=false; syncDoorUI(); }
+      else { activeDoorStyle=v; syncDoorUI(); }
     };
-    if($("doorFlip")) $("doorFlip").onchange=e=>{
-      const f=!!e.target.checked, t=doorSelTarget();
-      if(t){ pushHistory(); if(f) t.flip=true; else delete t.flip; commit(); }
-      else activeDoorFlip=f;
+    if($("floorOpaque")) $("floorOpaque").onchange=e=>{
+      const opaque=!!e.target.checked, t=alphaTarget();
+      if(t){ pushHistory(); t.alpha = !opaque; commit(); syncFloorAlphaUI(); }   // edit the selected room/shape
+      else { newShapeAlpha = !opaque; }                                          // set the default for new shapes
     };
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
@@ -7693,13 +7726,16 @@
     toast(tips[t]||"");
   }
   document.getElementById("toolbar").addEventListener("click", e=>{
-    const t=e.target.closest(".tool"); if(t) setTool(t.dataset.tool); });
+    const t=e.target.closest(".tool"); if(!t) return;
+    if(t.id==="snapTool"){ toggleSnap(); return; }   // snap toggle isn't a tool
+    if(t.dataset.tool) setTool(t.dataset.tool); });
   // Build the compact tool dropdown (shown instead of the icon grid on small screens)
   // from the same .tool buttons, so its labels and order always match. On change →
   // setTool; if setTool refuses (Light/Shadow off), snap back to the active tool.
   (function(){
     const ts=document.getElementById("toolSelect"); if(!ts) return;
     document.querySelectorAll("#toolbar .tool").forEach(el=>{
+      if(!el.dataset.tool) return;   // skip the snap toggle (not a tool)
       const o=document.createElement("option");
       o.value=el.dataset.tool; o.textContent=(el.textContent||el.dataset.tool).trim();
       ts.appendChild(o);
@@ -7728,6 +7764,7 @@
       } }
     }
     if(placing){ placing=null; } if(draft){ draft=null; } render();
+    if(typeof syncFloorAlphaUI==="function") syncFloorAlphaUI();
     toast(converted
       ? (m==="shapes" ? "Converted to a shape — non-occluding, no walls exported."
                       : "Converted to a room — occludes light and exports walls.")
@@ -7794,11 +7831,14 @@
   };
 
   $("gridInteriorToggle").onchange=e=>{ map.gridInterior=e.target.checked; render(); scheduleSave(); };
-  $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; scheduleSave(); };
+  function syncSnapUI(){ if($("snapToggle")) $("snapToggle").checked=snapOn;
+    if($("snapTool")) $("snapTool").classList.toggle("snapon", snapOn); }
+  $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; syncSnapUI(); scheduleSave(); };
   // Shift+S rather than plain S, which is already the Stairs tool.
   function toggleSnap(){ snapOn=!snapOn; map.snap=snapOn;
-    if($("snapToggle")) $("snapToggle").checked=snapOn;
+    syncSnapUI();
     scheduleSave(); toast("Snap to grid "+(snapOn?"on":"off")); }
+  syncSnapUI();   // reflect the initial snap state on the toolbar button
   $("darkToggle").onchange=e=>setTheme(e.target.checked ? "dark" : "light");
   // ── Keyboard-shortcuts popup ──
   const SHORTCUTS=[
@@ -8021,7 +8061,7 @@
     detectEmbed();
     resize();
     $("gridInteriorToggle").checked=!!map.gridInterior;
-    snapOn=map.snap!==false; $("snapToggle").checked=snapOn;
+    snapOn=map.snap!==false; if(typeof syncSnapUI==="function") syncSnapUI();
     $("darkToggle").checked = map.theme==="dark";
     setThemeColors(map.theme==="dark" ? "dark" : "light");
     initAdvanced();
