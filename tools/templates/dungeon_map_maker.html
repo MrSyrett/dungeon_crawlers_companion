@@ -4611,14 +4611,15 @@
   // carries either {pf} or {roomIdx}. ──
   function wallMidpoint(w){ const s=wallPts(w); if(!s||!s.length) return null; return s[Math.floor(s.length/2)]; }
   function isRoomShape(sh){ return sh && !sh.deco && (sh.type==="rect"||sh.type==="circle"||sh.type==="polygon"); }
-  // Is `o` (at world x,y) claimed by a DIFFERENT locked group than the one we're building?
-  // A piece is claimed elsewhere if it carries a different locked prefab's tag, or sits
-  // inside a different locked room that's no bigger than ours. This stops one locked group,
-  // when it overlaps another, from dragging the other's contents along.
+  // Is `o` (at world x,y) claimed by a DIFFERENT group than the one we're building?
+  // A piece that carries ANOTHER prefab's tag belongs to that prefab (locked or not) and is
+  // NEVER captured — this is what makes a locked room behave identically to a dropped prefab
+  // (both are pf-tagged), so rotating one through another can't drag the other's contents.
+  // The legacy `sh.locked` room check stays only for maps saved before rooms became prefabs.
   function ownedByOtherLocked(o,x,y,selfPf,selfRoomIdx,myArea){
-    if(o.pf!=null && o.pf!==selfPf && prefabLocked(o.pf)) return true;
+    if(o.pf!=null && o.pf!==selfPf) return true;
     for(let i=0;i<(map.shapes||[]).length;i++){ if(i===selfRoomIdx) continue;
-      const o2=map.shapes[i]; if(!(o2 && o2.locked && isRoomShape(o2))) continue;
+      const o2=map.shapes[i]; if(!(o2 && o2.locked && isRoomShape(o2) && o2.pf==null)) continue;
       if(pointInShape(x,y,o2)){ const b=bounds(o2,"shape"); const a=b?b.w*b.h:1e18; if(a<=myArea) return true; } }
     return false;
   }
@@ -5139,22 +5140,41 @@
     }
     markGeom(); render(); scheduleSave(); syncUndo();
   }
+  // Tag any UNtagged piece spatially inside this prefab's room as belonging to it, so no
+  // other group can ever claim it. Called whenever a group is (re)locked — this is what
+  // keeps a locked room and a dropped prefab identical.
+  function tagInsideLoose(pf){
+    const rs=(map.shapes||[]).find(s=>s&&s.pf===pf&&isRoomShape(s)); if(!rs) return;
+    for(const it of insideMembers(rs, pf, null)){ if(it.obj.pf==null) it.obj.pf=pf; }
+  }
   function groupLock(sel, wantLocked){   // lock/unlock the group referenced by sel
+    if(sel.roomIdx!=null){                 // legacy sh.locked room → convert to a real prefab on lock
+      const sh=(map.shapes||[])[sel.roomIdx]; if(!sh) return;
+      const want=(wantLocked==null)?!(sh.pf!=null||sh.locked):!!wantLocked;
+      if(want){ lockRoomShape(sel.roomIdx); return; }
+      delete sh.locked; setSel({kind:"shape", idx:sel.roomIdx}); toast('Room unlocked — its contents move individually.');
+      render(); scheduleSave(); return;
+    }
     if(sel.pf!=null){ const e=prefabEntry(sel.pf); if(!e) return;
       e.locked=(wantLocked==null)?!(e.locked!==false):!!wantLocked;
-      if(e.locked){ setSel({kind:"prefab", pf:sel.pf}); toast('"'+e.name+'" locked — moves & rotates as one unit.'); }
+      if(e.locked){ tagInsideLoose(sel.pf); setSel({kind:"prefab", pf:sel.pf}); toast('"'+e.name+'" locked — moves & rotates as one unit.'); }
       else { setSel(null); toast('"'+e.name+'" unlocked — pieces move individually. U on a piece re-locks.'); }
-    } else if(sel.roomIdx!=null){ const sh=(map.shapes||[])[sel.roomIdx]; if(!sh) return;
-      sh.locked=(wantLocked==null)?!sh.locked:!!wantLocked;
-      if(sh.locked){ setSel({kind:"prefab", roomIdx:sel.roomIdx}); toast('Room locked — drag/rotate moves everything inside it.'); }
-      else { setSel({kind:"shape", idx:sel.roomIdx}); toast('Room unlocked — its contents move individually.'); }
     }
     render(); scheduleSave();
   }
-  function lockRoomShape(idx){   // turn a plain room shape into a locked group
+  // Turn a room shape into a locked group. A locked room IS an unsaved prefab: assign it a
+  // pf id (reuse one it already has), tag its room + everything inside, and lock a prefab
+  // entry — so it groups by TAG (robust) exactly like a dropped prefab, not by spatial capture.
+  function lockRoomShape(idx){
     const sh=(map.shapes||[])[idx]; if(!isRoomShape(sh)) return;
-    sh.locked=true; setSel({kind:"prefab", roomIdx:idx});
-    toast('Room locked — drag to move everything inside · [ ] rotate · U unlock.'); render(); scheduleSave();
+    let pf=sh.pf; if(pf==null){ pf=uid(); sh.pf=pf; }
+    for(const it of insideMembers(sh, pf, idx)){ if(it.obj.pf==null) it.obj.pf=pf; }   // capture loose pieces once
+    map.prefabs=map.prefabs||[];
+    let e=prefabEntry(pf);
+    if(!e){ e={id:pf, name:(sh.name||"Room"), locked:true}; map.prefabs.push(e); } else e.locked=true;
+    delete sh.locked;                     // grouping is by pf now, not the legacy flag
+    setSel({kind:"prefab", pf});
+    toast('Room locked — moves & rotates as one unit · [ ] rotate · U unlock.'); render(); scheduleSave();
   }
   function deleteGroup(sel){
     pushHistory();
@@ -6197,7 +6217,7 @@
   if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.08b";
+  const BUILD="2026.09.08c";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
