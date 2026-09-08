@@ -2002,26 +2002,45 @@
     }
     return name;   // no variant token → only an identically-named sprite is a sibling (usually none → left as-is)
   }
-  // Index every LOADED object sprite (honouring the Library Picker) by stem.
+  // FIXTURES & OPENINGS stay consistent across a building, so re-roll never
+  // touches them — lights (lamp/lantern/candle/…), fireplaces, and doors/windows.
+  const _RR_LOCK=["door","window","lamp","lantern","candle","candelabra","chandelier","brazier","sconce","torch","campfire","fireplace","hearth","chimney"];
+  function _rrExcluded(name){ const s=String(name||"").toLowerCase(); return _RR_LOCK.some(k=>s.indexOf(k)>=0); }
+  // STYLE-SWAP categories — soft furnishings where different STYLES of the same
+  // size are interchangeable (a fur rug ↔ a patterned rug, one bed ↔ another).
+  // For these the swap pool is the whole category, not just the narrow family,
+  // so re-roll can change the style as Michael asked, still size-gated.
+  function _rrCategory(name){
+    const toks=String(name||"").split("-");
+    if(toks.indexOf("rug")>=0 || toks.indexOf("carpet")>=0) return "cat:rug";
+    if(toks.indexOf("bed")>=0 || toks.indexOf("bedroll")>=0 || toks.indexOf("cot")>=0) return "cat:bed";
+    return null;
+  }
+  // Grouping key for the swap pool: a broad category for style-swap furnishings,
+  // else the narrow closest-tier stem.
+  function _rrKey(name){ return _rrCategory(name) || _rrStem(name); }
+  // Index every LOADED object sprite (honouring the Library Picker) by key,
+  // skipping the locked fixtures/openings so nothing ever swaps INTO one.
   function _rrSiblingIndex(){
-    const byStem=new Map();
+    const byKey=new Map();
     for(const t of texReg.values()){
       if(!t || t.kind!=="object") continue;
       const lib=texLib(t); if(lib && !libActive(lib)) continue;      // don't swap into a switched-off library
-      const nm=_rrBaseName(t.id); if(!nm) continue;
-      const stem=_rrStem(nm);
-      let a=byStem.get(stem); if(!a){ a=[]; byStem.set(stem,a); } a.push(t);
+      const nm=_rrBaseName(t.id); if(!nm || _rrExcluded(nm)) continue;
+      const k=_rrKey(nm);
+      let a=byKey.get(k); if(!a){ a=[]; byKey.set(k,a); } a.push(t);
     }
-    return byStem;
+    return byKey;
   }
-  // Pick a swap sibling for `tex`: same family AND roughly the same NATIVE size.
-  // The size gate is essential — a family like "table-wood" spans 1×1, 2×1 and
-  // 2×2 members, so matching family alone lets a square table land in a 2×1 slot
-  // and render squished. Same native size ⇒ same aspect ⇒ no distortion.
+  // Pick a swap sibling for `tex`: same key (family, or category for furnishings)
+  // AND roughly the same NATIVE size. The size gate is essential — a family like
+  // "table-wood" spans 1×1, 2×1 and 2×2 members, so matching family alone lets a
+  // square table land in a 2×1 slot and render squished. Same native size ⇒ same
+  // aspect ⇒ no distortion.
   function _rrNear(a,b){ if(!a||!b) return false; return Math.min(a,b)/Math.max(a,b) >= 0.8; }   // within ~20%
-  function _rrPickSwap(tex, byStem){
+  function _rrPickSwap(tex, byKey){
     const nm=_rrBaseName(tex); if(!nm) return null;
-    const pool=byStem.get(_rrStem(nm)); if(!pool || pool.length<2) return null;
+    const pool=byKey.get(_rrKey(nm)); if(!pool || pool.length<2) return null;
     const cur=texReg.get(tex); const cw=cur&&cur.w, ch=cur&&cur.h;
     let cands=pool.filter(t=>t.id!==tex);
     if(cw&&ch) cands=cands.filter(t=> _rrNear(t.w,cw) && _rrNear(t.h,ch));
@@ -2061,29 +2080,41 @@
     return mem.filter(it=>it && it.kind==="object" && it.obj && it.obj.tex);
   }
   // Re-roll for VARIETY without disturbing a hand-tuned layout. Per object:
-  //   • already tinted (something the user deliberately coloured) → RECOLOUR it
-  //     (new hue, same sprite + size) — the easiest, safest variety, no squish.
-  //   • otherwise → SWAP to a same-family, same-size sibling, and re-derive w/h
-  //     from the new sprite's native size × the object's current scale so the
-  //     result keeps correct proportions (never squished).
-  // Position, rotation and flip are always preserved.
+  //   • a light fixture, fireplace, or door/window → LEFT ALONE (stays
+  //     consistent across a building).
+  //   • a bed/rug (style-swap category) → SWAP to another style of the same
+  //     size; if it's tinted, half the time recolour instead, so repeated
+  //     re-rolls vary both style and colour.
+  //   • otherwise tinted (something the user deliberately coloured) → RECOLOUR
+  //     (new hue, same sprite + size) — safe variety, no squish.
+  //   • otherwise → SWAP to a same-family, same-size sibling.
+  // Every swap re-derives w/h from the new sprite's native size × the object's
+  // current scale, so proportions are always correct. Position, rotation, flip
+  // (and the tint, on a style-swap) are preserved.
   function rerollSel(){
     const objs=_rrGroupObjects();
     if(!objs.length){ toast("Select a room or prefab to re-roll its sprites."); return; }
-    const byStem=_rrSiblingIndex();
+    const byKey=_rrSiblingIndex();
+    const swapAct=(o)=>{ const sib=_rrPickSwap(o.tex, byKey); if(!sib) return null;
+      const cur=texReg.get(o.tex); let nw=o.w, nh=o.h;
+      if(cur && cur.w && cur.h){ nw=+(sib.w*(o.w/cur.w)).toFixed(4); nh=+(sib.h*(o.h/cur.h)).toFixed(4); }
+      return {o, tex:sib.id, w:nw, h:nh}; };
+    const recolorAct=(o)=>{ const nt=_rrRecolor(o.tint);
+      return (nt && nt.toLowerCase()!==String(o.tint).toLowerCase()) ? {o, tint:nt} : null; };
     const acts=[];
     for(const it of objs){ const o=it.obj;
-      if(o.tint){
-        const nt=_rrRecolor(o.tint);
-        if(nt && nt.toLowerCase()!==String(o.tint).toLowerCase()) acts.push({o, tint:nt});
-        continue;
+      const nm=_rrBaseName(o.tex);
+      if(_rrExcluded(nm)) continue;                              // fixtures / doors / windows — untouched
+      const styleCat=!!_rrCategory(nm);
+      let a=null;
+      if(styleCat){                                             // bed/rug: restyle, or recolour a tinted one half the time
+        a = (o.tint && Math.random()<0.5) ? recolorAct(o) : (swapAct(o) || (o.tint ? recolorAct(o) : null));
+      } else if(o.tint){
+        a = recolorAct(o);
+      } else {
+        a = swapAct(o);
       }
-      const sib=_rrPickSwap(o.tex, byStem);
-      if(sib){
-        const cur=texReg.get(o.tex); let nw=o.w, nh=o.h;
-        if(cur && cur.w && cur.h){ nw=+(sib.w*(o.w/cur.w)).toFixed(4); nh=+(sib.h*(o.h/cur.h)).toFixed(4); }
-        acts.push({o, tex:sib.id, w:nw, h:nh});
-      }
+      if(a) acts.push(a);
     }
     if(!acts.length){ toast("No alternate sprites or colours available for this selection."); return; }
     pushHistory();
@@ -6396,7 +6427,7 @@
   if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.08g";
+  const BUILD="2026.09.08h";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
