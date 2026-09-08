@@ -281,8 +281,22 @@
     <div class="hdr">
       <h1>⚔ Map Maker</h1>
       <div style="display:flex;align-items:center;gap:8px">
+        <button type="button" id="mapsBtn" title="Your saved maps — keep and switch between several" style="border:1px solid var(--line,#3a3a44);background:none;color:inherit;border-radius:6px;width:26px;height:24px;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center">🗂</button>
         <button type="button" id="shortcutsBtn" title="Keyboard shortcuts (?)" style="border:1px solid var(--line,#3a3a44);background:none;color:inherit;border-radius:6px;width:26px;height:24px;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center">⌨</button>
         <label class="switch" title="Dark mode — darkens the background only"><input type="checkbox" id="darkToggle"><span class="slider"></span></label>
+      </div>
+    </div>
+    <div id="mapsModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5)">
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:560px;width:calc(100% - 40px);max-height:82vh;display:flex;flex-direction:column;background:var(--panel,#222228);color:var(--fg,#e8e8ec);border:1px solid var(--line,#3a3a44);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line,#3a3a44)">
+          <strong style="font-size:15px">🗂 Your maps</strong>
+          <button type="button" id="mapsClose" style="border:none;background:none;color:inherit;font-size:20px;cursor:pointer;line-height:1">×</button>
+        </div>
+        <div style="display:flex;gap:8px;padding:12px 18px;border-bottom:1px solid var(--line,#3a3a44)">
+          <button class="btn gold" id="mapSaveBtn" style="flex:1" title="Save the current map to your library (or update it if it's already saved)">💾 Save current</button>
+          <button class="btn" id="mapNewBtn" style="flex:1" title="Start a fresh blank map (keeps your textures &amp; lighting setup)">＋ New map</button>
+        </div>
+        <div id="mapsList" style="padding:12px 18px;display:flex;flex-direction:column;gap:10px;overflow:auto"></div>
       </div>
     </div>
     <div id="shortcutsModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5)">
@@ -4390,7 +4404,13 @@
     return JSON.stringify(rest);
   }
   function snapshot(){ return serializeMap(); }
-  function pushHistory(){ history.push(snapshot()); if(history.length>60) history.shift(); future.length=0; syncUndo(); }
+  const UNDO_MAX_STEPS=60, UNDO_MAX_CHARS=5e6;   // cap by step count AND by total size, so big
+  function pushHistory(){                          // maps don't hold ~60 full copies in memory
+    history.push(snapshot());
+    let chars=0; for(const h of history) chars+=h.length;
+    while(history.length>2 && (history.length>UNDO_MAX_STEPS || chars>UNDO_MAX_CHARS)){ chars-=history[0].length; history.shift(); }
+    future.length=0; syncUndo();
+  }
   function commit(){ markGeom(); render(); scheduleSave(); syncUndo(); }
   function undo(){ if(!history.length) return; future.push(snapshot()); map=JSON.parse(history.pop()); afterLoad(); syncUndo(); scheduleSave(); }
   function redo(){ if(!future.length) return; history.push(snapshot()); map=JSON.parse(future.pop()); afterLoad(); syncUndo(); scheduleSave(); }
@@ -4415,7 +4435,12 @@
   // it — nothing is saved to the site. Sharing / keeping a map is via Export.
   let saveTimer=null;
   function scheduleSave(){ if(embed) return; clearTimeout(saveTimer); saveTimer=setTimeout(doSave,700); }
-  function doSave(){ try{ localStorage.setItem("dcc_map", snapshot()); if($("saveWarn")) $("saveWarn").hidden=true; }
+  function doSave(){ try{ const s=snapshot(); localStorage.setItem("dcc_map", s);
+      // If this map is bound to a library entry, keep that entry's data + timestamp current too.
+      if(map.savedId){ localStorage.setItem("dcc_mapdata_"+map.savedId, s);
+        const idx=loadMapIndex(), e=idx.find(m=>m.id===map.savedId);
+        if(e){ e.updated=Date.now(); if((map.name||"").trim()) e.name=map.name.trim(); saveMapIndex(idx); } }
+      if($("saveWarn")) $("saveWarn").hidden=true; }
     catch(e){ if($("saveWarn")) $("saveWarn").hidden=false; } }   // surface a full-storage failure instead of losing work silently
 
   function load(){
@@ -4526,11 +4551,139 @@
       pushHistory();
       adoptMap(data);
       afterLoad();
+      map.savedId=null;                    // an imported map is unbound until you Save it to the library
       fitView();
       toast("Imported "+(file.name||"map"));
     };
     rd.onerror=()=>toast("Couldn’t read that file.");
     rd.readAsText(file);
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // SAVED-MAPS LIBRARY (localStorage) — several named maps, not one slot
+  // ════════════════════════════════════════════════════════════════
+  // The working buffer `dcc_map` still autosaves (refresh safety). The library
+  // adds named maps: an index `dcc_maps` = [{id,name,updated,thumb}], with each
+  // map's data under `dcc_mapdata_<id>`. `map.savedId` binds the current map to
+  // an entry, so edits to a named map persist automatically.
+  const MAPS_KEY="dcc_maps";
+  function loadMapIndex(){ try{ const a=JSON.parse(localStorage.getItem(MAPS_KEY)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function saveMapIndex(list){ try{ localStorage.setItem(MAPS_KEY, JSON.stringify(list)); return true; }
+    catch(e){ if($("saveWarn")) $("saveWarn").hidden=false; return false; } }
+  function newMapId(){ return "m"+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36); }
+  function fmtWhen(ts){ if(!ts) return ""; const d=new Date(ts), now=Date.now(), day=864e5;
+    if(now-ts<day && d.getDate()===new Date().getDate()) return d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+    return d.toLocaleDateString([], {month:"short",day:"numeric"}); }
+  // A small fitted thumbnail of a map (engine.toPNG → downscaled JPEG). Async; falls
+  // back to empty if the engine PNG path isn't available.
+  function makeMapThumb(mapData, cb){
+    const finish=(url)=>cb(url||"");
+    try{
+      if(window.DungeonEngine && DungeonEngine.toPNG){
+        const src=DungeonEngine.toPNG(mapData, {theme:(mapData.theme==="dark"?"dark":"light"), res:0.4, pad:1.2});
+        const img=new Image();
+        img.onload=()=>{ const W=220,H=150,c=document.createElement("canvas"); c.width=W;c.height=H;
+          const g=c.getContext("2d"); g.fillStyle="#17140f"; g.fillRect(0,0,W,H);
+          const s=Math.min(W/img.width,H/img.height), dw=img.width*s, dh=img.height*s;
+          g.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh);
+          try{ finish(c.toDataURL("image/jpeg",0.6)); }catch(e){ finish(""); } };
+        img.onerror=()=>finish("");
+        img.src=src; return;
+      }
+    }catch(e){}
+    finish("");
+  }
+  function libSaveCurrent(){
+    let idx=loadMapIndex(), e=map.savedId ? idx.find(m=>m.id===map.savedId) : null;
+    if(!e){ const nm=(prompt("Name this map:", (map.name||"").trim()||"Untitled map")||"").trim();
+      if(!nm) return; map.name=nm; e={id:newMapId(), name:nm, updated:Date.now(), thumb:""}; idx.unshift(e); map.savedId=e.id; }
+    else { e.updated=Date.now(); if((map.name||"").trim()) e.name=map.name.trim(); }
+    try{ localStorage.setItem("dcc_mapdata_"+e.id, snapshot()); }
+    catch(err){ if($("saveWarn")) $("saveWarn").hidden=false; toast("Storage full — couldn't save this map."); return; }
+    saveMapIndex(idx);
+    doSave();                                   // keep the working buffer in sync
+    makeMapThumb(map, url=>{ if(!url) return; const i2=loadMapIndex(), e2=i2.find(m=>m.id===e.id);
+      if(e2){ e2.thumb=url; saveMapIndex(i2); if(mapsOpen()) renderMapsList(); } });
+    toast('Saved “'+e.name+'” to your maps.');
+    renderMapsList();
+  }
+  function libGuardUnsaved(){                    // true = ok to proceed
+    if(map.savedId) return true;                // bound maps are already persisted
+    if(!mapHasContent()) return true;
+    return confirm("Your current map isn't saved to your maps yet — replace it?");
+  }
+  function libOpen(id){
+    let s=localStorage.getItem("dcc_mapdata_"+id); if(!s){ toast("That map's data is missing."); return; }
+    let data; try{ data=JSON.parse(s); }catch(e){ toast("Couldn't read that map."); return; }
+    if(!libGuardUnsaved()) return;
+    pushHistory(); adoptMap(data); map.savedId=id; afterLoad(); fitView();
+    const e=loadMapIndex().find(m=>m.id===id); toast('Opened “'+((e&&e.name)||"map")+'”.');
+    closeMaps();
+  }
+  function libNew(){
+    if(!libGuardUnsaved()) return;
+    pushHistory();
+    // Start blank but keep the working setup (textured mode, palette, lighting), the way Clear does.
+    const st=map.style, lit=map.lit, dark=map.darkness, wsh=map.wallShadow,
+          shON=map.shadowsOn, sTint=map.sceneTint, sTintA=map.sceneTintA, gop=map.gridOpacity;
+    map=blankMap(); map.theme=theme; map.savedId=null; map.name="";
+    if(st) map.style=st;
+    if(lit!=null) map.lit=lit; if(dark!=null) map.darkness=dark; if(wsh!=null) map.wallShadow=wsh;
+    if(shON!=null) map.shadowsOn=shON; if(sTint!=null) map.sceneTint=sTint; if(sTintA!=null) map.sceneTintA=sTintA;
+    if(gop!=null) map.gridOpacity=gop;
+    afterLoad(); commit(); toast("New blank map.");
+    closeMaps();
+  }
+  function libDuplicate(id){
+    const s=localStorage.getItem("dcc_mapdata_"+id); if(!s){ toast("That map's data is missing."); return; }
+    const idx=loadMapIndex(), src=idx.find(m=>m.id===id); if(!src) return;
+    const e={id:newMapId(), name:(src.name||"Map")+" copy", updated:Date.now(), thumb:src.thumb||""};
+    try{ localStorage.setItem("dcc_mapdata_"+e.id, s); }catch(err){ toast("Storage full — couldn't duplicate."); return; }
+    idx.unshift(e); saveMapIndex(idx); renderMapsList();
+  }
+  function libRename(id){
+    const idx=loadMapIndex(), e=idx.find(m=>m.id===id); if(!e) return;
+    const nm=(prompt("Rename map:", e.name||"")||"").trim(); if(!nm) return;
+    e.name=nm; e.updated=Date.now(); saveMapIndex(idx);
+    if(map.savedId===id) map.name=nm;
+    renderMapsList();
+  }
+  function libDelete(id){
+    const idx=loadMapIndex(), e=idx.find(m=>m.id===id); if(!e) return;
+    if(!confirm('Delete “'+(e.name||"this map")+'”? This can’t be undone.')) return;
+    try{ localStorage.removeItem("dcc_mapdata_"+id); }catch(err){}
+    saveMapIndex(idx.filter(m=>m.id!==id));
+    if(map.savedId===id) map.savedId=null;      // current map becomes unbound, not deleted
+    renderMapsList();
+  }
+  function mapsOpen(){ const m=$("mapsModal"); return !!(m && m.style.display!=="none"); }
+  function openMaps(){ renderMapsList(); const m=$("mapsModal"); if(m) m.style.display="block"; }
+  function closeMaps(){ const m=$("mapsModal"); if(m) m.style.display="none"; }
+  function renderMapsList(){
+    const box=$("mapsList"); if(!box) return;
+    const idx=loadMapIndex().sort((a,b)=>(b.updated||0)-(a.updated||0));
+    if(!idx.length){ box.innerHTML='<div style="color:var(--muted,#999);font-size:13px;padding:14px 2px">No saved maps yet. Build a map, then <b>Save current</b> to keep it here.</div>'; return; }
+    box.innerHTML="";
+    for(const e of idx){
+      const bound = map.savedId===e.id;
+      const row=document.createElement("div");
+      row.style.cssText="display:flex;gap:12px;align-items:center;padding:10px;border:1px solid "+(bound?"var(--gold,#c8a24a)":"var(--line,#3a3a44)")+";border-radius:10px;background:var(--panel2,#2a2a30)";
+      const th=document.createElement("div");
+      th.style.cssText="flex:0 0 auto;width:88px;height:60px;border-radius:6px;background:#17140f center/cover no-repeat;border:1px solid var(--line,#3a3a44)";
+      if(e.thumb) th.style.backgroundImage="url('"+e.thumb+"')";
+      const meta=document.createElement("div"); meta.style.cssText="flex:1;min-width:0";
+      meta.innerHTML='<div style="font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(e.name||"Untitled")+(bound?' <span style="color:var(--gold,#c8a24a);font-weight:500;font-size:11px">· open</span>':'')+'</div>'
+        +'<div style="font-size:11px;color:var(--muted,#999);margin-top:2px">'+esc(fmtWhen(e.updated))+'</div>';
+      const acts=document.createElement("div"); acts.style.cssText="display:flex;gap:5px;flex:0 0 auto";
+      const mk=(label,title,fn)=>{ const b=document.createElement("button"); b.type="button"; b.textContent=label; b.title=title;
+        b.style.cssText="border:1px solid var(--line,#3a3a44);background:var(--panel,#222);color:inherit;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px";
+        b.onclick=fn; return b; };
+      acts.appendChild(mk("Open","Open this map",()=>libOpen(e.id)));
+      acts.appendChild(mk("⧉","Duplicate",()=>libDuplicate(e.id)));
+      acts.appendChild(mk("✎","Rename",()=>libRename(e.id)));
+      acts.appendChild(mk("🗑","Delete",()=>libDelete(e.id)));
+      row.appendChild(th); row.appendChild(meta); row.appendChild(acts); box.appendChild(row);
+    }
   }
 
 
@@ -7901,6 +8054,11 @@
   if($("shortcutsBtn")) $("shortcutsBtn").onclick=openShortcuts;
   if($("shortcutsClose")) $("shortcutsClose").onclick=closeShortcuts;
   if($("shortcutsModal")) $("shortcutsModal").onclick=e=>{ if(e.target===$("shortcutsModal")) closeShortcuts(); };
+  if($("mapsBtn")) $("mapsBtn").onclick=openMaps;
+  if($("mapsClose")) $("mapsClose").onclick=closeMaps;
+  if($("mapsModal")) $("mapsModal").onclick=e=>{ if(e.target===$("mapsModal")) closeMaps(); };
+  if($("mapSaveBtn")) $("mapSaveBtn").onclick=libSaveCurrent;
+  if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
   const BUILD="2026.09.08";
@@ -7992,7 +8150,8 @@
     if(e.key==="\\"){ fitView(); return; }                        // \ = Fit view
     if(e.key==="Enter"&&polyPts){ finishPolygon(false); return; }
     if(e.key==="?"){ openShortcuts(); return; }
-    if(e.key==="Escape"){ const sm=$("shortcutsModal"); if(sm && sm.style.display!=="none"){ closeShortcuts(); return; }
+    if(e.key==="Escape"){ const mm=$("mapsModal"); if(mm && mm.style.display!=="none"){ closeMaps(); return; }
+      const sm=$("shortcutsModal"); if(sm && sm.style.display!=="none"){ closeShortcuts(); return; }
       if(pickOpen){ closePicker(); return; }
       if(armedRoom){ disarmRoom(true); return; }
       polyPts=null; draft=null; dragStart=null; setSel(null); placing=null; stroke=null; render(); return; }
