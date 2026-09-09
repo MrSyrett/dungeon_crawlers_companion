@@ -419,16 +419,10 @@
         <button class="pick" id="bgSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <label class="fld">Floor</label>
         <button class="pick" id="floorSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
-        <label class="chk" id="floorAlphaRow" style="margin:4px 0 2px;display:flex;align-items:center;gap:6px" title="Opaque floors cover whatever is beneath them (rooms). Transparent keeps the floor image's alpha channel so it layers over an exterior (shapes). Applies to the selected room/shape, or — with nothing selected — the next one you draw.">
-          <input type="checkbox" id="floorOpaque" checked> Opaque floor
-        </label>
         <label class="fld">Walls</label>
         <button class="pick" id="wallSel" type="button"><span class="sw"></span><span class="pl">—</span><span class="ca">&#9662;</span></button>
         <label class="fld" title="Draw doors with a Forgotten Adventures door sprite instead of the plain drawn leaf. Applies to the selected door, or — with nothing selected — to the next door you place. The door still exports as a door in a UniversalVTT.">Door style</label>
-        <select class="sel" id="doorStyleSel" title="The drawn default, or a Forgotten Adventures door sprite. FA doors need the FA pack loaded (admin).">
-          <option value="">Default (drawn)</option>
-        </select>
-        <span class="fld" style="margin:4px 0 0;opacity:.6;font-size:11px">Tip: draw a door in the opposite direction to flip which way it faces.</span>
+        <button class="pick" id="doorSel" type="button" title="The drawn default, or a Forgotten Adventures door sprite. Applies to the selected door, or — with nothing selected — the next door you place. FA doors need the FA pack loaded (admin)."><span class="sw"></span><span class="pl">Default (drawn)</span><span class="ca">&#9662;</span></button>
       </div>
     </div>
 
@@ -587,7 +581,6 @@
 
     <div class="grp">
       <div class="chk-row">
-        <label class="chk" title="Toggle with Shift+S"><input type="checkbox" id="snapToggle" checked> Snap to grid</label>
         <label class="chk" title="Draw the grid only over room interiors, not the exterior background. Use the Grid opacity slider (0%) to hide the grid entirely."><input type="checkbox" id="gridInteriorToggle"> Interior only</label>
       </div>
       <label class="fld">Grid opacity <b id="gridOpV">50%</b></label>
@@ -1708,7 +1701,9 @@
       const dash=(a,b)=>{ if(!a||!b) return; const [ax,ay]=toScreen(a[0],a[1]),[bx,by]=toScreen(b[0],b[1]);
         ghostStroke(()=>{ ctx.moveTo(ax,ay); ctx.lineTo(bx,by); }, {dash:[4,4], width:1.2}); };
       if(placing.tool==="door"){
-        const end=pts[1]||hv; if(end) drawDoor(doorFromPts(pts[0], end)); dash(pts[0], end);
+        const end=pts[1]||hv;
+        if(end){ const gd=doorFromPts(pts[0], end); if(activeDoorStyle) gd.style=activeDoorStyle; drawDoor(gd); }
+        dash(pts[0], end);
       } else if(placing.tool==="wall"){
         if(pts.length===1){ dash(pts[0], hv); }                        // dragging out the straight span
         else if(pts.length===2){                                       // span fixed, aiming the curve apex
@@ -3334,6 +3329,7 @@
   // Inert in normal use (activates solely with the ?fadev= query flag).
   try{ if(/[?&]fadev=/.test(location.search)){ window.__loadFAtest=loadGatedFA;
     window.__dcc={ getMap:()=>map, texReg, buildDoorStyles, applyStyle, render,
+      openDoorPicker, chooseDoorStyle, syncDoorUI, doorStyleList,
       getTex:()=>tex, getSel:()=>sel, setSel:setSel,
       setDoorStyle:v=>{ activeDoorStyle=v; }, getActiveDoorStyle:()=>activeDoorStyle,
       // library picker + prefab model (tests)
@@ -4066,9 +4062,12 @@
   const DOOR_INC=/(^|[^a-z])doors?([^a-z]|$)|portcullis/i;
   const DOOR_EXC=/cupboard|dresser|wardrobe|armoire|safe|cage|cellar|trap\s?door|hatch|drawer|chest|cabinet|locker/i;
   function doorSelTarget(){ if(sel && sel.kind==="door"){ const o=objAt(sel); return o?o.obj:null; } return null; }
-  function buildDoorStyles(){
-    const s=$("doorStyleSel"); if(!s) return;
-    const cur=s.value;
+  function esc(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+  function cssEsc(s){ return String(s).replace(/["\\]/g, "\\$&"); }
+  // Door styles offered in the picker: FA door SPRITES (kind "object") that read as
+  // WALL doors (name matches DOOR_INC, not a furniture door in DOOR_EXC), grouped by
+  // pack, with a "Default (drawn)" leaf first. Same thumbnail picker as floors/walls.
+  function doorStyleList(){
     const byPack=new Map(), order=[];
     for(const t of texReg.values()){
       if(t.kind!=="object") continue; const n=t.name||"";
@@ -4077,26 +4076,77 @@
       if(!byPack.has(k)){ byPack.set(k, []); order.push(k); }
       byPack.get(k).push(t);
     }
-    let html='<option value="">Default (drawn)</option>';
+    const out=[{label:"", list:[{id:"", name:"Default (drawn)"}]}];
     for(const k of order){
-      const list=byPack.get(k).sort((a,b)=>a.name.localeCompare(b.name));
-      html+='<optgroup label="'+esc(k)+'">';
-      for(const t of list) html+='<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>';
-      html+='</optgroup>';
+      const list=byPack.get(k).sort((a,b)=>a.name.localeCompare(b.name)).map(t=>({id:t.id, name:t.name}));
+      if(list.length) out.push({label:k, list});
     }
-    s.innerHTML=html;
-    // keep the current selection if it still exists
-    if(cur && s.querySelector('option[value="'+cssEsc(cur)+'"]')) s.value=cur;
+    return out;
+  }
+  function doorLabelFor(id){ if(!id) return "Default (drawn)"; const t=texReg.get(id); return t ? t.name : "(missing — load FA)"; }
+  // Paint a door sprite's atlas crop into a .sw swatch, CONTAINED so the whole leaf
+  // shows. Default (id="") draws a small door glyph instead.
+  function paintDoorSwatch(el, id){
+    if(!el) return;
+    el.style.backgroundImage=""; el.style.backgroundColor="#0f0f13"; el.style.backgroundSize=""; el.style.backgroundPosition=""; el.innerHTML="";
+    if(!id){ el.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" style="display:block;margin:auto" fill="none" stroke="#c9c2b4" stroke-width="1.6"><rect x="6" y="3" width="12" height="18" rx="1"/><circle cx="14.5" cy="12" r="1" fill="#c9c2b4" stroke="none"/></svg>'; return; }
+    const t=texReg.get(id); if(!t) return;
+    const r=t.thumbRect||t.atlas; if(!r || !r.sheet) return;
+    const base=t.thumbBase||"/packs/bundled/", ver=(t.ver!=null?t.ver:assetV);
+    const W=34, H=22, f=Math.min(W/r.w, H/r.h);            // contain (doors are tall/thin)
+    el.style.backgroundImage='url("'+base+r.sheet+ver+'")';
+    el.style.backgroundRepeat="no-repeat";
+    el.style.backgroundSize=(r.sw*f)+"px "+(r.sh*f)+"px";
+    el.style.backgroundPosition=(-r.x*f + (W-r.w*f)/2)+"px "+(-r.y*f + (H-r.h*f)/2)+"px";
+  }
+  function currentDoorStyle(){ const t=doorSelTarget(); return t ? (t.style||"") : activeDoorStyle; }
+  // Called whenever packs (re)load — just refreshes the button's swatch + label.
+  function buildDoorStyles(){ syncDoorUI(); }
+  function syncDoorUI(){
+    const b=$("doorSel"); if(!b) return;
+    const id=currentDoorStyle();
+    const useId = (!id || texReg.has(id)) ? id : "";     // FA not loaded → show Default, not a broken label
+    const lbl=doorLabelFor(useId);
+    const pl=b.querySelector(".pl"); if(pl) pl.textContent=lbl;
+    b.title=lbl;
+    paintDoorSwatch(b.querySelector(".sw"), useId);
+  }
+  function chooseDoorStyle(v){
+    const t=doorSelTarget();
+    if(t){ pushHistory(); if(v) t.style=v; else { delete t.style; delete t.flip; } commit(); }
+    else { activeDoorStyle=v; }
     syncDoorUI();
   }
-  function esc(s){ return String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
-  function cssEsc(s){ return String(s).replace(/["\\]/g, "\\$&"); }
-  function syncDoorUI(){
-    const s=$("doorStyleSel"); if(!s) return;
-    const t=doorSelTarget();
-    const style = t ? (t.style||"") : activeDoorStyle;
-    // if the selected door's style isn't in the list (pack not loaded), fall back to Default label
-    if(s.querySelector('option[value="'+cssEsc(style)+'"]')) s.value=style; else s.value="";
+  function openDoorPicker(){
+    const btn=$("doorSel"), pop=$("pickPop");
+    if(!btn || !pop) return;
+    if(pickOpen==="door"){ closePicker(); return; }
+    pickOpen="door";
+    const sb0=document.querySelector(".sidebar"); pickScrollTop = sb0 ? sb0.scrollTop : 0;
+    const cur=currentDoorStyle();
+    pop.innerHTML="";
+    for(const g of doorStyleList()){
+      if(g.label){ const h=document.createElement("div"); h.className="gl"; h.textContent=g.label; pop.appendChild(h); }
+      for(const o of g.list){
+        const r=document.createElement("button"); r.type="button";
+        r.className="opt"+(o.id===cur?" on":"");
+        const sw=document.createElement("span"); sw.className="sw";
+        const nm=document.createElement("span"); nm.textContent=o.name;
+        r.title=(g.label?g.label+" · ":"")+o.name;
+        r.appendChild(sw); r.appendChild(nm);
+        paintDoorSwatch(sw, o.id);
+        r.onclick=()=>{ closePicker(); chooseDoorStyle(o.id); };
+        pop.appendChild(r);
+      }
+    }
+    const rc=btn.getBoundingClientRect();
+    pop.hidden=false;
+    const below=window.innerHeight-rc.bottom-12, above=rc.top-12;
+    const h=Math.min(340, Math.max(below, above));
+    const w=Math.max(rc.width, Math.min(420, window.innerWidth-16));
+    const left=Math.max(8, Math.min(rc.left, window.innerWidth-8-w));
+    pop.style.width=w+"px"; pop.style.left=left+"px"; pop.style.maxHeight=h+"px";
+    pop.style.top = (below>=Math.min(340,above) ? rc.bottom+4 : Math.max(8, rc.top-4-h))+"px";
   }
 
   // Style scope, in priority order:
@@ -5911,12 +5961,7 @@
       $("objTintHex").onchange=e=>{ let v=e.target.value.trim(); if(v && v[0]!=="#") v="#"+v;
         if(_validHex(v)) applyObjTint(v,true); else syncObjTint(); };   // revert display on a bad code
     }
-    if($("doorStyleSel")) $("doorStyleSel").onchange=e=>{
-      const v=e.target.value, t=doorSelTarget();
-      if(t){ pushHistory(); if(v) t.style=v; else { delete t.style; delete t.flip; } commit(); syncDoorUI(); }
-      else { activeDoorStyle=v; syncDoorUI(); }
-    };
-    if($("floorOpaque")) $("floorOpaque").onchange=()=>toggleFloorOpaque();
+    if($("doorSel")) $("doorSel").onclick=e=>{ e.stopPropagation(); openDoorPicker(); };
     if($("packAdd"))  $("packAdd").onclick  =()=>$("packFile").click();
     if($("packFile")) $("packFile").onchange=e=>{ const f=e.target.files&&e.target.files[0];
       e.target.value=""; if(f) importPackFile(f).catch(err=>toast(err.message||"Import failed.")); };
@@ -6639,7 +6684,7 @@
   $("gridInteriorToggle").onchange=e=>{ map.gridInterior=e.target.checked; render(); scheduleSave(); };
   function syncSnapUI(){ if($("snapToggle")) $("snapToggle").checked=snapOn;
     const tb=$("snapTool"); if(tb){ tb.classList.toggle("snapon", snapOn); tb.setAttribute("aria-pressed", snapOn?"true":"false"); } }
-  $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; syncSnapUI(); scheduleSave(); };
+  if($("snapToggle")) $("snapToggle").onchange=e=>{ snapOn=e.target.checked; map.snap=snapOn; syncSnapUI(); scheduleSave(); };
   // Shift+S rather than plain S, which is already the Stairs tool.
   function toggleSnap(){ snapOn=!snapOn; map.snap=snapOn;
     syncSnapUI();
@@ -6697,7 +6742,7 @@
   if($("mapNameIn")) $("mapNameIn").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); libSaveCurrent(); } });
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.09b";
+  const BUILD="2026.09.09c";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
