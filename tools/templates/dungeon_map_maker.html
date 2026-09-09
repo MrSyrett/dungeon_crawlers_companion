@@ -292,9 +292,13 @@
           <strong style="font-size:15px">🗂 Your maps</strong>
           <button type="button" id="mapsClose" style="border:none;background:none;color:inherit;font-size:20px;cursor:pointer;line-height:1">×</button>
         </div>
-        <div style="display:flex;gap:8px;padding:12px 18px;border-bottom:1px solid var(--line,#3a3a44)">
-          <button class="btn gold" id="mapSaveBtn" style="flex:1" title="Save the current map to your library (or update it if it's already saved)">💾 Save current</button>
-          <button class="btn" id="mapNewBtn" style="flex:1" title="Start a fresh blank map (keeps your textures &amp; lighting setup)">＋ New map</button>
+        <div style="padding:12px 18px;border-bottom:1px solid var(--line,#3a3a44)">
+          <label class="fld" style="margin-top:0" for="mapNameIn">Map name</label>
+          <input type="text" id="mapNameIn" placeholder="Name this map" autocomplete="off" style="margin-bottom:8px">
+          <div style="display:flex;gap:8px">
+            <button class="btn gold" id="mapSaveBtn" style="flex:1" title="Save the current map to your library (or update it if it's already saved)">💾 Save current</button>
+            <button class="btn" id="mapNewBtn" style="flex:1" title="Start a fresh blank map (keeps your textures &amp; lighting setup)">＋ New map</button>
+          </div>
         </div>
         <div id="mapsList" style="padding:12px 18px;display:flex;flex-direction:column;gap:10px;overflow:auto"></div>
       </div>
@@ -3041,9 +3045,15 @@
   }
   function libSaveCurrent(){
     let idx=loadMapIndex(), e=map.savedId ? idx.find(m=>m.id===map.savedId) : null;
-    if(!e){ const nm=(prompt("Name this map:", (map.name||"").trim()||"Untitled map")||"").trim();
-      if(!nm) return; map.name=nm; e={id:newMapId(), name:nm, updated:Date.now(), thumb:""}; idx.unshift(e); map.savedId=e.id; }
-    else { e.updated=Date.now(); if((map.name||"").trim()) e.name=map.name.trim(); }
+    // Name comes from the field in the Save popup — no separate prompt.
+    const inp=$("mapNameIn"); const typed=inp ? inp.value.trim() : "";
+    if(!e){
+      const nm = typed || (map.name||"").trim() || "Untitled map";
+      if(inp && !typed){ inp.value=nm; inp.focus(); }   // show the fallback name we're using
+      map.name=nm; e={id:newMapId(), name:nm, updated:Date.now(), thumb:""}; idx.unshift(e); map.savedId=e.id;
+    }
+    else { e.updated=Date.now(); if(typed){ e.name=typed; map.name=typed; }   // rename in place from the field
+      else if((map.name||"").trim()) e.name=map.name.trim(); }
     try{ localStorage.setItem("dcc_mapdata_"+e.id, snapshot()); }
     catch(err){ if($("saveWarn")) $("saveWarn").hidden=false; toast("Storage full — couldn't save this map."); return; }
     saveMapIndex(idx);
@@ -3103,7 +3113,13 @@
     renderMapsList();
   }
   function mapsOpen(){ const m=$("mapsModal"); return !!(m && m.style.display!=="none"); }
-  function openMaps(){ renderMapsList(); const m=$("mapsModal"); if(m) m.style.display="block"; }
+  function openMaps(){ renderMapsList();
+    // Prefill the name field from the current map (or its saved entry), so Save
+    // needs no second prompt.
+    const inp=$("mapNameIn");
+    if(inp){ const e=map.savedId ? loadMapIndex().find(m=>m.id===map.savedId) : null;
+      inp.value=(map.name||(e&&e.name)||"").trim(); }
+    const m=$("mapsModal"); if(m) m.style.display="block"; }
   function closeMaps(){ const m=$("mapsModal"); if(m) m.style.display="none"; }
   function renderMapsList(){
     const box=$("mapsList"); if(!box) return;
@@ -6678,9 +6694,10 @@
   if($("mapsModal")) $("mapsModal").onclick=e=>{ if(e.target===$("mapsModal")) closeMaps(); };
   if($("mapSaveBtn")) $("mapSaveBtn").onclick=libSaveCurrent;
   if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
+  if($("mapNameIn")) $("mapNameIn").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); libSaveCurrent(); } });
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.09a";
+  const BUILD="2026.09.09b";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
