@@ -2259,7 +2259,7 @@
         const cur=objAt(sel);
         if(cur){ const hp=lightHandle(cur.obj);
           if(Math.hypot(sx-hp[0], sy-hp[1])<13){
-            const o=cur.obj;
+            const o=cur.obj; pushHistory();   // record the pre-drag state so Undo restores it
             handle={mode:"rotate", o, a0:Math.atan2(wy-o.y, wx-o.x), d0:1,
                     rot0:o.rot||0, w0:1, h0:1, snap:objSnapshot({obj:o})};
             return; } } }
@@ -2267,7 +2267,7 @@
         const cur=objAt(sel);
         if(cur){ const H=objHandles(cur.obj), near=(p)=>Math.hypot(sx-p[0],sy-p[1])<12;
           if(near(H.scale) || near(H.rotate)){
-            const o=cur.obj, ang=Math.atan2(wy-o.y, wx-o.x), d=Math.hypot(wx-o.x, wy-o.y);
+            const o=cur.obj, ang=Math.atan2(wy-o.y, wx-o.x), d=Math.hypot(wx-o.x, wy-o.y); pushHistory();
             handle={mode:near(H.rotate)?"rotate":"scale", o, a0:ang, d0:Math.max(0.05,d),
                     rot0:o.rot||0, w0:o.w||1, h0:o.h||1, snap:objSnapshot({obj:o})};
             return; } } }
@@ -2286,7 +2286,7 @@
         pushHistory();                                   // one undo step for the whole-unit move
         dragPrefab=beginGroupDrag(g, wx, wy); moved=false;
       }
-      else if(h){ setSel({kind:h.kind,idx:h.idx});
+      else if(h){ setSel({kind:h.kind,idx:h.idx}); pushHistory();   // record pre-drag state for Undo
         dragObj={h, ox:wx, oy:wy, snap:objSnapshot(h)}; }
       else if(e.pointerType==="touch"){ setSel(null); panning={sx,sy,cx:cam.x,cy:cam.y}; }   // one-finger drag pans on touch
       else { marquee={sx,sy,x0:wx,y0:wy,x1:wx,y1:wy,add:e.shiftKey}; }   // mouse: rubber-band select (Space/​middle-drag still pans)
@@ -2417,7 +2417,7 @@
     liveDrag=false; dragBlit=null;   // relight / rebuild the full map on the drop frame
     if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
     if(stroke){ finishStroke(); return; }
-    if(handle){ if(moved){ pushHistory(handle.snap); commit(); } handle=null; return; }
+    if(handle){ if(moved){ commit(); } else { if(history.length) history.pop(); syncUndo(); } handle=null; return; }   // history was pushed at pointerdown
     if(marquee){
       const rx0=Math.min(marquee.x0,marquee.x1), rx1=Math.max(marquee.x0,marquee.x1);
       const ry0=Math.min(marquee.y0,marquee.y1), ry1=Math.max(marquee.y0,marquee.y1);
@@ -2438,7 +2438,7 @@
     }
     if(panning){ panning=null; render(); return; }
     if(dragPrefab){ if(moved){ commit(); } else { if(history.length) history.pop(); syncUndo(); } dragPrefab=null; return; }
-    if(dragObj){ if(moved){ pushHistory(dragObj.snap); commit(); } dragObj=null; return; }
+    if(dragObj){ if(moved){ commit(); } else { if(history.length) history.pop(); syncUndo(); } dragObj=null; return; }   // history was pushed at pointerdown
     if(!dragStart){ return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
     if(tool==="rect" && draft){ pushHistory(); draft.id=uid(); if(drawMode==="shapes") draft.deco=true; draft.fill=fillMode;
@@ -4906,7 +4906,10 @@
     const R=(x,y)=>[px-(y-py), py+(x-px)];   // 90° CW in y-down screen/world space
     if(kind==="object"||kind==="door"||kind==="light"||kind==="shadow"){ const p=R(o.x,o.y); o.x=p[0]; o.y=p[1];
       if(kind==="object") o.rot=(o.rot||0)+Math.PI/2;
-      if(kind==="door")   o.a=(Math.abs(o.a||0)<0.01)?Math.PI/2:0; }
+      // A door's angle is the wall line it sits on. Add 90° like everything else and
+      // normalise to [0,π) (a door line reads the same at a and a+π). The old code only
+      // toggled 0↔π/2, so a door drawn in REVERSE (a=π or −π/2) rotated to the wrong wall.
+      if(kind==="door")   o.a=((((o.a||0)+Math.PI/2)%Math.PI)+Math.PI)%Math.PI; }
     else if(kind==="wall"){ const a=R(o.x1,o.y1), b=R(o.x2,o.y2); o.x1=a[0];o.y1=a[1];o.x2=b[0];o.y2=b[1];
       if(o.cx!=null){ const c=R(o.cx,o.cy); o.cx=c[0]; o.cy=c[1]; }
       if(o.pts) o.pts=o.pts.map(q=>R(q[0],q[1])); }
@@ -5013,19 +5016,22 @@
   // walls, stairs AND deco shapes — so a locked room behaves as one rigid unit. (Other
   // ROOM shapes are their own groups, so only DECO shapes get absorbed here.) Pieces
   // claimed by a different locked group are left out.
-  function insideMembers(roomShape, selfPf, selfRoomIdx){
+  // `margin` (cells) grows the capture region past the wall so wall-mounted decor
+  // (lamps, banners, shelves — centre ON or just outside the wall) is included. It is
+  // used ONLY at LOCK time (lockRoomShape / tagInsideLoose) to permanently pf-tag those
+  // pieces. The RUNTIME group re-scan (groupMembers) passes margin 0 — strict — so a
+  // rotating/moving room never transiently grabs a neighbour that its footprint sweeps
+  // past. Once locked, membership is by pf tag and never changes.
+  function insideMembers(roomShape, selfPf, selfRoomIdx, margin){
     const out=[];
     const mb=bounds(roomShape,"shape"); const myArea=mb?mb.w*mb.h:1e18;
-    // Capture pieces whose centre is inside the room OR within NEAR cells of its wall —
-    // wall-mounted decor (lamps, banners, shelves) sits with its centre ON or just
-    // outside the wall line, so a strict inside test left it behind when the room
-    // rotated/moved. Other locked groups still exclude their own pieces via owned().
-    const NEAR=0.6;
+    const M=margin||0;
     const inside=(x,y)=>{
       if(pointInShape(x,y,roomShape)) return true;
-      if(roomShape.type==="rect")   return x>=roomShape.x-NEAR && x<=roomShape.x+roomShape.w+NEAR && y>=roomShape.y-NEAR && y<=roomShape.y+roomShape.h+NEAR;
-      if(roomShape.type==="circle"){ const dx=x-roomShape.cx, dy=y-roomShape.cy; return Math.hypot(dx,dy)<=(roomShape.r||0)+NEAR; }
-      return !!mb && x>=mb.x-NEAR && x<=mb.x+mb.w+NEAR && y>=mb.y-NEAR && y<=mb.y+mb.h+NEAR;   // polygon: bbox+margin (owned() guards cross-capture)
+      if(M<=0) return false;
+      if(roomShape.type==="rect")   return x>=roomShape.x-M && x<=roomShape.x+roomShape.w+M && y>=roomShape.y-M && y<=roomShape.y+roomShape.h+M;
+      if(roomShape.type==="circle"){ const dx=x-roomShape.cx, dy=y-roomShape.cy; return Math.hypot(dx,dy)<=(roomShape.r||0)+M; }
+      return !!mb && x>=mb.x-M && x<=mb.x+mb.w+M && y>=mb.y-M && y<=mb.y+mb.h+M;   // polygon: bbox+margin (owned() guards cross-capture)
     };
     const owned=(o,x,y)=>ownedByOtherLocked(o,x,y,selfPf,selfRoomIdx,myArea);
     (map.shapes||[]).forEach((o,i)=>{ if(o===roomShape||!o||!o.deco) return;
@@ -5517,23 +5523,17 @@
     // Pivot on the ROOM's centre (NOT the group bbox, which is inflated by furniture/
     // doors overhanging the walls). Rotating everything rigidly about the room centre
     // keeps each piece exactly where it belongs relative to the room — no drift.
+    // Rotate the whole group rigidly about the room's centre. The pivot is the same
+    // point every step (rotation keeps a rect's centre fixed), so 4 turns are exactly
+    // the identity — the room comes back to where it started after 360°.
     for(let s=0;s<steps;s++){ const c=groupPivot(kids); for(const it of kids) rotElem(it.obj, it.kind, c[0], c[1]); }
-    // Grid-align the ROOM shape, then translate the WHOLE group by the same delta so
-    // nothing drifts off it. When the room's width and height have different parity
-    // (e.g. 7×6), rotating about its centre lands the origin on a half-cell; rounding
-    // ONLY the shape (as before) shifted the room ~0.5 while its objects stayed put, so
-    // each rotation "rolled" the contents off the room. Moving the whole group together
-    // keeps everything registered and still snaps the room to the grid.
-    const rs=groupRoomShape(kids);
-    if(rs && rs.type==="rect"){
-      const nx=Math.round(rs.x), ny=Math.round(rs.y), dx=nx-rs.x, dy=ny-rs.y;
-      rs.x=nx; rs.y=ny; rs.w=Math.round(rs.w); rs.h=Math.round(rs.h);
-      if(dx||dy) for(const it of kids){ if(it.obj===rs) continue; shiftElem(it.obj, it.kind, dx, dy); }
-    } else {
-      // No room shape to key off — keep the old light cleanup (rare; e.g. a shapeless group).
-      for(const it of kids){ const o=it.obj;
-        if(it.kind==="shape" && o.type==="rect"){ o.x=Math.round(o.x); o.y=Math.round(o.y); o.w=Math.round(o.w); o.h=Math.round(o.h); } }
-    }
+    // NO post-rotation grid snap. A mixed-parity room (e.g. 7×6) can't be both
+    // grid-aligned AND centre-fixed in every orientation — rounding the origin the same
+    // way each turn made the whole room "roll" across the map (and sweep over nearby
+    // objects). Keeping the centre fixed trades a half-cell origin in one orientation for
+    // zero drift: the room turns in place. Clean any float dust off rect dimensions only.
+    for(const it of kids){ const o=it.obj;
+      if(it.kind==="shape" && o.type==="rect"){ o.w=Math.round(o.w); o.h=Math.round(o.h); } }
     markGeom(); render(); scheduleSave(); syncUndo();
   }
   // Tag any UNtagged piece spatially inside this prefab's room as belonging to it, so no
@@ -5541,7 +5541,7 @@
   // keeps a locked room and a dropped prefab identical.
   function tagInsideLoose(pf){
     const rs=(map.shapes||[]).find(s=>s&&s.pf===pf&&isRoomShape(s)); if(!rs) return;
-    for(const it of insideMembers(rs, pf, null)){ if(it.obj.pf==null) it.obj.pf=pf; }
+    for(const it of insideMembers(rs, pf, null, 0.6)){ if(it.obj.pf==null) it.obj.pf=pf; }   // 0.6 margin captures wall-mounted decor
   }
   function groupLock(sel, wantLocked){   // lock/unlock the group referenced by sel
     if(sel.roomIdx!=null){                 // legacy sh.locked room → convert to a real prefab on lock
@@ -5564,7 +5564,7 @@
   function lockRoomShape(idx){
     const sh=(map.shapes||[])[idx]; if(!isRoomShape(sh)) return;
     let pf=sh.pf; if(pf==null){ pf=uid(); sh.pf=pf; }
-    for(const it of insideMembers(sh, pf, idx)){ if(it.obj.pf==null) it.obj.pf=pf; }   // capture loose pieces once
+    for(const it of insideMembers(sh, pf, idx, 0.6)){ if(it.obj.pf==null) it.obj.pf=pf; }   // capture loose pieces once (0.6 margin gets wall-mounted decor)
     map.prefabs=map.prefabs||[];
     let e=prefabEntry(pf);
     if(!e){ e={id:pf, name:(sh.name||"Room"), locked:true}; map.prefabs.push(e); } else e.locked=true;
@@ -6752,7 +6752,7 @@
   if($("mapNameIn")) $("mapNameIn").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); libSaveCurrent(); } });
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.09d";
+  const BUILD="2026.09.09e";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
