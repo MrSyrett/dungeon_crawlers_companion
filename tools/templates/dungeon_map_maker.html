@@ -299,6 +299,71 @@
         <div id="mapsList" style="padding:12px 18px;display:flex;flex-direction:column;gap:10px;overflow:auto"></div>
       </div>
     </div>
+
+    <!-- EXPORT dialog: one button → formats, resolution, crop, export-only lighting -->
+    <div id="exportModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5)">
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:460px;width:calc(100% - 40px);max-height:88vh;display:flex;flex-direction:column;background:var(--panel,#222228);color:var(--fg,#e8e8ec);border:1px solid var(--line,#3a3a44);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line,#3a3a44)">
+          <strong style="font-size:15px">⬇ Export map</strong>
+          <button type="button" id="exClose" style="border:none;background:none;color:inherit;font-size:20px;cursor:pointer;line-height:1">×</button>
+        </div>
+        <div style="padding:14px 18px;overflow:auto;font-size:13px">
+          <div class="fld" style="margin-top:0">Formats</div>
+          <label style="display:flex;align-items:center;gap:8px;margin:4px 0"><input type="checkbox" id="exPNG" checked> PNG image</label>
+          <label style="display:flex;align-items:center;gap:8px;margin:4px 0"><input type="checkbox" id="exPNGT"> PNG — transparent background (floors only)</label>
+          <label style="display:flex;align-items:center;gap:8px;margin:4px 0"><input type="checkbox" id="exUVTT"> UniversalVTT (.dd2vtt) — walls, doors &amp; lights</label>
+          <label style="display:flex;align-items:center;gap:8px;margin:4px 0"><input type="checkbox" id="exJSON"> Map file (.json) — re-openable here</label>
+
+          <div class="fld" style="margin-top:14px">Resolution <span style="color:var(--muted)">(pixels per grid square — PNG &amp; VTT)</span></div>
+          <div class="row" style="gap:8px;align-items:center">
+            <select id="exRes" class="sel" style="flex:1">
+              <option value="70">70 — VTT standard</option>
+              <option value="100">100 — crisp</option>
+              <option value="140">140 — print / high-DPI</option>
+              <option value="custom">Custom…</option>
+            </select>
+            <input type="number" id="exResCustom" min="16" max="300" value="70" style="width:74px;display:none">
+          </div>
+
+          <div class="fld" style="margin-top:14px">Export area</div>
+          <div class="row" style="gap:8px;align-items:center">
+            <span id="exCropInfo" style="flex:1;color:var(--muted)">Area: fit all content</span>
+            <button class="btn" id="exCropSet" title="Draw a crop rectangle on the map">▢ Set crop area</button>
+            <button class="btn" id="exCropReset" hidden title="Go back to fitting all content">Reset</button>
+          </div>
+
+          <div class="fld" style="margin-top:14px">Appearance <span style="color:var(--muted)">(applies to this export only)</span></div>
+          <label class="fld" style="margin-top:6px">Grid opacity <b id="exGridV">100%</b></label>
+          <input type="range" id="exGrid" min="0" max="100" value="100">
+          <label style="display:flex;align-items:center;gap:8px;margin:8px 0"><input type="checkbox" id="exLights"> Lights</label>
+          <label style="display:flex;align-items:center;gap:8px;margin:4px 0"><input type="checkbox" id="exShadows"> Shadows</label>
+          <label class="fld" style="margin-top:6px">Scene lighting</label>
+          <select id="exScene" class="sel">
+            <option value="keep">Current scene lighting</option>
+            <option value="none"   data-dark="0"    data-tint=""        data-a="0">None (flat)</option>
+            <option value="cozy"   data-dark="0.18" data-tint="#ffb060" data-a="0.16">Cozy</option>
+            <option value="dusk"   data-dark="0.48" data-tint="#ff8f4d" data-a="0.20">Dusk</option>
+            <option value="night"  data-dark="0.72" data-tint="#4560c8" data-a="0.30">Night</option>
+            <option value="eerie"  data-dark="0.58" data-tint="#48dd82" data-a="0.26">Eerie</option>
+            <option value="mystic" data-dark="0.55" data-tint="#8b44e6" data-a="0.32">Mystic</option>
+            <option value="dark"   data-dark="0.90" data-tint="#26324f" data-a="0.32">Dark</option>
+          </select>
+          <label class="fld" style="margin-top:8px">Darkness <b id="exDarkV">0%</b></label>
+          <input type="range" id="exDark" min="0" max="100" value="0">
+        </div>
+        <div style="display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line,#3a3a44)">
+          <button class="btn" id="exCancel" style="flex:1">Cancel</button>
+          <button class="btn gold" id="exGo" style="flex:1;font-weight:600">⬇ Export</button>
+        </div>
+      </div>
+    </div>
+    <!-- Floating toolbar shown while drawing the crop rectangle on the map -->
+    <div id="cropBar" style="display:none;position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:100000;gap:8px;align-items:center;background:var(--panel,#222228);color:var(--fg,#e8e8ec);border:1px solid var(--line,#3a3a44);border-radius:10px;padding:8px 12px;box-shadow:0 8px 28px rgba(0,0,0,.5)">
+      <span style="font-size:12px;color:var(--muted)">Drag the box or its handles to set the export area</span>
+      <button class="btn" id="cropCancel">Cancel</button>
+      <button class="btn gold" id="cropDone" style="font-weight:600">Apply crop</button>
+    </div>
+
     <div id="shortcutsModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5)">
       <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:560px;width:calc(100% - 40px);max-height:82vh;overflow:auto;background:var(--panel,#222228);color:var(--fg,#e8e8ec);border:1px solid var(--line,#3a3a44);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5)">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line,#3a3a44)">
@@ -573,17 +638,10 @@
 
     <div class="grp flush">
       <div class="row">
-        <button class="btn" id="export" title="Download an editable map file (.json) you can re-open later">⬇ Export</button>
+        <button class="btn gold" id="exportBtn" title="Export the map — pick formats, resolution, a crop area, and lighting for the output">⬇ Export…</button>
         <button class="btn" id="import" title="Open a previously exported map file">⬆ Import</button>
       </div>
       <input type="file" id="importFile" accept=".json,application/json" style="display:none">
-      <div class="row" style="margin-top:6px">
-        <button class="btn" id="png">⬇ PNG</button>
-        <button class="btn" id="pngT" title="Transparent background — floors only">⬇ PNG (transp.)</button>
-      </div>
-      <div class="row" style="margin-top:6px">
-        <button class="btn" id="vtt" title="Export a UniversalVTT (.dd2vtt) file — the battlemap image plus wall, door and light data, so a VTT like Foundry can set up dynamic walls, doors and lighting automatically">⬇ UniversalVTT</button>
-      </div>
       <p class="credit">Assets by <a href="https://2minutetabletop.com/" target="_blank" rel="noopener noreferrer">2-Minute Tabletop</a>
         (<a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC 4.0</a>)<br>
         and <a href="https://axebane.com/" target="_blank" rel="noopener noreferrer">Axebane Games</a>
@@ -989,7 +1047,7 @@
       // while placing, so the cached frame lines up exactly. Dropped when nothing is
       // being placed, so an ordinary render never pays for the copy.
       if(armedObj || armedRoom) snapMap(); else mapSnap=null;
-      drawPreview(); drawLightMarkers(); drawSelection();
+      drawPreview(); drawLightMarkers(); drawSelection(); drawCropOverlay();
     }
   }
   let mapSnap=null;
@@ -2154,6 +2212,18 @@
     scheduleRender(); updateZoom(); }
 
   cv.addEventListener("pointerdown", e=>{
+    // Crop mode owns the canvas: hit a handle/edge/interior to resize/move, or
+    // drag empty space to draw a fresh box. Middle/right/space still pans.
+    if(cropMode){
+      cv.setPointerCapture(e.pointerId);
+      const [sx,sy]=rel(e);
+      if(e.button===1 || e.button===2 || spaceDown){ panning={sx,sy,cx:cam.x,cy:cam.y}; return; }
+      const [wx,wy]=toWorld(sx,sy);
+      const h=_cropHandleAt(sx,sy);
+      if(h){ cropDrag={type:h, wx0:wx, wy0:wy, rect:{...exCrop}}; }
+      else { exCrop={x:wx,y:wy,X:wx,Y:wy}; cropDrag={type:"se", wx0:wx, wy0:wy, rect:{...exCrop}}; }
+      render(); return;
+    }
     cv.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, rel(e));
     // Second finger down → start a pinch/two-finger-pan gesture; abandon any
@@ -2249,6 +2319,23 @@
   });
 
   cv.addEventListener("pointermove", e=>{
+    if(cropMode){
+      const [sx,sy]=rel(e);
+      if(panning){ cam.x=panning.cx-(sx-panning.sx)/wpx(); cam.y=panning.cy-(sy-panning.sy)/wpx(); scheduleRender(); return; }
+      if(cropDrag){
+        const [wx,wy]=toWorld(sx,sy), d=cropDrag, r={...d.rect}, dx=wx-d.wx0, dy=wy-d.wy0, t=d.type;
+        if(t==="move"){ r.x+=dx; r.X+=dx; r.y+=dy; r.Y+=dy; }
+        else { if(t.indexOf("w")>=0) r.x=d.rect.x+dx; if(t.indexOf("e")>=0) r.X=d.rect.X+dx;
+               if(t.indexOf("n")>=0) r.y=d.rect.y+dy; if(t.indexOf("s")>=0) r.Y=d.rect.Y+dy; }
+        // snap edges to whole cells so the box (and its px size) stays tidy
+        for(const k of ["x","X","y","Y"]) r[k]=Math.round(r[k]);
+        exCrop=r; render();
+      } else {
+        const hnd=_cropHandleAt(sx,sy);
+        cv.style.cursor = hnd==="move" ? "move" : hnd ? (/^(n|s)$/.test(hnd)?"ns-resize":/^(e|w)$/.test(hnd)?"ew-resize":(hnd==="nw"||hnd==="se")?"nwse-resize":"nesw-resize") : "crosshair";
+      }
+      return;
+    }
     if(pointers.has(e.pointerId)) pointers.set(e.pointerId, rel(e));
     if(gesture){ if(pointers.size>=2) updatePinch(); return; }
     const [sx,sy]=rel(e); const [wx,wy]=toWorld(sx,sy);
@@ -2317,6 +2404,16 @@
   });
 
   cv.addEventListener("pointerup", e=>{
+    if(cropMode){
+      if(panning){ panning=null; return; }
+      if(cropDrag){
+        let {x,X,y,Y}=exCrop; if(x>X){const t=x;x=X;X=t;} if(y>Y){const t=y;y=Y;Y=t;}
+        x=Math.round(x); X=Math.round(X); y=Math.round(y); Y=Math.round(Y);
+        if(X-x<1) X=x+1; if(Y-y<1) Y=y+1;               // keep at least 1×1 cell
+        exCrop={x,y,X,Y}; cropDrag=null; render();
+      }
+      return;
+    }
     pointers.delete(e.pointerId);
     liveDrag=false; dragBlit=null;   // relight / rebuild the full map on the drop frame
     if(gesture){ if(pointers.size<2){ gesture=null; panning=null; dragStart=null; draft=null; } return; }
@@ -3229,6 +3326,10 @@
       loadCustomPrefabs, saveCustomPrefabs, loadHiddenDefaults, getDefaults:()=>ROOM_TEMPLATES,
       groupMembers, groupLockedAt, serializeGroupToTemplate,
       setMulti, selItems, mirrorSel, duplicateSel, rerollSel,
+      // export (tests)
+      pngBlob:(t,ppc,bnds)=>_pngBlob(t,ppc,bnds), uvtt:(ppc,bnds)=>exportUniversalVTT(ppc,bnds,true),
+      withExportSettings:(ov,fn)=>_withExportSettings(ov,fn), contentBounds,
+      setExCrop:r=>{ exCrop=r; }, getExCrop:()=>exCrop,
       fitView, commit, getCam:()=>cam }; } }catch(e){}
 
   // Kick off a load the first time a texture is asked for; re-render when it
@@ -5895,6 +5996,145 @@
   }
 
   // ════════════════════════════════════════════════════════════════
+  // EXPORT DIALOG — one button → formats, resolution, crop, export-only lighting
+  // ════════════════════════════════════════════════════════════════
+  // Render the map to a PNG blob at `ppc` pixels/cell, framed to `bnds` (world
+  // cells {x,y,X,Y}) or auto content-bounds. Overlays are skipped (exporting=true)
+  // so the crop box never bakes in. Returns {blob, filename} or null.
+  function _pngBlob(transparent, ppc, bnds){
+    const b = bnds || contentBounds(true); if(!b) return null;
+    const pad = bnds ? 0 : 1.5;
+    let res = (ppc>0?ppc:70)/CELL;
+    const cw=(b.X-b.x+pad*2), ch=(b.Y-b.y+pad*2);
+    let outW=Math.round(cw*CELL*res), outH=Math.round(ch*CELL*res);
+    const CAP=12000;                               // guard against accidental giant canvases
+    if(outW>CAP || outH>CAP){ const k=CAP/Math.max(outW,outH); res*=k; outW=Math.round(outW*k); outH=Math.round(outH*k);
+      toast("Resolution capped to keep the image under "+CAP+"px."); }
+    const savedCam={...cam}, savedDPR=DPR;
+    DPR=1; W=outW; H=outH; cv.width=outW; cv.height=outH;
+    cam=Object.assign({},cam,{scale:res, x:(b.x+b.X)/2, y:(b.y+b.Y)/2});
+    exporting=true; noRock=!!transparent; soloLayer=null;
+    render();
+    const url=cv.toDataURL("image/png");
+    soloLayer=null; exporting=false; noRock=false; cam=savedCam; DPR=savedDPR; resize();
+    const base=(map.name?slug(map.name):"dungeon-map");
+    return { blob:dataURLToBlob(url), filename: base+(transparent?"-transparent":"")+".png" };
+  }
+  function _jsonBlob(){ return { blob:new Blob([serializeMap()], {type:"application/json"}), filename:safeName()+".json" }; }
+
+  // Apply the dialog's appearance overrides to `map` for the duration of fn, then
+  // restore — so exports differ from the working map without changing it. Note the
+  // JSON export deliberately runs OUTSIDE this, capturing the real map.
+  function _withExportSettings(ov, fn){
+    const keys=["gridOpacity","lit","shadowsOn","darkness","sceneTint","sceneTintA"];
+    const saved={}; for(const k of keys) saved[k]=map[k];
+    if(ov) for(const k of keys) if(k in ov) map[k]=ov[k];
+    try{ return fn(); } finally { for(const k of keys) map[k]=saved[k]; }
+  }
+
+  // ── Crop box (draggable rectangle drawn on the map) ──────────────────────
+  let exCrop=null;        // committed crop rect {x,y,X,Y} in world cells, or null = fit content
+  let cropMode=false;     // interactive crop editing is active
+  let _cropStash=null;    // exCrop before editing, for Cancel
+  let cropDrag=null;      // active drag: {type, wx0, wy0, rect}
+  function _cropHandlePts(x,y,w,h){
+    return { nw:[x,y], n:[x+w/2,y], ne:[x+w,y], e:[x+w,y+h/2], se:[x+w,y+h], s:[x+w/2,y+h], sw:[x,y+h], w:[x,y+h/2] };
+  }
+  function _cropScreenRect(){
+    const a=toScreen(exCrop.x,exCrop.y), b=toScreen(exCrop.X,exCrop.Y);
+    return { x:Math.min(a[0],b[0]), y:Math.min(a[1],b[1]), w:Math.abs(b[0]-a[0]), h:Math.abs(b[1]-a[1]) };
+  }
+  function _cropHandleAt(sx,sy){
+    if(!exCrop) return null;
+    const r=_cropScreenRect(), hs=_cropHandlePts(r.x,r.y,r.w,r.h);
+    for(const k in hs){ if(Math.hypot(sx-hs[k][0], sy-hs[k][1])<11) return k; }
+    if(sx>r.x && sx<r.x+r.w && sy>r.y && sy<r.y+r.h) return "move";
+    return null;
+  }
+  function drawCropOverlay(){
+    if(!cropMode || !exCrop) return;
+    const r=_cropScreenRect();
+    ctx.save();
+    ctx.fillStyle="rgba(0,0,0,.45)";                 // dim everything outside the crop
+    ctx.beginPath(); ctx.rect(0,0,W,H); ctx.rect(r.x,r.y,r.w,r.h); ctx.fill("evenodd");
+    ctx.strokeStyle="#ffcf5a"; ctx.lineWidth=2; ctx.setLineDash([6,4]); ctx.strokeRect(r.x,r.y,r.w,r.h); ctx.setLineDash([]);
+    ctx.fillStyle="#ffcf5a"; const hs=_cropHandlePts(r.x,r.y,r.w,r.h);
+    for(const k in hs){ const p=hs[k]; ctx.fillRect(p[0]-4,p[1]-4,8,8); }
+    const cw=Math.round(Math.abs(exCrop.X-exCrop.x)), ch=Math.round(Math.abs(exCrop.Y-exCrop.y));
+    ctx.font="12px system-ui,sans-serif"; ctx.textAlign="center"; ctx.lineWidth=3; ctx.strokeStyle="rgba(0,0,0,.7)";
+    const ty = r.y>22 ? r.y-8 : r.y+18; ctx.strokeText(cw+" × "+ch+" cells", r.x+r.w/2, ty);
+    ctx.fillStyle="#fff"; ctx.fillText(cw+" × "+ch+" cells", r.x+r.w/2, ty);
+    ctx.restore();
+  }
+  function startCropMode(){
+    hideExportModal();
+    _cropStash = exCrop ? {...exCrop} : null;
+    if(!exCrop){ const b=contentBounds(true) || {x:-4,y:-4,X:4,Y:4}; exCrop={x:Math.round(b.x),y:Math.round(b.y),X:Math.round(b.X),Y:Math.round(b.Y)}; }
+    cropMode=true; cropDrag=null;
+    if($("cropBar")) $("cropBar").style.display="flex";
+    cv.style.cursor="crosshair"; render();
+  }
+  function endCropMode(apply){
+    cropMode=false; cropDrag=null;
+    if(!apply) exCrop=_cropStash;
+    _cropStash=null;
+    if($("cropBar")) $("cropBar").style.display="none";
+    cv.style.cursor="default"; render();
+    _updateCropInfo(); openExportModal(false);
+  }
+  function _updateCropInfo(){
+    const el=$("exCropInfo"); if(!el) return;
+    if(exCrop){ const w=Math.round(Math.abs(exCrop.X-exCrop.x)), h=Math.round(Math.abs(exCrop.Y-exCrop.y));
+      el.textContent="Custom crop: "+w+" × "+h+" cells"; if($("exCropReset")) $("exCropReset").hidden=false; }
+    else { el.textContent="Area: fit all content"; if($("exCropReset")) $("exCropReset").hidden=true; }
+  }
+
+  // ── Dialog open/close + scene-lighting helper ────────────────────────────
+  let exSceneTint="", exSceneTintA=0;
+  function openExportModal(reinit){
+    const m=$("exportModal"); if(!m) return;
+    if(reinit!==false){
+      if($("exGrid")) $("exGrid").value=Math.round(gridOp()*100);
+      if($("exGridV")) $("exGridV").textContent=$("exGrid").value+"%";
+      if($("exLights")) $("exLights").checked=!!map.lit;
+      if($("exShadows")) $("exShadows").checked=!!map.shadowsOn;
+      const dk=Math.round((map.darkness==null?0:map.darkness)*100);
+      if($("exDark")) $("exDark").value=dk;
+      if($("exDarkV")) $("exDarkV").textContent=dk+"%";
+      exSceneTint=map.sceneTint||""; exSceneTintA=map.sceneTintA||0;
+      if($("exScene")) $("exScene").value="keep";
+    }
+    _updateCropInfo();
+    m.style.display="block";
+  }
+  function hideExportModal(){ const m=$("exportModal"); if(m) m.style.display="none"; }
+  function closeExportModal(){ hideExportModal(); }
+
+  function runExport(){
+    const want={ png:$("exPNG")&&$("exPNG").checked, pngT:$("exPNGT")&&$("exPNGT").checked,
+                 uvtt:$("exUVTT")&&$("exUVTT").checked, json:$("exJSON")&&$("exJSON").checked };
+    if(!want.png && !want.pngT && !want.uvtt && !want.json){ toast("Pick at least one format."); return; }
+    let ppc = ($("exRes").value==="custom") ? Math.max(16, Math.min(300, +($("exResCustom").value)||70)) : (+$("exRes").value||70);
+    const bnds = exCrop ? {x:exCrop.x, y:exCrop.y, X:exCrop.X, Y:exCrop.Y} : null;
+    const ov={ gridOpacity:(+$("exGrid").value)/100, lit:!!$("exLights").checked, shadowsOn:!!$("exShadows").checked,
+               darkness:(+$("exDark").value)/100, sceneTint:exSceneTint, sceneTintA:exSceneTintA };
+    closeExportModal();
+    const jobs=[];
+    if(want.json){ const j=_jsonBlob(); if(j) jobs.push(j); }         // real map — outside overrides
+    if(want.png||want.pngT||want.uvtt){
+      _withExportSettings(ov, ()=>{
+        if(want.png){ const r=_pngBlob(false, ppc, bnds); if(r) jobs.push(r); }
+        if(want.pngT){ const r=_pngBlob(true, ppc, bnds); if(r) jobs.push(r); }
+        if(want.uvtt){ const r=exportUniversalVTT(ppc, bnds, true); if(r) jobs.push(r); }
+      });
+    }
+    if(!jobs.length){ toast("Nothing to export yet."); return; }
+    let i=0; const step=()=>{ if(i>=jobs.length){ toast("Exported "+jobs.length+" file"+(jobs.length>1?"s":"")+"."); return; }
+      const j=jobs[i++]; saveFile(j.blob, j.filename, null); setTimeout(step, 500); };   // stagger — browsers throttle rapid downloads
+    step();
+  }
+
+  // ════════════════════════════════════════════════════════════════
   // UNIVERSAL VTT EXPORT (.dd2vtt, format 0.3) — the battlemap image PLUS
   // wall / door / light DATA, so a VTT (Foundry, etc.) can auto-place dynamic
   // walls, doors and lights. Same file Dungeondraft exports. All coordinates
@@ -6138,14 +6378,15 @@
     }
     return out;
   }
-  function exportUniversalVTT(){
-    const b=contentBounds(true); if(!b){ toast("Nothing to export yet."); return; }
-    // Frame to WHOLE cells (+ a margin) so the VTT grid lines up with the map grid.
-    const pad=2;
+  function exportUniversalVTT(ppc, bnds, returnBlob){
+    const b=bnds || contentBounds(true); if(!b){ toast("Nothing to export yet."); return; }
+    // Frame to WHOLE cells so the VTT grid lines up with the map grid. A custom
+    // crop is used exactly (pad 0); auto-fit adds a 2-cell margin.
+    const pad = bnds ? 0 : 2;
     const x0=Math.floor(b.x)-pad, y0=Math.floor(b.y)-pad;
     const x1=Math.ceil(b.X)+pad,  y1=Math.ceil(b.Y)+pad;
     const mapW=Math.max(1,x1-x0), mapH=Math.max(1,y1-y0);
-    const PPG=70, res=PPG/CELL;                    // 70 px per cell (Dungeondraft's default)
+    const PPG=(ppc>0?ppc:70), res=PPG/CELL;         // px per cell (Dungeondraft's default is 70)
     const outW=Math.round(mapW*PPG), outH=Math.round(mapH*PPG);
     // 1) render the battlemap image at exactly this framing (lighting baked in if lit)
     const savedCam={...cam}, savedDPR=DPR;
@@ -6231,7 +6472,9 @@
       environment:{ baked_lighting:!!map.lit, ambient_light:ambient },
       lights, image };
     const base=(map.name?slug(map.name):"dungeon-map");
-    saveFile(new Blob([JSON.stringify(out)], {type:"application/json"}), base+".dd2vtt", "Exported UniversalVTT");
+    const blob=new Blob([JSON.stringify(out)], {type:"application/json"});
+    if(returnBlob) return {blob, filename:base+".dd2vtt"};
+    saveFile(blob, base+".dd2vtt", "Exported UniversalVTT");
   }
   function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"map"; }
 
@@ -6437,7 +6680,7 @@
   if($("mapNewBtn")) $("mapNewBtn").onclick=libNew;
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.08i";
+  const BUILD="2026.09.09a";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
@@ -6474,31 +6717,37 @@
   $("undo").onclick=undo; $("redo").onclick=redo;
   if($("toFront")) $("toFront").onclick=()=>reorderSel(true);
   if($("toBack"))  $("toBack").onclick =()=>reorderSel(false);
-  $("export").onclick=exportMap;
   $("import").onclick=()=>$("importFile").click();
   $("importFile").onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(f) importMapFile(f); e.target.value=""; };
-  // Flat vs per-layer is asked at export time (only when >1 layer is visible), rather
-  // than being a checkbox you have to notice and set beforehand.
-  function pngExport(transparent){
-    const nVis=(map.layers||[]).filter(L=>L.visible!==false).length;
-    let perLayer=false;
-    if(nVis>1){
-      perLayer = !confirm(
-        "This map has "+nVis+" visible layers — how should it export?\n\n"+
-        "OK  —  one flat, combined PNG\n"+
-        "Cancel  —  one PNG per layer (all framed the same, so they stack in register)");
-    }
-    exportPNG(transparent, perLayer);
-  }
-  $("png").onclick=()=>pngExport(false);
-  $("pngT").onclick=()=>pngExport(true);
-  if($("vtt")) $("vtt").onclick=()=>{ try{ exportUniversalVTT(); }catch(e){ toast(e.message||"VTT export failed."); } };
+  // ── Export dialog wiring ──────────────────────────────────────────────────
+  if($("exportBtn")) $("exportBtn").onclick=()=>openExportModal(true);
+  if($("exClose"))   $("exClose").onclick=closeExportModal;
+  if($("exCancel"))  $("exCancel").onclick=closeExportModal;
+  if($("exportModal")) $("exportModal").onclick=e=>{ if(e.target===$("exportModal")) closeExportModal(); };
+  if($("exGo"))      $("exGo").onclick=()=>{ try{ runExport(); }catch(err){ toast(err.message||"Export failed."); } };
+  if($("exRes"))     $("exRes").onchange=e=>{ const c=$("exResCustom"); if(c){ c.style.display = e.target.value==="custom" ? "" : "none"; } };
+  if($("exGrid"))    $("exGrid").oninput=e=>{ if($("exGridV")) $("exGridV").textContent=e.target.value+"%"; };
+  if($("exDark"))    $("exDark").oninput=e=>{ if($("exDarkV")) $("exDarkV").textContent=e.target.value+"%"; };
+  if($("exScene"))   $("exScene").onchange=e=>{
+    const o=e.target.selectedOptions[0];
+    if(e.target.value==="keep"){ exSceneTint=map.sceneTint||""; exSceneTintA=map.sceneTintA||0;
+      const dk=Math.round((map.darkness==null?0:map.darkness)*100); if($("exDark")){ $("exDark").value=dk; $("exDarkV").textContent=dk+"%"; } }
+    else if(o){ exSceneTint=o.dataset.tint||""; exSceneTintA=+o.dataset.a||0;
+      const dk=Math.round((+o.dataset.dark||0)*100); if($("exDark")){ $("exDark").value=dk; $("exDarkV").textContent=dk+"%"; } }
+  };
+  if($("exCropSet"))   $("exCropSet").onclick=startCropMode;
+  if($("exCropReset")) $("exCropReset").onclick=()=>{ exCrop=null; _updateCropInfo(); };
+  if($("cropDone"))    $("cropDone").onclick=()=>endCropMode(true);
+  if($("cropCancel"))  $("cropCancel").onclick=()=>endCropMode(false);
   $("zoomIn").onclick=()=>{ cam.scale=Math.min(6,cam.scale*1.2); render(); updateZoom(); };
   $("zoomOut").onclick=()=>{ cam.scale=Math.max(0.15,cam.scale/1.2); render(); updateZoom(); };
 
   // keyboard
   window.addEventListener("keydown", e=>{
     if(e.target.tagName==="INPUT") return;
+    // While the export dialog is open or the crop box is being drawn, only Escape
+    // is live — canvas shortcuts (tool keys, reroll, delete…) must not leak through.
+    if((cropMode || ($("exportModal") && $("exportModal").style.display!=="none")) && e.key!=="Escape") return;
     // Tab toggles Rooms / Shapes (same as G). Guarded above so it still tabs out of inputs.
     if(e.key==="Tab" && !e.ctrlKey && !e.metaKey && !e.altKey){
       e.preventDefault(); setMode(drawMode==="rooms"?"shapes":"rooms"); return;
@@ -6528,7 +6777,9 @@
     if(e.key==="\\"){ fitView(); return; }                        // \ = Fit view
     if(e.key==="Enter"&&polyPts){ finishPolygon(false); return; }
     if(e.key==="?"){ openShortcuts(); return; }
-    if(e.key==="Escape"){ const mm=$("mapsModal"); if(mm && mm.style.display!=="none"){ closeMaps(); return; }
+    if(e.key==="Escape"){ if(cropMode){ endCropMode(false); return; }
+      const em=$("exportModal"); if(em && em.style.display!=="none"){ closeExportModal(); return; }
+      const mm=$("mapsModal"); if(mm && mm.style.display!=="none"){ closeMaps(); return; }
       const sm=$("shortcutsModal"); if(sm && sm.style.display!=="none"){ closeShortcuts(); return; }
       if(pickOpen){ closePicker(); return; }
       if(armedRoom){ disarmRoom(true); return; }
