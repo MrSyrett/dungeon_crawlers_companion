@@ -2787,7 +2787,7 @@
     const cleanup=()=>{ clearTimeout(to); w.removeEventListener("message", onMsg); };
     const to=setTimeout(()=>{ if(done) return; done=true; cleanup(); _genBroken=true; runSync(); }, 8000);
     const onMsg=(e)=>{ const d=e.data||{}; if(d.id!==id || done) return; done=true; cleanup();
-      if(d.ok && d.map){ applyGen(d.map); _setGenBusy(false); }
+      if(d.ok && d.map){ try{ applyGen(d.map); } finally { _setGenBusy(false); } }   // never leave the button stuck
       else { runSync(); } };            // worker generate threw → regenerate inline
     w.addEventListener("message", onMsg);
     try{ w.postMessage({id, opts}); }
@@ -5016,7 +5016,17 @@
   function insideMembers(roomShape, selfPf, selfRoomIdx){
     const out=[];
     const mb=bounds(roomShape,"shape"); const myArea=mb?mb.w*mb.h:1e18;
-    const inside=(x,y)=>pointInShape(x,y,roomShape);
+    // Capture pieces whose centre is inside the room OR within NEAR cells of its wall —
+    // wall-mounted decor (lamps, banners, shelves) sits with its centre ON or just
+    // outside the wall line, so a strict inside test left it behind when the room
+    // rotated/moved. Other locked groups still exclude their own pieces via owned().
+    const NEAR=0.6;
+    const inside=(x,y)=>{
+      if(pointInShape(x,y,roomShape)) return true;
+      if(roomShape.type==="rect")   return x>=roomShape.x-NEAR && x<=roomShape.x+roomShape.w+NEAR && y>=roomShape.y-NEAR && y<=roomShape.y+roomShape.h+NEAR;
+      if(roomShape.type==="circle"){ const dx=x-roomShape.cx, dy=y-roomShape.cy; return Math.hypot(dx,dy)<=(roomShape.r||0)+NEAR; }
+      return !!mb && x>=mb.x-NEAR && x<=mb.x+mb.w+NEAR && y>=mb.y-NEAR && y<=mb.y+mb.h+NEAR;   // polygon: bbox+margin (owned() guards cross-capture)
+    };
     const owned=(o,x,y)=>ownedByOtherLocked(o,x,y,selfPf,selfRoomIdx,myArea);
     (map.shapes||[]).forEach((o,i)=>{ if(o===roomShape||!o||!o.deco) return;
       const b=bounds(o,"shape"); if(!b) return; const cx=b.x+b.w/2, cy=b.y+b.h/2;
@@ -6742,7 +6752,7 @@
   if($("mapNameIn")) $("mapNameIn").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); libSaveCurrent(); } });
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.09c";
+  const BUILD="2026.09.09d";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
@@ -6756,7 +6766,10 @@
       const t=(el.getAttribute("title")||el.textContent||"").trim();
       if(t && !el.getAttribute("aria-label")) el.setAttribute("aria-label", t);
       if(el.id==="snapTool"||el.id==="opaqueTool") el.setAttribute("aria-pressed","false");
-      el.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); el.click(); } });
+      // Enter activates a focused tool. NOT Space — the app reserves Space for panning,
+      // so activating on Space made pressing Space (to pan) also switch to whatever tool
+      // had focus. stopPropagation so the activation doesn't double into the window handler.
+      el.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); e.stopPropagation(); el.click(); } });
     });
   })();
   syncSnapUI(); syncFloorAlphaUI();   // stamp the initial aria-pressed values
@@ -6806,7 +6819,9 @@
 
   // keyboard
   window.addEventListener("keydown", e=>{
-    if(e.target.tagName==="INPUT") return;
+    // Don't let canvas shortcuts fire while a typing control has focus (a select,
+    // number field, text area…) — that was letting one keypress do two things.
+    if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
     // While the export dialog is open or the crop box is being drawn, only Escape
     // is live — canvas shortcuts (tool keys, reroll, delete…) must not leak through.
     if((cropMode || ($("exportModal") && $("exportModal").style.display!=="none")) && e.key!=="Escape") return;
