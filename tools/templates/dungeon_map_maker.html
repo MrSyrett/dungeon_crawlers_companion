@@ -254,6 +254,9 @@
     body:not(.embed) .sidebar{ order:2; width:auto; flex:1 1 auto; min-height:0;
       border-right:none; border-top:1px solid var(--line);
       padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); }
+    /* Bigger header tap targets on touch — the 🗂 Maps (Save/Load) and ⌨ Shortcuts
+       buttons are only 26×24 on desktop, too small for a fingertip. */
+    body:not(.embed) #mapsBtn, body:not(.embed) #shortcutsBtn{ width:40px!important; height:36px!important; font-size:17px; }
   }
   /* Small screens — portrait phones (narrow) OR landscape phones (short): drop the
      10-icon grid, which either eats the map (portrait) or runs off-screen (landscape),
@@ -6752,7 +6755,7 @@
   if($("mapNameIn")) $("mapNameIn").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); libSaveCurrent(); } });
 
   // ── Build stamp (so a stale cache is diagnosable at a glance) ──
-  const BUILD="2026.09.09e";
+  const BUILD="2026.09.11a";
   if($("buildStamp")) $("buildStamp").textContent="Build "+BUILD;
   if($("shortcutsBtn")) $("shortcutsBtn").title="Keyboard shortcuts (?) · Build "+BUILD;
 
@@ -6960,6 +6963,14 @@
     if(embed) document.body.classList.add("embed");
   }
   function boot(){
+    // The full-screen popups live inside .sidebar for markup convenience, but .sidebar
+    // has z-index:5 and is a flex item, so it forms a STACKING CONTEXT — trapping the
+    // popups' z-index:9999 below the toolbar (z-index:6, in the root context). On a phone,
+    // where the canvas is short, the toolbar then paints over an open Save/Export/etc.
+    // popup. Reparent the overlays to <body> so their z-index works against the root.
+    ["mapsModal","exportModal","shortcutsModal","prefabSaveModal","pickPop","cropBar"].forEach(id=>{
+      const el=document.getElementById(id); if(el && el.parentElement!==document.body) document.body.appendChild(el);
+    });
     load();
     installLayers(map);                 // ensure the initial/loaded map has layer refs
     detectEmbed();
