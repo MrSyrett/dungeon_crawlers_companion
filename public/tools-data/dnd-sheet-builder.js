@@ -60,7 +60,7 @@
     return { cls:"", level:1, subclass:"", species:"", lineage:"", background:"",
              method:"array", base:{ STR:8,DEX:8,CON:8,INT:8,WIS:8,CHA:8 }, arrayPick:{},
              bg2:"", bg1:"", classSkills:[], multiclass:[],
-             name:"", alignment:"",
+             name:"", alignment:"", nimble:false,
              fightingStyle:"", expertise:[], orders:{}, advances:[],
              pickedCantrips:[], pickedSpells:[], equipChoice:"gear" };
   }
@@ -172,6 +172,7 @@
          '<label style="flex:1 1 220px;"><span class="m-lbl">Character name</span><input type="text" id="dndb-name" class="m-input" placeholder="Aelric Thornwood" value="' + esc(st.name) + '"></label>' +
          '<label><span class="m-lbl">Level</span> <input type="number" id="dndb-level" class="m-input" style="width:80px;" min="1" max="20" value="' + st.level + '"></label>' +
          '</div>';
+    h += '<div class="dndb-nimble' + (st.nimble ? " on" : "") + '" id="dndb-nimble"><div class="dnb-main"><span class="dnb-check">' + (st.nimble ? "✓" : "") + '</span><div><div class="dnb-ttl">⚡ Nimble 5e mode</div><div class="dnb-sub">Faster play: no attack rolls (the damage die decides hit/miss/crit), Mana instead of spell slots, 3 Actions a turn, a Defend reaction. Abilities &amp; skills stay standard 5e. You can turn this on or off later on the sheet.</div></div></div></div>';
     h += '<div class="dndb-grid">';
     D.classes().forEach((c) => {
       const cast = c.spellcasting && c.spellcasting !== "none" ? c.spellcasting + " caster" : "martial";
@@ -421,6 +422,7 @@
     }
     const c2 = clsData(); const eq = c2 && c2.startingEquipment ? c2.startingEquipment : [];
     h += '<div class="dr-line">Starting gear: <b>' + esc(st.equipChoice === "gold" ? ((String(eq[1] || "").match(/(\d+)\s*GP/i) || [])[1] || "0") + " GP" : "Equipment package") + '</b></div>';
+    if (st.nimble) h += '<div class="dr-line">Rules: <b>⚡ Nimble 5e mode</b> — no attack rolls, Mana casting, 3 Actions</div>';
     h += "</div>";
     return h;
   }
@@ -431,6 +433,7 @@
     const lvl = $("dndb-level"); if (lvl) lvl.addEventListener("input", () => { st.level = Math.max(1, Math.min(20, parseInt(lvl.value,10) || 1)); while (secondaryTotal() > st.level - 1 && st.multiclass.length) st.multiclass.pop(); render(); });
     const nm = $("dndb-name"); if (nm) nm.addEventListener("input", () => { st.name = nm.value; });
     const al = $("dndb-align"); if (al) al.addEventListener("change", () => { st.alignment = al.value; });
+    const nb = $("dndb-nimble"); if (nb) nb.addEventListener("click", () => { st.nimble = !st.nimble; render(); });
     body.querySelectorAll("[data-cls]").forEach((el) => el.addEventListener("click", () => { st.cls = el.dataset.cls; st.subclass = ""; st.multiclass = []; st.fightingStyle = ""; st.expertise = []; st.orders = {}; st.pickedCantrips = []; st.pickedSpells = []; render(); }));
     body.querySelectorAll("[data-mc]").forEach((el) => el.addEventListener("click", () => { const i = num(el.dataset.mc), d = num(el.dataset.d); const m = st.multiclass[i]; if(!m) return; const nv = num(m.level) + d; if(nv < 1){ st.multiclass.splice(i,1); } else if(secondaryTotal() - num(m.level) + nv <= num(st.level) - 1){ m.level = nv; } render(); }));
     body.querySelectorAll("[data-mcx]").forEach((el) => el.addEventListener("click", () => { st.multiclass.splice(num(el.dataset.mcx),1); render(); }));
@@ -606,6 +609,7 @@
       customFeatures, addedFeats, spellsKnown, slotUsed:{},
       forceSpells: false, spellAbility: (spellcasts && c.spellcastingAbility) ? c.spellcastingAbility : "",
       lineage: st.lineage,
+      options: { nimble: !!st.nimble }, manaUsed: 0, actionsUsed: 0,
     };
     if (typeof window.applySheet === "function") window.applySheet(data);
     if (document.getElementById("f-lineage")) document.getElementById("f-lineage").value = st.lineage || "";
@@ -654,6 +658,14 @@
     ".dndb-mc-rows{display:flex;flex-direction:column;gap:6px;margin:6px 0;}" +
     ".dndb-mc-row{display:flex;align-items:center;gap:8px;}" +
     ".dndb-mc-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:#ece3d6;}" +
-    ".dndb-mc-x{background:transparent;border:none;color:#a99e90;cursor:pointer;font-size:13px;}.dndb-mc-x:hover{color:#e08a70;}";
+    ".dndb-mc-x{background:transparent;border:none;color:#a99e90;cursor:pointer;font-size:13px;}.dndb-mc-x:hover{color:#e08a70;}" +
+    ".dndb-nimble{border:1px solid #5a3f7a;border-radius:6px;background:#231a2e;padding:9px 11px;margin:0 0 12px;cursor:pointer;transition:.1s;}" +
+    ".dndb-nimble:hover{border-color:#7b4fb0;}" +
+    ".dndb-nimble.on{border-color:#a878e0;background:#2e2140;box-shadow:0 0 0 1px #a878e0 inset;}" +
+    ".dndb-nimble .dnb-main{display:flex;align-items:flex-start;gap:10px;}" +
+    ".dnb-check{flex:0 0 20px;width:20px;height:20px;border:2px solid #7b4fb0;border-radius:4px;color:#fff;text-align:center;line-height:18px;font-size:13px;font-weight:800;margin-top:1px;}" +
+    ".dndb-nimble.on .dnb-check{background:#a878e0;border-color:#a878e0;}" +
+    ".dnb-ttl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:#d9c2ff;letter-spacing:.02em;}" +
+    ".dnb-sub{font-size:11px;color:#b7add0;line-height:1.45;margin-top:3px;}";
   document.head.appendChild(css);
 })();
