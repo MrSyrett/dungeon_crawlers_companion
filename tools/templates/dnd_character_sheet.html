@@ -185,14 +185,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .defend-readout{font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;color:#c9a7ff;line-height:1;text-align:center;margin:2px 0 3px;}
 .defend-readout .dr-when{display:block;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
 .ac-tile.nimble input#f-ac{font-size:15px;opacity:.8;}
-.mana-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 10px;}
-.mana-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#c9a7ff;}
-.mana-val{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--ink);}.mana-val b{color:#c9a7ff;font-size:17px;}
-.mana-btn{width:26px;height:24px;background:#2a1b3a;color:#c9a7ff;border:1px solid #7b4fb0;border-radius:4px;cursor:pointer;font-size:15px;line-height:1;}
-.mana-btn:hover{background:#7b4fb0;color:#fff;}
-.mana-rest{background:var(--box);color:var(--ink);border:1px solid var(--muted);border-radius:4px;cursor:pointer;font-size:11px;padding:3px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-.mana-rest:hover{border-color:#7b4fb0;color:#c9a7ff;}
-.mana-note{font-size:10px;color:var(--muted);flex-basis:100%;line-height:1.4;}
+.spell-head .sh-box.mana-box{border-color:#7b4fb0;}
+.spell-head .mana-box .sh-lbl{color:#c9a7ff;}
+.mana-ctl{display:flex;align-items:center;justify-content:center;gap:5px;}
+.mana-ctl .sh-val{color:#c9a7ff;min-width:34px;}
+.mana-mini{width:18px;height:18px;background:#2a1b3a;color:#c9a7ff;border:1px solid #7b4fb0;border-radius:3px;cursor:pointer;font-size:13px;line-height:1;padding:0;}
+.mana-mini:hover{background:#7b4fb0;color:#fff;}
 
 /* REST BUTTONS */
 .rest-btns{display:flex;gap:6px;}
@@ -702,7 +700,6 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <div class="mc-attacks">
       <div class="section-bar"><span>Attacks</span></div>
-      <div id="conc-bar" class="conc-bar" style="display:none;"></div>
       <div class="tbl-scroll"><table class="tbl"><thead><tr><th>Name</th><th>Atk</th><th>Damage</th><th></th></tr></thead><tbody id="attacks-body"></tbody></table></div>
       <div class="add-hint">Equip a weapon in the Equipment tab to fill this list. Cast spells from the Spells tab.</div>
       </div><!-- mc-attacks -->
@@ -720,12 +717,17 @@ select option{background:var(--input-bg);color:var(--ink);}
       <!-- SPELLS TAB -->
       <div class="tab-panel" id="tab-spells">
         <div class="section-bar"><span>Spellcasting</span><span class="hdr-right"><span class="sb-note" id="spell-note">No spellcasting</span><button class="hdr-btn" onclick="openBook()">📖 Spellbook</button></span></div>
+        <div id="conc-bar" class="conc-bar" style="display:none;"></div>
         <div id="spell-block" style="display:none;">
           <div class="spell-head">
             <div class="sh-box"><div class="sh-lbl">Spell Ability</div><div class="sh-val" id="sp-ability">—</div></div>
             <div class="sh-box click" onclick="rollSpellAttack()" title="Roll a spell attack"><div class="sh-lbl">Spell Attack</div><div class="sh-val click" id="sp-atk">+0</div></div>
             <div class="sh-box"><div class="sh-lbl">Save DC</div><div class="sh-val" id="sp-dc">8</div></div>
             <div class="sh-box" id="sp-prep-box" style="display:none;" title="Spells prepared vs your maximum (spellcasting-class Prepared Spells)"><div class="sh-lbl">Prepared</div><div class="sh-val" id="sp-prep-val">0/0</div></div>
+            <div class="sh-box mana-box" id="sp-mana-box" style="display:none;" title="Mana (Nimble 5e). Casting deducts automatically; recovers on a Long Rest.">
+              <div class="sh-lbl">Mana</div>
+              <div class="mana-ctl"><button class="mana-mini" onclick="adjustMana(1)" title="Spend 1 Mana">−</button><span class="sh-val" id="sp-mana-val">0/0</span><button class="mana-mini" onclick="adjustMana(-1)" title="Regain 1 Mana">+</button></div>
+            </div>
           </div>
           <div id="spell-slots"></div>
           <div id="spells-by-level"></div>
@@ -2369,18 +2371,15 @@ function nimbleMaxMana(){
     else { base += lvl; addPB = true; } });
   return Math.max(1, base + nimbleSlotTotal() + (addPB ? PB : 0));
 }
+// Mana lives in a bubble next to Prepared in the spell header (no slot columns,
+// no dedicated rest button — the Short/Long Rest header buttons handle recovery).
 function renderMana(){
-  const box = $('spell-slots'); if(!box) return;
-  if(!isCaster()){ box.innerHTML = ''; return; }
+  const slots = $('spell-slots'); if(slots) slots.innerHTML = '';
+  const mb = $('sp-mana-box'); if(!mb) return;
+  if(!nimbleOn() || !isCaster()){ mb.style.display = 'none'; return; }
   const max = nimbleMaxMana(); if(manaUsed > max) manaUsed = max; if(manaUsed < 0) manaUsed = 0;
-  const cur = max - manaUsed;
-  box.innerHTML =
-    '<div class="mana-bar"><span class="mana-lbl">Mana</span>' +
-    '<button class="mana-btn" onclick="adjustMana(1)" title="Spend 1 Mana">−</button>' +
-    '<span class="mana-val"><b id="mana-cur">' + cur + '</b> / ' + max + '</span>' +
-    '<button class="mana-btn" onclick="adjustMana(-1)" title="Regain 1 Mana">+</button>' +
-    '<button class="mana-rest" onclick="restoreMana()" title="Recover all Mana (Long Rest)">Rest</button>' +
-    '<span class="mana-note">Leveled spell costs its level in Mana &amp; 2 Actions · cantrips are free &amp; 1 Action</span></div>';
+  mb.style.display = '';
+  const v = $('sp-mana-val'); if(v) v.textContent = (max - manaUsed) + '/' + max;
 }
 function adjustMana(spend){ const max = nimbleMaxMana(); manaUsed = Math.max(0, Math.min(max, manaUsed + spend)); renderMana(); scheduleAutosave(); }
 function restoreMana(){ manaUsed = 0; renderMana(); scheduleAutosave(); }
@@ -2391,6 +2390,7 @@ function nimbleSpendMana(cost, label){
 }
 function renderSlots(){
   if(nimbleOn()){ renderMana(); renderSpells(); return; }
+  { const mb = $('sp-mana-box'); if(mb) mb.style.display = 'none'; }   // no Mana bubble outside Nimble
   if(!isCaster()){ $('spell-slots').innerHTML=''; renderSpells(); return; }
   const box = $('spell-slots'); box.innerHTML = '';
   const cols = document.createElement('div'); cols.className = 'slot-cols';
