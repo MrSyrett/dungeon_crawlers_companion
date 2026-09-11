@@ -176,16 +176,15 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 /* Nimble 5e mode chrome */
 .nimble-badge{margin-top:5px;background:#2a1b3a;color:#c9a7ff;border:1px solid #7b4fb0;border-radius:4px;padding:2px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:.09em;cursor:pointer;text-align:center;white-space:nowrap;}
 .nimble-badge:hover{background:#7b4fb0;color:#fff;}
-.nimble-combat{display:flex;gap:8px 16px;flex-wrap:wrap;align-items:center;padding:7px 8px 3px;border-top:1px solid var(--rule);margin-top:4px;}
-.nimble-combat .nc-item{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
-.nc-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
-.nc-pips{display:inline-flex;gap:5px;}
-.act-pip{display:inline-block;width:18px;height:18px;border:2px solid #7b4fb0;border-radius:4px;cursor:pointer;background:transparent;box-sizing:border-box;vertical-align:middle;}
-.act-pip.used{background:#7b4fb0;border-color:#7b4fb0;}
-.nc-reset{background:var(--box);color:var(--ink);border:1px solid var(--muted);border-radius:4px;cursor:pointer;font-size:12px;line-height:1;padding:2px 6px;}
-.nc-reset:hover{border-color:#7b4fb0;color:#c9a7ff;}
-.nc-val{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--ink);}.nc-val b{color:#c9a7ff;font-size:16px;}
-.nc-sub{font-size:10px;color:var(--muted);line-height:1.4;}
+.actions-body{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.nc-pips{display:inline-flex;gap:6px;}
+.act-pip{display:inline-block;width:20px;height:20px;border:2px solid #a878e0;border-radius:4px;cursor:pointer;background:transparent;box-sizing:border-box;vertical-align:middle;}
+.act-pip.used{background:#a878e0;border-color:#a878e0;}
+.nc-reset{background:var(--box);color:var(--ink);border:1px solid var(--muted);border-radius:4px;cursor:pointer;font-size:11px;line-height:1;padding:4px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.nc-reset:hover{border-color:#a878e0;color:#c9a7ff;}
+.defend-readout{font-family:'Share Tech Mono',monospace;font-size:30px;font-weight:700;color:#c9a7ff;line-height:1;text-align:center;margin:2px 0 3px;}
+.defend-readout .dr-when{display:block;font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.ac-tile.nimble input#f-ac{font-size:15px;opacity:.8;}
 .mana-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:7px 10px;}
 .mana-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#c9a7ff;}
 .mana-val{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--ink);}.mana-val b{color:#c9a7ff;font-size:17px;}
@@ -649,7 +648,9 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="mc-combat">
       <div class="combat-strip">
         <div class="cbt-left">
-          <div class="cbt ac-tile"><div class="c-lbl">Armor Class</div><input id="f-ac" value="10" oninput="scheduleAutosave();if(typeof renderNimble==='function')renderNimble();">
+          <div class="cbt ac-tile"><div class="c-lbl" id="ac-lbl">Armor Class</div>
+            <div id="defend-readout" class="defend-readout" style="display:none;">−<b id="nimble-defend">2</b><span class="dr-when">reduce a hit you Defend</span></div>
+            <input id="f-ac" value="10" oninput="scheduleAutosave();if(typeof renderNimble==='function')renderNimble();">
             <div class="ac-fx">
               <label class="ac-chk" title="Mage Armor — while wearing no armor, AC = 13 + DEX"><input type="checkbox" id="f-mage-armor" onchange="onMageArmor()"><span>MA</span></label>
               <input id="f-ac-temp" class="ac-temp" inputmode="numeric" value="" placeholder="+0" title="Situational AC on top of your armor: Shield spell (+5), Haste / cover (+2)…" oninput="onTempAC()">
@@ -659,13 +660,17 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="cbt click" onclick="rollInitiative()" title="Roll Initiative"><div class="c-lbl">Initiative</div><div class="c-val" id="c-init">+0</div></div>
           <div class="cbt"><div class="c-lbl">Prof. Bonus</div><div class="c-val" id="c-prof">+2</div></div>
           <div class="cbt death-box">
-            <div class="c-lbl">Death Saves</div>
-            <div class="death-body">
+            <div class="c-lbl" id="deathbox-lbl">Death Saves</div>
+            <div class="death-body" id="death-saves-body">
               <div class="death-stack">
                 <span id="death-succ" title="Successes"></span>
                 <span id="death-fail" title="Failures"></span>
               </div>
               <button class="mini-roll" onclick="rollDeathSave()" title="Roll a Death Save">🎲 Roll</button>
+            </div>
+            <div class="actions-body" id="actions-nimble-body" style="display:none;">
+              <span id="nimble-actions" class="nc-pips"></span>
+              <button class="nc-reset" onclick="resetActions()" title="New turn — regain all 3 Actions">↺ Turn</button>
             </div>
           </div>
         </div>
@@ -692,11 +697,6 @@ select option{background:var(--input-bg);color:var(--ink);}
             <input id="f-hitdice" type="hidden">
           </div>
         </div>
-      </div>
-      <div id="nimble-combat" class="nimble-combat" style="display:none;">
-        <div class="nc-item"><span class="nc-lbl">Actions</span><span id="nimble-actions" class="nc-pips"></span><button class="nc-reset" onclick="resetActions()" title="New turn — regain all 3 Actions">↺</button></div>
-        <div class="nc-item"><span class="nc-lbl">Defend</span><span class="nc-val">−<b id="nimble-defend">2</b> dmg</span><span class="nc-sub">reaction · reduce a hit by AC−8</span></div>
-        <div class="nc-item"><span class="nc-sub">At 0 HP you're <b>Dying</b> (1 Action, not unconscious). <a href="#" onclick="openNimbleRules();return false;" style="color:#c9a7ff;">Nimble rules ⚡</a></span></div>
       </div>
       </div><!-- mc-combat -->
 
@@ -1442,11 +1442,21 @@ function doNimbleAttack(tr, sneakD6){
 function renderNimble(){
   const on = nimbleOn();
   const badge = $('nimble-badge'); if(badge) badge.style.display = on ? '' : 'none';
-  const panel = $('nimble-combat'); if(panel) panel.style.display = on ? '' : 'none';
+  // Death Saves box → Actions tracker
+  const dsBody = $('death-saves-body'), acWrap = $('actions-nimble-body'), dsLbl = $('deathbox-lbl');
+  if(dsBody) dsBody.style.display = on ? 'none' : '';
+  if(acWrap) acWrap.style.display = on ? '' : 'none';
+  if(dsLbl) dsLbl.textContent = on ? 'Actions' : 'Death Saves';
+  // AC box → Defend readout (AC−8)
+  const acLbl = $('ac-lbl'), dr = $('defend-readout'), acTile = document.querySelector('.ac-tile');
+  if(acLbl) acLbl.textContent = on ? 'Defend' : 'Armor Class';
+  if(dr) dr.style.display = on ? '' : 'none';
+  if(acTile) acTile.classList.toggle('nimble', on);
   if(on){
     const dv = $('nimble-defend'); if(dv) dv.textContent = Math.max(0, (num($('f-ac').value) || 10) - 8);
     renderActions();
   }
+  renderConditions();
   refreshAtkActions();
 }
 function renderActions(){
@@ -1461,9 +1471,9 @@ const NIMBLE_RULES_HTML =
   '<p style="margin:8px 0 3px;font-weight:800;color:#c9a7ff;">Automated on this sheet</p>' +
   '<ul style="margin:0 0 8px;padding-left:18px;line-height:1.5;">' +
   '<li><b>Attacks don\'t roll to hit.</b> Roll the weapon\'s damage; the <i>primary</i> (first) die decides it — a <b>1 misses</b>, the max value <b>crits and explodes</b> (re-roll &amp; add while it keeps maxing), anything else hits. Your ability mod + Bonus add to damage.</li>' +
-  '<li><b>Mana</b> replaces spell slots. A leveled spell costs Mana equal to its level and <b>2 Actions</b>; cantrips are free and <b>1 Action</b>. Save spells &amp; crits ignore armor. Mana recovers on a Long Rest.</li>' +
-  '<li><b>3 Actions</b> a turn (tracker in Combat). <b>Defend</b> reaction reduces one hit by your AC−8. At <b>0 HP</b> you\'re Dying — still 1 Action, not unconscious.</li>' +
-  '<li><b>Exhaustion</b> stacks to 6 = death (the pip track under Conditions).</li>' +
+  '<li><b>Mana</b> replaces spell slots (full caster = level + spell slots, half = level + PB, quarter = slots + PB). A leveled spell costs Mana equal to its level and <b>2 Actions</b>; cantrips are free and <b>1 Action</b>. Save spells &amp; crits ignore armor. Mana recovers on a Long Rest.</li>' +
+  '<li><b>3 Actions</b> a turn (the tracker replaces Death Saves in Combat). <b>Defend</b> reaction (replaces the AC box) reduces one hit by your AC−8.</li>' +
+  '<li><b>Dying</b> &amp; <b>Dazed</b> are added to Conditions. At <b>0 HP</b> you\'re Dying — still 1 Action, not unconscious. <b>Exhaustion</b> stacks to 6 = death (pip track under Conditions).</li>' +
   '</ul>' +
   '<p style="margin:8px 0 3px;font-weight:800;color:#c9a7ff;">Table rules (not automated)</p>' +
   '<ul style="margin:0;padding-left:18px;line-height:1.5;">' +
@@ -2334,9 +2344,12 @@ function slotArray(){
 }
 function pactInfo(){ const w = warlockEntry(), t = D.tables(); if(!w || !t || !t.pactMagic) return null; return t.pactMagic[num(w.cl.level)-1] || null; }
 // ── Nimble 5e Mana (replaces Vancian spell slots) ───────────────────────────
-// Max Mana per the hack: full caster = caster level; half-caster = level + PB;
-// quarter/third/pact = number of spell slots + PB. A spell costs Mana equal to
-// its (cast) level; cantrips are free. Mana recovers on a Long Rest.
+// Max Mana per the hack (page 10 examples are authoritative):
+//   full caster    = caster level + number of spell slots  (L7 Wizard = 7 + 11 = 18)
+//   half-caster    = caster level + PB                      (L7 Ranger = 7 + 3 = 10)
+//   quarter/third/pact = number of spell slots + PB         (L20 EK/AT = 11 + 6 = 17)
+// A level-1 Wizard therefore has 1 + 2 slots = 3 Mana. A spell costs Mana equal
+// to its (cast) level; cantrips are free. Mana recovers on a Long Rest.
 function nimbleSlotTotal(){ let n = 0; const arr = slotArray(); if(arr) arr.forEach(x => n += (num(x) || 0)); const pm = pactInfo(); if(pm) n += (pm.slots || 0); return n; }
 function nimbleMaxMana(){
   const PB = profBonus();
@@ -2344,17 +2357,17 @@ function nimbleMaxMana(){
   if(!casters.length) return _forceSpells ? Math.max(1, nimbleSlotTotal() + PB) : 0;
   if(casters.length === 1){
     const { cl, c } = casters[0], lvl = num(cl.level);
-    if(c.spellcasting === 'full') return Math.max(1, lvl);
+    if(c.spellcasting === 'full') return Math.max(1, lvl + nimbleSlotTotal());
     if(c.spellcasting === 'half' || c.spellcasting === 'artificer') return lvl + PB;
     return nimbleSlotTotal() + PB;   // third / pact / quarter
   }
-  // Multiclass: sum full levels + half levels, add PB once if any non-full caster.
+  // Multiclass (approximate): full casters add their levels + the shared slot pool;
+  // half/quarter casters add their levels and PB once.
   let base = 0, addPB = false;
   casters.forEach(({ cl, c }) => { const lvl = num(cl.level);
     if(c.spellcasting === 'full') base += lvl;
-    else if(c.spellcasting === 'half' || c.spellcasting === 'artificer'){ base += lvl; addPB = true; }
-    else { base += 2; addPB = true; } });
-  return Math.max(1, base + (addPB ? PB : 0));
+    else { base += lvl; addPB = true; } });
+  return Math.max(1, base + nimbleSlotTotal() + (addPB ? PB : 0));
 }
 function renderMana(){
   const box = $('spell-slots'); if(!box) return;
@@ -2712,9 +2725,15 @@ function compHP(i, sign){ const c = companions[i]; if(!c) return; const amtEl = 
   scheduleAutosave(); }
 
 // ═══ CONDITIONS & EXHAUSTION ══════════════════════════════════════════════
+// Nimble 5e adds two conditions not in the SRD list.
+const NIMBLE_CONDITIONS = [
+  { name:'Dying', description:'Nimble 5e: at 0 HP you\'re Dying, not Unconscious — you still get 1 Action on your turn. Roll death saves as your table uses them; being healed above 0 HP ends it.' },
+  { name:'Dazed', description:'Nimble 5e: a Dazed creature has 1 fewer Action next turn. It stacks — each stack strips more agency (slow, then incapacitate); a monster fully stacked is out of the fight. Clears one stack at the end of the turn.' },
+];
 function renderConditions(){
   const box = $('conditions-list'); if(!box) return;
-  const conds = D.conditions().filter(c => norm(c.name) !== 'exhaustion');   // exhaustion has its own 6-level pip tracker
+  let conds = D.conditions().filter(c => norm(c.name) !== 'exhaustion');   // exhaustion has its own 6-level pip tracker
+  if(nimbleOn()){ const have = new Set(conds.map(c => norm(c.name))); conds = NIMBLE_CONDITIONS.filter(c => !have.has(norm(c.name))).concat(conds); }
   box.innerHTML = conds.map(c => {
     const on = activeConditions.some(x => norm(x) === norm(c.name));
     return '<span class="cond-chip' + (on ? ' on' : '') + '" title="' + esc(c.description) + '" onclick="toggleCondition(\'' + esc(c.name).replace(/'/g,"\\'") + '\')" oncontextmenu="condInfo(\'' + esc(c.name).replace(/'/g,"\\'") + '\');return false;">' + esc(c.name) + '</span>';
@@ -2727,7 +2746,7 @@ function toggleCondition(name){
   else { activeConditions.push(name); addLog('Condition', '⚠', name + ' applied', 'fumble'); }
   renderConditions(); scheduleAutosave();
 }
-function condInfo(name){ const c = D.conditions().find(x => norm(x.name) === norm(name)); if(c){ $('desc-title').textContent = c.name; $('desc-body').innerHTML = '<p>' + esc(c.description) + '</p>'; $('desc-overlay').classList.add('open'); } }
+function condInfo(name){ const c = D.conditions().find(x => norm(x.name) === norm(name)) || NIMBLE_CONDITIONS.find(x => norm(x.name) === norm(name)); if(c){ $('desc-title').textContent = c.name; $('desc-body').innerHTML = '<p>' + esc(c.description) + '</p>'; $('desc-overlay').classList.add('open'); } }
 
 // ── Damage defenses: resistance (½) / immunity (0) / vulnerability (×2) ────────
 const DAMAGE_TYPES = ['acid','bludgeoning','cold','fire','force','lightning','necrotic','piercing','poison','psychic','radiant','slashing','thunder'];
