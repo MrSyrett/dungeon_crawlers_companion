@@ -102,16 +102,18 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .center-col{flex:1;display:flex;flex-direction:column;min-width:0;}
 
 /* STATS */
-.stat-row{display:grid;grid-template-columns:96px 66px 40px 50px auto;gap:5px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--rule);}
-.stats-head{display:grid;grid-template-columns:96px 66px 40px 50px auto;gap:5px;padding:4px 10px 2px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.stat-row{display:grid;grid-template-columns:86px 58px 30px 44px auto;gap:5px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--rule);}
+.stats-head{display:grid;grid-template-columns:86px 58px 30px 44px auto;gap:5px;padding:4px 10px 2px;font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
 .stat-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:var(--kob-dk);cursor:pointer;user-select:none;line-height:1;}
 .stat-name:hover{color:var(--kob-dk);}
 .stat-name small{display:block;font-size:8px;font-weight:600;letter-spacing:.04em;color:var(--muted);text-transform:none;margin-top:2px;}
 .die-sel{height:32px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:15px;font-weight:700;color:var(--ink);outline:none;text-align:center;width:100%;cursor:pointer;}
+.die-btn{height:32px;width:100%;border:2px solid var(--kob);border-radius:6px;background:var(--box);font-family:'Share Tech Mono',monospace;font-size:15px;font-weight:700;color:var(--kob-dk);cursor:pointer;text-align:center;}
+.die-btn:hover{background:var(--kob);color:#fff;}
 .stat-bonus{height:32px;line-height:30px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:var(--kob-dk);}
 .stat-mod{height:32px;width:100%;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
-.stat-btns{display:flex;gap:3px;}
-.stat-roll{flex:0 0 auto;width:34px;height:32px;background:var(--kob);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
+.stat-btns{display:flex;gap:3px;justify-content:flex-end;}
+.stat-roll{flex:0 0 auto;width:30px;height:32px;background:var(--kob);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
 .stat-roll:hover{background:var(--kob-dk);}
 .stat-roll.plan{background:var(--box);color:var(--ink);border:1px solid var(--rule);}
 .stat-roll.plan:hover{background:var(--kob-lt);}
@@ -282,12 +284,13 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
      space on the right. */
   .stat-row,.stats-head{grid-template-columns:minmax(96px,1.4fr) minmax(70px,1.1fr) 44px minmax(64px,1.1fr) min-content;gap:8px;padding-left:8px;padding-right:8px;}
   .die-sel{height:44px;font-size:17px;}
+  .die-btn{height:44px;font-size:18px;}
   .stat-mod{height:44px;font-size:15px;}
   .stat-bonus{height:44px;line-height:44px;font-size:15px;}
   /* Roll targets big enough for a thumb */
   .stat-name{min-height:44px;display:flex;flex-direction:column;justify-content:center;padding:2px 6px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
   .stat-name small{font-size:9px;}
-  .stat-roll{width:48px;height:44px;font-size:14px;}
+  .stat-roll{width:40px;height:44px;font-size:14px;}
   .stat-row input{height:44px;font-size:16px;}
   .blk-grid{grid-template-columns:1fr;}
   /* Mobile ergonomics: thumb-sized buttons/selects, readable labels */
@@ -456,7 +459,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <!-- NSBU: bought Abilities & Group Suites -->
       <div class="tab-panel" id="tab-abilities">
-        <div class="section-bar"><span>Abilities &amp; Group Suites</span><span class="hdr-right"><button class="hdr-btn" onclick="openAbilityPicker()">💥 Add ability</button></span></div>
+        <div class="section-bar"><span>Abilities &amp; Group Suites</span><span class="hdr-right"><button class="hdr-btn" onclick="openLevelUp()">💥 Level Up</button></span></div>
         <table class="tbl">
           <thead><tr><th style="width:34%;">Ability</th><th style="width:70px;">Cost</th><th>Effect</th><th style="width:26px;"></th></tr></thead>
           <tbody id="abilities-body"></tbody>
@@ -535,7 +538,8 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">🔗</button>
-    <button class="log-action-btn wizard" onclick="KOBB.launch()" title="Character Builder" aria-label="Character Builder">Create</button>
+    <button id="build-btn" class="log-action-btn wizard" onclick="KOBB.launch()" title="Character Builder" aria-label="Character Builder">Create</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Level Up — spend Turbo Tokens on abilities" aria-label="Level Up" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -572,7 +576,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
 <div id="ability-overlay" class="ov" onclick="if(event.target===this)closeAbilityPicker()">
   <div class="modal" style="max-width:560px;">
-    <div class="modal-hd"><div class="ttl">💥 Abilities &amp; Group Suites</div><button class="x" onclick="closeAbilityPicker()">&#10005;</button></div>
+    <div class="modal-hd"><div class="ttl">💥 Level Up — Buy Abilities</div><button class="x" onclick="closeAbilityPicker()">&#10005;</button></div>
     <div class="brow-controls"><input id="ability-search" class="m-input" placeholder="Search abilities…" oninput="renderAbilityPicker()"></div>
     <div class="modal-bd brow-list" id="ability-body"></div>
   </div>
@@ -630,13 +634,16 @@ function buildStats() {
   stats.forEach(s => {
     const row = document.createElement('div');
     row.className = 'stat-row';
-    // NSBU: the ⚡ Power button is replaced by a ½ Prepared-Action button.
+    // Every book gets a ½ Prepared-Action button. Non-NSBU also gets the ⚡ Power
+    // button (Capes-only via CSS); NSBU replaces Power with just the ½ button.
+    const halfBtn = `<button class="stat-roll plan" onclick="planStat('${s.id}')" title="Prepared Action: take half the die value">½</button>`;
     const btn = nsbuOn()
-      ? `<button class="stat-roll" onclick="planStat('${s.id}')" title="Prepared Action: take half the die value">½</button>`
-      : `<button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">⚡</button>`;
+      ? halfBtn
+      : halfBtn + `<button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">⚡</button>`;
     row.innerHTML =
       `<div class="stat-name" onclick="rollStat('${s.id}')" title="${nsbuOn() ? 'Roll ' + s.id + ' — blows up on a max' : 'Roll ' + s.id}">${s.id}</div>` +
-      `<select class="die-sel" id="die-${s.id}" onchange="recalc()">${DICE.map(d => '<option value="' + d + '"' + (d === defDie ? ' selected' : '') + '>d' + d + '</option>').join('')}</select>` +
+      `<input type="hidden" id="die-${s.id}" value="${defDie}">` +
+      `<button class="die-btn" id="dieb-${s.id}" onclick="rollStat('${s.id}')" title="${nsbuOn() ? 'Roll ' + s.id + ' — blows up on a max' : 'Roll ' + s.id}">d${defDie}</button>` +
       `<div class="stat-bonus" id="ab-${s.id}"></div>` +
       `<input class="stat-mod" id="mod-${s.id}" type="number" value="0" title="Other modifiers" oninput="recalc()">` +
       `<div class="stat-btns">${btn}</div>`;
@@ -674,7 +681,7 @@ function bonusOf(id) {
   return b;
 }
 function recalc() {
-  curStats().forEach(s => { const el = $('ab-' + s.id); if(!el) return; const b = bonusOf(s.id); el.textContent = b ? (b > 0 ? '+' + b : String(b)) : ''; el.title = 'Total bonus on ' + s.id + ' checks'; });
+  curStats().forEach(s => { const db = $('dieb-' + s.id); if(db) db.textContent = 'd' + dieOf(s.id); const el = $('ab-' + s.id); if(!el) return; const b = bonusOf(s.id); el.textContent = b ? (b > 0 ? '+' + b : String(b)) : ''; el.title = 'Total bonus on ' + s.id + ' checks'; });
   // book chrome
   const info = bookInfo();
   document.querySelector('.kob-word').innerHTML = 'KIDS ' + (book() === 'capes' ? 'IN' : 'ON') + '<span>' + (book() === 'brooms' ? 'BROOMS' : book() === 'capes' ? 'CAPES' : 'BIKES') + '</span>';
@@ -831,6 +838,8 @@ function renderNsbu() {
   const badge = $('nsbu-badge'); if(badge) badge.style.display = on ? '' : 'none';
   const lbl = $('tok-label'); if(lbl) lbl.textContent = on ? 'Turbo Tokens' : 'Adversity Tokens';
   const tb = document.querySelector('[data-tab="abilities"]'); if(tb) tb.style.display = on ? '' : 'none';
+  // NSBU characters advance by spending Turbo Tokens: swap Create → Level.
+  const bb = $('build-btn'), lv = $('level-btn'); if(bb) bb.style.display = on ? 'none' : ''; if(lv) lv.style.display = on ? '' : 'none';
   if(on) renderInjury();
 }
 const NSBU_INJURY = ['Healthy', 'Superficial', 'Severe', 'Adrenalized'];
@@ -946,33 +955,47 @@ function renderStrengthPicker() {
 })();
 
 // ═══ NSBU ABILITY PICKER ══════════════════════════════════════════════════
+// NSBU advancement: at the end of a session spend Turbo Tokens on new abilities —
+// 2 Turbo for an individual ability, 10 for a Group-Suite power (18 buys it for the
+// whole group, a table call). The same modal is the "Level Up" for NSBU characters.
+function openLevelUp() { if(!nsbuOn()) return; openAbilityPicker(); }
 function openAbilityPicker() { $('ability-search').value = ''; $('ability-overlay').classList.add('open'); renderAbilityPicker(); $('ability-search').focus(); }
 function closeAbilityPicker() { $('ability-overlay').classList.remove('open'); }
 function abilitiesTaken() { return new Set([...document.querySelectorAll('#abilities-body .ab-name')].map(el => norm(el.value))); }
+function abilityCost(key) { return String(key).indexOf(' — ') >= 0 ? 10 : 2; }   // suite item vs individual
 function renderAbilityPicker() {
   const box = $('ability-body'); if(typeof KOB_NSBU === 'undefined') { box.innerHTML = '<p class="brow-empty">No abilities available.</p>'; return; }
-  const q = norm($('ability-search').value), taken = abilitiesTaken();
+  const q = norm($('ability-search').value), taken = abilitiesTaken(), budget = at;
   const match = (name, text) => !q || norm(name).includes(q) || norm(text || '').includes(q);
   const row = (key, name, cost, note, text) => {
-    const have = taken.has(norm(key));
-    const btn = have ? '<button class="brow-add have">Added ✓</button>' : '<button class="brow-add" data-add-ability="' + esc(key) + '">+ Add</button>';
-    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(name) + '<span class="brow-cost">' + esc(cost) + '</span>' + (note ? ' <span class="brow-cost" style="background:#3a2d55;">' + esc(note) + '</span>' : '') + '</div>' +
+    const have = taken.has(norm(key)), afford = budget >= cost;
+    const btn = have ? '<button class="brow-add have">Owned ✓</button>'
+      : '<button class="brow-add" data-buy-ability="' + esc(key) + '" data-cost="' + cost + '"' + (afford ? '' : ' disabled title="Not enough Turbo Tokens"') + '>Buy · ' + cost + ' TT</button>';
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(name) + (note ? ' <span class="brow-cost" style="background:#3a2d55;">' + esc(note) + '</span>' : '') + '</div>' +
       (text ? '<div class="brow-desc">' + esc(text) + '</div>' : '') + '</div>' + btn + '</div>';
   };
-  let html = '';
+  let html = '<div class="brow-group" style="color:#ffb02e;">Turbo Tokens available: ' + budget + '</div>';
   const abil = KOB_NSBU.abilities.filter(a => match(a.name, a.text));
-  if(abil.length) html += '<div class="brow-group">Individual · 2 Turbo each</div>' + abil.map(a => row(a.name, a.name, '2 TT', a.note, a.text)).join('');
+  if(abil.length) html += '<div class="brow-group">Individual · 2 Turbo each</div>' + abil.map(a => row(a.name, a.name, 2, a.note, a.text)).join('');
   KOB_NSBU.suites.forEach(s => {
     const items = s.items.filter(i => match(s.name + ' ' + i.name, i.text));
     if(!items.length) return;
-    html += '<div class="brow-group">' + esc(s.name) + ' · unlock ' + esc(s.unlock) + ' · 10 / 18 Turbo</div>' +
-      items.map(i => row(s.name + ' — ' + i.name, s.name + ' — ' + i.name, '10 / 18', i.note, i.text)).join('');
+    html += '<div class="brow-group">' + esc(s.name) + ' · unlock ' + esc(s.unlock) + ' · 10 Turbo (18 for the group)</div>' +
+      items.map(i => row(s.name + ' — ' + i.name, s.name + ' — ' + i.name, 10, i.note, i.text)).join('');
   });
-  box.innerHTML = html || '<p class="brow-empty">No abilities match.</p>';
+  box.innerHTML = (abil.length || KOB_NSBU.suites.some(s => s.items.some(i => match(s.name + ' ' + i.name, i.text)))) ? html : '<p class="brow-empty">No abilities match.</p>';
 }
 (function wireAbilityPicker() {
   const ab = $('ability-body');
-  if(ab) ab.addEventListener('click', e => { const b = e.target.closest('[data-add-ability]'); if(b) { addAbilityRow({ name: b.dataset.addAbility, note: '' }); scheduleAutosave(); renderAbilityPicker(); } });
+  if(ab) ab.addEventListener('click', e => {
+    const b = e.target.closest('[data-buy-ability]'); if(!b) return;
+    const key = b.dataset.buyAbility, cost = num(b.dataset.cost);
+    if(at < cost) { addLog('Level Up', 'Turbo', 'Not enough Turbo Tokens for ' + key + ' (need ' + cost + ').', 'fumble'); return; }
+    at -= cost; renderAT();
+    addAbilityRow({ name: key, note: '' });
+    addLog('Level Up', '−' + cost + ' Turbo', 'Bought ' + key + ' · ' + at + ' Turbo left', 'crit');
+    scheduleAutosave(); renderAbilityPicker();
+  });
 })();
 function addSkillRow(s) {
   s = s || { name:'', tier:'starting' };

@@ -107,16 +107,17 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stat-name{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:var(--ace-dk);cursor:pointer;user-select:none;}
 .stat-name:hover{color:var(--ace-dk);}
 .stat-name small{display:block;font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--muted);}
-.stat-input,.focus-input{height:32px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--ink);outline:none;}
-.stat-input{width:100%;text-align:center;}
-.focus-input{width:100%;font-family:'Barlow Condensed',sans-serif;font-size:14px;padding:0 8px;}
-.focus-dice{height:32px;line-height:30px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;background:var(--box);border:1px solid var(--ace);border-radius:5px;color:var(--ace-dk);cursor:pointer;}
-.focus-dice:hover{background:var(--ace);color:#fff;border-color:var(--ace);}
+.stat-input{width:100%;text-align:center;height:32px;border:1px solid var(--input-border);border-radius:5px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--ink);outline:none;}
+/* Stat dice are set at creation → a rollable button, not a field. */
+.stat-dice-btn{width:100%;height:32px;border:2px solid var(--ace);border-radius:6px;background:var(--box);font-family:'Share Tech Mono',monospace;font-size:15px;font-weight:700;color:var(--ace-dk);cursor:pointer;text-align:center;}
+.stat-dice-btn:hover{background:var(--ace);color:#fff;}
+.focus-dice{min-width:26px;text-align:center;font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:800;color:inherit;}
 .focus-cell{grid-column:3 / span 2;display:flex;flex-direction:column;gap:4px;min-width:0;}
-.focus-line{display:grid;grid-template-columns:1fr 54px;gap:4px;align-items:center;}
-.focus-line .focus-input{min-width:0;}
-.focus-add{align-self:flex-start;background:none;border:none;padding:0 2px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;}
-.focus-add:hover{color:var(--ace-dk);}
+.focus-line{display:block;}
+/* A Focus is a fixed, rollable chip (name + dice). */
+.focus-chip{width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;height:32px;padding:0 8px;border:1px solid var(--ace);border-radius:5px;background:var(--box);color:var(--ace-dk);cursor:pointer;text-align:left;}
+.focus-chip:hover{background:var(--ace);color:#fff;}
+.focus-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .stat-roll{height:32px;background:var(--ace);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
 .stat-roll:hover{background:var(--ace-dk);}
 .power-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
@@ -289,10 +290,12 @@ body.dark .karma-pip.spent{border-color:#4a4a52;}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
   .stats-head,.stat-row{grid-template-columns:96px 48px 1fr 56px;padding-left:6px;padding-right:6px;}
-  .focus-line{grid-template-columns:1fr 56px;}
   .stat-name{min-height:44px;display:flex;flex-direction:column;justify-content:center;padding:2px 6px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
-  .stat-input,.focus-input{height:44px;font-size:16px;}
-  .focus-dice{height:44px;line-height:42px;font-size:16px;border-width:2px;}
+  .stat-input{height:44px;font-size:16px;}
+  .stat-dice-btn{height:44px;font-size:17px;}
+  .focus-chip{height:44px;}
+  .focus-name{font-size:15px;}
+  .focus-dice{font-size:16px;}
   .rt-grid{grid-template-columns:1fr;}
   .rt-cell{border-right:none;border-bottom:1px solid var(--rule);}
   /* Mobile ergonomics: thumb-sized buttons/selects, readable labels */
@@ -303,7 +306,6 @@ body.dark .karma-pip.spent{border-color:#4a4a52;}
   .hdr-field label,.tbl th,.stats-head span{font-size:10px;}
   .stat-name small,.stat-cell small,.sk-name small,.skills-table td.sk-name small{font-size:10px;}
   input[type=checkbox]{width:22px;height:22px;}
-  .focus-add{min-height:32px;font-size:12px;padding:0 6px;}
   .derived-formula input{width:48px;height:32px;font-size:14px;}
   .attacks-table{table-layout:fixed;}
   .attacks-table th:first-child{width:30% !important;}
@@ -592,7 +594,8 @@ function buildStats() {
     row.id = 'row-' + s.id;
     row.innerHTML =
       `<div class="stat-name" onclick="rollStat('${s.id}', false)" title="Roll ${s.name}">${s.name}</div>` +
-      `<input class="stat-input" id="st-${s.id}" type="number" min="0" max="20" value="${s.optional ? '' : 3}" oninput="recalc()">` +
+      `<input type="hidden" id="st-${s.id}" value="${s.optional ? '' : 3}">` +
+      `<button class="stat-dice-btn" id="stb-${s.id}" onclick="rollStat('${s.id}', false)" title="Roll ${s.name}">${s.optional ? '—' : 3}</button>` +
       `<div class="focus-cell" id="fc-${s.id}"></div>`;
     list.appendChild(row);
     addFocusLine(s.id, '');
@@ -603,18 +606,17 @@ function buildStats() {
 function focusInputs(id) { return [...$('fc-' + id).querySelectorAll('.focus-input')]; }
 function focusesOf(id) { return focusInputs(id).map(i => i.value.trim()).filter(Boolean); }
 function hasFocus(id, re) { return focusesOf(id).some(f => re.test(f)); }
+// A Focus is a fixed, rollable chip (set at creation / by Advancement) — like the
+// Stat name. Its value lives in a hidden input so persistence is unchanged; empty
+// focus lines stay hidden (see recalc). No +Focus button — focuses come from the
+// builder or Level Up.
 function addFocusLine(id, value) {
   const s = STATS.find(x => x.id === id), cell = $('fc-' + id);
   const first = !cell.querySelector('.focus-line');
   const line = document.createElement('div'); line.className = 'focus-line';
-  line.innerHTML = `<input type="text" class="focus-input"${first ? ` id="fo-${id}"` : ''} placeholder="${first ? 'Focus' : 'Another Focus'}" oninput="recalc()">` +
-    `<div class="focus-dice" ${first ? `id="fd-${id}" ` : ''}onclick="rollFocusLine('${id}', this)" title="Roll ${s.name} with this Focus">5</div>`;
-  const inp = line.querySelector('.focus-input'); inp.value = value || '';
-  // An emptied extra line goes away when you leave it.
-  if(!first) inp.addEventListener('blur', () => { if(!inp.value.trim()) { line.remove(); recalc(); scheduleAutosave(); } });
-  let add = cell.querySelector('.focus-add');
-  if(!add) { add = document.createElement('button'); add.type = 'button'; add.className = 'focus-add'; add.textContent = '+ Focus'; add.title = 'Add a Focus to ' + s.name + ' (Advancement)'; add.onclick = () => openFocusPicker(id); cell.appendChild(add); }
-  cell.insertBefore(line, add);
+  line.innerHTML = `<input type="hidden" class="focus-input"${first ? ` id="fo-${id}"` : ''} value="${esc(value || '')}">`
+    + `<button class="focus-chip" onclick="rollFocusLine('${id}', this)" title="Roll ${s.name} with this Focus"><span class="focus-name"></span><span class="focus-dice"${first ? ` id="fd-${id}"` : ''}>5</span></button>`;
+  cell.appendChild(line);
   return line;
 }
 function setFocuses(id, list) {
@@ -623,7 +625,7 @@ function setFocuses(id, list) {
   $('fo-' + id).value = arr[0] || '';
   arr.slice(1).forEach(f => addFocusLine(id, f));
 }
-function rollFocusLine(id, dice) { const f = dice.parentNode.querySelector('.focus-input').value.trim(); rollStat(id, f || false); }
+function rollFocusLine(id, chip) { const line = chip.closest('.focus-line'); const f = line.querySelector('.focus-input').value.trim(); rollStat(id, f || false); }
 
 function hasPower() { return $('has-power').checked; }
 function onPowerToggle() {
@@ -647,10 +649,13 @@ function recalc() {
     const on = !s.optional || hasPower();
     const v = statVal(s.id);
     if(on && !s.optional) used += v;
+    const sb = $('stb-' + s.id); if(sb) sb.textContent = on ? String(v) : '—';
     $('fc-' + s.id).querySelectorAll('.focus-line').forEach(line => {
-      const f = line.querySelector('.focus-input').value.trim(), dice = line.querySelector('.focus-dice');
-      dice.textContent = on ? String(statDice(s.id, f || false) + (f ? 0 : 2)) : '—';
-      dice.title = f ? `Roll ${s.name} + ${f} (${statDice(s.id, f)} dice)` : `Add a Focus to ${s.name} for +2 dice`;
+      const f = line.querySelector('.focus-input').value.trim(), dice = line.querySelector('.focus-dice'), nameEl = line.querySelector('.focus-name'), chip = line.querySelector('.focus-chip');
+      line.style.display = (on && f) ? '' : 'none';   // only named focuses show
+      if(nameEl) nameEl.textContent = f;
+      if(dice) dice.textContent = on ? String(statDice(s.id, f)) : '—';
+      if(chip) chip.title = f ? `Roll ${s.name} + ${f} (${statDice(s.id, f)} dice)` : '';
     });
   });
 
@@ -988,17 +993,17 @@ function renderLevelUp() {
   h += '<div class="m-lbl">Raise a Stat by +1</div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
   h += stats.map(s => { const v = statVal(s.id); return '<button class="m-btn" style="flex:1 1 40%;" onclick="levelRaiseStat(\'' + s.id + '\')">' + esc(s.name) + ' ' + v + ' &rarr; ' + (v + 1) + '</button>'; }).join('');
   h += '</div>';
+  // Learn a Focus — the same searchable per-Stat picker used at character creation.
   h += '<div class="m-lbl" style="margin-top:14px;">Learn a new Focus</div>';
-  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">';
+  h += '<div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">';
   h += '<select class="m-input" id="lvl-focus-stat" style="width:auto;flex:0 0 auto;" onchange="_lvlFocusStat=this.value;renderLevelUp()">' + stats.map(s => '<option value="' + s.id + '"' + (s.id === _lvlFocusStat ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('') + '</select>';
-  h += '<input class="m-input" id="lvl-focus-name" list="lvl-focus-dl" placeholder="Focus name" style="flex:1;min-width:120px;">';
-  h += '<button class="m-btn" onclick="levelLearnFocus()">Learn</button></div>';
-  const opts = [...new Set(D.focuses().filter(f => norm(f.stat) === _lvlFocusStat).map(f => f.name))].sort();
-  h += '<datalist id="lvl-focus-dl">' + opts.map(n => '<option value="' + esc(n) + '">').join('') + '</datalist>';
-  const cur = focusesOf(_lvlFocusStat);
-  if(cur.length) h += '<p class="m-hint" style="margin-top:6px;">Known ' + esc((STATS.find(s => s.id === _lvlFocusStat) || {}).name) + ' focuses: ' + esc(cur.join(', ')) + '</p>';
+  h += '<input class="m-input" id="lvl-focus-search" placeholder="Search focuses…" oninput="renderLvlFocusList()" style="flex:1;min-width:120px;">';
+  h += '<button class="m-btn ghost" onclick="lvlLearnCustom()" title="Add the typed name as a custom Focus">＋ Custom</button></div>';
+  h += '<div class="brow-list" id="lvl-focus-list" style="max-height:34vh;"></div>';
   $('levelup-body').innerHTML = h;
+  renderLvlFocusList();
 }
+function renderLvlFocusList() { const box = $('lvl-focus-list'); if(box) box.innerHTML = focusListHTML(_lvlFocusStat, ($('lvl-focus-search') || {}).value || ''); }
 function levelRaiseStat(id) {
   const v = statVal(id); $('st-' + id).value = v + 1;
   const nm = (STATS.find(s => s.id === id) || {}).name || id;
@@ -1006,17 +1011,17 @@ function levelRaiseStat(id) {
   addLog('Advancement', '+1 ' + nm, nm + ' ' + v + ' → ' + (v + 1), 'crit');
   closeLevelUp();
 }
-function levelLearnFocus() {
-  const id = $('lvl-focus-stat').value; const name = ($('lvl-focus-name').value || '').trim();
-  if(!name) { $('lvl-focus-name').focus(); return; }
-  if(focusesOf(id).some(f => norm(f) === norm(name))) { addLog('Advancement', '—', 'That Focus is already known.', 'normal'); $('lvl-focus-name').select(); return; }
-  const empty = focusInputs(id).find(i => !i.value.trim());
-  if(empty) empty.value = name; else addFocusLine(id, name);
-  const nm = (STATS.find(s => s.id === id) || {}).name || id;
+function lvlLearnFocusPick(name) {
+  name = String(name || '').trim(); if(!name) return;
+  if(focusesOf(_lvlFocusStat).some(f => norm(f) === norm(name))) return;   // already known
+  const empty = focusInputs(_lvlFocusStat).find(i => !i.value.trim());
+  if(empty) empty.value = name; else addFocusLine(_lvlFocusStat, name);
+  const nm = (STATS.find(s => s.id === _lvlFocusStat) || {}).name || _lvlFocusStat;
   recalc(); scheduleAutosave();
   addLog('Advancement', 'Focus', 'Learned ' + name + ' (' + nm + ')', 'crit');
-  closeLevelUp();
+  renderLvlFocusList();   // reflect Added ✓, stay open like the creation picker
 }
+function lvlLearnCustom() { const el = $('lvl-focus-search'); const q = (el && el.value || '').trim(); if(!q) { if(el) el.focus(); return; } lvlLearnFocusPick(q); if(el) el.value = ''; renderLvlFocusList(); }
 function pickFocusValue(name) {
   if(!_focusStat) return;
   const inputs = focusInputs(_focusStat);
@@ -1028,25 +1033,26 @@ function addBlankFocusLine() {
   if(!_focusStat) return;
   const l = addFocusLine(_focusStat, ''); closeFocusPicker(); l.querySelector('.focus-input').focus(); scheduleAutosave();
 }
-function renderFocusPicker() {
-  if(!_focusStat) return;
-  const q = norm($('focus-search').value);
-  const taken = new Set(focusesOf(_focusStat).map(norm));
-  const list = D.focuses().filter(f => norm(f.stat) === _focusStat && (!q || norm(f.name).includes(q)))
+// Shared list of a Stat's focuses (creation picker + Level Up both render this).
+function focusListHTML(statId, query) {
+  const q = norm(query || '');
+  const taken = new Set(focusesOf(statId).map(norm));
+  const list = D.focuses().filter(f => norm(f.stat) === statId && (!q || norm(f.name).includes(q)))
     .sort((a, b) => a.name.localeCompare(b.name));
-  const box = $('focus-body');
-  if(!list.length) { box.innerHTML = '<p class="brow-empty">No focuses match — use “Type my own”.</p>'; return; }
-  box.innerHTML = list.map(f => {
+  if(!list.length) return '<p class="brow-empty">No focuses match — use ＋ Custom.</p>';
+  return list.map(f => {
     const have = taken.has(norm(f.name));
     const btn = have ? '<button class="brow-add have">Added ✓</button>' : '<button class="brow-add" data-add-focus="' + esc(f.name) + '">+ Add</button>';
     return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(f.name) + '</div>' +
       (f.setting && f.setting !== 'core' ? '<div class="brow-meta">' + esc(f.setting) + '</div>' : '') + '</div>' + btn + '</div>';
   }).join('');
 }
+function renderFocusPicker() { if(!_focusStat) return; $('focus-body').innerHTML = focusListHTML(_focusStat, $('focus-search').value); }
 // Wire the browse lists once (event delegation).
 (function wireAcePickers() {
   const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => { const b = e.target.closest('[data-add-gear]'); if(b) { addGearFromData(b.dataset.addGear); _flashBrow(b); } });
   const fb = $('focus-body'); if(fb) fb.addEventListener('click', e => { const b = e.target.closest('[data-add-focus]'); if(b) pickFocusValue(b.dataset.addFocus); });
+  const lb = $('levelup-body'); if(lb) lb.addEventListener('click', e => { const b = e.target.closest('[data-add-focus]'); if(b) lvlLearnFocusPick(b.dataset.addFocus); });
 })();
 function _flashBrow(btn) { const o = btn.textContent, d = btn.disabled; btn.textContent = '✓ Added'; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = d; }, 600); }
 // "Add custom" from the Gear Store: drop in a blank gear row to fill by hand.

@@ -101,6 +101,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stat-cell .sn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.06em;color:var(--d62e-dk);cursor:pointer;}
 .stat-cell .sn:hover{text-decoration:underline;}
 .stat-cell input{width:64px;height:36px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:16px;font-weight:700;text-align:center;color:var(--ink);outline:none;margin:4px 0;}
+.attr-btn{width:66px;height:38px;margin:4px auto 0;display:block;border:2px solid var(--d62e);border-radius:6px;background:var(--box);font-family:'Share Tech Mono',monospace;font-size:16px;font-weight:700;color:var(--d62e-dk);cursor:pointer;text-align:center;}
+.attr-btn:hover{background:var(--d62e);color:#fff;}
 .stat-cell .attr-x{position:absolute;top:2px;right:3px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:11px;line-height:1;padding:1px 3px;}
 .stat-cell .attr-x:hover{color:var(--red);}
 .stat-cell small{display:block;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
@@ -240,6 +242,9 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 
 /* Combat/status tiles — even 3×2 grid, sized up */
 .combat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:6px 8px;border-bottom:1px solid var(--rule);}
+.combat-grid.four{grid-template-columns:repeat(4,1fr);}
+.cp-hdr{display:inline-flex;align-items:center;gap:5px;margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.cp-hdr input{width:56px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
 .combat-grid .vital{display:flex;flex-direction:column;min-height:0;padding:6px 8px;gap:1px;}
 .combat-grid .vbig{font-size:28px;line-height:1;margin-top:1px;}
 .combat-grid .vbig .calc{font-size:44px;line-height:1;}
@@ -304,7 +309,7 @@ body.spec-on .sk-spec-cell{display:table-cell;}
   .hdr-field{grid-column:span 1 !important;}
   .hdr-field.wide{grid-column:span 2 !important;}
   .blk-grid,.vitals{grid-template-columns:1fr;}
-  .combat-grid{grid-template-columns:1fr 1fr;}
+  .combat-grid,.combat-grid.four{grid-template-columns:1fr 1fr;}
   .stats-grid{grid-template-columns:repeat(2,1fr);}
   .stat-cell .sn{display:block;min-height:36px;line-height:36px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
   .stat-cell input{height:44px;}
@@ -362,7 +367,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="section-bar accent"><span>Attributes</span></div>
       <div class="stats-grid" id="stats-grid"></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
-      <div class="add-row"><button class="small-btn ghost" onclick="openSkillPicker()">＋ Skills</button></div>
+      <div class="add-row"><span class="cp-hdr">Character Points <input type="number" id="f-cp" value="0" min="0" oninput="scheduleAutosave()"></span></div>
       <div id="magic-panel" hidden></div>
       <div id="advancement-panel" hidden></div>
     </div>
@@ -375,23 +380,11 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="wound-track" id="wound-track"></div>
         </div>
       </div>
-      <div class="combat-grid">
+      <div class="combat-grid four">
         <div class="vital">
           <div class="vlbl"><span>Hero Points</span></div>
           <div class="vbig"><input type="number" id="f-hero" value="1" min="0" oninput="scheduleAutosave()"></div>
           <div class="vline"><button class="small-btn" id="hero-btn" onclick="toggleHeroPoint()">Spend: double</button></div>
-        </div>
-        <div class="vital">
-          <div class="vlbl"><span>Dodge</span></div>
-          <div class="vbig"><span class="calc" id="dodge-val">10</span></div>
-        </div>
-        <div class="vital">
-          <div class="vlbl"><span>Parry</span></div>
-          <div class="vbig"><span class="calc" id="parry-val">15</span></div>
-        </div>
-        <div class="vital">
-          <div class="vlbl"><span>Char. Points</span></div>
-          <div class="vbig"><input type="number" id="f-cp" value="0" min="0" oninput="scheduleAutosave()"></div>
         </div>
         <div class="vital">
           <div class="vlbl"><span>Move</span></div>
@@ -401,6 +394,10 @@ select option{background:var(--input-bg);color:var(--ink);}
           <div class="vlbl"><span>Armor</span></div>
           <div class="vbig"><input type="text" id="f-armor-prot" placeholder="+2D" oninput="scheduleAutosave()"></div>
           <div class="vline"><input type="text" id="f-armor" class="txt" placeholder="none (set from Equipment)" oninput="scheduleAutosave()"></div>
+        </div>
+        <div class="vital">
+          <div class="vlbl"><span>Dodge / Parry</span></div>
+          <div class="vbig"><span class="calc" id="dodge-val" title="Dodge">10</span> <span style="color:var(--muted);font-size:20px;">/</span> <span class="calc" id="parry-val" title="Parry">15</span></div>
         </div>
       </div>
 
@@ -614,7 +611,8 @@ function attrCellHtml(name, pipVal) {
   // Attributes are set at character creation; no on-sheet delete (core and optional match).
   return '<div class="stat-cell" data-attr="' + esc(name) + '">' +
     '<div class="sn" onclick="rollAttr(\'' + esc(name) + '\')" title="Roll ' + esc(name) + '">' + esc(name.toUpperCase()) + '</div>' +
-    '<input type="text" id="at-' + esc(name) + '" value="' + esc(code(pipVal)) + '" oninput="recalc();scheduleAutosave()">' +
+    '<input type="hidden" id="at-' + esc(name) + '" value="' + esc(code(pipVal)) + '">' +
+    '<button class="attr-btn" id="atb-' + esc(name) + '" onclick="rollAttr(\'' + esc(name) + '\')" title="Roll ' + esc(name) + '">' + esc(code(pipVal)) + '</button>' +
     '</div>';
 }
 function buildStats(attrsObj) {
@@ -648,9 +646,10 @@ function skillAttrLabel(a) { return esc(a.slice(0, 4).toUpperCase()); }
 function addSkillRow(s) {
   s = s || {}; const body = $('skills-body'); let a = s.attribute || 'Agility';
   const tr = document.createElement('tr'); tr.dataset.skill = '1'; tr.dataset.attr = a; tr.dataset.adv = s.adv ? '1' : '0';
-  tr.innerHTML = '<td class="sk-name"><input type="text" class="sk-name-in" value="' + esc(s.name || '') + '" placeholder="skill" style="width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font:inherit;font-weight:700;color:inherit;outline:none;" oninput="scheduleAutosave()"></td>'
+  // Adds (dice above the attribute) are set at creation / Level Up — hidden input,
+  // no on-sheet field. The rollable total is the skill's control.
+  tr.innerHTML = '<td class="sk-name"><input type="text" class="sk-name-in" value="' + esc(s.name || '') + '" placeholder="skill" style="width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font:inherit;font-weight:700;color:inherit;outline:none;" oninput="scheduleAutosave()"><input type="hidden" class="sk-adds" value="' + esc(s.pips ? code(s.pips, true) : '') + '"></td>'
     + '<td class="sk-attr" style="width:26px;" title="Click to change the governing attribute" onclick="cycleAttr(this)">' + skillAttrLabel(a) + '</td>'
-    + '<td style="width:60px;"><input type="text" class="sk-adds" value="' + esc(s.pips ? code(s.pips, true) : '') + '" placeholder="+1D" title="Dice added above the attribute" oninput="recalc();scheduleAutosave()"></td>'
     + '<td class="sk-spec-cell"><label title="Advanced Skill: rolls only its own dice"><input type="checkbox" class="sk-adv"' + (s.adv ? ' checked' : '') + ' onchange="onSkillAdvChange(this)">Adv</label>'
       + '<label title="Specialization applies: +1D to this roll"><input type="checkbox" class="sk-spec"' + (s.spec ? ' checked' : '') + ' onchange="scheduleAutosave()">Spec</label>'
       + '<input type="text" class="sk-specname" value="' + esc(s.specName || '') + '" placeholder="spec" title="Specialization name" oninput="scheduleAutosave()"></td>'
@@ -674,58 +673,82 @@ function refreshWizardButtons() { const built = hasCharacter(); const bb = $('bu
 // ═══ ADVANCEMENT (LEVEL UP) — spend Character Points ══════════════════════
 // Skill pip cost = current dice number of the skill.
 // Attribute pip cost = 10 × current dice number of the attribute.
-var _lvlAttr = null, _lvlSkill = null;
+var _lvlAttr = null, _lvlSkill = null, _lvlQ = '';
 function openLevelUp() {
   if(!hasCharacter()) { D62EB.launch(); return; }
-  _lvlAttr = {}; _lvlSkill = {}; renderLevelUp(); $('levelup-overlay').classList.add('open');
+  _lvlAttr = {}; _lvlSkill = {}; _lvlQ = ''; renderLevelUp(); $('levelup-overlay').classList.add('open');
 }
 function closeLevelUp() { $('levelup-overlay').classList.remove('open'); _lvlAttr = null; _lvlSkill = null; }
 function _cpBudget() { return Math.max(0, num($('f-cp').value)); }
 function _pipCostSkill(pips) { return Math.max(1, diceOf(pips)); }
 function _pipCostAttr(pips) { return 10 * Math.max(1, diceOf(pips)); }
 function _sumCost(basePips, added, costFn) { let c = 0; for(let k = 0; k < added; k++) c += costFn(basePips + k); return c; }
+// Every skill: those on the sheet first, then the standard list (so you can raise
+// skills you don't have yet — added on Apply). Keyed by name.
+function _lvlAllSkills() {
+  const rows = skillRows(); const seen = new Set(); const out = [];
+  rows.forEach(tr => { const nm = tr.querySelector('.sk-name-in').value.trim() || '(unnamed)'; seen.add(norm(nm)); out.push({ key: norm(nm), name: nm, attr: tr.dataset.attr, tr: tr, base: rowTotal(tr), owned: true }); });
+  D.skills().slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(def => { if(seen.has(norm(def.name))) return; seen.add(norm(def.name)); out.push({ key: norm(def.name), name: def.name, attr: def.attribute, tr: null, base: attr(def.attribute), owned: false }); });
+  return out;
+}
 function _lvlSpent() {
   let total = 0;
   activeAttrs().forEach(a => { total += _sumCost(attr(a), _lvlAttr[a] || 0, _pipCostAttr); });
-  skillRows().forEach((tr, i) => { total += _sumCost(rowTotal(tr), _lvlSkill[i] || 0, _pipCostSkill); });
+  _lvlAllSkills().forEach(s => { total += _sumCost(s.base, _lvlSkill[s.key] || 0, _pipCostSkill); });
   return total;
 }
-function _lvlRow(name, baseCode, newCode, nextCost, add, stepFn, left) {
+function _lvlRow(labelHtml, baseCode, newCode, nextCost, add, stepFn, left) {
   return '<div style="display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid var(--rule);">'
-    + '<span style="flex:1;font-weight:700;">' + esc(name) + '</span>'
+    + '<span style="flex:1;font-weight:700;">' + labelHtml + '</span>'
     + '<span style="font-family:\'Share Tech Mono\',monospace;min-width:96px;text-align:right;">' + baseCode + (newCode ? ' → ' + newCode : '') + '</span>'
     + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="' + stepFn + ',-1)"' + (add <= 0 ? ' disabled' : '') + '>−</button>'
     + '<button class="m-btn ghost" style="padding:4px 8px;min-width:44px;" onclick="' + stepFn + ',1)"' + (nextCost > left ? ' disabled' : '') + ' title="Next pip costs ' + nextCost + ' CP">+' + nextCost + '</button></div>';
 }
 function renderLevelUp() {
-  const budget = _cpBudget(), spent = _lvlSpent(), left = budget - spent;
-  let h = '<p class="m-hint">Spend <b>' + budget + '</b> Character Point' + (budget === 1 ? '' : 's') + ' to raise skills and attributes. A skill pip costs its current dice number; an attribute pip costs 10× its current dice number. The <b>+N</b> button shows the next pip\'s cost.</p>';
-  h += '<div class="m-lbl">Attributes</div><div class="alloc">';
-  activeAttrs().forEach(a => { const add = _lvlAttr[a] || 0, base = attr(a), nu = base + add; h += _lvlRow(a, code(base), add ? code(nu) : '', _pipCostAttr(nu), add, "lvlStepAttr('" + a + "'", left); });
-  h += '</div>';
+  const budget = _cpBudget();
+  let h = '<p class="m-hint">Spend <b>' + budget + '</b> Character Point' + (budget === 1 ? '' : 's') + ' to raise skills and attributes. A skill pip costs its current dice number; an attribute pip costs 10× its current dice number. The <b>+N</b> button shows the next pip\'s cost. Raise a skill you don\'t have and it\'s added.</p>';
+  h += '<div class="m-lbl">Attributes</div><div class="alloc" id="lvl-attr-list"></div>';
   h += '<div class="m-lbl" style="margin-top:12px;">Skills</div>';
-  const rows = skillRows();
-  if(!rows.length) h += '<p class="brow-empty">No skills on the sheet yet.</p>';
-  else { h += '<div class="alloc" style="max-height:40vh;overflow:auto;">'; rows.forEach((tr, i) => { const name = tr.querySelector('.sk-name-in').value || '(unnamed)', add = _lvlSkill[i] || 0, base = rowTotal(tr), nu = base + add; h += _lvlRow(name, code(base), add ? code(nu) : '', _pipCostSkill(nu), add, 'lvlStepSkill(' + i, left); }); h += '</div>'; }
+  h += '<input class="m-input" id="lvl-search" placeholder="Search skills…" oninput="_lvlQ=this.value;renderLvlBody()" value="' + esc(_lvlQ) + '" style="margin-bottom:8px;">';
+  h += '<div class="alloc" id="lvl-skill-list" style="max-height:38vh;overflow:auto;"></div>';
   $('levelup-body').innerHTML = h;
+  renderLvlBody();
+}
+function renderLvlBody() {
+  const budget = _cpBudget(), spent = _lvlSpent(), left = budget - spent;
+  let ah = '';
+  activeAttrs().forEach(a => { const add = _lvlAttr[a] || 0, base = attr(a), nu = base + add; ah += _lvlRow(esc(a), code(base), add ? code(nu) : '', _pipCostAttr(nu), add, "lvlStepAttr('" + a + "'", left); });
+  const ab = $('lvl-attr-list'); if(ab) ab.innerHTML = ah;
+  const q = norm(_lvlQ);
+  const list = _lvlAllSkills().filter(s => !q || s.key.includes(q));
+  let sh = '';
+  list.forEach(s => { const add = _lvlSkill[s.key] || 0, nu = s.base + add; const label = esc(s.name) + (s.owned ? '' : ' <span style="color:var(--muted);font-weight:400;font-size:11px;">' + esc(s.attr.slice(0, 3)) + '</span>'); sh += _lvlRow(label, code(s.base), add ? code(nu) : '', _pipCostSkill(nu), add, "lvlStepSkill('" + s.key + "'", left); });
+  if(!list.length) sh = '<p class="brow-empty">No skills match.</p>';
+  const sb = $('lvl-skill-list'); if(sb) { const top = sb.scrollTop; sb.innerHTML = sh; sb.scrollTop = top; }
   $('levelup-ft').innerHTML = '<span class="m-hint" style="margin:0;">CP left: <b style="color:' + (left ? 'var(--d62e-dk)' : '#999') + ';">' + left + '</b> / ' + budget + '</span>'
     + '<span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button><button class="m-btn" onclick="lvlApply()"' + (spent <= 0 ? ' disabled' : '') + '>Apply (' + spent + ' CP)</button></span>';
 }
 function lvlStepAttr(a, d) {
   const cur = _lvlAttr[a] || 0;
   if(d > 0 && _pipCostAttr(attr(a) + cur) > _cpBudget() - _lvlSpent()) return;
-  const nv = Math.max(0, cur + d); if(nv) _lvlAttr[a] = nv; else delete _lvlAttr[a]; renderLevelUp();
+  const nv = Math.max(0, cur + d); if(nv) _lvlAttr[a] = nv; else delete _lvlAttr[a]; renderLvlBody();
 }
-function lvlStepSkill(i, d) {
-  const tr = skillRows()[i]; if(!tr) return; const cur = _lvlSkill[i] || 0;
-  if(d > 0 && _pipCostSkill(rowTotal(tr) + cur) > _cpBudget() - _lvlSpent()) return;
-  const nv = Math.max(0, cur + d); if(nv) _lvlSkill[i] = nv; else delete _lvlSkill[i]; renderLevelUp();
+function lvlStepSkill(key, d) {
+  const s = _lvlAllSkills().find(x => x.key === key); if(!s) return; const cur = _lvlSkill[key] || 0;
+  if(d > 0 && _pipCostSkill(s.base + cur) > _cpBudget() - _lvlSpent()) return;
+  const nv = Math.max(0, cur + d); if(nv) _lvlSkill[key] = nv; else delete _lvlSkill[key]; renderLvlBody();
 }
 function lvlApply() {
   const spent = _lvlSpent(); if(spent <= 0) return;
+  const all = _lvlAllSkills(); const byKey = {}; all.forEach(s => byKey[s.key] = s);
   const changed = [];
   activeAttrs().forEach(a => { const add = _lvlAttr[a] || 0; if(!add) return; $('at-' + a).value = code(attr(a) + add); changed.push(a + ' +' + add + 'p'); });
-  skillRows().forEach((tr, i) => { const add = _lvlSkill[i] || 0; if(!add) return; const cur = codeOrZero(tr.querySelector('.sk-adds').value); tr.querySelector('.sk-adds').value = code(cur + add, true); changed.push((tr.querySelector('.sk-name-in').value || 'skill') + ' +' + add + 'p'); });
+  Object.keys(_lvlSkill).forEach(key => {
+    const add = _lvlSkill[key]; if(!add) return; const s = byKey[key]; if(!s) return;
+    if(s.tr) { const cur = codeOrZero(s.tr.querySelector('.sk-adds').value); s.tr.querySelector('.sk-adds').value = code(cur + add, true); }
+    else { addSkillRow({ name: s.name, attribute: s.attr, pips: add }); }
+    changed.push(s.name + ' +' + add + 'p');
+  });
   $('f-cp').value = Math.max(0, _cpBudget() - spent);
   recalc(); scheduleAutosave();
   addLog('Advancement', '−' + spent + ' CP', changed.join(', ') + ' · ' + num($('f-cp').value) + ' CP left', 'crit');
@@ -733,15 +756,18 @@ function lvlApply() {
 }
 function recalc() {
   refreshWizardButtons();
+  activeAttrs().forEach(a => { const b = $('atb-' + a); if(b) b.textContent = code(attr(a)); });
   skillRows().forEach(tr => { tr.querySelector('.sk-total').textContent = code(rowTotal(tr)); });
   const dv = $('dodge-val'), pv = $('parry-val');
-  // Parry and Dodge are always computed (5 × attribute dice).
-  pv.textContent = 5 * diceOf(attr('Agility'));
-  if(typeof options !== 'undefined' && options && options.noDodge) {
-    // No Dodge Defense: fixed ranged-attack difficulties instead of a computed number.
-    dv.textContent = 'PB5 · S10 · M15 · L20 · Dodge@L30'; dv.classList.add('ref');
-  } else {
-    dv.textContent = 5 * diceOf(attr('Perception')); dv.classList.remove('ref');
+  // Parry and Dodge are always computed (5 × attribute dice); shown in one bubble.
+  if(pv) pv.textContent = 5 * diceOf(attr('Agility'));
+  if(dv) {
+    if(typeof options !== 'undefined' && options && options.noDodge) {
+      // No Dodge Defense: fixed ranged-attack difficulties instead of a computed number.
+      dv.textContent = '—'; dv.title = 'No Dodge Defense — ranged difficulties: PB 5 · S 10 · M 15 · L 20 · Dodge @ L30'; dv.classList.add('ref');
+    } else {
+      dv.textContent = 5 * diceOf(attr('Perception')); dv.title = 'Dodge'; dv.classList.remove('ref');
+    }
   }
   refreshWeaponRows(); updateModNote();
 }

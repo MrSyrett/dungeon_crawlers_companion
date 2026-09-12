@@ -105,6 +105,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .stat-cell .sn{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;letter-spacing:.08em;color:var(--sw-dk);cursor:pointer;}
 .stat-cell .sn:hover{color:var(--sw-dk);}
 .stat-cell input{width:54px;height:36px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;text-align:center;color:var(--ink);outline:none;margin:4px 0;}
+.attr-btn{width:60px;height:38px;margin:4px auto 0;border:2px solid var(--sw);border-radius:6px;background:var(--box);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:var(--sw-dk);cursor:pointer;text-align:center;display:block;}
+.attr-btn:hover{background:var(--sw);color:#1a1a1a;}
 .save-toggle{display:flex;justify-content:center;gap:3px;}
 .save-toggle button{width:22px;height:20px;border:1px solid var(--rule);background:transparent;cursor:pointer;font-size:11px;font-weight:900;color:var(--muted);border-radius:2px;line-height:1;}
 .save-toggle button.adv{background:var(--sw);color:#fff;border-color:var(--sw-dk);}
@@ -398,7 +400,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div class="section-bar gold"><span>Attributes</span></div>
       <div class="stats-grid" id="stats-grid"></div>
       <table class="skills-table"><tbody id="skills-body"></tbody></table>
-      <div class="add-row"><button class="small-btn ghost" onclick="openSkillPicker()">＋ Skills</button><span class="sp-hdr">Skill Points <input type="number" id="f-sp" value="0" min="0"></span></div>
+      <div class="add-row"><span class="sp-hdr">Skill Points <input type="number" id="f-sp" value="0" min="0"></span></div>
     </div>
 
     <div class="center-col">
@@ -623,7 +625,7 @@ function findVehicle(name) { const n = norm(name); return n ? D.vehicles().find(
 // ═══ BUILD STATIC UI ══════════════════════════════════════════════════════
 function buildStats() {
   $('stats-grid').innerHTML = ATTRS.map(a =>
-    `<div class="stat-cell"><div class="sn" onclick="rollAttr('${a}')" title="Roll ${a}">${a.toUpperCase()}</div><input type="text" id="at-${a}" value="2D" oninput="recalc()"></div>`).join('');
+    `<div class="stat-cell"><div class="sn" onclick="rollAttr('${a}')" title="Roll ${a}">${a.toUpperCase()}</div><input type="hidden" id="at-${a}" value="2D"><button class="attr-btn" id="atb-${a}" onclick="rollAttr('${a}')" title="Roll ${a}">2D</button></div>`).join('');
   fillPickers();
   renderWoundTrack();
 }
@@ -650,9 +652,10 @@ function setWound(k) { const prev = wound; wound = k; renderWoundTrack(); update
 function addSkillRow(s) {
   s = s || {}; const body = $('skills-body'); const a = s.attr || 'Dexterity';
   const tr = document.createElement('tr'); tr.dataset.skill = '1'; tr.dataset.attr = a;
-  tr.innerHTML = '<td class="sk-name"><input type="text" class="sk-name-in" value="' + esc(s.name || '') + '" placeholder="skill" style="width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font:inherit;font-weight:700;color:inherit;outline:none;" oninput="recalc()"></td>'
+  // Adds (the dice above the attribute) are set at creation / Level Up — stored in
+  // a hidden input, no on-sheet field. The rollable total is the skill's control.
+  tr.innerHTML = '<td class="sk-name"><input type="text" class="sk-name-in" value="' + esc(s.name || '') + '" placeholder="skill" style="width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font:inherit;font-weight:700;color:inherit;outline:none;" oninput="recalc()"><input type="hidden" class="sk-adds" value="' + esc(s.adds ? toCode(s.adds, true) : '') + '"></td>'
     + '<td style="width:26px;"><small class="sk-attr-lbl" style="font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;" title="Click to change the governing attribute" onclick="cycleAttr(this)">' + esc(a === 'Force' ? 'FORCE' : a.slice(0, 4).toUpperCase()) + '</small></td>'
-    + '<td style="width:60px;"><input type="text" class="sk-adds" value="' + esc(s.adds ? toCode(s.adds, true) : '') + '" placeholder="+1D" title="Dice added above the attribute" oninput="recalc()"></td>'
     + '<td class="sk-total" style="cursor:pointer;" onclick="rollSkillRow(this.parentNode)" title="Roll this skill">0D</td>'
     + '<td style="width:20px;"><button class="row-x" onclick="this.closest(\'tr\').remove();recalc();scheduleAutosave()">✕</button></td>';
   tr.querySelector('.sk-name').addEventListener('click', e => { if(e.target.tagName !== 'INPUT') rollSkillRow(tr); });
@@ -676,6 +679,7 @@ function hasCharacter() { return !!(($('f-name') && $('f-name').value.trim()) ||
 function refreshWizardButtons() { const built = hasCharacter(); const bb = $('build-btn'), lb = $('level-btn'); if(bb) bb.style.display = built ? 'none' : ''; if(lb) lb.style.display = built ? '' : 'none'; }
 function recalc() {
   refreshWizardButtons();
+  ATTRS.forEach(a => { const b = $('atb-' + a); if(b) b.textContent = toCode(attr(a)); });
   let used = 0;
   skillRows().forEach(tr => {
     const adds = codeOrZero(tr.querySelector('.sk-adds').value); if(tr.dataset.attr !== 'Force') used += Math.max(0, adds); else used += Math.max(0, adds - 3);
@@ -684,53 +688,68 @@ function recalc() {
   refreshWeaponRows(); updateModNote();
 }
 // ═══ ADVANCEMENT (LEVEL UP) — spend Skill Points to raise skills ══════════
-// 1 point = 1 pip (3 pips = 1D). Spent points are removed; unspent stay.
-var _lvlAlloc = null;   // { rowIndex: pipsToAdd }
+// 1 point = 1 pip (3 pips = 1D). Spent points are removed; unspent stay. Every
+// skill is listed — like character creation — so you can raise ones you don't
+// have yet (they get added on Apply). Allocation is keyed by skill name.
+var _lvlAlloc = null;   // { skillKey: pipsToAdd }
+var _lvlQ = '';
 function openLevelUp() {
   if(!hasCharacter()) { SWB.launch(); return; }
-  _lvlAlloc = {}; renderLevelUp(); $('levelup-overlay').classList.add('open');
+  _lvlAlloc = {}; _lvlQ = ''; renderLevelUp(); $('levelup-overlay').classList.add('open');
 }
 function closeLevelUp() { $('levelup-overlay').classList.remove('open'); _lvlAlloc = null; }
 function _lvlBudget() { return Math.max(0, num($('f-sp').value)); }
 function _lvlSpent() { return Object.values(_lvlAlloc || {}).reduce((a, b) => a + b, 0); }
+// Every skill: those on the sheet, then the standard list, then Force skills.
+function _lvlAllSkills() {
+  const rows = skillRows(); const seen = new Set(); const out = [];
+  rows.forEach(tr => { const nm = tr.querySelector('.sk-name-in').value.trim() || '(unnamed)'; seen.add(norm(nm)); out.push({ key: norm(nm), name: nm, attr: tr.dataset.attr, tr: tr, base: rowTotal(tr), owned: true }); });
+  D.skills().slice().sort((a, b) => a.name.localeCompare(b.name)).forEach(def => { if(seen.has(norm(def.name))) return; seen.add(norm(def.name)); out.push({ key: norm(def.name), name: def.name, attr: def.attribute, tr: null, base: attr(def.attribute), owned: false }); });
+  FORCE_SKILLS.forEach(fs => { if(seen.has(norm(fs))) return; seen.add(norm(fs)); out.push({ key: norm(fs), name: fs, attr: 'Force', tr: null, base: 0, owned: false }); });
+  return out;
+}
 function renderLevelUp() {
-  const rows = skillRows();
   const budget = _lvlBudget(), spent = _lvlSpent(), left = budget - spent;
-  let h = '<p class="m-hint">Spend your <b>' + budget + '</b> Skill Point' + (budget === 1 ? '' : 's') + ' to raise skills — <b>1 point = 1 pip</b> (3 pips = 1D). Unspent points stay on your sheet.</p>';
-  if(!budget) h += '<p class="brow-empty">You have no Skill Points to spend. Add some in the Skill Points box, then level up.</p>';
-  else if(!rows.length) h += '<p class="brow-empty">No skills yet — add skills with ＋ Skills first.</p>';
-  else {
-    h += '<div class="alloc" style="max-height:52vh;overflow:auto;">';
-    rows.forEach((tr, i) => {
-      const name = tr.querySelector('.sk-name-in').value || '(unnamed)';
-      const add = _lvlAlloc[i] || 0, base = rowTotal(tr), nu = base + add;
-      h += '<div style="display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid var(--rule);">'
-        + '<span style="flex:1;font-weight:700;">' + esc(name) + '</span>'
-        + '<span style="font-family:\'Share Tech Mono\',monospace;min-width:92px;text-align:right;">' + toCode(base) + (add ? ' → ' + toCode(nu) : '') + '</span>'
-        + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="lvlStep(' + i + ',-1)"' + (add <= 0 ? ' disabled' : '') + '>−</button>'
-        + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="lvlStep(' + i + ',1)"' + (left <= 0 ? ' disabled' : '') + '>+</button></div>';
-    });
-    h += '</div>';
-  }
+  let h = '<p class="m-hint">Spend your <b>' + budget + '</b> Skill Point' + (budget === 1 ? '' : 's') + ' to raise skills — <b>1 point = 1 pip</b> (3 pips = 1D). Every skill is here; raise one you don\'t have and it\'s added. Unspent points stay on your sheet.</p>';
+  h += '<input class="m-input" id="lvl-search" placeholder="Search skills…" oninput="_lvlQ=this.value;renderLvlList()" value="' + esc(_lvlQ) + '" style="margin-bottom:8px;">';
+  h += '<div class="alloc" id="lvl-list" style="max-height:46vh;overflow:auto;"></div>';
   $('levelup-body').innerHTML = h;
+  renderLvlList();
+}
+function renderLvlList() {
+  const budget = _lvlBudget(), spent = _lvlSpent(), left = budget - spent;
+  const q = norm(_lvlQ);
+  const list = _lvlAllSkills().filter(s => !q || s.key.includes(q));
+  let h = '';
+  list.forEach(s => {
+    const add = _lvlAlloc[s.key] || 0, nu = s.base + add;
+    h += '<div style="display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid var(--rule);">'
+      + '<span style="flex:1;font-weight:700;">' + esc(s.name) + (s.owned ? '' : ' <span style="color:var(--muted);font-weight:400;font-size:11px;">' + (s.attr === 'Force' ? 'Force' : s.attr.slice(0, 3)) + '</span>') + '</span>'
+      + '<span style="font-family:\'Share Tech Mono\',monospace;min-width:92px;text-align:right;">' + toCode(s.base) + (add ? ' → ' + toCode(nu) : '') + '</span>'
+      + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="lvlStep(\'' + s.key + '\',-1)"' + (add <= 0 ? ' disabled' : '') + '>−</button>'
+      + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="lvlStep(\'' + s.key + '\',1)"' + (left <= 0 ? ' disabled' : '') + '>+</button></div>';
+  });
+  if(!list.length) h = '<p class="brow-empty">No skills match.</p>';
+  const box = $('lvl-list'); if(box) box.innerHTML = h;
   $('levelup-ft').innerHTML = '<span class="m-hint" style="margin:0;">Points left: <b style="color:' + (left ? 'var(--sw-dk)' : '#999') + ';">' + left + '</b> / ' + budget + '</span>'
     + '<span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button><button class="m-btn" onclick="lvlApply()"' + (spent <= 0 ? ' disabled' : '') + '>Apply (' + spent + ')</button></span>';
 }
-function lvlStep(i, d) {
-  const cur = _lvlAlloc[i] || 0;
+function lvlStep(key, d) {
+  const cur = _lvlAlloc[key] || 0;
   if(d > 0 && _lvlSpent() >= _lvlBudget()) return;
   const nv = Math.max(0, cur + d);
-  if(nv) _lvlAlloc[i] = nv; else delete _lvlAlloc[i];
-  renderLevelUp();
+  if(nv) _lvlAlloc[key] = nv; else delete _lvlAlloc[key];
+  renderLvlList();
 }
 function lvlApply() {
-  const rows = skillRows(), spent = _lvlSpent(); if(spent <= 0) return;
+  const spent = _lvlSpent(); if(spent <= 0) return;
+  const all = _lvlAllSkills(); const byKey = {}; all.forEach(s => byKey[s.key] = s);
   const changed = [];
-  rows.forEach((tr, i) => {
-    const add = _lvlAlloc[i] || 0; if(!add) return;
-    const cur = codeOrZero(tr.querySelector('.sk-adds').value);
-    tr.querySelector('.sk-adds').value = toCode(cur + add, true);
-    changed.push((tr.querySelector('.sk-name-in').value || 'skill') + ' +' + add + 'p');
+  Object.keys(_lvlAlloc).forEach(key => {
+    const add = _lvlAlloc[key]; if(!add) return; const s = byKey[key]; if(!s) return;
+    if(s.tr) { const cur = codeOrZero(s.tr.querySelector('.sk-adds').value); s.tr.querySelector('.sk-adds').value = toCode(cur + add, true); }
+    else { addSkillRow({ name: s.name, attr: s.attr, adds: add }); }
+    changed.push(s.name + ' +' + add + 'p');
   });
   $('f-sp').value = Math.max(0, _lvlBudget() - spent);
   recalc(); scheduleAutosave();
