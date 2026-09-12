@@ -275,6 +275,8 @@ body.dark .karma-pip.spent{border-color:#4a4a52;}
 }
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}
+  /* iOS zooms the page when a focused input is <16px — keep picker search at 16px so the menu opens at its proper size */
+  input[id$="-search"]{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
   .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--ace);z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
@@ -811,15 +813,22 @@ function attackDice(kind) {
   if(kind === 'power')  return statDice('power', true);
   return statDice('brawn', hasFocus('brawn', /^brawl/i));
 }
+// Link tokens tie a Gear weapon row to its Attacks row (add/remove together).
+var _linkSeq = 0;
+function nextLink() { return 'lk' + (++_linkSeq); }
 function addAttackRow(a) {
   a = a || { name:'', kind:'melee', damage:'' };
   const tr = document.createElement('tr');
+  // Linked rows (added from the Gear Store) have no ✕ here — they are removed by
+  // deleting the gear weapon. Legacy/unlinked rows keep their own ✕.
+  if(a.link) tr.dataset.link = a.link;
+  const removeBtn = a.link ? '' : `<button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button>`;
   tr.innerHTML =
     `<td><input type="text" class="atk-name" placeholder="Pistol, katana, hook hand…" value="${esc(a.name)}" oninput="onWeaponPick(this)"></td>` +
     `<td><select class="atk-kind" onchange="recalcAttacks()"><option value="melee"${a.kind==='melee'?' selected':''}>Melee</option><option value="ranged"${a.kind==='ranged'?' selected':''}>Ranged</option><option value="power"${a.kind==='power'?' selected':''}>Power</option></select></td>` +
     `<td><input type="number" class="num atk-dmg" min="0" placeholder="dmg" value="${esc(a.damage)}"></td>` +
     `<td class="atk-dice"></td>` +
-    `<td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this)" title="Roll the attack">🎲</button><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button></td>`;
+    `<td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this)" title="Roll the attack">🎲</button>${removeBtn}</td>`;
   $('attacks-body').appendChild(tr);
   recalcAttacks();
   return tr;
@@ -837,19 +846,6 @@ function onWeaponPick(input) {
 }
 function weaponIsRanged(g) { return /pistol|rifle|bow|gun|blaster|blazer|bazooka|grenade|thrower|laser|rocket|crossbow|sling|machine/i.test(g.name + ' ' + (g.description || '')); }
 function attackFromGear(g) { return { name: g.name, kind: weaponIsRanged(g) ? 'ranged' : 'melee', damage: g.damage != null ? String(g.damage) : '' }; }
-// Add an attack, reusing a blank row if there is one; skip if the same weapon is
-// already listed (so adding a weapon to gear won't double it in Attacks).
-function addAttackDeduped(a) {
-  const rows = [...document.querySelectorAll('#attacks-body tr')];
-  if(a.name && rows.some(tr => norm(tr.querySelector('.atk-name').value) === norm(a.name))) return;
-  const blank = rows.find(tr => !tr.querySelector('.atk-name').value && !tr.querySelector('.atk-dmg').value);
-  if(blank) {
-    blank.querySelector('.atk-name').value = a.name;
-    blank.querySelector('.atk-kind').value = a.kind;
-    blank.querySelector('.atk-dmg').value = a.damage;
-    recalcAttacks();
-  } else addAttackRow(a);
-}
 function recalcAttacks() {
   document.querySelectorAll('#attacks-body tr').forEach(tr => {
     const kind = tr.querySelector('.atk-kind').value;
@@ -875,21 +871,42 @@ function rollAttack(btn) {
 function addGearRow(g) {
   g = g || { name:'', note:'' };
   const tr = document.createElement('tr');
+  if(g.link) tr.dataset.link = g.link;
   tr.innerHTML = `<td style="width:45%;"><input type="text" class="gear-name" placeholder="Item" value="${esc(g.name)}"></td>` +
                  `<td><input type="text" class="gear-note" placeholder="notes" value="${esc(g.note)}"></td>` +
-                 `<td style="width:24px;"><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()" title="Remove">✕</button></td>`;
+                 `<td style="width:24px;"><button class="row-x" onclick="deleteGearRow(this)" title="Remove">✕</button></td>`;
   $('gear-body').appendChild(tr);
   return tr;
 }
+// Deleting a gear row also removes its linked attack row (weapon ↔ attack pair).
+function deleteGearRow(btn) {
+  const tr = btn.closest('tr'); if(!tr) return;
+  const link = tr.dataset.link;
+  tr.remove();
+  if(link) { const atk = document.querySelector('#attacks-body tr[data-link="' + link + '"]'); if(atk) atk.remove(); }
+  scheduleAutosave();
+}
+function isWeaponGear(g) { return !!(g && g.category === 'Weapon'); }
+// Tie a gear row and a fresh attack row together with one link token.
+function linkGearAttack(gearTr, attackObj) {
+  const link = nextLink();
+  if(gearTr) gearTr.dataset.link = link;
+  attackObj = attackObj || {};
+  attackObj.link = link;
+  addAttackRow(attackObj);
+  return link;
+}
 // Adds a gear-list item with its description (and damage) as the note; an
-// empty first row is reused so the sheet doesn't start with a blank line.
+// empty first row is reused so the sheet doesn't start with a blank line. A
+// weapon also creates ONE linked attack row (removed together with the gear).
 function addGearFromData(name) {
   const g = D.gear().find(x => x.name === name); if(!g) return;
   const note = [g.description, g.damage ? g.damage + ' damage' : '', g.tier && g.tier !== 'Normal' ? g.tier : ''].filter(Boolean).join(' · ');
   const blank = [...document.querySelectorAll('#gear-body tr')].find(tr => !tr.querySelector('.gear-name').value && !tr.querySelector('.gear-note').value);
-  if(blank) { blank.querySelector('.gear-name').value = g.name; blank.querySelector('.gear-note').value = note; } else addGearRow({ name: g.name, note });
-  // A weapon added to gear also shows up as an attack (deduped).
-  if(g.damage != null) addAttackDeduped(attackFromGear(g));
+  let gearTr;
+  if(blank) { blank.querySelector('.gear-name').value = g.name; blank.querySelector('.gear-note').value = note; gearTr = blank; }
+  else gearTr = addGearRow({ name: g.name, note });
+  if(isWeaponGear(g)) linkGearAttack(gearTr, attackFromGear(g));
   scheduleAutosave();
 }
 function fillGearPick() {
@@ -971,8 +988,9 @@ function renderFocusPicker() {
   const fb = $('focus-body'); if(fb) fb.addEventListener('click', e => { const b = e.target.closest('[data-add-focus]'); if(b) pickFocusValue(b.dataset.addFocus); });
 })();
 function _flashBrow(btn) { const o = btn.textContent, d = btn.disabled; btn.textContent = '✓ Added'; btn.disabled = true; setTimeout(() => { btn.textContent = o; btn.disabled = d; }, 600); }
-// "Add custom" from a picker: drop in a blank row to fill by hand.
-function addCustomAttack() { const tr = addAttackRow(); const inp = tr && tr.querySelector('.atk-name'); if(inp) inp.focus(); scheduleAutosave(); }
+// "Add custom" from the Gear Store: drop in a blank gear row to fill by hand.
+// (A custom WEAPON is added via the store's generic "Weapon" entry, which routes
+// through the weapon↔attack link flow with an editable damage field.)
 function addCustomGear() { const tr = addGearRow(); closeGearPicker(); const inp = tr && tr.querySelector('.gear-name'); if(inp) inp.focus(); scheduleAutosave(); }
 
 // ═══ HINTS FROM THE DATA LAYER ════════════════════════════════════════════
@@ -1085,8 +1103,8 @@ function collectSheet() {
     defBonus: num($('def-bonus').value), hpBonus: num($('hp-bonus').value),
     hpCur, karma,
     ability: $('f-ability').value, traitNotes: $('f-trait-notes').value, notes: $('f-notes').value,
-    attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, kind: tr.querySelector('.atk-kind').value, damage: tr.querySelector('.atk-dmg').value })),
-    gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gear-name').value, note: tr.querySelector('.gear-note').value })).filter(g => g.name || g.note),
+    attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, kind: tr.querySelector('.atk-kind').value, damage: tr.querySelector('.atk-dmg').value, link: tr.dataset.link || undefined })),
+    gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gear-name').value, note: tr.querySelector('.gear-note').value, link: tr.dataset.link || undefined })).filter(g => g.name || g.note),
     tab: _tab,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
@@ -1112,6 +1130,11 @@ function applySheet(d) {
   $('gear-body').innerHTML = '';
   (d.gear || []).forEach(g => addGearRow(g));
   if(!(d.gear || []).length) addGearRow();
+  // Advance the link counter past any restored tokens so new weapons get fresh
+  // links that can't collide with a reloaded pair.
+  [...document.querySelectorAll('#attacks-body tr[data-link], #gear-body tr[data-link]')].forEach(tr => {
+    const m = /(\d+)$/.exec(tr.dataset.link || ''); if(m) _linkSeq = Math.max(_linkSeq, +m[1]);
+  });
   _tab = TABS.includes(d.tab) ? d.tab : _tab;
   if(typeof campaignRestore === 'function') campaignRestore(d.campaign);
   recalc();
@@ -1377,8 +1400,12 @@ function claimLootItem(it){
   const g = D.gear().find(x => norm(x.name) === norm(it.item));
   const note = it.notes || (g ? [g.description, g.damage != null ? g.damage + ' damage' : ''].filter(Boolean).join(' · ') : '');
   const blank = [...document.querySelectorAll('#gear-body tr')].find(tr => !tr.querySelector('.gear-name').value && !tr.querySelector('.gear-note').value);
-  if(blank) { blank.querySelector('.gear-name').value = it.item; blank.querySelector('.gear-note').value = note; } else addGearRow({ name: it.item, note });
-  if((it.cat === 'Weapon' || (g && g.category === 'Weapon')) && typeof addAttackRow === 'function') addAttackRow({ name: it.item, kind: /gun|pistol|rifle|bow|blaster|laser|thrown/i.test(it.item + ' ' + note) ? 'ranged' : 'melee', damage: g && g.damage != null ? String(g.damage) : '' });
+  let gearTr;
+  if(blank) { blank.querySelector('.gear-name').value = it.item; blank.querySelector('.gear-note').value = note; gearTr = blank; }
+  else gearTr = addGearRow({ name: it.item, note });
+  if((it.cat === 'Weapon' || (g && g.category === 'Weapon')) && typeof addAttackRow === 'function') {
+    linkGearAttack(gearTr, { name: it.item, kind: /gun|pistol|rifle|bow|blaster|laser|thrown/i.test(it.item + ' ' + note) ? 'ranged' : 'melee', damage: g && g.damage != null ? String(g.damage) : '' });
+  }
   addLog('Claimed', '🎁', it.item, 'normal'); return true;
 }
 async function campaignPoll() {

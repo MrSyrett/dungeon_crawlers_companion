@@ -96,7 +96,7 @@
       + '<div id="d62eb-steps" style="display:flex;gap:4px;padding:8px 16px 0;flex-wrap:wrap;"></div>'
       + '<div class="modal-bd" id="d62eb-body"></div>'
       + '<div class="modal-ft"><button class="m-btn ghost" id="d62eb-back" onclick="D62EB.back()">← Back</button><span id="d62eb-note" style="font-size:12px;color:#999;align-self:center;flex:1;text-align:center;"></span><button class="m-btn" id="d62eb-next" onclick="D62EB.next()">Next →</button></div></div>';
-    ov.addEventListener('click', e => { if (e.target === ov) D62EB.close(); });
+    // Backdrop click no longer closes the builder (prevents losing build progress) — use the ✕.
     document.body.appendChild(ov);
   }
 

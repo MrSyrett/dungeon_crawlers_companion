@@ -422,7 +422,7 @@
       ov = document.createElement("div");
       ov.id = "dccw-overlay";
       ov.className = "dccw-overlay";
-      ov.addEventListener("mousedown", (e) => { if (e.target === ov) close(); });
+      // Backdrop click no longer closes the builder (prevents losing build progress) — use the ✕.
       document.body.appendChild(ov);
     }
     ov.style.display = "flex";
@@ -434,7 +434,7 @@
       ov = document.createElement("div");
       ov.id = "dccw-overlay";
       ov.className = "dccw-overlay";
-      ov.addEventListener("mousedown", (e) => { if (e.target === ov) close(); });
+      // Backdrop click no longer closes the builder (prevents losing build progress) — use the ✕.
       document.body.appendChild(ov);
     }
     ov.style.display = "flex";

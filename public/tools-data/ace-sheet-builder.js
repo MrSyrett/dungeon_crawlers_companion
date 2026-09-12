@@ -78,7 +78,7 @@
       '<div class="modal-ft"><div><button class="m-btn ghost" id="aceb-back" onclick="ACEB.back()">← Back</button></div>' +
       '<div style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="ACEB.close()">Cancel</button><button class="m-btn" id="aceb-next" onclick="ACEB.next()">Next →</button></div></div>' +
       "</div>";
-    ov.addEventListener("click", (e) => { if (e.target === ov) close(); });
+    // Backdrop click no longer closes the builder (prevents losing build progress) — use the ✕.
     document.body.appendChild(ov);
     const css = document.createElement("style");
     css.textContent =

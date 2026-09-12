@@ -253,6 +253,8 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 @media (max-width:900px){.body-row{flex-direction:column;}.stats-col{width:100%;border-right:none;border-bottom:2px solid var(--border);}}
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}
+  /* iOS zooms the page when a focused input is <16px — keep picker search at 16px so the menu opens at its proper size */
+  input[id$="-search"]{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
   .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--sw);z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
@@ -427,7 +429,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span>Weapons</span><span class="hdr-right"><button class="hdr-btn" onclick="openWeaponPicker()">⚔ Weapons</button></span></div>
+      <div class="section-bar"><span>Weapons</span><span class="hdr-right"><small class="hdr-hint">Add from 🛒 Equipment</small></span></div>
       <table class="tbl" id="weapons-tbl">
         <thead><tr><th style="width:21%;">Weapon</th><th style="width:19%;">Skill</th><th style="width:66px;">Damage</th><th style="width:13%;">Range</th><th>Notes</th><th style="width:92px;"></th></tr></thead>
         <tbody id="weapons-body"></tbody>
@@ -550,7 +552,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="gearstore-overlay" class="ov" onclick="if(event.target===this)closeGearPicker()">
   <div class="modal" style="max-width:600px;">
     <div class="modal-hd"><div class="ttl">🛒 Equipment</div><button class="x" onclick="closeGearPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search equipment…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><button class="m-btn ghost" onclick="addCustomGear()">＋ Add custom</button></div></div>
+    <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search equipment…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><button class="m-btn ghost" onclick="addCustomGear()">＋ Add custom</button><button class="m-btn ghost" onclick="addCustomWeapon()">＋ Custom weapon</button></div></div>
     <div class="modal-bd brow-list" id="gearstore-body"></div>
   </div>
 </div>
@@ -775,32 +777,46 @@ function skillOptions(cur) {
   const names = [...new Set([...D.skills().map(s => s.name), ...skillRows().map(r => r.querySelector('.sk-name-in').value.trim()).filter(Boolean)])].sort();
   return '<option value="">— attribute —</option>' + names.map(n => '<option value="' + esc(n) + '"' + (norm(n) === norm(cur) ? ' selected' : '') + '>' + esc(n) + '</option>').join('');
 }
+// Shared token generator that links an Equipment weapon row to its Attack row.
+var _linkSeq = 0;
+function nextLink() { return 'lk' + (++_linkSeq); }
 function addWeaponRow(w) {
   w = w || {}; const tr = document.createElement('tr');
+  if(w.link) tr.dataset.link = w.link;
+  // Linked rows (added from Equipment) drop their ✕ — removal happens by deleting
+  // the gear row. Legacy/unlinked rows from old saves keep a working ✕.
+  const xBtn = w.link ? '' : ' <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button>';
   tr.innerHTML = '<td><input type="text" class="wp-name" value="' + esc(w.name || '') + '" placeholder="Blaster pistol"></td>'
     + '<td><select class="wp-skill" style="width:100%;border:none;background:transparent;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:inherit;">' + skillOptions(w.skill || '') + '</select></td>'
     + '<td><input type="text" class="wp-dmg num" value="' + esc(w.damage || '') + '" placeholder="4D" style="width:60px;"></td>'
     + '<td><input type="text" class="wp-range" value="' + esc(w.range || '') + '" placeholder="3-10/30/120"></td>'
     + '<td><input type="text" class="wp-notes" value="' + esc(w.notes || '') + '"></td>'
-    + '<td style="white-space:nowrap;"><button class="small-btn" onclick="rollWeaponAttack(this.closest(\'tr\'))" title="Roll to-hit and damage">Attack</button> <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+    + '<td style="white-space:nowrap;"><button class="small-btn" onclick="rollWeaponAttack(this.closest(\'tr\'))" title="Roll to-hit and damage">Attack</button>' + xBtn + '</td>';
   $('weapons-body').appendChild(tr); return tr;
 }
 function refreshWeaponRows() { document.querySelectorAll('#weapons-body .wp-skill').forEach(sel => { const cur = sel.value; sel.innerHTML = skillOptions(cur); }); }
-function addWeaponFromData(name) {
-  const w = findWeapon(name); if(!w) return;
+function addWeaponFromData(name, link) {
+  const w = findWeapon(name); if(!w) return null;
   const skillName = w.skill ? (D.skills().find(s => norm(s.name) === norm(w.skill)) || {}).name || w.skill : '';
-  addWeaponRow({ name: w.name, skill: skillName, damage: w.damageText || toCode(w.damage), range: w.range || '', notes: w.kind === 'Melee' ? 'melee' : '' }); scheduleAutosave();
+  const tr = addWeaponRow({ name: w.name, skill: skillName, damage: w.damageText || toCode(w.damage), range: w.range || '', notes: w.kind === 'Melee' ? 'melee' : '', link: link }); scheduleAutosave(); return tr;
 }
 // True when an Attack (weapon) row with this name already exists.
 function weaponRowExists(name) {
   const n = norm(name);
   return [...document.querySelectorAll('#weapons-body .wp-name')].some(inp => norm(inp.value) === n);
 }
-// Adding a weapon from the Equipment picker creates its Attack row (skill,
-// damage, range, notes filled from the weapon data) — but never a duplicate row.
+// Adding a weapon from the Equipment store is ONE action: it creates a linked
+// pair — a gear row in the Equipment list AND an Attack row (skill, damage,
+// range, notes filled from the weapon data) — both tagged with the same link
+// token so deleting the gear row later removes the attack too. Never duplicates.
 function addWeaponFromEquip(name) {
   const w = findWeapon(name); if(!w || weaponRowExists(w.name)) return;
-  addWeaponFromData(name);
+  const link = nextLink();
+  addWeaponFromData(name, link);
+  const dmg = w.damageText || toCode(w.damage);
+  const note = [w.kind, dmg, w.range].filter(Boolean).join(' · ');
+  addGearRow({ name: w.name, note: note, link: link });
+  scheduleAutosave();
 }
 function weaponSkillPips(tr) {
   const sk = tr.querySelector('.wp-skill').value; if(sk) { const p = skillPips(sk); if(p !== null) return { name: sk, pips: p }; const def = D.skills().find(s => s.name === sk); if(def) return { name: sk, pips: attr(def.attribute) }; }
@@ -915,7 +931,7 @@ function renderGearPicker() {
     return true;
   })).map(g => ({ type: 'gear', name: g.name, category: g.category, _g: g }));
   // Personal-scale weapons surface here too (vehicle/artillery scale excluded).
-  // Adding one creates a matching Attack row rather than a plain gear line.
+  // Adding one creates a linked pair: a gear line AND a matching Attack row.
   const weaponList = ((fc && fc !== 'Weapon') ? [] : D.weapons().filter(w =>
       !/^(Starship|Capital|Vehicle|Artillery|Droid)$/.test(w.kind) &&
       (!q || norm(w.name).includes(q) || norm(w.kind || '').includes(q))))
@@ -927,7 +943,7 @@ function renderGearPicker() {
     if(e.type === 'weapon') {
       const w = e._w, dmg = w.damageText || toCode(w.damage), have = weaponRowExists(w.name);
       const meta = [w.kind || 'Weapon', w.range].filter(Boolean).map(esc).join(' · ');
-      const btn = have ? '<button class="brow-add have">On attacks ✓</button>' : '<button class="brow-add" data-add-weapon="' + esc(w.name) + '">+ Attack</button>';
+      const btn = have ? '<button class="brow-add have">Added ✓</button>' : '<button class="brow-add" data-add-weapon="' + esc(w.name) + '">+ Add</button>';
       return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(w.name) + (dmg ? '<span class="brow-cost">' + esc(dmg) + '</span>' : '') + '</div>' +
         (meta ? '<div class="brow-meta">' + meta + '</div>' : '') + '</div>' + btn + '</div>';
     }
@@ -974,15 +990,30 @@ function buyGear(name) {
 })();
 // "Add custom" from a picker: a blank row to fill by hand.
 function addCustomSkill() { addSkillRow({ name:'', attr:'Dexterity', adds:0 }); closeSkillPicker(); scheduleAutosave(); }
-function addCustomWeapon() { addWeaponRow(); closeWeaponPicker(); scheduleAutosave(); }
+// A custom weapon still goes through the link flow: a blank Attack row and a
+// matching gear row, tagged with one token so they add and delete together.
+function addCustomWeapon() {
+  const link = nextLink();
+  addWeaponRow({ name: 'New weapon', link: link });
+  addGearRow({ name: 'New weapon', link: link });
+  closeGearPicker(); closeWeaponPicker(); scheduleAutosave();
+}
 function addCustomGear() { addGearRow(); closeGearPicker(); scheduleAutosave(); }
 function rollForce(power, skill) { const p = skillPips(skill); if(p === null) { addLog(power, '✗', 'You have no ' + skill + ' skill — add it to the skill list', 'fumble'); return; } rollCode(power + ' (' + skill + ')', p); }
 
 // ═══ GEAR + SHIP ══════════════════════════════════════════════════════════
 function addGearRow(g) {
   g = g || {}; const tr = document.createElement('tr');
-  tr.innerHTML = '<td><input type="text" class="gr-name" value="' + esc(g.name || '') + '" placeholder="Comlink"></td><td><input type="text" class="gr-note" value="' + esc(g.note || '') + '"></td><td><button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
+  if(g.link) tr.dataset.link = g.link;
+  tr.innerHTML = '<td><input type="text" class="gr-name" value="' + esc(g.name || '') + '" placeholder="Comlink"></td><td><input type="text" class="gr-note" value="' + esc(g.note || '') + '"></td><td><button class="row-x" onclick="removeGearRow(this)">✕</button></td>';
   $('gear-body').appendChild(tr); return tr;
+}
+// Deleting a gear row also removes its linked Attack row (if any).
+function removeGearRow(btn) {
+  const tr = btn.closest('tr'); if(!tr) return;
+  const link = tr.dataset.link;
+  if(link) { const atk = document.querySelector('#weapons-body tr[data-link="' + link + '"]'); if(atk) atk.remove(); }
+  tr.remove(); scheduleAutosave();
 }
 function addGearFromData(name) {
   const g = findGear(name); if(!g) return;
@@ -1051,9 +1082,9 @@ function collectSheet() {
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attr: tr.dataset.attr, adds: codeOrZero(tr.querySelector('.sk-adds').value) })).filter(s => s.name),
     wound, forcePoints: num(v('f-fp')), darkSide: num(v('f-ds')), skillPoints: num(v('f-sp')), credits: v('f-credits'),
     armor: { name: v('f-armor'), pips: fromCode(v('f-armor-pips')) || 0 }, move: num(v('f-move')) || 10,
-    weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, skill: tr.querySelector('.wp-skill').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, notes: tr.querySelector('.wp-notes').value })).filter(w => w.name || w.damage),
+    weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, skill: tr.querySelector('.wp-skill').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || undefined })).filter(w => w.name || w.damage),
     force: [...document.querySelectorAll('#force-body tr')].map(tr => ({ name: tr.dataset.name })).filter(f => f.name),
-    gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gr-name').value, note: tr.querySelector('.gr-note').value })).filter(g => g.name),
+    gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gr-name').value, note: tr.querySelector('.gr-note').value, link: tr.dataset.link || undefined })).filter(g => g.name),
     ship: { name: v('sh-name'), craft: v('sh-craft'), speed: v('sh-speed'), hull: v('sh-hull'), weapons: v('sh-weapons') },
     background: v('f-background'), personality: v('f-personality'), connection: v('f-connection'), quote: v('f-quote'), special: v('f-special'), notes: v('f-notes'), tab: _tab,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
@@ -1067,9 +1098,11 @@ function applySheet(d) {
   wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; forcePointArmed = false; renderWoundTrack();
   set('f-fp', d.forcePoints ?? 1); set('f-ds', d.darkSide || 0); set('f-sp', d.skillPoints || 0); set('f-credits', d.credits);
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-pips', ar.pips ? toCode(ar.pips, true) : ''); set('f-move', d.move || 10);
-  $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(addWeaponRow);
+  $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(w => addWeaponRow(w));
   $('force-body').innerHTML = ''; (d.force || []).forEach(addForceRow);
-  $('gear-body').innerHTML = ''; (d.gear || []).forEach(addGearRow);
+  $('gear-body').innerHTML = ''; (d.gear || []).forEach(g => addGearRow(g));
+  // Advance the link counter past any restored tokens so new adds never collide.
+  _linkSeq = Math.max(_linkSeq, ...[...document.querySelectorAll('[data-link]')].map(el => parseInt(String(el.dataset.link).replace(/\D/g, ''), 10) || 0), 0);
   const sh = d.ship || {}; set('sh-name', sh.name); set('sh-craft', sh.craft); set('sh-speed', sh.speed); set('sh-hull', sh.hull); set('sh-weapons', sh.weapons);
   set('f-background', d.background); set('f-personality', d.personality); set('f-connection', d.connection); set('f-quote', d.quote); set('f-special', d.special); set('f-notes', d.notes);
   _tab = TABS.includes(d.tab) ? d.tab : _tab;

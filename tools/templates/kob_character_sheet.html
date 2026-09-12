@@ -250,6 +250,8 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
 }
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}
+  /* iOS zooms the page when a focused input is <16px — keep picker search at 16px so the menu opens at its proper size */
+  input[id$="-search"]{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
   .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--kob);z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}

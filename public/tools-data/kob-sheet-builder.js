@@ -51,7 +51,7 @@
       '<div class="modal-hd"><div class="ttl">✨ Character Builder <span id="kobb-step" style="color:#8ad4ff;font-size:12px;letter-spacing:.08em;margin-left:8px;"></span></div><button class="x" onclick="KOBB.close()">&#10005;</button></div>' +
       '<div class="modal-bd" id="kobb-body"></div>' +
       '<div class="modal-ft"><div><button class="m-btn ghost" id="kobb-back" onclick="KOBB.back()">← Back</button></div><div style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="KOBB.close()">Cancel</button><button class="m-btn" id="kobb-next" onclick="KOBB.next()">Next →</button></div></div></div>';
-    ov.addEventListener("click", (e) => { if (e.target === ov) close(); });
+    // Backdrop click no longer closes the builder (prevents losing build progress) — use the ✕.
     document.body.appendChild(ov);
     const css = document.createElement("style");
     css.textContent =

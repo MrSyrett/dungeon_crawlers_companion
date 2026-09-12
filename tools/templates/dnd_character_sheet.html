@@ -402,7 +402,7 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .atk-sub{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);line-height:1;}
 .atk-mastery{background:transparent;border:1px dashed var(--rule);border-radius:3px;color:var(--dnd);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;padding:2px 6px;letter-spacing:.02em;}
 .atk-mastery:hover{background:var(--box);border-style:solid;}
-.sneak-btn{background:transparent;border:1px solid #8a5cc0;color:#8a5cc0;border-radius:3px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;margin-right:4px;}
+.sneak-btn{background:transparent;border:1px solid #8a5cc0;color:#8a5cc0;border-radius:3px;padding:5px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;margin-right:4px;}
 .sneak-btn:hover{background:#8a5cc0;color:#fff;}
 .upcast-btn{background:transparent;border:1px solid var(--dnd);color:var(--dnd);border-radius:3px;padding:3px 6px;font-size:11px;line-height:1;cursor:pointer;margin-right:3px;}
 .upcast-btn:hover{background:var(--dnd);color:#fff;}
@@ -486,6 +486,8 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
 }
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}
+  /* iOS zooms the page when a focused input is <16px — keep picker/spellbook search at 16px so the menu opens at its proper size */
+  input[id$="-search"]{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
   .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--dnd);z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
@@ -542,7 +544,7 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
   /* --- Mobile QC pass: enlarge remaining small touch targets & tiny labels --- */
   /* Roll buttons: shared by the Attacks "Attack" button, the death-save roll,
      and the hit-die spend. Bump to a comfortable tap height. */
-  .mini-roll,.cast-btn{min-height:40px;padding:9px 16px;font-size:13px;}
+  .mini-roll,.cast-btn,.sneak-btn{min-height:40px;padding:9px 16px;font-size:13px;}
   .upcast-btn{min-height:40px;min-width:40px;padding:8px 10px;font-size:15px;}
   .rest-btn{min-height:40px;font-size:12px;}
   .log-action-btn{min-height:38px;font-size:12px;}

@@ -262,6 +262,8 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
 @media (max-width:900px){.body-row{flex-direction:column;}.stats-col{width:100%;border-right:none;border-bottom:2px solid var(--border);}}
 @media (max-width:768px){
   .app-wrap{flex-direction:column;align-items:stretch;}
+  /* iOS zooms the page when a focused input is <16px — keep picker/spellbook search at 16px so the menu opens at its proper size */
+  input[id$="-search"]{font-size:16px;}
   .sheet-wrap{padding:44px 8px 60px;overflow-y:visible;}
   .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--nim);z-index:200;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px);transition:transform .25s ease;overflow:visible !important;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
@@ -427,7 +429,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><button class="hdr-btn" onclick="addCustomAttack()">＋ Add attack</button></span></div>
+      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><span class="sb-note">Add weapons from the Item Store</span></span></div>
       <table class="tbl">
         <thead><tr><th style="width:32%;">Weapon / spell</th><th style="width:26%;">Damage</th><th>Properties</th><th style="width:96px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>
@@ -790,10 +792,25 @@ function rollAttack(name, expr) {
 }
 
 // ═══ ROWS: attacks / spells / picks / inventory ═══════════════════════════
+// Weapon↔attack linking: the Item Store is the ONE place to add a weapon. Adding
+// a weapon creates a linked pair (an inventory row + an attack row) sharing one
+// dataset.link token; removing the inventory row removes its attack row too.
+var _linkSeq = 0;
+function _nextLink() { return 'w' + (++_linkSeq); }
+function _restoreLinkSeq() {
+  let mx = 0;
+  document.querySelectorAll('#attacks-body tr, #inv-body tr').forEach(tr => { const m = /^w(\d+)$/.exec(tr.dataset.link || ''); if(m) mx = Math.max(mx, +m[1]); });
+  _linkSeq = mx;
+}
+function isWeapon(it) { return !!it && (/weapon/i.test(it.category || '') || !!it.damage); }
 function addAttackRow(a) {
   a = a || { name:'', damage:'', props:'' };
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input type="text" class="atk-name" value="${esc(a.name)}" placeholder="Longsword"></td><td><input type="text" class="atk-dmg" value="${esc(a.damage)}" placeholder="1d8+STR" oninput="refreshAttackRows()"></td><td><input type="text" class="atk-props" value="${esc(a.props)}" placeholder="2-handed, Reach 2"></td><td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this.closest('tr').querySelector('.atk-name').value||'Attack', this.closest('tr').querySelector('.atk-dmg').value)">🎲 Attack</button><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button></td>`;
+  if(a.link) tr.dataset.link = a.link;
+  // Linked rows (added from the Item Store) are removed by deleting the inventory
+  // weapon; only legacy/unlinked rows from old saves keep a per-row ✕.
+  const removeBtn = a.link ? '' : `<button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button>`;
+  tr.innerHTML = `<td><input type="text" class="atk-name" value="${esc(a.name)}" placeholder="Longsword"></td><td><input type="text" class="atk-dmg" value="${esc(a.damage)}" placeholder="1d8+STR" oninput="refreshAttackRows()"></td><td><input type="text" class="atk-props" value="${esc(a.props)}" placeholder="2-handed, Reach 2"></td><td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this.closest('tr').querySelector('.atk-name').value||'Attack', this.closest('tr').querySelector('.atk-dmg').value)">🎲 Attack</button>${removeBtn}</td>`;
   $('attacks-body').appendChild(tr); refreshAttackRows();
 }
 function refreshAttackRows() {}
@@ -845,16 +862,27 @@ function addPick(v) {
 function addInvRow(i) {
   i = i || { name:'', slots:1, note:'' };
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="this.closest('tr').remove();recalc();scheduleAutosave()">✕</button></td>`;
+  if(i.link) tr.dataset.link = i.link;
+  tr.innerHTML = `<td><input type="text" class="inv-name" value="${esc(i.name)}" placeholder="Item"></td><td><input type="number" class="num inv-slots" value="${esc(i.slots)}" step="0.5" min="0" oninput="recalc()"></td><td><input type="text" class="inv-note" value="${esc(i.note)}"></td><td><button class="row-x" onclick="removeInvRow(this)">✕</button></td>`;
   $('inv-body').appendChild(tr);
+  return tr;
+}
+// Delete an inventory row; if it's a linked weapon, delete its attack row too.
+function removeInvRow(btn) {
+  const tr = btn.closest('tr'); if(!tr) return;
+  const link = tr.dataset.link;
+  if(link) document.querySelectorAll('#attacks-body tr').forEach(a => { if(a.dataset.link === link) a.remove(); });
+  tr.remove(); recalc(); scheduleAutosave();
 }
 function addInvFromItem(name) {
   const it = findItem(name); if(!it) return;
   const two = /2-handed/i.test(it.properties || '') || ['Mail','Plate'].includes(it.category) && false;
-  addInvRow({ name: it.name, slots: two ? 2 : 1, note: [it.armor && 'Armor ' + it.armor, it.damage, it.properties, it.cost].filter(Boolean).join(' · ') });
+  const weapon = isWeapon(it);
+  const link = weapon ? _nextLink() : '';
+  addInvRow({ name: it.name, slots: two ? 2 : 1, note: [it.armor && 'Armor ' + it.armor, it.damage, it.properties, it.cost].filter(Boolean).join(' · '), link });
   if(['Cloth','Leather','Mail','Plate'].includes(it.category)) $('f-armor').value = it.name;
   if(it.category === 'Shield') $('f-shield').value = it.name;
-  if(it.damage) addAttackRow({ name: it.name, damage: it.damage, props: it.properties || '' });
+  if(weapon) addAttackRow({ name: it.name, damage: it.damage || '', props: it.properties || '', link });
   recalc(); scheduleAutosave();
 }
 function renderFeatures() {
@@ -1002,7 +1030,6 @@ function _flashBrowBtn(btn, txt) { const o = btn.textContent, d = btn.disabled; 
   const ab = $('ability-body'); if(ab) ab.addEventListener('click', e => { const b = e.target.closest('[data-add-ability]'); if(b) { addPick(b.dataset.addAbility); renderAbilityPicker(); } });
 })();
 // "Add custom" from a picker: drop in a blank row to fill by hand.
-function addCustomAttack() { addAttackRow(); scheduleAutosave(); }
 function addCustomSpell() { addSpellRow(); closeSpellbook(); scheduleAutosave(); }
 function addCustomItem() { addInvRow(); closeStore(); scheduleAutosave(); }
 
@@ -1063,10 +1090,10 @@ function collectSheet() {
     hp: { cur: num(v('hp-cur')), max: num(v('hp-max')), temp: num(v('hp-temp')) }, wounds, woundsMax: num(v('wounds-max')),
     hitDice: { cur: num(v('hd-cur')), max: num(v('hd-max')) }, mana: { cur: num(v('mana-cur')), max: num(v('mana-max')) },
     armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions,
-    attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value })).filter(a => a.name || a.damage),
+    attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '' })).filter(a => a.name || a.damage),
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value) })).filter(s => s.name),
-    inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value })).filter(i => i.name),
+    inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value, link: tr.dataset.link || '' })).filter(i => i.name),
     gold: num(v('f-gold')), silver: num(v('f-silver')), traits: v('f-traits'), languages: v('f-languages'), body: v('f-body'), notes: v('f-notes'), conditions: conditions.slice(), tab: _tab,
     campaign: (typeof _campaign !== 'undefined' && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
   };
@@ -1085,6 +1112,7 @@ function applySheet(d) {
   fillPoolPick(); $('picks-body').innerHTML = ''; (d.picks || []).forEach(p => addPick(p));
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);
+  _restoreLinkSeq();
   set('f-gold', d.gold ?? 50); set('f-silver', d.silver || 0); set('f-traits', d.traits); set('f-languages', d.languages || 'Common'); set('f-body', d.body); set('f-notes', d.notes);
   conditions = Array.isArray(d.conditions) ? d.conditions.slice() : []; renderConditions();
   _tab = TABS.includes(d.tab) ? d.tab : _tab;

@@ -119,7 +119,7 @@
         '<div class="modal-ft"><div><button class="m-btn ghost" id="dndb-back" onclick="DNDB.back()">← Back</button></div>' +
         '<div style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="DNDB.close()">Cancel</button><button class="m-btn" id="dndb-next" onclick="DNDB.next()">Next →</button></div></div>' +
       '</div>';
-    ov.addEventListener("click", (e) => { if (e.target === ov) DNDB.close(); });
+    // Backdrop click no longer closes the builder (prevents losing build progress) — use the ✕.
     document.body.appendChild(ov);
   }
   function launch() { ensureModal(); st = fresh(); step = 0; $("dndb-overlay").classList.add("open"); render(); }

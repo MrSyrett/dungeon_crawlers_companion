@@ -34,7 +34,7 @@
       + '<div id="swb-steps" style="display:flex;gap:4px;padding:8px 16px 0;flex-wrap:wrap;"></div>'
       + '<div class="modal-bd" id="swb-body"></div>'
       + '<div class="modal-ft"><button class="m-btn ghost" id="swb-back" onclick="SWB.back()">← Back</button><span id="swb-note" style="font-size:12px;color:#999;align-self:center;flex:1;text-align:center;"></span><button class="m-btn" id="swb-next" onclick="SWB.next()">Next →</button></div></div>';
-    ov.addEventListener('click', e => { if (e.target === ov) SWB.close(); });
+    // Backdrop click no longer closes the builder (prevents losing build progress) — use the ✕.
     document.body.appendChild(ov);
   }
   function render() {
