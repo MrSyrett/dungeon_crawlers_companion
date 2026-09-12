@@ -417,6 +417,24 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 .lb-btn{background:#c8a020;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
 .lb-btn:hover:not(:disabled){background:#e0b83a;}
 .lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
+/* HeroDark mode */
+.hd-badge{align-self:center;background:#2a1a10;color:#e0b83a;border:1px solid #8a5a1a;border-radius:3px;padding:5px 9px;font-family:'Montserrat',sans-serif;font-weight:800;font-size:10px;letter-spacing:.1em;cursor:pointer;white-space:nowrap;}
+.hd-badge:hover{background:#8a5a1a;color:#fff;}
+.hd-actions-wrap{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;margin:6px 2px 0;padding:6px 8px;background:rgba(200,160,32,.08);border:1px solid #6a4a12;border-radius:5px;}
+.hd-lbl{font-family:'Montserrat',sans-serif;font-weight:800;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#c8a020;}
+.hd-pips{display:inline-flex;gap:6px;}
+.hd-act-pip{display:inline-block;width:20px;height:20px;border:2px solid #c8a020;border-radius:4px;cursor:pointer;background:transparent;box-sizing:border-box;vertical-align:middle;}
+.hd-act-pip.used{background:#c8a020;border-color:#c8a020;}
+.hd-reset{background:#1a1a1a;color:#e0d0a0;border:1px solid #6a5a2a;border-radius:4px;cursor:pointer;font-size:10px;padding:4px 8px;font-family:'Montserrat',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.hd-reset:hover{border-color:#c8a020;color:#fff;}
+.hd-note{font-size:10px;color:#9a8f70;line-height:1.3;}
+.hd-dying{font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;color:#fff;background:#7a1a1a;border:1px solid #b03030;border-radius:4px;padding:3px 9px;}
+.hd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px;}
+.hd-modal{max-width:520px;width:100%;max-height:86vh;overflow:auto;background:#161412;border:1px solid #6a4a12;border-radius:8px;color:#e8e2d4;font-family:'Montserrat',sans-serif;}
+.hd-modal-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #3a3020;font-weight:800;font-size:15px;color:#e0b83a;letter-spacing:.04em;}
+.hd-modal-bd{padding:12px 16px;font-size:12px;}
+.hd-modal-bd b{color:#f0e2b0;}
+.hd-x{background:transparent;border:none;color:#9a8f70;font-size:16px;cursor:pointer;}.hd-x:hover{color:#fff;}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
@@ -432,6 +450,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   <div class="sheet-title">
     <div class="sheet-title-text">Shadowdark</div>
     <div class="sheet-title-actions">
+      <span id="hd-badge" class="hd-badge" onclick="openHeroDarkRules()" title="HeroDark mode is on — click for the rules summary" style="display:none;">⚔ HERODARK</span>
       <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and auto-consumes ammo (bows spend an arrow, crossbows a bolt), uses up a scroll on casting, and marks a wand spent on a failed check (broken on a natural 1). Also locks the Talents box (the wizards write it). Turn off to handle AC, talents and these items by hand."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
       <button onclick="takeRest()" style="padding:6px 14px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;align-self:center;" onmouseover="this.style.background='#1a5a7a';this.style.color='white'" onmouseout="this.style.background='#1a2e3a';this.style.color='#6ac8df'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg> Rest</button>
     </div>
@@ -475,7 +494,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
       <div class="sd-vitals">
         <div class="sd-vital">
           <span class="sv-lbl">HP</span>
-          <div class="sv-row"><input type="text" class="sv-big" id="hp-current" placeholder="0"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="hp-max" placeholder="0"></div>
+          <div class="sv-row"><input type="text" class="sv-big" id="hp-current" placeholder="0" oninput="onHPChange()"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="hp-max" placeholder="0"></div>
         </div>
         <div class="sd-vital">
           <span class="sv-lbl">AC</span>
@@ -489,6 +508,13 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <span class="sv-lbl">Luck</span>
           <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-big" id="lk-val" placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
         </div>
+      </div>
+      <div id="hd-actions-wrap" class="hd-actions-wrap" style="display:none;">
+        <span class="hd-lbl">Actions</span>
+        <span id="hd-actions" class="hd-pips"></span>
+        <button class="hd-reset" onclick="resetHeroDarkActions()" title="New turn — regain all 3 Actions">↺ Turn</button>
+        <span class="hd-note">Repeating the same action (not movement) is at disadvantage.</span>
+        <span id="hd-dying" class="hd-dying" style="display:none;">☠ DYING — 1 action, disadvantage on all checks</span>
       </div>
 
       <!-- ATTACKS -->
@@ -988,6 +1014,19 @@ let _itemBonusAtk   = { meleeAtk:0, meleeDmg:0, rangedAtk:0, rangedDmg:0 };
 // How much we've already baked into hp-max and each ability score input.
 let _itemBonusApplied = { hp:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 };
 let _applyingItemBonuses = false;   // re-entrancy guard
+
+// ── HeroDark mode (Shadowdark option, set at character creation) ─────────────
+// The HeroDark hack: Max HP at level 1, choose talents at level-up, an even-level
+// Skill Talent, unlimited Luck, a Luck point on any natural 1 or 20, a 3-Action
+// turn, and Dying (not unconscious) at 0 HP — 1 action + disadvantage on all
+// checks. Some of these are already how the sheet works (Luck is a free number,
+// talents can be chosen); the rest are automated below or listed in the ⚔ panel.
+function defaultOptions(){ return { heroDark:false }; }
+let options = defaultOptions();
+let heroDarkActionsUsed = 0;   // Actions spent this turn (of 3)
+let _heroDarkDying = false;    // at 0 HP in HeroDark: Dying, forces disadvantage
+function heroDarkOn(){ return !!(options && options.heroDark); }
+window.heroDarkOn = heroDarkOn;
 
 // Sum the bonuses of every equipped, non-disabled gear item that maps to a
 // homebrew item. Enchanted "+N <name>" rows resolve to the base item (findHomebrewItem strips the prefix).
@@ -2288,11 +2327,74 @@ function clearAdv() {
 }
 function rollWithAdv(sides) {
   const r1 = Math.floor(Math.random()*sides)+1;
-  if(sides !== 20 || !advState) return {result:r1, detail:null};
+  let st = advState;
+  // HeroDark: while Dying you have disadvantage on all d20 checks (a lone
+  // advantage cancels it to a normal roll, as adv/dis normally do).
+  if(sides === 20 && heroDarkOn() && _heroDarkDying) st = (st === 'advantage') ? null : 'disadvantage';
+  if(sides !== 20 || !st) return {result:r1, detail:null};
   const r2 = Math.floor(Math.random()*sides)+1;
-  return advState==='advantage'
+  return st==='advantage'
     ? {result:Math.max(r1,r2), detail:`adv[${r1},${r2}]→${Math.max(r1,r2)}`}
     : {result:Math.min(r1,r2), detail:`dis[${r1},${r2}]→${Math.min(r1,r2)}`};
+}
+// HeroDark: gain a Luck point on any natural 1 or 20 from a d20 roll.
+function heroDarkLuckOnNat(natRoll, source){
+  if(!heroDarkOn() || (natRoll !== 1 && natRoll !== 20)) return;
+  const el = document.getElementById('lk-val');
+  if(el) el.value = (parseInt(el.value) || 0) + 1;
+  addLog('Luck +1', '✦', 'HeroDark: natural ' + natRoll + (source ? ' on ' + source : '') + ' — gain a Luck point', natRoll === 20 ? 'crit' : 'fumble');
+  saveSheet();
+}
+// HeroDark: dropping to 0 HP makes you Dying (not unconscious) — 1 action and
+// disadvantage on all checks (enforced in rollWithAdv) until you're healed above 0.
+function onHPChange(){
+  saveSheet();
+  if(!heroDarkOn()) return;
+  const cur = parseInt(document.getElementById('hp-current')?.value);
+  const dying = !isNaN(cur) && cur <= 0;
+  if(dying === _heroDarkDying) return;
+  _heroDarkDying = dying;
+  renderHeroDark();
+  addLog(dying ? 'Dying' : 'Stabilized', dying ? '☠' : '✚',
+    dying ? 'HeroDark: at 0 HP you are Dying — 1 action and disadvantage on all checks (not unconscious).'
+          : 'Above 0 HP again — no longer Dying.',
+    dying ? 'fumble' : 'normal');
+}
+// ── HeroDark sheet chrome: badge, 3-Action tracker, Dying flag, rules modal ──
+function renderHeroDark(){
+  const on = heroDarkOn();
+  const badge = document.getElementById('hd-badge'); if(badge) badge.style.display = on ? '' : 'none';
+  const wrap = document.getElementById('hd-actions-wrap'); if(wrap) wrap.style.display = on ? '' : 'none';
+  const dv = document.getElementById('hd-dying'); if(dv) dv.style.display = (on && _heroDarkDying) ? '' : 'none';
+  if(on) renderHeroDarkActions();
+}
+function renderHeroDarkActions(){
+  const box = document.getElementById('hd-actions'); if(!box) return;
+  let h = ''; for(let i=1;i<=3;i++) h += '<span class="hd-act-pip' + (i<=heroDarkActionsUsed?' used':'') + '" onclick="toggleHeroDarkAction(' + i + ')" title="Action ' + i + ' — tap to spend"></span>';
+  box.innerHTML = h;
+}
+function toggleHeroDarkAction(i){ heroDarkActionsUsed = (i <= heroDarkActionsUsed ? i-1 : i); renderHeroDarkActions(); saveSheet(); }
+function resetHeroDarkActions(){ heroDarkActionsUsed = 0; renderHeroDarkActions(); saveSheet(); }
+const HERODARK_RULES_HTML =
+  '<p style="margin:0 0 8px;">HeroDark makes Shadowdark heroes tougher and more capable. This sheet automates the parts below; the rest are quick table rules.</p>' +
+  '<p style="margin:8px 0 3px;font-weight:800;color:#e0b83a;">Automated on this sheet</p>' +
+  '<ul style="margin:0 0 8px;padding-left:18px;line-height:1.55;">' +
+  '<li><b>Luck on any natural 1 or 20.</b> A nat 1 or 20 on a d20 roll (check, attack, or spellcast) adds a Luck point automatically.</li>' +
+  '<li><b>Unlimited Luck.</b> The Luck box has no cap — spend and bank as many as you earn.</li>' +
+  '<li><b>Dying at 0 HP.</b> Drop to 0 HP and you become Dying, not unconscious: 1 action on your turn and <b>disadvantage on all checks</b> (applied automatically) until you\'re healed above 0.</li>' +
+  '<li><b>3 Actions</b> a turn (the tracker below the vitals).</li>' +
+  '<li><b>Max HP at level 1</b> (set when you build a HeroDark character) and <b>choose your talent</b> at each level-up.</li>' +
+  '</ul>' +
+  '<p style="margin:8px 0 3px;font-weight:800;color:#e0b83a;">Table rules</p>' +
+  '<ul style="margin:0;padding-left:18px;line-height:1.55;">' +
+  '<li><b>Repeated actions.</b> You may take the same action more than once in a turn, but every repeat after the first (movement excepted) is at <b>disadvantage</b>.</li>' +
+  '<li><b>Skill Talent (even levels).</b> At each even level the level-up wizard lets you learn a new weapon or armor, a new language, or gain a write-in Skill (advantage on rolls about that subject).</li>' +
+  '</ul>';
+function openHeroDarkRules(){
+  let ov = document.getElementById('hd-overlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'hd-overlay'; ov.className = 'hd-overlay'; ov.onclick = (e) => { if(e.target === ov) ov.style.display = 'none'; }; document.body.appendChild(ov); }
+  ov.innerHTML = '<div class="hd-modal"><div class="hd-modal-hd"><span>⚔ HeroDark Mode</span><button class="hd-x" onclick="document.getElementById(\'hd-overlay\').style.display=\'none\'">✕</button></div><div class="hd-modal-bd">' + HERODARK_RULES_HTML + '</div></div>';
+  ov.style.display = 'flex';
 }
 function d(s){return Math.floor(Math.random()*s)+1;}
 function parseMod(v){if(!v)return 0;const n=parseInt((v+'').replace(/\s/g,''));return isNaN(n)?0:n;}
@@ -2359,6 +2461,7 @@ function rollStat(id, name) {
   const base = advDetail||`d20(${roll})`;
   addLog(`${name} Check`+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
     `${base} + Mod(${fmtMod(mod)}) = ${total}`, type);
+  heroDarkLuckOnNat(roll, name + ' check');
 }
 
 // Extra spell lists a caster opted into (beyond their class's own list). Saved
@@ -2599,6 +2702,7 @@ function rollAttack(btn) {
 
   addLog(`${name}`+(hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''),
     resultStr, detailStr, type);
+  heroDarkLuckOnNat(hitRoll, name);
 }
 
 function rollSpell(btn) {
@@ -2677,6 +2781,7 @@ function rollSpell(btn) {
     + (dmgBreakdown ? `  |  ${dmgBreakdown}` : '');
 
   addLog(`${name} (Tier ${spellLevel})${isAdvSpell?' ▲':''}`, resultStr, detailStr, type);
+  heroDarkLuckOnNat(roll, name);
 
   // ── Scroll / Wand consumption ── (only when Auto is on; off = track by hand)
   if(source && _autoConsume) {
@@ -2961,6 +3066,9 @@ function collectSheet(){
       // colon), so keep the verbatim text for our own round-trip.
       talents:   talentsText,
       luckPts:   document.getElementById('lk-val')?.value || '',
+      options:   options,
+      heroDarkActions: heroDarkActionsUsed,
+      dying:     _heroDarkDying,
       featureUses: _featureUses && typeof _featureUses === 'object' ? _featureUses : {},
       trackers:       Array.isArray(_trackers) ? _trackers : [],
       customTrackers: Array.isArray(_customTrackers) ? _customTrackers : [],
@@ -3299,6 +3407,11 @@ function _applySDData(d){
   // bonuses (adds the HP/ability deltas back on top of the loaded base values).
   if(typeof applyItemBonuses === 'function') applyItemBonuses();
   renderTalentsView();          // restore the styled Talents view after a load
+  // HeroDark option + play state
+  options = Object.assign(defaultOptions(), (d._sheet && d._sheet.options) || {});
+  heroDarkActionsUsed = parseInt(d._sheet?.heroDarkActions) || 0;
+  _heroDarkDying = !!(d._sheet && d._sheet.dying);
+  if(typeof renderHeroDark === 'function') renderHeroDark();
 }
 
 function importShadowdarklings(input) {
@@ -3392,7 +3505,7 @@ function takeRest() {
   // HP to max
   const hpMax = document.getElementById('hp-max')?.value || '';
   const hpCur = document.getElementById('hp-current');
-  if(hpCur && hpMax) { hpCur.value = hpMax; notes.push('HP restored to ' + hpMax); }
+  if(hpCur && hpMax) { hpCur.value = hpMax; notes.push('HP restored to ' + hpMax); if(typeof onHPChange === 'function') onHPChange(); }
 
   // Lost spells return; spent wands start working again
   let regained = 0;

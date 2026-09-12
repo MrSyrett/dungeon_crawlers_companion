@@ -34,6 +34,7 @@ function startLevelUp() {
     newLevel: newLevel,
     hpRoll: null,
     gainsTalent: newLevel % 2 === 1, // talents at odd levels (3,5,7,9)
+    skillTalent: null,               // HeroDark: even-level Skill Talent choice
     talent: null, talentRoll: null, talentPick: null, hbTalentChoice: null, hbTalentSpells: [], hbChoices: {}, tres: null,
     newSpells: [], spellSrc: null, spellSrcOf: {}, spellsNeeded: 0, spellTiers: [], spellTierCap: 0, extraHd: null,
   };
@@ -67,13 +68,39 @@ function startLevelUp() {
 
 function lvlClose() { document.getElementById('lvl-overlay').style.display = 'none'; _lvl = null; }
 
+function lvlHeroDarkEven(){ return (typeof heroDarkOn === 'function' && heroDarkOn() && _lvl.newLevel % 2 === 0); }
 function lvlSteps() {
   const steps = ['Hit Points'];
   if(_lvl.spellsNeeded > 0) steps.push('New Spells');
   if(_lvl.gainsTalent) steps.push('Talent');
+  if(lvlHeroDarkEven()) steps.push('Skill Talent');   // HeroDark even-level talent
   if(_hbLvlLearnCount() > 0) steps.push('Learn Spells');
   steps.push('Finish');
   return steps;
+}
+// HeroDark Skill Talent step: learn a weapon or armor, a language, or gain a write-in Skill.
+function lvlSkillTalent() {
+  const st = _lvl.skillTalent || (_lvl.skillTalent = { kind:'weapon', value:'' });
+  const seg = (k,label) => '<button class="ccw-choice'+(st.kind===k?' selected':'')+'" style="flex:1;min-width:0;padding:8px 4px;" onclick="lvlSkillKind(\''+k+'\')"><div class="ccw-choice-name" style="font-size:11px;">'+label+'</div></button>';
+  let h = '<p class="ccw-hint">HeroDark: level '+_lvl.newLevel+' grants a <b>Skill Talent</b>. Learn a new weapon or armor, a new language, or gain a Skill.</p>';
+  h += '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">'+seg('weapon','New Weapon')+seg('armor','New Armor')+seg('language','Language')+seg('skill','Gain a Skill')+'</div>';
+  const ph = st.kind==='weapon' ? 'Weapon you learn to wield (e.g. Longsword)'
+           : st.kind==='armor' ? 'Armor you learn to wear (e.g. Plate mail)'
+           : st.kind==='language' ? 'Language you learn (e.g. Draconic)'
+           : 'Subject you gain a Skill in (e.g. Climbing, Lockpicking)';
+  h += '<input type="text" id="lvl-skill-input" value="'+String(st.value||'').replace(/"/g,'&quot;')+'" placeholder="'+ph+'" oninput="_lvl.skillTalent.value=this.value" style="width:100%;padding:9px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;box-sizing:border-box;">';
+  if(st.kind==='skill') h += '<p class="ccw-hint" style="font-size:10px;margin-top:6px;">You gain <b>advantage</b> on rolls pertaining to this subject.</p>';
+  if((st.value||'').trim()) h += '<div class="ccw-result">'+lvlSkillTalentLine()+'</div>';
+  return h;
+}
+function lvlSkillKind(k){ if(!_lvl.skillTalent) _lvl.skillTalent = { kind:k, value:'' }; else _lvl.skillTalent.kind = k; lvlRender(); }
+function lvlSkillTalentLine(){
+  const st = _lvl.skillTalent; if(!st || !String(st.value||'').trim()) return '';
+  const v = String(st.value).trim();
+  if(st.kind==='weapon')   return 'Skill Talent: You can wield '+v+'.';
+  if(st.kind==='armor')    return 'Skill Talent: You can wear '+v+'.';
+  if(st.kind==='language') return 'Skill Talent: You learn the '+v+' language.';
+  return 'Skill Talent: '+v+' — advantage on rolls pertaining to '+v+'.';
 }
 
 function lvlRender() {
@@ -83,6 +110,7 @@ function lvlRender() {
   const name = steps[_lvl.step];
   if(name==='Hit Points') body.innerHTML = lvlHP();
   else if(name==='Talent') body.innerHTML = lvlTalent();
+  else if(name==='Skill Talent') body.innerHTML = lvlSkillTalent();
   else if(name==='New Spells') body.innerHTML = lvlSpells();
   else if(name==='Learn Spells') body.innerHTML = lvlLearnSpells();
   else body.innerHTML = lvlFinish();
@@ -108,6 +136,9 @@ function lvlNext() {
         if(!(_lvl.hbChoices && _lvl.hbChoices[ch.key])) { alert('Make a choice: ' + _hbChoiceLabel(ch)); return; }
       }
     }
+  }
+  if(name==='Skill Talent') {
+    if(!_lvl.skillTalent || !String(_lvl.skillTalent.value||'').trim()) { alert('Name your Skill Talent (a weapon, armor, language, or subject).'); return; }
   }
   if(name==='Learn Spells') {
     const n=_hbLvlLearnCount();
@@ -410,6 +441,7 @@ function lvlFinish() {
   }
   h += '<div>+'+(_lvl.hpRoll + (_lvl.extraHd||0))+' max HP'+(_lvl.extraHd?' (includes an extra Hit Die)':'')+'</div>';
   if(_lvl.talent) h += '<div>New Talent: '+((_lvl.tres&&_lvl.tres.final)||_lvl.talent)+'</div>';
+  if(typeof lvlSkillTalentLine === 'function' && lvlSkillTalentLine()) h += '<div>'+lvlSkillTalentLine()+'</div>';
   if(_lvl.newSpells.length) h += '<div>New Spells: '+_lvl.newSpells.join(', ')+'</div>';
   if(newTitle && newTitle!==oldTitle) h += '<div>New Title: '+newTitle+'</div>';
   h += '<div style="margin-top:6px;color:#888;font-size:10px;">XP resets to 0 on level up.</div>';
@@ -440,6 +472,13 @@ function lvlApply() {
   if(talentText) {
     const ta = document.getElementById('talents-text');
     if(ta) ta.value = (ta.value ? ta.value + '\n' : '') + '— Level ' + _lvl.newLevel + ' Talent —\n' + talentText;
+    renderTalentsView();
+  }
+  // HeroDark Skill Talent (even levels) → recorded in the Talents box.
+  const _skillLine = (typeof lvlSkillTalentLine === 'function') ? lvlSkillTalentLine() : '';
+  if(_skillLine) {
+    const ta = document.getElementById('talents-text');
+    if(ta) ta.value = (ta.value ? ta.value + '\n' : '') + '— Level ' + _lvl.newLevel + ' Skill Talent —\n' + _skillLine;
     renderTalentsView();
   }
   // Apply stat boosts from talent choices to the sheet

@@ -609,7 +609,7 @@ function startCharWizard() {
            langCommon: [], langRare: [], langPriest: '', elfFarsight: null, koboldKnack: null, hbChoice: {},
            inclOptional: true, inclHomebrew: true,
            spells: [], spellSrc: null, spellSrcOf: {}, gold: null, buyKit: true, buyWeapons: [], buyArmor: [],
-           name: '', hp: null };
+           name: '', hp: null, heroDark: false };
   document.getElementById('ccw-overlay').style.display = 'flex';
   ccwRender();
   // Pull the latest shared homebrew so freshly-authored classes/ancestries/
@@ -719,6 +719,11 @@ function ccwMethod() {
   h += '<label style="display:flex;align-items:center;gap:6px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#ccc;cursor:pointer;"><input type="checkbox" '+(_ccwInclOptional()?'checked':'')+' onchange="_ccw.inclOptional=this.checked;ccwRender()"> Optional Content</label>';
   h += '<label style="display:flex;align-items:center;gap:6px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#ccc;cursor:pointer;"><input type="checkbox" '+(_ccwInclHomebrew()?'checked':'')+' onchange="_ccw.inclHomebrew=this.checked;ccwRender()"> Homebrew</label>';
   h += '</div>';
+  h += '<div class="ccw-hd'+(_ccw.heroDark?' on':'')+'" onclick="_ccw.heroDark=!_ccw.heroDark;ccwRender()" style="margin:0 0 12px;padding:9px 11px;border:1px solid '+(_ccw.heroDark?'#c8a020':'#4a3a1a')+';border-radius:5px;background:'+(_ccw.heroDark?'#241a0a':'#141210')+';cursor:pointer;">'
+     + '<div style="display:flex;align-items:flex-start;gap:9px;">'
+     + '<span style="flex:0 0 18px;width:18px;height:18px;border:2px solid #c8a020;border-radius:3px;color:#161616;background:'+(_ccw.heroDark?'#c8a020':'transparent')+';text-align:center;line-height:15px;font-weight:900;font-size:12px;">'+(_ccw.heroDark?'✓':'')+'</span>'
+     + '<div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#e0b83a;">⚔ HeroDark mode</div>'
+     + '<div style="font-family:Montserrat,sans-serif;font-size:10px;color:#a99a78;line-height:1.4;margin-top:2px;">A heroic hack: max HP at level 1, choose talents on level-up, unlimited Luck (and a Luck point on any natural 1 or 20), 3 actions a turn, and Dying instead of unconscious at 0 HP. You can toggle it later on the sheet.</div></div></div></div>';
   h += '<button class="ccw-choice" style="width:100%;margin-bottom:8px;padding:14px;" onclick="ccwGoRandom()"><div class="ccw-choice-name"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random Character</div><div class="ccw-choice-desc">Instantly generate a complete character — stats, class, gear, everything rolled for you.</div></button>';
   h += '<button class="ccw-choice" style="width:100%;padding:14px;" onclick="_ccw.step++;ccwRender()"><div class="ccw-choice-name"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M5.5 4.2h9a1.3 1.3 0 0 1 1.3 1.3v2.2a1.3 1.3 0 0 1-1.3 1.3h-9a1.3 1.3 0 0 1-1.3-1.3V5.5a1.3 1.3 0 0 1 1.3-1.3Z"/><path d="M8.7 9h2.6l-.5 10.4a.8.8 0 0 1-1.6 0Z"/></svg> Design Your Own</div><div class="ccw-choice-desc">Walk through each step and make every roll and choice yourself.</div></button>';
   return h;
@@ -1764,7 +1769,13 @@ function ccwRollHP() {
 
 // ── Apply to sheet ──
 function ccwApply() {
-  if(!_ccw.hp) ccwRollHP();
+  // HeroDark: characters begin with maximum HP at level 1.
+  if(_ccw.heroDark){
+    const _hdN = parseInt(RC_CLASS_INFO[_ccw.cls].hd.split('d')[1]);
+    let _mhp = _hdN + _rc_mod(ccwEffStats().CON);
+    if(_ccw.ancestry==='Dwarf') _mhp += 2;
+    _ccw.hp = Math.max(1, _mhp);
+  } else if(!_ccw.hp) ccwRollHP();
   if(!_ccw.name) _ccw.name = _rc_roll(RC_NAMES[_ccw.ancestry]||RC_NAMES.Human);
   const c = _ccw;
   const eff = ccwEffStats();
@@ -2056,6 +2067,12 @@ function ccwApply() {
   _charSpellSources = c.spellSrc
     ? Object.keys(c.spellSrc).filter(k => c.spellSrc[k])
     : [];
+
+  // HeroDark: record the option on the sheet so it persists and drives the sheet chrome.
+  if(typeof options !== 'undefined'){ options = Object.assign((typeof defaultOptions==='function'?defaultOptions():{}), { heroDark: !!c.heroDark }); }
+  if(typeof heroDarkActionsUsed !== 'undefined') heroDarkActionsUsed = 0;
+  if(typeof _heroDarkDying !== 'undefined') _heroDarkDying = false;
+  if(typeof renderHeroDark === 'function') renderHeroDark();
 
   saveSheet(false);
   addLog('Character Created','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M5.5 4.2h9a1.3 1.3 0 0 1 1.3 1.3v2.2a1.3 1.3 0 0 1-1.3 1.3h-9a1.3 1.3 0 0 1-1.3-1.3V5.5a1.3 1.3 0 0 1 1.3-1.3Z"/><path d="M8.7 9h2.6l-.5 10.4a.8.8 0 0 1-1.6 0Z"/></svg>',c.name+' the '+c.ancestry+' '+c.cls,'normal');
