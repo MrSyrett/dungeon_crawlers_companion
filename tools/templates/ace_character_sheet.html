@@ -466,7 +466,8 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign" aria-label="Campaign">🔗</button>
-    <button class="log-action-btn wizard" onclick="ACEB.launch()" title="Hero Builder" aria-label="Hero Builder">Create</button>
+    <button id="build-btn" class="log-action-btn wizard" onclick="ACEB.launch()" title="Hero Builder" aria-label="Hero Builder">Create</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Advance this Hero" aria-label="Advance this Hero" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON" aria-label="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON" aria-label="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -538,6 +539,15 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="modal-hd"><div class="ttl" id="focus-title">Focuses</div><button class="x" onclick="closeFocusPicker()">&#10005;</button></div>
     <div class="brow-controls"><input id="focus-search" class="m-input" placeholder="Search focuses…" oninput="renderFocusPicker()"><button class="m-btn ghost" style="align-self:flex-start;" onclick="addBlankFocusLine()">＋ Add custom</button></div>
     <div class="modal-bd brow-list" id="focus-body"></div>
+  </div>
+</div>
+
+<!-- LEVEL UP -->
+<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-hd"><div class="ttl">✨ Advancement</div><button class="x" onclick="closeLevelUp()">&#10005;</button></div>
+    <div class="modal-bd" id="levelup-body"></div>
+    <div class="modal-ft" style="display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button></div>
   </div>
 </div>
 
@@ -627,7 +637,10 @@ function statVal(id) { return Math.max(0, num($('st-' + id).value)); }
 function focusOf(id) { return String($('fo-' + id).value || '').trim(); }
 function statDice(id, withFocus) { return statVal(id) + ((typeof withFocus === 'string' ? withFocus : (withFocus && focusOf(id))) ? 2 : 0); }
 
+function hasCharacter() { return !!(($('f-name') && $('f-name').value.trim()) || ($('f-role') && $('f-role').value.trim())); }
+function refreshWizardButtons() { const built = hasCharacter(); const bb = $('build-btn'), lb = $('level-btn'); if(bb) bb.style.display = built ? 'none' : ''; if(lb) lb.style.display = built ? '' : 'none'; }
 function recalc() {
+  refreshWizardButtons();
   // dice-with-focus preview + stat point tally
   let used = 0;
   STATS.forEach(s => {
@@ -956,6 +969,54 @@ function openFocusPicker(id) {
   $('focus-search').value = ''; $('focus-overlay').classList.add('open'); renderFocusPicker(); $('focus-search').focus();
 }
 function closeFocusPicker() { $('focus-overlay').classList.remove('open'); }
+
+// ═══ ADVANCEMENT (LEVEL UP) ═══════════════════════════════════════════════
+// Each advancement: raise one Stat by +1, or learn a new Focus.
+var _lvlFocusStat = null;
+function levelActiveStats() { return STATS.filter(s => !s.optional || hasPower()); }
+function openLevelUp() {
+  if(!hasCharacter()) { ACEB.launch(); return; }
+  const active = levelActiveStats();
+  if(!active.some(s => s.id === _lvlFocusStat)) _lvlFocusStat = active[0].id;
+  renderLevelUp(); $('levelup-overlay').classList.add('open');
+}
+function closeLevelUp() { $('levelup-overlay').classList.remove('open'); }
+function renderLevelUp() {
+  const stats = levelActiveStats();
+  if(!stats.some(s => s.id === _lvlFocusStat)) _lvlFocusStat = stats[0].id;
+  let h = '<p class="m-hint">Each advancement, choose <b>one</b>: raise a Stat by +1, or learn a new Focus.</p>';
+  h += '<div class="m-lbl">Raise a Stat by +1</div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+  h += stats.map(s => { const v = statVal(s.id); return '<button class="m-btn" style="flex:1 1 40%;" onclick="levelRaiseStat(\'' + s.id + '\')">' + esc(s.name) + ' ' + v + ' &rarr; ' + (v + 1) + '</button>'; }).join('');
+  h += '</div>';
+  h += '<div class="m-lbl" style="margin-top:14px;">Learn a new Focus</div>';
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">';
+  h += '<select class="m-input" id="lvl-focus-stat" style="width:auto;flex:0 0 auto;" onchange="_lvlFocusStat=this.value;renderLevelUp()">' + stats.map(s => '<option value="' + s.id + '"' + (s.id === _lvlFocusStat ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('') + '</select>';
+  h += '<input class="m-input" id="lvl-focus-name" list="lvl-focus-dl" placeholder="Focus name" style="flex:1;min-width:120px;">';
+  h += '<button class="m-btn" onclick="levelLearnFocus()">Learn</button></div>';
+  const opts = [...new Set(D.focuses().filter(f => norm(f.stat) === _lvlFocusStat).map(f => f.name))].sort();
+  h += '<datalist id="lvl-focus-dl">' + opts.map(n => '<option value="' + esc(n) + '">').join('') + '</datalist>';
+  const cur = focusesOf(_lvlFocusStat);
+  if(cur.length) h += '<p class="m-hint" style="margin-top:6px;">Known ' + esc((STATS.find(s => s.id === _lvlFocusStat) || {}).name) + ' focuses: ' + esc(cur.join(', ')) + '</p>';
+  $('levelup-body').innerHTML = h;
+}
+function levelRaiseStat(id) {
+  const v = statVal(id); $('st-' + id).value = v + 1;
+  const nm = (STATS.find(s => s.id === id) || {}).name || id;
+  recalc(); scheduleAutosave();
+  addLog('Advancement', '+1 ' + nm, nm + ' ' + v + ' → ' + (v + 1), 'crit');
+  closeLevelUp();
+}
+function levelLearnFocus() {
+  const id = $('lvl-focus-stat').value; const name = ($('lvl-focus-name').value || '').trim();
+  if(!name) { $('lvl-focus-name').focus(); return; }
+  if(focusesOf(id).some(f => norm(f) === norm(name))) { addLog('Advancement', '—', 'That Focus is already known.', 'normal'); $('lvl-focus-name').select(); return; }
+  const empty = focusInputs(id).find(i => !i.value.trim());
+  if(empty) empty.value = name; else addFocusLine(id, name);
+  const nm = (STATS.find(s => s.id === id) || {}).name || id;
+  recalc(); scheduleAutosave();
+  addLog('Advancement', 'Focus', 'Learned ' + name + ' (' + nm + ')', 'crit');
+  closeLevelUp();
+}
 function pickFocusValue(name) {
   if(!_focusStat) return;
   const inputs = focusInputs(_focusStat);

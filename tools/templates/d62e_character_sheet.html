@@ -468,7 +468,8 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #3a2c22;background:transparent;color:#9a8676;" title="Campaign">🔗</button>
-    <button class="log-action-btn wizard" onclick="D62EB.launch()" title="Character Builder">Create</button>
+    <button id="build-btn" class="log-action-btn wizard" onclick="D62EB.launch()" title="Character Builder">Create</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Advance this character" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -536,6 +537,13 @@ select option{background:var(--input-bg);color:var(--ink);}
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">D6 System 2e — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
+<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-hd"><div class="ttl">✨ Advancement</div><button class="x" onclick="closeLevelUp()">&#10005;</button></div>
+    <div class="modal-bd" id="levelup-body"></div>
+    <div class="modal-ft" id="levelup-ft" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 16px;"></div>
+  </div>
+</div>
 
 <script>
 // ═══ CORE ═════════════════════════════════════════════════════════════════
@@ -661,7 +669,70 @@ function addSkillByName(name) {
   const def = D.skills().find(s => s.name === name);
   addSkillRow({ name, attribute: def ? def.attribute : 'Agility', pips: 0 }); scheduleAutosave(); return true;
 }
+function hasCharacter() { return !!(($('f-name') && $('f-name').value.trim()) || ($('f-template') && $('f-template').value.trim()) || ($('f-archetype') && $('f-archetype').value.trim()) || skillRows().length); }
+function refreshWizardButtons() { const built = hasCharacter(); const bb = $('build-btn'), lb = $('level-btn'); if(bb) bb.style.display = built ? 'none' : ''; if(lb) lb.style.display = built ? '' : 'none'; }
+// ═══ ADVANCEMENT (LEVEL UP) — spend Character Points ══════════════════════
+// Skill pip cost = current dice number of the skill.
+// Attribute pip cost = 10 × current dice number of the attribute.
+var _lvlAttr = null, _lvlSkill = null;
+function openLevelUp() {
+  if(!hasCharacter()) { D62EB.launch(); return; }
+  _lvlAttr = {}; _lvlSkill = {}; renderLevelUp(); $('levelup-overlay').classList.add('open');
+}
+function closeLevelUp() { $('levelup-overlay').classList.remove('open'); _lvlAttr = null; _lvlSkill = null; }
+function _cpBudget() { return Math.max(0, num($('f-cp').value)); }
+function _pipCostSkill(pips) { return Math.max(1, diceOf(pips)); }
+function _pipCostAttr(pips) { return 10 * Math.max(1, diceOf(pips)); }
+function _sumCost(basePips, added, costFn) { let c = 0; for(let k = 0; k < added; k++) c += costFn(basePips + k); return c; }
+function _lvlSpent() {
+  let total = 0;
+  activeAttrs().forEach(a => { total += _sumCost(attr(a), _lvlAttr[a] || 0, _pipCostAttr); });
+  skillRows().forEach((tr, i) => { total += _sumCost(rowTotal(tr), _lvlSkill[i] || 0, _pipCostSkill); });
+  return total;
+}
+function _lvlRow(name, baseCode, newCode, nextCost, add, stepFn, left) {
+  return '<div style="display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid var(--rule);">'
+    + '<span style="flex:1;font-weight:700;">' + esc(name) + '</span>'
+    + '<span style="font-family:\'Share Tech Mono\',monospace;min-width:96px;text-align:right;">' + baseCode + (newCode ? ' → ' + newCode : '') + '</span>'
+    + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="' + stepFn + ',-1)"' + (add <= 0 ? ' disabled' : '') + '>−</button>'
+    + '<button class="m-btn ghost" style="padding:4px 8px;min-width:44px;" onclick="' + stepFn + ',1)"' + (nextCost > left ? ' disabled' : '') + ' title="Next pip costs ' + nextCost + ' CP">+' + nextCost + '</button></div>';
+}
+function renderLevelUp() {
+  const budget = _cpBudget(), spent = _lvlSpent(), left = budget - spent;
+  let h = '<p class="m-hint">Spend <b>' + budget + '</b> Character Point' + (budget === 1 ? '' : 's') + ' to raise skills and attributes. A skill pip costs its current dice number; an attribute pip costs 10× its current dice number. The <b>+N</b> button shows the next pip\'s cost.</p>';
+  h += '<div class="m-lbl">Attributes</div><div class="alloc">';
+  activeAttrs().forEach(a => { const add = _lvlAttr[a] || 0, base = attr(a), nu = base + add; h += _lvlRow(a, code(base), add ? code(nu) : '', _pipCostAttr(nu), add, "lvlStepAttr('" + a + "'", left); });
+  h += '</div>';
+  h += '<div class="m-lbl" style="margin-top:12px;">Skills</div>';
+  const rows = skillRows();
+  if(!rows.length) h += '<p class="brow-empty">No skills on the sheet yet.</p>';
+  else { h += '<div class="alloc" style="max-height:40vh;overflow:auto;">'; rows.forEach((tr, i) => { const name = tr.querySelector('.sk-name-in').value || '(unnamed)', add = _lvlSkill[i] || 0, base = rowTotal(tr), nu = base + add; h += _lvlRow(name, code(base), add ? code(nu) : '', _pipCostSkill(nu), add, 'lvlStepSkill(' + i, left); }); h += '</div>'; }
+  $('levelup-body').innerHTML = h;
+  $('levelup-ft').innerHTML = '<span class="m-hint" style="margin:0;">CP left: <b style="color:' + (left ? 'var(--d62e-dk)' : '#999') + ';">' + left + '</b> / ' + budget + '</span>'
+    + '<span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button><button class="m-btn" onclick="lvlApply()"' + (spent <= 0 ? ' disabled' : '') + '>Apply (' + spent + ' CP)</button></span>';
+}
+function lvlStepAttr(a, d) {
+  const cur = _lvlAttr[a] || 0;
+  if(d > 0 && _pipCostAttr(attr(a) + cur) > _cpBudget() - _lvlSpent()) return;
+  const nv = Math.max(0, cur + d); if(nv) _lvlAttr[a] = nv; else delete _lvlAttr[a]; renderLevelUp();
+}
+function lvlStepSkill(i, d) {
+  const tr = skillRows()[i]; if(!tr) return; const cur = _lvlSkill[i] || 0;
+  if(d > 0 && _pipCostSkill(rowTotal(tr) + cur) > _cpBudget() - _lvlSpent()) return;
+  const nv = Math.max(0, cur + d); if(nv) _lvlSkill[i] = nv; else delete _lvlSkill[i]; renderLevelUp();
+}
+function lvlApply() {
+  const spent = _lvlSpent(); if(spent <= 0) return;
+  const changed = [];
+  activeAttrs().forEach(a => { const add = _lvlAttr[a] || 0; if(!add) return; $('at-' + a).value = code(attr(a) + add); changed.push(a + ' +' + add + 'p'); });
+  skillRows().forEach((tr, i) => { const add = _lvlSkill[i] || 0; if(!add) return; const cur = codeOrZero(tr.querySelector('.sk-adds').value); tr.querySelector('.sk-adds').value = code(cur + add, true); changed.push((tr.querySelector('.sk-name-in').value || 'skill') + ' +' + add + 'p'); });
+  $('f-cp').value = Math.max(0, _cpBudget() - spent);
+  recalc(); scheduleAutosave();
+  addLog('Advancement', '−' + spent + ' CP', changed.join(', ') + ' · ' + num($('f-cp').value) + ' CP left', 'crit');
+  closeLevelUp();
+}
 function recalc() {
+  refreshWizardButtons();
   skillRows().forEach(tr => { tr.querySelector('.sk-total').textContent = code(rowTotal(tr)); });
   const dv = $('dodge-val'), pv = $('parry-val');
   // Parry and Dodge are always computed (5 × attribute dice).

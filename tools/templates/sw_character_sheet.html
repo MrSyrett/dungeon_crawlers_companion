@@ -496,7 +496,8 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #333;background:transparent;color:#888;" title="Campaign">🔗</button>
-    <button class="log-action-btn wizard" onclick="SWB.launch()" title="Character Builder">Create</button>
+    <button id="build-btn" class="log-action-btn wizard" onclick="SWB.launch()" title="Character Builder">Create</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Advance this character" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules" aria-label="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -554,6 +555,15 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="modal-hd"><div class="ttl">🛒 Equipment</div><button class="x" onclick="closeGearPicker()">&#10005;</button></div>
     <div class="brow-controls"><input id="gearstore-search" class="m-input" placeholder="Search equipment…" oninput="renderGearPicker()"><div class="brow-filters"><select id="gearstore-cat" class="m-input brow-sel" onchange="renderGearPicker()"></select><button class="m-btn ghost" onclick="addCustomGear()">＋ Add custom</button><button class="m-btn ghost" onclick="addCustomWeapon()">＋ Custom weapon</button></div></div>
     <div class="modal-bd brow-list" id="gearstore-body"></div>
+  </div>
+</div>
+
+<!-- LEVEL UP -->
+<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-hd"><div class="ttl">✨ Advancement</div><button class="x" onclick="closeLevelUp()">&#10005;</button></div>
+    <div class="modal-bd" id="levelup-body"></div>
+    <div class="modal-ft" id="levelup-ft" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 16px;"></div>
   </div>
 </div>
 
@@ -662,13 +672,70 @@ function addSkillByName(name) {
   const def = D.skills().find(s => s.name === name);
   addSkillRow({ name, attr: def ? def.attribute : FORCE_SKILLS.includes(name) ? 'Force' : 'Dexterity', adds: FORCE_SKILLS.includes(name) ? 3 : 0 }); scheduleAutosave(); return true;
 }
+function hasCharacter() { return !!(($('f-name') && $('f-name').value.trim()) || ($('f-template') && $('f-template').value.trim()) || skillRows().length); }
+function refreshWizardButtons() { const built = hasCharacter(); const bb = $('build-btn'), lb = $('level-btn'); if(bb) bb.style.display = built ? 'none' : ''; if(lb) lb.style.display = built ? '' : 'none'; }
 function recalc() {
+  refreshWizardButtons();
   let used = 0;
   skillRows().forEach(tr => {
     const adds = codeOrZero(tr.querySelector('.sk-adds').value); if(tr.dataset.attr !== 'Force') used += Math.max(0, adds); else used += Math.max(0, adds - 3);
     tr.querySelector('.sk-total').textContent = toCode(rowTotal(tr));
   });
   refreshWeaponRows(); updateModNote();
+}
+// ═══ ADVANCEMENT (LEVEL UP) — spend Skill Points to raise skills ══════════
+// 1 point = 1 pip (3 pips = 1D). Spent points are removed; unspent stay.
+var _lvlAlloc = null;   // { rowIndex: pipsToAdd }
+function openLevelUp() {
+  if(!hasCharacter()) { SWB.launch(); return; }
+  _lvlAlloc = {}; renderLevelUp(); $('levelup-overlay').classList.add('open');
+}
+function closeLevelUp() { $('levelup-overlay').classList.remove('open'); _lvlAlloc = null; }
+function _lvlBudget() { return Math.max(0, num($('f-sp').value)); }
+function _lvlSpent() { return Object.values(_lvlAlloc || {}).reduce((a, b) => a + b, 0); }
+function renderLevelUp() {
+  const rows = skillRows();
+  const budget = _lvlBudget(), spent = _lvlSpent(), left = budget - spent;
+  let h = '<p class="m-hint">Spend your <b>' + budget + '</b> Skill Point' + (budget === 1 ? '' : 's') + ' to raise skills — <b>1 point = 1 pip</b> (3 pips = 1D). Unspent points stay on your sheet.</p>';
+  if(!budget) h += '<p class="brow-empty">You have no Skill Points to spend. Add some in the Skill Points box, then level up.</p>';
+  else if(!rows.length) h += '<p class="brow-empty">No skills yet — add skills with ＋ Skills first.</p>';
+  else {
+    h += '<div class="alloc" style="max-height:52vh;overflow:auto;">';
+    rows.forEach((tr, i) => {
+      const name = tr.querySelector('.sk-name-in').value || '(unnamed)';
+      const add = _lvlAlloc[i] || 0, base = rowTotal(tr), nu = base + add;
+      h += '<div style="display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid var(--rule);">'
+        + '<span style="flex:1;font-weight:700;">' + esc(name) + '</span>'
+        + '<span style="font-family:\'Share Tech Mono\',monospace;min-width:92px;text-align:right;">' + toCode(base) + (add ? ' → ' + toCode(nu) : '') + '</span>'
+        + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="lvlStep(' + i + ',-1)"' + (add <= 0 ? ' disabled' : '') + '>−</button>'
+        + '<button class="m-btn ghost" style="padding:4px 10px;min-width:36px;" onclick="lvlStep(' + i + ',1)"' + (left <= 0 ? ' disabled' : '') + '>+</button></div>';
+    });
+    h += '</div>';
+  }
+  $('levelup-body').innerHTML = h;
+  $('levelup-ft').innerHTML = '<span class="m-hint" style="margin:0;">Points left: <b style="color:' + (left ? 'var(--sw-dk)' : '#999') + ';">' + left + '</b> / ' + budget + '</span>'
+    + '<span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button><button class="m-btn" onclick="lvlApply()"' + (spent <= 0 ? ' disabled' : '') + '>Apply (' + spent + ')</button></span>';
+}
+function lvlStep(i, d) {
+  const cur = _lvlAlloc[i] || 0;
+  if(d > 0 && _lvlSpent() >= _lvlBudget()) return;
+  const nv = Math.max(0, cur + d);
+  if(nv) _lvlAlloc[i] = nv; else delete _lvlAlloc[i];
+  renderLevelUp();
+}
+function lvlApply() {
+  const rows = skillRows(), spent = _lvlSpent(); if(spent <= 0) return;
+  const changed = [];
+  rows.forEach((tr, i) => {
+    const add = _lvlAlloc[i] || 0; if(!add) return;
+    const cur = codeOrZero(tr.querySelector('.sk-adds').value);
+    tr.querySelector('.sk-adds').value = toCode(cur + add, true);
+    changed.push((tr.querySelector('.sk-name-in').value || 'skill') + ' +' + add + 'p');
+  });
+  $('f-sp').value = Math.max(0, _lvlBudget() - spent);
+  recalc(); scheduleAutosave();
+  addLog('Advancement', '−' + spent + ' SP', changed.join(', ') + ' · ' + num($('f-sp').value) + ' SP left', 'crit');
+  closeLevelUp();
 }
 function onTemplateChange() {
   const t = template(); if(!t) return;
