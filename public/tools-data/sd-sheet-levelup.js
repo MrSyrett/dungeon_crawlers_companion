@@ -84,16 +84,44 @@ function lvlSkillTalent() {
   const seg = (k,label) => '<button class="ccw-choice'+(st.kind===k?' selected':'')+'" style="flex:1;min-width:0;padding:8px 4px;" onclick="lvlSkillKind(\''+k+'\')"><div class="ccw-choice-name" style="font-size:11px;">'+label+'</div></button>';
   let h = '<p class="ccw-hint">HeroDark: level '+_lvl.newLevel+' grants a <b>Skill Talent</b>. Learn a new weapon or armor, a new language, or gain a Skill.</p>';
   h += '<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">'+seg('weapon','New Weapon')+seg('armor','New Armor')+seg('language','Language')+seg('skill','Gain a Skill')+'</div>';
-  const ph = st.kind==='weapon' ? 'Weapon you learn to wield (e.g. Longsword)'
-           : st.kind==='armor' ? 'Armor you learn to wear (e.g. Plate mail)'
-           : st.kind==='language' ? 'Language you learn (e.g. Draconic)'
-           : 'Subject you gain a Skill in (e.g. Climbing, Lockpicking)';
-  h += '<input type="text" id="lvl-skill-input" value="'+String(st.value||'').replace(/"/g,'&quot;')+'" placeholder="'+ph+'" oninput="_lvl.skillTalent.value=this.value" style="width:100%;padding:9px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;box-sizing:border-box;">';
-  if(st.kind==='skill') h += '<p class="ccw-hint" style="font-size:10px;margin-top:6px;">You gain <b>advantage</b> on rolls pertaining to this subject.</p>';
-  if((st.value||'').trim()) h += '<div class="ccw-result">'+lvlSkillTalentLine()+'</div>';
+  const fldStyle = 'width:100%;padding:9px 10px;background:#141414;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;box-sizing:border-box;';
+  if(st.kind === 'skill'){
+    // Write-in: any subject, granting advantage on related rolls.
+    h += '<input type="text" id="lvl-skill-input" value="'+String(st.value||'').replace(/"/g,'&quot;')+'" placeholder="Subject you gain a Skill in (e.g. Climbing, Lockpicking)" oninput="_lvl.skillTalent.value=this.value" style="'+fldStyle+'">';
+    h += '<p class="ccw-hint" style="font-size:10px;margin-top:6px;">You gain <b>advantage</b> on rolls pertaining to this subject.</p>';
+  } else {
+    // Weapon / Armor / Language are picked from a list.
+    let opts, lbl;
+    if(st.kind === 'weapon'){ opts = (typeof SD_WEAPONS!=='undefined'?SD_WEAPONS:[]).map(w=>w.name).filter(n=>n!=='Strikes'); lbl = 'a weapon'; }
+    else if(st.kind === 'armor'){ opts = ['Leather armor','Chainmail','Plate mail','Shield']; lbl = 'an armor'; }
+    else { opts = ['Common'].concat(typeof CCW_COMMON_LANGS!=='undefined'?CCW_COMMON_LANGS:[], typeof CCW_RARE_LANGS!=='undefined'?CCW_RARE_LANGS:[]); lbl = 'a language'; }
+    h += '<select id="lvl-skill-input" onchange="_lvl.skillTalent.value=this.value;lvlRender()" style="'+fldStyle+'cursor:pointer;">';
+    h += '<option value="">— Choose '+lbl+' —</option>';
+    opts.forEach(o=>{ h += '<option value="'+String(o).replace(/"/g,'&quot;')+'"'+(st.value===o?' selected':'')+'>'+String(o).replace(/</g,'&lt;')+'</option>'; });
+    h += '</select>';
+  }
+  if(String(st.value||'').trim()) h += '<div class="ccw-result">'+lvlSkillTalentLine()+'</div>';
   return h;
 }
-function lvlSkillKind(k){ if(!_lvl.skillTalent) _lvl.skillTalent = { kind:k, value:'' }; else _lvl.skillTalent.kind = k; lvlRender(); }
+function lvlSkillKind(k){ if(!_lvl.skillTalent) _lvl.skillTalent = { kind:k, value:'' }; else { _lvl.skillTalent.kind = k; _lvl.skillTalent.value = ''; } lvlRender(); }
+// Match a typed weapon/armor name to the catalog so it registers as a proficiency.
+function _hdCanonWeapon(v){
+  v = String(v||'').trim(); if(!v) return '';
+  const names = (typeof SD_WEAPONS !== 'undefined' ? SD_WEAPONS : []).map(w=>w.name);
+  const lc = v.toLowerCase();
+  return names.find(n=>n.toLowerCase()===lc)
+      || names.find(n=>n.toLowerCase()===lc.replace(/s$/,''))
+      || names.find(n=>n.toLowerCase().includes(lc) || lc.includes(n.toLowerCase()))
+      || v;   // no catalog match → record the typed name
+}
+function _hdCanonArmor(v){
+  const lc = String(v||'').trim().toLowerCase(); if(!lc) return '';
+  if(/plate/.test(lc)) return 'Plate mail';
+  if(/chain/.test(lc)) return 'Chainmail';
+  if(/leather/.test(lc)) return 'Leather armor';
+  if(/shield/.test(lc)) return 'Shield';
+  return v;   // unknown (e.g. homebrew) → record as typed
+}
 function lvlSkillTalentLine(){
   const st = _lvl.skillTalent; if(!st || !String(st.value||'').trim()) return '';
   const v = String(st.value).trim();
@@ -480,6 +508,17 @@ function lvlApply() {
     const ta = document.getElementById('talents-text');
     if(ta) ta.value = (ta.value ? ta.value + '\n' : '') + '— Level ' + _lvl.newLevel + ' Skill Talent —\n' + _skillLine;
     renderTalentsView();
+    // A chosen weapon or armor becomes a real proficiency — added to the extra
+    // weapon/armor lists so it shows up as class-allowed in the in-play Shop and
+    // survives a reload (persisted via _sheet.extraWeapons / extraArmor).
+    const _stc = _lvl.skillTalent;
+    if(_stc && _stc.kind === 'weapon'){
+      const nm = _hdCanonWeapon(_stc.value);
+      if(nm && typeof _charExtraWeapons !== 'undefined' && !_charExtraWeapons.includes(nm)) _charExtraWeapons.push(nm);
+    } else if(_stc && _stc.kind === 'armor'){
+      const nm = _hdCanonArmor(_stc.value);
+      if(nm && typeof _charExtraArmor !== 'undefined' && !_charExtraArmor.includes(nm)) _charExtraArmor.push(nm);
+    }
   }
   // Apply stat boosts from talent choices to the sheet
   if(_lvl.tres && _lvl.tres.statBoost) {
