@@ -368,9 +368,10 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="hdr-fields">
       <div class="hdr-field wide" style="grid-column:span 3;"><label>First name / nickname</label><input type="text" id="f-name" placeholder="Billy"></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Trope</label><input type="text" id="f-trope" placeholder="Brilliant Mathlete"></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label id="age-label">Age</label><input type="text" id="f-age" placeholder="Age group" oninput="recalc()"></div>
-      <div class="hdr-field" style="grid-column:span 2;"><label>Book</label><select id="f-book" onchange="onBookChange()"><option value="bikes">Kids on Bikes</option><option value="brooms">Kids on Brooms</option><option value="capes">Kids in Capes</option></select></div>
-      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label id="age-label">Age</label><input type="text" id="f-age" placeholder="Age group" oninput="recalc()"></div>
+      <div class="hdr-field lastcol" style="grid-column:span 3;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
+      <!-- Book is set at character creation (in the builder) and never changed on the sheet. -->
+      <input type="hidden" id="f-book" value="bikes">
     </div>
   </div>
 
@@ -442,7 +443,7 @@ select option{background:var(--input-bg);color:var(--ink);}
       </div>
 
       <div class="tab-panel" id="tab-strengths">
-        <div class="section-bar"><span>Strengths &amp; Flaw</span><span class="hdr-right"><button class="hdr-btn" onclick="openStrengthPicker()">✦ Strengths</button></span></div>
+        <div class="section-bar"><span>Strengths &amp; Flaw</span><span class="hdr-right"><span class="hint" style="margin:0;color:rgba(255,255,255,.7);">Gain Strengths with <b>Level</b></span></span></div>
         <table class="tbl">
           <thead><tr><th style="width:34%;">Strength</th><th style="width:70px;">Cost</th><th>Notes</th><th style="width:26px;"></th></tr></thead>
           <tbody id="strengths-body"></tbody>
@@ -459,7 +460,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <!-- NSBU: bought Abilities & Group Suites -->
       <div class="tab-panel" id="tab-abilities">
-        <div class="section-bar"><span>Abilities &amp; Group Suites</span><span class="hdr-right"><button class="hdr-btn" onclick="openLevelUp()">💥 Level Up</button></span></div>
+        <div class="section-bar"><span>Abilities &amp; Group Suites</span><span class="hdr-right"><span class="hint" style="margin:0;color:rgba(255,255,255,.7);">Buy abilities with <b>Level</b></span></span></div>
         <table class="tbl">
           <thead><tr><th style="width:34%;">Ability</th><th style="width:70px;">Cost</th><th>Effect</th><th style="width:26px;"></th></tr></thead>
           <tbody id="abilities-body"></tbody>
@@ -469,12 +470,11 @@ select option{background:var(--input-bg);color:var(--ink);}
 
       <!-- CAPES: skills -->
       <div class="tab-panel" id="tab-skills">
-        <div class="section-bar teal"><span>Cape &amp; Power Skills</span></div>
+        <div class="section-bar teal"><span>Cape &amp; Power Skills</span><span class="hdr-right"><span class="hint" style="margin:0;color:rgba(255,255,255,.7);">Grow your trees with <b>Level</b></span></span></div>
         <table class="tbl">
           <thead><tr><th style="width:34%;">Skill</th><th style="width:110px;">Tier</th><th>Effect</th><th style="width:26px;"></th></tr></thead>
           <tbody id="skills-body"></tbody>
         </table>
-        <div class="add-row"><button class="small-btn ghost" onclick="addSkillRow()">+ Skill</button></div>
       </div>
 
       <div class="tab-panel" id="tab-bonds">
@@ -582,6 +582,14 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
 </div>
 
+<!-- CAPES: Growth (Level Up) -->
+<div id="growth-overlay" class="ov" onclick="if(event.target===this)closeGrowth()">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-hd"><div class="ttl">✨ Growth</div><button class="x" onclick="closeGrowth()">&#10005;</button></div>
+    <div class="modal-bd" id="growth-body"></div>
+  </div>
+</div>
+
 <script>
 // ═══ CORE ═════════════════════════════════════════════════════════════════
 const STATS = [
@@ -622,6 +630,13 @@ function tokenName() { return nsbuOn() ? 'Turbo Token' : 'Adversity Token'; }
 
 function book() { return $('f-book').value || 'bikes'; }
 function bookInfo() { return D.books().find(b => b.key === book()) || null; }
+// A character exists once the builder (or the player) has set a name/trope/flaw or
+// picked a Strength, or the sheet is in NSBU mode. Then Create → Level in the log.
+function hasCharacter() {
+  if(nsbuOn()) return true;
+  if((($('f-name') || {}).value || '').trim() || (($('f-trope') || {}).value || '').trim() || (($('f-flaw') || {}).value || '').trim()) return true;
+  return [...document.querySelectorAll('#strengths-body .st-name')].some(i => i.value.trim());
+}
 function itemsOf(kind) { return D.items().filter(i => i.book === book() && i.kind === kind); }
 function findItem(kind, name) { const n = norm(name); return n ? itemsOf(kind).find(i => norm(i.name) === n) || null : null; }
 
@@ -639,7 +654,7 @@ function buildStats() {
     const halfBtn = `<button class="stat-roll plan" onclick="planStat('${s.id}')" title="Prepared Action: take half the die value">½</button>`;
     const btn = nsbuOn()
       ? halfBtn
-      : halfBtn + `<button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">⚡</button>`;
+      : `<button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">⚡</button>` + halfBtn;
     row.innerHTML =
       `<div class="stat-name" onclick="rollStat('${s.id}')" title="${nsbuOn() ? 'Roll ' + s.id + ' — blows up on a max' : 'Roll ' + s.id}">${s.id}</div>` +
       `<input type="hidden" id="die-${s.id}" value="${defDie}">` +
@@ -838,8 +853,8 @@ function renderNsbu() {
   const badge = $('nsbu-badge'); if(badge) badge.style.display = on ? '' : 'none';
   const lbl = $('tok-label'); if(lbl) lbl.textContent = on ? 'Turbo Tokens' : 'Adversity Tokens';
   const tb = document.querySelector('[data-tab="abilities"]'); if(tb) tb.style.display = on ? '' : 'none';
-  // NSBU characters advance by spending Turbo Tokens: swap Create → Level.
-  const bb = $('build-btn'), lv = $('level-btn'); if(bb) bb.style.display = on ? 'none' : ''; if(lv) lv.style.display = on ? '' : 'none';
+  // Every book advances via the roll-log Level button once a character exists.
+  const built = hasCharacter(); const bb = $('build-btn'), lv = $('level-btn'); if(bb) bb.style.display = built ? 'none' : ''; if(lv) lv.style.display = built ? '' : 'none';
   if(on) renderInjury();
 }
 const NSBU_INJURY = ['Healthy', 'Superficial', 'Severe', 'Adrenalized'];
@@ -958,7 +973,100 @@ function renderStrengthPicker() {
 // NSBU advancement: at the end of a session spend Turbo Tokens on new abilities —
 // 2 Turbo for an individual ability, 10 for a Group-Suite power (18 buys it for the
 // whole group, a table call). The same modal is the "Level Up" for NSBU characters.
-function openLevelUp() { if(!nsbuOn()) return; openAbilityPicker(); }
+function openLevelUp() {
+  if(nsbuOn()) { openAbilityPicker(); return; }        // NSBU: buy abilities with Turbo
+  if(book() === 'capes') { openGrowth(); return; }     // Capes: spend Growth Points
+  openStrengthPicker();                                // Bikes / Brooms: gain a Strength
+}
+
+// ═══ CAPES GROWTH (LEVEL UP) ══════════════════════════════════════════════
+// The GM awards Growth Points; each spend (1 GP) advances a Cape/Power Skill Tree,
+// boosts a Cape Stat, or steps the Power Die. (Kids in Capes, "Mechanical Growth".)
+var _growthQ = '';
+function gp() { return Math.max(0, num($('f-gp').value)); }
+function spendGP(n) { $('f-gp').value = Math.max(0, gp() - n); }
+function capeStats() {
+  const cape = D.capes().find(c => norm(c.name) === norm($('f-cape').value));
+  if(cape) { const m = /Cape Stats?:\s*([^.]+)/i.exec(cape.description || ''); if(m) return m[1].split(/,|and/).map(s => s.trim()).filter(x => STATS.some(st => st.id === x)); }
+  return STATS.map(s => s.id);
+}
+function powerDieNext() {
+  const pd = num($('f-power-die').value), pb = num($('f-power-bonus').value);
+  if(pd === 0) return { die:4, bonus:0, label:'d4' };
+  if(pd === 4) return { die:6, bonus:0, label:'d6' };
+  if(pd === 6) return { die:8, bonus:0, label:'d8' };
+  if(pd === 8 && pb < 1) return { die:8, bonus:1, label:'d8+1' };
+  if(pd === 8) return { die:10, bonus:0, label:'d10' };
+  if(pd === 10) return { die:12, bonus:0, label:'d12' };
+  return null;   // maxed at d12
+}
+function powerDieLabel() { const pd = num($('f-power-die').value), pb = num($('f-power-bonus').value); return pd ? ('d' + pd + (pb > 0 ? '+' + pb : '')) : 'none'; }
+function openGrowth() { _growthQ = ''; renderGrowth(); $('growth-overlay').classList.add('open'); }
+function closeGrowth() { $('growth-overlay').classList.remove('open'); }
+function renderGrowth() {
+  const box = $('growth-body'); const pts = gp();
+  let h = '<p class="m-hint">Spend <b>' + pts + '</b> Growth Point' + (pts === 1 ? '' : 's') + ' (the GM awards these at session end). Each spend is 1 GP: advance a Skill Tree, boost a Cape Stat, or raise your Power Die. Explain how you gained it and how it shows.</p>';
+  h += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:12px;color:var(--kob-dk);margin-bottom:6px;">Growth Points: <b>' + pts + '</b></div>';
+  const dis = pts < 1 ? ' disabled' : '';
+  // Cape Stat +1
+  h += '<div class="m-lbl">Cape Stat +1</div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+  h += capeStats().map(id => { const cur = num($('mod-' + id).value); return '<button class="m-btn"' + dis + ' onclick="growthBuyStat(\'' + id + '\')">' + esc(id) + ' ' + (cur >= 0 ? '+' + cur : cur) + ' &rarr; ' + (cur >= 0 ? '+' + (cur + 1) : (cur + 1)) + '</button>'; }).join('');
+  h += '</div>';
+  // Power Die
+  const nx = powerDieNext();
+  h += '<div class="m-lbl" style="margin-top:12px;">Power Die</div>';
+  h += '<div style="display:flex;align-items:center;gap:8px;"><span style="flex:1;">Current: <b>' + powerDieLabel() + '</b></span>'
+    + (nx ? '<button class="m-btn"' + dis + ' onclick="growthBuyPowerDie()">Raise to ' + nx.label + ' (1 GP)</button>' : '<span class="hint" style="margin:0;">Maxed (d12)</span>') + '</div>';
+  // Cape Skill
+  h += '<div class="m-lbl" style="margin-top:12px;">Cape &amp; Power Skill</div>';
+  h += '<input class="m-input" id="growth-search" placeholder="Search skills…" oninput="_growthQ=this.value;renderGrowthSkills()" value="' + esc(_growthQ) + '" style="margin-bottom:6px;">';
+  h += '<div class="brow-list" id="growth-skill-list" style="max-height:30vh;"></div>';
+  // Other advancement
+  h += '<div class="m-lbl" style="margin-top:12px;">Other advancement</div>';
+  h += '<div style="display:flex;gap:6px;"><input class="m-input" id="growth-other" placeholder="New Power use · Team Tactic · Capstone…" style="flex:1;"><button class="m-btn"' + dis + ' onclick="growthBuyOther()">Add (1 GP)</button></div>';
+  box.innerHTML = h;
+  renderGrowthSkills();
+}
+function renderGrowthSkills() {
+  const box = $('growth-skill-list'); if(!box) return;
+  const cape = D.capes().find(c => norm(c.name) === norm($('f-cape').value));
+  const pool = cape ? cape.skills : D.capes().flatMap(c => c.skills);
+  const q = norm(_growthQ), pts = gp();
+  const have = new Set([...document.querySelectorAll('#skills-body .sk-name')].map(i => norm(i.value)));
+  const list = pool.filter(s => !q || norm(s.name).includes(q) || norm(s.description || '').includes(q));
+  if(!list.length) { box.innerHTML = '<p class="brow-empty">No skills match.</p>'; return; }
+  box.innerHTML = list.map(s => {
+    const owned = have.has(norm(s.name));
+    const btn = owned ? '<button class="brow-add have">On sheet ✓</button>' : '<button class="brow-add" data-growth-skill="' + esc(s.name) + '"' + (pts < 1 ? ' disabled' : '') + '>Take · 1 GP</button>';
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(s.name) + '<span class="brow-cost">' + esc(s.kind || '') + '</span></div>' +
+      (s.description ? '<div class="brow-desc">' + esc(s.description) + '</div>' : '') + '</div>' + btn + '</div>';
+  }).join('');
+}
+function growthBuyStat(id) {
+  if(gp() < 1) return;
+  $('mod-' + id).value = num($('mod-' + id).value) + 1; spendGP(1); recalc(); scheduleAutosave();
+  addLog('Growth', '+1 ' + id, 'Cape Stat bonus · ' + gp() + ' GP left', 'crit'); renderGrowth();
+}
+function growthBuyPowerDie() {
+  const nx = powerDieNext(); if(!nx || gp() < 1) return;
+  $('f-power-die').value = String(nx.die); $('f-power-bonus').value = String(nx.bonus); spendGP(1); recalc(); scheduleAutosave();
+  addLog('Growth', 'Power ' + nx.label, 'Power Die increase · ' + gp() + ' GP left', 'crit'); renderGrowth();
+}
+function growthBuySkill(name) {
+  if(gp() < 1) return;
+  addSkillRow({ name: name, tier:'starting' }); spendGP(1); recalc(); scheduleAutosave();
+  addLog('Growth', 'Skill', name + ' · ' + gp() + ' GP left', 'crit'); renderGrowth();
+}
+function growthBuyOther() {
+  const el = $('growth-other'); const name = (el && el.value || '').trim();
+  if(!name) { if(el) el.focus(); return; }
+  if(gp() < 1) return;
+  addSkillRow({ name: name, tier:'advanced' }); spendGP(1); recalc(); scheduleAutosave();
+  addLog('Growth', 'Advancement', name + ' · ' + gp() + ' GP left', 'crit'); renderGrowth();
+}
+(function wireGrowth() {
+  const gb = $('growth-body'); if(gb) gb.addEventListener('click', e => { const b = e.target.closest('[data-growth-skill]'); if(b) growthBuySkill(b.dataset.growthSkill); });
+})();
 function openAbilityPicker() { $('ability-search').value = ''; $('ability-overlay').classList.add('open'); renderAbilityPicker(); $('ability-search').focus(); }
 function closeAbilityPicker() { $('ability-overlay').classList.remove('open'); }
 function abilitiesTaken() { return new Set([...document.querySelectorAll('#abilities-body .ab-name')].map(el => norm(el.value))); }

@@ -115,24 +115,21 @@
   const diceChips = (dice) => '<div class="kb-dice">' + STATS.map((s) => '<span class="' + (dice[s] === 20 ? "hi" : dice[s] === 4 ? "lo" : "") + '">' + s.slice(0, 3) + " d" + dice[s] + "</span>").join("") + "</div>";
 
   function rStart() {
-    const nsbuCard =
-      '<div class="m-lbl">Variant</div>' +
-      '<div class="kb-big"><div class="kb-card' + (st.nsbu ? " on" : "") + '" data-nsbu="1" style="' + (st.nsbu ? "border-color:#ff8a1e;background:#2a1c08;" : "") + '"><b>💥 Never Stop Blowing Up</b><small>Dropout / Dimension 20\'s action-movie hack. Nine skills that start at d4 and <i>blow up</i> to bigger dice as you crit; Turbo Tokens, an injury track, and buyable Abilities. Replaces the standard stats and trope setup.</small></div></div>' +
-      (st.nsbu ? '<p class="m-hint" style="color:#ffb02e;">Never Stop Blowing Up is on. Next you\'ll pick 3 starting Abilities, then name your Action Hero. All nine skills begin at d4.</p>' : "");
+    // NSBU is listed as one of the books (it's a Kids on Bikes hack).
+    let cards = D.books().map((b) => '<div class="kb-card' + (!st.nsbu && st.book === b.key ? " on" : "") + '" data-bookpick="' + b.key + '"><b>' + esc(b.name) + "</b><small>" + esc(b.tagline) + "</small></div>").join("");
+    cards += '<div class="kb-card' + (st.nsbu ? " on" : "") + '" data-bookpick="nsbu" style="' + (st.nsbu ? "border-color:#ff8a1e;background:#2a1c08;" : "") + '"><b>💥 Never Stop Blowing Up</b><small>Dropout / Dimension 20\'s action-movie hack for Kids on Bikes: nine skills that <i>blow up</i> to bigger dice as you crit, Turbo Tokens, an injury track, and buyable Abilities.</small></div>';
     if (st.nsbu) {
       return (
-        '<p class="m-hint">You\'re building a Never Stop Blowing Up Action Hero. Everything runs off the nine key skills — no Tropes, no six-stat spread.</p>' +
-        nsbuCard
+        '<p class="m-hint">Pick your book. <b>Never Stop Blowing Up</b> runs off nine key skills — no Tropes or six-stat spread; next you\'ll pick 3 Abilities and name your Action Hero.</p>' +
+        '<div class="m-lbl">Book</div><div class="kb-big">' + cards + "</div>"
       );
     }
     return (
       '<p class="m-hint">Pick the book you\'re playing, then either start from one of its Tropes (fast — it sets your dice and suggests Strengths, Flaws and questions) or build from scratch by assigning the six dice yourself.</p>' +
-      '<div class="m-lbl">Book</div><div class="kb-big">' +
-      D.books().map((b) => '<div class="kb-card' + (st.book === b.key ? " on" : "") + '" data-book="' + b.key + '"><b>' + esc(b.name) + "</b><small>" + esc(b.tagline) + "</small></div>").join("") +
-      '</div><div class="m-lbl">Start from</div><div class="kb-big">' +
+      '<div class="m-lbl">Book</div><div class="kb-big">' + cards + "</div>" +
+      '<div class="m-lbl">Start from</div><div class="kb-big">' +
       '<div class="kb-card' + (st.mode === "trope" ? " on" : "") + '" data-mode="trope"><b>A Trope</b><small>' + D.tropes().filter((t) => t.book === st.book).length + " Tropes in " + esc(bookLabel()) + ". Touchstones, not stereotypes.</small></div>" +
-      '<div class="kb-card' + (st.mode === "scratch" ? " on" : "") + '" data-mode="scratch"><b>From scratch</b><small>Assign d20 → d4 to the six stats yourself. Start with what you\'re best and worst at.</small></div></div>' +
-      nsbuCard
+      '<div class="kb-card' + (st.mode === "scratch" ? " on" : "") + '" data-mode="scratch"><b>From scratch</b><small>Assign d20 → d4 to the six stats yourself. Start with what you\'re best and worst at.</small></div></div>'
     );
   }
   function rNsbuAbilities() {
@@ -262,9 +259,15 @@
         refreshNext();
       });
     });
-    body.querySelectorAll("[data-book]").forEach((el) => el.addEventListener("click", () => { st.book = el.dataset.book; st.trope = null; st.age = ""; st.strengths = []; st.flaw = ""; render(); }));
+    body.querySelectorAll("[data-bookpick]").forEach((el) => el.addEventListener("click", () => {
+      const pick = el.dataset.bookpick;
+      const wantNsbu = pick === "nsbu";
+      if (wantNsbu !== !!st.nsbu) { st.nsbu = wantNsbu; if (step > 0) step = 0; }
+      if (!wantNsbu) st.book = pick; else if (!st.book) st.book = "bikes";
+      st.trope = null; st.age = ""; st.strengths = []; st.flaw = "";
+      render();
+    }));
     body.querySelectorAll("[data-mode]").forEach((el) => el.addEventListener("click", () => { st.mode = el.dataset.mode; render(); }));
-    body.querySelectorAll("[data-nsbu]").forEach((el) => el.addEventListener("click", () => { st.nsbu = !st.nsbu; if (step > 0) step = 0; render(); }));
     body.querySelectorAll("[data-ability]").forEach((el) => el.addEventListener("click", () => {
       const n = el.dataset.ability; const i = st.abilities.indexOf(n);
       if (i >= 0) st.abilities.splice(i, 1); else if (st.abilities.length < 3) st.abilities.push(n);
