@@ -275,19 +275,33 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   .skills-table td.sk-name input,.skills-table td.sk-adds input,.skills-table td input{height:40px;font-size:15px;}
   .skills-table .sk-total{width:64px;min-width:64px;height:44px;font-size:16px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
   /* Mobile ergonomics: thumb-sized buttons/selects, readable labels */
-  .small-btn{min-height:36px;padding:6px 12px;font-size:12px;}
-  .row-x{min-width:36px;min-height:36px;font-size:18px;}
+  .small-btn{min-height:40px;padding:8px 12px;font-size:12px;}
+  .row-x{min-width:40px;min-height:40px;font-size:18px;}
   .add-row select,.hdr-field select,.tbl select,.sheet-wrap select{min-height:40px;font-size:14px;}
   .add-row select{max-width:100%;flex:1 1 200px;}
   .hdr-field label,.tbl th,.stats-head span{font-size:10px;}
   .stat-name small,.stat-cell small,.sk-name small,.skills-table td.sk-name small{font-size:10px;}
   .sk-attr-lbl{font-size:11px !important;}
   input[type=checkbox]{width:22px;height:22px;}
-  #wound-track button{min-height:38px;font-size:12px;}
+  #wound-track button{min-height:40px;padding:6px 4px;font-size:12px;}
+  /* Header action buttons (⚔ Weapons / 🛒 Equipment / ✦ Force Powers) big enough to tap */
+  .hdr-btn{min-height:40px;padding:8px 12px;font-size:11px;}
+  /* Tab bar rows: comfortable thumb targets */
+  .tab-btn{min-height:44px;padding:12px 10px;}
+  /* Tab-panel form controls */
+  .credits-row input{height:40px;}
+  .fld label{font-size:10px;}
+  .tbl input{min-height:40px;}
   /* Weapons: Range + Notes don't fit a phone; the roll buttons wrap under the name */
   #weapons-tbl th:nth-child(4),#weapons-tbl td:nth-child(4),#weapons-tbl th:nth-child(5),#weapons-tbl td:nth-child(5){display:none;}
   #weapons-tbl td[style*="nowrap"]{white-space:normal !important;}
   #weapons-tbl .wp-skill{min-width:90px;}
+}
+@media (max-width:480px){
+  /* Attribute roll-target labels (MECHANICAL/TECHNICAL) overflow the 3-col grid — shrink to fit while staying ≥12px */
+  .stat-cell .sn{font-size:12px !important;letter-spacing:.02em;}
+  /* Wounds row: 5 labels won't fit one line at 360 — wrap to two rows, taller & legible */
+  #wound-track button{flex:1 1 30%;min-width:0;min-height:44px;padding:6px 2px;line-height:1.1;font-size:12px;}
 }
 
 /* SW extras */

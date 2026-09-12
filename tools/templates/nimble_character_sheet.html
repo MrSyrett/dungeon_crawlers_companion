@@ -294,11 +294,41 @@ body.dark .stat-cell input,body.dark .skills-table input,body.dark .vbig input,b
   .hdr-field label,.tbl th,.stats-head span{font-size:10px;}
   .stat-name small,.stat-cell small,.sk-name small,.skills-table td.sk-name small{font-size:10px;}
   input[type=checkbox]{width:22px;height:22px;}
-  .save-toggle button{width:34px;height:30px;font-size:14px;}
+  .save-toggle button{width:34px;height:36px;font-size:14px;}
   .pip{width:32px;height:32px;font-size:13px;}
   .vline input{width:52px;height:34px;font-size:14px;}
   .vline{font-size:12px;gap:6px;}
   .vline .small-btn{flex:1 1 auto;white-space:nowrap;}
+  /* ── QC pass: enlarge remaining sub-40px touch targets ── */
+  /* Dice tray (roll log): d4–d20 buttons, advantage/disadvantage, DC + instance fields */
+  .dice-btn{min-height:44px;font-size:15px;padding:0;}
+  .adv-btn{min-height:44px;font-size:13px;padding:8px 6px;}
+  .tray-input,#tray-dc,#adv-n{min-height:40px;font-size:15px;box-sizing:border-box;}
+  .tray-note{font-size:11px;}
+  /* Tab bar (Spells / Features / Inventory / Notes) */
+  .tab-btn{padding:13px 4px;font-size:12px;min-height:44px;}
+  /* Section-header action buttons (+ Add Attack, Item Store, Spellbook, + Ability) */
+  .section-bar button{min-height:38px;padding:0 10px;font-size:11px;}
+  /* Let a crowded header (e.g. Spells: mana fields + Spellbook) wrap instead of overflow */
+  .hdr-right{flex-wrap:wrap;justify-content:flex-end;row-gap:6px;}
+  /* Condition chips — bigger tap area */
+  .cond-chip{padding:9px 12px;font-size:12px;}
+  /* Table text inputs in Attacks / Spells / Inventory rows */
+  .tbl input{min-height:40px;}
+  /* Keep Attacks/Spells/Inventory tables inside the viewport at ≤360px */
+  .tbl th,.tbl td{padding-left:4px;padding-right:4px;}
+  .tbl td .small-btn{padding:6px 7px;font-size:12px;}
+  /* Numeric fields (init, speed, temp, coins, mana, etc.) */
+  input.num{min-height:40px;font-size:14px;}
+  /* Action pips + wound pips */
+  #action-pips .pip{width:40px;height:40px;font-size:16px;}
+  .pip{width:36px;height:36px;font-size:14px;}
+  /* Per-row delete buttons up to full 40px */
+  .row-x{min-width:40px;min-height:40px;}
+  /* Dark-mode toggle a touch larger */
+  .dm-toggle-btn{height:28px;border-radius:14px;}
+  .dm-toggle-btn::after{width:22px;height:22px;top:2px;left:2px;}
+  .dm-toggle-btn.on::after{left:10px;}
 }
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scrollbar,.modal-bd::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb,select::-webkit-scrollbar-thumb,.log-entries::-webkit-scrollbar-thumb,.modal-bd::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track,select::-webkit-scrollbar-track{background:transparent;}
@@ -397,7 +427,7 @@ select option{background:var(--input-bg);color:var(--ink);}
         </div>
       </div>
 
-      <div class="section-bar"><span>Attacks</span></div>
+      <div class="section-bar"><span>Attacks</span><span class="hdr-right"><button class="hdr-btn" onclick="addCustomAttack()">＋ Add attack</button></span></div>
       <table class="tbl">
         <thead><tr><th style="width:32%;">Weapon / spell</th><th style="width:26%;">Damage</th><th>Properties</th><th style="width:96px;"></th></tr></thead>
         <tbody id="attacks-body"></tbody>

@@ -298,7 +298,7 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .tbl input:focus,.tbl select:focus{border-bottom-color:var(--dnd);}
 .tbl .num{width:52px;}.tbl .mono{font-family:'Share Tech Mono',monospace;font-size:12px;}
 .tbl .roll-cell{width:40px;text-align:center;}
-.mini-roll{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:4px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+.mini-roll{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
 .mini-roll:hover{background:var(--dnd-dk);}
 .row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;}
 .row-x:hover{color:var(--red);}
@@ -395,7 +395,7 @@ body.dark .dtype-sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='h
 .sp-info{flex:1 1 auto;text-align:right;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:.02em;color:var(--muted);text-transform:uppercase;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .sp-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:12px;}
 .sp-x:hover{color:var(--red);}
-.cast-btn{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:3px 7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+.cast-btn{background:var(--dnd);color:#fff;border:none;border-radius:3px;padding:5px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
 .cast-btn:hover{background:var(--dnd-dk);}
 .atk-grp{display:flex;gap:5px;align-items:flex-end;}
 .atk-field{display:flex;flex-direction:column;gap:1px;}
@@ -528,17 +528,42 @@ body.dark .abil-score,body.dark .hp-row input,body.dark .hp-sub input,body.dark 
   /* Tabs: sit under the content, wrap to two rows, and each window is a
      capped, scrollable pane so nothing runs off the page. */
   .tabs-bar{position:sticky;top:0;z-index:3;}
-  .tab-btn{flex:1 1 45%;font-size:11px;padding:8px 4px;}
+  .tab-btn{flex:1 1 45%;font-size:12px;padding:10px 4px;min-height:42px;}
   .tab-panel.on{height:auto;max-height:70vh;}
-  .tbl input,.tbl select{font-size:13px;}
-  .small-btn{min-height:36px;padding:7px 12px;font-size:12px;}
-  .row-x{min-width:32px;min-height:32px;font-size:18px;}
+  .tbl input,.tbl select{font-size:13px;min-height:34px;}
+  .small-btn{min-height:40px;padding:8px 12px;font-size:12px;}
+  .row-x{min-width:36px;min-height:36px;font-size:18px;}
   .pick-sel,.add-row select{min-height:40px;font-size:14px;flex:1 1 100%;}
   .add-row{flex-direction:column;align-items:stretch;}
   input[type=checkbox]{width:20px;height:20px;}
   .abil-mod{font-size:34px;}
   .skill-row{padding:5px 4px;}
   .sk-name{font-size:14px;}.sk-val{font-size:14px;}
+  /* --- Mobile QC pass: enlarge remaining small touch targets & tiny labels --- */
+  /* Roll buttons: shared by the Attacks "Attack" button, the death-save roll,
+     and the hit-die spend. Bump to a comfortable tap height. */
+  .mini-roll,.cast-btn{min-height:40px;padding:9px 16px;font-size:13px;}
+  .upcast-btn{min-height:40px;min-width:40px;padding:8px 10px;font-size:15px;}
+  .rest-btn{min-height:40px;font-size:12px;}
+  .log-action-btn{min-height:38px;font-size:12px;}
+  .log-action-btn.campaign{min-width:44px;}
+  /* Saving-throw roll row under each ability */
+  .abil-save{min-height:32px;font-size:11px;padding:4px 0;}
+  .abil-save .sv-val{font-size:13px;}
+  /* Pips: death saves, spell slots, per-day resources, nimble actions */
+  .death-pip{width:24px;height:24px;margin:0 4px;}
+  .slot-pip{width:22px;height:22px;}
+  .res-pip{width:24px;height:24px;}
+  .act-pip{width:24px;height:24px;}
+  /* Modal (Spellbook / Item Store / Builder / Level-Up) controls */
+  .brow-add{min-height:38px;padding:8px 12px;font-size:12px;}
+  .brow-check input{width:22px;height:22px;}
+  .m-input{min-height:42px;}
+  .m-btn{min-height:44px;}
+  .x{min-width:40px;min-height:40px;}
+  /* Tiny secondary labels bumped for legibility */
+  .atk-sub{font-size:10px;}
+  .tbl th{font-size:10px;}
 }
 @media (max-width:400px){
   .ability-col .abil-list{grid-template-columns:repeat(2,1fr);}

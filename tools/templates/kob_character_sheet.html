@@ -282,7 +282,23 @@ body.dark .stat-roll.plan{background:var(--box);color:var(--ink);}
   .hdr-field label,.tbl th,.stats-head span{font-size:10px;}
   .stat-name small,.stat-cell small,.sk-name small,.skills-table td.sk-name small{font-size:10px;}
   input[type=checkbox]{width:22px;height:22px;}
+  /* QC pass: remaining touch-target gaps */
+  .tbl input{min-height:40px;font-size:14px;}   /* strength/skill/relationship row text fields (were ~23px) */
+  .inline-num{height:40px;font-size:14px;}       /* Capes power bonus / growth pts / stress nums (were 28px) */
+  .inline-sel{height:40px;}                       /* Capes boosted/reduced/power-die selects */
+  .stress-cell{height:40px;font-size:12px;}      /* Capes stress track tap cells (were 24px) */
+  .small-btn{min-height:40px;min-width:44px;}    /* Adversity ±, stress ±1, add-row buttons (were 36px / 34px wide) */
+  .row-x{min-width:40px;min-height:40px;}         /* per-row delete (was 36px) */
+  .tab-btn{min-height:44px;}                       /* Strengths/Skills/Motivations/… tab bar (was 33px) */
+  .hdr-btn{min-height:40px;padding:8px 12px;font-size:11px;}  /* section-bar "✦ Strengths" (was 20px) */
 
+}
+@media (max-width:480px){
+  /* Narrow phones: the Capes ⚡ Power column pushed the stat row past 360px.
+     Tighten the grid mins + gap so all controls fit with no sideways scroll,
+     while keeping every control ≥40px in its smaller dimension. */
+  .stat-row,.stats-head{grid-template-columns:minmax(70px,1.3fr) minmax(58px,1fr) 32px minmax(54px,1fr) min-content;gap:6px;}
+  .stat-roll.power{width:44px;}
 }
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 textarea::-webkit-scrollbar,select::-webkit-scrollbar,.log-entries::-webkit-scrollbar,.modal-bd::-webkit-scrollbar{width:6px;}textarea::-webkit-scrollbar-thumb,select::-webkit-scrollbar-thumb,.log-entries::-webkit-scrollbar-thumb,.modal-bd::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}textarea::-webkit-scrollbar-track,select::-webkit-scrollbar-track{background:transparent;}

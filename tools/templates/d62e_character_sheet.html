@@ -307,11 +307,32 @@ body.spec-on .sk-spec-cell{display:table-cell;}
   .stat-cell .sn{display:block;min-height:36px;line-height:36px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
   .stat-cell input{height:44px;}
   .skills-table td.sk-total{width:64px;min-width:64px;height:44px;font-size:16px;background:var(--box);border:1px solid var(--rule);border-radius:4px;}
-  .small-btn{min-height:36px;padding:6px 12px;font-size:12px;}
-  .row-x{min-width:36px;min-height:36px;font-size:18px;}
+  .small-btn{min-height:40px;padding:8px 12px;font-size:12px;}
+  .row-x{min-width:40px;min-height:40px;font-size:18px;}
   .add-row select,.hdr-field select,.tbl select{min-height:40px;font-size:14px;}
-  #wound-track button{min-height:38px;font-size:12px;}
+  #wound-track button{min-height:44px;font-size:12.5px;padding:6px 4px;line-height:1.15;}
   #weapons-tbl th:nth-child(4),#weapons-tbl td:nth-child(4),#weapons-tbl th:nth-child(5),#weapons-tbl td:nth-child(5){display:none;}
+  /* Larger touch targets for skill-row inputs and secondary table labels */
+  .skills-table input{height:40px;font-size:14px;}
+  .tbl th{font-size:10px;}
+  .skills-table td.sk-attr{font-size:10px;}
+  /* Play-time tracker panels (Magic Points / Advancement) */
+  #advancement-panel input,#magic-panel input,.arc-row input{min-height:40px;}
+  /* Picker / builder modal controls */
+  .brow-controls select,.brow-sel{min-height:44px;font-size:14px;}
+  .brow-add{min-height:40px;padding:9px 12px;}
+  .m-btn{min-height:44px;}
+  /* Builder allocation steppers + attribute toggle chips */
+  .a-row button,.a-attr button{width:36px;height:40px;font-size:16px;}
+  .a-rk{width:36px;height:40px;font-size:16px;}
+  .builder-chip{padding:8px 12px;font-size:13px;}
+}
+@media (max-width:480px){
+  /* Let the five wound buttons wrap to two rows so every label stays legible */
+  .wound-track{gap:4px;}
+  .wound-track button{flex:1 1 28%;min-width:0;}
+  /* One skill per row in the builder so name + steppers never crowd at phone width */
+  .a-skills{grid-template-columns:1fr;}
 }
 textarea,select,.log-entries,.modal-bd,.brow-list{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 select option{background:var(--input-bg);color:var(--ink);}
