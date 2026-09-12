@@ -20,7 +20,10 @@
   const STATS = ["Brains", "Brawn", "Fight", "Flight", "Charm", "Grit"];
   const DICE = [20, 12, 10, 8, 6, 4];
   const BOOK_NAMES = { bikes: "Kids on Bikes", brooms: "Kids on Brooms", capes: "Kids in Capes" };
-  const STEPS = ["Start", "Trope", "Age", "Strengths", "Extras", "Touches", "Review"];
+  const STEPS_STD = ["Start", "Trope", "Age", "Strengths", "Extras", "Touches", "Review"];
+  const STEPS_NSBU = ["Start", "Abilities", "Touches", "Review"];
+  const NSBU_SKILLS = () => (typeof KOB_NSBU !== "undefined" ? KOB_NSBU.skills.map((s) => s.id) : ["Stunts", "Brawl", "Tough", "Tech", "Weapons", "Drive", "Sneak", "Wits", "Hot"]);
+  const steps = () => (st && st.nsbu ? STEPS_NSBU : STEPS_STD);
 
   let st = null, step = 0, _lastStep = -1;
   function fresh() {
@@ -34,6 +37,7 @@
       cape: "", powerCat: "", powerDesc: "", boost: "Charm", reduce: "Brawn",
       motivations: "", fear: "", obligations: "", bag: "",
       name: "", lastName: "", pronouns: "",
+      nsbu: false, abilities: [], catchphrase: "", abilityQuery: "",
     };
   }
   const info = () => D.books().find((b) => b.key === st.book) || null;
@@ -81,24 +85,26 @@
   function close() { const ov = $("kobb-overlay"); if (ov) ov.classList.remove("open"); }
 
   function canProceed() {
-    switch (STEPS[step]) {
+    switch (steps()[step]) {
       case "Trope": return st.mode === "scratch" ? diceOk() : !!st.trope;
       case "Age": return !!st.age;
       case "Strengths": return st.strengths.length === 2 && !!st.flaw.trim();
+      case "Abilities": return st.abilities.length >= 1 && st.abilities.length <= 3;
       default: return true;
     }
   }
-  function next() { if (!canProceed()) return; if (STEPS[step] === "Review") { apply(); return; } step += 1; render(); }
+  function next() { if (!canProceed()) return; if (steps()[step] === "Review") { apply(); return; } step += 1; render(); }
   function back() { if (step > 0) { step -= 1; render(); } }
   function render() {
-    $("kobb-step").textContent = step === 0 ? "" : "Step " + step + " of " + (STEPS.length - 1) + " — " + STEPS[step];
+    const S = steps();
+    $("kobb-step").textContent = step === 0 ? "" : "Step " + step + " of " + (S.length - 1) + " — " + S[step];
     $("kobb-back").style.visibility = step === 0 ? "hidden" : "visible";
-    $("kobb-next").textContent = STEPS[step] === "Review" ? "Build this character ✓" : "Next →";
+    $("kobb-next").textContent = S[step] === "Review" ? "Build this character ✓" : "Next →";
     const body = $("kobb-body");
     const keep = _lastStep === step;
     const bScroll = keep ? body.scrollTop : 0;
     const lScroll = keep ? [...body.querySelectorAll(".kb-list")].map((e) => e.scrollTop) : [];
-    const fn = { Start: rStart, Trope: rTrope, Age: rAge, Strengths: rStrengths, Extras: rExtras, Touches: rTouches, Review: rReview }[STEPS[step]];
+    const fn = { Start: rStart, Trope: rTrope, Age: rAge, Strengths: rStrengths, Extras: rExtras, Touches: rTouches, Review: rReview, Abilities: rNsbuAbilities }[S[step]];
     body.innerHTML = fn();
     wire();
     if (keep) { body.scrollTop = bScroll; body.querySelectorAll(".kb-list").forEach((e, i) => { if (lScroll[i] != null) e.scrollTop = lScroll[i]; }); }
@@ -109,13 +115,36 @@
   const diceChips = (dice) => '<div class="kb-dice">' + STATS.map((s) => '<span class="' + (dice[s] === 20 ? "hi" : dice[s] === 4 ? "lo" : "") + '">' + s.slice(0, 3) + " d" + dice[s] + "</span>").join("") + "</div>";
 
   function rStart() {
+    const nsbuCard =
+      '<div class="m-lbl">Variant</div>' +
+      '<div class="kb-big"><div class="kb-card' + (st.nsbu ? " on" : "") + '" data-nsbu="1" style="' + (st.nsbu ? "border-color:#ff8a1e;background:#2a1c08;" : "") + '"><b>💥 Never Stop Blowing Up</b><small>Dropout / Dimension 20\'s action-movie hack. Nine skills that start at d4 and <i>blow up</i> to bigger dice as you crit; Turbo Tokens, an injury track, and buyable Abilities. Replaces the standard stats and trope setup.</small></div></div>' +
+      (st.nsbu ? '<p class="m-hint" style="color:#ffb02e;">Never Stop Blowing Up is on. Next you\'ll pick 3 starting Abilities, then name your Action Hero. All nine skills begin at d4.</p>' : "");
+    if (st.nsbu) {
+      return (
+        '<p class="m-hint">You\'re building a Never Stop Blowing Up Action Hero. Everything runs off the nine key skills — no Tropes, no six-stat spread.</p>' +
+        nsbuCard
+      );
+    }
     return (
       '<p class="m-hint">Pick the book you\'re playing, then either start from one of its Tropes (fast — it sets your dice and suggests Strengths, Flaws and questions) or build from scratch by assigning the six dice yourself.</p>' +
       '<div class="m-lbl">Book</div><div class="kb-big">' +
       D.books().map((b) => '<div class="kb-card' + (st.book === b.key ? " on" : "") + '" data-book="' + b.key + '"><b>' + esc(b.name) + "</b><small>" + esc(b.tagline) + "</small></div>").join("") +
       '</div><div class="m-lbl">Start from</div><div class="kb-big">' +
       '<div class="kb-card' + (st.mode === "trope" ? " on" : "") + '" data-mode="trope"><b>A Trope</b><small>' + D.tropes().filter((t) => t.book === st.book).length + " Tropes in " + esc(bookLabel()) + ". Touchstones, not stereotypes.</small></div>" +
-      '<div class="kb-card' + (st.mode === "scratch" ? " on" : "") + '" data-mode="scratch"><b>From scratch</b><small>Assign d20 → d4 to the six stats yourself. Start with what you\'re best and worst at.</small></div></div>'
+      '<div class="kb-card' + (st.mode === "scratch" ? " on" : "") + '" data-mode="scratch"><b>From scratch</b><small>Assign d20 → d4 to the six stats yourself. Start with what you\'re best and worst at.</small></div></div>' +
+      nsbuCard
+    );
+  }
+  function rNsbuAbilities() {
+    const abil = (typeof KOB_NSBU !== "undefined" ? KOB_NSBU.abilities : []);
+    const q = norm(st.abilityQuery);
+    const list = abil.filter((a) => !q || norm(a.name).includes(q) || norm(a.text).includes(q));
+    const card = (a) => '<div class="kb-card' + (st.abilities.includes(a.name) ? " on" : "") + '" data-ability="' + esc(a.name) + '"><b>' + esc(a.name) + (a.note ? ' <span class="tag" style="display:inline;">' + esc(a.note) + "</span>" : "") + "</b><small>" + esc(a.text) + "</small></div>";
+    return (
+      '<p class="m-hint">Choose <b>3</b> starting Abilities. You can buy more later for 2 Turbo Tokens each, and unlock Group Suites in play — all from the Abilities tab on the sheet.</p>' +
+      '<input class="m-input" data-k="abilityQuery" placeholder="Search abilities…" value="' + esc(st.abilityQuery) + '">' +
+      '<div class="m-lbl">Abilities (' + st.abilities.length + "/3)</div>" +
+      '<div class="kb-list" style="max-height:44vh;margin-top:4px;">' + list.map(card).join("") + "</div>"
     );
   }
   function rTrope() {
@@ -185,6 +214,13 @@
   }
   function rTouches() {
     const i = info();
+    if (st.nsbu) {
+      return '<p class="m-hint">Every Action Hero needs a <b>catchphrase</b> — the line you say right before things blow up. Then whatever you\'re carrying and what drives you.</p>' +
+        '<div class="m-lbl">Catchphrase</div><input class="m-input" data-k="catchphrase" placeholder="&quot;I&apos;m getting too old for this.&quot;" value="' + esc(st.catchphrase) + '">' +
+        '<div class="kb-grid"><div><div class="m-lbl">Motivations</div><textarea class="m-input" data-k="motivations" rows="3" placeholder="What are you fighting for?">' + esc(st.motivations) + '</textarea></div>' +
+        '<div><div class="m-lbl">Fear</div><input class="m-input" data-k="fear" value="' + esc(st.fear) + '"></div></div>' +
+        '<div class="m-lbl">Backpack / arsenal (one item per line)</div><textarea class="m-input" data-k="bag" rows="3" placeholder="Sidearm, duct tape, one last cigarette">' + esc(st.bag) + "</textarea>";
+    }
     return '<p class="m-hint">Finishing touches. Motivations pull you into the story; your Fear pushes back (−1 to −3 on checks near it); Obligations are what you owe the world.' + (st.trope ? " Your Trope asks: <i>" + esc(st.trope.questions.join(" · ")) + "</i>" : "") + "</p>" +
       '<div class="kb-grid"><div><div class="m-lbl">Motivations</div><textarea class="m-input" data-k="motivations" rows="3">' + esc(st.motivations) + '</textarea></div>' +
       '<div><div class="m-lbl">Fear</div><input class="m-input" data-k="fear" value="' + esc(st.fear) + '"><div class="m-lbl">Obligations</div><input class="m-input" data-k="obligations" value="' + esc(st.obligations) + '"></div></div>' +
@@ -193,6 +229,16 @@
   function rReview() {
     const ag = ageGroup();
     const row = (k, v) => '<div><div class="k">' + k + '</div><div class="v">' + v + "</div></div>";
+    if (st.nsbu) {
+      return '<p class="m-hint">Name your Action Hero. All nine skills start at d4 and blow up from there.</p>' +
+        '<div class="kb-grid"><input class="m-input" data-k="name" placeholder="Name / handle" value="' + esc(st.name) + '" style="font-size:16px;"><input class="m-input" data-k="pronouns" placeholder="Pronouns" value="' + esc(st.pronouns) + '"></div>' +
+        '<div class="kb-review" style="margin-top:14px;">' +
+        row("Variant", "💥 Never Stop Blowing Up") +
+        row("Skills", NSBU_SKILLS().map((s) => s + " d4").join(" · ")) +
+        row("Abilities", esc(st.abilities.join(", ") || "—")) +
+        row("Catchphrase", esc(st.catchphrase || "—")) +
+        row("Turbo Tokens", "3") + "</div>";
+    }
     return '<p class="m-hint">Give your character a first name or nickname now — hold the last name until introductions, in case you turn out to be related to someone at the table.</p>' +
       '<div class="kb-grid"><input class="m-input" data-k="name" placeholder="First name / nickname" value="' + esc(st.name) + '" style="font-size:16px;"><input class="m-input" data-k="pronouns" placeholder="Pronouns" value="' + esc(st.pronouns) + '"></div>' +
       '<div class="kb-review" style="margin-top:14px;">' +
@@ -210,7 +256,7 @@
     body.querySelectorAll("[data-k]").forEach((el) => {
       el.addEventListener("input", () => {
         if (el.dataset.k === "skillNote") st.strengthNotes.skill = el.value; else st[el.dataset.k] = el.value;
-        if (el.dataset.k === "tropeQuery") { render(); const q = body.querySelector('[data-k="tropeQuery"]'); if (q) { q.focus({ preventScroll: true }); q.setSelectionRange(q.value.length, q.value.length); } return; }
+        if (el.dataset.k === "tropeQuery" || el.dataset.k === "abilityQuery") { const sel = '[data-k="' + el.dataset.k + '"]'; render(); const q = body.querySelector(sel); if (q) { q.focus({ preventScroll: true }); q.setSelectionRange(q.value.length, q.value.length); } return; }
         if (el.dataset.k === "flaw") body.querySelectorAll(".kb-chip.on[data-flaw]").forEach((c) => c.classList.remove("on"));
         if (el.dataset.k === "boost" || el.dataset.k === "reduce") { render(); return; }
         refreshNext();
@@ -218,6 +264,12 @@
     });
     body.querySelectorAll("[data-book]").forEach((el) => el.addEventListener("click", () => { st.book = el.dataset.book; st.trope = null; st.age = ""; st.strengths = []; st.flaw = ""; render(); }));
     body.querySelectorAll("[data-mode]").forEach((el) => el.addEventListener("click", () => { st.mode = el.dataset.mode; render(); }));
+    body.querySelectorAll("[data-nsbu]").forEach((el) => el.addEventListener("click", () => { st.nsbu = !st.nsbu; if (step > 0) step = 0; render(); }));
+    body.querySelectorAll("[data-ability]").forEach((el) => el.addEventListener("click", () => {
+      const n = el.dataset.ability; const i = st.abilities.indexOf(n);
+      if (i >= 0) st.abilities.splice(i, 1); else if (st.abilities.length < 3) st.abilities.push(n);
+      render();
+    }));
     body.querySelectorAll("[data-trope]").forEach((el) => el.addEventListener("click", () => {
       const t = D.tropes().find((x) => x.book === st.book && x.name === el.dataset.trope);
       st.trope = t; if (t) st.dice = Object.assign({}, t.dice);
@@ -241,6 +293,7 @@
   }
 
   function apply() {
+    if (st.nsbu) return applyNsbu();
     const ag = ageGroup();
     const strengths = [];
     if (ag) strengths.push({ name: ag.freeStrength, note: /skilled at|trained in|studied in/i.test(ag.freeStrength) ? (st.strengthNotes.skill || "") : "free from " + (st.book === "brooms" ? "grade" : "age") });
@@ -262,6 +315,32 @@
     if (typeof saveSheet === "function") saveSheet(true);
     if (typeof syncDocTitle === "function") syncDocTitle();
     if (typeof addLog === "function") addLog("Character Builder", "✨", "Built " + (st.name || "a character") + " — " + (st.trope ? st.trope.name : "from scratch") + " (" + bookLabel() + ")", "crit");
+    close();
+  }
+
+  // Never Stop Blowing Up: nine skills at d4, chosen Abilities, Turbo Tokens.
+  function applyNsbu() {
+    const stats = {}; NSBU_SKILLS().forEach((id) => { stats[id] = 4; });
+    const abilities = st.abilities.map((n) => ({ name: n, note: "" }));
+    let notes = "";
+    if (st.catchphrase) notes += 'Catchphrase: "' + st.catchphrase.replace(/^"|"$/g, "") + '"\n';
+    if (st.obligations) notes += st.obligations + "\n";
+    const data = {
+      system: "KOB", v: 1, book: st.book || "bikes",
+      options: { nsbu: true }, injury: 0,
+      name: st.name, lastName: st.lastName, pronouns: st.pronouns, trope: "", age: "",
+      stats, mods: {}, at: 3, stress: 0,
+      abilities,
+      strengths: [], flaw: "", knack: "",
+      motivations: st.motivations, fear: st.fear, obligations: st.obligations, bag: st.bag,
+      bike: {}, brooms: {}, capes: { skills: [] }, relationships: [],
+      notes: notes,
+      campaign: (typeof _campaign !== "undefined" && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
+    };
+    if (typeof applySheet === "function") applySheet(data);
+    if (typeof saveSheet === "function") saveSheet(true);
+    if (typeof syncDocTitle === "function") syncDocTitle();
+    if (typeof addLog === "function") addLog("Character Builder", "💥", "Built " + (st.name || "an Action Hero") + " — Never Stop Blowing Up", "crit");
     close();
   }
 

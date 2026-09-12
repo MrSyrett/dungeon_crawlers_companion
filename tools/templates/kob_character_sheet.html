@@ -173,6 +173,20 @@ body[data-book="capes"] .stat-roll.power{display:block;}
 .book-only{display:none;}
 body[data-book="brooms"] .brooms-only,body[data-book="capes"] .capes-only,body[data-book="bikes"] .bikes-only{display:block;}
 body[data-book="brooms"] tr.brooms-only,body[data-book="capes"] tr.capes-only{display:table-row;}
+/* ── Never Stop Blowing Up ── */
+.nsbu-only{display:none!important;}
+body[data-nsbu="1"] .nsbu-only{display:block!important;}
+body[data-nsbu="1"] .tab-btn.nsbu-only{display:inline-block!important;}
+.nsbu-badge{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;line-height:1.05;text-align:center;color:#111;background:linear-gradient(180deg,#ffd24a,#ff8a1e);border:2px solid #111;border-radius:5px;padding:3px 7px;margin-top:4px;letter-spacing:.04em;cursor:pointer;transform:rotate(-3deg);box-shadow:0 2px 0 #b34700;}
+.nsbu-badge:hover{filter:brightness(1.05);}
+.injury-track{display:flex;gap:5px;flex-wrap:wrap;}
+.inj-cell{flex:1 1 0;min-width:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9.5px;letter-spacing:0;text-transform:uppercase;padding:5px 2px;border:1px solid var(--rule);border-radius:4px;background:var(--input-bg);color:var(--muted);cursor:pointer;text-align:center;white-space:nowrap;}
+.inj-cell.on{color:#fff;border-color:transparent;}
+.inj-cell.on.lv0{background:#2e7d32;}
+.inj-cell.on.lv1{background:#c9a227;color:#111;}
+.inj-cell.on.lv2{background:#d1621b;}
+.inj-cell.on.lv3{background:#b3261e;}
+.brow-group{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#c9aaff;padding:10px 2px 4px;border-bottom:1px solid var(--rule);margin-bottom:4px;}
 .sheet-foot{padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 
 /* TABS — the right-hand sections (Strengths / Skills / Motivations / Backpack / Relationships / Notes) */
@@ -346,6 +360,7 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="hdr-row">
     <div class="hdr-logo">
       <div class="kob-word">KIDS ON<span>BIKES</span></div>
+      <div id="nsbu-badge" class="nsbu-badge" onclick="openRules()" title="Never Stop Blowing Up mode is on — click for the rules" style="display:none;">💥 NEVER STOP<br>BLOWING UP</div>
     </div>
     <div class="hdr-fields">
       <div class="hdr-field wide" style="grid-column:span 3;"><label>First name / nickname</label><input type="text" id="f-name" placeholder="Billy"></div>
@@ -364,13 +379,20 @@ select option{background:var(--input-bg);color:var(--ink);}
       <div id="stats-list"></div>
 
       <div class="tok-wrap">
-        <div class="derived-lbl"><span>Adversity Tokens</span></div>
+        <div class="derived-lbl"><span id="tok-label">Adversity Tokens</span></div>
         <div class="tok-line">
           <span class="tok-big" id="at-val">3</span>
           <div class="tok-pips" id="at-pips"></div>
           <button class="small-btn ghost" onclick="atChange(-1)">−</button>
           <button class="small-btn ghost" onclick="atChange(1)">+</button>
         </div>
+      </div>
+
+      <!-- NSBU: Injury track -->
+      <div class="tok-wrap nsbu-only">
+        <div class="derived-lbl"><span>Injury</span></div>
+        <div class="injury-track" id="injury-track"></div>
+        <div class="hint" style="margin-top:4px;">Fail a Tough Check by 5+ to take an injury. Severe: Turbo costs double to Blow Up. Adrenalized: +10 Turbo, next Tough fail is fatal.</div>
       </div>
 
       <!-- CAPES: Stress / Power -->
@@ -408,6 +430,7 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="center-col">
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="strengths" onclick="setTab('strengths')">Strengths</button>
+        <button class="tab-btn nsbu-only" data-tab="abilities" onclick="setTab('abilities')" style="display:none;">Abilities</button>
         <button class="tab-btn capes-only book-only" id="tabbtn-skills" data-tab="skills" onclick="setTab('skills')">Skills</button>
         <button class="tab-btn" data-tab="bonds" onclick="setTab('bonds')">Motivations</button>
         <button class="tab-btn" data-tab="backpack" onclick="setTab('backpack')">Backpack</button>
@@ -429,6 +452,16 @@ select option{background:var(--input-bg);color:var(--ink);}
             <div class="fld capes-only book-only"><label>Power</label><input type="text" id="f-power-cat" list="dl-power-cat" placeholder="Energy Control — describe it"></div>
           </div>
         </div>
+      </div>
+
+      <!-- NSBU: bought Abilities & Group Suites -->
+      <div class="tab-panel" id="tab-abilities">
+        <div class="section-bar"><span>Abilities &amp; Group Suites</span><span class="hdr-right"><button class="hdr-btn" onclick="openAbilityPicker()">💥 Add ability</button></span></div>
+        <table class="tbl">
+          <thead><tr><th style="width:34%;">Ability</th><th style="width:70px;">Cost</th><th>Effect</th><th style="width:26px;"></th></tr></thead>
+          <tbody id="abilities-body"></tbody>
+        </table>
+        <div class="hint" style="margin-top:8px;">Spend leftover Turbo Tokens at the end of a session: individual abilities cost 2 each; Group Suites cost 10 for one member (18 for the whole group) once every player reaches the listed die type.</div>
       </div>
 
       <!-- CAPES: skills -->
@@ -537,6 +570,14 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
 </div>
 
+<div id="ability-overlay" class="ov" onclick="if(event.target===this)closeAbilityPicker()">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-hd"><div class="ttl">💥 Abilities &amp; Group Suites</div><button class="x" onclick="closeAbilityPicker()">&#10005;</button></div>
+    <div class="brow-controls"><input id="ability-search" class="m-input" placeholder="Search abilities…" oninput="renderAbilityPicker()"></div>
+    <div class="modal-bd brow-list" id="ability-body"></div>
+  </div>
+</div>
+
 <script>
 // ═══ CORE ═════════════════════════════════════════════════════════════════
 const STATS = [
@@ -566,6 +607,14 @@ const D = {
 let at = 3;
 let stress = 0;
 let _lastRoll = null;
+// ── Never Stop Blowing Up (NSBU) — a Dropout variant, set at character creation.
+// 9 fixed skills starting at d4 that permanently "blow up" to the next die type on
+// a max roll; Adversity Tokens become Turbo Tokens; a 3-level Injury track.
+let options = { nsbu:false };
+let injury = 0;   // 0 none · 1 Superficial · 2 Severe · 3 Adrenalized
+function nsbuOn() { return !!(options && options.nsbu); }
+function curStats() { return (nsbuOn() && typeof KOB_NSBU !== 'undefined') ? KOB_NSBU.skills : STATS; }
+function tokenName() { return nsbuOn() ? 'Turbo Token' : 'Adversity Token'; }
 
 function book() { return $('f-book').value || 'bikes'; }
 function bookInfo() { return D.books().find(b => b.key === book()) || null; }
@@ -576,19 +625,25 @@ function findItem(kind, name) { const n = norm(name); return n ? itemsOf(kind).f
 function buildStats() {
   const list = $('stats-list');
   list.innerHTML = '';
-  STATS.forEach(s => {
+  const stats = curStats();
+  const defDie = nsbuOn() ? 4 : 8;   // NSBU skills all start at d4
+  stats.forEach(s => {
     const row = document.createElement('div');
     row.className = 'stat-row';
+    // NSBU: the ⚡ Power button is replaced by a ½ Prepared-Action button.
+    const btn = nsbuOn()
+      ? `<button class="stat-roll" onclick="planStat('${s.id}')" title="Prepared Action: take half the die value">½</button>`
+      : `<button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">⚡</button>`;
     row.innerHTML =
-      `<div class="stat-name" onclick="rollStat('${s.id}')" title="Roll ${s.id}">${s.id}</div>` +
-      `<select class="die-sel" id="die-${s.id}" onchange="recalc()">${DICE.map(d => '<option value="' + d + '"' + (d === 8 ? ' selected' : '') + '>d' + d + '</option>').join('')}</select>` +
+      `<div class="stat-name" onclick="rollStat('${s.id}')" title="${nsbuOn() ? 'Roll ' + s.id + ' — blows up on a max' : 'Roll ' + s.id}">${s.id}</div>` +
+      `<select class="die-sel" id="die-${s.id}" onchange="recalc()">${DICE.map(d => '<option value="' + d + '"' + (d === defDie ? ' selected' : '') + '>d' + d + '</option>').join('')}</select>` +
       `<div class="stat-bonus" id="ab-${s.id}"></div>` +
       `<input class="stat-mod" id="mod-${s.id}" type="number" value="0" title="Other modifiers" oninput="recalc()">` +
-      `<div class="stat-btns"><button class="stat-roll power" onclick="rollPower('${s.id}')" title="Use your Power: stat die + Power Die">⚡</button></div>`;
+      `<div class="stat-btns">${btn}</div>`;
     list.appendChild(row);
   });
-  const opts = STATS.map(s => '<option value="' + s.id + '">' + s.id + '</option>').join('');
-  ['f-stress-boost', 'f-stress-reduce'].forEach(id => { $(id).innerHTML = opts; });
+  const opts = stats.map(s => '<option value="' + s.id + '">' + s.id + '</option>').join('');
+  ['f-stress-boost', 'f-stress-reduce'].forEach(id => { if($(id)) $(id).innerHTML = opts; });
   $('f-stress-reduce').value = 'Brawn';
 }
 function dieOf(id) { return num($('die-' + id).value) || 4; }
@@ -619,7 +674,7 @@ function bonusOf(id) {
   return b;
 }
 function recalc() {
-  STATS.forEach(s => { const b = bonusOf(s.id); $('ab-' + s.id).textContent = b ? (b > 0 ? '+' + b : String(b)) : ''; $('ab-' + s.id).title = 'Total bonus on ' + s.id + ' checks'; });
+  curStats().forEach(s => { const el = $('ab-' + s.id); if(!el) return; const b = bonusOf(s.id); el.textContent = b ? (b > 0 ? '+' + b : String(b)) : ''; el.title = 'Total bonus on ' + s.id + ' checks'; });
   // book chrome
   const info = bookInfo();
   document.querySelector('.kob-word').innerHTML = 'KIDS ' + (book() === 'capes' ? 'IN' : 'ON') + '<span>' + (book() === 'brooms' ? 'BROOMS' : book() === 'capes' ? 'CAPES' : 'BIKES') + '</span>';
@@ -633,7 +688,8 @@ function recalc() {
   const ba = findItem('bike-accessory', $('f-bike-acc').value); $('bike-acc-hint').textContent = ba ? (ba.benefit || ba.description || '') : '';
   const br = findItem('broom', $('f-broom').value); $('broom-hint').textContent = br ? (br.tag ? br.tag + ' — ' : '') + (br.benefit || '') : '';
   const cape = D.capes().find(c => norm(c.name) === norm($('f-cape').value)); $('cape-hint').textContent = cape ? cape.description.slice(0, 160) + (cape.description.length > 160 ? '…' : '') : '';
-  renderAT(); renderStress(); refreshStrengthRows(); refreshSkillRows();
+  renderAT(); renderStress(); refreshStrengthRows(); refreshSkillRows(); refreshAbilityRows();
+  renderNsbu();
 }
 function onBookChange() {
   document.body.dataset.book = book();
@@ -654,8 +710,9 @@ function atChange(d, why) {
   const next = Math.max(0, at + d);
   if(next === at) return;
   at = next; renderAT();
-  if(d > 0) addLog('Adversity Token +' + d, '✦ ' + at, why || 'Earned', 'normal');
-  else addLog('Adversity Token −' + (-d), '✦ ' + at, why || 'Spent', 'normal');
+  const tn = tokenName();
+  if(d > 0) addLog(tn + ' +' + d, '✦ ' + at, why || 'Earned', 'normal');
+  else addLog(tn + ' −' + (-d), '✦ ' + at, why || 'Spent', 'normal');
   scheduleAutosave();
 }
 function renderStress() {
@@ -719,24 +776,72 @@ function doCheck(label, sides, bonus, opts) {
   if(r.lucky && type !== 'crit') type = 'crit';
   if(tn && j.type === 'fumble' && opts.earnAT !== false) { at += 1; renderAT(); scheduleAutosave(); }
   _lastRoll = { label, total, tn, spent:0 };
-  addLog(label, String(total), detail + j.verdict, type, { atBtn: true });
+  addLog(label, String(total), detail + (nsbuOn() ? j.verdict.replace(' → +1 AT', ' → +1 Turbo') : j.verdict), type, { atBtn: true });
   return total;
 }
 function spendATOnRoll() {
   if(!_lastRoll) return;
-  if(at <= 0) { addLog('Adversity Tokens', '0', 'None left — fail a check to earn some.', 'fumble'); return; }
-  at -= 1; renderAT();
+  const tName = tokenName();
+  // NSBU: at Severe injury (or worse) Turbo Tokens cost double to boost.
+  const cost = (nsbuOn() && injury >= 2) ? 2 : 1;
+  if(at < cost) { addLog(tName + 's', String(at), cost > 1 ? 'Severe injury — a boost costs 2 Turbo Tokens, and you don\'t have two.' : 'None left — fail a check to earn some.', 'fumble'); return; }
+  at -= cost; renderAT();
   const bonusPer = (book() === 'bikes' && /red/i.test($('f-bike-color').value)) || (book() === 'brooms' && /daring dodger/i.test($('f-broom').value)) ? 2 : 1;
-  _lastRoll.total += bonusPer; _lastRoll.spent += 1;
+  _lastRoll.total += bonusPer; _lastRoll.spent += cost;
   const j = judge(_lastRoll.total, _lastRoll.tn);
-  addLog(_lastRoll.label + ' +AT', String(_lastRoll.total), '+' + bonusPer + ' from an Adversity Token (' + _lastRoll.spent + ' spent)' + j.verdict.replace(' → +1 AT', ''), j.type, { atBtn: true });
+  addLog(_lastRoll.label + ' +' + (nsbuOn() ? 'Turbo' : 'AT'), String(_lastRoll.total), '+' + bonusPer + ' from ' + (cost > 1 ? cost + ' ' + tName + 's' : 'a ' + tName) + ' (' + _lastRoll.spent + ' spent)' + j.verdict.replace(/ → \+1 (AT|Turbo)/, ''), j.type, { atBtn: true });
   scheduleAutosave();
 }
 function rollStat(id) {
+  if(nsbuOn()) { nsbuRollStat(id); return; }
   const sm = stressMods();
   if(sm.out) { addLog(id, '✗', 'Stress 13 — you are out of the fight.', 'fumble'); return; }
   doCheck(id + ' check', dieOf(id), bonusOf(id), { note: fearNote() });
 }
+// NSBU "Blowing Up": roll the skill die; on a max it steps up to the next die type,
+// rolls that, and adds it — repeating until a non-max or d20. The skill's die
+// permanently advances to the highest type it reached.
+function nsbuRollStat(id) {
+  const bonus = bonusOf(id);
+  const tn = num(($('tray-tn') || {}).value) || null;
+  let idx = DICE.indexOf(dieOf(id)); if(idx < 0) idx = 0;
+  const startIdx = idx;
+  let total = 0; const parts = []; let blew = 0;
+  while(true) {
+    const sides = DICE[idx]; const f = dN(sides); total += f; parts.push('d' + sides + '→' + f);
+    if(f === sides && idx < DICE.length - 1) { blew++; idx++; continue; }
+    break;
+  }
+  const finalDie = DICE[idx];
+  if(idx !== startIdx) { $('die-' + id).value = String(finalDie); recalc(); }
+  total += bonus;
+  let detail = parts.join(' ') + (bonus ? ' ' + (bonus > 0 ? '+' : '') + bonus : '') + (blew ? ' · 💥 BLOW UP ×' + blew + ' → d' + finalDie : '');
+  const j = judge(total, tn);
+  let type = blew ? 'crit' : j.type;
+  if(tn && j.type === 'fumble') { at += 1; renderAT(); scheduleAutosave(); }
+  // A Tough Check failed by 5+ inflicts an Injury Level.
+  if(tn && norm(id) === 'tough' && total <= tn - 5) nsbuInjury(1, 'Failed a Tough Check by 5+');
+  _lastRoll = { label: id + ' check', total, tn, spent:0 };
+  addLog(id + ' check', String(total), detail + j.verdict.replace(' → +1 AT', ' → +1 Turbo'), type, { atBtn:true });
+}
+// ── NSBU chrome: badge, Turbo-token label, Injury track ──
+function renderNsbu() {
+  const on = nsbuOn();
+  document.body.dataset.nsbu = on ? '1' : '';
+  const badge = $('nsbu-badge'); if(badge) badge.style.display = on ? '' : 'none';
+  const lbl = $('tok-label'); if(lbl) lbl.textContent = on ? 'Turbo Tokens' : 'Adversity Tokens';
+  const tb = document.querySelector('[data-tab="abilities"]'); if(tb) tb.style.display = on ? '' : 'none';
+  if(on) renderInjury();
+}
+const NSBU_INJURY = ['Healthy', 'Superficial', 'Severe', 'Adrenalized'];
+function renderInjury() {
+  const box = $('injury-track'); if(!box) return;
+  box.innerHTML = NSBU_INJURY.map((lbl, i) =>
+    '<button class="inj-cell' + (i === injury ? ' on lv' + i : '') + '" onclick="setInjury(' + i + ')" title="' + esc(lbl) + '">' + esc(lbl) + '</button>'
+  ).join('');
+}
+function setInjury(n) { const prev = injury; injury = (n === injury && n > 0) ? n - 1 : n; renderInjury(); if(injury !== prev) { if(injury === 3) { at += 10; renderAT(); addLog('Adrenalized', '💥', 'Injury: Adrenalized — gain 10 Turbo Tokens. Fail a Tough Check now and you\'re Incapacitated or Dead.', 'fumble'); } else addLog('Injury', injury ? '🩸' : '✚', injury ? NSBU_INJURY[injury] + (injury === 2 ? ' — Turbo Tokens cost double to Blow Up' : '') : 'Recovered — Healthy', injury ? 'fumble' : 'normal'); } scheduleAutosave(); }
+function nsbuInjury(delta, why) { const prev = injury; injury = Math.max(0, Math.min(3, injury + delta)); if(injury !== prev) { renderInjury(); if(injury === 3) { at += 10; renderAT(); } addLog('Injury', injury === 3 ? '💥' : '🩸', (why ? why + ' — ' : '') + NSBU_INJURY[injury] + (injury === 3 ? ' (gain 10 Turbo Tokens!)' : injury === 2 ? ' (Turbo costs double to Blow Up)' : ''), 'fumble'); scheduleAutosave(); } }
 function fearNote() { const f = $('f-fear').value.trim(); return f ? 'fear: ' + f + '? −1 to −3' : ''; }
 function planStat(id) {
   const half = dieOf(id) / 2 + bonusOf(id);
@@ -769,12 +874,41 @@ function refreshStrengthRows() {
   });
 }
 
+// ═══ NSBU ABILITIES ═══════════════════════════════════════════════════════
+// Buyable individual Abilities and Group-Suite powers, stored Strengths-style.
+function addAbilityRow(a) {
+  a = a || { name:'', note:'' };
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input type="text" class="ab-name" placeholder="Ability" value="${esc(a.name)}" oninput="refreshAbilityRows()"></td><td class="cost"></td><td><input type="text" class="ab-note" placeholder="notes" value="${esc(a.note || '')}"><div class="desc"></div></td><td><button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button></td>`;
+  $('abilities-body').appendChild(tr);
+  refreshAbilityRows();
+}
+// Look a name up across the individual abilities and every group-suite item.
+function findAbility(name) {
+  const n = norm(name); if(!n || typeof KOB_NSBU === 'undefined') return null;
+  const hit = KOB_NSBU.abilities.find(a => norm(a.name) === n);
+  if(hit) return { name:hit.name, note:hit.note, text:hit.text, cost:'2', group:null };
+  for(const suite of KOB_NSBU.suites) {
+    const it = suite.items.find(i => norm(suite.name + ' — ' + i.name) === n || norm(i.name) === n);
+    if(it) return { name:it.name, note:it.note, text:it.text, cost:'10 / 18', group:suite.name };
+  }
+  return null;
+}
+function refreshAbilityRows() {
+  document.querySelectorAll('#abilities-body tr').forEach(tr => {
+    const a = findAbility(tr.querySelector('.ab-name').value);
+    tr.querySelector('.cost').textContent = a ? a.cost : '';
+    tr.querySelector('.desc').textContent = a ? ((a.group ? '[' + a.group + '] ' : '') + (a.note ? '(' + a.note + ') ' : '') + a.text) : '';
+  });
+}
+
 // ═══ TABS ═════════════════════════════════════════════════════════════════
 var _tab = 'strengths';
-const TABS = ['strengths','skills','bonds','backpack','relationships','notes'];
+const TABS = ['strengths','abilities','skills','bonds','backpack','relationships','notes'];
 function setTab(name) {
   if(!TABS.includes(name)) name = 'strengths';
   if(name === 'skills' && book() !== 'capes') name = 'strengths';   // Skills tab is Capes-only
+  if(name === 'abilities' && !nsbuOn()) name = 'strengths';         // Abilities tab is NSBU-only
   _tab = name;
   TABS.forEach(t => {
     const panel = $('tab-' + t); if(panel) panel.classList.toggle('on', t === name);
@@ -809,6 +943,36 @@ function renderStrengthPicker() {
 (function wireStrengthPicker() {
   const sb = $('strength-body');
   if(sb) sb.addEventListener('click', e => { const b = e.target.closest('[data-add-strength]'); if(b) { addStrengthRow({ name: b.dataset.addStrength, note: '' }); scheduleAutosave(); renderStrengthPicker(); } });
+})();
+
+// ═══ NSBU ABILITY PICKER ══════════════════════════════════════════════════
+function openAbilityPicker() { $('ability-search').value = ''; $('ability-overlay').classList.add('open'); renderAbilityPicker(); $('ability-search').focus(); }
+function closeAbilityPicker() { $('ability-overlay').classList.remove('open'); }
+function abilitiesTaken() { return new Set([...document.querySelectorAll('#abilities-body .ab-name')].map(el => norm(el.value))); }
+function renderAbilityPicker() {
+  const box = $('ability-body'); if(typeof KOB_NSBU === 'undefined') { box.innerHTML = '<p class="brow-empty">No abilities available.</p>'; return; }
+  const q = norm($('ability-search').value), taken = abilitiesTaken();
+  const match = (name, text) => !q || norm(name).includes(q) || norm(text || '').includes(q);
+  const row = (key, name, cost, note, text) => {
+    const have = taken.has(norm(key));
+    const btn = have ? '<button class="brow-add have">Added ✓</button>' : '<button class="brow-add" data-add-ability="' + esc(key) + '">+ Add</button>';
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(name) + '<span class="brow-cost">' + esc(cost) + '</span>' + (note ? ' <span class="brow-cost" style="background:#3a2d55;">' + esc(note) + '</span>' : '') + '</div>' +
+      (text ? '<div class="brow-desc">' + esc(text) + '</div>' : '') + '</div>' + btn + '</div>';
+  };
+  let html = '';
+  const abil = KOB_NSBU.abilities.filter(a => match(a.name, a.text));
+  if(abil.length) html += '<div class="brow-group">Individual · 2 Turbo each</div>' + abil.map(a => row(a.name, a.name, '2 TT', a.note, a.text)).join('');
+  KOB_NSBU.suites.forEach(s => {
+    const items = s.items.filter(i => match(s.name + ' ' + i.name, i.text));
+    if(!items.length) return;
+    html += '<div class="brow-group">' + esc(s.name) + ' · unlock ' + esc(s.unlock) + ' · 10 / 18 Turbo</div>' +
+      items.map(i => row(s.name + ' — ' + i.name, s.name + ' — ' + i.name, '10 / 18', i.note, i.text)).join('');
+  });
+  box.innerHTML = html || '<p class="brow-empty">No abilities match.</p>';
+}
+(function wireAbilityPicker() {
+  const ab = $('ability-body');
+  if(ab) ab.addEventListener('click', e => { const b = e.target.closest('[data-add-ability]'); if(b) { addAbilityRow({ name: b.dataset.addAbility, note: '' }); scheduleAutosave(); renderAbilityPicker(); } });
 })();
 function addSkillRow(s) {
   s = s || { name:'', tier:'starting' };
@@ -860,10 +1024,17 @@ function fillDatalists() {
 // ═══ RULES MODAL ══════════════════════════════════════════════════════════
 function openRules() {
   const T = D.tables(); const body = $('rules-body');
-  $('rules-title').textContent = BOOK_NAMES[book()] + ' — Quick Rules';
-  if(!T) body.innerHTML = '<p>Rules data not loaded.</p>';
+  $('rules-title').textContent = nsbuOn() ? 'Never Stop Blowing Up — Quick Rules' : BOOK_NAMES[book()] + ' — Quick Rules';
+  if(!T && !nsbuOn()) body.innerHTML = '<p>Rules data not loaded.</p>';
   else {
     let h = '';
+    // NSBU rules lead the panel when the mode is on.
+    if(nsbuOn() && typeof KOB_NSBU !== 'undefined') {
+      h += '<h4 style="color:#ffb02e;">💥 Never Stop Blowing Up</h4>';
+      KOB_NSBU.rules.forEach(r => { h += '<h4>' + esc(r.title) + '</h4><p>' + esc(r.text) + '</p>'; });
+      h += '<hr style="border:none;border-top:1px solid var(--rule);margin:14px 0;"><p class="hint">Kids on Bikes core reference:</p>';
+    }
+    if(!T) { body.innerHTML = h; $('rules-overlay').classList.add('open'); return; }
     const rules = (T.quickRules || []).filter(q => q.book === null || q.book === book());
     rules.forEach(q => { h += '<h4>' + esc(q.title) + '</h4><p>' + esc(q.text) + '</p>'; });
     h += '<h4>Difficulty</h4><table><tr><th>Target</th><th>What it means</th><th>Examples</th></tr>' + (T.difficulties || []).map(d => '<tr><td>' + esc(d.range) + '</td><td>' + esc(d.text) + '</td><td>' + esc(d.examples) + '</td></tr>').join('') + '</table>';
@@ -910,7 +1081,7 @@ function addLog(label, result, detail, type, opts) {
   const div = document.createElement('div');
   div.className = 'log-entry' + (type === 'crit' ? ' crit' : type === 'fumble' ? ' fumble' : '');
   div.innerHTML = '<div class="roll-label">' + esc(label) + '</div><div class="roll-result">' + esc(result) + '</div><div class="roll-detail">' + esc(detail) + '</div>' +
-    (opts.atBtn ? '<button class="at-btn" onclick="spendATOnRoll()" title="Spend an Adversity Token for +1">✦ +1 AT</button>' : '');
+    (opts.atBtn ? '<button class="at-btn" onclick="spendATOnRoll()" title="Spend a ' + esc(tokenName()) + (nsbuOn() && injury >= 2 ? ' (×2 — Severe injury)' : '') + ' for +1">✦ +1 ' + (nsbuOn() ? 'Turbo' : 'AT') + '</button>' : '');
   if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
   entries.insertBefore(div, entries.firstChild);
   while(entries.children.length > 60) entries.removeChild(entries.lastChild);
@@ -930,12 +1101,14 @@ function collectSheet() {
   // `mods` is the raw "Other modifiers" field; `bonuses` is the effective per-stat
   // check bonus the player actually rolls with (age + ride/broom benefit + Capes
   // stress + the manual mod) — what the GM Party tool should display.
-  STATS.forEach(s => { stats[s.id] = dieOf(s.id); mods[s.id] = num($('mod-' + s.id).value); bonuses[s.id] = bonusOf(s.id); });
+  curStats().forEach(s => { const el = $('mod-' + s.id); if(!el) return; stats[s.id] = dieOf(s.id); mods[s.id] = num(el.value); bonuses[s.id] = bonusOf(s.id); });
   const v = id => $(id).value;
   return {
     system:'KOB', v:1, book: book(),
+    options: { nsbu: nsbuOn() }, injury,
     name: v('f-name'), pronouns: v('f-pronouns'), trope: v('f-trope'), age: v('f-age'),
     stats, mods, bonuses, at, stress,
+    abilities: [...document.querySelectorAll('#abilities-body tr')].map(tr => ({ name: tr.querySelector('.ab-name').value, note: tr.querySelector('.ab-note').value })).filter(a => a.name || a.note),
     strengths: [...document.querySelectorAll('#strengths-body tr')].map(tr => ({ name: tr.querySelector('.st-name').value, note: tr.querySelector('.st-note').value })).filter(s => s.name || s.note),
     flaw: v('f-flaw'), knack: v('f-knack'),
     motivations: v('f-motivations'), fear: v('f-fear'), obligations: v('f-obligations'), bag: v('f-bag'),
@@ -952,10 +1125,17 @@ function applySheet(d) {
   d = d || {};
   const set = (id, val) => { $(id).value = val == null ? '' : val; };
   set('f-book', d.book || 'bikes'); document.body.dataset.book = book();
+  // Variant mode is restored before the stat rows are rebuilt, so the correct
+  // skill set (KoB stats vs the 9 NSBU skills) is laid out.
+  options = Object.assign({ nsbu:false }, d.options || {});
+  injury = typeof d.injury === 'number' ? d.injury : 0;
+  buildStats();
   fillAgeOptions(); fillDatalists();
   set('f-name', [d.name, d.lastName].filter(Boolean).join(' ')); set('f-pronouns', d.pronouns); set('f-trope', d.trope); set('f-age', d.age);
-  STATS.forEach(s => { set('die-' + s.id, (d.stats && d.stats[s.id]) || 8); set('mod-' + s.id, (d.mods && d.mods[s.id]) || 0); });
+  const defDie = nsbuOn() ? 4 : 8;
+  curStats().forEach(s => { set('die-' + s.id, (d.stats && d.stats[s.id]) || defDie); set('mod-' + s.id, (d.mods && d.mods[s.id]) || 0); });
   at = typeof d.at === 'number' ? d.at : 3; stress = typeof d.stress === 'number' ? d.stress : 0;
+  $('abilities-body').innerHTML = ''; (d.abilities || []).forEach(addAbilityRow);
   $('strengths-body').innerHTML = ''; (d.strengths && d.strengths.length ? d.strengths : [{ name:'', note:'' }, { name:'', note:'' }, { name:'', note:'' }]).forEach(addStrengthRow);
   set('f-flaw', d.flaw); set('f-knack', d.knack); set('f-motivations', d.motivations); set('f-fear', d.fear); set('f-obligations', d.obligations); set('f-bag', d.bag);
   const bk = d.bike || {}; set('f-bike-color', bk.color); set('f-bike-acc', bk.accessory);
@@ -990,7 +1170,7 @@ function importSheet(input) {
   r.onload = () => { try { applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported', '↑', f.name, 'normal'); } catch(e) { addLog('Import failed', '✗', 'Not a valid sheet file', 'fumble'); } };
   r.readAsText(f); input.value = '';
 }
-function newCharacter() { at = 3; stress = 0; applySheet({}); }
+function newCharacter() { at = 3; stress = 0; options = { nsbu:false }; injury = 0; applySheet({}); }
 function autoLoad() {
   let saved = null;
   if(window.__ddState !== undefined) saved = window.__ddState['kob_sheet'] || null;
@@ -1192,6 +1372,7 @@ campaignUpdateBtn();
 <script src="/tools-data/kob-questions.js"></script>
 <script src="/tools-data/kob-items.js"></script>
 <script src="/tools-data/kob-capes.js"></script>
+<script src="/tools-data/kob-nsbu.js"></script>
 <script src="/tools-data/kob-sheet-builder.js"></script>
 <script src="/tools-data/kob-homebrew.js"></script>
 <script>
