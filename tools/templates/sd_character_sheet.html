@@ -418,15 +418,8 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 .lb-btn:hover:not(:disabled){background:#e0b83a;}
 .lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
 /* HeroDark mode */
-.hd-actions-wrap{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap;margin:6px 2px 0;padding:6px 8px;background:rgba(200,160,32,.08);border:1px solid #6a4a12;border-radius:5px;}
-.hd-lbl{font-family:'Montserrat',sans-serif;font-weight:800;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#c8a020;}
-.hd-pips{display:inline-flex;gap:6px;}
-.hd-act-pip{display:inline-block;width:20px;height:20px;border:2px solid #c8a020;border-radius:4px;cursor:pointer;background:transparent;box-sizing:border-box;vertical-align:middle;}
-.hd-act-pip.used{background:#c8a020;border-color:#c8a020;}
-.hd-reset{background:#1a1a1a;color:#e0d0a0;border:1px solid #6a5a2a;border-radius:4px;cursor:pointer;font-size:10px;padding:4px 8px;font-family:'Montserrat',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-.hd-reset:hover{border-color:#c8a020;color:#fff;}
-.hd-note{font-size:10px;color:#9a8f70;line-height:1.3;}
-.hd-dying{font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;color:#fff;background:#7a1a1a;border:1px solid #b03030;border-radius:4px;padding:3px 9px;}
+.hd-dying-wrap{margin:6px 2px 0;}
+.hd-dying{display:inline-block;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;color:#fff;background:#7a1a1a;border:1px solid #b03030;border-radius:4px;padding:3px 9px;}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
@@ -500,11 +493,8 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-big" id="lk-val" placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
         </div>
       </div>
-      <div id="hd-actions-wrap" class="hd-actions-wrap" style="display:none;">
-        <span class="hd-lbl">Actions</span>
-        <span id="hd-actions" class="hd-pips"></span>
-        <button class="hd-reset" onclick="resetHeroDarkActions()" title="New turn — regain all 3 Actions">↺ Turn</button>
-        <span id="hd-dying" class="hd-dying" style="display:none;">☠ DYING — 1 action, disadvantage on all checks</span>
+      <div id="hd-dying-wrap" class="hd-dying-wrap" style="display:none;">
+        <span class="hd-dying">☠ DYING — 1 action, disadvantage on all checks</span>
       </div>
 
       <!-- ATTACKS -->
@@ -1013,7 +1003,6 @@ let _applyingItemBonuses = false;   // re-entrancy guard
 // talents can be chosen); the rest are automated below or listed in the ⚔ panel.
 function defaultOptions(){ return { heroDark:false }; }
 let options = defaultOptions();
-let heroDarkActionsUsed = 0;   // Actions spent this turn (of 3)
 let _heroDarkDying = false;    // at 0 HP in HeroDark: Dying, forces disadvantage
 function heroDarkOn(){ return !!(options && options.heroDark); }
 window.heroDarkOn = heroDarkOn;
@@ -2350,31 +2339,17 @@ function onHPChange(){
           : 'Above 0 HP again — no longer Dying.',
     dying ? 'fumble' : 'normal');
 }
-// ── HeroDark sheet chrome: 3-Action tracker + Dying flag ────────────────────
+// ── HeroDark sheet chrome: Dying flag ───────────────────────────────────────
 function renderHeroDark(){
   const on = heroDarkOn();
-  const wrap = document.getElementById('hd-actions-wrap'); if(wrap) wrap.style.display = on ? '' : 'none';
-  const dv = document.getElementById('hd-dying'); if(dv) dv.style.display = (on && _heroDarkDying) ? '' : 'none';
-  if(on) renderHeroDarkActions();
-}
-function renderHeroDarkActions(){
-  const box = document.getElementById('hd-actions'); if(!box) return;
-  let h = ''; for(let i=1;i<=3;i++) h += '<span class="hd-act-pip' + (i<=heroDarkActionsUsed?' used':'') + '" onclick="toggleHeroDarkAction(' + i + ')" title="Action ' + i + ' — tap to spend"></span>';
-  box.innerHTML = h;
-}
-function toggleHeroDarkAction(i){ heroDarkActionsUsed = (i <= heroDarkActionsUsed ? i-1 : i); renderHeroDarkActions(); saveSheet(); }
-function resetHeroDarkActions(){ heroDarkActionsUsed = 0; renderHeroDarkActions(); saveSheet(); }
-// Making an attack, casting a spell, or rolling a check spends one of the 3 Actions.
-function heroDarkSpendAction(){
-  if(!heroDarkOn() || heroDarkActionsUsed >= 3) return;
-  heroDarkActionsUsed++; renderHeroDarkActions(); saveSheet();
+  const dw = document.getElementById('hd-dying-wrap'); if(dw) dw.style.display = (on && _heroDarkDying) ? '' : 'none';
 }
 // HeroDark rules — folded into the Quick Rules panel while HeroDark mode is on.
 const HERODARK_QUICK_RULES = [
   { title: '⚔ HeroDark — Hit Points & Talents', text: 'You begin with maximum HP at level 1. At each level-up you choose your talent rather than rolling it.' },
   { title: '⚔ HeroDark — Skill Talents (even levels)', text: 'At every even level you also gain a Skill Talent: learn to use a new weapon or armor (added to your proficiencies), learn a new language, or gain a Skill — a write-in subject that grants advantage on rolls pertaining to it.' },
   { title: '⚔ HeroDark — Luck', text: 'You can hold an unlimited number of Luck points, and you gain a Luck point whenever you roll a natural 1 or a natural 20 on a d20 (check, attack, or spellcast). The sheet adds it automatically.' },
-  { title: '⚔ HeroDark — Actions', text: 'You get 3 actions on your turn (tracked below the vitals; attacks, spells, and checks fill a pip). You may repeat the same action, but every repeat after the first — movement excepted — is made with disadvantage.' },
+  { title: '⚔ HeroDark — Actions', text: 'You have 2 actions on your turn as normal. You may forgo your movement to take a second attack or cast a spell that turn — but that extra action is made with disadvantage.' },
   { title: '⚔ HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all checks (applied automatically) until you are healed above 0 HP.' },
 ];
 function d(s){return Math.floor(Math.random()*s)+1;}
@@ -2443,7 +2418,6 @@ function rollStat(id, name) {
   addLog(`${name} Check`+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
     `${base} + Mod(${fmtMod(mod)}) = ${total}`, type);
   heroDarkLuckOnNat(roll, name + ' check');
-  heroDarkSpendAction();
 }
 
 // Extra spell lists a caster opted into (beyond their class's own list). Saved
@@ -2685,7 +2659,6 @@ function rollAttack(btn) {
   addLog(`${name}`+(hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''),
     resultStr, detailStr, type);
   heroDarkLuckOnNat(hitRoll, name);
-  heroDarkSpendAction();
 }
 
 function rollSpell(btn) {
@@ -2765,7 +2738,6 @@ function rollSpell(btn) {
 
   addLog(`${name} (Tier ${spellLevel})${isAdvSpell?' ▲':''}`, resultStr, detailStr, type);
   heroDarkLuckOnNat(roll, name);
-  heroDarkSpendAction();
 
   // ── Scroll / Wand consumption ── (only when Auto is on; off = track by hand)
   if(source && _autoConsume) {
@@ -3051,7 +3023,6 @@ function collectSheet(){
       talents:   talentsText,
       luckPts:   document.getElementById('lk-val')?.value || '',
       options:   options,
-      heroDarkActions: heroDarkActionsUsed,
       dying:     _heroDarkDying,
       featureUses: _featureUses && typeof _featureUses === 'object' ? _featureUses : {},
       trackers:       Array.isArray(_trackers) ? _trackers : [],
@@ -3393,7 +3364,6 @@ function _applySDData(d){
   renderTalentsView();          // restore the styled Talents view after a load
   // HeroDark option + play state
   options = Object.assign(defaultOptions(), (d._sheet && d._sheet.options) || {});
-  heroDarkActionsUsed = parseInt(d._sheet?.heroDarkActions) || 0;
   _heroDarkDying = !!(d._sheet && d._sheet.dying);
   if(typeof renderHeroDark === 'function') renderHeroDark();
 }
