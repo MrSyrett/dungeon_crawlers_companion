@@ -2066,8 +2066,6 @@ function ccwApply() {
 
   // HeroDark: record the option on the sheet so it persists and drives the sheet chrome.
   if(typeof options !== 'undefined'){ options = Object.assign((typeof defaultOptions==='function'?defaultOptions():{}), { heroDark: !!c.heroDark }); }
-  if(typeof _heroDarkDying !== 'undefined') _heroDarkDying = false;
-  if(typeof renderHeroDark === 'function') renderHeroDark();
 
   saveSheet(false);
   addLog('Character Created','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M5.5 4.2h9a1.3 1.3 0 0 1 1.3 1.3v2.2a1.3 1.3 0 0 1-1.3 1.3h-9a1.3 1.3 0 0 1-1.3-1.3V5.5a1.3 1.3 0 0 1 1.3-1.3Z"/><path d="M8.7 9h2.6l-.5 10.4a.8.8 0 0 1-1.6 0Z"/></svg>',c.name+' the '+c.ancestry+' '+c.cls,'normal');

@@ -417,9 +417,6 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 .lb-btn{background:#c8a020;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
 .lb-btn:hover:not(:disabled){background:#e0b83a;}
 .lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
-/* HeroDark mode */
-.hd-dying-wrap{margin:6px 2px 0;}
-.hd-dying{display:inline-block;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;color:#fff;background:#7a1a1a;border:1px solid #b03030;border-radius:4px;padding:3px 9px;}
 </style>
 <style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
@@ -492,9 +489,6 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <span class="sv-lbl">Luck</span>
           <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-big" id="lk-val" placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
         </div>
-      </div>
-      <div id="hd-dying-wrap" class="hd-dying-wrap" style="display:none;">
-        <span class="hd-dying">☠ DYING — 1 action, disadvantage on all checks</span>
       </div>
 
       <!-- ATTACKS -->
@@ -1003,7 +997,6 @@ let _applyingItemBonuses = false;   // re-entrancy guard
 // talents can be chosen); the rest are automated below or listed in the ⚔ panel.
 function defaultOptions(){ return { heroDark:false }; }
 let options = defaultOptions();
-let _heroDarkDying = false;    // at 0 HP in HeroDark: Dying, forces disadvantage
 function heroDarkOn(){ return !!(options && options.heroDark); }
 window.heroDarkOn = heroDarkOn;
 
@@ -2304,12 +2297,19 @@ function clearAdv() {
   document.getElementById('adv-btn').className = 'adv-btn';
   document.getElementById('dis-btn').className = 'adv-btn';
 }
+// ── Condition automation (driven by the status trackers) ────────────────────
+// A chip in _trackers IS the condition. Two carry mechanical weight:
+//   Dying     → disadvantage on all d20 rolls
+//   Exhausted → −2 to all d20 rolls
+// Everything else is situational and left to the table.
+function trackerActive(name){ return _trackers.some(t => String(t).toLowerCase() === String(name).toLowerCase()); }
+function isDyingActive(){ return trackerActive('Dying'); }
+function exhaustedPenalty(){ return trackerActive('Exhausted') ? -2 : 0; }
 function rollWithAdv(sides) {
   const r1 = Math.floor(Math.random()*sides)+1;
   let st = advState;
-  // HeroDark: while Dying you have disadvantage on all d20 checks (a lone
-  // advantage cancels it to a normal roll, as adv/dis normally do).
-  if(sides === 20 && heroDarkOn() && _heroDarkDying) st = (st === 'advantage') ? null : 'disadvantage';
+  // Dying imposes disadvantage on all d20 rolls (a lone advantage cancels it).
+  if(sides === 20 && isDyingActive()) st = (st === 'advantage') ? null : 'disadvantage';
   if(sides !== 20 || !st) return {result:r1, detail:null};
   const r2 = Math.floor(Math.random()*sides)+1;
   return st==='advantage'
@@ -2324,25 +2324,15 @@ function heroDarkLuckOnNat(natRoll, source){
   addLog('Luck +1', '✦', 'HeroDark: natural ' + natRoll + (source ? ' on ' + source : '') + ' — gain a Luck point', natRoll === 20 ? 'crit' : 'fumble');
   saveSheet();
 }
-// HeroDark: dropping to 0 HP makes you Dying (not unconscious) — 1 action and
-// disadvantage on all checks (enforced in rollWithAdv) until you're healed above 0.
+// HeroDark: dropping to 0 HP makes you Dying (not unconscious). Signalled by the
+// Dying status tracker (which drives the disadvantage above); cleared when healed.
 function onHPChange(){
   saveSheet();
   if(!heroDarkOn()) return;
   const cur = parseInt(document.getElementById('hp-current')?.value);
-  const dying = !isNaN(cur) && cur <= 0;
-  if(dying === _heroDarkDying) return;
-  _heroDarkDying = dying;
-  renderHeroDark();
-  addLog(dying ? 'Dying' : 'Stabilized', dying ? '☠' : '✚',
-    dying ? 'HeroDark: at 0 HP you are Dying — 1 action and disadvantage on all checks (not unconscious).'
-          : 'Above 0 HP again — no longer Dying.',
-    dying ? 'fumble' : 'normal');
-}
-// ── HeroDark sheet chrome: Dying flag ───────────────────────────────────────
-function renderHeroDark(){
-  const on = heroDarkOn();
-  const dw = document.getElementById('hd-dying-wrap'); if(dw) dw.style.display = (on && _heroDarkDying) ? '' : 'none';
+  const at0 = !isNaN(cur) && cur <= 0;
+  if(at0 && !isDyingActive()) addTracker('Dying');
+  else if(!at0 && isDyingActive()) removeTracker('Dying');
 }
 // HeroDark rules — folded into the Quick Rules panel while HeroDark mode is on.
 const HERODARK_QUICK_RULES = [
@@ -2350,7 +2340,7 @@ const HERODARK_QUICK_RULES = [
   { title: '⚔ HeroDark — Skill Talents (even levels)', text: 'At every even level you also gain a Skill Talent: learn to use a new weapon or armor (added to your proficiencies), learn a new language, or gain a Skill — a write-in subject that grants advantage on rolls pertaining to it.' },
   { title: '⚔ HeroDark — Luck', text: 'You can hold an unlimited number of Luck points, and you gain a Luck point whenever you roll a natural 1 or a natural 20 on a d20 (check, attack, or spellcast). The sheet adds it automatically.' },
   { title: '⚔ HeroDark — Actions', text: 'You have 2 actions on your turn as normal. You may forgo your movement to take a second attack or cast a spell that turn — but that extra action is made with disadvantage.' },
-  { title: '⚔ HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all checks (applied automatically) until you are healed above 0 HP.' },
+  { title: '⚔ HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all rolls until you are healed above 0 HP. The sheet adds the Dying status automatically (it drives the disadvantage); clear it by healing. The Exhausted status likewise applies −2 to your rolls while active.' },
 ];
 function d(s){return Math.floor(Math.random()*s)+1;}
 function parseMod(v){if(!v)return 0;const n=parseInt((v+'').replace(/\s/g,''));return isNaN(n)?0:n;}
@@ -2410,13 +2400,15 @@ function clearLog() {
 
 // ── ROLLS ──
 function rollStat(id, name) {
-  const mod = getStatMod(id);
+  const statMod = getStatMod(id);
+  const exh = exhaustedPenalty();
+  const mod = statMod + exh;
   const {result:roll, detail:advDetail} = rollWithAdv(20);
   const total = roll + mod;
   let type = roll===20?'crit':roll===1?'fumble':'normal';
   const base = advDetail||`d20(${roll})`;
   addLog(`${name} Check`+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
-    `${base} + Mod(${fmtMod(mod)}) = ${total}`, type);
+    `${base} + Mod(${fmtMod(statMod)})${exh?' '+fmtMod(exh)+' exhausted':''} = ${total}`, type);
   heroDarkLuckOnNat(roll, name + ' check');
 }
 
@@ -2617,9 +2609,10 @@ function rollAttack(btn) {
   if(hasAtkAdv) advState = (advState === 'disadvantage') ? null : 'advantage';
   const {result:hitRoll, detail:advDetail} = rollWithAdv(20);
   advState = prevAdv;
-  const hitTotal = hitRoll + bonus + statMod;
+  const exh = exhaustedPenalty();
+  const hitTotal = hitRoll + bonus + statMod + exh;
   const hitBase = advDetail||`d20(${hitRoll})`;
-  const statLabel = statId?`+${statId.toUpperCase()}(${fmtMod(statMod)})`:'';
+  const statLabel = (statId?`+${statId.toUpperCase()}(${fmtMod(statMod)})`:'') + (exh?` ${fmtMod(exh)} exhausted`:'');
   let type = hitRoll===20?'crit':hitRoll===1?'fumble':'normal';
 
   let dmgTotal = null, dmgBreakdown = '';
@@ -2697,7 +2690,8 @@ function rollSpell(btn) {
   const {result:roll, detail:advDetail} = rollWithAdv(20);
   advState = prevAdv;
 
-  const total   = roll + bonus + castMod + gBonus;
+  const exh     = exhaustedPenalty();
+  const total   = roll + bonus + castMod + gBonus + exh;
   const success = total >= dc;
   const type    = !success ? 'fumble' : roll===20 ? 'crit' : 'normal';
   const base    = advDetail || `d20(${roll})`;
@@ -2706,7 +2700,7 @@ function rollSpell(btn) {
   const healing = isHealingSpell(name);
   const verdict = success ? `✓ ${healing ? 'SUCCESS' : 'HIT'} (DC ${dc})`
                           : `✗ ${healing ? 'FAILED' : 'MISS'} (DC ${dc}) — spell lost!`;
-  const bonusPart = [bonus !== 0 ? `${bonus>=0?'+':''}${bonus}` : '', castMod !== 0 ? `${castMod>=0?'+':''}${castMod} (${castStat.toUpperCase()})` : '', gBonus !== 0 ? `${gBonus>=0?'+':''}${gBonus}` : ''].filter(Boolean).join(' ');
+  const bonusPart = [bonus !== 0 ? `${bonus>=0?'+':''}${bonus}` : '', castMod !== 0 ? `${castMod>=0?'+':''}${castMod} (${castStat.toUpperCase()})` : '', gBonus !== 0 ? `${gBonus>=0?'+':''}${gBonus}` : '', exh !== 0 ? `${exh} exhausted` : ''].filter(Boolean).join(' ');
 
   // Mark as lost if failed — but only for spells you know. A scroll is consumed
   // whether it hits or misses; a wand is handled below (spent until rest on a fail).
@@ -3023,7 +3017,6 @@ function collectSheet(){
       talents:   talentsText,
       luckPts:   document.getElementById('lk-val')?.value || '',
       options:   options,
-      dying:     _heroDarkDying,
       featureUses: _featureUses && typeof _featureUses === 'object' ? _featureUses : {},
       trackers:       Array.isArray(_trackers) ? _trackers : [],
       customTrackers: Array.isArray(_customTrackers) ? _customTrackers : [],
@@ -3362,10 +3355,8 @@ function _applySDData(d){
   // bonuses (adds the HP/ability deltas back on top of the loaded base values).
   if(typeof applyItemBonuses === 'function') applyItemBonuses();
   renderTalentsView();          // restore the styled Talents view after a load
-  // HeroDark option + play state
+  // HeroDark option
   options = Object.assign(defaultOptions(), (d._sheet && d._sheet.options) || {});
-  _heroDarkDying = !!(d._sheet && d._sheet.dying);
-  if(typeof renderHeroDark === 'function') renderHeroDark();
 }
 
 function importShadowdarklings(input) {
