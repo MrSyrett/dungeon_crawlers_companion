@@ -877,8 +877,10 @@ function skillOptions(cur) {
 function addWeaponRow(w) {
   w = w || {}; const tr = document.createElement('tr');
   if(w.link) tr.dataset.link = w.link;
-  // Linked rows are removed from the Equipment list; unlinked (legacy) rows keep their own ✕.
-  const delBtn = w.link ? '' : ' <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button>';
+  if(w.fixed) tr.dataset.fixed = '1';
+  // Linked rows are removed from the Equipment list; the fixed Unarmed strike has
+  // no ✕ either. Unlinked (legacy) rows keep their own ✕.
+  const delBtn = (w.link || w.fixed) ? '' : ' <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button>';
   tr.innerHTML = '<td><input type="text" class="wp-name" value="' + esc(w.name || '') + '" placeholder="Sword" oninput="scheduleAutosave()"></td>'
     + '<td><select class="wp-skill" style="width:100%;border:none;background:transparent;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:inherit;" onchange="scheduleAutosave()">' + skillOptions(w.skill || '') + '</select></td>'
     + '<td><input type="text" class="wp-dmg num" value="' + esc(w.damage || '') + '" placeholder="Brawn+2D" oninput="scheduleAutosave()"></td>'
@@ -903,6 +905,14 @@ function addWeaponFromEquip(name) {
   const note = [w.era, w.damage ? 'Dmg ' + w.damage : '', w.range].filter(Boolean).join(' · ');
   const gr = addGearRow({ name: w.name, note: note, link: token });
   addWeaponFromData(name, token);
+}
+// Every character has a permanent Unarmed strike (Melee skill, Brawn damage),
+// added if the save has none. No ✕ — it can't be removed.
+function ensureUnarmed() {
+  if(weaponRowExists('Unarmed')) return;
+  const skillName = (D.skills().find(s => norm(s.name) === 'melee') || {}).name || 'Melee';
+  const tr = addWeaponRow({ name: 'Unarmed', skill: skillName, damage: 'Brawn', range: 'melee', notes: '', fixed: true });
+  const body = $('weapons-body'); if(tr && body.firstChild !== tr) body.insertBefore(tr, body.firstChild);
 }
 function weaponSkillPips(tr) {
   const sk = tr.querySelector('.wp-skill').value;
@@ -1162,7 +1172,7 @@ function collectSheet() {
     heroPoints: num(v('f-hero')), characterPoints: num(v('f-cp')),
     move: v('f-move'),
     wound: wound,
-    weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, skill: tr.querySelector('.wp-skill').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || '' })).filter(w => w.name || w.damage),
+    weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, skill: tr.querySelector('.wp-skill').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(w => w.name || w.damage),
     armor: { name: v('f-armor'), protection: v('f-armor-prot') },
     powers: [...document.querySelectorAll('#powers-body tr')].map(tr => ({ name: tr.querySelector('.pw-name').value.trim(), kind: tr.querySelector('.pw-kind').value.trim(), note: tr.querySelector('.pw-note').value.trim() })).filter(p => p.name),
     perks: traits('perks'), flaws: traits('flaws'), talents: traits('talents'),
@@ -1192,7 +1202,7 @@ function applySheet(d) {
   set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0);
   set('f-move', d.move != null ? d.move : '10');
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-prot', ar.protection);
-  $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(addWeaponRow);
+  $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(addWeaponRow); ensureUnarmed();
   $('powers-body').innerHTML = ''; (d.powers || []).forEach(addPowerRow);
   $('perks-body').innerHTML = ''; (d.perks || []).forEach(t => addTraitRow('perks', typeof t === 'string' ? { name: t } : t));
   $('flaws-body').innerHTML = ''; (d.flaws || []).forEach(t => addTraitRow('flaws', typeof t === 'string' ? { name: t } : t));

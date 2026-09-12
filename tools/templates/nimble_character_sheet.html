@@ -807,13 +807,25 @@ function addAttackRow(a) {
   a = a || { name:'', damage:'', props:'' };
   const tr = document.createElement('tr');
   if(a.link) tr.dataset.link = a.link;
+  if(a.fixed) tr.dataset.fixed = '1';
   // Linked rows (added from the Item Store) are removed by deleting the inventory
-  // weapon; only legacy/unlinked rows from old saves keep a per-row ✕.
-  const removeBtn = a.link ? '' : `<button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button>`;
+  // weapon; the fixed Unarmed strike has no ✕ either. Only legacy/unlinked rows
+  // from old saves keep a per-row ✕.
+  const removeBtn = (a.link || a.fixed) ? '' : `<button class="row-x" onclick="this.closest('tr').remove();scheduleAutosave()">✕</button>`;
   tr.innerHTML = `<td><input type="text" class="atk-name" value="${esc(a.name)}" placeholder="Longsword"></td><td><input type="text" class="atk-dmg" value="${esc(a.damage)}" placeholder="1d8+STR" oninput="refreshAttackRows()"></td><td><input type="text" class="atk-props" value="${esc(a.props)}" placeholder="2-handed, Reach 2"></td><td style="white-space:nowrap;"><button class="small-btn" onclick="rollAttack(this.closest('tr').querySelector('.atk-name').value||'Attack', this.closest('tr').querySelector('.atk-dmg').value)">🎲 Attack</button>${removeBtn}</td>`;
   $('attacks-body').appendChild(tr); refreshAttackRows();
 }
 function refreshAttackRows() {}
+// Every character has a permanent Unarmed Strike, added if the save has none.
+// No ✕ — it can't be removed.
+function ensureUnarmed() {
+  const has = [...document.querySelectorAll('#attacks-body .atk-name')].some(i => /unarmed/i.test(i.value));
+  if(has) return;
+  const it = (typeof findItem === 'function') ? findItem('Unarmed Strike') : null;
+  addAttackRow({ name: 'Unarmed Strike', damage: (it && it.damage) || '1d4; on hit: 1+STR', props: 'always available', fixed: true });
+  const body = $('attacks-body'); const last = body.lastChild;
+  if(last && body.firstChild !== last) body.insertBefore(last, body.firstChild);
+}
 function addSpellRow(s) {
   s = s || { name:'', tier:0 };
   const sp = D.spells().find(x => norm(x.name) === norm(s.name));
@@ -1090,7 +1102,7 @@ function collectSheet() {
     hp: { cur: num(v('hp-cur')), max: num(v('hp-max')), temp: num(v('hp-temp')) }, wounds, woundsMax: num(v('wounds-max')),
     hitDice: { cur: num(v('hd-cur')), max: num(v('hd-max')) }, mana: { cur: num(v('mana-cur')), max: num(v('mana-max')) },
     armor: v('f-armor'), shield: v('f-shield'), armorBonus: num(v('armor-bonus')), initBonus: num(v('init-bonus')), speedBonus: num(v('speed-bonus')), size: v('f-size'), actions,
-    attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '' })).filter(a => a.name || a.damage),
+    attacks: [...document.querySelectorAll('#attacks-body tr')].map(tr => ({ name: tr.querySelector('.atk-name').value, damage: tr.querySelector('.atk-dmg').value, props: tr.querySelector('.atk-props').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(a => a.name || a.damage),
     picks: [...document.querySelectorAll('#picks-body tr')].map(tr => tr.dataset.pick),
     spells: [...document.querySelectorAll('#spells-body tr')].map(tr => ({ name: tr.querySelector('.sp-name').value, tier: num(tr.querySelector('.sp-tier').value) })).filter(s => s.name),
     inventory: [...document.querySelectorAll('#inv-body tr')].map(tr => ({ name: tr.querySelector('.inv-name').value, slots: parseFloat(tr.querySelector('.inv-slots').value) || 0, note: tr.querySelector('.inv-note').value, link: tr.dataset.link || '' })).filter(i => i.name),
@@ -1108,7 +1120,7 @@ function applySheet(d) {
   const hd = d.hitDice || {}; set('hd-cur', hd.cur ?? 1); set('hd-max', hd.max ?? 1); if(hd.max) $('hd-max').dataset.manual = '1'; else delete $('hd-max').dataset.manual;
   const mn = d.mana || {}; set('mana-cur', mn.cur || 0); set('mana-max', mn.max || 0); if(mn.max) $('mana-max').dataset.manual = '1'; else delete $('mana-max').dataset.manual;
   set('f-armor', d.armor); set('f-shield', d.shield); set('armor-bonus', d.armorBonus || 0); set('init-bonus', d.initBonus || 0); set('speed-bonus', d.speedBonus || 0); set('f-size', d.size || 'Medium'); actions = typeof d.actions === 'number' ? d.actions : 3;
-  $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow);
+  $('attacks-body').innerHTML = ''; (d.attacks || []).forEach(addAttackRow); ensureUnarmed();
   fillPoolPick(); $('picks-body').innerHTML = ''; (d.picks || []).forEach(p => addPick(p));
   $('spells-body').innerHTML = ''; (d.spells || []).forEach(addSpellRow);
   $('inv-body').innerHTML = ''; (d.inventory || []).forEach(addInvRow);

@@ -153,9 +153,16 @@
   function apply() {
     const c = st.cls;
     const gear = st.gearMode === "class" ? c.startingGear : [];
-    const inventory = gear.map((g) => { const it = D.items().find((i) => norm(i.name) === norm(g.replace(/\s*\(.*\)$/, ""))); return { name: g, slots: it && /2-handed/i.test(it.properties || "") ? 2 : 1, note: it ? [it.armor && "Armor " + it.armor, it.damage, it.properties].filter(Boolean).join(" · ") : "" }; });
-    const attacks = [];
-    gear.forEach((g) => { const it = D.items().find((i) => norm(i.name) === norm(g.replace(/\s*\(.*\)$/, "")) && i.damage); if (it) attacks.push({ name: it.name, damage: it.damage, props: it.properties || "" }); });
+    // A starting weapon becomes a LINKED pair: an Inventory row and an Attack row
+    // sharing one token, so the attack has no ✕ and removing the item removes it —
+    // matching how weapons added from the Item Store behave.
+    const attacks = []; let _bl = 0;
+    const inventory = gear.map((g) => {
+      const it = D.items().find((i) => norm(i.name) === norm(g.replace(/\s*\(.*\)$/, "")));
+      const row = { name: g, slots: it && /2-handed/i.test(it.properties || "") ? 2 : 1, note: it ? [it.armor && "Armor " + it.armor, it.damage, it.properties].filter(Boolean).join(" · ") : "" };
+      if (it && it.damage) { const link = "w-b" + (++_bl); row.link = link; attacks.push({ name: it.name, damage: it.damage, props: it.properties || "", link: link }); }
+      return row;
+    });
     const armorItem = gear.map((g) => D.items().find((i) => norm(i.name) === norm(g.replace(/\s*\(.*\)$/, "")) && ["Cloth", "Leather", "Mail", "Plate"].includes(i.category))).find(Boolean);
     const shieldItem = gear.map((g) => D.items().find((i) => norm(i.name) === norm(g.replace(/\s*\(.*\)$/, "")) && i.category === "Shield")).find(Boolean);
     // Casters: start with the cantrips of their class schools.

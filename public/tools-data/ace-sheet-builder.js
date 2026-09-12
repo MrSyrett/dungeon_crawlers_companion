@@ -362,6 +362,17 @@
     });
     return rows;
   }
+  // Tie each starting weapon's Attack row to its Equipment row with a shared link
+  // token, so the attack has no ✕ and deleting the gear removes it — matching the
+  // Gear Store add path. Mutates both arrays in place.
+  function linkStartingWeapons(attacks, gear) {
+    let seq = 0;
+    attacks.forEach((a) => {
+      if (norm(a.name) === "unarmed" || a.kind === "power") return;
+      const g = gear.find((x) => norm(x.name) === norm(a.name) && !x.link);
+      if (g) { const link = "lk" + (++seq); a.link = link; g.link = link; }
+    });
+  }
   function applyNew() {
     const r = st.role;
     const stats = { smarts: st.stats.smarts, moves: st.stats.moves, style: st.stats.style, brawn: st.stats.brawn, power: hasPower() ? st.stats.power : 0 };
@@ -380,6 +391,7 @@
       gear: gearNames.map((n) => { const g = D.gear().find((x) => norm(x.name) === norm(n)); return { name: n, note: g ? (g.description || "").slice(0, 80) : "" }; }),
       campaign: (typeof _campaign !== "undefined" && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
     };
+    linkStartingWeapons(data.attacks, data.gear);
     finish(data, "Built " + (st.trait + " " + st.roleName).trim());
   }
   function applyPregen() {
@@ -403,6 +415,7 @@
       gear: (p.gear || []).map((n) => ({ name: n, note: "" })),
       campaign: (typeof _campaign !== "undefined" && _campaign) ? { id: _campaign.id, code: _campaign.code, name: _campaign.name } : null,
     };
+    linkStartingWeapons(data.attacks, data.gear);
     finish(data, "Loaded " + p.name + " (" + settingName(p.setting) + ")");
   }
   function finish(data, msg) {

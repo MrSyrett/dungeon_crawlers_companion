@@ -417,9 +417,16 @@
     const skills = Object.entries(skillMap).map(([name, adds]) => ({ name, attribute: (skillsData().find(s => s.name === name) || {}).attribute || CORE_ATTRS[0], pips: adds }));
     // Equipment picks.
     const weapons = [], gear = []; let armor = { name: '', protection: '' };
+    let _bl = 0;
     Object.keys(gearPicks).forEach(n => {
       if (!gearPicks[n]) return; const g = equipData().find(x => x.name === n); if (!g) return;
-      if (g.category === 'weapon') weapons.push({ name: g.name, damage: g.damage || '', range: g.range || '', skill: (skillsData().find(s => norm(s.name) === norm(g.skill || '')) || {}).name || (g.skill || ''), notes: g.era || '' });
+      if (g.category === 'weapon') {
+        // A starting weapon becomes a LINKED pair: an Attack row and an Equipment
+        // row sharing one token, matching how the store add path works.
+        const link = 'lk' + (++_bl) + '_b';
+        weapons.push({ name: g.name, damage: g.damage || '', range: g.range || '', skill: (skillsData().find(s => norm(s.name) === norm(g.skill || '')) || {}).name || (g.skill || ''), notes: g.era || '', link: link });
+        gear.push({ name: g.name, note: [g.era, g.damage ? 'Dmg ' + g.damage : '', g.range].filter(Boolean).join(' · '), link: link });
+      }
       else if (g.category === 'armor') { if (!armor.name) armor = { name: g.name, protection: g.protection || '' }; }
       else gear.push({ name: g.name, note: [g.era, g.description].filter(Boolean).join(' · ') });
     });

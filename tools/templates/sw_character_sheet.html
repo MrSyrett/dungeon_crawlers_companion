@@ -783,9 +783,11 @@ function nextLink() { return 'lk' + (++_linkSeq); }
 function addWeaponRow(w) {
   w = w || {}; const tr = document.createElement('tr');
   if(w.link) tr.dataset.link = w.link;
+  if(w.fixed) tr.dataset.fixed = '1';
   // Linked rows (added from Equipment) drop their ✕ — removal happens by deleting
-  // the gear row. Legacy/unlinked rows from old saves keep a working ✕.
-  const xBtn = w.link ? '' : ' <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button>';
+  // the gear row. Fixed rows (the default Unarmed strike) have no ✕ either.
+  // Legacy/unlinked rows from old saves keep a working ✕.
+  const xBtn = (w.link || w.fixed) ? '' : ' <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button>';
   tr.innerHTML = '<td><input type="text" class="wp-name" value="' + esc(w.name || '') + '" placeholder="Blaster pistol"></td>'
     + '<td><select class="wp-skill" style="width:100%;border:none;background:transparent;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:inherit;">' + skillOptions(w.skill || '') + '</select></td>'
     + '<td><input type="text" class="wp-dmg num" value="' + esc(w.damage || '') + '" placeholder="4D" style="width:60px;"></td>'
@@ -817,6 +819,15 @@ function addWeaponFromEquip(name) {
   const note = [w.kind, dmg, w.range].filter(Boolean).join(' · ');
   addGearRow({ name: w.name, note: note, link: link });
   scheduleAutosave();
+}
+// Every character has a permanent Unarmed strike. Added if the save has none,
+// with no ✕ (it can't be removed) so it's always available.
+function ensureUnarmed() {
+  if(weaponRowExists('Unarmed')) return;
+  const skillName = (D.skills().find(s => norm(s.name) === 'brawling') || {}).name || 'Brawling';
+  const tr = addWeaponRow({ name: 'Unarmed', skill: skillName, damage: 'STR', range: '', notes: 'melee', fixed: true });
+  // Keep the default strike at the top of the list.
+  const body = $('weapons-body'); if(tr && body.firstChild !== tr) body.insertBefore(tr, body.firstChild);
 }
 function weaponSkillPips(tr) {
   const sk = tr.querySelector('.wp-skill').value; if(sk) { const p = skillPips(sk); if(p !== null) return { name: sk, pips: p }; const def = D.skills().find(s => s.name === sk); if(def) return { name: sk, pips: attr(def.attribute) }; }
@@ -1082,7 +1093,7 @@ function collectSheet() {
     skills: skillRows().map(tr => ({ name: tr.querySelector('.sk-name-in').value.trim(), attr: tr.dataset.attr, adds: codeOrZero(tr.querySelector('.sk-adds').value) })).filter(s => s.name),
     wound, forcePoints: num(v('f-fp')), darkSide: num(v('f-ds')), skillPoints: num(v('f-sp')), credits: v('f-credits'),
     armor: { name: v('f-armor'), pips: fromCode(v('f-armor-pips')) || 0 }, move: num(v('f-move')) || 10,
-    weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, skill: tr.querySelector('.wp-skill').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || undefined })).filter(w => w.name || w.damage),
+    weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, skill: tr.querySelector('.wp-skill').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || undefined, fixed: tr.dataset.fixed ? true : undefined })).filter(w => w.name || w.damage),
     force: [...document.querySelectorAll('#force-body tr')].map(tr => ({ name: tr.dataset.name })).filter(f => f.name),
     gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gr-name').value, note: tr.querySelector('.gr-note').value, link: tr.dataset.link || undefined })).filter(g => g.name),
     ship: { name: v('sh-name'), craft: v('sh-craft'), speed: v('sh-speed'), hull: v('sh-hull'), weapons: v('sh-weapons') },
@@ -1099,6 +1110,7 @@ function applySheet(d) {
   set('f-fp', d.forcePoints ?? 1); set('f-ds', d.darkSide || 0); set('f-sp', d.skillPoints || 0); set('f-credits', d.credits);
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-pips', ar.pips ? toCode(ar.pips, true) : ''); set('f-move', d.move || 10);
   $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(w => addWeaponRow(w));
+  ensureUnarmed();
   $('force-body').innerHTML = ''; (d.force || []).forEach(addForceRow);
   $('gear-body').innerHTML = ''; (d.gear || []).forEach(g => addGearRow(g));
   // Advance the link counter past any restored tokens so new adds never collide.
