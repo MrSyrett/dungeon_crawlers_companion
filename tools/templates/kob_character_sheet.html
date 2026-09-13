@@ -830,7 +830,7 @@ function nsbuRollStat(id) {
   const startIdx = idx;
   let total = 0; const parts = []; let blew = 0;
   while(true) {
-    const sides = DICE[idx]; const f = dN(sides); total += f; parts.push('d' + sides + '→' + f);
+    const sides = DICE[idx]; const f = dN(sides); total += f; parts.push('d' + sides + ': ' + f);
     if(f === sides && idx < DICE.length - 1) { blew++; idx++; continue; }
     break;
   }
