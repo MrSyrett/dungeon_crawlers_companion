@@ -22,10 +22,12 @@ export interface ToolDef {
   label: string;
   file: string;
   keys: string[];
-  /** Seed blob for a freshly-created document (keyed by localStorage key). Lets a
-   *  variant tool open its sheet in the right mode — e.g. DarkSpace starts the
-   *  shared Shadowdark sheet with darkSpace mode on. */
-  seed?: Record<string, unknown>;
+  /** Seed blob for a freshly-created document (keyed by localStorage key), stored
+   *  in the document's JSON `data` column. Lets a variant tool open its sheet in
+   *  the right mode — e.g. DarkSpace starts the shared Shadowdark sheet with
+   *  darkSpace mode on. Typed `object` to match Prisma's JSON input (see the
+   *  documents API route). */
+  seed?: object;
 }
 
 export const TOOLS: Record<ToolId, ToolDef> = {
