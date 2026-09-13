@@ -493,10 +493,12 @@ function dswApply(){
 }
 
 // ══ DarkSpace Level Up ══════════════════════════════════════════════════════
-// Spacers advance on their Archetype's 2d6 talent table (DarkSpace is 100%
-// compatible with Shadowdark): each new level rolls HP (archetype hit die + CON
-// mod; Tough rolls with advantage and +2) and a talent. Kept separate from the
-// Shadowdark class level-up wizard, which is coupled to SD classes/spells.
+// Spacers advance on their Archetype's 2d6 talent table. DarkSpace is 100%
+// compatible with Shadowdark, so the cadence matches Shadowdark: every level
+// rolls HP (archetype hit die + CON mod; Tough rolls with advantage and +2), and
+// a talent is rolled at 1st level and at every ODD level (3, 5, 7, 9) — NOT at
+// even levels. Kept separate from the Shadowdark class level-up wizard, which is
+// coupled to SD classes/spells.
 var _dslu = null;
 function sheetStatVal(id){ var el=document.getElementById(id); return el?parseInt(el.value,10)||0:0; }
 
@@ -506,8 +508,11 @@ function startDarkSpaceLevelUp(){
   var archName = (document.getElementById('f-class')||{}).value || '';
   var arche = archetype(archName);
   if(!arche){ alert('Set a DarkSpace archetype on the sheet first (Strong, Quick, Tough, Clever, Wise, Charming, or Machine-Based).'); return; }
-  _dslu = { old:cur, next:cur+1, arche:arche, hp:null, talent:null };
-  dsluRollHP(); dsluRollTalent();
+  var next = cur + 1;
+  // Talents come at odd levels only (3, 5, 7, 9), like Shadowdark.
+  _dslu = { old:cur, next:next, arche:arche, hp:null, talent:null, gainsTalent:(next % 2 === 1) };
+  dsluRollHP();
+  if(_dslu.gainsTalent) dsluRollTalent();
   document.getElementById('dslu-overlay').style.display = 'flex';
   dsluRender();
 }
@@ -545,12 +550,16 @@ function dsluRender(){
   h += '<input type="number" min="1" value="'+(_dslu.hp!=null?_dslu.hp:'')+'" oninput="dsluSetHP(this.value)" style="width:60px;background:#0f0f0f;border:1px solid #16323d;color:#eee;text-align:center;font-family:Montserrat,sans-serif;font-size:16px;font-weight:900;padding:6px 0;border-radius:5px;">';
   h += '<span style="color:#8fd6ea;font-family:Montserrat,sans-serif;font-size:12px;">+'+(_dslu.hp!=null?_dslu.hp:0)+' max HP</span>';
   h += '</div>';
-  h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;margin:14px 0 4px;">Talent — '+esc(_dslu.arche.name)+' Table</div>';
-  h += '<button class="ccw-roll-btn" onclick="dsluRerollTalent()">🎲 Roll 2d6 Talent</button>';
-  if(_dslu.talent) h += '<div class="ccw-result"><b>2d6 = '+_dslu.talent.roll+'</b> → '+(_dslu.talent.row?esc(_dslu.talent.row.text):'—')+'</div>';
-  h += '<div class="ccw-summary" style="border-color:#16323d;"><div class="ccw-summary-title" style="color:#6ac8df;">'+esc(_dslu.arche.name)+' Talents</div>';
-  (_dslu.arche.talents||[]).forEach(function(r){ h += '<div><b>'+esc(r.r)+':</b> '+esc(r.text)+'</div>'; });
-  h += '</div>';
+  if(_dslu.gainsTalent){
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;margin:14px 0 4px;">Talent — '+esc(_dslu.arche.name)+' Table</div>';
+    h += '<button class="ccw-roll-btn" onclick="dsluRerollTalent()">🎲 Roll 2d6 Talent</button>';
+    if(_dslu.talent) h += '<div class="ccw-result"><b>2d6 = '+_dslu.talent.roll+'</b> → '+(_dslu.talent.row?esc(_dslu.talent.row.text):'—')+'</div>';
+    h += '<div class="ccw-summary" style="border-color:#16323d;"><div class="ccw-summary-title" style="color:#6ac8df;">'+esc(_dslu.arche.name)+' Talents</div>';
+    (_dslu.arche.talents||[]).forEach(function(r){ h += '<div><b>'+esc(r.r)+':</b> '+esc(r.text)+'</div>'; });
+    h += '</div>';
+  } else {
+    h += '<div class="ccw-result" style="margin-top:14px;">No talent at level '+_dslu.next+'. Talents come at odd levels (3, 5, 7, 9), like Shadowdark — you gain HP this level.</div>';
+  }
   document.getElementById('dslu-body').innerHTML = h;
 }
 window.dsluRender = dsluRender;
@@ -564,15 +573,17 @@ function dsluApply(){
   var newMax = (parseInt(hpMaxEl&&hpMaxEl.value,10)||0) + (_dslu.hp||0);
   set('hp-max', newMax);
   set('hp-current', (parseInt(hpCurEl&&hpCurEl.value,10)||0) + (_dslu.hp||0));
-  // Talent: append to the talents box.
-  var ta = document.getElementById('talents-text');
-  if(ta){
-    var line = 'Lvl '+_dslu.next+' talent: '+(_dslu.talent&&_dslu.talent.row?_dslu.talent.row.text:'')+' (2d6='+(_dslu.talent?_dslu.talent.roll:'')+')';
-    ta.value = (ta.value ? ta.value + '\n' : '') + line;
-    if(typeof renderTalentsView==='function') try{ renderTalentsView(); }catch(e){}
+  // Talent: append to the talents box (only on odd levels, when one is gained).
+  if(_dslu.gainsTalent && _dslu.talent){
+    var ta = document.getElementById('talents-text');
+    if(ta){
+      var line = 'Lvl '+_dslu.next+' talent: '+(_dslu.talent.row?_dslu.talent.row.text:'')+' (2d6='+_dslu.talent.roll+')';
+      ta.value = (ta.value ? ta.value + '\n' : '') + line;
+      if(typeof renderTalentsView==='function') try{ renderTalentsView(); }catch(e){}
+    }
   }
   try { if(typeof refreshXpNext==='function') refreshXpNext(); } catch(e){}
-  try { if(typeof addLog==='function') addLog('Level Up','⬆','Now level '+_dslu.next+' (+'+_dslu.hp+' HP, new talent)','normal'); } catch(e){}
+  try { if(typeof addLog==='function') addLog('Level Up','⬆','Now level '+_dslu.next+' (+'+_dslu.hp+' HP'+(_dslu.gainsTalent?', new talent':'')+')','normal'); } catch(e){}
   try { if(typeof _saveSheetNow==='function') _saveSheetNow(); } catch(e){}
   dsluClose();
 }
