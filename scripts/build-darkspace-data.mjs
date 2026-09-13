@@ -18,8 +18,10 @@ import { runInNewContext } from "node:vm";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "public", "tools-data", "sd-darkspace.js");
+const MON_SRC = join(ROOT, "public", "tools-data", "ds-monsters.js");
 const OUT_DIR = join(ROOT, "lib", "data");
 const OUT = join(OUT_DIR, "darkspace.ts");
+const MON_OUT = join(OUT_DIR, "darkspace-monsters.ts");
 
 const BANNER =
   "// GENERATED FILE - do not edit by hand.\n" +
@@ -88,6 +90,27 @@ const IMPORTS = [
   "DsShip", "DsAdvancedTech", "DsQuickRule",
 ];
 
+// The bestiary lives in its own module (ds-monsters.js) like sd-monsters.js.
+function loadMonsters() {
+  const src = readFileSync(MON_SRC, "utf8");
+  const sandbox = { window: {} };
+  runInNewContext(src, sandbox, { timeout: 5000 });
+  const mons = sandbox.window.DS_MONSTERS;
+  if (!Array.isArray(mons) || mons.length === 0) {
+    throw new Error("window.DS_MONSTERS did not evaluate to a non-empty array in " + MON_SRC);
+  }
+  return mons;
+}
+
+function buildMonsters() {
+  const mons = loadMonsters();
+  const out = BANNER.replace("sd-darkspace.js", "ds-monsters.js") +
+    "\n\nimport type { DsMonster } from \"./darkspace-types\";\n\n" +
+    "export const DS_MONSTERS: DsMonster[] = " + JSON.stringify(mons, null, 2) + ";\n";
+  writeFileSync(MON_OUT, out, "utf8");
+  console.log(`Wrote ${MON_OUT} (${mons.length} denizens).`);
+}
+
 function build() {
   const d = loadDarkSpace();
   sanityCheck(d);
@@ -106,3 +129,4 @@ function build() {
 }
 
 build();
+buildMonsters();

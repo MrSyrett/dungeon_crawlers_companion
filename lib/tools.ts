@@ -10,7 +10,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ds-character" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ds-character" | "ds-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session";
 
 export type ToolKind = "character" | "session";
 
@@ -71,6 +71,15 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     label: "Character Sheet",
     file: "ds_character_sheet.html",
     keys: ["sd_sheet"],
+  },
+  "ds-session": {
+    id: "ds-session",
+    system: "DS",
+    systemName: "DarkSpace",
+    kind: "session",
+    label: "Session Prep",
+    file: "ds_session_prep_builder.html",
+    keys: ["ds_session"],
   },
   "ace-character": {
     id: "ace-character",
@@ -184,7 +193,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
   },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ds-character", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ds-character", "ds-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

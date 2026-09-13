@@ -154,6 +154,25 @@ export interface DsSpacersKit {
   items: string[];
 }
 
+/** A DarkSpace "Denizen" (bestiary stat block). Living creatures carry
+ *  s/d/c/i/w/ch; digital entities (Interface constructs) carry acc/ctl/net. */
+export interface DsMonster {
+  name: string;
+  ac: string;
+  hp: string;
+  atk: string;
+  mv: string;
+  lv: string;
+  /** Motivation code (Vl / Vr / S / Su / Vi / Any). */
+  mo?: string;
+  s?: string; d?: string; c?: string; i?: string; w?: string; ch?: string;
+  acc?: string; ctl?: string; net?: string;
+  /** True for ship-scale denizens (attack/damage at ship scale). */
+  shipScale?: boolean;
+  desc?: string;
+  notes?: string;
+}
+
 export interface DarkSpaceData {
   terms: Record<string, string>;
   species: DsSpecies[];

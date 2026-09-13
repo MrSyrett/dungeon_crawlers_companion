@@ -23,7 +23,7 @@ export type HbType =
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
-  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-triad" | "ds-equipment" | "ds-ship-item";
+  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-triad" | "ds-equipment" | "ds-ship-item" | "ds-monster";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -34,7 +34,7 @@ const HB_TYPES = [
   "ace-role", "ace-gear", "ace-extra", "ace-focus", "ace-trait",
   "kob-trope", "kob-strength", "kob-flaw",
   "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
-  "ds-species", "ds-archetype", "ds-background", "ds-motivation", "ds-triad", "ds-equipment", "ds-ship-item",
+  "ds-species", "ds-archetype", "ds-background", "ds-motivation", "ds-triad", "ds-equipment", "ds-ship-item", "ds-monster",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1603,6 +1603,28 @@ function normalizeDsEquipment(input: unknown): { name: string; data: Record<stri
   if (str(o.desc)) data.desc = str(o.desc).slice(0, 2000);
   return { name, data };
 }
+function normalizeDsMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew denizen needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    ac: str(o.ac).slice(0, 40) || "10",
+    hp: str(o.hp).slice(0, 20) || "1",
+    atk: str(o.atk).slice(0, 200),
+    mv: str(o.mv).slice(0, 60) || "near",
+    lv: str(o.lv).slice(0, 10) || "1",
+    source: "Homebrew",
+  };
+  if (str(o.mo)) data.mo = str(o.mo).slice(0, 8);
+  for (const k of ["s", "d", "c", "i", "w", "ch", "acc", "ctl", "net"]) {
+    if (str(o[k])) data[k] = str(o[k]).slice(0, 6);
+  }
+  if (truthy(o.shipScale)) data.shipScale = true;
+  if (str(o.desc)) data.desc = str(o.desc).slice(0, 1000);
+  if (str(o.notes)) data.notes = str(o.notes).slice(0, 3000);
+  return { name, data };
+}
 function normalizeDsShipItem(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
@@ -1670,6 +1692,7 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "ds-triad": return normalizeDsTriad(data);
     case "ds-equipment": return normalizeDsEquipment(data);
     case "ds-ship-item": return normalizeDsShipItem(data);
+    case "ds-monster": return normalizeDsMonster(data);
   }
 }
 

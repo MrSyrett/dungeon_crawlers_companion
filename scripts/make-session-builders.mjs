@@ -27,6 +27,13 @@ const SYSTEMS = [
     mob: "Threat", boss: "Powered", npc: "NPC", typePh: "ADULT // Brains d12 Brawn d8 …", titlePh: "e.g. The Lights Over Perkins", subtitlePh: "e.g. A Kids on Bikes mystery",
   },
   {
+    file: "ds_session_prep_builder.html", key: "ds_session", ls: "ds_builder_v1", cfg: "ds", random: "Random Denizen",
+    name: "DarkSpace", title: "Session Prep Builder — DarkSpace",
+    accent: "#2a9dc2", accentDark: "#1a6f8c", red: "#c0392b", redDark: "#7a1510", highlight: "#f0c020", boxBg: "#d3e8f0",
+    chapter: "Episode", chapterPh: "Episode 1", session: "Session", mobs: "Denizens/NPCs", mobsHeading: "Denizens &amp; NPCs",
+    mob: "Denizen", boss: "Legendary", npc: "NPC", typePh: "DENIZEN // LV 2 // MO S", titlePh: "e.g. Derelict on the Rim", subtitlePh: "e.g. A DarkSpace one-shot for Rookies",
+  },
+  {
     file: "nimble_session_prep_builder.html", key: "nimble_session", ls: "nimble_builder_v1", cfg: "nimble", random: "Random Monster",
     name: "Nimble", title: "Session Prep Builder — Nimble",
     accent: "#2f9b63", accentDark: "#1f6f46", red: "#c0392b", redDark: "#8a1f14", highlight: "#f4d84a", boxBg: "#d8efe2",
@@ -85,6 +92,22 @@ const SB_CONFIGS = {
   ],
   abilitiesLabel: 'Strengths, Flaw & Motivation', abilitiesPlaceholder: 'One per line — Strength: note · Flaw: … · Motivation: …',
   mobs: null,
+};`,
+  ds: `const SB_CONFIG = {
+  typePlaceholder: 'DENIZEN // LV 2 // MO S',
+  hp: null,
+  rows: [
+    [{ key:'ac', label:'AC' }, { key:'hp', label:'HP' }, { key:'mv', label:'MOVE' }, { key:'lv', label:'LV', th:'Level' }, { key:'mo', label:'MOT', th:'Motivation' }],
+    [{ key:'s', label:'STR', ph:'+0' }, { key:'d', label:'DEX', ph:'+0' }, { key:'c', label:'CON', ph:'+0' }, { key:'i', label:'INT', ph:'+0' }, { key:'w', label:'WIS', ph:'+0' }, { key:'ch', label:'CHA', ph:'+0' }],
+  ],
+  abilitiesLabel: 'Attack, Interface & Abilities', abilitiesPlaceholder: 'One per line — ATK: … · Ability: effect',
+  mobs: { placeholder: 'Search the DarkSpace Bestiary…', pool: () => (typeof DS_MONSTERS !== 'undefined' && Array.isArray(DS_MONSTERS)) ? DS_MONSTERS : [], toCard: m => { const dig = m.acc != null; return {
+    sbtype: /\\blegendary\\b/i.test(m.notes||'') ? 'boss' : 'mob', name: m.name || '',
+    type: ['DENIZEN', 'LV ' + (m.lv||''), m.shipScale ? 'SHIP SCALE' : ''].filter(Boolean).join(' // '), flavor: m.desc || '',
+    ac: String(m.ac ?? ''), hp: String(m.hp ?? ''), mv: m.mv || '', lv: String(m.lv ?? ''), mo: m.mo || '',
+    s: m.s || '', d: m.d || '', c: m.c || '', i: m.i || '', w: m.w || '', ch: m.ch || '',
+    abilities: [m.atk ? 'ATK: ' + m.atk : '', dig ? 'Interface: ACC ' + m.acc + ', CTL ' + m.ctl + ', NET ' + m.net : '', m.notes || ''].filter(Boolean).join('\\n'),
+  }; }, sub: m => 'LV ' + m.lv + (m.mo ? ' · ' + m.mo : '') + (/\\blegendary\\b/i.test(m.notes||'') ? ' · legendary' : '') },
 };`,
   nimble: `const SB_CONFIG = {
   typePlaceholder: 'MINION // KOBOLDS // SMALL',
@@ -153,6 +176,7 @@ const SB_CONFIG = {
 };`,
 };
 const MOB_DATA = {
+  ds: '<script src="/tools-data/ds-monsters.js"></script>',
   ace: '<script src="/tools-data/ace-extras.js"></script>',
   kob: '',
   nimble: '<script src="/tools-data/nimble-monsters.js"></script>',

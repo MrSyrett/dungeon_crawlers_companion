@@ -437,6 +437,28 @@ const SCHEMAS: Record<string, Schema> = {
     ],
     blank: () => ({ category: "gear" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
   },
+  "ds-monster": {
+    title: "My Homebrew Denizens", noun: "Denizen",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "lv", label: "Level", type: "text", placeholder: "3" },
+      { key: "ac", label: "AC", type: "text", placeholder: "13" },
+      { key: "hp", label: "HP", type: "text", placeholder: "14" },
+      { key: "mv", label: "Move", type: "text", placeholder: "near (fly)" },
+      { key: "mo", label: "Motivation", type: "select", empty: "—", options: [["Vl", "Vile"], ["Vr", "Virtuous"], ["S", "Survivor"], ["Su", "Survivor"], ["Vi", "Vile"], ["Any", "Any"]] },
+      { key: "atk", label: "Attacks", type: "text", full: true, placeholder: "2 claw +4 (1d8) or 1 blaster (near) +3 (1d6)" },
+      { key: "s", label: "STR", type: "text", placeholder: "+0" },
+      { key: "d", label: "DEX", type: "text", placeholder: "+0" },
+      { key: "c", label: "CON", type: "text", placeholder: "+0" },
+      { key: "i", label: "INT", type: "text", placeholder: "+0" },
+      { key: "w", label: "WIS", type: "text", placeholder: "+0" },
+      { key: "ch", label: "CHA", type: "text", placeholder: "+0" },
+      { key: "shipScale", label: "Ship scale", type: "checkbox" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+      { key: "notes", label: "Abilities", type: "textarea", full: true, placeholder: "Name. Effect. …" },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }), summary: (d) => `LV ${sv(d, "lv") || "?"}${sv(d, "mo") ? " · " + sv(d, "mo") : ""}`,
+  },
   "ds-ship-item": {
     title: "My Homebrew Ship Items", noun: "Ship Item",
     fields: [
