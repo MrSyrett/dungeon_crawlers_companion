@@ -775,7 +775,10 @@ function updateHeaderButton() {
   const hasChar = (document.getElementById('f-name')?.value.trim()) && (document.getElementById('f-class')?.value.trim());
   if(hasChar) {
     btn.textContent = 'Level'; btn.title = 'Level up'; btn.setAttribute('aria-label', 'Level up');
-    btn.onclick = startLevelUp;
+    // DarkSpace Spacers level up on their archetype talent tables — route to the
+    // dedicated DarkSpace level-up rather than the Shadowdark class wizard.
+    btn.onclick = (typeof darkSpaceOn === 'function' && darkSpaceOn() && typeof startDarkSpaceLevelUp === 'function')
+      ? startDarkSpaceLevelUp : startLevelUp;
   } else {
     btn.textContent = 'Create'; btn.title = 'Create character'; btn.setAttribute('aria-label', 'Create character');
     btn.onclick = startCharWizard;

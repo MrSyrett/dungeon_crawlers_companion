@@ -440,14 +440,14 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   <!-- HEADER FIELDS ROW 1 -->
   <div class="hdr-fields">
     <div class="hdr-field"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
-    <div class="hdr-field"><label>Ancestry</label><input type="text" id="f-ancestry" placeholder="Elf, Dwarf..."></div>
-    <div class="hdr-field"><label>Class</label><input type="text" id="f-class" placeholder="Fighter, Wizard..."></div>
-    <div class="hdr-field"><label>Title</label><input type="text" id="f-title" placeholder="Apprentice..."></div>
+    <div class="hdr-field"><label id="lbl-ancestry">Ancestry</label><input type="text" id="f-ancestry" placeholder="Elf, Dwarf..."></div>
+    <div class="hdr-field"><label id="lbl-class">Class</label><input type="text" id="f-class" placeholder="Fighter, Wizard..."></div>
+    <div class="hdr-field"><label id="lbl-title">Title</label><input type="text" id="f-title" placeholder="Apprentice..."></div>
   </div>
   <div class="hdr-fields hdr-fields-2">
-    <div class="hdr-field"><label>Alignment</label><input type="text" id="f-alignment" placeholder="Lawful / Neutral / Chaotic"></div>
-    <div class="hdr-field"><label>Background</label><input type="text" id="f-background" placeholder="Acolyte, Soldier..."></div>
-    <div class="hdr-field"><label>Deity</label><input type="text" id="f-deity" placeholder=""></div>
+    <div class="hdr-field"><label id="lbl-alignment">Alignment</label><input type="text" id="f-alignment" placeholder="Lawful / Neutral / Chaotic"></div>
+    <div class="hdr-field"><label id="lbl-background">Background</label><input type="text" id="f-background" placeholder="Acolyte, Soldier..."></div>
+    <div class="hdr-field" id="hdr-deity-field"><label id="lbl-deity">Deity</label><input type="text" id="f-deity" placeholder=""></div>
     <div class="hdr-field" style="display:flex;align-items:center;gap:6px;">
       <div style="flex:1;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="font-size:18px;font-weight:900;"></div>
     </div>
@@ -543,7 +543,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
       <!-- GEAR TAB (coins + gear + free to carry) -->
       <div class="tab-panel" id="tab-gear">
         <div class="coin-row">
-          <div class="coin-cell"><span class="coin-label">GP</span><input type="text" class="coin-input" id="coin-gp" placeholder="0"></div>
+          <div class="coin-cell"><span class="coin-label" id="coin-gp-lbl">GP</span><input type="text" class="coin-input" id="coin-gp" placeholder="0"></div>
           <div class="coin-cell"><span class="coin-label">SP</span><input type="text" class="coin-input" id="coin-sp" placeholder="0"></div>
           <div class="coin-cell"><span class="coin-label">CP</span><input type="text" class="coin-input" id="coin-cp" placeholder="0"></div>
         </div>
@@ -584,6 +584,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
     <button id="hdr-create-btn" class="log-action-btn" onclick="startCharWizard()" style="border:1px solid #7a5a00;background:transparent;color:#e8c84a;" title="Create character" aria-label="Create character">Create</button>
     <button class="log-action-btn" onclick="openRules()" style="border:1px solid #2f4a2f;background:#1e2a1e;color:#b8d8b8;" title="Quick rules" aria-label="Quick rules">Rules</button>
+    <button id="hdr-ship-btn" class="log-action-btn" onclick="openDarkSpaceShip()" style="display:none;border:1px solid #1a5a7a;background:#0d1a20;color:#6ac8df;" title="Starship" aria-label="Starship">🚀 Ship</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export sheet as JSON" aria-label="Export">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import a sheet JSON" aria-label="Import">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
@@ -995,10 +996,43 @@ let _applyingItemBonuses = false;   // re-entrancy guard
 // turn, and Dying (not unconscious) at 0 HP — 1 action + disadvantage on all
 // checks. Some of these are already how the sheet works (Luck is a free number,
 // talents can be chosen); the rest are automated below or listed in the ⚔ panel.
-function defaultOptions(){ return { heroDark:false }; }
+function defaultOptions(){ return { heroDark:false, darkSpace:false }; }
 let options = defaultOptions();
 function heroDarkOn(){ return !!(options && options.heroDark); }
 window.heroDarkOn = heroDarkOn;
+function darkSpaceOn(){ return !!(options && options.darkSpace); }
+window.darkSpaceOn = darkSpaceOn;
+
+// DarkSpace mode relabels the header fields to the sci-fi terminology and hides
+// the Deity field (Motivation covers alignment/deity). Called after any load and
+// after the DarkSpace builder finishes. Reverting to standard Shadowdark restores
+// the original labels.
+function syncModeChrome(){
+  const ds = (typeof window.DARKSPACE !== 'undefined') ? window.DARKSPACE : null;
+  const on = darkSpaceOn() && !!ds;
+  const setLbl = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent = txt; };
+  const setPh  = (id, txt) => { const el=document.getElementById(id); if(el) el.placeholder = txt; };
+  if(on){
+    setLbl('lbl-ancestry','Species');   setPh('f-ancestry','Species / trait');
+    setLbl('lbl-class','Archetype');     setPh('f-class','Strong, Quick...');
+    setLbl('lbl-title','Rank');          setPh('f-title','Rookie...');
+    setLbl('lbl-alignment','Motivation');setPh('f-alignment','Survivor / Vile / Virtuous');
+    setLbl('lbl-background','Background');
+    const df = document.getElementById('hdr-deity-field'); if(df) df.style.display = 'none';
+    setLbl('coin-gp-lbl','cr');
+    const sb = document.getElementById('hdr-ship-btn'); if(sb) sb.style.display = '';
+  } else {
+    setLbl('lbl-ancestry','Ancestry');   setPh('f-ancestry','Elf, Dwarf...');
+    setLbl('lbl-class','Class');          setPh('f-class','Fighter, Wizard...');
+    setLbl('lbl-title','Title');          setPh('f-title','Apprentice...');
+    setLbl('lbl-alignment','Alignment');  setPh('f-alignment','Lawful / Neutral / Chaotic');
+    setLbl('lbl-background','Background');
+    const df = document.getElementById('hdr-deity-field'); if(df) df.style.display = '';
+    setLbl('coin-gp-lbl','GP');
+    const sb = document.getElementById('hdr-ship-btn'); if(sb) sb.style.display = 'none';
+  }
+}
+window.syncModeChrome = syncModeChrome;
 
 // Sum the bonuses of every equipped, non-disabled gear item that maps to a
 // homebrew item. Enchanted "+N <name>" rows resolve to the base item (findHomebrewItem strips the prefix).
@@ -1224,6 +1258,12 @@ const AC_ARMOR = [
   { match:'chainmail',          base:13, dex:true  },
   { match:'leather armor',      base:11, dex:true  },
   { match:'leather',            base:11, dex:true  },
+  // DarkSpace armor (sci-fi variant): Light 11+DEX, Medium 13+DEX, Heavy 15,
+  // Energy 15. Shields (Ballistic/Energy) fall through to the generic +2 rule.
+  { match:'light armor',        base:11, dex:true  },
+  { match:'medium armor',       base:13, dex:true  },
+  { match:'heavy armor',        base:15, dex:false },
+  { match:'energy armor',       base:15, dex:false },
 ];
 
 // Parse a gear item name into an armor/shield contribution, honoring "+N".
@@ -3017,6 +3057,7 @@ function collectSheet(){
       talents:   talentsText,
       luckPts:   document.getElementById('lk-val')?.value || '',
       options:   options,
+      ship:      (typeof window.dsShipState === 'function') ? window.dsShipState() : (window._dsShipState || null),
       featureUses: _featureUses && typeof _featureUses === 'object' ? _featureUses : {},
       trackers:       Array.isArray(_trackers) ? _trackers : [],
       customTrackers: Array.isArray(_customTrackers) ? _customTrackers : [],
@@ -3355,8 +3396,12 @@ function _applySDData(d){
   // bonuses (adds the HP/ability deltas back on top of the loaded base values).
   if(typeof applyItemBonuses === 'function') applyItemBonuses();
   renderTalentsView();          // restore the styled Talents view after a load
-  // HeroDark option
+  // HeroDark / DarkSpace options
   options = Object.assign(defaultOptions(), (d._sheet && d._sheet.options) || {});
+  // DarkSpace starship state (round-trips with the character save).
+  window._dsShipState = (d._sheet && d._sheet.ship) ? d._sheet.ship : null;
+  if(typeof window.dsShipLoaded === 'function') window.dsShipLoaded();
+  if(typeof syncModeChrome === 'function') syncModeChrome();
 }
 
 function importShadowdarklings(input) {
@@ -3942,6 +3987,7 @@ buildAttacks();
 buildSpells();
 buildGear();
 autoLoad();
+if(typeof syncModeChrome === 'function') syncModeChrome();   // apply DarkSpace/HeroDark chrome for the loaded character
 setDefaultTab();   // activate the saved (or default) main-column tab
 ensureStrikesAttack();   // blank sheets get the baseline unarmed attack too
 ensurePseudopodAttack(); // Wyrdling natural attack (no-op for other classes)
@@ -4254,6 +4300,67 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
     </div>
   </div>
 </div>
+
+<!-- DarkSpace character builder overlay (sci-fi cyan theme) -->
+<div id="dsw-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#0d1418;border:2px solid #3fb6d8;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
+    <div style="background:#081014;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">
+      <div>
+        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">DarkSpace — Create Spacer</div>
+        <div id="dsw-step" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#5a8595;margin-top:3px;"></div>
+      </div>
+      <button onclick="dswClose()" style="background:transparent;border:none;color:#5a8595;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div id="dsw-body" style="padding:14px 16px;overflow-y:auto;flex:1;"></div>
+    <div style="padding:10px 16px;background:#0a1216;border-top:1px solid #16323d;display:flex;justify-content:space-between;">
+      <button id="dsw-back" onclick="dswBack()" style="padding:7px 16px;background:transparent;color:#5a8595;border:1px solid #16323d;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-radius:6px;">← Back</button>
+      <button id="dsw-next" onclick="dswNext()" style="padding:7px 16px;background:#3fb6d8;color:#06131a;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:900;font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-radius:6px;">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DarkSpace starship overlay -->
+<div id="dsship-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1001;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#0d1418;border:2px solid #3fb6d8;max-width:640px;width:100%;max-height:92vh;display:flex;flex-direction:column;">
+    <div style="background:#081014;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">
+      <div>
+        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Starship</div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#5a8595;margin-top:3px;">A ship is built like a Spacer — Stats, HP, AC, systems &amp; weapons</div>
+      </div>
+      <button onclick="closeDarkSpaceShip()" style="background:transparent;border:none;color:#5a8595;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div id="dsship-body" style="padding:14px 16px;overflow-y:auto;flex:1;"></div>
+  </div>
+</div>
+
+<!-- DarkSpace level-up overlay -->
+<div id="dslu-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1001;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#0d1418;border:2px solid #3fb6d8;max-width:480px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
+    <div style="background:#081014;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">
+      <div>
+        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">DarkSpace — Level Up</div>
+        <div id="dslu-sub" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#5a8595;margin-top:3px;"></div>
+      </div>
+      <button onclick="dsluClose()" style="background:transparent;border:none;color:#5a8595;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div id="dslu-body" style="padding:14px 16px;overflow-y:auto;flex:1;"></div>
+    <div style="padding:10px 16px;background:#0a1216;border-top:1px solid #16323d;display:flex;justify-content:flex-end;">
+      <button id="dslu-apply" onclick="dsluApply()" style="padding:7px 16px;background:#3fb6d8;color:#06131a;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:900;font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-radius:6px;">✦ Apply Level Up</button>
+    </div>
+  </div>
+</div>
+
+<!-- DarkSpace reference overlay -->
+<div id="dsref-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1001;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#0d1418;border:2px solid #3fb6d8;max-width:640px;width:100%;max-height:90vh;display:flex;flex-direction:column;">
+    <div style="background:#081014;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">
+      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">DarkSpace Reference</div>
+      <button onclick="closeDarkSpaceRef()" style="background:transparent;border:none;color:#5a8595;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
+    <div id="dsref-tabs" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#0a1216;border-bottom:1px solid #16323d;"></div>
+    <div id="dsref-body" style="padding:14px 16px;overflow-y:auto;flex:1;"></div>
+  </div>
+</div>
 <style>
 .ccw-hint{font-family:'Montserrat',sans-serif;font-size:11px;color:#aaa;line-height:1.5;margin:0 0 10px;}
 .ccw-roll-btn{display:block;width:100%;padding:8px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
@@ -4293,7 +4400,10 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 }
 </style>
 
+<script src="/tools-data/sd-darkspace.js"></script>
 <script src="/tools-data/sd-sheet-ccw.js"></script>
+<script src="/tools-data/sd-darkspace-ccw.js"></script>
+<script src="/tools-data/sd-darkspace-ship.js"></script>
 
 <!-- ═══ LEVEL UP WIZARD ═══ -->
 <div id="lvl-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
@@ -5130,7 +5240,10 @@ function inscribeSpell(name, caster) {
   <div style="background:#1a1a1a;border:2px solid #c8a020;border-radius:6px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#e0c060;line-height:1;">Quick Rules</div>
-      <button onclick="closeRules()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">&#10005;</button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="dsref-open-btn" onclick="openDarkSpaceRef()" style="display:none;padding:5px 12px;background:#0d1a20;color:#6ac8df;border:1px solid #1a5a7a;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;">🚀 DarkSpace Reference</button>
+        <button onclick="closeRules()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">&#10005;</button>
+      </div>
     </div>
     <div id="rules-body" class="rules-list" style="padding:14px 16px;overflow-y:auto;scrollbar-width:thin;"></div>
   </div>
@@ -5144,12 +5257,108 @@ function openRules() {
   let rows = (typeof SD_QUICK_RULES !== 'undefined' && Array.isArray(SD_QUICK_RULES)) ? SD_QUICK_RULES : [];
   // While HeroDark mode is on, prepend its rules to the panel.
   if(typeof heroDarkOn === 'function' && heroDarkOn() && typeof HERODARK_QUICK_RULES !== 'undefined') rows = HERODARK_QUICK_RULES.concat(rows);
+  // While DarkSpace mode is on, prepend its rules to the panel.
+  if(typeof darkSpaceOn === 'function' && darkSpaceOn() && typeof window.DARKSPACE !== 'undefined' && Array.isArray(window.DARKSPACE.quickRules)) rows = window.DARKSPACE.quickRules.concat(rows);
   body.innerHTML = rows.length
     ? rows.map(r => '<h4>' + _qrEsc(r.title) + (r.page ? ' <span style="font-weight:400;color:#666;font-size:10px;">p.' + _qrEsc(String(r.page)) + '</span>' : '') + '</h4><p>' + _qrEsc(r.text) + '</p>').join('')
     : '<p>Rules data not loaded.</p>';
+  const dsBtn = document.getElementById('dsref-open-btn');
+  if(dsBtn) dsBtn.style.display = (typeof darkSpaceOn === 'function' && darkSpaceOn()) ? '' : 'none';
   document.getElementById('rules-overlay').style.display = 'flex';
 }
 function closeRules() { document.getElementById('rules-overlay').style.display = 'none'; }
+
+// ═══ DarkSpace Reference ════════════════════════════════════════════════════
+let _dsRefTab = 'Species';
+function openDarkSpaceRef(){ _dsRefTab = 'Species'; renderDarkSpaceRef(); document.getElementById('dsref-overlay').style.display = 'flex'; }
+function closeDarkSpaceRef(){ document.getElementById('dsref-overlay').style.display = 'none'; }
+window.openDarkSpaceRef = openDarkSpaceRef;
+window.closeDarkSpaceRef = closeDarkSpaceRef;
+function _dsRefTabTo(t){ _dsRefTab = t; renderDarkSpaceRef(); }
+window._dsRefTabTo = _dsRefTabTo;
+function renderDarkSpaceRef(){
+  const DS = window.DARKSPACE; if(!DS) return;
+  const E = t => _qrEsc(t);
+  const TABS = ['Species','Archetypes','Backgrounds','Motivations','The Triad','Gear','Weapons','Armor','Advanced Tech','Starships'];
+  const tabsEl = document.getElementById('dsref-tabs');
+  tabsEl.innerHTML = TABS.map(t =>
+    '<button onclick="_dsRefTabTo('+JSON.stringify(t).replace(/"/g,'&quot;')+')" style="padding:5px 10px;border-radius:5px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.05em;'+
+    (_dsRefTab===t ? 'background:#3fb6d8;color:#06131a;border:1px solid #3fb6d8;' : 'background:transparent;color:#6ac8df;border:1px solid #16323d;')+'">'+E(t)+'</button>'
+  ).join('');
+  const body = document.getElementById('dsref-body');
+  const H4 = (a,b) => '<h4 style="font-family:Montserrat,sans-serif;font-size:12px;font-weight:900;color:#8fd6ea;margin:10px 0 3px;">'+E(a)+(b?' <span style="color:#5a8595;font-weight:700;font-size:10px;">'+E(b)+'</span>':'')+'</h4>';
+  const P  = t => '<p style="font-family:Montserrat,sans-serif;font-size:11px;color:#cfe6ee;line-height:1.5;margin:0 0 6px;">'+E(t)+'</p>';
+  const tblRow = cells => '<tr>'+cells.map(c=>'<td style="padding:3px 8px;border-bottom:1px solid #16323d;font-family:Montserrat,sans-serif;font-size:11px;color:#cfe6ee;vertical-align:top;">'+E(c)+'</td>').join('')+'</tr>';
+  const tblHead = cells => '<tr>'+cells.map(c=>'<th style="padding:4px 8px;text-align:left;border-bottom:1px solid #2a5a6a;font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#6ac8df;">'+E(c)+'</th>').join('')+'</tr>';
+  const table = (head, rows) => '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'+tblHead(head)+rows.join('')+'</table></div>';
+  let h = '';
+  switch(_dsRefTab){
+    case 'Species':
+      h += P('Roll d20 or choose a Species Trait. Humans/analogues get Ambitious (roll twice on your Archetype talent table at 1st level). You may also use any Shadowdark ancestry.');
+      h += table(['d20','Trait','Effect'], DS.species.map(s=>tblRow([s.n, s.name, s.text])));
+      h += H4('Humans / Analogues'); h += P(DS.humanNote);
+      h += H4('Tech Species'); DS.techSpecies.forEach(t=>{ h+=H4(t.name); h+=P(t.text); });
+      break;
+    case 'Archetypes':
+      DS.archetypes.forEach(a=>{
+        h += H4(a.name, a.stat+' · d'+a.hitDie);
+        h += P(a.blurb);
+        h += P('Weapons: '+a.weapons+' · Armor: '+a.armor);
+        (a.features||[]).forEach(f=> h += P('• '+f.name+': '+f.text));
+        h += table(['2d6','Talent'], (a.talents||[]).map(r=>tblRow([r.r, r.text])));
+      });
+      break;
+    case 'Backgrounds':
+      h += table(['d20','Background','Description'], DS.backgrounds.map(b=>tblRow([b.n, b.name, b.text])));
+      break;
+    case 'Motivations':
+      DS.motivations.forEach(m=>{ h+=H4(m.name); h+=P(m.text); h+=P('Start: '+m.startBonus); h+=P('Luck: '+m.effect); });
+      break;
+    case 'The Triad':
+      h += P(DS.triad.intro);
+      DS.triad.powers.forEach(p=> { h+=H4(p.name, p.stat); h+=P(p.text); });
+      h += H4('Feat Difficulty');
+      h += table(['Difficulty','DC','Die'], DS.triad.feats.map(f=>tblRow([f.diff, f.dc, f.die])));
+      h += P(DS.triad.notes);
+      break;
+    case 'Gear':
+      h += P(DS.credits.note);
+      h += H4('Citizen Starting Gear (d12)'); h += P(DS.citizenGear.join(', '));
+      h += H4("Spacer's Kit"); h += P(DS.spacersKit.note+' Contains: '+DS.spacersKit.items.join(', '));
+      h += H4('Equipment');
+      h += table(['Item','Cost','Slots','Description'], DS.gear.map(g=>tblRow([g.name, g.cost+'cr', g.slot, g.desc])));
+      break;
+    case 'Weapons':
+      h += H4('Melee Weapons');
+      h += table(['Weapon','Cost','Range','Damage','Properties'], DS.meleeWeapons.map(w=>tblRow([w.name, w.cost+'cr', w.range, w.dmg, w.props])));
+      h += H4('Ranged Weapons');
+      h += table(['Weapon','Cost','Range','Damage','Group / Props'], DS.rangedWeapons.map(w=>tblRow([w.name, w.cost+'cr', w.range, w.dmg, (w.group||'')+' — '+w.props])));
+      h += H4('Explosives & Heavy');
+      h += table(['Item','Cost','Range','Damage','Properties'], DS.explosives.map(w=>tblRow([w.name, w.cost+'cr', w.range, w.dmg, w.props])));
+      h += H4('Weapon Properties');
+      h += table(['Code','Meaning'], Object.keys(DS.weaponProps).map(k=>tblRow([k, DS.weaponProps[k]])));
+      break;
+    case 'Armor':
+      h += table(['Armor','Cost','Slots','AC','Properties'], DS.armor.map(a=>tblRow([a.name, a.cost+'cr', a.slots, a.ac, a.props])));
+      break;
+    case 'Advanced Tech':
+      DS.advancedTech.forEach(t=> { h+=H4(t.name); h+=P(t.text); });
+      h += P(DS.advancedTechNote);
+      break;
+    case 'Starships':
+      h += H4('Building a Ship');
+      DS.ship.design.forEach(d=> h += P('• '+d));
+      h += H4('Classifications'); h += P(DS.ship.classes.join(', '));
+      h += H4('Ship Weapons');
+      h += table(['Weapon','Cost','Range','Damage','Properties'], DS.ship.weapons.map(w=>tblRow([w.name, w.cost+'cr', w.range, w.dmg, w.props])));
+      h += H4('Ship Armor');
+      h += table(['Armor','Cost','AC','Properties'], DS.ship.armor.map(a=>tblRow([a.name, a.cost+'cr', a.ac, a.props])));
+      h += H4('Stock Classes');
+      DS.ship.stockClasses.forEach(c=> h += P(c.name+': '+c.text));
+      break;
+  }
+  body.innerHTML = h;
+}
 </script>
 <div id="campaign-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#1a1a1a;border:2px solid #8a7ac8;max-width:420px;width:100%;display:flex;flex-direction:column;">
