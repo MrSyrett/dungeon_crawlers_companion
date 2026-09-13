@@ -15,7 +15,13 @@ export async function createDocument(formData: FormData): Promise<void> {
 
   const def = TOOLS[tool];
   const doc = await prisma.document.create({
-    data: { userId: user.id, tool, title: `New ${def.systemName} ${def.label}` },
+    data: {
+      userId: user.id,
+      tool,
+      title: `New ${def.systemName} ${def.label}`,
+      // A variant tool (e.g. DarkSpace) seeds its sheet's starting mode.
+      ...(def.seed ? { data: def.seed } : {}),
+    },
   });
   redirect(`/tools/${tool}/${doc.id}`);
 }

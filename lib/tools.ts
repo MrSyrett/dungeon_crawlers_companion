@@ -10,7 +10,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { SystemKey } from "@/components/systemStore";
 
-export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session";
+export type ToolId = "dcc-character" | "dcc-session" | "sd-character" | "sd-session" | "ds-character" | "ace-character" | "kob-character" | "nimble-character" | "ace-session" | "kob-session" | "nimble-session" | "sw-character" | "sw-session" | "dnd-character" | "dnd-session" | "d62e-character" | "d62e-session";
 
 export type ToolKind = "character" | "session";
 
@@ -22,6 +22,10 @@ export interface ToolDef {
   label: string;
   file: string;
   keys: string[];
+  /** Seed blob for a freshly-created document (keyed by localStorage key). Lets a
+   *  variant tool open its sheet in the right mode — e.g. DarkSpace starts the
+   *  shared Shadowdark sheet with darkSpace mode on. */
+  seed?: Record<string, unknown>;
 }
 
 export const TOOLS: Record<ToolId, ToolDef> = {
@@ -60,6 +64,19 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     label: "Session Prep",
     file: "sd_session_prep_builder.html",
     keys: ["sd_session"],
+  },
+  // DarkSpace shares the Shadowdark character sheet, opened in DarkSpace mode.
+  // The seed starts a new document with darkSpace mode on so the sheet shows the
+  // sci-fi terminology, quick rules and Starship button from the first load.
+  "ds-character": {
+    id: "ds-character",
+    system: "DS",
+    systemName: "DarkSpace",
+    kind: "character",
+    label: "Character Sheet",
+    file: "sd_character_sheet.html",
+    keys: ["sd_sheet"],
+    seed: { sd_sheet: { name: "", _sheet: { options: { heroDark: false, darkSpace: true } } } },
   },
   "ace-character": {
     id: "ace-character",
@@ -173,7 +190,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
   },
 };
 
-export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session"];
+export const TOOL_ORDER: ToolId[] = ["dcc-character", "dcc-session", "sd-character", "sd-session", "ds-character", "ace-character", "ace-session", "kob-character", "kob-session", "nimble-character", "nimble-session", "sw-character", "sw-session", "dnd-character", "dnd-session", "d62e-character", "d62e-session"];
 
 // Every character-sheet tool id — the set the campaign roster, VTT token access
 // and the documents API treat as "a sheet" (they all carry a campaign link).

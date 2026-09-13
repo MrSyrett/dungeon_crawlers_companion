@@ -38,6 +38,18 @@ const SD_REFERENCE: { href: string; label: string }[] = [
   { href: "/bestiary", label: "Bestiary" },
 ];
 
+// DarkSpace reference pages — science fiction for Shadowdark. Read DarkSpace data
+// and lead the toolbar on the DarkSpace tab only.
+const DS_REFERENCE: { href: string; label: string }[] = [
+  { href: "/darkspace/species", label: "Species" },
+  { href: "/darkspace/archetypes", label: "Archetypes" },
+  { href: "/darkspace/backgrounds", label: "Backgrounds" },
+  { href: "/darkspace/equipment", label: "Equipment" },
+  { href: "/darkspace/triad", label: "The Triad" },
+  { href: "/darkspace/starships", label: "Starships" },
+  { href: "/darkspace/rules", label: "Rules" },
+];
+
 // DCC reference pages — they read Dungeon Crawler Carl data and lead the toolbar
 // on the DCC tab only. Grows as each reference page ships (roadmap Phase 1);
 // links are added here only once their route exists so nothing points at a 404.
@@ -122,6 +134,7 @@ const D62E_REFERENCE: { href: string; label: string }[] = [
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
+  DS: DS_REFERENCE,
   DCC: DCC_REFERENCE,
   ACE: ACE_REFERENCE,
   KOB: KOB_REFERENCE,
