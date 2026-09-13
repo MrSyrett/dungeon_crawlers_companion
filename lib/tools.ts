@@ -22,12 +22,6 @@ export interface ToolDef {
   label: string;
   file: string;
   keys: string[];
-  /** Seed blob for a freshly-created document (keyed by localStorage key), stored
-   *  in the document's JSON `data` column. Lets a variant tool open its sheet in
-   *  the right mode — e.g. DarkSpace starts the shared Shadowdark sheet with
-   *  darkSpace mode on. Typed `object` to match Prisma's JSON input (see the
-   *  documents API route). */
-  seed?: object;
 }
 
 export const TOOLS: Record<ToolId, ToolDef> = {
@@ -67,18 +61,16 @@ export const TOOLS: Record<ToolId, ToolDef> = {
     file: "sd_session_prep_builder.html",
     keys: ["sd_session"],
   },
-  // DarkSpace shares the Shadowdark character sheet, opened in DarkSpace mode.
-  // The seed starts a new document with darkSpace mode on so the sheet shows the
-  // sci-fi terminology, quick rules and Starship button from the first load.
+  // DarkSpace: science fiction for Shadowdark. Its own sheet (a DarkSpace-native
+  // build of the Shadowdark sheet), so it opens straight into DarkSpace mode.
   "ds-character": {
     id: "ds-character",
     system: "DS",
     systemName: "DarkSpace",
     kind: "character",
     label: "Character Sheet",
-    file: "sd_character_sheet.html",
+    file: "ds_character_sheet.html",
     keys: ["sd_sheet"],
-    seed: { sd_sheet: { name: "", _sheet: { options: { heroDark: false, darkSpace: true } } } },
   },
   "ace-character": {
     id: "ace-character",

@@ -368,6 +368,89 @@ const SCHEMAS: Record<string, Schema> = {
     toForm: (d) => { const a = (d.attributes ?? {}) as Record<string, unknown>; const out: Data = { ...d }; for (const k of D62E_ATTRS) out[k] = codeFromPips(a[k]); return out; },
     summary: (d) => `${sv(d, "kind") || "Creature"} · ${sv(d, "genre")}`,
   },
+
+  // ── DarkSpace (science fiction for Shadowdark) ──
+  "ds-species": {
+    title: "My Homebrew Species", noun: "Species",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "text", label: "Trait", type: "textarea", full: true, placeholder: "What this species trait does." },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }), summary: () => "Species trait",
+  },
+  "ds-archetype": {
+    title: "My Homebrew Archetypes", noun: "Archetype",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "stat", label: "Prime Stat", type: "select", options: [["STR", "STR"], ["DEX", "DEX"], ["CON", "CON"], ["INT", "INT"], ["WIS", "WIS"], ["CHA", "CHA"], ["—", "—"]] },
+      { key: "hitDie", label: "Hit Die", type: "number", placeholder: "6" },
+      { key: "weapons", label: "Weapons", type: "text", placeholder: "All Melee weapons" },
+      { key: "armor", label: "Armor", type: "text", placeholder: "Light Armor" },
+      { key: "blurb", label: "Description", type: "textarea", full: true },
+      { key: "features", label: "Features", type: "objectList", full: true, addLabel: "+ Feature", fields: [{ key: "name", label: "Name", type: "text" }, { key: "text", label: "Text", type: "textarea" }] },
+      { key: "talents", label: "Talent table (2d6)", type: "objectList", full: true, addLabel: "+ Talent row", fields: [{ key: "r", label: "2d6", type: "text" }, { key: "text", label: "Talent", type: "textarea" }] },
+    ],
+    blank: () => ({ stat: "STR", hitDie: "6", features: [], talents: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "stat")} · d${sv(d, "hitDie") || "6"}`,
+  },
+  "ds-background": {
+    title: "My Homebrew Backgrounds", noun: "Background",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "text", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }), summary: () => "Background",
+  },
+  "ds-motivation": {
+    title: "My Homebrew Motivations", noun: "Motivation",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "text", label: "Description", type: "textarea", full: true },
+      { key: "startBonus", label: "Starting bonus", type: "textarea", full: true },
+      { key: "effect", label: "Luck Token trigger", type: "textarea", full: true },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }), summary: () => "Motivation",
+  },
+  "ds-triad": {
+    title: "My Homebrew Triad Disciplines", noun: "Discipline",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "stat", label: "Stat", type: "select", options: [["CON", "CON (Body)"], ["INT", "INT (Mind)"], ["WIS", "WIS (Soul)"], ["STR", "STR"], ["DEX", "DEX"], ["CHA", "CHA"]] },
+      { key: "text", label: "Description", type: "textarea", full: true, placeholder: "The kinds of feats this discipline can attempt." },
+    ],
+    blank: () => ({ stat: "WIS" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "stat"),
+  },
+  "ds-equipment": {
+    title: "My Homebrew Equipment", noun: "Item",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: [["gear", "Gear"], ["armor", "Armor"], ["melee", "Melee Weapon"], ["ranged", "Ranged Weapon"], ["explosive", "Explosive"]] },
+      { key: "cost", label: "Cost (cr)", type: "number", placeholder: "10" },
+      { key: "slot", label: "Slots", type: "text", placeholder: "1" },
+      { key: "ec", label: "Needs Energy Cell (EC)", type: "checkbox" },
+      { key: "ac", label: "AC (armor)", type: "text", placeholder: "11 + DEX mod" },
+      { key: "range", label: "Range (weapon)", type: "text", placeholder: "N / F / C" },
+      { key: "dmg", label: "Damage (weapon)", type: "text", placeholder: "1d6" },
+      { key: "group", label: "Group (ranged)", type: "text", placeholder: "Projectile / Energy / Disabling" },
+      { key: "props", label: "Properties", type: "text", placeholder: "EC, 2H" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ category: "gear" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
+  },
+  "ds-ship-item": {
+    title: "My Homebrew Ship Items", noun: "Ship Item",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: [["weapon", "Weapon"], ["armor", "Armor"], ["system", "System"], ["feature", "Feature"]] },
+      { key: "cost", label: "Cost (cr)", type: "number", placeholder: "100" },
+      { key: "range", label: "Range (weapon)", type: "text", placeholder: "N / F" },
+      { key: "dmg", label: "Damage (weapon)", type: "text", placeholder: "1d8" },
+      { key: "ac", label: "AC (armor)", type: "text", placeholder: "13 + Ship DEX mod" },
+      { key: "props", label: "Properties", type: "text", placeholder: "EG, AP" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ category: "weapon" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
+  },
 };
 
 // Accent CSS var by system prefix (globals.css: --nimble/--sw/--ace/--kob).
@@ -377,6 +460,7 @@ function accentFor(kind: string): string {
   if (kind.startsWith("ace-")) return "--ace";
   if (kind.startsWith("kob-")) return "--kob";
   if (kind.startsWith("d62e-")) return "--d62e";
+  if (kind.startsWith("ds-")) return "--darkspace";
   return "--dnd";
 }
 

@@ -26,7 +26,8 @@ type HbType =
   | "sw-weapon" | "sw-gear" | "sw-force" | "sw-character"
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
-  | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature";
+  | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
+  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-triad" | "ds-equipment" | "ds-ship-item";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {
   id: string;

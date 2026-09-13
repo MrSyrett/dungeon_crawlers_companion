@@ -722,10 +722,6 @@ function ccwMethod() {
   h += '</div>';
   h += '<button class="ccw-choice" style="width:100%;margin-bottom:8px;padding:14px;" onclick="ccwGoRandom()"><div class="ccw-choice-name"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Random Character</div><div class="ccw-choice-desc">Instantly generate a complete character — stats, class, gear, everything rolled for you.</div></button>';
   h += '<button class="ccw-choice" style="width:100%;padding:14px;" onclick="_ccw.step++;ccwRender()"><div class="ccw-choice-name"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M5.5 4.2h9a1.3 1.3 0 0 1 1.3 1.3v2.2a1.3 1.3 0 0 1-1.3 1.3h-9a1.3 1.3 0 0 1-1.3-1.3V5.5a1.3 1.3 0 0 1 1.3-1.3Z"/><path d="M8.7 9h2.6l-.5 10.4a.8.8 0 0 1-1.6 0Z"/></svg> Design Your Own</div><div class="ccw-choice-desc">Walk through each step and make every roll and choice yourself.</div></button>';
-  // DarkSpace — science-fiction variant. Launches its own dedicated builder.
-  if(typeof window.DARKSPACE !== 'undefined' && typeof startDarkSpaceWizard === 'function'){
-    h += '<button class="ccw-choice" style="width:100%;margin-top:8px;padding:14px;border-color:#1a5a7a;background:#0d1a20;" onclick="ccwClose();startDarkSpaceWizard();"><div class="ccw-choice-name" style="color:#6ac8df;">🚀 DarkSpace — Science-Fiction Spacer</div><div class="ccw-choice-desc">Build a sci-fi character with Species, Archetype, and Motivation instead of the fantasy options.</div></button>';
-  }
   return h;
 }
 function ccwGoRandom() {

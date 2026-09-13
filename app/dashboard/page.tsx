@@ -47,7 +47,6 @@ const DS_REFERENCE: { href: string; label: string }[] = [
   { href: "/darkspace/equipment", label: "Equipment" },
   { href: "/darkspace/triad", label: "The Triad" },
   { href: "/darkspace/starships", label: "Starships" },
-  { href: "/darkspace/rules", label: "Rules" },
 ];
 
 // DCC reference pages — they read Dungeon Crawler Carl data and lead the toolbar

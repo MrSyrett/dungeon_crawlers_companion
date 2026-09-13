@@ -12,6 +12,7 @@ export const chipOn = "border-[var(--darkspace)] bg-[var(--panel-2)] text-[#8fd6
 export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#8fd6ea]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
+export const hbBadge = "rounded border border-[var(--darkspace)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#8fd6ea]";
 export const accentText = "text-[#8fd6ea]";
 
 export function withParams(base: string, current: Query, patch: Query): string {
@@ -33,31 +34,6 @@ export function DarkSpaceHeader({ title, subtitle }: { title: string; subtitle: 
         <Link href="/dashboard" className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]">← Home</Link>
       </div>
     </header>
-  );
-}
-
-export function DarkSpaceNav({ active }: { active: string }) {
-  const links = [
-    { href: "/darkspace/species", label: "Species" },
-    { href: "/darkspace/archetypes", label: "Archetypes" },
-    { href: "/darkspace/backgrounds", label: "Backgrounds" },
-    { href: "/darkspace/equipment", label: "Equipment" },
-    { href: "/darkspace/triad", label: "The Triad" },
-    { href: "/darkspace/starships", label: "Starships" },
-    { href: "/darkspace/rules", label: "Rules" },
-  ];
-  return (
-    <nav className="mb-6 flex flex-wrap gap-1.5">
-      {links.map((l) => (
-        <Link
-          key={l.href}
-          href={l.href}
-          className={`${chipBase} ${l.label === active ? chipOn : chipOff}`}
-        >
-          {l.label}
-        </Link>
-      ))}
-    </nav>
   );
 }
 

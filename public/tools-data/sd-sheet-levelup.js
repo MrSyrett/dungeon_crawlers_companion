@@ -781,7 +781,9 @@ function updateHeaderButton() {
       ? startDarkSpaceLevelUp : startLevelUp;
   } else {
     btn.textContent = 'Create'; btn.title = 'Create character'; btn.setAttribute('aria-label', 'Create character');
-    btn.onclick = startCharWizard;
+    // On the DarkSpace sheet, Create launches the DarkSpace builder directly.
+    btn.onclick = (typeof darkSpaceOn === 'function' && darkSpaceOn() && typeof startDarkSpaceWizard === 'function')
+      ? startDarkSpaceWizard : startCharWizard;
   }
 }
 

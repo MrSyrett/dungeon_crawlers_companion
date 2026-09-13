@@ -22,7 +22,8 @@ export type HbType =
   | "sw-weapon" | "sw-gear" | "sw-force" | "sw-character"
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
-  | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature";
+  | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
+  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-triad" | "ds-equipment" | "ds-ship-item";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -33,6 +34,7 @@ const HB_TYPES = [
   "ace-role", "ace-gear", "ace-extra", "ace-focus", "ace-trait",
   "kob-trope", "kob-strength", "kob-flaw",
   "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
+  "ds-species", "ds-archetype", "ds-background", "ds-motivation", "ds-triad", "ds-equipment", "ds-ship-item",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1518,6 +1520,108 @@ function normalizeD62eCreature(input: unknown): { name: string; data: Record<str
   return { name, data };
 }
 
+// ── DarkSpace (science fiction for Shadowdark) ──────────────────────────────
+const DS_ARCH_STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA", "—"] as const;
+const DS_TRIAD_STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
+const DS_EQUIP_CATS = ["gear", "armor", "melee", "ranged", "explosive"] as const;
+const DS_SHIP_CATS = ["weapon", "armor", "system", "feature"] as const;
+
+function normalizeDsSpecies(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew species needs a name.");
+  return { name, data: { name, text: str(o.text).slice(0, 2000), source: "Homebrew" } };
+}
+function normalizeDsBackground(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew background needs a name.");
+  return { name, data: { name, text: str(o.text).slice(0, 2000), source: "Homebrew" } };
+}
+function normalizeDsMotivation(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew motivation needs a name.");
+  return {
+    name,
+    data: {
+      name,
+      text: str(o.text).slice(0, 1000),
+      startBonus: str(o.startBonus).slice(0, 1000),
+      effect: str(o.effect).slice(0, 1000),
+      source: "Homebrew",
+    },
+  };
+}
+function normalizeDsTriad(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew Triad discipline needs a name.");
+  return {
+    name,
+    data: { name, stat: oneOf(o.stat, DS_TRIAD_STATS, "WIS"), text: str(o.text).slice(0, 2000), source: "Homebrew" },
+  };
+}
+function normalizeDsArchetype(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew archetype needs a name.");
+  const hd = num(o.hitDie);
+  return {
+    name,
+    data: {
+      name,
+      stat: oneOf(o.stat, DS_ARCH_STATS, "STR"),
+      hitDie: hd != null && hd > 0 ? Math.min(20, hd) : 6,
+      weapons: str(o.weapons).slice(0, 200),
+      armor: str(o.armor).slice(0, 200),
+      blurb: str(o.blurb).slice(0, 1000),
+      features: objList(o.features, ["name", "text"], 12, 1000),
+      talents: objList(o.talents, ["r", "text"], 12, 1000),
+      source: "Homebrew",
+    },
+  };
+}
+function normalizeDsEquipment(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew equipment item needs a name.");
+  const cost = num(o.cost);
+  const data: Record<string, unknown> = {
+    name,
+    category: oneOf(o.category, DS_EQUIP_CATS, "gear"),
+    cost: cost != null && cost >= 0 ? cost : 0,
+    source: "Homebrew",
+  };
+  if (str(o.slot)) data.slot = str(o.slot).slice(0, 40);
+  if (truthy(o.ec)) data.ec = true;
+  if (str(o.ac)) data.ac = str(o.ac).slice(0, 40);
+  if (str(o.range)) data.range = str(o.range).slice(0, 40);
+  if (str(o.dmg)) data.dmg = str(o.dmg).slice(0, 60);
+  if (str(o.props)) data.props = str(o.props).slice(0, 120);
+  if (str(o.group)) data.group = str(o.group).slice(0, 40);
+  if (str(o.desc)) data.desc = str(o.desc).slice(0, 2000);
+  return { name, data };
+}
+function normalizeDsShipItem(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew ship item needs a name.");
+  const cost = num(o.cost);
+  const data: Record<string, unknown> = {
+    name,
+    category: oneOf(o.category, DS_SHIP_CATS, "weapon"),
+    cost: cost != null && cost >= 0 ? cost : 0,
+    source: "Homebrew",
+  };
+  if (str(o.range)) data.range = str(o.range).slice(0, 40);
+  if (str(o.dmg)) data.dmg = str(o.dmg).slice(0, 60);
+  if (str(o.ac)) data.ac = str(o.ac).slice(0, 40);
+  if (str(o.props)) data.props = str(o.props).slice(0, 120);
+  if (str(o.desc)) data.desc = str(o.desc).slice(0, 2000);
+  return { name, data };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -1559,6 +1663,13 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "d62e-gear": return normalizeD62eGear(data);
     case "d62e-power": return normalizeD62ePower(data);
     case "d62e-creature": return normalizeD62eCreature(data);
+    case "ds-species": return normalizeDsSpecies(data);
+    case "ds-archetype": return normalizeDsArchetype(data);
+    case "ds-background": return normalizeDsBackground(data);
+    case "ds-motivation": return normalizeDsMotivation(data);
+    case "ds-triad": return normalizeDsTriad(data);
+    case "ds-equipment": return normalizeDsEquipment(data);
+    case "ds-ship-item": return normalizeDsShipItem(data);
   }
 }
 
