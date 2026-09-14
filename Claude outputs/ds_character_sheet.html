@@ -14,7 +14,7 @@
 :root {
   --bg:#f8f8f6; --ink:#0a0a0a; --muted:#555; --rule:#c0c0c0;
   /* DarkSpace theme: the sci-fi cyan replaces Shadowdark's gold as the accent. */
-  --red:#c0251e; --gold:#3b82d6; --black:#0a0a0a;
+  --red:#2456b8; --gold:#3b82d6; --black:#0a0a0a;
   --box:#efefed; --input-bg:#fff; --border:#0a0a0a;
   --log-bg:#111; --log-text:#e8e4dc;
   --section-bar:#0a0a0a; --section-bar-text:#f8f8f6;
@@ -103,8 +103,8 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .log-action-btn.export:hover{background:#1a4a8a;color:white;}
 .log-action-btn.pdf{background:#10192b;color:#3b82d6;border:1px solid #1e466f;}
 .log-action-btn.pdf:hover{background:#1e466f;color:white;}
-.log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
-.log-action-btn.import:hover{background:#5a1a1a;color:white;}
+.log-action-btn.import{background:#2a1a1a;color:#8ab4e0;border:1px solid #1e3f66;}
+.log-action-btn.import:hover{background:#1e3f66;color:white;}
 .log-entries{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column-reverse;gap:5px;justify-content:flex-start;}
 /* Message-console entries broadcast from the GM (system messages + found loot). */
 .log-system{border-left:3px solid #3b82d6 !important;background:#10192b !important;}
@@ -126,9 +126,9 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .log-entry .roll-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#777;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Montserrat',monospace;font-size:22px;font-weight:900;color:var(--log-text);line-height:1;}
 .log-entry .roll-detail{font-size:9px;color:#555;margin-top:2px;font-family:'Montserrat',sans-serif;}
-.log-entry.crit .roll-result{color:#4a95f0;}.log-entry.fumble .roll-result{color:#ff4444;}
+.log-entry.crit .roll-result{color:#6dbf6d;}.log-entry.fumble .roll-result{color:#5a8fd8;}
 .log-entry.remote{border-left:3px solid #8a7ac8;background:#1c1a24;}
-.log-entry.crit{border-color:#4a95f0;}.log-entry.fumble{border-color:#ff4444;}
+.log-entry.crit{border-color:#6dbf6d;}.log-entry.fumble{border-color:#5a8fd8;}
 .log-hint{color:#333;font-size:10px;font-family:'Montserrat',sans-serif;text-align:center;padding:16px 8px;text-transform:uppercase;letter-spacing:.08em;}
 
 /* DICE TRAY */
@@ -136,7 +136,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .adv-btns{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:5px;}
 .adv-btn{padding:4px;background:#1a1a1a;border:1px solid #333;color:#777;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;cursor:pointer;text-align:center;text-transform:uppercase;letter-spacing:.06em;}
 .adv-btn.adv-active{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
-.adv-btn.dis-active{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
+.adv-btn.dis-active{background:#132a44;border-color:#274a7a;color:#8ab4e0;}
 .dice-btns{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-bottom:5px;}
 .dice-btn{min-width:0;padding:4px 1px;background:#1a1a1a;border:1px solid #333;color:#999;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;cursor:pointer;text-align:center;}
 .dice-btn:hover{background:var(--red);border-color:var(--red);color:white;}
@@ -202,14 +202,14 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 /* STATS BLOCK */
 /* TRACKERS (left column) — active status chips */
 .trk-box{padding:7px 8px 9px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid var(--rule);}
-.trk-chip{padding:5px 11px;border-radius:11px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;white-space:nowrap;background:#7a2d2d;border:1px solid #df6a6a;color:#ffdede;}
+.trk-chip{padding:5px 11px;border-radius:11px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;white-space:nowrap;background:#274a7a;border:1px solid #8ab4e0;color:#dbe8fb;}
 .trk-chip.good{background:#1e466f;border-color:#3b82d6;color:#cfe2ff;}
 .trk-chip.off{background:transparent;border:1px solid var(--rule);color:var(--muted);font-weight:600;}
 .trk-chip.off:hover{border-color:var(--ink);color:var(--ink);}
 .trk-pick-wrap{display:inline-flex;align-items:stretch;}
 .trk-pick-wrap .trk-chip{border-top-right-radius:0;border-bottom-right-radius:0;border-right:none;}
 .trk-del{padding:0 8px;border-radius:0 11px 11px 0;cursor:pointer;background:transparent;border:1px solid var(--rule);border-left:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;line-height:1;}
-.trk-del:hover{background:#7a2d2d;border-color:#df6a6a;color:#ffdede;}
+.trk-del:hover{background:#274a7a;border-color:#8ab4e0;color:#dbe8fb;}
 .trk-add{margin-left:auto;padding:3px 9px;font-size:11px;background:transparent;border:1px solid var(--rule);border-radius:3px;cursor:pointer;color:var(--muted);}
 .trk-add:hover{border-color:var(--ink);color:var(--ink);}
 /* Ability scores — single column, one row each (label · score · mod) */
@@ -283,7 +283,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .tv-uses{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
 .tv-pip{width:14px;height:14px;padding:0;border:1px solid var(--rule);border-radius:3px;background:transparent;cursor:pointer;flex:0 0 auto;}
 .tv-pip:hover{border-color:var(--ink);}
-.tv-pip.used{background:var(--red,#7a2d2d);border-color:var(--red,#7a2d2d);}
+.tv-pip.used{background:var(--red,#274a7a);border-color:var(--red,#274a7a);}
 .talents-area textarea{width:100%;flex:1;min-height:260px;border:none;background:transparent;resize:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:6px 10px;box-sizing:border-box;}
 .spells-list{padding:0;}
 /* Spell rows use grid for perfect column alignment */
@@ -310,7 +310,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .spell-adv-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}
 .spell-adv-btn.on{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
 .spell-lost-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}
-.spell-lost-btn.on{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
+.spell-lost-btn.on{background:#132a44;border-color:#274a7a;color:#8ab4e0;}
 .atk-adv-btn{padding:2px 4px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:var(--muted);}
 .atk-dmg-cell{display:flex;align-items:center;gap:3px;min-width:0;}
 /* The dice string gets whatever is left; the switch never shrinks, so
@@ -343,7 +343,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .title-auto{color:rgba(255,255,255,.72);font-size:10px;align-self:center;}
 .title-auto:hover{color:#fff;}
 .gear-disable-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;}
-.gear-disable-btn.on{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
+.gear-disable-btn.on{background:#132a44;border-color:#274a7a;color:#8ab4e0;}
 /* FREE TO CARRY */
 .free-carry{border-top:1px solid var(--rule);}
 .free-carry-inner{padding:6px 10px;}
@@ -353,7 +353,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .tabs-bar{display:flex;gap:0;background:var(--section-bar);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
 .tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.55);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;}
 .tab-btn:hover{color:#fff;}
-.tab-btn.on{color:#fff;border-bottom-color:var(--red);background:rgba(192,37,30,.28);}
+.tab-btn.on{color:#fff;border-bottom-color:var(--red);background:rgba(36,86,184,.28);}
 .tab-panel{display:none;}
 .tab-panel.on{display:block;}
 /* Softer 'bubble' feel: round the sheet shell and the coin row cells */
@@ -389,11 +389,11 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 }
 #roll-toast.show { display: block; animation: _toast-in 0.18s ease; }
 #roll-toast.crit { border-color: #6dbf6d; }
-#roll-toast.fumble { border-color: #df6a6a; }
+#roll-toast.fumble { border-color: #8ab4e0; }
 #roll-toast .t-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a8a93; margin-bottom: 3px; }
 #roll-toast .t-result { font-family: 'Share Tech Mono', monospace; font-size: 30px; font-weight: 900; color: #5fa3ea; line-height: 1; }
 #roll-toast.crit .t-result { color: #6dbf6d; }
-#roll-toast.fumble .t-result { color: #df6a6a; }
+#roll-toast.fumble .t-result { color: #8ab4e0; }
 #roll-toast .t-detail { font-size: 11px; color: #a0a0aa; margin-top: 3px; }
 @keyframes _toast-in {
   from { opacity: 0; transform: translateX(-50%) translateY(8px); }
@@ -433,7 +433,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   <div class="sheet-title">
     <div class="sheet-title-text">DarkSpace</div>
     <div class="sheet-title-actions">
-      <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and auto-consumes ammo (bows spend an arrow, crossbows a bolt), uses up a scroll on casting, and marks a wand spent on a failed check (broken on a natural 1). Also locks the Talents box (the wizards write it). Turn off to handle AC, talents and these items by hand."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
+      <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and locks the Talents box (creation writes it). Turn off to handle AC and talents by hand."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
       <button onclick="takeRest()" style="padding:6px 14px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;align-self:center;" onmouseover="this.style.background='#1a5a7a';this.style.color='white'" onmouseout="this.style.background='#1a2e3a';this.style.color='#6ac8df'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg> Rest</button>
     </div>
   </div>
@@ -903,17 +903,65 @@ function allSpells() {
 //   kind: 'gear' | 'weapon' | 'armor' | 'shield' | 'magic' | 'ammo'
 let _homebrewItems = [];
 
+// DarkSpace weapons (melee + ranged + explosives) mapped into SD_WEAPONS shape
+// so the attack/equip engine recognises them exactly like any weapon. The book
+// stores range as C/N/F codes and damage as `dmg`; translate to the sheet's
+// Close/Near/Far + `damage`/`type` shape.
+function darkSpaceWeaponBook() {
+  const D = (typeof window !== 'undefined' && window.DARKSPACE) ? window.DARKSPACE : {};
+  const RMAP = { C: 'Close', N: 'Near', F: 'Far' };
+  const mapRange = (r) => String(r || '').split('/').map(x => RMAP[x.trim()] || x.trim()).join('/');
+  const rows = [];
+  (D.meleeWeapons || []).forEach(w => rows.push({
+    name: w.name, type: /\bTh\b/.test(w.props || '') ? 'M/R' : 'M',
+    range: mapRange(w.range), damage: w.dmg || '', props: w.props || ''
+  }));
+  (D.rangedWeapons || []).forEach(w => rows.push({
+    name: w.name, type: 'R', range: mapRange(w.range), damage: w.dmg || '',
+    props: [w.group, w.props].filter(Boolean).join(', ')
+  }));
+  (D.explosives || []).forEach(w => rows.push({
+    name: w.name, type: 'R', range: mapRange(w.range), damage: w.dmg || '', props: w.props || ''
+  }));
+  return rows;
+}
+
 // Homebrew weapons in SD_WEAPONS shape, so they equip and roll like any weapon.
+// In DarkSpace mode the book is the DARKSPACE weapon tables (plus Strikes for
+// unarmed) rather than the Shadowdark fantasy weapons.
 function allWeapons() {
   if (_catalogCache.weapons) return _catalogCache.weapons;
-  const book = (typeof SD_WEAPONS !== 'undefined') ? SD_WEAPONS : [];
-  return (_catalogCache.weapons = book.concat(_homebrewItems.filter(i => i.kind === 'weapon').map(i => ({
+  let book;
+  if (typeof darkSpaceOn === 'function' && darkSpaceOn()) {
+    const strikes = (typeof SD_WEAPONS !== 'undefined') ? SD_WEAPONS.filter(w => w.name === 'Strikes') : [];
+    book = strikes.concat(darkSpaceWeaponBook());
+  } else {
+    book = (typeof SD_WEAPONS !== 'undefined') ? SD_WEAPONS : [];
+  }
+  return (_catalogCache.weapons = book.concat(dsHomebrewWeapons()).concat(_homebrewItems.filter(i => i.kind === 'weapon').map(i => ({
     name:   i.name,
     type:   i.wtype || 'M',
     range:  i.range || 'Close',
     damage: i.damage || '1d4',
     props:  i.props || ''
   }))));
+}
+
+// DarkSpace homebrew equipment of category melee/ranged/explosive, mapped into
+// weapon shape. (SD homebrew uses kind:'weapon'; DS uses category + dmg/ac/cost.)
+function dsHomebrewWeapons() {
+  if (!(typeof darkSpaceOn === 'function' && darkSpaceOn())) return [];
+  const RMAP = { C: 'Close', N: 'Near', F: 'Far' };
+  const mapRange = (r) => String(r || '').split('/').map(x => RMAP[x.trim()] || x.trim()).join('/');
+  return _homebrewItems
+    .filter(i => i.dsEquip && (i.category === 'melee' || i.category === 'ranged' || i.category === 'explosive'))
+    .map(i => ({
+      name: i.name,
+      type: i.category === 'melee' ? (/\bTh\b/.test(i.props || '') ? 'M/R' : 'M') : 'R',
+      range: mapRange(i.range) || 'Near',
+      damage: i.dmg || i.damage || '1d4',
+      props: i.props || ''
+    }));
 }
 
 // The book's two ammo entries, plus anything created as homebrew ammo. Used to
@@ -925,7 +973,13 @@ const BOOK_AMMO = ['Arrows', 'Crossbow bolts'];
 function allArmorAC() {
   if (_catalogCache.armor) return _catalogCache.armor;
   const book = (typeof AC_ARMOR !== 'undefined') ? AC_ARMOR : [];
-  return (_catalogCache.armor = book.concat(_homebrewItems.filter(i => i.kind === 'armor').map(i => ({
+  const dsArmor = _homebrewItems.filter(i => i.dsEquip && i.category === 'armor').map(i => ({
+    match: String(i.name || '').toLowerCase(),
+    // DarkSpace armor stores AC as a string, e.g. "11 + DEX mod" or "15".
+    base:  parseInt(String(i.ac || '').match(/\d+/)?.[0]) || 10,
+    dex:   /dex/i.test(String(i.ac || ''))
+  }));
+  return (_catalogCache.armor = book.concat(dsArmor).concat(_homebrewItems.filter(i => i.kind === 'armor').map(i => ({
     match: String(i.name || '').toLowerCase(),
     base:  parseInt(i.acBase) || 10,
     dex:   !!i.acDex
@@ -2039,7 +2093,7 @@ function addAttackRow() {
   const tbody = document.getElementById('attacks-body');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input type="text" class="atk-name" placeholder="Longsword, Fireball..."></td>
+    <td><input type="text" class="atk-name" placeholder="Vibro blade, Energy pistol..."></td>
     <td><input type="text" class="atk-bonus" style="width:100%;text-align:center;" placeholder="+0"></td>
     <td><input type="text" class="atk-stat" style="width:100%;text-align:center;" placeholder="STR" title="Stat used for this attack — STR, DEX, CON, INT, WIS or CHA"></td>
     <td><input type="text" class="atk-range" style="width:100%;text-align:center;" placeholder="Close" title="Range — Close, Near or Far"></td>
@@ -2412,7 +2466,7 @@ function addLog(label, result, detail, type='normal') {
   const div = document.createElement('div');
   div.className = 'log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
   const advLabel = advState==='advantage'?' <span style="color:#6dbf6d;font-size:8px;">▲ADV</span>'
-                 : advState==='disadvantage'?' <span style="color:#df6a6a;font-size:8px;">▼DIS</span>':'';
+                 : advState==='disadvantage'?' <span style="color:#8ab4e0;font-size:8px;">▼DIS</span>':'';
   div.innerHTML = `<div class="roll-label">${_logEsc(label)}${advLabel}</div><div class="roll-result">${_logIcon(result)}</div><div class="roll-detail">${_logEsc(detail)}</div>`;
   if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
   entries.insertBefore(div, entries.firstChild);
@@ -3858,7 +3912,7 @@ function exportPrintable() {
 
   <div class="fields">
     ${field('Background', V('f-background'))}
-    ${field('Deity', V('f-deity'))}
+    ${field('Motivation', V('f-alignment'))}
     ${field('XP', V('xp-current') + ' / ' + V('xp-next'))}
   </div>
 
@@ -3886,9 +3940,7 @@ function exportPrintable() {
       <section>
         <h2>Gear <span class="h2sub">${gear.filter(g=>!g.off).length} slots used</span></h2>
         <div class="coins">
-          <div class="coin"><b>GP</b> ${esc(V('coin-gp') || '0')}</div>
-          <div class="coin"><b>SP</b> ${esc(V('coin-sp') || '0')}</div>
-          <div class="coin"><b>CP</b> ${esc(V('coin-cp') || '0')}</div>
+          <div class="coin"><b>Credits</b> ${esc(V('coin-gp') || '0')} cr</div>
         </div>
         <ul class="gear">${gearRows}</ul>
         ${V('free-carry') ? `<div class="free"><b>Free to carry:</b> ${esc(V('free-carry'))}</div>` : ''}
@@ -4610,12 +4662,12 @@ function shopRender() {
       + '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3b82d6;">'
       +   _homebrewItems.length + ' custom item' + (_homebrewItems.length===1?'':'s')
       + '</div>'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:8px;color:#666;text-align:right;flex-shrink:0;">Created on the Gear page</div>'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:8px;color:#666;text-align:right;flex-shrink:0;">Created on the Equipment page</div>'
       + '</div>'
     : '';
   if(!shown.length) {
     body.innerHTML = hbBar + (_shopTab==='homebrew'
-      ? '<div style="padding:18px 4px;text-align:center;font-family:Montserrat,sans-serif;font-size:10px;color:#666;line-height:1.6;">No custom items available.<br>Create homebrew on the Gear page, or ask your GM to share theirs with the campaign.</div>'
+      ? '<div style="padding:18px 4px;text-align:center;font-family:Montserrat,sans-serif;font-size:10px;color:#666;line-height:1.6;">No custom items available.<br>Create homebrew on the Equipment page, or ask your GM to share theirs with the campaign.</div>'
       : '<div style="padding:20px 4px;text-align:center;font-family:Montserrat,sans-serif;font-size:10px;color:#666;line-height:1.6;">Nothing here a '+(cls||'character')+' can use.<br>Untick the box above to see everything.</div>');
     return;
   }
@@ -4655,13 +4707,22 @@ function shopGetItem(tab, i) {
 function homebrewShopItems() {
   return _homebrewItems.map(i => {
     const bits = [];
-    if(i.kind === 'weapon') bits.push([i.damage, i.range, i.props].filter(Boolean).join(', '));
+    if(i.dsEquip) {
+      // DarkSpace homebrew equipment (category + dmg/ac/cost, credits).
+      if(i.category === 'melee' || i.category === 'ranged' || i.category === 'explosive') {
+        bits.push([i.dmg, i.range, i.props].filter(Boolean).join(', '));
+      } else if(i.category === 'armor') {
+        bits.push(['AC ' + (i.ac || '—'), i.props].filter(Boolean).join(' · '));
+      } else {
+        bits.push([i.desc, i.props].filter(Boolean).join(' · '));
+      }
+    } else if(i.kind === 'weapon') bits.push([i.damage, i.range, i.props].filter(Boolean).join(', '));
     else if(i.kind === 'armor')  bits.push('AC ' + (i.acBase || 10) + (i.acDex ? ' + DEX' : ''));
     else if(i.kind === 'shield') bits.push('+' + (i.acBonus || 0) + ' AC');
     if(i.note) bits.push(i.note);
     return {
       name: i.name,
-      gp:   parseFloat(i.gp) || 0,
+      gp:   parseFloat(i.gp) || parseFloat(i.cost) || 0,
       qty:  i.qty || '',
       note: bits.filter(Boolean).join(' · '),
       _hb:  i
@@ -5090,7 +5151,7 @@ function spellShopRender() {
       + (_spellShopMode
           ? '<button onclick="inscribeSpell(\''+s.name.replace(/'/g,"\\'")+'\',\''+s.caster+'\')" style="padding:5px 10px;background:'+(_spellShopMode==='wand'?'#12283a':'#131f30')+';color:'+(_spellShopMode==='wand'?'#7ab8e0':'#3b82d6')+';border:1px solid '+(_spellShopMode==='wand'?'#2d5a7a':'#1e466f')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">'+(_spellShopMode==='wand'?'Wand':'Scroll')+' ▸</button>'
           : (isKnown
-              ? '<button onclick="unlearnSpell(\''+s.name.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Unlearn</button>'
+              ? '<button onclick="unlearnSpell(\''+s.name.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:#132a44;color:#9db8de;border:1px solid #274a7a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Unlearn</button>'
               : '<button onclick="learnSpell(\''+s.name.replace(/'/g,"\\'")+'\',\''+s.caster+'\')" style="padding:5px 10px;background:#2a1a3a;color:#b89ae0;border:1px solid #5a3a8a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Learn</button>'))
       + '</div>';
   }).join('');
@@ -5202,8 +5263,13 @@ function openRules() {
   let rows = (typeof SD_QUICK_RULES !== 'undefined' && Array.isArray(SD_QUICK_RULES)) ? SD_QUICK_RULES : [];
   // While HeroDark mode is on, prepend its rules to the panel.
   if(typeof heroDarkOn === 'function' && heroDarkOn() && typeof HERODARK_QUICK_RULES !== 'undefined') rows = HERODARK_QUICK_RULES.concat(rows);
-  // While DarkSpace mode is on, prepend its rules to the panel.
-  if(typeof darkSpaceOn === 'function' && darkSpaceOn() && typeof window.DARKSPACE !== 'undefined' && Array.isArray(window.DARKSPACE.quickRules)) rows = window.DARKSPACE.quickRules.concat(rows);
+  // While DarkSpace mode is on, drop the fantasy-only Shadowdark rows (spells,
+  // gold coins) and prepend the DarkSpace rules instead — the rest are neutral.
+  if(typeof darkSpaceOn === 'function' && darkSpaceOn()) {
+    const DROP = new Set(['Spellcasting checks', 'Spell criticals', 'Focus spells', 'Scrolls & wands', 'Coins & free slots']);
+    rows = rows.filter(r => !DROP.has(r && r.title));
+    if(typeof window.DARKSPACE !== 'undefined' && Array.isArray(window.DARKSPACE.quickRules)) rows = window.DARKSPACE.quickRules.concat(rows);
+  }
   body.innerHTML = rows.length
     ? rows.map(r => '<h4>' + _qrEsc(r.title) + (r.page ? ' <span style="font-weight:400;color:#666;font-size:10px;">p.' + _qrEsc(String(r.page)) + '</span>' : '') + '</h4><p>' + _qrEsc(r.text) + '</p>').join('')
     : '<p>Rules data not loaded.</p>';
@@ -5358,7 +5424,7 @@ function campaignRenderModal() {
       + '<div style="font-family:Montserrat,sans-serif;font-size:10px;color:#888;margin-top:4px;">Join code: <b style="color:#eee;font-size:14px;letter-spacing:.2em;">'+_campaign.code+'</b></div>'
       + '<div style="font-family:Montserrat,sans-serif;font-size:9px;color:#666;margin-top:4px;">Share this code with your table.</div>'
       + '</div>'
-      + '<button onclick="campaignLeave()" style="'+btnStyle+'background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;width:100%;">Leave Campaign</button>';
+      + '<button onclick="campaignLeave()" style="'+btnStyle+'background:#132a44;color:#9db8de;border:1px solid #274a7a;width:100%;">Leave Campaign</button>';
   } else {
     body.innerHTML =
       '<p class="ccw-hint">Enter a join code from your GM to connect this sheet. Rolls will appear in everyone\'s roll logs. Campaigns are created on the Campaigns page.</p>'
@@ -5367,7 +5433,7 @@ function campaignRenderModal() {
       + '<div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="'+inputStyle+'flex:1;text-transform:uppercase;letter-spacing:.15em;">'
       + '<button onclick="campaignJoin()" style="'+btnStyle+'background:#1a5a7a;color:#fff;flex-shrink:0;">Join</button></div>'
       + '</div>'
-      + '<div id="campaign-error" style="font-family:Montserrat,sans-serif;font-size:10px;color:#df6a6a;margin-top:10px;"></div>';
+      + '<div id="campaign-error" style="font-family:Montserrat,sans-serif;font-size:10px;color:#8ab4e0;margin-top:10px;"></div>';
   }
 }
 
@@ -6261,6 +6327,53 @@ function injectHomebrewContent(rows) {
   }
 }
 
+// DarkSpace homebrew → the wizard's DARKSPACE pools. Species / archetypes /
+// backgrounds / motivations authored as homebrew become selectable in the
+// DarkSpace character wizard. The book arrays are snapshotted once, so every
+// sync rebuilds the pools cleanly (book + current homebrew) with no duplicates.
+var _dsBookPools = null;
+function injectDarkSpaceHomebrew(rows) {
+  const D = (typeof window !== 'undefined' && window.DARKSPACE) ? window.DARKSPACE : null;
+  if(!D) return;
+  if(!_dsBookPools) {
+    _dsBookPools = {
+      species:     (D.species     || []).slice(),
+      archetypes:  (D.archetypes  || []).slice(),
+      backgrounds: (D.backgrounds || []).slice(),
+      motivations: (D.motivations || []).slice(),
+    };
+  }
+  const seen = { sp:new Set(), ar:new Set(), bg:new Set(), mo:new Set() };
+  _dsBookPools.species.forEach(x => seen.sp.add(String(x.name||'').toLowerCase()));
+  _dsBookPools.archetypes.forEach(x => seen.ar.add(String(x.name||'').toLowerCase()));
+  _dsBookPools.backgrounds.forEach(x => seen.bg.add(String(x.name||'').toLowerCase()));
+  _dsBookPools.motivations.forEach(x => seen.mo.add(String(x.name||'').toLowerCase()));
+  const hbSp=[], hbAr=[], hbBg=[], hbMo=[];
+  let nSp = 900, nBg = 900;   // synthetic ids, clear of the book's 1–20 range
+  (rows || []).forEach(row => {
+    if(!row || !row.data) return;
+    const d = row.data, nm = String(d.name||'').trim(); if(!nm) return;
+    const key = nm.toLowerCase();
+    if(row.type === 'ds-species') {
+      if(seen.sp.has(key)) return; seen.sp.add(key);
+      hbSp.push({ n: ++nSp, name: nm, text: String(d.text||''), _hb:true });
+    } else if(row.type === 'ds-archetype') {
+      if(seen.ar.has(key)) return; seen.ar.add(key);
+      hbAr.push(Object.assign({}, d, { _hb:true }));
+    } else if(row.type === 'ds-background') {
+      if(seen.bg.has(key)) return; seen.bg.add(key);
+      hbBg.push({ n: ++nBg, name: nm, text: String(d.text||''), _hb:true });
+    } else if(row.type === 'ds-motivation') {
+      if(seen.mo.has(key)) return; seen.mo.add(key);
+      hbMo.push(Object.assign({}, d, { _hb:true }));
+    }
+  });
+  D.species     = _dsBookPools.species.concat(hbSp);
+  D.archetypes  = _dsBookPools.archetypes.concat(hbAr);
+  D.backgrounds = _dsBookPools.backgrounds.concat(hbBg);
+  D.motivations = _dsBookPools.motivations.concat(hbMo);
+}
+
 // Fire-and-forget; a failed fetch leaves the sheet as it was.
 async function syncSharedHomebrew() {
   let url = '/api/homebrew';
@@ -6291,6 +6404,14 @@ async function syncSharedHomebrew() {
       if(haveItem.has(nm)) continue;
       haveItem.add(nm);
       nextItems.push(Object.assign({}, row.data));
+    } else if(row.type === 'ds-equipment') {
+      // DarkSpace homebrew gear/weapons/armor. Tag with dsEquip so the shop,
+      // allWeapons() and allArmorAC() read its DS shape (category/dmg/ac/cost)
+      // rather than the Shadowdark shape (kind/damage/acBase/gp).
+      if(haveItem.has(nm)) continue;
+      haveItem.add(nm);
+      const d = row.data;
+      nextItems.push(Object.assign({}, d, { dsEquip:true, gp: parseFloat(d.cost) || 0 }));
     }
   }
 
@@ -6301,8 +6422,12 @@ async function syncSharedHomebrew() {
   // Convert homebrew classes/ancestries/backgrounds into the wizard's reference
   // shapes so they're selectable and apply their core mechanics.
   try { injectHomebrewContent(items); } catch(e) {}
+  // DarkSpace: fold homebrew species/archetypes/backgrounds/motivations into the
+  // DARKSPACE pools the DarkSpace wizard reads, so they're selectable there too.
+  try { if(typeof darkSpaceOn === 'function' && darkSpaceOn()) injectDarkSpaceHomebrew(items); } catch(e) {}
   // If the creation wizard is open, redraw it so injected content appears.
   try { if(typeof _ccw !== 'undefined' && _ccw && typeof ccwRender === 'function') ccwRender(); } catch(e) {}
+  try { if(typeof _dsw !== 'undefined' && _dsw && typeof dswRender === 'function') dswRender(); } catch(e) {}
 
   // Refresh anything that reads these lists. Spell pickers read allSpells() on
   // open, so they pick up new entries automatically; the shop and equipped-item
