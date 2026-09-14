@@ -41,12 +41,10 @@ const SD_REFERENCE: { href: string; label: string }[] = [
 // DarkSpace reference pages — science fiction for Shadowdark. Read DarkSpace data
 // and lead the toolbar on the DarkSpace tab only.
 const DS_REFERENCE: { href: string; label: string }[] = [
-  { href: "/darkspace/species", label: "Species" },
+  { href: "/darkspace/options", label: "Options" },
   { href: "/darkspace/archetypes", label: "Archetypes" },
-  { href: "/darkspace/backgrounds", label: "Backgrounds" },
   { href: "/darkspace/equipment", label: "Equipment" },
   { href: "/darkspace/starships", label: "Starships" },
-  { href: "/darkspace/hacking", label: "Hacking" },
   { href: "/darkspace/bestiary", label: "Bestiary" },
 ];
 

@@ -529,7 +529,6 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
         <button class="tab-btn" data-tab="triad" onclick="setTab('triad')">Powers</button>
-        <button class="tab-btn" data-tab="interface" onclick="setTab('interface')">🖥️ Interface</button>
         <button class="tab-btn" data-tab="ship" onclick="setTab('ship')">🚀 Ship</button>
       </div>
 
@@ -571,12 +570,6 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           </div>
         </div>
         <div class="spells-list" id="spells-list"></div>
-      </div>
-
-      <!-- INTERFACE TAB (Hacking — the Spacer's deck/rig; ACC/CTL/NET) -->
-      <div class="tab-panel" id="tab-interface">
-        <div class="sl"><span>The Interface</span><span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#5a8595;">Attack = ACC · HP = 10 + CTL · AC = 11 + NET</span></div>
-        <div id="iface-body" style="padding:8px 4px;"></div>
       </div>
 
       <!-- SHIP TAB (Starship — built like a Spacer: Stats, HP, AC, systems & weapons) -->
@@ -1267,7 +1260,7 @@ function onStatChange(id) {
 
 // ═══ TABS (Spells / Talents / Gear) ═════════════════════════════════════════
 var _tab = 'gear';
-const TABS = ['talents','gear','triad','interface','ship'];
+const TABS = ['talents','gear','triad','ship'];
 function setTab(name){
   if(TABS.indexOf(name) < 0) name = 'gear';
   // Leaving the Ship tab persists ship edits (ship state round-trips in the save).
@@ -1280,7 +1273,6 @@ function setTab(name){
   // Render the ship / triad UI on demand when their tab opens.
   if(name === 'ship' && typeof renderShip === 'function') { try{ renderShip(); }catch(e){} }
   if(name === 'triad' && typeof renderTriad === 'function') { try{ renderTriad(); }catch(e){} }
-  if(name === 'interface' && typeof renderInterface === 'function') { try{ renderInterface(); }catch(e){} }
 }
 function setDefaultTab(){ setTab(_tab || 'gear'); }
 
@@ -5663,8 +5655,8 @@ function openRules() {
 function closeRules() { document.getElementById('rules-overlay').style.display = 'none'; }
 
 // ═══ DarkSpace Reference ════════════════════════════════════════════════════
-let _dsRefTab = 'Species';
-function openDarkSpaceRef(){ _dsRefTab = 'Species'; renderDarkSpaceRef(); document.getElementById('dsref-overlay').style.display = 'flex'; }
+let _dsRefTab = 'Traits';
+function openDarkSpaceRef(){ _dsRefTab = 'Traits'; renderDarkSpaceRef(); document.getElementById('dsref-overlay').style.display = 'flex'; }
 function closeDarkSpaceRef(){ document.getElementById('dsref-overlay').style.display = 'none'; }
 window.openDarkSpaceRef = openDarkSpaceRef;
 window.closeDarkSpaceRef = closeDarkSpaceRef;
@@ -5673,7 +5665,7 @@ window._dsRefTabTo = _dsRefTabTo;
 function renderDarkSpaceRef(){
   const DS = window.DARKSPACE; if(!DS) return;
   const E = t => _qrEsc(t);
-  const TABS = ['Species','Archetypes','Backgrounds','Motivations','The Triad','Corruption','Gear','Weapons','Armor','Advanced Tech','Starships','Hacking'];
+  const TABS = ['Traits','Archetypes','Backgrounds','Motivations','The Triad','Corruption','Gear','Weapons','Armor','Advanced Tech','Starships'];
   const tabsEl = document.getElementById('dsref-tabs');
   tabsEl.innerHTML = TABS.map(t =>
     '<button onclick="_dsRefTabTo('+JSON.stringify(t).replace(/"/g,'&quot;')+')" style="padding:5px 10px;border-radius:5px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.05em;'+
@@ -5687,7 +5679,7 @@ function renderDarkSpaceRef(){
   const table = (head, rows) => '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'+tblHead(head)+rows.join('')+'</table></div>';
   let h = '';
   switch(_dsRefTab){
-    case 'Species':
+    case 'Traits':
       h += P('Roll d20 or choose a Species Trait. Humans/analogues get Ambitious (roll twice on your Archetype talent table at 1st level). You may also use any Shadowdark ancestry.');
       h += table(['Trait','Effect'], DS.species.map(s=>tblRow([s.name, s.text])));
       h += H4('Humans / Analogues'); h += P(DS.humanNote);
@@ -5786,23 +5778,6 @@ function renderDarkSpaceRef(){
       (DS.ship.commandCrew||[]).forEach(function(r){ h += P(r.role+'. '+r.text); });
       h += H4('Stock Classes');
       DS.ship.stockClasses.forEach(c=> h += P(c.name+': '+c.text));
-      break;
-    case 'Hacking':
-      if(DS.hacking){
-        var hk = DS.hacking;
-        h += P(hk.intro);
-        h += H4('The Interface'); h += P(hk.interface.intro);
-        (hk.interface.functions||[]).forEach(function(f){ h += P(f.name+' ('+f.key+'). '+f.text); });
-        h += P(hk.interface.derived);
-        h += H4('Hacking Actions'); h += P(hk.actions.intro);
-        h += table(['Action','Function'], (hk.actions.list||[]).map(function(a){return tblRow([a.action, a.stat]);}));
-        h += H4('Hacking Dice Rolls');
-        h += table(['Difficulty','Die'], (hk.diceRolls||[]).map(function(d){return tblRow([d.dc, d.die]);}));
-        h += H4('Rules of Engagement');
-        (hk.rules||[]).forEach(function(r){ h += P(r.title+'. '+r.text); });
-        h += H4('Programs & Malware');
-        (hk.programs||[]).forEach(function(p){ h += H4(p.name, p.kind+(p.persistence?' · Persistence':'')); h += P(p.flavor); h += P('Deploy: '+p.deploy+' · Effect: '+p.effect); });
-      }
       break;
   }
   body.innerHTML = h;
