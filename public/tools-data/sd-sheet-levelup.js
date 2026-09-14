@@ -769,28 +769,27 @@ function lvlApply() {
 }
 
 // ── Swap Create/Level Up button based on sheet state ──────────────────────
+// Shadowdark routing only. A sheet variant (e.g. DarkSpace) can install its own
+// routing by reassigning window.updateHeaderButton — the listeners below call it
+// through window so an override takes effect.
 function updateHeaderButton() {
   const btn = document.getElementById('hdr-create-btn');
   if(!btn) return;
   const hasChar = (document.getElementById('f-name')?.value.trim()) && (document.getElementById('f-class')?.value.trim());
   if(hasChar) {
     btn.textContent = 'Level'; btn.title = 'Level up'; btn.setAttribute('aria-label', 'Level up');
-    // DarkSpace Spacers level up on their archetype talent tables — route to the
-    // dedicated DarkSpace level-up rather than the Shadowdark class wizard.
-    btn.onclick = (typeof darkSpaceOn === 'function' && darkSpaceOn() && typeof startDarkSpaceLevelUp === 'function')
-      ? startDarkSpaceLevelUp : startLevelUp;
+    btn.onclick = startLevelUp;
   } else {
     btn.textContent = 'Create'; btn.title = 'Create character'; btn.setAttribute('aria-label', 'Create character');
-    // On the DarkSpace sheet, Create launches the DarkSpace builder directly.
-    btn.onclick = (typeof darkSpaceOn === 'function' && darkSpaceOn() && typeof startDarkSpaceWizard === 'function')
-      ? startDarkSpaceWizard : startCharWizard;
+    btn.onclick = startCharWizard;
   }
 }
+window.updateHeaderButton = updateHeaderButton;
 
 // Init: swap button based on existing character + watch for changes
 updateHeaderButton();
-document.getElementById('f-name')?.addEventListener('input', updateHeaderButton);
-document.getElementById('f-class')?.addEventListener('input', updateHeaderButton);
+document.getElementById('f-name')?.addEventListener('input', () => window.updateHeaderButton());
+document.getElementById('f-class')?.addEventListener('input', () => window.updateHeaderButton());
 document.getElementById('f-level')?.addEventListener('input', refreshScalingHeals);
 document.getElementById('f-level')?.addEventListener('input', refreshXpNext);
 refreshXpNext();   // populate on first load

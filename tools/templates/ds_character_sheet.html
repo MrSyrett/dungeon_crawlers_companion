@@ -1070,31 +1070,20 @@ let _itemBonusAtk   = { meleeAtk:0, meleeDmg:0, rangedAtk:0, rangedDmg:0 };
 let _itemBonusApplied = { hp:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 };
 let _applyingItemBonuses = false;   // re-entrancy guard
 
-// ── HeroDark mode (Shadowdark option, set at character creation) ─────────────
-// The HeroDark hack: Max HP at level 1, choose talents at level-up, an even-level
-// Skill Talent, unlimited Luck, a Luck point on any natural 1 or 20, a 3-Action
-// turn, and Dying (not unconscious) at 0 HP — 1 action + disadvantage on all
-// checks. Some of these are already how the sheet works (Luck is a free number,
-// talents can be chosen); the rest are automated below or listed in the ⚔ panel.
+// This is the DarkSpace sheet — it is always in DarkSpace mode. (It shares some
+// engine files with the Shadowdark sheet, so darkSpaceOn() stays defined for
+// those files to branch on; here it is simply always true.)
 function defaultOptions(){ return { darkSpace:true }; }
 let options = defaultOptions();
-function heroDarkOn(){ return !!(options && options.heroDark); }
-window.heroDarkOn = heroDarkOn;
-function darkSpaceOn(){ return !!(options && options.darkSpace); }
+function darkSpaceOn(){ return true; }
 window.darkSpaceOn = darkSpaceOn;
 
-// DarkSpace mode relabels the header fields to the sci-fi terminology and hides
-// the Deity field (Motivation covers alignment/deity). Called after any load and
-// after the DarkSpace builder finishes. Reverting to standard Shadowdark restores
-// the original labels.
+// Set the DarkSpace header labels/placeholders and arrange the header fields.
+// Row 1: Name, Species, Archetype, Background · Row 2: Motivation, Ship, Role, Level.
+// (Named syncModeChrome for parity with the shared engine, which calls it by name.)
 function syncModeChrome(){
-  // Relabel strings are hard-coded, so this does not depend on the DARKSPACE data
-  // module (which loads from a later <script src>, after this runs at init).
-  const on = darkSpaceOn();
   const setLbl = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent = txt; };
   const setPh  = (id, txt) => { const el=document.getElementById(id); if(el) el.placeholder = txt; };
-  // Arrange the header fields for the active mode by moving them into the two
-  // rows in the desired order and hiding the fields that mode doesn't use.
   const row1 = document.getElementById('hdr-row1'), row2 = document.getElementById('hdr-row2');
   const F = id => document.getElementById(id);
   const arrange = (r1ids, r2ids, hideIds) => {
@@ -1103,30 +1092,15 @@ function syncModeChrome(){
     r2ids.forEach(id => { const el=F(id); if(el){ el.style.display=''; row2.appendChild(el); } });
     hideIds.forEach(id => { const el=F(id); if(el) el.style.display='none'; });
   };
-  if(on){
-    setLbl('lbl-ancestry','Species');   setPh('f-ancestry','Species / trait');
-    setLbl('lbl-class','Archetype');     setPh('f-class','Strong, Quick...');
-    setLbl('lbl-alignment','Motivation');setPh('f-alignment','Survivor / Vile / Virtuous');
-    setLbl('lbl-background','Background');
-    setLbl('coin-gp-lbl','cr');
-    const sb = document.getElementById('hdr-ship-btn'); if(sb) sb.style.display = '';
-    // Row 1: Name, Species, Archetype, Background · Row 2: Motivation, Ship, Role, Level
-    arrange(['hf-name','hf-species','hf-archetype','hf-background'],
-            ['hf-motivation','hf-ship','hf-role','hf-level'],
-            ['hf-title','hdr-deity-field']);
-  } else {
-    setLbl('lbl-ancestry','Ancestry');   setPh('f-ancestry','Elf, Dwarf...');
-    setLbl('lbl-class','Class');          setPh('f-class','Fighter, Wizard...');
-    setLbl('lbl-title','Title');          setPh('f-title','Apprentice...');
-    setLbl('lbl-alignment','Alignment');  setPh('f-alignment','Lawful / Neutral / Chaotic');
-    setLbl('lbl-background','Background');
-    setLbl('coin-gp-lbl','GP');
-    const sb = document.getElementById('hdr-ship-btn'); if(sb) sb.style.display = 'none';
-    // Row 1: Name, Ancestry, Class, Title · Row 2: Alignment, Background, Deity, Level
-    arrange(['hf-name','hf-species','hf-archetype','hf-title'],
-            ['hf-motivation','hf-background','hdr-deity-field','hf-level'],
-            ['hf-ship','hf-role']);
-  }
+  setLbl('lbl-ancestry','Species');   setPh('f-ancestry','Species / trait');
+  setLbl('lbl-class','Archetype');     setPh('f-class','Strong, Quick...');
+  setLbl('lbl-alignment','Motivation');setPh('f-alignment','Survivor / Vile / Virtuous');
+  setLbl('lbl-background','Background');
+  setLbl('coin-gp-lbl','cr');
+  const sb = document.getElementById('hdr-ship-btn'); if(sb) sb.style.display = '';
+  arrange(['hf-name','hf-species','hf-archetype','hf-background'],
+          ['hf-motivation','hf-ship','hf-role','hf-level'],
+          ['hf-title','hdr-deity-field']);
 }
 window.syncModeChrome = syncModeChrome;
 
@@ -2690,32 +2664,7 @@ function rollWithAdv(sides) {
     ? {result:Math.max(r1,r2), detail:`adv[${r1},${r2}]→${Math.max(r1,r2)}`}
     : {result:Math.min(r1,r2), detail:`dis[${r1},${r2}]→${Math.min(r1,r2)}`};
 }
-// HeroDark: gain a Luck point on any natural 1 or 20 from a d20 roll.
-function heroDarkLuckOnNat(natRoll, source){
-  if(!heroDarkOn() || (natRoll !== 1 && natRoll !== 20)) return;
-  const el = document.getElementById('lk-val');
-  if(el) el.value = (parseInt(el.value) || 0) + 1;
-  addLog('Luck +1', '✦', 'HeroDark: natural ' + natRoll + (source ? ' on ' + source : '') + ' — gain a Luck point', natRoll === 20 ? 'crit' : 'fumble');
-  saveSheet();
-}
-// HeroDark: dropping to 0 HP makes you Dying (not unconscious). Signalled by the
-// Dying status tracker (which drives the disadvantage above); cleared when healed.
-function onHPChange(){
-  saveSheet();
-  if(!heroDarkOn()) return;
-  const cur = parseInt(document.getElementById('hp-current')?.value);
-  const at0 = !isNaN(cur) && cur <= 0;
-  if(at0 && !isDyingActive()) addTracker('Dying');
-  else if(!at0 && isDyingActive()) removeTracker('Dying');
-}
-// HeroDark rules — folded into the Quick Rules panel while HeroDark mode is on.
-const HERODARK_QUICK_RULES = [
-  { title: '⚔ HeroDark — Hit Points & Talents', text: 'You begin with maximum HP at level 1. At each level-up you choose your talent rather than rolling it.' },
-  { title: '⚔ HeroDark — Skill Talents (even levels)', text: 'At every even level you also gain a Skill Talent: learn to use a new weapon or armor (added to your proficiencies), learn a new language, or gain a Skill — a write-in subject that grants advantage on rolls pertaining to it.' },
-  { title: '⚔ HeroDark — Luck', text: 'You can hold an unlimited number of Luck points, and you gain a Luck point whenever you roll a natural 1 or a natural 20 on a d20 (check, attack, or spellcast). The sheet adds it automatically.' },
-  { title: '⚔ HeroDark — Actions', text: 'You have 2 actions on your turn as normal. You may forgo your movement to take a second attack or cast a spell that turn — but that extra action is made with disadvantage.' },
-  { title: '⚔ HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all rolls until you are healed above 0 HP. The sheet adds the Dying status automatically (it drives the disadvantage); clear it by healing. The Exhausted status likewise applies −2 to your rolls while active.' },
-];
+function onHPChange(){ saveSheet(); }
 function d(s){return Math.floor(Math.random()*s)+1;}
 function parseMod(v){if(!v)return 0;const n=parseInt((v+'').replace(/\s/g,''));return isNaN(n)?0:n;}
 
@@ -2783,7 +2732,6 @@ function rollStat(id, name) {
   const base = advDetail||`d20(${roll})`;
   addLog(`${name} Check`+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
     `${base} + Mod(${fmtMod(statMod)})${exh?' '+fmtMod(exh)+' exhausted':''} = ${total}`, type);
-  heroDarkLuckOnNat(roll, name + ' check');
 }
 
 // Extra spell lists a caster opted into (beyond their class's own list). Saved
@@ -3025,7 +2973,6 @@ function rollAttack(btn) {
 
   addLog(`${name}`+(hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''),
     resultStr, detailStr, type);
-  heroDarkLuckOnNat(hitRoll, name);
 }
 
 function rollSpell(btn) {
@@ -3105,7 +3052,6 @@ function rollSpell(btn) {
     + (dmgBreakdown ? `  |  ${dmgBreakdown}` : '');
 
   addLog(`${name} (Tier ${spellLevel})${isAdvSpell?' ▲':''}`, resultStr, detailStr, type);
-  heroDarkLuckOnNat(roll, name);
 
   // ── Scroll / Wand consumption ── (only when Auto is on; off = track by hand)
   if(source && _autoConsume) {
@@ -3737,7 +3683,7 @@ function _applySDData(d){
   // bonuses (adds the HP/ability deltas back on top of the loaded base values).
   if(typeof applyItemBonuses === 'function') applyItemBonuses();
   renderTalentsView();          // restore the styled Talents view after a load
-  // HeroDark / DarkSpace options
+  // DarkSpace options
   options = Object.assign(defaultOptions(), (d._sheet && d._sheet.options) || {});
   // DarkSpace starship state (round-trips with the character save).
   window._dsShipState = (d._sheet && d._sheet.ship) ? d._sheet.ship : null;
@@ -4358,7 +4304,7 @@ buildAttacks();
 buildSpells();
 buildGear();
 autoLoad();
-if(typeof syncModeChrome === 'function') syncModeChrome();   // apply DarkSpace/HeroDark chrome for the loaded character
+if(typeof syncModeChrome === 'function') syncModeChrome();   // apply DarkSpace chrome for the loaded character
 setDefaultTab();   // activate the saved (or default) main-column tab
 ensureStrikesAttack();   // blank sheets get the baseline unarmed attack too
 ensurePseudopodAttack(); // Wyrdling natural attack (no-op for other classes)
@@ -5580,11 +5526,9 @@ const _qrEsc = t => String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</
 function openRules() {
   const body = document.getElementById('rules-body');
   let rows = (typeof SD_QUICK_RULES !== 'undefined' && Array.isArray(SD_QUICK_RULES)) ? SD_QUICK_RULES : [];
-  // While HeroDark mode is on, prepend its rules to the panel.
-  if(typeof heroDarkOn === 'function' && heroDarkOn() && typeof HERODARK_QUICK_RULES !== 'undefined') rows = HERODARK_QUICK_RULES.concat(rows);
-  // While DarkSpace mode is on, drop the fantasy-only Shadowdark rows (spells,
-  // gold coins) and prepend the DarkSpace rules instead — the rest are neutral.
-  if(typeof darkSpaceOn === 'function' && darkSpaceOn()) {
+  // Drop the fantasy-only Shadowdark rows (spells, gold coins) and prepend the
+  // DarkSpace rules instead — the rest are neutral.
+  {
     const DROP = new Set(['Spellcasting checks', 'Spell criticals', 'Focus spells', 'Scrolls & wands', 'Coins & free slots']);
     rows = rows.filter(r => !DROP.has(r && r.title));
     if(typeof window.DARKSPACE !== 'undefined' && Array.isArray(window.DARKSPACE.quickRules)) rows = window.DARKSPACE.quickRules.concat(rows);
@@ -6888,5 +6832,7 @@ function campaignRestore(saved) {
 </script>
 <!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (injects CSS + audio + 2D/3D engine). Extracted from the per-sheet inline copy. -->
 <script src="/tools-data/dice-anim.js"></script>
+<!-- DarkSpace header-button routing — overrides the shared (Shadowdark) updateHeaderButton. Loaded last. -->
+<script src="/tools-data/ds-header-button.js"></script>
 </body>
 </html>
