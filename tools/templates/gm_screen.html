@@ -1447,11 +1447,13 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     <select class="gm-sys-select" id="gm-system-toggle" title="Game system — hides the other system's generators and bestiary" aria-label="Game system" onchange="setGmSystem(this.value)">
       <option value="DCC">DCC</option>
       <option value="SD">Shadowdark</option>
+      <option value="DS">DarkSpace</option>
       <option value="ACE">ACE!</option>
       <option value="KOB">Kids on Bikes</option>
       <option value="NIM">Nimble</option>
       <option value="SW">Star Wars</option>
       <option value="DND">D&amp;D</option>
+      <option value="D62E">D6 System 2e</option>
     </select>
     <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
     <a class="btn small ghost vtt-launch" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg> VTT</a>
@@ -1486,12 +1488,14 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
 (function () {
   const SYS_GENS = {
     SD:  ['adventure','npc','rival','monster','dungeon','encounter','shop','sdfoundloot'],
+    DS:  ['dsmonster','dstreasure'],
     DCC: ['dccnpc','dccneighborhood','dccmonster','dccencounter','dccloot','dccitem'],
     ACE: ['acemonster','acetreasure'],
     KOB: [],
     NIM: ['nimmonster','nimtreasure'],
     SW:  ['swmonster','swtreasure'],
     DND: ['adventure','npc','dungeon','encounter','shop','dndmonster','dndtreasure'],
+    D62E:['d62emonster','d62etreasure'],
   };
   const SYS_KEYS = Object.keys(SYS_GENS);
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
@@ -2344,6 +2348,8 @@ GMScenes.renderPins();
         <option value="dccencounter">DCC Encounter</option>
         <option value="dccloot">DCC Loot Box</option>
         <option value="dccitem">DCC Item</option>
+        <option value="dsmonster">DarkSpace Denizen</option>
+        <option value="dstreasure">DarkSpace Salvage</option>
         <option value="acemonster">ACE! Monsters</option>
         <option value="acetreasure">ACE! Gear Drop</option>
         <option value="nimmonster">Nimble Monster</option>
@@ -2352,6 +2358,8 @@ GMScenes.renderPins();
         <option value="swtreasure">Star Wars Gear Drop</option>
         <option value="dndmonster">D&amp;D Monster</option>
         <option value="dndtreasure">D&amp;D Treasure</option>
+        <option value="d62emonster">D6 2e Creature</option>
+        <option value="d62etreasure">D6 2e Gear Drop</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -2765,6 +2773,38 @@ GMScenes.renderPins();
         <div class="gen-results" id="gen-dndmon-group-results"></div>
       </div>
 
+      <!-- DARKSPACE DENIZEN PANEL (bestiary draw; cards send to the tracker) -->
+      <div class="gen-panel" data-panel="dsmonster">
+        <div class="gen-controls">
+          <label class="gen-label">Tier
+            <select class="gen-select" id="gen-dsmon-type"><option value="">Any Tier</option></select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-dsmon-type-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-dsmon-type-results"></div>
+      </div>
+
+      <!-- D6 SYSTEM 2e CREATURE PANEL (bestiary draw; cards send to the tracker) -->
+      <div class="gen-panel" data-panel="d62emonster">
+        <div class="gen-controls">
+          <label class="gen-label">Kind
+            <select class="gen-select" id="gen-d62emon-kind"><option value="">Any Kind</option></select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-d62emon-kind-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-d62emon-kind-results"></div>
+      </div>
+
       <!-- ACE! TREASURE PANEL (random spread + hand-picked items from the gear list; sends a claimable drop) -->
       <div class="gen-panel xs-treasure" data-panel="acetreasure" data-sys="ace">
         <div class="ai-scroll">
@@ -2874,6 +2914,62 @@ GMScenes.renderPins();
             <div class="ai-row">
               <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
               <button class="btn small ghost xs-tr-credits" type="button" title="Add a coin stash">💰 Coins</button>
+            </div>
+            <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
+            <div class="ai-status xs-tr-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DARKSPACE SALVAGE PANEL (random spread + hand-picked gear from the DarkSpace lists; sends a claimable drop) -->
+      <div class="gen-panel xs-treasure" data-panel="dstreasure" data-sys="ds">
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Salvage</div>
+            <input type="text" class="ai-input xs-tr-name" placeholder="Where it's found (e.g. Derelict cargo hold)">
+            <div class="ai-row">
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="gear">Gear</option><option value="credits">Credits only</option></select>
+              <select class="ai-select xs-tr-count" title="How many items to roll">
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="5">5</option>
+              </select>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a spread from the DarkSpace gear list">🎲 Roll</button>
+            </div>
+            <div class="ai-cat-filters xs-tr-filters"></div>
+            <input type="text" class="ai-input xs-tr-search" placeholder="Search gear to add…">
+            <div class="ai-cat-results xs-tr-results"></div>
+            <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
+            <div class="ai-row">
+              <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
+              <button class="btn small ghost xs-tr-credits" type="button" title="Add a credit stash">💰 Credits</button>
+            </div>
+            <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
+            <div class="ai-status xs-tr-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- D6 SYSTEM 2e GEAR DROP PANEL (random spread + hand-picked gear from the D6 2e equipment list; sends a claimable drop) -->
+      <div class="gen-panel xs-treasure" data-panel="d62etreasure" data-sys="d62e">
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Gear Drop</div>
+            <input type="text" class="ai-input xs-tr-name" placeholder="Where it's found (e.g. Abandoned outpost)">
+            <div class="ai-row">
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="gear">Gear</option><option value="credits">Credits only</option></select>
+              <select class="ai-select xs-tr-count" title="How many items to roll">
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="5">5</option>
+              </select>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a spread from the D6 2e equipment list">🎲 Roll</button>
+            </div>
+            <div class="ai-cat-filters xs-tr-filters"></div>
+            <input type="text" class="ai-input xs-tr-search" placeholder="Search gear to add…">
+            <div class="ai-cat-results xs-tr-results"></div>
+            <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
+            <div class="ai-row">
+              <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
+              <button class="btn small ghost xs-tr-credits" type="button" title="Add a credit stash">💰 Credits</button>
             </div>
             <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
             <div class="ai-status xs-tr-status"></div>
@@ -4220,7 +4316,7 @@ function init_trackers(root) {
     const sum = xsMonSummary(src, m);
     // ACE Health is a row of clickable pips (like the ID card); Star Wars has
     // no HP at all — combatants use the same wound track as the players.
-    const hpMode = src === 'ace' ? 'ace' : src === 'sw' ? 'sw' : 'standard';
+    const hpMode = src === 'ace' ? 'ace' : (src === 'sw' || src === 'd62e') ? 'sw' : 'standard';
     return {
       id: nextId++, type: 'npc',
       name: m.name || 'Monster',
@@ -4714,7 +4810,7 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd'];
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'ds', 'd62e'];
   function sysToSource(sys) { sys = String(sys || 'DCC').toLowerCase(); return sys === 'sd' ? 'sd' : XS_SOURCES.indexOf(sys) >= 0 ? sys : 'dcc'; }
   let pickerSource = (window.GM_SYSTEM === 'SD') ? 'sd' : XS_SOURCES.indexOf(String(window.GM_SYSTEM || '').toLowerCase()) >= 0 ? String(window.GM_SYSTEM).toLowerCase() : (dccBestiary().length ? 'dcc' : 'sd');
 
@@ -7117,10 +7213,22 @@ function xsBestiary(src) {
   if(src === 'nim') return ok(typeof NIMBLE_MONSTERS !== 'undefined' ? NIMBLE_MONSTERS : undefined);
   if(src === 'sw')  return ok(typeof SW_CHARACTERS !== 'undefined' ? SW_CHARACTERS : undefined);
   if(src === 'dnd') return ok(typeof DND_MONSTERS !== 'undefined' ? DND_MONSTERS : undefined);
+  if(src === 'ds')  return ok(typeof DS_MONSTERS !== 'undefined' ? DS_MONSTERS : undefined);
+  if(src === 'd62e') return ok(typeof D62E_CREATURES !== 'undefined' ? D62E_CREATURES : undefined);
   return [];
 }
-// The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D group).
-function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : (m.group || ''); }
+// DarkSpace denizens have no "type" field — group them by a level tier instead.
+function dsMonTier(m) {
+  const lv = parseInt(String((m && m.lv) || '').replace(/[^0-9-]/g, ''), 10);
+  if(isNaN(lv)) return 'Unranked';
+  if(lv <= 2) return 'LV 0–2';
+  if(lv <= 5) return 'LV 3–5';
+  if(lv <= 8) return 'LV 6–8';
+  return 'LV 9+';
+}
+// The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D
+// group, DarkSpace level tier, D6 2e kind).
+function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'ds' ? dsMonTier(m) : src === 'd62e' ? (m.kind || '') : (m.group || ''); }
 function xsMonTypes(src) { return [...new Set(xsBestiary(src).map(m => xsMonType(src, m)).filter(Boolean))]; }
 // Star Wars die codes are stored as pips (3D+2 = 11).
 function swPipsCode(p) { p = Math.round(Number(p) || 0); const d = Math.floor(p / 3), r = p % 3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); }
@@ -7165,6 +7273,29 @@ function xsMonSummary(src, m) {
     (m.legendaryActions || []).forEach(a => out.lines.push({ label: 'Legendary — ' + (a.name || ''), text: a.description || '', roll: dmg(a.description) }));
     out.notes.push([m.size, m.type, m.alignment].filter(Boolean).join(' · ') + (m.senses ? ' · ' + m.senses : ''));
     out.hp = m.hp != null ? (parseInt(m.hp, 10) || 1) : 10;
+  } else if(src === 'ds') {
+    out.stats.push({ label: 'AC', val: String(m.ac ?? '') }, { label: 'HP', val: String(m.hp ?? '') }, { label: 'MV', val: String(m.mv || '') }, { label: 'LV', val: String(m.lv ?? '') });
+    if(m.mo) out.stats.push({ label: 'MO', val: String(m.mo) });   // motivation (alignment analogue)
+    // Living denizens carry S/D/C/I/W/Ch mods; digital "Interface" entities ACC/CTL/NET.
+    const mod = v => { const s = String(v == null ? '' : v).trim(); const n = parseInt(s.replace(/[^0-9-]/g, ''), 10); return { s, roll: isNaN(n) ? '' : ('1d20' + (n >= 0 ? '+' : '') + n) }; };
+    if(m.acc != null || m.ctl != null || m.net != null) {
+      [['ACC','acc'],['CTL','ctl'],['NET','net']].forEach(([l, k]) => { if(m[k] != null) { const x = mod(m[k]); out.stats.push({ label: l, val: x.s, roll: x.roll }); } });
+    } else {
+      [['STR','s'],['DEX','d'],['CON','c'],['INT','i'],['WIS','w'],['CHA','ch']].forEach(([l, k]) => { if(m[k] != null) { const x = mod(m[k]); out.stats.push({ label: l, val: x.s, roll: x.roll }); } });
+    }
+    if(m.atk) { const dm = /(\d+d\d+(?:\s*\+\s*\d+)?)/i.exec(m.atk); out.lines.push({ label: 'Attack', text: m.atk, roll: dm ? dm[1].replace(/\s+/g, '') : '' }); }
+    if(m.desc) out.notes.push(m.desc); if(m.notes) out.notes.push(m.notes);
+    out.hp = parseInt(m.hp, 10) || 1;
+  } else if(src === 'd62e') {
+    // D6 System: attributes stored as pips (12 = 4D). No hit points — a wound
+    // track lives on the tracker card, like Star Wars.
+    const A = m.attributes || {};
+    Object.keys(A).forEach(k => { out.stats.push({ label: k.slice(0, 3).toUpperCase(), val: swPipsCode(A[k]), roll: swPipsRoll(A[k]) }); });
+    (m.skills || []).forEach(sk => { const dm = /(\d+D(?:\+\d)?)/.exec(sk); out.lines.push({ label: 'Skill', text: sk, roll: dm ? dm[1].replace(/D/, 'd6') : '' }); });
+    (m.special || []).forEach(sp => out.lines.push({ label: 'Special', text: String(sp) }));
+    if(m.description) out.notes.push(m.description);
+    out.notes.push([m.kind, m.genre && m.genre !== 'core' ? m.genre : ''].filter(Boolean).join(' · '));
+    out.hp = 0;
   }
   return out;
 }
@@ -8629,7 +8760,7 @@ window.init_gen = function(root) {
   // pool when the button is tagged data-src="dcc", else the SD bestiary.
   function resolveGenMon(name, src) {
     if(src === 'dcc') return dccGenBestiary().find(x => x.name === name) || null;
-    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd') return xsBestiary(src).find(x => x.name === name) || null;
+    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'ds' || src === 'd62e') return xsBestiary(src).find(x => x.name === name) || null;
     return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
   }
   root.addEventListener('click', (e) => {
@@ -8666,9 +8797,9 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'dstreasure', 'd62etreasure'];
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
-  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group']].forEach(([src, id]) => {
+  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['ds','#gen-dsmon-type'],['d62e','#gen-d62emon-kind']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
     sel.innerHTML = sel.options[0].outerHTML + xsMonTypes(src).map(t => '<option value="' + dccSendAttr(t) + '">' + esc(t) + '</option>').join('');
   });
@@ -8887,9 +9018,9 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccmon-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccMonster(role, band));
 
-    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster') {
+    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='dsmonster' || activeTab==='d62emonster') {
       const src = activeTab.slice(0, activeTab.indexOf('monster'));
-      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : '#gen-dndmon-group';
+      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'ds' ? '#gen-dsmon-type' : '#gen-d62emon-kind';
       const type=root.querySelector(idBase).value;
       const band= src === 'nim' ? root.querySelector('#gen-nimmon-level').value : '';
       const count=parseInt(root.querySelector(idBase+'-count').value)||1;
@@ -10714,6 +10845,11 @@ else syncHomebrewMonsters();
 <script src="/tools-data/nimble-homebrew.js"></script>
 <script src="/tools-data/sw-homebrew.js"></script>
 <script src="/tools-data/ace-homebrew.js"></script>
+<!-- DarkSpace + D6 System 2e bestiaries and gear for their monster generators and gear drops -->
+<script src="/tools-data/ds-monsters.js"></script>
+<script src="/tools-data/sd-darkspace.js"></script>
+<script src="/tools-data/d62e-creatures.js"></script>
+<script src="/tools-data/d62e-equipment.js"></script>
 <script>
 
 
@@ -12539,6 +12675,20 @@ function wireAiConsole(root) {
         .concat(((typeof DND_MAGIC_ITEMS !== 'undefined' && Array.isArray(DND_MAGIC_ITEMS)) ? DND_MAGIC_ITEMS : []).map(m => ({ name: m.name, category: 'magic', desc: [m.rarity, m.type, m.attunement ? 'attunement' : '', m.description].filter(Boolean).join(' · ').slice(0, 160) }))),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'magic',label:'Magic',cats:['magic'] }],
       randomCats: ['weapon','armor','gear','magic'], money: { name: 'Gold', unit: 'gp', cat: 'gold', roll: tier => { let c = 0; for(let i = 0; i < 2; i++) c += 1 + Math.floor(Math.random() * 6); c *= (10 + Math.floor(Math.random() * 40)); return c * (({ '1': 1, '5': 4, '11': 12, '17': 30 })[String(tier || '1')] || 1); } }, label: 'TREASURE', empty: 'D&D item lists',
+    },
+    ds: {
+      list: () => { const D = (typeof DARKSPACE !== 'undefined' && DARKSPACE) ? DARKSPACE : {};
+        const wpn = [].concat(D.meleeWeapons || [], D.rangedWeapons || [], D.explosives || []).map(w => ({ name: w.name, category: 'weapon', desc: [w.dmg, w.range, w.props, w.cost != null ? w.cost + ' cr' : ''].filter(Boolean).join(' · ') }));
+        const arm = (D.armor || []).map(a => ({ name: a.name, category: 'armor', desc: [a.ac ? 'AC ' + a.ac : '', a.props, a.cost != null ? a.cost + ' cr' : ''].filter(Boolean).join(' · ') }));
+        const ger = (D.gear || []).map(g => ({ name: g.name, category: 'gear', desc: [g.desc, g.cost != null ? g.cost + ' cr' : ''].filter(Boolean).join(' · ').slice(0, 160) }));
+        return wpn.concat(arm, ger); },
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
+      randomCats: ['weapon','armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (2 + Math.floor(Math.random() * 11)) * 10 + (Math.random() < 0.3 ? 100 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'SALVAGE', empty: 'DarkSpace gear list',
+    },
+    d62e: {
+      list: () => ((typeof D62E_EQUIPMENT !== 'undefined' && Array.isArray(D62E_EQUIPMENT)) ? D62E_EQUIPMENT : []).map(e => ({ name: e.name, category: (e.category === 'weapon' || e.category === 'armor') ? e.category : 'gear', desc: [e.damage ? e.damage + ' dmg' : '', e.protection ? '+' + e.protection + ' prot' : '', e.range, e.era && e.era !== 'core' ? e.era : '', e.cost != null ? e.cost + ' cr' : '', e.description].filter(Boolean).join(' · ').slice(0, 160) })),
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
+      randomCats: ['weapon','armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (1 + Math.floor(Math.random() * 6)) * 100 + (Math.random() < 0.3 ? 500 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'GEAR DROP', empty: 'D6 2e equipment list',
     },
   };
   root.querySelectorAll('.xs-treasure').forEach(panel => {
