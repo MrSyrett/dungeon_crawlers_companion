@@ -100,6 +100,142 @@ function speciesEntry(){
 }
 function _effLabel(e){ return (typeof window._hbEffOne==='function') ? window._hbEffOne(e) : (String(e&&e.target||'')+' '+(e&&e.amount||0)); }
 
+// ══ Book (non-homebrew) species-trait / talent text → mechanical effects ══════
+// Book species traits and archetype talents are plain prose (no structured
+// _effects). This mirrors Shadowdark's ccwAnalyzeTalent: parse that prose into
+// the same effect-target vocabulary the homebrew engine uses (meleeAtk/rangedAtk
+// /meleeDmg/rangedDmg/ac/gearSlots/str…cha), resolve any "choose one" via
+// _dsw.hbChoices, and hand back concrete text so the sheet's live parser sees a
+// bonus it understands. Kept in this DarkSpace file so the two systems stay
+// separate — Shadowdark's own parser is untouched.
+var _DSW_STAT_FULL = [['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']];
+function _statKey(word){
+  var w = String(word||'').toLowerCase();
+  if(/\bstr/.test(w)||/strength/.test(w)) return 'str';
+  if(/\bdex/.test(w)||/dexterity/.test(w)) return 'dex';
+  if(/\bcon/.test(w)||/constitution/.test(w)) return 'con';
+  if(/\bint/.test(w)||/intelligence/.test(w)) return 'int';
+  if(/\bwis/.test(w)||/wisdom/.test(w)) return 'wis';
+  if(/\bcha/.test(w)||/charisma/.test(w)) return 'cha';
+  return null;
+}
+function _statLabel(k){ return {str:'Strength',dex:'Dexterity',con:'Constitution',int:'Intelligence',wis:'Wisdom',cha:'Charisma'}[k]||String(k||'').toUpperCase(); }
+
+// Book species trait → effect spec, or null when purely narrative.
+function dsBookSpeciesSpec(name, text){
+  var n = String(name||'');
+  var out = { auto:[], choices:[], baseText:text };
+  if(/Powerful/i.test(n))     { out.auto.push({target:'meleeAtk',amount:1},{target:'meleeDmg',amount:1}); return out; }
+  if(/Longsight/i.test(n))    { out.auto.push({target:'rangedAtk',amount:1},{target:'rangedDmg',amount:1}); return out; }
+  if(/Armored Skin/i.test(n)) { out.auto.push({target:'ac',amount:1}); return out; }
+  if(/Extra Arms/i.test(n))   { out.auto.push({target:'gearSlots',amount:2}); return out; }
+  return null;   // Natural Weapon is handled as an attack row; the rest are narrative
+}
+
+// Book archetype talent text → effect spec, or null when purely narrative.
+function dsBookTalentSpec(text){
+  var t = String(text||'').trim();
+  var out = { auto:[], choices:[], baseText:t };
+  // "Choose a <Archetype> Talent or +2 points to … stats" (the 12 result).
+  if(/^Choose a .* Talent or \+2 points/i.test(t)){
+    var opts = [{ label:'Take another talent (note it yourself)', effects:[], text:t }];
+    _DSW_STAT_FULL.forEach(function(o){ opts.push({ label:'+2 to '+_statLabel(o[0]), effects:[{target:o[0],amount:2}], text:'+2 to '+_statLabel(o[0]) }); });
+    out.choices.push({ ctl:'one', label:'Talent — take another or +2 to a stat', options:opts });
+    return out;
+  }
+  // "+2 to distribute to stats" / "+2 points to distribute" (Machine-Based 7-9).
+  if(/\+2 (points? )?to distribute/i.test(t)){ out.choices.push({ ctl:'dist2', label:'+2 to distribute (pick two)' }); return out; }
+  // Charming 3-6: "+1 to melee and ranged attacks, or +1 to your carousing rolls".
+  if(/melee and ranged attacks/i.test(t) && /carousing/i.test(t)){
+    out.choices.push({ ctl:'one', label:'Attacks or carousing', options:[
+      { label:'+1 to melee and ranged attacks', effects:[{target:'meleeAtk',amount:1},{target:'rangedAtk',amount:1}], text:'+1 to melee and ranged attacks.' },
+      { label:'+1 to your carousing rolls', effects:[], text:'+1 to your carousing rolls.' }
+    ]});
+    return out;
+  }
+  // Tough 3-5: "+1 to melee or ranged attacks".
+  if(/\+1 to melee or ranged attacks/i.test(t)){
+    out.choices.push({ ctl:'one', label:'Melee or ranged', options:[
+      { label:'+1 to melee attacks', effects:[{target:'meleeAtk',amount:1}], text:'+1 to melee attacks.' },
+      { label:'+1 to ranged attacks', effects:[{target:'rangedAtk',amount:1}], text:'+1 to ranged attacks.' }
+    ]});
+    return out;
+  }
+  // Machine-Based 3-6: "Gain either the Powerful or Longsight trait".
+  if(/Powerful or Longsight/i.test(t)){
+    out.choices.push({ ctl:'one', label:'Powerful or Longsight', options:[
+      { label:'Powerful (+1 melee attack & damage)', effects:[{target:'meleeAtk',amount:1},{target:'meleeDmg',amount:1}], text:'Powerful: You have a +1 bonus to melee attack and damage rolls.' },
+      { label:'Longsight (+1 ranged attack & damage)', effects:[{target:'rangedAtk',amount:1},{target:'rangedDmg',amount:1}], text:'Longsight: You get a +1 bonus to ranged attack and damage rolls.' }
+    ]});
+    return out;
+  }
+  // Machine-Based 10-11: "Gain the Armored Skin trait".
+  if(/Gain the Armored Skin trait/i.test(t)){ out.auto.push({target:'ac',amount:1}); return out; }
+  // Clever 6-8: "+2 to Intelligence or +1 to Specialization checks".
+  if(/\+2 to Intelligence or \+1 to Specialization/i.test(t)){
+    out.choices.push({ ctl:'one', label:'Intelligence or Specialization', options:[
+      { label:'+2 to Intelligence', effects:[{target:'int',amount:2}], text:'+2 to Intelligence' },
+      { label:'+1 to Specialization checks', effects:[], text:'+1 to Specialization checks' }
+    ]});
+    return out;
+  }
+  // Flat attack talents (Strong 3-6, Quick 10-11).
+  if(/^\+1 to melee attacks/i.test(t)){ out.auto.push({target:'meleeAtk',amount:1}); return out; }
+  if(/^\+1 to ranged attacks/i.test(t)){ out.auto.push({target:'rangedAtk',amount:1}); return out; }
+  // Strong/Tough 10-11: "Choose one category of armor. You get +1 AC from that armor".
+  if(/\+1 AC from that armor/i.test(t)){ out.auto.push({target:'ac',amount:1}); return out; }
+  // Restricted stat pick: "+2 to Strength, Dexterity, or Constitution" / "…either…".
+  if(/^\+2 to /i.test(t) && /(,| or )/i.test(t)){
+    var body = t.replace(/^\+2 to (?:either )?/i,'').replace(/\.$/,'');
+    var words = body.split(/,| or /i).map(function(s){return s.trim();}).filter(Boolean);
+    var sopts = [], allStats = words.length>0;
+    words.forEach(function(w){ var k=_statKey(w); if(k) sopts.push({ label:'+2 to '+_statLabel(k), effects:[{target:k,amount:2}], text:'+2 to '+_statLabel(k) }); else allStats=false; });
+    if(allStats && sopts.length>=2){ out.choices.push({ ctl:'one', label:'+2 to a stat', options:sopts }); return out; }
+  }
+  return null;   // narrative talent — no mechanical effect
+}
+
+// Resolve a book spec against the current picks → { effects:[], text:'<line>' }.
+function dsBookResolved(key, spec){
+  var effects = (spec.auto||[]).slice();
+  var text = spec.baseText;
+  (spec.choices||[]).forEach(function(c){
+    if(c.ctl==='one'){
+      var pick = _dsw.hbChoices[key];
+      if(pick!=null && pick!==''){
+        var opt = c.options[parseInt(pick,10)];
+        if(opt){ effects = effects.concat(opt.effects||[]); if(opt.text) text = opt.text; }
+      }
+    } else if(c.ctl==='dist2'){
+      var a=_dsw.hbChoices[key], b=_dsw.hbChoices[key+'~b'];
+      if(a) effects.push({target:a,amount:1});
+      if(b) effects.push({target:b,amount:1});
+    }
+  });
+  return { effects:effects, text:text };
+}
+
+// The book (non-homebrew) species/talent items that carry mechanical effects,
+// each with a stable key so effects, pending choices and the resolved talent
+// text all agree. Homebrew species/archetypes use their own _effects instead.
+function dswBookItems(){
+  var items = [];
+  var sp = speciesEntry();
+  if(sp && !sp._hb && !(sp._bonuses&&sp._bonuses.length) && !(sp._traits&&sp._traits.length)){
+    var sspec = dsBookSpeciesSpec(sp.name, sp.text);
+    if(sspec) items.push({ key:'bsp:0', spec:sspec });
+  }
+  var a = archetype(_dsw.archetype);
+  if(a && !a._hb){
+    (_dsw.talentRolls||[]).forEach(function(tr, ri){
+      var row = tr && tr.row; if(!row || (row.effects && row.effects.length)) return;
+      var tspec = dsBookTalentSpec(row.text);
+      if(tspec) items.push({ key:'btal:'+ri, spec:tspec });
+    });
+  }
+  return items;
+}
+
 // Proficiency (homebrew archetypes only — book archetypes keep free-text training).
 function archProfText(a, key){
   if(!a) return '—';
@@ -146,6 +282,10 @@ function dswApplicableEffects(){
       else effs.forEach(function(e){ list.push(e); });
     });
   }
+  // Book (non-homebrew) species-trait + talent effects, choices resolved.
+  dswBookItems().forEach(function(it){
+    dsBookResolved(it.key, it.spec).effects.forEach(function(e){ list.push(e); });
+  });
   return list;
 }
 // Accumulate applicable effects into the sheet's effect object.
@@ -186,6 +326,21 @@ function dswPendingChoices(){
     if(e && e.target==='statChoice')
       ch.push({ key:'stat:'+idx, label:'Stat choice ('+((Number(e.amount)>=0?'+':'')+(Number(e.amount)||0))+')',
                 opts:_DS_STAT_OPTS.map(function(o){ return { v:o[0], label:o[1] }; }) });
+  });
+  // Book (non-homebrew) species/talent choices. A single-select "one" choice
+  // becomes one dropdown; a "distribute" becomes two +1 stat dropdowns. All use
+  // the same {key,label,opts} shape the review step already renders.
+  dswBookItems().forEach(function(it){
+    (it.spec.choices||[]).forEach(function(c){
+      if(c.ctl==='one'){
+        ch.push({ key:it.key, label:esc(c.label),
+                  opts:c.options.map(function(o,i){ return { v:String(i), label:o.label }; }) });
+      } else if(c.ctl==='dist2'){
+        var sopts = _DSW_STAT_FULL.map(function(o){ return { v:o[0], label:o[1] }; });
+        ch.push({ key:it.key,       label:esc(c.label)+' — first +1',  opts:sopts });
+        ch.push({ key:it.key+'~b',  label:esc(c.label)+' — second +1', opts:sopts });
+      }
+    });
   });
   return ch;
 }
@@ -855,8 +1010,22 @@ function dswBuildTalentsText(){
   L.push('SPECIES — '+_dsw.species.name+': '+_dsw.species.text);
   L.push('ARCHETYPE — '+_dsw.archetype+' ('+arche.stat+', d'+arche.hitDie+')');
   (arche.features||[]).forEach(function(f){ L.push('  • '+f.name+': '+f.text); });
-  var tt = (_dsw.talentRolls||[]).map(function(t){ return (t.row?t.row.text:'')+' (2d6='+t.roll+')'; }).filter(Boolean);
-  if(tt.length) L.push('1ST-LEVEL TALENT: '+tt.join('  ||  '));
+  // 1st-level talent(s). Write the RESOLVED concrete text for book talents (so a
+  // "melee or ranged" choice becomes "+1 to melee attacks." and the sheet's live
+  // attack parser can read it), one per line so multiple bonuses each get parsed.
+  var isBookArch = !(arche && arche._hb);
+  var tt = (_dsw.talentRolls||[]).map(function(t, ri){
+    if(!t || !t.row) return '';
+    var base = t.row.text;
+    if(isBookArch && (!t.row.effects || !t.row.effects.length)){
+      var spec = dsBookTalentSpec(t.row.text);
+      if(spec) base = dsBookResolved('btal:'+ri, spec).text;
+    }
+    var tag = (t.roll!=null) ? (' (2d6='+t.roll+')') : ' (chosen)';
+    return base + tag;
+  }).filter(Boolean);
+  if(tt.length===1){ L.push('1ST-LEVEL TALENT: '+tt[0]); }
+  else if(tt.length>1){ L.push('1ST-LEVEL TALENTS:'); tt.forEach(function(line){ L.push('  • '+line); }); }
   if(_dsw.triadPower){
     var tp = ((ds().triad||{}).powers||[]).filter(function(p){ return p.name===_dsw.triadPower; })[0] || {};
     L.push('THE TRIAD — '+_dsw.triadPower+(tp.stat?' ('+tp.stat+')':'')+': '+(tp.text||''));

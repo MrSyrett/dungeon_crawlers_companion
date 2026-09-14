@@ -1119,7 +1119,11 @@ function equippedItemBonusTotals() {
     const cb = row.querySelector('.gear-equip');
     if(!cb || !cb.checked) return;                                   // not equipped
     const name = row.querySelector('.gear-name')?.value || '';
-    const hb = (typeof findHomebrewItem === 'function') ? findHomebrewItem(name) : null;
+    // Cosmetic rename: fall back to the canonical base so a renamed magic item
+    // keeps its bonuses.
+    let hb = (typeof findHomebrewItem === 'function') ? findHomebrewItem(name) : null;
+    if((!hb || !Array.isArray(hb.bonuses)) && row.dataset.baseItem && typeof findHomebrewItem === 'function')
+      hb = findHomebrewItem(row.dataset.baseItem);
     if(!hb || !Array.isArray(hb.bonuses)) return;
     hb.bonuses.forEach(b => {
       const amt = parseInt(b && b.amount);
@@ -1139,7 +1143,7 @@ function reapplyEquippedWeaponAttacks() {
     const cb = row.querySelector('.gear-equip');
     if(!cb || !cb.checked) return;
     const kind = (typeof gearItemKind === 'function')
-      ? gearItemKind(row.querySelector('.gear-name')?.value) : null;
+      ? gearItemKind(row.querySelector('.gear-name')?.value, row) : null;
     if(kind !== 'weapon') return;
     // Skip weapons whose derived attack row hasn't actually changed — otherwise
     // the destructive remove+add below makes equipped-weapon attacks visibly
@@ -1540,6 +1544,19 @@ function classInnateAC(unarmored) {
   const lvl = (typeof sheetLevel === 'function') ? (sheetLevel() || 1) : 1;
   let bonus = 0;
   if(cls === 'basilisk warrior' && unarmored) bonus += 3 + Math.floor(lvl/2);   // Stone Skin
+  // DarkSpace species/talent/archetype AC, re-derived live from the Talents box
+  // so it survives every AC recompute (and stacks — traits say "may gain this
+  // multiple times"). The Armored Skin trait only helps while unarmored; the
+  // "+1 AC from that armor" talent only while armored; the Wise archetype's
+  // Insightful Defense always adds half your level (min 1).
+  if(typeof darkSpaceOn === 'function' && darkSpaceOn()){
+    const txt = document.getElementById('talents-text')?.value || '';
+    txt.split('\n').forEach(line => {
+      if(unarmored && (/SPECIES —[^\n]*Armored Skin/i.test(line) || /Gain the Armored Skin trait/i.test(line))) bonus += 1;
+      if(!unarmored && /\+1 AC from that armor/i.test(line)) bonus += 1;
+    });
+    if(cls === 'wise') bonus += Math.max(1, Math.floor(lvl/2));   // Insightful Defense
+  }
   return bonus;
 }
 
@@ -1551,7 +1568,9 @@ function computeAC() {
     if(row.classList.contains('gear-slot-disabled')) return;          // dropped
     const cb = row.querySelector('.gear-equip');
     if(!cb || !cb.checked) return;                                    // not equipped
-    const parsed = acParseItem(row.querySelector('.gear-name')?.value);
+    // Cosmetic rename: fall back to the canonical base so renamed armor keeps AC.
+    let parsed = acParseItem(row.querySelector('.gear-name')?.value);
+    if(!parsed && row.dataset.baseItem) parsed = acParseItem(row.dataset.baseItem);
     if(!parsed) return;
     if(parsed.kind === 'shield') {
       shield = Math.max(shield, parsed.ac);
@@ -1579,8 +1598,8 @@ function refreshAutoAC() {
 
 let _gearEqSeq = 0;   // unique id linking a weapon gear slot to its attack row
 
-// Identify what a gear item is (strips a leading "+N " enchant prefix).
-function gearItemKind(name) {
+// Identify what a NAME alone is (strips a leading "+N " enchant prefix).
+function gearKindOf(name) {
   let n = String(name||'').trim();
   if(!n) return null;
   if(/^scroll:\s*/i.test(n)) return 'scroll';             // spell scroll item
@@ -1595,6 +1614,24 @@ function gearItemKind(name) {
   if(hb && hb.equippable) return 'magic';
   return null;
 }
+// Identify what a gear item is. A cosmetic rename ("Pistol, Light" → "Old
+// Betsy") leaves the typed name unrecognised, so we fall back to the row's
+// canonical base item (row.dataset.baseItem) — that's how a renamed weapon/armor
+// keeps its mechanical effects and its linked attack row.
+function gearItemKind(name, row) {
+  const k = gearKindOf(name);
+  if(k) return k;
+  const base = row && row.dataset ? row.dataset.baseItem : '';
+  if(base) return gearKindOf(base);
+  return null;
+}
+// The name to use for a row's MECHANICS: the typed name when it's a recognised
+// catalog item, otherwise the stored canonical base (cosmetic rename).
+function gearMechName(row) {
+  const typed = (row.querySelector('.gear-name')?.value || '').trim();
+  if(gearKindOf(typed)) return typed;
+  return (row.dataset && row.dataset.baseItem) ? row.dataset.baseItem : typed;
+}
 
 // Show/hide the equip checkbox as the item name changes; unequip if it stops
 // being a weapon/armor.
@@ -1602,7 +1639,12 @@ function onGearNameInput(nameEl) {
   const row = nameEl.closest('.gear-slot');
   if(!row) return;
   const cb = row.querySelector('.gear-equip');
-  const kind = gearItemKind(nameEl.value);
+  const typed = nameEl.value;
+  // If the typed name is itself a recognised catalog item, it becomes the row's
+  // new mechanical base (a swap). Otherwise the existing base is kept, so an
+  // arbitrary rename stays mechanically what it was.
+  if(gearKindOf(typed)) row.dataset.baseItem = typed.trim();
+  const kind = gearItemKind(typed, row);
   if(cb) {
     cb.style.visibility = kind ? 'visible' : 'hidden';
     cb.title = kind === 'weapon' ? 'Equip weapon (adds an attack)'
@@ -1610,8 +1652,18 @@ function onGearNameInput(nameEl) {
              : kind === 'magic'  ? 'Equip (applies this item\'s bonuses)' : 'Equip';
     if(!kind && cb.checked) {          // name no longer equippable → unequip
       cb.checked = false;
+      delete row.dataset.baseItem;
       removeEquipAttack(row);
       if(typeof applyItemBonuses === 'function') applyItemBonuses();   // drop its bonuses
+    } else if(cb.checked) {
+      if(kind === 'weapon') {
+        // Rebuild the linked attack row so a swap updates it (and a cosmetic
+        // rename relabels it) — the gear item and its attack stay linked.
+        removeEquipAttack(row);
+        addEquipAttack(row);
+      }
+      // Re-evaluate equipped-item bonuses (a swap/rename can change them) and AC.
+      if(typeof applyItemBonuses === 'function') applyItemBonuses();
     }
   }
   refreshAutoAC();
@@ -1621,7 +1673,7 @@ function onGearNameInput(nameEl) {
 function onGearEquipToggle(cb) {
   const row = cb.closest('.gear-slot');
   if(!row) return;
-  const kind = gearItemKind(row.querySelector('.gear-name')?.value);
+  const kind = gearItemKind(row.querySelector('.gear-name')?.value, row);
   if(kind === 'weapon') {
     if(cb.checked) addEquipAttack(row);
     else removeEquipAttack(row);
@@ -1749,9 +1801,12 @@ function talentLineEffects(line) {
   const bothAtk = () => { out.melee += 1; out.ranged += 1; };
   const bothDmg = () => { out.meleeDmg += 1; out.rangedDmg += 1; };
 
-  if(/\+1 to melee and ranged attacks/i.test(f) || /\+1 to melee\/ranged attacks/i.test(f)) { bothAtk(); if(andDamage) bothDmg(); }
-  else if(/\+1 to melee attacks/i.test(f))  { out.melee  += 1; if(andDamage) out.meleeDmg  += 1; }
-  else if(/\+1 to ranged attacks/i.test(f)) { out.ranged += 1; if(andDamage) out.rangedDmg += 1; }
+  // DarkSpace wording also uses "attack" (singular) with "bonus to" — the
+  // Powerful/Longsight species traits ("a +1 bonus to melee attack and damage
+  // rolls") and resolved talents ("+1 to melee attacks."). "attacks?" covers both.
+  if(/\+1 (bonus )?to melee and ranged attacks/i.test(f) || /\+1 to melee\/ranged attacks/i.test(f)) { bothAtk(); if(andDamage) bothDmg(); }
+  else if(/\+1 (bonus )?to melee attacks?\b/i.test(f))  { out.melee  += 1; if(andDamage) out.meleeDmg  += 1; }
+  else if(/\+1 (bonus )?to ranged attacks?\b/i.test(f)) { out.ranged += 1; if(andDamage) out.rangedDmg += 1; }
   // Unqualified "attacks" means every attack you make.
   else if(/\+1 to (weapon )?attacks/i.test(f)) { bothAtk(); if(andDamage) bothDmg(); }
 
@@ -2084,9 +2139,13 @@ function sheetArmorTalentTypes() {
 // from here, so a build and a diff can never disagree.
 function deriveEquipWeapon(row) {
   const raw = (row.querySelector('.gear-name')?.value || '').trim();
-  const m = /^\+(\d+)\s+/.exec(raw);
+  // Mechanics resolve from the typed name when it's a real weapon, else from the
+  // row's canonical base (a cosmetic rename) — so a renamed weapon keeps its
+  // stats. The displayed attack name stays the typed (cosmetic) name.
+  const mech = (typeof gearMechName === 'function') ? gearMechName(row) : raw;
+  const m = /^\+(\d+)\s+/.exec(mech);
   const bonus = m ? (parseInt(m[1])||0) : 0;
-  const type = raw.replace(/^\+\d+\s+/, '');
+  const type = mech.replace(/^\+\d+\s+/, '');
   const w = (typeof SD_WEAPONS!=='undefined') ? allWeapons().find(x=>x.name.toLowerCase()===type.toLowerCase()) : null;
   if(!w) return null;
   const isFinesse = (w.props||'').toLowerCase().includes('finesse');
@@ -2124,6 +2183,32 @@ function deriveEquipWeapon(row) {
   };
 }
 
+// ── Quick Shot (DarkSpace Quick archetype) = SD Thief Backstab / Sneak Attack ──
+// A special attack that rolls extra weapon dice: the Quick Shot feature adds dice
+// equal to half your level (round up), and each "Quick Shot deals +N dice" talent
+// adds more. Mirrors how the Thief's Backstab row is generated, but keyed to the
+// DarkSpace Quick archetype rather than a Shadowdark class.
+function isQuickArchetype() {
+  return (document.getElementById('f-class')?.value || '').trim().toLowerCase() === 'quick';
+}
+function quickShotExtraDice() {
+  let extra = Math.ceil((typeof sheetLevel === 'function' ? sheetLevel() : 1) / 2);   // the feature itself
+  const ta = document.getElementById('talents-text');
+  if(ta) ta.value.split('\n').forEach(f => {
+    const m = f.match(/quick shot deals \+(\d+)\s*dice/i);
+    if(m) extra += (parseInt(m[1], 10) || 0);
+  });
+  return Math.max(0, extra);
+}
+// The damage string for a weapon's Quick Shot row (extra dice folded into every
+// NdM term, then the same magic/talent damage bonus the main row carries).
+function quickShotDamage(dv) {
+  const extra = quickShotExtraDice();
+  const scaled = String(dv.w.damage || '').replace(/(\d+)d(\d+)/g,
+    (_, n, s) => (parseInt(n, 10) + extra) + 'd' + s);
+  return dv.applyDmg(scaled);
+}
+
 // Create an attack row for an equipped weapon, linked back to the gear slot.
 function addEquipAttack(row) {
   const dv = deriveEquipWeapon(row);
@@ -2145,27 +2230,21 @@ function addEquipAttack(row) {
   if(f.range)  f.range.value  = dv.range;
   refreshAtkDamageToggle(tr);
 
-  // Thief: also add a linked Backstab row for this weapon.
-  const cls = document.getElementById('f-class')?.value.trim().toLowerCase();
-  if(cls === 'thief') {
-    let bsDice = 2;
-    document.querySelectorAll('#attacks-body tr').forEach(r=>{
-      const nm = r.querySelector('.atk-name')?.value || '';
-      const dm = r.querySelector('.atk-damage')?.value || '';
-      if(/^Backstab/i.test(nm)) { const mm = dm.match(/(\d+)d/); if(mm) bsDice = Math.max(bsDice, parseInt(mm[1])); }
-    });
+  // Quick archetype: also add a linked Quick Shot row for this weapon (SD Thief
+  // Backstab treatment) with the extra weapon dice folded into its damage.
+  if(isQuickArchetype()) {
     addAttackRow();
-    const bsRow = tbody.lastElementChild;
-    if(bsRow) {
-      bsRow.dataset.eq = eqId;                 // linked so unequip removes it too
-      bsRow.dataset.eqBackstab = '1';
-      const bf = atkFields(bsRow);
-      if(bf.name)   bf.name.value   = 'Backstab ('+dv.w.name+')';
-      if(bf.bonus)  bf.bonus.value  = dv.bonus;
-      if(bf.damage) bf.damage.value = dv.applyDmg(dv.w.damage.replace(/1d/g, bsDice+'d'));
-      if(bf.stat)   bf.stat.value   = dv.stat;
-      if(bf.range)  bf.range.value  = dv.range;
-      refreshAtkDamageToggle(bsRow);
+    const qsRow = tbody.lastElementChild;
+    if(qsRow) {
+      qsRow.dataset.eq = eqId;                 // linked so unequip removes it too
+      qsRow.dataset.eqQuickShot = '1';
+      const qf = atkFields(qsRow);
+      if(qf.name)   qf.name.value   = 'Quick Shot ('+dv.w.name+')';
+      if(qf.bonus)  qf.bonus.value  = dv.bonus;
+      if(qf.damage) qf.damage.value = quickShotDamage(dv);
+      if(qf.stat)   qf.stat.value   = dv.stat;
+      if(qf.range)  qf.range.value  = dv.range;
+      refreshAtkDamageToggle(qsRow);
     }
   }
   saveSheet(false);
@@ -2181,7 +2260,7 @@ function equipAttackUnchanged(row) {
   const dv = deriveEquipWeapon(row);
   if(!dv) return false;
   const rows = [...document.querySelectorAll('#attacks-body tr[data-eq="'+eqId+'"]')];
-  const mainTr = rows.find(tr => tr.dataset.eqBackstab !== '1');
+  const mainTr = rows.find(tr => tr.dataset.eqQuickShot !== '1');
   if(!mainTr) return false;                                 // main row missing
   const f = atkFields(mainTr);
   const same = (f.name?.value||'')   === dv.name
@@ -2190,10 +2269,18 @@ function equipAttackUnchanged(row) {
             && (f.stat?.value||'')   === dv.stat
             && (f.range?.value||'')  === dv.range;
   if(!same) return false;
-  // The Thief backstab row must match presence too (class can change mid-play).
-  const isThief = (document.getElementById('f-class')?.value.trim().toLowerCase() === 'thief');
-  const hasBs = rows.some(tr => tr.dataset.eqBackstab === '1');
-  return isThief === hasBs;
+  // The Quick Shot row must match presence AND its (level/talent-scaled) damage,
+  // so a level-up or a new "+N dice" talent rebuilds it.
+  const qsRows = rows.filter(tr => tr.dataset.eqQuickShot === '1');
+  if(isQuickArchetype()) {
+    if(qsRows.length !== 1) return false;
+    const qf = atkFields(qsRows[0]);
+    if((qf.damage?.value||'') !== quickShotDamage(dv)) return false;
+    if((qf.bonus?.value||'')  !== dv.bonus) return false;
+  } else if(qsRows.length) {
+    return false;
+  }
+  return true;
 }
 
 // Remove the attack row(s) linked to a gear slot (weapon + any Backstab).
@@ -2449,7 +2536,7 @@ function autoEquipArmorFromGear() {
     const cb = row.querySelector('.gear-equip');
     if(!nameEl || !cb) return;
     if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);
-    const kind = gearItemKind(nameEl.value);
+    const kind = gearItemKind(nameEl.value, row);
     if(row.classList.contains('gear-slot-disabled')) return;
     if(kind === 'armor') {
       cb.checked = true;                                  // wear it (AC)
@@ -2462,11 +2549,11 @@ function autoEquipArmorFromGear() {
       if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
       if(existing) {
         existing.dataset.eq = row.dataset.eqId;           // reconnect
-        // Also link any Backstab row generated for this weapon.
+        // Also link any Quick Shot row generated for this weapon.
         [...document.querySelectorAll('#attacks-body tr')].forEach(tr => {
           if(tr.dataset.eq) return;
           const t = (tr.querySelector('td input')?.value || '').trim();
-          if(new RegExp('^Backstab \\(' + nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\)', 'i').test(t))
+          if(new RegExp('^Quick Shot \\(' + nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\)', 'i').test(t))
             tr.dataset.eq = row.dataset.eqId;
         });
         cb.checked = true;
@@ -3683,7 +3770,7 @@ function _applySDData(d){
     if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);
     if(gearEquippedArr[i] && cb.style.visibility !== 'hidden') {
       cb.checked = true;
-      const kind = gearItemKind(nameEl.value);
+      const kind = gearItemKind(nameEl.value, row);
       if(kind === 'weapon') {
         const nm = nameEl.value.trim();
         const existing = [...document.querySelectorAll('#attacks-body tr')].find(tr =>
@@ -5236,7 +5323,7 @@ function equipShopWeapon(name) {
   // plain "Chainmail" → "+1 Chainmail". The talent set stores bare type names,
   // so compare against the type with the enchant prefix stripped. Weapons get
   // their talent/ancestry bonuses via addEquipAttack when equipped instead.
-  if(nameEl && typeof gearItemKind === 'function' && gearItemKind(nameEl.value) === 'armor'
+  if(nameEl && typeof gearItemKind === 'function' && gearItemKind(nameEl.value, slot) === 'armor'
      && typeof sheetArmorTalentTypes === 'function') {
     const raw0 = nameEl.value.trim();
     const em = /^\+(\d+)\s+/.exec(raw0);
