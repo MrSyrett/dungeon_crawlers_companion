@@ -15,6 +15,9 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
   // DarkSpace: a standalone sci-fi reskin of Shadowdark (own storage/characters).
   { key: "DS", name: "DarkSpace", short: "DS", accent: "var(--darkspace)" },
+  // Index Card RPG (Runehammer, Master Edition) — a rules-light unified d20
+  // system: one TARGET, roll for EFFORT, five worlds.
+  { key: "ICRPG", name: "Index Card RPG", short: "ICRPG", accent: "var(--icrpg)" },
   { key: "NIM", name: "Nimble", short: "NIM", accent: "var(--nimble)" },
   // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
   // plus original concise descriptions for non-SRD options.
@@ -29,9 +32,6 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // D6 System: Second Edition (Gallant Knight Games, 2024) — a genre-agnostic
   // evolution of the West End Games D6 System.
   { key: "D62E", name: "D6 System 2e", short: "D62e", accent: "var(--d62e)" },
-  // Index Card RPG (Runehammer, Master Edition) — a rules-light unified d20
-  // system: one TARGET, roll for EFFORT, five worlds.
-  { key: "ICRPG", name: "Index Card RPG", short: "ICRPG", accent: "var(--icrpg)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";
