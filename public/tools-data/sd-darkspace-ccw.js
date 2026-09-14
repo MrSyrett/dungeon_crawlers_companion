@@ -583,13 +583,45 @@ function startDarkSpaceLevelUp(){
   if(!arche){ alert('Set a DarkSpace archetype on the sheet first (Strong, Quick, Tough, Clever, Wise, Charming, or Machine-Based).'); return; }
   var next = cur + 1;
   // Talents come at odd levels only (3, 5, 7, 9), like Shadowdark.
-  _dslu = { old:cur, next:next, arche:arche, hp:null, talent:null, gainsTalent:(next % 2 === 1) };
+  _dslu = { old:cur, next:next, arche:arche, hp:null, talent:null, gainsTalent:(next % 2 === 1),
+            hasShip:false, shipTalent:null, hasIface:false, ifaceBump:null };
   dsluRollHP();
   if(_dslu.gainsTalent) dsluRollTalent();
+  // The ship levels with the crew — if the Spacer has one, roll its class Talent.
+  var shipSt = window._dsShipState;
+  _dslu.hasShip = !!(shipSt && shipSt.classification);
+  if(_dslu.hasShip) dsluRollShipTalent();
+  // Offer to grow the hacker's Interface (a Function bonus) at level up.
+  var ifSt = window._iface;
+  _dslu.hasIface = !!(ifSt && (ifSt.name || ifSt.ACC || ifSt.CTL || ifSt.NET || ifSt.crashed));
   document.getElementById('dslu-overlay').style.display = 'flex';
   dsluRender();
 }
 window.startDarkSpaceLevelUp = startDarkSpaceLevelUp;
+
+// ── Ship / Interface level-up helpers ───────────────────────────────────────
+function dsluShipClass(){
+  var st = window._dsShipState; if(!st) return null;
+  var DS = window.DARKSPACE && window.DARKSPACE.ship; if(!DS) return null;
+  return (DS.classifications||[]).find(function(c){ return c.name===st.classification; }) || null;
+}
+function dsluShipTalentRow(cls, roll){
+  var rows = (cls && cls.talents) || [];
+  for(var i=0;i<rows.length;i++){
+    var r = String(rows[i].r);
+    if(r.indexOf('-')>=0){ var p=r.split('-'); if(roll>=(parseInt(p[0],10)||0) && roll<=(parseInt(p[1],10)||0)) return rows[i]; }
+    else if((parseInt(r,10)||0)===roll) return rows[i];
+  }
+  return null;
+}
+function dsluRollShipTalent(){
+  var cls = dsluShipClass(); if(!cls){ _dslu.shipTalent=null; return; }
+  var t = rollN(6)+rollN(6);
+  _dslu.shipTalent = { roll:t, row:dsluShipTalentRow(cls,t), cls:cls.name };
+}
+window.dsluRerollShipTalent = function(){ dsluRollShipTalent(); dsluRender(); };
+function dsluSetIfaceBump(fn){ _dslu.ifaceBump = (_dslu.ifaceBump===fn ? null : fn); dsluRender(); }
+window.dsluSetIfaceBump = dsluSetIfaceBump;
 
 function dsluClose(){ document.getElementById('dslu-overlay').style.display='none'; _dslu=null; }
 window.dsluClose = dsluClose;
@@ -633,6 +665,28 @@ function dsluRender(){
   } else {
     h += '<div class="ccw-result" style="margin-top:14px;">No talent at level '+_dslu.next+'. Talents come at odd levels (3, 5, 7, 9), like Shadowdark — you gain HP this level.</div>';
   }
+  // Ship levels with the crew — roll its class Talent (2d6).
+  if(_dslu.hasShip){
+    var st = window._dsShipState;
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;margin:16px 0 4px;">Starship — '+esc(st.classification)+' (levels with the crew)</div>';
+    h += '<p class="ccw-hint" style="margin:0 0 6px;">The ship advances to level '+_dslu.next+' and rolls on its Classification Talent table.</p>';
+    h += '<button class="ccw-roll-btn" onclick="dsluRerollShipTalent()">🎲 Roll 2d6 Ship Talent</button>';
+    if(_dslu.shipTalent) h += '<div class="ccw-result"><b>2d6 = '+_dslu.shipTalent.roll+'</b> → '+(_dslu.shipTalent.row?esc(_dslu.shipTalent.row.text):'—')+'</div>';
+  }
+  // Interface (hacking) growth — optional +1 to a Function bonus.
+  if(_dslu.hasIface){
+    var ifSt = window._iface;
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;margin:16px 0 4px;">Interface (optional)</div>';
+    h += '<p class="ccw-hint" style="margin:0 0 6px;">Optionally raise one Function bonus by +1.</p>';
+    h += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+    [['ACC','Access'],['CTL','Control'],['NET','Net']].forEach(function(t){
+      var cur = parseInt(ifSt[t[0]],10)||0;
+      var on = _dslu.ifaceBump===t[0];
+      h += '<button class="ccw-roll-btn" style="margin:0;width:auto;padding:8px 12px;'+(on?'background:#12303a;color:#8fe0ff;border-color:#2a6a8a;':'')+'" onclick="dsluSetIfaceBump(\''+t[0]+'\')">'+esc(t[1])+' '+(cur>=0?'+':'')+cur+(on?' → '+(cur+1>=0?'+':'')+(cur+1):'')+'</button>';
+    });
+    h += '</div>';
+    if(_dslu.ifaceBump) h += '<div class="ccw-result" style="margin-top:6px;">Interface '+_dslu.ifaceBump+' will increase by +1.</div>';
+  }
   document.getElementById('dslu-body').innerHTML = h;
 }
 window.dsluRender = dsluRender;
@@ -655,8 +709,27 @@ function dsluApply(){
       if(typeof renderTalentsView==='function') try{ renderTalentsView(); }catch(e){}
     }
   }
+  // Ship: it levels with the crew — bump its level and record the rolled Talent.
+  var shipNote = '';
+  if(_dslu.hasShip && window._dsShipState){
+    var sh = window._dsShipState;
+    sh.level = _dslu.next;
+    if(_dslu.shipTalent){
+      if(!Array.isArray(sh.talentLog)) sh.talentLog = [];
+      sh.talentLog.push('Lvl '+_dslu.next+' (2d6='+_dslu.shipTalent.roll+') → '+(_dslu.shipTalent.row?_dslu.shipTalent.row.text:'(no result)'));
+      shipNote = ', ship talent';
+    }
+    try { if(typeof window.renderShip==='function') window.renderShip(); } catch(e){}
+  }
+  // Interface: apply the optional +1 Function bump.
+  var ifaceNote = '';
+  if(_dslu.hasIface && _dslu.ifaceBump && window._iface){
+    window._iface[_dslu.ifaceBump] = (parseInt(window._iface[_dslu.ifaceBump],10)||0) + 1;
+    ifaceNote = ', Interface '+_dslu.ifaceBump+' +1';
+    try { if(typeof window.renderInterface==='function') window.renderInterface(); } catch(e){}
+  }
   try { if(typeof refreshXpNext==='function') refreshXpNext(); } catch(e){}
-  try { if(typeof addLog==='function') addLog('Level Up','⬆','Now level '+_dslu.next+' (+'+_dslu.hp+' HP'+(_dslu.gainsTalent?', new talent':'')+')','normal'); } catch(e){}
+  try { if(typeof addLog==='function') addLog('Level Up','⬆','Now level '+_dslu.next+' (+'+_dslu.hp+' HP'+(_dslu.gainsTalent?', new talent':'')+shipNote+ifaceNote+')','normal'); } catch(e){}
   try { if(typeof _saveSheetNow==='function') _saveSheetNow(); } catch(e){}
   dsluClose();
 }

@@ -199,6 +199,33 @@ function shipRollTalent(){
 } window.dsShipRollTalent = shipRollTalent;
 function shipDelTalent(i){ S().talentLog.splice(i,1); renderShip(); save(); } window.dsShipDelTalent = shipDelTalent;
 
+// Roll a ship weapon into the sheet's shared roll log (attack d20 + damage dice).
+// The gunner adds their own attack bonus; the log shows the raw d20 and the
+// weapon's damage. Uses the sheet globals (rollWithAdv / addLog) when present.
+function shipRollWeapon(i){
+  var w = S().weapons[i]; if(!w) return;
+  var row = weaponDef(w.name) || {};
+  var atk = (typeof window.rollWithAdv==='function') ? window.rollWithAdv(20) : { result: rollN(20) };
+  var atkRoll = (atk && atk.result!=null) ? atk.result : rollN(20);
+  var type = atkRoll===20 ? 'crit' : atkRoll===1 ? 'fumble' : 'normal';
+  var atkBase = (atk && atk.detail) ? atk.detail : ('d20('+atkRoll+')');
+  var resultStr, detailStr;
+  var dm = String(row.dmg||'').match(/^(\d*)d(\d+)$/i);
+  if(dm){
+    var num = (parseInt(dm[1]||'1',10)) * (type==='crit'?2:1), sides=parseInt(dm[2],10);
+    var rolls=[]; for(var k=0;k<num;k++) rolls.push(rollN(sides));
+    var dtot=rolls.reduce(function(a,b){return a+b;},0);
+    resultStr = 'Atk d20: '+atkRoll+'  |  Dmg: '+dtot;
+    detailStr = atkBase+'  |  '+num+'d'+sides+'('+rolls.join('+')+')='+dtot+(type==='crit'?' ✷ crit — double dice':'');
+  } else {
+    resultStr = 'Atk d20: '+atkRoll+(row.dmg?'  |  '+row.dmg:'');
+    detailStr = atkBase;
+  }
+  if(typeof window.addLog==='function'){
+    window.addLog(w.name+' (ship)'+(atkRoll===20?' ★ NAT 20':atkRoll===1?' ✗ NAT 1':''), resultStr, detailStr, type);
+  }
+} window.dsShipRollWeapon = shipRollWeapon;
+
 // ── Render ─────────────────────────────────────────────────────────────────
 function renderShip(){
   var sh = S();
@@ -312,6 +339,7 @@ function renderShip(){
     var row=weaponDef(w.name)||{};
     h += '<div style="display:flex;gap:8px;align-items:center;background:#0a1216;border:1px solid #16323d;border-radius:4px;padding:5px 8px;margin-bottom:4px;font-family:Montserrat,sans-serif;font-size:11px;color:#cfe6ee;">'+
       '<b style="flex:1;">'+esc(w.name)+(w.free?' <span style="color:#7ae0b0;font-weight:400;">(free)</span>':'')+'</b><span style="color:#5a8595;">'+esc(row.range||'')+' · '+esc(row.dmg||'')+' · '+esc(row.props||'')+'</span>'+
+      '<button style="'+cyanBtn+'" onclick="dsShipRollWeapon('+i+')" title="Roll attack + damage into the log">🎲</button>'+
       '<button style="'+cyanBtn+'" onclick="dsShipDelWeapon('+i+')">✕</button></div>';
   });
 

@@ -1336,6 +1336,25 @@ function ifaceSet(k,v){ _iface[k]=v; ifaceSave(); }                        windo
 function ifaceSetStat(k,v){ var n=parseInt(v,10); _iface[k]=isNaN(n)?0:n; renderInterface(); ifaceSave(); } window.ifaceSetStat = ifaceSetStat;
 function ifaceToggleCrash(){ _iface.crashed=!_iface.crashed; renderInterface(); ifaceSave(); } window.ifaceToggleCrash = ifaceToggleCrash;
 function ifaceRepair(){ _iface.crashed=false; _iface.hpCur=String(ifaceHPMax()); renderInterface(); ifaceSave(); } window.ifaceRepair = ifaceRepair;
+// Roll a Function check (d20 + bonus) into the shared roll log.
+function ifaceRoll(fn){
+  var bonus = parseInt(_iface[fn],10)||0;
+  var names = { ACC:'Access', CTL:'Control', NET:'Net' };
+  var r = (typeof rollWithAdv==='function') ? rollWithAdv(20) : { result: 1+Math.floor(Math.random()*20) };
+  var roll = (r && r.result!=null) ? r.result : (1+Math.floor(Math.random()*20));
+  var total = roll + bonus;
+  var type = roll===20?'crit':roll===1?'fumble':'normal';
+  var base = (r && r.detail) ? r.detail : ('d20('+roll+')');
+  if(typeof addLog==='function') addLog((names[fn]||fn)+' Check'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total, base+' + '+fn+'('+(bonus>=0?'+':'')+bonus+') = '+total, type);
+}
+window.ifaceRoll = ifaceRoll;
+// Roll a hacking effect die (from the DC→die table) into the log.
+function ifaceEffect(die){
+  var sides = parseInt(String(die).replace(/[^0-9]/g,''),10)||6;
+  var roll = 1+Math.floor(Math.random()*sides);
+  if(typeof addLog==='function') addLog('Hack Effect '+die, roll, die+'('+roll+')', 'normal');
+}
+window.ifaceEffect = ifaceEffect;
 function renderInterface(){
   var body = document.getElementById('iface-body'); if(!body) return;
   var D = window.DARKSPACE;
@@ -1374,6 +1393,19 @@ function renderInterface(){
   h += '<button style="'+cyanBtn+'" onclick="ifaceRepair()" title="Rest/Downtime + DC 9 INT restores full HP">↻ Repair (full HP)</button>';
   if(crashed) h += '<span style="font-family:Montserrat,sans-serif;font-size:10px;color:#e0503c;">Unusable until repaired (Rest/Downtime + DC 9 INT).</span>';
   h += '</div>';
+  // Roll buttons (Function checks + effect die)
+  h += '<div style="'+sect+'">Rolls</div>';
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+  [['ACC','Access'],['CTL','Control'],['NET','Net']].forEach(function(t){
+    h += '<button style="'+cyanBtn+'" onclick="ifaceRoll(\''+t[0]+'\')" title="Roll d20 + '+t[0]+' into the log">🎲 '+t[1]+' '+fmt(_iface[t[0]])+'</button>';
+  });
+  h += '</div>';
+  if(D && D.hacking){
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:9px;color:#5a8595;margin:6px 0 3px;">Effect die (roll the die for the DC you beat):</div>';
+    h += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+    (D.hacking.diceRolls||[]).forEach(function(dr){ h += '<button style="'+cyanBtn+'" onclick="ifaceEffect(\''+dr.die+'\')" title="'+E(dr.dc)+'">'+E(dr.die)+'</button>'; });
+    h += '</div>';
+  }
   // Quick reference: actions + dice
   if(D && D.hacking){
     h += '<div style="'+sect+'">Hacking Quick Reference</div>';
@@ -3771,6 +3803,19 @@ function takeRest() {
     let triadBack = 0;
     ['Body','Mind','Soul'].forEach(function(p){ if(_triad.exhausted[p]) { _triad.exhausted[p] = false; triadBack++; } });
     if(triadBack) { notes.push('Triad power' + (triadBack>1?'s':'') + ' restored'); if(typeof renderTriad === 'function') renderTriad(); }
+  }
+
+  // The Interface is repaired on a rest (full HP, crash cleared) — only if the
+  // Spacer actually uses one (has a name, Function bonus, or is crashed/damaged).
+  if(typeof _iface === 'object' && _iface) {
+    var ifaceMax = (typeof ifaceHPMax === 'function') ? ifaceHPMax() : (10 + (parseInt(_iface.CTL,10)||0));
+    var ifaceInUse = !!(_iface.name || _iface.ACC || _iface.CTL || _iface.NET || _iface.crashed || (_iface.hpCur!=='' && _iface.hpCur!=null));
+    var ifaceDamaged = _iface.crashed || (_iface.hpCur!=='' && _iface.hpCur!=null && String(_iface.hpCur) !== String(ifaceMax));
+    if(ifaceInUse && ifaceDamaged) {
+      _iface.crashed = false; _iface.hpCur = String(ifaceMax);
+      notes.push('Interface repaired');
+      if(typeof renderInterface === 'function') renderInterface();
+    }
   }
 
   saveSheet(false);
