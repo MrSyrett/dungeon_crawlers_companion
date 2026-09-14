@@ -484,6 +484,8 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #3a2c22;background:transparent;color:#9a8676;" title="Campaign">🔗</button>
+    <button id="build-btn" class="log-action-btn wizard" onclick="ICRPGB.launch()" title="Character Builder">Create</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Spend a Milestone">Milestone</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -515,6 +517,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">ICRPG — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
+<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal"><div class="modal-hd"><div class="ttl">✨ Milestone</div><button class="x" onclick="closeLevelUp()">&#10005;</button></div><div class="modal-bd" id="levelup-body"></div></div></div>
 
 <script>
 // ═══ ICRPG Character Sheet ══════════════════════════════════════════════════
@@ -582,6 +585,7 @@ function recalc(){
   STAT_ABBR.forEach(function(ab){ var t=statTotal(ab); var el=$('st-t-'+ab); if(el) el.textContent=(t>=0?'+':'')+t; });
   var def=Math.min(10, statTotal('CON')+num($('f-armor').value));
   $('def-val').textContent=(def>=0?'+':'')+def;
+  if(typeof refreshWizardButtons==='function') refreshWizardButtons();
   scheduleAutosave();
 }
 
@@ -710,6 +714,54 @@ function openRules(){
   $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open');
 }
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
+
+// ── Milestone (level-up) wizard ─────────────────────────────────────────────
+// ICRPG advances by Milestones: each grants one improvement. Apply as many as
+// the GM has awarded — every pick bumps the Milestones counter and logs it.
+function hasCharacter(){
+  if(($('f-name').value||'').trim()) return true;
+  return STAT_ABBR.some(function(ab){ return num($('st-b-'+ab).value)!==0 || num($('st-x-'+ab).value)!==0; })
+    || document.querySelectorAll('#abil-body tr, #loot-body tr, #spell-body tr').length>0;
+}
+function refreshWizardButtons(){
+  var lvl=$('level-btn'); if(lvl) lvl.style.display = hasCharacter() ? '' : 'none';
+}
+function openLevelUp(){
+  if(!hasCharacter()){ if(window.ICRPGB) ICRPGB.launch(); return; }
+  renderLevelUp(); $('levelup-overlay').classList.add('open');
+}
+function closeLevelUp(){ $('levelup-overlay').classList.remove('open'); }
+function milestoneBump(){ $('f-level').value=num($('f-level').value)+1; }
+function renderLevelUp(){
+  var ms=num($('f-level').value);
+  var h='<p class="m-hint">You have reached a <b>Milestone</b>. Take one improvement — pick as many as your GM has awarded. Milestones so far: <b style="color:var(--icrpg-dk);">'+ms+'</b>.</p>';
+  h+='<div class="m-lbl">Raise a Stat (+1, cap +10)</div><div style="display:flex;flex-wrap:wrap;gap:6px;">'+
+    STAT_ABBR.map(function(ab){ var t=statTotal(ab); return '<button class="m-btn ghost" onclick="msStat(\''+ab+'\')"'+(t>=10?' disabled':'')+'>'+ab+' <b style="color:var(--icrpg-dk);">+'+t+'</b> → +'+Math.min(10,t+1)+'</button>'; }).join('')+'</div>';
+  h+='<div class="m-lbl" style="margin-top:12px;">Grow tougher</div><div style="display:flex;flex-wrap:wrap;gap:6px;">'+
+    '<button class="m-btn ghost" onclick="msHeart()">＋ Gain a Heart (+10 max HP, heal up)</button>'+
+    '<button class="m-btn ghost" onclick="msEffort()">＋ Effort bonus (+1 to an Effort die)</button></div>';
+  h+='<div class="m-lbl" style="margin-top:12px;">Learn something new</div><div style="display:flex;flex-wrap:wrap;gap:6px;">'+
+    '<button class="m-btn" onclick="msPick(\'abil\')">＋ Ability / Power / Augment</button>'+
+    '<button class="m-btn" onclick="msPick(\'spell\')">＋ Spell</button>'+
+    '<button class="m-btn" onclick="msPick(\'loot\')">＋ Loot</button></div>';
+  h+='<div style="margin-top:16px;text-align:right;"><button class="m-btn ghost" onclick="closeLevelUp()">Done</button></div>';
+  $('levelup-body').innerHTML=h;
+}
+function msStat(ab){
+  var t=statTotal(ab); if(t>=10) return;
+  $('st-x-'+ab).value=num($('st-x-'+ab).value)+1; recalc(); milestoneBump();
+  addLog('Milestone','+1 '+ab,ab+' is now +'+statTotal(ab),'crit'); renderLevelUp(); scheduleAutosave();
+}
+function msHeart(){
+  $('f-hpmax').value=num($('f-hpmax').value)+10; $('f-hp').value=num($('f-hpmax').value); onHp(); milestoneBump();
+  addLog('Milestone','+1 Heart','Max HP is now '+num($('f-hpmax').value),'crit'); renderLevelUp();
+}
+function msEffort(){
+  var ef=EFFORT_LIST[1]||EFFORT_LIST[0]; var k=ef.name.replace(/[^A-Za-z]/g,''); var el=$('ef-'+k);
+  if(el){ el.value=num(el.value)+1; } milestoneBump();
+  addLog('Milestone','+1 Effort',(ef.name)+' Effort bonus is now +'+(el?num(el.value):1),'crit'); renderLevelUp(); scheduleAutosave();
+}
+function msPick(kind){ milestoneBump(); addLog('Milestone','+1','New '+(kind==='abil'?'ability':kind),'crit'); closeLevelUp(); openPicker(kind); scheduleAutosave(); }
 
 // ═══ LOG (shared chrome) ════════════════════════════════════════════════════
 var _toastTimer=null;
@@ -843,6 +895,7 @@ window.openCampaign=openCampaign; window.closeCampaign=closeCampaign; window.cam
 <script src="/tools-data/icrpg-loot.js"></script>
 <script src="/tools-data/icrpg-gear.js"></script>
 <script src="/tools-data/icrpg-spells.js"></script>
+<script src="/tools-data/icrpg-sheet-builder.js"></script>
 
 <script>
 // ═══ BOOT ═══════════════════════════════════════════════════════════════════
