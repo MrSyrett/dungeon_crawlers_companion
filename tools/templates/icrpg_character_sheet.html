@@ -347,14 +347,15 @@ select option{background:var(--input-bg);color:var(--ink);}
 <style>
 /* ICRPG-specific tweaks layered on the shared skeleton */
 .stats-grid.icrpg{grid-template-columns:repeat(2,1fr);}
-.stat-cell .st-io{display:flex;gap:4px;justify-content:center;align-items:center;margin:4px 0 2px;}
-.stat-cell .st-io input{width:38px;height:30px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
-.stat-cell .st-io span{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+.stat-cell .st-bon{display:flex;gap:5px;justify-content:center;align-items:center;margin-top:5px;}
+.stat-cell .st-bon input{width:46px;height:26px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
+.stat-cell .st-bon span{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
 .eff-tbl{width:100%;border-collapse:collapse;}
-.eff-tbl td{padding:3px 6px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;vertical-align:middle;}
+.eff-tbl td{padding:4px 6px;border-bottom:1px solid var(--rule);font-family:'Barlow Condensed',sans-serif;vertical-align:middle;}
 .eff-tbl .ef-name{font-size:13px;font-weight:700;color:var(--ink);}
-.eff-tbl .ef-die{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--icrpg-dk);width:34px;text-align:center;}
-.eff-tbl input{width:44px;height:24px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
+.eff-tbl input{width:44px;height:26px;border:1px solid var(--input-border);background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
+.eff-tbl .ef-roll{font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:#1a1a1a;background:var(--icrpg);border:1px solid var(--icrpg-dk);border-radius:5px;padding:5px 0;cursor:pointer;width:48px;text-align:center;}
+.eff-tbl .ef-roll:hover{background:var(--icrpg-dk);color:#fff;}
 .hearts{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
 .heart{width:26px;height:26px;border:1px solid var(--rule);border-radius:5px;background:var(--box);cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;color:var(--icrpg-dk);}
 .heart.full{background:var(--icrpg);border-color:var(--icrpg-dk);color:#fff;}
@@ -364,6 +365,13 @@ select option{background:var(--input-bg);color:var(--ink);}
 .mast b.on{background:var(--icrpg);}
 .coin-btn{width:100%;}
 .coin-btn.on{background:var(--gold);border-color:#9a7414;color:#1a1a1a;}
+.lvl-grid{display:flex;flex-direction:column;gap:1px;}
+.lvl-row{display:flex;align-items:center;gap:8px;padding:5px 2px;border-bottom:1px solid #2a221c;}
+.lvl-name{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:#e8dcd2;}
+.lvl-val{font-family:'Share Tech Mono',monospace;font-size:12px;color:#e8823c;min-width:118px;text-align:right;}
+.lvl-step{width:32px;height:30px;background:#2a221c;border:1px solid #4a4030;color:#ddd;cursor:pointer;border-radius:4px;font-weight:700;font-size:16px;line-height:1;}
+.lvl-step:hover:not(:disabled){border-color:var(--icrpg);color:#fff;}
+.lvl-step:disabled{opacity:.3;cursor:default;}
 .tag-pill{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--icrpg-dk);background:var(--box);border:1px solid var(--rule);border-radius:3px;padding:1px 5px;white-space:nowrap;}
 </style>
 
@@ -485,7 +493,7 @@ select option{background:var(--input-bg);color:var(--ink);}
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #3a2c22;background:transparent;color:#9a8676;" title="Campaign">🔗</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="ICRPGB.launch()" title="Character Builder">Create</button>
-    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Spend a Milestone">Milestone</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Level up (spend a Milestone)" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -517,7 +525,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">ICRPG — Quick Rules</div><button class="x" onclick="closeRules()">&#10005;</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">&#10005;</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
-<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal"><div class="modal-hd"><div class="ttl">✨ Milestone</div><button class="x" onclick="closeLevelUp()">&#10005;</button></div><div class="modal-bd" id="levelup-body"></div></div></div>
+<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal"><div class="modal-hd"><div class="ttl">✨ Level Up</div><button class="x" onclick="closeLevelUp()">&#10005;</button></div><div class="modal-bd" id="levelup-body"></div></div></div>
 
 <script>
 // ═══ ICRPG Character Sheet ══════════════════════════════════════════════════
@@ -546,12 +554,15 @@ var SPELLS = G(typeof ICRPG_SPELLS!=='undefined'?ICRPG_SPELLS:undefined);
 function statName(ab){ var s=STATS.find(function(x){return x.abbr===ab;}); return s?s.abbr:ab; }
 function statTotal(ab){ return Math.min(10, num($('st-b-'+ab).value)+num($('st-x-'+ab).value)); }
 function buildStats(){
+  // Base is fixed at creation (kept in a hidden input); the player edits Bonus,
+  // which sits under the rollable total button. Total = base + bonus (cap +10).
   var g=$('stats-grid'); g.innerHTML='';
   STAT_ABBR.forEach(function(ab){
     var cell=document.createElement('div'); cell.className='stat-cell';
     cell.innerHTML='<div class="sn" onclick="rollStat(\''+ab+'\')" title="Roll d20 + '+ab+'">'+ab+'</div>'+
-      '<div class="st-io"><span>base</span><input id="st-b-'+ab+'" type="number" value="0" oninput="recalc()"><span>bonus</span><input id="st-x-'+ab+'" type="number" value="0" oninput="recalc()"></div>'+
-      '<button class="attr-btn" id="st-t-'+ab+'" onclick="rollStat(\''+ab+'\')">+0</button>';
+      '<input id="st-b-'+ab+'" type="hidden" value="0">'+
+      '<button class="attr-btn" id="st-t-'+ab+'" onclick="rollStat(\''+ab+'\')">+0</button>'+
+      '<div class="st-bon"><span>bonus</span><input id="st-x-'+ab+'" type="number" value="0" oninput="recalc()"></div>';
     g.appendChild(cell);
   });
 }
@@ -559,11 +570,11 @@ function buildEffort(){
   var b=$('effort-body'); b.innerHTML='';
   EFFORT_LIST.forEach(function(ef){
     var key=ef.name.replace(/[^A-Za-z]/g,'');
+    var nm=esc(ef.name).replace(/&#39;/g,"\\'");
     var tr=document.createElement('tr');
     tr.innerHTML='<td class="ef-name">'+esc(ef.name)+'</td>'+
-      '<td class="ef-die">'+esc(ef.die)+'</td>'+
       '<td style="text-align:right;">bonus <input id="ef-'+key+'" type="number" value="0" oninput="scheduleAutosave()"></td>'+
-      '<td style="text-align:right;width:64px;"><button class="small-btn" onclick="rollEffort(\''+key+'\',\''+esc(ef.die)+'\',\''+esc(ef.name).replace(/&#39;/g,"\\'")+'\')">Roll</button></td>';
+      '<td style="text-align:right;width:60px;"><button class="ef-roll" title="Roll '+esc(ef.die)+' Effort" onclick="rollEffort(\''+key+'\',\''+esc(ef.die)+'\',\''+nm+'\')">'+esc(ef.die)+'</button></td>';
     b.appendChild(tr);
   });
 }
@@ -715,53 +726,64 @@ function openRules(){
 }
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
 
-// ── Milestone (level-up) wizard ─────────────────────────────────────────────
-// ICRPG advances by Milestones: each grants one improvement. Apply as many as
-// the GM has awarded — every pick bumps the Milestones counter and logs it.
+// ── Level up (Milestone) wizard ─────────────────────────────────────────────
+// ICRPG advances by Milestones. Queue improvements with the +/− steppers —
+// NOTHING is applied until you click Apply, and any step can be undone first.
+// The Create button becomes Level once a character exists (same as every system).
+var _lvl=null;
 function hasCharacter(){
   if(($('f-name').value||'').trim()) return true;
   return STAT_ABBR.some(function(ab){ return num($('st-b-'+ab).value)!==0 || num($('st-x-'+ab).value)!==0; })
     || document.querySelectorAll('#abil-body tr, #loot-body tr, #spell-body tr').length>0;
 }
 function refreshWizardButtons(){
-  var lvl=$('level-btn'); if(lvl) lvl.style.display = hasCharacter() ? '' : 'none';
+  var built=hasCharacter(), bb=$('build-btn'), lb=$('level-btn');
+  if(bb) bb.style.display = built ? 'none' : '';
+  if(lb) lb.style.display = built ? '' : 'none';
 }
 function openLevelUp(){
   if(!hasCharacter()){ if(window.ICRPGB) ICRPGB.launch(); return; }
+  _lvl={ stats:{}, hearts:0, effort:{} };
   renderLevelUp(); $('levelup-overlay').classList.add('open');
 }
-function closeLevelUp(){ $('levelup-overlay').classList.remove('open'); }
-function milestoneBump(){ $('f-level').value=num($('f-level').value)+1; }
+function closeLevelUp(){ $('levelup-overlay').classList.remove('open'); _lvl=null; }
+function _lvlCount(){ if(!_lvl) return 0; var n=_lvl.hearts; STAT_ABBR.forEach(function(a){ n+=_lvl.stats[a]||0; }); Object.keys(_lvl.effort).forEach(function(k){ n+=_lvl.effort[k]||0; }); return n; }
+function lvlStat(ab,d){ if(!_lvl) return; var p=_lvl.stats[ab]||0, t=statTotal(ab); if(d>0 && t+p>=10) return; var nv=Math.max(0,p+d); if(nv) _lvl.stats[ab]=nv; else delete _lvl.stats[ab]; renderLevelUp(); }
+function lvlHeart(d){ if(!_lvl) return; _lvl.hearts=Math.max(0,_lvl.hearts+d); renderLevelUp(); }
+function lvlEffort(k,d){ if(!_lvl) return; var nv=Math.max(0,(_lvl.effort[k]||0)+d); if(nv) _lvl.effort[k]=nv; else delete _lvl.effort[k]; renderLevelUp(); }
+function _lvlRow(nameHtml,valHtml,minus,plus,minusDis,plusDis){
+  return '<div class="lvl-row"><span class="lvl-name">'+nameHtml+'</span><span class="lvl-val">'+valHtml+'</span>'+
+    '<button class="lvl-step" onclick="'+minus+'"'+(minusDis?' disabled':'')+'>−</button>'+
+    '<button class="lvl-step" onclick="'+plus+'"'+(plusDis?' disabled':'')+'>+</button></div>';
+}
 function renderLevelUp(){
-  var ms=num($('f-level').value);
-  var h='<p class="m-hint">You have reached a <b>Milestone</b>. Take one improvement — pick as many as your GM has awarded. Milestones so far: <b style="color:var(--icrpg-dk);">'+ms+'</b>.</p>';
-  h+='<div class="m-lbl">Raise a Stat (+1, cap +10)</div><div style="display:flex;flex-wrap:wrap;gap:6px;">'+
-    STAT_ABBR.map(function(ab){ var t=statTotal(ab); return '<button class="m-btn ghost" onclick="msStat(\''+ab+'\')"'+(t>=10?' disabled':'')+'>'+ab+' <b style="color:var(--icrpg-dk);">+'+t+'</b> → +'+Math.min(10,t+1)+'</button>'; }).join('')+'</div>';
-  h+='<div class="m-lbl" style="margin-top:12px;">Grow tougher</div><div style="display:flex;flex-wrap:wrap;gap:6px;">'+
-    '<button class="m-btn ghost" onclick="msHeart()">＋ Gain a Heart (+10 max HP, heal up)</button>'+
-    '<button class="m-btn ghost" onclick="msEffort()">＋ Effort bonus (+1 to an Effort die)</button></div>';
-  h+='<div class="m-lbl" style="margin-top:12px;">Learn something new</div><div style="display:flex;flex-wrap:wrap;gap:6px;">'+
-    '<button class="m-btn" onclick="msPick(\'abil\')">＋ Ability / Power / Augment</button>'+
-    '<button class="m-btn" onclick="msPick(\'spell\')">＋ Spell</button>'+
-    '<button class="m-btn" onclick="msPick(\'loot\')">＋ Loot</button></div>';
-  h+='<div style="margin-top:16px;text-align:right;"><button class="m-btn ghost" onclick="closeLevelUp()">Done</button></div>';
+  var ms=num($('f-level').value), picks=_lvlCount();
+  var h='<p class="m-hint">You have reached one or more <b>Milestones</b>. Queue your improvements below — <b>nothing is applied until you click Apply</b>, and every step undoes with its <b>−</b>. Milestones so far: <b style="color:var(--icrpg-dk);">'+ms+'</b>.</p>';
+  h+='<div class="m-lbl">Raise a Stat (cap +10)</div><div class="lvl-grid">'+
+    STAT_ABBR.map(function(ab){ var t=statTotal(ab), p=_lvl.stats[ab]||0; return _lvlRow(ab, '+'+t+(p?' → +'+Math.min(10,t+p):''), "lvlStat('"+ab+"',-1)", "lvlStat('"+ab+"',1)", p<=0, t+p>=10); }).join('')+'</div>';
+  var hpMax=num($('f-hpmax').value);
+  h+='<div class="m-lbl" style="margin-top:12px;">Gain Hearts (+10 max HP each)</div><div class="lvl-grid">'+
+    _lvlRow('Hearts', hpMax+(_lvl.hearts?' → '+(hpMax+_lvl.hearts*10):'')+' HP', "lvlHeart(-1)", "lvlHeart(1)", _lvl.hearts<=0, false)+'</div>';
+  h+='<div class="m-lbl" style="margin-top:12px;">Effort bonus (+1 to a die)</div><div class="lvl-grid">'+
+    EFFORT_LIST.map(function(ef){ var k=ef.name.replace(/[^A-Za-z]/g,''); var cur=num(($('ef-'+k)||{}).value), p=_lvl.effort[k]||0; return _lvlRow(esc(ef.name)+' <span style="color:var(--muted);">'+esc(ef.die)+'</span>', '+'+cur+(p?' → +'+(cur+p):''), "lvlEffort('"+k+"',-1)", "lvlEffort('"+k+"',1)", p<=0, false); }).join('')+'</div>';
+  h+='<div class="m-lbl" style="margin-top:12px;">Learn something new</div><p class="m-hint" style="margin:0 0 6px;">Opens the sheet’s picker — add or remove these any time.</p><div style="display:flex;flex-wrap:wrap;gap:6px;">'+
+    '<button class="m-btn ghost" onclick="closeLevelUp();openPicker(\'abil\')">＋ Ability / Power</button>'+
+    '<button class="m-btn ghost" onclick="closeLevelUp();openPicker(\'spell\')">＋ Spell</button>'+
+    '<button class="m-btn ghost" onclick="closeLevelUp();openPicker(\'loot\')">＋ Loot</button></div>';
+  h+='<div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:8px;"><span class="m-hint" style="margin:0;">'+picks+' improvement'+(picks===1?'':'s')+' queued</span><span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button><button class="m-btn" onclick="lvlApply()"'+(picks<=0?' disabled':'')+'>Apply ('+picks+')</button></span></div>';
   $('levelup-body').innerHTML=h;
 }
-function msStat(ab){
-  var t=statTotal(ab); if(t>=10) return;
-  $('st-x-'+ab).value=num($('st-x-'+ab).value)+1; recalc(); milestoneBump();
-  addLog('Milestone','+1 '+ab,ab+' is now +'+statTotal(ab),'crit'); renderLevelUp(); scheduleAutosave();
+function lvlApply(){
+  if(!_lvl) return; var picks=_lvlCount(); if(picks<=0) return;
+  var changes=[];
+  STAT_ABBR.forEach(function(ab){ var p=_lvl.stats[ab]||0; if(!p) return; $('st-x-'+ab).value=num($('st-x-'+ab).value)+p; changes.push('+'+p+' '+ab); });
+  if(_lvl.hearts){ $('f-hpmax').value=num($('f-hpmax').value)+_lvl.hearts*10; $('f-hp').value=num($('f-hpmax').value); changes.push('+'+_lvl.hearts+' Heart'+(_lvl.hearts===1?'':'s')); }
+  Object.keys(_lvl.effort).forEach(function(k){ var el=$('ef-'+k); if(el) el.value=num(el.value)+_lvl.effort[k]; changes.push('+'+_lvl.effort[k]+' '+k+' Effort'); });
+  $('f-level').value=num($('f-level').value)+picks;
+  recalc(); onHp(); scheduleAutosave();
+  addLog('Level Up','+'+picks+' Milestone'+(picks===1?'':'s'), changes.join(', '), 'crit');
+  closeLevelUp();
 }
-function msHeart(){
-  $('f-hpmax').value=num($('f-hpmax').value)+10; $('f-hp').value=num($('f-hpmax').value); onHp(); milestoneBump();
-  addLog('Milestone','+1 Heart','Max HP is now '+num($('f-hpmax').value),'crit'); renderLevelUp();
-}
-function msEffort(){
-  var ef=EFFORT_LIST[1]||EFFORT_LIST[0]; var k=ef.name.replace(/[^A-Za-z]/g,''); var el=$('ef-'+k);
-  if(el){ el.value=num(el.value)+1; } milestoneBump();
-  addLog('Milestone','+1 Effort',(ef.name)+' Effort bonus is now +'+(el?num(el.value):1),'crit'); renderLevelUp(); scheduleAutosave();
-}
-function msPick(kind){ milestoneBump(); addLog('Milestone','+1','New '+(kind==='abil'?'ability':kind),'crit'); closeLevelUp(); openPicker(kind); scheduleAutosave(); }
 
 // ═══ LOG (shared chrome) ════════════════════════════════════════════════════
 var _toastTimer=null;

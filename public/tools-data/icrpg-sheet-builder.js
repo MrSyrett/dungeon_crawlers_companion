@@ -107,7 +107,9 @@
 
   function finish() {
     const lfo = lifeforms().find(x => x.name === lifeForm), bonus = lfo ? parseBonus(lfo.statBonus) : {};
-    const stats = {}; ABBR.forEach(a => { stats[a] = { base: alloc[a] || 0, bonus: bonus[a] || 0 }; });
+    // Base is the fixed creation value (assigned points + Life Form bonus); the
+    // sheet's editable Bonus field starts at 0 and holds later growth / situational mods.
+    const stats = {}; ABBR.forEach(a => { stats[a] = { base: (alloc[a] || 0) + (bonus[a] || 0), bonus: 0 }; });
     const tyo = typeObj();
     const abils = (tyo && Array.isArray(tyo.abilities)) ? tyo.abilities : [];
     const loots = (tyo && Array.isArray(tyo.startingLoot)) ? tyo.startingLoot : [];
