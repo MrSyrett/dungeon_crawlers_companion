@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DS_GEAR, DS_ARMOR, DS_MELEE_WEAPONS, DS_RANGED_WEAPONS, DS_EXPLOSIVES, DS_WEAPON_PROPS, DS_ADVANCED_TECH, DS_ADVANCED_TECH_NOTE } from "@/lib/data/darkspace";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import { effectLabel, type EffectLike } from "@/lib/effects";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { DarkSpaceHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, DataTable, one, type Query, type RawQuery } from "@/components/DarkSpaceRef";
 
@@ -24,7 +25,8 @@ const s = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : 
 
 type Row = {
   name: string; category: Cat; cost: number; slot?: string; ec?: boolean;
-  ac?: string; range?: string; dmg?: string; props?: string; group?: string; desc?: string; homebrew: boolean;
+  ac?: string; range?: string; dmg?: string; props?: string; group?: string; desc?: string;
+  bonuses?: EffectLike[]; homebrew: boolean;
 };
 
 function bookRows(): Row[] {
@@ -46,6 +48,7 @@ function hbToRow(data: Record<string, unknown>, name: string): Row {
     slot: s(data.slot) || undefined, ec: data.ec === true || undefined,
     ac: s(data.ac) || undefined, range: s(data.range) || undefined, dmg: s(data.dmg) || undefined,
     props: s(data.props) || undefined, group: s(data.group) || undefined, desc: s(data.desc) || undefined,
+    bonuses: Array.isArray(data.bonuses) ? (data.bonuses as EffectLike[]) : undefined,
     homebrew: true,
   };
 }
@@ -107,6 +110,7 @@ export default async function DarkSpaceEquipmentPage({ searchParams }: { searchP
               </div>
               {r.props ? <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">{r.props}</p> : null}
               {r.desc ? <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">{r.desc}</p> : null}
+              {r.bonuses && r.bonuses.length ? <p className="mt-2 text-[12px] text-[var(--text)]"><span className="font-semibold text-[#8fd6ea]">Equipped:</span> {r.bonuses.map(effectLabel).join(" · ")}</p> : null}
             </li>
           ))}
         </ul>

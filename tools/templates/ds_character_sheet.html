@@ -1060,6 +1060,9 @@ const ITEM_BONUS_TARGETS = [
 let _itemBonusAC    = 0;
 let _itemBonusSlots = 0;
 let _hbBonusSlots = 0;   // gear slots granted by homebrew talents/features/ancestry
+// Add homebrew gear-slot bonuses from outside the sheet scope (e.g. the DarkSpace
+// level-up, which grants gear slots via a homebrew archetype talent).
+window.dsAddBonusSlots = function(n){ n = parseInt(n,10)||0; if(!n) return; _hbBonusSlots += n; if(typeof refreshGearSlots === 'function') refreshGearSlots(); };
 let _itemBonusAtk   = { meleeAtk:0, meleeDmg:0, rangedAtk:0, rangedDmg:0 };
 // How much we've already baked into hp-max and each ability score input.
 let _itemBonusApplied = { hp:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 };
@@ -6640,16 +6643,30 @@ function injectDarkSpaceHomebrew(rows) {
     const key = nm.toLowerCase();
     if(row.type === 'ds-species') {
       if(seen.sp.has(key)) return; seen.sp.add(key);
-      // Fold ancestry-style extra traits + languages into the trait text.
+      // Fold ancestry-style extra traits + languages into the display text, AND
+      // keep the structured effects/bonuses so the wizard can apply them.
       var parts = [String(d.text||'')];
       (Array.isArray(d.traits) ? d.traits : []).forEach(function(t){
         if(t && (t.name || t.text)) parts.push((t.name ? t.name + ': ' : '') + (t.text||''));
       });
       if(d.languages) parts.push('Languages: ' + d.languages);
-      hbSp.push({ n: ++nSp, name: nm, text: parts.filter(Boolean).join('  •  '), _hb:true });
+      hbSp.push({
+        n: ++nSp, name: nm, text: parts.filter(Boolean).join('  •  '), _hb:true,
+        _bonuses: Array.isArray(d.bonuses) ? d.bonuses : [],
+        _traits:  Array.isArray(d.traits)  ? d.traits  : [],
+        _languages: String(d.languages||'')
+      });
     } else if(row.type === 'ds-archetype') {
       if(seen.ar.has(key)) return; seen.ar.add(key);
       hbAr.push(Object.assign({}, d, { _hb:true }));
+      // Register homebrew titles so the sheet's title machinery can use them.
+      // DarkSpace Motivations map onto the Lawful/Neutral/Chaotic keys:
+      // Virtuous→Lawful, Survivor→Neutral, Vile→Chaotic.
+      if(d.titles && typeof RC_TITLES === 'object'){
+        var _arr = function(v){ return Array.isArray(v) ? v.map(String) : []; };
+        var _L=_arr(d.titles.Lawful), _N=_arr(d.titles.Neutral), _C=_arr(d.titles.Chaotic);
+        if([].concat(_L,_N,_C).some(function(x){return x && x.trim();})) RC_TITLES[nm] = { Lawful:_L, Neutral:_N, Chaotic:_C };
+      }
     } else if(row.type === 'ds-background') {
       if(seen.bg.has(key)) return; seen.bg.add(key);
       hbBg.push({ n: ++nBg, name: nm, text: String(d.text||''), _hb:true });

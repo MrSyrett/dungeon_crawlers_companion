@@ -65,6 +65,117 @@ function talentForRoll(arche, total){
   return null;
 }
 
+// ══ Homebrew mechanical effects (species traits + archetype features/talents) ══
+// DarkSpace homebrew mirrors Shadowdark's effect model. The sheet already owns
+// the effect engine (window._hbEmptyEff / window._hbAccumEffect / window._hbEffOne);
+// this wizard gathers the applicable effects, resolves player choices, and folds
+// the accumulated bonuses into the character it builds.
+
+// The full species pool entry for the chosen species (carries _bonuses/_traits
+// for homebrew species; book species have none).
+function speciesEntry(){
+  if(!_dsw || !_dsw.species) return null;
+  return (ds().species||[]).find(function(x){ return x.name===_dsw.species.name; }) || null;
+}
+function _effLabel(e){ return (typeof window._hbEffOne==='function') ? window._hbEffOne(e) : (String(e&&e.target||'')+' '+(e&&e.amount||0)); }
+
+// Proficiency (homebrew archetypes only — book archetypes keep free-text training).
+function archProfText(a, key){
+  if(!a) return '—';
+  var all = key==='weapons' ? a.weaponsAll : a.armorAll;
+  if(all) return key==='weapons' ? 'All weapons' : 'All armor & shields';
+  var list = a[key];
+  if(Array.isArray(list)) return list.join(', ') || '—';
+  return String(list||'—');
+}
+function archAllowed(a, key, name){
+  if(!a || !a._hb) return true;                 // book archetype: no restriction
+  var all = key==='weapons' ? a.weaponsAll : a.armorAll;
+  if(all) return true;
+  var list = a[key];
+  if(typeof list==='string') list = list ? list.split(/[,;]/).map(function(s){return s.trim();}) : [];
+  if(!Array.isArray(list) || !list.length) return true;   // none defined = no restriction
+  var n = String(name||'').toLowerCase();
+  return list.some(function(w){ var lw=String(w||'').toLowerCase(); return lw && (n.indexOf(lw)>=0 || lw.indexOf(n)>=0); });
+}
+function dswFirstProfWeapon(a){ var w=allWeapons().find(function(x){return archAllowed(a,'weapons',x.name);}); return w?w.name:null; }
+function dswFirstProfArmor(a){ var m=(ds().armor||[]).find(function(x){return archAllowed(a,'armor',x.name);}); return m?m.name:null; }
+
+// Flat list of effects that apply to the Spacer, choose-one rows resolved via
+// _dsw.hbChoices. Order is stable so statChoice effects can be keyed by index.
+function dswApplicableEffects(){
+  var list = [];
+  var sp = speciesEntry();
+  if(sp){
+    (sp._bonuses||[]).forEach(function(e){ list.push(e); });
+    (sp._traits||[]).forEach(function(t, ti){
+      var effs = (t && t.effects) || [];
+      if(t && t.choose){ var pick=_dsw.hbChoices['sp:'+ti]; if(pick!=null && effs[pick]) list.push(effs[pick]); }
+      else effs.forEach(function(e){ list.push(e); });
+    });
+  }
+  var a = archetype(_dsw.archetype);
+  if(a){
+    (a.bonuses||[]).forEach(function(e){ list.push(e); });
+    (a.features||[]).forEach(function(f){ if(f && f.choose) return; ((f&&f.effects)||[]).forEach(function(e){ list.push(e); }); });
+    (_dsw.talentRolls||[]).forEach(function(tr, ri){
+      var row = tr && tr.row; if(!row) return;
+      var effs = row.effects || [];
+      if(row.choose){ var pick=_dsw.hbChoices['tal:'+ri]; if(pick!=null && effs[pick]) list.push(effs[pick]); }
+      else effs.forEach(function(e){ list.push(e); });
+    });
+  }
+  return list;
+}
+// Accumulate applicable effects into the sheet's effect object.
+function dswComputeEff(){
+  if(typeof window._hbEmptyEff!=='function' || typeof window._hbAccumEffect!=='function') return null;
+  var out = window._hbEmptyEff();
+  dswApplicableEffects().forEach(function(e, idx){
+    if(!e || !e.target) return;
+    if(e.target==='statChoice'){
+      var st = _dsw.hbChoices['stat:'+idx];
+      if(st) window._hbAccumEffect(out, { target:st, amount:e.amount });
+      return;
+    }
+    window._hbAccumEffect(out, e);
+  });
+  return out;
+}
+// Choices the player must resolve before creation (choose-one rows + statChoice).
+// Single-option "choose" rows are auto-resolved.
+var _DS_STAT_OPTS = [['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']];
+function dswPendingChoices(){
+  var ch = [];
+  var sp = speciesEntry();
+  if(sp) (sp._traits||[]).forEach(function(t, ti){
+    if(!(t && t.choose)) return;
+    var opts = ((t.effects)||[]).map(function(e,i){ return { v:String(i), label:_effLabel(e) }; });
+    if(opts.length>1) ch.push({ key:'sp:'+ti, label:'Species: '+esc(t.name||t.text||'trait'), opts:opts });
+    else if(opts.length===1) _dsw.hbChoices['sp:'+ti]=0;
+  });
+  var a = archetype(_dsw.archetype);
+  if(a) (_dsw.talentRolls||[]).forEach(function(tr, ri){
+    var row = tr && tr.row; if(!(row && row.choose)) return;
+    var opts = ((row.effects)||[]).map(function(e,i){ return { v:String(i), label:_effLabel(e) }; });
+    if(opts.length>1) ch.push({ key:'tal:'+ri, label:'Talent (2d6='+tr.roll+')', opts:opts });
+    else if(opts.length===1) _dsw.hbChoices['tal:'+ri]=0;
+  });
+  dswApplicableEffects().forEach(function(e, idx){
+    if(e && e.target==='statChoice')
+      ch.push({ key:'stat:'+idx, label:'Stat choice ('+((Number(e.amount)>=0?'+':'')+(Number(e.amount)||0))+')',
+                opts:_DS_STAT_OPTS.map(function(o){ return { v:o[0], label:o[1] }; }) });
+  });
+  return ch;
+}
+function dswSetChoice(key, val){
+  if(!_dsw.hbChoices) _dsw.hbChoices={};
+  if(/^(sp|tal):/.test(key)){ var n=parseInt(val,10); _dsw.hbChoices[key]=isNaN(n)?null:n; }
+  else _dsw.hbChoices[key]=val || null;
+  dswRender();
+}
+window.dswSetChoice = dswSetChoice;
+
 // ══ Wizard control ══════════════════════════════════════════════════════════
 function startDarkSpaceWizard(){
   _dsw = {
@@ -81,6 +192,7 @@ function startDarkSpaceWizard(){
     contacts: null,                    // for The Virtuous
     triadOptIn: false, triadPower: null,   // The Triad (metaphysical) discipline
     shipName: '', shipRole: '',            // crew identity (shown by Background)
+    hbChoices: {},                         // resolved homebrew choose-one / statChoice picks
     hp: null, name: ''
   };
   document.getElementById('dsw-overlay').style.display = 'flex';
@@ -288,13 +400,18 @@ function dswArchetype(){
     var sel = (_dsw.archetype===a.name) ? ' selected' : '';
     h += '<button class="ccw-choice'+sel+'" onclick="dswPickArch('+JSON.stringify(a.name).replace(/"/g,'&quot;')+')">'+
       '<div class="ccw-choice-name">'+esc(a.name)+'  <span style="color:#6ac8df;font-weight:700;">'+esc(a.stat)+' · d'+a.hitDie+'</span></div>'+
-      '<div class="ccw-choice-desc">'+esc(a.blurb)+'<br><i>Weapons:</i> '+esc(a.weapons)+' · <i>Armor:</i> '+esc(a.armor)+'</div></button>';
+      '<div class="ccw-choice-desc">'+esc(a.blurb)+'<br><i>Weapons:</i> '+esc(archProfText(a,'weapons'))+' · <i>Armor:</i> '+esc(archProfText(a,'armor'))+
+      (a.triad && (a.triad.Body||a.triad.Mind||a.triad.Soul) ? '<br><i>Triad:</i> '+['Body','Mind','Soul'].filter(function(p){return a.triad[p];}).join(', ') : '')+
+      '</div></button>';
   });
   h += '</div>';
   return h;
 }
 function dswPickArch(nm){ _dsw.archetype=nm; _dsw.talentRolls=null;
-  var kit=START_KIT[nm]||{}; _dsw.weapon=kit.weapon; _dsw.armor=kit.armor; dswRender(); }
+  var kit=START_KIT[nm];
+  if(kit){ _dsw.weapon=kit.weapon; _dsw.armor=kit.armor; }
+  else { var a=archetype(nm)||{}; _dsw.weapon=dswFirstProfWeapon(a); _dsw.armor=dswFirstProfArmor(a); }
+  dswRender(); }
 window.dswPickArch = dswPickArch;
 
 // ── Background ──
@@ -391,7 +508,13 @@ function dswRollCredits(){
 }
 function dswGear(){
   if(_dsw.credits==null) dswRollCredits();
+  var arche = archetype(_dsw.archetype);
+  var restricted = !!(arche && arche._hb);
   var wl = allWeapons(), al = ds().armor||[];
+  if(restricted){
+    wl = wl.filter(function(w){ return archAllowed(arche,'weapons',w.name); });
+    al = al.filter(function(a){ return archAllowed(arche,'armor',a.name); });
+  }
   var h = '<p class="ccw-hint">Rookies start with <b>2d6 × 10 credits</b>. Buy a Spacer\'s Kit and pick a starting weapon and armor (suggested for your archetype). Anything else you can shop for later.</p>';
   h += '<button class="ccw-roll-btn" onclick="dswRerollCredits()">🎲 Roll Starting Credits</button>';
   h += '<div class="ccw-result"><b>Credits:</b> '+_dsw.credits+' cr'+
@@ -450,6 +573,30 @@ function dswFinish(){
     '<div><label style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;">Ship Role</label><br>'+
     '<input value="'+esc(_dsw.shipRole)+'" oninput="dswSetShipRole(this.value)" placeholder="Pilot, Gunner, Engineer, Medic..." style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:8px;font-family:Montserrat,sans-serif;font-size:13px;margin-top:3px;"></div>'+
     '</div>';
+  // Homebrew choices to resolve (choose-one traits/talents, stat picks).
+  var pending = dswPendingChoices();
+  if(pending.length){
+    h += '<div class="ccw-summary" style="border-color:#2a6a8a;">';
+    h += '<div class="ccw-summary-title" style="color:#6ac8df;">Homebrew Choices</div>';
+    pending.forEach(function(c){
+      var cur = _dsw.hbChoices[c.key];
+      h += '<div style="margin:5px 0;font-family:Montserrat,sans-serif;font-size:12px;color:#ddd;">'+c.label+'<br>'+
+        '<select onchange="dswSetChoice('+JSON.stringify(c.key).replace(/"/g,'&quot;')+',this.value)" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:6px;font-family:Montserrat,sans-serif;font-size:12px;margin-top:3px;">'+
+        '<option value="">— choose —</option>'+
+        c.opts.map(function(o){ return '<option value="'+esc(o.v)+'"'+(String(cur)===String(o.v)?' selected':'')+'>'+esc(o.label)+'</option>'; }).join('')+
+        '</select></div>';
+    });
+    h += '</div>';
+  }
+  // Effect summary (what the homebrew grants mechanically).
+  var eff = dswComputeEff();
+  if(eff){
+    var bits = [];
+    [['hp','HP'],['ac','AC'],['meleeAtk','Melee Atk'],['meleeDmg','Melee Dmg'],['rangedAtk','Ranged Atk'],['rangedDmg','Ranged Dmg'],['gearSlots','Gear Slots'],['str','STR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','WIS'],['cha','CHA']].forEach(function(p){
+      var v = eff[p[0]]||0; if(v) bits.push((v>=0?'+':'')+v+' '+p[1]);
+    });
+    if(bits.length) h += '<div class="ccw-result"><b>Homebrew effects:</b> '+esc(bits.join(' · '))+'</div>';
+  }
   h += '<div class="ccw-summary">';
   h += '<div class="ccw-summary-title">Spacer Summary</div>';
   h += '<div><b>Species:</b> '+esc(_dsw.species.name)+'</div>';
@@ -502,7 +649,16 @@ function dswBuildGear(){
   return { rows:rows, free:'Backpack' };
 }
 
-function dswBuildAttacks(){
+// Append a flat +N to a dice/damage string ("1d6" → "1d6+2").
+function _dmgPlus(dmg, n){
+  n = parseInt(n,10)||0; var s=String(dmg||'');
+  if(!n) return s;
+  var m = s.match(/([+-]\d+)\s*$/);
+  if(m){ var base=(parseInt(m[1],10)||0)+n; return s.slice(0,m.index).replace(/\s+$/,'') + (base?(base>0?'+':'')+base:''); }
+  return s + (n>0?'+':'') + n;
+}
+function dswBuildAttacks(eff){
+  eff = eff || {};
   var atks = [];
   var s = _dsw.stats;
   if(_dsw.weapon){
@@ -510,14 +666,15 @@ function dswBuildAttacks(){
     if(w){
       var isRanged = (w.kind==='ranged');
       var st = isRanged ? 'DEX' : 'STR';
-      var b = mod(isRanged ? s.DEX : s.STR);
-      atks.push({ name:w.name, stat:st, bonus:(b>=0?'+':'')+b, range:(w.range||''), damage:(w.dmg||''), dmgPick:0, adv:false });
+      var b = mod(isRanged ? s.DEX : s.STR) + (isRanged ? (eff.rangedAtk||0) : (eff.meleeAtk||0));
+      var dmg = _dmgPlus(w.dmg||'', isRanged ? (eff.rangedDmg||0) : (eff.meleeDmg||0));
+      atks.push({ name:w.name, stat:st, bonus:(b>=0?'+':'')+b, range:(w.range||''), damage:dmg, dmgPick:0, adv:false });
     }
   }
   // Natural Weapon species trait → 1d6 melee attack
   if(_dsw.species && /Natural Weapon/i.test(_dsw.species.name)){
-    var bn = mod(s.STR);
-    atks.push({ name:'Natural Weapon', stat:'STR', bonus:(bn>=0?'+':'')+bn, range:'C', damage:'1d6', dmgPick:0, adv:false });
+    var bn = mod(s.STR) + (eff.meleeAtk||0);
+    atks.push({ name:'Natural Weapon', stat:'STR', bonus:(bn>=0?'+':'')+bn, range:'C', damage:_dmgPlus('1d6', eff.meleeDmg||0), dmgPick:0, adv:false });
   }
   return atks;
 }
@@ -526,9 +683,18 @@ function dswApply(){
   var arche = archetype(_dsw.archetype) || {};
   var s = _dsw.stats;
   if(_dsw.hp==null) _dsw.hp = dswComputeHP();
-  var dexMod = mod(s.DEX);
+
+  // Homebrew mechanical effects (species traits + archetype features/talents).
+  var eff = dswComputeEff() || {};
+  var st2 = {
+    STR: s.STR + (eff.str||0), DEX: s.DEX + (eff.dex||0), CON: s.CON + (eff.con||0),
+    INT: s.INT + (eff.int||0), WIS: s.WIS + (eff.wis||0), CHA: s.CHA + (eff.cha||0)
+  };
+  var dexMod = mod(st2.DEX);
   var armorRow = armorByName(_dsw.armor);
   var ac = armorAC(armorRow, dexMod); if(ac==null) ac = 10 + dexMod;
+  ac += (eff.ac||0);
+  var hp = Math.max(1, (_dsw.hp||1) + (eff.hp||0));
   var g = dswBuildGear();
 
   var data = {
@@ -542,8 +708,8 @@ function dswApply(){
     shipName: _dsw.shipName || '',
     shipRole: _dsw.shipRole || '',
     level: 1,
-    stats: { STR:s.STR, DEX:s.DEX, CON:s.CON, INT:s.INT, WIS:s.WIS, CHA:s.CHA },
-    maxHitPoints: _dsw.hp,
+    stats: st2,
+    maxHitPoints: hp,
     armorClass: ac,
     gold: _dsw.credits,               // credits stored in the gold field
     silver: 0, copper: 0,
@@ -551,13 +717,21 @@ function dswApply(){
     _sheet: {
       options: { heroDark:false, darkSpace:true },
       talents: dswBuildTalentsText(),
-      attacks: dswBuildAttacks(),
+      attacks: dswBuildAttacks(eff),
       gearRows: g.rows,               // verbatim slotted rows (with equip flags)
-      hpCurrent: _dsw.hp,
+      hpCurrent: hp,
+      hbBonusSlots: (eff.gearSlots||0),   // homebrew gear-slot bonuses
       luckPts: ''
     }
   };
   try { applySheet(data); } catch(e){ console.error('DarkSpace apply failed', e); }
+  // Archetype grants Triad access → mark those disciplines known on the sheet.
+  try {
+    if(arche.triad && window._triad && window._triad.known){
+      ['Body','Mind','Soul'].forEach(function(p){ if(arche.triad[p]) window._triad.known[p]=true; });
+      if(typeof renderTriad==='function') renderTriad();
+    }
+  } catch(e){}
   try { if(typeof syncModeChrome==='function') syncModeChrome(); } catch(e){}
   try { if(typeof updateHeaderButton==='function') updateHeaderButton(); } catch(e){}
   try { if(typeof _saveSheetNow==='function') _saveSheetNow(); } catch(e){}
@@ -701,12 +875,28 @@ function dsluApply(){
   set('hp-max', newMax);
   set('hp-current', (parseInt(hpCurEl&&hpCurEl.value,10)||0) + (_dslu.hp||0));
   // Talent: append to the talents box (only on odd levels, when one is gained).
+  var talNote = '';
   if(_dslu.gainsTalent && _dslu.talent){
     var ta = document.getElementById('talents-text');
     if(ta){
       var line = 'Lvl '+_dslu.next+' talent: '+(_dslu.talent.row?_dslu.talent.row.text:'')+' (2d6='+_dslu.talent.roll+')';
       ta.value = (ta.value ? ta.value + '\n' : '') + line;
       if(typeof renderTalentsView==='function') try{ renderTalentsView(); }catch(e){}
+    }
+    // Homebrew talent effects: apply stat / HP bonuses to the sheet (a choose-one
+    // row is left for the player). AC/attack effects are noted in the talent text.
+    var row = _dslu.talent.row;
+    if(row && Array.isArray(row.effects) && row.effects.length && !row.choose &&
+       typeof window._hbEmptyEff==='function' && typeof window._hbAccumEffect==='function'){
+      var tout = window._hbEmptyEff();
+      row.effects.forEach(function(e){ if(e && e.target && e.target!=='statChoice') window._hbAccumEffect(tout, e); });
+      ['str','dex','con','int','wis','cha'].forEach(function(k){
+        if(tout[k]){ var el=document.getElementById(k+'-val'); if(el){ el.value = String((parseInt(el.value,10)||0)+tout[k]); if(typeof onStatChange==='function') try{ onStatChange(k); }catch(e){} } }
+      });
+      if(tout.hp){ set('hp-max', (parseInt(document.getElementById('hp-max').value,10)||0)+tout.hp); set('hp-current', (parseInt(document.getElementById('hp-current').value,10)||0)+tout.hp); }
+      if(tout.gearSlots && typeof window.dsAddBonusSlots==='function'){ try{ window.dsAddBonusSlots(tout.gearSlots); }catch(e){} }
+      var eb=[]; if(tout.hp) eb.push('+'+tout.hp+' HP'); ['str','dex','con','int','wis','cha'].forEach(function(k){ if(tout[k]) eb.push('+'+tout[k]+' '+k.toUpperCase()); });
+      if(eb.length) talNote = ', '+eb.join(' ');
     }
   }
   // Ship: it levels with the crew — bump its level and record the rolled Talent.
@@ -729,7 +919,7 @@ function dsluApply(){
     try { if(typeof window.renderInterface==='function') window.renderInterface(); } catch(e){}
   }
   try { if(typeof refreshXpNext==='function') refreshXpNext(); } catch(e){}
-  try { if(typeof addLog==='function') addLog('Level Up','⬆','Now level '+_dslu.next+' (+'+_dslu.hp+' HP'+(_dslu.gainsTalent?', new talent':'')+shipNote+ifaceNote+')','normal'); } catch(e){}
+  try { if(typeof addLog==='function') addLog('Level Up','⬆','Now level '+_dslu.next+' (+'+_dslu.hp+' HP'+(_dslu.gainsTalent?', new talent':'')+talNote+shipNote+ifaceNote+')','normal'); } catch(e){}
   try { if(typeof _saveSheetNow==='function') _saveSheetNow(); } catch(e){}
   dsluClose();
 }

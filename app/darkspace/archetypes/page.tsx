@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DS_ARCHETYPES } from "@/lib/data/darkspace";
-import type { DsArchetype } from "@/lib/data/darkspace-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import { effectLabel, type EffectLike } from "@/lib/effects";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { DarkSpaceHeader, SearchForm, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, DataTable, one, type RawQuery } from "@/components/DarkSpaceRef";
 
@@ -10,23 +10,45 @@ export const dynamic = "force-dynamic";
 const BASE = "/darkspace/archetypes";
 
 const s = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
-type ArchRow = DsArchetype & { homebrew: boolean };
+type EffRow = { name: string; text: string; effects: EffectLike[]; choose?: boolean };
+type ArchRow = {
+  name: string; stat: string; hitDie: number; weapons: string; armor: string; blurb: string;
+  features: EffRow[]; talents: { r: string; text: string; effects: EffectLike[]; choose?: boolean }[];
+  bonuses: EffectLike[]; triad: string[]; homebrew: boolean;
+};
+
+const effList = (v: unknown): EffectLike[] => (Array.isArray(v) ? (v as EffectLike[]) : []);
+// Weapon/armor proficiency display: "All …", a joined list, or a legacy string.
+function profText(all: unknown, list: unknown, allLabel: string): string {
+  if (all === true) return allLabel;
+  if (Array.isArray(list)) return list.map((x) => s(x)).filter(Boolean).join(", ");
+  return s(list);
+}
 
 function hbToArch(data: Record<string, unknown>, name: string): ArchRow {
   const feats = Array.isArray(data.features) ? (data.features as Record<string, unknown>[]) : [];
   const tals = Array.isArray(data.talents) ? (data.talents as Record<string, unknown>[]) : [];
   const hd = parseInt(s(data.hitDie), 10);
+  const triadIn = (data.triad ?? {}) as Record<string, unknown>;
   return {
     name,
     stat: s(data.stat) || "STR",
     hitDie: Number.isFinite(hd) ? hd : 6,
-    weapons: s(data.weapons),
-    armor: s(data.armor),
+    weapons: profText(data.weaponsAll, data.weapons, "All weapons"),
+    armor: profText(data.armorAll, data.armor, "All armor & shields"),
     blurb: s(data.blurb),
-    features: feats.map((f) => ({ name: s(f.name), text: s(f.text) })),
-    talents: tals.map((t) => ({ r: s(t.r), text: s(t.text) })),
+    features: feats.map((f) => ({ name: s(f.name), text: s(f.text), effects: effList(f.effects), choose: f.choose === true })),
+    talents: tals.map((t) => ({ r: s(t.r), text: s(t.text), effects: effList(t.effects), choose: t.choose === true })),
+    bonuses: effList(data.bonuses),
+    triad: ["Body", "Mind", "Soul"].filter((p) => triadIn[p]),
     homebrew: true,
   };
+}
+
+function effSuffix(effects: EffectLike[], choose?: boolean): string {
+  if (!effects.length) return "";
+  const labels = effects.map(effectLabel).join(choose ? " / " : ", ");
+  return ` (${choose ? "choose one: " : ""}${labels})`;
 }
 
 export default async function DarkSpaceArchetypesPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
@@ -39,7 +61,12 @@ export default async function DarkSpaceArchetypesPage({ searchParams }: { search
     userCampaigns(user.id),
   ]);
   const hbRows: ArchRow[] = hbVisible.map((h) => hbToArch(h.data as Record<string, unknown>, h.name));
-  const bookRows: ArchRow[] = DS_ARCHETYPES.map((a) => ({ ...a, homebrew: false }));
+  const bookRows: ArchRow[] = DS_ARCHETYPES.map((a) => ({
+    name: a.name, stat: a.stat, hitDie: a.hitDie, weapons: a.weapons, armor: a.armor, blurb: a.blurb,
+    features: a.features.map((f) => ({ name: f.name, text: f.text, effects: [] as EffectLike[] })),
+    talents: a.talents.map((t) => ({ r: t.r, text: t.text, effects: [] as EffectLike[] })),
+    bonuses: [] as EffectLike[], triad: [] as string[], homebrew: false,
+  }));
 
   const raw = await searchParams;
   const q = one(raw.q).trim();
@@ -68,17 +95,19 @@ export default async function DarkSpaceArchetypesPage({ searchParams }: { search
             </div>
             {a.blurb ? <p className="mt-2 text-[13px] italic leading-relaxed text-[var(--muted)]">{a.blurb}</p> : null}
             {(a.weapons || a.armor) ? <p className="mt-2 text-[12px] text-[var(--text)]"><span className="font-semibold text-[#8fd6ea]">Weapons:</span> {a.weapons || "—"} &nbsp;·&nbsp; <span className="font-semibold text-[#8fd6ea]">Armor:</span> {a.armor || "—"}</p> : null}
+            {a.bonuses.length ? <p className="mt-2 text-[12px] text-[var(--text)]"><span className="font-semibold text-[#8fd6ea]">Bonuses:</span> {a.bonuses.map(effectLabel).join(" · ")}</p> : null}
+            {a.triad.length ? <p className="mt-1 text-[12px] text-[var(--text)]"><span className="font-semibold text-[#8fd6ea]">Grants Triad:</span> {a.triad.join(", ")}</p> : null}
             {a.features.length ? (
               <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {a.features.map((f, j) => (
-                  <p key={j} className="text-[13px] leading-relaxed text-[var(--text)]"><span className="font-semibold">{f.name}.</span> {f.text}</p>
+                  <p key={j} className="text-[13px] leading-relaxed text-[var(--text)]"><span className="font-semibold">{f.name}.</span> {f.text}<span className="text-[#8fd6ea]">{effSuffix(f.effects, f.choose)}</span></p>
                 ))}
               </div>
             ) : null}
             {a.talents.length ? (
               <div className="mt-4">
                 <h3 className="mb-1 text-[10px] font-black uppercase tracking-[0.15em] text-[#8fd6ea]">{a.name} Talents (2d6)</h3>
-                <DataTable head={["2d6", "Talent"]} rows={a.talents.map((t) => [t.r, t.text])} />
+                <DataTable head={["2d6", "Talent"]} rows={a.talents.map((t) => [t.r, t.text + effSuffix(t.effects, t.choose)])} />
               </div>
             ) : null}
           </section>

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { DS_SPECIES, DS_TECH_SPECIES, DS_HUMAN_NOTE } from "@/lib/data/darkspace";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
+import { effectLabel, type EffectLike } from "@/lib/effects";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { DarkSpaceHeader, SearchForm, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, type RawQuery } from "@/components/DarkSpaceRef";
 
@@ -9,11 +10,18 @@ export const dynamic = "force-dynamic";
 const BASE = "/darkspace/species";
 
 const s = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
-type Trait = { name: string; text: string };
-type SpeciesRow = { n: number | null; name: string; text: string; traits?: Trait[]; languages?: string; homebrew: boolean };
+type Trait = { name: string; text: string; effects?: EffectLike[]; choose?: boolean };
+type SpeciesRow = { n: number | null; name: string; text: string; traits?: Trait[]; bonuses?: EffectLike[]; languages?: string; homebrew: boolean };
 function hbTraits(data: Record<string, unknown>): Trait[] {
   const raw = Array.isArray(data.traits) ? data.traits : [];
-  return raw.map((t) => ({ name: s((t as Record<string, unknown>).name), text: s((t as Record<string, unknown>).text) })).filter((t) => t.name || t.text);
+  return raw.map((t) => {
+    const o = t as Record<string, unknown>;
+    return { name: s(o.name), text: s(o.text), effects: Array.isArray(o.effects) ? (o.effects as EffectLike[]) : [], choose: o.choose === true };
+  }).filter((t) => t.name || t.text);
+}
+function effSuffix(effects: EffectLike[] | undefined, choose?: boolean): string {
+  if (!effects || !effects.length) return "";
+  return ` (${choose ? "choose one: " : ""}${effects.map(effectLabel).join(choose ? " / " : ", ")})`;
 }
 
 export default async function DarkSpaceSpeciesPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
@@ -27,7 +35,7 @@ export default async function DarkSpaceSpeciesPage({ searchParams }: { searchPar
   ]);
   const hbRows: SpeciesRow[] = hbVisible.map((h) => {
     const d = h.data as Record<string, unknown>;
-    return { n: null, name: h.name, text: s(d.text), traits: hbTraits(d), languages: s(d.languages), homebrew: true };
+    return { n: null, name: h.name, text: s(d.text), traits: hbTraits(d), bonuses: Array.isArray(d.bonuses) ? (d.bonuses as EffectLike[]) : [], languages: s(d.languages), homebrew: true };
   });
   const bookRows: SpeciesRow[] = DS_SPECIES.map((sp) => ({ ...sp, homebrew: false }));
 
@@ -58,11 +66,12 @@ export default async function DarkSpaceSpeciesPage({ searchParams }: { searchPar
                 {sp.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
               </div>
               <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{sp.text}</p>
+              {sp.bonuses && sp.bonuses.length ? <p className="mt-2 text-[12px] text-[var(--text)]"><span className="font-semibold text-[#8fd6ea]">Bonuses:</span> {sp.bonuses.map(effectLabel).join(" · ")}</p> : null}
               {sp.traits && sp.traits.length ? (
                 <ul className="mt-2 space-y-1">
                   {sp.traits.map((t, j) => (
                     <li key={j} className="text-[13px] leading-relaxed text-[var(--text)]">
-                      {t.name ? <span className="font-semibold text-[#8fd6ea]">{t.name}: </span> : null}{t.text}
+                      {t.name ? <span className="font-semibold text-[#8fd6ea]">{t.name}: </span> : null}{t.text}<span className="text-[#8fd6ea]">{effSuffix(t.effects, t.choose)}</span>
                     </li>
                   ))}
                 </ul>

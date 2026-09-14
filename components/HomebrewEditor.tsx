@@ -2,6 +2,7 @@
 
 import { useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
+import { TALENT_TARGETS } from "@/lib/effects";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // A generic, schema-driven homebrew editor shared by the lighter game systems
@@ -38,7 +39,21 @@ export type ScalarField =
 export type Field =
   | ScalarField
   | (BaseField & { type: "stringList"; placeholder?: string; addLabel?: string })
-  | (BaseField & { type: "objectList"; addLabel?: string; fields: readonly ScalarField[] });
+  | (BaseField & { type: "objectList"; addLabel?: string; fields: readonly ScalarField[] })
+  // ── Mechanical-effect fields (DarkSpace species/archetype/equipment) ──
+  // Flat bonuses: rows of { amount, target } from BONUS_TARGET_OPTS.
+  | (BaseField & { type: "bonuses"; addLabel?: string })
+  // Rows of { <rowKey>, text, choose?, effects[] } — a trait/feature/talent that
+  // carries mechanical effects (and optionally a "choose one" flag).
+  | (BaseField & {
+      type: "effectRows";
+      rowKey: string; rowKeyLabel: string; rowKeyPlaceholder?: string;
+      textLabel?: string; withChoose?: boolean; addLabel?: string;
+    })
+  // Triad access this archetype grants (Body / Mind / Soul checkboxes).
+  | (BaseField & { type: "triad" })
+  // Titles by Motivation, 5 tiers each. Stored on Lawful/Neutral/Chaotic keys.
+  | (BaseField & { type: "titles" });
 export type Schema = {
   title: string; // accordion header ("My Homebrew Weapons")
   noun: string; // singular ("Weapon")
@@ -69,6 +84,30 @@ const SW_ATTRS = ["Dexterity", "Knowledge", "Mechanical", "Perception", "Strengt
 const KOB_STAT_KEYS = ["Brains", "Brawn", "Fight", "Flight", "Charm", "Grit"] as const;
 const D62E_GENRE_OPTS: readonly Opt[] = [["core", "Core"], ["fantasy", "Fantasy"], ["scifi", "Sci-Fi"], ["superhero", "Superhero"]];
 const D62E_ATTRS = ["Agility", "Brawn", "Knowledge", "Perception"] as const;
+
+// ── Mechanical-effect vocabularies (shared with lib/homebrew normalisers) ────
+// Flat bonus targets — mirror BONUS_TARGETS in lib/homebrew.ts (kept local so
+// this client component never imports the prisma-bound lib/homebrew module).
+const BONUS_TARGET_OPTS: readonly Opt[] = [
+  ["ac", "AC"], ["hp", "HP"],
+  ["meleeAtk", "Melee Attacks"], ["meleeDmg", "Melee Damage"],
+  ["rangedAtk", "Ranged Attacks"], ["rangedDmg", "Ranged Damage"],
+  ["slots", "Gear Slots"],
+  ["str", "Strength"], ["dex", "Dexterity"], ["con", "Constitution"],
+  ["int", "Intelligence"], ["wis", "Wisdom"], ["cha", "Charisma"],
+];
+// Effect targets for the effect builder — the full talent vocabulary minus the
+// Shadowdark-spell-only targets (DarkSpace uses the Triad, not spell lists).
+const DS_EFFECT_OPTS: readonly Opt[] = TALENT_TARGETS.filter(
+  ([k]) => !["spellKnown", "spellCheck", "advSpell"].includes(k),
+) as readonly Opt[];
+// Title columns — DarkSpace Motivations mapped onto the sheet's alignment keys.
+const TITLE_COLS: readonly [string, string][] = [
+  ["Lawful", "Virtuous"], ["Neutral", "Survivor"], ["Chaotic", "Vile"],
+];
+
+type EffectRow = { amount?: string; target?: string; weapon?: string; feature?: string };
+type Bonus = { amount?: string; target?: string };
 
 const sv = (d: Data, k: string): string => { const v = d[k]; return typeof v === "string" ? v : v == null ? "" : String(v); };
 // pips → die code: 10 → "3D+1", 12 → "4D", 0/blank → "".
@@ -375,10 +414,11 @@ const SCHEMAS: Record<string, Schema> = {
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "text", label: "Primary trait", type: "textarea", full: true, placeholder: "The species' main trait (like a Shadowdark ancestry ability)." },
-      { key: "traits", label: "Additional traits", type: "objectList", full: true, addLabel: "+ Trait", fields: [{ key: "name", label: "Name", type: "text" }, { key: "text", label: "Effect", type: "textarea" }] },
+      { key: "bonuses", label: "Flat bonuses", type: "bonuses", full: true, help: "Always-on bonuses applied at creation (e.g. +1 AC, +1 Melee Attacks)." },
+      { key: "traits", label: "Additional traits", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", textLabel: "Effect", withChoose: true, addLabel: "+ Trait", help: "Each trait can carry mechanical effects. Mark 'choose one' for a trait where the player picks a single effect at creation." },
       { key: "languages", label: "Languages", type: "text", full: true, placeholder: "Common, and one of your choosing" },
     ],
-    blank: () => ({ traits: [] }), toForm: (d) => ({ ...d }),
+    blank: () => ({ traits: [], bonuses: [] }), toForm: (d) => ({ ...d }),
     summary: (d) => { const t = Array.isArray((d as { traits?: unknown[] }).traits) ? (d as { traits: unknown[] }).traits.length : 0; return t ? `${t + 1} traits` : "Species trait"; },
   },
   "ds-archetype": {
@@ -387,13 +427,18 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "stat", label: "Prime Stat", type: "select", options: [["STR", "STR"], ["DEX", "DEX"], ["CON", "CON"], ["INT", "INT"], ["WIS", "WIS"], ["CHA", "CHA"], ["—", "—"]] },
       { key: "hitDie", label: "Hit Die", type: "number", placeholder: "6" },
-      { key: "weapons", label: "Weapons", type: "text", placeholder: "All Melee weapons" },
-      { key: "armor", label: "Armor", type: "text", placeholder: "Light Armor" },
+      { key: "weaponsAll", label: "Proficient with all weapons", type: "checkbox" },
+      { key: "weapons", label: "Weapon proficiencies", type: "stringList", addLabel: "+ Weapon", placeholder: "Pistol, Light" },
+      { key: "armorAll", label: "Proficient with all armor & shields", type: "checkbox" },
+      { key: "armor", label: "Armor proficiencies", type: "stringList", addLabel: "+ Armor", placeholder: "Light Armor" },
       { key: "blurb", label: "Description", type: "textarea", full: true },
-      { key: "features", label: "Features", type: "objectList", full: true, addLabel: "+ Feature", fields: [{ key: "name", label: "Name", type: "text" }, { key: "text", label: "Text", type: "textarea" }] },
-      { key: "talents", label: "Talent table (2d6)", type: "objectList", full: true, addLabel: "+ Talent row", fields: [{ key: "r", label: "2d6", type: "text" }, { key: "text", label: "Talent", type: "textarea" }] },
+      { key: "bonuses", label: "Flat bonuses", type: "bonuses", full: true, help: "Always-on bonuses applied at creation." },
+      { key: "features", label: "Features", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", textLabel: "Text", withChoose: true, addLabel: "+ Feature", help: "Class-feature style. Passive effects apply at creation; a 'choose one' feature is applied by hand." },
+      { key: "talents", label: "Talent table (2d6)", type: "effectRows", full: true, rowKey: "r", rowKeyLabel: "2d6", rowKeyPlaceholder: "7-9", textLabel: "Talent", withChoose: true, addLabel: "+ Talent row", help: "Rows the Spacer rolls on at 1st level and every odd level. Effects on the rolled row apply automatically." },
+      { key: "triad", label: "Grants Triad access", type: "triad", full: true },
+      { key: "titles", label: "Titles by Motivation", type: "titles", full: true },
     ],
-    blank: () => ({ stat: "STR", hitDie: "6", features: [], talents: [] }), toForm: (d) => ({ ...d }),
+    blank: () => ({ stat: "STR", hitDie: "6", weapons: [], armor: [], features: [], talents: [], bonuses: [] }), toForm: (d) => ({ ...d }),
     summary: (d) => `${sv(d, "stat")} · d${sv(d, "hitDie") || "6"}`,
   },
   "ds-background": {
@@ -428,8 +473,10 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "group", label: "Group (ranged)", type: "text", placeholder: "Projectile / Energy / Disabling" },
       { key: "props", label: "Properties", type: "text", placeholder: "EC, 2H" },
       { key: "desc", label: "Description", type: "textarea", full: true },
+      { key: "equippable", label: "Equippable (bonuses apply while equipped)", type: "checkbox" },
+      { key: "bonuses", label: "Equipped bonuses", type: "bonuses", full: true, help: "Applied while the item is equipped, like a magic item (e.g. +1 AC, +1 Ranged Attacks)." },
     ],
-    blank: () => ({ category: "gear" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
+    blank: () => ({ category: "gear", bonuses: [] }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
   },
   "ds-monster": {
     title: "My Homebrew Denizens", noun: "Denizen",
@@ -691,7 +738,163 @@ function FieldView({ field, value, onChange }: { field: Field; value: unknown; o
     );
   }
 
+  if (field.type === "bonuses") return <BonusesView field={field} value={value} onChange={onChange} wrapClass={cls} />;
+  if (field.type === "effectRows") return <EffectRowsView field={field} value={value} onChange={onChange} wrapClass={cls} />;
+  if (field.type === "triad") return <TriadView field={field} value={value} onChange={onChange} wrapClass={cls} />;
+  if (field.type === "titles") return <TitlesView field={field} value={value} onChange={onChange} wrapClass={cls} />;
+
   return <ScalarView field={field} value={value} onChange={onChange} wrapClass={cls} />;
+}
+
+// ── Flat bonuses: rows of { amount, target } ─────────────────────────────────
+function BonusesView({ field, value, onChange, wrapClass }: { field: Extract<Field, { type: "bonuses" }>; value: unknown; onChange: (v: unknown) => void; wrapClass?: string }) {
+  const list: Bonus[] = Array.isArray(value) ? (value as Bonus[]) : [];
+  const update = (i: number, patch: Partial<Bonus>) => onChange(list.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  return (
+    <div className={wrapClass}>
+      <label className={labelCls}>{field.label}</label>
+      {field.help ? <p className="mb-1 text-[11px] text-[var(--muted)]">{field.help}</p> : null}
+      <div className="flex flex-col gap-1.5">
+        {list.map((row, i) => (
+          <div key={i} className="flex gap-1.5">
+            <input className={`${fieldBase} w-16`} inputMode="numeric" value={row.amount == null ? "" : String(row.amount)} placeholder="+1"
+              onChange={(e) => update(i, { amount: e.target.value.replace(/[^\d+\-]/g, "") })} />
+            <select className={`${fieldBase} min-w-0 flex-1`} value={row.target ?? ""} onChange={(e) => update(i, { target: e.target.value })}>
+              <option value="">— target —</option>
+              {BONUS_TARGET_OPTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+            <button type="button" className={miniBtn} onClick={() => onChange(list.filter((_, j) => j !== i))}>✕</button>
+          </div>
+        ))}
+      </div>
+      <button type="button" className={`${miniBtn} mt-1.5`} onClick={() => onChange([...list, { amount: "1", target: "" }])}>{field.addLabel ?? "+ Bonus"}</button>
+    </div>
+  );
+}
+
+// ── One effect (amount + target + conditional weapon/feature) ────────────────
+function EffectView({ eff, onChange, onRemove }: { eff: EffectRow; onChange: (patch: Partial<EffectRow>) => void; onRemove: () => void }) {
+  const target = eff.target ?? "";
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <input className={`${fieldBase} w-16`} inputMode="numeric" value={eff.amount == null ? "" : String(eff.amount)} placeholder="+1"
+        onChange={(e) => onChange({ amount: e.target.value.replace(/[^\d+\-]/g, "") })} />
+      <select className={`${fieldBase} min-w-0 flex-1`} value={target} onChange={(e) => onChange({ target: e.target.value })}>
+        <option value="">— effect —</option>
+        {DS_EFFECT_OPTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+      </select>
+      {target === "weaponDie" ? (
+        <input className={`${fieldBase} w-28`} value={eff.weapon ?? ""} placeholder="weapon" onChange={(e) => onChange({ weapon: e.target.value })} />
+      ) : null}
+      {target === "featureCharges" ? (
+        <input className={`${fieldBase} w-28`} value={eff.feature ?? ""} placeholder="feature" onChange={(e) => onChange({ feature: e.target.value })} />
+      ) : null}
+      <button type="button" className={miniBtn} onClick={onRemove}>✕</button>
+    </div>
+  );
+}
+
+// ── Rows of { <rowKey>, text, choose?, effects[] } ───────────────────────────
+function EffectRowsView({ field, value, onChange, wrapClass }: { field: Extract<Field, { type: "effectRows" }>; value: unknown; onChange: (v: unknown) => void; wrapClass?: string }) {
+  const list: Data[] = Array.isArray(value) ? (value as Data[]) : [];
+  const update = (i: number, patch: Data) => onChange(list.map((row, j) => (j === i ? { ...row, ...patch } : row)));
+  const effs = (row: Data): EffectRow[] => (Array.isArray(row.effects) ? (row.effects as EffectRow[]) : []);
+  return (
+    <div className={wrapClass}>
+      <label className={labelCls}>{field.label}</label>
+      {field.help ? <p className="mb-1 text-[11px] text-[var(--muted)]">{field.help}</p> : null}
+      <div className="flex flex-col gap-2">
+        {list.map((row, i) => {
+          const rowEffs = effs(row);
+          return (
+            <div key={i} className="rounded border border-[var(--border)] bg-[var(--panel)] p-2.5">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div>
+                  <label className={labelCls}>{field.rowKeyLabel}</label>
+                  <input className={`${fieldBase} w-full`} value={sv(row, field.rowKey)} placeholder={field.rowKeyPlaceholder}
+                    onChange={(e) => update(i, { [field.rowKey]: e.target.value })} />
+                </div>
+                <div>
+                  <label className={labelCls}>{field.textLabel ?? "Text"}</label>
+                  <textarea className={`${fieldBase} min-h-[44px] w-full`} value={sv(row, "text")}
+                    onChange={(e) => update(i, { text: e.target.value })} />
+                </div>
+              </div>
+              <div className="mt-2">
+                <label className={labelCls}>Effects</label>
+                <div className="flex flex-col gap-1.5">
+                  {rowEffs.map((eff, ei) => (
+                    <EffectView key={ei} eff={eff}
+                      onChange={(patch) => update(i, { effects: rowEffs.map((x, j) => (j === ei ? { ...x, ...patch } : x)) })}
+                      onRemove={() => update(i, { effects: rowEffs.filter((_, j) => j !== ei) })} />
+                  ))}
+                </div>
+                <button type="button" className={`${miniBtn} mt-1.5`} onClick={() => update(i, { effects: [...rowEffs, { amount: "1", target: "" }] })}>+ Effect</button>
+              </div>
+              <div className="mt-2 flex items-center justify-between">
+                {field.withChoose ? (
+                  <label className="flex items-center gap-2 text-[12px] text-[var(--text)]">
+                    <input type="checkbox" checked={!!row.choose} onChange={(e) => update(i, { choose: e.target.checked })} />
+                    Choose one (player picks a single effect)
+                  </label>
+                ) : <span />}
+                <button type="button" className={miniBtn} onClick={() => onChange(list.filter((_, j) => j !== i))}>Remove</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <button type="button" className={`${miniBtn} mt-1.5`} onClick={() => onChange([...list, { [field.rowKey]: "", text: "", effects: [] }])}>{field.addLabel ?? "+ Add"}</button>
+    </div>
+  );
+}
+
+// ── Triad grant (Body / Mind / Soul) ────────────────────────────────────────
+function TriadView({ field, value, onChange, wrapClass }: { field: Extract<Field, { type: "triad" }>; value: unknown; onChange: (v: unknown) => void; wrapClass?: string }) {
+  const obj = (value && typeof value === "object" ? value : {}) as Record<string, boolean>;
+  const toggle = (k: string) => onChange({ ...obj, [k]: !obj[k] });
+  return (
+    <div className={wrapClass}>
+      <label className={labelCls}>{field.label}</label>
+      <div className="flex flex-wrap gap-4">
+        {["Body", "Mind", "Soul"].map((k) => (
+          <label key={k} className="flex items-center gap-2 text-[13px] text-[var(--text)]">
+            <input type="checkbox" checked={!!obj[k]} onChange={() => toggle(k)} />
+            {k}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Titles by Motivation (mapped to Lawful/Neutral/Chaotic keys) ─────────────
+function TitlesView({ field, value, onChange, wrapClass }: { field: Extract<Field, { type: "titles" }>; value: unknown; onChange: (v: unknown) => void; wrapClass?: string }) {
+  const obj = (value && typeof value === "object" ? value : {}) as Record<string, string[]>;
+  const col = (k: string): string[] => (Array.isArray(obj[k]) ? obj[k] : ["", "", "", "", ""]).slice(0, 5).concat(["", "", "", "", ""]).slice(0, 5);
+  const setTier = (k: string, tier: number, v: string) => {
+    const arr = col(k).slice(); arr[tier] = v;
+    onChange({ ...obj, [k]: arr });
+  };
+  return (
+    <div className={wrapClass}>
+      <label className={labelCls}>{field.label}</label>
+      <p className="mb-1 text-[11px] text-[var(--muted)]">Five tiers (levels 1–2, 3–4, 5–6, 7–8, 9–10). Leave blank to skip.</p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {TITLE_COLS.map(([key, motiv]) => (
+          <div key={key}>
+            <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--hb-accent)]">{motiv}</div>
+            <div className="flex flex-col gap-1">
+              {[0, 1, 2, 3, 4].map((t) => (
+                <input key={t} className={`${fieldBase} w-full`} value={col(key)[t] ?? ""} placeholder={`Tier ${t + 1}`}
+                  onChange={(e) => setTier(key, t, e.target.value)} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function ScalarView({ field, value, onChange, wrapClass }: { field: ScalarField; value: unknown; onChange: (v: unknown) => void; wrapClass?: string }) {

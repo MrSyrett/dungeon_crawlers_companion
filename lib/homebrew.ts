@@ -410,6 +410,51 @@ function cleanEffectRow(raw: unknown): { text: string; effects: HbEffect[] } {
   return row;
 }
 
+// Flat bonus rows ({amount, target}) validated against BONUS_TARGETS. Shared by
+// the SD ancestry/gear normalisers' inline logic and the DarkSpace normalisers.
+function cleanBonuses(v: unknown): { amount: number; target: string }[] {
+  const targets = BONUS_TARGETS as readonly string[];
+  return Array.isArray(v)
+    ? (v as unknown[])
+        .map((b) => {
+          const bo = (b ?? {}) as Record<string, unknown>;
+          return { amount: num(bo.amount), target: str(bo.target) };
+        })
+        .filter((b): b is { amount: number; target: string } =>
+          b.amount != null && b.amount !== 0 && targets.includes(b.target),
+        )
+        .slice(0, 12)
+    : [];
+}
+
+// A named effect row (DarkSpace species trait / archetype feature): like
+// cleanEffectRow but keeps a `name` so it reads like an ancestry trait / class
+// feature with a title.
+function cleanNamedEffectRow(raw: unknown): { name: string; text: string; effects: HbEffect[]; choose?: boolean } {
+  const o = (raw ?? {}) as Record<string, unknown>;
+  const base = cleanEffectRow(o);
+  const row: { name: string; text: string; effects: HbEffect[]; choose?: boolean } = {
+    name: str(o.name).slice(0, 80),
+    text: base.text,
+    effects: base.effects,
+  };
+  if (o.choose === true) row.choose = true;
+  return row;
+}
+
+// A DarkSpace archetype 2d6 talent row: a range key ("r"), text, effects, choose.
+function cleanDsTalentRow(raw: unknown): { r: string; text: string; effects: HbEffect[]; choose?: boolean } {
+  const o = (raw ?? {}) as Record<string, unknown>;
+  const base = cleanEffectRow(o);
+  const row: { r: string; text: string; effects: HbEffect[]; choose?: boolean } = {
+    r: str(o.r).slice(0, 12),
+    text: base.text,
+    effects: base.effects,
+  };
+  if (o.choose === true) row.choose = true;
+  return row;
+}
+
 function normalizeClass(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
@@ -1529,13 +1574,20 @@ function normalizeDsSpecies(input: unknown): { name: string; data: Record<string
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew species needs a name.");
+  // Ancestry-style: extra traits carry mechanical effects; flat bonuses apply
+  // directly (like Half-Orc's Mighty = +1 melee attack & damage).
+  const traits = Array.isArray(o.traits)
+    ? (o.traits as unknown[]).map(cleanNamedEffectRow).filter((t) => t.name || t.text).slice(0, 12)
+    : [];
   const data: Record<string, unknown> = {
     name,
-    text: str(o.text).slice(0, 2000),          // the primary species trait
-    traits: objList(o.traits, ["name", "text"], 8, 1000),   // extra traits (ancestry-style)
+    text: str(o.text).slice(0, 2000),          // the primary species trait (descriptive)
+    traits,
     languages: str(o.languages).slice(0, 200),
     source: "Homebrew",
   };
+  const bonuses = cleanBonuses(o.bonuses);
+  if (bonuses.length) data.bonuses = bonuses;
   return { name, data };
 }
 function normalizeDsBackground(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -1564,20 +1616,63 @@ function normalizeDsArchetype(input: unknown): { name: string; data: Record<stri
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew archetype needs a name.");
   const hd = num(o.hitDie);
-  return {
-    name,
-    data: {
-      name,
-      stat: oneOf(o.stat, DS_ARCH_STATS, "STR"),
-      hitDie: hd != null && hd > 0 ? Math.min(20, hd) : 6,
-      weapons: str(o.weapons).slice(0, 200),
-      armor: str(o.armor).slice(0, 200),
-      blurb: str(o.blurb).slice(0, 1000),
-      features: objList(o.features, ["name", "text"], 12, 1000),
-      talents: objList(o.talents, ["r", "text"], 12, 1000),
-      source: "Homebrew",
-    },
+
+  // Weapon / armor proficiencies: "All" toggle or a list of names. Back-compat:
+  // an older free-text string is split on commas into the list.
+  const nameList = (v: unknown): string[] => {
+    if (Array.isArray(v)) return (v as unknown[]).map((x) => str(x)).filter(Boolean).slice(0, 40);
+    const s = str(v);
+    return s ? s.split(/[,;]/).map((x) => x.trim()).filter(Boolean).slice(0, 40) : [];
   };
+  const weaponsAll = !!o.weaponsAll;
+  const armorAll = !!o.armorAll;
+
+  // Features carry effects (class-feature style); talents are a 2d6 table whose
+  // rows carry effects + optional "choose one".
+  const features = Array.isArray(o.features)
+    ? (o.features as unknown[]).map(cleanNamedEffectRow).filter((f) => f.name || f.text).slice(0, 16)
+    : [];
+  const talents = Array.isArray(o.talents)
+    ? (o.talents as unknown[]).map(cleanDsTalentRow).filter((t) => t.r || t.text).slice(0, 16)
+    : [];
+
+  const data: Record<string, unknown> = {
+    name,
+    stat: oneOf(o.stat, DS_ARCH_STATS, "STR"),
+    hitDie: hd != null && hd > 0 ? Math.min(20, hd) : 6,
+    weaponsAll,
+    weapons: weaponsAll ? [] : nameList(o.weapons),
+    armorAll,
+    armor: armorAll ? [] : nameList(o.armor),
+    blurb: str(o.blurb).slice(0, 1000),
+    features,
+    talents,
+    source: "Homebrew",
+  };
+
+  const bonuses = cleanBonuses(o.bonuses);
+  if (bonuses.length) data.bonuses = bonuses;
+
+  // Triad access this archetype grants (DarkSpace's caster analog — Body/Mind/Soul).
+  const triadIn = (o.triad ?? null) as Record<string, unknown> | null;
+  if (triadIn) {
+    const triad = { Body: !!triadIn.Body, Mind: !!triadIn.Mind, Soul: !!triadIn.Soul };
+    if (triad.Body || triad.Mind || triad.Soul) data.triad = triad;
+  }
+
+  // Titles by Motivation column (Virtuous / Survivor / Vile), stored on the SD
+  // Lawful/Neutral/Chaotic keys the sheet's title machinery already reads.
+  const titlesIn = (o.titles ?? null) as Record<string, unknown> | null;
+  if (titlesIn) {
+    const tierList = (v: unknown): string[] =>
+      Array.isArray(v) ? (v as unknown[]).map((x) => str(x).slice(0, 60)).slice(0, 5) : [];
+    const L = tierList(titlesIn.Lawful);
+    const N = tierList(titlesIn.Neutral);
+    const C = tierList(titlesIn.Chaotic);
+    if ([...L, ...N, ...C].some((x) => x)) data.titles = { Lawful: L, Neutral: N, Chaotic: C };
+  }
+
+  return { name, data };
 }
 function normalizeDsEquipment(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
@@ -1598,6 +1693,10 @@ function normalizeDsEquipment(input: unknown): { name: string; data: Record<stri
   if (str(o.props)) data.props = str(o.props).slice(0, 120);
   if (str(o.group)) data.group = str(o.group).slice(0, 40);
   if (str(o.desc)) data.desc = str(o.desc).slice(0, 2000);
+  // Equipped-item bonuses (like an SD magic item): +N AC / attack / stat while equipped.
+  const bonuses = cleanBonuses(o.bonuses);
+  if (bonuses.length) data.bonuses = bonuses;
+  if (truthy(o.equippable)) data.equippable = true;
   return { name, data };
 }
 function normalizeDsMonster(input: unknown): { name: string; data: Record<string, unknown> } {
