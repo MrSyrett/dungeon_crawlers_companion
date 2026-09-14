@@ -40,7 +40,7 @@ export type Field =
   | ScalarField
   | (BaseField & { type: "stringList"; placeholder?: string; addLabel?: string })
   | (BaseField & { type: "objectList"; addLabel?: string; fields: readonly ScalarField[] })
-  // ── Mechanical-effect fields (DarkSpace species/archetype/equipment) ──
+  // ── Mechanical-effect fields (reusable: bonuses / effect-rows / triad / titles) ──
   // Flat bonuses: rows of { amount, target } from BONUS_TARGET_OPTS.
   | (BaseField & { type: "bonuses"; addLabel?: string })
   // Rows of { <rowKey>, text, choose?, effects[] } — a trait/feature/talent that
@@ -99,11 +99,11 @@ const BONUS_TARGET_OPTS: readonly Opt[] = [
   ["int", "Intelligence"], ["wis", "Wisdom"], ["cha", "Charisma"],
 ];
 // Effect targets for the effect builder — the full talent vocabulary minus the
-// Shadowdark-spell-only targets (DarkSpace uses the Triad, not spell lists).
+// Shadowdark-spell-only targets (for effect rows that don't use spell lists).
 const DS_EFFECT_OPTS: readonly Opt[] = TALENT_TARGETS.filter(
   ([k]) => !["spellKnown", "spellCheck", "advSpell"].includes(k),
 ) as readonly Opt[];
-// Title columns — DarkSpace Motivations mapped onto the sheet's alignment keys.
+// Title columns — five-tier titles mapped onto the sheet's alignment keys.
 const TITLE_COLS: readonly [string, string][] = [
   ["Lawful", "Virtuous"], ["Neutral", "Survivor"], ["Chaotic", "Vile"],
 ];
@@ -410,115 +410,6 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "kind") || "Creature"} · ${sv(d, "genre")}`,
   },
 
-  // ── DarkSpace (science fiction for Shadowdark) ──
-  "ds-species": {
-    title: "My Homebrew Species", noun: "Species",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "text", label: "Primary trait", type: "textarea", full: true, placeholder: "The species' main trait (like a Shadowdark ancestry ability)." },
-      { key: "bonuses", label: "Flat bonuses", type: "bonuses", full: true, help: "Always-on bonuses applied at creation (e.g. +1 AC, +1 Melee Attacks)." },
-      { key: "traits", label: "Additional traits", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", textLabel: "Effect", withChoose: true, addLabel: "+ Trait", help: "Each trait can carry mechanical effects. Mark 'choose one' for a trait where the player picks a single effect at creation." },
-      { key: "languages", label: "Languages", type: "text", full: true, placeholder: "Common, and one of your choosing" },
-    ],
-    blank: () => ({ traits: [], bonuses: [] }), toForm: (d) => ({ ...d }),
-    summary: (d) => { const t = Array.isArray((d as { traits?: unknown[] }).traits) ? (d as { traits: unknown[] }).traits.length : 0; return t ? `${t + 1} traits` : "Species trait"; },
-  },
-  "ds-archetype": {
-    title: "My Homebrew Archetypes", noun: "Archetype",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "stat", label: "Prime Stat", type: "select", options: [["STR", "STR"], ["DEX", "DEX"], ["CON", "CON"], ["INT", "INT"], ["WIS", "WIS"], ["CHA", "CHA"], ["—", "—"]] },
-      { key: "hitDie", label: "Hit Die", type: "number", placeholder: "6" },
-      { key: "weaponsAll", label: "Proficient with all weapons", type: "checkbox" },
-      { key: "weapons", label: "Weapon proficiencies", type: "stringList", addLabel: "+ Weapon", placeholder: "Pistol, Light" },
-      { key: "armorAll", label: "Proficient with all armor & shields", type: "checkbox" },
-      { key: "armor", label: "Armor proficiencies", type: "stringList", addLabel: "+ Armor", placeholder: "Light Armor" },
-      { key: "blurb", label: "Description", type: "textarea", full: true },
-      { key: "bonuses", label: "Flat bonuses", type: "bonuses", full: true, help: "Always-on bonuses applied at creation." },
-      { key: "features", label: "Features", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", textLabel: "Text", withChoose: true, addLabel: "+ Feature", help: "Class-feature style. Passive effects apply at creation; a 'choose one' feature is applied by hand." },
-      { key: "talents", label: "Talent table (2d6)", type: "effectRows", full: true, rowKey: "r", rowKeyLabel: "2d6", rowKeyPlaceholder: "7-9", textLabel: "Talent", withChoose: true, addLabel: "+ Talent row", help: "Rows the Spacer rolls on at 1st level and every odd level. Effects on the rolled row apply automatically." },
-      { key: "triad", label: "Grants Triad access", type: "triad", full: true },
-      { key: "titles", label: "Titles by Motivation", type: "titles", full: true },
-    ],
-    blank: () => ({ stat: "STR", hitDie: "6", weapons: [], armor: [], features: [], talents: [], bonuses: [] }), toForm: (d) => ({ ...d }),
-    summary: (d) => `${sv(d, "stat")} · d${sv(d, "hitDie") || "6"}`,
-  },
-  "ds-background": {
-    title: "My Homebrew Backgrounds", noun: "Background",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "text", label: "Description", type: "textarea", full: true },
-    ],
-    blank: () => ({}), toForm: (d) => ({ ...d }), summary: () => "Background",
-  },
-  "ds-motivation": {
-    title: "My Homebrew Motivations", noun: "Motivation",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "text", label: "Description", type: "textarea", full: true },
-      { key: "startBonus", label: "Starting bonus", type: "textarea", full: true },
-      { key: "effect", label: "Luck Token trigger", type: "textarea", full: true },
-    ],
-    blank: () => ({}), toForm: (d) => ({ ...d }), summary: () => "Motivation",
-  },
-  "ds-equipment": {
-    title: "My Homebrew Equipment", noun: "Item",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "category", label: "Category", type: "select", options: [["gear", "Gear"], ["armor", "Armor"], ["melee", "Melee Weapon"], ["ranged", "Ranged Weapon"], ["explosive", "Explosive"]] },
-      { key: "cost", label: "Cost (cr)", type: "number", placeholder: "10" },
-      { key: "slot", label: "Slots", type: "text", placeholder: "1" },
-      { key: "ec", label: "Needs Energy Cell (EC)", type: "checkbox" },
-      { key: "ac", label: "AC (armor)", type: "text", placeholder: "11 + DEX mod" },
-      { key: "range", label: "Range (weapon)", type: "text", placeholder: "N / F / C" },
-      { key: "dmg", label: "Damage (weapon)", type: "text", placeholder: "1d6" },
-      { key: "group", label: "Group (ranged)", type: "text", placeholder: "Projectile / Energy / Disabling" },
-      { key: "props", label: "Properties", type: "text", placeholder: "EC, 2H" },
-      { key: "desc", label: "Description", type: "textarea", full: true },
-      { key: "equippable", label: "Equippable (bonuses apply while equipped)", type: "checkbox" },
-      { key: "bonuses", label: "Equipped bonuses", type: "bonuses", full: true, help: "Applied while the item is equipped, like a magic item (e.g. +1 AC, +1 Ranged Attacks)." },
-    ],
-    blank: () => ({ category: "gear", bonuses: [] }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
-  },
-  "ds-monster": {
-    title: "My Homebrew Denizens", noun: "Denizen",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "lv", label: "Level", type: "text", placeholder: "3" },
-      { key: "ac", label: "AC", type: "text", placeholder: "13" },
-      { key: "hp", label: "HP", type: "text", placeholder: "14" },
-      { key: "mv", label: "Move", type: "text", placeholder: "near (fly)" },
-      { key: "mo", label: "Motivation", type: "select", empty: "—", options: [["S", "Survivor"], ["VL", "Vile"], ["VR", "Virtuous"], ["Any", "Any"]] },
-      { key: "atk", label: "Attacks", type: "text", full: true, placeholder: "2 claw +4 (1d8) or 1 blaster (near) +3 (1d6)" },
-      { key: "s", label: "STR", type: "text", placeholder: "+0" },
-      { key: "d", label: "DEX", type: "text", placeholder: "+0" },
-      { key: "c", label: "CON", type: "text", placeholder: "+0" },
-      { key: "i", label: "INT", type: "text", placeholder: "+0" },
-      { key: "w", label: "WIS", type: "text", placeholder: "+0" },
-      { key: "ch", label: "CHA", type: "text", placeholder: "+0" },
-      { key: "acc", label: "ACC (digital)", type: "text", placeholder: "+0" },
-      { key: "ctl", label: "CTL (digital)", type: "text", placeholder: "+0" },
-      { key: "net", label: "NET (digital)", type: "text", placeholder: "+0" },
-      { key: "shipScale", label: "Ship scale", type: "checkbox" },
-      { key: "desc", label: "Description", type: "textarea", full: true },
-      { key: "notes", label: "Abilities", type: "textarea", full: true, placeholder: "Name. Effect. …" },
-    ],
-    blank: () => ({}), toForm: (d) => ({ ...d }), summary: (d) => `LV ${sv(d, "lv") || "?"}${sv(d, "mo") ? " · " + sv(d, "mo") : ""}`,
-  },
-  "ds-ship-item": {
-    title: "My Homebrew Ship Items", noun: "Ship Item",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "category", label: "Category", type: "select", options: [["weapon", "Weapon"], ["armor", "Armor"], ["system", "System"], ["feature", "Feature"]] },
-      { key: "cost", label: "Cost (cr)", type: "number", placeholder: "100" },
-      { key: "range", label: "Range (weapon)", type: "text", placeholder: "N / F" },
-      { key: "dmg", label: "Damage (weapon)", type: "text", placeholder: "1d8" },
-      { key: "ac", label: "AC (armor)", type: "text", placeholder: "13 + Ship DEX mod" },
-      { key: "props", label: "Properties", type: "text", placeholder: "EG, AP" },
-      { key: "desc", label: "Description", type: "textarea", full: true },
-    ],
-    blank: () => ({ category: "weapon" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
-  },
 
   // ── ICRPG (Index Card RPG) ──
   "icrpg-type": {
@@ -611,7 +502,6 @@ function accentFor(kind: string): string {
   if (kind.startsWith("ace-")) return "--ace";
   if (kind.startsWith("kob-")) return "--kob";
   if (kind.startsWith("d62e-")) return "--d62e";
-  if (kind.startsWith("ds-")) return "--darkspace";
   if (kind.startsWith("icrpg-")) return "--icrpg";
   return "--dnd";
 }

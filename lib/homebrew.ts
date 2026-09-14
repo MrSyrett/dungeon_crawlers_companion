@@ -23,7 +23,6 @@ export type HbType =
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
-  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-equipment" | "ds-ship-item" | "ds-monster"
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster";
 
 const HB_TYPES = [
@@ -35,7 +34,6 @@ const HB_TYPES = [
   "ace-role", "ace-gear", "ace-extra", "ace-focus", "ace-trait",
   "kob-trope", "kob-strength", "kob-flaw",
   "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
-  "ds-species", "ds-archetype", "ds-background", "ds-motivation", "ds-equipment", "ds-ship-item", "ds-monster",
   "icrpg-type", "icrpg-ability", "icrpg-loot", "icrpg-gear", "icrpg-spell", "icrpg-monster",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
@@ -408,51 +406,6 @@ function cleanEffectRow(raw: unknown): { text: string; effects: HbEffect[] } {
     : [];
   const row: { text: string; effects: HbEffect[]; choose?: boolean } = { text: str(o.text).slice(0, 500), effects };
   // A "choose one" trait: player picks a single effect at creation.
-  if (o.choose === true) row.choose = true;
-  return row;
-}
-
-// Flat bonus rows ({amount, target}) validated against BONUS_TARGETS. Shared by
-// the SD ancestry/gear normalisers' inline logic and the DarkSpace normalisers.
-function cleanBonuses(v: unknown): { amount: number; target: string }[] {
-  const targets = BONUS_TARGETS as readonly string[];
-  return Array.isArray(v)
-    ? (v as unknown[])
-        .map((b) => {
-          const bo = (b ?? {}) as Record<string, unknown>;
-          return { amount: num(bo.amount), target: str(bo.target) };
-        })
-        .filter((b): b is { amount: number; target: string } =>
-          b.amount != null && b.amount !== 0 && targets.includes(b.target),
-        )
-        .slice(0, 12)
-    : [];
-}
-
-// A named effect row (DarkSpace species trait / archetype feature): like
-// cleanEffectRow but keeps a `name` so it reads like an ancestry trait / class
-// feature with a title.
-function cleanNamedEffectRow(raw: unknown): { name: string; text: string; effects: HbEffect[]; choose?: boolean } {
-  const o = (raw ?? {}) as Record<string, unknown>;
-  const base = cleanEffectRow(o);
-  const row: { name: string; text: string; effects: HbEffect[]; choose?: boolean } = {
-    name: str(o.name).slice(0, 80),
-    text: base.text,
-    effects: base.effects,
-  };
-  if (o.choose === true) row.choose = true;
-  return row;
-}
-
-// A DarkSpace archetype 2d6 talent row: a range key ("r"), text, effects, choose.
-function cleanDsTalentRow(raw: unknown): { r: string; text: string; effects: HbEffect[]; choose?: boolean } {
-  const o = (raw ?? {}) as Record<string, unknown>;
-  const base = cleanEffectRow(o);
-  const row: { r: string; text: string; effects: HbEffect[]; choose?: boolean } = {
-    r: str(o.r).slice(0, 12),
-    text: base.text,
-    effects: base.effects,
-  };
   if (o.choose === true) row.choose = true;
   return row;
 }
@@ -1567,181 +1520,6 @@ function normalizeD62eCreature(input: unknown): { name: string; data: Record<str
   return { name, data };
 }
 
-// ── DarkSpace (science fiction for Shadowdark) ──────────────────────────────
-const DS_ARCH_STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA", "—"] as const;
-const DS_EQUIP_CATS = ["gear", "armor", "melee", "ranged", "explosive"] as const;
-const DS_SHIP_CATS = ["weapon", "armor", "system", "feature"] as const;
-
-function normalizeDsSpecies(input: unknown): { name: string; data: Record<string, unknown> } {
-  const o = (input ?? {}) as Record<string, unknown>;
-  const name = str(o.name).slice(0, 80);
-  if (!name) throw new Error("A homebrew species needs a name.");
-  // Ancestry-style: extra traits carry mechanical effects; flat bonuses apply
-  // directly (like Half-Orc's Mighty = +1 melee attack & damage).
-  const traits = Array.isArray(o.traits)
-    ? (o.traits as unknown[]).map(cleanNamedEffectRow).filter((t) => t.name || t.text).slice(0, 12)
-    : [];
-  const data: Record<string, unknown> = {
-    name,
-    text: str(o.text).slice(0, 2000),          // the primary species trait (descriptive)
-    traits,
-    languages: str(o.languages).slice(0, 200),
-    source: "Homebrew",
-  };
-  const bonuses = cleanBonuses(o.bonuses);
-  if (bonuses.length) data.bonuses = bonuses;
-  return { name, data };
-}
-function normalizeDsBackground(input: unknown): { name: string; data: Record<string, unknown> } {
-  const o = (input ?? {}) as Record<string, unknown>;
-  const name = str(o.name).slice(0, 80);
-  if (!name) throw new Error("A homebrew background needs a name.");
-  return { name, data: { name, text: str(o.text).slice(0, 2000), source: "Homebrew" } };
-}
-function normalizeDsMotivation(input: unknown): { name: string; data: Record<string, unknown> } {
-  const o = (input ?? {}) as Record<string, unknown>;
-  const name = str(o.name).slice(0, 80);
-  if (!name) throw new Error("A homebrew motivation needs a name.");
-  return {
-    name,
-    data: {
-      name,
-      text: str(o.text).slice(0, 1000),
-      startBonus: str(o.startBonus).slice(0, 1000),
-      effect: str(o.effect).slice(0, 1000),
-      source: "Homebrew",
-    },
-  };
-}
-function normalizeDsArchetype(input: unknown): { name: string; data: Record<string, unknown> } {
-  const o = (input ?? {}) as Record<string, unknown>;
-  const name = str(o.name).slice(0, 80);
-  if (!name) throw new Error("A homebrew archetype needs a name.");
-  const hd = num(o.hitDie);
-
-  // Weapon / armor proficiencies: "All" toggle or a list of names. Back-compat:
-  // an older free-text string is split on commas into the list.
-  const nameList = (v: unknown): string[] => {
-    if (Array.isArray(v)) return (v as unknown[]).map((x) => str(x)).filter(Boolean).slice(0, 40);
-    const s = str(v);
-    return s ? s.split(/[,;]/).map((x) => x.trim()).filter(Boolean).slice(0, 40) : [];
-  };
-  const weaponsAll = !!o.weaponsAll;
-  const armorAll = !!o.armorAll;
-
-  // Features carry effects (class-feature style); talents are a 2d6 table whose
-  // rows carry effects + optional "choose one".
-  const features = Array.isArray(o.features)
-    ? (o.features as unknown[]).map(cleanNamedEffectRow).filter((f) => f.name || f.text).slice(0, 16)
-    : [];
-  const talents = Array.isArray(o.talents)
-    ? (o.talents as unknown[]).map(cleanDsTalentRow).filter((t) => t.r || t.text).slice(0, 16)
-    : [];
-
-  const data: Record<string, unknown> = {
-    name,
-    stat: oneOf(o.stat, DS_ARCH_STATS, "STR"),
-    hitDie: hd != null && hd > 0 ? Math.min(20, hd) : 6,
-    weaponsAll,
-    weapons: weaponsAll ? [] : nameList(o.weapons),
-    armorAll,
-    armor: armorAll ? [] : nameList(o.armor),
-    blurb: str(o.blurb).slice(0, 1000),
-    features,
-    talents,
-    source: "Homebrew",
-  };
-
-  const bonuses = cleanBonuses(o.bonuses);
-  if (bonuses.length) data.bonuses = bonuses;
-
-  // Triad access this archetype grants (DarkSpace's caster analog — Body/Mind/Soul).
-  const triadIn = (o.triad ?? null) as Record<string, unknown> | null;
-  if (triadIn) {
-    const triad = { Body: !!triadIn.Body, Mind: !!triadIn.Mind, Soul: !!triadIn.Soul };
-    if (triad.Body || triad.Mind || triad.Soul) data.triad = triad;
-  }
-
-  // Titles by Motivation column (Virtuous / Survivor / Vile), stored on the SD
-  // Lawful/Neutral/Chaotic keys the sheet's title machinery already reads.
-  const titlesIn = (o.titles ?? null) as Record<string, unknown> | null;
-  if (titlesIn) {
-    const tierList = (v: unknown): string[] =>
-      Array.isArray(v) ? (v as unknown[]).map((x) => str(x).slice(0, 60)).slice(0, 5) : [];
-    const L = tierList(titlesIn.Lawful);
-    const N = tierList(titlesIn.Neutral);
-    const C = tierList(titlesIn.Chaotic);
-    if ([...L, ...N, ...C].some((x) => x)) data.titles = { Lawful: L, Neutral: N, Chaotic: C };
-  }
-
-  return { name, data };
-}
-function normalizeDsEquipment(input: unknown): { name: string; data: Record<string, unknown> } {
-  const o = (input ?? {}) as Record<string, unknown>;
-  const name = str(o.name).slice(0, 80);
-  if (!name) throw new Error("A homebrew equipment item needs a name.");
-  const cost = num(o.cost);
-  const data: Record<string, unknown> = {
-    name,
-    category: oneOf(o.category, DS_EQUIP_CATS, "gear"),
-    cost: cost != null && cost >= 0 ? cost : 0,
-    source: "Homebrew",
-  };
-  if (str(o.slot)) data.slot = str(o.slot).slice(0, 40);
-  if (truthy(o.ec)) data.ec = true;
-  if (str(o.ac)) data.ac = str(o.ac).slice(0, 40);
-  if (str(o.range)) data.range = str(o.range).slice(0, 40);
-  if (str(o.dmg)) data.dmg = str(o.dmg).slice(0, 60);
-  if (str(o.props)) data.props = str(o.props).slice(0, 120);
-  if (str(o.group)) data.group = str(o.group).slice(0, 40);
-  if (str(o.desc)) data.desc = str(o.desc).slice(0, 2000);
-  // Equipped-item bonuses (like an SD magic item): +N AC / attack / stat while equipped.
-  const bonuses = cleanBonuses(o.bonuses);
-  if (bonuses.length) data.bonuses = bonuses;
-  if (truthy(o.equippable)) data.equippable = true;
-  return { name, data };
-}
-function normalizeDsMonster(input: unknown): { name: string; data: Record<string, unknown> } {
-  const o = (input ?? {}) as Record<string, unknown>;
-  const name = str(o.name).slice(0, 80);
-  if (!name) throw new Error("A homebrew denizen needs a name.");
-  const data: Record<string, unknown> = {
-    name,
-    ac: str(o.ac).slice(0, 40) || "10",
-    hp: str(o.hp).slice(0, 20) || "1",
-    atk: str(o.atk).slice(0, 200),
-    mv: str(o.mv).slice(0, 60) || "near",
-    lv: str(o.lv).slice(0, 10) || "1",
-    source: "Homebrew",
-  };
-  if (str(o.mo)) data.mo = str(o.mo).slice(0, 8);
-  for (const k of ["s", "d", "c", "i", "w", "ch", "acc", "ctl", "net"]) {
-    if (str(o[k])) data[k] = str(o[k]).slice(0, 6);
-  }
-  if (truthy(o.shipScale)) data.shipScale = true;
-  if (str(o.desc)) data.desc = str(o.desc).slice(0, 1000);
-  if (str(o.notes)) data.notes = str(o.notes).slice(0, 3000);
-  return { name, data };
-}
-function normalizeDsShipItem(input: unknown): { name: string; data: Record<string, unknown> } {
-  const o = (input ?? {}) as Record<string, unknown>;
-  const name = str(o.name).slice(0, 80);
-  if (!name) throw new Error("A homebrew ship item needs a name.");
-  const cost = num(o.cost);
-  const data: Record<string, unknown> = {
-    name,
-    category: oneOf(o.category, DS_SHIP_CATS, "weapon"),
-    cost: cost != null && cost >= 0 ? cost : 0,
-    source: "Homebrew",
-  };
-  if (str(o.range)) data.range = str(o.range).slice(0, 40);
-  if (str(o.dmg)) data.dmg = str(o.dmg).slice(0, 60);
-  if (str(o.ac)) data.ac = str(o.ac).slice(0, 40);
-  if (str(o.props)) data.props = str(o.props).slice(0, 120);
-  if (str(o.desc)) data.desc = str(o.desc).slice(0, 2000);
-  return { name, data };
-}
-
 // ── ICRPG (Index Card RPG) ──────────────────────────────────────────────────
 // Each normaliser emits the exact lib/data/icrpg-types shape its reference page
 // consumes, and tags source/world so cards render a Homebrew badge + world chip.
@@ -1887,13 +1665,6 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "d62e-gear": return normalizeD62eGear(data);
     case "d62e-power": return normalizeD62ePower(data);
     case "d62e-creature": return normalizeD62eCreature(data);
-    case "ds-species": return normalizeDsSpecies(data);
-    case "ds-archetype": return normalizeDsArchetype(data);
-    case "ds-background": return normalizeDsBackground(data);
-    case "ds-motivation": return normalizeDsMotivation(data);
-    case "ds-equipment": return normalizeDsEquipment(data);
-    case "ds-ship-item": return normalizeDsShipItem(data);
-    case "ds-monster": return normalizeDsMonster(data);
     case "icrpg-type": return normalizeIcrpgType(data);
     case "icrpg-ability": return normalizeIcrpgAbility(data);
     case "icrpg-loot": return normalizeIcrpgLoot(data);
