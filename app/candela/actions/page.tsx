@@ -1,11 +1,12 @@
 import { CO_DRIVES, CO_ACTIONS } from "@/lib/data/candela-data";
-import { RefShell, cardCls, nameCls, badge } from "@/components/CandelaRef";
+import { CandelaHeader, cardCls, nameCls, badge } from "@/components/CandelaRef";
 
 export const dynamic = "force-dynamic";
 
 export default function Page() {
   return (
-    <RefShell title="Drives & Actions" subtitle="Candela Obscura · The Dice Pool" active="/candela/actions" count={`3 drives · ${CO_ACTIONS.length} actions`}>
+    <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <CandelaHeader title="Drives & Actions" subtitle="Candela Obscura · The Dice Pool" />
       <p className="mb-5 text-[13px] leading-relaxed text-[var(--muted)]">
         Each action is rated 0&ndash;3 — the number of d6 in your pool. Spend a point from its drive
         (0&ndash;9) to add +1d. Roll: a 6 is a full success, 4&ndash;5 a mixed success, 1&ndash;3 a miss;
@@ -34,6 +35,6 @@ export default function Page() {
           </div>
         ))}
       </div>
-    </RefShell>
+    </div>
   );
 }

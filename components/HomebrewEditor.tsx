@@ -493,6 +493,109 @@ const SCHEMAS: Record<string, Schema> = {
     },
     summary: (d) => `${sv(d, "tier") || "Monster"} · ${sv(d, "world") || "core"}`,
   },
+
+  // ── DarkSpace (sci-fi Shadowdark reskin) ──
+  "ds-archetype": {
+    title: "My Homebrew Archetypes", noun: "Archetype",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "hd", label: "Hit Die", type: "text", placeholder: "1d8" },
+      { key: "caster", label: "Caster", type: "select", options: [["None", "None"], ["Engineer", "Engineer"], ["Mystic", "Mystic"], ["Both", "Both"]] },
+      { key: "weapons", label: "Weapons", type: "text", full: true, placeholder: "All weapons" },
+      { key: "armor", label: "Armor", type: "text", full: true, placeholder: "All armor and deflectors" },
+      { key: "features", label: "Features", type: "stringList", full: true, addLabel: "+ Feature", placeholder: "Grit: advantage on force checks" },
+    ],
+    blank: () => ({ hd: "1d6", caster: "None", features: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => `HD ${sv(d, "hd") || "1d6"}${sv(d, "caster") && sv(d, "caster") !== "None" ? ` · ${sv(d, "caster")}` : ""}`,
+  },
+  "ds-trait": {
+    title: "My Homebrew Traits", noun: "Trait",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "effect", label: "Effect", type: "textarea", full: true },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }),
+    summary: () => "Trait",
+  },
+  "ds-background": {
+    title: "My Homebrew Backgrounds", noun: "Background",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }),
+    summary: () => "Background",
+  },
+  "ds-power": {
+    title: "My Homebrew Powers", noun: "Power",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "tier", label: "Tier", type: "text", placeholder: "1" },
+      { key: "caster", label: "Caster", type: "select", options: [["Both", "Engineer / Mystic"], ["Engineer", "Engineer"], ["Mystic", "Mystic"]] },
+      { key: "range", label: "Range", type: "text", placeholder: "Close, Near, Far, Self" },
+      { key: "duration", label: "Duration", type: "text", placeholder: "Instant, Focus…" },
+      { key: "damage", label: "Damage / Effect", type: "text", placeholder: "1d8" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ tier: "1", caster: "Both" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `Tier ${sv(d, "tier") || "1"} · ${sv(d, "caster") === "Both" ? "Engineer / Mystic" : sv(d, "caster")}`,
+  },
+  "ds-gear": {
+    title: "My Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "category", label: "Category", type: "select", options: [["basic", "Adventuring Gear"], ["weapon", "Weapon"], ["armor", "Armor & Deflectors"], ["ammo", "Ammo"]] },
+      { key: "cost", label: "Cost", type: "text", placeholder: "100 cr" },
+      { key: "qty", label: "Quantity", type: "text", placeholder: "20" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ category: "basic" }), toForm: (d) => ({ ...d }),
+    summary: (d) => sv(d, "category") || "Gear",
+  },
+  "ds-monster": {
+    title: "My Homebrew Hostiles", noun: "Hostile",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "lv", label: "LV", type: "text", placeholder: "1" },
+      { key: "ac", label: "AC", type: "text", placeholder: "12" },
+      { key: "hp", label: "HP", type: "text", placeholder: "7" },
+      { key: "mv", label: "Move", type: "text", placeholder: "near" },
+      { key: "al", label: "Alignment", type: "select", options: [["N", "Neutral"], ["L", "Lawful"], ["C", "Chaotic"]] },
+      { key: "s", label: "STR", type: "text", placeholder: "+1" },
+      { key: "d", label: "DEX", type: "text", placeholder: "+1" },
+      { key: "c", label: "CON", type: "text", placeholder: "+1" },
+      { key: "i", label: "INT", type: "text", placeholder: "-1" },
+      { key: "w", label: "WIS", type: "text", placeholder: "+0" },
+      { key: "ch", label: "CHA", type: "text", placeholder: "+0" },
+      { key: "atk", label: "Attacks", type: "text", full: true, placeholder: "1 blaster +2 (1d8) far" },
+      { key: "notes", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ al: "N", mv: "near", lv: "1" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `LV ${sv(d, "lv") || "1"} · AC ${sv(d, "ac") || "?"}`,
+  },
+
+  // ── Candela Obscura (Illuminated Worlds) ──
+  "co-ability": {
+    title: "My Homebrew Abilities", noun: "Ability",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "source", label: "Source", type: "select", options: [["Role", "Role"], ["Specialty", "Specialty"]] },
+      { key: "owner", label: "Role / Specialty", type: "text", placeholder: "Weird, Occultist…" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ source: "Role" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "source") || "Role"}${sv(d, "owner") ? ` · ${sv(d, "owner")}` : ""}`,
+  },
+  "co-gear": {
+    title: "My Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "type", label: "Type", type: "text", placeholder: "Standard, Specialty, Circle…" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ type: "Specialty" }), toForm: (d) => ({ ...d }),
+    summary: (d) => sv(d, "type") || "Gear",
+  },
 };
 
 // Accent CSS var by system prefix (globals.css: --nimble/--sw/--ace/--kob).
@@ -503,6 +606,8 @@ function accentFor(kind: string): string {
   if (kind.startsWith("kob-")) return "--kob";
   if (kind.startsWith("d62e-")) return "--d62e";
   if (kind.startsWith("icrpg-")) return "--icrpg";
+  if (kind.startsWith("ds-")) return "--darkspace";
+  if (kind.startsWith("co-")) return "--candela";
   return "--dnd";
 }
 

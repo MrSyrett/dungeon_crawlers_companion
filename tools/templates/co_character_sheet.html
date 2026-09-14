@@ -6,256 +6,336 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Candela Obscura Character Sheet</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700;900&family=Barlow+Condensed:wght@400;500;600;700;800&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="/tools-data/co-data.js"></script>
 <style>
-  :root{
-    --accent:#2fa595; --accent-2:#3fc2b0; --gild:#d8b24a;
-    --bg:#0a1413; --panel:#0f1c1a; --panel-2:#13221f; --ink:#e9efec;
-    --muted:#8ba39d; --border:#25403b; --danger:#c0564e; --bleed:#9d6bd0;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:"Barlow Condensed",ui-sans-serif,system-ui,sans-serif;font-size:16px}
-  body{padding:18px;max-width:1080px;margin:0 auto}
-  h1,h2,h3{font-family:"Cinzel",serif;font-weight:700;margin:0}
-  .title{font-family:"Cinzel Decorative",serif;font-weight:900;letter-spacing:.02em}
-  a{color:var(--accent-2)}
-  input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink);
-    background:#0c1817;border:1px solid var(--border);border-radius:6px;padding:6px 8px}
-  input:focus,select,textarea:focus{outline:none;border-color:var(--accent)}
-  textarea{width:100%;resize:vertical;line-height:1.35}
-  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px}
-  .panel > h2{font-size:15px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent-2);
-    border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:baseline}
-  .panel > h2 .hint{font-family:"Barlow Condensed";font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:600}
-  .row{display:flex;gap:12px;flex-wrap:wrap}
-  .grow{flex:1 1 auto;min-width:0}
-  label.fld{display:flex;flex-direction:column;gap:3px;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700}
-  label.fld input, label.fld select{margin-top:2px}
-  .btn{cursor:pointer;background:var(--panel-2);border:1px solid var(--accent);color:var(--accent-2);
-    border-radius:8px;padding:8px 14px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:12px}
-  .btn:hover{background:var(--accent);color:#04100e}
-  .btn.ghost{border-color:var(--border);color:var(--muted)}
-  .btn.ghost:hover{border-color:var(--muted);background:var(--panel-2);color:var(--ink)}
+/* ═══ Candela Obscura character sheet ═══ Same skeleton as the Nimble / ACE /
+   Star Wars sheets (paper sheet + sticky Roll Log). Accent --co (gaslamp teal). */
+:root {
+  --bg:#e6ebe9;--paper:#f6f8f6;--ink:#182220;--muted:#586460;--rule:#b3bfba;
+  --co:#2fa595;--co-dk:#1c6b60;--co-lt:#d7efe9;--gild:#b8892a;--red:#b23c34;--bleed:#7d4fb0;
+  --border:#233029;--section-hdr:#12201c;--box:#eaf0ed;--input-bg:#fff;--input-border:#889;
+  --log-bg:#0f1a18;--log-text:#e9efec;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
+.app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
+.sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;}
+.sheet{max-width:940px;margin:0 auto;}
 
-  /* ── Masthead ── */
-  header.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px}
-  header.mast .brand{font-size:30px;line-height:1}
-  header.mast .brand small{display:block;font-family:"Barlow Condensed";font-weight:600;font-size:12px;letter-spacing:.4em;text-transform:uppercase;color:var(--accent);margin-top:4px}
-  .flame{color:var(--gild)}
+/* ── Roll Log (shared skeleton) ── */
+.roll-log{width:280px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--co);position:sticky;top:0;height:100vh;overflow:hidden;}
+#log-collapse-btn{position:fixed;right:280px;top:50%;transform:translateY(-50%);z-index:201;background:var(--co);color:white;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
+#log-collapse-btn::after{content:"\25C0";}
+.roll-log.collapsed #log-collapse-btn{right:0;}
+.roll-log.collapsed #log-collapse-btn::after{content:"\25B6";}
+.log-header{padding:12px 14px 10px;background:var(--co);display:flex;justify-content:space-between;align-items:center;}
+.log-title{font-family:'Cinzel',serif;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:white;}
+.log-clear{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:white;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;cursor:pointer;border-radius:2px;}
+.log-entries{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column-reverse;gap:6px;}
+.log-entry{background:#16211e;border:1px solid #2a3b36;border-radius:3px;padding:8px 10px;}
+.log-entry .roll-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#7d938c;margin-bottom:2px;}
+.log-entry .roll-result{font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;color:var(--log-text);line-height:1.05;}
+.log-entry .roll-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#6f857e;margin-top:3px;line-height:1.4;word-break:break-word;}
+.log-entry.crit .roll-result{color:#5fd3a8;}.log-entry.fumble .roll-result{color:#e0776f;}
+.log-entry.crit{border-color:#3f9e7e;}.log-entry.fumble{border-color:#a04a44;}
+.log-entry.remote{border-left:3px solid #c88a5a;background:#1c2320;}
+.log-hint{color:#3a4a45;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
+.log-actions{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid #1b2825;}
+.log-action-btn{flex:1;padding:6px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;}
+.log-action-btn.wizard{background:#123029;color:#5fd3b0;border:1px solid #1f5a4d;}
+.log-action-btn.wizard:hover{background:#1f5a4d;color:white;}
+.log-action-btn.rules{background:#1e2a26;color:#b8d8cd;border:1px solid #2f4a42;}
+.log-action-btn.export{background:#1a2733;color:#6aabdf;border:1px solid #1a4a8a;}
+.log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
+.dm-toggle-wrap{display:flex;align-items:center;gap:6px;}
+.dm-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.75);}
+.dm-toggle-btn{width:36px;height:18px;background:#333;border:1px solid #555;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.dm-toggle-btn.on{background:#5fd3b0;border-color:#3f9e7e;}
+.dm-toggle-btn::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:1px;left:1px;transition:left .2s;}
+.dm-toggle-btn.on::after{left:19px;}
 
-  /* ── Drives ── */
-  .drives{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .drive{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
-  .drive h3{font-family:"Cinzel";font-size:15px;text-transform:uppercase;letter-spacing:.14em;color:var(--ink)}
-  .drive .blurb{font-size:12px;color:var(--muted);margin:2px 0 8px}
-  .pips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
-  .pip{width:17px;height:17px;border-radius:50%;border:2px solid var(--border);cursor:pointer;background:transparent;transition:all .08s}
-  .pip.max{border-color:var(--accent)}
-  .pip.cur{background:var(--accent);border-color:var(--accent);box-shadow:0 0 6px rgba(47,165,149,.6)}
-  .drive .meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;margin-top:4px}
-  .drive .meta b{color:var(--accent-2)}
-  .resbox{display:flex;gap:4px;align-items:center;margin-top:6px}
-  .resbox .rpip{width:14px;height:14px;border:2px solid var(--gild);border-radius:3px;cursor:pointer;background:transparent}
-  .resbox .rpip.burned{background:var(--gild);opacity:.35}
-  .resbox .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
+/* ── Dice tray ── */
+.dice-tray{border-top:1px solid #1b2825;padding:10px;display:flex;flex-direction:column;gap:7px;background:#0b1512;}
+.tray-row{display:flex;gap:6px;align-items:center;}
+.tray-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7d938c;}
+.tray-note{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#5a6f68;letter-spacing:.04em;}
+.tray-input{background:#16211e;border:1px solid #2a3b36;color:#dde;font-family:'Share Tech Mono',monospace;font-size:13px;padding:5px 6px;border-radius:3px;outline:none;width:54px;text-align:center;}
+.tray-chk{display:flex;align-items:center;gap:5px;color:#9fb3ac;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
+.dice-btn{flex:1;padding:8px 0;background:var(--co);border:1px solid var(--co-dk);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:3px;}
+.dice-btn:hover{background:var(--co-dk);}
+.dice-btn.ghost{background:#16211e;color:#9fb3ac;border-color:#2a3b36;}
 
-  /* ── Actions ── */
-  .actgroup{margin-bottom:10px}
-  .actgroup > .gh{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent);font-weight:700;margin:4px 0 6px}
-  .action{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px}
-  .action:hover{background:var(--panel-2)}
-  .action .diamond{width:15px;height:15px;transform:rotate(45deg);border:2px solid var(--border);cursor:pointer;flex:0 0 auto;border-radius:2px}
-  .action .diamond.on{background:var(--gild);border-color:var(--gild);box-shadow:0 0 6px rgba(216,178,74,.6)}
-  .action .dots{display:flex;gap:5px;flex:0 0 auto}
-  .action .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);cursor:pointer}
-  .action .dot.on{background:var(--accent);border-color:var(--accent)}
-  .action .nm{flex:1 1 auto;min-width:0}
-  .action .nm b{font-size:15px;letter-spacing:.02em}
-  .action .nm .sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-  .action .drv{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;flex:0 0 auto}
+/* ── Roll toast ── */
+#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(10,16,14,0.94);border:2px solid var(--co);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,0.7);}
+#roll-toast.show{display:block;}
+#roll-toast.crit{border-color:#5fd3a8;}#roll-toast.fumble{border-color:#e0776f;}
+#roll-toast .t-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#9fb3ac;}
+#roll-toast .t-result{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#fff;}
+#roll-toast .t-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8aa;margin-top:2px;}
 
-  /* ── Marks & Scars ── */
-  .marks{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .mtrack{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px}
-  .mtrack h3{font-family:"Cinzel";font-size:14px;text-transform:uppercase;letter-spacing:.12em}
-  .mtrack .mboxes{display:flex;gap:6px;margin:8px 0}
-  .mbox{width:26px;height:26px;border:2px solid var(--border);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--danger)}
-  .mbox.on{border-color:var(--danger)}
-  .mtrack.bleed .mbox.on{border-color:var(--bleed);color:var(--bleed)}
-  .mtrack .scarslot{width:100%;margin-top:4px;font-size:13px}
-  .mtrack .desc{font-size:11px;color:var(--muted)}
+/* ── Sheet paper components ── */
+.hdr-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;border-bottom:2px solid var(--co);padding-bottom:12px;margin-bottom:16px;}
+.hdr-logo .co-word{font-family:'Cinzel',serif;font-weight:800;font-size:26px;letter-spacing:.02em;color:var(--co-dk);line-height:1;}
+.hdr-logo .co-sub{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--co);margin-top:3px;}
+.hdr-fields{display:flex;gap:10px;flex-wrap:wrap;flex:1;justify-content:flex-end;}
+.hdr-field{display:flex;flex-direction:column;gap:2px;}
+.hdr-field label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
+input,select,textarea{font-family:'Barlow',sans-serif;font-size:14px;color:var(--ink);background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;padding:6px 8px;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--co);}
+textarea{width:100%;resize:vertical;line-height:1.35;}
+.hdr-field input{min-width:110px;}
+.hdr-field.wide input{min-width:180px;}
 
-  /* ── generic lists ── */
-  .slotline{display:flex;gap:8px;align-items:center;margin-bottom:6px}
-  .slotline .tick{width:16px;height:16px;border:2px solid var(--accent);border-radius:4px;flex:0 0 auto;cursor:pointer}
-  .slotline .tick.on{background:var(--accent)}
-  .slotline input{flex:1 1 auto}
-  .ability{border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:8px;background:var(--panel-2)}
-  .ability b{color:var(--accent-2)}
-  .ability .d{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.35}
-  .refbtn{font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0}
-  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .keys{display:flex;flex-direction:column;gap:6px}
+.section{margin-bottom:16px;}
+.section-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--section-hdr);color:#fff;padding:6px 12px;border-radius:5px 5px 0 0;}
+.section-bar h2{font-family:'Cinzel',serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.14em;}
+.section-bar .bar-note{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);}
+.section-body{border:1px solid var(--rule);border-top:none;border-radius:0 0 6px 6px;background:var(--paper);padding:12px;}
 
-  /* ── Dice roller ── */
-  .roller{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .roller .die{width:38px;height:38px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;background:#0c1817}
-  .roller .die.gild{border-color:var(--gild);color:var(--gild)}
-  .roller .die.hi{border-color:var(--accent);box-shadow:0 0 8px rgba(47,165,149,.5)}
-  #roll-result{font-size:14px;font-weight:700}
-  .tier6{color:var(--accent-2)} .tier45{color:var(--gild)} .tier13{color:var(--danger)}
+.drives{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.drive{border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:10px;}
+.drive h3{font-family:'Cinzel',serif;font-size:14px;text-transform:uppercase;letter-spacing:.12em;color:var(--co-dk);}
+.drive .blurb{font-size:11px;color:var(--muted);margin:1px 0 8px;}
+.pips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px;}
+.pip{width:17px;height:17px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;background:#fff;padding:0;}
+.pip.max{border-color:var(--co-dk);}
+.pip.cur{background:var(--co);border-color:var(--co-dk);}
+.drive .meta{font-size:11px;color:var(--muted);}
+.drive .meta b{color:var(--co-dk);}
+.resbox{display:flex;gap:4px;align-items:center;margin-top:6px;}
+.resbox .rpip{width:14px;height:14px;border:2px solid var(--gild);border-radius:3px;cursor:pointer;background:#fff;padding:0;}
+.resbox .rpip.burned{background:var(--gild);opacity:.4;}
+.resbox .lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;}
 
-  /* modal */
-  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:50}
-  .modal-bg.on{display:flex}
-  .modal{background:var(--panel);border:1px solid var(--accent);border-radius:14px;max-width:640px;width:100%;padding:20px}
-  .modal h2{font-family:"Cinzel";font-size:18px;color:var(--accent-2);margin-bottom:10px}
-  .modal .step{font-size:13px;color:var(--muted);line-height:1.4;margin-bottom:10px}
-  .pool-badge{display:inline-block;background:var(--panel-2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;color:var(--accent-2)}
-  .savebar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 40%);padding-top:16px;display:flex;gap:10px;justify-content:flex-end}
-  @media(max-width:760px){.drives{grid-template-columns:1fr}.marks{grid-template-columns:1fr}.cols2{grid-template-columns:1fr}}
+.actgroup{margin-bottom:10px;}
+.actgroup > .gh{font-family:'Barlow Condensed',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--co-dk);font-weight:800;margin:2px 0 5px;border-bottom:1px solid var(--rule);padding-bottom:3px;}
+.action{display:flex;align-items:center;gap:10px;padding:5px 6px;border-radius:5px;}
+.action:hover{background:var(--co-lt);}
+.action .diamond{width:14px;height:14px;transform:rotate(45deg);border:2px solid var(--rule);cursor:pointer;flex:0 0 auto;border-radius:2px;background:#fff;padding:0;}
+.action .diamond.on{background:var(--gild);border-color:#8a6a1e;}
+.action .dots{display:flex;gap:5px;flex:0 0 auto;}
+.action .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;background:#fff;padding:0;}
+.action .dot.on{background:var(--co);border-color:var(--co-dk);}
+.action .roll-name{flex:1 1 auto;min-width:0;text-align:left;background:none;border:none;cursor:pointer;padding:0;color:var(--ink);}
+.action .roll-name b{font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.02em;}
+.action .roll-name .sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.action .roll-name:hover b{color:var(--co-dk);}
+.action .roll-ico{font-size:11px;color:var(--co);opacity:0;flex:0 0 auto;}
+.action:hover .roll-ico{opacity:1;}
+
+.marks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.mtrack{border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:10px;}
+.mtrack h3{font-family:'Cinzel',serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;}
+.mtrack .mboxes{display:flex;gap:6px;margin:8px 0;}
+.mbox{width:26px;height:26px;border:2px solid var(--rule);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--red);background:#fff;padding:0;}
+.mbox.on{border-color:var(--red);}
+.mtrack.bleed .mbox{color:var(--bleed);}
+.mtrack.bleed .mbox.on{border-color:var(--bleed);}
+.mtrack .scarslot{width:100%;margin-top:2px;font-size:13px;}
+.mtrack .desc{font-size:10px;color:var(--muted);}
+
+.slotline{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
+.slotline .tick{width:16px;height:16px;border:2px solid var(--co-dk);border-radius:4px;flex:0 0 auto;cursor:pointer;background:#fff;padding:0;}
+.slotline .tick.on{background:var(--co);}
+.slotline input{flex:1 1 auto;}
+.ability{border:1px solid var(--rule);border-radius:6px;padding:8px 10px;margin-bottom:8px;background:var(--box);}
+.ability b{color:var(--co-dk);}
+.ability .d{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35;}
+.refbtn{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--co-dk);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.keys{display:flex;flex-direction:column;gap:6px;}
+.smallbtn{font-family:'Barlow Condensed',sans-serif;background:var(--co);border:1px solid var(--co-dk);color:#fff;border-radius:4px;padding:4px 10px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
+.smallbtn.ghost{background:transparent;color:var(--co-dk);}
+
+/* ── Modals ── */
+.modal-bd{position:fixed;inset:0;background:rgba(8,14,12,.72);display:none;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:300;}
+.modal-bd.on{display:flex;}
+.modal{background:var(--paper);border:1px solid var(--co);border-radius:12px;max-width:640px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.4);}
+.modal h2{font-family:'Cinzel',serif;font-size:18px;color:var(--co-dk);margin-bottom:10px;}
+.modal .step{font-size:13px;color:var(--muted);line-height:1.45;margin-bottom:10px;}
+.pool-badge{display:inline-block;background:var(--co-lt);border:1px solid var(--co);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;color:var(--co-dk);}
+.rules-overlay{position:fixed;inset:0;background:rgba(8,14,12,.72);display:none;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:300;}
+.rules-overlay.open{display:flex;}
+
+/* ── Dark mode ── */
+body.dark{--bg:#0c1512;--paper:#12201c;--ink:#e7efeb;--muted:#8ba39c;--rule:#28403a;--box:#16241f;--input-bg:#0e1a17;--input-border:#2c463f;--section-hdr:#0a1512;}
+body.dark input,body.dark select,body.dark textarea{color:var(--ink);}
+.roll-log{transition:width .2s ease;}
+.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
+
+@media(max-width:820px){
+  .drives{grid-template-columns:1fr;}.marks{grid-template-columns:1fr;}.cols2{grid-template-columns:1fr;}
+  .sheet-wrap{padding:12px 12px 16px;}
+  #log-collapse-btn{right:auto;}
+  .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--co);z-index:200;max-height:calc(100dvh - 34px);transition:transform .25s ease;}
+  .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
+  #log-collapse-btn{right:12px;top:auto;bottom:calc(100% + 4px);transform:none;border-radius:4px 4px 0 0;}
+  .roll-log.collapsed #log-collapse-btn{bottom:8px;}
+  .roll-log.collapsed #log-collapse-btn::after{content:"\25B2 Log";width:auto;padding:0 8px;}
+}
+textarea,select,.log-entries,.modal .step{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 </style>
 </head>
 <body>
-<header class="mast">
-  <div>
-    <div class="brand title"><span class="flame">&#10022;</span> Candela Obscura</div>
-    <small>Illuminated Worlds &middot; Investigator Dossier</small>
+<div id="roll-toast"><div class="t-label"></div><div class="t-dice" data-da-inline></div><div class="t-result"></div><div class="t-detail"></div></div>
+
+<div class="app-wrap">
+<div class="sheet-wrap">
+<div class="sheet">
+
+  <div class="hdr-row">
+    <div class="hdr-logo"><div class="co-word">Candela Obscura</div><div class="co-sub">Investigator Dossier</div></div>
+    <div class="hdr-fields">
+      <div class="hdr-field wide"><label>Name</label><input type="text" id="f-name" placeholder="Investigator name" oninput="syncDocTitle()"></div>
+      <div class="hdr-field"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
+      <div class="hdr-field"><label>Role</label><select id="f-role" onchange="onRoleChange()"></select></div>
+      <div class="hdr-field"><label>Specialty</label><select id="f-specialty" onchange="onSpecialtyChange()"></select></div>
+    </div>
   </div>
-  <div class="row">
-    <button class="btn" onclick="openWizard()">Build Character</button>
-    <button class="btn ghost" onclick="saveSheet(true);toast('Saved')">Save</button>
+  <p id="spec-focus" style="font-size:12px;color:var(--muted);margin:-6px 0 14px"></p>
+
+  <!-- Drives -->
+  <div class="section">
+    <div class="section-bar"><h2>Drives</h2><span class="bar-note">Spend for +1d · gilded refreshes · resist = max ÷ 3</span></div>
+    <div class="section-body"><div class="drives" id="drives"></div></div>
   </div>
-</header>
 
-<!-- Identity -->
-<section class="panel">
-  <h2>Investigator</h2>
-  <div class="row">
-    <label class="fld grow">Name<input id="f-name" oninput="syncDocTitle()" placeholder="Investigator name"></label>
-    <label class="fld">Pronouns<input id="f-pronouns" style="width:120px" placeholder="they/them"></label>
-    <label class="fld">Role<select id="f-role" onchange="onRoleChange()"></select></label>
-    <label class="fld">Specialty<select id="f-specialty" onchange="onSpecialtyChange()"></select></label>
+  <!-- Actions -->
+  <div class="section">
+    <div class="section-bar"><h2>Actions</h2><span class="bar-note">Click a name to roll its pool · ◆ = gilded</span></div>
+    <div class="section-body"><div id="actions"></div></div>
   </div>
-  <p id="spec-focus" class="desc" style="font-size:13px;color:var(--muted);margin:10px 0 0"></p>
-</section>
 
-<!-- Drives -->
-<section class="panel">
-  <h2>Drives <span class="hint">Spend a point for +1d &middot; gilded results refresh &middot; resistance = max &divide; 3</span></h2>
-  <div class="drives" id="drives"></div>
-</section>
-
-<!-- Actions -->
-<section class="panel">
-  <h2>Actions <span class="hint">Rating 0&ndash;3 = dice pool &middot; &#9670; diamond = gilded</span></h2>
-  <div id="actions"></div>
-</section>
-
-<!-- Dice roller -->
-<section class="panel">
-  <h2>Action Roll <span class="hint">6 success &middot; 4&ndash;5 mixed &middot; 1&ndash;3 miss &middot; rule of six</span></h2>
-  <div class="roller">
-    <label class="fld">Dice<input id="r-dice" type="number" min="0" max="6" value="1" style="width:60px"></label>
-    <label class="fld" style="justify-content:flex-end"><span>Gilded?</span><input id="r-gild" type="checkbox" style="width:18px;height:18px;margin-top:6px"></label>
-    <button class="btn" onclick="rollPool()">Roll</button>
-    <div id="roll-dice" style="display:flex;gap:8px"></div>
-    <div id="roll-result"></div>
+  <!-- Marks -->
+  <div class="section">
+    <div class="section-bar"><h2>Marks &amp; Scars</h2><span class="bar-note">3 marks → 4th is a scar &amp; you drop</span></div>
+    <div class="section-body"><div class="marks" id="marks"></div></div>
   </div>
-  <p class="desc" style="font-size:11px;color:var(--muted);margin:8px 0 0">Rating 0: roll two dice, take the lowest (no crit). Max six dice total.</p>
-</section>
 
-<!-- Marks -->
-<section class="panel">
-  <h2>Marks &amp; Scars <span class="hint">3 marks in a category &rarr; 4th is a scar &amp; you drop</span></h2>
-  <div class="marks" id="marks"></div>
-</section>
+  <div class="cols2">
+    <!-- Gear -->
+    <div class="section">
+      <div class="section-bar"><h2>Gear</h2><button class="refbtn" style="color:rgba(255,255,255,.8)" onclick="openRef('gear')">Reference</button></div>
+      <div class="section-body">
+        <div id="gear"></div>
+        <p class="desc" style="font-size:10px;color:var(--muted);margin-top:4px">Standard: Bleed Containment Vial · Hand Weapon · Bleed Detector. Plus specialty &amp; circle gear.</p>
+      </div>
+    </div>
+    <!-- Illumination -->
+    <div class="section">
+      <div class="section-bar"><h2>Illumination Keys</h2><span class="bar-note">fulfil one per assignment</span></div>
+      <div class="section-body"><div class="keys" id="keys"></div></div>
+    </div>
+  </div>
 
-<div class="cols2">
-  <!-- Gear -->
-  <section class="panel">
-    <h2>Gear <span class="hint">3 slots &middot; declare as needed <button class="refbtn" onclick="openRef('gear')">reference</button></span></h2>
-    <div id="gear"></div>
-    <p class="desc" style="font-size:11px;color:var(--muted);margin-top:6px">Standard: Bleed Containment Vial &middot; Hand Weapon &middot; Bleed Detector. Plus your specialty &amp; circle gear.</p>
-  </section>
+  <!-- Abilities -->
+  <div class="section">
+    <div class="section-bar"><h2>Abilities</h2><button class="refbtn" style="color:rgba(255,255,255,.8)" onclick="openRef('abilities')">All Options</button></div>
+    <div class="section-body">
+      <div id="abilities-chosen"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-top:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:160px"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Add ability</label><select id="ability-pick" style="width:100%"></select></div>
+        <button class="smallbtn ghost" onclick="addPickedAbility()">Add</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- Illumination -->
-  <section class="panel">
-    <h2>Illumination Keys <span class="hint">fulfil one per assignment</span></h2>
-    <div class="keys" id="keys"></div>
-  </section>
+  <div class="cols2">
+    <div class="section">
+      <div class="section-bar"><h2>Character</h2></div>
+      <div class="section-body">
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Catalyst — why they joined</label>
+        <textarea id="f-catalyst" rows="2"></textarea>
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:8px;display:block">Question — what they seek</label>
+        <textarea id="f-question" rows="2"></textarea>
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:8px;display:block">Style — feel &amp; aesthetic</label>
+        <textarea id="f-style" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-bar"><h2>Relationships</h2><button class="refbtn" style="color:rgba(255,255,255,.8)" onclick="addRelRow()">+ Add</button></div>
+      <div class="section-body"><div id="relationships"></div></div>
+    </div>
+  </div>
+
+</div>
 </div>
 
-<!-- Abilities -->
-<section class="panel">
-  <h2>Abilities <span class="hint">choose 1 role + 1 specialty at creation <button class="refbtn" onclick="openRef('abilities')">all options</button></span></h2>
-  <div id="abilities-chosen"></div>
-  <div class="row" style="margin-top:8px">
-    <label class="fld grow">Add ability<select id="ability-pick"></select></label>
-    <button class="btn ghost" style="align-self:flex-end" onclick="addPickedAbility()">Add</button>
+<!-- Roll Log -->
+<div class="roll-log">
+  <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
+  <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
+  <div class="log-actions">
+    <button class="log-action-btn wizard" onclick="openWizard()" title="Build a character">Create</button>
+    <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
+    <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
+    <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
-</section>
-
-<!-- Details -->
-<div class="cols2">
-  <section class="panel">
-    <h2>Character</h2>
-    <label class="fld" style="margin-bottom:10px">Catalyst — why they joined Candela Obscura<textarea id="f-catalyst" rows="2"></textarea></label>
-    <label class="fld" style="margin-bottom:10px">Question — what they hope to find out<textarea id="f-question" rows="2"></textarea></label>
-    <label class="fld">Style — their feel &amp; aesthetic<textarea id="f-style" rows="2"></textarea></label>
-  </section>
-  <section class="panel">
-    <h2>Relationships <span class="hint">one-sided &middot; circle members</span></h2>
-    <div id="relationships"></div>
-    <button class="btn ghost" onclick="addRelRow()">+ Relationship</button>
-  </section>
+  <div class="log-entries" id="log-entries"><div class="log-hint">Click an action to roll its dice pool</div></div>
+  <div class="dice-tray">
+    <div class="tray-row">
+      <span class="tray-label">Bonus</span>
+      <input class="tray-input" id="tray-bonus" type="number" min="0" max="5" value="0" title="extra dice from spent drive / assistance">
+      <label class="tray-chk"><input type="checkbox" id="tray-gild" style="width:auto;padding:0"> Gild</label>
+      <span class="tray-note" style="flex:1">applied to your next action roll</span>
+    </div>
+    <div class="tray-row">
+      <button class="dice-btn ghost" onclick="rollQuick()">Roll <span id="tray-qn">1</span>d6 pool</button>
+      <input class="tray-input" id="tray-qn-in" type="number" min="0" max="6" value="1" oninput="document.getElementById('tray-qn').textContent=Math.max(0,Math.min(6,parseInt(this.value)||0))">
+    </div>
+    <div class="tray-note">6 success · 4–5 mixed · 1–3 miss · two 6s crit · rating 0 rolls two, takes the lowest · max six dice.</div>
+  </div>
+</div>
 </div>
 
-<div class="savebar">
-  <button class="btn ghost" onclick="exportJSON()">Export JSON</button>
-  <label class="btn ghost" style="cursor:pointer">Import<input type="file" accept="application/json" style="display:none" onchange="importJSON(this)"></label>
-  <button class="btn" onclick="saveSheet(true);toast('Saved')">Save Sheet</button>
-</div>
-
-<!-- Wizard modal -->
-<div class="modal-bg" id="wizard-bg">
+<!-- Wizard -->
+<div class="modal-bd" id="wizard-bd">
   <div class="modal">
     <h2>Build an Investigator</h2>
-    <div class="step">
-      Choose a <b>role</b> and <b>specialty</b>, then apply the playbook. It fills your starting actions,
-      drives, gilded action, illumination keys, and lists your ability options — then follow the reminders
-      to spend your creation points.
-    </div>
-    <div class="row" style="margin-bottom:12px">
-      <label class="fld grow">Role<select id="wz-role"></select></label>
-      <label class="fld grow">Specialty<select id="wz-specialty"></select></label>
+    <div class="step">Choose a <b>role</b> and <b>specialty</b>, then apply the playbook. It fills your starting actions, drives, gilded action, illumination keys, and default abilities — then spend your creation points.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+      <div style="flex:1;min-width:150px"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Role</label><select id="wz-role" style="width:100%"></select></div>
+      <div style="flex:1;min-width:150px"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Specialty</label><select id="wz-specialty" style="width:100%"></select></div>
     </div>
     <div id="wz-preview" class="step"></div>
-    <div class="step" style="border-top:1px solid var(--border);padding-top:10px">
-      After applying: <b>Actions</b> — raise one 0-action to 1, then distribute 3 more (max 2 each).
-      <b>Drives</b> — distribute 6 more points (max 6 each). <b>Gild</b> one extra action.
-      <b>Abilities</b> — pick one role + one specialty ability.
-    </div>
-    <div class="row" style="justify-content:flex-end;gap:10px;margin-top:6px">
-      <button class="btn ghost" onclick="closeWizard()">Cancel</button>
-      <button class="btn" onclick="applyPlaybook()">Apply Playbook</button>
+    <div class="step" style="border-top:1px solid var(--rule);padding-top:10px">After applying: <b>Actions</b> — raise one 0-action to 1, then distribute 3 more (max 2). <b>Drives</b> — distribute 6 more (max 6). <b>Gild</b> one extra action. <b>Abilities</b> — one role + one specialty.</div>
+    <div style="display:flex;justify-content:flex-end;gap:10px">
+      <button class="smallbtn ghost" onclick="closeWizard()">Cancel</button>
+      <button class="smallbtn" onclick="applyPlaybook()">Apply Playbook</button>
     </div>
   </div>
 </div>
 
-<!-- Reference modal -->
-<div class="modal-bg" id="ref-bg" onclick="if(event.target===this)closeRef()">
-  <div class="modal" id="ref-modal"></div>
+<!-- Reference -->
+<div class="modal-bd" id="ref-bd" onclick="if(event.target===this)closeRef()"><div class="modal" id="ref-modal"></div></div>
+
+<!-- Rules -->
+<div class="rules-overlay" id="rules-overlay">
+  <div class="modal">
+    <h2>Illuminated Worlds — Quick Rules</h2>
+    <div class="step"><b>Action roll.</b> Take d6 equal to your action rating (0–3). Spend a drive point (or accept help) to add +1d, up to six dice. Roll and read the highest die: <b>6</b> full success · <b>4–5</b> mixed success · <b>1–3</b> miss · <b>two 6s</b> critical.</div>
+    <div class="step"><b>Rating 0.</b> Roll two dice and take the lowest — no crit.</div>
+    <div class="step"><b>Gilded.</b> A gilded action replaces one die with a gilded die; take its result (even if lower) to refresh a point in that action's drive.</div>
+    <div class="step"><b>Resistance.</b> For every 3 maximum drive points you have 1 resistance in that drive. Burn one to reroll dice equal to the action's rating.</div>
+    <div class="step"><b>Marks &amp; Scars.</b> Body / Brain / Bleed each hold 3 marks; the 4th drops you and becomes a scar — clear the track, note the scar, shift one action point.</div>
+    <div style="display:flex;justify-content:flex-end"><button class="smallbtn" onclick="closeRules()">Close</button></div>
+  </div>
 </div>
 
+<!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (2D/3D dice + toast inline). -->
+<script src="/tools-data/dice-anim.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
-   Candela Obscura character sheet — Illuminated Worlds dice-pool engine.
-   Self-contained; integrates with the app save host via window.__ddSave /
-   window.__ddState / window.__ddSaveTitle, persisting under the co_sheet key.
+   Candela Obscura character sheet — Illuminated Worlds dice pools on the shared
+   sheet skeleton (paper sheet + Roll Log). Persists under co_sheet; integrates
+   with the app host via window.__ddSave / __ddState / __ddSaveTitle.
    ══════════════════════════════════════════════════════════════════════════ */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function dN(n){ return Math.floor(Math.random()*n)+1; }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+
 var DRIVES = window.CO_DRIVES || [];
 var ACTIONS = window.CO_ACTIONS || [];
 var ROLES = window.CO_ROLES || [];
@@ -264,63 +344,53 @@ var MARKS = window.CO_MARKS || [];
 var DRIVE_NAMES = DRIVES.map(function(d){return d.name});
 var ACTION_NAMES = ACTIONS.map(function(a){return a.name});
 function actionDrive(a){ var f=ACTIONS.find(function(x){return x.name===a}); return f?f.drive:''; }
+function roleObj(r){ return ROLES.find(function(x){return x.role===r}) || ROLES[0]; }
+function specObj(r,s){ var ro=roleObj(r); return ro.specialties.find(function(x){return x.name===s}) || ro.specialties[0]; }
 
-// ── State ──────────────────────────────────────────────────────────────────
 var S = null;
 function blankState(){
-  var st = { name:'', pronouns:'', role:ROLES[0].role, specialty:ROLES[0].specialties[0].name,
-    actions:{}, gilded:{}, drives:{}, resUsed:{}, marks:{}, scars:{Body:'',Brain:'',Bleed:''},
-    gear:[{t:'',on:false},{t:'',on:false},{t:'',on:false}], abilities:[], illumination:['','',''],
-    catalyst:'', question:'', style:'', relationships:[], _sheet:{} };
+  var st={ name:'',pronouns:'',role:ROLES[0].role,specialty:ROLES[0].specialties[0].name,
+    actions:{},gilded:{},drives:{},resUsed:{},marks:{},scars:{Body:'',Brain:'',Bleed:''},
+    gear:[{t:'',on:false},{t:'',on:false},{t:'',on:false}],abilities:[],illumination:['','',''],
+    catalyst:'',question:'',style:'',relationships:[],_sheet:{} };
   ACTION_NAMES.forEach(function(a){ st.actions[a]=0; st.gilded[a]=false; });
   DRIVE_NAMES.forEach(function(d){ st.drives[d]={max:0,cur:0}; st.resUsed[d]=0; });
   MARKS.forEach(function(m){ st.marks[m.name]=0; });
   return st;
 }
-
-// ── Lookups ─────────────────────────────────────────────────────────────────
-function roleObj(r){ return ROLES.find(function(x){return x.role===r}) || ROLES[0]; }
-function specObj(r,s){ var ro=roleObj(r); return ro.specialties.find(function(x){return x.name===s}) || ro.specialties[0]; }
 function resTotal(d){ return Math.floor((S.drives[d].max||0)/3); }
 
-// ── Build static selects ────────────────────────────────────────────────────
+// ── Selects ──
 function fillRoleSelect(sel,val){ sel.innerHTML=''; ROLES.forEach(function(r){ var o=document.createElement('option'); o.value=r.role; o.textContent=r.role+' — '+r.mastery; sel.appendChild(o); }); if(val)sel.value=val; }
 function fillSpecSelect(sel,role,val){ sel.innerHTML=''; roleObj(role).specialties.forEach(function(sp){ var o=document.createElement('option'); o.value=sp.name; o.textContent=sp.name; sel.appendChild(o); }); if(val)sel.value=val; }
+function onRoleChange(){ S.role=$('f-role').value; var sp=roleObj(S.role).specialties[0].name; S.specialty=sp; fillSpecSelect($('f-specialty'),S.role,sp); renderSpecFocus(); renderAbilityPicker(); scheduleAutosave(); }
+function onSpecialtyChange(){ S.specialty=$('f-specialty').value; renderSpecFocus(); renderAbilityPicker(); scheduleAutosave(); }
+function renderSpecFocus(){ var sp=specObj(S.role,S.specialty); $('spec-focus').innerHTML='<b style="color:var(--co-dk)">'+esc(sp.name)+'</b> · primary drive '+sp.primaryDrive+' · '+esc(sp.focus); }
 
-function onRoleChange(){ S.role=document.getElementById('f-role').value; var sp=roleObj(S.role).specialties[0].name; S.specialty=sp; fillSpecSelect(document.getElementById('f-specialty'),S.role,sp); renderSpecFocus(); renderAbilityPicker(); scheduleAutosave(); }
-function onSpecialtyChange(){ S.specialty=document.getElementById('f-specialty').value; renderSpecFocus(); renderAbilityPicker(); scheduleAutosave(); }
-function renderSpecFocus(){ var sp=specObj(S.role,S.specialty); document.getElementById('spec-focus').innerHTML='<b style="color:var(--accent-2)">'+sp.name+'</b> &middot; primary drive '+sp.primaryDrive+' &middot; '+sp.focus; }
-
-// ── Render: Drives ───────────────────────────────────────────────────────────
+// ── Drives ──
 function renderDrives(){
-  var host=document.getElementById('drives'); host.innerHTML='';
+  var host=$('drives'); host.innerHTML='';
   DRIVES.forEach(function(d){
     var st=S.drives[d.name]; var res=resTotal(d.name); var used=S.resUsed[d.name]||0;
     var el=document.createElement('div'); el.className='drive';
     var pips='';
-    for(var i=1;i<=9;i++){
-      var cls='pip'+(i<=st.max?' max':'')+(i<=st.cur?' cur':'');
-      pips+='<button class="'+cls+'" title="click: set max &middot; shift/right: spend" onclick="pipClick(\''+d.name+'\','+i+',event)" oncontextmenu="pipSpend(\''+d.name+'\','+i+',event)"></button>';
-    }
+    for(var i=1;i<=9;i++){ var cls='pip'+(i<=st.max?' max':'')+(i<=st.cur?' cur':''); pips+='<button class="'+cls+'" title="click set max · right-click spend" onclick="pipClick(\''+d.name+'\','+i+',event)" oncontextmenu="pipSpend(\''+d.name+'\','+i+',event)"></button>'; }
     var rp='';
     for(var r=0;r<res;r++){ rp+='<button class="rpip'+(r<used?' burned':'')+'" title="burn resistance" onclick="burnRes(\''+d.name+'\','+r+')"></button>'; }
     if(res===0) rp='<span class="lbl">none</span>';
-    el.innerHTML='<h3>'+d.name+'</h3><div class="blurb">'+d.blurb+'</div>'
-      +'<div class="pips">'+pips+'</div>'
-      +'<div class="meta"><span>available <b>'+st.cur+'</b> / max '+st.max+'</span></div>'
+    el.innerHTML='<h3>'+d.name+'</h3><div class="blurb">'+esc(d.blurb)+'</div><div class="pips">'+pips+'</div>'
+      +'<div class="meta">available <b>'+st.cur+'</b> / max '+st.max+'</div>'
       +'<div class="resbox"><span class="lbl">Resist</span>'+rp+'</div>';
     host.appendChild(el);
   });
 }
-// left-click a pip: set MAX to that value (and clamp available). Click the current max to lower by one.
 function pipClick(d,n,e){ e.preventDefault(); var st=S.drives[d]; st.max=(st.max===n)?n-1:n; if(st.cur>st.max)st.cur=st.max; var mx=resTotal(d); if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDrives(); scheduleAutosave(); }
-// right-click / shift-click: toggle spent (available) up to max.
 function pipSpend(d,n,e){ e.preventDefault(); var st=S.drives[d]; if(n>st.max)return false; st.cur=(st.cur===n)?n-1:n; renderDrives(); scheduleAutosave(); return false; }
 function burnRes(d,i){ var mx=resTotal(d); var used=S.resUsed[d]||0; S.resUsed[d]=(i<used)?i:i+1; if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDrives(); scheduleAutosave(); }
 
-// ── Render: Actions ──────────────────────────────────────────────────────────
+// ── Actions ──
 function renderActions(){
-  var host=document.getElementById('actions'); host.innerHTML='';
+  var host=$('actions'); host.innerHTML='';
   DRIVES.forEach(function(d){
     var g=document.createElement('div'); g.className='actgroup';
     var inner='<div class="gh">'+d.name+'</div>';
@@ -331,7 +401,8 @@ function renderActions(){
       inner+='<div class="action">'
         +'<button class="diamond'+(gild?' on':'')+'" title="gild this action" onclick="toggleGild(\''+a.name+'\')"></button>'
         +'<div class="dots">'+dots+'</div>'
-        +'<div class="nm"><b>'+a.name+'</b> <span class="drv">'+a.drive+'</span><div class="sub">'+a.sub+'</div></div>'
+        +'<button class="roll-name" onclick="rollAction(\''+a.name+'\')"><b>'+a.name+'</b> <span class="sub">'+esc(a.sub)+'</span></button>'
+        +'<span class="roll-ico">▶ roll</span>'
         +'</div>';
     });
     g.innerHTML=inner; host.appendChild(g);
@@ -340,25 +411,59 @@ function renderActions(){
 function setAction(a,n){ S.actions[a]=(S.actions[a]===n)?n-1:n; renderActions(); scheduleAutosave(); }
 function toggleGild(a){ S.gilded[a]=!S.gilded[a]; renderActions(); scheduleAutosave(); }
 
-// ── Render: Marks ────────────────────────────────────────────────────────────
+// ── Rolling ──
+function poolTier(rolls, zeroMode){
+  var high = zeroMode ? Math.min(rolls[0],rolls[1]) : Math.max.apply(null,rolls);
+  var sixes = rolls.filter(function(v){return v===6}).length;
+  var tier, type;
+  if(!zeroMode && sixes>=2){ tier='Critical success'; type='crit'; }
+  else if(high===6){ tier='Full success'; type='crit'; }
+  else if(high>=4){ tier='Mixed success'; type='normal'; }
+  else { tier='Miss'; type='fumble'; }
+  return { high:high, tier:tier, type:type };
+}
+function rollAction(name){
+  var rating=S.actions[name]||0;
+  var bonus=clamp(parseInt($('tray-bonus').value,10)||0,0,5);
+  var trayGild=$('tray-gild').checked;
+  var gild=!!S.gilded[name] || trayGild;
+  var drive=actionDrive(name);
+  var n=rating+bonus, zeroMode=false, rolls=[];
+  if(n<=0){ zeroMode=true; rolls=[dN(6),dN(6)]; } else { n=Math.min(6,n); for(var i=0;i<n;i++)rolls.push(dN(6)); }
+  var r=poolTier(rolls, zeroMode);
+  var gildVal = gild ? rolls[rolls.length-1] : null;
+  var detail = drive+' · ['+rolls.join(',')+']';
+  if(bonus) detail += ' · +'+bonus+'d';
+  if(gildVal!==null) detail += ' · gilded '+gildVal+(gildVal<=r.high?' (take to refresh '+drive+')':'');
+  addLog(name+' · '+(zeroMode?'0':(rating+(bonus?'+'+bonus:'')))+'d', r.tier+' — '+r.high, detail, r.type);
+  $('tray-bonus').value='0'; $('tray-gild').checked=false;
+}
+function rollQuick(){
+  var n=clamp(parseInt($('tray-qn-in').value,10)||0,0,6);
+  var zeroMode=false, rolls=[];
+  if(n<=0){ zeroMode=true; rolls=[dN(6),dN(6)]; } else { for(var i=0;i<n;i++)rolls.push(dN(6)); }
+  var r=poolTier(rolls, zeroMode);
+  addLog((zeroMode?'0':n)+'d6 pool', r.tier+' — '+r.high, '['+rolls.join(',')+']', r.type);
+}
+
+// ── Marks ──
 function renderMarks(){
-  var host=document.getElementById('marks'); host.innerHTML='';
+  var host=$('marks'); host.innerHTML='';
   MARKS.forEach(function(m){
     var val=S.marks[m.name]||0;
     var el=document.createElement('div'); el.className='mtrack'+(m.name==='Bleed'?' bleed':'');
     var boxes='';
-    for(var i=1;i<=3;i++){ boxes+='<button class="mbox'+(i<=val?' on':'')+'" onclick="setMark(\''+m.name+'\','+i+')">'+(i<=val?'&#10007;':'')+'</button>'; }
-    el.innerHTML='<h3>'+m.name+'</h3><div class="desc">'+m.desc+'</div>'
-      +'<div class="mboxes">'+boxes+'</div>'
+    for(var i=1;i<=3;i++){ boxes+='<button class="mbox'+(i<=val?' on':'')+'" onclick="setMark(\''+m.name+'\','+i+')">'+(i<=val?'✗':'')+'</button>'; }
+    el.innerHTML='<h3>'+m.name+'</h3><div class="desc">'+esc(m.desc)+'</div><div class="mboxes">'+boxes+'</div>'
       +'<input class="scarslot" placeholder="Scar (4th mark)…" value="'+esc(S.scars[m.name]||'')+'" oninput="S.scars[\''+m.name+'\']=this.value;scheduleAutosave()">';
     host.appendChild(el);
   });
 }
 function setMark(m,n){ S.marks[m]=(S.marks[m]===n)?n-1:n; renderMarks(); scheduleAutosave(); }
 
-// ── Render: Gear ─────────────────────────────────────────────────────────────
+// ── Gear / Keys / Abilities / Relationships ──
 function renderGear(){
-  var host=document.getElementById('gear'); host.innerHTML='';
+  var host=$('gear'); host.innerHTML='';
   S.gear.forEach(function(g,i){
     var line=document.createElement('div'); line.className='slotline';
     line.innerHTML='<button class="tick'+(g.on?' on':'')+'" title="mark used" onclick="S.gear['+i+'].on=!S.gear['+i+'].on;renderGear();scheduleAutosave()"></button>'
@@ -366,172 +471,136 @@ function renderGear(){
     host.appendChild(line);
   });
 }
-
-// ── Render: Illumination keys ────────────────────────────────────────────────
 function renderKeys(){
-  var host=document.getElementById('keys'); host.innerHTML='';
-  for(var i=0;i<3;i++){
-    (function(i){
-      var inp=document.createElement('input'); inp.placeholder='Illumination key '+(i+1); inp.value=S.illumination[i]||'';
-      inp.oninput=function(){ S.illumination[i]=this.value; scheduleAutosave(); };
-      host.appendChild(inp);
-    })(i);
-  }
+  var host=$('keys'); host.innerHTML='';
+  for(var i=0;i<3;i++){ (function(i){ var inp=document.createElement('input'); inp.placeholder='Illumination key '+(i+1); inp.value=S.illumination[i]||''; inp.oninput=function(){ S.illumination[i]=this.value; scheduleAutosave(); }; host.appendChild(inp); })(i); }
 }
-
-// ── Render: Abilities ────────────────────────────────────────────────────────
 function renderAbilities(){
-  var host=document.getElementById('abilities-chosen'); host.innerHTML='';
-  if(!S.abilities.length){ host.innerHTML='<p class="desc" style="font-size:12px;color:var(--muted)">No abilities chosen yet — pick from the list below or use Build Character.</p>'; }
+  var host=$('abilities-chosen'); host.innerHTML='';
+  if(!S.abilities.length){ host.innerHTML='<p style="font-size:12px;color:var(--muted)">No abilities chosen yet — pick below or use Create.</p>'; }
   S.abilities.forEach(function(ab,i){
     var el=document.createElement('div'); el.className='ability';
-    el.innerHTML='<div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(ab.name)+'</b>'
-      +'<button class="refbtn" onclick="removeAbility('+i+')">remove</button></div>'
-      +'<div class="d">'+esc(ab.desc||'')+'</div>';
+    el.innerHTML='<div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(ab.name)+'</b><button class="refbtn" onclick="removeAbility('+i+')">remove</button></div><div class="d">'+esc(ab.desc||'')+'</div>';
     host.appendChild(el);
   });
 }
 function renderAbilityPicker(){
-  var sel=document.getElementById('ability-pick'); sel.innerHTML='';
+  var sel=$('ability-pick'); sel.innerHTML='';
   var ro=roleObj(S.role), sp=specObj(S.role,S.specialty);
   function grp(label,list){ var og=document.createElement('optgroup'); og.label=label; list.forEach(function(ab){ var o=document.createElement('option'); o.value=label+'|'+ab.name; o.textContent=ab.name; og.appendChild(o); }); sel.appendChild(og); }
-  grp(ro.role+' (Role)', ro.abilities);
-  grp(sp.name+' (Specialty)', sp.abilities);
+  grp(ro.role+' (Role)', ro.abilities); grp(sp.name+' (Specialty)', sp.abilities);
 }
 function addPickedAbility(){
-  var v=document.getElementById('ability-pick').value; if(!v)return;
-  var ro=roleObj(S.role), sp=specObj(S.role,S.specialty);
-  var pool=ro.abilities.concat(sp.abilities); var nm=v.split('|')[1];
+  var v=$('ability-pick').value; if(!v)return;
+  var ro=roleObj(S.role), sp=specObj(S.role,S.specialty); var pool=ro.abilities.concat(sp.abilities); var nm=v.split('|')[1];
   var ab=pool.find(function(x){return x.name===nm}); if(!ab)return;
   if(S.abilities.some(function(x){return x.name===ab.name}))return;
   S.abilities.push({name:ab.name,desc:ab.desc}); renderAbilities(); scheduleAutosave();
 }
 function removeAbility(i){ S.abilities.splice(i,1); renderAbilities(); scheduleAutosave(); }
-
-// ── Render: Relationships ────────────────────────────────────────────────────
 function renderRelationships(){
-  var host=document.getElementById('relationships'); host.innerHTML='';
+  var host=$('relationships'); host.innerHTML='';
   S.relationships.forEach(function(r,i){
-    var el=document.createElement('div'); el.className='row'; el.style.marginBottom='6px';
+    var el=document.createElement('div'); el.style.cssText='display:flex;gap:8px;margin-bottom:6px';
     el.innerHTML='<input placeholder="Name" style="flex:1" value="'+esc(r.name)+'" oninput="S.relationships['+i+'].name=this.value;scheduleAutosave()">'
       +'<input placeholder="Type (Mentor, Rival…)" style="flex:1" value="'+esc(r.type)+'" oninput="S.relationships['+i+'].type=this.value;scheduleAutosave()">'
-      +'<button class="refbtn" onclick="S.relationships.splice('+i+',1);renderRelationships();scheduleAutosave()">remove</button>';
+      +'<button class="refbtn" onclick="S.relationships.splice('+i+',1);renderRelationships();scheduleAutosave()">×</button>';
     host.appendChild(el);
   });
 }
 function addRelRow(){ S.relationships.push({name:'',type:''}); renderRelationships(); scheduleAutosave(); }
 
-// ── Dice roller ──────────────────────────────────────────────────────────────
-function rollPool(){
-  var n=parseInt(document.getElementById('r-dice').value,10)||0; var gild=document.getElementById('r-gild').checked;
-  n=Math.max(0,Math.min(6,n));
-  var rolls=[], zeroMode=false;
-  if(n===0){ zeroMode=true; rolls=[rnd(),rnd()]; } else { for(var i=0;i<n;i++)rolls.push(rnd()); }
-  var host=document.getElementById('roll-dice'); host.innerHTML='';
-  var chosen; // result value
-  if(zeroMode){ chosen=Math.min(rolls[0],rolls[1]); }
-  else { chosen=Math.max.apply(null,rolls); }
-  var gildVal = gild ? rolls[rolls.length-1] : null;
-  rolls.forEach(function(v,idx){
-    var d=document.createElement('div'); d.className='die';
-    if(gild && idx===rolls.length-1) d.className+=' gild';
-    if(!zeroMode && v===chosen) d.className+=' hi';
-    d.textContent=v; host.appendChild(d);
-  });
-  var tier, cls, sixes=rolls.filter(function(v){return v===6}).length;
-  if(zeroMode){ tier = chosen>=6?'Success':(chosen>=4?'Mixed success':'Miss'); }
-  else if(sixes>=2){ tier='Critical success'; }
-  else if(chosen===6){ tier='Full success'; }
-  else if(chosen>=4){ tier='Mixed success'; }
-  else { tier='Miss'; }
-  cls = chosen>=6?'tier6':(chosen>=4?'tier45':'tier13');
-  var extra = gildVal!==null ? '  ·  gilded die = '+gildVal+(gildVal<=chosen?' (take it to refresh drive)':'') : '';
-  document.getElementById('roll-result').innerHTML='<span class="'+cls+'">'+tier+'</span> — highest '+chosen+extra;
-}
-function rnd(){ return 1+Math.floor(Math.random()*6); }
-
-// ── Wizard ───────────────────────────────────────────────────────────────────
+// ── Wizard ──
 function openWizard(){
-  fillRoleSelect(document.getElementById('wz-role'),S.role);
-  fillSpecSelect(document.getElementById('wz-specialty'),S.role,S.specialty);
-  document.getElementById('wz-role').onchange=function(){ fillSpecSelect(document.getElementById('wz-specialty'),this.value); wzPreview(); };
-  document.getElementById('wz-specialty').onchange=wzPreview;
-  wzPreview(); document.getElementById('wizard-bg').classList.add('on');
+  fillRoleSelect($('wz-role'),S.role); fillSpecSelect($('wz-specialty'),S.role,S.specialty);
+  $('wz-role').onchange=function(){ fillSpecSelect($('wz-specialty'),this.value); wzPreview(); };
+  $('wz-specialty').onchange=wzPreview; wzPreview(); $('wizard-bd').classList.add('on');
 }
-function closeWizard(){ document.getElementById('wizard-bg').classList.remove('on'); }
+function closeWizard(){ $('wizard-bd').classList.remove('on'); }
 function wzPreview(){
-  var r=document.getElementById('wz-role').value, s=document.getElementById('wz-specialty').value;
-  var sp=specObj(r,s);
+  var r=$('wz-role').value, s=$('wz-specialty').value; var sp=specObj(r,s);
   var acts=Object.keys(sp.starting.actions).map(function(k){return k+' '+sp.starting.actions[k]}).join(', ');
   var drvs=Object.keys(sp.starting.drives).map(function(k){return k+' '+sp.starting.drives[k]}).join(', ');
-  document.getElementById('wz-preview').innerHTML=
-    '<div class="pool-badge">'+roleObj(r).role+' · '+sp.name+'</div>'
-    +'<p style="margin:8px 0 2px"><b>Starting actions:</b> '+acts+'</p>'
-    +'<p style="margin:2px 0"><b>Starting drives:</b> '+drvs+'</p>'
-    +'<p style="margin:2px 0"><b>Gilded:</b> '+sp.gilded+'</p>'
-    +'<p style="margin:2px 0"><b>Illumination:</b> '+sp.illumination.join(' · ')+'</p>';
+  $('wz-preview').innerHTML='<div class="pool-badge">'+roleObj(r).role+' · '+sp.name+'</div>'
+    +'<p style="margin:8px 0 2px"><b>Actions:</b> '+acts+'</p><p style="margin:2px 0"><b>Drives:</b> '+drvs+'</p>'
+    +'<p style="margin:2px 0"><b>Gilded:</b> '+sp.gilded+'</p><p style="margin:2px 0"><b>Illumination:</b> '+sp.illumination.join(' · ')+'</p>';
 }
 function applyPlaybook(){
-  var r=document.getElementById('wz-role').value, s=document.getElementById('wz-specialty').value;
-  var sp=specObj(r,s);
+  var r=$('wz-role').value, s=$('wz-specialty').value; var sp=specObj(r,s);
   S.role=r; S.specialty=s;
   ACTION_NAMES.forEach(function(a){ S.actions[a]=0; S.gilded[a]=false; });
   Object.keys(sp.starting.actions).forEach(function(k){ S.actions[k]=sp.starting.actions[k]; });
   DRIVE_NAMES.forEach(function(d){ S.drives[d]={max:0,cur:0}; S.resUsed[d]=0; });
   Object.keys(sp.starting.drives).forEach(function(k){ var v=sp.starting.drives[k]; S.drives[k]={max:v,cur:v}; });
-  S.gilded[sp.gilded]=true;
-  S.illumination=sp.illumination.slice(0,3);
-  // pre-fill the first role + specialty ability as the "top option" default
-  S.abilities=[{name:roleObj(r).abilities[0].name,desc:roleObj(r).abilities[0].desc},
-               {name:sp.abilities[0].name,desc:sp.abilities[0].desc}];
-  // gear hints into empty slots
+  S.gilded[sp.gilded]=true; S.illumination=sp.illumination.slice(0,3);
+  S.abilities=[{name:roleObj(r).abilities[0].name,desc:roleObj(r).abilities[0].desc},{name:sp.abilities[0].name,desc:sp.abilities[0].desc}];
   S.gear=[{t:sp.gear[0]||'',on:false},{t:sp.gear[1]||'',on:false},{t:'',on:false}];
-  document.getElementById('f-role').value=r; fillSpecSelect(document.getElementById('f-specialty'),r,s);
-  renderAll(); closeWizard(); saveSheet(true); toast('Playbook applied — now spend your creation points');
+  $('f-role').value=r; fillSpecSelect($('f-specialty'),r,s);
+  renderAll(); closeWizard(); saveSheet(true);
+  addLog('Playbook applied', roleObj(r).role+' · '+sp.name, 'Now spend your creation points', 'normal');
 }
 
-// ── Reference modal ──────────────────────────────────────────────────────────
+// ── Reference / rules ──
 function openRef(kind){
-  var m=document.getElementById('ref-modal'); var html='';
+  var m=$('ref-modal'); var html='';
   if(kind==='gear'){
-    html='<h2>Candela Obscura Gear</h2><div class="step">Every PC may carry up to three pieces of gear, declared during play. Standard gear is available to anyone.</div>';
-    GEAR.forEach(function(g){ html+='<div class="ability"><b>'+g.name+'</b><div class="d">'+g.desc+'</div></div>'; });
+    html='<h2>Candela Obscura Gear</h2><div class="step">Up to three pieces of gear, declared during play. Standard gear is available to anyone.</div>';
+    GEAR.forEach(function(g){ html+='<div class="ability"><b>'+esc(g.name)+'</b><div class="d">'+esc(g.desc)+'</div></div>'; });
     var sp=specObj(S.role,S.specialty);
-    html+='<div class="step" style="margin-top:8px"><b>'+sp.name+' specialty gear (examples):</b> '+sp.gear.join(', ')+'. Work with your GM to tailor gear to your character.</div>';
+    html+='<div class="step" style="margin-top:8px"><b>'+esc(sp.name)+' gear (examples):</b> '+esc(sp.gear.join(', '))+'.</div>';
   } else if(kind==='abilities'){
     var ro=roleObj(S.role), sp2=specObj(S.role,S.specialty);
-    html='<h2>'+ro.role+' &amp; '+sp2.name+' Abilities</h2><div class="step">Choose one from each list at creation (top option is the safe default).</div>';
-    html+='<h3 style="font-family:Cinzel;font-size:14px;color:var(--accent-2);margin:10px 0 4px">'+ro.role+' — Role</h3>';
-    ro.abilities.forEach(function(a){ html+='<div class="ability"><b>'+a.name+'</b><div class="d">'+a.desc+'</div></div>'; });
-    html+='<h3 style="font-family:Cinzel;font-size:14px;color:var(--accent-2);margin:10px 0 4px">'+sp2.name+' — Specialty</h3>';
-    sp2.abilities.forEach(function(a){ html+='<div class="ability"><b>'+a.name+'</b><div class="d">'+a.desc+'</div></div>'; });
+    html='<h2>'+esc(ro.role)+' &amp; '+esc(sp2.name)+' Abilities</h2><div class="step">Choose one from each list at creation.</div>';
+    html+='<h3 style="font-family:Cinzel;font-size:13px;color:var(--co-dk);margin:8px 0 4px">'+esc(ro.role)+' — Role</h3>';
+    ro.abilities.forEach(function(a){ html+='<div class="ability"><b>'+esc(a.name)+'</b><div class="d">'+esc(a.desc)+'</div></div>'; });
+    html+='<h3 style="font-family:Cinzel;font-size:13px;color:var(--co-dk);margin:8px 0 4px">'+esc(sp2.name)+' — Specialty</h3>';
+    sp2.abilities.forEach(function(a){ html+='<div class="ability"><b>'+esc(a.name)+'</b><div class="d">'+esc(a.desc)+'</div></div>'; });
   }
-  html+='<div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn ghost" onclick="closeRef()">Close</button></div>';
-  m.innerHTML=html; document.getElementById('ref-bg').classList.add('on');
+  html+='<div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="smallbtn" onclick="closeRef()">Close</button></div>';
+  m.innerHTML=html; $('ref-bd').classList.add('on');
 }
-function closeRef(){ document.getElementById('ref-bg').classList.remove('on'); }
+function closeRef(){ $('ref-bd').classList.remove('on'); }
+function openRules(){ $('rules-overlay').classList.add('open'); }
+function closeRules(){ $('rules-overlay').classList.remove('open'); }
 
-// ── Render everything from S ─────────────────────────────────────────────────
+// ── Roll Log (shared skeleton) ──
+var _toastTimer=null;
+function showRollToast(label,result,detail,type){
+  var _da=window.DiceAnim&&window.DiceAnim.get?window.DiceAnim.get():null;
+  var _twoD=!!(_da&&_da.on&&_da.mode==='2d');
+  if(!_twoD){ if(window.innerWidth>768)return; var log=document.querySelector('.roll-log'); if(!log||!log.classList.contains('collapsed'))return; }
+  var t=$('roll-toast'); if(!t)return;
+  t.className='show'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
+  t.querySelector('.t-label').textContent=label; t.querySelector('.t-result').textContent=result; t.querySelector('.t-detail').textContent=detail;
+  if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){ t.className=''; },3500);
+}
+function addLog(label,result,detail,type){
+  type=type||'normal';
+  var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
+  var div=document.createElement('div'); div.className='log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
+  div.innerHTML='<div class="roll-label">'+esc(label)+'</div><div class="roll-result">'+esc(result)+'</div><div class="roll-detail">'+esc(detail)+'</div>';
+  entries.insertBefore(div,entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
+  showRollToast(label,result,detail,type);
+}
+function clearLog(){ $('log-entries').innerHTML='<div class="log-hint">Click an action to roll its dice pool</div>'; }
+function toggleLogCollapse(){ document.querySelector('.roll-log').classList.toggle('collapsed'); }
+document.querySelector('.log-header').addEventListener('click',function(e){ if(window.innerWidth<=768&&!e.target.closest('button,.dm-toggle-btn'))toggleLogCollapse(); });
+(function(){ if(window.innerWidth<=768)document.querySelector('.roll-log').classList.add('collapsed'); })();
+function setDarkMode(on){ document.body.classList.toggle('dark',on); $('dm-toggle').classList.toggle('on',on); try{ localStorage.setItem('co_dark',on?'1':'0'); }catch(e){} }
+function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')); }
+
+// ── Render all ──
 function renderAll(){
-  document.getElementById('f-name').value=S.name||'';
-  document.getElementById('f-pronouns').value=S.pronouns||'';
-  fillRoleSelect(document.getElementById('f-role'),S.role);
-  fillSpecSelect(document.getElementById('f-specialty'),S.role,S.specialty);
-  document.getElementById('f-catalyst').value=S.catalyst||'';
-  document.getElementById('f-question').value=S.question||'';
-  document.getElementById('f-style').value=S.style||'';
-  renderSpecFocus(); renderDrives(); renderActions(); renderMarks(); renderGear();
-  renderKeys(); renderAbilities(); renderAbilityPicker(); renderRelationships();
+  $('f-name').value=S.name||''; $('f-pronouns').value=S.pronouns||'';
+  fillRoleSelect($('f-role'),S.role); fillSpecSelect($('f-specialty'),S.role,S.specialty);
+  $('f-catalyst').value=S.catalyst||''; $('f-question').value=S.question||''; $('f-style').value=S.style||'';
+  renderSpecFocus(); renderDrives(); renderActions(); renderMarks(); renderGear(); renderKeys(); renderAbilities(); renderAbilityPicker(); renderRelationships();
 }
 
-// ── Collect / apply for persistence ──────────────────────────────────────────
+// ── Persistence ──
 function collectSheet(){
-  S.name=document.getElementById('f-name').value;
-  S.pronouns=document.getElementById('f-pronouns').value;
-  S.catalyst=document.getElementById('f-catalyst').value;
-  S.question=document.getElementById('f-question').value;
-  S.style=document.getElementById('f-style').value;
-  // top-level name/role/specialty/class for roster + doc-title consumers
+  S.name=$('f-name').value; S.pronouns=$('f-pronouns').value;
+  S.catalyst=$('f-catalyst').value; S.question=$('f-question').value; S.style=$('f-style').value;
   return Object.assign({}, S, { class: S.specialty });
 }
 function applySheet(data){
@@ -552,53 +621,32 @@ function applySheet(data){
   if(data._sheet) S._sheet=data._sheet;
   renderAll();
 }
-
-// ── Save/load host integration ───────────────────────────────────────────────
-var _saveTimer=null, _ready=false;
-function _saveNow(){
-  if(_saveTimer){ clearTimeout(_saveTimer); _saveTimer=null; }
-  var json=JSON.stringify(collectSheet());
-  try{ localStorage.setItem('co_sheet',json); }catch(e){}
-  if(window.__ddSave) window.__ddSave({ co_sheet: json });
-}
+var _saveTimer=null,_ready=false;
+function _saveNow(){ if(_saveTimer){ clearTimeout(_saveTimer); _saveTimer=null; } var json=JSON.stringify(collectSheet()); try{ localStorage.setItem('co_sheet',json); }catch(e){} if(window.__ddSave)window.__ddSave({ co_sheet: json }); }
 function saveSheet(quiet){ if(quiet){ try{_saveNow()}catch(e){} return; } if(_saveTimer)clearTimeout(_saveTimer); _saveTimer=setTimeout(function(){_saveTimer=null;try{_saveNow()}catch(e){}},1200); }
 function scheduleAutosave(){ if(!_ready)return; saveSheet(false); }
-function syncDocTitle(){ S.name=document.getElementById('f-name').value; try{ var n=S.name.trim(); if(n&&window.__ddSaveTitle)window.__ddSaveTitle(n); }catch(e){} scheduleAutosave(); }
+function syncDocTitle(){ S.name=$('f-name').value; try{ var n=S.name.trim(); if(n&&window.__ddSaveTitle)window.__ddSaveTitle(n); }catch(e){} scheduleAutosave(); }
 function autoLoad(){
   var saved=null;
-  if(window.__ddState!==undefined) saved=window.__ddState['co_sheet']||null;
-  else { try{ saved=localStorage.getItem('co_sheet'); }catch(e){} }
+  if(window.__ddState!==undefined) saved=window.__ddState['co_sheet']||null; else { try{ saved=localStorage.getItem('co_sheet'); }catch(e){} }
   if(!saved)return false;
   try{ applySheet(JSON.parse(saved)); return true; }catch(e){ return false; }
 }
-
-// ── Export / import ──────────────────────────────────────────────────────────
-function exportJSON(){
-  var json=JSON.stringify(collectSheet(),null,2);
-  var blob=new Blob([json],{type:'application/json'});
-  var url=URL.createObjectURL(blob); var a=document.createElement('a');
-  a.href=url; a.download=(S.name||'candela-investigator').replace(/\s+/g,'_')+'.json'; a.click();
-  URL.revokeObjectURL(url);
+function exportSheet(){
+  var json=JSON.stringify(collectSheet(),null,2); var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=(S.name||'candela-investigator').replace(/\s+/g,'_')+'.json'; a.click(); URL.revokeObjectURL(url);
+  addLog('Exported','↓ JSON',(S.name||'investigator'),'normal');
 }
-function importJSON(input){
+function importSheet(input){
   var f=input.files&&input.files[0]; if(!f)return;
-  var rd=new FileReader(); rd.onload=function(){ try{ applySheet(JSON.parse(rd.result)); saveSheet(true); toast('Imported'); }catch(e){ toast('Import failed'); } };
+  var rd=new FileReader(); rd.onload=function(){ try{ applySheet(JSON.parse(rd.result)); saveSheet(true); addLog('Imported','✓',f.name,'normal'); }catch(e){ addLog('Import failed','✗',String(e.message||e),'fumble'); } };
   rd.readAsText(f); input.value='';
 }
 
-// ── misc ─────────────────────────────────────────────────────────────────────
-function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-var _toastTimer=null;
-function toast(msg){
-  var t=document.getElementById('_toast');
-  if(!t){ t=document.createElement('div'); t.id='_toast'; t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#04100e;font-weight:700;padding:8px 18px;border-radius:20px;z-index:99;font-size:13px;letter-spacing:.05em'; document.body.appendChild(t); }
-  t.textContent=msg; t.style.opacity='1'; if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){t.style.opacity='0'},1400);
-}
-
-// ── INIT ─────────────────────────────────────────────────────────────────────
+// ── INIT ──
 S=blankState();
+try{ if(localStorage.getItem('co_dark')==='1') setDarkMode(true); }catch(e){}
 if(!autoLoad()){ renderAll(); }
-// global autosave for identity/detail text fields not individually wired
 document.addEventListener('input',function(e){ if(e.target&&e.target.tagName&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) scheduleAutosave(); });
 _ready=true;
 </script>

@@ -1,5 +1,5 @@
 import { CO_ROLES } from "@/lib/data/candela-data";
-import { RefShell, cardCls, nameCls, badge, accentBadge, gildBadge } from "@/components/CandelaRef";
+import { CandelaHeader, cardCls, nameCls, badge, hbBadge, gildBadge } from "@/components/CandelaRef";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +10,12 @@ function fmt(obj: Record<string, number>): string {
 export default function Page() {
   const specCount = CO_ROLES.reduce((n, r) => n + r.specialties.length, 0);
   return (
-    <RefShell title="Roles & Specialties" subtitle="Candela Obscura · Playbooks" active="/candela/roles" count={`${CO_ROLES.length} roles · ${specCount} specialties`}>
+    <div className="mx-auto w-full max-w-6xl px-5 py-10">
+      <CandelaHeader title="Roles & Specialties" subtitle="Candela Obscura · Playbooks" />
+      <p className="mb-5 text-sm leading-relaxed text-[var(--muted)]">
+        {CO_ROLES.length} roles · {specCount} specialties. A character is a Role and a Specialty; together
+        they set your starting actions, drives, gilded action, abilities, and gear.
+      </p>
       <div className="space-y-6">
         {CO_ROLES.map((r) => (
           <div key={r.role} className={cardCls}>
@@ -36,7 +41,7 @@ export default function Page() {
                 <div key={sp.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel-2)] p-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-[13px] font-bold uppercase tracking-[0.1em] text-[var(--text)]">{sp.name}</span>
-                    <span className={accentBadge}>{sp.primaryDrive}</span>
+                    <span className={hbBadge}>{sp.primaryDrive}</span>
                     <span className={gildBadge}>Gild {sp.gilded}</span>
                   </div>
                   <p className="mt-1 text-[12px] text-[var(--muted)]">{sp.focus}</p>
@@ -49,6 +54,6 @@ export default function Page() {
           </div>
         ))}
       </div>
-    </RefShell>
+    </div>
   );
 }

@@ -1,16 +1,28 @@
 import Link from "next/link";
 
-// Shared shell for the Candela Obscura reference pages (app/candela/*). Mirrors
-// the other systems' reference shells (DarkSpaceRef / IcrpgRef) in the Candela
-// teal accent: a header with a "← Home" link, plus card/badge classes.
+// Shared shell for the Candela Obscura reference pages (app/candela/*) — same
+// pieces as IcrpgRef / NimbleRef (header with "My Homebrew" + "← Home", search
+// form, filter chips, count line, empty state, cards) in the Candela teal.
+export type Query = Record<string, string | undefined>;
+export type RawQuery = Record<string, string | string[] | undefined>;
+export const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-const ACCENT = "#2fa595";
-
+export const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
+export const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--candela)] hover:text-[var(--text)]";
+export const chipOn = "border-[var(--candela)] bg-[var(--panel-2)] text-[#3fc2b0]";
 export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#3fc2b0]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
-export const accentBadge = "rounded border border-[var(--candela)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#3fc2b0]";
+export const hbBadge = "rounded border border-[var(--candela)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#3fc2b0]";
 export const gildBadge = "rounded border border-[#d8b24a] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#d8b24a]";
+
+export function withParams(base: string, current: Query, patch: Query): string {
+  const next = { ...current, ...patch };
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(next)) if (v) sp.set(k, v);
+  const s = sp.toString();
+  return s ? `${base}?${s}` : base;
+}
 
 export function CandelaHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
@@ -20,54 +32,47 @@ export function CandelaHeader({ title, subtitle }: { title: string; subtitle: st
         <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--candela)] sm:text-[11px] sm:tracking-[0.35em]">{subtitle}</p>
       </div>
       <div className="flex shrink-0 gap-2">
+        <Link href="/candela/homebrew" className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--candela)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]">My Homebrew</Link>
         <Link href="/dashboard" className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]">← Home</Link>
       </div>
     </header>
   );
 }
 
-const REF_TABS: { href: string; label: string }[] = [
-  { href: "/candela/roles", label: "Roles" },
-  { href: "/candela/actions", label: "Actions" },
-  { href: "/candela/abilities", label: "Abilities" },
-  { href: "/candela/gear", label: "Gear" },
-];
-
-export function CandelaTabs({ active }: { active: string }) {
+export function SearchForm({ base, q, placeholder, hidden }: { base: string; q: string; placeholder: string; hidden: Query }) {
   return (
-    <nav className="mb-6 flex flex-wrap gap-2">
-      {REF_TABS.map((t) => {
-        const on = t.href === active;
-        return (
-          <Link
-            key={t.href}
-            href={t.href}
-            className={
-              "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors " +
-              (on
-                ? "border-[var(--candela)] bg-[var(--panel-2)] text-[#3fc2b0]"
-                : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--candela)] hover:text-[var(--text)]")
-            }
-          >
-            {t.label}
-          </Link>
-        );
-      })}
-    </nav>
+    <form method="get" action={base} className="mb-4 flex gap-2">
+      <input type="search" name="q" defaultValue={q} placeholder={placeholder} className="min-w-0 flex-1 rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2.5 text-sm text-[var(--text)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--candela)]" />
+      {Object.entries(hidden).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}
+      <button className="shrink-0 rounded border border-[var(--border)] px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)] hover:border-[var(--candela)] hover:text-[var(--text)]">Search</button>
+    </form>
   );
 }
 
-export function RefShell({
-  title, subtitle, active, count, children,
-}: {
-  title: string; subtitle: string; active: string; count?: string; children: React.ReactNode;
-}) {
+export function ChipRow({ label, base, current, param, options, active }: { label: string; base: string; current: Query; param: string; options: { key: string; label: string }[]; active: string }) {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6" style={{ ["--accent" as string]: ACCENT }}>
-      <CandelaHeader title={title} subtitle={subtitle} />
-      <CandelaTabs active={active} />
-      {count ? <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">{count}</p> : null}
-      {children}
-    </main>
+    <div className="mb-3 flex flex-wrap items-center gap-1.5">
+      <span className="mr-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--muted)]">{label}</span>
+      <Link href={withParams(base, current, { [param]: "" })} className={`${chipBase} ${active ? chipOff : chipOn}`}>All</Link>
+      {options.map((o) => <Link key={o.key} href={withParams(base, current, { [param]: o.key })} className={`${chipBase} ${active === o.key ? chipOn : chipOff}`}>{o.label}</Link>)}
+    </div>
+  );
+}
+
+export function CountLine({ count, noun, base, filtered }: { count: number; noun: string; base: string; filtered: boolean }) {
+  return (
+    <div className="mb-4 mt-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
+      <span>{count} {count === 1 ? noun : noun + "s"}</span>
+      {filtered ? <Link href={base} className="text-[var(--candela)] hover:underline">Clear filters</Link> : null}
+    </div>
+  );
+}
+
+export function EmptyState({ noun, base }: { noun: string; base: string }) {
+  return (
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">
+      <h2 className="text-base font-bold uppercase tracking-[0.15em]">Nothing found</h2>
+      <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">No {noun} matches those filters. Try a broader search or <Link href={base} className="text-[var(--candela)] underline">clear them</Link>.</p>
+    </div>
   );
 }

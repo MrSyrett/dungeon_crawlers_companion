@@ -23,7 +23,9 @@ export type HbType =
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
-  | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster";
+  | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
+  | "ds-archetype" | "ds-trait" | "ds-background" | "ds-power" | "ds-gear" | "ds-monster"
+  | "co-ability" | "co-gear";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -35,6 +37,8 @@ const HB_TYPES = [
   "kob-trope", "kob-strength", "kob-flaw",
   "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
   "icrpg-type", "icrpg-ability", "icrpg-loot", "icrpg-gear", "icrpg-spell", "icrpg-monster",
+  "ds-archetype", "ds-trait", "ds-background", "ds-power", "ds-gear", "ds-monster",
+  "co-ability", "co-gear",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1624,6 +1628,125 @@ function normalizeIcrpgMonster(input: unknown): { name: string; data: Record<str
   return { name, data };
 }
 
+// ── DarkSpace (sci-fi Shadowdark reskin) ─────────────────────────────────────
+// Each normaliser emits the lib/data/darkspace-* shape its reference page reads,
+// tagged source:"Homebrew" so cards render a Homebrew badge.
+const DS_CASTER_OPTS = ["Engineer", "Mystic", "Both", "None"] as const;
+
+function normalizeDsArchetype(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew archetype needs a name.");
+  const casterRaw = str(o.caster);
+  const data: Record<string, unknown> = {
+    name,
+    hd: str(o.hd).slice(0, 20) || "1d6",
+    weapons: str(o.weapons).slice(0, 200),
+    armor: str(o.armor).slice(0, 200),
+    caster: casterRaw && casterRaw !== "None" ? oneOf(casterRaw, DS_CASTER_OPTS, "None") : null,
+    features: strList(o.features, 20, 400),
+    ranks: null,
+    source: "Homebrew",
+  };
+  return { name, data };
+}
+
+function normalizeDsTrait(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew trait needs a name.");
+  return { name, data: { name, effect: str(o.effect).slice(0, 600), source: "Homebrew" } };
+}
+
+function normalizeDsBackground(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew background needs a name.");
+  const data: Record<string, unknown> = { name, source: "Homebrew" };
+  if (str(o.desc)) data.desc = str(o.desc).slice(0, 600);
+  return { name, data };
+}
+
+function normalizeDsPower(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew power needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    tier: str(o.tier).slice(0, 4) || "1",
+    caster: oneOf(str(o.caster) || "Both", DS_CASTER_OPTS, "Both"),
+    range: str(o.range).slice(0, 40),
+    duration: str(o.duration).slice(0, 60),
+    damage: str(o.damage).slice(0, 60),
+    desc: str(o.desc).slice(0, 3000),
+    source: "Homebrew",
+  };
+  return { name, data };
+}
+
+function normalizeDsGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    category: oneOf(str(o.category) || "basic", ["weapon", "armor", "ammo", "basic"] as const, "basic"),
+    cost: str(o.cost).slice(0, 40) || "—",
+    desc: str(o.desc).slice(0, 600),
+    source: "Homebrew",
+  };
+  if (str(o.qty)) data.qty = str(o.qty).slice(0, 10);
+  return { name, data };
+}
+
+function normalizeDsMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew hostile needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    ac: str(o.ac).slice(0, 8),
+    hp: str(o.hp).slice(0, 8),
+    atk: str(o.atk).slice(0, 200),
+    mv: str(o.mv).slice(0, 40) || "near",
+    lv: str(o.lv).slice(0, 4) || "1",
+    al: oneOf(str(o.al) || "N", ["L", "N", "C"] as const, "N"),
+    s: str(o.s).slice(0, 6), d: str(o.d).slice(0, 6), c: str(o.c).slice(0, 6),
+    i: str(o.i).slice(0, 6), w: str(o.w).slice(0, 6), ch: str(o.ch).slice(0, 6),
+    notes: str(o.notes).slice(0, 600),
+    source: "Homebrew",
+  };
+  return { name, data };
+}
+
+// ── Candela Obscura (Illuminated Worlds) ─────────────────────────────────────
+function normalizeCoAbility(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew ability needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    source: oneOf(str(o.source) || "Role", ["Role", "Specialty"] as const, "Role"),
+    owner: str(o.owner).slice(0, 60),
+    desc: str(o.desc).slice(0, 2000),
+    hb: true,
+  };
+  return { name, data };
+}
+
+function normalizeCoGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    type: str(o.type).slice(0, 60) || "Specialty",
+    desc: str(o.desc).slice(0, 2000),
+    hb: true,
+  };
+  return { name, data };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -1671,6 +1794,14 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "icrpg-gear": return normalizeIcrpgGear(data);
     case "icrpg-spell": return normalizeIcrpgSpell(data);
     case "icrpg-monster": return normalizeIcrpgMonster(data);
+    case "ds-archetype": return normalizeDsArchetype(data);
+    case "ds-trait": return normalizeDsTrait(data);
+    case "ds-background": return normalizeDsBackground(data);
+    case "ds-power": return normalizeDsPower(data);
+    case "ds-gear": return normalizeDsGear(data);
+    case "ds-monster": return normalizeDsMonster(data);
+    case "co-ability": return normalizeCoAbility(data);
+    case "co-gear": return normalizeCoGear(data);
   }
 }
 
