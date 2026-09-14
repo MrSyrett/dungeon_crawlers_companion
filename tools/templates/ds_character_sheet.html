@@ -531,6 +531,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
         <button class="tab-btn" data-tab="triad" onclick="setTab('triad')">The Triad</button>
+        <button class="tab-btn" data-tab="interface" onclick="setTab('interface')">🖥️ Interface</button>
         <button class="tab-btn" data-tab="ship" onclick="setTab('ship')">🚀 Ship</button>
       </div>
 
@@ -568,6 +569,12 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
       <div class="tab-panel" id="tab-triad">
         <div class="sl"><span>The Triad</span><span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#5a8595;">Mark the powers you know · Feats are freeform</span></div>
         <div id="triad-body" style="padding:6px 4px;"></div>
+      </div>
+
+      <!-- INTERFACE TAB (Hacking — the Spacer's deck/rig; ACC/CTL/NET) -->
+      <div class="tab-panel" id="tab-interface">
+        <div class="sl"><span>The Interface</span><span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#5a8595;">Attack = ACC · HP = 10 + CTL · AC = 11 + NET</span></div>
+        <div id="iface-body" style="padding:8px 4px;"></div>
       </div>
 
       <!-- SHIP TAB (Starship — built like a Spacer: Stats, HP, AC, systems & weapons) -->
@@ -1257,7 +1264,7 @@ function onStatChange(id) {
 
 // ═══ TABS (Spells / Talents / Gear) ═════════════════════════════════════════
 var _tab = 'gear';
-const TABS = ['talents','gear','triad','ship'];
+const TABS = ['talents','gear','triad','interface','ship'];
 function setTab(name){
   if(TABS.indexOf(name) < 0) name = 'gear';
   // Leaving the Ship tab persists ship edits (ship state round-trips in the save).
@@ -1270,6 +1277,7 @@ function setTab(name){
   // Render the ship / triad UI on demand when their tab opens.
   if(name === 'ship' && typeof renderShip === 'function') { try{ renderShip(); }catch(e){} }
   if(name === 'triad' && typeof renderTriad === 'function') { try{ renderTriad(); }catch(e){} }
+  if(name === 'interface' && typeof renderInterface === 'function') { try{ renderInterface(); }catch(e){} }
 }
 function setDefaultTab(){ setTab(_tab || 'gear'); }
 
@@ -1315,6 +1323,71 @@ function renderTriad(){
   body.innerHTML = h;
 }
 window.renderTriad = renderTriad;
+
+// ── The Interface (hacking) ─────────────────────────────────────────────────
+// A hacker's deck/rig/implant. Three Function bonuses (ACC/CTL/NET, +0..+4).
+// Attack bonus = ACC · HP = 10 + CTL · AC = 11 + NET. Round-trips in the save.
+var _iface = { name:'', ACC:0, CTL:0, NET:0, hpCur:'', crashed:false };
+function ifaceState(){ return _iface; }
+window.ifaceState = ifaceState;
+function ifaceSave(){ try{ if(typeof _saveSheetNow==='function') _saveSheetNow(); }catch(e){} }
+function ifaceHPMax(){ return 10 + (parseInt(_iface.CTL,10)||0); }
+function ifaceSet(k,v){ _iface[k]=v; ifaceSave(); }                        window.ifaceSet = ifaceSet;
+function ifaceSetStat(k,v){ var n=parseInt(v,10); _iface[k]=isNaN(n)?0:n; renderInterface(); ifaceSave(); } window.ifaceSetStat = ifaceSetStat;
+function ifaceToggleCrash(){ _iface.crashed=!_iface.crashed; renderInterface(); ifaceSave(); } window.ifaceToggleCrash = ifaceToggleCrash;
+function ifaceRepair(){ _iface.crashed=false; _iface.hpCur=String(ifaceHPMax()); renderInterface(); ifaceSave(); } window.ifaceRepair = ifaceRepair;
+function renderInterface(){
+  var body = document.getElementById('iface-body'); if(!body) return;
+  var D = window.DARKSPACE;
+  var E = function(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var fmt = function(n){ n=parseInt(n,10)||0; return (n>=0?'+':'')+n; };
+  var lbl = 'font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;';
+  var fld = 'background:#0f0f0f;border:1px solid #16323d;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;padding:6px 8px;border-radius:4px;box-sizing:border-box;';
+  var cyanBtn = 'background:#0d1a20;color:#6ac8df;border:1px solid #1a5a7a;border-radius:5px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;padding:5px 10px;';
+  var sect = 'font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:.08em;color:#8fd6ea;text-transform:uppercase;margin:14px 0 6px;border-bottom:1px solid #16323d;padding-bottom:3px;';
+  var hpMax = ifaceHPMax();
+  var h = '';
+  // Name
+  h += '<div><div style="'+lbl+'">Interface Name</div><input value="'+E(_iface.name)+'" oninput="ifaceSet(\'name\',this.value)" placeholder="Deck / rig / implant name" style="'+fld+'width:100%;margin-top:3px;"></div>';
+  // Function stats
+  h += '<div style="'+sect+'">Function Stats <span style="color:#5a8595;font-weight:700;">bonus +0 to +4</span></div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">';
+  [['ACC','Access','Attack'],['CTL','Control','HP'],['NET','Net','AC']].forEach(function(t){
+    h += '<div style="background:#0a1216;border:1px solid #16323d;border-radius:4px;padding:8px 4px;text-align:center;">'
+      + '<div style="'+lbl+'">'+t[1]+' <span style="color:#5a8595;">('+t[0]+')</span></div>'
+      + '<input value="'+E(_iface[t[0]])+'" oninput="ifaceSetStat(\''+t[0]+'\',this.value)" style="width:100%;background:transparent;border:none;color:#eee;text-align:center;font-family:Montserrat,sans-serif;font-size:22px;font-weight:900;outline:none;">'
+      + '</div>';
+  });
+  h += '</div>';
+  // Derived
+  var crashed = _iface.crashed;
+  h += '<div style="'+sect+'">Derived</div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">';
+  h += '<div style="background:#0d1a20;border:1px solid #1a5a7a;border-radius:4px;padding:8px 4px;text-align:center;"><div style="'+lbl+'">Attack</div><div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:900;color:#6ac8df;">'+fmt(_iface.ACC)+'</div></div>';
+  h += '<div style="background:#0d1a20;border:1px solid #1a5a7a;border-radius:4px;padding:8px 4px;text-align:center;"><div style="'+lbl+'">AC</div><div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:900;color:#6ac8df;">'+(11+(parseInt(_iface.NET,10)||0))+'</div></div>';
+  h += '<div style="background:'+(crashed?'#3a1414':'#0d1a20')+';border:1px solid '+(crashed?'#7a2a2a':'#1a5a7a')+';border-radius:4px;padding:8px 4px;text-align:center;"><div style="'+lbl+'">HP (10 + CTL)</div>'
+    + '<div style="display:flex;gap:4px;align-items:center;justify-content:center;margin-top:2px;"><input value="'+E(_iface.hpCur!==''?_iface.hpCur:hpMax)+'" oninput="ifaceSet(\'hpCur\',this.value)" style="'+fld+'width:44px;text-align:center;font-size:16px;font-weight:900;"> <span style="color:#5a8595;font-family:Montserrat,sans-serif;font-size:13px;">/ '+hpMax+'</span></div></div>';
+  h += '</div>';
+  // Crash / repair
+  h += '<div style="display:flex;gap:8px;align-items:center;margin-top:10px;">';
+  h += '<label style="display:flex;align-items:center;gap:6px;font-family:Montserrat,sans-serif;font-size:11px;color:'+(crashed?'#e0503c':'#cfe6ee')+';cursor:pointer;"><input type="checkbox" '+(crashed?'checked':'')+' onchange="ifaceToggleCrash()" style="accent-color:#e0503c;">Crashed</label>';
+  h += '<button style="'+cyanBtn+'" onclick="ifaceRepair()" title="Rest/Downtime + DC 9 INT restores full HP">↻ Repair (full HP)</button>';
+  if(crashed) h += '<span style="font-family:Montserrat,sans-serif;font-size:10px;color:#e0503c;">Unusable until repaired (Rest/Downtime + DC 9 INT).</span>';
+  h += '</div>';
+  // Quick reference: actions + dice
+  if(D && D.hacking){
+    h += '<div style="'+sect+'">Hacking Quick Reference</div>';
+    h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">';
+    (D.hacking.diceRolls||[]).forEach(function(d){ h += '<span style="font-family:Montserrat,sans-serif;font-size:10px;color:#cfe6ee;background:#0d1418;border:1px solid #16323d;border-radius:4px;padding:3px 7px;">'+E(d.dc)+' → '+E(d.die)+'</span>'; });
+    h += '</div>';
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;">';
+    (D.hacking.actions.list||[]).forEach(function(a){ h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;color:#cfe6ee;"><span style="color:#8fd6ea;">'+E(a.stat)+'</span> — '+E(a.action)+'</div>'; });
+    h += '</div>';
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:9px;color:#5a8595;margin-top:8px;">See the reference viewer\'s Hacking tab for programs, malware, and full rules.</div>';
+  }
+  body.innerHTML = h;
+}
+window.renderInterface = renderInterface;
 
 // ── Corruption (optional) ───────────────────────────────────────────────────
 // Corruption Points are tracked against WIS; exceeding WIS = the Spacer succumbs.
@@ -3201,6 +3274,7 @@ function collectSheet(){
       options:   options,
       ship:      (typeof window.dsShipState === 'function') ? window.dsShipState() : (window._dsShipState || null),
       triad:     (typeof triadState === 'function') ? triadState() : null,
+      iface:     (typeof ifaceState === 'function') ? ifaceState() : null,
       corruption: document.getElementById('corruption-pts')?.value || '',
       featureUses: _featureUses && typeof _featureUses === 'object' ? _featureUses : {},
       trackers:       Array.isArray(_trackers) ? _trackers : [],
@@ -3552,6 +3626,11 @@ function _applySDData(d){
   if(_tr && _tr.known){ _triad = { known:{Body:!!_tr.known.Body,Mind:!!_tr.known.Mind,Soul:!!_tr.known.Soul}, exhausted:{Body:!!(_tr.exhausted&&_tr.exhausted.Body),Mind:!!(_tr.exhausted&&_tr.exhausted.Mind),Soul:!!(_tr.exhausted&&_tr.exhausted.Soul)} }; }
   else { _triad = { known:{Body:false,Mind:false,Soul:false}, exhausted:{Body:false,Mind:false,Soul:false} }; }
   set('corruption-pts', (d._sheet && d._sheet.corruption) || '');
+  // DarkSpace Interface (hacking) state.
+  var _if = d._sheet && d._sheet.iface;
+  if(_if && typeof _if === 'object'){ _iface = { name:_if.name||'', ACC:parseInt(_if.ACC,10)||0, CTL:parseInt(_if.CTL,10)||0, NET:parseInt(_if.NET,10)||0, hpCur:_if.hpCur!=null?String(_if.hpCur):'', crashed:!!_if.crashed }; }
+  else { _iface = { name:'', ACC:0, CTL:0, NET:0, hpCur:'', crashed:false }; }
+  if(typeof renderInterface === 'function') try{ renderInterface(); }catch(e){}
   if(typeof renderTriad === 'function') try{ renderTriad(); }catch(e){}
   if(typeof syncCorruption === 'function') try{ syncCorruption(); }catch(e){}
   if(typeof syncModeChrome === 'function') syncModeChrome();
@@ -5396,7 +5475,7 @@ window._dsRefTabTo = _dsRefTabTo;
 function renderDarkSpaceRef(){
   const DS = window.DARKSPACE; if(!DS) return;
   const E = t => _qrEsc(t);
-  const TABS = ['Species','Archetypes','Backgrounds','Motivations','The Triad','Corruption','Gear','Weapons','Armor','Advanced Tech','Starships'];
+  const TABS = ['Species','Archetypes','Backgrounds','Motivations','The Triad','Corruption','Gear','Weapons','Armor','Advanced Tech','Starships','Hacking'];
   const tabsEl = document.getElementById('dsref-tabs');
   tabsEl.innerHTML = TABS.map(t =>
     '<button onclick="_dsRefTabTo('+JSON.stringify(t).replace(/"/g,'&quot;')+')" style="padding:5px 10px;border-radius:5px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.05em;'+
@@ -5509,6 +5588,23 @@ function renderDarkSpaceRef(){
       (DS.ship.commandCrew||[]).forEach(function(r){ h += P(r.role+'. '+r.text); });
       h += H4('Stock Classes');
       DS.ship.stockClasses.forEach(c=> h += P(c.name+': '+c.text));
+      break;
+    case 'Hacking':
+      if(DS.hacking){
+        var hk = DS.hacking;
+        h += P(hk.intro);
+        h += H4('The Interface'); h += P(hk.interface.intro);
+        (hk.interface.functions||[]).forEach(function(f){ h += P(f.name+' ('+f.key+'). '+f.text); });
+        h += P(hk.interface.derived);
+        h += H4('Hacking Actions'); h += P(hk.actions.intro);
+        h += table(['Action','Function'], (hk.actions.list||[]).map(function(a){return tblRow([a.action, a.stat]);}));
+        h += H4('Hacking Dice Rolls');
+        h += table(['Difficulty','Die'], (hk.diceRolls||[]).map(function(d){return tblRow([d.dc, d.die]);}));
+        h += H4('Rules of Engagement');
+        (hk.rules||[]).forEach(function(r){ h += P(r.title+'. '+r.text); });
+        h += H4('Programs & Malware');
+        (hk.programs||[]).forEach(function(p){ h += H4(p.name, p.kind+(p.persistence?' · Persistence':'')); h += P(p.flavor); h += P('Deploy: '+p.deploy+' · Effect: '+p.effect); });
+      }
       break;
   }
   body.innerHTML = h;

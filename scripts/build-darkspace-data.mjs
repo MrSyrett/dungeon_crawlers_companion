@@ -47,7 +47,7 @@ function sanityCheck(d) {
     "terms", "species", "humanNote", "techSpecies", "archetypes", "backgrounds",
     "motivations", "triad", "corruption", "credits", "citizenGear", "spacersKit", "gear",
     "armor", "meleeWeapons", "rangedWeapons", "explosives", "weaponProps",
-    "ship", "advancedTech", "advancedTechNote", "quickRules",
+    "ship", "hacking", "advancedTech", "advancedTechNote", "quickRules",
   ];
   for (const k of need) if (!(k in d)) problems.push(`missing key: ${k}`);
   if (Array.isArray(d.archetypes) && d.archetypes.length !== 7) problems.push(`expected 7 archetypes, got ${d.archetypes.length}`);
@@ -80,6 +80,7 @@ const CONSTS = [
   ["explosives", "DS_EXPLOSIVES", "DsWeapon[]"],
   ["weaponProps", "DS_WEAPON_PROPS", "Record<string, string>"],
   ["ship", "DS_SHIP", "DsShip"],
+  ["hacking", "DS_HACKING", "DsHacking"],
   ["advancedTech", "DS_ADVANCED_TECH", "DsAdvancedTech[]"],
   ["advancedTechNote", "DS_ADVANCED_TECH_NOTE", "string"],
   ["quickRules", "DS_QUICK_RULES", "DsQuickRule[]"],
@@ -88,7 +89,7 @@ const CONSTS = [
 const IMPORTS = [
   "DarkSpaceData", "DsSpecies", "DsTechSpecies", "DsArchetype", "DsBackground",
   "DsMotivation", "DsTriad", "DsCorruption", "DsSpacersKit", "DsGearItem", "DsArmor", "DsWeapon",
-  "DsShip", "DsAdvancedTech", "DsQuickRule",
+  "DsShip", "DsHacking", "DsAdvancedTech", "DsQuickRule",
 ];
 
 // The bestiary lives in its own module (ds-monsters.js) like sd-monsters.js.

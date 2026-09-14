@@ -2,7 +2,7 @@
 // Source: public/tools-data/sd-darkspace.js - regenerate with: node scripts/build-darkspace-data.mjs
 
 import type {
-  DarkSpaceData, DsSpecies, DsTechSpecies, DsArchetype, DsBackground, DsMotivation, DsTriad, DsCorruption, DsSpacersKit, DsGearItem, DsArmor, DsWeapon, DsShip, DsAdvancedTech, DsQuickRule,
+  DarkSpaceData, DsSpecies, DsTechSpecies, DsArchetype, DsBackground, DsMotivation, DsTriad, DsCorruption, DsSpacersKit, DsGearItem, DsArmor, DsWeapon, DsShip, DsHacking, DsAdvancedTech, DsQuickRule,
 } from "./darkspace-types";
 
 export const DS_TERMS: Record<string, string> = {
@@ -1923,6 +1923,178 @@ export const DS_SHIP: DsShip = {
   ]
 };
 
+export const DS_HACKING: DsHacking = {
+  "intro": "Hacking, Netrunning, Slicing, Net Diving — most of the time a simple stat check breaks into a system, but when a network has countermeasures and traversal, these rules add depth. Every hacker works through an Interface with three Function stats.",
+  "interface": {
+    "intro": "A hacker's deck, rig, or implant is simply called the Interface. Its three Function stats — Access, Control, Net — typically carry a bonus of +0 to +4 (rarely negative).",
+    "functions": [
+      {
+        "key": "ACC",
+        "name": "Access",
+        "text": "Offensive capabilities: decryption, password cracking, brute force, and similar active tasks. Your Interface's attack bonus equals its Access modifier."
+      },
+      {
+        "key": "CTL",
+        "name": "Control",
+        "text": "Persistence, activating and disabling devices and mechanisms, and similar manipulative tasks. Your Interface's HP equals 10 + its Control modifier."
+      },
+      {
+        "key": "NET",
+        "name": "Net",
+        "text": "Defensive capabilities, traversal, reconnaissance, transfers, and similar transitive tasks. Your Interface's AC equals 11 + its Net modifier."
+      }
+    ],
+    "derived": "Attack bonus = ACC · HP = 10 + CTL · AC = 11 + NET"
+  },
+  "actions": {
+    "intro": "A hacking action is one action per turn: make the appropriate Function check against a DC the GM sets. What the action looks like is up to the player.",
+    "list": [
+      {
+        "action": "Breaking Initial Security",
+        "stat": "Access"
+      },
+      {
+        "action": "Taking over a node",
+        "stat": "Control"
+      },
+      {
+        "action": "Maintain Persistence",
+        "stat": "Control"
+      },
+      {
+        "action": "Recon Scan",
+        "stat": "Net"
+      },
+      {
+        "action": "Activating / disabling a node",
+        "stat": "Control"
+      },
+      {
+        "action": "Breaking internal security",
+        "stat": "Access"
+      },
+      {
+        "action": "Using programs",
+        "stat": "Control"
+      },
+      {
+        "action": "Installing malware",
+        "stat": "Control"
+      },
+      {
+        "action": "Exfiltrating data",
+        "stat": "Net"
+      }
+    ]
+  },
+  "diceRolls": [
+    {
+      "dc": "Easy, DC 9",
+      "die": "d4"
+    },
+    {
+      "dc": "Normal, DC 12",
+      "die": "d6"
+    },
+    {
+      "dc": "Hard, DC 15",
+      "die": "d8"
+    },
+    {
+      "dc": "Extreme, DC 18",
+      "die": "d10"
+    }
+  ],
+  "rules": [
+    {
+      "title": "Critical Success",
+      "text": "Doubles one numerical component of what you were attempting (for a variable-DC action, doubles the result)."
+    },
+    {
+      "title": "Critical Failure",
+      "text": "The attempt fails and the Interface malfunctions, dealing d4 damage to the hacker. That stat can't be used until the Interface is repaired (DC 12)."
+    },
+    {
+      "title": "Opposed Checks",
+      "text": "Use the opponent's INT if they have no NET score."
+    },
+    {
+      "title": "Persistence",
+      "text": "Some actions persist beyond a single turn, but require an additional Control check at the start of each subsequent turn."
+    },
+    {
+      "title": "Variable Effects",
+      "text": "When a hacking action creates a die roll, the DC it beats determines which die to roll (see Hacking Dice Rolls). A critical success doubles the result."
+    },
+    {
+      "title": "Hacking Combat",
+      "text": "Hacking damage is applied to the Interface and deducted from its HP. At 0 HP the Interface crashes and the connection is severed. With a Datajack the hacker can stay connected past 0 — further damage is then dealt to their own HP."
+    },
+    {
+      "title": "Interface Crash",
+      "text": "A crashed Interface is unusable until repaired: a Rest or Downtime action and a DC 9 INT check restore full HP. You can also restore HP to a non-crashed Interface while disconnected — make an INT check and use the Hacking Dice Rolls table for the amount."
+    }
+  ],
+  "programs": [
+    {
+      "name": "Burn",
+      "kind": "Malware",
+      "flavor": "Anti-IC malware — virtual green flames engulf the IC, overheating its processing.",
+      "deploy": "ACC vs NET",
+      "effect": "Consult the Hacking Dice Rolls table for the damage die.",
+      "persistence": true
+    },
+    {
+      "name": "Chronicle",
+      "kind": "Program",
+      "flavor": "A utility program that copies and stores data from a node.",
+      "deploy": "CTL DC 15",
+      "effect": "Accesses and copies data stored in a node and transfers it out to the Rig.",
+      "persistence": false
+    },
+    {
+      "name": "Crash",
+      "kind": "Malware",
+      "flavor": "A brute-force access malware that resembles a wrecking ball.",
+      "deploy": "ACC vs Node DC",
+      "effect": "Initial access program that cracks entry nodes and firewalls.",
+      "persistence": false
+    },
+    {
+      "name": "Gate",
+      "kind": "Program",
+      "flavor": "A floating portal in virtual space.",
+      "deploy": "CTL DC 15",
+      "effect": "Create a permanent backdoor in a node that you control.",
+      "persistence": false
+    },
+    {
+      "name": "Hound",
+      "kind": "Program",
+      "flavor": "An anti-IC program resembling a large mastiff. ACC +2, CTL +2, NET +2, AC 13, HP 12, MV NEAR. Chomp +4, 1d6.",
+      "deploy": "CTL DC 12",
+      "effect": "Attacks hostile IC and hackers on your behalf.",
+      "persistence": true
+    },
+    {
+      "name": "Ping",
+      "kind": "Program",
+      "flavor": "A shockwave emanates from your persona, mapping the details of the next node.",
+      "deploy": "NET DC 9",
+      "effect": "Determine the details of a node before entering; each higher DC adds another node.",
+      "persistence": true
+    },
+    {
+      "name": "Wipe",
+      "kind": "Malware",
+      "flavor": "A \"scorched earth\" malware.",
+      "deploy": "ACC DC 18",
+      "effect": "Reformats a node, removing details and data stores.",
+      "persistence": false
+    }
+  ]
+};
+
 export const DS_ADVANCED_TECH: DsAdvancedTech[] = [
   {
     "name": "Alien Incubation Pod",
@@ -2043,6 +2215,7 @@ export const DARKSPACE: DarkSpaceData = {
   explosives: DS_EXPLOSIVES,
   weaponProps: DS_WEAPON_PROPS,
   ship: DS_SHIP,
+  hacking: DS_HACKING,
   advancedTech: DS_ADVANCED_TECH,
   advancedTechNote: DS_ADVANCED_TECH_NOTE,
   quickRules: DS_QUICK_RULES,

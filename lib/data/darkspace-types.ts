@@ -201,6 +201,52 @@ export interface DsShip {
   stockClasses: DsStockClass[];
 }
 
+export interface DsHackingFunction {
+  key: string;
+  name: string;
+  text: string;
+}
+
+export interface DsHackingAction {
+  action: string;
+  stat: string;
+}
+
+export interface DsHackingDiceRoll {
+  dc: string;
+  die: string;
+}
+
+export interface DsHackingRule {
+  title: string;
+  text: string;
+}
+
+export interface DsHackingProgram {
+  name: string;
+  kind: string;
+  flavor: string;
+  deploy: string;
+  effect: string;
+  persistence: boolean;
+}
+
+export interface DsHacking {
+  intro: string;
+  interface: {
+    intro: string;
+    functions: DsHackingFunction[];
+    derived: string;
+  };
+  actions: {
+    intro: string;
+    list: DsHackingAction[];
+  };
+  diceRolls: DsHackingDiceRoll[];
+  rules: DsHackingRule[];
+  programs: DsHackingProgram[];
+}
+
 export interface DsAdvancedTech {
   name: string;
   text: string;
@@ -257,6 +303,7 @@ export interface DarkSpaceData {
   explosives: DsWeapon[];
   weaponProps: Record<string, string>;
   ship: DsShip;
+  hacking: DsHacking;
   advancedTech: DsAdvancedTech[];
   advancedTechNote: string;
   quickRules: DsQuickRule[];
