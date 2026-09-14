@@ -48,7 +48,7 @@ export const DS_ARCHETYPES: DsArchetype[] = [
     "features": [
       "Banish (bonus power, does not count toward power limit).",
       "Power Channeling (WIS). Know 2 tier 1 powers. Add powers per level.",
-      "Languages: Ascendant, Void-cant, or Machine-code.",
+      "Languages: Ascendant, Void-cant, or Binary.",
       "Choose an Allegiance matching your alignment."
     ],
     "ranks": {
@@ -82,7 +82,7 @@ export const DS_ARCHETYPES: DsArchetype[] = [
     "armor": "Flak weave, reinforced combat weave",
     "caster": null,
     "features": [
-      "Ambush: Hit unaware target → extra weapon die damage + half level dice.",
+      "Sneak Attack: Hit unaware target → extra weapon die damage + half level dice.",
       "Infiltration: Advantage on climbing, sneaking, disguises, traps, locks, pickpocketing."
     ],
     "ranks": {
@@ -116,7 +116,7 @@ export const DS_ARCHETYPES: DsArchetype[] = [
     "armor": "None",
     "caster": "INT",
     "features": [
-      "Power Channeling (INT). Know 3 tier 1 powers. Add powers per level.",
+      "Tech Savvy (INT). Know 3 tier 1 Tech. Add tech per level.",
       "Reverse-Engineering: Study a datachip 1 day, DC 15 INT check to learn permanently.",
       "Languages: 2 additional common + 2 rare languages."
     ],

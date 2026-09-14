@@ -28,7 +28,7 @@ const CCW_BG_DESC = {
 };
 
 const CCW_COMMON_LANGS = ['Ferrix','High Voidkin','Xeno-cant','Raider-cant','Scav','Trade Pidgin','Kastellan','Zeph','Greldan'];
-const CCW_RARE_LANGS   = ['Ascendant','Void-cant','Leviathan','Machine-code'];
+const CCW_RARE_LANGS   = ['Ascendant','Void-cant','Leviathan','Binary'];
 const CCW_ARMOR_TYPES  = ['Flak Weave','Combat Weave','Powered Armor','Deflector'];
 const CCW_REMEDIES     = SD_REMEDIES.map(r => r.name);
 const CCW_ALL_STATS    = ['STR','DEX','CON','INT','WIS','CHA'];
@@ -210,7 +210,7 @@ function ccwTalentChoiceUI(p, stateRef, knownSpells, cls) {
     h += '<option value="">— Choose a spell you know —</option>';
     (knownSpells||[]).filter(sp=>sp!=='Micro-Missile').forEach(sp=>{ h += '<option value="'+sp+'"'+(p.picked===sp?' selected':'')+'>'+sp+'</option>'; });
     h += '</select>';
-    if(!(knownSpells||[]).length) h += '<p class="ccw-hint" style="font-size:9px;color:#df6a6a;">No known powers yet — you can note this later.</p>';
+    if(!(knownSpells||[]).length) h += '<p class="ccw-hint" style="font-size:9px;color:#4fc8d8;">No known powers yet — you can note this later.</p>';
   }
   else if(p.kind==='armor') {
     h += '<select style="'+selStyle+'" onchange="'+stateRef+'.picked=this.value;ccwResolve('+stateRef+');ccwRerender()">';
@@ -392,12 +392,13 @@ const CCW_ARMOR_SHOP = [
   {name:'Deflector',     gp:10, ac:'+2'},
 ];
 const CCW_KIT_ITEMS = [
-  {name:'Backpack', qty:'1'}, {name:'Flint & Steel', qty:'1'}, {name:'Glowrod', qty:'2'},
+  {name:'Backpack', qty:'1'}, {name:'Igniter', qty:'1'}, {name:'Glowrod', qty:'2'},
   {name:'Ration Packs', qty:'3'}, {name:'Mag Spikes', qty:'10'}, {name:'Grapple Line', qty:'1'},
   {name:'Tether (60 ft)', qty:'1'},
 ];
-function ccwCostGp(c) { return (c.gp||0) + (c.sp||0)/10 + (c.cp||0)/100; }
-function ccwFmtCost(c) { return c.gp ? c.gp+' cr' : c.sp ? c.sp+' sp' : c.cp+' cp'; }
+// DarkSpace: costs in Credits (cr). 1 gp = 100 cr, 1 sp = 10 cr, 1 cp = 1 cr.
+function ccwCostGp(c) { return (c.gp||0)*100 + (c.sp||0)*10 + (c.cp||0); }
+function ccwFmtCost(c) { const cr = ccwCostGp(c); return cr ? cr+' cr' : '—'; }
 
 // Which weapons a class may use. Understands category grants ("all weapons",
 // "all melee weapons", "all ranged weapons", "all swords") as well as weapons
@@ -442,9 +443,9 @@ function ccwClassArmor(cls) {
 // ── Step: Gear & Weapons ──
 function ccwGearSpent() {
   let spent = 0;
-  if(_ccw.buyKit) spent += 7;
+  if(_ccw.buyKit) spent += 700;   // Traveler's Kit (7 gp → 700 cr)
   _ccw.buyWeapons.forEach(n=>{ spent += ccwCostGp(CCW_WEAPON_COSTS[n]||{}); });
-  _ccw.buyArmor.forEach(n=>{ const a=CCW_ARMOR_SHOP.find(x=>x.name===n); if(a) spent += a.gp; });
+  _ccw.buyArmor.forEach(n=>{ const a=CCW_ARMOR_SHOP.find(x=>x.name===n); if(a) spent += ccwCostGp(a); });
   return spent;
 }
 // The Choices step: resolve every "player choice" effect (stat / advantage /
@@ -462,7 +463,7 @@ function ccwChoices(){
     h+='<div style="margin-bottom:12px;"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#24c3d6;margin-bottom:4px;">'+_hbChoiceLabel(ch)+'</div>';
     const cur=_ccw.hbChoices[ch.key]||'';
     if(ch.kind==='stat') h+=_hbChoiceSelect(ch.key,cur,_HB_STAT_OPTS,'ccwSetChoice');
-    else if(ch.kind==='advSpell') h+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p class="ccw-hint" style="color:#df6a6a;">You know no spells to gain advantage on — this choice is skipped.</p>';
+    else if(ch.kind==='advSpell') h+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p class="ccw-hint" style="color:#4fc8d8;">You know no spells to gain advantage on — this choice is skipped.</p>';
     else if(ch.kind==='weaponDie') h+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
     else if(ch.kind==='talent') h+=_hbChoiceControl('talent',ch.key,cur,talents,'ccwSetChoice');
     else if(ch.kind==='oneOf') h+=_hbChoiceControl('oneOf',ch.key,cur,_hbTraitDistinctOpts(ch.effects).map(o=>[String(o.oi),_hbEffOne(o.eff)]),'ccwSetChoice');
@@ -478,26 +479,26 @@ function ccwGear() {
   if(_ccw.gold===null) {
     return '<p class="ccw-hint">Roll 2d6 × 5 for your starting credits, or take the flat 35 cr, then buy your gear.</p>'
       + '<div style="display:flex;gap:6px;">'
-      + '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollGold()">' + CCW_DICE_ICO + ' Roll 2d6 × 5 gp</button>'
-      + '<button style="flex:0 0 auto;margin:0;padding:0 14px;background:#1a3a4a;border:1px solid #2d6a7a;color:#8ad4e0;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="ccwTakeGold()" title="Take the average instead of rolling">Take 35 gp</button>'
+      + '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="ccwRollGold()">' + CCW_DICE_ICO + ' Roll 2d6 × 500 cr</button>'
+      + '<button style="flex:0 0 auto;margin:0;padding:0 14px;background:#1a3a4a;border:1px solid #2d6a7a;color:#8ad4e0;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="ccwTakeGold()" title="Take the average instead of rolling">Take 3500 cr</button>'
       + '</div>';
   }
   const spent = ccwGearSpent();
   const left = Math.round((_ccw.gold - spent)*100)/100;
-  let h = '<p class="ccw-hint">Starting credits: <b style="color:#24c3d6;">'+_ccw.gold+' cr</b> · Spent: '+(Math.round(spent*100)/100)+' gp · <b style="color:'+(left<0?'#df6a6a':'#4caf7d')+';">Remaining: '+left+' gp</b></p>';
-  if(left<0) h += '<p class="ccw-hint" style="color:#df6a6a;">You\'ve overspent — remove something.</p>';
+  let h = '<p class="ccw-hint">Starting credits: <b style="color:#24c3d6;">'+_ccw.gold+' cr</b> · Spent: '+(Math.round(spent))+' cr · <b style="color:'+(left<0?'#4fc8d8':'#4caf7d')+';">Remaining: '+left+' cr</b></p>';
+  if(left<0) h += '<p class="ccw-hint" style="color:#4fc8d8;">You\'ve overspent — remove something.</p>';
 
   // Rolling gold used to be one-way: once _ccw.gold was set the roll / take-35
   // buttons vanished with the rest of the pre-roll block. Keep them here so a
-  // roll can always be redone or swapped for the flat 35 gp. Spending is left
+  // roll can always be redone or swapped for the flat 3500 cr. Spending is left
   // alone — the Remaining line turns red and Next blocks if a reroll goes low.
   h += '<div style="display:flex;gap:6px;margin:-4px 0 10px;">'
     + '<button class="ccw-roll-btn" style="flex:1;margin:0;padding:5px;font-size:10px;" onclick="ccwRollGold()" title="Roll your starting gold again">' + CCW_DICE_ICO + ' Reroll 2d6 × 5</button>'
-    + '<button style="flex:0 0 auto;margin:0;padding:0 14px;background:'+(_ccw.gold===35?'#08252a':'#1a3a4a')+';border:1px solid '+(_ccw.gold===35?'#0e6b78':'#2d6a7a')+';color:'+(_ccw.gold===35?'#24c3d6':'#8ad4e0')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="ccwTakeGold()" title="Take the average instead of rolling">Take 35 gp</button>'
+    + '<button style="flex:0 0 auto;margin:0;padding:0 14px;background:'+(_ccw.gold===3500?'#08252a':'#1a3a4a')+';border:1px solid '+(_ccw.gold===3500?'#0e6b78':'#2d6a7a')+';color:'+(_ccw.gold===3500?'#24c3d6':'#8ad4e0')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="ccwTakeGold()" title="Take the average instead of rolling">Take 3500 cr</button>'
     + '</div>';
 
-  // Crawling kit
-  h += '<button class="ccw-choice'+(_ccw.buyKit?' selected':'')+'" style="width:100%;margin-bottom:8px;" onclick="_ccw.buyKit=!_ccw.buyKit;ccwRender()"><div class="ccw-choice-name" style="font-size:11px;">Crawling Kit — 7 gp '+(_ccw.buyKit?'✓':'')+'</div><div class="ccw-choice-desc">Backpack, flint & steel, 2 torches, 3 rations, 10 iron spikes, grappling hook, 60\' rope</div></button>';
+  // Traveler's kit
+  h += '<button class="ccw-choice'+(_ccw.buyKit?' selected':'')+'" style="width:100%;margin-bottom:8px;" onclick="_ccw.buyKit=!_ccw.buyKit;ccwRender()"><div class="ccw-choice-name" style="font-size:11px;">Traveler’s Kit — 700 cr '+(_ccw.buyKit?'✓':'')+'</div><div class="ccw-choice-desc">Backpack, igniter, 2 glowrods, 3 ration packs, 10 mag spikes, grapple line, 60\' tether</div></button>';
 
   // Weapons
   h += '<p class="ccw-hint" style="color:#24c3d6;font-weight:700;margin-top:6px;">Weapons</p>';
@@ -518,7 +519,7 @@ function ccwGear() {
     allowedArmor.forEach(n=>{
       const a = CCW_ARMOR_SHOP.find(x=>x.name===n);
       const sel = _ccw.buyArmor.includes(n) ? ' selected' : '';
-      h += '<button class="ccw-choice'+sel+'" onclick="ccwToggleArmor(\''+n+'\')"><div class="ccw-choice-name" style="font-size:10px;">'+n+' — '+a.gp+' gp</div><div class="ccw-choice-desc">AC '+a.ac+'</div></button>';
+      h += '<button class="ccw-choice'+sel+'" onclick="ccwToggleArmor(\''+n+'\')"><div class="ccw-choice-name" style="font-size:10px;">'+n+' — '+ccwFmtCost(a)+'</div><div class="ccw-choice-desc">AC '+a.ac+'</div></button>';
     });
     h += '</div>';
   } else {
@@ -526,14 +527,14 @@ function ccwGear() {
   }
   return h;
 }
-// Take the flat 35 gp (the average of 2d6 × 5) instead of rolling
+// Take the flat 3500 cr (the average of 2d6 × 500) instead of rolling
 function ccwTakeGold() {
-  _ccw.gold = 35;
+  _ccw.gold = 3500;
   ccwRender();
 }
 
 function ccwRollGold() {
-  _ccw.gold = (Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6)) * 5;
+  _ccw.gold = (Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6)) * 500;
   ccwRender();
 }
 function ccwToggleWeapon(n) {
@@ -819,16 +820,16 @@ function ccwRandomize() {
     while(_ccw.langCommon.length < lc.common && pool.length) _ccw.langCommon.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); }
   { const pool = [...CCW_RARE_LANGS];
     while(_ccw.langRare.length < lc.rare && pool.length) _ccw.langRare.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); }
-  if(lc.priest) _ccw.langPriest = rand(['Ascendant','Void-cant','Machine-code']);
+  if(lc.priest) _ccw.langPriest = rand(['Ascendant','Void-cant','Binary']);
 
-  // Gear: roll 2d6 × 5 gp and shop within the budget like a designed character
+  // Gear: roll 2d6 × 500 cr and shop within the budget like a designed character
   _ccw.gold = roll2d6() * 5;
   _ccw.buyWeapons = [];
   _ccw.buyArmor = [];
   let remaining = _ccw.gold;
-  // Crawling kit first (7 gp) if affordable
-  _ccw.buyKit = remaining >= 7;
-  if(_ccw.buyKit) remaining -= 7;
+  // Traveler's kit first (7 gp) if affordable
+  _ccw.buyKit = remaining >= 700;
+  if(_ccw.buyKit) remaining -= 700;
   // One random affordable class weapon
   const affordableWeapons = ccwClassWeapons(_ccw.cls).filter(n => ccwCostGp(CCW_WEAPON_COSTS[n]||{}) <= remaining);
   if(affordableWeapons.length) {
@@ -838,14 +839,14 @@ function ccwRandomize() {
   }
   // Flak Weave if allowed and affordable
   const allowedArmor = ccwClassArmor(_ccw.cls);
-  if(allowedArmor.includes('Flak Weave') && remaining >= 10) {
+  if(allowedArmor.includes('Flak Weave') && remaining >= 1000) {
     _ccw.buyArmor.push('Flak Weave');
-    remaining -= 10;
+    remaining -= 1000;
   }
   // Deflector 50% of the time if allowed and affordable
-  if(allowedArmor.includes('Deflector') && remaining >= 10 && Math.random() < 0.5) {
+  if(allowedArmor.includes('Deflector') && remaining >= 1000 && Math.random() < 0.5) {
     _ccw.buyArmor.push('Deflector');
-    remaining -= 10;
+    remaining -= 1000;
   }
 
   // Name & HP
@@ -976,7 +977,7 @@ function ccwStats() {
     }
     if(!_ccw.isArray) {
       const has14 = _ccw.rolled.some(v=>v>=14);
-      if(!has14) h += '<p class="ccw-hint" style="color:#df6a6a;margin-top:8px;">No score is 14+ — you may reroll!</p>';
+      if(!has14) h += '<p class="ccw-hint" style="color:#4fc8d8;margin-top:8px;">No score is 14+ — you may reroll!</p>';
     }
   }
   return h;
@@ -1076,7 +1077,7 @@ function ccwAncestry() {
           const spells=_hbKnownSpellsCreation(_ccw).filter(s=>s!=='Micro-Missile').map(s=>[s,s]);
           let ctl='';
           if(nested.kind==='stat') ctl=_hbChoiceSelect(nested.key,cur,_HB_STAT_OPTS,'ccwSetChoice');
-          else if(nested.kind==='advSpell') ctl= spells.length?_hbChoiceSelect(nested.key,cur,spells,'ccwSetChoice'):'<p class="ccw-hint" style="font-size:9px;color:#df6a6a;margin:6px 0 0;">You know no spells to gain advantage on \u2014 skipped.</p>';
+          else if(nested.kind==='advSpell') ctl= spells.length?_hbChoiceSelect(nested.key,cur,spells,'ccwSetChoice'):'<p class="ccw-hint" style="font-size:9px;color:#4fc8d8;margin:6px 0 0;">You know no spells to gain advantage on \u2014 skipped.</p>';
           else if(nested.kind==='weaponDie') ctl=_hbChoiceSelect(nested.key,cur,weapons,'ccwSetChoice');
           else if(nested.kind==='talent') ctl=_hbChoiceControl('talent',nested.key,cur,_hbTalentRowOptions(_ccw.cls),'ccwSetChoice');
           if(ctl) x += '<div style="margin-top:8px;"><div style="font-family:Montserrat,sans-serif;font-size:9px;color:#9a9a8a;margin-bottom:4px;">'+_hbChoiceLabel(nested)+'</div>'+ctl+'</div>';
@@ -1313,7 +1314,7 @@ function _hbFeatureChoicesHtml(){
     x+='<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:#24c3d6;margin:6px 0 4px;">'+_hbChoiceLabel(ch)+'</div>';
     const cur=_ccw.hbChoices[ch.key]||'';
     if(ch.kind==='stat') x+=_hbChoiceSelect(ch.key,cur,_HB_STAT_OPTS,'ccwSetChoice');
-    else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">No spells available.</p>';
+    else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p style="color:#4fc8d8;font-size:11px;margin:0;">No spells available.</p>';
     else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
     else if(ch.kind==='talent') x+=_hbChoiceControl('talent',ch.key,cur,talents,'ccwSetChoice');
     else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,_hbTraitDistinctOpts(ch.effects).map(o=>[String(o.oi),_hbEffOne(o.eff)]),'ccwSetChoice');
@@ -1338,7 +1339,7 @@ function _hbTalentChoicesHtml(which){
     x+='<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#24c3d6;margin:2px 0 6px;">'+_hbChoiceLabel(ch)+'</div>';
     const cur=_ccw.hbChoices[ch.key]||'';
     if(ch.kind==='stat') x+=_hbChoiceSelect(ch.key,cur,_HB_STAT_OPTS,'ccwSetChoice');
-    else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">You know no spells yet.</p>';
+    else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'ccwSetChoice'):'<p style="color:#4fc8d8;font-size:11px;margin:0;">You know no spells yet.</p>';
     else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'ccwSetChoice');
     else if(ch.kind==='talent') x+=_hbChoiceControl('talent',ch.key,cur,talents,'ccwSetChoice');
     else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,_hbTraitDistinctOpts(ch.effects).map(o=>[String(o.oi),_hbEffOne(o.eff)]),'ccwSetChoice');
@@ -1659,7 +1660,7 @@ function ccwFinish() {
   const langs = [..._ccw.langCommon, ..._ccw.langRare, ...(_ccw.langPriest?[_ccw.langPriest]:[])];
   if(langs.length) h += '<div>Extra Languages: '+langs.join(', ')+'</div>';
   if(_ccw.spells.length) h += '<div>Spells: '+_ccw.spells.join(', ')+'</div>';
-  const gearBits = [...(_ccw.buyKit?['Crawling Kit']:[]), ..._ccw.buyWeapons, ..._ccw.buyArmor];
+  const gearBits = [...(_ccw.buyKit?['Traveler’s Kit']:[]), ..._ccw.buyWeapons, ..._ccw.buyArmor];
   if(gearBits.length) h += '<div>Gear: '+gearBits.join(', ')+'</div>';
   h += '<div>Credits remaining: '+(Math.round((_ccw.gold - ccwGearSpent())*100)/100)+' cr</div>';
   h += '</div>';
@@ -1815,10 +1816,9 @@ function ccwApply() {
   });
 
   // Gold remaining after purchases
-  const goldLeft = Math.max(0, Math.round((c.gold - ccwGearSpent())*100)/100);
-  set('coin-gp', String(Math.floor(goldLeft)));
-  const spRemainder = Math.round((goldLeft - Math.floor(goldLeft))*10);
-  if(spRemainder > 0) set('coin-sp', String(spRemainder));
+  const creditsLeft = Math.max(0, Math.round(c.gold - ccwGearSpent()));   // whole Credits
+  set('coin-gp', String(creditsLeft));
+  set('coin-slv', '0');   // Salvage is GM-awarded; new characters start with none
 
   // Gear list from purchases
   document.querySelectorAll('#gear-list .gear-name').forEach(el=>el.value='');
@@ -1878,7 +1878,7 @@ function ccwApply() {
     atkBonus.melee += e.melee; atkBonus.ranged += e.ranged;
     atkBonus.meleeDmg += e.meleeDmg; atkBonus.rangedDmg += e.rangedDmg;
     spellChkBonus += e.spellCheck;
-    if(/Ambush deals \+1 dice/i.test(f)) backstabExtraDice += 1;
+    if(/Sneak Attack deals \+1 dice/i.test(f)) backstabExtraDice += 1;
     let m = f.match(/Weapon Specialization with one additional weapon type — (.+)$/i);
     if(m) masterySet.add(m[1].trim());
     m = f.match(/d12 damage with one weapon type you choose — (.+)$/i);
@@ -1962,7 +1962,7 @@ function ccwApply() {
       let bsDmg = d12Set.has(bw.name) ? baseDmg.replace(/d\d+/g,'d12') : baseDmg;
       bsDmg = _hbWeaponDamage(bsDmg, bw.name, hbEff);
       bsDmg = bsDmg.replace(/1d/g, bsDice+'d');
-      _fillAtkRow('Ambush ('+bw.name+')', bw, bsDmg);
+      _fillAtkRow('Sneak Attack ('+bw.name+')', bw, bsDmg);
     });
   }
 

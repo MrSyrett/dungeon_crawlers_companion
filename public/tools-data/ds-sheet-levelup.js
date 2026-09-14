@@ -247,7 +247,7 @@ function _hbLvlChoicesHtml(){
   if(!_lvl.hbChoices)_lvl.hbChoices={};
   const weapons=[['Strikes','Strikes (unarmed)']].concat(
     [...document.querySelectorAll('#attacks-body .atk-name')].map(el=>(el.value||'').trim())
-      .map(n=>{const m=n.match(/^Ambush \((.+)\)$/i);return m?m[1]:n;})
+      .map(n=>{const m=n.match(/^Sneak Attack \((.+)\)$/i);return m?m[1]:n;})
       .filter((v,i,a)=>v && !/^strikes$/i.test(v) && a.indexOf(v)===i).map(w=>[w,w]));
   const spells=[...document.querySelectorAll('#spells-list .spell-input')].map(el=>(el.value||'').trim())
     .filter((v,i,a)=>v && v!=='Micro-Missile' && a.indexOf(v)===i).map(s=>[s,s]);
@@ -561,7 +561,7 @@ function lvlApply() {
     }).join('/');
     const rowWeaponType = (row) => {
       let nm = row.querySelector('.atk-name')?.value.trim() || '';
-      const bs = nm.match(/^Ambush \((.+)\)$/i);
+      const bs = nm.match(/^Sneak Attack \((.+)\)$/i);
       if(bs) nm = bs[1];
       const w = (typeof SD_WEAPONS!=='undefined') ? allWeapons().find(x=>x.name.toLowerCase()===nm.toLowerCase()) : null;
       if(w) return w.type==='R' ? 'ranged' : 'melee';
@@ -598,7 +598,7 @@ function lvlApply() {
       if(!_charMastery.some(x=>x.toLowerCase()===wn)) _charMastery.push(wname);
       rows.forEach(row=>{
         let nm = (row.querySelector('.atk-name')?.value||'').trim();
-        const bs = nm.match(/^Ambush \((.+)\)$/i);
+        const bs = nm.match(/^Sneak Attack \((.+)\)$/i);
         if(bs) nm = bs[1];
         if(nm.toLowerCase()===wn) {
           const dEl = row.querySelector('.atk-damage');
@@ -614,7 +614,7 @@ function lvlApply() {
       const wn = m[1].trim().toLowerCase();
       rows.forEach(row=>{
         let nm = (row.querySelector('.atk-name')?.value||'').trim();
-        const bs = nm.match(/^Ambush \((.+)\)$/i);
+        const bs = nm.match(/^Sneak Attack \((.+)\)$/i);
         if(bs) nm = bs[1];
         const dEl = row.querySelector('.atk-damage');
         if(nm.toLowerCase()===wn && dEl && dEl.value.trim()) {
@@ -623,11 +623,11 @@ function lvlApply() {
       });
     }
 
-    // Thief: Ambush +1 dice
-    if(/Ambush deals \+1 dice/i.test(f)) {
+    // Thief: Sneak Attack +1 dice
+    if(/Sneak Attack deals \+1 dice/i.test(f)) {
       rows.forEach(row=>{
         const dEl = row.querySelector('.atk-damage');
-        if(/^Ambush/i.test(row.querySelector('.atk-name')?.value||'') && dEl && dEl.value.trim()) {
+        if(/^Sneak Attack/i.test(row.querySelector('.atk-name')?.value||'') && dEl && dEl.value.trim()) {
           dEl.value = dEl.value.replace(/(\d+)d/g, (_,n)=>(parseInt(n)+1)+'d');
         }
       });
@@ -678,7 +678,7 @@ function lvlApply() {
     const rows=[...document.querySelectorAll('#attacks-body tr')];
     const bumpVal=(el,n)=>{ if(!el||!n)return; const cur=parseInt((el.value||'').replace(/^\+/,''))||0; const v=cur+n; el.value=v>0?'+'+v:(v<0?String(v):''); };
     const bumpDmg=(d,n)=> d.split('/').map(part=>{ const mm=part.match(/^(.*?)([+-]\d+)?$/); const mod=(parseInt(mm[2]||'0'))+n; return mm[1]+(mod>0?'+'+mod:(mod<0?String(mod):'')); }).join('/');
-    const nameOf=(row)=>{ let nm=(row.querySelector('.atk-name')?.value||'').trim(); const bs=nm.match(/^Ambush \((.+)\)$/i); return bs?bs[1]:nm; };
+    const nameOf=(row)=>{ let nm=(row.querySelector('.atk-name')?.value||'').trim(); const bs=nm.match(/^Sneak Attack \((.+)\)$/i); return bs?bs[1]:nm; };
     const typeOf=(row)=>{ const nm=nameOf(row); const w=(typeof allWeapons==='function')?allWeapons().find(x=>x.name.toLowerCase()===nm.toLowerCase()):null; if(w) return w.type==='R'?'ranged':'melee'; const rng=row.querySelector('.atk-range')?.value||''; return rng==='Close'?'melee':(rng?'ranged':'melee'); };
     // Attack / damage bonuses
     if(agg.meleeAtk||agg.rangedAtk||agg.meleeDmg||agg.rangedDmg){
@@ -723,7 +723,7 @@ function lvlApply() {
 
   // ── Half-level scaling (DarkSpace) ──
   // Weapon Specialization: "add half your level to these rolls (round down)".
-  // Ambush: "add additional weapon dice equal to half your level (round down)".
+  // Sneak Attack: "add additional weapon dice equal to half your level (round down)".
   // floor(level/2) ticks up by 1 exactly on even levels, so scale then.
   if(_lvl.newLevel % 2 === 0) {
     const rows2 = [...document.querySelectorAll('#attacks-body tr')];
@@ -747,7 +747,7 @@ function lvlApply() {
       const bEl = row.querySelector('.atk-bonus'), dEl = row.querySelector('.atk-damage');
       let nm = (row.querySelector('.atk-name')?.value || '').trim();
       if(!nm) return;
-      const bs = nm.match(/^Ambush \((.+)\)$/i);
+      const bs = nm.match(/^Sneak Attack \((.+)\)$/i);
       const weaponName = bs ? bs[1] : nm;
 
       // Weapon Specialization: +1 attack and +1 damage on mastered weapon types
@@ -755,7 +755,7 @@ function lvlApply() {
         bump(bEl, 1);
         if(dEl && dEl.value.trim()) dEl.value = bumpDmg2(dEl.value.trim(), 1);
       }
-      // Ambush: one more weapon die of damage
+      // Sneak Attack: one more weapon die of damage
       if(bs && _lvl.cls === 'Scoundrel' && dEl && dEl.value.trim()) {
         dEl.value = addDie(dEl.value.trim());
       }
