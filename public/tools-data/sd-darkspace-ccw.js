@@ -195,24 +195,43 @@ function dsBookTalentSpec(text){
   return null;   // narrative talent — no mechanical effect
 }
 
-// Resolve a book spec against the current picks → { effects:[], text:'<line>' }.
-function dsBookResolved(key, spec){
+// Resolve a book spec against a picks map → { effects:[], text:'<line>' }.
+// `choices` defaults to the builder's _dsw.hbChoices; the level-up passes its own.
+function dsBookResolved(key, spec, choices){
+  choices = choices || (_dsw && _dsw.hbChoices) || {};
   var effects = (spec.auto||[]).slice();
   var text = spec.baseText;
   (spec.choices||[]).forEach(function(c){
     if(c.ctl==='one'){
-      var pick = _dsw.hbChoices[key];
+      var pick = choices[key];
       if(pick!=null && pick!==''){
         var opt = c.options[parseInt(pick,10)];
         if(opt){ effects = effects.concat(opt.effects||[]); if(opt.text) text = opt.text; }
       }
     } else if(c.ctl==='dist2'){
-      var a=_dsw.hbChoices[key], b=_dsw.hbChoices[key+'~b'];
+      var a=choices[key], b=choices[key+'~b'];
       if(a) effects.push({target:a,amount:1});
       if(b) effects.push({target:b,amount:1});
     }
   });
   return { effects:effects, text:text };
+}
+
+// The pending-choice dropdown descriptors ({key,label,opts}) for one spec, shared
+// by the builder's review list and the level-up. A "one" choice is a single
+// select; a "dist2" becomes two +1 stat selects (key and key+"~b").
+function dswSpecChoiceDescriptors(key, spec){
+  var ch = [];
+  (spec.choices||[]).forEach(function(c){
+    if(c.ctl==='one'){
+      ch.push({ key:key, label:esc(c.label), opts:c.options.map(function(o,i){ return { v:String(i), label:o.label }; }) });
+    } else if(c.ctl==='dist2'){
+      var sopts = _DSW_STAT_FULL.map(function(o){ return { v:o[0], label:o[1] }; });
+      ch.push({ key:key,      label:esc(c.label)+' — first +1',  opts:sopts });
+      ch.push({ key:key+'~b', label:esc(c.label)+' — second +1', opts:sopts });
+    }
+  });
+  return ch;
 }
 
 // The book (non-homebrew) species/talent items that carry mechanical effects,
@@ -327,20 +346,9 @@ function dswPendingChoices(){
       ch.push({ key:'stat:'+idx, label:'Stat choice ('+((Number(e.amount)>=0?'+':'')+(Number(e.amount)||0))+')',
                 opts:_DS_STAT_OPTS.map(function(o){ return { v:o[0], label:o[1] }; }) });
   });
-  // Book (non-homebrew) species/talent choices. A single-select "one" choice
-  // becomes one dropdown; a "distribute" becomes two +1 stat dropdowns. All use
-  // the same {key,label,opts} shape the review step already renders.
+  // Book (non-homebrew) species/talent choices, via the shared descriptor helper.
   dswBookItems().forEach(function(it){
-    (it.spec.choices||[]).forEach(function(c){
-      if(c.ctl==='one'){
-        ch.push({ key:it.key, label:esc(c.label),
-                  opts:c.options.map(function(o,i){ return { v:String(i), label:o.label }; }) });
-      } else if(c.ctl==='dist2'){
-        var sopts = _DSW_STAT_FULL.map(function(o){ return { v:o[0], label:o[1] }; });
-        ch.push({ key:it.key,       label:esc(c.label)+' — first +1',  opts:sopts });
-        ch.push({ key:it.key+'~b',  label:esc(c.label)+' — second +1', opts:sopts });
-      }
-    });
+    dswSpecChoiceDescriptors(it.key, it.spec).forEach(function(d){ ch.push(d); });
   });
   return ch;
 }
@@ -716,6 +724,26 @@ function dswPickTalent(i, idxStr){
   dswRender();
 }
 window.dswPickTalent = dswPickTalent;
+// Talent choices (melee/ranged, stat pick, distribute, Powerful/Longsight, meta)
+// resolve on THIS step, like the Shadowdark sheet; species/stat homebrew picks
+// stay on the review step. Keyed by prefix: tal:/btal: are talent choices.
+function _isTalentChoiceKey(k){ return /^(tal|btal):/.test(String(k||'')); }
+function dswRenderChoiceBlock(list, title){
+  if(!list || !list.length) return '';
+  var h = '<div class="ccw-summary" style="border-color:#2a6a8a;">';
+  h += '<div class="ccw-summary-title" style="color:#6ac8df;">'+esc(title)+'</div>';
+  list.forEach(function(c){
+    var cur = _dsw.hbChoices[c.key];
+    h += '<div style="margin:5px 0;font-family:Montserrat,sans-serif;font-size:12px;color:#ddd;">'+c.label+'<br>'+
+      '<select onchange="dswSetChoice('+JSON.stringify(c.key).replace(/"/g,'&quot;')+',this.value)" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:6px;font-family:Montserrat,sans-serif;font-size:12px;margin-top:3px;">'+
+      '<option value="">— choose —</option>'+
+      c.opts.map(function(o){ return '<option value="'+esc(o.v)+'"'+(String(cur)===String(o.v)?' selected':'')+'>'+esc(o.label)+'</option>'; }).join('')+
+      '</select></div>';
+  });
+  h += '</div>';
+  return h;
+}
+
 function dswTalent(){
   var arche = archetype(_dsw.archetype);
   var rows = (arche && arche.talents) || [];
@@ -749,6 +777,10 @@ function dswTalent(){
     if(t) h += '<div class="ccw-result">'+(t.roll?('<b>2d6 = '+t.roll+'</b> → '):'✔ Chosen: ')+(t.row?esc(t.row.text):'—')+'</div>';
     h += '</div>';
   }
+  // Talent choices resolve here (like the SD sheet) — melee/ranged, stat picks,
+  // distribute, Powerful/Longsight, the "choose a talent or +2" result, etc.
+  var talChoices = dswPendingChoices().filter(function(c){ return _isTalentChoiceKey(c.key); });
+  h += dswRenderChoiceBlock(talChoices, 'Talent Choice');
   // The Triad opt-in.
   h += '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-family:Montserrat,sans-serif;font-size:12px;color:#ddd;cursor:pointer;">'+
     '<input type="checkbox" '+(dswHasTriad()?'checked':'')+' onchange="dswSetTriadOptIn(this.checked)">'+
@@ -964,21 +996,10 @@ function dswFinish(){
     '<div><label style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;">Ship Role</label><br>'+
     '<input value="'+esc(_dsw.shipRole)+'" oninput="dswSetShipRole(this.value)" placeholder="Pilot, Gunner, Engineer, Medic..." style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:8px;font-family:Montserrat,sans-serif;font-size:13px;margin-top:3px;"></div>'+
     '</div>';
-  // Homebrew choices to resolve (choose-one traits/talents, stat picks).
-  var pending = dswPendingChoices();
-  if(pending.length){
-    h += '<div class="ccw-summary" style="border-color:#2a6a8a;">';
-    h += '<div class="ccw-summary-title" style="color:#6ac8df;">Homebrew Choices</div>';
-    pending.forEach(function(c){
-      var cur = _dsw.hbChoices[c.key];
-      h += '<div style="margin:5px 0;font-family:Montserrat,sans-serif;font-size:12px;color:#ddd;">'+c.label+'<br>'+
-        '<select onchange="dswSetChoice('+JSON.stringify(c.key).replace(/"/g,'&quot;')+',this.value)" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:6px;font-family:Montserrat,sans-serif;font-size:12px;margin-top:3px;">'+
-        '<option value="">— choose —</option>'+
-        c.opts.map(function(o){ return '<option value="'+esc(o.v)+'"'+(String(cur)===String(o.v)?' selected':'')+'>'+esc(o.label)+'</option>'; }).join('')+
-        '</select></div>';
-    });
-    h += '</div>';
-  }
+  // Species / stat homebrew choices resolve here; talent choices were made on the
+  // Talent step.
+  var pending = dswPendingChoices().filter(function(c){ return !_isTalentChoiceKey(c.key); });
+  h += dswRenderChoiceBlock(pending, 'Species Choices');
   // Effect summary (what the homebrew grants mechanically).
   var eff = dswComputeEff();
   if(eff){
@@ -1159,7 +1180,7 @@ function startDarkSpaceLevelUp(){
   var next = cur + 1;
   // Talents come at odd levels only (3, 5, 7, 9), like Shadowdark.
   _dslu = { old:cur, next:next, arche:arche, hp:null, talent:null, gainsTalent:(next % 2 === 1),
-            hasShip:false, shipTalent:null };
+            hasShip:false, shipTalent:null, talentChoices:{} };
   dsluRollHP();
   if(_dslu.gainsTalent) dsluRollTalent();
   // The ship levels with the crew — if the Spacer has one, roll its class Talent.
@@ -1208,8 +1229,18 @@ function dsluMaxHP(){ var hd=_dslu.arche.hitDie||6; _dslu.hp = Math.max(1, hd + 
 window.dsluMaxHP = dsluMaxHP;
 function dsluSetHP(v){ var n=parseInt(v,10); if(!isNaN(n)) _dslu.hp = Math.max(1,n); }
 window.dsluSetHP = dsluSetHP;
-function dsluRollTalent(){ var t=rollN(6)+rollN(6); _dslu.talent = { roll:t, row:talentForRoll(_dslu.arche, t) }; }
+function dsluRollTalent(){ var t=rollN(6)+rollN(6); _dslu.talent = { roll:t, row:talentForRoll(_dslu.arche, t) }; _dslu.talentChoices={}; }
 window.dsluRerollTalent = function(){ dsluRollTalent(); dsluRender(); };
+// The book-talent effect spec for the rolled level-up talent (null for homebrew
+// talents with structured effects, or a purely narrative talent).
+function dsluTalentSpec(){
+  if(!_dslu || !_dslu.gainsTalent || !_dslu.talent || !_dslu.talent.row) return null;
+  var row = _dslu.talent.row;
+  if(row.effects && row.effects.length) return null;   // homebrew structured effects
+  return (typeof dsBookTalentSpec==='function') ? dsBookTalentSpec(row.text) : null;
+}
+function dsluSetTalentChoice(key, val){ if(!_dslu.talentChoices) _dslu.talentChoices={}; _dslu.talentChoices[key] = (val===''?null:val); dsluRender(); }
+window.dsluSetTalentChoice = dsluSetTalentChoice;
 
 function dsluRender(){
   if(!_dslu) return;
@@ -1229,6 +1260,24 @@ function dsluRender(){
     h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;margin:14px 0 4px;">Talent — '+esc(_dslu.arche.name)+' Table</div>';
     h += '<button class="ccw-roll-btn" onclick="dsluRerollTalent()">🎲 Roll 2d6 Talent</button>';
     if(_dslu.talent) h += '<div class="ccw-result"><b>2d6 = '+_dslu.talent.roll+'</b> → '+(_dslu.talent.row?esc(_dslu.talent.row.text):'—')+'</div>';
+    // Talent choices (melee/ranged, stat pick, distribute, Powerful/Longsight, …)
+    // resolve here — the mechanics apply automatically on Apply.
+    var _lvSpec = dsluTalentSpec();
+    if(_lvSpec){
+      var _pend = dswSpecChoiceDescriptors('lvtal', _lvSpec);
+      if(_pend.length){
+        h += '<div class="ccw-summary" style="border-color:#2a6a8a;"><div class="ccw-summary-title" style="color:#6ac8df;">Talent Choice</div>';
+        _pend.forEach(function(c){
+          var cur = (_dslu.talentChoices||{})[c.key];
+          h += '<div style="margin:5px 0;font-family:Montserrat,sans-serif;font-size:12px;color:#ddd;">'+c.label+'<br>'+
+            '<select onchange="dsluSetTalentChoice('+JSON.stringify(c.key).replace(/"/g,'&quot;')+',this.value)" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:6px;font-family:Montserrat,sans-serif;font-size:12px;margin-top:3px;">'+
+            '<option value="">— choose —</option>'+
+            c.opts.map(function(o){ return '<option value="'+esc(o.v)+'"'+(String(cur)===String(o.v)?' selected':'')+'>'+esc(o.label)+'</option>'; }).join('')+
+            '</select></div>';
+        });
+        h += '</div>';
+      }
+    }
     h += '<div class="ccw-summary" style="border-color:#16323d;"><div class="ccw-summary-title" style="color:#6ac8df;">'+esc(_dslu.arche.name)+' Talents</div>';
     (_dslu.arche.talents||[]).forEach(function(r){ h += '<div><b>'+esc(r.r)+':</b> '+esc(r.text)+'</div>'; });
     h += '</div>';
@@ -1259,27 +1308,41 @@ function dsluApply(){
   // Talent: append to the talents box (only on odd levels, when one is gained).
   var talNote = '';
   if(_dslu.gainsTalent && _dslu.talent){
+    var row = _dslu.talent.row;
+    var lineText = row ? row.text : '';
+    var tout = (typeof window._hbEmptyEff==='function') ? window._hbEmptyEff() : null;
+    var accum = function(effs){ if(!tout || typeof window._hbAccumEffect!=='function') return; effs.forEach(function(e){ if(e && e.target && e.target!=='statChoice') window._hbAccumEffect(tout, e); }); };
+    if(row && (!row.effects || !row.effects.length)){
+      // Book talent → resolve its choices to concrete effects + a concrete line so
+      // the sheet's live attack/AC parser reads the bonus.
+      var spec = (typeof dsBookTalentSpec==='function') ? dsBookTalentSpec(row.text) : null;
+      if(spec){ var res = dsBookResolved('lvtal', spec, _dslu.talentChoices||{}); lineText = res.text; accum(res.effects); }
+    } else if(row && Array.isArray(row.effects) && row.effects.length && !row.choose){
+      accum(row.effects);   // homebrew talent structured effects
+    }
+    // Write the resolved talent line.
     var ta = document.getElementById('talents-text');
     if(ta){
-      var line = 'Lvl '+_dslu.next+' talent: '+(_dslu.talent.row?_dslu.talent.row.text:'')+' (2d6='+_dslu.talent.roll+')';
+      var line = 'Lvl '+_dslu.next+' talent: '+lineText+(_dslu.talent.roll?' (2d6='+_dslu.talent.roll+')':'');
       ta.value = (ta.value ? ta.value + '\n' : '') + line;
       if(typeof renderTalentsView==='function') try{ renderTalentsView(); }catch(e){}
     }
-    // Homebrew talent effects: apply stat / HP bonuses to the sheet (a choose-one
-    // row is left for the player). AC/attack effects are noted in the talent text.
-    var row = _dslu.talent.row;
-    if(row && Array.isArray(row.effects) && row.effects.length && !row.choose &&
-       typeof window._hbEmptyEff==='function' && typeof window._hbAccumEffect==='function'){
-      var tout = window._hbEmptyEff();
-      row.effects.forEach(function(e){ if(e && e.target && e.target!=='statChoice') window._hbAccumEffect(tout, e); });
+    // Apply stat / HP / gear-slot effects to the sheet. AC and attack bonuses
+    // re-derive live from the talent line just written (talentLineEffects /
+    // classInnateAC), refreshed by applyItemBonuses/refreshAutoAC below.
+    if(tout){
       ['str','dex','con','int','wis','cha'].forEach(function(k){
         if(tout[k]){ var el=document.getElementById(k+'-val'); if(el){ el.value = String((parseInt(el.value,10)||0)+tout[k]); if(typeof onStatChange==='function') try{ onStatChange(k); }catch(e){} } }
       });
       if(tout.hp){ set('hp-max', (parseInt(document.getElementById('hp-max').value,10)||0)+tout.hp); set('hp-current', (parseInt(document.getElementById('hp-current').value,10)||0)+tout.hp); }
       if(tout.gearSlots && typeof window.dsAddBonusSlots==='function'){ try{ window.dsAddBonusSlots(tout.gearSlots); }catch(e){} }
       var eb=[]; if(tout.hp) eb.push('+'+tout.hp+' HP'); ['str','dex','con','int','wis','cha'].forEach(function(k){ if(tout[k]) eb.push('+'+tout[k]+' '+k.toUpperCase()); });
+      if(tout.ac) eb.push('+'+tout.ac+' AC'); if(tout.meleeAtk||tout.rangedAtk||tout.meleeDmg||tout.rangedDmg) eb.push('attack');
       if(eb.length) talNote = ', '+eb.join(' ');
     }
+    // AC + equipped-weapon attacks re-derive from the (now updated) talents box.
+    if(typeof applyItemBonuses==='function') try{ applyItemBonuses(); }catch(e){}
+    if(typeof refreshAutoAC==='function') try{ refreshAutoAC(); }catch(e){}
   }
   // Ship: it levels with the crew — bump its level and record the rolled Talent.
   var shipNote = '';

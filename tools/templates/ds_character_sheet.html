@@ -287,7 +287,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .talents-area textarea{width:100%;flex:1;min-height:260px;border:none;background:transparent;resize:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:6px 10px;box-sizing:border-box;}
 .spells-list{padding:0;}
 /* Spell rows use grid for perfect column alignment */
-.spell-row{display:grid;grid-template-columns:16px 1fr 32px 40px 62px 74px 76px 22px 22px 28px;align-items:center;gap:2px;padding:1px 6px;border-bottom:1px solid var(--rule);}
+.spell-row{display:grid;grid-template-columns:16px 1fr 40px 22px 22px 30px;align-items:center;gap:2px;padding:1px 6px;border-bottom:1px solid var(--rule);}
 /* Wrapper for level/bonus/range/duration/damage. On desktop it dissolves so the
    fields sit directly in the row grid; on mobile it becomes a second line. */
 .spell-meta{display:contents;}
@@ -545,7 +545,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
       <div class="tab-panel" id="tab-gear">
         <div class="coin-row">
           <div class="coin-cell"><span class="coin-label" id="coin-gp-lbl">cr</span><input type="text" class="coin-input" id="coin-gp" placeholder="0"></div>
-          <div class="coin-cell" style="display:none;"><span class="coin-label">SP</span><input type="text" class="coin-input" id="coin-sp" placeholder="0"></div>
+          <div class="coin-cell"><span class="coin-label" id="coin-sp-lbl">Salvage</span><input type="text" class="coin-input" id="coin-sp" placeholder="0"></div>
           <div class="coin-cell" style="display:none;"><span class="coin-label">CP</span><input type="text" class="coin-input" id="coin-cp" placeholder="0"></div>
         </div>
         <div class="sl"><span>Gear</span>
@@ -2395,13 +2395,9 @@ function addSpellRow(num) {
   row.className = 'spell-row';
   row.innerHTML =
     `<span class="spell-num">${num}.</span>` +
-    `<span class="spell-name-cell"><input type="text" class="spell-input" placeholder="Spell name"><span class="spell-src-slot"></span><span class="spell-discard-slot"></span><button class="spell-info-btn" onclick="openSpellDesc(this)" title="Spell description">i</button></span>` +
+    `<span class="spell-name-cell"><input type="text" class="spell-input" placeholder="Power name"><span class="spell-src-slot"></span><span class="spell-discard-slot"></span><button class="spell-info-btn" onclick="openSpellDesc(this)" title="Power description">i</button></span>` +
     `<span class="spell-meta">` +
-    `<input type="text" class="spell-level" value="1" placeholder="1" title="Spell Level (DC = 10 + level)" style="font-size:10px;padding:1px 0;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:Montserrat,sans-serif;font-weight:700;text-align:center;outline:none;width:28px;">` +
-    `<input type="text" class="spell-bonus" placeholder="+0" title="Bonus to casting check" style="font-size:10px;border:none;border-bottom:1px solid var(--rule);background:transparent;color:var(--ink);font-family:Montserrat,sans-serif;font-weight:700;outline:none;padding:0 2px;width:100%;text-align:center;">` +
-    `<input type="text" class="spell-range" placeholder="Rng" title="Range — Self, Close, Near or Far" style="font-size:10px;border:none;border-bottom:1px solid var(--rule);background:transparent;color:var(--ink);font-family:Montserrat,sans-serif;outline:none;padding:0 2px;width:46px;text-align:center;">` +
-    `<input type="text" class="spell-duration" placeholder="Dur" title="Duration" style="font-size:10px;border:none;border-bottom:1px solid var(--rule);background:transparent;color:var(--ink);font-family:Montserrat,sans-serif;outline:none;padding:0 2px;width:100%;">` +
-    `<input type="text" class="spell-damage" placeholder="1d6" title="Damage dice (e.g. 2d8+3)" style="font-size:10px;border:none;border-bottom:1px solid var(--rule);background:transparent;color:var(--ink);font-family:Montserrat,sans-serif;outline:none;padding:0 2px;width:100%;">` +
+    `<input type="text" class="spell-level" value="1" placeholder="1" title="Tier (DC = 10 + tier)" style="font-size:10px;padding:1px 0;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:Montserrat,sans-serif;font-weight:700;text-align:center;outline:none;width:28px;">` +
     `</span>` +
     `<button class="spell-lost-btn" onclick="toggleSpellLost(this)" title="Mark lost">✗</button>` +
     `<button class="spell-adv-btn" onclick="toggleSpellAdv(this)" title="Advantage">▲</button>` +
@@ -2562,17 +2558,13 @@ function buildSpells() {
   if(!list) return;   // DarkSpace: no spells subsystem on this sheet
   const hdr = document.createElement('div');
   hdr.className = 'spell-header';
-  hdr.style.cssText = 'display:grid;grid-template-columns:16px 1fr 32px 40px 62px 74px 76px 22px 22px 28px;align-items:center;gap:2px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
+  hdr.style.cssText = 'display:grid;grid-template-columns:16px 1fr 40px 22px 22px 30px;align-items:center;gap:2px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
   // DarkSpace calls these "Powers" (The Triad); Shadowdark's sheet calls them Spells.
   const ds = (typeof darkSpaceOn === 'function' && darkSpaceOn());
   hdr.innerHTML =
     '<span class="sh-num" style="font-size:8px;font-weight:700;color:var(--muted);">#</span>' +
     '<span class="sh-name" style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">'+(ds?'Power':'Spell')+'</span>' +
     '<span class="sh-lvl" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;" title="'+(ds?'Tier — DC = 10 + tier':'Level')+'">'+(ds?'Tr':'Lvl')+'</span>' +
-    '<span class="sh-bon" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;">+Bon</span>' +
-    '<span class="sh-range" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Range</span>' +
-    '<span class="sh-dur" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Dur</span>' +
-    '<span class="sh-dmg" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">'+(ds?'Die':'Dmg')+'</span>' +
     '<span class="sh-lost" style="font-size:8px;font-weight:900;color:var(--muted);text-align:center;" title="Lost">✗</span>' +
     '<span class="sh-adv" style="font-size:8px;font-weight:900;color:var(--muted);text-align:center;" title="Advantage">▲</span>' +
     '<span class="sh-roll" style="font-size:8px;font-weight:700;color:var(--muted);">'+(ds?'Cast':'Roll')+'</span>';
@@ -2580,12 +2572,12 @@ function buildSpells() {
   _spellCount = 0; // start with no spells
 
   // Bottom toolbar — the insertion anchor addSpellRow() inserts new rows before.
+  // Powers are learned/unlearned from the picker (the + Power button above), so
+  // no add/remove buttons here — just the rest reminder.
   const bar = document.createElement('div');
   bar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 8px;';
   const noun = ds ? 'Power' : 'Spell';
   bar.innerHTML =
-    '<button onclick="addPowerRow()" style="padding:3px 10px;background:#0d1418;color:#3fb6d8;border:1px solid #1a5a7a;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;">+ Blank</button>' +
-    '<button onclick="removeLastPower()" style="padding:3px 10px;background:transparent;color:#7f9eab;border:1px solid var(--rule);border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;">− Remove</button>' +
     '<span style="font-family:Montserrat,sans-serif;font-size:9px;color:#5a8595;margin-left:auto;">Lost '+noun.toLowerCase()+'s return on a Rest.</span>';
   list.appendChild(bar);
 }
@@ -2608,6 +2600,31 @@ function addPowerFromFeat(power, name, text){
 }
 window.addPowerFromFeat = addPowerFromFeat;
 
+// ── Learn / unlearn helpers for the power picker ──
+function _powerRows(){ return [...document.querySelectorAll('#spells-list .spell-row')]; }
+function isPowerLearned(name){
+  const n = String(name||'').trim().toLowerCase();
+  if(!n) return false;
+  return _powerRows().some(r => (r.querySelector('.spell-input')?.value||'').trim().toLowerCase() === n);
+}
+// Remove the (first) power row with this name; refresh the picker if it's open.
+function unlearnPower(name){
+  const n = String(name||'').trim().toLowerCase();
+  const row = _powerRows().find(r => (r.querySelector('.spell-input')?.value||'').trim().toLowerCase() === n);
+  if(row){ row.remove(); if(_spellCount>0) _spellCount--; if(typeof saveSheet==='function') saveSheet(false); }
+  if(document.getElementById('power-pick-overlay')) openPowerPick();
+}
+window.unlearnPower = unlearnPower;
+// Learn a Triad example feat (no-op if already known), then refresh the picker.
+function learnPowerFeat(power, name, text){
+  if(!isPowerLearned(name)) addPowerFromFeat(power, name, text);
+  if(document.getElementById('power-pick-overlay')) openPowerPick();
+}
+window.learnPowerFeat = learnPowerFeat;
+// Add a blank custom power and refresh the picker so you can name it.
+function learnBlankPower(){ addPowerRow(); if(document.getElementById('power-pick-overlay')) openPowerPick(); }
+window.learnBlankPower = learnBlankPower;
+
 // Powers picker — offers the Triad example feats (Body / Mind / Soul) plus a
 // blank row. A lightweight overlay built on the fly (no dedicated markup).
 function openPowerPick(){
@@ -2621,25 +2638,47 @@ function openPowerPick(){
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1200;display:flex;align-items:center;justify-content:center;padding:16px;';
   let h = '<div style="background:#0c1418;border:2px solid #1a5a7a;border-radius:8px;max-width:520px;width:100%;max-height:80vh;display:flex;flex-direction:column;">';
   h += '<div style="background:#0a0f12;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">';
-  h += '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:800;color:#8fd6ea;letter-spacing:.06em;">Add a Power</div>';
+  h += '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:800;color:#8fd6ea;letter-spacing:.06em;">Powers — Learn / Unlearn</div>';
   h += '<button onclick="closePowerPick()" style="background:transparent;border:none;color:#7f9eab;font-size:20px;cursor:pointer;">✕</button></div>';
   h += '<div style="padding:12px 14px;overflow-y:auto;">';
   if(D && D.triad){
     const die = (D.triad.feats||[]).map(f=>esc(f.diff)+' (DC '+f.dc+') → '+esc(f.die)).join(' · ');
     if(die) h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;color:#5a8595;margin-bottom:8px;line-height:1.4;">Cast with a stat check — the DC you beat sets the die: '+die+'</div>';
   }
-  h += '<button onclick="addPowerRow();closePowerPick();" style="width:100%;padding:8px;margin-bottom:10px;background:#0d1a20;color:#6ac8df;border:1px solid #1a5a7a;border-radius:5px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;">+ Blank Power</button>';
+  // Powers you already know — unlearn any of them here (including custom ones).
+  const known = (typeof _powerRows==='function') ? _powerRows() : [];
+  const featNames = new Set(feats.map(f=>String(f.name||'').trim().toLowerCase()));
+  const customKnown = known.filter(r => {
+    const nm = (r.querySelector('.spell-input')?.value||'').trim();
+    return nm && !featNames.has(nm.toLowerCase());
+  });
+  if(known.length){
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#8fd6ea;margin:2px 0 4px;">Your Powers</div>';
+    known.forEach(r=>{
+      const nm = (r.querySelector('.spell-input')?.value||'').trim() || '(unnamed)';
+      const nmAttr = JSON.stringify(nm).replace(/"/g,'&quot;');
+      h += '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;margin-bottom:4px;background:#0a1216;border:1px solid #16323d;border-radius:4px;">'+
+        '<span style="flex:1;min-width:0;font-family:Montserrat,sans-serif;font-size:11px;color:#cfe6ee;">'+esc(nm)+'</span>'+
+        '<button onclick="unlearnPower('+nmAttr+')" style="flex:0 0 auto;padding:3px 8px;background:transparent;border:1px solid #5a2a2a;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;color:#e0857a;">Unlearn</button>'+
+        '</div>';
+    });
+  }
+  h += '<button onclick="learnBlankPower()" style="width:100%;padding:8px;margin:6px 0 10px;background:#0d1a20;color:#6ac8df;border:1px solid #1a5a7a;border-radius:5px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;">+ Blank Power</button>';
   ['Body','Mind','Soul'].forEach(pw=>{
     const fs = feats.filter(f=>f.power===pw);
     if(!fs.length) return;
     h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#8fd6ea;margin:10px 0 4px;">'+pw+'</div>';
     fs.forEach(f=>{
-      const arg = "addPowerFromFeat('"+pw+"',"+JSON.stringify(f.name).replace(/"/g,'&quot;')+","+JSON.stringify(f.text||'').replace(/"/g,'&quot;')+");closePowerPick();";
-      h += '<button onclick="'+arg+'" style="display:block;width:100%;text-align:left;padding:6px 8px;margin-bottom:4px;background:#0a1216;border:1px solid #16323d;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;color:#cfe6ee;">'+
-        '<b style="color:#8fd6ea;">'+esc(f.name)+'.</b> <span style="font-size:11px;color:#9fbecb;">'+esc((f.text||'').slice(0,110))+((f.text||'').length>110?'…':'')+'</span></button>';
+      const learned = (typeof isPowerLearned==='function') && isPowerLearned(f.name);
+      const arg = learned
+        ? ("unlearnPower("+JSON.stringify(f.name).replace(/"/g,'&quot;')+");")
+        : ("learnPowerFeat('"+pw+"',"+JSON.stringify(f.name).replace(/"/g,'&quot;')+","+JSON.stringify(f.text||'').replace(/"/g,'&quot;')+");");
+      h += '<button onclick="'+arg+'" style="display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;padding:6px 8px;margin-bottom:4px;background:'+(learned?'#0f1c24':'#0a1216')+';border:1px solid '+(learned?'#2a6a8a':'#16323d')+';border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;color:#cfe6ee;">'+
+        '<span style="flex:0 0 auto;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:'+(learned?'#e0857a':'#6ac8df')+';padding-top:1px;">'+(learned?'✓ Unlearn':'+ Learn')+'</span>'+
+        '<span style="flex:1;min-width:0;"><b style="color:#8fd6ea;">'+esc(f.name)+'.</b> <span style="font-size:11px;color:#9fbecb;">'+esc((f.text||'').slice(0,100))+((f.text||'').length>100?'…':'')+'</span></span></button>';
     });
   });
-  if(!feats.length) h += '<div style="font-family:Montserrat,sans-serif;font-size:11px;color:#5a8595;">No example powers loaded — use <b>+ Blank Power</b> and fill it in.</div>';
+  if(!feats.length && !customKnown.length) h += '<div style="font-family:Montserrat,sans-serif;font-size:11px;color:#5a8595;">No example powers loaded — use <b>+ Blank Power</b> and fill it in.</div>';
   h += '</div></div>';
   ov.innerHTML = h;
   ov.addEventListener('click', e=>{ if(e.target===ov) closePowerPick(); });
