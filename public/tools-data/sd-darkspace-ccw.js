@@ -31,6 +31,27 @@ var START_KIT = {
   'Machine-Based':{ weapon:null,                   armor:null },
 };
 
+// ── Step-1 toggles: include homebrew content, HeroDark mode ──
+function dswInclHb(){ return !_dsw || _dsw.inclHomebrew !== false; }
+// A book+homebrew pool with homebrew entries (_hb:true) filtered out when the
+// Homebrew toggle is off.
+function dswPool(kind){
+  var arr = ds()[kind] || [];
+  return dswInclHb() ? arr : arr.filter(function(x){ return !(x && x._hb); });
+}
+function dswSetInclHb(v){ if(!_dsw) return; _dsw.inclHomebrew = !!v;
+  // Drop any now-hidden homebrew selection.
+  var hidden = function(o){ return o && o._hb && !dswInclHb(); };
+  if(_dsw.species){ var sp=(ds().species||[]).find(function(x){return x.name===_dsw.species.name;}); if(hidden(sp)) _dsw.species=null; }
+  if(_dsw.archetype){ if(hidden(archetype(_dsw.archetype))){ _dsw.archetype=null; _dsw.talentRolls=null; } }
+  if(_dsw.background && _dsw.background._hb && !dswInclHb()) _dsw.background=null;
+  if(_dsw.motivation && _dsw.motivation._hb && !dswInclHb()) _dsw.motivation=null;
+  dswRender();
+}
+window.dswSetInclHb = dswSetInclHb;
+function dswSetHeroDark(v){ if(_dsw){ _dsw.heroDark = !!v; if(_dsw.heroDark) _dsw.hpMode='max'; } dswRender(); }
+window.dswSetHeroDark = dswSetHeroDark;
+
 // ── Data lookups ──
 function archetype(name){ return (ds().archetypes||[]).find(function(a){ return a.name===name; }) || null; }
 function allWeapons(){
@@ -180,20 +201,23 @@ window.dswSetChoice = dswSetChoice;
 function startDarkSpaceWizard(){
   _dsw = {
     step: 0, method: null,
-    stats: null,                       // {STR,DEX,CON,INT,WIS,CHA}
+    inclHomebrew: true, heroDark: false,   // Step-1 toggles
+    stats: null,                       // {STR,DEX,CON,INT,WIS,CHA} (derived from rolled/assign)
+    rolled: null, isArray: false, statMode: 'order', assign: [0,1,2,3,4,5],
     species: null,                     // {kind, name, text}
     archetype: null,                   // archetype name
     background: null,                  // {name,text}
     motivation: null,                  // motivation obj
-    talentRolls: null,                 // [{roll,row}]
+    talentRolls: null,                 // [{roll,row}]  (rolled) — talentPicks holds manual picks
+    talentPicks: null,                 // [rowIndex|null] parallel to talentRolls when a row is chosen
     credits: null, buyKit: true,
-    weapon: null, armor: null,         // names
+    buyWeapons: [], buyArmor: [],      // names bought (multi-buy, filtered to the archetype)
     survivorGear: null,                // extra citizen gear (string) for The Survivor
     contacts: null,                    // for The Virtuous
     triadOptIn: false, triadPower: null,   // The Triad (metaphysical) discipline
     shipName: '', shipRole: '',            // crew identity (shown by Background)
     hbChoices: {},                         // resolved homebrew choose-one / statChoice picks
-    hp: null, name: ''
+    hp: null, hpMode: 'roll', name: ''
   };
   document.getElementById('dsw-overlay').style.display = 'flex';
   dswRender();
@@ -280,29 +304,35 @@ window.dswNext = dswNext;
 // ── Method ──
 function dswMethod(){
   var h = '<p class="ccw-hint">DarkSpace — science fiction for Shadowdark. Build a <b>Spacer</b>: Species, Archetype, Background, and Motivation replace the usual Ancestry, Class, and Alignment.</p>';
+  h += '<div style="display:flex;gap:16px;justify-content:center;margin:0 0 12px;padding:8px 10px;background:#0f0f0f;border:1px solid #16323d;">';
+  h += '<label style="display:flex;align-items:center;gap:6px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#ccc;cursor:pointer;"><input type="checkbox" '+(dswInclHb()?'checked':'')+' onchange="dswSetInclHb(this.checked)"> Homebrew</label>';
+  h += '<label style="display:flex;align-items:center;gap:6px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:'+(_dsw.heroDark?'#e0b83a':'#ccc')+';cursor:pointer;" title="HeroDark: maximum HP at level 1, a Luck point on any natural 1 or 20, and Dying (not unconscious) at 0 HP. Toggle it later on the sheet."><input type="checkbox" '+(_dsw.heroDark?'checked':'')+' onchange="dswSetHeroDark(this.checked)"> ⚔ HeroDark</label>';
+  h += '</div>';
   h += '<button class="ccw-choice" style="width:100%;margin-bottom:8px;padding:14px;" onclick="dswGoRandom()"><div class="ccw-choice-name">🎲 Random Spacer</div><div class="ccw-choice-desc">Roll everything at once — stats, species, archetype, gear.</div></button>';
   h += '<button class="ccw-choice" style="width:100%;padding:14px;" onclick="dswGoDesign()"><div class="ccw-choice-name">✎ Design Your Own</div><div class="ccw-choice-desc">Walk through each step and make every choice yourself.</div></button>';
   return h;
 }
 
 function dswGoRandom(){
-  // Stats
-  _dsw.stats = { STR:roll3d6(),DEX:roll3d6(),CON:roll3d6(),INT:roll3d6(),WIS:roll3d6(),CHA:roll3d6() };
+  // Stats (respect the assign flow so the review shows a clean rolled pool)
+  dswRollStats();
   // Species: 70% roll a trait, 20% human, 10% tech
   var r = Math.random();
   if(r < 0.2){ _dsw.species = { kind:'human', name:'Human', text:ds().humanNote }; }
   else if(r < 0.3){ var t = rand(ds().techSpecies||[]); _dsw.species = { kind:'tech', name:t.name, text:t.text }; }
-  else { var sp = rand(ds().species||[]); _dsw.species = { kind:'trait', name:sp.name, text:sp.text }; }
+  else { var sp = rand(dswPool('species')); if(sp) _dsw.species = { kind:'trait', name:sp.name, text:sp.text }; }
   // Archetype (avoid Machine-Based unless tech species)
-  var pool = (ds().archetypes||[]).filter(function(a){ return a.name!=='Machine-Based'; });
-  if(_dsw.species.kind==='tech') pool = ds().archetypes||[];
+  var pool = dswPool('archetypes').filter(function(a){ return a.name!=='Machine-Based'; });
+  if(_dsw.species && _dsw.species.kind==='tech') pool = dswPool('archetypes');
   _dsw.archetype = rand(pool).name;
-  _dsw.background = rand(ds().backgrounds||[]);
-  _dsw.motivation = rand(ds().motivations||[]);
+  _dsw.background = rand(dswPool('backgrounds'));
+  _dsw.motivation = rand(dswPool('motivations'));
   _dsw.talentRolls = null; dswRollTalent();
-  // Gear
+  // Gear — suggest the archetype's starter kit weapon/armor.
   var kit = START_KIT[_dsw.archetype] || {};
-  _dsw.buyKit = true; _dsw.weapon = kit.weapon; _dsw.armor = kit.armor;
+  _dsw.buyKit = true;
+  _dsw.buyWeapons = kit.weapon ? [kit.weapon] : [];
+  _dsw.buyArmor   = kit.armor  ? [kit.armor]  : [];
   dswRollCredits();
   _dsw.name = '';
   _dsw.step = dswSteps().length - 1;    // jump to Finish for review
@@ -320,46 +350,84 @@ function rollStatSet(){
   return s;
 }
 var DSW_STD_ARRAY = [15,14,13,12,10,8];
-function dswStats(){
-  if(!_dsw.stats) _dsw.stats = rollStatSet();
-  var s = _dsw.stats;
-  var h = '<p class="ccw-hint">Roll 3d6 per ability (rerolled until one score is 14+, per Shadowdark), or take the <b>Standard Array</b> [15,14,13,12,10,8]. Edit any value by hand to assign or swap.</p>';
-  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;">'+
-       '<button class="ccw-roll-btn" onclick="dswRerollStats()">🎲 Roll 3d6 ×6</button>'+
-       '<button class="ccw-roll-btn" onclick="dswStandardArray()">📊 Standard Array</button>'+
-       '</div>';
-  h += '<div class="ccw-stat-grid">';
-  ['STR','DEX','CON','INT','WIS','CHA'].forEach(function(k){
-    h += '<div class="ccw-stat"><div class="ccw-stat-name">'+k+'</div>'+
-         '<input class="dsw-stat-in" data-k="'+k+'" value="'+esc(s[k])+'" '+
-         'style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;text-align:center;font-family:Montserrat,sans-serif;font-size:20px;font-weight:900;padding:2px 0;" '+
-         'oninput="dswStatMod(this)">'+
-         '<div class="ccw-stat-mod" id="dsw-mod-'+k+'">'+fmtMod(mod(s[k]))+'</div></div>';
-  });
-  h += '</div>';
-  return h;
+var DSW_STATS = ['STR','DEX','CON','INT','WIS','CHA'];
+// Rolled/array values live in _dsw.rolled (6 values); _dsw.assign maps each stat
+// to a pool index; _dsw.stats is the resolved {STR:..} object. Mirrors the SD
+// builder's Roll / Standard Array + assign-dropdown flow.
+function dswSyncStats(){
+  if(!_dsw.rolled){ return; }
+  var order = _dsw.statMode==='assign' ? _dsw.assign : [0,1,2,3,4,5];
+  _dsw.stats = {}; DSW_STATS.forEach(function(k,i){ _dsw.stats[k] = _dsw.rolled[order[i]]; });
 }
-function dswStatMod(inp){
-  var k = inp.dataset.k; var el = document.getElementById('dsw-mod-'+k);
-  if(el) el.textContent = fmtMod(mod(inp.value));
+function dswRollStats(){
+  var r; do { r = [0,0,0,0,0,0].map(function(){ return roll3d6(); }); } while(Math.max.apply(null,r) < 14);
+  _dsw.rolled = r; _dsw.isArray = false;
+  _dsw.statMode = _dsw.statMode==='assign' ? 'assign' : 'order';
+  _dsw.assign = [0,1,2,3,4,5];
+  dswSyncStats(); dswRender();
 }
-window.dswStatMod = dswStatMod;
-function dswRerollStats(){
-  _dsw.stats = rollStatSet();
-  dswRender();
-}
-window.dswRerollStats = dswRerollStats;
+window.dswRollStats = dswRollStats;
+window.dswRerollStats = dswRollStats;   // legacy alias
 function dswStandardArray(){
-  var keys = ['STR','DEX','CON','INT','WIS','CHA'];
-  _dsw.stats = {}; keys.forEach(function(k,i){ _dsw.stats[k] = DSW_STD_ARRAY[i]; });
-  dswRender();
+  _dsw.rolled = DSW_STD_ARRAY.slice(); _dsw.isArray = true;
+  _dsw.statMode = 'assign'; _dsw.assign = [0,1,2,3,4,5];
+  dswSyncStats(); dswRender();
 }
 window.dswStandardArray = dswStandardArray;
-function dswCommitStats(){
-  document.querySelectorAll('#dsw-body .dsw-stat-in').forEach(function(inp){
-    var v = parseInt(inp.value,10); if(!isNaN(v)) _dsw.stats[inp.dataset.k] = v;
-  });
+function dswSetStatMode(m){ _dsw.statMode = m; dswSyncStats(); dswRender(); }
+window.dswSetStatMode = dswSetStatMode;
+function dswAssignStat(statIdx, poolIdxStr){
+  var poolIdx = parseInt(poolIdxStr,10);
+  var other = _dsw.assign.indexOf(poolIdx);
+  var cur = _dsw.assign[statIdx];
+  if(other >= 0 && other !== statIdx) _dsw.assign[other] = cur;
+  _dsw.assign[statIdx] = poolIdx;
+  dswSyncStats(); dswRender();
 }
+window.dswAssignStat = dswAssignStat;
+function dswStats(){
+  // Seed from an initial roll (keeps the reroll-until-14+ rule) if nothing yet.
+  if(!_dsw.rolled){
+    if(_dsw.stats){ _dsw.rolled = DSW_STATS.map(function(k){ return _dsw.stats[k]; }); }
+    else dswRollStats();
+  }
+  var h = '<p class="ccw-hint">Roll 3d6 six times (rerolled until one score is 14+, per Shadowdark), or take the <b>Standard Array</b> [15, 14, 13, 12, 10, 8]. Assign in order, or place each value where you want.</p>';
+  h += '<div style="display:flex;gap:6px;margin-bottom:10px;">'+
+       '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="dswRollStats()">🎲 Roll 3d6 × 6</button>'+
+       '<button class="ccw-roll-btn" style="flex:1;margin:0;background:#12303a;border-color:#2a6a8a;color:#8ad4e0;" onclick="dswStandardArray()">📊 Standard Array</button>'+
+       '</div>';
+  if(_dsw.rolled){
+    if(!_dsw.isArray){
+      h += '<div style="display:flex;gap:6px;margin-bottom:10px;">'+
+           '<button class="ccw-choice'+(_dsw.statMode==='order'?' selected':'')+'" style="flex:1;text-align:center;" onclick="dswSetStatMode(\'order\')"><div class="ccw-choice-name" style="font-size:10px;">In Order (as rolled)</div></button>'+
+           '<button class="ccw-choice'+(_dsw.statMode==='assign'?' selected':'')+'" style="flex:1;text-align:center;" onclick="dswSetStatMode(\'assign\')"><div class="ccw-choice-name" style="font-size:10px;">Assign Manually</div></button>'+
+           '</div>';
+    }
+    if(_dsw.statMode==='assign'){
+      h += '<p class="ccw-hint" style="font-size:10px;">'+(_dsw.isArray?'Standard array':'Rolled pool')+': <b style="color:#6ac8df;">'+_dsw.rolled.join(' · ')+'</b>. Pick a value for each ability (choosing a used value swaps them).</p>';
+      h += '<div class="ccw-stat-grid">';
+      DSW_STATS.forEach(function(k,si){
+        var idx = _dsw.assign[si]; var v = _dsw.rolled[idx];
+        h += '<div class="ccw-stat"><div class="ccw-stat-name">'+k+'</div>'+
+             '<select onchange="dswAssignStat('+si+',this.value)" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;text-align:center;padding:3px 0;outline:none;">'+
+             _dsw.rolled.map(function(rv,ri){ return '<option value="'+ri+'"'+(ri===idx?' selected':'')+'>'+rv+'</option>'; }).join('')+
+             '</select><div class="ccw-stat-mod">'+fmtMod(mod(v))+'</div></div>';
+      });
+      h += '</div>';
+    } else {
+      h += '<div class="ccw-stat-grid">';
+      DSW_STATS.forEach(function(k,si){
+        var v = _dsw.rolled[si];
+        h += '<div class="ccw-stat"><div class="ccw-stat-name">'+k+'</div><div class="ccw-stat-val" style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:900;color:#eee;">'+v+'</div><div class="ccw-stat-mod">'+fmtMod(mod(v))+'</div></div>';
+      });
+      h += '</div>';
+    }
+    if(!_dsw.isArray && !_dsw.rolled.some(function(v){ return v>=14; }))
+      h += '<p class="ccw-hint" style="color:#df6a6a;margin-top:8px;">No score is 14+ — roll again!</p>';
+  }
+  return h;
+}
+function dswCommitStats(){ dswSyncStats(); if(!_dsw.stats && _dsw.rolled){ _dsw.stats={}; DSW_STATS.forEach(function(k,i){_dsw.stats[k]=_dsw.rolled[i];}); } }
 
 // ── Species ──
 function dswSpecies(){
@@ -375,7 +443,7 @@ function dswSpecies(){
   });
   h += '</div>';
   h += '<div class="ccw-choice-grid">';
-  (ds().species||[]).forEach(function(sp){
+  dswPool("species").forEach(function(sp){
     var sel = (_dsw.species && _dsw.species.kind==='trait' && _dsw.species.name===sp.name) ? ' selected' : '';
     h += '<button class="ccw-choice'+sel+'" onclick="dswPickTrait('+sp.n+')"><div class="ccw-choice-name">'+esc(sp.name)+'</div><div class="ccw-choice-desc">'+esc(sp.text)+'</div></button>';
   });
@@ -389,28 +457,50 @@ function dswPickHuman(){ _dsw.species={kind:'human',name:'Human',text:ds().human
 window.dswPickHuman = dswPickHuman;
 function dswPickTech(nm){ var t=(ds().techSpecies||[]).find(function(x){return x.name===nm;}); if(t){ _dsw.species={kind:'tech',name:t.name,text:t.text}; if(nm==='Power Armor Spacer'||nm==='Android') _dsw.archetype='Machine-Based'; dswRender(); } }
 window.dswPickTech = dswPickTech;
-function dswRollSpecies(){ var sp=rand(ds().species||[]); _dsw.species={kind:'trait',name:sp.name,text:sp.text}; dswRender(); }
+function dswRollSpecies(){ var sp=rand(dswPool("species")); _dsw.species={kind:'trait',name:sp.name,text:sp.text}; dswRender(); }
 window.dswRollSpecies = dswRollSpecies;
 
 // ── Archetype ──
 function dswArchetype(){
-  var h = '<p class="ccw-hint">Choose an Archetype — your Spacer\'s calling. It sets your prime stat, hit die, and weapon/armor training.</p>';
-  h += '<div style="display:grid;grid-template-columns:1fr;gap:6px;">';
-  (ds().archetypes||[]).forEach(function(a){
+  var h = '<p class="ccw-hint">Choose an Archetype — your Spacer\'s calling. It sets your prime stat, hit die, weapon/armor training, and features. Select one to see its full details.</p>';
+  h += '<div class="ccw-choice-grid">';
+  dswPool('archetypes').forEach(function(a){
     var sel = (_dsw.archetype===a.name) ? ' selected' : '';
     h += '<button class="ccw-choice'+sel+'" onclick="dswPickArch('+JSON.stringify(a.name).replace(/"/g,'&quot;')+')">'+
-      '<div class="ccw-choice-name">'+esc(a.name)+'  <span style="color:#6ac8df;font-weight:700;">'+esc(a.stat)+' · d'+a.hitDie+'</span></div>'+
-      '<div class="ccw-choice-desc">'+esc(a.blurb)+'<br><i>Weapons:</i> '+esc(archProfText(a,'weapons'))+' · <i>Armor:</i> '+esc(archProfText(a,'armor'))+
-      (a.triad && (a.triad.Body||a.triad.Mind||a.triad.Soul) ? '<br><i>Triad:</i> '+['Body','Mind','Soul'].filter(function(p){return a.triad[p];}).join(', ') : '')+
-      '</div></button>';
+      '<div class="ccw-choice-name">'+esc(a.name)+(a._hb?' <span style="color:#8fd6ea;font-size:8px;">HB</span>':'')+'  <span style="color:#6ac8df;font-weight:700;">'+esc(a.stat)+' · d'+a.hitDie+'</span></div></button>';
   });
+  h += '</div>';
+  // Details panel — full features of the selected archetype (like the SD class step).
+  h += '<div style="background:#0a1216;border:1px solid #1a5a7a;padding:10px 12px;margin-top:10px;min-height:110px;">';
+  var a = archetype(_dsw.archetype);
+  if(a){
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#8fd6ea;margin-bottom:6px;">'+esc(a.name)+'</div>';
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:11px;color:#cfe6ee;line-height:1.5;">';
+    if(a.blurb) h += '<div style="font-style:italic;color:#9fbecb;margin-bottom:5px;">'+esc(a.blurb)+'</div>';
+    h += '<div><b style="color:#eee;">Prime Stat:</b> '+esc(a.stat)+' &nbsp;·&nbsp; <b style="color:#eee;">Hit Die:</b> d'+a.hitDie+'</div>';
+    h += '<div><b style="color:#eee;">Weapons:</b> '+esc(archProfText(a,'weapons'))+'</div>';
+    h += '<div><b style="color:#eee;">Armor:</b> '+esc(archProfText(a,'armor'))+'</div>';
+    if(a.triad && (a.triad.Body||a.triad.Mind||a.triad.Soul)) h += '<div><b style="color:#eee;">Grants Triad:</b> '+['Body','Mind','Soul'].filter(function(p){return a.triad[p];}).join(', ')+'</div>';
+    if((a.features||[]).length){
+      h += '<div style="margin-top:5px;"><b style="color:#eee;">Features:</b></div>';
+      (a.features||[]).forEach(function(f){ h += '<div style="padding-left:8px;">• <b style="color:#8fd6ea;">'+esc(f.name)+'.</b> '+esc(f.text)+'</div>'; });
+    }
+    if((a.talents||[]).length){
+      h += '<div style="margin-top:6px;"><b style="color:#eee;">Talent Table (2d6):</b></div>';
+      (a.talents||[]).forEach(function(t){ h += '<div style="padding-left:8px;font-size:10px;color:#9fbecb;"><b style="color:#cfe6ee;">'+esc(t.r)+':</b> '+esc(t.text)+'</div>'; });
+    }
+    h += '</div>';
+  } else {
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:11px;color:#5a8595;font-style:italic;">Select an archetype to see its full details.</div>';
+  }
   h += '</div>';
   return h;
 }
 function dswPickArch(nm){ _dsw.archetype=nm; _dsw.talentRolls=null;
-  var kit=START_KIT[nm];
-  if(kit){ _dsw.weapon=kit.weapon; _dsw.armor=kit.armor; }
-  else { var a=archetype(nm)||{}; _dsw.weapon=dswFirstProfWeapon(a); _dsw.armor=dswFirstProfArmor(a); }
+  // Reset gear to this archetype's suggested starter kit (player edits in the gear step).
+  var kit=START_KIT[nm]||{};
+  _dsw.buyWeapons = kit.weapon ? [kit.weapon] : [];
+  _dsw.buyArmor   = kit.armor  ? [kit.armor]  : [];
   dswRender(); }
 window.dswPickArch = dswPickArch;
 
@@ -419,7 +509,7 @@ function dswBackground(){
   var h = '<p class="ccw-hint">Choose a Background (roll d20). You have advantage on checks where it plausibly applies.</p>';
   h += '<button class="ccw-roll-btn" onclick="dswRollBg()">🎲 Roll d20 Background</button>';
   h += '<div class="ccw-choice-grid">';
-  (ds().backgrounds||[]).forEach(function(b){
+  dswPool("backgrounds").forEach(function(b){
     var sel = (_dsw.background && _dsw.background.name===b.name) ? ' selected' : '';
     h += '<button class="ccw-choice'+sel+'" onclick="dswPickBg('+b.n+')"><div class="ccw-choice-name">'+esc(b.name)+'</div><div class="ccw-choice-desc">'+esc(b.text)+'</div></button>';
   });
@@ -428,14 +518,14 @@ function dswBackground(){
 }
 function dswPickBg(n){ var b=(ds().backgrounds||[]).find(function(x){return x.n===n;}); if(b){ _dsw.background=b; dswRender(); } }
 window.dswPickBg = dswPickBg;
-function dswRollBg(){ _dsw.background=rand(ds().backgrounds||[]); dswRender(); }
+function dswRollBg(){ _dsw.background=rand(dswPool("backgrounds")); dswRender(); }
 window.dswRollBg = dswRollBg;
 
 // ── Motivation ──
 function dswMotivation(){
   var h = '<p class="ccw-hint">Choose a Motivation (this replaces Alignment). Each grants a one-time starting bonus and a recurring way to earn Luck Tokens.</p>';
   h += '<div style="display:grid;grid-template-columns:1fr;gap:6px;">';
-  (ds().motivations||[]).forEach(function(m){
+  dswPool("motivations").forEach(function(m){
     var sel = (_dsw.motivation && _dsw.motivation.name===m.name) ? ' selected' : '';
     h += '<button class="ccw-choice'+sel+'" onclick="dswPickMot('+JSON.stringify(m.name).replace(/"/g,'&quot;')+')">'+
       '<div class="ccw-choice-name">'+esc(m.name)+'</div>'+
@@ -449,29 +539,62 @@ window.dswPickMot = dswPickMot;
 
 // ── Talent ──
 function dswTalentRolls(){ return (_dsw.species && _dsw.species.kind==='human') ? 2 : 1; }
-function dswRollTalent(){
+// Roll or pick a talent for a slot (0 = main, 1 = Human/Ambitious bonus).
+function dswRollTalentSlot(i){
   var arche = archetype(_dsw.archetype);
-  var n = dswTalentRolls();
-  var out = [];
-  for(var i=0;i<n;i++){ var total=rollN(6)+rollN(6); out.push({ roll:total, row:talentForRoll(arche, total) }); }
-  _dsw.talentRolls = out;
+  var total = rollN(6)+rollN(6);
+  if(!Array.isArray(_dsw.talentRolls)) _dsw.talentRolls = [];
+  _dsw.talentRolls[i] = { roll:total, row:talentForRoll(arche, total) };
 }
+function dswRollTalent(){ var n=dswTalentRolls(); _dsw.talentRolls=[]; for(var i=0;i<n;i++) dswRollTalentSlot(i); }
 window.dswRollTalent = dswRollTalent;
-function dswTalent(){
-  if(!_dsw.talentRolls) dswRollTalent();
+function dswRollTalentSlotUI(i){ dswRollTalentSlot(i); dswRender(); }
+window.dswRollTalentSlotUI = dswRollTalentSlotUI;
+function dswPickTalent(i, idxStr){
+  if(idxStr==='') return;
   var arche = archetype(_dsw.archetype);
-  var h = '<p class="ccw-hint">Your 1st-level Archetype talent — roll 2d6 on the <b>'+esc(_dsw.archetype)+'</b> talent table.'+
-    (dswTalentRolls()>1 ? ' Your Human/analogue Ambitious trait rolls <b>twice</b>.' : '')+'</p>';
-  h += '<button class="ccw-roll-btn" onclick="dswRerollTalent()">🎲 Roll '+(dswTalentRolls()>1?'2×':'')+'2d6 Talent</button>';
-  _dsw.talentRolls.forEach(function(t){
-    h += '<div class="ccw-result"><b>2d6 = '+t.roll+'</b> → '+(t.row?esc(t.row.text):'—')+'</div>';
+  var rows = (arche && arche.talents) || [];
+  var row = rows[parseInt(idxStr,10)];
+  if(!row) return;
+  if(!Array.isArray(_dsw.talentRolls)) _dsw.talentRolls = [];
+  _dsw.talentRolls[i] = { roll:null, pick:parseInt(idxStr,10), row:row };
+  dswRender();
+}
+window.dswPickTalent = dswPickTalent;
+function dswTalent(){
+  var arche = archetype(_dsw.archetype);
+  var rows = (arche && arche.talents) || [];
+  var n = dswTalentRolls();
+  if(!Array.isArray(_dsw.talentRolls) || _dsw.talentRolls.length < n){ dswRollTalent(); }
+  // Which table row a slot landed on (for highlighting) — match by identity.
+  var rowIndexOf = function(slot){ var t=_dsw.talentRolls[slot]; if(!t||!t.row) return -1; return rows.indexOf(t.row); };
+  var h = '<p class="ccw-hint">Your 1st-level Archetype talent — roll 2d6 on the <b>'+esc(_dsw.archetype)+'</b> talent table, or choose one.'+
+    (n>1 ? ' Your Human/analogue Ambitious trait grants <b>two</b> talents.' : '')+'</p>';
+  // Talent table (highlight the chosen/rolled rows).
+  h += '<table style="width:100%;border-collapse:collapse;margin-bottom:10px;">';
+  h += '<tr><th style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#6ac8df;text-align:left;padding:4px 8px;border-bottom:1px solid #16323d;width:52px;">2d6</th><th style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#6ac8df;text-align:left;padding:4px 8px;border-bottom:1px solid #16323d;">Talent</th></tr>';
+  rows.forEach(function(r, ri){
+    var hit = _dsw.talentRolls.some(function(t){ return t && t.row===r; });
+    var bg = hit ? 'background:#0f2630;border-left:3px solid #3fb6d8;' : '';
+    h += '<tr style="'+bg+'"><td style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;color:#eee;padding:5px 8px;border-bottom:1px solid #12222a;vertical-align:top;">'+esc(r.r)+(hit?' ✦':'')+'</td><td style="font-family:Montserrat,sans-serif;font-size:10px;color:#cfe6ee;padding:5px 8px;border-bottom:1px solid #12222a;line-height:1.4;">'+esc(r.text)+'</td></tr>';
   });
-  // Show the full table for reference
-  h += '<div class="ccw-summary"><div class="ccw-summary-title">'+esc(_dsw.archetype)+' Talent Table</div>';
-  (arche&&arche.talents||[]).forEach(function(r){ h += '<div><b>'+esc(r.r)+':</b> '+esc(r.text)+'</div>'; });
-  h += '</div>';
-  // The Triad opt-in — a Wise talent, the Power Armor Spacer species, or a GM
-  // ruling can grant it. Ticking this inserts a discipline-choice step next.
+  h += '</table>';
+  // Per-slot Roll + Pick controls.
+  for(var i=0;i<n;i++){
+    var slotLbl = (n>1) ? (i===0 ? 'Talent 1' : 'Talent 2 (Ambitious)') : 'Talent';
+    var t = _dsw.talentRolls[i];
+    h += '<div style="margin-bottom:6px;">';
+    if(n>1) h += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#6ac8df;margin-bottom:3px;">'+slotLbl+'</div>';
+    h += '<div style="display:flex;gap:6px;">';
+    h += '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="dswRollTalentSlotUI('+i+')">🎲 Roll Talent</button>';
+    h += '<select onchange="dswPickTalent('+i+',this.value)" style="flex:1;padding:8px 10px;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;outline:none;cursor:pointer;">';
+    h += '<option value="">— Choose a Talent —</option>';
+    rows.forEach(function(r, ri){ var sel=(t && t.pick===ri)?' selected':''; h += '<option value="'+ri+'"'+sel+'>'+esc(r.r)+': '+esc(r.text.slice(0,52))+(r.text.length>52?'…':'')+'</option>'; });
+    h += '</select></div>';
+    if(t) h += '<div class="ccw-result">'+(t.roll?('<b>2d6 = '+t.roll+'</b> → '):'✔ Chosen: ')+(t.row?esc(t.row.text):'—')+'</div>';
+    h += '</div>';
+  }
+  // The Triad opt-in.
   h += '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-family:Montserrat,sans-serif;font-size:12px;color:#ddd;cursor:pointer;">'+
     '<input type="checkbox" '+(dswHasTriad()?'checked':'')+' onchange="dswSetTriadOptIn(this.checked)">'+
     '<span>I gained <b>The Triad</b> (Wise talent, Power Armor Spacer, or GM ruling) — choose a discipline next.</span></label>';
@@ -499,48 +622,121 @@ function dswPickTriad(nm){ _dsw.triadPower = nm; dswRender(); }
 window.dswPickTriad = dswPickTriad;
 
 // ── Gear & Credits ──
-function dswRollCredits(){
-  var c = (rollN(6)+rollN(6))*10;                 // Rookie: 2d6 × 10 cr
+// Starting credits: 2d6 × 10 (roll) or 70 (average), plus Motivation extras.
+function dswSetCredits(doRoll){
+  var c = doRoll ? (rollN(6)+rollN(6))*10 : 70;
   if(_dsw.motivation && _dsw.motivation.code==='VL') c += rollN(10)+rollN(10);  // The Vile: +2d10
   if(_dsw.motivation && _dsw.motivation.code==='S' && !_dsw.survivorGear) _dsw.survivorGear = rand(ds().citizenGear||[]);
   if(_dsw.motivation && _dsw.motivation.code==='VR' && _dsw.contacts==null) _dsw.contacts = rollN(3);
-  _dsw.credits = c;
+  _dsw.credits = c; _dsw.creditsAvg = !doRoll;
+}
+function dswRollCredits(){ dswSetCredits(true); }
+function dswTakeCredits(){ dswSetCredits(false); dswRender(); }
+window.dswTakeCredits = dswTakeCredits;
+function dswToggleKit(){ _dsw.buyKit = !_dsw.buyKit; dswRender(); }
+window.dswToggleKit = dswToggleKit;
+function dswToggleBuyWeapon(n){ var i=_dsw.buyWeapons.indexOf(n); if(i>=0) _dsw.buyWeapons.splice(i,1); else _dsw.buyWeapons.push(n); dswRender(); }
+window.dswToggleBuyWeapon = dswToggleBuyWeapon;
+function dswToggleBuyArmor(n){
+  var i=_dsw.buyArmor.indexOf(n);
+  if(i>=0){ _dsw.buyArmor.splice(i,1); }
+  else { if(!/shield/i.test(n)) _dsw.buyArmor = _dsw.buyArmor.filter(function(x){ return /shield/i.test(x); }); _dsw.buyArmor.push(n); }
+  dswRender();
+}
+window.dswToggleBuyArmor = dswToggleBuyArmor;
+
+// Which weapons/armor an archetype may buy (interprets the book training strings;
+// homebrew archetypes use their proficiency lists via archAllowed).
+function dswArchWeaponList(arche){
+  var melee  = (ds().meleeWeapons||[]).map(function(x){ return Object.assign({kind:'melee', group:'Melee'}, x); });
+  var ranged = (ds().rangedWeapons||[]).map(function(x){ return Object.assign({kind:'ranged'}, x); });
+  if(!arche) return melee.concat(ranged);
+  if(arche._hb) return melee.concat(ranged).filter(function(x){ return archAllowed(arche,'weapons',x.name); });
+  var w = String(arche.weapons||'').toLowerCase();
+  if(/built-in/.test(w)) return [];                       // Machine-Based: built-in
+  var cls = function(n){ n=String(n); return /heavy/i.test(n)?'heavy':/medium/i.test(n)?'medium':/light/i.test(n)?'light':''; };
+  var out;
+  if(/light melee/.test(w))       out = melee.filter(function(x){ return cls(x.name)==='light'; });
+  else if(/light ranged/.test(w)) out = ranged.filter(function(x){ return cls(x.name)==='light'; });
+  else if(/pistols/.test(w))      out = ranged.filter(function(x){ return /pistol/i.test(x.name); });
+  else {
+    out = [];
+    if(/all melee|melee and ranged|all weapons/.test(w)) out = out.concat(melee);
+    if(/all ranged|melee and ranged|all weapons|rifle/.test(w)) out = out.concat(ranged);
+    if(/excluding all heavy|excluding heavy/.test(w)) out = out.filter(function(x){ return cls(x.name)!=='heavy'; });
+    if(/excluding light/.test(w)) out = out.filter(function(x){ return cls(x.name)!=='light'; });
+  }
+  if(!out || !out.length) out = melee.concat(ranged);     // unparsed → show all rather than hide
+  return out;
+}
+function dswArchArmorList(arche){
+  var all = ds().armor||[];
+  if(!arche) return all;
+  if(arche._hb) return all.filter(function(x){ return archAllowed(arche,'armor',x.name); });
+  var s = String(arche.armor||'').toLowerCase();
+  if(/none|built-in/.test(s)) return [];
+  if(/all armor/.test(s)) return all;
+  var want = [];
+  if(/light/.test(s))  want.push('Light Armor');
+  if(/medium/.test(s)) want.push('Medium Armor');
+  if(/heavy/.test(s))  want.push('Heavy Armor');
+  return all.filter(function(x){ return want.indexOf(x.name)>=0; });
+}
+function dswGearSpent(){
+  var spent = 0;
+  if(_dsw.buyKit) spent += ((ds().spacersKit && ds().spacersKit.cost) || 40);
+  (_dsw.buyWeapons||[]).forEach(function(n){ var w=weaponByName(n); if(w) spent += (parseInt(w.cost,10)||0); });
+  (_dsw.buyArmor||[]).forEach(function(n){ var a=armorByName(n); if(a) spent += (parseInt(a.cost,10)||0); });
+  return spent;
 }
 function dswGear(){
-  if(_dsw.credits==null) dswRollCredits();
   var arche = archetype(_dsw.archetype);
-  var restricted = !!(arche && arche._hb);
-  var wl = allWeapons(), al = ds().armor||[];
-  if(restricted){
-    wl = wl.filter(function(w){ return archAllowed(arche,'weapons',w.name); });
-    al = al.filter(function(a){ return archAllowed(arche,'armor',a.name); });
+  if(_dsw.credits==null){
+    return '<p class="ccw-hint">Roll 2d6 × 10 for your starting credits, or take the average (70 cr), then buy your gear.</p>'
+      + '<div style="display:flex;gap:6px;">'
+      + '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="dswRerollCredits()">🎲 Roll 2d6 × 10 cr</button>'
+      + '<button style="flex:0 0 auto;margin:0;padding:0 14px;background:#12303a;border:1px solid #2a6a8a;color:#8ad4e0;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="dswTakeCredits()" title="Take the average instead of rolling">Take 70 cr</button>'
+      + '</div>';
   }
-  var h = '<p class="ccw-hint">Rookies start with <b>2d6 × 10 credits</b>. Buy a Spacer\'s Kit and pick a starting weapon and armor (suggested for your archetype). Anything else you can shop for later.</p>';
-  h += '<button class="ccw-roll-btn" onclick="dswRerollCredits()">🎲 Roll Starting Credits</button>';
-  h += '<div class="ccw-result"><b>Credits:</b> '+_dsw.credits+' cr'+
-       (_dsw.motivation&&_dsw.motivation.code==='VL'?' <span style="color:#6ac8df;">(incl. The Vile +2d10)</span>':'')+'</div>';
+  var spent = dswGearSpent();
+  var left = _dsw.credits - spent;
+  var h = '<p class="ccw-hint">Credits: <b style="color:#6ac8df;">'+_dsw.credits+' cr</b>'+
+          (_dsw.motivation&&_dsw.motivation.code==='VL'?' <span style="color:#6ac8df;">(incl. The Vile +2d10)</span>':'')+
+          ' · Spent: '+spent+' cr · <b style="color:'+(left<0?'#df6a6a':'#7ae0b0')+';">Remaining: '+left+' cr</b></p>';
+  if(left<0) h += '<p class="ccw-hint" style="color:#df6a6a;">You\'ve overspent — remove something.</p>';
+  h += '<div style="display:flex;gap:6px;margin:-4px 0 10px;">'
+    + '<button class="ccw-roll-btn" style="flex:1;margin:0;padding:5px;font-size:10px;" onclick="dswRerollCredits()">🎲 Reroll 2d6 × 10</button>'
+    + '<button style="flex:0 0 auto;margin:0;padding:0 14px;background:'+(_dsw.creditsAvg?'#241f10':'#12303a')+';border:1px solid '+(_dsw.creditsAvg?'#7a5a00':'#2a6a8a')+';color:'+(_dsw.creditsAvg?'#c8a020':'#8ad4e0')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;" onclick="dswTakeCredits()" title="Take the average (70) instead of rolling">Take 70 cr</button>'
+    + '</div>';
   // Spacer's Kit
   var kit = ds().spacersKit||{};
-  h += '<label style="display:flex;align-items:center;gap:8px;margin:10px 0;font-family:Montserrat,sans-serif;font-size:12px;color:#ddd;cursor:pointer;">'+
-    '<input type="checkbox" '+(_dsw.buyKit?'checked':'')+' onchange="dswSetKit(this.checked)">'+
-    '<span>Buy a <b>Spacer\'s Kit</b> ('+(kit.cost||40)+' cr, '+(kit.slots||5)+' slots): '+esc((kit.items||[]).join(', '))+'</span></label>';
-  // Weapon
-  h += '<div style="margin:8px 0;"><label style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;">Starting Weapon</label><br>';
-  h += '<select onchange="dswSetWeapon(this.value)" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:6px;font-family:Montserrat,sans-serif;font-size:12px;margin-top:3px;">';
-  h += '<option value="">— none —</option>';
-  wl.forEach(function(w){
-    var g = w.group || w.kind;
-    h += '<option value="'+esc(w.name)+'"'+(_dsw.weapon===w.name?' selected':'')+'>'+esc(w.name)+' ('+esc(g)+', '+esc(w.dmg)+', '+w.cost+'cr)</option>';
-  });
-  h += '</select></div>';
+  h += '<button class="ccw-choice'+(_dsw.buyKit?' selected':'')+'" style="width:100%;margin-bottom:8px;" onclick="dswToggleKit()"><div class="ccw-choice-name" style="font-size:11px;">Spacer\'s Kit — '+(kit.cost||40)+' cr '+(_dsw.buyKit?'✓':'')+'</div><div class="ccw-choice-desc">'+esc((kit.items||[]).join(', '))+'</div></button>';
+  // Weapons (options available to this archetype)
+  h += '<p class="ccw-hint" style="color:#6ac8df;font-weight:700;margin-top:6px;">Weapons</p>';
+  var wl = dswArchWeaponList(arche);
+  if(wl.length){
+    h += '<div class="ccw-choice-grid">';
+    wl.forEach(function(w){
+      var sel = (_dsw.buyWeapons.indexOf(w.name)>=0)?' selected':'';
+      h += '<button class="ccw-choice'+sel+'" onclick="dswToggleBuyWeapon('+JSON.stringify(w.name).replace(/"/g,'&quot;')+')"><div class="ccw-choice-name" style="font-size:10px;">'+esc(w.name)+' — '+(w.cost||0)+'cr</div><div class="ccw-choice-desc">'+esc(w.dmg||'')+' · '+esc(w.range||'')+(w.props?' · '+esc(w.props):'')+'</div></button>';
+    });
+    h += '</div>';
+  } else {
+    h += '<p class="ccw-hint">'+esc(_dsw.archetype)+' uses built-in weapons — nothing to buy.</p>';
+  }
   // Armor
-  h += '<div style="margin:8px 0;"><label style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;">Starting Armor</label><br>';
-  h += '<select onchange="dswSetArmor(this.value)" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:6px;font-family:Montserrat,sans-serif;font-size:12px;margin-top:3px;">';
-  h += '<option value="">— none (AC 10 + DEX) —</option>';
-  al.forEach(function(a){
-    h += '<option value="'+esc(a.name)+'"'+(_dsw.armor===a.name?' selected':'')+'>'+esc(a.name)+' (AC '+esc(a.ac)+', '+a.cost+'cr)</option>';
-  });
-  h += '</select></div>';
+  var al = dswArchArmorList(arche);
+  if(al.length){
+    h += '<p class="ccw-hint" style="color:#6ac8df;font-weight:700;margin-top:10px;">Armor</p>';
+    h += '<div class="ccw-choice-grid">';
+    al.forEach(function(a2){
+      var sel = (_dsw.buyArmor.indexOf(a2.name)>=0)?' selected':'';
+      h += '<button class="ccw-choice'+sel+'" onclick="dswToggleBuyArmor('+JSON.stringify(a2.name).replace(/"/g,'&quot;')+')"><div class="ccw-choice-name" style="font-size:10px;">'+esc(a2.name)+' — '+(a2.cost||0)+'cr</div><div class="ccw-choice-desc">AC '+esc(a2.ac||'')+'</div></button>';
+    });
+    h += '</div>';
+  } else {
+    h += '<p class="ccw-hint" style="margin-top:8px;">'+esc(_dsw.archetype)+' wears no armor.</p>';
+  }
   if(_dsw.survivorGear) h += '<div class="ccw-result">The Survivor start: extra gear — <b>'+esc(_dsw.survivorGear)+'</b></div>';
   if(_dsw.contacts) h += '<div class="ccw-result">The Virtuous start: <b>'+_dsw.contacts+'</b> trusted contact(s) — define before or during play.</div>';
   return h;
@@ -548,23 +744,63 @@ function dswGear(){
 function dswCommitGear(){ /* selections already stored live via onchange */ }
 
 // ── Finish / build the character object ──
-function dswComputeHP(){
+// Maximum HP (HeroDark, or the player's choice): hit die + CON mod (+2 for Tough).
+function dswMaxHP(){
   var arche = archetype(_dsw.archetype) || {hitDie:6};
   var conMod = mod(_dsw.stats.CON);
-  var roll;
-  if(_dsw.archetype==='Tough'){ roll = Math.max(rollN(arche.hitDie), rollN(arche.hitDie)) + 2; } // Sturdy: +2, advantage
-  else { roll = rollN(arche.hitDie); }
+  return Math.max(1, (arche.hitDie||6) + (_dsw.archetype==='Tough'?2:0) + conMod);
+}
+function dswRolledHP(){
+  var arche = archetype(_dsw.archetype) || {hitDie:6};
+  var conMod = mod(_dsw.stats.CON);
+  var roll = (_dsw.archetype==='Tough') ? (Math.max(rollN(arche.hitDie), rollN(arche.hitDie)) + 2) : rollN(arche.hitDie);
   return Math.max(1, roll + conMod);
 }
+// Resolve HP for the current hpMode (HeroDark forces max).
+function dswComputeHP(){
+  if(_dsw.heroDark || _dsw.hpMode==='max') return dswMaxHP();
+  if(_dsw.hp==null) _dsw.hp = dswRolledHP();
+  return _dsw.hp;
+}
+function dswSetHpMode(m){ _dsw.hpMode = m; if(m==='roll') _dsw.hp = dswRolledHP(); dswRender(); }
+window.dswSetHpMode = dswSetHpMode;
+function dswRerollHP(){ _dsw.hpMode='roll'; _dsw.hp = dswRolledHP(); dswRender(); }
+window.dswRerollHP = dswRerollHP;
 
+// Best AC from bought armor: highest body-armor value (+DEX where noted) plus any
+// shield/helmet "+N" bonuses; falls back to 10 + DEX.
+function dswComputeAC(eff){
+  var s = _dsw.stats; var dexMod = mod((s.DEX||10) + ((eff&&eff.dex)||0));
+  var body = null, bonus = 0;
+  (_dsw.buyArmor||[]).forEach(function(n){
+    var a = armorByName(n); if(!a) return;
+    var acs = String(a.ac||'').trim();
+    var plus = acs.match(/^\+(\d+)/);
+    if(plus){ bonus += parseInt(plus[1],10); return; }
+    var num = acs.match(/(\d+)/); if(!num) return;
+    var val = parseInt(num[1],10); if(/DEX mod/i.test(acs)) val += dexMod;
+    if(body===null || val>body) body = val;
+  });
+  return (body===null ? (10+dexMod) : body) + bonus + ((eff&&eff.ac)||0);
+}
 function dswFinish(){
-  if(_dsw.hp==null) _dsw.hp = dswComputeHP();
   var arche = archetype(_dsw.archetype) || {};
   var s = _dsw.stats;
-  var dexMod = mod(s.DEX);
-  var armorRow = armorByName(_dsw.armor);
-  var ac = armorAC(armorRow, dexMod); if(ac==null) ac = 10 + dexMod;
+  var effAc = dswComputeEff() || {};
+  var hp = dswComputeHP();
+  var ac = dswComputeAC(effAc);
   var h = '<p class="ccw-hint">Review your Spacer, name them, and create. You can edit anything on the sheet afterward.</p>';
+  // HP — roll or take max (HeroDark forces max).
+  h += '<div style="margin-bottom:8px;"><label style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;">Hit Points</label>';
+  if(_dsw.heroDark){
+    h += '<div class="ccw-result" style="margin-top:3px;"><b>'+hp+' HP</b> — max (HeroDark)</div>';
+  } else {
+    h += '<div style="display:flex;gap:6px;align-items:center;margin-top:3px;">'+
+      '<button class="ccw-roll-btn" style="flex:1;margin:0;" onclick="dswRerollHP()">🎲 Roll d'+(arche.hitDie||6)+' + CON</button>'+
+      '<button class="ccw-choice'+(_dsw.hpMode==='max'?' selected':'')+'" style="flex:1;text-align:center;" onclick="dswSetHpMode(\'max\')"><div class="ccw-choice-name" style="font-size:10px;">Take Max ('+dswMaxHP()+')</div></button>'+
+      '<span style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:900;color:#6ac8df;min-width:44px;text-align:center;">'+hp+'</span></div>';
+  }
+  h += '</div>';
   h += '<div style="margin-bottom:8px;"><label style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;">Name</label><br>'+
     '<input value="'+esc(_dsw.name)+'" oninput="dswSetName(this.value)" placeholder="Spacer name" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:8px;font-family:Montserrat,sans-serif;font-size:14px;margin-top:3px;"></div>';
   h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'+
@@ -604,10 +840,10 @@ function dswFinish(){
   h += '<div><b>Background:</b> '+esc(_dsw.background.name)+'</div>';
   h += '<div><b>Motivation:</b> '+esc(_dsw.motivation.name)+'</div>';
   h += '<div><b>Stats:</b> STR '+s.STR+' · DEX '+s.DEX+' · CON '+s.CON+' · INT '+s.INT+' · WIS '+s.WIS+' · CHA '+s.CHA+'</div>';
-  h += '<div><b>HP:</b> '+_dsw.hp+'  ·  <b>AC:</b> '+ac+'  ·  <b>Credits:</b> '+_dsw.credits+' cr</div>';
-  if(_dsw.weapon) h += '<div><b>Weapon:</b> '+esc(_dsw.weapon)+'</div>';
-  if(_dsw.armor)  h += '<div><b>Armor:</b> '+esc(_dsw.armor)+'</div>';
-  h += '<div><b>Talent:</b> '+ (_dsw.talentRolls||[]).map(function(t){return t.row?esc(t.row.text):'';}).join(' | ') +'</div>';
+  h += '<div><b>HP:</b> '+hp+(_dsw.heroDark?' (max)':'')+'  ·  <b>AC:</b> '+ac+'  ·  <b>Credits:</b> '+_dsw.credits+' cr</div>';
+  if((_dsw.buyWeapons||[]).length) h += '<div><b>Weapons:</b> '+esc(_dsw.buyWeapons.join(', '))+'</div>';
+  if((_dsw.buyArmor||[]).length)   h += '<div><b>Armor:</b> '+esc(_dsw.buyArmor.join(', '))+'</div>';
+  h += '<div><b>Talent'+((_dsw.talentRolls||[]).length>1?'s':'')+':</b> '+ (_dsw.talentRolls||[]).map(function(t){return t.row?esc(t.row.text):'';}).filter(Boolean).join(' | ') +'</div>';
   if(_dsw.triadPower) h += '<div><b>The Triad:</b> '+esc(_dsw.triadPower)+'</div>';
   h += '</div>';
   return h;
@@ -643,8 +879,8 @@ function dswBuildGear(){
       rows.push({ name:it.replace(/\s*\(.*\)\s*$/,''), qty:'', equipped:false, disabled:false });
     });
   }
-  if(_dsw.weapon) rows.push({ name:_dsw.weapon, qty:'', equipped:true, disabled:false });
-  if(_dsw.armor)  rows.push({ name:_dsw.armor, qty:'', equipped:true, disabled:false });
+  (_dsw.buyWeapons||[]).forEach(function(n){ rows.push({ name:n, qty:'', equipped:true, disabled:false }); });
+  (_dsw.buyArmor||[]).forEach(function(n){ rows.push({ name:n, qty:'', equipped:true, disabled:false }); });
   if(_dsw.survivorGear) rows.push({ name:_dsw.survivorGear, qty:'', equipped:false, disabled:false });
   return { rows:rows, free:'Backpack' };
 }
@@ -661,16 +897,16 @@ function dswBuildAttacks(eff){
   eff = eff || {};
   var atks = [];
   var s = _dsw.stats;
-  if(_dsw.weapon){
-    var w = weaponByName(_dsw.weapon);
-    if(w){
-      var isRanged = (w.kind==='ranged');
-      var st = isRanged ? 'DEX' : 'STR';
-      var b = mod(isRanged ? s.DEX : s.STR) + (isRanged ? (eff.rangedAtk||0) : (eff.meleeAtk||0));
-      var dmg = _dmgPlus(w.dmg||'', isRanged ? (eff.rangedDmg||0) : (eff.meleeDmg||0));
-      atks.push({ name:w.name, stat:st, bonus:(b>=0?'+':'')+b, range:(w.range||''), damage:dmg, dmgPick:0, adv:false });
-    }
-  }
+  // One attack row per bought weapon.
+  (_dsw.buyWeapons||[]).forEach(function(name){
+    var w = weaponByName(name);
+    if(!w) return;
+    var isRanged = (w.kind==='ranged');
+    var st = isRanged ? 'DEX' : 'STR';
+    var b = mod(isRanged ? s.DEX : s.STR) + (isRanged ? (eff.rangedAtk||0) : (eff.meleeAtk||0));
+    var dmg = _dmgPlus(w.dmg||'', isRanged ? (eff.rangedDmg||0) : (eff.meleeDmg||0));
+    atks.push({ name:w.name, stat:st, bonus:(b>=0?'+':'')+b, range:(w.range||''), damage:dmg, dmgPick:0, adv:false });
+  });
   // Natural Weapon species trait → 1d6 melee attack
   if(_dsw.species && /Natural Weapon/i.test(_dsw.species.name)){
     var bn = mod(s.STR) + (eff.meleeAtk||0);
@@ -682,7 +918,6 @@ function dswBuildAttacks(eff){
 function dswApply(){
   var arche = archetype(_dsw.archetype) || {};
   var s = _dsw.stats;
-  if(_dsw.hp==null) _dsw.hp = dswComputeHP();
 
   // Homebrew mechanical effects (species traits + archetype features/talents).
   var eff = dswComputeEff() || {};
@@ -690,11 +925,8 @@ function dswApply(){
     STR: s.STR + (eff.str||0), DEX: s.DEX + (eff.dex||0), CON: s.CON + (eff.con||0),
     INT: s.INT + (eff.int||0), WIS: s.WIS + (eff.wis||0), CHA: s.CHA + (eff.cha||0)
   };
-  var dexMod = mod(st2.DEX);
-  var armorRow = armorByName(_dsw.armor);
-  var ac = armorAC(armorRow, dexMod); if(ac==null) ac = 10 + dexMod;
-  ac += (eff.ac||0);
-  var hp = Math.max(1, (_dsw.hp||1) + (eff.hp||0));
+  var ac = dswComputeAC(eff);
+  var hp = Math.max(1, dswComputeHP() + (eff.hp||0));
   var g = dswBuildGear();
 
   var data = {
@@ -715,7 +947,7 @@ function dswApply(){
     silver: 0, copper: 0,
     freeCary: g.free,
     _sheet: {
-      options: { heroDark:false, darkSpace:true },
+      options: { heroDark: !!_dsw.heroDark, darkSpace:true },
       talents: dswBuildTalentsText(),
       attacks: dswBuildAttacks(eff),
       gearRows: g.rows,               // verbatim slotted rows (with equip flags)

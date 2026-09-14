@@ -1073,10 +1073,15 @@ let _applyingItemBonuses = false;   // re-entrancy guard
 // This is the DarkSpace sheet — it is always in DarkSpace mode. (It shares some
 // engine files with the Shadowdark sheet, so darkSpaceOn() stays defined for
 // those files to branch on; here it is simply always true.)
-function defaultOptions(){ return { darkSpace:true }; }
+// HeroDark is an optional DarkSpace play mode (set at creation): max HP at level
+// 1, a Luck point on any natural 1 or 20, and Dying (not unconscious) at 0 HP.
+// It is DarkSpace's own copy of the option — the Shadowdark sheet has its own.
+function defaultOptions(){ return { darkSpace:true, heroDark:false }; }
 let options = defaultOptions();
 function darkSpaceOn(){ return true; }
 window.darkSpaceOn = darkSpaceOn;
+function heroDarkOn(){ return !!(options && options.heroDark); }
+window.heroDarkOn = heroDarkOn;
 
 // Set the DarkSpace header labels/placeholders and arrange the header fields.
 // Row 1: Name, Species, Archetype, Background · Row 2: Motivation, Ship, Role, Level.
@@ -2664,7 +2669,30 @@ function rollWithAdv(sides) {
     ? {result:Math.max(r1,r2), detail:`adv[${r1},${r2}]→${Math.max(r1,r2)}`}
     : {result:Math.min(r1,r2), detail:`dis[${r1},${r2}]→${Math.min(r1,r2)}`};
 }
-function onHPChange(){ saveSheet(); }
+// HeroDark: gain a Luck point on any natural 1 or 20 from a d20 roll.
+function heroDarkLuckOnNat(natRoll, source){
+  if(!heroDarkOn() || (natRoll !== 1 && natRoll !== 20)) return;
+  const el = document.getElementById('lk-val');
+  if(el) el.value = (parseInt(el.value) || 0) + 1;
+  addLog('Luck +1', '✦', 'HeroDark: natural ' + natRoll + (source ? ' on ' + source : '') + ' — gain a Luck point', natRoll === 20 ? 'crit' : 'fumble');
+  saveSheet();
+}
+// HeroDark: dropping to 0 HP makes you Dying (not unconscious). Signalled by the
+// Dying status tracker (which drives the disadvantage); cleared when healed.
+function onHPChange(){
+  saveSheet();
+  if(!heroDarkOn()) return;
+  const cur = parseInt(document.getElementById('hp-current')?.value);
+  const at0 = !isNaN(cur) && cur <= 0;
+  if(at0 && !isDyingActive()) addTracker('Dying');
+  else if(!at0 && isDyingActive()) removeTracker('Dying');
+}
+// HeroDark rules — folded into the Quick Rules panel while HeroDark mode is on.
+const HERODARK_QUICK_RULES = [
+  { title: '⚔ HeroDark — Hit Points', text: 'You begin with maximum HP at level 1.' },
+  { title: '⚔ HeroDark — Luck', text: 'You can hold an unlimited number of Luck points, and you gain a Luck point whenever you roll a natural 1 or a natural 20 on a d20 (check, attack, or power). The sheet adds it automatically.' },
+  { title: '⚔ HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all rolls until you are healed above 0 HP. The sheet adds the Dying status automatically (it drives the disadvantage); clear it by healing.' },
+];
 function d(s){return Math.floor(Math.random()*s)+1;}
 function parseMod(v){if(!v)return 0;const n=parseInt((v+'').replace(/\s/g,''));return isNaN(n)?0:n;}
 
@@ -2732,6 +2760,7 @@ function rollStat(id, name) {
   const base = advDetail||`d20(${roll})`;
   addLog(`${name} Check`+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
     `${base} + Mod(${fmtMod(statMod)})${exh?' '+fmtMod(exh)+' exhausted':''} = ${total}`, type);
+  heroDarkLuckOnNat(roll, name + ' check');
 }
 
 // Extra spell lists a caster opted into (beyond their class's own list). Saved
@@ -2973,6 +3002,7 @@ function rollAttack(btn) {
 
   addLog(`${name}`+(hitRoll===20?' ★ NAT 20':hitRoll===1?' ✗ NAT 1':''),
     resultStr, detailStr, type);
+  heroDarkLuckOnNat(hitRoll, name);
 }
 
 function rollSpell(btn) {
@@ -3087,6 +3117,7 @@ function rollSpell(btn) {
     saveSheet(false);
    }
   }
+  heroDarkLuckOnNat(roll, name);
 }
 
 // Find the gear slot for a "Scroll: <spell>" / "Wand: <spell>" item.
@@ -5533,6 +5564,8 @@ function openRules() {
     rows = rows.filter(r => !DROP.has(r && r.title));
     if(typeof window.DARKSPACE !== 'undefined' && Array.isArray(window.DARKSPACE.quickRules)) rows = window.DARKSPACE.quickRules.concat(rows);
   }
+  // While HeroDark mode is on, prepend its rules.
+  if(typeof heroDarkOn === 'function' && heroDarkOn() && typeof HERODARK_QUICK_RULES !== 'undefined') rows = HERODARK_QUICK_RULES.concat(rows);
   body.innerHTML = rows.length
     ? rows.map(r => '<h4>' + _qrEsc(r.title) + (r.page ? ' <span style="font-weight:400;color:#666;font-size:10px;">p.' + _qrEsc(String(r.page)) + '</span>' : '') + '</h4><p>' + _qrEsc(r.text) + '</p>').join('')
     : '<p>Rules data not loaded.</p>';
