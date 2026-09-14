@@ -374,9 +374,12 @@ const SCHEMAS: Record<string, Schema> = {
     title: "My Homebrew Species", noun: "Species",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "text", label: "Trait", type: "textarea", full: true, placeholder: "What this species trait does." },
+      { key: "text", label: "Primary trait", type: "textarea", full: true, placeholder: "The species' main trait (like a Shadowdark ancestry ability)." },
+      { key: "traits", label: "Additional traits", type: "objectList", full: true, addLabel: "+ Trait", fields: [{ key: "name", label: "Name", type: "text" }, { key: "text", label: "Effect", type: "textarea" }] },
+      { key: "languages", label: "Languages", type: "text", full: true, placeholder: "Common, and one of your choosing" },
     ],
-    blank: () => ({}), toForm: (d) => ({ ...d }), summary: () => "Species trait",
+    blank: () => ({ traits: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => { const t = Array.isArray((d as { traits?: unknown[] }).traits) ? (d as { traits: unknown[] }).traits.length : 0; return t ? `${t + 1} traits` : "Species trait"; },
   },
   "ds-archetype": {
     title: "My Homebrew Archetypes", noun: "Archetype",
@@ -410,15 +413,6 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "effect", label: "Luck Token trigger", type: "textarea", full: true },
     ],
     blank: () => ({}), toForm: (d) => ({ ...d }), summary: () => "Motivation",
-  },
-  "ds-triad": {
-    title: "My Homebrew Triad Disciplines", noun: "Discipline",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "stat", label: "Stat", type: "select", options: [["CON", "CON (Body)"], ["INT", "INT (Mind)"], ["WIS", "WIS (Soul)"], ["STR", "STR"], ["DEX", "DEX"], ["CHA", "CHA"]] },
-      { key: "text", label: "Description", type: "textarea", full: true, placeholder: "The kinds of feats this discipline can attempt." },
-    ],
-    blank: () => ({ stat: "WIS" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "stat"),
   },
   "ds-equipment": {
     title: "My Homebrew Equipment", noun: "Item",

@@ -9,7 +9,12 @@ export const dynamic = "force-dynamic";
 const BASE = "/darkspace/species";
 
 const s = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
-type SpeciesRow = { n: number | null; name: string; text: string; homebrew: boolean };
+type Trait = { name: string; text: string };
+type SpeciesRow = { n: number | null; name: string; text: string; traits?: Trait[]; languages?: string; homebrew: boolean };
+function hbTraits(data: Record<string, unknown>): Trait[] {
+  const raw = Array.isArray(data.traits) ? data.traits : [];
+  return raw.map((t) => ({ name: s((t as Record<string, unknown>).name), text: s((t as Record<string, unknown>).text) })).filter((t) => t.name || t.text);
+}
 
 export default async function DarkSpaceSpeciesPage({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -20,7 +25,10 @@ export default async function DarkSpaceSpeciesPage({ searchParams }: { searchPar
     ownHomebrew(user.id, "ds-species"),
     userCampaigns(user.id),
   ]);
-  const hbRows: SpeciesRow[] = hbVisible.map((h) => ({ n: null, name: h.name, text: s((h.data as Record<string, unknown>).text), homebrew: true }));
+  const hbRows: SpeciesRow[] = hbVisible.map((h) => {
+    const d = h.data as Record<string, unknown>;
+    return { n: null, name: h.name, text: s(d.text), traits: hbTraits(d), languages: s(d.languages), homebrew: true };
+  });
   const bookRows: SpeciesRow[] = DS_SPECIES.map((sp) => ({ ...sp, homebrew: false }));
 
   const raw = await searchParams;
@@ -47,9 +55,19 @@ export default async function DarkSpaceSpeciesPage({ searchParams }: { searchPar
             <li key={`${sp.homebrew ? "hb" : "bk"}-${sp.name}-${i}`} className={cardCls}>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <h2 className={nameCls}>{sp.name}</h2>
-                {sp.homebrew ? <span className={hbBadge}>Homebrew</span> : <span className={badge}>d20: {sp.n}</span>}
+                {sp.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
               </div>
               <p className="mt-2 text-[13px] leading-relaxed text-[var(--text)]">{sp.text}</p>
+              {sp.traits && sp.traits.length ? (
+                <ul className="mt-2 space-y-1">
+                  {sp.traits.map((t, j) => (
+                    <li key={j} className="text-[13px] leading-relaxed text-[var(--text)]">
+                      {t.name ? <span className="font-semibold text-[#8fd6ea]">{t.name}: </span> : null}{t.text}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {sp.languages ? <p className="mt-2 text-[12px] text-[var(--muted)]"><span className="font-semibold">Languages:</span> {sp.languages}</p> : null}
             </li>
           ))}
         </ul>

@@ -47,9 +47,10 @@ function shipACAuto(sh){
   return best===null ? (10 + dexMod) : best;
 }
 
-function openDarkSpaceShip(){ S(); document.getElementById('dsship-overlay').style.display='flex'; renderShip(); }
+// The Starship now lives in the sheet's Ship tab, not a modal — route here to it.
+function openDarkSpaceShip(){ S(); if(typeof setTab==='function'){ setTab('ship'); } else { renderShip(); } }
 window.openDarkSpaceShip = openDarkSpaceShip;
-function closeDarkSpaceShip(){ document.getElementById('dsship-overlay').style.display='none'; save(); }
+function closeDarkSpaceShip(){ save(); }
 window.closeDarkSpaceShip = closeDarkSpaceShip;
 function save(){ try{ if(typeof _saveSheetNow==='function') _saveSheetNow(); }catch(e){} }
 

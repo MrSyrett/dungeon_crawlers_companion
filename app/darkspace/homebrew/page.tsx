@@ -11,7 +11,6 @@ const KINDS: { kind: HbType; label: string }[] = [
   { kind: "ds-archetype", label: "Archetypes" },
   { kind: "ds-background", label: "Backgrounds" },
   { kind: "ds-motivation", label: "Motivations" },
-  { kind: "ds-triad", label: "The Triad" },
   { kind: "ds-equipment", label: "Equipment" },
   { kind: "ds-ship-item", label: "Ship Items" },
   { kind: "ds-monster", label: "Denizens" },

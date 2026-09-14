@@ -80,6 +80,7 @@ function startDarkSpaceWizard(){
     survivorGear: null,                // extra citizen gear (string) for The Survivor
     contacts: null,                    // for The Virtuous
     triadOptIn: false, triadPower: null,   // The Triad (metaphysical) discipline
+    shipName: '', shipRole: '',            // crew identity (shown by Background)
     hp: null, name: ''
   };
   document.getElementById('dsw-overlay').style.display = 'flex';
@@ -94,6 +95,8 @@ window.dswClose = dswClose;
 //    and cannot see the closure-private _dsw). ──
 function dswGoDesign(){ _dsw.step++; dswRender(); }              window.dswGoDesign = dswGoDesign;
 function dswSetName(v){ if(_dsw) _dsw.name = v; }               window.dswSetName = dswSetName;
+function dswSetShipName(v){ if(_dsw) _dsw.shipName = v; }        window.dswSetShipName = dswSetShipName;
+function dswSetShipRole(v){ if(_dsw) _dsw.shipRole = v; }        window.dswSetShipRole = dswSetShipRole;
 function dswSetKit(v){ if(_dsw) _dsw.buyKit = !!v; }            window.dswSetKit = dswSetKit;
 function dswSetWeapon(v){ if(_dsw) _dsw.weapon = v || null; }   window.dswSetWeapon = dswSetWeapon;
 function dswSetArmor(v){ if(_dsw) _dsw.armor = v || null; }     window.dswSetArmor = dswSetArmor;
@@ -262,7 +265,7 @@ function dswSpecies(){
   h += '<div class="ccw-choice-grid">';
   (ds().species||[]).forEach(function(sp){
     var sel = (_dsw.species && _dsw.species.kind==='trait' && _dsw.species.name===sp.name) ? ' selected' : '';
-    h += '<button class="ccw-choice'+sel+'" onclick="dswPickTrait('+sp.n+')"><div class="ccw-choice-name">'+sp.n+'. '+esc(sp.name)+'</div><div class="ccw-choice-desc">'+esc(sp.text)+'</div></button>';
+    h += '<button class="ccw-choice'+sel+'" onclick="dswPickTrait('+sp.n+')"><div class="ccw-choice-name">'+esc(sp.name)+'</div><div class="ccw-choice-desc">'+esc(sp.text)+'</div></button>';
   });
   h += '</div>';
   if(_dsw.species) h += '<div class="ccw-result"><b>'+esc(_dsw.species.name)+'</b> — '+esc(_dsw.species.text)+'</div>';
@@ -301,7 +304,7 @@ function dswBackground(){
   h += '<div class="ccw-choice-grid">';
   (ds().backgrounds||[]).forEach(function(b){
     var sel = (_dsw.background && _dsw.background.name===b.name) ? ' selected' : '';
-    h += '<button class="ccw-choice'+sel+'" onclick="dswPickBg('+b.n+')"><div class="ccw-choice-name">'+b.n+'. '+esc(b.name)+'</div><div class="ccw-choice-desc">'+esc(b.text)+'</div></button>';
+    h += '<button class="ccw-choice'+sel+'" onclick="dswPickBg('+b.n+')"><div class="ccw-choice-name">'+esc(b.name)+'</div><div class="ccw-choice-desc">'+esc(b.text)+'</div></button>';
   });
   h += '</div>';
   return h;
@@ -441,6 +444,12 @@ function dswFinish(){
   var h = '<p class="ccw-hint">Review your Spacer, name them, and create. You can edit anything on the sheet afterward.</p>';
   h += '<div style="margin-bottom:8px;"><label style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;">Name</label><br>'+
     '<input value="'+esc(_dsw.name)+'" oninput="dswSetName(this.value)" placeholder="Spacer name" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:8px;font-family:Montserrat,sans-serif;font-size:14px;margin-top:3px;"></div>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'+
+    '<div><label style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;">Ship Name</label><br>'+
+    '<input value="'+esc(_dsw.shipName)+'" oninput="dswSetShipName(this.value)" placeholder="The Wandering Star" style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:8px;font-family:Montserrat,sans-serif;font-size:13px;margin-top:3px;"></div>'+
+    '<div><label style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;color:#6ac8df;text-transform:uppercase;">Ship Role</label><br>'+
+    '<input value="'+esc(_dsw.shipRole)+'" oninput="dswSetShipRole(this.value)" placeholder="Pilot, Gunner, Engineer, Medic..." style="width:100%;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;padding:8px;font-family:Montserrat,sans-serif;font-size:13px;margin-top:3px;"></div>'+
+    '</div>';
   h += '<div class="ccw-summary">';
   h += '<div class="ccw-summary-title">Spacer Summary</div>';
   h += '<div><b>Species:</b> '+esc(_dsw.species.name)+'</div>';
@@ -530,6 +539,8 @@ function dswApply(){
     alignment: _dsw.motivation.name,  // Motivation
     background: _dsw.background.name,
     deity: '',
+    shipName: _dsw.shipName || '',
+    shipRole: _dsw.shipRole || '',
     level: 1,
     stats: { STR:s.STR, DEX:s.DEX, CON:s.CON, INT:s.INT, WIS:s.WIS, CHA:s.CHA },
     maxHitPoints: _dsw.hp,

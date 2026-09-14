@@ -23,7 +23,7 @@ export type HbType =
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
-  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-triad" | "ds-equipment" | "ds-ship-item" | "ds-monster";
+  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-equipment" | "ds-ship-item" | "ds-monster";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -34,7 +34,7 @@ const HB_TYPES = [
   "ace-role", "ace-gear", "ace-extra", "ace-focus", "ace-trait",
   "kob-trope", "kob-strength", "kob-flaw",
   "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
-  "ds-species", "ds-archetype", "ds-background", "ds-motivation", "ds-triad", "ds-equipment", "ds-ship-item", "ds-monster",
+  "ds-species", "ds-archetype", "ds-background", "ds-motivation", "ds-equipment", "ds-ship-item", "ds-monster",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1522,7 +1522,6 @@ function normalizeD62eCreature(input: unknown): { name: string; data: Record<str
 
 // ── DarkSpace (science fiction for Shadowdark) ──────────────────────────────
 const DS_ARCH_STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA", "—"] as const;
-const DS_TRIAD_STATS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
 const DS_EQUIP_CATS = ["gear", "armor", "melee", "ranged", "explosive"] as const;
 const DS_SHIP_CATS = ["weapon", "armor", "system", "feature"] as const;
 
@@ -1530,7 +1529,14 @@ function normalizeDsSpecies(input: unknown): { name: string; data: Record<string
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew species needs a name.");
-  return { name, data: { name, text: str(o.text).slice(0, 2000), source: "Homebrew" } };
+  const data: Record<string, unknown> = {
+    name,
+    text: str(o.text).slice(0, 2000),          // the primary species trait
+    traits: objList(o.traits, ["name", "text"], 8, 1000),   // extra traits (ancestry-style)
+    languages: str(o.languages).slice(0, 200),
+    source: "Homebrew",
+  };
+  return { name, data };
 }
 function normalizeDsBackground(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
@@ -1551,15 +1557,6 @@ function normalizeDsMotivation(input: unknown): { name: string; data: Record<str
       effect: str(o.effect).slice(0, 1000),
       source: "Homebrew",
     },
-  };
-}
-function normalizeDsTriad(input: unknown): { name: string; data: Record<string, unknown> } {
-  const o = (input ?? {}) as Record<string, unknown>;
-  const name = str(o.name).slice(0, 80);
-  if (!name) throw new Error("A homebrew Triad discipline needs a name.");
-  return {
-    name,
-    data: { name, stat: oneOf(o.stat, DS_TRIAD_STATS, "WIS"), text: str(o.text).slice(0, 2000), source: "Homebrew" },
   };
 }
 function normalizeDsArchetype(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -1689,7 +1686,6 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "ds-archetype": return normalizeDsArchetype(data);
     case "ds-background": return normalizeDsBackground(data);
     case "ds-motivation": return normalizeDsMotivation(data);
-    case "ds-triad": return normalizeDsTriad(data);
     case "ds-equipment": return normalizeDsEquipment(data);
     case "ds-ship-item": return normalizeDsShipItem(data);
     case "ds-monster": return normalizeDsMonster(data);

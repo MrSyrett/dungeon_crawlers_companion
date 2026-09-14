@@ -45,7 +45,6 @@ const DS_REFERENCE: { href: string; label: string }[] = [
   { href: "/darkspace/archetypes", label: "Archetypes" },
   { href: "/darkspace/backgrounds", label: "Backgrounds" },
   { href: "/darkspace/equipment", label: "Equipment" },
-  { href: "/darkspace/triad", label: "The Triad" },
   { href: "/darkspace/starships", label: "Starships" },
   { href: "/darkspace/bestiary", label: "Bestiary" },
 ];

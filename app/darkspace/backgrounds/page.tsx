@@ -56,7 +56,7 @@ export default async function DarkSpaceBackgroundsPage({ searchParams }: { searc
         <ul className="grid grid-cols-1 items-start gap-2 md:grid-cols-2">
           {bg.map((b, i) => (
             <li key={`${b.homebrew ? "hb" : "bk"}-${b.name}-${i}`} className="rounded border border-[var(--border)] bg-[var(--panel)] px-3 py-2 text-[13px] leading-relaxed text-[var(--muted)]">
-              {b.homebrew ? <span className={hbBadge}>HB</span> : <span className={badge}>{b.n}</span>} <span className="font-semibold text-[var(--text)]">{b.name}.</span> {b.text}
+              {b.homebrew ? <span className={hbBadge}>HB</span> : null} <span className="font-semibold text-[var(--text)]">{b.name}.</span> {b.text}
             </li>
           ))}
         </ul>

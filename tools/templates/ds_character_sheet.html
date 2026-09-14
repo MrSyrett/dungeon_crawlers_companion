@@ -14,7 +14,7 @@
 :root {
   --bg:#f8f8f6; --ink:#0a0a0a; --muted:#555; --rule:#c0c0c0;
   /* DarkSpace theme: the sci-fi cyan replaces Shadowdark's gold as the accent. */
-  --red:#2456b8; --gold:#3b82d6; --black:#0a0a0a;
+  --red:#1f8fb0; --gold:#3fb6d8; --black:#0a0a0a;
   --box:#efefed; --input-bg:#fff; --border:#0a0a0a;
   --log-bg:#111; --log-text:#e8e4dc;
   --section-bar:#0a0a0a; --section-bar-text:#f8f8f6;
@@ -101,34 +101,34 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .log-action-btn.save:hover{background:#2d5a2d;color:white;}
 .log-action-btn.export{background:#1a2a3a;color:#6aabdf;border:1px solid #1a4a8a;}
 .log-action-btn.export:hover{background:#1a4a8a;color:white;}
-.log-action-btn.pdf{background:#10192b;color:#3b82d6;border:1px solid #1e466f;}
-.log-action-btn.pdf:hover{background:#1e466f;color:white;}
-.log-action-btn.import{background:#2a1a1a;color:#8ab4e0;border:1px solid #1e3f66;}
-.log-action-btn.import:hover{background:#1e3f66;color:white;}
+.log-action-btn.pdf{background:#0d1418;color:#3fb6d8;border:1px solid #1a5a7a;}
+.log-action-btn.pdf:hover{background:#1a5a7a;color:white;}
+.log-action-btn.import{background:#2a1a1a;color:#7ab8e0;border:1px solid #164450;}
+.log-action-btn.import:hover{background:#164450;color:white;}
 .log-entries{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column-reverse;gap:5px;justify-content:flex-start;}
 /* Message-console entries broadcast from the GM (system messages + found loot). */
-.log-system{border-left:3px solid #3b82d6 !important;background:#10192b !important;}
-.log-system .sys-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#5a97dd;}
+.log-system{border-left:3px solid #3fb6d8 !important;background:#0d1418 !important;}
+.log-system .sys-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#6ac8df;}
 .log-system .sys-body{font-size:11px;color:#d8d2c0;margin-top:3px;line-height:1.45;}
-.log-foundloot{border-left:3px solid #3b82d6 !important;background:#101a28 !important;}
-.fl-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#5a97dd;}
-.fl-name{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:#cfe2f4;margin-top:2px;}
-.fl-desc{font-size:10px;color:#9db4c8;margin-top:2px;line-height:1.4;}
+.log-foundloot{border-left:3px solid #3fb6d8 !important;background:#0d1620 !important;}
+.fl-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#6ac8df;}
+.fl-name{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:#cfe6ee;margin-top:2px;}
+.fl-desc{font-size:10px;color:#7ab8e0;margin-top:2px;line-height:1.4;}
 .fl-items{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
-.fl-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:11px;color:#b3c4d6;}
-.fl-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#7d94aa;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.fl-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:11px;color:#9fcfe0;}
+.fl-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#5a8595;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
 .fl-item-name{flex:1;min-width:0;}
-.fl-note{color:#6f8598;font-style:italic;}
-.fl-btn{flex:0 0 auto;background:#3b82d6;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
-.fl-btn:hover:not(:disabled){background:#4a95d8;}
-.fl-btn:disabled{background:transparent;color:#6f8598;border:1px solid #2a3a4a;cursor:default;}
+.fl-note{color:#5a8595;font-style:italic;}
+.fl-btn{flex:0 0 auto;background:#3fb6d8;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.fl-btn:hover:not(:disabled){background:#3fb6d8;}
+.fl-btn:disabled{background:transparent;color:#5a8595;border:1px solid #1a3a44;cursor:default;}
 .log-entry{background:#1e1e1e;border:1px solid #333;padding:7px 9px;}
 .log-entry .roll-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#777;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Montserrat',monospace;font-size:22px;font-weight:900;color:var(--log-text);line-height:1;}
 .log-entry .roll-detail{font-size:9px;color:#555;margin-top:2px;font-family:'Montserrat',sans-serif;}
-.log-entry.crit .roll-result{color:#6dbf6d;}.log-entry.fumble .roll-result{color:#5a8fd8;}
+.log-entry.crit .roll-result{color:#6dbf6d;}.log-entry.fumble .roll-result{color:#4a9ab5;}
 .log-entry.remote{border-left:3px solid #8a7ac8;background:#1c1a24;}
-.log-entry.crit{border-color:#6dbf6d;}.log-entry.fumble{border-color:#5a8fd8;}
+.log-entry.crit{border-color:#6dbf6d;}.log-entry.fumble{border-color:#4a9ab5;}
 .log-hint{color:#333;font-size:10px;font-family:'Montserrat',sans-serif;text-align:center;padding:16px 8px;text-transform:uppercase;letter-spacing:.08em;}
 
 /* DICE TRAY */
@@ -136,12 +136,12 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .adv-btns{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:5px;}
 .adv-btn{padding:4px;background:#1a1a1a;border:1px solid #333;color:#777;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;cursor:pointer;text-align:center;text-transform:uppercase;letter-spacing:.06em;}
 .adv-btn.adv-active{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
-.adv-btn.dis-active{background:#132a44;border-color:#274a7a;color:#8ab4e0;}
+.adv-btn.dis-active{background:#0f2a34;border-color:#1a5a6e;color:#7ab8e0;}
 .dice-btns{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-bottom:5px;}
 .dice-btn{min-width:0;padding:4px 1px;background:#1a1a1a;border:1px solid #333;color:#999;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;cursor:pointer;text-align:center;}
 .dice-btn:hover{background:var(--red);border-color:var(--red);color:white;}
 .dice-pool-display{font-size:9px;color:#666;min-height:14px;margin-bottom:5px;font-family:'Montserrat',sans-serif;}
-.dice-pool-display span{color:#3b82d6;}
+.dice-pool-display span{color:#3fb6d8;}
 .dice-tray-actions{display:flex;gap:3px;}
 .dice-roll-btn{flex:1;padding:5px;background:var(--red);border:none;color:white;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
 .dice-roll-btn:hover{background:var(--red);}
@@ -202,14 +202,14 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 /* STATS BLOCK */
 /* TRACKERS (left column) — active status chips */
 .trk-box{padding:7px 8px 9px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid var(--rule);}
-.trk-chip{padding:5px 11px;border-radius:11px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;white-space:nowrap;background:#274a7a;border:1px solid #8ab4e0;color:#dbe8fb;}
-.trk-chip.good{background:#1e466f;border-color:#3b82d6;color:#cfe2ff;}
+.trk-chip{padding:5px 11px;border-radius:11px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;white-space:nowrap;background:#1a5a6e;border:1px solid #7ab8e0;color:#dbeef4;}
+.trk-chip.good{background:#1a5a7a;border-color:#3fb6d8;color:#cfe6ee;}
 .trk-chip.off{background:transparent;border:1px solid var(--rule);color:var(--muted);font-weight:600;}
 .trk-chip.off:hover{border-color:var(--ink);color:var(--ink);}
 .trk-pick-wrap{display:inline-flex;align-items:stretch;}
 .trk-pick-wrap .trk-chip{border-top-right-radius:0;border-bottom-right-radius:0;border-right:none;}
 .trk-del{padding:0 8px;border-radius:0 11px 11px 0;cursor:pointer;background:transparent;border:1px solid var(--rule);border-left:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;line-height:1;}
-.trk-del:hover{background:#274a7a;border-color:#8ab4e0;color:#dbe8fb;}
+.trk-del:hover{background:#1a5a6e;border-color:#7ab8e0;color:#dbeef4;}
 .trk-add{margin-left:auto;padding:3px 9px;font-size:11px;background:transparent;border:1px solid var(--rule);border-radius:3px;cursor:pointer;color:var(--muted);}
 .trk-add:hover{border-color:var(--ink);color:var(--ink);}
 /* Ability scores — single column, one row each (label · score · mod) */
@@ -283,7 +283,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .tv-uses{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
 .tv-pip{width:14px;height:14px;padding:0;border:1px solid var(--rule);border-radius:3px;background:transparent;cursor:pointer;flex:0 0 auto;}
 .tv-pip:hover{border-color:var(--ink);}
-.tv-pip.used{background:var(--red,#274a7a);border-color:var(--red,#274a7a);}
+.tv-pip.used{background:var(--red,#1a5a6e);border-color:var(--red,#1a5a6e);}
 .talents-area textarea{width:100%;flex:1;min-height:260px;border:none;background:transparent;resize:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:6px 10px;box-sizing:border-box;}
 .spells-list{padding:0;}
 /* Spell rows use grid for perfect column alignment */
@@ -298,10 +298,10 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .spell-src-slot{flex:0 0 auto;display:flex;}
 .spell-discard-slot{flex:0 0 auto;display:flex;}
 .spell-src-badge{display:inline-block;font-family:'Montserrat',sans-serif;font-size:7px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:2px 4px;border-radius:2px;white-space:nowrap;line-height:1;}
-.spell-src-badge.scroll{background:#131f30;color:#3b82d6;border:1px solid #1e466f;}
+.spell-src-badge.scroll{background:#0f1c24;color:#3fb6d8;border:1px solid #1a5a7a;}
 .spell-src-badge.wand{background:#1a2a3a;color:#7ab8e0;border:1px solid #2d5a7a;}
 .spell-row[data-src] .spell-input{font-style:italic;}
-.spell-row[data-src='scroll']{border-left:3px solid #1e466f;}
+.spell-row[data-src='scroll']{border-left:3px solid #1a5a7a;}
 .spell-row[data-src='wand']{border-left:3px solid #2d5a7a;}
 .spell-input{border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:3px 2px;min-width:0;}
 .spell-level{width:100%;border:1px solid var(--rule);background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:1px 0;}
@@ -310,14 +310,14 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .spell-adv-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}
 .spell-adv-btn.on{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
 .spell-lost-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}
-.spell-lost-btn.on{background:#132a44;border-color:#274a7a;color:#8ab4e0;}
+.spell-lost-btn.on{background:#0f2a34;border-color:#1a5a6e;color:#7ab8e0;}
 .atk-adv-btn{padding:2px 4px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:var(--muted);}
 .atk-dmg-cell{display:flex;align-items:center;gap:3px;min-width:0;}
 /* The dice string gets whatever is left; the switch never shrinks, so
    "1d8+2/1d10+2" stays readable next to it. */
 .atk-dmg-cell > input{flex:1 1 auto;min-width:0;}
-.atk-dmg-btn{flex:0 0 auto;padding:2px 5px;background:#10192b;border:1px solid #1e466f;border-radius:3px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:#3b82d6;line-height:1.3;}
-.atk-dmg-btn:hover{border-color:#3b82d6;}
+.atk-dmg-btn{flex:0 0 auto;padding:2px 5px;background:#0d1418;border:1px solid #1a5a7a;border-radius:3px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:#3fb6d8;line-height:1.3;}
+.atk-dmg-btn:hover{border-color:#3fb6d8;}
 .atk-adv-btn.on{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
 
 .spells-bottom{grid-column:1/3;grid-row:2;}
@@ -325,7 +325,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
    eight on one line; the mobile block below lets them wrap. */
 .spell-src-bar{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;justify-content:space-between;margin:0 0 10px;padding:7px 8px;background:#141414;border:1px solid #2a2a2a;border-radius:5px;overflow:hidden;}
 .spell-src-opt{display:flex;align-items:center;gap:3px;min-width:0;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.01em;white-space:nowrap;}
-.spell-src-opt input{flex:0 0 auto;margin:0;accent-color:#3b82d6;}
+.spell-src-opt input{flex:0 0 auto;margin:0;accent-color:#3fb6d8;}
 .spell-desc-wrap{display:none;}
 .spell-info-btn{flex:0 0 auto;width:14px;height:14px;padding:0;line-height:1;border:1px solid var(--rule);border-radius:50%;background:transparent;color:var(--muted);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;font-style:italic;}
 .spell-info-btn:hover{background:var(--black);border-color:var(--black);color:#fff;}
@@ -335,7 +335,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .gear-slot-disabled{background:repeating-linear-gradient(135deg,transparent,transparent 4px,rgba(128,128,128,0.07) 4px,rgba(128,128,128,0.07) 5px);}
 /* Auto-consume ammo toggle switch (next to + Add Item) */
 .sw-toggle{position:relative;display:inline-block;width:26px;height:14px;background:#4a4a4a;border:1px solid #2a2a2a;border-radius:8px;cursor:pointer;transition:background .12s;flex:0 0 auto;vertical-align:middle;}
-.sw-toggle.on{background:#1e466f;border-color:#3b82d6;}
+.sw-toggle.on{background:#1a5a7a;border-color:#3fb6d8;}
 .sw-knob{position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#ddd;transition:left .12s;}
 .sw-toggle.on .sw-knob{left:13px;background:#f0d070;}
 .ammo-toggle-lbl{display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);user-select:none;}
@@ -343,7 +343,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .title-auto{color:rgba(255,255,255,.72);font-size:10px;align-self:center;}
 .title-auto:hover{color:#fff;}
 .gear-disable-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;}
-.gear-disable-btn.on{background:#132a44;border-color:#274a7a;color:#8ab4e0;}
+.gear-disable-btn.on{background:#0f2a34;border-color:#1a5a6e;color:#7ab8e0;}
 /* FREE TO CARRY */
 .free-carry{border-top:1px solid var(--rule);}
 .free-carry-inner{padding:6px 10px;}
@@ -353,7 +353,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .tabs-bar{display:flex;gap:0;background:var(--section-bar);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
 .tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.55);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;}
 .tab-btn:hover{color:#fff;}
-.tab-btn.on{color:#fff;border-bottom-color:var(--red);background:rgba(36,86,184,.28);}
+.tab-btn.on{color:#fff;border-bottom-color:var(--red);background:rgba(63,182,216,.28);}
 .tab-panel{display:none;}
 .tab-panel.on{display:block;}
 /* Softer 'bubble' feel: round the sheet shell and the coin row cells */
@@ -389,11 +389,11 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 }
 #roll-toast.show { display: block; animation: _toast-in 0.18s ease; }
 #roll-toast.crit { border-color: #6dbf6d; }
-#roll-toast.fumble { border-color: #8ab4e0; }
+#roll-toast.fumble { border-color: #7ab8e0; }
 #roll-toast .t-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a8a93; margin-bottom: 3px; }
-#roll-toast .t-result { font-family: 'Share Tech Mono', monospace; font-size: 30px; font-weight: 900; color: #5fa3ea; line-height: 1; }
+#roll-toast .t-result { font-family: 'Share Tech Mono', monospace; font-size: 30px; font-weight: 900; color: #7ab8e0; line-height: 1; }
 #roll-toast.crit .t-result { color: #6dbf6d; }
-#roll-toast.fumble .t-result { color: #8ab4e0; }
+#roll-toast.fumble .t-result { color: #7ab8e0; }
 #roll-toast .t-detail { font-size: 11px; color: #a0a0aa; margin-top: 3px; }
 @keyframes _toast-in {
   from { opacity: 0; transform: translateX(-50%) translateY(8px); }
@@ -401,25 +401,25 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 }
 
 /* Quick Rules panel */
-.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#3b82d6;margin:12px 0 3px;}
+.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#3fb6d8;margin:12px 0 3px;}
 .rules-list h4:first-child{margin-top:0;}
 .rules-list p{font-family:'Barlow',sans-serif;font-size:12px;line-height:1.5;color:#ccc;}
 /* DCC loot boxes broadcast from the GM screen (sealed until opened / claimed). */
-.log-lootbox{border-left:3px solid #3b82d6 !important;background:#0f1a28 !important;}
-.lb-head{font-family:'Barlow Condensed',sans-serif;color:#5a97dd;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
-.lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#cfe2f4;margin-top:2px;}
-.lb-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#7d94aa;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
-.lb-desc{font-size:11px;color:#9db4c8;margin-top:3px;line-height:1.4;}
-.lb-items{margin:5px 0 0;padding-left:16px;font-size:11px;color:#b3c4d6;}
+.log-lootbox{border-left:3px solid #3fb6d8 !important;background:#0d1620 !important;}
+.lb-head{font-family:'Barlow Condensed',sans-serif;color:#6ac8df;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
+.lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#cfe6ee;margin-top:2px;}
+.lb-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#5a8595;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.lb-desc{font-size:11px;color:#7ab8e0;margin-top:3px;line-height:1.4;}
+.lb-items{margin:5px 0 0;padding-left:16px;font-size:11px;color:#9fcfe0;}
 .lb-items li{margin:1px 0;}
-.lb-sealed{margin-top:5px;font-size:11px;color:#6f8598;font-style:italic;}
-.lb-note{color:#6f8598;font-style:italic;}
+.lb-sealed{margin-top:5px;font-size:11px;color:#5a8595;font-style:italic;}
+.lb-note{color:#5a8595;font-style:italic;}
 .lb-actions{margin-top:6px;}
-.lb-btn{background:#3b82d6;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
-.lb-btn:hover:not(:disabled){background:#4a95d8;}
-.lb-btn:disabled{background:transparent;color:#6f8598;border:1px solid #2a3a4a;cursor:default;}
+.lb-btn{background:#3fb6d8;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.lb-btn:hover:not(:disabled){background:#3fb6d8;}
+.lb-btn:disabled{background:transparent;color:#5a8595;border:1px solid #1a3a44;cursor:default;}
 </style>
-<style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#3b82d6)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
+<style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#3fb6d8)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
 <body>
 <div id="roll-toast"><div class="t-label"></div><div class="t-dice" data-da-inline></div><div class="t-result"></div><div class="t-detail"></div></div>
@@ -452,6 +452,10 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
     <div class="hdr-field" style="display:flex;align-items:center;gap:6px;">
       <div style="flex:1;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="font-size:18px;font-weight:900;"></div>
     </div>
+  </div>
+  <div class="hdr-fields hdr-fields-2" id="hdr-ship-fields">
+    <div class="hdr-field" style="grid-column:span 2;"><label>Ship Name</label><input type="text" id="f-shipname" placeholder="The Wandering Star"></div>
+    <div class="hdr-field" style="grid-column:span 2;"><label>Ship Role</label><input type="text" id="f-shiprole" placeholder="Pilot, Gunner, Engineer, Medic..."></div>
   </div>
 
   <!-- MAIN BODY -->
@@ -511,10 +515,11 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         </table>
       </div>
 
-      <!-- TABS: Talents / Gear (DarkSpace has no spells — see The Triad) -->
+      <!-- TABS: Talents / Gear / Ship (DarkSpace has no spells — see The Triad) -->
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
+        <button class="tab-btn" data-tab="ship" onclick="setTab('ship')">🚀 Ship</button>
       </div>
 
       <!-- TALENTS TAB -->
@@ -535,7 +540,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         </div>
         <div class="sl"><span>Gear</span>
           <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
-            <button onclick="openShop()" style="padding:2px 10px;background:#10192b;color:#3b82d6;border:1px solid #1e466f;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#1e466f';this.style.color='white'" onmouseout="this.style.background='#10192b';this.style.color='#3b82d6'">+ Item</button>
+            <button onclick="openShop()" style="padding:2px 10px;background:#0d1418;color:#3fb6d8;border:1px solid #1a5a7a;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#1a5a7a';this.style.color='white'" onmouseout="this.style.background='#0d1418';this.style.color='#3fb6d8'">+ Item</button>
           </div></div>
         <div id="gear-list"></div>
 
@@ -545,6 +550,12 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
             <textarea id="free-carry" placeholder="Torch, Rations, Rope..." rows="4"></textarea>
           </div>
         </div>
+      </div>
+
+      <!-- SHIP TAB (Starship — built like a Spacer: Stats, HP, AC, systems & weapons) -->
+      <div class="tab-panel" id="tab-ship">
+        <div class="sl"><span>Starship</span><span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#5a8595;">Built like a Spacer — Stats · HP · AC · systems &amp; weapons</span></div>
+        <div id="dsship-body" style="padding:8px 4px;"></div>
       </div>
 
     </div><!-- end main-col -->
@@ -568,9 +579,8 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
-    <button id="hdr-create-btn" class="log-action-btn" onclick="startCharWizard()" style="border:1px solid #1e466f;background:transparent;color:#5fa3ea;" title="Create character" aria-label="Create character">Create</button>
+    <button id="hdr-create-btn" class="log-action-btn" onclick="startCharWizard()" style="border:1px solid #1a5a7a;background:transparent;color:#7ab8e0;" title="Create character" aria-label="Create character">Create</button>
     <button class="log-action-btn" onclick="openRules()" style="border:1px solid #2f4a2f;background:#1e2a1e;color:#b8d8b8;" title="Quick rules" aria-label="Quick rules">Rules</button>
-    <button id="hdr-ship-btn" class="log-action-btn" onclick="openDarkSpaceShip()" style="display:none;border:1px solid #1a5a7a;background:#0d1a20;color:#6ac8df;" title="Starship" aria-label="Starship">🚀 Ship</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export sheet as JSON" aria-label="Export">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import a sheet JSON" aria-label="Import">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
@@ -1227,14 +1237,18 @@ function onStatChange(id) {
 
 // ═══ TABS (Spells / Talents / Gear) ═════════════════════════════════════════
 var _tab = 'gear';
-const TABS = ['talents','gear'];
+const TABS = ['talents','gear','ship'];
 function setTab(name){
   if(TABS.indexOf(name) < 0) name = 'gear';
+  // Leaving the Ship tab persists ship edits (ship state round-trips in the save).
+  if(_tab === 'ship' && name !== 'ship' && typeof _saveSheetNow === 'function') { try{ _saveSheetNow(); }catch(e){} }
   _tab = name;
   TABS.forEach(function(t){
     var panel = document.getElementById('tab-'+t); if(panel) panel.classList.toggle('on', t===name);
     var btn = document.querySelector('.tab-btn[data-tab="'+t+'"]'); if(btn) btn.classList.toggle('on', t===name);
   });
+  // Render the ship UI on demand when its tab opens.
+  if(name === 'ship' && typeof renderShip === 'function') { try{ renderShip(); }catch(e){} }
 }
 function setDefaultTab(){ setTab(_tab || 'gear'); }
 
@@ -2358,7 +2372,7 @@ function buildGear() {
     row.className = 'gear-slot';
     row.style.cssText = 'display:flex;align-items:center;border-bottom:1px solid var(--rule);padding:1px 6px;gap:3px;overflow:hidden;';
     row.innerHTML = `
-      <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" title="Equip" style="width:16px;flex:0 0 16px;margin:0;cursor:pointer;visibility:hidden;accent-color:#3b82d6;">
+      <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" title="Equip" style="width:16px;flex:0 0 16px;margin:0;cursor:pointer;visibility:hidden;accent-color:#3fb6d8;">
       <span style="font-size:8px;font-weight:700;color:var(--muted);width:16px;flex:0 0 16px;">${i}.</span>
       <input type="text" class="gear-name" oninput="onGearNameInput(this)" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
       <input type="text" class="gear-qty" style="width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;" placeholder="">
@@ -2466,7 +2480,7 @@ function addLog(label, result, detail, type='normal') {
   const div = document.createElement('div');
   div.className = 'log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
   const advLabel = advState==='advantage'?' <span style="color:#6dbf6d;font-size:8px;">▲ADV</span>'
-                 : advState==='disadvantage'?' <span style="color:#8ab4e0;font-size:8px;">▼DIS</span>':'';
+                 : advState==='disadvantage'?' <span style="color:#7ab8e0;font-size:8px;">▼DIS</span>':'';
   div.innerHTML = `<div class="roll-label">${_logEsc(label)}${advLabel}</div><div class="roll-result">${_logIcon(result)}</div><div class="roll-detail">${_logEsc(detail)}</div>`;
   if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
   entries.insertBefore(div, entries.firstChild);
@@ -3070,6 +3084,8 @@ function collectSheet(){
     alignment:        document.getElementById('f-alignment')?.value || '',
     background:       document.getElementById('f-background')?.value || '',
     deity:            document.getElementById('f-deity')?.value || '',
+    shipName:         document.getElementById('f-shipname')?.value || '',
+    shipRole:         document.getElementById('f-shiprole')?.value || '',
     maxHitPoints:     hp,
     armorClass:       parseInt(document.getElementById('ac-val')?.value) || 0,
     gearSlotsTotal:   10,
@@ -3173,6 +3189,8 @@ function _applySDData(d){
   set('f-alignment',  d.alignment || d['f-alignment'] || '');
   set('f-background', d.background || d['f-background'] || '');
   set('f-deity',      d.deity || d['f-deity'] || '');
+  set('f-shipname',   d.shipName || d['f-shipname'] || '');
+  set('f-shiprole',   d.shipRole || d['f-shiprole'] || '');
   set('f-level',      d.level || d['f-level'] || 1);
 
   // Stats — Shadowdarklings: d.stats.STR etc
@@ -4084,7 +4102,7 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   .main-body > .left-col > .sl:nth-child(3){order:4;}  /* Trackers label */
   #trk-list{order:4;}
   .tabs-bar{order:5;}
-  #tab-talents,#tab-gear{order:6;}
+  #tab-talents,#tab-gear,#tab-ship{order:6;}
   /* Ability scores stay stacked (single column) on phones */
   .stats-grid{display:flex;flex-direction:column;}
   .hdr-fields,.hdr-fields-2{grid-template-columns:1fr 1fr;}
@@ -4326,10 +4344,10 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 
 <!-- ═══ CHARACTER CREATION WIZARD ═══ -->
 <div id="ccw-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #3b82d6;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #3fb6d8;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3b82d6;line-height:1;">Create Character</div>
+        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Create Character</div>
         <div id="ccw-step" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#888;margin-top:3px;"></div>
       </div>
       <button onclick="ccwClose()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -4337,7 +4355,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
     <div id="ccw-body" style="padding:14px 16px;overflow-y:auto;flex:1;"></div>
     <div style="padding:10px 16px;background:#141414;border-top:1px solid #2a2a2a;display:flex;justify-content:space-between;">
       <button id="ccw-back" onclick="ccwBack()" style="padding:7px 16px;background:transparent;color:#888;border:1px solid #2a2a2a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;">← Back</button>
-      <button id="ccw-next" onclick="ccwNext()" style="padding:7px 16px;background:#3b82d6;color:#1a1a1a;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:900;font-size:10px;letter-spacing:.1em;text-transform:uppercase;">Next →</button>
+      <button id="ccw-next" onclick="ccwNext()" style="padding:7px 16px;background:#3fb6d8;color:#1a1a1a;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:900;font-size:10px;letter-spacing:.1em;text-transform:uppercase;">Next →</button>
     </div>
   </div>
 </div>
@@ -4361,18 +4379,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 </div>
 
 <!-- DarkSpace starship overlay -->
-<div id="dsship-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1001;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#0d1418;border:2px solid #3fb6d8;max-width:640px;width:100%;max-height:92vh;display:flex;flex-direction:column;">
-    <div style="background:#081014;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">
-      <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Starship</div>
-        <div style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#5a8595;margin-top:3px;">A ship is built like a Spacer — Stats, HP, AC, systems &amp; weapons</div>
-      </div>
-      <button onclick="closeDarkSpaceShip()" style="background:transparent;border:none;color:#5a8595;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
-    </div>
-    <div id="dsship-body" style="padding:14px 16px;overflow-y:auto;flex:1;"></div>
-  </div>
-</div>
+<!-- Starship now lives in the Ship tab (see #tab-ship / #dsship-body above). -->
 
 <!-- DarkSpace level-up overlay -->
 <div id="dslu-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1001;align-items:center;justify-content:center;padding:16px;">
@@ -4408,7 +4415,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 .ccw-roll-btn:hover{background:#1a5a7a;color:white;}
 .ccw-stat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
 .ccw-stat{background:#141414;border:1px solid #2a2a2a;padding:8px 4px;text-align:center;}
-.ccw-stat-name{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:#3b82d6;letter-spacing:.1em;}
+.ccw-stat-name{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:#3fb6d8;letter-spacing:.1em;}
 .ccw-stat-val{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:900;color:#eee;}
 .ccw-stat-mod{font-family:'Montserrat',sans-serif;font-size:11px;color:#888;}
 .ccw-choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
@@ -4416,16 +4423,16 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
    Each group is its own 2-column button grid on desktop. On mobile the two
    groups stay side by side but each drops to a single column. */
 .ccw-class-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;}
-.ccw-class-grouphdr{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#3b82d6;margin:0 0 6px;}
+.ccw-class-grouphdr{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#3fb6d8;margin:0 0 6px;}
 .ccw-class-grid{grid-template-columns:repeat(2,1fr);}
 .ccw-choice{background:#141414;border:1px solid #2a2a2a;padding:8px 10px;cursor:pointer;text-align:left;transition:border-color .1s;}
-.ccw-choice:hover{border-color:#3b82d6;}
-.ccw-choice.selected{border-color:#3b82d6;background:#10192b;}
+.ccw-choice:hover{border-color:#3fb6d8;}
+.ccw-choice.selected{border-color:#3fb6d8;background:#0d1418;}
 .ccw-choice-name{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#eee;}
 .ccw-choice-desc{font-family:'Montserrat',sans-serif;font-size:9px;color:#888;line-height:1.4;margin-top:2px;}
 .ccw-result{background:#141414;border-left:3px solid #6ac8df;padding:8px 12px;font-family:'Montserrat',sans-serif;font-size:12px;color:#eee;margin-top:8px;line-height:1.5;}
 .ccw-summary{background:#0f0f0f;border:1px solid #2a2a2a;padding:10px 12px;margin-top:12px;font-family:'Montserrat',sans-serif;font-size:11px;color:#ccc;line-height:1.7;}
-.ccw-summary-title{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#3b82d6;margin-bottom:4px;}
+.ccw-summary-title{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#3fb6d8;margin-bottom:4px;}
 
 /* ══ ROUNDED BUTTONS ══════════════════════════════════════════════════════
    Applied last so it wins over the per-button rules above. Deliberately
@@ -4468,10 +4475,10 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 
 <!-- ═══ ITEM SHOP ═══ -->
 <div id="shop-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #3b82d6;max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #3fb6d8;max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3b82d6;line-height:1;">Item Shop</div>
+        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Item Shop</div>
         <div id="shop-coins" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;color:#888;margin-top:3px;"></div>
       </div>
       <button onclick="closeShop()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -4606,7 +4613,7 @@ function shopRender() {
   // Tabs
   const tabBar = document.getElementById('shop-tabs');
   tabBar.innerHTML = SHOP_TABS.map(t=>
-    '<button onclick="shopSetTab(\''+t.id+'\')" style="flex:1;padding:8px 4px;background:'+(_shopTab===t.id?'#3b82d6':'#141414')+';color:'+(_shopTab===t.id?'#1a1a1a':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:9px;letter-spacing:.08em;text-transform:uppercase;">'+t.label+'</button>'
+    '<button onclick="shopSetTab(\''+t.id+'\')" style="flex:1;padding:8px 4px;background:'+(_shopTab===t.id?'#3fb6d8':'#141414')+';color:'+(_shopTab===t.id?'#1a1a1a':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:9px;letter-spacing:.08em;text-transform:uppercase;">'+t.label+'</button>'
   ).join('');
 
   // Magic subtabs
@@ -4614,7 +4621,7 @@ function shopRender() {
   if(_shopTab==='magic') {
     subBar.style.display = 'flex';
     subBar.innerHTML = SHOP_MAGIC_SUBS.map(s=>
-      '<button onclick="shopSetMagicSub(\''+s.replace(/'/g,"\\'")+'\')" style="flex:1 0 auto;padding:5px 6px;background:'+(_shopMagicSub===s?'#1a2c44':'#0f0f0f')+';color:'+(_shopMagicSub===s?'#3b82d6':'#666')+';border:none;border-bottom:2px solid '+(_shopMagicSub===s?'#3b82d6':'transparent')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:8px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;">'+s+'</button>'
+      '<button onclick="shopSetMagicSub(\''+s.replace(/'/g,"\\'")+'\')" style="flex:1 0 auto;padding:5px 6px;background:'+(_shopMagicSub===s?'#163040':'#0f0f0f')+';color:'+(_shopMagicSub===s?'#3fb6d8':'#666')+';border:none;border-bottom:2px solid '+(_shopMagicSub===s?'#3fb6d8':'transparent')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:8px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;">'+s+'</button>'
     ).join('');
   } else {
     subBar.style.display = 'none';
@@ -4642,7 +4649,7 @@ function shopRender() {
     filterBar.style.display = 'flex';
     filterBar.innerHTML =
         '<label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#888;">'
-      +   '<input type="checkbox" '+(_shopClassOnly?'checked':'')+' onchange="shopToggleClassOnly(this.checked)" style="accent-color:#3b82d6;width:15px;height:15px;cursor:pointer;">'
+      +   '<input type="checkbox" '+(_shopClassOnly?'checked':'')+' onchange="shopToggleClassOnly(this.checked)" style="accent-color:#3fb6d8;width:15px;height:15px;cursor:pointer;">'
       +   cls+' Only'
       + '</label>'
       + (_shopClassOnly && hidden ? '<span style="margin-left:auto;font-family:Montserrat,sans-serif;font-size:9px;color:#5a5a5a;">'+hidden+' hidden</span>' : '');
@@ -4659,7 +4666,7 @@ function shopRender() {
   const body = document.getElementById('shop-body');
   const hbBar = (_shopTab==='homebrew')
     ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 4px 10px;border-bottom:1px solid #2a2a2a;margin-bottom:4px;">'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3b82d6;">'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3fb6d8;">'
       +   _homebrewItems.length + ' custom item' + (_homebrewItems.length===1?'':'s')
       + '</div>'
       + '<div style="font-family:Montserrat,sans-serif;font-size:8px;color:#666;text-align:right;flex-shrink:0;">Created on the Equipment page</div>'
@@ -4679,14 +4686,14 @@ function shopRender() {
     return '<div style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #1e1e1e;">'
       + '<div style="flex:1;min-width:0;'+(hasFull?'cursor:pointer;':'')+'" '+(hasFull?'onclick="toggleFullDesc(this)"':'')+'>'
       +   '<div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#eee;">'+it.name+(it.qty?' ('+it.qty+')':'')+'</div>'
-      +   (note?'<div class="desc-short" style="font-family:Montserrat,sans-serif;font-size:9px;color:#888;line-height:1.3;">'+note+(hasFull?' <span style="color:#3b82d6;">▸ more</span>':'')+'</div>':'')
-      +   (hasFull?'<div class="desc-full" style="display:none;font-family:Montserrat,sans-serif;font-size:9px;color:#bbb;line-height:1.45;">'+it.full+' <span style="color:#3b82d6;">▾ less</span></div>':'')
+      +   (note?'<div class="desc-short" style="font-family:Montserrat,sans-serif;font-size:9px;color:#888;line-height:1.3;">'+note+(hasFull?' <span style="color:#3fb6d8;">▸ more</span>':'')+'</div>':'')
+      +   (hasFull?'<div class="desc-full" style="display:none;font-family:Montserrat,sans-serif;font-size:9px;color:#bbb;line-height:1.45;">'+it.full+' <span style="color:#3fb6d8;">▾ less</span></div>':'')
       + '</div>'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:#3b82d6;width:44px;text-align:right;flex-shrink:0;">'+cost+'</div>'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:#3fb6d8;width:44px;text-align:right;flex-shrink:0;">'+cost+'</div>'
       + (canBuy
           ? '<button onclick="shopBuy(\''+_shopTab+'\','+i+')" style="padding:5px 10px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Buy</button>'
           : '<span style="width:44px;flex-shrink:0;"></span>')
-      + '<button onclick="shopAdd(\''+_shopTab+'\','+i+')" style="padding:5px 10px;background:#10192b;color:#3b82d6;border:1px solid #1e466f;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Add</button>'
+      + '<button onclick="shopAdd(\''+_shopTab+'\','+i+')" style="padding:5px 10px;background:#0d1418;color:#3fb6d8;border:1px solid #1a5a7a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Add</button>'
       + '</div>';
   }).join('');
 }
@@ -4869,7 +4876,7 @@ function openEnchantPicker(kind) {
   // Bonus buttons (+1..+3), default +1
   if(bonusEl) {
     bonusEl.innerHTML = [1,2,3].map(b =>
-      '<button data-bonus="'+b+'" onclick="enchantSetBonus('+b+')" style="flex:1;padding:8px 4px;background:'+(b===1?'#1e466f':'#141414')+';color:'+(b===1?'#fff':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:13px;">+'+b+'</button>'
+      '<button data-bonus="'+b+'" onclick="enchantSetBonus('+b+')" style="flex:1;padding:8px 4px;background:'+(b===1?'#1a5a7a':'#141414')+';color:'+(b===1?'#fff':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:13px;">+'+b+'</button>'
     ).join('');
   }
   _enchantBonus = 1;
@@ -4883,7 +4890,7 @@ function enchantSetBonus(b) {
   _enchantBonus = b;
   document.querySelectorAll('#enchant-bonus button').forEach(btn => {
     const on = parseInt(btn.dataset.bonus) === b;
-    btn.style.background = on ? '#1e466f' : '#141414';
+    btn.style.background = on ? '#1a5a7a' : '#141414';
     btn.style.color = on ? '#fff' : '#888';
   });
   enchantPreview();
@@ -4900,12 +4907,12 @@ function enchantPreview() {
   if(_enchantKind === 'weapon') {
     const w = (typeof SD_WEAPONS!=='undefined' ? SD_WEAPONS : []).find(x=>x.name===type);
     const dmg = w ? w.damage : '';
-    el.innerHTML = 'Adds <b style="color:#3b82d6;">' + enchantName() + '</b> to gear'
+    el.innerHTML = 'Adds <b style="color:#3fb6d8;">' + enchantName() + '</b> to gear'
       + (dmg ? ' and an attack (' + dmg + (dmg.includes('/')?' versatile':'') + ', +' + _enchantBonus + ' to hit &amp; damage).' : '.');
   } else {
     const a = ENCHANT_ARMOR.find(x=>x.name===type);
     const base = a ? a.note : '';
-    el.innerHTML = 'Adds <b style="color:#3b82d6;">' + enchantName() + '</b> to gear'
+    el.innerHTML = 'Adds <b style="color:#3fb6d8;">' + enchantName() + '</b> to gear'
       + (base ? ' (' + base + ', +' + _enchantBonus + ' AC).' : '.');
   }
 }
@@ -4985,19 +4992,19 @@ function openSpellPick(kind) {
 
 <!-- ═══ TRACKER PICKER ═══ -->
 <div id="trkpick-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1003;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeTrackerPicker()">
-  <div style="background:#1a1a1a;border:2px solid #1e466f;max-width:400px;width:100%;max-height:85vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #1a5a7a;max-width:400px;width:100%;max-height:85vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3b82d6;line-height:1;">Trackers</div>
+      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Trackers</div>
       <button onclick="closeTrackerPicker()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
     </div>
     <div style="padding:14px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
       <div style="font-family:Montserrat,sans-serif;font-size:9px;color:#777;">Tap to add or remove. Active ones are highlighted.</div>
       <div id="trkpick-grid" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
       <div>
-        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#3b82d6;margin-bottom:5px;">Add your own</div>
+        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#3fb6d8;margin-bottom:5px;">Add your own</div>
         <div style="display:flex;gap:7px;">
           <input type="text" id="trkpick-custom" placeholder="Tracker name" onkeydown="if(event.key==='Enter')addCustomTracker()" style="flex:1;min-width:0;box-sizing:border-box;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;padding:7px 8px;outline:none;">
-          <button onclick="addCustomTracker()" style="padding:7px 14px;background:#131f30;color:#3b82d6;border:1px solid #1e466f;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Add</button>
+          <button onclick="addCustomTracker()" style="padding:7px 14px;background:#0f1c24;color:#3fb6d8;border:1px solid #1a5a7a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Add</button>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;">
@@ -5028,22 +5035,22 @@ function openSpellPick(kind) {
 </div>
 
 <div id="enchant-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1001;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #1e466f;max-width:420px;width:100%;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #1a5a7a;max-width:420px;width:100%;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <div id="enchant-title" style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3b82d6;line-height:1;">Enchanted Item</div>
+      <div id="enchant-title" style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Enchanted Item</div>
       <button onclick="closeEnchantPicker()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
     </div>
     <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px;">
       <div>
-        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#3b82d6;margin-bottom:5px;">Type</div>
+        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#3fb6d8;margin-bottom:5px;">Type</div>
         <select id="enchant-type" style="width:100%;padding:7px 8px;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;"></select>
       </div>
       <div>
-        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#3b82d6;margin-bottom:5px;">Bonus</div>
+        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#3fb6d8;margin-bottom:5px;">Bonus</div>
         <div id="enchant-bonus" style="display:flex;gap:6px;"></div>
       </div>
       <div id="enchant-preview" style="font-family:Montserrat,sans-serif;font-size:11px;color:#999;line-height:1.5;min-height:16px;"></div>
-      <button onclick="confirmEnchant()" style="padding:9px;background:#10192b;color:#3b82d6;border:1px solid #1e466f;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;">Add to Gear</button>
+      <button onclick="confirmEnchant()" style="padding:9px;background:#0d1418;color:#3fb6d8;border:1px solid #1a5a7a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;">Add to Gear</button>
     </div>
   </div>
 </div>
@@ -5107,7 +5114,7 @@ function spellShopRender() {
     + '<label title="Sorcerer spells (Cursed Scroll 5)" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b89ae0;cursor:pointer;"><input type="checkbox" '+(_spellShopSor?'checked':'')+' onchange="_spellShopSor=this.checked;spellShopRender()" style="accent-color:#5a3a8a;">Sorcerer</label>'
     + '<label title="Necromancer spells (Necromancer playtest)" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b89ae0;cursor:pointer;"><input type="checkbox" '+(_spellShopNec?'checked':'')+' onchange="_spellShopNec=this.checked;spellShopRender()" style="accent-color:#5a3a8a;">Necromancer</label>'
     + '<label title="Seer spells (Cursed Scroll 3)" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b89ae0;cursor:pointer;"><input type="checkbox" '+(_spellShopSee?'checked':'')+' onchange="_spellShopSee=this.checked;spellShopRender()" style="accent-color:#5a3a8a;">Seer</label>'
-    + '<label title="Spells you created yourself" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3b82d6;cursor:pointer;"><input type="checkbox" '+(_spellShopHb?'checked':'')+' onchange="_spellShopHb=this.checked;spellShopRender()" style="accent-color:#3b82d6;">Homebrew</label>';
+    + '<label title="Spells you created yourself" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3fb6d8;cursor:pointer;"><input type="checkbox" '+(_spellShopHb?'checked':'')+' onchange="_spellShopHb=this.checked;spellShopRender()" style="accent-color:#3fb6d8;">Homebrew</label>';
 
   // "Known" = genuinely learned spells only. Scroll/wand rows (data-src) are
   // items, not learned spells, so they must not affect the Spellbook's
@@ -5130,7 +5137,7 @@ function spellShopRender() {
 
   const createBar = (_spellShopHb && !_spellShopMode)
     ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 4px 10px;border-bottom:1px solid #2a2a2a;margin-bottom:4px;">'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3b82d6;">Homebrew · '
+      + '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3fb6d8;">Homebrew · '
       +   _homebrewSpells.length + ' spell' + (_homebrewSpells.length===1?'':'s')
       + '</div>'
       + '<div style="font-family:Montserrat,sans-serif;font-size:8px;color:#666;text-align:right;flex-shrink:0;">Created on the Spells page</div>'
@@ -5149,9 +5156,9 @@ function spellShopRender() {
       +   (sFull?'<div class="desc-full" style="display:none;font-family:Montserrat,sans-serif;font-size:9px;color:#bbb;line-height:1.45;">'+sFull+' <span style="color:#b89ae0;">▾ less</span></div>':'')
       + '</div>'
       + (_spellShopMode
-          ? '<button onclick="inscribeSpell(\''+s.name.replace(/'/g,"\\'")+'\',\''+s.caster+'\')" style="padding:5px 10px;background:'+(_spellShopMode==='wand'?'#12283a':'#131f30')+';color:'+(_spellShopMode==='wand'?'#7ab8e0':'#3b82d6')+';border:1px solid '+(_spellShopMode==='wand'?'#2d5a7a':'#1e466f')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">'+(_spellShopMode==='wand'?'Wand':'Scroll')+' ▸</button>'
+          ? '<button onclick="inscribeSpell(\''+s.name.replace(/'/g,"\\'")+'\',\''+s.caster+'\')" style="padding:5px 10px;background:'+(_spellShopMode==='wand'?'#12283a':'#0f1c24')+';color:'+(_spellShopMode==='wand'?'#7ab8e0':'#3fb6d8')+';border:1px solid '+(_spellShopMode==='wand'?'#2d5a7a':'#1a5a7a')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">'+(_spellShopMode==='wand'?'Wand':'Scroll')+' ▸</button>'
           : (isKnown
-              ? '<button onclick="unlearnSpell(\''+s.name.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:#132a44;color:#9db8de;border:1px solid #274a7a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Unlearn</button>'
+              ? '<button onclick="unlearnSpell(\''+s.name.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:#0f2a34;color:#9fcfe0;border:1px solid #1a5a6e;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Unlearn</button>'
               : '<button onclick="learnSpell(\''+s.name.replace(/'/g,"\\'")+'\',\''+s.caster+'\')" style="padding:5px 10px;background:#2a1a3a;color:#b89ae0;border:1px solid #5a3a8a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Learn</button>'))
       + '</div>';
   }).join('');
@@ -5243,9 +5250,9 @@ function inscribeSpell(name, caster) {
 
 <!-- ═══ CAMPAIGN LINK ═══ -->
 <div id="rules-overlay" onclick="if(event.target===this)closeRules()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #3b82d6;border-radius:6px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #3fb6d8;border-radius:6px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#5a97dd;line-height:1;">Quick Rules</div>
+      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#6ac8df;line-height:1;">Quick Rules</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <button id="dsref-open-btn" onclick="openDarkSpaceRef()" style="display:none;padding:5px 12px;background:#0d1a20;color:#6ac8df;border:1px solid #1a5a7a;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;">🚀 DarkSpace Reference</button>
         <button onclick="closeRules()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">&#10005;</button>
@@ -5306,7 +5313,7 @@ function renderDarkSpaceRef(){
   switch(_dsRefTab){
     case 'Species':
       h += P('Roll d20 or choose a Species Trait. Humans/analogues get Ambitious (roll twice on your Archetype talent table at 1st level). You may also use any Shadowdark ancestry.');
-      h += table(['d20','Trait','Effect'], DS.species.map(s=>tblRow([s.n, s.name, s.text])));
+      h += table(['Trait','Effect'], DS.species.map(s=>tblRow([s.name, s.text])));
       h += H4('Humans / Analogues'); h += P(DS.humanNote);
       h += H4('Tech Species'); DS.techSpecies.forEach(t=>{ h+=H4(t.name); h+=P(t.text); });
       break;
@@ -5320,7 +5327,7 @@ function renderDarkSpaceRef(){
       });
       break;
     case 'Backgrounds':
-      h += table(['d20','Background','Description'], DS.backgrounds.map(b=>tblRow([b.n, b.name, b.text])));
+      h += table(['Background','Description'], DS.backgrounds.map(b=>tblRow([b.name, b.text])));
       break;
     case 'Motivations':
       DS.motivations.forEach(m=>{ h+=H4(m.name); h+=P(m.text); h+=P('Start: '+m.startBonus); h+=P('Luck: '+m.effect); });
@@ -5398,7 +5405,7 @@ function campaignUpdateBtn() {
   if(_campaign) {
     btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';
     btn.title = 'Campaign: ' + _campaign.name + ' (' + _campaign.code + ')';
-    btn.style.background = '#10192b'; btn.style.color = '#3b82d6'; btn.style.borderColor = '#1e466f';
+    btn.style.background = '#0d1418'; btn.style.color = '#3fb6d8'; btn.style.borderColor = '#1a5a7a';
   } else {
     btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';
     btn.title = 'Link this sheet to a campaign';
@@ -5419,12 +5426,12 @@ function campaignRenderModal() {
   if(_campaign) {
     body.innerHTML =
       '<p class="ccw-hint">Connected — rolls are shared with everyone in this campaign.</p>'
-      + '<div style="background:#0f0f0f;border:1px solid #1e466f;padding:12px;margin-bottom:12px;">'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:900;color:#3b82d6;">'+_campaign.name+'</div>'
+      + '<div style="background:#0f0f0f;border:1px solid #1a5a7a;padding:12px;margin-bottom:12px;">'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:900;color:#3fb6d8;">'+_campaign.name+'</div>'
       + '<div style="font-family:Montserrat,sans-serif;font-size:10px;color:#888;margin-top:4px;">Join code: <b style="color:#eee;font-size:14px;letter-spacing:.2em;">'+_campaign.code+'</b></div>'
       + '<div style="font-family:Montserrat,sans-serif;font-size:9px;color:#666;margin-top:4px;">Share this code with your table.</div>'
       + '</div>'
-      + '<button onclick="campaignLeave()" style="'+btnStyle+'background:#132a44;color:#9db8de;border:1px solid #274a7a;width:100%;">Leave Campaign</button>';
+      + '<button onclick="campaignLeave()" style="'+btnStyle+'background:#0f2a34;color:#9fcfe0;border:1px solid #1a5a6e;width:100%;">Leave Campaign</button>';
   } else {
     body.innerHTML =
       '<p class="ccw-hint">Enter a join code from your GM to connect this sheet. Rolls will appear in everyone\'s roll logs. Campaigns are created on the Campaigns page.</p>'
@@ -5433,7 +5440,7 @@ function campaignRenderModal() {
       + '<div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="'+inputStyle+'flex:1;text-transform:uppercase;letter-spacing:.15em;">'
       + '<button onclick="campaignJoin()" style="'+btnStyle+'background:#1a5a7a;color:#fff;flex-shrink:0;">Join</button></div>'
       + '</div>'
-      + '<div id="campaign-error" style="font-family:Montserrat,sans-serif;font-size:10px;color:#8ab4e0;margin-top:10px;"></div>';
+      + '<div id="campaign-error" style="font-family:Montserrat,sans-serif;font-size:10px;color:#7ab8e0;margin-top:10px;"></div>';
   }
 }
 
@@ -6356,7 +6363,13 @@ function injectDarkSpaceHomebrew(rows) {
     const key = nm.toLowerCase();
     if(row.type === 'ds-species') {
       if(seen.sp.has(key)) return; seen.sp.add(key);
-      hbSp.push({ n: ++nSp, name: nm, text: String(d.text||''), _hb:true });
+      // Fold ancestry-style extra traits + languages into the trait text.
+      var parts = [String(d.text||'')];
+      (Array.isArray(d.traits) ? d.traits : []).forEach(function(t){
+        if(t && (t.name || t.text)) parts.push((t.name ? t.name + ': ' : '') + (t.text||''));
+      });
+      if(d.languages) parts.push('Languages: ' + d.languages);
+      hbSp.push({ n: ++nSp, name: nm, text: parts.filter(Boolean).join('  •  '), _hb:true });
     } else if(row.type === 'ds-archetype') {
       if(seen.ar.has(key)) return; seen.ar.add(key);
       hbAr.push(Object.assign({}, d, { _hb:true }));
