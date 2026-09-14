@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore, type ReactNode } from "react";
 import {
+  SYSTEMS,
   subscribeSystem,
   getSystemSnapshot,
   getSystemServerSnapshot,
@@ -23,6 +24,7 @@ export default function SystemTabs({
   systemNav,
   nav,
   navFor,
+  hiddenKeys = [],
 }: {
   /** One dashboard panel per system key. */
   panels: Partial<Record<SystemKey, ReactNode>>;
@@ -32,10 +34,17 @@ export default function SystemTabs({
   nav?: ReactNode;
   /** Per-system override of the shared `nav` (e.g. D&D drops Rulebooks — no PDFs). */
   navFor?: Partial<Record<SystemKey, ReactNode>>;
+  /** Systems hidden site-wide (admin). A hidden active selection falls back to the first visible. */
+  hiddenKeys?: SystemKey[];
 }) {
   const active = useSyncExternalStore(subscribeSystem, getSystemSnapshot, getSystemServerSnapshot);
-  const ownNav = systemNav?.[active];
-  const sharedNav = navFor?.[active] ?? nav;
+  // Mirror SystemToggle: if the saved system is hidden, show the first visible one.
+  const hidden = new Set(hiddenKeys);
+  const visible = SYSTEMS.map((s) => s.key).filter((k) => !hidden.has(k));
+  const list = visible.length ? visible : SYSTEMS.map((s) => s.key);
+  const effective = list.includes(active) ? active : list[0];
+  const ownNav = systemNav?.[effective];
+  const sharedNav = navFor?.[effective] ?? nav;
 
   return (
     <>
@@ -48,7 +57,7 @@ export default function SystemTabs({
         </nav>
       ) : null}
 
-      <div role="tabpanel">{panels[active] ?? null}</div>
+      <div role="tabpanel">{panels[effective] ?? null}</div>
     </>
   );
 }

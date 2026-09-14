@@ -256,3 +256,15 @@ model RulebookAccess {
   @@index([userId])
   @@index([file])
 }
+
+// ── Site-wide system visibility ──────────────────────────────────────────────
+// One row per game system the admin has chosen to hide from the homepage system
+// switcher (components/systemStore.ts SystemKey). A system with no row is
+// VISIBLE — the default — so this table only ever holds the hidden ones.
+// Display-only: it removes a system from the dashboard toggle/tabs for everyone;
+// it does NOT block that system's routes.
+model SystemSetting {
+  key       String   @id // SystemKey, e.g. "SD", "DS", "DND"
+  hidden    Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+}

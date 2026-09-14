@@ -11,6 +11,7 @@ import { ConfirmButton } from "@/components/ConfirmButton";
 import SystemTabs from "@/components/SystemTabs";
 import SystemToggle from "@/components/SystemToggle";
 import { SYSTEMS, type SystemKey } from "@/components/systemStore";
+import { getHiddenSystemKeys } from "@/lib/systems";
 
 // Toolbar links, in the order they appear beside the system toggle.
 // These work for either ruleset, so they show on both tabs. On the Shadowdark
@@ -242,6 +243,7 @@ export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const isAdmin = isAdminEmail(user.email);
+  const hiddenSystems = await getHiddenSystemKeys();
 
   const docs = await prisma.document.findMany({
     where: { userId: user.id },
@@ -318,7 +320,7 @@ export default async function DashboardPage() {
       {/* System picker on its own row, centred, so the tab strip has room
           for six systems without crowding the sign-out controls. */}
       <div className="mb-8 flex justify-center border-b border-[var(--border)] pb-6">
-        <SystemToggle />
+        <SystemToggle hiddenKeys={hiddenSystems} />
       </div>
 
       {/* One system at a time; Shadowdark by default. Each system gets the
@@ -326,6 +328,7 @@ export default async function DashboardPage() {
           filtered by the tool registry's system tag, plus its own reference
           links ahead of the shared toolbar links. */}
       <SystemTabs
+        hiddenKeys={hiddenSystems}
         nav={<NavLinks links={SHARED_NAV} />}
         navFor={{ DND: <NavLinks links={SHARED_NAV_DND} /> }}
         systemNav={Object.fromEntries(

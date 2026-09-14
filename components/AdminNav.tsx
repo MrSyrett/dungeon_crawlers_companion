@@ -8,6 +8,7 @@ const SECTIONS = [
   { key: "users", href: "/admin/users", label: "Members" },
   { key: "sounds", href: "/admin/sounds", label: "Sounds" },
   { key: "rulebooks", href: "/admin/rulebooks", label: "Rulebooks" },
+  { key: "systems", href: "/admin/systems", label: "Systems" },
 ] as const;
 
 const base =
@@ -16,7 +17,7 @@ const inactive =
   `${base} border-[var(--border)] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)]`;
 const activeCls = `${base} border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]`;
 
-export function AdminNav({ active }: { active: "users" | "sounds" | "rulebooks" }) {
+export function AdminNav({ active }: { active: "users" | "sounds" | "rulebooks" | "systems" }) {
   return (
     <nav className="flex flex-wrap items-center gap-2">
       {SECTIONS.map((s) => (
