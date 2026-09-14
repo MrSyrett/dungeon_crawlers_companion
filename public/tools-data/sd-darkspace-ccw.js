@@ -701,7 +701,7 @@ function dswApply(){
     name: _dsw.name || '',
     ancestry: _dsw.species.name,      // Species (relabeled on sheet)
     class: _dsw.archetype,            // Archetype
-    title: 'Rookie',                  // Rank
+    title: '',                        // (Rank field removed in DarkSpace)
     alignment: _dsw.motivation.name,  // Motivation
     background: _dsw.background.name,
     deity: '',

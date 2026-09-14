@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DarkSpace Character Sheet</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=UnifrakturMaguntia&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
 <style>
 /* JSL Blackletter — Shadowdark title face, embedded below as a woff2 base64 data: URI (self-contained, no network fetch).
    (c) 1997-2000 Jeffrey S. Lee; freely distributable & edit-embeddable per its license. */
@@ -172,7 +172,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
    whether the group wraps, so there's no toggle feedback loop. */
 .sheet-title.stacked{justify-content:center;}
 .sheet-title.stacked .sheet-title-actions{margin-left:0;}
-.sheet-title-text{font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:32px;color:white;line-height:1;}
+.sheet-title-text{font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:32px;color:white;line-height:1;}
 .hdr-fields{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid var(--border);}
 .hdr-field{padding:4px 8px 5px;border-right:1px solid var(--rule);}
 .hdr-field:last-child{border-right:none;}
@@ -438,24 +438,22 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
     </div>
   </div>
 
-  <!-- HEADER FIELDS ROW 1 -->
-  <div class="hdr-fields">
-    <div class="hdr-field"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
-    <div class="hdr-field"><label id="lbl-ancestry">Ancestry</label><input type="text" id="f-ancestry" placeholder="Elf, Dwarf..."></div>
-    <div class="hdr-field"><label id="lbl-class">Class</label><input type="text" id="f-class" placeholder="Fighter, Wizard..."></div>
-    <div class="hdr-field"><label id="lbl-title">Title</label><input type="text" id="f-title" placeholder="Apprentice..."></div>
+  <!-- HEADER FIELDS — fields are arranged per mode by syncModeChrome().
+       Shadowdark: [Name, Ancestry, Class, Title] / [Alignment, Background, Deity, Level]
+       DarkSpace:  [Name, Species, Archetype, Background] / [Motivation, Ship, Role, Level] -->
+  <div class="hdr-fields" id="hdr-row1">
+    <div class="hdr-field" id="hf-name"><label>Name</label><input type="text" id="f-name" placeholder="Character Name"></div>
+    <div class="hdr-field" id="hf-species"><label id="lbl-ancestry">Ancestry</label><input type="text" id="f-ancestry" placeholder="Elf, Dwarf..."></div>
+    <div class="hdr-field" id="hf-archetype"><label id="lbl-class">Class</label><input type="text" id="f-class" placeholder="Fighter, Wizard..."></div>
+    <div class="hdr-field" id="hf-title"><label id="lbl-title">Title</label><input type="text" id="f-title" placeholder="Apprentice..."></div>
   </div>
-  <div class="hdr-fields hdr-fields-2">
-    <div class="hdr-field"><label id="lbl-alignment">Alignment</label><input type="text" id="f-alignment" placeholder="Lawful / Neutral / Chaotic"></div>
-    <div class="hdr-field"><label id="lbl-background">Background</label><input type="text" id="f-background" placeholder="Acolyte, Soldier..."></div>
+  <div class="hdr-fields hdr-fields-2" id="hdr-row2">
+    <div class="hdr-field" id="hf-motivation"><label id="lbl-alignment">Alignment</label><input type="text" id="f-alignment" placeholder="Lawful / Neutral / Chaotic"></div>
+    <div class="hdr-field" id="hf-background"><label id="lbl-background">Background</label><input type="text" id="f-background" placeholder="Acolyte, Soldier..."></div>
     <div class="hdr-field" id="hdr-deity-field"><label id="lbl-deity">Deity</label><input type="text" id="f-deity" placeholder=""></div>
-    <div class="hdr-field" style="display:flex;align-items:center;gap:6px;">
-      <div style="flex:1;"><label>Level</label><input type="text" id="f-level" placeholder="1" style="font-size:18px;font-weight:900;"></div>
-    </div>
-  </div>
-  <div class="hdr-fields hdr-fields-2" id="hdr-ship-fields">
-    <div class="hdr-field" style="grid-column:span 2;"><label>Ship Name</label><input type="text" id="f-shipname" placeholder="The Wandering Star"></div>
-    <div class="hdr-field" style="grid-column:span 2;"><label>Ship Role</label><input type="text" id="f-shiprole" placeholder="Pilot, Gunner, Engineer, Medic..."></div>
+    <div class="hdr-field" id="hf-level"><label>Level</label><input type="text" id="f-level" placeholder="1" style="font-size:18px;font-weight:900;"></div>
+    <div class="hdr-field" id="hf-ship"><label>Ship</label><input type="text" id="f-shipname" placeholder="The Wandering Star"></div>
+    <div class="hdr-field" id="hf-role"><label>Role</label><input type="text" id="f-shiprole" placeholder="Pilot, Gunner, Engineer..."></div>
   </div>
 
   <!-- MAIN BODY -->
@@ -530,7 +528,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
-        <button class="tab-btn" data-tab="triad" onclick="setTab('triad')">The Triad</button>
+        <button class="tab-btn" data-tab="triad" onclick="setTab('triad')">Powers</button>
         <button class="tab-btn" data-tab="interface" onclick="setTab('interface')">🖥️ Interface</button>
         <button class="tab-btn" data-tab="ship" onclick="setTab('ship')">🚀 Ship</button>
       </div>
@@ -565,10 +563,14 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         </div>
       </div>
 
-      <!-- TRIAD TAB (metaphysical powers — Body / Mind / Soul; replaces spells) -->
+      <!-- POWERS TAB (The Triad — metaphysical powers managed like Shadowdark spells) -->
       <div class="tab-panel" id="tab-triad">
-        <div class="sl"><span>The Triad</span><span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#5a8595;">Mark the powers you know · Feats are freeform</span></div>
-        <div id="triad-body" style="padding:6px 4px;"></div>
+        <div class="sl"><span>Powers</span>
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+            <button onclick="openPowerPick()" style="padding:2px 10px;background:#0d1418;color:#3fb6d8;border:1px solid #1a5a7a;cursor:pointer;text-transform:uppercase;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;" title="Add a Triad power">+ Power</button>
+          </div>
+        </div>
+        <div class="spells-list" id="spells-list"></div>
       </div>
 
       <!-- INTERFACE TAB (Hacking — the Spacer's deck/rig; ACC/CTL/NET) -->
@@ -1091,24 +1093,39 @@ function syncModeChrome(){
   const on = darkSpaceOn();
   const setLbl = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent = txt; };
   const setPh  = (id, txt) => { const el=document.getElementById(id); if(el) el.placeholder = txt; };
+  // Arrange the header fields for the active mode by moving them into the two
+  // rows in the desired order and hiding the fields that mode doesn't use.
+  const row1 = document.getElementById('hdr-row1'), row2 = document.getElementById('hdr-row2');
+  const F = id => document.getElementById(id);
+  const arrange = (r1ids, r2ids, hideIds) => {
+    if(!row1 || !row2) return;
+    r1ids.forEach(id => { const el=F(id); if(el){ el.style.display=''; row1.appendChild(el); } });
+    r2ids.forEach(id => { const el=F(id); if(el){ el.style.display=''; row2.appendChild(el); } });
+    hideIds.forEach(id => { const el=F(id); if(el) el.style.display='none'; });
+  };
   if(on){
     setLbl('lbl-ancestry','Species');   setPh('f-ancestry','Species / trait');
     setLbl('lbl-class','Archetype');     setPh('f-class','Strong, Quick...');
-    setLbl('lbl-title','Rank');          setPh('f-title','Rookie...');
     setLbl('lbl-alignment','Motivation');setPh('f-alignment','Survivor / Vile / Virtuous');
     setLbl('lbl-background','Background');
-    const df = document.getElementById('hdr-deity-field'); if(df) df.style.display = 'none';
     setLbl('coin-gp-lbl','cr');
     const sb = document.getElementById('hdr-ship-btn'); if(sb) sb.style.display = '';
+    // Row 1: Name, Species, Archetype, Background · Row 2: Motivation, Ship, Role, Level
+    arrange(['hf-name','hf-species','hf-archetype','hf-background'],
+            ['hf-motivation','hf-ship','hf-role','hf-level'],
+            ['hf-title','hdr-deity-field']);
   } else {
     setLbl('lbl-ancestry','Ancestry');   setPh('f-ancestry','Elf, Dwarf...');
     setLbl('lbl-class','Class');          setPh('f-class','Fighter, Wizard...');
     setLbl('lbl-title','Title');          setPh('f-title','Apprentice...');
     setLbl('lbl-alignment','Alignment');  setPh('f-alignment','Lawful / Neutral / Chaotic');
     setLbl('lbl-background','Background');
-    const df = document.getElementById('hdr-deity-field'); if(df) df.style.display = '';
     setLbl('coin-gp-lbl','GP');
     const sb = document.getElementById('hdr-ship-btn'); if(sb) sb.style.display = 'none';
+    // Row 1: Name, Ancestry, Class, Title · Row 2: Alignment, Background, Deity, Level
+    arrange(['hf-name','hf-species','hf-archetype','hf-title'],
+            ['hf-motivation','hf-background','hdr-deity-field','hf-level'],
+            ['hf-ship','hf-role']);
   }
 }
 window.syncModeChrome = syncModeChrome;
@@ -2488,22 +2505,91 @@ function buildSpells() {
   const hdr = document.createElement('div');
   hdr.className = 'spell-header';
   hdr.style.cssText = 'display:grid;grid-template-columns:16px 1fr 32px 40px 62px 74px 76px 22px 22px 28px;align-items:center;gap:2px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
+  // DarkSpace calls these "Powers" (The Triad); Shadowdark's sheet calls them Spells.
+  const ds = (typeof darkSpaceOn === 'function' && darkSpaceOn());
   hdr.innerHTML =
     '<span class="sh-num" style="font-size:8px;font-weight:700;color:var(--muted);">#</span>' +
-    '<span class="sh-name" style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Spell</span>' +
-    '<span class="sh-lvl" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;">Lvl</span>' +
+    '<span class="sh-name" style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">'+(ds?'Power':'Spell')+'</span>' +
+    '<span class="sh-lvl" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;" title="'+(ds?'Tier — DC = 10 + tier':'Level')+'">'+(ds?'Tr':'Lvl')+'</span>' +
     '<span class="sh-bon" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;">+Bon</span>' +
     '<span class="sh-range" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Range</span>' +
     '<span class="sh-dur" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Dur</span>' +
-    '<span class="sh-dmg" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">Dmg</span>' +
+    '<span class="sh-dmg" style="font-size:8px;font-weight:700;text-transform:uppercase;color:var(--muted);">'+(ds?'Die':'Dmg')+'</span>' +
     '<span class="sh-lost" style="font-size:8px;font-weight:900;color:var(--muted);text-align:center;" title="Lost">✗</span>' +
     '<span class="sh-adv" style="font-size:8px;font-weight:900;color:var(--muted);text-align:center;" title="Advantage">▲</span>' +
-    '<span class="sh-roll" style="font-size:8px;font-weight:700;color:var(--muted);">Roll</span>';
+    '<span class="sh-roll" style="font-size:8px;font-weight:700;color:var(--muted);">'+(ds?'Cast':'Roll')+'</span>';
   list.appendChild(hdr);
   _spellCount = 0; // start with no spells
 
-
+  // Bottom toolbar — the insertion anchor addSpellRow() inserts new rows before.
+  const bar = document.createElement('div');
+  bar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 8px;';
+  const noun = ds ? 'Power' : 'Spell';
+  bar.innerHTML =
+    '<button onclick="addPowerRow()" style="padding:3px 10px;background:#0d1418;color:#3fb6d8;border:1px solid #1a5a7a;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;">+ Blank</button>' +
+    '<button onclick="removeLastPower()" style="padding:3px 10px;background:transparent;color:#7f9eab;border:1px solid var(--rule);border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;">− Remove</button>' +
+    '<span style="font-family:Montserrat,sans-serif;font-size:9px;color:#5a8595;margin-left:auto;">Lost '+noun.toLowerCase()+'s return on a Rest.</span>';
+  list.appendChild(bar);
 }
+
+// ── Powers (DarkSpace Triad) — thin wrappers over the spell-row machinery ──
+function addPowerRow(){ _spellCount++; const r = addSpellRow(_spellCount); if(typeof saveSheet==='function') saveSheet(false); return r; }
+window.addPowerRow = addPowerRow;
+function removeLastPower(){
+  const rows = document.querySelectorAll('#spells-list .spell-row');
+  if(rows.length){ rows[rows.length-1].remove(); if(_spellCount>0) _spellCount--; if(typeof saveSheet==='function') saveSheet(false); }
+}
+window.removeLastPower = removeLastPower;
+
+// Add a power row prefilled from a Triad example feat.
+function addPowerFromFeat(power, name, text){
+  const r = addPowerRow(); if(!r) return;
+  const ni = r.querySelector('.spell-input'); if(ni) ni.value = name || '';
+  const de = r.querySelector('.spell-desc'); if(de){ de.value = (power ? power + '. ' : '') + (text||''); }
+  if(typeof saveSheet==='function') saveSheet(false);
+}
+window.addPowerFromFeat = addPowerFromFeat;
+
+// Powers picker — offers the Triad example feats (Body / Mind / Soul) plus a
+// blank row. A lightweight overlay built on the fly (no dedicated markup).
+function openPowerPick(){
+  const D = window.DARKSPACE;
+  const esc = s => String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const feats = (D && D.triad && Array.isArray(D.triad.exampleFeats)) ? D.triad.exampleFeats : [];
+  let ov = document.getElementById('power-pick-overlay');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'power-pick-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1200;display:flex;align-items:center;justify-content:center;padding:16px;';
+  let h = '<div style="background:#0c1418;border:2px solid #1a5a7a;border-radius:8px;max-width:520px;width:100%;max-height:80vh;display:flex;flex-direction:column;">';
+  h += '<div style="background:#0a0f12;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">';
+  h += '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:800;color:#8fd6ea;letter-spacing:.06em;">Add a Power</div>';
+  h += '<button onclick="closePowerPick()" style="background:transparent;border:none;color:#7f9eab;font-size:20px;cursor:pointer;">✕</button></div>';
+  h += '<div style="padding:12px 14px;overflow-y:auto;">';
+  if(D && D.triad){
+    const die = (D.triad.feats||[]).map(f=>esc(f.diff)+' (DC '+f.dc+') → '+esc(f.die)).join(' · ');
+    if(die) h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;color:#5a8595;margin-bottom:8px;line-height:1.4;">Cast with a stat check — the DC you beat sets the die: '+die+'</div>';
+  }
+  h += '<button onclick="addPowerRow();closePowerPick();" style="width:100%;padding:8px;margin-bottom:10px;background:#0d1a20;color:#6ac8df;border:1px solid #1a5a7a;border-radius:5px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;">+ Blank Power</button>';
+  ['Body','Mind','Soul'].forEach(pw=>{
+    const fs = feats.filter(f=>f.power===pw);
+    if(!fs.length) return;
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#8fd6ea;margin:10px 0 4px;">'+pw+'</div>';
+    fs.forEach(f=>{
+      const arg = "addPowerFromFeat('"+pw+"',"+JSON.stringify(f.name).replace(/"/g,'&quot;')+","+JSON.stringify(f.text||'').replace(/"/g,'&quot;')+");closePowerPick();";
+      h += '<button onclick="'+arg+'" style="display:block;width:100%;text-align:left;padding:6px 8px;margin-bottom:4px;background:#0a1216;border:1px solid #16323d;border-radius:4px;cursor:pointer;font-family:Montserrat,sans-serif;color:#cfe6ee;">'+
+        '<b style="color:#8fd6ea;">'+esc(f.name)+'.</b> <span style="font-size:11px;color:#9fbecb;">'+esc((f.text||'').slice(0,110))+((f.text||'').length>110?'…':'')+'</span></button>';
+    });
+  });
+  if(!feats.length) h += '<div style="font-family:Montserrat,sans-serif;font-size:11px;color:#5a8595;">No example powers loaded — use <b>+ Blank Power</b> and fill it in.</div>';
+  h += '</div></div>';
+  ov.innerHTML = h;
+  ov.addEventListener('click', e=>{ if(e.target===ov) closePowerPick(); });
+  document.body.appendChild(ov);
+}
+window.openPowerPick = openPowerPick;
+function closePowerPick(){ const ov=document.getElementById('power-pick-overlay'); if(ov) ov.remove(); }
+window.closePowerPick = closePowerPick;
 
 function adjustLuck(delta) {
   const el = document.getElementById('lk-val');
@@ -4573,7 +4659,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
   <div style="background:#1a1a1a;border:2px solid #3fb6d8;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Create Character</div>
+        <div style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#3fb6d8;line-height:1;">Create Character</div>
         <div id="ccw-step" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#888;margin-top:3px;"></div>
       </div>
       <button onclick="ccwClose()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -4591,7 +4677,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
   <div style="background:#0d1418;border:2px solid #3fb6d8;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
     <div style="background:#081014;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">
       <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">DarkSpace — Create Spacer</div>
+        <div style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#3fb6d8;line-height:1;">DarkSpace — Create Spacer</div>
         <div id="dsw-step" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#5a8595;margin-top:3px;"></div>
       </div>
       <button onclick="dswClose()" style="background:transparent;border:none;color:#5a8595;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -4612,7 +4698,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
   <div style="background:#0d1418;border:2px solid #3fb6d8;max-width:480px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
     <div style="background:#081014;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">
       <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">DarkSpace — Level Up</div>
+        <div style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#3fb6d8;line-height:1;">DarkSpace — Level Up</div>
         <div id="dslu-sub" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#5a8595;margin-top:3px;"></div>
       </div>
       <button onclick="dsluClose()" style="background:transparent;border:none;color:#5a8595;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -4628,7 +4714,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 <div id="dsref-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1001;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#0d1418;border:2px solid #3fb6d8;max-width:640px;width:100%;max-height:90vh;display:flex;flex-direction:column;">
     <div style="background:#081014;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #16323d;">
-      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">DarkSpace Reference</div>
+      <div style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#3fb6d8;line-height:1;">DarkSpace Reference</div>
       <button onclick="closeDarkSpaceRef()" style="background:transparent;border:none;color:#5a8595;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
     </div>
     <div id="dsref-tabs" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px 12px;background:#0a1216;border-bottom:1px solid #16323d;"></div>
@@ -4684,7 +4770,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
   <div style="background:#1a1a1a;border:2px solid #6ac8df;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#6ac8df;line-height:1;">Level Up</div>
+        <div style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#6ac8df;line-height:1;">Level Up</div>
         <div id="lvl-step" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#888;margin-top:3px;"></div>
       </div>
       <button onclick="lvlClose()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -4704,7 +4790,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
   <div style="background:#1a1a1a;border:2px solid #3fb6d8;max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Item Shop</div>
+        <div style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#3fb6d8;line-height:1;">Item Shop</div>
         <div id="shop-coins" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;color:#888;margin-top:3px;"></div>
       </div>
       <button onclick="closeShop()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -5207,7 +5293,7 @@ function openSpellPick(kind) {
 <div id="spellshop-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#1a1a1a;border:2px solid #5a3a8a;max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <div id="spellshop-title" style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#b89ae0;line-height:1;">Spellbook</div>
+      <div id="spellshop-title" style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#b89ae0;line-height:1;">Spellbook</div>
       <button onclick="closeSpellShop()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
     </div>
     <div id="spellshop-tabs" style="display:flex;flex-shrink:0;"></div>
@@ -5220,7 +5306,7 @@ function openSpellPick(kind) {
 <div id="trkpick-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1003;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeTrackerPicker()">
   <div style="background:#1a1a1a;border:2px solid #1a5a7a;max-width:400px;width:100%;max-height:85vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Trackers</div>
+      <div style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#3fb6d8;line-height:1;">Trackers</div>
       <button onclick="closeTrackerPicker()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
     </div>
     <div style="padding:14px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
@@ -5245,7 +5331,7 @@ function openSpellPick(kind) {
   <div style="background:#1a1a1a;border:2px solid #5a3a8a;max-width:460px;width:100%;max-height:80vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
       <div style="min-width:0;">
-        <div id="spelldesc-title" style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#b89ae0;line-height:1.1;">Spell</div>
+        <div id="spelldesc-title" style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#b89ae0;line-height:1.1;">Spell</div>
         <div id="spelldesc-meta" style="font-family:Montserrat,sans-serif;font-size:8px;letter-spacing:.06em;color:#9a7ac8;margin-top:2px;"></div>
       </div>
       <button onclick="closeSpellDesc()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;flex:0 0 auto;">✕</button>
@@ -5263,7 +5349,7 @@ function openSpellPick(kind) {
 <div id="enchant-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1001;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#1a1a1a;border:2px solid #1a5a7a;max-width:420px;width:100%;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <div id="enchant-title" style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3fb6d8;line-height:1;">Enchanted Item</div>
+      <div id="enchant-title" style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#3fb6d8;line-height:1;">Enchanted Item</div>
       <button onclick="closeEnchantPicker()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
     </div>
     <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px;">
@@ -5478,7 +5564,7 @@ function inscribeSpell(name, caster) {
 <div id="rules-overlay" onclick="if(event.target===this)closeRules()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#1a1a1a;border:2px solid #3fb6d8;border-radius:6px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#6ac8df;line-height:1;">Quick Rules</div>
+      <div style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#6ac8df;line-height:1;">Quick Rules</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <button id="dsref-open-btn" onclick="openDarkSpaceRef()" style="display:none;padding:5px 12px;background:#0d1a20;color:#6ac8df;border:1px solid #1a5a7a;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;">🚀 DarkSpace Reference</button>
         <button onclick="closeRules()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">&#10005;</button>
@@ -5661,7 +5747,7 @@ function renderDarkSpaceRef(){
 <div id="campaign-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#1a1a1a;border:2px solid #8a7ac8;max-width:420px;width:100%;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#b8aae0;line-height:1;">Campaign</div>
+      <div style="font-family:'Orbitron','Barlow Condensed',sans-serif;font-size:20px;color:#b8aae0;line-height:1;">Campaign</div>
       <button onclick="closeCampaign()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
     </div>
     <div id="campaign-body" style="padding:14px 16px;"></div>
