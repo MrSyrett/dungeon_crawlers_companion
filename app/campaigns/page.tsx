@@ -75,6 +75,17 @@ function readCharMeta(
         level: typeof s.level === "number" ? s.level : null,
       };
     }
+    // Candela Obscura: no levels — the roster shows role · specialty as the class.
+    const co = blob?.co_sheet;
+    if (typeof co === "string") {
+      const s = JSON.parse(co) as { name?: unknown; role?: unknown; specialty?: unknown };
+      const cls = [s.role, s.specialty].filter((v) => typeof v === "string" && v.trim()).join(" · ");
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: null,
+      };
+    }
     const dcc = blob?.dcc_sheet;
     if (typeof dcc === "string") {
       const s = JSON.parse(dcc) as { header?: Record<string, unknown> };

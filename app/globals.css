@@ -25,6 +25,8 @@
   --icrpg: #c8501e;
   /* DarkSpace accent — cold sci-fi cyan (sister system to Shadowdark). */
   --darkspace: #24c3d6;
+  /* Candela Obscura accent — gaslamp-horror candela teal. */
+  --candela: #2fa595;
 }
 
 @theme inline {
@@ -43,6 +45,7 @@
   --color-dnd: var(--dnd);
   --color-icrpg: var(--icrpg);
   --color-darkspace: var(--darkspace);
+  --color-candela: var(--candela);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }

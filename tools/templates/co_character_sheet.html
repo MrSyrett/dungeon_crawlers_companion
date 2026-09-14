@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- BUILD: CO Character Sheet — 2026-09-14 -->
+<script>window.__BUILD__="CO Character Sheet — 2026-09-14";</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candela Obscura Character Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700;900&family=Barlow+Condensed:wght@400;500;600;700;800&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<script src="/tools-data/co-data.js"></script>
+<style>
+  :root{
+    --accent:#2fa595; --accent-2:#3fc2b0; --gild:#d8b24a;
+    --bg:#0a1413; --panel:#0f1c1a; --panel-2:#13221f; --ink:#e9efec;
+    --muted:#8ba39d; --border:#25403b; --danger:#c0564e; --bleed:#9d6bd0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Barlow Condensed",ui-sans-serif,system-ui,sans-serif;font-size:16px}
+  body{padding:18px;max-width:1080px;margin:0 auto}
+  h1,h2,h3{font-family:"Cinzel",serif;font-weight:700;margin:0}
+  .title{font-family:"Cinzel Decorative",serif;font-weight:900;letter-spacing:.02em}
+  a{color:var(--accent-2)}
+  input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink);
+    background:#0c1817;border:1px solid var(--border);border-radius:6px;padding:6px 8px}
+  input:focus,select,textarea:focus{outline:none;border-color:var(--accent)}
+  textarea{width:100%;resize:vertical;line-height:1.35}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+  .panel > h2{font-size:15px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent-2);
+    border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:baseline}
+  .panel > h2 .hint{font-family:"Barlow Condensed";font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:600}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .grow{flex:1 1 auto;min-width:0}
+  label.fld{display:flex;flex-direction:column;gap:3px;font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700}
+  label.fld input, label.fld select{margin-top:2px}
+  .btn{cursor:pointer;background:var(--panel-2);border:1px solid var(--accent);color:var(--accent-2);
+    border-radius:8px;padding:8px 14px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:12px}
+  .btn:hover{background:var(--accent);color:#04100e}
+  .btn.ghost{border-color:var(--border);color:var(--muted)}
+  .btn.ghost:hover{border-color:var(--muted);background:var(--panel-2);color:var(--ink)}
+
+  /* ── Masthead ── */
+  header.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  header.mast .brand{font-size:30px;line-height:1}
+  header.mast .brand small{display:block;font-family:"Barlow Condensed";font-weight:600;font-size:12px;letter-spacing:.4em;text-transform:uppercase;color:var(--accent);margin-top:4px}
+  .flame{color:var(--gild)}
+
+  /* ── Drives ── */
+  .drives{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .drive{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+  .drive h3{font-family:"Cinzel";font-size:15px;text-transform:uppercase;letter-spacing:.14em;color:var(--ink)}
+  .drive .blurb{font-size:12px;color:var(--muted);margin:2px 0 8px}
+  .pips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+  .pip{width:17px;height:17px;border-radius:50%;border:2px solid var(--border);cursor:pointer;background:transparent;transition:all .08s}
+  .pip.max{border-color:var(--accent)}
+  .pip.cur{background:var(--accent);border-color:var(--accent);box-shadow:0 0 6px rgba(47,165,149,.6)}
+  .drive .meta{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+  .drive .meta b{color:var(--accent-2)}
+  .resbox{display:flex;gap:4px;align-items:center;margin-top:6px}
+  .resbox .rpip{width:14px;height:14px;border:2px solid var(--gild);border-radius:3px;cursor:pointer;background:transparent}
+  .resbox .rpip.burned{background:var(--gild);opacity:.35}
+  .resbox .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
+
+  /* ── Actions ── */
+  .actgroup{margin-bottom:10px}
+  .actgroup > .gh{font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent);font-weight:700;margin:4px 0 6px}
+  .action{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px}
+  .action:hover{background:var(--panel-2)}
+  .action .diamond{width:15px;height:15px;transform:rotate(45deg);border:2px solid var(--border);cursor:pointer;flex:0 0 auto;border-radius:2px}
+  .action .diamond.on{background:var(--gild);border-color:var(--gild);box-shadow:0 0 6px rgba(216,178,74,.6)}
+  .action .dots{display:flex;gap:5px;flex:0 0 auto}
+  .action .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);cursor:pointer}
+  .action .dot.on{background:var(--accent);border-color:var(--accent)}
+  .action .nm{flex:1 1 auto;min-width:0}
+  .action .nm b{font-size:15px;letter-spacing:.02em}
+  .action .nm .sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .action .drv{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;flex:0 0 auto}
+
+  /* ── Marks & Scars ── */
+  .marks{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .mtrack{background:var(--panel-2);border:1px solid var(--border);border-radius:10px;padding:10px}
+  .mtrack h3{font-family:"Cinzel";font-size:14px;text-transform:uppercase;letter-spacing:.12em}
+  .mtrack .mboxes{display:flex;gap:6px;margin:8px 0}
+  .mbox{width:26px;height:26px;border:2px solid var(--border);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--danger)}
+  .mbox.on{border-color:var(--danger)}
+  .mtrack.bleed .mbox.on{border-color:var(--bleed);color:var(--bleed)}
+  .mtrack .scarslot{width:100%;margin-top:4px;font-size:13px}
+  .mtrack .desc{font-size:11px;color:var(--muted)}
+
+  /* ── generic lists ── */
+  .slotline{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .slotline .tick{width:16px;height:16px;border:2px solid var(--accent);border-radius:4px;flex:0 0 auto;cursor:pointer}
+  .slotline .tick.on{background:var(--accent)}
+  .slotline input{flex:1 1 auto}
+  .ability{border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:8px;background:var(--panel-2)}
+  .ability b{color:var(--accent-2)}
+  .ability .d{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.35}
+  .refbtn{font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .keys{display:flex;flex-direction:column;gap:6px}
+
+  /* ── Dice roller ── */
+  .roller{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .roller .die{width:38px;height:38px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;background:#0c1817}
+  .roller .die.gild{border-color:var(--gild);color:var(--gild)}
+  .roller .die.hi{border-color:var(--accent);box-shadow:0 0 8px rgba(47,165,149,.5)}
+  #roll-result{font-size:14px;font-weight:700}
+  .tier6{color:var(--accent-2)} .tier45{color:var(--gild)} .tier13{color:var(--danger)}
+
+  /* modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:50}
+  .modal-bg.on{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--accent);border-radius:14px;max-width:640px;width:100%;padding:20px}
+  .modal h2{font-family:"Cinzel";font-size:18px;color:var(--accent-2);margin-bottom:10px}
+  .modal .step{font-size:13px;color:var(--muted);line-height:1.4;margin-bottom:10px}
+  .pool-badge{display:inline-block;background:var(--panel-2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;color:var(--accent-2)}
+  .savebar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 40%);padding-top:16px;display:flex;gap:10px;justify-content:flex-end}
+  @media(max-width:760px){.drives{grid-template-columns:1fr}.marks{grid-template-columns:1fr}.cols2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="mast">
+  <div>
+    <div class="brand title"><span class="flame">&#10022;</span> Candela Obscura</div>
+    <small>Illuminated Worlds &middot; Investigator Dossier</small>
+  </div>
+  <div class="row">
+    <button class="btn" onclick="openWizard()">Build Character</button>
+    <button class="btn ghost" onclick="saveSheet(true);toast('Saved')">Save</button>
+  </div>
+</header>
+
+<!-- Identity -->
+<section class="panel">
+  <h2>Investigator</h2>
+  <div class="row">
+    <label class="fld grow">Name<input id="f-name" oninput="syncDocTitle()" placeholder="Investigator name"></label>
+    <label class="fld">Pronouns<input id="f-pronouns" style="width:120px" placeholder="they/them"></label>
+    <label class="fld">Role<select id="f-role" onchange="onRoleChange()"></select></label>
+    <label class="fld">Specialty<select id="f-specialty" onchange="onSpecialtyChange()"></select></label>
+  </div>
+  <p id="spec-focus" class="desc" style="font-size:13px;color:var(--muted);margin:10px 0 0"></p>
+</section>
+
+<!-- Drives -->
+<section class="panel">
+  <h2>Drives <span class="hint">Spend a point for +1d &middot; gilded results refresh &middot; resistance = max &divide; 3</span></h2>
+  <div class="drives" id="drives"></div>
+</section>
+
+<!-- Actions -->
+<section class="panel">
+  <h2>Actions <span class="hint">Rating 0&ndash;3 = dice pool &middot; &#9670; diamond = gilded</span></h2>
+  <div id="actions"></div>
+</section>
+
+<!-- Dice roller -->
+<section class="panel">
+  <h2>Action Roll <span class="hint">6 success &middot; 4&ndash;5 mixed &middot; 1&ndash;3 miss &middot; rule of six</span></h2>
+  <div class="roller">
+    <label class="fld">Dice<input id="r-dice" type="number" min="0" max="6" value="1" style="width:60px"></label>
+    <label class="fld" style="justify-content:flex-end"><span>Gilded?</span><input id="r-gild" type="checkbox" style="width:18px;height:18px;margin-top:6px"></label>
+    <button class="btn" onclick="rollPool()">Roll</button>
+    <div id="roll-dice" style="display:flex;gap:8px"></div>
+    <div id="roll-result"></div>
+  </div>
+  <p class="desc" style="font-size:11px;color:var(--muted);margin:8px 0 0">Rating 0: roll two dice, take the lowest (no crit). Max six dice total.</p>
+</section>
+
+<!-- Marks -->
+<section class="panel">
+  <h2>Marks &amp; Scars <span class="hint">3 marks in a category &rarr; 4th is a scar &amp; you drop</span></h2>
+  <div class="marks" id="marks"></div>
+</section>
+
+<div class="cols2">
+  <!-- Gear -->
+  <section class="panel">
+    <h2>Gear <span class="hint">3 slots &middot; declare as needed <button class="refbtn" onclick="openRef('gear')">reference</button></span></h2>
+    <div id="gear"></div>
+    <p class="desc" style="font-size:11px;color:var(--muted);margin-top:6px">Standard: Bleed Containment Vial &middot; Hand Weapon &middot; Bleed Detector. Plus your specialty &amp; circle gear.</p>
+  </section>
+
+  <!-- Illumination -->
+  <section class="panel">
+    <h2>Illumination Keys <span class="hint">fulfil one per assignment</span></h2>
+    <div class="keys" id="keys"></div>
+  </section>
+</div>
+
+<!-- Abilities -->
+<section class="panel">
+  <h2>Abilities <span class="hint">choose 1 role + 1 specialty at creation <button class="refbtn" onclick="openRef('abilities')">all options</button></span></h2>
+  <div id="abilities-chosen"></div>
+  <div class="row" style="margin-top:8px">
+    <label class="fld grow">Add ability<select id="ability-pick"></select></label>
+    <button class="btn ghost" style="align-self:flex-end" onclick="addPickedAbility()">Add</button>
+  </div>
+</section>
+
+<!-- Details -->
+<div class="cols2">
+  <section class="panel">
+    <h2>Character</h2>
+    <label class="fld" style="margin-bottom:10px">Catalyst — why they joined Candela Obscura<textarea id="f-catalyst" rows="2"></textarea></label>
+    <label class="fld" style="margin-bottom:10px">Question — what they hope to find out<textarea id="f-question" rows="2"></textarea></label>
+    <label class="fld">Style — their feel &amp; aesthetic<textarea id="f-style" rows="2"></textarea></label>
+  </section>
+  <section class="panel">
+    <h2>Relationships <span class="hint">one-sided &middot; circle members</span></h2>
+    <div id="relationships"></div>
+    <button class="btn ghost" onclick="addRelRow()">+ Relationship</button>
+  </section>
+</div>
+
+<div class="savebar">
+  <button class="btn ghost" onclick="exportJSON()">Export JSON</button>
+  <label class="btn ghost" style="cursor:pointer">Import<input type="file" accept="application/json" style="display:none" onchange="importJSON(this)"></label>
+  <button class="btn" onclick="saveSheet(true);toast('Saved')">Save Sheet</button>
+</div>
+
+<!-- Wizard modal -->
+<div class="modal-bg" id="wizard-bg">
+  <div class="modal">
+    <h2>Build an Investigator</h2>
+    <div class="step">
+      Choose a <b>role</b> and <b>specialty</b>, then apply the playbook. It fills your starting actions,
+      drives, gilded action, illumination keys, and lists your ability options — then follow the reminders
+      to spend your creation points.
+    </div>
+    <div class="row" style="margin-bottom:12px">
+      <label class="fld grow">Role<select id="wz-role"></select></label>
+      <label class="fld grow">Specialty<select id="wz-specialty"></select></label>
+    </div>
+    <div id="wz-preview" class="step"></div>
+    <div class="step" style="border-top:1px solid var(--border);padding-top:10px">
+      After applying: <b>Actions</b> — raise one 0-action to 1, then distribute 3 more (max 2 each).
+      <b>Drives</b> — distribute 6 more points (max 6 each). <b>Gild</b> one extra action.
+      <b>Abilities</b> — pick one role + one specialty ability.
+    </div>
+    <div class="row" style="justify-content:flex-end;gap:10px;margin-top:6px">
+      <button class="btn ghost" onclick="closeWizard()">Cancel</button>
+      <button class="btn" onclick="applyPlaybook()">Apply Playbook</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reference modal -->
+<div class="modal-bg" id="ref-bg" onclick="if(event.target===this)closeRef()">
+  <div class="modal" id="ref-modal"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   Candela Obscura character sheet — Illuminated Worlds dice-pool engine.
+   Self-contained; integrates with the app save host via window.__ddSave /
+   window.__ddState / window.__ddSaveTitle, persisting under the co_sheet key.
+   ══════════════════════════════════════════════════════════════════════════ */
+var DRIVES = window.CO_DRIVES || [];
+var ACTIONS = window.CO_ACTIONS || [];
+var ROLES = window.CO_ROLES || [];
+var GEAR = window.CO_GEAR || [];
+var MARKS = window.CO_MARKS || [];
+var DRIVE_NAMES = DRIVES.map(function(d){return d.name});
+var ACTION_NAMES = ACTIONS.map(function(a){return a.name});
+function actionDrive(a){ var f=ACTIONS.find(function(x){return x.name===a}); return f?f.drive:''; }
+
+// ── State ──────────────────────────────────────────────────────────────────
+var S = null;
+function blankState(){
+  var st = { name:'', pronouns:'', role:ROLES[0].role, specialty:ROLES[0].specialties[0].name,
+    actions:{}, gilded:{}, drives:{}, resUsed:{}, marks:{}, scars:{Body:'',Brain:'',Bleed:''},
+    gear:[{t:'',on:false},{t:'',on:false},{t:'',on:false}], abilities:[], illumination:['','',''],
+    catalyst:'', question:'', style:'', relationships:[], _sheet:{} };
+  ACTION_NAMES.forEach(function(a){ st.actions[a]=0; st.gilded[a]=false; });
+  DRIVE_NAMES.forEach(function(d){ st.drives[d]={max:0,cur:0}; st.resUsed[d]=0; });
+  MARKS.forEach(function(m){ st.marks[m.name]=0; });
+  return st;
+}
+
+// ── Lookups ─────────────────────────────────────────────────────────────────
+function roleObj(r){ return ROLES.find(function(x){return x.role===r}) || ROLES[0]; }
+function specObj(r,s){ var ro=roleObj(r); return ro.specialties.find(function(x){return x.name===s}) || ro.specialties[0]; }
+function resTotal(d){ return Math.floor((S.drives[d].max||0)/3); }
+
+// ── Build static selects ────────────────────────────────────────────────────
+function fillRoleSelect(sel,val){ sel.innerHTML=''; ROLES.forEach(function(r){ var o=document.createElement('option'); o.value=r.role; o.textContent=r.role+' — '+r.mastery; sel.appendChild(o); }); if(val)sel.value=val; }
+function fillSpecSelect(sel,role,val){ sel.innerHTML=''; roleObj(role).specialties.forEach(function(sp){ var o=document.createElement('option'); o.value=sp.name; o.textContent=sp.name; sel.appendChild(o); }); if(val)sel.value=val; }
+
+function onRoleChange(){ S.role=document.getElementById('f-role').value; var sp=roleObj(S.role).specialties[0].name; S.specialty=sp; fillSpecSelect(document.getElementById('f-specialty'),S.role,sp); renderSpecFocus(); renderAbilityPicker(); scheduleAutosave(); }
+function onSpecialtyChange(){ S.specialty=document.getElementById('f-specialty').value; renderSpecFocus(); renderAbilityPicker(); scheduleAutosave(); }
+function renderSpecFocus(){ var sp=specObj(S.role,S.specialty); document.getElementById('spec-focus').innerHTML='<b style="color:var(--accent-2)">'+sp.name+'</b> &middot; primary drive '+sp.primaryDrive+' &middot; '+sp.focus; }
+
+// ── Render: Drives ───────────────────────────────────────────────────────────
+function renderDrives(){
+  var host=document.getElementById('drives'); host.innerHTML='';
+  DRIVES.forEach(function(d){
+    var st=S.drives[d.name]; var res=resTotal(d.name); var used=S.resUsed[d.name]||0;
+    var el=document.createElement('div'); el.className='drive';
+    var pips='';
+    for(var i=1;i<=9;i++){
+      var cls='pip'+(i<=st.max?' max':'')+(i<=st.cur?' cur':'');
+      pips+='<button class="'+cls+'" title="click: set max &middot; shift/right: spend" onclick="pipClick(\''+d.name+'\','+i+',event)" oncontextmenu="pipSpend(\''+d.name+'\','+i+',event)"></button>';
+    }
+    var rp='';
+    for(var r=0;r<res;r++){ rp+='<button class="rpip'+(r<used?' burned':'')+'" title="burn resistance" onclick="burnRes(\''+d.name+'\','+r+')"></button>'; }
+    if(res===0) rp='<span class="lbl">none</span>';
+    el.innerHTML='<h3>'+d.name+'</h3><div class="blurb">'+d.blurb+'</div>'
+      +'<div class="pips">'+pips+'</div>'
+      +'<div class="meta"><span>available <b>'+st.cur+'</b> / max '+st.max+'</span></div>'
+      +'<div class="resbox"><span class="lbl">Resist</span>'+rp+'</div>';
+    host.appendChild(el);
+  });
+}
+// left-click a pip: set MAX to that value (and clamp available). Click the current max to lower by one.
+function pipClick(d,n,e){ e.preventDefault(); var st=S.drives[d]; st.max=(st.max===n)?n-1:n; if(st.cur>st.max)st.cur=st.max; var mx=resTotal(d); if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDrives(); scheduleAutosave(); }
+// right-click / shift-click: toggle spent (available) up to max.
+function pipSpend(d,n,e){ e.preventDefault(); var st=S.drives[d]; if(n>st.max)return false; st.cur=(st.cur===n)?n-1:n; renderDrives(); scheduleAutosave(); return false; }
+function burnRes(d,i){ var mx=resTotal(d); var used=S.resUsed[d]||0; S.resUsed[d]=(i<used)?i:i+1; if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDrives(); scheduleAutosave(); }
+
+// ── Render: Actions ──────────────────────────────────────────────────────────
+function renderActions(){
+  var host=document.getElementById('actions'); host.innerHTML='';
+  DRIVES.forEach(function(d){
+    var g=document.createElement('div'); g.className='actgroup';
+    var inner='<div class="gh">'+d.name+'</div>';
+    ACTIONS.filter(function(a){return a.drive===d.name}).forEach(function(a){
+      var rating=S.actions[a.name]||0; var gild=S.gilded[a.name];
+      var dots='';
+      for(var i=1;i<=3;i++){ dots+='<button class="dot'+(i<=rating?' on':'')+'" onclick="setAction(\''+a.name+'\','+i+')"></button>'; }
+      inner+='<div class="action">'
+        +'<button class="diamond'+(gild?' on':'')+'" title="gild this action" onclick="toggleGild(\''+a.name+'\')"></button>'
+        +'<div class="dots">'+dots+'</div>'
+        +'<div class="nm"><b>'+a.name+'</b> <span class="drv">'+a.drive+'</span><div class="sub">'+a.sub+'</div></div>'
+        +'</div>';
+    });
+    g.innerHTML=inner; host.appendChild(g);
+  });
+}
+function setAction(a,n){ S.actions[a]=(S.actions[a]===n)?n-1:n; renderActions(); scheduleAutosave(); }
+function toggleGild(a){ S.gilded[a]=!S.gilded[a]; renderActions(); scheduleAutosave(); }
+
+// ── Render: Marks ────────────────────────────────────────────────────────────
+function renderMarks(){
+  var host=document.getElementById('marks'); host.innerHTML='';
+  MARKS.forEach(function(m){
+    var val=S.marks[m.name]||0;
+    var el=document.createElement('div'); el.className='mtrack'+(m.name==='Bleed'?' bleed':'');
+    var boxes='';
+    for(var i=1;i<=3;i++){ boxes+='<button class="mbox'+(i<=val?' on':'')+'" onclick="setMark(\''+m.name+'\','+i+')">'+(i<=val?'&#10007;':'')+'</button>'; }
+    el.innerHTML='<h3>'+m.name+'</h3><div class="desc">'+m.desc+'</div>'
+      +'<div class="mboxes">'+boxes+'</div>'
+      +'<input class="scarslot" placeholder="Scar (4th mark)…" value="'+esc(S.scars[m.name]||'')+'" oninput="S.scars[\''+m.name+'\']=this.value;scheduleAutosave()">';
+    host.appendChild(el);
+  });
+}
+function setMark(m,n){ S.marks[m]=(S.marks[m]===n)?n-1:n; renderMarks(); scheduleAutosave(); }
+
+// ── Render: Gear ─────────────────────────────────────────────────────────────
+function renderGear(){
+  var host=document.getElementById('gear'); host.innerHTML='';
+  S.gear.forEach(function(g,i){
+    var line=document.createElement('div'); line.className='slotline';
+    line.innerHTML='<button class="tick'+(g.on?' on':'')+'" title="mark used" onclick="S.gear['+i+'].on=!S.gear['+i+'].on;renderGear();scheduleAutosave()"></button>'
+      +'<input placeholder="Gear slot '+(i+1)+'…" value="'+esc(g.t)+'" oninput="S.gear['+i+'].t=this.value;scheduleAutosave()">';
+    host.appendChild(line);
+  });
+}
+
+// ── Render: Illumination keys ────────────────────────────────────────────────
+function renderKeys(){
+  var host=document.getElementById('keys'); host.innerHTML='';
+  for(var i=0;i<3;i++){
+    (function(i){
+      var inp=document.createElement('input'); inp.placeholder='Illumination key '+(i+1); inp.value=S.illumination[i]||'';
+      inp.oninput=function(){ S.illumination[i]=this.value; scheduleAutosave(); };
+      host.appendChild(inp);
+    })(i);
+  }
+}
+
+// ── Render: Abilities ────────────────────────────────────────────────────────
+function renderAbilities(){
+  var host=document.getElementById('abilities-chosen'); host.innerHTML='';
+  if(!S.abilities.length){ host.innerHTML='<p class="desc" style="font-size:12px;color:var(--muted)">No abilities chosen yet — pick from the list below or use Build Character.</p>'; }
+  S.abilities.forEach(function(ab,i){
+    var el=document.createElement('div'); el.className='ability';
+    el.innerHTML='<div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(ab.name)+'</b>'
+      +'<button class="refbtn" onclick="removeAbility('+i+')">remove</button></div>'
+      +'<div class="d">'+esc(ab.desc||'')+'</div>';
+    host.appendChild(el);
+  });
+}
+function renderAbilityPicker(){
+  var sel=document.getElementById('ability-pick'); sel.innerHTML='';
+  var ro=roleObj(S.role), sp=specObj(S.role,S.specialty);
+  function grp(label,list){ var og=document.createElement('optgroup'); og.label=label; list.forEach(function(ab){ var o=document.createElement('option'); o.value=label+'|'+ab.name; o.textContent=ab.name; og.appendChild(o); }); sel.appendChild(og); }
+  grp(ro.role+' (Role)', ro.abilities);
+  grp(sp.name+' (Specialty)', sp.abilities);
+}
+function addPickedAbility(){
+  var v=document.getElementById('ability-pick').value; if(!v)return;
+  var ro=roleObj(S.role), sp=specObj(S.role,S.specialty);
+  var pool=ro.abilities.concat(sp.abilities); var nm=v.split('|')[1];
+  var ab=pool.find(function(x){return x.name===nm}); if(!ab)return;
+  if(S.abilities.some(function(x){return x.name===ab.name}))return;
+  S.abilities.push({name:ab.name,desc:ab.desc}); renderAbilities(); scheduleAutosave();
+}
+function removeAbility(i){ S.abilities.splice(i,1); renderAbilities(); scheduleAutosave(); }
+
+// ── Render: Relationships ────────────────────────────────────────────────────
+function renderRelationships(){
+  var host=document.getElementById('relationships'); host.innerHTML='';
+  S.relationships.forEach(function(r,i){
+    var el=document.createElement('div'); el.className='row'; el.style.marginBottom='6px';
+    el.innerHTML='<input placeholder="Name" style="flex:1" value="'+esc(r.name)+'" oninput="S.relationships['+i+'].name=this.value;scheduleAutosave()">'
+      +'<input placeholder="Type (Mentor, Rival…)" style="flex:1" value="'+esc(r.type)+'" oninput="S.relationships['+i+'].type=this.value;scheduleAutosave()">'
+      +'<button class="refbtn" onclick="S.relationships.splice('+i+',1);renderRelationships();scheduleAutosave()">remove</button>';
+    host.appendChild(el);
+  });
+}
+function addRelRow(){ S.relationships.push({name:'',type:''}); renderRelationships(); scheduleAutosave(); }
+
+// ── Dice roller ──────────────────────────────────────────────────────────────
+function rollPool(){
+  var n=parseInt(document.getElementById('r-dice').value,10)||0; var gild=document.getElementById('r-gild').checked;
+  n=Math.max(0,Math.min(6,n));
+  var rolls=[], zeroMode=false;
+  if(n===0){ zeroMode=true; rolls=[rnd(),rnd()]; } else { for(var i=0;i<n;i++)rolls.push(rnd()); }
+  var host=document.getElementById('roll-dice'); host.innerHTML='';
+  var chosen; // result value
+  if(zeroMode){ chosen=Math.min(rolls[0],rolls[1]); }
+  else { chosen=Math.max.apply(null,rolls); }
+  var gildVal = gild ? rolls[rolls.length-1] : null;
+  rolls.forEach(function(v,idx){
+    var d=document.createElement('div'); d.className='die';
+    if(gild && idx===rolls.length-1) d.className+=' gild';
+    if(!zeroMode && v===chosen) d.className+=' hi';
+    d.textContent=v; host.appendChild(d);
+  });
+  var tier, cls, sixes=rolls.filter(function(v){return v===6}).length;
+  if(zeroMode){ tier = chosen>=6?'Success':(chosen>=4?'Mixed success':'Miss'); }
+  else if(sixes>=2){ tier='Critical success'; }
+  else if(chosen===6){ tier='Full success'; }
+  else if(chosen>=4){ tier='Mixed success'; }
+  else { tier='Miss'; }
+  cls = chosen>=6?'tier6':(chosen>=4?'tier45':'tier13');
+  var extra = gildVal!==null ? '  ·  gilded die = '+gildVal+(gildVal<=chosen?' (take it to refresh drive)':'') : '';
+  document.getElementById('roll-result').innerHTML='<span class="'+cls+'">'+tier+'</span> — highest '+chosen+extra;
+}
+function rnd(){ return 1+Math.floor(Math.random()*6); }
+
+// ── Wizard ───────────────────────────────────────────────────────────────────
+function openWizard(){
+  fillRoleSelect(document.getElementById('wz-role'),S.role);
+  fillSpecSelect(document.getElementById('wz-specialty'),S.role,S.specialty);
+  document.getElementById('wz-role').onchange=function(){ fillSpecSelect(document.getElementById('wz-specialty'),this.value); wzPreview(); };
+  document.getElementById('wz-specialty').onchange=wzPreview;
+  wzPreview(); document.getElementById('wizard-bg').classList.add('on');
+}
+function closeWizard(){ document.getElementById('wizard-bg').classList.remove('on'); }
+function wzPreview(){
+  var r=document.getElementById('wz-role').value, s=document.getElementById('wz-specialty').value;
+  var sp=specObj(r,s);
+  var acts=Object.keys(sp.starting.actions).map(function(k){return k+' '+sp.starting.actions[k]}).join(', ');
+  var drvs=Object.keys(sp.starting.drives).map(function(k){return k+' '+sp.starting.drives[k]}).join(', ');
+  document.getElementById('wz-preview').innerHTML=
+    '<div class="pool-badge">'+roleObj(r).role+' · '+sp.name+'</div>'
+    +'<p style="margin:8px 0 2px"><b>Starting actions:</b> '+acts+'</p>'
+    +'<p style="margin:2px 0"><b>Starting drives:</b> '+drvs+'</p>'
+    +'<p style="margin:2px 0"><b>Gilded:</b> '+sp.gilded+'</p>'
+    +'<p style="margin:2px 0"><b>Illumination:</b> '+sp.illumination.join(' · ')+'</p>';
+}
+function applyPlaybook(){
+  var r=document.getElementById('wz-role').value, s=document.getElementById('wz-specialty').value;
+  var sp=specObj(r,s);
+  S.role=r; S.specialty=s;
+  ACTION_NAMES.forEach(function(a){ S.actions[a]=0; S.gilded[a]=false; });
+  Object.keys(sp.starting.actions).forEach(function(k){ S.actions[k]=sp.starting.actions[k]; });
+  DRIVE_NAMES.forEach(function(d){ S.drives[d]={max:0,cur:0}; S.resUsed[d]=0; });
+  Object.keys(sp.starting.drives).forEach(function(k){ var v=sp.starting.drives[k]; S.drives[k]={max:v,cur:v}; });
+  S.gilded[sp.gilded]=true;
+  S.illumination=sp.illumination.slice(0,3);
+  // pre-fill the first role + specialty ability as the "top option" default
+  S.abilities=[{name:roleObj(r).abilities[0].name,desc:roleObj(r).abilities[0].desc},
+               {name:sp.abilities[0].name,desc:sp.abilities[0].desc}];
+  // gear hints into empty slots
+  S.gear=[{t:sp.gear[0]||'',on:false},{t:sp.gear[1]||'',on:false},{t:'',on:false}];
+  document.getElementById('f-role').value=r; fillSpecSelect(document.getElementById('f-specialty'),r,s);
+  renderAll(); closeWizard(); saveSheet(true); toast('Playbook applied — now spend your creation points');
+}
+
+// ── Reference modal ──────────────────────────────────────────────────────────
+function openRef(kind){
+  var m=document.getElementById('ref-modal'); var html='';
+  if(kind==='gear'){
+    html='<h2>Candela Obscura Gear</h2><div class="step">Every PC may carry up to three pieces of gear, declared during play. Standard gear is available to anyone.</div>';
+    GEAR.forEach(function(g){ html+='<div class="ability"><b>'+g.name+'</b><div class="d">'+g.desc+'</div></div>'; });
+    var sp=specObj(S.role,S.specialty);
+    html+='<div class="step" style="margin-top:8px"><b>'+sp.name+' specialty gear (examples):</b> '+sp.gear.join(', ')+'. Work with your GM to tailor gear to your character.</div>';
+  } else if(kind==='abilities'){
+    var ro=roleObj(S.role), sp2=specObj(S.role,S.specialty);
+    html='<h2>'+ro.role+' &amp; '+sp2.name+' Abilities</h2><div class="step">Choose one from each list at creation (top option is the safe default).</div>';
+    html+='<h3 style="font-family:Cinzel;font-size:14px;color:var(--accent-2);margin:10px 0 4px">'+ro.role+' — Role</h3>';
+    ro.abilities.forEach(function(a){ html+='<div class="ability"><b>'+a.name+'</b><div class="d">'+a.desc+'</div></div>'; });
+    html+='<h3 style="font-family:Cinzel;font-size:14px;color:var(--accent-2);margin:10px 0 4px">'+sp2.name+' — Specialty</h3>';
+    sp2.abilities.forEach(function(a){ html+='<div class="ability"><b>'+a.name+'</b><div class="d">'+a.desc+'</div></div>'; });
+  }
+  html+='<div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn ghost" onclick="closeRef()">Close</button></div>';
+  m.innerHTML=html; document.getElementById('ref-bg').classList.add('on');
+}
+function closeRef(){ document.getElementById('ref-bg').classList.remove('on'); }
+
+// ── Render everything from S ─────────────────────────────────────────────────
+function renderAll(){
+  document.getElementById('f-name').value=S.name||'';
+  document.getElementById('f-pronouns').value=S.pronouns||'';
+  fillRoleSelect(document.getElementById('f-role'),S.role);
+  fillSpecSelect(document.getElementById('f-specialty'),S.role,S.specialty);
+  document.getElementById('f-catalyst').value=S.catalyst||'';
+  document.getElementById('f-question').value=S.question||'';
+  document.getElementById('f-style').value=S.style||'';
+  renderSpecFocus(); renderDrives(); renderActions(); renderMarks(); renderGear();
+  renderKeys(); renderAbilities(); renderAbilityPicker(); renderRelationships();
+}
+
+// ── Collect / apply for persistence ──────────────────────────────────────────
+function collectSheet(){
+  S.name=document.getElementById('f-name').value;
+  S.pronouns=document.getElementById('f-pronouns').value;
+  S.catalyst=document.getElementById('f-catalyst').value;
+  S.question=document.getElementById('f-question').value;
+  S.style=document.getElementById('f-style').value;
+  // top-level name/role/specialty/class for roster + doc-title consumers
+  return Object.assign({}, S, { class: S.specialty });
+}
+function applySheet(data){
+  S=blankState();
+  ['name','pronouns','role','specialty','catalyst','question','style'].forEach(function(k){ if(data[k]!=null)S[k]=data[k]; });
+  if(data.actions) ACTION_NAMES.forEach(function(a){ if(data.actions[a]!=null)S.actions[a]=data.actions[a]; });
+  if(data.gilded) ACTION_NAMES.forEach(function(a){ S.gilded[a]=!!data.gilded[a]; });
+  if(data.drives) DRIVE_NAMES.forEach(function(d){ if(data.drives[d])S.drives[d]={max:data.drives[d].max||0,cur:data.drives[d].cur||0}; });
+  if(data.resUsed) DRIVE_NAMES.forEach(function(d){ if(data.resUsed[d]!=null)S.resUsed[d]=data.resUsed[d]; });
+  if(data.marks) MARKS.forEach(function(m){ if(data.marks[m.name]!=null)S.marks[m.name]=data.marks[m.name]; });
+  if(data.scars) S.scars=Object.assign({Body:'',Brain:'',Bleed:''},data.scars);
+  if(Array.isArray(data.gear)) S.gear=data.gear.slice(0,3).map(function(g){ return typeof g==='string'?{t:g,on:false}:{t:g.t||'',on:!!g.on}; });
+  while(S.gear.length<3)S.gear.push({t:'',on:false});
+  if(Array.isArray(data.abilities)) S.abilities=data.abilities.map(function(a){ return typeof a==='string'?{name:a,desc:''}:{name:a.name||'',desc:a.desc||''}; });
+  if(Array.isArray(data.illumination)) S.illumination=data.illumination.slice(0,3);
+  while(S.illumination.length<3)S.illumination.push('');
+  if(Array.isArray(data.relationships)) S.relationships=data.relationships.map(function(r){ return {name:r.name||'',type:r.type||''}; });
+  if(data._sheet) S._sheet=data._sheet;
+  renderAll();
+}
+
+// ── Save/load host integration ───────────────────────────────────────────────
+var _saveTimer=null, _ready=false;
+function _saveNow(){
+  if(_saveTimer){ clearTimeout(_saveTimer); _saveTimer=null; }
+  var json=JSON.stringify(collectSheet());
+  try{ localStorage.setItem('co_sheet',json); }catch(e){}
+  if(window.__ddSave) window.__ddSave({ co_sheet: json });
+}
+function saveSheet(quiet){ if(quiet){ try{_saveNow()}catch(e){} return; } if(_saveTimer)clearTimeout(_saveTimer); _saveTimer=setTimeout(function(){_saveTimer=null;try{_saveNow()}catch(e){}},1200); }
+function scheduleAutosave(){ if(!_ready)return; saveSheet(false); }
+function syncDocTitle(){ S.name=document.getElementById('f-name').value; try{ var n=S.name.trim(); if(n&&window.__ddSaveTitle)window.__ddSaveTitle(n); }catch(e){} scheduleAutosave(); }
+function autoLoad(){
+  var saved=null;
+  if(window.__ddState!==undefined) saved=window.__ddState['co_sheet']||null;
+  else { try{ saved=localStorage.getItem('co_sheet'); }catch(e){} }
+  if(!saved)return false;
+  try{ applySheet(JSON.parse(saved)); return true; }catch(e){ return false; }
+}
+
+// ── Export / import ──────────────────────────────────────────────────────────
+function exportJSON(){
+  var json=JSON.stringify(collectSheet(),null,2);
+  var blob=new Blob([json],{type:'application/json'});
+  var url=URL.createObjectURL(blob); var a=document.createElement('a');
+  a.href=url; a.download=(S.name||'candela-investigator').replace(/\s+/g,'_')+'.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+function importJSON(input){
+  var f=input.files&&input.files[0]; if(!f)return;
+  var rd=new FileReader(); rd.onload=function(){ try{ applySheet(JSON.parse(rd.result)); saveSheet(true); toast('Imported'); }catch(e){ toast('Import failed'); } };
+  rd.readAsText(f); input.value='';
+}
+
+// ── misc ─────────────────────────────────────────────────────────────────────
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var _toastTimer=null;
+function toast(msg){
+  var t=document.getElementById('_toast');
+  if(!t){ t=document.createElement('div'); t.id='_toast'; t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#04100e;font-weight:700;padding:8px 18px;border-radius:20px;z-index:99;font-size:13px;letter-spacing:.05em'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1'; if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){t.style.opacity='0'},1400);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+S=blankState();
+if(!autoLoad()){ renderAll(); }
+// global autosave for identity/detail text fields not individually wired
+document.addEventListener('input',function(e){ if(e.target&&e.target.tagName&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) scheduleAutosave(); });
+_ready=true;
+</script>
+</body>
+</html>

@@ -59,7 +59,7 @@ function extractLinkedCampaignId(data: object): string | null {
   try {
     const blob = data as Record<string, unknown>;
     // SD sheet and its DarkSpace fork keep the link under _sheet.campaign.id
-    for (const skey of ["sd_sheet", "ds_sheet"]) {
+    for (const skey of ["sd_sheet", "ds_sheet", "co_sheet"]) {
       if (typeof blob[skey] !== "string") continue;
       const sheet = JSON.parse(blob[skey] as string) as {
         _sheet?: { campaign?: { id?: unknown } | null } | null;

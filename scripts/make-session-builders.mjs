@@ -69,6 +69,13 @@ const SYSTEMS = [
     chapter: "Sector", chapterPh: "Sector 1", session: "Session", mobs: "Hostiles/NPCs", mobsHeading: "Hostiles &amp; NPCs",
     mob: "Hostile", boss: "Elite", npc: "NPC", typePh: "SCAV // LV 1 // AC 11 // 5 HP", titlePh: "e.g. The Derelict Hauler", subtitlePh: "e.g. A DarkSpace one-shot for 4 crew",
   },
+  {
+    file: "co_session_prep_builder.html", key: "co_session", ls: "co_builder_v1", cfg: "co", random: "Random Threat",
+    name: "Candela Obscura", title: "Session Prep Builder — Candela Obscura",
+    accent: "#2fa595", accentDark: "#1c6b60", red: "#b82018", redDark: "#7a1510", highlight: "#6fe0d2", boxBg: "#0f221f",
+    chapter: "Scene", chapterPh: "Scene 1", session: "Assignment", mobs: "Threats/NPCs", mobsHeading: "Threats &amp; Phenomena",
+    mob: "Threat", boss: "Phenomenon", npc: "NPC", typePh: "PHENOMENON // FLARE // BLEED", titlePh: "e.g. The Hallowharbor Exsanguinations", subtitlePh: "e.g. A Candela Obscura assignment for one circle",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -197,6 +204,15 @@ const SB_CONFIG = {
     abilities: [m.atk ? 'Attack: ' + m.atk : '', m.notes || ''].filter(Boolean).join('\\n'),
   }), sub: m => ['LV ' + m.lv, ({ L:'Lawful', N:'Neutral', C:'Chaotic' })[m.al] || ''].filter(Boolean).join(' · ') },
 };`,
+  co: `const SB_CONFIG = {
+  typePlaceholder: 'PHENOMENON // FLARE',
+  hp: null,
+  rows: [
+    [{ key:'stakes', label:'STAKES', ph:'Standard' }, { key:'harm', label:'HARM', ph:'Bleed' }, { key:'aspect', label:'ASPECT', ph:'Corrupting' }],
+  ],
+  abilitiesLabel: 'Powers & Weaknesses', abilitiesPlaceholder: 'One per line — Power: … · Weakness: … · Move: …',
+  mobs: null,
+};`,
 };
 const MOB_DATA = {
   ace: '<script src="/tools-data/ace-extras.js"></script>',
@@ -207,6 +223,7 @@ const MOB_DATA = {
   d62e: '<script src="/tools-data/d62e-creatures.js"></script>',
   icrpg: '<script src="/tools-data/icrpg-monsters.js"></script>',
   ds: '<script src="/tools-data/ds-monsters.js"></script>',
+  co: '',
 };
 
 function rep(s, a, b, all = true) {

@@ -141,6 +141,13 @@ const DS_REFERENCE: { href: string; label: string }[] = [
   { href: "/darkspace/bestiary", label: "Bestiary" },
 ];
 
+const CO_REFERENCE: { href: string; label: string }[] = [
+  { href: "/candela/roles", label: "Roles" },
+  { href: "/candela/actions", label: "Actions" },
+  { href: "/candela/abilities", label: "Abilities" },
+  { href: "/candela/gear", label: "Gear" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
@@ -153,6 +160,7 @@ const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   DND: DND_REFERENCE,
   D62E: D62E_REFERENCE,
   ICRPG: ICRPG_REFERENCE,
+  CO: CO_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

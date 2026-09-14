@@ -77,6 +77,7 @@ const PAGE = String.raw`<!doctype html>
   .group-head.dnd { color: #e0554e; }
   .group-head.d62e { color: #e07b39; }
   .group-head.icrpg { color: #e8823c; }
+  .group-head.co { color: #2fa595; }
   .note { font-size: 11px; color: var(--muted); line-height: 1.6; }
   .note a { color: var(--gold); }
   .err { font-size: 12px; color: var(--red); }
@@ -264,7 +265,8 @@ const PAGE = String.raw`<!doctype html>
             { key: "SW", name: "Star Wars", cls: "sw" },
             { key: "DND", name: "D&D", cls: "dnd" },
             { key: "D62E", name: "D6 System 2e", cls: "d62e" },
-            { key: "ICRPG", name: "Index Card RPG", cls: "icrpg" }
+            { key: "ICRPG", name: "Index Card RPG", cls: "icrpg" },
+            { key: "CO", name: "Candela Obscura", cls: "co" }
           ];
           var seen = {};
           var html = "";

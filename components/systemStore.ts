@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "DS";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "DS" | "CO";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -26,6 +26,9 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Kids on Bikes, with Kids on Brooms and Kids in Capes as flavors of the
   // same system (one sheet, one shelf, one tab).
   { key: "KOB", name: "Kids on Bikes", short: "KoB", accent: "var(--kob)" },
+  // Candela Obscura (Darrington Press) — gaslamp horror on the Illuminated
+  // Worlds engine: d6 dice pools, roles & specialties, drives & actions.
+  { key: "CO", name: "Candela Obscura", short: "CO", accent: "var(--candela)" },
   { key: "ACE", name: "ACE!", short: "ACE", accent: "var(--ace)" },
   // Star Wars: The Roleplaying Game (WEG 1e, 1987) with the Rules Companion.
   { key: "SW", name: "Star Wars", short: "SW", accent: "var(--sw)" },
