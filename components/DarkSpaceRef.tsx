@@ -6,6 +6,20 @@ export type Query = Record<string, string | undefined>;
 export type RawQuery = Record<string, string | string[] | undefined>;
 export const one = (v: string | string[] | undefined): string => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
+// Motivation code → readable label. The bestiary stores canonical codes
+// (S / VL / VR / Any, matching DS_MOTIVATIONS), but older/homebrew data may
+// carry legacy variants (Su, Vi); fold those in so nothing shows a raw code.
+const MOTIV_LABELS: Record<string, string> = {
+  S: "Survivor", SU: "Survivor",
+  VL: "Vile", VI: "Vile",
+  VR: "Virtuous",
+  ANY: "Any",
+};
+export const motivLabel = (code: string | undefined): string => {
+  if (!code) return "";
+  return MOTIV_LABELS[code.trim().toUpperCase()] ?? code;
+};
+
 export const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 export const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--darkspace)] hover:text-[var(--text)]";
 export const chipOn = "border-[var(--darkspace)] bg-[var(--panel-2)] text-[#8fd6ea]";
@@ -31,6 +45,7 @@ export function DarkSpaceHeader({ title, subtitle }: { title: string; subtitle: 
         <p className="mt-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[var(--darkspace)] sm:text-[11px] sm:tracking-[0.35em]">{subtitle}</p>
       </div>
       <div className="flex shrink-0 gap-2">
+        <Link href="/darkspace/homebrew" className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--darkspace)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]">My Homebrew</Link>
         <Link href="/dashboard" className="rounded border border-[var(--border)] px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.15em] text-[var(--muted)] hover:border-[var(--muted)] hover:text-[var(--text)] sm:px-3 sm:py-1.5 sm:text-[11px]">← Home</Link>
       </div>
     </header>

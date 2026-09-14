@@ -14,7 +14,7 @@
 :root {
   --bg:#f8f8f6; --ink:#0a0a0a; --muted:#555; --rule:#c0c0c0;
   /* DarkSpace theme: the sci-fi cyan replaces Shadowdark's gold as the accent. */
-  --red:#c0251e; --gold:#2a9dc2; --black:#0a0a0a;
+  --red:#2456b8; --gold:#3b82d6; --black:#0a0a0a;
   --box:#efefed; --input-bg:#fff; --border:#0a0a0a;
   --log-bg:#111; --log-text:#e8e4dc;
   --section-bar:#0a0a0a; --section-bar-text:#f8f8f6;
@@ -101,34 +101,34 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .log-action-btn.save:hover{background:#2d5a2d;color:white;}
 .log-action-btn.export{background:#1a2a3a;color:#6aabdf;border:1px solid #1a4a8a;}
 .log-action-btn.export:hover{background:#1a4a8a;color:white;}
-.log-action-btn.pdf{background:#241f10;color:#c8a020;border:1px solid #7a5a00;}
-.log-action-btn.pdf:hover{background:#7a5a00;color:white;}
-.log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
-.log-action-btn.import:hover{background:#5a1a1a;color:white;}
+.log-action-btn.pdf{background:#10192b;color:#3b82d6;border:1px solid #1e466f;}
+.log-action-btn.pdf:hover{background:#1e466f;color:white;}
+.log-action-btn.import{background:#2a1a1a;color:#8ab4e0;border:1px solid #1e3f66;}
+.log-action-btn.import:hover{background:#1e3f66;color:white;}
 .log-entries{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column-reverse;gap:5px;justify-content:flex-start;}
 /* Message-console entries broadcast from the GM (system messages + found loot). */
-.log-system{border-left:3px solid #c8a020 !important;background:#241f14 !important;}
-.log-system .sys-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#e0c060;}
+.log-system{border-left:3px solid #3b82d6 !important;background:#10192b !important;}
+.log-system .sys-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#5a97dd;}
 .log-system .sys-body{font-size:11px;color:#d8d2c0;margin-top:3px;line-height:1.45;}
-.log-foundloot{border-left:3px solid #c8a020 !important;background:#221f16 !important;}
-.fl-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#e0c060;}
-.fl-name{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:#f0e2b0;margin-top:2px;}
-.fl-desc{font-size:10px;color:#b7a98a;margin-top:2px;line-height:1.4;}
+.log-foundloot{border-left:3px solid #3b82d6 !important;background:#101a28 !important;}
+.fl-head{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#5a97dd;}
+.fl-name{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:800;color:#cfe2f4;margin-top:2px;}
+.fl-desc{font-size:10px;color:#9db4c8;margin-top:2px;line-height:1.4;}
 .fl-items{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
-.fl-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:11px;color:#cfc6a8;}
-.fl-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9a9a78;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.fl-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:11px;color:#b3c4d6;}
+.fl-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#7d94aa;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
 .fl-item-name{flex:1;min-width:0;}
-.fl-note{color:#8a8570;font-style:italic;}
-.fl-btn{flex:0 0 auto;background:#c8a020;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
-.fl-btn:hover:not(:disabled){background:#e0b83a;}
-.fl-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
+.fl-note{color:#6f8598;font-style:italic;}
+.fl-btn{flex:0 0 auto;background:#3b82d6;color:#161616;border:none;border-radius:3px;padding:4px 10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;}
+.fl-btn:hover:not(:disabled){background:#4a95d8;}
+.fl-btn:disabled{background:transparent;color:#6f8598;border:1px solid #2a3a4a;cursor:default;}
 .log-entry{background:#1e1e1e;border:1px solid #333;padding:7px 9px;}
 .log-entry .roll-label{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#777;margin-bottom:2px;}
 .log-entry .roll-result{font-family:'Montserrat',monospace;font-size:22px;font-weight:900;color:var(--log-text);line-height:1;}
 .log-entry .roll-detail{font-size:9px;color:#555;margin-top:2px;font-family:'Montserrat',sans-serif;}
-.log-entry.crit .roll-result{color:#ffd700;}.log-entry.fumble .roll-result{color:#ff4444;}
+.log-entry.crit .roll-result{color:#6dbf6d;}.log-entry.fumble .roll-result{color:#5a8fd8;}
 .log-entry.remote{border-left:3px solid #8a7ac8;background:#1c1a24;}
-.log-entry.crit{border-color:#ffd700;}.log-entry.fumble{border-color:#ff4444;}
+.log-entry.crit{border-color:#6dbf6d;}.log-entry.fumble{border-color:#5a8fd8;}
 .log-hint{color:#333;font-size:10px;font-family:'Montserrat',sans-serif;text-align:center;padding:16px 8px;text-transform:uppercase;letter-spacing:.08em;}
 
 /* DICE TRAY */
@@ -136,12 +136,12 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .adv-btns{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:5px;}
 .adv-btn{padding:4px;background:#1a1a1a;border:1px solid #333;color:#777;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;cursor:pointer;text-align:center;text-transform:uppercase;letter-spacing:.06em;}
 .adv-btn.adv-active{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
-.adv-btn.dis-active{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
+.adv-btn.dis-active{background:#132a44;border-color:#274a7a;color:#8ab4e0;}
 .dice-btns{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-bottom:5px;}
 .dice-btn{min-width:0;padding:4px 1px;background:#1a1a1a;border:1px solid #333;color:#999;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;cursor:pointer;text-align:center;}
 .dice-btn:hover{background:var(--red);border-color:var(--red);color:white;}
 .dice-pool-display{font-size:9px;color:#666;min-height:14px;margin-bottom:5px;font-family:'Montserrat',sans-serif;}
-.dice-pool-display span{color:#c8a020;}
+.dice-pool-display span{color:#3b82d6;}
 .dice-tray-actions{display:flex;gap:3px;}
 .dice-roll-btn{flex:1;padding:5px;background:var(--red);border:none;color:white;font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
 .dice-roll-btn:hover{background:var(--red);}
@@ -202,14 +202,14 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 /* STATS BLOCK */
 /* TRACKERS (left column) — active status chips */
 .trk-box{padding:7px 8px 9px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid var(--rule);}
-.trk-chip{padding:5px 11px;border-radius:11px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;white-space:nowrap;background:#7a2d2d;border:1px solid #df6a6a;color:#ffdede;}
-.trk-chip.good{background:#7a5a00;border-color:#c8a020;color:#ffe9a8;}
+.trk-chip{padding:5px 11px;border-radius:11px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:800;white-space:nowrap;background:#274a7a;border:1px solid #8ab4e0;color:#dbe8fb;}
+.trk-chip.good{background:#1e466f;border-color:#3b82d6;color:#cfe2ff;}
 .trk-chip.off{background:transparent;border:1px solid var(--rule);color:var(--muted);font-weight:600;}
 .trk-chip.off:hover{border-color:var(--ink);color:var(--ink);}
 .trk-pick-wrap{display:inline-flex;align-items:stretch;}
 .trk-pick-wrap .trk-chip{border-top-right-radius:0;border-bottom-right-radius:0;border-right:none;}
 .trk-del{padding:0 8px;border-radius:0 11px 11px 0;cursor:pointer;background:transparent;border:1px solid var(--rule);border-left:none;color:var(--muted);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;line-height:1;}
-.trk-del:hover{background:#7a2d2d;border-color:#df6a6a;color:#ffdede;}
+.trk-del:hover{background:#274a7a;border-color:#8ab4e0;color:#dbe8fb;}
 .trk-add{margin-left:auto;padding:3px 9px;font-size:11px;background:transparent;border:1px solid var(--rule);border-radius:3px;cursor:pointer;color:var(--muted);}
 .trk-add:hover{border-color:var(--ink);color:var(--ink);}
 /* Ability scores — single column, one row each (label · score · mod) */
@@ -283,7 +283,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .tv-uses{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
 .tv-pip{width:14px;height:14px;padding:0;border:1px solid var(--rule);border-radius:3px;background:transparent;cursor:pointer;flex:0 0 auto;}
 .tv-pip:hover{border-color:var(--ink);}
-.tv-pip.used{background:var(--red,#7a2d2d);border-color:var(--red,#7a2d2d);}
+.tv-pip.used{background:var(--red,#274a7a);border-color:var(--red,#274a7a);}
 .talents-area textarea{width:100%;flex:1;min-height:260px;border:none;background:transparent;resize:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:6px 10px;box-sizing:border-box;}
 .spells-list{padding:0;}
 /* Spell rows use grid for perfect column alignment */
@@ -298,10 +298,10 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .spell-src-slot{flex:0 0 auto;display:flex;}
 .spell-discard-slot{flex:0 0 auto;display:flex;}
 .spell-src-badge{display:inline-block;font-family:'Montserrat',sans-serif;font-size:7px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;padding:2px 4px;border-radius:2px;white-space:nowrap;line-height:1;}
-.spell-src-badge.scroll{background:#2a1f10;color:#c8a020;border:1px solid #7a5a00;}
+.spell-src-badge.scroll{background:#131f30;color:#3b82d6;border:1px solid #1e466f;}
 .spell-src-badge.wand{background:#1a2a3a;color:#7ab8e0;border:1px solid #2d5a7a;}
 .spell-row[data-src] .spell-input{font-style:italic;}
-.spell-row[data-src='scroll']{border-left:3px solid #7a5a00;}
+.spell-row[data-src='scroll']{border-left:3px solid #1e466f;}
 .spell-row[data-src='wand']{border-left:3px solid #2d5a7a;}
 .spell-input{border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:500;outline:none;color:var(--ink);padding:3px 2px;min-width:0;}
 .spell-level{width:100%;border:1px solid var(--rule);background:var(--input-bg);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:1px 0;}
@@ -310,14 +310,14 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .spell-adv-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}
 .spell-adv-btn.on{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
 .spell-lost-btn{padding:1px 2px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:8px;font-weight:900;color:var(--muted);width:100%;text-align:center;}
-.spell-lost-btn.on{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
+.spell-lost-btn.on{background:#132a44;border-color:#274a7a;color:#8ab4e0;}
 .atk-adv-btn{padding:2px 4px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:var(--muted);}
 .atk-dmg-cell{display:flex;align-items:center;gap:3px;min-width:0;}
 /* The dice string gets whatever is left; the switch never shrinks, so
    "1d8+2/1d10+2" stays readable next to it. */
 .atk-dmg-cell > input{flex:1 1 auto;min-width:0;}
-.atk-dmg-btn{flex:0 0 auto;padding:2px 5px;background:#241f10;border:1px solid #7a5a00;border-radius:3px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:#c8a020;line-height:1.3;}
-.atk-dmg-btn:hover{border-color:#c8a020;}
+.atk-dmg-btn{flex:0 0 auto;padding:2px 5px;background:#10192b;border:1px solid #1e466f;border-radius:3px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:#3b82d6;line-height:1.3;}
+.atk-dmg-btn:hover{border-color:#3b82d6;}
 .atk-adv-btn.on{background:#1a3a1a;border-color:#2d7a2d;color:#6dbf6d;}
 
 .spells-bottom{grid-column:1/3;grid-row:2;}
@@ -325,7 +325,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
    eight on one line; the mobile block below lets them wrap. */
 .spell-src-bar{display:flex;flex-wrap:nowrap;gap:6px;align-items:center;justify-content:space-between;margin:0 0 10px;padding:7px 8px;background:#141414;border:1px solid #2a2a2a;border-radius:5px;overflow:hidden;}
 .spell-src-opt{display:flex;align-items:center;gap:3px;min-width:0;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.01em;white-space:nowrap;}
-.spell-src-opt input{flex:0 0 auto;margin:0;accent-color:#c8a020;}
+.spell-src-opt input{flex:0 0 auto;margin:0;accent-color:#3b82d6;}
 .spell-desc-wrap{display:none;}
 .spell-info-btn{flex:0 0 auto;width:14px;height:14px;padding:0;line-height:1;border:1px solid var(--rule);border-radius:50%;background:transparent;color:var(--muted);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;font-style:italic;}
 .spell-info-btn:hover{background:var(--black);border-color:var(--black);color:#fff;}
@@ -335,7 +335,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .gear-slot-disabled{background:repeating-linear-gradient(135deg,transparent,transparent 4px,rgba(128,128,128,0.07) 4px,rgba(128,128,128,0.07) 5px);}
 /* Auto-consume ammo toggle switch (next to + Add Item) */
 .sw-toggle{position:relative;display:inline-block;width:26px;height:14px;background:#4a4a4a;border:1px solid #2a2a2a;border-radius:8px;cursor:pointer;transition:background .12s;flex:0 0 auto;vertical-align:middle;}
-.sw-toggle.on{background:#7a5a00;border-color:#c8a020;}
+.sw-toggle.on{background:#1e466f;border-color:#3b82d6;}
 .sw-knob{position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#ddd;transition:left .12s;}
 .sw-toggle.on .sw-knob{left:13px;background:#f0d070;}
 .ammo-toggle-lbl{display:flex;align-items:center;gap:5px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);user-select:none;}
@@ -343,7 +343,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .title-auto{color:rgba(255,255,255,.72);font-size:10px;align-self:center;}
 .title-auto:hover{color:#fff;}
 .gear-disable-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;}
-.gear-disable-btn.on{background:#3a1a1a;border-color:#7a2d2d;color:#df6a6a;}
+.gear-disable-btn.on{background:#132a44;border-color:#274a7a;color:#8ab4e0;}
 /* FREE TO CARRY */
 .free-carry{border-top:1px solid var(--rule);}
 .free-carry-inner{padding:6px 10px;}
@@ -353,7 +353,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .tabs-bar{display:flex;gap:0;background:var(--section-bar);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
 .tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.55);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;}
 .tab-btn:hover{color:#fff;}
-.tab-btn.on{color:#fff;border-bottom-color:var(--red);background:rgba(192,37,30,.28);}
+.tab-btn.on{color:#fff;border-bottom-color:var(--red);background:rgba(36,86,184,.28);}
 .tab-panel{display:none;}
 .tab-panel.on{display:block;}
 /* Softer 'bubble' feel: round the sheet shell and the coin row cells */
@@ -389,11 +389,11 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 }
 #roll-toast.show { display: block; animation: _toast-in 0.18s ease; }
 #roll-toast.crit { border-color: #6dbf6d; }
-#roll-toast.fumble { border-color: #df6a6a; }
+#roll-toast.fumble { border-color: #8ab4e0; }
 #roll-toast .t-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a8a93; margin-bottom: 3px; }
-#roll-toast .t-result { font-family: 'Share Tech Mono', monospace; font-size: 30px; font-weight: 900; color: #e8c84a; line-height: 1; }
+#roll-toast .t-result { font-family: 'Share Tech Mono', monospace; font-size: 30px; font-weight: 900; color: #5fa3ea; line-height: 1; }
 #roll-toast.crit .t-result { color: #6dbf6d; }
-#roll-toast.fumble .t-result { color: #df6a6a; }
+#roll-toast.fumble .t-result { color: #8ab4e0; }
 #roll-toast .t-detail { font-size: 11px; color: #a0a0aa; margin-top: 3px; }
 @keyframes _toast-in {
   from { opacity: 0; transform: translateX(-50%) translateY(8px); }
@@ -401,25 +401,25 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
 }
 
 /* Quick Rules panel */
-.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#c8a020;margin:12px 0 3px;}
+.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#3b82d6;margin:12px 0 3px;}
 .rules-list h4:first-child{margin-top:0;}
 .rules-list p{font-family:'Barlow',sans-serif;font-size:12px;line-height:1.5;color:#ccc;}
 /* DCC loot boxes broadcast from the GM screen (sealed until opened / claimed). */
-.log-lootbox{border-left:3px solid #c8a020 !important;background:#20211a !important;}
-.lb-head{font-family:'Barlow Condensed',sans-serif;color:#e0c060;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
-.lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#f0e2b0;margin-top:2px;}
-.lb-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9a9a78;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
-.lb-desc{font-size:11px;color:#b7a98a;margin-top:3px;line-height:1.4;}
-.lb-items{margin:5px 0 0;padding-left:16px;font-size:11px;color:#cfc6a8;}
+.log-lootbox{border-left:3px solid #3b82d6 !important;background:#0f1a28 !important;}
+.lb-head{font-family:'Barlow Condensed',sans-serif;color:#5a97dd;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
+.lb-name{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:#cfe2f4;margin-top:2px;}
+.lb-for{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#7d94aa;text-transform:uppercase;letter-spacing:.08em;margin-top:2px;}
+.lb-desc{font-size:11px;color:#9db4c8;margin-top:3px;line-height:1.4;}
+.lb-items{margin:5px 0 0;padding-left:16px;font-size:11px;color:#b3c4d6;}
 .lb-items li{margin:1px 0;}
-.lb-sealed{margin-top:5px;font-size:11px;color:#8a8570;font-style:italic;}
-.lb-note{color:#8a8570;font-style:italic;}
+.lb-sealed{margin-top:5px;font-size:11px;color:#6f8598;font-style:italic;}
+.lb-note{color:#6f8598;font-style:italic;}
 .lb-actions{margin-top:6px;}
-.lb-btn{background:#c8a020;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
-.lb-btn:hover:not(:disabled){background:#e0b83a;}
-.lb-btn:disabled{background:transparent;color:#8a8570;border:1px solid #4a463a;cursor:default;}
+.lb-btn{background:#3b82d6;color:#161616;border:none;border-radius:3px;padding:6px 12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;}
+.lb-btn:hover:not(:disabled){background:#4a95d8;}
+.lb-btn:disabled{background:transparent;color:#6f8598;border:1px solid #2a3a4a;cursor:default;}
 </style>
-<style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#c8a020)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
+<style>/* icon color policy: gold on black/light backgrounds, white on saturated colored/red backgrounds */.dcc-ico{color:var(--gold,#3b82d6)}.btn.primary .dcc-ico,.dice-roll-go .dcc-ico{color:#fff}</style>
 </head>
 <body>
 <div id="roll-toast"><div class="t-label"></div><div class="t-dice" data-da-inline></div><div class="t-result"></div><div class="t-detail"></div></div>
@@ -433,7 +433,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   <div class="sheet-title">
     <div class="sheet-title-text">DarkSpace</div>
     <div class="sheet-title-actions">
-      <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and auto-consumes ammo (bows spend an arrow, crossbows a bolt), uses up a scroll on casting, and marks a wand spent on a failed check (broken on a natural 1). Also locks the Talents box (the wizards write it). Turn off to handle AC, talents and these items by hand."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
+      <span class="ammo-toggle-lbl title-auto" onclick="toggleAutoConsume()" title="Auto: computes AC from your equipped armor and shield, and locks the Talents box (creation writes it). Turn off to handle AC and talents by hand."><span>Auto</span><span class="sw-toggle on" id="ammo-switch"><span class="sw-knob"></span></span></span>
       <button onclick="takeRest()" style="padding:6px 14px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;align-self:center;" onmouseover="this.style.background='#1a5a7a';this.style.color='white'" onmouseout="this.style.background='#1a2e3a';this.style.color='#6ac8df'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg> Rest</button>
     </div>
   </div>
@@ -511,25 +511,10 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         </table>
       </div>
 
-      <!-- TABS: Spells / Talents / Gear -->
+      <!-- TABS: Talents / Gear (DarkSpace has no spells — see The Triad) -->
       <div class="tabs-bar">
-        <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
-      </div>
-
-      <!-- SPELLS TAB -->
-      <div class="tab-panel" id="tab-spells">
-        <div class="sl"><span>Spells</span><label style="display:flex;align-items:center;gap:4px;text-transform:uppercase;color:#aaa;margin-left:auto;">Cast Mod
-          <select id="spell-stat" onchange="saveSheet(false)" style="background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:2px;color:#f8f8f6;padding:1px 4px;outline:none;">
-            <option value="">—</option>
-            <option value="int">INT</option>
-            <option value="wis">WIS</option>
-            <option value="cha">CHA</option>
-          </select>
-          <input type="text" id="spell-gbonus" placeholder="+0" title="Global bonus to all casting checks" style="width:26px;background:rgba(255,255,255,0.08);border:1px solid #555;border-radius:2px;color:#f8f8f6;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;padding:1px 2px;outline:none;text-align:center;" onchange="saveSheet(false)">
-        </label><button onclick="_spellShopMode=null;openSpellShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;letter-spacing:.08em;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M11.2 5.3C9.6 4.3 7.5 3.8 5 3.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c2.2 0 4 .4 5.4 1.2a1.2 1.2 0 0 0 .8.2V5.6a1 1 0 0 0-.0-.3Zm1.6 0V18a1.2 1.2 0 0 0 .8-.2c1.4-.8 3.2-1.2 5.4-1.2a1 1 0 0 0 1-1V4.8a1 1 0 0 0-1-1c-2.5 0-4.6.5-6.2 1.5Z"/><path d="M11.2 19.4c-1.5-.9-3.4-1.4-5.9-1.4a1 1 0 0 0 0 2c2.2 0 3.9.4 5.1 1.2a1.5 1.5 0 0 0 1.6 0c1.2-.8 2.9-1.2 5.1-1.2a1 1 0 0 0 0-2c-2.5 0-4.4.5-5.9 1.4a.5.5 0 0 1-.1 0Z" opacity=".55"/></svg> Spellbook</button></div>
-        <div id="spells-list"></div>
       </div>
 
       <!-- TALENTS TAB -->
@@ -544,13 +529,13 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
       <!-- GEAR TAB (coins + gear + free to carry) -->
       <div class="tab-panel" id="tab-gear">
         <div class="coin-row">
-          <div class="coin-cell"><span class="coin-label" id="coin-gp-lbl">GP</span><input type="text" class="coin-input" id="coin-gp" placeholder="0"></div>
-          <div class="coin-cell"><span class="coin-label">SP</span><input type="text" class="coin-input" id="coin-sp" placeholder="0"></div>
-          <div class="coin-cell"><span class="coin-label">CP</span><input type="text" class="coin-input" id="coin-cp" placeholder="0"></div>
+          <div class="coin-cell"><span class="coin-label" id="coin-gp-lbl">cr</span><input type="text" class="coin-input" id="coin-gp" placeholder="0"></div>
+          <div class="coin-cell" style="display:none;"><span class="coin-label">SP</span><input type="text" class="coin-input" id="coin-sp" placeholder="0"></div>
+          <div class="coin-cell" style="display:none;"><span class="coin-label">CP</span><input type="text" class="coin-input" id="coin-cp" placeholder="0"></div>
         </div>
         <div class="sl"><span>Gear</span>
           <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
-            <button onclick="openShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">+ Item</button>
+            <button onclick="openShop()" style="padding:2px 10px;background:#10192b;color:#3b82d6;border:1px solid #1e466f;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#1e466f';this.style.color='white'" onmouseout="this.style.background='#10192b';this.style.color='#3b82d6'">+ Item</button>
           </div></div>
         <div id="gear-list"></div>
 
@@ -583,7 +568,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
   </div>
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid var(--rule);" title="Link this sheet to a campaign" aria-label="Campaign"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg></button>
-    <button id="hdr-create-btn" class="log-action-btn" onclick="startCharWizard()" style="border:1px solid #7a5a00;background:transparent;color:#e8c84a;" title="Create character" aria-label="Create character">Create</button>
+    <button id="hdr-create-btn" class="log-action-btn" onclick="startCharWizard()" style="border:1px solid #1e466f;background:transparent;color:#5fa3ea;" title="Create character" aria-label="Create character">Create</button>
     <button class="log-action-btn" onclick="openRules()" style="border:1px solid #2f4a2f;background:#1e2a1e;color:#b8d8b8;" title="Quick rules" aria-label="Quick rules">Rules</button>
     <button id="hdr-ship-btn" class="log-action-btn" onclick="openDarkSpaceShip()" style="display:none;border:1px solid #1a5a7a;background:#0d1a20;color:#6ac8df;" title="Starship" aria-label="Starship">🚀 Ship</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export sheet as JSON" aria-label="Export">Export</button>
@@ -918,17 +903,65 @@ function allSpells() {
 //   kind: 'gear' | 'weapon' | 'armor' | 'shield' | 'magic' | 'ammo'
 let _homebrewItems = [];
 
+// DarkSpace weapons (melee + ranged + explosives) mapped into SD_WEAPONS shape
+// so the attack/equip engine recognises them exactly like any weapon. The book
+// stores range as C/N/F codes and damage as `dmg`; translate to the sheet's
+// Close/Near/Far + `damage`/`type` shape.
+function darkSpaceWeaponBook() {
+  const D = (typeof window !== 'undefined' && window.DARKSPACE) ? window.DARKSPACE : {};
+  const RMAP = { C: 'Close', N: 'Near', F: 'Far' };
+  const mapRange = (r) => String(r || '').split('/').map(x => RMAP[x.trim()] || x.trim()).join('/');
+  const rows = [];
+  (D.meleeWeapons || []).forEach(w => rows.push({
+    name: w.name, type: /\bTh\b/.test(w.props || '') ? 'M/R' : 'M',
+    range: mapRange(w.range), damage: w.dmg || '', props: w.props || ''
+  }));
+  (D.rangedWeapons || []).forEach(w => rows.push({
+    name: w.name, type: 'R', range: mapRange(w.range), damage: w.dmg || '',
+    props: [w.group, w.props].filter(Boolean).join(', ')
+  }));
+  (D.explosives || []).forEach(w => rows.push({
+    name: w.name, type: 'R', range: mapRange(w.range), damage: w.dmg || '', props: w.props || ''
+  }));
+  return rows;
+}
+
 // Homebrew weapons in SD_WEAPONS shape, so they equip and roll like any weapon.
+// In DarkSpace mode the book is the DARKSPACE weapon tables (plus Strikes for
+// unarmed) rather than the Shadowdark fantasy weapons.
 function allWeapons() {
   if (_catalogCache.weapons) return _catalogCache.weapons;
-  const book = (typeof SD_WEAPONS !== 'undefined') ? SD_WEAPONS : [];
-  return (_catalogCache.weapons = book.concat(_homebrewItems.filter(i => i.kind === 'weapon').map(i => ({
+  let book;
+  if (typeof darkSpaceOn === 'function' && darkSpaceOn()) {
+    const strikes = (typeof SD_WEAPONS !== 'undefined') ? SD_WEAPONS.filter(w => w.name === 'Strikes') : [];
+    book = strikes.concat(darkSpaceWeaponBook());
+  } else {
+    book = (typeof SD_WEAPONS !== 'undefined') ? SD_WEAPONS : [];
+  }
+  return (_catalogCache.weapons = book.concat(dsHomebrewWeapons()).concat(_homebrewItems.filter(i => i.kind === 'weapon').map(i => ({
     name:   i.name,
     type:   i.wtype || 'M',
     range:  i.range || 'Close',
     damage: i.damage || '1d4',
     props:  i.props || ''
   }))));
+}
+
+// DarkSpace homebrew equipment of category melee/ranged/explosive, mapped into
+// weapon shape. (SD homebrew uses kind:'weapon'; DS uses category + dmg/ac/cost.)
+function dsHomebrewWeapons() {
+  if (!(typeof darkSpaceOn === 'function' && darkSpaceOn())) return [];
+  const RMAP = { C: 'Close', N: 'Near', F: 'Far' };
+  const mapRange = (r) => String(r || '').split('/').map(x => RMAP[x.trim()] || x.trim()).join('/');
+  return _homebrewItems
+    .filter(i => i.dsEquip && (i.category === 'melee' || i.category === 'ranged' || i.category === 'explosive'))
+    .map(i => ({
+      name: i.name,
+      type: i.category === 'melee' ? (/\bTh\b/.test(i.props || '') ? 'M/R' : 'M') : 'R',
+      range: mapRange(i.range) || 'Near',
+      damage: i.dmg || i.damage || '1d4',
+      props: i.props || ''
+    }));
 }
 
 // The book's two ammo entries, plus anything created as homebrew ammo. Used to
@@ -940,7 +973,13 @@ const BOOK_AMMO = ['Arrows', 'Crossbow bolts'];
 function allArmorAC() {
   if (_catalogCache.armor) return _catalogCache.armor;
   const book = (typeof AC_ARMOR !== 'undefined') ? AC_ARMOR : [];
-  return (_catalogCache.armor = book.concat(_homebrewItems.filter(i => i.kind === 'armor').map(i => ({
+  const dsArmor = _homebrewItems.filter(i => i.dsEquip && i.category === 'armor').map(i => ({
+    match: String(i.name || '').toLowerCase(),
+    // DarkSpace armor stores AC as a string, e.g. "11 + DEX mod" or "15".
+    base:  parseInt(String(i.ac || '').match(/\d+/)?.[0]) || 10,
+    dex:   /dex/i.test(String(i.ac || ''))
+  }));
+  return (_catalogCache.armor = book.concat(dsArmor).concat(_homebrewItems.filter(i => i.kind === 'armor').map(i => ({
     match: String(i.name || '').toLowerCase(),
     base:  parseInt(i.acBase) || 10,
     dex:   !!i.acDex
@@ -1188,7 +1227,7 @@ function onStatChange(id) {
 
 // ═══ TABS (Spells / Talents / Gear) ═════════════════════════════════════════
 var _tab = 'gear';
-const TABS = ['spells','talents','gear'];
+const TABS = ['talents','gear'];
 function setTab(name){
   if(TABS.indexOf(name) < 0) name = 'gear';
   _tab = name;
@@ -2054,7 +2093,7 @@ function addAttackRow() {
   const tbody = document.getElementById('attacks-body');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input type="text" class="atk-name" placeholder="Longsword, Fireball..."></td>
+    <td><input type="text" class="atk-name" placeholder="Vibro blade, Energy pistol..."></td>
     <td><input type="text" class="atk-bonus" style="width:100%;text-align:center;" placeholder="+0"></td>
     <td><input type="text" class="atk-stat" style="width:100%;text-align:center;" placeholder="STR" title="Stat used for this attack — STR, DEX, CON, INT, WIS or CHA"></td>
     <td><input type="text" class="atk-range" style="width:100%;text-align:center;" placeholder="Close" title="Range — Close, Near or Far"></td>
@@ -2071,6 +2110,7 @@ let _spellCount = 0;
 
 function addSpellRow(num) {
   const list = document.getElementById('spells-list');
+  if(!list) return null;   // DarkSpace: no spells subsystem on this sheet
   const row = document.createElement('div');
   row.className = 'spell-row';
   row.innerHTML =
@@ -2239,6 +2279,7 @@ function autoEquipArmorFromGear() {
 
 function buildSpells() {
   const list = document.getElementById('spells-list');
+  if(!list) return;   // DarkSpace: no spells subsystem on this sheet
   const hdr = document.createElement('div');
   hdr.className = 'spell-header';
   hdr.style.cssText = 'display:grid;grid-template-columns:16px 1fr 32px 40px 62px 74px 76px 22px 22px 28px;align-items:center;gap:2px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
@@ -2317,7 +2358,7 @@ function buildGear() {
     row.className = 'gear-slot';
     row.style.cssText = 'display:flex;align-items:center;border-bottom:1px solid var(--rule);padding:1px 6px;gap:3px;overflow:hidden;';
     row.innerHTML = `
-      <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" title="Equip" style="width:16px;flex:0 0 16px;margin:0;cursor:pointer;visibility:hidden;accent-color:#c8a020;">
+      <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" title="Equip" style="width:16px;flex:0 0 16px;margin:0;cursor:pointer;visibility:hidden;accent-color:#3b82d6;">
       <span style="font-size:8px;font-weight:700;color:var(--muted);width:16px;flex:0 0 16px;">${i}.</span>
       <input type="text" class="gear-name" oninput="onGearNameInput(this)" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
       <input type="text" class="gear-qty" style="width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;" placeholder="">
@@ -2425,7 +2466,7 @@ function addLog(label, result, detail, type='normal') {
   const div = document.createElement('div');
   div.className = 'log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
   const advLabel = advState==='advantage'?' <span style="color:#6dbf6d;font-size:8px;">▲ADV</span>'
-                 : advState==='disadvantage'?' <span style="color:#df6a6a;font-size:8px;">▼DIS</span>':'';
+                 : advState==='disadvantage'?' <span style="color:#8ab4e0;font-size:8px;">▼DIS</span>':'';
   div.innerHTML = `<div class="roll-label">${_logEsc(label)}${advLabel}</div><div class="roll-result">${_logIcon(result)}</div><div class="roll-detail">${_logEsc(detail)}</div>`;
   if(typeof campaignBroadcast === 'function') campaignBroadcast(label, result, detail, type);
   entries.insertBefore(div, entries.firstChild);
@@ -3871,7 +3912,7 @@ function exportPrintable() {
 
   <div class="fields">
     ${field('Background', V('f-background'))}
-    ${field('Deity', V('f-deity'))}
+    ${field('Motivation', V('f-alignment'))}
     ${field('XP', V('xp-current') + ' / ' + V('xp-next'))}
   </div>
 
@@ -3899,9 +3940,7 @@ function exportPrintable() {
       <section>
         <h2>Gear <span class="h2sub">${gear.filter(g=>!g.off).length} slots used</span></h2>
         <div class="coins">
-          <div class="coin"><b>GP</b> ${esc(V('coin-gp') || '0')}</div>
-          <div class="coin"><b>SP</b> ${esc(V('coin-sp') || '0')}</div>
-          <div class="coin"><b>CP</b> ${esc(V('coin-cp') || '0')}</div>
+          <div class="coin"><b>Credits</b> ${esc(V('coin-gp') || '0')} cr</div>
         </div>
         <ul class="gear">${gearRows}</ul>
         ${V('free-carry') ? `<div class="free"><b>Free to carry:</b> ${esc(V('free-carry'))}</div>` : ''}
@@ -4045,7 +4084,7 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   .main-body > .left-col > .sl:nth-child(3){order:4;}  /* Trackers label */
   #trk-list{order:4;}
   .tabs-bar{order:5;}
-  #tab-spells,#tab-talents,#tab-gear{order:6;}
+  #tab-talents,#tab-gear{order:6;}
   /* Ability scores stay stacked (single column) on phones */
   .stats-grid{display:flex;flex-direction:column;}
   .hdr-fields,.hdr-fields-2{grid-template-columns:1fr 1fr;}
@@ -4287,10 +4326,10 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 
 <!-- ═══ CHARACTER CREATION WIZARD ═══ -->
 <div id="ccw-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #c8a020;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #3b82d6;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#c8a020;line-height:1;">Create Character</div>
+        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3b82d6;line-height:1;">Create Character</div>
         <div id="ccw-step" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#888;margin-top:3px;"></div>
       </div>
       <button onclick="ccwClose()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -4298,7 +4337,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
     <div id="ccw-body" style="padding:14px 16px;overflow-y:auto;flex:1;"></div>
     <div style="padding:10px 16px;background:#141414;border-top:1px solid #2a2a2a;display:flex;justify-content:space-between;">
       <button id="ccw-back" onclick="ccwBack()" style="padding:7px 16px;background:transparent;color:#888;border:1px solid #2a2a2a;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.1em;text-transform:uppercase;">← Back</button>
-      <button id="ccw-next" onclick="ccwNext()" style="padding:7px 16px;background:#c8a020;color:#1a1a1a;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:900;font-size:10px;letter-spacing:.1em;text-transform:uppercase;">Next →</button>
+      <button id="ccw-next" onclick="ccwNext()" style="padding:7px 16px;background:#3b82d6;color:#1a1a1a;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:900;font-size:10px;letter-spacing:.1em;text-transform:uppercase;">Next →</button>
     </div>
   </div>
 </div>
@@ -4369,7 +4408,7 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 .ccw-roll-btn:hover{background:#1a5a7a;color:white;}
 .ccw-stat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
 .ccw-stat{background:#141414;border:1px solid #2a2a2a;padding:8px 4px;text-align:center;}
-.ccw-stat-name{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:#c8a020;letter-spacing:.1em;}
+.ccw-stat-name{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;color:#3b82d6;letter-spacing:.1em;}
 .ccw-stat-val{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:900;color:#eee;}
 .ccw-stat-mod{font-family:'Montserrat',sans-serif;font-size:11px;color:#888;}
 .ccw-choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
@@ -4377,16 +4416,16 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
    Each group is its own 2-column button grid on desktop. On mobile the two
    groups stay side by side but each drops to a single column. */
 .ccw-class-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;}
-.ccw-class-grouphdr{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#c8a020;margin:0 0 6px;}
+.ccw-class-grouphdr{font-family:'Montserrat',sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#3b82d6;margin:0 0 6px;}
 .ccw-class-grid{grid-template-columns:repeat(2,1fr);}
 .ccw-choice{background:#141414;border:1px solid #2a2a2a;padding:8px 10px;cursor:pointer;text-align:left;transition:border-color .1s;}
-.ccw-choice:hover{border-color:#c8a020;}
-.ccw-choice.selected{border-color:#c8a020;background:#241f10;}
+.ccw-choice:hover{border-color:#3b82d6;}
+.ccw-choice.selected{border-color:#3b82d6;background:#10192b;}
 .ccw-choice-name{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#eee;}
 .ccw-choice-desc{font-family:'Montserrat',sans-serif;font-size:9px;color:#888;line-height:1.4;margin-top:2px;}
 .ccw-result{background:#141414;border-left:3px solid #6ac8df;padding:8px 12px;font-family:'Montserrat',sans-serif;font-size:12px;color:#eee;margin-top:8px;line-height:1.5;}
 .ccw-summary{background:#0f0f0f;border:1px solid #2a2a2a;padding:10px 12px;margin-top:12px;font-family:'Montserrat',sans-serif;font-size:11px;color:#ccc;line-height:1.7;}
-.ccw-summary-title{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#c8a020;margin-bottom:4px;}
+.ccw-summary-title{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#3b82d6;margin-bottom:4px;}
 
 /* ══ ROUNDED BUTTONS ══════════════════════════════════════════════════════
    Applied last so it wins over the per-button rules above. Deliberately
@@ -4429,10 +4468,10 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 
 <!-- ═══ ITEM SHOP ═══ -->
 <div id="shop-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #c8a020;max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #3b82d6;max-width:520px;width:100%;height:85vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#c8a020;line-height:1;">Item Shop</div>
+        <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3b82d6;line-height:1;">Item Shop</div>
         <div id="shop-coins" style="font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;color:#888;margin-top:3px;"></div>
       </div>
       <button onclick="closeShop()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
@@ -4446,74 +4485,37 @@ window.SD_SPELL_FULL  = (typeof SD_SPELL_FULL  !== 'undefined') ? SD_SPELL_FULL 
 
 <script>
 // ═══ ITEM SHOP ═════════════════════════════════════════════════════════════
+// ── DarkSpace shop — built from window.DARKSPACE (single source of truth,
+// loaded from /tools-data/sd-darkspace.js just above this block). Currency is
+// credits (cr); each item carries its cost in the `gp` field so the existing
+// buy/deduct plumbing (which spends from the credits box) works unchanged.
+const _DSHOP = (typeof window !== 'undefined' && window.DARKSPACE) ? window.DARKSPACE : {};
+function _dsWpnNote(w) {
+  return [w.dmg, w.range ? 'Range ' + w.range : '', w.group, w.props]
+    .filter(Boolean).join(' · ');
+}
 const SHOP_WEAPONS = [
-  {name:'Bastard Sword', gp:10, note:'1d8/1d10, Versatile, 2 slots'},
-  {name:'Club',          cp:5,  note:'1d4'},
-  {name:'Crossbow',      gp:8,  note:'1d6, Two-handed, Loading'},
-  {name:'Dagger',        gp:1,  note:'1d4, Finesse, Thrown'},
-  {name:'Greataxe',      gp:10, note:'1d8/1d10, Versatile, 2 slots'},
-  {name:'Greatsword',    gp:12, note:'1d12, Two-handed, 2 slots'},
-  {name:'Javelin',       sp:5,  note:'1d4, Thrown'},
-  {name:'Longbow',       gp:8,  note:'1d8, Two-handed'},
-  {name:'Longsword',     gp:9,  note:'1d8'},
-  {name:'Mace',          gp:5,  note:'1d6'},
-  {name:'Shortbow',      gp:6,  note:'1d4, Two-handed'},
-  {name:'Shortsword',    gp:7,  note:'1d6'},
-  {name:'Spear',         sp:5,  note:'1d6, Thrown'},
-  {name:'Staff',         sp:5,  note:'1d4, Two-handed'},
-  {name:'Warhammer',     gp:10, note:'1d10, Two-handed, 2 slots'},
-  {name:'Blowgun',       gp:5,  note:'1 damage, Near. Firing from hiding does not reveal your position'},
-  {name:'Bolas',         gp:2,  note:'Near. Hit a legged creature horse-sized or smaller: speed drops to close until it frees itself (DC 15 STR/DEX)'},
-  {name:'Morningstar',   gp:5,  note:'1d6/1d8, Versatile'},
-  {name:'Pike',          gp:10, note:'1d10, Reach (double close), Two-handed, 2 slots'},
-  {name:'Razor Chain',   gp:12, note:'1d6, Close/Near, Finesse, Lash'},
-  {name:'Scimitar',      gp:8,  note:'1d6, Finesse'},
-  {name:'Shuriken',      gp:1,  note:'1d4, Near. Can be strewn on the ground: 1 damage and half speed for 10 rounds'},
-  {name:'Sling',         sp:5,  note:'1d4, Far'},
-  {name:'Whip',          gp:10, note:'1d4, Close/Near, Finesse, Lash'},
-];
-const SHOP_ARMOR = [
-  {name:'Leather armor', gp:10, note:'AC 11 + DEX'},
-  {name:'Chainmail',     gp:60, note:'AC 13 + DEX, disadv. stealth/swim, 2 slots'},
-  {name:'Plate mail',    gp:130,note:'AC 15, no swim, disadv. stealth, 3 slots'},
-  {name:'Shield',        gp:10, note:'+2 AC, occupies one hand'},
-];
-const SHOP_BASIC = [
-  {name:'Arrows',         qty:'20', gp:1,  note:'Ammo for bows'},
-  {name:'Backpack',       gp:2,  note:'First one free to carry'},
-  {name:'Ball bearing',   gp:1,  note:'DC 12 DEX to roll it a near distance in a straight line. Triggers traps as if an adult human stepped there; lost once it does.'},
-  {name:'Caltrops',       sp:5,  note:'One bag'},
-  {name:'Candle',         qty:'3', cp:5,  note:'Close light for 20 real minutes. Can be hidden behind a cloak or hand.'},
-  {name:'Charcoal, jar',  gp:1,  note:'One use. Leeches the poison out of an edible item, making it safe.'},
-  {name:'Crossbow bolts', qty:'20', gp:1,  note:'Ammo for crossbows'},
-  {name:'Crawling Kit',   gp:7,  note:'Backpack, flint & steel, 2 torches, 3 rations, 10 iron spikes, grappling hook, rope', kit:true},
-  {name:'Crowbar',        sp:5,  note:''},
-  {name:'Flash seed',     gp:1,  note:'Sulfurous seed that bursts in a flash of light on impact. Dark-adapted creatures in near who see it: DC 12 CON or blinded 1 round.'},
-  {name:'Flask or bottle',sp:3,  note:'Holds one draught'},
-  {name:'Flint & Steel',  sp:5,  note:'Routine fire-lighting succeeds'},
-  {name:'Glow paste, jar',gp:2,  note:'Five uses. Sticky paste glows faintly green when exposed to air, leaving a subtle mark for one day.'},
-  {name:'Grappling Hook', gp:1,  note:''},
-  {name:'Holy water, flask', sp:5, note:'Deals 2d4 damage to an undead creature.'},
-  {name:'Iron Spikes',    qty:'10', gp:1,  note:''},
-  {name:'Lantern',        gp:5,  note:'Casts light like torch, shutter, 1 hr/oil'},
-  {name:'Lantern hook',   sp:5,  note:'Connects to a belt, allowing hands-free use of a lantern.'},
-  {name:"Miner's putty, jar", sp:5, note:'Three uses of tacky putty. One glob bonds 500 lbs. of weight; dries and flakes off in a day.'},
-  {name:'Mirror',         gp:10, note:''},
-  {name:'Net',            sp:5,  note:'Close range, one target. DC 15 DEX to entrap a human-sized or smaller creature. It escapes on a DC 12 DEX check on its turn.'},
-  {name:'Oil, flask',     sp:5,  note:'Fuel or thrown weapon, 1d4/round'},
-  {name:'Pole',           sp:5,  note:"Wooden, 10' long"},
-  {name:'Rations',        qty:'3', sp:5,  note:'Food + water, one day each'},
-  {name:'Rope (60 ft)',   gp:1,  note:'Hemp'},
-  {name:'Rope, morzo silk', gp:50, note:"Pencil-thin 60' rope of morzo worm silk. Immune to all damage except from a silvered or magical source."},
-  {name:'Tallow, jar',    sp:5,  note:'One application. Greases a door-sized object, a person, or a close area, making it absurdly slippery for a day.'},
-  {name:'Torch',          sp:5,  note:'Near light, 1 hour'},
-  {name:"Traveler's lamp", gp:10, note:'Burns one flask of oil a day. Enough light to see during hex travel in darkness, but not in combat or crawling rounds.'},
-];
+  ...(_DSHOP.meleeWeapons || []),
+  ...(_DSHOP.rangedWeapons || []),
+  ...(_DSHOP.explosives || []),
+].map(w => ({ name:w.name, gp:w.cost, kind:'weapon', note:_dsWpnNote(w) }));
+const SHOP_ARMOR = (_DSHOP.armor || []).map(a => ({
+  name:a.name, gp:a.cost, kind:'armor',
+  note:['AC ' + a.ac, a.props].filter(Boolean).join(' · '),
+}));
+const SHOP_BASIC = (_DSHOP.gear || []).map(g => ({
+  name:g.name, gp:g.cost,
+  note:[g.desc, g.slot ? 'Slot: ' + g.slot : '', g.ec ? 'EC' : '']
+    .filter(Boolean).join(' · '),
+}));
+// Advanced Tech replaces Shadowdark's Magic Items. The rulebook gives no buy
+// price for most of it (found/installed via Downtime), so these Add-only.
+const SHOP_TECH = (_DSHOP.advancedTech || []).map(t => ({ name:t.name, note:t.text }));
 const SHOP_TABS = [
-  {id:'basic',   label:'Basic Gear'},
+  {id:'basic',   label:'Gear'},
   {id:'weapons', label:'Weapons'},
   {id:'armor',   label:'Armor'},
-  {id:'magic',   label:'Magic Items'},
+  {id:'tech',    label:'Adv. Tech'},
   {id:'homebrew',label:'Homebrew'},
 ];
 let _shopTab = 'basic';
@@ -4545,12 +4547,10 @@ function shopItemAllowed(tab, it) {
 function shopToggleClassOnly(on) { _shopClassOnly = !!on; shopRender(); }
 
 function shopFmtCost(it) {
-  if(it.gp) return it.gp+' gp';
-  if(it.sp) return it.sp+' sp';
-  if(it.cp) return it.cp+' cp';
+  if(it.gp) return it.gp+' cr';
   return '—';
 }
-function shopCostCp(it) { return (it.gp||0)*100 + (it.sp||0)*10 + (it.cp||0); }
+function shopCostCp(it) { return (it.gp||0); }
 
 function openShop() {
   _shopTab = 'basic';   // always open on Basic Gear
@@ -4606,7 +4606,7 @@ function shopRender() {
   // Tabs
   const tabBar = document.getElementById('shop-tabs');
   tabBar.innerHTML = SHOP_TABS.map(t=>
-    '<button onclick="shopSetTab(\''+t.id+'\')" style="flex:1;padding:8px 4px;background:'+(_shopTab===t.id?'#c8a020':'#141414')+';color:'+(_shopTab===t.id?'#1a1a1a':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:9px;letter-spacing:.08em;text-transform:uppercase;">'+t.label+'</button>'
+    '<button onclick="shopSetTab(\''+t.id+'\')" style="flex:1;padding:8px 4px;background:'+(_shopTab===t.id?'#3b82d6':'#141414')+';color:'+(_shopTab===t.id?'#1a1a1a':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:9px;letter-spacing:.08em;text-transform:uppercase;">'+t.label+'</button>'
   ).join('');
 
   // Magic subtabs
@@ -4614,25 +4614,24 @@ function shopRender() {
   if(_shopTab==='magic') {
     subBar.style.display = 'flex';
     subBar.innerHTML = SHOP_MAGIC_SUBS.map(s=>
-      '<button onclick="shopSetMagicSub(\''+s.replace(/'/g,"\\'")+'\')" style="flex:1 0 auto;padding:5px 6px;background:'+(_shopMagicSub===s?'#3a3320':'#0f0f0f')+';color:'+(_shopMagicSub===s?'#c8a020':'#666')+';border:none;border-bottom:2px solid '+(_shopMagicSub===s?'#c8a020':'transparent')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:8px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;">'+s+'</button>'
+      '<button onclick="shopSetMagicSub(\''+s.replace(/'/g,"\\'")+'\')" style="flex:1 0 auto;padding:5px 6px;background:'+(_shopMagicSub===s?'#1a2c44':'#0f0f0f')+';color:'+(_shopMagicSub===s?'#3b82d6':'#666')+';border:none;border-bottom:2px solid '+(_shopMagicSub===s?'#3b82d6':'transparent')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:8px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;">'+s+'</button>'
     ).join('');
   } else {
     subBar.style.display = 'none';
     subBar.innerHTML = '';
   }
 
-  // GP display
+  // Credits display
   const gp = document.getElementById('coin-gp')?.value || '0';
-  const sp = document.getElementById('coin-sp')?.value || '0';
-  const cp = document.getElementById('coin-cp')?.value || '0';
-  document.getElementById('shop-coins').innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><circle cx="15" cy="9.3" r="5.2" opacity=".65"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9 8.4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm0 1.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg> '+(gp||0)+' gp · '+(sp||0)+' sp · '+(cp||0)+' cp';
+  document.getElementById('shop-coins').innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><circle cx="15" cy="9.3" r="5.2" opacity=".65"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9 8.4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm0 1.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg> '+(gp||0)+' cr';
 
   // Items
   const items = _shopTab==='weapons' ? SHOP_WEAPONS
               : _shopTab==='armor'   ? SHOP_ARMOR
               : _shopTab==='basic'   ? SHOP_BASIC
+              : _shopTab==='tech'    ? SHOP_TECH
               : _shopTab==='homebrew'? homebrewShopItems()
-              : shopMagicItems();
+              : SHOP_BASIC;
 
   // Class filter — only meaningful on the Weapons and Armor tabs
   const filterBar = document.getElementById('shop-classfilter');
@@ -4643,7 +4642,7 @@ function shopRender() {
     filterBar.style.display = 'flex';
     filterBar.innerHTML =
         '<label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#888;">'
-      +   '<input type="checkbox" '+(_shopClassOnly?'checked':'')+' onchange="shopToggleClassOnly(this.checked)" style="accent-color:#c8a020;width:15px;height:15px;cursor:pointer;">'
+      +   '<input type="checkbox" '+(_shopClassOnly?'checked':'')+' onchange="shopToggleClassOnly(this.checked)" style="accent-color:#3b82d6;width:15px;height:15px;cursor:pointer;">'
       +   cls+' Only'
       + '</label>'
       + (_shopClassOnly && hidden ? '<span style="margin-left:auto;font-family:Montserrat,sans-serif;font-size:9px;color:#5a5a5a;">'+hidden+' hidden</span>' : '');
@@ -4660,15 +4659,15 @@ function shopRender() {
   const body = document.getElementById('shop-body');
   const hbBar = (_shopTab==='homebrew')
     ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 4px 10px;border-bottom:1px solid #2a2a2a;margin-bottom:4px;">'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c8a020;">'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3b82d6;">'
       +   _homebrewItems.length + ' custom item' + (_homebrewItems.length===1?'':'s')
       + '</div>'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:8px;color:#666;text-align:right;flex-shrink:0;">Created on the Gear page</div>'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:8px;color:#666;text-align:right;flex-shrink:0;">Created on the Equipment page</div>'
       + '</div>'
     : '';
   if(!shown.length) {
     body.innerHTML = hbBar + (_shopTab==='homebrew'
-      ? '<div style="padding:18px 4px;text-align:center;font-family:Montserrat,sans-serif;font-size:10px;color:#666;line-height:1.6;">No custom items available.<br>Create homebrew on the Gear page, or ask your GM to share theirs with the campaign.</div>'
+      ? '<div style="padding:18px 4px;text-align:center;font-family:Montserrat,sans-serif;font-size:10px;color:#666;line-height:1.6;">No custom items available.<br>Create homebrew on the Equipment page, or ask your GM to share theirs with the campaign.</div>'
       : '<div style="padding:20px 4px;text-align:center;font-family:Montserrat,sans-serif;font-size:10px;color:#666;line-height:1.6;">Nothing here a '+(cls||'character')+' can use.<br>Untick the box above to see everything.</div>');
     return;
   }
@@ -4680,14 +4679,14 @@ function shopRender() {
     return '<div style="display:flex;align-items:center;gap:8px;padding:7px 4px;border-bottom:1px solid #1e1e1e;">'
       + '<div style="flex:1;min-width:0;'+(hasFull?'cursor:pointer;':'')+'" '+(hasFull?'onclick="toggleFullDesc(this)"':'')+'>'
       +   '<div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#eee;">'+it.name+(it.qty?' ('+it.qty+')':'')+'</div>'
-      +   (note?'<div class="desc-short" style="font-family:Montserrat,sans-serif;font-size:9px;color:#888;line-height:1.3;">'+note+(hasFull?' <span style="color:#c8a020;">▸ more</span>':'')+'</div>':'')
-      +   (hasFull?'<div class="desc-full" style="display:none;font-family:Montserrat,sans-serif;font-size:9px;color:#bbb;line-height:1.45;">'+it.full+' <span style="color:#c8a020;">▾ less</span></div>':'')
+      +   (note?'<div class="desc-short" style="font-family:Montserrat,sans-serif;font-size:9px;color:#888;line-height:1.3;">'+note+(hasFull?' <span style="color:#3b82d6;">▸ more</span>':'')+'</div>':'')
+      +   (hasFull?'<div class="desc-full" style="display:none;font-family:Montserrat,sans-serif;font-size:9px;color:#bbb;line-height:1.45;">'+it.full+' <span style="color:#3b82d6;">▾ less</span></div>':'')
       + '</div>'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:#c8a020;width:44px;text-align:right;flex-shrink:0;">'+cost+'</div>'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:#3b82d6;width:44px;text-align:right;flex-shrink:0;">'+cost+'</div>'
       + (canBuy
           ? '<button onclick="shopBuy(\''+_shopTab+'\','+i+')" style="padding:5px 10px;background:#1a2e3a;color:#6ac8df;border:1px solid #1a5a7a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Buy</button>'
           : '<span style="width:44px;flex-shrink:0;"></span>')
-      + '<button onclick="shopAdd(\''+_shopTab+'\','+i+')" style="padding:5px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Add</button>'
+      + '<button onclick="shopAdd(\''+_shopTab+'\','+i+')" style="padding:5px 10px;background:#10192b;color:#3b82d6;border:1px solid #1e466f;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Add</button>'
       + '</div>';
   }).join('');
 }
@@ -4698,8 +4697,9 @@ function shopRender() {
 // longer equippable, then applyItemBonuses recomputes the totals.
 function shopGetItem(tab, i) {
   const items = tab==='weapons' ? SHOP_WEAPONS : tab==='armor' ? SHOP_ARMOR
-              : tab==='basic' ? SHOP_BASIC : tab==='homebrew' ? homebrewShopItems()
-              : shopMagicItems();
+              : tab==='basic' ? SHOP_BASIC : tab==='tech' ? SHOP_TECH
+              : tab==='homebrew' ? homebrewShopItems()
+              : SHOP_BASIC;
   return items[i];
 }
 
@@ -4707,13 +4707,22 @@ function shopGetItem(tab, i) {
 function homebrewShopItems() {
   return _homebrewItems.map(i => {
     const bits = [];
-    if(i.kind === 'weapon') bits.push([i.damage, i.range, i.props].filter(Boolean).join(', '));
+    if(i.dsEquip) {
+      // DarkSpace homebrew equipment (category + dmg/ac/cost, credits).
+      if(i.category === 'melee' || i.category === 'ranged' || i.category === 'explosive') {
+        bits.push([i.dmg, i.range, i.props].filter(Boolean).join(', '));
+      } else if(i.category === 'armor') {
+        bits.push(['AC ' + (i.ac || '—'), i.props].filter(Boolean).join(' · '));
+      } else {
+        bits.push([i.desc, i.props].filter(Boolean).join(' · '));
+      }
+    } else if(i.kind === 'weapon') bits.push([i.damage, i.range, i.props].filter(Boolean).join(', '));
     else if(i.kind === 'armor')  bits.push('AC ' + (i.acBase || 10) + (i.acDex ? ' + DEX' : ''));
     else if(i.kind === 'shield') bits.push('+' + (i.acBonus || 0) + ' AC');
     if(i.note) bits.push(i.note);
     return {
       name: i.name,
-      gp:   parseFloat(i.gp) || 0,
+      gp:   parseFloat(i.gp) || parseFloat(i.cost) || 0,
       qty:  i.qty || '',
       note: bits.filter(Boolean).join(' · '),
       _hb:  i
@@ -4808,18 +4817,13 @@ function shopAdd(tab, i) {
 function shopBuy(tab, i) {
   const it = shopGetItem(tab, i);
   if(!it) return;
-  const cost = shopCostCp(it);
+  const cost = shopCostCp(it);   // credits
   const gpEl = document.getElementById('coin-gp');
-  const spEl = document.getElementById('coin-sp');
-  const cpEl = document.getElementById('coin-cp');
-  const total = (parseInt(gpEl?.value)||0)*100 + (parseInt(spEl?.value)||0)*10 + (parseInt(cpEl?.value)||0);
-  if(total < cost) { alert('Not enough coin! '+it.name+' costs '+shopFmtCost(it)+'.'); return; }
+  const total = parseInt(gpEl?.value) || 0;   // credits on hand
+  if(total < cost) { alert('Not enough credits! '+it.name+' costs '+shopFmtCost(it)+'.'); return; }
   if(!shopAddToGear(it)) return;
   if(tab==='weapons' || tab==='armor') equipShopWeapon(it.name);
-  const left = total - cost;
-  if(gpEl) gpEl.value = String(Math.floor(left/100));
-  if(spEl) spEl.value = String(Math.floor((left%100)/10));
-  if(cpEl) cpEl.value = String(left%10);
+  if(gpEl) gpEl.value = String(total - cost);
   addLog('Purchase','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',it.name+' — '+shopFmtCost(it),'normal');
   saveSheet(false);
   closeShop();
@@ -4865,7 +4869,7 @@ function openEnchantPicker(kind) {
   // Bonus buttons (+1..+3), default +1
   if(bonusEl) {
     bonusEl.innerHTML = [1,2,3].map(b =>
-      '<button data-bonus="'+b+'" onclick="enchantSetBonus('+b+')" style="flex:1;padding:8px 4px;background:'+(b===1?'#7a5a00':'#141414')+';color:'+(b===1?'#fff':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:13px;">+'+b+'</button>'
+      '<button data-bonus="'+b+'" onclick="enchantSetBonus('+b+')" style="flex:1;padding:8px 4px;background:'+(b===1?'#1e466f':'#141414')+';color:'+(b===1?'#fff':'#888')+';border:none;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:13px;">+'+b+'</button>'
     ).join('');
   }
   _enchantBonus = 1;
@@ -4879,7 +4883,7 @@ function enchantSetBonus(b) {
   _enchantBonus = b;
   document.querySelectorAll('#enchant-bonus button').forEach(btn => {
     const on = parseInt(btn.dataset.bonus) === b;
-    btn.style.background = on ? '#7a5a00' : '#141414';
+    btn.style.background = on ? '#1e466f' : '#141414';
     btn.style.color = on ? '#fff' : '#888';
   });
   enchantPreview();
@@ -4896,12 +4900,12 @@ function enchantPreview() {
   if(_enchantKind === 'weapon') {
     const w = (typeof SD_WEAPONS!=='undefined' ? SD_WEAPONS : []).find(x=>x.name===type);
     const dmg = w ? w.damage : '';
-    el.innerHTML = 'Adds <b style="color:#c8a020;">' + enchantName() + '</b> to gear'
+    el.innerHTML = 'Adds <b style="color:#3b82d6;">' + enchantName() + '</b> to gear'
       + (dmg ? ' and an attack (' + dmg + (dmg.includes('/')?' versatile':'') + ', +' + _enchantBonus + ' to hit &amp; damage).' : '.');
   } else {
     const a = ENCHANT_ARMOR.find(x=>x.name===type);
     const base = a ? a.note : '';
-    el.innerHTML = 'Adds <b style="color:#c8a020;">' + enchantName() + '</b> to gear'
+    el.innerHTML = 'Adds <b style="color:#3b82d6;">' + enchantName() + '</b> to gear'
       + (base ? ' (' + base + ', +' + _enchantBonus + ' AC).' : '.');
   }
 }
@@ -4981,19 +4985,19 @@ function openSpellPick(kind) {
 
 <!-- ═══ TRACKER PICKER ═══ -->
 <div id="trkpick-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1003;align-items:center;justify-content:center;padding:16px;" onclick="if(event.target===this)closeTrackerPicker()">
-  <div style="background:#1a1a1a;border:2px solid #7a5a00;max-width:400px;width:100%;max-height:85vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #1e466f;max-width:400px;width:100%;max-height:85vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#c8a020;line-height:1;">Trackers</div>
+      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3b82d6;line-height:1;">Trackers</div>
       <button onclick="closeTrackerPicker()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
     </div>
     <div style="padding:14px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
       <div style="font-family:Montserrat,sans-serif;font-size:9px;color:#777;">Tap to add or remove. Active ones are highlighted.</div>
       <div id="trkpick-grid" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
       <div>
-        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#c8a020;margin-bottom:5px;">Add your own</div>
+        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#3b82d6;margin-bottom:5px;">Add your own</div>
         <div style="display:flex;gap:7px;">
           <input type="text" id="trkpick-custom" placeholder="Tracker name" onkeydown="if(event.key==='Enter')addCustomTracker()" style="flex:1;min-width:0;box-sizing:border-box;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;padding:7px 8px;outline:none;">
-          <button onclick="addCustomTracker()" style="padding:7px 14px;background:#2a1f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Add</button>
+          <button onclick="addCustomTracker()" style="padding:7px 14px;background:#131f30;color:#3b82d6;border:1px solid #1e466f;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Add</button>
         </div>
       </div>
       <div style="display:flex;justify-content:flex-end;">
@@ -5024,22 +5028,22 @@ function openSpellPick(kind) {
 </div>
 
 <div id="enchant-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:1001;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #7a5a00;max-width:420px;width:100%;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #1e466f;max-width:420px;width:100%;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
-      <div id="enchant-title" style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#c8a020;line-height:1;">Enchanted Item</div>
+      <div id="enchant-title" style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#3b82d6;line-height:1;">Enchanted Item</div>
       <button onclick="closeEnchantPicker()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">✕</button>
     </div>
     <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px;">
       <div>
-        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#c8a020;margin-bottom:5px;">Type</div>
+        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#3b82d6;margin-bottom:5px;">Type</div>
         <select id="enchant-type" style="width:100%;padding:7px 8px;background:#0f0f0f;border:1px solid #2a2a2a;color:#eee;font-family:Montserrat,sans-serif;font-size:12px;outline:none;"></select>
       </div>
       <div>
-        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#c8a020;margin-bottom:5px;">Bonus</div>
+        <div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#3b82d6;margin-bottom:5px;">Bonus</div>
         <div id="enchant-bonus" style="display:flex;gap:6px;"></div>
       </div>
       <div id="enchant-preview" style="font-family:Montserrat,sans-serif;font-size:11px;color:#999;line-height:1.5;min-height:16px;"></div>
-      <button onclick="confirmEnchant()" style="padding:9px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;">Add to Gear</button>
+      <button onclick="confirmEnchant()" style="padding:9px;background:#10192b;color:#3b82d6;border:1px solid #1e466f;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:900;font-size:11px;letter-spacing:.08em;text-transform:uppercase;">Add to Gear</button>
     </div>
   </div>
 </div>
@@ -5103,7 +5107,7 @@ function spellShopRender() {
     + '<label title="Sorcerer spells (Cursed Scroll 5)" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b89ae0;cursor:pointer;"><input type="checkbox" '+(_spellShopSor?'checked':'')+' onchange="_spellShopSor=this.checked;spellShopRender()" style="accent-color:#5a3a8a;">Sorcerer</label>'
     + '<label title="Necromancer spells (Necromancer playtest)" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b89ae0;cursor:pointer;"><input type="checkbox" '+(_spellShopNec?'checked':'')+' onchange="_spellShopNec=this.checked;spellShopRender()" style="accent-color:#5a3a8a;">Necromancer</label>'
     + '<label title="Seer spells (Cursed Scroll 3)" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#b89ae0;cursor:pointer;"><input type="checkbox" '+(_spellShopSee?'checked':'')+' onchange="_spellShopSee=this.checked;spellShopRender()" style="accent-color:#5a3a8a;">Seer</label>'
-    + '<label title="Spells you created yourself" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c8a020;cursor:pointer;"><input type="checkbox" '+(_spellShopHb?'checked':'')+' onchange="_spellShopHb=this.checked;spellShopRender()" style="accent-color:#c8a020;">Homebrew</label>';
+    + '<label title="Spells you created yourself" style="display:flex;align-items:center;gap:5px;white-space:nowrap;flex:0 0 auto;font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3b82d6;cursor:pointer;"><input type="checkbox" '+(_spellShopHb?'checked':'')+' onchange="_spellShopHb=this.checked;spellShopRender()" style="accent-color:#3b82d6;">Homebrew</label>';
 
   // "Known" = genuinely learned spells only. Scroll/wand rows (data-src) are
   // items, not learned spells, so they must not affect the Spellbook's
@@ -5126,7 +5130,7 @@ function spellShopRender() {
 
   const createBar = (_spellShopHb && !_spellShopMode)
     ? '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 4px 10px;border-bottom:1px solid #2a2a2a;margin-bottom:4px;">'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#c8a020;">Homebrew · '
+      + '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#3b82d6;">Homebrew · '
       +   _homebrewSpells.length + ' spell' + (_homebrewSpells.length===1?'':'s')
       + '</div>'
       + '<div style="font-family:Montserrat,sans-serif;font-size:8px;color:#666;text-align:right;flex-shrink:0;">Created on the Spells page</div>'
@@ -5145,9 +5149,9 @@ function spellShopRender() {
       +   (sFull?'<div class="desc-full" style="display:none;font-family:Montserrat,sans-serif;font-size:9px;color:#bbb;line-height:1.45;">'+sFull+' <span style="color:#b89ae0;">▾ less</span></div>':'')
       + '</div>'
       + (_spellShopMode
-          ? '<button onclick="inscribeSpell(\''+s.name.replace(/'/g,"\\'")+'\',\''+s.caster+'\')" style="padding:5px 10px;background:'+(_spellShopMode==='wand'?'#12283a':'#2a1f10')+';color:'+(_spellShopMode==='wand'?'#7ab8e0':'#c8a020')+';border:1px solid '+(_spellShopMode==='wand'?'#2d5a7a':'#7a5a00')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">'+(_spellShopMode==='wand'?'Wand':'Scroll')+' ▸</button>'
+          ? '<button onclick="inscribeSpell(\''+s.name.replace(/'/g,"\\'")+'\',\''+s.caster+'\')" style="padding:5px 10px;background:'+(_spellShopMode==='wand'?'#12283a':'#131f30')+';color:'+(_spellShopMode==='wand'?'#7ab8e0':'#3b82d6')+';border:1px solid '+(_spellShopMode==='wand'?'#2d5a7a':'#1e466f')+';cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">'+(_spellShopMode==='wand'?'Wand':'Scroll')+' ▸</button>'
           : (isKnown
-              ? '<button onclick="unlearnSpell(\''+s.name.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Unlearn</button>'
+              ? '<button onclick="unlearnSpell(\''+s.name.replace(/'/g,"\\'")+'\')" style="padding:5px 10px;background:#132a44;color:#9db8de;border:1px solid #274a7a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Unlearn</button>'
               : '<button onclick="learnSpell(\''+s.name.replace(/'/g,"\\'")+'\',\''+s.caster+'\')" style="padding:5px 10px;background:#2a1a3a;color:#b89ae0;border:1px solid #5a3a8a;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:9px;letter-spacing:.06em;text-transform:uppercase;flex-shrink:0;">Learn</button>'))
       + '</div>';
   }).join('');
@@ -5239,9 +5243,9 @@ function inscribeSpell(name, caster) {
 
 <!-- ═══ CAMPAIGN LINK ═══ -->
 <div id="rules-overlay" onclick="if(event.target===this)closeRules()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#1a1a1a;border:2px solid #c8a020;border-radius:6px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;">
+  <div style="background:#1a1a1a;border:2px solid #3b82d6;border-radius:6px;max-width:860px;width:100%;max-height:92vh;display:flex;flex-direction:column;">
     <div style="background:#0a0a0a;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#e0c060;line-height:1;">Quick Rules</div>
+      <div style="font-family:'JSL Blackletter','UnifrakturMaguntia',cursive;font-size:20px;color:#5a97dd;line-height:1;">Quick Rules</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <button id="dsref-open-btn" onclick="openDarkSpaceRef()" style="display:none;padding:5px 12px;background:#0d1a20;color:#6ac8df;border:1px solid #1a5a7a;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;">🚀 DarkSpace Reference</button>
         <button onclick="closeRules()" style="background:transparent;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 4px;">&#10005;</button>
@@ -5259,8 +5263,13 @@ function openRules() {
   let rows = (typeof SD_QUICK_RULES !== 'undefined' && Array.isArray(SD_QUICK_RULES)) ? SD_QUICK_RULES : [];
   // While HeroDark mode is on, prepend its rules to the panel.
   if(typeof heroDarkOn === 'function' && heroDarkOn() && typeof HERODARK_QUICK_RULES !== 'undefined') rows = HERODARK_QUICK_RULES.concat(rows);
-  // While DarkSpace mode is on, prepend its rules to the panel.
-  if(typeof darkSpaceOn === 'function' && darkSpaceOn() && typeof window.DARKSPACE !== 'undefined' && Array.isArray(window.DARKSPACE.quickRules)) rows = window.DARKSPACE.quickRules.concat(rows);
+  // While DarkSpace mode is on, drop the fantasy-only Shadowdark rows (spells,
+  // gold coins) and prepend the DarkSpace rules instead — the rest are neutral.
+  if(typeof darkSpaceOn === 'function' && darkSpaceOn()) {
+    const DROP = new Set(['Spellcasting checks', 'Spell criticals', 'Focus spells', 'Scrolls & wands', 'Coins & free slots']);
+    rows = rows.filter(r => !DROP.has(r && r.title));
+    if(typeof window.DARKSPACE !== 'undefined' && Array.isArray(window.DARKSPACE.quickRules)) rows = window.DARKSPACE.quickRules.concat(rows);
+  }
   body.innerHTML = rows.length
     ? rows.map(r => '<h4>' + _qrEsc(r.title) + (r.page ? ' <span style="font-weight:400;color:#666;font-size:10px;">p.' + _qrEsc(String(r.page)) + '</span>' : '') + '</h4><p>' + _qrEsc(r.text) + '</p>').join('')
     : '<p>Rules data not loaded.</p>';
@@ -5389,7 +5398,7 @@ function campaignUpdateBtn() {
   if(_campaign) {
     btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';
     btn.title = 'Campaign: ' + _campaign.name + ' (' + _campaign.code + ')';
-    btn.style.background = '#241f10'; btn.style.color = '#c8a020'; btn.style.borderColor = '#7a5a00';
+    btn.style.background = '#10192b'; btn.style.color = '#3b82d6'; btn.style.borderColor = '#1e466f';
   } else {
     btn.innerHTML = '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg>';
     btn.title = 'Link this sheet to a campaign';
@@ -5410,12 +5419,12 @@ function campaignRenderModal() {
   if(_campaign) {
     body.innerHTML =
       '<p class="ccw-hint">Connected — rolls are shared with everyone in this campaign.</p>'
-      + '<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:12px;margin-bottom:12px;">'
-      + '<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:900;color:#c8a020;">'+_campaign.name+'</div>'
+      + '<div style="background:#0f0f0f;border:1px solid #1e466f;padding:12px;margin-bottom:12px;">'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:900;color:#3b82d6;">'+_campaign.name+'</div>'
       + '<div style="font-family:Montserrat,sans-serif;font-size:10px;color:#888;margin-top:4px;">Join code: <b style="color:#eee;font-size:14px;letter-spacing:.2em;">'+_campaign.code+'</b></div>'
       + '<div style="font-family:Montserrat,sans-serif;font-size:9px;color:#666;margin-top:4px;">Share this code with your table.</div>'
       + '</div>'
-      + '<button onclick="campaignLeave()" style="'+btnStyle+'background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;width:100%;">Leave Campaign</button>';
+      + '<button onclick="campaignLeave()" style="'+btnStyle+'background:#132a44;color:#9db8de;border:1px solid #274a7a;width:100%;">Leave Campaign</button>';
   } else {
     body.innerHTML =
       '<p class="ccw-hint">Enter a join code from your GM to connect this sheet. Rolls will appear in everyone\'s roll logs. Campaigns are created on the Campaigns page.</p>'
@@ -5424,7 +5433,7 @@ function campaignRenderModal() {
       + '<div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="'+inputStyle+'flex:1;text-transform:uppercase;letter-spacing:.15em;">'
       + '<button onclick="campaignJoin()" style="'+btnStyle+'background:#1a5a7a;color:#fff;flex-shrink:0;">Join</button></div>'
       + '</div>'
-      + '<div id="campaign-error" style="font-family:Montserrat,sans-serif;font-size:10px;color:#df6a6a;margin-top:10px;"></div>';
+      + '<div id="campaign-error" style="font-family:Montserrat,sans-serif;font-size:10px;color:#8ab4e0;margin-top:10px;"></div>';
   }
 }
 
@@ -6318,6 +6327,53 @@ function injectHomebrewContent(rows) {
   }
 }
 
+// DarkSpace homebrew → the wizard's DARKSPACE pools. Species / archetypes /
+// backgrounds / motivations authored as homebrew become selectable in the
+// DarkSpace character wizard. The book arrays are snapshotted once, so every
+// sync rebuilds the pools cleanly (book + current homebrew) with no duplicates.
+var _dsBookPools = null;
+function injectDarkSpaceHomebrew(rows) {
+  const D = (typeof window !== 'undefined' && window.DARKSPACE) ? window.DARKSPACE : null;
+  if(!D) return;
+  if(!_dsBookPools) {
+    _dsBookPools = {
+      species:     (D.species     || []).slice(),
+      archetypes:  (D.archetypes  || []).slice(),
+      backgrounds: (D.backgrounds || []).slice(),
+      motivations: (D.motivations || []).slice(),
+    };
+  }
+  const seen = { sp:new Set(), ar:new Set(), bg:new Set(), mo:new Set() };
+  _dsBookPools.species.forEach(x => seen.sp.add(String(x.name||'').toLowerCase()));
+  _dsBookPools.archetypes.forEach(x => seen.ar.add(String(x.name||'').toLowerCase()));
+  _dsBookPools.backgrounds.forEach(x => seen.bg.add(String(x.name||'').toLowerCase()));
+  _dsBookPools.motivations.forEach(x => seen.mo.add(String(x.name||'').toLowerCase()));
+  const hbSp=[], hbAr=[], hbBg=[], hbMo=[];
+  let nSp = 900, nBg = 900;   // synthetic ids, clear of the book's 1–20 range
+  (rows || []).forEach(row => {
+    if(!row || !row.data) return;
+    const d = row.data, nm = String(d.name||'').trim(); if(!nm) return;
+    const key = nm.toLowerCase();
+    if(row.type === 'ds-species') {
+      if(seen.sp.has(key)) return; seen.sp.add(key);
+      hbSp.push({ n: ++nSp, name: nm, text: String(d.text||''), _hb:true });
+    } else if(row.type === 'ds-archetype') {
+      if(seen.ar.has(key)) return; seen.ar.add(key);
+      hbAr.push(Object.assign({}, d, { _hb:true }));
+    } else if(row.type === 'ds-background') {
+      if(seen.bg.has(key)) return; seen.bg.add(key);
+      hbBg.push({ n: ++nBg, name: nm, text: String(d.text||''), _hb:true });
+    } else if(row.type === 'ds-motivation') {
+      if(seen.mo.has(key)) return; seen.mo.add(key);
+      hbMo.push(Object.assign({}, d, { _hb:true }));
+    }
+  });
+  D.species     = _dsBookPools.species.concat(hbSp);
+  D.archetypes  = _dsBookPools.archetypes.concat(hbAr);
+  D.backgrounds = _dsBookPools.backgrounds.concat(hbBg);
+  D.motivations = _dsBookPools.motivations.concat(hbMo);
+}
+
 // Fire-and-forget; a failed fetch leaves the sheet as it was.
 async function syncSharedHomebrew() {
   let url = '/api/homebrew';
@@ -6348,6 +6404,14 @@ async function syncSharedHomebrew() {
       if(haveItem.has(nm)) continue;
       haveItem.add(nm);
       nextItems.push(Object.assign({}, row.data));
+    } else if(row.type === 'ds-equipment') {
+      // DarkSpace homebrew gear/weapons/armor. Tag with dsEquip so the shop,
+      // allWeapons() and allArmorAC() read its DS shape (category/dmg/ac/cost)
+      // rather than the Shadowdark shape (kind/damage/acBase/gp).
+      if(haveItem.has(nm)) continue;
+      haveItem.add(nm);
+      const d = row.data;
+      nextItems.push(Object.assign({}, d, { dsEquip:true, gp: parseFloat(d.cost) || 0 }));
     }
   }
 
@@ -6358,8 +6422,12 @@ async function syncSharedHomebrew() {
   // Convert homebrew classes/ancestries/backgrounds into the wizard's reference
   // shapes so they're selectable and apply their core mechanics.
   try { injectHomebrewContent(items); } catch(e) {}
+  // DarkSpace: fold homebrew species/archetypes/backgrounds/motivations into the
+  // DARKSPACE pools the DarkSpace wizard reads, so they're selectable there too.
+  try { if(typeof darkSpaceOn === 'function' && darkSpaceOn()) injectDarkSpaceHomebrew(items); } catch(e) {}
   // If the creation wizard is open, redraw it so injected content appears.
   try { if(typeof _ccw !== 'undefined' && _ccw && typeof ccwRender === 'function') ccwRender(); } catch(e) {}
+  try { if(typeof _dsw !== 'undefined' && _dsw && typeof dswRender === 'function') dswRender(); } catch(e) {}
 
   // Refresh anything that reads these lists. Spell pickers read allSpells() on
   // open, so they pick up new entries automatically; the shop and equipped-item

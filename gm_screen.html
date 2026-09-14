@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Barlow+Condensed:wght@400;500;600;700;900&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <!-- DarkSpace bestiary (Denizens) — selectable as an alternate bestiary source. -->
 <script src="/tools-data/ds-monsters.js"></script>
+<script src="/tools-data/gm-darkspace-tables.js"></script>
 <style>
 :root {
   --black: #070707;
@@ -3406,7 +3407,8 @@ function init_trackers(root) {
         ac: m.ac || '', hp: m.hp || '', mv: m.mv || '', lv: m.lv || '', al: m.al || '',
         s: m.s || '', d: m.d || '', c: m.c || '', i: m.i || '', w: m.w || '', ch: m.ch || '',
         atk: m.atk || '', notes: m.notes || '',
-        ctype: (typeof monsterTypeOf === 'function') ? monsterTypeOf(m.name) : ''
+        ds: !!m.ds, acc: m.acc, ctl: m.ctl, net: m.net, shipScale: !!m.shipScale,
+        ctype: (typeof mType === 'function') ? mType(m) : ''
       }
     };
   }
@@ -3505,10 +3507,13 @@ function init_trackers(root) {
     if(!mo) return '';
     // HP is deliberately absent: the bar above already shows it, and dropping it
     // leaves room for Type on the same line.
-    const head = [monStat('AC', mo.ac), monStat('MV', mo.mv),
-                  monStat('LV', mo.lv), monStat('AL', mo.al), monStat('Type', mo.ctype)].join('');
-    const abil = [monRollStat('STR', mo.s), monRollStat('DEX', mo.d), monRollStat('CON', mo.c),
-                  monRollStat('INT', mo.i), monRollStat('WIS', mo.w), monRollStat('CHA', mo.ch)].join('');
+    const head = [monStat('AC', mo.ac), monStat('MV', mo.mv), monStat('LV', mo.lv),
+                  monStat(mo.ds ? 'MO' : 'AL', mo.ds ? dsMotivLabel(mo.al) : mo.al),
+                  monStat('Type', mo.ctype)].join('');
+    const abil = (mo.ds && mo.acc != null)
+      ? [monRollStat('ACC', mo.acc), monRollStat('CTL', mo.ctl), monRollStat('NET', mo.net)].join('')
+      : [monRollStat('STR', mo.s), monRollStat('DEX', mo.d), monRollStat('CON', mo.c),
+         monRollStat('INT', mo.i), monRollStat('WIS', mo.w), monRollStat('CHA', mo.ch)].join('');
     const atk = mo.atk
       ? `<div class="npc-mon-atks"><span class="npc-mon-label">ATK</span>${attackRowsHtml(n.name || 'Monster', mo.atk)}</div>` : '';
     // Stats (AC/MV/LV/AL/Type + ability mods) fold away to save space in a
@@ -3766,7 +3771,7 @@ function init_trackers(root) {
     if(typeof allMonsters !== 'function') return [];
     const q = pickerQuery.trim().toLowerCase();
     return allMonsters().filter(m => {
-      if(pickerType && (typeof monsterTypeOf === 'function') && monsterTypeOf(m.name) !== pickerType) return false;
+      if(pickerType && (typeof mType === 'function') && mType(m) !== pickerType) return false;
       if(!q) return true;
       return String(m.name).toLowerCase().includes(q);
     });
@@ -3805,8 +3810,11 @@ function init_trackers(root) {
 
   function openPicker() {
     if(pickerEl) return;
-    const types = (typeof SD_MONSTER_TYPE_LIST !== 'undefined' && typeof monsterTypeOf === 'function')
-      ? SD_MONSTER_TYPE_LIST.filter(t => allMonsters().some(m => monsterTypeOf(m.name) === t)) : [];
+    const types = (typeof mType !== 'function') ? []
+      : (_bestiarySource === 'ds')
+        ? [...new Set(allMonsters().map(m => mType(m)).filter(Boolean))].sort()
+        : (typeof SD_MONSTER_TYPE_LIST !== 'undefined'
+            ? SD_MONSTER_TYPE_LIST.filter(t => allMonsters().some(m => mType(m) === t)) : []);
     pickerEl = document.createElement('div');
     pickerEl.className = 'mon-pick';
     pickerEl.innerHTML = `
@@ -5553,8 +5561,13 @@ function row(label, val) { return `<div class="gen-card-row"><span class="gen-ca
 function tag(t, v) { return `<span class="gen-card-tag">${esc(t)}: ${esc(v)}</span> `; }
 
 // ── Mundane Loot ──────────────────────────────────────────────────────────
+// Active DarkSpace GM tables when the bestiary source is DarkSpace, else null.
+function _dsgm() { return (_bestiarySource === 'ds' && window.DS_GM) ? window.DS_GM : null; }
+
 function genMundaneLoot(subtype) {
+  const DS = _dsgm();
   if(subtype==='gem') {
+    if(DS) { const v = R(DS.valuables); return card(`<div class="gen-item-name">${esc(v.name)}</div><div class="gen-item-desc">Value: ${esc(v.value)}</div>`); }
     const gem = R(GEMS);
     const isGiant = Math.random() < 0.15;
     const name = isGiant ? 'Giant '+gem.name : gem.name;
@@ -5562,30 +5575,38 @@ function genMundaneLoot(subtype) {
     return card(`<div class="gen-item-name">${esc(name)}</div><div class="gen-item-desc">Value: ${esc(val)}</div>`);
   }
   if(subtype==='luxury') {
+    if(DS) { const v = R(DS.valuables); return card(`<div class="gen-item-name">Luxury Item</div><div class="gen-item-desc">${esc(v.name)} — ${esc(v.value)}</div>`); }
     const feat = R(LUX_FEAT); const pool = R(LUX_ITEM_POOLS); const item = R(pool);
     return card(`<div class="gen-item-name">Luxury Item</div><div class="gen-item-desc">${esc(feat)} ${esc(item)}</div>`);
   }
+  if(DS) return card(`<div class="gen-item-name">Salvage</div><div class="gen-item-desc">${esc(R(DS.mundaneLoot))}</div>`);
   return card(`<div class="gen-item-name">Mundane Loot</div><div class="gen-item-desc">${esc(R(MUNDANE_LOOT))}</div>`);
 }
 
 // ── Rival Crawlers ────────────────────────────────────────────────────────
 function genRivalCrawler(size, disp) {
+  const DS = _dsgm();
   const count = size==='random' ? (Math.ceil(Math.random()*4)+1) : parseInt(size);
   const disposition = disp==='random' ? R(['Hostile','Wary','Neutral','Neutral','Friendly']) : disp;
-  const goal = R(RC_GOALS);
-  const quirk = R(RC_QUIRKS);
-  const gear = R(RC_GEAR_HINTS);
-  const dispDetail = R(RC_DISPOSITION_DETAILS[disposition]||RC_DISPOSITION_DETAILS.Neutral);
+  const goal = DS ? R(DS.rivalGoals) : R(RC_GOALS);
+  const quirk = DS ? R(DS.rivalQuirks) : R(RC_QUIRKS);
+  const gear = DS ? R(DS.rivalGear) : R(RC_GEAR_HINTS);
+  const dispDetail = DS ? R(DS.rivalDisposition[disposition]||DS.rivalDisposition.Neutral)
+                        : R(RC_DISPOSITION_DETAILS[disposition]||RC_DISPOSITION_DETAILS.Neutral);
   const members = [];
   for(let i=0;i<count;i++) {
-    const anc = R(RC_ANCESTRY);
-    const cls = R(RC_CLASSES);
-    const name = R(NPC_NAMES[anc]||NPC_NAMES.Human);
-    members.push(`${name} (${anc} ${cls})`);
+    if(DS) {
+      members.push(`${R(DS.names)} (${R(DS.rivalSpecies)} ${R(DS.rivalArchetypes)})`);
+    } else {
+      const anc = R(RC_ANCESTRY);
+      const cls = R(RC_CLASSES);
+      const name = R(NPC_NAMES[anc]||NPC_NAMES.Human);
+      members.push(`${name} (${anc} ${cls})`);
+    }
   }
   return card(`
-    <div class="gen-card-header"><span class="gen-card-name">Rival Crawlers</span>
-    <span class="gen-card-tag">${count} crawlers · ${esc(disposition)}</span></div>
+    <div class="gen-card-header"><span class="gen-card-name">${DS ? 'Rival Crew' : 'Rival Crawlers'}</span>
+    <span class="gen-card-tag">${count} ${DS ? 'crew' : 'crawlers'} · ${esc(disposition)}</span></div>
     <div class="gen-card-row"><span class="gen-card-row-label">Members</span>
     <span>${members.map(esc).join('<br>')}</span></div>
     <hr class="gen-card-divider">
@@ -5596,8 +5617,23 @@ function genRivalCrawler(size, disp) {
 
 // ── NPC ───────────────────────────────────────────────────────────────────
 function genNPC(ancestry, wealth) {
-  const anc  = ancestry==='random'?R(['Human','Human','Human','Dwarf','Elf','Halfling','Half-Orc','Goblin']):ancestry;
+  const DS = _dsgm();
   const wlth = wealth==='random'?R(['Poor','Poor','Standard','Standard','Standard','Wealthy']):wealth;
+  if(DS) {
+    const species = ancestry==='random' ? R(DS.rivalSpecies) : ancestry;
+    const name = R(DS.names);
+    const age  = `${rollD(50)+16}`;
+    return card(`
+      <div class="gen-card-header"><span class="gen-card-name">${esc(name)}</span><span class="gen-card-tag">${esc(species)} · ${esc(wlth)}</span></div>
+      ${row('Age',age)} ${row('Build',`${R(BUILDS)}, ${R(HAIR)} hair, ${R(EYES)} eyes`)}
+      ${row('Dress',R(DS.clothing[wlth]||DS.clothing.Standard))} ${row('Feature',R(DS.features))}
+      <hr class="gen-card-divider">
+      ${row('Role',R(DS.occupations))} ${row('Demeanor',R(DS.demeanor))}
+      ${row('Quirk',R(DS.quirks))} ${row('Wants',R(DS.wants))}
+      ${row('Secret',R(DS.secrets))} ${row('Credits',(DS.coin[wlth]||DS.coin.Standard)())}
+    `);
+  }
+  const anc  = ancestry==='random'?R(['Human','Human','Human','Dwarf','Elf','Halfling','Half-Orc','Goblin']):ancestry;
   const pool = NPC_NAMES[anc]||NPC_NAMES.Human;
   const name = R(pool);
   const age  = anc==='Goblin'?`${rollD(20)+5}`:anc==='Elf'?`${rollD(400)+50}`:anc==='Dwarf'?`${rollD(200)+30}`:`${rollD(40)+15}`;
@@ -5619,11 +5655,13 @@ function genTreasure(tierKey, type) {
     type = R(['random','random','Weapon','Armor','Wand','Ring','Cloak','Boots',
               'Potion','Scroll','table','mundane','gem','luxury']);
   }
+  const DS = _dsgm();
   if(type==='table') {
-    const tier = TREASURE_TIERS[tierKey]||TREASURE_T1;
-    return card(`<div class="gen-item-name">Treasure Table Roll (Tier ${tierKey})</div><div class="gen-item-desc">${esc(R(tier))}</div>`);
+    const tier = DS ? (DS.treasureTiers[tierKey]||DS.treasureTiers['1']) : (TREASURE_TIERS[tierKey]||TREASURE_T1);
+    return card(`<div class="gen-item-name">${DS ? 'Salvage' : 'Treasure'} Table Roll (Tier ${tierKey})</div><div class="gen-item-desc">${esc(R(tier))}</div>`);
   }
   if(type==='mundane' || type==='gem' || type==='luxury') return genMundaneLoot(type);
+  if(DS) { const t = R(DS.techLoot); return card(`<div class="gen-item-name">${esc(t.name)}</div><div class="gen-item-desc">${esc(t.desc)}</div>`); }
   const pool = type==='random'?MAGIC_ITEM_POOLS[R(LOOT_TYPES)]:(MAGIC_ITEM_POOLS[type]||POTIONS);
   const item = R(pool);
   return card(`<div class="gen-item-name">${esc(item.name)}</div><div class="gen-item-desc">${esc(item.desc)}</div>`);
@@ -5631,9 +5669,22 @@ function genTreasure(tierKey, type) {
 
 // ── Shop/Tavern ──────────────────────────────────────────────────────────
 function genShop(type, tier) {
+  const DS = _dsgm();
   const t = type==='random'?R(['Shop','Tavern']):type;
   const t2 = tier==='random'?R(['Poor','Standard','Standard','Wealthy']):tier;
   const isShop=t==='Shop';
+  if(DS) {
+    const name = R(isShop ? (DS.shopNames[t2]||DS.shopNames.Standard) : (DS.cantinaNames[t2]||DS.cantinaNames.Standard));
+    const prop = `${R(DS.names)}, ${isShop?R(['Quartermaster','Trader','Fixer']):R(['Barkeep','Host','Proprietor'])}`;
+    if(isShop) {
+      const stock=[...(DS.shopStock[t2]||DS.shopStock.Standard)].sort(()=>Math.random()-.5).slice(0,6);
+      return card(`<div class="gen-card-header"><span class="gen-card-name">${esc(name)}</span><span class="gen-card-tag">Depot · ${esc(t2)}</span></div>${row('Proprietor',prop)}<hr class="gen-card-divider"><div class="gen-card-row"><span class="gen-card-row-label">Stock</span><span>${stock.map(esc).join('<br>')}</span></div>`);
+    } else {
+      const menu=[...(DS.cantinaMenu[t2]||DS.cantinaMenu.Standard)].sort(()=>Math.random()-.5).slice(0,4);
+      const rooms=t2==='Poor'?'Capsule bunk (3 cr/night)':t2==='Wealthy'?'Private cabin (25 cr/night)':'Shared berth (8 cr/night)';
+      return card(`<div class="gen-card-header"><span class="gen-card-name">${esc(name)}</span><span class="gen-card-tag">Cantina · ${esc(t2)}</span></div>${row('Proprietor',prop)}<hr class="gen-card-divider"><div class="gen-card-row"><span class="gen-card-row-label">Menu</span><span>${menu.map(esc).join('<br>')}</span></div>${row('Lodging',rooms)}<hr class="gen-card-divider">${row('Rumour',R(DS.rumors))}`);
+    }
+  }
   const name = R(isShop?SHOP_NAMES[t2]:TAVERN_NAMES[t2]);
   const prop = `${R(NPC_NAMES.Human)}, ${isShop?R(['Shopkeeper','Merchant','Trader']):R(['Innkeeper','Barkeep','Host'])}`;
   if(isShop) {
@@ -5646,16 +5697,39 @@ function genShop(type, tier) {
   }
 }
 
+// Rebuild the encounter-type dropdown's biome/locale list for the active source
+// (DarkSpace locales vs Shadowdark biomes). Called on mount and on source change.
+function fillEncTypeSelect(root) {
+  const sels = (root || document).querySelectorAll('#gen-enc-type');
+  if(!sels.length) return;
+  const safe = (v) => String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const ds = (_bestiarySource === 'ds' && window.DS_GM);
+  const biomes = ds ? Object.keys(window.DS_GM.biomes)
+    : ['Arctic','Artisan District','Castle District','Cave','Deep Tunnels','Desert','Forest','Grassland','High District','Jungle','Low District','Market','Mountain','Ocean','River & Coast','Ruins','Slums','Swamp','Tavern','Temple District'];
+  const html = '<option value="random_all">Random (All Types)</option>'
+    + '<optgroup label="── Events ──">'
+    + '<option value="happens">Something Happens!</option><option value="rumor">Rumor</option>'
+    + '<option value="secret">Secret</option><option value="trap">Trap</option><option value="hazard">Hazard</option>'
+    + '</optgroup>'
+    + '<optgroup label="── ' + (ds ? 'Locales' : 'Biomes') + ' ──">'
+    + biomes.map(b => '<option value="' + safe(b) + '">' + safe(b) + '</option>').join('')
+    + '</optgroup>';
+  sels.forEach(sel => { const keep = sel.value; sel.innerHTML = html; if([...sel.options].some(o => o.value === keep)) sel.value = keep; });
+}
+
 // ── Encounter ────────────────────────────────────────────────────────────
 function genEncounterItem(type) {
+  const DS = _dsgm();
   // Events
-  if(type==='happens')  return card(`<div class="gen-item-name">Something Happens!</div><div class="gen-item-desc">${esc(R(HAPPENS))}</div>`);
-  if(type==='rumor')    return card(`<div class="gen-item-name">Rumor</div><div class="gen-item-desc">${esc(R(RUMORS))}</div>`);
-  if(type==='secret')   return card(`<div class="gen-item-name">Secret</div><div class="gen-item-desc">${esc(R(SECRETS_D1))} ${esc(R(SECRETS_D2))}</div>`);
+  if(type==='happens')  return card(`<div class="gen-item-name">Something Happens!</div><div class="gen-item-desc">${esc(R(DS ? DS.happens : HAPPENS))}</div>`);
+  if(type==='rumor')    return card(`<div class="gen-item-name">Rumor</div><div class="gen-item-desc">${esc(R(DS ? DS.rumors : RUMORS))}</div>`);
+  if(type==='secret')   return DS
+      ? card(`<div class="gen-item-name">Secret</div><div class="gen-item-desc">${esc(R(DS.secretsD1))} ${esc(R(DS.secretsD2))}</div>`)
+      : card(`<div class="gen-item-name">Secret</div><div class="gen-item-desc">${esc(R(SECRETS_D1))} ${esc(R(SECRETS_D2))}</div>`);
   if(type==='trap')     return genTrap('trap');
   if(type==='hazard')   return genTrap('hazard');
-  // Biome
-  const pool = BIOME_ENC_TABLES[type];
+  // Biome / locale
+  const pool = DS ? (DS.biomes[type] || DS.biomes[R(Object.keys(DS.biomes))]) : BIOME_ENC_TABLES[type];
   if(pool) return card(`<div class="gen-card-header"><span class="gen-card-name">${esc(type)} Encounter</span></div><div class="gen-item-desc">${esc(R(pool))}</div>`);
   return card(`<div class="gen-empty">Unknown type</div>`);
 }
@@ -5673,7 +5747,11 @@ const ALL_ENC_TYPES = ['happens','rumor','secret','trap','hazard',
 function fillMonsterTypeFilter(root) {
   const sel = (root || document).querySelector('#gen-mon-type');
   if(!sel || typeof SD_MONSTER_TYPE_LIST === 'undefined') return;
-  const present = SD_MONSTER_TYPE_LIST.filter(t => allMonsters().some(m => monsterTypeOf(m.name) === t));
+  // DarkSpace denizens carry their own ctype (Digital / Ship Scale / Denizen),
+  // which aren't in the Shadowdark list — derive the present types from the pool.
+  const present = (_bestiarySource === 'ds')
+    ? [...new Set(allMonsters().map(m => mType(m)).filter(Boolean))].sort()
+    : SD_MONSTER_TYPE_LIST.filter(t => allMonsters().some(m => mType(m) === t));
   const keep = sel.value;
   // Type names come from SD_MONSTER_TYPE_LIST (our own constant), but escape
   // anyway so a future entry with punctuation can't break the markup.
@@ -5693,19 +5771,26 @@ function monsterStat(label, val) {
 }
 
 function monsterCard(m, opts) {
-  const type = (typeof monsterTypeOf === 'function') ? monsterTypeOf(m.name) : '';
+  const type = (typeof mType === 'function') ? mType(m) : '';
   // NB: escAttr() belongs to init_trackers' scope, not this one — escape locally.
   const attr = (v) => String(v == null ? '' : v)
     .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   const send = opts && opts.send
     ? `<div class="gen-card-actions"><button class="btn small primary gen-send-tracker" data-mon="${attr(m.name)}">Send to Tracker</button></div>`
     : '';
+  // DarkSpace denizens: Motivation replaces Alignment, and digital entities use
+  // Interface stats (ACC/CTL/NET) in place of the six physical scores.
+  const motLabel = m.ds ? ('MO ' + esc(dsMotivLabel(m.al))) : ('AL ' + esc(m.al));
+  const digital = m.ds && m.acc != null;
+  const statRow = digital
+    ? `<div class="gen-card-stats">${monsterStat('ACC', m.acc)}${monsterStat('CTL', m.ctl)}${monsterStat('NET', m.net)}</div>`
+    : `<div class="gen-card-stats">${monsterStat('STR', m.s)}${monsterStat('DEX', m.d)}${monsterStat('CON', m.c)}` +
+      `${monsterStat('INT', m.i)}${monsterStat('WIS', m.w)}${monsterStat('CHA', m.ch)}</div>`;
   return card(
     `<div class="gen-card-header"><span class="gen-card-name">${esc(m.name)}</span>` +
-      `<span class="gen-card-tag">LV ${esc(m.lv)} · AL ${esc(m.al)}${type ? ' · ' + esc(type) : ''}</span></div>` +
+      `<span class="gen-card-tag">LV ${esc(m.lv)} · ${motLabel}${m.shipScale ? ' · Ship Scale' : ''}${type ? ' · ' + esc(type) : ''}</span></div>` +
     `<div class="gen-card-stats">${monsterStat('AC', m.ac)}${monsterStat('HP', m.hp)}${monsterStat('MV', m.mv)}</div>` +
-    `<div class="gen-card-stats">${monsterStat('STR', m.s)}${monsterStat('DEX', m.d)}${monsterStat('CON', m.c)}` +
-      `${monsterStat('INT', m.i)}${monsterStat('WIS', m.w)}${monsterStat('CHA', m.ch)}</div>` +
+    statRow +
     `<div class="gen-card-row"><span class="gen-card-row-label">ATK</span><span>${esc(m.atk)}</span></div>` +
     (m.notes ? `<div class="gen-card-row"><span class="gen-card-row-label">Traits</span><span>${esc(m.notes)}</span></div>` : '') +
     send
@@ -5715,22 +5800,25 @@ function monsterCard(m, opts) {
 // Every monster of a given creature type; empty type means the whole bestiary.
 function monstersOfType(type) {
   if(!type) return allMonsters();
-  return allMonsters().filter(m => monsterTypeOf(m.name) === type);
+  return allMonsters().filter(m => mType(m) === type);
 }
 
 // ── Monster Generator ─────────────────────────────────────────────────────
 function genMonster(pl, numMut) {
+  const DS = _dsgm();
   pl = parseInt(pl)||1;
-  const entry = MON_TABLE[Math.ceil(Math.random()*20)-1];
+  const table = DS ? DS.monTable : MON_TABLE;
+  const entry = table[Math.floor(Math.random()*table.length)];
   const hd_adj = entry.combat==='PL'?0:entry.combat.includes('+')?(parseInt(entry.combat.replace('PL+',''))):(-parseInt(entry.combat.replace('PL-','')));
   const hd = Math.max(1, pl+hd_adj);
   const ac = pl+10;
   const hp = hd*4+hd;
   const atk = Math.min(hd, hd+1);
   const muts = [];
-  for(let i=0;i<parseInt(numMut||0);i++) { muts.push(`${R(MON_MUT_1)} / ${R(MON_MUT_2)} / ${R(MON_MUT_3)}`); }
+  const [m1,m2,m3] = DS ? [DS.monMut1,DS.monMut2,DS.monMut3] : [MON_MUT_1,MON_MUT_2,MON_MUT_3];
+  for(let i=0;i<parseInt(numMut||0);i++) { muts.push(`${R(m1)} / ${R(m2)} / ${R(m3)}`); }
   return card(`
-    <div class="gen-card-header"><span class="gen-card-name">${esc(entry.quality)} Creature</span><span class="gen-card-tag">HD ${hd} · PL ${pl}</span></div>
+    <div class="gen-card-header"><span class="gen-card-name">${esc(entry.quality)} ${DS ? 'Denizen' : 'Creature'}</span><span class="gen-card-tag">HD ${hd} · PL ${pl}</span></div>
     ${row('AC',`${ac}`)} ${row('HP',`${hp} (${hd}d8)`)} ${row('ATK',`+${atk}, 1d${hd<=3?6:hd<=6?8:10} dmg`)}
     <hr class="gen-card-divider">
     ${row('Strength',entry.strength)} ${row('Weakness',entry.weakness)}
@@ -5742,12 +5830,14 @@ function genMonster(pl, numMut) {
 
 // ── Trap / Hazard ─────────────────────────────────────────────────────────
 function genTrap(type) {
+  const DS = _dsgm();
   const t = type==='random' ? R(['trap','hazard']) : type;
   if(t==='trap') {
-    const trap = TRAPS[Math.ceil(Math.random()*12)-1];
+    const traps = DS ? DS.traps : TRAPS;
+    const trap = traps[Math.floor(Math.random()*traps.length)];
     return card(`<div class="gen-card-header"><span class="gen-card-name">${esc(trap.trap)}</span><span class="gen-card-tag">Trap</span></div>${row('Trigger',trap.trigger)}${row('Damage/Effect',trap.damage)}`);
   } else {
-    const mov = R(HAZARDS_MOV); const dmg = R(HAZARDS_DMG); const wkn = R(HAZARDS_WKN);
+    const mov = R(DS ? DS.hazardsMov : HAZARDS_MOV); const dmg = R(DS ? DS.hazardsDmg : HAZARDS_DMG); const wkn = R(DS ? DS.hazardsWkn : HAZARDS_WKN);
     const types = []; if(Math.random()>.3) types.push(mov); if(Math.random()>.4) types.push(dmg); if(Math.random()>.5) types.push(wkn);
     if(!types.length) types.push(mov);
     return card(`<div class="gen-card-header"><span class="gen-card-name">Hazard</span><span class="gen-card-tag">${types.length>1?'Combined':'Single'}</span></div>${types.map((x,i)=>row(['Movement','Damage','Weakening'][i]||'Effect',x)).join('')}`);
@@ -6429,9 +6519,14 @@ function genDungeon(level, motif, numRooms) {
   numRooms = parseInt(numRooms) || 5;
   const mot = motif === 'random' ? R(DUN_MOTIFS) : motif;
 
+  const DS = _dsgm();
   const nameStyle = Math.random();
   let name;
-  if(nameStyle < 0.4) name = `The ${R(DUN_NAMES_ADJ)} ${R(DUN_NAMES_NOUN)}`;
+  if(DS) {
+    if(nameStyle < 0.4) name = `The ${R(DS.placeAdj)} ${R(DS.placeNoun)}`;
+    else if(nameStyle < 0.7) name = `${R(DS.placeNoun)} ${R(DS.placeProper)}`;
+    else name = `The ${R(DS.placeProper)} ${R(DS.placeNoun)}`;
+  } else if(nameStyle < 0.4) name = `The ${R(DUN_NAMES_ADJ)} ${R(DUN_NAMES_NOUN)}`;
   else if(nameStyle < 0.7) name = `${R(DUN_NAMES_ADJ)} ${R(DUN_NAMES_NOUN)} of ${R(DUN_NAMES_OF)}`;
   else name = `The ${R(DUN_NAMES_NOUN)} of ${R(DUN_NAMES_OF)}`;
 
@@ -6913,6 +7008,7 @@ window._genDungeonMap = generateDungeonMap;
 function refreshMonsterConsumers() {
   document.querySelectorAll('.gen-tool, [data-tool="gen"]').forEach(node => {
     if(typeof fillMonsterTypeFilter === 'function') fillMonsterTypeFilter(node);
+    if(typeof fillEncTypeSelect === 'function') fillEncTypeSelect(node);
   });
   document.querySelectorAll('.mon-pick').forEach(box => {
     const ev = new Event('input', { bubbles: true });
@@ -6927,6 +7023,7 @@ window.init_gen = function(root) {
   const tabSelect = root.querySelector('.gen-tab-select');
   const panels = root.querySelectorAll('.gen-panel');
   fillMonsterTypeFilter(root);   // panel markup only exists once mounted
+  if(typeof fillEncTypeSelect === 'function') fillEncTypeSelect(root);
 
   // Make each panel's option controls (.gen-controls) collapsible so they don't
   // take up vertical space once they're set — the results area then gets the
@@ -7013,8 +7110,11 @@ window.init_gen = function(root) {
       const count=parseInt(root.querySelector('#gen-enc-count').value)||1;
       const res=root.querySelector('#gen-enc-results'); res.innerHTML='';
       for(let i=0;i<count;i++){
+        const pool = (_bestiarySource === 'ds' && window.DS_GM)
+          ? ['happens','rumor','secret','trap','hazard'].concat(Object.keys(window.DS_GM.biomes))
+          : ALL_ENC_TYPES;
         const t = (type==='random_all' || type==='random')
-          ? ALL_ENC_TYPES[Math.floor(Math.random()*ALL_ENC_TYPES.length)]
+          ? pool[Math.floor(Math.random()*pool.length)]
           : type;
         res.appendChild(genEncounterItem(t));
       }
@@ -8811,10 +8911,17 @@ const SD_MONSTER_TYPES = {
 // Anything unclassified still shows up in the list and in search — it just
 // falls into the catch-all rather than vanishing.
 function monsterTypeOf(name) {
-  const hb = _homebrewMonsters.find(m => m.name === name);
+  const hb = _homebrewMonsters.find(m => m.name === name)
+          || (Array.isArray(_dsHomebrewMonsters) ? _dsHomebrewMonsters.find(m => m.name === name) : null);
   if(hb && hb.ctype) return hb.ctype;
   return SD_MONSTER_TYPES[name] || 'Monster';
 }
+// Creature type of a monster OBJECT. DarkSpace denizens carry their own ctype
+// (Digital / Ship Scale / Denizen); Shadowdark monsters are looked up by name.
+function mType(m) { return (m && m.ctype) ? m.ctype : (m && m.name ? monsterTypeOf(m.name) : ''); }
+// DarkSpace motivation code → readable label (replaces Alignment on DS cards).
+var DS_MOTIV_LABELS = { S:'Survivor', SU:'Survivor', VL:'Vile', VI:'Vile', VR:'Virtuous', ANY:'Any' };
+function dsMotivLabel(code) { return code ? (DS_MOTIV_LABELS[String(code).trim().toUpperCase()] || code) : ''; }
 
 // ── Homebrew monsters ─────────────────────────────────────────────────────
 // Created on the Bestiary page and pulled in from the account: personal ones,
@@ -8836,9 +8943,11 @@ function _dsBookPool() {
     name: m.name, ac: m.ac || '', hp: m.hp || '', atk: m.atk || '', mv: m.mv || '', lv: m.lv || '',
     al: m.mo || '',
     s: m.s || '', d: m.d || '', c: m.c || '', i: m.i || '', w: m.w || '', ch: m.ch || '',
-    notes: (m.acc != null ? ('Interface: ACC ' + m.acc + ', CTL ' + m.ctl + ', NET ' + m.net + '. ') : '')
-         + (m.shipScale ? 'Ship Scale. ' : '') + (m.notes || ''),
-    ctype: 'Denizen', ds: true,
+    acc: m.acc, ctl: m.ctl, net: m.net, shipScale: !!m.shipScale,
+    notes: m.notes || '',
+    // A useful sub-type for the creature-type filter, derived from the denizen's
+    // own data: digital entities use Interface stats, some threats are ship-scale.
+    ctype: (m.acc != null) ? 'Digital' : (m.shipScale ? 'Ship Scale' : 'Denizen'), ds: true,
   }));
 }
 
@@ -8853,6 +8962,7 @@ function allMonsters() {
 function setBestiarySource(src) {
   _bestiarySource = (src === 'ds') ? 'ds' : 'sd';
   try { if(typeof fillMonsterTypeFilter === 'function') fillMonsterTypeFilter(); } catch(e) {}
+  try { if(typeof fillEncTypeSelect === 'function') fillEncTypeSelect(); } catch(e) {}
   try { if(typeof window._refreshMonsterConsumers === 'function') window._refreshMonsterConsumers(); } catch(e) {}
 }
 window.setBestiarySource = setBestiarySource;

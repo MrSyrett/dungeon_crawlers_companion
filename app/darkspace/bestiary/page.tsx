@@ -4,7 +4,7 @@ import { DS_MONSTERS } from "@/lib/data/darkspace-monsters";
 import type { DsMonster } from "@/lib/data/darkspace-types";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
-import { DarkSpaceHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, type Query, type RawQuery } from "@/components/DarkSpaceRef";
+import { DarkSpaceHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, one, motivLabel, type Query, type RawQuery } from "@/components/DarkSpaceRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/darkspace/bestiary";
@@ -88,7 +88,7 @@ export default async function DarkSpaceBestiaryPage({ searchParams }: { searchPa
                   <h2 className={nameCls}>{m.name}</h2>
                   {m.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
                   <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--muted)]">
-                    LV {m.lv}{m.mo ? ` · ${m.mo}` : ""}{m.shipScale ? " · Ship Scale" : ""}
+                    LV {m.lv}{m.mo ? ` · ${motivLabel(m.mo)}` : ""}{m.shipScale ? " · Ship Scale" : ""}
                   </span>
                 </div>
                 {m.desc ? <p className="mt-2 text-[12px] italic leading-relaxed text-[var(--muted)]">{m.desc}</p> : null}

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { DS_GEAR, DS_ARMOR, DS_MELEE_WEAPONS, DS_RANGED_WEAPONS, DS_EXPLOSIVES, DS_WEAPON_PROPS } from "@/lib/data/darkspace";
+import { DS_GEAR, DS_ARMOR, DS_MELEE_WEAPONS, DS_RANGED_WEAPONS, DS_EXPLOSIVES, DS_WEAPON_PROPS, DS_ADVANCED_TECH, DS_ADVANCED_TECH_NOTE } from "@/lib/data/darkspace";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import { DarkSpaceHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge, DataTable, one, type Query, type RawQuery } from "@/components/DarkSpaceRef";
@@ -8,16 +8,17 @@ import { DarkSpaceHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, n
 export const dynamic = "force-dynamic";
 const BASE = "/darkspace/equipment";
 
-type Cat = "gear" | "armor" | "melee" | "ranged" | "explosive";
+type Cat = "gear" | "armor" | "melee" | "ranged" | "explosive" | "tech";
 const KINDS: { key: Cat; label: string }[] = [
   { key: "gear", label: "Gear" },
   { key: "armor", label: "Armor" },
   { key: "melee", label: "Melee" },
   { key: "ranged", label: "Ranged" },
   { key: "explosive", label: "Explosives" },
+  { key: "tech", label: "Adv. Tech" },
 ];
-const CAT_LABEL: Record<Cat, string> = { gear: "Gear", armor: "Armor", melee: "Melee Weapon", ranged: "Ranged Weapon", explosive: "Explosive" };
-const CAT_RANK: Record<Cat, number> = { gear: 0, armor: 1, melee: 2, ranged: 3, explosive: 4 };
+const CAT_LABEL: Record<Cat, string> = { gear: "Gear", armor: "Armor", melee: "Melee Weapon", ranged: "Ranged Weapon", explosive: "Explosive", tech: "Advanced Tech" };
+const CAT_RANK: Record<Cat, number> = { gear: 0, armor: 1, melee: 2, ranged: 3, explosive: 4, tech: 5 };
 
 const s = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
 
@@ -33,6 +34,7 @@ function bookRows(): Row[] {
   DS_MELEE_WEAPONS.forEach((w) => rows.push({ name: w.name, category: "melee", cost: w.cost, range: w.range, dmg: w.dmg, props: w.props, homebrew: false }));
   DS_RANGED_WEAPONS.forEach((w) => rows.push({ name: w.name, category: "ranged", cost: w.cost, range: w.range, dmg: w.dmg, props: w.props, group: w.group, homebrew: false }));
   DS_EXPLOSIVES.forEach((w) => rows.push({ name: w.name, category: "explosive", cost: w.cost, range: w.range, dmg: w.dmg, props: w.props, homebrew: false }));
+  DS_ADVANCED_TECH.forEach((t) => rows.push({ name: t.name, category: "tech", cost: 0, desc: t.text, homebrew: false }));
   return rows;
 }
 
@@ -82,6 +84,7 @@ export default async function DarkSpaceEquipmentPage({ searchParams }: { searchP
       <SearchForm base={BASE} q={q} placeholder="Search name, damage, or property…" hidden={{ kind }} />
       <ChipRow label="Type" base={BASE} current={current} param="kind" options={KINDS} active={kind} />
       <CountLine count={results.length} noun="item" base={BASE} filtered={Boolean(needle || kind)} />
+      {kind === "tech" ? <p className="mb-4 text-[12px] italic leading-relaxed text-[var(--muted)]">{DS_ADVANCED_TECH_NOTE}</p> : null}
       {results.length === 0 ? <EmptyState noun="item" base={BASE} /> : null}
 
       {results.length ? (

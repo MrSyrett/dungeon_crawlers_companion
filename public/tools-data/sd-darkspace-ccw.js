@@ -79,6 +79,7 @@ function startDarkSpaceWizard(){
     weapon: null, armor: null,         // names
     survivorGear: null,                // extra citizen gear (string) for The Survivor
     contacts: null,                    // for The Virtuous
+    triadOptIn: false, triadPower: null,   // The Triad (metaphysical) discipline
     hp: null, name: ''
   };
   document.getElementById('dsw-overlay').style.display = 'flex';
@@ -99,8 +100,19 @@ function dswSetArmor(v){ if(_dsw) _dsw.armor = v || null; }     window.dswSetArm
 function dswRerollTalent(){ _dsw.talentRolls = null; dswRollTalent(); dswRender(); } window.dswRerollTalent = dswRerollTalent;
 function dswRerollCredits(){ _dsw.credits = null; _dsw.survivorGear = null; _dsw.contacts = null; dswRollCredits(); dswRender(); } window.dswRerollCredits = dswRerollCredits;
 
+// A character gains The Triad from the Power Armor Spacer species, a Wise
+// archetype talent, a talent roll that grants it, or a GM ruling (opt-in).
+function dswHasTriad(){
+  if(_dsw.triadOptIn) return true;
+  if(_dsw.species && /Power Armor|Triad/i.test(_dsw.species.name||'')) return true;
+  if((_dsw.talentRolls||[]).some(function(t){ return t.row && /triad/i.test(t.row.text||''); })) return true;
+  return false;
+}
 function dswSteps(){
-  return ['Method','Ability Scores','Species','Archetype','Background','Motivation','Talent','Gear & Credits','Name & Finish'];
+  var steps = ['Method','Ability Scores','Species','Archetype','Background','Motivation','Talent'];
+  if(dswHasTriad()) steps.push('The Triad');
+  steps.push('Gear & Credits','Name & Finish');
+  return steps;
 }
 
 function dswRender(){
@@ -118,6 +130,7 @@ function dswRender(){
     case 'Background':      h = dswBackground(); break;
     case 'Motivation':     h = dswMotivation(); break;
     case 'Talent':         h = dswTalent(); break;
+    case 'The Triad':      h = dswTriad(); break;
     case 'Gear & Credits': h = dswGear(); break;
     default:               h = dswFinish(); break;
   }
@@ -141,6 +154,7 @@ function dswNext(){
   if(name==='Background' && !_dsw.background){ alert('Choose a background.'); return; }
   if(name==='Motivation' && !_dsw.motivation){ alert('Choose a motivation.'); return; }
   if(name==='Talent'){ if(!_dsw.talentRolls) dswRollTalent(); }
+  if(name==='The Triad' && !_dsw.triadPower){ alert('Choose a Triad discipline (Body, Mind, or Soul).'); return; }
   if(name==='Gear & Credits'){ dswCommitGear(); }
   if(name==='Name & Finish'){ dswApply(); return; }
   _dsw.step++;
@@ -182,11 +196,23 @@ function dswGoRandom(){
 window.dswGoRandom = dswGoRandom;
 
 // ── Ability Scores ──
+// Shadowdark rolls 3d6 per ability but rerolls the whole set unless at least
+// one score is 14+ — DarkSpace is 100% compatible, so honour that here.
+function rollStatSet(){
+  var s;
+  do { s = { STR:roll3d6(),DEX:roll3d6(),CON:roll3d6(),INT:roll3d6(),WIS:roll3d6(),CHA:roll3d6() }; }
+  while(Math.max(s.STR,s.DEX,s.CON,s.INT,s.WIS,s.CHA) < 14);
+  return s;
+}
+var DSW_STD_ARRAY = [15,14,13,12,10,8];
 function dswStats(){
-  if(!_dsw.stats) _dsw.stats = { STR:roll3d6(),DEX:roll3d6(),CON:roll3d6(),INT:roll3d6(),WIS:roll3d6(),CHA:roll3d6() };
+  if(!_dsw.stats) _dsw.stats = rollStatSet();
   var s = _dsw.stats;
-  var h = '<p class="ccw-hint">Roll 3d6 for each ability (Shadowdark). Edit any value by hand if your table uses a different method.</p>';
-  h += '<button class="ccw-roll-btn" onclick="dswRerollStats()">🎲 Roll 3d6 ×6</button>';
+  var h = '<p class="ccw-hint">Roll 3d6 per ability (rerolled until one score is 14+, per Shadowdark), or take the <b>Standard Array</b> [15,14,13,12,10,8]. Edit any value by hand to assign or swap.</p>';
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;">'+
+       '<button class="ccw-roll-btn" onclick="dswRerollStats()">🎲 Roll 3d6 ×6</button>'+
+       '<button class="ccw-roll-btn" onclick="dswStandardArray()">📊 Standard Array</button>'+
+       '</div>';
   h += '<div class="ccw-stat-grid">';
   ['STR','DEX','CON','INT','WIS','CHA'].forEach(function(k){
     h += '<div class="ccw-stat"><div class="ccw-stat-name">'+k+'</div>'+
@@ -204,10 +230,16 @@ function dswStatMod(inp){
 }
 window.dswStatMod = dswStatMod;
 function dswRerollStats(){
-  _dsw.stats = { STR:roll3d6(),DEX:roll3d6(),CON:roll3d6(),INT:roll3d6(),WIS:roll3d6(),CHA:roll3d6() };
+  _dsw.stats = rollStatSet();
   dswRender();
 }
 window.dswRerollStats = dswRerollStats;
+function dswStandardArray(){
+  var keys = ['STR','DEX','CON','INT','WIS','CHA'];
+  _dsw.stats = {}; keys.forEach(function(k,i){ _dsw.stats[k] = DSW_STD_ARRAY[i]; });
+  dswRender();
+}
+window.dswStandardArray = dswStandardArray;
 function dswCommitStats(){
   document.querySelectorAll('#dsw-body .dsw-stat-in').forEach(function(inp){
     var v = parseInt(inp.value,10); if(!isNaN(v)) _dsw.stats[inp.dataset.k] = v;
@@ -318,8 +350,33 @@ function dswTalent(){
   h += '<div class="ccw-summary"><div class="ccw-summary-title">'+esc(_dsw.archetype)+' Talent Table</div>';
   (arche&&arche.talents||[]).forEach(function(r){ h += '<div><b>'+esc(r.r)+':</b> '+esc(r.text)+'</div>'; });
   h += '</div>';
+  // The Triad opt-in — a Wise talent, the Power Armor Spacer species, or a GM
+  // ruling can grant it. Ticking this inserts a discipline-choice step next.
+  h += '<label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-family:Montserrat,sans-serif;font-size:12px;color:#ddd;cursor:pointer;">'+
+    '<input type="checkbox" '+(dswHasTriad()?'checked':'')+' onchange="dswSetTriadOptIn(this.checked)">'+
+    '<span>I gained <b>The Triad</b> (Wise talent, Power Armor Spacer, or GM ruling) — choose a discipline next.</span></label>';
   return h;
 }
+function dswSetTriadOptIn(v){ _dsw.triadOptIn = !!v; if(!dswHasTriad()) _dsw.triadPower = null; dswRender(); }
+window.dswSetTriadOptIn = dswSetTriadOptIn;
+
+// ── The Triad ──
+function dswTriad(){
+  var tr = ds().triad || {};
+  var h = '<p class="ccw-hint">'+esc(tr.intro||'The Triad — metaphysical disciplines that replace spells.')+'</p>';
+  h += '<p class="ccw-hint">Choose one discipline you don\'t already know. A Feat is any check to accomplish a metaphysical effect within that power, at the GM\'s discretion.</p>';
+  h += '<div style="display:grid;grid-template-columns:1fr;gap:6px;">';
+  (tr.powers||[]).forEach(function(pw){
+    var sel = (_dsw.triadPower===pw.name) ? ' selected' : '';
+    h += '<button class="ccw-choice'+sel+'" onclick="dswPickTriad('+JSON.stringify(pw.name).replace(/"/g,'&quot;')+')">'+
+      '<div class="ccw-choice-name">'+esc(pw.name)+'  <span style="color:#6ac8df;font-weight:700;">'+esc(pw.stat)+'</span></div>'+
+      '<div class="ccw-choice-desc">'+esc(pw.text)+'</div></button>';
+  });
+  h += '</div>';
+  return h;
+}
+function dswPickTriad(nm){ _dsw.triadPower = nm; dswRender(); }
+window.dswPickTriad = dswPickTriad;
 
 // ── Gear & Credits ──
 function dswRollCredits(){
@@ -395,6 +452,7 @@ function dswFinish(){
   if(_dsw.weapon) h += '<div><b>Weapon:</b> '+esc(_dsw.weapon)+'</div>';
   if(_dsw.armor)  h += '<div><b>Armor:</b> '+esc(_dsw.armor)+'</div>';
   h += '<div><b>Talent:</b> '+ (_dsw.talentRolls||[]).map(function(t){return t.row?esc(t.row.text):'';}).join(' | ') +'</div>';
+  if(_dsw.triadPower) h += '<div><b>The Triad:</b> '+esc(_dsw.triadPower)+'</div>';
   h += '</div>';
   return h;
 }
@@ -407,6 +465,10 @@ function dswBuildTalentsText(){
   (arche.features||[]).forEach(function(f){ L.push('  • '+f.name+': '+f.text); });
   var tt = (_dsw.talentRolls||[]).map(function(t){ return (t.row?t.row.text:'')+' (2d6='+t.roll+')'; }).filter(Boolean);
   if(tt.length) L.push('1ST-LEVEL TALENT: '+tt.join('  ||  '));
+  if(_dsw.triadPower){
+    var tp = ((ds().triad||{}).powers||[]).filter(function(p){ return p.name===_dsw.triadPower; })[0] || {};
+    L.push('THE TRIAD — '+_dsw.triadPower+(tp.stat?' ('+tp.stat+')':'')+': '+(tp.text||''));
+  }
   L.push('BACKGROUND — '+_dsw.background.name+': '+_dsw.background.text);
   L.push('MOTIVATION — '+_dsw.motivation.name+': '+_dsw.motivation.effect);
   if(_dsw.survivorGear) L.push('  • The Survivor start: '+_dsw.survivorGear);
