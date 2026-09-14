@@ -23,6 +23,8 @@
   --d62e: #e07b39;
   /* DarkSpace accent — sci-fi cyan (matches the sheet's DarkSpace mode). */
   --darkspace: #3fb6d8;
+  /* Index Card RPG accent — Runehammer burnt orange. */
+  --icrpg: #c8501e;
 }
 
 @theme inline {
@@ -40,6 +42,7 @@
   --color-sw: var(--sw);
   --color-dnd: var(--dnd);
   --color-darkspace: var(--darkspace);
+  --color-icrpg: var(--icrpg);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }

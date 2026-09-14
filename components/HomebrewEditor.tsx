@@ -84,6 +84,8 @@ const SW_ATTRS = ["Dexterity", "Knowledge", "Mechanical", "Perception", "Strengt
 const KOB_STAT_KEYS = ["Brains", "Brawn", "Fight", "Flight", "Charm", "Grit"] as const;
 const D62E_GENRE_OPTS: readonly Opt[] = [["core", "Core"], ["fantasy", "Fantasy"], ["scifi", "Sci-Fi"], ["superhero", "Superhero"]];
 const D62E_ATTRS = ["Agility", "Brawn", "Knowledge", "Perception"] as const;
+const ICRPG_WORLD_OPTS: readonly Opt[] = [["core", "Core"], ["alfheim", "Alfheim"], ["warpshell", "Warp Shell"], ["ghostmountain", "Ghost Mountain"], ["vigilantecity", "Vigilante City"], ["bloodandsnow", "Blood & Snow"]];
+const ICRPG_STAT_KEYS = ["STR", "DEX", "CON", "INT", "WIS", "CHA"] as const;
 
 // ── Mechanical-effect vocabularies (shared with lib/homebrew normalisers) ────
 // Flat bonus targets — mirror BONUS_TARGETS in lib/homebrew.ts (kept local so
@@ -517,6 +519,89 @@ const SCHEMAS: Record<string, Schema> = {
     ],
     blank: () => ({ category: "weapon" }), toForm: (d) => ({ ...d }), summary: (d) => sv(d, "category"),
   },
+
+  // ── ICRPG (Index Card RPG) ──
+  "icrpg-type": {
+    title: "My Homebrew Hero Types", noun: "Hero Type",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "world", label: "World", type: "select", options: ICRPG_WORLD_OPTS },
+      { key: "statFocus", label: "Stat focus", type: "text", placeholder: "STR, DEX, magic EFFORT…" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+      { key: "startingLoot", label: "Starting loot", type: "stringList", full: true, addLabel: "+ Loot" },
+      { key: "abilities", label: "Signature abilities", type: "stringList", full: true, addLabel: "+ Ability" },
+    ],
+    blank: () => ({ world: "core", startingLoot: [], abilities: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => sv(d, "world") || "core",
+  },
+  "icrpg-ability": {
+    title: "My Homebrew Abilities", noun: "Ability",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "kind", label: "Kind", type: "text", placeholder: "Ability, Power, Augment, Mastery…" },
+      { key: "world", label: "World", type: "select", options: ICRPG_WORLD_OPTS },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ kind: "Ability", world: "core" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "kind") || "Ability"} · ${sv(d, "world") || "core"}`,
+  },
+  "icrpg-loot": {
+    title: "My Homebrew Loot", noun: "Loot",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "table", label: "Table", type: "text", placeholder: "Weapons, Wonders, Curses…" },
+      { key: "roll", label: "Roll", type: "text", placeholder: "1-100 or a d-code" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+      { key: "effects", label: "Effects", type: "stringList", full: true, addLabel: "+ Effect" },
+    ],
+    blank: () => ({ table: "Homebrew", effects: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => sv(d, "table") || "Loot",
+  },
+  "icrpg-gear": {
+    title: "My Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "world", label: "World", type: "select", options: ICRPG_WORLD_OPTS },
+      { key: "category", label: "Category", type: "text", placeholder: "Weapon, Armor, Tool, Gun…" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+      { key: "effects", label: "Effects", type: "stringList", full: true, addLabel: "+ Effect" },
+    ],
+    blank: () => ({ world: "core", category: "Gear", effects: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "category") || "Gear"} · ${sv(d, "world") || "core"}`,
+  },
+  "icrpg-spell": {
+    title: "My Homebrew Spells", noun: "Spell",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "school", label: "School", type: "text", placeholder: "Magic, Energy, Blood, Tech…" },
+      { key: "target", label: "Target / DIFFICULTY", type: "text", placeholder: "TARGET 12, WIS…" },
+      { key: "effort", label: "Effort", type: "text", placeholder: "Magic EFFORT (d10)" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ school: "Magic" }), toForm: (d) => ({ ...d }),
+    summary: (d) => sv(d, "school") || "Magic",
+  },
+  "icrpg-monster": {
+    title: "My Homebrew Monsters", noun: "Monster",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "world", label: "World", type: "select", options: ICRPG_WORLD_OPTS },
+      { key: "tier", label: "Tier", type: "text", placeholder: "Grunt, Boss…" },
+      { key: "hearts", label: "Hearts", type: "number", placeholder: "1" },
+      { key: "hp", label: "HP", type: "number", placeholder: "10" },
+      { key: "defense", label: "Defense", type: "number", placeholder: "0" },
+      ...ICRPG_STAT_KEYS.map((s) => ({ key: s, label: s, type: "number" as const, placeholder: "0" })),
+      { key: "attacks", label: "Attacks", type: "stringList", full: true, addLabel: "+ Attack", placeholder: "Claw, d6 EFFORT" },
+      { key: "abilities", label: "Abilities", type: "stringList", full: true, addLabel: "+ Ability" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ world: "core", tier: "Grunt", attacks: [], abilities: [] }), toForm: (d) => {
+      const st = (d.stats ?? {}) as Record<string, unknown>; const out: Data = { ...d };
+      for (const k of ICRPG_STAT_KEYS) out[k] = typeof st[k] === "number" ? String(st[k]) : "";
+      return out;
+    },
+    summary: (d) => `${sv(d, "tier") || "Monster"} · ${sv(d, "world") || "core"}`,
+  },
 };
 
 // Accent CSS var by system prefix (globals.css: --nimble/--sw/--ace/--kob).
@@ -527,6 +612,7 @@ function accentFor(kind: string): string {
   if (kind.startsWith("kob-")) return "--kob";
   if (kind.startsWith("d62e-")) return "--d62e";
   if (kind.startsWith("ds-")) return "--darkspace";
+  if (kind.startsWith("icrpg-")) return "--icrpg";
   return "--dnd";
 }
 

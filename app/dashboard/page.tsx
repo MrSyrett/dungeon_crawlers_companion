@@ -130,6 +130,17 @@ const D62E_REFERENCE: { href: string; label: string }[] = [
   { href: "/d62e/rules", label: "Rules" },
 ];
 
+// Index Card RPG (ICRPG Master Edition) reference pages — a rules-light unified
+// d20 system: worlds, heroes (life forms + types), loot tables, spells, bestiary.
+const ICRPG_REFERENCE: { href: string; label: string }[] = [
+  { href: "/icrpg/worlds", label: "Worlds" },
+  { href: "/icrpg/heroes", label: "Heroes" },
+  { href: "/icrpg/loot", label: "Loot" },
+  { href: "/icrpg/spells", label: "Spells" },
+  { href: "/icrpg/bestiary", label: "Bestiary" },
+  { href: "/icrpg/rules", label: "Rules" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
@@ -141,6 +152,7 @@ const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SW: SW_REFERENCE,
   DND: DND_REFERENCE,
   D62E: D62E_REFERENCE,
+  ICRPG: ICRPG_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

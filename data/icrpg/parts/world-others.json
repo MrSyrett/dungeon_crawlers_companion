@@ -1,0 +1,469 @@
+{
+  "worlds": [
+    {
+      "key": "ghostmountain",
+      "name": "Ghost Mountain",
+      "blurb": "A wild-West mountain torn from the mortal coil and caught between Earth, Heaven, and Hell. Every night a blood-red sun threatens to set forever; good deeds hold it at dusk while evil deeds strengthen the Devil and his colonel Azael. All characters are human, though many are worse for wear as Muertos or Infernals. SOULS serve as sacred currency wagered against Lucifer in the game called THE MEASURE.",
+      "era": "western"
+    },
+    {
+      "key": "vigilantecity",
+      "name": "Vigilante City",
+      "blurb": "After the Mutant Crisis of 2024, the street-level town of Grey Heights has gone half-dark. Scrappy supers are the last line of defense against mega-criminals, mutants, and cosmic threats gathering in the shadows. Heroes build with 12 STAT points, three POWERS and three PROPERTIES, and clash largely through STUN POINTS (SP) rather than death.",
+      "era": "superhero"
+    },
+    {
+      "key": "bloodandsnow",
+      "name": "Blood and Snow",
+      "blurb": "An ice-age world before metal, science, or government, of vast frozen plains, giant megafauna, and desperate tribes of Snow Folk. There is no magic, no resurrection, and no healing spells; survival, trekking, weather, and cold are the true enemies. A mysterious geological Relic warps weather and minds beneath the ice.",
+      "era": "ice age"
+    }
+  ],
+  "lifeForms": [
+    {
+      "name": "Normal Folk",
+      "world": "ghostmountain",
+      "desc": "Flesh-and-blood humans just trying to get by, avoiding The Edge and staying out of Hell's war. Many heroes start this way before revenge or calamity pulls them in."
+    },
+    {
+      "name": "Infernal",
+      "world": "ghostmountain",
+      "desc": "A soul claimed by Azael and twisted into a horned, merciless minion of evil. Relentless and feared; playable as a hero only with a very good story."
+    },
+    {
+      "name": "Muerto",
+      "world": "ghostmountain",
+      "statBonus": "+2 HEARTS, -6 CHA",
+      "desc": "A person who died unburied and stood back up, a skeleton in boots. Takes half damage from bullets and heals HP only from SPELLS or WIS spells, but is shunned. Common across the mountain."
+    },
+    {
+      "name": "Human Vigilante",
+      "world": "vigilantecity",
+      "statBonus": "Build with 12 STAT points",
+      "desc": "An ordinary human driven to superheroics by willpower, training, or tragedy, the average-joe-in-a-mask who has become the last line of defense."
+    },
+    {
+      "name": "Mutant",
+      "world": "vigilantecity",
+      "desc": "Anthropomorphic mutations born of the 2024 Mutant Crisis, feared by the public and once interned in the containment camp on Ash Island."
+    },
+    {
+      "name": "Visitor",
+      "world": "vigilantecity",
+      "desc": "A being fallen to Earth from the stars by unknown means, or a creation of forbidden science, wielding strange innate powers."
+    },
+    {
+      "name": "Rock Eaters",
+      "world": "bloodandsnow",
+      "desc": "The most primitive splinter species of humankind: minimal language, smaller brains, crude stone tools, and a feral, predatory demeanor."
+    },
+    {
+      "name": "Pongo",
+      "world": "bloodandsnow",
+      "desc": "The most physically robust splinter species, ape-like with incredible strength, thick bones, and heavy skulls, but sluggish and terrified of water. They despise other species' technology."
+    },
+    {
+      "name": "Aksum",
+      "world": "bloodandsnow",
+      "desc": "Bronze-skinned equatorial hunters with complex traditions of astronomy, geology, and technology, sought out by chieftains for their omens and opinions."
+    },
+    {
+      "name": "Nords",
+      "world": "bloodandsnow",
+      "desc": "Tall, pale 'Mammoth Hunters' from the endless northern plains, more dependent on technology and infrastructure than the other species."
+    },
+    {
+      "name": "Mog",
+      "world": "bloodandsnow",
+      "desc": "A diminutive, reclusive species near extinction, slight of build with narrow high features, standing a head shorter than most and renowned as arrow-makers."
+    },
+    {
+      "name": "Hawaiki",
+      "world": "bloodandsnow",
+      "desc": "Ocean-separated seafarers adapted to the currents and seasonal seas of the ice age, thick-skinned and identified by complex tattoos and broad backs."
+    }
+  ],
+  "types": [
+    {
+      "name": "Tracker",
+      "world": "ghostmountain",
+      "desc": "Keen-eyed masters of the wild and the hunt.",
+      "statFocus": "WIS",
+      "startingLoot": ["Carbine Rifle", "Longbow", "Trapper Gear", "Supplies", "Bush Blanket or Crystal Scope"],
+      "abilities": ["Shady Brady: all TRACKING attempts and checks are EASY"]
+    },
+    {
+      "name": "Wraith",
+      "world": "ghostmountain",
+      "desc": "Smoke-and-brimstone devils you can talk to, wielders of infernal magic.",
+      "statFocus": "INT",
+      "startingLoot": ["Fire Stone", "Bowie Knife", "Spell Book", "Pouch of 50 Coin", "Demon Glyph"],
+      "abilities": ["Demon Glyph: turn immaterial at will", "Cast INFERNAL (INT) spells"]
+    },
+    {
+      "name": "Brave",
+      "world": "ghostmountain",
+      "desc": "Fierce Hepawa warriors and the deadliest knife-fighters on the mountain.",
+      "statFocus": "DEX",
+      "startingLoot": ["Bowie Knife (2)", "Carbine Rifle", "Weapon Kit", "Trapper Gear", "Ammo Pouch"],
+      "abilities": ["Great Eagle Feather: knife attacks of 15+ earn another attack and a NEAR move"]
+    },
+    {
+      "name": "Gambler",
+      "world": "ghostmountain",
+      "desc": "Shrewd, lonely card-sharps with the Devil in their eyes.",
+      "statFocus": "CHA",
+      "startingLoot": ["Pouch of 50 Coin (2)", "Six Shooter (2)", "Supplies", "Armor Kit", "Devil's Deck, Bad Bet, or Lucky"],
+      "abilities": ["Lucky: replace any ATTEMPT or CHECK with a DRAW; high card wins, an ACE is a critical success"]
+    },
+    {
+      "name": "Shaman",
+      "world": "ghostmountain",
+      "desc": "Healers who draw power from the stones rather than holy or infernal spirits.",
+      "statFocus": "WIS",
+      "startingLoot": ["Meditation Beads", "Small Pet", "Walking Stick", "Supplies", "Dream Catcher"],
+      "abilities": ["Dream Catcher: speak with or use CHA to persuade animals and natural forces", "Cast WIS spells"]
+    },
+    {
+      "name": "Mariachi",
+      "world": "ghostmountain",
+      "desc": "Musicians who carry hope; a lucky posse always has one around.",
+      "statFocus": "CHA",
+      "startingLoot": ["Instrument (rare or unique)", "Bowie Knife", "Six-shooter", "Weapon Kit", "Embroidered Sombrero, Gun Case, or Cookin' Spit"],
+      "abilities": ["Perform Sheet Music (e.g. Red Rodeo, Pistolero!) to buff or command those who hear"]
+    },
+    {
+      "name": "Gunslinger",
+      "world": "ghostmountain",
+      "desc": "Anyone can carry a six-shooter, but a Gunslinger makes an art of the gun.",
+      "statFocus": "DEX",
+      "startingLoot": ["Weapons Kit", "Six Shooter (2)", "Ammo Pouch", "Wool Poncho", "Masterwork Revolver"],
+      "abilities": ["Masterwork Revolver: on a hit, roll 1D6 and fire that many bullets at that many targets"]
+    },
+    {
+      "name": "Old Timer",
+      "world": "ghostmountain",
+      "desc": "Rare survivors of old age who keep the mountain's secrets and channel holy power.",
+      "statFocus": "WIS",
+      "startingLoot": ["Heavy Jacket (+1 ARMOR)", "Six Shooter", "Oak Cross", "Medical Case", "Hallowed Book"],
+      "abilities": ["Hallowed Book: create and cast HOLY (WIS) spells", "Begin with two HOLY spells"]
+    }
+  ],
+  "abilities": [
+    { "name": "Acrobat", "kind": "power", "world": "vigilantecity", "desc": "Superhuman DEX maneuvers: swing, flip and tumble across terrain to move FAR unharmed (1 SP), instantly evade an attack (2 SP), or pull off any described stunt (3 SP)." },
+    { "name": "Blink", "kind": "power", "world": "vigilantecity", "desc": "Flexible teleportation: zap NEAR or FAR with no roll (1 SP), open a linked portal pair (2 SP), or create and interlink up to six portals within a mile (3 SP)." },
+    { "name": "Energy Blast", "kind": "power", "world": "vigilantecity", "desc": "Release destructive energy: a single ULTIMATE FAR blast ignoring armor (1 SP), an unstoppable half-mile linear beam (2 SP), or a 3D12 area burst (3 SP)." },
+    { "name": "Flight", "kind": "power", "world": "vigilantecity", "desc": "Fly with speed and precision (no SP for normal moves): burst DOUBLE FAR through obstacles (1 SP), pull a wild maneuver (2 SP), or hold supersonic flight (3 SP)." },
+    { "name": "Gadgets", "kind": "power", "world": "vigilantecity", "desc": "Master of machines: instantly fix anything mechanical (1 SP), build LOOT-grade gadgets from scraps (2 SP), or remote-control modified machines (3 SP), all via INT rolls." },
+    { "name": "Immunity", "kind": "power", "world": "vigilantecity", "desc": "Impervious to one chosen damage type (blades, bullets, fire, ice, energy, stun, etc.); pay 1 SP to negate that damage when hit." },
+    { "name": "Invisible", "kind": "power", "world": "vigilantecity", "desc": "Incredible stealth by degrees: vanish for 1 round (1 SP), become heat-only-visible for 1D4 rounds (2 SP), or hold true invisibility for you and CLOSE allies (3 SP)." },
+    { "name": "Killshot", "kind": "power", "world": "vigilantecity", "desc": "The world's best shot with one chosen ranged weapon: auto-hit (1 SP), hit 1D8 targets in one motion (2 SP), or drop a target to 0 HP ignoring HEARTS (3 SP)." },
+    { "name": "Lucky", "kind": "power", "world": "vigilantecity", "desc": "A knack for walking away from explosions: re-roll any roll (1 SP), turn a mishap to advantage (2 SP), or narrowly escape otherwise lethal harm (3 SP)." },
+    { "name": "Martial Arts", "kind": "power", "world": "vigilantecity", "desc": "Superhuman melee: land a crushing critical (1 SP), unleash 1D8 hits (2 SP), or a CLOSE smash reducing all to 0 HP that shatters structures and can deal CHUNK damage (3 SP)." },
+    { "name": "Mega Brain", "kind": "power", "world": "vigilantecity", "desc": "Super-intelligence and mind control: no-roll INT/WIS insight (1 SP), read or resist thoughts (2 SP), or mass mind-reading and thought-implanting within a mile (3 SP)." },
+    { "name": "Mind > Matter", "kind": "power", "world": "vigilantecity", "desc": "Telekinesis: move small objects (1 SP), lift or hurl car-sized masses including self-flight (2 SP), or sustain wild feats like crumpling a tank (3 SP)." },
+    { "name": "Phase", "kind": "power", "world": "vigilantecity", "desc": "Become immaterial: NEAR move through solids (1 SP), phase to dodge an attack (2 SP), or phase another person or object; an enemy phased into matter takes ULTIMATE damage (3 SP)." },
+    { "name": "Plastic", "kind": "power", "world": "vigilantecity", "desc": "Rubbery body chemistry: stretch a limb 10x (1 SP), extend your whole body 50x (2 SP), or morph into a described object for CON rounds (3 SP)." },
+    { "name": "Regeneration", "kind": "power", "world": "vigilantecity", "desc": "Heal and regrow tissue: shrug off last round's HP or SP (1 SP), recover to full (2 SP), or regrow from near-death in 1D6 rounds if you have 3 SP (3 SP)." },
+    { "name": "Sonic", "kind": "power", "world": "vigilantecity", "desc": "Manipulate sound, especially for STUN: focused NEAR blast (1 SP), omni-directional FAR wave (2 SP), or a delayed explosion that levels 1D8 structures (3 SP)." },
+    { "name": "Super Senses", "kind": "power", "world": "vigilantecity", "desc": "See, smell or hear for miles: 5-mile senses (1 SP), read trace evidence by touch (2 SP), or sense through solid matter and vast distances (3 SP), via WIS rolls." },
+    { "name": "Super Speed", "kind": "power", "world": "vigilantecity", "desc": "Mind-bending speed: ignore movement distance limits (1 SP), take TWO actions per turn (2 SP), or describe catastrophic high-speed effects with a DEX roll (3 SP)." },
+    { "name": "Super Strength", "kind": "power", "world": "vigilantecity", "desc": "Exponential strength: ULTIMATE+STR melee (1 SP), throw cars or stop trains (2 SP), or catch jetliners and topple buildings (3 SP)." },
+    { "name": "Transform", "kind": "power", "world": "vigilantecity", "desc": "Change into an alternate form with its own powers and stats: for 1D4 rounds (1 SP), until 0 SP (2 SP), or until 0 HP (3 SP); reverting is not under your control." },
+    { "name": "Archer", "kind": "ability", "world": "bloodandsnow", "desc": "On a successful EASY bow attack, roll DOUBLE EFFORT." },
+    { "name": "Chief", "kind": "ability", "world": "bloodandsnow", "desc": "Non-player characters will always hear you out, or stop to listen." },
+    { "name": "Cook", "kind": "ability", "world": "bloodandsnow", "desc": "Double the benefits of any FOOD ITEMS you create." },
+    { "name": "Craftsman", "kind": "ability", "world": "bloodandsnow", "desc": "Create WOOD or ANTLER items in 1 hour with an INT or WIS roll." },
+    { "name": "Delver", "kind": "ability", "world": "bloodandsnow", "desc": "Rolls to navigate or survive tunnels or caves are always EASY." },
+    { "name": "Dreamer", "kind": "ability", "world": "bloodandsnow", "desc": "Visualize revolutionary technology every 1D4 days." },
+    { "name": "Fisherman", "kind": "ability", "world": "bloodandsnow", "desc": "Yield twice the FOOD or SUPPLY gained from fishing as others." },
+    { "name": "Flamekeeper", "kind": "ability", "world": "bloodandsnow", "desc": "You always keep a small firepot going, no matter what." },
+    { "name": "Forager", "kind": "ability", "world": "bloodandsnow", "desc": "Double the outcome of any successful FORAGE roll." },
+    { "name": "Herbalist", "kind": "ability", "world": "bloodandsnow", "desc": "Use a FORAGE roll to find specific plants, roots or fungi." },
+    { "name": "Mason", "kind": "ability", "world": "bloodandsnow", "desc": "Building with STONE is never HARD." },
+    { "name": "Mender", "kind": "ability", "world": "bloodandsnow", "desc": "Make REPAIR rolls on any EQUIPMENT." },
+    { "name": "Metalurgist", "kind": "ability", "world": "bloodandsnow", "desc": "Create METAL implements in 1 hour with an INT or WIS roll." },
+    { "name": "Naturalist", "kind": "ability", "world": "bloodandsnow", "desc": "Use INT or WIS to recall facts about any BEAST or LANDSCAPE." },
+    { "name": "Navigator", "kind": "ability", "world": "bloodandsnow", "desc": "Ignore BAD WEATHER when making NAVIGATION rolls." },
+    { "name": "Runic", "kind": "ability", "world": "bloodandsnow", "desc": "Read TEACHER stones with an INT roll." },
+    { "name": "Runner", "kind": "ability", "world": "bloodandsnow", "desc": "Travel twice the distance per day trekking." },
+    { "name": "Seer", "kind": "ability", "world": "bloodandsnow", "desc": "Speak of OMENS or GHOSTS; listeners must roll to disbelieve." },
+    { "name": "Shapeshift", "kind": "ability", "world": "bloodandsnow", "desc": "Use hide and bone to disguise yourself as a large animal." },
+    { "name": "Slayer", "kind": "ability", "world": "bloodandsnow", "desc": "Roll ULTIMATE EFFORT on any target you have already injured." },
+    { "name": "Spearman", "kind": "ability", "world": "bloodandsnow", "desc": "No roll with a SPEAR is ever HARD." },
+    { "name": "Survivor", "kind": "ability", "world": "bloodandsnow", "desc": "When DYING, add 1 to your roll." },
+    { "name": "Swimmer", "kind": "ability", "world": "bloodandsnow", "desc": "Never take damage from deep water; swim twice as fast." },
+    { "name": "Tracker", "kind": "ability", "world": "bloodandsnow", "desc": "Pursuing BEASTS, tracking is EASY." },
+    { "name": "Warrior", "kind": "ability", "world": "bloodandsnow", "desc": "When fighting other humans, roll DOUBLE EFFORT." },
+    { "name": "Wild", "kind": "ability", "world": "bloodandsnow", "desc": "When rolling HAZARDS, roll twice and choose." },
+    { "name": "Wise", "kind": "ability", "world": "bloodandsnow", "desc": "Aid an ally on a WIS or INT roll, making it EASY." }
+  ],
+  "monsters": [
+    {
+      "name": "Brain X",
+      "tier": "Villain",
+      "attacks": [
+        "Mind Ray: all enemies within FAR roll CON or take 1D12 STUN",
+        "Sabotage: INT roll to jam one piece of LOOT for 4 rounds",
+        "Trap: enemies roll DEX or are stuck until a HARD STR roll to break free",
+        "Ion Beam: ruby retinas always do 12 HP to one visible target"
+      ],
+      "abilities": ["Held in a duranium fluid capsule and transportable to any cybernetic vessel; no grasp of human suffering; fights with lies, trickery and armies of minions"],
+      "desc": "An inhuman intellect and criminal mastermind who wages war through deception.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Destroyer",
+      "tier": "Villain",
+      "attacks": [
+        "Assault Rifles: targets not in cover and in front roll DEX or take 1D12",
+        "Smart Missile: laser-tagged target hit each round; CON halves 1D12 HP and 1D12 STUN",
+        "Adaptive Sabers: double melee flurry at 1D8 each, bypassing any damage immunity",
+        "Stun Pulse: enemies within FAR roll CON or take 1D12 STUN"
+      ],
+      "abilities": ["A mercenary paid only in platinum bars; unknown origin; evasive fighter using cover, vertical surfaces and speed"],
+      "desc": "A relentless mercenary killer who works for any employer who can afford him.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Dr. Atom",
+      "tier": "Villain",
+      "attacks": [
+        "Accelerate: move any TIMER ahead 1D4 rounds instantly",
+        "Erase: undo one event from the previous round",
+        "Quantum Defense: recover all previous damage and raise the TARGET by 1",
+        "Staff of Stars: no-roll cosmic strike, 1 CLOSE target takes 1D12 HP and SP"
+      ],
+      "abilities": ["An extragalactic visitor who fights by bending time and gravity and never shows fear"],
+      "desc": "An evil, extragalactic being far darker than any doomsday headline.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Ezra Evil",
+      "tier": "Villain",
+      "attacks": [
+        "Hack: electronically-controlled LOOT and POWERS fail within FAR of her",
+        "Give Up: she sits down and stops the conflict, hard to budge for 1D4 rounds",
+        "Seduce: CHA roll to convert one person to her cause for 1D4 rounds",
+        "Smoke: all who see her roll CHA or delay their plans for 1D4 rounds"
+      ],
+      "abilities": ["Vast intelligence and sinister wit; a siren who fights mainly with words"],
+      "desc": "A sadistic goth super-genius, bored but never boring.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "God's Hand",
+      "tier": "Villain",
+      "attacks": [
+        "Blood: enemies in the Immediate area roll CON or drop to 1 HP and 1 SP",
+        "Storms: lightning strikes 3 random places per round for 3D12 HP and 1D12 SP",
+        "Locusts: summoned locusts get one free WEAPON attack on foes in sight",
+        "Death: a chosen target rolls CON or dies fully, revivable only by resurrection (regeneration and immunity do not apply)"
+      ],
+      "abilities": ["A silent being believed responsible for many biblical events; terrifying power"],
+      "desc": "A wordless, godlike menace of plague, storm, and death.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Goo Jira",
+      "tier": "Villain",
+      "attacks": [
+        "Smash: spiked-flail fists crush a target or object up to bus size to 0 HP",
+        "Pseudopod: ooze pierces a FAR straight line; targets roll DEX or drop to 0 HP",
+        "Split: divides into two full selves, HEARTS divided between them",
+        "Grow: roars and gains 50% mass, +1 HEART and heals to full HP"
+      ],
+      "abilities": ["A chemical-spill mutant, barely human anymore, driven by rage"],
+      "desc": "An unstable ooze-monster of pure fury.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Green Man",
+      "tier": "Villain",
+      "attacks": [
+        "Thumper Pistol: a WEAPON that never misses, 3 SP even if resisted",
+        "Stabby: target takes 1D4 WEAPON cuts",
+        "All Teeth: if very CLOSE, bites off an enemy's face, ears or nose",
+        "Green Gas: releases a cloud of poisonous gas",
+        "Bring the Car Around: summons his supercar and 1D8 tuxedo'd henchmen instantly"
+      ],
+      "abilities": ["An unpredictable, nihilistic, long-winded lunatic megalomaniac and prankster"],
+      "desc": "A chaotic super-criminal driven by a twisted sense of amusement.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Incinerator",
+      "tier": "Villain",
+      "attacks": [
+        "Flame Burst: sprays burning plasma for 1D12 HP and destroys 1D4 pieces of LOOT",
+        "Smoke Bomb: FAR-radius wall of smoke that dissipates after 1D6 rounds",
+        "Jet Slide: DEX roll to dart anywhere in the scene instantly",
+        "Respirator Boost: injects adrenaline to heal all damage and add 1 to all rolls"
+      ],
+      "abilities": ["A pyromaniac with prototype military hardware and an endless appetite to burn it all down"],
+      "desc": "The worst kind of pyromaniac, armed with military-grade fire tech.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "The Iron Clan",
+      "tier": "Villain",
+      "attacks": [
+        "We Are Many: 1D6 more assassins clone out of the others",
+        "Odachi Slash: sword attack",
+        "Shuriken: a ranged WEAPON",
+        "Smoke Jump: relocate anywhere in the current scene instantly",
+        "Unify: several assassins recombine their numbers",
+        "Collateral Damage: cut power lines, start fires, collapse buildings, or kill innocents to lure foes"
+      ],
+      "abilities": ["An ancient, silent, leaderless order with a seemingly infinite number of members"],
+      "desc": "An endless order of deadly ninja assassins with an unclear purpose.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Monstro",
+      "tier": "Villain",
+      "attacks": [
+        "Razor Claw: ULTIMATE melee attack, no roll, CLOSE range",
+        "Saw Spines: poison-tipped barbs doing ULTIMATE SP damage",
+        "Dart Spitter: spine-darts deal WEAPON damage and repeat each round until picked out",
+        "Hydro Ray: corrosive bio-liquid does 1D12 extra to metal and WEAPON damage to enemies in front"
+      ],
+      "abilities": ["Part insect, leech, sea urchin and cobra; fights with savage speed and feral unpredictability"],
+      "desc": "A grisly serial-killer chimera of the worst animal parts.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Pharaoh",
+      "tier": "Villain (demigod)",
+      "attacks": [
+        "Sand: conjure, control, shape or destroy sand, concrete or stone",
+        "Snakes: summon or control snakes, or change underlings into snakes",
+        "Crush: any victim smashed is dropped to 1 HP and 0 SP instantly",
+        "Raise Dead: raise any dead creatures within sight to do his bidding"
+      ],
+      "abilities": ["An untouchable demigod ancestor of Egyptian emperors, moving through centuries to dominate mankind"],
+      "desc": "The campaign's chief menace: a tyrant demigod uniting the city's evil.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Rax",
+      "tier": "Villain",
+      "attacks": [
+        "Chain Sword: an Imperium WEAPON, no roll, always 1D12+4",
+        "Energy Cannon: triple-shot energy gun, 3D8 HP and SP on 1-3 targets",
+        "Recovery Unit: recovers 1 HEART with no roll",
+        "Drain Unit: grabs one enemy to steal 1 HEART and 1 POWER (a CON roll recovers the power)"
+      ],
+      "abilities": ["Imperator Rax, an Imperium Ghost Armor from deep space; his arrival signals The Imperium will attack"],
+      "desc": "A deep-space imperial warlord and herald of invasion.",
+      "world": "vigilantecity"
+    },
+    {
+      "name": "Spear Tooth",
+      "tier": "Megafauna",
+      "stats": { "STR": 2, "DEX": 2, "CON": 2, "INT": 2, "WIS": 2, "CHA": 2 },
+      "attacks": [
+        "Pounce: a flying leap to FAR range; victims take ULTIMATE damage and are pinned",
+        "Crushing Bite: a CLOSE ULTIMATE attack aimed at head or neck",
+        "Claws: strikes at equipment, knocking a random piece of gear to FAR",
+        "Deafening Roar: all living things within FAR roll CHA or lose their next turn petrified or fleeing",
+        "Sprint: a reckless bounding run to TRIPLE FAR over any terrain"
+      ],
+      "abilities": [
+        "3 actions per turn; +2 to all STATS",
+        "Snow Stalker: WIS rolls to detect it in snowy terrain are HARD, and it can Pounce from stealth with no roll (victim rolls DEX or drops to 1 HP, pinned)",
+        "Devious Lure: mimics human sounds like a weeping child; rolls to see through the deception are HARD"
+      ],
+      "desc": "The supreme sabre-toothed predator of the frozen epoch, able to kill a mammoth with one brain-piercing bite.",
+      "world": "bloodandsnow"
+    },
+    {
+      "name": "River Giant",
+      "tier": "Megafauna",
+      "stats": { "STR": 4, "DEX": 4, "CON": 4, "INT": 4, "WIS": 4, "CHA": 4 },
+      "attacks": [
+        "Swat: hits all NEAR enemies, throwing them FAR for WEAPON damage",
+        "Crush: stumbles onto NEAR foes, pinning them for 10 damage (HARD STR to escape)",
+        "Charge: a single target rolls DEX to leap aside or falls to 0 HP; can destroy a SHELTER",
+        "Earth Gouger: digs trenches or hurls boulders to make an impassable obstacle; NEAR enemies roll CHA or lose their next turn",
+        "March: moves in family groups of 5-10 along a fixed migration trail"
+      ],
+      "abilities": ["2 actions per turn; +4 to all STATS", "Giant: standing 40 feet tall, it smashes houses, sinks ships and topples small hills"],
+      "desc": "A 40-foot member of the beaver family; vegetarian but violently territorial when shortages strike.",
+      "world": "bloodandsnow"
+    },
+    {
+      "name": "Cave Bear",
+      "tier": "Megafauna",
+      "stats": { "STR": 3, "DEX": 3, "CON": 3, "INT": 3, "WIS": 3, "CHA": 3 },
+      "attacks": [
+        "Maul: a CLOSE claw attack for WEAPON damage that breaks 1 piece of gear",
+        "Chomp: a WEAPON attack that heals the bear the damage done",
+        "Flurry of Claws: for each successful CLOSE WEAPON attack, it attacks again",
+        "Ram: a FAR charge; enemies in a straight line roll DEX or take WEAPON damage"
+      ],
+      "abilities": ["1 action per turn; +3 to all STATS", "Reclusive: steals SUPPLIES and hauls them to its lair", "Master of Darkness: flawless night vision", "Architect: roars to collapse or open cave tunnels"],
+      "desc": "An intelligent, patient bear that will ignore intruders unless its young or hibernation are disturbed, then fights to the death.",
+      "world": "bloodandsnow"
+    },
+    {
+      "name": "Anacon",
+      "tier": "Megafauna",
+      "stats": { "STR": 5, "DEX": 5, "CON": 5, "INT": 5, "WIS": 5, "CHA": 5 },
+      "attacks": [
+        "Constrictor: after a hit, victim must beat its STR roll each turn or be crushed to death in 1D4 rounds",
+        "Venom Bite: a NEAR attack for ULTIMATE damage; failed CON means WEAPON damage for 1D4 more turns",
+        "Slam: all FAR targets roll DEX or take ULTIMATE damage",
+        "Coil: at or below 2 HEARTS, a RECOVERY roll regenerates a full HEART, often while retreating"
+      ],
+      "abilities": ["3 actions per turn; +5 to all STATS", "Ground Breaker: digs extensive tunnels 2-20 feet wide with no sense of up or down", "Massive Grappler: can Constrictor up to 4 targets at once by threading its body through the ground (roll 1D4)"],
+      "desc": "A giant, cold-adapted constrictor snake that grows to terrible age, becoming highly intelligent and cruel with hunger.",
+      "world": "bloodandsnow"
+    },
+    {
+      "name": "Black Wolves",
+      "tier": "Megafauna",
+      "attacks": ["Pack hunting: stalk and attack humans, closing in from all sides"],
+      "abilities": ["1D20 appearing; encounters can swell by 1D6 wolves each round"],
+      "desc": "Relentless pack hunters that trail travelers for days before pressing in for the kill.",
+      "world": "bloodandsnow"
+    },
+    {
+      "name": "Snow Bear",
+      "tier": "Megafauna",
+      "abilities": ["Solitary nomad; will flee 1D10 miles or until cornered"],
+      "desc": "A wandering solitary bear that avoids conflict until cornered.",
+      "world": "bloodandsnow"
+    },
+    {
+      "name": "Sky Shadow",
+      "tier": "Megafauna",
+      "attacks": ["Carry off victims in the open, dropping them at a crag-top nesting place"],
+      "abilities": ["1D4 appearing; a hoarder that steals equipment", "Flees one at a time after losing one HEART; its nest holds 1D4 giant eggs (each 1 SUPPLY)"],
+      "desc": "A massive flying predator and hoarder that blots out the sun before it dives.",
+      "world": "bloodandsnow"
+    },
+    {
+      "name": "Hook",
+      "tier": "Megafauna",
+      "abilities": ["1D4 appearing; hateful temper, always crazed and attacks on sight"],
+      "desc": "A crazed, ill-tempered beast of the thaw lands.",
+      "world": "bloodandsnow"
+    },
+    {
+      "name": "Mammoth",
+      "tier": "Megafauna",
+      "abilities": ["1D12 appearing; passive until provoked; a rich source of SUPPLY and FORAGING"],
+      "desc": "A towering, normally peaceful herd beast, devastating when roused.",
+      "world": "bloodandsnow"
+    },
+    {
+      "name": "Pine Stag",
+      "tier": "Megafauna",
+      "attacks": ["Hit-and-run raids on camps and travelers"],
+      "abilities": ["1D20 appearing"],
+      "desc": "A large antlered beast of the pine lands that strikes and withdraws in numbers.",
+      "world": "bloodandsnow"
+    }
+  ]
+}

@@ -62,6 +62,13 @@ const SYSTEMS = [
     chapter: "Scene", chapterPh: "Scene 1", session: "Session", mobs: "Foes/NPCs", mobsHeading: "Foes &amp; NPCs",
     mob: "Foe", boss: "Villain", npc: "NPC", typePh: "THUG // AGILITY 2D // BRAWLING 3D", titlePh: "e.g. The Heist Goes Sideways", subtitlePh: "e.g. A D62e one-shot for 4 heroes",
   },
+  {
+    file: "icrpg_session_prep_builder.html", key: "icrpg_session", ls: "icrpg_builder_v1", cfg: "icrpg", random: "Random Monster",
+    name: "Index Card RPG", title: "Session Prep Builder — Index Card RPG",
+    accent: "#c8501e", accentDark: "#8f3714", red: "#b82018", redDark: "#7a1510", highlight: "#f0c020", boxBg: "#f0d9cb",
+    chapter: "Room", chapterPh: "Room 1", session: "Session", mobs: "Monsters", mobsHeading: "Monsters",
+    mob: "Monster", boss: "Boss", npc: "NPC", typePh: "GRUNT // 1♥ // DEF +0", titlePh: "e.g. The Grey Hill Inferno", subtitlePh: "e.g. An ICRPG one-shot, TARGET 12",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -108,6 +115,22 @@ const SB_CONFIGS = {
     s: m.s || '', d: m.d || '', c: m.c || '', i: m.i || '', w: m.w || '', ch: m.ch || '',
     abilities: [m.atk ? 'ATK: ' + m.atk : '', dig ? 'Interface: ACC ' + m.acc + ', CTL ' + m.ctl + ', NET ' + m.net : '', m.notes || ''].filter(Boolean).join('\\n'),
   }; }, sub: m => 'LV ' + m.lv + (m.mo ? ' · ' + m.mo : '') + (/\\blegendary\\b/i.test(m.notes||'') ? ' · legendary' : '') },
+};`,
+  icrpg: `const SB_CONFIG = {
+  typePlaceholder: 'GRUNT // ALFHEIM',
+  hp: null,
+  rows: [
+    [{ key:'tier', label:'TIER' }, { key:'hearts', label:'HEARTS' }, { key:'hp', label:'HP' }, { key:'def', label:'DEF', th:'Defense' }],
+    [{ key:'str', label:'STR', ph:'+0' }, { key:'dex', label:'DEX', ph:'+0' }, { key:'con', label:'CON', ph:'+0' }, { key:'int', label:'INT', ph:'+0' }, { key:'wis', label:'WIS', ph:'+0' }, { key:'cha', label:'CHA', ph:'+0' }],
+  ],
+  abilitiesLabel: 'Attacks & Abilities', abilitiesPlaceholder: 'One per line — ATK: Claw d6 · Ability: effect',
+  mobs: { placeholder: 'Search the ICRPG Bestiary…', pool: () => (typeof ICRPG_MONSTERS !== 'undefined' && Array.isArray(ICRPG_MONSTERS)) ? ICRPG_MONSTERS : [], toCard: m => { const s = m.stats || {}; const st = k => s[k] == null ? '' : ((s[k] >= 0 ? '+' : '') + s[k]); return {
+    sbtype: /boss|big five|villain/i.test(m.tier||'') ? 'boss' : 'mob', name: m.name || '',
+    type: ['MONSTER', (m.tier||'').toUpperCase(), String(m.world||'').toUpperCase()].filter(Boolean).join(' // '), flavor: m.desc || '',
+    tier: m.tier || '', hearts: m.hearts != null ? String(m.hearts) : '', hp: m.hp != null ? String(m.hp) : '', def: m.defense != null ? String(m.defense) : '',
+    str: st('STR'), dex: st('DEX'), con: st('CON'), int: st('INT'), wis: st('WIS'), cha: st('CHA'),
+    abilities: [...(m.attacks||[]).map(a => 'ATK: ' + a), ...(m.abilities||[])].join('\\n'),
+  }; }, sub: m => [m.tier, m.hearts != null ? m.hearts + '♥' : '', m.world].filter(Boolean).join(' · ') },
 };`,
   nimble: `const SB_CONFIG = {
   typePlaceholder: 'MINION // KOBOLDS // SMALL',
@@ -183,6 +206,7 @@ const MOB_DATA = {
   sw: '<script src="/tools-data/sw-characters.js"></script>',
   dnd: '<script src="/tools-data/dnd-monsters.js"></script>',
   d62e: '<script src="/tools-data/d62e-creatures.js"></script>',
+  icrpg: '<script src="/tools-data/icrpg-monsters.js"></script>',
 };
 
 function rep(s, a, b, all = true) {

@@ -23,7 +23,8 @@ export type HbType =
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
-  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-equipment" | "ds-ship-item" | "ds-monster";
+  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-equipment" | "ds-ship-item" | "ds-monster"
+  | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -35,6 +36,7 @@ const HB_TYPES = [
   "kob-trope", "kob-strength", "kob-flaw",
   "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
   "ds-species", "ds-archetype", "ds-background", "ds-motivation", "ds-equipment", "ds-ship-item", "ds-monster",
+  "icrpg-type", "icrpg-ability", "icrpg-loot", "icrpg-gear", "icrpg-spell", "icrpg-monster",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1740,6 +1742,110 @@ function normalizeDsShipItem(input: unknown): { name: string; data: Record<strin
   return { name, data };
 }
 
+// ── ICRPG (Index Card RPG) ──────────────────────────────────────────────────
+// Each normaliser emits the exact lib/data/icrpg-types shape its reference page
+// consumes, and tags source/world so cards render a Homebrew badge + world chip.
+const ICRPG_WORLD_KEYS = ["core", "alfheim", "warpshell", "ghostmountain", "vigilantecity", "bloodandsnow"] as const;
+
+function normalizeIcrpgType(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew hero type needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    world: oneOf(o.world, ICRPG_WORLD_KEYS, "core"),
+    desc: str(o.desc).slice(0, 3000),
+    source: "Homebrew",
+  };
+  if (str(o.statFocus)) data.statFocus = str(o.statFocus).slice(0, 120);
+  const startingLoot = strList(o.startingLoot, 20, 120); if (startingLoot.length) data.startingLoot = startingLoot;
+  const abilities = strList(o.abilities, 20, 120); if (abilities.length) data.abilities = abilities;
+  return { name, data };
+}
+
+function normalizeIcrpgAbility(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew ability needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    kind: str(o.kind).slice(0, 60) || "Ability",
+    world: oneOf(o.world, ICRPG_WORLD_KEYS, "core"),
+    desc: str(o.desc).slice(0, 3000),
+    source: "Homebrew",
+  };
+  return { name, data };
+}
+
+function normalizeIcrpgLoot(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew loot entry needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    table: str(o.table).slice(0, 80) || "Homebrew",
+    desc: str(o.desc).slice(0, 3000),
+    source: "Homebrew",
+  };
+  if (str(o.roll)) data.roll = str(o.roll).slice(0, 20);
+  const effects = strList(o.effects, 20, 200); if (effects.length) data.effects = effects;
+  return { name, data };
+}
+
+function normalizeIcrpgGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    world: oneOf(o.world, ICRPG_WORLD_KEYS, "core"),
+    category: str(o.category).slice(0, 60) || "Gear",
+    desc: str(o.desc).slice(0, 3000),
+    source: "Homebrew",
+  };
+  const effects = strList(o.effects, 20, 200); if (effects.length) data.effects = effects;
+  return { name, data };
+}
+
+function normalizeIcrpgSpell(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew spell needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    school: str(o.school).slice(0, 60) || "Magic",
+    desc: str(o.desc).slice(0, 3000),
+    source: "Homebrew",
+  };
+  if (str(o.target)) data.target = str(o.target).slice(0, 60);
+  if (str(o.effort)) data.effort = str(o.effort).slice(0, 60);
+  return { name, data };
+}
+
+function normalizeIcrpgMonster(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew monster needs a name.");
+  const stats: Record<string, number> = {};
+  for (const k of ["STR", "DEX", "CON", "INT", "WIS", "CHA"]) {
+    const n = num(o[k]); if (n != null) stats[k] = n;
+  }
+  const data: Record<string, unknown> = {
+    name,
+    world: oneOf(o.world, ICRPG_WORLD_KEYS, "core"),
+    desc: str(o.desc).slice(0, 3000),
+    stats,
+    source: "Homebrew",
+  };
+  if (str(o.tier)) data.tier = str(o.tier).slice(0, 40);
+  const hearts = num(o.hearts); if (hearts != null && hearts >= 0) data.hearts = hearts;
+  const hp = num(o.hp); if (hp != null && hp >= 0) data.hp = hp;
+  const defense = num(o.defense); if (defense != null) data.defense = defense;
+  const attacks = strList(o.attacks, 20, 200); if (attacks.length) data.attacks = attacks;
+  const abilities = strList(o.abilities, 20, 200); if (abilities.length) data.abilities = abilities;
+  return { name, data };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -1788,6 +1894,12 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "ds-equipment": return normalizeDsEquipment(data);
     case "ds-ship-item": return normalizeDsShipItem(data);
     case "ds-monster": return normalizeDsMonster(data);
+    case "icrpg-type": return normalizeIcrpgType(data);
+    case "icrpg-ability": return normalizeIcrpgAbility(data);
+    case "icrpg-loot": return normalizeIcrpgLoot(data);
+    case "icrpg-gear": return normalizeIcrpgGear(data);
+    case "icrpg-spell": return normalizeIcrpgSpell(data);
+    case "icrpg-monster": return normalizeIcrpgMonster(data);
   }
 }
 

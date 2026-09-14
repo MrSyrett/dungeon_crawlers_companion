@@ -1454,6 +1454,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
       <option value="SW">Star Wars</option>
       <option value="DND">D&amp;D</option>
       <option value="D62E">D6 System 2e</option>
+      <option value="ICRPG">Index Card RPG</option>
     </select>
     <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
     <a class="btn small ghost vtt-launch" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg> VTT</a>
@@ -1496,6 +1497,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     SW:  ['swmonster','swtreasure'],
     DND: ['adventure','npc','dungeon','encounter','shop','dndmonster','dndtreasure'],
     D62E:['d62emonster','d62etreasure'],
+    ICRPG:['icrpgmonster','icrpgtreasure'],
   };
   const SYS_KEYS = Object.keys(SYS_GENS);
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
@@ -2360,6 +2362,8 @@ GMScenes.renderPins();
         <option value="dndtreasure">D&amp;D Treasure</option>
         <option value="d62emonster">D6 2e Creature</option>
         <option value="d62etreasure">D6 2e Gear Drop</option>
+        <option value="icrpgmonster">ICRPG Monster</option>
+        <option value="icrpgtreasure">ICRPG Loot</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -2970,6 +2974,49 @@ GMScenes.renderPins();
             <div class="ai-row">
               <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
               <button class="btn small ghost xs-tr-credits" type="button" title="Add a credit stash">💰 Credits</button>
+            </div>
+            <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
+            <div class="ai-status xs-tr-status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ICRPG MONSTER PANEL (bestiary draw; cards send to the tracker) -->
+      <div class="gen-panel" data-panel="icrpgmonster">
+        <div class="gen-controls">
+          <label class="gen-label">Tier
+            <select class="gen-select" id="gen-icrpgmon-tier"><option value="">Any Tier</option></select>
+          </label>
+          <label class="gen-label">Count
+            <select class="gen-select" id="gen-icrpgmon-tier-count">
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="5">5</option>
+            </select>
+          </label>
+        </div>
+        <div class="gen-results" id="gen-icrpgmon-tier-results"></div>
+      </div>
+
+      <!-- ICRPG LOOT PANEL (random spread + hand-picked gear/loot from the ICRPG lists; sends a claimable drop) -->
+      <div class="gen-panel xs-treasure" data-panel="icrpgtreasure" data-sys="icrpg">
+        <div class="ai-scroll">
+          <div class="ai-section">
+            <div class="ai-sec-title">Loot Drop</div>
+            <input type="text" class="ai-input xs-tr-name" placeholder="Where it turns up (e.g. The dungeon's final room)">
+            <div class="ai-row">
+              <select class="ai-select xs-tr-type" title="What to roll"><option value="random_all">Random (all)</option><option value="weapon">Weapon</option><option value="armor">Armor</option><option value="gear">Gear</option><option value="loot">Loot</option></select>
+              <select class="ai-select xs-tr-count" title="How many items to roll">
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="5">5</option>
+              </select>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a spread from the ICRPG loot &amp; gear lists">🎲 Roll</button>
+            </div>
+            <div class="ai-cat-filters xs-tr-filters"></div>
+            <input type="text" class="ai-input xs-tr-search" placeholder="Search loot &amp; gear to add…">
+            <div class="ai-cat-results xs-tr-results"></div>
+            <table class="ai-items"><tbody class="xs-tr-body"></tbody></table>
+            <div class="ai-row">
+              <button class="btn small ghost xs-tr-add" type="button">+ Add custom item</button>
             </div>
             <button class="btn small primary xs-tr-send" type="button">Send Drop</button>
             <div class="ai-status xs-tr-status"></div>
@@ -4810,7 +4857,7 @@ function init_trackers(root) {
   }
   // Default the picker's bestiary to the top-bar system toggle; fall back to DCC
   // when its data is loaded, else SD.
-  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'ds', 'd62e'];
+  const XS_SOURCES = ['ace', 'nim', 'sw', 'kob', 'dnd', 'ds', 'd62e', 'icrpg'];
   function sysToSource(sys) { sys = String(sys || 'DCC').toLowerCase(); return sys === 'sd' ? 'sd' : XS_SOURCES.indexOf(sys) >= 0 ? sys : 'dcc'; }
   let pickerSource = (window.GM_SYSTEM === 'SD') ? 'sd' : XS_SOURCES.indexOf(String(window.GM_SYSTEM || '').toLowerCase()) >= 0 ? String(window.GM_SYSTEM).toLowerCase() : (dccBestiary().length ? 'dcc' : 'sd');
 
@@ -7215,6 +7262,7 @@ function xsBestiary(src) {
   if(src === 'dnd') return ok(typeof DND_MONSTERS !== 'undefined' ? DND_MONSTERS : undefined);
   if(src === 'ds')  return ok(typeof DS_MONSTERS !== 'undefined' ? DS_MONSTERS : undefined);
   if(src === 'd62e') return ok(typeof D62E_CREATURES !== 'undefined' ? D62E_CREATURES : undefined);
+  if(src === 'icrpg') return ok(typeof ICRPG_MONSTERS !== 'undefined' ? ICRPG_MONSTERS : undefined);
   return [];
 }
 // DarkSpace denizens have no "type" field — group them by a level tier instead.
@@ -7228,7 +7276,7 @@ function dsMonTier(m) {
 }
 // The "type" facet each bestiary is filtered by (ACE type, Nimble family, SW/D&D
 // group, DarkSpace level tier, D6 2e kind).
-function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'ds' ? dsMonTier(m) : src === 'd62e' ? (m.kind || '') : (m.group || ''); }
+function xsMonType(src, m) { return src === 'ace' ? (m.type || '') : src === 'nim' ? (m.family || '') : src === 'ds' ? dsMonTier(m) : src === 'd62e' ? (m.kind || '') : src === 'icrpg' ? (m.tier || '') : (m.group || ''); }
 function xsMonTypes(src) { return [...new Set(xsBestiary(src).map(m => xsMonType(src, m)).filter(Boolean))]; }
 // Star Wars die codes are stored as pips (3D+2 = 11).
 function swPipsCode(p) { p = Math.round(Number(p) || 0); const d = Math.floor(p / 3), r = p % 3; return d ? d + 'D' + (r ? '+' + r : '') : (r ? '+' + r : ''); }
@@ -7296,6 +7344,17 @@ function xsMonSummary(src, m) {
     if(m.description) out.notes.push(m.description);
     out.notes.push([m.kind, m.genre && m.genre !== 'core' ? m.genre : ''].filter(Boolean).join(' · '));
     out.hp = 0;
+  } else if(src === 'icrpg') {
+    // ICRPG: d20 + stat vs TARGET. Hearts are 10 HP each; stats are flat mods.
+    const S = m.stats || {};
+    out.stats.push({ label: 'Hearts', val: m.hearts != null ? String(m.hearts) : '' }, { label: 'HP', val: String(m.hp != null ? m.hp : (m.hearts != null ? m.hearts * 10 : '')) });
+    if(m.defense != null) out.stats.push({ label: 'DEF', val: (m.defense >= 0 ? '+' : '') + m.defense });
+    ['STR','DEX','CON','INT','WIS','CHA'].forEach(k => { if(S[k] != null) out.stats.push({ label: k, val: (S[k] >= 0 ? '+' : '') + S[k], roll: '1d20' + (S[k] >= 0 ? '+' : '') + S[k] }); });
+    (m.attacks || []).forEach(a => out.lines.push({ label: 'Attack', text: String(a) }));
+    (m.abilities || []).forEach(a => out.lines.push({ label: 'Ability', text: String(a) }));
+    if(m.desc) out.notes.push(m.desc);
+    out.notes.push([m.tier, m.world && m.world !== 'core' ? m.world : ''].filter(Boolean).join(' · '));
+    out.hp = m.hp != null ? (parseInt(m.hp, 10) || 1) : (m.hearts != null ? m.hearts * 10 : 10);
   }
   return out;
 }
@@ -8760,7 +8819,7 @@ window.init_gen = function(root) {
   // pool when the button is tagged data-src="dcc", else the SD bestiary.
   function resolveGenMon(name, src) {
     if(src === 'dcc') return dccGenBestiary().find(x => x.name === name) || null;
-    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'ds' || src === 'd62e') return xsBestiary(src).find(x => x.name === name) || null;
+    if(src === 'ace' || src === 'nim' || src === 'sw' || src === 'dnd' || src === 'ds' || src === 'd62e' || src === 'icrpg') return xsBestiary(src).find(x => x.name === name) || null;
     return (typeof allMonsters === 'function') ? (allMonsters().find(x => x.name === name) || null) : null;
   }
   root.addEventListener('click', (e) => {
@@ -8797,9 +8856,9 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'dstreasure', 'd62etreasure'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'dstreasure', 'd62etreasure', 'icrpgtreasure'];
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
-  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['ds','#gen-dsmon-type'],['d62e','#gen-d62emon-kind']].forEach(([src, id]) => {
+  [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['ds','#gen-dsmon-type'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
     sel.innerHTML = sel.options[0].outerHTML + xsMonTypes(src).map(t => '<option value="' + dccSendAttr(t) + '">' + esc(t) + '</option>').join('');
   });
@@ -9018,9 +9077,9 @@ window.init_gen = function(root) {
       const res=root.querySelector('#gen-dccmon-results'); res.innerHTML='';
       for(let i=0;i<count;i++) res.appendChild(genDccMonster(role, band));
 
-    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='dsmonster' || activeTab==='d62emonster') {
+    } else if(activeTab==='acemonster' || activeTab==='nimmonster' || activeTab==='swmonster' || activeTab==='dndmonster' || activeTab==='dsmonster' || activeTab==='d62emonster' || activeTab==='icrpgmonster') {
       const src = activeTab.slice(0, activeTab.indexOf('monster'));
-      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'ds' ? '#gen-dsmon-type' : '#gen-d62emon-kind';
+      const idBase = src === 'ace' ? '#gen-acemon-type' : src === 'nim' ? '#gen-nimmon-family' : src === 'sw' ? '#gen-swmon-group' : src === 'dnd' ? '#gen-dndmon-group' : src === 'ds' ? '#gen-dsmon-type' : src === 'd62e' ? '#gen-d62emon-kind' : '#gen-icrpgmon-tier';
       const type=root.querySelector(idBase).value;
       const band= src === 'nim' ? root.querySelector('#gen-nimmon-level').value : '';
       const count=parseInt(root.querySelector(idBase+'-count').value)||1;
@@ -10850,6 +10909,9 @@ else syncHomebrewMonsters();
 <script src="/tools-data/sd-darkspace.js"></script>
 <script src="/tools-data/d62e-creatures.js"></script>
 <script src="/tools-data/d62e-equipment.js"></script>
+<script src="/tools-data/icrpg-monsters.js"></script>
+<script src="/tools-data/icrpg-gear.js"></script>
+<script src="/tools-data/icrpg-loot.js"></script>
 <script>
 
 
@@ -11438,6 +11500,28 @@ function init_party(root) {
     };
   }
 
+  // Build a Party-tool summary from an ICRPG (Index Card RPG) sheet. Stats are
+  // flat mods (base+bonus); Defense is CON + armor, capped at +10; Hearts are
+  // 10 HP each so HP is tracked directly. Loot/abilities/spells are name lists.
+  function icrpgParty(d) {
+    const n = v => parseInt(v) || 0;
+    const S = d.stats || {};
+    const ABBR = ['STR','DEX','CON','INT','WIS','CHA'];
+    const statVal = ab => { const s = S[ab] || {}; return n(s.base) + n(s.bonus); };
+    const armor = n(d.armor);
+    const defense = Math.min(10, statVal('CON') + armor);
+    const list = arr => (Array.isArray(arr) ? arr : []).filter(x => x && x.name).map(x => x.name);
+    return {
+      system: 'ICRPG',
+      name: d.name || 'Unnamed', type: d.type || '', world: d.world || '', level: d.level || '',
+      stats: ABBR.filter(ab => S[ab]).map(ab => ({ id: ab, val: statVal(ab) })),
+      hp: n(d.hp), hpMax: n(d.hpMax), armor: armor, defense: defense,
+      dying: d.dying || '', coin: !!d.coin, mastery: n(d.mastery),
+      loot: list(d.loot), abilities: list(d.abilities), spells: list(d.spells),
+      story: d.story || '',
+    };
+  }
+
   // Build a Party-tool summary from a Nimble sheet (stats, skills, HP/wounds,
   // armor, mana, class features come straight from the saved blob).
   function nimParty(d) {
@@ -11541,6 +11625,7 @@ function init_party(root) {
     if(d && d.system === 'ACE') return aceParty(d);
     if(d && d.system === 'DND') return dndParty(d);
     if(d && d.system === 'D62E') return d62eParty(d);
+    if(d && d.system === 'ICRPG') return icrpgParty(d);
     if(d && d.header && d.combat) return dccParty(d);
     if(!d.name && !d.class && !d.stats) return null;
     const st = d.stats || d.rolledStats || {};
@@ -11805,6 +11890,35 @@ function init_party(root) {
     return h;
   }
 
+  function cardHTMLICRPG(entry) {
+    const c = entry.sheet;
+    const open = openIds.has(entry.id);
+    const WORLD = { alfheim:'Alfheim', warpshell:'Warp Shell', ghostmountain:'Ghost Mountain', vigilantecity:'Vigilante City', bloodandsnow:'Blood & Snow' };
+    const sub = [c.type, WORLD[c.world] || '', c.level ? 'Milestone ' + c.level : ''].filter(Boolean).join(' · ');
+    const cell = (lbl,val) => '<span class="pty-chip">'+lbl+' <b>'+esc(val===''||val==null?'—':val)+'</b></span>';
+    let h = '<div class="pty-card' + (open ? ' open' : '') + '" data-id="' + entry.id + '">';
+    h += '<div class="pty-card-hd">'
+       + '<div style="min-width:0;flex:1;"><div class="pty-name">' + esc(c.name) + '</div>'
+       + '<div class="pty-sub">' + esc(sub) + '</div></div>'
+       + '<span class="pty-chip"' + (c.dying === 'yes' || c.dying === true ? ' style="color:#ff6a6a;"' : '') + '>HP <b>' + esc(c.hp) + '/' + esc(c.hpMax) + '</b></span>'
+       + '<span class="pty-chip">DEF <b>' + esc((c.defense >= 0 ? '+' : '') + c.defense) + '</b></span>'
+       + '<button class="pty-x" data-remove="' + entry.id + '" title="Remove">✕</button>'
+       + '</div>';
+    h += '<div class="pty-card-bd">';
+    h += '<div class="pty-stats">' + c.stats.map(s =>
+        '<div class="pty-stat"><div class="pty-stat-lbl">' + esc(s.id) + '</div>'
+      + '<div class="pty-stat-mod">' + (s.val >= 0 ? '+' : '') + s.val + '</div><div class="pty-stat-val"></div></div>').join('') + '</div>';
+    h += '<div class="pty-sec"><div class="pty-sec-h">Status</div><div style="display:flex;flex-wrap:wrap;gap:4px;">'
+       + cell('Defense', (c.defense >= 0 ? '+' : '') + c.defense) + cell('Armor', c.armor || 0) + (c.mastery ? cell('Mastery', c.mastery) : '') + (c.coin ? cell('Hero Coin', '✓') : '')
+       + '</div></div>';
+    if(c.abilities.length) h += '<div class="pty-sec"><div class="pty-sec-h">Abilities</div><div class="pty-line dim">' + esc(c.abilities.join(', ')) + '</div></div>';
+    if(c.spells.length) h += '<div class="pty-sec"><div class="pty-sec-h">Spells</div><div class="pty-line dim">' + esc(c.spells.join(', ')) + '</div></div>';
+    if(c.loot.length) h += '<div class="pty-sec"><div class="pty-sec-h">Loot</div><div class="pty-line dim">' + esc(c.loot.join(', ')) + '</div></div>';
+    if(c.story) h += '<div class="pty-sec"><div class="pty-sec-h">Story</div><div class="pty-line dim">' + esc(c.story) + '</div></div>';
+    h += '</div></div>';
+    return h;
+  }
+
   function cardHTMLNIM(entry) {
     const c = entry.sheet;
     const open = openIds.has(entry.id);
@@ -11943,6 +12057,7 @@ function init_party(root) {
     if(c.system === 'ACE') return cardHTMLACE(entry);
     if(c.system === 'DND') return cardHTMLDND(entry);
     if(c.system === 'D62E') return cardHTMLD62E(entry);
+    if(c.system === 'ICRPG') return cardHTMLICRPG(entry);
     if(c.system === 'DCC') return cardHTMLDCC(entry);
     const open = openIds.has(entry.id);
     const hp = c.hpCur !== '' ? esc(c.hpCur) + '/' + c.hpMax : String(c.hpMax);
@@ -12689,6 +12804,13 @@ function wireAiConsole(root) {
       list: () => ((typeof D62E_EQUIPMENT !== 'undefined' && Array.isArray(D62E_EQUIPMENT)) ? D62E_EQUIPMENT : []).map(e => ({ name: e.name, category: (e.category === 'weapon' || e.category === 'armor') ? e.category : 'gear', desc: [e.damage ? e.damage + ' dmg' : '', e.protection ? '+' + e.protection + ' prot' : '', e.range, e.era && e.era !== 'core' ? e.era : '', e.cost != null ? e.cost + ' cr' : '', e.description].filter(Boolean).join(' · ').slice(0, 160) })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
       randomCats: ['weapon','armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (1 + Math.floor(Math.random() * 6)) * 100 + (Math.random() < 0.3 ? 500 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'GEAR DROP', empty: 'D6 2e equipment list',
+    },
+    icrpg: {
+      list: () => []
+        .concat(((typeof ICRPG_GEAR !== 'undefined' && Array.isArray(ICRPG_GEAR)) ? ICRPG_GEAR : []).map(g => ({ name: g.name, category: /gun|weapon/i.test(g.category) ? 'weapon' : /armor/i.test(g.category) ? 'armor' : 'gear', desc: [g.category, g.world && g.world !== 'core' ? g.world : '', (g.effects || []).join('; '), g.desc].filter(Boolean).join(' · ').slice(0, 160) })))
+        .concat(((typeof ICRPG_LOOT !== 'undefined' && Array.isArray(ICRPG_LOOT)) ? ICRPG_LOOT : []).map(l => ({ name: l.name, category: 'loot', desc: [l.table, (l.effects || []).join('; '), l.desc].filter(Boolean).join(' · ').slice(0, 160) }))),
+      groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] },{ key:'loot',label:'Loot',cats:['loot'] }],
+      randomCats: ['weapon','armor','gear','loot'], money: null, label: 'LOOT DROP', empty: 'ICRPG loot & gear lists',
     },
   };
   root.querySelectorAll('.xs-treasure').forEach(panel => {

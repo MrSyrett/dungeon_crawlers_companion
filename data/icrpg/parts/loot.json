@@ -1,0 +1,5983 @@
+{
+  "loot": [
+    {
+      "name": "Moldy Buns",
+      "table": "Ancient",
+      "roll": "1",
+      "desc": "Food, Heal 5 HP but tastes simply awful",
+      "effects": [
+        "Heal 5 HP"
+      ]
+    },
+    {
+      "name": "Levitation",
+      "table": "Ancient",
+      "roll": "2",
+      "desc": "INT Spell, Enchant a target to float up to 6 feet high for 1D4 ROUNDS"
+    },
+    {
+      "name": "Identify",
+      "table": "Ancient",
+      "roll": "3",
+      "desc": "INT Spell, Give a target +3 on an INT/Investigate roll, No Attempt needed to cast"
+    },
+    {
+      "name": "10 Magic Arrows",
+      "table": "Ancient",
+      "roll": "4",
+      "desc": "Item, Magical Damage with a bow shot, can be retrieved, broken on crit fail"
+    },
+    {
+      "name": "Speedy Snack",
+      "table": "Ancient",
+      "roll": "5",
+      "desc": "Food, Gain a bonus MOVE atier your next MOVE"
+    },
+    {
+      "name": "Spider Bites",
+      "table": "Ancient",
+      "roll": "6",
+      "desc": "Food, Heal 2D6 HP but you're pretty much eating a bug",
+      "effects": [
+        "Heal 2D6 HP"
+      ]
+    },
+    {
+      "name": "Feast o' Fingers",
+      "table": "Ancient",
+      "roll": "7",
+      "desc": "Food, Heal all allies 1D8 if they are at CLOSE range",
+      "effects": [
+        "Heal 1D8 HP"
+      ]
+    },
+    {
+      "name": "Armor of Faith",
+      "table": "Ancient",
+      "roll": "8",
+      "desc": "WIS Spell, Give a target +3 DEFENSE for 1 Turn",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Silver Sword",
+      "table": "Ancient",
+      "roll": "9",
+      "desc": "Weapon, +1 Effort, Silver properties",
+      "effects": [
+        "+1 EFFORT"
+      ]
+    },
+    {
+      "name": "Spiked Net",
+      "table": "Ancient",
+      "roll": "10",
+      "desc": "Weapon, STR check to escape, Entangled, Move NEAR only and all checks HARD"
+    },
+    {
+      "name": "Disguise Kit",
+      "table": "Ancient",
+      "roll": "11",
+      "desc": "Item, Whenever deceiving a stranger Do ULTIMATE effort and EASY checks"
+    },
+    {
+      "name": "Mithril Vest",
+      "table": "Ancient",
+      "roll": "12",
+      "desc": "Armor, Subtract 2 from all Weapon Damage done against you"
+    },
+    {
+      "name": "Aegis Amulet",
+      "table": "Ancient",
+      "roll": "13",
+      "desc": "Item, Roll 1D8 when dying"
+    },
+    {
+      "name": "Iradrum Heart",
+      "table": "Ancient",
+      "roll": "14",
+      "desc": "Food, For 24 hours atier eating if you drop to 0 HP instantly recover to 1 HP"
+    },
+    {
+      "name": "Ire Bacons",
+      "table": "Ancient",
+      "roll": "15",
+      "desc": "Food, Heal 3D12",
+      "effects": [
+        "Heal 3D12 HP"
+      ]
+    },
+    {
+      "name": "Fin Boots",
+      "table": "Ancient",
+      "roll": "16",
+      "desc": "Armor, +1 DEFENSE, double effort and range when swimming",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Red Gar",
+      "table": "Ancient",
+      "roll": "17",
+      "desc": "Food, Heal to full HP, absorb the next attack unharmed",
+      "effects": [
+        "Heal to full HP"
+      ]
+    },
+    {
+      "name": "Cloak of Shadows",
+      "table": "Ancient",
+      "roll": "18",
+      "desc": "Armor, +1 DEFENSE, roll EASY checks when sneaking",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Lion Shield",
+      "table": "Ancient",
+      "roll": "19",
+      "desc": "Armor, +2 DEFENSE, Allies that are NEAR also get +2 DEFENSE",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Demon Helmet",
+      "table": "Ancient",
+      "roll": "20",
+      "desc": "Armor, +1 DEFENSE, +3 CHA when intimidating",
+      "effects": [
+        "+1 DEF",
+        "+3 CHA"
+      ]
+    },
+    {
+      "name": "Healing Touch",
+      "table": "Ancient",
+      "roll": "21",
+      "desc": "WIS Spell, Touch to heal an ally with Magical Effort"
+    },
+    {
+      "name": "Healing Nova",
+      "table": "Ancient",
+      "roll": "22",
+      "desc": "WIS Spell, Heal all NEAR allies with double Magical Effort"
+    },
+    {
+      "name": "Grapple Vine",
+      "table": "Ancient",
+      "roll": "23",
+      "desc": "WIS Spell, Pull a NEAR monster or ally with you, Opposing STR to resist"
+    },
+    {
+      "name": "Lightning Bolt",
+      "table": "Ancient",
+      "roll": "24",
+      "desc": "INT Spell, Burn 1-12 HP, add to a magic blast, double against metal-clad"
+    },
+    {
+      "name": "Ice Blast",
+      "table": "Ancient",
+      "roll": "25",
+      "desc": "INT Spell, Inflict magical damage and immobilize target for 1 turn"
+    },
+    {
+      "name": "Arcane Bomb",
+      "table": "Ancient",
+      "roll": "26",
+      "desc": "INT Spell, A glowing orb, in 1D4 ROUNDS explodes for 2D12, NEAR range"
+    },
+    {
+      "name": "Ragged Battleaxe",
+      "table": "Ancient",
+      "roll": "27",
+      "desc": "Weapon, -2 to Attempts but roll ULTIMATE effort every time"
+    },
+    {
+      "name": "Fireball",
+      "table": "Ancient",
+      "roll": "28",
+      "desc": "INT Spell, Blast any targets within NEAR range of a location"
+    },
+    {
+      "name": "Claw Boots",
+      "table": "Ancient",
+      "roll": "29",
+      "desc": "Armor, Walk on any surface in any direction without a Check"
+    },
+    {
+      "name": "Heart Stone",
+      "table": "Ancient",
+      "roll": "30",
+      "desc": "Item, add 1 Heart to your max",
+      "effects": [
+        "+1 HEART"
+      ]
+    },
+    {
+      "name": "Enchanting",
+      "table": "Ancient",
+      "roll": "31",
+      "desc": "WIS Spell, Enchant item to do magical effort and a +1 per Heart of Effort spent"
+    },
+    {
+      "name": "Enchanted Grimoire",
+      "table": "Ancient",
+      "roll": "32",
+      "desc": "Item, Consider a natural 19+ a critical hit when casting spells"
+    },
+    {
+      "name": "Warrior's Amulet",
+      "table": "Ancient",
+      "roll": "33",
+      "desc": "Item, Use magical effort with any weapon"
+    },
+    {
+      "name": "Divine Shield",
+      "table": "Ancient",
+      "roll": "34",
+      "desc": "WIS Spell, Enchant a target you can see to absorb the next 10 Effort done to it"
+    },
+    {
+      "name": "Staff of Elements",
+      "table": "Ancient",
+      "roll": "35",
+      "desc": "Item, Triple any elemental Magical Effort you do with INT SPELLS"
+    },
+    {
+      "name": "Cloak of Aras",
+      "table": "Ancient",
+      "roll": "36",
+      "desc": "Armor, Deflect 1 Weapon attack against you per turn"
+    },
+    {
+      "name": "Silver Gauntlets",
+      "table": "Ancient",
+      "roll": "37",
+      "desc": "Armor, +3 STR when gripping or grappling, silver properties",
+      "effects": [
+        "+3 STR"
+      ]
+    },
+    {
+      "name": "The Iron Hook",
+      "table": "Ancient",
+      "roll": "38",
+      "desc": "Weapon, Use a turn to pull a target to your location, FAR range"
+    },
+    {
+      "name": "Turn Undead",
+      "table": "Ancient",
+      "roll": "39",
+      "desc": "WIS Spell, For 1 ROUND, repel 1D8 undead, They cannot get within NEAR"
+    },
+    {
+      "name": "Terror Shard",
+      "table": "Ancient",
+      "roll": "40",
+      "desc": "Item, Hold aloti, living things must resist with WIS or flee for a turn"
+    },
+    {
+      "name": "Resurrection",
+      "table": "Ancient",
+      "roll": "41",
+      "desc": "WIS Spell, HARD roll, In 4 ROUNDS deceased target touched revives with 1 HP"
+    },
+    {
+      "name": "Dragon Orb",
+      "table": "Ancient",
+      "roll": "42",
+      "desc": "Item, Blast 4D12 Magical Fire damage, FAR range, The item is destroyed"
+    },
+    {
+      "name": "Dragon Helmet",
+      "table": "Ancient",
+      "roll": "43",
+      "desc": "Armor, +2 DEFENSE, Wearer immune to damage inflicted by fire",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Ring of Ghosts",
+      "table": "Ancient",
+      "roll": "44",
+      "desc": "Item, Roll INT to create a clone NEAR that performs the same attack or action"
+    },
+    {
+      "name": "Crown of Madness",
+      "table": "Ancient",
+      "roll": "45",
+      "desc": "Item, Make a target take a random action (GM's roll)"
+    },
+    {
+      "name": "Smoked Roc Wings",
+      "table": "Ancient",
+      "roll": "46",
+      "desc": "Food, Fly for 4 ROUNDS"
+    },
+    {
+      "name": "Black Gar",
+      "table": "Ancient",
+      "roll": "47",
+      "desc": "Food, +10 DEFENSE for 4 ROUNDS",
+      "effects": [
+        "+10 DEF"
+      ]
+    },
+    {
+      "name": "Queen's Kiss",
+      "table": "Ancient",
+      "roll": "48",
+      "desc": "Food, Your next action is an automatic critical success"
+    },
+    {
+      "name": "Sharpening",
+      "table": "Ancient",
+      "roll": "49",
+      "desc": "INT Spell, Add +2 Effort to a weapon, Once per weapon",
+      "effects": [
+        "+2 EFFORT"
+      ]
+    },
+    {
+      "name": "Spiked Shield",
+      "table": "Ancient",
+      "roll": "50",
+      "desc": "Armor, Failed enemy attacks are answered with Weapon Damage (no bonuses)"
+    },
+    {
+      "name": "Bow of Eagles",
+      "table": "Ancient",
+      "roll": "51",
+      "desc": "Weapon, Use an extra turn aiming to do double Damage"
+    },
+    {
+      "name": "Swarm",
+      "table": "Ancient",
+      "roll": "52",
+      "desc": "WIS Spell, Cast on a seen area, CLOSE targets Magically Damaged for 1D4 ROUNDS"
+    },
+    {
+      "name": "Mender",
+      "table": "Ancient",
+      "roll": "53",
+      "desc": "INT Spell, Repair a ruined item or weapon instantly"
+    },
+    {
+      "name": "Skull Shield",
+      "table": "Ancient",
+      "roll": "54",
+      "desc": "Armor, +2 DEFENSE, Can also be used as a Magical Weapon",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Silver Spear",
+      "table": "Ancient",
+      "roll": "55",
+      "desc": "Weapon, Magical, +3 to DEX Attempt when thrown, silver properties"
+    },
+    {
+      "name": "Dwarven Anvil",
+      "table": "Ancient",
+      "roll": "56",
+      "desc": "Item, Once / 1D12 days, create a weapon with +3 Attempt OR Effort bonuses",
+      "effects": [
+        "+3 ATTEMPT"
+      ]
+    },
+    {
+      "name": "Book of Skills",
+      "table": "Ancient",
+      "roll": "57",
+      "desc": "Item, With any 3 successes, earn a permanent +1 to a specific type of Attempt"
+    },
+    {
+      "name": "Ring of Fire",
+      "table": "Ancient",
+      "roll": "58",
+      "desc": "Item, Double all fire Damage inflicted"
+    },
+    {
+      "name": "Flaming Sword",
+      "table": "Ancient",
+      "roll": "59",
+      "desc": "Weapon, Magical, Add 1D4 Burn damage for 1D4 ROUNDS to hit targets"
+    },
+    {
+      "name": "Ringlet of Genius",
+      "table": "Ancient",
+      "roll": "60",
+      "desc": "Item, Use ULTIMATE effort with any successful INT roll"
+    },
+    {
+      "name": "Goblet of Udin",
+      "table": "Ancient",
+      "roll": "61",
+      "desc": "Item, Double effects from any Food consumed"
+    },
+    {
+      "name": "Ring of Aras",
+      "table": "Ancient",
+      "roll": "62",
+      "desc": "Item, When recovering, fill a HEART in addition to your normal RECOVERY"
+    },
+    {
+      "name": "Heart Stone",
+      "table": "Ancient",
+      "roll": "63",
+      "desc": "Item, add 1 Heart to your max",
+      "effects": [
+        "+1 HEART"
+      ]
+    },
+    {
+      "name": "Translocate",
+      "table": "Ancient",
+      "roll": "64",
+      "desc": "INT Spell, Swap places with an ally you can see"
+    },
+    {
+      "name": "Mask of Mofune",
+      "table": "Ancient",
+      "roll": "65",
+      "desc": "Armor, +1 DEFENSE, Roll ULTIMATE effort when intimidating",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Ring of Power",
+      "table": "Ancient",
+      "roll": "66",
+      "desc": "Item, Double all MAGIC EFFORT"
+    },
+    {
+      "name": "King's Signet",
+      "table": "Ancient",
+      "roll": "67",
+      "desc": "Item, Have final say on group decisions, and be loved for it"
+    },
+    {
+      "name": "Dwarvish Hammer",
+      "table": "Ancient",
+      "roll": "68",
+      "desc": "Weapon, MAGIC Weapon, roll Double ULTIMATE on natural 20s"
+    },
+    {
+      "name": "Thieves' Picks",
+      "table": "Ancient",
+      "roll": "69",
+      "desc": "Item, +3 Attempt AND Double Effort when opening chests",
+      "effects": [
+        "+3 ATTEMPT"
+      ]
+    },
+    {
+      "name": "Ring of Giants",
+      "table": "Ancient",
+      "roll": "70",
+      "desc": "Item, +1 STR, +1 DEFENSE",
+      "effects": [
+        "+1 DEF",
+        "+1 STR"
+      ]
+    },
+    {
+      "name": "Masterful Boots",
+      "table": "Ancient",
+      "roll": "71",
+      "desc": "Item, +1 DEX",
+      "effects": [
+        "+1 DEX"
+      ]
+    },
+    {
+      "name": "King's Mug",
+      "table": "Ancient",
+      "roll": "72",
+      "desc": "Item, +1 CON",
+      "effects": [
+        "+1 CON"
+      ]
+    },
+    {
+      "name": "Amulet of Secrets",
+      "table": "Ancient",
+      "roll": "73",
+      "desc": "Item, +1 INT",
+      "effects": [
+        "+1 INT"
+      ]
+    },
+    {
+      "name": "Meditation Beads",
+      "table": "Ancient",
+      "roll": "74",
+      "desc": "Item, +1 WIS",
+      "effects": [
+        "+1 WIS"
+      ]
+    },
+    {
+      "name": "Masterful Coats",
+      "table": "Ancient",
+      "roll": "75",
+      "desc": "Item, +1 CHA",
+      "effects": [
+        "+1 CHA"
+      ]
+    },
+    {
+      "name": "Armor Kit",
+      "table": "Ancient",
+      "roll": "76",
+      "desc": "Item, +2 DEFENSE",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Fire Stone",
+      "table": "Ancient",
+      "roll": "77",
+      "desc": "Item, +1 MAGIC Effort",
+      "effects": [
+        "+1 MAGIC EFFORT"
+      ]
+    },
+    {
+      "name": "Weapon Kit",
+      "table": "Ancient",
+      "roll": "78",
+      "desc": "Item, +2 Weapon Effort",
+      "effects": [
+        "+2 WEAPON EFFORT"
+      ]
+    },
+    {
+      "name": "Diamond Spyglass",
+      "table": "Ancient",
+      "roll": "79",
+      "desc": "Item, +6 WIS on Scouting attempts",
+      "effects": [
+        "+6 WIS"
+      ]
+    },
+    {
+      "name": "Berserk Ring",
+      "table": "Ancient",
+      "roll": "80",
+      "desc": "Item, +3 on ULTIMATE effort"
+    },
+    {
+      "name": "Holy Bulwark",
+      "table": "Ancient",
+      "roll": "81",
+      "desc": "WIS Spell, Touch an ally, they are immune to non-Magic Effort for 4 ROUNDS"
+    },
+    {
+      "name": "Storm",
+      "table": "Ancient",
+      "roll": "82",
+      "desc": "WIS Spell, Everything with FAR range blasted with hail for MAGIC"
+    },
+    {
+      "name": "Shire Jerky",
+      "table": "Ancient",
+      "roll": "83",
+      "desc": "Food, Regenerate 1D12 HP for the next 4 ROUNDS"
+    },
+    {
+      "name": "Adamantine Hauberk",
+      "table": "Ancient",
+      "roll": "84",
+      "desc": "Armor, +4 DEFENSE",
+      "effects": [
+        "+4 DEF"
+      ]
+    },
+    {
+      "name": "Lifedrinker",
+      "table": "Ancient",
+      "roll": "85",
+      "desc": "Weapon, Magic weapon, Heal half of any Damage done to living targets"
+    },
+    {
+      "name": "Wristlets of Might",
+      "table": "Ancient",
+      "roll": "86",
+      "desc": "Armor, DEFENSE +1, Roll 1D8 for any Basic Effort",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Iron Gut Belt",
+      "table": "Ancient",
+      "roll": "87",
+      "desc": "Armor, +1 DEFENSE, If you fail a CON roll, try one more time",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Ale of Death",
+      "table": "Ancient",
+      "roll": "88",
+      "desc": "Food, Return from death with 10 HP. Wasted if unused within 1 day of drinking"
+    },
+    {
+      "name": "Ale of Life",
+      "table": "Ancient",
+      "roll": "89",
+      "desc": "Food, Drink in battle. Any ally who touches you heals 1D12 HP once"
+    },
+    {
+      "name": "Gadgeteer's Goggles",
+      "table": "Ancient",
+      "roll": "90",
+      "desc": "Armor, +1 DEFENSE, Creating or repairing machines is always EASY",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Feather of Falling",
+      "table": "Ancient",
+      "roll": "91",
+      "desc": "Item, You cannot be hurt by damage from a fall at any height"
+    },
+    {
+      "name": "Timebender",
+      "table": "Ancient",
+      "roll": "92",
+      "desc": "Item, If the GM rolls a timer, roll it again. The second roll will be final"
+    },
+    {
+      "name": "Mace of Thunder",
+      "table": "Ancient",
+      "roll": "93",
+      "desc": "Weapon, Magical, Any target struck is stunned on its next TURN"
+    },
+    {
+      "name": "Lightning Steed",
+      "table": "Ancient",
+      "roll": "94",
+      "desc": "Item, Summon a flying steed. What would take a day, takes 1 ROUND"
+    },
+    {
+      "name": "Ring of Weird Luck",
+      "table": "Ancient",
+      "roll": "95",
+      "desc": "Item, If you roll a 1 twice, your blunder causes something beneficial"
+    },
+    {
+      "name": "Spellslinger Ring",
+      "table": "Ancient",
+      "roll": "96",
+      "desc": "Item, If you roll a critical when casting, Attempt another spell instantly"
+    },
+    {
+      "name": "Boots of Haste",
+      "table": "Ancient",
+      "roll": "97",
+      "desc": "Armor, DEFENSE +1, Atier an action, you may then also Move again",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Ring of Slayers",
+      "table": "Ancient",
+      "roll": "98",
+      "desc": "Item, If you make a successful Weapon attack, attack again for ULTIMATE"
+    },
+    {
+      "name": "Astral Crown",
+      "table": "Ancient",
+      "roll": "99",
+      "desc": "Armor, +2 DEFENSE, On a critical spell cast, cast through an ally",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Feast of Kings",
+      "table": "Ancient",
+      "roll": "100",
+      "desc": "Food, All allies restore full HP and receive one Chest"
+    },
+    {
+      "name": "Soldier's Rations",
+      "table": "Shabby",
+      "roll": "1",
+      "desc": "Food, Heal 1D4 HP",
+      "effects": [
+        "Heal 1D4 HP"
+      ]
+    },
+    {
+      "name": "Captain's Rations",
+      "table": "Shabby",
+      "roll": "2",
+      "desc": "Food, Heal 1D6 HP",
+      "effects": [
+        "Heal 1D6 HP"
+      ]
+    },
+    {
+      "name": "Coin Pouch",
+      "table": "Shabby",
+      "roll": "3",
+      "desc": "1D10 Coin"
+    },
+    {
+      "name": "Coin Satchel",
+      "table": "Shabby",
+      "roll": "4",
+      "desc": "2D10 Coin"
+    },
+    {
+      "name": "Common Sword",
+      "table": "Shabby",
+      "roll": "5",
+      "desc": "Weapon, Standard Steel blade with heavy use"
+    },
+    {
+      "name": "Used Shield",
+      "table": "Shabby",
+      "roll": "6",
+      "desc": "Armor, +2 DEFENSE, Heavily worn, will break on 3rd hit",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Mechanic's tools",
+      "table": "Shabby",
+      "roll": "7",
+      "desc": "Item, Hammer, spanner, roll EASY checks on mechanical tasks"
+    },
+    {
+      "name": "Common Helmet",
+      "table": "Shabby",
+      "roll": "8",
+      "desc": "Armor, +1 DEFENSE",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Worker's Clothes",
+      "table": "Shabby",
+      "roll": "9",
+      "desc": "Armor, +1 DEFENSE, Durable coveralls, gloves and hat",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Coin Box",
+      "table": "Shabby",
+      "roll": "10",
+      "desc": "3D12 Coin"
+    },
+    {
+      "name": "Lantern",
+      "table": "Shabby",
+      "roll": "11",
+      "desc": "Item, Easy-light box lantern, lights all within NEAR range"
+    },
+    {
+      "name": "Climber's Spikes",
+      "table": "Shabby",
+      "roll": "12",
+      "desc": "Item, Climb a route as normal. Any who follow roll EASY"
+    },
+    {
+      "name": "50' Rope",
+      "table": "Shabby",
+      "roll": "13",
+      "desc": "Item, 50 feet of sturdy fiber rope coiled up"
+    },
+    {
+      "name": "Pry Bar",
+      "table": "Shabby",
+      "roll": "14",
+      "desc": "Item, A 3 foot iron bar with one hooked end, roll EASY when forcing doors"
+    },
+    {
+      "name": "First Aid Kit",
+      "table": "Shabby",
+      "roll": "15",
+      "desc": "Item, Bandages for field dressing, consume to give a dying ally 1 HP"
+    },
+    {
+      "name": "Ladder",
+      "table": "Shabby",
+      "roll": "16",
+      "desc": "Item, A wooden ladder with 12 rungs, 12 feet high"
+    },
+    {
+      "name": "Wool Cloak",
+      "table": "Shabby",
+      "roll": "17",
+      "desc": "Armor, +1 DEFENSE, A typical hooded cape for winter wear",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Skin of Stale Gar",
+      "table": "Shabby",
+      "roll": "18",
+      "desc": "Food, Consume to make your next roll EASY"
+    },
+    {
+      "name": "Hunting Snare",
+      "table": "Shabby",
+      "roll": "19",
+      "desc": "Item, Reusable spring-loaded trap, will immobilize, do 1 damage"
+    },
+    {
+      "name": "Dusty Gem",
+      "table": "Shabby",
+      "roll": "20",
+      "desc": "Worth 1D100 Coin"
+    },
+    {
+      "name": "Torch",
+      "table": "Shabby",
+      "roll": "21",
+      "desc": "Item, An oil soaked stick wrapped in cloth, illuminates NEAR for D8 ROUNDS"
+    },
+    {
+      "name": "Rivet Kit",
+      "table": "Shabby",
+      "roll": "22",
+      "desc": "Item, A small hammer and awl to press rivets through leather or wood"
+    },
+    {
+      "name": "Smoke Canister",
+      "table": "Shabby",
+      "roll": "23",
+      "desc": "Item, Create a cloud of smoke with NEAR radius for 1D4 ROUNDS"
+    },
+    {
+      "name": "Turkey Leg",
+      "table": "Shabby",
+      "roll": "24",
+      "desc": "Food, Heal 1D10 HP",
+      "effects": [
+        "Heal 1D10 HP"
+      ]
+    },
+    {
+      "name": "Stimulant Elixir",
+      "table": "Shabby",
+      "roll": "25",
+      "desc": "Food, On your next turn move FAR as if it was NEAR"
+    },
+    {
+      "name": "Blank Book",
+      "table": "Shabby",
+      "roll": "26",
+      "desc": "Item, A blank journal-style book with sheathed pen"
+    },
+    {
+      "name": "Metal Cutters",
+      "table": "Shabby",
+      "roll": "27",
+      "desc": "Item, A snip for cutting bars, roll ULTIMATE Effort when doing so"
+    },
+    {
+      "name": "Small Tent",
+      "table": "Shabby",
+      "roll": "28",
+      "desc": "Item, Houses 3 individuals, packs into small bundle"
+    },
+    {
+      "name": "Canvas Tarp",
+      "table": "Shabby",
+      "roll": "29",
+      "desc": "Item, A durable cloth square NEAR long on each side"
+    },
+    {
+      "name": "Worn Parachute",
+      "table": "Shabby",
+      "roll": "30",
+      "desc": "Item, Deploy when falling to nullify damage, 1% chance of failure"
+    },
+    {
+      "name": "Coin Stash",
+      "table": "Shabby",
+      "roll": "31",
+      "desc": "2D100 Coin"
+    },
+    {
+      "name": "Worn Long Bow",
+      "table": "Shabby",
+      "roll": "32",
+      "desc": "Weapon, Has 10% chance of breaking when used"
+    },
+    {
+      "name": "Common Ammo",
+      "table": "Shabby",
+      "roll": "33",
+      "desc": "Standard ammunition, 10 count, roll for type"
+    },
+    {
+      "name": "Common Dagger",
+      "table": "Shabby",
+      "roll": "34",
+      "desc": "Weapon, Thrown, Piercing, Fast"
+    },
+    {
+      "name": "Pikeman's Spear",
+      "table": "Shabby",
+      "roll": "35",
+      "desc": "Weapon, Has NEAR reach, cannot be thrown"
+    },
+    {
+      "name": "Ferry Pole",
+      "table": "Shabby",
+      "roll": "36",
+      "desc": "Item, A sturdy pole that can reach FAR, very difficult to carry"
+    },
+    {
+      "name": "Fishing Gear",
+      "table": "Shabby",
+      "roll": "37",
+      "desc": "Item, Standard low-cost fishing tackle and rod"
+    },
+    {
+      "name": "Cooking Set",
+      "table": "Shabby",
+      "roll": "38",
+      "desc": "Item, Pot, plates, spices. Heal 5 HP OVER HEART max when camping",
+      "effects": [
+        "Heal 5 HP"
+      ]
+    },
+    {
+      "name": "Large Magnet",
+      "table": "Shabby",
+      "roll": "39",
+      "desc": "Item, Powerful magnet that can hold 100 pounds"
+    },
+    {
+      "name": "Hacksaw",
+      "table": "Shabby",
+      "roll": "40",
+      "desc": "Item, used to very slowly cut metal or wood with precision"
+    },
+    {
+      "name": "Traveler's Meal",
+      "table": "Shabby",
+      "roll": "41",
+      "desc": "Food, Heal up to 5 people for 1 HEART",
+      "effects": [
+        "Heal 5 HP"
+      ]
+    },
+    {
+      "name": "Fur-lined Coat",
+      "table": "Shabby",
+      "roll": "42",
+      "desc": "Armor, +1 DEFENSE, Disregard negative effects of extreme cold",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Corrosion-Proof Gloves",
+      "table": "Shabby",
+      "roll": "43",
+      "desc": "Armor, +1 DEFENSE, Leather immune to Acid or corrosion",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "War Banner",
+      "table": "Shabby",
+      "roll": "44",
+      "desc": "Item, A canvas banner mounted on a 10 foot pole, unmarked"
+    },
+    {
+      "name": "Anchor",
+      "table": "Shabby",
+      "roll": "45",
+      "desc": "Item, An iron anchor and 50 foot chain used on medium sized boats"
+    },
+    {
+      "name": "Highborn Clothes",
+      "table": "Shabby",
+      "roll": "46",
+      "desc": "Armor, +1 DEFENSE, One set of high-end, tailored formal wear",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Jug of Junk Oil",
+      "table": "Shabby",
+      "roll": "47",
+      "desc": "Item, Letiovers from mechanical work, highly flammable, slick"
+    },
+    {
+      "name": "Bullhorn",
+      "table": "Shabby",
+      "roll": "48",
+      "desc": "Item, A conical horn with pistol grip, transmit a yell to DOUBLE FAR range"
+    },
+    {
+      "name": "Ratchet Winch",
+      "table": "Shabby",
+      "roll": "49",
+      "desc": "Item, A chain bisected by a lever, pull VERY HEAVY objects"
+    },
+    {
+      "name": "Armor Spike Kit",
+      "table": "Shabby",
+      "roll": "50",
+      "desc": "Item, Add spikes to any armor, attackers take 1 HP when hitting"
+    },
+    {
+      "name": "Mastercrati Arrows",
+      "table": "Shabby",
+      "roll": "51",
+      "desc": "Item, Double Weapon Effort on a hit, 3 count"
+    },
+    {
+      "name": "Jug of Flies",
+      "table": "Shabby",
+      "roll": "52",
+      "desc": "Item, A large glass jug filled with flies, remnant of science work"
+    },
+    {
+      "name": "Side of Beef",
+      "table": "Shabby",
+      "roll": "53",
+      "desc": "Roasted: Food, Heal 3 people 1D12",
+      "effects": [
+        "Heal 3 HP"
+      ]
+    },
+    {
+      "name": "Deformed Skull",
+      "table": "Shabby",
+      "roll": "54",
+      "desc": "Item, A weird artifact kept by some oddball"
+    },
+    {
+      "name": "Wheeled Dolly",
+      "table": "Shabby",
+      "roll": "55",
+      "desc": "Item, A metal platiorm with four small wheels, used to truck cargo"
+    },
+    {
+      "name": "Carved Tankard",
+      "table": "Shabby",
+      "roll": "56",
+      "desc": "Item, a uniquely cratied drinking mug, huge"
+    },
+    {
+      "name": "Luminous Gem",
+      "table": "Shabby",
+      "roll": "57",
+      "desc": "Worth 3D100 Coin"
+    },
+    {
+      "name": "Forgeman's Boots",
+      "table": "Shabby",
+      "roll": "58",
+      "desc": "Armor, +1 DEFENSE, Immune to fire or hot surfaces walked on",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Signal Flare",
+      "table": "Shabby",
+      "roll": "59",
+      "desc": "Item, A magnesium flare that burns bright yellow, even under water"
+    },
+    {
+      "name": "Signal Horn",
+      "table": "Shabby",
+      "roll": "60",
+      "desc": "Item, When sounded can be heard for 1 mile"
+    },
+    {
+      "name": "Hard Gar Cider",
+      "table": "Shabby",
+      "roll": "61",
+      "desc": "Food, Ignore the next 10 Damage done to you"
+    },
+    {
+      "name": "Glass Scope",
+      "table": "Shabby",
+      "roll": "62",
+      "desc": "Item, Attach to one ranged weapon, +1 DEX when using that weapon",
+      "effects": [
+        "+1 DEX"
+      ]
+    },
+    {
+      "name": "Huge Cargo Pulley",
+      "table": "Shabby",
+      "roll": "63",
+      "desc": "Item, Used with rope to easily hoist huge objects"
+    },
+    {
+      "name": "Lode Stone",
+      "table": "Shabby",
+      "roll": "64",
+      "desc": "Item, An incredibly heavy cube of solid iron with a hoop on top"
+    },
+    {
+      "name": "Steel Rod",
+      "table": "Shabby",
+      "roll": "65",
+      "desc": "Item, Letiover from some machine, 3 feet long, almost unbreakable"
+    },
+    {
+      "name": "Frogman Gear",
+      "table": "Shabby",
+      "roll": "66",
+      "desc": "Item, Mask, fins, and air bladder, 4 ROUNDS underwater, reusable"
+    },
+    {
+      "name": "Mining Tools",
+      "table": "Shabby",
+      "roll": "67",
+      "desc": "Item, Make EASY rolls when excavating"
+    },
+    {
+      "name": "Gold Chain",
+      "table": "Shabby",
+      "roll": "68",
+      "desc": "Item, Once worn by the wealthy, worth 1D100 x 5 Coin"
+    },
+    {
+      "name": "Cask of Golden Gar",
+      "table": "Shabby",
+      "roll": "69",
+      "desc": "Food, 2 HP for up to 50 people, once tapped sours in 1 day"
+    },
+    {
+      "name": "Bird Suit",
+      "table": "Shabby",
+      "roll": "70",
+      "desc": "Armor, +1 DEFENSE, A theatrical feather-suit and mask for festive occasions",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Shovel",
+      "table": "Shabby",
+      "roll": "71",
+      "desc": "Item, A sturdy steel and wood shovel"
+    },
+    {
+      "name": "Padlock and Key",
+      "table": "Shabby",
+      "roll": "72",
+      "desc": "Item, Reinforced steel lock"
+    },
+    {
+      "name": "Gilly Cloak",
+      "table": "Shabby",
+      "roll": "73",
+      "desc": "Armor, +1 DEFENSE, A leafy cape, Roll EASY stealth in natural surrounds",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Rapid Crossbow",
+      "table": "Shabby",
+      "roll": "74",
+      "desc": "Weapon, Has 10% chance of firing a second BOLT when fired"
+    },
+    {
+      "name": "Phial of Acid",
+      "table": "Shabby",
+      "roll": "75",
+      "desc": "Item, A few ounces of concentrated hydrochloric acid"
+    },
+    {
+      "name": "Scout's Pouch Harness",
+      "table": "Shabby",
+      "roll": "76",
+      "desc": "Armor, +1 DEFENSE, Extend carry capacity to 12 LOOT",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Hunter's Bait",
+      "table": "Shabby",
+      "roll": "77",
+      "desc": "Item, A non-perishable gunk that draws wildlife for up to 1 mile"
+    },
+    {
+      "name": "Forgeman's Bellows",
+      "table": "Shabby",
+      "roll": "78",
+      "desc": "Item, Huge, bellows to stoke a fire to incredible temperatures"
+    },
+    {
+      "name": "Pouch of Ball Bearings",
+      "table": "Shabby",
+      "roll": "79",
+      "desc": "Item, A small sack of stainless steel spheres ranging in size"
+    },
+    {
+      "name": "Goat Bell",
+      "table": "Shabby",
+      "roll": "80",
+      "desc": "Item, A leather collar with iron bell, adjustable size"
+    },
+    {
+      "name": "Medic Stretcher",
+      "table": "Shabby",
+      "roll": "81",
+      "desc": "Item, Carry a fallen ally with no STR checks"
+    },
+    {
+      "name": "Arming Jacket",
+      "table": "Shabby",
+      "roll": "82",
+      "desc": "Armor, +1 DEFENSE, Increase maximum wearable Armor to 11",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "A Fine Steak",
+      "table": "Shabby",
+      "roll": "83",
+      "desc": "Food, Heal to full HP",
+      "effects": [
+        "Heal to full HP"
+      ]
+    },
+    {
+      "name": "Float Vest",
+      "table": "Shabby",
+      "roll": "84",
+      "desc": "Item, Used to avoid swimming fatigue or drowning in rough water"
+    },
+    {
+      "name": "Deck of Cards",
+      "table": "Shabby",
+      "roll": "85",
+      "desc": "Item, Play numerous games or perform parlor tricks"
+    },
+    {
+      "name": "Butchery Kit",
+      "table": "Shabby",
+      "roll": "86",
+      "desc": "Item, A rolled cloth with numerous knives, hooks, and cleavers"
+    },
+    {
+      "name": "Farmer's Bug Sprayer",
+      "table": "Shabby",
+      "roll": "87",
+      "desc": "Item, A hand operated pump filled with vinegar mixture"
+    },
+    {
+      "name": "Riding Tack",
+      "table": "Shabby",
+      "roll": "88",
+      "desc": "Item, Leather harnesses, saddle for any number of beast-mounts"
+    },
+    {
+      "name": "Armor Repair Kit",
+      "table": "Shabby",
+      "roll": "89",
+      "desc": "Item, Reusable supplies and tools to fix any armor"
+    },
+    {
+      "name": "Navigation Gear",
+      "table": "Shabby",
+      "roll": "90",
+      "desc": "Item, Scopes and charts for navigating, EASY navigation rolls"
+    },
+    {
+      "name": "Holy Silver Amulet",
+      "table": "Shabby",
+      "roll": "91",
+      "desc": "Item, Silver properties, an inspiring symbol of the good"
+    },
+    {
+      "name": "Cosmic Gem",
+      "table": "Shabby",
+      "roll": "92",
+      "desc": "Worth 1000 Coin"
+    },
+    {
+      "name": "Elemental Elixir",
+      "table": "Shabby",
+      "roll": "93",
+      "desc": "Food, When enchanting, consume to add an elemental property"
+    },
+    {
+      "name": "Martial Arts Manual",
+      "table": "Shabby",
+      "roll": "94",
+      "desc": "Item, When fighting with bare hands, do Weapon Damage"
+    },
+    {
+      "name": "Locale Map",
+      "table": "Shabby",
+      "roll": "95",
+      "desc": "Item, Glean all pertinent locations in a 25 mile radius"
+    },
+    {
+      "name": "Phial of Resolve",
+      "table": "Shabby",
+      "roll": "96",
+      "desc": "Food, Drink to add ULTIMATE Effort to your next successful Attempt"
+    },
+    {
+      "name": "Alchemist's Kit",
+      "table": "Shabby",
+      "roll": "97",
+      "desc": "Item, Do 1 HEART of effort to produce a random 1-use Potion"
+    },
+    {
+      "name": "Imperium Signet",
+      "table": "Shabby",
+      "roll": "98",
+      "desc": "Armor, +1 DEFENSE, The sign of a ranking member of cosmic order",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Runestone",
+      "table": "Shabby",
+      "roll": "99",
+      "desc": "Item, If you are killed in battle, return from Asgard...but how?"
+    },
+    {
+      "name": "Light of the Gods",
+      "table": "Shabby",
+      "roll": "100",
+      "desc": "Item, Destroy this gem to raise a DYING ally to full HP"
+    },
+    {
+      "name": "Seaweed Sandwich",
+      "table": "Cursed",
+      "roll": "1",
+      "desc": "Food, Heal 3 HP, Smell like seawater and bilge for 1 week",
+      "effects": [
+        "Heal 3 HP"
+      ]
+    },
+    {
+      "name": "Arn's Hex",
+      "table": "Cursed",
+      "roll": "2",
+      "desc": "INT Spell, Rot a target with 1 Damage / round / 1 day, also suffer the rot"
+    },
+    {
+      "name": "Mind Trap",
+      "table": "Cursed",
+      "roll": "3",
+      "desc": "INT Spell, Once learned, lose 1 INT, Touch a target to cast same effect"
+    },
+    {
+      "name": "10 Terrible Arrows",
+      "table": "Cursed",
+      "roll": "4",
+      "desc": "Item, Magical Arrows, NEVER hit target, boomeranging on a 1"
+    },
+    {
+      "name": "Toe Rot Waybread",
+      "table": "Cursed",
+      "roll": "5",
+      "desc": "Food, Heal 3 HP, Move only NEAR for 1D4 of your ROUNDS",
+      "effects": [
+        "Heal 3 HP"
+      ]
+    },
+    {
+      "name": "Raw Hatchlings",
+      "table": "Cursed",
+      "roll": "6",
+      "desc": "Food, Take 3 HP, CON Check or vomit, hate eggs for 1 month"
+    },
+    {
+      "name": "Wrigglers",
+      "table": "Cursed",
+      "roll": "7",
+      "desc": "Food, Heal 2D6 HP, All CON Checks are now HARD for 24 hours",
+      "effects": [
+        "Heal 2D6 HP"
+      ]
+    },
+    {
+      "name": "Cloven Sword",
+      "table": "Cursed",
+      "roll": "8",
+      "desc": "Weapon, +2 Attempts / Effort, can't put down, slowly become a goat",
+      "effects": [
+        "+2 ATTEMPT"
+      ]
+    },
+    {
+      "name": "Turtle Shield",
+      "table": "Cursed",
+      "roll": "9",
+      "desc": "Armor, +3 DEFENSE, HARD CON roll to put down, Occupies 3 slots",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Crown of Memories",
+      "table": "Cursed",
+      "roll": "10",
+      "desc": "Item, HARD INT to take off, devours wearer's best memories"
+    },
+    {
+      "name": "Skullcrusher Helm",
+      "table": "Cursed",
+      "roll": "11",
+      "desc": "Trap, Slams shut for Weapon Damage, Damage again to remove"
+    },
+    {
+      "name": "Handshake from Hell",
+      "table": "Cursed",
+      "roll": "12",
+      "desc": "Trap, Hand sculpture, when touched grabs with a STR +5 grip"
+    },
+    {
+      "name": "Ring of Tears",
+      "table": "Cursed",
+      "roll": "13",
+      "desc": "Item, -1 WIS, To remove the ring a willing recipient must be found",
+      "effects": [
+        "-1 WIS"
+      ]
+    },
+    {
+      "name": "Ravager Axe",
+      "table": "Cursed",
+      "roll": "14",
+      "desc": "Weapon, +1 STR, Once fighting, you are compelled to finish the kill",
+      "effects": [
+        "+1 STR"
+      ]
+    },
+    {
+      "name": "Agnar Liver Paste",
+      "table": "Cursed",
+      "roll": "15",
+      "desc": "Heal 2D12, NEAR Allies roll CON or take 1 stink damage",
+      "effects": [
+        "Heal 2D12 HP"
+      ]
+    },
+    {
+      "name": "Hag's Eye",
+      "table": "Cursed",
+      "roll": "16",
+      "desc": "Item, Look through to locate evil, for 1 week, see evil hiding everywhere"
+    },
+    {
+      "name": "Locust Urn",
+      "table": "Cursed",
+      "roll": "17",
+      "desc": "Trap, If opened, release a 2 HEART Swarm of Locusts"
+    },
+    {
+      "name": "Cloak of Crushing Weight",
+      "table": "Cursed",
+      "roll": "18",
+      "desc": "Armor, +1 DEFENSE, Hard STR to remove, all rolls HARD",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Shield of Teeth",
+      "table": "Cursed",
+      "roll": "19",
+      "desc": "Armor, +3 DEFENSE, If you make a kill, the shield will eat the remains",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Needle Glove",
+      "table": "Cursed",
+      "roll": "20",
+      "desc": "Trap, A metal gauntlet with poison finger needles, 5 HP damage"
+    },
+    {
+      "name": "Magic Bomb",
+      "table": "Cursed",
+      "roll": "21",
+      "desc": "Trap, If looted, gas cloud FAR range, gas nullifies magic 1D4 ROUNDS"
+    },
+    {
+      "name": "Fish Boots",
+      "table": "Cursed",
+      "roll": "22",
+      "desc": "Armor, +1 DEFENSE, Swim up to DOUBLE FAR, slowly grow gills",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Helm of Toads",
+      "table": "Cursed",
+      "roll": "23",
+      "desc": "Armor, -3 CHA, HARD STR remove, Croak if speaking, Talk to Toads",
+      "effects": [
+        "-3 CHA"
+      ]
+    },
+    {
+      "name": "Bow of Hatred",
+      "table": "Cursed",
+      "roll": "24",
+      "desc": "Weapon, Magical, HARD WIS put down, misses hit random target"
+    },
+    {
+      "name": "Freezing Blade",
+      "table": "Cursed",
+      "roll": "25",
+      "desc": "Weapon, Magical, HARD WIS and 2D6 cold damage to put down"
+    },
+    {
+      "name": "K'Tuul Parasite",
+      "table": "Cursed",
+      "roll": "26",
+      "desc": "Trap, Attach to face, controls you utterly, HARD CON remove"
+    },
+    {
+      "name": "K'Tuul Egg Layer",
+      "table": "Cursed",
+      "roll": "27",
+      "desc": "Trap, Blasts cloud of spores, in 1D8 ROUNDS, they hatch in you"
+    },
+    {
+      "name": "K'Tuul Spine",
+      "table": "Cursed",
+      "roll": "28",
+      "desc": "Trap, A black spine of sticks through your hand for 1D6 Damage"
+    },
+    {
+      "name": "K'Tuul Breather",
+      "table": "Cursed",
+      "roll": "29",
+      "desc": "Armor, -2 CHA, Breathe anywhere, if worn 3 ROUNDS, permanent",
+      "effects": [
+        "-2 CHA"
+      ]
+    },
+    {
+      "name": "Tentacle Glove",
+      "table": "Cursed",
+      "roll": "30",
+      "desc": "Item, +2 STR, -3 CHA, A hideous barbed whip replaces one arm",
+      "effects": [
+        "+2 STR",
+        "-3 CHA"
+      ]
+    },
+    {
+      "name": "Sticky Ice",
+      "table": "Cursed",
+      "roll": "31",
+      "desc": "Trap, Looter is stuck to a frozen chest, immobilized until chest destroyed"
+    },
+    {
+      "name": "Drunk's Tankard",
+      "table": "Cursed",
+      "roll": "32",
+      "desc": "Item, HARD CON and -1 CON to put down, Constant thirst for Gar",
+      "effects": [
+        "-1 CON"
+      ]
+    },
+    {
+      "name": "Amulet of Certainty",
+      "table": "Cursed",
+      "roll": "33",
+      "desc": "Item, HARD CHA to remove, +1 CHA, Stride into danger as if invincible",
+      "effects": [
+        "+1 CHA"
+      ]
+    },
+    {
+      "name": "Crow's Foot",
+      "table": "Cursed",
+      "roll": "34",
+      "desc": "Item, Natural 20 to put down, Covet the Crow's Foot over all else, even allies"
+    },
+    {
+      "name": "Staff of Serpents",
+      "table": "Cursed",
+      "roll": "35",
+      "desc": "Item, +3 CHA, user is drawn to sadistic uses of magic",
+      "effects": [
+        "+3 CHA"
+      ]
+    },
+    {
+      "name": "Cloak of Vapor",
+      "table": "Cursed",
+      "roll": "36",
+      "desc": "Armor, +2 DEFENSE, Stealth Checks EASY, If worn 1D8 days become vapor",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "War Axe of Skulls",
+      "table": "Cursed",
+      "roll": "37",
+      "desc": "Weapon, Magical, HARD CHA to put down, forces you to collect skulls"
+    },
+    {
+      "name": "Mask of Horrors",
+      "table": "Cursed",
+      "roll": "38",
+      "desc": "Trap, A hideously deformed human face, -5 CHA, 2D12 damage to remove",
+      "effects": [
+        "-5 CHA"
+      ]
+    },
+    {
+      "name": "Fungus Burger",
+      "table": "Cursed",
+      "roll": "39",
+      "desc": "Food, Heal 1 HP, Lose -2 HP per round, CON Checks HARD until healed to full",
+      "effects": [
+        "Heal 1 HP"
+      ]
+    },
+    {
+      "name": "Vision of Fear",
+      "table": "Cursed",
+      "roll": "40",
+      "desc": "Trap, An illusory presence of fear, Looter must flee FAR in a random direction"
+    },
+    {
+      "name": "A Lovely Box",
+      "table": "Cursed",
+      "roll": "41",
+      "desc": "Trap, HARD CHA to put down, Never open it, NO ONE can ever open it! Mine!"
+    },
+    {
+      "name": "Ugly Stick",
+      "table": "Cursed",
+      "roll": "42",
+      "desc": "Weapon, Magical Staff, Do -1 CHA damage the first time you hit a target",
+      "effects": [
+        "-1 CHA"
+      ]
+    },
+    {
+      "name": "Hungry Bread",
+      "table": "Cursed",
+      "roll": "43",
+      "desc": "Food, Heal 1D6 HP, Become ravenously, insatiably hungry for 1D6 days",
+      "effects": [
+        "Heal 1D6 HP"
+      ]
+    },
+    {
+      "name": "Liar's Dice",
+      "table": "Cursed",
+      "roll": "44",
+      "desc": "Item, For the next 3 rolls, lie to your group about what you rolled, then destroy"
+    },
+    {
+      "name": "Ring of Betrayal",
+      "table": "Cursed",
+      "roll": "45",
+      "desc": "Item, HARD CON remove, Choose an ally, be convinced they hate you"
+    },
+    {
+      "name": "Necklace of Decay",
+      "table": "Cursed",
+      "roll": "46",
+      "desc": "Item, HARD CON to remove, Age 10 years every round"
+    },
+    {
+      "name": "Ring of Flame",
+      "table": "Cursed",
+      "roll": "47",
+      "desc": "Item, Add 1D6 Fire to attacks, Flammable items on your person burn away"
+    },
+    {
+      "name": "Woodbane Crown",
+      "table": "Cursed",
+      "roll": "48",
+      "desc": "Item, Double EFFORT against anything wood, your wood items fall apart"
+    },
+    {
+      "name": "Mira's Broach",
+      "table": "Cursed",
+      "roll": "49",
+      "desc": "Trap, HARD CON remove, Gem sucks 2 HP per successful attack"
+    },
+    {
+      "name": "Belt of Burdens",
+      "table": "Cursed",
+      "roll": "50",
+      "desc": "Trap, HARD STR remove, A crushing weight, Occupies 5 gear slots"
+    },
+    {
+      "name": "Glowcap Mushroom",
+      "table": "Cursed",
+      "roll": "51",
+      "desc": "Food, Heal 1 HEART, Experience bonzo hallucinations for 1D4 days",
+      "effects": [
+        "Heal 1 HP"
+      ]
+    },
+    {
+      "name": "Fel Armor",
+      "table": "Cursed",
+      "roll": "52",
+      "desc": "Armor, +6 DEFENSE, No other armor can be Equipped, take on evil habits / look",
+      "effects": [
+        "+6 DEF"
+      ]
+    },
+    {
+      "name": "Fel Cleaver",
+      "table": "Cursed",
+      "roll": "53",
+      "desc": "Weapon, Magical, HARD STR put down, When you kill, attack random NEAR target"
+    },
+    {
+      "name": "Helm of the Dead",
+      "table": "Cursed",
+      "roll": "54",
+      "desc": "Armor, +2 DEFENSE, Gain properties of undead, Remove only when DYING",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Flower Demon",
+      "table": "Cursed",
+      "roll": "55",
+      "desc": "Trap, Unleashes a demon, everywhere it goes choked with vines / flowers"
+    },
+    {
+      "name": "Gnomish Gar",
+      "table": "Cursed",
+      "roll": "56",
+      "desc": "Food, Drop to 1 HP, If healed become Grey Gnome, -3 CHA, -2 STR for 1D4 days",
+      "effects": [
+        "-3 CHA",
+        "-2 STR"
+      ]
+    },
+    {
+      "name": "Book of Lies",
+      "table": "Cursed",
+      "roll": "57",
+      "desc": "Item, HARD INT to break free, Convinced of falsehoods, all INT checks are HARD"
+    },
+    {
+      "name": "Magnetic Crossbow",
+      "table": "Cursed",
+      "roll": "58",
+      "desc": "Weapon, +2 Attempts / Effort, HARD STR to separate from metal armor",
+      "effects": [
+        "+2 ATTEMPT"
+      ]
+    },
+    {
+      "name": "Liar's Compass",
+      "table": "Cursed",
+      "roll": "59",
+      "desc": "Trap, HARD INT to put down, Become convinced the worst way is the best way"
+    },
+    {
+      "name": "Giggles",
+      "table": "Cursed",
+      "roll": "60",
+      "desc": "Trap, A cute monkey doll, CHA 18 to put down, Giggle constantly at awful things"
+    },
+    {
+      "name": "Swamp Gar",
+      "table": "Cursed",
+      "roll": "61",
+      "desc": "Food, Lose 3 HP, Mucky mud beer makes you UNABLE TO EAT for 1D6 days"
+    },
+    {
+      "name": "Spider Pack",
+      "table": "Cursed",
+      "roll": "62",
+      "desc": "Item, A bag that won't let go, STR 15 to remove, -5 CHA, Reduce Carry to 5",
+      "effects": [
+        "-5 CHA"
+      ]
+    },
+    {
+      "name": "Black Heart Stone",
+      "table": "Cursed",
+      "roll": "63",
+      "desc": "Trap, You only have 1 HEART for 1D4 days, no matter your actual max"
+    },
+    {
+      "name": "Aazul's Conjuration",
+      "table": "Cursed",
+      "roll": "64",
+      "desc": "INT Spell, Summon 1D4 imp demons who crave living flesh"
+    },
+    {
+      "name": "Ring of Death Wish",
+      "table": "Cursed",
+      "roll": "65",
+      "desc": "Item, HARD INT to remove, A sudden and potent will to die with glory"
+    },
+    {
+      "name": "Effigy of Azatoth",
+      "table": "Cursed",
+      "roll": "66",
+      "desc": "Trap, A fiendish statue, Touched: for 1D4 days blood loss spawns a tentacle"
+    },
+    {
+      "name": "Hunter Orb",
+      "table": "Cursed",
+      "roll": "67",
+      "desc": "Trap, A relentless orb flies out and hunts you and allies, 3 HEARTS, Magic"
+    },
+    {
+      "name": "Impaler's Spear",
+      "table": "Cursed",
+      "roll": "68",
+      "desc": "Weapon, Magical, HARD CHA to put down, Be compelled to pike your victims"
+    },
+    {
+      "name": "Whispering Amulet",
+      "table": "Cursed",
+      "roll": "69",
+      "desc": "Item, HARD CHA to remove, It won't shut up, All Stealth checks HARD"
+    },
+    {
+      "name": "Pouch of 100 Counterfeit Coin",
+      "table": "Cursed",
+      "roll": "70",
+      "desc": "Merchants and others hate you for duping them"
+    },
+    {
+      "name": "Agnar Helmet",
+      "table": "Cursed",
+      "roll": "71",
+      "desc": "Armor, +2 DEFENSE, HARD STR to remove, Gain half of any benefit from FOOD",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Dead Man's Mug",
+      "table": "Cursed",
+      "roll": "72",
+      "desc": "Item, HARD CHA to put down, Invert any benefits from drink into harm"
+    },
+    {
+      "name": "Book of Forgetting",
+      "table": "Cursed",
+      "roll": "73",
+      "desc": "Trap, Falls apart when read, Lose ONE EQUIPPED LOOT for 1D4 days"
+    },
+    {
+      "name": "Gar Swill",
+      "table": "Cursed",
+      "roll": "74",
+      "desc": "Food, 6 sips, Take 2 damage with each sip, but be hopelessly addicted for 1D4 days"
+    },
+    {
+      "name": "Reaver's Scythe",
+      "table": "Cursed",
+      "roll": "75",
+      "desc": "Weapon, Magical, HARD CHA put down, You are now forbidden to heal allies"
+    },
+    {
+      "name": "Fool's Armor Kit",
+      "table": "Cursed",
+      "roll": "76",
+      "desc": "Trap, When used, deduct 1 from your DEFENSE total"
+    },
+    {
+      "name": "Fool's Weapon Kit",
+      "table": "Cursed",
+      "roll": "77",
+      "desc": "Trap, The weapon you modify will BREAK on its next failed attack"
+    },
+    {
+      "name": "Exploding Thorn Whips",
+      "table": "Cursed",
+      "roll": "78",
+      "desc": "Trap, LOOTED, you and all NEAR ALLIES immobilized for 1D4 ROUNDS"
+    },
+    {
+      "name": "Rotted Pipeweed",
+      "table": "Cursed",
+      "roll": "79",
+      "desc": "Item, HARD INT to put down, Addictive, Nullify INT bonus for 1D4 hours"
+    },
+    {
+      "name": "Dizzy Gas",
+      "table": "Cursed",
+      "roll": "80",
+      "desc": "Trap, Looter breathes a poof of purple mist, All DEX rolls are HARD for 1D4 days"
+    },
+    {
+      "name": "Eye Mites",
+      "table": "Cursed",
+      "roll": "81",
+      "desc": "Trap, A colony of tiny mites explodes into your eyes, go BLIND for 1D4 hours"
+    },
+    {
+      "name": "Dagger of Spite",
+      "table": "Cursed",
+      "roll": "82",
+      "desc": "Weapon, HARD CHA put down, Anytime you are persuaded, stab that person!"
+    },
+    {
+      "name": "Skull Bracelet",
+      "table": "Cursed",
+      "roll": "83",
+      "desc": "Item, HARD INT to put down, When worn, re-roll DYING if above 3"
+    },
+    {
+      "name": "Blade of Greed",
+      "table": "Cursed",
+      "roll": "84",
+      "desc": "Weapon, Magical, HARD CHA put down, Go atier EVERY CHEST"
+    },
+    {
+      "name": "Cloak of Despair",
+      "table": "Cursed",
+      "roll": "85",
+      "desc": "Armor, +1 DEFENSE, HARD CHA remove, Constantly nay-say your allies' plans",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Pure Beauty",
+      "table": "Cursed",
+      "roll": "86",
+      "desc": "Trap, HARD CHA to look away once opened, If others look, same escape required"
+    },
+    {
+      "name": "Ray of Death",
+      "table": "Cursed",
+      "roll": "87",
+      "desc": "Trap, Make a CON check or be instantly reduced to 0 HP by a black ray of magic"
+    },
+    {
+      "name": "Cap of Madness",
+      "table": "Cursed",
+      "roll": "88",
+      "desc": "Item, HARD INT remove, All INT checks HARD, Go completely bonkers"
+    },
+    {
+      "name": "Bloodwine",
+      "table": "Cursed",
+      "roll": "89",
+      "desc": "Food, Lose 4 HP, You are unable to heal any HP until you drink human blood once"
+    },
+    {
+      "name": "Feral Fur Coat",
+      "table": "Cursed",
+      "roll": "90",
+      "desc": "Armor, +3 DEFENSE, HARD CHA remove, Be animalistic in action and thought",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Beltstone",
+      "table": "Cursed",
+      "roll": "91",
+      "desc": "Item, HARD INT to remove, When worn, take double damage from any fall"
+    },
+    {
+      "name": "Timeslip",
+      "table": "Cursed",
+      "roll": "92",
+      "desc": "Trap, Whatever the DM's timer reads when LOOTED, accelerate it by 1"
+    },
+    {
+      "name": "Booby-trapped Arrow",
+      "table": "Cursed",
+      "roll": "93",
+      "desc": "1 Ammo, When fired, do Magical Damage to anything within FAR range"
+    },
+    {
+      "name": "Blade of Azatoth",
+      "table": "Cursed",
+      "roll": "94",
+      "desc": "Weapon, Magical, A tentacle sword, Be convinced The Devourer must arise"
+    },
+    {
+      "name": "Cuirass of Rising",
+      "table": "Cursed",
+      "roll": "95",
+      "desc": "Armor, +3 DEFENSE, to remove, Any dead things NEAR you arise as undead",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Berserk Helm",
+      "table": "Cursed",
+      "roll": "96",
+      "desc": "Armor, +2 DEFENSE, Double WEAPON EFFORT bonus, choose targets randomly",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Olive Branch",
+      "table": "Cursed",
+      "roll": "97",
+      "desc": "Item, HARD CHA to put down, Refuse to hurt any living thing"
+    },
+    {
+      "name": "Stink Bomb",
+      "table": "Cursed",
+      "roll": "98",
+      "desc": "Trap, You and your allies smell awful, -5 CHA and smell for 1 mile for 1D4 days",
+      "effects": [
+        "-5 CHA"
+      ]
+    },
+    {
+      "name": "Cold Iron Cross",
+      "table": "Cursed",
+      "roll": "99",
+      "desc": "Item, HARD WIS to remove, You cannot use WIS Spells"
+    },
+    {
+      "name": "Key of the Ogdru",
+      "table": "Cursed",
+      "roll": "100",
+      "desc": "Item, If used, a keyhole appears, widens, summons 1D8 Giant Tentacles"
+    },
+    {
+      "name": "Heart Stone",
+      "table": "SciFi",
+      "roll": "1",
+      "desc": "Add 1 HEART to your max",
+      "effects": [
+        "+1 HEART"
+      ]
+    },
+    {
+      "name": "Shield Projector",
+      "table": "SciFi",
+      "roll": "2",
+      "desc": "Item, Drop to emit a NEAR energy wall with 14 DEFENSE and 2 HEARTS"
+    },
+    {
+      "name": "Sentry Turret",
+      "table": "SciFi",
+      "roll": "3",
+      "desc": "Item, Build with Effort, Fires twice per round within FAR, 12 DEFENSE, 1 HEART"
+    },
+    {
+      "name": "Fusion Cell",
+      "table": "SciFi",
+      "roll": "4",
+      "desc": "Food, MECHA only, Heal 1D12, DEX and STR checks are EASY for 1D4 ROUNDS",
+      "effects": [
+        "Heal 1D12 HP"
+      ]
+    },
+    {
+      "name": "Plasma Rifle",
+      "table": "SciFi",
+      "roll": "5",
+      "desc": "Weapon, Magical, Never reload, Always does ULTIMATE when used in vacuum"
+    },
+    {
+      "name": "Incinerator",
+      "table": "SciFi",
+      "roll": "6",
+      "desc": "Weapon, High-pressure flame unit, Can't use in vacuum, Ignites targets NEAR"
+    },
+    {
+      "name": "Grav Anchor",
+      "table": "SciFi",
+      "roll": "7",
+      "desc": "Item, A gravity spike that sticks with immense power, +10 STR on any surface",
+      "effects": [
+        "+10 STR"
+      ]
+    },
+    {
+      "name": "Nano-Winch",
+      "table": "SciFi",
+      "roll": "8",
+      "desc": "Item, 100' cable, Free slack or wind-in, +10 STR when pulling, Cable has 1 HEART",
+      "effects": [
+        "+10 STR"
+      ]
+    },
+    {
+      "name": "Imperium Power Armor",
+      "table": "SciFi",
+      "roll": "9",
+      "desc": "Armor, +2 DEFENSE, +2 STR, Use 1 of 3 fuel to 2X stats 1D4 ROUNDS",
+      "effects": [
+        "+2 DEF",
+        "+2 STR"
+      ]
+    },
+    {
+      "name": "Xill Armor",
+      "table": "SciFi",
+      "roll": "10",
+      "desc": "Armor, +3 DEFENSE, +1 DEFENSE per failed attack against you, null once hit",
+      "effects": [
+        "+3 DEF",
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Zurin Robes",
+      "table": "SciFi",
+      "roll": "11",
+      "desc": "Item, +2 WIS, Command moves robe to any NEAR ally and absorbs next attack",
+      "effects": [
+        "+2 WIS"
+      ]
+    },
+    {
+      "name": "Cyber Lenses",
+      "table": "SciFi",
+      "roll": "12",
+      "desc": "Item, Eye replacements, +1 WIS, Only fail scouting or spotting on a 1",
+      "effects": [
+        "+1 WIS"
+      ]
+    },
+    {
+      "name": "Zurin Flute",
+      "table": "SciFi",
+      "roll": "13",
+      "desc": "Item, Play for a turn to heal all who can hear for 1D8 OR make recovery EASY"
+    },
+    {
+      "name": "Plasteel Helmet",
+      "table": "SciFi",
+      "roll": "14",
+      "desc": "Armor, +2 DEFENSE, Ignore any effect that would blind or deafen you",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Rip Saw",
+      "table": "SciFi",
+      "roll": "15",
+      "desc": "Weapon, Magical, Fusion-powered chainsaw, ULTIMATE against structures / objects"
+    },
+    {
+      "name": "Ion Sword",
+      "table": "SciFi",
+      "roll": "16",
+      "desc": "Weapon, Magical, Does not occupy a slot, Highly concealable, ULTIMATE on 18+"
+    },
+    {
+      "name": "Duranium Hammer",
+      "table": "SciFi",
+      "roll": "17",
+      "desc": "Weapon, Indestructible, Magnetics do MAGIC when thrown, returns"
+    },
+    {
+      "name": "Micro-Jet",
+      "table": "SciFi",
+      "roll": "18",
+      "desc": "Item, a tiny, super powered thruster that can move up to 50 tons"
+    },
+    {
+      "name": "Rask Omnitool",
+      "table": "SciFi",
+      "roll": "19",
+      "desc": "Item, Useful and versatile, any Attempt or Check that could use tools EASY"
+    },
+    {
+      "name": "Remote Unit",
+      "table": "SciFi",
+      "roll": "20",
+      "desc": "Item, Attach to any Weapon or Item to trigger or use from up to 1 mile away"
+    },
+    {
+      "name": "Hack Bug",
+      "table": "SciFi",
+      "roll": "21",
+      "desc": "Item, Tiny stick-on module that decodes passwords or locked doors in 1 round"
+    },
+    {
+      "name": "Particle Grenade",
+      "table": "SciFi",
+      "roll": "22",
+      "desc": "Weapon, 3 count, Instant or 1 round fuse, Explodes for ULTIMATE, NEAR"
+    },
+    {
+      "name": "Mono Filament",
+      "table": "SciFi",
+      "roll": "23",
+      "desc": "Item, Micro-thin cable for snares, Invisible, Does ULTIMATE used as garrote"
+    },
+    {
+      "name": "Wood Beast Gel",
+      "table": "SciFi",
+      "roll": "24",
+      "desc": "Food, A small blob of goo, Heal 1D12 for 3 ROUNDS, Causes searing pain",
+      "effects": [
+        "Heal 1D12 HP"
+      ]
+    },
+    {
+      "name": "Power Pill",
+      "table": "SciFi",
+      "roll": "25",
+      "desc": "Food, 3 count, Move FAR twice in one turn AND take an action"
+    },
+    {
+      "name": "Smoke Armor",
+      "table": "SciFi",
+      "roll": "26",
+      "desc": "Item, +2 DEFENSE, Be detected by others ONLY with a HARD scouting check",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Laser Cutter",
+      "table": "SciFi",
+      "roll": "27",
+      "desc": "Item, Do ULTIMATE effort against structures and objects within FAR range"
+    },
+    {
+      "name": "Arc Cannon",
+      "table": "SciFi",
+      "roll": "28",
+      "desc": "Weapon, Arcing energy leaps to a target, Magical, DOUBLE if target is metal clad"
+    },
+    {
+      "name": "Nano-Swarm",
+      "table": "SciFi",
+      "roll": "29",
+      "desc": "Item, 10,000 tiny machines penetrate small spaces, doing a tiny task"
+    },
+    {
+      "name": "Nitro Putty",
+      "table": "SciFi",
+      "roll": "30",
+      "desc": "Item, Sticky, Explodes when ignited or fired on, DOUBLE ULTIMATE / NEAR"
+    },
+    {
+      "name": "Medi Foam",
+      "table": "SciFi",
+      "roll": "31",
+      "desc": "Food, 2 uses, Heal to full HP, Regenerate 3 HP per round for 1D4 ROUNDS",
+      "effects": [
+        "Heal to full HP"
+      ]
+    },
+    {
+      "name": "Grav Chute",
+      "table": "SciFi",
+      "roll": "32",
+      "desc": "Item, Cradle of dense blue energy, Slow the fall of all NEAR objects or ALLIES"
+    },
+    {
+      "name": "AI Module",
+      "table": "SciFi",
+      "roll": "33",
+      "desc": "Item, A portable personality that can perform INT, WIS, CHA checks at a location"
+    },
+    {
+      "name": "Imperium Uniform",
+      "table": "SciFi",
+      "roll": "34",
+      "desc": "Armor, +1 DEFENSE, Captain rank with sidearm and full outiit",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Mark of the Devourer",
+      "table": "SciFi",
+      "roll": "35",
+      "desc": "Item, A sign of the evil, +1 INT, Intuit imminent danger with INT roll",
+      "effects": [
+        "+1 INT"
+      ]
+    },
+    {
+      "name": "Gauss Piercer",
+      "table": "SciFi",
+      "roll": "36",
+      "desc": "Weapon, Magnetic needle, If you hit, do ULTIMATE on shots done atierward"
+    },
+    {
+      "name": "Energy Bow",
+      "table": "SciFi",
+      "roll": "37",
+      "desc": "Weapon, Magical, No ammo needed, choose Ice or Fire bolt properties"
+    },
+    {
+      "name": "Rapid Fire Module",
+      "table": "SciFi",
+      "roll": "38",
+      "desc": "Item, Attach to any ranged weapon, If you score a hit, fire again"
+    },
+    {
+      "name": "Plasma Mortar",
+      "table": "SciFi",
+      "roll": "39",
+      "desc": "Weapon, Lobs a round high up, Impact in 1D4 ROUNDS, ULTIMATE to target"
+    },
+    {
+      "name": "Soul Harness",
+      "table": "SciFi",
+      "roll": "40",
+      "desc": "Item, If you roll a 6 when DYING, instantly pop up with 1 HP"
+    },
+    {
+      "name": "Nano Gar",
+      "table": "SciFi",
+      "roll": "41",
+      "desc": "Food, Nanite-infused beer, Heal to full HP, only fail your next check with a 1",
+      "effects": [
+        "Heal to full HP"
+      ]
+    },
+    {
+      "name": "Titan Blade",
+      "table": "SciFi",
+      "roll": "42",
+      "desc": "Weapon, only CARRY other weapons when equipped, Huge, ULTIMATE on 15+"
+    },
+    {
+      "name": "Stun Gun",
+      "table": "SciFi",
+      "roll": "43",
+      "desc": "Weapon, Target can roll CON to resist, otherwise STUNNED for 2 ROUNDS"
+    },
+    {
+      "name": "Mutate",
+      "table": "SciFi",
+      "roll": "44",
+      "desc": "INT SPELL, Grant 1 minor biological modification such as gills, fins, claws, or fur"
+    },
+    {
+      "name": "Drain",
+      "table": "SciFi",
+      "roll": "45",
+      "desc": "INT SPELL, Drain MAGICAL EFFORT from a target, and convert into HP"
+    },
+    {
+      "name": "Mind Link",
+      "table": "SciFi",
+      "roll": "46",
+      "desc": "INT SPELL, Gain a target's thought contents OR roll ULTIMATE when convincing"
+    },
+    {
+      "name": "Spike",
+      "table": "SciFi",
+      "roll": "47",
+      "desc": "INT SPELL, Hurl a bolt of impaling energy, Hits all targets in a straight line up to FAR"
+    },
+    {
+      "name": "Hack",
+      "table": "SciFi",
+      "roll": "48",
+      "desc": "INT SPELL, Enter any computer system for 2 ROUNDS, +5 INT and ULTIMATE inside",
+      "effects": [
+        "+5 INT"
+      ]
+    },
+    {
+      "name": "Smoke",
+      "table": "SciFi",
+      "roll": "49",
+      "desc": "INT SPELL, Take the form of smoke for a number of ROUNDS equal to your INT"
+    },
+    {
+      "name": "Blessing of the Void",
+      "table": "SciFi",
+      "roll": "50",
+      "desc": "WIS Spell, Grant one ally a guaranteed success on next roll"
+    },
+    {
+      "name": "Lifegiver",
+      "table": "SciFi",
+      "roll": "51",
+      "desc": "WIS Spell, Give your life for another, Drop to 0 HP, Raise DYING ally to full HP"
+    },
+    {
+      "name": "Freeze",
+      "table": "SciFi",
+      "roll": "52",
+      "desc": "WIS Spell, Emit cloud of freezing cold to NEAR, Immobilize enemies 1D4 ROUNDS"
+    },
+    {
+      "name": "Elemental Air",
+      "table": "SciFi",
+      "roll": "53",
+      "desc": "WIS Spell, Emit a blast of air, Push objects and targets with +5 STR",
+      "effects": [
+        "+5 STR"
+      ]
+    },
+    {
+      "name": "Iron Palm",
+      "table": "SciFi",
+      "roll": "54",
+      "desc": "WIS Spell, Your next 1D4 unarmed attacks are +3 ATTEMPT and ULTIMATE"
+    },
+    {
+      "name": "Crystal Talisman",
+      "table": "SciFi",
+      "roll": "55",
+      "desc": "Item, Mark 1 enemy, attacks against that target add MAGIC EFFORT"
+    },
+    {
+      "name": "Mag Boots",
+      "table": "SciFi",
+      "roll": "56",
+      "desc": "Armor, +1 DEFENSE, Walk on any surface if metallic with no DEX checks",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Duranium Hauberk",
+      "table": "SciFi",
+      "roll": "57",
+      "desc": "Armor, +3 DEFENSE, Ignore all ranged attacks that use projectiles",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Telekinetic Module",
+      "table": "SciFi",
+      "roll": "58",
+      "desc": "Item, Move objects up to 5 pounds FAR range"
+    },
+    {
+      "name": "Astro Chip",
+      "table": "SciFi",
+      "roll": "59",
+      "desc": "Item, All piloting, starship navigation, or maneuver checks are EASY"
+    },
+    {
+      "name": "Sharpshooter's Goggles",
+      "table": "SciFi",
+      "roll": "60",
+      "desc": "Armor, +1 DEFENSE, +5 to attacks when at FAR range",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Teleport Pads (pair of 2)",
+      "table": "SciFi",
+      "roll": "61",
+      "desc": "Item, Place the pads, blip between them, Active for 1D4 ROUNDS"
+    },
+    {
+      "name": "Book of Stars",
+      "table": "SciFi",
+      "roll": "62",
+      "desc": "Item, +1 INT, Locate yourself anywhere in the cosmos with an EASY INT check",
+      "effects": [
+        "+1 INT"
+      ]
+    },
+    {
+      "name": "Book of Moons",
+      "table": "SciFi",
+      "roll": "63",
+      "desc": "Item, EASY INT check to know the history of any Moon in the cosmos"
+    },
+    {
+      "name": "Book of Beasts",
+      "table": "SciFi",
+      "roll": "64",
+      "desc": "Item, Make an EASY WIS check to know details about any creature you see"
+    },
+    {
+      "name": "Hagro Biscuit",
+      "table": "SciFi",
+      "roll": "65",
+      "desc": "Food, Heal all allies NEAR you for 1D12"
+    },
+    {
+      "name": "Tentacle Pod",
+      "table": "SciFi",
+      "roll": "66",
+      "desc": "Item, Activate to summon a GIANT TENTACLE for 1D4 ROUNDS"
+    },
+    {
+      "name": "Vogon Poetry",
+      "table": "SciFi",
+      "roll": "67",
+      "desc": "Volume 3: Item, If read aloud, creatures who hear make a CON or 1D4 damage"
+    },
+    {
+      "name": "Utility Arm",
+      "table": "SciFi",
+      "roll": "68",
+      "desc": "Armor, +2 DEFENSE, A compact hydraulic arm, STR checks EASY, EQUIP 12 slots",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Motion Tracker",
+      "table": "SciFi",
+      "roll": "69",
+      "desc": "Item, Huge, Takes 3 Equip slots, Detect ALL movement within DOUBLE FAR"
+    },
+    {
+      "name": "Grav Bike",
+      "table": "SciFi",
+      "roll": "70",
+      "desc": "Item/Vehicle, A hyperspeed micro bike, Seats 2, Subsonic, Foldable to 3 Carry slots"
+    },
+    {
+      "name": "Superspark",
+      "table": "SciFi",
+      "roll": "71",
+      "desc": "Item, Jump-start any engine, hyperdrive, stardrive, or other motor"
+    },
+    {
+      "name": "EM Spool",
+      "table": "SciFi",
+      "roll": "72",
+      "desc": "Item, Activate in 4 ROUNDS, electronics within FAR disabled 4 ROUNDS"
+    },
+    {
+      "name": "Mag Snare",
+      "table": "SciFi",
+      "roll": "73",
+      "desc": "Item, Place to set magnetic trap, NEAR Metals pinned for 4 ROUNDS"
+    },
+    {
+      "name": "Immunity Pill",
+      "table": "SciFi",
+      "roll": "74",
+      "desc": "Food, +5 CON until your next meal",
+      "effects": [
+        "+5 CON"
+      ]
+    },
+    {
+      "name": "Flash Virus",
+      "table": "SciFi",
+      "roll": "75",
+      "desc": "Item, Implant one infectious, indomitable COMMAND into a computer system"
+    },
+    {
+      "name": "Runaway",
+      "table": "SciFi",
+      "roll": "76",
+      "desc": "Item, A fast-moving robot drone that can retrieve or recon within a half mile"
+    },
+    {
+      "name": "Repair Spider",
+      "table": "SciFi",
+      "roll": "77",
+      "desc": "Item, Regenerate 1 HP per round, Repair any damaged LOOT in 1D4 ROUNDS"
+    },
+    {
+      "name": "Collapse-Pole",
+      "table": "SciFi",
+      "roll": "78",
+      "desc": "Weapon, Magical, A metal staff, shrink to 1 inch or extend up to FAR length"
+    },
+    {
+      "name": "Illumidrone",
+      "table": "SciFi",
+      "roll": "79",
+      "desc": "Item, a small hovering orb that casts a beam of white light to FAR range"
+    },
+    {
+      "name": "Suppressor Foam",
+      "table": "SciFi",
+      "roll": "80",
+      "desc": "Item, 3 uses, Instantly suppress any fire within FAR range"
+    },
+    {
+      "name": "Ammo Brick",
+      "table": "SciFi",
+      "roll": "81",
+      "desc": "Ammo, Micronized ammo, 50 count, for any weapon, takes NO CARRY SLOT"
+    },
+    {
+      "name": "Sonic Nullifier",
+      "table": "SciFi",
+      "roll": "82",
+      "desc": "Item, Nullify ALL SOUND within FAR range upon activation, lasts 1D4 ROUNDS"
+    },
+    {
+      "name": "Reptoid Pheromone",
+      "table": "SciFi",
+      "roll": "83",
+      "desc": "Food, Repel or attract biological life form with +10 CHA, lasts 4 ROUNDS",
+      "effects": [
+        "+10 CHA"
+      ]
+    },
+    {
+      "name": "Duranium Chain Gun",
+      "table": "SciFi",
+      "roll": "84",
+      "desc": "Weapon, Magical, Use 1D4 ROUNDS to spin up, fire 6 Attacks in 1 turn"
+    },
+    {
+      "name": "G Card",
+      "table": "SciFi",
+      "roll": "85",
+      "desc": "Item, 1,000 Coin of credit"
+    },
+    {
+      "name": "Stubing's Ace",
+      "table": "SciFi",
+      "roll": "86",
+      "desc": "Item, A worn out Ace of Spades, redeemed for a junk starship...somewhere..."
+    },
+    {
+      "name": "Reptoid Symbiote",
+      "table": "SciFi",
+      "roll": "87",
+      "desc": "Item, Cannot be removed, gain the BONUSES and quirks of a Reptoid"
+    },
+    {
+      "name": "Xevosian Crown",
+      "table": "SciFi",
+      "roll": "88",
+      "desc": "Item, +2 CHA, includes rank and title of a Xevos elder",
+      "effects": [
+        "+2 CHA"
+      ]
+    },
+    {
+      "name": "Crystal Pill",
+      "table": "SciFi",
+      "roll": "89",
+      "desc": "Food, All MAGICAL EFFECTS are ULTIMATE for 4 ROUNDS"
+    },
+    {
+      "name": "Friendly Heart Stone",
+      "table": "SciFi",
+      "roll": "90",
+      "desc": "Add 1 HEART to any ally's max",
+      "effects": [
+        "+1 HEART"
+      ]
+    },
+    {
+      "name": "Hydraulic Barricade",
+      "table": "SciFi",
+      "roll": "91",
+      "desc": "Item, Install on any physical door, Becomes a 3 HEART challenge to open"
+    },
+    {
+      "name": "Energy Grapple",
+      "table": "SciFi",
+      "roll": "92",
+      "desc": "Item, Attach to any object within 2 miles, Tethered for 1D4 ROUNDS"
+    },
+    {
+      "name": "EVA Suit",
+      "table": "SciFi",
+      "roll": "93",
+      "desc": "Armor, +3 DEFENSE, Breathe, Immune to fire, radiation, cold, and bio-agents",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Ring of Sol",
+      "table": "SciFi",
+      "roll": "94",
+      "desc": "Item, When worn, any fire damage HEALS you for that amount instead"
+    },
+    {
+      "name": "Whiskey Gar",
+      "table": "SciFi",
+      "roll": "95",
+      "desc": "Food, Heal to full HP, become invulnerable for 1D4 ROUNDS",
+      "effects": [
+        "Heal to full HP"
+      ]
+    },
+    {
+      "name": "Heart Stone",
+      "table": "SciFi",
+      "roll": "96",
+      "desc": "Add 1 HEART to your max",
+      "effects": [
+        "+1 HEART"
+      ]
+    },
+    {
+      "name": "Prophecy",
+      "table": "SciFi",
+      "roll": "97",
+      "desc": "INT SPELL, If a TIMER is rolled, glean its meaning"
+    },
+    {
+      "name": "Dominate Machine",
+      "table": "SciFi",
+      "roll": "98",
+      "desc": "WIS Spell, Utterly control any 1 machine for 1D4 ROUNDS"
+    },
+    {
+      "name": "Pocket Dimension Unit",
+      "table": "SciFi",
+      "roll": "99",
+      "desc": "Item, A doorway to a tiny realm, holds 50 LOOT and up to 10 people"
+    },
+    {
+      "name": "Polarity Inverter",
+      "table": "SciFi",
+      "roll": "100",
+      "desc": "Item, Feasibly reverse ANY energy-based effect with an INT roll"
+    },
+    {
+      "name": "Heart Stone",
+      "table": "Epic",
+      "roll": "1",
+      "desc": "Add 1 HEART to your max",
+      "effects": [
+        "+1 HEART"
+      ]
+    },
+    {
+      "name": "Fighter's Girdle",
+      "table": "Epic",
+      "roll": "2",
+      "desc": "Armor, +1 DEFENSE, When DYING, add 2 to your roll",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "King's Coins",
+      "table": "Epic",
+      "roll": "3",
+      "desc": "Gain 3 HERO COINS that can be given to OTHER PLAYERS for heroic deeds"
+    },
+    {
+      "name": "Chain Energy Gem",
+      "table": "Epic",
+      "roll": "4",
+      "desc": "Item, Attach to a weapon, Make Magical, Effort hits all CLOSE enemies"
+    },
+    {
+      "name": "Gemini Jewel",
+      "table": "Epic",
+      "roll": "5",
+      "desc": "Item, Attune to any INT SPELL, That spell casts twice when used"
+    },
+    {
+      "name": "Salamander Wristlet",
+      "table": "Epic",
+      "roll": "6",
+      "desc": "Item, Regenerate 1 HP each round, unless DYING"
+    },
+    {
+      "name": "Frost Bracers",
+      "table": "Epic",
+      "roll": "7",
+      "desc": "Armor, +3 DEFENSE, Become immune to any damage done or ill effects of cold",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Acid Whetstone",
+      "table": "Epic",
+      "roll": "8",
+      "desc": "Item, Sharpen a bladed weapon, attacks with that weapon destroy 1 gear"
+    },
+    {
+      "name": "Helmet of Udin",
+      "table": "Epic",
+      "roll": "9",
+      "desc": "Armor, +4 DEFENSE, +3 CHA, Allies NEAR you gain +1 DEFENSE",
+      "effects": [
+        "+4 DEF",
+        "+1 DEF",
+        "+3 CHA"
+      ]
+    },
+    {
+      "name": "Ring of Invisibility",
+      "table": "Epic",
+      "roll": "10",
+      "desc": "Item, Make a WIS check to activate, remain invisible for 1D4 ROUNDS"
+    },
+    {
+      "name": "Crown of Goblins",
+      "table": "Epic",
+      "roll": "11",
+      "desc": "Item, Command all Goblins with absolute authority, even if they hate you"
+    },
+    {
+      "name": "Illusory Self",
+      "table": "Epic",
+      "roll": "12",
+      "desc": "INT SPELL, Conjure a very realistic mirror-clone of yourself"
+    },
+    {
+      "name": "Dimension Jump",
+      "table": "Epic",
+      "roll": "13",
+      "desc": "INT SPELL, Warp to any location you can see or can accurately remember"
+    },
+    {
+      "name": "Antlers of the Storm",
+      "table": "Epic",
+      "roll": "14",
+      "desc": "Armor, +3 DEFENSE, WIS check command weather when outdoors",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Hand of Resurrection",
+      "table": "Epic",
+      "roll": "15",
+      "desc": "Item, Raise 1 dead back to full HP, roll 1D4, if a 1 / 2 item is destroyed"
+    },
+    {
+      "name": "Dire Bear",
+      "table": "Epic",
+      "roll": "16",
+      "desc": "WIS Spell, Become a huge bear for 1D4 ROUNDS, Add 1 HEART, Double bonuses",
+      "effects": [
+        "+1 HEART"
+      ]
+    },
+    {
+      "name": "Iron Skin",
+      "table": "Epic",
+      "roll": "17",
+      "desc": "WIS Spell, Your DEFENSE is 20 for 1D4 ROUNDS"
+    },
+    {
+      "name": "Hoppy Gar",
+      "table": "Epic",
+      "roll": "18",
+      "desc": "Food, Heal to Full HP, All checks are EASY for 1D4 ROUNDS",
+      "effects": [
+        "Heal to full HP"
+      ]
+    },
+    {
+      "name": "Dwarven Bomb",
+      "table": "Epic",
+      "roll": "19",
+      "desc": "Weapon, Fuse burns for 1D4 ROUNDS, Explodes doing 4D12 to NEAR"
+    },
+    {
+      "name": "Hood of Fear",
+      "table": "Epic",
+      "roll": "20",
+      "desc": "Armor, +3 DEFENSE, enemies who see you WIS check or flee on their turn",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Diamond Tiara",
+      "table": "Epic",
+      "roll": "21",
+      "desc": "Item, A crown worth more than a small city"
+    },
+    {
+      "name": "Ivory Rose",
+      "table": "Epic",
+      "roll": "22",
+      "desc": "Item, Bestow this on one person, that person will guard you with their life"
+    },
+    {
+      "name": "Tooth of the Agnar",
+      "table": "Epic",
+      "roll": "23",
+      "desc": "Item, Attach to 1 Weapon, weapon does ULTIMATE on any roll of 15+"
+    },
+    {
+      "name": "Magma Coil",
+      "table": "Epic",
+      "roll": "24",
+      "desc": "Item, Give off smoke and fire to make STR check EASY or STR EFFORT Ultimate"
+    },
+    {
+      "name": "Frog Boots",
+      "table": "Epic",
+      "roll": "25",
+      "desc": "Armor, +2 DEFENSE, When moving FAR, leap with ease",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Heroic Tabard",
+      "table": "Epic",
+      "roll": "26",
+      "desc": "Item, When you cry \"Huzzah!\" those who cry \"Huzzah!\" roll EASY next turn"
+    },
+    {
+      "name": "Song of the Mountain",
+      "table": "Epic",
+      "roll": "27",
+      "desc": "INT SPELL, Sing! Enemies within FAR are -5 CHA to resist persuasion",
+      "effects": [
+        "-5 CHA"
+      ]
+    },
+    {
+      "name": "Harpoon Gun",
+      "table": "Epic",
+      "roll": "28",
+      "desc": "Weapon, Magical, Attack to grapple a foe with a +5 STR if they try to escape",
+      "effects": [
+        "+5 STR"
+      ]
+    },
+    {
+      "name": "Bow of Seeking",
+      "table": "Epic",
+      "roll": "29",
+      "desc": "Weapon, Magical, If know a target's name, you never miss"
+    },
+    {
+      "name": "Pet Slime Cube",
+      "table": "Epic",
+      "roll": "30",
+      "desc": "Item, This tiny Slime Cube has imprinted on you as parent, 3\" on a side"
+    },
+    {
+      "name": "Pet Goblin",
+      "table": "Epic",
+      "roll": "31",
+      "desc": "Item, This hapless, gearless runt has sworn never to leave your side"
+    },
+    {
+      "name": "Fire Blade",
+      "table": "Epic",
+      "roll": "32",
+      "desc": "Weapon, Magical, +3 Attempts/Effort, Ignites flammables, 1D4 for 1D4 ROUNDS",
+      "effects": [
+        "+3 ATTEMPT/EFFORT"
+      ]
+    },
+    {
+      "name": "Wave of Fury",
+      "table": "Epic",
+      "roll": "33",
+      "desc": "WIS Spell, If NEAR ocean, call forth a massive wave, impacts in 1D4 ROUNDS"
+    },
+    {
+      "name": "Gravity Inversion",
+      "table": "Epic",
+      "roll": "34",
+      "desc": "INT SPELL, Invert gravity within FAR range for 1D4 ROUNDS"
+    },
+    {
+      "name": "Brain Horror Helm",
+      "table": "Epic",
+      "roll": "35",
+      "desc": "Armor, +3 DEFENSE, Gain 'It shows you things' property of a Brain Horror",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Gunner's Tripod",
+      "table": "Epic",
+      "roll": "36",
+      "desc": "Item, Gain +5 Attempts/Effort when firing at targets beyond FAR",
+      "effects": [
+        "+5 ATTEMPT/EFFORT"
+      ]
+    },
+    {
+      "name": "Watcher",
+      "table": "Epic",
+      "roll": "37",
+      "desc": "Item, A small glass eye, place anywhere and see through it within 1 mile"
+    },
+    {
+      "name": "Dobbs' Cheddar",
+      "table": "Epic",
+      "roll": "38",
+      "desc": "Food, 3 Count, Add to any FOOD to double that FOOD's effects"
+    },
+    {
+      "name": "Yalfonso's Disc",
+      "table": "Epic",
+      "roll": "39",
+      "desc": "Item, A frictionless, levitating disc of energy that holds up to 200 pounds"
+    },
+    {
+      "name": "Ramthas Battle Harness",
+      "table": "Epic",
+      "roll": "40",
+      "desc": "Armor, +1 DEFENSE, Gain 3 more slots in EQUIPPED gear",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Ronaldo's Backwagon",
+      "table": "Epic",
+      "roll": "41",
+      "desc": "Item, Gain 10 more slots in CARRIED gear"
+    },
+    {
+      "name": "Call of Aram",
+      "table": "Epic",
+      "roll": "42",
+      "desc": "Item, A mighty war horn, Sound a call heard for 5 miles, with a +3 CHA",
+      "effects": [
+        "+3 CHA"
+      ]
+    },
+    {
+      "name": "Genetic Soup",
+      "table": "Epic",
+      "roll": "43",
+      "desc": "Food, changes the eater into a random new BIO-FORM instantly"
+    },
+    {
+      "name": "Runic Rope",
+      "table": "Epic",
+      "roll": "44",
+      "desc": "Item, ANY roll using this rope is EASY, 50'"
+    },
+    {
+      "name": "Thoor's Stone",
+      "table": "Epic",
+      "roll": "45",
+      "desc": "Item, Only the looter is able to liti or move it, a baseball-sized cube"
+    },
+    {
+      "name": "Gnomish Beam Goggles",
+      "table": "Epic",
+      "roll": "46",
+      "desc": "Armor, +2 DEFENSE, Fires a ray of ULTIMATE damage",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Feral Claws",
+      "table": "Epic",
+      "roll": "47",
+      "desc": "Weapon, Magical, +3 Attempts, Retractable blades, Roll EFFORT TWICE on a hit",
+      "effects": [
+        "+3 ATTEMPT"
+      ]
+    },
+    {
+      "name": "Belt of Guzzling",
+      "table": "Epic",
+      "roll": "48",
+      "desc": "Armor, +4 DEFENSE, Never fail another CON check",
+      "effects": [
+        "+4 DEF"
+      ]
+    },
+    {
+      "name": "Book of Infinity",
+      "table": "Epic",
+      "roll": "49",
+      "desc": "Item, You have perfect recall of every fact you have ever encountered"
+    },
+    {
+      "name": "Amulet of Thunder",
+      "table": "Epic",
+      "roll": "50",
+      "desc": "Item, When rolling ULTIMATE, re-roll anything less than a 6"
+    },
+    {
+      "name": "Lemninkainen's Wondrous Sack",
+      "table": "Epic",
+      "roll": "51",
+      "desc": "Item, Increase your CARRIED gear slots to 20"
+    },
+    {
+      "name": "Akintu",
+      "table": "Epic",
+      "roll": "52",
+      "desc": "Item, An odd tiki statue that brings good luck, When you roll a 19, treat it as a 20"
+    },
+    {
+      "name": "Enchanted Sandwich",
+      "table": "Epic",
+      "roll": "53",
+      "desc": "Food, Never spoils, 5 bites, 1 Bite = 1D8 HP, When finished gain +1 CON",
+      "effects": [
+        "+1 CON"
+      ]
+    },
+    {
+      "name": "Cloud Buffalo",
+      "table": "Epic",
+      "roll": "54",
+      "desc": "A steed that descends from the sky, carries 8 people and 10 LOOT"
+    },
+    {
+      "name": "Red Fang",
+      "table": "Epic",
+      "roll": "55",
+      "desc": "Weapon, Magical Great Sword, damage you do with Red Fang, heal half that"
+    },
+    {
+      "name": "Crystal Darts",
+      "table": "Epic",
+      "roll": "56",
+      "desc": "Ammo, 3 Count, Magical, Immobilize target, in 1D4 ROUNDS explode for 2D12"
+    },
+    {
+      "name": "Earth's Heart",
+      "table": "Epic",
+      "roll": "57",
+      "desc": "Item, A massive ruby, the biggest, most rare jewel in all the world"
+    },
+    {
+      "name": "Gnomish Metal Melter",
+      "table": "Epic",
+      "roll": "58",
+      "desc": "Item, 1D4 ROUNDS reach full power, vaporizes NEAR metal objects"
+    },
+    {
+      "name": "Ghost Trap",
+      "table": "Epic",
+      "roll": "59",
+      "desc": "Item, Holds 5 non-corporeal beings: place, wait, trigger, Target gets DEX check"
+    },
+    {
+      "name": "Adamantium Armor",
+      "table": "Epic",
+      "roll": "60",
+      "desc": "Armor, +8 DEFENSE, Ignore any Damage below 3, Occupies 5 slots",
+      "effects": [
+        "+8 DEF"
+      ]
+    },
+    {
+      "name": "Clockwork Arm",
+      "table": "Epic",
+      "roll": "61",
+      "desc": "Item, Prosthetic, +3 STR, all STR checks are EASY, -1 CHA",
+      "effects": [
+        "+3 STR",
+        "-1 CHA"
+      ]
+    },
+    {
+      "name": "Juice of Sapho",
+      "table": "Epic",
+      "roll": "62",
+      "desc": "Food, +8 INT, Triple the EFFORT of your next SPELL",
+      "effects": [
+        "+8 INT"
+      ]
+    },
+    {
+      "name": "Styll Suit",
+      "table": "Epic",
+      "roll": "63",
+      "desc": "Armor, +4 DEFENSE, Wear no other armor, Breathe anywhere, heal 1 HP / ROUND",
+      "effects": [
+        "+4 DEF",
+        "Heal 1 HP"
+      ]
+    },
+    {
+      "name": "Bracelet of Thoor",
+      "table": "Epic",
+      "roll": "64",
+      "desc": "Item, +2 STR",
+      "effects": [
+        "+2 STR"
+      ]
+    },
+    {
+      "name": "Ring of Quickness",
+      "table": "Epic",
+      "roll": "65",
+      "desc": "Item, +2 DEX",
+      "effects": [
+        "+2 DEX"
+      ]
+    },
+    {
+      "name": "Drunken Hauberk",
+      "table": "Epic",
+      "roll": "66",
+      "desc": "Armor, +2 DEFENSE, +2 CON, Never fail a test involving Gar",
+      "effects": [
+        "+2 DEF",
+        "+2 CON"
+      ]
+    },
+    {
+      "name": "Sage's Crystal",
+      "table": "Epic",
+      "roll": "67",
+      "desc": "Item, +2 INT",
+      "effects": [
+        "+2 INT"
+      ]
+    },
+    {
+      "name": "Effigy of Osric",
+      "table": "Epic",
+      "roll": "68",
+      "desc": "Item, +2 WIS",
+      "effects": [
+        "+2 WIS"
+      ]
+    },
+    {
+      "name": "Gleaming Gorget",
+      "table": "Epic",
+      "roll": "69",
+      "desc": "Armor, +1 DEFENSE, +2 CHA",
+      "effects": [
+        "+1 DEF",
+        "+2 CHA"
+      ]
+    },
+    {
+      "name": "Dagger of the Unseen",
+      "table": "Epic",
+      "roll": "70",
+      "desc": "Weapon, Magical, If attack undetected, human-sized victim to 0 HP"
+    },
+    {
+      "name": "Headsman's Shovel",
+      "table": "Epic",
+      "roll": "71",
+      "desc": "Weapon, Magical, On a 20, behead any human-sized target"
+    },
+    {
+      "name": "The Hidden",
+      "table": "Epic",
+      "roll": "72",
+      "desc": "INT SPELL, Allies NEAR are invisible for 1D4 ROUNDS, visible if move away"
+    },
+    {
+      "name": "Slayer's Helm",
+      "table": "Epic",
+      "roll": "73",
+      "desc": "Armor, +2 DEFENSE, +6 Weapon Effort",
+      "effects": [
+        "+2 DEF",
+        "+6 WEAPON EFFORT"
+      ]
+    },
+    {
+      "name": "Eye of Idimmu",
+      "table": "Epic",
+      "roll": "74",
+      "desc": "Item, Amulet, +6 Magical Effort"
+    },
+    {
+      "name": "Boon of the Gods",
+      "table": "Epic",
+      "roll": "75",
+      "desc": "Item, Grant one OTHER PLAYER Milestone Reward of their choice, one use"
+    },
+    {
+      "name": "Timecap Mushroom",
+      "table": "Epic",
+      "roll": "76",
+      "desc": "FOOD, SKIP the next DM's turn"
+    },
+    {
+      "name": "Roll Twice on the ANCIENT LOOT table",
+      "table": "Epic",
+      "roll": "77",
+      "desc": ""
+    },
+    {
+      "name": "Shrink Ray",
+      "table": "Epic",
+      "roll": "78",
+      "desc": "INT SPELL, Reduce one target to 1/100th its size for 1D4 ROUNDS"
+    },
+    {
+      "name": "Giant Growth",
+      "table": "Epic",
+      "roll": "79",
+      "desc": "WIS Spell, Grow one target to 5x its size for 1D4 ROUNDS"
+    },
+    {
+      "name": "Osric's Bulwark Wall",
+      "table": "Epic",
+      "roll": "80",
+      "desc": "WIS Spell, Form a massive castle wall from boulders or cobbles"
+    },
+    {
+      "name": "Destroy the Dead",
+      "table": "Epic",
+      "roll": "81",
+      "desc": "INT SPELL, Annihilate 1 Undead per 1 HP burned, FAR range"
+    },
+    {
+      "name": "Ghost Ship",
+      "table": "Epic",
+      "roll": "82",
+      "desc": "Item, Conjure a black galleon, no crew, that will last 1D4 weeks before dissipating"
+    },
+    {
+      "name": "Dragon's Blood",
+      "table": "Epic",
+      "roll": "83",
+      "desc": "Food, Grow wings and breathe fire for 1D4 ROUNDS"
+    },
+    {
+      "name": "Gungnir",
+      "table": "Epic",
+      "roll": "84",
+      "desc": "Weapon, Magical, Spear, Pass final judgment, +10 CHA for 1 mile",
+      "effects": [
+        "+10 CHA"
+      ]
+    },
+    {
+      "name": "Cosmic Gateway",
+      "table": "Epic",
+      "roll": "85",
+      "desc": "Item, Open a door, access ANY world in the cosmos, 8 HP to walk through"
+    },
+    {
+      "name": "Invulnerability",
+      "table": "Epic",
+      "roll": "86",
+      "desc": "WIS Spell, Anoint target with touch, cannot be harmed for 1D8 ROUNDS"
+    },
+    {
+      "name": "Sherherezazahd",
+      "table": "Epic",
+      "roll": "87",
+      "desc": "Item, A ghostly sword, add Magical Weapon effort to all attacks"
+    },
+    {
+      "name": "Time Doorway",
+      "table": "Epic",
+      "roll": "88",
+      "desc": "Item, Access ANY time at current location, age 10 years to go through"
+    },
+    {
+      "name": "Stench Gar",
+      "table": "Epic",
+      "roll": "89",
+      "desc": "Food, Release a poisonous belch, Reduce one NEAR creature to 1 HEART"
+    },
+    {
+      "name": "Lifewalker",
+      "table": "Epic",
+      "roll": "90",
+      "desc": "Item, Leave a trail of flowers wherever you go, those within heal 2 HP per round",
+      "effects": [
+        "Heal 2 HP"
+      ]
+    },
+    {
+      "name": "Hammer of Hell",
+      "table": "Epic",
+      "roll": "91",
+      "desc": "Weapon, Magical, All EFFORT with this weapon affects all NEAR enemies"
+    },
+    {
+      "name": "Wings of Gabriel",
+      "table": "Epic",
+      "roll": "92",
+      "desc": "Armor, +5 DEFENSE, Foldable, Fly at will, 2X your maximum move range",
+      "effects": [
+        "+5 DEF"
+      ]
+    },
+    {
+      "name": "Wishing Well",
+      "table": "Epic",
+      "roll": "93",
+      "desc": "Item, Immovable once used, Make 1 WISH per YEAR, comes true in 1D4 days"
+    },
+    {
+      "name": "Book of Mastery",
+      "table": "Epic",
+      "roll": "94",
+      "desc": "Item, 3 pages, Learn 1 Milestone Reward per page"
+    },
+    {
+      "name": "Star of Unadai",
+      "table": "Epic",
+      "roll": "95",
+      "desc": "Food, Gain +1 to all STATS",
+      "effects": [
+        "+1 all STATS"
+      ]
+    },
+    {
+      "name": "Vision of Perfection",
+      "table": "Epic",
+      "roll": "96",
+      "desc": "Trap, Reveal to one EVIL being, HARD CHA check or it becomes GOOD"
+    },
+    {
+      "name": "Water of Life",
+      "table": "Epic",
+      "roll": "97",
+      "desc": "Food, Die, Return to life 1D4 ROUNDS later with 2 additional HEARTS"
+    },
+    {
+      "name": "Mead of Udin",
+      "table": "Epic",
+      "roll": "98",
+      "desc": "Food, All who drink awake the next day with an additional HEART"
+    },
+    {
+      "name": "Shield of Angels",
+      "table": "Epic",
+      "roll": "99",
+      "desc": "Armor, +6 DEFENSE, You and all NEAR allies ignore any damage of 5 or less",
+      "effects": [
+        "+6 DEF"
+      ]
+    },
+    {
+      "name": "Necronomicon",
+      "table": "Epic",
+      "roll": "100",
+      "desc": "Item, Create 1 INT SPELL / WIS Spell with HARD INT"
+    },
+    {
+      "name": "Translator Tapeworm",
+      "table": "Bizarre",
+      "roll": "1",
+      "desc": "Item, Increases appetite, Speak and understand all spoken languages"
+    },
+    {
+      "name": "You Doll",
+      "table": "Bizarre",
+      "roll": "2",
+      "desc": "Item, Perfectly resembles owner, INT roll to ask it any question, get true answer"
+    },
+    {
+      "name": "Monkey Root",
+      "table": "Bizarre",
+      "roll": "3",
+      "desc": "Food, 1 Use, +5 DEX for 4 ROUNDS, Make monkey noises when you try to speak",
+      "effects": [
+        "+5 DEX"
+      ]
+    },
+    {
+      "name": "Sedated Runner Bird",
+      "table": "Bizarre",
+      "roll": "4",
+      "desc": "Item, Sleepy bird has been drugged and goes berserk when it awakes"
+    },
+    {
+      "name": "Boomerang Whip",
+      "table": "Bizarre",
+      "roll": "5",
+      "desc": "Weapon, A 12' bull whip, leather, that can be thrown and caught again"
+    },
+    {
+      "name": "Finful Ring",
+      "table": "Bizarre",
+      "roll": "6",
+      "desc": "Item, +1 DEFENSE, A ring wreathed in wiggling fins. Swim at triple normal speed",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Bag o' Fingers",
+      "table": "Bizarre",
+      "roll": "7",
+      "desc": "Item, A leather sack filled with 2D20 fingers from various bio-forms"
+    },
+    {
+      "name": "Lizard Head Hat",
+      "table": "Bizarre",
+      "roll": "8",
+      "desc": "Armor, +1 DEFENSE, A leather hat cratied to resemble a lizard, Convincing",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Dud Beer Cask",
+      "table": "Bizarre",
+      "roll": "9",
+      "desc": "Food, 5 uses, Gar that has been brewed wrong and has no alcohol"
+    },
+    {
+      "name": "Mushroom Gar",
+      "table": "Bizarre",
+      "roll": "10",
+      "desc": "Food, 5 uses, Gar brewed with fungus. Glow slightly / delirious 1D4 Hours"
+    },
+    {
+      "name": "Glooby Trap",
+      "table": "Bizarre",
+      "roll": "11",
+      "desc": "Item, A glob of ultra-sticky putty. Touched, only a HARD STR roll can set you free"
+    },
+    {
+      "name": "Eyeball Ball",
+      "table": "Bizarre",
+      "roll": "12",
+      "desc": "Item, A wacky, energetic bouncing eyeball toy. See through it with an INT roll"
+    },
+    {
+      "name": "Gag Plank",
+      "table": "Bizarre",
+      "roll": "13",
+      "desc": "Item, A plank of wood for building, but made hollow to break under little force"
+    },
+    {
+      "name": "Blade of Skepticism",
+      "table": "Bizarre",
+      "roll": "14",
+      "desc": "Weapon, Trap, HARD STR put down, Talking sword doubts every move"
+    },
+    {
+      "name": "Giant Egg",
+      "table": "Bizarre",
+      "roll": "15",
+      "desc": "Item, Use warmth and time to hatch. Spawn 1 random monster, bonds to you"
+    },
+    {
+      "name": "Eargantua's Ears",
+      "table": "Bizarre",
+      "roll": "16",
+      "desc": "Item, A pair of giant ears that can be worn, only fail a hearing roll with a 1"
+    },
+    {
+      "name": "Soggy Bottoms Banjo",
+      "table": "Bizarre",
+      "roll": "17",
+      "desc": "Item, A weird stringed instrument, entertain any small crowd"
+    },
+    {
+      "name": "Azael's Blood Dice",
+      "table": "Bizarre",
+      "roll": "18",
+      "desc": "Item, Roll these red dice. Enemies fascinated with them for 1D4 ROUNDS"
+    },
+    {
+      "name": "Bowby Trap",
+      "table": "Bizarre",
+      "roll": "19",
+      "desc": "Weapon, Gag bow, when shot roll acts against the user, and the arrow backfires"
+    },
+    {
+      "name": "Chatty Skull",
+      "table": "Bizarre",
+      "roll": "20",
+      "desc": "Item, A human skull that just won't shut up. If disposed, will pop up elsewhere"
+    },
+    {
+      "name": "Robes of Kazghat",
+      "table": "Bizarre",
+      "roll": "21",
+      "desc": "Armor, +2 DEFENSE, Immune to effects caused by time travel / distortion",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Time Tube",
+      "table": "Bizarre",
+      "roll": "22",
+      "desc": "Item, A small tube. Pass item through. It arrives in the past at moment chosen"
+    },
+    {
+      "name": "Beauty Bacon",
+      "table": "Bizarre",
+      "roll": "23",
+      "desc": "Food, 3 uses, enjoy +10 CHA for 1D4 ROUNDS. You look, and smell, delicious",
+      "effects": [
+        "+10 CHA"
+      ]
+    },
+    {
+      "name": "Bomb Roach",
+      "table": "Bizarre",
+      "roll": "24",
+      "desc": "Item, A mechanical insect. Set it in motion, it will explode as it runs in 1 TURN"
+    },
+    {
+      "name": "Sandwich of Love",
+      "table": "Bizarre",
+      "roll": "25",
+      "desc": "Food, 1 use, Whoever eats falls in love with a person of your choice"
+    },
+    {
+      "name": "Faber Mortiferum",
+      "table": "Bizarre",
+      "roll": "26",
+      "desc": "Book, Ask the GM any question with HARD INT, receive an honest answer"
+    },
+    {
+      "name": "Tunic of Generosity",
+      "table": "Bizarre",
+      "roll": "27",
+      "desc": "Armor, +5 DEFENSE, Nat 20 remove, Compelled to give gear to friends",
+      "effects": [
+        "+5 DEF"
+      ]
+    },
+    {
+      "name": "Grim's Boot",
+      "table": "Bizarre",
+      "roll": "28",
+      "desc": "Item, Use on a rope or line to fish, You are guaranteed a major catch"
+    },
+    {
+      "name": "Knot Rope",
+      "table": "Bizarre",
+      "roll": "29",
+      "desc": "Item, A 300 foot length of rope tangled in inextricable knots"
+    },
+    {
+      "name": "Towel, Green",
+      "table": "Bizarre",
+      "roll": "30",
+      "desc": "Item, A green towel"
+    },
+    {
+      "name": "Ship in a Bottle",
+      "table": "Bizarre",
+      "roll": "31",
+      "desc": "Item, 1 use, Shatter bottle to reveal a full galleon, weapons and supplies"
+    },
+    {
+      "name": "Death's Eye",
+      "table": "Bizarre",
+      "roll": "32",
+      "desc": "Item, A crystal sphere, Look within to see the moment of your death"
+    },
+    {
+      "name": "Blood Spider",
+      "table": "Bizarre",
+      "roll": "33",
+      "desc": "Item, Spider crawls on you, heals 1 HP per ROUND unless you are DYING"
+    },
+    {
+      "name": "Spectrum Silk",
+      "table": "Bizarre",
+      "roll": "34",
+      "desc": "Item, A bolt of slick fabric that seethes with a myriad of vibrant colors"
+    },
+    {
+      "name": "Glider Parasite",
+      "table": "Bizarre",
+      "roll": "35",
+      "desc": "Item, Arthropod, HARD STR to remove, Allows you to glide when falling"
+    },
+    {
+      "name": "See Me Torch",
+      "table": "Bizarre",
+      "roll": "36",
+      "desc": "Item, A torch that will burn as long as at least 1 person is looking directly at it"
+    },
+    {
+      "name": "Expanding Slime Cube",
+      "table": "Bizarre",
+      "roll": "37",
+      "desc": "Item, A tiny slime cube which continuously grows once released"
+    },
+    {
+      "name": "Wind of Saras",
+      "table": "Bizarre",
+      "roll": "38",
+      "desc": "Item, A bottle of air, which bellows out like wind whenever uncorked"
+    },
+    {
+      "name": "Tectura Infinitessema",
+      "table": "Bizarre",
+      "roll": "39",
+      "desc": "Item, A tiny, malevolent, sentient dungeon"
+    },
+    {
+      "name": "Note to Self",
+      "table": "Bizarre",
+      "roll": "40",
+      "desc": "Item, A letter written from you in alternate dimension, addressed to you"
+    },
+    {
+      "name": "Martin's Leti Hand",
+      "table": "Bizarre",
+      "roll": "41",
+      "desc": "Item, This is Martin's leti hand. Martin wants it back"
+    },
+    {
+      "name": "Lil Stool",
+      "table": "Bizarre",
+      "roll": "42",
+      "desc": "Item, A fully functional toilet, 2 inches tall"
+    },
+    {
+      "name": "Magician's Hoop",
+      "table": "Bizarre",
+      "roll": "43",
+      "desc": "Item, A steel ring that can 'hook into' any other ring or circle with a whack"
+    },
+    {
+      "name": "Phial of Demon's Tears",
+      "table": "Bizarre",
+      "roll": "44",
+      "desc": "Food, 1 use, Take the form of a demon for 1D4 days"
+    },
+    {
+      "name": "Crab Arm",
+      "table": "Bizarre",
+      "roll": "45",
+      "desc": "Armor, DEFENSE +2, A crab claw arm that attaches to your shoulder permanently",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Jarred Silk Worm",
+      "table": "Bizarre",
+      "roll": "46",
+      "desc": "Item, A jar containing a worm. Produces 1' of unbreakable thread per day"
+    },
+    {
+      "name": "Cockroach Pinata",
+      "table": "Bizarre",
+      "roll": "47",
+      "desc": "Item, A paper globe containing 10,000 hungry cockroaches"
+    },
+    {
+      "name": "Lantern of Sett",
+      "table": "Bizarre",
+      "roll": "48",
+      "desc": "Item, A candle-lit lantern. When lit, it emits pitch black darkness NEAR"
+    },
+    {
+      "name": "Really Ugly Stick",
+      "table": "Bizarre",
+      "roll": "49",
+      "desc": "Weapon, Inflict 5 or more damage on a target, give it a permanent -5 CHA",
+      "effects": [
+        "-5 CHA"
+      ]
+    },
+    {
+      "name": "Handsy Hands",
+      "table": "Bizarre",
+      "roll": "50",
+      "desc": "Armor, DEFENSE+1, Your hands has 10 fingers, each functioning as two hands",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Spores of Chang",
+      "table": "Bizarre",
+      "roll": "51",
+      "desc": "Item, A jar of spores. Inhaled, sense of smell is 1,000 times normal acuity"
+    },
+    {
+      "name": "Bag o' Keys",
+      "table": "Bizarre",
+      "roll": "52",
+      "desc": "Item, Each time you reach in, extract a key. 5% chance it's the key you want"
+    },
+    {
+      "name": "Portable Footprints",
+      "table": "Bizarre",
+      "roll": "53",
+      "desc": "Item, Place paper-thin footprints anywhere, they look perfectly realistic"
+    },
+    {
+      "name": "Xylobone",
+      "table": "Bizarre",
+      "roll": "54",
+      "desc": "Item, A musical instrument of bone. The music can make some men crave death"
+    },
+    {
+      "name": "Rope Incense",
+      "table": "Bizarre",
+      "roll": "55",
+      "desc": "Item, 5 uses, The smoke from this incense can be climbed, lasts 1D4 ROUNDS"
+    },
+    {
+      "name": "Pipes of Dawn",
+      "table": "Bizarre",
+      "roll": "56",
+      "desc": "Item, magical flute. When played with a CHA, the sun will rise"
+    },
+    {
+      "name": "Mini Mimic",
+      "table": "Bizarre",
+      "roll": "57",
+      "desc": "Item, A tiny mimic that can imitate any object the size of a cantaloupe or smaller"
+    },
+    {
+      "name": "Chokemeat",
+      "table": "Bizarre",
+      "roll": "58",
+      "desc": "Food, 1 use, When eaten, this jerky will choke and gag eater until they pass out"
+    },
+    {
+      "name": "Comical Toot",
+      "table": "Bizarre",
+      "roll": "59",
+      "desc": "Item, Attach this tassle to headgear. Causes laughter for those who see it"
+    },
+    {
+      "name": "Sitier of All Things",
+      "table": "Bizarre",
+      "roll": "60",
+      "desc": "Item, A culinary sitier. Things inside become other things"
+    },
+    {
+      "name": "Teeth of Krynn",
+      "table": "Bizarre",
+      "roll": "61",
+      "desc": "Item, A necklace of 8 teeth from beasts, each still hungry for its favored prey"
+    },
+    {
+      "name": "Hungry Emerald",
+      "table": "Bizarre",
+      "roll": "62",
+      "desc": "Item, An emerald with a hard-to-notice mouth. It eats COINS when possible"
+    },
+    {
+      "name": "Here",
+      "table": "Bizarre",
+      "roll": "63",
+      "desc": "Fishy, Fishy: Item, A simple horn. When used, summon a fish from ANY mass of water"
+    },
+    {
+      "name": "Cozy Hat",
+      "table": "Bizarre",
+      "roll": "64",
+      "desc": "Armor, DEFENSE +2, This fluffy fur hat is so warm and cozy, be immune to cold",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Dry Ring",
+      "table": "Bizarre",
+      "roll": "65",
+      "desc": "Item, You can never be wet or touched by liquid"
+    },
+    {
+      "name": "Portable Fissure",
+      "table": "Bizarre",
+      "roll": "66",
+      "desc": "Item, Place this crack on an object, and it will be cracked"
+    },
+    {
+      "name": "Sponge Stone",
+      "table": "Bizarre",
+      "roll": "67",
+      "desc": "Item, A rock that can absorb up to 100 gallons of liquid"
+    },
+    {
+      "name": "Ring of Mirrors",
+      "table": "Bizarre",
+      "roll": "68",
+      "desc": "Item, When worn, interact with objects and structures as if reversed"
+    },
+    {
+      "name": "Frog Pellets",
+      "table": "Bizarre",
+      "roll": "69",
+      "desc": "Item, Green blobs. When touching moisture, each becomes D20 frogs"
+    },
+    {
+      "name": "Bug Bait",
+      "table": "Bizarre",
+      "roll": "70",
+      "desc": "Food, 3 uses, Insects within 1 mile are drawn to it"
+    },
+    {
+      "name": "Erratic Power",
+      "table": "Bizarre",
+      "roll": "71",
+      "desc": "A weird bolt of energy leaps forth! A random character receives 2 STAT points"
+    },
+    {
+      "name": "Dimensional Map",
+      "table": "Bizarre",
+      "roll": "72",
+      "desc": "Item, Unroll this map. Becomes a 3D, moving version of surroundings"
+    },
+    {
+      "name": "Volatile Goggles",
+      "table": "Bizarre",
+      "roll": "73",
+      "desc": "Armor, DEFENSE +1, When rolling ULTIMATE, roll twice. If a 1, negate both",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Hand-on-a-Stick",
+      "table": "Bizarre",
+      "roll": "74",
+      "desc": "Item, Can be used to open chests or doors, or test trapped items"
+    },
+    {
+      "name": "Dragon Wine",
+      "table": "Bizarre",
+      "roll": "75",
+      "desc": "Food, 3 uses, Atier drinking, you sound, smell, and intimidate just like a Drake"
+    },
+    {
+      "name": "Monkey Drummer",
+      "table": "Bizarre",
+      "roll": "76",
+      "desc": "Item, When set down, begins drumming a tiny drum. Stops when stored"
+    },
+    {
+      "name": "Tattoo Collection",
+      "table": "Bizarre",
+      "roll": "77",
+      "desc": "Items, A small pirate's chest filled with tattooed skin pieces"
+    },
+    {
+      "name": "Rubber Treasure",
+      "table": "Bizarre",
+      "roll": "78",
+      "desc": "Items, A collection of fake COINS, jewels, and baubles made of resin"
+    },
+    {
+      "name": "Deathbraid",
+      "table": "Bizarre",
+      "roll": "79",
+      "desc": "Weapon, A huge braid of hair that whips and moves like a WEAPON, MAGICAL"
+    },
+    {
+      "name": "Vortex in a Bottle",
+      "table": "Bizarre",
+      "roll": "80",
+      "desc": "Item, A powerful vortex in glass. If released, sucks everything FAR"
+    },
+    {
+      "name": "Larry",
+      "table": "Bizarre",
+      "roll": "81",
+      "desc": "Item, A small creature who owes you his life. It cannot be determined what he is"
+    },
+    {
+      "name": "Creepy Coconut",
+      "table": "Bizarre",
+      "roll": "82",
+      "desc": "Item, A hideous coconut that resembles a human face"
+    },
+    {
+      "name": "If playing in ALFHEIM",
+      "table": "Bizarre",
+      "roll": "83",
+      "desc": "roll once on the SCI FI LOOT TABLE"
+    },
+    {
+      "name": "If playing in WARP SHELL",
+      "table": "Bizarre",
+      "roll": "84",
+      "desc": "roll once on the ANCIENT LOOT TABLE"
+    },
+    {
+      "name": "God's Blood",
+      "table": "Bizarre",
+      "roll": "85",
+      "desc": "Food, 1 use, Increase any STAT by 2"
+    },
+    {
+      "name": "Wheel-mobile",
+      "table": "Bizarre",
+      "roll": "86",
+      "desc": "Vehicle, 1 CHUNK, A one-wheeled gadget that can hold up to 5 passengers"
+    },
+    {
+      "name": "Beard Birds",
+      "table": "Bizarre",
+      "roll": "87",
+      "desc": "Item, A family of birds that live in the nearest beard, but move to follow you"
+    },
+    {
+      "name": "Bees",
+      "table": "Bizarre",
+      "roll": "88",
+      "desc": "Bees. So many bees. Thousands of bees. These bees are mad"
+    },
+    {
+      "name": "Magnetic Plank",
+      "table": "Bizarre",
+      "roll": "89",
+      "desc": "Item, A plank of wood for building but with a +5 STR magnetic pull",
+      "effects": [
+        "+5 STR"
+      ]
+    },
+    {
+      "name": "The Best Tobacco Ever Known",
+      "table": "Bizarre",
+      "roll": "90",
+      "desc": "Food, 10 uses, Simply the best tobacco in the universe"
+    },
+    {
+      "name": "Limb Seed",
+      "table": "Bizarre",
+      "roll": "91",
+      "desc": "Food, 1 use, Apply to a severed limb or stump to grow a new limb in 1D4 days"
+    },
+    {
+      "name": "A Single Truth",
+      "table": "Bizarre",
+      "roll": "92",
+      "desc": "1 use, Tell or describe a single Truth, any Truth. It is now true"
+    },
+    {
+      "name": "Soul of a King",
+      "table": "Bizarre",
+      "roll": "93",
+      "desc": "Item, A glowing spark in glass. This is the everlasting soul of a long lost King"
+    },
+    {
+      "name": "Infinity Banner",
+      "table": "Bizarre",
+      "roll": "94",
+      "desc": "Item, A huge billowing flag which can display anything you choose"
+    },
+    {
+      "name": "Kelligan's Cube",
+      "table": "Bizarre",
+      "roll": "95",
+      "desc": "Item, A cubic puzzle. The cubes align in colors and symbols, bending reality"
+    },
+    {
+      "name": "Skin Suit",
+      "table": "Bizarre",
+      "roll": "96",
+      "desc": "Armor, A suit of hide that fits under your armor, granting you 10 disposable HP"
+    },
+    {
+      "name": "Wand of Genders",
+      "table": "Bizarre",
+      "roll": "97",
+      "desc": "Item, With a touch, change any creature's gender"
+    },
+    {
+      "name": "Cold Box",
+      "table": "Bizarre",
+      "roll": "98",
+      "desc": "Item, A small chest. Inside is always freezing cold"
+    },
+    {
+      "name": "Folding Road",
+      "table": "Bizarre",
+      "roll": "99",
+      "desc": "Item, Unfold 1 mile of wagon-width road at any location"
+    },
+    {
+      "name": "Roll twice on this TABLE",
+      "table": "Bizarre",
+      "roll": "100",
+      "desc": ""
+    },
+    {
+      "name": "Rattler Venom",
+      "table": "GhostMountain",
+      "roll": "1",
+      "desc": "FOOD, 5 uses, use as antidote OR poison"
+    },
+    {
+      "name": "Silver Crucifix",
+      "table": "GhostMountain",
+      "roll": "2",
+      "desc": "ITEM, take half damage from any supernatural entities that would harm you"
+    },
+    {
+      "name": "Jug o' Moonshine",
+      "table": "GhostMountain",
+      "roll": "3",
+      "desc": "FOOD, 10 uses, 1 swig gets you drunk, use as flammable or antiseptic"
+    },
+    {
+      "name": "Undertaker's Shovel",
+      "table": "GhostMountain",
+      "roll": "4",
+      "desc": "WEAPON, If you bring a target to 0 HP with this, it DIES instantly"
+    },
+    {
+      "name": "Saddle Blanket",
+      "table": "GhostMountain",
+      "roll": "5",
+      "desc": "DEFENSE +3, place on any animal, all rolls with that animal are EASY",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Fingerbone Bracelet",
+      "table": "GhostMountain",
+      "roll": "6",
+      "desc": "ITEM, rolls to control, destroy or resist SKELETONS are EASY"
+    },
+    {
+      "name": "Necklace of Seven Fangs",
+      "table": "GhostMountain",
+      "roll": "7",
+      "desc": "ITEM, If doing 5 or more damage with a KNIFE, roll damage again"
+    },
+    {
+      "name": "Hepawa Warbonnet",
+      "table": "GhostMountain",
+      "roll": "8",
+      "desc": "DEFENSE +1, a crown of feathers, +5 CHA when interacting with Hepawa",
+      "effects": [
+        "+1 DEF",
+        "+5 CHA"
+      ]
+    },
+    {
+      "name": "Hidden Pistol",
+      "table": "GhostMountain",
+      "roll": "9",
+      "desc": "WEAPON, 1 shot, 1 TURN reload, only used CLOSE, target rolls WIS to spot"
+    },
+    {
+      "name": "Silver Bullets",
+      "table": "GhostMountain",
+      "roll": "10",
+      "desc": "AMMO, MAGICAL, 6 count, Double damage against supernatural creatures"
+    },
+    {
+      "name": "Hungry Medallion",
+      "table": "GhostMountain",
+      "roll": "11",
+      "desc": "ITEM, Gain the maximum benefit of FOOD consumed"
+    },
+    {
+      "name": "Master Musket",
+      "table": "GhostMountain",
+      "roll": "12",
+      "desc": "WEAPON, ATTEMPT of 10+ do max damage, 2 SHOTS, 2 TURNS to reload"
+    },
+    {
+      "name": "Armored Duster",
+      "table": "GhostMountain",
+      "roll": "13",
+      "desc": "DEFENSE +3, Gunshots from FAR range only inflict 1 point of damage",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Piggin' Strings",
+      "table": "GhostMountain",
+      "roll": "14",
+      "desc": "ITEM, Any object, animal or person tied with these CANNOT shake loose"
+    },
+    {
+      "name": "Butter Rum Tobacco",
+      "table": "GhostMountain",
+      "roll": "15",
+      "desc": "FOOD, 3 uses, Ask the GM any question, get a true answer"
+    },
+    {
+      "name": "Canuska Bone Armor",
+      "table": "GhostMountain",
+      "roll": "16",
+      "desc": "DEFENSE +5, All rolls when interacting with the Canuska are EASY",
+      "effects": [
+        "+5 DEF"
+      ]
+    },
+    {
+      "name": "Black Skull",
+      "table": "GhostMountain",
+      "roll": "17",
+      "desc": "ITEM, No evil entity may come within NEAR of this powerful object"
+    },
+    {
+      "name": "Rusty Leg Irons",
+      "table": "GhostMountain",
+      "roll": "18",
+      "desc": "ITEM, Bind a person at the ankles, on a HARD STR roll, they can break free"
+    },
+    {
+      "name": "Iron Bolo",
+      "table": "GhostMountain",
+      "roll": "19",
+      "desc": "WEAPON, FAR, Targets hit rolls HARD DEX or falls prone, immobile for 1D4 ROUNDS"
+    },
+    {
+      "name": "Jawbone Club",
+      "table": "GhostMountain",
+      "roll": "20",
+      "desc": "WEAPON, MAGICAL, When struck, targets also lose 3 STR for 4 ROUNDS"
+    },
+    {
+      "name": "Viper Boots",
+      "table": "GhostMountain",
+      "roll": "21",
+      "desc": "DEFENSE +1, You cannot be poisoned, these boots are also fire and acid proof",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Gambler's Vest",
+      "table": "GhostMountain",
+      "roll": "22",
+      "desc": "ITEM, A vest with hidden pockets, EQUIP 15 pieces of GEAR, 5 secretly"
+    },
+    {
+      "name": "Obsidian Tomahawk",
+      "table": "GhostMountain",
+      "roll": "23",
+      "desc": "WEAPON, THROWN, Reroll DAMAGE dice below 5, take best result"
+    },
+    {
+      "name": "Antler Knives",
+      "table": "GhostMountain",
+      "roll": "24",
+      "desc": "WEAPON, MAGICAL, Do double EFFORT against animals, wood, or stone"
+    },
+    {
+      "name": "The Devil's Dice",
+      "table": "GhostMountain",
+      "roll": "25",
+      "desc": "ITEM, Reroll any 1 die once per TURN, Be compelled to do Lucifer's will"
+    },
+    {
+      "name": "Chemical Lantern",
+      "table": "GhostMountain",
+      "roll": "26",
+      "desc": "ITEM, A sulphur-magnesium lamp, illuminate up to double FAR"
+    },
+    {
+      "name": "Spyglass",
+      "table": "GhostMountain",
+      "roll": "27",
+      "desc": "ITEM, +3 WIS when rolling to scout, navigate or spot",
+      "effects": [
+        "+3 WIS"
+      ]
+    },
+    {
+      "name": "Cavalry Saber",
+      "table": "GhostMountain",
+      "roll": "28",
+      "desc": "WEAPON, RARE, Targets hit for 8 or more DAMAGE roll CON or fall to 0 HP"
+    },
+    {
+      "name": "Chloroform Flask",
+      "table": "GhostMountain",
+      "roll": "29",
+      "desc": "FOOD, 3 uses, Breathe this in to appear dead for 1D4 hours"
+    },
+    {
+      "name": "Bundle of TNT",
+      "table": "GhostMountain",
+      "roll": "30",
+      "desc": "EXPLOSIVE, 1D4 ROUND fuse, Inflict 4D12 damage to all NEAR"
+    },
+    {
+      "name": "Blacksmith's Friend",
+      "table": "GhostMountain",
+      "roll": "31",
+      "desc": "ITEM, All rolls when repairing, building, or using tools are EASY"
+    },
+    {
+      "name": "Lucky Horseshoe",
+      "table": "GhostMountain",
+      "roll": "32",
+      "desc": "ITEM, Any natural roll of 18+ counts as a CRITICAL success"
+    },
+    {
+      "name": "Red Eye Whiskey",
+      "table": "GhostMountain",
+      "roll": "33",
+      "desc": "FOOD, 5 uses, who knows what it'll do to ya"
+    },
+    {
+      "name": "Snake Oil",
+      "table": "GhostMountain",
+      "roll": "34",
+      "desc": "FOOD, 3 uses, cures any CONDITION"
+    },
+    {
+      "name": "Arcane Gun Kit",
+      "table": "GhostMountain",
+      "roll": "35",
+      "desc": "ITEM, Attach to 1 firearm, that gun is now MAGICAL"
+    },
+    {
+      "name": "Lucky Poker Chip",
+      "table": "GhostMountain",
+      "roll": "36",
+      "desc": "ITEM, When using cards, draw twice and take the better draw"
+    },
+    {
+      "name": "Cloth Bandage Kit",
+      "table": "GhostMountain",
+      "roll": "37",
+      "desc": "ITEM, Heal 1 HP when succeeding at \"don't die on me, man!\"",
+      "effects": [
+        "Heal 1 HP"
+      ]
+    },
+    {
+      "name": "Cactus Juice",
+      "table": "GhostMountain",
+      "roll": "38",
+      "desc": "FOOD, 5 uses, Replaces 1 day of SUPPLIES for a group of people"
+    },
+    {
+      "name": "Sawed-off Shotgun",
+      "table": "GhostMountain",
+      "roll": "39",
+      "desc": "See weapons list"
+    },
+    {
+      "name": "Death Mask",
+      "table": "GhostMountain",
+      "roll": "40",
+      "desc": "DEFENSE +2, Bronze shaped into a face, terrify townsfolk, 3 damage if removed",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Wolf Totem",
+      "table": "GhostMountain",
+      "roll": "41",
+      "desc": "ITEM, Wolves are drawn to you, and consider you one of their own"
+    },
+    {
+      "name": "Barbed Bullwhip",
+      "table": "GhostMountain",
+      "roll": "42",
+      "desc": "WEAPON, A working grappler bullwhip that also does WEAPON EFFORT"
+    },
+    {
+      "name": "Harpoon Gun",
+      "table": "GhostMountain",
+      "roll": "43",
+      "desc": "WEAPON, Functions as ELEPHANT RIFLE, grapples its target for 4 ROUNDS"
+    },
+    {
+      "name": "Ruby Ring",
+      "table": "GhostMountain",
+      "roll": "44",
+      "desc": "ITEM, Worth 2,000 COIN, Reveal to mesmerize or entrance the greedy"
+    },
+    {
+      "name": "Ebon Hemp Robe",
+      "table": "GhostMountain",
+      "roll": "45",
+      "desc": "ITEM, cannot be cut, burned, ripped or damaged in any way"
+    },
+    {
+      "name": "Ivory Broach",
+      "table": "GhostMountain",
+      "roll": "46",
+      "desc": "ITEM, An old portrait, Give to someone to bind them to one OATH forever"
+    },
+    {
+      "name": "Greensteel Katana",
+      "table": "GhostMountain",
+      "roll": "47",
+      "desc": "WEAPON, RARE, SHARP, Any foe killed grants you its SOUL"
+    },
+    {
+      "name": "Hangin' Judge's Gavel",
+      "table": "GhostMountain",
+      "roll": "48",
+      "desc": "ITEM, Point and slam, all those in sight see target as GUILTY"
+    },
+    {
+      "name": "Cossak Sash",
+      "table": "GhostMountain",
+      "roll": "49",
+      "desc": "ITEM, Be avoided by bandits, outlaws, and criminals who can see the sash"
+    },
+    {
+      "name": "Amulet of Azael",
+      "table": "GhostMountain",
+      "roll": "50",
+      "desc": "ITEM, IMMUNE to attacks from Azael, he knows your location"
+    },
+    {
+      "name": "Dazzling Sapphire",
+      "table": "GhostMountain",
+      "roll": "51",
+      "desc": "ITEM, Worth 10,000 COIN, Can be bartered for twice its value"
+    },
+    {
+      "name": "Devil's Pitchfork",
+      "table": "GhostMountain",
+      "roll": "52",
+      "desc": "WEAPON, MAGICAL, Spear, Can be consumed in flames on command"
+    },
+    {
+      "name": "Sharp Obsidian Shard",
+      "table": "GhostMountain",
+      "roll": "53",
+      "desc": "ITEM, Replace the blade on a WEAPON, becomes as deadly as a gun"
+    },
+    {
+      "name": "Bear Burgers",
+      "table": "GhostMountain",
+      "roll": "54",
+      "desc": "FOOD, 3 uses, +5 STR for 4 ROUNDS, Heal to full HP",
+      "effects": [
+        "+5 STR",
+        "Heal to full HP"
+      ]
+    },
+    {
+      "name": "Bar o' Lard",
+      "table": "GhostMountain",
+      "roll": "55",
+      "desc": "ITEM, Apply to any surface to make it super slick, flammable and waterproof"
+    },
+    {
+      "name": "Beacon of Hell",
+      "table": "GhostMountain",
+      "roll": "56",
+      "desc": "ITEM, All demons and infernals within 1 mile are drawn to it until put away"
+    },
+    {
+      "name": "Blowgun",
+      "table": "GhostMountain",
+      "roll": "57",
+      "desc": "WEAPON, SILENT, Includes 8 darts, POISON a target with no detection"
+    },
+    {
+      "name": "Range Rider's Trench Coat",
+      "table": "GhostMountain",
+      "roll": "58",
+      "desc": "DEFENSE +1, Use half SUPPLIES, All mounted rolls are EASY",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "True Skeleton Key",
+      "table": "GhostMountain",
+      "roll": "59",
+      "desc": "ITEM, Open ANY locked door"
+    },
+    {
+      "name": "Crossbones Eyepatch",
+      "table": "GhostMountain",
+      "roll": "60",
+      "desc": "ITEM, On command, you have limited X-RAY type vision to FAR"
+    },
+    {
+      "name": "Brawler's Gloves",
+      "table": "GhostMountain",
+      "roll": "61",
+      "desc": "WEAPON, Fight unarmed as if with a WEAPON, DEFENSE +3",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Golden Lariat",
+      "table": "GhostMountain",
+      "roll": "62",
+      "desc": "ITEM, MAGICAL, Any target grappled must tell the truth, immobilized"
+    },
+    {
+      "name": "Pouch of Gold Dust",
+      "table": "GhostMountain",
+      "roll": "63",
+      "desc": "ITEM, 1 Use, Sprinkle on any object to make it MAGICAL"
+    },
+    {
+      "name": "Bottle of Holy Water",
+      "table": "GhostMountain",
+      "roll": "64",
+      "desc": "FOOD, 3 uses, Sprinkle in a threshold, supernatural evil cannot pass"
+    },
+    {
+      "name": "Cane Sword",
+      "table": "GhostMountain",
+      "roll": "65",
+      "desc": "WEAPON, Requires a HARD WIS roll to spot"
+    },
+    {
+      "name": "Hexar Almanis",
+      "table": "GhostMountain",
+      "roll": "66",
+      "desc": "BOOK, A massive book of magic rites, Learn and cast 5 SPELLS of any type"
+    },
+    {
+      "name": "Smoke Bullets",
+      "table": "GhostMountain",
+      "roll": "67",
+      "desc": "AMMO, 12 count, These bullets will hit targets with the SMOKE condition"
+    },
+    {
+      "name": "Urn of Angels",
+      "table": "GhostMountain",
+      "roll": "68",
+      "desc": "ITEM, Burn a dead creature, place its ashes here, it will be reborn in 1D4 days"
+    },
+    {
+      "name": "Scrounger's Pack",
+      "table": "GhostMountain",
+      "roll": "69",
+      "desc": "ITEM, Make a WIS roll once per location, find an object you seek there"
+    },
+    {
+      "name": "Ring of Slayers",
+      "table": "GhostMountain",
+      "roll": "70",
+      "desc": "ITEM, On an attack roll of 15+ roll again, if 2nd roll hits, it does ULTIMATE"
+    },
+    {
+      "name": "Critter in Need",
+      "table": "GhostMountain",
+      "roll": "71",
+      "desc": "SPECIAL, You find a small animal that imprints on you as its best friend"
+    },
+    {
+      "name": "Diamond Whetstone",
+      "table": "GhostMountain",
+      "roll": "72",
+      "desc": "ITEM, Sharpen a bladed WEAPON, that WEAPON is +3 EFFORT",
+      "effects": [
+        "+3 EFFORT"
+      ]
+    },
+    {
+      "name": "Spiral Locket",
+      "table": "GhostMountain",
+      "roll": "75",
+      "desc": "ITEM, EFFORT done with HOLY SPELLS is +3"
+    },
+    {
+      "name": "Signet of the Righteous",
+      "table": "GhostMountain",
+      "roll": "76",
+      "desc": "ITEM, Earns you membership of the elite gunslinger cult"
+    },
+    {
+      "name": "Ezra's Wedding Band",
+      "table": "GhostMountain",
+      "roll": "77",
+      "desc": "ITEM, Ezra's ghost haunts you for all time, roll a natural 20 to remove"
+    },
+    {
+      "name": "Dagger of Ruins",
+      "table": "GhostMountain",
+      "roll": "78",
+      "desc": "WEAPON, Does TRIPLE ULTIMATE against structures, doors, or vehicles"
+    },
+    {
+      "name": "Staff of Spirits",
+      "table": "GhostMountain",
+      "roll": "79",
+      "desc": "ITEM, MAGICAL, Learn and cast any 5 WIS SpellS"
+    },
+    {
+      "name": "Ghost Drum",
+      "table": "GhostMountain",
+      "roll": "80",
+      "desc": "INSTRUMENT, MAGICAL, Supernatural entities are terrified of this sound"
+    },
+    {
+      "name": "Bag o' Money",
+      "table": "GhostMountain",
+      "roll": "81",
+      "desc": "ITEM, Contains 5d10 x 1,000 COIN in bonds, cash and gold"
+    },
+    {
+      "name": "Blue Cactus Peaches",
+      "table": "GhostMountain",
+      "roll": "82",
+      "desc": "FOOD, 2 uses, Heal 1D12 HP, Cure all CONDITIONS",
+      "effects": [
+        "Heal 1D12 HP"
+      ]
+    },
+    {
+      "name": "Black Spade Revolver",
+      "table": "GhostMountain",
+      "roll": "83",
+      "desc": "WEAPON, MAGICAL, Never needs AMMO"
+    },
+    {
+      "name": "Raven's Claw",
+      "table": "GhostMountain",
+      "roll": "84",
+      "desc": "ITEM, Shapeshiti into a raven with a WIS roll, stay as long as you choose"
+    },
+    {
+      "name": "Bullet Arrows",
+      "table": "GhostMountain",
+      "roll": "85",
+      "desc": "AMMO, 20 count, Use firearm rules when firing with a bow"
+    },
+    {
+      "name": "Demon Deck",
+      "table": "GhostMountain",
+      "roll": "86",
+      "desc": "ITEM, Replaces a Gambler's Deck, Treat every card as if it were one card better"
+    },
+    {
+      "name": "Devil's Deck",
+      "table": "GhostMountain",
+      "roll": "87",
+      "desc": "ITEM, Replaces Gambler's Deck, Re draw on any non-face card"
+    },
+    {
+      "name": "Turban of Futures",
+      "table": "GhostMountain",
+      "roll": "88",
+      "desc": "ITEM, With a HARD INT roll, see into a specific future"
+    },
+    {
+      "name": "Golden Mattock",
+      "table": "GhostMountain",
+      "roll": "89",
+      "desc": "ITEM, Roll WIS underground, find a YOG splinter, gold nugget, or tunnel"
+    },
+    {
+      "name": "Azael's Cleaver",
+      "table": "GhostMountain",
+      "roll": "90",
+      "desc": "WEAPON, MAGICAL, When you hit a target, they roll CON or drop to 0 HP"
+    },
+    {
+      "name": "Chest of Wonders",
+      "table": "GhostMountain",
+      "roll": "91",
+      "desc": "CHEST, Take 3 total LOOT rolls, These can be rolled on any TABLE"
+    },
+    {
+      "name": "Owl Headdress",
+      "table": "GhostMountain",
+      "roll": "92",
+      "desc": "DEFENSE +5, You cannot be harmed by bladed WEAPONS",
+      "effects": [
+        "+5 DEF"
+      ]
+    },
+    {
+      "name": "Chain Claw",
+      "table": "GhostMountain",
+      "roll": "93",
+      "desc": "ITEM, With a DEX roll, fly to any FAR point instantly"
+    },
+    {
+      "name": "Dr. Warstein's Amazing Machine",
+      "table": "GhostMountain",
+      "roll": "94",
+      "desc": "ITEM, this machine takes a form designated by the GM"
+    },
+    {
+      "name": "Ghost Gun",
+      "table": "GhostMountain",
+      "roll": "95",
+      "desc": "WEAPON, MAGICAL, This pistol cannot miss and never needs to be reloaded"
+    },
+    {
+      "name": "Lightning Coil",
+      "table": "GhostMountain",
+      "roll": "96",
+      "desc": "ITEM, Use lever, 1D4 ROUNDS everything within FAR takes 3D12 damage"
+    },
+    {
+      "name": "Cross of Santiago",
+      "table": "GhostMountain",
+      "roll": "97",
+      "desc": "ITEM, INFERNAL SPELLS cannot harm you"
+    },
+    {
+      "name": "Gueras Malefectorum",
+      "table": "GhostMountain",
+      "roll": "98",
+      "desc": "BOOK, Melee attacks on Infernals are CRITICAL and MAGICAL"
+    },
+    {
+      "name": "Ghost Bullets",
+      "table": "GhostMountain",
+      "roll": "99",
+      "desc": "ITEM, 20 count, Shoot these through any material up to FAR"
+    },
+    {
+      "name": "Ring of Falling Stars",
+      "table": "GhostMountain",
+      "roll": "100",
+      "desc": "ITEM, Make a wish. It will come to be. There may be consequences"
+    },
+    {
+      "name": "Walking Stick",
+      "table": "Magic",
+      "roll": "1",
+      "desc": "Item, Move FAR and still take an action"
+    },
+    {
+      "name": "Spell Mirror",
+      "table": "Magic",
+      "roll": "2",
+      "desc": "Item, Reflect a SPELL cast against you in a random direction with an INT roll"
+    },
+    {
+      "name": "Crown of Eye",
+      "table": "Magic",
+      "roll": "3",
+      "desc": "+1 DEFENSE, The wearer of this refractive band cannot be surprised",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Manual of Persuasion",
+      "table": "Magic",
+      "roll": "4",
+      "desc": "Tool, +3 CHA to any ATTEMPT utilizing language or speech",
+      "effects": [
+        "+3 CHA"
+      ]
+    },
+    {
+      "name": "Blood Pebble",
+      "table": "Magic",
+      "roll": "5",
+      "desc": "Item, Cast rolls HARD, if you succeed, pay 1 level less than its POWER COST"
+    },
+    {
+      "name": "Nightbringer",
+      "table": "Magic",
+      "roll": "6",
+      "desc": "Dagger, Any victim injured by this MAGICAL blade is blinded for 1D4 ROUNDS"
+    },
+    {
+      "name": "Doomsayer Snare",
+      "table": "Magic",
+      "roll": "7",
+      "desc": "Trap, Tripped with common wire, Release APOCALYPTICA at POWER 4"
+    },
+    {
+      "name": "Ice Dagger",
+      "table": "Magic",
+      "roll": "8",
+      "desc": "Kris Knife, If injured with 6+ damage with this blade, frozen solid for 1D4 ROUNDS"
+    },
+    {
+      "name": "Red Tinted Glasses",
+      "table": "Magic",
+      "roll": "9",
+      "desc": "Item, If you see a primary red object, ignite that object with an INT roll"
+    },
+    {
+      "name": "Gyroscope of Falling",
+      "table": "Magic",
+      "roll": "10",
+      "desc": "Item, When falling roll CON to change your gravity field for 1 ROUND"
+    },
+    {
+      "name": "Shards of Ka'a",
+      "table": "Magic",
+      "roll": "11",
+      "desc": "3 Arrowheads, An arrowhead that explodes for DOUBLE ULTIMATE on impact"
+    },
+    {
+      "name": "Proto Artifact",
+      "table": "Magic",
+      "roll": "12",
+      "desc": "Item, 2 Uses, Reach into this strange object and withdraw 1 random LOOT"
+    },
+    {
+      "name": "Critter Cloak",
+      "table": "Magic",
+      "roll": "13",
+      "desc": "+2 DEFENSE, Become a small animal, +5 DEX, remain or return at will",
+      "effects": [
+        "+2 DEF",
+        "+5 DEX"
+      ]
+    },
+    {
+      "name": "The DawnStorm",
+      "table": "Magic",
+      "roll": "14",
+      "desc": "Staff, Use DEX to cast any ranged attack SPELL at POWER 1 for 2 SP cost"
+    },
+    {
+      "name": "Flute of Forgetting",
+      "table": "Magic",
+      "roll": "15",
+      "desc": "Instrument, Play a tune, listeners forget where they are for 1D4 ROUNDS"
+    },
+    {
+      "name": "Zeke's Wooden Slippers",
+      "table": "Magic",
+      "roll": "16",
+      "desc": "+1 DEFENSE, Comfy, always add an extra +3 to your RECOVERY rolls",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Doorway Chalk",
+      "table": "Magic",
+      "roll": "17",
+      "desc": "Item, 3 uses, Draw a doorway, it leads to another door... anywhere"
+    },
+    {
+      "name": "Mirror Prison",
+      "table": "Magic",
+      "roll": "18",
+      "desc": "Item, Trap, See your reflection and be imprisoned for 1D4 ROUNDS"
+    },
+    {
+      "name": "Spell Stealer Gloves",
+      "table": "Magic",
+      "roll": "19",
+      "desc": "+2 DEFENSE, With a DEX roll steal a SPELL cast on you last ROUND",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Presto's Hat",
+      "table": "Magic",
+      "roll": "20",
+      "desc": "+2 DEFENSE, Once per location, pull out a BIZARRE LOOT roll",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Jar of Flame Pixies",
+      "table": "Magic",
+      "roll": "21",
+      "desc": "Item, 10 Pixies, fast-flying fireballs with 1 HP that fight for you"
+    },
+    {
+      "name": "Wand of Disarming",
+      "table": "Magic",
+      "roll": "22",
+      "desc": "Wand, Blast an enemy you see with DEX to send their WEAPON flying"
+    },
+    {
+      "name": "Dragonslayer",
+      "table": "Magic",
+      "roll": "23",
+      "desc": "Spear, NEAR reach, ULTIMATE, damage of natural 8+ explode vs. dragons"
+    },
+    {
+      "name": "Phylactery",
+      "table": "Magic",
+      "roll": "24",
+      "desc": "SPELL, Store your immortal soul in a small object. If object intact, you cannot die"
+    },
+    {
+      "name": "Garland's Ear",
+      "table": "Magic",
+      "roll": "25",
+      "desc": "Item, A golden ear horn that allows you to hear EVERYTHING within 1 mile"
+    },
+    {
+      "name": "Fabric of Shadows",
+      "table": "Magic",
+      "roll": "26",
+      "desc": "+2 DEFENSE, Create a garment. INT roll, become perfectly flat, any color",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Dragon Fireworks",
+      "table": "Magic",
+      "roll": "27",
+      "desc": "Item, 5 Uses, Amaze a village of folk into awe or gleeful excitement"
+    },
+    {
+      "name": "Ghost Chess",
+      "table": "Magic",
+      "roll": "28",
+      "desc": "SPELL, Control 1D6 enemies as if they were pieces on a board for 1D4 ROUNDS"
+    },
+    {
+      "name": "Sphere of Projectiles",
+      "table": "Magic",
+      "roll": "29",
+      "desc": "SPELL, Create a crystal sphere. Projectiles attracted for 1D6 ROUNDS"
+    },
+    {
+      "name": "Potioner's Kit",
+      "table": "Magic",
+      "roll": "30",
+      "desc": "Tools, Make potions with a single RARE INGREDIENT rather than 3"
+    },
+    {
+      "name": "Ingara's Luck Ring",
+      "table": "Magic",
+      "roll": "31",
+      "desc": "Item, 6 Uses, Turn a failed roll into a success"
+    },
+    {
+      "name": "Herald's Trumpet",
+      "table": "Magic",
+      "roll": "32",
+      "desc": "Item, 2 Uses, Summon an Angel to fight on your side for 1D4 ROUND"
+    },
+    {
+      "name": "Stick of Stickery",
+      "table": "Magic",
+      "roll": "33",
+      "desc": "Staff, Turn any object into solid wood for 1D4 ROUNDS"
+    },
+    {
+      "name": "Kaleido Arcanum",
+      "table": "Magic",
+      "roll": "34",
+      "desc": "Book, Pages align in cosmic ways. Answer any question about color"
+    },
+    {
+      "name": "Scroll of Shame",
+      "table": "Magic",
+      "roll": "35",
+      "desc": "Scroll, A creature you see becomes instantly dumbstruck and embarrassed"
+    },
+    {
+      "name": "Crystal Symbiote",
+      "table": "Magic",
+      "roll": "36",
+      "desc": "Item, +8 DEFENSE, A Green crystal that hovers CLOSE to intercept attacks",
+      "effects": [
+        "+8 DEF"
+      ]
+    },
+    {
+      "name": "Dial of Stretching",
+      "table": "Magic",
+      "roll": "37",
+      "desc": "Item, Turn this dial and stretch a target you see twice its length"
+    },
+    {
+      "name": "Amulet of Dragons",
+      "table": "Magic",
+      "roll": "38",
+      "desc": "+1 DEFENSE, No dragon can harm you while wearing this talisman",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Garland's Amulet",
+      "table": "Magic",
+      "roll": "39",
+      "desc": "Item, For a roll where you don't get a bonus, get +2 to that roll instead"
+    },
+    {
+      "name": "Mana Root",
+      "table": "Magic",
+      "roll": "40",
+      "desc": "Food, 3 uses, Consume to grant 10 HP usable only to absorb SPELL casting COST"
+    },
+    {
+      "name": "Clockworks",
+      "table": "Magic",
+      "roll": "41",
+      "desc": "Item, Use healing magic on mechanical beings as if they were alive"
+    },
+    {
+      "name": "Wicker Mushroom Kreel",
+      "table": "Magic",
+      "roll": "42",
+      "desc": "Item, Contains 15 RARE INGREDIENTS"
+    },
+    {
+      "name": "Ghost Candle",
+      "table": "Magic",
+      "roll": "43",
+      "desc": "Item, 5 uses, Light this candle to attract and reveal GHOSTS within 1 mile"
+    },
+    {
+      "name": "Olfan's Hymnal Hurdy Gurdy",
+      "table": "Magic",
+      "roll": "44",
+      "desc": "Instrument, Cast any SPELLS that boost allies at no COST"
+    },
+    {
+      "name": "Lasher Tooth",
+      "table": "Magic",
+      "roll": "45",
+      "desc": "Item, You are always partly phased, any roll to evade an attack is always EASY"
+    },
+    {
+      "name": "Breathing Bell",
+      "table": "Magic",
+      "roll": "46",
+      "desc": "Item, A diving bell that allows 3 people to breathe in any airless environment"
+    },
+    {
+      "name": "Star of Aras",
+      "table": "Magic",
+      "roll": "47",
+      "desc": "Weapon, A glaive that damages multiple enemies and returns"
+    },
+    {
+      "name": "Witch's Skull",
+      "table": "Magic",
+      "roll": "48",
+      "desc": "Item, Reveal it's face to unleash a terrifying scream, Roll CHA to resist the fear"
+    },
+    {
+      "name": "Krellian Chain Mace",
+      "table": "Magic",
+      "roll": "49",
+      "desc": "Weapon, A massive spiked ball on 8 feet of chain, +6 WEAPON EFFORT",
+      "effects": [
+        "+6 WEAPON EFFORT"
+      ]
+    },
+    {
+      "name": "Gnomish Brain Stick",
+      "table": "Magic",
+      "roll": "50",
+      "desc": "Wand, Alter your voice, lighting, and noises to bewilder those who see"
+    },
+    {
+      "name": "Rod of Rot",
+      "table": "Magic",
+      "roll": "51",
+      "desc": "Wand, Plague a structure with moss, mold, and decay. Collapses in 1D4 days"
+    },
+    {
+      "name": "Dead Sword",
+      "table": "Magic",
+      "roll": "52",
+      "desc": "MAGICAL, Ghosts, specters, and wraiths follow your commands, still hate you"
+    },
+    {
+      "name": "Blood of an Archfiend",
+      "table": "Magic",
+      "roll": "53",
+      "desc": "12 RARE INGREDIENTS that can be used to make POTIONS"
+    },
+    {
+      "name": "Iradrum Shield Machine",
+      "table": "Magic",
+      "roll": "54",
+      "desc": "Item, A sentient shield. Absorbs 20 damage per location"
+    },
+    {
+      "name": "Necklace of Tides",
+      "table": "Magic",
+      "roll": "55",
+      "desc": "Item, Call a massive wave or rapids to your location with a CHA roll"
+    },
+    {
+      "name": "Boots of Wall Running",
+      "table": "Magic",
+      "roll": "56",
+      "desc": "+4 DEFENSE, Use a vertical surface for movement, when moving FAR",
+      "effects": [
+        "+4 DEF"
+      ]
+    },
+    {
+      "name": "Globe of Blades",
+      "table": "Magic",
+      "roll": "57",
+      "desc": "Item, You are surrounded by hovering knives, Attackers take WEAPON dmg"
+    },
+    {
+      "name": "Alacar's Ink",
+      "table": "Magic",
+      "roll": "58",
+      "desc": "Item, 3 uses, Draw anything, it becomes real in every way for 2D4 ROUNDS"
+    },
+    {
+      "name": "Robe of Many Pockets",
+      "table": "Magic",
+      "roll": "59",
+      "desc": "+2 DEFENSE, Magical LOOT takes no space in your inventory",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Fire Caltrops",
+      "table": "Magic",
+      "roll": "60",
+      "desc": "Item, 3 uses, Scatter spikes ignite anything that touches them, then burn away"
+    },
+    {
+      "name": "Spore Sentry",
+      "table": "Magic",
+      "roll": "61",
+      "desc": "Creature, Mykonoid warrior who can't move, but fight with a spear, speaks"
+    },
+    {
+      "name": "Demon Powder",
+      "table": "Magic",
+      "roll": "62",
+      "desc": "Item, 5 uses, Ignite this flammable dust to conjure a DEMON instantly"
+    },
+    {
+      "name": "Collar of Balthus",
+      "table": "Magic",
+      "roll": "63",
+      "desc": "+5 DEFENSE, A locking neck ring which binds its wearer to obey you",
+      "effects": [
+        "+5 DEF"
+      ]
+    },
+    {
+      "name": "Vestments of Mastery",
+      "table": "Magic",
+      "roll": "64",
+      "desc": "+5 DEFENSE, Gain 3 MASTERY in any SPELL TYPE as long as you wear",
+      "effects": [
+        "+5 DEF"
+      ]
+    },
+    {
+      "name": "Ankh of Sett",
+      "table": "Magic",
+      "roll": "65",
+      "desc": "Item, If you roll a natural 20 to pop up from DYING, return to life with full HP"
+    },
+    {
+      "name": "Dwarven War Anvil",
+      "table": "Magic",
+      "roll": "66",
+      "desc": "Item, A wheeled anvil and tools, Create any metal item with STR"
+    },
+    {
+      "name": "Antoine's Quill",
+      "table": "Magic",
+      "roll": "67",
+      "desc": "Item, Write any SPELL you know on parchment for anyone to cast once"
+    },
+    {
+      "name": "Javelin Bridge",
+      "table": "Magic",
+      "roll": "68",
+      "desc": "Weapon, Throw to form a 30' bridge 6' wide, collapse with a command"
+    },
+    {
+      "name": "Libram of Gum",
+      "table": "Magic",
+      "roll": "69",
+      "desc": "Book, Set as a trap. If read, reader is stuck in that spot for 1D8 ROUNDS"
+    },
+    {
+      "name": "Cloak of Embers",
+      "table": "Magic",
+      "roll": "70",
+      "desc": "+4 DEFENSE, Cast any SPELL that uses fire at no cost",
+      "effects": [
+        "+4 DEF"
+      ]
+    },
+    {
+      "name": "Arcane Fuse",
+      "table": "Magic",
+      "roll": "71",
+      "desc": "Item, 5 Uses, SPELLS cast on this thin cord take effect in 1D4 ROUNDS"
+    },
+    {
+      "name": "Heavy Water Vial",
+      "table": "Magic",
+      "roll": "72",
+      "desc": "Item, Use your HEALING TOUCH SPELL to create bottled healing POTIONS"
+    },
+    {
+      "name": "Ring of Resolve",
+      "table": "Magic",
+      "roll": "73",
+      "desc": "+3 DEFENSE, Ignore any attack against you of 5 or less",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Wigglers",
+      "table": "Magic",
+      "roll": "74",
+      "desc": "Food, 10 uses, Pupae of pine toad, Eat with CON roll for full HP, if failing gain 1 HP"
+    },
+    {
+      "name": "Faber Infinitum",
+      "table": "Magic",
+      "roll": "75",
+      "desc": "Book, Read with an INT roll and gain floorplans on your current location"
+    },
+    {
+      "name": "Minish Cap",
+      "table": "Magic",
+      "roll": "76",
+      "desc": "+3 DEFENSE, A wide-brimmed wizard's hat, pockets, you have no inventory limit",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Ring of Gehenna",
+      "table": "Magic",
+      "roll": "77",
+      "desc": "Item, +1 all STATS, Summon a doorway to The Arcane Library",
+      "effects": [
+        "+1 all STATS"
+      ]
+    },
+    {
+      "name": "Book of Commonalities",
+      "table": "Magic",
+      "roll": "78",
+      "desc": "Book, When awarded MASTERY by the GM, apply it to any TYPE"
+    },
+    {
+      "name": "Libram Mortiferum",
+      "table": "Magic",
+      "roll": "79",
+      "desc": "Book, The methods of death. Any victim you reduce to 5 HP drops to 0"
+    },
+    {
+      "name": "Skolari's Almanac",
+      "table": "Magic",
+      "roll": "80",
+      "desc": "Book, PORTALS stay open 1 extra ROUND for you"
+    },
+    {
+      "name": "Tobin's Spirit Guide",
+      "table": "Magic",
+      "roll": "81",
+      "desc": "Book, Know the details of any monster you encounter with an INT roll"
+    },
+    {
+      "name": "Tome of Timelines",
+      "table": "Magic",
+      "roll": "82",
+      "desc": "Book, Retain knowledge of alternate times no matter what"
+    },
+    {
+      "name": "Skull of Vincent Aligeeri",
+      "table": "Magic",
+      "roll": "83",
+      "desc": "Item, A ventriloquist skull functions as your voice from any distance"
+    },
+    {
+      "name": "Render",
+      "table": "Magic",
+      "roll": "84",
+      "desc": "Great Sword, ULTIMATE, The damage done with this weapon also affects DEFENSE"
+    },
+    {
+      "name": "Il-Zah'red",
+      "table": "Magic",
+      "roll": "85",
+      "desc": "Scimitar, Magical, A weapon, so perfect, so sharp, you attack with no roll"
+    },
+    {
+      "name": "Myre Manuscript",
+      "table": "Magic",
+      "roll": "86",
+      "desc": "Book, Gain all the abilities and properties of a Brain Horror"
+    },
+    {
+      "name": "Scroll of Finding",
+      "table": "Magic",
+      "roll": "87",
+      "desc": "Item, 1 Use, Looking for something? Destroy this scroll and find it instantly"
+    },
+    {
+      "name": "Windchaser",
+      "table": "Magic",
+      "roll": "88",
+      "desc": "Vehicle, Miniature boat grows to full size instantly, 20 SUPPLY, holds 8 crew"
+    },
+    {
+      "name": "Olfan's Dousing Fork",
+      "table": "Magic",
+      "roll": "89",
+      "desc": "Item, Roll INT to find 1D6 RARE INGREDIENTS anywhere"
+    },
+    {
+      "name": "Oil of Redemption",
+      "table": "Magic",
+      "roll": "90",
+      "desc": "Food, 3 uses, Evil creatures that consume this become good"
+    },
+    {
+      "name": "Tube of Scrolls",
+      "table": "Magic",
+      "roll": "91",
+      "desc": "Item, A tube of 5 SPELL SCROLLS, the GM will select what SPELLS"
+    },
+    {
+      "name": "Littleton Township",
+      "table": "Magic",
+      "roll": "92",
+      "desc": "Item, A tiny town of 500 folk, all contained in a glass bottle"
+    },
+    {
+      "name": "Bone Collector's Case",
+      "table": "Magic",
+      "roll": "93",
+      "desc": "Luggage, Burn bones instead of your SP as COST, includes 16 bones"
+    },
+    {
+      "name": "Ironbrand",
+      "table": "Magic",
+      "roll": "94",
+      "desc": "Shield, +8 DEFENSE, Allies CLOSE to you also gain this DEFENSE bonus",
+      "effects": [
+        "+8 DEF"
+      ]
+    },
+    {
+      "name": "Hoodria Petrificatum",
+      "table": "Magic",
+      "roll": "95",
+      "desc": "+4 DEFENSE, Pull the hood up on this cloak and become solid stone",
+      "effects": [
+        "+4 DEF"
+      ]
+    },
+    {
+      "name": "Crystal Scatter Prism",
+      "table": "Magic",
+      "roll": "96",
+      "desc": "Item, Refract any SPELL, it is tripled in whatever way you devise"
+    },
+    {
+      "name": "Proto Matter",
+      "table": "Magic",
+      "roll": "97",
+      "desc": "Substance, 1 use, Form this blob of goo into any ITEM on any LOOT TABLE"
+    },
+    {
+      "name": "Spellstar",
+      "table": "Magic",
+      "roll": "98",
+      "desc": "Item, When you BURN a SPELL, pay no COST and regenerate the SPELL"
+    },
+    {
+      "name": "Zeke's Magnificent Entitizer",
+      "table": "Magic",
+      "roll": "99",
+      "desc": "Item, Grant any creature the power to phase for 1D8 days"
+    },
+    {
+      "name": "Ring of Power",
+      "table": "Magic",
+      "roll": "100",
+      "desc": "+5 DEFENSE, +2 STATS, Leave no footprints, Cast all Level I SPELLS at no cost",
+      "effects": [
+        "+5 DEF",
+        "+2 all STATS"
+      ]
+    }
+  ],
+  "gear": [
+    {
+      "name": "Adventurer's Pack",
+      "world": "alfheim",
+      "category": "gear",
+      "desc": "A well-worn rucksack with a torch, bedroll, scrap of jerky, apple, pipe, and rope."
+    },
+    {
+      "name": "Miner's Pack",
+      "world": "alfheim",
+      "category": "gear",
+      "desc": "Pick hammer, lantern, fire-starting oil and flint, compass, and breather mask in a heavy canvas pack."
+    },
+    {
+      "name": "Polar Pack",
+      "world": "alfheim",
+      "category": "gear",
+      "desc": "A fur-lined pack built into a warm sealskin cloak; holds a fire pot, fur mittens, snowblind goggles, ski poles, boots and rope."
+    },
+    {
+      "name": "Fisherman's Satchel",
+      "world": "alfheim",
+      "category": "gear",
+      "desc": "Mesh creel, two fishing poles, tackle box, fillet knife, basket snare, swim fins and a glass diving mask."
+    },
+    {
+      "name": "Mender's Toolbox",
+      "world": "alfheim",
+      "category": "tool",
+      "desc": "Hammer and pliers, rivets, scrap steel, leather strips, spare buckles and iron nails for armor or boat repair."
+    },
+    {
+      "name": "Healer's Case",
+      "world": "alfheim",
+      "category": "tool",
+      "desc": "A kit of bandages, tinctures and serums. Heal 1 HP on an ally with an INT or WIS roll. Includes bottles, scalpel, and anti-venom.",
+      "effects": [
+        "Heal 1 HP"
+      ]
+    },
+    {
+      "name": "Climbing Gear",
+      "world": "alfheim",
+      "category": "gear",
+      "desc": "Grapple hooks, extreme rope, steel belt clips, 2 pairs of boot crampons, iron spikes and hammer worn over one shoulder."
+    },
+    {
+      "name": "Mixed Armor Garb",
+      "world": "alfheim",
+      "category": "armor",
+      "desc": "A mix of padded gambeson, leather belts, and armor odds & ends, common garb for adventurers. +2 DEFENSE.",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Heavy Plate and Chain Armor",
+      "world": "alfheim",
+      "category": "armor",
+      "desc": "A cumbersome set of steel plates, chainmail, and steel boots for heavy combat. +4 DEFENSE, but DEX rolls are always HARD.",
+      "effects": [
+        "+4 DEF",
+        "DEX rolls HARD"
+      ]
+    },
+    {
+      "name": "Common Shield",
+      "world": "alfheim",
+      "category": "armor",
+      "desc": "A round wooden shield and strap suited for travel on foot. +2 DEFENSE. If hit, sacrifice the shield to absorb all of any 1 attack.",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Iron Shield",
+      "world": "alfheim",
+      "category": "armor",
+      "desc": "A heavy steel shield with iron bands. +3 DEFENSE. Occupies 2 inventory spaces and you cannot use one hand while using it.",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Traveler's Garb",
+      "world": "alfheim",
+      "category": "armor",
+      "desc": "A lighter, more comfortable set of clothes. Only +1 DEFENSE, but includes 2 extra inventory spaces.",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Sword and Scabbard",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A trusty blade of whatever size or make suits your training, with leather sheath, belts, and sharpening kit."
+    },
+    {
+      "name": "Battle Axe and Harness",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A huge chopping weapon of one or two blades. Damages timbers or structures but is impossible to conceal."
+    },
+    {
+      "name": "Spearman's Kit",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A ten-foot oak shaft with swappable blade tip (hook, spearhead, or glaive). Can attack targets up to NEAR range."
+    },
+    {
+      "name": "Bow and Quiver",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A recurve bow, short for small spaces or long for outdoor use. Quiver empties on attack rolls of natural 1."
+    },
+    {
+      "name": "Crossbow and Bolt Kit",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A powerful mechanical weapon. Critical hits on natural 19 or 20. The bolt kit allows incendiary, smoke, or flare tips."
+    },
+    {
+      "name": "Warhammer",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A hefty, blocky weapon for smashing. Hits of 5-10 damage destroy 1 point of enemy DEFENSE; 10+ also stuns the target for 1 ROUND."
+    },
+    {
+      "name": "Great Sword",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A tremendous two-handed blade 5 feet long. Occupies 3 inventory spaces, but always inflicts ULTIMATE damage.",
+      "effects": [
+        "ULTIMATE damage"
+      ]
+    },
+    {
+      "name": "Knife Belt",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A sling holding up to 8 daggers and throwing knives in concealed scabbards, one with a poison-protective sheath."
+    },
+    {
+      "name": "Knight's Weapon Kit",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A heavy black belt with a spiked mace and chain flail on steel rings. Used against shields, degrades DEFENSE by 1 on each hit."
+    },
+    {
+      "name": "Quarter Staff and Wraps",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "A fire-tempered wooden walking staff 4 feet long, with fist-wraps for unarmed fighters."
+    },
+    {
+      "name": "Exotic Weaponry",
+      "world": "alfheim",
+      "category": "weapon",
+      "desc": "Strange weapons from far lands: chain whips, nunchaku, segment staff, and sword-of-rings. Work with your GM."
+    },
+    {
+      "name": "Maps",
+      "world": "alfheim",
+      "category": "tool",
+      "desc": "A wooden tube of regional maps and location plan views. Roll INT to check for a useful map once per location."
+    },
+    {
+      "name": "Scan Unit",
+      "world": "warpshell",
+      "category": "tool",
+      "desc": "A compact scanner and electronics unit. Use 1 TURN to run a scan, reducing the current TARGET by 1.",
+      "effects": [
+        "-1 TARGET"
+      ]
+    },
+    {
+      "name": "Away Team Pack",
+      "world": "warpshell",
+      "category": "gear",
+      "desc": "Belt pouch with hand lamp, micro cutting torch, reel of cable, leak sealant slap-patch, 10-minute air canister, and locator beacon."
+    },
+    {
+      "name": "Salvage Kit",
+      "world": "warpshell",
+      "category": "gear",
+      "desc": "A deep-space retrieval backpack: heavy winch grappler, heavy cutting torch, 2 magnet anchors, pick hammer, 2 magnetic flood lights."
+    },
+    {
+      "name": "Xeno Response Pack",
+      "world": "warpshell",
+      "category": "tool",
+      "desc": "Tools for collecting and analyzing biological specimens: collapsible clear tube, respirator, dissection kit, sample vials."
+    },
+    {
+      "name": "Medical Kit",
+      "world": "warpshell",
+      "category": "tool",
+      "desc": "Emergency first aid with bandages and antidotes. Roll WIS or INT to heal an ally for 1 HP. On a natural 1, the kit is empty.",
+      "effects": [
+        "Heal 1 HP"
+      ]
+    },
+    {
+      "name": "Vac Suit",
+      "world": "warpshell",
+      "category": "armor",
+      "desc": "Nanotech that integrates into any clothing for deep-space operation, with energy helmet, gloves, and x-wave radio. +1 DEFENSE.",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Hard Suit",
+      "world": "warpshell",
+      "category": "armor",
+      "desc": "A vac suit with an armored exterior for dangerous space work. +3 DEFENSE. DEX rolls are never EASY; stealth only succeeds on natural 20.",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Link Armor",
+      "world": "warpshell",
+      "category": "armor",
+      "desc": "A light reinforcement to any clothing made from tiny links of nonmetallic ceramic material. +1 DEFENSE.",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Plasteel Armor",
+      "world": "warpshell",
+      "category": "armor",
+      "desc": "Heavy armor plating that ignores any attack of 2 or less damage, but its bulk makes DEX rolls always HARD. +3 DEFENSE.",
+      "effects": [
+        "+3 DEF",
+        "DEX rolls HARD"
+      ]
+    },
+    {
+      "name": "Energy Shield",
+      "world": "warpshell",
+      "category": "armor",
+      "desc": "A wrist unit that emits a glowing round force shield. +2 DEFENSE. DEFENSE rolls against energy weapons are EASY.",
+      "effects": [
+        "+2 DEF"
+      ]
+    },
+    {
+      "name": "Vibro Blade",
+      "world": "warpshell",
+      "category": "weapon",
+      "desc": "A duranium blade with vibrating nano-blades. Critical success on natural 19 or 20, and unbreakable by physical means."
+    },
+    {
+      "name": "Energy Blade",
+      "world": "warpshell",
+      "category": "weapon",
+      "desc": "An elegant weapon from a civilized time. Does ENERGY damage. On a natural 1, the weightless blade cuts its user for 1 HP.",
+      "effects": [
+        "ENERGY damage"
+      ]
+    },
+    {
+      "name": "Pulse Rifle",
+      "world": "warpshell",
+      "category": "firearm",
+      "desc": "Advanced Reptoid war tech using a power cell as ammo; it never runs out. On a natural 1, the rifle hits a random target."
+    },
+    {
+      "name": "Particle Cannon",
+      "world": "warpshell",
+      "category": "firearm",
+      "desc": "A heavy military weapon occupying 3 inventory slots. On a hit, sprays of fire hit 1D4 enemy targets, each taking the damage rolled."
+    },
+    {
+      "name": "Blast Rifle",
+      "world": "warpshell",
+      "category": "firearm",
+      "desc": "A classic, reliable long gun. Spend 1 TURN aiming to either hit with no roll or inflict maximum damage on a rolled hit."
+    },
+    {
+      "name": "Blaster",
+      "world": "warpshell",
+      "category": "firearm",
+      "desc": "The sturdy, basic sidearm of space, easily concealed under any armor or clothes. Occupies no inventory space."
+    },
+    {
+      "name": "Chem Rail",
+      "world": "warpshell",
+      "category": "firearm",
+      "desc": "A charged ion rail gun that builds powerful shots. Add another GUN damage die for each TURN spent powering up a single shot."
+    },
+    {
+      "name": "Ripsaw",
+      "world": "warpshell",
+      "category": "weapon",
+      "desc": "A carbon-toothed chainsaw weapon. For each 5 damage inflicted, remove 1 DEFENSE or destroy 1 item."
+    },
+    {
+      "name": "Ion Grenade Sling",
+      "world": "warpshell",
+      "category": "weapon",
+      "desc": "A bandolier of 6 explosives on a D4 ROUND fuse or set to explode on impact. ULTIMATE damage in a NEAR radius.",
+      "effects": [
+        "ULTIMATE damage"
+      ]
+    },
+    {
+      "name": "Karambit Blades",
+      "world": "warpshell",
+      "category": "weapon",
+      "desc": "Small talon knives designed for killing. Occupies no inventory space, easily concealed. Natural 20 inflicts maximum + ULTIMATE."
+    },
+    {
+      "name": "Blip Module",
+      "world": "warpshell",
+      "category": "gear",
+      "desc": "A phase-movement augment. When you move, you do not pass through the space between the two locations."
+    },
+    {
+      "name": "Cybernetics Loadout",
+      "world": "warpshell",
+      "category": "armor",
+      "desc": "Limbs and skeleton augmented with nano fibers and duranium scaffolds. All forms of blunt impact inflict no damage."
+    },
+    {
+      "name": "Zurin Symbiote",
+      "world": "warpshell",
+      "category": "gear",
+      "desc": "A Zurin primordial organism that binds to the spinal cord and enhances empathy. 'Don't Die on me, man!' rolls are always EASY."
+    },
+    {
+      "name": "Jump Pack",
+      "world": "warpshell",
+      "category": "gear",
+      "desc": "A miniaturized ion thruster worn as a small backpack. Move twice on your TURN, even when taking an action or attacking."
+    },
+    {
+      "name": "Fire Water",
+      "world": "ghostmountain",
+      "category": "gear",
+      "desc": "Viper venom mixed with monkey juice; 8 sips, pass out for 1D4 ROUNDS. Also usable as a flammable."
+    },
+    {
+      "name": "Ammo Pouch",
+      "world": "ghostmountain",
+      "category": "gear",
+      "desc": "A pouch with 24 capacity that keeps ammo dry; without one you'll be lucky to keep 6 shots dry."
+    },
+    {
+      "name": "Cold Weather Gear",
+      "world": "ghostmountain",
+      "category": "armor",
+      "desc": "Essential gear for the cold heights above Buckskin. +1 DEFENSE.",
+      "effects": [
+        "+1 DEF"
+      ]
+    },
+    {
+      "name": "Bull Whip",
+      "world": "ghostmountain",
+      "category": "weapon",
+      "desc": "Hard to master but a nasty, useful tool. Can be used as a WEAPON or a grappler."
+    },
+    {
+      "name": "Saddle & Tack",
+      "world": "ghostmountain",
+      "category": "gear",
+      "desc": "A must for any riding, includes a lariat. Sells for 30 COIN; requires a wagon or cart to transport."
+    },
+    {
+      "name": "Manacles",
+      "world": "ghostmountain",
+      "category": "gear",
+      "desc": "Leg irons and restraints, crucial for a Law man. Can be forged with silver properties to restrain Infernals and Wraiths."
+    },
+    {
+      "name": "Coffee Outfit",
+      "world": "ghostmountain",
+      "category": "gear",
+      "desc": "Conserve 1 SUPPLY when camping and grant all cohorts a HERO COIN at breakfast."
+    },
+    {
+      "name": "Canuska Blanket",
+      "world": "ghostmountain",
+      "category": "gear",
+      "desc": "A near-indestructible wool blanket with geometric patterns; also shows friendship with the Canuska tribes."
+    },
+    {
+      "name": "Hepawa Hide Tent & Tack",
+      "world": "ghostmountain",
+      "category": "gear",
+      "desc": "A compact, portable shelter for five, usable in cold to conserve 2 SUPPLIES per day. Requires a wagon or cart to transport."
+    },
+    {
+      "name": "Six Shooter",
+      "world": "ghostmountain",
+      "category": "firearm",
+      "desc": "The standard sidearm of the West: simple, reliable, uses 1 TURN to reload."
+    },
+    {
+      "name": "Carbine Rifle",
+      "world": "ghostmountain",
+      "category": "firearm",
+      "desc": "A lever-action rifle with 8 capacity."
+    },
+    {
+      "name": "Shotgun",
+      "world": "ghostmountain",
+      "category": "firearm",
+      "desc": "A nasty, clumsy close-quarters weapon. 2 capacity, 1 TURN reload."
+    },
+    {
+      "name": "Snub Shotgun",
+      "world": "ghostmountain",
+      "category": "firearm",
+      "desc": "Brutal scatter shots, 2 capacity. Hit any/all CLOSE targets in front of you when firing."
+    },
+    {
+      "name": "Compound Bow",
+      "world": "ghostmountain",
+      "category": "weapon",
+      "desc": "A powerful bow. Add STR to damage.",
+      "effects": [
+        "+STR damage"
+      ]
+    },
+    {
+      "name": "Bowie Knife",
+      "world": "ghostmountain",
+      "category": "weapon",
+      "desc": "The most reliable thing on the mountain."
+    },
+    {
+      "name": "Sabre",
+      "world": "ghostmountain",
+      "category": "weapon",
+      "desc": "A cavalry sword. Expensive, with silver properties."
+    },
+    {
+      "name": "Gatling Gun",
+      "world": "ghostmountain",
+      "category": "firearm",
+      "desc": "A godless death machine of the East. 4 shots per roll."
+    },
+    {
+      "name": "Demonspine",
+      "world": "ghostmountain",
+      "category": "weapon",
+      "desc": "A fencing blade used by Infernals."
+    },
+    {
+      "name": "Smoke Blade",
+      "world": "ghostmountain",
+      "category": "weapon",
+      "desc": "A blade caught 'tween worlds; can only be touched by Infernals."
+    },
+    {
+      "name": "Relic Pistol",
+      "world": "ghostmountain",
+      "category": "firearm",
+      "desc": "A haunted gun with 4 capacity."
+    },
+    {
+      "name": "Elephant Rifle",
+      "world": "ghostmountain",
+      "category": "firearm",
+      "desc": "The biggest gun around. 1 capacity, always does ULTIMATE damage.",
+      "effects": [
+        "ULTIMATE damage"
+      ]
+    },
+    {
+      "name": "Screamer",
+      "world": "ghostmountain",
+      "category": "gear",
+      "desc": "Like a grenade, but it's a skull."
+    },
+    {
+      "name": "Iron Cross",
+      "world": "ghostmountain",
+      "category": "weapon",
+      "desc": "Oak and cold iron with one huge spike. Simple, deadly, always does DOUBLE to Infernals."
+    },
+    {
+      "name": "Nitro Bottle",
+      "world": "ghostmountain",
+      "category": "gear",
+      "desc": "A volatile bottle of explosive. Careful with that."
+    },
+    {
+      "name": "Thumper Pistol",
+      "world": "vigilantecity",
+      "category": "firearm",
+      "desc": "An easily concealed pistol. Does 3 SP even when resisted.",
+      "effects": [
+        "3 SP"
+      ]
+    },
+    {
+      "name": "X-Tech Assault Rifle",
+      "world": "vigilantecity",
+      "category": "firearm",
+      "desc": "A weapon of future wars, moddable to take custom ammo or attached weapons."
+    },
+    {
+      "name": "Plasteel Riot Armor",
+      "world": "vigilantecity",
+      "category": "armor",
+      "desc": "Clunky but effective protection. +3 ARMOR, and reduce any STUN damage done to you in any attack by 1.",
+      "effects": [
+        "+3 DEF"
+      ]
+    },
+    {
+      "name": "Ion Pack",
+      "world": "vigilantecity",
+      "category": "gear",
+      "desc": "Grants 1 use of the FLIGHT power, recharging in 1D4 ROUNDS."
+    },
+    {
+      "name": "Micro Comms",
+      "world": "vigilantecity",
+      "category": "gear",
+      "desc": "Keep in touch with teammates at any range, concealed and hands-free."
+    },
+    {
+      "name": "Utility Belt",
+      "world": "vigilantecity",
+      "category": "gear",
+      "desc": "Holds 3 med kits, 3 smoke grenades, rope, and one remote-triggered explosive brick."
+    },
+    {
+      "name": "Adrenaline Pack",
+      "world": "vigilantecity",
+      "category": "gear",
+      "desc": "On a successful RECOVERY, add +3 to your result.",
+      "effects": [
+        "+3 RECOVERY"
+      ]
+    },
+    {
+      "name": "Team Suit",
+      "world": "vigilantecity",
+      "category": "armor",
+      "desc": "A fireproof, tear-proof suit that protects against cold."
+    },
+    {
+      "name": "Street Pack",
+      "world": "vigilantecity",
+      "category": "gear",
+      "desc": "Holds 3 pipe bombs, a crow bar, folding ladder, crime scene kit, lock-picks and a signal flare."
+    },
+    {
+      "name": "All the Knives",
+      "world": "vigilantecity",
+      "category": "weapon",
+      "desc": "So many knives. Even when throwing or breaking knives and swords, you always have more."
+    }
+  ]
+}

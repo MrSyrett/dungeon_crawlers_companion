@@ -110,6 +110,20 @@ function readCharMeta(
         level: null,
       };
     }
+    // ICRPG: the roster shows the hero Type (and World) as the class; Milestones
+    // are tracked on the sheet's level field.
+    const icrpg = blob?.icrpg_sheet;
+    if (typeof icrpg === "string") {
+      const s = JSON.parse(icrpg) as { name?: unknown; type?: unknown; world?: unknown; level?: unknown };
+      const world = { alfheim: "Alfheim", warpshell: "Warp Shell", ghostmountain: "Ghost Mountain", vigilantecity: "Vigilante City", bloodandsnow: "Blood & Snow" }[String(s.world ?? "")] ?? "";
+      const cls = [typeof s.type === "string" ? s.type : "", world].filter((v) => v && String(v).trim()).join(" · ");
+      const lv = parseInt(String(s.level ?? ""), 10);
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: Number.isNaN(lv) ? null : lv,
+      };
+    }
     // Kids on Bikes: no levels — the roster shows the Trope (and book) as the class.
     const kob = blob?.kob_sheet;
     if (typeof kob === "string") {

@@ -27,7 +27,8 @@ type HbType =
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
-  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-equipment" | "ds-ship-item" | "ds-monster";
+  | "ds-species" | "ds-archetype" | "ds-background" | "ds-motivation" | "ds-equipment" | "ds-ship-item" | "ds-monster"
+  | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {
   id: string;

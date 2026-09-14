@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DS" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E";
+export type SystemKey = "SD" | "DS" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -30,6 +30,9 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // D6 System: Second Edition (Gallant Knight Games, 2024) — a genre-agnostic
   // evolution of the West End Games D6 System.
   { key: "D62E", name: "D6 System 2e", short: "D62e", accent: "var(--d62e)" },
+  // Index Card RPG (Runehammer, Master Edition) — a rules-light unified d20
+  // system: one TARGET, roll for EFFORT, five worlds.
+  { key: "ICRPG", name: "Index Card RPG", short: "ICRPG", accent: "var(--icrpg)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";
