@@ -58,8 +58,10 @@ async function liveCampaignId(id: string | null): Promise<string | null> {
 function extractLinkedCampaignId(data: object): string | null {
   try {
     const blob = data as Record<string, unknown>;
-    if (typeof blob.sd_sheet === "string") {
-      const sheet = JSON.parse(blob.sd_sheet) as {
+    // SD sheet and its DarkSpace fork keep the link under _sheet.campaign.id
+    for (const skey of ["sd_sheet", "ds_sheet"]) {
+      if (typeof blob[skey] !== "string") continue;
+      const sheet = JSON.parse(blob[skey] as string) as {
         _sheet?: { campaign?: { id?: unknown } | null } | null;
       };
       const id = sheet?._sheet?.campaign?.id;

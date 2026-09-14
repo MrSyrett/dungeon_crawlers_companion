@@ -68,6 +68,7 @@ const PAGE = String.raw`<!doctype html>
     color: var(--muted); padding-bottom: 4px; border-bottom: 1px solid var(--border);
   }
   .group-head.sd { color: var(--gold); }
+  .group-head.ds { color: #24c3d6; }
   .group-head.dcc { color: var(--red); }
   .group-head.ace { color: #3aa8e0; }
   .group-head.kob { color: #a56ee8; }
@@ -255,6 +256,7 @@ const PAGE = String.raw`<!doctype html>
           // read as one undifferentiated list.
           var GROUPS = [
             { key: "SD", name: "Shadowdark", cls: "sd" },
+            { key: "DS", name: "DarkSpace", cls: "ds" },
             { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" },
             { key: "ACE", name: "ACE!", cls: "ace" },
             { key: "KOB", name: "Kids on Bikes", cls: "kob" },

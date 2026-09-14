@@ -116,6 +116,10 @@ function extractDocTitle(tool: string, data: object): string | null {
       const sheet = JSON.parse(blob.icrpg_sheet) as { name?: unknown };
       if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
     }
+    if (tool === "ds-character" && typeof blob.ds_sheet === "string") {
+      const sheet = JSON.parse(blob.ds_sheet) as { name?: unknown };
+      if (typeof sheet.name === "string" && sheet.name.trim()) return sheet.name.trim();
+    }
 
     // Every session-prep tool keeps its blob under its registered key.
     const sessionKey = isToolId(tool) && TOOLS[tool].kind === "session" ? TOOLS[tool].keys[0] : null;
@@ -136,9 +140,10 @@ function extractDocTitle(tool: string, data: object): string | null {
 function extractLinkedCampaignId(data: object): string | null {
   try {
     const blob = data as Record<string, unknown>;
-    // SD sheet: campaign lives under _sheet.campaign.id
-    if (typeof blob.sd_sheet === "string") {
-      const sheet = JSON.parse(blob.sd_sheet) as {
+    // SD sheet (and its DarkSpace fork): campaign lives under _sheet.campaign.id
+    for (const skey of ["sd_sheet", "ds_sheet"]) {
+      if (typeof blob[skey] !== "string") continue;
+      const sheet = JSON.parse(blob[skey] as string) as {
         _sheet?: { campaign?: { id?: unknown } | null } | null;
       };
       const id = sheet?._sheet?.campaign?.id;

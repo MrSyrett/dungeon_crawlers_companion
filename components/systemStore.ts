@@ -8,11 +8,13 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "DS";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
+  // DarkSpace: a standalone sci-fi reskin of Shadowdark (own storage/characters).
+  { key: "DS", name: "DarkSpace", short: "DS", accent: "var(--darkspace)" },
   { key: "NIM", name: "Nimble", short: "NIM", accent: "var(--nimble)" },
   // Dungeons & Dragons (2024 rules): mechanics adapted from the SRD 5.2 (CC-BY)
   // plus original concise descriptions for non-SRD options.

@@ -62,6 +62,13 @@ const SYSTEMS = [
     chapter: "Room", chapterPh: "Room 1", session: "Session", mobs: "Monsters", mobsHeading: "Monsters",
     mob: "Monster", boss: "Boss", npc: "NPC", typePh: "GRUNT // 1♥ // DEF +0", titlePh: "e.g. The Grey Hill Inferno", subtitlePh: "e.g. An ICRPG one-shot, TARGET 12",
   },
+  {
+    file: "ds_session_prep_builder.html", key: "ds_session", ls: "ds_builder_v1", cfg: "ds", random: "Random Hostile",
+    name: "DarkSpace", title: "Session Prep Builder — DarkSpace",
+    accent: "#24c3d6", accentDark: "#0e6b78", red: "#b82018", redDark: "#7a1510", highlight: "#6fe0ef", boxBg: "#0f2b30",
+    chapter: "Sector", chapterPh: "Sector 1", session: "Session", mobs: "Hostiles/NPCs", mobsHeading: "Hostiles &amp; NPCs",
+    mob: "Hostile", boss: "Elite", npc: "NPC", typePh: "SCAV // LV 1 // AC 11 // 5 HP", titlePh: "e.g. The Derelict Hauler", subtitlePh: "e.g. A DarkSpace one-shot for 4 crew",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -174,6 +181,22 @@ const SB_CONFIG = {
     abilities: [...(m.skills||[]).map(x => 'Skill: ' + x), ...(m.special||[]).map(x => 'Special: ' + x), ...(m.talents||[]).map(x => 'Talent: ' + x), ...(m.powers||[]).map(x => 'Power: ' + x)].filter(Boolean).join('\\n'),
   }; }, sub: m => String(m.kind||'') + (m.genre && m.genre !== 'core' ? ' · ' + m.genre : '') },
 };`,
+  ds: `const SB_CONFIG = {
+  typePlaceholder: 'HOSTILE // FRONTIER',
+  hp: null,
+  rows: [
+    [{ key:'ac', label:'AC' }, { key:'hp', label:'HP' }, { key:'lv', label:'LV' }, { key:'mv', label:'MV', th:'Move' }],
+    [{ key:'str', label:'STR', ph:'+0' }, { key:'dex', label:'DEX', ph:'+0' }, { key:'con', label:'CON', ph:'+0' }, { key:'int', label:'INT', ph:'+0' }, { key:'wis', label:'WIS', ph:'+0' }, { key:'cha', label:'CHA', ph:'+0' }],
+  ],
+  abilitiesLabel: 'Attacks & Notes', abilitiesPlaceholder: 'One per line — Attack: +N (dmg) · Note: effect',
+  mobs: { placeholder: 'Search the DarkSpace Bestiary…', pool: () => (typeof DS_MONSTERS !== 'undefined' && Array.isArray(DS_MONSTERS)) ? DS_MONSTERS : [], toCard: m => ({
+    sbtype: (Number(m.lv) >= 8) ? 'boss' : 'mob', name: m.name || '',
+    type: ['HOSTILE', ({ L:'LAWFUL', N:'NEUTRAL', C:'CHAOTIC' })[m.al] || ''].filter(Boolean).join(' // '), flavor: '',
+    ac: String(m.ac ?? ''), hp: String(m.hp ?? ''), lv: String(m.lv ?? ''), mv: m.mv || '',
+    str: String(m.s ?? ''), dex: String(m.d ?? ''), con: String(m.c ?? ''), int: String(m.i ?? ''), wis: String(m.w ?? ''), cha: String(m.ch ?? ''),
+    abilities: [m.atk ? 'Attack: ' + m.atk : '', m.notes || ''].filter(Boolean).join('\\n'),
+  }), sub: m => ['LV ' + m.lv, ({ L:'Lawful', N:'Neutral', C:'Chaotic' })[m.al] || ''].filter(Boolean).join(' · ') },
+};`,
 };
 const MOB_DATA = {
   ace: '<script src="/tools-data/ace-extras.js"></script>',
@@ -183,6 +206,7 @@ const MOB_DATA = {
   dnd: '<script src="/tools-data/dnd-monsters.js"></script>',
   d62e: '<script src="/tools-data/d62e-creatures.js"></script>',
   icrpg: '<script src="/tools-data/icrpg-monsters.js"></script>',
+  ds: '<script src="/tools-data/ds-monsters.js"></script>',
 };
 
 function rep(s, a, b, all = true) {
