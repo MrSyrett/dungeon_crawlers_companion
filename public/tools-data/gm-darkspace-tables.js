@@ -229,5 +229,20 @@
   DS_GM.rivalSpecies = ['Human', 'Human', 'Android', 'Tech-augmented', 'Void-born', 'Mutant', 'Uplifted'];
   DS_GM.rivalArchetypes = ['Strong', 'Quick', 'Tough', 'Clever', 'Wise', 'Charming', 'Machine-Based'];
 
+  // ── Corruption (pp. 48-51) — for the Corruption generator (roll a Source +
+  // a Side Effect). Mirrors DARKSPACE.corruption in the sheet's data module. ──
+  DS_GM.corruptionSources = {
+    Technological: ['A black-market cybernetic implant', 'Malfunctioning repair nanites', 'A failed teleportation', 'Prolonged neural interface', 'An experimental starship reactor core', 'A "data-phage" virus', 'A piece of "dead" alien technology', 'An assimilating cyborg hive'],
+    Biological: ['Stung by a hyper-mutagenic creature', 'A symbiotic parasite', 'Exposure to a tailored retrovirus', 'Inhaling alien spores', 'A forbidden gene-splicing procedure', 'A regenerative alien mold', 'A failed cloning — you\'re the unstable copy', 'Contaminated synthetic blood'],
+    Mental: ['Deciphering a signal of non-Euclidean origin', 'Staring into the heart of a functioning alien artifact', 'Telepathic contact with a vast alien hive-mind', 'A region of space where physical laws are unstable', 'Witnessing the birth of a cosmic horror', 'Years in deep space, leading to "void madness"', 'A full, unredacted data-infusion', 'A powerful, dreaming alien entity'],
+    Emotional: ['A "psychic echo" left in a place of terror', 'An entity replaced your emotions with cold purpose', 'Inhaling alien pheromones', 'A relic imprinted with alien malice', 'Your personality overwritten by an alien entity', 'Surviving a catastrophic event', 'Telepathic link with an alien emotional spectrum', 'Witnessing an entity of pure chaos'],
+  };
+  DS_GM.corruptionSideEffects = {
+    Technological: ['Weeping Metal — an oily, mercury-like substance weeps from your eyes, ears, or pores.', 'Data-Glitch Skin — your skin flickers like a corrupted hologram.', 'Vox Scramble — your voice is intermittently replaced by harsh static.', 'Cable Tendrils — thin black wires grow from beneath your skin.', 'Heat Sink Vents — grilled vents open along your spine, venting hot steam.', 'Ocular Lens — one eye becomes a camera\'s aperture.', 'Sonic Hum — your body emits a constant low-frequency hum.', 'Fused Plating — patches of skin harden into alloy plates, restricting movement.'],
+    Biological: ['Asymmetrical Growth — a limb becomes unnaturally long and jointed.', 'Mycelial Veins — your veins glow with faint pulsing bioluminescence.', 'Crystalline Growths — translucent crystals sprout from your skeleton.', 'Translucent Flesh — your skin turns transparent, revealing shifting organs.', 'Corrosive Touch — your sweat and saliva are acidic.', 'Poly-Phalangeal Hands — your fingers split into many spindly digits.', 'Second Mouth — a second, non-functional mouth forms on your body.', 'Abiotic Respiration — you exhale a thin ammonia mist instead of breathing.'],
+    Mental: ['Memory Fragmentation — your memories are jumbled.', 'Visual Ghosts — you perceive flickering afterimages.', 'Logic Conversion — you can\'t process emotional reasoning.', 'Apophenia Cascade — you see sinister patterns and conspiracies everywhere.', 'Synesthesia — your senses merge (you "smell" lies, "hear" colors).', 'Identity Protocol — you refer to yourself in the third person.', 'Aphasia — under stress you lose the ability to form words.', 'Obsessive Calculation — your brain runs constant calculations.'],
+    Emotional: ['Empathy Inversion — you take pleasure in others\' suffering.', 'Phobia Imprint — a new, overwhelming, irrational fear.', 'Cold Rage — your anger becomes silent, merciless focus.', 'Social Agnosia — you can no longer read body language.', 'State Shift — moods flip instantly from stoicism to volatility.', 'Xenomorphic Longing — homesickness for a place you\'ve never been.', 'Object Imprint — a deep, loving bond with an inanimate object.', 'Machine Paranoia — you feel networked machines are always watching.'],
+  };
+
   if (typeof window !== 'undefined') window.DS_GM = DS_GM;
 })();

@@ -45,7 +45,7 @@ function sanityCheck(d) {
   const problems = [];
   const need = [
     "terms", "species", "humanNote", "techSpecies", "archetypes", "backgrounds",
-    "motivations", "triad", "credits", "citizenGear", "spacersKit", "gear",
+    "motivations", "triad", "corruption", "credits", "citizenGear", "spacersKit", "gear",
     "armor", "meleeWeapons", "rangedWeapons", "explosives", "weaponProps",
     "ship", "advancedTech", "advancedTechNote", "quickRules",
   ];
@@ -69,6 +69,7 @@ const CONSTS = [
   ["backgrounds", "DS_BACKGROUNDS", "DsBackground[]"],
   ["motivations", "DS_MOTIVATIONS", "DsMotivation[]"],
   ["triad", "DS_TRIAD", "DsTriad"],
+  ["corruption", "DS_CORRUPTION", "DsCorruption"],
   ["credits", "DS_CREDITS", "{ note: string }"],
   ["citizenGear", "DS_CITIZEN_GEAR", "string[]"],
   ["spacersKit", "DS_SPACERS_KIT", "DsSpacersKit"],
@@ -86,7 +87,7 @@ const CONSTS = [
 
 const IMPORTS = [
   "DarkSpaceData", "DsSpecies", "DsTechSpecies", "DsArchetype", "DsBackground",
-  "DsMotivation", "DsTriad", "DsSpacersKit", "DsGearItem", "DsArmor", "DsWeapon",
+  "DsMotivation", "DsTriad", "DsCorruption", "DsSpacersKit", "DsGearItem", "DsArmor", "DsWeapon",
   "DsShip", "DsAdvancedTech", "DsQuickRule",
 ];
 

@@ -2,7 +2,7 @@
 // Source: public/tools-data/sd-darkspace.js - regenerate with: node scripts/build-darkspace-data.mjs
 
 import type {
-  DarkSpaceData, DsSpecies, DsTechSpecies, DsArchetype, DsBackground, DsMotivation, DsTriad, DsSpacersKit, DsGearItem, DsArmor, DsWeapon, DsShip, DsAdvancedTech, DsQuickRule,
+  DarkSpaceData, DsSpecies, DsTechSpecies, DsArchetype, DsBackground, DsMotivation, DsTriad, DsCorruption, DsSpacersKit, DsGearItem, DsArmor, DsWeapon, DsShip, DsAdvancedTech, DsQuickRule,
 } from "./darkspace-types";
 
 export const DS_TERMS: Record<string, string> = {
@@ -620,7 +620,175 @@ export const DS_TRIAD: DsTriad = {
       "die": "d10"
     }
   ],
-  "notes": "Make the Feat check with the power's stat. A crit doubles one numerical component. A crit fail ends that power until you rest. Effects that deal damage/healing use the die matching the DC beaten (see table). Sustained feats need a new check each turn."
+  "notes": "Make the Feat check with the power's stat. A crit doubles one numerical component. A crit fail ends that power until you rest. Effects that deal damage/healing use the die matching the DC beaten (see table). Sustained feats need a new check each turn.",
+  "exampleFeats": [
+    {
+      "power": "Body",
+      "name": "Force Field",
+      "text": "Create an invisible solid barrier of psychic energy. Make a BODY check; the total is the barrier's HP. Focus (DC 9/round)."
+    },
+    {
+      "power": "Body",
+      "name": "Inner Light",
+      "text": "Cause part or all of your body to glow. DC 11 BODY check: glow up to CLOSE for one hour of real time."
+    },
+    {
+      "power": "Body",
+      "name": "Levitation",
+      "text": "Lift a creature off the ground and move it with your mind (DC by size). A resisting target makes a CON check vs your roll. On a success, move it NEAR. Focus."
+    },
+    {
+      "power": "Body",
+      "name": "Psychic Healing",
+      "text": "Accelerate the body's healing. BODY check vs a DC on the Feat table; the result is HP the target regains."
+    },
+    {
+      "power": "Body",
+      "name": "Pyrokinesis",
+      "text": "Create and project fire. BODY check vs a DC; the result is damage. The target checks vs your roll to resist or avoid it."
+    },
+    {
+      "power": "Body",
+      "name": "Telekinesis",
+      "text": "Lift and move an object (DC by size). On a success move it NEAR; it can be thrown as a projectile — attack with BODY, damage die by the lifting DC. Focus."
+    },
+    {
+      "power": "Mind",
+      "name": "Coercion",
+      "text": "Influence a sentient being to follow a mental command. Contested MIND vs their INT/MIND (ADV if it opposes their Motivation). On a success it takes one action. Focus."
+    },
+    {
+      "power": "Mind",
+      "name": "Enhance Senses",
+      "text": "Extend your senses. DC 12 MIND check: ADV on checks involving your senses (not darkvision). Focus (DC 12/round)."
+    },
+    {
+      "power": "Mind",
+      "name": "Mental Blast",
+      "text": "Deal psychic damage. MIND check vs a DC for the damage die; the target checks vs your total to resist or avoid it."
+    },
+    {
+      "power": "Mind",
+      "name": "Mental Illusions",
+      "text": "Make creatures perceive an illusion. Contested MIND vs INT/MIND against a number of targets equal to your level. Focus."
+    },
+    {
+      "power": "Mind",
+      "name": "Telepathy",
+      "text": "Communicate mentally. MIND check vs a DC; the die rolled is how many targets up to FAR you reach. Targets resist with INT/MIND. Focus."
+    },
+    {
+      "power": "Soul",
+      "name": "Astral Projection",
+      "text": "Leave your body and travel to a place you know (DC 15 SOUL). Your body is inert; other psychic entities can see you. Focus."
+    },
+    {
+      "power": "Soul",
+      "name": "Clairvoyance",
+      "text": "See into and interact with the astral plane up to NEAR (DC 11 SOUL). You still can't physically interact. Focus."
+    },
+    {
+      "power": "Soul",
+      "name": "Empathy",
+      "text": "Sense (and later influence) creatures' emotions. SOUL check vs a DC for how many targets up to FAR; targets resist with WIS/SOUL. Focus to influence with a contested check."
+    },
+    {
+      "power": "Soul",
+      "name": "Psychometry",
+      "text": "Glean sense-memories of a place or object (DC 15 SOUL, target present). The GM gives the most important memory/emotion. Focus for more each round."
+    }
+  ]
+};
+
+export const DS_CORRUPTION: DsCorruption = {
+  "intro": "Corruption is a catch-all for any slow descent toward a permanent end — addiction, mutation, a virus, cyberpsychosis, the dark side, void madness. These optional rules should be agreed on at the start of a campaign, as they can result in character loss.",
+  "check": "When a situation would corrupt a Spacer, they make a check (stat and DC set by the GM — e.g. addiction vs CON, psychosis vs WIS, dark side vs CHA). Failure = +1 Corruption Point. A critical failure also inflicts a Side Effect. A critical success grants immediate Restoration.",
+  "threshold": "If Corruption Points ever exceed the Spacer's WIS score, they have succumbed — death, loss of free will or reason, or turning villain (GM and player decide the ending together).",
+  "restoration": "On a rest, a Spacer may forgo healing to instead reduce Corruption Points by their WIS bonus (minimum 1).",
+  "sideEffects": {
+    "Technological": [
+      "Weeping Metal — an oily, mercury-like substance weeps from your eyes, ears, or pores.",
+      "Data-Glitch Skin — your skin flickers like a corrupted hologram, showing static or code.",
+      "Vox Scramble — your voice is intermittently replaced by bursts of harsh static.",
+      "Cable Tendrils — thin black wires like optical fibers grow from beneath your skin.",
+      "Heat Sink Vents — grilled vents open along your spine or torso, venting hot steam.",
+      "Ocular Lens — one eye's iris and pupil become a camera's aperture.",
+      "Sonic Hum — your body emits a constant low-frequency hum.",
+      "Fused Plating — patches of skin harden into overlapping alloy plates, restricting movement."
+    ],
+    "Biological": [
+      "Asymmetrical Growth — a limb becomes unnaturally long and jointed.",
+      "Mycelial Veins — your veins glow with faint pulsing bioluminescence.",
+      "Crystalline Growths — translucent crystals sprout from your skeleton, tearing through skin.",
+      "Translucent Flesh — your skin turns transparent, revealing shifting organs.",
+      "Corrosive Touch — your sweat and saliva are acidic, slowly rusting metal.",
+      "Poly-Phalangeal Hands — your fingers split into many spindly, twitching digits.",
+      "Second Mouth — a second, non-functional mouth forms somewhere on your body.",
+      "Abiotic Respiration — you no longer seem to breathe; you exhale a thin ammonia mist."
+    ],
+    "Mental": [
+      "Memory Fragmentation — your memories are jumbled.",
+      "Visual Ghosts — you perceive flickering afterimages of people and objects.",
+      "Logic Conversion — you struggle to process emotional reasoning.",
+      "Apophenia Cascade — you see sinister patterns; nonexistent conspiracies feel real.",
+      "Synesthesia — your senses merge unnaturally (you \"smell\" lies, \"hear\" colors).",
+      "Identity Protocol — you lose your sense of self, referring to yourself in the third person.",
+      "Aphasia — under stress you lose the ability to form coherent words.",
+      "Obsessive Calculation — your brain runs constant low-level calculations about everything."
+    ],
+    "Emotional": [
+      "Empathy Inversion — you take pleasure in others' suffering; their joy causes you anxiety.",
+      "Phobia Imprint — a new, overwhelming, irrational fear.",
+      "Cold Rage — your anger becomes silent, placid, merciless focus.",
+      "Social Agnosia — you can no longer intuitively read body language.",
+      "State Shift — your moods flip instantly from stoicism to volatile emotion.",
+      "Xenomorphic Longing — deep homesickness for a place you've never been.",
+      "Object Imprint — a deep, protective, loving bond with an inanimate object.",
+      "Machine Paranoia — an unshakable feeling that networked machines are watching you."
+    ]
+  },
+  "sources": {
+    "Technological": [
+      "A black-market cybernetic implant",
+      "Malfunctioning repair nanites",
+      "A failed teleportation",
+      "Prolonged neural interface",
+      "An experimental starship reactor core",
+      "A \"data-phage\" virus",
+      "A piece of \"dead\" alien technology",
+      "An assimilating cyborg hive"
+    ],
+    "Biological": [
+      "Stung by a hyper-mutagenic creature",
+      "A symbiotic parasite",
+      "Exposure to a tailored retrovirus",
+      "Inhaling alien spores",
+      "A forbidden gene-splicing procedure",
+      "A regenerative alien mold",
+      "A failed cloning — you're the unstable copy",
+      "Contaminated synthetic blood"
+    ],
+    "Mental": [
+      "Deciphering a signal of non-Euclidean origin",
+      "Staring into the heart of a functioning alien artifact",
+      "Telepathic contact with a vast alien hive-mind",
+      "A region of space where physical laws are unstable",
+      "Witnessing the birth of a cosmic horror",
+      "Years in deep space, leading to \"void madness\"",
+      "A full, unredacted data-infusion",
+      "A powerful, dreaming alien entity"
+    ],
+    "Emotional": [
+      "A \"psychic echo\" left in a place of terror",
+      "An entity replaced your emotions with cold purpose",
+      "Inhaling alien pheromones",
+      "A relic imprinted with alien malice",
+      "Your personality overwritten by an alien entity",
+      "Surviving a catastrophic event",
+      "Telepathic link with an alien emotional spectrum",
+      "Witnessing an entity of pure chaos"
+    ]
+  }
 };
 
 export const DS_CREDITS: { note: string } = {
@@ -1412,6 +1580,7 @@ export const DARKSPACE: DarkSpaceData = {
   backgrounds: DS_BACKGROUNDS,
   motivations: DS_MOTIVATIONS,
   triad: DS_TRIAD,
+  corruption: DS_CORRUPTION,
   credits: DS_CREDITS,
   citizenGear: DS_CITIZEN_GEAR,
   spacersKit: DS_SPACERS_KIT,

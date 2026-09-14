@@ -73,11 +73,27 @@ export interface DsTriadFeat {
   die: string;
 }
 
+export interface DsTriadExampleFeat {
+  power: string;
+  name: string;
+  text: string;
+}
+
 export interface DsTriad {
   intro: string;
   powers: DsTriadPower[];
   feats: DsTriadFeat[];
   notes: string;
+  exampleFeats?: DsTriadExampleFeat[];
+}
+
+export interface DsCorruption {
+  intro: string;
+  check: string;
+  threshold: string;
+  restoration: string;
+  sideEffects: Record<string, string[]>;
+  sources: Record<string, string[]>;
 }
 
 export interface DsGearItem {
@@ -182,6 +198,7 @@ export interface DarkSpaceData {
   backgrounds: DsBackground[];
   motivations: DsMotivation[];
   triad: DsTriad;
+  corruption: DsCorruption;
   credits: { note: string };
   citizenGear: string[];
   spacersKit: DsSpacersKit;

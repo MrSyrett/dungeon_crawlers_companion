@@ -471,6 +471,17 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         <button class="trk-add" onclick="openTrackerPicker()" title="Add a tracker">+</button>
       </div>
       <div class="trk-box" id="trk-list"></div>
+
+      <div class="sl"><span>Corruption</span><span style="margin-left:auto;font-size:8px;font-weight:700;letter-spacing:.08em;color:var(--muted);">OPTIONAL · VS WIS</span></div>
+      <div id="corruption-box" style="padding:6px 8px 8px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button onclick="corruptionAdd(-1)" title="Remove a point" style="width:24px;height:24px;border:1px solid var(--rule);background:transparent;color:var(--ink);cursor:pointer;border-radius:3px;font-weight:900;">−</button>
+          <input type="text" id="corruption-pts" placeholder="0" onchange="syncCorruption();corruptionSave()" style="width:40px;text-align:center;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);border-radius:3px;font-family:'Montserrat',sans-serif;font-size:16px;font-weight:900;padding:2px 0;outline:none;">
+          <button onclick="corruptionAdd(1)" title="Add a point" style="width:24px;height:24px;border:1px solid var(--rule);background:transparent;color:var(--ink);cursor:pointer;border-radius:3px;font-weight:900;">+</button>
+          <span id="corruption-threshold" style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--muted);">/ WIS</span>
+        </div>
+        <div id="corruption-warn" style="display:none;margin-top:5px;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#e0503c;">⚠ Succumbed — points exceed WIS</div>
+      </div>
     </div><!-- end left-col -->
 
     <!-- MAIN COL: combat tiles → attacks → tabs -->
@@ -515,10 +526,11 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         </table>
       </div>
 
-      <!-- TABS: Talents / Gear / Ship (DarkSpace has no spells — see The Triad) -->
+      <!-- TABS: Talents / Gear / Triad / Ship (The Triad replaces spells) -->
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
+        <button class="tab-btn" data-tab="triad" onclick="setTab('triad')">The Triad</button>
         <button class="tab-btn" data-tab="ship" onclick="setTab('ship')">🚀 Ship</button>
       </div>
 
@@ -550,6 +562,12 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
             <textarea id="free-carry" placeholder="Torch, Rations, Rope..." rows="4"></textarea>
           </div>
         </div>
+      </div>
+
+      <!-- TRIAD TAB (metaphysical powers — Body / Mind / Soul; replaces spells) -->
+      <div class="tab-panel" id="tab-triad">
+        <div class="sl"><span>The Triad</span><span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#5a8595;">Mark the powers you know · Feats are freeform</span></div>
+        <div id="triad-body" style="padding:6px 4px;"></div>
       </div>
 
       <!-- SHIP TAB (Starship — built like a Spacer: Stats, HP, AC, systems & weapons) -->
@@ -1233,11 +1251,13 @@ function onStatChange(id) {
   const val = document.getElementById(id+'-val')?.value;
   const m = statToMod(val);
   document.getElementById(id+'-mod').textContent = fmtMod(m);
+  // WIS drives the Corruption threshold.
+  if(id === 'wis' && typeof syncCorruption === 'function') { try{ syncCorruption(); }catch(e){} }
 }
 
 // ═══ TABS (Spells / Talents / Gear) ═════════════════════════════════════════
 var _tab = 'gear';
-const TABS = ['talents','gear','ship'];
+const TABS = ['talents','gear','triad','ship'];
 function setTab(name){
   if(TABS.indexOf(name) < 0) name = 'gear';
   // Leaving the Ship tab persists ship edits (ship state round-trips in the save).
@@ -1247,10 +1267,73 @@ function setTab(name){
     var panel = document.getElementById('tab-'+t); if(panel) panel.classList.toggle('on', t===name);
     var btn = document.querySelector('.tab-btn[data-tab="'+t+'"]'); if(btn) btn.classList.toggle('on', t===name);
   });
-  // Render the ship UI on demand when its tab opens.
+  // Render the ship / triad UI on demand when their tab opens.
   if(name === 'ship' && typeof renderShip === 'function') { try{ renderShip(); }catch(e){} }
+  if(name === 'triad' && typeof renderTriad === 'function') { try{ renderTriad(); }catch(e){} }
 }
 function setDefaultTab(){ setTab(_tab || 'gear'); }
+
+// ── The Triad (metaphysical powers) ─────────────────────────────────────────
+// State: which of Body/Mind/Soul the Spacer knows, and which are "exhausted"
+// (spent by a critical failure — recovered on a rest). Round-trips in the save.
+var _triad = { known:{Body:false,Mind:false,Soul:false}, exhausted:{Body:false,Mind:false,Soul:false} };
+function triadState(){ return _triad; }
+window.triadState = triadState;
+function triadToggleKnown(p){ _triad.known[p] = !_triad.known[p]; if(!_triad.known[p]) _triad.exhausted[p] = false; renderTriad(); triadSave(); }
+function triadToggleExh(p){ _triad.exhausted[p] = !_triad.exhausted[p]; renderTriad(); triadSave(); }
+function triadSave(){ try{ if(typeof _saveSheetNow==='function') _saveSheetNow(); }catch(e){} }
+window.triadToggleKnown = triadToggleKnown; window.triadToggleExh = triadToggleExh;
+function renderTriad(){
+  var body = document.getElementById('triad-body'); if(!body) return;
+  var D = window.DARKSPACE;
+  if(!D || !D.triad){ body.innerHTML = '<div style="padding:10px;font-family:Montserrat,sans-serif;font-size:11px;color:#5a8595;">Triad data not loaded.</div>'; return; }
+  var E = function(t){ return String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var STAT = { Body:'CON', Mind:'INT', Soul:'WIS' };
+  var h = '';
+  h += '<p style="font-family:Montserrat,sans-serif;font-size:10px;color:#5a8595;line-height:1.5;margin:0 0 8px;">'+E(D.triad.intro)+'</p>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">';
+  ['Body','Mind','Soul'].forEach(function(p){
+    var known = _triad.known[p], exh = _triad.exhausted[p];
+    h += '<div style="border:1px solid '+(known?'#3fb6d8':'#16323d')+';background:'+(known?'#0f2630':'#0d1418')+';border-radius:6px;padding:8px;">'
+      + '<div style="font-family:Montserrat,sans-serif;font-size:12px;font-weight:900;color:'+(known?'#8fd6ea':'#5a8595')+';letter-spacing:.06em;">'+E(p)+' <span style="font-size:9px;color:#5a8595;">'+STAT[p]+'</span></div>'
+      + '<label style="display:flex;align-items:center;gap:5px;margin-top:6px;font-family:Montserrat,sans-serif;font-size:10px;color:#cfe6ee;cursor:pointer;"><input type="checkbox" '+(known?'checked':'')+' onchange="triadToggleKnown(\''+p+'\')" style="accent-color:#3fb6d8;">Known</label>'
+      + (known ? '<label style="display:flex;align-items:center;gap:5px;margin-top:4px;font-family:Montserrat,sans-serif;font-size:10px;color:'+(exh?'#e0a03c':'#5a8595')+';cursor:pointer;"><input type="checkbox" '+(exh?'checked':'')+' onchange="triadToggleExh(\''+p+'\')" style="accent-color:#e0a03c;">Exhausted</label>' : '')
+      + '</div>';
+  });
+  h += '</div>';
+  h += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#8fd6ea;margin:4px 0 4px;">Feat Rolls</div>';
+  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">';
+  (D.triad.feats||[]).forEach(function(f){ h += '<span style="font-family:Montserrat,sans-serif;font-size:10px;color:#cfe6ee;background:#0d1418;border:1px solid #16323d;border-radius:4px;padding:3px 7px;">'+E(f.diff)+' (DC '+f.dc+') → '+E(f.die)+'</span>'; });
+  h += '</div>';
+  ['Body','Mind','Soul'].forEach(function(p){
+    var feats = (D.triad.exampleFeats||[]).filter(function(f){return f.power===p;});
+    if(!feats.length) return;
+    h += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#8fd6ea;margin:8px 0 3px;">'+E(p)+' Feats</div>';
+    feats.forEach(function(f){ h += '<div style="font-family:Montserrat,sans-serif;font-size:11px;color:#cfe6ee;line-height:1.4;margin-bottom:4px;"><b style="color:#8fd6ea;">'+E(f.name)+'.</b> '+E(f.text)+'</div>'; });
+  });
+  h += '<div style="font-family:Montserrat,sans-serif;font-size:10px;color:#5a8595;line-height:1.45;margin-top:8px;">'+E(D.triad.notes)+'</div>';
+  body.innerHTML = h;
+}
+window.renderTriad = renderTriad;
+
+// ── Corruption (optional) ───────────────────────────────────────────────────
+// Corruption Points are tracked against WIS; exceeding WIS = the Spacer succumbs.
+function corruptionSave(){ try{ if(typeof _saveSheetNow==='function') _saveSheetNow(); }catch(e){} }
+function corruptionAdd(delta){
+  var el = document.getElementById('corruption-pts'); if(!el) return;
+  var v = (parseInt(el.value,10)||0) + delta; if(v<0) v=0;
+  el.value = String(v); syncCorruption(); corruptionSave();
+}
+function syncCorruption(){
+  var el = document.getElementById('corruption-pts'); if(!el) return;
+  var pts = parseInt(el.value,10)||0;
+  var wis = parseInt(document.getElementById('wis-val') && document.getElementById('wis-val').value, 10)||0;
+  var th = document.getElementById('corruption-threshold'); if(th) th.textContent = '/ ' + (wis||'—') + ' WIS';
+  var over = pts > wis && wis > 0;
+  var warn = document.getElementById('corruption-warn'); if(warn) warn.style.display = over ? 'block' : 'none';
+  el.style.color = over ? '#e0503c' : '';
+}
+window.corruptionAdd = corruptionAdd; window.syncCorruption = syncCorruption; window.corruptionSave = corruptionSave;
 
 // Weapon types the character has mastered (Fighter class feature + any talent
 // grants). Bonus per the rules = +1 atk/dmg, plus half your level (round down).
@@ -3117,6 +3200,8 @@ function collectSheet(){
       luckPts:   document.getElementById('lk-val')?.value || '',
       options:   options,
       ship:      (typeof window.dsShipState === 'function') ? window.dsShipState() : (window._dsShipState || null),
+      triad:     (typeof triadState === 'function') ? triadState() : null,
+      corruption: document.getElementById('corruption-pts')?.value || '',
       featureUses: _featureUses && typeof _featureUses === 'object' ? _featureUses : {},
       trackers:       Array.isArray(_trackers) ? _trackers : [],
       customTrackers: Array.isArray(_customTrackers) ? _customTrackers : [],
@@ -3462,6 +3547,13 @@ function _applySDData(d){
   // DarkSpace starship state (round-trips with the character save).
   window._dsShipState = (d._sheet && d._sheet.ship) ? d._sheet.ship : null;
   if(typeof window.dsShipLoaded === 'function') window.dsShipLoaded();
+  // DarkSpace Triad + Corruption state.
+  var _tr = d._sheet && d._sheet.triad;
+  if(_tr && _tr.known){ _triad = { known:{Body:!!_tr.known.Body,Mind:!!_tr.known.Mind,Soul:!!_tr.known.Soul}, exhausted:{Body:!!(_tr.exhausted&&_tr.exhausted.Body),Mind:!!(_tr.exhausted&&_tr.exhausted.Mind),Soul:!!(_tr.exhausted&&_tr.exhausted.Soul)} }; }
+  else { _triad = { known:{Body:false,Mind:false,Soul:false}, exhausted:{Body:false,Mind:false,Soul:false} }; }
+  set('corruption-pts', (d._sheet && d._sheet.corruption) || '');
+  if(typeof renderTriad === 'function') try{ renderTriad(); }catch(e){}
+  if(typeof syncCorruption === 'function') try{ syncCorruption(); }catch(e){}
   if(typeof syncModeChrome === 'function') syncModeChrome();
 }
 
@@ -3593,6 +3685,13 @@ function takeRest() {
     _featureUses = {};
     if(typeof renderTalentsView === 'function') renderTalentsView();
     notes.push(usedCount + ' feature use' + (usedCount > 1 ? 's' : '') + ' restored');
+  }
+
+  // Triad powers exhausted by a critical failure are restored on a rest.
+  if(typeof _triad === 'object' && _triad.exhausted) {
+    let triadBack = 0;
+    ['Body','Mind','Soul'].forEach(function(p){ if(_triad.exhausted[p]) { _triad.exhausted[p] = false; triadBack++; } });
+    if(triadBack) { notes.push('Triad power' + (triadBack>1?'s':'') + ' restored'); if(typeof renderTriad === 'function') renderTriad(); }
   }
 
   saveSheet(false);
@@ -5297,7 +5396,7 @@ window._dsRefTabTo = _dsRefTabTo;
 function renderDarkSpaceRef(){
   const DS = window.DARKSPACE; if(!DS) return;
   const E = t => _qrEsc(t);
-  const TABS = ['Species','Archetypes','Backgrounds','Motivations','The Triad','Gear','Weapons','Armor','Advanced Tech','Starships'];
+  const TABS = ['Species','Archetypes','Backgrounds','Motivations','The Triad','Corruption','Gear','Weapons','Armor','Advanced Tech','Starships'];
   const tabsEl = document.getElementById('dsref-tabs');
   tabsEl.innerHTML = TABS.map(t =>
     '<button onclick="_dsRefTabTo('+JSON.stringify(t).replace(/"/g,'&quot;')+')" style="padding:5px 10px;border-radius:5px;cursor:pointer;font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;letter-spacing:.05em;'+
@@ -5337,7 +5436,29 @@ function renderDarkSpaceRef(){
       DS.triad.powers.forEach(p=> { h+=H4(p.name, p.stat); h+=P(p.text); });
       h += H4('Feat Difficulty');
       h += table(['Difficulty','DC','Die'], DS.triad.feats.map(f=>tblRow([f.diff, f.dc, f.die])));
+      ['Body','Mind','Soul'].forEach(function(pw){
+        var fs = (DS.triad.exampleFeats||[]).filter(function(f){return f.power===pw;});
+        if(!fs.length) return;
+        h += H4(pw + ' Feats');
+        fs.forEach(function(f){ h += P(f.name + '. ' + f.text); });
+      });
       h += P(DS.triad.notes);
+      break;
+    case 'Corruption':
+      if(DS.corruption){
+        h += P(DS.corruption.intro);
+        h += H4('Corruption Check'); h += P(DS.corruption.check);
+        h += H4('Succumbing'); h += P(DS.corruption.threshold);
+        h += H4('Restoration'); h += P(DS.corruption.restoration);
+        h += H4('Side Effects (d8)');
+        Object.keys(DS.corruption.sideEffects).forEach(function(cat){
+          h += table([cat, ''], DS.corruption.sideEffects[cat].map(function(x,i){return tblRow([i+1, x]);}));
+        });
+        h += H4('Sources of Corruption (d8)');
+        Object.keys(DS.corruption.sources).forEach(function(cat){
+          h += table([cat, ''], DS.corruption.sources[cat].map(function(x,i){return tblRow([i+1, x]);}));
+        });
+      }
       break;
     case 'Gear':
       h += P(DS.credits.note);
