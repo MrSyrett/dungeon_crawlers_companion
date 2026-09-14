@@ -146,6 +146,7 @@ const CO_REFERENCE: { href: string; label: string }[] = [
   { href: "/candela/actions", label: "Actions" },
   { href: "/candela/abilities", label: "Abilities" },
   { href: "/candela/gear", label: "Gear" },
+  { href: "/candela/rules", label: "Rules" },
 ];
 
 // Per-system reference links, keyed the same way the toggle is.

@@ -10,6 +10,7 @@ export type CoSpecialty = {
 export type CoRole = { role: string; mastery: string; desc: string; abilities: CoAbility[]; specialties: CoSpecialty[] };
 export type CoGear = { name: string; type: string; desc: string };
 export type CoMark = { name: string; desc: string };
+export type CoRule = { title: string; text: string };
 
 export const CO_DRIVES: CoDrive[] = [
   {
@@ -759,5 +760,36 @@ export const CO_MARKS: CoMark[] = [
   {
     "name": "Bleed",
     "desc": "Magickal corruption — a ghost’s touch, venom, harmful arcane energy."
+  }
+];
+
+export const CO_RULES: CoRule[] = [
+  {
+    "title": "Action Roll",
+    "text": "Take d6 equal to your action rating (0–3). Spend a drive point or accept help for +1d, to a max of six dice. Read the highest die."
+  },
+  {
+    "title": "Results",
+    "text": "6 = full success · 4–5 = mixed success (a cost) · 1–3 = miss · two or more 6s = critical."
+  },
+  {
+    "title": "Rating 0",
+    "text": "Roll two dice and take the lowest — no crit possible."
+  },
+  {
+    "title": "Gilded",
+    "text": "A gilded action replaces one die with a gilded die; take its result (even if lower) to refresh a point in that action’s drive."
+  },
+  {
+    "title": "Resistance",
+    "text": "For every 3 maximum drive points you have 1 resistance in that drive. Burn one to reroll dice equal to the action’s rating."
+  },
+  {
+    "title": "Marks & Scars",
+    "text": "Body / Brain / Bleed each hold 3 marks; the 4th drops you and becomes a scar — clear the track, note the scar, shift one action point."
+  },
+  {
+    "title": "Stakes",
+    "text": "Low / Standard / High — the GM sets how bad a mixed success or miss will be before you roll."
   }
 ];

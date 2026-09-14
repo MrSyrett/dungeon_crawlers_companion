@@ -68,6 +68,10 @@ export function CountLine({ count, noun, base, filtered }: { count: number; noun
   );
 }
 
+export function SectionH({ children }: { children: React.ReactNode }) {
+  return <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fc2b0]">{children}</h2>;
+}
+
 export function EmptyState({ noun, base }: { noun: string; base: string }) {
   return (
     <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-6">

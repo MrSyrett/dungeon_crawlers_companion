@@ -262,10 +262,28 @@ const CO_MARKS = [
   { name: 'Bleed', desc: 'Magickal corruption — a ghost’s touch, venom, harmful arcane energy.' },
 ];
 
+// ── Quick rules (for the sheet's Rules overlay) ────────────────────────────
+const CO_RULES = [
+  { title: 'Action Roll', text: 'Take d6 equal to your action rating (0–3). Spend a drive point or accept help for +1d, to a max of six dice. Read the highest die.' },
+  { title: 'Results', text: '6 = full success · 4–5 = mixed success (a cost) · 1–3 = miss · two or more 6s = critical.' },
+  { title: 'Rating 0', text: 'Roll two dice and take the lowest — no crit possible.' },
+  { title: 'Gilded', text: 'A gilded action replaces one die with a gilded die; take its result (even if lower) to refresh a point in that action’s drive.' },
+  { title: 'Resistance', text: 'For every 3 maximum drive points you have 1 resistance in that drive. Burn one to reroll dice equal to the action’s rating.' },
+  { title: 'Marks & Scars', text: 'Body / Brain / Bleed each hold 3 marks; the 4th drops you and becomes a scar — clear the track, note the scar, shift one action point.' },
+  { title: 'Stakes', text: 'Low / Standard / High — the GM sets how bad a mixed success or miss will be before you roll.' },
+];
+
+// Mutable homebrew pools — filled at runtime by co-homebrew.js (fetch → inject).
+const CO_HB_ABILITIES = [];
+const CO_HB_GEAR = [];
+
 if (typeof window !== 'undefined') {
   window.CO_DRIVES = CO_DRIVES;
   window.CO_ACTIONS = CO_ACTIONS;
   window.CO_ROLES = CO_ROLES;
   window.CO_GEAR = CO_GEAR;
   window.CO_MARKS = CO_MARKS;
+  window.CO_RULES = CO_RULES;
+  window.CO_HB_ABILITIES = CO_HB_ABILITIES;
+  window.CO_HB_GEAR = CO_HB_GEAR;
 }

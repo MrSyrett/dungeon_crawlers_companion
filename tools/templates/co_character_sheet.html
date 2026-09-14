@@ -6,24 +6,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Candela Obscura Character Sheet</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="/tools-data/co-data.js"></script>
 <style>
-/* ═══ Candela Obscura character sheet ═══ Same skeleton as the Nimble / ACE /
-   Star Wars sheets (paper sheet + sticky Roll Log). Accent --co (gaslamp teal). */
-:root {
-  --bg:#e6ebe9;--paper:#f6f8f6;--ink:#182220;--muted:#586460;--rule:#b3bfba;
-  --co:#2fa595;--co-dk:#1c6b60;--co-lt:#d7efe9;--gild:#b8892a;--red:#b23c34;--bleed:#7d4fb0;
-  --border:#233029;--section-hdr:#12201c;--box:#eaf0ed;--input-bg:#fff;--input-border:#889;
+/* ═══ Candela Obscura sheet ═══ Same skeleton + chrome as the ICRPG / Star Wars /
+   ACE / Nimble / D6 sheets (framed paper card + two-column body + tabs + sticky
+   Roll Log). Accent --co (gaslamp teal). */
+:root{
+  --bg:#e6ebe9;--paper:#f6f8f6;--ink:#182220;--muted:#586460;--rule:#c2cec9;
+  --co:#2fa595;--co-dk:#1c6b60;--co-lt:#d7efe9;--gild:#a97f22;--red:#b23c34;--bleed:#7d4fb0;--blue:#2b6cb0;
+  --border:#233029;--section-hdr:#12201c;--box:#eaf0ed;--input-bg:#fff;--input-border:#8a938f;
   --log-bg:#0f1a18;--log-text:#e9efec;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
 .app-wrap{display:flex;flex:1;min-height:0;align-items:flex-start;}
 .sheet-wrap{flex:1;overflow-y:auto;padding:44px 16px 16px;}
-.sheet{max-width:940px;margin:0 auto;}
 
-/* ── Roll Log (shared skeleton) ── */
+/* Roll log */
 .roll-log{width:280px;flex-shrink:0;background:var(--log-bg);display:flex;flex-direction:column;border-left:3px solid var(--co);position:sticky;top:0;height:100vh;overflow:hidden;}
 #log-collapse-btn{position:fixed;right:280px;top:50%;transform:translateY(-50%);z-index:201;background:var(--co);color:white;border:none;cursor:pointer;width:20px;height:56px;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;border-radius:4px 0 0 4px;box-shadow:-2px 0 6px rgba(0,0,0,.3);transition:right .2s ease;}
 #log-collapse-btn::after{content:"\25C0";}
@@ -42,7 +42,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-entry.remote{border-left:3px solid #c88a5a;background:#1c2320;}
 .log-hint{color:#3a4a45;font-size:11px;font-family:'Barlow Condensed',sans-serif;text-align:center;padding:20px 10px;letter-spacing:.06em;text-transform:uppercase;}
 .log-actions{display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;border-bottom:1px solid #1b2825;}
-.log-action-btn{flex:1;padding:6px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-radius:2px;}
+.log-action-btn{flex:1;padding:6px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;border-radius:2px;}
 .log-action-btn.wizard{background:#123029;color:#5fd3b0;border:1px solid #1f5a4d;}
 .log-action-btn.wizard:hover{background:#1f5a4d;color:white;}
 .log-action-btn.rules{background:#1e2a26;color:#b8d8cd;border:1px solid #2f4a42;}
@@ -52,213 +52,260 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .dm-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.75);}
 .dm-toggle-btn{width:36px;height:18px;background:#333;border:1px solid #555;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
 .dm-toggle-btn.on{background:#5fd3b0;border-color:#3f9e7e;}
-.dm-toggle-btn::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:1px;left:1px;transition:left .2s;}
-.dm-toggle-btn.on::after{left:19px;}
-
-/* ── Dice tray ── */
+.dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:white;border-radius:50%;transition:left .2s;}
+.dm-toggle-btn.on::after{left:20px;background:#0f1a18;}
 .dice-tray{border-top:1px solid #1b2825;padding:10px;display:flex;flex-direction:column;gap:7px;background:#0b1512;}
-.tray-row{display:flex;gap:6px;align-items:center;}
-.tray-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7d938c;}
-.tray-note{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#5a6f68;letter-spacing:.04em;}
-.tray-input{background:#16211e;border:1px solid #2a3b36;color:#dde;font-family:'Share Tech Mono',monospace;font-size:13px;padding:5px 6px;border-radius:3px;outline:none;width:54px;text-align:center;}
-.tray-chk{display:flex;align-items:center;gap:5px;color:#9fb3ac;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
-.dice-btn{flex:1;padding:8px 0;background:var(--co);border:1px solid var(--co-dk);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:3px;}
+.tray-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.tray-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#7d938c;flex-shrink:0;}
+.tray-note{font-size:10px;color:#5a6f68;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em;line-height:1.3;}
+.tray-input{background:#16211e;border:1px solid #2a3b36;color:#dde;font-family:'Share Tech Mono',monospace;font-size:13px;padding:5px 6px;border-radius:3px;outline:none;width:52px;text-align:center;}
+.tray-toggle{background:#16211e;border:1px solid #2a3b36;color:#9fb3ac;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 8px;border-radius:3px;cursor:pointer;}
+.tray-toggle.on{background:#123029;color:#5fd3b0;border-color:#1f5a4d;}
+.dice-btn{flex:1;padding:8px 0;background:var(--co);border:1px solid var(--co-dk);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border-radius:3px;}
 .dice-btn:hover{background:var(--co-dk);}
-.dice-btn.ghost{background:#16211e;color:#9fb3ac;border-color:#2a3b36;}
 
-/* ── Roll toast ── */
-#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(10,16,14,0.94);border:2px solid var(--co);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,0.7);}
-#roll-toast.show{display:block;}
-#roll-toast.crit{border-color:#5fd3a8;}#roll-toast.fumble{border-color:#e0776f;}
-#roll-toast .t-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#9fb3ac;}
-#roll-toast .t-result{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#fff;}
-#roll-toast .t-detail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8aa;margin-top:2px;}
+/* Sheet card */
+.sheet{background:var(--paper);border:2px solid var(--border);max-width:1040px;margin:0 auto;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+.section-bar{background:var(--section-hdr);color:white;font-family:'Cinzel',serif;font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.section-bar.accent{background:var(--co);}
+.section-bar .sb-note{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:.06em;text-transform:none;color:rgba(255,255,255,.78);}
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.hdr-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:3px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.hdr-btn:hover{background:rgba(255,255,255,.3);}
 
-/* ── Sheet paper components ── */
-.hdr-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;border-bottom:2px solid var(--co);padding-bottom:12px;margin-bottom:16px;}
-.hdr-logo .co-word{font-family:'Cinzel',serif;font-weight:800;font-size:26px;letter-spacing:.02em;color:var(--co-dk);line-height:1;}
-.hdr-logo .co-sub{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--co);margin-top:3px;}
-.hdr-fields{display:flex;gap:10px;flex-wrap:wrap;flex:1;justify-content:flex-end;}
-.hdr-field{display:flex;flex-direction:column;gap:2px;}
-.hdr-field label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);}
-input,select,textarea{font-family:'Barlow',sans-serif;font-size:14px;color:var(--ink);background:var(--input-bg);border:1px solid var(--input-border);border-radius:4px;padding:6px 8px;}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--co);}
-textarea{width:100%;resize:vertical;line-height:1.35;}
-.hdr-field input{min-width:110px;}
-.hdr-field.wide input{min-width:180px;}
+/* Header */
+.hdr-row{display:flex;border-bottom:2px solid var(--border);background:var(--section-hdr);}
+.hdr-logo{padding:10px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:150px;gap:2px;border-right:2px solid #2a3b36;}
+.hdr-logo .lg-word{font-family:'Cinzel',serif;font-weight:800;font-size:22px;line-height:1;color:var(--co);letter-spacing:.02em;text-align:center;}
+.hdr-logo .lg-sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#8ba79f;text-align:center;}
+.hdr-fields{flex:1;display:grid;grid-template-columns:repeat(12,1fr);}
+.hdr-field{padding:5px 8px 6px;border-right:1px solid #2a3b36;border-bottom:1px solid #2a3b36;min-width:0;}
+.hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#5fd3b0;margin-bottom:2px;}
+.hdr-field input,.hdr-field select{width:100%;border:none;border-bottom:1px solid #37514a;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;outline:none;padding:2px 0;}
+.hdr-field select{font-size:15px;cursor:pointer;}
+.hdr-field select option{color:#111;background:#fff;}
+.hdr-field input::placeholder{color:#5a6f68;font-weight:500;}
+.hdr-field.lastcol{border-right:none;}
 
-.section{margin-bottom:16px;}
-.section-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--section-hdr);color:#fff;padding:6px 12px;border-radius:5px 5px 0 0;}
-.section-bar h2{font-family:'Cinzel',serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.14em;}
-.section-bar .bar-note{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);}
-.section-body{border:1px solid var(--rule);border-top:none;border-radius:0 0 6px 6px;background:var(--paper);padding:12px;}
+/* Body */
+.body-row{display:flex;border-bottom:2px solid var(--border);align-items:stretch;}
+.stats-col{width:380px;flex-shrink:0;border-right:2px solid var(--border);display:flex;flex-direction:column;}
+.center-col{flex:1;display:flex;flex-direction:column;min-width:0;}
+.blk{padding:10px;}
 
-.drives{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.drive{border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:10px;}
-.drive h3{font-family:'Cinzel',serif;font-size:14px;text-transform:uppercase;letter-spacing:.12em;color:var(--co-dk);}
-.drive .blurb{font-size:11px;color:var(--muted);margin:1px 0 8px;}
-.pips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px;}
-.pip{width:17px;height:17px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;background:#fff;padding:0;}
+/* Drives */
+.drives{display:flex;flex-direction:column;gap:8px;padding:10px;border-bottom:1px solid var(--rule);}
+.drive{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:8px 10px;}
+.drive .dh{display:flex;justify-content:space-between;align-items:baseline;}
+.drive h3{font-family:'Cinzel',serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--co-dk);}
+.drive .dmeta{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);}
+.drive .dmeta b{color:var(--co-dk);}
+.pips{display:flex;gap:4px;flex-wrap:wrap;margin:5px 0 3px;}
+.pip{width:16px;height:16px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;background:#fff;padding:0;}
 .pip.max{border-color:var(--co-dk);}
 .pip.cur{background:var(--co);border-color:var(--co-dk);}
-.drive .meta{font-size:11px;color:var(--muted);}
-.drive .meta b{color:var(--co-dk);}
-.resbox{display:flex;gap:4px;align-items:center;margin-top:6px;}
-.resbox .rpip{width:14px;height:14px;border:2px solid var(--gild);border-radius:3px;cursor:pointer;background:#fff;padding:0;}
+.resbox{display:flex;gap:4px;align-items:center;margin-top:3px;}
+.resbox .rpip{width:13px;height:13px;border:2px solid var(--gild);border-radius:3px;cursor:pointer;background:#fff;padding:0;}
 .resbox .rpip.burned{background:var(--gild);opacity:.4;}
-.resbox .lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;}
+.resbox .lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800;}
 
-.actgroup{margin-bottom:10px;}
-.actgroup > .gh{font-family:'Barlow Condensed',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--co-dk);font-weight:800;margin:2px 0 5px;border-bottom:1px solid var(--rule);padding-bottom:3px;}
-.action{display:flex;align-items:center;gap:10px;padding:5px 6px;border-radius:5px;}
+/* Actions */
+.actgroup{padding:2px 10px;}
+.actgroup > .gh{font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--co-dk);font-weight:800;margin:6px 0 3px;border-bottom:1px solid var(--rule);padding-bottom:2px;}
+.action{display:flex;align-items:center;gap:9px;padding:4px 4px;border-radius:5px;}
 .action:hover{background:var(--co-lt);}
-.action .diamond{width:14px;height:14px;transform:rotate(45deg);border:2px solid var(--rule);cursor:pointer;flex:0 0 auto;border-radius:2px;background:#fff;padding:0;}
-.action .diamond.on{background:var(--gild);border-color:#8a6a1e;}
-.action .dots{display:flex;gap:5px;flex:0 0 auto;}
-.action .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;background:#fff;padding:0;}
+.action .diamond{width:13px;height:13px;transform:rotate(45deg);border:2px solid var(--rule);cursor:pointer;flex:0 0 auto;border-radius:2px;background:#fff;padding:0;}
+.action .diamond.on{background:var(--gild);border-color:#7a5c18;}
+.action .dots{display:flex;gap:4px;flex:0 0 auto;}
+.action .dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;background:#fff;padding:0;}
 .action .dot.on{background:var(--co);border-color:var(--co-dk);}
 .action .roll-name{flex:1 1 auto;min-width:0;text-align:left;background:none;border:none;cursor:pointer;padding:0;color:var(--ink);}
 .action .roll-name b{font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.02em;}
-.action .roll-name .sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
-.action .roll-name:hover b{color:var(--co-dk);}
-.action .roll-ico{font-size:11px;color:var(--co);opacity:0;flex:0 0 auto;}
-.action:hover .roll-ico{opacity:1;}
+.action .roll-name .sub{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.action .roll-name:hover b{color:var(--co-dk);text-decoration:underline;}
 
-.marks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.mtrack{border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:10px;}
-.mtrack h3{font-family:'Cinzel',serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;}
-.mtrack .mboxes{display:flex;gap:6px;margin:8px 0;}
-.mbox{width:26px;height:26px;border:2px solid var(--rule);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--red);background:#fff;padding:0;}
+/* Marks */
+.marks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;border-bottom:1px solid var(--rule);}
+.mtrack{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:8px;}
+.mtrack h3{font-family:'Cinzel',serif;font-size:12px;text-transform:uppercase;letter-spacing:.08em;}
+.mtrack .desc{font-size:10px;color:var(--muted);line-height:1.3;margin-top:1px;}
+.mtrack .mboxes{display:flex;gap:5px;margin:7px 0 5px;}
+.mbox{width:24px;height:24px;border:2px solid var(--rule);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--red);background:#fff;padding:0;}
 .mbox.on{border-color:var(--red);}
 .mtrack.bleed .mbox{color:var(--bleed);}
 .mtrack.bleed .mbox.on{border-color:var(--bleed);}
-.mtrack .scarslot{width:100%;margin-top:2px;font-size:13px;}
-.mtrack .desc{font-size:10px;color:var(--muted);}
+.mtrack .scarslot{width:100%;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--ink);outline:none;padding:2px 0;}
 
-.slotline{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
-.slotline .tick{width:16px;height:16px;border:2px solid var(--co-dk);border-radius:4px;flex:0 0 auto;cursor:pointer;background:#fff;padding:0;}
-.slotline .tick.on{background:var(--co);}
-.slotline input{flex:1 1 auto;}
-.ability{border:1px solid var(--rule);border-radius:6px;padding:8px 10px;margin-bottom:8px;background:var(--box);}
-.ability b{color:var(--co-dk);}
-.ability .d{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35;}
-.refbtn{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--co-dk);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
-.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+/* Tabs */
+.tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
+.tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.6);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+.tab-btn:hover{color:#fff;}
+.tab-btn.on{color:#fff;border-bottom-color:var(--co);background:rgba(47,165,149,.28);}
+.tab-panel{display:none;}
+.tab-panel.on{display:block;}
+
+/* Tables */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 8px;border-bottom:1px solid var(--rule);}
+.tbl td{padding:3px 8px;border-bottom:1px solid var(--rule);vertical-align:middle;}
+.tbl input{width:100%;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;color:var(--ink);outline:none;padding:3px 0;}
+.tbl input:focus{border-bottom-color:var(--co);}
+.tbl .row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;width:auto;}
+.tbl .row-x:hover{color:var(--red);}
+.tbl-empty{padding:12px;font-size:12px;color:var(--muted);}
+.fld{margin-bottom:8px;}
+.fld label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
+.fld input,.fld textarea{width:100%;border:1px solid var(--rule);background:var(--input-bg);font-family:'Barlow',sans-serif;font-size:13px;color:var(--ink);outline:none;padding:6px 8px;resize:vertical;}
+.fld input:focus,.fld textarea:focus{border-color:var(--co);}
 .keys{display:flex;flex-direction:column;gap:6px;}
-.smallbtn{font-family:'Barlow Condensed',sans-serif;background:var(--co);border:1px solid var(--co-dk);color:#fff;border-radius:4px;padding:4px 10px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;}
-.smallbtn.ghost{background:transparent;color:var(--co-dk);}
+.keys input{width:100%;border:1px solid var(--rule);background:var(--input-bg);font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--ink);outline:none;padding:6px 8px;}
+.rel-row{display:flex;gap:8px;margin-bottom:6px;}
+.rel-row input{flex:1;border:1px solid var(--rule);background:var(--input-bg);font-size:13px;color:var(--ink);outline:none;padding:5px 8px;}
+.sheet-foot{padding:6px 10px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--muted);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.subhead{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--co-dk);padding:8px 10px 2px;}
 
-/* ── Modals ── */
-.modal-bd{position:fixed;inset:0;background:rgba(8,14,12,.72);display:none;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:300;}
-.modal-bd.on{display:flex;}
-.modal{background:var(--paper);border:1px solid var(--co);border-radius:12px;max-width:640px;width:100%;padding:20px;box-shadow:0 10px 40px rgba(0,0,0,.4);}
-.modal h2{font-family:'Cinzel',serif;font-size:18px;color:var(--co-dk);margin-bottom:10px;}
-.modal .step{font-size:13px;color:var(--muted);line-height:1.45;margin-bottom:10px;}
-.pool-badge{display:inline-block;background:var(--co-lt);border:1px solid var(--co);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;color:var(--co-dk);}
-.rules-overlay{position:fixed;inset:0;background:rgba(8,14,12,.72);display:none;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto;z-index:300;}
-.rules-overlay.open{display:flex;}
+/* Picker / browse */
+.brow-controls{padding:10px 16px 8px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;border-bottom:1px solid #24322d;}
+.brow-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.brow-sel{flex:1;min-width:120px;cursor:pointer;}
+.brow-list{padding:4px 12px;overflow-y:auto;}
+.brow-item{display:flex;align-items:flex-start;gap:10px;padding:8px 2px;border-bottom:1px solid #22302b;}
+.brow-main{flex:1;min-width:0;}
+.brow-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#e6efec;letter-spacing:.01em;}
+.brow-cost{font-family:'Share Tech Mono',monospace;font-size:11px;color:#5fd3b0;margin-left:8px;font-weight:400;}
+.brow-desc{font-size:11.5px;color:#b3c2bc;line-height:1.4;margin-top:3px;}
+.brow-add{flex-shrink:0;background:var(--co);color:#08201c;border:none;border-radius:4px;padding:6px 11px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.brow-add:hover{background:#5fd3b0;}
+.brow-add.have{background:transparent;color:#6f857e;border:1px solid #34463f;cursor:default;}
+.brow-empty{padding:14px 4px;font-size:12px;color:#889;}
 
-/* ── Dark mode ── */
-body.dark{--bg:#0c1512;--paper:#12201c;--ink:#e7efeb;--muted:#8ba39c;--rule:#28403a;--box:#16241f;--input-bg:#0e1a17;--input-border:#2c463f;--section-hdr:#0a1512;}
-body.dark input,body.dark select,body.dark textarea{color:var(--ink);}
-.roll-log{transition:width .2s ease;}
-.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
+/* Toast + modals */
+#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(10,16,14,0.94);border:2px solid var(--co);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,0.7);}
+#roll-toast.show{display:block;}
+#roll-toast.crit{border-color:#5fd3a8;}#roll-toast.fumble{border-color:#e0776f;}
+#roll-toast .t-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8ba79f;margin-bottom:3px;}
+#roll-toast .t-result{font-family:'Cinzel',serif;font-size:24px;font-weight:800;color:#fff;line-height:1;}
+#roll-toast .t-detail{font-size:11px;color:#9fb3ac;margin-top:3px;}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:16px;}
+.ov.open{display:flex;}
+.modal{background:#16211e;border:2px solid var(--co);border-radius:6px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e6efec;font-family:'Barlow',sans-serif;}
+.modal.wide{max-width:820px;}
+.modal-hd{background:#0f1a18;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-hd .ttl{font-family:'Cinzel',serif;font-weight:700;font-size:17px;letter-spacing:.08em;text-transform:uppercase;color:#5fd3b0;line-height:1;}
+.modal-hd .x{background:transparent;border:none;color:#8ba79f;font-size:20px;cursor:pointer;padding:0 4px;}
+.modal-bd{padding:14px 16px;overflow-y:auto;}
+.modal-ft{padding:10px 16px;border-top:1px solid #2a3b36;display:flex;justify-content:space-between;gap:8px;flex-shrink:0;align-items:center;}
+.m-btn{padding:9px 14px;border:none;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:var(--co);color:#fff;}
+.m-btn:hover{background:var(--co-dk);}
+.m-btn.ghost{background:#22302b;color:#bcd;border:1px solid #34463f;}
+.m-btn.warn{background:#3a1a1a;color:#df8a8a;border:1px solid #7a2d2d;}
+.m-btn:disabled{opacity:.4;cursor:default;}
+.m-hint{font-size:12px;color:#9fb3ac;margin:0 0 12px;line-height:1.5;}
+.m-input{width:100%;padding:9px 10px;background:#101a17;border:1px solid #24322d;border-radius:5px;color:#eee;font-family:Barlow,sans-serif;font-size:13px;outline:none;}
+.m-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#5fd3b0;margin:10px 0 5px;}
+.rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#5fd3b0;margin:12px 0 3px;}
+.rules-list p{font-size:12px;line-height:1.5;color:#cdd;}
+/* Builder */
+.builder-chip{background:#16211e;border:1px solid #2a3b36;color:#dde;border-radius:12px;padding:4px 11px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
+.builder-chip:hover{border-color:var(--co);}
+.builder-chip.sel{background:#123029;border-color:var(--co);color:#5fd3b0;}
+.a-attr{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5fd3b0;margin-top:8px;border-bottom:1px solid #2a3b36;padding-bottom:2px;}
+.a-skills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px;margin-top:4px;}
+.a-row{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;align-items:center;padding:1px 0;}
+.a-row .a-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Barlow Condensed',sans-serif;}
+.a-row .a-code{font-family:'Share Tech Mono',monospace;font-size:12px;color:#ddd;text-align:right;min-width:56px;}
+.a-row button{width:24px;height:22px;background:#22302b;border:1px solid #34463f;color:#ddd;cursor:pointer;border-radius:3px;font-weight:700;}
+.a-row button:disabled{opacity:.3;cursor:default;}
 
+/* Dark mode */
+body.dark{--bg:#0c1512;--paper:#12201c;--ink:#e7efeb;--muted:#8ba39c;--rule:#2b433c;--border:#3a544c;--box:#16241f;--input-bg:#0e1a17;--input-border:#33514a;--section-hdr:#0a1512;}
+body.dark .sheet{border-color:#3a544c;}
+body.dark .pip,body.dark .dot,body.dark .diamond,body.dark .mbox,body.dark .rpip{background:var(--input-bg);}
+
+@media(max-width:900px){.body-row{flex-direction:column;}.stats-col{width:100%;border-right:none;border-bottom:2px solid var(--border);}.hdr-fields{grid-template-columns:repeat(6,1fr);}}
 @media(max-width:820px){
-  .drives{grid-template-columns:1fr;}.marks{grid-template-columns:1fr;}.cols2{grid-template-columns:1fr;}
-  .sheet-wrap{padding:12px 12px 16px;}
-  #log-collapse-btn{right:auto;}
+  .sheet-wrap{padding:12px 12px 16px;}.marks{grid-template-columns:1fr;}
   .roll-log{width:100% !important;position:fixed;bottom:0;left:0;right:0;top:auto !important;border-left:none;border-top:3px solid var(--co);z-index:200;max-height:calc(100dvh - 34px);transition:transform .25s ease;}
   .roll-log.collapsed{transform:translateY(100%);width:100% !important;}
   #log-collapse-btn{right:12px;top:auto;bottom:calc(100% + 4px);transform:none;border-radius:4px 4px 0 0;}
   .roll-log.collapsed #log-collapse-btn{bottom:8px;}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25B2 Log";width:auto;padding:0 8px;}
 }
-textarea,select,.log-entries,.modal .step{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
+.roll-log{transition:width .2s ease;}.roll-log.collapsed{width:0 !important;overflow:hidden;border:none;}
+textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
 </style>
 </head>
 <body>
 <div id="roll-toast"><div class="t-label"></div><div class="t-dice" data-da-inline></div><div class="t-result"></div><div class="t-detail"></div></div>
-
 <div class="app-wrap">
 <div class="sheet-wrap">
 <div class="sheet">
 
   <div class="hdr-row">
-    <div class="hdr-logo"><div class="co-word">Candela Obscura</div><div class="co-sub">Investigator Dossier</div></div>
+    <div class="hdr-logo"><div class="lg-word">Candela Obscura</div><div class="lg-sub">Investigator Dossier</div></div>
     <div class="hdr-fields">
-      <div class="hdr-field wide"><label>Name</label><input type="text" id="f-name" placeholder="Investigator name" oninput="syncDocTitle()"></div>
-      <div class="hdr-field"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
-      <div class="hdr-field"><label>Role</label><select id="f-role" onchange="onRoleChange()"></select></div>
-      <div class="hdr-field"><label>Specialty</label><select id="f-specialty" onchange="onSpecialtyChange()"></select></div>
+      <div class="hdr-field wide" style="grid-column:span 4;"><label>Name</label><input type="text" id="f-name" placeholder="Investigator name"></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Role</label><select id="f-role" onchange="onRole()"></select></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Specialty</label><select id="f-specialty" onchange="onSpecialty()"></select></div>
+      <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
     </div>
   </div>
-  <p id="spec-focus" style="font-size:12px;color:var(--muted);margin:-6px 0 14px"></p>
 
-  <!-- Drives -->
-  <div class="section">
-    <div class="section-bar"><h2>Drives</h2><span class="bar-note">Spend for +1d · gilded refreshes · resist = max ÷ 3</span></div>
-    <div class="section-body"><div class="drives" id="drives"></div></div>
-  </div>
+  <div class="body-row">
+    <div class="stats-col">
+      <div class="section-bar accent"><span>Drives</span><span class="sb-note">spend for +1d · resist = max ÷ 3</span></div>
+      <div class="drives" id="drives"></div>
+      <div class="section-bar"><span>Actions</span><span class="sb-note">click a name to roll · ◆ gilded</span></div>
+      <div id="actions"></div>
+    </div>
 
-  <!-- Actions -->
-  <div class="section">
-    <div class="section-bar"><h2>Actions</h2><span class="bar-note">Click a name to roll its pool · ◆ = gilded</span></div>
-    <div class="section-body"><div id="actions"></div></div>
-  </div>
+    <div class="center-col">
+      <div class="section-bar accent"><span>Marks &amp; Scars</span><span class="sb-note">3 marks → the 4th is a scar</span></div>
+      <div class="marks" id="marks"></div>
 
-  <!-- Marks -->
-  <div class="section">
-    <div class="section-bar"><h2>Marks &amp; Scars</h2><span class="bar-note">3 marks → 4th is a scar &amp; you drop</span></div>
-    <div class="section-body"><div class="marks" id="marks"></div></div>
-  </div>
+      <div class="tabs-bar">
+        <button class="tab-btn" data-tab="abilities" onclick="setTab('abilities')">Abilities</button>
+        <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
+        <button class="tab-btn" data-tab="illumination" onclick="setTab('illumination')">Illumination</button>
+        <button class="tab-btn" data-tab="story" onclick="setTab('story')">Story</button>
+        <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
+      </div>
 
-  <div class="cols2">
-    <!-- Gear -->
-    <div class="section">
-      <div class="section-bar"><h2>Gear</h2><button class="refbtn" style="color:rgba(255,255,255,.8)" onclick="openRef('gear')">Reference</button></div>
-      <div class="section-body">
-        <div id="gear"></div>
-        <p class="desc" style="font-size:10px;color:var(--muted);margin-top:4px">Standard: Bleed Containment Vial · Hand Weapon · Bleed Detector. Plus specialty &amp; circle gear.</p>
+      <div class="tab-panel" id="tab-abilities">
+        <div class="section-bar"><span>Abilities</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('abil')">＋ Add</button></span></div>
+        <table class="tbl" id="abil-tbl"><thead><tr><th style="width:34%;">Name</th><th style="width:24%;">Source</th><th>Note</th><th style="width:26px;"></th></tr></thead><tbody id="abil-body"></tbody></table>
+        <div id="abil-empty" class="tbl-empty">No abilities yet — <b>＋ Add</b> from your role &amp; specialty, or use <b>Create</b>.</div>
+      </div>
+
+      <div class="tab-panel" id="tab-gear">
+        <div class="section-bar"><span>Gear</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add</button></span></div>
+        <table class="tbl" id="gear-tbl"><thead><tr><th style="width:38%;">Item</th><th style="width:22%;">Type</th><th>Note</th><th style="width:26px;"></th></tr></thead><tbody id="gear-body"></tbody></table>
+        <div id="gear-empty" class="tbl-empty">Up to three per assignment, declared as needed — <b>＋ Add</b> standard, specialty &amp; homebrew gear.</div>
+      </div>
+
+      <div class="tab-panel" id="tab-illumination">
+        <div class="section-bar"><span>Illumination Keys</span><span class="sb-note">fulfil one per assignment</span></div>
+        <div class="blk"><div class="keys" id="keys"></div></div>
+      </div>
+
+      <div class="tab-panel" id="tab-story">
+        <div class="section-bar"><span>Story</span></div>
+        <div class="blk">
+          <div class="fld"><label>Catalyst — why they joined Candela Obscura</label><textarea id="f-catalyst" rows="2"></textarea></div>
+          <div class="fld"><label>Question — what they hope to find out</label><textarea id="f-question" rows="2"></textarea></div>
+          <div class="fld"><label>Style — feel &amp; aesthetic</label><textarea id="f-style" rows="2"></textarea></div>
+          <div class="subhead" style="padding-left:0;">Relationships <button class="hdr-btn" style="background:var(--co);border-color:var(--co-dk);" onclick="addRelRow()">＋ Add</button></div>
+          <div id="relationships"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-notes">
+        <div class="section-bar"><span>Notes</span></div>
+        <div class="blk"><div class="fld"><textarea id="f-notes" rows="7"></textarea></div></div>
       </div>
     </div>
-    <!-- Illumination -->
-    <div class="section">
-      <div class="section-bar"><h2>Illumination Keys</h2><span class="bar-note">fulfil one per assignment</span></div>
-      <div class="section-body"><div class="keys" id="keys"></div></div>
-    </div>
   </div>
-
-  <!-- Abilities -->
-  <div class="section">
-    <div class="section-bar"><h2>Abilities</h2><button class="refbtn" style="color:rgba(255,255,255,.8)" onclick="openRef('abilities')">All Options</button></div>
-    <div class="section-body">
-      <div id="abilities-chosen"></div>
-      <div style="display:flex;gap:8px;align-items:flex-end;margin-top:8px;flex-wrap:wrap">
-        <div style="flex:1;min-width:160px"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Add ability</label><select id="ability-pick" style="width:100%"></select></div>
-        <button class="smallbtn ghost" onclick="addPickedAbility()">Add</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="cols2">
-    <div class="section">
-      <div class="section-bar"><h2>Character</h2></div>
-      <div class="section-body">
-        <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Catalyst — why they joined</label>
-        <textarea id="f-catalyst" rows="2"></textarea>
-        <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:8px;display:block">Question — what they seek</label>
-        <textarea id="f-question" rows="2"></textarea>
-        <label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-top:8px;display:block">Style — feel &amp; aesthetic</label>
-        <textarea id="f-style" rows="2"></textarea>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-bar"><h2>Relationships</h2><button class="refbtn" style="color:rgba(255,255,255,.8)" onclick="addRelRow()">+ Add</button></div>
-      <div class="section-body"><div id="relationships"></div></div>
-    </div>
-  </div>
-
+  <div class="sheet-foot"><span>Roll d6 dice pools: 6 success · 4–5 mixed · 1–3 miss. Gilded dice refresh drive.</span><span id="foot-build"></span></div>
 </div>
 </div>
 
@@ -267,92 +314,56 @@ textarea,select,.log-entries,.modal .step{scrollbar-width:thin;scrollbar-color:v
   <button id="log-collapse-btn" onclick="toggleLogCollapse()" title="Toggle Roll Log"></button>
   <div class="log-header"><span class="log-title">Roll Log</span><div style="display:flex;align-items:center;gap:6px;"><div class="dm-toggle-wrap"><span class="dm-label">Dark</span><div class="dm-toggle-btn" id="dm-toggle" onclick="toggleDarkMode()"></div></div><button class="log-clear" onclick="clearLog()">Clear</button></div></div>
   <div class="log-actions">
-    <button class="log-action-btn wizard" onclick="openWizard()" title="Build a character">Create</button>
+    <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2a3b36;background:transparent;color:#7d938c;" title="Campaign">🔗</button>
+    <button id="build-btn" class="log-action-btn wizard" onclick="COB.launch()" title="Character Builder">Create</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click an action to roll its dice pool</div></div>
   <div class="dice-tray">
-    <div class="tray-row">
-      <span class="tray-label">Bonus</span>
-      <input class="tray-input" id="tray-bonus" type="number" min="0" max="5" value="0" title="extra dice from spent drive / assistance">
-      <label class="tray-chk"><input type="checkbox" id="tray-gild" style="width:auto;padding:0"> Gild</label>
-      <span class="tray-note" style="flex:1">applied to your next action roll</span>
-    </div>
-    <div class="tray-row">
-      <button class="dice-btn ghost" onclick="rollQuick()">Roll <span id="tray-qn">1</span>d6 pool</button>
-      <input class="tray-input" id="tray-qn-in" type="number" min="0" max="6" value="1" oninput="document.getElementById('tray-qn').textContent=Math.max(0,Math.min(6,parseInt(this.value)||0))">
-    </div>
-    <div class="tray-note">6 success · 4–5 mixed · 1–3 miss · two 6s crit · rating 0 rolls two, takes the lowest · max six dice.</div>
+    <div class="tray-row"><span class="tray-label">Next roll</span><span class="tray-label" style="color:#5a6f68;">+dice</span><input class="tray-input" id="tray-bonus" type="number" value="0" min="0" max="5" title="drive spent / assistance"><button class="tray-toggle" id="tray-gild" onclick="this.classList.toggle('on')">Gild</button></div>
+    <div class="tray-row"><span class="tray-label">Free pool</span><input class="tray-input" id="tray-qn" type="number" value="1" min="0" max="6"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
+    <div class="tray-note">Click an action to roll its rating (＋ any bonus dice / gild set above). Rating 0 rolls two, takes the lowest. Max six dice.</div>
   </div>
 </div>
 </div>
 
-<!-- Wizard -->
-<div class="modal-bd" id="wizard-bd">
-  <div class="modal">
-    <h2>Build an Investigator</h2>
-    <div class="step">Choose a <b>role</b> and <b>specialty</b>, then apply the playbook. It fills your starting actions, drives, gilded action, illumination keys, and default abilities — then spend your creation points.</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-      <div style="flex:1;min-width:150px"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Role</label><select id="wz-role" style="width:100%"></select></div>
-      <div style="flex:1;min-width:150px"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)">Specialty</label><select id="wz-specialty" style="width:100%"></select></div>
-    </div>
-    <div id="wz-preview" class="step"></div>
-    <div class="step" style="border-top:1px solid var(--rule);padding-top:10px">After applying: <b>Actions</b> — raise one 0-action to 1, then distribute 3 more (max 2). <b>Drives</b> — distribute 6 more (max 6). <b>Gild</b> one extra action. <b>Abilities</b> — one role + one specialty.</div>
-    <div style="display:flex;justify-content:flex-end;gap:10px">
-      <button class="smallbtn ghost" onclick="closeWizard()">Cancel</button>
-      <button class="smallbtn" onclick="applyPlaybook()">Apply Playbook</button>
-    </div>
+<!-- Picker -->
+<div id="picker-overlay" class="ov" onclick="if(event.target===this)closePicker()">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-hd"><div class="ttl" id="picker-title">Add</div><button class="x" onclick="closePicker()">✕</button></div>
+    <div class="brow-controls"><input id="picker-search" class="m-input" placeholder="Search…" oninput="renderPicker()"><div class="brow-filters"><select id="picker-filter" class="m-input brow-sel" onchange="renderPicker()"></select><button class="m-btn ghost" onclick="addCustomFromPicker()">＋ Add custom</button></div></div>
+    <div class="modal-bd brow-list" id="picker-body"></div>
   </div>
 </div>
 
-<!-- Reference -->
-<div class="modal-bd" id="ref-bd" onclick="if(event.target===this)closeRef()"><div class="modal" id="ref-modal"></div></div>
+<div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Candela Obscura — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 
-<!-- Rules -->
-<div class="rules-overlay" id="rules-overlay">
-  <div class="modal">
-    <h2>Illuminated Worlds — Quick Rules</h2>
-    <div class="step"><b>Action roll.</b> Take d6 equal to your action rating (0–3). Spend a drive point (or accept help) to add +1d, up to six dice. Roll and read the highest die: <b>6</b> full success · <b>4–5</b> mixed success · <b>1–3</b> miss · <b>two 6s</b> critical.</div>
-    <div class="step"><b>Rating 0.</b> Roll two dice and take the lowest — no crit.</div>
-    <div class="step"><b>Gilded.</b> A gilded action replaces one die with a gilded die; take its result (even if lower) to refresh a point in that action's drive.</div>
-    <div class="step"><b>Resistance.</b> For every 3 maximum drive points you have 1 resistance in that drive. Burn one to reroll dice equal to the action's rating.</div>
-    <div class="step"><b>Marks &amp; Scars.</b> Body / Brain / Bleed each hold 3 marks; the 4th drops you and becomes a scar — clear the track, note the scar, shift one action point.</div>
-    <div style="display:flex;justify-content:flex-end"><button class="smallbtn" onclick="closeRules()">Close</button></div>
-  </div>
-</div>
-
-<!-- Dice Animation Module — shared asset: /tools-data/dice-anim.js (2D/3D dice + toast inline). -->
-<script src="/tools-data/dice-anim.js"></script>
 <script>
-/* ══════════════════════════════════════════════════════════════════════════
-   Candela Obscura character sheet — Illuminated Worlds dice pools on the shared
-   sheet skeleton (paper sheet + Roll Log). Persists under co_sheet; integrates
-   with the app host via window.__ddSave / __ddState / __ddSaveTitle.
-   ══════════════════════════════════════════════════════════════════════════ */
+// ═══ Candela Obscura Character Sheet ════════════════════════════════════════
+// Same skeleton + chrome as the ICRPG / Star Wars / ACE / Nimble / D6 sheets.
+// Mechanics: d6 dice pools; action rating = pool size; gilded dice refresh drive.
 function $(id){ return document.getElementById(id); }
-function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function dN(n){ return Math.floor(Math.random()*n)+1; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function num(v){ var n=parseInt(v,10); return isNaN(n)?0:n; }
 function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function die6(){ return 1+Math.floor(Math.random()*6); }
+function G(x){ return (typeof x!=='undefined'&&Array.isArray(x))?x:[]; }
 
-var DRIVES = window.CO_DRIVES || [];
-var ACTIONS = window.CO_ACTIONS || [];
-var ROLES = window.CO_ROLES || [];
-var GEAR = window.CO_GEAR || [];
-var MARKS = window.CO_MARKS || [];
-var DRIVE_NAMES = DRIVES.map(function(d){return d.name});
-var ACTION_NAMES = ACTIONS.map(function(a){return a.name});
-function actionDrive(a){ var f=ACTIONS.find(function(x){return x.name===a}); return f?f.drive:''; }
-function roleObj(r){ return ROLES.find(function(x){return x.role===r}) || ROLES[0]; }
-function specObj(r,s){ var ro=roleObj(r); return ro.specialties.find(function(x){return x.name===s}) || ro.specialties[0]; }
+var DRIVES=G(window.CO_DRIVES), ACTIONS=G(window.CO_ACTIONS), ROLES=G(window.CO_ROLES), GEAR=G(window.CO_GEAR), MARKS=G(window.CO_MARKS);
+var DRIVE_NAMES=DRIVES.map(function(d){return d.name;}), ACTION_NAMES=ACTIONS.map(function(a){return a.name;});
+function actionDrive(a){ var f=ACTIONS.find(function(x){return x.name===a;}); return f?f.drive:''; }
+function roleObj(r){ return ROLES.find(function(x){return x.role===r;})||ROLES[0]; }
+function specObj(r,s){ var ro=roleObj(r); return ro.specialties.find(function(x){return x.name===s;})||ro.specialties[0]; }
 
-var S = null;
+// ── State ──
+var S=null;
 function blankState(){
   var st={ name:'',pronouns:'',role:ROLES[0].role,specialty:ROLES[0].specialties[0].name,
     actions:{},gilded:{},drives:{},resUsed:{},marks:{},scars:{Body:'',Brain:'',Bleed:''},
-    gear:[{t:'',on:false},{t:'',on:false},{t:'',on:false}],abilities:[],illumination:['','',''],
-    catalyst:'',question:'',style:'',relationships:[],_sheet:{} };
+    abilities:[],gear:[],illumination:['','',''],catalyst:'',question:'',style:'',relationships:[],notes:'' };
   ACTION_NAMES.forEach(function(a){ st.actions[a]=0; st.gilded[a]=false; });
   DRIVE_NAMES.forEach(function(d){ st.drives[d]={max:0,cur:0}; st.resUsed[d]=0; });
   MARKS.forEach(function(m){ st.marks[m.name]=0; });
@@ -360,50 +371,40 @@ function blankState(){
 }
 function resTotal(d){ return Math.floor((S.drives[d].max||0)/3); }
 
-// ── Selects ──
-function fillRoleSelect(sel,val){ sel.innerHTML=''; ROLES.forEach(function(r){ var o=document.createElement('option'); o.value=r.role; o.textContent=r.role+' — '+r.mastery; sel.appendChild(o); }); if(val)sel.value=val; }
-function fillSpecSelect(sel,role,val){ sel.innerHTML=''; roleObj(role).specialties.forEach(function(sp){ var o=document.createElement('option'); o.value=sp.name; o.textContent=sp.name; sel.appendChild(o); }); if(val)sel.value=val; }
-function onRoleChange(){ S.role=$('f-role').value; var sp=roleObj(S.role).specialties[0].name; S.specialty=sp; fillSpecSelect($('f-specialty'),S.role,sp); renderSpecFocus(); renderAbilityPicker(); scheduleAutosave(); }
-function onSpecialtyChange(){ S.specialty=$('f-specialty').value; renderSpecFocus(); renderAbilityPicker(); scheduleAutosave(); }
-function renderSpecFocus(){ var sp=specObj(S.role,S.specialty); $('spec-focus').innerHTML='<b style="color:var(--co-dk)">'+esc(sp.name)+'</b> · primary drive '+sp.primaryDrive+' · '+esc(sp.focus); }
+// ── Header selects ──
+function fillRoleSelect(sel,val){ sel.innerHTML=ROLES.map(function(r){return '<option value="'+esc(r.role)+'">'+esc(r.role)+' — '+esc(r.mastery)+'</option>';}).join(''); if(val)sel.value=val; }
+function fillSpecSelect(sel,role,val){ sel.innerHTML=roleObj(role).specialties.map(function(sp){return '<option value="'+esc(sp.name)+'">'+esc(sp.name)+'</option>';}).join(''); if(val)sel.value=val; }
+function onRole(){ S.role=$('f-role').value; S.specialty=roleObj(S.role).specialties[0].name; fillSpecSelect($('f-specialty'),S.role,S.specialty); scheduleAutosave(); }
+function onSpecialty(){ S.specialty=$('f-specialty').value; scheduleAutosave(); }
 
-// ── Drives ──
+// ── Render: drives ──
 function renderDrives(){
   var host=$('drives'); host.innerHTML='';
   DRIVES.forEach(function(d){
-    var st=S.drives[d.name]; var res=resTotal(d.name); var used=S.resUsed[d.name]||0;
-    var el=document.createElement('div'); el.className='drive';
-    var pips='';
-    for(var i=1;i<=9;i++){ var cls='pip'+(i<=st.max?' max':'')+(i<=st.cur?' cur':''); pips+='<button class="'+cls+'" title="click set max · right-click spend" onclick="pipClick(\''+d.name+'\','+i+',event)" oncontextmenu="pipSpend(\''+d.name+'\','+i+',event)"></button>'; }
-    var rp='';
-    for(var r=0;r<res;r++){ rp+='<button class="rpip'+(r<used?' burned':'')+'" title="burn resistance" onclick="burnRes(\''+d.name+'\','+r+')"></button>'; }
+    var st=S.drives[d.name], res=resTotal(d.name), used=S.resUsed[d.name]||0;
+    var pips=''; for(var i=1;i<=9;i++){ pips+='<button class="pip'+(i<=st.max?' max':'')+(i<=st.cur?' cur':'')+'" title="click set max · right-click spend" onclick="pipClick(\''+d.name+'\','+i+',event)" oncontextmenu="pipSpend(\''+d.name+'\','+i+',event)"></button>'; }
+    var rp=''; for(var r=0;r<res;r++){ rp+='<button class="rpip'+(r<used?' burned':'')+'" title="burn resistance" onclick="burnRes(\''+d.name+'\','+r+')"></button>'; }
     if(res===0) rp='<span class="lbl">none</span>';
-    el.innerHTML='<h3>'+d.name+'</h3><div class="blurb">'+esc(d.blurb)+'</div><div class="pips">'+pips+'</div>'
-      +'<div class="meta">available <b>'+st.cur+'</b> / max '+st.max+'</div>'
-      +'<div class="resbox"><span class="lbl">Resist</span>'+rp+'</div>';
+    var el=document.createElement('div'); el.className='drive';
+    el.innerHTML='<div class="dh"><h3>'+d.name+'</h3><span class="dmeta">avail <b>'+st.cur+'</b>/'+st.max+'</span></div><div class="pips">'+pips+'</div><div class="resbox"><span class="lbl">Resist</span>'+rp+'</div>';
     host.appendChild(el);
   });
 }
-function pipClick(d,n,e){ e.preventDefault(); var st=S.drives[d]; st.max=(st.max===n)?n-1:n; if(st.cur>st.max)st.cur=st.max; var mx=resTotal(d); if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDrives(); scheduleAutosave(); }
+function pipClick(d,n,e){ e.preventDefault(); var st=S.drives[d]; st.max=(st.max===n)?n-1:n; if(st.cur>st.max)st.cur=st.max; if(S.resUsed[d]>resTotal(d))S.resUsed[d]=resTotal(d); renderDrives(); scheduleAutosave(); }
 function pipSpend(d,n,e){ e.preventDefault(); var st=S.drives[d]; if(n>st.max)return false; st.cur=(st.cur===n)?n-1:n; renderDrives(); scheduleAutosave(); return false; }
-function burnRes(d,i){ var mx=resTotal(d); var used=S.resUsed[d]||0; S.resUsed[d]=(i<used)?i:i+1; if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDrives(); scheduleAutosave(); }
+function burnRes(d,i){ var mx=resTotal(d),used=S.resUsed[d]||0; S.resUsed[d]=(i<used)?i:i+1; if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDrives(); scheduleAutosave(); }
 
-// ── Actions ──
+// ── Render: actions ──
 function renderActions(){
   var host=$('actions'); host.innerHTML='';
   DRIVES.forEach(function(d){
     var g=document.createElement('div'); g.className='actgroup';
     var inner='<div class="gh">'+d.name+'</div>';
-    ACTIONS.filter(function(a){return a.drive===d.name}).forEach(function(a){
-      var rating=S.actions[a.name]||0; var gild=S.gilded[a.name];
-      var dots='';
+    ACTIONS.filter(function(a){return a.drive===d.name;}).forEach(function(a){
+      var rating=S.actions[a.name]||0, gild=S.gilded[a.name], dots='';
       for(var i=1;i<=3;i++){ dots+='<button class="dot'+(i<=rating?' on':'')+'" onclick="setAction(\''+a.name+'\','+i+')"></button>'; }
-      inner+='<div class="action">'
-        +'<button class="diamond'+(gild?' on':'')+'" title="gild this action" onclick="toggleGild(\''+a.name+'\')"></button>'
-        +'<div class="dots">'+dots+'</div>'
-        +'<button class="roll-name" onclick="rollAction(\''+a.name+'\')"><b>'+a.name+'</b> <span class="sub">'+esc(a.sub)+'</span></button>'
-        +'<span class="roll-ico">▶ roll</span>'
-        +'</div>';
+      inner+='<div class="action"><button class="diamond'+(gild?' on':'')+'" title="gild" onclick="toggleGild(\''+a.name+'\')"></button><div class="dots">'+dots+'</div>'
+        +'<button class="roll-name" onclick="rollAction(\''+a.name+'\')"><b>'+a.name+'</b> <span class="sub">'+esc(a.sub)+'</span></button></div>';
     });
     g.innerHTML=inner; host.appendChild(g);
   });
@@ -411,166 +412,131 @@ function renderActions(){
 function setAction(a,n){ S.actions[a]=(S.actions[a]===n)?n-1:n; renderActions(); scheduleAutosave(); }
 function toggleGild(a){ S.gilded[a]=!S.gilded[a]; renderActions(); scheduleAutosave(); }
 
-// ── Rolling ──
-function poolTier(rolls, zeroMode){
-  var high = zeroMode ? Math.min(rolls[0],rolls[1]) : Math.max.apply(null,rolls);
-  var sixes = rolls.filter(function(v){return v===6}).length;
-  var tier, type;
-  if(!zeroMode && sixes>=2){ tier='Critical success'; type='crit'; }
-  else if(high===6){ tier='Full success'; type='crit'; }
-  else if(high>=4){ tier='Mixed success'; type='normal'; }
-  else { tier='Miss'; type='fumble'; }
-  return { high:high, tier:tier, type:type };
-}
-function rollAction(name){
-  var rating=S.actions[name]||0;
-  var bonus=clamp(parseInt($('tray-bonus').value,10)||0,0,5);
-  var trayGild=$('tray-gild').checked;
-  var gild=!!S.gilded[name] || trayGild;
-  var drive=actionDrive(name);
-  var n=rating+bonus, zeroMode=false, rolls=[];
-  if(n<=0){ zeroMode=true; rolls=[dN(6),dN(6)]; } else { n=Math.min(6,n); for(var i=0;i<n;i++)rolls.push(dN(6)); }
-  var r=poolTier(rolls, zeroMode);
-  var gildVal = gild ? rolls[rolls.length-1] : null;
-  var detail = drive+' · ['+rolls.join(',')+']';
-  if(bonus) detail += ' · +'+bonus+'d';
-  if(gildVal!==null) detail += ' · gilded '+gildVal+(gildVal<=r.high?' (take to refresh '+drive+')':'');
-  addLog(name+' · '+(zeroMode?'0':(rating+(bonus?'+'+bonus:'')))+'d', r.tier+' — '+r.high, detail, r.type);
-  $('tray-bonus').value='0'; $('tray-gild').checked=false;
-}
-function rollQuick(){
-  var n=clamp(parseInt($('tray-qn-in').value,10)||0,0,6);
-  var zeroMode=false, rolls=[];
-  if(n<=0){ zeroMode=true; rolls=[dN(6),dN(6)]; } else { for(var i=0;i<n;i++)rolls.push(dN(6)); }
-  var r=poolTier(rolls, zeroMode);
-  addLog((zeroMode?'0':n)+'d6 pool', r.tier+' — '+r.high, '['+rolls.join(',')+']', r.type);
-}
-
-// ── Marks ──
+// ── Render: marks ──
 function renderMarks(){
   var host=$('marks'); host.innerHTML='';
   MARKS.forEach(function(m){
-    var val=S.marks[m.name]||0;
-    var el=document.createElement('div'); el.className='mtrack'+(m.name==='Bleed'?' bleed':'');
-    var boxes='';
+    var val=S.marks[m.name]||0, boxes='';
     for(var i=1;i<=3;i++){ boxes+='<button class="mbox'+(i<=val?' on':'')+'" onclick="setMark(\''+m.name+'\','+i+')">'+(i<=val?'✗':'')+'</button>'; }
+    var el=document.createElement('div'); el.className='mtrack'+(m.name==='Bleed'?' bleed':'');
     el.innerHTML='<h3>'+m.name+'</h3><div class="desc">'+esc(m.desc)+'</div><div class="mboxes">'+boxes+'</div>'
-      +'<input class="scarslot" placeholder="Scar (4th mark)…" value="'+esc(S.scars[m.name]||'')+'" oninput="S.scars[\''+m.name+'\']=this.value;scheduleAutosave()">';
+      +'<input class="scarslot" placeholder="Scar…" value="'+esc(S.scars[m.name]||'')+'" oninput="S.scars[\''+m.name+'\']=this.value;scheduleAutosave()">';
     host.appendChild(el);
   });
 }
 function setMark(m,n){ S.marks[m]=(S.marks[m]===n)?n-1:n; renderMarks(); scheduleAutosave(); }
 
-// ── Gear / Keys / Abilities / Relationships ──
-function renderGear(){
-  var host=$('gear'); host.innerHTML='';
-  S.gear.forEach(function(g,i){
-    var line=document.createElement('div'); line.className='slotline';
-    line.innerHTML='<button class="tick'+(g.on?' on':'')+'" title="mark used" onclick="S.gear['+i+'].on=!S.gear['+i+'].on;renderGear();scheduleAutosave()"></button>'
-      +'<input placeholder="Gear slot '+(i+1)+'…" value="'+esc(g.t)+'" oninput="S.gear['+i+'].t=this.value;scheduleAutosave()">';
-    host.appendChild(line);
-  });
-}
-function renderKeys(){
-  var host=$('keys'); host.innerHTML='';
-  for(var i=0;i<3;i++){ (function(i){ var inp=document.createElement('input'); inp.placeholder='Illumination key '+(i+1); inp.value=S.illumination[i]||''; inp.oninput=function(){ S.illumination[i]=this.value; scheduleAutosave(); }; host.appendChild(inp); })(i); }
-}
-function renderAbilities(){
-  var host=$('abilities-chosen'); host.innerHTML='';
-  if(!S.abilities.length){ host.innerHTML='<p style="font-size:12px;color:var(--muted)">No abilities chosen yet — pick below or use Create.</p>'; }
-  S.abilities.forEach(function(ab,i){
-    var el=document.createElement('div'); el.className='ability';
-    el.innerHTML='<div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(ab.name)+'</b><button class="refbtn" onclick="removeAbility('+i+')">remove</button></div><div class="d">'+esc(ab.desc||'')+'</div>';
-    host.appendChild(el);
-  });
-}
-function renderAbilityPicker(){
-  var sel=$('ability-pick'); sel.innerHTML='';
-  var ro=roleObj(S.role), sp=specObj(S.role,S.specialty);
-  function grp(label,list){ var og=document.createElement('optgroup'); og.label=label; list.forEach(function(ab){ var o=document.createElement('option'); o.value=label+'|'+ab.name; o.textContent=ab.name; og.appendChild(o); }); sel.appendChild(og); }
-  grp(ro.role+' (Role)', ro.abilities); grp(sp.name+' (Specialty)', sp.abilities);
-}
-function addPickedAbility(){
-  var v=$('ability-pick').value; if(!v)return;
-  var ro=roleObj(S.role), sp=specObj(S.role,S.specialty); var pool=ro.abilities.concat(sp.abilities); var nm=v.split('|')[1];
-  var ab=pool.find(function(x){return x.name===nm}); if(!ab)return;
-  if(S.abilities.some(function(x){return x.name===ab.name}))return;
-  S.abilities.push({name:ab.name,desc:ab.desc}); renderAbilities(); scheduleAutosave();
-}
-function removeAbility(i){ S.abilities.splice(i,1); renderAbilities(); scheduleAutosave(); }
-function renderRelationships(){
-  var host=$('relationships'); host.innerHTML='';
-  S.relationships.forEach(function(r,i){
-    var el=document.createElement('div'); el.style.cssText='display:flex;gap:8px;margin-bottom:6px';
-    el.innerHTML='<input placeholder="Name" style="flex:1" value="'+esc(r.name)+'" oninput="S.relationships['+i+'].name=this.value;scheduleAutosave()">'
-      +'<input placeholder="Type (Mentor, Rival…)" style="flex:1" value="'+esc(r.type)+'" oninput="S.relationships['+i+'].type=this.value;scheduleAutosave()">'
-      +'<button class="refbtn" onclick="S.relationships.splice('+i+',1);renderRelationships();scheduleAutosave()">×</button>';
-    host.appendChild(el);
-  });
-}
+// ── Render: illumination + relationships ──
+function renderKeys(){ var host=$('keys'); host.innerHTML=''; for(var i=0;i<3;i++){ (function(i){ var inp=document.createElement('input'); inp.placeholder='Illumination key '+(i+1); inp.value=S.illumination[i]||''; inp.oninput=function(){ S.illumination[i]=this.value; scheduleAutosave(); }; host.appendChild(inp); })(i); } }
+function renderRelationships(){ var host=$('relationships'); host.innerHTML=''; S.relationships.forEach(function(r,i){ var el=document.createElement('div'); el.className='rel-row'; el.innerHTML='<input placeholder="Name" value="'+esc(r.name)+'" oninput="S.relationships['+i+'].name=this.value;scheduleAutosave()"><input placeholder="Type (Mentor, Rival…)" value="'+esc(r.type)+'" oninput="S.relationships['+i+'].type=this.value;scheduleAutosave()"><button class="row-x" style="background:none;border:none;color:var(--muted);cursor:pointer;" onclick="S.relationships.splice('+i+',1);renderRelationships();scheduleAutosave()">✕</button>'; host.appendChild(el); }); }
 function addRelRow(){ S.relationships.push({name:'',type:''}); renderRelationships(); scheduleAutosave(); }
 
-// ── Wizard ──
-function openWizard(){
-  fillRoleSelect($('wz-role'),S.role); fillSpecSelect($('wz-specialty'),S.role,S.specialty);
-  $('wz-role').onchange=function(){ fillSpecSelect($('wz-specialty'),this.value); wzPreview(); };
-  $('wz-specialty').onchange=wzPreview; wzPreview(); $('wizard-bd').classList.add('on');
+// ── Rows: abilities + gear (picker-driven tables) ──
+function renderRows(kind){
+  var list = kind==='abil'?S.abilities:S.gear;
+  var body=$(kind+'-body'); body.innerHTML='';
+  list.forEach(function(d,i){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><input value="'+esc(d.name||'')+'" oninput="rowEdit(\''+kind+'\','+i+',\'name\',this.value)" placeholder="Name"></td>'
+      +'<td><input value="'+esc(d.tag||'')+'" oninput="rowEdit(\''+kind+'\','+i+',\'tag\',this.value)" placeholder="'+(kind==='abil'?'Source':'Type')+'"></td>'
+      +'<td><input value="'+esc(d.note||'')+'" oninput="rowEdit(\''+kind+'\','+i+',\'note\',this.value)" placeholder="note"></td>'
+      +'<td style="text-align:right;"><button class="row-x" onclick="rowDel(\''+kind+'\','+i+')">✕</button></td>';
+    body.appendChild(tr);
+  });
+  var emp=$(kind+'-empty'); if(emp) emp.style.display=list.length?'none':'block';
 }
-function closeWizard(){ $('wizard-bd').classList.remove('on'); }
-function wzPreview(){
-  var r=$('wz-role').value, s=$('wz-specialty').value; var sp=specObj(r,s);
-  var acts=Object.keys(sp.starting.actions).map(function(k){return k+' '+sp.starting.actions[k]}).join(', ');
-  var drvs=Object.keys(sp.starting.drives).map(function(k){return k+' '+sp.starting.drives[k]}).join(', ');
-  $('wz-preview').innerHTML='<div class="pool-badge">'+roleObj(r).role+' · '+sp.name+'</div>'
-    +'<p style="margin:8px 0 2px"><b>Actions:</b> '+acts+'</p><p style="margin:2px 0"><b>Drives:</b> '+drvs+'</p>'
-    +'<p style="margin:2px 0"><b>Gilded:</b> '+sp.gilded+'</p><p style="margin:2px 0"><b>Illumination:</b> '+sp.illumination.join(' · ')+'</p>';
+function rowEdit(kind,i,f,v){ var list=kind==='abil'?S.abilities:S.gear; if(list[i]){ list[i][f]=v; scheduleAutosave(); } }
+function rowDel(kind,i){ var list=kind==='abil'?S.abilities:S.gear; list.splice(i,1); renderRows(kind); scheduleAutosave(); }
+function addRow(kind,d){ var list=kind==='abil'?S.abilities:S.gear; list.push({name:(d&&d.name)||'',tag:(d&&d.tag)||'',note:(d&&d.note)||''}); renderRows(kind); }
+
+// ── Picker ──
+var _pk=null;
+function pickerPool(kind){
+  if(kind==='abil'){
+    var ro=roleObj(S.role), sp=specObj(S.role,S.specialty), out=[];
+    ROLES.forEach(function(r){ r.abilities.forEach(function(a){ out.push({name:a.name,tag:r.role+' (Role)',note:a.desc,facet:r.role}); }); r.specialties.forEach(function(s){ s.abilities.forEach(function(a){ out.push({name:a.name,tag:s.name+' (Specialty)',note:a.desc,facet:s.name}); }); }); });
+    G(window.CO_HB_ABILITIES).forEach(function(d){ out.push({name:d.name,tag:'Homebrew'+(d.owner?' · '+d.owner:''),note:d.desc||'',facet:'Homebrew'}); });
+    // surface the current playbook's own abilities first
+    out.sort(function(a,b){ var ap=(a.facet===ro.role||a.facet===sp.name)?0:1, bp=(b.facet===ro.role||b.facet===sp.name)?0:1; return ap-bp; });
+    return out;
+  }
+  var g=GEAR.map(function(x){return {name:x.name,tag:x.type||'Standard',note:x.desc||'',facet:x.type||'Standard'};});
+  ROLES.forEach(function(r){ r.specialties.forEach(function(s){ (s.gear||[]).forEach(function(nm){ g.push({name:nm,tag:s.name+' gear',note:'',facet:s.name}); }); }); });
+  G(window.CO_HB_GEAR).forEach(function(d){ g.push({name:d.name,tag:'Homebrew',note:d.desc||'',facet:'Homebrew'}); });
+  return g;
 }
-function applyPlaybook(){
-  var r=$('wz-role').value, s=$('wz-specialty').value; var sp=specObj(r,s);
-  S.role=r; S.specialty=s;
-  ACTION_NAMES.forEach(function(a){ S.actions[a]=0; S.gilded[a]=false; });
-  Object.keys(sp.starting.actions).forEach(function(k){ S.actions[k]=sp.starting.actions[k]; });
-  DRIVE_NAMES.forEach(function(d){ S.drives[d]={max:0,cur:0}; S.resUsed[d]=0; });
-  Object.keys(sp.starting.drives).forEach(function(k){ var v=sp.starting.drives[k]; S.drives[k]={max:v,cur:v}; });
-  S.gilded[sp.gilded]=true; S.illumination=sp.illumination.slice(0,3);
-  S.abilities=[{name:roleObj(r).abilities[0].name,desc:roleObj(r).abilities[0].desc},{name:sp.abilities[0].name,desc:sp.abilities[0].desc}];
-  S.gear=[{t:sp.gear[0]||'',on:false},{t:sp.gear[1]||'',on:false},{t:'',on:false}];
-  $('f-role').value=r; fillSpecSelect($('f-specialty'),r,s);
-  renderAll(); closeWizard(); saveSheet(true);
-  addLog('Playbook applied', roleObj(r).role+' · '+sp.name, 'Now spend your creation points', 'normal');
+function openPicker(kind){
+  _pk=kind; $('picker-title').textContent=kind==='abil'?'✦ Abilities':'✦ Gear';
+  $('picker-search').value='';
+  var facets=[]; pickerPool(kind).forEach(function(x){ if(x.facet&&facets.indexOf(x.facet)<0)facets.push(x.facet); });
+  $('picker-filter').innerHTML='<option value="">All</option>'+facets.map(function(f){return '<option value="'+esc(f)+'">'+esc(f)+'</option>';}).join('');
+  renderPicker(); $('picker-overlay').classList.add('open');
+}
+function closePicker(){ $('picker-overlay').classList.remove('open'); }
+function renderPicker(){
+  if(!_pk)return;
+  var q=($('picker-search').value||'').toLowerCase().trim(), f=$('picker-filter').value;
+  var list=_pk==='abil'?S.abilities:S.gear, have={}; list.forEach(function(x){ have[(x.name||'').toLowerCase()]=1; });
+  var rows=pickerPool(_pk).filter(function(x){ if(f&&x.facet!==f)return false; if(!q)return true; return (x.name+' '+x.tag+' '+x.note).toLowerCase().indexOf(q)>=0; }).slice(0,300);
+  var el=$('picker-body');
+  if(!rows.length){ el.innerHTML='<div class="brow-empty">No matches.</div>'; return; }
+  el.innerHTML=rows.map(function(x){
+    var has=have[x.name.toLowerCase()];
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+'<span class="brow-cost">'+esc(x.tag)+'</span></div>'
+      +(x.note?'<div class="brow-desc">'+esc(x.note)+'</div>':'')+'</div>'
+      +(has?'<button class="brow-add have" disabled>✓ Added</button>':'<button class="brow-add" onclick="pickAdd('+"'"+esc(x.name).replace(/'/g,"\\'")+"','"+esc(x.tag).replace(/'/g,"\\'")+"','"+esc(x.note).replace(/'/g,"\\'")+"'"+')">＋ Add</button>')+'</div>';
+  }).join('');
+}
+function pickAdd(name,tag,note){ addRow(_pk,{name:name,tag:tag,note:note}); setTab(_pk==='abil'?'abilities':'gear'); scheduleAutosave(); renderPicker(); }
+function addCustomFromPicker(){ addRow(_pk,{}); setTab(_pk==='abil'?'abilities':'gear'); closePicker(); scheduleAutosave(); }
+
+// ── Rolling ──
+function rollAction(name){
+  var rating=S.actions[name]||0, bonus=clamp(num($('tray-bonus').value),0,5), trayGild=$('tray-gild').classList.contains('on');
+  var gild=!!S.gilded[name]||trayGild, drive=actionDrive(name), n=rating+bonus, zeroMode=false, rolls=[];
+  if(n<=0){ zeroMode=true; rolls=[die6(),die6()]; } else { n=Math.min(6,n); for(var i=0;i<n;i++)rolls.push(die6()); }
+  var high=zeroMode?Math.min(rolls[0],rolls[1]):Math.max.apply(null,rolls), sixes=rolls.filter(function(v){return v===6;}).length;
+  var tier,type;
+  if(!zeroMode&&sixes>=2){ tier='CRITICAL'; type='crit'; }
+  else if(high===6){ tier='FULL SUCCESS'; type='crit'; }
+  else if(high>=4){ tier='MIXED'; type='normal'; }
+  else { tier='MISS'; type='fumble'; }
+  var gildVal=gild?rolls[rolls.length-1]:null;
+  var detail=drive+' ['+rolls.join(',')+']'+(bonus?' +'+bonus+'d':'')+(gildVal!==null?' · gild '+gildVal+(gildVal<=high?' (refresh '+drive+')':''):'');
+  addLog(name+' · '+(zeroMode?'0':(rating+(bonus?'+'+bonus:'')))+'d', high+'  '+tier, detail, type);
+  $('tray-bonus').value='0'; $('tray-gild').classList.remove('on');
+}
+function rollQuick(){
+  var n=clamp(num($('tray-qn').value),0,6), zeroMode=false, rolls=[];
+  if(n<=0){ zeroMode=true; rolls=[die6(),die6()]; } else { for(var i=0;i<n;i++)rolls.push(die6()); }
+  var high=zeroMode?Math.min(rolls[0],rolls[1]):Math.max.apply(null,rolls), sixes=rolls.filter(function(v){return v===6;}).length;
+  var tier=(!zeroMode&&sixes>=2)?'CRITICAL':high===6?'FULL SUCCESS':high>=4?'MIXED':'MISS', type=high>=6?'crit':high>=4?'normal':'fumble';
+  addLog((zeroMode?'0':n)+'d6 pool', high+'  '+tier, '['+rolls.join(',')+']', type);
 }
 
-// ── Reference / rules ──
-function openRef(kind){
-  var m=$('ref-modal'); var html='';
-  if(kind==='gear'){
-    html='<h2>Candela Obscura Gear</h2><div class="step">Up to three pieces of gear, declared during play. Standard gear is available to anyone.</div>';
-    GEAR.forEach(function(g){ html+='<div class="ability"><b>'+esc(g.name)+'</b><div class="d">'+esc(g.desc)+'</div></div>'; });
-    var sp=specObj(S.role,S.specialty);
-    html+='<div class="step" style="margin-top:8px"><b>'+esc(sp.name)+' gear (examples):</b> '+esc(sp.gear.join(', '))+'.</div>';
-  } else if(kind==='abilities'){
-    var ro=roleObj(S.role), sp2=specObj(S.role,S.specialty);
-    html='<h2>'+esc(ro.role)+' &amp; '+esc(sp2.name)+' Abilities</h2><div class="step">Choose one from each list at creation.</div>';
-    html+='<h3 style="font-family:Cinzel;font-size:13px;color:var(--co-dk);margin:8px 0 4px">'+esc(ro.role)+' — Role</h3>';
-    ro.abilities.forEach(function(a){ html+='<div class="ability"><b>'+esc(a.name)+'</b><div class="d">'+esc(a.desc)+'</div></div>'; });
-    html+='<h3 style="font-family:Cinzel;font-size:13px;color:var(--co-dk);margin:8px 0 4px">'+esc(sp2.name)+' — Specialty</h3>';
-    sp2.abilities.forEach(function(a){ html+='<div class="ability"><b>'+esc(a.name)+'</b><div class="d">'+esc(a.desc)+'</div></div>'; });
-  }
-  html+='<div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="smallbtn" onclick="closeRef()">Close</button></div>';
-  m.innerHTML=html; $('ref-bd').classList.add('on');
+// ── Tabs ──
+function setTab(name){
+  [].forEach.call(document.querySelectorAll('.tab-btn'),function(b){ b.classList.toggle('on', b.dataset.tab===name); });
+  [].forEach.call(document.querySelectorAll('.tab-panel'),function(p){ p.classList.toggle('on', p.id==='tab-'+name); });
+  try{ localStorage.setItem('co_tab',name); }catch(e){}
 }
-function closeRef(){ $('ref-bd').classList.remove('on'); }
-function openRules(){ $('rules-overlay').classList.add('open'); }
+function setDefaultTab(){ var t='abilities'; try{ t=localStorage.getItem('co_tab')||'abilities'; }catch(e){} if(!$('tab-'+t))t='abilities'; setTab(t); }
+
+// ── Rules ──
+function openRules(){
+  var R=G(window.CO_RULES);
+  var h='<p class="m-hint">Candela Obscura runs on the Illuminated Worlds engine — d6 dice pools, not d20.</p>';
+  h+=R.map(function(q){ return '<p><b>'+esc(q.title)+'.</b> '+esc(q.text)+'</p>'; }).join('');
+  $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open');
+}
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
 
-// ── Roll Log (shared skeleton) ──
+// ═══ LOG (shared chrome) ════════════════════════════════════════════════════
 var _toastTimer=null;
 function showRollToast(label,result,detail,type){
-  var _da=window.DiceAnim&&window.DiceAnim.get?window.DiceAnim.get():null;
-  var _twoD=!!(_da&&_da.on&&_da.mode==='2d');
+  var _da=window.DiceAnim&&window.DiceAnim.get?window.DiceAnim.get():null, _twoD=!!(_da&&_da.on&&_da.mode==='2d');
   if(!_twoD){ if(window.innerWidth>768)return; var log=document.querySelector('.roll-log'); if(!log||!log.classList.contains('collapsed'))return; }
-  var t=$('roll-toast'); if(!t)return;
-  t.className='show'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
+  var t=$('roll-toast'); if(!t)return; t.className='show'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
   t.querySelector('.t-label').textContent=label; t.querySelector('.t-result').textContent=result; t.querySelector('.t-detail').textContent=detail;
   if(_toastTimer)clearTimeout(_toastTimer); _toastTimer=setTimeout(function(){ t.className=''; },3500);
 }
@@ -579,6 +545,7 @@ function addLog(label,result,detail,type){
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
   var div=document.createElement('div'); div.className='log-entry'+(type==='crit'?' crit':type==='fumble'?' fumble':'');
   div.innerHTML='<div class="roll-label">'+esc(label)+'</div><div class="roll-result">'+esc(result)+'</div><div class="roll-detail">'+esc(detail)+'</div>';
+  if(typeof campaignBroadcast==='function') campaignBroadcast(label,result,detail,type);
   entries.insertBefore(div,entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
   showRollToast(label,result,detail,type);
 }
@@ -589,66 +556,113 @@ document.querySelector('.log-header').addEventListener('click',function(e){ if(w
 function setDarkMode(on){ document.body.classList.toggle('dark',on); $('dm-toggle').classList.toggle('on',on); try{ localStorage.setItem('co_dark',on?'1':'0'); }catch(e){} }
 function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')); }
 
-// ── Render all ──
+// ═══ SAVE / LOAD ════════════════════════════════════════════════════════════
+function collectSheet(){
+  S.name=$('f-name').value.trim(); S.pronouns=$('f-pronouns').value; S.role=$('f-role').value; S.specialty=$('f-specialty').value;
+  S.catalyst=$('f-catalyst').value; S.question=$('f-question').value; S.style=$('f-style').value; S.notes=$('f-notes').value;
+  return Object.assign({}, S, { system:'CO', class:S.specialty, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
+}
+function applySheet(d){
+  d=d||{};
+  // Merge onto current state so the builder can hand a partial character.
+  if(!S) S=blankState();
+  ['name','pronouns','role','specialty','catalyst','question','style','notes'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
+  if(d.actions) ACTION_NAMES.forEach(function(a){ if(d.actions[a]!=null)S.actions[a]=d.actions[a]; });
+  if(d.gilded) ACTION_NAMES.forEach(function(a){ S.gilded[a]=!!d.gilded[a]; });
+  if(d.drives) DRIVE_NAMES.forEach(function(dn){ if(d.drives[dn])S.drives[dn]={max:d.drives[dn].max||0,cur:(d.drives[dn].cur!=null?d.drives[dn].cur:d.drives[dn].max||0)}; });
+  if(d.resUsed) DRIVE_NAMES.forEach(function(dn){ if(d.resUsed[dn]!=null)S.resUsed[dn]=d.resUsed[dn]; });
+  if(d.marks) MARKS.forEach(function(m){ if(d.marks[m.name]!=null)S.marks[m.name]=d.marks[m.name]; });
+  if(d.scars) S.scars=Object.assign({Body:'',Brain:'',Bleed:''},d.scars);
+  if(Array.isArray(d.abilities)) S.abilities=d.abilities.map(function(a){ return {name:a.name||'',tag:a.tag||'',note:a.note||''}; });
+  if(Array.isArray(d.gear)) S.gear=d.gear.map(function(g){ return {name:g.name||'',tag:g.tag||'',note:g.note||''}; });
+  if(Array.isArray(d.illumination)){ S.illumination=d.illumination.slice(0,3); while(S.illumination.length<3)S.illumination.push(''); }
+  if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',type:r.type||''}; });
+  renderAll();
+  if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
+  if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
+  scheduleAutosave();
+}
 function renderAll(){
   $('f-name').value=S.name||''; $('f-pronouns').value=S.pronouns||'';
   fillRoleSelect($('f-role'),S.role); fillSpecSelect($('f-specialty'),S.role,S.specialty);
-  $('f-catalyst').value=S.catalyst||''; $('f-question').value=S.question||''; $('f-style').value=S.style||'';
-  renderSpecFocus(); renderDrives(); renderActions(); renderMarks(); renderGear(); renderKeys(); renderAbilities(); renderAbilityPicker(); renderRelationships();
+  $('f-catalyst').value=S.catalyst||''; $('f-question').value=S.question||''; $('f-style').value=S.style||''; $('f-notes').value=S.notes||'';
+  renderDrives(); renderActions(); renderMarks(); renderKeys(); renderRelationships(); renderRows('abil'); renderRows('gear');
 }
+function saveSheet(quiet){
+  var data=collectSheet(), json=JSON.stringify(data);
+  try{ localStorage.setItem('co_sheet',json); }catch(e){}
+  if(window.__ddSave) window.__ddSave({ co_sheet:json });
+  if(!quiet) addLog('Sheet Saved','✓',data.name||'Unnamed','normal');
+}
+function syncDocTitle(){ var name=($('f-name').value||'').trim(); if(name&&window.__ddSaveTitle) window.__ddSaveTitle(name); }
+function exportSheet(){
+  var data=collectSheet(), blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=((data.name||'candela-investigator').replace(/[^a-z0-9]+/gi,'_').toLowerCase()||'candela-investigator')+'.json'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000); addLog('Sheet Exported','↓',a.download,'normal');
+}
+function importSheet(input){ var f=input.files&&input.files[0]; if(!f)return; var r=new FileReader(); r.onload=function(){ try{ applySheet(JSON.parse(r.result)); saveSheet(true); addLog('Imported','↑',f.name,'normal'); }catch(e){ addLog('Import failed','✗','Not a valid sheet file','fumble'); } }; r.readAsText(f); input.value=''; }
+var _pageReady=false; setTimeout(function(){ _pageReady=true; },2500);
+function autoSaveOnExit(){ if(!_pageReady)return; try{ saveSheet(true); }catch(e){} try{ syncDocTitle(); }catch(e){} }
+window.addEventListener('beforeunload',autoSaveOnExit); window.addEventListener('pagehide',autoSaveOnExit);
+document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden')autoSaveOnExit(); });
+var _autoSaveTimer=null;
+function scheduleAutosave(){ if(!_pageReady)return; if(_autoSaveTimer)clearTimeout(_autoSaveTimer); _autoSaveTimer=setTimeout(function(){ try{ saveSheet(true); }catch(e){} },1500); }
+window.scheduleAutosave=scheduleAutosave;
+$('f-name').addEventListener('input',function(){ if(window.__ddSaveTitle)try{ window.__ddSaveTitle(($('f-name').value||'').trim()); }catch(e){} });
+try{ if(localStorage.getItem('co_dark')==='1') setDarkMode(true); }catch(e){}
+</script>
 
-// ── Persistence ──
-function collectSheet(){
-  S.name=$('f-name').value; S.pronouns=$('f-pronouns').value;
-  S.catalyst=$('f-catalyst').value; S.question=$('f-question').value; S.style=$('f-style').value;
-  return Object.assign({}, S, { class: S.specialty });
+<script>
+// ═══ CAMPAIGN LINK — same contract as the other sheets ══════════════════════
+var _campaign=null; var _campaignClientKey='ck-'+Math.random().toString(36).slice(2,12); var _campaignLastId=0; var _campaignTimer=null;
+var CAMPAIGN_SKIP_LABELS=new Set(['Sheet Saved','Sheet Exported','Imported','Import failed','Campaign','Character Built']);
+function campaignPlayerName(){ return ($('f-name').value||'').trim()||'Player'; }
+function campaignUpdateBtn(){ var btn=$('campaign-btn'); if(!btn)return; if(_campaign){ btn.title='Campaign: '+_campaign.name; btn.style.background='#123029'; btn.style.color='#5fd3b0'; btn.style.borderColor='#1f5a4d'; } else { btn.title='Campaign'; btn.style.background='transparent'; btn.style.color='#7d938c'; btn.style.borderColor='#2a3b36'; } }
+function openCampaign(){ $('campaign-overlay').classList.add('open'); campaignRenderModal(); }
+function closeCampaign(){ $('campaign-overlay').classList.remove('open'); }
+function campaignRenderModal(){
+  var body=$('campaign-body');
+  if(_campaign) body.innerHTML='<p class="m-hint">Connected — your rolls are shared with everyone in this campaign.</p><div style="background:#0f1a18;border:1px solid #1f5a4d;border-radius:5px;padding:12px;margin-bottom:12px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-size:15px;font-weight:900;color:#5fd3b0;">'+esc(_campaign.name)+'</div><div style="font-size:11px;color:#7d938c;margin-top:4px;">Join code: <b style="color:#eee;font-family:\'Share Tech Mono\',monospace;font-size:15px;letter-spacing:.2em;">'+esc(_campaign.code)+'</b></div></div><button class="m-btn warn" style="width:100%;" onclick="campaignLeave()">Leave Campaign</button>';
+  else body.innerHTML='<p class="m-hint">Enter a join code from your GM to connect this sheet. Campaigns are created on the Campaigns page.</p><div class="m-lbl">Join a Campaign</div><div style="display:flex;gap:6px;"><input type="text" id="campaign-code-input" class="m-input" placeholder="Join code (e.g. K7XP2M)" maxlength="6" style="flex:1;text-transform:uppercase;letter-spacing:.15em;"><button class="m-btn" onclick="campaignJoin()">Join</button></div><div id="campaign-error" style="font-size:12px;color:#df6a6a;margin-top:10px;"></div>';
 }
-function applySheet(data){
-  S=blankState();
-  ['name','pronouns','role','specialty','catalyst','question','style'].forEach(function(k){ if(data[k]!=null)S[k]=data[k]; });
-  if(data.actions) ACTION_NAMES.forEach(function(a){ if(data.actions[a]!=null)S.actions[a]=data.actions[a]; });
-  if(data.gilded) ACTION_NAMES.forEach(function(a){ S.gilded[a]=!!data.gilded[a]; });
-  if(data.drives) DRIVE_NAMES.forEach(function(d){ if(data.drives[d])S.drives[d]={max:data.drives[d].max||0,cur:data.drives[d].cur||0}; });
-  if(data.resUsed) DRIVE_NAMES.forEach(function(d){ if(data.resUsed[d]!=null)S.resUsed[d]=data.resUsed[d]; });
-  if(data.marks) MARKS.forEach(function(m){ if(data.marks[m.name]!=null)S.marks[m.name]=data.marks[m.name]; });
-  if(data.scars) S.scars=Object.assign({Body:'',Brain:'',Bleed:''},data.scars);
-  if(Array.isArray(data.gear)) S.gear=data.gear.slice(0,3).map(function(g){ return typeof g==='string'?{t:g,on:false}:{t:g.t||'',on:!!g.on}; });
-  while(S.gear.length<3)S.gear.push({t:'',on:false});
-  if(Array.isArray(data.abilities)) S.abilities=data.abilities.map(function(a){ return typeof a==='string'?{name:a,desc:''}:{name:a.name||'',desc:a.desc||''}; });
-  if(Array.isArray(data.illumination)) S.illumination=data.illumination.slice(0,3);
-  while(S.illumination.length<3)S.illumination.push('');
-  if(Array.isArray(data.relationships)) S.relationships=data.relationships.map(function(r){ return {name:r.name||'',type:r.type||''}; });
-  if(data._sheet) S._sheet=data._sheet;
-  renderAll();
+function campaignError(msg){ var el=$('campaign-error'); if(el)el.textContent=msg; }
+async function campaignJoin(){ var code=(($('campaign-code-input')||{}).value||'').trim().toUpperCase(); if(!code){ campaignError('Enter a join code.'); return; } try{ var r=await fetch('/api/campaigns?code='+encodeURIComponent(code),{credentials:'same-origin'}); if(r.status===404){ campaignError('No campaign found with that code.'); return; } if(!r.ok)throw new Error(r.status); _campaign=await r.json(); campaignConnected(); }catch(e){ campaignError('Could not join — are you signed in to the app?'); } }
+function campaignConnected(){ _campaignLastId=0; campaignUpdateBtn(); campaignRenderModal(); campaignStartPolling(); addLog('Campaign','🔗','Connected to "'+_campaign.name+'" ('+_campaign.code+')','normal'); saveSheet(true); }
+function campaignLeaveSilent(){ if(_campaignTimer){ clearInterval(_campaignTimer); _campaignTimer=null; } _campaign=null; _campaignLastId=0; campaignUpdateBtn(); }
+function campaignLeave(){ var name=_campaign?_campaign.name:''; campaignLeaveSilent(); campaignRenderModal(); addLog('Campaign','🔗','Left "'+name+'"','normal'); saveSheet(true); }
+function campaignBroadcast(label,result,detail,type){ if(!_campaign||CAMPAIGN_SKIP_LABELS.has(String(label)))return; fetch('/api/campaigns/'+_campaign.id+'/rolls',{method:'POST',credentials:'same-origin',headers:{'content-type':'application/json'},body:JSON.stringify({clientKey:_campaignClientKey,source:campaignPlayerName(),label:String(label),result:String(result),detail:String(detail||''),type:type||'normal'})}).catch(function(){}); }
+function campaignAddRemote(roll){
+  var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
+  var div=document.createElement('div'); div.className='log-entry remote'+(roll.type==='crit'?' crit':roll.type==='fumble'?' fumble':'');
+  div.innerHTML='<div class="roll-label"><span style="color:#c88a5a;">'+esc(roll.source||'Player')+'</span> · '+esc(roll.label||'')+'</div><div class="roll-result">'+esc(roll.result||'')+'</div><div class="roll-detail">'+esc(roll.detail||'')+'</div>';
+  entries.insertBefore(div,entries.firstChild); while(entries.children.length>60)entries.removeChild(entries.lastChild); entries.scrollTop=0;
 }
-var _saveTimer=null,_ready=false;
-function _saveNow(){ if(_saveTimer){ clearTimeout(_saveTimer); _saveTimer=null; } var json=JSON.stringify(collectSheet()); try{ localStorage.setItem('co_sheet',json); }catch(e){} if(window.__ddSave)window.__ddSave({ co_sheet: json }); }
-function saveSheet(quiet){ if(quiet){ try{_saveNow()}catch(e){} return; } if(_saveTimer)clearTimeout(_saveTimer); _saveTimer=setTimeout(function(){_saveTimer=null;try{_saveNow()}catch(e){}},1200); }
-function scheduleAutosave(){ if(!_ready)return; saveSheet(false); }
-function syncDocTitle(){ S.name=$('f-name').value; try{ var n=S.name.trim(); if(n&&window.__ddSaveTitle)window.__ddSaveTitle(n); }catch(e){} scheduleAutosave(); }
+async function campaignPoll(){ if(!_campaign)return; try{ var r=await fetch('/api/campaigns/'+_campaign.id+'/rolls'+(_campaignLastId?'?since='+_campaignLastId:''),{credentials:'same-origin'}); if(!r.ok)return; var data=await r.json(); (data.rolls||[]).forEach(function(roll){ if(roll.clientKey!==_campaignClientKey)campaignAddRemote(roll); }); if(data.last)_campaignLastId=data.last; }catch(e){} }
+function campaignPollDelay(){ return document.hidden?20000:4000; }
+function campaignStartPolling(){ if(_campaignTimer)clearInterval(_campaignTimer); campaignPoll(); _campaignTimer=setInterval(campaignPoll,campaignPollDelay()); }
+document.addEventListener('visibilitychange',function(){ if(!_campaign||!_campaignTimer)return; clearInterval(_campaignTimer); if(!document.hidden)campaignPoll(); _campaignTimer=setInterval(campaignPoll,campaignPollDelay()); });
+function campaignRestore(saved){ if(saved&&saved.id&&saved.code){ _campaign={id:saved.id,code:saved.code,name:saved.name||'Campaign'}; campaignStartPolling(); } else campaignLeaveSilent(); campaignUpdateBtn(); }
+window.openCampaign=openCampaign; window.closeCampaign=closeCampaign;
+
+// ═══ INIT ════════════════════════════════════════════════════════════════════
 function autoLoad(){
   var saved=null;
   if(window.__ddState!==undefined) saved=window.__ddState['co_sheet']||null; else { try{ saved=localStorage.getItem('co_sheet'); }catch(e){} }
-  if(!saved)return false;
-  try{ applySheet(JSON.parse(saved)); return true; }catch(e){ return false; }
+  if(!saved){ renderAll(); setDefaultTab(); return; }
+  try{ applySheet(JSON.parse(saved)); }catch(e){ renderAll(); }
+  setDefaultTab();
 }
-function exportSheet(){
-  var json=JSON.stringify(collectSheet(),null,2); var blob=new Blob([json],{type:'application/json'});
-  var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=(S.name||'candela-investigator').replace(/\s+/g,'_')+'.json'; a.click(); URL.revokeObjectURL(url);
-  addLog('Exported','↓ JSON',(S.name||'investigator'),'normal');
-}
-function importSheet(input){
-  var f=input.files&&input.files[0]; if(!f)return;
-  var rd=new FileReader(); rd.onload=function(){ try{ applySheet(JSON.parse(rd.result)); saveSheet(true); addLog('Imported','✓',f.name,'normal'); }catch(e){ addLog('Import failed','✗',String(e.message||e),'fumble'); } };
-  rd.readAsText(f); input.value='';
-}
-
-// ── INIT ──
 S=blankState();
-try{ if(localStorage.getItem('co_dark')==='1') setDarkMode(true); }catch(e){}
-if(!autoLoad()){ renderAll(); }
-document.addEventListener('input',function(e){ if(e.target&&e.target.tagName&&/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) scheduleAutosave(); });
-_ready=true;
+autoLoad();
+</script>
+
+<script src="/tools-data/co-homebrew.js"></script>
+<script src="/tools-data/co-sheet-builder.js"></script>
+<script src="/tools-data/dice-anim.js"></script>
+<script>
+// Pull the viewer's homebrew into the Abilities/Gear pickers once the loader is
+// available, then refresh the picker if it happens to be open.
+if(window.COHomebrew){ try{ window.COHomebrew.load(function(){ if(typeof _pk!=='undefined' && _pk) renderPicker(); }); }catch(e){} }
 </script>
 </body>
 </html>
