@@ -5487,11 +5487,26 @@ function renderDarkSpaceRef(){
     case 'Starships':
       h += H4('Building a Ship');
       DS.ship.design.forEach(d=> h += P('• '+d));
-      h += H4('Classifications'); h += P(DS.ship.classes.join(', '));
+      h += H4('Base Systems'); h += P(DS.ship.baseSystems.join(', '));
+      h += H4('Classifications');
+      (DS.ship.classifications||[]).forEach(function(c){
+        h += H4(c.name, 'Sys '+c.sysSlots+' · Feat '+c.featSlots+' · HP '+c.hpDie+' · Free: '+c.freeComponent);
+        h += P(c.blurb);
+        (c.features||[]).forEach(function(f){ h += P(f.name+'. '+f.text); });
+        h += table(['2d6', c.name+' Talent'], (c.talents||[]).map(function(t){return tblRow([t.r, t.text]);}));
+      });
+      h += H4('Components');
+      h += table(['Component','Type','Cost','Upkeep','Adv','Notes'], (DS.ship.components||[]).map(function(c){return tblRow([c.name, c.type, (c.costNote||c.cost+'cr'), c.maint+'cr', c.advanced?'yes':'—', c.desc]);}));
       h += H4('Ship Weapons');
       h += table(['Weapon','Cost','Range','Damage','Properties'], DS.ship.weapons.map(w=>tblRow([w.name, w.cost+'cr', w.range, w.dmg, w.props])));
+      h += H4('Weapon Properties');
+      Object.keys(DS.ship.weaponProps||{}).forEach(function(k){ h += P(k+' — '+DS.ship.weaponProps[k]); });
       h += H4('Ship Armor');
       h += table(['Armor','Cost','AC','Properties'], DS.ship.armor.map(a=>tblRow([a.name, a.cost+'cr', a.ac, a.props])));
+      h += H4('Armor Properties');
+      Object.keys(DS.ship.armorProps||{}).forEach(function(k){ h += P(k+' — '+DS.ship.armorProps[k]); });
+      h += H4('Command Crew');
+      (DS.ship.commandCrew||[]).forEach(function(r){ h += P(r.role+'. '+r.text); });
       h += H4('Stock Classes');
       DS.ship.stockClasses.forEach(c=> h += P(c.name+': '+c.text));
       break;

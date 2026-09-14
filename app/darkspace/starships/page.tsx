@@ -35,13 +35,46 @@ export default async function DarkSpaceStarshipsPage() {
       </section>
 
       <section className={`${cardCls} mt-4`}>
-        <h2 className={`${nameCls} mb-1`}>Classifications</h2>
-        <p className="text-[13px] text-[var(--text)]">{ship.classes.join(" · ")}</p>
-        <ul className="mt-3 grid gap-2 md:grid-cols-2">
-          {ship.stockClasses.map((c) => (
-            <li key={c.name} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{c.name}.</span> {c.text}</li>
+        <h2 className={`${nameCls} mb-1`}>Base Systems</h2>
+        <p className="text-[13px] leading-relaxed text-[var(--muted)]">Every ship needs these to operate: <span className="font-semibold text-[var(--text)]">{ship.baseSystems.join(", ")}</span>.</p>
+      </section>
+
+      <section className={`${cardCls} mt-4`}>
+        <h2 className={`${nameCls} mb-2`}>Classifications</h2>
+        <p className="mb-3 text-[12px] text-[var(--muted)]">Choose a Classification for base System / Feature slots, a free starting component, an HP die, always-on Features, and a Talent table the ship rolls on as it levels with its crew.</p>
+        <div className="flex flex-col gap-3">
+          {ship.classifications.map((c) => (
+            <div key={c.name} className="rounded-md border border-[var(--border)] bg-[var(--panel-2)] p-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="text-[13px] font-black uppercase tracking-[0.1em] text-[#8fd6ea]">{c.name}</h3>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[var(--muted)]">
+                  <span><span className="font-semibold text-[var(--text)]">Sys</span> {c.sysSlots}</span>
+                  <span><span className="font-semibold text-[var(--text)]">Feat</span> {c.featSlots}</span>
+                  <span><span className="font-semibold text-[var(--text)]">HP</span> {c.hpDie}</span>
+                  <span><span className="font-semibold text-[var(--text)]">Free</span> {c.freeComponent}</span>
+                </div>
+              </div>
+              <p className="mt-1 text-[12px] italic leading-relaxed text-[var(--muted)]">{c.blurb}</p>
+              <ul className="mt-2 flex flex-col gap-1">
+                {c.features.map((f) => (
+                  <li key={f.name} className="text-[12px] leading-relaxed text-[var(--text)]"><span className="font-semibold text-[#8fd6ea]">{f.name}.</span> <span className="text-[var(--muted)]">{f.text}</span></li>
+                ))}
+              </ul>
+              <div className="mt-2">
+                <DataTable head={["2d6", `${c.name} Talent`]} rows={c.talents.map((t) => [t.r, t.text])} />
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
+      </section>
+
+      <section className={`${cardCls} mt-4`}>
+        <h2 className={`${nameCls} mb-2`}>Components</h2>
+        <p className="mb-2 text-[12px] text-[var(--muted)]">Purchasable Systems and Features. Advanced versions cost +1 slot and grant advantage on that system.</p>
+        <DataTable
+          head={["Component", "Type", "Cost", "Upkeep", "Adv", "Notes"]}
+          rows={ship.components.map((c) => [c.name, c.type, (c.costNote ? c.costNote : c.cost + "cr"), c.maint + "cr", c.advanced ? "yes" : "—", c.desc])}
+        />
       </section>
 
       <section className={`${cardCls} mt-4`}>
@@ -64,6 +97,46 @@ export default async function DarkSpaceStarshipsPage() {
             <DataTable head={["Armor", "Cost", "AC", "Properties"]} rows={hbBy("armor").map((a) => [s(a.name), s(a.cost) + "cr", s(a.ac), s(a.props)])} />
           </div>
         ) : null}
+      </section>
+
+      <section className={`${cardCls} mt-4`}>
+        <h2 className={`${nameCls} mb-2`}>Property Keys</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <h3 className="mb-1 text-[10px] font-black uppercase tracking-[0.15em] text-[#8fd6ea]">Weapon Properties</h3>
+            <ul className="flex flex-col gap-1">
+              {Object.entries(ship.weaponProps).map(([k, v]) => (
+                <li key={k} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{k}</span> — {v}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="mb-1 text-[10px] font-black uppercase tracking-[0.15em] text-[#8fd6ea]">Armor Properties</h3>
+            <ul className="flex flex-col gap-1">
+              {Object.entries(ship.armorProps).map(([k, v]) => (
+                <li key={k} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{k}</span> — {v}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className={`${cardCls} mt-4`}>
+        <h2 className={`${nameCls} mb-2`}>Command Crew</h2>
+        <ul className="grid gap-2 md:grid-cols-2">
+          {ship.commandCrew.map((r) => (
+            <li key={r.role} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{r.role}.</span> {r.text}</li>
+          ))}
+        </ul>
+      </section>
+
+      <section className={`${cardCls} mt-4`}>
+        <h2 className={`${nameCls} mb-1`}>Stock Ship Classes</h2>
+        <ul className="mt-2 grid gap-2 md:grid-cols-2">
+          {ship.stockClasses.map((c) => (
+            <li key={c.name} className="text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">{c.name}.</span> {c.text}</li>
+          ))}
+        </ul>
       </section>
 
       {(hbBy("system").length || hbBy("feature").length) ? (

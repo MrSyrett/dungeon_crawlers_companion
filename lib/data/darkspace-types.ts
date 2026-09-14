@@ -145,9 +145,57 @@ export interface DsStockClass {
   text: string;
 }
 
+export interface DsShipClassFeature {
+  name: string;
+  text: string;
+}
+
+export interface DsShipClassTalent {
+  r: string;
+  text: string;
+}
+
+/** A playable ship Classification — the ship equivalent of a character class. */
+export interface DsShipClassification {
+  name: string;
+  blurb: string;
+  /** Base System slots. */
+  sysSlots: number;
+  /** Base Feature slots. */
+  featSlots: number;
+  /** Component granted free at creation (takes a slot, costs nothing). */
+  freeComponent: string;
+  /** HP die rolled per level. */
+  hpDie: string;
+  features: DsShipClassFeature[];
+  talents: DsShipClassTalent[];
+}
+
+/** A purchasable ship component (System or Feature). */
+export interface DsShipComponent {
+  name: string;
+  cost: number;
+  maint: number;
+  type: "System" | "Feature";
+  advanced: boolean;
+  costNote?: string;
+  desc: string;
+}
+
+export interface DsCommandCrewRole {
+  role: string;
+  text: string;
+}
+
 export interface DsShip {
   design: string[];
   classes: string[];
+  baseSystems: string[];
+  classifications: DsShipClassification[];
+  components: DsShipComponent[];
+  weaponProps: Record<string, string>;
+  armorProps: Record<string, string>;
+  commandCrew: DsCommandCrewRole[];
   weapons: DsShipWeapon[];
   armor: DsShipArmor[];
   stockClasses: DsStockClass[];
