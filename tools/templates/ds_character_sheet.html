@@ -355,6 +355,20 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 /* Stow: move a gear-slot item down to Free to Carry. */
 .gear-stow-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;line-height:1;}
 .gear-stow-btn:hover{border-color:#24c3d6;color:#24c3d6;}
+/* Delete an item (clears the slot). Slot lock/unlock is automatic (STR limit). */
+.gear-del-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;}
+.gear-del-btn:hover{border-color:#c8503a;color:#e0776f;}
+.gear-slot-disabled .gear-stow-btn,.gear-slot-disabled .gear-del-btn{visibility:hidden;pointer-events:none;}
+/* Inventory list — rows mirror the Equipment slots (name + qty + Equip + delete). */
+.inv-list{}
+.inv-row{display:flex;align-items:center;border-bottom:1px solid var(--rule);padding:1px 6px;gap:3px;overflow:hidden;}
+.inv-name{flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;}
+.inv-qty{width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;}
+.inv-eq-btn{flex:0 0 auto;padding:1px 7px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-radius:2px;}
+.inv-eq-btn:hover{border-color:#24c3d6;color:#24c3d6;}
+.inv-del-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--muted);border-radius:2px;text-align:center;}
+.inv-del-btn:hover{border-color:#c8503a;color:#e0776f;}
+.inv-empty{padding:8px 10px;font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);font-style:italic;}
 /* Free-to-Carry chips: click to move an item up into a gear slot. */
 .fc-chips{display:flex;flex-wrap:wrap;gap:4px;padding:6px 0 2px;}
 .fc-chip{display:inline-flex;align-items:center;gap:3px;max-width:100%;padding:3px 8px;background:var(--box);border:1px solid var(--rule);border-radius:12px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -570,18 +584,18 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <div class="coin-cell"><span class="coin-label">CR</span><input type="text" class="coin-input" id="coin-gp" placeholder="0" title="Credits"></div>
           <div class="coin-cell"><span class="coin-label">SLV</span><input type="text" class="coin-input" id="coin-slv" placeholder="0" title="Salvage"></div>
         </div>
-        <div class="sl"><span>Gear</span>
+        <div class="sl"><span>Equipment</span>
           <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
             <button onclick="openShop()" style="padding:2px 10px;background:#08252a;color:#24c3d6;border:1px solid #0e6b78;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#0e6b78';this.style.color='white'" onmouseout="this.style.background='#08252a';this.style.color='#24c3d6'">+ Item</button>
           </div></div>
         <div id="gear-list"></div>
 
         <div class="free-carry">
-          <div class="sl">Free to Carry</div>
-          <div class="free-carry-inner">
-            <textarea id="free-carry" placeholder="Glowrod, Ration Packs, Tether..." rows="4" oninput="renderFreeCarryChips()"></textarea>
-            <div id="free-carry-chips" class="fc-chips"></div>
-          </div>
+          <div class="sl"><span>Inventory</span>
+            <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
+              <button onclick="addInvItem('','')" style="padding:2px 10px;background:#0f0f0f;color:#9aa;border:1px solid var(--rule);cursor:pointer;text-transform:uppercase;" onmouseover="this.style.borderColor='#24c3d6';this.style.color='#24c3d6'" onmouseout="this.style.borderColor='var(--rule)';this.style.color='#9aa'">+ Item</button>
+            </div></div>
+          <div id="inventory-list" class="inv-list"></div>
         </div>
       </div>
 
@@ -1154,24 +1168,29 @@ function gearItemKind(name) {
   return null;
 }
 
-// Show/hide the equip checkbox as the item name changes; unequip if it stops
-// being a weapon/armor.
+// An item in an Equipment slot is auto-equipped BY PRESENCE (no toggle): a weapon
+// adds an attack, armor sets AC, a magic/scroll/wand item applies its effect.
+// Emptying the slot (or a slot beyond the STR limit) unequips it.
 function onGearNameInput(nameEl) {
   const row = nameEl.closest('.gear-slot');
   if(!row) return;
   const cb = row.querySelector('.gear-equip');
   const kind = gearItemKind(nameEl.value);
+  const shouldEquip = !!kind && !row.classList.contains('gear-slot-disabled');
   if(cb) {
-    cb.style.visibility = kind ? 'visible' : 'hidden';
-    cb.title = kind === 'weapon' ? 'Equip weapon (adds an attack)'
-             : kind === 'armor'  ? 'Equip armor (adds AC)'
-             : kind === 'magic'  ? 'Equip (applies this item\'s bonuses)' : 'Equip';
-    if(!kind && cb.checked) {          // name no longer equippable → unequip
-      cb.checked = false;
+    const was = cb.checked;
+    cb.checked = shouldEquip;
+    if(was && !shouldEquip) {                 // no longer equipped → drop its attack/spell
       removeEquipAttack(row);
-      if(typeof applyItemBonuses === 'function') applyItemBonuses();   // drop its bonuses
+      if(typeof removeEquipSpell === 'function') removeEquipSpell(row);
+    } else if(!was && shouldEquip) {           // newly equipped → add its attack/spell
+      if(kind === 'weapon') addEquipAttack(row);
+      else if(kind === 'scroll' || kind === 'wand') addEquipSpell(row, kind);
     }
   }
+  // Recompute bonuses, AC, gear slots, and rebuild any equipped weapon attack
+  // whose profile changed (e.g. the item was renamed to a different weapon).
+  if(typeof applyItemBonuses === 'function') applyItemBonuses();
   refreshAutoAC();
 }
 
@@ -2037,20 +2056,24 @@ function setSpellRowSource(row, src) {
 // After a character generator fills the gear list, auto-equip armor/shields so
 // the derived AC is correct. Weapons stay unequipped (generators add their own
 // attack rows), but their equip checkbox is revealed for the player to use.
+// Presence-based equip reconcile for a freshly-built character: every
+// weapon/armor/magic in an enabled Equipment slot is equipped, linking each
+// weapon to its generator-created attack row (no duplicates).
 function autoEquipArmorFromGear() {
   document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
     const nameEl = row.querySelector('.gear-name');
     const cb = row.querySelector('.gear-equip');
     if(!nameEl || !cb) return;
-    if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);
     const kind = gearItemKind(nameEl.value);
-    if(row.classList.contains('gear-slot-disabled')) return;
-    if(kind === 'armor') {
-      cb.checked = true;                                  // wear it (AC)
-    } else if(kind === 'weapon') {
+    const shouldEquip = !!kind && !row.classList.contains('gear-slot-disabled');
+    cb.checked = shouldEquip;
+    if(!shouldEquip) return;
+    if(kind === 'weapon') {
       // Generators create the attack rows directly; link this slot to its
-      // matching (unlinked) attack row so unequip/re-equip works, checking the box.
+      // matching (unlinked) attack row so unequip works — or build one if none.
       const nm = nameEl.value.trim();
+      // Idempotent: if this slot already owns a linked attack row, leave it.
+      if(row.dataset.eqId && [...document.querySelectorAll('#attacks-body tr')].some(tr => tr.dataset.eq === row.dataset.eqId)) return;
       const existing = [...document.querySelectorAll('#attacks-body tr')].find(tr =>
         !tr.dataset.eq && (tr.querySelector('td input')?.value || '').trim() === nm);
       if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
@@ -2063,12 +2086,14 @@ function autoEquipArmorFromGear() {
           if(new RegExp('^Sneak Attack \\(' + nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') +'\\)', 'i').test(t))
             tr.dataset.eq = row.dataset.eqId;
         });
-        cb.checked = true;
       } else {
-        cb.checked = true; addEquipAttack(row);           // none found → build linked
+        addEquipAttack(row);                              // none found → build linked
       }
+    } else if(kind === 'scroll' || kind === 'wand') {
+      if(typeof addEquipSpell === 'function') addEquipSpell(row, kind);
     }
   });
+  if(typeof applyItemBonuses === 'function') applyItemBonuses();
   if(typeof refreshAutoAC === 'function') refreshAutoAC();
 }
 
@@ -2105,20 +2130,6 @@ function autoResizeDesc(el) {
   el.style.height = el.scrollHeight + 'px';
 }
 
-function toggleGearSlot(btn) {
-  const row = btn.closest('div');
-  row.classList.toggle('gear-slot-disabled');
-  const on = row.classList.contains('gear-slot-disabled');
-  btn.classList.toggle('on', on);
-  btn.title = on ? 'Enable slot' : 'Disable slot (exceeds STR limit)';
-  const nameEl = row.querySelector('.gear-name');
-  const qtyEl  = row.querySelector('.gear-qty');
-  if(nameEl) nameEl.disabled = on;
-  if(qtyEl)  qtyEl.disabled  = on;
-  refreshAutoAC();
-  saveSheet();
-}
-
 
 function toggleAtkAdv(btn) {
   btn.classList.toggle('on');
@@ -2145,69 +2156,92 @@ function buildGear() {
   // Header
   const hdr = document.createElement('div');
   hdr.style.cssText = 'display:flex;align-items:center;gap:3px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
-  hdr.innerHTML = '<span class="gear-eq-hd" style="width:16px;flex:0 0 16px;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:center;" title="Equip: check to wield a weapon (adds an attack) or wear armor (adds AC)">Eq</span><span style="width:16px;flex:0 0 16px;"></span><span style="flex:1 1 auto;min-width:0;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Item</span><span style="width:30px;flex:0 0 30px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;">Qty</span><span style="width:20px;flex:0 0 20px;"></span><span class="gear-disable-spacer" style="width:20px;flex:0 0 20px;"></span>';
+  hdr.innerHTML = '<span style="width:16px;flex:0 0 16px;"></span><span style="flex:1 1 auto;min-width:0;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Equipped Item</span><span style="width:30px;flex:0 0 30px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;">Qty</span><span style="width:20px;flex:0 0 20px;"></span><span style="width:20px;flex:0 0 20px;"></span>';
   list.appendChild(hdr);
   for(let i=1;i<=20;i++) {
     const row = document.createElement('div');
     row.className = 'gear-slot';
     row.style.cssText = 'display:flex;align-items:center;border-bottom:1px solid var(--rule);padding:1px 6px;gap:3px;overflow:hidden;';
     row.innerHTML = `
-      <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" title="Equip" style="width:16px;flex:0 0 16px;margin:0;cursor:pointer;visibility:hidden;accent-color:#24c3d6;">
+      <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" style="display:none;">
       <span style="font-size:8px;font-weight:700;color:var(--muted);width:16px;flex:0 0 16px;">${i}.</span>
-      <input type="text" class="gear-name" oninput="onGearNameInput(this)" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
+      <input type="text" class="gear-name" oninput="onGearNameInput(this)" title="An item here is equipped: weapons add an attack, armor sets your AC, magic items apply their bonuses" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
       <input type="text" class="gear-qty" style="width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;" placeholder="">
-      <button class="gear-stow-btn" onclick="stowGearRow(this)" title="Move to Free to Carry">▽</button>
-      <button class="gear-disable-btn" onclick="toggleGearSlot(this)" title="Disable slot (exceeds STR limit)">✕</button>
+      <button class="gear-stow-btn" onclick="stowGearRow(this)" title="Move to Inventory (unequip)">▽</button>
+      <button class="gear-del-btn" onclick="deleteGearRow(this)" title="Delete item">✕</button>
     `;
     list.appendChild(row);
   }
 }
 
-// ── Move gear between the Gear Slots and Free to Carry ──────────────────────
-// The slots keep their STR limit and equip behavior; these just shuttle an item
-// between the two lists. Stowing clears the slot (unequipping if needed); readying
-// drops an item into the first open, enabled slot.
-function _fcLines(){
-  const ta = document.getElementById('free-carry');
-  return ta ? ta.value.split('\n').map(s => s.trim()).filter(Boolean) : [];
-}
+// ── Equipment ⇄ Inventory ───────────────────────────────────────────────────
+// An item in an Equipment slot IS equipped (weapons add an attack, armor sets
+// AC, magic items apply their bonuses). Inventory holds everything else; nothing
+// there is equipped. Items shuttle between the lists with the ▽ / Equip buttons.
+let _inventory = [];   // [{name, qty}] — unlimited, unequipped
+
 function stowGearRow(btn){
   const row = btn.closest('.gear-slot'); if(!row) return;
   const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
   const name = (nameEl.value || '').trim(); if(!name) return;
-  const qty = (qtyEl.value || '').trim();
-  const line = name + (qty && qty !== '1' ? ' ×' + qty : '');
-  const ta = document.getElementById('free-carry');
-  if(ta) ta.value = (ta.value.trim() ? ta.value.replace(/\s*$/, '') + '\n' : '') + line;
+  _inventory.push({ name: name, qty: (qtyEl.value || '').trim() });
   nameEl.value = ''; qtyEl.value = '';
-  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute AC
-  renderFreeCarryChips();
+  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
+  renderInventory();
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
 }
-function readyFreeCarry(idx){
-  const lines = _fcLines(); const item = lines[idx]; if(!item) return;
-  let target = null;   // first open (empty-named), enabled gear slot
+function deleteGearRow(btn){
+  const row = btn.closest('.gear-slot'); if(!row) return;
+  const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
+  nameEl.value = ''; qtyEl.value = '';
+  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function _firstOpenGearRow(){
+  let target = null;
   document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
     if(target || row.classList.contains('gear-slot-disabled')) return;
     const nm = row.querySelector('.gear-name');
     if(nm && !nm.value.trim()) target = row;
   });
-  if(!target){ addLog('Gear', 'Full', 'No open gear slots — free one up or enable another slot first', 'fumble'); return; }
-  const m = item.match(/^(.*?)\s*[×x]\s*(\d+)\s*$/);
-  const name = m ? m[1].trim() : item, qty = m ? m[2] : '';
+  return target;
+}
+function invEquip(idx){
+  const item = _inventory[idx]; if(!item) return;
+  const target = _firstOpenGearRow();
+  if(!target){ addLog('Equipment', 'Full', 'No open Equipment slots — your carry limit is full', 'fumble'); return; }
   const nameEl = target.querySelector('.gear-name'), qtyEl = target.querySelector('.gear-qty');
-  nameEl.value = name; qtyEl.value = qty;
-  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // reveal equip toggle if applicable
-  lines.splice(idx, 1);
-  const ta = document.getElementById('free-carry'); if(ta) ta.value = lines.join('\n');
-  renderFreeCarryChips();
+  nameEl.value = item.name; qtyEl.value = item.qty || '';
+  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // auto-equip if weapon/armor/magic
+  _inventory.splice(idx, 1);
+  renderInventory();
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
 }
-function renderFreeCarryChips(){
-  const box = document.getElementById('free-carry-chips'); if(!box) return;
-  box.innerHTML = _fcLines().map((l, i) =>
-    '<button type="button" class="fc-chip" onclick="readyFreeCarry(' + i + ')" title="Move to Gear Slots">'
-    + '<span class="fc-up">△</span><span>' + _trkEsc(l) + '</span></button>'
+function invDelete(idx){
+  if(idx < 0 || idx >= _inventory.length) return;
+  _inventory.splice(idx, 1);
+  renderInventory();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function addInvItem(name, qty){
+  _inventory.push({ name: name || '', qty: qty || '' });
+  renderInventory();
+  const rows = document.querySelectorAll('#inventory-list .inv-row .inv-name');
+  const last = rows[rows.length - 1]; if(last) last.focus();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function onInvNameInput(idx, val){ if(_inventory[idx]){ _inventory[idx].name = val; if(typeof scheduleAutosave === 'function') scheduleAutosave(); } }
+function onInvQtyInput(idx, val){ if(_inventory[idx]){ _inventory[idx].qty = val; if(typeof scheduleAutosave === 'function') scheduleAutosave(); } }
+function renderInventory(){
+  const box = document.getElementById('inventory-list'); if(!box) return;
+  if(!_inventory.length){ box.innerHTML = '<div class="inv-empty">Empty — buy or add items, or move gear here from Equipment.</div>'; return; }
+  box.innerHTML = _inventory.map((it, i) =>
+    '<div class="inv-row">'
+    + '<input type="text" class="inv-name" value="' + _trkEsc(it.name) + '" oninput="onInvNameInput(' + i + ',this.value)">'
+    + '<input type="text" class="inv-qty" value="' + _trkEsc(it.qty || '') + '" oninput="onInvQtyInput(' + i + ',this.value)" placeholder="">'
+    + '<button type="button" class="inv-eq-btn" onclick="invEquip(' + i + ')" title="Move to Equipment (equip)">△ Equip</button>'
+    + '<button type="button" class="inv-del-btn" onclick="invDelete(' + i + ')" title="Delete item">✕</button>'
+    + '</div>'
   ).join('');
 }
 
@@ -2793,24 +2827,21 @@ function collectSheet(){
       currency: 'gp'
     });
   });
-  // Free to carry items → slots:0
-  const freeCarry = document.getElementById('free-carry')?.value || '';
-  if(freeCarry.trim()) {
-    freeCarry.split(',').forEach((item, i) => {
-      const name = item.trim();
-      if(name) gearItems.push({
-        instanceId: 'free'+(i+1),
-        gearId: 'f'+(i+1),
-        name,
-        type: 'sundry',
-        quantity: 1,
-        totalUnits: 1,
-        slots: 0,
-        cost: 0,
-        currency: 'gp'
-      });
+  // Inventory items (unequipped, unlimited) → slots:0
+  (Array.isArray(_inventory) ? _inventory : []).forEach((it, i) => {
+    const name = String(it && it.name || '').trim();
+    if(name) gearItems.push({
+      instanceId: 'inv'+(i+1),
+      gearId: 'i'+(i+1),
+      name,
+      type: 'sundry',
+      quantity: parseInt(it.qty) || 1,
+      totalUnits: 1,
+      slots: 0,
+      cost: 0,
+      currency: 'gp'
     });
-  }
+  });
 
   // Attacks as strings
   const attackStrings = [];
@@ -2972,10 +3003,9 @@ function collectSheet(){
       // the list has gaps — which silently unequipped items.
       gearRows: [...document.querySelectorAll('#gear-list .gear-slot')].map(row => ({
         name:     row.querySelector('.gear-name')?.value || '',
-        qty:      row.querySelector('.gear-qty')?.value || '',
-        equipped: !!row.querySelector('.gear-equip')?.checked,
-        disabled: row.classList.contains('gear-slot-disabled')
+        qty:      row.querySelector('.gear-qty')?.value || ''
       })),
+      inventory: (Array.isArray(_inventory) ? _inventory : []).map(it => ({ name: String(it.name||''), qty: String(it.qty||'') })).filter(it => it.name.trim()),
       gearQtys: [...document.querySelectorAll('#gear-list .gear-qty')].map(el => el.value || ''),
       gearDisabled: [...document.querySelectorAll('#gear-list > div')].map(row => row.classList.contains('gear-slot-disabled')),
       gearEquipped: [...document.querySelectorAll('#gear-list .gear-slot')].map(row => !!row.querySelector('.gear-equip')?.checked),
@@ -3076,27 +3106,23 @@ function _applySDData(d){
                         : (gearSlotted[i] ? (gearSlotted[i].name || '') : '');
   });
   gearQtyInputs.forEach((el, i) => {
-    const qty = gearRows
+    el.value = gearRows
       ? (gearRows[i]?.qty || '')
       : (d._sheet?.gearQtys?.[i] || (gearSlotted[i]?.quantity > 1 ? String(gearSlotted[i].quantity) : ''));
-    el.value = qty;
-    const gearDisabledArr = gearRows ? gearRows.map(r => !!r.disabled) : (d._sheet?.gearDisabled || []);
-    if(gearDisabledArr[i]) {
-      const gRow = el.closest('div');
-      if(gRow) {
-        gRow.classList.add('gear-slot-disabled');
-        const dbtn = gRow.querySelector('.gear-disable-btn');
-        const nameEl = gRow.querySelector('.gear-name');
-        const qtyEl  = gRow.querySelector('.gear-qty');
-        if(dbtn)   { dbtn.classList.add('on'); dbtn.title='Enable slot'; }
-        if(nameEl) nameEl.disabled = true;
-        if(qtyEl)  qtyEl.disabled  = true;
-      }
-    }
   });
-  const freeText = d.freeCary || gearFree.map(g => g.name).join(', ') || '';
-  set('free-carry', freeText);
-  if(typeof renderFreeCarryChips === 'function') renderFreeCarryChips();
+  // Slot locking beyond the STR carry limit is automatic — ccwSetGearSlots runs
+  // via applyItemBonuses below, so no saved "disabled" state is restored here.
+  // Inventory (unequipped, unlimited). New saves carry an array; older saves get
+  // migrated from the free-carry text / free (slots:0) gear items.
+  if(Array.isArray(d._sheet?.inventory)){
+    _inventory = d._sheet.inventory.map(it => ({ name: String(it && it.name || ''), qty: String(it && it.qty || '') })).filter(it => it.name.trim());
+  } else {
+    const legacy = (typeof d.freeCary === 'string' ? d.freeCary : '')
+                || (typeof d._sheet?.freeCarry === 'string' ? d._sheet.freeCarry : '')
+                || (Array.isArray(gearFree) ? gearFree.map(g => g.name).join(', ') : '');
+    _inventory = String(legacy || '').split(/[,\n]/).map(s => ({ name: s.trim(), qty: '' })).filter(it => it.name);
+  }
+  if(typeof renderInventory === 'function') renderInventory();
     const spellStatEl = document.getElementById('spell-stat');
     if(spellStatEl) spellStatEl.value = d._sheet?.spellStat || '';
     const spellGBEl = document.getElementById('spell-gbonus');
@@ -3243,42 +3269,37 @@ function _applySDData(d){
     }
   }
 
-  // Equip rehydration runs LAST — after gear names AND attacks are restored — so
-  // it reconnects equipped weapons to their already-restored attack rows (no
-  // duplicates) and derives AC from equipped armor. Also reveals the checkbox.
-  const gearEquippedArr = Array.isArray(d._sheet?.gearRows)
-    ? d._sheet.gearRows.map(r => !!r.equipped)
-    : (d._sheet?.gearEquipped || []);
-  document.querySelectorAll('#gear-list .gear-slot').forEach((row, i) => {
+  // Equip rehydration runs LAST — after gear names AND attacks are restored.
+  // Equip is now BY PRESENCE: any weapon/armor/magic in an (enabled) Equipment
+  // slot is equipped. Reconnect to the already-restored attack/spell rows so we
+  // never duplicate them; only create one if none exists.
+  document.querySelectorAll('#gear-list .gear-slot').forEach((row) => {
     const nameEl = row.querySelector('.gear-name');
     const cb = row.querySelector('.gear-equip');
     if(!nameEl || !cb) return;
-    if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);
-    if(gearEquippedArr[i] && cb.style.visibility !== 'hidden') {
-      cb.checked = true;
-      const kind = gearItemKind(nameEl.value);
-      if(kind === 'weapon') {
-        const nm = nameEl.value.trim();
-        const existing = [...document.querySelectorAll('#attacks-body tr')].find(tr =>
-          !tr.dataset.eq && (tr.querySelector('td input')?.value || '').trim() === nm);
-        if(existing) {
-          if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
-          existing.dataset.eq = row.dataset.eqId;
-        } else {
-          addEquipAttack(row);
-        }
-      } else if(kind === 'scroll' || kind === 'wand') {
-        // Reconnect to the already-restored tagged spell row (by name + src) so
-        // we don't duplicate it; only create one if none exists.
-        const spellName = nameEl.value.replace(/^(scroll|wand):\s*/i, '').trim();
-        const existing = [...document.querySelectorAll('#spells-list .spell-row[data-src="'+kind+'"]')].find(sr =>
-          !sr.dataset.eq && (sr.querySelector('.spell-input')?.value || '').trim() === spellName);
-        if(existing) {
-          if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
-          existing.dataset.eq = row.dataset.eqId;
-        } else {
-          addEquipSpell(row, kind);
-        }
+    const kind = gearItemKind(nameEl.value);
+    const shouldEquip = !!kind && !row.classList.contains('gear-slot-disabled');
+    cb.checked = shouldEquip;
+    if(!shouldEquip) return;
+    if(kind === 'weapon') {
+      const nm = nameEl.value.trim();
+      const existing = [...document.querySelectorAll('#attacks-body tr')].find(tr =>
+        !tr.dataset.eq && (tr.querySelector('td input')?.value || '').trim() === nm);
+      if(existing) {
+        if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
+        existing.dataset.eq = row.dataset.eqId;
+      } else {
+        addEquipAttack(row);
+      }
+    } else if(kind === 'scroll' || kind === 'wand') {
+      const spellName = nameEl.value.replace(/^(scroll|wand):\s*/i, '').trim();
+      const existing = [...document.querySelectorAll('#spells-list .spell-row[data-src="'+kind+'"]')].find(sr =>
+        !sr.dataset.eq && (sr.querySelector('.spell-input')?.value || '').trim() === spellName);
+      if(existing) {
+        if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
+        existing.dataset.eq = row.dataset.eqId;
+      } else {
+        addEquipSpell(row, kind);
       }
     }
   });
@@ -3340,13 +3361,8 @@ function ccwSetGearSlots(str) {
   // rows[0] is the header; gear slots are rows[1..20]
   for(let i=1; i<rows.length; i++) {
     const row = rows[i];
-    const btn = row.querySelector('.gear-disable-btn');
-    const disable = i > slots;
+    const disable = i > slots;   // slots beyond the STR carry limit lock automatically
     row.classList.toggle('gear-slot-disabled', disable);
-    if(btn) {
-      btn.classList.toggle('on', disable);
-      btn.title = disable ? 'Enable slot' : 'Disable slot (beyond your carry limit)';
-    }
   }
 }
 
@@ -3581,7 +3597,7 @@ async function exportPDF() {
     gear.slice(0, 20).forEach((item, i) => set('Gear ' + (i + 1), item));
     if(gear.length > 20) set('Gear 20', gear.slice(19).join(' · '));   // don't silently drop the tail
 
-    set('Free To Carry', V('free-carry'));
+    set('Free To Carry', (Array.isArray(_inventory) ? _inventory : []).map(it => String(it.name||'').trim()).filter(Boolean).join(', '));
 
     // Bake the values into the field appearances so every reader shows them
     try { form.updateFieldAppearances(); } catch(e) {}
@@ -3790,7 +3806,7 @@ function exportPrintable() {
           <div class="coin"><b>SLV</b> ${esc(V('coin-slv') || '0')}</div>
         </div>
         <ul class="gear">${gearRows}</ul>
-        ${V('free-carry') ? `<div class="free"><b>Free to carry:</b> ${esc(V('free-carry'))}</div>` : ''}
+        ${(Array.isArray(_inventory) && _inventory.length) ? `<div class="free"><b>Inventory:</b> ${esc(_inventory.map(it => String(it.name||'').trim() + (it.qty && String(it.qty).trim() && String(it.qty).trim() !== '1' ? ' ×' + String(it.qty).trim() : '')).filter(Boolean).join(', '))}</div>` : ''}
       </section>
     </div>
     <div class="col">
@@ -4127,7 +4143,7 @@ setTimeout(function() { _pageReady = true; }, 2500);
 renderTalentsView();   // initial styled render of the Talents box
 renderTrackers();
 renderStress();
-renderFreeCarryChips();
+renderInventory();
 
 function autoSaveOnExit() {
   if(!_pageReady) return;
@@ -4572,43 +4588,18 @@ function shopNextSlot() {
   return null;
 }
 
+// Shop buys/adds go to INVENTORY (unequipped). Move an item to Equipment to
+// equip it. Inventory is unlimited, so there's no slot cost or "no room" here.
 function shopAddToGear(it) {
   if(it.kit) {
-    // Traveler's kit: expand into items; Backpack to Free Carry if empty
-    const kit = [{name:'Igniter'},{name:'Glowrod',qty:'2'},{name:'Ration Packs',qty:'3'},{name:'Mag Spikes',qty:'10'},{name:'Grapple Line'},{name:'Tether (60 ft)'}];
-    const fc = document.getElementById('free-carry');
-    if(fc && !fc.value.trim()) fc.value = 'Backpack';
-    else kit.unshift({name:'Backpack'});
-    let placed = 0;
-    for(const k of kit) {
-      const row = shopNextSlot();
-      if(!row) break;
-      row.querySelector('.gear-name').value = k.name;
-      const q = row.querySelector('.gear-qty');
-      if(q) q.value = k.qty || '1';
-      placed++;
-    }
-    if(placed < kit.length) alert('Not enough free gear slots for the whole kit — added what fits.');
-    if(typeof refreshAutoAC==='function') refreshAutoAC();
+    // Traveler's kit → Inventory.
+    const kit = [{name:'Backpack'},{name:'Igniter'},{name:'Glowrod',qty:'2'},{name:'Ration Packs',qty:'3'},{name:'Mag Spikes',qty:'10'},{name:'Grapple Line'},{name:'Tether (60 ft)'}];
+    kit.forEach(k => _inventory.push({ name: k.name, qty: k.qty || '' }));
+    renderInventory();
     return true;
   }
-  const slotCost = itemSlotCost(it.name);
-  const row = shopNextSlot();
-  if(!row) { alert('No free gear slots available.'); return false; }
-  const nameEl = row.querySelector('.gear-name');
-  nameEl.value = it.name;
-  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // reveal Equip box
-  const q = row.querySelector('.gear-qty');
-  if(q) q.value = it.qty || '1';
-  // Bulky items (2-slot weapons, chainmail, plate mail) occupy extra slots
-  for(let s = 1; s < slotCost; s++) {
-    const extra = shopNextSlot();
-    if(!extra) { alert(it.name + ' needs ' + slotCost + ' gear slots — not enough room.'); break; }
-    extra.querySelector('.gear-name').value = '↳ ' + it.name;
-    const eq = extra.querySelector('.gear-qty');
-    if(eq) eq.value = '';
-  }
-  if(typeof refreshAutoAC==='function') refreshAutoAC();
+  _inventory.push({ name: it.name, qty: it.qty || '' });
+  renderInventory();
   return true;
 }
 
@@ -4617,12 +4608,7 @@ function shopAdd(tab, i) {
   if(!it) return;
   if(it.pick) { openSpellPick(it.pick); return; }
   if(it.enchant) { openEnchantPicker(it.enchant); return; }
-  if(shopAddToGear(it)) {
-    const hbEquippable = tab==='homebrew'
-      && ['weapon','armor','shield'].includes(it._hb ? it._hb.kind : '');
-    if(tab==='weapons' || tab==='armor' || hbEquippable) equipShopWeapon(it.name);
-    saveSheet(false); closeShop();
-  }
+  if(shopAddToGear(it)) { saveSheet(false); closeShop(); }
 }
 
 function shopBuy(tab, i) {
@@ -4633,7 +4619,6 @@ function shopBuy(tab, i) {
   const total = parseInt(gpEl?.value)||0;   // credits (single spendable pool)
   if(total < cost) { alert('Not enough credits! '+it.name+' costs '+shopFmtCost(it)+'.'); return; }
   if(!shopAddToGear(it)) return;
-  if(tab==='weapons' || tab==='armor') equipShopWeapon(it.name);
   if(gpEl) gpEl.value = String(total - cost);
   addLog('Purchase','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',it.name+' — '+shopFmtCost(it),'normal');
   saveSheet(false);
@@ -4725,11 +4710,9 @@ function confirmEnchant() {
   const type = document.getElementById('enchant-type')?.value || '';
   if(!type) return;
   const itemName = enchantName();               // e.g. "+2 Longsword"
-  // Gear item (uses the underlying type's slot cost, e.g. chainmail = 2 slots).
-  // shopAddToGear reveals the Equip box; equip it so the attack (weapons) or AC
-  // (armor) is applied correctly and stays linked to the slot.
+  // Enchanted items go to Inventory like any other shop purchase; move it to
+  // Equipment to equip it (which applies its attack/AC/bonuses by presence).
   if(!shopAddToGear({ name: itemName })) return;
-  equipShopWeapon(itemName);                     // works for weapon or armor names
   addLog('Enchanted Item','<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M10.2 3.4h3.6l-1 2.3h-1.6zM12 6.6c-3.4 0-6.4 3.6-6.4 8 0 3.6 2.9 5.9 6.4 5.9s6.4-2.3 6.4-5.9c0-4.4-3-8-6.4-8Zm0 5.1a2.9 2.9 0 0 1 2.9 2.9.9.9 0 0 1-1.8 0 1.1 1.1 0 0 0-1.1-1.1.9.9 0 0 1 0-1.8Z"/></svg>',itemName,'normal');
   saveSheet(false);
   closeEnchantPicker();

@@ -1827,11 +1827,11 @@ function ccwApply() {
   set('coin-gp', String(creditsLeft));
   set('coin-slv', '0');   // Salvage is GM-awarded; new characters start with none
 
-  // Gear list from purchases
+  // Gear from purchases. Weapons + armor go to EQUIPMENT (equipped by presence);
+  // the Traveler's Kit and sundries go to INVENTORY (unequipped).
   document.querySelectorAll('#gear-list .gear-name').forEach(el=>el.value='');
   document.querySelectorAll('#gear-list .gear-qty').forEach(el=>el.value='');
   const gearItems = [];
-  if(c.buyKit) CCW_KIT_ITEMS.forEach(k=>{ if(k.name!=='Backpack') gearItems.push(k); });
   c.buyArmor.forEach(a=>gearItems.push({name:a, qty:'1'}));
   c.buyWeapons.forEach(w=>{
     const existing = gearItems.find(g=>g.name===w);
@@ -1852,7 +1852,12 @@ function ccwApply() {
   const gn=document.querySelectorAll('#gear-list .gear-name');
   const gq=document.querySelectorAll('#gear-list .gear-qty');
   gearRows.forEach((g,i)=>{ if(gn[i])gn[i].value=g.name; if(gq[i])gq[i].value=(g.qty===''?'':(g.qty||'1')); });
-  const fc=document.getElementById('free-carry'); if(fc) fc.value=c.buyKit?'Backpack':'';
+  // Inventory: the Traveler's Kit (Backpack + sundries).
+  if(typeof _inventory !== 'undefined'){
+    _inventory = [];
+    if(c.buyKit) CCW_KIT_ITEMS.forEach(k=>_inventory.push({ name:k.name, qty:(k.qty||'') }));
+    if(typeof renderInventory === 'function') renderInventory();
+  }
 
   // Gear slots: max(10, STR) available; disable the rest from slot 20 downward
   ccwSetGearSlots(eff.STR);
