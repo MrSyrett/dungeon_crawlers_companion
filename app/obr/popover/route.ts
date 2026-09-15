@@ -257,7 +257,7 @@ const PAGE = String.raw`<!doctype html>
           // read as one undifferentiated list.
           var GROUPS = [
             { key: "SD", name: "Shadowdark", cls: "sd" },
-            { key: "DS", name: "DarkSpace", cls: "ds" },
+            { key: "DS", name: "HeroDark", cls: "ds" },
             { key: "DCC", name: "Dungeon Crawler Carl", cls: "dcc" },
             { key: "ACE", name: "ACE!", cls: "ace" },
             { key: "KOB", name: "Kids on Bikes", cls: "kob" },

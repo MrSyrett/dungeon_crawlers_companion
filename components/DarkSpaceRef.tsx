@@ -29,8 +29,8 @@ const EFFECT_LABEL: Record<string, string> = {
   meleeAtkDmg: "Melee Attack & Damage", rangedAtkDmg: "Ranged Attack & Damage",
   mrAtk: "Melee & Ranged Attacks", mrDmg: "Melee & Ranged Damage",
   mrAtkDmg: "Melee & Ranged Attack & Damage", statChoice: "Stat (choice)",
-  spellKnown: "Learn Power", spellCheck: "Power Checks", weaponDie: "Weapon Damage Die",
-  advSpell: "Advantage: Power", featureCharges: "Charges", playerTalent: "Player Choice",
+  spellKnown: "Learn Spell", spellCheck: "Spell Checks", weaponDie: "Weapon Damage Die",
+  advSpell: "Advantage: Spell", featureCharges: "Charges", playerTalent: "Player Choice",
   perDay: "Per Day",
 };
 export type Effectish = { amount?: number | string; target?: string };
@@ -104,10 +104,15 @@ export function ChipRow({ label, base, current, param, options, active }: { labe
   );
 }
 
+export function plural(noun: string): string {
+  if (/[^aeiou]y$/.test(noun)) return noun.slice(0, -1) + "ies";   // ancestry → ancestries
+  if (/(s|x|z|ch|sh)$/.test(noun)) return noun + "es";              // class → classes
+  return noun + "s";
+}
 export function CountLine({ count, noun, base, filtered }: { count: number; noun: string; base: string; filtered: boolean }) {
   return (
     <div className="mb-4 mt-3 flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-[var(--muted)]">
-      <span>{count} {count === 1 ? noun : noun + "s"}</span>
+      <span>{count} {count === 1 ? noun : plural(noun)}</span>
       {filtered ? <Link href={base} className="text-[var(--darkspace)] hover:underline">Clear filters</Link> : null}
     </div>
   );

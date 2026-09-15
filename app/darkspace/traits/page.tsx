@@ -18,13 +18,22 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   if (!user) redirect("/login");
 
   const [hbVisible, hbOwn, campaigns] = await Promise.all([
-    visibleHomebrew(user.id, { type: "ds-trait" }),
-    ownHomebrew(user.id, "ds-trait"),
+    visibleHomebrew(user.id, { type: "ds-ancestry" }),
+    ownHomebrew(user.id, "ds-ancestry"),
     userCampaigns(user.id),
   ]);
   const hbRows: Row[] = hbVisible.map((h) => {
     const d = h.data as Record<string, unknown>;
-    return { name: h.name, effect: typeof d.effect === "string" ? (d.effect as string) : "", bonuses: Array.isArray(d.bonuses) ? (d.bonuses as Effectish[]) : [], homebrew: true };
+    const traits = Array.isArray(d.traits)
+      ? (d.traits as unknown[]).map((t) => (t && typeof t === "object" ? String((t as Record<string, unknown>).text ?? "") : String(t))).filter(Boolean).join(" ")
+      : "";
+    return {
+      name: h.name,
+      effect: traits || (typeof d.effect === "string" ? (d.effect as string) : ""),
+      languages: typeof d.languages === "string" ? (d.languages as string) : "",
+      bonuses: Array.isArray(d.bonuses) ? (d.bonuses as Effectish[]) : [],
+      homebrew: true,
+    };
   });
   const ALL: Row[] = [...hbRows, ...DS_TRAITS.map((t) => ({ ...t }))];
 
@@ -34,18 +43,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <DarkSpaceHeader title="Traits" subtitle={`DarkSpace · Decoupled from Species${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
-      <p className="mb-5 text-[13px] leading-relaxed text-[var(--muted)]">
-        In DarkSpace your Species is free-text flavor — you write in whatever you like. Your mechanical edge comes from a single Trait you choose separately.
-      </p>
+      <DarkSpaceHeader title="Ancestries" subtitle={`HeroDark · Ancestries${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
-      <div className="mb-6"><HomebrewEditor kind="ds-trait" campaigns={campaigns} initial={hbOwn} /></div>
+      <div className="mb-6"><HomebrewEditor kind="ds-ancestry" campaigns={campaigns} initial={hbOwn} /></div>
 
-      <SearchForm base={BASE} q={q} placeholder="Search traits…" hidden={{}} />
-      <CountLine count={results.length} noun="trait" base={BASE} filtered={Boolean(needle)} />
+      <SearchForm base={BASE} q={q} placeholder="Search ancestries…" hidden={{}} />
+      <CountLine count={results.length} noun="ancestry" base={BASE} filtered={Boolean(needle)} />
 
       {results.length === 0 ? (
-        <EmptyState noun="trait" base={BASE} />
+        <EmptyState noun="ancestry" base={BASE} />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {results.map((t) => (
@@ -55,6 +61,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                 {t.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
               </div>
               <p className="mt-1 text-[13px] leading-relaxed text-[var(--text)]">{t.effect}</p>
+              {t.languages ? <p className="mt-1 text-[12px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Languages:</span> {t.languages}</p> : null}
               {t.homebrew && t.bonuses ? <EffectChips items={t.bonuses} kind="bonus" /> : null}
             </div>
           ))}

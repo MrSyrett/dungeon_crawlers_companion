@@ -39,7 +39,7 @@ function startLevelUp() {
     newSpells: [], spellSrc: null, spellSrcOf: {}, spellsNeeded: 0, spellTiers: [], spellTierCap: 0, extraHd: null,
   };
   // Spell gains for casters
-  const table = clsKey==='Mystic' ? CCW_PRIEST_SPELLS_KNOWN : clsKey==='Engineer' ? CCW_WIZARD_SPELLS_KNOWN : clsKey==='Witch' ? CCW_WITCH_SPELLS_KNOWN : null;
+  const table = clsKey==='Priest' ? CCW_PRIEST_SPELLS_KNOWN : clsKey==='Wizard' ? CCW_WIZARD_SPELLS_KNOWN : clsKey==='Witch' ? CCW_WITCH_SPELLS_KNOWN : null;
   if(table) {
     const oldRow = table[_lvl.oldLevel] || [0,0,0,0,0];
     const newRow = table[_lvl.newLevel] || oldRow;
@@ -71,10 +71,10 @@ function lvlClose() { document.getElementById('lvl-overlay').style.display = 'no
 function lvlHeroDarkEven(){ return (typeof heroDarkOn === 'function' && heroDarkOn() && _lvl.newLevel % 2 === 0); }
 function lvlSteps() {
   const steps = ['Hit Points'];
-  if(_lvl.spellsNeeded > 0) steps.push('New Powers');
+  if(_lvl.spellsNeeded > 0) steps.push('New Spells');
   if(_lvl.gainsTalent) steps.push('Talent');
   if(lvlHeroDarkEven()) steps.push('Skill Talent');   // HeroDark even-level talent
-  if(_hbLvlLearnCount() > 0) steps.push('Learn Powers');
+  if(_hbLvlLearnCount() > 0) steps.push('Learn Spells');
   steps.push('Finish');
   return steps;
 }
@@ -139,8 +139,8 @@ function lvlRender() {
   if(name==='Hit Points') body.innerHTML = lvlHP();
   else if(name==='Talent') body.innerHTML = lvlTalent();
   else if(name==='Skill Talent') body.innerHTML = lvlSkillTalent();
-  else if(name==='New Powers') body.innerHTML = lvlSpells();
-  else if(name==='Learn Powers') body.innerHTML = lvlLearnSpells();
+  else if(name==='New Spells') body.innerHTML = lvlSpells();
+  else if(name==='Learn Spells') body.innerHTML = lvlLearnSpells();
   else body.innerHTML = lvlFinish();
   document.getElementById('lvl-back').style.visibility = _lvl.step > 0 ? 'visible' : 'hidden';
   document.getElementById('lvl-next').textContent = name==='Finish' ? '⬆ Apply Level Up' : 'Next →';
@@ -168,11 +168,11 @@ function lvlNext() {
   if(name==='Skill Talent') {
     if(!_lvl.skillTalent || !String(_lvl.skillTalent.value||'').trim()) { alert('Name your Skill Talent (a weapon, armor, language, or subject).'); return; }
   }
-  if(name==='Learn Powers') {
+  if(name==='Learn Spells') {
     const n=_hbLvlLearnCount();
-    if((_lvl.hbTalentSpells||[]).length < n) { alert('Choose '+n+' power'+(n>1?'s':'')+' to learn.'); return; }
+    if((_lvl.hbTalentSpells||[]).length < n) { alert('Choose '+n+' spell'+(n>1?'s':'')+' to learn.'); return; }
   }
-  if(name==='New Powers' && _lvl.newSpells.length < _lvl.spellsNeeded) { alert('Choose '+_lvl.spellsNeeded+' new spell'+(_lvl.spellsNeeded>1?'s':'')+'.'); return; }
+  if(name==='New Spells' && _lvl.newSpells.length < _lvl.spellsNeeded) { alert('Choose '+_lvl.spellsNeeded+' new spell'+(_lvl.spellsNeeded>1?'s':'')+'.'); return; }
   if(name==='Finish') { lvlApply(); return; }
   _lvl.step++;
   lvlRender();
@@ -233,7 +233,7 @@ function lvlTalent() {
   if(_lvl.talent) {
     h += '<div class="ccw-result">'+(_lvl.talentRoll ? '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path fill-rule="evenodd" clip-rule="evenodd" d="M5 3.2h14a1.8 1.8 0 0 1 1.8 1.8v14a1.8 1.8 0 0 1-1.8 1.8H5A1.8 1.8 0 0 1 3.2 19V5A1.8 1.8 0 0 1 5 3.2Zm3 3.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4.1a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></svg> Rolled '+_lvl.talentRoll : '✔ Chosen')+': '+_lvl.talent+'</div>';
     const known = [...document.querySelectorAll('#spells-list .spell-row .spell-input')].map(el=>el.value.trim()).filter(Boolean);
-    const allKnown = [...new Set([...known, ..._lvl.newSpells])].filter(sp=>sp!=='Micro-Missile');
+    const allKnown = [...new Set([...known, ..._lvl.newSpells])].filter(sp=>sp!=='Magic Missile');
     h += ccwTalentChoiceUI(_lvl.tres, '_lvl.tres', allKnown, _lvl.cls);
     h += _hbLvlTalentPickerHtml();
     h += _hbLvlChoicesHtml();
@@ -247,17 +247,17 @@ function _hbLvlChoicesHtml(){
   if(!_lvl.hbChoices)_lvl.hbChoices={};
   const weapons=[['Strikes','Strikes (unarmed)']].concat(
     [...document.querySelectorAll('#attacks-body .atk-name')].map(el=>(el.value||'').trim())
-      .map(n=>{const m=n.match(/^Sneak Attack \((.+)\)$/i);return m?m[1]:n;})
+      .map(n=>{const m=n.match(/^Backstab \((.+)\)$/i);return m?m[1]:n;})
       .filter((v,i,a)=>v && !/^strikes$/i.test(v) && a.indexOf(v)===i).map(w=>[w,w]));
   const spells=[...document.querySelectorAll('#spells-list .spell-input')].map(el=>(el.value||'').trim())
-    .filter((v,i,a)=>v && v!=='Micro-Missile' && a.indexOf(v)===i).map(s=>[s,s]);
+    .filter((v,i,a)=>v && v!=='Magic Missile' && a.indexOf(v)===i).map(s=>[s,s]);
   const talents=_hbTalentRowOptions(_lvl.cls);
   let x='<div style="background:#0f0f0f;border:1px solid #7a5a00;padding:10px 12px;margin-top:10px;">';
   list.forEach(ch=>{
     x+='<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#c8a020;margin:2px 0 6px;">'+_hbChoiceLabel(ch)+'</div>';
     const cur=_lvl.hbChoices[ch.key]||'';
     if(ch.kind==='stat') x+=_hbChoiceSelect(ch.key,cur,_HB_STAT_OPTS,'lvlSetChoice');
-    else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'lvlSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">No powers known.</p>';
+    else if(ch.kind==='advSpell') x+= spells.length?_hbChoiceSelect(ch.key,cur,spells,'lvlSetChoice'):'<p style="color:#df6a6a;font-size:11px;margin:0;">No spells known.</p>';
     else if(ch.kind==='weaponDie') x+=_hbChoiceSelect(ch.key,cur,weapons,'lvlSetChoice');
     else if(ch.kind==='talent') x+=_hbChoiceControl('talent',ch.key,cur,talents,'lvlSetChoice');
     else if(ch.kind==='oneOf') x+=_hbChoiceControl('oneOf',ch.key,cur,_hbTraitDistinctOpts(ch.effects).map(o=>[String(o.oi),_hbEffOne(o.eff)]),'lvlSetChoice');
@@ -326,10 +326,10 @@ function lvlLearnSpells(){
   if(!_lvl.hbTalentSpells)_lvl.hbTalentSpells=[];
   if(!_lvl.spellSrc)_lvl.spellSrc=lvlDefaultSpellSources(cls);
   const _lc=RC_CLASS_INFO[cls]&&RC_CLASS_INFO[cls]._caster;
-  const own=_lc?_lc.list:({Wizard:'Engineer',Priest:'Mystic',Witch:'Witch'}[cls]||'');
+  const own=_lc?_lc.list:({Wizard:'Wizard',Priest:'Priest',Witch:'Witch'}[cls]||'');
   const known=[...document.querySelectorAll('#spells-list .spell-input')].map(el=>el.value.trim()).filter(Boolean);
   const maxTier=Math.min(5,Math.ceil(_lvl.newLevel/2));
-  let h='<p class="ccw-hint">Your talent lets you learn '+needed+' power'+(needed>1?'s':'')+'. ('+_lvl.hbTalentSpells.length+'/'+needed+' selected)</p>';
+  let h='<p class="ccw-hint">Your talent lets you learn '+needed+' spell'+(needed>1?'s':'')+'. ('+_lvl.hbTalentSpells.length+'/'+needed+' selected)</p>';
   h+=spellSourceBar(_lvl.spellSrc,cls,'lvlToggleSpellSrc');
   for(let tier=1;tier<=maxTier;tier++){
     const seen=new Set();
@@ -359,7 +359,7 @@ function _lvlSpellsBody() {
   const cls = _lvl.cls;
   if(!_lvl.spellSrc) _lvl.spellSrc = lvlDefaultSpellSources(cls);
   const _lc = RC_CLASS_INFO[cls] && RC_CLASS_INFO[cls]._caster;
-  const own = _lc ? _lc.list : ({ Wizard:'Engineer', Priest:'Mystic', Witch:'Witch' }[cls] || '');
+  const own = _lc ? _lc.list : ({ Wizard:'Wizard', Priest:'Priest', Witch:'Witch' }[cls] || '');
   // Already-known spells (from the sheet)
   const known = [...document.querySelectorAll('#spells-list .spell-row .spell-input')].map(el=>el.value.trim()).filter(Boolean);
   // Cap mode (Knight of St. Ydris): pick any spellsNeeded spells of tier ≤ cap,
@@ -561,7 +561,7 @@ function lvlApply() {
     }).join('/');
     const rowWeaponType = (row) => {
       let nm = row.querySelector('.atk-name')?.value.trim() || '';
-      const bs = nm.match(/^Sneak Attack \((.+)\)$/i);
+      const bs = nm.match(/^Backstab \((.+)\)$/i);
       if(bs) nm = bs[1];
       const w = (typeof SD_WEAPONS!=='undefined') ? allWeapons().find(x=>x.name.toLowerCase()===nm.toLowerCase()) : null;
       if(w) return w.type==='R' ? 'ranged' : 'melee';
@@ -583,14 +583,14 @@ function lvlApply() {
       if(d && dEl && dEl.value.trim()) dEl.value = bumpDmg(dEl.value.trim(), d);
     });
 
-    // Power check bonus
+    // Spellcasting check bonus
     if(e.spellCheck) {
       bumpVal(document.getElementById('spell-gbonus'), e.spellCheck);
     }
 
-    // Weapon Specialization (talent) — newly mastered weapon gains its full value now:
+    // Weapon Mastery (talent) — newly mastered weapon gains its full value now:
     // +1 atk/dmg plus half the character's level (round down).
-    let m = f.match(/Weapon Specialization with one additional weapon type — (.+)$/i);
+    let m = f.match(/Weapon Mastery with one additional weapon type — (.+)$/i);
     if(m) {
       const wname = m[1].trim();
       const wn = wname.toLowerCase();
@@ -598,7 +598,7 @@ function lvlApply() {
       if(!_charMastery.some(x=>x.toLowerCase()===wn)) _charMastery.push(wname);
       rows.forEach(row=>{
         let nm = (row.querySelector('.atk-name')?.value||'').trim();
-        const bs = nm.match(/^Sneak Attack \((.+)\)$/i);
+        const bs = nm.match(/^Backstab \((.+)\)$/i);
         if(bs) nm = bs[1];
         if(nm.toLowerCase()===wn) {
           const dEl = row.querySelector('.atk-damage');
@@ -614,7 +614,7 @@ function lvlApply() {
       const wn = m[1].trim().toLowerCase();
       rows.forEach(row=>{
         let nm = (row.querySelector('.atk-name')?.value||'').trim();
-        const bs = nm.match(/^Sneak Attack \((.+)\)$/i);
+        const bs = nm.match(/^Backstab \((.+)\)$/i);
         if(bs) nm = bs[1];
         const dEl = row.querySelector('.atk-damage');
         if(nm.toLowerCase()===wn && dEl && dEl.value.trim()) {
@@ -623,11 +623,11 @@ function lvlApply() {
       });
     }
 
-    // Thief: Sneak Attack +1 dice
-    if(/Sneak Attack deals \+1 dice/i.test(f)) {
+    // Thief: Backstab +1 dice
+    if(/Backstab deals \+1 dice/i.test(f)) {
       rows.forEach(row=>{
         const dEl = row.querySelector('.atk-damage');
-        if(/^Sneak Attack/i.test(row.querySelector('.atk-name')?.value||'') && dEl && dEl.value.trim()) {
+        if(/^Backstab/i.test(row.querySelector('.atk-name')?.value||'') && dEl && dEl.value.trim()) {
           dEl.value = dEl.value.replace(/(\d+)d/g, (_,n)=>(parseInt(n)+1)+'d');
         }
       });
@@ -672,13 +672,13 @@ function lvlApply() {
     if(agg.gearSlots){ _hbBonusSlots=(parseInt(_hbBonusSlots)||0)+agg.gearSlots; if(typeof refreshGearSlots==='function') refreshGearSlots(); }
     // Feature charges (homebrew)
     if(agg.featureCharges && Object.keys(agg.featureCharges).length){ Object.keys(agg.featureCharges).forEach(fn=>{ _hbFeatureChargeBonus[fn]=(parseInt(_hbFeatureChargeBonus[fn])||0)+agg.featureCharges[fn]; }); if(typeof renderTalentsView==='function') renderTalentsView(); }
-    // Power checks
+    // Spellcasting checks
     if(agg.spellCheck){ const el=document.getElementById('spell-gbonus'); if(el){ const cur=parseInt((el.value||'').replace(/^\+/,''))||0; const v=cur+agg.spellCheck; el.value=v>0?'+'+v:(v<0?String(v):''); } }
 
     const rows=[...document.querySelectorAll('#attacks-body tr')];
     const bumpVal=(el,n)=>{ if(!el||!n)return; const cur=parseInt((el.value||'').replace(/^\+/,''))||0; const v=cur+n; el.value=v>0?'+'+v:(v<0?String(v):''); };
     const bumpDmg=(d,n)=> d.split('/').map(part=>{ const mm=part.match(/^(.*?)([+-]\d+)?$/); const mod=(parseInt(mm[2]||'0'))+n; return mm[1]+(mod>0?'+'+mod:(mod<0?String(mod):'')); }).join('/');
-    const nameOf=(row)=>{ let nm=(row.querySelector('.atk-name')?.value||'').trim(); const bs=nm.match(/^Sneak Attack \((.+)\)$/i); return bs?bs[1]:nm; };
+    const nameOf=(row)=>{ let nm=(row.querySelector('.atk-name')?.value||'').trim(); const bs=nm.match(/^Backstab \((.+)\)$/i); return bs?bs[1]:nm; };
     const typeOf=(row)=>{ const nm=nameOf(row); const w=(typeof allWeapons==='function')?allWeapons().find(x=>x.name.toLowerCase()===nm.toLowerCase()):null; if(w) return w.type==='R'?'ranged':'melee'; const rng=row.querySelector('.atk-range')?.value||''; return rng==='Close'?'melee':(rng?'ranged':'melee'); };
     // Attack / damage bonuses
     if(agg.meleeAtk||agg.rangedAtk||agg.meleeDmg||agg.rangedDmg){
@@ -708,7 +708,7 @@ function lvlApply() {
   })();
 
   // Auto-toggle advantage: talent-chosen spell + Magic Missile
-  const lvlAdvSpells = new Set(['Micro-Missile']);
+  const lvlAdvSpells = new Set(['Magic Missile']);
   [(_lvl.tres), (_lvl.tres && _lvl.tres.sub)].forEach(p=>{
     if(p && p.kind==='spellknown' && p.picked) lvlAdvSpells.add(p.picked);
   });
@@ -721,9 +721,9 @@ function lvlApply() {
   });
 
 
-  // ── Half-level scaling (DarkSpace) ──
-  // Weapon Specialization: "add half your level to these rolls (round down)".
-  // Sneak Attack: "add additional weapon dice equal to half your level (round down)".
+  // ── Half-level scaling (Shadowdark) ──
+  // Weapon Mastery: "add half your level to these rolls (round down)".
+  // Backstab: "add additional weapon dice equal to half your level (round down)".
   // floor(level/2) ticks up by 1 exactly on even levels, so scale then.
   if(_lvl.newLevel % 2 === 0) {
     const rows2 = [...document.querySelectorAll('#attacks-body tr')];
@@ -747,16 +747,16 @@ function lvlApply() {
       const bEl = row.querySelector('.atk-bonus'), dEl = row.querySelector('.atk-damage');
       let nm = (row.querySelector('.atk-name')?.value || '').trim();
       if(!nm) return;
-      const bs = nm.match(/^Sneak Attack \((.+)\)$/i);
+      const bs = nm.match(/^Backstab \((.+)\)$/i);
       const weaponName = bs ? bs[1] : nm;
 
-      // Weapon Specialization: +1 attack and +1 damage on mastered weapon types
+      // Weapon Mastery: +1 attack and +1 damage on mastered weapon types
       if(_charMastery.some(x => x.toLowerCase() === weaponName.toLowerCase())) {
         bump(bEl, 1);
         if(dEl && dEl.value.trim()) dEl.value = bumpDmg2(dEl.value.trim(), 1);
       }
-      // Sneak Attack: one more weapon die of damage
-      if(bs && _lvl.cls === 'Scoundrel' && dEl && dEl.value.trim()) {
+      // Backstab: one more weapon die of damage
+      if(bs && _lvl.cls === 'Thief' && dEl && dEl.value.trim()) {
         dEl.value = addDie(dEl.value.trim());
       }
     });
@@ -769,7 +769,7 @@ function lvlApply() {
 }
 
 // ── Swap Create/Level Up button based on sheet state ──────────────────────
-// DarkSpace routing only. A sheet variant (e.g. DarkSpace) can install its own
+// Shadowdark routing only. A sheet variant (e.g. DarkSpace) can install its own
 // routing by reassigning window.updateHeaderButton — the listeners below call it
 // through window so an override takes effect.
 function updateHeaderButton() {

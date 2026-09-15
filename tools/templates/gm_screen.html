@@ -1447,7 +1447,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     <select class="gm-sys-select" id="gm-system-toggle" title="Game system — hides the other system's generators and bestiary" aria-label="Game system" onchange="setGmSystem(this.value)">
       <option value="DCC">DCC</option>
       <option value="SD">Shadowdark</option>
-      <option value="DS">DarkSpace</option>
+      <option value="DS">HeroDark</option>
       <option value="ACE">ACE!</option>
       <option value="KOB">Kids on Bikes</option>
       <option value="NIM">Nimble</option>
@@ -2374,8 +2374,8 @@ GMScenes.renderPins();
         <option value="d62etreasure">D6 2e Gear Drop</option>
         <option value="icrpgmonster">ICRPG Monster</option>
         <option value="icrpgtreasure">ICRPG Loot</option>
-        <option value="dsmonster">DarkSpace Hostile</option>
-        <option value="dstreasure">DarkSpace Gear Drop</option>
+        <option value="dsmonster">HeroDark Monster</option>
+        <option value="dstreasure">HeroDark Gear Drop</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -3020,7 +3020,7 @@ GMScenes.renderPins();
                 <option value="1">1</option><option value="2">2</option>
                 <option value="3">3</option><option value="5">5</option>
               </select>
-              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a spread from the DarkSpace gear list">🎲 Roll</button>
+              <button class="btn small ghost xs-tr-roll" type="button" title="Roll a spread from the HeroDark gear list">🎲 Roll</button>
             </div>
             <div class="ai-cat-filters xs-tr-filters"></div>
             <input type="text" class="ai-input xs-tr-search" placeholder="Search gear to add…">
@@ -12809,7 +12809,7 @@ function wireAiConsole(root) {
     ds: {
       list: () => ((typeof DS_GEAR !== 'undefined' && Array.isArray(DS_GEAR)) ? DS_GEAR : []).map(g => ({ name: g.name, category: g.category === 'weapon' ? 'weapon' : g.category === 'armor' ? 'armor' : 'gear', desc: [g.desc, g.qty ? '×' + g.qty : '', g.cost && g.cost !== '—' ? g.cost : ''].filter(Boolean).join(' · ').slice(0, 160) })),
       groups: [{ key:'all',label:'All',cats:null },{ key:'weapon',label:'Weapons',cats:['weapon'] },{ key:'armor',label:'Armor',cats:['armor'] },{ key:'gear',label:'Gear',cats:['gear'] }],
-      randomCats: ['weapon','armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (1 + Math.floor(Math.random() * 6)) * 10 + (Math.random() < 0.3 ? 50 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'GEAR DROP', empty: 'DarkSpace gear list',
+      randomCats: ['weapon','armor','gear','gear'], money: { name: 'Credits', unit: 'cr', cat: 'credits', roll: () => (1 + Math.floor(Math.random() * 6)) * 10 + (Math.random() < 0.3 ? 50 * (1 + Math.floor(Math.random() * 4)) : 0) }, label: 'GEAR DROP', empty: 'HeroDark gear list',
     },
   };
   root.querySelectorAll('.xs-treasure').forEach(panel => {

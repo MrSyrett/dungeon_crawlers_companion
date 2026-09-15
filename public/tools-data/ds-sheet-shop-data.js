@@ -4,8 +4,8 @@
 // sheet open. Loaded at the same point in the page, so declaration order is
 // unchanged. scripts/extract-game-data.mjs reads SHOP_MAGIC from THIS file.
 const SHOP_MAGIC = {
-  'Injectors, Datachips & Gadgets': [
-    {name:'Gadget', pick:'Wand', note:'A gadget storing a single power — choose which when adding'},
+  'Potions, Scrolls & Wands': [
+    {name:'Magic Wand', pick:'Wand', note:'A wand containing a single spell — choose which when adding'},
     {name:'Potion of Extirpation', full:'An acrid, tarry substance in an iron flask with a lead stopper. Benefit. You can pour the potion on one object or creature filling up to a close area. The target is utterly removed from reality and cannot be returned by anything short of a wish spell. Personality. Chaotic. Protests loudly while being used and never agrees that the target is the right choice for extirpation.', note:'You can pour the potion on one object or creature filling up to a close area. The target is utterly removed from reality and…'},
     {name:'Potion of Flying', full:'A sunny liquid with bubbles that flash and pop like tiny stars. Benefit. You can fly a near distance for 10 rounds when you drink this potion.', note:'You can fly a near distance for 10 rounds when you drink this potion.'},
     {name:'Potion of Forgetfulness', full:'A pink draught that swirls with a counter-clockwise current. Benefit. If you serve this potion to an intelligent being and that being drinks it, the imbiber permanently forgets one memory of your choosing.', note:'If you serve this potion to an intelligent being and that being drinks it, the imbiber permanently forgets one memory of…'},
@@ -15,7 +15,7 @@ const SHOP_MAGIC = {
     {name:'Potion of Legendary Deeds', full:'A golden elixir that resonates with a faint, angelic chord. Benefit. When you drink this potion, you gain one level and your XP total resets to zero.', note:'When you drink this potion, you gain one level and your XP total resets to zero.'},
     {name:'Potion of Polymorph', full:'A pickled newt floats in this lavender flask of clear liquid. Benefit. When you drink this potion, it casts the polymorph spell (pg. 67) on you with a duration of 1 hour instead of 10 rounds.', note:'When you drink this potion, it casts the polymorph spell (pg. 67) on you with a duration of 1 hour instead of 10 rounds.'},
     {name:'Potion of Vitality', full:'A crimson elixir that gently thumps with a heartbeat. Benefit. When you drink this potion, roll your class\'s hit points die. You permanently gain that many HP. Curse. If you drink more than one Potion of Vitality in your lifetime, you must pass a DC 18 Constitution check each time or die instantly.', note:'When you drink this potion, roll your class\'s hit points die. You permanently gain that many HP.'},
-    {name:'Datachip', pick:'Scroll', note:'A datachip encoding a single power — choose which when adding'},
+    {name:'Spell Scroll', pick:'Scroll', note:'A scroll inscribed with a single spell — choose which when adding'},
   ],
   'Weapons': [
     {name:'Enchanted Weapon', enchant:'weapon', note:'A magic weapon — choose the weapon type and bonus when adding'},
@@ -115,7 +115,7 @@ const SHOP_MAGIC = {
     {name:'Well of Many Worlds', full:'A dark circle of cloth that seems to create a tunnel through the surface it lies upon. Benefit. The Well of Many Worlds folds open on a flat surface into a 6-foot wide hole. Creatures can jump into the hole once per day each to be transported to a random plane of existence.', note:'The Well of Many Worlds folds open on a flat surface into a 6-foot wide hole. Creatures can jump into the hole once per day…'},
   ],
 };
-const SHOP_MAGIC_SUBS = ["Injectors, Datachips & Gadgets", "Weapons", "Armor & Deflectors", "Apparel", "Wondrous Tech"];
+const SHOP_MAGIC_SUBS = ["Potions, Scrolls & Wands", "Weapons", "Armor & Shields", "Apparel", "Wondrous"];
 
 const SD_SPELL_FULL = {
   'Acid Arrow': 'You conjure a corrosive bolt that hits one foe, dealing 1d6 damage a round. The bolt remains in the target for as long as you focus.',

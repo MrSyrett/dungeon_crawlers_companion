@@ -192,7 +192,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
   "ds-character": {
     id: "ds-character",
     system: "DS",
-    systemName: "DarkSpace",
+    systemName: "HeroDark",
     kind: "character",
     label: "Character Sheet",
     file: "ds_character_sheet.html",
@@ -201,7 +201,7 @@ export const TOOLS: Record<ToolId, ToolDef> = {
   "ds-session": {
     id: "ds-session",
     system: "DS",
-    systemName: "DarkSpace",
+    systemName: "HeroDark",
     kind: "session",
     label: "Session Prep",
     file: "ds_session_prep_builder.html",

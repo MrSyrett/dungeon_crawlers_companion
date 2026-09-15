@@ -1,4 +1,4 @@
-// DarkSpace quick rules for the character sheet's "? Rules" panel.
+// Shadowdark quick rules for the character sheet's "? Rules" panel.
 // Hand-curated from the core rulebook (page = printed page). Edit here.
 const SD_QUICK_RULES = [
   {
@@ -33,7 +33,7 @@ const SD_QUICK_RULES = [
   },
   {
     title: "Distances",
-    text: "Close = 5 feet. Near = up to 30 feet. Far = within sight during the encounter or scene. Weapon and power ranges use these same three bands.",
+    text: "Close = 5 feet. Near = up to 30 feet. Far = within sight during the encounter or scene. Weapon and spell ranges use these same three bands.",
     page: 85
   },
   {
@@ -43,12 +43,12 @@ const SD_QUICK_RULES = [
   },
   {
     title: "Damage & knockout",
-    text: "On a hit, roll the weapon or power's damage dice + relevant bonuses and subtract it from the target's HP. If you reduce a creature to 0 HP you may choose to knock it unconscious instead of killing it.",
+    text: "On a hit, roll the weapon or spell's damage dice + relevant bonuses and subtract it from the target's HP. If you reduce a creature to 0 HP you may choose to knock it unconscious instead of killing it.",
     page: 89
   },
   {
     title: "Critical hits",
-    text: "A natural 20 on an attack roll or power check is a critical hit. For a weapon, double its damage dice. For a power, you may double one of its numerical effects.",
+    text: "A natural 20 on an attack roll or spellcasting check is a critical hit. For a weapon, double its damage dice. For a spell, you may double one of its numerical effects.",
     page: 89
   },
   {
@@ -83,7 +83,7 @@ const SD_QUICK_RULES = [
   },
   {
     title: "Resting & healing",
-    text: "To rest, consume a ration and sleep for 8 hours (light tasks like a turn on watch are fine). A successful rest restores all lost HP and recovers all stat damage, and refreshes talents, powers, and items that recharge on a rest. Each stressful interruption (including combat) forces a DC 12 CON check; on a failure the ration is spent but you gain no benefit.",
+    text: "To rest, consume a ration and sleep for 8 hours (light tasks like a turn on watch are fine). A successful rest restores all lost HP and recovers all stat damage, and refreshes talents, spells, and items that recharge on a rest. Each stressful interruption (including combat) forces a DC 12 CON check; on a failure the ration is spent but you gain no benefit.",
     page: 86
   },
   {
@@ -108,32 +108,32 @@ const SD_QUICK_RULES = [
   },
   {
     title: "Coins & free slots",
-    text: "1 credits piece (gp) = 10 silver pieces (sp) = 100 copper pieces (cp). The first 100 coins are free to carry; each further 100 coins fills one gear slot. Your first backpack is also free to carry. Arrows and bolts stack 20 per slot, gems 10, rations 3, iron spikes 10.",
+    text: "1 gold piece (gp) = 10 silver pieces (sp) = 100 copper pieces (cp). The first 100 coins are free to carry; each further 100 coins fills one gear slot. Your first backpack is also free to carry. Arrows and bolts stack 20 per slot, gems 10, rations 3, iron spikes 10.",
     page: 35
   },
   {
-    title: "Power checks",
-    text: "Casting a power takes your action. Engineers roll 1d20 + INT modifier; mystics roll 1d20 + WIS modifier. The DC is 10 + the power's tier. On a success the power takes effect; on a failure it does not, and you can't cast that power again until you complete a rest.",
+    title: "Spellcasting checks",
+    text: "Casting a spell takes your action. Wizards roll 1d20 + INT modifier; priests roll 1d20 + WIS modifier. The DC is 10 + the spell's tier. On a success the spell takes effect; on a failure it does not, and you can't cast that spell again until you complete a rest.",
     page: 44
   },
   {
     title: "Spell criticals",
-    text: "Natural 20: you may double one of the power's numerical effects (on a focus power this lasts until your next focus check). Natural 1: the power fails and a focus power ends immediately. A engineer also loses the power until after a rest and rolls on the Engineer Mishap table for that tier. A mystic's allegiance revokes the power until the mystic completes penance and a rest.",
+    text: "Natural 20: you may double one of the spell's numerical effects (on a focus spell this lasts until your next focus check). Natural 1: the spell fails and a focus spell ends immediately. A wizard also loses the spell until after a rest and rolls on the Wizard Mishap table for that tier. A priest's deity revokes the spell until the priest completes penance and a rest.",
     page: 45
   },
   {
-    title: "Focus powers",
-    text: "You can't cast another focus power while focusing, and you can end focus at any time. At the start of each turn make a power check as if casting the power: success keeps it going until your next turn, failure ends it (without losing the power). Taking damage or being distracted forces an immediate check to maintain focus.",
+    title: "Focus spells",
+    text: "You can't cast another focus spell while focusing, and you can end focus at any time. At the start of each turn make a spellcasting check as if casting the spell: success keeps it going until your next turn, failure ends it (without losing the spell). Taking damage or being distracted forces an immediate check to maintain focus.",
     page: 50
   },
   {
     title: "Scrolls & wands",
-    text: "A power user can cast a scroll or wand's power if it's on their class list, even if they don't know it, with a power check at DC 10 + the power's tier. Failing doesn't affect your known powers. A scroll is consumed after any attempt. A wand stops working until you rest on a failure, and breaks permanently on a natural 1; casters with mishap tables roll a mishap on a critical failure either way.",
+    text: "A spellcaster can cast a scroll or wand's spell if it's on their class list, even if they don't know it, with a spellcasting check at DC 10 + the spell's tier. Failing doesn't affect your known spells. A scroll is consumed after any attempt. A wand stops working until you rest on a failure, and breaks permanently on a natural 1; casters with mishap tables roll a mishap on a critical failure either way.",
     page: 49
   },
   {
     title: "XP & leveling up",
-    text: "XP comes from treasure and boons: poor 0, normal 1, fabulous 3, legendary 10, and every PC gets the full value of each find. You need your current level x 10 XP to gain a level (10 at level 1, 20 at level 2, ...). On leveling, XP resets to zero, roll your class hit die and add it to max HP, and gain any new title, powers, and talent roll.",
+    text: "XP comes from treasure and boons: poor 0, normal 1, fabulous 3, legendary 10, and every PC gets the full value of each find. You need your current level x 10 XP to gain a level (10 at level 1, 20 at level 2, ...). On leveling, XP resets to zero, roll your class hit die and add it to max HP, and gain any new title, spells, and talent roll.",
     page: 39
   },
   {
@@ -173,7 +173,7 @@ const SD_QUICK_RULES = [
   },
   {
     title: "Carousing",
-    text: "Between adventures you may spend one downtime activity carousing to turn coin into XP. Each participant pays the event cost (30 cr at +0 up to 1,800 cr at +6) and rolls 1d8 + the event bonus on the outcome table, gaining 2-6 XP plus allies, enemies, fines, luck tokens, or loot.",
+    text: "Between adventures you may spend one downtime activity carousing to turn coin into XP. Each participant pays the event cost (30 gp at +0 up to 1,800 gp at +6) and rolls 1d8 + the event bonus on the outcome table, gaining 2-6 XP plus allies, enemies, fines, luck tokens, or loot.",
     page: 92
   }
 ];

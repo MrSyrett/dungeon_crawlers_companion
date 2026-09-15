@@ -133,10 +133,10 @@ const ICRPG_REFERENCE: { href: string; label: string }[] = [
 ];
 
 const DS_REFERENCE: { href: string; label: string }[] = [
-  { href: "/darkspace/archetypes", label: "Archetypes" },
-  { href: "/darkspace/traits", label: "Traits" },
+  { href: "/darkspace/archetypes", label: "Classes" },
+  { href: "/darkspace/traits", label: "Ancestries" },
   { href: "/darkspace/backgrounds", label: "Backgrounds" },
-  { href: "/darkspace/powers", label: "Powers" },
+  { href: "/darkspace/powers", label: "Spells" },
   { href: "/darkspace/gear", label: "Gear" },
   { href: "/darkspace/bestiary", label: "Bestiary" },
 ];

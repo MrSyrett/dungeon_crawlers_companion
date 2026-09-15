@@ -13,8 +13,8 @@ export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
-  // DarkSpace: a standalone sci-fi reskin of Shadowdark (own storage/characters).
-  { key: "DS", name: "DarkSpace", short: "DS", accent: "var(--darkspace)" },
+  // HeroDark: a homebrewed duplicate of Shadowdark (own storage/characters), HeroDark rules standard.
+  { key: "DS", name: "HeroDark", short: "HD", accent: "var(--darkspace)" },
   // Index Card RPG (Runehammer, Master Edition) — a rules-light unified d20
   // system: one TARGET, roll for EFFORT, five worlds.
   { key: "ICRPG", name: "Index Card RPG", short: "ICRPG", accent: "var(--icrpg)" },

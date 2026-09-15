@@ -494,31 +494,31 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "tier") || "Monster"} · ${sv(d, "world") || "core"}`,
   },
 
-  // ── DarkSpace (sci-fi Shadowdark reskin) ──
-  "ds-archetype": {
-    title: "My Homebrew Archetypes", noun: "Archetype",
+  // ── HeroDark (Shadowdark clone; homebrew stored under ds-* keys, SD shapes) ──
+  "ds-class": {
+    title: "My Homebrew Classes", noun: "Class",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "hd", label: "Hit Die", type: "text", placeholder: "1d8" },
-      { key: "caster", label: "Caster", type: "select", options: [["None", "None"], ["Engineer", "Engineer"], ["Mystic", "Mystic"], ["Both", "Both"]] },
-      { key: "weapons", label: "Weapons", type: "text", full: true, placeholder: "All weapons" },
-      { key: "armor", label: "Armor", type: "text", full: true, placeholder: "All armor and deflectors" },
-      { key: "features", label: "Features", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", rowKeyPlaceholder: "Grit", textLabel: "Description", withChoose: true, addLabel: "+ Feature", help: "Each feature can carry mechanical effects (e.g. +1 AC, +2 HP) applied at creation. Tick “Choose one” for a feature the player selects from." },
-      { key: "talent", label: "Talents (2d6 table)", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", rowKeyPlaceholder: "Deadeye", textLabel: "Description", withChoose: true, addLabel: "+ Talent row", help: "Up to 5 rows, mapped to the 2d6 bands (row 1 → 2, row 2 → 3–6, row 3 → 7–9, row 4 → 10–11, row 5 → 12). Effects apply when that talent is rolled or chosen." },
-      { key: "titles", label: "Ranks by Motivation", type: "titles", full: true },
+      { key: "weaponsAll", label: "Proficient with all weapons", type: "checkbox" },
+      { key: "armorAll", label: "Proficient with all armor & shields", type: "checkbox" },
+      { key: "features", label: "Features", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", rowKeyPlaceholder: "Hard to Kill", textLabel: "Description", withChoose: true, addLabel: "+ Feature", help: "Each feature can carry mechanical effects (e.g. +1 AC, +2 HP) applied at creation. Tick “Choose one” for a feature the player selects from." },
+      { key: "talent", label: "Talents (2d6 table)", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", rowKeyPlaceholder: "Grit", textLabel: "Description", withChoose: true, addLabel: "+ Talent row", help: "Up to 5 rows, mapped to the 2d6 bands (row 1 → 2, row 2 → 3–6, row 3 → 7–9, row 4 → 10–11, row 5 → 12). Effects apply when that talent is rolled or chosen." },
+      { key: "titles", label: "Titles by Alignment", type: "titles", full: true },
     ],
-    blank: () => ({ hd: "1d6", caster: "None", features: [], talent: [] }), toForm: (d) => ({ ...d }),
-    summary: (d) => `HD ${sv(d, "hd") || "1d6"}${sv(d, "caster") && sv(d, "caster") !== "None" ? ` · ${sv(d, "caster")}` : ""}`,
+    blank: () => ({ hd: "1d6", features: [], talent: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => `HD ${sv(d, "hd") || "1d6"}`,
   },
-  "ds-trait": {
-    title: "My Homebrew Traits", noun: "Trait",
+  "ds-ancestry": {
+    title: "My Homebrew Ancestries", noun: "Ancestry",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "effect", label: "Description", type: "textarea", full: true, placeholder: "What the trait does, in plain words." },
-      { key: "bonuses", label: "Mechanical Bonuses", type: "bonuses", full: true, addLabel: "+ Bonus", help: "Applied automatically when a character picks this trait at creation (e.g. +1 AC, +2 HP, +1 Strength)." },
+      { key: "traits", label: "Traits", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", rowKeyPlaceholder: "Keen Senses", textLabel: "Description", addLabel: "+ Trait", help: "Each trait can carry mechanical effects (e.g. +1 DEX) applied at creation." },
+      { key: "languages", label: "Languages", type: "text", full: true, placeholder: "Common, Elvish" },
+      { key: "bonuses", label: "Mechanical Bonuses", type: "bonuses", full: true, addLabel: "+ Bonus", help: "Applied automatically when a character picks this ancestry at creation (e.g. +1 DEX, +2 HP)." },
     ],
-    blank: () => ({ bonuses: [] }), toForm: (d) => ({ ...d }),
-    summary: (d) => { const n = Array.isArray(d.bonuses) ? d.bonuses.length : 0; return n ? `${n} bonus${n === 1 ? "" : "es"}` : "Trait"; },
+    blank: () => ({ traits: [], bonuses: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => { const n = Array.isArray(d.traits) ? d.traits.length : 0; return n ? `${n} trait${n === 1 ? "" : "s"}` : "Ancestry"; },
   },
   "ds-background": {
     title: "My Homebrew Backgrounds", noun: "Background",
@@ -529,47 +529,48 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({}), toForm: (d) => ({ ...d }),
     summary: () => "Background",
   },
-  "ds-power": {
-    title: "My Homebrew Powers", noun: "Power",
+  "ds-spell": {
+    title: "My Homebrew Spells", noun: "Spell",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "tier", label: "Tier", type: "text", placeholder: "1" },
-      { key: "caster", label: "Caster", type: "select", options: [["Both", "Engineer / Mystic"], ["Engineer", "Engineer"], ["Mystic", "Mystic"]] },
       { key: "range", label: "Range", type: "text", placeholder: "Close, Near, Far, Self" },
       { key: "duration", label: "Duration", type: "text", placeholder: "Instant, Focus…" },
       { key: "damage", label: "Damage / Effect", type: "text", placeholder: "1d8" },
       { key: "desc", label: "Description", type: "textarea", full: true },
     ],
-    blank: () => ({ tier: "1", caster: "Both" }), toForm: (d) => ({ ...d }),
-    summary: (d) => `Tier ${sv(d, "tier") || "1"} · ${sv(d, "caster") === "Both" ? "Engineer / Mystic" : sv(d, "caster")}`,
+    blank: () => ({ tier: "1" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `Tier ${sv(d, "tier") || "1"}`,
   },
   "ds-gear": {
     title: "My Homebrew Gear", noun: "Gear",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "category", label: "Category", type: "select", options: [["basic", "Adventuring Gear"], ["weapon", "Weapon"], ["armor", "Armor"], ["shield", "Deflector / Shield"], ["ammo", "Ammo"]] },
-      { key: "cost", label: "Cost", type: "text", placeholder: "100 cr" },
+      { key: "kind", label: "Category", type: "select", options: [["gear", "Adventuring Gear"], ["weapon", "Weapon"], ["armor", "Armor"], ["shield", "Shield"], ["magic", "Magic Item"], ["ammo", "Ammo"]] },
+      { key: "cost", label: "Cost", type: "number", placeholder: "10" },
+      { key: "costUnit", label: "Coin", type: "select", options: [["gp", "gp"], ["sp", "sp"], ["cp", "cp"]] },
+      { key: "slots", label: "Gear Slots", type: "text", placeholder: "1" },
       { key: "qty", label: "Quantity", type: "text", placeholder: "20" },
       // Weapon stats (category = Weapon).
       { key: "wtype", label: "Weapon Type", type: "select", options: [["M", "Melee"], ["R", "Ranged"], ["M/R", "Melee / Ranged"]], help: "Weapons only." },
       { key: "damage", label: "Damage", type: "text", placeholder: "1d8", help: "Weapons only." },
       { key: "range", label: "Range", type: "select", options: [["Close", "Close"], ["Near", "Near"], ["Far", "Far"], ["Close/Near", "Close/Near"], ["Close/Far", "Close/Far"]], help: "Weapons only." },
       { key: "props", label: "Properties", type: "text", full: true, placeholder: "Two-handed, thrown…", help: "Weapons only." },
-      { key: "ammo", label: "Requires Ammo", type: "text", placeholder: "Power Cells", help: "Weapons only — leave blank if none." },
-      // Armor / deflector stats.
+      { key: "ammo", label: "Requires Ammo", type: "text", placeholder: "Arrows", help: "Weapons only — leave blank if none." },
+      // Armor / shield stats.
       { key: "acBase", label: "Armor Base AC", type: "number", placeholder: "13", help: "Armor only." },
       { key: "acDex", label: "Adds DEX to AC", type: "checkbox", help: "Armor only." },
-      { key: "acBonus", label: "Deflector AC Bonus", type: "number", placeholder: "2", help: "Deflector / shield only." },
-      // Equipped-item bonuses (magic items, implants, augments).
+      { key: "acBonus", label: "Shield AC Bonus", type: "number", placeholder: "2", help: "Shield only." },
+      // Equipped-item bonuses (magic items).
       { key: "equippable", label: "Equippable (applies bonuses when equipped)", type: "checkbox" },
-      { key: "bonuses", label: "Bonuses While Equipped", type: "bonuses", full: true, addLabel: "+ Bonus", help: "For augments, implants and magic items — folded into the sheet when the item sits in a gear slot and is equipped." },
-      { key: "desc", label: "Description", type: "textarea", full: true },
+      { key: "bonuses", label: "Bonuses While Equipped", type: "bonuses", full: true, addLabel: "+ Bonus", help: "For magic items — folded into the sheet when the item sits in a gear slot and is equipped." },
+      { key: "note", label: "Description", type: "textarea", full: true },
     ],
-    blank: () => ({ category: "basic", bonuses: [] }), toForm: (d) => ({ ...d }),
-    summary: (d) => { const c = sv(d, "category") || "basic"; const n = Array.isArray(d.bonuses) ? d.bonuses.length : 0; return n ? `${c} · ${n} bonus${n === 1 ? "" : "es"}` : c; },
+    blank: () => ({ kind: "gear", costUnit: "gp", bonuses: [] }), toForm: (d) => ({ ...d }),
+    summary: (d) => { const c = sv(d, "kind") || "gear"; const n = Array.isArray(d.bonuses) ? d.bonuses.length : 0; return n ? `${c} · ${n} bonus${n === 1 ? "" : "es"}` : c; },
   },
   "ds-monster": {
-    title: "My Homebrew Hostiles", noun: "Hostile",
+    title: "My Homebrew Monsters", noun: "Monster",
     fields: [
       { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
       { key: "lv", label: "LV", type: "text", placeholder: "1" },
@@ -583,7 +584,7 @@ const SCHEMAS: Record<string, Schema> = {
       { key: "i", label: "INT", type: "text", placeholder: "-1" },
       { key: "w", label: "WIS", type: "text", placeholder: "+0" },
       { key: "ch", label: "CHA", type: "text", placeholder: "+0" },
-      { key: "atk", label: "Attacks", type: "text", full: true, placeholder: "1 blaster +2 (1d8) far" },
+      { key: "atk", label: "Attacks", type: "text", full: true, placeholder: "1 sword +2 (1d8)" },
       { key: "notes", label: "Notes", type: "textarea", full: true },
     ],
     blank: () => ({ al: "N", mv: "near", lv: "1" }), toForm: (d) => ({ ...d }),

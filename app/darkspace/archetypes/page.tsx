@@ -45,8 +45,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
   if (!user) redirect("/login");
 
   const [hbVisible, hbOwn, campaigns] = await Promise.all([
-    visibleHomebrew(user.id, { type: "ds-archetype" }),
-    ownHomebrew(user.id, "ds-archetype"),
+    visibleHomebrew(user.id, { type: "ds-class" }),
+    ownHomebrew(user.id, "ds-class"),
     userCampaigns(user.id),
   ]);
   const hbRows: Row[] = hbVisible.map((h) => hbToArchetype(h.data as Record<string, unknown>, h.name));
@@ -58,15 +58,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <DarkSpaceHeader title="Archetypes" subtitle={`DarkSpace · Character Roles${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
+      <DarkSpaceHeader title="Classes" subtitle={`HeroDark · Classes${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
-      <div className="mb-6"><HomebrewEditor kind="ds-archetype" campaigns={campaigns} initial={hbOwn} /></div>
+      <div className="mb-6"><HomebrewEditor kind="ds-class" campaigns={campaigns} initial={hbOwn} /></div>
 
-      <SearchForm base={BASE} q={q} placeholder="Search archetypes…" hidden={{}} />
-      <CountLine count={results.length} noun="archetype" base={BASE} filtered={Boolean(needle)} />
+      <SearchForm base={BASE} q={q} placeholder="Search classes…" hidden={{}} />
+      <CountLine count={results.length} noun="class" base={BASE} filtered={Boolean(needle)} />
 
       {results.length === 0 ? (
-        <EmptyState noun="archetype" base={BASE} />
+        <EmptyState noun="class" base={BASE} />
       ) : (
         <div className="space-y-4">
           {results.map((a) => (

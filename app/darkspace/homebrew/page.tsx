@@ -7,12 +7,12 @@ import HomebrewEditor from "@/components/HomebrewEditor";
 export const dynamic = "force-dynamic";
 
 const KINDS: { kind: HbType; label: string }[] = [
-  { kind: "ds-archetype", label: "Archetypes" },
-  { kind: "ds-trait", label: "Traits" },
+  { kind: "ds-class", label: "Classes" },
+  { kind: "ds-ancestry", label: "Ancestries" },
   { kind: "ds-background", label: "Backgrounds" },
-  { kind: "ds-power", label: "Powers" },
+  { kind: "ds-spell", label: "Spells" },
   { kind: "ds-gear", label: "Gear" },
-  { kind: "ds-monster", label: "Hostiles" },
+  { kind: "ds-monster", label: "Monsters" },
 ];
 
 export default async function DarkSpaceHomebrewHubPage() {
@@ -41,7 +41,7 @@ export default async function DarkSpaceHomebrewHubPage() {
       </header>
 
       <p className="mb-6 max-w-[62ch] text-[13px] leading-relaxed text-[var(--muted)]">
-        Everything you make here flows into the DarkSpace reference pages and the GM tools. Share a
+        Everything you make here flows into the HeroDark reference pages and the GM tools. Share a
         creation to a campaign to let your table use it too.
       </p>
 

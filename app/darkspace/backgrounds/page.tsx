@@ -23,7 +23,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
     userCampaigns(user.id),
   ]);
   const hbRows: Row[] = hbVisible.map((h) => ({ name: h.name, desc: typeof (h.data as Record<string, unknown>).desc === "string" ? ((h.data as Record<string, unknown>).desc as string) : "", homebrew: true }));
-  const ALL: Row[] = [...hbRows, ...DS_BACKGROUNDS.map((b) => ({ name: b }))];
+  const ALL: Row[] = [...hbRows, ...DS_BACKGROUNDS.map((b) => ({ name: b.name, desc: b.desc }))];
 
   const raw = await searchParams;
   const q = one(raw.q).trim(); const needle = q.toLowerCase();
@@ -31,7 +31,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <DarkSpaceHeader title="Backgrounds" subtitle={`DarkSpace · Where You Came From${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
+      <DarkSpaceHeader title="Backgrounds" subtitle={`HeroDark · Where You Came From${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
       <div className="mb-6"><HomebrewEditor kind="ds-background" campaigns={campaigns} initial={hbOwn} /></div>
 

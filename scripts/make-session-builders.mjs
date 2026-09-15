@@ -63,11 +63,11 @@ const SYSTEMS = [
     mob: "Monster", boss: "Boss", npc: "NPC", typePh: "GRUNT // 1♥ // DEF +0", titlePh: "e.g. The Grey Hill Inferno", subtitlePh: "e.g. An ICRPG one-shot, TARGET 12",
   },
   {
-    file: "ds_session_prep_builder.html", key: "ds_session", ls: "ds_builder_v1", cfg: "ds", random: "Random Hostile",
-    name: "DarkSpace", title: "Session Prep Builder — DarkSpace",
+    file: "ds_session_prep_builder.html", key: "ds_session", ls: "ds_builder_v1", cfg: "ds", random: "Random Monster",
+    name: "HeroDark", title: "Session Prep Builder — HeroDark",
     accent: "#24c3d6", accentDark: "#0e6b78", red: "#b82018", redDark: "#7a1510", highlight: "#6fe0ef", boxBg: "#0f2b30",
-    chapter: "Sector", chapterPh: "Sector 1", session: "Session", mobs: "Hostiles/NPCs", mobsHeading: "Hostiles &amp; NPCs",
-    mob: "Hostile", boss: "Elite", npc: "NPC", typePh: "SCAV // LV 1 // AC 11 // 5 HP", titlePh: "e.g. The Derelict Hauler", subtitlePh: "e.g. A DarkSpace one-shot for 4 crew",
+    chapter: "Chapter", chapterPh: "Chapter 1", session: "Session", mobs: "Monsters/NPCs", mobsHeading: "Monsters &amp; NPCs",
+    mob: "Monster", boss: "Boss", npc: "NPC", typePh: "LV 1 // AC 11 // 5 HP", titlePh: "e.g. The Sunken Crypt", subtitlePh: "e.g. A HeroDark one-shot for 4 heroes",
   },
   {
     file: "co_session_prep_builder.html", key: "co_session", ls: "co_builder_v1", cfg: "co", random: "Random Threat",
@@ -196,7 +196,7 @@ const SB_CONFIG = {
     [{ key:'str', label:'STR', ph:'+0' }, { key:'dex', label:'DEX', ph:'+0' }, { key:'con', label:'CON', ph:'+0' }, { key:'int', label:'INT', ph:'+0' }, { key:'wis', label:'WIS', ph:'+0' }, { key:'cha', label:'CHA', ph:'+0' }],
   ],
   abilitiesLabel: 'Attacks & Notes', abilitiesPlaceholder: 'One per line — Attack: +N (dmg) · Note: effect',
-  mobs: { placeholder: 'Search the DarkSpace Bestiary…', pool: () => (typeof DS_MONSTERS !== 'undefined' && Array.isArray(DS_MONSTERS)) ? DS_MONSTERS : [], toCard: m => ({
+  mobs: { placeholder: 'Search the HeroDark Bestiary…', pool: () => (typeof DS_MONSTERS !== 'undefined' && Array.isArray(DS_MONSTERS)) ? DS_MONSTERS : [], toCard: m => ({
     sbtype: (Number(m.lv) >= 8) ? 'boss' : 'mob', name: m.name || '',
     type: ['HOSTILE', ({ L:'LAWFUL', N:'NEUTRAL', C:'CHAOTIC' })[m.al] || ''].filter(Boolean).join(' // '), flavor: '',
     ac: String(m.ac ?? ''), hp: String(m.hp ?? ''), lv: String(m.lv ?? ''), mv: m.mv || '',

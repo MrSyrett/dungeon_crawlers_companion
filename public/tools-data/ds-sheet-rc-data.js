@@ -1,193 +1,238 @@
-// DarkSpace character sheet — random-character / rules data. A sci-fi reskin of
-// Shadowdark (mechanics identical; only names/flavor differ). Fork of
-// sd-sheet-rc-data.js, trimmed to CORE content only (6 archetypes, no optional
-// classes/ancestries/backgrounds). DarkSpace decouples Traits: your Species is
-// free-text and you pick ONE Trait from DS_TRAITS. Loaded before the sheet
-// script; declaration order mirrors the Shadowdark file so the engine fork
-// finds every RC_* name in the same shared scope.
+// SD character sheet — random-character / rules data (RC_CLASSES,
+// RC_CLASS_INFO, RC_TITLES, RC_ANCESTRY, RC_BACKGROUNDS, RC_SPELL_DATA,
+// RC_OPTIONAL_*, ...). Split out of sd_character_sheet.html (~60KB of static
+// data) so the browser caches it. Loaded at the same point in the page;
+// declaration order unchanged. NOTE: the homebrew sync mutates some of these
+// (RC_CLASSES, RC_ANCESTRY) in place at runtime — that still works, the
+// const binding lives in the shared script scope either way.
+// scripts/extract-game-data.mjs reads the RC_* names from THIS file.
 // ── Random Character Generator ─────────────────────────────────────────────
-// Flavor species for the random roller only. In DarkSpace, Species grants NO
-// trait (decoupled) — the trait is chosen separately from DS_TRAITS. `ability`
-// is kept empty so any engine code that reads it stays harmless.
 const RC_ANCESTRY = {
   table: [
-    {w:4,v:'Human'},{w:2,v:'Voidkin'},{w:2,v:'Ferrix'},
-    {w:2,v:'Zeph'},{w:1,v:'Greldan'},{w:1,v:'Synthetic'},
-    {w:1,v:'Kastellan'}
+    {w:4,v:'Human'},{w:2,v:'Elf'},{w:2,v:'Dwarf'},
+    {w:2,v:'Halfling'},{w:1,v:'Half-Orc'},{w:1,v:'Goblin'},
+    {w:1,v:'Kobold'}
   ],
   ability: {
-    Human:'', Voidkin:'', Ferrix:'', Zeph:'', Greldan:'', Synthetic:'', Kastellan:'',
+    Human:    'Ambitious: +1 bonus talent roll at 1st level.',
+    Elf:      'Farsight: +1 to ranged attack rolls OR +1 to spellcasting checks.',
+    Dwarf:    'Stout: Start with +2 HP. Roll hit points with advantage.',
+    Halfling: 'Stealthy: Once per day, become invisible for 3 rounds.',
+    'Half-Orc': 'Mighty: +1 to attack and damage with melee weapons.',
+    Goblin:   'Keen Senses: You cannot be surprised.',
+    Kobold:   'Knack: +1 to spellcasting checks OR begin each session with a luck token.',
   },
   languages: {
-    Human:     'Common + 1 additional common language',
-    Voidkin:   'Common, High Voidkin, Xeno-cant',
-    Ferrix:    'Common, Ferrix',
-    Zeph:      'Common',
-    Greldan:   'Common, Raider-cant',
-    Synthetic: 'Common, Binary',
-    Kastellan: 'Common, Binary',
+    Human:    'Common + 1 additional common language',
+    Elf:      'Common, Elvish, Sylvan',
+    Dwarf:    'Common, Dwarvish',
+    Halfling: 'Common',
+    'Half-Orc': 'Common, Orcish',
+    Goblin:   'Common, Goblin',
+    Kobold:   'Common, Draconic',
   }
 };
 
-// ── Decoupled Traits ───────────────────────────────────────────────────────
-// Pick ONE. Effects are Shadowdark's ancestry/DarkSpace traits, unchanged.
-const DS_TRAITS = [
-  // core six (from the Shadowdark ancestries)
-  { name:'Ambitious',      effect:'+1 bonus talent roll at 1st level.' },
-  { name:'Keen Optics',    effect:'+1 to ranged attack rolls OR +1 to power checks.' },
-  { name:'Reinforced',     effect:'Start with +2 HP. Roll hit points with advantage.' },
-  { name:'Cloaked',        effect:'Once per day, become invisible for 3 rounds.' },
-  { name:'Augmented',      effect:'+1 to attack and damage with melee weapons.' },
-  { name:'Motion Sense',   effect:'You cannot be surprised.' },
-  // additional (from DarkSpace — The Triad excluded)
-  { name:'Armored Hide',   effect:'+1 AC when unarmored.' },
-  { name:'Longsight',      effect:'+1 to ranged attack and damage.' },
-  { name:'Natural Weapon', effect:'You have a natural weapon dealing 1d6 damage (you are proficient with it).' },
-  { name:'Flight',         effect:'You can fly and/or walk.' },
-  { name:'Sneaky',         effect:'Advantage on deception checks.' },
-  { name:'Amphibious',     effect:'You breathe water and air; swim at full speed.' },
-  { name:'Tracking Sense', effect:'1/session, mark a quarry; advantage to track it.' },
-  { name:'Heat Adapted',   effect:'Survive hot environments; take half fire/heat damage.' },
-  { name:'Cold Adapted',   effect:'Survive cold environments; take half ice/cold damage.' },
-  { name:'Rad-Shielded',   effect:'Survive radioactive environments; take half radiation/electric damage.' },
-  { name:'Filtration',     effect:'Survive toxic environments; take half poison damage.' },
-  { name:'Technical Knack',effect:'+1 to checks working with technology and machines.' },
-  { name:'Beast Affinity', effect:'+1 to checks working with creatures and xenofauna.' },
-  { name:'Natural Climber',effect:'Climb at full speed; reduce the DC of climbing checks by one category.' },
-  { name:'Covert Comms',   effect:'You can communicate secretly with others of your own kind.' },
-  { name:'Extra Arms',     effect:'One extra non-attack action per turn; +2 gear slots.' },
-  { name:'Extra Legs',     effect:'Move up to double near in addition to your action; +1 category on checks to resist being tripped.' },
-  { name:'Mechanical',     effect:'Synthetic body: you need no food, drink, or air; you recharge on a rest.' },
-  { name:'Life Support',   effect:'Sealed suit: no food, drink, or air needed while powered; you still rest to recharge.' },
+const RC_CLASSES = ['Fighter','Priest','Thief','Wizard','Bard','Ranger','Witch','Pit Fighter',"Knight of St. Ydris","Warlock","Desert Rider","Ras-Godai","Sea Wolf","Seer","Basilisk Warrior","Delver","Wyrdling","Duelist","Roustabout","Necromancer"];
+// Display order for the 2-column Character Creation Wizard grid (row-major), so
+// the left column reads Fighter / Thief / Ranger / Pit Fighter and the right
+// column reads Priest / Wizard / Bard / Witch.
+const CCW_CLASS_ORDER = ['Fighter','Priest','Thief','Wizard','Ranger','Bard','Pit Fighter','Witch',"Knight of St. Ydris","Warlock","Desert Rider","Ras-Godai","Sea Wolf","Seer","Basilisk Warrior","Delver","Wyrdling","Duelist","Roustabout","Necromancer"];
+// Official-but-optional content (not part of the Shadowdark core rules). Used by
+// the reference pages and creation to let players include/exclude these.
+const RC_OPTIONAL_CLASSES = [
+  'Pit Fighter','Witch',
+  "Knight of St. Ydris","Warlock","Desert Rider","Ras-Godai","Sea Wolf","Seer","Basilisk Warrior","Delver","Wyrdling","Duelist","Roustabout","Necromancer"
 ];
-
-// Archetypes = the six Shadowdark core classes, reskinned.
-const RC_CLASSES = ['Soldier','Mystic','Scoundrel','Engineer','Scout','Diplomat'];
-// Display order for the 2-column Character Creation Wizard grid (row-major).
-const CCW_CLASS_ORDER = ['Soldier','Scoundrel','Scout','Mystic','Engineer','Diplomat'];
-// Core only — no optional content in DarkSpace.
-const RC_OPTIONAL_CLASSES = [];
-const RC_OPTIONAL_ANCESTRIES = [];
-const RC_OPTIONAL_BACKGROUNDS = [];
-
-// ── Scout stims (Ranger's herbal remedies, reskinned; effects unchanged) ────
+const RC_OPTIONAL_ANCESTRIES = [
+  'Kobold'
+];
+const RC_OPTIONAL_BACKGROUNDS = [
+  "Hermit","Outcast","Woodborn","Amnesiac","Haunted","Fugitive","Feytouched","Witchborn","Forager","Redeemer","Marked","Sacrifice","Marooned","Fallen","Drawn","Ascetic","Wolfchild","Healer","Chosen","Demonborn","Freed","Displaced","Criminal","Drifter","Crop Farmer","Livestock Farmer","Hunter","Fisher","Enforcer","Trader","Crafter","Bowyer","Seer's Apprentice","Shipwright","Blacksmith","Far Traveler","Skald","Heroborn","Nobleborn","God's Blood"
+];
+// ── Ranger herbal remedies (Shadowdark, Ranger) ────────────────────────────
+// One table drives the class feature text, the Talents box and the creation
+// wizard's remedy picker, so the wording can't drift between them.
 const SD_REMEDIES = [
-  { name:'Medgel',      dc:11, effect:'Heals 1 HP.' },
-  { name:'Combat Stim', dc:12, effect:"You can't be surprised for 10 rounds." },
-  { name:'Target Lock', dc:13, effect:'ADV on attacks and damage against one creature type you choose for 1d6 rounds.' },
-  { name:'Antitox',     dc:14, effect:'Ends one poison or disease.' },
-  { name:'Medkit',      dc:15, effect:'Restores HP as a healing stimpack (Potion of Healing equivalent).' },
+  { name:'Salve',       dc:11, effect:'Heals 1 HP.' },
+  { name:'Stimulant',   dc:12, effect:"You can't be surprised for 10 rounds." },
+  { name:'Foebane',     dc:13, effect:'ADV on attacks and damage against one creature type you choose for 1d6 rounds.' },
+  { name:'Restorative', dc:14, effect:'Ends one poison or disease.' },
+  { name:'Curative',    dc:15, effect:'Equivalent to a Potion of Healing.' },
 ];
 const remedyLine = r => r.name + ' (DC ' + r.dc + '): ' + r.effect;
 
 const RC_CLASS_INFO = {
-  Soldier: { hd:'1d8', weapons:'All weapons', armor:'All armor and deflectors',
-    talent:['Gain Weapon Specialization with one additional weapon type','+1 to melee and ranged attacks','+1 to melee and ranged attacks','+1 to melee and ranged attacks','+1 to melee and ranged attacks','+2 to Strength, Dexterity, or Constitution stat','+2 to Strength, Dexterity, or Constitution stat','+2 to Strength, Dexterity, or Constitution stat','+2 to Strength, Dexterity, or Constitution stat','Choose one armor type, get +1 AC from it','Choose one armor type, get +1 AC from it','Choose a talent or +2 stat points'],
-    features:['Hauler: Add CON modifier (if positive) to gear slots.','Weapon Specialization: Choose a weapon type; +1 to attack and damage. Add half your level to these rolls.','Grit: Choose STR or DEX; advantage on checks to overcome opposing force.'] },
-  Mystic: { hd:'1d6', weapons:'Stun baton, slug rifle, combat knife, shock maul, vibroblade, power staff, breaching hammer', armor:'All armor and deflectors',
-    talent:['Gain advantage on casting one power you know','+1 to melee or ranged attacks','+1 to melee or ranged attacks','+1 to melee or ranged attacks','+1 to melee or ranged attacks','+1 to Mystic power checks','+1 to Mystic power checks','+1 to Mystic power checks','+1 to Mystic power checks','+2 to Strength or Wisdom stat','+2 to Strength or Wisdom stat','Choose a talent or +2 stat points'],
-    features:['Banish (bonus power, does not count toward power limit).','Power Channeling (WIS). Know 2 tier 1 powers. Add powers per level.','Languages: Ascendant, Void-cant, or Binary.','Choose an Allegiance matching your alignment.'] },
-  Scoundrel: { hd:'1d4', weapons:'Stun baton, slug rifle, combat knife, blaster pistol, vibro-shortblade', armor:'Flak weave, reinforced combat weave',
+  Fighter: { hd:'1d8', weapons:'All weapons', armor:'All armor and shields',
+    talent:['Gain Weapon Mastery with one additional weapon type','+1 to melee and ranged attacks','+1 to melee and ranged attacks','+1 to melee and ranged attacks','+1 to melee and ranged attacks','+2 to Strength, Dexterity, or Constitution stat','+2 to Strength, Dexterity, or Constitution stat','+2 to Strength, Dexterity, or Constitution stat','+2 to Strength, Dexterity, or Constitution stat','Choose one armor type, get +1 AC from it','Choose one armor type, get +1 AC from it','Choose a talent or +2 stat points'],
+    features:['Hauler: Add CON modifier (if positive) to gear slots.','Weapon Mastery: Choose a weapon type; +1 to attack and damage. Add half your level to these rolls.','Grit: Choose STR or DEX; advantage on checks to overcome opposing force.'] },
+  Priest: { hd:'1d6', weapons:'Club, crossbow, dagger, mace, longsword, staff, warhammer', armor:'All armor and shields',
+    talent:['Gain advantage on casting one spell you know','+1 to melee or ranged attacks','+1 to melee or ranged attacks','+1 to melee or ranged attacks','+1 to melee or ranged attacks','+1 to priest spellcasting checks','+1 to priest spellcasting checks','+1 to priest spellcasting checks','+1 to priest spellcasting checks','+2 to Strength or Wisdom stat','+2 to Strength or Wisdom stat','Choose a talent or +2 stat points'],
+    features:['Turn Undead (bonus spell, does not count toward spell limit).','Spellcasting (WIS). Know 2 tier 1 spells. Add spells per level.','Languages: Celestial, Diabolic, or Primordial.','Choose a Deity matching your alignment.'] },
+  Thief: { hd:'1d4', weapons:'Club, crossbow, dagger, shortbow, shortsword', armor:'Leather armor, mithral chainmail',
     talent:['1/day, all attacks that would hit you this round miss instead',
-            'Sneak Attack deals +1 dice of damage','Sneak Attack deals +1 dice of damage','Sneak Attack deals +1 dice of damage','+2 to Strength, Dexterity, or Charisma stat','+2 to Strength, Dexterity, or Charisma stat','+2 to Strength, Dexterity, or Charisma stat','+2 to Strength, Dexterity, or Charisma stat','+2 to Strength, Dexterity, or Charisma stat','+1 to melee and ranged attacks','+1 to melee and ranged attacks','Choose a talent or +2 stat points'],
-    features:['Sneak Attack: Hit unaware target → extra weapon die damage + half level dice.','Infiltration: Advantage on climbing, sneaking, disguises, traps, locks, pickpocketing.'] },
-  Engineer: { hd:'1d4', weapons:'Combat knife, power staff', armor:'None',
-    talent:['Make 1 random tech gadget (your choice of type)','+2 to Intelligence stat or +1 to power checks','+2 to Intelligence stat or +1 to power checks','+2 to Intelligence stat or +1 to power checks','+2 to Intelligence stat or +1 to power checks','+2 to Intelligence stat or +1 to power checks','Advantage on casting one power you know','Advantage on casting one power you know','Advantage on casting one power you know','Learn one additional Engineer power of any tier you know','Learn one additional Engineer power of any tier you know','Choose a talent or +2 stat points'],
-    features:['Tech Savvy (INT). Know 3 tier 1 Tech. Add tech per level.','Reverse-Engineering: Study a datachip 1 day, DC 15 INT check to learn permanently.','Languages: 2 additional common + 2 rare languages.'] },
-  Scout: { hd:'1d8', weapons:'Combat knife, blaster rifle, vibroblade, blaster pistol, vibro-shortblade, shock lance, power staff', armor:'Flak weave, combat weave',
-    talent:['You deal d12 damage with one weapon type you choose','+1 to melee or ranged attacks and damage','+1 to melee or ranged attacks and damage','+1 to melee or ranged attacks and damage','+1 to melee or ranged attacks and damage','+2 to Strength, Dexterity, or Intelligence stat','+2 to Strength, Dexterity, or Intelligence stat','+2 to Strength, Dexterity, or Intelligence stat','+2 to Strength, Dexterity, or Intelligence stat','ADV on Field Medicine checks for a stim you choose','ADV on Field Medicine checks for a stim you choose','Choose a talent or +2 stat points'],
-    features:['Wayfinder: Advantage on Navigation, Tracking, Survival, Stealth, and Xeno-handling checks.','Field Medicine (INT check): Prepare a stim. Stims expire in 3 rounds.', ...SD_REMEDIES.map(r => '  ' + remedyLine(r))] },
-  Diplomat: { hd:'1d6', weapons:'Slug rifle, combat knife, shock maul, blaster pistol, vibro-shortblade, shock lance, power staff', armor:'Flak weave, combat weave, deflectors',
+            'Backstab deals +1 dice of damage','Backstab deals +1 dice of damage','Backstab deals +1 dice of damage','+2 to Strength, Dexterity, or Charisma stat','+2 to Strength, Dexterity, or Charisma stat','+2 to Strength, Dexterity, or Charisma stat','+2 to Strength, Dexterity, or Charisma stat','+2 to Strength, Dexterity, or Charisma stat','+1 to melee and ranged attacks','+1 to melee and ranged attacks','Choose a talent or +2 stat points'],
+    features:['Backstab: Hit unaware target → extra weapon die damage + half level dice.','Thievery: Advantage on climbing, sneaking, disguises, traps, locks, pickpocketing.'] },
+  Wizard: { hd:'1d4', weapons:'Dagger, staff', armor:'None',
+    talent:['Make 1 random magic item (your choice of type)','+2 to Intelligence stat or +1 to spellcasting checks','+2 to Intelligence stat or +1 to spellcasting checks','+2 to Intelligence stat or +1 to spellcasting checks','+2 to Intelligence stat or +1 to spellcasting checks','+2 to Intelligence stat or +1 to spellcasting checks','Advantage on casting one spell you know','Advantage on casting one spell you know','Advantage on casting one spell you know','Learn one additional wizard spell of any tier you know','Learn one additional wizard spell of any tier you know','Choose a talent or +2 stat points'],
+    features:['Spellcasting (INT). Know 3 tier 1 spells. Add spells per level.','Learning Spells: Study scroll 1 day, DC 15 INT check to learn permanently.','Languages: 2 additional common + 2 rare languages.'] },
+  Bard: { hd:'1d6', weapons:'Crossbow, dagger, mace, shortbow, shortsword, spear, staff', armor:'Leather armor, chainmail, shields',
     // 12 slots; text is read from indices 0,1,6,9,11 (one per band).
-    talent:['You find a random gadget (you choose)',
-            '+1 to melee/ranged attacks or +1 to Tech Dabbler rolls','+1 to melee/ranged attacks or +1 to Tech Dabbler rolls','+1 to melee/ranged attacks or +1 to Tech Dabbler rolls','+1 to melee/ranged attacks or +1 to Tech Dabbler rolls','+1 to melee/ranged attacks or +1 to Tech Dabbler rolls',
+    talent:['You find a random wand (you choose)',
+            '+1 to melee/ranged attacks or +1 to Magical Dabbler rolls','+1 to melee/ranged attacks or +1 to Magical Dabbler rolls','+1 to melee/ranged attacks or +1 to Magical Dabbler rolls','+1 to melee/ranged attacks or +1 to Magical Dabbler rolls','+1 to melee/ranged attacks or +1 to Magical Dabbler rolls',
             '+2 points to any stats','+2 points to any stats','+2 points to any stats',
             'Presence effects become DC 9 to enact','Presence effects become DC 9 to enact',
             'Choose a talent'],
-    features:['Silver Tongue: Advantage on oration, performing arts, lore, and diplomacy.','Tech Dabbler: Activate datachips/gadgets using CHA. Critical fail = tech mishap.','Presence (DC 12 CHA): Inspire (give luck token) or Fascinate (transfix targets ≤ lvl 4).','Networker: +1d6 to learning rolls. Groups with Diplomats +1d6 to carousing.','Languages: 4 additional common + 1 rare language.'] },
+    features:['Bardic Arts: Advantage on oration, performing arts, lore, and diplomacy.','Magical Dabbler: Activate scrolls/wands using CHA. Critical fail = wizard mishap.','Presence (DC 12 CHA): Inspire (give luck token) or Fascinate (transfix targets ≤ lvl 4).','Prolific: +1d6 to learning rolls. Groups with bards +1d6 to carousing.','Languages: 4 additional common + 1 rare language.'] },
+  Ranger: { hd:'1d8', weapons:'Dagger, longbow, longsword, shortbow, shortsword, spear, staff', armor:'Leather armor, chainmail',
+    talent:['You deal d12 damage with one weapon type you choose','+1 to melee or ranged attacks and damage','+1 to melee or ranged attacks and damage','+1 to melee or ranged attacks and damage','+1 to melee or ranged attacks and damage','+2 to Strength, Dexterity, or Intelligence stat','+2 to Strength, Dexterity, or Intelligence stat','+2 to Strength, Dexterity, or Intelligence stat','+2 to Strength, Dexterity, or Intelligence stat','ADV on Herbalism checks for a remedy you choose','ADV on Herbalism checks for a remedy you choose','Choose a talent or +2 stat points'],
+    features:['Wayfinder: Advantage on Navigation, Tracking, Bushcraft, Stealth, Wild animal checks.','Herbalism (INT check): Prepare a herbal remedy. Remedies expire in 3 rounds.', ...SD_REMEDIES.map(r => '  ' + remedyLine(r))] },
+  Witch: { hd:'1d4', weapons:'Dagger, staff', armor:'Leather armor',
+    // 12 slots; text is read from indices 0,1,6,9,11 (one per band).
+    // Witch bands are 2 / 3-7 / 8-9 / 10-11 / 12 — see talentBands below.
+    talent:["1/day, teleport to your familiar's location as a move",
+            '+2 to Charisma stat or +1 to witch spellcasting checks','+2 to Charisma stat or +1 to witch spellcasting checks','+2 to Charisma stat or +1 to witch spellcasting checks','+2 to Charisma stat or +1 to witch spellcasting checks','+2 to Charisma stat or +1 to witch spellcasting checks',
+            'Gain advantage on casting one spell you know','Gain advantage on casting one spell you know','Gain advantage on casting one spell you know',
+            'Learn an additional witch spell of any tier you can cast','Learn an additional witch spell of any tier you can cast',
+            'Choose a talent or +2 points to distribute to stats'],
+    talentBands:[[2,2],[3,7],[8,9],[10,11],[12,12]],
+    features:["Familiar: A small animal (raven, rat, frog) serves you loyally and speaks Common. It can be the source of your spells — treat it as you for spell ranges. If it dies, restore it by permanently sacrificing 1d4 HP.",'Spellcasting (CHA). Know 3 tier 1 witch spells. DC is 10 + spell tier. Add spells per level.','Languages: Diabolic, Primordial, Sylvan.'] },
+  'Pit Fighter': { hd:'1d8', weapons:'All weapons', armor:'Leather armor, shields',
+    // 12 slots; text is read from indices 0,1,6,9,11 (one per band).
+    talent:['1/day, ignore all damage and effects from one attack',
+            'You gain +1 to melee weapon damage','You gain +1 to melee weapon damage','You gain +1 to melee weapon damage','You gain +1 to melee weapon damage','You gain +1 to melee weapon damage',
+            '+2 to Strength or Constitution stat, or +1 to melee attacks','+2 to Strength or Constitution stat, or +1 to melee attacks','+2 to Strength or Constitution stat, or +1 to melee attacks',
+            'Increase the HP you gain from Flourish by 1d6','Increase the HP you gain from Flourish by 1d6',
+            'Choose a talent or +2 points to distribute to stats'],
+    features:['Flourish: 3/day, regain 1d6 HP when you hit an enemy with a melee attack.','Implacable: Advantage on Constitution checks to resist injury, poison, or endure extreme environments.','Last Stand: You get up from dying with 1 HP on a natural d20 roll of 18-20.','Relentless: 3/day, when reduced to 0 HP, make a DC 18 Constitution check (Implacable applies). On a success, you go to 1 HP instead.'] },
+  "Knight of St. Ydris": { hd:"1d6", weapons:"All melee weapons, crossbow", armor:"All armor and shields",    talent:["Your Demonic Possession bonus increases by 1 point","+1 to melee or ranged attacks","+1 to melee or ranged attacks","+1 to melee or ranged attacks","+1 to melee or ranged attacks","+1 to melee or ranged attacks","+2 to Strength, Dexterity, or Constitution stat","+2 to Strength, Dexterity, or Constitution stat","+2 to Strength, Dexterity, or Constitution stat","+2 to Charisma stat or +1 to witch spellcasting checks","+2 to Charisma stat or +1 to witch spellcasting checks","Choose a talent or +2 points to distribute to stats"],    features:["Demonic Possession: 3/day, gain a +1 bonus to your damage rolls that lasts 3 rounds. In addition, add half your level to the damage bonus (round down).","Spellcasting (CHA): Cast witch spells you know. Beginning at level 3, learn new witch spells per the Witch Spells Known table. DC is 10 + the spell's tier.","Languages: Diabolic."], _caster:{ stat:"cha", list:"Witch", known:0 } },
+  "Warlock": { hd:"1d6", weapons:"Club, crossbow, dagger, mace, longsword", armor:"Leather armor, chainmail, and shields",    talent:["Roll a Patron Boon from any patron; an unexplained gift","Add +1 point to two stats (they must be different)","Add +1 point to two stats (they must be different)","Add +1 point to two stats (they must be different)","Add +1 point to two stats (they must be different)","Add +1 point to two stats (they must be different)","+1 to melee or ranged attacks","+1 to melee or ranged attacks","+1 to melee or ranged attacks","Roll two Patron Boons and choose one to keep","Roll two Patron Boons and choose one to keep","Choose a talent or +2 points to distribute to stats"],    features:["Patron: Choose a patron to serve (Mugdulblub, Titania, or The Willowman) — the source of your supernatural gifts. Your patron may grant or withhold its gifts at any time.","Patron Boon: At 1st level, gain a random Patron Boon talent from your patron's table. Whenever you gain a new talent roll, you may roll on your Patron Boon table instead of the Warlock Talents table.","Languages: Choose one — Celestial, Diabolic, Draconic, Primordial, or Sylvan."] },
+  "Desert Rider": { hd:"1d8", weapons:"Club, dagger, javelin, longsword, pike, shortbow, scimitar, spear, whip", armor:"Leather armor, shields",    talent:["You can use any rider-bearing creature as your mount","You gain +1 to attacks or damage","You gain +1 to attacks or damage","You gain +1 to attacks or damage","You gain +1 to attacks or damage","You gain +1 to attacks or damage","+2 to Strength or Dexterity stat, or +1 to melee attacks","+2 to Strength or Dexterity stat, or +1 to melee attacks","+2 to Strength or Dexterity stat, or +1 to melee attacks","Gain an additional use of your Charge talent each day","Gain an additional use of your Charge talent each day","Choose a talent or +2 points to distribute to stats"],    features:["Charge: 3/day, charge into combat by moving at least near before attacking; your melee attacks deal double damage that round.","Mount: You have a common camel or horse with a reliable or lovely demeanor. It comes when you call and never spooks. While riding, you and your mount gain a bonus to AC equal to half your level (round down); your mount has additional levels equal to half your level. You may leap on or off once per round."] },
+  "Ras-Godai": { hd:"1d6", weapons:"Blowgun, bolas, dagger, razor chain, scimitar, shuriken, spear", armor:"Leather armor",    talent:["You are trained in the use of poisons","Roll an additional talent on the Black Lotus Talents table","Roll an additional talent on the Black Lotus Talents table","Roll an additional talent on the Black Lotus Talents table","Roll an additional talent on the Black Lotus Talents table","Roll an additional talent on the Black Lotus Talents table","+2 to Strength or Dexterity stat, or +1 to melee attacks","+2 to Strength or Dexterity stat, or +1 to melee attacks","+2 to Strength or Dexterity stat, or +1 to melee attacks","Gain an additional use of your Smoke Step talent","Gain an additional use of your Smoke Step talent","Choose a talent or +2 points to distribute to stats"],    features:["Assassin: Advantage on checks to sneak and hide. Your attacks deal double damage against targets that are unaware of your presence.","Smoke Step: 3/day, teleport to a location you can see within near. This does not use your action.","Black Lotus: Roll one talent on the Black Lotus Talents table (d12)."] },
+  "Sea Wolf": { hd:"1d8", weapons:"Dagger, greataxe, handaxe, longbow, longsword, spear", armor:"Leather armor, chainmail, shields",    talent:["1/day, go berserk: immune to damage for 3 rounds","Your attacks deal +1 damage","Your attacks deal +1 damage","Your attacks deal +1 damage","Your attacks deal +1 damage","Your attacks deal +1 damage","+2 to Strength or Constitution stat, or +1 to attacks","+2 to Strength or Constitution stat, or +1 to attacks","+2 to Strength or Constitution stat, or +1 to attacks","Duality; choose two different Old Gods effects each day","Duality; choose two different Old Gods effects each day","Choose a talent or +2 points to distribute to stats"],    features:["Seafarer: Advantage on checks related to navigating and crewing boats.","Old Gods: After each rest, choose one — Odin (regain 1d4 HP each time you kill an enemy); Freya (once a day, gain a luck token if you have none; each luck token adds 1d6 to your roll); Loki (advantage on checks to lie, sneak, and hide).","Shield Wall: If you wield a shield, use your action to take a defensive stance; your AC becomes 20 until your next turn."] },
+  "Seer": { hd:"1d6", weapons:"Dagger, stave, spear", armor:"Leather armor",    talent:["Learn an additional seer spell from any tier you can cast","Gain an additional use of your Omen talent each day","Gain an additional use of your Omen talent each day","Gain an additional use of your Omen talent each day","Gain an additional use of your Omen talent each day","Gain an additional use of your Omen talent each day","+2 to WIS or CHA stat, or +1 to spellcasting checks","+2 to WIS or CHA stat, or +1 to spellcasting checks","+2 to WIS or CHA stat, or +1 to spellcasting checks","Increase the die category of your Destined talent by one","Increase the die category of your Destined talent by one","Choose a talent or +2 points to distribute to stats"],    features:["Destined: Whenever you use a luck token, add 1d6 to the roll.","Omen: 3/day, make a DC 9 WIS check. On a success, gain a luck token (you can't have more than one at a time).","Spellcasting (WIS): Cast seer spells you know. Know one tier 1 seer spell to start; learn more per the Seer Spells Known table. DC is 10 + the spell's tier. On a natural 1, you can't cast that spell again until you complete Seer Penance."], _caster:{ stat:"wis", list:"Seer", known:1 } },
+  "Basilisk Warrior": { hd:"1d8", weapons:"Boomerang, club, dagger, spear, spear-thrower", armor:"None",    talent:["You find a basilisk egg; a loyal hatchling emerges in 1d4 days","+1 to weapon attacks and damage","+1 to weapon attacks and damage","+1 to weapon attacks and damage","+1 to weapon attacks and damage","+1 to weapon attacks and damage","+2 to Strength, Dexterity, or Constitution stat","+2 to Strength, Dexterity, or Constitution stat","+2 to Strength, Dexterity, or Constitution stat","+1 use per day of Petrifying Gaze","+1 use per day of Petrifying Gaze","Choose a talent or +2 points to distribute to stats"],    features:["Basilisk Blood: Advantage on Constitution checks to avoid harmful maladies, poisons, or afflictions.","Petrifying Gaze: One creature of your level or less that meets your gaze must pass a DC 15 CON check or be petrified for 1d4 rounds (it still takes damage while petrified). Usable per day equal to your CON modifier (minimum 1).","Stone Skin: Add 3 + half your level (round down) to your AC while unarmored. Advantage on checks to hide in natural environments."] },
+  "Delver": { hd:"1d6", weapons:"Club, crossbow, dagger, javelin, mace, shortbow, shortsword, spear, staff", armor:"Leather armor, chainmail, shields",    talent:["You gain 2 gear slots and an additional Trusty Gear","+1 to melee or ranged attacks and damage","+1 to melee or ranged attacks and damage","+1 to melee or ranged attacks and damage","+1 to melee or ranged attacks and damage","+1 to melee or ranged attacks and damage","+2 to Strength, Dexterity, or Constitution stat","+2 to Strength, Dexterity, or Constitution stat","+2 to Strength, Dexterity, or Constitution stat","Add one more point to your Scavenger success range","Add one more point to your Scavenger success range","Choose a talent or +2 points to distribute to stats"],    features:["Languages: You know two additional common languages.","Scavenger: When you expend the last of a consumable item carried since your last rest, roll a d6. On a 5 or 6, you regain one use of that item.","Trailblazer: Advantage on Climbing, Swimming, Foraging, understanding unknown languages, and avoiding or escaping natural terrain hazards.","Trusty Gear: Choose one type of gear or weapon you can wield. Gain 2 + half your level (round down) on checks or attack rolls made with that type."] },
+  "Wyrdling": { hd:"1d6", weapons:"Club, crossbow, dagger, pseudopod, shortbow, shortsword, spear", armor:"Leather armor, chainmail, shields",    talent:["Gain two new Corruption talents","+2 to Strength, Dexterity, or Charisma stats","+2 to Strength, Dexterity, or Charisma stats","+2 to Strength, Dexterity, or Charisma stats","+2 to Strength, Dexterity, or Charisma stats","+2 to Strength, Dexterity, or Charisma stats","Gain a new Corruption talent","Gain a new Corruption talent","Gain a new Corruption talent","Gain +1 to attacks and damage rolls with your pseudopod","Gain +1 to attacks and damage rolls with your pseudopod","Choose a talent or +2 points to distribute to stats"],    features:["Languages: You know Primordial.","Corruption: Roll one talent on the Corruption table (d10).","Hideous Biology: You can stretch your body to fit through inch-wide cracks. It takes 3 rounds to pass through an obstacle this way.","Pseudopod: Sprout a clawed pseudopod — melee, near range, 1d6 damage, Finesse (use STR or DEX)."] },
+  "Duelist": { hd:"1d8", weapons:"Dagger, all swords", armor:"Leather armor, mithral chainmail",    talent:["1/day, all attacks that would hit you this round miss instead","+1 to melee attacks and damage or +1 Parry per day","+1 to melee attacks and damage or +1 Parry per day","+1 to melee attacks and damage or +1 Parry per day","+1 to melee attacks and damage or +1 Parry per day","+1 to melee attacks and damage or +1 Parry per day","+2 to Strength, Dexterity, or Charisma stat","+2 to Strength, Dexterity, or Charisma stat","+2 to Strength, Dexterity, or Charisma stat","Deal +1d6 damage when you hit with a Taunt attack","Deal +1d6 damage when you hit with a Taunt attack","Choose a talent or +2 points to distribute to stats"],    features:["Parry: 1/day, an attack of your choice that would hit you misses instead.","Tale Spinner: Make a DC 15 CHA check; on a pass, strangers believe you are famous and important for the rest of your interaction. The same individual can't be fooled twice.","Taunt: When an enemy misses you with an attack, you have advantage on attacks against that enemy next round."] },
+  "Roustabout": { hd:"1d4", weapons:"Club, dagger, hammer, staff", armor:"Leather armor",    talent:["+1 to any stat and roll another talent","Gain the ability to wield a new weapon or armor","Gain the ability to wield a new weapon or armor","Gain the ability to wield a new weapon or armor","Gain the ability to wield a new weapon or armor","Gain the ability to wield a new weapon or armor","+1 to any two stats (they can't be the same)","+1 to any two stats (they can't be the same)","+1 to any two stats (they can't be the same)","Roll an extra hit points die this level","Roll an extra hit points die this level","Learn any spell of a tier equal to half your level rounded down (min 1). Cast it using that class's spellcasting stat"],    features:["Knowaguy: Advantage on checks related to interacting with commoners and sourcing favors.","Lucksmith: Whenever another player uses your luck token, they have advantage on the new roll.","Surprising Guts: When reduced to half your HP or lower, make a DC 12 Wisdom check. On a success, you have advantage on your next roll."] },
+  "Necromancer": { hd:"1d6", weapons:"Crossbow, dagger, longsword, scimitar, staff, stave", armor:"Leather armor, chainmail",    talentBands:[[2,2],[3,7],[8,9],[10,11],[12,12]],    talent:["The next time you die, you may return to life with full HP","+1 to your spellcasting checks or +1 to melee attacks","+1 to your spellcasting checks or +1 to melee attacks","+1 to your spellcasting checks or +1 to melee attacks","+1 to your spellcasting checks or +1 to melee attacks","+1 to your spellcasting checks or +1 to melee attacks","+2 to Strength, Constitution, or Charisma stat","+2 to Strength, Constitution, or Charisma stat","+2 to Strength, Constitution, or Charisma stat","Gain advantage on casting one spell you know","Gain advantage on casting one spell you know","Choose a talent or +2 points to distribute to stats"],    features:["Death Sense: Sense the location and general nature of undead and dying creatures within near.","River of Death: You do not die at 0 CON, and you roll a d6 for your death timer instead of a d4.","Spellcasting (CHA): Cast necromancer spells you know. Know two tier 1 necromancer spells to start; learn more per the Necromancer Spells Known table. DC is 10 + the spell's tier."], _caster:{ stat:"cha", list:"Necromancer", known:2 } }
 };
 
-// Ranks (Shadowdark titles), reworked for the sci-fi archetype names.
 const RC_TITLES = {
-  Soldier:   { Lawful:['Recruit','Trooper','Sergeant','Lieutenant','Commander'], Chaotic:['Grunt','Gun','Enforcer','Warlord','Butcher'], Neutral:['Fighter','Veteran','Hardcase','Warchief','Legend'] },
-  Mystic:    { Lawful:['Acolyte','Adept','Seer','Oracle','Ascendant'], Chaotic:['Initiate','Channeler','Cultist','Void-touched','Herald'], Neutral:['Seeker','Wanderer','Sage','Elder','Enlightened'] },
-  Scoundrel: { Lawful:['Runner','Fixer','Operator','Handler','Boss'], Chaotic:['Thug','Cutthroat','Ghost','Assassin','Kingpin'], Neutral:['Grifter','Hustler','Rogue','Renegade','Legend'] },
-  Engineer:  { Lawful:['Apprentice','Technician','Engineer','Chief','Architect'], Chaotic:['Hacker','Breaker','Saboteur','Ghost','Zero'], Neutral:['Tinker','Mechanic','Specialist','Savant','Mastermind'] },
-  Scout:     { Lawful:['Tracker','Pathfinder','Ranger','Warden','Sentinel'], Chaotic:['Stalker','Hunter','Poacher','Killer','Reaper'], Neutral:['Wayfarer','Rover','Outlander','Nomad','Ghost'] },
-  Diplomat:  { Lawful:['Attaché','Liaison','Diplomat','Ambassador','Envoy'], Chaotic:['Grifter','Charlatan','Silvertongue','Manipulator','Kingmaker'], Neutral:['Talker','Broker','Mediator','Speaker','Voice'] },
+  Fighter: { Lawful:['Squire','Cavalier','Knight','Thane','Lord/Lady'], Chaotic:['Knave','Bandit','Slayer','Reaver','Warlord'], Neutral:['Warrior','Barbarian','Battlerager','Warchief','Chieftain'] },
+  Priest:  { Lawful:['Acolyte','Crusader','Templar','Champion','Paladin'], Chaotic:['Initiate','Zealot','Cultist','Scourge','Chaos Knight'], Neutral:['Seeker','Invoker','Haruspex','Mystic','Oracle'] },
+  Thief:   { Lawful:['Footpad','Burglar','Rook','Underboss','Boss'], Chaotic:['Thug','Cutthroat','Shadow','Assassin','Wraith'], Neutral:['Robber','Outlaw','Rogue','Renegade','Bandit King/Queen'] },
+  Wizard:  { Lawful:['Apprentice','Conjurer','Arcanist','Mage','Archmage'], Chaotic:['Adept','Channeler','Witch/Warlock','Diabolist','Sorcerer'], Neutral:['Shaman','Seer','Warden','Sage','Druid'] },
+  Bard:    { Lawful:['Storyteller','Balladeer','Philosopher','Poet','Master Poet'], Chaotic:['Guttersnipe','Charlatan','Satirist','Silvertongue','Doomspeaker'], Neutral:['Seeker','Witness','Speaker','Voice','Truthbearer'] },
+  Ranger:  { Lawful:['Wanderer','Strider','Warden','Guardian','Sentinel'], Chaotic:['Hood','Outlaw','Fugitive','Exile','Pariah'], Neutral:['Stranger','Wayfarer','Outlander','Recluse','Hermit'] },
+  Witch:   { Lawful:['Fortune Teller','Far Seer','Prophet','Wise One','Baba'], Chaotic:['Whisperer','Hexer','Hag/Elder','Crone/Uncle','Baba'], Neutral:['Shaman','Conjurer','Soothsayer','Conduit','Baba'] },
+  'Pit Fighter': { Lawful:['Rookie','Gladiator','Hero','Champion','Legend'], Chaotic:['Ruffian','Brawler','Heel','Villain','Legend'], Neutral:['Underdog','Dark Horse','Wild Card','Victor','Legend'] },
+  "Knight of St. Ydris": { Lawful:["Arbiter","Enforcer","Knight Marshal","Judge","Justiciar"], Chaotic:["Traitor","Fallen","Oathbreaker","Blackguard","Demonlord"], Neutral:["Brother/Sister","Exorcist","Reverend Knight","Inquisitor","Grand Inquisitor"] },
+  "Warlock": { Lawful:["Favored","Herald","Eminent","Exalted","Incarnation"], Chaotic:["Marked","Zealot","Occultist","Champion","Harbinger"], Neutral:["Chosen","Channeler","Prophesied","Transcendent","Avatar"] },
+  "Desert Rider": { Lawful:["Outrider","Sandrunner","Trailblazer","Swift Wind","Stormrunner"], Chaotic:["Bandit","Robber","Raider","Scourge","Bandit King/Queen"], Neutral:["Rat","Fox","Wolf","Tiger","Dragon"] },
+  "Ras-Godai": { Lawful:["Acolyte","Mirror Path","Monk","Master","White Lotus"], Chaotic:["Acolyte","Shadow Path","Monk","Assassin","Black Lotus"], Neutral:["Acolyte","Fire Path","Monk","Demon Blade","Red Lotus"] },
+  "Sea Wolf": { Lawful:["Freefolk","Shieldman/maiden","Thane","Jarl","King/Queen"], Chaotic:["Rabble","Raider","Reaver","Conqueror","Usurper"], Neutral:["Wanderer","Explorer","Adventurer","Renowned","Legendary"] },
+  "Seer": { Lawful:["Guide","Chanter","Rune Reader","Wise One","Seer of Odin"], Chaotic:["Hedge Witch","Whisperer","Bone Reader","Dreaded One","Seer of Loki"], Neutral:["Fortune Teller","Singer","Star Reader","Blessed One","Seer of Freya"] },
+  "Basilisk Warrior": { Lawful:["Stone Warrior","Strong Stone","Protector","Sun Serpent","Amber Basilisk"], Chaotic:["Stone Warrior","Sharp Stone","Slayer","Moon Serpent","Obsidian Basilisk"], Neutral:["Stone Warrior","Silent Stone","Watcher","Sky Serpent","Sapphire Basilisk"] },
+  "Delver": { Lawful:["Explorer","Researcher","Antiquarian","Archaeologist","Professor"], Chaotic:["Intruder","Opportunist","Larcenist","Tomb Robber","Defiler"], Neutral:["Investigator","Observer","Pathfinder","Trailblazer","Pioneer"] },
+  "Wyrdling": { Lawful:["Chosen One","Cursed","Haunted","Tortured","Crazed One"], Chaotic:["Chosen One","Blessed","Consecrated","Revered","Exalted One"], Neutral:["Chosen One","Seeker","Listener","Watcher","Learned One"] },
+  "Duelist": { Lawful:["Fencer","Defender","Mongoose","Wolf","Swordmaster"], Chaotic:["Ruffian","Heckler","Viper","Cobra","Swordmaster"], Neutral:["Student","Challenger","Mouser","Panther","Swordmaster"] }
 };
 
-// Core 20 backgrounds, reskinned to sci-fi.
 const RC_BACKGROUNDS = [
-  'Station Rat','Wanted','Cult Initiate','Syndicate','Exiled','Orphaned',
-  'Engineer Trainee','Tech','Medic','Frontier-born','Merc','Void Sailor',
-  'Devotee','Soldier','Scout','Recon','Broadcaster','Scholar','Corporate','Field Surgeon',
+  'Urchin','Wanted','Cult Initiate','Thieves\' Guild','Banished','Orphaned',
+  'Wizard\'s Apprentice','Jeweler','Herbalist','Barbarian','Mercenary','Sailor',
+  'Acolyte','Soldier','Ranger','Scout','Minstrel','Scholar','Noble','Chirurgeon',
+  "Hermit","Outcast","Woodborn","Amnesiac","Haunted","Fugitive","Feytouched","Witchborn","Forager","Redeemer","Marked","Sacrifice","Marooned","Fallen","Drawn","Ascetic","Wolfchild","Healer","Chosen","Demonborn","Freed","Displaced","Criminal","Drifter","Crop Farmer","Livestock Farmer","Hunter","Fisher","Enforcer","Trader","Crafter","Bowyer","Seer's Apprentice","Shipwright","Blacksmith","Far Traveler","Skald","Heroborn","Nobleborn","God's Blood"
 ];
 
 const RC_NAMES = {
-  Human:     ['Zali','Bram','Clara','Nattias','Rina','Denton','Mirena','Aran','Morgan','Giralt','Tamra','Oscar','Ishana','Rogar','Jasmin','Tarin','Yuri','Malchor','Lienna','Godfrey'],
-  Voidkin:   ['Eliara','Ryarn','Sariel','Tirolas','Galira','Varos','Daeniel','Axidor','Hiralia','Cyrwin','Lothiel','Zaphiel','Nayra','Ithior','Amriel','Elyon','Jirwyn','Natinel','Fiora','Ruhiel'],
-  Ferrix:    ['Hilde','Torbin','Marga','Bruno','Karina','Naugrim','Brenna','Darvin','Elga','Alric','Isolde','Gendry','Bruga','Junnor','Vidrid','Torson','Brielle','Ulfgar','Sarna','Grimm'],
-  Zeph:      ['Willow','Benny','Annie','Tucker','Marie','Hobb','Cora','Gordie','Rose','Ardo','Alma','Norbert','Jennie','Barvin','Tilly','Pike','Lydia','Marlow','Astrid','Jasper'],
-  Greldan:   ['Vara','Gralk','Ranna','Korv','Zasha','Hrogar','Klara','Tragan','Brolga','Drago','Yelena','Krull','Ulara','Tulk','Shiraal','Wulf','Ivara','Hirok','Aja','Zoraan'],
-  Synthetic: ['Unit-9','Tark','Nix','Lenk','Roke','Fitz','Tila','Riggs','Prim','Zeb','Cass','Vex','Yark','Delta','Nibs','Brak','Fink','Echo','Squib','Grix'],
+  Human:    ['Zali','Bram','Clara','Nattias','Rina','Denton','Mirena','Aran','Morgan','Giralt','Tamra','Oscar','Ishana','Rogar','Jasmin','Tarin','Yuri','Malchor','Lienna','Godfrey'],
+  Elf:      ['Eliara','Ryarn','Sariel','Tirolas','Galira','Varos','Daeniel','Axidor','Hiralia','Cyrwin','Lothiel','Zaphiel','Nayra','Ithior','Amriel','Elyon','Jirwyn','Natinel','Fiora','Ruhiel'],
+  Dwarf:    ['Hilde','Torbin','Marga','Bruno','Karina','Naugrim','Brenna','Darvin','Elga','Alric','Isolde','Gendry','Bruga','Junnor','Vidrid','Torson','Brielle','Ulfgar','Sarna','Grimm'],
+  Halfling: ['Willow','Benny','Annie','Tucker','Marie','Hobb','Cora','Gordie','Rose','Ardo','Alma','Norbert','Jennie','Barvin','Tilly','Pike','Lydia','Marlow','Astrid','Jasper'],
+  'Half-Orc':['Vara','Gralk','Ranna','Korv','Zasha','Hrogar','Klara','Tragan','Brolga','Drago','Yelena','Krull','Ulara','Tulk','Shiraal','Wulf','Ivara','Hirok','Aja','Zoraan'],
+  Goblin:   ['Iggs','Tark','Nix','Lenk','Roke','Fitz','Tila','Riggs','Prim','Zeb','Finn','Borg','Yark','Deeg','Nibs','Brak','Fink','Rizzo','Squib','Grix'],
 };
 
 const RC_SPELL_DATA = {
-  // Mystic Tier 1 (Priest)
-  'Mend':               { level:'1', range:'Close', duration:'Instant',   damage:'', heal:'scaling', desc:'Restore 1 + half your level (round down) d6 HP with touch.' },
-  'Psi-Edge':           { level:'1', range:'Close', duration:'5 rounds',  damage:'', desc:'One touched weapon deals +1d6 damage (1d8 vs reanimated).' },
-  'Force of Will':      { level:'1', range:'Self',  duration:'5 rounds',  damage:'', desc:'Gain +2 bonus to AC for duration.' },
-  'Banish':             { level:'1', range:'Near',  duration:'Instant',   damage:'', desc:'Reanimated and synthetic hostiles in near range flee (CHA check vs power check). Fail by 10+ and ≤ your level = destroyed.' },
-  // Engineer Tier 1 (Wizard) — re-themed as tech/gadgets
-  'Proximity Sensor':   { level:'1', range:'Close', duration:'1 day',     damage:'', desc:'Ward a door/threshold. You are mentally alerted when a creature passes through it.' },
-  'Flame Projector':    { level:'1', range:'Close', duration:'Instant',   damage:'2d6', desc:'Release a roaring jet of flame across a close area.' },
-  'Neural Override':    { level:'1', range:'Near',  duration:'1d8 days',  damage:'', desc:'Override one humanoid of level 2 or less. It regards you as a trusted friend.' },
-  'Diagnostic Scan':    { level:'1', range:'Near',  duration:'Focus',     damage:'', desc:'Sense powered tech and active powers within near range. Focus 2 rounds to discern general properties.' },
-  'Mag-Seal':           { level:'1', range:'Near',  duration:'10 rounds', damage:'', desc:'Magnetically seal a portal closed for the duration.' },
-  'Micro-Missile':      { level:'1', range:'Far',   duration:'Instant',   damage:'1d4', desc:'Advantage on cast check. A guided micro-missile deals 1d4 damage to one target.' },
-  'Sedation Field':     { level:'1', range:'Near',  duration:'Instant',   damage:'', desc:'Creatures level 2 or less in a near cube fall unconscious. Woken by damage or shaking.' },
-  'Nano-Weave':         { level:'1', range:'Self',  duration:'10 rounds', damage:'', desc:'Your AC becomes 14 (18 on critical success) for duration.' },
-  // Shared (Priest + Wizard) — one entry, both lists reference it
-  'Floodlight':         { level:'1', range:'Close', duration:'1 hour',    damage:'', desc:'One object glows bright, illuminating near distance for 1 hour.' },
-  'Deflector Field':    { level:'1', range:'Close', duration:'Focus',     damage:'', desc:'Chaotic creatures have disadvantage on attacks vs the warded target.' },
+  // Priest Tier 1
+  'Cure Wounds':         { level:'1', range:'Close', duration:'Instant',   damage:'', heal:'scaling', desc:'Restore 1 + half your level (round down) d6 HP with touch.' },
+  'Holy Weapon':         { level:'1', range:'Close', duration:'5 rounds',  damage:'', desc:'One touched weapon deals +1d6 damage (1d8 vs undead).' },
+  'Light':               { level:'1', range:'Close', duration:'1 hour',    damage:'', desc:'One object glows bright, illuminating near distance for 1 hour.' },
+  'Protection From Evil':{ level:'1', range:'Close', duration:'Focus',     damage:'', desc:'Chaotic creatures have disadvantage on attacks vs target.' },
+  'Shield of Faith':     { level:'1', range:'Self',  duration:'5 rounds',  damage:'', desc:'Gain +2 bonus to AC for duration.' },
+  'Turn Undead':         { level:'1', range:'Near',  duration:'Instant',   damage:'', desc:'Undead in near range flee (CHA check vs spell check). Fail by 10+ and ≤ your level = destroyed.' },
+  // Wizard Tier 1
+  'Alarm':               { level:'1', range:'Close', duration:'1 day',     damage:'', desc:'Ward a door/threshold. You are mentally alerted when a creature passes through it.' },
+  'Burning Hands':       { level:'1', range:'Close', duration:'Instant',   damage:'2d6', desc:'Spread fingers and release a circle of flame roaring out to a close area.' },
+  'Charm Person':        { level:'1', range:'Near',  duration:'1d8 days',  damage:'', desc:'Beguile one humanoid of level 2 or less. It regards you as a trusted friend.' },
+  'Detect Magic':        { level:'1', range:'Near',  duration:'Focus',     damage:'', desc:'Sense magic within near range. Focus 2 rounds to discern general properties.' },
+  'Hold Portal':         { level:'1', range:'Near',  duration:'10 rounds', damage:'', desc:'Magically hold a portal closed for the duration.' },
+  'Magic Missile':       { level:'1', range:'Far',   duration:'Instant',   damage:'1d4', desc:'Advantage on cast check. A glowing bolt of force deals 1d4 damage to one target.' },
+  'Sleep':               { level:'1', range:'Near',  duration:'Instant',   damage:'', desc:'Creatures level 2 or less in a near cube fall into deep sleep. Woken by damage or shaking.' },
+  'Mage Armor':          { level:'1', range:'Self',  duration:'10 rounds', damage:'', desc:'Your AC becomes 14 (18 on critical success) for duration.' },
 };
 
-const RC_PRIEST_SPELLS_T1 = ['Mend','Psi-Edge','Floodlight','Deflector Field','Force of Will'];
-const RC_WIZARD_SPELLS_T1 = ['Proximity Sensor','Flame Projector','Neural Override','Diagnostic Scan','Mag-Seal','Floodlight','Micro-Missile','Deflector Field','Sedation Field'];
+const RC_PRIEST_SPELLS_T1 = ['Cure Wounds','Holy Weapon','Light','Protection From Evil','Shield of Faith'];
+const RC_WIZARD_SPELLS_T1 = ['Alarm','Burning Hands','Charm Person','Detect Magic','Hold Portal','Light','Magic Missile','Protection From Evil','Sleep'];
+const RC_WITCH_SPELLS_T1  = ['Cauldron','Charm Person','Eyebite','Fog','Hypnotize','Oak, Ash, Thorn','Puppet','Shadowdance','Willowman','Witchlight'];
+const RC_DRUID_SPELLS_T1  = ['Breath','Instill','Oxidize','Whisperwind'];
+const RC_MAGE_SPELLS_T1   = ['Cleanse','Flare','Reveal','Ward'];
+const RC_SORC_SPELLS_T1   = ['Blight','Eyebite','Mischief','Protection From Good'];
+const RC_NECRO_SPELLS_T1  = ['First Gate','Protection From Evil','Seal Soul','Turn Undead','Undeath','Withermark'];
+const RC_SEER_SPELLS_T1   = ['Chant','Evoke Rage','Potion','Trance'];
 
-// ── Power sources ──────────────────────────────────────────────────────────
-// DarkSpace has two power lists: Engineer (tech) and Mystic (psychic).
-const SPELL_SOURCES = ['Engineer','Mystic','Homebrew'];
+// ── Spell sources ─────────────────────────────────────────────────────────
+// A caster defaults to its own list, but may tick other lists open and pick
+// from them. 'Both' is an internal tag for spells shared by wizard + priest.
+const SPELL_SOURCES = ['Wizard','Priest','Witch','Druid','Mage','Sorcerer','Necromancer','Seer','Homebrew'];
 const RC_T1_BY_SOURCE = {
-  Engineer: RC_WIZARD_SPELLS_T1,
-  Mystic:   RC_PRIEST_SPELLS_T1,
+  Wizard: RC_WIZARD_SPELLS_T1,
+  Priest: RC_PRIEST_SPELLS_T1,
+  Witch:  RC_WITCH_SPELLS_T1,
+  Druid:  RC_DRUID_SPELLS_T1,
+  Mage:   RC_MAGE_SPELLS_T1,
+  Sorcerer: RC_SORC_SPELLS_T1,
+  Necromancer: RC_NECRO_SPELLS_T1,
+  Seer:   RC_SEER_SPELLS_T1,
 };
 
-// Which lists are ticked by default for an archetype.
+// Which lists are ticked by default for a class. Alignment plays no part in
+// this — every other list can simply be ticked on.
 function defaultSpellSources(cls) {
-  const src = { Engineer:false, Mystic:false, Homebrew:false };
-  if(cls==='Engineer')    src.Engineer = true;
-  else if(cls==='Mystic') src.Mystic = true;
+  const src = { Wizard:false, Priest:false, Witch:false, Druid:false, Mage:false, Sorcerer:false, Necromancer:false, Seer:false, Homebrew:false };
+  if(cls==='Wizard')      src.Wizard = true;
+  else if(cls==='Priest') src.Priest = true;
+  else if(cls==='Witch')  src.Witch  = true;
   const ci = RC_CLASS_INFO[cls];
   if(ci && ci._caster && Object.prototype.hasOwnProperty.call(src, ci._caster.list)) src[ci._caster.list] = true;
   return src;
 }
 
-// Does a power belong to any ticked source?
+// Does a spell belong to any ticked source?
 function spellInSources(s, src) {
   if(!src) return false;
-  if(s.caster==='Both')     return !!(src.Engineer || src.Mystic);
-  if(s.caster==='Engineer') return !!src.Engineer;
-  if(s.caster==='Mystic')   return !!src.Mystic;
+  if(s.caster==='Both')   return !!(src.Wizard || src.Priest);
+  if(s.caster==='Wizard') return !!src.Wizard;
+  if(s.caster==='Priest') return !!src.Priest;
+  if(s.caster==='Witch')  return !!src.Witch;
+  if(s.caster==='Druid')  return !!src.Druid;
+  if(s.caster==='Mage')   return !!src.Mage;
+  if(s.caster==='Sorcerer') return !!src.Sorcerer;
+  if(s.caster==='Necromancer') return !!src.Necromancer;
+  if(s.caster==='Seer')   return !!src.Seer;
   if(s.caster==='Homebrew') return !!src.Homebrew;
   return false;
 }
 
 // Checkbox bar. `cls` drives which box is the "own" list (shown but locked on,
-// so a caster can't accidentally cut themselves off from their own powers).
+// so a caster can't accidentally cut themselves off from their own spells).
 function spellSourceBar(src, cls, onToggle) {
-  const own = { Engineer:'Engineer', Mystic:'Mystic' }[cls] || '';
+  const own = { Wizard:'Wizard', Priest:'Priest', Witch:'Witch' }[cls] || '';
+  // Styling lives in CSS (.spell-src-bar) so the row can stay on one line on
+  // desktop but wrap onto as many lines as it needs on a phone.
   let h = '<div class="spell-src-bar">';
   SPELL_SOURCES.forEach(name=>{
     const isOwn = (name===own);
@@ -204,11 +249,10 @@ function spellSourceBar(src, cls, onToggle) {
   return h;
 }
 
-// Allegiances (Shadowdark deities), reskinned to sci-fi orders/creeds.
 const RC_DEITIES = {
-  Lawful:  ['The Ascendancy','The Concord','The Machine Choir','The Vanguard'],
-  Neutral: ['The Vanguard','The Freeholds'],
-  Chaotic: ['The Void Cult','The Reavers','The Freeholds'],
+  Lawful:  ['Saint Terragnis','Gede','Madeera the Covenant','Ord'],
+  Neutral: ['Ord','Memnon'],
+  Chaotic: ['Shune the Vile','Ramlaat','Memnon'],
 };
 
 function _rc_3d6() { return [0,0,0].reduce(s=>s+Math.ceil(Math.random()*6),0); }
@@ -223,3 +267,9 @@ function _rc_weighted(table) {
   for(const e of table){ r-=e.w; if(r<0) return e.v; }
   return table[table.length-1].v;
 }
+
+
+// HeroDark keeps Shadowdark ancestries (which grant their own talents); the old
+// DarkSpace decoupled-trait list is retired. Empty shim keeps guarded sheet/builder
+// code a no-op.
+const DS_TRAITS = [];

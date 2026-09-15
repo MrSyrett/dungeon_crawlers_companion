@@ -48,11 +48,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-10">
-      <DarkSpaceHeader title="Bestiary" subtitle={`DarkSpace · Frontier Hostiles${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
+      <DarkSpaceHeader title="Bestiary" subtitle={`HeroDark · Monsters${hbRows.length ? ` + ${hbRows.length} homebrew` : ""}`} />
 
       <div className="mb-6"><HomebrewEditor kind="ds-monster" campaigns={campaigns} initial={hbOwn} /></div>
 
-      <SearchForm base={BASE} q={q} placeholder="Search hostiles…" hidden={{ al }} />
+      <SearchForm base={BASE} q={q} placeholder="Search monsters…" hidden={{ al }} />
       <ChipRow label="Alignment" base={BASE} current={current} param="al" options={ALIGN} active={al} />
       <CountLine count={results.length} noun="creature" base={BASE} filtered={filtered} />
 
