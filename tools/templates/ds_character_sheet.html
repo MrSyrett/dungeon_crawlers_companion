@@ -189,6 +189,15 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 
 /* COMBAT TILES (HP / AC / XP / Luck) — rounded 'bubble' cards above Attacks */
 .sd-vitals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;border-bottom:1px solid var(--rule);align-items:stretch;}
+/* Stress track — each filled pip is -2 to all d20 rolls; a rest clears one. */
+.ds-stress{display:flex;align-items:center;gap:8px;padding:6px 10px 8px;border-bottom:1px solid var(--rule);}
+.ds-stress .st-lbl{font-family:'Montserrat',sans-serif;font-weight:800;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex:0 0 auto;}
+.ds-stress .st-pips{display:flex;gap:5px;flex:1 1 auto;}
+.ds-stress .st-pip{flex:1 1 auto;height:14px;border:1px solid var(--rule);border-radius:3px;background:var(--box);cursor:pointer;padding:0;transition:background .1s,border-color .1s;}
+.ds-stress .st-pip:hover{border-color:#e07050;}
+.ds-stress .st-pip.on{background:#c8503a;border-color:#e07050;}
+.ds-stress .st-pip.last.on{background:#8a1c10;}
+.ds-stress .st-pen{font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:#e0776f;flex:0 0 auto;min-width:40px;text-align:right;}
 .sd-vital{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:7px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;}
 .sd-vital .sv-lbl{font-family:'Montserrat',sans-serif;font-weight:800;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
 .sd-vital .sv-row{display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;}
@@ -489,6 +498,13 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <span class="sv-lbl">Luck</span>
           <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-big" id="lk-val" placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
         </div>
+      </div>
+
+      <!-- STRESS: each level is -2 to all d20 rolls; a rest clears one; 6 = out of the fight -->
+      <div class="ds-stress" title="Stress — each level is -2 to all d20 rolls until cleared. A rest clears one level. At 6 you are out of the fight. Click a pip to set your stress.">
+        <span class="st-lbl">Stress</span>
+        <div class="st-pips" id="stress-pips"></div>
+        <span class="st-pen" id="stress-pen"></span>
       </div>
 
       <!-- ATTACKS -->
@@ -810,9 +826,12 @@ let _applyingItemBonuses = false;   // re-entrancy guard
 // turn, and Dying (not unconscious) at 0 HP — 1 action + disadvantage on all
 // checks. Some of these are already how the sheet works (Luck is a free number,
 // talents can be chosen); the rest are automated below or listed in the ⚔ panel.
-function defaultOptions(){ return { heroDark:false }; }
+function defaultOptions(){ return { heroDark:true }; }
 let options = defaultOptions();
-function heroDarkOn(){ return !!(options && options.heroDark); }
+// HeroDark is the STANDARD ruleset for this system (not an opt-in): max HP at L1,
+// choose talents on level-up, even-level Skill Talent, unlimited Luck + Luck on a
+// natural 1/20, and Dying instead of unconscious at 0 HP are always on.
+function heroDarkOn(){ return true; }
 window.heroDarkOn = heroDarkOn;
 
 // Sum the bonuses of every equipped, non-disabled gear item that maps to a
@@ -1488,6 +1507,39 @@ const SD_TRACKERS_GOOD = ['Light','Focused','Invisible'];
 let _trackers = [];    // active on the sheet — none on by default
 let _customTrackers = [];     // extra names this player has invented
 
+// ── STRESS (HeroDark) ───────────────────────────────────────────────────────
+// A stacking track, 0–6. Each level is −2 to ALL d20 rolls (checks, attacks,
+// spellcasting) until cleared; a rest clears one level. At 6 you are out of the
+// fight. Persisted in the save blob as _sheet.stress.
+const STRESS_MAX = 6;
+let _stress = 0;
+function stressPenalty(){ return -2 * (parseInt(_stress) || 0); }
+function setStress(n){
+  n = Math.max(0, Math.min(STRESS_MAX, parseInt(n) || 0));
+  const prev = _stress; _stress = n;
+  renderStress();
+  if(n !== prev){
+    const pen = stressPenalty();
+    addLog('Stress', n === 0 ? 'Clear' : (n >= STRESS_MAX ? 'OUT' : String(n)),
+      n === 0 ? 'No stress' : (n >= STRESS_MAX ? 'Stress 6 — out of the fight' : ('Stress ' + n + ' · ' + pen + ' to all d20 rolls')),
+      n === 0 ? 'normal' : 'fumble');
+    if(typeof scheduleAutosave === 'function') scheduleAutosave();
+  }
+}
+function renderStress(){
+  const box = document.getElementById('stress-pips'); if(!box) return;
+  let h = '';
+  for(let i = 1; i <= STRESS_MAX; i++){
+    const on = i <= _stress;
+    h += '<button type="button" class="st-pip' + (on ? ' on' : '') + (i === STRESS_MAX ? ' last' : '') + '"'
+       + ' title="' + (i === STRESS_MAX ? 'Out of the fight' : ('Stress ' + i + ' (' + (-2 * i) + ')')) + '"'
+       + ' onclick="setStress(' + (i === _stress ? i - 1 : i) + ')"></button>';
+  }
+  box.innerHTML = h;
+  const pen = document.getElementById('stress-pen');
+  if(pen) pen.textContent = _stress >= STRESS_MAX ? 'OUT' : (_stress ? String(stressPenalty()) : '');
+}
+
 const _trkEsc = t => String(t == null ? '' : t)
   .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const _trkArg = t => _trkEsc(t).replace(/'/g, "\\'");
@@ -2157,6 +2209,7 @@ const HERODARK_QUICK_RULES = [
   { title: '⚔ HeroDark — Luck', text: 'You can hold an unlimited number of Luck points, and you gain a Luck point whenever you roll a natural 1 or a natural 20 on a d20 (check, attack, or spellcast). The sheet adds it automatically.' },
   { title: '⚔ HeroDark — Actions', text: 'You have 2 actions on your turn as normal. You may forgo your movement to take a second attack or cast a spell that turn — but that extra action is made with disadvantage.' },
   { title: '⚔ HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all rolls until you are healed above 0 HP. The sheet adds the Dying status automatically (it drives the disadvantage); clear it by healing. The Exhausted status likewise applies −2 to your rolls while active.' },
+  { title: '⚔ HeroDark — Stress', text: 'Stress stacks in levels (track it on the sheet). Each level of Stress is a −2 penalty to ALL d20 rolls — checks, attacks, and spellcasting — folded in automatically. A rest clears one level. At Stress 6 you are out of the fight until you recover.' },
 ];
 function d(s){return Math.floor(Math.random()*s)+1;}
 function parseMod(v){if(!v)return 0;const n=parseInt((v+'').replace(/\s/g,''));return isNaN(n)?0:n;}
@@ -2218,13 +2271,14 @@ function clearLog() {
 function rollStat(id, name) {
   const statMod = getStatMod(id);
   const exh = exhaustedPenalty();
-  const mod = statMod + exh;
+  const str = stressPenalty();
+  const mod = statMod + exh + str;
   const {result:roll, detail:advDetail} = rollWithAdv(20);
   const total = roll + mod;
   let type = roll===20?'crit':roll===1?'fumble':'normal';
   const base = advDetail||`d20(${roll})`;
   addLog(`${name} Check`+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
-    `${base} + Mod(${fmtMod(statMod)})${exh?' '+fmtMod(exh)+' exhausted':''} = ${total}`, type);
+    `${base} + Mod(${fmtMod(statMod)})${exh?' '+fmtMod(exh)+' exhausted':''}${str?' '+fmtMod(str)+' stress':''} = ${total}`, type);
   heroDarkLuckOnNat(roll, name + ' check');
 }
 
@@ -2426,9 +2480,10 @@ function rollAttack(btn) {
   const {result:hitRoll, detail:advDetail} = rollWithAdv(20);
   advState = prevAdv;
   const exh = exhaustedPenalty();
-  const hitTotal = hitRoll + bonus + statMod + exh;
+  const str = stressPenalty();
+  const hitTotal = hitRoll + bonus + statMod + exh + str;
   const hitBase = advDetail||`d20(${hitRoll})`;
-  const statLabel = (statId?`+${statId.toUpperCase()}(${fmtMod(statMod)})`:'') + (exh?` ${fmtMod(exh)} exhausted`:'');
+  const statLabel = (statId?`+${statId.toUpperCase()}(${fmtMod(statMod)})`:'') + (exh?` ${fmtMod(exh)} exhausted`:'') + (str?` ${fmtMod(str)} stress`:'');
   let type = hitRoll===20?'crit':hitRoll===1?'fumble':'normal';
 
   let dmgTotal = null, dmgBreakdown = '';
@@ -2507,7 +2562,8 @@ function rollSpell(btn) {
   advState = prevAdv;
 
   const exh     = exhaustedPenalty();
-  const total   = roll + bonus + castMod + gBonus + exh;
+  const str     = stressPenalty();
+  const total   = roll + bonus + castMod + gBonus + exh + str;
   const success = total >= dc;
   const type    = !success ? 'fumble' : roll===20 ? 'crit' : 'normal';
   const base    = advDetail || `d20(${roll})`;
@@ -2516,7 +2572,7 @@ function rollSpell(btn) {
   const healing = isHealingSpell(name);
   const verdict = success ? `✓ ${healing ? 'SUCCESS' : 'HIT'} (DC ${dc})`
                           : `✗ ${healing ? 'FAILED' : 'MISS'} (DC ${dc}) — spell lost!`;
-  const bonusPart = [bonus !== 0 ? `${bonus>=0?'+':''}${bonus}` : '', castMod !== 0 ? `${castMod>=0?'+':''}${castMod} (${castStat.toUpperCase()})` : '', gBonus !== 0 ? `${gBonus>=0?'+':''}${gBonus}` : '', exh !== 0 ? `${exh} exhausted` : ''].filter(Boolean).join(' ');
+  const bonusPart = [bonus !== 0 ? `${bonus>=0?'+':''}${bonus}` : '', castMod !== 0 ? `${castMod>=0?'+':''}${castMod} (${castStat.toUpperCase()})` : '', gBonus !== 0 ? `${gBonus>=0?'+':''}${gBonus}` : '', exh !== 0 ? `${exh} exhausted` : '', str !== 0 ? `${str} stress` : ''].filter(Boolean).join(' ');
 
   // Mark as lost if failed — but only for spells you know. A scroll is consumed
   // whether it hits or misses; a wand is handled below (spent until rest on a fail).
@@ -2832,6 +2888,7 @@ function collectSheet(){
       talents:   talentsText,
       luckPts:   document.getElementById('lk-val')?.value || '',
       options:   options,
+      stress:    parseInt(_stress) || 0,
       featureUses: _featureUses && typeof _featureUses === 'object' ? _featureUses : {},
       trackers:       Array.isArray(_trackers) ? _trackers : [],
       customTrackers: Array.isArray(_customTrackers) ? _customTrackers : [],
@@ -2940,6 +2997,8 @@ function _applySDData(d){
   _customTrackers = Array.isArray(d._sheet?.customTrackers) ? d._sheet.customTrackers.slice()
                   : (Array.isArray(d._sheet?.customConditions) ? d._sheet.customConditions.slice() : []);
   if(typeof renderTrackers === 'function') renderTrackers();
+  _stress = Math.max(0, Math.min(STRESS_MAX, parseInt(d._sheet?.stress) || 0));
+  if(typeof renderStress === 'function') renderStress();
   // xp-level field removed
 
   // Coins
@@ -3302,6 +3361,9 @@ function takeRest() {
     if(typeof renderTalentsView === 'function') renderTalentsView();
     notes.push(usedCount + ' feature use' + (usedCount > 1 ? 's' : '') + ' restored');
   }
+
+  // A rest clears one level of Stress.
+  if((parseInt(_stress) || 0) > 0) { _stress = _stress - 1; renderStress(); notes.push('1 stress cleared (now ' + _stress + ')'); }
 
   saveSheet(false);
   addLog('Rest', '<svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13 3a9 9 0 1 0 8 13.4A7.2 7.2 0 0 1 13 3Z"/></svg>', notes.length ? notes.join(', ') : 'Rested', 'normal');
@@ -4005,6 +4067,7 @@ var _pageReady = false;
 setTimeout(function() { _pageReady = true; }, 2500);
 renderTalentsView();   // initial styled render of the Talents box
 renderTrackers();
+renderStress();
 
 function autoSaveOnExit() {
   if(!_pageReady) return;
