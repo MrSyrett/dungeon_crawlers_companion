@@ -45,8 +45,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-action-btn{flex:1;padding:6px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;border-radius:2px;}
 .log-action-btn.wizard{background:#123029;color:#5fd3b0;border:1px solid #1f5a4d;}
 .log-action-btn.wizard:hover{background:#1f5a4d;color:white;}
-.log-action-btn.advance{background:#2a2410;color:#e0bd6a;border:1px solid #6a5418;}
-.log-action-btn.advance:hover{background:#6a5418;color:#fff;}
 .log-action-btn.rules{background:#1e2a26;color:#b8d8cd;border:1px solid #2f4a42;}
 .log-action-btn.export{background:#1a2733;color:#6aabdf;border:1px solid #1a4a8a;}
 .log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
@@ -339,7 +337,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2a3b36;background:transparent;color:#7d938c;" title="Campaign">🔗</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="COB.launch()" title="Character Builder">Create</button>
-    <button id="advance-btn" class="log-action-btn advance" onclick="openAdvance()" title="Advancement (Illumination)">Advance</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openAdvance()" title="Advancement (Illumination)" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -496,6 +494,7 @@ function renderRows(kind){
     }
   });
   var emp=$(kind+'-empty'); if(emp) emp.style.display=list.length?'none':'block';
+  if(kind==='abil') refreshWizardButtons();
 }
 function rowEdit(kind,i,f,v){ var list=kind==='abil'?S.abilities:S.gear; if(list[i]){ list[i][f]=v; scheduleAutosave(); } }
 function rowDel(kind,i){ var list=kind==='abil'?S.abilities:S.gear; list.splice(i,1); renderRows(kind); scheduleAutosave(); }
@@ -554,7 +553,13 @@ function poolTier(high,sixes,zeroMode){
   return {tier:'MISS',type:'fumble'};
 }
 function refreshDrive(d){ var st=S.drives[d]; if(!st)return; st.cur=Math.min(st.max,st.cur+1); renderDriveBlocks(); scheduleAutosave(); }
-function animate(rolls){ if(window.DiceAnim&&window.DiceAnim.play){ try{ window.DiceAnim.play(rolls.map(function(v){return {sides:6,display:String(v)};}),'normal'); }catch(e){} } }
+// The gilded die animates in gold — a distinct colour like the Star Wars / D6
+// Wild Die. play() honours a per-die `color`, so we tint the last (gilded) die.
+var GILD_COLOR='#d8b24a';
+function animateRoll(rolls, gildIdx){
+  if(!(window.DiceAnim&&window.DiceAnim.play))return;
+  try{ window.DiceAnim.play(rolls.map(function(v,i){ var o={sides:6,display:String(v)}; if(gildIdx!=null&&i===gildIdx)o.color=GILD_COLOR; return o; }),'normal'); }catch(e){}
+}
 
 function rollAction(name){
   var rating=S.actions[name]||0, drive=actionDrive(name);
@@ -566,17 +571,19 @@ function rollAction(name){
   _staged[drive]=0; $('tray-bonus').value='0'; $('tray-gild').classList.remove('on'); renderDriveBlocks();
   var label=name+' · '+(zeroMode?'0':rating+(bonus?'+'+bonus:''))+'d';
   var high=zeroMode?Math.min(rolls[0],rolls[1]):Math.max.apply(null,rolls), sixes=rolls.filter(function(v){return v===6;}).length;
-  if(gild && !zeroMode){
-    // Gilded, non-zero pool: let the player choose the highest result OR the
-    // gilded die (to refresh a drive point). Animate now; the choice logs the result.
-    _pendingGild={name:name,drive:drive,rolls:rolls,label:label,gildVal:rolls[rolls.length-1]};
-    animate(rolls); showGildChoice();
+  if(gild){
+    // Gilded roll: animate now with the gilded (last) die in gold, and log with a
+    // bracket detail so the addLog hook does NOT animate a second time.
+    animateRoll(rolls, rolls.length-1);
+    if(!zeroMode){ _pendingGild={name:name,drive:drive,rolls:rolls,label:label,gildVal:rolls[rolls.length-1]}; showGildChoice(); return; }
+    // Rating-0 gilded: no choice; take the lowest, and refresh if the gilded die is it.
+    var tz=poolTier(high,sixes,true), extra='';
+    if(rolls[rolls.length-1]===high){ refreshDrive(drive); extra=' · gilded refreshed '+drive; }
+    addLog(label, high+'  '+tz.tier, drive+' ['+rolls.join(',')+']'+extra, tz.type);
     return;
   }
-  var t=poolTier(high,sixes,zeroMode), extra='';
-  // Rating-0 gilded: no choice, but if the gilded (last) die is the taken lowest, still refresh.
-  if(gild && zeroMode && rolls[rolls.length-1]===high){ refreshDrive(drive); extra=' · gilded refreshed '+drive; }
-  addLog(label, high+'  '+t.tier, drive+' '+poolStr(rolls)+extra, t.type);
+  var t=poolTier(high,sixes,zeroMode);
+  addLog(label, high+'  '+t.tier, drive+' '+poolStr(rolls), t.type);   // hook animates via Nd6(...)
 }
 function showGildChoice(){
   var pr=_pendingGild; if(!pr)return;
@@ -625,6 +632,20 @@ function openRules(){
   $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open');
 }
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
+
+// The Create button becomes Level once a character exists — the standard across
+// every sheet. "Built" = a name, any drive max, any action rating, or an ability.
+function hasCharacter(){
+  if(($('f-name').value||'').trim()) return true;
+  if(DRIVE_NAMES.some(function(d){ return (S.drives[d]||{}).max>0; })) return true;
+  if(ACTION_NAMES.some(function(a){ return (S.actions[a]||0)>0; })) return true;
+  return !!(S.abilities && S.abilities.length);
+}
+function refreshWizardButtons(){
+  var built=hasCharacter(), c=$('build-btn'), l=$('level-btn');
+  if(c) c.style.display=built?'none':'';
+  if(l) l.style.display=built?'':'none';
+}
 
 // ── Advancement (Illumination) — queue improvements, then Apply, like the other sheets ──
 var _adv=null;
@@ -724,7 +745,7 @@ function renderAll(){
   $('f-name').value=S.name||''; $('f-pronouns').value=S.pronouns||'';
   renderIdentity();
   $('f-catalyst').value=S.catalyst||''; $('f-question').value=S.question||''; $('f-style').value=S.style||''; $('f-notes').value=S.notes||'';
-  renderDriveBlocks(); renderMarks(); renderKeys(); renderRelationships(); renderRows('abil'); renderRows('gear'); updateFoot();
+  renderDriveBlocks(); renderMarks(); renderKeys(); renderRelationships(); renderRows('abil'); renderRows('gear'); updateFoot(); refreshWizardButtons();
 }
 function saveSheet(quiet){
   var data=collectSheet(), json=JSON.stringify(data);
@@ -746,7 +767,7 @@ document.addEventListener('visibilitychange',function(){ if(document.visibilityS
 var _autoSaveTimer=null;
 function scheduleAutosave(){ if(!_pageReady)return; if(_autoSaveTimer)clearTimeout(_autoSaveTimer); _autoSaveTimer=setTimeout(function(){ try{ saveSheet(true); }catch(e){} },1500); }
 window.scheduleAutosave=scheduleAutosave;
-$('f-name').addEventListener('input',function(){ if(window.__ddSaveTitle)try{ window.__ddSaveTitle(($('f-name').value||'').trim()); }catch(e){} });
+$('f-name').addEventListener('input',function(){ if(window.__ddSaveTitle)try{ window.__ddSaveTitle(($('f-name').value||'').trim()); }catch(e){} refreshWizardButtons(); });
 try{ if(localStorage.getItem('co_dark')==='1') setDarkMode(true); }catch(e){}
 </script>
 
