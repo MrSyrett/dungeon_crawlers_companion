@@ -1503,10 +1503,20 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
   };
   const SYS_KEYS = Object.keys(SYS_GENS);
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
-  function readSys() { try { const v = localStorage.getItem('gm_system'); return SYS_KEYS.indexOf(v) >= 0 ? v : 'DCC'; } catch (e) { return 'DCC'; } }
+  // Systems an admin hid (Admin → Systems) — injected by the server before the
+  // page runs. Those are dropped from the system dropdown here too. Never let
+  // the visible set go empty (mirrors the server guard against hiding them all).
+  const HIDDEN_SYS = (function () { try { return Array.isArray(window.__gmHiddenSystems__) ? window.__gmHiddenSystems__ : []; } catch (e) { return []; } })();
+  const VISIBLE_KEYS = (function () { const v = SYS_KEYS.filter(k => HIDDEN_SYS.indexOf(k) < 0); return v.length ? v : SYS_KEYS; })();
+  const DEFAULT_SYS = VISIBLE_KEYS.indexOf('DCC') >= 0 ? 'DCC' : VISIBLE_KEYS[0];
+  function readSys() { try { const v = localStorage.getItem('gm_system'); return VISIBLE_KEYS.indexOf(v) >= 0 ? v : DEFAULT_SYS; } catch (e) { return DEFAULT_SYS; } }
   let SYS = readSys();
   window.GM_SYSTEM = SYS;
-  window.GM_SYSTEM_KEYS = SYS_KEYS;
+  window.GM_SYSTEM_KEYS = VISIBLE_KEYS;
+  // Hide the admin-hidden systems from every system-toggle <select>.
+  function hideToggleOptions(sel) {
+    [].slice.call(sel.options).forEach(o => { const h = HIDDEN_SYS.indexOf(o.value) >= 0; o.hidden = h; o.disabled = h; });
+  }
 
   function applyToSelect(sel) {
     let curHidden = false, firstVisible = null;
@@ -1525,16 +1535,16 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     (root || document).querySelectorAll('.gen-tab-select').forEach(applyToSelect);
   };
   window.setGmSystem = function (v) {
-    SYS = SYS_KEYS.indexOf(v) >= 0 ? v : 'DCC';
+    SYS = VISIBLE_KEYS.indexOf(v) >= 0 ? v : DEFAULT_SYS;
     window.GM_SYSTEM = SYS;
     try { localStorage.setItem('gm_system', SYS); } catch (e) {}
-    document.querySelectorAll('#gm-system-toggle').forEach(s => { s.value = SYS; });
+    document.querySelectorAll('#gm-system-toggle').forEach(s => { hideToggleOptions(s); s.value = SYS; });
     window.applyGmSystemToGenerators(document);
     if (typeof window.setGmMonsterSource === 'function') window.setGmMonsterSource(SYS.toLowerCase());
     try { document.dispatchEvent(new CustomEvent('gm-system-change', { detail: SYS })); } catch (e) {}
   };
   function initSys() {
-    document.querySelectorAll('#gm-system-toggle').forEach(s => { s.value = SYS; });
+    document.querySelectorAll('#gm-system-toggle').forEach(s => { hideToggleOptions(s); s.value = SYS; });
     window.applyGmSystemToGenerators(document);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSys);

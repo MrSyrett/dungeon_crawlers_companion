@@ -1,4 +1,5 @@
 import { loadToolTemplate } from "@/lib/tools";
+import { getHiddenSystemKeys } from "@/lib/systems";
 
 // Shared builder for the GM Screen HTML page. Two routes render it:
 //   • app/gm-screen (cookie auth, full page) — no token, floating "Home" chrome.
@@ -646,12 +647,19 @@ export async function buildGmScreenHtml(opts: {
   const tokenScript = opts.vttToken ? `${tokenFetchPatch(opts.vttToken)}\n` : "";
   const audioScript = audioVolumeFix(opts.vttToken || "");
 
-  // Inject (audio fix → token patch →) state → shim → Sound Library picker
-  // before </head>. The audio fix goes first so window.Audio is wrapped before
-  // any of the template's music code runs.
+  // Systems an admin has hidden (Admin → Systems) are also dropped from the GM
+  // Screen's game-system dropdown. Fail-open: on error the list is empty (all
+  // systems visible). The template's system IIFE reads this global.
+  let hiddenSystems: string[] = [];
+  try { hiddenSystems = await getHiddenSystemKeys(); } catch { hiddenSystems = []; }
+  const hiddenScript = `<script>window.__gmHiddenSystems__ = ${JSON.stringify(hiddenSystems)};</script>\n`;
+
+  // Inject (audio fix → token patch →) hidden-systems → state → shim → Sound
+  // Library picker before </head>. The audio fix goes first so window.Audio is
+  // wrapped before any of the template's music code runs.
   html = html.replace(
     /<\/head>/i,
-    `${audioScript}\n${tokenScript}${stateScript}${SHIM}\n${LIBRARY_UI}\n</head>`,
+    `${audioScript}\n${tokenScript}${hiddenScript}${stateScript}${SHIM}\n${LIBRARY_UI}\n</head>`,
   );
 
   // Inject chrome after <body>: Home + status (cookie) or status-only (embed).

@@ -404,12 +404,11 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="derived-lbl"><span>Stress <span id="stress-val" style="font-family:'Share Tech Mono',monospace;font-size:18px;">0</span></span></div>
         <div class="stress-track" id="stress-track"></div>
         <div class="stress-effect" id="stress-effect"></div>
-        <div class="tok-line">
-          <span class="hint" style="margin:0;">Boosted</span><select class="inline-sel" id="f-stress-boost" onchange="recalc()"></select>
-          <span class="hint" style="margin:0;">Reduced</span><select class="inline-sel" id="f-stress-reduce" onchange="recalc()"></select>
-          <button class="small-btn ghost" onclick="stressChange(1)">+1</button>
-          <button class="small-btn ghost" onclick="stressChange(-1)">−1</button>
-        </div>
+        <!-- Boosted / Reduced stats are chosen at character creation (the builder
+             writes them); they drive the stress bonus mechanic via these hidden
+             fields. Stress itself is set by tapping the track above. -->
+        <input type="hidden" id="f-stress-boost" value="Charm">
+        <input type="hidden" id="f-stress-reduce" value="Brawn">
         <div class="tok-line" style="margin-top:8px;">
           <span class="hint" style="margin:0;">Power Die</span><select class="inline-sel" id="f-power-die" onchange="recalc()"><option value="0">none yet</option><option value="4">d4</option><option value="6">d6</option><option value="8">d8</option><option value="10">d10</option><option value="12">d12</option></select>
           <span class="hint" style="margin:0;">+</span><input class="inline-num" id="f-power-bonus" type="number" value="0" oninput="recalc()">
@@ -664,9 +663,6 @@ function buildStats() {
       `<div class="stat-btns">${btn}</div>`;
     list.appendChild(row);
   });
-  const opts = stats.map(s => '<option value="' + s.id + '">' + s.id + '</option>').join('');
-  ['f-stress-boost', 'f-stress-reduce'].forEach(id => { if($(id)) $(id).innerHTML = opts; });
-  $('f-stress-reduce').value = 'Brawn';
 }
 function dieOf(id) { return num($('die-' + id).value) || 4; }
 function ageGroup() { const b = bookInfo(); return b ? b.ageGroups.find(a => a.name === $('f-age').value) || null : null; }
@@ -743,7 +739,7 @@ function renderStress() {
     const c = document.createElement('div');
     c.className = 'stress-cell' + (i <= stress ? ' on' + (i <= 4 ? ' ok' : i <= 9 ? ' mild' : '') : '');
     c.textContent = i;
-    c.onclick = () => { stress = (i === stress) ? i - 1 : i; recalc(); scheduleAutosave(); };
+    c.onclick = () => { stress = (i === stress) ? i - 1 : i; recalc(); if(stress >= 13) addLog('Stress 13', '💥', 'Get outta here! You must leave the fight.', 'fumble'); scheduleAutosave(); };
     track.appendChild(c);
   }
   $('stress-val').textContent = stress;
@@ -755,7 +751,6 @@ function inRange(range, v) {
   const m = /^(\d+)\s*(?:to|–|-)\s*(\d+)/.exec(range); if(m) return v >= +m[1] && v <= +m[2];
   const n = parseInt(range, 10); return !isNaN(n) && v === n;
 }
-function stressChange(d) { stress = Math.max(0, Math.min(13, stress + d)); recalc(); if(stress >= 13) addLog('Stress 13', '💥', 'Get outta here! You must leave the fight.', 'fumble'); scheduleAutosave(); }
 
 // ═══ DICE ═════════════════════════════════════════════════════════════════
 function dN(n) { return Math.floor(Math.random() * n) + 1; }
