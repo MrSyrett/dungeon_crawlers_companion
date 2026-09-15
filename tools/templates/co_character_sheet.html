@@ -114,7 +114,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .res-tri.off{cursor:default;color:#26332e;}
 .dv-avail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8ba79f;flex:0 0 auto;padding-left:2px;}
 .dv-avail b{color:#5fd3b0;}
-.dv-staged{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;color:#08201c;background:var(--gild);border-radius:10px;padding:1px 7px;flex:0 0 auto;}
+.dv-staged{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;color:#08201c;background:var(--gild);border-radius:10px;padding:1px 0;flex:0 0 auto;min-width:30px;text-align:center;}
+.dv-staged.empty{visibility:hidden;}
 .log-entry.gild-choice{border-color:var(--gild);}
 .gild-btns{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
 .gild-btns button{flex:1;min-width:110px;background:#16211e;border:1px solid #34463f;color:#cdd6d2;border-radius:4px;padding:7px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.04em;cursor:pointer;line-height:1.2;}
@@ -421,9 +422,10 @@ function renderDriveBlocks(){
       cols+='<div class="dv-col"><div class="dv-grp">'+grp+'</div>'+tri+'</div>';
     }
     var el=document.createElement('div'); el.className='drive-block';
-    el.innerHTML='<div class="drive-head"><span class="dv-name">'+d.name+'</span>'
+    el.innerHTML='<div class="drive-head">'
+      +'<span class="dv-staged'+(staged(d.name)>0?'':' empty')+'" title="staged as bonus dice for your next '+d.name+' action">'+(staged(d.name)>0?'+'+staged(d.name)+'d':'')+'</span>'
+      +'<span class="dv-name">'+d.name+'</span>'
       +'<div class="dv-track"><div class="dv-tlabel">Drives<br>Max</div><div class="dv-groups">'+cols+'</div></div>'
-      +(staged(d.name)>0?'<span class="dv-staged" title="staged as bonus dice for your next '+d.name+' action">+'+staged(d.name)+'d</span>':'')
       +'<span class="dv-avail" title="available / max">'+st.cur+'/<b>'+st.max+'</b></span></div>'
       +'<div class="drive-body">'+ACTIONS.filter(function(a){return a.drive===d.name;}).map(function(a){
         var rating=S.actions[a.name]||0, gild=S.gilded[a.name], dots='';
