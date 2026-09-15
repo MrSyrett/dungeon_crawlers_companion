@@ -83,6 +83,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hdr-field label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#5fd3b0;margin-bottom:2px;}
 .hdr-field input,.hdr-field select{width:100%;border:none;border-bottom:1px solid #37514a;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;outline:none;padding:2px 0;}
 .hdr-field select{font-size:15px;cursor:pointer;}
+.hdr-field .hdr-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#fff;padding:3px 0 2px;border-bottom:1px solid #37514a;min-height:26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hdr-field select option{color:#111;background:#fff;}
 .hdr-field input::placeholder{color:#5a6f68;font-weight:500;}
 .hdr-field.lastcol{border-right:none;}
@@ -106,6 +107,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .dv-pip{width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);cursor:pointer;background:transparent;padding:0;}
 .dv-pip.max{border-color:#5fd3b0;}
 .dv-pip.cur{background:var(--co);border-color:#5fd3b0;}
+.dv-pip.off{border-color:rgba(255,255,255,.14);cursor:default;}
 .res-tri{background:none;border:none;cursor:pointer;font-size:11px;line-height:1;padding:0;color:#3a4a45;}
 .res-tri.on{color:var(--gild);}
 .res-tri.on.burned{color:#5a6f68;}
@@ -221,7 +223,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .a-row button:disabled{opacity:.3;cursor:default;}
 
 /* Dark mode */
-body.dark{--bg:#0c1512;--paper:#12201c;--ink:#e7efeb;--muted:#8ba39c;--rule:#2b433c;--border:#3a544c;--box:#16241f;--input-bg:#0e1a17;--input-border:#33514a;--section-hdr:#0a1512;}
+body.dark{--bg:#0c1512;--paper:#12201c;--ink:#e7efeb;--muted:#8ba39c;--rule:#2b433c;--border:#3a544c;--box:#16241f;--input-bg:#0e1a17;--input-border:#33514a;--section-hdr:#0a1512;--co-lt:#123029;}
 body.dark .sheet{border-color:#3a544c;}
 body.dark .pip,body.dark .dot,body.dark .diamond,body.dark .mbox,body.dark .rpip{background:var(--input-bg);}
 
@@ -248,8 +250,8 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
     <div class="hdr-logo"><div class="lg-word">Candela Obscura</div><div class="lg-sub">Investigator Dossier</div></div>
     <div class="hdr-fields">
       <div class="hdr-field wide" style="grid-column:span 4;"><label>Name</label><input type="text" id="f-name" placeholder="Investigator name"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Role</label><select id="f-role" onchange="onRole()"></select></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Specialty</label><select id="f-specialty" onchange="onSpecialty()"></select></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Role</label><div class="hdr-val" id="f-role" title="Set with Create">—</div></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Specialty</label><div class="hdr-val" id="f-specialty" title="Set with Create">—</div></div>
       <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
     </div>
   </div>
@@ -374,10 +376,9 @@ function blankState(){
 function resTotal(d){ return Math.floor((S.drives[d].max||0)/3); }
 
 // ── Header selects ──
-function fillRoleSelect(sel,val){ sel.innerHTML=ROLES.map(function(r){return '<option value="'+esc(r.role)+'">'+esc(r.role)+' — '+esc(r.mastery)+'</option>';}).join(''); if(val)sel.value=val; }
-function fillSpecSelect(sel,role,val){ sel.innerHTML=roleObj(role).specialties.map(function(sp){return '<option value="'+esc(sp.name)+'">'+esc(sp.name)+'</option>';}).join(''); if(val)sel.value=val; }
-function onRole(){ S.role=$('f-role').value; S.specialty=roleObj(S.role).specialties[0].name; fillSpecSelect($('f-specialty'),S.role,S.specialty); scheduleAutosave(); }
-function onSpecialty(){ S.specialty=$('f-specialty').value; scheduleAutosave(); }
+// Role & Specialty are set at character creation (the Create wizard) and shown
+// read-only in the header — no dropdowns.
+function renderIdentity(){ $('f-role').textContent=S.role||'—'; $('f-specialty').textContent=S.specialty||'—'; }
 
 // ── Render: fused Drive & Action blocks (official CO arrangement) ──
 // Each drive block = a dark header with the drive's Max track (3 groups of 3)
@@ -391,7 +392,9 @@ function renderDriveBlocks(){
     var cols='';
     for(var g=0;g<3;g++){
       var grp='';
-      for(var k=1;k<=3;k++){ var n=g*3+k; grp+='<button class="dv-pip'+(n<=st.max?' max':'')+(n<=st.cur?' cur':'')+'" title="click set max · right-click spend" onclick="pipClick(\''+d.name+'\','+n+',event)" oncontextmenu="pipSpend(\''+d.name+'\','+n+',event)"></button>'; }
+      for(var k=1;k<=3;k++){ var n=g*3+k; var within=n<=st.max;
+        grp+='<button class="dv-pip'+(within?' max':' off')+(n<=st.cur?' cur':'')+'"'
+          +(within?' title="click to spend / refresh this point" onclick="spendDrive(\''+d.name+'\','+n+')"':' disabled title="Drive max is set at character creation"')+'></button>'; }
       var earned=res>g, burned=used>g;
       var tri = earned
         ? '<button class="res-tri on'+(burned?' burned':'')+'" title="burn resistance to reroll" onclick="burnRes(\''+d.name+'\','+g+')">'+(burned?'▼':'▽')+'</button>'
@@ -411,8 +414,10 @@ function renderDriveBlocks(){
     host.appendChild(el);
   });
 }
-function pipClick(d,n,e){ e.preventDefault(); var st=S.drives[d]; st.max=(st.max===n)?n-1:n; if(st.cur>st.max)st.cur=st.max; if(S.resUsed[d]>resTotal(d))S.resUsed[d]=resTotal(d); renderDriveBlocks(); scheduleAutosave(); }
-function pipSpend(d,n,e){ e.preventDefault(); var st=S.drives[d]; if(n>st.max)return false; st.cur=(st.cur===n)?n-1:n; renderDriveBlocks(); scheduleAutosave(); return false; }
+// Drive max is set by the builder at creation. Clicking a filled point spends it
+// (click the topmost available point to spend one; click a higher point to refresh
+// back up to it). Max cannot be changed here.
+function spendDrive(d,n){ var st=S.drives[d]; if(n>st.max)return; st.cur=(st.cur===n)?n-1:n; renderDriveBlocks(); scheduleAutosave(); }
 function burnRes(d,i){ var mx=resTotal(d),used=S.resUsed[d]||0; S.resUsed[d]=(i<used)?i:i+1; if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDriveBlocks(); scheduleAutosave(); }
 function setAction(a,n){ S.actions[a]=(S.actions[a]===n)?n-1:n; renderDriveBlocks(); scheduleAutosave(); }
 function toggleGild(a){ S.gilded[a]=!S.gilded[a]; renderDriveBlocks(); scheduleAutosave(); }
@@ -563,7 +568,7 @@ function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')
 
 // ═══ SAVE / LOAD ════════════════════════════════════════════════════════════
 function collectSheet(){
-  S.name=$('f-name').value.trim(); S.pronouns=$('f-pronouns').value; S.role=$('f-role').value; S.specialty=$('f-specialty').value;
+  S.name=$('f-name').value.trim(); S.pronouns=$('f-pronouns').value;
   S.catalyst=$('f-catalyst').value; S.question=$('f-question').value; S.style=$('f-style').value; S.notes=$('f-notes').value;
   return Object.assign({}, S, { system:'CO', class:S.specialty, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
 }
@@ -589,7 +594,7 @@ function applySheet(d){
 }
 function renderAll(){
   $('f-name').value=S.name||''; $('f-pronouns').value=S.pronouns||'';
-  fillRoleSelect($('f-role'),S.role); fillSpecSelect($('f-specialty'),S.role,S.specialty);
+  renderIdentity();
   $('f-catalyst').value=S.catalyst||''; $('f-question').value=S.question||''; $('f-style').value=S.style||''; $('f-notes').value=S.notes||'';
   renderDriveBlocks(); renderMarks(); renderKeys(); renderRelationships(); renderRows('abil'); renderRows('gear');
 }
