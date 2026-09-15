@@ -168,6 +168,19 @@ function readCharMeta(
         level: null,
       };
     }
+    // D&D (2024): class (+ subclass) as the class, character level as the level.
+    const dnd = blob?.dnd_sheet;
+    if (typeof dnd === "string") {
+      const s = JSON.parse(dnd) as { name?: unknown; cls?: unknown; subclass?: unknown; level?: unknown };
+      const sub = typeof s.subclass === "string" && s.subclass.trim() ? `(${s.subclass.trim()})` : "";
+      const cls = [typeof s.cls === "string" ? s.cls : "", sub].filter(Boolean).join(" ");
+      const lv = parseInt(String(s.level ?? ""), 10);
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: Number.isNaN(lv) ? null : lv,
+      };
+    }
   } catch {
     return null;
   }
