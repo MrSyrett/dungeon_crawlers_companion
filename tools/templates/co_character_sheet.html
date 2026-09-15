@@ -93,36 +93,39 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .center-col{flex:1;display:flex;flex-direction:column;min-width:0;}
 .blk{padding:10px;}
 
-/* Drives */
-.drives{display:flex;flex-direction:column;gap:8px;padding:10px;border-bottom:1px solid var(--rule);}
-.drive{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:8px 10px;}
-.drive .dh{display:flex;justify-content:space-between;align-items:baseline;}
-.drive h3{font-family:'Cinzel',serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--co-dk);}
-.drive .dmeta{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);}
-.drive .dmeta b{color:var(--co-dk);}
-.pips{display:flex;gap:4px;flex-wrap:wrap;margin:5px 0 3px;}
-.pip{width:16px;height:16px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;background:#fff;padding:0;}
-.pip.max{border-color:var(--co-dk);}
-.pip.cur{background:var(--co);border-color:var(--co-dk);}
-.resbox{display:flex;gap:4px;align-items:center;margin-top:3px;}
-.resbox .rpip{width:13px;height:13px;border:2px solid var(--gild);border-radius:3px;cursor:pointer;background:#fff;padding:0;}
-.resbox .rpip.burned{background:var(--gild);opacity:.4;}
-.resbox .lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800;}
-
-/* Actions */
-.actgroup{padding:2px 10px;}
-.actgroup > .gh{font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:var(--co-dk);font-weight:800;margin:6px 0 3px;border-bottom:1px solid var(--rule);padding-bottom:2px;}
-.action{display:flex;align-items:center;gap:9px;padding:4px 4px;border-radius:5px;}
+/* Drives & Actions — fused per-drive blocks (official CO layout, our style) */
+#drive-blocks{padding:10px;display:flex;flex-direction:column;gap:10px;}
+.drive-block{border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--paper);}
+.drive-head{background:var(--section-hdr);color:#fff;display:flex;align-items:center;gap:10px;padding:7px 10px;}
+.drive-head .dv-name{font-family:'Cinzel',serif;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.12em;flex:0 0 auto;}
+.dv-track{display:flex;align-items:flex-start;gap:6px;margin-left:auto;}
+.dv-tlabel{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;line-height:1.05;letter-spacing:.06em;text-transform:uppercase;color:#8ba79f;text-align:right;padding-top:1px;}
+.dv-groups{display:flex;gap:7px;}
+.dv-col{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.dv-grp{display:flex;gap:3px;}
+.dv-pip{width:11px;height:11px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);cursor:pointer;background:transparent;padding:0;}
+.dv-pip.max{border-color:#5fd3b0;}
+.dv-pip.cur{background:var(--co);border-color:#5fd3b0;}
+.res-tri{background:none;border:none;cursor:pointer;font-size:11px;line-height:1;padding:0;color:#3a4a45;}
+.res-tri.on{color:var(--gild);}
+.res-tri.on.burned{color:#5a6f68;}
+.res-tri.off{cursor:default;color:#26332e;}
+.dv-avail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8ba79f;flex:0 0 auto;padding-left:2px;}
+.dv-avail b{color:#5fd3b0;}
+.drive-body{padding:4px 2px 6px;}
+.action{display:flex;align-items:flex-start;gap:9px;padding:4px 8px;border-radius:5px;}
 .action:hover{background:var(--co-lt);}
-.action .diamond{width:13px;height:13px;transform:rotate(45deg);border:2px solid var(--rule);cursor:pointer;flex:0 0 auto;border-radius:2px;background:#fff;padding:0;}
+.action .diamond{width:14px;height:14px;transform:rotate(45deg);border:2px solid var(--rule);cursor:pointer;flex:0 0 auto;border-radius:2px;background:#fff;padding:0;margin-top:3px;}
 .action .diamond.on{background:var(--gild);border-color:#7a5c18;}
-.action .dots{display:flex;gap:4px;flex:0 0 auto;}
-.action .dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--rule);cursor:pointer;background:#fff;padding:0;}
-.action .dot.on{background:var(--co);border-color:var(--co-dk);}
-.action .roll-name{flex:1 1 auto;min-width:0;text-align:left;background:none;border:none;cursor:pointer;padding:0;color:var(--ink);}
-.action .roll-name b{font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.02em;}
-.action .roll-name .sub{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+.act-main{flex:1 1 auto;min-width:0;}
+.action .roll-name{display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:0;color:var(--ink);}
+.action .roll-name b{font-family:'Cinzel',serif;font-weight:600;font-size:15px;letter-spacing:.01em;}
+.action .roll-name .sub{font-family:'Barlow',sans-serif;font-style:italic;font-size:11px;color:var(--muted);margin-left:6px;}
 .action .roll-name:hover b{color:var(--co-dk);text-decoration:underline;}
+.action .dots{display:flex;gap:5px;margin-top:3px;}
+.action .dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--input-border);cursor:pointer;background:#fff;padding:0;}
+.action .dot.on{background:var(--co);border-color:var(--co-dk);}
+.stats-foot{padding:2px 12px 10px;font-family:'Barlow',sans-serif;font-style:italic;font-size:11px;color:var(--muted);line-height:1.3;}
 
 /* Marks */
 .marks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;border-bottom:1px solid var(--rule);}
@@ -253,10 +256,9 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="section-bar accent"><span>Drives</span><span class="sb-note">spend for +1d · resist = max ÷ 3</span></div>
-      <div class="drives" id="drives"></div>
-      <div class="section-bar"><span>Actions</span><span class="sb-note">click a name to roll · ◆ gilded</span></div>
-      <div id="actions"></div>
+      <div class="section-bar accent"><span>Drives &amp; Actions</span><span class="sb-note">spend a drive for +1d · click a name to roll · ◆ gilded</span></div>
+      <div id="drive-blocks"></div>
+      <div class="stats-foot">Burn a resistance to reroll a number of dice equal to your action rating.</div>
     </div>
 
     <div class="center-col">
@@ -377,40 +379,43 @@ function fillSpecSelect(sel,role,val){ sel.innerHTML=roleObj(role).specialties.m
 function onRole(){ S.role=$('f-role').value; S.specialty=roleObj(S.role).specialties[0].name; fillSpecSelect($('f-specialty'),S.role,S.specialty); scheduleAutosave(); }
 function onSpecialty(){ S.specialty=$('f-specialty').value; scheduleAutosave(); }
 
-// ── Render: drives ──
-function renderDrives(){
-  var host=$('drives'); host.innerHTML='';
+// ── Render: fused Drive & Action blocks (official CO arrangement) ──
+// Each drive block = a dark header with the drive's Max track (3 groups of 3)
+// + resistance markers, then that drive's three actions (gilded diamond, name,
+// italic sub-actions, and a row of 3 rating circles below).
+function renderDriveBlocks(){
+  var host=$('drive-blocks'); host.innerHTML='';
   DRIVES.forEach(function(d){
     var st=S.drives[d.name], res=resTotal(d.name), used=S.resUsed[d.name]||0;
-    var pips=''; for(var i=1;i<=9;i++){ pips+='<button class="pip'+(i<=st.max?' max':'')+(i<=st.cur?' cur':'')+'" title="click set max · right-click spend" onclick="pipClick(\''+d.name+'\','+i+',event)" oncontextmenu="pipSpend(\''+d.name+'\','+i+',event)"></button>'; }
-    var rp=''; for(var r=0;r<res;r++){ rp+='<button class="rpip'+(r<used?' burned':'')+'" title="burn resistance" onclick="burnRes(\''+d.name+'\','+r+')"></button>'; }
-    if(res===0) rp='<span class="lbl">none</span>';
-    var el=document.createElement('div'); el.className='drive';
-    el.innerHTML='<div class="dh"><h3>'+d.name+'</h3><span class="dmeta">avail <b>'+st.cur+'</b>/'+st.max+'</span></div><div class="pips">'+pips+'</div><div class="resbox"><span class="lbl">Resist</span>'+rp+'</div>';
+    // 3 columns of 3 pips + a resistance marker per column (earned when that group of 3 max is filled)
+    var cols='';
+    for(var g=0;g<3;g++){
+      var grp='';
+      for(var k=1;k<=3;k++){ var n=g*3+k; grp+='<button class="dv-pip'+(n<=st.max?' max':'')+(n<=st.cur?' cur':'')+'" title="click set max · right-click spend" onclick="pipClick(\''+d.name+'\','+n+',event)" oncontextmenu="pipSpend(\''+d.name+'\','+n+',event)"></button>'; }
+      var earned=res>g, burned=used>g;
+      var tri = earned
+        ? '<button class="res-tri on'+(burned?' burned':'')+'" title="burn resistance to reroll" onclick="burnRes(\''+d.name+'\','+g+')">'+(burned?'▼':'▽')+'</button>'
+        : '<span class="res-tri off">▿</span>';
+      cols+='<div class="dv-col"><div class="dv-grp">'+grp+'</div>'+tri+'</div>';
+    }
+    var el=document.createElement('div'); el.className='drive-block';
+    el.innerHTML='<div class="drive-head"><span class="dv-name">'+d.name+'</span>'
+      +'<div class="dv-track"><div class="dv-tlabel">Drives<br>Max</div><div class="dv-groups">'+cols+'</div></div>'
+      +'<span class="dv-avail" title="available / max">'+st.cur+'/<b>'+st.max+'</b></span></div>'
+      +'<div class="drive-body">'+ACTIONS.filter(function(a){return a.drive===d.name;}).map(function(a){
+        var rating=S.actions[a.name]||0, gild=S.gilded[a.name], dots='';
+        for(var i=1;i<=3;i++){ dots+='<button class="dot'+(i<=rating?' on':'')+'" onclick="setAction(\''+a.name+'\','+i+')"></button>'; }
+        return '<div class="action"><button class="diamond'+(gild?' on':'')+'" title="gild this action" onclick="toggleGild(\''+a.name+'\')"></button>'
+          +'<div class="act-main"><button class="roll-name" onclick="rollAction(\''+a.name+'\')"><b>'+a.name+'</b><span class="sub">'+esc(a.sub)+'</span></button><div class="dots">'+dots+'</div></div></div>';
+      }).join('')+'</div>';
     host.appendChild(el);
   });
 }
-function pipClick(d,n,e){ e.preventDefault(); var st=S.drives[d]; st.max=(st.max===n)?n-1:n; if(st.cur>st.max)st.cur=st.max; if(S.resUsed[d]>resTotal(d))S.resUsed[d]=resTotal(d); renderDrives(); scheduleAutosave(); }
-function pipSpend(d,n,e){ e.preventDefault(); var st=S.drives[d]; if(n>st.max)return false; st.cur=(st.cur===n)?n-1:n; renderDrives(); scheduleAutosave(); return false; }
-function burnRes(d,i){ var mx=resTotal(d),used=S.resUsed[d]||0; S.resUsed[d]=(i<used)?i:i+1; if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDrives(); scheduleAutosave(); }
-
-// ── Render: actions ──
-function renderActions(){
-  var host=$('actions'); host.innerHTML='';
-  DRIVES.forEach(function(d){
-    var g=document.createElement('div'); g.className='actgroup';
-    var inner='<div class="gh">'+d.name+'</div>';
-    ACTIONS.filter(function(a){return a.drive===d.name;}).forEach(function(a){
-      var rating=S.actions[a.name]||0, gild=S.gilded[a.name], dots='';
-      for(var i=1;i<=3;i++){ dots+='<button class="dot'+(i<=rating?' on':'')+'" onclick="setAction(\''+a.name+'\','+i+')"></button>'; }
-      inner+='<div class="action"><button class="diamond'+(gild?' on':'')+'" title="gild" onclick="toggleGild(\''+a.name+'\')"></button><div class="dots">'+dots+'</div>'
-        +'<button class="roll-name" onclick="rollAction(\''+a.name+'\')"><b>'+a.name+'</b> <span class="sub">'+esc(a.sub)+'</span></button></div>';
-    });
-    g.innerHTML=inner; host.appendChild(g);
-  });
-}
-function setAction(a,n){ S.actions[a]=(S.actions[a]===n)?n-1:n; renderActions(); scheduleAutosave(); }
-function toggleGild(a){ S.gilded[a]=!S.gilded[a]; renderActions(); scheduleAutosave(); }
+function pipClick(d,n,e){ e.preventDefault(); var st=S.drives[d]; st.max=(st.max===n)?n-1:n; if(st.cur>st.max)st.cur=st.max; if(S.resUsed[d]>resTotal(d))S.resUsed[d]=resTotal(d); renderDriveBlocks(); scheduleAutosave(); }
+function pipSpend(d,n,e){ e.preventDefault(); var st=S.drives[d]; if(n>st.max)return false; st.cur=(st.cur===n)?n-1:n; renderDriveBlocks(); scheduleAutosave(); return false; }
+function burnRes(d,i){ var mx=resTotal(d),used=S.resUsed[d]||0; S.resUsed[d]=(i<used)?i:i+1; if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDriveBlocks(); scheduleAutosave(); }
+function setAction(a,n){ S.actions[a]=(S.actions[a]===n)?n-1:n; renderDriveBlocks(); scheduleAutosave(); }
+function toggleGild(a){ S.gilded[a]=!S.gilded[a]; renderDriveBlocks(); scheduleAutosave(); }
 
 // ── Render: marks ──
 function renderMarks(){
@@ -586,7 +591,7 @@ function renderAll(){
   $('f-name').value=S.name||''; $('f-pronouns').value=S.pronouns||'';
   fillRoleSelect($('f-role'),S.role); fillSpecSelect($('f-specialty'),S.role,S.specialty);
   $('f-catalyst').value=S.catalyst||''; $('f-question').value=S.question||''; $('f-style').value=S.style||''; $('f-notes').value=S.notes||'';
-  renderDrives(); renderActions(); renderMarks(); renderKeys(); renderRelationships(); renderRows('abil'); renderRows('gear');
+  renderDriveBlocks(); renderMarks(); renderKeys(); renderRelationships(); renderRows('abil'); renderRows('gear');
 }
 function saveSheet(quiet){
   var data=collectSheet(), json=JSON.stringify(data);
