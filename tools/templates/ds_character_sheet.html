@@ -372,7 +372,7 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .inv-row{display:flex;align-items:center;border-bottom:1px solid var(--rule);padding:1px 6px;gap:3px;overflow:hidden;}
 .inv-name{flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;}
 .inv-qty{width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;}
-.inv-eq-btn{flex:0 0 auto;padding:1px 7px;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-radius:2px;}
+.inv-eq-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--muted);border-radius:2px;text-align:center;line-height:1;}
 .inv-eq-btn:hover{border-color:#24c3d6;color:#24c3d6;}
 .inv-del-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--muted);border-radius:2px;text-align:center;}
 .inv-del-btn:hover{border-color:#c8503a;color:#e0776f;}
@@ -608,10 +608,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         <div id="gear-list"></div>
 
         <div class="free-carry">
-          <div class="sl"><span>Inventory</span>
-            <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
-              <button onclick="addInvItem('','')" style="padding:2px 10px;background:#0f0f0f;color:#9aa;border:1px solid var(--rule);cursor:pointer;text-transform:uppercase;" onmouseover="this.style.borderColor='#24c3d6';this.style.color='#24c3d6'" onmouseout="this.style.borderColor='var(--rule)';this.style.color='#9aa'">+ Item</button>
-            </div></div>
+          <div class="sl"><span>Inventory</span></div>
           <div id="inventory-list" class="inv-list"></div>
         </div>
       </div>
@@ -2204,7 +2201,7 @@ function buildGear() {
     row.innerHTML = `
       <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" style="display:none;">
       <span style="font-size:8px;font-weight:700;color:var(--muted);width:16px;flex:0 0 16px;">${i}.</span>
-      <input type="text" class="gear-name" oninput="onGearNameInput(this)" title="An item here is equipped: weapons add an attack, armor sets your AC, magic items apply their bonuses" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
+      <input type="text" class="gear-name" oninput="onGearNameInput(this)" title="An item here is equipped: weapons add an attack, armor sets your Armor (soak), magic items apply their bonuses" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
       <input type="text" class="gear-qty" style="width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;" placeholder="">
       <button class="gear-stow-btn" onclick="stowGearRow(this)" title="Move to Inventory (unequip)">▽</button>
       <button class="gear-del-btn" onclick="deleteGearRow(this)" title="Delete item">✕</button>
@@ -2226,6 +2223,7 @@ function stowGearRow(btn){
   _inventory.push({ name: name, qty: (qtyEl.value || '').trim() });
   nameEl.value = ''; qtyEl.value = '';
   if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
+  if(typeof refreshGearSlots === 'function') refreshGearSlots();       // hide it if it was over-limit
   renderInventory();
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
 }
@@ -2234,6 +2232,7 @@ function deleteGearRow(btn){
   const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
   nameEl.value = ''; qtyEl.value = '';
   if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
+  if(typeof refreshGearSlots === 'function') refreshGearSlots();       // hide it if it was over-limit
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
 }
 function _firstOpenGearRow(){
@@ -2278,7 +2277,7 @@ function renderInventory(){
     '<div class="inv-row">'
     + '<input type="text" class="inv-name" value="' + _trkEsc(it.name) + '" oninput="onInvNameInput(' + i + ',this.value)">'
     + '<input type="text" class="inv-qty" value="' + _trkEsc(it.qty || '') + '" oninput="onInvQtyInput(' + i + ',this.value)" placeholder="">'
-    + '<button type="button" class="inv-eq-btn" onclick="invEquip(' + i + ')" title="Move to Equipment (equip)">△ Equip</button>'
+    + '<button type="button" class="inv-eq-btn" onclick="invEquip(' + i + ')" title="Move to Equipment (equip)">△</button>'
     + '<button type="button" class="inv-del-btn" onclick="invDelete(' + i + ')" title="Delete item">✕</button>'
     + '</div>'
   ).join('');
@@ -3418,8 +3417,14 @@ function ccwSetGearSlots(str) {
   // rows[0] is the header; gear slots are rows[1..20]
   for(let i=1; i<rows.length; i++) {
     const row = rows[i];
-    const disable = i > slots;   // slots beyond the STR carry limit lock automatically
+    const disable = i > slots;   // slots beyond the carry limit aren't available
     row.classList.toggle('gear-slot-disabled', disable);
+    // Don't show slots the character can't use — hide the unavailable ones. A
+    // disabled slot that still holds an item stays visible (struck) so nothing is
+    // silently lost if the carry limit ever drops below a filled slot.
+    const nm = row.querySelector('.gear-name');
+    const empty = !nm || !nm.value.trim();
+    row.style.display = (disable && empty) ? 'none' : 'flex';
   }
 }
 
