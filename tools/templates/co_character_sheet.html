@@ -45,6 +45,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-action-btn{flex:1;padding:6px 4px;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;transition:background .1s;border-radius:2px;}
 .log-action-btn.wizard{background:#123029;color:#5fd3b0;border:1px solid #1f5a4d;}
 .log-action-btn.wizard:hover{background:#1f5a4d;color:white;}
+.log-action-btn.advance{background:#2a2410;color:#e0bd6a;border:1px solid #6a5418;}
+.log-action-btn.advance:hover{background:#6a5418;color:#fff;}
 .log-action-btn.rules{background:#1e2a26;color:#b8d8cd;border:1px solid #2f4a42;}
 .log-action-btn.export{background:#1a2733;color:#6aabdf;border:1px solid #1a4a8a;}
 .log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
@@ -114,6 +116,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .res-tri.off{cursor:default;color:#26332e;}
 .dv-avail{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8ba79f;flex:0 0 auto;padding-left:2px;}
 .dv-avail b{color:#5fd3b0;}
+.dv-staged{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;color:#08201c;background:var(--gild);border-radius:10px;padding:1px 7px;flex:0 0 auto;}
+.log-entry.gild-choice{border-color:var(--gild);}
+.gild-btns{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+.gild-btns button{flex:1;min-width:110px;background:#16211e;border:1px solid #34463f;color:#cdd6d2;border-radius:4px;padding:7px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.04em;cursor:pointer;line-height:1.2;}
+.gild-btns button:hover{border-color:var(--co);color:#fff;}
+.gild-btns button.gild{border-color:var(--gild);color:#e0bd6a;}
+.gild-btns button.gild:hover{background:var(--gild);color:#08201c;}
 .drive-body{padding:4px 2px 6px;}
 .action{display:flex;align-items:flex-start;gap:9px;padding:4px 8px;border-radius:5px;}
 .action:hover{background:var(--co-lt);}
@@ -158,6 +167,16 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tbl .row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;width:auto;}
 .tbl .row-x:hover{color:var(--red);}
 .tbl-empty{padding:12px;font-size:12px;color:var(--muted);}
+.ab-list{padding:8px 10px;display:flex;flex-direction:column;gap:8px;}
+.ab-card{border:1px solid var(--rule);border-radius:7px;background:var(--box);padding:8px 10px;}
+.ab-head{display:flex;align-items:center;gap:8px;}
+.ab-head .ab-name{flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:'Cinzel',serif;font-weight:700;font-size:15px;color:var(--co-dk);outline:none;padding:0;}
+.ab-head .ab-src{flex:0 0 auto;width:150px;border:none;background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:right;outline:none;padding:0;}
+.ab-head .row-x{flex:0 0 auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;}
+.ab-head .row-x:hover{color:var(--red);}
+.ab-card .ab-desc{width:100%;margin-top:5px;border:1px solid var(--rule);border-radius:5px;background:var(--input-bg);font-family:'Barlow',sans-serif;font-size:12.5px;line-height:1.4;color:var(--ink);outline:none;padding:6px 8px;resize:vertical;}
+.ab-card .ab-desc:focus,.ab-head .ab-name:focus,.ab-head .ab-src:focus{outline:none;}
+.ab-card .ab-name:focus{color:var(--co);}
 .fld{margin-bottom:8px;}
 .fld label{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:2px;}
 .fld input,.fld textarea{width:100%;border:1px solid var(--rule);background:var(--input-bg);font-family:'Barlow',sans-serif;font-size:13px;color:var(--ink);outline:none;padding:6px 8px;resize:vertical;}
@@ -277,7 +296,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 
       <div class="tab-panel" id="tab-abilities">
         <div class="section-bar"><span>Abilities</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('abil')">＋ Add</button></span></div>
-        <table class="tbl" id="abil-tbl"><thead><tr><th style="width:34%;">Name</th><th style="width:24%;">Source</th><th>Note</th><th style="width:26px;"></th></tr></thead><tbody id="abil-body"></tbody></table>
+        <div id="abil-body" class="ab-list"></div>
         <div id="abil-empty" class="tbl-empty">No abilities yet — <b>＋ Add</b> from your role &amp; specialty, or use <b>Create</b>.</div>
       </div>
 
@@ -320,15 +339,16 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #2a3b36;background:transparent;color:#7d938c;" title="Campaign">🔗</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="COB.launch()" title="Character Builder">Create</button>
+    <button id="advance-btn" class="log-action-btn advance" onclick="openAdvance()" title="Advancement (Illumination)">Advance</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click an action to roll its dice pool</div></div>
   <div class="dice-tray">
-    <div class="tray-row"><span class="tray-label">Next roll</span><span class="tray-label" style="color:#5a6f68;">+dice</span><input class="tray-input" id="tray-bonus" type="number" value="0" min="0" max="5" title="drive spent / assistance"><button class="tray-toggle" id="tray-gild" onclick="this.classList.toggle('on')">Gild</button></div>
+    <div class="tray-row"><span class="tray-label">Assist</span><span class="tray-label" style="color:#5a6f68;">+dice</span><input class="tray-input" id="tray-bonus" type="number" value="0" min="0" max="5" title="extra dice from an ally's help"><button class="tray-toggle" id="tray-gild" onclick="this.classList.toggle('on')" title="force this roll gilded">Gild</button></div>
     <div class="tray-row"><span class="tray-label">Free pool</span><input class="tray-input" id="tray-qn" type="number" value="1" min="0" max="6"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
-    <div class="tray-note">Click an action to roll its rating (＋ any bonus dice / gild set above). Rating 0 rolls two, takes the lowest. Max six dice.</div>
+    <div class="tray-note">Spend a drive point (click a filled point) to stage +1d for your next action in that drive — automatically. Assist adds an ally's die. Rating 0 rolls two, takes the lowest; max six dice.</div>
   </div>
 </div>
 </div>
@@ -344,6 +364,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Candela Obscura — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
+<div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
 
 <script>
 // ═══ Candela Obscura Character Sheet ════════════════════════════════════════
@@ -364,10 +385,16 @@ function specObj(r,s){ var ro=roleObj(r); return ro.specialties.find(function(x)
 
 // ── State ──
 var S=null;
+// Transient (not persisted): drive points spent since the last roll, staged as
+// bonus dice for the next action in that drive; and a pending gilded roll awaiting
+// the take-highest / take-gilded choice.
+var _staged={Nerve:0,Cunning:0,Intuition:0};
+var _pendingGild=null;
+function staged(d){ return _staged[d]||0; }
 function blankState(){
   var st={ name:'',pronouns:'',role:ROLES[0].role,specialty:ROLES[0].specialties[0].name,
     actions:{},gilded:{},drives:{},resUsed:{},marks:{},scars:{Body:'',Brain:'',Bleed:''},
-    abilities:[],gear:[],illumination:['','',''],catalyst:'',question:'',style:'',relationships:[],notes:'' };
+    abilities:[],gear:[],illumination:['','',''],catalyst:'',question:'',style:'',relationships:[],notes:'',advancements:0 };
   ACTION_NAMES.forEach(function(a){ st.actions[a]=0; st.gilded[a]=false; });
   DRIVE_NAMES.forEach(function(d){ st.drives[d]={max:0,cur:0}; st.resUsed[d]=0; });
   MARKS.forEach(function(m){ st.marks[m.name]=0; });
@@ -404,6 +431,7 @@ function renderDriveBlocks(){
     var el=document.createElement('div'); el.className='drive-block';
     el.innerHTML='<div class="drive-head"><span class="dv-name">'+d.name+'</span>'
       +'<div class="dv-track"><div class="dv-tlabel">Drives<br>Max</div><div class="dv-groups">'+cols+'</div></div>'
+      +(staged(d.name)>0?'<span class="dv-staged" title="staged as bonus dice for your next '+d.name+' action">+'+staged(d.name)+'d</span>':'')
       +'<span class="dv-avail" title="available / max">'+st.cur+'/<b>'+st.max+'</b></span></div>'
       +'<div class="drive-body">'+ACTIONS.filter(function(a){return a.drive===d.name;}).map(function(a){
         var rating=S.actions[a.name]||0, gild=S.gilded[a.name], dots='';
@@ -417,7 +445,11 @@ function renderDriveBlocks(){
 // Drive max is set by the builder at creation. Clicking a filled point spends it
 // (click the topmost available point to spend one; click a higher point to refresh
 // back up to it). Max cannot be changed here.
-function spendDrive(d,n){ var st=S.drives[d]; if(n>st.max)return; st.cur=(st.cur===n)?n-1:n; renderDriveBlocks(); scheduleAutosave(); }
+function spendDrive(d,n){ var st=S.drives[d]; if(n>st.max)return; var old=st.cur; st.cur=(st.cur===n)?n-1:n;
+  var delta=old-st.cur;                         // >0 spent, <0 refreshed
+  if(delta>0) _staged[d]=(_staged[d]||0)+delta; // stage spent points as bonus dice for the next action in this drive
+  else if(delta<0) _staged[d]=Math.max(0,(_staged[d]||0)+delta);
+  renderDriveBlocks(); scheduleAutosave(); }
 function burnRes(d,i){ var mx=resTotal(d),used=S.resUsed[d]||0; S.resUsed[d]=(i<used)?i:i+1; if(S.resUsed[d]>mx)S.resUsed[d]=mx; renderDriveBlocks(); scheduleAutosave(); }
 function setAction(a,n){ S.actions[a]=(S.actions[a]===n)?n-1:n; renderDriveBlocks(); scheduleAutosave(); }
 function toggleGild(a){ S.gilded[a]=!S.gilded[a]; renderDriveBlocks(); scheduleAutosave(); }
@@ -446,12 +478,22 @@ function renderRows(kind){
   var list = kind==='abil'?S.abilities:S.gear;
   var body=$(kind+'-body'); body.innerHTML='';
   list.forEach(function(d,i){
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td><input value="'+esc(d.name||'')+'" oninput="rowEdit(\''+kind+'\','+i+',\'name\',this.value)" placeholder="Name"></td>'
-      +'<td><input value="'+esc(d.tag||'')+'" oninput="rowEdit(\''+kind+'\','+i+',\'tag\',this.value)" placeholder="'+(kind==='abil'?'Source':'Type')+'"></td>'
-      +'<td><input value="'+esc(d.note||'')+'" oninput="rowEdit(\''+kind+'\','+i+',\'note\',this.value)" placeholder="note"></td>'
-      +'<td style="text-align:right;"><button class="row-x" onclick="rowDel(\''+kind+'\','+i+')">✕</button></td>';
-    body.appendChild(tr);
+    if(kind==='abil'){
+      // Abilities: name + source on one line, the full description below.
+      var card=document.createElement('div'); card.className='ab-card';
+      card.innerHTML='<div class="ab-head"><input class="ab-name" value="'+esc(d.name||'')+'" oninput="rowEdit(\'abil\','+i+',\'name\',this.value)" placeholder="Name">'
+        +'<input class="ab-src" value="'+esc(d.tag||'')+'" oninput="rowEdit(\'abil\','+i+',\'tag\',this.value)" placeholder="Source">'
+        +'<button class="row-x" title="remove" onclick="rowDel(\'abil\','+i+')">✕</button></div>'
+        +'<textarea class="ab-desc" rows="2" oninput="rowEdit(\'abil\','+i+',\'note\',this.value)" placeholder="Description">'+esc(d.note||'')+'</textarea>';
+      body.appendChild(card);
+    } else {
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><input value="'+esc(d.name||'')+'" oninput="rowEdit(\''+kind+'\','+i+',\'name\',this.value)" placeholder="Name"></td>'
+        +'<td><input value="'+esc(d.tag||'')+'" oninput="rowEdit(\''+kind+'\','+i+',\'tag\',this.value)" placeholder="Type"></td>'
+        +'<td><input value="'+esc(d.note||'')+'" oninput="rowEdit(\''+kind+'\','+i+',\'note\',this.value)" placeholder="note"></td>'
+        +'<td style="text-align:right;"><button class="row-x" onclick="rowDel(\''+kind+'\','+i+')">✕</button></td>';
+      body.appendChild(tr);
+    }
   });
   var emp=$(kind+'-empty'); if(emp) emp.style.display=list.length?'none':'block';
 }
@@ -501,27 +543,70 @@ function pickAdd(name,tag,note){ addRow(_pk,{name:name,tag:tag,note:note}); setT
 function addCustomFromPicker(){ addRow(_pk,{}); setTab(_pk==='abil'?'abilities':'gear'); closePicker(); scheduleAutosave(); }
 
 // ── Rolling ──
+// dieList → "Nd6(a,b,c)" so the shared dice-anim.js (which hooks addLog and reads
+// the detail) animates the actual pool. A bracket form "[a,b,c]" is NOT parsed,
+// so we use it only where we've already animated and must not double-fire.
+function poolStr(rolls){ return rolls.length+'d6('+rolls.join(',')+')'; }
+function poolTier(high,sixes,zeroMode){
+  if(!zeroMode&&sixes>=2) return {tier:'CRITICAL',type:'crit'};
+  if(high===6) return {tier:'FULL SUCCESS',type:'crit'};
+  if(high>=4) return {tier:'MIXED',type:'normal'};
+  return {tier:'MISS',type:'fumble'};
+}
+function refreshDrive(d){ var st=S.drives[d]; if(!st)return; st.cur=Math.min(st.max,st.cur+1); renderDriveBlocks(); scheduleAutosave(); }
+function animate(rolls){ if(window.DiceAnim&&window.DiceAnim.play){ try{ window.DiceAnim.play(rolls.map(function(v){return {sides:6,display:String(v)};}),'normal'); }catch(e){} } }
+
 function rollAction(name){
-  var rating=S.actions[name]||0, bonus=clamp(num($('tray-bonus').value),0,5), trayGild=$('tray-gild').classList.contains('on');
-  var gild=!!S.gilded[name]||trayGild, drive=actionDrive(name), n=rating+bonus, zeroMode=false, rolls=[];
+  var rating=S.actions[name]||0, drive=actionDrive(name);
+  var trayBonus=clamp(num($('tray-bonus').value),0,5), st=staged(drive), bonus=st+trayBonus;
+  var gild=!!S.gilded[name]||$('tray-gild').classList.contains('on');
+  var n=rating+bonus, zeroMode=false, rolls=[];
   if(n<=0){ zeroMode=true; rolls=[die6(),die6()]; } else { n=Math.min(6,n); for(var i=0;i<n;i++)rolls.push(die6()); }
+  // consume the staged drive spend + tray inputs now that the pool is thrown
+  _staged[drive]=0; $('tray-bonus').value='0'; $('tray-gild').classList.remove('on'); renderDriveBlocks();
+  var label=name+' · '+(zeroMode?'0':rating+(bonus?'+'+bonus:''))+'d';
   var high=zeroMode?Math.min(rolls[0],rolls[1]):Math.max.apply(null,rolls), sixes=rolls.filter(function(v){return v===6;}).length;
-  var tier,type;
-  if(!zeroMode&&sixes>=2){ tier='CRITICAL'; type='crit'; }
-  else if(high===6){ tier='FULL SUCCESS'; type='crit'; }
-  else if(high>=4){ tier='MIXED'; type='normal'; }
-  else { tier='MISS'; type='fumble'; }
-  var gildVal=gild?rolls[rolls.length-1]:null;
-  var detail=drive+' ['+rolls.join(',')+']'+(bonus?' +'+bonus+'d':'')+(gildVal!==null?' · gild '+gildVal+(gildVal<=high?' (refresh '+drive+')':''):'');
-  addLog(name+' · '+(zeroMode?'0':(rating+(bonus?'+'+bonus:'')))+'d', high+'  '+tier, detail, type);
-  $('tray-bonus').value='0'; $('tray-gild').classList.remove('on');
+  if(gild && !zeroMode){
+    // Gilded, non-zero pool: let the player choose the highest result OR the
+    // gilded die (to refresh a drive point). Animate now; the choice logs the result.
+    _pendingGild={name:name,drive:drive,rolls:rolls,label:label,gildVal:rolls[rolls.length-1]};
+    animate(rolls); showGildChoice();
+    return;
+  }
+  var t=poolTier(high,sixes,zeroMode), extra='';
+  // Rating-0 gilded: no choice, but if the gilded (last) die is the taken lowest, still refresh.
+  if(gild && zeroMode && rolls[rolls.length-1]===high){ refreshDrive(drive); extra=' · gilded refreshed '+drive; }
+  addLog(label, high+'  '+t.tier, drive+' '+poolStr(rolls)+extra, t.type);
+}
+function showGildChoice(){
+  var pr=_pendingGild; if(!pr)return;
+  var high=Math.max.apply(null,pr.rolls), sixes=pr.rolls.filter(function(v){return v===6;}).length;
+  var hi=poolTier(high,sixes,false), gi=poolTier(pr.gildVal,pr.gildVal===6?1:0,false);
+  var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
+  var old=$('gild-choice'); if(old)old.remove();
+  var div=document.createElement('div'); div.className='log-entry gild-choice'; div.id='gild-choice';
+  div.innerHTML='<div class="roll-label">'+esc(pr.label)+' · GILDED — choose</div>'
+    +'<div class="roll-detail" style="margin-top:2px;">'+esc(pr.drive+' ['+pr.rolls.join(',')+']')+'</div>'
+    +'<div class="gild-btns"><button onclick="finalizeGild(false)">Take '+high+' · '+hi.tier+'</button>'
+    +'<button class="gild" onclick="finalizeGild(true)">Gilded '+pr.gildVal+' · '+gi.tier+' ↻ refresh '+pr.drive+'</button></div>';
+  entries.insertBefore(div,entries.firstChild); entries.scrollTop=0;
+}
+function finalizeGild(takeGild){
+  var pr=_pendingGild; if(!pr)return; _pendingGild=null;
+  var ce=$('gild-choice'); if(ce)ce.remove();
+  var high=Math.max.apply(null,pr.rolls), sixes=pr.rolls.filter(function(v){return v===6;}).length;
+  // Use bracket detail here (not Nd6(...)) so the addLog hook does NOT re-animate — we already animated on the roll.
+  if(takeGild){ refreshDrive(pr.drive); var t=poolTier(pr.gildVal,pr.gildVal===6?1:0,false);
+    addLog(pr.label+' · gilded', pr.gildVal+'  '+t.tier, pr.drive+' ['+pr.rolls.join(',')+'] — took gilded, refreshed '+pr.drive, t.type);
+  } else { var t2=poolTier(high,sixes,false);
+    addLog(pr.label, high+'  '+t2.tier, pr.drive+' ['+pr.rolls.join(',')+']', t2.type); }
 }
 function rollQuick(){
   var n=clamp(num($('tray-qn').value),0,6), zeroMode=false, rolls=[];
   if(n<=0){ zeroMode=true; rolls=[die6(),die6()]; } else { for(var i=0;i<n;i++)rolls.push(die6()); }
   var high=zeroMode?Math.min(rolls[0],rolls[1]):Math.max.apply(null,rolls), sixes=rolls.filter(function(v){return v===6;}).length;
-  var tier=(!zeroMode&&sixes>=2)?'CRITICAL':high===6?'FULL SUCCESS':high>=4?'MIXED':'MISS', type=high>=6?'crit':high>=4?'normal':'fumble';
-  addLog((zeroMode?'0':n)+'d6 pool', high+'  '+tier, '['+rolls.join(',')+']', type);
+  var t=poolTier(high,sixes,zeroMode);
+  addLog((zeroMode?'0':n)+'d6 pool', high+'  '+t.tier, poolStr(rolls), t.type);
 }
 
 // ── Tabs ──
@@ -540,6 +625,47 @@ function openRules(){
   $('rules-body').innerHTML=h; $('rules-overlay').classList.add('open');
 }
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
+
+// ── Advancement (Illumination) — queue improvements, then Apply, like the other sheets ──
+var _adv=null;
+function openAdvance(){ _adv={act:{},drv:{},gild:{}}; renderAdvance(); $('advance-overlay').classList.add('open'); }
+function closeAdvance(){ $('advance-overlay').classList.remove('open'); _adv=null; }
+function advCount(){ if(!_adv)return 0; var n=0; ACTION_NAMES.forEach(function(a){n+=_adv.act[a]||0;}); DRIVE_NAMES.forEach(function(d){n+=_adv.drv[d]||0;}); ACTION_NAMES.forEach(function(a){if(_adv.gild[a])n++;}); return n; }
+function advAct(a,delta){ if(!_adv)return; var proj=(S.actions[a]||0)+(_adv.act[a]||0); if(delta>0&&proj>=3)return; var nv=Math.max(0,(_adv.act[a]||0)+delta); if(nv)_adv.act[a]=nv; else delete _adv.act[a]; renderAdvance(); }
+function advDrv(d,delta){ if(!_adv)return; var proj=(S.drives[d].max||0)+(_adv.drv[d]||0); if(delta>0&&proj>=9)return; var nv=Math.max(0,(_adv.drv[d]||0)+delta); if(nv)_adv.drv[d]=nv; else delete _adv.drv[d]; renderAdvance(); }
+function advGild(a){ if(!_adv||S.gilded[a])return; _adv.gild[a]=!_adv.gild[a]; renderAdvance(); }
+function advRow(nm,val,minus,plus,minusDis,plusDis){ return '<div class="a-row"><span class="a-name">'+nm+'</span><span class="a-code">'+val+'</span><button onclick="'+minus+'"'+(minusDis?' disabled':'')+'>−</button><button onclick="'+plus+'"'+(plusDis?' disabled':'')+'>+</button></div>'; }
+function renderAdvance(){
+  var n=advCount();
+  var h='<p class="m-hint">When your circle&rsquo;s Illumination track fills, choose <b>two</b> options: +1 action point, +2 drive points, a new ability, or gild an action. Queue them below — nothing applies until you click Apply. Advancements so far: <b style="color:var(--co-dk);">'+(S.advancements||0)+'</b>.</p>';
+  h+='<div class="m-lbl">Action points (max 3 each)</div>';
+  DRIVE_NAMES.forEach(function(dn){
+    h+='<div class="a-attr">'+dn+'</div><div class="a-skills">';
+    ACTIONS.filter(function(a){return a.drive===dn;}).forEach(function(a){ var cur=S.actions[a.name]||0, add=_adv.act[a.name]||0;
+      h+=advRow(a.name, cur+(add?' → '+(cur+add):''), "advAct('"+a.name+"',-1)", "advAct('"+a.name+"',1)", add<=0, cur+add>=3); });
+    h+='</div>';
+  });
+  h+='<div class="m-lbl" style="margin-top:12px;">Drive points (max 9 each)</div><div class="a-skills">';
+  DRIVE_NAMES.forEach(function(dn){ var cur=S.drives[dn].max||0, add=_adv.drv[dn]||0; h+=advRow(dn, cur+(add?' → '+(cur+add):''), "advDrv('"+dn+"',-1)", "advDrv('"+dn+"',1)", add<=0, cur+add>=9); });
+  h+='</div>';
+  h+='<div class="m-lbl" style="margin-top:12px;">Gild an action</div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+  h+=ACTION_NAMES.map(function(a){ var already=S.gilded[a], sel=_adv.gild[a]; return '<button class="builder-chip'+(sel?' sel':'')+'"'+(already?' disabled title="already gilded" style="opacity:.4;"':' onclick="advGild(\''+a+'\')"')+'>'+a+'</button>'; }).join('');
+  h+='</div>';
+  h+='<div class="m-lbl" style="margin-top:12px;">Take a new ability</div><p class="m-hint" style="margin:0 0 6px;">Opens the ability picker — pick one from your role, specialty, or homebrew.</p><button class="m-btn ghost" onclick="closeAdvance();openPicker(\'abil\')">＋ New ability</button>';
+  h+='<div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:8px;"><span class="m-hint" style="margin:0;">'+n+' change'+(n===1?'':'s')+' queued</span><span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="closeAdvance()">Cancel</button><button class="m-btn" onclick="applyAdvance()"'+(n<=0?' disabled':'')+'>Apply ('+n+')</button></span></div>';
+  $('advance-body').innerHTML=h;
+}
+function applyAdvance(){
+  if(!_adv)return; var n=advCount(); if(n<=0)return; var changes=[];
+  ACTION_NAMES.forEach(function(a){ var add=_adv.act[a]||0; if(add){ S.actions[a]=Math.min(3,(S.actions[a]||0)+add); changes.push('+'+add+' '+a); } });
+  DRIVE_NAMES.forEach(function(d){ var add=_adv.drv[d]||0; if(add){ var st=S.drives[d]; st.max=Math.min(9,st.max+add); st.cur=Math.min(st.max,st.cur+add); changes.push('+'+add+' '+d); } });
+  ACTION_NAMES.forEach(function(a){ if(_adv.gild[a]){ S.gilded[a]=true; changes.push('gild '+a); } });
+  S.advancements=(S.advancements||0)+1;
+  renderDriveBlocks(); updateFoot(); scheduleAutosave();
+  addLog('Advancement','#'+S.advancements, changes.join(', '), 'crit');
+  closeAdvance();
+}
+function updateFoot(){ var f=$('foot-build'); if(f) f.textContent=(S.advancements? S.advancements+' advancement'+(S.advancements===1?'':'s') : ''); }
 
 // ═══ LOG (shared chrome) ════════════════════════════════════════════════════
 var _toastTimer=null;
@@ -587,6 +713,8 @@ function applySheet(d){
   if(Array.isArray(d.gear)) S.gear=d.gear.map(function(g){ return {name:g.name||'',tag:g.tag||'',note:g.note||''}; });
   if(Array.isArray(d.illumination)){ S.illumination=d.illumination.slice(0,3); while(S.illumination.length<3)S.illumination.push(''); }
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',type:r.type||''}; });
+  if(d.advancements!=null) S.advancements=d.advancements;
+  _staged={Nerve:0,Cunning:0,Intuition:0}; _pendingGild=null;
   renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
@@ -596,7 +724,7 @@ function renderAll(){
   $('f-name').value=S.name||''; $('f-pronouns').value=S.pronouns||'';
   renderIdentity();
   $('f-catalyst').value=S.catalyst||''; $('f-question').value=S.question||''; $('f-style').value=S.style||''; $('f-notes').value=S.notes||'';
-  renderDriveBlocks(); renderMarks(); renderKeys(); renderRelationships(); renderRows('abil'); renderRows('gear');
+  renderDriveBlocks(); renderMarks(); renderKeys(); renderRelationships(); renderRows('abil'); renderRows('gear'); updateFoot();
 }
 function saveSheet(quiet){
   var data=collectSheet(), json=JSON.stringify(data);
