@@ -275,19 +275,17 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="section-bar accent"><span>Drives &amp; Actions</span><span class="sb-note">spend a drive for +1d · click a name to roll · ◆ gilded</span></div>
+      <div class="section-bar accent"><span>Drives &amp; Actions</span></div>
       <div id="drive-blocks"></div>
-      <div class="stats-foot">Burn a resistance to reroll a number of dice equal to your action rating.</div>
     </div>
 
     <div class="center-col">
-      <div class="section-bar accent"><span>Marks &amp; Scars</span><span class="sb-note">3 marks → the 4th is a scar</span></div>
+      <div class="section-bar accent"><span>Marks &amp; Scars</span></div>
       <div class="marks" id="marks"></div>
 
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="abilities" onclick="setTab('abilities')">Abilities</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
-        <button class="tab-btn" data-tab="illumination" onclick="setTab('illumination')">Illumination</button>
         <button class="tab-btn" data-tab="story" onclick="setTab('story')">Story</button>
         <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
       </div>
@@ -295,26 +293,23 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
       <div class="tab-panel" id="tab-abilities">
         <div class="section-bar"><span>Abilities</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('abil')">＋ Add</button></span></div>
         <div id="abil-body" class="ab-list"></div>
-        <div id="abil-empty" class="tbl-empty">No abilities yet — <b>＋ Add</b> from your role &amp; specialty, or use <b>Create</b>.</div>
+        <div id="abil-empty" class="tbl-empty">No abilities yet.</div>
       </div>
 
       <div class="tab-panel" id="tab-gear">
         <div class="section-bar"><span>Gear</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add</button></span></div>
         <table class="tbl" id="gear-tbl"><thead><tr><th style="width:38%;">Item</th><th style="width:22%;">Type</th><th>Note</th><th style="width:26px;"></th></tr></thead><tbody id="gear-body"></tbody></table>
-        <div id="gear-empty" class="tbl-empty">Up to three per assignment, declared as needed — <b>＋ Add</b> standard, specialty &amp; homebrew gear.</div>
-      </div>
-
-      <div class="tab-panel" id="tab-illumination">
-        <div class="section-bar"><span>Illumination Keys</span><span class="sb-note">fulfil one per assignment</span></div>
-        <div class="blk"><div class="keys" id="keys"></div></div>
+        <div id="gear-empty" class="tbl-empty">No gear yet.</div>
       </div>
 
       <div class="tab-panel" id="tab-story">
         <div class="section-bar"><span>Story</span></div>
         <div class="blk">
-          <div class="fld"><label>Catalyst — why they joined Candela Obscura</label><textarea id="f-catalyst" rows="2"></textarea></div>
-          <div class="fld"><label>Question — what they hope to find out</label><textarea id="f-question" rows="2"></textarea></div>
-          <div class="fld"><label>Style — feel &amp; aesthetic</label><textarea id="f-style" rows="2"></textarea></div>
+          <div class="subhead" style="padding-left:0;">Illumination Keys</div>
+          <div class="keys" id="keys"></div>
+          <div class="fld" style="margin-top:12px;"><label>Catalyst</label><textarea id="f-catalyst" rows="2"></textarea></div>
+          <div class="fld"><label>Question</label><textarea id="f-question" rows="2"></textarea></div>
+          <div class="fld"><label>Style</label><textarea id="f-style" rows="2"></textarea></div>
           <div class="subhead" style="padding-left:0;">Relationships <button class="hdr-btn" style="background:var(--co);border-color:var(--co-dk);" onclick="addRelRow()">＋ Add</button></div>
           <div id="relationships"></div>
         </div>
@@ -326,7 +321,7 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
       </div>
     </div>
   </div>
-  <div class="sheet-foot"><span>Roll d6 dice pools: 6 success · 4–5 mixed · 1–3 miss. Gilded dice refresh drive.</span><span id="foot-build"></span></div>
+  <div class="sheet-foot"><span></span><span id="foot-build"></span></div>
 </div>
 </div>
 
@@ -346,7 +341,6 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
   <div class="dice-tray">
     <div class="tray-row"><span class="tray-label">Assist</span><span class="tray-label" style="color:#5a6f68;">+dice</span><input class="tray-input" id="tray-bonus" type="number" value="0" min="0" max="5" title="extra dice from an ally's help"><button class="tray-toggle" id="tray-gild" onclick="this.classList.toggle('on')" title="force this roll gilded">Gild</button></div>
     <div class="tray-row"><span class="tray-label">Free pool</span><input class="tray-input" id="tray-qn" type="number" value="1" min="0" max="6"><button class="dice-btn" onclick="rollQuick()">Roll d6 pool</button></div>
-    <div class="tray-note">Spend a drive point (click a filled point) to stage +1d for your next action in that drive — automatically. Assist adds an ally's die. Rating 0 rolls two, takes the lowest; max six dice.</div>
   </div>
 </div>
 </div>
@@ -459,7 +453,7 @@ function renderMarks(){
     var val=S.marks[m.name]||0, boxes='';
     for(var i=1;i<=3;i++){ boxes+='<button class="mbox'+(i<=val?' on':'')+'" onclick="setMark(\''+m.name+'\','+i+')">'+(i<=val?'✗':'')+'</button>'; }
     var el=document.createElement('div'); el.className='mtrack'+(m.name==='Bleed'?' bleed':'');
-    el.innerHTML='<h3>'+m.name+'</h3><div class="desc">'+esc(m.desc)+'</div><div class="mboxes">'+boxes+'</div>'
+    el.innerHTML='<h3>'+m.name+'</h3><div class="mboxes">'+boxes+'</div>'
       +'<input class="scarslot" placeholder="Scar…" value="'+esc(S.scars[m.name]||'')+'" oninput="S.scars[\''+m.name+'\']=this.value;scheduleAutosave()">';
     host.appendChild(el);
   });
@@ -498,7 +492,9 @@ function renderRows(kind){
 }
 function rowEdit(kind,i,f,v){ var list=kind==='abil'?S.abilities:S.gear; if(list[i]){ list[i][f]=v; scheduleAutosave(); } }
 function rowDel(kind,i){ var list=kind==='abil'?S.abilities:S.gear; list.splice(i,1); renderRows(kind); scheduleAutosave(); }
-function addRow(kind,d){ var list=kind==='abil'?S.abilities:S.gear; list.push({name:(d&&d.name)||'',tag:(d&&d.tag)||'',note:(d&&d.note)||''}); renderRows(kind); }
+function addRow(kind,d){ var list=kind==='abil'?S.abilities:S.gear;
+  if(kind==='gear' && list.length>=3){ addLog('Gear','3 max','You can carry up to three pieces of gear','fumble'); return false; }
+  list.push({name:(d&&d.name)||'',tag:(d&&d.tag)||'',note:(d&&d.note)||''}); renderRows(kind); return true; }
 
 // ── Picker ──
 var _pk=null;
@@ -531,11 +527,14 @@ function renderPicker(){
   var rows=pickerPool(_pk).filter(function(x){ if(f&&x.facet!==f)return false; if(!q)return true; return (x.name+' '+x.tag+' '+x.note).toLowerCase().indexOf(q)>=0; }).slice(0,300);
   var el=$('picker-body');
   if(!rows.length){ el.innerHTML='<div class="brow-empty">No matches.</div>'; return; }
+  var gearFull = _pk==='gear' && S.gear.length>=3;
   el.innerHTML=rows.map(function(x){
     var has=have[x.name.toLowerCase()];
+    var addBtn = has ? '<button class="brow-add have" disabled>✓ Added</button>'
+      : gearFull ? '<button class="brow-add have" disabled>3 max</button>'
+      : '<button class="brow-add" onclick="pickAdd('+"'"+esc(x.name).replace(/'/g,"\\'")+"','"+esc(x.tag).replace(/'/g,"\\'")+"','"+esc(x.note).replace(/'/g,"\\'")+"'"+')">＋ Add</button>';
     return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(x.name)+'<span class="brow-cost">'+esc(x.tag)+'</span></div>'
-      +(x.note?'<div class="brow-desc">'+esc(x.note)+'</div>':'')+'</div>'
-      +(has?'<button class="brow-add have" disabled>✓ Added</button>':'<button class="brow-add" onclick="pickAdd('+"'"+esc(x.name).replace(/'/g,"\\'")+"','"+esc(x.tag).replace(/'/g,"\\'")+"','"+esc(x.note).replace(/'/g,"\\'")+"'"+')">＋ Add</button>')+'</div>';
+      +(x.note?'<div class="brow-desc">'+esc(x.note)+'</div>':'')+'</div>'+addBtn+'</div>';
   }).join('');
 }
 function pickAdd(name,tag,note){ addRow(_pk,{name:name,tag:tag,note:note}); setTab(_pk==='abil'?'abilities':'gear'); scheduleAutosave(); renderPicker(); }
