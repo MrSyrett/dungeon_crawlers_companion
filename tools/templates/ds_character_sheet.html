@@ -206,6 +206,14 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .sd-vital .sv-sm{width:34px;height:26px;font-size:12px;font-weight:700;background:var(--box);}
 .sd-vital .sv-slash{font-size:13px;color:var(--muted);}
 .sd-vital .lk-btn{border-radius:5px;}
+.sd-vital .def-row{gap:8px;}
+.sd-vital .def-cell{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.sd-vital .def-mini{font-family:'Montserrat',sans-serif;font-weight:800;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);line-height:1;}
+.sd-vital .def-armor{width:40px;}
+.sd-vital .def-evade{width:44px;height:34px;border:1px solid var(--input-border,var(--rule));border-radius:5px;background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.sd-vital .def-evade:hover{background:var(--black);}
+.sd-vital .def-evade:hover .def-evade-mod{color:#fff;}
+.sd-vital .def-evade-mod{font-family:'Montserrat',sans-serif;font-weight:900;font-size:16px;color:var(--ink);line-height:1;}
 
 /* STATS BLOCK */
 /* TRACKERS (left column) — active status chips */
@@ -508,9 +516,18 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <span class="sv-lbl">HP</span>
           <div class="sv-row"><input type="text" class="sv-big" id="hp-current" placeholder="0" oninput="onHPChange()"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="hp-max" placeholder="0"></div>
         </div>
-        <div class="sd-vital">
-          <span class="sv-lbl">AC</span>
-          <div class="sv-row"><input type="text" class="sv-big" id="ac-val" placeholder="0" title="Armor Class — from your equipped armor and shield (turn off Auto to edit by hand)"></div>
+        <div class="sd-vital sd-vital-def">
+          <span class="sv-lbl">Defense</span>
+          <div class="sv-row def-row">
+            <div class="def-cell" title="Armor — the flat amount of damage your equipped armor soaks when you're hit (light 1, medium 2, heavy 3, plus any bonuses). Turn Auto off to edit by hand.">
+              <span class="def-mini">Armor</span>
+              <input type="text" class="sv-big def-armor" id="armor-val" placeholder="0">
+            </div>
+            <div class="def-cell">
+              <span class="def-mini">Evade</span>
+              <button type="button" class="def-evade" id="evade-btn" onclick="rollEvade()" title="Evade — roll d20 + DEX against the attacker's Attack DC to avoid the hit entirely"><span class="def-evade-mod" id="evade-mod">+0</span></button>
+            </div>
+          </div>
         </div>
         <div class="sd-vital">
           <span class="sv-lbl">XP</span>
@@ -747,7 +764,7 @@ let _homebrewSpells = [];
 
 // The all*() catalog helpers below used to rebuild their concat array on every
 // call — and they're called inside per-row loops and per-keystroke paths
-// (computeAC walks 20 gear rows, each consulting allArmorAC()). Book data and
+// (computeSoak walks 20 gear rows, each consulting allArmorAC()). Book data and
 // homebrew only change when the homebrew sync runs, so the merged arrays are
 // cached and invalidated there (see syncSharedHomebrew).
 let _catalogCache = { spells: null, weapons: null, armor: null };
@@ -795,7 +812,8 @@ function allArmorAC() {
   return (_catalogCache.armor = book.concat(_homebrewItems.filter(i => i.kind === 'armor').map(i => ({
     match: String(i.name || '').toLowerCase(),
     base:  parseInt(i.acBase) || 10,
-    dex:   !!i.acDex
+    dex:   !!i.acDex,
+    soak:  (i.soak != null && i.soak !== '') ? (parseInt(i.soak) || 0) : null
   }))));
 }
 
@@ -833,7 +851,7 @@ const ITEM_BONUS_TARGETS = [
   { key:'cha',       label:'Charisma' },
 ];
 
-// AC / gear-slot / attack contributions from equipped items. Read by computeAC,
+// Armor / gear-slot / attack contributions from equipped items. Read by computeSoak,
 // gearSlotCount and sheetAtkBonusProfile respectively.
 let _itemBonusAC    = 0;
 let _itemBonusSlots = 0;
@@ -1065,20 +1083,35 @@ function getStatMod(id) {
   return statToMod(val) ?? 0;
 }
 
-// ═══ AUTO ARMOR CLASS ════════════════════════════════════════════════════════
-// AC is computed from equipped armor + shield + DEX per the Shadowdark rules:
-//   none 10+DEX · leather 11+DEX · chainmail/mithral 13+DEX · plate 15 (no DEX)
-//   shield +2 · enchanted "+N <armor/shield>" adds N. Best body armor wins;
-//   one shield stacks. Disabled (struck-out) gear slots don't count. When the AC
-//   Bonus toggle is on, its value is folded in here too.
-// Auto-AC is driven by the gear-area Auto switch (_autoConsume) — no separate
-// toggle. When that switch is off, AC is edited by hand.
-// Body-armor definitions (lower-cased match). base = AC, dex = adds DEX mod.
+// ═══ DEFENSE: ARMOR (SOAK) + EVADE ═══════════════════════════════════════════
+// HeroDark defense model: attackers don't roll to hit. When you're attacked you
+// roll EVADE (d20 + DEX vs the attacker's Attack DC) to avoid the hit entirely;
+// if hit, your ARMOR soaks a flat amount of the damage. So on this sheet:
+//   • Armor  = soak of the best equipped armor (light 1 / medium 2 / heavy 3),
+//              plus a shield (+1), an enchant "+N", and any innate/item Armor
+//              bonuses. DEX does NOT add to soak. Unarmored = 0.
+//   • Evade  = your DEX modifier (the static part of the d20 + DEX evade roll).
+// Best body armor wins; one shield stacks. Disabled (struck-out) gear slots
+// don't count. Auto is driven by the gear-area Auto switch (_autoConsume); when
+// off, the Armor value can be edited by hand.
+// Body-armor definitions (lower-cased match). base = old AC (kept for the shop
+// tables + soak fallback), dex = adds DEX to old AC, soak = damage soaked.
 const AC_ARMOR = [
-  { match:'powered armor',      base:15, dex:false },
-  { match:'combat weave',       base:13, dex:true  },
-  { match:'flak weave',         base:11, dex:true  },
+  { match:'powered armor',      base:15, dex:false, soak:3 },
+  { match:'combat weave',       base:13, dex:true,  soak:2 },
+  { match:'flak weave',         base:11, dex:true,  soak:1 },
 ];
+
+// Soak of an armor definition: explicit .soak, else derived from its old AC base
+// (>=15 heavy 3, >=13 medium 2, >=11 light 1, else 0).
+function armorSoakOf(a) {
+  if(a && a.soak != null) return parseInt(a.soak) || 0;
+  const b = a ? (parseInt(a.base) || 0) : 0;
+  if(b >= 15) return 3;
+  if(b >= 13) return 2;
+  if(b >= 11) return 1;
+  return 0;
+}
 
 // Parse a gear item name into an armor/shield contribution, honoring "+N".
 function acParseItem(name) {
@@ -1090,11 +1123,11 @@ function acParseItem(name) {
   // A homebrew shield carries its own AC bonus, so match it before the generic
   // "anything called a shield is +2" rule.
   const hbShield = _homebrewItems.find(i => i.kind === 'shield' && i.name.toLowerCase() === n);
-  if(hbShield) return { kind:'shield', ac:(parseInt(hbShield.acBonus) || 0) + bonus };
-  if(/\bshield\b/.test(n)) return { kind:'shield', ac:2 + bonus };
+  if(hbShield) return { kind:'shield', ac:(parseInt(hbShield.acBonus) || 0) + bonus, soak:1 + bonus };
+  if(/\bshield\b/.test(n)) return { kind:'shield', ac:2 + bonus, soak:1 + bonus };
   for(const a of allArmorAC()) {
     if(n === a.match || n.startsWith(a.match)) {
-      return { kind:'armor', base:a.base, dex:a.dex, bonus };
+      return { kind:'armor', base:a.base, dex:a.dex, bonus, soak:armorSoakOf(a) };
     }
   }
   return null;
@@ -1115,10 +1148,12 @@ function classInnateAC(unarmored) {
   return bonus;
 }
 
-function computeAC() {
-  const dexMod = getStatMod('dex');
-  let best = null;        // best equipped body-armor AC
-  let shield = 0;         // best equipped shield bonus
+// Total Armor (soak): flat damage your best equipped armor absorbs on a hit, plus
+// a shield, an enchant "+N", and any innate/item Armor bonuses. DEX does NOT add
+// to soak — DEX is your Evade. Unarmored = 0 soak.
+function computeSoak() {
+  let best = 0;           // best equipped body-armor soak
+  let shield = 0;         // best equipped shield soak
   document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
     if(row.classList.contains('gear-slot-disabled')) return;          // dropped
     const cb = row.querySelector('.gear-equip');
@@ -1126,21 +1161,25 @@ function computeAC() {
     const parsed = acParseItem(row.querySelector('.gear-name')?.value);
     if(!parsed) return;
     if(parsed.kind === 'shield') {
-      shield = Math.max(shield, parsed.ac);
+      shield = Math.max(shield, (parseInt(parsed.soak) || 0));
     } else {
-      const ac = parsed.base + (parsed.dex ? dexMod : 0) + parsed.bonus;
-      if(best === null || ac > best) best = ac;
+      const s = (parseInt(parsed.soak) || 0) + (parseInt(parsed.bonus) || 0);
+      if(s > best) best = s;
     }
   });
-  const unarmored = (best === null);
-  const baseAC = unarmored ? (10 + dexMod) : best;         // unarmored = 10 + DEX
-  return baseAC + shield + (parseInt(_innateAC) || 0) + (parseInt(_itemBonusAC) || 0) + classInnateAC(unarmored);
+  return best + shield + (parseInt(_innateAC) || 0) + (parseInt(_itemBonusAC) || 0);
 }
 
-// AC is always derived from equipped armor now — recompute and write it.
+// Evade modifier = your DEX modifier (the static part of the d20 + DEX evade roll).
+function evadeMod() { return getStatMod('dex'); }
+
+// Defense is derived from equipped gear — recompute Armor (soak) + the Evade mod.
+// (Name kept as refreshAutoAC so the builder and level-up scripts keep calling it.)
 function refreshAutoAC() {
-  const el = document.getElementById('ac-val');
-  if(el) el.value = String(computeAC());
+  const a = document.getElementById('armor-val');
+  if(a) a.value = String(computeSoak());
+  const em = document.getElementById('evade-mod');
+  if(em) em.textContent = fmtMod(evadeMod());
 }
 
 // ── EQUIP: weapons & armor in the gear list ─────────────────────────────────
@@ -2302,6 +2341,7 @@ const HERODARK_QUICK_RULES = [
   { title: '⚔ HeroDark — Actions', text: 'You have 2 actions on your turn as normal. You may forgo your movement to take a second attack or cast a spell that turn — but that extra action is made with disadvantage.' },
   { title: '⚔ HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all rolls until you are healed above 0 HP. The sheet adds the Dying status automatically (it drives the disadvantage); clear it by healing. The Exhausted status likewise applies −2 to your rolls while active.' },
   { title: '⚔ HeroDark — Stress', text: 'Stress stacks in levels (track it on the sheet). Each level of Stress is a −2 penalty to ALL d20 rolls — checks, attacks, and spellcasting — folded in automatically. A rest clears one level. At Stress 6 you are out of the fight until you recover.' },
+  { title: '⚔ HeroDark — Defense (Evade & Armor)', text: 'Attackers don\'t roll to hit you. When you\'re attacked, roll Evade (d20 + DEX, the button on your Defense tile) against the attacker\'s Attack DC — beat it and you avoid the hit entirely. If you\'re hit, your Armor soaks a flat amount off the damage (light 1, medium 2, heavy 3, plus a shield and any bonuses). Your own attacks against enemies still roll to hit as normal.' },
 ];
 function d(s){return Math.floor(Math.random()*s)+1;}
 function parseMod(v){if(!v)return 0;const n=parseInt((v+'').replace(/\s/g,''));return isNaN(n)?0:n;}
@@ -2374,6 +2414,23 @@ function rollStat(id, name) {
   heroDarkLuckOnNat(roll, name + ' check');
 }
 
+// Evade: roll d20 + DEX against the attacker's Attack DC (the GM sets the DC).
+// Beat it and you avoid the hit entirely; if you fail, your Armor soaks damage.
+// Stress and exhaustion fold in like any other d20 roll.
+function rollEvade() {
+  const dexMod = getStatMod('dex');
+  const exh = exhaustedPenalty();
+  const str = stressPenalty();
+  const mod = dexMod + exh + str;
+  const {result:roll, detail:advDetail} = rollWithAdv(20);
+  const total = roll + mod;
+  const type = roll===20?'crit':roll===1?'fumble':'normal';
+  const base = advDetail || `d20(${roll})`;
+  addLog('Evade'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
+    `${base} + DEX(${fmtMod(dexMod)})${exh?' '+fmtMod(exh)+' exhausted':''}${str?' '+fmtMod(str)+' stress':''} = ${total} vs Attack DC`, type);
+  heroDarkLuckOnNat(roll, 'evade');
+}
+
 // Extra spell lists a caster opted into (beyond their class's own list). Saved
 // with the sheet so level-up starts with the same lists already ticked.
 let _charSpellSources = [];
@@ -2431,7 +2488,7 @@ function applyAutoLock(on) {
   });
   const hpMax = document.getElementById('hp-max');
   if(hpMax) { hpMax.readOnly = lock; hpMax.style.opacity = lock ? '0.95' : '1'; }
-  const ac = document.getElementById('ac-val');
+  const ac = document.getElementById('armor-val');
   if(ac) { ac.readOnly = lock; ac.style.opacity = lock ? '0.95' : '1'; ac.style.cursor = lock ? 'default' : 'text'; }
   // Talents are written by the character-creation and level-up wizards while
   // Auto is on, so lock the box to stop hand-edits being overwritten. Turning
@@ -2949,7 +3006,7 @@ function collectSheet(){
     background:       document.getElementById('f-background')?.value || '',
     deity:            document.getElementById('f-deity')?.value || '',
     maxHitPoints:     hp,
-    armorClass:       parseInt(document.getElementById('ac-val')?.value) || 0,
+    armorClass:       parseInt(document.getElementById('armor-val')?.value) || 0,
     gearSlotsTotal:   10,
     gearSlotsUsed:    gearItems.filter(g=>g.slots>0).length,
     bonuses,
@@ -3065,9 +3122,9 @@ function _applySDData(d){
   set('hp-max',     maxHP);
   set('hp-current', curHP);
 
-  // AC
-  const ac = d.armorClass ?? d.ac ?? '';
-  set('ac-val', ac);
+  // Armor (soak) — refreshAutoAC recomputes it below, but restore any hand value.
+  const ac = d.armorClass ?? d.armorSoak ?? d.ac ?? '';
+  set('armor-val', ac);
 
   // XP / Level
   set('xp-current', d.XP ?? d.xp?.current ?? 0);
@@ -3548,7 +3605,7 @@ async function exportPDF() {
     // ── Vitals ──
     const hpCur = V('hp-current'), hpMax = V('hp-max');
     set('Hit Points', hpMax ? (hpCur || '0') + ' / ' + hpMax : hpCur);
-    set('Armor Class', V('ac-val'));
+    set('Armor Class', V('armor-val'));
     set('Gold Pieces',   V('coin-gp'));
     set('Silver Pieces', V('coin-slv'));
 
@@ -3782,7 +3839,8 @@ function exportPrintable() {
     <div class="stats">${statCells}</div>
     <div class="vitals">
       <div class="vital"><div class="vital-l">HP</div><div class="vital-v">${esc(V('hp-current'))}<span style="font-size:11px;color:#666;">/${esc(V('hp-max'))}</span></div></div>
-      <div class="vital"><div class="vital-l">AC</div><div class="vital-v">${esc(V('ac-val'))}</div></div>
+      <div class="vital"><div class="vital-l">Armor</div><div class="vital-v">${esc(V('armor-val'))}</div></div>
+      <div class="vital"><div class="vital-l">Evade</div><div class="vital-v">${esc((document.getElementById('evade-mod')||{}).textContent || '')}</div></div>
       <div class="vital"><div class="vital-l">Luck</div><div class="vital-v">${esc(V('lk-val') || '0')}</div></div>
     </div>
   </div>
@@ -3907,13 +3965,14 @@ if(typeof applyAutoLock==='function') applyAutoLock(_autoConsume);   // lock der
   refreshGearSlots();
 })();
 
-// Keep AC current: recompute when DEX changes or any gear item is typed/cleared.
+// Keep Defense current: recompute Armor (soak) + the Evade mod when DEX changes
+// or any gear item is typed/cleared.
 (function wireAutoAC(){
   const dex = document.getElementById('dex-val');
   if(dex) dex.addEventListener('change', refreshAutoAC);
   // (No gear-list input listener here: each .gear-name input's own
   // oninput="onGearNameInput(this)" already ends in refreshAutoAC(), so a
-  // delegated listener recomputed AC twice per keystroke.)
+  // delegated listener recomputed it twice per keystroke.)
   refreshAutoAC();
 })();
 </script>

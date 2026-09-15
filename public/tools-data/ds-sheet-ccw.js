@@ -386,10 +386,10 @@ const CCW_WEAPON_COSTS = {
   'Shock Lance':{sp:5}, 'Power Staff':{sp:5}, 'Breaching Hammer':{gp:10},
 };
 const CCW_ARMOR_SHOP = [
-  {name:'Flak Weave',    gp:10, ac:'11 + DEX'},
-  {name:'Combat Weave',  gp:60, ac:'13 + DEX'},
-  {name:'Powered Armor', gp:130,ac:'15'},
-  {name:'Deflector',     gp:10, ac:'+2'},
+  {name:'Flak Weave',    gp:10, ac:'11 + DEX', soak:'1 (light)'},
+  {name:'Combat Weave',  gp:60, ac:'13 + DEX', soak:'2 (medium)'},
+  {name:'Powered Armor', gp:130,ac:'15',       soak:'3 (heavy)'},
+  {name:'Deflector',     gp:10, ac:'+2',       soak:'+1 (shield)'},
 ];
 const CCW_KIT_ITEMS = [
   {name:'Backpack', qty:'1'}, {name:'Igniter', qty:'1'}, {name:'Glowrod', qty:'2'},
@@ -519,7 +519,7 @@ function ccwGear() {
     allowedArmor.forEach(n=>{
       const a = CCW_ARMOR_SHOP.find(x=>x.name===n);
       const sel = _ccw.buyArmor.includes(n) ? ' selected' : '';
-      h += '<button class="ccw-choice'+sel+'" onclick="ccwToggleArmor(\''+n+'\')"><div class="ccw-choice-name" style="font-size:10px;">'+n+' — '+ccwFmtCost(a)+'</div><div class="ccw-choice-desc">AC '+a.ac+'</div></button>';
+      h += '<button class="ccw-choice'+sel+'" onclick="ccwToggleArmor(\''+n+'\')"><div class="ccw-choice-name" style="font-size:10px;">'+n+' — '+ccwFmtCost(a)+'</div><div class="ccw-choice-desc">Soak '+(a.soak||'')+'</div></button>';
     });
     h += '</div>';
   } else {
