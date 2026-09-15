@@ -16,6 +16,51 @@ export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[
 export const hbBadge = "rounded border border-[var(--darkspace)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#24c3d6]";
 export const accentBadge = hbBadge;
 
+// ── Mechanical effect labels (mirror the sheet's homebrew engine) ────────────
+// Flat item/stat bonus targets (BONUS_TARGETS in lib/homebrew.ts).
+const BONUS_LABEL: Record<string, string> = {
+  ac: "AC", hp: "HP", meleeAtk: "Melee Attacks", meleeDmg: "Melee Damage",
+  rangedAtk: "Ranged Attacks", rangedDmg: "Ranged Damage", slots: "Gear Slots",
+  str: "STR", dex: "DEX", con: "CON", int: "INT", wis: "WIS", cha: "CHA",
+};
+// Full effect vocabulary for archetype features/talents (TALENT_TARGETS).
+const EFFECT_LABEL: Record<string, string> = {
+  ...BONUS_LABEL, gearSlots: "Gear Slots",
+  meleeAtkDmg: "Melee Attack & Damage", rangedAtkDmg: "Ranged Attack & Damage",
+  mrAtk: "Melee & Ranged Attacks", mrDmg: "Melee & Ranged Damage",
+  mrAtkDmg: "Melee & Ranged Attack & Damage", statChoice: "Stat (choice)",
+  spellKnown: "Learn Power", spellCheck: "Power Checks", weaponDie: "Weapon Damage Die",
+  advSpell: "Advantage: Power", featureCharges: "Charges", playerTalent: "Player Choice",
+  perDay: "Per Day",
+};
+export type Effectish = { amount?: number | string; target?: string };
+export function bonusLabel(b: Effectish): string {
+  const amt = Number(b?.amount) || 0;
+  const label = BONUS_LABEL[String(b?.target ?? "")] ?? String(b?.target ?? "");
+  return `${amt >= 0 ? "+" : ""}${amt} ${label}`;
+}
+export function effectLabel(e: Effectish): string {
+  const t = String(e?.target ?? "");
+  const amt = Number(e?.amount) || 0;
+  const label = EFFECT_LABEL[t] ?? t;
+  if (t === "perDay") return `${amt}/day`;
+  if (t === "playerTalent") return "Player Choice";
+  if (t === "statChoice") return `+${amt} Stat (choice)`;
+  return `${amt >= 0 ? "+" : ""}${amt} ${label}`;
+}
+export function EffectChips({ items, kind }: { items: Effectish[]; kind?: "bonus" | "effect" }) {
+  const list = (items ?? []).filter((e) => e && e.target);
+  if (!list.length) return null;
+  const fmt = kind === "effect" ? effectLabel : bonusLabel;
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {list.map((e, i) => (
+        <span key={i} className="rounded border border-[var(--darkspace)] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#24c3d6]">{fmt(e)}</span>
+      ))}
+    </div>
+  );
+}
+
 export function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch };
   const sp = new URLSearchParams();

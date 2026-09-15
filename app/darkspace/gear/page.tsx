@@ -4,14 +4,14 @@ import { DS_GEAR, type DsGear } from "@/lib/data/darkspace-ref-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import {
-  DarkSpaceHeader, SearchForm, ChipRow, CountLine, EmptyState, cardCls, nameCls, badge, hbBadge,
-  one, type Query, type RawQuery,
+  DarkSpaceHeader, SearchForm, ChipRow, CountLine, EmptyState, EffectChips, cardCls, nameCls, badge, hbBadge,
+  one, type Effectish, type Query, type RawQuery,
 } from "@/components/DarkSpaceRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/darkspace/gear";
 
-type Row = DsGear & { homebrew?: boolean };
+type Row = DsGear & { homebrew?: boolean; bonuses?: Effectish[]; equippable?: boolean; stat?: string };
 
 const CATS = [
   { key: "weapon", label: "Weapons" },
@@ -22,9 +22,17 @@ const CATS = [
 
 function hbToGear(data: Record<string, unknown>, name: string): Row {
   const s = (k: string) => (typeof data[k] === "string" ? (data[k] as string) : "");
-  const cat = s("category");
-  const row: Row = { name, category: cat || "basic", cost: s("cost") || "—", desc: s("desc"), homebrew: true };
+  const rawCat = s("category");
+  // Deflectors group with Armor on the reference page; the sheet keeps them a shield.
+  const cat = rawCat === "shield" ? "armor" : (rawCat || "basic");
+  const row: Row = { name, category: cat, cost: s("cost") || "—", desc: s("desc"), homebrew: true };
   if (s("qty")) row.qty = s("qty");
+  if (Array.isArray(data.bonuses)) row.bonuses = data.bonuses as Effectish[];
+  if (data.equippable) row.equippable = true;
+  // A short stat line for weapons / armor / deflectors.
+  if (rawCat === "weapon") row.stat = [s("damage") || "1d6", s("range"), s("props")].filter(Boolean).join(" · ");
+  else if (rawCat === "armor") row.stat = `AC ${Number(data.acBase) || 11}${data.acDex ? " + DEX" : ""}`;
+  else if (rawCat === "shield") row.stat = `+${Number(data.acBonus) || 2} AC (deflector)`;
   return row;
 }
 
@@ -75,10 +83,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={nameCls}>{g.name}</span>
                       {g.qty ? <span className={badge}>×{g.qty}</span> : null}
+                      {g.equippable ? <span className={badge}>Equippable</span> : null}
                       {g.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
                       <span className="ml-auto text-[12px] font-semibold text-[var(--muted)]">{g.cost}</span>
                     </div>
+                    {g.stat ? <p className="mt-1 text-[12px] font-semibold text-[#24c3d6]">{g.stat}</p> : null}
                     {g.desc ? <p className="mt-1 text-[13px] text-[var(--muted)]">{g.desc}</p> : null}
+                    {g.bonuses ? <EffectChips items={g.bonuses} kind="bonus" /> : null}
                   </div>
                 ))}
               </div>

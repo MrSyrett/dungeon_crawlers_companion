@@ -1630,24 +1630,71 @@ function normalizeIcrpgMonster(input: unknown): { name: string; data: Record<str
 
 // ── DarkSpace (sci-fi Shadowdark reskin) ─────────────────────────────────────
 // Each normaliser emits the lib/data/darkspace-* shape its reference page reads,
-// tagged source:"Homebrew" so cards render a Homebrew badge.
+// tagged source:"Homebrew" so cards render a Homebrew badge. Traits, archetype
+// features/talents, and gear now carry the same mechanical effect vocabulary as
+// Shadowdark (lib/effects.ts) so the DarkSpace sheet applies real bonuses — see
+// injectHomebrewContent / equippedItemBonusTotals in ds_character_sheet.html.
 const DS_CASTER_OPTS = ["Engineer", "Mystic", "Both", "None"] as const;
+
+// Flat {amount,target} bonuses using the equipped-item / stat target vocabulary
+// (BONUS_TARGETS). Shared by DarkSpace traits and gear.
+// A feature/talent row from the DarkSpace editor carries a separate `name` and
+// `text`; the sheet expects the name embedded in the text ("Grit: …"), so fold
+// them together, then reuse the shared effect-row cleaner for effects/choose.
+function cleanDsEffectRow(raw: unknown): { text: string; effects: HbEffect[]; choose?: boolean } {
+  const o = (raw ?? {}) as Record<string, unknown>;
+  const nm = str(o.name).trim();
+  const body = str(o.text).trim();
+  const text = nm ? (body ? `${nm}: ${body}` : nm) : body;
+  return cleanEffectRow({ ...o, text });
+}
+
+function cleanDsBonuses(v: unknown): { amount: number; target: string }[] {
+  const targets = BONUS_TARGETS as readonly string[];
+  return Array.isArray(v)
+    ? (v as unknown[])
+        .map((b) => {
+          const bo = (b ?? {}) as Record<string, unknown>;
+          return { amount: num(bo.amount) ?? 0, target: str(bo.target) };
+        })
+        .filter((b) => b.amount !== 0 && targets.includes(b.target))
+        .slice(0, 12)
+    : [];
+}
 
 function normalizeDsArchetype(input: unknown): { name: string; data: Record<string, unknown> } {
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew archetype needs a name.");
   const casterRaw = str(o.caster);
+  // Features: descriptive text + mechanical effects (choose-one supported).
+  const features = Array.isArray(o.features)
+    ? (o.features as unknown[]).map(cleanDsEffectRow).filter((f) => f.text).slice(0, 20)
+    : [];
+  // Exactly 5 talent-table rows (aligned to the 2d6 bands), each with effects.
+  const talentIn = Array.isArray(o.talent) ? (o.talent as unknown[]) : [];
+  const talent = Array.from({ length: 5 }, (_, i) => cleanDsEffectRow(talentIn[i]));
+  const talentSplit = str(o.talentSplit) === "hi" ? "hi" : "lo";
   const data: Record<string, unknown> = {
     name,
     hd: str(o.hd).slice(0, 20) || "1d6",
     weapons: str(o.weapons).slice(0, 200),
     armor: str(o.armor).slice(0, 200),
     caster: casterRaw && casterRaw !== "None" ? oneOf(casterRaw, DS_CASTER_OPTS, "None") : null,
-    features: strList(o.features, 20, 400),
+    features,
+    talent,
+    talentSplit,
     ranks: null,
     source: "Homebrew",
   };
+  // Optional ranks (titles) by Motivation — Lawful/Neutral/Chaotic, 5 tiers each.
+  const titlesIn = (o.titles ?? null) as Record<string, unknown> | null;
+  if (titlesIn) {
+    const tierList = (v: unknown): string[] =>
+      Array.isArray(v) ? (v as unknown[]).map((x) => str(x).slice(0, 60)).slice(0, 5) : [];
+    const L = tierList(titlesIn.Lawful), N = tierList(titlesIn.Neutral), C = tierList(titlesIn.Chaotic);
+    if ([...L, ...N, ...C].some((x) => x)) data.titles = { Lawful: L, Neutral: N, Chaotic: C };
+  }
   return { name, data };
 }
 
@@ -1655,7 +1702,14 @@ function normalizeDsTrait(input: unknown): { name: string; data: Record<string, 
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew trait needs a name.");
-  return { name, data: { name, effect: str(o.effect).slice(0, 600), source: "Homebrew" } };
+  const data: Record<string, unknown> = {
+    name,
+    effect: str(o.effect).slice(0, 600),
+    source: "Homebrew",
+  };
+  const bonuses = cleanDsBonuses(o.bonuses);
+  if (bonuses.length) data.bonuses = bonuses;
+  return { name, data };
 }
 
 function normalizeDsBackground(input: unknown): { name: string; data: Record<string, unknown> } {
@@ -1688,14 +1742,35 @@ function normalizeDsGear(input: unknown): { name: string; data: Record<string, u
   const o = (input ?? {}) as Record<string, unknown>;
   const name = str(o.name).slice(0, 80);
   if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const category = oneOf(str(o.category) || "basic", ["weapon", "armor", "shield", "ammo", "basic"] as const, "basic");
   const data: Record<string, unknown> = {
     name,
-    category: oneOf(str(o.category) || "basic", ["weapon", "armor", "ammo", "basic"] as const, "basic"),
+    category,
     cost: str(o.cost).slice(0, 40) || "—",
     desc: str(o.desc).slice(0, 600),
     source: "Homebrew",
   };
   if (str(o.qty)) data.qty = str(o.qty).slice(0, 10);
+  // Weapon stats — so a homebrew weapon rolls and equips like a book one.
+  if (category === "weapon") {
+    data.wtype = ["M", "R", "M/R"].includes(str(o.wtype)) ? str(o.wtype) : "M";
+    data.range = (WEAPON_RANGES as readonly string[]).includes(str(o.range)) ? str(o.range) : "Close";
+    data.damage = str(o.damage).slice(0, 40) || "1d6";
+    data.props = str(o.props).slice(0, 120);
+    data.ammo = str(o.ammo).slice(0, 40);
+  }
+  // Armor / deflector stats — feed the AC calc.
+  if (category === "armor") {
+    data.acBase = num(o.acBase) ?? 11;
+    data.acDex = !!o.acDex;
+  }
+  if (category === "shield") {
+    data.acBonus = num(o.acBonus) ?? 2;
+  }
+  // Equipped-item bonuses (magic items, implants, augments) + the wearable flag.
+  const bonuses = cleanDsBonuses(o.bonuses);
+  if (bonuses.length) data.bonuses = bonuses;
+  if (o.equippable) data.equippable = true;
   return { name, data };
 }
 

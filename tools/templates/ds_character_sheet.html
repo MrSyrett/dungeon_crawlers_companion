@@ -5329,7 +5329,7 @@ document.addEventListener('visibilitychange', function() {
 // pass wires those into ccwApply). Injection is rebuilt on every sync so it
 // stays idempotent and reflects deletes/edits.
 let _hbAncestryNames = [];
-const _hbInjected = { classes: [], ancestries: [], backgrounds: [] };
+const _hbInjected = { classes: [], ancestries: [], backgrounds: [], traits: [] };
 const HB_TALENT_LABEL = {
   // GENERATED from lib/effects.ts (TALENT_TARGETS) by scripts/extract-game-data.mjs.
   // Edit lib/effects.ts, then re-run the extract — do not hand-edit this block.
@@ -5351,7 +5351,10 @@ function _hbClearInjected() {
     const i = RC_BACKGROUNDS.indexOf(n); if(i>=0) RC_BACKGROUNDS.splice(i,1);
     delete CCW_BG_DESC[n];
   });
-  _hbInjected.classes = []; _hbInjected.ancestries = []; _hbInjected.backgrounds = [];
+  _hbInjected.traits.forEach(n => {
+    if(typeof DS_TRAITS !== 'undefined'){ const i = DS_TRAITS.findIndex(t=>t.name===n && t._hb); if(i>=0) DS_TRAITS.splice(i,1); }
+  });
+  _hbInjected.classes = []; _hbInjected.ancestries = []; _hbInjected.backgrounds = []; _hbInjected.traits = [];
   _hbAncestryNames = [];
 }
 
@@ -5597,9 +5600,13 @@ function _hbAncFeatLearnPicks(c){
 // target only drives the label; the picked value drives the mechanics.
 const _HB_STAT_OPTS = [['str','Strength'],['dex','Dexterity'],['con','Constitution'],['int','Intelligence'],['wis','Wisdom'],['cha','Charisma']];
 
-// All effects that actually apply for a character (ancestry + features + chosen talents).
+// All effects that actually apply for a character (trait + ancestry + features + chosen talents).
 function _hbActiveEffects(c){
   const out=[];
+  if(typeof DS_TRAITS!=='undefined' && c.trait){
+    const t=DS_TRAITS.find(x=>x.name===c.trait);
+    if(t&&t._hb&&Array.isArray(t.bonuses)) t.bonuses.forEach(b=>{ if(b&&b.target) out.push({target:b.target==='slots'?'gearSlots':b.target, amount:b.amount}); });
+  }
   const hb=RC_ANCESTRY._hb&&RC_ANCESTRY._hb[c.ancestry];
   if(hb){
     (Array.isArray(hb.bonuses)?hb.bonuses:[]).forEach(e=>out.push(e));
@@ -5794,8 +5801,10 @@ function injectHomebrewContent(rows) {
 
     if(row.type === 'class') {
       if(offClasses.has(nm) || _hbInjected.classes.includes(nm)) continue;
-      const weapons = d.weaponsAll ? 'All weapons' : (Array.isArray(d.weapons) ? d.weapons.join(', ') : '');
-      const armor = d.armorAll ? 'All armor and shields' : (Array.isArray(d.armor) ? d.armor.join(', ') : '');
+      const weapons = (typeof d.weapons === 'string') ? d.weapons
+                    : (d.weaponsAll ? 'All weapons' : (Array.isArray(d.weapons) ? d.weapons.join(', ') : ''));
+      const armor = (typeof d.armor === 'string') ? d.armor
+                  : (d.armorAll ? 'All armor and shields' : (Array.isArray(d.armor) ? d.armor.join(', ') : ''));
       const talentRows = Array.isArray(d.talent) ? d.talent : [];
       const features = (Array.isArray(d.features) ? d.features : []).map(f => {
         if(typeof f === 'string') return f;
@@ -5884,27 +5893,101 @@ function injectHomebrewContent(rows) {
       RC_BACKGROUNDS.push(nm);
       CCW_BG_DESC[nm] = String(d.desc || '');
       _hbInjected.backgrounds.push(nm);
+    } else if(row.type === 'trait') {
+      // A DarkSpace homebrew Trait joins the pick-one DS_TRAITS list. Its flat
+      // bonuses ({amount,target}) are applied at creation by _hbFillTrait.
+      if(typeof DS_TRAITS === 'undefined') continue;
+      if(_hbInjected.traits.includes(nm)) continue;
+      if(DS_TRAITS.some(t => t.name === nm && !t._hb)) continue;   // book trait wins
+      const bonuses = Array.isArray(d.bonuses) ? d.bonuses : [];
+      const desc = String(d.effect || '').trim() || _dsBonusSummary(bonuses) || 'Homebrew trait.';
+      DS_TRAITS.push({ name: nm, effect: desc, _hb: true, bonuses: bonuses });
+      _hbInjected.traits.push(nm);
     }
   }
+}
+// A single equipped-item/stat bonus → a readable label (slots → gear slots).
+function _dsBonusLabel(b){
+  if(!b || !b.target) return '';
+  return _hbEffOne({ target: b.target === 'slots' ? 'gearSlots' : b.target, amount: b.amount });
+}
+function _dsBonusSummary(bonuses){
+  return (Array.isArray(bonuses) ? bonuses : []).map(_dsBonusLabel).filter(Boolean).join(', ');
+}
+// The picked homebrew trait's bonuses, folded into the effect accumulator so
+// creation applies them to stats / HP / AC / attacks / gear slots like an
+// ancestry. Book traits (Augmented, Reinforced…) keep their own name-checks.
+function _hbFillTrait(out, c){
+  if(!c || !c.trait || typeof DS_TRAITS === 'undefined') return;
+  const t = DS_TRAITS.find(x => x.name === c.trait);
+  if(!t || !t._hb || !Array.isArray(t.bonuses)) return;
+  t.bonuses.forEach(b => {
+    if(!b || !b.target) return;
+    _hbAccumEffect(out, { target: b.target === 'slots' ? 'gearSlots' : b.target, amount: b.amount });
+  });
+}
+
+// DarkSpace-scoped homebrew only. /api/homebrew returns the whole account
+// library (every system), so filter to the `ds-*` types — pulling Shadowdark's
+// own 'spell'/'gear'/'class' rows here would bleed that content into DarkSpace.
+// ds-power → spells, ds-gear → items, and ds-archetype/ds-trait/ds-background
+// are re-tagged to the shapes injectHomebrewContent understands (class/trait/
+// background) so their mechanical effects apply through the shared engine.
+function _dsGearToItem(d) {
+  const cat = String(d.category || 'basic');
+  const kind = cat === 'basic' ? 'gear' : cat;   // weapon|armor|shield|ammo|gear
+  const it = { name: String(d.name || ''), kind: kind, note: String(d.desc || '') };
+  const gp = parseFloat(String(d.cost || '').replace(/[^0-9.]/g, ''));
+  if(!isNaN(gp)) it.gp = gp;
+  if(d.qty) it.qty = String(d.qty);
+  if(kind === 'weapon') { it.wtype = d.wtype || 'M'; it.range = d.range || 'Close'; it.damage = d.damage || '1d6'; it.props = d.props || ''; it.ammo = (d.ammo !== undefined ? String(d.ammo) : ''); }
+  if(kind === 'armor')  { it.acBase = parseInt(d.acBase) || 11; it.acDex = !!d.acDex; }
+  if(kind === 'shield') { it.acBonus = parseInt(d.acBonus) || 2; }
+  if(Array.isArray(d.bonuses) && d.bonuses.length) it.bonuses = d.bonuses;
+  if(d.equippable) it.equippable = true;
+  return it;
 }
 
 // Fire-and-forget; a failed fetch leaves the sheet as it was.
 async function syncSharedHomebrew() {
-  // DarkSpace has no homebrew subsystem of its own yet. The generic
-  // 'spell'/'gear' homebrew types on /api/homebrew belong to Shadowdark, so
-  // pulling them here would bleed Shadowdark content into a DarkSpace sheet.
-  // Until DarkSpace-scoped homebrew types exist, keep the sheet's homebrew
-  // empty. (Structure preserved so DS homebrew can be wired in later.)
-  const items = [];
-  const nextSpells = [], nextItems = [];
+  let url = '/api/homebrew';
+  if(_campaign && _campaign.id) url += '?campaign=' + encodeURIComponent(_campaign.id);
+  let all;
+  try {
+    const r = await fetch(url, { credentials: 'same-origin' });
+    if(!r.ok) return;
+    const data = await r.json();
+    all = Array.isArray(data.items) ? data.items : [];
+  } catch(e) { return; }
+
+  const nextSpells = [], nextItems = [], inject = [];
+  const haveSpell = new Set(), haveItem = new Set();
+  for(const row of all) {
+    if(!row || !row.data) continue;
+    const nm = String(row.data.name || '').toLowerCase();
+    if(!nm) continue;
+    if(row.type === 'ds-power') {
+      if(haveSpell.has(nm)) continue; haveSpell.add(nm);
+      nextSpells.push(Object.assign({}, row.data, { caster: 'Homebrew' }));
+    } else if(row.type === 'ds-gear') {
+      if(haveItem.has(nm)) continue; haveItem.add(nm);
+      nextItems.push(_dsGearToItem(row.data));
+    } else if(row.type === 'ds-archetype') {
+      inject.push({ type: 'class', data: row.data });
+    } else if(row.type === 'ds-trait') {
+      inject.push({ type: 'trait', data: row.data });
+    } else if(row.type === 'ds-background') {
+      inject.push({ type: 'background', data: row.data });
+    }
+  }
 
   _homebrewSpells = nextSpells;
   _homebrewItems  = nextItems;
   invalidateCatalogs();   // the merged book+homebrew arrays are cached — see allSpells()
 
-  // Convert homebrew classes/ancestries/backgrounds into the wizard's reference
+  // Convert homebrew archetypes/traits/backgrounds into the wizard's reference
   // shapes so they're selectable and apply their core mechanics.
-  try { injectHomebrewContent(items); } catch(e) {}
+  try { injectHomebrewContent(inject); } catch(e) {}
   // If the creation wizard is open, redraw it so injected content appears.
   try { if(typeof _ccw !== 'undefined' && _ccw && typeof ccwRender === 'function') ccwRender(); } catch(e) {}
 

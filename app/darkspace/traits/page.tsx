@@ -4,14 +4,14 @@ import { DS_TRAITS, type DsTrait } from "@/lib/data/darkspace-rules-data";
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import {
-  DarkSpaceHeader, SearchForm, CountLine, EmptyState, cardCls, nameCls, hbBadge,
-  one, type RawQuery,
+  DarkSpaceHeader, SearchForm, CountLine, EmptyState, EffectChips, cardCls, nameCls, hbBadge,
+  one, type Effectish, type RawQuery,
 } from "@/components/DarkSpaceRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/darkspace/traits";
 
-type Row = DsTrait & { homebrew?: boolean };
+type Row = DsTrait & { homebrew?: boolean; bonuses?: Effectish[] };
 
 export default async function Page({ searchParams }: { searchParams: Promise<RawQuery> }) {
   const user = await getCurrentUser();
@@ -22,7 +22,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
     ownHomebrew(user.id, "ds-trait"),
     userCampaigns(user.id),
   ]);
-  const hbRows: Row[] = hbVisible.map((h) => ({ name: h.name, effect: typeof (h.data as Record<string, unknown>).effect === "string" ? ((h.data as Record<string, unknown>).effect as string) : "", homebrew: true }));
+  const hbRows: Row[] = hbVisible.map((h) => {
+    const d = h.data as Record<string, unknown>;
+    return { name: h.name, effect: typeof d.effect === "string" ? (d.effect as string) : "", bonuses: Array.isArray(d.bonuses) ? (d.bonuses as Effectish[]) : [], homebrew: true };
+  });
   const ALL: Row[] = [...hbRows, ...DS_TRAITS.map((t) => ({ ...t }))];
 
   const raw = await searchParams;
@@ -52,6 +55,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                 {t.homebrew ? <span className={hbBadge}>Homebrew</span> : null}
               </div>
               <p className="mt-1 text-[13px] leading-relaxed text-[var(--text)]">{t.effect}</p>
+              {t.homebrew && t.bonuses ? <EffectChips items={t.bonuses} kind="bonus" /> : null}
             </div>
           ))}
         </div>

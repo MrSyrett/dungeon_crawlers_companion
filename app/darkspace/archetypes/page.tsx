@@ -4,23 +4,39 @@ import { DS_ARCHETYPES, type DsArchetype } from "@/lib/data/darkspace-rules-data
 import { visibleHomebrew, ownHomebrew, userCampaigns } from "@/lib/homebrew";
 import HomebrewEditor from "@/components/HomebrewEditor";
 import {
-  DarkSpaceHeader, SearchForm, CountLine, EmptyState, cardCls, nameCls, badge, accentBadge, hbBadge,
-  one, type RawQuery,
+  DarkSpaceHeader, SearchForm, CountLine, EmptyState, EffectChips, cardCls, nameCls, badge, accentBadge, hbBadge,
+  one, type Effectish, type RawQuery,
 } from "@/components/DarkSpaceRef";
 
 export const dynamic = "force-dynamic";
 const BASE = "/darkspace/archetypes";
 
-type Row = DsArchetype & { homebrew?: boolean };
+type EffRow = { text: string; effects: Effectish[]; choose?: boolean };
+type Row = DsArchetype & { homebrew?: boolean; featureRows?: EffRow[]; talentRows?: EffRow[] };
+
+function effRows(v: unknown): EffRow[] {
+  return (Array.isArray(v) ? v : [])
+    .map((r) => {
+      const o = (r ?? {}) as Record<string, unknown>;
+      return { text: typeof o.text === "string" ? o.text : "", effects: Array.isArray(o.effects) ? (o.effects as Effectish[]) : [], choose: o.choose === true };
+    })
+    .filter((r) => r.text || r.effects.length);
+}
 
 function hbToArchetype(data: Record<string, unknown>, name: string): Row {
   const s = (k: string) => (typeof data[k] === "string" ? (data[k] as string) : "");
-  const list = (k: string) => (Array.isArray(data[k]) ? (data[k] as unknown[]) : []).filter((x): x is string => typeof x === "string");
   const caster = s("caster");
+  const featureRows = effRows(data.features);
+  const talentRows = effRows(data.talent);
+  const t = (data.titles ?? null) as Record<string, unknown> | null;
+  const strList = (v: unknown) => (Array.isArray(v) ? (v as unknown[]).map((x) => String(x)) : []);
+  const ranks = t && [t.Lawful, t.Neutral, t.Chaotic].some((c) => strList(c).some((x) => x.trim()))
+    ? { Lawful: strList(t.Lawful), Neutral: strList(t.Neutral), Chaotic: strList(t.Chaotic) }
+    : null;
   return {
     name, hd: s("hd") || "1d6", weapons: s("weapons"), armor: s("armor"),
     caster: caster && caster !== "None" ? caster : null,
-    features: list("features"), ranks: null, homebrew: true,
+    features: featureRows.map((f) => f.text), featureRows, talentRows, ranks, homebrew: true,
   };
 }
 
@@ -63,11 +79,33 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
               </div>
               {a.weapons ? <p className="mt-2 text-[13px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Weapons:</span> {a.weapons}</p> : null}
               {a.armor ? <p className="text-[13px] text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Armor:</span> {a.armor}</p> : null}
-              <ul className="mt-2 space-y-1">
-                {a.features.map((f, i) => (
-                  <li key={i} className="text-[13px] leading-relaxed text-[var(--text)]">{f}</li>
-                ))}
-              </ul>
+              {a.featureRows && a.featureRows.length ? (
+                <ul className="mt-2 space-y-2">
+                  {a.featureRows.map((f, i) => (
+                    <li key={i} className="text-[13px] leading-relaxed text-[var(--text)]">
+                      {f.text}{f.choose ? <span className="ml-1 text-[11px] text-[var(--muted)]">(choose one)</span> : null}
+                      <EffectChips items={f.effects} kind="effect" />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <ul className="mt-2 space-y-1">
+                  {a.features.map((f, i) => (
+                    <li key={i} className="text-[13px] leading-relaxed text-[var(--text)]">{f}</li>
+                  ))}
+                </ul>
+              )}
+              {a.talentRows && a.talentRows.length ? (
+                <div className="mt-3 space-y-2 border-t border-[var(--border)] pt-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Talents (2d6)</p>
+                  {a.talentRows.map((t, i) => (
+                    <div key={i} className="text-[13px] leading-relaxed text-[var(--text)]">
+                      {t.text}{t.choose ? <span className="ml-1 text-[11px] text-[var(--muted)]">(choose one)</span> : null}
+                      <EffectChips items={t.effects} kind="effect" />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
               {a.ranks ? (
                 <div className="mt-3 space-y-1 border-t border-[var(--border)] pt-3">
                   <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Ranks</p>

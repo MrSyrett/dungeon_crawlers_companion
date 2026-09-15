@@ -656,6 +656,11 @@ function _ccwClassAllowed(n){ if(_hbInjected.classes.indexOf(n)>=0) return _ccwI
 function _ccwAncestryAllowed(n){ if(_hbInjected.ancestries.indexOf(n)>=0) return _ccwInclHomebrew(); if(RC_OPTIONAL_ANCESTRIES.indexOf(n)>=0) return _ccwInclOptional(); return true; }
 function _ccwBgAllowed(n){ if(_hbInjected.backgrounds.indexOf(n)>=0) return _ccwInclHomebrew(); if(RC_OPTIONAL_BACKGROUNDS.indexOf(n)>=0) return _ccwInclOptional(); return true; }
 // Filtered random pools honoring the Step 1 toggles.
+function _dsRandomTraitName(){
+  const pool = DS_TRAITS.filter(t=>!t._hb || _ccwInclHomebrew());
+  const src = pool.length ? pool : DS_TRAITS;
+  return src[Math.floor(Math.random()*src.length)].name;
+}
 function _ccwRandomAncestry(){
   const pool = RC_ANCESTRY.table.filter(t=>_ccwAncestryAllowed(t.v))
     .concat(_ccwInclHomebrew() ? (_hbAncestryNames||[]).map(n=>({w:1,v:n})) : []);
@@ -747,7 +752,7 @@ function ccwRandomize() {
 
   // Ancestry / class / background / alignment / deity
   _ccw.ancestry  = _ccwRandomAncestry();
-  _ccw.trait = DS_TRAITS[Math.floor(Math.random()*DS_TRAITS.length)].name;
+  _ccw.trait = _dsRandomTraitName();
   _ccw.elfFarsight = _ccw.trait==='Keen Optics' ? rand(['ranged','spell']) : null;
   _ccw.koboldKnack  = null;
   // Homebrew ancestry "choose one" traits: roll a distinct option, resolving a
@@ -1033,8 +1038,10 @@ function ccwAncestry() {
   h += '<div style="font-family:Montserrat,sans-serif;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#24c3d6;margin:4px 0 5px;">Trait — choose one</div>';
   h += '<div class="ccw-choice-grid">';
   DS_TRAITS.forEach(t=>{
+    if(t._hb && !_ccwInclHomebrew()) return;   // hide homebrew traits when the toggle is off
     const sel = _ccw.trait===t.name ? ' selected' : '';
-    h += '<button class="ccw-choice'+sel+'" onclick="ccwPickTrait(\''+t.name.replace(/'/g,"\\'")+'\')"><div class="ccw-choice-name">'+t.name+'</div><div class="ccw-choice-desc">'+t.effect+'</div></button>';
+    const tag = t._hb ? ' <span style="font-size:8px;letter-spacing:.1em;color:#24c3d6;">HB</span>' : '';
+    h += '<button class="ccw-choice'+sel+'" onclick="ccwPickTrait(\''+t.name.replace(/'/g,"\\'")+'\')"><div class="ccw-choice-name">'+t.name+tag+'</div><div class="ccw-choice-desc">'+t.effect+'</div></button>';
   });
   h += '</div>';
   const ancChoice = (title, field, opts)=>{
@@ -1093,7 +1100,7 @@ function _ccwPickHbChoiceSel(key, val){ const ti=parseInt(key.slice(4)); if(val=
 function ccwClearAncestryChoices() { _ccw.langCommon=[]; _ccw.langRare=[]; _ccw.elfFarsight=null; _ccw.koboldKnack=null; _ccw.hbChoice={}; }
 function ccwPickAncestry(a) { _ccw.ancestry = a; ccwClearAncestryChoices(); ccwRender(); }
 function ccwPickTrait(t) { _ccw.trait = t; _ccw.elfFarsight = null; ccwRender(); }
-function ccwRandAncestry() { _ccw.ancestry = _ccwRandomAncestry(); _ccw.trait = DS_TRAITS[Math.floor(Math.random()*DS_TRAITS.length)].name; _ccw.elfFarsight = _ccw.trait==='Keen Optics' ? (Math.random()<0.5?'ranged':'spell') : null; ccwRender(); }
+function ccwRandAncestry() { _ccw.ancestry = _ccwRandomAncestry(); _ccw.trait = _dsRandomTraitName(); _ccw.elfFarsight = _ccw.trait==='Keen Optics' ? (Math.random()<0.5?'ranged':'spell') : null; ccwRender(); }
 
 // ── Step: Class ──
 function ccwSetClass(c){
@@ -1702,6 +1709,7 @@ function ccwApply() {
   const eff = ccwEffStats();
   const hbEff = _hbEmptyEff();
   _hbFillAncestry(hbEff, c);
+  if(typeof _hbFillTrait === 'function') _hbFillTrait(hbEff, c);   // homebrew trait bonuses
   _hbFillTalent(hbEff, c);
   _hbFillFeatures(hbEff, c);
   // Resolve player-choice effects (stat / advantage / weapon die / talent), expanding
