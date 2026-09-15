@@ -352,6 +352,14 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .title-auto:hover{color:#fff;}
 .gear-disable-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:9px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;}
 .gear-disable-btn.on{background:#0c2b30;border-color:#124e57;color:#4fc8d8;}
+/* Stow: move a gear-slot item down to Free to Carry. */
+.gear-stow-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;line-height:1;}
+.gear-stow-btn:hover{border-color:#24c3d6;color:#24c3d6;}
+/* Free-to-Carry chips: click to move an item up into a gear slot. */
+.fc-chips{display:flex;flex-wrap:wrap;gap:4px;padding:6px 0 2px;}
+.fc-chip{display:inline-flex;align-items:center;gap:3px;max-width:100%;padding:3px 8px;background:var(--box);border:1px solid var(--rule);border-radius:12px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fc-chip:hover{border-color:#24c3d6;color:#24c3d6;}
+.fc-chip .fc-up{font-size:11px;font-weight:900;color:#24c3d6;}
 /* FREE TO CARRY */
 .free-carry{border-top:1px solid var(--rule);}
 .free-carry-inner{padding:6px 10px;}
@@ -571,7 +579,8 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
         <div class="free-carry">
           <div class="sl">Free to Carry</div>
           <div class="free-carry-inner">
-            <textarea id="free-carry" placeholder="Glowrod, Ration Packs, Tether..." rows="4"></textarea>
+            <textarea id="free-carry" placeholder="Glowrod, Ration Packs, Tether..." rows="4" oninput="renderFreeCarryChips()"></textarea>
+            <div id="free-carry-chips" class="fc-chips"></div>
           </div>
         </div>
       </div>
@@ -2136,7 +2145,7 @@ function buildGear() {
   // Header
   const hdr = document.createElement('div');
   hdr.style.cssText = 'display:flex;align-items:center;gap:3px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
-  hdr.innerHTML = '<span class="gear-eq-hd" style="width:16px;flex:0 0 16px;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:center;" title="Equip: check to wield a weapon (adds an attack) or wear armor (adds AC)">Eq</span><span style="width:16px;flex:0 0 16px;"></span><span style="flex:1 1 auto;min-width:0;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Item</span><span style="width:30px;flex:0 0 30px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;">Qty</span><span class="gear-disable-spacer" style="width:20px;flex:0 0 20px;"></span>';
+  hdr.innerHTML = '<span class="gear-eq-hd" style="width:16px;flex:0 0 16px;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:center;" title="Equip: check to wield a weapon (adds an attack) or wear armor (adds AC)">Eq</span><span style="width:16px;flex:0 0 16px;"></span><span style="flex:1 1 auto;min-width:0;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Item</span><span style="width:30px;flex:0 0 30px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;">Qty</span><span style="width:20px;flex:0 0 20px;"></span><span class="gear-disable-spacer" style="width:20px;flex:0 0 20px;"></span>';
   list.appendChild(hdr);
   for(let i=1;i<=20;i++) {
     const row = document.createElement('div');
@@ -2147,10 +2156,59 @@ function buildGear() {
       <span style="font-size:8px;font-weight:700;color:var(--muted);width:16px;flex:0 0 16px;">${i}.</span>
       <input type="text" class="gear-name" oninput="onGearNameInput(this)" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
       <input type="text" class="gear-qty" style="width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;" placeholder="">
+      <button class="gear-stow-btn" onclick="stowGearRow(this)" title="Move to Free to Carry">▽</button>
       <button class="gear-disable-btn" onclick="toggleGearSlot(this)" title="Disable slot (exceeds STR limit)">✕</button>
     `;
     list.appendChild(row);
   }
+}
+
+// ── Move gear between the Gear Slots and Free to Carry ──────────────────────
+// The slots keep their STR limit and equip behavior; these just shuttle an item
+// between the two lists. Stowing clears the slot (unequipping if needed); readying
+// drops an item into the first open, enabled slot.
+function _fcLines(){
+  const ta = document.getElementById('free-carry');
+  return ta ? ta.value.split('\n').map(s => s.trim()).filter(Boolean) : [];
+}
+function stowGearRow(btn){
+  const row = btn.closest('.gear-slot'); if(!row) return;
+  const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
+  const name = (nameEl.value || '').trim(); if(!name) return;
+  const qty = (qtyEl.value || '').trim();
+  const line = name + (qty && qty !== '1' ? ' ×' + qty : '');
+  const ta = document.getElementById('free-carry');
+  if(ta) ta.value = (ta.value.trim() ? ta.value.replace(/\s*$/, '') + '\n' : '') + line;
+  nameEl.value = ''; qtyEl.value = '';
+  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute AC
+  renderFreeCarryChips();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function readyFreeCarry(idx){
+  const lines = _fcLines(); const item = lines[idx]; if(!item) return;
+  let target = null;   // first open (empty-named), enabled gear slot
+  document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
+    if(target || row.classList.contains('gear-slot-disabled')) return;
+    const nm = row.querySelector('.gear-name');
+    if(nm && !nm.value.trim()) target = row;
+  });
+  if(!target){ addLog('Gear', 'Full', 'No open gear slots — free one up or enable another slot first', 'fumble'); return; }
+  const m = item.match(/^(.*?)\s*[×x]\s*(\d+)\s*$/);
+  const name = m ? m[1].trim() : item, qty = m ? m[2] : '';
+  const nameEl = target.querySelector('.gear-name'), qtyEl = target.querySelector('.gear-qty');
+  nameEl.value = name; qtyEl.value = qty;
+  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // reveal equip toggle if applicable
+  lines.splice(idx, 1);
+  const ta = document.getElementById('free-carry'); if(ta) ta.value = lines.join('\n');
+  renderFreeCarryChips();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function renderFreeCarryChips(){
+  const box = document.getElementById('free-carry-chips'); if(!box) return;
+  box.innerHTML = _fcLines().map((l, i) =>
+    '<button type="button" class="fc-chip" onclick="readyFreeCarry(' + i + ')" title="Move to Gear Slots">'
+    + '<span class="fc-up">△</span><span>' + _trkEsc(l) + '</span></button>'
+  ).join('');
 }
 
 // ── ADV/DIS ──
@@ -3038,6 +3096,7 @@ function _applySDData(d){
   });
   const freeText = d.freeCary || gearFree.map(g => g.name).join(', ') || '';
   set('free-carry', freeText);
+  if(typeof renderFreeCarryChips === 'function') renderFreeCarryChips();
     const spellStatEl = document.getElementById('spell-stat');
     if(spellStatEl) spellStatEl.value = d._sheet?.spellStat || '';
     const spellGBEl = document.getElementById('spell-gbonus');
@@ -4068,6 +4127,7 @@ setTimeout(function() { _pageReady = true; }, 2500);
 renderTalentsView();   // initial styled render of the Talents box
 renderTrackers();
 renderStress();
+renderFreeCarryChips();
 
 function autoSaveOnExit() {
   if(!_pageReady) return;
