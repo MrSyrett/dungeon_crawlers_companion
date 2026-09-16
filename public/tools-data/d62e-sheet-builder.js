@@ -14,12 +14,13 @@
   // traitPicks / powerPicks map name -> chosen rank (number, >=1). Absent = not picked.
   let traitPicks = {}, traitKind = '', traitQ = '';
   let powerPicks = {}, powerLevel = 'none', powerKind = '', powerQ = '';
+  let limitPicks = {}, limitQ = '';   // Superpower Limitations = the "flaws" for powers; each grants dice back.
   let bopts = {}, bgearCat = '', bgearQ = '', bgearEra = '';
   let ov = null;
   const STEP_LABELS = { Traits: 'Perks, Flaws & Talents', Extras: 'Troubles & Assets', Powers: 'Superpowers' };
   // Replace a scrollable list's contents in place, preserving its scroll position + focus.
   function relist(id, html, wire) { const el = $(id); if (!el) { if (wire) wire(); return; } const sp = el.scrollTop; el.innerHTML = html; el.scrollTop = sp; if (wire) wire(); }
-  function freshOpts() { return (typeof defaultOptions === 'function') ? defaultOptions() : { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', traitModule:'perks', superpowers:false, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
+  function freshOpts() { return (typeof defaultOptions === 'function') ? defaultOptions() : { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', traitModule:'troubles', superpowers:false, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
   // ── Power Levels (pg 212): key, label, superpower-dice pool ──
   const POWER_LEVELS = [['none','None',0],['young','Young Heroes',8],['street','Street Level',10],['standard','Standard Hero',12],['national','National Heroic Team',16],['worldwide','Worldwide Heroic Team',20],['galactic','Galactic & Cosmic Heroes',24]];
   function powerLevelDice() { const r = POWER_LEVELS.find(l => l[0] === powerLevel); return r ? r[2] : 0; }
@@ -28,6 +29,7 @@
   const skillsData = () => (typeof D62E_SKILLS !== 'undefined' ? D62E_SKILLS : []);
   const equipData = () => (typeof D62E_EQUIPMENT !== 'undefined' ? D62E_EQUIPMENT : []);
   const powersData = () => (typeof D62E_POWERS !== 'undefined' ? D62E_POWERS : []);
+  const limitsData = () => (typeof D62E_LIMITATIONS !== 'undefined' ? D62E_LIMITATIONS : []);
   const genreOk = item => { const g = item && item.genre; if (genre === 'all') return true; return !g || g === 'core' || g === genre; };
   // Templates only: All shows everything, Core shows only core, a specific genre shows only that genre (no core).
   const templateGenreOk = t => { const g = t && t.genre; if (genre === 'all') return true; if (genre === 'core') return g === 'core'; return g === genre; };
@@ -38,7 +40,7 @@
   function steps() {
     const s = ['Options', 'Path'];
     if (mode === 'alacarte') s.push('Attributes');
-    const tm = bopts.traitModule || 'perks';
+    const tm = bopts.traitModule || 'troubles';
     if (tm === 'perks') s.push('Traits');
     if (bopts.superpowers) s.push('Powers');
     s.push('Skills');
@@ -62,7 +64,7 @@
   function traitHasStepper(t) { const b = traitRankBounds(t); return (t.kind === 'perk' || t.kind === 'flaw' || (t.kind === 'talent' && isPerRank(t.cost))) && b.max > b.min; }
   // Skill-die delta (dice) from picked perks/flaws/talents. Troubles & assets: 0.
   function traitDeltaDice() {
-    if ((bopts.traitModule || 'perks') !== 'perks') return 0;   // only the Perks/Flaws/Talents module spends skill dice
+    if ((bopts.traitModule || 'troubles') !== 'perks') return 0;   // only the Perks/Flaws/Talents module spends skill dice
     let d = 0;
     Object.keys(traitPicks).forEach(n => { const t = perksData().find(x => x.name === n); if (!t) return; const r = traitPicks[n] || 1;
       if (t.kind === 'perk') d -= r; else if (t.kind === 'flaw') d += r; else if (t.kind === 'talent') d -= talentCostFor(t, r); });
@@ -75,6 +77,10 @@
   function powerCostFor(p, rank) { if (p.kind !== 'superpower' || p.cost == null) return 0; return isPerRank(p.cost) ? leadingInt(p.cost) * (rank || 1) : leadingInt(p.cost); }
   function powerPerRank(p) { return p.kind === 'superpower' && isPerRank(p.cost); }
   function powerPoolSpent() { let s = 0; Object.keys(powerPicks).forEach(n => { const p = powersData().find(x => x.name === n); if (p) s += powerCostFor(p, powerPicks[n] || 1); }); return s; }
+  // Limitations grant Superpower Dice back to the pool (the "flaw" side of powers).
+  function limitObj(nm) { return limitsData().find(x => x.name === nm) || null; }
+  function limitBonus() { let n = 0; Object.keys(limitPicks).forEach(k => { const l = limitObj(k); if (l && limitPicks[k]) n += (+l.value || 0); }); return n; }
+  function powerPoolTotal() { return powerLevelDice() + limitBonus(); }
   function charAttrs() {
     if (mode === 'alacarte') return Object.assign({}, attrAlloc);
     return tpl ? Object.assign({}, tpl.attributes) : { Agility: 9, Brawn: 9, Knowledge: 9, Perception: 9 };
@@ -171,7 +177,15 @@
     h += optRow('Character Traits Module', 'Two versions of the same system — pick one, or neither. <b>Perks, Flaws &amp; Talents</b> adjust your skill dice; <b>Troubles &amp; Assets</b> grant Hero Points and benefits.', bsel('traitModule', [['perks','Perks, Flaws & Talents'],['troubles','Troubles & Assets'],['none','Neither']]));
     h += optRow('Superpowers', 'An extension of Talents — adds a Superpower Dice pool and a Superpowers step to the builder.', bchk('superpowers'));
     b.innerHTML = h;
-    $('d62eb-bgenre').addEventListener('change', e => { genre = e.target.value; if (mode === 'template' && tpl && !templateGenreOk(tpl)) { tpl = null; mode = null; } render(); });
+    $('d62eb-bgenre').addEventListener('change', e => {
+      genre = e.target.value;
+      // Genre nudges the optional modules toward that genre's usual setup.
+      if (genre === 'superhero') { bopts.superpowers = true; bopts.traitModule = 'none'; traitPicks = {}; }
+      else if (genre === 'scifi') { bopts.traitModule = 'perks'; bopts.rollMode = 'successes'; traitPicks = {}; }
+      if (mode === 'template' && tpl && !templateGenreOk(tpl)) { tpl = null; mode = null; }
+      maxStep = Math.min(maxStep, step);   // module/step set may have changed — re-walk from here
+      render();
+    });
     b.querySelectorAll('[data-optk]').forEach(el => el.addEventListener('click', () => {
       const k = el.dataset.optk; bopts[k] = !bopts[k];
       // Turning Superpowers off drops any picked powers / power level.
@@ -359,19 +373,24 @@
 
   // ── Step: Powers (own dice pool by Power Level, pg 212) ─────────────────────
   function renderPowers(b, note) {
-    const total = powerLevelDice(), spent = powerPoolSpent();
+    const total = powerPoolTotal(), spent = powerPoolSpent(), bonus = limitBonus();
     note.textContent = powerLevel === 'none' ? 'Powers (optional)' : 'Power dice: ' + spent + ' / ' + total + (spent > total ? '  ⚠ over pool' : '');
-    let h = '<p class="m-hint">Superpowers are an extension of Talents. Pick a <b>Power Level</b> to get a Superpower Dice pool (pg 212) — superpowers spend from it. Picked powers go on the sheet.</p>';
+    let h = '<p class="m-hint">Superpowers are an extension of Talents. Pick a <b>Power Level</b> to get a Superpower Dice pool (pg 212) — superpowers spend from it. <b>Limitations</b> are the flaws for superpowers: each grants dice back to the pool. Picked powers &amp; limitations go on the sheet.</p>';
     h += '<div class="m-lbl">Power Level</div><select class="m-input" id="d62eb-plevel" style="max-width:280px;">'
       + POWER_LEVELS.map(l => '<option value="' + l[0] + '"' + (powerLevel === l[0] ? ' selected' : '') + '>' + esc(l[1]) + (l[2] ? ' (' + l[2] + ')' : '') + '</option>').join('') + '</select>';
-    if (powerLevel !== 'none') h += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:#f0a860;margin:8px 0 4px;">Superpower dice: <b>' + spent + ' / ' + total + '</b>' + (spent > total ? ' <span style="color:#df8a8a;">— over pool</span>' : '') + '</div>';
+    if (powerLevel !== 'none') h += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;color:#f0a860;margin:8px 0 4px;">Superpower dice: <b>' + spent + ' / ' + total + '</b>' + (bonus ? ' <span style="color:#8ad48a;">(+' + bonus + ' from limitations)</span>' : '') + (spent > total ? ' <span style="color:#df8a8a;">— over pool</span>' : '') + '</div>';
     h += '<div style="display:flex;gap:6px;margin:8px 0;"><input class="m-input" id="d62eb-power-search" placeholder="Search superpowers…" value="' + esc(powerQ) + '" style="flex:1;"></div>';
-    h += '<div class="brow-list" id="d62eb-power-list" style="max-height:40vh;overflow:auto;padding:0;">' + powerListHtml() + '</div>';
+    h += '<div class="brow-list" id="d62eb-power-list" style="max-height:32vh;overflow:auto;padding:0;">' + powerListHtml() + '</div>';
+    h += '<div class="m-lbl" style="margin-top:12px;">Limitations <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">(flaws for superpowers — grant dice back)</span></div>';
+    h += '<div style="display:flex;gap:6px;margin:6px 0;"><input class="m-input" id="d62eb-limit-search" placeholder="Search limitations…" value="' + esc(limitQ) + '" style="flex:1;"></div>';
+    h += '<div class="brow-list" id="d62eb-limit-list" style="max-height:28vh;overflow:auto;padding:0;">' + limitListHtml() + '</div>';
     b.innerHTML = h;
     $('d62eb-plevel').addEventListener('change', e => { powerLevel = e.target.value; render(); });
     const s = $('d62eb-power-search');
     s.addEventListener('input', () => { powerQ = norm(s.value); relist('d62eb-power-list', powerListHtml(), wire); });
-    wire();
+    const ls = $('d62eb-limit-search');
+    ls.addEventListener('input', () => { limitQ = norm(ls.value); relist('d62eb-limit-list', limitListHtml(), wireLimits); });
+    wire(); wireLimits();
     function wire() {
       const box = $('d62eb-power-list');
       box.querySelectorAll('[data-power]').forEach(btn => btn.addEventListener('click', () => {
@@ -384,6 +403,22 @@
         const nv = (powerPicks[p.name] || 1) + Number(btn.dataset.d); powerPicks[p.name] = Math.max(1, Math.min(5, nv)); render();
       }));
     }
+    function wireLimits() {
+      $('d62eb-limit-list').querySelectorAll('[data-limit]').forEach(btn => btn.addEventListener('click', () => {
+        const l = limitObj(btn.dataset.limit); if (!l) return;
+        if (limitPicks[l.name] != null) delete limitPicks[l.name]; else limitPicks[l.name] = 1;
+        render();
+      }));
+    }
+  }
+  function limitListHtml() {
+    const list = limitsData().filter(l => genreOk(l) && (!limitQ || norm(l.name).includes(limitQ) || norm(l.description || '').includes(limitQ))).sort((a, c) => a.name.localeCompare(c.name));
+    if (!list.length) return '<p class="brow-empty">No limitations match.</p>';
+    return list.map(l => {
+      const on = limitPicks[l.name] != null;
+      const btn = '<button class="brow-add" data-limit="' + esc(l.name) + '"' + (on ? ' style="background:#1a3a1a;color:#a0f0a0;"' : '') + '>' + (on ? 'Added ✓' : '+ Add') + '</button>';
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(l.name) + '<span class="brow-cost" style="color:#8ad48a;">+' + (+l.value || 0) + 'D back</span></div>' + (l.description ? '<div class="brow-desc">' + esc(l.description) + '</div>' : '') + '</div>' + btn + '</div>';
+    }).join('');
   }
   function powerListHtml() {
     // Superpowers only — magic & psionic are a separate system, excluded here.
@@ -473,8 +508,14 @@
       const cost = (p.kind === 'superpower' && p.cost != null) ? 'Cost ' + powerCostFor(p, r) : '';
       powers.push({ name: nm, kind: p.kind || 'superpower', note: powerMeta(p, cost) });
     });
+    // Limitations (flaws for superpowers) — only when the Superpowers module is on.
+    const limitations = [];
+    if (bopts.superpowers) Object.keys(limitPicks).forEach(n => {
+      if (limitPicks[n] == null) return; const l = limitObj(n); if (!l) return;
+      limitations.push({ name: l.name, note: ['+' + (+l.value || 0) + 'D back', l.description || ''].filter(Boolean).join(' — ') });
+    });
     // Character Traits module (perks/flaws/talents OR troubles/assets — mutually exclusive), routed to buckets by kind.
-    const tmSel = bopts.traitModule || 'perks';
+    const tmSel = bopts.traitModule || 'troubles';
     const traitKindOk = k => (tmSel === 'perks') ? (k === 'perk' || k === 'flaw' || k === 'talent') : (tmSel === 'troubles') ? (k === 'trouble' || k === 'asset') : false;
     const perks = [], flaws = [], talents = [];
     Object.keys(traitPicks).forEach(n => {
@@ -494,7 +535,7 @@
       attrs: attrs, skills: skills,
       heroPoints: mode === 'template' ? (tpl.heroPoints || 1) : 1, characterPoints: 0,
       dodgeOverride: null, parryOverride: null, move: '10', wound: 'none',
-      weapons: weapons, armor: armor, powers: powers,
+      weapons: weapons, armor: armor, powers: powers, limitations: limitations,
       perks: perks, flaws: flaws, talents: talents, gear: gear,
       wealth: '', background: details.background || (mode === 'template' ? tpl.description : '') || '', personality: details.personality || '', notes: '',
       options: Object.assign(freshOpts(), bopts, { powerLevel: powerLevel }),
@@ -509,7 +550,7 @@
     launch() {
       step = 0; maxStep = 0; mode = null; tpl = null; genre = 'all';
       attrAlloc = { Agility: 3, Brawn: 3, Knowledge: 3, Perception: 3 }; skillAlloc = {}; details = {}; gearPicks = {};
-      traitPicks = {}; traitKind = ''; traitQ = ''; powerPicks = {}; powerLevel = 'none'; powerKind = ''; powerQ = '';
+      traitPicks = {}; traitKind = ''; traitQ = ''; powerPicks = {}; powerLevel = 'none'; powerKind = ''; powerQ = ''; limitPicks = {}; limitQ = '';
       bgearCat = ''; bgearQ = ''; bgearEra = '';
       bopts = Object.assign(freshOpts(), (typeof options !== 'undefined' && options) ? JSON.parse(JSON.stringify(options)) : {});
       powerLevel = bopts.powerLevel || 'none';

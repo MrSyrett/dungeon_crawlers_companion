@@ -31,6 +31,7 @@ const ENTITIES = [
   { key: "creatures",  constName: "D62E_CREATURES",      type: "D62eCreature",      base: "d62e-creatures" },
   { key: "perks",      constName: "D62E_PERKS",          type: "D62ePerk",          base: "d62e-perks" },
   { key: "powers",     constName: "D62E_POWERS",         type: "D62ePower",         base: "d62e-powers" },
+  { key: "limitations",constName: "D62E_LIMITATIONS",    type: "D62eLimitation",    base: "d62e-limitations" },
   { key: "vehicles",   constName: "D62E_VEHICLES",       type: "D62eVehicle",       base: "d62e-vehicles" },
   { key: "modules",    constName: "D62E_MODULES",        type: "D62eModule",        base: "d62e-modules" },
 ];

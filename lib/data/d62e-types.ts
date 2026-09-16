@@ -120,6 +120,17 @@ export interface D62ePower {
   page: number;
 }
 
+/** Superpower Limitations (pg 212) — the "flaws" for superpowers. Each grants
+ *  back `value` Superpower Dice to the creation pool (never reducing a power below 1D). */
+export interface D62eLimitation {
+  name: string;
+  genre: D62eGenre;
+  /** Superpower Dice granted back to the pool when this limitation is taken. */
+  value: number;
+  description: string;
+  page?: number;
+}
+
 export interface D62eVehicleWeapon {
   name: string;
   damage?: string;

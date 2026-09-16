@@ -48,7 +48,7 @@ export const D62E_PERKS = [
     "name": "Blindly Vengeful",
     "kind": "trouble",
     "cost": "+1 Hero Point",
-    "description": "An example Trouble: a short weakness the character can willingly trigger to gain a Hero Point while the gamemaster immediately triggers an impactful complication (usable twice per session).",
+    "description": "A short weakness the character can willingly trigger to gain a Hero Point while the gamemaster immediately triggers an impactful complication (usable twice per session).",
     "genre": "core",
     "page": 130
   },
@@ -56,7 +56,7 @@ export const D62E_PERKS = [
     "name": "Brave & Steadfast",
     "kind": "asset",
     "cost": "+3D or +1 Hero Point",
-    "description": "An example Asset: a dramatic heroic reputation the character can declare in a fitting, impactful moment to either gain +3D to a die code or gain a Hero Point (usable twice per session).",
+    "description": "A dramatic heroic reputation the character can declare in a fitting, impactful moment to either gain +3D to a die code or gain a Hero Point (usable twice per session).",
     "genre": "core",
     "page": 131
   },
@@ -72,7 +72,7 @@ export const D62E_PERKS = [
     "name": "Clever like a Fox",
     "kind": "asset",
     "cost": "+3D or +1 Hero Point",
-    "description": "An example Asset: a dramatic heroic reputation the character can declare in a fitting, impactful moment to either gain +3D to a die code or gain a Hero Point (usable twice per session).",
+    "description": "A dramatic heroic reputation the character can declare in a fitting, impactful moment to either gain +3D to a die code or gain a Hero Point (usable twice per session).",
     "genre": "core",
     "page": 131
   },
@@ -207,7 +207,7 @@ export const D62E_PERKS = [
     "name": "Hot-Headed",
     "kind": "trouble",
     "cost": "+1 Hero Point",
-    "description": "An example Trouble: a short foible the character can willingly trigger to gain a Hero Point while the gamemaster immediately triggers an impactful complication (usable twice per session).",
+    "description": "A short foible the character can willingly trigger to gain a Hero Point while the gamemaster immediately triggers an impactful complication (usable twice per session).",
     "genre": "core",
     "page": 130
   },
@@ -278,7 +278,7 @@ export const D62E_PERKS = [
     "name": "Mob Debt",
     "kind": "trouble",
     "cost": "+1 Hero Point",
-    "description": "An example Trouble: a short setback the character can willingly trigger to gain a Hero Point while the gamemaster immediately triggers an impactful complication (usable twice per session).",
+    "description": "A short setback the character can willingly trigger to gain a Hero Point while the gamemaster immediately triggers an impactful complication (usable twice per session).",
     "genre": "core",
     "page": 130
   },
@@ -286,7 +286,7 @@ export const D62E_PERKS = [
     "name": "Overly Ambitious",
     "kind": "trouble",
     "cost": "+1 Hero Point",
-    "description": "An example Trouble: a short two-or-three-word weakness the character can willingly trigger to gain a Hero Point while the gamemaster immediately triggers a complication against them (usable twice per session).",
+    "description": "A short two-or-three-word weakness the character can willingly trigger to gain a Hero Point while the gamemaster immediately triggers a complication against them (usable twice per session).",
     "genre": "core",
     "page": 130
   },
@@ -404,7 +404,7 @@ export const D62E_PERKS = [
     "name": "Tough as Nails",
     "kind": "asset",
     "cost": "+3D or +1 Hero Point",
-    "description": "An example Asset: a dramatic heroic reputation the character can declare in a fitting, impactful moment to either gain +3D to a die code or gain a Hero Point (usable twice per session).",
+    "description": "A dramatic heroic reputation the character can declare in a fitting, impactful moment to either gain +3D to a die code or gain a Hero Point (usable twice per session).",
     "genre": "core",
     "page": 131
   },

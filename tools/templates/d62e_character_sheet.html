@@ -151,8 +151,8 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 /* Stacked trait / power rows: name on top, full description below. */
 .tbl td.trait-cell{padding:7px 8px;}
 .trait-head{display:flex;align-items:center;gap:6px;}
-.trait-head .tr-name,.trait-head .pw-name{flex:1;min-width:0;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:var(--ink);outline:none;padding:2px 0;}
-.trait-head .tr-name:focus,.trait-head .pw-name:focus{border-bottom-color:var(--d62e);}
+.trait-head .tr-name,.trait-head .pw-name,.trait-head .lm-name{flex:1;min-width:0;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:var(--ink);outline:none;padding:2px 0;}
+.trait-head .tr-name:focus,.trait-head .pw-name:focus,.trait-head .lm-name:focus{border-bottom-color:var(--d62e);}
 .tbl td.trait-cell textarea{width:100%;margin-top:3px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:'Barlow',sans-serif;font-size:12px;line-height:1.45;padding:5px 7px;outline:none;resize:vertical;overflow:hidden;min-height:28px;}
 .tbl td.trait-cell textarea:focus{border-color:var(--d62e);}
 .add-row{margin:6px 10px 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
@@ -430,6 +430,8 @@ select option{background:var(--input-bg);color:var(--ink);}
         <div class="subhead" id="sub-tal" style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><span id="sub-tal-lbl">Talents / Powers</span><button class="hdr-btn" id="powers-add-btn" onclick="openPowerPicker()">✦ Powers</button></div>
         <table class="tbl" id="tbl-tal"><tbody id="talents-body"></tbody></table>
         <table class="tbl" id="powers-tbl"><tbody id="powers-body"></tbody></table>
+        <div class="subhead" id="sub-lim" style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><span>Limitations</span><button class="hdr-btn" id="limits-add-btn" onclick="openLimitPicker()">⊘ Add</button></div>
+        <table class="tbl" id="limits-tbl"><tbody id="limits-body"></tbody></table>
         <div class="tbl-empty" id="traits-empty" style="display:none;padding:10px;color:var(--muted);font-size:12px;">No trait modules enabled. Turn on the Character Traits Module or Superpowers in the builder's Options step.</div>
       </div>
 
@@ -515,6 +517,15 @@ select option{background:var(--input-bg);color:var(--ink);}
   </div>
 </div>
 
+<!-- LIMITATION PICKER (flaws for superpowers) -->
+<div id="limit-overlay" class="ov" onclick="if(event.target===this)closeLimitPicker()">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-hd"><div class="ttl">⊘ Limitations</div><button class="x" onclick="closeLimitPicker()">&#10005;</button></div>
+    <div class="brow-controls"><input id="limit-search" class="m-input" placeholder="Search limitations…" oninput="renderLimitPicker()"></div>
+    <div class="modal-bd brow-list" id="limit-body"></div>
+  </div>
+</div>
+
 <!-- TRAIT PICKER (perks / flaws / talents) -->
 <div id="trait-overlay" class="ov" onclick="if(event.target===this)closeTraitPicker()">
   <div class="modal" style="max-width:600px;">
@@ -562,11 +573,12 @@ const D = {
   equipment: () => (typeof D62E_EQUIPMENT       !== 'undefined' ? D62E_EQUIPMENT       : []),
   perks:     () => (typeof D62E_PERKS           !== 'undefined' ? D62E_PERKS           : []),
   powers:    () => (typeof D62E_POWERS          !== 'undefined' ? D62E_POWERS          : []),
+  limitations:() => (typeof D62E_LIMITATIONS    !== 'undefined' ? D62E_LIMITATIONS     : []),
   attrInfo:  () => (typeof D62E_ATTRIBUTE_INFO  !== 'undefined' ? D62E_ATTRIBUTE_INFO  : []),
   tables:    () => (typeof D62E_TABLES          !== 'undefined' ? D62E_TABLES          : null),
 };
 let wound = 'none', heroArmed = false;
-function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', traitModule:'perks', superpowers:false, rollMode:'additive', successTarget:6, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
+function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', traitModule:'troubles', superpowers:false, rollMode:'additive', successTarget:6, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
 let options = defaultOptions();
 
 // ═══ DICE CODES ═══════════════════════════════════════════════════════════
@@ -950,7 +962,7 @@ function applyOptions() {
 // Traits tab sections follow the module toggles: Perks/Flaws/Talents vs Troubles/Assets
 // (mutually exclusive), and Superpowers (its own toggle) sits under Talents / Powers.
 function applyTraitTabLabels() {
-  const tm = (options && options.traitModule) || 'perks';
+  const tm = (options && options.traitModule) || 'troubles';
   const sp = !!(options && options.superpowers);
   const show = (id, on) => { const el = $(id); if(el) el.style.display = on ? '' : 'none'; };
   const traitsOn = tm !== 'none';       // positive + negative trait rows
@@ -960,6 +972,7 @@ function applyTraitTabLabels() {
   show('sub-tal', talOn || sp);
   show('tbl-tal', talOn);
   show('powers-tbl', sp);
+  show('sub-lim', sp); show('limits-tbl', sp);   // Limitations = flaws for superpowers
   const pab = $('powers-add-btn'); if(pab) pab.style.display = sp ? '' : 'none';
   const stl = $('sub-tal-lbl'); if(stl) stl.textContent = (talOn && sp) ? 'Talents / Powers' : talOn ? 'Talents' : sp ? 'Powers' : 'Talents / Powers';
   const empty = $('traits-empty'); if(empty) empty.style.display = (!traitsOn && !talOn && !sp) ? '' : 'none';
@@ -1124,6 +1137,36 @@ function rollPower(tr) {
   addLog(name, 'ⓘ', skillStr ? ('Uses ' + skillStr + ' — add that skill to roll it') : 'No governing skill on the sheet', 'normal');
 }
 
+// ═══ LIMITATIONS (flaws for superpowers) ══════════════════════════════════
+function addLimitRow(l) {
+  l = l || {}; const body = $('limits-body'); if(!body) return;
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td class="trait-cell">'
+    + '<div class="trait-head"><input type="text" class="lm-name" value="' + esc(l.name || '') + '" placeholder="limitation" oninput="scheduleAutosave()"><button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></div>'
+    + '<textarea class="lm-note" rows="2" placeholder="description" oninput="autoGrow(this);scheduleAutosave()">' + esc(l.note || '') + '</textarea>'
+    + '</td>';
+  body.appendChild(tr); const ta = tr.querySelector('.lm-note'); if(ta) autoGrow(ta); return tr;
+}
+function limitExists(name) { const n = norm(name); return [...document.querySelectorAll('#limits-body .lm-name')].some(inp => norm(inp.value) === n); }
+function addLimitByName(name) {
+  const l = D.limitations().find(x => x.name === name); if(!l || limitExists(l.name)) return false;
+  const note = ['+' + (+l.value || 0) + 'D back', l.description || ''].filter(Boolean).join(' — ');
+  addLimitRow({ name: l.name, note: note }); scheduleAutosave(); return true;
+}
+function openLimitPicker() { $('limit-search').value = ''; $('limit-overlay').classList.add('open'); renderLimitPicker(); $('limit-search').focus(); }
+function closeLimitPicker() { $('limit-overlay').classList.remove('open'); }
+function renderLimitPicker() {
+  const q = norm($('limit-search').value);
+  const list = D.limitations().filter(l => !q || norm(l.name).includes(q) || norm(l.description || '').includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+  const box = $('limit-body');
+  if(!list.length) { box.innerHTML = '<p class="brow-empty">No limitations match.</p>'; return; }
+  box.innerHTML = list.map(l => {
+    const have = limitExists(l.name);
+    const btn = have ? '<button class="brow-add have">Added ✓</button>' : '<button class="brow-add" data-add-limit="' + esc(l.name) + '">+ Add</button>';
+    return '<div class="brow-item"><div class="brow-main"><div class="brow-name">' + esc(l.name) + '<span class="brow-cost" style="color:#4bb371;">+' + (+l.value || 0) + 'D back</span></div>' + (l.description ? '<div class="brow-desc">' + esc(l.description) + '</div>' : '') + '</div>' + btn + '</div>';
+  }).join('');
+}
+
 // ═══ PERKS / FLAWS / TALENTS (traits) ═════════════════════════════════════
 const TRAIT_BUCKETS = { perk:'perks', asset:'perks', flaw:'flaws', trouble:'flaws', talent:'talents' };
 function traitBucketOf(kind) { return TRAIT_BUCKETS[norm(kind)] || 'perks'; }
@@ -1266,6 +1309,7 @@ function renderGearPicker() {
   const sb = $('skill-body'); if(sb) sb.addEventListener('click', e => { const b = e.target.closest('[data-add-skill]'); if(b) { if(addSkillByName(b.dataset.addSkill)) _flashBrow(b); renderSkillPicker(); } });
   const pb = $('power-body'); if(pb) pb.addEventListener('click', e => { const b = e.target.closest('[data-add-power]'); if(b) { if(addPowerByName(b.dataset.addPower)) { setTab('traits'); _flashBrow(b); } renderPowerPicker(); } });
   const tb = $('trait-body'); if(tb) tb.addEventListener('click', e => { const b = e.target.closest('[data-add-trait]'); if(b) { if(addTraitByName(b.dataset.addTrait)) { setTab('traits'); _flashBrow(b); } renderTraitPicker(); } });
+  const lb = $('limit-body'); if(lb) lb.addEventListener('click', e => { const b = e.target.closest('[data-add-limit]'); if(b) { if(addLimitByName(b.dataset.addLimit)) { setTab('traits'); _flashBrow(b); } renderLimitPicker(); } });
   const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => {
     const wpn = e.target.closest('[data-add-weapon]'); if(wpn) { addWeaponFromEquip(wpn.dataset.addWeapon); _flashBrow(wpn); renderGearPicker(); return; }
     const arm = e.target.closest('[data-add-armor]'); if(arm) { addGearFromData(arm.dataset.addArmor); _flashBrow(arm); renderGearPicker(); return; }
@@ -1333,6 +1377,7 @@ function collectSheet() {
     weapons: [...document.querySelectorAll('#weapons-body tr')].map(tr => ({ name: tr.querySelector('.wp-name').value, damage: tr.querySelector('.wp-dmg').value, range: tr.querySelector('.wp-range').value, skill: tr.querySelector('.wp-skill').value, notes: tr.querySelector('.wp-notes').value, link: tr.dataset.link || '', fixed: tr.dataset.fixed ? true : undefined })).filter(w => w.name || w.damage),
     armor: { name: v('f-armor'), protection: v('f-armor-prot') },
     powers: [...document.querySelectorAll('#powers-body tr')].map(tr => ({ name: tr.querySelector('.pw-name').value.trim(), kind: tr.querySelector('.pw-kind').value.trim(), note: tr.querySelector('.pw-note').value.trim() })).filter(p => p.name),
+    limitations: [...document.querySelectorAll('#limits-body tr')].map(tr => ({ name: tr.querySelector('.lm-name').value.trim(), note: tr.querySelector('.lm-note').value.trim() })).filter(l => l.name),
     perks: traits('perks'), flaws: traits('flaws'), talents: traits('talents'),
     gear: [...document.querySelectorAll('#gear-body tr')].map(tr => ({ name: tr.querySelector('.gr-name').value.trim(), note: tr.querySelector('.gr-note').value.trim(), link: tr.dataset.link || '' })).filter(g => g.name),
     wealth: v('f-wealth'), background: v('f-background'), personality: v('f-personality'), notes: v('f-notes'),
@@ -1340,7 +1385,7 @@ function collectSheet() {
       noDodge: !!options.noDodge, wildDie: options.wildDie || 'core', heroModel: options.heroModel || 'heroic',
       advancement: options.advancement || 'none', magicPoints: !!options.magicPoints,
       specialization: !!options.specialization, attrBudget: !!options.attrBudget, powerLevel: options.powerLevel || 'none',
-      traitModule: (options.traitModule === 'troubles' || options.traitModule === 'none') ? options.traitModule : 'perks', superpowers: !!options.superpowers,
+      traitModule: (options.traitModule === 'perks' || options.traitModule === 'none') ? options.traitModule : 'troubles', superpowers: !!options.superpowers,
       rollMode: options.rollMode === 'successes' ? 'successes' : 'additive', successTarget: Math.max(1, Math.min(6, num(options.successTarget) || 6)),
       xp: num(options.xp), milestones: num(options.milestones),
       arcs: (options.arcs || []).map(a => ({ skill: a.skill || '', stepsDone: num(a.stepsDone), stepsNeeded: num(a.stepsNeeded) })),
@@ -1364,6 +1409,7 @@ function applySheet(d) {
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-prot', ar.protection);
   $('weapons-body').innerHTML = ''; (d.weapons || []).forEach(addWeaponRow); ensureUnarmed();
   $('powers-body').innerHTML = ''; (d.powers || []).forEach(addPowerRow);
+  $('limits-body').innerHTML = ''; (d.limitations || []).forEach(addLimitRow);
   $('perks-body').innerHTML = ''; (d.perks || []).forEach(t => addTraitRow('perks', typeof t === 'string' ? { name: t } : t));
   $('flaws-body').innerHTML = ''; (d.flaws || []).forEach(t => addTraitRow('flaws', typeof t === 'string' ? { name: t } : t));
   $('talents-body').innerHTML = ''; (d.talents || []).forEach(t => addTraitRow('talents', typeof t === 'string' ? { name: t } : t));
@@ -1561,6 +1607,7 @@ campaignUpdateBtn();
 <script src="/tools-data/d62e-equipment.js"></script>
 <script src="/tools-data/d62e-perks.js"></script>
 <script src="/tools-data/d62e-powers.js"></script>
+<script src="/tools-data/d62e-limitations.js"></script>
 <script src="/tools-data/d62e-sheet-builder.js"></script>
 <script>
 buildStats();
