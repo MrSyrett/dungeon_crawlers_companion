@@ -10,11 +10,11 @@ export const one = (v: string | string[] | undefined): string => (Array.isArray(
 
 export const chipBase = "rounded border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors";
 export const chipOff = "border-[var(--border)] text-[var(--muted)] hover:border-[var(--yze)] hover:text-[var(--text)]";
-export const chipOn = "border-[var(--yze)] bg-[var(--panel-2)] text-[#e6a04a]";
-export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]";
+export const chipOn = "border-[var(--yze)] bg-[var(--panel-2)] text-[#3fd0e6]";
+export const nameCls = "text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]";
 export const cardCls = "rounded-lg border border-[var(--border)] bg-[var(--panel)] p-4";
 export const badge = "rounded border border-[var(--border)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]";
-export const hbBadge = "rounded border border-[var(--yze)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#e6a04a]";
+export const hbBadge = "rounded border border-[var(--yze)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#3fd0e6]";
 
 export function withParams(base: string, current: Query, patch: Query): string {
   const next = { ...current, ...patch };
@@ -69,7 +69,7 @@ export function CountLine({ count, noun, base, filtered }: { count: number; noun
 }
 
 export function SectionH({ children }: { children: React.ReactNode }) {
-  return <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">{children}</h2>;
+  return <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">{children}</h2>;
 }
 
 export function EmptyState({ noun, base }: { noun: string; base: string }) {

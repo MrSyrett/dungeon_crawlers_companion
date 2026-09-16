@@ -72,7 +72,7 @@ const SYSTEMS = [
   {
     file: "yze_session_prep_builder.html", key: "yze_session", ls: "yze_builder_v1", cfg: "yze", random: "Random Adversary",
     name: "Year Zero Engine", title: "Session Prep Builder — Year Zero Engine",
-    accent: "#d98a2b", accentDark: "#a5641a", red: "#b82018", redDark: "#7a1510", highlight: "#e6b45f", boxBg: "#f4e6d0",
+    accent: "#16bdd6", accentDark: "#0d8299", red: "#b82018", redDark: "#7a1510", highlight: "#5fd6ea", boxBg: "#dbeff4",
     chapter: "Scene", chapterPh: "Scene 1", session: "Session", mobs: "Adversaries/NPCs", mobsHeading: "Adversaries &amp; NPCs",
     mob: "Adversary", boss: "Threat", npc: "NPC", typePh: "GRUNT // STR 3 · MELEE 2", titlePh: "e.g. The Cold Below", subtitlePh: "e.g. A Year Zero Engine one-shot",
   },

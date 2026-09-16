@@ -12965,16 +12965,16 @@ window.init_rules = init_rules;
     var o=out(btn); if(!o)return; var a=d6(),b=d6(),code=''+a+b;
     if(kind==='phys'){ var r=look(CRITP,code); if(!r){o.innerHTML='';return;}
       var lethal=r[2]!=='No';
-      o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;'+(lethal?'border-color:#b23c2f;':'')+'"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Physical Crit · D66 = '+code+'</div><div style="font-size:17px;font-weight:800;color:#e6a04a;">'+esc(r[1])+(lethal?' <span style="color:#e0776f;font-size:12px;">LETHAL '+esc(r[2])+' · '+esc(r[3])+'</span>':'')+'</div><div style="font-size:13px;margin-top:3px;">'+esc(r[4])+'</div><div style="font-size:11px;color:#999;margin-top:2px;">Heal: '+esc(r[5])+'</div></div>'+o.innerHTML;
+      o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;'+(lethal?'border-color:#b23c2f;':'')+'"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Physical Crit · D66 = '+code+'</div><div style="font-size:17px;font-weight:800;color:#3fd0e6;">'+esc(r[1])+(lethal?' <span style="color:#e0776f;font-size:12px;">LETHAL '+esc(r[2])+' · '+esc(r[3])+'</span>':'')+'</div><div style="font-size:13px;margin-top:3px;">'+esc(r[4])+'</div><div style="font-size:11px;color:#999;margin-top:2px;">Heal: '+esc(r[5])+'</div></div>'+o.innerHTML;
     } else { var m=look(CRITM,code); if(!m){o.innerHTML='';return;}
-      o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Mental Crit · D66 = '+code+'</div><div style="font-size:17px;font-weight:800;color:#e6a04a;">'+esc(m[1])+'</div><div style="font-size:13px;margin-top:3px;">'+esc(m[2])+'</div><div style="font-size:11px;color:#999;margin-top:2px;">Heal: '+esc(m[3])+'</div></div>'+o.innerHTML;
+      o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Mental Crit · D66 = '+code+'</div><div style="font-size:17px;font-weight:800;color:#3fd0e6;">'+esc(m[1])+'</div><div style="font-size:13px;margin-top:3px;">'+esc(m[2])+'</div><div style="font-size:11px;color:#999;margin-top:2px;">Heal: '+esc(m[3])+'</div></div>'+o.innerHTML;
     }
   };
   window.yzePanic=function(btn){
     var o=out(btn); if(!o)return; var p=btn.closest('[data-panel]'); var si=p?p.querySelector('.yze-stress'):null;
     var stress=si?(parseInt(si.value,10)||0):0; var roll=d6(), total=roll+stress, row=null;
     for(var i=0;i<PANIC.length;i++){ if(total<=PANIC[i][0]){ row=PANIC[i]; break; } } if(!row)row=PANIC[PANIC.length-1];
-    o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Panic · D6 '+roll+' + stress '+stress+' = '+total+'</div><div style="font-size:17px;font-weight:800;color:#e6a04a;">'+esc(row[1])+'</div><div style="font-size:13px;margin-top:3px;">'+esc(row[2])+'</div></div>'+o.innerHTML;
+    o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Panic · D6 '+roll+' + stress '+stress+' = '+total+'</div><div style="font-size:17px;font-weight:800;color:#3fd0e6;">'+esc(row[1])+'</div><div style="font-size:13px;margin-top:3px;">'+esc(row[2])+'</div></div>'+o.innerHTML;
   };
 })();
 </script>

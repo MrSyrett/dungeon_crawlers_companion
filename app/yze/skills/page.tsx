@@ -15,7 +15,7 @@ export default function YzeSkillsPage() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {YZE_ATTRIBUTES.map((a) => (
           <section key={a.key}>
-            <h2 className="mb-2 flex items-baseline justify-between border-b border-[var(--border)] pb-1 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">
+            <h2 className="mb-2 flex items-baseline justify-between border-b border-[var(--border)] pb-1 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">
               <span>{a.name}</span>
               <span className="text-[11px] font-semibold text-[var(--muted)]">{a.key}</span>
             </h2>

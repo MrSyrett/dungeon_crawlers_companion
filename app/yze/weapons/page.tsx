@@ -61,7 +61,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             <tbody>
               {results.map((w, i) => (
                 <tr key={`${w.homebrew ? "hb" : "bk"}-${w.name}-${i}`} className="border-t border-[var(--border)]">
-                  <td className="p-2 font-semibold text-[#e6a04a]">{w.name}{w.homebrew ? <span className="ml-2 rounded border border-[var(--yze)] px-1 py-0.5 text-[8px] uppercase tracking-[0.1em] text-[#e6a04a]">HB</span> : null}</td>
+                  <td className="p-2 font-semibold text-[#3fd0e6]">{w.name}{w.homebrew ? <span className="ml-2 rounded border border-[var(--yze)] px-1 py-0.5 text-[8px] uppercase tracking-[0.1em] text-[#3fd0e6]">HB</span> : null}</td>
                   <td className="p-2 text-[var(--muted)]">{w.grip}</td>
                   <td className="p-2 font-mono">{w.bonus}</td>
                   <td className="p-2 font-mono">{w.damage}</td>

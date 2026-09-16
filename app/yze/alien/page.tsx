@@ -15,22 +15,22 @@ export default function YzeAlienPage() {
         <p className="text-[13px] leading-relaxed text-[var(--text)]">
           ALIEN is a variant of the Year Zero Engine — choose it in the character sheet&rsquo;s
           Create wizard. It keeps the four attributes and d6 dice pools but swaps in its own twelve
-          skills and three signature changes: <b className="text-[#e6a04a]">Health = your Strength score</b>,
-          <b className="text-[#e6a04a]"> Stress replaces Resolve</b> (it counts up; you add Stress Dice
+          skills and three signature changes: <b className="text-[#3fd0e6]">Health = your Strength score</b>,
+          <b className="text-[#3fd0e6]"> Stress replaces Resolve</b> (it counts up; you add Stress Dice
           equal to your Stress Level to every roll, and a <b>1</b> on a Stress Die forces a Panic Roll
-          and blocks pushing), and characters take a <b className="text-[#e6a04a]">career</b>, a starting
-          <b className="text-[#e6a04a]"> talent</b>, and a <b className="text-[#e6a04a]">signature item</b>.
+          and blocks pushing), and characters take a <b className="text-[#3fd0e6]">career</b>, a starting
+          <b className="text-[#3fd0e6]"> talent</b>, and a <b className="text-[#3fd0e6]">signature item</b>.
           Pushing a roll raises your Stress by one.
         </p>
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">Skills</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">Skills</h2>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {ALIEN_SKILLS.map((s) => (
             <div key={s.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3">
               <div className="flex items-baseline gap-2">
-                <span className="text-[14px] font-bold text-[#e6a04a]">{s.name}</span>
+                <span className="text-[14px] font-bold text-[#3fd0e6]">{s.name}</span>
                 <span className={badge}>{s.attr}</span>
               </div>
               <p className="mt-0.5 text-[12px] text-[var(--muted)]">{s.desc}</p>
@@ -40,7 +40,7 @@ export default function YzeAlienPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">Careers</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">Careers</h2>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {ALIEN_CAREERS.map((c) => (
             <div key={c.name} className={cardCls}>
@@ -58,12 +58,12 @@ export default function YzeAlienPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">Career talents</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">Career talents</h2>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {careerTalents.map((t) => (
             <div key={t.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3">
               <div className="flex flex-wrap items-baseline gap-x-2">
-                <span className="text-[13px] font-bold text-[#e6a04a]">{t.name}</span>
+                <span className="text-[13px] font-bold text-[#3fd0e6]">{t.name}</span>
                 <span className={badge}>{t.career}</span>
               </div>
               <p className="mt-0.5 text-[12px] leading-relaxed text-[var(--text)]">{t.desc}</p>
@@ -73,11 +73,11 @@ export default function YzeAlienPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">General talents</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">General talents</h2>
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {generalTalents.map((t) => (
             <div key={t.name} className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3">
-              <span className="text-[13px] font-bold text-[#e6a04a]">{t.name}</span>
+              <span className="text-[13px] font-bold text-[#3fd0e6]">{t.name}</span>
               <p className="mt-0.5 text-[12px] leading-relaxed text-[var(--text)]">{t.desc}</p>
             </div>
           ))}
@@ -85,7 +85,7 @@ export default function YzeAlienPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">Weapons</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">Weapons</h2>
         <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
           <table className="w-full border-collapse text-[12px]">
             <thead>
@@ -96,7 +96,7 @@ export default function YzeAlienPage() {
             <tbody>
               {weaponClasses.map((cls) => ALIEN_WEAPONS.filter((w) => w.class === cls).map((w, i) => (
                 <tr key={`${cls}-${w.name}-${i}`} className="border-t border-[var(--border)]">
-                  <td className="p-2 font-semibold text-[#e6a04a]">{w.name}</td>
+                  <td className="p-2 font-semibold text-[#3fd0e6]">{w.name}</td>
                   <td className="p-2 text-[var(--muted)]">{w.class}</td>
                   <td className="p-2 font-mono">{w.bonus}</td>
                   <td className="p-2 font-mono">{w.damage || "—"}</td>
@@ -111,7 +111,7 @@ export default function YzeAlienPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">Suits &amp; armor</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">Suits &amp; armor</h2>
         <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
           <table className="w-full border-collapse text-[12px]">
             <thead>
@@ -122,7 +122,7 @@ export default function YzeAlienPage() {
             <tbody>
               {ALIEN_ARMOR.map((a) => (
                 <tr key={a.name} className="border-t border-[var(--border)]">
-                  <td className="p-2 font-semibold text-[#e6a04a]">{a.name}</td>
+                  <td className="p-2 font-semibold text-[#3fd0e6]">{a.name}</td>
                   <td className="p-2 font-mono">{a.rating}</td>
                   <td className="p-2 font-mono text-[var(--muted)]">{a.air}</td>
                   <td className="p-2 font-mono text-[var(--muted)]">{a.weight}</td>

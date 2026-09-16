@@ -35,7 +35,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       <YzeHeader title="Gear & Encumbrance" subtitle={`Year Zero Engine · SRD v1.0${hbRows.length ? ` · ${hbRows.length} homebrew` : ""}`} />
 
       <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">Encumbrance</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">Encumbrance</h2>
         <p className="max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
           You can carry regular items up to your carry limit, equal to double your Strength score.
           Heavier items count as two or more; light items count as ½ or ¼. Tiny items (hideable in a
@@ -45,7 +45,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">Armor & cover</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">Armor & cover</h2>
         <p className="mb-3 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
           Body armor has a numeric rating; when hit, roll that many D6 and each 6 stops one point of
           damage. Cover works like armor but only against ranged attacks. Armor does nothing against
@@ -61,7 +61,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
             <tbody>
               {YZE_COVER.map((c) => (
                 <tr key={c.barrier} className="border-t border-[var(--border)]">
-                  <td className="p-2 font-semibold text-[#e6a04a]">{c.barrier}</td>
+                  <td className="p-2 font-semibold text-[#3fd0e6]">{c.barrier}</td>
                   <td className="p-2 font-mono">{c.rating}</td>
                   <td className="p-2 font-mono text-[var(--muted)]">{c.die}</td>
                 </tr>
@@ -72,7 +72,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       </section>
 
       <section>
-        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#e6a04a]">Your homebrew gear</h2>
+        <h2 className="mb-3 text-base font-bold uppercase tracking-[0.12em] text-[#3fd0e6]">Your homebrew gear</h2>
         <p className="mb-4 max-w-[68ch] text-[13px] leading-relaxed text-[var(--muted)]">
           The SRD ships no fixed gear list — gear is setting-specific. Add your own below; it shows in
           the character sheet&rsquo;s gear picker.

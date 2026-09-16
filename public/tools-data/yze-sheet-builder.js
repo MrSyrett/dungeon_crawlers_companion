@@ -67,31 +67,31 @@
       + chip('ALIEN', alien, "window.YZEB.setVariant('alien')", 'ALIEN RPG: Stress & Panic, careers, talents') + '</div>';
 
     h += (alien
-      ? '<p class="m-hint" style="margin-top:10px;">ALIEN: Health = your Strength; Stress replaces Resolve. Pick a career (it sets your key attribute), spend <b style="color:#e6b45f;">14</b> attribute points and <b style="color:#e6b45f;">10</b> skill points (career skills to 3, others to 1), and choose one career talent.</p>'
-      : '<p class="m-hint" style="margin-top:10px;">Spend <b style="color:#e6b45f;">14 points total</b> across the four attributes (each starts at 2; key to 5, others to 4) and <b style="color:#e6b45f;">10 points</b> across the twelve skills (cap 3).</p>');
+      ? '<p class="m-hint" style="margin-top:10px;">ALIEN: Health = your Strength; Stress replaces Resolve. Pick a career (it sets your key attribute), spend <b style="color:#5fd6ea;">14</b> attribute points and <b style="color:#5fd6ea;">10</b> skill points (career skills to 3, others to 1), and choose one career talent.</p>'
+      : '<p class="m-hint" style="margin-top:10px;">Spend <b style="color:#5fd6ea;">14 points total</b> across the four attributes (each starts at 2; key to 5, others to 4) and <b style="color:#5fd6ea;">10 points</b> across the twelve skills (cap 3).</p>');
 
     h += '<div class="m-lbl" style="margin-top:10px;">Name</div><input class="m-input" id="yzeb-name" value="' + esc(name) + '" placeholder="Character name" oninput="window.YZEB.setName(this.value)">';
 
     if (alien) {
-      h += '<div class="m-lbl" style="margin-top:12px;">Career <span style="color:#9d9384;font-weight:600;text-transform:none;letter-spacing:0;">(sets your key attribute)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      h += '<div class="m-lbl" style="margin-top:12px;">Career <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">(sets your key attribute)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
       h += CAREERS.map(function (c) { return chip(c.name, career === c.name, "window.YZEB.setCareer('" + c.name.replace(/'/g, "\\'") + "')", 'Key ' + c.key + ' · ' + c.skills.join(', ')); }).join('');
       h += '</div>';
       var cc = careerObj(career);
-      if (cc) h += '<p class="m-hint" style="margin:6px 0 0;">Key <b style="color:#e6b45f;">' + esc(cc.key) + '</b> · career skills: ' + esc(cc.skills.join(', ')) + '</p>';
+      if (cc) h += '<p class="m-hint" style="margin:6px 0 0;">Key <b style="color:#5fd6ea;">' + esc(cc.key) + '</b> · career skills: ' + esc(cc.skills.join(', ')) + '</p>';
     } else {
-      h += '<div class="m-lbl" style="margin-top:12px;">Key attribute <span style="color:#9d9384;font-weight:600;text-transform:none;letter-spacing:0;">(may reach 5)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      h += '<div class="m-lbl" style="margin-top:12px;">Key attribute <span style="color:#8ba3a8;font-weight:600;text-transform:none;letter-spacing:0;">(may reach 5)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
       h += ATTRS.map(function (a) { return chip(a.name, key === a.key, "window.YZEB.setKey('" + a.key + "')"); }).join('');
       h += '</div>';
     }
 
-    h += '<div class="m-lbl" style="margin-top:12px;">Attributes — <span style="color:' + (aLeft < 0 ? '#df6a6a' : '#e6b45f') + ';">' + aLeft + ' left</span></div><div class="a-skills">';
+    h += '<div class="m-lbl" style="margin-top:12px;">Attributes — <span style="color:' + (aLeft < 0 ? '#df6a6a' : '#5fd6ea') + ';">' + aLeft + ' left</span></div><div class="a-skills">';
     h += ATTRS.map(function (a) {
       var v = attrs[a.key];
       return stepper(a.name + (key === a.key ? ' ★' : ''), v, "window.YZEB.attr('" + a.key + "',-1)", "window.YZEB.attr('" + a.key + "',1)", v <= 2, v >= attrMax(a.key) || aLeft <= 0);
     }).join('');
     h += '</div>';
 
-    h += '<div class="m-lbl" style="margin-top:12px;">Skills — <span style="color:' + (sLeft < 0 ? '#df6a6a' : '#e6b45f') + ';">' + sLeft + ' left</span></div>';
+    h += '<div class="m-lbl" style="margin-top:12px;">Skills — <span style="color:' + (sLeft < 0 ? '#df6a6a' : '#5fd6ea') + ';">' + sLeft + ' left</span></div>';
     ATTRS.forEach(function (a) {
       h += '<div class="a-attr">' + esc(a.name) + '</div><div class="a-skills">';
       h += SK.filter(function (s) { return s.attr === a.key; }).map(function (s) {

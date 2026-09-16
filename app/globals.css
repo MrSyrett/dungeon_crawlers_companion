@@ -25,8 +25,8 @@
   --icrpg: #c8501e;
   /* Candela Obscura accent — gaslamp-horror candela teal. */
   --candela: #2fa595;
-  /* Year Zero Engine accent — stark survival amber. */
-  --yze: #d98a2b;
+  /* Year Zero Engine accent — sci-fi terminal cyan (Alien vibes). */
+  --yze: #16bdd6;
 }
 
 @theme inline {
