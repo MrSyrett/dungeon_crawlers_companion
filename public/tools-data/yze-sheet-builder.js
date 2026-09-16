@@ -18,7 +18,9 @@
     attrs = {}; ATTRS.forEach(function (a) { attrs[a.key] = 2; });
     skills = {}; SKILLS.forEach(function (s) { skills[s.name] = 0; });
   }
-  function attrSpent() { var n = 0; ATTRS.forEach(function (a) { n += (attrs[a.key] - 2); }); return n; }
+  // SRD: distribute 14 points TOTAL across the four attributes, each 2–5 (the base
+  // 2s count toward the 14), so attrTotal is the running sum, not points above base.
+  function attrTotal() { var n = 0; ATTRS.forEach(function (a) { n += attrs[a.key]; }); return n; }
   function skillSpent() { var n = 0; SKILLS.forEach(function (s) { n += skills[s.name]; }); return n; }
   function attrMax(k) { return key === k ? 5 : 4; }
 
@@ -41,8 +43,8 @@
 
   function render() {
     ensure();
-    var aLeft = ATTR_BUDGET - attrSpent(), sLeft = SKILL_BUDGET - skillSpent();
-    var h = '<p class="m-hint">Distribute <b style="color:#e6b45f;">14 points</b> across the four attributes (each 2–5; your key attribute may reach 5, the others cap at 4) and <b style="color:#e6b45f;">10 points</b> across the twelve skills (starting skills cap at 3).</p>';
+    var aLeft = ATTR_BUDGET - attrTotal(), sLeft = SKILL_BUDGET - skillSpent();
+    var h = '<p class="m-hint">Spend <b style="color:#e6b45f;">14 points total</b> across the four attributes — each starts at 2 (so 6 points are yours to place); your key attribute may reach 5, the others cap at 4. Then distribute <b style="color:#e6b45f;">10 points</b> across the twelve skills (starting skills cap at 3).</p>';
 
     h += '<div class="m-lbl">Name</div><input class="m-input" id="yzeb-name" value="' + esc(name) + '" placeholder="Character name" oninput="window.YZEB.setName(this.value)">';
 
@@ -93,7 +95,7 @@
     close: function () { if (ov) ov.classList.remove('open'); },
     setName: function (v) { name = v; },
     setKey: function (k) { key = (key === k) ? '' : k; if (key && attrs[key] > 5) attrs[key] = 5; ATTRS.forEach(function (a) { if (a.key !== key && attrs[a.key] > 4) attrs[a.key] = 4; }); render(); },
-    attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (ATTR_BUDGET - attrSpent()) <= 0) return; attrs[k] = v; render(); },
+    attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (ATTR_BUDGET - attrTotal()) <= 0) return; attrs[k] = v; render(); },
     skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > SKILL_CAP) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },
     apply: function () {
       var d = { name: name, key: key, attrs: {}, skills: {} };

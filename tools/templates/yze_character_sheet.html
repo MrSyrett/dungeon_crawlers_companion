@@ -104,6 +104,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .pip.on{background:var(--yz);border-color:var(--yz-dk);}
 .pip.sk{width:13px;height:13px;}
 .attr-row .a-val{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);width:20px;text-align:center;flex:0 0 auto;}
+/* Attributes with their skills nested underneath */
+.attr-skills{padding:8px 10px;display:flex;flex-direction:column;gap:11px;}
+.as-attr .attr-row{padding-bottom:3px;border-bottom:1px solid var(--rule);margin-bottom:4px;}
+.as-attr .attr-row .a-name{font-size:15px;color:var(--yz-dk);}
+.as-skills{display:flex;flex-direction:column;gap:2px;padding-left:8px;}
+.as-skills .skill-row{gap:8px;}
 
 /* Vitals */
 .vitals{padding:8px 10px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:8px;}
@@ -276,26 +282,25 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="section-bar accent"><span>Attributes</span><span class="sb-note">1–5 · key to 5</span></div>
-      <div class="attr-list" id="attr-list"></div>
+      <div class="section-bar accent"><span>Attributes &amp; Skills</span><span class="sb-note">1–5 · click a skill to roll</span></div>
+      <div class="attr-skills" id="attr-skills"></div>
 
+      <div class="xp-row"><span class="v-lbl">Experience</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button><span style="font-size:10px;color:var(--muted);font-style:italic;">skill +1: 5×lvl · new skill: 5 · specialty: 10</span></div>
+    </div>
+
+    <div class="center-col">
+      <div class="section-bar accent"><span>Health &amp; Resolve</span><span class="sb-note">damage tracks</span></div>
       <div class="vitals" id="vitals">
         <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div><button class="v-auto" onclick="autoDerive('health')" title="Set max from (Str+Agi)/2 +1">auto</button></div>
         <div class="vrow"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div><button class="v-auto" onclick="autoDerive('resolve')" title="Set max from (Wits+Emp)/2 +1">auto</button></div>
         <div class="vrow"><span class="broken-tag hide" id="broken-tag">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('phys')">Physical Crit</button><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('ment')">Mental Crit</button></div>
       </div>
 
+      <div class="section-bar accent"><span>Conditions</span><span class="sb-note">from pushing, attacks &amp; stress</span></div>
       <div class="conds">
         <div class="cond-grp"><div class="cg-lbl">Physical conditions <span style="font-weight:600;text-transform:none;letter-spacing:0;">(−1 to Str/Agi each)</span></div><div class="cond-row" id="cond-phys"></div></div>
         <div class="cond-grp"><div class="cg-lbl">Mental conditions <span style="font-weight:600;text-transform:none;letter-spacing:0;">(−1 to Wits/Emp each)</span></div><div class="cond-row" id="cond-ment"></div></div>
       </div>
-
-      <div class="xp-row"><span class="v-lbl">Experience</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button><span style="font-size:10px;color:var(--muted);font-style:italic;">skill +1: 5×lvl · new skill: 5 · specialty: 10</span></div>
-    </div>
-
-    <div class="center-col">
-      <div class="section-bar accent"><span>Skills</span><span class="sb-note">click a skill to roll its pool</span></div>
-      <div class="skills-wrap" id="skills-wrap"></div>
 
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="combat" onclick="setTab('combat')">Combat</button>
@@ -414,18 +419,26 @@ function derivedMax(which){
   return Math.ceil((attrVal('WITS')+attrVal('EMP'))/2)+1;
 }
 
-// ── Render: attributes ──
-function renderAttrs(){
-  var host=$('attr-list'); host.innerHTML='';
+// ── Render: attributes with their skills nested underneath ──
+function renderAttrSkills(){
+  var host=$('attr-skills'); if(!host)return; host.innerHTML='';
   ATTRS.forEach(function(a){
     var v=attrVal(a.key), max=(S.key===a.key)?5:4, pips='';
     for(var i=1;i<=5;i++){ var dis=i>max&&i>v; pips+='<button class="pip'+(i<=v?' on':'')+'"'+(dis?' disabled title="cap 4 (non-key)"':' onclick="setAttr(\''+a.key+'\','+i+')" title="'+esc(a.desc)+'"')+(dis?' style="opacity:.25;"':'')+'></button>'; }
-    var el=document.createElement('div'); el.className='attr-row';
-    el.innerHTML='<span class="a-name">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><div class="pips">'+pips+'</div><span class="a-val">'+v+'</span>';
-    host.appendChild(el);
+    var head='<div class="attr-row"><span class="a-name">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><div class="pips">'+pips+'</div><span class="a-val">'+v+'</span></div>';
+    var rows='';
+    skillsByAttr(a.key).forEach(function(s){
+      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key), skp='';
+      for(var j=1;j<=5;j++){ skp+='<button class="pip sk'+(j<=lvl?' on':'')+'" onclick="setSkill(\''+s.name.replace(/'/g,"\\'")+'\','+j+')"></button>'; }
+      rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+s.name.replace(/'/g,"\\'")+'\')" title="'+esc(s.desc)+'">'+s.name+'</button><div class="pips">'+skp+'</div><span class="sk-pool" title="pool = attribute + skill − conditions">'+Math.max(0,pool)+'d</span></div>';
+    });
+    var block=document.createElement('div'); block.className='as-attr';
+    block.innerHTML=head+'<div class="as-skills">'+rows+'</div>';
+    host.appendChild(block);
   });
 }
-function setAttr(k,n){ var max=(S.key===k)?5:4; n=clamp(n,0,max); S.attrs[k]=(S.attrs[k]===n)?n-1:n; renderAttrs(); renderSkills(); renderEnc(); scheduleAutosave(); }
+function renderAttrs(){ renderAttrSkills(); }
+function setAttr(k,n){ var max=(S.key===k)?5:4; n=clamp(n,0,max); S.attrs[k]=(S.attrs[k]===n)?n-1:n; renderAttrSkills(); renderEnc(); scheduleAutosave(); }
 
 // ── Render: vitals (Health / Resolve damage tracks) ──
 function renderVitals(){
@@ -458,22 +471,9 @@ function renderConds(){
   });
 }
 
-// ── Render: skills ──
-function renderSkills(){
-  var host=$('skills-wrap'); host.innerHTML='';
-  ATTRS.forEach(function(a){
-    var grp=document.createElement('div'); grp.className='skill-grp';
-    var rows='';
-    skillsByAttr(a.key).forEach(function(s){
-      var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key), pips='';
-      for(var i=1;i<=5;i++){ pips+='<button class="pip sk'+(i<=lvl?' on':'')+'" onclick="setSkill(\''+s.name.replace(/'/g,"\\'")+'\','+i+')"></button>'; }
-      rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+s.name.replace(/'/g,"\\'")+'\')" title="'+esc(s.desc)+'">'+s.name+'</button><div class="pips">'+pips+'</div><span class="sk-pool" title="dice pool = attribute + skill − conditions">'+Math.max(0,pool)+'d</span></div>';
-    });
-    grp.innerHTML='<div class="sg-hd"><span>'+a.name+'</span><span class="sg-attr">'+a.key+' '+attrVal(a.key)+'</span></div>'+rows;
-    host.appendChild(grp);
-  });
-}
-function setSkill(name,n){ n=clamp(n,0,5); S.skills[name]=(S.skills[name]===n)?n-1:n; renderSkills(); refreshWizardButtons(); scheduleAutosave(); }
+// ── Render: skills (nested under attributes via renderAttrSkills) ──
+function renderSkills(){ renderAttrSkills(); }
+function setSkill(name,n){ n=clamp(n,0,5); S.skills[name]=(S.skills[name]===n)?n-1:n; renderAttrSkills(); refreshWizardButtons(); scheduleAutosave(); }
 
 // ── Render: XP + traits + relationships ──
 function bumpXP(d){ S.xp=Math.max(0,num(S.xp)+d); $('f-xp').value=S.xp; scheduleAutosave(); }
@@ -757,7 +757,7 @@ function applySheet(d){
 function renderAll(){
   $('f-name').value=S.name||''; $('f-archetype').value=S.archetype||''; $('f-pronouns').value=S.pronouns||''; $('f-key').value=S.key||'';
   $('f-appearance').value=S.appearance||''; $('f-notes').value=S.notes||''; $('f-xp').value=num(S.xp); $('f-armor').value=num(S.armor);
-  renderAttrs(); renderVitals(); renderConds(); renderSkills(); renderTraits(); renderRelationships(); renderWeapons(); renderGear(); updateFoot(); refreshWizardButtons();
+  renderAttrSkills(); renderVitals(); renderConds(); renderTraits(); renderRelationships(); renderWeapons(); renderGear(); updateFoot(); refreshWizardButtons();
 }
 function saveSheet(quiet){
   var data=collectSheet(), json=JSON.stringify(data);
@@ -784,7 +784,7 @@ $('f-archetype').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-pronouns').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-appearance').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-notes').addEventListener('input',function(){ scheduleAutosave(); });
-$('f-key').addEventListener('change',function(){ S.key=this.value; renderAttrs(); renderSkills(); scheduleAutosave(); });
+$('f-key').addEventListener('change',function(){ S.key=this.value; renderAttrSkills(); scheduleAutosave(); });
 try{ if(localStorage.getItem('yze_dark')==='1') setDarkMode(true); }catch(e){}
 </script>
 
