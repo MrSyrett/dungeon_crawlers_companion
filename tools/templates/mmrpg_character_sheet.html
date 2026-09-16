@@ -110,20 +110,31 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .abil-row .a-roll{background:var(--mv);color:#fff;border:none;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:5px 9px;cursor:pointer;}
 .abil-row .a-roll:hover{background:var(--mv-dk);}
 
-/* Vitals */
-.vitals{padding:8px 10px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:7px;}
-.vrow{display:flex;align-items:center;gap:8px;}
-.vrow .v-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);width:64px;flex:0 0 auto;}
-.vrow .v-cur{width:56px;border:1px solid var(--rule);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:15px;text-align:center;color:var(--ink);outline:none;padding:3px 0;}
-.vrow .v-max{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);}
-.vrow .v-step{width:24px;height:26px;border:1px solid var(--rule);background:var(--box);border-radius:4px;cursor:pointer;font-weight:800;color:var(--ink);}
-.vrow.health .v-cur{border-color:var(--red);}
-.vrow.focus .v-cur{border-color:var(--blue);}
-.vrow.karma .v-cur{border-color:var(--gold);}
-.derived{padding:8px 10px;border-bottom:1px solid var(--rule);display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;}
-.derived .d-item{display:flex;justify-content:space-between;gap:6px;font-family:'Barlow Condensed',sans-serif;font-size:12px;}
-.derived .d-item .d-lbl{font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
-.derived .d-item .d-val{font-family:'Share Tech Mono',monospace;color:var(--mv-dk);font-weight:700;}
+/* Vitals — bubble tiles (matching the other sheets' stat boxes) */
+.vitals{padding:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border-bottom:1px solid var(--rule);align-items:stretch;}
+.vital{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:7px 9px;display:flex;flex-direction:column;gap:3px;}
+.vlbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:4px;}
+.vlbl small{font-weight:600;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:none;}
+.vbig{display:flex;align-items:center;gap:4px;}
+.vbig .v-step{width:22px;height:30px;border:1px solid var(--rule);background:var(--input-bg);border-radius:4px;cursor:pointer;font-weight:800;color:var(--ink);flex:0 0 auto;}
+.vbig .v-cur{width:52px;height:34px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
+.vbig .v-max{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);white-space:nowrap;}
+.vital.health .v-cur{border-color:var(--red);}
+.vital.focus .v-cur{border-color:var(--blue);}
+.vital.karma .v-cur{border-color:var(--gold);}
+.vline{display:flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.vline input{width:40px;height:22px;border:1px solid var(--rule);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:12px;text-align:center;color:var(--ink);outline:none;}
+/* Derived — small stat bubbles */
+.derived{padding:0 8px 8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border-bottom:1px solid var(--rule);}
+.sbub{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:6px 8px;text-align:center;}
+.sbub .sbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.sbub .sbv{font-family:'Share Tech Mono',monospace;font-size:19px;font-weight:700;color:var(--mv-dk);line-height:1.1;}
+/* Conditions (toggle chips) */
+.conds{padding:8px 10px;display:flex;flex-wrap:wrap;gap:5px;}
+.cond{display:flex;align-items:center;gap:4px;border:1px solid var(--rule);border-radius:12px;padding:2px 9px 2px 6px;cursor:pointer;background:var(--input-bg);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--muted);}
+.cond .cbox{width:11px;height:11px;border:1.5px solid var(--input-border);border-radius:3px;display:inline-block;flex:0 0 auto;}
+.cond.on{border-color:var(--mv);color:var(--mv-dk);background:var(--mv-lt);}
+.cond.on .cbox{background:var(--mv);border-color:var(--mv);}
 
 /* Tabs */
 .tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
@@ -240,18 +251,30 @@ body.dark .sheet{border-color:#3a3d47;}
       <div class="section-bar accent"><span>Abilities</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;">M A R V E L</span></div>
       <div class="abil-list" id="abil-list"></div>
 
-      <div class="section-bar accent"><span>Vitals</span></div>
-      <div class="vitals" id="vitals">
-        <div class="vrow health"><span class="v-lbl">Health</span><button class="v-step" onclick="bumpVital('health',-1)">−</button><input class="v-cur" id="v-health" type="number" value="0" oninput="S.health.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('health',1)">＋</button><span class="v-max">/ <b id="v-health-max">0</b></span></div>
-        <div class="vrow focus"><span class="v-lbl">Focus</span><button class="v-step" onclick="bumpVital('focus',-1)">−</button><input class="v-cur" id="v-focus" type="number" value="0" oninput="S.focus.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('focus',1)">＋</button><span class="v-max">/ <b id="v-focus-max">0</b></span></div>
-        <div class="vrow karma"><span class="v-lbl">Karma</span><button class="v-step" onclick="bumpVital('karma',-1)">−</button><input class="v-cur" id="v-karma" type="number" value="0" oninput="S.karma.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('karma',1)">＋</button><span class="v-max">/ <b id="v-karma-max">0</b></span></div>
-        <div class="vrow"><button class="dice-btn mini" style="flex:1;" onclick="recover('health')" title="Resilience check vs 10 → regain Marvel die × rank">Recover Health</button><button class="dice-btn mini" style="flex:1;" onclick="recover('focus')" title="Vigilance check vs 10 → regain Marvel die × rank">Recover Focus</button></div>
-      </div>
-
-      <div class="derived" id="derived"></div>
+      <div class="section-bar accent"><span>Conditions</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;">tap to toggle</span></div>
+      <div class="conds" id="conds"></div>
     </div>
 
     <div class="center-col">
+      <div class="section-bar accent"><span>Vitals</span><span class="hdr-right"><button class="hdr-btn" onclick="recover('health')" title="Resilience check vs 10 → regain Marvel die × rank">Recover Health</button><button class="hdr-btn" onclick="recover('focus')" title="Vigilance check vs 10 → regain Marvel die × rank">Recover Focus</button></span></div>
+      <div class="vitals" id="vitals">
+        <div class="vital health">
+          <div class="vlbl"><span>Health</span><small>Res × 30</small></div>
+          <div class="vbig"><button class="v-step" onclick="bumpVital('health',-1)">−</button><input class="v-cur" id="v-health" type="number" value="0" oninput="S.health.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('health',1)">＋</button><span class="v-max">/ <b id="v-health-max">0</b></span></div>
+          <div class="vline">DR <input id="v-health-dr" type="number" value="0" oninput="S.healthDR=num(this.value);scheduleAutosave()"></div>
+        </div>
+        <div class="vital focus">
+          <div class="vlbl"><span>Focus</span><small>Vig × 30</small></div>
+          <div class="vbig"><button class="v-step" onclick="bumpVital('focus',-1)">−</button><input class="v-cur" id="v-focus" type="number" value="0" oninput="S.focus.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('focus',1)">＋</button><span class="v-max">/ <b id="v-focus-max">0</b></span></div>
+          <div class="vline">DR <input id="v-focus-dr" type="number" value="0" oninput="S.focusDR=num(this.value);scheduleAutosave()"></div>
+        </div>
+        <div class="vital karma">
+          <div class="vlbl"><span>Karma</span><small>= Rank</small></div>
+          <div class="vbig"><button class="v-step" onclick="bumpVital('karma',-1)">−</button><input class="v-cur" id="v-karma" type="number" value="0" oninput="S.karma.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('karma',1)">＋</button><span class="v-max">/ <b id="v-karma-max">0</b></span></div>
+        </div>
+      </div>
+      <div class="derived" id="derived"></div>
+
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="powers" onclick="setTab('powers')">Powers</button>
         <button class="tab-btn" data-tab="traits" onclick="setTab('traits')">Traits &amp; Tags</button>
@@ -306,8 +329,8 @@ body.dark .sheet{border-color:#3a3d47;}
   </div>
   <div class="log-entries" id="log-entries"><div class="log-hint">Click an ability to make a d616 action check</div></div>
   <div class="dice-tray">
-    <div class="tray-row"><span class="tray-label">Target #</span><input class="tray-input" id="tray-tn" type="number" value="10" min="0"><span class="tray-label" style="color:#6a6e78;">edges</span><button class="tray-step" onclick="bumpTray('edge',-1)">−</button><span id="tray-edge" style="font-family:'Share Tech Mono';color:#e8c86a;width:16px;text-align:center;">0</span><button class="tray-step" onclick="bumpTray('edge',1)">＋</button></div>
-    <div class="tray-row"><span class="tray-label">Modifier</span><input class="tray-input" id="tray-mod" type="number" value="0"><span class="tray-label" style="color:#6a6e78;">troubles</span><button class="tray-step" onclick="bumpTray('trouble',-1)">−</button><span id="tray-trouble" style="font-family:'Share Tech Mono';color:#e0776f;width:16px;text-align:center;">0</span><button class="tray-step" onclick="bumpTray('trouble',1)">＋</button></div>
+    <div class="tray-row"><span class="tray-label">Modifier</span><input class="tray-input" id="tray-mod" type="number" value="0"><span class="tray-label" style="color:#6a6e78;">edges</span><button class="tray-step" onclick="bumpTray('edge',-1)">−</button><span id="tray-edge" style="font-family:'Share Tech Mono';color:#e8c86a;width:16px;text-align:center;">0</span><button class="tray-step" onclick="bumpTray('edge',1)">＋</button></div>
+    <div class="tray-row"><span class="tray-label" style="visibility:hidden;">Modifier</span><span class="tray-label" style="color:#6a6e78;">troubles</span><button class="tray-step" onclick="bumpTray('trouble',-1)">−</button><span id="tray-trouble" style="font-family:'Share Tech Mono';color:#e0776f;width:16px;text-align:center;">0</span><button class="tray-step" onclick="bumpTray('trouble',1)">＋</button></div>
     <div class="tray-row"><button class="dice-btn" onclick="rollFree()">Roll d616</button><button class="karma-btn" id="karma-btn" onclick="toggleKarma()" title="Spend 1 Karma to reroll a die (edge)">Karma</button></div>
   </div>
 </div>
@@ -344,14 +367,29 @@ var ABILITIES=[
   {key:'ego',name:'Ego',desc:'Magic & willpower'},
   {key:'logic',name:'Logic',desc:'Reason → telepathy'},
 ];
+var CONDITIONS=[
+  {name:'Ablaze',desc:'Lose 5 Health at the end of each of your turns until put out (Agility vs TN 10).'},
+  {name:'Bleeding',desc:'Lose 5 Health at the end of each turn until stopped (Logic vs TN 10) or you recover any Health.'},
+  {name:'Blinded',desc:'Sight-based concentration powers end; speed halved; trouble on sight checks; enemies get an edge on you.'},
+  {name:'Deafened',desc:'Hearing-based concentration powers end; trouble on action checks that need hearing.'},
+  {name:'Demoralized',desc:'Your concentration powers end; you have trouble on all action checks.'},
+  {name:'Grabbed',desc:"You can't move (nor can the grabber, unless they carry you along)."},
+  {name:'Paralyzed',desc:"Can't move or take actions needing Melee or Agility; attackers get an edge."},
+  {name:'Pinned',desc:'Like Grabbed, plus trouble on Melee/Agility checks and no movement actions.'},
+  {name:'Prone',desc:'On the ground: trouble on your ranged attacks; close attackers get an edge.'},
+  {name:'Shattered',desc:'Mentally broken — requires long-term care.'},
+  {name:'Stunned',desc:'Concentration powers end; you lose your next action; enemies get an edge.'},
+  {name:'Surprised',desc:"Can't act in the bonus round; attackers get an edge on you."},
+  {name:'Unconscious',desc:'Out cold — concentration powers end; helpless and unable to act.'},
+];
 
 // ── State ──
 var S=null; var _lastRoll=null; var karmaArmed=false; var edges=0, troubles=0;
 function blankState(){
   var st={ name:'',real:'',pronouns:'',rank:1,origin:'',occupation:'',size:'Average',teams:'',
     abilities:{melee:0,agility:0,resilience:0,vigilance:0,ego:0,logic:0},
-    health:{cur:0,max:0}, focus:{cur:0,max:0}, karma:{cur:1,max:1},
-    powers:[], traits:[], tags:[], attacks:[],
+    health:{cur:0,max:0}, focus:{cur:0,max:0}, karma:{cur:1,max:1}, healthDR:0, focusDR:0,
+    conditions:{}, powers:[], traits:[], tags:[], attacks:[],
     history:'', personality:'', features:'', base:'', notes:'' };
   return st;
 }
@@ -387,19 +425,32 @@ function renderVitals(){
   $('v-health').value=S.health.cur; $('v-health-max').textContent=S.health.max;
   $('v-focus').value=S.focus.cur; $('v-focus-max').textContent=S.focus.max;
   $('v-karma').value=S.karma.cur; $('v-karma-max').textContent=S.karma.max;
+  var hd=$('v-health-dr'); if(hd)hd.value=num(S.healthDR); var fd=$('v-focus-dr'); if(fd)fd.value=num(S.focusDR);
 }
 function bumpVital(w,d){ var mx=(w==='health'?healthMax():w==='focus'?focusMax():karmaMax()); S[w].cur=clamp(num(S[w].cur)+d,0, w==='karma'?99:mx); renderVitals(); scheduleAutosave(); }
 function renderDerived(){
   var host=$('derived'); if(!host)return;
-  var items=[['Initiative','+'+ab('vigilance')],['Run Speed',runSpeed()],['Damage Mult','×'+dmgMult()],['Rank',rank()]];
-  host.innerHTML=items.map(function(it){ return '<div class="d-item"><span class="d-lbl">'+it[0]+'</span><span class="d-val">'+it[1]+'</span></div>'; }).join('');
+  var half=Math.floor(runSpeed()/2);
+  var items=[['Initiative',(ab('vigilance')>=0?'+':'')+ab('vigilance')],['Run',runSpeed()],['Climb/Swim',half],['Jump',half],['Dmg Mult','×'+dmgMult()],['Rank',rank()]];
+  host.innerHTML=items.map(function(it){ return '<div class="sbub"><div class="sbl">'+it[0]+'</div><div class="sbv">'+it[1]+'</div></div>'; }).join('');
 }
+// ── Render: conditions (toggle chips) ──
+function renderConditions(){
+  var host=$('conds'); if(!host)return;
+  host.innerHTML=CONDITIONS.map(function(c){
+    var on=!!(S.conditions&&S.conditions[c.name]);
+    return '<button class="cond'+(on?' on':'')+'" title="'+esc(c.desc)+'" onclick="toggleCondition(\''+c.name+'\')"><span class="cbox"></span>'+esc(c.name)+'</button>';
+  }).join('');
+}
+function toggleCondition(name){ if(!S.conditions)S.conditions={}; S.conditions[name]=!S.conditions[name];
+  addLog('Condition',(S.conditions[name]?'+ ':'− ')+name, S.conditions[name]?'gained':'cleared', S.conditions[name]?'fumble':'normal');
+  renderConditions(); scheduleAutosave(); }
 function recover(w){
   var abl=(w==='health')?'resilience':'vigilance';
   var r=roll616(); var total=r.sum+ab(abl);
   if(total>=10){ var gain=r.marvelVal*rank()*(r.fantastic?2:1); S[w].cur=clamp(num(S[w].cur)+gain,0,(w==='health'?healthMax():focusMax()));
-    addLog('Recover '+(w==='health'?'Health':'Focus'),'+'+gain, dieStr(r)+' + '+ab(abl)+' = '+total+' vs 10 ✓', 'crit'); }
-  else addLog('Recover '+(w==='health'?'Health':'Focus'),'✗', dieStr(r)+' + '+ab(abl)+' = '+total+' vs 10 — failed','fumble');
+    addLog('Recover '+(w==='health'?'Health':'Focus'),'+'+gain+(w==='health'?' Health':' Focus'), dieStr(r)+' + '+ab(abl)+' = '+total+(r.fantastic?' · Fantastic (×2)':''), 'crit'); }
+  else addLog('Recover '+(w==='health'?'Health':'Focus'),'—', dieStr(r)+' + '+ab(abl)+' = '+total+' · need 10 to recover','normal');
   renderVitals(); scheduleAutosave();
 }
 
@@ -430,20 +481,17 @@ function dieStr(r){ var mid=r.fantastic?'M':String(r.m); return '['+r.d1+' '+mid
 function consumeKarma(){ if(karmaArmed){ S.karma.cur=Math.max(0,num(S.karma.cur)-1); karmaArmed=false; $('karma-btn').classList.remove('on'); renderVitals(); return true; } return false; }
 function doCheck(label, abilityKey, opts){
   opts=opts||{};
-  var mod=num($('tray-mod').value); var tn=opts.tn!=null?opts.tn:num($('tray-tn').value);
+  var mod=num($('tray-mod').value);
   // Karma edge: arm one extra reroll (edge) if armed
   var usedK=consumeKarma(); if(usedK) edges+=1;
   var r=roll616();
   if(usedK) edges-=1;
   var score=abilityKey?ab(abilityKey):0;
   var total=r.sum+score+mod;
-  var pass=total>=tn;
   var etTxt=(edges||troubles)?(' · '+(edges?edges+'E':'')+(troubles?troubles+'T':'')):'';
   var kTxt=usedK?' · Karma':'';
-  var detail=dieStr(r)+' '+r.sum+(score?' +'+score:'')+(mod?' '+(mod>0?'+':'')+mod:'')+' = '+total+' vs TN '+tn+etTxt+kTxt;
-  var type=r.fantastic?'crit':(pass?'':'fumble');
-  var res=(r.fantastic?'FANTASTIC ':'')+total+(pass?' ✓ HIT':' ✗ miss');
-  addLog(label, res, detail+(r.fantastic?' · Fantastic! (Yes, and…)':''), type);
+  var detail=dieStr(r)+' '+r.sum+(score?' +'+score:'')+(mod?' '+(mod>0?'+':'')+mod:'')+etTxt+kTxt+(r.fantastic?' · Fantastic! (Yes, and…)':'');
+  addLog(label, (r.fantastic?'FANTASTIC · ':'')+total, detail, r.fantastic?'crit':'normal');
   edges=0; troubles=0; renderTray(); $('tray-mod').value='0';
   return r;
 }
@@ -451,13 +499,14 @@ function rollAbility(k){ var a=ABILITIES.find(function(x){return x.key===k;}); d
 function rollFree(){ doCheck('d616', null, {}); }
 function rollAttack(i){
   var w=S.attacks[i]; if(!w)return; var k=w.ability||'melee';
-  var mod=num($('tray-mod').value); var tn=num($('tray-tn').value);
+  var mod=num($('tray-mod').value);
   var usedK=consumeKarma(); if(usedK) edges+=1;
   var r=roll616(); if(usedK) edges-=1;
-  var score=ab(k); var total=r.sum+score+mod; var pass=total>=tn;
+  var score=ab(k); var total=r.sum+score+mod;
   var dmg=r.marvelVal*dmgMult()*(r.fantastic?2:1)+score;
-  var detail=dieStr(r)+' '+r.sum+' +'+score+' = '+total+' vs '+tn+' · dmg '+r.marvelVal+'×'+dmgMult()+(r.fantastic?'×2':'')+' +'+score+' = '+dmg;
-  addLog((w.name||'Attack')+' ('+ABILITIES.find(function(x){return x.key===k;}).name+')', (r.fantastic?'FANTASTIC ':'')+(pass?'HIT · '+dmg+' dmg':'miss'), detail, r.fantastic?'crit':(pass?'':'fumble'));
+  var etTxt=(edges||troubles)?(' · '+(edges?edges+'E':'')+(troubles?troubles+'T':'')):'';
+  var detail=dieStr(r)+' '+r.sum+' +'+score+(mod?' '+(mod>0?'+':'')+mod:'')+etTxt+(usedK?' · Karma':'')+' · dmg '+r.marvelVal+'×'+dmgMult()+(r.fantastic?'×2':'')+' +'+score;
+  addLog((w.name||'Attack')+' ('+ABILITIES.find(function(x){return x.key===k;}).name+')', (r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmg+' dmg', detail, r.fantastic?'crit':'normal');
   edges=0;troubles=0;renderTray();$('tray-mod').value='0';
 }
 function toggleKarma(){ if(!karmaArmed){ if(num(S.karma.cur)<=0){ addLog('Karma','✗','No Karma left','fumble'); return; } karmaArmed=true; } else karmaArmed=false; $('karma-btn').classList.toggle('on',karmaArmed); }
@@ -613,6 +662,8 @@ function applySheet(d){
   if(d.rank!=null)S.rank=clamp(num(d.rank)||1,1,6);
   if(d.abilities) ABILITIES.forEach(function(a){ if(d.abilities[a.key]!=null)S.abilities[a.key]=num(d.abilities[a.key]); });
   ['health','focus','karma'].forEach(function(w){ if(d[w])S[w]={cur:num(d[w].cur),max:num(d[w].max)}; });
+  if(d.healthDR!=null)S.healthDR=num(d.healthDR); if(d.focusDR!=null)S.focusDR=num(d.focusDR);
+  S.conditions={}; if(d.conditions) CONDITIONS.forEach(function(c){ if(d.conditions[c.name])S.conditions[c.name]=true; });
   if(Array.isArray(d.powers)) S.powers=d.powers.map(function(p){ return {name:p.name||'',powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||''}; });
   if(Array.isArray(d.traits)) S.traits=d.traits.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.tags)) S.tags=d.tags.map(function(t){ return {name:t.name||'',description:t.description||''}; });
@@ -628,7 +679,7 @@ function renderAll(){
   $('f-history').value=S.history||''; $('f-personality').value=S.personality||''; $('f-features').value=S.features||''; $('f-base').value=S.base||''; $('f-notes').value=S.notes||'';
   fillHeaderSelects(); $('f-origin').value=S.origin||''; $('f-occupation').value=S.occupation||'';
   if(!S.health.max)S.health.max=healthMax(); if(!S.focus.max)S.focus.max=focusMax();
-  renderAbilities(); renderVitals(); renderDerived(); renderPowers(); renderTraitsTags(); renderAttacks(); renderTray(); updateFoot(); refreshWizardButtons();
+  renderAbilities(); renderVitals(); renderDerived(); renderConditions(); renderPowers(); renderTraitsTags(); renderAttacks(); renderTray(); updateFoot(); refreshWizardButtons();
 }
 function updateFoot(){ var f=$('foot-build'); if(f) f.textContent='Rank '+rank(); }
 function saveSheet(quiet){
