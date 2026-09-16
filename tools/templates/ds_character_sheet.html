@@ -2245,12 +2245,17 @@ function autoEquipArmorFromGear() {
       if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
       if(existing) {
         existing.dataset.eq = row.dataset.eqId;           // reconnect
-        // Also link any Sneak Attack row generated for this weapon.
+        // Also link the Thief Backstab row generated for this weapon so the slot
+        // owns it too (matching addEquipAttack's naming + eqBackstab marker) —
+        // otherwise reapplyEquippedWeaponAttacks thinks the backstab is missing
+        // and re-adds it, duplicating the row.
         [...document.querySelectorAll('#attacks-body tr')].forEach(tr => {
           if(tr.dataset.eq) return;
           const t = (tr.querySelector('td input')?.value || '').trim();
-          if(new RegExp('^Sneak Attack \\(' + nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') +'\\)', 'i').test(t))
+          if(new RegExp('^Backstab \\(' + nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') +'\\)', 'i').test(t)) {
             tr.dataset.eq = row.dataset.eqId;
+            tr.dataset.eqBackstab = '1';
+          }
         });
       } else {
         addEquipAttack(row);                              // none found → build linked
@@ -3536,6 +3541,16 @@ function _applySDData(d){
       if(existing) {
         if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
         existing.dataset.eq = row.dataset.eqId;
+        // Link the Thief Backstab row for this weapon too (name + eqBackstab marker),
+        // so reapplyEquippedWeaponAttacks doesn't treat it as missing and duplicate it.
+        [...document.querySelectorAll('#attacks-body tr')].forEach(tr => {
+          if(tr.dataset.eq) return;
+          const t = (tr.querySelector('td input')?.value || '').trim();
+          if(new RegExp('^Backstab \\(' + nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') +'\\)', 'i').test(t)) {
+            tr.dataset.eq = row.dataset.eqId;
+            tr.dataset.eqBackstab = '1';
+          }
+        });
       } else {
         addEquipAttack(row);
       }
