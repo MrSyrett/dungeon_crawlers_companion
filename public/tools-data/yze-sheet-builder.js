@@ -1,27 +1,37 @@
-// Year Zero Engine character builder — a single-panel point-buy creation tool.
-// SRD dice-pool creation: distribute 14 points across the four attributes (2–5,
-// key attribute may reach 5, others cap at 4); distribute 10 points across the
-// twelve skills (starting skills cap at level 3). Then hands a finished
-// character to applySheet(). Uses the sheet globals: YZE_ATTRIBUTES, YZE_SKILLS,
-// $, esc, applySheet, autoDerive, num.
+// Year Zero Engine character builder — a single-panel point-buy creation tool
+// that also picks the game variant (YZE SRD or ALIEN). Distribute 14 points
+// across the four attributes (2–5, key to 5 / others 4) and 10 across the twelve
+// skills, then hand a finished character to applySheet(). In Alien mode you also
+// pick a career (which sets the key attribute) and one starting talent; career
+// skills cap at 3, non-career skills at 1. Uses sheet globals: YZE_ATTRIBUTES,
+// YZE_SKILLS, ALIEN_SKILLS, ALIEN_CAREERS, ALIEN_TALENTS, $, esc, applySheet,
+// autoDerive, num, setVariant, saveSheet, addLog.
 (function () {
   'use strict';
-  var ATTRS = (typeof window !== 'undefined' && Array.isArray(window.YZE_ATTRIBUTES)) ? window.YZE_ATTRIBUTES : [];
-  var SKILLS = (typeof window !== 'undefined' && Array.isArray(window.YZE_SKILLS)) ? window.YZE_SKILLS : [];
-  var ATTR_BUDGET = 14, SKILL_BUDGET = 10, SKILL_CAP = 3;
+  var W = (typeof window !== 'undefined') ? window : {};
+  var ATTRS = Array.isArray(W.YZE_ATTRIBUTES) ? W.YZE_ATTRIBUTES : [];
+  var YSK = Array.isArray(W.YZE_SKILLS) ? W.YZE_SKILLS : [];
+  var ASK = Array.isArray(W.ALIEN_SKILLS) ? W.ALIEN_SKILLS : [];
+  var CAREERS = Array.isArray(W.ALIEN_CAREERS) ? W.ALIEN_CAREERS : [];
+  var TALENTS = Array.isArray(W.ALIEN_TALENTS) ? W.ALIEN_TALENTS : [];
+  var ATTR_BUDGET = 14, SKILL_BUDGET = 10;
 
-  var name = '', key = '';
+  var variant = 'yze', name = '', key = '', career = '', talentPick = '';
   var attrs = {}, skills = {};
 
+  function curSkills() { return variant === 'alien' ? ASK : YSK; }
+  function careerObj(nm) { for (var i = 0; i < CAREERS.length; i++) if (CAREERS[i].name === nm) return CAREERS[i]; return null; }
+  function talentDesc(nm) { for (var i = 0; i < TALENTS.length; i++) if (TALENTS[i].name === nm) return TALENTS[i].desc; return ''; }
+  function isCareerSkill(nm) { var c = careerObj(career); return !!(c && c.skills.indexOf(nm) >= 0); }
+  function skillCap(nm) { return (variant === 'alien' && !isCareerSkill(nm)) ? 1 : 3; }
+
   function reset() {
-    name = ''; key = '';
+    name = ''; key = ''; career = ''; talentPick = '';
     attrs = {}; ATTRS.forEach(function (a) { attrs[a.key] = 2; });
-    skills = {}; SKILLS.forEach(function (s) { skills[s.name] = 0; });
+    skills = {}; YSK.concat(ASK).forEach(function (s) { skills[s.name] = 0; });
   }
-  // SRD: distribute 14 points TOTAL across the four attributes, each 2–5 (the base
-  // 2s count toward the 14), so attrTotal is the running sum, not points above base.
   function attrTotal() { var n = 0; ATTRS.forEach(function (a) { n += attrs[a.key]; }); return n; }
-  function skillSpent() { var n = 0; SKILLS.forEach(function (s) { n += skills[s.name]; }); return n; }
+  function skillSpent() { var n = 0; curSkills().forEach(function (s) { n += skills[s.name]; }); return n; }
   function attrMax(k) { return key === k ? 5 : 4; }
 
   var ov;
@@ -40,17 +50,39 @@
       + '<button onclick="' + minus + '"' + (minusDis ? ' disabled' : '') + '>−</button>'
       + '<button onclick="' + plus + '"' + (plusDis ? ' disabled' : '') + '>+</button></div>';
   }
+  function chip(label, sel, onclick, title) {
+    return '<button class="builder-chip' + (sel ? ' sel' : '') + '" title="' + esc(title || '') + '" onclick="' + onclick + '">' + esc(label) + '</button>';
+  }
 
   function render() {
     ensure();
+    var alien = variant === 'alien';
     var aLeft = ATTR_BUDGET - attrTotal(), sLeft = SKILL_BUDGET - skillSpent();
-    var h = '<p class="m-hint">Spend <b style="color:#e6b45f;">14 points total</b> across the four attributes — each starts at 2 (so 6 points are yours to place); your key attribute may reach 5, the others cap at 4. Then distribute <b style="color:#e6b45f;">10 points</b> across the twelve skills (starting skills cap at 3).</p>';
+    var SK = curSkills();
 
-    h += '<div class="m-lbl">Name</div><input class="m-input" id="yzeb-name" value="' + esc(name) + '" placeholder="Character name" oninput="window.YZEB.setName(this.value)">';
+    var h = '';
+    // Variant picker
+    h += '<div class="m-lbl">Game</div><div style="display:flex;flex-wrap:wrap;gap:6px;">'
+      + chip('Year Zero (SRD)', !alien, "window.YZEB.setVariant('yze')", 'Generic YZE dice-pool core')
+      + chip('ALIEN', alien, "window.YZEB.setVariant('alien')", 'ALIEN RPG: Stress & Panic, careers, talents') + '</div>';
 
-    h += '<div class="m-lbl" style="margin-top:12px;">Key attribute <span style="color:#9d9384;font-weight:600;text-transform:none;letter-spacing:0;">(may reach 5)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
-    h += ATTRS.map(function (a) { return '<button class="builder-chip' + (key === a.key ? ' sel' : '') + '" onclick="window.YZEB.setKey(\'' + a.key + '\')">' + esc(a.name) + '</button>'; }).join('');
-    h += '</div>';
+    h += (alien
+      ? '<p class="m-hint" style="margin-top:10px;">ALIEN: Health = your Strength; Stress replaces Resolve. Pick a career (it sets your key attribute), spend <b style="color:#e6b45f;">14</b> attribute points and <b style="color:#e6b45f;">10</b> skill points (career skills to 3, others to 1), and choose one career talent.</p>'
+      : '<p class="m-hint" style="margin-top:10px;">Spend <b style="color:#e6b45f;">14 points total</b> across the four attributes (each starts at 2; key to 5, others to 4) and <b style="color:#e6b45f;">10 points</b> across the twelve skills (cap 3).</p>');
+
+    h += '<div class="m-lbl" style="margin-top:10px;">Name</div><input class="m-input" id="yzeb-name" value="' + esc(name) + '" placeholder="Character name" oninput="window.YZEB.setName(this.value)">';
+
+    if (alien) {
+      h += '<div class="m-lbl" style="margin-top:12px;">Career <span style="color:#9d9384;font-weight:600;text-transform:none;letter-spacing:0;">(sets your key attribute)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      h += CAREERS.map(function (c) { return chip(c.name, career === c.name, "window.YZEB.setCareer('" + c.name.replace(/'/g, "\\'") + "')", 'Key ' + c.key + ' · ' + c.skills.join(', ')); }).join('');
+      h += '</div>';
+      var cc = careerObj(career);
+      if (cc) h += '<p class="m-hint" style="margin:6px 0 0;">Key <b style="color:#e6b45f;">' + esc(cc.key) + '</b> · career skills: ' + esc(cc.skills.join(', ')) + '</p>';
+    } else {
+      h += '<div class="m-lbl" style="margin-top:12px;">Key attribute <span style="color:#9d9384;font-weight:600;text-transform:none;letter-spacing:0;">(may reach 5)</span></div><div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      h += ATTRS.map(function (a) { return chip(a.name, key === a.key, "window.YZEB.setKey('" + a.key + "')"); }).join('');
+      h += '</div>';
+    }
 
     h += '<div class="m-lbl" style="margin-top:12px;">Attributes — <span style="color:' + (aLeft < 0 ? '#df6a6a' : '#e6b45f') + ';">' + aLeft + ' left</span></div><div class="a-skills">';
     h += ATTRS.map(function (a) {
@@ -62,16 +94,27 @@
     h += '<div class="m-lbl" style="margin-top:12px;">Skills — <span style="color:' + (sLeft < 0 ? '#df6a6a' : '#e6b45f') + ';">' + sLeft + ' left</span></div>';
     ATTRS.forEach(function (a) {
       h += '<div class="a-attr">' + esc(a.name) + '</div><div class="a-skills">';
-      h += SKILLS.filter(function (s) { return s.attr === a.key; }).map(function (s) {
-        var v = skills[s.name];
-        return stepper(s.name, v, "window.YZEB.skill('" + s.name.replace(/'/g, "\\'") + "',-1)", "window.YZEB.skill('" + s.name.replace(/'/g, "\\'") + "',1)", v <= 0, v >= SKILL_CAP || sLeft <= 0);
+      h += SK.filter(function (s) { return s.attr === a.key; }).map(function (s) {
+        var v = skills[s.name], cap = skillCap(s.name), star = (alien && isCareerSkill(s.name)) ? ' ★' : '';
+        return stepper(s.name + star, v, "window.YZEB.skill('" + s.name.replace(/'/g, "\\'") + "',-1)", "window.YZEB.skill('" + s.name.replace(/'/g, "\\'") + "',1)", v <= 0, v >= cap || sLeft <= 0);
       }).join('');
       h += '</div>';
     });
 
-    var ready = aLeft === 0 && sLeft >= 0;
+    if (alien) {
+      var c2 = careerObj(career);
+      h += '<div class="m-lbl" style="margin-top:12px;">Starting talent</div>';
+      if (c2) {
+        h += '<div style="display:flex;flex-wrap:wrap;gap:6px;">' + c2.talents.map(function (t) { return chip(t, talentPick === t, "window.YZEB.setTalent('" + t.replace(/'/g, "\\'") + "')", talentDesc(t)); }).join('') + '</div>';
+        if (talentPick) h += '<p class="m-hint" style="margin:6px 0 0;">' + esc(talentDesc(talentPick)) + '</p>';
+      } else {
+        h += '<p class="m-hint" style="margin:0;">Pick a career first.</p>';
+      }
+    }
+
+    var ready = aLeft === 0 && sLeft >= 0 && (!alien || !!career);
     h += '<div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:8px;">'
-      + '<span class="m-hint" style="margin:0;">' + (aLeft === 0 ? 'Attributes set' : aLeft + ' attribute points left') + ' · ' + sLeft + ' skill points left</span>'
+      + '<span class="m-hint" style="margin:0;">' + (aLeft === 0 ? 'Attributes set' : aLeft + ' attribute points left') + ' · ' + sLeft + ' skill points left' + (alien && !career ? ' · pick a career' : '') + '</span>'
       + '<span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="window.YZEB.close()">Cancel</button>'
       + '<button class="m-btn" onclick="window.YZEB.apply()"' + (ready ? '' : ' disabled') + '>Apply</button></span></div>';
 
@@ -80,31 +123,42 @@
 
   window.YZEB = {
     launch: function () {
-      // seed from the live sheet so re-launching keeps existing choices
       try {
         if (typeof S !== 'undefined' && S) {
           reset();
+          variant = (S.variant === 'alien') ? 'alien' : 'yze';
           if (S.name) name = S.name;
           if (S.key) key = S.key;
+          if (S.career) career = S.career;
           ATTRS.forEach(function (a) { if (S.attrs && S.attrs[a.key] != null) attrs[a.key] = Math.max(2, num(S.attrs[a.key])); });
-          SKILLS.forEach(function (s) { if (S.skills && S.skills[s.name] != null) skills[s.name] = num(S.skills[s.name]); });
+          YSK.concat(ASK).forEach(function (s) { if (S.skills && S.skills[s.name] != null) skills[s.name] = num(S.skills[s.name]); });
         } else reset();
       } catch (e) { reset(); }
       ensure(); render(); ov.classList.add('open');
     },
     close: function () { if (ov) ov.classList.remove('open'); },
     setName: function (v) { name = v; },
+    setVariant: function (v) { variant = (v === 'alien') ? 'alien' : 'yze'; if (variant !== 'alien') { career = ''; talentPick = ''; } render(); },
     setKey: function (k) { key = (key === k) ? '' : k; if (key && attrs[key] > 5) attrs[key] = 5; ATTRS.forEach(function (a) { if (a.key !== key && attrs[a.key] > 4) attrs[a.key] = 4; }); render(); },
+    setCareer: function (nm) {
+      career = (career === nm) ? '' : nm; talentPick = '';
+      var c = careerObj(career);
+      if (c) { key = c.key; if (attrs[key] > 5) attrs[key] = 5; ATTRS.forEach(function (a) { if (a.key !== key && attrs[a.key] > 4) attrs[a.key] = 4; }); }
+      render();
+    },
+    setTalent: function (t) { talentPick = (talentPick === t) ? '' : t; render(); },
     attr: function (k, d) { var v = attrs[k] + d; if (v < 2 || v > attrMax(k)) return; if (d > 0 && (ATTR_BUDGET - attrTotal()) <= 0) return; attrs[k] = v; render(); },
-    skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > SKILL_CAP) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },
+    skill: function (nm, d) { var v = skills[nm] + d; if (v < 0 || v > skillCap(nm)) return; if (d > 0 && (SKILL_BUDGET - skillSpent()) <= 0) return; skills[nm] = v; render(); },
     apply: function () {
-      var d = { name: name, key: key, attrs: {}, skills: {} };
+      var alien = variant === 'alien';
+      var d = { name: name, key: key, variant: variant, attrs: {}, skills: {} };
       ATTRS.forEach(function (a) { d.attrs[a.key] = attrs[a.key]; });
-      SKILLS.forEach(function (s) { d.skills[s.name] = skills[s.name]; });
+      curSkills().forEach(function (s) { d.skills[s.name] = skills[s.name]; });
+      if (alien) { d.career = career; if (talentPick) d.talents = [{ name: talentPick, note: talentDesc(talentPick) }]; }
       try { applySheet(d); } catch (e) {}
-      try { autoDerive('health'); autoDerive('resolve'); } catch (e) {}
+      try { autoDerive('health'); if (!alien) autoDerive('resolve'); } catch (e) {}
       this.close();
-      try { addLog('Character Built', name || 'Unnamed', 'Attributes & skills set · Health/Resolve derived', 'crit'); } catch (e) {}
+      try { addLog('Character Built', name || 'Unnamed', alien ? ('ALIEN · ' + (career || 'crew') + ' · Health = Strength') : 'Attributes & skills set · Health/Resolve derived', 'crit'); } catch (e) {}
       try { saveSheet(true); } catch (e) {}
     }
   };

@@ -152,6 +152,7 @@
     h += optRow('Magic Points Casting', 'Cast from a points pool instead of straight rolls.', bchk('magicPoints'));
     h += optRow('Skill Specializations & Advanced Skills', 'Adds Adv / Spec controls to each skill on the sheet.', bchk('specialization'));
     h += optRow('Additional Attribute Budgets', 'Scales the a-la-carte attribute budget +3D per attribute beyond the core four.', bchk('attrBudget'));
+    h += optRow('Roll Resolution', 'Additive totals the dice (standard). Successes counts each die at or above a target number — set the target in the roll log.', bsel('rollMode', [['additive','Additive'],['successes','Successes']]));
     b.innerHTML = h;
     $('d62eb-bgenre').addEventListener('change', e => { genre = e.target.value; if (mode === 'template' && tpl && !templateGenreOk(tpl)) { tpl = null; mode = null; } render(); });
     b.querySelectorAll('[data-optk]').forEach(el => el.addEventListener('click', () => { bopts[el.dataset.optk] = !bopts[el.dataset.optk]; render(); }));

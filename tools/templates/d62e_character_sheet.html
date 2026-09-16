@@ -476,6 +476,7 @@ select option{background:var(--input-bg);color:var(--ink);}
     <div class="dice-pool-display" id="pool-display">Empty — tap 1D / 2D / 3D to build a pool</div>
     <div class="tray-note" id="mod-note">No modifiers.</div>
     <div class="tray-note" id="opt-note"></div>
+    <div class="tray-row" id="succ-target-row" style="display:none;"><span class="tray-label">Success on</span><select class="tray-select" id="succ-target" onchange="optField('successTarget', num(this.value)); applyOptions();"><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6</option></select><span class="tray-label" style="color:#6a5a4c;">or higher</span></div>
     <div class="dice-btns">
       <button class="dice-btn" onclick="addPoolDice(1)">+1D</button>
       <button class="dice-btn" onclick="addPoolDice(2)">+2D</button>
@@ -565,7 +566,7 @@ const D = {
   tables:    () => (typeof D62E_TABLES          !== 'undefined' ? D62E_TABLES          : null),
 };
 let wound = 'none', heroArmed = false;
-function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
+function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', rollMode:'additive', successTarget:6, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
 let options = defaultOptions();
 
 // ═══ DICE CODES ═══════════════════════════════════════════════════════════
@@ -822,7 +823,12 @@ function rollDice(p, wild, extraPlain) {
   }
   let total = rolls.reduce((a, b) => a + b, 0) + pipsRem;
   if(mishap && wildFaces) { total -= wildFaces.reduce((a, b) => a + b, 0); if(regular.length) total -= Math.max.apply(null, regular); if(total < 0) total = 0; }
-  return { rolls, total: total, pips: pipsRem, wildFaces: wildFaces, complication: complication, mishap: mishap, variant: variant };
+  // Successes module: count each rolled die (including exploded Wild Die faces) at
+  // or above the target number. Pips don't roll a die, so they don't score.
+  const succMode = !!(typeof options !== 'undefined' && options && options.rollMode === 'successes');
+  const target = Math.max(1, Math.min(6, num(options && options.successTarget) || 6));
+  let successes = 0; if(succMode) rolls.forEach(f => { if(f >= target) successes++; });
+  return { rolls, total: total, pips: pipsRem, wildFaces: wildFaces, complication: complication, mishap: mishap, variant: variant, succMode: succMode, target: target, successes: successes };
 }
 function wildStyle(r) {
   if(r.wildFaces && r.wildFaces[0] === 6) return { type: 'crit', mark: ' ✦', note: '✦ Advantage — the Wild Die exploded!' };
@@ -851,6 +857,12 @@ function computeRoll(basePips, opts) {
   const r = rollDice(p, !opts.noWild, extraPlain);
   const dc = opts.dc !== undefined ? opts.dc : null;
   const ws = wildStyle(r);
+  if(r.succMode) {
+    const succTxt = 'target ' + r.target + '+ · ' + r.successes + ' success' + (r.successes === 1 ? '' : 'es') + (r.pips ? ' (+' + r.pips + ' pips, no die)' : '');
+    const detailS = [diceStr(p, r), heroInfo, m.total ? 'mods ' + code(m.total, true) : '', ws.note, succTxt, dc ? 'vs ' + dc + ' successes' + (r.successes >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
+    const typeS = ws.type || (dc ? (r.successes >= dc ? 'crit' : 'fumble') : (r.successes > 0 ? 'crit' : 'fumble'));
+    return { total: r.successes, mark: ws.mark, detail: detailS, type: typeS };
+  }
   const detail = [diceStr(p, r), heroInfo, m.total ? 'mods ' + code(m.total, true) : '', ws.note, dc ? 'vs ' + dc + (r.total >= dc ? ' — success' : ' — failure') : ''].filter(Boolean).join(' · ');
   const type = ws.type || (dc ? (r.total >= dc ? 'crit' : 'fumble') : 'normal');
   return { total: r.total, mark: ws.mark, detail: detail, type: type };
@@ -878,7 +890,12 @@ function clearPool() { d62ePool = 0; renderPool(); }
 function rollPool() {
   if(d62ePool <= 0) { addLog('Dice Pool', '—', 'Add dice with 1D / 2D / 3D first', 'normal'); return; }
   const r = rollDice(d62ePool * 3, true); const ws = wildStyle(r);
-  addLog(d62ePool + 'D Pool', r.total + ws.mark, [diceStr(d62ePool * 3, r), ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
+  if(r.succMode) {
+    var st = 'target ' + r.target + '+ · ' + r.successes + ' success' + (r.successes === 1 ? '' : 'es');
+    addLog(d62ePool + 'D Pool', r.successes + ws.mark, [diceStr(d62ePool * 3, r), st, ws.note].filter(Boolean).join(' · '), ws.type || (r.successes > 0 ? 'crit' : 'fumble'));
+  } else {
+    addLog(d62ePool + 'D Pool', r.total + ws.mark, [diceStr(d62ePool * 3, r), ws.note].filter(Boolean).join(' · '), ws.type || 'normal');
+  }
   clearPool();
 }
 
@@ -908,10 +925,18 @@ function refreshOptNote() {
   if(options.specialization) extras.push('Specializations');
   if(options.magicPoints) extras.push('Magic Points');
   if(options.advancement && options.advancement !== 'none') extras.push('Adv: ' + options.advancement);
+  if(options.rollMode === 'successes') extras.push('Successes (' + (num(options.successTarget) || 6) + '+)');
   el.textContent = wd + ' · Hero: ' + hm + (extras.length ? ' · ' + extras.join(' · ') : '');
 }
 function applyOptions() {
   document.body.classList.toggle('spec-on', !!options.specialization);
+  // Successes module: reveal the success-target dropdown in the roll log.
+  var succRow = $('succ-target-row');
+  if(succRow) {
+    var on = options.rollMode === 'successes';
+    succRow.style.display = on ? 'flex' : 'none';
+    var st = $('succ-target'); if(st) st.value = String(Math.max(3, Math.min(6, num(options.successTarget) || 6)));
+  }
   setHeroUI(); refreshOptNote(); renderMagicPanel(); renderAdvancementPanel(); recalc();
 }
 // Rule TOGGLES are set only in the builder's Options step. The sheet reads them and,
@@ -1279,6 +1304,7 @@ function collectSheet() {
       noDodge: !!options.noDodge, wildDie: options.wildDie || 'core', heroModel: options.heroModel || 'heroic',
       advancement: options.advancement || 'none', magicPoints: !!options.magicPoints,
       specialization: !!options.specialization, attrBudget: !!options.attrBudget, powerLevel: options.powerLevel || 'none',
+      rollMode: options.rollMode === 'successes' ? 'successes' : 'additive', successTarget: Math.max(1, Math.min(6, num(options.successTarget) || 6)),
       xp: num(options.xp), milestones: num(options.milestones),
       arcs: (options.arcs || []).map(a => ({ skill: a.skill || '', stepsDone: num(a.stepsDone), stepsNeeded: num(a.stepsNeeded) })),
       magicAlignment: num(options.magicAlignment), magicCurrent: num(options.magicCurrent),

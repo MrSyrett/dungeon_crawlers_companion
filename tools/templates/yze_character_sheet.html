@@ -8,6 +8,7 @@
 <title>Year Zero Engine Character Sheet</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="/tools-data/yze-data.js"></script>
+<script src="/tools-data/yze-alien-data.js"></script>
 <style>
 /* ═══ Year Zero Engine sheet ═══ Same skeleton + chrome as the Candela / ICRPG /
    Star Wars sheets (framed card + two-column body + tabs + sticky Roll Log).
@@ -262,6 +263,24 @@ body.dark .pip,body.dark .vbox,body.dark .cond{background:var(--input-bg);}
   .roll-log.collapsed #log-collapse-btn::after{content:"\25BC Log";}
 }
 textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(--rule) transparent;}
+
+/* ── Variant: YZE SRD vs ALIEN ── */
+body[data-variant="alien"] .yze-only{display:none !important;}
+body:not([data-variant="alien"]) .alien-only{display:none !important;}
+/* Stress track (Alien mode) */
+.stress-row{display:flex;align-items:center;gap:8px;}
+.stress-pips{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 auto;}
+.spip{width:20px;height:20px;border:2px solid var(--rule);border-radius:4px;cursor:pointer;background:#fff;padding:0;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--yz-dk);line-height:1;}
+.spip.on{background:var(--yz);border-color:var(--yz-dk);color:#1a140a;}
+.stress-val{font-family:'Share Tech Mono',monospace;font-size:16px;color:var(--yz-dk);font-weight:700;min-width:20px;text-align:center;}
+.career-note{padding:6px 10px;font-size:11px;line-height:1.4;color:var(--muted);border-bottom:1px solid var(--rule);background:var(--box);}
+.career-note b{color:var(--yz-dk);}
+.tln-list{padding:8px 10px;display:flex;flex-direction:column;gap:6px;}
+.tln-card{border:1px solid var(--rule);border-radius:7px;background:var(--box);padding:7px 9px;}
+.tln-head{display:flex;align-items:center;gap:8px;}
+.tln-head .tln-name{flex:1 1 auto;font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;color:var(--yz-dk);}
+.tln-head .row-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;}
+.tln-card .tln-desc{margin-top:4px;font-size:12px;line-height:1.4;color:var(--ink);}
 </style>
 </head>
 <body>
@@ -274,7 +293,8 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
     <div class="hdr-logo"><div class="lg-word">YEAR ZERO</div><div class="lg-sub">Engine · Dossier</div></div>
     <div class="hdr-fields">
       <div class="hdr-field" style="grid-column:span 4;"><label>Name</label><input type="text" id="f-name" placeholder="Character name"></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Archetype</label><input type="text" id="f-archetype" placeholder="Role / career"></div>
+      <div class="hdr-field yze-only" style="grid-column:span 3;"><label>Archetype</label><input type="text" id="f-archetype" placeholder="Role / career"></div>
+      <div class="hdr-field alien-only" style="grid-column:span 3;"><label>Career</label><select id="f-career"><option value="">—</option></select></div>
       <div class="hdr-field" style="grid-column:span 3;"><label>Key Attribute</label><select id="f-key"><option value="">—</option><option value="STR">Strength</option><option value="AGI">Agility</option><option value="WITS">Wits</option><option value="EMP">Empathy</option></select></div>
       <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
     </div>
@@ -289,15 +309,20 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
     </div>
 
     <div class="center-col">
-      <div class="section-bar accent"><span>Health &amp; Resolve</span><span class="sb-note">damage tracks</span></div>
+      <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span><span class="sb-note">damage tracks</span></div>
+      <div class="section-bar accent alien-only"><span>Health &amp; Stress</span><span class="sb-note">Health = Strength · Stress counts up</span></div>
       <div class="vitals" id="vitals">
-        <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div><button class="v-auto" onclick="autoDerive('health')" title="Set max from (Str+Agi)/2 +1">auto</button></div>
-        <div class="vrow"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div><button class="v-auto" onclick="autoDerive('resolve')" title="Set max from (Wits+Emp)/2 +1">auto</button></div>
-        <div class="vrow"><span class="broken-tag hide" id="broken-tag">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('phys')">Physical Crit</button><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('ment')">Mental Crit</button></div>
+        <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div><button class="v-auto" onclick="autoDerive('health')" title="Alien: Health = Strength; YZE: (Str+Agi)/2 +1">auto</button></div>
+        <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div><button class="v-auto" onclick="autoDerive('resolve')" title="Set max from (Wits+Emp)/2 +1">auto</button></div>
+        <div class="vrow alien-only"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><span class="stress-val" id="stress-val">0</span></div>
+        <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('phys')">Physical Crit</button><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('ment')">Mental Crit</button></div>
+        <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('phys')">Crit Injury</button></div>
       </div>
 
-      <div class="section-bar accent"><span>Conditions</span><span class="sb-note">from pushing, attacks &amp; stress</span></div>
-      <div class="conds">
+      <div class="career-note alien-only" id="career-note"></div>
+
+      <div class="section-bar accent yze-only"><span>Conditions</span><span class="sb-note">from pushing, attacks &amp; stress</span></div>
+      <div class="conds yze-only">
         <div class="cond-grp"><div class="cg-lbl">Physical conditions <span style="font-weight:600;text-transform:none;letter-spacing:0;">(−1 to Str/Agi each)</span></div><div class="cond-row" id="cond-phys"></div></div>
         <div class="cond-grp"><div class="cg-lbl">Mental conditions <span style="font-weight:600;text-transform:none;letter-spacing:0;">(−1 to Wits/Emp each)</span></div><div class="cond-row" id="cond-ment"></div></div>
       </div>
@@ -324,6 +349,9 @@ textarea,select,.log-entries,.modal-bd{scrollbar-width:thin;scrollbar-color:var(
       </div>
 
       <div class="tab-panel" id="tab-story">
+        <div class="section-bar alien-only"><span>Talents</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('talent')">＋ Add</button></span></div>
+        <div class="tln-list alien-only" id="tln-list"></div>
+        <div class="alien-only" id="tln-empty" style="padding:2px 10px 6px;font-size:12px;color:var(--muted);">No talents yet. Your career offers three — pick one at creation.</div>
         <div class="section-bar"><span>Story</span></div>
         <div class="blk" id="traits-blk"></div>
         <div class="subhead" style="padding-left:0;">Relationships <button class="hdr-btn" style="background:var(--yz);border-color:var(--yz-dk);color:#1a140a;" onclick="addRelRow()">＋ Add</button></div>
@@ -386,8 +414,21 @@ function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
 function die6(){ return 1+Math.floor(Math.random()*6); }
 function G(x){ return (typeof x!=='undefined'&&Array.isArray(x))?x:[]; }
 
-var ATTRS=G(window.YZE_ATTRIBUTES), SKILLS=G(window.YZE_SKILLS), WEAPONS=G(window.YZE_WEAPONS),
-    CONDS=G(window.YZE_CONDITIONS), TRAITS=G(window.YZE_TRAITS), CRITP=G(window.YZE_CRITS_PHYSICAL), CRITM=G(window.YZE_CRITS_MENTAL);
+var ATTRS=G(window.YZE_ATTRIBUTES), WEAPONS=G(window.YZE_WEAPONS),
+    CONDS=G(window.YZE_CONDITIONS), CRITP=G(window.YZE_CRITS_PHYSICAL), CRITM=G(window.YZE_CRITS_MENTAL), PANIC=G(window.YZE_PANIC);
+// Variant-swappable data: SKILLS and TRAITS change between YZE SRD and Alien.
+var BASE_SKILLS=G(window.YZE_SKILLS), ALIEN_SK=G(window.ALIEN_SKILLS);
+var BASE_TRAITS=G(window.YZE_TRAITS), ALIEN_TR=G(window.ALIEN_TRAITS);
+var ALIEN_CAR=G(window.ALIEN_CAREERS), ALIEN_WP=G(window.ALIEN_WEAPONS), ALIEN_AR=G(window.ALIEN_ARMOR), ALIEN_TL=G(window.ALIEN_TALENTS);
+var SKILLS=BASE_SKILLS, TRAITS=BASE_TRAITS;
+function isAlien(){ return !!(S && S.variant==='alien'); }
+function careerObj(name){ for(var i=0;i<ALIEN_CAR.length;i++){ if(ALIEN_CAR[i].name===name)return ALIEN_CAR[i]; } return null; }
+// Re-point the swappable data + body flag for the current variant.
+function syncVariant(){
+  SKILLS = isAlien()?ALIEN_SK:BASE_SKILLS;
+  TRAITS = isAlien()?ALIEN_TR:BASE_TRAITS;
+  try{ document.body.dataset.variant = isAlien()?'alien':'yze'; }catch(e){}
+}
 var ATTR_KEYS=ATTRS.map(function(a){return a.key;});
 function skillsByAttr(k){ return SKILLS.filter(function(s){return s.attr===k;}); }
 function skillObj(name){ return SKILLS.find(function(s){return s.name===name;}); }
@@ -398,14 +439,14 @@ function itemWeight(w){ w=String(w||'1'); if(w==='—'||w==='-'||w==='')return 0
 var S=null;
 var _lastRoll=null;   // for the push option on the newest roll
 function blankState(){
-  var st={ name:'',archetype:'',pronouns:'',key:'',
+  var st={ name:'',archetype:'',pronouns:'',key:'',variant:'yze',career:'',
     attrs:{STR:2,AGI:2,WITS:2,EMP:2}, skills:{},
-    health:{max:0,dmg:0}, resolve:{max:0,dmg:0},
-    conditions:{}, xp:0, armor:0, weapons:[], gear:[],
+    health:{max:0,dmg:0}, resolve:{max:0,dmg:0}, stress:0,
+    conditions:{}, xp:0, armor:0, weapons:[], gear:[], talents:[],
     traits:{}, relationships:[], appearance:'', notes:'' };
-  SKILLS.forEach(function(s){ st.skills[s.name]=0; });
+  // seed every skill name from BOTH variants so switching modes never loses data
+  BASE_SKILLS.concat(ALIEN_SK).forEach(function(s){ if(st.skills[s.name]==null) st.skills[s.name]=0; });
   CONDS.forEach(function(c){ st.conditions[c.name]=false; });
-  TRAITS.forEach(function(t){ st.traits[t.key]=''; });
   return st;
 }
 function attrVal(k){ return num((S.attrs||{})[k]); }
@@ -415,7 +456,8 @@ function condPenaltyFor(attrKey){
   var n=0; CONDS.forEach(function(c){ if(c.type===type && S.conditions[c.name]) n++; }); return n;
 }
 function derivedMax(which){
-  if(which==='health') return Math.ceil((attrVal('STR')+attrVal('AGI'))/2)+1;
+  // Alien: Health = Strength score (talents can raise it). YZE: (Str+Agi)/2 +1.
+  if(which==='health') return isAlien()? attrVal('STR') : Math.ceil((attrVal('STR')+attrVal('AGI'))/2)+1;
   return Math.ceil((attrVal('WITS')+attrVal('EMP'))/2)+1;
 }
 
@@ -438,7 +480,9 @@ function renderAttrSkills(){
   });
 }
 function renderAttrs(){ renderAttrSkills(); }
-function setAttr(k,n){ var max=(S.key===k)?5:4; n=clamp(n,0,max); S.attrs[k]=(S.attrs[k]===n)?n-1:n; renderAttrSkills(); renderEnc(); scheduleAutosave(); }
+function setAttr(k,n){ var max=(S.key===k)?5:4; n=clamp(n,0,max); S.attrs[k]=(S.attrs[k]===n)?n-1:n;
+  if(isAlien() && k==='STR'){ S.health.max=attrVal('STR'); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; renderVitals(); }
+  renderAttrSkills(); renderEnc(); scheduleAutosave(); }
 
 // ── Render: vitals (Health / Resolve damage tracks) ──
 function renderVitals(){
@@ -450,9 +494,20 @@ function renderVitals(){
     if(max>0) boxes+='<button class="v-auto" onclick="bumpMax(\''+w+'\',-1)" title="remove a box">−</button>';
     host.innerHTML=boxes;
   });
-  var broken=(S.health.max>0&&S.health.dmg>=S.health.max)||(S.resolve.max>0&&S.resolve.dmg>=S.resolve.max);
+  var broken = isAlien()
+    ? (S.health.max>0 && S.health.dmg>=S.health.max)
+    : ((S.health.max>0&&S.health.dmg>=S.health.max)||(S.resolve.max>0&&S.resolve.dmg>=S.resolve.max));
   $('broken-tag').classList.toggle('hide',!broken);
+  var ba=$('broken-tag-a'); if(ba) ba.classList.toggle('hide',!broken);
+  renderStress();
 }
+function renderStress(){
+  var host=$('stress-pips'); if(!host)return; var s=clamp(num(S.stress),0,10), pips='';
+  for(var i=1;i<=10;i++){ pips+='<button class="spip'+(i<=s?' on':'')+'" onclick="setStress('+i+')" title="stress '+i+'">'+i+'</button>'; }
+  host.innerHTML=pips; var v=$('stress-val'); if(v)v.textContent=s;
+}
+function setStress(n){ S.stress=(num(S.stress)===n)?n-1:n; if(S.stress<0)S.stress=0; renderStress(); scheduleAutosave(); }
+function bumpStress(d){ S.stress=clamp(num(S.stress)+d,0,10); renderStress(); scheduleAutosave(); }
 function setDamage(w,n){ var st=S[w]; st.dmg=(st.dmg===n)?n-1:n; renderVitals(); scheduleAutosave(); }
 function bumpMax(w,d){ var st=S[w]; st.max=clamp(st.max+d,0,20); if(st.dmg>st.max)st.dmg=st.max; renderVitals(); scheduleAutosave(); }
 function autoDerive(w){ S[w].max=derivedMax(w); if(S[w].dmg>S[w].max)S[w].dmg=S[w].max; renderVitals(); scheduleAutosave(); addLog(w==='health'?'Health':'Resolve','max '+S[w].max, 'derived from attributes','normal'); }
@@ -474,6 +529,41 @@ function renderConds(){
 // ── Render: skills (nested under attributes via renderAttrSkills) ──
 function renderSkills(){ renderAttrSkills(); }
 function setSkill(name,n){ n=clamp(n,0,5); S.skills[name]=(S.skills[name]===n)?n-1:n; renderAttrSkills(); refreshWizardButtons(); scheduleAutosave(); }
+
+// ── Talents (Alien) ──
+function renderTalents(){
+  var host=$('tln-list'); if(!host)return; host.innerHTML='';
+  (S.talents||[]).forEach(function(t,i){
+    var card=document.createElement('div'); card.className='tln-card';
+    card.innerHTML='<div class="tln-head"><input class="tln-name" style="border:none;background:transparent;outline:none;" value="'+esc(t.name||'')+'" oninput="tlnEdit('+i+',\'name\',this.value)" placeholder="Talent"><button class="row-x" onclick="tlnDel('+i+')">✕</button></div>'
+      +'<textarea class="tln-desc" rows="2" oninput="tlnEdit('+i+',\'note\',this.value)" placeholder="Effect">'+esc(t.note||'')+'</textarea>';
+    host.appendChild(card);
+  });
+  var emp=$('tln-empty'); if(emp) emp.style.display=(S.talents&&S.talents.length)?'none':'block';
+}
+function tlnEdit(i,f,v){ if(S.talents&&S.talents[i]){ S.talents[i][f]=v; scheduleAutosave(); } }
+function tlnDel(i){ S.talents.splice(i,1); renderTalents(); scheduleAutosave(); }
+
+// ── Career (Alien) ──
+function fillCareerOptions(){
+  var sel=$('f-career'); if(!sel)return;
+  sel.innerHTML='<option value="">—</option>'+ALIEN_CAR.map(function(c){ return '<option value="'+esc(c.name)+'">'+esc(c.name)+'</option>'; }).join('');
+  sel.value=S.career||'';
+}
+function renderCareer(){
+  var note=$('career-note'); if(!note)return;
+  var c=careerObj(S.career);
+  if(!c){ note.innerHTML='<b>No career.</b> Pick one in the header to see its key attribute, skills and talents.'; return; }
+  note.innerHTML='<b>'+esc(c.name)+'</b> · key <b>'+esc(c.key)+'</b> &nbsp;|&nbsp; Skills: '+esc(c.skills.join(', '))+' &nbsp;|&nbsp; Talents: '+esc(c.talents.join(', '));
+}
+function onCareerChange(){
+  S.career=$('f-career').value;
+  var c=careerObj(S.career);
+  if(c){ S.key=c.key; var ks=$('f-key'); if(ks)ks.value=c.key; if(isAlien()){ S.health.max=attrVal('STR'); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; } }
+  renderAttrSkills(); renderVitals(); renderCareer(); scheduleAutosave();
+}
+// ── Variant switch (called by the builder) ──
+function setVariant(v){ S.variant=(v==='alien')?'alien':'yze'; syncVariant(); renderAll(); scheduleAutosave(); }
 
 // ── Render: XP + traits + relationships ──
 function bumpXP(d){ S.xp=Math.max(0,num(S.xp)+d); $('f-xp').value=S.xp; scheduleAutosave(); }
@@ -535,15 +625,21 @@ function renderEnc(){
 var _pk=null;
 function pickerPool(kind){
   if(kind==='weap'){
-    var out=WEAPONS.map(function(w){ return {name:w.name,cost:w.damage+' dmg · '+w.range,note:'Grip '+w.grip+' · bonus '+w.bonus+' · weight '+w.weight,data:w}; });
+    var src=isAlien()?ALIEN_WP:WEAPONS;
+    var out=src.map(function(w){ return {name:w.name,cost:w.damage+' dmg · '+w.range,note:(isAlien()?(w.class+' · '):('Grip '+w.grip+' · '))+'bonus '+w.bonus+' · wt '+w.weight+(w.special?' · '+w.special:''),data:w}; });
     G(window.YZE_HB_WEAPONS).forEach(function(d){ out.push({name:d.name,cost:(d.damage!=null?d.damage+' dmg':'')+(d.range?' · '+d.range:''),note:'Homebrew'+(d.bonus?' · bonus '+d.bonus:''),data:d}); });
     return out;
   }
-  var g=[]; G(window.YZE_HB_GEAR).forEach(function(d){ g.push({name:d.name,cost:d.weight?d.weight+' wt':'',note:'Homebrew'+(d.desc?' · '+d.desc:''),data:d}); });
+  if(kind==='talent'){
+    return ALIEN_TL.map(function(t){ return {name:t.name,cost:t.career,note:t.desc,data:t}; });
+  }
+  var g=[];
+  if(isAlien()){ ALIEN_AR.forEach(function(a){ g.push({name:a.name,cost:'Armor '+a.rating,note:(a.air!=='—'?'Air '+a.air+' · ':'')+'wt '+a.weight+' · '+a.comment,data:{name:a.name,weight:a.weight,note:'Armor '+a.rating+(a.air!=='—'?', Air '+a.air:'')+' — '+a.comment}}); }); }
+  G(window.YZE_HB_GEAR).forEach(function(d){ g.push({name:d.name,cost:d.weight?d.weight+' wt':'',note:'Homebrew'+(d.desc?' · '+d.desc:''),data:d}); });
   return g;
 }
 function openPicker(kind){
-  _pk=kind; $('picker-title').textContent=kind==='weap'?'✦ Weapons':'✦ Gear';
+  _pk=kind; $('picker-title').textContent=kind==='weap'?'✦ Weapons':kind==='talent'?'✦ Talents':'✦ Gear';
   $('picker-search').value=''; renderPicker(); $('picker-overlay').classList.add('open');
 }
 function closePicker(){ $('picker-overlay').classList.remove('open'); }
@@ -562,12 +658,14 @@ function renderPicker(){
 var _pkRows=[];
 function pickAdd(idx){
   var x=_pkRows[idx]; if(!x)return;
-  if(_pk==='weap'){ var w=x.data||{}; S.weapons.push({name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',weight:w.weight||'1',skill:w.skill||'Melee'}); renderWeapons(); setTab('combat'); }
+  if(_pk==='weap'){ var w=x.data||{}; S.weapons.push({name:w.name||x.name,grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?w.damage:1,range:w.range||'',weight:w.weight||'1',skill:w.skill||(isAlien()?'Ranged Combat':'Melee')}); renderWeapons(); setTab('combat'); }
+  else if(_pk==='talent'){ var t=x.data||{}; S.talents.push({name:t.name||x.name,note:t.desc||t.note||''}); renderTalents(); setTab('story'); }
   else { var d=x.data||{}; S.gear.push({name:d.name||x.name,weight:d.weight||'1',note:d.desc||d.note||''}); renderGear(); setTab('gear'); }
   scheduleAutosave(); renderPicker();
 }
 function addCustomFromPicker(){
-  if(_pk==='weap'){ S.weapons.push({name:'',grip:'1H',bonus:'',damage:1,range:'Engaged',weight:'1',skill:'Melee'}); renderWeapons(); setTab('combat'); }
+  if(_pk==='weap'){ S.weapons.push({name:'',grip:isAlien()?'':'1H',bonus:'',damage:1,range:'Engaged',weight:'1',skill:isAlien()?'Ranged Combat':'Melee'}); renderWeapons(); setTab('combat'); }
+  else if(_pk==='talent'){ S.talents.push({name:'',note:''}); renderTalents(); setTab('story'); }
   else { S.gear.push({name:'',weight:'1',note:''}); renderGear(); setTab('gear'); }
   closePicker(); scheduleAutosave();
 }
@@ -578,16 +676,26 @@ function countPool(rolls){ var s=0,b=0; rolls.forEach(function(v){ if(v===6)s++;
 function tierOf(succ){ if(succ>=2) return {t:'SUCCESS ×'+succ,type:'crit'}; if(succ===1) return {t:'SUCCESS',type:'crit'}; return {t:'FAILURE',type:'fumble'}; }
 function animateRoll(rolls){ if(!(window.DiceAnim&&window.DiceAnim.play))return; try{ window.DiceAnim.play(rolls.map(function(v){ return {sides:6,display:String(v)}; }),'normal'); }catch(e){} }
 
+// Roll base dice, plus (Alien) a number of Stress Dice equal to stress level.
+// A 1 on a Stress Die forces a Panic Roll and blocks pushing.
+function rollDicePool(baseSize){
+  var base=[]; for(var i=0;i<baseSize;i++)base.push(die6());
+  var stress=[], panic=false;
+  if(isAlien()){ var lvl=clamp(num(S.stress),0,10); for(var k=0;k<lvl;k++){ var d=die6(); stress.push(d); if(d===1)panic=true; } }
+  return { base:base, stress:stress, all:base.concat(stress), panic:panic };
+}
+function poolDetail(r, floored){
+  return poolStr(r.base)+(r.stress.length?' + '+r.stress.length+' stress('+r.stress.join(',')+')':'')+(floored?' · min 1 die':'');
+}
 function doPool(label, poolSize, pushable){
-  var mod=clamp(num($('tray-mod').value),-6,6); poolSize+=mod;
-  if(mod){} $('tray-mod').value='0';
+  var mod=clamp(num($('tray-mod').value),-6,6); poolSize+=mod; $('tray-mod').value='0';
   var floored=false; if(poolSize<1){ poolSize=1; floored=true; }
   poolSize=Math.min(20,poolSize);
-  var rolls=[]; for(var i=0;i<poolSize;i++)rolls.push(die6());
-  var c=countPool(rolls), t=tierOf(c.succ);
-  var detail=poolStr(rolls)+' · '+c.succ+' succ'+(c.bane?' · '+c.bane+' bane'+(c.bane>1?'s':''):'')+(floored?' · min 1 die':'');
+  var r=rollDicePool(poolSize), c=countPool(r.all), t=tierOf(c.succ);
+  var detail=poolDetail(r,floored)+' · '+c.succ+' succ'+((!isAlien()&&c.bane)?' · '+c.bane+' bane'+(c.bane>1?'s':''):'');
   addLog(label, c.succ+'  '+t.t, detail, t.type);
-  if(pushable && c.succ<1){ _lastRoll={label:label,rolls:rolls}; showPushOption(); }
+  if(r.panic){ _lastRoll=null; forcePanic(label); return; }
+  if(pushable && c.succ<1){ _lastRoll={label:label,base:r.base}; showPushOption(); }
   else _lastRoll=null;
 }
 function rollSkill(name){
@@ -600,17 +708,30 @@ function rollAttack(i){
   var skName=w.skill||'Melee', s=skillObj(skName)||{attr:'STR'};
   var pool=attrVal(s.attr)+num(S.skills[skName])+weaponBonus(w.bonus)-condPenaltyFor(s.attr);
   var label=(w.name||'Attack')+' · '+skName;
-  // show weapon damage in the outcome
   var mod=clamp(num($('tray-mod').value),-6,6); $('tray-mod').value='0';
   var poolSize=pool+mod, floored=false; if(poolSize<1){ poolSize=1; floored=true; } poolSize=Math.min(20,poolSize);
-  var rolls=[]; for(var k=0;k<poolSize;k++)rolls.push(die6());
-  var c=countPool(rolls), hit=c.succ>=1;
+  var r=rollDicePool(poolSize), c=countPool(r.all), hit=c.succ>=1;
   var dmg=hit?(num(w.damage)+(c.succ-1)):0;
   var t=hit?{t:'HIT · '+dmg+' dmg',type:'crit'}:{t:'MISS',type:'fumble'};
-  var detail=poolStr(rolls)+' · '+c.succ+' succ'+(c.bane?' · '+c.bane+' bane'+(c.bane>1?'s':''):'')+(floored?' · min 1 die':'');
+  var detail=poolDetail(r,floored)+' · '+c.succ+' succ';
   addLog(label, c.succ+'  '+t.t, detail, t.type);
-  if(!hit){ _lastRoll={label:label,rolls:rolls}; showPushOption(); } else _lastRoll=null;
+  if(r.panic){ _lastRoll=null; forcePanic(label); return; }
+  if(!hit){ _lastRoll={label:label,base:r.base}; showPushOption(); } else _lastRoll=null;
 }
+// ── Panic (Alien) ──
+function panicLookup(total){
+  for(var i=0;i<PANIC.length;i++){ var r=PANIC[i].roll;
+    if(r.indexOf('+')>=0){ if(total>=parseInt(r,10))return PANIC[i]; continue; }
+    var m=r.split(/[–-]/); if(m.length===2){ if(total>=parseInt(m[0],10)&&total<=parseInt(m[1],10))return PANIC[i]; continue; }
+    if(parseInt(r,10)===total)return PANIC[i];
+  }
+  return PANIC[PANIC.length-1];
+}
+function rollPanic(){
+  var stress=clamp(num(S.stress),0,10), roll=die6(), total=roll+stress, row=panicLookup(total);
+  addLog('Panic · d6 '+roll+' + stress '+stress+' = '+total, row?row.effect:'—', row?row.detail:'', total>=10?'fumble':'normal');
+}
+function forcePanic(label){ addLog((label||'')+' · PANIC','⚠ 1 on a Stress Die','You can\'t push this roll — Panic Roll forced.','fumble'); rollPanic(); }
 function rollQuick(){
   var n=clamp(num($('tray-qn').value),1,12);
   doPool(n+'d6 pool', n, false);
@@ -645,20 +766,25 @@ function showPushOption(){
   if(!_lastRoll)return;
   var entries=$('log-entries'); var hint=entries.querySelector('.log-hint'); if(hint)hint.remove();
   var old=$('push-choice'); if(old)old.remove();
+  var costTxt=isAlien()?'Cost: +1 Stress (a 1 on a Stress Die triggers Panic).':'Cost: a condition (or damage/stress per bane).';
   var div=document.createElement('div'); div.className='log-entry push-choice'; div.id='push-choice';
   div.innerHTML='<div class="roll-label">'+esc(_lastRoll.label)+' — push?</div>'
-    +'<div class="roll-detail">Re-roll every die that isn\'t a 6 or a 1. Cost: a condition (or damage/stress per bane).</div>'
+    +'<div class="roll-detail">Re-roll every base die that isn\'t a 6 or a 1. '+costTxt+'</div>'
     +'<div class="push-btns"><button onclick="doPush()">Push the roll</button><button onclick="cancelPush()">Keep failure</button></div>';
   entries.insertBefore(div,entries.firstChild); entries.scrollTop=0;
 }
 function cancelPush(){ var c=$('push-choice'); if(c)c.remove(); _lastRoll=null; }
 function doPush(){
   var pr=_lastRoll; var c=$('push-choice'); if(c)c.remove(); if(!pr){ return; } _lastRoll=null;
-  var rolls=pr.rolls.map(function(v){ return (v===6||v===1)?v:die6(); });
-  animateRoll(rolls);
-  var cc=countPool(rolls), t=tierOf(cc.succ);
-  var detail=poolStr(rolls)+' · '+cc.succ+' succ'+(cc.bane?' · '+cc.bane+' bane'+(cc.bane>1?'s':''):'')+' · PUSHED — take a condition'+(cc.bane?' / '+cc.bane+' damage or stress':'');
+  var base=pr.base.map(function(v){ return (v===6||v===1)?v:die6(); });
+  var alien=isAlien(), stressRolls=[], panic=false;
+  if(alien){ bumpStress(1); var lvl=clamp(num(S.stress),0,10); for(var k=0;k<lvl;k++){ var d=die6(); stressRolls.push(d); if(d===1)panic=true; } }
+  animateRoll(base);
+  var cc=countPool(base.concat(stressRolls)), t=tierOf(cc.succ);
+  var detail=poolStr(base)+(stressRolls.length?' + '+stressRolls.length+' stress('+stressRolls.join(',')+')':'')+' · '+cc.succ+' succ · PUSHED'
+    +(alien?' (+1 stress)':(cc.bane?' — a condition / '+cc.bane+' damage or stress':' — take a condition'));
   addLog(pr.label+' · pushed', cc.succ+'  '+t.t, detail, t.type);
+  if(alien && panic){ forcePanic(pr.label+' · pushed'); }
 }
 
 // ── Tabs ──
@@ -732,19 +858,25 @@ function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')
 function collectSheet(){
   S.name=$('f-name').value.trim(); S.archetype=$('f-archetype').value; S.pronouns=$('f-pronouns').value;
   S.key=$('f-key').value; S.appearance=$('f-appearance').value; S.notes=$('f-notes').value; S.xp=num($('f-xp').value); S.armor=num($('f-armor').value);
-  return Object.assign({}, S, { system:'YZE', class:S.archetype, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
+  if($('f-career')) S.career=$('f-career').value;
+  var cls = isAlien() ? (S.career||'Alien crew') : S.archetype;
+  return Object.assign({}, S, { system:'YZE', variant:S.variant||'yze', class:cls, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
 }
 function applySheet(d){
   d=d||{};
   if(!S) S=blankState();
-  ['name','archetype','pronouns','key','appearance','notes'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
-  if(d.xp!=null)S.xp=num(d.xp); if(d.armor!=null)S.armor=num(d.armor);
+  if(d.variant) S.variant=(d.variant==='alien')?'alien':'yze';
+  syncVariant();
+  ['name','archetype','pronouns','key','appearance','notes','career'].forEach(function(k){ if(d[k]!=null)S[k]=d[k]; });
+  if(d.xp!=null)S.xp=num(d.xp); if(d.armor!=null)S.armor=num(d.armor); if(d.stress!=null)S.stress=clamp(num(d.stress),0,10);
   if(d.attrs) ATTR_KEYS.forEach(function(k){ if(d.attrs[k]!=null)S.attrs[k]=num(d.attrs[k]); });
-  if(d.skills) SKILLS.forEach(function(s){ if(d.skills[s.name]!=null)S.skills[s.name]=num(d.skills[s.name]); });
+  // apply skills across BOTH variant skill sets so switching modes never loses data
+  if(d.skills) BASE_SKILLS.concat(ALIEN_SK).forEach(function(s){ if(d.skills[s.name]!=null)S.skills[s.name]=num(d.skills[s.name]); });
   if(d.health) S.health={max:num(d.health.max),dmg:num(d.health.dmg)};
   if(d.resolve) S.resolve={max:num(d.resolve.max),dmg:num(d.resolve.dmg)};
   if(d.conditions) CONDS.forEach(function(c){ S.conditions[c.name]=!!d.conditions[c.name]; });
-  if(d.traits) TRAITS.forEach(function(t){ if(d.traits[t.key]!=null)S.traits[t.key]=d.traits[t.key]; });
+  if(d.traits) S.traits=Object.assign({}, S.traits, d.traits);
+  if(Array.isArray(d.talents)) S.talents=d.talents.map(function(t){ return {name:t.name||'',note:t.note||''}; });
   if(Array.isArray(d.weapons)) S.weapons=d.weapons.map(function(w){ return {name:w.name||'',grip:w.grip||'',bonus:w.bonus||'',damage:w.damage!=null?num(w.damage):1,range:w.range||'',weight:w.weight||'1',skill:w.skill||'Melee'}; });
   if(Array.isArray(d.gear)) S.gear=d.gear.map(function(g){ return {name:g.name||'',weight:g.weight||'1',note:g.note||''}; });
   if(Array.isArray(d.relationships)) S.relationships=d.relationships.map(function(r){ return {name:r.name||'',note:r.note||r.type||''}; });
@@ -755,9 +887,11 @@ function applySheet(d){
   scheduleAutosave();
 }
 function renderAll(){
+  syncVariant();
   $('f-name').value=S.name||''; $('f-archetype').value=S.archetype||''; $('f-pronouns').value=S.pronouns||''; $('f-key').value=S.key||'';
   $('f-appearance').value=S.appearance||''; $('f-notes').value=S.notes||''; $('f-xp').value=num(S.xp); $('f-armor').value=num(S.armor);
-  renderAttrSkills(); renderVitals(); renderConds(); renderTraits(); renderRelationships(); renderWeapons(); renderGear(); updateFoot(); refreshWizardButtons();
+  fillCareerOptions();
+  renderAttrSkills(); renderVitals(); renderConds(); renderTraits(); renderRelationships(); renderWeapons(); renderGear(); renderTalents(); renderCareer(); updateFoot(); refreshWizardButtons();
 }
 function saveSheet(quiet){
   var data=collectSheet(), json=JSON.stringify(data);
@@ -785,6 +919,7 @@ $('f-pronouns').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-appearance').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-notes').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-key').addEventListener('change',function(){ S.key=this.value; renderAttrSkills(); scheduleAutosave(); });
+if($('f-career')) $('f-career').addEventListener('change',onCareerChange);
 try{ if(localStorage.getItem('yze_dark')==='1') setDarkMode(true); }catch(e){}
 </script>
 

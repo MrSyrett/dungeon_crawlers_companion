@@ -146,6 +146,7 @@ const YZE_REFERENCE: { href: string; label: string }[] = [
   { href: "/yze/weapons", label: "Weapons" },
   { href: "/yze/gear", label: "Gear" },
   { href: "/yze/combat", label: "Combat" },
+  { href: "/yze/alien", label: "Alien" },
 ];
 
 // Per-system reference links, keyed the same way the toggle is.
