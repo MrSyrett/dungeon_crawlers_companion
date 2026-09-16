@@ -17,7 +17,7 @@
   --bg:#e2e8ea;--paper:#f4f7f8;--ink:#141a1c;--muted:#5c6a6e;--rule:#c2ccce;
   --yz:#16bdd6;--yz-dk:#0d8299;--yz-lt:#d0eff4;--gild:#0d8299;--red:#b23c2f;--green:#2f8f5b;--blue:#2b6cb0;
   --border:#1e2a2d;--section-hdr:#122227;--box:#e8eef0;--input-bg:#fff;--input-border:#7f8b8e;
-  --log-bg:#161310;--log-text:#f0ece5;
+  --log-bg:#0b1619;--log-text:#eef4f5;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;}
@@ -50,7 +50,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .log-action-btn.export{background:#1a2733;color:#6aabdf;border:1px solid #1a4a8a;}
 .log-action-btn.import{background:#2a1a1a;color:#df6a6a;border:1px solid #5a1a1a;}
 .dm-toggle-wrap{display:flex;align-items:center;gap:6px;}
-.dm-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(26,20,10,.75);}
+.dm-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(4,35,42,.75);}
 .dm-toggle-btn{width:36px;height:18px;background:#1f3d43;border:1px solid #2f4f56;border-radius:9px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
 .dm-toggle-btn.on{background:#5fd6ea;border-color:#0d8299;}
 .dm-toggle-btn::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:left .2s;}
@@ -69,10 +69,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .section-bar{background:var(--section-hdr);color:#fff;font-family:'Oswald',sans-serif;font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .section-bar.accent{background:var(--yz);color:#04232a;}
 .section-bar .sb-note{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:.04em;text-transform:none;color:rgba(255,255,255,.72);}
-.section-bar.accent .sb-note{color:rgba(26,20,10,.7);}
+.section-bar.accent .sb-note{color:rgba(4,35,42,.7);}
 .hdr-right{display:flex;align-items:center;gap:8px;}
 .hdr-btn{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:3px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
-.section-bar.accent .hdr-btn{background:rgba(26,20,10,.14);border-color:rgba(26,20,10,.35);color:#04232a;}
+.section-bar.accent .hdr-btn{background:rgba(4,35,42,.14);border-color:rgba(4,35,42,.35);color:#04232a;}
 .hdr-btn:hover{background:rgba(255,255,255,.3);}
 
 /* Header */
@@ -86,6 +86,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .hdr-field input,.hdr-field select{width:100%;border:none;border-bottom:1px solid #2f4f56;background:transparent;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;outline:none;padding:2px 0;}
 .hdr-field select{font-size:15px;cursor:pointer;}
 .hdr-field select option{color:#111;background:#fff;}
+.hdr-field .hdr-ro{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;padding:2px 0;border-bottom:1px solid #2f4f56;min-height:26px;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hdr-field input::placeholder{color:#5c7075;font-weight:500;}
 .hdr-field.lastcol{border-right:none;}
 
@@ -104,7 +105,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .pip{width:16px;height:16px;border-radius:50%;border:2px solid var(--input-border);cursor:pointer;background:#fff;padding:0;}
 .pip.on{background:var(--yz);border-color:var(--yz-dk);}
 .pip.sk{width:13px;height:13px;}
+.pips.locked .pip{cursor:default;}
 .attr-row .a-val{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);width:20px;text-align:center;flex:0 0 auto;}
+.attr-row .a-die{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--yz-dk);width:34px;text-align:right;flex:0 0 auto;background:none;border:none;cursor:pointer;padding:0;}
+.attr-row .a-die:hover{color:var(--yz);text-decoration:underline;}
 /* Attributes with their skills nested underneath */
 .attr-skills{padding:8px 10px;display:flex;flex-direction:column;gap:11px;}
 .as-attr .attr-row{padding-bottom:3px;border-bottom:1px solid var(--rule);margin-bottom:4px;}
@@ -152,12 +156,14 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .skill-row .sk-name{flex:1 1 auto;min-width:0;text-align:left;background:none;border:none;cursor:pointer;color:var(--ink);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .skill-row .sk-name:hover{color:var(--yz-dk);text-decoration:underline;}
 .skill-row .sk-pool{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);width:26px;text-align:right;flex:0 0 auto;}
+.skill-row button.sk-pool{background:none;border:none;padding:0;cursor:pointer;color:var(--yz-dk);font-weight:700;}
+.skill-row button.sk-pool:hover{color:var(--yz);text-decoration:underline;}
 
 /* Tabs */
 .tabs-bar{display:flex;gap:0;background:var(--section-hdr);border-top:1px solid var(--border);border-bottom:2px solid var(--border);flex-wrap:wrap;}
 .tab-btn{flex:1 1 auto;padding:8px 10px;background:transparent;color:rgba(255,255,255,.6);border:none;border-bottom:3px solid transparent;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
 .tab-btn:hover{color:#fff;}
-.tab-btn.on{color:#fff;border-bottom-color:var(--yz);background:rgba(217,138,43,.24);}
+.tab-btn.on{color:#fff;border-bottom-color:var(--yz);background:rgba(22,189,214,.20);}
 .tab-panel{display:none;}
 .tab-panel.on{display:block;}
 
@@ -195,7 +201,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 /* Picker / browse */
 .brow-controls{padding:10px 16px 8px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;border-bottom:1px solid #183036;}
 .brow-list{padding:4px 12px;overflow-y:auto;}
-.brow-item{display:flex;align-items:flex-start;gap:10px;padding:8px 2px;border-bottom:1px solid #2a2218;}
+.brow-item{display:flex;align-items:flex-start;gap:10px;padding:8px 2px;border-bottom:1px solid #22333a;}
 .brow-main{flex:1;min-width:0;}
 .brow-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#e6f1f3;letter-spacing:.01em;}
 .brow-cost{font-family:'Share Tech Mono',monospace;font-size:11px;color:#5fd6ea;margin-left:8px;font-weight:400;}
@@ -206,7 +212,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .brow-empty{padding:14px 4px;font-size:12px;color:#889;}
 
 /* Toast + modals */
-#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(16,12,8,0.94);border:2px solid var(--yz);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,0.7);}
+#roll-toast{display:none;position:fixed;bottom:52px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(6,20,26,0.94);border:2px solid var(--yz);border-radius:8px;padding:10px 20px;text-align:center;min-width:160px;max-width:82vw;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,0.7);}
 #roll-toast.show{display:block;}
 #roll-toast.crit{border-color:#5fd38a;}#roll-toast.fumble{border-color:#e0a06f;}
 #roll-toast .t-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8ba3a8;margin-bottom:3px;}
@@ -214,7 +220,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 #roll-toast .t-detail{font-size:11px;color:#a9bfc3;margin-top:3px;}
 .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:center;justify-content:center;padding:16px;}
 .ov.open{display:flex;}
-.modal{background:#1c1712;border:2px solid var(--yz);border-radius:6px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e6f1f3;font-family:'Barlow',sans-serif;}
+.modal{background:#101c20;border:2px solid var(--yz);border-radius:6px;max-width:560px;width:100%;max-height:92vh;display:flex;flex-direction:column;color:#e6f1f3;font-family:'Barlow',sans-serif;}
 .modal.wide{max-width:820px;}
 .modal-hd{background:#0a181c;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .modal-hd .ttl{font-family:'Oswald',sans-serif;font-weight:700;font-size:17px;letter-spacing:.08em;text-transform:uppercase;color:#5fd6ea;line-height:1;}
@@ -294,26 +300,26 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
     <div class="hdr-fields">
       <div class="hdr-field" style="grid-column:span 4;"><label>Name</label><input type="text" id="f-name" placeholder="Character name"></div>
       <div class="hdr-field yze-only" style="grid-column:span 3;"><label>Archetype</label><input type="text" id="f-archetype" placeholder="Role / career"></div>
-      <div class="hdr-field alien-only" style="grid-column:span 3;"><label>Career</label><select id="f-career"><option value="">—</option></select></div>
-      <div class="hdr-field" style="grid-column:span 3;"><label>Key Attribute</label><select id="f-key"><option value="">—</option><option value="STR">Strength</option><option value="AGI">Agility</option><option value="WITS">Wits</option><option value="EMP">Empathy</option></select></div>
+      <div class="hdr-field alien-only" style="grid-column:span 3;"><label>Career</label><div class="hdr-ro" id="f-career-disp" title="Set at character creation">—</div></div>
+      <div class="hdr-field" style="grid-column:span 3;"><label>Key Attribute</label><div class="hdr-ro" id="f-key-disp" title="Set at character creation">—</div></div>
       <div class="hdr-field lastcol" style="grid-column:span 2;"><label>Pronouns</label><input type="text" id="f-pronouns" placeholder="they/them"></div>
     </div>
   </div>
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="section-bar accent"><span>Attributes &amp; Skills</span><span class="sb-note">1–5 · click a skill to roll</span></div>
+      <div class="section-bar accent"><span>Attributes &amp; Skills</span></div>
       <div class="attr-skills" id="attr-skills"></div>
 
-      <div class="xp-row"><span class="v-lbl">Experience</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button><span style="font-size:10px;color:var(--muted);font-style:italic;">skill +1: 5×lvl · new skill: 5 · specialty: 10</span></div>
+      <div class="xp-row"><span class="v-lbl">Experience</span><button class="xp-step" onclick="bumpXP(-1)">−</button><input type="number" id="f-xp" value="0" min="0" oninput="S.xp=num(this.value);scheduleAutosave()"><button class="xp-step" onclick="bumpXP(1)">＋</button></div>
     </div>
 
     <div class="center-col">
-      <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span><span class="sb-note">damage tracks</span></div>
-      <div class="section-bar accent alien-only"><span>Health &amp; Stress</span><span class="sb-note">Health = Strength · Stress counts up</span></div>
+      <div class="section-bar accent yze-only"><span>Health &amp; Resolve</span></div>
+      <div class="section-bar accent alien-only"><span>Health &amp; Stress</span></div>
       <div class="vitals" id="vitals">
-        <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div><button class="v-auto" onclick="autoDerive('health')" title="Alien: Health = Strength; YZE: (Str+Agi)/2 +1">auto</button></div>
-        <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div><button class="v-auto" onclick="autoDerive('resolve')" title="Set max from (Wits+Emp)/2 +1">auto</button></div>
+        <div class="vrow"><span class="v-lbl">Health</span><div class="vboxes" id="health-boxes"></div></div>
+        <div class="vrow yze-only"><span class="v-lbl">Resolve</span><div class="vboxes" id="resolve-boxes"></div></div>
         <div class="vrow alien-only"><span class="v-lbl">Stress</span><div class="stress-pips" id="stress-pips"></div><span class="stress-val" id="stress-val">0</span></div>
         <div class="vrow yze-only"><span class="broken-tag hide" id="broken-tag">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('phys')">Physical Crit</button><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('ment')">Mental Crit</button></div>
         <div class="vrow alien-only"><span class="broken-tag hide" id="broken-tag-a">Broken</span><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollPanic()">Roll Panic</button><button class="dice-btn mini" style="flex:0 0 auto;padding:5px 9px;font-size:10px;" onclick="rollCrit('phys')">Crit Injury</button></div>
@@ -321,7 +327,7 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
 
       <div class="career-note alien-only" id="career-note"></div>
 
-      <div class="section-bar accent yze-only"><span>Conditions</span><span class="sb-note">from pushing, attacks &amp; stress</span></div>
+      <div class="section-bar accent yze-only"><span>Conditions</span></div>
       <div class="conds yze-only">
         <div class="cond-grp"><div class="cg-lbl">Physical conditions <span style="font-weight:600;text-transform:none;letter-spacing:0;">(−1 to Str/Agi each)</span></div><div class="cond-row" id="cond-phys"></div></div>
         <div class="cond-grp"><div class="cg-lbl">Mental conditions <span style="font-weight:600;text-transform:none;letter-spacing:0;">(−1 to Wits/Emp each)</span></div><div class="cond-row" id="cond-ment"></div></div>
@@ -338,12 +344,12 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
         <div class="section-bar"><span>Weapons</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('weap')">＋ Add</button></span></div>
         <table class="tbl" id="weap-tbl"><thead><tr><th style="width:30%;">Weapon</th><th style="width:8%;">Grip</th><th style="width:10%;">Bonus</th><th style="width:10%;">Dmg</th><th style="width:16%;">Range</th><th style="width:12%;">Wt</th><th style="width:14%;"></th></tr></thead><tbody id="weap-body"></tbody></table>
         <div id="weap-empty" class="tbl-empty">No weapons yet. Add one to roll attacks.</div>
-        <div class="enc-bar"><span class="e-lbl">Armor rating</span><input class="armor-in" id="f-armor" type="number" value="0" min="0" oninput="S.armor=num(this.value);scheduleAutosave()"><button class="dice-btn mini" onclick="rollArmor()">Roll armor</button><span style="font-size:10px;color:var(--muted);font-style:italic;">roll rating in d6; each 6 stops one damage</span></div>
+        <div class="enc-bar"><span class="e-lbl">Armor rating</span><input class="armor-in" id="f-armor" type="number" value="0" min="0" oninput="S.armor=num(this.value);scheduleAutosave()"><button class="dice-btn mini" onclick="rollArmor()">Roll armor</button></div>
       </div>
 
       <div class="tab-panel" id="tab-gear">
         <div class="section-bar"><span>Gear &amp; Inventory</span><span class="hdr-right"><button class="hdr-btn" onclick="openPicker('gear')">＋ Add</button></span></div>
-        <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span><span style="font-size:10px;color:var(--muted);font-style:italic;">limit = Strength × 2 regular items</span></div>
+        <div class="enc-bar"><span class="e-lbl">Carry limit</span><span class="e-val" id="enc-limit">0</span><span class="e-lbl">Carried</span><span class="e-val" id="enc-load">0</span></div>
         <table class="tbl" id="gear-tbl"><thead><tr><th style="width:44%;">Item</th><th style="width:16%;">Weight</th><th>Note</th><th style="width:26px;"></th></tr></thead><tbody id="gear-body"></tbody></table>
         <div id="gear-empty" class="tbl-empty">No gear yet.</div>
       </div>
@@ -376,7 +382,7 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #274449;background:transparent;color:#8ba3a8;" title="Campaign">🔗</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.YZEB)YZEB.launch();" title="Character Builder">Create</button>
-    <button id="level-btn" class="log-action-btn wizard" onclick="openAdvance()" title="Experience & advancement" style="display:none;">XP</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openAdvance()" title="Advancement &amp; experience" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -400,7 +406,7 @@ body:not([data-variant="alien"]) .alien-only{display:none !important;}
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">Year Zero Engine — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
-<div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Experience</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
+<div id="advance-overlay" class="ov" onclick="if(event.target===this)closeAdvance()"><div class="modal"><div class="modal-hd"><div class="ttl">✦ Advancement</div><button class="x" onclick="closeAdvance()">✕</button></div><div class="modal-bd" id="advance-body"></div></div></div>
 
 <script>
 // ═══ Year Zero Engine Character Sheet ═══════════════════════════════════════
@@ -465,14 +471,17 @@ function derivedMax(which){
 function renderAttrSkills(){
   var host=$('attr-skills'); if(!host)return; host.innerHTML='';
   ATTRS.forEach(function(a){
-    var v=attrVal(a.key), max=(S.key===a.key)?5:4, pips='';
-    for(var i=1;i<=5;i++){ var dis=i>max&&i>v; pips+='<button class="pip'+(i<=v?' on':'')+'"'+(dis?' disabled title="cap 4 (non-key)"':' onclick="setAttr(\''+a.key+'\','+i+')" title="'+esc(a.desc)+'"')+(dis?' style="opacity:.25;"':'')+'></button>'; }
-    var head='<div class="attr-row"><span class="a-name">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><div class="pips">'+pips+'</div><span class="a-val">'+v+'</span></div>';
+    var v=attrVal(a.key), pips='';
+    // Pips are set at creation / advancement — display-only (locked) here.
+    for(var i=1;i<=5;i++){ pips+='<button class="pip'+(i<=v?' on':'')+'" tabindex="-1" title="'+esc(a.desc)+' — set at creation"></button>'; }
+    var apool=Math.max(0, attrVal(a.key)-condPenaltyFor(a.key));
+    var head='<div class="attr-row"><span class="a-name">'+a.name+(S.key===a.key?'<span class="key-star" title="key attribute">★</span>':'')+'</span><div class="pips locked">'+pips+'</div><button class="a-die" onclick="rollAttr(\''+a.key+'\')" title="roll '+esc(a.name)+' pool">'+apool+'d</button></div>';
     var rows='';
     skillsByAttr(a.key).forEach(function(s){
       var lvl=num(S.skills[s.name]), pool=attrVal(a.key)+lvl-condPenaltyFor(a.key), skp='';
-      for(var j=1;j<=5;j++){ skp+='<button class="pip sk'+(j<=lvl?' on':'')+'" onclick="setSkill(\''+s.name.replace(/'/g,"\\'")+'\','+j+')"></button>'; }
-      rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+s.name.replace(/'/g,"\\'")+'\')" title="'+esc(s.desc)+'">'+s.name+'</button><div class="pips">'+skp+'</div><span class="sk-pool" title="pool = attribute + skill − conditions">'+Math.max(0,pool)+'d</span></div>';
+      for(var j=1;j<=5;j++){ skp+='<button class="pip sk'+(j<=lvl?' on':'')+'" tabindex="-1"></button>'; }
+      var esn=s.name.replace(/'/g,"\\'");
+      rows+='<div class="skill-row"><button class="sk-name" onclick="rollSkill(\''+esn+'\')" title="'+esc(s.desc)+'">'+s.name+'</button><div class="pips locked">'+skp+'</div><button class="sk-pool sk-roll" onclick="rollSkill(\''+esn+'\')" title="roll pool = attribute + skill − conditions">'+Math.max(0,pool)+'d</button></div>';
     });
     var block=document.createElement('div'); block.className='as-attr';
     block.innerHTML=head+'<div class="as-skills">'+rows+'</div>';
@@ -545,22 +554,14 @@ function tlnEdit(i,f,v){ if(S.talents&&S.talents[i]){ S.talents[i][f]=v; schedul
 function tlnDel(i){ S.talents.splice(i,1); renderTalents(); scheduleAutosave(); }
 
 // ── Career (Alien) ──
-function fillCareerOptions(){
-  var sel=$('f-career'); if(!sel)return;
-  sel.innerHTML='<option value="">—</option>'+ALIEN_CAR.map(function(c){ return '<option value="'+esc(c.name)+'">'+esc(c.name)+'</option>'; }).join('');
-  sel.value=S.career||'';
-}
+function keyName(k){ for(var i=0;i<ATTRS.length;i++){ if(ATTRS[i].key===k)return ATTRS[i].name; } return ''; }
+function renderKeyDisp(){ var el=$('f-key-disp'); if(el) el.textContent=keyName(S.key)||'—'; }
+function renderCareerDisp(){ var el=$('f-career-disp'); if(el) el.textContent=S.career||'—'; }
 function renderCareer(){
   var note=$('career-note'); if(!note)return;
   var c=careerObj(S.career);
-  if(!c){ note.innerHTML='<b>No career.</b> Pick one in the header to see its key attribute, skills and talents.'; return; }
+  if(!c){ note.innerHTML='<b>No career.</b> Use <b>Create</b> to pick a career — it sets your key attribute, skills and talents.'; return; }
   note.innerHTML='<b>'+esc(c.name)+'</b> · key <b>'+esc(c.key)+'</b> &nbsp;|&nbsp; Skills: '+esc(c.skills.join(', '))+' &nbsp;|&nbsp; Talents: '+esc(c.talents.join(', '));
-}
-function onCareerChange(){
-  S.career=$('f-career').value;
-  var c=careerObj(S.career);
-  if(c){ S.key=c.key; var ks=$('f-key'); if(ks)ks.value=c.key; if(isAlien()){ S.health.max=attrVal('STR'); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; } }
-  renderAttrSkills(); renderVitals(); renderCareer(); scheduleAutosave();
 }
 // ── Variant switch (called by the builder) ──
 function setVariant(v){ S.variant=(v==='alien')?'alien':'yze'; syncVariant(); renderAll(); scheduleAutosave(); }
@@ -703,6 +704,11 @@ function rollSkill(name){
   var pool=attrVal(s.attr)+num(S.skills[name])-condPenaltyFor(s.attr);
   doPool(name+' ('+s.attr+')', pool, true);
 }
+function rollAttr(k){
+  var a=null; for(var i=0;i<ATTRS.length;i++){ if(ATTRS[i].key===k){ a=ATTRS[i]; break; } }
+  var pool=attrVal(k)-condPenaltyFor(k);
+  doPool((a?a.name:k)+' ('+k+')', pool, true);
+}
 function rollAttack(i){
   var w=S.weapons[i]; if(!w)return;
   var skName=w.skill||'Melee', s=skillObj(skName)||{attr:'STR'};
@@ -815,15 +821,46 @@ function refreshWizardButtons(){ var built=hasCharacter(), c=$('build-btn'), l=$
 // ── Experience modal (spend XP; skills/attrs raised directly on the sheet) ──
 function openAdvance(){ renderAdvance(); $('advance-overlay').classList.add('open'); }
 function closeAdvance(){ $('advance-overlay').classList.remove('open'); }
+function advStepper(label,val,minus,plus,minusDis,plusDis){
+  return '<div class="a-row"><span class="a-name2">'+esc(label)+'</span><span class="a-code">'+val+'</span>'
+    +'<button onclick="'+minus+'"'+(minusDis?' disabled':'')+'>−</button>'
+    +'<button onclick="'+plus+'"'+(plusDis?' disabled':'')+'>+</button></div>';
+}
 function renderAdvance(){
-  var h='<p class="m-hint">You have <b style="color:#5fd6ea;">'+num(S.xp)+' XP</b>. Raise a skill or attribute directly on the sheet, then subtract the cost here.</p>';
-  h+='<div class="m-lbl">Costs</div><p class="m-hint" style="margin:0 0 10px;">Raise a skill to level N: <b>5 × N</b> XP. Learn a new skill (level 1): <b>5</b> XP. New specialty: <b>10</b> XP. Raise an attribute: GM\'s call (typically 5 × new level).</p>';
-  h+='<div class="m-lbl">Adjust XP</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
+  var h='<p class="m-hint">Attributes &amp; skills are locked on the sheet — raise them here as your character advances, then adjust remaining <b style="color:#5fd6ea;">XP</b>.</p>';
+  // Attributes
+  h+='<div class="m-lbl">Attributes</div><div class="a-skills">';
+  h+=ATTRS.map(function(a){ var v=attrVal(a.key), max=(S.key===a.key)?5:4;
+    return advStepper(a.name+(S.key===a.key?' ★':''), v, "advAttr('"+a.key+"',-1)", "advAttr('"+a.key+"',1)", v<=0, v>=max); }).join('');
+  h+='</div>';
+  // Skills grouped by attribute
+  h+='<div class="m-lbl" style="margin-top:12px;">Skills</div>';
+  ATTRS.forEach(function(a){
+    var list=skillsByAttr(a.key); if(!list.length)return;
+    h+='<div class="a-attr">'+esc(a.name)+'</div><div class="a-skills">';
+    h+=list.map(function(s){ var v=num(S.skills[s.name]), esn=s.name.replace(/'/g,"\\'");
+      return advStepper(s.name, v, "advSkill('"+esn+"',-1)", "advSkill('"+esn+"',1)", v<=0, v>=5); }).join('');
+    h+='</div>';
+  });
+  // XP costs + adjuster
+  h+='<div class="m-lbl" style="margin-top:12px;">Experience</div>';
+  h+='<p class="m-hint" style="margin:0 0 8px;">Raise a skill to level N: <b>5 × N</b> XP. Learn a new skill (level 1): <b>5</b> XP. New specialty: <b>10</b> XP. Raise an attribute: GM\'s call (typically 5 × new level).</p>';
+  h+='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
     +'<button class="m-btn ghost" onclick="advXP(-5)">−5</button><button class="m-btn ghost" onclick="advXP(-1)">−1</button>'
     +'<span style="font-family:\'Share Tech Mono\',monospace;font-size:20px;color:#5fd6ea;min-width:40px;text-align:center;" id="adv-xp">'+num(S.xp)+'</span>'
     +'<button class="m-btn ghost" onclick="advXP(1)">＋1</button><button class="m-btn ghost" onclick="advXP(5)">＋5</button></div>';
   h+='<div style="margin-top:16px;text-align:right;"><button class="m-btn" onclick="closeAdvance()">Done</button></div>';
   $('advance-body').innerHTML=h;
+}
+function advAttr(k,d){
+  var cur=attrVal(k), max=(S.key===k)?5:4, nv=clamp(cur+d,0,max); if(nv===cur)return;
+  S.attrs[k]=nv;
+  if(isAlien() && k==='STR'){ S.health.max=attrVal('STR'); if(S.health.dmg>S.health.max)S.health.dmg=S.health.max; }
+  renderAttrSkills(); renderVitals(); renderEnc(); renderAdvance(); scheduleAutosave();
+}
+function advSkill(name,d){
+  var cur=num(S.skills[name]), nv=clamp(cur+d,0,5); if(nv===cur)return;
+  S.skills[name]=nv; renderAttrSkills(); refreshWizardButtons(); renderAdvance(); scheduleAutosave();
 }
 function advXP(d){ S.xp=Math.max(0,num(S.xp)+d); $('f-xp').value=S.xp; var e=$('adv-xp'); if(e)e.textContent=S.xp; scheduleAutosave(); }
 function updateFoot(){ var f=$('foot-build'); if(f) f.textContent=num(S.xp)?('XP '+S.xp):''; }
@@ -857,8 +894,8 @@ function toggleDarkMode(){ setDarkMode(!document.body.classList.contains('dark')
 // ═══ SAVE / LOAD ════════════════════════════════════════════════════════════
 function collectSheet(){
   S.name=$('f-name').value.trim(); S.archetype=$('f-archetype').value; S.pronouns=$('f-pronouns').value;
-  S.key=$('f-key').value; S.appearance=$('f-appearance').value; S.notes=$('f-notes').value; S.xp=num($('f-xp').value); S.armor=num($('f-armor').value);
-  if($('f-career')) S.career=$('f-career').value;
+  S.appearance=$('f-appearance').value; S.notes=$('f-notes').value; S.xp=num($('f-xp').value); S.armor=num($('f-armor').value);
+  // Key attribute and career are set at creation (read-only on the sheet) — keep S.key / S.career.
   var cls = isAlien() ? (S.career||'Alien crew') : S.archetype;
   return Object.assign({}, S, { system:'YZE', variant:S.variant||'yze', class:cls, campaign:(typeof _campaign!=='undefined'&&_campaign)?{ id:_campaign.id, code:_campaign.code, name:_campaign.name }:null });
 }
@@ -888,9 +925,9 @@ function applySheet(d){
 }
 function renderAll(){
   syncVariant();
-  $('f-name').value=S.name||''; $('f-archetype').value=S.archetype||''; $('f-pronouns').value=S.pronouns||''; $('f-key').value=S.key||'';
+  $('f-name').value=S.name||''; $('f-archetype').value=S.archetype||''; $('f-pronouns').value=S.pronouns||'';
   $('f-appearance').value=S.appearance||''; $('f-notes').value=S.notes||''; $('f-xp').value=num(S.xp); $('f-armor').value=num(S.armor);
-  fillCareerOptions();
+  renderKeyDisp(); renderCareerDisp();
   renderAttrSkills(); renderVitals(); renderConds(); renderTraits(); renderRelationships(); renderWeapons(); renderGear(); renderTalents(); renderCareer(); updateFoot(); refreshWizardButtons();
 }
 function saveSheet(quiet){
@@ -918,8 +955,7 @@ $('f-archetype').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-pronouns').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-appearance').addEventListener('input',function(){ scheduleAutosave(); });
 $('f-notes').addEventListener('input',function(){ scheduleAutosave(); });
-$('f-key').addEventListener('change',function(){ S.key=this.value; renderAttrSkills(); scheduleAutosave(); });
-if($('f-career')) $('f-career').addEventListener('change',onCareerChange);
+// Key attribute + career are set at creation (read-only header displays) — no change listeners.
 try{ if(localStorage.getItem('yze_dark')==='1') setDarkMode(true); }catch(e){}
 </script>
 
