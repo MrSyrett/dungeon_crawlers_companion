@@ -494,103 +494,6 @@ const SCHEMAS: Record<string, Schema> = {
     summary: (d) => `${sv(d, "tier") || "Monster"} · ${sv(d, "world") || "core"}`,
   },
 
-  // ── HeroDark (Shadowdark clone; homebrew stored under ds-* keys, SD shapes) ──
-  "ds-class": {
-    title: "My Homebrew Classes", noun: "Class",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "hd", label: "Hit Die", type: "text", placeholder: "1d8" },
-      { key: "weaponsAll", label: "Proficient with all weapons", type: "checkbox" },
-      { key: "armorAll", label: "Proficient with all armor & shields", type: "checkbox" },
-      { key: "features", label: "Features", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", rowKeyPlaceholder: "Hard to Kill", textLabel: "Description", withChoose: true, addLabel: "+ Feature", help: "Each feature can carry mechanical effects (e.g. +1 AC, +2 HP) applied at creation. Tick “Choose one” for a feature the player selects from." },
-      { key: "talent", label: "Talents (2d6 table)", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", rowKeyPlaceholder: "Grit", textLabel: "Description", withChoose: true, addLabel: "+ Talent row", help: "Up to 5 rows, mapped to the 2d6 bands (row 1 → 2, row 2 → 3–6, row 3 → 7–9, row 4 → 10–11, row 5 → 12). Effects apply when that talent is rolled or chosen." },
-      { key: "titles", label: "Titles by Alignment", type: "titles", full: true },
-    ],
-    blank: () => ({ hd: "1d6", features: [], talent: [] }), toForm: (d) => ({ ...d }),
-    summary: (d) => `HD ${sv(d, "hd") || "1d6"}`,
-  },
-  "ds-ancestry": {
-    title: "My Homebrew Ancestries", noun: "Ancestry",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "traits", label: "Traits", type: "effectRows", full: true, rowKey: "name", rowKeyLabel: "Name", rowKeyPlaceholder: "Keen Senses", textLabel: "Description", addLabel: "+ Trait", help: "Each trait can carry mechanical effects (e.g. +1 DEX) applied at creation." },
-      { key: "languages", label: "Languages", type: "text", full: true, placeholder: "Common, Elvish" },
-      { key: "bonuses", label: "Mechanical Bonuses", type: "bonuses", full: true, addLabel: "+ Bonus", help: "Applied automatically when a character picks this ancestry at creation (e.g. +1 DEX, +2 HP)." },
-    ],
-    blank: () => ({ traits: [], bonuses: [] }), toForm: (d) => ({ ...d }),
-    summary: (d) => { const n = Array.isArray(d.traits) ? d.traits.length : 0; return n ? `${n} trait${n === 1 ? "" : "s"}` : "Ancestry"; },
-  },
-  "ds-background": {
-    title: "My Homebrew Backgrounds", noun: "Background",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "desc", label: "Description", type: "textarea", full: true },
-    ],
-    blank: () => ({}), toForm: (d) => ({ ...d }),
-    summary: () => "Background",
-  },
-  "ds-spell": {
-    title: "My Homebrew Spells", noun: "Spell",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "tier", label: "Tier", type: "text", placeholder: "1" },
-      { key: "range", label: "Range", type: "text", placeholder: "Close, Near, Far, Self" },
-      { key: "duration", label: "Duration", type: "text", placeholder: "Instant, Focus…" },
-      { key: "damage", label: "Damage / Effect", type: "text", placeholder: "1d8" },
-      { key: "desc", label: "Description", type: "textarea", full: true },
-    ],
-    blank: () => ({ tier: "1" }), toForm: (d) => ({ ...d }),
-    summary: (d) => `Tier ${sv(d, "tier") || "1"}`,
-  },
-  "ds-gear": {
-    title: "My Homebrew Gear", noun: "Gear",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "kind", label: "Category", type: "select", options: [["gear", "Adventuring Gear"], ["weapon", "Weapon"], ["armor", "Armor"], ["shield", "Shield"], ["magic", "Magic Item"], ["ammo", "Ammo"]] },
-      { key: "cost", label: "Cost", type: "number", placeholder: "10" },
-      { key: "costUnit", label: "Coin", type: "select", options: [["gp", "gp"], ["sp", "sp"], ["cp", "cp"]] },
-      { key: "slots", label: "Gear Slots", type: "text", placeholder: "1" },
-      { key: "qty", label: "Quantity", type: "text", placeholder: "20" },
-      // Weapon stats (category = Weapon).
-      { key: "wtype", label: "Weapon Type", type: "select", options: [["M", "Melee"], ["R", "Ranged"], ["M/R", "Melee / Ranged"]], help: "Weapons only." },
-      { key: "damage", label: "Damage", type: "text", placeholder: "1d8", help: "Weapons only." },
-      { key: "range", label: "Range", type: "select", options: [["Close", "Close"], ["Near", "Near"], ["Far", "Far"], ["Close/Near", "Close/Near"], ["Close/Far", "Close/Far"]], help: "Weapons only." },
-      { key: "props", label: "Properties", type: "text", full: true, placeholder: "Two-handed, thrown…", help: "Weapons only." },
-      { key: "ammo", label: "Requires Ammo", type: "text", placeholder: "Arrows", help: "Weapons only — leave blank if none." },
-      // Armor / shield stats.
-      { key: "acBase", label: "Armor Base AC", type: "number", placeholder: "13", help: "Armor only." },
-      { key: "acDex", label: "Adds DEX to AC", type: "checkbox", help: "Armor only." },
-      { key: "acBonus", label: "Shield AC Bonus", type: "number", placeholder: "2", help: "Shield only." },
-      // Equipped-item bonuses (magic items).
-      { key: "equippable", label: "Equippable (applies bonuses when equipped)", type: "checkbox" },
-      { key: "bonuses", label: "Bonuses While Equipped", type: "bonuses", full: true, addLabel: "+ Bonus", help: "For magic items — folded into the sheet when the item sits in a gear slot and is equipped." },
-      { key: "note", label: "Description", type: "textarea", full: true },
-    ],
-    blank: () => ({ kind: "gear", costUnit: "gp", bonuses: [] }), toForm: (d) => ({ ...d }),
-    summary: (d) => { const c = sv(d, "kind") || "gear"; const n = Array.isArray(d.bonuses) ? d.bonuses.length : 0; return n ? `${c} · ${n} bonus${n === 1 ? "" : "es"}` : c; },
-  },
-  "ds-monster": {
-    title: "My Homebrew Monsters", noun: "Monster",
-    fields: [
-      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
-      { key: "lv", label: "LV", type: "text", placeholder: "1" },
-      { key: "ac", label: "AC", type: "text", placeholder: "12" },
-      { key: "hp", label: "HP", type: "text", placeholder: "7" },
-      { key: "mv", label: "Move", type: "text", placeholder: "near" },
-      { key: "al", label: "Alignment", type: "select", options: [["N", "Neutral"], ["L", "Lawful"], ["C", "Chaotic"]] },
-      { key: "s", label: "STR", type: "text", placeholder: "+1" },
-      { key: "d", label: "DEX", type: "text", placeholder: "+1" },
-      { key: "c", label: "CON", type: "text", placeholder: "+1" },
-      { key: "i", label: "INT", type: "text", placeholder: "-1" },
-      { key: "w", label: "WIS", type: "text", placeholder: "+0" },
-      { key: "ch", label: "CHA", type: "text", placeholder: "+0" },
-      { key: "atk", label: "Attacks", type: "text", full: true, placeholder: "1 sword +2 (1d8)" },
-      { key: "notes", label: "Notes", type: "textarea", full: true },
-    ],
-    blank: () => ({ al: "N", mv: "near", lv: "1" }), toForm: (d) => ({ ...d }),
-    summary: (d) => `LV ${sv(d, "lv") || "1"} · AC ${sv(d, "ac") || "?"}`,
-  },
-
   // ── Candela Obscura (Illuminated Worlds) ──
   "co-ability": {
     title: "My Homebrew Abilities", noun: "Ability",
@@ -623,7 +526,6 @@ function accentFor(kind: string): string {
   if (kind.startsWith("kob-")) return "--kob";
   if (kind.startsWith("d62e-")) return "--d62e";
   if (kind.startsWith("icrpg-")) return "--icrpg";
-  if (kind.startsWith("ds-")) return "--darkspace";
   if (kind.startsWith("co-")) return "--candela";
   return "--dnd";
 }

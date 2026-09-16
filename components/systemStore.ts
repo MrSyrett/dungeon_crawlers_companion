@@ -8,13 +8,11 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "DS" | "CO";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
   { key: "SD", name: "Shadowdark", short: "SD", accent: "var(--gold)" },
-  // HeroDark: a homebrewed duplicate of Shadowdark (own storage/characters), HeroDark rules standard.
-  { key: "DS", name: "HeroDark", short: "HD", accent: "var(--darkspace)" },
   // Index Card RPG (Runehammer, Master Edition) — a rules-light unified d20
   // system: one TARGET, roll for EFFORT, five worlds.
   { key: "ICRPG", name: "Index Card RPG", short: "ICRPG", accent: "var(--icrpg)" },

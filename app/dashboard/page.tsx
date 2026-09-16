@@ -132,15 +132,6 @@ const ICRPG_REFERENCE: { href: string; label: string }[] = [
   { href: "/icrpg/rules", label: "Rules" },
 ];
 
-const DS_REFERENCE: { href: string; label: string }[] = [
-  { href: "/darkspace/archetypes", label: "Classes" },
-  { href: "/darkspace/traits", label: "Ancestries" },
-  { href: "/darkspace/backgrounds", label: "Backgrounds" },
-  { href: "/darkspace/powers", label: "Spells" },
-  { href: "/darkspace/gear", label: "Gear" },
-  { href: "/darkspace/bestiary", label: "Bestiary" },
-];
-
 const CO_REFERENCE: { href: string; label: string }[] = [
   { href: "/candela/roles", label: "Roles" },
   { href: "/candela/actions", label: "Actions" },
@@ -152,7 +143,6 @@ const CO_REFERENCE: { href: string; label: string }[] = [
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
-  DS: DS_REFERENCE,
   DCC: DCC_REFERENCE,
   ACE: ACE_REFERENCE,
   KOB: KOB_REFERENCE,

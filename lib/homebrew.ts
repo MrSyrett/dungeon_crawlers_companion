@@ -24,7 +24,6 @@ export type HbType =
   | "kob-trope" | "kob-strength" | "kob-flaw"
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
-  | "ds-class" | "ds-ancestry" | "ds-spell" | "ds-background" | "ds-gear" | "ds-monster"
   | "co-ability" | "co-gear";
 
 const HB_TYPES = [
@@ -37,7 +36,6 @@ const HB_TYPES = [
   "kob-trope", "kob-strength", "kob-flaw",
   "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
   "icrpg-type", "icrpg-ability", "icrpg-loot", "icrpg-gear", "icrpg-spell", "icrpg-monster",
-  "ds-class", "ds-ancestry", "ds-spell", "ds-background", "ds-gear", "ds-monster",
   "co-ability", "co-gear",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
@@ -1703,14 +1701,6 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "icrpg-gear": return normalizeIcrpgGear(data);
     case "icrpg-spell": return normalizeIcrpgSpell(data);
     case "icrpg-monster": return normalizeIcrpgMonster(data);
-    // HeroDark reuses Shadowdark's homebrew shapes (it IS a Shadowdark clone),
-    // stored under ds-* keys so HeroDark homebrew stays isolated from Shadowdark's.
-    case "ds-class": return normalizeClass(data);
-    case "ds-ancestry": return normalizeAncestry(data);
-    case "ds-spell": return normalizeSpell(data);
-    case "ds-background": return normalizeBackground(data);
-    case "ds-gear": return normalizeGear(data);
-    case "ds-monster": return normalizeMonster(data);
     case "co-ability": return normalizeCoAbility(data);
     case "co-gear": return normalizeCoGear(data);
   }

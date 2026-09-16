@@ -197,6 +197,28 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .sd-vital .sv-sm{width:34px;height:26px;font-size:12px;font-weight:700;background:var(--box);}
 .sd-vital .sv-slash{font-size:13px;color:var(--muted);}
 .sd-vital .lk-btn{border-radius:5px;}
+.sd-vital .def-row{gap:8px;}
+.sd-vital .def-cell{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.sd-vital .def-mini{font-family:'Montserrat',sans-serif;font-weight:800;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);line-height:1;}
+.sd-vital .def-armor{width:40px;}
+.sd-vital .def-evade{width:44px;height:34px;border:1px solid var(--input-border,var(--rule));border-radius:5px;background:var(--input-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.sd-vital .def-evade:hover{background:var(--black);}
+.sd-vital .def-evade:hover .def-evade-mod{color:#fff;}
+.sd-vital .def-evade-mod{font-family:'Montserrat',sans-serif;font-weight:900;font-size:16px;color:var(--ink);line-height:1;}
+/* HeroDark toggle: vanilla Shadowdark shows the AC tile and hides the Defense tile
+   + Stress track; HeroDark mode (body.hd-mode) flips it. Set at character creation.
+   :not() selectors so this wins regardless of stylesheet order. */
+body:not(.hd-mode) .sd-vital-def{display:none;}
+body:not(.hd-mode) .ds-stress{display:none;}
+body.hd-mode .sd-vital-ac{display:none;}
+.ds-stress{display:flex;align-items:center;gap:8px;padding:6px 10px 8px;border-bottom:1px solid var(--rule);}
+.ds-stress .st-lbl{font-family:'Montserrat',sans-serif;font-weight:800;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex:0 0 auto;}
+.ds-stress .st-pips{display:flex;gap:5px;flex:1 1 auto;}
+.ds-stress .st-pip{flex:1 1 auto;height:14px;border:1px solid var(--rule);border-radius:3px;background:var(--box);cursor:pointer;padding:0;transition:background .1s,border-color .1s;}
+.ds-stress .st-pip:hover{border-color:#e07050;}
+.ds-stress .st-pip.on{background:#c8503a;border-color:#e07050;}
+.ds-stress .st-pip.last.on{background:#8a1c10;}
+.ds-stress .st-pen{font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:#e0776f;flex:0 0 auto;min-width:40px;text-align:right;}
 
 /* STATS BLOCK */
 /* TRACKERS (left column) — active status chips */
@@ -332,6 +354,20 @@ body::-webkit-scrollbar-thumb:hover { background: #9d9d96; }
 .gear-slot-disabled .gear-name{text-decoration:line-through;opacity:0.35;color:var(--muted);pointer-events:none;}
 .gear-slot-disabled .gear-qty{opacity:0.35;pointer-events:none;}
 .gear-slot-disabled{background:repeating-linear-gradient(135deg,transparent,transparent 4px,rgba(128,128,128,0.07) 4px,rgba(128,128,128,0.07) 5px);}
+.gear-stow-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;line-height:1;}
+.gear-stow-btn:hover{border-color:#24c3d6;color:#24c3d6;}
+.gear-del-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--muted);border-radius:2px;flex-shrink:0;text-align:center;}
+.gear-del-btn:hover{border-color:#c8503a;color:#e0776f;}
+.gear-slot-disabled .gear-stow-btn,.gear-slot-disabled .gear-del-btn{visibility:hidden;pointer-events:none;}
+.inv-list{}
+.inv-row{display:flex;align-items:center;border-bottom:1px solid var(--rule);padding:1px 6px;gap:3px;overflow:hidden;}
+.inv-name{flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;}
+.inv-qty{width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;}
+.inv-eq-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--muted);border-radius:2px;text-align:center;line-height:1;}
+.inv-eq-btn:hover{border-color:#24c3d6;color:#24c3d6;}
+.inv-del-btn{width:20px;flex:0 0 20px;padding:1px 0;background:transparent;border:1px solid var(--rule);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--muted);border-radius:2px;text-align:center;}
+.inv-del-btn:hover{border-color:#c8503a;color:#e0776f;}
+.inv-empty{padding:8px 10px;font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);font-style:italic;}
 /* Auto-consume ammo toggle switch (next to + Add Item) */
 .sw-toggle{position:relative;display:inline-block;width:26px;height:14px;background:#4a4a4a;border:1px solid #2a2a2a;border-radius:8px;cursor:pointer;transition:background .12s;flex:0 0 auto;vertical-align:middle;}
 .sw-toggle.on{background:#7a5a00;border-color:#c8a020;}
@@ -477,9 +513,22 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <span class="sv-lbl">HP</span>
           <div class="sv-row"><input type="text" class="sv-big" id="hp-current" placeholder="0" oninput="onHPChange()"><span class="sv-slash">/</span><input type="text" class="sv-sm" id="hp-max" placeholder="0"></div>
         </div>
-        <div class="sd-vital">
+        <div class="sd-vital sd-vital-ac">
           <span class="sv-lbl">AC</span>
           <div class="sv-row"><input type="text" class="sv-big" id="ac-val" placeholder="0" title="Armor Class — from your equipped armor and shield (turn off Auto to edit by hand)"></div>
+        </div>
+        <div class="sd-vital sd-vital-def">
+          <span class="sv-lbl">Defense</span>
+          <div class="sv-row def-row">
+            <div class="def-cell" title="Armor — the flat amount of damage your equipped armor soaks when you're hit (light 1, medium 2, heavy 3, plus any bonuses). Turn Auto off to edit by hand.">
+              <span class="def-mini">Armor</span>
+              <input type="text" class="sv-big def-armor" id="armor-val" placeholder="0">
+            </div>
+            <div class="def-cell">
+              <span class="def-mini">Evade</span>
+              <button type="button" class="def-evade" id="evade-btn" onclick="rollEvade()" title="Evade — roll d20 + DEX against the attacker's Attack DC to avoid the hit entirely"><span class="def-evade-mod" id="evade-mod">+0</span></button>
+            </div>
+          </div>
         </div>
         <div class="sd-vital">
           <span class="sv-lbl">XP</span>
@@ -489,6 +538,13 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <span class="sv-lbl">Luck</span>
           <div class="sv-row"><button class="lk-btn" onclick="adjustLuck(-1)">−</button><input type="text" class="sv-big" id="lk-val" placeholder="0"><button class="lk-btn" onclick="adjustLuck(1)">+</button></div>
         </div>
+      </div>
+
+      <!-- STRESS: each level is -2 to all d20 rolls; a rest clears one; 6 = out of the fight -->
+      <div class="ds-stress" title="Stress — each level is -2 to all d20 rolls until cleared. A rest clears one level. At 6 you are out of the fight. Click a pip to set your stress.">
+        <span class="st-lbl">Stress</span>
+        <div class="st-pips" id="stress-pips"></div>
+        <span class="st-pen" id="stress-pen"></span>
       </div>
 
       <!-- ATTACKS -->
@@ -514,7 +570,7 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="spells" onclick="setTab('spells')">Spells</button>
         <button class="tab-btn" data-tab="talents" onclick="setTab('talents')">Talents</button>
-        <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
+        <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Equipment</button>
       </div>
 
       <!-- SPELLS TAB -->
@@ -547,17 +603,15 @@ body.dark .stat-val, body.dark .hpac-input, body.dark .hpac-max, body.dark .xp-i
           <div class="coin-cell"><span class="coin-label">SP</span><input type="text" class="coin-input" id="coin-sp" placeholder="0"></div>
           <div class="coin-cell"><span class="coin-label">CP</span><input type="text" class="coin-input" id="coin-cp" placeholder="0"></div>
         </div>
-        <div class="sl"><span>Gear</span>
+        <div class="sl"><span>Equipment</span>
           <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
             <button onclick="openShop()" style="padding:2px 10px;background:#241f10;color:#c8a020;border:1px solid #7a5a00;cursor:pointer;text-transform:uppercase;" onmouseover="this.style.background='#7a5a00';this.style.color='white'" onmouseout="this.style.background='#241f10';this.style.color='#c8a020'">+ Item</button>
           </div></div>
         <div id="gear-list"></div>
 
         <div class="free-carry">
-          <div class="sl">Free to Carry</div>
-          <div class="free-carry-inner">
-            <textarea id="free-carry" placeholder="Torch, Rations, Rope..." rows="4"></textarea>
-          </div>
+          <div class="sl"><span>Inventory</span></div>
+          <div id="inventory-list" class="inv-list"></div>
         </div>
       </div>
 
@@ -941,8 +995,20 @@ function allArmorAC() {
   return (_catalogCache.armor = book.concat(_homebrewItems.filter(i => i.kind === 'armor').map(i => ({
     match: String(i.name || '').toLowerCase(),
     base:  parseInt(i.acBase) || 10,
-    dex:   !!i.acDex
+    dex:   !!i.acDex,
+    soak:  (i.soak != null && i.soak !== '') ? (parseInt(i.soak) || 0) : null
   }))));
+}
+
+// Soak of an armor definition: explicit .soak, else derived from its AC base
+// (>=15 heavy 3, >=13 medium 2, >=11 light 1, else 0).
+function armorSoakOf(a) {
+  if(a && a.soak != null) return parseInt(a.soak) || 0;
+  const b = a ? (parseInt(a.base) || 0) : 0;
+  if(b >= 15) return 5;   // plate
+  if(b >= 13) return 3;   // chainmail
+  if(b >= 11) return 1;   // leather
+  return 0;
 }
 
 function findHomebrewItem(name) {
@@ -989,12 +1055,11 @@ let _itemBonusAtk   = { meleeAtk:0, meleeDmg:0, rangedAtk:0, rangedDmg:0 };
 let _itemBonusApplied = { hp:0, str:0, dex:0, con:0, int:0, wis:0, cha:0 };
 let _applyingItemBonuses = false;   // re-entrancy guard
 
-// ── HeroDark mode (Shadowdark option, set at character creation) ─────────────
-// The HeroDark hack: Max HP at level 1, choose talents at level-up, an even-level
-// Skill Talent, unlimited Luck, a Luck point on any natural 1 or 20, a 3-Action
-// turn, and Dying (not unconscious) at 0 HP — 1 action + disadvantage on all
-// checks. Some of these are already how the sheet works (Luck is a free number,
-// talents can be chosen); the rest are automated below or listed in the ⚔ panel.
+// ── HeroDark rules are the STANDARD for this system (not an opt-in) ───────────
+// HeroDark IS the system now: Max HP at level 1, choose talents at level-up, an
+// even-level Skill Talent, unlimited Luck, a Luck point on any natural 1 or 20, a
+// 3-Action turn, Dying (not unconscious) at 0 HP, plus Stress and the Evade/Armor
+// defense model. heroDarkOn() hard-returns true so all of it is always active.
 function defaultOptions(){ return { heroDark:false }; }
 let options = defaultOptions();
 function heroDarkOn(){ return !!(options && options.heroDark); }
@@ -1218,12 +1283,12 @@ function getStatMod(id) {
 // toggle. When that switch is off, AC is edited by hand.
 // Body-armor definitions (lower-cased match). base = AC, dex = adds DEX mod.
 const AC_ARMOR = [
-  { match:'plate mail',         base:15, dex:false },
-  { match:'plate',              base:15, dex:false },
-  { match:'mithral chainmail',  base:13, dex:true  },
-  { match:'chainmail',          base:13, dex:true  },
-  { match:'leather armor',      base:11, dex:true  },
-  { match:'leather',            base:11, dex:true  },
+  { match:'plate mail',         base:15, dex:false, soak:5 },
+  { match:'plate',              base:15, dex:false, soak:5 },
+  { match:'mithral chainmail',  base:13, dex:true,  soak:3 },
+  { match:'chainmail',          base:13, dex:true,  soak:3 },
+  { match:'leather armor',      base:11, dex:true,  soak:1 },
+  { match:'leather',            base:11, dex:true,  soak:1 },
 ];
 
 // Parse a gear item name into an armor/shield contribution, honoring "+N".
@@ -1236,11 +1301,11 @@ function acParseItem(name) {
   // A homebrew shield carries its own AC bonus, so match it before the generic
   // "anything called a shield is +2" rule.
   const hbShield = _homebrewItems.find(i => i.kind === 'shield' && i.name.toLowerCase() === n);
-  if(hbShield) return { kind:'shield', ac:(parseInt(hbShield.acBonus) || 0) + bonus };
-  if(/\bshield\b/.test(n)) return { kind:'shield', ac:2 + bonus };
+  if(hbShield) return { kind:'shield', ac:(parseInt(hbShield.acBonus) || 0) + bonus, soak:2 + bonus };
+  if(/\bshield\b/.test(n)) return { kind:'shield', ac:2 + bonus, soak:2 + bonus };
   for(const a of allArmorAC()) {
     if(n === a.match || n.startsWith(a.match)) {
-      return { kind:'armor', base:a.base, dex:a.dex, bonus };
+      return { kind:'armor', base:a.base, dex:a.dex, bonus, soak:armorSoakOf(a) };
     }
   }
   return null;
@@ -1261,14 +1326,40 @@ function classInnateAC(unarmored) {
   return bonus;
 }
 
+// Total Armor (soak): flat damage your best equipped armor absorbs on a hit, plus
+// a shield, an enchant "+N", and any innate/item Armor bonuses. DEX does NOT add
+// to soak — DEX is your Evade. Unarmored = 0 soak.
+function computeSoak() {
+  let best = 0;           // best equipped body-armor soak
+  let shield = 0;         // best equipped shield soak
+  document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
+    if(row.classList.contains('gear-slot-disabled')) return;          // dropped
+    const cb = row.querySelector('.gear-equip');
+    if(!cb || !cb.checked) return;                                    // not equipped
+    const parsed = acParseItem(row.querySelector('.gear-name')?.value);
+    if(!parsed) return;
+    if(parsed.kind === 'shield') {
+      shield = Math.max(shield, (parseInt(parsed.soak) || 0));
+    } else {
+      const s = (parseInt(parsed.soak) || 0) + (parseInt(parsed.bonus) || 0);
+      if(s > best) best = s;
+    }
+  });
+  return best + shield + (parseInt(_innateAC) || 0) + (parseInt(_itemBonusAC) || 0);
+}
+
+// Evade modifier = your DEX modifier (the static part of the d20 + DEX evade roll).
+function evadeMod() { return getStatMod('dex'); }
+
+// Standard Shadowdark AC — used when HeroDark mode is OFF (the AC combat tile).
 function computeAC() {
   const dexMod = getStatMod('dex');
   let best = null;        // best equipped body-armor AC
   let shield = 0;         // best equipped shield bonus
   document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
-    if(row.classList.contains('gear-slot-disabled')) return;          // dropped
+    if(row.classList.contains('gear-slot-disabled')) return;
     const cb = row.querySelector('.gear-equip');
-    if(!cb || !cb.checked) return;                                    // not equipped
+    if(!cb || !cb.checked) return;
     const parsed = acParseItem(row.querySelector('.gear-name')?.value);
     if(!parsed) return;
     if(parsed.kind === 'shield') {
@@ -1283,10 +1374,22 @@ function computeAC() {
   return baseAC + shield + (parseInt(_innateAC) || 0) + (parseInt(_itemBonusAC) || 0) + classInnateAC(unarmored);
 }
 
-// AC is always derived from equipped armor now — recompute and write it.
+// Defense is derived from equipped gear. Both the standard AC (off) and the
+// HeroDark Armor-soak + Evade (on) are recomputed; the mode class chooses which
+// tile is visible. (Name kept as refreshAutoAC so builder/level-up keep calling it.)
 function refreshAutoAC() {
-  const el = document.getElementById('ac-val');
-  if(el) el.value = String(computeAC());
+  const ac = document.getElementById('ac-val');
+  if(ac) ac.value = String(computeAC());
+  const a = document.getElementById('armor-val');
+  if(a) a.value = String(computeSoak());
+  const em = document.getElementById('evade-mod');
+  if(em) em.textContent = fmtMod(evadeMod());
+}
+
+// Show the AC tile + hide Stress/Defense in vanilla Shadowdark; flip in HeroDark.
+// Driven by the option set at character creation (persists on the sheet).
+function applyHeroDarkMode() {
+  try { document.body.classList.toggle('hd-mode', !!(typeof heroDarkOn === 'function' && heroDarkOn())); } catch(e) {}
 }
 
 // ── EQUIP: weapons & armor in the gear list ─────────────────────────────────
@@ -1321,17 +1424,21 @@ function onGearNameInput(nameEl) {
   if(!row) return;
   const cb = row.querySelector('.gear-equip');
   const kind = gearItemKind(nameEl.value);
+  const shouldEquip = !!kind && !row.classList.contains('gear-slot-disabled');
   if(cb) {
-    cb.style.visibility = kind ? 'visible' : 'hidden';
-    cb.title = kind === 'weapon' ? 'Equip weapon (adds an attack)'
-             : kind === 'armor'  ? 'Equip armor (adds AC)'
-             : kind === 'magic'  ? 'Equip (applies this item\'s bonuses)' : 'Equip';
-    if(!kind && cb.checked) {          // name no longer equippable → unequip
-      cb.checked = false;
+    const was = cb.checked;
+    cb.checked = shouldEquip;
+    if(was && !shouldEquip) {                 // no longer equipped → drop its attack/spell
       removeEquipAttack(row);
-      if(typeof applyItemBonuses === 'function') applyItemBonuses();   // drop its bonuses
+      if(typeof removeEquipSpell === 'function') removeEquipSpell(row);
+    } else if(!was && shouldEquip) {           // newly equipped → add its attack/spell
+      if(kind === 'weapon') addEquipAttack(row);
+      else if(kind === 'scroll' || kind === 'wand') addEquipSpell(row, kind);
     }
   }
+  // Recompute bonuses, AC, gear slots, and rebuild any equipped weapon attack
+  // whose profile changed (e.g. the item was renamed to a different weapon).
+  if(typeof applyItemBonuses === 'function') applyItemBonuses();
   refreshAutoAC();
 }
 
@@ -2165,33 +2272,41 @@ function autoEquipArmorFromGear() {
     const nameEl = row.querySelector('.gear-name');
     const cb = row.querySelector('.gear-equip');
     if(!nameEl || !cb) return;
-    if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);
     const kind = gearItemKind(nameEl.value);
-    if(row.classList.contains('gear-slot-disabled')) return;
-    if(kind === 'armor') {
-      cb.checked = true;                                  // wear it (AC)
-    } else if(kind === 'weapon') {
+    const shouldEquip = !!kind && !row.classList.contains('gear-slot-disabled');
+    cb.checked = shouldEquip;
+    if(!shouldEquip) return;
+    if(kind === 'weapon') {
       // Generators create the attack rows directly; link this slot to its
-      // matching (unlinked) attack row so unequip/re-equip works, checking the box.
+      // matching (unlinked) attack row so unequip works — or build one if none.
       const nm = nameEl.value.trim();
+      // Idempotent: if this slot already owns a linked attack row, leave it.
+      if(row.dataset.eqId && [...document.querySelectorAll('#attacks-body tr')].some(tr => tr.dataset.eq === row.dataset.eqId)) return;
       const existing = [...document.querySelectorAll('#attacks-body tr')].find(tr =>
         !tr.dataset.eq && (tr.querySelector('td input')?.value || '').trim() === nm);
       if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
       if(existing) {
         existing.dataset.eq = row.dataset.eqId;           // reconnect
-        // Also link any Backstab row generated for this weapon.
+        // Also link the Thief Backstab row generated for this weapon so the slot
+        // owns it too (matching addEquipAttack's naming + eqBackstab marker) —
+        // otherwise reapplyEquippedWeaponAttacks thinks the backstab is missing
+        // and re-adds it, duplicating the row.
         [...document.querySelectorAll('#attacks-body tr')].forEach(tr => {
           if(tr.dataset.eq) return;
           const t = (tr.querySelector('td input')?.value || '').trim();
-          if(new RegExp('^Backstab \\(' + nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\)', 'i').test(t))
+          if(new RegExp('^Backstab \\(' + nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') +'\\)', 'i').test(t)) {
             tr.dataset.eq = row.dataset.eqId;
+            tr.dataset.eqBackstab = '1';
+          }
         });
-        cb.checked = true;
       } else {
-        cb.checked = true; addEquipAttack(row);           // none found → build linked
+        addEquipAttack(row);                              // none found → build linked
       }
+    } else if(kind === 'scroll' || kind === 'wand') {
+      if(typeof addEquipSpell === 'function') addEquipSpell(row, kind);
     }
   });
+  if(typeof applyItemBonuses === 'function') applyItemBonuses();
   if(typeof refreshAutoAC === 'function') refreshAutoAC();
 }
 
@@ -2268,21 +2383,123 @@ function buildGear() {
   // Header
   const hdr = document.createElement('div');
   hdr.style.cssText = 'display:flex;align-items:center;gap:3px;padding:2px 6px;border-bottom:2px solid var(--border);background:var(--box);';
-  hdr.innerHTML = '<span class="gear-eq-hd" style="width:16px;flex:0 0 16px;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:center;" title="Equip: check to wield a weapon (adds an attack) or wear armor (adds AC)">Eq</span><span style="width:16px;flex:0 0 16px;"></span><span style="flex:1 1 auto;min-width:0;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Item</span><span style="width:30px;flex:0 0 30px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;">Qty</span><span class="gear-disable-spacer" style="width:20px;flex:0 0 20px;"></span>';
+  hdr.innerHTML = '<span style="width:16px;flex:0 0 16px;"></span><span style="flex:1 1 auto;min-width:0;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);">Equipped Item</span><span style="width:30px;flex:0 0 30px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;">Qty</span><span style="width:20px;flex:0 0 20px;"></span><span style="width:20px;flex:0 0 20px;"></span>';
   list.appendChild(hdr);
   for(let i=1;i<=20;i++) {
     const row = document.createElement('div');
     row.className = 'gear-slot';
     row.style.cssText = 'display:flex;align-items:center;border-bottom:1px solid var(--rule);padding:1px 6px;gap:3px;overflow:hidden;';
     row.innerHTML = `
-      <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" title="Equip" style="width:16px;flex:0 0 16px;margin:0;cursor:pointer;visibility:hidden;accent-color:#c8a020;">
+      <input type="checkbox" class="gear-equip" onchange="onGearEquipToggle(this)" style="display:none;">
       <span style="font-size:8px;font-weight:700;color:var(--muted);width:16px;flex:0 0 16px;">${i}.</span>
-      <input type="text" class="gear-name" oninput="onGearNameInput(this)" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
+      <input type="text" class="gear-name" oninput="onGearNameInput(this)" title="An item here is equipped: weapons add an attack, armor sets your Armor (soak), magic items apply their bonuses" style="flex:1 1 auto;min-width:0;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;color:var(--ink);outline:none;padding:3px 0;">
       <input type="text" class="gear-qty" style="width:30px;flex:0 0 30px;border:none;border-bottom:1px solid var(--rule);background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;text-align:center;color:var(--ink);outline:none;padding:2px 0;" placeholder="">
-      <button class="gear-disable-btn" onclick="toggleGearSlot(this)" title="Disable slot (exceeds STR limit)">✕</button>
+      <button class="gear-stow-btn" onclick="stowGearRow(this)" title="Move to Inventory (unequip)">▽</button>
+      <button class="gear-del-btn" onclick="deleteGearRow(this)" title="Delete item">✕</button>
     `;
     list.appendChild(row);
   }
+}
+
+// ── Equipment ⇄ Inventory ───────────────────
+let _inventory = [];   // [{name, qty}] — unlimited, unequipped
+
+// Clear the continuation rows (↳ Name) a bulky item reserved, so removing the
+// item frees the slots it took instead of leaving orphaned rows behind.
+function _clearGearContinuations(name){
+  const n = String(name || '').trim();
+  if(!n) return;
+  document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
+    const el = row.querySelector('.gear-name');
+    if(el && el.value.trim() === '↳ ' + n){ el.value = ''; const q = row.querySelector('.gear-qty'); if(q) q.value = ''; }
+  });
+}
+
+function stowGearRow(btn){
+  const row = btn.closest('.gear-slot'); if(!row) return;
+  const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
+  const name = (nameEl.value || '').trim(); if(!name) return;
+  if(/^↳ /.test(name)) return;   // continuation rows aren't stowable on their own
+  _inventory.push({ name: name, qty: (qtyEl.value || '').trim() });
+  nameEl.value = ''; qtyEl.value = '';
+  _clearGearContinuations(name);
+  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
+  if(typeof refreshGearSlots === 'function') refreshGearSlots();       // hide it if it was over-limit
+  renderInventory();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function deleteGearRow(btn){
+  const row = btn.closest('.gear-slot'); if(!row) return;
+  const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
+  const name = (nameEl.value || '').trim();
+  nameEl.value = ''; qtyEl.value = '';
+  _clearGearContinuations(name);
+  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
+  if(typeof refreshGearSlots === 'function') refreshGearSlots();       // hide it if it was over-limit
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function _firstOpenGearRow(){
+  let target = null;
+  document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
+    if(target || row.classList.contains('gear-slot-disabled')) return;
+    const nm = row.querySelector('.gear-name');
+    if(nm && !nm.value.trim()) target = row;
+  });
+  return target;
+}
+function invEquip(idx){
+  const item = _inventory[idx]; if(!item) return;
+  const cost = (typeof itemSlotCost === 'function') ? itemSlotCost(item.name) : 1;
+  // Bulky items (2-slot weapons, chainmail=2, plate mail=3) need `cost` open slots.
+  const open = [...document.querySelectorAll('#gear-list .gear-slot')].filter(row =>
+    !row.classList.contains('gear-slot-disabled') && !(row.querySelector('.gear-name')?.value || '').trim());
+  if(open.length < cost){
+    addLog('Equipment', 'Full', cost > 1
+      ? (item.name + ' needs ' + cost + ' open Equipment slots — not enough room')
+      : 'No open Equipment slots — your carry limit is full', 'fumble');
+    return;
+  }
+  const target = open[0];
+  const nameEl = target.querySelector('.gear-name'), qtyEl = target.querySelector('.gear-qty');
+  nameEl.value = item.name; qtyEl.value = item.qty || '';
+  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // auto-equip if weapon/armor/magic
+  // Reserve the extra slots with continuation rows (↳), matching the shop/builder.
+  for(let s = 1; s < cost; s++){
+    const extra = open[s];
+    const en = extra.querySelector('.gear-name'), eq = extra.querySelector('.gear-qty');
+    if(en) en.value = '↳ ' + item.name;
+    if(eq) eq.value = '';
+  }
+  _inventory.splice(idx, 1);
+  renderInventory();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function invDelete(idx){
+  if(idx < 0 || idx >= _inventory.length) return;
+  _inventory.splice(idx, 1);
+  renderInventory();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function addInvItem(name, qty){
+  _inventory.push({ name: name || '', qty: qty || '' });
+  renderInventory();
+  const rows = document.querySelectorAll('#inventory-list .inv-row .inv-name');
+  const last = rows[rows.length - 1]; if(last) last.focus();
+  if(typeof scheduleAutosave === 'function') scheduleAutosave();
+}
+function onInvNameInput(idx, val){ if(_inventory[idx]){ _inventory[idx].name = val; if(typeof scheduleAutosave === 'function') scheduleAutosave(); } }
+function onInvQtyInput(idx, val){ if(_inventory[idx]){ _inventory[idx].qty = val; if(typeof scheduleAutosave === 'function') scheduleAutosave(); } }
+function renderInventory(){
+  const box = document.getElementById('inventory-list'); if(!box) return;
+  if(!_inventory.length){ box.innerHTML = '<div class="inv-empty">Empty — buy or add items, or move gear here from Equipment.</div>'; return; }
+  box.innerHTML = _inventory.map((it, i) =>
+    '<div class="inv-row">'
+    + '<input type="text" class="inv-name" value="' + _trkEsc(it.name) + '" oninput="onInvNameInput(' + i + ',this.value)">'
+    + '<input type="text" class="inv-qty" value="' + _trkEsc(it.qty || '') + '" oninput="onInvQtyInput(' + i + ',this.value)" placeholder="">'
+    + '<button type="button" class="inv-eq-btn" onclick="invEquip(' + i + ')" title="Move to Equipment (equip)">△</button>'
+    + '<button type="button" class="inv-del-btn" onclick="invDelete(' + i + ')" title="Delete item">✕</button>'
+    + '</div>'
+  ).join('');
 }
 
 // ── ADV/DIS ──
@@ -2341,6 +2558,8 @@ const HERODARK_QUICK_RULES = [
   { title: '⚔ HeroDark — Luck', text: 'You can hold an unlimited number of Luck points, and you gain a Luck point whenever you roll a natural 1 or a natural 20 on a d20 (check, attack, or spellcast). The sheet adds it automatically.' },
   { title: '⚔ HeroDark — Actions', text: 'You have 2 actions on your turn as normal. You may forgo your movement to take a second attack or cast a spell that turn — but that extra action is made with disadvantage.' },
   { title: '⚔ HeroDark — Dying', text: 'When reduced to 0 HP you are Dying, not unconscious: you have only 1 action on your turn and disadvantage on all rolls until you are healed above 0 HP. The sheet adds the Dying status automatically (it drives the disadvantage); clear it by healing. The Exhausted status likewise applies −2 to your rolls while active.' },
+  { title: '⚔ HeroDark — Stress', text: 'Stress stacks in levels (track it on the sheet). Each level of Stress is a −2 penalty to ALL d20 rolls — checks, attacks, and spellcasting — folded in automatically. A rest clears one level. At Stress 6 you are out of the fight until you recover.' },
+  { title: '⚔ HeroDark — Defense (Evade & Armor)', text: "Attackers don't roll to hit you. When you're attacked, roll Evade (d20 + DEX, the button on your Defense tile) against the attacker's Attack DC — beat it and you avoid the hit entirely. If you're hit, your Armor soaks a flat amount off the damage (light 1, medium 2, heavy 3, plus a shield and any bonuses). Your own attacks against enemies still roll to hit as normal." },
 ];
 function d(s){return Math.floor(Math.random()*s)+1;}
 function parseMod(v){if(!v)return 0;const n=parseInt((v+'').replace(/\s/g,''));return isNaN(n)?0:n;}
@@ -2398,18 +2617,69 @@ function clearLog() {
   document.getElementById('log-entries').innerHTML = '<div class="log-hint">Click a stat or roll button</div>';
 }
 
+// ── STRESS (HeroDark) ───────────────────────────────────────────────────────
+// A stacking track, 0–6. Each level is −2 to ALL d20 rolls (checks, attacks,
+// spellcasting) until cleared; a rest clears one level. At 6 you are out of the
+// fight. Persisted in the save blob as _sheet.stress.
+const STRESS_MAX = 6;
+let _stress = 0;
+function stressPenalty(){ return heroDarkOn() ? -2 * (parseInt(_stress) || 0) : 0; }
+function setStress(n){
+  n = Math.max(0, Math.min(STRESS_MAX, parseInt(n) || 0));
+  const prev = _stress; _stress = n;
+  renderStress();
+  if(n !== prev){
+    const pen = stressPenalty();
+    addLog('Stress', n === 0 ? 'Clear' : (n >= STRESS_MAX ? 'OUT' : String(n)),
+      n === 0 ? 'No stress' : (n >= STRESS_MAX ? 'Stress 6 — out of the fight' : ('Stress ' + n + ' · ' + pen + ' to all d20 rolls')),
+      n === 0 ? 'normal' : 'fumble');
+    if(typeof scheduleAutosave === 'function') scheduleAutosave();
+  }
+}
+function renderStress(){
+  const box = document.getElementById('stress-pips'); if(!box) return;
+  let h = '';
+  for(let i = 1; i <= STRESS_MAX; i++){
+    const on = i <= _stress;
+    h += '<button type="button" class="st-pip' + (on ? ' on' : '') + (i === STRESS_MAX ? ' last' : '') + '"'
+       + ' title="' + (i === STRESS_MAX ? 'Out of the fight' : ('Stress ' + i + ' (' + (-2 * i) + ')')) + '"'
+       + ' onclick="setStress(' + (i === _stress ? i - 1 : i) + ')"></button>';
+  }
+  box.innerHTML = h;
+  const pen = document.getElementById('stress-pen');
+  if(pen) pen.textContent = _stress >= STRESS_MAX ? 'OUT' : (_stress ? String(stressPenalty()) : '');
+}
+
 // ── ROLLS ──
 function rollStat(id, name) {
   const statMod = getStatMod(id);
   const exh = exhaustedPenalty();
-  const mod = statMod + exh;
+  const str = (typeof stressPenalty === 'function') ? stressPenalty() : 0;
+  const mod = statMod + exh + str;
   const {result:roll, detail:advDetail} = rollWithAdv(20);
   const total = roll + mod;
   let type = roll===20?'crit':roll===1?'fumble':'normal';
   const base = advDetail||`d20(${roll})`;
   addLog(`${name} Check`+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
-    `${base} + Mod(${fmtMod(statMod)})${exh?' '+fmtMod(exh)+' exhausted':''} = ${total}`, type);
+    `${base} + Mod(${fmtMod(statMod)})${exh?' '+fmtMod(exh)+' exhausted':''}${str?' '+fmtMod(str)+' stress':''} = ${total}`, type);
   heroDarkLuckOnNat(roll, name + ' check');
+}
+
+// Evade: roll d20 + DEX against the attacker's Attack DC (the GM sets the DC).
+// Beat it and you avoid the hit entirely; if you fail, your Armor soaks damage.
+// Stress and exhaustion fold in like any other d20 roll.
+function rollEvade() {
+  const dexMod = getStatMod('dex');
+  const exh = exhaustedPenalty();
+  const str = (typeof stressPenalty === 'function') ? stressPenalty() : 0;
+  const mod = dexMod + exh + str;
+  const {result:roll, detail:advDetail} = rollWithAdv(20);
+  const total = roll + mod;
+  const type = roll===20?'crit':roll===1?'fumble':'normal';
+  const base = advDetail || `d20(${roll})`;
+  addLog('Evade'+(roll===20?' ★ NAT 20':roll===1?' ✗ NAT 1':''), total,
+    `${base} + DEX(${fmtMod(dexMod)})${exh?' '+fmtMod(exh)+' exhausted':''}${str?' '+fmtMod(str)+' stress':''} = ${total} vs Attack DC`, type);
+  heroDarkLuckOnNat(roll, 'evade');
 }
 
 // Extra spell lists a caster opted into (beyond their class's own list). Saved
@@ -2469,7 +2739,7 @@ function applyAutoLock(on) {
   });
   const hpMax = document.getElementById('hp-max');
   if(hpMax) { hpMax.readOnly = lock; hpMax.style.opacity = lock ? '0.95' : '1'; }
-  const ac = document.getElementById('ac-val');
+  const ac = document.getElementById('armor-val');
   if(ac) { ac.readOnly = lock; ac.style.opacity = lock ? '0.95' : '1'; ac.style.cursor = lock ? 'default' : 'text'; }
   // Talents are written by the character-creation and level-up wizards while
   // Auto is on, so lock the box to stop hand-edits being overwritten. Turning
@@ -2610,9 +2880,10 @@ function rollAttack(btn) {
   const {result:hitRoll, detail:advDetail} = rollWithAdv(20);
   advState = prevAdv;
   const exh = exhaustedPenalty();
-  const hitTotal = hitRoll + bonus + statMod + exh;
+  const str = (typeof stressPenalty === 'function') ? stressPenalty() : 0;
+  const hitTotal = hitRoll + bonus + statMod + exh + str;
   const hitBase = advDetail||`d20(${hitRoll})`;
-  const statLabel = (statId?`+${statId.toUpperCase()}(${fmtMod(statMod)})`:'') + (exh?` ${fmtMod(exh)} exhausted`:'');
+  const statLabel = (statId?`+${statId.toUpperCase()}(${fmtMod(statMod)})`:'') + (exh?` ${fmtMod(exh)} exhausted`:'') + (str?` ${fmtMod(str)} stress`:'');
   let type = hitRoll===20?'crit':hitRoll===1?'fumble':'normal';
 
   let dmgTotal = null, dmgBreakdown = '';
@@ -2691,7 +2962,8 @@ function rollSpell(btn) {
   advState = prevAdv;
 
   const exh     = exhaustedPenalty();
-  const total   = roll + bonus + castMod + gBonus + exh;
+  const str     = (typeof stressPenalty === 'function') ? stressPenalty() : 0;
+  const total   = roll + bonus + castMod + gBonus + exh + str;
   const success = total >= dc;
   const type    = !success ? 'fumble' : roll===20 ? 'crit' : 'normal';
   const base    = advDetail || `d20(${roll})`;
@@ -2700,7 +2972,7 @@ function rollSpell(btn) {
   const healing = isHealingSpell(name);
   const verdict = success ? `✓ ${healing ? 'SUCCESS' : 'HIT'} (DC ${dc})`
                           : `✗ ${healing ? 'FAILED' : 'MISS'} (DC ${dc}) — spell lost!`;
-  const bonusPart = [bonus !== 0 ? `${bonus>=0?'+':''}${bonus}` : '', castMod !== 0 ? `${castMod>=0?'+':''}${castMod} (${castStat.toUpperCase()})` : '', gBonus !== 0 ? `${gBonus>=0?'+':''}${gBonus}` : '', exh !== 0 ? `${exh} exhausted` : ''].filter(Boolean).join(' ');
+  const bonusPart = [bonus !== 0 ? `${bonus>=0?'+':''}${bonus}` : '', castMod !== 0 ? `${castMod>=0?'+':''}${castMod} (${castStat.toUpperCase()})` : '', gBonus !== 0 ? `${gBonus>=0?'+':''}${gBonus}` : '', exh !== 0 ? `${exh} exhausted` : '', str !== 0 ? `${str} stress` : ''].filter(Boolean).join(' ');
 
   // Mark as lost if failed — but only for spells you know. A scroll is consumed
   // whether it hits or misses; a wand is handled below (spent until rest on a fail).
@@ -2863,24 +3135,21 @@ function collectSheet(){
       currency: 'gp'
     });
   });
-  // Free to carry items → slots:0
-  const freeCarry = document.getElementById('free-carry')?.value || '';
-  if(freeCarry.trim()) {
-    freeCarry.split(',').forEach((item, i) => {
-      const name = item.trim();
-      if(name) gearItems.push({
-        instanceId: 'free'+(i+1),
-        gearId: 'f'+(i+1),
-        name,
-        type: 'sundry',
-        quantity: 1,
-        totalUnits: 1,
-        slots: 0,
-        cost: 0,
-        currency: 'gp'
-      });
+  // Inventory items (unequipped, unlimited) → slots:0
+  (Array.isArray(_inventory) ? _inventory : []).forEach((it, i) => {
+    const name = String(it && it.name || '').trim();
+    if(name) gearItems.push({
+      instanceId: 'inv'+(i+1),
+      gearId: 'i'+(i+1),
+      name,
+      type: 'sundry',
+      quantity: parseInt(it.qty) || 1,
+      totalUnits: 1,
+      slots: 0,
+      cost: 0,
+      currency: 'gp'
     });
-  }
+  });
 
   // Attacks as strings
   const attackStrings = [];
@@ -3017,6 +3286,7 @@ function collectSheet(){
       talents:   talentsText,
       luckPts:   document.getElementById('lk-val')?.value || '',
       options:   options,
+      stress:    parseInt(_stress) || 0,
       featureUses: _featureUses && typeof _featureUses === 'object' ? _featureUses : {},
       trackers:       Array.isArray(_trackers) ? _trackers : [],
       customTrackers: Array.isArray(_customTrackers) ? _customTrackers : [],
@@ -3046,6 +3316,7 @@ function collectSheet(){
         equipped: !!row.querySelector('.gear-equip')?.checked,
         disabled: row.classList.contains('gear-slot-disabled')
       })),
+      inventory: (Array.isArray(_inventory) ? _inventory : []).map(it => ({ name: String(it.name||''), qty: String(it.qty||'') })).filter(it => it.name.trim()),
       gearQtys: [...document.querySelectorAll('#gear-list .gear-qty')].map(el => el.value || ''),
       gearDisabled: [...document.querySelectorAll('#gear-list > div')].map(row => row.classList.contains('gear-slot-disabled')),
       gearEquipped: [...document.querySelectorAll('#gear-list .gear-slot')].map(row => !!row.querySelector('.gear-equip')?.checked),
@@ -3105,7 +3376,7 @@ function _applySDData(d){
   set('hp-max',     maxHP);
   set('hp-current', curHP);
 
-  // AC
+  // AC (standard). Armor soak + Evade are auto-derived by refreshAutoAC below.
   const ac = d.armorClass ?? d.ac ?? '';
   set('ac-val', ac);
 
@@ -3114,6 +3385,8 @@ function _applySDData(d){
   set('xp-next',    d._sheet?.xpNext ?? d.xp?.next ?? '');
   refreshXpNext();   // XP-to-next is derived: 10 × level (overrides any saved value)
   set('lk-val',     d._sheet?.luckPts ?? '');
+  _stress = Math.max(0, Math.min(STRESS_MAX, parseInt(d._sheet?.stress) || 0));
+  if(typeof renderStress === 'function') renderStress();
   _featureUses = (d._sheet?.featureUses && typeof d._sheet.featureUses === 'object') ? d._sheet.featureUses : {};
   if(Array.isArray(d._sheet?.trackers)) {
     _trackers = d._sheet.trackers.slice();
@@ -3163,8 +3436,17 @@ function _applySDData(d){
       }
     }
   });
-  const freeText = d.freeCary || gearFree.map(g => g.name).join(', ') || '';
-  set('free-carry', freeText);
+  // Inventory (unequipped, unlimited). New saves carry an array; older saves get
+  // migrated from the legacy free-carry text / free (slots:0) gear items.
+  if(Array.isArray(d._sheet?.inventory)){
+    _inventory = d._sheet.inventory.map(it => ({ name: String(it && it.name || ''), qty: String(it && it.qty || '') })).filter(it => it.name.trim());
+  } else {
+    const legacy = (typeof d.freeCary === 'string' ? d.freeCary : '')
+                || (typeof d._sheet?.freeCarry === 'string' ? d._sheet.freeCarry : '')
+                || (Array.isArray(gearFree) ? gearFree.map(g => g.name).join(', ') : '');
+    _inventory = String(legacy || '').split(/[,\n]/).map(s => ({ name: s.trim(), qty: '' })).filter(it => it.name);
+  }
+  if(typeof renderInventory === 'function') renderInventory();
     const spellStatEl = document.getElementById('spell-stat');
     if(spellStatEl) spellStatEl.value = d._sheet?.spellStat || '';
     const spellGBEl = document.getElementById('spell-gbonus');
@@ -3314,39 +3596,46 @@ function _applySDData(d){
   // Equip rehydration runs LAST — after gear names AND attacks are restored — so
   // it reconnects equipped weapons to their already-restored attack rows (no
   // duplicates) and derives AC from equipped armor. Also reveals the checkbox.
-  const gearEquippedArr = Array.isArray(d._sheet?.gearRows)
-    ? d._sheet.gearRows.map(r => !!r.equipped)
-    : (d._sheet?.gearEquipped || []);
-  document.querySelectorAll('#gear-list .gear-slot').forEach((row, i) => {
+  // Equip is now BY PRESENCE: any weapon/armor/magic in an (enabled) Equipment
+  // slot is equipped. Reconnect to the already-restored attack/spell rows so we
+  // never duplicate them; only create one if none exists.
+  document.querySelectorAll('#gear-list .gear-slot').forEach((row) => {
     const nameEl = row.querySelector('.gear-name');
     const cb = row.querySelector('.gear-equip');
     if(!nameEl || !cb) return;
-    if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);
-    if(gearEquippedArr[i] && cb.style.visibility !== 'hidden') {
-      cb.checked = true;
-      const kind = gearItemKind(nameEl.value);
-      if(kind === 'weapon') {
-        const nm = nameEl.value.trim();
-        const existing = [...document.querySelectorAll('#attacks-body tr')].find(tr =>
-          !tr.dataset.eq && (tr.querySelector('td input')?.value || '').trim() === nm);
-        if(existing) {
-          if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
-          existing.dataset.eq = row.dataset.eqId;
-        } else {
-          addEquipAttack(row);
-        }
-      } else if(kind === 'scroll' || kind === 'wand') {
-        // Reconnect to the already-restored tagged spell row (by name + src) so
-        // we don't duplicate it; only create one if none exists.
-        const spellName = nameEl.value.replace(/^(scroll|wand):\s*/i, '').trim();
-        const existing = [...document.querySelectorAll('#spells-list .spell-row[data-src="'+kind+'"]')].find(sr =>
-          !sr.dataset.eq && (sr.querySelector('.spell-input')?.value || '').trim() === spellName);
-        if(existing) {
-          if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
-          existing.dataset.eq = row.dataset.eqId;
-        } else {
-          addEquipSpell(row, kind);
-        }
+    const kind = gearItemKind(nameEl.value);
+    const shouldEquip = !!kind && !row.classList.contains('gear-slot-disabled');
+    cb.checked = shouldEquip;
+    if(!shouldEquip) return;
+    if(kind === 'weapon') {
+      const nm = nameEl.value.trim();
+      const existing = [...document.querySelectorAll('#attacks-body tr')].find(tr =>
+        !tr.dataset.eq && (tr.querySelector('td input')?.value || '').trim() === nm);
+      if(existing) {
+        if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
+        existing.dataset.eq = row.dataset.eqId;
+        // Link the Thief Backstab row for this weapon too (name + eqBackstab marker),
+        // so reapplyEquippedWeaponAttacks doesn't treat it as missing and duplicate it.
+        [...document.querySelectorAll('#attacks-body tr')].forEach(tr => {
+          if(tr.dataset.eq) return;
+          const t = (tr.querySelector('td input')?.value || '').trim();
+          if(new RegExp('^Backstab \\(' + nm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') +'\\)', 'i').test(t)) {
+            tr.dataset.eq = row.dataset.eqId;
+            tr.dataset.eqBackstab = '1';
+          }
+        });
+      } else {
+        addEquipAttack(row);
+      }
+    } else if(kind === 'scroll' || kind === 'wand') {
+      const spellName = nameEl.value.replace(/^(scroll|wand):\s*/i, '').trim();
+      const existing = [...document.querySelectorAll('#spells-list .spell-row[data-src="'+kind+'"]')].find(sr =>
+        !sr.dataset.eq && (sr.querySelector('.spell-input')?.value || '').trim() === spellName);
+      if(existing) {
+        if(!row.dataset.eqId) row.dataset.eqId = 'eq' + (++_gearEqSeq);
+        existing.dataset.eq = row.dataset.eqId;
+      } else {
+        addEquipSpell(row, kind);
       }
     }
   });
@@ -3357,6 +3646,7 @@ function _applySDData(d){
   renderTalentsView();          // restore the styled Talents view after a load
   // HeroDark option
   options = Object.assign(defaultOptions(), (d._sheet && d._sheet.options) || {});
+  if(typeof applyHeroDarkMode === 'function') applyHeroDarkMode();   // show AC or Defense/Stress per the loaded option
 }
 
 function importShadowdarklings(input) {
@@ -3399,7 +3689,7 @@ function ccwSetGearSlots(str) {
               : (function(){
                   let s = Math.max(10, parseInt(str)||10);
                   const cls = (document.getElementById('f-class')?.value || '').trim().toLowerCase();
-                  if(cls === 'fighter') { const c = getStatMod('con'); if(c > 0) s += c; }
+                  if(cls === 'soldier') { const c = getStatMod('con'); if(c > 0) s += c; }
                   s += (parseInt(_itemBonusSlots) || 0);
                   s += (parseInt(_hbBonusSlots) || 0);
                   return Math.min(20, s);
@@ -3408,13 +3698,14 @@ function ccwSetGearSlots(str) {
   // rows[0] is the header; gear slots are rows[1..20]
   for(let i=1; i<rows.length; i++) {
     const row = rows[i];
-    const btn = row.querySelector('.gear-disable-btn');
-    const disable = i > slots;
+    const disable = i > slots;   // slots beyond the carry limit aren't available
     row.classList.toggle('gear-slot-disabled', disable);
-    if(btn) {
-      btn.classList.toggle('on', disable);
-      btn.title = disable ? 'Enable slot' : 'Disable slot (beyond your carry limit)';
-    }
+    // Don't show slots the character can't use — hide the unavailable ones. A
+    // disabled slot that still holds an item stays visible (struck) so nothing is
+    // silently lost if the carry limit ever drops below a filled slot.
+    const nm = row.querySelector('.gear-name');
+    const empty = !nm || !nm.value.trim();
+    row.style.display = (disable && empty) ? 'none' : 'flex';
   }
 }
 
@@ -3451,6 +3742,9 @@ function takeRest() {
   const hpMax = document.getElementById('hp-max')?.value || '';
   const hpCur = document.getElementById('hp-current');
   if(hpCur && hpMax) { hpCur.value = hpMax; notes.push('HP restored to ' + hpMax); if(typeof onHPChange === 'function') onHPChange(); }
+
+  // HeroDark: a rest clears one level of Stress.
+  if((parseInt(_stress) || 0) > 0) { _stress = _stress - 1; renderStress(); notes.push('1 stress cleared (now ' + _stress + ')'); }
 
   // Lost spells return; spent wands start working again
   let regained = 0;
@@ -3597,7 +3891,7 @@ async function exportPDF() {
     // ── Vitals ──
     const hpCur = V('hp-current'), hpMax = V('hp-max');
     set('Hit Points', hpMax ? (hpCur || '0') + ' / ' + hpMax : hpCur);
-    set('Armor Class', V('ac-val'));
+    set('Armor Class', V('armor-val'));
     set('Gold Pieces',   V('coin-gp'));
     set('Silver Pieces', V('coin-sp'));
     set('Copper Pieces', V('coin-cp'));
@@ -3647,7 +3941,7 @@ async function exportPDF() {
     gear.slice(0, 20).forEach((item, i) => set('Gear ' + (i + 1), item));
     if(gear.length > 20) set('Gear 20', gear.slice(19).join(' · '));   // don't silently drop the tail
 
-    set('Free To Carry', V('free-carry'));
+    set('Free To Carry', (Array.isArray(_inventory) ? _inventory : []).map(it => String(it.name||'').trim() + (it.qty && String(it.qty).trim() && String(it.qty).trim() !== '1' ? ' ×' + String(it.qty).trim() : '')).filter(Boolean).join(', '));
 
     // Bake the values into the field appearances so every reader shows them
     try { form.updateFieldAppearances(); } catch(e) {}
@@ -3832,7 +4126,9 @@ function exportPrintable() {
     <div class="stats">${statCells}</div>
     <div class="vitals">
       <div class="vital"><div class="vital-l">HP</div><div class="vital-v">${esc(V('hp-current'))}<span style="font-size:11px;color:#666;">/${esc(V('hp-max'))}</span></div></div>
-      <div class="vital"><div class="vital-l">AC</div><div class="vital-v">${esc(V('ac-val'))}</div></div>
+      ${heroDarkOn()
+        ? `<div class="vital"><div class="vital-l">Armor</div><div class="vital-v">${esc(V('armor-val'))}</div></div><div class="vital"><div class="vital-l">Evade</div><div class="vital-v">${esc((document.getElementById('evade-mod')||{}).textContent || '')}</div></div>`
+        : `<div class="vital"><div class="vital-l">AC</div><div class="vital-v">${esc(V('ac-val'))}</div></div>`}
       <div class="vital"><div class="vital-l">Luck</div><div class="vital-v">${esc(V('lk-val') || '0')}</div></div>
     </div>
   </div>
@@ -4193,6 +4489,8 @@ var _pageReady = false;
 setTimeout(function() { _pageReady = true; }, 2500);
 renderTalentsView();   // initial styled render of the Talents box
 renderTrackers();
+renderStress();
+applyHeroDarkMode();   // AC tile by default; Defense + Stress when HeroDark is on
 
 function autoSaveOnExit() {
   if(!_pageReady) return;
@@ -4643,41 +4941,14 @@ function shopNextSlot() {
 
 function shopAddToGear(it) {
   if(it.kit) {
-    // Crawling kit: expand into items; Backpack to Free Carry if empty
-    const kit = [{name:'Flint & Steel'},{name:'Torch',qty:'2'},{name:'Rations',qty:'3'},{name:'Iron Spikes',qty:'10'},{name:'Grappling Hook'},{name:'Rope (60 ft)'}];
-    const fc = document.getElementById('free-carry');
-    if(fc && !fc.value.trim()) fc.value = 'Backpack';
-    else kit.unshift({name:'Backpack'});
-    let placed = 0;
-    for(const k of kit) {
-      const row = shopNextSlot();
-      if(!row) break;
-      row.querySelector('.gear-name').value = k.name;
-      const q = row.querySelector('.gear-qty');
-      if(q) q.value = k.qty || '1';
-      placed++;
-    }
-    if(placed < kit.length) alert('Not enough free gear slots for the whole kit — added what fits.');
-    if(typeof refreshAutoAC==='function') refreshAutoAC();
+    // Traveler's kit → Inventory.
+    const kit = [{name:'Backpack'},{name:'Flint & Steel'},{name:'Torch',qty:'2'},{name:'Rations',qty:'3'},{name:'Iron Spikes',qty:'10'},{name:'Grappling Hook'},{name:'Rope (60 ft)'}];
+    kit.forEach(k => _inventory.push({ name: k.name, qty: k.qty || '' }));
+    renderInventory();
     return true;
   }
-  const slotCost = itemSlotCost(it.name);
-  const row = shopNextSlot();
-  if(!row) { alert('No free gear slots available.'); return false; }
-  const nameEl = row.querySelector('.gear-name');
-  nameEl.value = it.name;
-  if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // reveal Equip box
-  const q = row.querySelector('.gear-qty');
-  if(q) q.value = it.qty || '1';
-  // Bulky items (2-slot weapons, chainmail, plate mail) occupy extra slots
-  for(let s = 1; s < slotCost; s++) {
-    const extra = shopNextSlot();
-    if(!extra) { alert(it.name + ' needs ' + slotCost + ' gear slots — not enough room.'); break; }
-    extra.querySelector('.gear-name').value = '↳ ' + it.name;
-    const eq = extra.querySelector('.gear-qty');
-    if(eq) eq.value = '';
-  }
-  if(typeof refreshAutoAC==='function') refreshAutoAC();
+  _inventory.push({ name: it.name, qty: it.qty || '' });
+  renderInventory();
   return true;
 }
 

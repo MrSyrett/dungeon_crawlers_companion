@@ -769,7 +769,7 @@ function lvlApply() {
 }
 
 // ── Swap Create/Level Up button based on sheet state ──────────────────────
-// Shadowdark routing only. A sheet variant (e.g. DarkSpace) can install its own
+// Shadowdark routing only. A sheet variant can install its own
 // routing by reassigning window.updateHeaderButton — the listeners below call it
 // through window so an override takes effect.
 function updateHeaderButton() {

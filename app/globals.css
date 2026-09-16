@@ -23,8 +23,6 @@
   --d62e: #e07b39;
   /* Index Card RPG accent — Runehammer burnt orange. */
   --icrpg: #c8501e;
-  /* DarkSpace accent — cold sci-fi cyan (sister system to Shadowdark). */
-  --darkspace: #24c3d6;
   /* Candela Obscura accent — gaslamp-horror candela teal. */
   --candela: #2fa595;
 }
@@ -44,7 +42,6 @@
   --color-sw: var(--sw);
   --color-dnd: var(--dnd);
   --color-icrpg: var(--icrpg);
-  --color-darkspace: var(--darkspace);
   --color-candela: var(--candela);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);

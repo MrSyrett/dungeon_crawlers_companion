@@ -28,7 +28,6 @@ type HbType =
   | "kob-trope" | "kob-strength" | "kob-flaw"
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
-  | "ds-class" | "ds-ancestry" | "ds-spell" | "ds-background" | "ds-gear" | "ds-monster"
   | "co-ability" | "co-gear";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {

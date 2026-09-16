@@ -65,16 +65,6 @@ function readCharMeta(
         level: typeof s.level === "number" ? s.level : null,
       };
     }
-    // DarkSpace: same shape as Shadowdark (its fork) — name/class(archetype)/level.
-    const ds = blob?.ds_sheet;
-    if (typeof ds === "string") {
-      const s = JSON.parse(ds) as SheetBlob;
-      return {
-        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
-        cls: typeof s.class === "string" ? s.class : "",
-        level: typeof s.level === "number" ? s.level : null,
-      };
-    }
     // Candela Obscura: no levels — the roster shows role · specialty as the class.
     const co = blob?.co_sheet;
     if (typeof co === "string") {
