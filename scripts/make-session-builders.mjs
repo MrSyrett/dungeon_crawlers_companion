@@ -76,6 +76,13 @@ const SYSTEMS = [
     chapter: "Scene", chapterPh: "Scene 1", session: "Session", mobs: "Adversaries/NPCs", mobsHeading: "Adversaries &amp; NPCs",
     mob: "Adversary", boss: "Threat", npc: "NPC", typePh: "GRUNT // STR 3 · MELEE 2", titlePh: "e.g. The Cold Below", subtitlePh: "e.g. A Year Zero Engine one-shot",
   },
+  {
+    file: "mmrpg_session_prep_builder.html", key: "mmrpg_session", ls: "mmrpg_builder_v1", cfg: "mmrpg", random: "Random Villain",
+    name: "Marvel Multiverse RPG", title: "Session Prep Builder — Marvel Multiverse RPG",
+    accent: "#EC1D24", accentDark: "#b3141a", red: "#b3141a", redDark: "#7a1510", highlight: "#ffd23f", boxBg: "#fbe0e1",
+    chapter: "Scene", chapterPh: "Scene 1", session: "Session", mobs: "Villains/NPCs", mobsHeading: "Villains &amp; NPCs",
+    mob: "Villain", boss: "Threat", npc: "NPC", typePh: "THUG // Rank 1 · Melee +2", titlePh: "e.g. The Symbiote Outbreak", subtitlePh: "e.g. A Marvel Multiverse one-shot for Rank 3 heroes",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -207,6 +214,17 @@ const SB_CONFIG = {
   abilitiesLabel: 'Attacks & Notes', abilitiesPlaceholder: 'One per line — Attack: pool, damage · Note: …',
   mobs: null,
 };`,
+  mmrpg: `const SB_CONFIG = {
+  typePlaceholder: 'THUG // MINION',
+  hp: null,
+  rows: [
+    [{ key:'rank', label:'RANK' }, { key:'melee', label:'MEL' }, { key:'agility', label:'AGI' }, { key:'resilience', label:'RES' }],
+    [{ key:'vigilance', label:'VIG' }, { key:'ego', label:'EGO' }, { key:'logic', label:'LOG' }],
+    [{ key:'health', label:'HEALTH' }, { key:'focus', label:'FOCUS' }, { key:'powers', label:'POWERS', ph:'Spider-Powers · Wall-Crawling' }],
+  ],
+  abilitiesLabel: 'Attacks & Traits', abilitiesPlaceholder: 'One per line — Attack: ability vs defense, dMarvel×rank+ability · Trait: …',
+  mobs: null,
+};`,
 };
 const MOB_DATA = {
   ace: '<script src="/tools-data/ace-extras.js"></script>',
@@ -218,6 +236,7 @@ const MOB_DATA = {
   icrpg: '<script src="/tools-data/icrpg-monsters.js"></script>',
   co: '',
   yze: '',
+  mmrpg: '',
 };
 
 function rep(s, a, b, all = true) {

@@ -8,7 +8,7 @@
 // tools in lib/tools.ts, give the dashboard a panel for it, and extend the
 // admin rulebook "Shown on" select (lib/rulebooks.ts accepts any SystemKey).
 
-export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE";
+export type SystemKey = "SD" | "DCC" | "ACE" | "KOB" | "NIM" | "SW" | "DND" | "D62E" | "ICRPG" | "CO" | "YZE" | "MMRPG";
 
 // Homepage/toggle display order (the tab order the user sees).
 export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: string }[] = [
@@ -36,6 +36,7 @@ export const SYSTEMS: { key: SystemKey; name: string; short: string; accent: str
   // Year Zero Engine (Fria Ligan) — SRD v1.0 dice-pool core: four attributes,
   // twelve skills, roll D6 pools where each 6 is a success, push at a cost.
   { key: "YZE", name: "Year Zero Engine", short: "YZE", accent: "var(--yze)" },
+  { key: "MMRPG", name: "Marvel Multiverse RPG", short: "Marvel", accent: "var(--mmrpg)" },
 ];
 
 export const DEFAULT_SYSTEM: SystemKey = "SD";

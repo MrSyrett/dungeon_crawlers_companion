@@ -25,7 +25,8 @@ export type HbType =
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature" | "d62e-trait" | "d62e-limitation"
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
   | "co-ability" | "co-gear"
-  | "yze-weapon" | "yze-gear";
+  | "yze-weapon" | "yze-gear"
+  | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -39,6 +40,7 @@ const HB_TYPES = [
   "icrpg-type", "icrpg-ability", "icrpg-loot", "icrpg-gear", "icrpg-spell", "icrpg-monster",
   "co-ability", "co-gear",
   "yze-weapon", "yze-gear",
+  "mmrpg-power", "mmrpg-trait", "mmrpg-tag",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1723,6 +1725,34 @@ function normalizeYzeGear(input: unknown): { name: string; data: Record<string, 
   return { name, data };
 }
 
+// ── Marvel Multiverse RPG (MMRPG, d616) ─────────────────────────────────────
+function normalizeMmrpgPower(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew power needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    genre: "core",
+    powerSet: str(o.powerSet).slice(0, 60) || "None",
+    effect: str(o.effect).slice(0, 3000),
+    source: "Homebrew",
+  };
+  if (str(o.prerequisites)) data.prerequisites = str(o.prerequisites).slice(0, 200);
+  if (str(o.action)) data.action = str(o.action).slice(0, 60);
+  if (str(o.duration)) data.duration = str(o.duration).slice(0, 60);
+  if (str(o.range)) data.range = str(o.range).slice(0, 60);
+  if (str(o.cost)) data.cost = str(o.cost).slice(0, 60);
+  if (str(o.trigger)) data.trigger = str(o.trigger).slice(0, 200);
+  if (str(o.fantastic)) data.fantastic = str(o.fantastic).slice(0, 400);
+  return { name, data };
+}
+function normalizeMmrpgLabel(input: unknown, noun: string): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error(`A homebrew ${noun} needs a name.`);
+  return { name, data: { name, genre: "core", description: str(o.description).slice(0, 3000), source: "Homebrew" } };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -1776,6 +1806,9 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "co-gear": return normalizeCoGear(data);
     case "yze-weapon": return normalizeYzeWeapon(data);
     case "yze-gear": return normalizeYzeGear(data);
+    case "mmrpg-power": return normalizeMmrpgPower(data);
+    case "mmrpg-trait": return normalizeMmrpgLabel(data, "trait");
+    case "mmrpg-tag": return normalizeMmrpgLabel(data, "tag");
   }
 }
 

@@ -29,7 +29,8 @@ type HbType =
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature" | "d62e-trait" | "d62e-limitation"
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
   | "co-ability" | "co-gear"
-  | "yze-weapon" | "yze-gear";
+  | "yze-weapon" | "yze-gear"
+  | "mmrpg-power" | "mmrpg-trait" | "mmrpg-tag";
 type CampaignRef = { id: string; name: string; code: string };
 type HomebrewRecord = {
   id: string;

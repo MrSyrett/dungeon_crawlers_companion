@@ -20,6 +20,7 @@
     "data:sw": "node scripts/build-sw-data.mjs",
     "data:icrpg": "node scripts/build-icrpg-data.mjs",
     "data:dnd": "node scripts/build-dnd-data.mjs",
+    "data:mmrpg": "node scripts/build-mmrpg-data.mjs",
     "tools:session-builders": "node scripts/make-session-builders.mjs"
   },
   "engines": {

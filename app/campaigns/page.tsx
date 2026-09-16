@@ -87,6 +87,18 @@ function readCharMeta(
         level: null,
       };
     }
+    // Marvel Multiverse RPG: "level" is Rank; the class column shows the origin.
+    const mmrpg = blob?.mmrpg_sheet;
+    if (typeof mmrpg === "string") {
+      const s = JSON.parse(mmrpg) as { name?: unknown; origin?: unknown; occupation?: unknown; rank?: unknown };
+      const cls = (typeof s.origin === "string" && s.origin.trim()) ? s.origin : (typeof s.occupation === "string" ? s.occupation : "");
+      const rank = Number(s.rank);
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: Number.isFinite(rank) && rank > 0 ? rank : null,
+      };
+    }
     const dcc = blob?.dcc_sheet;
     if (typeof dcc === "string") {
       const s = JSON.parse(dcc) as { header?: Record<string, unknown> };

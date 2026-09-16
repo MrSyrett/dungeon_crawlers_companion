@@ -148,6 +148,14 @@ const YZE_REFERENCE: { href: string; label: string }[] = [
   { href: "/yze/alien", label: "Alien" },
 ];
 
+const MMRPG_REFERENCE: { href: string; label: string }[] = [
+  { href: "/mmrpg/rules", label: "Rules (d616)" },
+  { href: "/mmrpg/origins", label: "Origins" },
+  { href: "/mmrpg/occupations", label: "Occupations" },
+  { href: "/mmrpg/powers", label: "Powers" },
+  { href: "/mmrpg/traits", label: "Traits & Tags" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
@@ -161,6 +169,7 @@ const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   ICRPG: ICRPG_REFERENCE,
   CO: CO_REFERENCE,
   YZE: YZE_REFERENCE,
+  MMRPG: MMRPG_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {

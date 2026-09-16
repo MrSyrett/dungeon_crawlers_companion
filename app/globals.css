@@ -27,6 +27,8 @@
   --candela: #2fa595;
   /* Year Zero Engine accent — sci-fi terminal cyan (Alien vibes). */
   --yze: #16bdd6;
+  /* Marvel Multiverse RPG accent — Marvel red. */
+  --mmrpg: #EC1D24;
 }
 
 @theme inline {
@@ -46,6 +48,7 @@
   --color-icrpg: var(--icrpg);
   --color-candela: var(--candela);
   --color-yze: var(--yze);
+  --color-mmrpg: var(--mmrpg);
   --font-display: var(--font-cinzel);
   --font-body: var(--font-barlow);
 }

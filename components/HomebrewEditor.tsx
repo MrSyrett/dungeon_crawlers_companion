@@ -566,6 +566,41 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ weight: "1" }), toForm: (d) => ({ ...d }),
     summary: (d) => `${sv(d, "weight") || "1"} wt`,
   },
+  "mmrpg-power": {
+    title: "My Homebrew Powers", noun: "Power",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "powerSet", label: "Power Set", type: "text", placeholder: "None (basic), Super-Strength, Telepathy…" },
+      { key: "prerequisites", label: "Prerequisites", type: "text", placeholder: "Static Illusion, Rank 2" },
+      { key: "action", label: "Action", type: "text", placeholder: "Standard, Reaction, Movement" },
+      { key: "duration", label: "Duration", type: "text", placeholder: "Permanent, Instant, Concentration" },
+      { key: "range", label: "Range", type: "text", placeholder: "50 spaces" },
+      { key: "cost", label: "Cost", type: "text", placeholder: "5 Focus" },
+      { key: "trigger", label: "Trigger (reactions)", type: "text" },
+      { key: "effect", label: "Effect", type: "textarea", full: true },
+      { key: "fantastic", label: "Fantastic result", type: "textarea", full: true },
+    ],
+    blank: () => ({ powerSet: "None" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "powerSet") || "None"}${sv(d, "action") ? " · " + sv(d, "action") : ""}`,
+  },
+  "mmrpg-trait": {
+    title: "My Homebrew Traits", noun: "Trait",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "description", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }),
+    summary: () => "trait",
+  },
+  "mmrpg-tag": {
+    title: "My Homebrew Tags", noun: "Tag",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "description", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({}), toForm: (d) => ({ ...d }),
+    summary: () => "tag",
+  },
 };
 
 // Accent CSS var by system prefix (globals.css: --nimble/--sw/--ace/--kob).
@@ -578,6 +613,7 @@ function accentFor(kind: string): string {
   if (kind.startsWith("icrpg-")) return "--icrpg";
   if (kind.startsWith("co-")) return "--candela";
   if (kind.startsWith("yze-")) return "--yze";
+  if (kind.startsWith("mmrpg-")) return "--mmrpg";
   return "--dnd";
 }
 
