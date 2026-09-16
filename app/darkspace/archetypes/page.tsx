@@ -68,7 +68,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {results.length === 0 ? (
         <EmptyState noun="class" base={BASE} />
       ) : (
-        <div className="space-y-4">
+        <div className="grid items-start gap-4 md:grid-cols-2">
           {results.map((a) => (
             <div key={(a.homebrew ? "hb-" : "bk-") + a.name} className={cardCls}>
               <div className="flex flex-wrap items-center gap-2">
@@ -96,15 +96,17 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
                 </ul>
               )}
               {a.talentRows && a.talentRows.length ? (
-                <div className="mt-3 space-y-2 border-t border-[var(--border)] pt-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)]">Talents (2d6)</p>
-                  {a.talentRows.map((t, i) => (
-                    <div key={i} className="text-[13px] leading-relaxed text-[var(--text)]">
-                      {t.text}{t.choose ? <span className="ml-1 text-[11px] text-[var(--muted)]">(choose one)</span> : null}
-                      <EffectChips items={t.effects} kind="effect" />
-                    </div>
-                  ))}
-                </div>
+                <details className="mt-3 border-t border-[var(--border)] pt-3">
+                  <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--muted)] hover:text-[var(--text)]">Talents (2d6)</summary>
+                  <div className="mt-2 space-y-2">
+                    {a.talentRows.map((t, i) => (
+                      <div key={i} className="text-[13px] leading-relaxed text-[var(--text)]">
+                        {t.text}{t.choose ? <span className="ml-1 text-[11px] text-[var(--muted)]">(choose one)</span> : null}
+                        <EffectChips items={t.effects} kind="effect" />
+                      </div>
+                    ))}
+                  </div>
+                </details>
               ) : null}
               {a.ranks ? (
                 <div className="mt-3 space-y-1 border-t border-[var(--border)] pt-3">

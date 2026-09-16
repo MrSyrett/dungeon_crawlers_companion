@@ -65,7 +65,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
         tiers.map((tier) => (
           <section key={tier} className="mb-6">
             <h2 className="mb-3 text-[12px] font-bold uppercase tracking-[0.2em] text-[#24c3d6]">Tier {tier}</h2>
-            <div className="space-y-3">
+            <div className="grid items-start gap-3 md:grid-cols-2">
               {byTier[tier].sort((a, b) => a.name.localeCompare(b.name)).map((p) => (
                 <div key={(p.homebrew ? "hb-" : "bk-") + p.name + p.tier} className={cardCls}>
                   <div className="flex flex-wrap items-center gap-2">

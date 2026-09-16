@@ -59,7 +59,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Raw
       {results.length === 0 ? (
         <EmptyState noun="creature" base={BASE} />
       ) : (
-        <div className="space-y-3">
+        <div className="grid items-start gap-3 md:grid-cols-2">
           {results.map((m) => (
             <div key={(m.homebrew ? "hb-" : "bk-") + m.name} className={cardCls}>
               <div className="flex flex-wrap items-center gap-2">
