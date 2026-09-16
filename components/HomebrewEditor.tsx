@@ -516,6 +516,33 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({ type: "Specialty" }), toForm: (d) => ({ ...d }),
     summary: (d) => sv(d, "type") || "Gear",
   },
+
+  // ── Year Zero Engine (Fria Ligan) ──
+  "yze-weapon": {
+    title: "My Homebrew Weapons", noun: "Weapon",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "grip", label: "Grip", type: "select", options: [["1H", "One-handed"], ["2H", "Two-handed"], ["—", "None"]] },
+      { key: "bonus", label: "Gear bonus", type: "text", placeholder: "+2" },
+      { key: "damage", label: "Damage", type: "number", placeholder: "2" },
+      { key: "range", label: "Range", type: "select", options: [["Engaged", "Engaged"], ["Short", "Short"], ["Medium", "Medium"], ["Long", "Long"], ["Extreme", "Extreme"]] },
+      { key: "skill", label: "Skill", type: "select", options: [["Melee", "Melee"], ["Marksmanship", "Marksmanship"], ["Mobility", "Mobility (thrown)"]] },
+      { key: "weight", label: "Weight", type: "text", placeholder: "1, ½, ¼" },
+      { key: "desc", label: "Notes", type: "textarea", full: true },
+    ],
+    blank: () => ({ grip: "1H", range: "Engaged", skill: "Melee", weight: "1", damage: 1 }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "damage") || "1"} dmg · ${sv(d, "range") || "Engaged"}`,
+  },
+  "yze-gear": {
+    title: "My Homebrew Gear", noun: "Gear",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "weight", label: "Weight", type: "text", placeholder: "1, ½, ¼" },
+      { key: "desc", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ weight: "1" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "weight") || "1"} wt`,
+  },
 };
 
 // Accent CSS var by system prefix (globals.css: --nimble/--sw/--ace/--kob).
@@ -527,6 +554,7 @@ function accentFor(kind: string): string {
   if (kind.startsWith("d62e-")) return "--d62e";
   if (kind.startsWith("icrpg-")) return "--icrpg";
   if (kind.startsWith("co-")) return "--candela";
+  if (kind.startsWith("yze-")) return "--yze";
   return "--dnd";
 }
 

@@ -24,7 +24,8 @@ export type HbType =
   | "kob-trope" | "kob-strength" | "kob-flaw"
   | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
-  | "co-ability" | "co-gear";
+  | "co-ability" | "co-gear"
+  | "yze-weapon" | "yze-gear";
 
 const HB_TYPES = [
   "spell", "gear", "monster", "class", "ancestry", "background",
@@ -37,6 +38,7 @@ const HB_TYPES = [
   "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
   "icrpg-type", "icrpg-ability", "icrpg-loot", "icrpg-gear", "icrpg-spell", "icrpg-monster",
   "co-ability", "co-gear",
+  "yze-weapon", "yze-gear",
 ] as const;
 export function isHbType(v: unknown): v is HbType {
   return typeof v === "string" && (HB_TYPES as readonly string[]).includes(v);
@@ -1654,6 +1656,39 @@ function normalizeCoGear(input: unknown): { name: string; data: Record<string, u
   return { name, data };
 }
 
+// ── Year Zero Engine (Fria Ligan) ────────────────────────────────────────────
+function normalizeYzeWeapon(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew weapon needs a name.");
+  const damage = Math.max(0, Math.min(10, Math.round(Number(o.damage) || 0)));
+  const data: Record<string, unknown> = {
+    name,
+    grip: oneOf(str(o.grip) || "1H", ["—", "1H", "2H"] as const, "1H"),
+    bonus: str(o.bonus).slice(0, 8),
+    damage,
+    range: str(o.range).slice(0, 20) || "Engaged",
+    weight: str(o.weight).slice(0, 8) || "1",
+    skill: oneOf(str(o.skill) || "Melee", ["Melee", "Marksmanship", "Mobility"] as const, "Melee"),
+    desc: str(o.desc).slice(0, 1000),
+    hb: true,
+  };
+  return { name, data };
+}
+
+function normalizeYzeGear(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew gear entry needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    weight: str(o.weight).slice(0, 8) || "1",
+    desc: str(o.desc).slice(0, 2000),
+    hb: true,
+  };
+  return { name, data };
+}
+
 export function normalize(type: HbType, data: unknown): { name: string; data: Record<string, unknown> } {
   switch (type) {
     case "spell": return normalizeSpell(data);
@@ -1703,6 +1738,8 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "icrpg-monster": return normalizeIcrpgMonster(data);
     case "co-ability": return normalizeCoAbility(data);
     case "co-gear": return normalizeCoGear(data);
+    case "yze-weapon": return normalizeYzeWeapon(data);
+    case "yze-gear": return normalizeYzeGear(data);
   }
 }
 

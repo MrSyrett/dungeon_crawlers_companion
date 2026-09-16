@@ -76,6 +76,17 @@ function readCharMeta(
         level: null,
       };
     }
+    // Year Zero Engine: no levels — the roster shows the archetype as the class.
+    const yze = blob?.yze_sheet;
+    if (typeof yze === "string") {
+      const s = JSON.parse(yze) as { name?: unknown; archetype?: unknown; class?: unknown };
+      const cls = (typeof s.archetype === "string" && s.archetype.trim()) ? s.archetype : (typeof s.class === "string" ? s.class : "");
+      return {
+        name: (typeof s.name === "string" && s.name.trim()) || fallbackTitle || "Unnamed",
+        cls,
+        level: null,
+      };
+    }
     const dcc = blob?.dcc_sheet;
     if (typeof dcc === "string") {
       const s = JSON.parse(dcc) as { header?: Record<string, unknown> };

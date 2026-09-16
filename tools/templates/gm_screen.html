@@ -1455,6 +1455,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
       <option value="D62E">D6 System 2e</option>
       <option value="ICRPG">Index Card RPG</option>
       <option value="CO">Candela Obscura</option>
+      <option value="YZE">Year Zero Engine</option>
     </select>
     <button class="btn small ghost" id="camp-btn" onclick="GMCamp.togglePanel()" title="Campaign link"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M9.6 12.9a3.4 3.4 0 0 0 5.1.4l2.8-2.8a3.4 3.4 0 0 0-4.8-4.8l-1.6 1.6a.9.9 0 0 0 1.3 1.3l1.6-1.6a1.6 1.6 0 0 1 2.3 2.3l-2.8 2.8a1.6 1.6 0 0 1-2.4-.2.9.9 0 0 0-1.4 1.2Z"/><path d="M14.4 11.1a3.4 3.4 0 0 0-5.1-.4L6.5 13.5a3.4 3.4 0 0 0 4.8 4.8l1.6-1.6a.9.9 0 0 0-1.3-1.3l-1.6 1.6a1.6 1.6 0 0 1-2.3-2.3l2.8-2.8a1.6 1.6 0 0 1 2.4.2.9.9 0 0 0 1.4-1.2Z"/></svg> Campaign</button>
     <a class="btn small ghost vtt-launch" id="vtt-btn" target="_blank" rel="noopener noreferrer" title="Launch this campaign's virtual tabletop" aria-label="Launch VTT" style="display:none;text-decoration:none;"><svg class="dcc-ico" viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true" style="display:inline-block;vertical-align:-0.14em"><path d="M13.5 3h7.5v7.5h-2.2V6.8l-8 8L9.2 13.3l8-8H13.5z"/><path d="M5.2 5.4h6.3v2.2H6.4v10h10v-5.1h2.2v6.3a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1z"/></svg> VTT</a>
@@ -1498,6 +1499,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     D62E:['d62emonster','d62etreasure'],
     ICRPG:['icrpgmonster','icrpgtreasure'],
     CO:  [],
+    YZE: ['yzetables'],
   };
   const SYS_KEYS = Object.keys(SYS_GENS);
   const OWNED = [].concat.apply([], SYS_KEYS.map(k => SYS_GENS[k]));   // every system-specific generator
@@ -2372,6 +2374,7 @@ GMScenes.renderPins();
         <option value="d62etreasure">D6 2e Gear Drop</option>
         <option value="icrpgmonster">ICRPG Monster</option>
         <option value="icrpgtreasure">ICRPG Loot</option>
+        <option value="yzetables">YZE Crit &amp; Panic</option>
         <option value="map">Map</option>
       </select>
       <div class="toolbar-spacer"></div>
@@ -3135,6 +3138,44 @@ GMScenes.renderPins();
         <div class="gen-results" id="gen-dccenc-results">
           <div class="gen-empty">Assembles a group of DCC mobs near the chosen level, optionally led by an Elite or Boss. Send the whole group, or any single member, to the tracker.</div>
         </div>
+      </div>
+
+      <!-- YEAR ZERO ENGINE — crit (D66) + panic (D6) rollers and quick reference -->
+      <div class="gen-panel" data-panel="yzetables">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <button class="btn small primary" onclick="yzeCrit(this,'phys')">Roll Physical Crit (D66)</button>
+          <button class="btn small primary" onclick="yzeCrit(this,'ment')">Roll Mental Crit (D66)</button>
+          <label class="gen-label" style="max-width:120px;">Stress
+            <input type="number" class="gen-select yze-stress" value="0" min="0" max="12">
+          </label>
+          <button class="btn small primary" onclick="yzePanic(this)">Roll Panic (D6 + stress)</button>
+        </div>
+        <div class="yze-out" style="margin-top:10px;"></div>
+        <div style="margin-top:16px;font-size:11px;color:var(--muted,#888);text-transform:uppercase;letter-spacing:.1em;">Weapons</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;">
+          <thead><tr style="text-align:left;color:var(--muted,#888);"><th style="padding:3px 6px;">Weapon</th><th style="padding:3px 6px;">Grip</th><th style="padding:3px 6px;">Bonus</th><th style="padding:3px 6px;">Dmg</th><th style="padding:3px 6px;">Range</th></tr></thead>
+          <tbody>
+            <tr><td style="padding:3px 6px;">Unarmed</td><td style="padding:3px 6px;">—</td><td style="padding:3px 6px;">—</td><td style="padding:3px 6px;">1</td><td style="padding:3px 6px;">Engaged</td></tr>
+            <tr><td style="padding:3px 6px;">Knife</td><td style="padding:3px 6px;">1H</td><td style="padding:3px 6px;">+1</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Engaged</td></tr>
+            <tr><td style="padding:3px 6px;">Sword</td><td style="padding:3px 6px;">1H</td><td style="padding:3px 6px;">+2</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Engaged</td></tr>
+            <tr><td style="padding:3px 6px;">Battleaxe</td><td style="padding:3px 6px;">2H</td><td style="padding:3px 6px;">+2</td><td style="padding:3px 6px;">3</td><td style="padding:3px 6px;">Engaged</td></tr>
+            <tr><td style="padding:3px 6px;">Spear</td><td style="padding:3px 6px;">1H</td><td style="padding:3px 6px;">+1</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Short</td></tr>
+            <tr><td style="padding:3px 6px;">Bow</td><td style="padding:3px 6px;">2H</td><td style="padding:3px 6px;">+1</td><td style="padding:3px 6px;">1</td><td style="padding:3px 6px;">Long</td></tr>
+            <tr><td style="padding:3px 6px;">Pistol</td><td style="padding:3px 6px;">1H</td><td style="padding:3px 6px;">+2</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Medium</td></tr>
+            <tr><td style="padding:3px 6px;">Rifle</td><td style="padding:3px 6px;">2H</td><td style="padding:3px 6px;">+2</td><td style="padding:3px 6px;">2</td><td style="padding:3px 6px;">Long</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:14px;font-size:11px;color:var(--muted,#888);text-transform:uppercase;letter-spacing:.1em;">Armor &amp; cover — roll rating in D6, each 6 stops one damage</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;">
+          <thead><tr style="text-align:left;color:var(--muted,#888);"><th style="padding:3px 6px;">Barrier</th><th style="padding:3px 6px;">Rating</th></tr></thead>
+          <tbody>
+            <tr><td style="padding:3px 6px;">Furniture</td><td style="padding:3px 6px;">3</td></tr>
+            <tr><td style="padding:3px 6px;">Wooden door</td><td style="padding:3px 6px;">4</td></tr>
+            <tr><td style="padding:3px 6px;">Tree trunk</td><td style="padding:3px 6px;">5</td></tr>
+            <tr><td style="padding:3px 6px;">Wooden wall</td><td style="padding:3px 6px;">6</td></tr>
+            <tr><td style="padding:3px 6px;">Stone wall</td><td style="padding:3px 6px;">8</td></tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- MAP GENERATOR PANEL (system-neutral — same engine as the Dungeon/Adventure map) -->
@@ -8797,7 +8838,7 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables'];
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
   [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
@@ -12870,6 +12911,71 @@ window.init_rules = init_rules;
   }
   try { if(typeof GMCamp !== 'undefined' && GMCamp.onChange) GMCamp.onChange(go); } catch(e){}
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+})();
+</script>
+
+<!-- Year Zero Engine GM tables — self-contained crit (D66) + panic (D6) rollers for the YZE generator panel. -->
+<script>
+(function(){
+  'use strict';
+  var CRITP=[
+    ['11','Winded','No','—','None.','—'],['12','Stunned','No','—','None.','—'],['13','Crippling pain','No','—','None.','—'],
+    ['14','Sprained ankle','No','—','Mobility −2 and movement is a slow action until a Healing roll.','—'],
+    ['15','Blood in eyes','No','—','Observation and Marksmanship −2 until a Healing roll.','—'],
+    ['16','Concussion','No','—','Mobility −2.','D6'],['21','Severed ear','No','—','Observation −2.','D6'],
+    ['22','Broken toes','No','—','Movement becomes a slow action.','D6'],['23','Broken hand','No','—','Hand cannot be used.','D6'],
+    ['24','Knocked out teeth','No','—','Persuasion −2.','D6'],['25','Impaled thigh','No','—','Movement becomes a slow action.','2D6'],
+    ['26','Slashed shoulder','No','—','Arm cannot be used.','D6'],['31','Broken nose','No','—','Persuasion and Observation −1.','D6'],
+    ['32','Crotch hit','No','—','One damage per Mobility or Melee roll made.','D6'],['33','Broken ribs','No','—','Mobility and Observation −2.','2D6'],
+    ['34','Gouged eye','No','—','Marksmanship and Observation −2.','2D6'],['35','Busted kneecap','No','—','Movement becomes a slow action.','2D6'],
+    ['36','Broken arm','No','—','Arm cannot be used.','2D6'],['41','Broken leg','No','—','Movement becomes a slow action.','2D6'],
+    ['42','Crushed foot','No','—','Movement becomes a slow action.','3D6'],['43','Crushed elbow','No','—','Arm cannot be used.','3D6'],
+    ['44','Punctured lung','Yes','Shift','Stamina and Mobility −2.','D6'],['45','Bleeding gut','Yes','Shift','One damage per Mobility or Melee roll.','D6'],
+    ['46','Ruptured intestines','Yes','Shift','Disease with virulence 6.','2D6'],['51','Busted kidney','Yes','Day','Mobility −2 and movement is a slow action.','2D6'],
+    ['52','Severed arm artery','Yes −1','Stretch','Arm cannot be used.','D6'],['53','Severed leg artery','Yes −1','Stretch','Movement becomes a slow action.','D6'],
+    ['54','Severed arm','Yes −1','Shift','Arm cannot be used.','Permanent'],['55','Severed leg','Yes −1','Shift','Movement becomes a slow action.','Permanent'],
+    ['56','Cracked spine','No','—','Paralyzed from the neck down; permanent if no Healing roll in time.','3D6'],
+    ['61','Ruptured jugular','Yes −1','Round','Stamina −1.','2D6'],['62','Ruptured aorta','Yes −2','Round','Stamina −2.','3D6'],
+    ['63','Disemboweled','Yes','—','Instant death.','—'],['64','Crushed skull','Yes','—','Your story ends here.','—'],
+    ['65','Pierced head','Yes','—','You die immediately.','—'],['66','Impaled heart','Yes','—','Your heart beats for the last time.','—']
+  ];
+  var CRITM=[
+    ['11-16','Trembling','Modifier −1 on all Agility-based rolls.','D6'],['21','White hair','None.','Permanent'],
+    ['22-24','Anxious','Modifier −1 on all Wits-based rolls.','D6'],['25-31','Sullen','Modifier −1 on all Empathy-based rolls.','D6'],
+    ['32-35','Nightmares','Insight roll every shift spent sleeping; failure means the sleep does not count.','D6'],
+    ['36-41','Nocturnal','You can only sleep during the light part of the day.','2D6'],
+    ['42-43','Phobic','Terrified of what broke you; one stress/damage to Wits each round within Short range of it.','2D6'],
+    ['44-45','Alcoholic','Drink alcohol every day or suffer one stress/damage to Agility.','3D6'],
+    ['46-51','Claustrophobic','Every stretch in a confined space, one stress/damage to Wits.','2D6'],
+    ['52','Mythomaniac','You cannot stop lying about everything.','2D6'],['53-54','Paranoia','You are certain someone is out to get you.','2D6'],
+    ['55','Delusion','Convinced of something totally untrue.','3D6'],['56','Hallucinations','Insight roll every shift or suffer a powerful hallucination.','3D6'],
+    ['61-62','Altered personality','Your personality is altered in a fundamental way.','Permanent'],['63','Amnesia','You lose all memory.','D6'],
+    ['64-65','Catatonic','You stare blankly and do not respond to stimuli.','D6'],['66','Heart attack','Your heart stops; you die of pure fright.','—']
+  ];
+  var PANIC=[[6,'Keeping it Together','You keep your nerves in check. Barely.'],[7,'Nervous Twitch','You and all PCs in Short range gain a stress point.'],
+    [8,'Tremble','All Agility skill rolls suffer −2.'],[9,'Drop Item','You drop a weapon or important item.'],
+    [10,'Freeze','Frozen for one round; lose your next turn.'],[11,'Seek Cover','Move to safety; lose one stress, all PCs in Short range gain one.'],
+    [12,'Scream','Lose your next turn; every PC who hears you must panic roll.'],[13,'Flee','Flee to safety and refuse to leave; hearers must panic roll.'],
+    [14,'Berserk','Attack the nearest creature, friend or foe; witnesses must panic roll.'],[999,'Catatonic','You collapse, unable to talk or move.']];
+  function d6(){ return 1+Math.floor(Math.random()*6); }
+  function look(tbl,code,ci){ var n=parseInt(code,10); for(var i=0;i<tbl.length;i++){ var r=tbl[i][0]; if(r===code)return tbl[i]; var m=r.split(/[–-]/); if(m.length===2){ if(n>=parseInt(m[0],10)&&n<=parseInt(m[1],10))return tbl[i]; } } return null; }
+  function out(btn){ var p=btn.closest('[data-panel]'); return p?p.querySelector('.yze-out'):null; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  window.yzeCrit=function(btn,kind){
+    var o=out(btn); if(!o)return; var a=d6(),b=d6(),code=''+a+b;
+    if(kind==='phys'){ var r=look(CRITP,code); if(!r){o.innerHTML='';return;}
+      var lethal=r[2]!=='No';
+      o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;'+(lethal?'border-color:#b23c2f;':'')+'"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Physical Crit · D66 = '+code+'</div><div style="font-size:17px;font-weight:800;color:#e6a04a;">'+esc(r[1])+(lethal?' <span style="color:#e0776f;font-size:12px;">LETHAL '+esc(r[2])+' · '+esc(r[3])+'</span>':'')+'</div><div style="font-size:13px;margin-top:3px;">'+esc(r[4])+'</div><div style="font-size:11px;color:#999;margin-top:2px;">Heal: '+esc(r[5])+'</div></div>'+o.innerHTML;
+    } else { var m=look(CRITM,code); if(!m){o.innerHTML='';return;}
+      o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Mental Crit · D66 = '+code+'</div><div style="font-size:17px;font-weight:800;color:#e6a04a;">'+esc(m[1])+'</div><div style="font-size:13px;margin-top:3px;">'+esc(m[2])+'</div><div style="font-size:11px;color:#999;margin-top:2px;">Heal: '+esc(m[3])+'</div></div>'+o.innerHTML;
+    }
+  };
+  window.yzePanic=function(btn){
+    var o=out(btn); if(!o)return; var p=btn.closest('[data-panel]'); var si=p?p.querySelector('.yze-stress'):null;
+    var stress=si?(parseInt(si.value,10)||0):0; var roll=d6(), total=roll+stress, row=null;
+    for(var i=0;i<PANIC.length;i++){ if(total<=PANIC[i][0]){ row=PANIC[i]; break; } } if(!row)row=PANIC[PANIC.length-1];
+    o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Panic · D6 '+roll+' + stress '+stress+' = '+total+'</div><div style="font-size:17px;font-weight:800;color:#e6a04a;">'+esc(row[1])+'</div><div style="font-size:13px;margin-top:3px;">'+esc(row[2])+'</div></div>'+o.innerHTML;
+  };
 })();
 </script>
 

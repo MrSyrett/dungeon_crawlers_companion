@@ -69,6 +69,13 @@ const SYSTEMS = [
     chapter: "Scene", chapterPh: "Scene 1", session: "Assignment", mobs: "Threats/NPCs", mobsHeading: "Threats &amp; Phenomena",
     mob: "Threat", boss: "Phenomenon", npc: "NPC", typePh: "PHENOMENON // FLARE // BLEED", titlePh: "e.g. The Hallowharbor Exsanguinations", subtitlePh: "e.g. A Candela Obscura assignment for one circle",
   },
+  {
+    file: "yze_session_prep_builder.html", key: "yze_session", ls: "yze_builder_v1", cfg: "yze", random: "Random Adversary",
+    name: "Year Zero Engine", title: "Session Prep Builder — Year Zero Engine",
+    accent: "#d98a2b", accentDark: "#a5641a", red: "#b82018", redDark: "#7a1510", highlight: "#e6b45f", boxBg: "#f4e6d0",
+    chapter: "Scene", chapterPh: "Scene 1", session: "Session", mobs: "Adversaries/NPCs", mobsHeading: "Adversaries &amp; NPCs",
+    mob: "Adversary", boss: "Threat", npc: "NPC", typePh: "GRUNT // STR 3 · MELEE 2", titlePh: "e.g. The Cold Below", subtitlePh: "e.g. A Year Zero Engine one-shot",
+  },
 ];
 
 // Per-system stat-block schema + bestiary adapter. Replaces the block between
@@ -190,6 +197,16 @@ const SB_CONFIG = {
   abilitiesLabel: 'Powers & Weaknesses', abilitiesPlaceholder: 'One per line — Power: … · Weakness: … · Move: …',
   mobs: null,
 };`,
+  yze: `const SB_CONFIG = {
+  typePlaceholder: 'GRUNT // ELITE',
+  hp: null,
+  rows: [
+    [{ key:'str', label:'STR' }, { key:'agi', label:'AGI' }, { key:'wits', label:'WITS' }, { key:'emp', label:'EMP' }],
+    [{ key:'health', label:'HEALTH' }, { key:'armor', label:'ARMOR' }, { key:'skills', label:'KEY SKILLS', ph:'Melee 2 · Marksmanship 1' }],
+  ],
+  abilitiesLabel: 'Attacks & Notes', abilitiesPlaceholder: 'One per line — Attack: pool, damage · Note: …',
+  mobs: null,
+};`,
 };
 const MOB_DATA = {
   ace: '<script src="/tools-data/ace-extras.js"></script>',
@@ -200,6 +217,7 @@ const MOB_DATA = {
   d62e: '<script src="/tools-data/d62e-creatures.js"></script>',
   icrpg: '<script src="/tools-data/icrpg-monsters.js"></script>',
   co: '',
+  yze: '',
 };
 
 function rep(s, a, b, all = true) {

@@ -140,6 +140,14 @@ const CO_REFERENCE: { href: string; label: string }[] = [
   { href: "/candela/rules", label: "Rules" },
 ];
 
+const YZE_REFERENCE: { href: string; label: string }[] = [
+  { href: "/yze/rules", label: "Core Rules" },
+  { href: "/yze/skills", label: "Skills" },
+  { href: "/yze/weapons", label: "Weapons" },
+  { href: "/yze/gear", label: "Gear" },
+  { href: "/yze/combat", label: "Combat" },
+];
+
 // Per-system reference links, keyed the same way the toggle is.
 const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   SD: SD_REFERENCE,
@@ -152,6 +160,7 @@ const SYSTEM_REFERENCE: Record<SystemKey, { href: string; label: string }[]> = {
   D62E: D62E_REFERENCE,
   ICRPG: ICRPG_REFERENCE,
   CO: CO_REFERENCE,
+  YZE: YZE_REFERENCE,
 };
 
 function NavLinks({ links }: { links: { href: string; label: string }[] }) {
