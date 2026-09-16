@@ -9,7 +9,9 @@ export const dynamic = "force-dynamic";
 const KINDS: { kind: HbType; label: string }[] = [
   { kind: "d62e-skill", label: "Skills" },
   { kind: "d62e-gear", label: "Gear" },
+  { kind: "d62e-trait", label: "Perks, Flaws & Talents" },
   { kind: "d62e-power", label: "Powers" },
+  { kind: "d62e-limitation", label: "Limitations" },
   { kind: "d62e-creature", label: "Creatures" },
 ];
 

@@ -155,6 +155,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .trait-head .tr-name:focus,.trait-head .pw-name:focus,.trait-head .lm-name:focus{border-bottom-color:var(--d62e);}
 .tbl td.trait-cell textarea{width:100%;margin-top:3px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:'Barlow',sans-serif;font-size:12px;line-height:1.45;padding:5px 7px;outline:none;resize:vertical;overflow:hidden;min-height:28px;}
 .tbl td.trait-cell textarea:focus{border-color:var(--d62e);}
+.asset-ctrl{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;margin-right:2px;}
+.asset-pips{display:inline-flex;gap:3px;}
+.asset-pip{width:13px;height:13px;border:2px solid var(--rule);border-radius:50%;background:transparent;cursor:pointer;padding:0;}
+.asset-pip.on{background:var(--d62e);border-color:var(--d62e);}
+.small-btn.asset-use{background:#3a7d55;color:#fff;}
+.small-btn.asset-use:hover{background:#2f8f5b;}
+.small-btn:disabled{opacity:.4;cursor:default;}
 .add-row{margin:6px 10px 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .blk{padding:8px 10px;border-bottom:1px solid var(--rule);}
 .blk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;}
@@ -802,6 +809,7 @@ function updateModNote() {
   const m = currentMods(); const parts = [];
   if(m.wound) parts.push('−' + code(m.wound) + ' ' + wound);
   if(heroArmed) parts.push('Hero Point: ' + heroArmDesc());
+  if(assetBonusPips) parts.push('Asset: +' + code(assetBonusPips) + ' next roll');
   const note = $('mod-note'); if(note) note.textContent = parts.length ? parts.join(' · ') : 'No modifiers.';
   const hb = $('hero-btn'); if(hb) hb.textContent = heroArmed ? 'Hero armed ✓' : heroArmLabel();
 }
@@ -873,6 +881,7 @@ function computeRoll(basePips, opts) {
     else { extraPlain = 1; heroInfo = 'Hero Point (+1 die)'; }  // basic
     heroArmed = false; $('f-hero').value = Math.max(0, num($('f-hero').value) - 1);
   }
+  if(assetBonusPips && !opts.noMods) { p += assetBonusPips; heroInfo = [heroInfo, 'Asset +' + code(assetBonusPips)].filter(Boolean).join(' · '); assetBonusPips = 0; }
   if(p < 1) p = 1;
   const r = rollDice(p, !opts.noWild, extraPlain);
   const dc = opts.dc !== undefined ? opts.dc : null;
@@ -1173,18 +1182,51 @@ function traitBucketOf(kind) { return TRAIT_BUCKETS[norm(kind)] || 'perks'; }
 function addTraitRow(bucket, t) {
   t = t || {}; const body = $(bucket + '-body'); if(!body) return;
   const tr = document.createElement('tr');
+  const isAsset = norm(t.kind) === 'asset';
+  const uses = Math.max(0, Math.min(2, num(t.uses)));
+  if(t.kind) tr.dataset.kind = t.kind;
+  if(isAsset) tr.dataset.uses = uses;
+  // Assets can be invoked twice per session: a 2-pip tracker + a Use button that
+  // marks a pip and arms +3D for the next roll.
+  const assetCtrl = isAsset
+    ? '<span class="asset-ctrl"><span class="asset-pips">'
+        + [1,2].map(i => '<button class="asset-pip' + (i<=uses?' on':'') + '" title="use ' + i + ' of 2" onclick="toggleAssetPip(this,' + i + ')"></button>').join('')
+      + '</span><button class="small-btn asset-use" title="Mark a use and add +3D to your next roll" onclick="useAsset(this)"' + (uses>=2?' disabled':'') + '>Use +3D</button></span>'
+    : '';
   // Stacked format: name on top, full description in a textarea below.
   tr.innerHTML = '<td class="trait-cell">'
-    + '<div class="trait-head"><input type="text" class="tr-name" value="' + esc(t.name || '') + '" placeholder="name" oninput="scheduleAutosave()"><button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></div>'
+    + '<div class="trait-head"><input type="text" class="tr-name" value="' + esc(t.name || '') + '" placeholder="name" oninput="scheduleAutosave()">' + assetCtrl + '<button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></div>'
     + '<textarea class="tr-note" rows="2" placeholder="description" oninput="autoGrow(this);scheduleAutosave()">' + esc(t.note || '') + '</textarea>'
     + '</td>';
   body.appendChild(tr); const ta = tr.querySelector('.tr-note'); if(ta) autoGrow(ta); return tr;
+}
+// ── Assets: twice-per-session use tracker + a +3D arm on the next roll ──
+var assetBonusPips = 0;
+function _assetUses(tr) { return Math.max(0, Math.min(2, num(tr.dataset.uses))); }
+function refreshAssetRow(tr) {
+  const uses = _assetUses(tr);
+  tr.querySelectorAll('.asset-pip').forEach((pip, idx) => pip.classList.toggle('on', idx < uses));
+  const btn = tr.querySelector('.asset-use'); if(btn) btn.disabled = uses >= 2;
+}
+function toggleAssetPip(btn, i) {
+  const tr = btn.closest('tr'); const uses = _assetUses(tr);
+  tr.dataset.uses = (i <= uses) ? i - 1 : i;   // click a filled pip to clear back to it; an empty pip to fill up to it
+  refreshAssetRow(tr); scheduleAutosave();
+}
+function useAsset(btn) {
+  const tr = btn.closest('tr'); let uses = _assetUses(tr);
+  if(uses >= 2) { addLog('Asset', '✗', 'Already used twice this session', 'fumble'); return; }
+  uses++; tr.dataset.uses = uses; refreshAssetRow(tr);
+  assetBonusPips += 9;   // +3D
+  const nm = (tr.querySelector('.tr-name').value || 'Asset').trim();
+  addLog('Asset · ' + nm, '+3D armed', 'Adds +3D to your next roll · ' + uses + '/2 used this session', 'crit');
+  updateModNote(); scheduleAutosave();
 }
 function traitExists(name) { const n = norm(name); return [...document.querySelectorAll('#perks-body .tr-name, #flaws-body .tr-name, #talents-body .tr-name')].some(inp => norm(inp.value) === n); }
 function addTraitByName(name) {
   const t = D.perks().find(x => x.name === name); if(!t || traitExists(t.name)) return false;
   const note = [t.cost ? 'Cost ' + t.cost : '', t.description || ''].filter(Boolean).join(' · ');
-  addTraitRow(traitBucketOf(t.kind), { name: t.name, note: note }); scheduleAutosave(); return true;
+  addTraitRow(traitBucketOf(t.kind), { name: t.name, note: note, kind: t.kind }); scheduleAutosave(); return true;
 }
 
 // ═══ GEAR ═════════════════════════════════════════════════════════════════
@@ -1366,7 +1408,7 @@ function onGenreChange() { scheduleAutosave(); }
 function collectSheet() {
   const v = id => $(id).value;
   const attrs = {}; activeAttrs().forEach(a => attrs[a] = attr(a));
-  const traits = bucket => [...document.querySelectorAll('#' + bucket + '-body tr')].map(tr => ({ name: tr.querySelector('.tr-name').value.trim(), note: tr.querySelector('.tr-note').value.trim() })).filter(t => t.name);
+  const traits = bucket => [...document.querySelectorAll('#' + bucket + '-body tr')].map(tr => { const o = { name: tr.querySelector('.tr-name').value.trim(), note: tr.querySelector('.tr-note').value.trim() }; if(tr.dataset.kind) o.kind = tr.dataset.kind; if(norm(tr.dataset.kind) === 'asset') o.uses = num(tr.dataset.uses); return o; }).filter(t => t.name);
   return {
     system: 'D62E', name: v('f-name'), genre: v('f-genre'), template: v('f-template'), archetype: v('f-archetype'),
     attrs: attrs,
@@ -1403,7 +1445,7 @@ function applySheet(d) {
   set('f-name', d.name); set('f-genre', d.genre || 'core'); set('f-template', d.template || ''); set('f-archetype', d.archetype || '');
   buildStats(d.attrs && typeof d.attrs === 'object' ? d.attrs : { Agility:9, Brawn:9, Knowledge:9, Perception:9 });
   $('skills-body').innerHTML = ''; (d.skills || []).forEach(s => addSkillRow(s));
-  wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; heroArmed = false; renderWoundTrack();
+  wound = WOUND_PEN[d.wound] !== undefined ? d.wound : 'none'; heroArmed = false; assetBonusPips = 0; renderWoundTrack();
   set('f-hero', d.heroPoints != null ? d.heroPoints : 1); set('f-cp', d.characterPoints || 0);
   set('f-move', d.move != null ? d.move : '10');
   const ar = d.armor || {}; set('f-armor', ar.name); set('f-armor-prot', ar.protection);

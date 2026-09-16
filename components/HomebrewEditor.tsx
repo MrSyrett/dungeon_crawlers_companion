@@ -409,6 +409,29 @@ const SCHEMAS: Record<string, Schema> = {
     toForm: (d) => { const a = (d.attributes ?? {}) as Record<string, unknown>; const out: Data = { ...d }; for (const k of D62E_ATTRS) out[k] = codeFromPips(a[k]); return out; },
     summary: (d) => `${sv(d, "kind") || "Creature"} · ${sv(d, "genre")}`,
   },
+  "d62e-trait": {
+    title: "My Homebrew Perks, Flaws & Talents", noun: "Trait",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "kind", label: "Kind", type: "select", options: [["perk", "Perk"], ["flaw", "Flaw"], ["talent", "Talent"], ["asset", "Asset"], ["trouble", "Trouble"]] },
+      { key: "genre", label: "Genre", type: "select", options: D62E_GENRE_OPTS },
+      { key: "cost", label: "Cost", type: "text", placeholder: "3, +2, (R1-R3), 1 per rank…" },
+      { key: "description", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ kind: "perk", genre: "core" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "kind")} · ${sv(d, "genre")}`,
+  },
+  "d62e-limitation": {
+    title: "My Homebrew Limitations", noun: "Limitation",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "value", label: "Dice back (D)", type: "text", placeholder: "1, 2…" },
+      { key: "genre", label: "Genre", type: "select", options: D62E_GENRE_OPTS },
+      { key: "description", label: "Description", type: "textarea", full: true },
+    ],
+    blank: () => ({ value: "1", genre: "superhero" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `+${sv(d, "value") || "0"}D back · ${sv(d, "genre")}`,
+  },
 
 
   // ── ICRPG (Index Card RPG) ──

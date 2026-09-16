@@ -525,7 +525,8 @@
       let nm = t.name;
       if ((t.kind === 'perk' || t.kind === 'flaw') && (traitRankBounds(t).max > 1 || r > 1)) nm += ' (R' + r + ')';
       else if (t.kind === 'talent' && isPerRank(t.cost)) nm += ' (×' + r + ')';
-      const obj = { name: nm, note: [t.cost ? 'Cost ' + t.cost : '', t.description || ''].filter(Boolean).join(' · ') };
+      const obj = { name: nm, kind: t.kind, note: [t.cost ? 'Cost ' + t.cost : '', t.description || ''].filter(Boolean).join(' · ') };
+      if (t.kind === 'asset') obj.uses = 0;   // assets track twice-per-session uses on the sheet
       if (bucket === 'flaws') flaws.push(obj); else if (bucket === 'talents') talents.push(obj); else perks.push(obj);
     });
     const prev = (typeof collectSheet === 'function') ? collectSheet() : {};

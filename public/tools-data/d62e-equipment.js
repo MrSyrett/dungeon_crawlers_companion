@@ -1721,7 +1721,7 @@ const D62E_EQUIPMENT = [
     "category": "gear",
     "genre": "superhero",
     "era": "Modern",
-    "description": "Example super-science gear built with the Multiple Abilities superpower plus the Super-science enhancement. A sample 6D build (with Restricted 1) grants +1 to Athletics (grapple gun), Investigation (forensic kit), Stealth (smoke bombs), Perception (binoculars), and Rank 1 Natural Ranged Weapons (throwing stars). Can be loaned or grabbed away (-1D to use by another).",
+    "description": "Grants +1 to Athletics (grapple gun), Investigation (forensic kit), Stealth (smoke bombs), Perception (binoculars), and Rank 1 Natural Ranged Weapons (throwing stars). Can be loaned or grabbed away (-1D to use by another).",
     "page": 228
   },
   {

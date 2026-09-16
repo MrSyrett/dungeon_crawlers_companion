@@ -26,7 +26,7 @@ type HbType =
   | "sw-weapon" | "sw-gear" | "sw-force" | "sw-character"
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
-  | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
+  | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature" | "d62e-trait" | "d62e-limitation"
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
   | "co-ability" | "co-gear"
   | "yze-weapon" | "yze-gear";

@@ -22,7 +22,7 @@ export type HbType =
   | "sw-weapon" | "sw-gear" | "sw-force" | "sw-character"
   | "ace-role" | "ace-gear" | "ace-extra" | "ace-focus" | "ace-trait"
   | "kob-trope" | "kob-strength" | "kob-flaw"
-  | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature"
+  | "d62e-skill" | "d62e-gear" | "d62e-power" | "d62e-creature" | "d62e-trait" | "d62e-limitation"
   | "icrpg-type" | "icrpg-ability" | "icrpg-loot" | "icrpg-gear" | "icrpg-spell" | "icrpg-monster"
   | "co-ability" | "co-gear"
   | "yze-weapon" | "yze-gear";
@@ -35,7 +35,7 @@ const HB_TYPES = [
   "sw-weapon", "sw-gear", "sw-force", "sw-character",
   "ace-role", "ace-gear", "ace-extra", "ace-focus", "ace-trait",
   "kob-trope", "kob-strength", "kob-flaw",
-  "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature",
+  "d62e-skill", "d62e-gear", "d62e-power", "d62e-creature", "d62e-trait", "d62e-limitation",
   "icrpg-type", "icrpg-ability", "icrpg-loot", "icrpg-gear", "icrpg-spell", "icrpg-monster",
   "co-ability", "co-gear",
   "yze-weapon", "yze-gear",
@@ -1524,6 +1524,40 @@ function normalizeD62eCreature(input: unknown): { name: string; data: Record<str
   return { name, data };
 }
 
+// Perks / Flaws / Talents / Assets / Troubles share one shape — the reference
+// page groups them by `kind`.
+const D62E_TRAIT_KINDS = ["perk", "flaw", "talent", "asset", "trouble"] as const;
+function normalizeD62eTrait(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew trait needs a name.");
+  const data: Record<string, unknown> = {
+    name,
+    kind: oneOf(o.kind, D62E_TRAIT_KINDS, "perk"),
+    genre: oneOf(o.genre, D62E_GENRES, "core"),
+    description: str(o.description).slice(0, 3000),
+    page: 0, source: "Homebrew",
+  };
+  if (str(o.cost)) data.cost = str(o.cost).slice(0, 60);
+  return { name, data };
+}
+
+// Superpower Limitations (the "flaws" for superpowers) — `value` = dice granted back.
+function normalizeD62eLimitation(input: unknown): { name: string; data: Record<string, unknown> } {
+  const o = (input ?? {}) as Record<string, unknown>;
+  const name = str(o.name).slice(0, 80);
+  if (!name) throw new Error("A homebrew limitation needs a name.");
+  const v = num(o.value);
+  const data: Record<string, unknown> = {
+    name,
+    value: v == null ? 1 : Math.max(0, Math.min(9, Math.round(v))),
+    genre: oneOf(o.genre, D62E_GENRES, "superhero"),
+    description: str(o.description).slice(0, 3000),
+    page: 0, source: "Homebrew",
+  };
+  return { name, data };
+}
+
 // ── ICRPG (Index Card RPG) ──────────────────────────────────────────────────
 // Each normaliser emits the exact lib/data/icrpg-types shape its reference page
 // consumes, and tags source/world so cards render a Homebrew badge + world chip.
@@ -1730,6 +1764,8 @@ export function normalize(type: HbType, data: unknown): { name: string; data: Re
     case "d62e-gear": return normalizeD62eGear(data);
     case "d62e-power": return normalizeD62ePower(data);
     case "d62e-creature": return normalizeD62eCreature(data);
+    case "d62e-trait": return normalizeD62eTrait(data);
+    case "d62e-limitation": return normalizeD62eLimitation(data);
     case "icrpg-type": return normalizeIcrpgType(data);
     case "icrpg-ability": return normalizeIcrpgAbility(data);
     case "icrpg-loot": return normalizeIcrpgLoot(data);

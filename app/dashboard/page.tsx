@@ -115,8 +115,7 @@ const D62E_REFERENCE: { href: string; label: string }[] = [
   { href: "/d62e/skills", label: "Skills" },
   { href: "/d62e/templates", label: "Templates" },
   { href: "/d62e/equipment", label: "Equipment" },
-  { href: "/d62e/powers", label: "Powers" },
-  { href: "/d62e/perks", label: "Perks" },
+  { href: "/d62e/traits", label: "Traits" },
   { href: "/d62e/bestiary", label: "Bestiary" },
   { href: "/d62e/rules", label: "Rules" },
 ];
