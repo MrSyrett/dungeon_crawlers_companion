@@ -995,9 +995,9 @@ function allArmorAC() {
 function armorSoakOf(a) {
   if(a && a.soak != null) return parseInt(a.soak) || 0;
   const b = a ? (parseInt(a.base) || 0) : 0;
-  if(b >= 15) return 3;
-  if(b >= 13) return 2;
-  if(b >= 11) return 1;
+  if(b >= 15) return 5;   // plate
+  if(b >= 13) return 3;   // chainmail
+  if(b >= 11) return 1;   // leather
   return 0;
 }
 
@@ -1273,12 +1273,12 @@ function getStatMod(id) {
 // toggle. When that switch is off, AC is edited by hand.
 // Body-armor definitions (lower-cased match). base = AC, dex = adds DEX mod.
 const AC_ARMOR = [
-  { match:'plate mail',         base:15, dex:false },
-  { match:'plate',              base:15, dex:false },
-  { match:'mithral chainmail',  base:13, dex:true  },
-  { match:'chainmail',          base:13, dex:true  },
-  { match:'leather armor',      base:11, dex:true  },
-  { match:'leather',            base:11, dex:true  },
+  { match:'plate mail',         base:15, dex:false, soak:5 },
+  { match:'plate',              base:15, dex:false, soak:5 },
+  { match:'mithral chainmail',  base:13, dex:true,  soak:3 },
+  { match:'chainmail',          base:13, dex:true,  soak:3 },
+  { match:'leather armor',      base:11, dex:true,  soak:1 },
+  { match:'leather',            base:11, dex:true,  soak:1 },
 ];
 
 // Parse a gear item name into an armor/shield contribution, honoring "+N".
@@ -1291,8 +1291,8 @@ function acParseItem(name) {
   // A homebrew shield carries its own AC bonus, so match it before the generic
   // "anything called a shield is +2" rule.
   const hbShield = _homebrewItems.find(i => i.kind === 'shield' && i.name.toLowerCase() === n);
-  if(hbShield) return { kind:'shield', ac:(parseInt(hbShield.acBonus) || 0) + bonus, soak:1 + bonus };
-  if(/\bshield\b/.test(n)) return { kind:'shield', ac:2 + bonus, soak:1 + bonus };
+  if(hbShield) return { kind:'shield', ac:(parseInt(hbShield.acBonus) || 0) + bonus, soak:2 + bonus };
+  if(/\bshield\b/.test(n)) return { kind:'shield', ac:2 + bonus, soak:2 + bonus };
   for(const a of allArmorAC()) {
     if(n === a.match || n.startsWith(a.match)) {
       return { kind:'armor', base:a.base, dex:a.dex, bonus, soak:armorSoakOf(a) };
@@ -2362,12 +2362,25 @@ function buildGear() {
 // ── Equipment ⇄ Inventory ───────────────────
 let _inventory = [];   // [{name, qty}] — unlimited, unequipped
 
+// Clear the continuation rows (↳ Name) a bulky item reserved, so removing the
+// item frees the slots it took instead of leaving orphaned rows behind.
+function _clearGearContinuations(name){
+  const n = String(name || '').trim();
+  if(!n) return;
+  document.querySelectorAll('#gear-list .gear-slot').forEach(row => {
+    const el = row.querySelector('.gear-name');
+    if(el && el.value.trim() === '↳ ' + n){ el.value = ''; const q = row.querySelector('.gear-qty'); if(q) q.value = ''; }
+  });
+}
+
 function stowGearRow(btn){
   const row = btn.closest('.gear-slot'); if(!row) return;
   const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
   const name = (nameEl.value || '').trim(); if(!name) return;
+  if(/^↳ /.test(name)) return;   // continuation rows aren't stowable on their own
   _inventory.push({ name: name, qty: (qtyEl.value || '').trim() });
   nameEl.value = ''; qtyEl.value = '';
+  _clearGearContinuations(name);
   if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
   if(typeof refreshGearSlots === 'function') refreshGearSlots();       // hide it if it was over-limit
   renderInventory();
@@ -2376,7 +2389,9 @@ function stowGearRow(btn){
 function deleteGearRow(btn){
   const row = btn.closest('.gear-slot'); if(!row) return;
   const nameEl = row.querySelector('.gear-name'), qtyEl = row.querySelector('.gear-qty');
+  const name = (nameEl.value || '').trim();
   nameEl.value = ''; qtyEl.value = '';
+  _clearGearContinuations(name);
   if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // unequip + recompute
   if(typeof refreshGearSlots === 'function') refreshGearSlots();       // hide it if it was over-limit
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
@@ -2392,11 +2407,27 @@ function _firstOpenGearRow(){
 }
 function invEquip(idx){
   const item = _inventory[idx]; if(!item) return;
-  const target = _firstOpenGearRow();
-  if(!target){ addLog('Equipment', 'Full', 'No open Equipment slots — your carry limit is full', 'fumble'); return; }
+  const cost = (typeof itemSlotCost === 'function') ? itemSlotCost(item.name) : 1;
+  // Bulky items (2-slot weapons, chainmail=2, plate mail=3) need `cost` open slots.
+  const open = [...document.querySelectorAll('#gear-list .gear-slot')].filter(row =>
+    !row.classList.contains('gear-slot-disabled') && !(row.querySelector('.gear-name')?.value || '').trim());
+  if(open.length < cost){
+    addLog('Equipment', 'Full', cost > 1
+      ? (item.name + ' needs ' + cost + ' open Equipment slots — not enough room')
+      : 'No open Equipment slots — your carry limit is full', 'fumble');
+    return;
+  }
+  const target = open[0];
   const nameEl = target.querySelector('.gear-name'), qtyEl = target.querySelector('.gear-qty');
   nameEl.value = item.name; qtyEl.value = item.qty || '';
   if(typeof onGearNameInput === 'function') onGearNameInput(nameEl);   // auto-equip if weapon/armor/magic
+  // Reserve the extra slots with continuation rows (↳), matching the shop/builder.
+  for(let s = 1; s < cost; s++){
+    const extra = open[s];
+    const en = extra.querySelector('.gear-name'), eq = extra.querySelector('.gear-qty');
+    if(en) en.value = '↳ ' + item.name;
+    if(eq) eq.value = '';
+  }
   _inventory.splice(idx, 1);
   renderInventory();
   if(typeof scheduleAutosave === 'function') scheduleAutosave();
