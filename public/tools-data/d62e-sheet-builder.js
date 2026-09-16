@@ -216,7 +216,8 @@
     const groups = {};
     skillsData().forEach(s => { if (!genreOk(s)) return; if (base[s.attribute] == null) return; (groups[s.attribute] = groups[s.attribute] || []).push(s); });
     const delta = traitDeltaDice();
-    let h = '<p class="m-hint">Spend <b>' + code(budget) + '</b> of skill adds — no more than <b>2D</b> on any one skill (pips are fine)'
+    const succ = !!(bopts && bopts.rollMode === 'successes'); const dstep = succ ? 3 : 1;
+    let h = '<p class="m-hint">Spend <b>' + code(budget) + '</b> of skill adds — no more than <b>2D</b> on any one skill (' + (succ ? 'whole dice only' : 'pips are fine') + ')'
       + (delta ? '. Base 7D ' + (delta < 0 ? '−' : '+') + ' ' + code(Math.abs(delta) * 3) + ' from your perks/flaws/talents = ' + code(budget) : '') + '. A skill\'s code is its attribute plus the adds you put on it.'
       + (rec.length ? ' <b style="color:#f0a860;">Recommended:</b> ' + rec.map(esc).join(', ') + '.' : '') + '</p><div class="alloc">';
     Object.keys(base).forEach(a => {
@@ -225,8 +226,8 @@
       list.forEach(s => {
         const v = skillAlloc[s.name] || 0; const star = rec.indexOf(s.name) >= 0 ? ' <span style="color:#f0a860;">★</span>' : '';
         h += '<div class="a-row"><span class="a-name">' + esc(s.name) + star + '</span><span class="a-code">' + code(base[a] + v) + (v ? ' <span style="color:#f0a860;">' + code(v, true) + '</span>' : '') + '</span>'
-          + '<button data-s="' + esc(s.name) + '" data-d="-1"' + (v ? '' : ' disabled') + '>−</button>'
-          + '<button data-s="' + esc(s.name) + '" data-d="1"' + (v >= SKILL_PER || left <= 0 ? ' disabled' : '') + '>+</button></div>';
+          + '<button data-s="' + esc(s.name) + '" data-d="' + (-dstep) + '"' + (v ? '' : ' disabled') + '>−</button>'
+          + '<button data-s="' + esc(s.name) + '" data-d="' + dstep + '"' + (v >= SKILL_PER || left < dstep ? ' disabled' : '') + '>+</button></div>';
       });
       h += '</div>';
     });
@@ -234,7 +235,7 @@
     b.querySelectorAll('button[data-s]').forEach(btn => btn.addEventListener('click', () => {
       const k = btn.dataset.s, d = Number(btn.dataset.d);
       const nv = Math.max(0, (skillAlloc[k] || 0) + d);
-      if (nv > SKILL_PER) return; if (d > 0 && skillBudgetPips() - skillSpent() <= 0) return;
+      if (nv > SKILL_PER) return; if (d > 0 && skillBudgetPips() - skillSpent() < Math.abs(d)) return;
       if (nv) skillAlloc[k] = nv; else delete skillAlloc[k]; render();
     }));
   }

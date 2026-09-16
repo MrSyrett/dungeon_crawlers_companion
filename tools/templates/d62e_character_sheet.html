@@ -587,6 +587,11 @@ function pipsFrom(str) {
 const toCode = code, fromCode = pipsFrom, pips = pipsFrom;
 const codeOrZero = str => pipsFrom(str) || 0;
 const diceOf = p => Math.floor(Math.max(0, num(p)) / 3);
+// Successes module disables pips: adjustments move in whole dice (3 pips) and
+// displays floor any leftover pips so the sheet reads in whole dice.
+function inSuccessMode() { return !!(typeof options !== 'undefined' && options && options.rollMode === 'successes'); }
+function pipStep() { return inSuccessMode() ? 3 : 1; }
+function codeDisp(p) { let v = num(p); if(inSuccessMode()) v = Math.floor(Math.max(0, v) / 3) * 3; return code(v); }
 const currentGenre = () => ($('f-genre') && $('f-genre').value) || 'core';
 function genreOk(item) { const g = item && item.genre; const cur = currentGenre(); if(cur === 'all') return true; return !g || g === 'core' || g === cur; }
 
@@ -684,6 +689,9 @@ function _cpBudget() { return Math.max(0, num($('f-cp').value)); }
 function _pipCostSkill(pips) { return Math.max(1, diceOf(pips)); }
 function _pipCostAttr(pips) { return 10 * Math.max(1, diceOf(pips)); }
 function _sumCost(basePips, added, costFn) { let c = 0; for(let k = 0; k < added; k++) c += costFn(basePips + k); return c; }
+// CP cost of the next step (1 pip normally, 1 full die in Successes mode).
+function _stepCostAttr(base, cur) { const s = pipStep(); return _sumCost(base, cur + s, _pipCostAttr) - _sumCost(base, cur, _pipCostAttr); }
+function _stepCostSkill(base, cur) { const s = pipStep(); return _sumCost(base, cur + s, _pipCostSkill) - _sumCost(base, cur, _pipCostSkill); }
 // Every skill: those on the sheet first, then the standard list (so you can raise
 // skills you don't have yet — added on Apply). Keyed by name.
 function _lvlAllSkills() {
@@ -718,26 +726,26 @@ function renderLevelUp() {
 function renderLvlBody() {
   const budget = _cpBudget(), spent = _lvlSpent(), left = budget - spent;
   let ah = '';
-  activeAttrs().forEach(a => { const add = _lvlAttr[a] || 0, base = attr(a), nu = base + add; ah += _lvlRow(esc(a), code(base), add ? code(nu) : '', _pipCostAttr(nu), add, "lvlStepAttr('" + a + "'", left); });
+  activeAttrs().forEach(a => { const add = _lvlAttr[a] || 0, base = attr(a), nu = base + add; ah += _lvlRow(esc(a), codeDisp(base), add ? codeDisp(nu) : '', _stepCostAttr(base, add), add, "lvlStepAttr('" + a + "'", left); });
   const ab = $('lvl-attr-list'); if(ab) ab.innerHTML = ah;
   const q = norm(_lvlQ);
   const list = _lvlAllSkills().filter(s => !q || s.key.includes(q));
   let sh = '';
-  list.forEach(s => { const add = _lvlSkill[s.key] || 0, nu = s.base + add; const label = esc(s.name) + (s.owned ? '' : ' <span style="color:var(--muted);font-weight:400;font-size:11px;">' + esc(s.attr.slice(0, 3)) + '</span>'); sh += _lvlRow(label, code(s.base), add ? code(nu) : '', _pipCostSkill(nu), add, "lvlStepSkill('" + s.key + "'", left); });
+  list.forEach(s => { const add = _lvlSkill[s.key] || 0, nu = s.base + add; const label = esc(s.name) + (s.owned ? '' : ' <span style="color:var(--muted);font-weight:400;font-size:11px;">' + esc(s.attr.slice(0, 3)) + '</span>'); sh += _lvlRow(label, codeDisp(s.base), add ? codeDisp(nu) : '', _stepCostSkill(s.base, add), add, "lvlStepSkill('" + s.key + "'", left); });
   if(!list.length) sh = '<p class="brow-empty">No skills match.</p>';
   const sb = $('lvl-skill-list'); if(sb) { const top = sb.scrollTop; sb.innerHTML = sh; sb.scrollTop = top; }
   $('levelup-ft').innerHTML = '<span class="m-hint" style="margin:0;">CP left: <b style="color:' + (left ? 'var(--d62e-dk)' : '#999') + ';">' + left + '</b> / ' + budget + '</span>'
     + '<span style="display:flex;gap:8px;"><button class="m-btn ghost" onclick="closeLevelUp()">Cancel</button><button class="m-btn" onclick="lvlApply()"' + (spent <= 0 ? ' disabled' : '') + '>Apply (' + spent + ' CP)</button></span>';
 }
 function lvlStepAttr(a, d) {
-  const cur = _lvlAttr[a] || 0;
-  if(d > 0 && _pipCostAttr(attr(a) + cur) > _cpBudget() - _lvlSpent()) return;
-  const nv = Math.max(0, cur + d); if(nv) _lvlAttr[a] = nv; else delete _lvlAttr[a]; renderLvlBody();
+  const step = pipStep(), cur = _lvlAttr[a] || 0;
+  if(d > 0 && _stepCostAttr(attr(a), cur) > _cpBudget() - _lvlSpent()) return;
+  const nv = Math.max(0, cur + d * step); if(nv) _lvlAttr[a] = nv; else delete _lvlAttr[a]; renderLvlBody();
 }
 function lvlStepSkill(key, d) {
-  const s = _lvlAllSkills().find(x => x.key === key); if(!s) return; const cur = _lvlSkill[key] || 0;
-  if(d > 0 && _pipCostSkill(s.base + cur) > _cpBudget() - _lvlSpent()) return;
-  const nv = Math.max(0, cur + d); if(nv) _lvlSkill[key] = nv; else delete _lvlSkill[key]; renderLvlBody();
+  const s = _lvlAllSkills().find(x => x.key === key); if(!s) return; const step = pipStep(), cur = _lvlSkill[key] || 0;
+  if(d > 0 && _stepCostSkill(s.base, cur) > _cpBudget() - _lvlSpent()) return;
+  const nv = Math.max(0, cur + d * step); if(nv) _lvlSkill[key] = nv; else delete _lvlSkill[key]; renderLvlBody();
 }
 function lvlApply() {
   const spent = _lvlSpent(); if(spent <= 0) return;
@@ -757,8 +765,8 @@ function lvlApply() {
 }
 function recalc() {
   refreshWizardButtons();
-  activeAttrs().forEach(a => { const b = $('atb-' + a); if(b) b.textContent = code(attr(a)); });
-  skillRows().forEach(tr => { tr.querySelector('.sk-total').textContent = code(rowTotal(tr)); });
+  activeAttrs().forEach(a => { const b = $('atb-' + a); if(b) b.textContent = codeDisp(attr(a)); });
+  skillRows().forEach(tr => { tr.querySelector('.sk-total').textContent = codeDisp(rowTotal(tr)); });
   const dv = $('dodge-val'), pv = $('parry-val');
   // Parry and Dodge are always computed (5 × attribute dice); shown in one bubble.
   if(pv) pv.textContent = 5 * diceOf(attr('Agility'));
