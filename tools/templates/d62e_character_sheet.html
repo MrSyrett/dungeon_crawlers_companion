@@ -148,6 +148,13 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .tbl .desc{font-family:'Barlow',sans-serif;font-size:11px;color:var(--muted);line-height:1.35;}
 .row-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px;}
 .row-x:hover{color:var(--red);}
+/* Stacked trait / power rows: name on top, full description below. */
+.tbl td.trait-cell{padding:7px 8px;}
+.trait-head{display:flex;align-items:center;gap:6px;}
+.trait-head .tr-name,.trait-head .pw-name{flex:1;min-width:0;border:none;border-bottom:1px solid transparent;background:transparent;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:var(--ink);outline:none;padding:2px 0;}
+.trait-head .tr-name:focus,.trait-head .pw-name:focus{border-bottom-color:var(--d62e);}
+.tbl td.trait-cell textarea{width:100%;margin-top:3px;border:1px solid var(--rule);background:var(--input-bg);color:var(--ink);font-family:'Barlow',sans-serif;font-size:12px;line-height:1.45;padding:5px 7px;outline:none;resize:vertical;overflow:hidden;min-height:28px;}
+.tbl td.trait-cell textarea:focus{border-color:var(--d62e);}
 .add-row{margin:6px 10px 8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 .blk{padding:8px 10px;border-bottom:1px solid var(--rule);}
 .blk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;}
@@ -408,29 +415,22 @@ select option{background:var(--input-bg);color:var(--ink);}
       </table>
 
       <div class="tabs-bar">
-        <button class="tab-btn" data-tab="powers" onclick="setTab('powers')">Powers</button>
-        <button class="tab-btn" data-tab="traits" onclick="setTab('traits')">Perks / Flaws</button>
+        <button class="tab-btn" data-tab="traits" onclick="setTab('traits')">Traits</button>
         <button class="tab-btn" data-tab="gear" onclick="setTab('gear')">Gear</button>
         <button class="tab-btn" data-tab="background" onclick="setTab('background')">Background</button>
         <button class="tab-btn" data-tab="notes" onclick="setTab('notes')">Notes</button>
       </div>
 
-      <div class="tab-panel" id="tab-powers">
-        <div class="section-bar"><span>Powers &amp; Abilities</span><span class="hdr-right"><button class="hdr-btn" onclick="openPowerPicker()">✦ Powers</button></span></div>
-        <table class="tbl" id="powers-tbl">
-          <thead><tr><th style="width:28%;">Power</th><th style="width:16%;">Kind</th><th>Note</th><th style="width:96px;"></th></tr></thead>
-          <tbody id="powers-body"></tbody>
-        </table>
-      </div>
-
       <div class="tab-panel" id="tab-traits">
-        <div class="section-bar"><span>Perks · Flaws · Talents</span><span class="hdr-right"><button class="hdr-btn" onclick="openTraitPicker()">＋ Add</button></span></div>
-        <div class="subhead">Perks &amp; Assets</div>
-        <table class="tbl"><tbody id="perks-body"></tbody></table>
-        <div class="subhead">Flaws &amp; Troubles</div>
-        <table class="tbl"><tbody id="flaws-body"></tbody></table>
-        <div class="subhead">Talents</div>
-        <table class="tbl"><tbody id="talents-body"></tbody></table>
+        <div class="section-bar"><span>Traits</span><span class="hdr-right"><button class="hdr-btn" onclick="openTraitPicker()">＋ Add</button></span></div>
+        <div class="subhead" id="sub-pos">Perks / Assets</div>
+        <table class="tbl" id="tbl-pos"><tbody id="perks-body"></tbody></table>
+        <div class="subhead" id="sub-neg">Flaws / Troubles</div>
+        <table class="tbl" id="tbl-neg"><tbody id="flaws-body"></tbody></table>
+        <div class="subhead" id="sub-tal" style="display:flex;justify-content:space-between;align-items:center;gap:8px;"><span id="sub-tal-lbl">Talents / Powers</span><button class="hdr-btn" id="powers-add-btn" onclick="openPowerPicker()">✦ Powers</button></div>
+        <table class="tbl" id="tbl-tal"><tbody id="talents-body"></tbody></table>
+        <table class="tbl" id="powers-tbl"><tbody id="powers-body"></tbody></table>
+        <div class="tbl-empty" id="traits-empty" style="display:none;padding:10px;color:var(--muted);font-size:12px;">No trait modules enabled. Turn on the Character Traits Module or Superpowers in the builder's Options step.</div>
       </div>
 
       <div class="tab-panel" id="tab-gear">
@@ -510,7 +510,7 @@ select option{background:var(--input-bg);color:var(--ink);}
 <div id="power-overlay" class="ov" onclick="if(event.target===this)closePowerPicker()">
   <div class="modal" style="max-width:600px;">
     <div class="modal-hd"><div class="ttl">✦ Powers</div><button class="x" onclick="closePowerPicker()">&#10005;</button></div>
-    <div class="brow-controls"><input id="power-search" class="m-input" placeholder="Search powers…" oninput="renderPowerPicker()"><div class="brow-filters"><select id="power-kind" class="m-input brow-sel" onchange="renderPowerPicker()"><option value="">All kinds</option><option value="magic">Magic</option><option value="psionic">Psionic</option><option value="superpower">Superpower</option></select></div></div>
+    <div class="brow-controls"><input id="power-search" class="m-input" placeholder="Search superpowers…" oninput="renderPowerPicker()"></div>
     <div class="modal-bd brow-list" id="power-body"></div>
   </div>
 </div>
@@ -566,7 +566,7 @@ const D = {
   tables:    () => (typeof D62E_TABLES          !== 'undefined' ? D62E_TABLES          : null),
 };
 let wound = 'none', heroArmed = false;
-function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', rollMode:'additive', successTarget:6, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
+function defaultOptions() { return { noDodge:false, wildDie:'core', heroModel:'basic', advancement:'none', magicPoints:false, specialization:false, attrBudget:true, powerLevel:'none', traitModule:'perks', superpowers:false, rollMode:'additive', successTarget:6, xp:0, milestones:0, arcs:[], magicAlignment:0, magicCurrent:0 }; }
 let options = defaultOptions();
 
 // ═══ DICE CODES ═══════════════════════════════════════════════════════════
@@ -945,7 +945,24 @@ function applyOptions() {
     succRow.style.display = on ? 'flex' : 'none';
     var st = $('succ-target'); if(st) st.value = String(Math.max(3, Math.min(6, num(options.successTarget) || 6)));
   }
-  setHeroUI(); refreshOptNote(); renderMagicPanel(); renderAdvancementPanel(); recalc();
+  setHeroUI(); refreshOptNote(); renderMagicPanel(); renderAdvancementPanel(); applyTraitTabLabels(); recalc();
+}
+// Traits tab sections follow the module toggles: Perks/Flaws/Talents vs Troubles/Assets
+// (mutually exclusive), and Superpowers (its own toggle) sits under Talents / Powers.
+function applyTraitTabLabels() {
+  const tm = (options && options.traitModule) || 'perks';
+  const sp = !!(options && options.superpowers);
+  const show = (id, on) => { const el = $(id); if(el) el.style.display = on ? '' : 'none'; };
+  const traitsOn = tm !== 'none';       // positive + negative trait rows
+  show('sub-pos', traitsOn); show('tbl-pos', traitsOn);
+  show('sub-neg', traitsOn); show('tbl-neg', traitsOn);
+  const talOn = tm === 'perks';          // Talents come from the Perks/Flaws/Talents module
+  show('sub-tal', talOn || sp);
+  show('tbl-tal', talOn);
+  show('powers-tbl', sp);
+  const pab = $('powers-add-btn'); if(pab) pab.style.display = sp ? '' : 'none';
+  const stl = $('sub-tal-lbl'); if(stl) stl.textContent = (talOn && sp) ? 'Talents / Powers' : talOn ? 'Talents' : sp ? 'Powers' : 'Talents / Powers';
+  const empty = $('traits-empty'); if(empty) empty.style.display = (!traitsOn && !talOn && !sp) ? '' : 'none';
 }
 // Rule TOGGLES are set only in the builder's Options step. The sheet reads them and,
 // for the play-time rules, renders live trackers on the sheet body (not a modal).
@@ -1075,19 +1092,26 @@ function rollWeaponAttack(tr) {
   addLog(label, result, detail, atk.type);
 }
 
+// Grow a textarea to fit its content (used by trait / power rows).
+function autoGrow(ta) { if(!ta) return; ta.style.height = 'auto'; ta.style.height = Math.max(ta.scrollHeight, 28) + 'px'; }
 // ═══ POWERS ═══════════════════════════════════════════════════════════════
 function addPowerRow(p) {
   p = p || {}; const tr = document.createElement('tr'); tr.dataset.name = p.name || ''; tr.dataset.skill = p.skill || '';
-  tr.innerHTML = '<td><input type="text" class="pw-name" value="' + esc(p.name || '') + '" placeholder="Power" oninput="this.closest(\'tr\').dataset.name=this.value;scheduleAutosave()"></td>'
-    + '<td><input type="text" class="pw-kind" value="' + esc(p.kind || '') + '" placeholder="magic" oninput="scheduleAutosave()"></td>'
-    + '<td><input type="text" class="pw-note" value="' + esc(p.note || '') + '" placeholder="effect / difficulty" oninput="scheduleAutosave()"></td>'
-    + '<td style="white-space:nowrap;"><button class="small-btn" onclick="rollPower(this.closest(\'tr\'))">Roll</button> <button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
-  $('powers-body').appendChild(tr); return tr;
+  // Stacked format: name (with Roll) on top, full description below. Kind kept as data (superpower).
+  tr.innerHTML = '<td class="trait-cell">'
+    + '<div class="trait-head"><input type="text" class="pw-name" value="' + esc(p.name || '') + '" placeholder="Power" oninput="this.closest(\'tr\').dataset.name=this.value;scheduleAutosave()">'
+    +   '<input type="hidden" class="pw-kind" value="' + esc(p.kind || 'superpower') + '">'
+    +   '<button class="small-btn" onclick="rollPower(this.closest(\'tr\'))">Roll</button>'
+    +   '<button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></div>'
+    + '<textarea class="pw-note" rows="2" placeholder="effect / difficulty" oninput="autoGrow(this);scheduleAutosave()">' + esc(p.note || '') + '</textarea>'
+    + '</td>';
+  $('powers-body').appendChild(tr); const ta = tr.querySelector('.pw-note'); if(ta) autoGrow(ta); return tr;
 }
 function powerExists(name) { const n = norm(name); return [...document.querySelectorAll('#powers-body tr')].some(r => norm(r.dataset.name) === n); }
 function addPowerByName(name) {
   const p = D.powers().find(x => x.name === name); if(!p || powerExists(p.name)) return false;
-  const note = [p.difficulty ? 'Diff ' + p.difficulty : '', p.skill || ''].filter(Boolean).join(' · ');
+  const meta = [p.difficulty ? 'Diff ' + p.difficulty : '', p.skill || ''].filter(Boolean).join(' · ');
+  const note = [meta, p.description || ''].filter(Boolean).join(' — ');
   addPowerRow({ name: p.name, kind: p.kind, note: note, skill: p.skill }); scheduleAutosave(); return true;
 }
 function rollPower(tr) {
@@ -1106,10 +1130,12 @@ function traitBucketOf(kind) { return TRAIT_BUCKETS[norm(kind)] || 'perks'; }
 function addTraitRow(bucket, t) {
   t = t || {}; const body = $(bucket + '-body'); if(!body) return;
   const tr = document.createElement('tr');
-  tr.innerHTML = '<td style="width:34%;"><input type="text" class="tr-name" value="' + esc(t.name || '') + '" placeholder="name" oninput="scheduleAutosave()"></td>'
-    + '<td><input type="text" class="tr-note" value="' + esc(t.note || '') + '" placeholder="effect / rank" oninput="scheduleAutosave()"></td>'
-    + '<td style="width:20px;"><button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></td>';
-  body.appendChild(tr); return tr;
+  // Stacked format: name on top, full description in a textarea below.
+  tr.innerHTML = '<td class="trait-cell">'
+    + '<div class="trait-head"><input type="text" class="tr-name" value="' + esc(t.name || '') + '" placeholder="name" oninput="scheduleAutosave()"><button class="row-x" onclick="this.closest(\'tr\').remove();scheduleAutosave()">✕</button></div>'
+    + '<textarea class="tr-note" rows="2" placeholder="description" oninput="autoGrow(this);scheduleAutosave()">' + esc(t.note || '') + '</textarea>'
+    + '</td>';
+  body.appendChild(tr); const ta = tr.querySelector('.tr-note'); if(ta) autoGrow(ta); return tr;
 }
 function traitExists(name) { const n = norm(name); return [...document.querySelectorAll('#perks-body .tr-name, #flaws-body .tr-name, #talents-body .tr-name')].some(inp => norm(inp.value) === n); }
 function addTraitByName(name) {
@@ -1149,16 +1175,17 @@ function addGearFromData(name) {
 }
 
 // ═══ TABS ═════════════════════════════════════════════════════════════════
-var _tab = 'powers';
-const TABS = ['powers','traits','gear','background','notes'];
+var _tab = 'traits';
+const TABS = ['traits','gear','background','notes'];
 function setTab(name) {
-  if(!TABS.includes(name)) name = 'powers'; _tab = name;
+  if(name === 'powers') name = 'traits';   // Powers folded into the Traits tab
+  if(!TABS.includes(name)) name = 'traits'; _tab = name;
   TABS.forEach(t => {
     const panel = $('tab-' + t); if(panel) panel.classList.toggle('on', t === name);
     const btn = document.querySelector('.tab-btn[data-tab="' + t + '"]'); if(btn) btn.classList.toggle('on', t === name);
   });
 }
-function setDefaultTab() { setTab(_tab || 'powers'); }
+function setDefaultTab() { setTab(_tab || 'traits'); }
 
 // ═══ PICKERS ══════════════════════════════════════════════════════════════
 function fillPickers() {
@@ -1186,8 +1213,9 @@ function addCustomSkill() { addSkillRow({ name:'', attribute:'Agility', pips:0 }
 function openPowerPicker() { $('power-search').value = ''; $('power-overlay').classList.add('open'); renderPowerPicker(); $('power-search').focus(); }
 function closePowerPicker() { $('power-overlay').classList.remove('open'); }
 function renderPowerPicker() {
-  const q = norm($('power-search').value), fk = $('power-kind').value;
-  const list = D.powers().filter(p => (!fk || p.kind === fk) && (!q || norm(p.name).includes(q) || norm(p.skill || '').includes(q))).sort((a, b) => (a.kind || '').localeCompare(b.kind || '') || a.name.localeCompare(b.name));
+  const q = norm($('power-search').value);
+  // Superpowers only — magic & psionic are a separate system.
+  const list = D.powers().filter(p => p.kind === 'superpower' && (!q || norm(p.name).includes(q) || norm(p.skill || '').includes(q))).sort((a, b) => (a.kind || '').localeCompare(b.kind || '') || a.name.localeCompare(b.name));
   const box = $('power-body');
   if(!list.length) { box.innerHTML = '<p class="brow-empty">No powers match.</p>'; return; }
   box.innerHTML = list.map(p => {
@@ -1236,7 +1264,7 @@ function renderGearPicker() {
 (function wirePickers() {
   const ab = $('attr-body'); if(ab) ab.addEventListener('click', e => { const b = e.target.closest('[data-add-attr]'); if(b) { addAttr(b.dataset.addAttr); closeAttrPicker(); } });
   const sb = $('skill-body'); if(sb) sb.addEventListener('click', e => { const b = e.target.closest('[data-add-skill]'); if(b) { if(addSkillByName(b.dataset.addSkill)) _flashBrow(b); renderSkillPicker(); } });
-  const pb = $('power-body'); if(pb) pb.addEventListener('click', e => { const b = e.target.closest('[data-add-power]'); if(b) { if(addPowerByName(b.dataset.addPower)) { setTab('powers'); _flashBrow(b); } renderPowerPicker(); } });
+  const pb = $('power-body'); if(pb) pb.addEventListener('click', e => { const b = e.target.closest('[data-add-power]'); if(b) { if(addPowerByName(b.dataset.addPower)) { setTab('traits'); _flashBrow(b); } renderPowerPicker(); } });
   const tb = $('trait-body'); if(tb) tb.addEventListener('click', e => { const b = e.target.closest('[data-add-trait]'); if(b) { if(addTraitByName(b.dataset.addTrait)) { setTab('traits'); _flashBrow(b); } renderTraitPicker(); } });
   const gb = $('gearstore-body'); if(gb) gb.addEventListener('click', e => {
     const wpn = e.target.closest('[data-add-weapon]'); if(wpn) { addWeaponFromEquip(wpn.dataset.addWeapon); _flashBrow(wpn); renderGearPicker(); return; }
@@ -1312,6 +1340,7 @@ function collectSheet() {
       noDodge: !!options.noDodge, wildDie: options.wildDie || 'core', heroModel: options.heroModel || 'heroic',
       advancement: options.advancement || 'none', magicPoints: !!options.magicPoints,
       specialization: !!options.specialization, attrBudget: !!options.attrBudget, powerLevel: options.powerLevel || 'none',
+      traitModule: (options.traitModule === 'troubles' || options.traitModule === 'none') ? options.traitModule : 'perks', superpowers: !!options.superpowers,
       rollMode: options.rollMode === 'successes' ? 'successes' : 'additive', successTarget: Math.max(1, Math.min(6, num(options.successTarget) || 6)),
       xp: num(options.xp), milestones: num(options.milestones),
       arcs: (options.arcs || []).map(a => ({ skill: a.skill || '', stepsDone: num(a.stepsDone), stepsNeeded: num(a.stepsNeeded) })),
