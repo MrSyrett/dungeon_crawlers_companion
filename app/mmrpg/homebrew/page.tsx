@@ -10,6 +10,7 @@ const KINDS: { kind: HbType; label: string }[] = [
   { kind: "mmrpg-power", label: "Powers" },
   { kind: "mmrpg-trait", label: "Traits" },
   { kind: "mmrpg-tag", label: "Tags" },
+  { kind: "mmrpg-iconic", label: "Iconic Items" },
 ];
 
 export default async function MmrpgHomebrewHubPage() {

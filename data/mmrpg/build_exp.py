@@ -242,12 +242,13 @@ _RESTR = re.compile(r'\b(Worn|Carried|Concealed|Flashy|Large|Reduced Focus|Stack
                     r'Alternate Form|Summonable|Returns When Thrown|Unkillable)\b')
 
 def _titlecase(nm):
-    # Title-case an ALL-CAPS name, capitalising each alphabetic run (so
-    # "(EARTH-1610)" -> "(Earth-1610)", "MAR-VELL" -> "Mar-Vell"); keep lone-cap
-    # words already mixed-case untouched.
-    if not nm.isupper():
-        return nm
-    return re.sub(r'[A-Za-z]+', lambda m: m.group(0)[:1].upper() + m.group(0)[1:].lower(), nm)
+    # Title-case each ALL-CAPS alphabetic run (>1 letter) wherever it appears, so a
+    # mixed name like "OLD MAN LOGAN (Earth-214923)" -> "Old Man Logan (Earth-214923)";
+    # already-mixed words and lone capitals ("M", "Earth") are left as-is.
+    return re.sub(r'[A-Za-z]+',
+                  lambda m: (m.group(0)[:1].upper() + m.group(0)[1:].lower())
+                  if (m.group(0).isupper() and len(m.group(0)) > 1) else m.group(0),
+                  nm)
 
 _SMALL = {'of', 'the', 'a', 'an', 'and', 'or', 'to', 'in', 'with', 'for'}
 def _clean_item_name(nm):
@@ -265,43 +266,64 @@ def _clean_item_name(nm):
     parts = nm.split()
     return ' '.join(cap(w, i == 0) for i, w in enumerate(parts))
 
-# ── auto iconic gear: pull the character's Iconic Item / Iconic Weapon / Armor /
-# Battle Suit out of their power block into a full equipment entry (name, owner,
-# type, range, damage bonus, restrictions, power value), and attach it. Handles
-# the three stat-block forms: "Iconic Item: <name>", "Iconic Weapon: <name>", and
-# "<Owner>'s Armor|Battle Suit Powers:". Returns the equipment dict (or None).
-def extract_iconic(rec, source):
-    flat = ' | '.join(n for g in rec.get('powers', []) for n in g.get('names', []))
-    flat = re.sub(r'\bEff ect\b', 'Effect', flat)
-    name = None; typ = 'Item'; inline_eff = ''; body_mult = 0; body_abils = []
-    m = re.search(r"Iconic (Item|Weapon):\s*([^|]+?)\s*(?:\||$)", flat)
+def _seg_name_type(seg, base, paren, has_weapon_stat):
+    """Determine (name, type) for one iconic-item segment. An iconic item is marked
+    by a "<ItemName> Powers:" label and/or an "Iconic Item/Weapon: <name>" marker;
+    battle suits carry only the label and are named from the owning character."""
+    m = re.search(r"Iconic (Item|Weapon):\s*([^|]+?)\s*(?:\||$)", seg)
+    armorlbl = re.search(r"['’]s (Armor|Battle Suit|Suit) Powers:", seg)
+    paren_armor = bool(re.search(r'\b(Armor|Suit)\b', paren, re.I))
+    # ARMOR / BATTLE SUIT (label or the character's "(… Armor)" variant), unless the
+    # segment is really a weapon (has a Weapon: Range line).
+    if (armorlbl or paren_armor) and not has_weapon_stat:
+        if paren_armor:
+            return paren, 'Armor'                       # "Hulkbuster Armor", "Mysterium Armor"
+        w = armorlbl.group(1) if armorlbl else 'Armor'
+        return "%s’s %s" % (base, 'Armor' if w == 'Suit' else w), 'Armor'
+    # explicit Iconic Item/Weapon marker (clean name); split off only a bracketed
+    # "[effects]" clause, keeping any "(Earth-XXXX)" that's part of the name.
     if m:
-        typ = 'Weapon' if m.group(1) == 'Weapon' else 'Item'
         body = m.group(2).strip()
-        name = re.split(r'\s*[\(\[]', body, 1)[0].strip().rstrip('.').strip()
-        pe = re.search(r'[\(\[](.+)[\)\]]', body)
-        if pe:
-            inline_eff = pe.group(1).strip()
-            for mm in re.finditer(r'\+(\d+)\s+(?:to (?:their )?)?([A-Za-z]+)?\s*(?:Ego|Melee|Agility|Logic)?\s*damage multiplier', body):
-                body_mult = max(body_mult, int(mm.group(1)))
-            for ab in re.findall(r'\b(Melee|Agility|Ego|Logic)\b', body):
-                body_abils.append(ab.lower())
-    else:
-        a = re.search(r"['’]s (Armor|Battle Suit) Powers:", flat)
-        if a:
-            # name the armour/suit after the character (owner), not the glued prefix;
-            # keep any (variant) so different suits of one hero stay distinct.
-            name = "%s’s %s" % (_titlecase(rec['name']).strip(), a.group(1))
-            typ = 'Armor'
-    if not name or len(name) < 2 or len(name) > 60:
-        return None
+        # strip a trailing "[effects]"/"(effects)" clause but keep a "(Earth-XXXX)"
+        # that is part of the name
+        prot = re.sub(r'\((Earth-[\dA-Za-z-]+)\)', r'⟦\1⟧', body)
+        nm = re.split(r'\s*[\[(]', prot, 1)[0].strip().rstrip('.').strip()
+        nm = nm.replace('⟦', '(').replace('⟧', ')')
+        return nm, ('Weapon' if m.group(1) == 'Weapon' else 'Item')
+    # otherwise derive the item name from the "<Owner>'s <ItemName> Powers:" label
+    lbl = re.search(r"([A-Za-z][\w'’.&()\- ]{1,44}?) Powers:", seg)
+    if lbl:
+        text = lbl.group(1).strip()
+        mm = re.search(re.escape(base) + r"['’]s\s+(.+)$", text)
+        if mm:
+            nm = mm.group(1).strip()
+        elif re.search(re.escape(base) + r"['’]s?\s*$", text):
+            nm = "%s’s Armor" % base                      # bare possessive ("Teen Immortus'")
+        else:
+            caps = re.search(r"([A-Z][\w'’.&-]+(?:\s+[A-Z][\w'’.&-]+){0,3})$", text)
+            nm = caps.group(1).strip() if caps else text
+        if len(nm) < 2 or re.fullmatch(r"(the|a|an)?\s*", nm, re.I):
+            nm = "%s’s Armor" % base
+        # a segment with a Weapon: Range line is a weapon, never armor
+        if has_weapon_stat:
+            return nm, 'Weapon'
+        armor_like = re.search(r'\b(Armor|Suit)\b', nm, re.I) or (
+            re.search(r'\bWorn\b', seg) and not _WEAPON_KW.search(nm))
+        typ = 'Armor' if armor_like else 'Item'
+        return nm, typ
+    return None, None
+
+def _parse_iconic_segment(seg, rec, source):
+    seg = re.sub(r'\bEff ect\b', 'Effect', seg)
+    base_full = _titlecase(rec['name']).strip()
+    base = re.sub(r'\s*\(.*\)\s*$', '', base_full).strip()
+    pm = re.search(r'\(([^)]*)\)\s*$', base_full)
+    paren = pm.group(1).strip() if pm else ''
 
     # weapon stat line: "Weapon: Range: <R>, Melee/Agility Damage Multiplier bonus: +N/+N"
     rng = ''; abils = []; mult = 0
-    ws = re.search(r"Weapon:\s*Range:\s*([^,|]+),\s*([A-Za-z/ ]+?)\s*Damage\s*Multiplier bonus:\s*([+\d/ ]+)", flat)
+    ws = re.search(r"Weapon:\s*Range:\s*([^,|]+),\s*([A-Za-z/ ]+?)\s*Damage\s*Multiplier bonus:\s*([+\d/ ]+)", seg)
     if ws:
-        if typ == 'Item':
-            typ = 'Weapon'
         rng = re.sub(r'\s*/\s*', '/', re.sub(r'\+\s+', '+', re.sub(r'\s+', ' ', ws.group(1)))).strip()
         for ab in re.findall(r'[A-Za-z]+', ws.group(2)):
             if ab.lower() in ('melee', 'agility', 'ego', 'logic'):
@@ -309,36 +331,44 @@ def extract_iconic(rec, source):
         nums = [int(x) for x in re.findall(r'\d+', ws.group(3))]
         if nums:
             mult = max(nums)
-    mult = max(mult, body_mult)
-    if not abils and body_abils:
-        abils = body_abils
-    # type by name keyword if still generic
+
+    name, typ = _seg_name_type(seg, base, paren, bool(ws))
+    if not name or len(name) < 2 or len(name) > 60:
+        return None
+    if ws and typ != 'Armor':
+        typ = 'Weapon'
     if typ == 'Item' and _WEAPON_KW.search(name):
         typ = 'Weapon'
-    if re.search(r'\b(armor|battle suit|suit)\b', name, re.I):
-        typ = 'Armor'
 
-    # restrictions & power value
+    # inline effect / bracketed damage-mult on an "Iconic Weapon: name [..]" marker
+    inline_eff = ''
+    mm = re.search(r"Iconic (?:Item|Weapon):\s*[^|\[(]+[\[(](.+?)[\])]", seg)
+    if mm:
+        inline_eff = mm.group(1).strip()
+        for x in re.finditer(r'\+(\d+)\s+[A-Za-z]*\s*damage multiplier', inline_eff):
+            mult = max(mult, int(x.group(1)))
+        for ab in re.findall(r'\b(Melee|Agility|Ego|Logic)\b', inline_eff):
+            if ab.lower() not in abils:
+                abils.append(ab.lower())
+
     restr = []
-    rs = re.search(r"Restrictions?:\s*(.+?)(?:Power Value:|$)", flat)
+    rs = re.search(r"Restrictions?:\s*(.+?)(?:Power Value:|$)", seg)
     if rs:
         restr = list(dict.fromkeys(_RESTR.findall(rs.group(1))))
-    req = re.search(r"Requires?:\s*([^|]+?)(?:\s*Power Value:|\s*\||$)", flat)
-    pv = re.search(r"Power Value:\s*(\d+)", flat)
+    req = re.search(r"Requires?:\s*([^|]+?)(?:\s*Power Value:|\s*\||$)", seg)
+    pv = re.search(r"Power Value:\s*(\d+)", seg)
+    eff = re.search(r"([A-Za-z][\w ]{0,24}\([^()|]*?with Iconic Item\))", seg)
 
     special_bits = []
+    if eff: special_bits.append(eff.group(1).strip())
     if inline_eff: special_bits.append(inline_eff)
     if restr: special_bits.append('Restrictions: ' + ', '.join(restr))
     if req: special_bits.append('Requires: ' + req.group(1).strip())
     if pv: special_bits.append('Power Value: ' + pv.group(1))
-    # a short inline effect e.g. "Shield 2 (Shield 3 with Iconic Item)"
-    eff = re.search(r"([A-Za-z][\w ]{0,24}\([^()|]*?with Iconic Item\))", flat)
-    if eff: special_bits.insert(0, eff.group(1).strip())
 
     name = _clean_item_name(name)
     item = {'name': name, 'tier': 'Iconic', 'type': typ, 'category': typ,
-            'owner': _titlecase(rec['name']), 'source': source,
-            'notes': '', 'special': '; '.join(special_bits)}
+            'owner': base_full, 'source': source, 'notes': '', 'special': '; '.join(special_bits)}
     if typ == 'Weapon':
         item['ability'] = abils[0] if abils else 'melee'
         item['range'] = rng or 'Reach'
@@ -348,10 +378,38 @@ def extract_iconic(rec, source):
             item['multAbilities'] = sorted(set(abils))
     if pv:
         item['powerValue'] = int(pv.group(1))
-
-    rec['equipment'] = [name]
-    rec['powers'] = _clean_power_block(rec.get('powers', []))
     return item
+
+# ── auto iconic gear: EVERY Iconic Item / Iconic Weapon / Armor / Battle Suit a
+# character carries. Each item is one "… Power Value: N" segment of the power
+# block; split on those and parse each. Returns a LIST of equipment dicts.
+def extract_iconic(rec, source):
+    flat = ' | '.join(n for g in rec.get('powers', []) for n in g.get('names', []))
+    flat = re.sub(r'\bEff ect\b', 'Effect', flat)
+    # split into per-item segments at each "Power Value: N"
+    segs = []
+    last = 0
+    for m in re.finditer(r'Power Value:\s*\d+', flat):
+        segs.append(flat[last:m.end()]); last = m.end()
+    tail = flat[last:]
+    # a trailing item with a "… Powers:" label but no Power Value (rare)
+    if re.search(r'\bPowers:', tail) or re.search(r'Iconic (?:Item|Weapon):', tail):
+        segs.append(tail)
+    items = []
+    for seg in segs:
+        it = _parse_iconic_segment(seg, rec, source)
+        if it:
+            items.append(it)
+    # dedupe items within a character by name
+    seen = set(); uniq = []
+    for it in items:
+        k = it['name'].lower()
+        if k in seen: continue
+        seen.add(k); uniq.append(it)
+    if uniq:
+        rec['equipment'] = [it['name'] for it in uniq]
+        rec['powers'] = _clean_power_block(rec.get('powers', []))
+    return uniq
 
 # strip the iconic-item metadata noise out of a character's visible power list
 _META = re.compile(r"^(?:Iconic (?:Item|Weapon):|Weapon:\s*Range:|Restrictions?:|"
@@ -394,9 +452,9 @@ def build_book(pdf_path, source, pmin=0, pmax=None):
             if len(nm) > 40 or not nm[0].isalnum(): continue
             if len(nm) < 2 and not nm.isalpha(): continue
             r['genre'] = 'core'; r['source'] = source
-            it = extract_iconic(r, source)
-            if it and it['name'] and it['name'] not in icons:
-                icons[it['name']] = it
+            for it in extract_iconic(r, source):
+                if it.get('name') and it['name'] not in icons:
+                    icons[it['name']] = it
             out.append(r)
     # ids (disambiguate duplicate codenames by realName), slugged + source suffix
     sfx = '-' + slug(source)

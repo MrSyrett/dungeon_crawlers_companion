@@ -941,7 +941,7 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "equipment": [
-      "Captain America"
+      "Captain America (Earth-9907)’s Shield"
     ],
     "id": "american-dream-avengers-expansion"
   },
@@ -3926,7 +3926,7 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "equipment": [
-      "Black Widow (Earth-1610)’s Battle Suit"
+      "Black Widow’s Battle Suit"
     ],
     "id": "black-widow-earth-1610-avengers-expansion"
   },
@@ -13716,7 +13716,7 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "equipment": [
-      "Iron Man (Earth-1610)’s Armor"
+      "Iron Man’s Armor"
     ],
     "id": "iron-man-earth-1610-avengers-expansion"
   },
@@ -13793,14 +13793,17 @@ const MMRPG_CHARACTERS = [
           "Salvation",
           "Smash",
           "Sturdy 4",
-          "Summonable Restrictions:",
+          "Summonable",
           "Large",
-          "Worn Power Value: 20"
+          "Worn"
         ]
       }
     ],
     "genre": "core",
     "source": "Avengers Expansion",
+    "equipment": [
+      "Hulkbuster Armor"
+    ],
     "id": "iron-man-hulkbuster-armor-avengers-expansion"
   },
   {
@@ -13860,7 +13863,6 @@ const MMRPG_CHARACTERS = [
           "Brilliance 2",
           "Combat Trickery",
           "Discipline 1",
-          "Slow-Motion Dodge Iron Man’s Mysterium Powers:",
           "Accuracy 1",
           "Elemental Barrage (Energy)",
           "Elemental Barrier (Energy)",
@@ -13875,14 +13877,17 @@ const MMRPG_CHARACTERS = [
           "Salvation",
           "Sturdy 3",
           "Summonable",
-          "Supernova Restrictions:",
+          "Supernova",
           "Flashy",
-          "Worn Power Value: 17"
+          "Worn"
         ]
       }
     ],
     "genre": "core",
     "source": "Avengers Expansion",
+    "equipment": [
+      "Mysterium Armor"
+    ],
     "id": "iron-man-mysterium-armor-avengers-expansion"
   },
   {
@@ -30345,14 +30350,17 @@ const MMRPG_CHARACTERS = [
           "Sturdy 1",
           "Summonable",
           "Time Travel",
-          "Time Travel Together Restrictions:",
+          "Time Travel Together",
           "Flashy",
-          "Worn Power Value: 11"
+          "Worn"
         ]
       }
     ],
     "genre": "core",
     "source": "Avengers Expansion",
+    "equipment": [
+      "Teen Immortus’s Armor"
+    ],
     "id": "teen-immortus-avengers-expansion"
   },
   {
@@ -31473,7 +31481,7 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "equipment": [
-      "Mjolnir"
+      "Mjolnir (Earth-1610)"
     ],
     "id": "thor-earth-1610-avengers-expansion"
   },
@@ -34100,6 +34108,7 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Avengers Expansion",
     "equipment": [
+      "Whiplash’s Armor",
       "Energy Whips"
     ],
     "id": "whiplash-avengers-expansion"
@@ -34791,7 +34800,8 @@ const MMRPG_CHARACTERS = [
     "genre": "core",
     "source": "Secret Wars",
     "equipment": [
-      "Anti-Gravity Disc Shooter"
+      "Anti-Gravity Disc Shooter",
+      "High Tech"
     ],
     "id": "wizard-secret-wars"
   },

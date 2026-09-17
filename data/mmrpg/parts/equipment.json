@@ -461,7 +461,7 @@
   "owner": "Angel",
   "source": "X-Men Expansion",
   "notes": "",
-  "special": "when in Archangel form, can fire feathery flechettes (treat like a submachine gun) and can act as a protective barrier (20 points to shatter)",
+  "special": "when in Archangel form, can fire feathery flechettes (treat like a submachine gun",
   "ability": "melee",
   "range": "Reach",
   "damageBonus": "—",
@@ -472,7 +472,7 @@
   "tier": "Iconic",
   "type": "Weapon",
   "category": "Weapon",
-  "owner": "BLINK (Earth-295)",
+  "owner": "Blink (Earth-295)",
   "source": "X-Men Expansion",
   "notes": "",
   "special": "Ranged weapons. Blink can use her Teleport Object and Teleport Other powers on any person or object she hits with these daggers.",
@@ -601,7 +601,7 @@
   "owner": "Silence",
   "source": "Spider-Verse Expansion",
   "notes": "",
-  "special": "Grants Elemental Burst (Hellfire). Also allows Silence to create dimensional portals exclusively to and from Hell. She must still pay the regular Dimensional Portal power cost of 15 Focus.",
+  "special": "Grants Elemental Burst (Hellfire",
   "ability": "melee",
   "range": "Reach",
   "damageBonus": "—",
@@ -641,14 +641,18 @@
   "powerValue": 1
  },
  {
-  "name": "Captain America",
+  "name": "Captain America (Earth-9907)’s Shield",
   "tier": "Iconic",
-  "type": "Item",
-  "category": "Item",
+  "type": "Weapon",
+  "category": "Weapon",
   "owner": "American Dream",
   "source": "Avengers Expansion",
   "notes": "",
   "special": "Shield 2 (Shield 3 with Iconic Item); Earth-9907; Restrictions: Carried, Flashy; Requires: Shield 1 power; Power Value: 1",
+  "ability": "melee",
+  "range": "Reach",
+  "damageBonus": "—",
+  "multBonus": 0,
   "powerValue": 1
  },
  {
@@ -712,7 +716,7 @@
   "powerValue": 1
  },
  {
-  "name": "Black Widow (Earth-1610)’s Battle Suit",
+  "name": "Black Widow’s Battle Suit",
   "tier": "Iconic",
   "type": "Armor",
   "category": "Armor",
@@ -840,7 +844,7 @@
   "powerValue": 8
  },
  {
-  "name": "Iron Man (Earth-1610)’s Armor",
+  "name": "Iron Man’s Armor",
   "tier": "Iconic",
   "type": "Armor",
   "category": "Armor",
@@ -849,6 +853,28 @@
   "notes": "",
   "special": "Restrictions: Flashy, Worn; Power Value: 13",
   "powerValue": 13
+ },
+ {
+  "name": "Hulkbuster Armor",
+  "tier": "Iconic",
+  "type": "Armor",
+  "category": "Armor",
+  "owner": "Iron Man (Hulkbuster Armor)",
+  "source": "Avengers Expansion",
+  "notes": "",
+  "special": "Restrictions: Large, Worn; Power Value: 20",
+  "powerValue": 20
+ },
+ {
+  "name": "Mysterium Armor",
+  "tier": "Iconic",
+  "type": "Armor",
+  "category": "Armor",
+  "owner": "Iron Man (Mysterium Armor)",
+  "source": "Avengers Expansion",
+  "notes": "",
+  "special": "Restrictions: Flashy, Worn; Power Value: 17",
+  "powerValue": 17
  },
  {
   "name": "Shard of the Crimson Gem of Cyttorak",
@@ -937,6 +963,36 @@
   "powerValue": 3
  },
  {
+  "name": "Teen Immortus’s Armor",
+  "tier": "Iconic",
+  "type": "Armor",
+  "category": "Armor",
+  "owner": "Teen Immortus",
+  "source": "Avengers Expansion",
+  "notes": "",
+  "special": "Restrictions: Flashy, Worn; Power Value: 11",
+  "powerValue": 11
+ },
+ {
+  "name": "Mjolnir (Earth-1610)",
+  "tier": "Iconic",
+  "type": "Weapon",
+  "category": "Weapon",
+  "owner": "Thor (Earth-1610)",
+  "source": "Avengers Expansion",
+  "notes": "",
+  "special": "Earth-1610; Restrictions: Carried, Flashy; Requires: Enhanced Physique trait and Mighty 2 power; Power Value: 11",
+  "ability": "melee",
+  "range": "Reach/5",
+  "damageBonus": "+1",
+  "multBonus": 1,
+  "multAbilities": [
+   "agility",
+   "melee"
+  ],
+  "powerValue": 11
+ },
+ {
   "name": "U.S.Agent’s Shield",
   "tier": "Iconic",
   "type": "Weapon",
@@ -956,6 +1012,17 @@
   "powerValue": 1
  },
  {
+  "name": "Whiplash’s Armor",
+  "tier": "Iconic",
+  "type": "Armor",
+  "category": "Armor",
+  "owner": "Whiplash",
+  "source": "Avengers Expansion",
+  "notes": "",
+  "special": "Restrictions: Worn; Power Value: 4",
+  "powerValue": 4
+ },
+ {
   "name": "Energy Whips",
   "tier": "Iconic",
   "type": "Weapon",
@@ -963,12 +1030,12 @@
   "owner": "Whiplash",
   "source": "Avengers Expansion",
   "notes": "",
-  "special": "Restrictions: Worn; Power Value: 4",
+  "special": "Restrictions: Worn; Power Value: 1",
   "ability": "melee",
   "range": "Reach+1",
   "damageBonus": "+1",
   "multBonus": 1,
-  "powerValue": 4
+  "powerValue": 1
  },
  {
   "name": "Cosmic Control Rod",
@@ -1053,6 +1120,17 @@
   "source": "Secret Wars",
   "notes": "",
   "special": "Restrictions: Flashy, Worn; Power Value: 1",
+  "powerValue": 1
+ },
+ {
+  "name": "High Tech",
+  "tier": "Iconic",
+  "type": "Item",
+  "category": "Item",
+  "owner": "Wizard",
+  "source": "Secret Wars",
+  "notes": "",
+  "special": "Restrictions: Carried; Power Value: 1",
   "powerValue": 1
  },
  {

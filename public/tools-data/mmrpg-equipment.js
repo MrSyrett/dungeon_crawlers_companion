@@ -249,7 +249,7 @@ const MMRPG_EQUIPMENT = [
     "powerValue": 1
   },
   {
-    "name": "Black Widow (Earth-1610)’s Battle Suit",
+    "name": "Black Widow’s Battle Suit",
     "tier": "Iconic",
     "type": "Armor",
     "category": "Armor",
@@ -348,14 +348,18 @@ const MMRPG_EQUIPMENT = [
     "damageBonus": "+1"
   },
   {
-    "name": "Captain America",
+    "name": "Captain America (Earth-9907)’s Shield",
     "tier": "Iconic",
-    "type": "Item",
-    "category": "Item",
+    "type": "Weapon",
+    "category": "Weapon",
     "owner": "American Dream",
     "source": "Avengers Expansion",
     "notes": "",
     "special": "Shield 2 (Shield 3 with Iconic Item); Earth-9907; Restrictions: Carried, Flashy; Requires: Shield 1 power; Power Value: 1",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
     "powerValue": 1
   },
   {
@@ -647,7 +651,7 @@ const MMRPG_EQUIPMENT = [
     "tier": "Iconic",
     "type": "Weapon",
     "category": "Weapon",
-    "owner": "BLINK (Earth-295)",
+    "owner": "Blink (Earth-295)",
     "source": "X-Men Expansion",
     "notes": "",
     "special": "Ranged weapons. Blink can use her Teleport Object and Teleport Other powers on any person or object she hits with these daggers.",
@@ -753,12 +757,12 @@ const MMRPG_EQUIPMENT = [
     "owner": "Whiplash",
     "source": "Avengers Expansion",
     "notes": "",
-    "special": "Restrictions: Worn; Power Value: 4",
+    "special": "Restrictions: Worn; Power Value: 1",
     "ability": "melee",
     "range": "Reach+1",
     "damageBonus": "+1",
     "multBonus": 1,
-    "powerValue": 4
+    "powerValue": 1
   },
   {
     "name": "Eternity Mask",
@@ -974,7 +978,7 @@ const MMRPG_EQUIPMENT = [
     "owner": "Silence",
     "source": "Spider-Verse Expansion",
     "notes": "",
-    "special": "Grants Elemental Burst (Hellfire). Also allows Silence to create dimensional portals exclusively to and from Hell. She must still pay the regular Dimensional Portal power cost of 15 Focus.",
+    "special": "Grants Elemental Burst (Hellfire",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
@@ -992,6 +996,17 @@ const MMRPG_EQUIPMENT = [
     "powerValue": 8
   },
   {
+    "name": "High Tech",
+    "tier": "Iconic",
+    "type": "Item",
+    "category": "Item",
+    "owner": "Wizard",
+    "source": "Secret Wars",
+    "notes": "",
+    "special": "Restrictions: Carried; Power Value: 1",
+    "powerValue": 1
+  },
+  {
     "name": "Hofund",
     "tier": "Iconic",
     "type": "Item",
@@ -1001,6 +1016,17 @@ const MMRPG_EQUIPMENT = [
     "notes": "",
     "special": "Restrictions: Carried; Power Value: 1",
     "powerValue": 1
+  },
+  {
+    "name": "Hulkbuster Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Iron Man (Hulkbuster Armor)",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Large, Worn; Power Value: 20",
+    "powerValue": 20
   },
   {
     "name": "Infinity Gauntlet",
@@ -1021,7 +1047,7 @@ const MMRPG_EQUIPMENT = [
     "source": "Avengers Expansion"
   },
   {
-    "name": "Iron Man (Earth-1610)’s Armor",
+    "name": "Iron Man’s Armor",
     "tier": "Iconic",
     "type": "Armor",
     "category": "Armor",
@@ -1183,6 +1209,25 @@ const MMRPG_EQUIPMENT = [
     "source": "core ch.8 (Characters)"
   },
   {
+    "name": "Mjolnir (Earth-1610)",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Thor (Earth-1610)",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Earth-1610; Restrictions: Carried, Flashy; Requires: Enhanced Physique trait and Mighty 2 power; Power Value: 11",
+    "ability": "melee",
+    "range": "Reach/5",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "multAbilities": [
+      "agility",
+      "melee"
+    ],
+    "powerValue": 11
+  },
+  {
     "name": "Motorcycle",
     "tier": "Vehicle",
     "type": "Vehicle",
@@ -1208,6 +1253,17 @@ const MMRPG_EQUIPMENT = [
     "owner": "—",
     "notes": "Some weapons are large enough that they must be either fixed in place or mounted to a vehicle to function. Most of these can be automated. If so, they are considered to have ability scores of 2 for making attacks. Automated weapons are always considered to have an initiative of 10. When fired manually, these weapons use the attacker’s abilities and are fired during the attacker’s turn, using their standard action. However, they use the listed fixed damage multiplier instead of the attacker’s. The attacker gets to add their ability bonus to the damage, though, as normal. Here is a list of some common mounted weapons: Close-In Weapon System (CIWS): This battery is fully automated and cannot be fired manually. Laser Batteries: On a Fantastic success, the target is also blinded for one round. Machine-Gun Turret: This weapon can be fired manually as well. Missile System: This weapon has the Elemental Burst (Energy), Elemental Blast (Energy) and Elemental Barrage (Energy) powers, each with a range of 20. If automated, the weapons system can add 10 Focus to Elemental Blast (Energy) and can spend 15 Focus on Elemental Barrage (Energy) each time the powers are used, without limit. Iffired manually, the attacker must use their own Focus instead. On a Fantastic success, the target has trouble on all actions for one round. Triple-Mounted Cannons: This battery has trouble against targets within 50 spaces. Twin-Mounted Guns: This battery has trouble against targets within 20 spaces.",
     "source": "Avengers Expansion"
+  },
+  {
+    "name": "Mysterium Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Iron Man (Mysterium Armor)",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn; Power Value: 17",
+    "powerValue": 17
   },
   {
     "name": "Nega-Bands",
@@ -1781,11 +1837,22 @@ const MMRPG_EQUIPMENT = [
     "owner": "Angel",
     "source": "X-Men Expansion",
     "notes": "",
-    "special": "when in Archangel form, can fire feathery flechettes (treat like a submachine gun) and can act as a protective barrier (20 points to shatter)",
+    "special": "when in Archangel form, can fire feathery flechettes (treat like a submachine gun",
     "ability": "melee",
     "range": "Reach",
     "damageBonus": "—",
     "multBonus": 0
+  },
+  {
+    "name": "Teen Immortus’s Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Teen Immortus",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Flashy, Worn; Power Value: 11",
+    "powerValue": 11
   },
   {
     "name": "The Bloodaxe",
@@ -1952,6 +2019,17 @@ const MMRPG_EQUIPMENT = [
     "owner": "—",
     "notes": "Doctor Octopus devised a webbing solvent that can instantly free a person trapped in webbing. It requires a standard action or reaction to use, and it works automatically. This solvent normally comes in single-use bottles, but it is not sold in stores. It’s rare to find someone who has it on hand— unless they’re prepared to come up against a Spider-Hero.",
     "source": "Spider-Verse Expansion"
+  },
+  {
+    "name": "Whiplash’s Armor",
+    "tier": "Iconic",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "Whiplash",
+    "source": "Avengers Expansion",
+    "notes": "",
+    "special": "Restrictions: Worn; Power Value: 4",
+    "powerValue": 4
   },
   {
     "name": "Widow's Bite",

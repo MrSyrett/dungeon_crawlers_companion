@@ -601,6 +601,25 @@ const SCHEMAS: Record<string, Schema> = {
     blank: () => ({}), toForm: (d) => ({ ...d }),
     summary: () => "tag",
   },
+  "mmrpg-iconic": {
+    title: "My Homebrew Iconic Items", noun: "Iconic Item",
+    fields: [
+      { key: "name", label: "Name", type: "text", full: true, maxLength: 80 },
+      { key: "type", label: "Type", type: "select", options: [["Weapon", "Weapon"], ["Item", "Item"], ["Armor", "Battle Suit / Armor"]] },
+      { key: "owner", label: "Signature owner (optional)", type: "text", placeholder: "e.g. Iron Man" },
+      { key: "origin", label: "Origin granted (optional)", type: "text", placeholder: "e.g. High Tech, Weird Science" },
+      { key: "powers", label: "Powers granted", type: "textarea", full: true, placeholder: "Flight 2, Sturdy 3, Elemental Blast (Energy)…" },
+      { key: "attachment", label: "Attachment", type: "select", empty: "—", options: [["Worn", "Worn (like armor)"], ["Carried", "Carried (like a weapon)"], ["Driven", "Driven (like a vehicle)"]] },
+      { key: "restrictions", label: "Restrictions", type: "text", full: true, placeholder: "Flashy, Large, Menacing, Requires: Worthy tag…" },
+      { key: "range", label: "Range (weapons)", type: "text", placeholder: "Reach, Reach +1, or spaces e.g. 10" },
+      { key: "ability", label: "Attacks with (weapons)", type: "select", empty: "Melee", options: [["Melee", "Melee"], ["Agility", "Agility"], ["Ego", "Ego"], ["Logic", "Logic"]] },
+      { key: "damageBonus", label: "Damage mult. bonus (weapons)", type: "text", placeholder: "+1, +2" },
+      { key: "powerValue", label: "Power Value", type: "number", placeholder: "power picks to own it" },
+      { key: "special", label: "Special / effect", type: "textarea", full: true },
+    ],
+    blank: () => ({ type: "Item" }), toForm: (d) => ({ ...d }),
+    summary: (d) => `${sv(d, "type") || "Item"}${sv(d, "powerValue") ? " · PV " + sv(d, "powerValue") : ""}`,
+  },
 };
 
 // Accent CSS var by system prefix (globals.css: --nimble/--sw/--ace/--kob).
