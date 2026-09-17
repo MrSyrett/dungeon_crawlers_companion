@@ -256,6 +256,18 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .m-btn.ghost{background:#26282f;color:#cdd;border:1px solid #34272b;}
 .m-input{width:100%;padding:9px 10px;background:#0f1014;border:1px solid #2a1416;border-radius:5px;color:#eee;font-family:Barlow,sans-serif;font-size:13px;outline:none;}
 .m-hint{font-size:12px;color:#bfc3cb;margin:0 0 12px;line-height:1.5;}
+.lu-chart{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:4px 0 12px;}
+@media(max-width:520px){.lu-chart{grid-template-columns:repeat(2,1fr);}}
+.lu-box{border:1px solid #34272b;border-radius:5px;background:#0f1014;padding:8px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#7a7e88;text-align:center;}
+.lu-box.on{border-color:var(--mv);background:#2a1215;color:#f4a6a8;}
+.lu-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+.lu-actions .m-btn[disabled]{opacity:.4;cursor:default;}
+.lu-abils{display:flex;flex-wrap:wrap;gap:8px;}
+.lu-abils .m-btn{text-transform:none;letter-spacing:.02em;font-size:12px;}
+.lu-log{margin-top:12px;border-top:1px solid #34272b;padding-top:8px;}
+.lu-log-h{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#889;margin-bottom:4px;}
+.lu-log-row{font-size:12px;color:#cdd;padding:2px 0;}
+.lu-trade{font-size:9px;color:#e8c86a;border:1px solid #e8c86a;border-radius:3px;padding:0 4px;text-transform:uppercase;letter-spacing:.06em;}
 .rules-list h4{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#f4a6a8;margin:12px 0 3px;}
 .rules-list p{font-size:12px;line-height:1.5;color:#ddd;}
 .rules-list ul{margin:3px 0 3px;padding-left:18px;}
@@ -380,6 +392,7 @@ body.dark .sheet{border-color:#3a3d47;}
   <div class="log-actions">
     <button id="campaign-btn" class="log-action-btn" onclick="openCampaign()" style="border:1px solid #34272b;background:transparent;color:#b8a0a2;" title="Campaign">🔗</button>
     <button id="build-btn" class="log-action-btn wizard" onclick="if(window.MMRPGB)MMRPGB.launch();" title="Character Builder">Create</button>
+    <button id="level-btn" class="log-action-btn wizard" onclick="openLevelUp()" title="Getting Schooled — advance a rank" style="display:none;">Level</button>
     <button class="log-action-btn rules" onclick="openRules()" title="Quick rules">Rules</button>
     <button class="log-action-btn export" onclick="exportSheet()" title="Export JSON">Export</button>
     <label class="log-action-btn import" style="display:flex;align-items:center;justify-content:center;cursor:pointer;" title="Import JSON">Import<input type="file" accept=".json" style="display:none" onchange="importSheet(this)"></label>
@@ -402,6 +415,7 @@ body.dark .sheet{border-color:#3a3d47;}
 </div>
 
 <div id="rules-overlay" class="ov" onclick="if(event.target===this)closeRules()"><div class="modal wide"><div class="modal-hd"><div class="ttl">d616 — Quick Rules</div><button class="x" onclick="closeRules()">✕</button></div><div class="modal-bd rules-list" id="rules-body"></div></div></div>
+<div id="levelup-overlay" class="ov" onclick="if(event.target===this)closeLevelUp()"><div class="modal wide"><div class="modal-hd"><div class="ttl">✨ Getting Schooled</div><button class="x" onclick="closeLevelUp()">✕</button></div><div class="modal-bd" id="levelup-body"></div></div></div>
 <div id="campaign-overlay" class="ov" onclick="if(event.target===this)closeCampaign()"><div class="modal"><div class="modal-hd"><div class="ttl">Campaign</div><button class="x" onclick="closeCampaign()">✕</button></div><div class="modal-bd" id="campaign-body"></div></div></div>
 
 <script>
@@ -446,6 +460,7 @@ function blankState(){
     abilities:{melee:0,agility:0,resilience:0,vigilance:0,ego:0,logic:0},
     health:{cur:0,max:0}, focus:{cur:0,max:0}, karma:{cur:1,max:1}, healthDR:0, focusDR:0,
     conditions:{}, powers:[], traits:[], tags:[], attacks:[],
+    levelup:{abilityBoxes:0, powerBoxes:[], traitBox:0, picks:[]},
     history:'', personality:'', features:'', base:'', notes:'' };
   return st;
 }
@@ -945,9 +960,163 @@ function openRules(){
 }
 function closeRules(){ $('rules-overlay').classList.remove('open'); }
 
+// ═══ GETTING SCHOOLED (advancement) ═══════════════════════════════════════════
+// Between ranks a character fills a 10-box Schooling Advancement Chart — 5 Ability
+// points, 4 Powers, 1 Trait — one box at a time, each applied to the sheet at once
+// and the progress saved. A Power box can be traded for an ability point or a trait.
+// When all 10 boxes are filled the rank rises by 1 (which grants +1 damage multiplier
+// and +1 Karma through the rank), and a fresh chart begins — up to the rank cap of 6.
+// Powers offered are those whose prerequisite rank is at most the rank being climbed to.
+function LU(){ if(!S.levelup||typeof S.levelup!=='object') S.levelup={};
+  var l=S.levelup;
+  if(typeof l.abilityBoxes!=='number') l.abilityBoxes=0;
+  if(!Array.isArray(l.powerBoxes)) l.powerBoxes=[];
+  if(typeof l.traitBox!=='number') l.traitBox=0;
+  if(!Array.isArray(l.picks)) l.picks=[];
+  return l; }
+function luFilled(){ var l=LU(); return l.abilityBoxes + l.traitBox + l.powerBoxes.length; }
+function luPowerLeft(){ return 4 - LU().powerBoxes.length; }
+function luCanAbility(){ return LU().abilityBoxes<5 || luPowerLeft()>0; }
+function luCanPower(){ return luPowerLeft()>0; }
+function luCanTrait(){ return LU().traitBox<1 || luPowerLeft()>0; }
+function luNextRank(){ return Math.min(6, rank()+1); }
+function prereqRank(p){ var m=/Rank\s*(\d+)/i.exec((p&&p.prerequisites)||''); return m?+m[1]:0; }
+function findLastIndex(arr,fn){ for(var i=arr.length-1;i>=0;i--){ if(fn(arr[i]))return i; } return -1; }
+
+var _lu={mode:null, q:''};
+function openLevelUp(){ if(!$('levelup-overlay'))return; _lu={mode:null,q:''}; renderLevelUp(); $('levelup-overlay').classList.add('open'); }
+function closeLevelUp(){ $('levelup-overlay').classList.remove('open'); _lu={mode:null,q:''}; }
+
+function luApply(box, action, ref){ var l=LU();
+  if(box==='ability') l.abilityBoxes++;
+  else if(box==='trait') l.traitBox=1;
+  else l.powerBoxes.push(action);
+  l.picks.push({box:box, action:action, ref:ref});
+  saveSheet(true);
+}
+function luAddAbility(k){ if(!luCanAbility())return;
+  var box=(LU().abilityBoxes<5)?'ability':'power';
+  setAbility(k, ab(k)+1);
+  luApply(box,'ability',k);
+  var a=ABILITIES.find(function(x){return x.key===k;});
+  luAfterPick((a?a.name:k)+' +1'+(box==='power'?' (traded a power pick)':''));
+}
+function luAddPower(name){ if(!luCanPower())return;
+  var p=(POWERS||[]).find(function(x){return x.name===name;})||{name:name};
+  S.powers.push({name:p.name,powerSet:p.powerSet||'',action:p.action||'',duration:p.duration||'',cost:p.cost||'',range:p.range||'',prerequisites:p.prerequisites||'',effect:p.effect||'',fantastic:p.fantastic||''});
+  renderPowers(); renderAbilities(); renderDerived(); renderDamage();
+  luApply('power','power',name);
+  luAfterPick('Power: '+name);
+}
+function luAddTrait(name){ if(!luCanTrait())return;
+  var t=(TRAITS||[]).find(function(x){return x.name===name;})||{name:name};
+  S.traits.push({name:t.name,description:t.description||''});
+  renderTraitsTags();
+  var box=(LU().traitBox<1)?'trait':'power';
+  luApply(box,'trait',name);
+  luAfterPick('Trait: '+name+(box==='power'?' (traded a power pick)':''));
+}
+function luAfterPick(label){
+  addLog('Advancement','+ '+label, luFilled()+'/10 → Rank '+luNextRank(), 'normal');
+  if(luFilled()>=10) luRankUp();
+  _lu.mode=null; _lu.q=''; renderLevelUp(); refreshWizardButtons();
+}
+function luRankUp(){
+  var nr=Math.min(6, rank()+1);
+  S.rank=nr; S.levelup={abilityBoxes:0,powerBoxes:[],traitBox:0,picks:[]};
+  renderVitals(); renderDerived(); renderDamage(); renderAbilities();
+  addLog('RANK UP!','Now Rank '+nr, '+1 damage multiplier · +1 Karma','crit');
+  saveSheet(true);
+}
+function luUndo(){ var l=LU(); if(!l.picks.length)return;
+  var last=l.picks.pop();
+  if(last.box==='ability') l.abilityBoxes=Math.max(0,l.abilityBoxes-1);
+  else if(last.box==='trait') l.traitBox=0;
+  else l.powerBoxes.pop();
+  if(last.action==='ability'){ setAbility(last.ref, ab(last.ref)-1); }
+  else if(last.action==='power'){ var i=findLastIndex(S.powers,function(p){return p.name===last.ref;}); if(i>=0){S.powers.splice(i,1);renderPowers();renderAbilities();renderDerived();renderDamage();} }
+  else if(last.action==='trait'){ var j=findLastIndex(S.traits,function(t){return t.name===last.ref;}); if(j>=0){S.traits.splice(j,1);renderTraitsTags();} }
+  saveSheet(true); _lu.mode=null; renderLevelUp(); refreshWizardButtons();
+}
+function luSetMode(m){ _lu.mode=(_lu.mode===m?null:m); _lu.q=''; renderLevelUp(); }
+function luSearch(v){ _lu.q=v; var el=$('lu-pick-list'); if(el) el.innerHTML=luPickList(); }
+
+function luChartHtml(){
+  var l=LU(), h='<div class="lu-chart">';
+  for(var i=0;i<5;i++) h+='<span class="lu-box'+(i<l.abilityBoxes?' on':'')+'" title="Ability point">'+(i<l.abilityBoxes?'✓':'')+' Ability</span>';
+  for(var j=0;j<4;j++){ var v=l.powerBoxes[j]; h+='<span class="lu-box'+(v?' on':'')+'" title="Power (tradeable)">'+(v?(v==='power'?'✓ Power':'✓ '+cap1(v)):'')+(v?'':' Power')+'</span>'; }
+  h+='<span class="lu-box'+(l.traitBox?' on':'')+'" title="Trait">'+(l.traitBox?'✓':'')+' Trait</span>';
+  h+='</div>'; return h;
+}
+function cap1(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function luPickList(){
+  var q=(_lu.q||'').toLowerCase().trim();
+  if(_lu.mode==='ability'){
+    return '<div class="lu-abils">'+ABILITIES.map(function(a){
+      return '<button class="m-btn ghost" onclick="luAddAbility(\''+a.key+'\')"><b>'+esc(a.name)+'</b> '+((ab(a.key)>=0?'+':'')+ab(a.key))+' → '+((ab(a.key)+1>=0?'+':'')+(ab(a.key)+1))+'</button>';
+    }).join('')+'</div>';
+  }
+  if(_lu.mode==='power'){
+    var nr=luNextRank(), have={}; (S.powers||[]).forEach(function(p){have[(p.name||'').toLowerCase()]=1;});
+    var rows=(POWERS||[]).filter(function(p){
+      if(prereqRank(p)>nr) return false;
+      if(have[(p.name||'').toLowerCase()]) return false;
+      if(!q) return true;
+      return ((p.name||'')+' '+(p.powerSet||'')+' '+(p.effect||'')).toLowerCase().indexOf(q)>=0;
+    }).slice(0,300);
+    if(!rows.length) return '<div class="brow-empty">No matching powers.</div>';
+    return rows.map(function(p){
+      var meta=(p.powerSet&&p.powerSet!=='None'?p.powerSet:'Basic')+(p.prerequisites&&p.prerequisites!=='None'?' · '+p.prerequisites:'');
+      return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(p.name)+'<span class="brow-cost">'+esc(meta)+'</span></div>'+(p.effect?'<div class="brow-desc">'+esc(p.effect)+'</div>':'')+'</div><button class="brow-add" onclick="luAddPower('+jsq(p.name)+')">＋ Add</button></div>';
+    }).join('');
+  }
+  if(_lu.mode==='trait'){
+    var haveT={}; (S.traits||[]).forEach(function(t){haveT[(t.name||'').toLowerCase()]=1;});
+    var tr=(TRAITS||[]).filter(function(t){ if(haveT[(t.name||'').toLowerCase()])return false; if(!q)return true; return ((t.name||'')+' '+(t.description||'')).toLowerCase().indexOf(q)>=0; }).slice(0,300);
+    if(!tr.length) return '<div class="brow-empty">No matching traits.</div>';
+    return tr.map(function(t){ return '<div class="brow-item"><div class="brow-main"><div class="brow-name">'+esc(t.name)+'</div>'+(t.description?'<div class="brow-desc">'+esc(t.description)+'</div>':'')+'</div><button class="brow-add" onclick="luAddTrait('+jsq(t.name)+')">＋ Add</button></div>'; }).join('');
+  }
+  return '';
+}
+function jsq(s){ return "'"+String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'"; }
+function renderLevelUp(){
+  var host=$('levelup-body'); if(!host)return;
+  var atCap=(rank()>=6);
+  var h='';
+  if(atCap && luFilled()===0){
+    h='<p class="m-hint">This character is at the <b>rank cap (Rank 6)</b> — the highest rank. There’s no further advancement to school for.</p>';
+    host.innerHTML=h; return;
+  }
+  h+='<p class="m-hint">Advancing from <b>Rank '+rank()+'</b> to <b>Rank '+luNextRank()+'</b>. Fill all ten boxes — <b>'+luFilled()+' / 10</b> — one at a time; each is applied to your sheet and saved. When the chart is full your rank rises (+1 damage multiplier, +1 Karma) and a new chart begins. A <b>Power</b> box can be traded for an ability point or a trait.</p>';
+  h+=luChartHtml();
+  // action buttons
+  h+='<div class="lu-actions">'
+    +'<button class="m-btn'+(_lu.mode==='ability'?'':' ghost')+'" '+(luCanAbility()?'':'disabled ')+'onclick="luSetMode(\'ability\')">＋ Ability point</button>'
+    +'<button class="m-btn'+(_lu.mode==='power'?'':' ghost')+'" '+(luCanPower()?'':'disabled ')+'onclick="luSetMode(\'power\')">＋ Power</button>'
+    +'<button class="m-btn'+(_lu.mode==='trait'?'':' ghost')+'" '+(luCanTrait()?'':'disabled ')+'onclick="luSetMode(\'trait\')">＋ Trait</button>'
+    +(LU().picks.length?'<button class="m-btn ghost" onclick="luUndo()" title="Undo the last pick">↶ Undo</button>':'')
+    +'</div>';
+  if(_lu.mode==='power'||_lu.mode==='trait'){
+    h+='<input class="m-input" style="margin:8px 0;" placeholder="Search '+_lu.mode+'s…" value="'+esc(_lu.q||'')+'" oninput="luSearch(this.value)">';
+  }
+  if(_lu.mode){
+    if(_lu.mode==='ability') h+='<p class="m-hint" style="margin:6px 0 4px;">Choose an ability to raise by +1'+(LU().abilityBoxes>=5?' (this will trade a power pick)':'')+':</p>';
+    if(_lu.mode==='trait' && LU().traitBox>=1) h+='<p class="m-hint" style="margin:6px 0 4px;">Trait box used — this will trade a power pick.</p>';
+    h+='<div class="brow-list" id="lu-pick-list" style="max-height:38vh;overflow-y:auto;">'+luPickList()+'</div>';
+  }
+  // history of picks this rank
+  if(LU().picks.length){
+    h+='<div class="lu-log"><div class="lu-log-h">This rank so far</div>'+LU().picks.map(function(p){ return '<div class="lu-log-row">'+esc(p.action==='ability'?((ABILITIES.find(function(a){return a.key===p.ref;})||{}).name+' +1'):(cap1(p.action)+': '+p.ref))+(p.box==='power'&&p.action!=='power'?' <span class="lu-trade">traded</span>':'')+'</div>'; }).join('')+'</div>';
+  }
+  host.innerHTML=h;
+}
+
 // ── Create → advancement (builder) button swap ──
 function hasCharacter(){ if((S.name||'').trim())return true; return ABILITIES.some(function(a){return ab(a.key)!==0;})||S.powers.length>0; }
-function refreshWizardButtons(){ var c=$('build-btn'); if(c) c.textContent=hasCharacter()?'Rebuild':'Create'; }
+function refreshWizardButtons(){ var built=hasCharacter(); var c=$('build-btn'), l=$('level-btn');
+  if(c){ c.textContent='Create'; c.style.display=built?'none':''; }
+  if(l){ l.style.display=built?'':'none'; l.textContent=(rank()>=6)?'Max':'Level'; }
+}
 
 // ═══ LOG (shared chrome) ════════════════════════════════════════════════════
 var _toastTimer=null;
@@ -992,6 +1161,8 @@ function applySheet(d){
   if(Array.isArray(d.traits)) S.traits=d.traits.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.tags)) S.tags=d.tags.map(function(t){ return {name:t.name||'',description:t.description||''}; });
   if(Array.isArray(d.attacks)) S.attacks=d.attacks.map(function(w){ return mkEquip(w, w.equipped); });
+  if(d.levelup&&typeof d.levelup==='object'){ S.levelup={abilityBoxes:num(d.levelup.abilityBoxes)||0, powerBoxes:Array.isArray(d.levelup.powerBoxes)?d.levelup.powerBoxes.slice():[], traitBox:num(d.levelup.traitBox)||0, picks:Array.isArray(d.levelup.picks)?d.levelup.picks.slice():[]}; }
+  else S.levelup={abilityBoxes:0,powerBoxes:[],traitBox:0,picks:[]};
   renderAll();
   if(typeof campaignRestore==='function' && d.campaign!==undefined) campaignRestore(d.campaign);
   if(window.__ddSaveTitle && S.name) try{ window.__ddSaveTitle(S.name); }catch(e){}
