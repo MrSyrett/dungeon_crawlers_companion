@@ -3,10 +3,34 @@
 
 const MMRPG_CONDITIONS = [
   {
+    "name": "Ablaze",
+    "genre": "core",
+    "description": null,
+    "source": "Lose 5 Health at the end of each of your turns until put out (Agility vs TN 10)."
+  },
+  {
     "name": "Asleep",
     "genre": "core",
     "description": "Some powers (like Mists of Morpheus) and weapons (like the Night-Night Gun) can cause characters to fall asleep. When a character is asleep, they cannot take any actions. Their defenses are all reduced to 10, and Melee attacks automatically hit them. Normally, a character can be awakened by someone taking a standard action to rouse them by shaking or shouting. However, when a character has been forced asleep, this is more diffi cult. If the character was knocked out for a plot reason, the Narrator should let the player know and then cut to the character waking up when appropriate. However, if the character is in real danger—as in the middle of a combat—the character can attempt to wake up on their turn every round. To do so requires a Challenging check using the ability the character resisted with in the first place. For instance, that is Resilience for the Night-Night Gun (which puts a character to sleep with drugs) and Vigilance for Mists of Morpheus (which puts a character to sleep with magic). Anyone trying to wake the character up gives the character an edge on the check.",
-    "source": "Avengers Expansion"
+    "source": "Avengers Expansion",
+    "mech": {
+      "disableAll": true
+    }
+  },
+  {
+    "name": "Bleeding",
+    "genre": "core",
+    "description": null,
+    "source": "Lose 5 Health at the end of each turn until stopped (Logic vs TN 10) or you recover any Health."
+  },
+  {
+    "name": "Blinded",
+    "genre": "core",
+    "description": null,
+    "source": "Sight-based concentration powers end; speed halved; trouble on sight checks; enemies get an edge on you.",
+    "mech": {
+      "halveSpeed": true
+    }
   },
   {
     "name": "Corroding",
@@ -15,10 +39,28 @@ const MMRPG_CONDITIONS = [
     "source": "X-Men Expansion"
   },
   {
+    "name": "Deafened",
+    "genre": "core",
+    "description": null,
+    "source": "Hearing-based concentration powers end; trouble on action checks that need hearing."
+  },
+  {
+    "name": "Demoralized",
+    "genre": "core",
+    "description": null,
+    "source": "Your concentration powers end; you have trouble on all action checks.",
+    "mech": {
+      "troubleAll": true
+    }
+  },
+  {
     "name": "Exhausted",
     "genre": "core",
     "description": "Many heroes push themselves too hard for too long when in a crisis. The exhaustion this causes affects them physically and mentally. This can come about for many reasons. The character could go without sleep for more than 24 hours. They could be ill from a respiratory disease. They could have been tortured. They could have spent all week at a gaming convention. When a character is exhausted, they must add +5 for every 24 hours to the Focus cost of any powers that have a Focus cost. This penalty ignores the regular cap on spending Focus. Example: Spider-Man (Peter Parker) has been up for more than 72 hours. Webtrapping normally costs 10 Focus, but it now costs 25 Focus. Spider-Man’s Focus spending cap is 20, but since the overage is due to the penalty, he can still spend enough Focus to activate the power. In addition, an exhausted character has trouble on all actions. The exhaustion ends once a character gets a good night’s sleep.",
-    "source": "Spider-Verse Expansion"
+    "source": "Spider-Verse Expansion",
+    "mech": {
+      "troubleAll": true
+    }
   },
   {
     "name": "Frightened",
@@ -27,16 +69,87 @@ const MMRPG_CONDITIONS = [
     "source": "Spider-Verse Expansion"
   },
   {
+    "name": "Grabbed",
+    "genre": "core",
+    "description": null,
+    "source": "You can't move (nor can the grabber, unless they carry you along).",
+    "mech": {
+      "noMove": true
+    }
+  },
+  {
     "name": "Infected",
     "genre": "core",
     "description": "The character has been infected with a disease of some sort. To be infected, the target of an airborne infection must be within 3 spaces of the source of the infection and breathe air that the source can affect. If the infection is passed by contact, a close attack that does at least 1 point of damage is required. Either way, once exposed, the target must immediately make a Resilience check (which does not cost an action) against the infection’s target number. Unless otherwise stated, the standard is TN 12, but it can vary with the virulence of the infection. A Fantastic success on resisting an infection gives the target immunity to that disease for a full day. Otherwise, the source may affect the target again on the next turn. If the target does not breathe (or does not have to breathe), it cannot be infected by an airborne infection. To hold their breath to avoid infection, a character must use a standard action or reaction. At the start of each of their turns thereafter, they must make a Resilience vs. TN 10 check to continue effectively holding their breath. The effects and the timing of the incubation of the infection vary with the disease, as do any cures and duration. A common cold, for instance, doesn’t affect the character until the next day, and then it gives them trouble on all actions. After a good night’s rest, the character makes a Resilience vs. TN 12 action check. If they succeed, they are cured. If they fail, subtract 1 from the TN each day thereafter. While suffering from the disease, the target can infect others in the same way that it was originally infected.",
     "source": "X-Men Expansion"
   },
   {
+    "name": "Paralyzed",
+    "genre": "core",
+    "description": null,
+    "source": "Can't move or take actions needing Melee or Agility; attackers get an edge.",
+    "mech": {
+      "disable": [
+        "melee",
+        "agility"
+      ]
+    }
+  },
+  {
+    "name": "Pinned",
+    "genre": "core",
+    "description": null,
+    "source": "Like Grabbed, plus trouble on Melee/Agility checks and no movement actions.",
+    "mech": {
+      "trouble": [
+        "melee",
+        "agility"
+      ]
+    }
+  },
+  {
     "name": "Poisoned",
     "genre": "core",
     "description": "If a character is poisoned, they must make a Resilience vs. TN 18 action check at the start of each of their turns. (This does not cost an action.) If they fail, they lose 1 Health. If they succeed, they are fine that turn. A Fantastic success means the poison has passed from their system and no longer affects them. Many poisons have an antidote. Others do not, but they may be cured or removed by certain powers. If the poison was ingested, for instance, swallowing activated charcoal can neutralize it. Most emergency medical facilities have supplies of this on hand. Such places often also have antivenom to help with injected venoms or poisons. Many super-hero teams have stocks of both at their headquarters. Most characters with the Healing Factor power can effectively ignore poisons, as their power can replace the lost Health point. If a poison has not killed a character within 24 hours, their system eliminates it.",
     "source": "X-Men Expansion"
+  },
+  {
+    "name": "Prone",
+    "genre": "core",
+    "description": null,
+    "source": "On the ground: trouble on your ranged attacks; close attackers get an edge.",
+    "mech": {
+      "troubleAtk": [
+        "agility"
+      ]
+    }
+  },
+  {
+    "name": "Shattered",
+    "genre": "core",
+    "description": null,
+    "source": "Mentally broken — requires long-term care."
+  },
+  {
+    "name": "Stunned",
+    "genre": "core",
+    "description": null,
+    "source": "Concentration powers end; you lose your next action; enemies get an edge."
+  },
+  {
+    "name": "Surprised",
+    "genre": "core",
+    "description": null,
+    "source": "Can't act in the bonus round; attackers get an edge on you."
+  },
+  {
+    "name": "Unconscious",
+    "genre": "core",
+    "description": null,
+    "source": "Out cold — concentration powers end; helpless and unable to act.",
+    "mech": {
+      "disableAll": true
+    }
   }
 ];
 if (typeof window !== 'undefined') { window.MMRPG_CONDITIONS = MMRPG_CONDITIONS; }

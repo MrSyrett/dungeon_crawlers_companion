@@ -14,6 +14,7 @@
 <script src="/tools-data/mmrpg-powers.js"></script>
 <script src="/tools-data/mmrpg-characters.js"></script>
 <script src="/tools-data/mmrpg-equipment.js"></script>
+<script src="/tools-data/mmrpg-conditions.js"></script>
 <style>
 /* ═══ Marvel Multiverse RPG (d616) sheet ═══ Same skeleton + chrome as the other
    sheets (framed card + two-column body + tabs + sticky Roll Log). Accent Marvel red. */
@@ -437,27 +438,13 @@ var ABILITIES=[
   {key:'ego',name:'Ego',desc:'Magic & willpower'},
   {key:'logic',name:'Logic',desc:'Reason → telepathy'},
 ];
-var CONDITIONS=[
-  {name:'Ablaze',desc:'Lose 5 Health at the end of each of your turns until put out (Agility vs TN 10).'},
-  {name:'Asleep',desc:"Out cold — you can't take any actions, your defenses drop to 10, and Melee attacks automatically hit you.",src:'Avengers Expansion'},
-  {name:'Bleeding',desc:'Lose 5 Health at the end of each turn until stopped (Logic vs TN 10) or you recover any Health.'},
-  {name:'Blinded',desc:'Sight-based concentration powers end; speed halved; trouble on sight checks; enemies get an edge on you.'},
-  {name:'Corroding',desc:'Lose 5 Health at the end of each of your turns until the condition ends (e.g. washed off with water).',src:'X-Men Expansion'},
-  {name:'Deafened',desc:'Hearing-based concentration powers end; trouble on action checks that need hearing.'},
-  {name:'Demoralized',desc:'Your concentration powers end; you have trouble on all action checks.'},
-  {name:'Exhausted',desc:'Physically and mentally worn out — trouble on all action checks until you get a good night’s sleep.',src:'Spider-Verse Expansion'},
-  {name:'Frightened',desc:'Struck with fear: make Ego vs TN 13 or be paralyzed for a round; otherwise you must flee the source at top speed.',src:'Spider-Verse Expansion'},
-  {name:'Grabbed',desc:"You can't move (nor can the grabber, unless they carry you along)."},
-  {name:'Infected',desc:"Infected with a disease — resist with the infection's check (often Resilience vs TN 12); effects and cures vary.",src:'X-Men Expansion'},
-  {name:'Paralyzed',desc:"Can't move or take actions needing Melee or Agility; attackers get an edge."},
-  {name:'Pinned',desc:'Like Grabbed, plus trouble on Melee/Agility checks and no movement actions.'},
-  {name:'Poisoned',desc:'At the start of each turn make Resilience vs TN 18 (no action); on a fail lose 1 Health. A Fantastic success ends it.',src:'X-Men Expansion'},
-  {name:'Prone',desc:'On the ground: trouble on your ranged attacks; close attackers get an edge.'},
-  {name:'Shattered',desc:'Mentally broken — requires long-term care.'},
-  {name:'Stunned',desc:'Concentration powers end; you lose your next action; enemies get an edge.'},
-  {name:'Surprised',desc:"Can't act in the bonus round; attackers get an edge on you."},
-  {name:'Unconscious',desc:'Out cold — concentration powers end; helpless and unable to act.'},
-];
+// Conditions + their automation are data-driven: built from MMRPG_CONDITIONS
+// (data/mmrpg/parts/conditions.json → /tools-data/mmrpg-conditions.js). The
+// per-condition `mech` field feeds CONDMECH below, so the sheet and the reference
+// data can never drift apart. Falls back to an empty list if the global is absent.
+var CONDITIONS=(typeof MMRPG_CONDITIONS!=='undefined'?MMRPG_CONDITIONS:[]).map(function(c){
+  return {name:c.name, desc:c.description||'', src:c.source||''};
+});
 
 // ── State ──
 var S=null; var _lastRoll=null; var karmaArmed=false; var edges=0, troubles=0;
@@ -633,17 +620,11 @@ function rollDamage(key){
 // `disableAll` block those actions; `halveSpeed` halves movement. Effects that
 // only touch the ATTACKER's roll ("enemies get an edge on you") or are timing-
 // based (end-of-turn Health loss, "lose your next action") stay as chip notes.
-var CONDMECH={
-  'Blinded':{halveSpeed:true},
-  'Demoralized':{troubleAll:true},
-  'Exhausted':{troubleAll:true},
-  'Pinned':{trouble:['melee','agility']},
-  'Prone':{troubleAtk:['agility']},
-  'Paralyzed':{disable:['melee','agility']},
-  'Grabbed':{noMove:true},
-  'Asleep':{disableAll:true},
-  'Unconscious':{disableAll:true},
-};
+// Built from each condition's `mech` field in the data (see MMRPG_CONDITIONS).
+var CONDMECH=(function(){ var m={};
+  (typeof MMRPG_CONDITIONS!=='undefined'?MMRPG_CONDITIONS:[]).forEach(function(c){ if(c.mech) m[c.name]=c.mech; });
+  return m;
+})();
 function condOn(n){ return !!(S.conditions&&S.conditions[n]); }
 function activeConds(){ return CONDITIONS.filter(function(c){return condOn(c.name);}).map(function(c){return c.name;}); }
 // Extra trouble dice on a check (isAtk=true for an attack roll) from conditions.

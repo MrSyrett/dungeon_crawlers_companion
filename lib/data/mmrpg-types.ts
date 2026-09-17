@@ -41,11 +41,24 @@ export interface MmrpgTag {
   source?: string;
 }
 
+/** Automation hints the character sheet applies for a condition (mirrors the
+ *  sheet's CONDMECH). Ability keys are lowercase (melee/agility/…). */
+export interface MmrpgConditionMech {
+  halveSpeed?: boolean;
+  troubleAll?: boolean;
+  trouble?: string[];
+  troubleAtk?: string[];
+  disable?: string[];
+  disableAll?: boolean;
+  noMove?: boolean;
+}
 export interface MmrpgCondition {
   name: string;
   genre: MmrpgGenre;
   description: string;
   source?: string;
+  /** Present when the sheet auto-applies penalties for this condition. */
+  mech?: MmrpgConditionMech;
 }
 
 export interface MmrpgVehicle {
