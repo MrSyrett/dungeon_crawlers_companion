@@ -112,13 +112,28 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);min-h
 .abil-row .a-roll:hover{background:var(--mv-dk);}
 
 /* Vitals — bubble tiles (matching the other sheets' stat boxes) */
-.vitals{padding:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border-bottom:1px solid var(--rule);align-items:stretch;}
+.vitals{padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;border-bottom:1px solid var(--rule);align-items:stretch;}
+@media(max-width:560px){.vitals{grid-template-columns:1fr 1fr;}}
 .vital{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:7px 9px;display:flex;flex-direction:column;gap:3px;}
+/* Speed bubble — movement + initiative in one tile */
+.vital.speed{gap:2px;}
+.spd-lines{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin-top:1px;}
+.spd-lines .spd{display:flex;justify-content:space-between;align-items:baseline;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);}
+.spd-lines .spd b{font-family:'Share Tech Mono',monospace;font-size:14px;font-weight:700;color:var(--mv-dk);}
+.spd-lines .spd.init{grid-column:1 / -1;border-bottom:1px solid var(--rule);padding-bottom:2px;margin-bottom:1px;}
+/* Attacks / Damage section (above the tabs) */
+.dmg-wrap{padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;border-bottom:1px solid var(--rule);}
+@media(max-width:560px){.dmg-wrap{grid-template-columns:1fr 1fr;}}
+.dmg-cell{border:1px solid var(--rule);border-radius:8px;background:var(--box);padding:6px 7px;display:flex;flex-direction:column;gap:4px;text-align:center;}
+.dmg-cell .dmg-ab{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink);}
+.dmg-cell .dmg-val{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--mv-dk);}
+.dmg-cell .dmg-val small{color:var(--muted);font-size:10px;}
+.dmg-cell .w-roll{width:100%;}
 .vlbl{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:4px;}
 .vlbl small{font-weight:600;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:none;}
 .vbig{display:flex;align-items:center;gap:4px;}
-.vbig .v-step{width:22px;height:30px;border:1px solid var(--rule);background:var(--input-bg);border-radius:4px;cursor:pointer;font-weight:800;color:var(--ink);flex:0 0 auto;}
-.vbig .v-cur{width:52px;height:34px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:20px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
+.vbig .v-step{width:19px;height:30px;border:1px solid var(--rule);background:var(--input-bg);border-radius:4px;cursor:pointer;font-weight:800;color:var(--ink);flex:0 0 auto;}
+.vbig .v-cur{width:40px;min-width:0;flex:1;height:34px;border:1px solid var(--input-border);border-radius:4px;background:var(--input-bg);font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;text-align:center;color:var(--ink);outline:none;}
 .vbig .v-max{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--muted);white-space:nowrap;}
 .vital.health .v-cur{border-color:var(--red);}
 .vital.focus .v-cur{border-color:var(--blue);}
@@ -259,27 +274,33 @@ body.dark .sheet{border-color:#3a3d47;}
     <div class="center-col">
       <div class="section-bar accent"><span>Vitals</span><span class="hdr-right"><button class="hdr-btn" onclick="recover('health')" title="Resilience check vs 10 → regain Marvel die × rank">Recover Health</button><button class="hdr-btn" onclick="recover('focus')" title="Vigilance check vs 10 → regain Marvel die × rank">Recover Focus</button></span></div>
       <div class="vitals" id="vitals">
-        <div class="vital health">
-          <div class="vlbl"><span>Health</span><small>Res × 30</small></div>
-          <div class="vbig"><button class="v-step" onclick="bumpVital('health',-1)">−</button><input class="v-cur" id="v-health" type="number" value="0" oninput="S.health.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('health',1)">＋</button><span class="v-max">/ <b id="v-health-max">0</b></span></div>
-          <div class="vline">DR <input id="v-health-dr" type="number" value="0" oninput="S.healthDR=num(this.value);scheduleAutosave()"></div>
+        <div class="vital speed">
+          <div class="vlbl"><span>Speed</span><small>&amp; Initiative</small></div>
+          <div class="spd-lines" id="speed-lines"></div>
+        </div>
+        <div class="vital karma">
+          <div class="vlbl"><span>Karma</span><small>= Rank</small></div>
+          <div class="vbig"><button class="v-step" onclick="bumpVital('karma',-1)">−</button><input class="v-cur" id="v-karma" type="number" value="0" oninput="S.karma.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('karma',1)">＋</button><span class="v-max">/ <b id="v-karma-max">0</b></span></div>
         </div>
         <div class="vital focus">
           <div class="vlbl"><span>Focus</span><small>Vig × 30</small></div>
           <div class="vbig"><button class="v-step" onclick="bumpVital('focus',-1)">−</button><input class="v-cur" id="v-focus" type="number" value="0" oninput="S.focus.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('focus',1)">＋</button><span class="v-max">/ <b id="v-focus-max">0</b></span></div>
           <div class="vline">DR <input id="v-focus-dr" type="number" value="0" oninput="S.focusDR=num(this.value);scheduleAutosave()"></div>
         </div>
-        <div class="vital karma">
-          <div class="vlbl"><span>Karma</span><small>= Rank</small></div>
-          <div class="vbig"><button class="v-step" onclick="bumpVital('karma',-1)">−</button><input class="v-cur" id="v-karma" type="number" value="0" oninput="S.karma.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('karma',1)">＋</button><span class="v-max">/ <b id="v-karma-max">0</b></span></div>
+        <div class="vital health">
+          <div class="vlbl"><span>Health</span><small>Res × 30</small></div>
+          <div class="vbig"><button class="v-step" onclick="bumpVital('health',-1)">−</button><input class="v-cur" id="v-health" type="number" value="0" oninput="S.health.cur=num(this.value);scheduleAutosave()"><button class="v-step" onclick="bumpVital('health',1)">＋</button><span class="v-max">/ <b id="v-health-max">0</b></span></div>
+          <div class="vline">DR <input id="v-health-dr" type="number" value="0" oninput="S.healthDR=num(this.value);scheduleAutosave()"></div>
         </div>
       </div>
-      <div class="derived" id="derived"></div>
+
+      <div class="section-bar accent"><span>Attacks</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;">Marvel die × mult + ability</span></div>
+      <div class="dmg-wrap" id="dmg-wrap"></div>
 
       <div class="tabs-bar">
         <button class="tab-btn" data-tab="powers" onclick="setTab('powers')">Powers</button>
         <button class="tab-btn" data-tab="traits" onclick="setTab('traits')">Traits &amp; Tags</button>
-        <button class="tab-btn" data-tab="combat" onclick="setTab('combat')">Attacks</button>
+        <button class="tab-btn" data-tab="equipment" onclick="setTab('equipment')">Equipment</button>
         <button class="tab-btn" data-tab="bio" onclick="setTab('bio')">Bio</button>
       </div>
 
@@ -298,10 +319,10 @@ body.dark .sheet{border-color:#3a3d47;}
         <div id="tags-empty" class="tbl-empty">No tags yet. Tags describe who you are (Heroic gives you Karma).</div>
       </div>
 
-      <div class="tab-panel" id="tab-combat">
-        <div class="section-bar"><span>Attacks</span><span class="hdr-right"><button class="hdr-btn" onclick="addAttack()">＋ Add</button></span></div>
-        <table class="tbl" id="atk-tbl"><thead><tr><th style="width:30%;">Attack</th><th style="width:16%;">Ability</th><th style="width:16%;">Range</th><th>Notes</th><th style="width:80px;"></th></tr></thead><tbody id="atk-body"></tbody></table>
-        <div id="atk-empty" class="tbl-empty">No attacks yet. Add one — an attack rolls its ability vs the target's defense and deals Marvel die × damage multiplier + ability.</div>
+      <div class="tab-panel" id="tab-equipment">
+        <div class="section-bar"><span>Equipment &amp; Weapons</span><span class="hdr-right"><button class="hdr-btn" onclick="addAttack()">＋ Add</button></span></div>
+        <table class="tbl" id="atk-tbl"><thead><tr><th style="width:32%;">Item</th><th style="width:16%;">Attacks with</th><th style="width:16%;">Range</th><th>Notes</th><th style="width:80px;"></th></tr></thead><tbody id="atk-body"></tbody></table>
+        <div id="atk-empty" class="tbl-empty">No equipment yet. Add weapons or gear — a weapon rolls its ability and deals Marvel die × damage multiplier + ability.</div>
       </div>
 
       <div class="tab-panel" id="tab-bio">
@@ -418,7 +439,7 @@ function renderAbilities(){
 function setAbility(k,v){ S.abilities[k]=num(v);
   if(k==='resilience'){ S.health.max=healthMax(); if(S.health.cur<1||S.health.cur>S.health.max)S.health.cur=S.health.max; }
   if(k==='vigilance'){ S.focus.max=focusMax(); if(S.focus.cur<1||S.focus.cur>S.focus.max)S.focus.cur=S.focus.max; }
-  renderAbilities(); renderVitals(); renderDerived(); scheduleAutosave(); }
+  renderAbilities(); renderVitals(); renderDerived(); renderDamage(); scheduleAutosave(); }
 
 // ── Render: vitals + derived ──
 function renderVitals(){
@@ -429,11 +450,39 @@ function renderVitals(){
   var hd=$('v-health-dr'); if(hd)hd.value=num(S.healthDR); var fd=$('v-focus-dr'); if(fd)fd.value=num(S.focusDR);
 }
 function bumpVital(w,d){ var mx=(w==='health'?healthMax():w==='focus'?focusMax():karmaMax()); S[w].cur=clamp(num(S[w].cur)+d,0, w==='karma'?99:mx); renderVitals(); scheduleAutosave(); }
+function hasPower(re){ return (S.powers||[]).some(function(p){ return re.test(p.name||''); }); }
 function renderDerived(){
-  var host=$('derived'); if(!host)return;
-  var half=Math.floor(runSpeed()/2);
-  var items=[['Initiative',(ab('vigilance')>=0?'+':'')+ab('vigilance')],['Run',runSpeed()],['Climb/Swim',half],['Jump',half],['Dmg Mult','×'+dmgMult()],['Rank',rank()]];
-  host.innerHTML=items.map(function(it){ return '<div class="sbub"><div class="sbl">'+it[0]+'</div><div class="sbv">'+it[1]+'</div></div>'; }).join('');
+  var host=$('speed-lines'); if(!host)return;
+  var run=runSpeed(), half=Math.floor(run/2);
+  var init=(ab('vigilance')>=0?'+':'')+ab('vigilance');
+  var lines=[['init','Initiative',init],['','Run',run],['','Climb',half],['','Swim',half],['','Jump',half]];
+  if(hasPower(/\bFlight\b/i)) lines.push(['','Flight',run]);
+  if(hasPower(/\bWall\s*-?crawling\b/i)) lines.push(['','Climb',run]);
+  host.innerHTML=lines.map(function(l){ return '<div class="spd '+l[0]+'"><span>'+l[1]+'</span><b>'+l[2]+'</b></div>'; }).join('');
+}
+// ── Attacks / Damage: the four damage abilities (Melee, Agility, Ego, Logic) ──
+var DMG_ABILITIES=['melee','agility','ego','logic'];
+function renderDamage(){
+  var host=$('dmg-wrap'); if(!host)return;
+  host.innerHTML=DMG_ABILITIES.map(function(k){
+    var a=ABILITIES.find(function(x){return x.key===k;}); var sc=ab(k);
+    return '<div class="dmg-cell"><div class="dmg-ab">'+esc(a.name)+'</div>'
+      +'<div class="dmg-val">×'+dmgMult()+' <small>mult</small></div>'
+      +'<div class="dmg-val">'+(sc>=0?'+':'')+sc+' <small>bonus</small></div>'
+      +'<button class="w-roll" onclick="rollDamage(\''+k+'\')">Attack</button></div>';
+  }).join('');
+}
+function rollDamage(key){
+  var a=ABILITIES.find(function(x){return x.key===key;}); if(!a)return;
+  var mod=num($('tray-mod').value);
+  var usedK=consumeKarma(); if(usedK) edges+=1;
+  var r=roll616(); if(usedK) edges-=1;
+  var score=ab(key); var total=r.sum+score+mod;
+  var dmg=r.marvelVal*dmgMult()*(r.fantastic?2:1)+score;
+  var etTxt=(edges||troubles)?(' · '+(edges?edges+'E':'')+(troubles?troubles+'T':'')):'';
+  var detail=dieStr(r)+' '+r.sum+' +'+score+(mod?' '+(mod>0?'+':'')+mod:'')+etTxt+(usedK?' · Karma':'')+' · dmg '+r.marvelVal+'×'+dmgMult()+(r.fantastic?'×2':'')+' +'+score;
+  addLog(a.name+' Attack', (r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmg+' dmg', detail, r.fantastic?'crit':'normal');
+  edges=0;troubles=0;renderTray();$('tray-mod').value='0';
 }
 // ── Render: conditions (toggle chips) ──
 function renderConditions(){
@@ -569,7 +618,7 @@ function renderAttacks(){
   $('atk-empty').style.display=S.attacks.length?'none':'block';
 }
 function aEdit(i,f,v){ if(S.attacks[i]){ S.attacks[i][f]=v; scheduleAutosave(); } }
-function addAttack(){ S.attacks.push({name:'',ability:'melee',range:'',notes:''}); renderAttacks(); setTab('combat'); scheduleAutosave(); }
+function addAttack(){ S.attacks.push({name:'',ability:'melee',range:'',notes:''}); renderAttacks(); setTab('equipment'); scheduleAutosave(); }
 
 // ── Picker ──
 var _pk=null, _pkRows=[];
@@ -694,7 +743,7 @@ function renderAll(){
   $('f-history').value=S.history||''; $('f-personality').value=S.personality||''; $('f-features').value=S.features||''; $('f-base').value=S.base||''; $('f-notes').value=S.notes||'';
   fillHeaderSelects(); $('f-origin').value=S.origin||''; $('f-occupation').value=S.occupation||'';
   if(!S.health.max)S.health.max=healthMax(); if(!S.focus.max)S.focus.max=focusMax();
-  renderAbilities(); renderVitals(); renderDerived(); renderConditions(); renderPowers(); renderTraitsTags(); renderAttacks(); renderTray(); updateFoot(); refreshWizardButtons();
+  renderAbilities(); renderVitals(); renderDerived(); renderConditions(); renderPowers(); renderTraitsTags(); renderAttacks(); renderDamage(); renderTray(); updateFoot(); refreshWizardButtons();
 }
 function updateFoot(){ var f=$('foot-build'); if(f) f.textContent='Rank '+rank(); }
 function saveSheet(quiet){
@@ -719,7 +768,7 @@ function scheduleAutosave(){ if(!_pageReady)return; if(_autoSaveTimer)clearTimeo
 window.scheduleAutosave=scheduleAutosave;
 $('f-name').addEventListener('input',function(){ if(window.__ddSaveTitle)try{ window.__ddSaveTitle(($('f-name').value||'').trim()); }catch(e){} refreshWizardButtons(); });
 ['f-real','f-pronouns','f-teams','f-history','f-personality','f-features','f-base','f-notes'].forEach(function(id){ $(id).addEventListener('input',scheduleAutosave); });
-$('f-rank').addEventListener('change',function(){ S.rank=num(this.value)||1; renderVitals(); renderDerived(); updateFoot(); scheduleAutosave(); });
+$('f-rank').addEventListener('change',function(){ S.rank=num(this.value)||1; renderVitals(); renderDerived(); renderDamage(); updateFoot(); scheduleAutosave(); });
 $('f-size').addEventListener('change',function(){ S.size=this.value; renderDerived(); scheduleAutosave(); });
 $('f-origin').addEventListener('change',function(){ S.origin=this.value; scheduleAutosave(); });
 $('f-occupation').addEventListener('change',function(){ S.occupation=this.value; scheduleAutosave(); });
