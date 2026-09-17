@@ -8,9 +8,21 @@ const MMRPG_TAGS = [
     "description": "The character possesses an artificial intelligence in a computerized mind. Their digital nature means that copies or backups can be made of their mind and can even be transferred into other compatible forms."
   },
   {
+    "name": "Ageless",
+    "genre": "core",
+    "description": "The character does not age after becoming an adult. They are immune to any effects that would cause them to age.",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Alien Heritage",
     "genre": "core",
     "description": "The character—or at least one of their ancestors—is not from Earth. Pick an alien race that they belong to. If they were not raised on Earth, they should consider taking the Outsider occupation."
+  },
+  {
+    "name": "Allspeak",
+    "genre": "core",
+    "description": "The character can communicate verbally with anyone else. They can understand any spoken language, and when they speak, everyone who hears them believes them to be speaking in the listener’s native tongue.",
+    "source": "Avengers Expansion"
   },
   {
     "name": "Alternate Form",
@@ -21,6 +33,12 @@ const MMRPG_TAGS = [
     "name": "Amphibious",
     "genre": "core",
     "description": "The character can breathe just fine underwater and can see and hear well in it too."
+  },
+  {
+    "name": "Arakkii",
+    "genre": "core",
+    "description": "The character hails from Arakko, which was once part of the same island as Krakoa before it was severed and sent into the dark dimension of Amenth. Arakko has since returned to the regular world and been transplanted onto a terra formed Mars. Arakkii society emphasizes independence. Arakkii do not accept help from others and often settle disputes by means of formal duels. They refuse to allow the Five to resurrect them. Restriction: For mutants only.",
+    "source": "X-Men Expansion"
   },
   {
     "name": "Auditory Issues",
@@ -48,6 +66,12 @@ const MMRPG_TAGS = [
     "description": "The character has been affected by the chaos lord Chthon."
   },
   {
+    "name": "Clone",
+    "genre": "core",
+    "description": "The character is a clone of another character. See the Clones section starting on p. 118 for more on how this may affect them.",
+    "source": "Spider-Verse Expansion"
+  },
+  {
     "name": "Convict",
     "genre": "core",
     "description": "The character has been convicted of a crime, which is reflected on their record."
@@ -68,6 +92,12 @@ const MMRPG_TAGS = [
     "description": "The character has young children, elderly relatives or others who rely on them. They can’t just abandon these people and must check on them and help care for them on a regular basis."
   },
   {
+    "name": "Early Bloomer",
+    "genre": "core",
+    "description": "The character is a rare kind of throwback mutant who gained their powers at birth. In most cases, this means their parents hid their powers as long as they could—or that the authorities took charge of them early on, supposedly for everyone’s protection. Art by David Lopez",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Enemy",
     "genre": "core",
     "description": "There’s someone out there who has sworn to defeat the character. The enemy is of at least the same rank as the character and is obsessed with bringing them down. This tag can be taken multiple times, but it should be reserved for truly obsessed foes."
@@ -76,6 +106,12 @@ const MMRPG_TAGS = [
     "name": "Eternally Immortal",
     "genre": "core",
     "description": "The character does not age and could theoretically live forever. If the character is killed, they can be brought back to life in the Activation Chamber found in the Exclusion, an Eternal base located beneath the South Pole. To make this happen, the Activation Chamber sacrifices the life of a random human anywhere on Earth. Restriction: For Eternals only."
+  },
+  {
+    "name": "Externally Immortal",
+    "genre": "core",
+    "description": "The character is nearly impossible to permanently kill. If they die, they are either revived somehow or reincarnated with their full memories, and then they age quickly till they reach the age of their first death, at which point they stop aging at all. The only way for an External to permanently die is for another External to kill all the others within a certain period of time and either drain their life energies or eat their hearts, which grants the killer the victim’s powers. Otherwise, they come back again. Restriction: For Externals only.",
+    "source": "X-Men Expansion"
   },
   {
     "name": "Extreme Appearance",
@@ -148,9 +184,33 @@ const MMRPG_TAGS = [
     "description": "The character lives for so long that their accumulated memories have the potential to drive them insane. The only cure for this condition is to die and then be reborn with a restoration of their mind from a clean backup. This happens rarely, but the disease can progress quickly once it starts. Restriction: For Eternals only."
   },
   {
+    "name": "Media Awareness",
+    "genre": "core",
+    "description": "The character is aware (or simply believes) that they are actually a character in some kind of consumable media, like a book, comic, movie, cartoon, video game or even a tabletop game. They understand the tropes of that medium and can comment on it and address the consumers of that media. However, they oŽ en keep such comments to themselves, as doing so makes them seem insane to those around them who do not have this tag.",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Mental Health Conditions",
+    "genre": "core",
+    "description": "The character has mental health conditions. These might include anxiety, depression, dissociative identity disorder or other conditions.",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Mentor",
     "genre": "core",
     "description": "The character knows an older person they can ask for advice, even when it comes to having super-powers. This tag can be selected multiple times."
+  },
+  {
+    "name": "Mobility Issues",
+    "genre": "core",
+    "description": "The character has mobility issues. This can range from using a cane to using a wheelchair.",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Mutant Associate",
+    "genre": "core",
+    "description": "Much of the public believes—or has believed—the character to be a mutant. While this isn’t technically true, the character is lumped in with other mutants in most people’s minds. Restriction: For non-mutants or those with the Mutant: Artificial origin.",
+    "source": "X-Men Expansion"
   },
   {
     "name": "Mute",
@@ -166,6 +226,12 @@ const MMRPG_TAGS = [
     "name": "Obligation",
     "genre": "core",
     "description": "The character is responsible to certain people, places or organizations who rely on them. This tag can be selected multiple times, using many different categories. These include family, school, society, sports, work and so on."
+  },
+  {
+    "name": "Patron",
+    "genre": "core",
+    "description": "The character has a wealthy benefactor they can ask to purchase them anything within reason. The patron could be an individual, an organization or even a government. The character’s access to the resources the patron provides depends on their relationship with the patron. If they anger or embarrass their patron, they might be cut off and have to remove this tag. This is similar to the Rich tag, but the character is relying on someone else’s wealth. One example of this happened recently when Peter Parker worked for a repentant Norman Osborn. Parker had access to Osborn’s resources while he continued to work with him.",
+    "source": "Spider-Verse Expansion"
   },
   {
     "name": "Poor",
@@ -193,9 +259,21 @@ const MMRPG_TAGS = [
     "description": "The character has access to plenty of money. If they want something normally and legally available to people, they can simply buy it."
   },
   {
+    "name": "Secondary Mutation",
+    "genre": "core",
+    "description": "In rare cases, a mutant can experience a secondary mutation at some point after their original mutation. A good example is Emma Frost, who started out as a fairly straightforward telepath but later gained a secondary mutation that allowed her to turn into living diamond. This is not a new origin but a new tag that serves as an extension of the regular Mutant origin. Only characters with the Mutant origin can have a secondary mutation. If a character has this tag, it means that they once had a lower rank cap and broke through it. For example, they might have been at Rank 3 for years and then gained a secondary mutation that let them eventually rise to Rank 5. When an existing character gains this tag, they advance to the next rank. Thus, a character can take it only after they’ve had enough adventures that they would normally be able to rank up but cannot because of their rank cap. Taking this tag means they can add a single rank, and if their new rank cap allows further growth, they can play to gain more ranks as normal. If the player of an existing character wants to take this tag for their character, they should talk to their Narrator about the rank cap. This should cover: • The character’s current rank cap and the reasons it was chosen. • The ranks and rank caps of the other characters on the team. • What the new rank cap should be. Alternatively, the Narrator can suggest the Secondary Mutation tag to one or more players. If the Narrator wants to expand the horizons for the team’s adventures, they might propose this to help ensure that the characters are powerful enough to meet the new challenges the game has in store for them. Sometimes this is as simple as allowing the character to reach the same ranks as others on the team who are of a higher rank. Initially, the player might have thought it would be fun to play at a lower rank (like Hawkeye on the Avengers) but now wants their character to be on a more equal footing with their teammates. However, if the player wants their character to reach a higher rank than the rest of the team, that could cause friction. In such cases, it’s best to include the entire team in the conversation to make sure that everyone is comfortable with the decision. Otherwise, the characters can find themselves in a race to reach Rank 6. That’sfine if that’s what everyone wants, but it can change the nature of the game and the challenges the characters face in their adventures. Restriction: For mutants only.",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Secret Identity",
     "genre": "core",
     "description": "The character’s real identity is a secret to the public, and they must take precautions to maintain this status. This might help keep the people they care about safe from their enemies, but it can also cause strain in those same relationships."
+  },
+  {
+    "name": "Signature Item",
+    "genre": "core",
+    "description": "This is a broader form of the Signature Weapon tag. The character is known for owning and using a specific kind of item. This can be a weapon (like Hawkeye’s bow or Elektra’s sai), a vehicle (like the motorcycle of Ghost Rider [Johnny Blaze]) or anything else. This tag can be taken more than once, but each time must be with a different item.",
+    "source": "Avengers Expansion"
   },
   {
     "name": "Signature Weapon",
@@ -231,6 +309,12 @@ const MMRPG_TAGS = [
     "name": "Worshipped",
     "genre": "core",
     "description": "The character is worshipped by others as a god."
+  },
+  {
+    "name": "Worthy",
+    "genre": "core",
+    "description": "The character is deemed worthy of using a particular iconic item. The criteria for being worthy of a particular item is imbued in it by its creator, and it’s always up to the Narrator to determine if a character is actually worthy at any given moment. When taking this tag, the character should also name the iconic item to which it applies. For example, Worthy (Mjolnir). Characters who have yet to encounter a particular iconic item might not have this tag when they do, but that doesn’t mean they’re not worthy of using it. It’s up to the Narrator to judge if the character meets the criteria for worthiness. If so, the character then gains this tag for that item.",
+    "source": "Avengers Expansion"
   },
   {
     "name": "X-Gene",

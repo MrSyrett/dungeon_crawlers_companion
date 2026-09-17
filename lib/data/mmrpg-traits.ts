@@ -100,6 +100,12 @@ export const MMRPG_TRAITS = [
     "description": "The character is stronger than regular humans. Treat them as one size bigger for lifting, carrying, swinging and throwing things. (This does not stack with other factors.) They also have an Edge on Melee non-combat checks."
   },
   {
+    "name": "External Awareness",
+    "genre": "core",
+    "description": "The character has a telepathic link with all other Externals. This allows them to: • Know where other Externals are. • Know when other Externals are first killed. • Know when an External kills another External. • Telepathically call for other Externals. Restriction: For Externals only.",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Extra Occupation",
     "genre": "core",
     "description": "The character has a busy life and has done all sorts of things. They can choose another occupation."
@@ -140,6 +146,12 @@ export const MMRPG_TRAITS = [
     "description": "The character has their own way of doing things. This often makes them seem strange to those around them, but it means they can bring new perspectives to existing issues. They have an edge on Logic checks when faced with something for the first time."
   },
   {
+    "name": "From Range",
+    "genre": "core",
+    "description": "The character can increase the range of one of their powers from reach to 10 spaces. When the power is used on a target beyond the character’s reach, the character must make an Agility check against the target’s Agility defense. Additionally, if the power normally does Melee damage, it instead does Agility damage when used on such a target. If the target is an ally, the ally can lower the target number for the check to 10. This trait cannot be applied to powers that affect multiple targets.",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Gearhead",
     "genre": "core",
     "description": "The character knows their way around machines. They have an edge on Logic checks to figure out how any machine works."
@@ -160,9 +172,27 @@ export const MMRPG_TRAITS = [
     "description": "The character is easy to fool. People lying to them have an edge on their Ego checks to persuade the character of something."
   },
   {
+    "name": "Hard to Kill",
+    "genre": "core",
+    "description": "The character is immune to most Health damage. However, any damage that is done to them by a Fantastic result is permanent, representing a catastrophic injury of some sort. When they reach 0 Health, they do not fall unconscious. Instead, they become immobilized—unable to physically move without some kind of assistance. Restriction: To take this trait, the character must also have the Deceased trait. If they have the Healing Factor power already, they lose it.",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Hive Mind",
+    "genre": "core",
+    "description": "The character has some independence but is connected to others of their kind by a telepathic network with an unlimited range and an unlimited number of members. When given orders by the leader of that network, the character must make an Ego vs. TN 18 action check or follow those orders. On a Fantastic success, the character can choose to permanently break free from the network. Restriction: For Brood only.",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Honest",
     "genre": "core",
     "description": "The character is a terrible liar. They have trouble any time they make an Ego check that involves telling a lie. However, they have an edge on any friendly Ego (persuasion) checks in which they’re truthful."
+  },
+  {
+    "name": "Infector",
+    "genre": "core",
+    "description": "The character can infect a target with a disease, which must be chosen along with the trait. Examples include: • Brood implantation • Techno-Organic virus • Transmode virus See the infected condition (p. 139) for details about how infection works, and the Infections and Possessions section (p. 146) for the effects of the above diseases.",
+    "source": "X-Men Expansion"
   },
   {
     "name": "Interrogation",
@@ -198,6 +228,12 @@ export const MMRPG_TRAITS = [
     "name": "Loner",
     "genre": "core",
     "description": "The character does not play well with others. They cannot be given an edge via assistance by someone who is not a teammate."
+  },
+  {
+    "name": "Magic Item Reliance",
+    "genre": "core",
+    "description": "The character relies on a magically empowered item for some or all of their powers. When they take Health damage that would render them unconscious, they can instead choose to lose all of their magic-item–related powers and remain conscious with 1 point of Health left. Similarly, if they take Focus damage that would render them demoralized, they can instead choose to lose all of their magic-item–related powers and have 1 point of Focus left. Magic items are notoriously difficult to destroy. They cannot be harmed by most attacks. However, they can be taken away or lost. Many characters would go to great lengths to recover the magic items that grant them powers.",
+    "source": "X-Men Expansion"
   },
   {
     "name": "Monster",
@@ -275,9 +311,39 @@ export const MMRPG_TRAITS = [
     "description": "The character can choose a power they normally wouldn’t be able to use. The character will still need to have any prerequisite powers, but they can ignore rank and origin requirements. This trait can be selected multiple times."
   },
   {
+    "name": "Suspicious",
+    "genre": "core",
+    "description": "The character is naturally suspicious of people who are hiding something. When someone with a secret identity makes a Logic check to try to convince the character that they’re mistaken about the secret identity, the character gives them trouble.",
+    "source": "Spider-Verse Expansion"
+  },
+  {
+    "name": "Symbiotic Spider-Blinder",
+    "genre": "core",
+    "description": "While the character is bonded to a symbiote, they cannot be detected by the Spider-Sense of any character who was previously bonded to the same symbiote. This effect is passed on to the symbiote’s offspring as well. The reason is that Spider-Sense detects the previously bonded symbiote as part of itself and thus not a threat. As such, the affected character does not gain an edge on Vigilance checks to perceive danger from such a symbiote. Nor do such symbiotes have trouble on Agility checks against the character’s Vigilance defense. Example: Because Spider-Man (Peter Parker) was once bonded to the Venom symbiote, his Spider-Sense cannot detect the Venom symbiote or anyone bonded with it. This also applies to all of Venom’s offspring, like Carnage, Sleeper and so on.",
+    "source": "Spider-Verse Expansion"
+  },
+  {
     "name": "Tech Reliance",
     "genre": "core",
     "description": "The character relies on technology for powers. When they take damage that would render them unconscious, they can instead choose to lose all of their technology-related powers and remain conscious with 1 point of Health remaining. Assuming the character has access to parts and tools, lost powers can be repaired after a battle."
+  },
+  {
+    "name": "The Hunger",
+    "genre": "core",
+    "description": "For each hour that the zombie goes without eating living flesh, the zombie must make an Ego attack roll against themself, ignoring any Focus damage reduction. When the zombie’s Focus is reduced to 0, they must then make a Vigilance check against TN 25 each hour or go mad with hunger. A zombie mad with hunger must do anything it can to find and consume livingflesh—ideally human. Once they do, they bring their Focus back up to full, they regain control of themselves, and the cycle starts all over again. If the character can be kept from feeding on what they desire for about two weeks, the cravings that the Hunger induces disappear, along with the Bloodthirsty trait. This leaves the character undead but in no danger of losing their mind to the disease once again—unless they somehow indulge in their horrible fixation once more. Restriction: To take this trait, the character must have been infected with the Hunger virus and become a zombie.",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Unusual Size",
+    "genre": "core",
+    "description": "The character’s regular size is beyond those for small, average or big, as shown on the Resize Effects table (see p. 73 of the Core Rulebook). When picking this trait, the player must choose the character’s size: microscopic, miniature, tiny, little, huge, gigantic, titanic or gargantuan. Apply the modifiers listed on the Resize Effects table, just as if the character had grown or shrunk to that size, but permanently. The one exception is a character’s Flight Speed. If they are microscopic, miniature, tiny or little, calculate their Flight Speed as if they were small-sized. If they are huge, gigantic, titanic or gargantuan, calculate their Flight Speed as if they were big-sized.",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Venomous",
+    "genre": "core",
+    "description": "When the character uses sharp Melee Weapons powers and gets a Fantastic success, they have the option of causing a target to be poisoned rather than bleeding.",
+    "source": "X-Men Expansion"
   },
   {
     "name": "Weakness",

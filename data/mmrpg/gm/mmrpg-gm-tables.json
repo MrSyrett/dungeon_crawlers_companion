@@ -1,0 +1,444 @@
+{
+ "encounters": [
+  {
+   "title": "Krakoa Encounters",
+   "rows": [
+    {
+     "roll": 1,
+     "result": "A squad of Sentinels attack Krakoa to test the nation’s defenses. There’s one for each character on the team. They fly in from the coast and start blasting away."
+    },
+    {
+     "roll": 2,
+     "result": "A group of former villain mutants are drunk down at the Green Lagoon again. There’s one of them for each character on the team. They look at Krakoan resurrection protocols as a license to let loose with fatal attacks."
+    },
+    {
+     "roll": 3,
+     "result": "A Krakoan gateway the team has never seen before appears, and the field inside the frameflickers as if to beckon the heroes. Does Krakoa want the heroes to go someplace to help someone, or is this a trap planted here by someone else (likely Mister Sinister)?"
+    },
+    {
+     "roll": 4,
+     "result": "An Arakkii mutant approaches one of the heroes and challenges them to a duel over a matter of honor that they refuse to explain. If the hero does not rise to the challenge, the angry mutant calls them a coward and attacks."
+    },
+    {
+     "roll": 5,
+     "result": "A group of wealthy thrill-seekers parachute onto Krakoa, depending on the law against killing humans to protect them. Use the Hydra Agent profile from the Core Rulebook for them. They broadcast the entire incident live via social media. The heroes must find and capture them and then escort them off the island in an emphatic but kind way."
+    },
+    {
+     "roll": 6,
+     "result": "A mutant the X-Men didn’t accept on to the team accosts one of the heroes and tries to beat them in a fair fight, hoping that this can finally prove that they would have been the better choice for the team."
+    }
+   ],
+   "source": "X-Men Expansion",
+   "die": "d6",
+   "kind": "encounter"
+  },
+  {
+   "title": "New York City Encounters",
+   "rows": [
+    {
+     "roll": 1,
+     "result": "A group of super villains decide that taking down a team of mutants would establish them as people to be feared. During a quiet moment, they charge at the heroes and attack. There’s one of them at an equal rank for each character on the team."
+    },
+    {
+     "roll": 2,
+     "result": "A self-proclaimed citizen journalist spots the team and begins recording them with a phone. They loudly judge the team’s every move, and at the slightest provocation they call 9-1-1 and claim that they are being attacked by evil mutants."
+    },
+    {
+     "roll": 3,
+     "result": "A young mutant shows up at the team’s headquarters, looking for sanctuary, but a group of anti-mutant protesters grab the teenager, claiming that they are going to take the mutant to a doctor for a cure."
+    },
+    {
+     "roll": 4,
+     "result": "A group of disaffected Hellfire Club guards (use the Hydra Agent profile) attack the team. There’s one for every hero. Perhaps they’re still working for Sebastian Shaw, but they claim they’re just angry about being kept offKrakoa."
+    },
+    {
+     "roll": 5,
+     "result": "Cerebro has detected a new mutant somewhere in New York City. It’s up to the heroes to track them down and offer them safe haven. Unfortunately, the mutant’s powers have attracted a lot of unwanted attention already."
+    },
+    {
+     "roll": 6,
+     "result": "A building is on fire, and there are people trapped on the upper floors. This is a chance for the X-Men to save the day and show the world how helpful mutants can be."
+    }
+   ],
+   "source": "X-Men Expansion",
+   "die": "d6",
+   "kind": "encounter"
+  },
+  {
+   "title": "Mutant School Encounters",
+   "rows": [
+    {
+     "roll": 1,
+     "result": "A Sentinel comes crashing into the school, right through the roof. It was after someone on the faculty, but now that it’s found the school, it is content with attacking any other mutants it finds, no matter their age."
+    },
+    {
+     "roll": 2,
+     "result": "A group of bullies spy the students and decide to give them a hard time. If this is at the school, they can be fellow students or visitors. Outside the school, they’re regular bullies looking for someone strange to pick on."
+    },
+    {
+     "roll": 3,
+     "result": "Surprise attack! One of the faculty members leaps out of nowhere and attacks the students. They should always be prepared for such things, and this is (probably) only a test."
+    },
+    {
+     "roll": 4,
+     "result": "Outsider alert! Someone from outside the school is here to visit, and all students have to be on their best behavior so the visitor doesn’t realize that there’s something odd about this place."
+    },
+    {
+     "roll": 5,
+     "result": "A young new student arrives at the school and starts lashing out with their powers right away. Create a random Rank 1 mutant and have them begin causing trouble."
+    },
+    {
+     "roll": 6,
+     "result": "Training time! The students get thrown into a training session—even the Danger Room, if it’s accessible—and must see which of them can last the longest."
+    }
+   ],
+   "source": "X-Men Expansion",
+   "die": "d6",
+   "kind": "encounter"
+  },
+  {
+   "title": "Empire State University Encounters",
+   "rows": [
+    {
+     "roll": 1,
+     "result": "A symbiote has gotten loose from a lab in which it was being studied, and it tries to latch onto one of the heroes."
+    },
+    {
+     "roll": 2,
+     "result": "An anti-symbiote march is storming into campus, trying to start a fight with students holding a rally in support of the supposedly innocent symbiotes le behind a er the death of Knull."
+    },
+    {
+     "roll": 3,
+     "result": "An experiment has gone wrong in one of the research buildings, spilling poison into the place. There’s one person trapped inside for each hero to rescue."
+    },
+    {
+     "roll": 4,
+     "result": "A pair of identical students stumble out of a local coffee shop, groggy and confused. They both claim that the other one must be a clone."
+    },
+    {
+     "roll": 5,
+     "result": "One of the heroes’ friends spots them crossing campus in their super-hero identity."
+    },
+    {
+     "roll": 6,
+     "result": "Someone discovers one of the heroes’ hidden stash of street clothes."
+    }
+   ],
+   "source": "Spider-Verse Expansion",
+   "die": "d6",
+   "kind": "encounter"
+  },
+  {
+   "title": "New York City Encounters",
+   "rows": [
+    {
+     "roll": 1,
+     "result": "A group of super villains decides that taking down some heroes would boost their reputation. During a quiet moment, they charge at the heroes and attack. There’s one of them at an equal rank for each character on the team."
+    },
+    {
+     "roll": 2,
+     "result": "A group of bank robbers—one for each player—is racing down the street in a getaway car. The heroes need to stop them without anyone (besides the robbers) getting hurt."
+    },
+    {
+     "roll": 3,
+     "result": "A group of super villains spills out of the Bar With No Name,* drunk and disorderly, and they wander off looking for trouble. That’s when the heroes find them. There’s one of an equal rank for each hero, but the villains have trouble on all actions."
+    },
+    {
+     "roll": 4,
+     "result": "A building is on fire! There’s one person trapped inside for each hero to rescue."
+    },
+    {
+     "roll": 5,
+     "result": "A gang fight is about to break out in the middle of the street, with three gangsters for each hero."
+    },
+    {
+     "roll": 6,
+     "result": "Someone just toppled off a skyscraper. Catch them before they hit the ground!"
+    }
+   ],
+   "source": "Spider-Verse Expansion",
+   "die": "d6",
+   "kind": "encounter"
+  },
+  {
+   "title": "Multiversal Encounters",
+   "rows": [
+    {
+     "roll": 1,
+     "result": "Evil versions of the heroes appear from a portal and attack!"
+    },
+    {
+     "roll": 2,
+     "result": "The heroes encounter a group of alternate versions of villains (one for each player) who are gender-flipped."
+    },
+    {
+     "roll": 3,
+     "result": "The heroes run into a group of alternate versions of heroes (one for each player) who are morality-flipped."
+    },
+    {
+     "roll": 4,
+     "result": "A cartoon version of one of the heroes shows up to say hello."
+    },
+    {
+     "roll": 5,
+     "result": "The heroes run into a group of alternate versions of villains (one for each player) who are morality- flipped and think the heroes are villains from their universe."
+    },
+    {
+     "roll": 6,
+     "result": "Super-powered versions of the heroes’ closest non-powered friends arrive."
+    }
+   ],
+   "source": "Spider-Verse Expansion",
+   "die": "d6",
+   "kind": "encounter"
+  },
+  {
+   "title": "New York City Encounters",
+   "rows": [
+    {
+     "roll": 1,
+     "result": "Aliens land in Central Park and demand to speak to the leader of the planet—and they believe the leader of the Avengers to be the correct person to deal with."
+    },
+    {
+     "roll": 2,
+     "result": "A gang of crooks (two for each hero) dressed in body armor painted to look like Iron Man’s—but without any power—are attacking people in Times Square."
+    },
+    {
+     "roll": 3,
+     "result": "A force of A.I.M. agents (four for each hero) storms Washington Square Park to disrupt the chess games going on there. M.O.D.O.K. wants to play but doesn’t want any serious challengers around when he arrives."
+    },
+    {
+     "roll": 4,
+     "result": "A group of Skrulls (one for each hero) is lurking around the Port Authority, mugging new arrivals to the city, dumping them in nearby alleys and assuming their identities."
+    },
+    {
+     "roll": 5,
+     "result": "A gang of Hydra agents (four for each hero) hijacks the Staten Island Ferry and attempts to flee with it to the open sea with the morning commuters still aboard."
+    },
+    {
+     "roll": 6,
+     "result": "A group of hungry vampires (two for each hero) attacks a trendy nightclub in the East Village."
+    }
+   ],
+   "source": "Avengers Expansion",
+   "die": "d6",
+   "kind": "encounter"
+  },
+  {
+   "title": "West Coast Encounters",
+   "rows": [
+    {
+     "roll": 1,
+     "result": "A team of Skrulls (two for each hero) has invaded Disneyland, posing as cast members."
+    },
+    {
+     "roll": 2,
+     "result": "A group of A.I.M. agents (two for each hero) has taken over NASA’s Jet Propulsion Laboratory in an effort to escape the planet before M.O.D.O.K. discovers they’ve failed their most recent assignment."
+    },
+    {
+     "roll": 3,
+     "result": "Late one night, a gang of Hand ninja (four for each hero) takes over the Ferris wheel at the Santa Monica pier and attempts to roll it into the Pacific Ocean."
+    },
+    {
+     "roll": 4,
+     "result": "Afire has broken out near the La Brea Tar Pits, apparently set by Hydra agents (two for each hero) armed withflamethrowers."
+    },
+    {
+     "roll": 5,
+     "result": "A band of time-lost barbarians (one for each hero) from the distant past runs rampant through West Hollywood, drinking their fill at the bars and threatening to kill any who try to spoil their fun."
+    },
+    {
+     "roll": 6,
+     "result": "A team of disillusioned former S.H.I.E.L.D. agents (four for each hero) takes over the Diablo Canyon Power Plant (the last nuclear power facility in California), hoping to gain super-powers or die trying."
+    }
+   ],
+   "source": "Avengers Expansion",
+   "die": "d6",
+   "kind": "encounter"
+  }
+ ],
+ "dangerRoom": {
+  "source": "X-Men Expansion",
+  "tnByRank": {
+   "formula": "Challenging TN = 10 + rank",
+   "rows": [
+    {
+     "rank": 1,
+     "tn": 11
+    },
+    {
+     "rank": 2,
+     "tn": 12
+    },
+    {
+     "rank": 3,
+     "tn": 13
+    },
+    {
+     "rank": 4,
+     "tn": 14
+    },
+    {
+     "rank": 5,
+     "tn": 15
+    },
+    {
+     "rank": 6,
+     "tn": 16
+    }
+   ]
+  },
+  "tnModifiers": [
+   {
+    "adjective": "Trivial",
+    "mod": -6
+   },
+   {
+    "adjective": "Easy",
+    "mod": -4
+   },
+   {
+    "adjective": "Routine",
+    "mod": -2
+   },
+   {
+    "adjective": "Challenging",
+    "mod": 0
+   },
+   {
+    "adjective": "Difficult",
+    "mod": 2
+   },
+   {
+    "adjective": "Ridiculous",
+    "mod": 4
+   },
+   {
+    "adjective": "Absurd",
+    "mod": 6
+   }
+  ],
+  "tables": [
+   {
+    "title": "Random Danger Room Setting",
+    "die": "d6",
+    "rows": [
+     {
+      "roll": 1,
+      "result": "The Arena, Krakoa"
+     },
+     {
+      "roll": 2,
+      "result": "Central Park, New York City"
+     },
+     {
+      "roll": 3,
+      "result": "Lowtown, Madripoor"
+     },
+     {
+      "roll": 4,
+      "result": "Circle Perilous, Arakko"
+     },
+     {
+      "roll": 5,
+      "result": "Utopia"
+     },
+     {
+      "roll": 6,
+      "result": "Genosha/Necrosha* (Genosha if the setting TN is Challenging or below; Necrosha if Difficult or above)"
+     }
+    ]
+   },
+   {
+    "title": "Random Danger Room Threats",
+    "die": "d6",
+    "rows": [
+     {
+      "roll": 1,
+      "result": "Missile attack"
+     },
+     {
+      "roll": 2,
+      "result": "Hydraulic press"
+     },
+     {
+      "roll": 3,
+      "result": "Tangling net"
+     },
+     {
+      "roll": 4,
+      "result": "Close attack"
+     },
+     {
+      "roll": 5,
+      "result": "Ranged attack"
+     },
+     {
+      "roll": 6,
+      "result": "Environment change"
+     }
+    ]
+   },
+   {
+    "title": "Random Danger Room Environment (Modern)",
+    "die": "d6",
+    "rows": [
+     {
+      "roll": 1,
+      "result": "Standard (no effect)."
+     },
+     {
+      "roll": 2,
+      "result": "Foggy. Blocks sight beyond 10 spaces."
+     },
+     {
+      "roll": 3,
+      "result": "Storming. Ranges and speeds cut in half."
+     },
+     {
+      "roll": 4,
+      "result": "Windy. Ranged attacks have trouble, and characters cannot fly or swingline."
+     },
+     {
+      "roll": 5,
+      "result": "Kaleidoscopic flashing. All Focus costs for powers are doubled."
+     },
+     {
+      "roll": 6,
+      "result": "Lights out. Characters are blinded, but the Danger Room is not."
+     }
+    ]
+   },
+   {
+    "title": "Random Danger Room Environment (Classic)",
+    "die": "d6",
+    "rows": [
+     {
+      "roll": 1,
+      "result": "Standard (no effect)."
+     },
+     {
+      "roll": 2,
+      "result": "Roof lowers. Characters cannot fly."
+     },
+     {
+      "roll": 3,
+      "result": "Walls close in. Close attacks have trouble in such tight quarters."
+     },
+     {
+      "roll": 4,
+      "result": "Giant fan blows. Ranged attacks have trouble."
+     },
+     {
+      "roll": 5,
+      "result": "Sonic disruption. All Focus costs for powers are doubled."
+     },
+     {
+      "roll": 6,
+      "result": "Lights out. Characters are blinded, but the Danger Room is not."
+     }
+    ]
+   }
+  ]
+ }
+}

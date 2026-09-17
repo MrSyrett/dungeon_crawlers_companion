@@ -23,8 +23,9 @@ def is_set_header(t):
 
 def center(w): return (w['x0']+w['x1'])/2
 
-def parse_page(pg):
-    W=pg.extract_words(x_tolerance=1.5,y_tolerance=2,extra_attrs=['size'])
+def parse_page(pg, W=None):
+    if W is None:
+        W=pg.extract_words(x_tolerance=1.5,y_tolerance=2,extra_attrs=['size'])
     lab={w['text']:w for w in W if w['text'] in LABELS}
     if len(lab)<6: return None
 

@@ -24,11 +24,12 @@ XM_SIGNATURE = {
 
 def center(w): return (w['x0'] + w['x1']) / 2.0
 
-def powers_3col(page):
+def powers_3col(page, W=None):
     """The supplement lays powers out in THREE full-width columns below the
     POWERS banner (x≈60 / 310 / 440), unlike the core's 2-column right block.
     Read each column top-to-bottom, then build set-header/bulleted groups."""
-    W = page.extract_words(x_tolerance=1.5, y_tolerance=2, extra_attrs=['size'])
+    if W is None:
+        W = page.extract_words(x_tolerance=1.5, y_tolerance=2, extra_attrs=['size'])
     po = [w for w in W if w['text'] == 'POWERS']
     if not po: return None
     ytop = po[0]['top'] + 8

@@ -3,6 +3,32 @@
 
 const MMRPG_EQUIPMENT = [
   {
+    "name": "Adamantium",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "Adamantium is an incredibly tough and rare steel alloy that cannot be destroyed by normal means. Once the alloy is made in its liquid form and allowed to cool, it is too tough to be reshaped and too durable to be melted back down. Powers or devices that manipulate items at the molecular level can alter it—essentially by rewriting reality in that space—but little else can. Adamantiu m is tougher than vibranium but less versatile. Because it’s nearly impossible to rework once it’s been forged, it’s difficult to weave into mesh to form flexible armor the way that vibranium is used in Black Panther uniforms. Art by Leinil Francis Yu & Dave McCaig Despite this, mutants seem to have an affinity for adamantium. Several mutants have had it laced through their bodies—reinforcing their bones or forming retractable blades—but that’s likely because they have a Healing Factor that can handle the fact that implanted adamantium is poisonous. • When a character is created with the Reinforced Skeleton power and the Healing Factor power, assume that their skeleton is reinforced with adamantium unless specified otherwise. If they lose the Healing Factor, they must make a Challenging Resilience check at the end of each week. If they fail it, they lose 1 point of Resilience. If they reach –4 Resilience, they die. This loss of Resilience cannot be healed by normal means. However, if the Healing Factor is restored, the character regains the lost Resilience immediately. Attacks made against adamantium weapons cannot destroy them. Weapons made of adamantium can ignore 1 level of damage reduction. This applies to characters with adamantium Iconic Weapons who appeared in previous books—like Wolverine (Logan) and Wolverine (Laura Kinney)—and it’s the standard in this book and future ones. Example:Wolverine (Logan) stabs the Hulk (Bruce Banner). Normally Wolverine’s Melee damage multiplier is ×. However, the Hulk has Sturdy , which grants him Health Damage Reduction –. This would reduce Wolverine’s damage multiplier to , but his Adamantium-laced claws ignore level of damage reduction, so his attack has a damage multiplier of against the Hulk instead.",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Adamantium claws",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Old Man Logan Earth 214923",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "special": "+1 melee damage multiplier; ignores 1 level of DR",
+    "notes": "",
+    "source": "X-Men Expansion",
+    "multAbilities": [
+      "melee"
+    ]
+  },
+  {
     "name": "Adamantium Claws",
     "tier": "Iconic",
     "type": "Weapon",
@@ -38,6 +64,32 @@ const MMRPG_EQUIPMENT = [
     "source": "X-Men '97"
   },
   {
+    "name": "Adamantium nails",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Lady Deathstrike",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+1",
+    "multBonus": 1,
+    "special": "+1 Melee damage multiplier; ignores 1 level of DR",
+    "notes": "",
+    "source": "X-Men Expansion",
+    "multAbilities": [
+      "melee"
+    ]
+  },
+  {
+    "name": "Alien Weaponry",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "Many starfaring civilizations use ranged weapons that fire lasers rather than bullets. Here’s how those weapons work in the game. • Laser Pistol: An energy-basedfirearm. On a Fantastic success, the target is blinded for 1 round. • Laser Rifle: Attacks with this energy-basedfirearm against targets 5 spaces away or fewer have trouble. On a Fantastic success, the target is blinded for 1 round.",
+    "source": "Secret Wars"
+  },
+  {
     "name": "All-Black the Necrosword",
     "tier": "Iconic",
     "type": "Weapon",
@@ -53,6 +105,94 @@ const MMRPG_EQUIPMENT = [
     "source": "core ch.8 (Characters)"
   },
   {
+    "name": "Anti-Gravity Disc Shooter",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Wizard",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Anti-Telepathy Helmet",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "With the proliferation of strong telepaths, some people have come up with technological means of preventing anyone from reading or taking over their minds. This is usually embedded within a helmet of some kind. A person wearing an anti-telepathy helmet cannot use any sort of Telepathy or Telekinesis powers. The helmet also blocks the formation of a Telepathic Link, preventing attackers from using Telepathy powers against the wearer. This protection works only as long as the helmet is being worn. The moment it is removed, the protection ends. Magneto and Juggernaut both wear such helmets, and this should be added to their profiles from previous books.",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Arkon’s Lightning Bolts",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Arkon",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Assorted Bomberangs",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Boomerang",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "ranged weapon; on a Fantastic success, user can apply an elemental eff ect of their choice.",
+    "notes": "",
+    "source": "Spider-Verse Expansion"
+  },
+  {
+    "name": "Ball & Chain",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Absorbingman",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Black Panther’s Claws",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Blackpanther",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Bo Staff",
+    "tier": "Narrative",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "—",
+    "notes": "Gambit uses a bo staffin combat. It has the following stats:",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Bow",
     "tier": "Common",
     "type": "Weapon",
@@ -64,6 +204,34 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 1,
     "notes": "Ammunition is assumed to be plentiful.",
     "source": "core p34"
+  },
+  {
+    "name": "Captain America",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Americandream",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Captain America of the Railways’ Shield",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Captainamericaoftherailways",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
   },
   {
     "name": "Captain America's Shield",
@@ -85,6 +253,43 @@ const MMRPG_EQUIPMENT = [
     "source": "core ch.8 (Characters)"
   },
   {
+    "name": "Captain America’s Shield",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Captainamerica",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Cerebro",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "This amazing room-sized device amplifies the user’s telepathic powers and has several functions. To use it, the character must sit in a chair in the center of the sphereshaped room that houses it and don an interface helmet wired to the larger machine. To get Cerebro to work, the user must have a power from the Telepathy power set or have a Logic of 2 or higher. If they have neither of these, they can use Cerebro’s location abilities, but doing so drains them down to 1 Focus. Cerebro can locate mutants whose powers have manifested and are functioning. This works as if the character has the Detect Supers: Mutants power, but with a much larger range. It has the accuracy of a standard GPS device, which means it’s far from perfect. However, the effective range is the entirety of Earth and the moon, although it cannot reach into different dimensions or alternate universes. While using Cerebro, a telepath has an edge on all action checks using powers from the Telepathy set and is granted the Copy Psyche power if they don't already have it. The X-Men often have a limited version of Cerebro installed in a chair in the Blackbird, and they have used other portable units as well. These don’t grant edges to telepathic powers. Instead, they simply allow the user access to the Detect Supers: Mutants power, with the standard range of 25 miles. In the Krakoan era, Forge created a helmet-sized version of Cerebro that had all of the normal functions of the larger device, with the exception of the telepathic edges, and Professor X wore it much of the time. In addition, Forge fashioned Cerebro Cradles that could store copied psyches, allowing the Five to draw from them to restore deceased mutants to life in freshly made clone bodies. While the Five mostly made use of the main cradle, there were four other backup units scattered around Krakoa and beyond.",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Charged cards",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Gambit",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "These act as knives, usually thrown. Using Elemental Infusion on them costs 0 Focus. Cards function only for Gambit.",
+    "notes": "",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Club",
     "tier": "Common",
     "type": "Weapon",
@@ -96,6 +301,62 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 1,
     "notes": "A simple bludgeon.",
     "source": "core p34"
+  },
+  {
+    "name": "Control Box",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Psycho-man",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Corvus Glaive’s Glaive",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Corvusglaive",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Cosmic Axe",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Terrax",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Cosmic Control Rod",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Annihilus",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Secret Wars"
   },
   {
     "name": "Crimson Gem of Cyttorak",
@@ -132,6 +393,48 @@ const MMRPG_EQUIPMENT = [
     "special": "Can be thrown and instantly retrieved. The range of the club and the reach of the swingline both equal its Swingline Speed.",
     "notes": "A billy club on a de-cel cable that doubles as a grappling line.",
     "source": "core ch.8 (Characters)"
+  },
+  {
+    "name": "Destroyer’s Energy Baton",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Destroyer",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Displacement field daggers",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Blink Earth 295",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "Ranged weapons. Blink can use her Teleport Object and Teleport Other powers on any person or object she hits with these daggers.",
+    "notes": "",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Ebony Blade",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Blackknight",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
   },
   {
     "name": "Electrified Vibranium Claws",
@@ -179,6 +482,20 @@ const MMRPG_EQUIPMENT = [
     "special": "Ignores one level of the target's Damage Reduction.",
     "notes": "The Destroyer's collapsible energy baton.",
     "source": "Quickstart"
+  },
+  {
+    "name": "Energy Whips",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Whiplash",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
   },
   {
     "name": "Flash-Bang Grenade",
@@ -243,6 +560,57 @@ const MMRPG_EQUIPMENT = [
     "source": "X-Men '97"
   },
   {
+    "name": "Grenades",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "A grenade affects all characters within 2 spaces of where it lands and to which the grenade (not its thrower) would have a line of sight past any intervening obstacles. The user picks",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Hawkeye’s Trick Quiver",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Hawkeye",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Hell-Mark",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Silence",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "Grants Elemental Burst (Hellfire). Also allows Silence to create dimensional portals exclusively to and from Hell. She must still pay the regular Dimensional Portal power cost of 15 Focus.",
+    "notes": "",
+    "source": "Spider-Verse Expansion"
+  },
+  {
+    "name": "Hofund",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Sif",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
     "name": "Iron Man's Gloves",
     "tier": "Iconic",
     "type": "Item",
@@ -251,6 +619,15 @@ const MMRPG_EQUIPMENT = [
     "special": "Grants the Elemental Burst power (Energy).",
     "notes": "A repurposed pair of Iron Man's gauntlets.",
     "source": "core ch.8 (Characters)"
+  },
+  {
+    "name": "Iron Spider Armor",
+    "tier": "Narrative",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "—",
+    "notes": "Iron Man (Tony Stark) specifically designed this armor for Spider-Man (Peter Parker). It allows the user to have full access to their Spider-Powers and basic powers (assuming they have them). • The user gains the Extreme Appearance tag while wearing the suit and the Tech Reliance trait for all powers the suit grants. The suit grants the user the following powers: • Additional Limbs • Environmental Protection • Heightened Senses 1 • Mighty 1 • Sturdy 2 • Webgliding These powers do not stack with any powers the character already has. The suit’s Additional Limbs power counts as having Spider-Arms.",
+    "source": "Spider-Verse Expansion"
   },
   {
     "name": "Knife",
@@ -279,6 +656,15 @@ const MMRPG_EQUIPMENT = [
     "source": "core p34"
   },
   {
+    "name": "Krakoan Flowers",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "Krakoa can grow six different kinds offlowers that offer incredible powers. They are: • Gateways: These are grown in pairs that create connected teleportation portals that function much like the Teleportal power. Krakoa’s consciousness controls who can access them and who cannot. If someone can control Krakoa, they can control the gateways through it. • Habitat: These grow into self-sustaining biomes that are connected to Krakoa’s consciousness. • Human Drug I: This is made into a pill that works as a super-antibiotic. A single dose can eradicate all bacterial infections. • Human Drug L: This is made into pills that can extend the natural human life span by an average offive years, if taken daily. • Human Drug M: This is made into a pill that can cure mental illnesses caused by chemical imbalances in the brain. • No-Place: These flowers produce habitats that are disconnected from Krakoa’s consciousness. Moira MacTaggert lived in one of these so that few people would know she was secretly on Krakoa. In this way, these habitats are more like tumors than natural parts of Krakoa’s body. During the fall of Krakoa, Orchis revealed that the human drugs had all been tampered with and had secret genetic triggers that could be used to kill people who took them. They publicly blamed the government of Krakoa for this, although the true blame laid with them and their Director of Human/Resources, Doctor Stasis.",
+    "source": "X-Men Expansion"
+  },
+  {
     "name": "Mjolnir",
     "tier": "Iconic",
     "type": "Weapon",
@@ -298,6 +684,57 @@ const MMRPG_EQUIPMENT = [
     "source": "core ch.8 (Characters)"
   },
   {
+    "name": "Mounted Weapons",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "Some weapons are large enough that they must be either fixed in place or mounted to a vehicle to function. Most of these can be automated. If so, they are considered to have ability scores of 2 for making attacks. Automated weapons are always considered to have an initiative of 10. When fired manually, these weapons use the attacker’s abilities and are fired during the attacker’s turn, using their standard action. However, they use the listed fixed damage multiplier instead of the attacker’s. The attacker gets to add their ability bonus to the damage, though, as normal. Here is a list of some common mounted weapons: Close-In Weapon System (CIWS): This battery is fully automated and cannot be fired manually. Laser Batteries: On a Fantastic success, the target is also blinded for one round. Machine-Gun Turret: This weapon can be fired manually as well. Missile System: This weapon has the Elemental Burst (Energy), Elemental Blast (Energy) and Elemental Barrage (Energy) powers, each with a range of 20. If automated, the weapons system can add 10 Focus to Elemental Blast (Energy) and can spend 15 Focus on Elemental Barrage (Energy) each time the powers are used, without limit. Iffired manually, the attacker must use their own Focus instead. On a Fantastic success, the target has trouble on all actions for one round. Triple-Mounted Cannons: This battery has trouble against targets within 50 spaces. Twin-Mounted Guns: This battery has trouble against targets within 20 spaces.",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Nega-Bands",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Captainmar-vell",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Nova Helmet: Centurion",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Nova",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "Richard Rider",
+    "notes": "",
+    "source": "Secret Wars"
+  },
+  {
+    "name": "Ocktoid Tentacles",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Doctoroctopus",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "These semi- autonomous drones have a psychic link with Octavius. He can see through them and pilot them by remote. While under remote control, they use Octavius’ stats and take his place in the initiative order. If Octavius is rendered unconscious, the tentacles automatically stop fighting and attempt to transport him to safety.",
+    "notes": "",
+    "source": "Spider-Verse Expansion"
+  },
+  {
     "name": "Pistol",
     "tier": "Common",
     "type": "Weapon",
@@ -309,6 +746,58 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 1,
     "notes": "A handgun.",
     "source": "core p34"
+  },
+  {
+    "name": "Protection",
+    "tier": "Narrative",
+    "type": "Armor",
+    "category": "Armor",
+    "owner": "—",
+    "notes": "These items offer some protection from personal attacks. Body Armor: Health Damage Reduction –2. Once damaged in combat, it becomes useless at the end of that combat. This covers the wearer from head to toe. Unlike a battle suit, it is not powered. Because of its bulk, it reduces the wearer’s Agility by –1 for one full turn aŽ er they use a movement action. Bulletproof Vest: Health Damage Reduction –1. This covers the wearer’s core, including most of their vital organs. Once damaged in combat, it becomes useless at the end of that combat. Riot Shield: Health Damage Reduction –2. If the user does not have the Shield 1 (or higher) power, they can only use this to protect themselves from attacks coming from a single 90-degree angle. They can only change this angle at the start of their turn. Once damaged in combat, it becomes useless at the end of that combat.",
+    "source": "Avengers Expansion",
+    "special": "Health Damage Reduction –2"
+  },
+  {
+    "name": "Proxima Midnight’s Spear",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Proximamidnight",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Psychic Sword",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Captain Britain",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "Deals either Focus or Health damage, as Betsy chooses. Summonable.",
+    "notes": "",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Pumpkin Scepter",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Queengoblin",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "Inflicts hellfire damage on a Fantastic success, splitting the damage equally between Health and Focus; otherwise acts as an ordinary club",
+    "notes": "",
+    "source": "Spider-Verse Expansion"
   },
   {
     "name": "Red Boomerangs",
@@ -357,6 +846,34 @@ const MMRPG_EQUIPMENT = [
     "source": "core p34"
   },
   {
+    "name": "Scell",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Nemesis Heather Hudson",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "The wielder of this mystic sword must pay the Focus costs of their powers with their Health instead.",
+    "notes": "",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Shard of the Crimson Gem of Cyttorak",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Kidjuggernaut",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
     "name": "Shotgun",
     "tier": "Common",
     "type": "Weapon",
@@ -368,6 +885,20 @@ const MMRPG_EQUIPMENT = [
     "multBonus": 1,
     "notes": "Can attack up to two adjacent targets — one attack roll compared to both Agility defenses; split the damage equally.",
     "source": "core p34"
+  },
+  {
+    "name": "Sin-Eating Shotgun",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Sin-eater",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "Applies the eff ects of Penance Stare on a Fantastic success; otherwise acts as a normal shotgun",
+    "notes": "",
+    "source": "Spider-Verse Expansion"
   },
   {
     "name": "Skurge's Battle-Ax",
@@ -401,6 +932,38 @@ const MMRPG_EQUIPMENT = [
     "source": "core p34"
   },
   {
+    "name": "Spider-Arms",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "The gadget consists of a set of four long, spidery limbs attached to the character’s back, which can be used in combat. This grants the user the Additional Limbs power with the Tech Reliance trait. The user gains the Extreme Appearance tag while the arms are deployed. The Spider-Arms can fold away to backpack size when not in use.",
+    "source": "Spider-Verse Expansion"
+  },
+  {
+    "name": "Spider-Bots",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "These are small, autonomous, eight-legged drones that Doctor Octopus invented during his time as the Superior Spider-Man. The user can control them via mental commands (which do not require any actions). The drones can send visual and audio information to their controller, which is displayed on the lenses of the controller’s mask or goggles.",
+    "source": "Spider-Verse Expansion"
+  },
+  {
+    "name": "Stormbreaker",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Stormborn",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Secret Wars"
+  },
+  {
     "name": "Submachine Gun",
     "tier": "Common",
     "type": "Weapon",
@@ -427,6 +990,102 @@ const MMRPG_EQUIPMENT = [
     "source": "core p34"
   },
   {
+    "name": "Swordsman’s Sword",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Swordsman",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Tallus",
+    "tier": "Narrative",
+    "type": "Item",
+    "category": "Item",
+    "owner": "—",
+    "notes": "The Tallus is an amulet—usually worn on a wrist strap—that contains a shard of the M’kraan Crystal. It grants the user the Multiversal Portal power. Using the power requires an Ego vs. TN 10 action check. If the check fails, the Tallus works normally but then stops working. It can be repaired with a Difficult Ego check, which can be attempted once per day. In some cases, the Tallus seems to have a mind of its own. It can transport characters of its own accord and refuse to take them someplace else until the team solves the problem they were sent to fix. It’s up to the Narrator if this happens in any particular case. In addition, the Tallus can be used to communicate with people in the control room of the extradimensional Crystal Palace, which often serves as the home base of the Exiles. Initially, it seemed there might be only a single Tallus, but others have turned up as well. They function just like the original.",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "Techno- organic wings",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Angel",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "when in Archangel form, can fire feathery flechettes (treat like a submachine gun) and can act as a protective barrier (20 points to shatter)",
+    "notes": "",
+    "source": "X-Men Expansion"
+  },
+  {
+    "name": "The Bloodaxe",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Executioner",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "The Soulsword",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Magik",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "+4",
+    "multBonus": 4,
+    "special": "Summonable. Provides a +4 Ego damage multiplier, but only against extra- dimensional creatures.",
+    "notes": "",
+    "source": "X-Men Expansion",
+    "multAbilities": [
+      "ego"
+    ]
+  },
+  {
+    "name": "The Ten Rings",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Shang-chi",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "The Zodiac Key",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Scorpio",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
     "name": "U.S.Agent's Shield",
     "tier": "Iconic",
     "type": "Weapon",
@@ -442,6 +1101,20 @@ const MMRPG_EQUIPMENT = [
     "source": "Quickstart"
   },
   {
+    "name": "U.S.Agent’s Shield",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "U.s.agent",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
     "name": "Widow's Bite",
     "tier": "Iconic",
     "type": "Weapon",
@@ -455,6 +1128,34 @@ const MMRPG_EQUIPMENT = [
     "special": "On a Fantastic success, stuns the target for one round.",
     "notes": "Wrist gauntlets that fire electro-static bolts.",
     "source": "Quickstart"
+  },
+  {
+    "name": "Widow’s Bite",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Blackwidow",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Avengers Expansion"
+  },
+  {
+    "name": "Yaka Arrow",
+    "tier": "Iconic",
+    "type": "Weapon",
+    "category": "Weapon",
+    "owner": "Yonduudonta",
+    "ability": "melee",
+    "range": "Reach",
+    "damageBonus": "—",
+    "multBonus": 0,
+    "special": "",
+    "notes": "",
+    "source": "Secret Wars"
   }
 ];
 if (typeof window !== 'undefined') { window.MMRPG_EQUIPMENT = MMRPG_EQUIPMENT; }

@@ -1499,7 +1499,7 @@ textarea.ai-input { resize: vertical; line-height: 1.4; }
     DND: ['adventure','npc','dungeon','encounter','shop','dndmonster','dndtreasure'],
     D62E:['d62emonster','d62etreasure'],
     ICRPG:['icrpgmonster','icrpgtreasure'],
-    MMRPG:['mmrpgmonster'],
+    MMRPG:['mmrpgmonster','mmrpgtables'],
     CO:  [],
     YZE: ['yzetables'],
   };
@@ -2377,6 +2377,7 @@ GMScenes.renderPins();
         <option value="icrpgmonster">ICRPG Monster</option>
         <option value="icrpgtreasure">ICRPG Loot</option>
         <option value="mmrpgmonster">Marvel Character</option>
+        <option value="mmrpgtables">Marvel Encounters &amp; Danger Room</option>
         <option value="yzetables">YZE Crit &amp; Panic</option>
         <option value="map">Map</option>
       </select>
@@ -2821,6 +2822,28 @@ GMScenes.renderPins();
           </label>
         </div>
         <div class="gen-results" id="gen-mmrpgmon-kind-results"></div>
+      </div>
+
+      <!-- MMRPG RANDOM ENCOUNTERS + DANGER ROOM (d6 tables from the expansions) -->
+      <div class="gen-panel" data-panel="mmrpgtables">
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+          <label class="gen-label" style="min-width:220px;">Encounter table
+            <select class="gen-select" id="gen-mmrpg-enc"></select>
+          </label>
+          <button class="btn small primary" onclick="mmrpgRollEncounter(this)">Roll Encounter (d6)</button>
+        </div>
+        <div class="gen-results" id="gen-mmrpg-enc-results" style="margin-top:8px;"></div>
+        <div style="margin-top:18px;font-size:11px;color:var(--muted,#888);text-transform:uppercase;letter-spacing:.1em;">Danger Room (X-Men Expansion)</div>
+        <div class="gen-controls" style="flex-wrap:wrap;gap:8px;align-items:flex-end;margin-top:6px;">
+          <label class="gen-label" style="max-width:150px;">Danger level
+            <input type="number" class="gen-select" id="gen-mmrpg-dr-level" value="3" min="1" max="6" title="Sets the Challenging TN (10 + level) reported with the run">
+          </label>
+          <label class="gen-label" style="max-width:150px;">Era
+            <select class="gen-select" id="gen-mmrpg-dr-era"><option value="Modern">Modern</option><option value="Classic">Classic</option></select>
+          </label>
+          <button class="btn small primary" onclick="mmrpgRollDangerRoom(this)">Generate Danger Room</button>
+        </div>
+        <div class="gen-results" id="gen-mmrpg-dr-results" style="margin-top:8px;"></div>
       </div>
 
       <!-- ACE! TREASURE PANEL (random spread + hand-picked items from the gear list; sends a claimable drop) -->
@@ -8876,7 +8899,16 @@ window.init_gen = function(root) {
 
   // The loot-box / found-loot builders are self-contained (own Roll / Send buttons),
   // so the toolbar "Generate" button is hidden while one of them is active.
-  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables'];
+  const BUILDER_PANELS = ['dccloot', 'sdfoundloot', 'acetreasure', 'nimtreasure', 'swtreasure', 'dndtreasure', 'd62etreasure', 'icrpgtreasure', 'yzetables', 'mmrpgtables'];
+  // Populate the MMRPG Random-Encounter table picker from MMRPG_GM_TABLES.
+  (function(){
+    const sel = root.querySelector('#gen-mmrpg-enc');
+    const T = (typeof MMRPG_GM_TABLES !== 'undefined') ? MMRPG_GM_TABLES : (window.MMRPG_GM_TABLES || null);
+    if(sel && T && !sel.options.length) {
+      sel.innerHTML = (T.encounters || []).map((t, i) =>
+        '<option value="' + i + '">' + esc(t.title + ' — ' + String(t.source).replace(' Expansion','')) + '</option>').join('');
+    }
+  })();
   // Type facets for the ACE / Nimble / SW / D&D monster generators come from the data.
   [['ace','#gen-acemon-type'],['nim','#gen-nimmon-family'],['sw','#gen-swmon-group'],['dnd','#gen-dndmon-group'],['d62e','#gen-d62emon-kind'],['icrpg','#gen-icrpgmon-tier'],['mmrpg','#gen-mmrpgmon-kind']].forEach(([src, id]) => {
     const sel = root.querySelector(id); if(!sel) return;
@@ -10931,6 +10963,7 @@ else syncHomebrewMonsters();
 <script src="/tools-data/icrpg-gear.js"></script>
 <script src="/tools-data/icrpg-loot.js"></script>
 <script src="/tools-data/mmrpg-characters.js"></script>
+<script src="/tools-data/mmrpg-gm-tables.js"></script>
 <script>
 
 
@@ -13070,6 +13103,55 @@ window.init_rules = init_rules;
     for(var i=0;i<PANIC.length;i++){ if(total<=PANIC[i][0]){ row=PANIC[i]; break; } } if(!row)row=PANIC[PANIC.length-1];
     o.innerHTML='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;"><div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Panic · D6 '+roll+' + stress '+stress+' = '+total+'</div><div style="font-size:17px;font-weight:800;color:#3fd0e6;">'+esc(row[1])+'</div><div style="font-size:13px;margin-top:3px;">'+esc(row[2])+'</div></div>'+o.innerHTML;
   };
+})();
+
+// ── MMRPG Random Encounters + Danger Room generator (d6 tables from the
+//    expansion books; data in /tools-data/mmrpg-gm-tables.js as MMRPG_GM_TABLES).
+(function(){
+  function G(){ return (typeof MMRPG_GM_TABLES !== 'undefined') ? MMRPG_GM_TABLES : (typeof window!=='undefined'?window.MMRPG_GM_TABLES:null); }
+  function d6(){ return 1+Math.floor(Math.random()*6); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function card(kicker, title, body){
+    return '<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:6px;">'
+      + '<div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">'+esc(kicker)+'</div>'
+      + (title?'<div style="font-size:16px;font-weight:800;color:#3fd0e6;">'+esc(title)+'</div>':'')
+      + (body?'<div style="font-size:13px;margin-top:3px;">'+esc(body)+'</div>':'') + '</div>';
+  }
+  function populate(){
+    var d=G(); var sel=document.getElementById('gen-mmrpg-enc');
+    if(!d||!sel||sel.options.length) return;
+    (d.encounters||[]).forEach(function(t,i){
+      var o=document.createElement('option'); o.value=String(i);
+      o.textContent=t.title+' — '+t.source.replace(' Expansion',''); sel.appendChild(o);
+    });
+  }
+  window.mmrpgRollEncounter=function(btn){
+    var d=G(); var p=btn.closest('[data-panel]'); var o=p&&p.querySelector('#gen-mmrpg-enc-results');
+    var sel=p&&p.querySelector('#gen-mmrpg-enc'); if(!d||!o||!sel) return;
+    var t=(d.encounters||[])[parseInt(sel.value,10)||0]; if(!t) return;
+    var roll=d6(); var row=(t.rows||[]).filter(function(r){return r.roll===roll;})[0] || t.rows[0];
+    o.innerHTML=card(t.title+' · '+t.source+' · d6 = '+roll, '', row?row.result:'—')+o.innerHTML;
+  };
+  window.mmrpgRollDangerRoom=function(btn){
+    var d=G(); var p=btn.closest('[data-panel]'); var o=p&&p.querySelector('#gen-mmrpg-dr-results');
+    var dr=d&&d.dangerRoom; if(!dr||!o) return;
+    var lvl=parseInt((p.querySelector('#gen-mmrpg-dr-level')||{}).value,10)||3;
+    var era=(p.querySelector('#gen-mmrpg-dr-era')||{}).value||'Modern';
+    function tbl(name){ return (dr.tables||[]).filter(function(t){return t.title===name;})[0]; }
+    function roll(t){ if(!t) return null; var r=d6(); var row=(t.rows||[]).filter(function(x){return x.roll===r;})[0]; return {r:r,row:row}; }
+    var setting=roll(tbl('Random Danger Room Setting'));
+    var threat=roll(tbl('Random Danger Room Threats'));
+    var env=roll(tbl('Random Danger Room Environment ('+era+')'));
+    var tn=10+lvl;
+    var html='<div style="border:1px solid var(--border,#333);border-radius:6px;padding:10px;margin-bottom:8px;">'
+      + '<div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.1em;">Danger Room · Level '+lvl+' · Challenging TN '+tn+' · '+esc(era)+'</div>';
+    if(setting&&setting.row) html+='<div style="margin-top:5px;"><b style="color:#3fd0e6;">Setting</b> (d6 '+setting.r+'): '+esc(setting.row.result)+'</div>';
+    if(threat&&threat.row) html+='<div style="margin-top:3px;"><b style="color:#3fd0e6;">Threat</b> (d6 '+threat.r+'): '+esc(threat.row.result)+'</div>';
+    if(env&&env.row) html+='<div style="margin-top:3px;"><b style="color:#3fd0e6;">Environment</b> (d6 '+env.r+'): '+esc(env.row.result)+'</div>';
+    html+='</div>';
+    o.innerHTML=html+o.innerHTML;
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', populate); else populate();
 })();
 </script>
 

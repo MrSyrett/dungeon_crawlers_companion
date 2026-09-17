@@ -41,6 +41,13 @@ export interface MmrpgTag {
   source?: string;
 }
 
+export interface MmrpgCondition {
+  name: string;
+  genre: MmrpgGenre;
+  description: string;
+  source?: string;
+}
+
 export interface MmrpgAbilities {
   melee: number;
   agility: number;
