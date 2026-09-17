@@ -70,9 +70,20 @@ def parse_page(pg):
     for w in bio:
         if cy is None or abs(w['top']-cy)>6: cur=[]; blines.append(cur); cy=w['top']
         cur.append(w['text'])
-    btext=clean(' '.join(' '.join(l) for l in blines))
-    # cut off History/Personality narrative
-    btext=re.split(r'\bHistory\b|\bPersonality\b',btext)[0]
+    blns=[clean(' '.join(l)) for l in blines]
+    # header bio text = everything before the History narrative starts
+    def line_is_head(s,name): return s.strip()==name or s.strip().startswith(name+' ')
+    def first_idx(pred,start=0):
+        for i in range(start,len(blns)):
+            if pred(blns[i]): return i
+        return -1
+    iHist=first_idx(lambda s:line_is_head(s,'History'))
+    iPers=first_idx(lambda s:line_is_head(s,'Personality'), iHist+1 if iHist>=0 else 0)
+    def is_powers_line(s):
+        s=s.strip()
+        return ('◆' in s) or bool(re.search(r'Set\)', s)) or s in ('POWERS','POWER SETS') or bool(re.fullmatch(r'\d+', s)) or is_set_header(s)
+    headEnd=iHist if iHist>=0 else (iPers if iPers>=0 else len(blns))
+    btext=clean(' '.join(blns[:headEnd]))
     def rx(p):
         m=re.search(p,btext); return clean(m.group(1)) if m else ''
     real=rx(r'Real Name:\s*(.+?)(?:\s*Height:|$)')
@@ -80,6 +91,28 @@ def parse_page(pg):
     origin=rx(r'Origin:\s*(.+?)(?:\s*Occupation:|\s*Teams:|\s*Base:|$)')
     teams=rx(r'Teams:\s*(.+?)(?:\s*Base:|\s*Origin:|\s*Occupation:|$)')
     base=rx(r'Base:\s*(.+?)(?:\s*Origin:|\s*Occupation:|\s*Teams:|$)')
+    features=rx(r'Distinguishing Features:\s*(.+?)(?:\s*Occupation:|\s*Origin:|\s*Teams:|\s*Base:|$)')
+    if features.strip() in ('None','—','-'): features=''
+    # narrative sections: History (until Personality) and Personality (until powers)
+    def join_prose(lns):
+        out=''
+        for ln in lns:
+            ln=ln.strip()
+            if not ln or is_powers_line(ln): break
+            if out.endswith('-') and not out.endswith(('- ',)): out=out[:-1]+ln
+            else: out=(out+' '+ln) if out else ln
+        return clean(out)
+    def section(i0,i1):
+        if i0<0: return ''
+        seg=blns[i0+1 : (i1 if i1>=0 else len(blns))]
+        # cut at first powers line
+        cut=[]
+        for ln in seg:
+            if is_powers_line(ln): break
+            cut.append(ln)
+        return join_prose(cut)
+    history=section(iHist, iPers)
+    personality=section(iPers, first_idx(is_powers_line, iPers+1 if iPers>=0 else 0))
 
     # --- speed: middle column under SPEED label ---
     speed={}
@@ -143,7 +176,7 @@ def parse_page(pg):
     # sanitize: strip any embedded "Label:" tail left by a scrambled reading order
     LBL=re.compile(r'\b(Origin|Teams|Base|Occupation|Height|Weight|Real Name|Gender|Eyes|Hair|Size|Distinguishing|Features)\b\s*:.*$')
     def san(v): return clean(LBL.sub('',v)) if v else v
-    occ,origin,teams,base,real=map(san,(occ,origin,teams,base,real))
+    occ,origin,teams,base,real,features=map(san,(occ,origin,teams,base,real,features))
 
     # per-character overrides for pages whose reading order scrambled a field
     OV={'GHOST RIDER':{'realName':'Robbie Reyes','occupation':'Mechanic'}}
@@ -156,6 +189,7 @@ def parse_page(pg):
 
     return {'name':name,'realName':real,'rank':rank,'health':health,'focus':focus,'karma':karma,
             'abilities':ab,'speed':speed,'occupation':occ,'origin':origin,'teams':teams,'base':base,
+            'features':features,'history':history,'personality':personality,
             'traits':traits,'tags':tags,'powers':powers}
 
 if __name__=='__main__':

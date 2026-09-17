@@ -101,7 +101,7 @@
     B.name = c.name || ''; B.real = c.realName || ''; B.pronouns = '';
     B.rank = Math.max(1, Math.min(6, parseInt(c.rank, 10) || 1));
     B.origin = c.origin || ''; B.occupation = c.occupation || ''; B.teams = c.teams || ''; B.base = c.base || '';
-    B.history = ''; B.personality = ''; B.features = ''; B.size = 'Average';
+    B.history = c.history || ''; B.personality = c.personality || ''; B.features = c.features || ''; B.size = 'Average';
     B.convAbility = 0; B.convTraits = 0;
     ABIL.forEach(function (a) { B.scores[a.key] = (c.abilities && c.abilities[a.key] != null) ? (parseInt(c.abilities[a.key], 10) || 0) : 0; });
     B.traits = arr(c.traits).map(function (t) { var d = traitByName(t); return { name:t, description: d ? d.description : '' }; });

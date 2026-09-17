@@ -66,6 +66,12 @@ export interface MmrpgCharacter {
   origin?: string;
   teams?: string;
   base?: string;
+  /** Distinguishing features (blank when the book lists "None"). */
+  features?: string;
+  /** History narrative. */
+  history?: string;
+  /** Personality narrative. */
+  personality?: string;
   /** Traits carried by the character (name + any parenthetical). */
   traits?: string[];
   /** Tags carried by the character. */

@@ -109,6 +109,8 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .abil-head .a-head-sp{flex:1 1 auto;min-width:0;}
 .abil-head .a-tiles{gap:5px;}
 .a-head-l{min-width:54px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:8px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.section-bar .a-tiles{gap:5px;}
+.section-bar .a-head-l{color:rgba(255,255,255,.9);}
 .a-tiles{display:flex;gap:5px;flex:0 0 auto;}
 .a-tile{display:flex;align-items:center;justify-content:center;min-width:54px;height:34px;border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:2px 6px;cursor:pointer;transition:border-color .12s ease,background .12s ease,transform .05s ease;}
 .a-tile:hover{border-color:var(--mv);background:var(--input-bg);}
@@ -281,10 +283,10 @@ body.dark .sheet{border-color:#3a3d47;}
 
   <div class="body-row">
     <div class="stats-col">
-      <div class="section-bar accent"><span>Abilities</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;">M A R V E L</span></div>
+      <div class="section-bar accent"><span>Abilities</span><span class="a-tiles"><span class="a-head-l">Ability</span><span class="a-head-l">Defense</span><span class="a-head-l">Non-Combat</span></span></div>
       <div class="abil-list" id="abil-list"></div>
 
-      <div class="section-bar accent"><span>Conditions</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;">tap to toggle</span></div>
+      <div class="section-bar accent"><span>Conditions</span></div>
       <div class="conds" id="conds"></div>
     </div>
 
@@ -311,7 +313,7 @@ body.dark .sheet{border-color:#3a3d47;}
         </div>
       </div>
 
-      <div class="section-bar accent"><span>Attacks</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;">Marvel die × mult + ability</span></div>
+      <div class="section-bar accent"><span>Attacks</span></div>
       <div class="dmg-wrap" id="dmg-wrap"></div>
 
       <div class="tabs-bar">
@@ -322,13 +324,13 @@ body.dark .sheet{border-color:#3a3d47;}
       </div>
 
       <div class="tab-panel" id="tab-powers">
-        <div class="section-bar"><span>Powers &amp; Power Sets</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;">set at creation &amp; level-up</span></div>
+        <div class="section-bar"><span>Powers &amp; Power Sets</span></div>
         <div class="card-list" id="powers-list"></div>
         <div id="powers-empty" class="tbl-empty">No powers yet. Powers are chosen in the character builder (Create / Rebuild).</div>
       </div>
 
       <div class="tab-panel" id="tab-traits">
-        <div class="subhead"><span>Traits</span><span style="font-family:'Barlow Condensed';font-size:10px;letter-spacing:.04em;color:var(--muted);">set at creation &amp; level-up</span></div>
+        <div class="subhead"><span>Traits</span></div>
         <div class="card-list" id="traits-list"></div>
         <div id="traits-empty" class="tbl-empty">No traits yet. Traits are chosen in the character builder (Create / Rebuild).</div>
         <div class="subhead"><span>Tags</span></div>
@@ -443,9 +445,6 @@ function dmgMult(){ return rank(); }
 // ── Render: abilities ──
 function renderAbilities(){
   var host=$('abil-list'); if(!host)return; host.innerHTML='';
-  var head=document.createElement('div'); head.className='abil-head';
-  head.innerHTML='<span class="a-head-sp"></span><div class="a-tiles"><span class="a-head-l">Ability</span><span class="a-head-l">Defense</span><span class="a-head-l">Non-Combat</span></div>';
-  host.appendChild(head);
   ABILITIES.forEach(function(a){
     var sc=ab(a.key), def=defense(a.key);
     var sg=(sc>=0?'+':'')+sc;

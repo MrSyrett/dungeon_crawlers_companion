@@ -120,6 +120,22 @@ export default function MmrpgCharacterCard({ c }: { c: MmrpgCharacter }) {
               </section>
             ) : null}
           </div>
+
+          {c.features ? (
+            <p className="mt-4 text-[12px] leading-relaxed text-[var(--muted)]"><span className="font-semibold text-[var(--text)]">Distinguishing features:</span> {c.features}</p>
+          ) : null}
+          {c.history ? (
+            <section className="mt-4">
+              <h3 className="mb-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[#f4737a]">History</h3>
+              <p className="text-[12px] leading-relaxed text-[var(--muted)]">{c.history}</p>
+            </section>
+          ) : null}
+          {c.personality ? (
+            <section className="mt-4">
+              <h3 className="mb-1 text-[11px] font-bold uppercase tracking-[0.15em] text-[#f4737a]">Personality</h3>
+              <p className="text-[12px] leading-relaxed text-[var(--muted)]">{c.personality}</p>
+            </section>
+          ) : null}
         </div>
       </dialog>
     </>
