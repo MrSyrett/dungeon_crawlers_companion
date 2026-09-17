@@ -35,7 +35,7 @@ origins=parse_blocks(sec_lines(52,58,'ORIGINS','OCCUPATIONS'),['Examples','Tags'
 occs=parse_blocks(sec_lines(57,60,'OCCUPATIONS','TRAITS'),['Examples','Tags','Traits'],'Adventurer')
 # Traits & Tags
 traits=parse_name_desc(sec_lines(59,64,None,'TAGS'),'Abrasive')
-tags=parse_name_desc(sec_lines(64,68,None,'PICKING POWERS'),'A.I.')
+tags=parse_name_desc(sec_lines(64,68,None,'Powers are what make'),'A.I.')
 for name,data in [('origins',origins),('occupations',occs),('traits',traits),('tags',tags)]:
     json.dump(data, open('data/mmrpg/parts/_%s.json'%name,'w'), indent=1, ensure_ascii=False)
     print('%s: %d'%(name,len(data)))

@@ -115,7 +115,14 @@ input[type=number]{-moz-appearance:textfield;appearance:textfield;}
 .a-tile{display:flex;align-items:center;justify-content:center;min-width:54px;height:34px;border:1px solid var(--rule);border-radius:6px;background:var(--box);padding:2px 6px;cursor:pointer;transition:border-color .12s ease,background .12s ease,transform .05s ease;}
 .a-tile:hover{border-color:var(--mv);background:var(--input-bg);}
 .a-tile:active{transform:translateY(1px);}
+.a-tile.a-static{cursor:default;}
+.a-tile.a-static:hover{border-color:var(--rule);background:var(--box);}
+.a-tile.a-static:active{transform:none;}
 .a-tile.a-boosted{border-color:var(--mv);background:var(--input-bg);}
+.a-tile.a-static.a-boosted:hover{border-color:var(--mv);background:var(--input-bg);}
+.a-tile.a-disabled{opacity:.4;filter:grayscale(1);}
+.w-roll.w-disabled{opacity:.4;filter:grayscale(1);}
+.spd-lines .spd.cond span,.spd-lines .spd.cond b{color:#df8a8a;}
 .a-tile.a-boosted .atv{color:var(--mv);}
 .a-tile .atv{font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;color:var(--mv-dk);line-height:1;}
 @media(max-width:420px){.a-tile,.a-head-l{min-width:46px;}.a-tile{padding:2px 3px;}.a-tile .atv{font-size:15px;}.abil-row .a-name{font-size:13px;}}
@@ -482,12 +489,14 @@ function renderAbilities(){
     var nb=ncBonus(a.key), ncv=sc+nb, dfb=defBonus(a.key);
     var sg=(sc>=0?'+':'')+sc;
     var ncg=(ncv>=0?'+':'')+ncv;
+    var dis=condDisabled(a.key,false);
+    var disC=dis?' a-disabled':'', disT=dis?' — '+dis+' (can’t act)':'';
     var row=document.createElement('div'); row.className='abil-row';
     row.innerHTML='<div class="a-name">'+a.name+'<small>'+a.desc+'</small></div>'
       +'<div class="a-tiles">'
-      +  '<button class="a-tile" onclick="rollCheck(\''+a.key+'\',\'score\')" title="Roll d616 + '+a.name+'"><span class="atv">'+sg+'</span></button>'
-      +  '<button class="a-tile'+(dfb?' a-boosted':'')+'" onclick="rollCheck(\''+a.key+'\',\'defense\')" title="'+a.name+' Defense (10 + score'+(dfb?' + '+dfb+' power':'')+')"><span class="atv">'+def+'</span></button>'
-      +  '<button class="a-tile'+(nb?' a-boosted':'')+'" onclick="rollCheck(\''+a.key+'\',\'noncombat\')" title="Roll a non-combat '+a.name+' check'+(nb?' (incl. +'+nb+' power)':'')+'"><span class="atv">'+ncg+'</span></button>'
+      +  '<button class="a-tile'+disC+'" onclick="rollCheck(\''+a.key+'\',\'score\')" title="Roll d616 + '+a.name+disT+'"><span class="atv">'+sg+'</span></button>'
+      +  '<div class="a-tile a-static'+(dfb?' a-boosted':'')+'" title="'+a.name+' Defense (10 + score'+(dfb?' + '+dfb+' power':'')+')"><span class="atv">'+def+'</span></div>'
+      +  '<button class="a-tile'+(nb?' a-boosted':'')+disC+'" onclick="rollCheck(\''+a.key+'\',\'noncombat\')" title="Roll a non-combat '+a.name+' check'+(nb?' (incl. +'+nb+' power)':'')+disT+'"><span class="atv">'+ncg+'</span></button>'
       +'</div>';
     host.appendChild(row);
   });
@@ -496,7 +505,9 @@ function renderAbilities(){
 // ability score (defense = 10 + score, shown as its target number).
 function rollCheck(key,kind){
   var a=ABILITIES.find(function(x){return x.key===key;}); if(!a)return;
-  var label=a.name+(kind==='defense'?' Defense':kind==='noncombat'?' Non-Combat':' Check');
+  var dis=condDisabled(key,false);
+  if(dis){ addLog(a.name+' Check','✗ '+dis, "Can't act while "+dis, 'fumble'); return; }
+  var label=a.name+(kind==='noncombat'?' Non-Combat':' Check');
   doCheck(label, key, kind==='noncombat'?{bonus:ncBonus(key)}:{});
 }
 function setAbility(k,v){ S.abilities[k]=num(v);
@@ -548,11 +559,14 @@ function grantedMovement(){
 }
 function renderDerived(){
   var host=$('speed-lines'); if(!host)return;
-  var run=runSpeed(), half=Math.floor(run/2);
+  var halved=speedHalvedByCond();
+  var hv=function(n){ return halved?Math.floor(n/2):n; };
+  var run=hv(runSpeed()), half=hv(Math.floor(runSpeed()/2));
   var init=(ab('vigilance')>=0?'+':'')+ab('vigilance');
   var lines=[['init','Initiative',init],['','Run',run],['','Climb',half],['','Swim',half],['','Jump',half]];
   var mv=grantedMovement();
-  Object.keys(mv).forEach(function(mode){ lines.push(['mv',mode,mv[mode]]); });
+  Object.keys(mv).forEach(function(mode){ lines.push(['mv',mode,hv(mv[mode])]); });
+  if(halved) lines.push(['cond','⚙ Blinded','½ speed']);
   host.innerHTML=lines.map(function(l){ return '<div class="spd '+l[0]+'"><span>'+l[1]+'</span><b>'+l[2]+'</b></div>'; }).join('');
 }
 // ── Attacks / Damage: the four damage abilities (Melee, Agility, Ego, Logic) ──
@@ -565,39 +579,80 @@ function renderDamage(){
   var host=$('dmg-wrap'); if(!host)return;
   host.innerHTML=DMG_ABILITIES.map(function(k){
     var a=ABILITIES.find(function(x){return x.key===k;}); var sc=ab(k);
-    var wb=weaponBonus(k), pb=pDmgBonus(k), bonus=Math.max(wb,pb), mult=dmgMult()+bonus, wn=equippedWeaponName(k);
+    var wb=weaponBonus(k), pb=pDmgBonus(k), bonus=Math.max(wb,pb), mult=dmgMult()+bonus;
     var src=bonus?(' ('+(pb>=wb&&pb>0?'+'+pb+' power':'+'+wb+' weapon')+')'):'';
+    var dis=condDisabled(k,true);
     return '<div class="dmg-cell"><div class="dmg-ab">'+esc(a.name)+'</div>'
       +'<div class="dmg-val">×'+mult+' <small>mult'+src+'</small></div>'
       +'<div class="dmg-val">'+(sc>=0?'+':'')+sc+' <small>bonus</small></div>'
-      +(wn?'<div class="dmg-wpn" title="Equipped">'+esc(wn)+'</div>':'')
-      +'<button class="w-roll" onclick="rollDamage(\''+k+'\')">Attack</button></div>';
+      +'<button class="w-roll'+(dis?' w-disabled':'')+'" onclick="rollDamage(\''+k+'\')"'+(dis?' title="'+dis+' — can’t attack"':'')+'>Attack</button></div>';
   }).join('');
 }
 function rollDamage(key){
   var a=ABILITIES.find(function(x){return x.key===key;}); if(!a)return;
+  var dis=condDisabled(key,true);
+  if(dis){ addLog(a.name+' Attack','✗ '+dis, "Can't act while "+dis, 'fumble'); return; }
+  var ct=condTrouble(key,true); troubles+=ct.t;
   var usedK=consumeKarma(); if(usedK) edges+=1;
   var r=roll616(); if(usedK) edges-=1;
   var score=ab(key); var total=r.sum+score;
   var mult=attackMult(key);
   var dmg=r.marvelVal*mult*(r.fantastic?2:1)+score;
   var etTxt=(edges||troubles)?(' · '+(edges?edges+'E':'')+(troubles?troubles+'T':'')):'';
-  var wn=equippedWeaponName(key);
-  var detail=dieStr(r)+' '+r.sum+' +'+score+etTxt+(usedK?' · Karma':'')+(wn?' · '+wn:'')+' · dmg '+r.marvelVal+'×'+mult+(r.fantastic?'×2':'')+' +'+score;
+  var cTxt=ct.t?' · '+ct.why.join(', '):'';
+  var detail=dieStr(r)+' '+r.sum+' +'+score+etTxt+(usedK?' · Karma':'')+cTxt+' · dmg '+r.marvelVal+'×'+mult+(r.fantastic?'×2':'')+' +'+score;
   addLog(a.name+' Attack', (r.fantastic?'FANTASTIC · ':'')+'total '+total+' · '+dmg+' dmg', detail, r.fantastic?'crit':'normal');
   edges=0;troubles=0;renderTray();
 }
+// ── Condition penalties: automate the parts that map to sheet mechanics.
+// `trouble`/`troubleAtk` add trouble to the matching checks/attacks; `disable`/
+// `disableAll` block those actions; `halveSpeed` halves movement. Effects that
+// only touch the ATTACKER's roll ("enemies get an edge on you") or are timing-
+// based (end-of-turn Health loss, "lose your next action") stay as chip notes.
+var CONDMECH={
+  'Blinded':{halveSpeed:true},
+  'Demoralized':{troubleAll:true},
+  'Pinned':{trouble:['melee','agility']},
+  'Prone':{troubleAtk:['agility']},
+  'Paralyzed':{disable:['melee','agility']},
+  'Grabbed':{noMove:true},
+  'Unconscious':{disableAll:true},
+};
+function condOn(n){ return !!(S.conditions&&S.conditions[n]); }
+function activeConds(){ return CONDITIONS.filter(function(c){return condOn(c.name);}).map(function(c){return c.name;}); }
+// Extra trouble dice on a check (isAtk=true for an attack roll) from conditions.
+function condTrouble(key,isAtk){
+  var t=0, why=[];
+  activeConds().forEach(function(n){ var m=CONDMECH[n]; if(!m)return;
+    if(m.troubleAll){ t++; why.push(n); }
+    else if(m.trouble && m.trouble.indexOf(key)>=0){ t++; why.push(n); }
+    else if(isAtk && m.troubleAtk && m.troubleAtk.indexOf(key)>=0){ t++; why.push(n); }
+  });
+  return {t:t, why:why};
+}
+// Name of a condition that disables an action on `key` (isAtk = attack), or ''.
+function condDisabled(key,isAtk){
+  var why='';
+  activeConds().forEach(function(n){ var m=CONDMECH[n]; if(!m||why)return;
+    if(m.disableAll) why=n;
+    else if(m.disable && m.disable.indexOf(key)>=0) why=n;
+  });
+  return why;
+}
+function speedHalvedByCond(){ return activeConds().some(function(n){ return CONDMECH[n]&&CONDMECH[n].halveSpeed; }); }
+
 // ── Render: conditions (toggle chips) ──
 function renderConditions(){
   var host=$('conds'); if(!host)return;
   host.innerHTML=CONDITIONS.map(function(c){
     var on=!!(S.conditions&&S.conditions[c.name]);
-    return '<button class="cond'+(on?' on':'')+'" title="'+esc(c.desc)+'" onclick="toggleCondition(\''+c.name+'\')"><span class="cbox"></span>'+esc(c.name)+'</button>';
+    var auto=CONDMECH[c.name]?' ⚙':'';
+    return '<button class="cond'+(on?' on':'')+'" title="'+esc(c.desc)+(CONDMECH[c.name]?' — penalties auto-applied':'')+'" onclick="toggleCondition(\''+c.name+'\')"><span class="cbox"></span>'+esc(c.name)+auto+'</button>';
   }).join('');
 }
 function toggleCondition(name){ if(!S.conditions)S.conditions={}; S.conditions[name]=!S.conditions[name];
   addLog('Condition',(S.conditions[name]?'+ ':'− ')+name, S.conditions[name]?'gained':'cleared', S.conditions[name]?'fumble':'normal');
-  renderConditions(); scheduleAutosave(); }
+  renderConditions(); renderAbilities(); renderDamage(); renderDerived(); scheduleAutosave(); }
 function recover(w){
   var abl=(w==='health')?'resilience':'vigilance';
   var r=roll616(); var total=r.sum+ab(abl);
@@ -649,6 +704,8 @@ function consumeKarma(){ if(karmaArmed){ S.karma.cur=Math.max(0,num(S.karma.cur)
 function doCheck(label, abilityKey, opts){
   opts=opts||{};
   var bonus=num(opts.bonus)||0;   // flat bonus granted by powers (e.g. non-combat check bonus)
+  var ct=abilityKey?condTrouble(abilityKey, !!opts.attack):{t:0,why:[]};
+  troubles+=ct.t;                 // auto-trouble from active conditions (reset below)
   var usedK=consumeKarma(); if(usedK) edges+=1;
   var r=roll616();
   if(usedK) edges-=1;
@@ -657,7 +714,8 @@ function doCheck(label, abilityKey, opts){
   var etTxt=(edges||troubles)?(' · '+(edges?edges+'E':'')+(troubles?troubles+'T':'')):'';
   var kTxt=usedK?' · Karma':'';
   var bTxt=bonus?' (incl. +'+bonus+' power)':'';
-  var detail=dieStr(r)+' '+r.sum+(score?' +'+score:'')+bTxt+etTxt+kTxt+(r.fantastic?' · Fantastic! (Yes, and…)':'');
+  var cTxt=ct.t?' · '+ct.why.join(', '):'';
+  var detail=dieStr(r)+' '+r.sum+(score?' +'+score:'')+bTxt+etTxt+kTxt+cTxt+(r.fantastic?' · Fantastic! (Yes, and…)':'');
   addLog(label, (r.fantastic?'FANTASTIC · ':'')+total, detail, r.fantastic?'crit':'normal');
   edges=0; troubles=0; renderTray();
   return r;

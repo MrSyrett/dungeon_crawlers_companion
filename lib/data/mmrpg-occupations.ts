@@ -47,7 +47,7 @@ export const MMRPG_OCCUPATIONS = [
   {
     "name": "Entertainer",
     "genre": "core",
-    "description": "The character entertains others for a living. They could be a singer, a dancer, an actor, a musician, a writer, a filmmaker, speaker or something similar. They aren’t shy—at least when on the job—and they work hard to both gain an audience and keep them engaged.",
+    "description": "The character entertains others for a living. They could be a singer, a dancer, an actor, a musician, a writer, a filmmaker, a speaker or something similar. They aren’t shy—at least when on the job—and they work hard to both gain an audience and keep them engaged.",
     "examples": "Dazzler, Echo, Mysterio, Wonder Man.",
     "tags": "",
     "traits": "Famous, Presence, Public Speaking."
@@ -55,7 +55,7 @@ export const MMRPG_OCCUPATIONS = [
   {
     "name": "Health Care Worker",
     "genre": "core",
-    "description": "The character is a doctor, nurse, therapist or other person dedicated to helping heal others. They likely have access to an office where they practice their craft.",
+    "description": "The character is a doctor, nurse, therapist or other person dedicated to helping heal others. They likely have access to an office where they practice their craft.",
     "examples": "Doc Samson, Doctor Strange, the Night Nurse (Linda Carter), Thor (Jane Foster).",
     "tags": "",
     "traits": "Clinician, First Aid."
@@ -79,7 +79,7 @@ export const MMRPG_OCCUPATIONS = [
   {
     "name": "Law Enforcer",
     "genre": "core",
-    "description": "The character works as a law enforcement officer. They could a be anything from a town cop to an agent of S.H.I.E.L.D. They have a great deal of authority inside their jurisdiction and oen command respect outside of it as well.",
+    "description": "The character works as a law enforcement officer. They could be anything from a town cop to an agent of S.H.I.E.L.D. They have a great deal of authority inside their jurisdiction and often command respect outside of it as well.",
     "examples": "Nick Fury Jr., Human Torch (Jim Hammond), Maria Hill, Photon (Monica Rambeau).",
     "tags": "Authority, Backup.",
     "traits": "Interrogation, Investigation."
@@ -103,7 +103,7 @@ export const MMRPG_OCCUPATIONS = [
   {
     "name": "Military",
     "genre": "core",
-    "description": "The character serves (or at least once served) in a military organization and relies on that training. They can sometimes call on their fellow soldiers for help. They may have worked for a nation or possibly as part of a mercenary outfit. If they are on active duty, their time is oen not their own, and they should take the tag Obligation: Duty.",
+    "description": "The character serves (or at least once served) in a military organization and relies on that training. They can sometimes call on their fellow soldiers for help. They may have worked for a nation or possibly as part of a mercenary outfit. If they are on active duty, their time is often not their own, and they should take the tag Obligation: Duty.",
     "examples": "Captain America (Steve Rogers), Captain Marvel (Carol Danvers), War Machine, Wolverine (Logan).",
     "tags": "",
     "traits": "Battle Ready, Connections: Military, Situational Awareness."
@@ -119,7 +119,7 @@ export const MMRPG_OCCUPATIONS = [
   {
     "name": "Scientist",
     "genre": "core",
-    "description": "The character solves problems by means of scientific research. They are oen among the smartest people in the world, and other heroes turn to them for their expertise.",
+    "description": "The character solves problems by means of scientific research. They are often among the smartest people in the world, and other heroes turn to them for their expertise.",
     "examples": "Doctor Octopus (Otto Octavius), Hulk (Bruce Banner), Mister Fantastic, Moon Girl.",
     "tags": "Lab Access.",
     "traits": "Inventor, Scientific Expertise."

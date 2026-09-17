@@ -6,7 +6,11 @@ FT = {'oen':'often','Oen':'Often','aer':'after','Aer':'After','aerlife':'afterli
  'shape-shi':'shape-shift','oentimes':'oftentimes'}
 def clean(s):
     if not s: return s
-    s=s.replace('◆','').replace('ﬀ','ff').replace('ﬁ','fi').replace('ﬂ','fl').replace('ﬃ','ffi').replace('ﬄ','ffl')
+    s=s.replace('◆','').replace('ﬀ','ff').replace('ﬁ','fi').replace('ﬂ','fl').replace('ﬃ','ffi').replace('ﬄ','ffl').replace('ﬅ','ft')
+    # this book renders the "ft" ligature as stray control/Latin-1 bytes; map them
+    # to 'ft' (byte + spurious space before a word continuation → 'ft' with no gap).
+    s=re.sub(r'[©] (?=[a-z])', 'ft', s)
+    s=re.sub(r'[©]', 'ft', s)
     s=re.sub(r'([A-Za-z]*(?:ffi|ffl|ff|fi|fl)) ([a-z])', r'\1\2', s)
     s=re.sub(r'\b([A-Za-z]+)\b', lambda m: FT.get(m.group(1), m.group(1)), s)
     s=re.sub(r'[ \t]+',' ',s).strip()

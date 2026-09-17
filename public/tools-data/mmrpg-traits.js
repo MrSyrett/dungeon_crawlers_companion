@@ -30,7 +30,7 @@ const MMRPG_TRAITS = [
   {
     "name": "Berserker",
     "genre": "core",
-    "description": "The character oen loses control of their temper. Any time they take physical damage, they must make an Ego check with a TN equal to the amount of damage done. If they fail, they go berserk and must charge at full speed into combat with the enemy who hurt them. Being berserk gives the character an edge on all close attacks and adds +2 to their Melee, Resilience and Ego defenses. However, it takes –2 from their Agility defense, and they cannot use ranged weapons. If the character defeats the enemy who hurt them, they must then charge to attack the next closest foe. At the end of the character’s turn, they lose 5 Focus. When their Focus is reduced to the point that the character could not voluntarily spend any more Focus—or if there are no enemies in sight—the berserk state automatically ends."
+    "description": "The character often loses control of their temper. Any time they take physical damage, they must make an Ego check with a TN equal to the amount of damage done. If they fail, they go berserk and must charge at full speed into combat with the enemy who hurt them. Being berserk gives the character an edge on all close attacks and adds +2 to their Melee, Resilience and Ego defenses. However, it takes –2 from their Agility defense, and they cannot use ranged weapons. If the character defeats the enemy who hurt them, they must then charge to attack the next closest foe. At the end of the character’s turn, they lose 5 Focus. When their Focus is reduced to the point that the character could not voluntarily spend any more Focus—or if there are no enemies in sight—the berserk state automatically ends."
   },
   {
     "name": "Big",
@@ -40,7 +40,7 @@ const MMRPG_TRAITS = [
   {
     "name": "Bloodthirsty",
     "genre": "core",
-    "description": "The character likes hurting people—even killing them. Aer they knock someone unconscious, they must make a Challenging Ego check to keep from continuing to attack them until they’re dead. A character with this trait cannot take the Heroic tag."
+    "description": "The character likes hurting people—even killing them. After they knock someone unconscious, they must make a Challenging Ego check to keep from continuing to attack them until they’re dead. A character with this trait cannot take the Heroic tag."
   },
   {
     "name": "Breathe Different",
@@ -95,7 +95,7 @@ const MMRPG_TRAITS = [
   {
     "name": "Enhanced Physique",
     "genre": "core",
-    "description": "The character is stronger than regular humans. Treat them as one size bigger for liing, carrying, swinging and throwing things. (This does not stack with other factors.) They also have an Edge on Melee non-combat checks."
+    "description": "The character is stronger than regular humans. Treat them as one size bigger for lifting, carrying, swinging and throwing things. (This does not stack with other factors.) They also have an Edge on Melee non-combat checks."
   },
   {
     "name": "Extra Occupation",
@@ -135,32 +135,32 @@ const MMRPG_TRAITS = [
   {
     "name": "Fresh Eyes",
     "genre": "core",
-    "description": "The character has their own things. This oen makes the strange to those around the means they can bring new pe to existing issues. They ha on Logic checks when faced something for the first tim"
+    "description": "The character has their own way of doing things. This often makes them seem strange to those around them, but it means they can bring new perspectives to existing issues. They have an edge on Logic checks when faced with something for the first time."
   },
   {
     "name": "Gearhead",
     "genre": "core",
-    "description": "The character knows their w machines. They have an edge Logic checks to figure out machine works."
+    "description": "The character knows their way around machines. They have an edge on Logic checks to figure out how any machine works."
   },
   {
     "name": "Glibness",
     "genre": "core",
-    "description": "The character can strike up conversation with anyone at and can oen convince them a hand. They have an edge o checks to persuade characte are speaking to for the fir"
+    "description": "The character can strike up a conversation with anyone at any time and can often convince them to lend a hand. They have an edge on Ego checks to persuade characters they are speaking to for the first time."
   },
   {
     "name": "God Heritage",
     "genre": "core",
-    "description": "The character—or at least o ancestors—is a god. Pick so that they are the god of. They don’t have to be a most people have heard of. they can be the god of some entirely new. However, they generally be the god of som that’s already been claimed someone else in their panth Other gods are oen jealous their positions and take is with such rivals. The character has an edg dealing with something that are the god of. Restriction: This trait can selected only by characters mythic origin and an attach to a particular pantheon, l Asgardian or Olympian."
+    "description": "The character—or at least one of their ancestors—is a god. Pick something that they are the god of. They don’t have to be a god that most people have heard of. In fact, they can be the god of something entirely new. However, they cannot generally be the god of something that’s already been claimed by someone else in their pantheon. Other gods are often jealous of their positions and take issue with such rivals. The character has an edge when dealing with something that they are the god of. Restriction: This trait can be selected only by characters with a mythic origin and an attachment to a particular pantheon, like Asgardian or Olympian."
   },
   {
     "name": "Gullible",
     "genre": "core",
-    "description": "The character is easy to fo People lying to them have a on their Ego checks to pers the character of something."
+    "description": "The character is easy to fool. People lying to them have an edge on their Ego checks to persuade the character of something."
   },
   {
     "name": "Honest",
     "genre": "core",
-    "description": "The character is a terrible They have trouble any time make an Ego check that invo telling a lie. However, the an edge on any friendly Ego (persuasion) checks in whic they’re truthful. way of doing m seem m, but it rspectives ve an edge with e. ay around on how any a any time to lend n Ego rs they st time. ne of their mething god that In fact, thing cannot ething by eon. of sue e when they be with a ment ike ol. n edge uade liar. they lves y have h"
+    "description": "The character is a terrible liar. They have trouble any time they make an Ego check that involves telling a lie. However, they have an edge on any friendly Ego (persuasion) checks in which they’re truthful."
   },
   {
     "name": "Interrogation",
@@ -200,17 +200,17 @@ const MMRPG_TRAITS = [
   {
     "name": "Monster",
     "genre": "core",
-    "description": "The character is some kind of monster, oen of a type spoken of in legend. They have an edge whenever they attempt to intimidate someone."
+    "description": "The character is some kind of monster, often of a type spoken of in legend. They have an edge whenever they attempt to intimidate someone."
   },
   {
     "name": "Out of Shape",
     "genre": "core",
-    "description": "The character is in poor physical condition. They are considered one size smaller for the purposes of li ing, carrying, swinging and throwing things."
+    "description": "The character is in poor physical condition. They are considered one size smaller for the purposes of lifting, carrying, swinging and throwing things."
   },
   {
     "name": "Piloting",
     "genre": "core",
-    "description": "The character knows how to operate vehicles of all kinds. They have an edge on Agility checks triggered when piloting or driving a vehicle during a movement action. This applies to cars, boats, aircra and so on."
+    "description": "The character knows how to operate vehicles of all kinds. They have an edge on Agility checks triggered when piloting or driving a vehicle during a movement action. This applies to cars, boats, aircraftand so on."
   },
   {
     "name": "Presence",
@@ -225,7 +225,7 @@ const MMRPG_TRAITS = [
   {
     "name": "Pundit",
     "genre": "core",
-    "description": "The character knows how to break news items and put them into context to craft a story around them. They have an edge on Ego or Logic rolls made when giving their opinion via media."
+    "description": "The character knows how to break news items and put them into context to crafta story around them. They have an edge on Ego or Logic rolls made when giving their opinion via media."
   },
   {
     "name": "Quick Learner",
@@ -275,7 +275,7 @@ const MMRPG_TRAITS = [
   {
     "name": "Tech Reliance",
     "genre": "core",
-    "description": "The character relies on technology for powers. When they take damage that would render them unconscious, they can instead choose to lose all of their technology-related powers and remain conscious with 1 point of Health remaining. Assuming the character has access to parts and tools, lost powers can be repaired aer a battle."
+    "description": "The character relies on technology for powers. When they take damage that would render them unconscious, they can instead choose to lose all of their technology-related powers and remain conscious with 1 point of Health remaining. Assuming the character has access to parts and tools, lost powers can be repaired after a battle."
   },
   {
     "name": "Weakness",

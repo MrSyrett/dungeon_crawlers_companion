@@ -40,12 +40,12 @@ export const MMRPG_ORIGINS = [
   {
     "name": "Alien: Skrull",
     "genre": "core",
-    "description": "The character is a member of the Skrull, a reptilian humanoid race of shape-shiers who formed the interstellar Skrull Empire. In their natural form, they have green skin, red or green eyes, pointed ears and furrowed chins. They sprang from the planet Skrullos in the Andromeda Galaxy. The original Skrulls could not shape-shi , but the Celestials experimented on them to form Eternal Skrulls and Deviant Skrulls, much like they did with humans on Earth. The Deviant Skrulls became the dominant form of the species, driving the originals to extinction.",
+    "description": "The character is a member of the Skrull, a reptilian humanoid race of shape-shifters who formed the interstellar Skrull Empire. In their natural form, they have green skin, red or green eyes, pointed ears and furrowed chins. They sprang from the planet Skrullos in the Andromeda Galaxy. The original Skrulls could not shape-shift , but the Celestials experimented on them to form Eternal Skrulls and Deviant Skrulls, much like they did with humans on Earth. The Deviant Skrulls became the dominant form of the species, driving the originals to extinction.",
     "examples": "Hulkling (half Skrull and half Kree), Lyja, Super-Skrull (Kl’rt).",
     "tags": "Alien Heritage, Extreme Appearance (in their natural form).",
     "traits": "",
     "occupation": "",
-    "powers": "Disguise, Extended Reach 1, Flexible Bones 1, Shape-shi, Slip Free.",
+    "powers": "Disguise, Extended Reach 1, Flexible Bones 1, Shape-shift, Slip Free.",
     "limitation": ""
   },
   {
@@ -128,7 +128,7 @@ export const MMRPG_ORIGINS = [
   {
     "name": "High Tech: Pym Particles",
     "genre": "core",
-    "description": "The character uses Pym Particles (named aer their inventor, Henry Pym) to dramatically grow or shrink in size. Aer long-enough exposure to Pym Particles, many people are able to generate such particles on their own without the need of external aid. They may still need to use extra Pym Particles to reach extremely large or small sizes.",
+    "description": "The character uses Pym Particles (named after their inventor, Henry Pym) to dramatically grow or shrink in size. After long-enough exposure to Pym Particles, many people are able to generate such particles on their own without the need of external aid. They may still need to use extra Pym Particles to reach extremely large or small sizes.",
     "examples": "Ant-Man (Scott Lang), Giant-Man (Rax Malhotra), Wasp (Janet Van Dyne).",
     "tags": "",
     "traits": "Tech Reliance (at first).",
@@ -227,7 +227,7 @@ export const MMRPG_ORIGINS = [
   {
     "name": "Mutant",
     "genre": "core",
-    "description": "The character’s powers spring from them being a member of the subspecies Homo superior. They have a latent X-Gene that grants them powers, oen triggered at adolescence.",
+    "description": "The character’s powers spring from them being a member of the subspecies Homo superior. They have a latent X-Gene that grants them powers, often triggered at adolescence.",
     "examples": "Cyclops, Jean Grey, Storm, Wolverine (Logan), Wolverine (Laura Kinney).",
     "tags": "Hounded, Krakoan, X-Gene.",
     "traits": "",
@@ -293,7 +293,7 @@ export const MMRPG_ORIGINS = [
   {
     "name": "Symbiote",
     "genre": "core",
-    "description": "The character has bonded with one of the Klyntar, a race of alien symbiotes created by the alien god Knull. Most of these creatures on Earth display spiderlike powers. When a character bonds with a symbiote, they go up one rank and gain the listed tags, traits and powers. Any remaining powers they select are oen from the Spider- Powers set but do not have to be. Many symbiotes have the Disguise power. If the symbiote is Venom or one of its progeny, Spider-Man (Peter Parker) cannot gain any benefits from his Spider-Sense power against the bonded character.",
+    "description": "The character has bonded with one of the Klyntar, a race of alien symbiotes created by the alien god Knull. Most of these creatures on Earth display spiderlike powers. When a character bonds with a symbiote, they go up one rank and gain the listed tags, traits and powers. Any remaining powers they select are often from the Spider- Powers set but do not have to be. Many symbiotes have the Disguise power. If the symbiote is Venom or one of its progeny, Spider-Man (Peter Parker) cannot gain any benefits from his Spider-Sense power against the bonded character.",
     "examples": "Carnage, Venom (Eddie Brock), Shriek.",
     "tags": "",
     "traits": "Anathema: Extreme Heat/Extreme Sonics.",
@@ -315,7 +315,7 @@ export const MMRPG_ORIGINS = [
   {
     "name": "Weird Science",
     "genre": "core",
-    "description": "The character’s powers arose from a scientific experiment or accident that’s hard—if not impossible—to reproduce. Oen, they had the latent genetic potential to develop powers and were somehow exposed to the right triggers—which would have likely killed most other people. These kinds of characters are sometimes called mutates. The difference between a mutate and a mutant is that a mutant’s powers come to them naturally, but a mutate’s powers require a triggering incident that might never happen. In this sense, Inhumans are all mutates who share a gene with a known trigger: the Terrigen Mist.",
+    "description": "The character’s powers arose from a scientific experiment or accident that’s hard—if not impossible—to reproduce. Often, they had the latent genetic potential to develop powers and were somehow exposed to the right triggers—which would have likely killed most other people. These kinds of characters are sometimes called mutates. The difference between a mutate and a mutant is that a mutant’s powers come to them naturally, but a mutate’s powers require a triggering incident that might never happen. In this sense, Inhumans are all mutates who share a gene with a known trigger: the Terrigen Mist.",
     "examples": "Captain America (Steve Rogers), Daredevil (Matt Murdock), Invisible Woman, Jessica Jones, Luke Cage, Spider-Man (Miles Morales), Spider-Man (Peter Parker).",
     "tags": "",
     "traits": "Weird.",
@@ -326,7 +326,7 @@ export const MMRPG_ORIGINS = [
   {
     "name": "Weird Science: Gamma Mutate",
     "genre": "core",
-    "description": "The character has a genetic mutation that gave them powers once they were exposed to enough gamma radiation, transforming them physically. This oen gives them a monstrous appearance and changes their coloration drastically, usually to green, although some become red or even blue. They can oen transform back into their original form as well.",
+    "description": "The character has a genetic mutation that gave them powers once they were exposed to enough gamma radiation, transforming them physically. This often gives them a monstrous appearance and changes their coloration drastically, usually to green, although some become red or even blue. They can often transform back into their original form as well.",
     "examples": "Doc Samson, Harpy (Betty Banner), Hulk (Bruce Banner), Red Hulk (Thaddeus “Thunderbolt” Ross).",
     "tags": "Extreme Appearance (common in gamma mutate form), Green Door, Immunity: Gamma Radiation, Radioactive.",
     "traits": "Weird.",

@@ -87,7 +87,7 @@ export const MMRPG_TAGS = [
   {
     "name": "Green Door",
     "genre": "core",
-    "description": "After being killed, the character can come back to life by passing through the Green Door, a portal that connects a part of the aerlife to Earth. This makes them effectively immortal. Restriction: For gamma mutates only."
+    "description": "After being killed, the character can come back to life by passing through the Green Door, a portal that connects a part of the afterlife to Earth. This makes them effectively immortal. Restriction: For gamma mutates only."
   },
   {
     "name": "Headquarters",
@@ -242,6 +242,6 @@ export const MMRPG_TAGS = [
   {
     "name": "Young",
     "genre": "core",
-    "description": "The character is a minor, under 18 years old. If possible, they must report in to their parents or guardians on a regular basis. Powers are what make a super hero super. They’re the amazing abilities that normal people can barely imagine. Without them, you can have heroes, but you need them to have super heroes. This chapter features a list of powers in alphabetical order. While they describe many of the most common kinds of powers shown in Marvel comics, they don’t quite cover everything. If you have an idea for a power you’ve seen in a Marvel comic that isn’t shown here—or for one of your own creation—discuss it with your Narrator. Note that powers inherently break the rules. They’re exceptions to the normal state of things. If the regular rules and the rules for a power contradict each other, follow the rules for the power. More official powers may show up in future expansions of the Marvel Multiverse Role-Playing Game."
+    "description": "The character is a minor, under 18 years old. If possible, they must report in to their parents or guardians on a regular basis."
   }
 ] as unknown as MmrpgTag[];
